@@ -17,6 +17,11 @@ EVIDENCE_RUNTIME_TARGETS = {"codex", "agents"}
 WORKSPACE_ROOT_MARKER = "${WORKSPACE_ROOT}"
 HOME_MARKER = "${HOME}"
 SAFE_EVIDENCE_SEGMENT_PATTERN = re.compile(r"[^A-Za-z0-9._-]+")
+CODEX_SESSION_LOOKBACK_LIMIT = 80
+CODEX_SESSION_TURN_EVENT_LIMIT = 8
+AGENTS_OTEL_STATS_RELATIVE_PATH = Path(
+    ".agents/otel-collector/data/processed/stats.json"
+)
 RUNTIME_REACHABILITY_FAILURES = {
     "user_runtime_ready",
     "codex_user_runtime_ready",
@@ -31,10 +36,10 @@ RUNTIME_REACHABILITY_FAILURES = {
 def normalize_runtime_target(runtime_target: object) -> str:
     """
     Normalize a runtime target value to a lowercase string with surrounding whitespace removed.
-    
+
     Parameters:
         runtime_target (object): The input value to normalize; it will be converted with `str()` before trimming and lowercasing.
-    
+
     Returns:
         The runtime target as a lowercase string with leading and trailing whitespace removed.
     """
@@ -44,11 +49,11 @@ def normalize_runtime_target(runtime_target: object) -> str:
 def invalid_runtime_target_failure(handle: str, runtime_target: object) -> dict[str, Any]:
     """
     Create a standardized runtime validation failure payload for an invalid runtime target.
-    
+
     Parameters:
         handle (str): Skill handle (may include a leading '$'); used to build suggested validation commands.
         runtime_target (object): The original runtime target value provided by the user; will be normalized for the failure message.
-    
+
     Returns:
         dict[str, Any]: A runtime failure payload describing the invalid `runtime_target`, including an error code, failed check id,
         recovery guidance, and suggested validation command(s).
@@ -72,7 +77,7 @@ def invalid_runtime_target_failure(handle: str, runtime_target: object) -> dict[
 def _utc_now() -> str:
     """
     Return the current UTC time formatted as an ISO-8601 timestamp without microseconds and with a trailing 'Z'.
-    
+
     Returns:
         str: ISO-8601 UTC timestamp (e.g. '2024-05-01T12:00:00Z')
     """
@@ -82,13 +87,13 @@ def _utc_now() -> str:
 def _repo_relative(repo_root: Path, path: Path) -> str:
     """
     Produce a repository-relative string for `path` when it is inside `repo_root`; otherwise return the original path string.
-    
+
     Parameters:
-    	repo_root (Path): Repository root path used as the base for relativization.
-    	path (Path): Path to be made relative to `repo_root` when possible.
-    
+        repo_root (Path): Repository root path used as the base for relativization.
+        path (Path): Path to be made relative to `repo_root` when possible.
+
     Returns:
-    	relative_path (str): `path` made relative to `repo_root` if `path` is beneath `repo_root`, otherwise `str(path)`.
+        relative_path (str): `path` made relative to `repo_root` if `path` is beneath `repo_root`, otherwise `str(path)`.
     """
     try:
         return str(path.relative_to(repo_root))
@@ -99,11 +104,11 @@ def _repo_relative(repo_root: Path, path: Path) -> str:
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
     """
     Ensure the parent directory exists and write the given payload to the specified path as pretty-printed JSON.
-    
+
     Parameters:
         path (Path): Filesystem path where the JSON will be written; parent directories are created if missing.
         payload (dict[str, Any]): JSON-serializable mapping to write.
-    
+
     Notes:
         The JSON is written with 2-space indentation, keys sorted, encoded as UTF-8, and terminated with a single trailing newline.
     """
@@ -138,16 +143,16 @@ def _redact_runtime_paths(value: Any, repo_root: Path) -> Any:
 def _runtime_status_for_proof(proof: dict[str, Any]) -> str:
     """
     Map a command-handle proof object to a runtime status label.
-    
+
     Examines `proof["status"]` and, when not `"pass"`, inspects
     `proof["runtime_failure"]["failed_check_id"]` (defaults to `"runtime_reachability"`).
     Returns `"implemented_enforced"` when the proof status is `"pass"`;
     returns `"blocked_runtime"` when the failed check id is one of
     `RUNTIME_REACHABILITY_FAILURES`; otherwise returns `"stale_or_drifted"`.
-    
+
     Parameters:
         proof (dict[str, Any]): The command-handle proof payload.
-    
+
     Returns:
         str: One of `"implemented_enforced"`, `"blocked_runtime"`, or `"stale_or_drifted"` describing runtime status.
     """
@@ -165,10 +170,10 @@ def _runtime_status_for_proof(proof: dict[str, Any]) -> str:
 def _claim_status_for_runtime(runtime_status: str) -> str:
     """
     Map a normalized runtime status to the claim status used in evidence artifacts.
-    
+
     Parameters:
         runtime_status (str): Runtime status string (e.g., "implemented_enforced" for a successful runtime proof).
-    
+
     Returns:
         str: "pass" when `runtime_status` is "implemented_enforced", "blocked" otherwise.
     """
@@ -178,7 +183,7 @@ def _claim_status_for_runtime(runtime_status: str) -> str:
 def _runtime_display_name(runtime_target: str) -> str:
     """
     Map a runtime target identifier to a human-friendly display name.
-    
+
     Returns:
         display_name (str): "Codex" when `runtime_target` is "codex", "Agents" otherwise.
     """
@@ -283,6 +288,291 @@ def _runtime_evidence_context(
             if isinstance(proof.get("runtime_diagnostics"), dict)
             else {}
         ),
+    }
+
+
+def _safe_json_object(line: str) -> dict[str, Any] | None:
+    try:
+        payload = json.loads(line)
+    except json.JSONDecodeError:
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def _iter_recent_codex_rollouts(sessions_root: Path) -> list[Path]:
+    if not sessions_root.is_dir():
+        return []
+    candidates: list[tuple[float, Path]] = []
+    for path in sessions_root.rglob("*.jsonl"):
+        try:
+            candidates.append((path.stat().st_mtime, path))
+        except OSError:
+            continue
+    candidates.sort(reverse=True)
+    return [path for _mtime, path in candidates[:CODEX_SESSION_LOOKBACK_LIMIT]]
+
+
+def _session_cwd_matches_repo(cwd: object, repo_root: Path) -> bool:
+    if not isinstance(cwd, str) or not cwd:
+        return False
+    try:
+        cwd_resolved = Path(cwd).resolve(strict=False)
+        repo_resolved = repo_root.resolve(strict=False)
+        if cwd_resolved == repo_resolved:
+            return True
+        # Check if cwd is a descendant of repo_root
+        try:
+            cwd_resolved.relative_to(repo_resolved)
+            return True
+        except ValueError:
+            return False
+    except OSError:
+        return False
+
+
+def _codex_session_summary_from_rollout(
+    path: Path,
+    *,
+    context: dict[str, Any],
+) -> dict[str, Any] | None:
+    repo_root = context["repo_root"]
+    session_meta: dict[str, Any] | None = None
+    matching_turn_ids: list[str] = []
+    turn_events: list[dict[str, Any]] = []
+    matched_cwd = False
+
+    try:
+        with path.open("r", encoding="utf-8") as file:
+            for line_number, line in enumerate(file, start=1):
+                entry = _safe_json_object(line)
+                if not entry:
+                    continue
+                entry_type = entry.get("type")
+                payload = entry.get("payload")
+                if not isinstance(payload, dict):
+                    continue
+
+                if entry_type == "session_meta":
+                    raw_meta = payload.get("payload") if isinstance(payload.get("payload"), dict) else payload
+                    if isinstance(raw_meta, dict):
+                        session_meta = raw_meta
+                        matched_cwd = matched_cwd or _session_cwd_matches_repo(raw_meta.get("cwd"), repo_root)
+                elif entry_type == "turn_context":
+                    matched_turn = _session_cwd_matches_repo(payload.get("cwd"), repo_root)
+                    matched_cwd = matched_cwd or matched_turn
+                    turn_id = str(payload.get("turn_id") or "")
+                    if matched_turn and turn_id:
+                        matching_turn_ids.append(turn_id)
+                        if len(turn_events) < CODEX_SESSION_TURN_EVENT_LIMIT:
+                            turn_events.append(
+                                {
+                                    "event_type": "turn_context_observed",
+                                    "turn_id": turn_id,
+                                    "runtime_target": context["runtime_target"],
+                                    "cwd": WORKSPACE_ROOT_MARKER,
+                                    "observed_at": str(entry.get("timestamp") or context["created_at"]),
+                                    "source_line": line_number,
+                                }
+                            )
+                elif entry_type == "event_msg":
+                    event_type = payload.get("type")
+                    turn_id = str(payload.get("turn_id") or "")
+                    if (
+                        turn_id
+                        and turn_id in matching_turn_ids
+                        and len(turn_events) < CODEX_SESSION_TURN_EVENT_LIMIT
+                    ):
+                        turn_events.append(
+                            {
+                                "event_type": str(event_type or "event_msg_observed"),
+                                "turn_id": turn_id,
+                                "runtime_target": context["runtime_target"],
+                                "observed_at": str(entry.get("timestamp") or context["created_at"]),
+                                "source_line": line_number,
+                            }
+                        )
+    except OSError:
+        return None
+
+    if not matched_cwd or not session_meta:
+        return None
+
+    session_id = str(session_meta.get("id") or path.stem)
+    thread_source = str(session_meta.get("thread_source") or "unknown")
+    latest_turn_id = matching_turn_ids[-1] if matching_turn_ids else None
+    redacted_rollout_path = _redact_runtime_path(str(path), repo_root)
+    thread_run = {
+        "thread_id": session_id,
+        "session_id": session_id,
+        "runtime_target": context["runtime_target"],
+        "runtime_status": context["runtime_status"],
+        "source": "codex_rollout_jsonl",
+        "rollout_path": redacted_rollout_path,
+        "cwd": WORKSPACE_ROOT_MARKER,
+        "thread_source": thread_source,
+        "originator": str(session_meta.get("originator") or "unknown"),
+        "observed_at": context["created_at"],
+    }
+    if latest_turn_id:
+        thread_run["latest_turn_id"] = latest_turn_id
+
+    return {
+        "session_id": session_id,
+        "thread_run": thread_run,
+        "turn_events": turn_events,
+        "rollout_path": redacted_rollout_path,
+        "latest_turn_id": latest_turn_id,
+    }
+
+
+def _codex_runtime_observation(
+    context: dict[str, Any],
+    *,
+    codex_sessions_root: Path | None = None,
+) -> dict[str, Any]:
+    if context["runtime_target"] != "codex":
+        return {"thread_runs": [], "turn_events": [], "session": None}
+    sessions_root = codex_sessions_root or Path.home() / ".codex" / "sessions"
+    for path in _iter_recent_codex_rollouts(sessions_root):
+        summary = _codex_session_summary_from_rollout(path, context=context)
+        if summary:
+            return {
+                "thread_runs": [summary["thread_run"]],
+                "turn_events": summary["turn_events"],
+                "session": summary,
+            }
+    return {"thread_runs": [], "turn_events": [], "session": None}
+
+
+def _agents_observability_observation(
+    context: dict[str, Any],
+    *,
+    agents_otel_stats_path: Path | None = None,
+) -> dict[str, Any]:
+    if context["runtime_target"] != "codex":
+        return {"thread_runs": [], "turn_events": [], "observability": None}
+
+    stats_path = agents_otel_stats_path or Path.home() / AGENTS_OTEL_STATS_RELATIVE_PATH
+    try:
+        stats = json.loads(stats_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {"thread_runs": [], "turn_events": [], "observability": None}
+    if not isinstance(stats, dict):
+        return {"thread_runs": [], "turn_events": [], "observability": None}
+
+    confidence = stats.get("telemetry_confidence")
+    if not isinstance(confidence, dict):
+        confidence = {}
+    last_ingest_by_kind = stats.get("last_ingest_by_kind")
+    if not isinstance(last_ingest_by_kind, dict):
+        last_ingest_by_kind = {}
+    signal_freshness = confidence.get("signal_freshness")
+    if not isinstance(signal_freshness, dict):
+        signal_freshness = {}
+    live_presence = confidence.get("live_presence_by_signal")
+    if not isinstance(live_presence, dict):
+        live_presence = {}
+
+    codex_log_presence = False
+    logs_presence = live_presence.get("logs")
+    if isinstance(logs_presence, dict):
+        codex_log_presence = bool(logs_presence.get("codex"))
+
+    skill_invocation_event_count = int(stats.get("skill_invocation_event_count") or 0)
+    plugin_backed_skill_invocation_count = int(
+        stats.get("plugin_backed_skill_invocation_count") or 0
+    )
+    observability = {
+        "source": "agents_otel_stats",
+        "stats_path": _redact_runtime_path(str(stats_path), context["repo_root"]),
+        "overall_status": str(confidence.get("overall_status") or "unknown"),
+        "last_ingest_at": str(stats.get("last_ingest_at") or ""),
+        "last_logs_ingest_at": str(last_ingest_by_kind.get("logs") or ""),
+        "last_traces_ingest_at": str(last_ingest_by_kind.get("traces") or ""),
+        "logs_freshness": str(
+            signal_freshness.get("logs", {}).get("freshness")
+            if isinstance(signal_freshness.get("logs"), dict)
+            else "unknown"
+        ),
+        "traces_freshness": str(
+            signal_freshness.get("traces", {}).get("freshness")
+            if isinstance(signal_freshness.get("traces"), dict)
+            else "unknown"
+        ),
+        "codex_log_presence": codex_log_presence,
+        "skill_invocation_event_count": skill_invocation_event_count,
+        "plugin_backed_skill_invocation_count": plugin_backed_skill_invocation_count,
+    }
+    reasons = confidence.get("reasons")
+    if isinstance(reasons, list):
+        observability["reasons"] = [str(reason) for reason in reasons[:5]]
+    stale_signals = confidence.get("stale_signals")
+    if isinstance(stale_signals, list):
+        observability["stale_signals"] = [
+            {
+                "signal": str(item.get("signal") or "unknown"),
+                "freshness": str(item.get("freshness") or "unknown"),
+                "last_ingest_at": str(item.get("last_ingest_at") or ""),
+            }
+            for item in stale_signals[:5]
+            if isinstance(item, dict)
+        ]
+
+    thread_run = {
+        "thread_id": "agents-otel-observability",
+        "runtime_target": context["runtime_target"],
+        "runtime_status": context["runtime_status"],
+        "source": "agents_otel_stats",
+        "stats_path": observability["stats_path"],
+        "observed_at": context["created_at"],
+        "overall_status": observability["overall_status"],
+        "codex_log_presence": codex_log_presence,
+        "last_logs_ingest_at": observability["last_logs_ingest_at"],
+        "last_traces_ingest_at": observability["last_traces_ingest_at"],
+    }
+    turn_event = {
+        "event_type": "agents_observability_stats_observed",
+        "runtime_target": context["runtime_target"],
+        "observed_at": context["created_at"],
+        "source": "agents_otel_stats",
+        "stats_path": observability["stats_path"],
+        "overall_status": observability["overall_status"],
+        "codex_log_presence": codex_log_presence,
+        "skill_invocation_event_count": skill_invocation_event_count,
+        "plugin_backed_skill_invocation_count": plugin_backed_skill_invocation_count,
+    }
+    return {
+        "thread_runs": [thread_run],
+        "turn_events": [turn_event],
+        "observability": observability,
+    }
+
+
+def _runtime_observation(
+    context: dict[str, Any],
+    *,
+    codex_sessions_root: Path | None = None,
+    agents_otel_stats_path: Path | None = None,
+) -> dict[str, Any]:
+    codex_observation = _codex_runtime_observation(
+        context,
+        codex_sessions_root=codex_sessions_root,
+    )
+    agents_observation = _agents_observability_observation(
+        context,
+        agents_otel_stats_path=agents_otel_stats_path,
+    )
+    return {
+        "thread_runs": [
+            *codex_observation.get("thread_runs", []),
+            *agents_observation.get("thread_runs", []),
+        ],
+        "turn_events": [
+            *codex_observation.get("turn_events", []),
+            *agents_observation.get("turn_events", []),
+        ],
+        "session": codex_observation.get("session"),
+        "observability": agents_observation.get("observability"),
     }
 
 
@@ -519,6 +809,7 @@ def _runtime_card_payload(
     artifact_record: dict[str, Any],
     probe_record: dict[str, Any],
     receipt: dict[str, Any],
+    runtime_observation: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """
     Builds a RuntimeCard payload that aggregates runtime-proof metadata, artifacts, verifier results and a recovery plan for a skill handle.
@@ -552,6 +843,50 @@ def _runtime_card_payload(
     }
     if context["claim_status"] == "blocked":
         runtime_session["unavailable_reason"] = context["blocker"]
+    runtime_observation = runtime_observation or {"thread_runs": [], "turn_events": [], "session": None}
+    observed_session = runtime_observation.get("session")
+    if isinstance(observed_session, dict):
+        runtime_session["session_id"] = str(observed_session.get("session_id") or runtime_session["session_id"])
+        runtime_session["source"] = "codex_rollout_jsonl"
+        runtime_session["rollout_path"] = str(observed_session.get("rollout_path") or "")
+        latest_turn_id = observed_session.get("latest_turn_id")
+        if latest_turn_id:
+            runtime_session["latest_turn_id"] = str(latest_turn_id)
+    observed_observability = runtime_observation.get("observability")
+    if isinstance(observed_observability, dict):
+        runtime_session["observability"] = observed_observability
+        runtime_session["observability_sources"] = [
+            str(observed_observability.get("source") or "agents_otel_stats")
+        ]
+    thread_runs = runtime_observation.get("thread_runs")
+    if not isinstance(thread_runs, list):
+        thread_runs = []
+    turn_events = runtime_observation.get("turn_events")
+    if not isinstance(turn_events, list):
+        turn_events = []
+    runtime_display = _runtime_display_name(context["runtime_target"])
+    limitations = (
+        [
+            {
+                "class": "skill_invocation_not_asserted",
+                "message": (
+                    f"{runtime_display} session metadata was observed for this workspace; this proof still verifies "
+                    "command-handle reachability rather than a dedicated skill tool invocation event. "
+                    "Agents observability counters are attached when available but are not treated as "
+                    "per-skill invocation proof."
+                ),
+            }
+        ]
+        if isinstance(observed_session, dict)
+        else [
+            {
+                "class": "manual_session_gate",
+                "message": (
+                    "Runtime reachability proves command-handle wiring; it does not execute an interactive session."
+                ),
+            }
+        ]
+    )
     return {
         "schema_version": 1,
         "card_id": f"runtime-card-{context['handle']}-{context['runtime_target']}",
@@ -561,8 +896,8 @@ def _runtime_card_payload(
         "skill_handle": context["handle"],
         "command_handle": "$" + context["handle"],
         "runtime_session": runtime_session,
-        "thread_runs": [],
-        "turn_events": [],
+        "thread_runs": thread_runs,
+        "turn_events": turn_events,
         "artifacts": [artifact_record, probe_record],
         "evidence_receipts": [receipt],
         "verifier_results": [
@@ -587,15 +922,7 @@ def _runtime_card_payload(
         "actor_type": context["actor_type"],
         "mutation_scope": "evidence_write",
         "visibility_status": "user_observable",
-        "limitations": [
-            {
-                "class": "manual_session_gate",
-                "message": (
-                    "Runtime reachability proves command-handle wiring; it does not execute an interactive "
-                    "Codex session."
-                ),
-            }
-        ],
+        "limitations": limitations,
         "runtime_diagnostics": _redact_runtime_paths(
             context["runtime_diagnostics"],
             context["repo_root"],
@@ -609,27 +936,31 @@ def emit_command_handle_runtime_evidence(
     repo_root: Path,
     proof: dict[str, Any],
     actor_type: str = "agent",
+    codex_sessions_root: Path | None = None,
+    agents_otel_stats_path: Path | None = None,
 ) -> dict[str, Any]:
     """
     Emit runtime-proof evidence files for an explicit 'codex' or 'agents' runtime target.
     
     Parameters:
-    	repo_root (Path): Repository root used to compute evidence output paths.
-    	proof (dict[str, Any]): Command-handle proof payload that must include a `runtime_target` entry.
-    	actor_type (str): Actor classification to include in generated evidence (default: "agent").
+        repo_root (Path): Repository root used to compute evidence output paths.
+        proof (dict[str, Any]): Command-handle proof payload that must include a `runtime_target` entry.
+        actor_type (str): Actor classification to include in generated evidence (default: "agent").
     
     Returns:
-    	dict[str, Any]: Result summary containing:
-    		- "status": runtime status string (e.g. "implemented_enforced", "blocked_runtime", "stale_or_drifted").
-    		- "evidence_dir": repository-relative evidence directory path.
-    		- "runtime_card_path": repository-relative path to the written runtime card JSON.
-    		- "evidence_receipt_path": repository-relative path to the written receipt JSON.
-    		- "artifact_record_path": repository-relative path to the written artifact record JSON.
-    		- "probe_artifact_path": repository-relative path to the written probe JSON.
-    		- "validation_command": a CLI string that can be used to validate the emitted runtime card.
-    	
-    	If the proof's `runtime_target` is not "codex" or "agents", returns:
-    		{"status": "skipped", "reason": "runtime evidence is only emitted for explicit codex or agents targets"}.
+        dict[str, Any]: Result summary containing:
+            - "status": runtime status string (e.g. "implemented_enforced", "blocked_runtime", "stale_or_drifted").
+            - "evidence_dir": repository-relative evidence directory path.
+            - "runtime_card_path": repository-relative path to the written runtime card JSON.
+            - "evidence_receipt_path": repository-relative path to the written receipt JSON.
+            - "artifact_record_path": repository-relative path to the written artifact record JSON.
+            - "probe_artifact_path": repository-relative path to the written probe JSON.
+            - "validation_command": a CLI string that can be used to validate the emitted runtime card.
+            - "runtime_session_status": whether Codex rollout session evidence was attached.
+            - "observability_status": whether Agents OTEL stats evidence was attached.
+
+        If the proof's `runtime_target` is not "codex" or "agents", returns:
+            {"status": "skipped", "reason": "runtime evidence is only emitted for explicit codex or agents targets"}.
     """
     runtime_target = str(proof.get("runtime_target") or "")
     if runtime_target not in EVIDENCE_RUNTIME_TARGETS:
@@ -639,6 +970,11 @@ def emit_command_handle_runtime_evidence(
         }
 
     context = _runtime_evidence_context(repo_root=repo_root, proof=proof, actor_type=actor_type)
+    runtime_observation = _runtime_observation(
+        context,
+        codex_sessions_root=codex_sessions_root,
+        agents_otel_stats_path=agents_otel_stats_path,
+    )
     relative_card_path = _repo_relative(repo_root, context["card_path"])
     relative_receipt_path = _repo_relative(repo_root, context["receipt_path"])
     relative_artifact_path = _repo_relative(repo_root, context["artifact_path"])
@@ -666,6 +1002,7 @@ def emit_command_handle_runtime_evidence(
         artifact_record=card_record,
         probe_record=probe_record,
         receipt=receipt,
+        runtime_observation=runtime_observation,
     )
 
     _write_json(context["probe_path"], probe)
@@ -675,6 +1012,12 @@ def emit_command_handle_runtime_evidence(
 
     return {
         "status": context["runtime_status"],
+        "runtime_session_status": (
+            "observed" if runtime_observation.get("session") else "not_observed"
+        ),
+        "observability_status": (
+            "observed" if runtime_observation.get("observability") else "not_observed"
+        ),
         "evidence_dir": _repo_relative(repo_root, context["evidence_dir"]),
         "runtime_card_path": relative_card_path,
         "evidence_receipt_path": relative_receipt_path,

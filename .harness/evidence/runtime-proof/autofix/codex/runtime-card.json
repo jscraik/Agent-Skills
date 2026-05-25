@@ -42,7 +42,7 @@
   ],
   "card_id": "runtime-card-autofix-codex",
   "command_handle": "$autofix",
-  "created_at": "2026-05-25T18:17:37Z",
+  "created_at": "2026-05-25T20:13:17Z",
   "evidence_receipts": [
     {
       "artifact_path": ".harness/evidence/runtime-proof/autofix/codex/runtime-card.json",
@@ -52,7 +52,7 @@
       "command": "./bin/ask skills proof autofix --runtime-target codex --json --robot",
       "evidence_type": "command",
       "exit_code": 0,
-      "observed_at": "2026-05-25T18:17:37Z",
+      "observed_at": "2026-05-25T20:13:17Z",
       "probe_artifact_path": ".harness/evidence/runtime-proof/autofix/codex/probe.json",
       "probe_command": "./bin/ask skills proof autofix --runtime-target codex --json --robot",
       "probe_exit_code": 0,
@@ -69,8 +69,8 @@
   ],
   "limitations": [
     {
-      "class": "manual_session_gate",
-      "message": "Runtime reachability proves command-handle wiring; it does not execute an interactive Codex session."
+      "class": "skill_invocation_not_asserted",
+      "message": "Codex session metadata was observed for this workspace; this proof still verifies command-handle reachability rather than a dedicated skill tool invocation event. Agents observability counters are attached when available but are not treated as per-skill invocation proof."
     }
   ],
   "mutation_scope": "evidence_write",
@@ -200,10 +200,40 @@
   },
   "runtime_session": {
     "actor_type": "agent",
-    "created_at": "2026-05-25T18:17:37Z",
+    "created_at": "2026-05-25T20:13:17Z",
+    "latest_turn_id": "019e60b5-aa7f-7793-9b41-29e821bfd54f",
+    "observability": {
+      "codex_log_presence": true,
+      "last_ingest_at": "2026-05-25T20:13:16.563757Z",
+      "last_logs_ingest_at": "2026-05-25T20:13:16.563757Z",
+      "last_traces_ingest_at": "2026-05-25T20:12:33.806577Z",
+      "logs_freshness": "fresh",
+      "overall_status": "degraded",
+      "plugin_backed_skill_invocation_count": 0,
+      "reasons": [
+        "auth ingest errors recorded",
+        "claude exists historically but is absent from live signal presence"
+      ],
+      "skill_invocation_event_count": 0,
+      "source": "agents_otel_stats",
+      "stale_signals": [
+        {
+          "freshness": "stale",
+          "last_ingest_at": "2026-05-16T12:22:20.991212Z",
+          "signal": "metrics"
+        }
+      ],
+      "stats_path": "${HOME}/.agents/otel-collector/data/processed/stats.json",
+      "traces_freshness": "fresh"
+    },
+    "observability_sources": [
+      "agents_otel_stats"
+    ],
+    "rollout_path": "${HOME}/.codex/sessions/2026/05/24/rollout-2026-05-24T18-11-11-019e5af8-214a-70e2-824d-40574af940e8.jsonl",
     "runtime_status": "implemented_enforced",
     "runtime_target": "codex",
-    "session_id": "runtime-proof-autofix-codex",
+    "session_id": "019e5af8-214a-70e2-824d-40574af940e8",
+    "source": "codex_rollout_jsonl",
     "visibility_status": "user_observable",
     "workspace_root": "${WORKSPACE_ROOT}"
   },
@@ -211,8 +241,106 @@
   "runtime_target": "codex",
   "schema_version": 1,
   "skill_handle": "autofix",
-  "thread_runs": [],
-  "turn_events": [],
+  "thread_runs": [
+    {
+      "cwd": "${WORKSPACE_ROOT}",
+      "latest_turn_id": "019e60b5-aa7f-7793-9b41-29e821bfd54f",
+      "observed_at": "2026-05-25T20:13:17Z",
+      "originator": "Codex Desktop",
+      "rollout_path": "${HOME}/.codex/sessions/2026/05/24/rollout-2026-05-24T18-11-11-019e5af8-214a-70e2-824d-40574af940e8.jsonl",
+      "runtime_status": "implemented_enforced",
+      "runtime_target": "codex",
+      "session_id": "019e5af8-214a-70e2-824d-40574af940e8",
+      "source": "codex_rollout_jsonl",
+      "thread_id": "019e5af8-214a-70e2-824d-40574af940e8",
+      "thread_source": "user"
+    },
+    {
+      "codex_log_presence": true,
+      "last_logs_ingest_at": "2026-05-25T20:13:16.563757Z",
+      "last_traces_ingest_at": "2026-05-25T20:12:33.806577Z",
+      "observed_at": "2026-05-25T20:13:17Z",
+      "overall_status": "degraded",
+      "runtime_status": "implemented_enforced",
+      "runtime_target": "codex",
+      "source": "agents_otel_stats",
+      "stats_path": "${HOME}/.agents/otel-collector/data/processed/stats.json",
+      "thread_id": "agents-otel-observability"
+    }
+  ],
+  "turn_events": [
+    {
+      "cwd": "${WORKSPACE_ROOT}",
+      "event_type": "turn_context_observed",
+      "observed_at": "2026-05-24T17:11:15.349Z",
+      "runtime_target": "codex",
+      "source_line": 5,
+      "turn_id": "019e5af8-2ab7-7963-88c3-3477c24b4111"
+    },
+    {
+      "event_type": "task_complete",
+      "observed_at": "2026-05-24T17:15:20.099Z",
+      "runtime_target": "codex",
+      "source_line": 98,
+      "turn_id": "019e5af8-2ab7-7963-88c3-3477c24b4111"
+    },
+    {
+      "cwd": "${WORKSPACE_ROOT}",
+      "event_type": "turn_context_observed",
+      "observed_at": "2026-05-24T17:15:40.989Z",
+      "runtime_target": "codex",
+      "source_line": 101,
+      "turn_id": "019e5afc-3d1f-72b2-9b27-631796e00260"
+    },
+    {
+      "event_type": "patch_apply_end",
+      "observed_at": "2026-05-24T17:25:46.694Z",
+      "runtime_target": "codex",
+      "source_line": 141,
+      "turn_id": "019e5afc-3d1f-72b2-9b27-631796e00260"
+    },
+    {
+      "event_type": "task_complete",
+      "observed_at": "2026-05-24T17:26:10.684Z",
+      "runtime_target": "codex",
+      "source_line": 154,
+      "turn_id": "019e5afc-3d1f-72b2-9b27-631796e00260"
+    },
+    {
+      "cwd": "${WORKSPACE_ROOT}",
+      "event_type": "turn_context_observed",
+      "observed_at": "2026-05-24T17:31:36.776Z",
+      "runtime_target": "codex",
+      "source_line": 157,
+      "turn_id": "019e5b0a-d245-7da3-9e6f-5544ae9288de"
+    },
+    {
+      "cwd": "${WORKSPACE_ROOT}",
+      "event_type": "turn_context_observed",
+      "observed_at": "2026-05-24T17:34:43.070Z",
+      "runtime_target": "codex",
+      "source_line": 203,
+      "turn_id": "019e5b0a-d245-7da3-9e6f-5544ae9288de"
+    },
+    {
+      "event_type": "patch_apply_end",
+      "observed_at": "2026-05-24T17:40:36.865Z",
+      "runtime_target": "codex",
+      "source_line": 296,
+      "turn_id": "019e5b0a-d245-7da3-9e6f-5544ae9288de"
+    },
+    {
+      "codex_log_presence": true,
+      "event_type": "agents_observability_stats_observed",
+      "observed_at": "2026-05-25T20:13:17Z",
+      "overall_status": "degraded",
+      "plugin_backed_skill_invocation_count": 0,
+      "runtime_target": "codex",
+      "skill_invocation_event_count": 0,
+      "source": "agents_otel_stats",
+      "stats_path": "${HOME}/.agents/otel-collector/data/processed/stats.json"
+    }
+  ],
   "verifier_results": [
     {
       "failed_check_id": null,

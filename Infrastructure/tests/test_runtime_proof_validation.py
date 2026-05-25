@@ -199,6 +199,203 @@ class TestRuntimeProofValidation(unittest.TestCase):
             )
             self.assertEqual(process.returncode, 0, process.stdout + process.stderr)
 
+    def test_runtime_card_attaches_codex_session_evidence_when_available(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir) / "repo"
+            repo_root.mkdir()
+            sessions_root = Path(temp_dir) / "sessions"
+            rollout_path = sessions_root / "2026" / "05" / "25" / "rollout-session.jsonl"
+            rollout_path.parent.mkdir(parents=True)
+            session_id = "019e5d55-runtime-proof-session"
+            turn_id = "019e5d55-runtime-proof-turn"
+            rollout_path.write_text(
+                "\n".join(
+                    [
+                        json.dumps(
+                            {
+                                "timestamp": "2026-05-25T18:00:00Z",
+                                "type": "session_meta",
+                                "payload": {
+                                    "id": session_id,
+                                    "cwd": str(repo_root),
+                                    "originator": "Codex Desktop",
+                                    "thread_source": "root",
+                                },
+                            }
+                        ),
+                        json.dumps(
+                            {
+                                "timestamp": "2026-05-25T18:00:01Z",
+                                "type": "turn_context",
+                                "payload": {
+                                    "turn_id": turn_id,
+                                    "cwd": str(repo_root),
+                                    "approval_policy": "on-request",
+                                },
+                            }
+                        ),
+                        json.dumps(
+                            {
+                                "timestamp": "2026-05-25T18:00:02Z",
+                                "type": "event_msg",
+                                "payload": {
+                                    "type": "task_started",
+                                    "turn_id": turn_id,
+                                },
+                            }
+                        ),
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            proof = {
+                "schema_version": "command-handle-proof.v2",
+                "handle": "autofix",
+                "runtime_target": "codex",
+                "status": "pass",
+                "resolution": {
+                    "status": "ok",
+                    "handle": "autofix",
+                    "source_path": "Skills/agent-ops/autofix/SKILL.md",
+                    "command_handle_path": ".agents/skills/autofix/SKILL.md",
+                },
+                "gates": {
+                    "resolver": True,
+                    "generated_command_handle_check": True,
+                    "workspace_command_handle_exists": True,
+                    "codex_user_runtime_ready": True,
+                },
+                "gate_policy": {"required": ["codex_user_runtime_ready"]},
+            }
+
+            summary = runtime_adapters.emit_command_handle_runtime_evidence(
+                repo_root=repo_root,
+                proof=proof,
+                actor_type="agent",
+                codex_sessions_root=sessions_root,
+            )
+
+            self.assertEqual(summary["runtime_session_status"], "observed")
+            card = json.loads((repo_root / summary["runtime_card_path"]).read_text(encoding="utf-8"))
+            self.assertEqual(card["runtime_session"]["session_id"], session_id)
+            self.assertEqual(card["runtime_session"]["latest_turn_id"], turn_id)
+            self.assertEqual(card["thread_runs"][0]["thread_id"], session_id)
+            self.assertEqual(card["thread_runs"][0]["cwd"], "${WORKSPACE_ROOT}")
+            self.assertEqual(card["turn_events"][0]["turn_id"], turn_id)
+            self.assertEqual(card["limitations"][0]["class"], "skill_invocation_not_asserted")
+            process = self.run_validator(
+                str(repo_root / summary["runtime_card_path"]),
+                "--require-shared-workspace",
+                "--workspace-root",
+                "${WORKSPACE_ROOT}",
+                "--json",
+            )
+            self.assertEqual(process.returncode, 0, process.stdout + process.stderr)
+
+    def test_runtime_card_attaches_agents_observability_stats_when_available(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir) / "repo"
+            repo_root.mkdir()
+            sessions_root = Path(temp_dir) / "sessions"
+            rollout_path = sessions_root / "2026" / "05" / "25" / "rollout-session.jsonl"
+            rollout_path.parent.mkdir(parents=True)
+            session_id = "019e60a9-observed-session"
+            turn_id = "019e60a9-observed-turn"
+            rollout_path.write_text(
+                "\n".join(
+                    [
+                        json.dumps(
+                            {
+                                "timestamp": "2026-05-25T18:00:00Z",
+                                "type": "session_meta",
+                                "payload": {
+                                    "id": session_id,
+                                    "cwd": str(repo_root),
+                                    "originator": "Codex Desktop",
+                                },
+                            }
+                        ),
+                        json.dumps(
+                            {
+                                "timestamp": "2026-05-25T18:00:01Z",
+                                "type": "turn_context",
+                                "payload": {"turn_id": turn_id, "cwd": str(repo_root)},
+                            }
+                        ),
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            stats_path = Path(temp_dir) / "stats.json"
+            stats_path.write_text(
+                json.dumps(
+                    {
+                        "last_ingest_at": "2026-05-25T19:57:15Z",
+                        "last_ingest_by_kind": {
+                            "logs": "2026-05-25T19:57:15Z",
+                            "traces": "2026-05-25T19:56:20Z",
+                        },
+                        "skill_invocation_event_count": 0,
+                        "plugin_backed_skill_invocation_count": 0,
+                        "telemetry_confidence": {
+                            "overall_status": "degraded",
+                            "live_presence_by_signal": {"logs": {"codex": True}},
+                            "signal_freshness": {
+                                "logs": {"freshness": "fresh"},
+                                "traces": {"freshness": "fresh"},
+                            },
+                            "reasons": ["auth ingest errors recorded"],
+                        },
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            proof = {
+                "schema_version": "command-handle-proof.v2",
+                "handle": "autofix",
+                "runtime_target": "codex",
+                "status": "pass",
+                "resolution": {
+                    "status": "ok",
+                    "handle": "autofix",
+                    "source_path": "Skills/agent-ops/autofix/SKILL.md",
+                    "command_handle_path": ".agents/skills/autofix/SKILL.md",
+                },
+                "gates": {"codex_user_runtime_ready": True},
+                "gate_policy": {"required": ["codex_user_runtime_ready"]},
+            }
+
+            summary = runtime_adapters.emit_command_handle_runtime_evidence(
+                repo_root=repo_root,
+                proof=proof,
+                actor_type="agent",
+                codex_sessions_root=sessions_root,
+                agents_otel_stats_path=stats_path,
+            )
+
+            self.assertEqual(summary["runtime_session_status"], "observed")
+            self.assertEqual(summary["observability_status"], "observed")
+            card = json.loads((repo_root / summary["runtime_card_path"]).read_text(encoding="utf-8"))
+            self.assertEqual(card["runtime_session"]["observability"]["source"], "agents_otel_stats")
+            self.assertTrue(card["runtime_session"]["observability"]["codex_log_presence"])
+            self.assertEqual(
+                card["runtime_session"]["observability"]["skill_invocation_event_count"],
+                0,
+            )
+            self.assertTrue(
+                any(run["source"] == "agents_otel_stats" for run in card["thread_runs"])
+            )
+            self.assertTrue(
+                any(
+                    event["event_type"] == "agents_observability_stats_observed"
+                    for event in card["turn_events"]
+                )
+            )
+            self.assertEqual(card["limitations"][0]["class"], "skill_invocation_not_asserted")
+
     def test_build_command_handle_proof_accepts_handle_bridge_without_root_symlink(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir) / "repo"
