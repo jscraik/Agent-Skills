@@ -918,6 +918,32 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
         self.assertEqual(card["runtime_status"], "implemented_enforced")
         self.assertEqual(card["evidence_receipts"][0]["claim_status"], "pass")
 
+    def test_skills_proof_runtime_target_codex_passes_with_handle_bridge(self) -> None:
+        """Codex-targeted proof accepts a per-handle bridge under ~/.codex/skills."""
+        repo_root = self.temp_dir / "repo"
+        self._write_he_heartbeat_source(repo_root)
+        command_surface.write_command_handles(repo_root_path=repo_root, dry_run=False)
+        handle_dir = repo_root / ".agents" / "skills" / "he-heartbeat"
+
+        home = self.temp_dir / "home"
+        codex_skills = home / ".codex" / "skills"
+        codex_skills.mkdir(parents=True)
+        (codex_skills / "he-heartbeat").symlink_to(handle_dir)
+
+        with mock.patch("pathlib.Path.home", return_value=home):
+            result = skills_proof(repo_root, "he-heartbeat", runtime_target="codex")
+
+        proof = result.data["proof"]
+        diagnostics = proof["runtime_diagnostics"]
+        self.assertEqual(result.status, "success")
+        self.assertEqual(proof["status"], "pass")
+        self.assertFalse(proof["gates"]["codex_user_link"])
+        self.assertTrue(proof["gates"]["codex_user_command_handle_exists"])
+        self.assertTrue(proof["gates"]["codex_user_command_handle_points_to_workspace"])
+        self.assertTrue(proof["gates"]["codex_user_runtime_ready"])
+        self.assertEqual(proof["runtime_satisfied_by"], "codex_user_runtime")
+        self.assertEqual(diagnostics["runtime_modes"]["codex_user_runtime"], "handle_bridge")
+
 
 class TestCommittedCommandSurface(CommandSurfaceTempDirTestCase):
     def test_committed_command_surface_matches_rooted_manifests(self) -> None:

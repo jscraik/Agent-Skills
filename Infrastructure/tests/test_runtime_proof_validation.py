@@ -91,6 +91,225 @@ class TestRuntimeProofValidation(unittest.TestCase):
             )
             self.assertEqual(process.returncode, 0, process.stdout + process.stderr)
 
+    def test_runtime_card_embeds_redacted_runtime_diagnostics(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir) / "repo"
+            workspace_runtime = repo_root / ".agents" / "skills"
+            workspace_handle = workspace_runtime / "autofix" / "SKILL.md"
+            workspace_handle.parent.mkdir(parents=True)
+            workspace_handle.write_text("---\nname: autofix\n---\n", encoding="utf-8")
+            codex_handle = repo_root / ".tmp-home" / ".codex" / "skills" / "autofix" / "SKILL.md"
+            proof = {
+                "schema_version": "command-handle-proof.v2",
+                "handle": "autofix",
+                "runtime_target": "codex",
+                "status": "fail",
+                "resolution": {
+                    "status": "ok",
+                    "handle": "autofix",
+                    "source_path": "Skills/agent-ops/autofix/SKILL.md",
+                    "command_handle_path": ".agents/skills/autofix/SKILL.md",
+                },
+                "gates": {
+                    "resolver": True,
+                    "generated_command_handle_check": True,
+                    "workspace_command_handle_exists": True,
+                    "codex_user_runtime_ready": False,
+                },
+                "gate_policy": {"required": ["codex_user_runtime_ready"]},
+                "runtime_failure": {
+                    "failed_check_id": "codex_user_runtime_ready",
+                    "message": "Codex runtime handle is unavailable.",
+                    "recovery_guidance": "Preview user runtime sync before applying it.",
+                },
+                "runtime_diagnostics": {
+                    "schema_version": "command-handle-runtime-diagnostics.v1",
+                    "selected_runtime_target": "codex",
+                    "failed_gate": "codex_user_runtime_ready",
+                    "expected_workspace_runtime": str(workspace_runtime.resolve(strict=False)),
+                    "runtime_modes": {"codex_user_runtime": "missing_root"},
+                    "missing_command_handles": [
+                        {
+                            "runtime": "codex_user_runtime",
+                            "path": str(codex_handle.resolve(strict=False)),
+                            "expected_under": str(workspace_runtime.resolve(strict=False)),
+                        }
+                    ],
+                    "recovery_commands": [
+                        {
+                            "kind": "preview_user_runtime_sync",
+                            "command": "./bin/ask skills sync --scope user --projection rooted --dry-run --json --robot",
+                            "preconditions": ["Workspace rooted projection validates cleanly."],
+                            "permission_profile": {
+                                "filesystem": "read workspace and user runtime links",
+                                "network": "not required",
+                            },
+                            "expected_outcome": "Reports the user-runtime relink plan before mutation.",
+                        },
+                        {
+                            "kind": "rerun_runtime_proof",
+                            "command": "./bin/ask skills proof autofix --runtime-target codex --json --robot",
+                            "preconditions": ["User runtime now points at the workspace projection."],
+                            "permission_profile": {
+                                "filesystem": "read workspace and user runtime links",
+                                "network": "not required",
+                            },
+                            "expected_outcome": "Updates runtime evidence with pass or a narrower blocker.",
+                        },
+                    ],
+                },
+            }
+
+            summary = runtime_adapters.emit_command_handle_runtime_evidence(
+                repo_root=repo_root,
+                proof=proof,
+                actor_type="agent",
+            )
+
+            card_path = repo_root / summary["runtime_card_path"]
+            card = json.loads(card_path.read_text(encoding="utf-8"))
+            diagnostics = card["runtime_diagnostics"]
+            self.assertEqual(
+                diagnostics["expected_workspace_runtime"],
+                "${WORKSPACE_ROOT}/.agents/skills",
+            )
+            self.assertEqual(
+                card["verifier_results"][0]["runtime_diagnostics"],
+                diagnostics,
+            )
+            self.assertEqual(
+                diagnostics["missing_command_handles"][0]["expected_under"],
+                "${WORKSPACE_ROOT}/.agents/skills",
+            )
+            recovery_commands = card["recovery_plan"]["next_commands"]
+            self.assertEqual(
+                recovery_commands[0]["command"],
+                "./bin/ask skills sync --scope user --projection rooted --dry-run --json --robot",
+            )
+            self.assertEqual(
+                recovery_commands[1]["command"],
+                "./bin/ask skills proof autofix --runtime-target codex --json --robot",
+            )
+            process = self.run_validator(
+                str(card_path),
+                "--require-shared-workspace",
+                "--workspace-root",
+                "${WORKSPACE_ROOT}",
+                "--json",
+            )
+            self.assertEqual(process.returncode, 0, process.stdout + process.stderr)
+
+    def test_build_command_handle_proof_accepts_handle_bridge_without_root_symlink(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir) / "repo"
+            workspace_runtime = repo_root / ".agents" / "skills"
+            workspace_handle = workspace_runtime / "autofix" / "SKILL.md"
+            workspace_handle.parent.mkdir(parents=True)
+            workspace_handle.write_text("---\\nname: autofix\\n---\\n", encoding="utf-8")
+
+            home_path = repo_root / ".tmp-home"
+            codex_handle = home_path / ".codex" / "skills" / "autofix" / "SKILL.md"
+            codex_handle.parent.mkdir(parents=True, exist_ok=True)
+            codex_handle.symlink_to(workspace_handle)
+
+            def resolve_skill_handle_fn(
+                _handle: str,
+                *,
+                repo_root_path: Path,
+            ) -> dict[str, object]:
+                del repo_root_path
+                return {
+                    "status": "ok",
+                    "handle": "autofix",
+                    "source_path": "Skills/agent-ops/autofix/SKILL.md",
+                    "command_handle_path": ".agents/skills/autofix/SKILL.md",
+                }
+
+            def check_command_handles_fn(*, repo_root_path: Path) -> dict[str, object]:
+                del repo_root_path
+                return {"status": "pass", "violations": []}
+
+            proof = runtime_adapters.build_command_handle_proof(
+                repo_root=repo_root,
+                handle="autofix",
+                runtime_target="codex",
+                resolve_skill_handle_fn=resolve_skill_handle_fn,
+                check_command_handles_fn=check_command_handles_fn,
+                home_path=home_path,
+            )
+
+            self.assertEqual(proof["status"], "pass")
+            self.assertFalse(proof["gates"]["codex_user_link"])
+            self.assertTrue(proof["gates"]["codex_user_command_handle_exists"])
+            self.assertTrue(proof["gates"]["codex_user_command_handle_points_to_workspace"])
+            self.assertTrue(proof["gates"]["codex_user_runtime_ready"])
+            self.assertEqual(proof["runtime_satisfied_by"], "codex_user_runtime")
+            self.assertEqual(
+                proof["runtime_diagnostics"]["runtime_modes"]["codex_user_runtime"],
+                "handle_bridge",
+            )
+            missing = proof["runtime_diagnostics"]["missing_command_handles"]
+            self.assertTrue(any(entry["runtime"] == "agents_user_runtime" for entry in missing))
+            self.assertFalse(any(entry["runtime"] == "codex_user_runtime" for entry in missing))
+
+    def test_build_command_handle_proof_reports_blocked_runtime_with_actionable_diagnostics(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir) / "repo"
+            workspace_runtime = repo_root / ".agents" / "skills"
+            workspace_handle = workspace_runtime / "autofix" / "SKILL.md"
+            workspace_handle.parent.mkdir(parents=True)
+            workspace_handle.write_text("---\\nname: autofix\\n---\\n", encoding="utf-8")
+
+            home_path = repo_root / ".tmp-home"
+            (home_path / ".codex" / "skills").mkdir(parents=True, exist_ok=True)
+
+            agents_link = home_path / ".agents" / "skills"
+            agents_link.parent.mkdir(parents=True, exist_ok=True)
+            agents_link.symlink_to(workspace_runtime)
+
+            def resolve_skill_handle_fn(
+                _handle: str,
+                *,
+                repo_root_path: Path,
+            ) -> dict[str, object]:
+                del repo_root_path
+                return {
+                    "status": "ok",
+                    "handle": "autofix",
+                    "source_path": "Skills/agent-ops/autofix/SKILL.md",
+                    "command_handle_path": ".agents/skills/autofix/SKILL.md",
+                }
+
+            def check_command_handles_fn(*, repo_root_path: Path) -> dict[str, object]:
+                del repo_root_path
+                return {"status": "pass", "violations": []}
+
+            proof = runtime_adapters.build_command_handle_proof(
+                repo_root=repo_root,
+                handle="autofix",
+                runtime_target="codex",
+                resolve_skill_handle_fn=resolve_skill_handle_fn,
+                check_command_handles_fn=check_command_handles_fn,
+                home_path=home_path,
+            )
+
+            self.assertEqual(proof["status"], "fail")
+            runtime_failure = proof["runtime_failure"]
+            self.assertEqual(runtime_failure["failed_check_id"], "codex_user_runtime_ready")
+            self.assertEqual(proof["runtime_diagnostics"]["failed_gate"], "codex_user_runtime_ready")
+            missing = proof["runtime_diagnostics"]["missing_command_handles"]
+            self.assertTrue(any(entry["runtime"] == "codex_user_runtime" for entry in missing))
+            self.assertIn("dry-run", proof["runtime_diagnostics"]["recovery_risk"])
+            recovery_kinds = {entry["kind"] for entry in proof["runtime_diagnostics"]["recovery_commands"]}
+            self.assertTrue(
+                {
+                    "preview_user_runtime_sync",
+                    "refresh_workspace_projection",
+                    "apply_user_runtime_sync",
+                    "rerun_runtime_proof",
+                }.issubset(recovery_kinds)
+            )
+
     def test_schema_files_accept_valid_runtime_card_fixture(self) -> None:
         payload = json.loads((FIXTURES_DIR / "valid-runtime-card.json").read_text(encoding="utf-8"))
 

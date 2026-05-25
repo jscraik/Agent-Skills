@@ -185,6 +185,24 @@ def _runtime_display_name(runtime_target: str) -> str:
     return "Codex" if runtime_target == "codex" else "Agents"
 
 
+def _path_is_under(path: Path, parent: Path) -> bool:
+    try:
+        path.resolve(strict=False).relative_to(parent.resolve(strict=False))
+        return True
+    except (OSError, ValueError):
+        return False
+
+
+def _runtime_mode(link: dict[str, object], *, handle_points_to_workspace: bool) -> str:
+    if bool(link.get("points_to_workspace_runtime")):
+        return "root_symlink"
+    if handle_points_to_workspace:
+        return "handle_bridge"
+    if bool(link.get("exists")):
+        return "foreign_or_unmanaged_root"
+    return "missing_root"
+
+
 def _runtime_evidence_path_segment(handle: str) -> str:
     segment = SAFE_EVIDENCE_SEGMENT_PATTERN.sub("-", handle.strip().lstrip("$"))
     return segment.strip(".-") or "unknown"
@@ -260,6 +278,11 @@ def _runtime_evidence_context(
             "Infrastructure/scripts/lib/ask/commands/skills_impl.py",
         ],
         "actor_type": actor_type,
+        "runtime_diagnostics": (
+            proof.get("runtime_diagnostics")
+            if isinstance(proof.get("runtime_diagnostics"), dict)
+            else {}
+        ),
     }
 
 
@@ -428,10 +451,37 @@ def _recovery_plan(context: dict[str, Any]) -> dict[str, Any]:
             + context["handle"]
             + f" is reachable in the {_runtime_display_name(context['runtime_target'])} runtime."
         )
-    return {
-        "recovery_status": context["runtime_status"],
-        "reason": recovery_reason,
-        "next_commands": [
+    runtime_diagnostics = (
+        context.get("runtime_diagnostics")
+        if isinstance(context.get("runtime_diagnostics"), dict)
+        else {}
+    )
+    diagnostic_commands = runtime_diagnostics.get("recovery_commands")
+    if isinstance(diagnostic_commands, list) and diagnostic_commands:
+        next_commands = [
+            {
+                "command": str(item.get("command") or context["command"]),
+                "preconditions": item.get("preconditions")
+                if isinstance(item.get("preconditions"), list) and item.get("preconditions")
+                else [
+                    f"{_runtime_display_name(context['runtime_target'])} skill runtime can be inspected."
+                ],
+                "permission_profile": item.get("permission_profile")
+                if isinstance(item.get("permission_profile"), dict)
+                else {
+                    "filesystem": "read workspace and user runtime skill links",
+                    "network": "not required",
+                },
+                "expected_outcome": str(
+                    item.get("expected_outcome")
+                    or "Runtime proof can be rerun with fresher user-runtime evidence."
+                ),
+            }
+            for item in diagnostic_commands
+            if isinstance(item, dict)
+        ]
+    else:
+        next_commands = [
             {
                 "command": context["command"],
                 "preconditions": [
@@ -446,7 +496,11 @@ def _recovery_plan(context: dict[str, Any]) -> dict[str, Any]:
                     "RuntimeCard is updated with implemented_enforced proof or typed blocked_runtime evidence."
                 ),
             }
-        ],
+        ]
+    return {
+        "recovery_status": context["runtime_status"],
+        "reason": recovery_reason,
+        "next_commands": next_commands,
         "preconditions": [
             "Run workspace and user skill sync if the runtime link or command handle is absent."
         ],
@@ -519,6 +573,10 @@ def _runtime_card_payload(
                 "required_gates": proof.get("gate_policy", {}).get("required", []),
                 "gates": proof.get("gates", {}),
                 "failed_check_id": context["failed_check_id"] if context["claim_status"] == "blocked" else None,
+                "runtime_diagnostics": _redact_runtime_paths(
+                    context["runtime_diagnostics"],
+                    context["repo_root"],
+                ),
             }
         ],
         "permission_profile": {
@@ -538,6 +596,10 @@ def _runtime_card_payload(
                 ),
             }
         ],
+        "runtime_diagnostics": _redact_runtime_paths(
+            context["runtime_diagnostics"],
+            context["repo_root"],
+        ),
         "recovery_plan": _recovery_plan(context),
     }
 
@@ -707,26 +769,31 @@ def build_command_handle_proof(
             payload["points_to_workspace_runtime"] = False
         return payload
 
+    def handle_points_to_workspace(handle_path: Path) -> bool:
+        return handle_path.exists() and _path_is_under(handle_path, expected_runtime)
+
+    codex_link = link_payload(codex_skills)
+    agents_link = link_payload(agents_skills)
+    codex_handle_points = handle_points_to_workspace(user_codex_handle)
+    agents_handle_points = handle_points_to_workspace(user_agents_handle)
     gates = {
         "resolver": resolution.get("status") == "ok",
         "generated_command_handle_check": handle_check_ok,
         "workspace_command_handle_exists": workspace_handle.is_file(),
-        "codex_user_link": codex_skills.is_symlink() and codex_skills.resolve() == expected_runtime.resolve(),
-        "agents_user_link": agents_skills.is_symlink() and agents_skills.resolve() == expected_runtime.resolve(),
+        "codex_user_link": bool(codex_link["points_to_workspace_runtime"]),
+        "agents_user_link": bool(agents_link["points_to_workspace_runtime"]),
         "codex_user_command_handle_exists": user_codex_handle.is_file(),
         "agents_user_command_handle_exists": user_agents_handle.is_file(),
+        "codex_user_command_handle_points_to_workspace": codex_handle_points,
+        "agents_user_command_handle_points_to_workspace": agents_handle_points,
     }
     core_gates = (
         gates["resolver"],
         gates["generated_command_handle_check"],
         gates["workspace_command_handle_exists"],
     )
-    codex_runtime_ready = (
-        gates["codex_user_link"] and gates["codex_user_command_handle_exists"]
-    )
-    agents_runtime_ready = (
-        gates["agents_user_link"] and gates["agents_user_command_handle_exists"]
-    )
+    codex_runtime_ready = gates["codex_user_command_handle_points_to_workspace"]
+    agents_runtime_ready = gates["agents_user_command_handle_points_to_workspace"]
     user_runtime_ready = codex_runtime_ready or agents_runtime_ready
     gates["codex_user_runtime_ready"] = codex_runtime_ready
     gates["agents_user_runtime_ready"] = agents_runtime_ready
@@ -737,9 +804,118 @@ def build_command_handle_proof(
         "agents": "agents_user_runtime_ready",
     }[runtime_target]
     required_runtime_ready = bool(gates[required_runtime_gate])
+    failed_check_id = (
+        None
+        if all(core_gates) and required_runtime_ready
+        else next(
+            (
+                check_id
+                for check_id in (
+                    "resolver",
+                    "generated_command_handle_check",
+                    "workspace_command_handle_exists",
+                    required_runtime_gate,
+                )
+                if not gates.get(check_id)
+            ),
+            "runtime_reachability",
+        )
+    )
     validation_args = [str(normalized)]
     if runtime_target != "any":
         validation_args.extend(["--runtime-target", runtime_target])
+    runtime_diagnostics = {
+        "schema_version": "command-handle-runtime-diagnostics.v1",
+        "selected_runtime_target": runtime_target,
+        "failed_gate": failed_check_id,
+        "expected_workspace_runtime": str(expected_runtime),
+        "runtime_modes": {
+            "codex_user_runtime": _runtime_mode(
+                codex_link,
+                handle_points_to_workspace=codex_handle_points,
+            ),
+            "agents_user_runtime": _runtime_mode(
+                agents_link,
+                handle_points_to_workspace=agents_handle_points,
+            ),
+        },
+        "missing_command_handles": [
+            {
+                "runtime": runtime_name,
+                "path": str(handle_path),
+                "expected_under": str(expected_runtime),
+            }
+            for runtime_name, handle_path, exists, points_to_workspace in (
+                (
+                    "codex_user_runtime",
+                    user_codex_handle,
+                    gates["codex_user_command_handle_exists"],
+                    gates["codex_user_command_handle_points_to_workspace"],
+                ),
+                (
+                    "agents_user_runtime",
+                    user_agents_handle,
+                    gates["agents_user_command_handle_exists"],
+                    gates["agents_user_command_handle_points_to_workspace"],
+                ),
+            )
+            if not exists or not points_to_workspace
+        ],
+        "recovery_risk": (
+            "User-scope sync mutates home-directory runtime links; preview with --dry-run before applying."
+        ),
+        "recovery_commands": [
+            {
+                "kind": "preview_user_runtime_sync",
+                "command": skills_validation_command(
+                    "sync",
+                    "--scope",
+                    "user",
+                    "--projection",
+                    "rooted",
+                    "--dry-run",
+                ),
+                "preconditions": ["Workspace rooted projection validates cleanly."],
+                "permission_profile": {
+                    "filesystem": "read workspace and user runtime links",
+                    "network": "not required",
+                },
+                "expected_outcome": (
+                    "Reports whether ~/.codex/skills or ~/.agents/skills would be relinked before mutation."
+                ),
+            },
+            {
+                "kind": "refresh_workspace_projection",
+                "command": skills_validation_command("sync", "--scope", "workspace", "--projection", "rooted"),
+                "preconditions": ["Canonical skill sources are ready to project."],
+                "permission_profile": {
+                    "filesystem": "write workspace runtime projection",
+                    "network": "not required",
+                },
+                "expected_outcome": "Refreshes .agents/skills command handles from canonical sources.",
+            },
+            {
+                "kind": "apply_user_runtime_sync",
+                "command": skills_validation_command("sync", "--scope", "user", "--projection", "rooted"),
+                "preconditions": ["Dry-run output is acceptable to the operator."],
+                "permission_profile": {
+                    "filesystem": "write home-directory runtime links",
+                    "network": "not required",
+                },
+                "expected_outcome": "Makes user-level Codex and Agents skill runtimes point at the workspace projection.",
+            },
+            {
+                "kind": "rerun_runtime_proof",
+                "command": skills_validation_command("proof", *validation_args),
+                "preconditions": ["User runtime link or handle bridge now points at the workspace projection."],
+                "permission_profile": {
+                    "filesystem": "read workspace and user runtime links; write runtime-proof evidence",
+                    "network": "not required",
+                },
+                "expected_outcome": "Updates runtime evidence with pass or a narrower blocked_runtime reason.",
+            },
+        ],
+    }
     proof = {
         "schema_version": "command-handle-proof.v2",
         "handle": normalized,
@@ -765,9 +941,11 @@ def build_command_handle_proof(
             "supporting_runtime_diagnostics": [
                 "codex_user_link",
                 "codex_user_command_handle_exists",
+                "codex_user_command_handle_points_to_workspace",
                 "codex_user_runtime_ready",
                 "agents_user_link",
                 "agents_user_command_handle_exists",
+                "agents_user_command_handle_points_to_workspace",
                 "agents_user_runtime_ready",
             ],
         },
@@ -798,28 +976,23 @@ def build_command_handle_proof(
             "command_handle_exists": workspace_handle.is_file(),
         },
         "user_runtime_links": {
-            "codex_skills": link_payload(codex_skills),
-            "agents_skills": link_payload(agents_skills),
+            "codex_skills": codex_link,
+            "agents_skills": agents_link,
         },
         "user_runtime_command_handles": {
             "codex_handle": str(user_codex_handle),
             "codex_handle_exists": user_codex_handle.is_file(),
+            "codex_handle_points_to_workspace": codex_handle_points,
             "agents_handle": str(user_agents_handle),
             "agents_handle_exists": user_agents_handle.is_file(),
+            "agents_handle_points_to_workspace": agents_handle_points,
         },
+        "runtime_diagnostics": runtime_diagnostics,
     }
     if proof["status"] != "pass":
-        failed_check_id = next(
-            (
-                check_id
-                for check_id in proof["gate_policy"]["required"]
-                if not gates.get(check_id)
-            ),
-            "runtime_reachability",
-        )
         recovery_guidance = (
-            "Run ./bin/ask skills sync --scope workspace --projection rooted, "
-            "then ./bin/ask skills sync --scope user --projection rooted, and rerun proof."
+            "Preview with ./bin/ask skills sync --scope user --projection rooted --dry-run, "
+            "then run workspace/user sync only if the user-runtime relink plan is acceptable."
         )
         proof["runtime_failure"] = runtime_failure_payload(
             command="skills proof",

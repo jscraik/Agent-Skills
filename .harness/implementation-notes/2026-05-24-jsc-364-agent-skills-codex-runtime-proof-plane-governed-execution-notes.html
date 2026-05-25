@@ -349,7 +349,7 @@
         </div>
         <div class="pill">
           <span class="label">Last Updated</span>
-          <time datetime="2026-05-25T12:09:34Z">2026-05-25T12:09:34Z</time>
+          <time datetime="2026-05-25T17:23:00Z">2026-05-25T17:23:00Z</time>
         </div>
         <div class="pill">
           <span class="label">Active Board</span>
@@ -357,7 +357,7 @@
         </div>
         <div class="pill">
           <span class="label">Active Task</span>
-          <code>T011</code> Delivery closure pending explicit merge/cleanup authority
+          <code>T012</code> Runtime bridge diagnostics hardening in progress
         </div>
       </div>
     </header>
@@ -440,6 +440,7 @@
             <li><strong>Review work</strong> lands in <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/</code>, separate from runtime proof artifacts.</li>
             <li><strong>Delivery work</strong> lands in the stacked PR series <code>200-207</code>; PR <code>207</code> carries PU-008, with triage evidence in <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/pr207-green-sweep.md</code>.</li>
             <li><strong>Final audit work</strong> lands in <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/final-completion-audit.md</code>, with the goal-board state and receipts updated beside the implementation ledger.</li>
+            <li><strong>Runtime bridge follow-up</strong> lands in <code>Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py</code> plus focused proof tests in <code>Infrastructure/tests/test_command_surface_handles.py</code>. It now distinguishes <code>root_symlink</code> vs <code>handle_bridge</code> runtime modes and emits explicit recovery command packets without mutating global Codex runtime links.</li>
             <li><strong>Not placed here:</strong> no durable implementation is being written into generated <code>.agents/skills/**</code> projections, plugin cache directories, global Codex state, or <code>/Users/jamiecraik/dev/codex</code>.</li>
           </ul>
         </aside>
@@ -573,9 +574,12 @@
       </div>
       <div class="placement-grid" aria-label="Current implementation placement">
         <article class="placement-card current">
-          <h3>Current slice: delivery closed</h3>
-          <p>PR 208 is merged, cleanup is complete, and the remaining proof surface preserves <code>blocked_runtime</code> truth without claiming live runtime parity.</p>
+          <h3>Current slice: runtime bridge diagnostics</h3>
+          <p>Delivery is closed, and this follow-up hardens the trust boundary: targeted Codex proof now accepts handle-level bridge reachability, while unresolved runtime states still emit durable <code>blocked_runtime</code> evidence with explicit operator recovery commands.</p>
           <div class="path-list">
+            <code>Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py</code>
+            <code>Infrastructure/tests/test_command_surface_handles.py</code>
+            <code>Infrastructure/tests/test_runtime_proof_validation.py</code>
             <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/architecture-strategist.md</code>
             <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/agent-native-reviewer.md</code>
             <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-008/adversarial-reviewer.md</code>
@@ -1257,11 +1261,24 @@
           <li>The refreshed <code>testing/codex</code> runtime card remains schema-valid <code>blocked_runtime</code> evidence on merged main.</li>
         </ul>
       </article>
+
+      <article class="entry">
+        <h3>Runtime bridge diagnostics tightened</h3>
+        <time datetime="2026-05-25T17:23:00Z">2026-05-25T17:23:00Z</time>
+        <p>I followed up on the remaining <code>blocked_runtime</code> boundary by making the runtime proof plane more precise. The code now distinguishes a missing root-level <code>~/.codex/skills</code> link from a specific command handle that is actually bridged back into the workspace projection.</p>
+        <ul>
+          <li>Implementation: <code>Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py</code>.</li>
+          <li>Regression coverage: <code>Infrastructure/tests/test_runtime_proof_validation.py</code> now includes a Codex-targeted pass case for handle-level bridge mode (no root symlink required) and a codex-only blocked-runtime case with explicit failed gate and recovery command set.</li>
+          <li>Runtime-card coverage: <code>Infrastructure/tests/test_runtime_proof_validation.py</code> proves diagnostic redaction and recovery-command propagation into <code>runtime-card.json</code>.</li>
+          <li>Refreshed proof artifact: <code>.harness/evidence/runtime-proof/autofix/codex/runtime-card.json</code> now carries recovery commands for dry-run user sync, workspace refresh, user sync, and proof rerun.</li>
+          <li>Truth boundary preserved: this does not claim live Codex parity while the user runtime remains unbridged; it makes the next safe action explicit and test-backed.</li>
+        </ul>
+      </article>
     </section>
 
     <section aria-labelledby="next">
       <h2 id="next">Next</h2>
-      <p>JSC-364 is delivery-complete. The only remaining caution is semantic: the proof plane proves runtime absence as durable <code>blocked_runtime</code> evidence and still does not claim live Codex runtime parity.</p>
+      <p>JSC-364 is delivery-complete. The proof plane now gives a safer path out of <code>blocked_runtime</code>: preview user-runtime sync, apply only if the relink plan is acceptable, then rerun the Codex-targeted proof. Until that user-runtime bridge exists, the project still correctly avoids claiming live Codex runtime parity.</p>
     </section>
   </main>
 </body>
