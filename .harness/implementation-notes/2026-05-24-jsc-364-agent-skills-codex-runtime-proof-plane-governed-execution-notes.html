@@ -245,7 +245,7 @@
         </div>
         <div class="pill">
           <span class="label">Last Updated</span>
-          <time datetime="2026-05-25T08:33:51Z">2026-05-25T08:33:51Z</time>
+          <time datetime="2026-05-25T08:44:13Z">2026-05-25T08:44:13Z</time>
         </div>
         <div class="pill">
           <span class="label">Active Board</span>
@@ -700,6 +700,18 @@
           <li>Load-preview scan errors now add <code>preview_scan_errors</code>, degrade status to <code>partial</code>, and propagate into <code>source_basis.blocked_check_ids</code>.</li>
           <li>A shared refresh helper keeps <code>status</code> and <code>source_basis.blocked_check_ids</code> synchronized after late blocker appends in config, inject, and implicit preview paths.</li>
           <li>Final review artifacts: <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-005/adversarial-final2-reviewer.md</code> and <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-005/agent-native-final2-reviewer.md</code>.</li>
+        </ul>
+      </article>
+
+      <article class="entry">
+        <h3>PU-005 PR opened and green-sweep launched</h3>
+        <time datetime="2026-05-25T08:44:13Z">2026-05-25T08:44:13Z</time>
+        <p>PU-005 was committed, pushed, and opened as stacked draft PR 204: <code>https://github.com/jscraik/Agent-Skills/pull/204</code>.</p>
+        <ul>
+          <li>Branch: <code>codex/jsc-364-runtime-proof-plane-pu005</code>.</li>
+          <li>Commit: <code>8b6e594af</code>.</li>
+          <li>Base: <code>codex/jsc-364-runtime-proof-plane-pu004</code>, because PR 203 is still open.</li>
+          <li>A PR green-sweep worker is triaging live checks and blockers for PR 204 while PU-006 starts.</li>
         </ul>
       </article>
     </section>
