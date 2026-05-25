@@ -1,0 +1,153 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agent-skills.local/schemas/runtime-card.v1.schema.json",
+  "title": "Runtime Card v1",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "card_id",
+    "created_at",
+    "runtime_target",
+    "runtime_status",
+    "skill_handle",
+    "runtime_session",
+    "thread_runs",
+    "turn_events",
+    "artifacts",
+    "evidence_receipts",
+    "verifier_results",
+    "permission_profile",
+    "workspace_root",
+    "actor_type",
+    "mutation_scope",
+    "visibility_status",
+    "limitations",
+    "recovery_plan"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "card_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "runtime_target": {
+      "$ref": "#/definitions/runtimeTarget"
+    },
+    "runtime_status": {
+      "$ref": "#/definitions/runtimeStatus"
+    },
+    "skill_handle": {
+      "type": "string",
+      "minLength": 1
+    },
+    "command_handle": {
+      "type": "string",
+      "minLength": 1
+    },
+    "package_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "runtime_session": {
+      "$ref": "runtime-session-summary.v1.schema.json"
+    },
+    "thread_runs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "turn_events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "$ref": "artifact-record.v1.schema.json"
+      }
+    },
+    "evidence_receipts": {
+      "type": "array",
+      "items": {
+        "$ref": "evidence-receipt.v1.schema.json"
+      }
+    },
+    "verifier_results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "permission_profile": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "workspace_root": {
+      "type": "string",
+      "minLength": 1
+    },
+    "actor_type": {
+      "$ref": "#/definitions/actorType"
+    },
+    "mutation_scope": {
+      "$ref": "#/definitions/mutationScope"
+    },
+    "visibility_status": {
+      "$ref": "#/definitions/visibilityStatus"
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "recovery_plan": {
+      "$ref": "recovery-plan-summary.v1.schema.json"
+    }
+  },
+  "definitions": {
+    "runtimeTarget": {
+      "type": "string",
+      "enum": ["codex", "agents", "local_model", "fixture"]
+    },
+    "runtimeStatus": {
+      "type": "string",
+      "enum": [
+        "implemented_enforced",
+        "implemented_not_enforced",
+        "scaffolded",
+        "modeled_only",
+        "partial",
+        "blocked_runtime",
+        "stale_or_drifted"
+      ]
+    },
+    "actorType": {
+      "type": "string",
+      "enum": ["user", "agent", "system"]
+    },
+    "mutationScope": {
+      "type": "string",
+      "enum": ["read_only", "evidence_write", "repo_write", "tracker_mutation"]
+    },
+    "visibilityStatus": {
+      "type": "string",
+      "enum": ["user_observable", "agent_only"]
+    }
+  }
+}

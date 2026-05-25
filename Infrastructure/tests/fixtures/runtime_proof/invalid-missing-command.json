@@ -1,0 +1,13 @@
+{
+  "receipt_id": "receipt-missing-command",
+  "claim": "Command evidence must include the executed command",
+  "claim_status": "pass",
+  "runtime_target": "codex",
+  "evidence_type": "command",
+  "exit_code": 0,
+  "source_paths": [
+    "Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py"
+  ],
+  "verifier": "validate_runtime_cards.py",
+  "observed_at": "2026-05-24T22:30:00Z"
+}

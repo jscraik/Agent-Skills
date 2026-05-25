@@ -1,0 +1,93 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agent-skills.local/schemas/recovery-plan-summary.v1.schema.json",
+  "title": "Recovery Plan Summary v1",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "recovery_status",
+    "reason",
+    "next_commands",
+    "preconditions",
+    "permission_profile",
+    "expected_outcome"
+  ],
+  "properties": {
+    "recovery_status": {
+      "$ref": "#/definitions/runtimeStatus"
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "next_commands": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/commandDescriptor"
+      }
+    },
+    "preconditions": {
+      "$ref": "#/definitions/stringList"
+    },
+    "permission_profile": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "expected_outcome": {
+      "type": "string",
+      "minLength": 1
+    },
+    "freshness_expires_at": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "definitions": {
+    "runtimeStatus": {
+      "type": "string",
+      "enum": [
+        "implemented_enforced",
+        "implemented_not_enforced",
+        "scaffolded",
+        "modeled_only",
+        "partial",
+        "blocked_runtime",
+        "stale_or_drifted"
+      ]
+    },
+    "stringList": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "commandDescriptor": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "command",
+        "preconditions",
+        "permission_profile",
+        "expected_outcome"
+      ],
+      "properties": {
+        "command": {
+          "type": "string",
+          "minLength": 1
+        },
+        "preconditions": {
+          "$ref": "#/definitions/stringList"
+        },
+        "permission_profile": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "expected_outcome": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

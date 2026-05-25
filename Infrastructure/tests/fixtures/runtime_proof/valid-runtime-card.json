@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "card_id": "runtime-card-fixture-001",
+  "created_at": "2026-05-24T22:30:00Z",
+  "runtime_target": "codex",
+  "runtime_status": "blocked_runtime",
+  "skill_handle": "autofix",
+  "command_handle": "autofix",
+  "runtime_session": {
+    "session_id": "fixture-session-001",
+    "runtime_target": "codex",
+    "runtime_status": "blocked_runtime",
+    "created_at": "2026-05-24T22:30:00Z",
+    "workspace_root": "/Users/jamiecraik/dev/agent-skills",
+    "actor_type": "agent",
+    "visibility_status": "user_observable",
+    "unavailable_reason": "Codex runtime unavailable in fixture mode"
+  },
+  "thread_runs": [],
+  "turn_events": [],
+  "artifacts": [
+    {
+      "artifact_id": "artifact-runtime-card-fixture-001",
+      "artifact_type": "runtime_card",
+      "path": ".harness/evidence/runtime-card-fixture-001.json",
+      "source_identity": {
+        "source_paths": [
+          "Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py"
+        ],
+        "source_hash": "fixture-sha"
+      },
+      "workspace_root": "/Users/jamiecraik/dev/agent-skills",
+      "actor_type": "agent",
+      "mutation_scope": "evidence_write",
+      "visibility_status": "user_observable",
+      "generated_by": "./bin/ask skills proof autofix --runtime-target codex --json --robot",
+      "validation_status": "blocked",
+      "consumer_contract": "runtime-card.v1"
+    }
+  ],
+  "evidence_receipts": [
+    {
+      "receipt_id": "receipt-runtime-blocked-001",
+      "claim": "Codex runtime proof is blocked with a typed recovery path",
+      "claim_status": "blocked",
+      "runtime_target": "codex",
+      "runtime_status": "blocked_runtime",
+      "evidence_type": "command",
+      "command": "./bin/ask skills proof autofix --runtime-target codex --json --robot",
+      "exit_code": 2,
+      "probe_command": "codex runtime probe",
+      "probe_exit_code": 127,
+      "probe_artifact_path": ".harness/evidence/runtime-probe.json",
+      "blocker_class": "runtime_unavailable",
+      "source_paths": [
+        "Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py"
+      ],
+      "verifier": "validate_runtime_cards.py",
+      "observed_at": "2026-05-24T22:30:00Z",
+      "blocker": "Codex runtime probe unavailable in fixture mode"
+    }
+  ],
+  "verifier_results": [
+    {
+      "name": "validate_runtime_cards.py",
+      "status": "blocked"
+    }
+  ],
+  "permission_profile": {
+    "network": "not_required",
+    "filesystem": "evidence_write"
+  },
+  "workspace_root": "/Users/jamiecraik/dev/agent-skills",
+  "actor_type": "agent",
+  "mutation_scope": "evidence_write",
+  "visibility_status": "user_observable",
+  "limitations": [
+    {
+      "limitation_class": "fixture_runtime",
+      "detail": "Fixture proves schema shape, not live Codex runtime parity"
+    }
+  ],
+  "recovery_plan": {
+    "recovery_status": "blocked_runtime",
+    "reason": "Codex runtime is unavailable in the fixture environment",
+    "next_commands": [
+      {
+        "command": "./bin/ask skills proof autofix --runtime-target codex --json --robot",
+        "preconditions": [
+          "Codex runtime is authenticated and reachable"
+        ],
+        "permission_profile": {
+          "network": "not_required"
+        },
+        "expected_outcome": "RuntimeCard is updated with live runtime proof or typed blocked_runtime evidence"
+      }
+    ],
+    "preconditions": [
+      "Codex runtime is authenticated and reachable"
+    ],
+    "permission_profile": {
+      "network": "not_required"
+    },
+    "expected_outcome": "Operator can rerun the proof command and receive durable evidence"
+  }
+}
