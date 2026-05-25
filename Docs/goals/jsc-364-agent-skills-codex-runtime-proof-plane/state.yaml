@@ -45,10 +45,10 @@ rules:
 checks:
   dirty_fingerprint: "main...origin/main with untracked governed prompt observed 2026-05-24T21:41:48Z"
   last_verification:
-    command: "PU-006 focused validation: py_compile, command-handle proof tests, explicit codex blocked_runtime proof, RuntimeCard validator, source-provenance jq check, and mandatory review artifacts"
-    outcome: pass_with_environment_blocker
-    checked_at: "2026-05-25T09:15:06Z"
-    detail: "py_compile passes for runtime_adapters.py, skills_impl.py, and test_command_surface_handles.py; focused TestCommandHandleProof passes with 6 tests; ./bin/ask skills proof context7 --runtime-target codex --json --robot exits 2 as expected and writes RuntimeCard, EvidenceReceipt, ArtifactRecord, and probe artifacts; RuntimeCard validator passes with --require-shared-workspace; jq confirms canonical source paths include Skills/agent-ops/context7/SKILL.md and implementation modules. Full Infrastructure/tests remains blocked by local missing PyYAML in unrelated test modules. Mandatory review artifacts exist; agent-native postfix report is PASS but lacks an in-artifact WROTE footer, and the single retry failed to write a replacement artifact, so that is recorded as an artifact-compliance coverage gap rather than a technical blocker."
+    command: "PU-007 focused validation: py_compile, closeout focused tests, closeout CLI parity tests, RuntimeCard validator, changed closeout, implementation notes server check, and mandatory review artifacts"
+    outcome: pass_reviewed_with_artifact_gap
+    checked_at: "2026-05-25T10:15:55Z"
+    detail: "py_compile passes for repo_impl.py, Infrastructure/bin/ask, test_ask_repo_doctor.py, and test_ask_cli_impl.py; python3 -m pytest Infrastructure/tests/test_ask_repo_doctor.py -q reports 42 passed; targeted closeout CLI tests report 3 passed; validate_runtime_cards.py passes over .harness/evidence/runtime-proof; ./bin/ask repo closeout --changed --json --robot passes. The live implementation notes page served over http://127.0.0.1:18080 includes the updated deep-module placement visual. Final concrete adversarial review reports no findings after invalid-card, unrelated-stale-card, deletion, absolute-path, and symlink edge fixes. Testing and unslopify post-fix artifact retries did not produce requested artifacts after earlier mailbox findings were addressed, so that remains an artifact-compliance coverage gap rather than a technical blocker."
   last_scout:
     command: "PU-001 baseline: ./bin/ask skills handles --check --check-command-handles --no-handles --json --robot and ./bin/ask repo doctor --json --robot"
     outcome: "blocked_as_expected"
@@ -155,6 +155,20 @@ claims:
       - "Delivery packaging remains before this slice is pushed or opened as a PR."
       - "Full Infrastructure/tests remains blocked by a local missing PyYAML dependency in unrelated modules."
       - "Agent-native postfix artifact is substantively PASS but missed the required WROTE footer; retry failed to write a replacement artifact."
+  - id: C009
+    claim: "PU-007 closeout now exposes shared workspace runtime evidence, separates changed-scope and workspace-scope findings, and blocks invalid changed runtime-card evidence without claiming unchecked PR, tracker, docs, or schema proof."
+    evidence_surface:
+      - "Infrastructure/scripts/lib/ask/commands/repo_impl.py"
+      - "Infrastructure/bin/ask"
+      - "Infrastructure/tests/test_ask_repo_doctor.py"
+      - "Infrastructure/tests/test_ask_cli_impl.py"
+      - "artifacts/reviews/jsc-364-runtime-proof-plane/pu-007/adversarial-final-concrete-reviewer.md"
+      - ".harness/implementation-notes/2026-05-24-jsc-364-agent-skills-codex-runtime-proof-plane-governed-execution-notes.html"
+    route: reproduced
+    status: supported
+    remaining_uncertainty:
+      - "Delivery packaging remains before this slice is pushed or opened as a PR."
+      - "Testing and unslopify post-fix artifact retries failed to write requested artifacts after their earlier mailbox findings were fixed."
 tasks:
   - id: T001
     type: pm
@@ -265,6 +279,7 @@ tasks:
       - "Infrastructure/scripts/lib/ask/skills_sdk/**"
       - "Infrastructure/tests/**"
       - ".harness/evidence/**"
+      - "artifacts/reviews/jsc-364-runtime-proof-plane/pu-007/**"
       - "Docs/goals/jsc-364-agent-skills-codex-runtime-proof-plane/**"
       - ".harness/implementation-notes/2026-05-24-jsc-364-agent-skills-codex-runtime-proof-plane-governed-execution-notes.html"
     verify:
@@ -383,7 +398,7 @@ tasks:
   - id: T009
     type: worker
     assignee: Worker
-    status: active
+    status: done
     objective: "Implement PU-007 shared workspace evidence and closeout integration."
     inputs:
       - "Infrastructure/scripts/lib/ask/commands/repo_impl.py"
@@ -405,11 +420,11 @@ tasks:
     stop_if:
       - "Closeout would conflate local proof with live PR or Linear truth"
       - "Shared workspace evidence cannot be written under repo-owned paths"
-    receipt_id: null
+    receipt_id: R020
   - id: T010
     type: judge
     assignee: Judge
-    status: queued
+    status: active
     objective: "Run PU-008 final validation, docs accuracy review, and delivery sweep before completion."
     inputs:
       - "All JSC-364 slice receipts"

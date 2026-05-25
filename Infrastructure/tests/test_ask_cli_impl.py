@@ -1526,6 +1526,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("memory_readiness", closeout)
         self.assertIn("package_readiness", closeout)
         self.assertIn("surface_policy", closeout)
+        self.assertIn("runtime_evidence", closeout)
         self.assertIn("focused_validation", closeout)
         self.assertIn("commit_readiness", closeout)
         self.assertIn("next_command", closeout)
@@ -1557,6 +1558,23 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(package["checkout_test_status"], "pass")
         self.assertEqual(package["missing_fields"], [])
         self.assertEqual(package["blocked_reasons"], [])
+        runtime_evidence = closeout["runtime_evidence"]
+        self.assertIn(runtime_evidence["status"], {"not_applicable", "missing", "present", "invalid", "deleted"})
+        self.assertEqual(runtime_evidence["evidence_root"], ".harness/evidence/runtime-proof")
+        self.assertIn("changed_scope", runtime_evidence)
+        self.assertIn("workspace_scope", runtime_evidence)
+        self.assertEqual(runtime_evidence["schema_validation"]["status"], "not_run")
+        self.assertEqual(
+            runtime_evidence["truth_boundaries"]["command_proof"],
+            "workspace_runtime_evidence",
+        )
+        self.assertEqual(
+            runtime_evidence["truth_boundaries"]["schema_proof"],
+            "not_run_by_closeout_use_schema_validation_command",
+        )
+        self.assertEqual(runtime_evidence["truth_boundaries"]["pr_truth"], "not_checked_by_repo_closeout")
+        self.assertEqual(runtime_evidence["truth_boundaries"]["tracker_truth"], "not_checked_by_repo_closeout")
+        self.assertEqual(runtime_evidence["truth_boundaries"]["docs_truth"], "not_checked_by_repo_closeout")
         validation_ids = [command["id"] for command in closeout["focused_validation"]]
         self.assertIn("skill_profiles_readiness", validation_ids)
         self.assertIn("skill_events_readiness", validation_ids)
@@ -1592,6 +1610,10 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("Capability readiness: pass (0 gaps)", result.stdout)
         self.assertIn("Memory readiness: pass", result.stdout)
         self.assertIn("Package readiness: pass", result.stdout)
+        self.assertIn("Runtime evidence:", result.stdout)
+        self.assertIn("command=workspace_runtime_evidence", result.stdout)
+        self.assertIn("schema=not_run_by_closeout_use_schema_validation_command", result.stdout)
+        self.assertIn("PR=not_checked_by_repo_closeout", result.stdout)
         self.assertIn("Eval blocker classes: 9", result.stdout)
         self.assertIn("blocked_runtime", result.stdout)
         self.assertIn("skill_profiles_readiness", result.stdout)

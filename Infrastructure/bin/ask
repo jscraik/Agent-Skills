@@ -1055,31 +1055,30 @@ def main():
                     capability = closeout.get("capability_readiness", {})
                     memory = closeout.get("memory_readiness", {})
                     package = closeout.get("package_readiness", {})
+                    runtime_evidence = closeout.get("runtime_evidence", {})
                     focused = closeout.get("focused_validation", [])
                     print(f"Repo closeout: {closeout.get('agent_summary')}")
                     print(f"  Commit ready: {readiness.get('ready')}")
-                    print(
-                        "  Capability readiness: "
-                        f"{capability.get('status')} "
-                        f"({capability.get('contract_gap_count', 0)} gaps)"
-                    )
+                    print(f"  Capability readiness: {capability.get('status')} ({capability.get('contract_gap_count', 0)} gaps)")
                     blocker_classes = capability.get("eval_blocker_classes") or []
                     if blocker_classes:
-                        print(
-                            "  Eval blocker classes: "
-                            f"{capability.get('eval_blocker_class_count', len(blocker_classes))} "
-                            f"({', '.join(blocker_classes)})"
+                        count = capability.get("eval_blocker_class_count", len(blocker_classes))
+                        print(f"  Eval blocker classes: {count} ({', '.join(blocker_classes)})")
+                    print(f"  Memory readiness: {memory.get('status')} ({memory.get('entry_count', 0)} entries)")
+                    print(f"  Package readiness: {package.get('status')} ({package.get('missing_field_count', 0)} missing fields)")
+                    print(f"  Runtime evidence: {runtime_evidence.get('status')} ({runtime_evidence.get('runtime_card_count', 0)} cards)")
+                    boundaries = runtime_evidence.get("truth_boundaries") or {}
+                    if boundaries:
+                        boundary_text = ", ".join(
+                            [
+                                f"command={boundaries.get('command_proof')}",
+                                f"schema={boundaries.get('schema_proof')}",
+                                f"PR={boundaries.get('pr_truth')}",
+                                f"tracker={boundaries.get('tracker_truth')}",
+                                f"docs={boundaries.get('docs_truth')}",
+                            ]
                         )
-                    print(
-                        "  Memory readiness: "
-                        f"{memory.get('status')} "
-                        f"({memory.get('entry_count', 0)} entries)"
-                    )
-                    print(
-                        "  Package readiness: "
-                        f"{package.get('status')} "
-                        f"({package.get('missing_field_count', 0)} missing fields)"
-                    )
+                        print(f"  Runtime evidence boundaries: {boundary_text}")
                     if focused:
                         ids = [item.get("id") for item in focused if item.get("id")]
                         print(f"  Focused validation: {', '.join(ids)}")

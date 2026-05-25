@@ -226,8 +226,112 @@
     .module-evidence { --module-color: #a83dcc; --module-height: 176px; }
     .module-delivery { --module-color: #ffc433; --module-height: 118px; }
 
+    .placement-board {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 14px;
+      margin: 16px 0 20px;
+    }
+
+    .placement-flow,
+    .placement-index {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      padding: 14px;
+    }
+
+    .placement-flow h3,
+    .placement-index h3 {
+      margin: 0 0 10px;
+      font-size: 15px;
+    }
+
+    .placement-lanes {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .placement-node {
+      border: 2px solid var(--lane-color);
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--lane-color) 8%, transparent);
+      padding: 10px;
+      min-height: 132px;
+    }
+
+    .placement-node strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+
+    .placement-node .label {
+      color: var(--text);
+      margin-bottom: 7px;
+    }
+
+    .placement-node code {
+      display: inline-block;
+      margin: 3px 3px 0 0;
+      border-color: color-mix(in srgb, var(--lane-color) 45%, var(--line));
+      background: color-mix(in srgb, var(--lane-color) 8%, var(--code));
+      overflow-wrap: anywhere;
+    }
+
+    .lane-command { --lane-color: #ff6b12; }
+    .lane-deep { --lane-color: #2e9cf0; }
+    .lane-schema { --lane-color: #33bf62; }
+    .lane-evidence { --lane-color: #a83dcc; }
+    .lane-governance { --lane-color: #ef3838; }
+    .lane-delivery { --lane-color: #ffc433; }
+
+    .placement-index ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .placement-index li {
+      margin: 7px 0;
+    }
+
+    .placement-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .placement-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.025);
+      padding: 12px;
+    }
+
+    .placement-card h3 {
+      margin: 0 0 8px;
+      font-size: 15px;
+    }
+
+    .placement-card p {
+      margin-bottom: 8px;
+      color: var(--muted);
+    }
+
+    .placement-card.current {
+      border-color: var(--accent);
+      background: rgba(73, 169, 255, 0.08);
+    }
+
     @media (max-width: 760px) {
+      .placement-board,
       .module-map {
+        grid-template-columns: 1fr;
+      }
+
+      .placement-lanes {
         grid-template-columns: 1fr;
       }
     }
@@ -245,7 +349,7 @@
         </div>
         <div class="pill">
           <span class="label">Last Updated</span>
-          <time datetime="2026-05-25T08:55:51Z">2026-05-25T08:55:51Z</time>
+          <time datetime="2026-05-25T10:18:00Z">2026-05-25T10:18:00Z</time>
         </div>
         <div class="pill">
           <span class="label">Active Board</span>
@@ -253,7 +357,7 @@
         </div>
         <div class="pill">
           <span class="label">Active Task</span>
-          <code>T008</code> PU-006 active: runtime proof command and blocked runtime receipts
+          <code>T009</code> PU-007 active: shared workspace evidence and closeout integration
         </div>
       </div>
     </header>
@@ -279,6 +383,64 @@
       <h2 id="deep-modules">Deep Modules</h2>
       <p>The JSC-364 implementation should behave like a small set of deep modules: each module owns a narrow public surface, hides its internal mechanics, and exports evidence that another agent can verify without reading private context.</p>
       <p><strong>Architecture decision:</strong> this work should extend the project's current deep modules, not create a parallel proof framework. Command modules should orchestrate public <code>./bin/ask</code> behavior; <code>command_surface.py</code>, <code>skills_sdk/runtime_adapters.py</code>, <code>skills_sdk/conformance.py</code>, <code>services/codex_preview.py</code>, and schema validators should own the durable behavior.</p>
+      <div class="placement-board" aria-label="Where JSC-364 work is being placed">
+        <article class="placement-flow">
+          <h3>Placement View</h3>
+          <div class="placement-lanes">
+            <div class="placement-node lane-command">
+              <span class="label">Public command surface</span>
+              <strong>Agent entrypoints and closeout output</strong>
+              <code>Infrastructure/bin/ask</code>
+              <code>commands/skills_impl.py</code>
+              <code>commands/repo_impl.py</code>
+            </div>
+            <div class="placement-node lane-deep">
+              <span class="label">Deep module internals</span>
+              <strong>Runtime proof, conformance, preview</strong>
+              <code>skills_sdk/runtime_adapters.py</code>
+              <code>skills_sdk/conformance.py</code>
+              <code>services/codex_preview.py</code>
+            </div>
+            <div class="placement-node lane-schema">
+              <span class="label">Mechanical proof contracts</span>
+              <strong>Schemas, validators, fixtures, tests</strong>
+              <code>config/schemas/*.v1.schema.json</code>
+              <code>validate_runtime_cards.py</code>
+              <code>Infrastructure/tests/**</code>
+            </div>
+            <div class="placement-node lane-evidence">
+              <span class="label">Shared workspace evidence</span>
+              <strong>Runtime cards and replayable artifacts</strong>
+              <code>.harness/evidence/runtime-proof/**</code>
+              <code>.harness/evidence/**</code>
+              <code>/tmp/jsc-364-*.json</code>
+            </div>
+            <div class="placement-node lane-governance">
+              <span class="label">Governed execution</span>
+              <strong>Board state, receipts, reviews, this ledger</strong>
+              <code>Docs/goals/.../state.yaml</code>
+              <code>Docs/goals/.../receipts.jsonl</code>
+              <code>artifacts/reviews/**</code>
+            </div>
+            <div class="placement-node lane-delivery">
+              <span class="label">External truth</span>
+              <strong>PRs, CI, review state, tracker state</strong>
+              <code>GitHub PRs</code>
+              <code>PR green-sweep artifacts</code>
+              <code>Linear JSC-364</code>
+            </div>
+          </div>
+        </article>
+        <aside class="placement-index">
+          <h3>Current Placement Truth</h3>
+          <ul>
+            <li><strong>PU-006</strong> placed durable RuntimeCard, EvidenceReceipt, ArtifactRecord, and probe output under <code>.harness/evidence/runtime-proof/context7/codex/</code>.</li>
+            <li><strong>PU-007</strong> is placing closeout discovery in <code>repo_impl.py</code>, browser-visible output in <code>Infrastructure/bin/ask</code>, and coverage in focused closeout tests.</li>
+            <li><strong>Review work</strong> lands in <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-007/</code>, separate from runtime proof artifacts.</li>
+            <li><strong>Delivery work</strong> stays out of local proof until GitHub, CI, review, and Linear state are refreshed.</li>
+          </ul>
+        </aside>
+      </div>
       <div class="module-map" role="img" aria-label="Deep module map for the JSC-364 runtime proof plane">
         <div class="module-stack">
           <article class="module module-primary">
@@ -401,6 +563,46 @@
           </article>
         </div>
       </div>
+      <div class="placement-grid" aria-label="Current implementation placement">
+        <article class="placement-card current">
+          <h3>Current slice: PU-007</h3>
+          <p>Closeout now discovers shared runtime evidence, blocks invalid changed runtime cards, and labels the truth boundaries it has not checked.</p>
+          <div class="path-list">
+            <code>Infrastructure/scripts/lib/ask/commands/repo_impl.py</code>
+            <code>Infrastructure/bin/ask</code>
+            <code>Infrastructure/tests/test_ask_repo_doctor.py</code>
+            <code>Infrastructure/tests/test_ask_cli_impl.py</code>
+          </div>
+        </article>
+        <article class="placement-card">
+          <h3>Durable evidence path</h3>
+          <p>Runtime proof artifacts are repo-owned and visible to future agents.</p>
+          <div class="path-list">
+            <code>.harness/evidence/runtime-proof/&lt;handle&gt;/&lt;runtime&gt;/runtime-card.json</code>
+            <code>.harness/evidence/runtime-proof/&lt;handle&gt;/&lt;runtime&gt;/evidence-receipt.json</code>
+            <code>.harness/evidence/runtime-proof/&lt;handle&gt;/&lt;runtime&gt;/artifact-record.json</code>
+          </div>
+        </article>
+        <article class="placement-card">
+          <h3>Review and governance path</h3>
+          <p>Slice reviews and task receipts stay separate from runtime proof artifacts.</p>
+          <div class="path-list">
+            <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-007/</code>
+            <code>Docs/goals/jsc-364-agent-skills-codex-runtime-proof-plane/state.yaml</code>
+            <code>Docs/goals/jsc-364-agent-skills-codex-runtime-proof-plane/receipts.jsonl</code>
+          </div>
+        </article>
+        <article class="placement-card">
+          <h3>Validation work path</h3>
+          <p>Focused proof stays beside the changed closeout code until the slice is ready to package.</p>
+          <div class="path-list">
+            <code>python3 -m pytest Infrastructure/tests/test_ask_repo_doctor.py -q</code>
+            <code>python3 -m pytest Infrastructure/tests/test_ask_cli_impl.py -k closeout -q</code>
+            <code>python3 Infrastructure/scripts/validation-and-linting/validate_runtime_cards.py .harness/evidence/runtime-proof</code>
+            <code>./bin/ask repo closeout --changed --json --robot</code>
+          </div>
+        </article>
+      </div>
     </section>
 
     <section aria-labelledby="slice">
@@ -450,6 +652,18 @@
             <td><span class="status">passed, packaging next</span></td>
             <td>Codex preview source basis, truncation reporting, and public <code>skills codex-preview</code> command-family discoverability.</td>
             <td>Focused pytest passes with 25 tests after the human-output false-success, scan-error status, and blocker-sync fixes; public help, human output, JSON command-family output, render-preview jq proof, and py_compile pass. Final adversarial and agent-native artifacts report no blockers.</td>
+          </tr>
+          <tr>
+            <td>PU-006</td>
+            <td><span class="status">PR opened, green-sweep delegated</span></td>
+            <td>Runtime proof command writes shared workspace RuntimeCard, EvidenceReceipt, ArtifactRecord, and probe artifacts for Codex-targeted proof.</td>
+            <td>Focused proof-plane tests pass; runtime card validator passes on generated workspace evidence; broad <code>Infrastructure/tests</code> remains blocked by unrelated local missing PyYAML collection failures. Draft PR 205 is open and under PR green-sweep.</td>
+          </tr>
+          <tr>
+            <td>PU-007</td>
+            <td><span class="status">in review</span></td>
+            <td><code>repo closeout --changed</code> exposes runtime evidence placement and truth boundaries without claiming PR, tracker, docs, or schema proof.</td>
+            <td>Focused py_compile, 41 closeout unit tests, CLI closeout contract tests, runtime card validation, and <code>./bin/ask repo closeout --changed --json --robot</code> pass. The malformed RuntimeCard testing gap, adversarial false-success blocker, runtime-card deletion edge case, absolute changed-path detection hole, and agent-native human-output parity warning are fixed; post-fix testing and unslopify artifact retries failed to write files and are recorded as artifact-compliance coverage gaps.</td>
           </tr>
         </tbody>
       </table>
@@ -767,11 +981,94 @@
           <li>Receipt <code>R019</code> records the delivery package and leaves PR green-sweep as delegated follow-up while PU-007 becomes active.</li>
         </ul>
       </article>
+
+      <article class="entry">
+        <h3>Deep-module placement visual refreshed</h3>
+        <time datetime="2026-05-25T09:42:31Z">2026-05-25T09:42:31Z</time>
+        <p>Jamie asked the deep-module visual to show where the work is being placed. I added a current-placement overlay above the module map and updated the header to the active PU-007/T009 truth.</p>
+        <ul>
+          <li>PU-007 code changes are landing in <code>repo_impl.py</code>, <code>Infrastructure/bin/ask</code>, and focused closeout tests.</li>
+          <li>Runtime proof artifacts land under <code>.harness/evidence/runtime-proof/&lt;handle&gt;/&lt;runtime&gt;/</code>.</li>
+          <li>Review artifacts and governed receipts stay in <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-007/</code> and <code>Docs/goals/jsc-364-agent-skills-codex-runtime-proof-plane/</code>.</li>
+        </ul>
+      </article>
+
+      <article class="entry">
+        <h3>PU-007 testing gap fixed</h3>
+        <time datetime="2026-05-25T09:52:03Z">2026-05-25T09:52:03Z</time>
+        <p>The testing reviewer found a real gap: malformed runtime cards could enter the new closeout invalid path without a focused regression test. I added that coverage and made invalid-card diagnostics name the failure class.</p>
+        <ul>
+          <li>Added <code>test_closeout_changed_runtime_evidence_reports_invalid_card</code> in <code>Infrastructure/tests/test_ask_repo_doctor.py</code>.</li>
+          <li><code>_runtime_card_summary</code> now reports parser failures as <code>invalid JSON: ...</code>.</li>
+          <li><code>python3 -m pytest Infrastructure/tests/test_ask_repo_doctor.py -q</code> now reports <code>38 passed</code>.</li>
+          <li>Focused validation remains green: py_compile, targeted CLI closeout tests, runtime-card validator, and changed closeout all pass.</li>
+          <li>Artifact gap: testing and unslopify post-fix reviewers were retried with narrower prompts but did not write requested artifacts before shutdown. Their earlier mailbox findings were handled; simplify and HE code-review artifacts are present.</li>
+        </ul>
+      </article>
+
+      <article class="entry">
+        <h3>PU-007 final-review fixes folded back</h3>
+        <time datetime="2026-05-25T09:57:47Z">2026-05-25T09:57:47Z</time>
+        <p>The final adversarial review found a P1 false-success path: changed malformed runtime evidence could be reported while closeout still claimed commit readiness. The agent-native review found a smaller parity gap in human output. I accepted both.</p>
+        <ul>
+          <li><code>repo_closeout</code> now adds <code>runtime_evidence_invalid</code> to blockers when changed runtime-card evidence is invalid.</li>
+          <li>Runtime evidence is separated into <code>changed_scope</code> and <code>workspace_scope</code>, so stale invalid workspace evidence does not poison unrelated changed-code closeouts.</li>
+          <li>Human closeout output now prints <code>command_proof</code> and <code>schema_proof</code> alongside PR, tracker, and docs truth boundaries.</li>
+          <li><code>python3 -m pytest Infrastructure/tests/test_ask_repo_doctor.py -q</code> now reports <code>39 passed</code>, including the unrelated-stale-card regression.</li>
+          <li>Focused py_compile, targeted CLI closeout tests, runtime-card validation, and changed closeout all pass after the fold-back.</li>
+        </ul>
+      </article>
+
+      <article class="entry">
+        <h3>PU-007 deletion edge fixed</h3>
+        <time datetime="2026-05-25T10:04:11Z">2026-05-25T10:04:11Z</time>
+        <p>The post-fix adversarial pass found that deleting a runtime-card file for cleanup could be misclassified as malformed evidence. I changed missing changed-card paths into a distinct <code>deleted</code> state.</p>
+        <ul>
+          <li>Existing malformed changed cards still produce <code>changed_scope.status: invalid</code> and block closeout readiness.</li>
+          <li>Deleted changed cards now produce <code>changed_scope.status: deleted</code> and do not add <code>runtime_evidence_invalid</code>.</li>
+          <li>Added <code>test_closeout_changed_runtime_evidence_deletion_does_not_block_readiness</code>.</li>
+          <li><code>python3 -m pytest Infrastructure/tests/test_ask_repo_doctor.py -q</code> now reports <code>40 passed</code>.</li>
+        </ul>
+      </article>
+
+      <article class="entry">
+        <h3>PU-007 absolute changed path fixed</h3>
+        <time datetime="2026-05-25T10:04:11Z">2026-05-25T10:04:11Z</time>
+        <p>The adversarial state-machine spot-check found that absolute changed-file paths could bypass runtime-card detection. I normalized changed-file inputs against the repo root before runtime-evidence prefix checks.</p>
+        <ul>
+          <li>Absolute paths under the repo now map back to repo-relative paths before <code>.harness/evidence/runtime-proof/</code> matching.</li>
+          <li>Added <code>test_closeout_changed_runtime_evidence_reports_invalid_absolute_card_path</code>.</li>
+          <li><code>python3 -m pytest Infrastructure/tests/test_ask_repo_doctor.py -q</code> reported <code>41 passed</code> before the symlink guard was added.</li>
+        </ul>
+      </article>
+
+      <article class="entry">
+        <h3>PU-007 symlink runtime-card edge fixed</h3>
+        <time datetime="2026-05-25T10:15:55Z">2026-05-25T10:15:55Z</time>
+        <p>The final concrete adversarial pass found no remaining blockers after the symlink guard. The closeout path now rejects changed runtime-card paths that are symlinks instead of following them as trusted evidence.</p>
+        <ul>
+          <li><code>_runtime_card_summary</code> returns <code>invalid</code> for symlinked runtime-card paths with a direct diagnostic.</li>
+          <li>Added <code>test_closeout_changed_runtime_evidence_symlink_is_invalid</code>.</li>
+          <li><code>python3 -m pytest Infrastructure/tests/test_ask_repo_doctor.py -q</code> now reports <code>42 passed</code>.</li>
+          <li>Focused py_compile, targeted CLI closeout tests, runtime-card validation, changed closeout, and the concrete adversarial artifact are green for PU-007.</li>
+        </ul>
+      </article>
+
+      <article class="entry">
+        <h3>PU-007 delivery package opened</h3>
+        <time datetime="2026-05-25T10:24:00Z">2026-05-25T10:24:00Z</time>
+        <p>PU-007 is committed as <code>e61e564d6</code>, pushed on <code>codex/jsc-364-runtime-proof-plane-pu007</code>, and opened as draft PR <a href="https://github.com/jscraik/Agent-Skills/pull/206">#206</a> stacked on <code>codex/jsc-364-runtime-proof-plane-pu006</code>.</p>
+        <ul>
+          <li>Pre-push diagnostics passed after the wrapper output was compressed below the <code>Infrastructure/bin/ask</code> line-budget gate.</li>
+          <li>GitHub connector PR creation failed with transport closed; <code>gh pr create</code> fallback succeeded.</li>
+          <li>Template broad gates are currently blocked by projection drift in <code>cache-harness-engineering</code> and <code>cache-skill-factory</code>; focused PU-007 validation remains green.</li>
+        </ul>
+      </article>
     </section>
 
     <section aria-labelledby="next">
       <h2 id="next">Next</h2>
-      <p>Package PU-006 into the stacked PR flow, launch PR green-sweep triage for the new draft PR, then continue with PU-007 shared workspace evidence and closeout integration.</p>
+      <p>Delegate PR 206 green-sweep triage, then continue PU-008 final validation, docs accuracy review, and delivery sweep.</p>
     </section>
   </main>
 </body>
