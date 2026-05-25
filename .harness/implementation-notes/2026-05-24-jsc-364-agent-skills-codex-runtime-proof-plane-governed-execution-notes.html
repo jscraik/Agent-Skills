@@ -217,7 +217,7 @@
         </div>
         <div class="pill">
           <span class="label">Last Updated</span>
-          <time datetime="2026-05-24T23:41:30Z">2026-05-24T23:41:30Z</time>
+          <time datetime="2026-05-24T23:58:38Z">2026-05-24T23:58:38Z</time>
         </div>
         <div class="pill">
           <span class="label">Active Board</span>
@@ -225,7 +225,7 @@
         </div>
         <div class="pill">
           <span class="label">Active Task</span>
-          <code>T005</code> PU-003 active after PU-002 review closure
+          <code>T006</code> PU-004 active after PU-003 review closure
         </div>
       </div>
     </header>
@@ -355,9 +355,9 @@
           </tr>
           <tr>
             <td>PU-003</td>
-            <td><span class="status">active</span></td>
+            <td><span class="status">passed, packaging next</span></td>
             <td>Codex parity conformance status split: keep modeled conformance, live runtime parity, and blocked runtime separate.</td>
-            <td>Next validation target is <code>./bin/ask skills conformance run --suite codex-parity --evidence-dir /tmp/jsc-364-codex-parity --json --robot</code> plus focused tests.</td>
+            <td>Focused tests pass with 103 tests, the public conformance command exits success with <code>model_contract_status: pass</code>, and live runtime absence is reported separately as <code>live_parity_status: blocked_runtime</code>. Six final review artifacts are present with <code>WROTE:</code> footers.</td>
           </tr>
         </tbody>
       </table>
@@ -527,11 +527,39 @@
           <li>A PR green-sweep worker is triaging live checks and blockers for PR 201 while PU-003 starts.</li>
         </ul>
       </article>
+
+      <article class="entry">
+        <h3>PU-003 implementation: conformance status split</h3>
+        <time datetime="2026-05-24T23:43:16Z">2026-05-24T23:43:16Z</time>
+        <p>Implemented the PU-003 split inside <code>Infrastructure/scripts/lib/ask/skills_sdk/conformance.py</code>, keeping modeled repo-contract fixture results distinct from live Codex runtime parity.</p>
+        <p><strong>Decision:</strong> live Codex runtime absence is now represented as <code>blocked_runtime</code> evidence under <code>live_runtime_parity</code> and <code>blocked_runtime</code>, while the source-modeled suite can still report <code>model_contract_status: pass</code>. This prevents both false failure of modeled conformance and false success of live parity.</p>
+        <ul>
+          <li><code>python3 -m pytest Infrastructure/tests/test_pr196_jsc351_governed_closeout.py -q</code> passed with 103 tests.</li>
+          <li><code>python3 Infrastructure/bin/ask skills conformance run --suite codex-parity --evidence-dir /tmp/jsc-364-codex-parity --json --robot</code> exited success.</li>
+          <li>The conformance output now includes <code>model_contract_status</code>, <code>live_parity_status</code>, <code>modeled_conformance</code>, <code>live_runtime_parity</code>, and <code>blocked_runtime</code>.</li>
+          <li>The current live parity blockers are explicit: live config layer stack availability, runtime plugin skill roots, and live skills config layer merging are not proven by the repo-side preview.</li>
+          <li><code>python3 -m py_compile Infrastructure/scripts/lib/ask/skills_sdk/conformance.py Infrastructure/tests/test_pr196_jsc351_governed_closeout.py</code> passed.</li>
+        </ul>
+        <p><strong>Remaining gate:</strong> PU-003 still needs packaging, push, PR creation or stacking decision, and PR green-sweep handoff before it should be described as delivered.</p>
+      </article>
+
+      <article class="entry">
+        <h3>PU-003 review findings folded back</h3>
+        <time datetime="2026-05-24T23:58:38Z">2026-05-24T23:58:38Z</time>
+        <p>The final PU-003 review stack is present under <code>artifacts/reviews/jsc-364-runtime-proof-plane/pu-003</code>. I accepted the concrete simplify, maintainability, and testing findings instead of carrying them as loose notes.</p>
+        <ul>
+          <li>Removed an unnecessary pass-count list allocation and tied summary <code>status</code> directly to <code>model_contract_status</code>.</li>
+          <li>Added invariant coverage for nested status parity, summary case blocker aggregation, and <code>cases</code>/<code>checks</code> compatibility.</li>
+          <li>Added malformed preview limitation coverage for non-list containers, non-object entries, non-blocked entries, scalar <code>source_files</code>, and mixed-type <code>source_files</code> lists.</li>
+          <li>Verified six required review artifacts: simplify, unslopify, HE code review, testing, adversarial, and agent-native.</li>
+        </ul>
+        <p><strong>Accepted residual risk:</strong> downstream consumers that only read top-level <code>status</code> or <code>blockers</code> can miss live runtime blockers. PU-003 creates the split; PU-004 and PU-007 must migrate consumer surfaces so model-contract pass is not mistaken for live runtime parity.</p>
+      </article>
     </section>
 
     <section aria-labelledby="next">
       <h2 id="next">Next</h2>
-      <p>Package PU-002 safely, decide whether to open it as a stacked PR or first repair PR 200's template/projection blockers, then continue PU-003 without mixing delivery truth into local runtime proof.</p>
+      <p>Package PU-003 as a stacked PR on top of PU-002, launch PR green-sweep, then govern PU-004 capability discovery and public wrapper fixtures.</p>
     </section>
   </main>
 </body>

@@ -38,6 +38,7 @@ from ask.skills_sdk.package_verify import (  # noqa: E402
     verify_archive_package,
 )
 from ask.skills_sdk.conformance import (  # noqa: E402
+    _annotate_conformance_status,
     _safe_case_id,
     run_skills_conformance,
 )
@@ -372,6 +373,15 @@ class TestRunSkillsConformanceUnknownSuite(unittest.TestCase):
         self.assertIsInstance(result.get("validation_commands"), list)
         self.assertTrue(result["validation_commands"])
 
+    def test_unknown_suite_reports_separate_statuses(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            result = run_skills_conformance(REPO_ROOT, suite="bad-suite", evidence_dir=tmp)
+
+        self.assertEqual(result["status"], result["model_contract_status"])
+        self.assertEqual(result["model_contract_status"], "blocked")
+        self.assertEqual(result["live_parity_status"], "not_checked")
+        self.assertEqual(result["blocked_runtime"]["status"], "not_applicable")
+
 
 class TestRunSkillsConformanceEvidenceStructure(unittest.TestCase):
     """Verify the codex-parity suite writes the expected evidence files."""
@@ -385,6 +395,81 @@ class TestRunSkillsConformanceEvidenceStructure(unittest.TestCase):
 
     def test_status_is_pass_or_blocked(self) -> None:
         self.assertIn(self._result["status"], {"pass", "blocked"})
+
+    def test_model_and_live_status_are_separate(self) -> None:
+        self.assertEqual(self._result["model_contract_status"], self._result["status"])
+        self.assertEqual(self._result["modeled_conformance"]["status"], self._result["status"])
+        self.assertIn(self._result["live_parity_status"], {"blocked_runtime", "not_checked"})
+        self.assertEqual(self._result["live_runtime_parity"]["status"], self._result["live_parity_status"])
+        self.assertIn("modeled_conformance", self._result)
+        self.assertIn("live_runtime_parity", self._result)
+        self.assertIn("blocked_runtime", self._result)
+
+    def test_cases_and_checks_remain_compatible_aliases(self) -> None:
+        self.assertEqual(self._result["cases"], self._result["checks"])
+
+    def test_live_runtime_blockers_do_not_fail_model_contract(self) -> None:
+        if self._result["live_parity_status"] != "blocked_runtime":
+            self.skipTest("live parity was not blocked in this environment")
+
+        self.assertEqual(self._result["status"], "pass")
+        self.assertTrue(self._result["blocked_runtime"]["does_not_fail_model_contract"])
+        self.assertTrue(self._result["live_runtime_parity"]["blockers"])
+
+    def test_summary_live_runtime_blockers_match_case_blockers(self) -> None:
+        expected_blockers = [
+            blocker
+            for case in self._result["cases"]
+            for blocker in case["live_runtime_parity"]["blockers"]
+        ]
+
+        self.assertEqual(self._result["live_runtime_parity"]["blockers"], expected_blockers)
+        self.assertEqual(self._result["blocked_runtime"]["blockers"], expected_blockers)
+
+    def test_cases_include_separate_statuses(self) -> None:
+        for case in self._result["cases"]:
+            self.assertIn("modeled_conformance", case)
+            self.assertIn("live_runtime_parity", case)
+
+    def test_non_object_preview_limitations_are_ignored(self) -> None:
+        case = {
+            "case_id": "malformed_preview_limitations",
+            "status": "pass",
+            "evidence": {
+                "preview_limitations": [
+                    "not-an-object",
+                    {"status": "partial", "id": "not_blocked", "reason": "informational"},
+                    {"status": "blocked", "id": "live_runtime", "reason": "blocked"},
+                    {
+                        "status": "blocked",
+                        "id": "mixed_sources",
+                        "source_files": ["codex-rs/core-skills/src/loader.rs", 42, None],
+                    },
+                    {"status": "blocked", "id": "bad_sources", "source_files": "not-a-list"},
+                ]
+            },
+        }
+
+        _annotate_conformance_status(case)
+
+        blockers = case["live_runtime_parity"]["blockers"]
+        self.assertEqual(len(blockers), 3)
+        self.assertEqual(blockers[0]["rule_id"], "live_runtime")
+        self.assertEqual(blockers[1]["rule_id"], "mixed_sources")
+        self.assertEqual(blockers[1]["source_files"], ["codex-rs/core-skills/src/loader.rs"])
+        self.assertEqual(blockers[2]["source_files"], [])
+
+    def test_non_list_preview_limitations_are_ignored(self) -> None:
+        case = {
+            "case_id": "scalar_preview_limitations",
+            "status": "pass",
+            "evidence": {"preview_limitations": "not-a-list"},
+        }
+
+        _annotate_conformance_status(case)
+
+        self.assertEqual(case["live_runtime_parity"]["status"], "not_checked")
+        self.assertEqual(case["live_runtime_parity"]["blockers"], [])
 
     def test_schema_version(self) -> None:
         self.assertEqual(self._result["schema_version"], "skills-conformance-evidence.v1")

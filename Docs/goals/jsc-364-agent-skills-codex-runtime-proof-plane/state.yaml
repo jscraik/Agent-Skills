@@ -45,10 +45,10 @@ rules:
 checks:
   dirty_fingerprint: "main...origin/main with untracked governed prompt observed 2026-05-24T21:41:48Z"
   last_verification:
-    command: "PU-002 closure validation: runtime proof validator help, valid RuntimeCard fixture, schema/validator parity tests, doctor regression tests, mandatory review artifacts"
+    command: "PU-003 final validation: conformance status split tests, codex-parity ask command, py_compile, and mandatory review artifact verification"
     outcome: pass
-    checked_at: "2026-05-24T23:24:12Z"
-    detail: "validate_runtime_cards.py --help passes; valid runtime card fixture passes with --require-shared-workspace; runtime proof validation tests pass with 20 tests including schema-backed enum/required loading, operator-facing diagnostics, no-artifact directory false-success prevention, order-insensitive conditional enum matching, and single-value conditional enum matching; doctor regression tests pass with 17 tests and 15 subtests; final adversarial, agent-native, testing, simplify, unslopify, and HE code review artifacts report no PU-002 P0 blockers."
+    checked_at: "2026-05-24T23:58:38Z"
+    detail: "test_pr196_jsc351_governed_closeout.py passes with 103 tests; skills conformance codex-parity command exits success with model_contract_status pass, live_parity_status blocked_runtime, blocked_runtime.does_not_fail_model_contract true, and three explicit live-runtime blockers; py_compile passes for conformance.py and the focused governed-closeout test module; six required PU-003 review artifacts are present and non-empty with WROTE footers."
   last_scout:
     command: "PU-001 baseline: ./bin/ask skills handles --check --check-command-handles --no-handles --json --robot and ./bin/ask repo doctor --json --robot"
     outcome: "blocked_as_expected"
@@ -105,6 +105,16 @@ claims:
     status: supported
     remaining_uncertainty:
       - "Delivery packaging remains before this slice is pushed or opened as a PR"
+  - id: C005
+    claim: "PU-003 separates source-modeled conformance from live Codex runtime parity instead of letting blocked live runtime fail or pass the model contract."
+    evidence_surface:
+      - "Infrastructure/scripts/lib/ask/skills_sdk/conformance.py"
+      - "Infrastructure/tests/test_pr196_jsc351_governed_closeout.py"
+      - "/tmp/jsc-364-codex-parity/skills-conformance-summary.json"
+    route: reproduced
+    status: supported
+    remaining_uncertainty:
+      - "Downstream consumers still need to migrate to the split fields in later slices so top-level model pass cannot be mistaken for live runtime parity"
 tasks:
   - id: T001
     type: pm
@@ -228,7 +238,7 @@ tasks:
   - id: T005
     type: worker
     assignee: Worker
-    status: active
+    status: done
     objective: "Implement PU-003 Codex parity conformance status split."
     inputs:
       - "Infrastructure/scripts/lib/ask/skills_sdk/conformance.py"
@@ -249,11 +259,11 @@ tasks:
     stop_if:
       - "Public suite semantics cannot preserve separate live and modeled statuses"
       - "Status split requires broad SDK rewrite"
-    receipt_id: null
+    receipt_id: R009
   - id: T006
     type: worker
     assignee: Worker
-    status: queued
+    status: active
     objective: "Implement PU-004 capability discovery and public wrapper fixtures."
     inputs:
       - "Infrastructure/scripts/validation-and-linting/verify_wrapper_contract_fixtures.py"
