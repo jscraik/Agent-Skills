@@ -16,7 +16,7 @@
           "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
         ]
       },
-      "validation_status": "blocked",
+      "validation_status": "pass",
       "visibility_status": "user_observable",
       "workspace_root": "${WORKSPACE_ROOT}"
     },
@@ -35,30 +35,29 @@
           "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
         ]
       },
-      "validation_status": "blocked",
+      "validation_status": "pass",
       "visibility_status": "user_observable",
       "workspace_root": "${WORKSPACE_ROOT}"
     }
   ],
   "card_id": "runtime-card-autofix-codex",
   "command_handle": "$autofix",
-  "created_at": "2026-05-25T17:28:33Z",
+  "created_at": "2026-05-25T18:17:37Z",
   "evidence_receipts": [
     {
       "artifact_path": ".harness/evidence/runtime-proof/autofix/codex/runtime-card.json",
-      "blocker": "Command handle proof failed for 'autofix'.",
-      "blocker_class": "blocked_runtime",
+      "blocker_class": "none",
       "claim": "$autofix is reachable in the Codex runtime.",
-      "claim_status": "blocked",
+      "claim_status": "pass",
       "command": "./bin/ask skills proof autofix --runtime-target codex --json --robot",
       "evidence_type": "command",
-      "exit_code": 2,
-      "observed_at": "2026-05-25T17:28:33Z",
+      "exit_code": 0,
+      "observed_at": "2026-05-25T18:17:37Z",
       "probe_artifact_path": ".harness/evidence/runtime-proof/autofix/codex/probe.json",
       "probe_command": "./bin/ask skills proof autofix --runtime-target codex --json --robot",
-      "probe_exit_code": 2,
+      "probe_exit_code": 0,
       "receipt_id": "runtime-proof-autofix-codex",
-      "runtime_status": "blocked_runtime",
+      "runtime_status": "implemented_enforced",
       "runtime_target": "codex",
       "source_paths": [
         "Skills/agent-ops/autofix/SKILL.md",
@@ -134,19 +133,13 @@
     "preconditions": [
       "Run workspace and user skill sync if the runtime link or command handle is absent."
     ],
-    "reason": "Preview with ./bin/ask skills sync --scope user --projection rooted --dry-run, then run workspace/user sync only if the user-runtime relink plan is acceptable.",
-    "recovery_status": "blocked_runtime"
+    "reason": "$autofix is reachable in the Codex runtime.",
+    "recovery_status": "implemented_enforced"
   },
   "runtime_diagnostics": {
     "expected_workspace_runtime": "${WORKSPACE_ROOT}/.agents/skills",
-    "failed_gate": "codex_user_runtime_ready",
-    "missing_command_handles": [
-      {
-        "expected_under": "${WORKSPACE_ROOT}/.agents/skills",
-        "path": "${HOME}/.codex/skills/autofix/SKILL.md",
-        "runtime": "codex_user_runtime"
-      }
-    ],
+    "failed_gate": null,
+    "missing_command_handles": [],
     "recovery_commands": [
       {
         "command": "./bin/ask skills sync --scope user --projection rooted --dry-run --json --robot",
@@ -200,22 +193,21 @@
     "recovery_risk": "User-scope sync mutates home-directory runtime links; preview with --dry-run before applying.",
     "runtime_modes": {
       "agents_user_runtime": "root_symlink",
-      "codex_user_runtime": "foreign_or_unmanaged_root"
+      "codex_user_runtime": "root_symlink"
     },
     "schema_version": "command-handle-runtime-diagnostics.v1",
     "selected_runtime_target": "codex"
   },
   "runtime_session": {
     "actor_type": "agent",
-    "created_at": "2026-05-25T17:28:33Z",
-    "runtime_status": "blocked_runtime",
+    "created_at": "2026-05-25T18:17:37Z",
+    "runtime_status": "implemented_enforced",
     "runtime_target": "codex",
     "session_id": "runtime-proof-autofix-codex",
-    "unavailable_reason": "Command handle proof failed for 'autofix'.",
     "visibility_status": "user_observable",
     "workspace_root": "${WORKSPACE_ROOT}"
   },
-  "runtime_status": "blocked_runtime",
+  "runtime_status": "implemented_enforced",
   "runtime_target": "codex",
   "schema_version": 1,
   "skill_handle": "autofix",
@@ -223,16 +215,16 @@
   "turn_events": [],
   "verifier_results": [
     {
-      "failed_check_id": "codex_user_runtime_ready",
+      "failed_check_id": null,
       "gates": {
         "agents_user_command_handle_exists": true,
         "agents_user_command_handle_points_to_workspace": true,
         "agents_user_link": true,
         "agents_user_runtime_ready": true,
-        "codex_user_command_handle_exists": false,
-        "codex_user_command_handle_points_to_workspace": false,
-        "codex_user_link": false,
-        "codex_user_runtime_ready": false,
+        "codex_user_command_handle_exists": true,
+        "codex_user_command_handle_points_to_workspace": true,
+        "codex_user_link": true,
+        "codex_user_runtime_ready": true,
         "generated_command_handle_check": true,
         "resolver": true,
         "user_runtime_ready": true,
@@ -246,14 +238,8 @@
       ],
       "runtime_diagnostics": {
         "expected_workspace_runtime": "${WORKSPACE_ROOT}/.agents/skills",
-        "failed_gate": "codex_user_runtime_ready",
-        "missing_command_handles": [
-          {
-            "expected_under": "${WORKSPACE_ROOT}/.agents/skills",
-            "path": "${HOME}/.codex/skills/autofix/SKILL.md",
-            "runtime": "codex_user_runtime"
-          }
-        ],
+        "failed_gate": null,
+        "missing_command_handles": [],
         "recovery_commands": [
           {
             "command": "./bin/ask skills sync --scope user --projection rooted --dry-run --json --robot",
@@ -307,13 +293,13 @@
         "recovery_risk": "User-scope sync mutates home-directory runtime links; preview with --dry-run before applying.",
         "runtime_modes": {
           "agents_user_runtime": "root_symlink",
-          "codex_user_runtime": "foreign_or_unmanaged_root"
+          "codex_user_runtime": "root_symlink"
         },
         "schema_version": "command-handle-runtime-diagnostics.v1",
         "selected_runtime_target": "codex"
       },
       "runtime_target": "codex",
-      "status": "fail",
+      "status": "pass",
       "verifier": "ask.skills.proof"
     }
   ],
