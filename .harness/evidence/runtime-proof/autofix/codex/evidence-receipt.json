@@ -6,7 +6,7 @@
   "command": "./bin/ask skills proof autofix --runtime-target codex --json --robot",
   "evidence_type": "command",
   "exit_code": 0,
-  "observed_at": "2026-05-25T19:43:09Z",
+  "observed_at": "2026-05-25T20:13:17Z",
   "probe_artifact_path": ".harness/evidence/runtime-proof/autofix/codex/probe.json",
   "probe_command": "./bin/ask skills proof autofix --runtime-target codex --json --robot",
   "probe_exit_code": 0,

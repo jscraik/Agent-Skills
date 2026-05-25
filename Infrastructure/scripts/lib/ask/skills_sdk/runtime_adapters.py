@@ -19,6 +19,9 @@ HOME_MARKER = "${HOME}"
 SAFE_EVIDENCE_SEGMENT_PATTERN = re.compile(r"[^A-Za-z0-9._-]+")
 CODEX_SESSION_LOOKBACK_LIMIT = 80
 CODEX_SESSION_TURN_EVENT_LIMIT = 8
+AGENTS_OTEL_STATS_RELATIVE_PATH = Path(
+    ".agents/otel-collector/data/processed/stats.json"
+)
 RUNTIME_REACHABILITY_FAILURES = {
     "user_runtime_ready",
     "codex_user_runtime_ready",
@@ -429,9 +432,8 @@ def _codex_runtime_observation(
 ) -> dict[str, Any]:
     if context["runtime_target"] != "codex":
         return {"thread_runs": [], "turn_events": [], "session": None}
-    if not codex_sessions_root:
-        return {"thread_runs": [], "turn_events": [], "session": None}
-    for path in _iter_recent_codex_rollouts(codex_sessions_root):
+    sessions_root = codex_sessions_root or Path.home() / ".codex" / "sessions"
+    for path in _iter_recent_codex_rollouts(sessions_root):
         summary = _codex_session_summary_from_rollout(path, context=context)
         if summary:
             return {
@@ -440,6 +442,138 @@ def _codex_runtime_observation(
                 "session": summary,
             }
     return {"thread_runs": [], "turn_events": [], "session": None}
+
+
+def _agents_observability_observation(
+    context: dict[str, Any],
+    *,
+    agents_otel_stats_path: Path | None = None,
+) -> dict[str, Any]:
+    if context["runtime_target"] != "codex":
+        return {"thread_runs": [], "turn_events": [], "observability": None}
+
+    stats_path = agents_otel_stats_path or Path.home() / AGENTS_OTEL_STATS_RELATIVE_PATH
+    try:
+        stats = json.loads(stats_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {"thread_runs": [], "turn_events": [], "observability": None}
+    if not isinstance(stats, dict):
+        return {"thread_runs": [], "turn_events": [], "observability": None}
+
+    confidence = stats.get("telemetry_confidence")
+    if not isinstance(confidence, dict):
+        confidence = {}
+    last_ingest_by_kind = stats.get("last_ingest_by_kind")
+    if not isinstance(last_ingest_by_kind, dict):
+        last_ingest_by_kind = {}
+    signal_freshness = confidence.get("signal_freshness")
+    if not isinstance(signal_freshness, dict):
+        signal_freshness = {}
+    live_presence = confidence.get("live_presence_by_signal")
+    if not isinstance(live_presence, dict):
+        live_presence = {}
+
+    codex_log_presence = False
+    logs_presence = live_presence.get("logs")
+    if isinstance(logs_presence, dict):
+        codex_log_presence = bool(logs_presence.get("codex"))
+
+    skill_invocation_event_count = int(stats.get("skill_invocation_event_count") or 0)
+    plugin_backed_skill_invocation_count = int(
+        stats.get("plugin_backed_skill_invocation_count") or 0
+    )
+    observability = {
+        "source": "agents_otel_stats",
+        "stats_path": _redact_runtime_path(str(stats_path), context["repo_root"]),
+        "overall_status": str(confidence.get("overall_status") or "unknown"),
+        "last_ingest_at": str(stats.get("last_ingest_at") or ""),
+        "last_logs_ingest_at": str(last_ingest_by_kind.get("logs") or ""),
+        "last_traces_ingest_at": str(last_ingest_by_kind.get("traces") or ""),
+        "logs_freshness": str(
+            signal_freshness.get("logs", {}).get("freshness")
+            if isinstance(signal_freshness.get("logs"), dict)
+            else "unknown"
+        ),
+        "traces_freshness": str(
+            signal_freshness.get("traces", {}).get("freshness")
+            if isinstance(signal_freshness.get("traces"), dict)
+            else "unknown"
+        ),
+        "codex_log_presence": codex_log_presence,
+        "skill_invocation_event_count": skill_invocation_event_count,
+        "plugin_backed_skill_invocation_count": plugin_backed_skill_invocation_count,
+    }
+    reasons = confidence.get("reasons")
+    if isinstance(reasons, list):
+        observability["reasons"] = [str(reason) for reason in reasons[:5]]
+    stale_signals = confidence.get("stale_signals")
+    if isinstance(stale_signals, list):
+        observability["stale_signals"] = [
+            {
+                "signal": str(item.get("signal") or "unknown"),
+                "freshness": str(item.get("freshness") or "unknown"),
+                "last_ingest_at": str(item.get("last_ingest_at") or ""),
+            }
+            for item in stale_signals[:5]
+            if isinstance(item, dict)
+        ]
+
+    thread_run = {
+        "thread_id": "agents-otel-observability",
+        "runtime_target": context["runtime_target"],
+        "runtime_status": context["runtime_status"],
+        "source": "agents_otel_stats",
+        "stats_path": observability["stats_path"],
+        "observed_at": context["created_at"],
+        "overall_status": observability["overall_status"],
+        "codex_log_presence": codex_log_presence,
+        "last_logs_ingest_at": observability["last_logs_ingest_at"],
+        "last_traces_ingest_at": observability["last_traces_ingest_at"],
+    }
+    turn_event = {
+        "event_type": "agents_observability_stats_observed",
+        "runtime_target": context["runtime_target"],
+        "observed_at": context["created_at"],
+        "source": "agents_otel_stats",
+        "stats_path": observability["stats_path"],
+        "overall_status": observability["overall_status"],
+        "codex_log_presence": codex_log_presence,
+        "skill_invocation_event_count": skill_invocation_event_count,
+        "plugin_backed_skill_invocation_count": plugin_backed_skill_invocation_count,
+    }
+    return {
+        "thread_runs": [thread_run],
+        "turn_events": [turn_event],
+        "observability": observability,
+    }
+
+
+def _runtime_observation(
+    context: dict[str, Any],
+    *,
+    codex_sessions_root: Path | None = None,
+    agents_otel_stats_path: Path | None = None,
+) -> dict[str, Any]:
+    codex_observation = _codex_runtime_observation(
+        context,
+        codex_sessions_root=codex_sessions_root,
+    )
+    agents_observation = _agents_observability_observation(
+        context,
+        agents_otel_stats_path=agents_otel_stats_path,
+    )
+    return {
+        "thread_runs": [
+            *codex_observation.get("thread_runs", []),
+            *agents_observation.get("thread_runs", []),
+        ],
+        "turn_events": [
+            *codex_observation.get("turn_events", []),
+            *agents_observation.get("turn_events", []),
+        ],
+        "session": codex_observation.get("session"),
+        "observability": agents_observation.get("observability"),
+    }
 
 
 def _artifact_record(
@@ -718,6 +852,12 @@ def _runtime_card_payload(
         latest_turn_id = observed_session.get("latest_turn_id")
         if latest_turn_id:
             runtime_session["latest_turn_id"] = str(latest_turn_id)
+    observed_observability = runtime_observation.get("observability")
+    if isinstance(observed_observability, dict):
+        runtime_session["observability"] = observed_observability
+        runtime_session["observability_sources"] = [
+            str(observed_observability.get("source") or "agents_otel_stats")
+        ]
     thread_runs = runtime_observation.get("thread_runs")
     if not isinstance(thread_runs, list):
         thread_runs = []
@@ -731,11 +871,13 @@ def _runtime_card_payload(
                 "class": "skill_invocation_not_asserted",
                 "message": (
                     f"{runtime_display} session metadata was observed for this workspace; this proof still verifies "
-                    "command-handle reachability rather than a dedicated skill tool invocation event."
+                    "command-handle reachability rather than a dedicated skill tool invocation event. "
+                    "Agents observability counters are attached when available but are not treated as "
+                    "per-skill invocation proof."
                 ),
             }
         ]
-        if thread_runs
+        if isinstance(observed_session, dict)
         else [
             {
                 "class": "manual_session_gate",
@@ -795,28 +937,30 @@ def emit_command_handle_runtime_evidence(
     proof: dict[str, Any],
     actor_type: str = "agent",
     codex_sessions_root: Path | None = None,
+    agents_otel_stats_path: Path | None = None,
 ) -> dict[str, Any]:
     """
     Emit runtime-proof evidence files for an explicit 'codex' or 'agents' runtime target.
     
     Parameters:
-    	repo_root (Path): Repository root used to compute evidence output paths.
-    	proof (dict[str, Any]): Command-handle proof payload that must include a `runtime_target` entry.
-    	actor_type (str): Actor classification to include in generated evidence (default: "agent").
+        repo_root (Path): Repository root used to compute evidence output paths.
+        proof (dict[str, Any]): Command-handle proof payload that must include a `runtime_target` entry.
+        actor_type (str): Actor classification to include in generated evidence (default: "agent").
     
     Returns:
-    	dict[str, Any]: Result summary containing:
-    		- "status": runtime status string (e.g. "implemented_enforced", "blocked_runtime", "stale_or_drifted").
-    		- "evidence_dir": repository-relative evidence directory path.
-    		- "runtime_card_path": repository-relative path to the written runtime card JSON.
-    		- "evidence_receipt_path": repository-relative path to the written receipt JSON.
-    		- "artifact_record_path": repository-relative path to the written artifact record JSON.
-    		- "probe_artifact_path": repository-relative path to the written probe JSON.
-		- "validation_command": a CLI string that can be used to validate the emitted runtime card.
-		- "runtime_session_status": whether Codex rollout session evidence was attached.
-    	
-    	If the proof's `runtime_target` is not "codex" or "agents", returns:
-    		{"status": "skipped", "reason": "runtime evidence is only emitted for explicit codex or agents targets"}.
+        dict[str, Any]: Result summary containing:
+            - "status": runtime status string (e.g. "implemented_enforced", "blocked_runtime", "stale_or_drifted").
+            - "evidence_dir": repository-relative evidence directory path.
+            - "runtime_card_path": repository-relative path to the written runtime card JSON.
+            - "evidence_receipt_path": repository-relative path to the written receipt JSON.
+            - "artifact_record_path": repository-relative path to the written artifact record JSON.
+            - "probe_artifact_path": repository-relative path to the written probe JSON.
+            - "validation_command": a CLI string that can be used to validate the emitted runtime card.
+            - "runtime_session_status": whether Codex rollout session evidence was attached.
+            - "observability_status": whether Agents OTEL stats evidence was attached.
+
+        If the proof's `runtime_target` is not "codex" or "agents", returns:
+            {"status": "skipped", "reason": "runtime evidence is only emitted for explicit codex or agents targets"}.
     """
     runtime_target = str(proof.get("runtime_target") or "")
     if runtime_target not in EVIDENCE_RUNTIME_TARGETS:
@@ -826,9 +970,10 @@ def emit_command_handle_runtime_evidence(
         }
 
     context = _runtime_evidence_context(repo_root=repo_root, proof=proof, actor_type=actor_type)
-    runtime_observation = _codex_runtime_observation(
+    runtime_observation = _runtime_observation(
         context,
         codex_sessions_root=codex_sessions_root,
+        agents_otel_stats_path=agents_otel_stats_path,
     )
     relative_card_path = _repo_relative(repo_root, context["card_path"])
     relative_receipt_path = _repo_relative(repo_root, context["receipt_path"])
@@ -868,7 +1013,10 @@ def emit_command_handle_runtime_evidence(
     return {
         "status": context["runtime_status"],
         "runtime_session_status": (
-            "observed" if runtime_observation.get("thread_runs") else "not_observed"
+            "observed" if runtime_observation.get("session") else "not_observed"
+        ),
+        "observability_status": (
+            "observed" if runtime_observation.get("observability") else "not_observed"
         ),
         "evidence_dir": _repo_relative(repo_root, context["evidence_dir"]),
         "runtime_card_path": relative_card_path,
