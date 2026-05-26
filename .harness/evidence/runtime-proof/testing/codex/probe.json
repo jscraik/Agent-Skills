@@ -1,17 +1,307 @@
 {
   "command": "./bin/ask skills proof testing --runtime-target codex --json --robot",
-  "exit_code": 2,
+  "exit_code": 0,
   "handle": "testing",
-  "observed_at": "2026-05-25T16:32:16Z",
+  "observed_at": "2026-05-26T02:56:36Z",
   "proof": {
     "available_runtimes": [
+      "codex_user_runtime",
       "agents_user_runtime"
     ],
     "command_handle_check": {
-      "checked_count": 210,
-      "command_handle_count": 105,
+      "checked_count": 162,
+      "command_handle_count": 81,
       "schema_version": "command-handle-check.v1",
-      "skipped": [],
+      "skipped": [
+        {
+          "handle": "agents-md",
+          "kind": "skill_command_handle",
+          "path": ".agents/skills/agents-md/SKILL.md",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "agents-md",
+          "kind": "openai_metadata",
+          "path": ".agents/skills/agents-md/agents/openai.yaml",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "autofix",
+          "kind": "skill_command_handle",
+          "path": ".agents/skills/autofix/SKILL.md",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "autofix",
+          "kind": "openai_metadata",
+          "path": ".agents/skills/autofix/agents/openai.yaml",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "autoresearch",
+          "kind": "skill_command_handle",
+          "path": ".agents/skills/autoresearch/SKILL.md",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "autoresearch",
+          "kind": "openai_metadata",
+          "path": ".agents/skills/autoresearch/agents/openai.yaml",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "bootstrap",
+          "kind": "skill_command_handle",
+          "path": ".agents/skills/bootstrap/SKILL.md",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "bootstrap",
+          "kind": "openai_metadata",
+          "path": ".agents/skills/bootstrap/agents/openai.yaml",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "code-fixes-triage",
+          "kind": "skill_command_handle",
+          "path": ".agents/skills/code-fixes-triage/SKILL.md",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "code-fixes-triage",
+          "kind": "openai_metadata",
+          "path": ".agents/skills/code-fixes-triage/agents/openai.yaml",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "codex-agent-creator",
+          "kind": "skill_command_handle",
+          "path": ".agents/skills/codex-agent-creator/SKILL.md",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "codex-agent-creator",
+          "kind": "openai_metadata",
+          "path": ".agents/skills/codex-agent-creator/agents/openai.yaml",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "codex-automation-architect",
+          "kind": "skill_command_handle",
+          "path": ".agents/skills/codex-automation-architect/SKILL.md",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "codex-automation-architect",
+          "kind": "openai_metadata",
+          "path": ".agents/skills/codex-automation-architect/agents/openai.yaml",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "codex-hooks-builder",
+          "kind": "skill_command_handle",
+          "path": ".agents/skills/codex-hooks-builder/SKILL.md",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "codex-hooks-builder",
+          "kind": "openai_metadata",
+          "path": ".agents/skills/codex-hooks-builder/agents/openai.yaml",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "codex-review",
+          "kind": "skill_command_handle",
+          "path": ".agents/skills/codex-review/SKILL.md",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "codex-review",
+          "kind": "openai_metadata",
+          "path": ".agents/skills/codex-review/agents/openai.yaml",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "coding-harness",
+          "kind": "skill_command_handle",
+          "path": ".agents/skills/coding-harness/SKILL.md",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "coding-harness",
+          "kind": "openai_metadata",
+          "path": ".agents/skills/coding-harness/agents/openai.yaml",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "context7",
+          "kind": "skill_command_handle",
+          "path": ".agents/skills/context7/SKILL.md",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "context7",
+          "kind": "openai_metadata",
+          "path": ".agents/skills/context7/agents/openai.yaml",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "docs-expert",
+          "kind": "skill_command_handle",
+          "path": ".agents/skills/docs-expert/SKILL.md",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "docs-expert",
+          "kind": "openai_metadata",
+          "path": ".agents/skills/docs-expert/agents/openai.yaml",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "fix-mise",
+          "kind": "skill_command_handle",
+          "path": ".agents/skills/fix-mise/SKILL.md",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "fix-mise",
+          "kind": "openai_metadata",
+          "path": ".agents/skills/fix-mise/agents/openai.yaml",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "improve-codebase-architecture",
+          "kind": "skill_command_handle",
+          "path": ".agents/skills/improve-codebase-architecture/SKILL.md",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "improve-codebase-architecture",
+          "kind": "openai_metadata",
+          "path": ".agents/skills/improve-codebase-architecture/agents/openai.yaml",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "keep-codex-fast",
+          "kind": "skill_command_handle",
+          "path": ".agents/skills/keep-codex-fast/SKILL.md",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "keep-codex-fast",
+          "kind": "openai_metadata",
+          "path": ".agents/skills/keep-codex-fast/agents/openai.yaml",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "npm-release",
+          "kind": "skill_command_handle",
+          "path": ".agents/skills/npm-release/SKILL.md",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "npm-release",
+          "kind": "openai_metadata",
+          "path": ".agents/skills/npm-release/agents/openai.yaml",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "pnpm-manager",
+          "kind": "skill_command_handle",
+          "path": ".agents/skills/pnpm-manager/SKILL.md",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "pnpm-manager",
+          "kind": "openai_metadata",
+          "path": ".agents/skills/pnpm-manager/agents/openai.yaml",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "project-brain",
+          "kind": "skill_command_handle",
+          "path": ".agents/skills/project-brain/SKILL.md",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "project-brain",
+          "kind": "openai_metadata",
+          "path": ".agents/skills/project-brain/agents/openai.yaml",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "simplify",
+          "kind": "skill_command_handle",
+          "path": ".agents/skills/simplify/SKILL.md",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "simplify",
+          "kind": "openai_metadata",
+          "path": ".agents/skills/simplify/agents/openai.yaml",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "skill-pr-delivery",
+          "kind": "skill_command_handle",
+          "path": ".agents/skills/skill-pr-delivery/SKILL.md",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "skill-pr-delivery",
+          "kind": "openai_metadata",
+          "path": ".agents/skills/skill-pr-delivery/agents/openai.yaml",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "triage",
+          "kind": "skill_command_handle",
+          "path": ".agents/skills/triage/SKILL.md",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "triage",
+          "kind": "openai_metadata",
+          "path": ".agents/skills/triage/agents/openai.yaml",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "ubiquitous-language",
+          "kind": "skill_command_handle",
+          "path": ".agents/skills/ubiquitous-language/SKILL.md",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "ubiquitous-language",
+          "kind": "openai_metadata",
+          "path": ".agents/skills/ubiquitous-language/agents/openai.yaml",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "unslopify",
+          "kind": "skill_command_handle",
+          "path": ".agents/skills/unslopify/SKILL.md",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "unslopify",
+          "kind": "openai_metadata",
+          "path": ".agents/skills/unslopify/agents/openai.yaml",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "verification-before-completion",
+          "kind": "skill_command_handle",
+          "path": ".agents/skills/verification-before-completion/SKILL.md",
+          "reason": "rooted_runtime_symlink"
+        },
+        {
+          "handle": "verification-before-completion",
+          "kind": "openai_metadata",
+          "path": ".agents/skills/verification-before-completion/agents/openai.yaml",
+          "reason": "rooted_runtime_symlink"
+        }
+      ],
       "status": "pass"
     },
     "gate_policy": {
@@ -26,25 +316,34 @@
       "supporting_runtime_diagnostics": [
         "codex_user_link",
         "codex_user_command_handle_exists",
+        "codex_user_command_handle_points_to_workspace",
         "codex_user_runtime_ready",
         "agents_user_link",
         "agents_user_command_handle_exists",
+        "agents_user_command_handle_points_to_workspace",
         "agents_user_runtime_ready"
       ]
     },
     "gates": {
       "agents_user_command_handle_exists": true,
+      "agents_user_command_handle_points_to_workspace": true,
       "agents_user_link": true,
       "agents_user_runtime_ready": true,
-      "codex_user_command_handle_exists": false,
-      "codex_user_link": false,
-      "codex_user_runtime_ready": false,
+      "codex_user_command_handle_exists": true,
+      "codex_user_command_handle_points_to_workspace": true,
+      "codex_user_link": true,
+      "codex_user_runtime_ready": true,
       "generated_command_handle_check": true,
       "resolver": true,
       "user_runtime_ready": true,
       "workspace_command_handle_exists": true
     },
     "handle": "testing",
+    "live_runtime_invocation": {
+      "operator_action": "Open or reload a Codex session and verify the handle appears in the picker or can be invoked as a $ handle.",
+      "runtime_satisfied_by": "codex_user_runtime",
+      "status": "manual_session_gate"
+    },
     "resolution": {
       "command_handle_path": ".agents/skills/testing/SKILL.md",
       "command_visibility": "target",
@@ -58,34 +357,86 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "787e3d620",
+        "source_revision": "602943847",
         "source_sha256": "6c451fc0bcab80a8d8b7cbf8000dde19f2e3aae875c87d220d5cf144605d0279"
       },
       "runtime_visibility": "latent",
       "source_path": "Skills/agent-ops/testing/SKILL.md",
       "status": "ok"
     },
-    "runtime_failure": {
-      "command": "skills proof",
-      "error_code": "ERR_VALIDATION",
-      "failed_check_id": "codex_user_runtime_ready",
-      "message": "Command handle proof failed for 'testing'.",
-      "path": "gates.codex_user_runtime_ready",
-      "recovery_guidance": "Run ./bin/ask skills sync --scope workspace --projection rooted, then ./bin/ask skills sync --scope user --projection rooted, and rerun proof.",
-      "schema_version": "skill-runtime-failure.v1",
-      "validation_commands": [
-        "./bin/ask skills proof testing --runtime-target codex --json --robot"
-      ]
+    "runtime_diagnostics": {
+      "expected_workspace_runtime": "${WORKSPACE_ROOT}/.agents/skills",
+      "failed_gate": null,
+      "missing_command_handles": [],
+      "recovery_commands": [
+        {
+          "command": "./bin/ask skills sync --scope user --projection rooted --dry-run --json --robot",
+          "expected_outcome": "Reports whether ~/.codex/skills or ~/.agents/skills would be relinked before mutation.",
+          "kind": "preview_user_runtime_sync",
+          "permission_profile": {
+            "filesystem": "read workspace and user runtime links",
+            "network": "not required"
+          },
+          "preconditions": [
+            "Workspace rooted projection validates cleanly."
+          ]
+        },
+        {
+          "command": "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
+          "expected_outcome": "Refreshes .agents/skills command handles from canonical sources.",
+          "kind": "refresh_workspace_projection",
+          "permission_profile": {
+            "filesystem": "write workspace runtime projection",
+            "network": "not required"
+          },
+          "preconditions": [
+            "Canonical skill sources are ready to project."
+          ]
+        },
+        {
+          "command": "./bin/ask skills sync --scope user --projection rooted --json --robot",
+          "expected_outcome": "Makes user-level Codex and Agents skill runtimes point at the workspace projection.",
+          "kind": "apply_user_runtime_sync",
+          "permission_profile": {
+            "filesystem": "write home-directory runtime links",
+            "network": "not required"
+          },
+          "preconditions": [
+            "Dry-run output is acceptable to the operator."
+          ]
+        },
+        {
+          "command": "./bin/ask skills proof testing --runtime-target codex --json --robot",
+          "expected_outcome": "Updates runtime evidence with pass or a narrower blocked_runtime reason.",
+          "kind": "rerun_runtime_proof",
+          "permission_profile": {
+            "filesystem": "read workspace and user runtime links; write runtime-proof evidence",
+            "network": "not required"
+          },
+          "preconditions": [
+            "User runtime link or handle bridge now points at the workspace projection."
+          ]
+        }
+      ],
+      "recovery_risk": "User-scope sync mutates home-directory runtime links; preview with --dry-run before applying.",
+      "runtime_modes": {
+        "agents_user_runtime": "root_symlink",
+        "codex_user_runtime": "root_symlink"
+      },
+      "schema_version": "command-handle-runtime-diagnostics.v1",
+      "selected_runtime_target": "codex"
     },
-    "runtime_satisfied_by": null,
+    "runtime_satisfied_by": "codex_user_runtime",
     "runtime_target": "codex",
     "schema_version": "command-handle-proof.v2",
-    "status": "fail",
+    "status": "pass",
     "user_runtime_command_handles": {
       "agents_handle": "${HOME}/.agents/skills/testing/SKILL.md",
       "agents_handle_exists": true,
+      "agents_handle_points_to_workspace": true,
       "codex_handle": "${HOME}/.codex/skills/testing/SKILL.md",
-      "codex_handle_exists": false
+      "codex_handle_exists": true,
+      "codex_handle_points_to_workspace": true
     },
     "user_runtime_links": {
       "agents_skills": {
@@ -99,8 +450,8 @@
         "exists": true,
         "is_symlink": true,
         "path": "${HOME}/.codex/skills",
-        "points_to_workspace_runtime": false,
-        "target": "${HOME}/dev/configs/.codex/skills"
+        "points_to_workspace_runtime": true,
+        "target": "${WORKSPACE_ROOT}/.agents/skills"
       }
     },
     "validation_commands": [
@@ -112,7 +463,7 @@
       "path": "${WORKSPACE_ROOT}/.agents/skills"
     }
   },
-  "runtime_status": "blocked_runtime",
+  "runtime_status": "implemented_enforced",
   "runtime_target": "codex",
   "schema_version": "command-handle-runtime-probe.v1"
 }
