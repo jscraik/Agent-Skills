@@ -2524,6 +2524,20 @@ def _load_project_skills_sdk_manifest(repo_root: Path | None) -> dict[str, Any] 
         return None
     if payload.get("schema_version") != "skills-sdk.project.v1":
         return None
+
+    # Validate unique skill_roots paths
+    skill_roots = payload.get("skill_roots", [])
+    if isinstance(skill_roots, list):
+        seen_paths = set()
+        for root in skill_roots:
+            if isinstance(root, dict):
+                path = root.get("path")
+                if path is not None:
+                    if path in seen_paths:
+                        # Duplicate path detected - reject manifest
+                        return None
+                    seen_paths.add(path)
+
     return payload
 
 
@@ -2531,6 +2545,9 @@ def _manifest_skill_root_ownership(repo_root: Path | None, path: str) -> dict[st
     manifest = _load_project_skills_sdk_manifest(repo_root)
     if not manifest:
         return None
+
+    # Collect all matching candidates
+    candidates = []
     for root in manifest.get("skill_roots", []):
         if not isinstance(root, dict):
             continue
@@ -2540,19 +2557,25 @@ def _manifest_skill_root_ownership(repo_root: Path | None, path: str) -> dict[st
         classification = str(root.get("classification") or "unknown")
         if classification not in PROJECT_SKILL_ROOT_CLASSIFICATIONS:
             classification = "unknown"
-        editable_source = classification == "canonical_project_source"
-        return {
-            "path": path,
-            "root": root_path,
-            "classification": classification,
-            "editable_source": editable_source,
-            "owner_manifest_required_for_edit": not editable_source,
-            "manifest_schema": PROJECT_SKILLS_SDK_SCHEMA,
-            "manifest_declared": True,
-            "owner_manifest_path": PROJECT_SKILLS_SDK_MANIFEST,
-            "owner_manifest_project_id": manifest.get("project_id"),
-        }
-    return None
+        candidates.append((root_path, classification))
+
+    # Pick the most specific candidate (longest root_path)
+    if not candidates:
+        return None
+
+    most_specific_root_path, classification = max(candidates, key=lambda c: len(c[0]))
+    editable_source = classification == "canonical_project_source"
+    return {
+        "path": path,
+        "root": most_specific_root_path,
+        "classification": classification,
+        "editable_source": editable_source,
+        "owner_manifest_required_for_edit": not editable_source,
+        "manifest_schema": PROJECT_SKILLS_SDK_SCHEMA,
+        "manifest_declared": True,
+        "owner_manifest_path": PROJECT_SKILLS_SDK_MANIFEST,
+        "owner_manifest_project_id": manifest.get("project_id"),
+    }
 
 
 def _skill_root_ownership_for_path(
@@ -2601,7 +2624,7 @@ def _skill_root_ownership_for_path(
         return {
             "path": path,
             "root": "Skills/**",
-            "classification": "editable_source",
+            "classification": "canonical_project_source",
             "editable_source": True,
             "owner_manifest_required_for_edit": False,
         }
@@ -2609,7 +2632,7 @@ def _skill_root_ownership_for_path(
         return {
             "path": path,
             "root": "Plugins/*/skills/**",
-            "classification": "plugin_owned_editable_source",
+            "classification": "canonical_project_source",
             "editable_source": True,
             "owner_manifest_required_for_edit": False,
         }
