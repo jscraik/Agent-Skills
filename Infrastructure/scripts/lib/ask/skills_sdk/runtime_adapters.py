@@ -694,11 +694,6 @@ def _apply_runtime_observation_quality(
         for thread_run in thread_runs:
             if isinstance(thread_run, dict):
                 thread_run["claim_status"] = "partial"
-    verifier_results = context.get("verifier_results")
-    if isinstance(verifier_results, list):
-        for vr in verifier_results:
-            if isinstance(vr, dict):
-                vr["status"] = "partial"
 
 
 def _artifact_record(
@@ -1028,7 +1023,7 @@ def _runtime_card_payload(
         "verifier_results": [
             {
                 "verifier": "ask.skills.proof",
-                "status": proof.get("status"),
+                "status": context["claim_status"] if context["claim_status"] != "pass" else proof.get("status"),
                 "runtime_target": context["runtime_target"],
                 "required_gates": proof.get("gate_policy", {}).get("required", []),
                 "gates": proof.get("gates", {}),

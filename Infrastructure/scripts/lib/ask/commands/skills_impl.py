@@ -1352,7 +1352,7 @@ def skills_proof(repo_root: Path, handle: str, runtime_target: str = "any") -> C
                 path="runtime_evidence.claim_status",
                 message=str(runtime_evidence.get("blocker") or "Runtime evidence quality is incomplete."),
                 recovery_guidance="Rerun the explicit runtime proof after collecting current runtime evidence.",
-                validation_commands=[f"./bin/ask skills proof {normalized} --runtime-target {runtime_target} --json --robot"],
+                validation_commands=[_skills_validation_command("proof", normalized, "--runtime-target", runtime_target)],
             )
         )
         if runtime_evidence_blocks and proof.get("status") == "pass":
