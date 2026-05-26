@@ -23,9 +23,9 @@
       "minLength": 1
     },
     "skill_roots": {
-      "description": "Array of skill root directories. Each skill root must have a unique path value.",
       "type": "array",
       "minItems": 1,
+      "description": "Project-local skill root declarations. Each entry path must be unique after trimming leading/trailing slashes.",
       "items": {
         "$ref": "#/definitions/skillRoot"
       }
@@ -67,8 +67,8 @@
   },
   "definitions": {
     "skillRoot": {
-      "description": "Configuration for a skill root directory within the project",
       "type": "object",
+      "description": "Declares one project-local skill root and its ownership classification.",
       "additionalProperties": false,
       "required": [
         "path",
@@ -79,13 +79,13 @@
       ],
       "properties": {
         "path": {
-          "description": "Repository-relative path to the skill root directory",
           "type": "string",
+          "description": "Filesystem or repository-relative path to the skill root.",
           "minLength": 1
         },
         "classification": {
-          "description": "Classification of the skill root: canonical source, runtime projection, client config, or unknown",
           "type": "string",
+          "description": "Ownership classification for the declared skill root.",
           "enum": [
             "canonical_project_source",
             "generated_runtime_projection",
@@ -94,15 +94,15 @@
           ]
         },
         "default_for_create": {
-          "description": "Whether this root should be used by default when creating new skills",
+          "description": "Whether this root is the default target for creating skills.",
           "type": "boolean"
         },
         "default_for_install": {
-          "description": "Whether this root should be used by default when installing skills",
+          "description": "Whether this root is the default target for installing skills.",
           "type": "boolean"
         },
         "default_for_update": {
-          "description": "Whether this root should be used by default when updating skills",
+          "description": "Whether this root is the default target for updating skills.",
           "type": "boolean"
         }
       }

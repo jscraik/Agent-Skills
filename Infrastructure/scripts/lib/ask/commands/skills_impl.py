@@ -2524,20 +2524,17 @@ def _load_project_skills_sdk_manifest(repo_root: Path | None) -> dict[str, Any] 
         return None
     if payload.get("schema_version") != "skills-sdk.project.v1":
         return None
-
-    # Validate unique skill_roots paths
-    skill_roots = payload.get("skill_roots", [])
-    if isinstance(skill_roots, list):
-        seen_paths = set()
-        for root in skill_roots:
-            if isinstance(root, dict):
-                path = root.get("path")
-                if path is not None:
-                    if path in seen_paths:
-                        # Duplicate path detected - reject manifest
-                        return None
-                    seen_paths.add(path)
-
+    seen_root_paths: set[str] = set()
+    for root in payload.get("skill_roots", []):
+        if not isinstance(root, dict):
+            continue
+        root_path = str(root.get("path") or "").strip().strip("/")
+        if not root_path:
+            continue
+        normalized_root = "/".join(_repo_relative_path_parts(root_path))
+        if normalized_root in seen_root_paths:
+            return None
+        seen_root_paths.add(normalized_root)
     return payload
 
 
@@ -2545,9 +2542,7 @@ def _manifest_skill_root_ownership(repo_root: Path | None, path: str) -> dict[st
     manifest = _load_project_skills_sdk_manifest(repo_root)
     if not manifest:
         return None
-
-    # Collect all matching candidates
-    candidates = []
+    matches: list[tuple[int, str, str]] = []
     for root in manifest.get("skill_roots", []):
         if not isinstance(root, dict):
             continue
@@ -2556,18 +2551,15 @@ def _manifest_skill_root_ownership(repo_root: Path | None, path: str) -> dict[st
             continue
         classification = str(root.get("classification") or "unknown")
         if classification not in PROJECT_SKILL_ROOT_CLASSIFICATIONS:
-            classification = "unknown"
-        candidates.append((root_path, classification))
-
-    # Pick the most specific candidate (longest root_path)
-    if not candidates:
+            continue
+        matches.append((len(_repo_relative_path_parts(root_path)), root_path, classification))
+    if not matches:
         return None
-
-    most_specific_root_path, classification = max(candidates, key=lambda c: len(c[0]))
+    _, root_path, classification = max(matches, key=lambda item: item[0])
     editable_source = classification == "canonical_project_source"
     return {
         "path": path,
-        "root": most_specific_root_path,
+        "root": root_path,
         "classification": classification,
         "editable_source": editable_source,
         "owner_manifest_required_for_edit": not editable_source,
@@ -2627,6 +2619,7 @@ def _skill_root_ownership_for_path(
             "classification": "canonical_project_source",
             "editable_source": True,
             "owner_manifest_required_for_edit": False,
+            "owner_kind": "repo_skills",
         }
     if len(parts) >= 3 and parts[0] == "Plugins" and parts[2] == "skills":
         return {
@@ -2635,6 +2628,7 @@ def _skill_root_ownership_for_path(
             "classification": "canonical_project_source",
             "editable_source": True,
             "owner_manifest_required_for_edit": False,
+            "owner_kind": "plugin_skills",
         }
     return {
         "path": path,

@@ -11,7 +11,6 @@ And the updated generated surface files:
   - .skillsets/*/manifest.jsonl
 """
 import json
-import re
 import unittest
 from pathlib import Path
 from typing import Any
@@ -749,6 +748,27 @@ class TestSkillsSdkProjectSchemaStructure(unittest.TestCase):
                 "unknown",
             ],
         )
+
+    def test_skill_roots_document_unique_path_requirement(self) -> None:
+        description = self.schema["properties"]["skill_roots"].get("description", "")
+        self.assertIn("unique", description.lower())
+        self.assertIn("path", description.lower())
+
+    def test_skill_root_properties_have_descriptions(self) -> None:
+        skill_root = self.schema["definitions"]["skillRoot"]
+        self.assertIn("description", skill_root)
+        for property_name in (
+            "path",
+            "classification",
+            "default_for_create",
+            "default_for_install",
+            "default_for_update",
+        ):
+            with self.subTest(property_name=property_name):
+                self.assertIn(
+                    "description",
+                    skill_root["properties"][property_name],
+                )
 
     def test_valid_project_manifest_passes_schema(self) -> None:
         try:

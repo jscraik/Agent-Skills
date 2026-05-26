@@ -19,6 +19,7 @@ from selection_policy import (  # type: ignore  # noqa: E402
     DEFAULT_VISIBLE_FLAT_SKILL_NAMES,
     DEFAULT_VISIBLE_SYSTEM_BRIDGE_SKILL_NAMES,
     DEFAULT_PROJECTION_MODE,
+    PLUGIN_SKILL_COLLISION_POLICIES,
     ROOT_SKILL_SET_NAMES,
     SYSTEM_BRIDGE_SKILL_NAMES,
     policy_identity,
@@ -45,41 +46,6 @@ BRIDGE_SKILLS = set(SYSTEM_BRIDGE_SKILL_NAMES)
 DEFAULT_VISIBLE_BRIDGE_SKILLS = set(DEFAULT_VISIBLE_SYSTEM_BRIDGE_SKILL_NAMES)
 ROOT_SKILL_SETS = set(ROOT_SKILL_SET_NAMES)
 SCOPE_PRECEDENCE = USER_SKILL_SCOPE_PRECEDENCE
-BASELINED_SCOPE_COLLISIONS = {
-    (
-        "agents-sdk",
-        (
-            "Plugins/cache/openai-curated/cloudflare/skills/agents-sdk",
-            "Plugins/cache/openai-curated/openai-developers/skills/agents-sdk",
-        ),
-    ): (
-        "Curated Cloudflare and OpenAI developer plugins both ship an advanced-only "
-        "agents-sdk skill. Keep this explicit so unrelated same-scope collisions "
-        "continue to block runtime-budget validation."
-    ),
-    (
-        "build-chatgpt-app",
-        (
-            "Plugins/cache/openai-curated/chatgpt-apps/skills/build-chatgpt-app",
-            "Plugins/cache/openai-curated/openai-developers/skills/build-chatgpt-app",
-        ),
-    ): (
-        "Curated ChatGPT Apps and OpenAI Developers plugins both ship the same "
-        "ChatGPT Apps SDK build skill. Keep this explicit so unrelated "
-        "same-scope collisions continue to block runtime-budget validation."
-    ),
-    (
-        "chatgpt-app-submission",
-        (
-            "Plugins/cache/openai-curated/chatgpt-apps/skills/chatgpt-app-submission",
-            "Plugins/cache/openai-curated/openai-developers/skills/chatgpt-app-submission",
-        ),
-    ): (
-        "Curated ChatGPT Apps and OpenAI Developers plugins both ship the same "
-        "ChatGPT Apps submission skill. Keep this explicit so unrelated "
-        "same-scope collisions continue to block runtime-budget validation."
-    ),
-}
 
 
 def _rel(path: Path) -> str:
@@ -195,15 +161,50 @@ def _scope_payloads() -> tuple[dict[str, int], list[dict[str, str]], list[dict[s
     return scope_counts, entries, shadowed_entries, unresolved_scope_collisions
 
 
-def _baselined_scope_collision(collision: dict[str, Any]) -> dict[str, Any] | None:
+def _plugin_skill_collision_policy(collision: dict[str, Any]) -> dict[str, Any] | None:
     paths = tuple(sorted(_scope_collision_baseline_path(candidate["path"]) for candidate in collision["candidates"]))
-    reason = BASELINED_SCOPE_COLLISIONS.get((collision["name"], paths))
-    if reason is None:
+    for policy in PLUGIN_SKILL_COLLISION_POLICIES:
+        policy_paths = tuple(sorted(str(path) for path in policy.get("paths", ())))
+        if collision["name"] == policy.get("name") and paths == policy_paths:
+            return policy
+    return None
+
+
+def _classified_scope_collision(collision: dict[str, Any]) -> dict[str, Any] | None:
+    policy = _plugin_skill_collision_policy(collision)
+    if policy is None:
         return None
-    return {
-        **collision,
-        "baseline_reason": reason,
+
+    normalized_candidates = {
+        _scope_collision_baseline_path(candidate["path"]): candidate
+        for candidate in collision["candidates"]
     }
+    classified = {
+        **collision,
+        "classification": policy["classification"],
+        "display_strategy": policy["display_strategy"],
+        "resolution": policy["resolution"],
+        "policy_reason": policy["reason"],
+    }
+    if policy["classification"] == "same_capability":
+        canonical_path = str(policy["canonical_path"])
+        suppressed_paths = tuple(str(path) for path in policy.get("suppressed_paths", ()))
+        classified["canonical_path"] = canonical_path
+        classified["canonical_candidate"] = normalized_candidates.get(canonical_path)
+        classified["suppressed_candidates"] = [
+            normalized_candidates[path]
+            for path in suppressed_paths
+            if path in normalized_candidates
+        ]
+    elif policy["classification"] == "distinct_homonym":
+        qualified_names = {
+            path: qualified
+            for path, qualified in dict(policy.get("qualified_names", {})).items()
+            if path in normalized_candidates
+        }
+        classified["qualified_names"] = qualified_names
+
+    return classified
 
 
 def _scope_collision_baseline_path(path: str) -> str:
@@ -316,14 +317,20 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
     first_level_entries = _first_level_skill_entries()
     hidden_system_entries = _system_lane_entries()
     scope_counts, scoped_entries, shadowed_entries, unresolved_scope_collisions = _scope_payloads()
-    baselined_scope_collisions: list[dict[str, Any]] = []
+    classified_scope_collisions: list[dict[str, Any]] = []
+    same_capability_scope_collisions: list[dict[str, Any]] = []
+    distinct_homonym_scope_collisions: list[dict[str, Any]] = []
     active_unresolved_scope_collisions: list[dict[str, Any]] = []
     for collision in unresolved_scope_collisions:
-        baselined_collision = _baselined_scope_collision(collision)
-        if baselined_collision is None:
+        classified_collision = _classified_scope_collision(collision)
+        if classified_collision is None:
             active_unresolved_scope_collisions.append(collision)
         else:
-            baselined_scope_collisions.append(baselined_collision)
+            classified_scope_collisions.append(classified_collision)
+            if classified_collision["classification"] == "same_capability":
+                same_capability_scope_collisions.append(classified_collision)
+            elif classified_collision["classification"] == "distinct_homonym":
+                distinct_homonym_scope_collisions.append(classified_collision)
 
     by_name: dict[str, list[dict[str, str]]] = defaultdict(list)
     for name, source_dir in _iter_default_visibility_candidates():
@@ -479,7 +486,10 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
             for suppressed in shadow["suppressed"]
         ],
         "unresolved_scope_collisions": active_unresolved_scope_collisions,
-        "baselined_scope_collisions": baselined_scope_collisions,
+        "classified_scope_collisions": classified_scope_collisions,
+        "same_capability_scope_collisions": same_capability_scope_collisions,
+        "distinct_homonym_scope_collisions": distinct_homonym_scope_collisions,
+        "baselined_scope_collisions": classified_scope_collisions,
         "duplicate_default_names": duplicate_default_names,
         "largest_descriptions": _largest_description_payloads(advanced_entries),
         "root_skill_set_count": root_skill_set_count,

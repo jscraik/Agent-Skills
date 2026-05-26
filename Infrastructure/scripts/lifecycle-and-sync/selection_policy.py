@@ -115,6 +115,67 @@ DEFAULT_VISIBLE_SYSTEM_BRIDGE_SKILL_NAMES: tuple[str, ...] = (
     "openai-docs",
 )
 
+# Intentional same-scope plugin skill name collisions. Same-capability rows are
+# one skill exposed by two plugin families and should dedupe to the canonical
+# owning plugin. Distinct homonyms share a short handle but must stay qualified
+# by plugin name so the picker does not imply they are interchangeable.
+PLUGIN_SKILL_COLLISION_POLICIES: tuple[dict[str, Any], ...] = (
+    {
+        "name": "agents-sdk",
+        "classification": "distinct_homonym",
+        "display_strategy": "qualify_all",
+        "resolution": "keep_qualified",
+        "reason": (
+            "Cloudflare and OpenAI Developers both ship an agents-sdk skill, "
+            "but they target different runtime platforms."
+        ),
+        "paths": (
+            "Plugins/cache/openai-curated/cloudflare/skills/agents-sdk",
+            "Plugins/cache/openai-curated/openai-developers/skills/agents-sdk",
+        ),
+        "qualified_names": {
+            "Plugins/cache/openai-curated/cloudflare/skills/agents-sdk": "cloudflare:agents-sdk",
+            "Plugins/cache/openai-curated/openai-developers/skills/agents-sdk": "openai-developers:agents-sdk",
+        },
+    },
+    {
+        "name": "build-chatgpt-app",
+        "classification": "same_capability",
+        "display_strategy": "dedupe_to_canonical",
+        "resolution": "suppress_duplicate",
+        "reason": (
+            "ChatGPT Apps and OpenAI Developers both expose the same ChatGPT "
+            "Apps SDK build workflow; the ChatGPT Apps plugin is canonical."
+        ),
+        "paths": (
+            "Plugins/cache/openai-curated/chatgpt-apps/skills/build-chatgpt-app",
+            "Plugins/cache/openai-curated/openai-developers/skills/build-chatgpt-app",
+        ),
+        "canonical_path": "Plugins/cache/openai-curated/chatgpt-apps/skills/build-chatgpt-app",
+        "suppressed_paths": (
+            "Plugins/cache/openai-curated/openai-developers/skills/build-chatgpt-app",
+        ),
+    },
+    {
+        "name": "chatgpt-app-submission",
+        "classification": "same_capability",
+        "display_strategy": "dedupe_to_canonical",
+        "resolution": "suppress_duplicate",
+        "reason": (
+            "ChatGPT Apps and OpenAI Developers both expose the same ChatGPT "
+            "Apps submission workflow; the ChatGPT Apps plugin is canonical."
+        ),
+        "paths": (
+            "Plugins/cache/openai-curated/chatgpt-apps/skills/chatgpt-app-submission",
+            "Plugins/cache/openai-curated/openai-developers/skills/chatgpt-app-submission",
+        ),
+        "canonical_path": "Plugins/cache/openai-curated/chatgpt-apps/skills/chatgpt-app-submission",
+        "suppressed_paths": (
+            "Plugins/cache/openai-curated/openai-developers/skills/chatgpt-app-submission",
+        ),
+    },
+)
+
 # Runtime projection modes. These are intentionally outside the selection
 # policy identity: mode support is command behavior, not a change to which
 # flat skills are selected by default.
@@ -161,6 +222,7 @@ def payload() -> dict[str, Any]:
             - "plugin_hidden_lane_skill_names": list[str]
             - "system_bridge_skill_names": list[str]
             - "default_visible_system_bridge_skill_names": list[str]
+            - "plugin_skill_collision_policies": list[dict]
     """
     return {
         "policy_version": POLICY_VERSION,
@@ -176,6 +238,7 @@ def payload() -> dict[str, Any]:
         "default_visible_system_bridge_skill_names": list(
             DEFAULT_VISIBLE_SYSTEM_BRIDGE_SKILL_NAMES
         ),
+        "plugin_skill_collision_policies": list(PLUGIN_SKILL_COLLISION_POLICIES),
     }
 
 
