@@ -1,0 +1,104 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agent-skills.local/schemas/skills-sdk.project.v1.schema.json",
+  "title": "Skills SDK Project Manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "project_id",
+    "skill_roots",
+    "eval_suite",
+    "evidence",
+    "trust_policy",
+    "precedence_policy"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "skills-sdk.project.v1"
+    },
+    "project_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "skill_roots": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/skillRoot"
+      }
+    },
+    "eval_suite": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["output_path"],
+      "properties": {
+        "output_path": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "trust_policy": {
+      "type": "string",
+      "enum": ["local_owner", "workspace_declared", "blocked_until_declared"]
+    },
+    "precedence_policy": {
+      "type": "string",
+      "enum": [
+        "project_over_user_after_trust",
+        "user_over_project",
+        "blocked_until_declared"
+      ]
+    }
+  },
+  "definitions": {
+    "skillRoot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "classification",
+        "default_for_create",
+        "default_for_install",
+        "default_for_update"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "classification": {
+          "type": "string",
+          "enum": [
+            "canonical_project_source",
+            "generated_runtime_projection",
+            "client_runtime_config",
+            "unknown"
+          ]
+        },
+        "default_for_create": {
+          "type": "boolean"
+        },
+        "default_for_install": {
+          "type": "boolean"
+        },
+        "default_for_update": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

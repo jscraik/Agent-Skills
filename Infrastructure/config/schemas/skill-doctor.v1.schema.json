@@ -22,8 +22,7 @@
     "checks",
     "check_summary",
     "agent_summary",
-    "next_command",
-    "next_command_decision"
+    "next_command"
   ],
   "properties": {
     "schema_version": {
@@ -232,6 +231,7 @@
       "required": [
         "resolver",
         "canonical_source",
+        "projection_ownership",
         "structural_audit",
         "capability_metadata",
         "package_readiness",
@@ -245,6 +245,9 @@
           "$ref": "#/definitions/check"
         },
         "canonical_source": {
+          "$ref": "#/definitions/check"
+        },
+        "projection_ownership": {
           "$ref": "#/definitions/check"
         },
         "structural_audit": {

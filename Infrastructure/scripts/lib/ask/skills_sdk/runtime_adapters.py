@@ -680,6 +680,7 @@ def _apply_runtime_observation_quality(
     runtime_failure = _runtime_observation_quality_failure(context, runtime_observation)
     if not runtime_failure:
         return
+    context["runtime_status"] = "partial"
     context["claim_status"] = "partial"
     context["runtime_failure"] = runtime_failure
     context["failed_check_id"] = str(
@@ -1236,13 +1237,17 @@ def build_command_handle_proof(
             payload["points_to_workspace_runtime"] = False
         return payload
 
-    def handle_points_to_workspace(handle_path: Path) -> bool:
-        return handle_path.exists() and _path_is_under(handle_path, expected_runtime)
+    def handle_points_to_workspace(handle_path: Path, runtime_link: dict[str, object]) -> bool:
+        if not handle_path.exists():
+            return False
+        if _path_is_under(handle_path, expected_runtime):
+            return True
+        return bool(runtime_link.get("points_to_workspace_runtime"))
 
     codex_link = link_payload(codex_skills)
     agents_link = link_payload(agents_skills)
-    codex_handle_points = handle_points_to_workspace(user_codex_handle)
-    agents_handle_points = handle_points_to_workspace(user_agents_handle)
+    codex_handle_points = handle_points_to_workspace(user_codex_handle, codex_link)
+    agents_handle_points = handle_points_to_workspace(user_agents_handle, agents_link)
     gates = {
         "resolver": resolution.get("status") == "ok",
         "generated_command_handle_check": handle_check_ok,

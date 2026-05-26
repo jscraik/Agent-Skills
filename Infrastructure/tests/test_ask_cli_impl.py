@@ -1928,6 +1928,15 @@ class TestAskCLI(unittest.TestCase):
         )
         self.assertIn("eval_blocked", doctor["lifecycle_event_types"])
         self.assertIn("Packaging", doctor["sdk_layers"])
+        projection_ownership = doctor["checks"]["projection_ownership"]
+        self.assertEqual(projection_ownership["sdk_layer"], "Runtime Adapters")
+        self.assertEqual(projection_ownership["source"]["classification"], "editable_source")
+        self.assertTrue(projection_ownership["source"]["editable_source"])
+        self.assertFalse(projection_ownership["projection_editable"])
+        self.assertEqual(
+            projection_ownership["owner_manifest_schema"],
+            "Infrastructure/config/schemas/skills-sdk.project.v1.schema.json",
+        )
         self.assertEqual(doctor["checks"]["package_readiness"]["sdk_layer"], "Packaging")
         package_readiness = doctor["checks"]["capability_metadata"]["package_readiness"]
         self.assertIn("version", package_readiness["required_fields"]["present"])
@@ -1937,6 +1946,31 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(package_contract["runtime_contract"], package_readiness["runtime_contract"])
         self.assertEqual(package_contract["install_gate"], package_readiness["install_gate"])
         self.assertEqual(package_contract["promotion_gate"], package_readiness["promotion_gate"])
+
+    def test_skills_doctor_blocks_generated_projection_path_as_source(self):
+        """Verify doctor refuses to treat generated .agents skill projections as source."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "doctor",
+            ".agents/skills/1password",
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, f"skills doctor output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        doctor = output["data"]["skill_doctor"]
+        self.assertEqual(doctor["checks"]["projection_ownership"]["status"], "fail")
+        self.assertEqual(
+            doctor["checks"]["projection_ownership"]["source"]["classification"],
+            "generated_runtime_projection",
+        )
+        self.assertFalse(doctor["checks"]["projection_ownership"]["source"]["editable_source"])
+        self.assertIn("blocked_validation", [blocker["class"] for blocker in doctor["blockers"]])
 
     def test_skills_doctor_human_output_exposes_lifecycle_event(self):
         """Verify ask skills doctor exposes the primary lifecycle event in human output."""
@@ -1955,7 +1989,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("Skill doctor: skill-builder", result.stdout)
         self.assertIn("Event: skill_doctor_completed", result.stdout)
         self.assertIn("Warning classes: outcome_proof_missing", result.stdout)
-        self.assertIn("Checks: missing=1, pass=6", result.stdout)
+        self.assertIn("Checks: missing=1, pass=7", result.stdout)
         self.assertIn("Validation: ./bin/ask skills doctor <handle-or-path> --json --robot", result.stdout)
         self.assertIn("Next:", result.stdout)
 

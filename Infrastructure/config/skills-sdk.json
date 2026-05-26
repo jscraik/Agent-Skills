@@ -41,7 +41,7 @@
       "scope": "project",
       "standard_role": "codex_native",
       "ownership": "canonical_only_if_manifest_declares",
-      "agent_skills_kit_default": "runtime_or_client_config_surface",
+      "agent_skills_kit_default": "client_runtime_config",
       "notes": ".codex/skills is a Codex client-specific root, not the cross-client Agent Skills standard path. In an owner repo, skills-sdk.json may declare it as canonical_project_source."
     },
     {
@@ -95,6 +95,8 @@
   ],
   "project_local_skill_manifest": {
     "filename": "skills-sdk.json",
+    "schema": "Infrastructure/config/schemas/skills-sdk.project.v1.schema.json",
+    "schema_version": "skills-sdk.project.v1",
     "purpose": "Declare which project-local skill roots are canonical source, projection, runtime config, or unknown before the SDK creates, installs, updates, audits, or runs evals.",
     "root_classifications": [
       "canonical_project_source",

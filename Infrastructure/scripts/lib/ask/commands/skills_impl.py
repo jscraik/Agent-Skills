@@ -2490,6 +2490,62 @@ def _doctor_check(status: str, **details: Any) -> dict[str, Any]:
     return payload
 
 
+def _skill_root_ownership_for_path(repo_relative_path: str | None) -> dict[str, Any]:
+    """Classify whether a repo-relative skill path is editable source or projection."""
+    if not repo_relative_path:
+        return {
+            "path": None,
+            "root": None,
+            "classification": "unknown",
+            "editable_source": False,
+            "owner_manifest_required_for_edit": False,
+        }
+
+    path = repo_relative_path.strip().strip("/")
+    parts = Path(path).parts
+    if path.startswith(".agents/skills/") or path == ".agents/skills":
+        return {
+            "path": path,
+            "root": ".agents/skills",
+            "classification": "generated_runtime_projection",
+            "editable_source": False,
+            "owner_manifest_required_for_edit": True,
+            "manifest_schema": "Infrastructure/config/schemas/skills-sdk.project.v1.schema.json",
+        }
+    if path.startswith(".codex/skills/") or path == ".codex/skills":
+        return {
+            "path": path,
+            "root": ".codex/skills",
+            "classification": "client_runtime_config",
+            "editable_source": False,
+            "owner_manifest_required_for_edit": True,
+            "manifest_schema": "Infrastructure/config/schemas/skills-sdk.project.v1.schema.json",
+        }
+    if path.startswith("Skills/") or path == "Skills":
+        return {
+            "path": path,
+            "root": "Skills/**",
+            "classification": "editable_source",
+            "editable_source": True,
+            "owner_manifest_required_for_edit": False,
+        }
+    if len(parts) >= 3 and parts[0] == "Plugins" and parts[2] == "skills":
+        return {
+            "path": path,
+            "root": "Plugins/*/skills/**",
+            "classification": "plugin_owned_editable_source",
+            "editable_source": True,
+            "owner_manifest_required_for_edit": False,
+        }
+    return {
+        "path": path,
+        "root": None,
+        "classification": "unknown",
+        "editable_source": False,
+        "owner_manifest_required_for_edit": False,
+    }
+
+
 def _skill_doctor_next_command_decision(
     *,
     blockers: list[dict[str, str]],
@@ -3399,6 +3455,40 @@ def skills_doctor(
                 f"Canonical source is missing for '{query}'.",
             )
         )
+
+    projection_path_value = None
+    if isinstance(resolution, dict):
+        projection_path_value = resolution.get("command_handle_path")
+    source_ownership = _skill_root_ownership_for_path(str(source_path_value) if source_path_value else None)
+    projection_ownership = _skill_root_ownership_for_path(
+        str(projection_path_value) if projection_path_value else None
+    )
+    ownership_status = "pass"
+    if source_exists and source_ownership.get("classification") in {
+        "generated_runtime_projection",
+        "client_runtime_config",
+    }:
+        ownership_status = "fail"
+        blockers.append(
+            _doctor_blocker(
+                "blocked_validation",
+                (
+                    f"Doctor target '{query}' resolves to {source_ownership['classification']}; "
+                    "edit canonical source or declare the root in an owner-repo skills-sdk.json manifest."
+                ),
+            )
+        )
+    elif not source_exists:
+        ownership_status = "skipped"
+    checks["projection_ownership"] = _doctor_check(
+        ownership_status,
+        check_name="projection_ownership",
+        source=source_ownership,
+        projection=projection_ownership,
+        projection_path=projection_path_value,
+        projection_editable=bool(projection_ownership.get("editable_source")),
+        owner_manifest_schema="Infrastructure/config/schemas/skills-sdk.project.v1.schema.json",
+    )
 
     audit_level = "strict" if strict else "compat"
     if audit_target and source_exists:

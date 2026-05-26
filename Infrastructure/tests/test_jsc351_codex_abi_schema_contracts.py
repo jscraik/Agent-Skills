@@ -24,6 +24,7 @@ SKILLSETS_DIR = REPO_ROOT / ".skillsets"
 SKILL_DOCTOR_SCHEMA_PATH = SCHEMAS_DIR / "skill-doctor.v1.schema.json"
 SKILL_PACKAGE_SCHEMA_PATH = SCHEMAS_DIR / "skill-package.v1.schema.json"
 SKILL_PACKAGE_READINESS_SCHEMA_PATH = SCHEMAS_DIR / "skill-package-readiness.v1.schema.json"
+SKILLS_SDK_PROJECT_SCHEMA_PATH = SCHEMAS_DIR / "skills-sdk.project.v1.schema.json"
 COMMAND_SURFACE_PATH = SKILLSETS_DIR / "command-surface.json"
 SYSTEM_BRIDGE_HANDLES = {
     "imagegen",
@@ -199,6 +200,9 @@ class TestSchemaFilesExistAndAreValidJson(unittest.TestCase):
     def test_skill_package_readiness_schema_file_exists_and_is_valid_json(self) -> None:
         self._assert_schema_file(SKILL_PACKAGE_READINESS_SCHEMA_PATH)
 
+    def test_skills_sdk_project_schema_file_exists_and_is_valid_json(self) -> None:
+        self._assert_schema_file(SKILLS_SDK_PROJECT_SCHEMA_PATH)
+
     def test_skill_doctor_schema_has_draft07_declaration(self) -> None:
         schema = _load_schema("skill-doctor.v1.schema.json")
         self.assertIn("$schema", schema)
@@ -211,6 +215,11 @@ class TestSchemaFilesExistAndAreValidJson(unittest.TestCase):
 
     def test_skill_package_readiness_schema_has_draft07_declaration(self) -> None:
         schema = _load_schema("skill-package-readiness.v1.schema.json")
+        self.assertIn("$schema", schema)
+        self.assertIn("draft-07", schema["$schema"])
+
+    def test_skills_sdk_project_schema_has_draft07_declaration(self) -> None:
+        schema = _load_schema("skills-sdk.project.v1.schema.json")
         self.assertIn("$schema", schema)
         self.assertIn("draft-07", schema["$schema"])
 
@@ -283,12 +292,13 @@ class TestSkillDoctorSchemaStructure(unittest.TestCase):
         ):
             self.assertIn(expected_layer, layer_enum, f"Missing SDK layer: {expected_layer}")
 
-    def test_checks_object_requires_six_core_checks(self) -> None:
+    def test_checks_object_requires_core_checks(self) -> None:
         checks = self.schema["properties"]["checks"]
         required = checks.get("required", [])
         for check_name in (
             "resolver",
             "canonical_source",
+            "projection_ownership",
             "structural_audit",
             "capability_metadata",
             "package_readiness",
@@ -421,6 +431,7 @@ class TestSkillDoctorSchemaAcceptsValidPayload(unittest.TestCase):
             "checks": {
                 "resolver": {"status": "pass", "sdk_layer": "Catalog"},
                 "canonical_source": {"status": "pass", "sdk_layer": "Catalog"},
+                "projection_ownership": {"status": "pass", "sdk_layer": "Runtime Adapters"},
                 "structural_audit": {"status": "pass", "sdk_layer": "Validation"},
                 "capability_metadata": {"status": "pass", "sdk_layer": "Contracts"},
                 "package_readiness": {"status": "pass", "sdk_layer": "Packaging"},
@@ -559,6 +570,7 @@ class TestSkillDoctorSchemaRejectsInvalidPayloads(unittest.TestCase):
             "checks": {
                 "resolver": {"status": "pass", "sdk_layer": "Catalog"},
                 "canonical_source": {"status": "pass", "sdk_layer": "Catalog"},
+                "projection_ownership": {"status": "pass", "sdk_layer": "Runtime Adapters"},
                 "structural_audit": {"status": "pass", "sdk_layer": "Validation"},
                 "capability_metadata": {"status": "pass", "sdk_layer": "Contracts"},
                 "package_readiness": {"status": "pass", "sdk_layer": "Packaging"},
@@ -671,6 +683,79 @@ class TestSkillDoctorSchemaRejectsInvalidPayloads(unittest.TestCase):
         with self.assertRaises(AssertionError) as ctx:
             _validate_schema(self.schema, payload, self.schema)
         self.assertIn("expected const", str(ctx.exception))
+
+
+# ---------------------------------------------------------------------------
+# skills-sdk.project.v1.schema.json contract tests
+# ---------------------------------------------------------------------------
+
+class TestSkillsSdkProjectSchemaStructure(unittest.TestCase):
+    """skills-sdk.project.v1.schema.json must define owner-repo source boundaries."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.schema = _load_schema("skills-sdk.project.v1.schema.json")
+
+    def _make_valid_manifest(self) -> dict:
+        return {
+            "schema_version": "skills-sdk.project.v1",
+            "project_id": "example-owner-repo",
+            "skill_roots": [
+                {
+                    "path": ".agents/skills",
+                    "classification": "canonical_project_source",
+                    "default_for_create": True,
+                    "default_for_install": True,
+                    "default_for_update": True,
+                }
+            ],
+            "eval_suite": {"path": ".harness/evals/skills"},
+            "evidence": {"output_path": ".harness/session-evidence/skills"},
+            "trust_policy": "local_owner",
+            "precedence_policy": "project_over_user_after_trust",
+        }
+
+    def test_schema_version_const_is_skills_sdk_project_v1(self) -> None:
+        self.assertEqual(
+            self.schema["properties"]["schema_version"]["const"],
+            "skills-sdk.project.v1",
+        )
+
+    def test_root_classification_enum_matches_sdk_contract(self) -> None:
+        classification_enum = self.schema["definitions"]["skillRoot"]["properties"]["classification"]["enum"]
+        self.assertEqual(
+            sorted(classification_enum),
+            [
+                "canonical_project_source",
+                "client_runtime_config",
+                "generated_runtime_projection",
+                "unknown",
+            ],
+        )
+
+    def test_valid_project_manifest_passes_schema(self) -> None:
+        try:
+            _validate_schema(self.schema, self._make_valid_manifest(), self.schema)
+        except AssertionError as exc:
+            self.fail(f"Valid skills-sdk.project.v1 manifest rejected: {exc}")
+
+    def test_manifest_requires_skill_roots(self) -> None:
+        manifest = self._make_valid_manifest()
+        manifest.pop("skill_roots")
+        with self.assertRaises(AssertionError):
+            _validate_schema(self.schema, manifest, self.schema)
+
+    def test_manifest_requires_default_operation_flags(self) -> None:
+        manifest = self._make_valid_manifest()
+        manifest["skill_roots"][0].pop("default_for_update")
+        with self.assertRaises(AssertionError):
+            _validate_schema(self.schema, manifest, self.schema)
+
+    def test_manifest_rejects_unknown_root_classification(self) -> None:
+        manifest = self._make_valid_manifest()
+        manifest["skill_roots"][0]["classification"] = "editable_runtime_projection"
+        with self.assertRaises(AssertionError):
+            _validate_schema(self.schema, manifest, self.schema)
 
 
 # ---------------------------------------------------------------------------
