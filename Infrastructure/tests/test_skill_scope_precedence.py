@@ -196,7 +196,7 @@ class TestSkillScopePrecedence(unittest.TestCase):
             {violation["code"] for violation in report["violations"]},
         )
 
-    def test_runtime_budget_baselines_curated_agents_sdk_collision(self) -> None:
+    def test_runtime_budget_classifies_curated_agents_sdk_homonym(self) -> None:
         self.assertEqual(
             verify_runtime_budget._scope_collision_baseline_path(
                 "Plugins/cache/openai-curated/cloudflare/rotating-version/skills/agents-sdk"
@@ -223,10 +223,20 @@ class TestSkillScopePrecedence(unittest.TestCase):
 
         self.assertEqual(report["status"], "pass")
         self.assertEqual(report["unresolved_scope_collisions"], [])
-        self.assertEqual(len(report["baselined_scope_collisions"]), 1)
-        self.assertEqual(report["baselined_scope_collisions"][0]["name"], "agents-sdk")
+        self.assertEqual(len(report["classified_scope_collisions"]), 1)
+        collision = report["classified_scope_collisions"][0]
+        self.assertEqual(collision["name"], "agents-sdk")
+        self.assertEqual(collision["classification"], "distinct_homonym")
+        self.assertEqual(collision["display_strategy"], "qualify_all")
+        self.assertEqual(
+            collision["qualified_names"],
+            {
+                "Plugins/cache/openai-curated/cloudflare/skills/agents-sdk": "cloudflare:agents-sdk",
+                "Plugins/cache/openai-curated/openai-developers/skills/agents-sdk": "openai-developers:agents-sdk",
+            },
+        )
 
-    def test_runtime_budget_baselines_curated_chatgpt_apps_collisions(self) -> None:
+    def test_runtime_budget_classifies_curated_chatgpt_apps_duplicates(self) -> None:
         self._write_skill(
             "Plugins/cache/openai-curated/chatgpt-apps/rotating-version/skills/build-chatgpt-app",
             "ChatGPT Apps build skill.",
@@ -250,8 +260,24 @@ class TestSkillScopePrecedence(unittest.TestCase):
         self.assertEqual(report["status"], "pass")
         self.assertEqual(report["unresolved_scope_collisions"], [])
         self.assertEqual(
-            {collision["name"] for collision in report["baselined_scope_collisions"]},
+            {collision["name"] for collision in report["same_capability_scope_collisions"]},
             {"build-chatgpt-app", "chatgpt-app-submission"},
+        )
+        by_name = {
+            collision["name"]: collision
+            for collision in report["same_capability_scope_collisions"]
+        }
+        self.assertEqual(
+            by_name["build-chatgpt-app"]["canonical_path"],
+            "Plugins/cache/openai-curated/chatgpt-apps/skills/build-chatgpt-app",
+        )
+        self.assertEqual(
+            [candidate["path"] for candidate in by_name["build-chatgpt-app"]["suppressed_candidates"]],
+            ["Plugins/cache/openai-curated/openai-developers/another-version/skills/build-chatgpt-app"],
+        )
+        self.assertEqual(
+            by_name["chatgpt-app-submission"]["canonical_path"],
+            "Plugins/cache/openai-curated/chatgpt-apps/skills/chatgpt-app-submission",
         )
 
     def test_rooted_runtime_allows_primary_runtime_lane(self) -> None:

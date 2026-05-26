@@ -1928,6 +1928,15 @@ class TestAskCLI(unittest.TestCase):
         )
         self.assertIn("eval_blocked", doctor["lifecycle_event_types"])
         self.assertIn("Packaging", doctor["sdk_layers"])
+        projection_ownership = doctor["checks"]["projection_ownership"]
+        self.assertEqual(projection_ownership["sdk_layer"], "Runtime Adapters")
+        self.assertEqual(projection_ownership["source"]["classification"], "canonical_project_source")
+        self.assertTrue(projection_ownership["source"]["editable_source"])
+        self.assertFalse(projection_ownership["projection_editable"])
+        self.assertEqual(
+            projection_ownership["owner_manifest_schema"],
+            "Infrastructure/config/schemas/skills-sdk.project.v1.schema.json",
+        )
         self.assertEqual(doctor["checks"]["package_readiness"]["sdk_layer"], "Packaging")
         package_readiness = doctor["checks"]["capability_metadata"]["package_readiness"]
         self.assertIn("version", package_readiness["required_fields"]["present"])
@@ -1937,6 +1946,270 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(package_contract["runtime_contract"], package_readiness["runtime_contract"])
         self.assertEqual(package_contract["install_gate"], package_readiness["install_gate"])
         self.assertEqual(package_contract["promotion_gate"], package_readiness["promotion_gate"])
+
+    def test_skills_doctor_blocks_generated_projection_path_as_source(self):
+        """Verify doctor refuses to treat generated .agents skill projections as source."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "doctor",
+            ".agents/skills/1password",
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 2, f"skills doctor output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        doctor = output["data"]["skill_doctor"]
+        self.assertEqual(doctor["checks"]["projection_ownership"]["status"], "fail")
+        self.assertEqual(
+            doctor["checks"]["projection_ownership"]["source"]["classification"],
+            "generated_runtime_projection",
+        )
+        self.assertFalse(doctor["checks"]["projection_ownership"]["source"]["editable_source"])
+        self.assertIn("blocked_validation", [blocker["class"] for blocker in doctor["blockers"]])
+
+    def test_skills_doctor_blocks_runtime_symlink_target_path(self):
+        """Verify path-mode doctor classifies the queried path before dereferencing symlinks."""
+        from ask.commands import skills_impl as skills_commands
+        from ask.envelope import CallResult
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            source = repo_root / "Skills" / "agent-ops" / "autofix" / "SKILL.md"
+            source.parent.mkdir(parents=True)
+            source.write_text(
+                "---\n"
+                "name: autofix\n"
+                "description: Fix a known issue\n"
+                "version: 0.1.0\n"
+                "---\n"
+                "# Autofix\n",
+                encoding="utf-8",
+            )
+            projection = repo_root / ".agents" / "skills" / "autofix"
+            projection.parent.mkdir(parents=True)
+            try:
+                projection.symlink_to(source.parent)
+            except OSError as exc:
+                self.skipTest(f"symlinks unavailable: {exc}")
+
+            with mock.patch.object(
+                skills_commands,
+                "audit_skill",
+                return_value=CallResult(),
+            ), mock.patch.object(
+                skills_commands,
+                "_skill_workout_candidates",
+                return_value=["autofix proof"],
+            ):
+                result = skills_commands.skills_doctor(repo_root, ".agents/skills/autofix")
+
+        doctor = result.data["skill_doctor"]
+        projection_ownership = doctor["checks"]["projection_ownership"]
+        self.assertEqual(result.status, "error")
+        self.assertEqual(projection_ownership["status"], "fail")
+        self.assertEqual(
+            projection_ownership["source"]["classification"],
+            "canonical_project_source",
+        )
+        self.assertEqual(
+            projection_ownership["projection"]["classification"],
+            "generated_runtime_projection",
+        )
+        self.assertFalse(projection_ownership["projection_editable"])
+        self.assertIn("blocked_validation", [blocker["class"] for blocker in doctor["blockers"]])
+
+    def test_skill_root_ownership_classifies_generated_roots_case_insensitively(self):
+        """Verify generated-root guards survive mixed-case paths on case-insensitive filesystems."""
+        from ask.commands import skills_impl as skills_commands
+
+        agents_ownership = skills_commands._skill_root_ownership_for_path(".Agents/skills/1password")
+        codex_ownership = skills_commands._skill_root_ownership_for_path(".CoDeX/skills/1password")
+
+        self.assertEqual(agents_ownership["classification"], "generated_runtime_projection")
+        self.assertFalse(agents_ownership["editable_source"])
+        self.assertTrue(agents_ownership["owner_manifest_required_for_edit"])
+        self.assertEqual(codex_ownership["classification"], "client_runtime_config")
+        self.assertFalse(codex_ownership["editable_source"])
+        self.assertTrue(codex_ownership["owner_manifest_required_for_edit"])
+
+    def test_skills_doctor_allows_manifest_declared_project_skill_source(self):
+        """Verify owner repo manifests can declare .agents/skills as canonical project source."""
+        from ask.commands import skills_impl as skills_commands
+        from ask.envelope import CallResult
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_source = repo_root / ".agents" / "skills" / "local-demo" / "SKILL.md"
+            skill_source.parent.mkdir(parents=True)
+            skill_source.write_text(
+                "---\n"
+                "name: local-demo\n"
+                "description: Local owner skill\n"
+                "version: 0.1.0\n"
+                "---\n"
+                "# Local Demo\n",
+                encoding="utf-8",
+            )
+            (repo_root / "skills-sdk.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": "skills-sdk.project.v1",
+                        "project_id": "owner-repo",
+                        "skill_roots": [
+                            {
+                                "path": ".agents/skills",
+                                "classification": "canonical_project_source",
+                                "default_for_create": True,
+                                "default_for_install": True,
+                                "default_for_update": True,
+                            }
+                        ],
+                        "eval_suite": {"path": ".harness/evals/skills"},
+                        "evidence": {"output_path": ".harness/session-evidence/skills"},
+                        "trust_policy": "local_owner",
+                        "precedence_policy": "project_over_user_after_trust",
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            with mock.patch.object(
+                skills_commands,
+                "audit_skill",
+                return_value=CallResult(),
+            ), mock.patch.object(
+                skills_commands,
+                "_skill_workout_candidates",
+                return_value=["local-demo proof"],
+            ):
+                result = skills_commands.skills_doctor(repo_root, ".agents/skills/local-demo")
+
+        doctor = result.data["skill_doctor"]
+        source = doctor["checks"]["projection_ownership"]["source"]
+        self.assertNotEqual(result.status, "error")
+        self.assertEqual(doctor["checks"]["projection_ownership"]["status"], "pass")
+        self.assertEqual(source["classification"], "canonical_project_source")
+        self.assertTrue(source["editable_source"])
+        self.assertTrue(source["manifest_declared"])
+        self.assertEqual(source["owner_manifest_path"], "skills-sdk.json")
+        self.assertNotIn("blocked_validation", [blocker["class"] for blocker in doctor["blockers"]])
+
+    def test_skill_root_ownership_prefers_most_specific_manifest_root(self):
+        """Verify nested generated roots are not masked by broader manifest roots."""
+        from ask.commands import skills_impl as skills_commands
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            (repo_root / "skills-sdk.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": "skills-sdk.project.v1",
+                        "project_id": "owner-repo",
+                        "skill_roots": [
+                            {
+                                "path": ".agents/skills",
+                                "classification": "canonical_project_source",
+                                "default_for_create": True,
+                                "default_for_install": True,
+                                "default_for_update": True,
+                            },
+                            {
+                                "path": ".agents/skills/generated",
+                                "classification": "generated_runtime_projection",
+                                "default_for_create": False,
+                                "default_for_install": False,
+                                "default_for_update": False,
+                            },
+                        ],
+                        "eval_suite": {"path": ".harness/evals/skills"},
+                        "evidence": {"output_path": ".harness/session-evidence/skills"},
+                        "trust_policy": "local_owner",
+                        "precedence_policy": "project_over_user_after_trust",
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            ownership = skills_commands._skill_root_ownership_for_path(
+                ".agents/skills/generated/demo",
+                repo_root=repo_root,
+            )
+
+        self.assertEqual(ownership["root"], ".agents/skills/generated")
+        self.assertEqual(ownership["classification"], "generated_runtime_projection")
+        self.assertFalse(ownership["editable_source"])
+        self.assertTrue(ownership["owner_manifest_required_for_edit"])
+
+    def test_skills_doctor_rejects_duplicate_manifest_root_paths(self):
+        """Verify duplicate manifest paths cannot grant canonical edit authority."""
+        from ask.commands import skills_impl as skills_commands
+        from ask.envelope import CallResult
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_source = repo_root / ".agents" / "skills" / "local-demo" / "SKILL.md"
+            skill_source.parent.mkdir(parents=True)
+            skill_source.write_text(
+                "---\n"
+                "name: local-demo\n"
+                "description: Local owner skill\n"
+                "version: 0.1.0\n"
+                "---\n"
+                "# Local Demo\n",
+                encoding="utf-8",
+            )
+            (repo_root / "skills-sdk.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": "skills-sdk.project.v1",
+                        "project_id": "owner-repo",
+                        "skill_roots": [
+                            {
+                                "path": ".agents/skills",
+                                "classification": "canonical_project_source",
+                                "default_for_create": True,
+                                "default_for_install": True,
+                                "default_for_update": True,
+                            },
+                            {
+                                "path": "/.agents/skills/",
+                                "classification": "canonical_project_source",
+                                "default_for_create": False,
+                                "default_for_install": False,
+                                "default_for_update": False,
+                            },
+                        ],
+                        "eval_suite": {"path": ".harness/evals/skills"},
+                        "evidence": {"output_path": ".harness/session-evidence/skills"},
+                        "trust_policy": "local_owner",
+                        "precedence_policy": "project_over_user_after_trust",
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            with mock.patch.object(
+                skills_commands,
+                "audit_skill",
+                return_value=CallResult(),
+            ), mock.patch.object(
+                skills_commands,
+                "_skill_workout_candidates",
+                return_value=["local-demo proof"],
+            ):
+                result = skills_commands.skills_doctor(repo_root, ".agents/skills/local-demo")
+
+        doctor = result.data["skill_doctor"]
+        source = doctor["checks"]["projection_ownership"]["source"]
+        self.assertEqual(result.status, "error")
+        self.assertEqual(source["classification"], "generated_runtime_projection")
+        self.assertFalse(source["manifest_declared"])
+        self.assertIn("blocked_validation", [blocker["class"] for blocker in doctor["blockers"]])
 
     def test_skills_doctor_human_output_exposes_lifecycle_event(self):
         """Verify ask skills doctor exposes the primary lifecycle event in human output."""
@@ -1955,7 +2228,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("Skill doctor: skill-builder", result.stdout)
         self.assertIn("Event: skill_doctor_completed", result.stdout)
         self.assertIn("Warning classes: outcome_proof_missing", result.stdout)
-        self.assertIn("Checks: missing=1, pass=6", result.stdout)
+        self.assertIn("Checks: missing=1, pass=7", result.stdout)
         self.assertIn("Validation: ./bin/ask skills doctor <handle-or-path> --json --robot", result.stdout)
         self.assertIn("Next:", result.stdout)
 
