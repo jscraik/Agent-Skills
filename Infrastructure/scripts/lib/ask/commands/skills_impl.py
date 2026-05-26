@@ -3079,6 +3079,7 @@ def _resolve_doctor_target(repo_root: Path, target: str) -> tuple[dict[str, Any]
     query = target.strip()
     looks_like_path = "/" in query or query.endswith(".md") or query.startswith(".")
     if looks_like_path:
+        target_path, target_path_value = _normalize_skill_target_path(query)
         resolved_path, path_error = _validate_repo_relative_skill_path(repo_root, query)
         if path_error:
             return {
@@ -3092,9 +3093,10 @@ def _resolve_doctor_target(repo_root: Path, target: str) -> tuple[dict[str, Any]
             "target_kind": "canonical_source_path",
             "handle": None,
             "source_path": source_rel,
+            "target_path": target_path_value,
             "source_exists": source.is_file(),
             "resolution": None,
-        }, Path(source_rel).parent.as_posix() if source_rel else None
+        }, Path(source_rel).parent.as_posix() if source_rel else target_path.as_posix()
 
     resolution = resolve_skill_handle(query, repo_root_path=repo_root)
     audit_target = _skill_audit_target(repo_root, resolution) if resolution.get("status") == "ok" else None
@@ -3552,16 +3554,32 @@ def skills_doctor(
     projection_path_value = None
     if isinstance(resolution, dict):
         projection_path_value = resolution.get("command_handle_path")
+    target_path_value = target_info.get("target_path")
     source_ownership = _skill_root_ownership_for_path(
         str(source_path_value) if source_path_value else None,
         repo_root=repo_root,
     )
+    target_ownership = (
+        _skill_root_ownership_for_path(str(target_path_value), repo_root=repo_root)
+        if target_kind != "command_handle" and target_path_value
+        else source_ownership
+    )
+    if (
+        target_kind != "command_handle"
+        and not projection_path_value
+        and target_ownership.get("classification")
+        in {
+            "generated_runtime_projection",
+            "client_runtime_config",
+        }
+    ):
+        projection_path_value = str(target_path_value)
     projection_ownership = _skill_root_ownership_for_path(
         str(projection_path_value) if projection_path_value else None,
         repo_root=repo_root,
     )
     ownership_status = "pass"
-    if source_exists and source_ownership.get("classification") in {
+    if source_exists and target_ownership.get("classification") in {
         "generated_runtime_projection",
         "client_runtime_config",
     }:
@@ -3570,7 +3588,7 @@ def skills_doctor(
             _doctor_blocker(
                 "blocked_validation",
                 (
-                    f"Doctor target '{query}' resolves to {source_ownership['classification']}; "
+                    f"Doctor target '{query}' resolves to {target_ownership['classification']}; "
                     "edit canonical source or declare the root as canonical_project_source in an owner-repo "
                     "skills-sdk.json manifest."
                 ),
@@ -3582,6 +3600,8 @@ def skills_doctor(
         ownership_status,
         check_name="projection_ownership",
         source=source_ownership,
+        target=target_ownership,
+        target_path=target_path_value,
         projection=projection_ownership,
         projection_path=projection_path_value,
         projection_editable=bool(projection_ownership.get("editable_source")),

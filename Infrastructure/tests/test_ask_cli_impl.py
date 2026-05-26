@@ -1972,6 +1972,57 @@ class TestAskCLI(unittest.TestCase):
         self.assertFalse(doctor["checks"]["projection_ownership"]["source"]["editable_source"])
         self.assertIn("blocked_validation", [blocker["class"] for blocker in doctor["blockers"]])
 
+    def test_skills_doctor_blocks_runtime_symlink_target_path(self):
+        """Verify path-mode doctor classifies the queried path before dereferencing symlinks."""
+        from ask.commands import skills_impl as skills_commands
+        from ask.envelope import CallResult
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            source = repo_root / "Skills" / "agent-ops" / "autofix" / "SKILL.md"
+            source.parent.mkdir(parents=True)
+            source.write_text(
+                "---\n"
+                "name: autofix\n"
+                "description: Fix a known issue\n"
+                "version: 0.1.0\n"
+                "---\n"
+                "# Autofix\n",
+                encoding="utf-8",
+            )
+            projection = repo_root / ".agents" / "skills" / "autofix"
+            projection.parent.mkdir(parents=True)
+            try:
+                projection.symlink_to(source.parent)
+            except OSError as exc:
+                self.skipTest(f"symlinks unavailable: {exc}")
+
+            with mock.patch.object(
+                skills_commands,
+                "audit_skill",
+                return_value=CallResult(),
+            ), mock.patch.object(
+                skills_commands,
+                "_skill_workout_candidates",
+                return_value=["autofix proof"],
+            ):
+                result = skills_commands.skills_doctor(repo_root, ".agents/skills/autofix")
+
+        doctor = result.data["skill_doctor"]
+        projection_ownership = doctor["checks"]["projection_ownership"]
+        self.assertEqual(result.status, "error")
+        self.assertEqual(projection_ownership["status"], "fail")
+        self.assertEqual(
+            projection_ownership["source"]["classification"],
+            "canonical_project_source",
+        )
+        self.assertEqual(
+            projection_ownership["projection"]["classification"],
+            "generated_runtime_projection",
+        )
+        self.assertFalse(projection_ownership["projection_editable"])
+        self.assertIn("blocked_validation", [blocker["class"] for blocker in doctor["blockers"]])
+
     def test_skill_root_ownership_classifies_generated_roots_case_insensitively(self):
         """Verify generated-root guards survive mixed-case paths on case-insensitive filesystems."""
         from ask.commands import skills_impl as skills_commands
