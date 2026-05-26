@@ -1,13 +1,27 @@
 # Architecture
 
-This document describes the high-level architecture of Agent Skills Kit. It is
-the orientation map for humans and agents landing in this repository: what the
-major parts are, which paths are canonical, which paths are generated, and what
-must stay true as the codebase evolves.
+This document describes the physical architecture of Agent Skills Kit. It is the
+orientation map for humans and agents landing in this repository: what problem
+the project solves, where major things live, which paths are canonical, which
+paths are generated, and what must stay true as the codebase evolves.
+
+Keep this file short and stable. It should answer "where does the thing that
+does X live?" and "what am I looking at?" without becoming a second README, a
+procedure manual, or an exhaustive tree dump.
 
 If you are trying to use the project, start with [README.md](README.md). If you
 are an agent changing the repository, start with [AGENTS.md](AGENTS.md). If you
 are changing terminology, read [UBIQUITOUS_LANGUAGE.md](UBIQUITOUS_LANGUAGE.md).
+
+## How to Read This Map
+
+Read this file top-down once, then use symbol search, file search, and `./bin/ask`
+to navigate. It intentionally names important files, directories, commands, and
+concepts, but leaves implementation detail to owning docs, tests, validators,
+and inline code.
+
+This file should change when the repository shape or architectural boundaries
+change. It should not change for every local implementation detail.
 
 ## Bird's Eye View
 
@@ -107,6 +121,37 @@ The documentation plane explains durable behavior and project conventions.
 `docs/**` is a drift signal unless an explicit migration or compatibility path
 owns it.
 
+## Deep Modules
+
+In this repository, a deep module is a bounded capability region with its own
+ownership, routing boundary, validation surface, and runtime projection story.
+Deep modules are not always single directories. Some are skill-set families,
+some are plugin lifecycle lanes, some are factory subsystems, and some are
+governance surfaces.
+
+| Deep module | Where to look | What it owns |
+| --- | --- | --- |
+| Agent operations | `Skills/agent-ops`, `.skillsets/agent-ops` | Repo operations, validation, review, goal governance, runtime proof, docs, testing, automation, and delivery closeout. |
+| First-party capability clusters | `Skills/backend-platform`, `Skills/frontend-ui`, `Skills/product-strategy`, `Skills/security-ops`, `Skills/content-publishing`, `Skills/mobile-native` | Bounded skill clusters that route broad user intent into smaller latent modules. |
+| Skill Factory | `Plugins/skill-factory` | Skill creation, hardening, refactoring, evaluation, installation, and proof workflows. |
+| Plugin Factory | `Plugins/plugin-factory` | Plugin creation, validation, packaging, installation, and lifecycle workflows. |
+| Harness Engineering | `Plugins/harness-engineering` | Brainstorm, spec, plan, work, review, eval, reinforce, reconcile, and closeout lifecycle. |
+| Ask CLI | `Infrastructure/scripts/lib/ask` | Public command contracts behind `./bin/ask` and the reusable services that power them. |
+| Projection and routing | `Infrastructure/scripts/lifecycle-and-sync`, `.skillsets`, `.agents` | Rooted manifests, command handles, sync mechanics, picker visibility, and runtime discovery. |
+| Validation and tests | `Infrastructure/scripts/validation-and-linting`, `Infrastructure/tests`, `Infrastructure/scripts/testing` | Deterministic guardrails for source, projections, docs, skills, governance, and runtime parity. |
+| Governance memory | `.harness`, `Docs/goals`, `Wiki` | Specs, plans, implementation notes, receipts, quality ledgers, and operational memory. |
+
+Deep module levels appear in rooted manifests as `router`, `atom`,
+`molecule`, and `compound`. The level describes loading and routing shape,
+not importance. Root skill sets route into latent modules, while command handles
+make selected modules mentionable without loading the full workflow into runtime
+context.
+
+**Architecture Invariant:** Deep modules should have explicit ownership, narrow
+entrypoints, and local proof. A change that crosses deep modules should update
+the relevant contracts, validators, implementation notes, or routing metadata
+instead of relying on conversational memory.
+
 ## Code Map
 
 ### `Skills/`
@@ -175,6 +220,15 @@ goals, plans copied into docs, runbooks, and solutions.
 **Architecture Invariant:** Do not add new lowercase `docs/**` content. Use
 `Docs/**` unless a migration explicitly says otherwise.
 
+### `Wiki/`
+
+Skill-ops knowledge surface for browsable notes, playbooks, and maintained
+knowledge. Use it for operational memory and knowledge navigation, not as a
+replacement for executable contracts, validators, or canonical docs.
+
+**Architecture Invariant:** Wiki knowledge can explain an operating model, but
+repo behavior still needs source, tests, or validation gates.
+
 ### `.harness/`
 
 Governed work artifacts: specs, plans, implementation notes, receipts, research,
@@ -191,6 +245,15 @@ Generated runtime and rooted projection surfaces.
 
 **Architecture Invariant:** `.agents/**` and `.skillsets/**` are generated in
 this repository. Edit canonical source or projection code instead.
+
+### `.workouts/` and `.skill-telemetry/`
+
+Workout fixtures and observed skill-exercise evidence. `.workouts/**` is the
+canonical workout harness source. `.skill-telemetry/**` is runtime output and
+should not be treated as committed product source.
+
+**Architecture Invariant:** Exercise evidence is valuable, but it must stay
+separate from the fixtures and contracts that generate it.
 
 ### `bin/`
 
@@ -218,12 +281,39 @@ The root is a front door and contract boundary. Root files should be one of:
 Root files should not be one-off migration scripts, local logs, scratch files,
 stale proposal documents, or generated runtime output.
 
+## Main Flow
+
+The dominant path through the repository is:
+
+```text
+canonical source -> factory tooling -> generated projection -> runtime proof
+        ^                                                     |
+        |                                                     v
+        +------------- governance evidence and fixes ----------+
+```
+
+Canonical source starts in `Skills/**`, plugin-owned paths under `Plugins/**`,
+or factory code under `Infrastructure/**`. Factory tooling validates and projects
+that source into `.skillsets/**`, `.agents/**`, plugin mirrors, and generated
+indexes. Runtime proof comes from `./bin/ask`, tests, scorecards, dashboards,
+receipts, Browser previews, CI, review state, and tracker truth.
+
+Treat each step as a separate proof. Source existence does not prove projection;
+projection does not prove runtime visibility; runtime visibility does not prove
+the work is ready to close.
+
 ## Cross-Cutting Concerns
 
 ### Generated Projections
 
 Generated projections may be committed when the repository contract says they
 are compatibility surfaces. They must have a generator and a freshness check.
+
+### Context Budget
+
+The runtime surface is deliberately smaller than the source tree. Root skill
+sets, latent manifests, and generated command handles keep high-level routing
+visible while leaving large workflows latent until selected.
 
 ### Validation
 

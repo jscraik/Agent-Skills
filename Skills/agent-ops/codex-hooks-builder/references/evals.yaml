@@ -188,3 +188,19 @@ cases:
     value: "(?is)(?=.*PreCompact)(?=.*PostCompact)(?=.*(manual|auto))(?=.*schema)(?=.*stdout)"
   realistic: true
   why_realistic: The prompt describes a concrete local agent-skills workflow with an action, artifact, or safety constraint that this skill is expected to handle.
+- id: edge-subagent-lifecycle-runtime-card
+  name: subagent lifecycle and runtime card
+  category: edge
+  eval_modes:
+  - release
+  timeout_sec: 240
+  should_trigger: true
+  prepend_skill: false
+  prompt: Upgrade the repo-local hook pack at codex/hooks/reviewer-swarm/hooks.json for Codex-native reviewer swarms. SubagentStart must inject a task envelope from .harness/runtime/current-card.json, SubagentStop must verify artifacts/reviews/correctness-reviewer.md, hook telemetry must append JSONL to .harness/hooks/events.jsonl, and Stop must check claim-vs-evidence for validation and review-thread readiness.
+  acceptance:
+  - type: skill_selected
+    expected_skill: codex-hooks-builder
+  - type: regex
+    value: "(?is)(?=.*SubagentStart)(?=.*SubagentStop)(?=.*runtime.?card)(?=.*artifact receipt)(?=.*telemetry)(?=.*claim.?vs.?evidence)"
+  realistic: true
+  why_realistic: A Codex repo operator is upgrading one named hook pack with explicit runtime-card, reviewer artifact, telemetry, and Stop verification paths, matching the operational review's subagent lifecycle recommendations.

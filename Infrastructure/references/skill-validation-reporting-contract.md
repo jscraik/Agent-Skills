@@ -51,6 +51,9 @@ If only a wrapper ran, report the wrapper label instead of the internal file nam
 | `sync/projection checks` | `./bin/ask skills prove <handle-or-path> --json --robot` or owned sync proof | first-class evidence check |
 | `docs/prose/spelling` | `vale <paths>` execution is the only accepted evidence; repo docs-quality wrappers may orchestrate but do not replace the Vale output requirement | first-class only when Vale (or equivalent canonical docs-quality command) has run and produced output |
 | `eval realism` | explicit eval schema fields such as `realistic: true\|false`, strict audit findings, or owned eval-realism validator output | first-class when schema or validator evidence exists |
+| `claim-to-evidence coverage` | `references/evals.yaml` claim records, scenario `claim_ids`, scorecards, traces, and release manifests | first-class when claim records are present and every release-readiness claim maps to at least one executed scenario |
+| `MDX eval report` | MDX report source rendered from machine-readable eval artifacts, such as `Infrastructure/templates/eval-report.mdx` plus scorecard/release manifest inputs | advisory by default; first-class only when a report deliverable explicitly requires an MDX source |
+| `macro eval export` | `./bin/ask evals macro-report --json --robot`, `macro-eval-events.jsonl`, and `macro-eval-report.json` | first-class when population-level eval analysis is claimed |
 | `eval observability export` | `Infrastructure/references/eval-observability-otel-contract.md`, local eval artifacts, and explicit repo-owned OTel-style export evidence when configured | advisory by default; first-class only when an eval program explicitly requires observability export |
 | `media artifact persistence` | generated artifact path, prompt metadata path, sidecar, and existence check under `.harness/media/` or owned artifact location | first-class only for media/artifact asks |
 
@@ -117,6 +120,65 @@ candidate.
   `missing realism evidence surface`; do not omit the row for release-readiness
   claims.
 - Plugin Eval success does not override strict-audit or eval-realism failures.
+
+### `claim-to-evidence coverage`
+
+- Treat skill evals as release-evidence systems, not only prompt samples.
+- Claim records should name the source text, claim type, risk, hard-gate status,
+  and required evidence.
+- Scenario cases should use `claim_ids` to show which claim they test.
+- Release-readiness claims should be blocked or capped when any high-risk claim
+  lacks a scenario, deterministic check, trace, artifact, or explicit blocker.
+- Activation claims and execution claims must be reported separately. A skill can
+  route correctly while failing execution, or execute well while triggering too
+  broadly.
+
+### `MDX eval report`
+
+- Prefer MDX when a human-readable eval report needs reusable visual panels such
+  as claim coverage, scenario matrix, hard-gate status, baseline delta, score
+  vector, or trace evidence.
+- Treat the MDX template and its declared component bundle as one renderable
+  unit. Generated reports copied to artifact directories must copy the component
+  bundle or replace the import with an equivalent local module.
+- MDX is a report source, not the pass/fail source of truth. The canonical status
+  remains in JSON scorecards, release manifests, trace files, staged Tessl input,
+  and command outputs.
+- Do not embed raw secrets, credentials, private URLs, full prompts, full stdout,
+  full stderr, or complete file contents in MDX reports. Link or summarize
+  redacted evidence packets instead.
+- If the MDX report cannot render, classify the report lane as `blocked`; do not
+  use a rendered screenshot or browser view as proof that the underlying eval
+  passed.
+
+### `macro eval export`
+
+- Use `./bin/ask evals macro-report --json --robot` after skill eval summaries
+  exist and before claiming population-level behavior-pattern analysis.
+- The exporter is deterministic: it labels each saved eval case with
+  `case_type`, `run_outcome`, `eval_finding`, and `behavior_pattern` and writes
+  JSONL plus aggregate JSON/MDX reports. When the MDX report imports React
+  components, the exporter must copy the component bundle beside the generated
+  report artifact.
+- Do not describe this gate as BERTopic, AgentTrace, or semantic clustering.
+  Those are downstream analysis layers that may consume the JSONL corpus.
+- If no summaries are present, report the export as `blocked` for claims that
+  require macro evidence; an empty export can be `pass` only for a smoke check
+  of exporter mechanics.
+
+### `no-skill lift gate`
+
+- Use `baseline_type: no_skill` plus `budgets.require_skill_lift: true` when
+  the case is meant to prove the skill changes behavior beyond the base model.
+- Pair `baseline_type: no_skill` with `prepend_skill: true`; otherwise there
+  is no skill-enabled run for the runner to compare against the no-skill
+  control.
+- The eval summary must include an executed baseline comparison with
+  `skill_lift`, `is_beneficial`, and `baseline_regression` before the case can
+  satisfy a lift-gated release claim.
+- Do not use lift gates for broad generic prompts where a no-skill response may
+  legitimately pass. Use ordinary baseline metadata or a documented neutral
+  baseline instead.
 
 ### `Snyk dependency screening`
 

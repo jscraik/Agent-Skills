@@ -1288,11 +1288,37 @@
           <li>Remaining manual gate: open or reload a Codex session and verify the handle appears in the picker or can be invoked as a <code>$</code> handle.</li>
         </ul>
       </article>
+
+      <article class="entry">
+        <h3>Macro eval export added</h3>
+        <time datetime="2026-05-25T22:59:04Z">2026-05-25T22:59:04Z</time>
+        <p>I converted the macro-evals recommendation into a small deterministic eval surface: saved skill eval summaries can now be exported into population-level event rows and a human-readable MDX report for pattern review.</p>
+        <ul>
+          <li>Command: <code>./bin/ask evals macro-report --json --robot</code>.</li>
+          <li>Generated artifacts: <code>Infrastructure/artifacts/evals/macro/macro-eval-events.jsonl</code>, <code>macro-eval-report.json</code>, and <code>macro-eval-report.mdx</code>.</li>
+          <li>Current corpus: <code>46</code> saved summaries, <code>131</code> case-level events, <code>6</code> skills, and <code>41</code> deterministic behavior-pattern buckets.</li>
+          <li>Current top repeated pattern: <code>edge:failed:codex-codex-returned-non-zero-exit-code-124</code> with <code>21</code> events.</li>
+          <li>Boundary: this is the evidence export layer from the cookbook, not semantic clustering or AgentTrace-style root-cause diagnosis yet.</li>
+        </ul>
+      </article>
+
+      <article class="entry">
+        <h3>Macro eval MDX dashboard wired</h3>
+        <time datetime="2026-05-25T23:03:25Z">2026-05-25T23:03:25Z</time>
+        <p>I turned the macro-eval report from plain Markdown-in-MDX into a component-backed MDX evidence dashboard. The generated report now carries an embedded <code>macroReport</code> data object and renders through reusable React components for totals, artifacts, leaderboards, flow rows, and skill-pattern concentration.</p>
+        <ul>
+          <li>Generator: <code>Infrastructure/scripts/lib/ask/commands/evals.py</code>.</li>
+          <li>Components: <code>Infrastructure/templates/components/eval-report.tsx</code> now exposes <code>MacroEvalTotals</code>, <code>MacroEvalArtifacts</code>, <code>MacroEvalLeaderboard</code>, and <code>MacroEvalFlowTable</code>.</li>
+          <li>Generated report: <code>Infrastructure/artifacts/evals/macro/macro-eval-report.mdx</code> uses schema <code>skill-macro-eval-report.mdx.v1</code> and ships with <code>Infrastructure/artifacts/evals/macro/components/eval-report.tsx</code>.</li>
+          <li>New aggregate: <code>by_skill_behavior_pattern</code> shows where repeated patterns concentrate by skill; current leaders are <code>agents-md</code> and <code>skill-builder</code> on the exit-code-124 edge failure pattern.</li>
+          <li>Validation passed: <code>python3 -m py_compile ...</code>, <code>python3 -m pytest Infrastructure/tests/test_ask_evals_command.py -q</code>, and <code>./bin/ask evals macro-report --json --robot</code>.</li>
+        </ul>
+      </article>
     </section>
 
     <section aria-labelledby="next">
       <h2 id="next">Next</h2>
-      <p>JSC-364 is delivery-complete and the local Codex user-runtime blocker is cleared for <code>$autofix</code>. The next useful check is interactive runtime observation: reload Codex and verify the handle appears or invokes from the actual Codex picker/session surface.</p>
+      <p>JSC-364 is delivery-complete and the local Codex user-runtime blocker is cleared for <code>$autofix</code>. The next useful eval step is a downstream discovery pass over <code>Infrastructure/artifacts/evals/macro/macro-eval-events.jsonl</code>: compute lift by skill, case type, runner, and outcome, then promote the highest-repeat failures into concrete eval fixtures or validator checks.</p>
     </section>
   </main>
 </body>

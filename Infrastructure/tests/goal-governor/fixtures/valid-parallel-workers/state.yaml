@@ -17,6 +17,18 @@ rules:
   one_active_task: false
   require_fresh_verification: true
   require_final_audit: true
+artifacts:
+  implementation_notes:
+    path: ".harness/implementation-notes/2026-05-25-valid-parallel-workers-notes.mdx"
+    format: mdx
+    status: present
+    browser_preview:
+      surface: localhost
+      status: blocked
+      blocker: "Fixture board does not start a localhost preview server."
+      live_update:
+        status: blocked
+        blocker: "Fixture board does not start a localhost preview server."
 tasks:
   - id: T001
     type: worker
@@ -25,6 +37,7 @@ tasks:
     objective: "Update docs."
     allowed_files:
       - "Docs/goal.md"
+      - ".harness/implementation-notes/2026-05-25-valid-parallel-workers-notes.mdx"
     verify:
       - "bash scripts/verify-work.sh --fast"
     stop_if:

@@ -8,7 +8,7 @@
         }
       }
     },
-    "generated_at": "2026-05-24T12:12:56Z",
+    "generated_at": "2026-05-26T00:29:04Z",
     "plugin_eval": {
       "status": "not_run",
       "stdout": "Plugin Eval was not run for this eval-only dashboard. Run ./bin/ask skills external-review <path> --json --robot for the static budget and ergonomics lane."
@@ -31,7 +31,7 @@
         "profile": "[profiles.fast] for Codex smoke runs",
         "role": "dynamic run-trace behavior checks for skill selection, commands, artifacts, and release gates",
         "status": "run_for_this_dashboard",
-        "tessl_evidence": "stages copied eval inputs under /tmp/ask-tessl-evals with tessl.json"
+        "tessl_evidence": "stages copied eval inputs under /tmp/ask-tessl-evals/<skill-path>-<sha12> with tessl.json"
       },
       "plugin_eval": {
         "command": "./bin/ask skills external-review <path> --json --robot",

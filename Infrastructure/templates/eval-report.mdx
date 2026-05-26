@@ -1,0 +1,101 @@
+---
+title: Skill Eval Report
+schema_version: skill-eval-report.mdx.v1
+preferred_for: human-readable eval evidence
+machine_outputs:
+  - scorecard.json
+  - release_manifest.json
+---
+
+import {
+  BaselineDelta,
+  ClaimCoverage,
+  EvidenceStrip,
+  HardGateStatus,
+  ScenarioMatrix,
+  ScoreVector,
+  TraceEvidence,
+} from "./components/eval-report";
+
+export const report = {
+  skill: null,
+  skillVersion: null,
+  evaluatorVersion: null,
+  scenarioVersion: null,
+  reportHash: null,
+  releaseStatus: null,
+  claims: [],
+  cases: [],
+  results: [],
+  scoreVector: {},
+  thresholds: {},
+  hardGateStatus: {},
+  hardGates: [],
+  blockers: [],
+  candidateResult: {},
+  baselineResults: [],
+  traces: [],
+  artifacts: [],
+  releaseDecision: "Pending generated release decision.",
+  residualRisk: "Pending generated residual risk.",
+};
+
+# Skill Eval Report
+
+<EvidenceStrip
+  skill={report.skill}
+  skillVersion={report.skillVersion}
+  evaluatorVersion={report.evaluatorVersion}
+  scenarioVersion={report.scenarioVersion}
+  reportHash={report.reportHash}
+  releaseStatus={report.releaseStatus}
+/>
+
+## Claim Coverage
+
+<ClaimCoverage claims={report.claims} cases={report.cases} results={report.results} />
+
+## Score Vector
+
+<ScoreVector
+  scores={report.scoreVector}
+  thresholds={report.thresholds}
+  hardGateStatus={report.hardGateStatus}
+/>
+
+## Scenario Matrix
+
+<ScenarioMatrix
+  cases={report.cases}
+  results={report.results}
+  groupBy="category"
+  showBaselineDelta
+/>
+
+## Hard Gates
+
+<HardGateStatus gates={report.hardGates} blockers={report.blockers} />
+
+## Baseline Delta
+
+<BaselineDelta
+  candidate={report.candidateResult}
+  baselines={report.baselineResults}
+  dimensions={["activation", "execution", "safety", "efficiency", "traceability"]}
+/>
+
+## Trace Evidence
+
+<TraceEvidence
+  traces={report.traces}
+  artifacts={report.artifacts}
+  redactionPolicy="no raw secrets, full prompts, private URLs, credentials, or complete file contents"
+/>
+
+## Release Decision
+
+{report.releaseDecision}
+
+## Residual Risk
+
+{report.residualRisk}

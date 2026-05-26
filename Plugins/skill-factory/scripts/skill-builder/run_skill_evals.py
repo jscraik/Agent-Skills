@@ -38,10 +38,11 @@ import sys
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, Union
+from typing import Any, Dict, List, Mapping, Optional, Sequence, Set, Tuple, Union
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parents[2]
+WORKSPACE_ROOT = SCRIPT_DIR.parents[3]
 for path_entry in (str(REPO_ROOT), str(SCRIPT_DIR)):
     if path_entry not in sys.path:
         sys.path.insert(0, path_entry)
@@ -97,7 +98,23 @@ _RUNNER_CHOICES = ["codex", "codex-kimi", "codex-zai", "openai", "discovery-smok
 _TIMEOUT_PROFILE_CHOICES = ["default", "codex-heavy", "discovery-heavy"]
 _EVAL_MODE_CHOICES = ["standard", "smoke", "release"]
 _CODEX_AUTH_ENV_VARS = ("OPENAI_API_KEY", "OPENAI_API_TOKEN", "OPENAI_ACCESS_TOKEN")
-_BASELINE_TYPE_CHOICES = {"no_skill", "prior_skill_snapshot", "neutral_repo_baseline"}
+_BASELINE_TYPE_CHOICES = {
+    "no_skill",
+    "previous_version",
+    "prior_skill_snapshot",
+    "neutral_repo_baseline",
+    "competing_skill",
+    "human_reference",
+}
+_KNOWN_HARD_GATES = {
+    "no_false_completion",
+    "no_validation_bypass",
+    "no_unsafe_command",
+    "no_missing_required_artifact",
+    "no_unredacted_secret",
+    "no_unresolved_source_projection_ownership",
+    "versioned_release_evidence",
+}
 _ROUND_STATE_CHOICES = {
     "prepared",
     "running",
@@ -311,6 +328,12 @@ class EvalCase:
     readiness_state: Optional[str] = None
     comparison_review_artifact: Optional[str] = None
     neutral_baseline_approval_id: Optional[str] = None
+    claim_ids: Tuple[str, ...] = ()
+    realistic: Optional[bool] = None
+    why_realistic: Optional[str] = None
+    baseline_id: Optional[str] = None
+    hard_gates: Tuple[str, ...] = ()
+    expected_evidence: Tuple[str, ...] = ()
 
 
 _VALID_CATEGORIES = {"happy", "edge", "negative", "pressure"}
@@ -363,6 +386,287 @@ def _load_evals_document(evals_path: Path) -> Dict[str, Any]:
     return obj
 
 
+def _normalize_string_list(raw: Any, *, field_name: str, case_number: Optional[int] = None) -> Tuple[str, ...]:
+    if raw is None:
+        return ()
+    if not isinstance(raw, list):
+        prefix = f"Case #{case_number} " if case_number is not None else ""
+        raise ValueError(f"{prefix}`{field_name}` must be a list when provided.")
+    values: List[str] = []
+    for item in raw:
+        text = str(item).strip()
+        if text:
+            values.append(text)
+    return tuple(values)
+
+
+def _load_claims(obj: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
+    raw = obj.get("claims")
+    if raw is None:
+        return {}
+    if not isinstance(raw, list):
+        raise ValueError("`claims` must be a list when provided.")
+    claims: Dict[str, Dict[str, Any]] = {}
+    for i, item in enumerate(raw, 1):
+        if not isinstance(item, dict):
+            raise ValueError(f"claims entry #{i} must be a mapping.")
+        claim_id = str(item.get("id") or "").strip()
+        if not claim_id:
+            raise ValueError(f"claims entry #{i} missing non-empty `id`.")
+        if claim_id in claims:
+            raise ValueError(f"duplicate claim id in evals.yaml: {claim_id}")
+        evidence_required = item.get("evidence_required")
+        if evidence_required is not None:
+            _normalize_string_list(evidence_required, field_name=f"claims[{claim_id}].evidence_required")
+        claims[claim_id] = dict(item)
+    return claims
+
+
+def _load_baselines(obj: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
+    raw = obj.get("baselines")
+    if raw is None:
+        return {}
+    if not isinstance(raw, list):
+        raise ValueError("`baselines` must be a list when provided.")
+    baselines: Dict[str, Dict[str, Any]] = {}
+    for i, item in enumerate(raw, 1):
+        if not isinstance(item, dict):
+            raise ValueError(f"baselines entry #{i} must be a mapping.")
+        baseline_id = str(item.get("id") or "").strip()
+        if not baseline_id:
+            raise ValueError(f"baselines entry #{i} missing non-empty `id`.")
+        if baseline_id in baselines:
+            raise ValueError(f"duplicate baseline id in evals.yaml: {baseline_id}")
+        baseline_type = str(item.get("baseline_type") or "").strip().lower()
+        if baseline_type and baseline_type not in _BASELINE_TYPE_CHOICES:
+            raise ValueError(
+                f"baselines entry #{i} `baseline_type` must be one of {sorted(_BASELINE_TYPE_CHOICES)}; "
+                f"got {baseline_type!r}."
+            )
+        normalized = dict(item)
+        if baseline_type:
+            normalized["baseline_type"] = baseline_type
+        baselines[baseline_id] = normalized
+    return baselines
+
+
+def _case_evidence_surfaces(case: EvalCase) -> List[str]:
+    surfaces: List[str] = []
+    if case.deterministic_checks:
+        surfaces.append("deterministic_checks")
+    if case.expected_signals:
+        surfaces.append("expected_signals")
+    if case.output_schema:
+        surfaces.append("output_schema")
+    if case.hard_gates:
+        surfaces.append("hard_gates")
+    return surfaces
+
+
+def _case_has_check_surface(case: EvalCase) -> bool:
+    return bool(case.deterministic_checks or case.expected_signals or case.output_schema)
+
+
+def _case_has_executed_check_evidence(case: EvalCase, runner_records: Mapping[str, Any]) -> bool:
+    if not _case_has_check_surface(case):
+        return False
+    for raw_record in runner_records.values():
+        if not isinstance(raw_record, dict) or not raw_record.get("passed") or raw_record.get("blocked"):
+            continue
+        metrics = raw_record.get("metrics") if isinstance(raw_record.get("metrics"), dict) else {}
+        if case.deterministic_checks and isinstance(metrics.get("trace"), dict):
+            return True
+        if case.expected_signals and isinstance(metrics.get(EXPECTED_SIGNAL_METRIC_KEY), dict):
+            return True
+        if case.output_schema and raw_record.get("used_schema") is True:
+            return True
+    return False
+
+
+def _case_requires_no_skill_baseline(case: EvalCase) -> bool:
+    return case.baseline_type == "no_skill" and bool(case.prepend_skill)
+
+
+def _baseline_comparison_from_records(
+    *,
+    runner_record: Mapping[str, Any],
+    baseline_record: Mapping[str, Any],
+) -> Dict[str, Any]:
+    if baseline_record.get("status") != "executed":
+        return {
+            "baseline_type": baseline_record.get("baseline_type"),
+            "status": baseline_record.get("status") or "unavailable",
+            "reason": baseline_record.get("reason"),
+        }
+
+    with_skill_passed = bool(runner_record.get("passed"))
+    baseline_passed = bool(baseline_record.get("passed"))
+    skill_lift = int(with_skill_passed) - int(baseline_passed)
+    return {
+        "baseline_type": baseline_record.get("baseline_type"),
+        "status": "compared",
+        "with_skill_passed": with_skill_passed,
+        "baseline_passed": baseline_passed,
+        "skill_lift": skill_lift,
+        "is_beneficial": with_skill_passed and not baseline_passed,
+        "regression": baseline_passed and not with_skill_passed,
+    }
+
+
+def _evaluate_baseline_output(
+    *,
+    runner_name: str,
+    case: EvalCase,
+    skill_name: str,
+    exit_code: int,
+    stdout_text: str,
+    stderr_text: str,
+    output_text: str,
+    schema_path: Optional[Path],
+    codex_output_format: str,
+    openai_output_format: str,
+) -> Dict[str, Any]:
+    failures: List[str] = []
+    findings: List[str] = []
+    warnings: List[str] = []
+    metrics: Dict[str, Any] = {}
+
+    blocker_class = _classify_runner_blocker(
+        output_text=output_text,
+        stdout_text=stdout_text,
+        stderr_text=stderr_text,
+        exit_code=exit_code,
+    )
+    blocked = blocker_class is not None
+    if blocked:
+        failures.append(f"{blocker_class}: no-skill baseline runner was blocked before comparison.")
+    elif exit_code != 0:
+        failures.append(f"{runner_name} no-skill baseline returned non-zero exit code: {exit_code}")
+
+    selected_skill = detect_skill_selected(
+        skill_name=skill_name,
+        output_text=output_text,
+        stdout_text=stdout_text,
+        stderr_text=stderr_text,
+        events=None,
+    )
+    metrics["selected_skill"] = selected_skill
+
+    parsed_json: Optional[Any] = None
+    used_json_assertions = False
+    acceptance_skip_reason = _acceptance_skip_reason(exit_code=exit_code, output_text=output_text)
+    if blocked:
+        pass
+    elif acceptance_skip_reason is not None:
+        warnings.append(acceptance_skip_reason)
+    else:
+        expects_json = (
+            (schema_path is not None and runner_name == "codex")
+            or (runner_name in {"codex-kimi", "codex-zai"} and codex_output_format == "json")
+            or (runner_name == "openai" and openai_output_format == "json")
+        )
+        if expects_json:
+            try:
+                parsed_json = json.loads(output_text)
+            except Exception as e:  # noqa: BLE001
+                failures.append(f"expected JSON output from no-skill baseline, but parsing failed: {e}")
+            else:
+                used_json_assertions = True
+
+        if used_json_assertions and parsed_json is not None:
+            failures.extend(
+                evaluate_assertions_json(
+                    parsed_json,
+                    case.acceptance,
+                    skill_name=skill_name,
+                    selected_skill=selected_skill,
+                )
+            )
+        else:
+            failures.extend(
+                evaluate_assertions_text(
+                    output_text,
+                    case.acceptance,
+                    skill_name=skill_name,
+                    selected_skill=selected_skill,
+                )
+            )
+
+    rubric = extract_rubric_metrics(parsed_json) if parsed_json is not None else None
+    if rubric:
+        metrics["rubric"] = rubric
+
+    if not blocked and case.expected_signals:
+        try:
+            expected_signal_result = evaluate_expected_signals(output_text, case.expected_signals)
+        except ValueError as exc:
+            failures.append(str(exc))
+            expected_signal_result = None
+        if expected_signal_result is not None:
+            metrics[EXPECTED_SIGNAL_METRIC_KEY] = expected_signal_result
+            min_expected_score = _extract_min_expected_signal_score(case.budgets)
+            if (
+                min_expected_score is not None
+                and expected_signal_result[EXPECTED_SIGNAL_COMPOSITE_KEY] < min_expected_score
+            ):
+                findings.append(
+                    "expected signal score below budget: "
+                    f"got {expected_signal_result[EXPECTED_SIGNAL_COMPOSITE_KEY]} < "
+                    f"min_expected_signal_score {min_expected_score:g}"
+                )
+
+    return {
+        "baseline_type": "no_skill",
+        "status": "executed",
+        "runner": runner_name,
+        "exit_code": exit_code,
+        "passed": (len(failures) == 0) and not blocked,
+        "blocked": blocked,
+        "blocker_class": blocker_class,
+        "tier1_failures": failures,
+        "tier2_findings": findings,
+        "warnings": warnings,
+        "metrics": metrics,
+        "used_schema": bool(schema_path and runner_name == "codex"),
+    }
+
+
+def _hard_gate_gaps_for_case(case: EvalCase, *, eval_mode: str) -> List[Dict[str, Any]]:
+    if eval_mode != "release" or not case.hard_gates:
+        return []
+    gaps: List[Dict[str, Any]] = []
+    for gate in case.hard_gates:
+        if gate not in _KNOWN_HARD_GATES:
+            gaps.append({
+                "type": "unknown_hard_gate",
+                "case_id": case.id,
+                "hard_gate": gate,
+                "severity": "blocking",
+                "message": f"release case references unknown hard_gate={gate!r}",
+            })
+            continue
+        if not _case_has_check_surface(case):
+            gaps.append({
+                "type": "hard_gate_without_required_evidence",
+                "case_id": case.id,
+                "hard_gate": gate,
+                "severity": "blocking",
+                "message": (
+                    f"hard_gate={gate!r} requires deterministic_checks, expected_signals, "
+                    "or output_schema evidence in release mode"
+                ),
+            })
+        elif not _case_evidence_surfaces(case):
+            gaps.append({
+                "type": "hard_gate_without_evidence_surface",
+                "case_id": case.id,
+                "hard_gate": gate,
+                "severity": "blocking",
+                "message": "hard-gated release case must declare a concrete evidence surface",
+            })
+    return gaps
+
+
 def load_neutral_baseline_approvals(evals_path: Path) -> Dict[str, Dict[str, Any]]:
     obj = _load_evals_document(evals_path)
     raw = obj.get("neutral_baseline_approvals")
@@ -378,12 +682,16 @@ def load_neutral_baseline_approvals(evals_path: Path) -> Dict[str, Dict[str, Any
         approval_id = str(item.get("id") or "").strip()
         if not approval_id:
             raise ValueError(f"neutral_baseline_approvals entry #{i} missing non-empty `id`.")
+        if approval_id in approvals:
+            raise ValueError(f"duplicate neutral_baseline_approval id in evals.yaml: {approval_id}")
         approvals[approval_id] = dict(item)
     return approvals
 
 
 def load_evals(evals_path: Path) -> List[EvalCase]:
     obj = _load_evals_document(evals_path)
+    claims = _load_claims(obj)
+    baselines = _load_baselines(obj)
 
     cases: List[EvalCase] = []
     for i, c in enumerate(obj["cases"], 1):
@@ -503,6 +811,38 @@ def load_evals(evals_path: Path) -> List[EvalCase]:
             if not neutral_baseline_approval_id:
                 neutral_baseline_approval_id = None
 
+        claim_ids = _normalize_string_list(c.get("claim_ids"), field_name="claim_ids", case_number=i)
+        unknown_claim_ids = [claim_id for claim_id in claim_ids if claims and claim_id not in claims]
+        if unknown_claim_ids:
+            raise ValueError(
+                f"Case #{i} references unknown claim_ids: {', '.join(unknown_claim_ids)}."
+            )
+
+        realistic = c.get("realistic")
+        if realistic is not None and not isinstance(realistic, bool):
+            raise ValueError(f"Case #{i} `realistic` must be boolean when provided.")
+
+        why_realistic = c.get("why_realistic")
+        if why_realistic is not None:
+            why_realistic = str(why_realistic).strip()
+            if not why_realistic:
+                why_realistic = None
+
+        baseline_id = c.get("baseline_id")
+        if baseline_id is not None:
+            baseline_id = str(baseline_id).strip()
+            if not baseline_id:
+                baseline_id = None
+            elif baseline_id not in baselines:
+                raise ValueError(f"Case #{i} references unknown baseline_id={baseline_id!r}.")
+
+        hard_gates = _normalize_string_list(c.get("hard_gates"), field_name="hard_gates", case_number=i)
+        expected_evidence = _normalize_string_list(
+            c.get("expected_evidence"),
+            field_name="expected_evidence",
+            case_number=i,
+        )
+
         if baseline_type == "neutral_repo_baseline" and not neutral_baseline_approval_id:
             raise ValueError(
                 f"Case #{i} uses baseline_type=neutral_repo_baseline but is missing `neutral_baseline_approval_id`."
@@ -532,6 +872,12 @@ def load_evals(evals_path: Path) -> List[EvalCase]:
                 readiness_state=readiness_state if readiness_state else None,
                 comparison_review_artifact=comparison_review_artifact,
                 neutral_baseline_approval_id=neutral_baseline_approval_id,
+                claim_ids=claim_ids,
+                realistic=realistic,
+                why_realistic=why_realistic,
+                baseline_id=baseline_id,
+                hard_gates=hard_gates,
+                expected_evidence=expected_evidence,
             )
         )
     return cases
@@ -553,6 +899,279 @@ def _case_matches_eval_mode(case: EvalCase, *, eval_mode: str) -> bool:
 
 def _filter_cases_for_eval_mode(cases: Sequence[EvalCase], *, eval_mode: str) -> List[EvalCase]:
     return [case for case in cases if _case_matches_eval_mode(case, eval_mode=eval_mode)]
+
+
+def _reporting_metadata(obj: Dict[str, Any]) -> Dict[str, Any]:
+    raw = obj.get("reporting")
+    if raw is None:
+        return {}
+    if not isinstance(raw, dict):
+        raise ValueError("`reporting` must be a mapping when provided.")
+    reporting = dict(raw)
+    preferred_source_format = reporting.get("preferred_source_format")
+    if preferred_source_format is not None:
+        if not isinstance(preferred_source_format, str):
+            raise ValueError("`reporting.preferred_source_format` must be a string when provided.")
+        normalized = preferred_source_format.strip().lower()
+        if normalized and normalized not in {"mdx", "markdown", "json"}:
+            raise ValueError("`reporting.preferred_source_format` must be one of: mdx, markdown, json.")
+        reporting["preferred_source_format"] = normalized
+    for path_field in ("report_template", "component_bundle"):
+        raw_path = reporting.get(path_field)
+        if raw_path is not None and not isinstance(raw_path, str):
+            raise ValueError(f"`reporting.{path_field}` must be a string when provided.")
+        if isinstance(raw_path, str) and raw_path.strip():
+            report_path = Path(raw_path)
+            if report_path.is_absolute():
+                raise ValueError(f"`reporting.{path_field}` must be a repo-relative path.")
+            if ".." in report_path.parts:
+                raise ValueError(f"`reporting.{path_field}` must not contain path traversal.")
+    return reporting
+
+
+def _reporting_artifact_exists(relative_path: str, *, search_roots: Sequence[Path]) -> bool:
+    for root in search_roots:
+        root_resolved = root.resolve()
+        candidate = root / relative_path
+        if not candidate.is_file():
+            continue
+        try:
+            candidate_resolved = candidate.resolve()
+            candidate_resolved.relative_to(root_resolved)
+        except (OSError, ValueError):
+            continue
+        return True
+    return False
+
+
+def _claim_to_evidence_summary(
+    evals_doc: Dict[str, Any],
+    cases: Sequence[EvalCase],
+    *,
+    eval_mode: str,
+    skill_dir: Path,
+) -> Dict[str, Any]:
+    claims = _load_claims(evals_doc)
+    baselines = _load_baselines(evals_doc)
+    reporting = _reporting_metadata(evals_doc)
+    claim_records: List[Dict[str, Any]] = []
+    gaps: List[Dict[str, Any]] = []
+
+    if eval_mode == "release" and cases and not claims:
+        gaps.append({
+            "type": "missing_claim_registry",
+            "severity": "blocking",
+            "message": "release evals must define top-level claims before claim evidence can pass",
+        })
+
+    for claim_id, claim in sorted(claims.items()):
+        covering = [case for case in cases if claim_id in case.claim_ids]
+        hard_gate = bool(claim.get("hard_gate"))
+        risk = str(claim.get("risk") or "medium").strip().lower()
+        blocking = eval_mode == "release" and hard_gate and risk in {"critical", "high"}
+        evidence_required = _normalize_string_list(
+            claim.get("evidence_required"),
+            field_name=f"claims[{claim_id}].evidence_required",
+        )
+        evidence_surfaces = sorted({surface for case in covering for surface in _case_evidence_surfaces(case)})
+
+        record = {
+            "id": claim_id,
+            "claim_type": claim.get("claim_type"),
+            "risk": risk,
+            "hard_gate": hard_gate,
+            "source": claim.get("source"),
+            "evidence_required": list(evidence_required),
+            "evidence_surfaces": evidence_surfaces,
+            "cases": [case.id for case in covering],
+        }
+        claim_records.append(record)
+
+        if not covering:
+            gaps.append({
+                "type": "claim_without_case",
+                "claim_id": claim_id,
+                "severity": "blocking" if blocking else "advisory",
+                "message": "claim has no eval case linked through claim_ids",
+            })
+            continue
+
+        if blocking and not any(case.acceptance for case in covering):
+            gaps.append({
+                "type": "claim_without_acceptance",
+                "claim_id": claim_id,
+                "severity": "blocking",
+                "message": "high-risk hard-gate claim lacks acceptance checks",
+            })
+        if blocking and not evidence_surfaces:
+            gaps.append({
+                "type": "claim_without_evidence_surface",
+                "claim_id": claim_id,
+                "severity": "blocking",
+                "message": "high-risk hard-gate claim lacks deterministic, signal, schema, hard-gate, or expected-evidence coverage",
+            })
+        if blocking and evidence_required and not evidence_surfaces:
+            gaps.append({
+                "type": "claim_evidence_required_unmapped",
+                "claim_id": claim_id,
+                "severity": "blocking",
+                "message": "claim declares evidence_required but no covering case declares an evidence surface",
+            })
+
+    for case in cases:
+        if claims and not case.claim_ids:
+            gaps.append({
+                "type": "case_without_claim",
+                "case_id": case.id,
+                "severity": "advisory",
+                "message": "case is not linked to a claim_id",
+            })
+        if eval_mode == "release" and case.claim_ids:
+            if case.realistic is not True:
+                gaps.append({
+                    "type": "missing_realism_evidence",
+                    "case_id": case.id,
+                    "severity": "blocking",
+                    "message": "release claim-linked case must set realistic: true",
+                })
+            if not case.why_realistic:
+                gaps.append({
+                    "type": "missing_realism_rationale",
+                    "case_id": case.id,
+                    "severity": "blocking",
+                    "message": "release claim-linked case must explain why_realistic",
+                })
+        if case.baseline_id and case.baseline_id not in baselines:
+            gaps.append({
+                "type": "unknown_baseline",
+                "case_id": case.id,
+                "severity": "blocking",
+                "message": f"case references unknown baseline_id={case.baseline_id!r}",
+            })
+        gaps.extend(_hard_gate_gaps_for_case(case, eval_mode=eval_mode))
+
+    report_template = str(reporting.get("report_template") or "").strip()
+    report_template_exists: Optional[bool] = None
+    component_bundle = str(reporting.get("component_bundle") or "").strip()
+    component_bundle_exists: Optional[bool] = None
+    preferred_source_format = str(reporting.get("preferred_source_format") or "").strip().lower()
+    search_roots = [WORKSPACE_ROOT, REPO_ROOT, skill_dir, SCRIPT_DIR]
+    if eval_mode == "release" and preferred_source_format == "mdx" and not report_template:
+        gaps.append({
+            "type": "missing_report_template",
+            "severity": "blocking",
+            "message": "release MDX reporting must declare report_template",
+        })
+    if preferred_source_format == "mdx" and report_template and Path(report_template).suffix != ".mdx":
+        gaps.append({
+            "type": "invalid_report_template_type",
+            "severity": "blocking" if eval_mode == "release" else "advisory",
+            "message": f"MDX report_template must point to a .mdx file: {report_template}",
+        })
+    if preferred_source_format == "mdx" and component_bundle and Path(component_bundle).suffix not in {".tsx", ".jsx"}:
+        gaps.append({
+            "type": "invalid_report_component_bundle_type",
+            "severity": "blocking" if eval_mode == "release" else "advisory",
+            "message": f"MDX component_bundle must point to a .tsx or .jsx file: {component_bundle}",
+        })
+    if report_template:
+        report_template_exists = _reporting_artifact_exists(report_template, search_roots=search_roots)
+        if report_template_exists is False:
+            gaps.append({
+                "type": "missing_report_template",
+                "severity": "blocking" if eval_mode == "release" else "advisory",
+                "message": f"report_template does not exist: {report_template}",
+            })
+    if component_bundle:
+        component_bundle_exists = _reporting_artifact_exists(component_bundle, search_roots=search_roots)
+        if component_bundle_exists is False:
+            gaps.append({
+                "type": "missing_report_component_bundle",
+                "severity": "blocking" if eval_mode == "release" else "advisory",
+                "message": f"component_bundle does not exist: {component_bundle}",
+            })
+    elif eval_mode == "release" and preferred_source_format == "mdx":
+        gaps.append({
+            "type": "missing_report_component_bundle",
+            "severity": "blocking",
+            "message": "release MDX reporting must declare component_bundle",
+        })
+
+    blocking_gaps = [gap for gap in gaps if gap.get("severity") == "blocking"]
+    return {
+        "schema_version": "claim-to-evidence.v1",
+        "claims": claim_records,
+        "baselines": sorted(baselines),
+        "reporting": reporting,
+        "report_template_exists": report_template_exists,
+        "component_bundle_exists": component_bundle_exists,
+        "gaps": gaps,
+        "blocking_gaps": blocking_gaps,
+        "passed": not blocking_gaps,
+    }
+
+
+def _attach_claim_execution_results(claim_summary: Dict[str, Any], case_results: Sequence[Dict[str, Any]], *, eval_mode: str) -> None:
+    cases_by_id = {str(case.get("id")): case for case in case_results}
+    gaps = list(claim_summary.get("gaps") or [])
+    existing_gap_keys = {
+        (gap.get("type"), gap.get("claim_id"), gap.get("case_id"))
+        for gap in gaps
+        if isinstance(gap, dict)
+    }
+    for claim in claim_summary.get("claims", []):
+        if not isinstance(claim, dict):
+            continue
+        claim_id = str(claim.get("id") or "")
+        linked_results: List[Dict[str, Any]] = []
+        for case_id in claim.get("cases") or []:
+            case = cases_by_id.get(str(case_id))
+            if not case:
+                continue
+            runner_artifacts = []
+            for runner in (case.get("runners") or {}).values():
+                if isinstance(runner, dict):
+                    artifacts = runner.get("artifacts")
+                    if isinstance(artifacts, dict) and any(value for value in artifacts.values()):
+                        runner_artifacts.append({
+                            "runner": runner.get("runner"),
+                            "artifacts": artifacts,
+                        })
+            linked_results.append({
+                "case_id": case.get("id"),
+                "passed": bool(case.get("passed")),
+                "blocked": bool(case.get("blocked")),
+                "tier1_failed": bool(case.get("tier1_failed")),
+                "tier2_failed": bool(case.get("tier2_failed")),
+                "evidence_surfaces": case.get("evidence_surfaces") or [],
+                "check_evidence": bool(case.get("check_evidence")),
+                "runner_artifacts": runner_artifacts,
+            })
+        claim["case_results"] = linked_results
+        if (
+            eval_mode == "release"
+            and claim.get("hard_gate")
+            and str(claim.get("risk") or "").lower() in {"critical", "high"}
+            and not any(
+                result.get("passed")
+                and result.get("runner_artifacts")
+                and result.get("check_evidence")
+                for result in linked_results
+            )
+        ):
+            key = ("claim_without_passing_case", claim_id, None)
+            if key not in existing_gap_keys:
+                gaps.append({
+                    "type": "claim_without_passing_case",
+                    "claim_id": claim_id,
+                    "severity": "blocking",
+                    "message": "high-risk hard-gate claim has no passing case with runner artifacts",
+                })
+                existing_gap_keys.add(key)
+    blocking_gaps = [gap for gap in gaps if isinstance(gap, dict) and gap.get("severity") == "blocking"]
+    claim_summary["gaps"] = gaps
+    claim_summary["blocking_gaps"] = blocking_gaps
+    claim_summary["passed"] = not blocking_gaps
 
 
 def _is_smoke_only_case(case: EvalCase) -> bool:
@@ -2234,6 +2853,41 @@ def _extract_require_overall_pass(budgets: Optional[Dict[str, Any]]) -> Optional
     return None
 
 
+def _extract_bool_budget(budgets: Optional[Dict[str, Any]], key: str) -> Optional[bool]:
+    if not budgets:
+        return None
+    value = budgets.get(key)
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        text = value.strip().lower()
+        if text in {"true", "yes", "1"}:
+            return True
+        if text in {"false", "no", "0"}:
+            return False
+    return None
+
+
+def _extract_min_skill_lift(budgets: Optional[Dict[str, Any]]) -> Optional[int]:
+    if not budgets:
+        return None
+    value = budgets.get("min_skill_lift")
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float):
+        return int(value)
+    if isinstance(value, str):
+        try:
+            return int(value.strip())
+        except ValueError:
+            return None
+    return None
+
+
 def _print_case_listing(cases: Sequence[EvalCase]) -> None:
     print("Available eval cases:")
     for case in cases:
@@ -2271,6 +2925,7 @@ def run_discovery_smoke(
     skill_dir: Path,
     case: EvalCase,
     output_last_message_path: Path,
+    include_skill_context: bool = True,
 ) -> Tuple[int, str, str, List[str]]:
     """
     Fast, deterministic smoke check for discovery-first-turn behavior.
@@ -2281,6 +2936,27 @@ def run_discovery_smoke(
     """
 
     warnings: List[str] = []
+
+    if not include_skill_context:
+        response = "\n".join(
+            [
+                "## Inputs",
+                "- Skill context was intentionally withheld for this no-skill baseline run.",
+                "- The response can only use the task prompt and generic repository expectations.",
+                "",
+                "## Outputs",
+                "- Baseline response recorded for comparison against the skill-enabled runner.",
+                "- No skill-specific routing, discovery contract, or reference-file evidence is available.",
+                "",
+                "## Next step",
+                "- Compare this control output with the normal skill-enabled output before claiming skill lift.",
+                "",
+                "## Failure mode",
+                "- Passing this baseline means the case may not prove the skill added value.",
+            ]
+        )
+        output_last_message_path.write_text(response, encoding="utf-8")
+        return 0, response, "", warnings
 
     skill_text = _read_text(skill_md_path)
     discovery_ref = skill_dir / "references" / "discovery-interview.md"
@@ -2522,6 +3198,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         return 1
 
     try:
+        evals_doc = _load_evals_document(evals_path)
         cases = load_evals(evals_path)
         neutral_baseline_approvals = load_neutral_baseline_approvals(evals_path)
     except ValueError as exc:
@@ -2535,6 +3212,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
     cases = _filter_cases_for_eval_mode(cases, eval_mode=args.eval_mode)
+    try:
+        claim_to_evidence = _claim_to_evidence_summary(
+            evals_doc,
+            cases,
+            eval_mode=args.eval_mode,
+            skill_dir=skill_dir,
+        )
+    except ValueError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
 
     if args.list_cases:
         _print_case_listing(cases)
@@ -2725,6 +3412,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "readiness_summary": readiness_summary,
         "round_state_summary": round_state_summary,
         "neutral_baseline_approvals_used": [],
+        "claim_to_evidence": claim_to_evidence,
     }
     if args.eval_mode == "release":
         summary["security_dependency_screening"] = _snyk_release_gate(
@@ -3088,6 +3776,114 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 "metrics": runner_metrics,
                 "used_schema": bool(schema_path and runner_name == "codex"),
             }
+
+            if _case_requires_no_skill_baseline(c):
+                baseline_record: Dict[str, Any]
+                baseline_dir = runner_dir / "baseline-no-skill"
+                baseline_dir.mkdir(parents=True, exist_ok=True)
+                baseline_output_path = baseline_dir / "output_last_message.txt"
+                baseline_jsonl_path = (
+                    (baseline_dir / "codex_events.jsonl")
+                    if (runner_name == "codex" and capture_jsonl)
+                    else None
+                )
+                if runner_name in {"codex-kimi", "codex-zai"}:
+                    if runner_name == "codex-kimi":
+                        runner_settings = codex_kimi_settings
+                        runner_command = codex_kimi_command
+                    else:
+                        runner_settings = codex_zai_settings
+                        runner_command = codex_zai_command
+                    baseline_rc, baseline_stdout, baseline_stderr = run_alt_codex_exec(
+                        workspace_root=workspace_root,
+                        prompt=prompt_body,
+                        output_last_message_path=baseline_output_path,
+                        codex_bin=codex_bin,
+                        output_format=args.codex_output_format,
+                        settings_path=runner_settings,
+                        cli_command=runner_command,
+                        timeout_sec=case_timeout_sec,
+                        timeout_profile=case_timeout_profile,
+                        extra_codex_args=args.codex_arg or None,
+                    )
+                    baseline_exec_warnings = []
+                elif runner_name == "openai":
+                    baseline_rc, baseline_stdout, baseline_stderr = run_openai_exec(
+                        workspace_root=workspace_root,
+                        prompt=prompt_body,
+                        output_last_message_path=baseline_output_path,
+                        openai_bin=openai_bin,
+                        output_format=args.openai_output_format,
+                        timeout_sec=case_timeout_sec,
+                        timeout_profile=case_timeout_profile,
+                        extra_openai_args=args.openai_arg or None,
+                    )
+                    baseline_exec_warnings = []
+                elif runner_name == "discovery-smoke":
+                    baseline_rc, baseline_stdout, baseline_stderr, baseline_exec_warnings = run_discovery_smoke(
+                        skill_md_path=skill_md,
+                        skill_dir=skill_dir,
+                        case=c,
+                        output_last_message_path=baseline_output_path,
+                        include_skill_context=False,
+                    )
+                else:
+                    baseline_rc, baseline_stdout, baseline_stderr, baseline_exec_warnings = run_codex_exec(
+                        workspace_root=workspace_root,
+                        prompt=prompt_body,
+                        output_last_message_path=baseline_output_path,
+                        output_schema_path=schema_path,
+                        sandbox=args.sandbox,
+                        ask_for_approval=args.ask_for_approval,
+                        model=args.model,
+                        profile=args.profile,
+                        codex_home=codex_home,
+                        jsonl_path=baseline_jsonl_path,
+                        codex_bin=codex_bin,
+                        timeout_sec=case_timeout_sec,
+                        timeout_profile=case_timeout_profile,
+                        extra_codex_args=args.codex_arg or None,
+                        fallback_profile=codex_fallback_profile,
+                    )
+
+                (baseline_dir / "stdout.txt").write_text(baseline_stdout or "", encoding="utf-8")
+                (baseline_dir / "stderr.txt").write_text(baseline_stderr or "", encoding="utf-8")
+                baseline_output_text = (
+                    baseline_output_path.read_text(encoding="utf-8")
+                    if baseline_output_path.exists()
+                    else ""
+                )
+                (baseline_dir / "final.txt").write_text(baseline_output_text, encoding="utf-8")
+                baseline_record = _evaluate_baseline_output(
+                    runner_name=runner_name,
+                    case=c,
+                    skill_name=skill_name,
+                    exit_code=baseline_rc,
+                    stdout_text=baseline_stdout,
+                    stderr_text=baseline_stderr,
+                    output_text=baseline_output_text,
+                    schema_path=schema_path,
+                    codex_output_format=args.codex_output_format,
+                    openai_output_format=args.openai_output_format,
+                )
+                baseline_record["warnings"] = list(baseline_exec_warnings) + list(baseline_record.get("warnings") or [])
+                baseline_record["artifacts"] = {
+                    "dir": _make_relative(baseline_dir, workspace_root),
+                    "final": _make_relative(baseline_dir / "final.txt", workspace_root),
+                    "stdout": _make_relative(baseline_dir / "stdout.txt", workspace_root),
+                    "stderr": _make_relative(baseline_dir / "stderr.txt", workspace_root),
+                    "jsonl": _make_relative(baseline_jsonl_path, workspace_root) if baseline_jsonl_path else None,
+                }
+                (baseline_dir / "result.json").write_text(
+                    json.dumps(baseline_record, indent=2, ensure_ascii=False),
+                    encoding="utf-8",
+                )
+
+                runner_record["baseline"] = baseline_record
+                runner_record["baseline_comparison"] = _baseline_comparison_from_records(
+                    runner_record=runner_record,
+                    baseline_record=baseline_record,
+                )
             (runner_dir / "result.json").write_text(json.dumps(runner_record, indent=2, ensure_ascii=False), encoding="utf-8")
 
             runner_records[runner_name] = runner_record
@@ -3097,8 +3893,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             case_blocked_reasons.extend([f"[{runner_name}] {x}" for x in runner_blocked_reasons])
             case_notes.extend([f"[{runner_name}] {x}" for x in runner_notes])
 
-        case_tier1_failed = len(case_tier1_failures) > 0
-        case_tier2_failed = len(case_tier2_findings) > 0
         case_blocked = any(bool(record.get("blocked")) for record in runner_records.values())
         case_blocker_classes = sorted(
             {
@@ -3107,7 +3901,43 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 if record.get("blocker_class")
             }
         )
+        baseline_comparisons = {
+            runner_name: record["baseline_comparison"]
+            for runner_name, record in runner_records.items()
+            if isinstance(record, dict) and isinstance(record.get("baseline_comparison"), dict)
+        }
+        compared_baselines = [
+            comparison
+            for comparison in baseline_comparisons.values()
+            if comparison.get("status") == "compared"
+        ]
+        skill_lift: Optional[int] = None
+        is_beneficial = False
+        baseline_regression = False
+        if compared_baselines:
+            skill_lift = max(int(comparison.get("skill_lift") or 0) for comparison in compared_baselines)
+            is_beneficial = any(bool(comparison.get("is_beneficial")) for comparison in compared_baselines)
+            baseline_regression = any(bool(comparison.get("regression")) for comparison in compared_baselines)
 
+        require_skill_lift = _extract_bool_budget(c.budgets, "require_skill_lift")
+        min_skill_lift = _extract_min_skill_lift(c.budgets)
+        if require_skill_lift is True or min_skill_lift is not None:
+            if not compared_baselines:
+                case_tier1_failures.append(
+                    "skill lift budget requested but no executed no-skill baseline comparison was available"
+                )
+            else:
+                if require_skill_lift is True and not is_beneficial:
+                    case_tier1_failures.append(
+                        "require_skill_lift failed: skill-enabled run did not beat the no-skill baseline"
+                    )
+                if min_skill_lift is not None and (skill_lift is None or skill_lift < min_skill_lift):
+                    case_tier1_failures.append(
+                        f"min_skill_lift failed: got {skill_lift if skill_lift is not None else 'none'} < {min_skill_lift}"
+                    )
+
+        case_tier1_failed = len(case_tier1_failures) > 0
+        case_tier2_failed = len(case_tier2_findings) > 0
         case_pass = (not case_tier1_failed) and (
             args.tier2_mode != "fail" or (not case_tier2_failed)
         )
@@ -3121,12 +3951,24 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "should_trigger": c.should_trigger,
             "prepend_skill": c.prepend_skill,
             "baseline_type": c.baseline_type,
+            "baseline_id": c.baseline_id,
+            "claim_ids": list(c.claim_ids),
+            "realistic": c.realistic,
+            "why_realistic": c.why_realistic,
+            "hard_gates": list(c.hard_gates),
+            "expected_evidence": list(c.expected_evidence),
+            "evidence_surfaces": _case_evidence_surfaces(c),
+            "check_evidence": _case_has_executed_check_evidence(c, runner_records),
             "comparison_inputs": dict(c.comparison_inputs) if c.comparison_inputs else None,
             "iteration_round_state": c.iteration_round_state,
             "metric_availability": c.metric_availability,
             "readiness_state": c.readiness_state,
             "comparison_review_artifact": comparison_review_artifact,
             "neutral_baseline_approval": neutral_baseline_approval,
+            "baseline_comparisons": baseline_comparisons,
+            "skill_lift": skill_lift,
+            "is_beneficial": is_beneficial,
+            "baseline_regression": baseline_regression,
             "expected_signals": bool(c.expected_signals),
             "timeout_profile": case_timeout_profile,
             "timeout_sec": _eval_timeout_seconds(
@@ -3181,14 +4023,23 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             summary["tier2_findings"] += 1
 
     summary["expected_signal_summary"] = summarize_expected_signal_results(summary["cases"])
+    _attach_claim_execution_results(
+        summary["claim_to_evidence"],
+        summary["cases"],
+        eval_mode=args.eval_mode,
+    )
     snyk_gate_passed = _snyk_release_gate_passed(summary["security_dependency_screening"])
+    claim_gate_passed = bool(summary["claim_to_evidence"].get("passed", True))
     summary["passed"] = (not any_blocked) and (not any_tier1_failed) and snyk_gate_passed and (
         args.tier2_mode != "fail" or (not any_tier2_failed)
     )
+    summary["passed"] = summary["passed"] and claim_gate_passed
     summary["decision"] = "pass" if summary["passed"] else "fail"
     if not snyk_gate_passed:
         snyk_status = str(summary["security_dependency_screening"].get("status", ""))
         summary["decision"] = "blocked" if snyk_status.startswith("blocked") else "fail"
+    if not claim_gate_passed:
+        summary["decision"] = "blocked"
     summary["exit_code"] = 0 if summary["passed"] else 2
 
     summary_path = reports_base / "summary.json"
@@ -3232,6 +4083,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "round_state_summary": summary["round_state_summary"],
             "neutral_baseline_approvals_used": summary["neutral_baseline_approvals_used"],
             "security_dependency_screening": summary["security_dependency_screening"],
+            "claim_to_evidence": summary["claim_to_evidence"],
             "reports_base": _rel(reports_base),
         },
         "artifacts": summary["artifacts"],
@@ -3257,6 +4109,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         print(f"Timeout profile: {args.timeout_profile}")
         print(f"Timeout seconds: {summary['timeout_sec']}")
         print(f"Tier-2 mode: {args.tier2_mode}")
+        for gap in summary.get("claim_to_evidence", {}).get("blocking_gaps", []):
+            print(f"CLAIM-GATE: {gap.get('type')}: {gap.get('message')}")
         for w in summary.get("preflight_warnings", []):
             print(f"WARNING: {w}")
         for c in summary["cases"]:

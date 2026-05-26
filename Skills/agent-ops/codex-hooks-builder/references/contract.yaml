@@ -28,6 +28,8 @@ runtime_contract:
     conflict_rule: "When official docs and local runtime/schema evidence disagree, state the conflict and follow the target runtime's schema or validator."
   events:
     - SessionStart
+    - SubagentStart
+    - SubagentStop
     - PreToolUse
     - PermissionRequest
     - PostToolUse
@@ -53,6 +55,22 @@ runtime_contract:
     ignored_matcher_events:
       - UserPromptSubmit
       - Stop
+  subagent_lifecycle:
+    start_role: "Inject task envelopes, runtime-card path, freshness requirements, expected artifacts, and role boundary context."
+    stop_role: "Verify expected artifacts, record lifecycle outcome, and classify blocked or missing-artifact agents before coordinator synthesis."
+    preferred_starting_point: "One shared lifecycle recorder plus one artifact verifier before per-role hook scripts."
+    receipt_fields: [agent_id, agent_type, turn_id, session_id, artifact_path, expected_artifacts, completion_class, blocker_class]
+  runtime_card:
+    candidate_paths: [.harness/runtime/current-card.json, .codex/runtime-card.json]
+    fields: [repo, cwd, branch, head_sha, dirty_state, session_id, turn_id, trace_id, goal_state, permission_profile, approval_reviewer, active_hooks_hash, active_agents, expected_artifacts, known_external_refs, last_validation, freshness, generated_at, expires_at]
+    freshness_values: [fresh, stale, unknown]
+  stop_claim_verifier:
+    policy: "Allow by default; block only high-confidence contradictions between final claims and evidence."
+    claim_classes: [validation, artifact, pr_readiness, review_thread, goal_completion]
+    loop_escape_required: true
+  telemetry:
+    sink_format: jsonl
+    fields: [session_id, turn_id, trace_id, hook_event_name, tool_name, agent_id, artifact_path, decision, blocker_class, runtime_card_freshness]
   compact_lifecycle:
     source_evidence: "Target Codex checkout compact event implementation and generated pre-compact/post-compact schemas, when that checkout is available."
     input_fields:
@@ -85,6 +103,7 @@ runtime_contract:
     trust: "Non-managed command hooks require enabled state and a matching trusted_hash unless trust is bypassed by the runtime."
     managed_only: "allow_managed_hooks_only is requirements-only; config.toml does not enable it."
     plugin_env: [PLUGIN_ROOT, PLUGIN_DATA, CLAUDE_PLUGIN_ROOT, CLAUDE_PLUGIN_DATA]
+    plugin_hooks_feature_flag: "Do not document or require a plugin-hooks feature flag unless the target runtime proves it still exists."
     output_spill: "Large model-visible hook text is truncated and saved under the OS temp hook_outputs directory."
 risks:
   - over_triggering
@@ -93,6 +112,8 @@ risks:
   - duplicate_layer_execution
   - stale_feature_aliases
   - unmatched_payload_shape
+  - stale_runtime_card
+  - missing_artifact_receipt
 safety:
   untrusted_inputs: true
   redact_secrets: true

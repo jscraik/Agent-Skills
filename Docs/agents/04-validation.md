@@ -98,6 +98,50 @@ copied inputs, synthesized Tessl tasks, and Tessl project marker remain
 inspectable evidence. Do not duplicate eval cases by hand unless the canonical
 eval format changes.
 
+The live Tessl workflow is a separate explicit lane. Use
+`./bin/ask evals run <skill-path> --tessl-live-private --tessl-workspace <workspace>`
+only when the operator asks for live private Tessl evidence. This lane must
+stage a tile-shaped package under
+`/tmp/ask-tessl-live/<skill-path>-<sha12>`, write `tile.json` with
+`"name": "<workspace>/<tile-name>"` and `"private": true`, include the skill
+through the `skills` manifest field, and convert eval cases into
+`evals/<case-id>/task.md` plus `evals/<case-id>/criteria.json` using Tessl's
+`weighted_checklist` criteria shape. Include local `references/**` support
+files so Tessl tile validation can resolve links from `SKILL.md`. Run
+`tessl eval run --json <staged-tile-json>`; the workspace is enforced by the
+private `tile.json` name `<workspace>/<tile-name>`, because Tessl tile evals
+reject `--workspace`. Stage `tessl.json` for the same
+`<workspace>/<tile-name>` identity because Tessl saves eval runs to a project
+even for tile eval sources; if the project is missing, classify the setup
+blocker and require `tessl project create`, `link`, or `repair` before
+retrying. Start with `--tessl-live-dry-run` when proving package shape
+or policy before any live service call.
+
+The live-private lane is still not a publish lane. Do not run `tessl install`,
+`tessl skill publish`, `tessl tile publish`, `tessl tile pack`, registry upload,
+or package upload from `ask evals run`. If live evals require Tessl project
+setup, classify the exact setup need: `tessl init`, `tessl project create`,
+`tessl project link`, or `tessl project repair`. For Codex sessions, load
+credentials from the operator-approved environment only; never print API tokens.
+
+Tessl scenario generation is a separate prep lane, not part of ordinary
+`ask evals run`. When the operator asks to use Tessl's scenario-generation
+skill, run:
+
+```bash
+./bin/ask evals prepare-tessl-scenarios <skill-path> --tessl-workspace <workspace> --json --robot
+```
+
+Start with `--dry-run` to prove package shape. The command stages the target
+skill under `/tmp/ask-tessl-scenario-generation/<skill-path>-<sha12>/target-tile`
+and installs only `tessl-labs/tessl-skill-eval-scenarios@0.1.0` under the
+paired `tool-project`. Do not run this install in the repo root. Generated
+Tessl scenarios remain draft evidence until reviewed for instruction leakage,
+feasibility, criteria totals, and duplication. Import only selected cases back
+into canonical `references/evals.yaml`. See
+[Tessl Live Skill Eval Workflow](/Docs/agents/24-tessl-live-skill-eval-workflow.md) for
+the full agent checklist.
+
 In Codex sandboxed sessions, do not request network permission for the Tessl
 eval lane up front. The repo wrapper already limits Tessl input to the staged
 stable staged project, and asking the sandbox for network turns the command into an

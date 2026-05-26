@@ -46,7 +46,7 @@ VALID_ACTIONS = {
     "reviewers": ["resolve"],
     "runtime": ["surface", "budget"],
     "plugins": ["list", "status", "doctor", "sync-local-runtime", "init", "create", "install", "import", "harden", "uninstall"],
-    "evals": ["run", "benchmark", "dashboard"],
+    "evals": ["run", "benchmark", "dashboard", "macro-report", "prepare-tessl-scenarios"],
     "graph": ["related", "find", "info", "chain", "list", "topics"],
     "mcp": ["sync"],
     "memory": ["list", "read", "search"],
@@ -106,6 +106,8 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
     "evals": [
         "ask evals run Skills/backend-platform/cli-spec --mode smoke",
         "ask evals dashboard",
+        "ask evals macro-report --json --robot",
+        "ask evals prepare-tessl-scenarios Skills/agent-ops/goal-governor --tessl-workspace skills-sdk --dry-run --json --robot",
     ],
     "graph": [
         "ask graph find security",

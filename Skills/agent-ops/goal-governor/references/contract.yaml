@@ -19,6 +19,7 @@ outputs:
   - "next safe action"
   - "validation evidence"
   - "truth lanes for local validation, generated artifacts, remote PR checks, review threads, tracker state, and merge readiness when closeout evidence is used"
+  - "MDX implementation notes artifact for governed implementation Worker lanes"
   - "XP operating artifacts: blackboard delta and slack policy for long-running continuation"
   - "receipts or repair proposal"
 non_goals:
@@ -31,8 +32,38 @@ risks:
   - "native /goal objective can drift from the repo-visible board"
   - "native blocked and usage-limited stop states can be confused with ordinary validator or environment blockers"
   - "stale local collector or PR evidence can be mistaken for live delivery truth"
+  - "implementation notes can drift from runtime truth when not enforced as a board artifact"
   - "goal tools may be unavailable for ephemeral or state-less turns even when source support exists"
   - "unscoped workers can edit outside the intended boundary"
+implementation_notes_contract:
+  required_when: "Any task has type=worker."
+  path_prefix: ".harness/implementation-notes/"
+  extension: ".mdx"
+  state_path: "artifacts.implementation_notes"
+  required_statuses:
+    - "present"
+    - "verified"
+  required_browser_preview_surface: "localhost"
+  browser_preview_statuses:
+    - "verified"
+    - "blocked"
+  live_update_statuses:
+    - "enabled"
+    - "blocked"
+  live_update_required_when: "Browser preview is verified."
+  live_update_watched_path: "Must match artifacts.implementation_notes.path."
+  required_sections:
+    - "Deep Module Topology"
+    - "Current Slice Insertion Map"
+    - "Runtime Truth Surface"
+    - "Blast Radius View"
+    - "Validation Coverage"
+  required_components:
+    - "DeepModuleMap"
+    - "InsertionPoint"
+    - "RuntimeCardState"
+    - "BlastRadiusMap"
+    - "ValidatorCoverage"
 output_contract:
   schema_version: "1"
   applies_to_modes:
