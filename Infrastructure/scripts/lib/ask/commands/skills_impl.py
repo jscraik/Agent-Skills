@@ -64,6 +64,7 @@ from ask.skills_sdk.contracts import (  # noqa: E402
     doctor_sdk_layer_for as _doctor_sdk_layer_for,
     doctor_warning as _doctor_warning,
     read_skill_frontmatter_fields as _read_skill_frontmatter_fields,
+    runtime_failure_payload as _runtime_failure_payload,
     skill_doctor_check_summary as _skill_doctor_check_summary,
     skill_target_summary as _skill_target_summary,
     skills_validation_command as _skills_validation_command,
@@ -1344,12 +1345,19 @@ def skills_proof(repo_root: Path, handle: str, runtime_target: str = "any") -> C
         failure = (
             proof.get("runtime_failure")
             if isinstance(proof.get("runtime_failure"), dict)
-            else {
-                "failed_check_id": runtime_evidence.get("failed_check_id") or "runtime_observation_quality",
-                "message": runtime_evidence.get("blocker") or "Runtime evidence quality is incomplete.",
-                "recovery_guidance": "Rerun the explicit runtime proof after collecting current runtime evidence.",
-            }
+            else _runtime_failure_payload(
+                command="skills proof",
+                error_code="ERR_RUNTIME",
+                failed_check_id=str(runtime_evidence.get("failed_check_id") or "runtime_observation_quality"),
+                path="runtime_evidence.claim_status",
+                message=str(runtime_evidence.get("blocker") or "Runtime evidence quality is incomplete."),
+                recovery_guidance="Rerun the explicit runtime proof after collecting current runtime evidence.",
+                validation_commands=[f"./bin/ask skills proof {normalized} --runtime-target {runtime_target} --json --robot"],
+            )
         )
+        if runtime_evidence_blocks and proof.get("status") == "pass":
+            proof["status"] = "fail"
+        proof["runtime_failure"] = failure
         result.data["runtime_failure"] = failure
         message = (
             f"Invalid runtime target '{runtime_target}'."

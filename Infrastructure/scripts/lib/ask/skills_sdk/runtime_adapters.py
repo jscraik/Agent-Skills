@@ -598,16 +598,24 @@ def _runtime_observation(
 
 def _latest_observed_turn_at(runtime_observation: dict[str, Any]) -> datetime | None:
     timestamps: list[datetime] = []
+    has_observed_at = False
     turn_events = runtime_observation.get("turn_events")
     if not isinstance(turn_events, list):
         return None
     for event in turn_events:
         if not isinstance(event, dict):
             continue
+        if event.get("observed_at") is not None:
+            has_observed_at = True
         parsed = _parse_utc_timestamp(event.get("observed_at"))
         if parsed:
             timestamps.append(parsed)
-    return max(timestamps) if timestamps else None
+    if timestamps:
+        return max(timestamps)
+    if has_observed_at and turn_events:
+        # Events exist with observed_at values but none parsed — treat as maximally stale
+        return datetime(1970, 1, 1, tzinfo=timezone.utc)
+    return None
 
 
 def _runtime_observation_quality_failure(
@@ -672,7 +680,6 @@ def _apply_runtime_observation_quality(
     runtime_failure = _runtime_observation_quality_failure(context, runtime_observation)
     if not runtime_failure:
         return
-    context["runtime_status"] = "partial"
     context["claim_status"] = "partial"
     context["runtime_failure"] = runtime_failure
     context["failed_check_id"] = str(
@@ -685,8 +692,13 @@ def _apply_runtime_observation_quality(
     thread_runs = runtime_observation.get("thread_runs")
     if isinstance(thread_runs, list):
         for thread_run in thread_runs:
-            if isinstance(thread_run, dict) and "runtime_status" in thread_run:
-                thread_run["runtime_status"] = context["runtime_status"]
+            if isinstance(thread_run, dict):
+                thread_run["claim_status"] = "partial"
+    verifier_results = context.get("verifier_results")
+    if isinstance(verifier_results, list):
+        for vr in verifier_results:
+            if isinstance(vr, dict):
+                vr["status"] = "partial"
 
 
 def _artifact_record(
