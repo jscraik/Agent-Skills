@@ -17,6 +17,12 @@ Why this matters: Goal Governor changes behavior depending on whether the work
 is prompt review, board creation, continuation, repair, runtime doctoring, or
 validation-only closeout.
 
+If interaction is unavailable, write this first-round question to
+`goal-governor-output.yaml` instead of inventing a target. Include
+`mode: discovery`, `round_1_question: What should this skill help you do?`,
+`question_label: Round 1 question`, and the `Why this matters` explanation so
+future agents can see why Goal Governor stopped before repo inspection.
+
 ## Copy paste payload examples
 
 Ambiguous target:

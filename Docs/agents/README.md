@@ -41,6 +41,7 @@
 - [21-zero-setup-agent-workspace](/Docs/agents/21-zero-setup-agent-workspace.md)
 - [22-systems-thinking-product-rule](/Docs/agents/22-systems-thinking-product-rule.md)
 - [23-ctf-workflow-evals](/Docs/agents/23-ctf-workflow-evals.md)
+- [24-tessl-live-skill-eval-workflow](/Docs/agents/24-tessl-live-skill-eval-workflow.md)
 - [ask product golden path command contracts](/Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md)
 
 ## Quick picks
@@ -61,4 +62,5 @@
 | Zero-setup agent workspace product rule           | [/Docs/agents/21-zero-setup-agent-workspace.md](/Docs/agents/21-zero-setup-agent-workspace.md)                                     |
 | Systems thinking and blocker empowerment          | [/Docs/agents/22-systems-thinking-product-rule.md](/Docs/agents/22-systems-thinking-product-rule.md)                               |
 | CTF-style workflow evals and skill self-refinement | [/Docs/agents/23-ctf-workflow-evals.md](/Docs/agents/23-ctf-workflow-evals.md)                                                     |
+| Tessl private evals and scenario generation       | [/Docs/agents/24-tessl-live-skill-eval-workflow.md](/Docs/agents/24-tessl-live-skill-eval-workflow.md)                             |
 | Product command contracts                         | [/Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md](/Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md) |

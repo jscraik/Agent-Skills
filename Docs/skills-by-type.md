@@ -13,14 +13,14 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `library_api_reference`: 2
 - `product_verification`: 4
 - `data_fetch_analysis`: 3
-- `team_automation`: 35
+- `team_automation`: 37
 - `scaffolding_templates`: 16
 - `code_quality_review`: 24
 - `ci_cd_deployment`: 0
 - `runbook`: 13
 - `infrastructure_ops`: 3
 - `invalid`: 0
-- `total_tagged`: 100
+- `total_tagged`: 102
 
 ## Semantic Types
 
@@ -48,6 +48,7 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `architecture-interview` — `Skills/product-strategy`
 - `atlas` — `Skills/mobile-native`
 - `autoresearch` — `Skills/agent-ops`
+- `code-fixes-triage` — `Skills/agent-ops`
 - `codex-automation-architect` — `Skills/agent-ops`
 - `coding-harness` — `Skills/agent-ops`
 - `decide-build-primitive` — `Skills/agent-ops`
@@ -72,6 +73,7 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `pr-green-sweep` — `Skills/agent-ops`
 - `production-deployment` — `Skills/agent-ops`
 - `release-notes` — `Skills/content-publishing`
+- `session-workflow-miner` — `Skills/agent-ops`
 - `skill-factory-router` — `Plugins/skill-factory/skills`
 - `skill-pr-delivery` — `Skills/agent-ops`
 - `triage` — `Skills/agent-ops`

@@ -8,7 +8,7 @@
         }
       }
     },
-    "generated_at": "2026-05-25T23:24:45Z",
+    "generated_at": "2026-05-26T00:29:04Z",
     "plugin_eval": {
       "status": "not_run",
       "stdout": "Plugin Eval was not run for this eval-only dashboard. Run ./bin/ask skills external-review <path> --json --robot for the static budget and ergonomics lane."

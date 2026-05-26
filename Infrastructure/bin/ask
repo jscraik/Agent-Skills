@@ -51,7 +51,13 @@ from ask.commands.plugins import (
     doctor_plugins_state,
     uninstall_plugin,
 )
-from ask.commands.evals import run_evals, benchmark_portfolio, dashboard_report, macro_eval_report
+from ask.commands.evals import (
+    benchmark_portfolio,
+    dashboard_report,
+    macro_eval_report,
+    prepare_tessl_scenario_generation,
+    run_evals,
+)
 from ask.commands.graph import graph_related, graph_find, graph_info, graph_chain, graph_list, graph_topics
 from ask.commands.mcp import sync_mcp
 from ask.commands.memory import memory_list, memory_read, memory_search
@@ -295,6 +301,10 @@ def main():
     evals_macro_parser = evals_subparsers.add_parser("macro-report", help="Export deterministic macro-eval events from saved skill eval summaries", parents=[global_parser])
     evals_macro_parser.add_argument("--output-dir", default=None, help="Directory for macro-eval artifacts")
     evals_macro_parser.add_argument("--summaries-glob", default=None, help="Repo-relative glob for summary.json files")
+    evals_tessl_scenarios_parser = evals_subparsers.add_parser("prepare-tessl-scenarios", help="Stage a skill and install Tessl's scenario-generation tile in temp space", parents=[global_parser])
+    evals_tessl_scenarios_parser.add_argument("path", help="Path to the skill directory")
+    evals_tessl_scenarios_parser.add_argument("--tessl-workspace", required=True, help="Workspace namespace for the staged private tile")
+    evals_tessl_scenarios_parser.add_argument("--dry-run", action="store_true", help="Stage inputs and write the brief without invoking Tessl install")
     add_workouts_parser(subparsers, global_parser)
     graph_parser = subparsers.add_parser("graph", help="Skill graph navigation and discovery", parents=[global_parser])
     graph_subparsers = graph_parser.add_subparsers(dest="action")
@@ -763,10 +773,16 @@ def main():
         elif args.action == "dashboard":
             result = dashboard_report(repo_root)
         elif args.action == "macro-report":
-            result = macro_eval_report(
+            macro_report_kwargs = {"output_dir": args.output_dir}
+            if args.summaries_glob:
+                macro_report_kwargs["summaries_glob"] = args.summaries_glob
+            result = macro_eval_report(repo_root, **macro_report_kwargs)
+        elif args.action == "prepare-tessl-scenarios":
+            result = prepare_tessl_scenario_generation(
                 repo_root,
-                output_dir=args.output_dir,
-                summaries_glob=args.summaries_glob or "artifacts/reports/skills/*/*/summary.json",
+                path=args.path,
+                workspace=args.tessl_workspace,
+                dry_run=args.dry_run,
             )
         else:
             result = build_unknown_action_result(

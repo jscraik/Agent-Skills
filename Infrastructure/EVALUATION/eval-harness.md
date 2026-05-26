@@ -80,6 +80,32 @@ for later macro discovery, notebooks, or dashboards. The exporter does not claim
 BERTopic, AgentTrace, or semantic clustering; it creates the compact evidence
 corpus those layers can consume.
 
+## No-Skill Lift Gates
+
+Use `baseline_type: no_skill` when a case should prove that loading the skill
+changes the result. The runner executes the same case again without prepending
+skill context and records `baseline_comparisons`, `skill_lift`,
+`is_beneficial`, and `baseline_regression` in the case summary.
+`no_skill` baselines are executable for skill-prepended cases; pair this
+baseline with `prepend_skill: true` so the runner has a real skill-enabled run
+to compare against the no-skill control.
+
+Add these budgets only when the no-skill control is expected to lose:
+
+```yaml
+prepend_skill: true
+baseline_type: no_skill
+budgets:
+  require_skill_lift: true
+  min_skill_lift: 1
+```
+
+`require_skill_lift` fails the case when the skill-enabled run does not beat the
+no-skill baseline. `min_skill_lift` fails the case when the numeric lift is below
+the requested threshold. Do not add these budgets to generic acceptance cases
+where a capable base model could reasonably pass without the skill; those cases
+should still record a baseline or use a neutral baseline decision instead.
+
 ## Run Record Template
 
 | Date | Scope | Checks run | Result | Follow-up |

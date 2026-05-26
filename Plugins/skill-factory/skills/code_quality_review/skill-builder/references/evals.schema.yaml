@@ -70,8 +70,18 @@ properties:
           items: {type: string}
         realistic: {type: boolean}
         why_realistic: {type: string}
+        baseline_type: {type: string, enum: [no_skill, previous_version, prior_skill_snapshot, neutral_repo_baseline, competing_skill, human_reference]}
         baseline_id: {type: string}
         comparison_inputs: {type: object}
+        budgets:
+          type: object
+          properties:
+            max_total_tokens: {type: integer, minimum: 1}
+            max_command_budget: {type: integer, minimum: 0}
+            max_duplicate_command_ratio: {type: number, minimum: 0}
+            require_selection_signal: {type: boolean}
+            require_skill_lift: {type: boolean}
+            min_skill_lift: {type: integer}
         hard_gates:
           type: array
           items: {type: string}

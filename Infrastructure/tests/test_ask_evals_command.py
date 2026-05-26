@@ -122,7 +122,7 @@ def test_benchmark_portfolio_exposes_validation_command(tmp_path: Path) -> None:
 
 
 def test_macro_eval_report_exports_case_level_events(tmp_path: Path) -> None:
-    report_dir = tmp_path / "artifacts" / "reports" / "skills" / "demo-skill" / "run-1"
+    report_dir = tmp_path / "Infrastructure" / "artifacts" / "skills" / "demo-skill" / "run-1"
     report_dir.mkdir(parents=True)
     (report_dir / "summary.json").write_text(
         json.dumps(
@@ -141,9 +141,36 @@ def test_macro_eval_report_exports_case_level_events(tmp_path: Path) -> None:
                         "name": "Pricing exception",
                         "category": "pricing",
                         "passed": False,
+                        "baseline_type": "neutral_repo_baseline",
+                        "baseline_id": "pricing-neutral",
+                        "comparison_inputs": {"control": "without-skill"},
+                        "baseline_comparisons": {
+                            "codex": {
+                                "status": "compared",
+                                "skill_lift": 1,
+                                "is_beneficial": True,
+                                "regression": False,
+                            }
+                        },
+                        "skill_lift": 1,
+                        "is_beneficial": True,
+                        "baseline_regression": False,
+                        "readiness_state": "comparison_incomplete",
+                        "metric_availability": "available",
+                        "evidence_surfaces": ["deterministic_checks", "expected_signals"],
+                        "check_evidence": True,
+                        "hard_gates": ["no_false_completion"],
+                        "expected_evidence": ["acceptance"],
                         "tier1_failed": True,
                         "tier1_failures": ["expected margin guardrail evidence"],
-                        "runners": {},
+                        "runners": {
+                            "codex": {
+                                "metrics": {
+                                    "trace": {"tool_calls": 2},
+                                    "expected_signals": {"score": 75},
+                                },
+                            },
+                        },
                     },
                     {
                         "id": "clean-path",
@@ -173,11 +200,30 @@ def test_macro_eval_report_exports_case_level_events(tmp_path: Path) -> None:
     assert rows[0]["run_outcome"] == "failed"
     assert rows[0]["eval_finding"] == "expected margin guardrail evidence"
     assert rows[0]["behavior_pattern"] == "pricing:failed:expected-margin-guardrail-evidence"
-    assert rows[0]["summary_path"] == "artifacts/reports/skills/demo-skill/run-1/summary.json"
-    assert rows[0]["release_manifest_path"] == "artifacts/reports/skills/demo-skill/run-1/release_manifest.json"
+    assert rows[0]["baseline_status"] == "executed_compared"
+    assert rows[0]["baseline_type"] == "neutral_repo_baseline"
+    assert rows[0]["skill_lift"] == 1
+    assert rows[0]["is_beneficial"] is True
+    assert rows[0]["baseline_regression"] is False
+    assert rows[0]["readiness_state"] == "comparison_incomplete"
+    assert rows[0]["metric_availability"] == "available"
+    assert rows[0]["check_evidence"] is True
+    assert rows[0]["verification_strategy"] == "executed_deterministic"
+    assert rows[0]["verifier_types"] == [
+        "deterministic_checks",
+        "executed_check_evidence",
+        "expected_evidence",
+        "expected_signals",
+        "hard_gates",
+        "trace_metrics",
+    ]
+    assert rows[0]["summary_path"] == "Infrastructure/artifacts/skills/demo-skill/run-1/summary.json"
+    assert rows[0]["release_manifest_path"] == "Infrastructure/artifacts/skills/demo-skill/run-1/release_manifest.json"
     assert rows[1]["case_type"] == "clean"
     assert rows[1]["run_outcome"] == "passed"
     assert rows[1]["eval_finding"] == "none"
+    assert rows[1]["baseline_status"] == "none_declared"
+    assert rows[1]["verification_strategy"] == "acceptance_only"
     assert (tmp_path / result.data["artifacts"]["report_json"]).is_file()
     assert result.data["groups"]["by_skill_behavior_pattern"] == [
         {
@@ -191,6 +237,15 @@ def test_macro_eval_report_exports_case_level_events(tmp_path: Path) -> None:
             "trace_count": 1,
         },
     ]
+    assert result.data["groups"]["by_verification_strategy"] == [
+        {"verification_strategy": "acceptance_only", "trace_count": 1},
+        {"verification_strategy": "executed_deterministic", "trace_count": 1},
+    ]
+    assert result.data["groups"]["by_baseline_status"] == [
+        {"baseline_status": "executed_compared", "trace_count": 1},
+        {"baseline_status": "none_declared", "trace_count": 1},
+    ]
+    assert {"verifier_type": "trace_metrics", "trace_count": 1} in result.data["groups"]["by_verifier_type"]
     assert (tmp_path / result.data["artifacts"]["report_components"]).is_file()
     mdx_text = (tmp_path / result.data["artifacts"]["report_mdx"]).read_text(encoding="utf-8")
     assert "schema_version: skill-macro-eval-report.mdx.v1" in mdx_text
@@ -200,7 +255,7 @@ def test_macro_eval_report_exports_case_level_events(tmp_path: Path) -> None:
 
 
 def test_macro_eval_report_uses_claim_gap_when_case_has_no_finding(tmp_path: Path) -> None:
-    report_dir = tmp_path / "artifacts" / "reports" / "skills" / "demo-skill" / "run-2"
+    report_dir = tmp_path / "Infrastructure" / "artifacts" / "skills" / "demo-skill" / "run-2"
     report_dir.mkdir(parents=True)
     (report_dir / "summary.json").write_text(
         json.dumps(
@@ -280,7 +335,10 @@ def _write_example_skill(tmp_path: Path) -> Path:
     skill_root = tmp_path / "Skills" / "example-skill"
     references = skill_root / "references"
     references.mkdir(parents=True)
-    (skill_root / "SKILL.md").write_text("# Example Skill\n", encoding="utf-8")
+    (skill_root / "SKILL.md").write_text(
+        '---\nname: example-skill\nmetadata:\n  version: "1.2.3"\n---\n# Example Skill\n',
+        encoding="utf-8",
+    )
     (references / "evals.yaml").write_text(
         'cases:\n  - id: smoke-example\n    prompt: "Do the example task."\n',
         encoding="utf-8",
@@ -348,7 +406,9 @@ def test_evals_run_native_tessl_by_default_with_temp_staged_source(tmp_path: Pat
         assert "HOME" in kwargs["env"]
         assert "ask-tessl-evals" not in str(kwargs["env"]["HOME"])
         assert kwargs["env"]["TESSL_AUTO_UPDATE_INTERVAL_MINUTES"] == "0"
-        assert (staged_source / "SKILL.md").read_text(encoding="utf-8") == "# Example Skill\n"
+        assert (staged_source / "SKILL.md").read_text(encoding="utf-8") == (
+            '---\nname: example-skill\nmetadata:\n  version: "1.2.3"\n---\n# Example Skill\n'
+        )
         assert (staged_source / "references" / "evals.yaml").exists()
         assert (staged_source / "references" / "contract.yaml").exists()
         assert (staged_source / "tessl.json").exists()
@@ -396,6 +456,7 @@ def test_evals_live_private_dry_run_stages_private_tile_shape(tmp_path: Path) ->
     completed = mock.Mock(returncode=0, stdout="{}", stderr="")
     skill_root = _write_example_skill(tmp_path)
     (skill_root / "SKILL.md").write_text(
+        '---\nname: example-skill\nmetadata:\n  version: "2.3.4"\n---\n'
         "# Example Skill\n\nSee references/runtime-boundary.md for runtime details.\n",
         encoding="utf-8",
     )
@@ -439,10 +500,12 @@ def test_evals_live_private_dry_run_stages_private_tile_shape(tmp_path: Path) ->
     assert tessl_eval["policy"]["no_registry_upload"] is True
     assert tessl_eval["policy"]["tile_private_required"] is True
     assert tessl_eval["tessl_project_marker"].endswith("/tessl.json")
+    assert tessl_eval["tile_version"] == "2.3.4"
 
     staged_source = Path(tessl_eval["staged_source"])
     tile_manifest = json.loads((staged_source / "tile.json").read_text(encoding="utf-8"))
     assert tile_manifest["name"] == "jscraik/example-skill"
+    assert tile_manifest["version"] == "2.3.4"
     assert tile_manifest["private"] is True
     assert tile_manifest["skills"]["example-skill"]["path"] == "SKILL.md"
     assert (staged_source / "evals" / "smoke-example" / "task.md").read_text(encoding="utf-8") == (
@@ -530,6 +593,71 @@ def test_evals_live_private_invokes_tessl_with_workspace_and_tile_manifest(tmp_p
     assert result.data["tessl_eval"]["policy"]["command_shape"] == (
         "tessl eval run --json <staged-tile-json>"
     )
+
+
+def test_prepare_tessl_scenario_generation_dry_run_stages_target_tile(tmp_path: Path) -> None:
+    skill_root = _write_example_skill(tmp_path)
+    (skill_root / "evals").mkdir()
+    (skill_root / "evals" / "old-case.txt").write_text(
+        "do not stage generated evals\\n",
+        encoding="utf-8",
+    )
+
+    result = evals.prepare_tessl_scenario_generation(
+        tmp_path,
+        "Skills/example-skill",
+        workspace="skills-sdk",
+        dry_run=True,
+    )
+
+    assert result.status == "success"
+    assert result.data["status"] == "pass"
+    assert result.data["command"] == (
+        "tessl install tessl-labs/tessl-skill-eval-scenarios@0.1.0 --agent codex --yes"
+    )
+    target_tile = Path(result.data["target_tile"])
+    tool_project = Path(result.data["tool_project"])
+    assert target_tile.name == "target-tile"
+    assert tool_project.name == "tool-project"
+    assert (target_tile / "SKILL.md").is_file()
+    assert not (target_tile / "evals").exists()
+    assert (tool_project / "tessl.json").is_file()
+    assert Path(result.data["scenario_generation_brief"]).is_file()
+    manifest = json.loads((target_tile / "tile.json").read_text(encoding="utf-8"))
+    assert manifest["name"] == "skills-sdk/example-skill"
+    assert manifest["version"] == "1.2.3"
+    assert manifest["private"] is True
+    assert result.data["policy"]["no_repo_root_install"] is True
+    assert result.data["policy"]["allowed_install_scope"] == "temp tool project only"
+
+
+def test_prepare_tessl_scenario_generation_installs_tool_in_temp_project(tmp_path: Path) -> None:
+    completed = mock.Mock(returncode=0, stdout="installed\\n", stderr="")
+    _write_example_skill(tmp_path)
+
+    with (
+        mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
+        mock.patch.object(evals.subprocess, "run", return_value=completed) as run,
+    ):
+        result = evals.prepare_tessl_scenario_generation(
+            tmp_path,
+            "Skills/example-skill",
+            workspace="skills-sdk",
+        )
+
+    assert result.status == "success"
+    cmd = run.call_args.args[0]
+    assert cmd == [
+        "/usr/local/bin/tessl",
+        "install",
+        "tessl-labs/tessl-skill-eval-scenarios@0.1.0",
+        "--agent",
+        "codex",
+        "--yes",
+    ]
+    assert run.call_args.kwargs["cwd"] == result.data["tool_project"]
+    assert "/ask-tessl-scenario-generation/" in result.data["tool_project"]
+    assert result.data["generated_output"].endswith("/target-tile/evals")
 
 
 def test_evals_stage_folded_yaml_prompts_for_tessl(tmp_path: Path) -> None:

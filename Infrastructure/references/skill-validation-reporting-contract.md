@@ -166,6 +166,20 @@ candidate.
   require macro evidence; an empty export can be `pass` only for a smoke check
   of exporter mechanics.
 
+### `no-skill lift gate`
+
+- Use `baseline_type: no_skill` plus `budgets.require_skill_lift: true` when
+  the case is meant to prove the skill changes behavior beyond the base model.
+- Pair `baseline_type: no_skill` with `prepend_skill: true`; otherwise there
+  is no skill-enabled run for the runner to compare against the no-skill
+  control.
+- The eval summary must include an executed baseline comparison with
+  `skill_lift`, `is_beneficial`, and `baseline_regression` before the case can
+  satisfy a lift-gated release claim.
+- Do not use lift gates for broad generic prompts where a no-skill response may
+  legitimately pass. Use ordinary baseline metadata or a documented neutral
+  baseline instead.
+
 ### `Snyk dependency screening`
 
 Use Snyk when any of these are true:

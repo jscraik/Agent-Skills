@@ -483,6 +483,154 @@ def _case_has_executed_check_evidence(case: EvalCase, runner_records: Mapping[st
     return False
 
 
+def _case_requires_no_skill_baseline(case: EvalCase) -> bool:
+    return case.baseline_type == "no_skill" and bool(case.prepend_skill)
+
+
+def _baseline_comparison_from_records(
+    *,
+    runner_record: Mapping[str, Any],
+    baseline_record: Mapping[str, Any],
+) -> Dict[str, Any]:
+    if baseline_record.get("status") != "executed":
+        return {
+            "baseline_type": baseline_record.get("baseline_type"),
+            "status": baseline_record.get("status") or "unavailable",
+            "reason": baseline_record.get("reason"),
+        }
+
+    with_skill_passed = bool(runner_record.get("passed"))
+    baseline_passed = bool(baseline_record.get("passed"))
+    skill_lift = int(with_skill_passed) - int(baseline_passed)
+    return {
+        "baseline_type": baseline_record.get("baseline_type"),
+        "status": "compared",
+        "with_skill_passed": with_skill_passed,
+        "baseline_passed": baseline_passed,
+        "skill_lift": skill_lift,
+        "is_beneficial": with_skill_passed and not baseline_passed,
+        "regression": baseline_passed and not with_skill_passed,
+    }
+
+
+def _evaluate_baseline_output(
+    *,
+    runner_name: str,
+    case: EvalCase,
+    skill_name: str,
+    exit_code: int,
+    stdout_text: str,
+    stderr_text: str,
+    output_text: str,
+    schema_path: Optional[Path],
+    codex_output_format: str,
+    openai_output_format: str,
+) -> Dict[str, Any]:
+    failures: List[str] = []
+    findings: List[str] = []
+    warnings: List[str] = []
+    metrics: Dict[str, Any] = {}
+
+    blocker_class = _classify_runner_blocker(
+        output_text=output_text,
+        stdout_text=stdout_text,
+        stderr_text=stderr_text,
+        exit_code=exit_code,
+    )
+    blocked = blocker_class is not None
+    if blocked:
+        failures.append(f"{blocker_class}: no-skill baseline runner was blocked before comparison.")
+    elif exit_code != 0:
+        failures.append(f"{runner_name} no-skill baseline returned non-zero exit code: {exit_code}")
+
+    selected_skill = detect_skill_selected(
+        skill_name=skill_name,
+        output_text=output_text,
+        stdout_text=stdout_text,
+        stderr_text=stderr_text,
+        events=None,
+    )
+    metrics["selected_skill"] = selected_skill
+
+    parsed_json: Optional[Any] = None
+    used_json_assertions = False
+    acceptance_skip_reason = _acceptance_skip_reason(exit_code=exit_code, output_text=output_text)
+    if blocked:
+        pass
+    elif acceptance_skip_reason is not None:
+        warnings.append(acceptance_skip_reason)
+    else:
+        expects_json = (
+            (schema_path is not None and runner_name == "codex")
+            or (runner_name in {"codex-kimi", "codex-zai"} and codex_output_format == "json")
+            or (runner_name == "openai" and openai_output_format == "json")
+        )
+        if expects_json:
+            try:
+                parsed_json = json.loads(output_text)
+            except Exception as e:  # noqa: BLE001
+                failures.append(f"expected JSON output from no-skill baseline, but parsing failed: {e}")
+            else:
+                used_json_assertions = True
+
+        if used_json_assertions and parsed_json is not None:
+            failures.extend(
+                evaluate_assertions_json(
+                    parsed_json,
+                    case.acceptance,
+                    skill_name=skill_name,
+                    selected_skill=selected_skill,
+                )
+            )
+        else:
+            failures.extend(
+                evaluate_assertions_text(
+                    output_text,
+                    case.acceptance,
+                    skill_name=skill_name,
+                    selected_skill=selected_skill,
+                )
+            )
+
+    rubric = extract_rubric_metrics(parsed_json) if parsed_json is not None else None
+    if rubric:
+        metrics["rubric"] = rubric
+
+    if not blocked and case.expected_signals:
+        try:
+            expected_signal_result = evaluate_expected_signals(output_text, case.expected_signals)
+        except ValueError as exc:
+            failures.append(str(exc))
+            expected_signal_result = None
+        if expected_signal_result is not None:
+            metrics[EXPECTED_SIGNAL_METRIC_KEY] = expected_signal_result
+            min_expected_score = _extract_min_expected_signal_score(case.budgets)
+            if (
+                min_expected_score is not None
+                and expected_signal_result[EXPECTED_SIGNAL_COMPOSITE_KEY] < min_expected_score
+            ):
+                findings.append(
+                    "expected signal score below budget: "
+                    f"got {expected_signal_result[EXPECTED_SIGNAL_COMPOSITE_KEY]} < "
+                    f"min_expected_signal_score {min_expected_score:g}"
+                )
+
+    return {
+        "baseline_type": "no_skill",
+        "status": "executed",
+        "runner": runner_name,
+        "exit_code": exit_code,
+        "passed": (len(failures) == 0) and not blocked,
+        "blocked": blocked,
+        "blocker_class": blocker_class,
+        "tier1_failures": failures,
+        "tier2_findings": findings,
+        "warnings": warnings,
+        "metrics": metrics,
+        "used_schema": bool(schema_path and runner_name == "codex"),
+    }
+
+
 def _hard_gate_gaps_for_case(case: EvalCase, *, eval_mode: str) -> List[Dict[str, Any]]:
     if eval_mode != "release" or not case.hard_gates:
         return []
@@ -2705,6 +2853,41 @@ def _extract_require_overall_pass(budgets: Optional[Dict[str, Any]]) -> Optional
     return None
 
 
+def _extract_bool_budget(budgets: Optional[Dict[str, Any]], key: str) -> Optional[bool]:
+    if not budgets:
+        return None
+    value = budgets.get(key)
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        text = value.strip().lower()
+        if text in {"true", "yes", "1"}:
+            return True
+        if text in {"false", "no", "0"}:
+            return False
+    return None
+
+
+def _extract_min_skill_lift(budgets: Optional[Dict[str, Any]]) -> Optional[int]:
+    if not budgets:
+        return None
+    value = budgets.get("min_skill_lift")
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float):
+        return int(value)
+    if isinstance(value, str):
+        try:
+            return int(value.strip())
+        except ValueError:
+            return None
+    return None
+
+
 def _print_case_listing(cases: Sequence[EvalCase]) -> None:
     print("Available eval cases:")
     for case in cases:
@@ -2742,6 +2925,7 @@ def run_discovery_smoke(
     skill_dir: Path,
     case: EvalCase,
     output_last_message_path: Path,
+    include_skill_context: bool = True,
 ) -> Tuple[int, str, str, List[str]]:
     """
     Fast, deterministic smoke check for discovery-first-turn behavior.
@@ -2752,6 +2936,27 @@ def run_discovery_smoke(
     """
 
     warnings: List[str] = []
+
+    if not include_skill_context:
+        response = "\n".join(
+            [
+                "## Inputs",
+                "- Skill context was intentionally withheld for this no-skill baseline run.",
+                "- The response can only use the task prompt and generic repository expectations.",
+                "",
+                "## Outputs",
+                "- Baseline response recorded for comparison against the skill-enabled runner.",
+                "- No skill-specific routing, discovery contract, or reference-file evidence is available.",
+                "",
+                "## Next step",
+                "- Compare this control output with the normal skill-enabled output before claiming skill lift.",
+                "",
+                "## Failure mode",
+                "- Passing this baseline means the case may not prove the skill added value.",
+            ]
+        )
+        output_last_message_path.write_text(response, encoding="utf-8")
+        return 0, response, "", warnings
 
     skill_text = _read_text(skill_md_path)
     discovery_ref = skill_dir / "references" / "discovery-interview.md"
@@ -3571,6 +3776,114 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 "metrics": runner_metrics,
                 "used_schema": bool(schema_path and runner_name == "codex"),
             }
+
+            if _case_requires_no_skill_baseline(c):
+                baseline_record: Dict[str, Any]
+                baseline_dir = runner_dir / "baseline-no-skill"
+                baseline_dir.mkdir(parents=True, exist_ok=True)
+                baseline_output_path = baseline_dir / "output_last_message.txt"
+                baseline_jsonl_path = (
+                    (baseline_dir / "codex_events.jsonl")
+                    if (runner_name == "codex" and capture_jsonl)
+                    else None
+                )
+                if runner_name in {"codex-kimi", "codex-zai"}:
+                    if runner_name == "codex-kimi":
+                        runner_settings = codex_kimi_settings
+                        runner_command = codex_kimi_command
+                    else:
+                        runner_settings = codex_zai_settings
+                        runner_command = codex_zai_command
+                    baseline_rc, baseline_stdout, baseline_stderr = run_alt_codex_exec(
+                        workspace_root=workspace_root,
+                        prompt=prompt_body,
+                        output_last_message_path=baseline_output_path,
+                        codex_bin=codex_bin,
+                        output_format=args.codex_output_format,
+                        settings_path=runner_settings,
+                        cli_command=runner_command,
+                        timeout_sec=case_timeout_sec,
+                        timeout_profile=case_timeout_profile,
+                        extra_codex_args=args.codex_arg or None,
+                    )
+                    baseline_exec_warnings = []
+                elif runner_name == "openai":
+                    baseline_rc, baseline_stdout, baseline_stderr = run_openai_exec(
+                        workspace_root=workspace_root,
+                        prompt=prompt_body,
+                        output_last_message_path=baseline_output_path,
+                        openai_bin=openai_bin,
+                        output_format=args.openai_output_format,
+                        timeout_sec=case_timeout_sec,
+                        timeout_profile=case_timeout_profile,
+                        extra_openai_args=args.openai_arg or None,
+                    )
+                    baseline_exec_warnings = []
+                elif runner_name == "discovery-smoke":
+                    baseline_rc, baseline_stdout, baseline_stderr, baseline_exec_warnings = run_discovery_smoke(
+                        skill_md_path=skill_md,
+                        skill_dir=skill_dir,
+                        case=c,
+                        output_last_message_path=baseline_output_path,
+                        include_skill_context=False,
+                    )
+                else:
+                    baseline_rc, baseline_stdout, baseline_stderr, baseline_exec_warnings = run_codex_exec(
+                        workspace_root=workspace_root,
+                        prompt=prompt_body,
+                        output_last_message_path=baseline_output_path,
+                        output_schema_path=schema_path,
+                        sandbox=args.sandbox,
+                        ask_for_approval=args.ask_for_approval,
+                        model=args.model,
+                        profile=args.profile,
+                        codex_home=codex_home,
+                        jsonl_path=baseline_jsonl_path,
+                        codex_bin=codex_bin,
+                        timeout_sec=case_timeout_sec,
+                        timeout_profile=case_timeout_profile,
+                        extra_codex_args=args.codex_arg or None,
+                        fallback_profile=codex_fallback_profile,
+                    )
+
+                (baseline_dir / "stdout.txt").write_text(baseline_stdout or "", encoding="utf-8")
+                (baseline_dir / "stderr.txt").write_text(baseline_stderr or "", encoding="utf-8")
+                baseline_output_text = (
+                    baseline_output_path.read_text(encoding="utf-8")
+                    if baseline_output_path.exists()
+                    else ""
+                )
+                (baseline_dir / "final.txt").write_text(baseline_output_text, encoding="utf-8")
+                baseline_record = _evaluate_baseline_output(
+                    runner_name=runner_name,
+                    case=c,
+                    skill_name=skill_name,
+                    exit_code=baseline_rc,
+                    stdout_text=baseline_stdout,
+                    stderr_text=baseline_stderr,
+                    output_text=baseline_output_text,
+                    schema_path=schema_path,
+                    codex_output_format=args.codex_output_format,
+                    openai_output_format=args.openai_output_format,
+                )
+                baseline_record["warnings"] = list(baseline_exec_warnings) + list(baseline_record.get("warnings") or [])
+                baseline_record["artifacts"] = {
+                    "dir": _make_relative(baseline_dir, workspace_root),
+                    "final": _make_relative(baseline_dir / "final.txt", workspace_root),
+                    "stdout": _make_relative(baseline_dir / "stdout.txt", workspace_root),
+                    "stderr": _make_relative(baseline_dir / "stderr.txt", workspace_root),
+                    "jsonl": _make_relative(baseline_jsonl_path, workspace_root) if baseline_jsonl_path else None,
+                }
+                (baseline_dir / "result.json").write_text(
+                    json.dumps(baseline_record, indent=2, ensure_ascii=False),
+                    encoding="utf-8",
+                )
+
+                runner_record["baseline"] = baseline_record
+                runner_record["baseline_comparison"] = _baseline_comparison_from_records(
+                    runner_record=runner_record,
+                    baseline_record=baseline_record,
+                )
             (runner_dir / "result.json").write_text(json.dumps(runner_record, indent=2, ensure_ascii=False), encoding="utf-8")
 
             runner_records[runner_name] = runner_record
@@ -3580,8 +3893,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             case_blocked_reasons.extend([f"[{runner_name}] {x}" for x in runner_blocked_reasons])
             case_notes.extend([f"[{runner_name}] {x}" for x in runner_notes])
 
-        case_tier1_failed = len(case_tier1_failures) > 0
-        case_tier2_failed = len(case_tier2_findings) > 0
         case_blocked = any(bool(record.get("blocked")) for record in runner_records.values())
         case_blocker_classes = sorted(
             {
@@ -3590,7 +3901,43 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 if record.get("blocker_class")
             }
         )
+        baseline_comparisons = {
+            runner_name: record["baseline_comparison"]
+            for runner_name, record in runner_records.items()
+            if isinstance(record, dict) and isinstance(record.get("baseline_comparison"), dict)
+        }
+        compared_baselines = [
+            comparison
+            for comparison in baseline_comparisons.values()
+            if comparison.get("status") == "compared"
+        ]
+        skill_lift: Optional[int] = None
+        is_beneficial = False
+        baseline_regression = False
+        if compared_baselines:
+            skill_lift = max(int(comparison.get("skill_lift") or 0) for comparison in compared_baselines)
+            is_beneficial = any(bool(comparison.get("is_beneficial")) for comparison in compared_baselines)
+            baseline_regression = any(bool(comparison.get("regression")) for comparison in compared_baselines)
 
+        require_skill_lift = _extract_bool_budget(c.budgets, "require_skill_lift")
+        min_skill_lift = _extract_min_skill_lift(c.budgets)
+        if require_skill_lift is True or min_skill_lift is not None:
+            if not compared_baselines:
+                case_tier1_failures.append(
+                    "skill lift budget requested but no executed no-skill baseline comparison was available"
+                )
+            else:
+                if require_skill_lift is True and not is_beneficial:
+                    case_tier1_failures.append(
+                        "require_skill_lift failed: skill-enabled run did not beat the no-skill baseline"
+                    )
+                if min_skill_lift is not None and (skill_lift is None or skill_lift < min_skill_lift):
+                    case_tier1_failures.append(
+                        f"min_skill_lift failed: got {skill_lift if skill_lift is not None else 'none'} < {min_skill_lift}"
+                    )
+
+        case_tier1_failed = len(case_tier1_failures) > 0
+        case_tier2_failed = len(case_tier2_findings) > 0
         case_pass = (not case_tier1_failed) and (
             args.tier2_mode != "fail" or (not case_tier2_failed)
         )
@@ -3618,6 +3965,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "readiness_state": c.readiness_state,
             "comparison_review_artifact": comparison_review_artifact,
             "neutral_baseline_approval": neutral_baseline_approval,
+            "baseline_comparisons": baseline_comparisons,
+            "skill_lift": skill_lift,
+            "is_beneficial": is_beneficial,
+            "baseline_regression": baseline_regression,
             "expected_signals": bool(c.expected_signals),
             "timeout_profile": case_timeout_profile,
             "timeout_sec": _eval_timeout_seconds(

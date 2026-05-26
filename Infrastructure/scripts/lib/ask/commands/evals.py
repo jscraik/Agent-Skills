@@ -22,7 +22,10 @@ RELEASE_EVAL_TIMEOUT_SECONDS = 21600
 SMOKE_EVAL_MODEL = "gpt-5.3-codex-spark"
 # Codex CLI selects `[profiles.fast]` with the plain profile name.
 SMOKE_EVAL_PROFILE = "fast"
-DEFAULT_MACRO_EVAL_REPORTS_GLOB = "artifacts/reports/skills/*/*/summary.json"
+DEFAULT_MACRO_EVAL_REPORTS_GLOB = "Infrastructure/artifacts/skills/*/*/summary.json"
+TESSL_SCENARIO_TOOL_TILE = "tessl-labs/tessl-skill-eval-scenarios"
+TESSL_SCENARIO_TOOL_VERSION = "0.1.0"
+TESSL_TILE_VERSION_RE = re.compile(r"^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$")
 
 
 EVAL_BLOCKER_TAXONOMY = {
@@ -48,6 +51,64 @@ EVAL_LIFECYCLE_EVENT_TYPES = {
 def _safe_slug(value: str) -> str:
     slug = re.sub(r"[^A-Za-z0-9._-]+", "-", value.strip()).strip("-")
     return slug or "skill"
+
+
+def _frontmatter_scalar(value: str) -> str:
+    scalar = value.strip()
+    if len(scalar) >= 2 and scalar[0] == scalar[-1] and scalar[0] in {'"', "'"}:
+        return scalar[1:-1]
+    return scalar
+
+
+def _read_skill_frontmatter(source_root: Path) -> dict[str, object]:
+    skill_md = source_root / "SKILL.md"
+    text = skill_md.read_text(encoding="utf-8")
+    if not text.startswith("---"):
+        return {}
+    end = text.find("\n---", 3)
+    if end == -1:
+        return {}
+
+    frontmatter: dict[str, object] = {}
+    current_mapping: str | None = None
+    for raw_line in text[3:end].splitlines():
+        if not raw_line.strip() or raw_line.lstrip().startswith("#"):
+            continue
+        if raw_line[:1].isspace():
+            if current_mapping is None or ":" not in raw_line:
+                continue
+            key, value = raw_line.strip().split(":", 1)
+            mapping = frontmatter.setdefault(current_mapping, {})
+            if isinstance(mapping, dict):
+                mapping[key.strip()] = _frontmatter_scalar(value)
+            continue
+        if ":" not in raw_line:
+            continue
+        key, value = raw_line.split(":", 1)
+        key = key.strip()
+        if value.strip():
+            frontmatter[key] = _frontmatter_scalar(value)
+            current_mapping = None
+        else:
+            frontmatter[key] = {}
+            current_mapping = key
+    return frontmatter
+
+
+def _skill_tessl_tile_version(source_root: Path) -> str:
+    frontmatter = _read_skill_frontmatter(source_root)
+    metadata = frontmatter.get("metadata")
+    version = None
+    if isinstance(metadata, dict):
+        version = metadata.get("version")
+    if not version:
+        version = frontmatter.get("version")
+    if not isinstance(version, str) or not TESSL_TILE_VERSION_RE.fullmatch(version.strip()):
+        raise ValueError(
+            "Tessl live private evals require a SemVer SKILL.md frontmatter version "
+            "at metadata.version or version."
+        )
+    return version.strip()
 
 
 def _canonical_skill_identifier(repo_root: Path, skill_path: str) -> str:
@@ -147,6 +208,38 @@ def _tessl_live_private_policy(workspace: str | None = None) -> dict:
         ],
         "command_shape": "tessl eval run --json <staged-tile-json>",
         "usage_data_opt_out": "tessl config set shareUsageData false",
+    }
+
+
+def _tessl_scenario_generation_root_template() -> str:
+    """Return the human-readable template for Tessl scenario-generation staging."""
+    return str(Path(tempfile.gettempdir()) / "ask-tessl-scenario-generation" / "<skill-path>-<sha12>")
+
+
+def _tessl_scenario_generation_policy(workspace: str | None = None) -> dict:
+    """Return the repo's Tessl scenario-generation safety contract."""
+    return {
+        "enabled_by": "ask evals prepare-tessl-scenarios",
+        "purpose": "use Tessl's public scenario-generation skill without installing Tessl state into the repo root",
+        "workspace_required": True,
+        "workspace": workspace,
+        "scenario_tool_tile": TESSL_SCENARIO_TOOL_TILE,
+        "scenario_tool_version": TESSL_SCENARIO_TOOL_VERSION,
+        "allowed_install": f"{TESSL_SCENARIO_TOOL_TILE}@{TESSL_SCENARIO_TOOL_VERSION}",
+        "allowed_install_scope": "temp tool project only",
+        "native_tessl_only": True,
+        "no_npx": True,
+        "no_repo_root_install": True,
+        "no_publish": True,
+        "no_registry_upload": True,
+        "temp_staged_tile_input_only": True,
+        "stable_staging_root": _tessl_scenario_generation_root_template(),
+        "target_tile": "target-tile",
+        "tool_project": "tool-project",
+        "scenario_skill_path": ".tessl/tiles/tessl-labs/tessl-skill-eval-scenarios/creating-eval-scenarios/SKILL.md",
+        "scenario_reference_path": ".tessl/tiles/tessl-labs/tessl-skill-eval-scenarios/creating-eval-scenarios/references/scenario-generation.md",
+        "generated_output": "target-tile/evals/",
+        "canonical_import_target": "references/evals.yaml after review",
     }
 
 
@@ -429,9 +522,10 @@ def _write_tessl_live_project_marker(staged_root: Path, workspace: str, tile_slu
 
 def _write_tessl_live_tile_manifest(source_root: Path, staged_root: Path, workspace: str) -> list[str]:
     tile_slug = _safe_slug(source_root.name.lower())
+    tile_version = _skill_tessl_tile_version(source_root)
     manifest = {
         "name": f"{workspace}/{tile_slug}",
-        "version": "0.0.0",
+        "version": tile_version,
         "summary": f"Private live eval tile for {source_root.name}.",
         "entrypoint": "SKILL.md",
         "private": True,
@@ -458,6 +552,9 @@ def _validate_tessl_live_private_manifest(tile_path: Path, workspace: str) -> No
         raise ValueError("Staged Tessl tile name must use workspace/tile-name format for the requested workspace.")
     if manifest.get("private") is not True:
         raise ValueError("Staged Tessl tile manifest must set private: true.")
+    version = manifest.get("version")
+    if not isinstance(version, str) or not TESSL_TILE_VERSION_RE.fullmatch(version):
+        raise ValueError("Staged Tessl tile manifest must include a SemVer version.")
     if not any(key in manifest for key in ("docs", "steering", "skills")):
         raise ValueError("Staged Tessl tile manifest must include docs, steering, or skills.")
 
@@ -569,6 +666,301 @@ def _stage_tessl_live_private_source(
     return staged_root, copied
 
 
+def _stable_tessl_scenario_generation_parent(path: str) -> Path:
+    safe_name = path.replace("/", "__").replace(" ", "_")
+    digest = hashlib.sha256(path.encode("utf-8")).hexdigest()[:12]
+    return Path(tempfile.gettempdir()) / "ask-tessl-scenario-generation" / f"{safe_name}-{digest}"
+
+
+def _clear_directory(target: Path) -> None:
+    target.mkdir(parents=True, exist_ok=True)
+    for child in target.iterdir():
+        if child.is_dir():
+            shutil.rmtree(child)
+        else:
+            child.unlink()
+
+
+def _stage_tessl_scenario_target_tile(
+    repo_root: Path,
+    path: str,
+    workspace: str,
+    target_tile: Path,
+) -> tuple[Path, list[str]]:
+    repo_root_resolved = repo_root.resolve()
+    source_root = (repo_root_resolved / path).resolve()
+    if not source_root.is_relative_to(repo_root_resolved):
+        raise FileNotFoundError("Tessl scenario source must be inside repo_root")
+    if not source_root.is_dir():
+        raise FileNotFoundError(f"Tessl scenario source is not a directory: {path}")
+
+    _clear_directory(target_tile)
+
+    copied: list[str] = []
+    copied.extend(_write_tessl_live_tile_manifest(source_root, target_tile, workspace))
+    for relative_path in (
+        "SKILL.md",
+        "references/evals.yaml",
+        "references/contract.yaml",
+        "references/task-profile.json",
+    ):
+        copied.extend(_copy_if_present(source_root, relative_path, target_tile))
+    copied.extend(_copy_tessl_live_reference_support_files(source_root, target_tile, set(copied)))
+    _validate_tessl_live_private_manifest(target_tile / "tile.json", workspace)
+
+    generated_evals = target_tile / "evals"
+    if generated_evals.exists():
+        shutil.rmtree(generated_evals)
+
+    if "SKILL.md" not in copied:
+        raise FileNotFoundError(f"No SKILL.md found under Tessl scenario source: {path}")
+    return target_tile, copied
+
+
+def _write_tessl_scenario_tool_project(tool_project: Path) -> list[str]:
+    _clear_directory(tool_project)
+    manifest = {
+        "name": "tessl-scenario-tools",
+        "mode": "managed",
+        "dependencies": {},
+    }
+    manifest_path = tool_project / "tessl.json"
+    manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    return ["tessl.json"]
+
+
+def _write_tessl_scenario_generation_brief(
+    staged_root: Path,
+    *,
+    source_path: str,
+    workspace: str,
+    target_tile: Path,
+    tool_project: Path,
+) -> Path:
+    brief_path = staged_root / "scenario-generation-brief.md"
+    scenario_skill = tool_project / ".tessl/tiles/tessl-labs/tessl-skill-eval-scenarios/creating-eval-scenarios/SKILL.md"
+    scenario_reference = (
+        tool_project
+        / ".tessl/tiles/tessl-labs/tessl-skill-eval-scenarios/creating-eval-scenarios/references/scenario-generation.md"
+    )
+    brief_path.write_text(
+        "\n".join([
+            "# Tessl Scenario Generation Brief",
+            "",
+            f"Source skill: {source_path}",
+            f"Workspace: {workspace}",
+            f"Target staged tile: {target_tile}",
+            f"Tessl scenario skill: {scenario_skill}",
+            f"Tessl scenario workflow reference: {scenario_reference}",
+            "",
+            "## Agent Procedure",
+            "",
+            "1. Read the Tessl scenario skill and workflow reference above.",
+            "2. Treat the staged target tile as disposable input; do not edit the live repo source.",
+            "3. Generate scenarios into target-tile/evals/ using the Tessl scenario skill format.",
+            "4. Review the generated scenarios for instruction leakage, feasibility, and criteria totals.",
+            "5. Import only reviewed, useful cases back into the canonical references/evals.yaml.",
+            "6. Run the repo eval wrapper after import; do not publish or upload packages from this lane.",
+            "",
+            "## Hard Boundaries",
+            "",
+            "- Do not run Tessl install from the repository root.",
+            "- Do not run tessl publish, tessl tile publish, tessl skill publish, or package upload commands.",
+            "- Do not copy generated scenarios into canonical sources until they have been reviewed.",
+            "- Preserve this staging directory as evidence for the scenario-generation pass.",
+            "",
+        ])
+        + "\n",
+        encoding="utf-8",
+    )
+    return brief_path
+
+
+def prepare_tessl_scenario_generation(
+    repo_root: Path,
+    path: str,
+    *,
+    workspace: str | None,
+    dry_run: bool = False,
+) -> CallResult:
+    """Prepare a temp Tessl scenario-generation workspace for a skill."""
+    policy = _tessl_scenario_generation_policy(workspace)
+    tool_spec = f"{TESSL_SCENARIO_TOOL_TILE}@{TESSL_SCENARIO_TOOL_VERSION}"
+    command_display = f"tessl install {tool_spec} --agent codex --yes"
+    try:
+        normalized_workspace = _validate_tessl_workspace(workspace)
+        staged_root = _stable_tessl_scenario_generation_parent(path)
+        staged_root.mkdir(parents=True, exist_ok=True)
+        target_tile = staged_root / "target-tile"
+        tool_project = staged_root / "tool-project"
+        target_tile, target_files = _stage_tessl_scenario_target_tile(
+            repo_root,
+            path,
+            normalized_workspace,
+            target_tile,
+        )
+        tool_files = _write_tessl_scenario_tool_project(tool_project)
+    except (OSError, ValueError) as e:
+        return CallResult(
+            status="error",
+            data={
+                "status": "blocked",
+                "command": command_display,
+                "source_path": path,
+                "raw_output": "",
+                "raw_error": str(e),
+                "blocker": f"Failed to prepare Tessl scenario-generation staging: {e}",
+                "blocker_class": "blocked_validation",
+                "policy": policy,
+            },
+            errors=[ErrorObject(code="ERR_VALIDATION", message=str(e))],
+        )
+
+    common = {
+        "source_path": path,
+        "staged_root": str(staged_root),
+        "target_tile": str(target_tile),
+        "tool_project": str(tool_project),
+        "target_tile_manifest": str(target_tile / "tile.json"),
+        "target_tessl_project_marker": str(target_tile / "tessl.json"),
+        "target_staged_files": target_files,
+        "tool_project_files": tool_files,
+        "workspace": normalized_workspace,
+        "dry_run": dry_run,
+        "scenario_tool_tile": TESSL_SCENARIO_TOOL_TILE,
+        "scenario_tool_version": TESSL_SCENARIO_TOOL_VERSION,
+        "staging_policy": "stable_tmp_scenario_generation_evidence",
+        "evidence_retention": f"staged directory is left under {tempfile.gettempdir()}/ask-tessl-scenario-generation for inspection",
+        "policy": _tessl_scenario_generation_policy(normalized_workspace),
+    }
+
+    if dry_run:
+        brief_path = _write_tessl_scenario_generation_brief(
+            staged_root,
+            source_path=path,
+            workspace=normalized_workspace,
+            target_tile=target_tile,
+            tool_project=tool_project,
+        )
+        return CallResult(
+            status="success",
+            data={
+                "status": "pass",
+                **common,
+                "command": command_display,
+                "scenario_generation_brief": str(brief_path),
+                "raw_output": "",
+                "raw_error": "",
+                "exit_code": 0,
+                "blocker": None,
+                "blocker_class": None,
+            },
+        )
+
+    tessl_path = shutil.which("tessl")
+    if not tessl_path:
+        return CallResult(
+            status="error",
+            data={
+                "status": "blocked",
+                **common,
+                "command": command_display,
+                "raw_output": "",
+                "raw_error": "",
+                "blocker": "Installed native tessl CLI was not found on PATH.",
+                "blocker_class": "blocked_runtime",
+            },
+            errors=[ErrorObject(code="ERR_RUNTIME", message="Installed native tessl CLI was not found on PATH.")],
+        )
+
+    cmd = [tessl_path, "install", tool_spec, "--agent", "codex", "--yes"]
+    tessl_env = dict(os.environ)
+    tessl_env["TESSL_AUTO_UPDATE_INTERVAL_MINUTES"] = "0"
+    try:
+        process = subprocess.run(
+            cmd,
+            cwd=str(tool_project),
+            capture_output=True,
+            text=True,
+            timeout=600,
+            env=tessl_env,
+        )
+    except subprocess.TimeoutExpired as e:
+        return CallResult(
+            status="error",
+            data={
+                "status": "blocked",
+                **common,
+                "command": command_display,
+                "raw_output": _as_text(e.stdout),
+                "raw_error": _as_text(e.stderr),
+                "blocker": "Tessl scenario tool install timed out after 600 seconds.",
+                "blocker_class": "blocked_runtime",
+            },
+            errors=[ErrorObject(code="ERR_RUNTIME", message="Tessl scenario tool install timed out after 600 seconds.")],
+        )
+    except OSError as e:
+        return CallResult(
+            status="error",
+            data={
+                "status": "blocked",
+                **common,
+                "command": command_display,
+                "raw_output": "",
+                "raw_error": str(e),
+                "blocker": f"Failed to run Tessl scenario tool install: {e}",
+                "blocker_class": "blocked_runtime",
+            },
+            errors=[ErrorObject(code="ERR_RUNTIME", message=f"Failed to run Tessl scenario tool install: {e}")],
+        )
+
+    raw_output = process.stdout
+    raw_error = process.stderr
+    combined = f"{raw_output}\n{raw_error}".lower()
+    if process.returncode != 0 and "authenticate with tessl" in combined:
+        status = "blocked"
+        blocker = "Tessl CLI is installed locally, but authentication is required before scenario tool install can run."
+        blocker_class = "blocked_auth"
+    else:
+        status = "pass" if process.returncode == 0 else "fail"
+        blocker = None
+        blocker_class = None
+
+    scenario_skill = tool_project / ".tessl/tiles/tessl-labs/tessl-skill-eval-scenarios/creating-eval-scenarios/SKILL.md"
+    scenario_reference = (
+        tool_project
+        / ".tessl/tiles/tessl-labs/tessl-skill-eval-scenarios/creating-eval-scenarios/references/scenario-generation.md"
+    )
+    brief_path = _write_tessl_scenario_generation_brief(
+        staged_root,
+        source_path=path,
+        workspace=normalized_workspace,
+        target_tile=target_tile,
+        tool_project=tool_project,
+    )
+    data = {
+        "status": status,
+        **common,
+        "command": command_display,
+        "exit_code": process.returncode,
+        "raw_output": raw_output,
+        "raw_error": raw_error,
+        "blocker": blocker,
+        "blocker_class": blocker_class,
+        "scenario_skill": str(scenario_skill) if scenario_skill.exists() else None,
+        "scenario_reference": str(scenario_reference) if scenario_reference.exists() else None,
+        "scenario_generation_brief": str(brief_path),
+        "generated_output": str(target_tile / "evals"),
+    }
+    if status == "pass":
+        return CallResult(status="success", data=data)
+    return CallResult(
+        status="error",
+        data=data,
+        errors=[ErrorObject(code="ERR_RUNTIME" if blocker_class == "blocked_runtime" else "ERR_VALIDATION", message=blocker or "Tessl scenario tool install failed.")],
+    )
+
+
 def _tessl_eval_result_common(
     *,
     command: str,
@@ -578,11 +970,20 @@ def _tessl_eval_result_common(
     workspace: str,
     dry_run: bool,
 ) -> dict:
+    tile_version = None
+    try:
+        manifest = json.loads((staged_source / "tile.json").read_text(encoding="utf-8"))
+        raw_version = manifest.get("version") if isinstance(manifest, dict) else None
+        if isinstance(raw_version, str):
+            tile_version = raw_version
+    except (OSError, json.JSONDecodeError):
+        tile_version = None
     return {
         "command": command,
         "source_path": source_path,
         "staged_source": str(staged_source),
         "tile_manifest": str(staged_source / "tile.json"),
+        "tile_version": tile_version,
         "tessl_project_marker": str(staged_source / "tessl.json") if (staged_source / "tessl.json").exists() else None,
         "staged_files": copied_files,
         "staging_policy": "stable_tmp_private_tile_evidence",
@@ -967,6 +1368,77 @@ def _macro_behavior_pattern(case_type: str, run_outcome: str, eval_finding: str)
     return f"{_safe_slug(case_type.lower())}:{run_outcome}:{finding_slug}"
 
 
+def _macro_string_list(value: object) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    return [str(item).strip() for item in value if str(item).strip()]
+
+
+def _macro_runner_metric_keys(case: dict) -> set[str]:
+    metric_keys: set[str] = set()
+    runners = case.get("runners")
+    if not isinstance(runners, dict):
+        return metric_keys
+    for runner in runners.values():
+        if not isinstance(runner, dict):
+            continue
+        metrics = runner.get("metrics")
+        if not isinstance(metrics, dict):
+            continue
+        metric_keys.update(str(key) for key in metrics.keys())
+    return metric_keys
+
+
+def _macro_verifier_types(case: dict) -> list[str]:
+    verifier_types: set[str] = set(_macro_string_list(case.get("evidence_surfaces")))
+    metric_keys = _macro_runner_metric_keys(case)
+    if "trace" in metric_keys:
+        verifier_types.add("trace_metrics")
+    if "expected_signals" in metric_keys or case.get("expected_signals") is True:
+        verifier_types.add("expected_signals")
+    if "rubric" in metric_keys:
+        verifier_types.add("rubric")
+    if _macro_string_list(case.get("hard_gates")):
+        verifier_types.add("hard_gates")
+    if _macro_string_list(case.get("expected_evidence")):
+        verifier_types.add("expected_evidence")
+    if case.get("check_evidence") is True:
+        verifier_types.add("executed_check_evidence")
+    return sorted(verifier_types)
+
+
+def _macro_verification_strategy(case: dict) -> str:
+    verifier_types = set(_macro_verifier_types(case))
+    if "executed_check_evidence" in verifier_types:
+        return "executed_deterministic"
+    if verifier_types & {"deterministic_checks", "expected_signals", "output_schema", "hard_gates"}:
+        return "declared_not_executed"
+    if case.get("passed") is not None:
+        return "acceptance_only"
+    return "unknown"
+
+
+def _macro_baseline_status(case: dict) -> str:
+    baseline_type = str(case.get("baseline_type") or "").strip()
+    baseline_id = str(case.get("baseline_id") or "").strip()
+    if not baseline_type and not baseline_id:
+        return "none_declared"
+    comparisons = case.get("baseline_comparisons")
+    if isinstance(comparisons, dict) and comparisons:
+        statuses = {
+            str(comparison.get("status") or "")
+            for comparison in comparisons.values()
+            if isinstance(comparison, dict)
+        }
+        if "compared" in statuses:
+            return "executed_compared"
+        if statuses:
+            return "declared_unexecuted"
+    if case.get("comparison_review_artifact") or case.get("comparison_inputs") or case.get("neutral_baseline_approval"):
+        return "declared_with_review_surface"
+    return "declared_unverified"
+
+
 def _macro_summary_paths(repo_root: Path, summaries_glob: str) -> list[Path]:
     return sorted(path for path in repo_root.glob(summaries_glob) if path.is_file())
 
@@ -986,6 +1458,7 @@ def _macro_eval_events_from_summary(repo_root: Path, summary_path: Path) -> list
         run_outcome = _macro_run_outcome(summary, case)
         eval_finding = _macro_eval_finding(summary, case)
         behavior_pattern = _macro_behavior_pattern(case_type, run_outcome, eval_finding)
+        verifier_types = _macro_verifier_types(case)
         event = {
             "schema_version": "1.0",
             "source": "ask_evals_macro_report",
@@ -1004,6 +1477,17 @@ def _macro_eval_events_from_summary(repo_root: Path, summary_path: Path) -> list
             "tier1_failed": bool(case.get("tier1_failed")),
             "tier2_failed": bool(case.get("tier2_failed")),
             "blocked": run_outcome == "blocked",
+            "baseline_type": case.get("baseline_type"),
+            "baseline_id": case.get("baseline_id"),
+            "baseline_status": _macro_baseline_status(case),
+            "skill_lift": case.get("skill_lift"),
+            "is_beneficial": case.get("is_beneficial"),
+            "baseline_regression": case.get("baseline_regression"),
+            "readiness_state": case.get("readiness_state"),
+            "metric_availability": case.get("metric_availability"),
+            "check_evidence": bool(case.get("check_evidence")),
+            "verification_strategy": _macro_verification_strategy(case),
+            "verifier_types": verifier_types,
             "summary_path": _repo_relative_path(repo_root, summary_path),
             "release_manifest_path": _repo_relative_path(repo_root, release_manifest_path) if release_manifest else None,
         }
@@ -1021,6 +1505,21 @@ def _macro_group_counts(events: list[dict], fields: tuple[str, ...]) -> list[dic
         for key, count in counts.items()
     ]
     return sorted(rows, key=lambda row: (-int(row["trace_count"]), tuple(str(row[field]) for field in fields)))
+
+
+def _macro_group_list_counts(events: list[dict], field: str) -> list[dict]:
+    counts: dict[str, int] = {}
+    for event in events:
+        values = event.get(field)
+        if not isinstance(values, list) or not values:
+            values = ["none"]
+        for value in values:
+            key = str(value or "unknown")
+            counts[key] = counts.get(key, 0) + 1
+    return sorted(
+        [{field[:-1] if field.endswith("s") else field: key, "trace_count": count} for key, count in counts.items()],
+        key=lambda row: (-int(row["trace_count"]), tuple(str(value) for value in row.values())),
+    )
 
 
 def _write_jsonl(path: Path, rows: list[dict]) -> None:
@@ -1138,6 +1637,9 @@ def macro_eval_report(
             "by_run_outcome": _macro_group_counts(events, ("run_outcome",)),
             "by_eval_finding": _macro_group_counts(events, ("eval_finding",)),
             "by_behavior_pattern": _macro_group_counts(events, ("behavior_pattern",)),
+            "by_verification_strategy": _macro_group_counts(events, ("verification_strategy",)),
+            "by_baseline_status": _macro_group_counts(events, ("baseline_status",)),
+            "by_verifier_type": _macro_group_list_counts(events, "verifier_types"),
             "by_case_outcome_finding": _macro_group_counts(events, ("case_type", "run_outcome", "eval_finding")),
             "by_skill_behavior_pattern": _macro_group_counts(events, ("skill", "behavior_pattern")),
         },

@@ -124,6 +124,24 @@ setup, classify the exact setup need: `tessl init`, `tessl project create`,
 `tessl project link`, or `tessl project repair`. For Codex sessions, load
 credentials from the operator-approved environment only; never print API tokens.
 
+Tessl scenario generation is a separate prep lane, not part of ordinary
+`ask evals run`. When the operator asks to use Tessl's scenario-generation
+skill, run:
+
+```bash
+./bin/ask evals prepare-tessl-scenarios <skill-path> --tessl-workspace <workspace> --json --robot
+```
+
+Start with `--dry-run` to prove package shape. The command stages the target
+skill under `/tmp/ask-tessl-scenario-generation/<skill-path>-<sha12>/target-tile`
+and installs only `tessl-labs/tessl-skill-eval-scenarios@0.1.0` under the
+paired `tool-project`. Do not run this install in the repo root. Generated
+Tessl scenarios remain draft evidence until reviewed for instruction leakage,
+feasibility, criteria totals, and duplication. Import only selected cases back
+into canonical `references/evals.yaml`. See
+[Tessl Live Skill Eval Workflow](/Docs/agents/24-tessl-live-skill-eval-workflow.md) for
+the full agent checklist.
+
 In Codex sandboxed sessions, do not request network permission for the Tessl
 eval lane up front. The repo wrapper already limits Tessl input to the staged
 stable staged project, and asking the sandbox for network turns the command into an
