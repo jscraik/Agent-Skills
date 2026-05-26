@@ -298,13 +298,22 @@ class TestSkillDoctorSchemaStructure(unittest.TestCase):
         for check_name in (
             "resolver",
             "canonical_source",
-            "projection_ownership",
             "structural_audit",
             "capability_metadata",
             "package_readiness",
             "outcome_proof",
         ):
             self.assertIn(check_name, required, f"checks missing required check '{check_name}'")
+        self.assertIn(
+            "projection_ownership",
+            checks.get("properties", {}),
+            "checks must still document optional projection_ownership payloads",
+        )
+        self.assertNotIn(
+            "projection_ownership",
+            required,
+            "skill-doctor.v1 cannot require newly added checks from older producers",
+        )
 
     def test_checks_disallows_additional_properties(self) -> None:
         checks = self.schema["properties"]["checks"]
@@ -485,6 +494,14 @@ class TestSkillDoctorSchemaAcceptsValidPayload(unittest.TestCase):
             _validate_schema(self.schema, payload, self.schema)
         except AssertionError as exc:
             self.fail(f"Blocked-status payload rejected by skill-doctor.v1 schema: {exc}")
+
+    def test_payload_without_projection_ownership_preserves_v1_compatibility(self) -> None:
+        payload = self._make_minimal_valid_payload()
+        del payload["checks"]["projection_ownership"]
+        try:
+            _validate_schema(self.schema, payload, self.schema)
+        except AssertionError as exc:
+            self.fail(f"Legacy skill-doctor.v1 payload rejected without projection_ownership: {exc}")
 
 
 class TestSkillDoctorSchemaRejectsInvalidPayloads(unittest.TestCase):

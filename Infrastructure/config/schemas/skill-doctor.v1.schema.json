@@ -231,7 +231,6 @@
       "required": [
         "resolver",
         "canonical_source",
-        "projection_ownership",
         "structural_audit",
         "capability_metadata",
         "package_readiness",

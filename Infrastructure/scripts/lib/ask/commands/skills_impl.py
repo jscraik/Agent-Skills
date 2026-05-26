@@ -2490,7 +2490,76 @@ def _doctor_check(status: str, **details: Any) -> dict[str, Any]:
     return payload
 
 
-def _skill_root_ownership_for_path(repo_relative_path: str | None) -> dict[str, Any]:
+PROJECT_SKILLS_SDK_MANIFEST = "skills-sdk.json"
+PROJECT_SKILLS_SDK_SCHEMA = "Infrastructure/config/schemas/skills-sdk.project.v1.schema.json"
+PROJECT_SKILL_ROOT_CLASSIFICATIONS = {
+    "canonical_project_source",
+    "generated_runtime_projection",
+    "client_runtime_config",
+    "unknown",
+}
+
+
+def _repo_relative_path_parts(path: str) -> tuple[str, ...]:
+    return tuple(part.casefold() for part in Path(path.strip().strip("/")).parts)
+
+
+def _path_is_under_declared_skill_root(path: str, root: str) -> bool:
+    path_parts = _repo_relative_path_parts(path)
+    root_parts = _repo_relative_path_parts(root)
+    return bool(root_parts) and path_parts[: len(root_parts)] == root_parts
+
+
+def _load_project_skills_sdk_manifest(repo_root: Path | None) -> dict[str, Any] | None:
+    if repo_root is None:
+        return None
+    manifest_path = repo_root / PROJECT_SKILLS_SDK_MANIFEST
+    if not manifest_path.is_file():
+        return None
+    try:
+        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    if not isinstance(payload, dict):
+        return None
+    if payload.get("schema_version") != "skills-sdk.project.v1":
+        return None
+    return payload
+
+
+def _manifest_skill_root_ownership(repo_root: Path | None, path: str) -> dict[str, Any] | None:
+    manifest = _load_project_skills_sdk_manifest(repo_root)
+    if not manifest:
+        return None
+    for root in manifest.get("skill_roots", []):
+        if not isinstance(root, dict):
+            continue
+        root_path = str(root.get("path") or "").strip().strip("/")
+        if not root_path or not _path_is_under_declared_skill_root(path, root_path):
+            continue
+        classification = str(root.get("classification") or "unknown")
+        if classification not in PROJECT_SKILL_ROOT_CLASSIFICATIONS:
+            classification = "unknown"
+        editable_source = classification == "canonical_project_source"
+        return {
+            "path": path,
+            "root": root_path,
+            "classification": classification,
+            "editable_source": editable_source,
+            "owner_manifest_required_for_edit": not editable_source,
+            "manifest_schema": PROJECT_SKILLS_SDK_SCHEMA,
+            "manifest_declared": True,
+            "owner_manifest_path": PROJECT_SKILLS_SDK_MANIFEST,
+            "owner_manifest_project_id": manifest.get("project_id"),
+        }
+    return None
+
+
+def _skill_root_ownership_for_path(
+    repo_relative_path: str | None,
+    *,
+    repo_root: Path | None = None,
+) -> dict[str, Any]:
     """Classify whether a repo-relative skill path is editable source or projection."""
     if not repo_relative_path:
         return {
@@ -2503,23 +2572,30 @@ def _skill_root_ownership_for_path(repo_relative_path: str | None) -> dict[str, 
 
     path = repo_relative_path.strip().strip("/")
     parts = Path(path).parts
-    if path.startswith(".agents/skills/") or path == ".agents/skills":
+    manifest_ownership = _manifest_skill_root_ownership(repo_root, path)
+    if manifest_ownership:
+        return manifest_ownership
+
+    normalized_parts = _repo_relative_path_parts(path)
+    if normalized_parts[:2] == (".agents", "skills"):
         return {
             "path": path,
             "root": ".agents/skills",
             "classification": "generated_runtime_projection",
             "editable_source": False,
             "owner_manifest_required_for_edit": True,
-            "manifest_schema": "Infrastructure/config/schemas/skills-sdk.project.v1.schema.json",
+            "manifest_schema": PROJECT_SKILLS_SDK_SCHEMA,
+            "manifest_declared": False,
         }
-    if path.startswith(".codex/skills/") or path == ".codex/skills":
+    if normalized_parts[:2] == (".codex", "skills"):
         return {
             "path": path,
             "root": ".codex/skills",
             "classification": "client_runtime_config",
             "editable_source": False,
             "owner_manifest_required_for_edit": True,
-            "manifest_schema": "Infrastructure/config/schemas/skills-sdk.project.v1.schema.json",
+            "manifest_schema": PROJECT_SKILLS_SDK_SCHEMA,
+            "manifest_declared": False,
         }
     if path.startswith("Skills/") or path == "Skills":
         return {
@@ -3459,9 +3535,13 @@ def skills_doctor(
     projection_path_value = None
     if isinstance(resolution, dict):
         projection_path_value = resolution.get("command_handle_path")
-    source_ownership = _skill_root_ownership_for_path(str(source_path_value) if source_path_value else None)
+    source_ownership = _skill_root_ownership_for_path(
+        str(source_path_value) if source_path_value else None,
+        repo_root=repo_root,
+    )
     projection_ownership = _skill_root_ownership_for_path(
-        str(projection_path_value) if projection_path_value else None
+        str(projection_path_value) if projection_path_value else None,
+        repo_root=repo_root,
     )
     ownership_status = "pass"
     if source_exists and source_ownership.get("classification") in {
@@ -3474,7 +3554,8 @@ def skills_doctor(
                 "blocked_validation",
                 (
                     f"Doctor target '{query}' resolves to {source_ownership['classification']}; "
-                    "edit canonical source or declare the root in an owner-repo skills-sdk.json manifest."
+                    "edit canonical source or declare the root as canonical_project_source in an owner-repo "
+                    "skills-sdk.json manifest."
                 ),
             )
         )
@@ -3487,7 +3568,7 @@ def skills_doctor(
         projection=projection_ownership,
         projection_path=projection_path_value,
         projection_editable=bool(projection_ownership.get("editable_source")),
-        owner_manifest_schema="Infrastructure/config/schemas/skills-sdk.project.v1.schema.json",
+        owner_manifest_schema=PROJECT_SKILLS_SDK_SCHEMA,
     )
 
     audit_level = "strict" if strict else "compat"

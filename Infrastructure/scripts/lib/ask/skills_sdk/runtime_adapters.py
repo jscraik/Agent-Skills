@@ -1215,6 +1215,8 @@ def build_command_handle_proof(
     codex_skills = home_path / ".codex" / "skills"
     agents_skills = home_path / ".agents" / "skills"
     expected_runtime = repo_root / ".agents" / "skills"
+    source_path_value = str(resolution.get("source_path") or "").strip()
+    expected_source = repo_root / source_path_value if source_path_value else None
 
     handle_violations = [
         violation
@@ -1242,7 +1244,12 @@ def build_command_handle_proof(
             return False
         if _path_is_under(handle_path, expected_runtime):
             return True
-        return bool(runtime_link.get("points_to_workspace_runtime"))
+        if (
+            expected_source is not None
+            and handle_path.resolve(strict=False) == expected_source.resolve(strict=False)
+        ):
+            return True
+        return False
 
     codex_link = link_payload(codex_skills)
     agents_link = link_payload(agents_skills)

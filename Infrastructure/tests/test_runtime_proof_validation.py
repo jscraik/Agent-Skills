@@ -585,6 +585,59 @@ class TestRuntimeProofValidation(unittest.TestCase):
             self.assertTrue(proof["gates"]["agents_user_runtime_ready"])
             self.assertEqual(proof["runtime_satisfied_by"], "agents_user_runtime")
 
+    def test_build_command_handle_proof_rejects_poisoned_handle_under_root_symlink(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir) / "repo"
+            source_handle = repo_root / "Skills" / "agent-ops" / "autofix" / "SKILL.md"
+            source_handle.parent.mkdir(parents=True)
+            source_handle.write_text("---\nname: autofix\n---\n", encoding="utf-8")
+
+            external_handle = Path(temp_dir) / "external" / "autofix" / "SKILL.md"
+            external_handle.parent.mkdir(parents=True)
+            external_handle.write_text("---\nname: autofix\n---\n", encoding="utf-8")
+
+            workspace_runtime = repo_root / ".agents" / "skills"
+            workspace_runtime.mkdir(parents=True)
+            (workspace_runtime / "autofix").symlink_to(external_handle.parent)
+
+            home_path = repo_root / ".tmp-home"
+            agents_runtime = home_path / ".agents" / "skills"
+            agents_runtime.parent.mkdir(parents=True, exist_ok=True)
+            agents_runtime.symlink_to(workspace_runtime)
+
+            def resolve_skill_handle_fn(
+                _handle: str,
+                *,
+                repo_root_path: Path,
+            ) -> dict[str, object]:
+                del repo_root_path
+                return {
+                    "status": "ok",
+                    "handle": "autofix",
+                    "source_path": "Skills/agent-ops/autofix/SKILL.md",
+                    "command_handle_path": ".agents/skills/autofix/SKILL.md",
+                }
+
+            def check_command_handles_fn(*, repo_root_path: Path) -> dict[str, object]:
+                del repo_root_path
+                return {"status": "pass", "violations": []}
+
+            proof = runtime_adapters.build_command_handle_proof(
+                repo_root=repo_root,
+                handle="autofix",
+                runtime_target="agents",
+                resolve_skill_handle_fn=resolve_skill_handle_fn,
+                check_command_handles_fn=check_command_handles_fn,
+                home_path=home_path,
+            )
+
+            self.assertEqual(proof["status"], "fail")
+            self.assertTrue(proof["gates"]["agents_user_link"])
+            self.assertTrue(proof["gates"]["agents_user_command_handle_exists"])
+            self.assertFalse(proof["gates"]["agents_user_command_handle_points_to_workspace"])
+            self.assertFalse(proof["gates"]["agents_user_runtime_ready"])
+            self.assertEqual(proof["runtime_failure"]["failed_check_id"], "agents_user_runtime_ready")
+
     def test_build_command_handle_proof_reports_blocked_runtime_with_actionable_diagnostics(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir) / "repo"
