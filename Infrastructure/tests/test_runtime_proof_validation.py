@@ -208,12 +208,13 @@ class TestRuntimeProofValidation(unittest.TestCase):
             rollout_path.parent.mkdir(parents=True)
             session_id = "019e5d55-runtime-proof-session"
             turn_id = "019e5d55-runtime-proof-turn"
+            observed_at = runtime_adapters._utc_now()
             rollout_path.write_text(
                 "\n".join(
                     [
                         json.dumps(
                             {
-                                "timestamp": "2026-05-25T18:00:00Z",
+                                "timestamp": observed_at,
                                 "type": "session_meta",
                                 "payload": {
                                     "id": session_id,
@@ -225,7 +226,7 @@ class TestRuntimeProofValidation(unittest.TestCase):
                         ),
                         json.dumps(
                             {
-                                "timestamp": "2026-05-25T18:00:01Z",
+                                "timestamp": observed_at,
                                 "type": "turn_context",
                                 "payload": {
                                     "turn_id": turn_id,
@@ -236,7 +237,7 @@ class TestRuntimeProofValidation(unittest.TestCase):
                         ),
                         json.dumps(
                             {
-                                "timestamp": "2026-05-25T18:00:02Z",
+                                "timestamp": observed_at,
                                 "type": "event_msg",
                                 "payload": {
                                     "type": "task_started",
@@ -274,6 +275,7 @@ class TestRuntimeProofValidation(unittest.TestCase):
                 proof=proof,
                 actor_type="agent",
                 codex_sessions_root=sessions_root,
+                agents_otel_stats_path=Path(temp_dir) / "missing-stats.json",
             )
 
             self.assertEqual(summary["runtime_session_status"], "observed")
@@ -302,12 +304,13 @@ class TestRuntimeProofValidation(unittest.TestCase):
             rollout_path.parent.mkdir(parents=True)
             session_id = "019e60a9-observed-session"
             turn_id = "019e60a9-observed-turn"
+            observed_at = runtime_adapters._utc_now()
             rollout_path.write_text(
                 "\n".join(
                     [
                         json.dumps(
                             {
-                                "timestamp": "2026-05-25T18:00:00Z",
+                                "timestamp": observed_at,
                                 "type": "session_meta",
                                 "payload": {
                                     "id": session_id,
@@ -318,7 +321,7 @@ class TestRuntimeProofValidation(unittest.TestCase):
                         ),
                         json.dumps(
                             {
-                                "timestamp": "2026-05-25T18:00:01Z",
+                                "timestamp": observed_at,
                                 "type": "turn_context",
                                 "payload": {"turn_id": turn_id, "cwd": str(repo_root)},
                             }
@@ -378,7 +381,16 @@ class TestRuntimeProofValidation(unittest.TestCase):
 
             self.assertEqual(summary["runtime_session_status"], "observed")
             self.assertEqual(summary["observability_status"], "observed")
+            self.assertEqual(summary["status"], "partial")
+            self.assertEqual(summary["claim_status"], "partial")
+            self.assertEqual(summary["failed_check_id"], "runtime_observability_degraded")
             card = json.loads((repo_root / summary["runtime_card_path"]).read_text(encoding="utf-8"))
+            receipt = json.loads((repo_root / summary["evidence_receipt_path"]).read_text(encoding="utf-8"))
+            self.assertEqual(card["runtime_status"], "partial")
+            self.assertEqual(card["runtime_session"]["runtime_status"], "partial")
+            self.assertEqual(card["evidence_receipts"][0]["claim_status"], "partial")
+            self.assertEqual(receipt["claim_status"], "partial")
+            self.assertIn("observability is degraded", receipt["blocker"])
             self.assertEqual(card["runtime_session"]["observability"]["source"], "agents_otel_stats")
             self.assertTrue(card["runtime_session"]["observability"]["codex_log_presence"])
             self.assertEqual(
@@ -395,6 +407,80 @@ class TestRuntimeProofValidation(unittest.TestCase):
                 )
             )
             self.assertEqual(card["limitations"][0]["class"], "skill_invocation_not_asserted")
+            process = self.run_validator(
+                str(repo_root / summary["runtime_card_path"]),
+                "--require-shared-workspace",
+                "--workspace-root",
+                "${WORKSPACE_ROOT}",
+                "--json",
+            )
+            self.assertEqual(process.returncode, 0, process.stdout + process.stderr)
+
+    def test_runtime_card_marks_stale_codex_session_partial(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir) / "repo"
+            repo_root.mkdir()
+            sessions_root = Path(temp_dir) / "sessions"
+            rollout_path = sessions_root / "2000" / "01" / "01" / "rollout-session.jsonl"
+            rollout_path.parent.mkdir(parents=True)
+            session_id = "019e60a9-stale-session"
+            turn_id = "019e60a9-stale-turn"
+            rollout_path.write_text(
+                "\n".join(
+                    [
+                        json.dumps(
+                            {
+                                "timestamp": "2000-01-01T00:00:00Z",
+                                "type": "session_meta",
+                                "payload": {
+                                    "id": session_id,
+                                    "cwd": str(repo_root),
+                                    "originator": "Codex Desktop",
+                                },
+                            }
+                        ),
+                        json.dumps(
+                            {
+                                "timestamp": "2000-01-01T00:00:01Z",
+                                "type": "turn_context",
+                                "payload": {"turn_id": turn_id, "cwd": str(repo_root)},
+                            }
+                        ),
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            proof = {
+                "schema_version": "command-handle-proof.v2",
+                "handle": "autofix",
+                "runtime_target": "codex",
+                "status": "pass",
+                "resolution": {
+                    "status": "ok",
+                    "handle": "autofix",
+                    "source_path": "Skills/agent-ops/autofix/SKILL.md",
+                    "command_handle_path": ".agents/skills/autofix/SKILL.md",
+                },
+                "gates": {"codex_user_runtime_ready": True},
+                "gate_policy": {"required": ["codex_user_runtime_ready"]},
+            }
+
+            summary = runtime_adapters.emit_command_handle_runtime_evidence(
+                repo_root=repo_root,
+                proof=proof,
+                actor_type="agent",
+                codex_sessions_root=sessions_root,
+                agents_otel_stats_path=Path(temp_dir) / "missing-stats.json",
+            )
+
+            self.assertEqual(summary["status"], "partial")
+            self.assertEqual(summary["claim_status"], "partial")
+            self.assertEqual(summary["failed_check_id"], "runtime_session_stale")
+            card = json.loads((repo_root / summary["runtime_card_path"]).read_text(encoding="utf-8"))
+            self.assertEqual(card["runtime_status"], "partial")
+            self.assertEqual(card["runtime_session"]["runtime_status"], "partial")
+            self.assertIn("session evidence is stale", card["runtime_session"]["unavailable_reason"])
 
     def test_build_command_handle_proof_accepts_handle_bridge_without_root_symlink(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

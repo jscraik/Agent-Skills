@@ -1,0 +1,61 @@
+---
+schema_version: implementation-notes.v1
+goal_slug: jsc-364-agent-skills-codex-runtime-proof-plane
+status: present
+updated_at: 2026-05-26T13:28:26Z
+---
+
+# JSC-364 Runtime Proof Plane Implementation Notes
+
+These notes are the validator-facing MDX companion to the existing browser
+handoff HTML. They preserve the current closeout truth: JSC-364 is complete,
+runtime absence is recorded as explicit blocked_runtime evidence, and live
+Codex runtime parity is not claimed.
+
+## Deep Module Topology
+
+<DeepModuleMap goal="jsc-364-agent-skills-codex-runtime-proof-plane" status="complete" />
+
+- Public command entrypoint: `Infrastructure/bin/ask`.
+- Command implementation: `Infrastructure/scripts/lib/ask/commands/skills_impl.py`.
+- Runtime proof adapters: `Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py`.
+- Schema validation: `Infrastructure/scripts/validation-and-linting/validate_runtime_cards.py`.
+- Evidence outputs: `.harness/evidence/runtime-proof/**`.
+
+## Current Slice Insertion Map
+
+<InsertionPoint slice="post-closeout-metadata-repair" status="metadata-only" />
+
+- The active heartbeat did not require a new runtime-proof feature slice.
+- The smallest valid phase was to repair the goal board metadata so the current
+  Goal Governor validator can rediscover the implementation notes artifact.
+- The historical HTML handoff remains available for browser viewing; this MDX
+  file is the canonical validator artifact.
+
+## Runtime Truth Surface
+
+<RuntimeCardState runtime_target="codex" status="blocked_runtime" parity_claimed="false" />
+
+- Runtime proof is schema-valid when runtime access is absent.
+- Blocked runtime evidence remains a first-class result, not a pass and not a
+  hidden failure.
+- Current completion truth is anchored in receipts, runtime-card validation,
+  repo closeout output, PR truth, and Linear truth.
+
+## Blast Radius View
+
+<BlastRadiusMap scope="metadata" risk="low" />
+
+- Source implementation code is unchanged by this metadata repair.
+- Generated runtime projections are not edited by hand.
+- The only intended behavior change is that Goal Governor validation can locate
+  and validate the required implementation-notes artifact.
+
+## Validation Coverage
+
+<ValidatorCoverage status="focused" />
+
+- Goal board validator covers the new `artifacts.implementation_notes` mapping.
+- Skill handle checks cover command-surface projection integrity.
+- Runtime-card and repo closeout commands remain the proof surfaces for runtime
+  evidence and changed-scope readiness.

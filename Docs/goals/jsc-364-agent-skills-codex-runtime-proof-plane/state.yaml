@@ -34,7 +34,8 @@ completion_contract:
     - "Target repository is /Users/jamiecraik/dev/agent-skills"
     - "Canonical plan is .harness/plan/2026-05-24-jsc-364-agent-skills-codex-runtime-proof-plane-plan.md"
     - "Canonical spec is .harness/specs/2026-05-24-agent-skills-codex-runtime-proof-plane-spec.md"
-    - "Implementation notes are .harness/implementation-notes/2026-05-24-jsc-364-agent-skills-codex-runtime-proof-plane-governed-execution-notes.html"
+    - "Implementation notes are .harness/implementation-notes/2026-05-24-jsc-364-agent-skills-codex-runtime-proof-plane-governed-execution-notes.mdx"
+    - "Browser handoff remains .harness/implementation-notes/2026-05-24-jsc-364-agent-skills-codex-runtime-proof-plane-governed-execution-notes.html"
     - "PR green-sweep artifacts live under artifacts/reviews/jsc-364-runtime-proof-plane"
   iteration_policy: "Govern one bounded slice at a time, record allowed files and validation before implementation, run mandatory reviews, update notes and receipts, then hand off delivery triage only after a validated safe state."
   blocked_stop_condition: "Stop on unverifiable runtime safety, stale validation, unclear merge safety, deterministic verification failure, review blocker, unsafe external mutation, or a slice that cannot produce durable proof or blocked_runtime evidence."
@@ -62,6 +63,18 @@ continuation_gate:
   pending_work: absent
   auto_continue_allowed: no
   blocked_by: null
+artifacts:
+  implementation_notes:
+    path: ".harness/implementation-notes/2026-05-24-jsc-364-agent-skills-codex-runtime-proof-plane-governed-execution-notes.mdx"
+    format: mdx
+    status: present
+    browser_preview:
+      surface: localhost
+      status: blocked
+      blocker: "No localhost notes preview was started during this metadata-only heartbeat repair; the existing HTML handoff remains available on disk."
+      live_update:
+        status: blocked
+        blocker: "No live-update watcher was started during this metadata-only heartbeat repair."
 claims:
   - id: C001
     claim: "JSC-364 is the active governed implementation lane after Jamie approved the mode switch."
@@ -316,6 +329,7 @@ tasks:
       - "Infrastructure/tests/**"
       - "Docs/goals/jsc-364-agent-skills-codex-runtime-proof-plane/**"
       - ".harness/implementation-notes/2026-05-24-jsc-364-agent-skills-codex-runtime-proof-plane-governed-execution-notes.html"
+      - ".harness/implementation-notes/2026-05-24-jsc-364-agent-skills-codex-runtime-proof-plane-governed-execution-notes.mdx"
     verify:
       - "./bin/ask skills conformance run --suite codex-parity --evidence-dir /tmp/jsc-364-codex-parity --json --robot"
       - "python3 -m pytest Infrastructure/tests -q"

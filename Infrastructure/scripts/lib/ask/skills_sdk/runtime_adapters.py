@@ -19,6 +19,7 @@ HOME_MARKER = "${HOME}"
 SAFE_EVIDENCE_SEGMENT_PATTERN = re.compile(r"[^A-Za-z0-9._-]+")
 CODEX_SESSION_LOOKBACK_LIMIT = 80
 CODEX_SESSION_TURN_EVENT_LIMIT = 8
+CODEX_SESSION_FRESHNESS_SECONDS = 24 * 60 * 60
 AGENTS_OTEL_STATS_RELATIVE_PATH = Path(
     ".agents/otel-collector/data/processed/stats.json"
 )
@@ -82,6 +83,21 @@ def _utc_now() -> str:
         str: ISO-8601 UTC timestamp (e.g. '2024-05-01T12:00:00Z')
     """
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def _parse_utc_timestamp(value: object) -> datetime | None:
+    if not isinstance(value, str) or not value.strip():
+        return None
+    text = value.strip()
+    if text.endswith("Z"):
+        text = text[:-1] + "+00:00"
+    try:
+        parsed = datetime.fromisoformat(text)
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        return parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
 
 
 def _repo_relative(repo_root: Path, path: Path) -> str:
@@ -177,7 +193,11 @@ def _claim_status_for_runtime(runtime_status: str) -> str:
     Returns:
         str: "pass" when `runtime_status` is "implemented_enforced", "blocked" otherwise.
     """
-    return "pass" if runtime_status == "implemented_enforced" else "blocked"
+    if runtime_status == "implemented_enforced":
+        return "pass"
+    if runtime_status == "partial":
+        return "partial"
+    return "blocked"
 
 
 def _runtime_display_name(runtime_target: str) -> str:
@@ -576,6 +596,106 @@ def _runtime_observation(
     }
 
 
+def _latest_observed_turn_at(runtime_observation: dict[str, Any]) -> datetime | None:
+    timestamps: list[datetime] = []
+    has_observed_at = False
+    turn_events = runtime_observation.get("turn_events")
+    if not isinstance(turn_events, list):
+        return None
+    for event in turn_events:
+        if not isinstance(event, dict):
+            continue
+        if event.get("observed_at") is not None:
+            has_observed_at = True
+        parsed = _parse_utc_timestamp(event.get("observed_at"))
+        if parsed:
+            timestamps.append(parsed)
+    if timestamps:
+        return max(timestamps)
+    if has_observed_at and turn_events:
+        # Events exist with observed_at values but none parsed — treat as maximally stale
+        return datetime(1970, 1, 1, tzinfo=timezone.utc)
+    return None
+
+
+def _runtime_observation_quality_failure(
+    context: dict[str, Any],
+    runtime_observation: dict[str, Any],
+) -> dict[str, Any] | None:
+    if context["runtime_target"] != "codex" or context["runtime_status"] != "implemented_enforced":
+        return None
+
+    observability = runtime_observation.get("observability")
+    if isinstance(observability, dict):
+        overall_status = str(observability.get("overall_status") or "unknown")
+        invocation_count = int(observability.get("skill_invocation_event_count") or 0)
+        if overall_status != "healthy":
+            message = (
+                "Codex runtime observability is degraded; runtime evidence cannot claim live "
+                f"pass while telemetry reports overall_status={overall_status!r} and "
+                f"skill_invocation_event_count={invocation_count}."
+            )
+            return runtime_failure_payload(
+                command="skills proof",
+                error_code="ERR_RUNTIME",
+                failed_check_id="runtime_observability_degraded",
+                path="runtime_session.observability.overall_status",
+                message=message,
+                recovery_guidance=(
+                    "Restore healthy Codex observability or collect a fresh skill invocation event, "
+                    "then rerun the explicit runtime proof."
+                ),
+                validation_commands=[context["command"]],
+            )
+
+    latest_turn_at = _latest_observed_turn_at(runtime_observation)
+    created_at = _parse_utc_timestamp(context["created_at"])
+    if latest_turn_at and created_at:
+        age_seconds = (created_at - latest_turn_at).total_seconds()
+        if age_seconds > CODEX_SESSION_FRESHNESS_SECONDS:
+            hours = round(age_seconds / 3600, 1)
+            message = (
+                "Codex runtime session evidence is stale; runtime evidence cannot claim live "
+                f"pass from a session event observed {hours} hours before this proof run."
+            )
+            return runtime_failure_payload(
+                command="skills proof",
+                error_code="ERR_RUNTIME",
+                failed_check_id="runtime_session_stale",
+                path="runtime_session.latest_turn_id",
+                message=message,
+                recovery_guidance=(
+                    "Run a fresh Codex session in this workspace or collect current runtime session "
+                    "events, then rerun the explicit runtime proof."
+                ),
+                validation_commands=[context["command"]],
+            )
+    return None
+
+
+def _apply_runtime_observation_quality(
+    context: dict[str, Any],
+    runtime_observation: dict[str, Any],
+) -> None:
+    runtime_failure = _runtime_observation_quality_failure(context, runtime_observation)
+    if not runtime_failure:
+        return
+    context["claim_status"] = "partial"
+    context["runtime_failure"] = runtime_failure
+    context["failed_check_id"] = str(
+        runtime_failure.get("failed_check_id") or "runtime_observation_quality"
+    )
+    context["blocker"] = str(
+        runtime_failure.get("message") or "Runtime observation quality is incomplete."
+    )
+    context["exit_code"] = 2
+    thread_runs = runtime_observation.get("thread_runs")
+    if isinstance(thread_runs, list):
+        for thread_run in thread_runs:
+            if isinstance(thread_run, dict):
+                thread_run["claim_status"] = "partial"
+
+
 def _artifact_record(
     context: dict[str, Any],
     *,
@@ -700,7 +820,7 @@ def _receipt_payload(context: dict[str, Any], relative_card_path: str, relative_
         "verifier": "ask.skills.proof",
         "observed_at": context["created_at"],
     }
-    if context["claim_status"] == "blocked":
+    if context["claim_status"] != "pass":
         receipt["blocker"] = context["blocker"]
     return receipt
 
@@ -728,7 +848,7 @@ def _recovery_plan(context: dict[str, Any]) -> dict[str, Any]:
             - "permission_profile": required permissions for recovery actions
             - "expected_outcome": expected result after following the plan
     """
-    if context["claim_status"] == "blocked":
+    if context["claim_status"] != "pass":
         guidance = context["runtime_failure"].get("recovery_guidance")
         recovery_reason = (
             str(guidance)
@@ -841,7 +961,7 @@ def _runtime_card_payload(
         "actor_type": context["actor_type"],
         "visibility_status": "user_observable",
     }
-    if context["claim_status"] == "blocked":
+    if context["claim_status"] != "pass":
         runtime_session["unavailable_reason"] = context["blocker"]
     runtime_observation = runtime_observation or {"thread_runs": [], "turn_events": [], "session": None}
     observed_session = runtime_observation.get("session")
@@ -903,11 +1023,11 @@ def _runtime_card_payload(
         "verifier_results": [
             {
                 "verifier": "ask.skills.proof",
-                "status": proof.get("status"),
+                "status": context["claim_status"] if context["claim_status"] != "pass" else proof.get("status"),
                 "runtime_target": context["runtime_target"],
                 "required_gates": proof.get("gate_policy", {}).get("required", []),
                 "gates": proof.get("gates", {}),
-                "failed_check_id": context["failed_check_id"] if context["claim_status"] == "blocked" else None,
+                "failed_check_id": context["failed_check_id"] if context["claim_status"] != "pass" else None,
                 "runtime_diagnostics": _redact_runtime_paths(
                     context["runtime_diagnostics"],
                     context["repo_root"],
@@ -975,6 +1095,7 @@ def emit_command_handle_runtime_evidence(
         codex_sessions_root=codex_sessions_root,
         agents_otel_stats_path=agents_otel_stats_path,
     )
+    _apply_runtime_observation_quality(context, runtime_observation)
     relative_card_path = _repo_relative(repo_root, context["card_path"])
     relative_receipt_path = _repo_relative(repo_root, context["receipt_path"])
     relative_artifact_path = _repo_relative(repo_root, context["artifact_path"])
@@ -1012,6 +1133,9 @@ def emit_command_handle_runtime_evidence(
 
     return {
         "status": context["runtime_status"],
+        "claim_status": context["claim_status"],
+        "failed_check_id": context["failed_check_id"] if context["claim_status"] != "pass" else None,
+        "blocker": context["blocker"] if context["claim_status"] != "pass" else None,
         "runtime_session_status": (
             "observed" if runtime_observation.get("session") else "not_observed"
         ),

@@ -918,6 +918,49 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
         self.assertEqual(card["runtime_status"], "implemented_enforced")
         self.assertEqual(card["evidence_receipts"][0]["claim_status"], "pass")
 
+    def test_skills_proof_runtime_target_codex_downgrades_degraded_observability(self) -> None:
+        """Explicit Codex proof must not stay green when attached observability is degraded."""
+        repo_root = self.temp_dir / "repo"
+        self._write_he_heartbeat_source(repo_root)
+        command_surface.write_command_handles(repo_root_path=repo_root, dry_run=False)
+        skills_dir = repo_root / ".agents" / "skills"
+
+        home = self.temp_dir / "home"
+        codex_skills = home / ".codex" / "skills"
+        codex_skills.parent.mkdir(parents=True)
+        codex_skills.symlink_to(skills_dir)
+        stats_path = home / ".agents" / "otel-collector" / "data" / "processed" / "stats.json"
+        stats_path.parent.mkdir(parents=True)
+        stats_path.write_text(
+            json.dumps(
+                {
+                    "skill_invocation_event_count": 0,
+                    "plugin_backed_skill_invocation_count": 0,
+                    "telemetry_confidence": {
+                        "overall_status": "degraded",
+                        "live_presence_by_signal": {"logs": {"codex": True}},
+                    },
+                }
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+        with mock.patch("pathlib.Path.home", return_value=home):
+            result = skills_proof(repo_root, "he-heartbeat", runtime_target="codex")
+
+        proof = result.data["proof"]
+        runtime_evidence = result.data["runtime_evidence"]
+        card = json.loads((repo_root / runtime_evidence["runtime_card_path"]).read_text(encoding="utf-8"))
+        self.assertEqual(result.status, "error")
+        self.assertEqual(proof["status"], "pass")
+        self.assertEqual(runtime_evidence["status"], "partial")
+        self.assertEqual(runtime_evidence["claim_status"], "partial")
+        self.assertEqual(runtime_evidence["failed_check_id"], "runtime_observability_degraded")
+        self.assertEqual(card["runtime_status"], "partial")
+        self.assertEqual(card["evidence_receipts"][0]["claim_status"], "partial")
+        self.assertIn("observability is degraded", result.data["runtime_failure"]["message"])
+
     def test_skills_proof_runtime_target_codex_passes_with_handle_bridge(self) -> None:
         """Codex-targeted proof accepts a per-handle bridge under ~/.codex/skills."""
         repo_root = self.temp_dir / "repo"
