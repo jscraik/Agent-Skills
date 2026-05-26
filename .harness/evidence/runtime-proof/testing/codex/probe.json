@@ -1,11 +1,10 @@
 {
   "command": "./bin/ask skills proof testing --runtime-target codex --json --robot",
-  "exit_code": 0,
+  "exit_code": 2,
   "handle": "testing",
-  "observed_at": "2026-05-26T02:56:36Z",
+  "observed_at": "2026-05-26T03:33:45Z",
   "proof": {
     "available_runtimes": [
-      "codex_user_runtime",
       "agents_user_runtime"
     ],
     "command_handle_check": {
@@ -329,21 +328,16 @@
       "agents_user_command_handle_points_to_workspace": true,
       "agents_user_link": true,
       "agents_user_runtime_ready": true,
-      "codex_user_command_handle_exists": true,
-      "codex_user_command_handle_points_to_workspace": true,
-      "codex_user_link": true,
-      "codex_user_runtime_ready": true,
+      "codex_user_command_handle_exists": false,
+      "codex_user_command_handle_points_to_workspace": false,
+      "codex_user_link": false,
+      "codex_user_runtime_ready": false,
       "generated_command_handle_check": true,
       "resolver": true,
       "user_runtime_ready": true,
       "workspace_command_handle_exists": true
     },
     "handle": "testing",
-    "live_runtime_invocation": {
-      "operator_action": "Open or reload a Codex session and verify the handle appears in the picker or can be invoked as a $ handle.",
-      "runtime_satisfied_by": "codex_user_runtime",
-      "status": "manual_session_gate"
-    },
     "resolution": {
       "command_handle_path": ".agents/skills/testing/SKILL.md",
       "command_visibility": "target",
@@ -357,7 +351,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "6c4a3a9db4f4d8f0",
         "projection_mode": "rooted",
-        "source_revision": "602943847",
+        "source_revision": "164c77d35",
         "source_sha256": "6c451fc0bcab80a8d8b7cbf8000dde19f2e3aae875c87d220d5cf144605d0279"
       },
       "runtime_visibility": "latent",
@@ -366,8 +360,14 @@
     },
     "runtime_diagnostics": {
       "expected_workspace_runtime": "${WORKSPACE_ROOT}/.agents/skills",
-      "failed_gate": null,
-      "missing_command_handles": [],
+      "failed_gate": "codex_user_runtime_ready",
+      "missing_command_handles": [
+        {
+          "expected_under": "${WORKSPACE_ROOT}/.agents/skills",
+          "path": "${HOME}/.codex/skills/testing/SKILL.md",
+          "runtime": "codex_user_runtime"
+        }
+      ],
       "recovery_commands": [
         {
           "command": "./bin/ask skills sync --scope user --projection rooted --dry-run --json --robot",
@@ -421,22 +421,34 @@
       "recovery_risk": "User-scope sync mutates home-directory runtime links; preview with --dry-run before applying.",
       "runtime_modes": {
         "agents_user_runtime": "root_symlink",
-        "codex_user_runtime": "root_symlink"
+        "codex_user_runtime": "foreign_or_unmanaged_root"
       },
       "schema_version": "command-handle-runtime-diagnostics.v1",
       "selected_runtime_target": "codex"
     },
-    "runtime_satisfied_by": "codex_user_runtime",
+    "runtime_failure": {
+      "command": "skills proof",
+      "error_code": "ERR_VALIDATION",
+      "failed_check_id": "codex_user_runtime_ready",
+      "message": "Command handle proof failed for 'testing'.",
+      "path": "gates.codex_user_runtime_ready",
+      "recovery_guidance": "Preview with ./bin/ask skills sync --scope user --projection rooted --dry-run, then run workspace/user sync only if the user-runtime relink plan is acceptable.",
+      "schema_version": "skill-runtime-failure.v1",
+      "validation_commands": [
+        "./bin/ask skills proof testing --runtime-target codex --json --robot"
+      ]
+    },
+    "runtime_satisfied_by": null,
     "runtime_target": "codex",
     "schema_version": "command-handle-proof.v2",
-    "status": "pass",
+    "status": "fail",
     "user_runtime_command_handles": {
       "agents_handle": "${HOME}/.agents/skills/testing/SKILL.md",
       "agents_handle_exists": true,
       "agents_handle_points_to_workspace": true,
       "codex_handle": "${HOME}/.codex/skills/testing/SKILL.md",
-      "codex_handle_exists": true,
-      "codex_handle_points_to_workspace": true
+      "codex_handle_exists": false,
+      "codex_handle_points_to_workspace": false
     },
     "user_runtime_links": {
       "agents_skills": {
@@ -450,8 +462,8 @@
         "exists": true,
         "is_symlink": true,
         "path": "${HOME}/.codex/skills",
-        "points_to_workspace_runtime": true,
-        "target": "${WORKSPACE_ROOT}/.agents/skills"
+        "points_to_workspace_runtime": false,
+        "target": "${HOME}/dev/configs/.codex/skills"
       }
     },
     "validation_commands": [
@@ -463,7 +475,7 @@
       "path": "${WORKSPACE_ROOT}/.agents/skills"
     }
   },
-  "runtime_status": "implemented_enforced",
+  "runtime_status": "blocked_runtime",
   "runtime_target": "codex",
   "schema_version": "command-handle-runtime-probe.v1"
 }

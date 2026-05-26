@@ -13,7 +13,7 @@
       "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
     ]
   },
-  "validation_status": "pass",
+  "validation_status": "blocked",
   "visibility_status": "user_observable",
   "workspace_root": "${WORKSPACE_ROOT}"
 }

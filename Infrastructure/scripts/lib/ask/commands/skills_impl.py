@@ -87,7 +87,6 @@ from ask.skills_sdk.package_contracts import (  # noqa: E402
     skill_package_checkout_test as _skill_package_checkout_test,
     skill_package_compatibility_snapshot as _skill_package_compatibility_snapshot,
     skill_package_contract as _skill_package_contract,
-    skill_package_contract_summary as _skill_package_contract_summary,
     skill_package_gate_summary as _skill_package_gate_summary,
     skill_package_readiness as _skill_package_readiness,
     skill_package_readiness_summary as _skill_package_readiness_summary,
@@ -1336,11 +1335,22 @@ def skills_proof(repo_root: Path, handle: str, runtime_target: str = "any") -> C
     runtime_evidence = emit_command_handle_runtime_evidence(repo_root=repo_root, proof=proof)
     result.data["runtime_evidence"] = runtime_evidence
     proof["runtime_evidence"] = runtime_evidence
-    if proof["status"] != "pass":
-        result.data["runtime_failure"] = proof["runtime_failure"]
+    runtime_evidence_blocks = (
+        runtime_target in {"codex", "agents"}
+        and runtime_evidence.get("claim_status") in {"blocked", "partial"}
+    )
     result.data["proof"] = proof
-    if proof["status"] != "pass":
-        failure = proof["runtime_failure"]
+    if proof["status"] != "pass" or runtime_evidence_blocks:
+        failure = (
+            proof.get("runtime_failure")
+            if isinstance(proof.get("runtime_failure"), dict)
+            else {
+                "failed_check_id": runtime_evidence.get("failed_check_id") or "runtime_observation_quality",
+                "message": runtime_evidence.get("blocker") or "Runtime evidence quality is incomplete.",
+                "recovery_guidance": "Rerun the explicit runtime proof after collecting current runtime evidence.",
+            }
+        )
+        result.data["runtime_failure"] = failure
         message = (
             f"Invalid runtime target '{runtime_target}'."
             if failure.get("failed_check_id") == "runtime_target"
