@@ -202,6 +202,22 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
 
         self.assertNotEqual(payload["selected"]["id"], "skill-refactor")
 
+    def test_skill_factory_excludes_ordinary_app_work_with_no_skill_changes(self) -> None:
+        payload = self._route(
+            "skill-factory",
+            "fix a failing unit test in ordinary app code; no skill changes are needed",
+            [
+                _row("skill-builder", "Harden and validate skills."),
+                _row("skill-creator", "Guide for creating effective skills."),
+                _row("skill-factory-router", "Route skill work."),
+            ],
+        )
+
+        self.assertEqual(payload["status"], "no_match")
+        self.assertIsNone(payload["selected"])
+        self.assertEqual(payload["candidates"], [])
+        self.assertIn("factory routing is excluded", payload["operator_action"])
+
     def test_harness_engineering_folded_direct_stage_routes_to_parent(self) -> None:
         payload = self._route(
             "harness-engineering",

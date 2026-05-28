@@ -453,6 +453,17 @@ def _eval_model(repo_root: Path, target: str) -> dict[str, Any]:
             "baseline_score": None,
             "status": status,
             "notes": notes,
+            "riteway": case.get("riteway") if isinstance(case.get("riteway"), dict) else None,
+            "agent_eval_artifacts": (
+                case.get("agent_eval_artifacts")
+                if isinstance(case.get("agent_eval_artifacts"), dict)
+                else None
+            ),
+            "pass_rate_policy": (
+                case.get("pass_rate_policy")
+                if isinstance(case.get("pass_rate_policy"), dict)
+                else None
+            ),
             "expected_signal_score": signal_score,
             "runner_mode": scorecard.get("runner_mode") or "unknown",
         })
@@ -577,12 +588,28 @@ def _render_eval_cases(evals: dict[str, Any]) -> str:
             if status == "passed"
             else "<td><span>Not run</span></td>"
         )
+        riteway = case.get("riteway") if isinstance(case.get("riteway"), dict) else {}
+        riteway_lines = []
+        for label, key in (
+            ("unit", "unit"),
+            ("given", "given"),
+            ("should", "should"),
+            ("actual", "actual"),
+            ("expected", "expected"),
+            ("reproduce", "reproduce"),
+        ):
+            value = riteway.get(key)
+            if value:
+                riteway_lines.append(f"{label}: {value}")
+        evidence_notes = "; ".join(_as_list(case.get("notes"))) or case.get("status")
+        if riteway_lines:
+            evidence_notes = f"{evidence_notes}\n" + "\n".join(riteway_lines)
         rows.append(
             "<tr>"
             f"<td><strong>{_escape(case.get('name'))}</strong><br><span>{_escape(case.get('category'))}</span></td>"
             f"{baseline_cell}"
             f"<td class=\"score {_status_class(pct)}\">{pct}%</td>"
-            f"<td>{_escape('; '.join(_as_list(case.get('notes'))) or case.get('status'))}</td>"
+            f"<td>{_escape(evidence_notes).replace(chr(10), '<br>')}</td>"
             "</tr>"
         )
     return f"""

@@ -49,10 +49,23 @@ The command writes a stable evidence directory:
 target-tile is the disposable tile-shaped input for scenario creation.
 tool-project is the only place where the Tessl scenario tile may be installed.
 The installed tile is pinned as tessl-labs/tessl-skill-eval-scenarios@0.1.0.
+The wrapper stops at preparation and install; it does not generate scenario
+files by itself. On rerun, the wrapper archives prior target-tile, tool-project,
+and generated scenario evidence under evidence-archive/ before refreshing the
+current staging inputs.
+
+If the approved environment stream was sourced and `TESSL_WORKSPACE_API_TOKEN`
+is present, but `tessl project repair --json` still returns
+`Please authenticate with Tessl to continue`, classify the result as
+`blocked_auth` for the native Tessl CLI session. Do not keep retrying token
+export advice, do not print token values, and do not delete the staged
+`/tmp/ask-tessl-scenario-generation/**` evidence. The next required action is
+a Tessl CLI login/session repair outside the package staging lane.
 
 After the command succeeds, open scenario-generation-brief.md. It points to the
 installed Tessl scenario skill and its workflow reference. Follow that skill
-inside the staged directory and write generated scenarios under:
+inside the staged directory and write instructions.json, summary.json,
+summary_infeasible.json, and sequential scenario folders under:
 
     /tmp/ask-tessl-scenario-generation/<skill-path>-<sha12>/target-tile/evals/
 
@@ -96,6 +109,7 @@ The wrapper stages a private tile under:
       references/
       evals/<case-id>/task.md
       evals/<case-id>/criteria.json
+      evidence-archive/<timestamp>-live-private/   # only after reruns
 
 The staged tile.json must use:
 
@@ -115,19 +129,32 @@ metadata.version and falling back to a top-level version field. This value must
 be valid SemVer. Do not run live private Tessl evals for a changed skill until
 the canonical SKILL.md version represents the behavior being evaluated.
 
-Tessl tile evals attach to a Tessl project using that same
-<workspace>/<tile-name> identity. If Tessl reports a missing or inaccessible
-project, create, link, or repair the project for the staged lane before
-rerunning:
+For plugin-owned skills under `Plugins/<plugin-id>/skills/**`, `<tile-name>`
+is the plugin id rather than the leaf skill directory. For example,
+`Plugins/skill-factory/skills/code_quality_review/skill-builder` stages as
+`<workspace>/skill-factory` while the tile manifest still exposes the
+`skill-builder` skill entry.
 
-    tessl project create --workspace <workspace> <tile-name>
-    tessl project link --workspace <workspace>
+Tessl tile evals attach to a Tessl project using that same
+`<workspace>/<tile-name>` identity. The wrapper must check that staged project
+link before running live evals, relink an existing project first, and create the
+project only when the relink path proves it does not already exist:
+
     tessl project repair --workspace <workspace>
+    tessl project link --workspace <workspace>
+    tessl project create --workspace <workspace> <tile-name>
 
 ## Reading Results
 
 Treat Tessl scores as evidence, not proof by themselves.
 
+- A live-private command is not green merely because `tessl eval run`
+  completed. The wrapper must inspect `tessl eval view --json <run-id>` and
+  compare usage-spec results against baseline before reporting readiness.
+- The live-private readiness gate is: usage-spec score is at least 90% and is
+  not below the baseline score. A 95%+ score remains the improvement target.
+  A lower score, lower baseline comparison, or
+  missing viewable score summary is a failed or blocked gate, not a pass.
 - If with-context scores exceed baseline, inspect which criteria improved and
   decide whether to preserve the current skill behavior.
 - If with-context scores are below baseline, inspect failing scenarios before

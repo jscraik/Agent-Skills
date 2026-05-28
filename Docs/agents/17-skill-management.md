@@ -54,5 +54,27 @@ Removed context must have a disposition:
 Do not create context landfills. Deferred references should protect useful
 knowledge, not preserve stale or inappropriate text for its own sake.
 
+## Reference Quality
+
+References are part of the Skills SDK package contract, not spare notes. Treat
+them like scripts: if a skill uses `references/**`, those files must work for
+future agents at package-readiness time.
+
+The SDK package contract reports `values.reference_quality` and
+`./bin/ask skills package verify <skill> --json --robot` blocks broken reference
+sets. The minimum enforced floor is:
+
+- every file under `references/` is readable and non-empty;
+- structured references (`.json`, `.yaml`, `.yml`) parse successfully;
+- `references/contract.yaml`, when present, declares purpose, inputs, and
+  outputs;
+- `references/evals.yaml`, when present, declares claims and cases.
+
+Passing this floor does not prove that a reference is great; it prevents known
+low-quality reference packages from being promoted as ready. When a reference
+drives execution, evals, rollback, validation, or policy, keep it specific,
+current, and runnable enough that an agent can use it without re-deriving the
+contract from chat history.
+
 See [Tooling and Command Policy](/Docs/agents/02-tooling-policy.md#skill-line-budget-policy)
 for the detailed policy.

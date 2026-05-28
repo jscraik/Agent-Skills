@@ -3,6 +3,26 @@ purpose: "Skillify routing and execution boundaries."
 triggers: ["user asks to skillify a repeatable workflow"]
 inputs: ["workflow evidence", "target path or category"]
 outputs: ["validated skill package", "explicit blocked status", "context lifecycle handoff"]
+commands:
+  - "./bin/ask skills audit <skill-path> --level strict --json --robot"
+  - "./bin/ask evals run <skill-path> --mode smoke --json --robot"
+  - "./bin/ask skills external-review <skill-path> --audit-level compat --json --robot"
+permission_profile:
+  filesystem:
+    read:
+      - "source workflow evidence"
+      - "session collector, memory, telemetry, Project Brain, and vault summaries when requested"
+      - "existing skills, agents, automations, docs, scripts, validators, and hooks"
+    write:
+      - "canonical target skill package"
+      - "repo-local validation artifacts"
+      - "blocked implementation plan when the runner is read-only"
+  network: "only for external review, Tessl, or user-approved live validation gates"
+  approval_required:
+    - "external writes"
+    - "publishing or package upload"
+    - "global runtime projection edits"
+    - "destructive cleanup outside the target package"
 non_goals: ["unrelated implementation work"]
 risks: ["ambiguous scope", "sensitive transcript content", "codifying a workflow with no observation path"]
 output_contract: {schema_version: "1", required_fields: [schema_version, mode, validation_evidence, context_lifecycle_handoff, lifecycle_stage], optional_fields: [blocked_by]}

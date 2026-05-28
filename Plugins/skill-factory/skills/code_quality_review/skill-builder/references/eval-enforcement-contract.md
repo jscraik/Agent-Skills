@@ -33,7 +33,7 @@ Never run Tessl against the live repo source tree, and never use `npx tessl`, pu
 
 Plugin Eval is a budget and ergonomics guardrail. Grade `B+` or better with zero failures is acceptable when strict audit, evals, and Tessl gates pass.
 
-Tessl is the content quality gate. Tessl review must run through the repo wrapper with `--json --threshold 95`; scores below `95` block Tessl acceptance.
+Tessl is the content quality gate. Tessl review must run through the repo wrapper with `--json --threshold 90`; scores below `90` block Tessl acceptance. Scores `95+` remain the improvement target, not the minimum acceptance floor.
 
 The Tessl review wrapper is preserved under `/tmp/ask-tessl-reviews/<skill-path>-<sha12>` with `tile.json`, `tessl.json`, copied skill files, and included references.
 

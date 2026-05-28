@@ -288,7 +288,20 @@ def _contains_command(commands: List[str], needle: str) -> bool:
         return False
     if _is_simple_command_token(needle_norm):
         return any(needle_norm in _command_tokens(c) for c in commands)
-    return any(needle_norm in c.lower() for c in commands)
+
+    try:
+        needle_parts = [part.lower() for part in shlex.split(needle_norm) if part.strip()]
+    except ValueError:
+        needle_parts = [part.lower() for part in needle_norm.split() if part.strip()]
+    if not needle_parts:
+        return False
+
+    for command in commands:
+        for token_stream in _command_token_streams(command):
+            for idx in range(0, len(token_stream) - len(needle_parts) + 1):
+                if token_stream[idx : idx + len(needle_parts)] == needle_parts:
+                    return True
+    return False
 
 
 def _is_simple_command_token(value: str) -> bool:
@@ -297,6 +310,13 @@ def _is_simple_command_token(value: str) -> bool:
 
 def _command_tokens(command: str) -> Set[str]:
     tokens: Set[str] = set()
+    for parts in _command_token_streams(command):
+        tokens.update(parts)
+    return tokens
+
+
+def _command_token_streams(command: str) -> List[List[str]]:
+    streams: List[List[str]] = []
     stack: List[str] = [command]
     while stack:
         current = stack.pop()
@@ -304,13 +324,15 @@ def _command_tokens(command: str) -> Set[str]:
             parts = shlex.split(current)
         except ValueError:
             parts = current.split()
+        normalized_parts: List[str] = []
         for idx, part in enumerate(parts):
             normalized = Path(part).name.lower()
             if normalized:
-                tokens.add(normalized)
+                normalized_parts.append(normalized)
             if normalized in {"bash", "sh", "zsh"} and idx + 2 < len(parts) and parts[idx + 1] == "-c":
                 stack.append(parts[idx + 2])
-    return tokens
+        streams.append(normalized_parts)
+    return streams
 
 
 def _check_command_order(commands: List[str], sequence: List[str]) -> bool:

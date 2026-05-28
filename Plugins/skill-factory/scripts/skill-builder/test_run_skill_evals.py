@@ -49,12 +49,14 @@ from run_skill_evals import (
     _isolated_codex_home_for_eval,
     _is_runner_runtime_blocked,
     _is_smoke_only_case,
+    _scrub_mcp_servers_from_toml,
     _write_junit_report,
     evaluate_assertions_text,
     evaluate_expected_signals,
     load_evals,
     load_neutral_baseline_approvals,
     main,
+    run_codex_exec,
     run_discovery_smoke,
     summarize_expected_signal_results,
     _dependency_manifest_paths,
@@ -159,6 +161,22 @@ class RunSkillEvalsModeTests(unittest.TestCase):
             _classify_runner_blocker(
                 output_text="",
                 stdout_text="",
+                stderr_text='Auth(TokenRefreshFailed("Server returned error response: invalid_grant: Invalid refresh token"))',
+            ),
+            "blocked_auth",
+        )
+        self.assertIsNone(
+            _classify_runner_blocker(
+                output_text="valid final answer",
+                stdout_text="",
+                stderr_text='Auth(TokenRefreshFailed("Server returned error response: invalid_grant: Invalid refresh token"))',
+                exit_code=0,
+            )
+        )
+        self.assertEqual(
+            _classify_runner_blocker(
+                output_text="",
+                stdout_text="",
                 stderr_text="",
                 exit_code=124,
             ),
@@ -172,6 +190,27 @@ class RunSkillEvalsModeTests(unittest.TestCase):
                 exit_code=124,
             ),
             "timeout_partial_output",
+        )
+        self.assertEqual(
+            _classify_runner_blocker(
+                output_text="",
+                stdout_text=(
+                    "{\"type\":\"error\",\"message\":\"You've hit your usage limit. "
+                    "Visit https://chatgpt.com/codex/settings/usage to purchase "
+                    "more credits or try again at 2:59 AM.\"}"
+                ),
+                stderr_text="",
+                exit_code=1,
+            ),
+            "blocked_runtime",
+        )
+        self.assertIsNone(
+            _classify_runner_blocker(
+                output_text="Validation: pass",
+                stdout_text="Skill docs mention that the context window is a public good.",
+                stderr_text="",
+                exit_code=0,
+            )
         )
 
     def test_forbidden_short_command_matches_tokens_not_substrings(self) -> None:
@@ -203,6 +242,36 @@ class RunSkillEvalsModeTests(unittest.TestCase):
         result = evaluate_trace(events, deterministic_checks={"forbidden_commands": ["nc"]})
 
         self.assertEqual(result.hard_failures, ["forbidden command was executed: 'nc'"])
+
+    def test_forbidden_phrase_matches_shell_c_payload(self) -> None:
+        events = [
+            {
+                "type": "item.completed",
+                "item": {
+                    "type": "command_execution",
+                    "command": "/bin/zsh -c 'rm -rf /tmp/example'",
+                },
+            }
+        ]
+
+        result = evaluate_trace(events, deterministic_checks={"forbidden_commands": ["rm -rf"]})
+
+        self.assertEqual(result.hard_failures, ["forbidden command was executed: 'rm -rf'"])
+
+    def test_forbidden_phrase_ignores_literal_search_patterns(self) -> None:
+        events = [
+            {
+                "type": "item.completed",
+                "item": {
+                    "type": "command_execution",
+                    "command": r'/bin/zsh -lc "rg -n \"\\b(curl|wget|rm -rf|nc|netcat)\\b\" artifact.txt"',
+                },
+            }
+        ]
+
+        result = evaluate_trace(events, deterministic_checks={"forbidden_commands": ["rm -rf"]})
+
+        self.assertEqual(result.hard_failures, [])
 
     def test_repo_evals_include_family_contract_cases(self) -> None:
         evals_path = SKILL_DIR / "references" / "evals.yaml"
@@ -267,6 +336,45 @@ class RunSkillEvalsModeTests(unittest.TestCase):
             self.assertEqual(cases[0].expected_signals["required_terms"], ["canonical source"])
             self.assertEqual(cases[0].expected_signals["forbidden_terms"], ["runtime projection"])
             self.assertEqual(cases[0].budgets["min_expected_signal_score"], 90)
+
+    def test_load_evals_parses_riteway_contract_metadata(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            evals_path = Path(tmp) / "evals.yaml"
+            evals_path.write_text(
+                textwrap.dedent(
+                    """
+                    cases:
+                      - id: report-shape
+                        name: report shape
+                        prompt: Check the report.
+                        acceptance:
+                          - contains: done
+                        unit: eval report rendering
+                        given: a failed agent-mediated assertion
+                        should: show the bug-report shape
+                        actual_artifact: actual.txt
+                        expected_artifact: expected.txt
+                        raw_response_artifact: .responses.md
+                        judge_detail_artifact: judge.json
+                        pass_rate_threshold: 0.75
+                        reproduce: ./bin/ask evals run demo
+                    """
+                ).strip()
+                + "\n",
+                encoding="utf-8",
+            )
+
+            cases = load_evals(evals_path)
+
+        self.assertEqual(cases[0].unit, "eval report rendering")
+        self.assertEqual(cases[0].given, "a failed agent-mediated assertion")
+        self.assertEqual(cases[0].should, "show the bug-report shape")
+        self.assertEqual(cases[0].actual_artifact, "actual.txt")
+        self.assertEqual(cases[0].expected_artifact, "expected.txt")
+        self.assertEqual(cases[0].raw_response_artifact, ".responses.md")
+        self.assertEqual(cases[0].judge_detail_artifact, "judge.json")
+        self.assertEqual(cases[0].pass_rate_threshold, 0.75)
+        self.assertEqual(cases[0].reproduce, "./bin/ask evals run demo")
 
     def test_load_evals_parses_claim_coverage_metadata(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -412,6 +520,38 @@ class RunSkillEvalsModeTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "duplicate baseline id"):
                 load_evals(evals_path)
 
+    def test_claim_summary_flags_missing_riteway_shape_and_weak_acceptance(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            evals_path = Path(tmp) / "evals.yaml"
+            evals_path.write_text(
+                textwrap.dedent(
+                    """
+                    cases:
+                      - id: weak-smoke
+                        name: weak smoke
+                        prompt: Check this.
+                        eval_modes: [smoke]
+                        realistic: true
+                        acceptance:
+                          - contains: done
+                    """
+                ).strip()
+                + "\n",
+                encoding="utf-8",
+            )
+            cases = load_evals(evals_path)
+            summary = _claim_to_evidence_summary(
+                _load_evals_document(evals_path),
+                cases,
+                eval_mode="smoke",
+                skill_dir=Path(tmp),
+            )
+
+        gap_types = {gap["type"] for gap in summary["gaps"]}
+        self.assertIn("missing_riteway_shape", gap_types)
+        self.assertIn("weak_acceptance_shape", gap_types)
+        self.assertEqual(summary["blocking_gaps"], [])
+
     def test_neutral_baseline_approvals_reject_duplicate_ids(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             evals_path = Path(tmp) / "evals.yaml"
@@ -479,6 +619,51 @@ class RunSkillEvalsModeTests(unittest.TestCase):
             self.assertIn(
                 "claim_without_evidence_surface",
                 {gap["type"] for gap in summary["blocking_gaps"]},
+            )
+
+    def test_release_claim_gate_counts_expected_evidence_surface(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            evals_path = Path(tmp) / "evals.yaml"
+            evals_path.write_text(
+                textwrap.dedent(
+                    """
+                    claims:
+                      - id: demo.execution
+                        statement: Executes correctly.
+                        source: SKILL.md:workflow
+                        claim_type: execution
+                        risk: high
+                        hard_gate: true
+                        evidence_required: [runner artifact]
+                    cases:
+                      - id: execution
+                        name: Execution
+                        prompt: Do the thing.
+                        claim_ids: [demo.execution]
+                        realistic: true
+                        why_realistic: Normal release request.
+                        expected_evidence: [runner artifact]
+                        acceptance:
+                          - type: contains
+                            value: done
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            cases = load_evals(evals_path)
+            summary = _claim_to_evidence_summary(
+                _load_evals_document(evals_path),
+                cases,
+                eval_mode="release",
+                skill_dir=Path(tmp),
+            )
+
+            self.assertTrue(summary["passed"])
+            self.assertEqual(summary["blocking_gaps"], [])
+            self.assertEqual(
+                summary["claims"][0]["evidence_surfaces"],
+                ["expected_evidence"],
             )
 
     def test_release_hard_gate_requires_check_surface_for_bypass_gates(self) -> None:
@@ -1269,6 +1454,60 @@ class RunSkillEvalsModeTests(unittest.TestCase):
         self.assertTrue((isolated_home / "logs").is_dir())
         self.assertIn("Using isolated CODEX_HOME", "\n".join(warnings))
 
+    def test_isolated_codex_config_drops_mcp_servers(self) -> None:
+        source = textwrap.dedent(
+            """
+            model = "gpt-test"
+
+            [profiles.test]
+            model = "gpt-profile"
+
+            [mcp_servers.linear]
+            url = "https://mcp.linear.app/mcp"
+
+            [mcp_servers.linear.tools.save_comment]
+            enabled = false
+
+            [tools]
+            web_search = true
+            """
+        ).lstrip()
+
+        scrubbed = _scrub_mcp_servers_from_toml(source)
+
+        self.assertIn("[profiles.test]", scrubbed)
+        self.assertIn("[tools]", scrubbed)
+        self.assertNotIn("[mcp_servers.linear]", scrubbed)
+        self.assertNotIn("save_comment", scrubbed)
+
+    def test_run_codex_exec_ignores_user_config(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            workspace_root = Path(tmpdir)
+            output_last_message_path = workspace_root / "last.txt"
+            fake_proc = unittest.mock.Mock(returncode=0, stdout="", stderr="")
+
+            with unittest.mock.patch("run_skill_evals.sp.run", return_value=fake_proc) as mocked_run:
+                rc, stdout, stderr, warnings = run_codex_exec(
+                    workspace_root=workspace_root,
+                    prompt="Route only.",
+                    output_last_message_path=output_last_message_path,
+                    output_schema_path=None,
+                    sandbox="read-only",
+                    ask_for_approval=None,
+                    model=None,
+                    profile=None,
+                    codex_home=workspace_root / ".codex",
+                    jsonl_path=None,
+                    codex_bin=None,
+                    timeout_sec=1,
+                    timeout_profile="default",
+                )
+
+        self.assertEqual((rc, stdout, stderr, warnings), (0, "", "", []))
+        cmd = mocked_run.call_args.args[0]
+        self.assertIn("--ignore-user-config", cmd)
+        self.assertLess(cmd.index("--ignore-user-config"), cmd.index("--sandbox"))
+
     def test_write_junit_report_outputs_failures(self) -> None:
         summary = {
             "skill": "skill-builder",
@@ -1431,6 +1670,8 @@ class RunSkillEvalsModeTests(unittest.TestCase):
         self.assertIn("junit", summary["artifacts"])
         self.assertEqual(summary["cases"][0]["warnings"], [])
         self.assertTrue(summary["cases"][0]["runners"]["discovery-smoke"]["metrics"]["selected_skill"])
+        self.assertEqual(summary["cases"][0]["riteway"]["unit"], "discovery smoke")
+        self.assertIn("eval_contract_migration", summary)
         self.assertIn("release_manifest", summary["artifacts"])
         self.assertEqual(release_manifest["artifacts"]["junit"], summary["artifacts"]["junit"])
         self.assertEqual(

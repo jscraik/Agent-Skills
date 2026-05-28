@@ -1,0 +1,213 @@
+{
+  "command": "./bin/ask skills proof skill-factory-router --runtime-target codex --json --robot",
+  "exit_code": 2,
+  "handle": "skill-factory-router",
+  "observed_at": "2026-05-27T10:24:50Z",
+  "proof": {
+    "available_runtimes": [
+      "agents_user_runtime"
+    ],
+    "command_handle_check": {
+      "checked_count": 210,
+      "command_handle_count": 105,
+      "schema_version": "command-handle-check.v1",
+      "skipped": [],
+      "status": "fail",
+      "violations": [
+        {
+          "code": "COMMAND_HANDLE_DRIFT",
+          "handle": "skill-builder",
+          "path": ".agents/skills/skill-builder/agents/openai.yaml"
+        },
+        {
+          "code": "COMMAND_HANDLE_DRIFT",
+          "handle": "skill-factory-router",
+          "path": ".agents/skills/skill-factory-router/agents/openai.yaml"
+        },
+        {
+          "code": "COMMAND_HANDLE_DRIFT",
+          "handle": "skill-refactor",
+          "path": ".agents/skills/skill-refactor/agents/openai.yaml"
+        },
+        {
+          "code": "COMMAND_HANDLE_DRIFT",
+          "handle": "skillify",
+          "path": ".agents/skills/skillify/agents/openai.yaml"
+        }
+      ]
+    },
+    "gate_policy": {
+      "required": [
+        "resolver",
+        "generated_command_handle_check",
+        "workspace_command_handle_exists",
+        "codex_user_runtime_ready"
+      ],
+      "required_semantics": "codex_user_runtime_ready must be true for runtime_target=codex.",
+      "runtime_target": "codex",
+      "supporting_runtime_diagnostics": [
+        "codex_user_link",
+        "codex_user_command_handle_exists",
+        "codex_user_command_handle_points_to_workspace",
+        "codex_user_runtime_ready",
+        "agents_user_link",
+        "agents_user_command_handle_exists",
+        "agents_user_command_handle_points_to_workspace",
+        "agents_user_runtime_ready"
+      ]
+    },
+    "gates": {
+      "agents_user_command_handle_exists": true,
+      "agents_user_command_handle_points_to_workspace": true,
+      "agents_user_link": true,
+      "agents_user_runtime_ready": true,
+      "codex_user_command_handle_exists": false,
+      "codex_user_command_handle_points_to_workspace": false,
+      "codex_user_link": false,
+      "codex_user_runtime_ready": false,
+      "generated_command_handle_check": false,
+      "resolver": true,
+      "user_runtime_ready": true,
+      "workspace_command_handle_exists": true
+    },
+    "handle": "skill-factory-router",
+    "resolution": {
+      "command_handle_path": ".agents/skills/skill-factory-router/SKILL.md",
+      "command_visibility": "orchestrator",
+      "description": "Use when a skill lifecycle request needs routing to one Skill Factory lane for creation, audit, improvement, install, refactor, or lifecycle decision.",
+      "handle": "skill-factory-router",
+      "kind": "skill",
+      "level": "router",
+      "owner": "skill-factory",
+      "provenance": {
+        "generator": "context-budgeted-skillsets.v1",
+        "policy_identity": "296d65527f6072ac",
+        "projection_mode": "rooted",
+        "source_revision": "5cd337fce",
+        "source_sha256": "0daf5e219fe798ad89b5ae4259218aea1f8a8b34d28f532d58745797f8e5c5c7"
+      },
+      "runtime_visibility": "latent",
+      "source_path": "Plugins/skill-factory/skills/skill-factory-router/SKILL.md",
+      "status": "ok"
+    },
+    "runtime_diagnostics": {
+      "expected_workspace_runtime": "${WORKSPACE_ROOT}/.agents/skills",
+      "failed_gate": "generated_command_handle_check",
+      "missing_command_handles": [
+        {
+          "expected_under": "${WORKSPACE_ROOT}/.agents/skills",
+          "path": "${HOME}/.codex/skills/skill-factory-router/SKILL.md",
+          "runtime": "codex_user_runtime"
+        }
+      ],
+      "recovery_commands": [
+        {
+          "command": "./bin/ask skills sync --scope user --projection rooted --dry-run --json --robot",
+          "expected_outcome": "Reports whether ~/.codex/skills or ~/.agents/skills would be relinked before mutation.",
+          "kind": "preview_user_runtime_sync",
+          "permission_profile": {
+            "filesystem": "read workspace and user runtime links",
+            "network": "not required"
+          },
+          "preconditions": [
+            "Workspace rooted projection validates cleanly."
+          ]
+        },
+        {
+          "command": "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
+          "expected_outcome": "Refreshes .agents/skills command handles from canonical sources.",
+          "kind": "refresh_workspace_projection",
+          "permission_profile": {
+            "filesystem": "write workspace runtime projection",
+            "network": "not required"
+          },
+          "preconditions": [
+            "Canonical skill sources are ready to project."
+          ]
+        },
+        {
+          "command": "./bin/ask skills sync --scope user --projection rooted --json --robot",
+          "expected_outcome": "Makes user-level Codex and Agents skill runtimes point at the workspace projection.",
+          "kind": "apply_user_runtime_sync",
+          "permission_profile": {
+            "filesystem": "write home-directory runtime links",
+            "network": "not required"
+          },
+          "preconditions": [
+            "Dry-run output is acceptable to the operator."
+          ]
+        },
+        {
+          "command": "./bin/ask skills proof skill-factory-router --runtime-target codex --json --robot",
+          "expected_outcome": "Updates runtime evidence with pass or a narrower blocked_runtime reason.",
+          "kind": "rerun_runtime_proof",
+          "permission_profile": {
+            "filesystem": "read workspace and user runtime links; write runtime-proof evidence",
+            "network": "not required"
+          },
+          "preconditions": [
+            "User runtime link or handle bridge now points at the workspace projection."
+          ]
+        }
+      ],
+      "recovery_risk": "User-scope sync mutates home-directory runtime links; preview with --dry-run before applying.",
+      "runtime_modes": {
+        "agents_user_runtime": "root_symlink",
+        "codex_user_runtime": "foreign_or_unmanaged_root"
+      },
+      "schema_version": "command-handle-runtime-diagnostics.v1",
+      "selected_runtime_target": "codex"
+    },
+    "runtime_failure": {
+      "command": "skills proof",
+      "error_code": "ERR_VALIDATION",
+      "failed_check_id": "generated_command_handle_check",
+      "message": "Command handle proof failed for 'skill-factory-router'.",
+      "path": "gates.generated_command_handle_check",
+      "recovery_guidance": "Preview with ./bin/ask skills sync --scope user --projection rooted --dry-run, then run workspace/user sync only if the user-runtime relink plan is acceptable.",
+      "schema_version": "skill-runtime-failure.v1",
+      "validation_commands": [
+        "./bin/ask skills proof skill-factory-router --runtime-target codex --json --robot"
+      ]
+    },
+    "runtime_satisfied_by": null,
+    "runtime_target": "codex",
+    "schema_version": "command-handle-proof.v2",
+    "status": "fail",
+    "user_runtime_command_handles": {
+      "agents_handle": "${HOME}/.agents/skills/skill-factory-router/SKILL.md",
+      "agents_handle_exists": true,
+      "agents_handle_points_to_workspace": true,
+      "codex_handle": "${HOME}/.codex/skills/skill-factory-router/SKILL.md",
+      "codex_handle_exists": false,
+      "codex_handle_points_to_workspace": false
+    },
+    "user_runtime_links": {
+      "agents_skills": {
+        "exists": true,
+        "is_symlink": true,
+        "path": "${HOME}/.agents/skills",
+        "points_to_workspace_runtime": true,
+        "target": "${WORKSPACE_ROOT}/.agents/skills"
+      },
+      "codex_skills": {
+        "exists": true,
+        "is_symlink": true,
+        "path": "${HOME}/.codex/skills",
+        "points_to_workspace_runtime": false,
+        "target": "${HOME}/dev/configs/.codex/skills"
+      }
+    },
+    "validation_commands": [
+      "./bin/ask skills proof skill-factory-router --runtime-target codex --json --robot"
+    ],
+    "workspace_runtime": {
+      "command_handle_exists": true,
+      "command_handle_path": "${WORKSPACE_ROOT}/.agents/skills/skill-factory-router/SKILL.md",
+      "path": "${WORKSPACE_ROOT}/.agents/skills"
+    }
+  },
+  "runtime_status": "stale_or_drifted",
+  "runtime_target": "codex",
+  "schema_version": "command-handle-runtime-probe.v1"
+}

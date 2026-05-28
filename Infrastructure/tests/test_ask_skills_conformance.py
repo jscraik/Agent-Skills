@@ -286,6 +286,41 @@ class TestAskSkillsConformance(unittest.TestCase):
         self.assertFalse(verification["provenance_identity"]["trusted"])
         self.assertTrue(any(item["rule_id"] == "untrusted_provenance" for item in verification["blockers"]))
 
+    def test_directory_verify_blocks_empty_reference_files(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_md = Path(temp_dir) / "sample" / "SKILL.md"
+            references_dir = skill_md.parent / "references"
+            references_dir.mkdir(parents=True)
+            skill_md.write_text(
+                "---\n"
+                "name: sample-skill\n"
+                "description: Use when verifying sample packages.\n"
+                "version: 1.0.0\n"
+                "compatible_roles: default\n"
+                "runtime_needs: local files\n"
+                "maturity: fixture\n"
+                "provenance: agent-skills\n"
+                "share_readiness: ready\n"
+                "---\n",
+                encoding="utf-8",
+            )
+            (references_dir / "context.md").write_text("\n", encoding="utf-8")
+
+            verification = verify_skill_directory(REPO_ROOT, skill_md, str(skill_md.parent))
+
+        self.assertEqual(verification["status"], "blocked")
+        self.assertEqual(
+            verification["sdk_contract"]["values"]["reference_quality"]["status"],
+            "blocked_validation",
+        )
+        self.assertTrue(
+            any(item["rule_id"] == "reference_quality_blocked" for item in verification["blockers"])
+        )
+        self.assertEqual(
+            {check["name"]: check["status"] for check in verification["checks"]}["reference_quality"],
+            "fail",
+        )
+
     def test_handle_verify_preserves_branch_rule_evidence(self) -> None:
         result = skills_package_verify(REPO_ROOT, "skill-builder")
 
@@ -295,6 +330,7 @@ class TestAskSkillsConformance(unittest.TestCase):
         self.assertIn("skill_md_present:true", rule_evidence)
         self.assertIn("frontmatter_read:true", rule_evidence)
         self.assertIn("package_metadata_complete:true", rule_evidence)
+        self.assertIn("reference_quality:true", rule_evidence)
         self.assertIn("provenance_trusted:true", rule_evidence)
 
     def test_conformance_run_writes_replayable_evidence(self) -> None:

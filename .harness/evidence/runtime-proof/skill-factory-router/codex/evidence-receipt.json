@@ -1,0 +1,23 @@
+{
+  "artifact_path": ".harness/evidence/runtime-proof/skill-factory-router/codex/runtime-card.json",
+  "blocker": "Command handle proof failed for 'skill-factory-router'.",
+  "blocker_class": "stale_or_drifted",
+  "claim": "$skill-factory-router is reachable in the Codex runtime.",
+  "claim_status": "blocked",
+  "command": "./bin/ask skills proof skill-factory-router --runtime-target codex --json --robot",
+  "evidence_type": "command",
+  "exit_code": 2,
+  "observed_at": "2026-05-27T10:24:50Z",
+  "probe_artifact_path": ".harness/evidence/runtime-proof/skill-factory-router/codex/probe.json",
+  "probe_command": "./bin/ask skills proof skill-factory-router --runtime-target codex --json --robot",
+  "probe_exit_code": 2,
+  "receipt_id": "runtime-proof-skill-factory-router-codex",
+  "runtime_status": "stale_or_drifted",
+  "runtime_target": "codex",
+  "source_paths": [
+    "Plugins/skill-factory/skills/skill-factory-router/SKILL.md",
+    "Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py",
+    "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+  ],
+  "verifier": "ask.skills.proof"
+}

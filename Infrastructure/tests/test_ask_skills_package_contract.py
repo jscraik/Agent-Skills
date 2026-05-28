@@ -23,6 +23,7 @@ SUPPORTED_SCHEMA_KEYS = {
     "allOf",
     "const",
     "definitions",
+    "description",
     "enum",
     "if",
     "items",
@@ -78,6 +79,8 @@ def _schema_type_matches(value: object, expected: str) -> bool:
         return isinstance(value, str)
     if expected == "integer":
         return isinstance(value, int) and not isinstance(value, bool)
+    if expected == "number":
+        return isinstance(value, (int, float)) and not isinstance(value, bool)
     if expected == "boolean":
         return isinstance(value, bool)
     if expected == "null":
@@ -231,6 +234,10 @@ class TestAskSkillsPackageContract(unittest.TestCase):
             "skill-package.v1.schema.json": _load_schema("skill-package.v1.schema.json"),
             "skill-package-readiness.v1.schema.json": _load_schema(
                 "skill-package-readiness.v1.schema.json"
+            ),
+            "skillflow.v1.schema.json": _load_schema("skillflow.v1.schema.json"),
+            "skill-optimization-contract.v1.schema.json": _load_schema(
+                "skill-optimization-contract.v1.schema.json"
             ),
         }
 
@@ -549,10 +556,618 @@ policy:
             "skill-package-readiness.v1",
         )
         self.assertEqual(
+            package["optimization_schema"]["schema_version"],
+            "skill-optimization-contract.v1",
+        )
+        self.assertEqual(
             package["compatibility_snapshot"]["id"],
             "skill-package-readiness.v1.public-output.2026-05-23",
         )
         self.assertEqual(package["contract_schemas"]["skill_package"], "skill-package.v1")
+
+    def test_package_payload_exposes_sdk_contract_and_optional_observability(self) -> None:
+        with patch("ask.commands.skills_impl.resolve_skill_handle", return_value={
+            "status": "ok",
+            "handle": "skill-builder",
+            "source_path": "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md",
+        }):
+            package = skills_package(REPO_ROOT, "skill-builder").data["skill_package"]
+
+        sdk_contract = package["package_contract"]["sdk_contract"]
+        self.assertEqual(sdk_contract["schema_version"], "skill-sdk-contract.v1")
+        self.assertIn("agent_metadata", sdk_contract["required_fields"]["present"])
+        self.assertIn("reference_contract", sdk_contract["required_fields"]["present"])
+        self.assertIn("reference_quality", sdk_contract["required_fields"]["present"])
+        self.assertIn("purpose", sdk_contract["required_fields"]["present"])
+        self.assertIn("inputs", sdk_contract["required_fields"]["present"])
+        self.assertIn("outputs", sdk_contract["required_fields"]["present"])
+        self.assertIn("commands", sdk_contract["required_fields"]["present"])
+        self.assertIn("permission_profile", sdk_contract["required_fields"]["present"])
+        self.assertIn("evals", sdk_contract["required_fields"]["present"])
+        self.assertIn("task_profile", sdk_contract["required_fields"]["present"])
+        self.assertIn("evidence_policy", sdk_contract["required_fields"]["present"])
+        self.assertEqual(
+            sdk_contract["values"]["agent_metadata"]["path"],
+            "Plugins/skill-factory/skills/code_quality_review/skill-builder/agents/openai.yaml",
+        )
+        self.assertEqual(
+            sdk_contract["values"]["reference_contract"]["path"],
+            "Plugins/skill-factory/skills/code_quality_review/skill-builder/references/contract.yaml",
+        )
+        self.assertEqual(
+            sdk_contract["values"]["reference_quality"]["policy"],
+            "references_are_package_contract",
+        )
+        self.assertEqual(sdk_contract["values"]["reference_quality"]["status"], "pass")
+        self.assertTrue(
+            sdk_contract["values"]["reference_quality"]["required_for_package_readiness"]
+        )
+        self.assertFalse(sdk_contract["values"]["reference_quality"]["blockers"])
+        self.assertEqual(
+            sdk_contract["progressive_disclosure"]["references_quality_status"],
+            "pass",
+        )
+        self.assertEqual(
+            sdk_contract["values"]["task_profile"]["path"],
+            "Plugins/skill-factory/skills/code_quality_review/skill-builder/references/task-profile.json",
+        )
+        self.assertEqual(
+            sdk_contract["values"]["permission_profile"]["filesystem"]["read"],
+            [
+                "target skill package",
+                "repo validation scripts",
+                "optional ~/.agents evidence provider summaries",
+            ],
+        )
+        self.assertTrue(sdk_contract["progressive_disclosure"]["skill_md_under_500_lines"])
+        self.assertTrue(sdk_contract["progressive_disclosure"]["agent_metadata_declared"])
+        self.assertTrue(sdk_contract["progressive_disclosure"]["references_contract_declared"])
+        self.assertTrue(sdk_contract["values"]["evals"]["declared"])
+        self.assertTrue(sdk_contract["progressive_disclosure"]["task_profile_declared"])
+        self.assertFalse(sdk_contract["progressive_disclosure"]["agent_tomls_declared"])
+        self.assertIn(
+            "Plugins/skill-factory/skills/code_quality_review/skill-builder/references/evals.yaml",
+            sdk_contract["values"]["evals"]["paths"],
+        )
+        self.assertFalse(
+            any(
+                command.startswith("Tessl content below 95")
+                for command in sdk_contract["values"]["commands"]
+            )
+        )
+        self.assertEqual(
+            sdk_contract["agent_contract"]["source_of_truth"],
+            "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md",
+        )
+        self.assertIn(
+            "claim_eval_pass_as_runtime_proof",
+            sdk_contract["agent_contract"]["forbidden_actions"],
+        )
+        self.assertIn("optional_per_skill_runtime_profiles", sdk_contract["agent_contract"]["agent_toml_policy"])
+        self.assertEqual(
+            sdk_contract["values"]["workflow_contract"]["schema_version"],
+            "skillflow-contract.v1",
+        )
+        self.assertEqual(
+            sdk_contract["values"]["workflow_contract"]["skillflow_schema_version"],
+            "skillflow.v1",
+        )
+        self.assertEqual(
+            sdk_contract["values"]["optimization_contract"]["schema_version"],
+            "skill-optimization-readiness.v1",
+        )
+        self.assertEqual(
+            sdk_contract["values"]["optimization_contract"]["optimization_schema_version"],
+            "skill-optimization-contract.v1",
+        )
+        self.assertEqual(
+            sdk_contract["progressive_disclosure"]["execution_mode"],
+            sdk_contract["values"]["workflow_contract"]["execution_mode"],
+        )
+        self.assertEqual(
+            sdk_contract["progressive_disclosure"]["optimization_status"],
+            sdk_contract["values"]["optimization_contract"]["status"],
+        )
+        self.assertIn(
+            "workflows/skillflow.json",
+            sdk_contract["agent_contract"]["workflow_policy"],
+        )
+        self.assertIn(
+            "bounded candidate artifacts",
+            sdk_contract["agent_contract"]["optimization_policy"],
+        )
+
+        providers = sdk_contract["evidence_providers"]
+        self.assertEqual(providers["schema_version"], "skill-evidence-providers.v1")
+        self.assertEqual(providers["authority"], "artifacts_decide_telemetry_explains")
+        self.assertFalse(providers["required_for_package_readiness"])
+        self.assertIn(
+            providers["telemetry_confidence"],
+            {"enriched", "partial", "not_available"},
+        )
+        self.assertEqual(
+            [provider["name"] for provider in providers["providers"]],
+            ["otel_collector", "session_collector", "observability_stack"],
+        )
+
+    def test_sdk_contract_accepts_optional_valid_skillflow(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "workflow-skill"
+            references_dir = skill_dir / "references"
+            workflows_dir = skill_dir / "workflows"
+            references_dir.mkdir(parents=True)
+            workflows_dir.mkdir()
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: workflow-skill
+description: Workflow skill fixture.
+---
+
+# Workflow Skill
+""",
+                encoding="utf-8",
+            )
+            (references_dir / "contract.yaml").write_text(
+                """schema_version: "1.0"
+purpose: "Exercise optional skillflow contract support."
+execution_mode: "hybrid"
+inputs:
+  - name: task
+outputs:
+  - name: result
+workflow:
+  path: "workflows/skillflow.json"
+  required: true
+  execution_mode: "hybrid"
+""",
+                encoding="utf-8",
+            )
+            skillflow_payload = {
+                "schema_version": "skillflow.v1",
+                "name": "workflow-skill",
+                "inputs": {"task": {"type": "string"}},
+                "outputs": {"result": {"type": "string"}},
+                "nodes": [
+                    {
+                        "id": "classify",
+                        "type": "llm",
+                        "out": "classification",
+                    },
+                    {
+                        "id": "validate",
+                        "type": "validator",
+                        "out": "result",
+                    },
+                ],
+            }
+            (workflows_dir / "skillflow.json").write_text(
+                json.dumps(skillflow_payload),
+                encoding="utf-8",
+            )
+
+            contract = package_contracts.sdk_package_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+            )
+
+        workflow_contract = contract["values"]["workflow_contract"]
+        _validate_schema_subset(
+            self.schemas["skillflow.v1.schema.json"],
+            skillflow_payload,
+            self.schemas,
+        )
+        self.assertEqual(workflow_contract["status"], "pass")
+        self.assertTrue(workflow_contract["declared"])
+        self.assertTrue(workflow_contract["required"])
+        self.assertEqual(workflow_contract["execution_mode"], "hybrid")
+        self.assertEqual(workflow_contract["node_count"], 2)
+        self.assertEqual(workflow_contract["human_gate_count"], 0)
+        self.assertFalse(workflow_contract["blockers"])
+        self.assertTrue(contract["progressive_disclosure"]["workflow_declared"])
+
+    def test_required_skillflow_missing_blocks_package_readiness(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "workflow-skill"
+            references_dir = skill_dir / "references"
+            references_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: workflow-skill
+description: Workflow skill fixture.
+version: "1.0.0"
+metadata:
+  compatible_roles:
+    - worker
+  runtime_needs:
+    - filesystem
+  maturity: beta
+  provenance: internal
+  share_readiness: ready
+---
+
+# Workflow Skill
+""",
+                encoding="utf-8",
+            )
+            (references_dir / "contract.yaml").write_text(
+                """schema_version: "1.0"
+purpose: "Exercise required skillflow blocking."
+execution_mode: "deterministic_flow"
+inputs:
+  - name: task
+outputs:
+  - name: result
+workflow:
+  path: "workflows/skillflow.json"
+  required: true
+  execution_mode: "deterministic_flow"
+""",
+                encoding="utf-8",
+            )
+
+            package = skills_package(
+                repo_root,
+                "Skills/agent-ops/workflow-skill",
+                strict=True,
+            ).data["skill_package"]
+
+        workflow_contract = package["package_contract"]["sdk_contract"]["values"]["workflow_contract"]
+        self.assertEqual(workflow_contract["status"], "blocked_validation")
+        self.assertIn(
+            "workflow_contract:skillflow_required_file_missing",
+            package["gate_summary"]["blocked_reasons"],
+        )
+        self.assertIn(
+            package["package_contract"]["readiness_level"],
+            {"sdk_contract_incomplete", "workflow_contract_incomplete"},
+        )
+
+    def test_sdk_contract_accepts_valid_skill_optimization_contract(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "optimizable-skill"
+            references_dir = skill_dir / "references"
+            references_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: optimizable-skill
+description: Optimizable skill fixture.
+---
+
+# Optimizable Skill
+""",
+                encoding="utf-8",
+            )
+            optimization_payload = {
+                "schema_version": "skill-optimization-contract.v1",
+                "enabled": True,
+                "target_artifact": "SKILL.md",
+                "optimizer_mode": "bounded_patch",
+                "roles": {
+                    "target_runner": {
+                        "may_edit": "none",
+                        "sees": ["current_target"],
+                    },
+                    "optimizer": {
+                        "may_edit": "candidate_patch_only",
+                        "sees": ["train", "selection"],
+                    },
+                    "promoter": {
+                        "may_edit": "canonical_source_after_review",
+                        "sees": ["candidate", "selection", "test"],
+                    },
+                    "auditor": {
+                        "may_edit": "none",
+                        "sees": ["diff", "protected_paths"],
+                    },
+                },
+                "splits": {
+                    "train": {
+                        "path": ".harness/evals/optimizable/train.jsonl",
+                        "role": "proposal_generation",
+                    },
+                    "selection": {
+                        "path": ".harness/evals/optimizable/selection.jsonl",
+                        "role": "candidate_acceptance",
+                    },
+                    "test": {
+                        "path": ".harness/evals/optimizable/test.jsonl",
+                        "role": "final_report_only",
+                    },
+                    "split_seed": 42,
+                },
+                "edit_policy": {
+                    "mode": "patch",
+                    "operations": ["add", "delete", "replace"],
+                    "max_edits": 4,
+                },
+                "acceptance_gate": {
+                    "metric": "score",
+                    "direction": "maximize",
+                    "rule": "strict_improvement",
+                    "ties": "reject",
+                    "min_delta": 0.01,
+                    "noise_runs": 3,
+                    "guard_failure": "discard",
+                    "report_test_score_only_after_acceptance": True,
+                },
+                "anti_cheat": {
+                    "protected_paths": ["references/evals.yaml", ".harness/evals/**"],
+                    "checks": ["protected_path_diff_empty", "held_out_not_visible_to_optimizer"],
+                },
+                "evidence": {
+                    "root": ".harness/evidence/optimizable/<run_tag>",
+                    "rollout_jsonl": "rollouts.jsonl",
+                    "rejected_buffer_jsonl": "rejected-edits.jsonl",
+                    "candidate_artifact": "best_skill.md",
+                    "promotion_manifest": "promotion.json",
+                    "selection_results": "selection-results.json",
+                    "test_results": "test-results.json",
+                },
+                "promotion": {
+                    "canonical_edit_requires_review": True,
+                    "required_checks": [
+                        "selection_gate_pass",
+                        "held_out_test_report",
+                        "anti_cheat_pass",
+                    ],
+                },
+            }
+            (references_dir / "contract.yaml").write_text(
+                """schema_version: "1.0"
+purpose: "Exercise valid bounded optimization contract support."
+inputs:
+  - name: task
+outputs:
+  - name: result
+optimization:
+  schema_version: "skill-optimization-contract.v1"
+  enabled: true
+  target_artifact: "SKILL.md"
+  optimizer_mode: "bounded_patch"
+  roles:
+    target_runner:
+      may_edit: "none"
+      sees:
+        - current_target
+    optimizer:
+      may_edit: "candidate_patch_only"
+      sees:
+        - train
+        - selection
+    promoter:
+      may_edit: "canonical_source_after_review"
+      sees:
+        - candidate
+        - selection
+        - test
+    auditor:
+      may_edit: "none"
+      sees:
+        - diff
+        - protected_paths
+  splits:
+    train:
+      path: ".harness/evals/optimizable/train.jsonl"
+      role: "proposal_generation"
+    selection:
+      path: ".harness/evals/optimizable/selection.jsonl"
+      role: "candidate_acceptance"
+    test:
+      path: ".harness/evals/optimizable/test.jsonl"
+      role: "final_report_only"
+    split_seed: 42
+  edit_policy:
+    mode: "patch"
+    operations:
+      - add
+      - delete
+      - replace
+    max_edits: 4
+  acceptance_gate:
+    metric: "score"
+    direction: "maximize"
+    rule: "strict_improvement"
+    ties: "reject"
+    min_delta: 0.01
+    noise_runs: 3
+    guard_failure: "discard"
+    report_test_score_only_after_acceptance: true
+  anti_cheat:
+    protected_paths:
+      - "references/evals.yaml"
+      - ".harness/evals/**"
+    checks:
+      - protected_path_diff_empty
+      - held_out_not_visible_to_optimizer
+  evidence:
+    root: ".harness/evidence/optimizable/<run_tag>"
+    rollout_jsonl: "rollouts.jsonl"
+    rejected_buffer_jsonl: "rejected-edits.jsonl"
+    candidate_artifact: "best_skill.md"
+    promotion_manifest: "promotion.json"
+    selection_results: "selection-results.json"
+    test_results: "test-results.json"
+  promotion:
+    canonical_edit_requires_review: true
+    required_checks:
+      - selection_gate_pass
+      - held_out_test_report
+      - anti_cheat_pass
+""",
+                encoding="utf-8",
+            )
+
+            contract = package_contracts.sdk_package_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+            )
+
+        optimization_contract = contract["values"]["optimization_contract"]
+        _validate_schema_subset(
+            self.schemas["skill-optimization-contract.v1.schema.json"],
+            optimization_payload,
+            self.schemas,
+        )
+        self.assertEqual(optimization_contract["status"], "pass")
+        self.assertTrue(optimization_contract["enabled"])
+        self.assertEqual(optimization_contract["optimizer_mode"], "bounded_patch")
+        self.assertEqual(optimization_contract["split_seed"], 42)
+        self.assertFalse(optimization_contract["blockers"])
+        self.assertTrue(contract["progressive_disclosure"]["optimization_declared"])
+
+    def test_incomplete_skill_optimization_contract_blocks_package_readiness(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "optimizable-skill"
+            references_dir = skill_dir / "references"
+            references_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: optimizable-skill
+description: Optimizable skill fixture.
+version: "1.0.0"
+metadata:
+  compatible_roles:
+    - worker
+  runtime_needs:
+    - filesystem
+  maturity: beta
+  provenance: internal
+  share_readiness: ready
+---
+
+# Optimizable Skill
+""",
+                encoding="utf-8",
+            )
+            (references_dir / "contract.yaml").write_text(
+                """schema_version: "1.0"
+purpose: "Exercise incomplete bounded optimization contract blocking."
+inputs:
+  - name: task
+outputs:
+  - name: result
+optimization:
+  enabled: true
+  target_artifact: "SKILL.md"
+""",
+                encoding="utf-8",
+            )
+
+            package = skills_package(
+                repo_root,
+                "Skills/agent-ops/optimizable-skill",
+                strict=True,
+            ).data["skill_package"]
+
+        optimization_contract = package["package_contract"]["sdk_contract"]["values"][
+            "optimization_contract"
+        ]
+        self.assertEqual(optimization_contract["status"], "blocked_validation")
+        self.assertIn(
+            "optimization_contract:optimization_optimizer_mode_invalid",
+            package["gate_summary"]["blocked_reasons"],
+        )
+        self.assertIn(
+            package["package_contract"]["readiness_level"],
+            {"sdk_contract_incomplete", "optimization_contract_incomplete"},
+        )
+
+    def test_sdk_contract_missing_files_block_install_readiness(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "packaged-skill"
+            skill_dir.mkdir(parents=True)
+            (skill_dir / "SKILL.md").write_text(
+                """---
+name: packaged-skill
+description: Packaged skill fixture.
+version: "2.0.0"
+metadata:
+  compatible_roles:
+    - worker
+  runtime_needs:
+    - filesystem
+  maturity: beta
+  provenance: internal
+  share_readiness: ready
+---
+
+# Packaged Skill
+""",
+                encoding="utf-8",
+            )
+
+            package = skills_package(
+                repo_root,
+                "Skills/agent-ops/packaged-skill",
+                strict=True,
+            ).data["skill_package"]
+
+        summary = package["readiness_summary"]
+        self.assertEqual(summary["missing_fields"], [])
+        self.assertIn("agent_metadata", summary["sdk_contract_missing_fields"])
+        self.assertIn("reference_contract", summary["sdk_contract_missing_fields"])
+        self.assertIn("task_profile", summary["sdk_contract_missing_fields"])
+        self.assertFalse(package["gate_summary"]["install_ready"])
+        self.assertIn("sdk_contract:agent_metadata", package["gate_summary"]["blocked_reasons"])
+
+    def test_package_readiness_schema_requires_sdk_contract(self) -> None:
+        with patch("ask.commands.skills_impl.resolve_skill_handle", return_value={
+            "status": "ok",
+            "handle": "skill-builder",
+            "source_path": "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md",
+        }):
+            package = skills_package(REPO_ROOT, "skill-builder").data["skill_package"]
+
+        package["package_contract"].pop("sdk_contract")
+
+        with self.assertRaises(AssertionError) as context:
+            _validate_schema_subset(
+                self.schemas["skill-package-readiness.v1.schema.json"],
+                package,
+                self.schemas,
+            )
+
+        self.assertIn("missing required key 'sdk_contract'", str(context.exception))
+
+    def test_reference_contract_fallback_supports_sdk_fields_without_pyyaml(self) -> None:
+        skill_md = (
+            REPO_ROOT
+            / "Plugins"
+            / "skill-factory"
+            / "skills"
+            / "code_quality_review"
+            / "skill-builder"
+            / "SKILL.md"
+        )
+        with patch.object(package_contracts, "yaml", None):
+            contract = package_contracts.sdk_package_contract(
+                REPO_ROOT,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+            )
+
+        self.assertEqual(
+            contract["values"]["purpose"],
+            "Operational contract for skill-builder routing and execution boundaries.",
+        )
+        self.assertIn("inputs", contract["required_fields"]["present"])
+        self.assertIn("outputs", contract["required_fields"]["present"])
+        self.assertEqual(
+            contract["values"]["permission_profile"]["filesystem"]["write"],
+            ["canonical target skill package", "repo-local validation artifacts"],
+        )
+        self.assertTrue(contract["progressive_disclosure"]["references_contract_declared"])
 
     def test_package_readiness_schema_rejects_payload_without_snapshot_identity(self) -> None:
         with patch("ask.commands.skills_impl.resolve_skill_handle", return_value={

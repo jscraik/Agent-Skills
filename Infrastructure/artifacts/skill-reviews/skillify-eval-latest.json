@@ -1,0 +1,66 @@
+{
+  "data": {
+    "ask_audit": {
+      "data": {
+        "openclaw": {
+          "status": "not_run",
+          "stdout": "Summary: 0 critical \u00b7 0 warn"
+        }
+      }
+    },
+    "generated_at": "2026-05-28T14:27:56Z",
+    "plugin_eval": {
+      "status": "not_run",
+      "stdout": "Plugin Eval was not run for this eval-only dashboard. Run ./bin/ask skills external-review <path> --json --robot for the static budget and ergonomics lane."
+    },
+    "policy": {
+      "codex_smoke_profile": "[profiles.fast]",
+      "mode": "local_internal_only",
+      "plugin_eval_min_acceptable_grade": "B+",
+      "primary_gate": "local_eval_ask_audit",
+      "snyk_default": "disabled_until_requested",
+      "snyk_release_requirement": "release_required_for_manifest_backed_candidates",
+      "tessl_eval_staging_root": "/tmp/ask-tessl-evals/<skill-path>-<sha12>",
+      "tessl_project_marker": "tessl.json",
+      "tessl_review_min_score": 90,
+      "tessl_review_target_score": 95
+    },
+    "review_mode": "eval_only",
+    "review_mode_details": {
+      "local_evals": {
+        "command": "./bin/ask evals run <path> --mode smoke|release --json --robot",
+        "profile": "[profiles.fast] for Codex smoke runs",
+        "role": "dynamic run-trace behavior checks for skill selection, commands, artifacts, and release gates",
+        "status": "run_for_this_dashboard",
+        "tessl_evidence": "stages copied eval inputs under /tmp/ask-tessl-evals/<skill-path>-<sha12> with tessl.json"
+      },
+      "plugin_eval": {
+        "command": "./bin/ask skills external-review <path> --json --robot",
+        "role": "static budget and ergonomics guardrail; not a substitute for local evals",
+        "status": "not_run_in_eval_only_dashboard"
+      },
+      "snyk": {
+        "command": "./bin/ask skills external-review <path> --include-snyk --json --robot",
+        "role": "opt-in local dependency security screening; release-required for manifest-backed candidates",
+        "status": "not_run_by_default"
+      },
+      "tessl_lint": {
+        "command": "./bin/ask skills external-review <path> --json --robot",
+        "role": "disposable tile.json package-shape check, not a direct content finding",
+        "status": "not_run_in_eval_only_dashboard"
+      },
+      "tessl_review": {
+        "command": "./bin/ask skills external-review <path> --json --robot",
+        "role": "local best-practice/content review for private or work-in-progress skills",
+        "status": "not_run_in_eval_only_dashboard"
+      }
+    },
+    "target": "Plugins/skill-factory/skills/scaffolding_templates/skillify",
+    "tessl_review": {
+      "status": "not_run",
+      "stdout": "Tessl review was not run for this eval-only dashboard. Run ./bin/ask skills external-review <path> --json --robot for the local best-practice review lane."
+    }
+  },
+  "errors": [],
+  "status": "success"
+}

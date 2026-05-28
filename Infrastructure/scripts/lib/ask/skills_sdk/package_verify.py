@@ -12,6 +12,7 @@ from ask.skills_sdk.package_contracts import (
     normalized_list,
     package_field_values,
     repo_relative_path,
+    sdk_package_contract,
     skill_package_contract,
 )
 
@@ -42,6 +43,11 @@ RUNTIME_MUTATION_SENTINELS = (
 
 def _normalized_trusted_sources(trusted_sources: set[str] | None = None) -> set[str]:
     return {source.strip().lower() for source in (trusted_sources or TRUSTED_PROVENANCE_SOURCES) if source.strip()}
+
+
+def _provenance_value_trusted(value: str, trusted_sources: set[str]) -> bool:
+    parts = [part.strip().lower() for part in value.split(":") if part.strip()]
+    return bool(parts) and any(part in trusted_sources for part in parts)
 
 
 def sha256_bytes(data: bytes) -> str:
@@ -464,8 +470,11 @@ def verify_skill_directory(
     trusted_sources = _normalized_trusted_sources(trusted_sources)
     frontmatter = read_skill_frontmatter_fields(skill_md)
     contract = skill_package_contract(repo_root, skill_md, frontmatter)
+    sdk_contract = sdk_package_contract(repo_root, skill_md, frontmatter)
     values = package_field_values(frontmatter)
     missing = contract.get("required_fields", {}).get("missing", [])
+    reference_quality = sdk_contract.get("values", {}).get("reference_quality", {})
+    reference_blockers = reference_quality.get("blockers", [])
     if missing:
         blockers.append(
             _blocker(
@@ -474,8 +483,24 @@ def verify_skill_directory(
                 path=repo_relative_path(repo_root, skill_md),
             )
         )
+    if reference_blockers:
+        first_reference_blocker = reference_blockers[0]
+        blockers.append(
+            _blocker(
+                "reference_quality_blocked",
+                "Skill references failed package-readiness quality checks.",
+                path=first_reference_blocker.get("path"),
+                evidence={
+                    "policy": reference_quality.get("policy"),
+                    "status": reference_quality.get("status"),
+                    "blockers": reference_blockers,
+                },
+            )
+        )
     provenance_values = normalized_list(values.get("provenance"))
-    provenance_trusted = any(value.strip().lower() in trusted_sources for value in provenance_values)
+    provenance_trusted = any(
+        _provenance_value_trusted(value, trusted_sources) for value in provenance_values
+    )
     if not provenance_trusted:
         blockers.append(
             _blocker(
@@ -496,8 +521,20 @@ def verify_skill_directory(
             "values": provenance_values,
         },
         "contract": contract,
+        "sdk_contract": sdk_contract,
         "checks": [
+            _check("skill_md_present", "pass", {"path": repo_relative_path(repo_root, skill_md)}),
+            _check("frontmatter_read", "pass", {"fields": sorted(frontmatter)}),
+            _check("package_metadata_complete", "fail" if missing else "pass", {"missing": missing}),
             _check("package_contract", "fail" if missing else "pass", {"missing": missing}),
+            _check(
+                "reference_quality",
+                "fail" if reference_blockers else "pass",
+                {
+                    "status": reference_quality.get("status"),
+                    "blockers": reference_blockers,
+                },
+            ),
             _check(
                 "trusted_provenance",
                 "pass" if provenance_trusted else "fail",

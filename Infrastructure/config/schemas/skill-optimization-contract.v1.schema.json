@@ -1,0 +1,254 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agent-skills.local/schemas/skill-optimization-contract.v1.schema.json",
+  "title": "Skill Optimization Contract v1",
+  "description": "Optional contract for bounded, evidence-backed skill optimization loops.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "enabled",
+    "target_artifact",
+    "optimizer_mode",
+    "roles",
+    "splits",
+    "edit_policy",
+    "acceptance_gate",
+    "anti_cheat",
+    "evidence",
+    "promotion"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "skill-optimization-contract.v1"
+    },
+    "enabled": {
+      "type": "boolean"
+    },
+    "target_artifact": {
+      "type": "string",
+      "minLength": 1
+    },
+    "optimizer_mode": {
+      "type": "string",
+      "enum": ["bounded_patch", "reviewed_rewrite"]
+    },
+    "roles": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["target_runner", "optimizer", "promoter"],
+      "properties": {
+        "target_runner": {
+          "$ref": "#/definitions/rolePolicy"
+        },
+        "optimizer": {
+          "$ref": "#/definitions/rolePolicy"
+        },
+        "promoter": {
+          "$ref": "#/definitions/rolePolicy"
+        },
+        "auditor": {
+          "$ref": "#/definitions/rolePolicy"
+        }
+      }
+    },
+    "splits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["train", "selection", "test"],
+      "properties": {
+        "train": {
+          "$ref": "#/definitions/split"
+        },
+        "selection": {
+          "$ref": "#/definitions/split"
+        },
+        "test": {
+          "$ref": "#/definitions/split"
+        },
+        "split_seed": {
+          "type": "integer"
+        }
+      }
+    },
+    "edit_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "operations", "max_edits"],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["patch", "reviewed_rewrite"]
+        },
+        "operations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": ["add", "delete", "replace"]
+          }
+        },
+        "max_edits": {
+          "type": "integer"
+        },
+        "schedule": {
+          "type": "string",
+          "enum": ["constant", "linear", "cosine", "autonomous"]
+        },
+        "floor": {
+          "type": "integer"
+        },
+        "protected_paths": {
+          "$ref": "#/definitions/stringList"
+        }
+      }
+    },
+    "acceptance_gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["metric", "direction", "rule", "ties", "guard_failure"],
+      "properties": {
+        "metric": {
+          "type": "string",
+          "minLength": 1
+        },
+        "direction": {
+          "type": "string",
+          "enum": ["maximize", "minimize"]
+        },
+        "rule": {
+          "type": "string",
+          "enum": ["strict_improvement", "min_delta"]
+        },
+        "ties": {
+          "type": "string",
+          "enum": ["reject", "allow_with_review"]
+        },
+        "min_delta": {
+          "type": "number"
+        },
+        "noise_runs": {
+          "type": "integer"
+        },
+        "guard_failure": {
+          "type": "string",
+          "enum": ["discard", "block"]
+        },
+        "report_test_score_only_after_acceptance": {
+          "type": "boolean"
+        }
+      }
+    },
+    "anti_cheat": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["protected_paths", "checks"],
+      "properties": {
+        "protected_paths": {
+          "$ref": "#/definitions/stringList"
+        },
+        "checks": {
+          "$ref": "#/definitions/stringList"
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "root",
+        "rollout_jsonl",
+        "rejected_buffer_jsonl",
+        "candidate_artifact",
+        "promotion_manifest"
+      ],
+      "properties": {
+        "root": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rollout_jsonl": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rejected_buffer_jsonl": {
+          "type": "string",
+          "minLength": 1
+        },
+        "candidate_artifact": {
+          "type": "string",
+          "minLength": 1
+        },
+        "promotion_manifest": {
+          "type": "string",
+          "minLength": 1
+        },
+        "selection_results": {
+          "type": "string",
+          "minLength": 1
+        },
+        "test_results": {
+          "type": "string",
+          "minLength": 1
+        },
+        "optimizer_memory": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "promotion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["canonical_edit_requires_review", "required_checks"],
+      "properties": {
+        "canonical_edit_requires_review": {
+          "type": "boolean"
+        },
+        "required_checks": {
+          "$ref": "#/definitions/stringList"
+        }
+      }
+    }
+  },
+  "definitions": {
+    "rolePolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["may_edit"],
+      "properties": {
+        "may_edit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sees": {
+          "$ref": "#/definitions/stringList"
+        }
+      }
+    },
+    "split": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "role"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "role": {
+          "type": "string",
+          "enum": ["proposal_generation", "candidate_acceptance", "final_report_only"]
+        }
+      }
+    },
+    "stringList": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}

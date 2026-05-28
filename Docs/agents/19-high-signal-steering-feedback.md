@@ -56,28 +56,31 @@ equivalent, run a claim-vs-evidence closeout check:
 
 For each high-signal steering item:
 
-1. Classify the failure pattern in plain language.
-2. Assign a failure category from the taxonomy below.
-3. Decide whether the correction is local or systemic. Treat specific code
+1. Identify the feedback signal in plain language.
+2. Identify the root operational failure that let the signal reach Jamie.
+3. Classify the failure pattern in plain language.
+4. Assign a failure category from the taxonomy below.
+5. Decide whether the correction is local or systemic. Treat specific code
    feedback as a visible instance of a possible wider class until repository
    evidence proves otherwise.
-4. Search for sibling patterns, structurally similar implementations, repeated
+6. Search for sibling patterns, structurally similar implementations, repeated
    anti-patterns, and convention drift before deciding scope.
-5. Identify the underlying engineering preference or invariant: API philosophy,
+7. Identify the underlying engineering preference or invariant: API philosophy,
    error-handling doctrine, validation expectation, runtime safety assumption,
    architecture intent, repository convention, or operational standard.
-6. Identify the mechanism that allowed the failure to reach Jamie.
-7. Choose the durable improvement type: validator, schema, trace event, runtime
-   check, workflow rule, recovery handler, CI gate, repo artifact, skill
-   improvement, context-routing improvement, governance rule, reusable
-   primitive, or implementation note.
-8. Add the smallest durable guardrail in docs, skills, scripts, validation, or
+8. Identify the mechanism that allowed the failure to reach Jamie.
+9. Choose the durable system improvement type: validator, schema, trace event, runtime
+   check, workflow rule, recovery handler, lint rule, schema constraint,
+   style rule, CI check, shared utility, repo artifact, skill improvement,
+   context-routing improvement, governance rule, reusable abstraction,
+   reusable primitive, architectural policy, or implementation note.
+10. Add the smallest durable guardrail in docs, skills, scripts, validation, or
    memory surfaces.
-9. Record the item in [steering-uptake.md](/.harness/quality/steering-uptake.md)
+11. Record the item in [steering-uptake.md](/.harness/quality/steering-uptake.md)
    with the guardrail path, failure category, improvement type, and validation
    command.
-10. Run `python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json`.
-11. Report the exact pass/fail/blocked outcome before resuming the original lane.
+12. Run `python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json`.
+13. Report the exact pass/fail/blocked outcome before resuming the original lane.
 
 ## Failure Categories
 
@@ -106,6 +109,8 @@ Use one or more exact improvement type names in each ledger row:
 
 - validator
 - schema
+- schema contract
+- schema constraint
 - trace event
 - runtime check
 - workflow rule
@@ -120,6 +125,16 @@ Use one or more exact improvement type names in each ledger row:
 - retrieval improvement
 - stale-state prevention
 - claim-vs-evidence verification
+- generated runtime guardrail
+- runtime projection guardrail
+- runtime persistence guardrail
+- doctor blocker
+- selection policy
+- eval contract
+
+Ledger rows must use known taxonomy values from the Failure Categories and
+Durable Improvement Types lists. The validator rejects unknown category or
+improvement-type labels so steering uptake cannot pass as vague ceremony.
 
 ## Systemic Scope Check
 
@@ -135,18 +150,26 @@ or final report:
 
 Do not apply corrections mechanically to one line, function, file, or local code
 path when the feedback plausibly describes a broader design principle.
+When a correction says the implementation is not doing what Jamie wants, treat
+the named example as evidence of possible wider misalignment before assuming it
+is a local defect.
 
 ## Required Evidence
 
 Every ledger entry must include:
 
+- the feedback signal or steering trigger.
+- the root operational failure that let the signal reach Jamie.
 - the steering trigger or failure pattern.
 - the failure category.
 - the local-or-systemic scope decision and sibling-pattern search outcome.
 - the inferred engineering preference or invariant.
 - the durable improvement type.
 - the durable guardrail path.
-- the validation command or blocker.
+- the validation command or blocker, including evidence that the improvement
+  changes future behavior.
+- the repo artifact, implementation note, or other documented surface that
+  preserves the rule for future agents.
 - status: `open`, `validated`, or `blocked`.
 
 Do not mark an item `validated` when the guardrail is only a promise, a chat

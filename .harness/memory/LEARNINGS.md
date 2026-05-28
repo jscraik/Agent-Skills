@@ -237,3 +237,15 @@ Repo-specific agent knowledge base. Append-only.
 **2026-05-25 [Codex]:** Bash command 'zsh' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:4246922559)
 
 **2026-05-26 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:1625694350)
+
+**2026-05-26 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:199742871)
+
+**2026-05-27 [Codex]:** Bash command 'zsh' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:1225174823)
+
+**2026-05-27 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:159795417)
+
+**2026-05-28 [Codex]:** Bash command 'cat' failed with exit code 1 -> summarize the failure and change approach before rerunning the same command (auto-key:2462131021)
+
+**2026-05-28 [Codex]:** Bash command 'zsh' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:1358686701)
+
+**2026-05-28 [Codex]:** Bash command 'jq' failed with exit code 1 -> summarize the failure and change approach before rerunning the same command (auto-key:1679367281)

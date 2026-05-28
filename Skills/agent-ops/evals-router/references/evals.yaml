@@ -35,8 +35,15 @@ cases:
     eval_modes: [smoke, release]
     should_trigger: true
     realistic: true
+    why_realistic: Jamie often asks to mine external framework shapes into repo-owned skill eval contracts while keeping provenance and local validation boundaries explicit.
+    unit: evals-router external pattern extraction
+    given: An existing Codex skill eval suite needs to borrow assertion structure from an external skill-creator pattern without copying or installing that source.
+    should: Audit the current eval shape, translate only the useful pattern into local comparator and deterministic-check guidance, and report pass/fail/blocked readiness evidence.
+    actual_artifact: Infrastructure/artifacts/skill-reviews/evals-router-eval-latest.json
+    expected_artifact: Skills/agent-ops/evals-router/references/evals.yaml
+    reproduce: "./bin/ask evals run Skills/agent-ops/evals-router --mode smoke --runner codex --case route-skill-eval-creation-loop --skip-tessl --no-dashboard --json --robot"
     prepend_skill: true
-    prompt: "Use $evals-router to improve our Codex skill eval design from an external skill-creator pattern, but keep only the local borrowed-pattern extraction: realistic prompts, comparator choice, deterministic checks, weak-eval critique, and readiness evidence."
+    prompt: "Jamie asks: Audit our Codex skill eval design against an external skill-creator pattern and build only the local borrowed-pattern extraction. Keep the output grounded in realistic prompts, comparator choice, deterministic checks, weak-eval critique, and readiness evidence; do not copy or install the external source."
     deterministic_checks: {forbidden_commands: [curl, wget, "rm -rf", nc]}
     acceptance:
       - {type: skill_selected, expected_skill: evals-router}
@@ -49,8 +56,15 @@ cases:
     eval_modes: [smoke, release]
     should_trigger: true
     realistic: true
+    why_realistic: The repo uses lens packs as local design aids, and Jamie asks for bounded eval improvements that turn those lenses into actor-goal cases plus evidence rather than citations.
+    unit: evals-router bounded literature-lens eval design
+    given: A skill eval suite has a software literature lens pack available as inspiration but needs concrete actor-goal eval cases and repo evidence.
+    should: Route to evals-router, select only the named lenses, add positive and negative eval paths, and preserve pass/fail/blocked evidence without treating book references as proof.
+    actual_artifact: Infrastructure/artifacts/skill-reviews/evals-router-eval-latest.json
+    expected_artifact: Skills/agent-ops/evals-router/references/evals.yaml
+    reproduce: "./bin/ask evals run Skills/agent-ops/evals-router --mode smoke --runner codex --case route-literature-lens-eval-design --skip-tessl --no-dashboard --json --robot"
     prepend_skill: true
-    prompt: "Use $evals-router to improve a skill eval suite using the software literature lens pack. Keep it bounded: pick only the Story Slicer, Use-Case Flow Designer, and XP Feedback Coach lenses; add realistic actor-goal prompts, a negative path, deterministic checks, and pass/fail/blocked evidence without citing books as proof."
+    prompt: "Jamie asks: Review a skill eval suite with the software literature lens pack as inspiration, then build a bounded improvement plan. Pick only Story Slicer, Use-Case Flow Designer, and XP Feedback Coach; add realistic actor-goal prompts, a negative path, deterministic checks, and pass/fail/blocked evidence without citing books as proof."
     deterministic_checks: {forbidden_commands: [curl, wget, "rm -rf", nc]}
     acceptance:
       - {type: skill_selected, expected_skill: evals-router}
@@ -73,3 +87,46 @@ cases:
       - {type: regex, value: "(?is)(optional|opt-in|observability|trace|dataset|local export)"}
       - {type: regex, value: "(?is)(not.*replace|separate.*gate|deterministic|codex_events|local artifact)"}
       - {type: regex, value: "(?is)(blocked|not_configured|collector|network|export target|exporter failure)"}
+  - id: route-borrowed-given-should-eval-shape
+    name: route borrowed given should eval shape
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    realistic: false
+    unit: evals-router borrowed assertion-shape routing
+    given: A user wants to mine an external test framework pattern into repo-owned skill evals without installing or copying that framework.
+    should: Route to evals-router and translate the pattern into local unit/given/should/actual/expected/reproduce metadata plus deterministic evidence.
+    actual_artifact: scorecard.json
+    expected_artifact: references/evals.yaml
+    reproduce: "./bin/ask evals run Skills/agent-ops/evals-router --mode smoke --runner codex --case route-borrowed-given-should-eval-shape --skip-tessl --no-dashboard --json --robot"
+    prepend_skill: true
+    prompt: "Use $evals-router for this concrete hardening task: Skills/agent-ops/testing/references/evals.yaml has several natural-language acceptance checks, and I want to mine an external test framework's given/should assertion style without installing or copying that framework. Tell us how to translate the pattern into repo-owned references/evals.yaml cases with per-case unit, given condition, should expectation, actual artifact, expected artifact, reproduction fixture, deterministic checks, and pass/fail/blocked evidence."
+    deterministic_checks: {forbidden_commands: [curl, wget, "rm -rf", nc]}
+    acceptance:
+      - {type: skill_selected, expected_skill: evals-router}
+      - {type: regex, value: "(?is)(external|borrowed-pattern|repo-owned|do not install|do not copy)"}
+      - {type: regex, value: "(?is)(unit|given|should|actual|expected|reproduc)"}
+      - {type: regex, value: "(?is)(references/evals.yaml|deterministic checks|pass|fail|blocked)"}
+  - id: route-agent-pass-rate-debug-artifacts
+    name: route agent pass-rate debug artifacts
+    category: edge
+    eval_modes: [smoke, release]
+    should_trigger: true
+    realistic: false
+    unit: evals-router agent-mediated pass-rate reporting
+    given: An agent-mediated assertion ran multiple times with a pass-rate threshold and one run timed out after partial output.
+    should: Preserve raw responses and judge details as artifacts, classify timeout_partial_output, and keep the threshold advisory until calibrated.
+    actual_artifact: scorecard.json
+    expected_artifact: references/evals.yaml
+    raw_response_artifact: .responses.md
+    judge_detail_artifact: judge-details.json
+    pass_rate_threshold: 0.75
+    reproduce: "./bin/ask evals run Skills/agent-ops/evals-router --mode smoke --runner codex --case route-agent-pass-rate-debug-artifacts --skip-tessl --no-dashboard --json --robot"
+    prepend_skill: true
+    prompt: "Use $evals-router to improve the skill eval report for Infrastructure/artifacts/skills/evals-router/latest/scorecard.json after an agent-mediated assertion ran 4 times with a 75 percent pass-rate threshold. Keep the threshold advisory until calibrated, save raw responses or trace artifacts for debugging, classify timeouts and partial output separately, and preserve deterministic checks as the hard gate."
+    deterministic_checks: {forbidden_commands: [curl, wget, "rm -rf", nc]}
+    acceptance:
+      - {type: skill_selected, expected_skill: evals-router}
+      - {type: regex, value: "(?is)(run count|runs|pass-rate|threshold|per-assertion)"}
+      - {type: regex, value: "(?is)(raw responses|trace artifacts|debug|timeout|partial output)"}
+      - {type: regex, value: "(?is)(advisory|calibrated|deterministic checks|hard gate)"}

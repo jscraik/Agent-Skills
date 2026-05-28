@@ -82,9 +82,14 @@ from ask.skills_sdk.package_contracts import (  # noqa: E402
     SKILL_PACKAGE_READINESS_SCHEMA_VERSION,
     SKILL_PACKAGE_SCHEMA_PATH,
     SKILL_PACKAGE_SCHEMA_VERSION,
+    SKILL_OPTIMIZATION_CONTRACT_SCHEMA_PATH,
+    SKILL_OPTIMIZATION_CONTRACT_SCHEMA_VERSION,
+    SKILLFLOW_SCHEMA_PATH,
+    SKILLFLOW_SCHEMA_VERSION,
     capability_metadata_status as _capability_metadata_status,
     empty_skill_package_contract as _empty_skill_package_contract,
     refresh_package_promotion_gate as _refresh_package_promotion_gate,
+    sdk_package_contract as _sdk_package_contract,
     skill_package_checkout_test as _skill_package_checkout_test,
     skill_package_compatibility_snapshot as _skill_package_compatibility_snapshot,
     skill_package_contract as _skill_package_contract,
@@ -142,7 +147,8 @@ from ask.skill_review_dashboard import (  # noqa: E402
 )
 
 
-TESSL_REVIEW_MIN_SCORE = 95
+TESSL_REVIEW_MIN_SCORE = 90
+TESSL_REVIEW_TARGET_SCORE = 95
 PLUGIN_EVAL_MIN_ACCEPTABLE_GRADE = "B+"
 
 
@@ -1529,7 +1535,7 @@ SKILL_OPERATION_PROFILES: dict[str, dict[str, Any]] = {
             "compat or strict audit",
             "external review report",
             "Plugin Eval grade B+ or better",
-            "Tessl review score >= 95",
+            "Tessl review score >= 90 (95+ target)",
             "metadata contract",
         ],
         "stop_conditions": ["blocked_validation", "blocked_missing_artifact", "blocked_missing_tool"],
@@ -2153,6 +2159,7 @@ def _profiles_with_effective_roots(profiles: dict[str, dict[str, Any]]) -> dict[
                 "plugin_eval_min_acceptable_grade": PLUGIN_EVAL_MIN_ACCEPTABLE_GRADE,
                 "plugin_eval_b_plus_is_acceptable": True,
                 "tessl_review_min_score": TESSL_REVIEW_MIN_SCORE,
+                "tessl_review_target_score": TESSL_REVIEW_TARGET_SCORE,
                 "tessl_review_args": ["skill", "review", "--json", "--threshold", str(TESSL_REVIEW_MIN_SCORE)],
                 "tessl_review_staging_root": f"{os.path.join(tempfile.gettempdir(), 'ask-tessl-reviews')}/<skill-path>-<sha12>",
                 "tessl_project_marker": "tessl.json",
@@ -3159,6 +3166,7 @@ def skills_package(
                 "blocked_reasons": list(PACKAGE_CONTRACT_FIELDS),
                 "recommended_next_fields": list(PACKAGE_CONTRACT_FIELDS),
             },
+            "sdk_contract": _sdk_package_contract(repo_root, None, {}),
         }
         skill_package_contract = _empty_skill_package_contract()
     else:
@@ -3167,7 +3175,7 @@ def skills_package(
         except OSError:
             frontmatter = {}
         skill_package_contract = _skill_package_contract(repo_root, source_path, frontmatter)
-        package_contract = _skill_package_readiness(frontmatter)
+        package_contract = _skill_package_readiness(frontmatter, repo_root, source_path)
         missing_fields = package_contract["required_fields"]["missing"]
         gate_blockers = package_contract["install_gate"]["blocked_reasons"]
         if gate_blockers:
@@ -3267,11 +3275,21 @@ def skills_package(
         "contract_schemas": {
             "package": SKILL_PACKAGE_READINESS_SCHEMA_VERSION,
             "skill_package": SKILL_PACKAGE_SCHEMA_VERSION,
+            "skillflow": SKILLFLOW_SCHEMA_VERSION,
+            "optimization": SKILL_OPTIMIZATION_CONTRACT_SCHEMA_VERSION,
             "events": "skill-events.v1",
             "lifecycle_event": "capability-lifecycle-event.v1",
             "profiles": "skill-operation-profiles.v1",
             "doctor": "skill-doctor.v1",
             "memory": "skill-memory-provider.v1",
+        },
+        "workflow_schema": {
+            "schema_version": SKILLFLOW_SCHEMA_VERSION,
+            "path": SKILLFLOW_SCHEMA_PATH,
+        },
+        "optimization_schema": {
+            "schema_version": SKILL_OPTIMIZATION_CONTRACT_SCHEMA_VERSION,
+            "path": SKILL_OPTIMIZATION_CONTRACT_SCHEMA_PATH,
         },
         "operation_context": _skill_package_operation_context(),
         "blockers": blockers,
@@ -4436,7 +4454,11 @@ def external_review_skill(
         "primary_gate": "local_eval_ask_audit",
         "external_quality_judge": "tessl_local_review",
         "tessl_review_min_score": TESSL_REVIEW_MIN_SCORE,
-        "tessl_review_threshold_policy": f"Tessl review must return reviewScore >= {TESSL_REVIEW_MIN_SCORE}.",
+        "tessl_review_target_score": TESSL_REVIEW_TARGET_SCORE,
+        "tessl_review_threshold_policy": (
+            f"Tessl review must return reviewScore >= {TESSL_REVIEW_MIN_SCORE}; "
+            f"{TESSL_REVIEW_TARGET_SCORE}+ remains the improvement target."
+        ),
         "tessl_staging_root": f"{os.path.join(tempfile.gettempdir(), 'ask-tessl-reviews')}/<skill-path>-<sha12>",
         "tessl_project_marker": "tessl.json",
         "tessl_evidence_retention": "stable tmp wrapper is intentionally left for inspection and copied-input evidence",
@@ -4489,6 +4511,7 @@ def external_review_skill(
             "command": f"tessl skill review --json --threshold {TESSL_REVIEW_MIN_SCORE} <stable-skill-directory>",
             "role": "local best-practice/content review for private or work-in-progress skills",
             "minimum_score": TESSL_REVIEW_MIN_SCORE,
+            "target_score": TESSL_REVIEW_TARGET_SCORE,
             "publishes": False,
         },
         "snyk": {

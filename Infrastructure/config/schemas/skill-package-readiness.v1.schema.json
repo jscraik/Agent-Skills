@@ -66,6 +66,12 @@
     "package_readiness_schema": {
       "$ref": "#/definitions/schemaPointer"
     },
+    "workflow_schema": {
+      "$ref": "#/definitions/schemaPointer"
+    },
+    "optimization_schema": {
+      "$ref": "#/definitions/schemaPointer"
+    },
     "compatibility_snapshot": {
       "type": "object",
       "additionalProperties": false,
@@ -101,7 +107,8 @@
         "role_compatibility",
         "runtime_contract",
         "install_gate",
-        "promotion_gate"
+        "promotion_gate",
+        "sdk_contract"
       ]
     },
     "gate_summary": {
@@ -191,6 +198,19 @@
       "items": {
         "type": "string",
         "minLength": 1
+      }
+    },
+    "statusFieldList": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["present", "missing"],
+      "properties": {
+        "present": {
+          "$ref": "#/definitions/stringList"
+        },
+        "missing": {
+          "$ref": "#/definitions/stringList"
+        }
       }
     }
   }

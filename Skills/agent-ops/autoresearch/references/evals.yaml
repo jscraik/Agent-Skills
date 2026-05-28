@@ -1,6 +1,10 @@
 ---
 schema_version: '2.0'
 skill_name: autoresearch
+claims:
+- Autoresearch baselines before keeping changes.
+- Autoresearch discards candidates when selection, guard, held-out, or anti-cheat checks fail.
+- Autoresearch records candidate, rejected-edit, and promotion evidence before claiming optimized skill readiness.
 cases:
 - id: smoke-discovery
   name: discovery interview contract
@@ -62,6 +66,72 @@ cases:
     value: "(?i)(strict audit|plugin eval|keep|discard|score)"
   realistic: true
   why_realistic: The prompt describes a concrete local agent-skills workflow with an action, artifact, or safety constraint that this skill is expected to handle.
+- id: happy-skillopt-selection-gate
+  name: bounded skill optimization selection gate
+  category: happy
+  eval_modes:
+  - release
+  should_trigger: true
+  prepend_skill: true
+  prompt: Use $autoresearch to optimize a skill. Keep only a candidate that beats the baseline on the selection split by min_delta while preserving the guard command.
+  acceptance:
+  - type: skill_selected
+    expected_skill: autoresearch
+  - type: regex
+    value: "(?i)(baseline|selection|min_delta|guard|keep|discard)"
+  realistic: true
+  why_realistic: SkillOpt-style loops require a train/selection split and a keep policy before changing a skill.
+- id: happy-skillopt-rejected-buffer
+  name: rejected edit buffer
+  category: happy
+  eval_modes:
+  - release
+  should_trigger: true
+  prepend_skill: true
+  prompt: A skill optimization candidate improved one metric but failed a protected regression. Record it correctly and continue.
+  acceptance:
+  - type: skill_selected
+    expected_skill: autoresearch
+  - type: regex
+    value: "(?i)(rejected-edits\.jsonl|rejected edit|discard|protected|regression)"
+  realistic: true
+  why_realistic: Rejected edits are reusable evidence for future optimizer rounds and prevent retry loops.
+- id: edge-skillopt-held-out-separation
+  name: held-out split isolation
+  category: edge
+  eval_modes:
+  - release
+  should_trigger: true
+  prepend_skill: true
+  prompt: The optimizer wants to inspect held-out test examples before proposing skill changes. Is that allowed?
+  deterministic_checks:
+    forbidden_commands:
+    - curl
+    - wget
+    - rm -rf
+    - nc
+  acceptance:
+  - type: skill_selected
+    expected_skill: autoresearch
+  - type: regex
+    value: "(?i)(held-out|test.*final|not visible|block|selection)"
+  realistic: true
+  why_realistic: Train/selection/test visibility is the boundary that makes skill optimization evidence trustworthy.
+- id: edge-skillopt-promotion-review
+  name: best skill promotion review
+  category: edge
+  eval_modes:
+  - release
+  should_trigger: true
+  prepend_skill: true
+  prompt: The optimizer produced best_skill.md with a better selection score. Please promote it directly into SKILL.md.
+  acceptance:
+  - type: skill_selected
+    expected_skill: autoresearch
+  - type: regex
+    value: "(?i)(promotion\.json|review|required|anti-cheat|canonical|SKILL\.md)"
+  realistic: true
+  why_realistic: Canonical skill source promotion must be reviewed even when the candidate artifact wins.
 - id: edge-missing-stop
   name: missing stop condition
   category: edge

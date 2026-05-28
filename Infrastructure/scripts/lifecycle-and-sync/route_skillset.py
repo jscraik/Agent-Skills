@@ -196,6 +196,70 @@ def row_by_id(rows: list[dict[str, Any]], stage_id: str) -> dict[str, Any] | Non
     return None
 
 
+def factory_scope_excluded(skill_set: str, task: str) -> bool:
+    task_text = task.lower()
+    task_tokens = tokenize(task)
+    if skill_set == "skill-factory":
+        no_factory_change = any(
+            phrase in task_text
+            for phrase in (
+                "no skill changes",
+                "no skill change",
+                "without skill changes",
+                "without changing skills",
+                "do not change skills",
+                "don't change skills",
+            )
+        )
+        ordinary_work = bool(
+            task_tokens
+            & {
+                "app",
+                "application",
+                "code",
+                "debug",
+                "debugging",
+                "feature",
+                "implementation",
+                "product",
+                "test",
+                "tests",
+                "unit",
+            }
+        )
+        return no_factory_change and ordinary_work
+    if skill_set == "plugin-factory":
+        no_factory_change = any(
+            phrase in task_text
+            for phrase in (
+                "no plugin changes",
+                "no plugin change",
+                "without plugin changes",
+                "without changing plugins",
+                "do not change plugins",
+                "don't change plugins",
+            )
+        )
+        ordinary_work = bool(
+            task_tokens
+            & {
+                "app",
+                "application",
+                "code",
+                "debug",
+                "debugging",
+                "feature",
+                "implementation",
+                "product",
+                "test",
+                "tests",
+                "unit",
+            }
+        )
+        return no_factory_change and ordinary_work
+    return False
+
+
 def resolve_he_stage_alias(stage_id: str) -> str:
     return HE_FOLDED_STAGE_ALIASES.get(stage_id, stage_id)
 
@@ -544,6 +608,17 @@ def route(skill_set: str, task: str, *, top_k: int = MAX_TOP_K, skillsets_dir: P
             "selected": None,
             "candidates": [],
             "operator_action": "Generate manifests before routing." if error_status == "manifest_missing" else "Choose a valid root skill set.",
+        }
+    if skill_set in {"plugin-factory", "skill-factory"} and factory_scope_excluded(skill_set, task):
+        return {
+            "schema_version": 1,
+            "status": "no_match",
+            "policy_identity": policy_identity(),
+            "skill_set": skill_set,
+            "top_k": bounded_top_k,
+            "selected": None,
+            "candidates": [],
+            "operator_action": "Handle as ordinary product work; factory routing is excluded by the task text.",
         }
     override = None
     try:

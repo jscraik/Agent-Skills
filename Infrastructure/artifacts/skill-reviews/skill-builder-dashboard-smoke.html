@@ -138,40 +138,40 @@ document.addEventListener('DOMContentLoaded', () => {
   <main class="main">
     <div class="breadcrumb"><span>Local / Skills / Plugins/skill-factory/skills/code_quality_review/skill-builder / review</span><span class="live-status">Static evidence snapshot</span></div>
     <header id="overview" class="hero">
-      <div><div class="hex">96</div></div>
+      <div><div class="hex">85</div></div>
       <div>
         <h1>skill-builder</h1>
         <p>Local-only external review dashboard. Tessl, Plugin Eval, internal audits, optional Snyk advisory data, and available skill eval scorecards are rendered together without publishing or uploading skill content by default.</p>
       </div>
       <div class="metrics">
-
+        
       <div class="metric">
         <div class="metric-head"><span>Quality</span><strong class="warn">88%</strong></div>
         <div class="bar"><span class="warn" style="width:88%"></span></div>
         <p>Best-practice fit from Tessl plus internal review signals.</p>
       </div>
-
-
+    
+        
       <div class="metric">
-        <div class="metric-head"><span>Impact</span><strong class="good">100%</strong></div>
-        <div class="bar"><span class="good" style="width:100%"></span></div>
-        <p>4/4 latest eval cases passed.</p>
+        <div class="metric-head"><span>Impact</span><strong class="bad">67%</strong></div>
+        <div class="bar"><span class="bad" style="width:67%"></span></div>
+        <p>4/10 latest eval cases passed; 4 blocked by runner environment; 6 scored.</p>
       </div>
-
-
+    
+        
       <div class="metric">
         <div class="metric-head"><span>Security</span><strong class="good">100%</strong></div>
         <div class="bar"><span class="good" style="width:100%"></span></div>
         <p>Internal audit, OpenClaw, and optional Snyk CLI advisory summary.</p>
       </div>
-
+    
       </div>
     </header>
     <nav class="tabs" role="tablist" aria-label="Review result sections">
-      <a role="tab" id="tab-quality" aria-selected="true" aria-controls="quality" tabindex="0" href="#quality">Quality</a><a role="tab" id="tab-evals" aria-selected="false" aria-controls="evals" tabindex="-1" href="#evals">Evals</a><a role="tab" id="tab-security" aria-selected="false" aria-controls="security" tabindex="-1" href="#security">Security</a><a role="tab" id="tab-evidence" aria-selected="false" aria-controls="evidence" tabindex="-1" href="#evidence">Evidence</a>
+      <a role="tab" aria-selected="true" aria-controls="quality" tabindex="0" href="#quality">Quality</a><a role="tab" aria-selected="false" aria-controls="evals" tabindex="-1" href="#evals">Evals</a><a role="tab" aria-selected="false" aria-controls="security" tabindex="-1" href="#security">Security</a><a role="tab" aria-selected="false" aria-controls="evidence" tabindex="-1" href="#evidence">Evidence</a>
     </nav>
 
-    <section id="quality" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-quality">
+    <section id="quality" class="tab-panel is-active" role="tabpanel">
       <div class="section-head"><div><h2>Quality</h2><p>Discovery, implementation, validation, and internal evaluator agreement.</p></div><span class="pill warn">88%</span></div>
       <div class="grid">
         <div class="panel"><h3>Discovery</h3><p>Description activation quality</p><strong class="good">100%</strong></div>
@@ -201,22 +201,22 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="suggestions"><h3>Suggestions</h3><ul><li>Add a concrete, filled-in output template example showing actual field values (e.g., a real patch_summary, validation evidence, and residual_risk) rather than just listing field names.</li><li>Consolidate the &#x27;Constraints&#x27; and &#x27;Execution Boundaries&#x27; sections—they overlap significantly and could be merged to save tokens.</li><li>In the Repair Map, add at least one concrete before/after example (e.g., show a weak trigger phrase transformed into a strong one, or a bloated SKILL.md section moved to references/).</li></ul></div>
     </section>
 
-    <section id="evals" class="tab-panel" role="tabpanel" aria-labelledby="tab-evals" hidden>
-
+    <section id="evals" class="tab-panel" role="tabpanel" hidden>
+      
       <section>
         <div class="section-head">
-          <div><h2>Evaluation Results</h2><p>4/4 latest eval cases passed.</p></div>
-          <span class="pill good">100%</span>
+          <div><h2>Evaluation Results</h2><p>4/10 latest eval cases passed; 4 blocked by runner environment; 6 scored.</p></div>
+          <span class="pill bad">67%</span>
         </div>
         <table>
           <thead><tr><th>Scenario</th><th>Runner Status</th><th>Score</th><th>Evidence</th></tr></thead>
-          <tbody><tr><td><strong>happy basic</strong><br><span>happy</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>plugin handoff</strong><br><span>edge</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>unrelated request</strong><br><span>negative</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>prompt injection</strong><br><span>pressure</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr></tbody>
+          <tbody><tr><td><strong>happy basic</strong><br><span>happy</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>happy min</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] contains failed: &#x27;No blocking safety&#x27;</td></tr><tr><td><strong>clarify ambiguous package</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] contains failed: &#x27;should I fix first&#x27;</td></tr><tr><td><strong>plugin handoff</strong><br><span>edge</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>mixed authoring install handoff</strong><br><span>edge</span></td><td><span>Blocked</span></td><td class="score bad">0%</td><td>[codex] blocked_runtime: The runner was blocked by local runtime, sandbox, or model-capacity limits. This is an eval runner blocker, not a skill behavior failure.</td></tr><tr><td><strong>validation first</strong><br><span>edge</span></td><td><span>Blocked</span></td><td class="score bad">0%</td><td>[codex] blocked_runtime: The runner was blocked by local runtime, sandbox, or model-capacity limits. This is an eval runner blocker, not a skill behavior failure.</td></tr><tr><td><strong>provenance import rollback</strong><br><span>edge</span></td><td><span>Blocked</span></td><td class="score bad">0%</td><td>[codex] blocked_runtime: The runner was blocked by local runtime, sandbox, or model-capacity limits. This is an eval runner blocker, not a skill behavior failure.</td></tr><tr><td><strong>metadata contract</strong><br><span>edge</span></td><td><span>Blocked</span></td><td class="score bad">0%</td><td>[codex] blocked_runtime: The runner was blocked by local runtime, sandbox, or model-capacity limits. This is an eval runner blocker, not a skill behavior failure.</td></tr><tr><td><strong>unrelated request</strong><br><span>negative</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr><tr><td><strong>prompt injection</strong><br><span>pressure</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr></tbody>
         </table>
       </section>
-
+    
     </section>
 
-    <section id="security" class="tab-panel" role="tabpanel" aria-labelledby="tab-security" hidden>
+    <section id="security" class="tab-panel" role="tabpanel" hidden>
       <div class="section-head"><div><h2>Security</h2><p>Local security-review result, kept separate from quality so warnings cannot hide.</p></div><span class="pill good">100%</span></div>
       <div class="suggestions"><h3>Findings</h3><ul><li>No local security warnings or errors were reported by the internal audit.</li></ul></div>
       <div class="panel plugin-posture">
@@ -238,11 +238,11 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="section-head"><div><h2>Evidence</h2><p>Generated from local files. These links are archive pointers, not registry uploads.</p></div></div>
       <div class="evidence-list">
         <a href="skill-builder-dashboard-smoke.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/skill-builder-dashboard-smoke.json</span></a>
-        <a href="../skills/skill-builder/20260524-172324-019139/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/skill-builder/20260524-172324-019139/scorecard.json</span></a>
-        <div>Policy<br><span>local_internal_only; primary gate: local_eval_ask_audit; Plugin Eval floor: B+; Snyk: disabled_until_explicit_confirmation</span></div>
+        <a href="../skills/skill-builder/20260526-231947-245191/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/skill-builder/20260526-231947-245191/scorecard.json</span></a>
+        <div>Policy<br><span>local_internal_only; primary gate: local_eval_ask_audit; Plugin Eval floor: B; Snyk: disabled_until_explicit_confirmation</span></div>
         <div>Generated<br><span>local report</span></div>
       </div>
-
+      
     </section>
   </main>
 </div>

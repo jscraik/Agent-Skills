@@ -27,6 +27,10 @@ inputs:
   - min_delta
   - stop_condition
   - evidence_paths
+commands:
+  - "./bin/ask evals run <target-skill> --mode smoke --json --robot"
+  - "./bin/ask skills audit <target-skill> --level strict --json --robot"
+  - "python3 <repo>/train.py --json"
 outputs:
   - experiment_ledger
   - hypothesis_journal
@@ -37,6 +41,135 @@ outputs:
   - pivot_recommendation_when_plateaued
   - evidence_summary
   - validation_status
+permission_profile:
+  filesystem:
+    read:
+      - target repo or skill package
+      - declared train/selection/test eval fixtures
+      - repo-local validation scripts
+    write:
+      - declared evidence root
+      - candidate artifact only until promotion review passes
+  shell:
+    allowed:
+      - declared baseline command
+      - declared verify command
+      - declared guard command
+    forbidden:
+      - destructive filesystem operations
+      - credential exfiltration
+      - evaluator/data/corpus edits without explicit contract change
+portability_profile:
+  host_agents:
+    - codex
+    - claude-code
+    - cursor
+    - openclaw
+  runtime_needs:
+    - filesystem
+    - shell
+    - repo-validation
+evidence_policy:
+  authority: "artifacts_decide"
+  required:
+    - baseline
+    - candidate_result
+    - rejected_edit_buffer
+    - protected_path_check
+    - promotion_manifest
+optimization:
+  schema_version: "skill-optimization-contract.v1"
+  enabled: true
+  target_artifact: "SKILL.md"
+  optimizer_mode: "bounded_patch"
+  roles:
+    target_runner:
+      may_edit: "none"
+      sees:
+        - current_target
+        - baseline_command
+        - verify_command
+        - guard_command
+    optimizer:
+      may_edit: "candidate_patch_only"
+      sees:
+        - train
+        - selection_summary
+        - rejected_edit_buffer
+    promoter:
+      may_edit: "canonical_source_after_review"
+      sees:
+        - candidate_artifact
+        - selection_results
+        - held_out_test_report
+        - anti_cheat_report
+    auditor:
+      may_edit: "none"
+      sees:
+        - diff
+        - protected_paths
+        - promotion_manifest
+  splits:
+    train:
+      path: ".harness/evals/autoresearch/train.jsonl"
+      role: "proposal_generation"
+    selection:
+      path: ".harness/evals/autoresearch/selection.jsonl"
+      role: "candidate_acceptance"
+    test:
+      path: ".harness/evals/autoresearch/test.jsonl"
+      role: "final_report_only"
+    split_seed: 42
+  edit_policy:
+    mode: "patch"
+    operations:
+      - add
+      - delete
+      - replace
+    max_edits: 4
+    schedule: "bounded_rounds"
+    protected_paths:
+      - "references/evals.yaml"
+      - ".harness/evals/**"
+      - "data/**"
+      - "evaluator/**"
+  acceptance_gate:
+    metric: "declared_success_metric"
+    direction: "maximize"
+    rule: "strict_improvement"
+    ties: "reject"
+    min_delta: 0.01
+    noise_runs: 3
+    guard_failure: "discard"
+    report_test_score_only_after_acceptance: true
+  anti_cheat:
+    protected_paths:
+      - "references/evals.yaml"
+      - ".harness/evals/**"
+      - "data/**"
+      - "evaluator/**"
+      - "fixtures/**"
+    checks:
+      - protected_path_diff_empty
+      - held_out_not_visible_to_optimizer
+      - evaluator_contract_unchanged
+      - no_metric_string_smuggling
+  evidence:
+    root: ".harness/evidence/autoresearch/<run_tag>"
+    rollout_jsonl: "rollouts.jsonl"
+    rejected_buffer_jsonl: "rejected-edits.jsonl"
+    candidate_artifact: "best_skill.md"
+    promotion_manifest: "promotion.json"
+    selection_results: "selection-results.json"
+    test_results: "test-results.json"
+    optimizer_memory: "optimizer-meta.md"
+  promotion:
+    canonical_edit_requires_review: true
+    required_checks:
+      - strict_audit_pass
+      - selection_gate_pass
+      - held_out_test_report
+      - anti_cheat_pass
 risks:
   - untrusted_input
   - prompt_injection_from_project_files

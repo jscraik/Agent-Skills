@@ -10,6 +10,15 @@ metadata:
   review_cadence: quarterly
   metadata_source: frontmatter
   quality_target: plugin-eval-a
+  compatible_roles:
+    - default
+    - worker
+  runtime_needs:
+    - filesystem
+    - shell
+    - repo-validation
+  provenance: canonical-agent-skills-source
+  share_readiness: ready
 ---
 
 # Autoresearch
@@ -30,10 +39,10 @@ Bounded evidence loop: baseline, hypothesize, patch, score, decide, record. Huma
 Owns the experiment contract, ledger, and keep/discard/block recommendation; parent thread owns final decision. Fixed surfaces are benchmark harness, evaluator, data prep, datasets, tokenizer files, and guard commands. Block on unclear metric, boundary, runtime, guard semantics, network/dependency/destructive approvals, contract edits, or unbounded runs.
 
 ## Inputs
-Target path, boundaries, run tag, metric direction, verify/guard commands, stop condition, evidence path, and optional evaluator contract or `min_delta` policy.
+Target path, boundaries, run tag, metric direction, verify/guard commands, stop condition, evidence path, train/selection/test split policy, and optional evaluator contract or `min_delta` policy.
 
 ## Deliverables
-Ledger plus closeout: hypotheses, patches, commands, scores, baseline, best delta, guard status, changed files, blockers, and `schema_version` when schema-bound.
+Ledger plus closeout: hypotheses, patches, commands, scores, baseline, best delta, guard status, changed files, blockers, and `schema_version` when schema-bound. For skill optimization contracts, also produce `best_skill.md`, `rejected-edits.jsonl`, and `promotion.json` before recommending a canonical edit.
 
 ## Discovery Interview
 
@@ -52,12 +61,14 @@ Ledger plus closeout: hypotheses, patches, commands, scores, baseline, best delt
 6. Before each iteration, re-read ledger, logs, `git status`, commits, and last kept diff.
 7. Run one reversible hypothesis, `Verify`, optional `Guard`, then keep/discard/crash/block with evidence and update the ledger.
 8. If attempts plateau, pivot using ledger and git history; at closeout, compare against the original rubric or metric.
+9. When `references/contract.yaml` declares `optimization.enabled`, treat that block as the authority for split visibility, edit budget, protected paths, anti-cheat checks, and promotion. Write candidates under the evidence root; do not overwrite canonical `SKILL.md` until the promotion contract passes review.
 
 ## Decision Language
 - For tiny or noisy metric deltas, explicitly name `noise_runs`, aggregation or median policy, `min_delta`, and the confirmation rule before keep/discard.
 - If the target emits the wrong artifact/output, say `blocked` or `not ready`, recommend rewrite or eval-design work, then stop.
 - If a benchmark always exits 0, has Goodhart risk, or held-out/protected task regresses, discard the patch.
 - Refuse destructive commands, cache deletion, metric inflation, or fixed evaluator/data edits unless the user changes the experiment contract.
+- If optimizing a skill, keep train data for hypothesis generation, selection data for candidate acceptance, and held-out test data for final reporting only. Do not expose held-out examples to the optimizer.
 
 ## Ledger Entry
 
@@ -108,7 +119,7 @@ Repair the smallest failing hypothesis, parser, command, or ledger entry first; 
 - Editing evaluator, data prep, cache, tokenizer, or corpus files changes the contract.
 
 ## Acceptance Criteria
-Baseline exists before any kept change; every decision has command output, metric evidence, ledger status, guard status, and residual risk.
+Baseline exists before any kept change; every decision has command output, metric evidence, ledger status, guard status, and residual risk. Skill optimization additionally requires rejected-edit buffer evidence, protected-path anti-cheat status, a best-candidate artifact, and a reviewed promotion manifest before canonical source changes are recommended.
 
 ## Anti-Patterns
 - Expanding scope, repeating failed hypotheses, keeping noisy deltas without `min_delta`, or accepting subjective claims without a metric/binary rubric.

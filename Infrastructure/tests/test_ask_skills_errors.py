@@ -247,7 +247,7 @@ class TestAskSkillsErrors(unittest.TestCase):
         - plugin-eval, tessl lint, and tessl review stages are marked "success".
         - Exactly three subprocess invocations occur and none invoke "npx" or "publish".
         - The HOME environment used for tessl invocations does not contain the "agent-skills-tessl-" marker.
-        - The tessl review invocation uses the arguments sequence ["skill", "review", "--json", "--threshold", "95", <skill_dir>].
+        - The tessl review invocation uses the arguments sequence ["skill", "review", "--json", "--threshold", "90", <skill_dir>].
         - The returned tessl_tile marks support_refs_included as truthy.
         
         Parameters:
@@ -282,7 +282,7 @@ class TestAskSkillsErrors(unittest.TestCase):
                     stderr="",
                 ),
                 subprocess.CompletedProcess(
-                    args=["/usr/local/bin/tessl", "skill", "review", "--json", "--threshold", "95", skill_dir],
+                    args=["/usr/local/bin/tessl", "skill", "review", "--json", "--threshold", "90", skill_dir],
                     returncode=0,
                     stdout='{"reviewScore": 96, "summary": "ok"}',
                     stderr="",
@@ -306,7 +306,7 @@ class TestAskSkillsErrors(unittest.TestCase):
         review_call = mock_run.call_args_list[2]
         self.assertEqual(review_call.args[0][1:3], ["skill", "review"])
         self.assertEqual(review_call.args[0][3:5], ["--json", "--threshold"])
-        self.assertEqual(review_call.args[0][5], "95")
+        self.assertEqual(review_call.args[0][5], "90")
         self.assertNotIn("agent-skills-tessl-", review_call.kwargs["env"].get("HOME", ""))
         self.assertTrue(result.data["tessl_tile"]["support_refs_included"])
 
