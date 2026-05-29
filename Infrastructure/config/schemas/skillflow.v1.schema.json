@@ -57,7 +57,7 @@
     },
     "node": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
       "required": ["id", "type"],
       "properties": {
         "id": {
@@ -73,9 +73,6 @@
           "minLength": 1
         },
         "side_effect": {
-          "type": "boolean"
-        },
-        "side_effecting": {
           "type": "boolean"
         }
       }
