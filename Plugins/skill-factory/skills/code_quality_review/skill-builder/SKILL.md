@@ -52,10 +52,6 @@ Prefer one evidence-backed repair over broad rewriting. A score is useful only w
 5. If score/blocker is flat, undo or narrow and try the next map item. After three flat loops, stop with `blocker_notes:`.
 6. On green, run final gates. If any fail, name the gate and next patch target; do not claim release readiness.
 
-```bash
-./bin/ask skills audit <target> --level strict --json --robot
-./bin/ask evals run <target> --mode smoke --skip-tessl --json --robot
-./bin/ask evals run <target> --mode release --skip-tessl --json --robot
 ./bin/ask skills external-review <target> --audit-level compat --skip-plugin-eval --json --robot
 ```
 
