@@ -196,66 +196,49 @@ def row_by_id(rows: list[dict[str, Any]], stage_id: str) -> dict[str, Any] | Non
     return None
 
 
+FACTORY_ORDINARY_WORK_TOKENS = {
+    "app",
+    "application",
+    "code",
+    "debug",
+    "debugging",
+    "feature",
+    "implementation",
+    "product",
+    "test",
+    "tests",
+    "unit",
+}
+
+SKILL_FACTORY_NO_CHANGE_PHRASES = (
+    "no skill changes",
+    "no skill change",
+    "without skill changes",
+    "without changing skills",
+    "do not change skills",
+    "don't change skills",
+)
+
+PLUGIN_FACTORY_NO_CHANGE_PHRASES = (
+    "no plugin changes",
+    "no plugin change",
+    "without plugin changes",
+    "without changing plugins",
+    "do not change plugins",
+    "don't change plugins",
+)
+
+
 def factory_scope_excluded(skill_set: str, task: str) -> bool:
     task_text = task.lower()
     task_tokens = tokenize(task)
     if skill_set == "skill-factory":
-        no_factory_change = any(
-            phrase in task_text
-            for phrase in (
-                "no skill changes",
-                "no skill change",
-                "without skill changes",
-                "without changing skills",
-                "do not change skills",
-                "don't change skills",
-            )
-        )
-        ordinary_work = bool(
-            task_tokens
-            & {
-                "app",
-                "application",
-                "code",
-                "debug",
-                "debugging",
-                "feature",
-                "implementation",
-                "product",
-                "test",
-                "tests",
-                "unit",
-            }
-        )
+        no_factory_change = any(phrase in task_text for phrase in SKILL_FACTORY_NO_CHANGE_PHRASES)
+        ordinary_work = bool(task_tokens & FACTORY_ORDINARY_WORK_TOKENS)
         return no_factory_change and ordinary_work
     if skill_set == "plugin-factory":
-        no_factory_change = any(
-            phrase in task_text
-            for phrase in (
-                "no plugin changes",
-                "no plugin change",
-                "without plugin changes",
-                "without changing plugins",
-                "do not change plugins",
-                "don't change plugins",
-            )
-        )
-        ordinary_work = bool(
-            task_tokens
-            & {
-                "app",
-                "application",
-                "code",
-                "debug",
-                "debugging",
-                "feature",
-                "implementation",
-                "product",
-                "test",
-                "tests",
-                "unit",
-            }
-        )
+        no_factory_change = any(phrase in task_text for phrase in PLUGIN_FACTORY_NO_CHANGE_PHRASES)
+        ordinary_work = bool(task_tokens & FACTORY_ORDINARY_WORK_TOKENS)
         return no_factory_change and ordinary_work
     return False
 

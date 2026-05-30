@@ -44,6 +44,7 @@ from run_skill_evals import (
     _claim_to_evidence_summary,
     _case_has_executed_check_evidence,
     _load_evals_document,
+    _resolve_existing_optional_case_artifact_path,
     _preflight_codex_live_runner,
     _filter_cases_for_eval_mode,
     _isolated_codex_home_for_eval,
@@ -397,6 +398,50 @@ class RunSkillEvalsModeTests(unittest.TestCase):
             )
 
             with self.assertRaisesRegex(ValueError, "pass_rate_threshold.*finite"):
+                load_evals(evals_path)
+
+    def test_load_evals_rejects_boolean_pass_rate_threshold(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            evals_path = Path(tmp) / "evals.yaml"
+            evals_path.write_text(
+                textwrap.dedent(
+                    """
+                    cases:
+                      - id: bad-threshold
+                        name: bad threshold
+                        prompt: Check this.
+                        acceptance:
+                          - contains: done
+                        pass_rate_threshold: true
+                    """
+                ).strip()
+                + "\n",
+                encoding="utf-8",
+            )
+
+            with self.assertRaisesRegex(ValueError, "pass_rate_threshold.*numeric"):
+                load_evals(evals_path)
+
+    def test_load_evals_rejects_absolute_case_artifact_paths(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            evals_path = Path(tmp) / "evals.yaml"
+            evals_path.write_text(
+                textwrap.dedent(
+                    """
+                    cases:
+                      - id: bad-artifact
+                        name: bad artifact
+                        prompt: Check this.
+                        acceptance:
+                          - contains: done
+                        raw_response_artifact: /tmp/raw-response.md
+                    """
+                ).strip()
+                + "\n",
+                encoding="utf-8",
+            )
+
+            with self.assertRaisesRegex(ValueError, "raw_response_artifact.*repo-relative"):
                 load_evals(evals_path)
 
     def test_load_evals_parses_claim_coverage_metadata(self) -> None:
@@ -1759,6 +1804,20 @@ class RunSkillEvalsModeTests(unittest.TestCase):
             release_manifest["artifacts"]["release_manifest"],
             summary["artifacts"]["release_manifest"],
         )
+
+    def test_pass_rate_policy_calibrates_only_when_artifact_exists(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            case_dir = Path(tmpdir) / "reports" / "demo-skill" / "01-calibrated"
+            case_dir.mkdir(parents=True)
+            (case_dir / "calibration.json").write_text('{"baseline": 0.9}\n', encoding="utf-8")
+
+            self.assertEqual(
+                _resolve_existing_optional_case_artifact_path(case_dir, "calibration.json"),
+                str((case_dir / "calibration.json").resolve()),
+            )
+            self.assertIsNone(
+                _resolve_existing_optional_case_artifact_path(case_dir, "missing-calibration.json")
+            )
 
     def test_snyk_release_gate_is_not_required_for_skill_md_only_package(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

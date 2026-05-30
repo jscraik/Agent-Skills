@@ -1021,6 +1021,32 @@ def _run_tessl_project_command(
     )
 
 
+def _tessl_project_link_matches(stdout: str, *, workspace: str, project: str) -> bool:
+    parsed = _json_or_text(stdout.strip()) if stdout.strip() else None
+    if not isinstance(parsed, dict):
+        return False
+
+    def values_for(key: str, obj: object) -> set[str]:
+        values: set[str] = set()
+        if isinstance(obj, dict):
+            for item_key, item_value in obj.items():
+                if item_key in {key, f"{key}Name", f"{key}_name"} and isinstance(item_value, str):
+                    values.add(item_value)
+                values.update(values_for(key, item_value))
+        elif isinstance(obj, list):
+            for item in obj:
+                values.update(values_for(key, item))
+        return values
+
+    workspace_values = values_for("workspace", parsed)
+    project_values = values_for("project", parsed)
+    name_values = values_for("name", parsed)
+    return (
+        workspace in workspace_values
+        and (project in project_values or f"{workspace}/{project}" in name_values)
+    )
+
+
 def _ensure_tessl_project_link(
     tessl_path: str,
     staged_root: Path,
@@ -1072,7 +1098,7 @@ def _ensure_tessl_project_link(
                 "blocker_class": "blocked_auth",
                 "commands": commands,
             }
-        if check.returncode == 0:
+        if check.returncode == 0 and _tessl_project_link_matches(check.stdout, workspace=workspace, project=project):
             return {
                 **common,
                 "status": "pass",
@@ -2635,12 +2661,14 @@ def _write_timeout_partial_artifact(
     artifact_root.mkdir(parents=True, exist_ok=True)
     stamp = _utc_now_iso().replace(":", "").replace("-", "")
     artifact_path = artifact_root / f"{stamp}-{_safe_slug(skill_path)}-{_safe_slug(mode)}-{_safe_slug(runner)}.txt"
+    sanitized_output = _repo_relative_text(repo_root, raw_output)
+    sanitized_error = _repo_relative_text(repo_root, raw_error)
     artifact_path.write_text(
         "timeout_classification: timeout_partial_output\n\n"
         "stdout:\n"
-        f"{raw_output}\n\n"
+        f"{sanitized_output}\n\n"
         "stderr:\n"
-        f"{raw_error}\n",
+        f"{sanitized_error}\n",
         encoding="utf-8",
     )
     return _repo_relative_path(repo_root, artifact_path)

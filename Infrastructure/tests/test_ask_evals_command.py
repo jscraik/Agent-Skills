@@ -687,7 +687,12 @@ def test_evals_run_uses_plugin_project_identity_when_workspace_is_set(tmp_path: 
             staged_source = Path(str(kwargs["cwd"]))
             marker = json.loads((staged_source / "tessl.json").read_text(encoding="utf-8"))
             assert marker["name"] == "skills-sdk/skill-factory"
-            return mock.Mock(returncode=0, stdout="{}", stderr="", args=cmd)
+            return mock.Mock(
+                returncode=0,
+                stdout='{"workspace":"skills-sdk","project":"skill-factory","name":"skills-sdk/skill-factory"}',
+                stderr="",
+                args=cmd,
+            )
         if cmd[1:4] == ["eval", "run", "--json"]:
             staged_source = Path(cmd[4])
             marker = json.loads((staged_source / "tessl.json").read_text(encoding="utf-8"))
@@ -711,6 +716,43 @@ def test_evals_run_uses_plugin_project_identity_when_workspace_is_set(tmp_path: 
     assert tessl_eval["project_identity"]["owner_type"] == "plugin"
     assert tessl_eval["project_identity"]["project"] == "skill-factory"
     assert tessl_eval["project_link"]["action"] == "already_linked"
+
+
+def test_tessl_project_link_relinks_mismatched_existing_project(tmp_path: Path) -> None:
+    staged_root = tmp_path / "staged"
+    staged_root.mkdir()
+    calls: list[list[str]] = []
+
+    def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
+        calls.append(cmd)
+        if cmd[1:4] == ["project", "repair", "--json"]:
+            return mock.Mock(
+                returncode=0,
+                stdout='{"workspace":"old-workspace","project":"old-project","name":"old-workspace/old-project"}',
+                stderr="",
+                args=cmd,
+            )
+        if "--relink" in cmd:
+            return mock.Mock(returncode=0, stdout='{"status":"relinked"}', stderr="", args=cmd)
+        if "--update-source" in cmd:
+            return mock.Mock(returncode=0, stdout='{"status":"updated"}', stderr="", args=cmd)
+        raise AssertionError(f"unexpected command: {cmd}")
+
+    with mock.patch.object(evals.subprocess, "run", side_effect=fake_run):
+        link = evals._ensure_tessl_project_link(
+            "/usr/local/bin/tessl",
+            staged_root,
+            {
+                "owner_type": "plugin",
+                "workspace": "skills-sdk",
+                "project": "skill-factory",
+                "name": "skills-sdk/skill-factory",
+            },
+        )
+
+    assert link["status"] == "pass"
+    assert link["action"] == "relinked_existing_project_updated_source"
+    assert any("--relink" in call for call in calls)
 
 
 def test_tessl_project_link_creates_after_missing_existing_project(tmp_path: Path) -> None:
@@ -775,6 +817,25 @@ def test_tessl_project_link_updates_source_after_relink(tmp_path: Path) -> None:
     assert link["status"] == "pass"
     assert link["action"] == "relinked_existing_project_updated_source"
     assert calls[-1] == ["/usr/local/bin/tessl", "project", "repair", "--update-source", "--yes", "--json"]
+
+
+def test_timeout_partial_artifact_sanitizes_repo_paths(tmp_path: Path) -> None:
+    skill_dir = tmp_path / "Skills" / "example"
+    skill_dir.mkdir(parents=True)
+
+    artifact = evals._write_timeout_partial_artifact(
+        tmp_path,
+        skill_path="Skills/example",
+        mode="smoke",
+        runner="codex",
+        raw_output=f"wrote {tmp_path}/Skills/example/output.txt",
+        raw_error=f"failed under {tmp_path}",
+    )
+
+    assert artifact is not None
+    payload = (tmp_path / artifact).read_text(encoding="utf-8")
+    assert str(tmp_path) not in payload
+    assert "Skills/example/output.txt" in payload
 
 
 def test_evals_live_private_requires_workspace(tmp_path: Path) -> None:
@@ -849,6 +910,13 @@ def test_evals_live_private_invokes_tessl_with_workspace_and_tile_manifest(tmp_p
     _write_example_skill(tmp_path)
 
     def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
+        if cmd[1:4] == ["project", "repair", "--json"]:
+            return mock.Mock(
+                returncode=0,
+                stdout='{"workspace":"jscraik","project":"example-skill","name":"jscraik/example-skill"}',
+                stderr="",
+                args=cmd,
+            )
         if cmd[1:3] == ["eval", "run"]:
             return completed_eval
         if cmd[1:3] == ["eval", "view"]:

@@ -5,7 +5,7 @@ inputs: ["workflow evidence", "target path or category"]
 outputs: ["validated skill package", "explicit blocked status", "context lifecycle handoff"]
 commands:
   - "./bin/ask skills audit <skill-path> --level strict --json --robot"
-  - "./bin/ask evals run <skill-path> --mode smoke --json --robot"
+  - "./bin/ask evals run <skill-path> --mode smoke --profile fast --json --robot"
   - "./bin/ask skills external-review <skill-path> --audit-level compat --json --robot"
 permission_profile:
   filesystem:

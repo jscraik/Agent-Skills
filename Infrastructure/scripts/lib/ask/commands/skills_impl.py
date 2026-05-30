@@ -664,12 +664,14 @@ def _parse_tessl_review_output(stdout: str, status: str = "") -> dict[str, Any]:
             return {
                 "review_score": score,
                 "minimum_score": TESSL_REVIEW_MIN_SCORE,
+                "target_score": TESSL_REVIEW_TARGET_SCORE,
                 "score_acceptable": isinstance(score, (int, float)) and score >= TESSL_REVIEW_MIN_SCORE,
                 "status": status or "reported",
                 "raw": parsed,
             }
     parsed_human = _parse_tessl_review(stdout, status)
     parsed_human["minimum_score"] = TESSL_REVIEW_MIN_SCORE
+    parsed_human["target_score"] = TESSL_REVIEW_TARGET_SCORE
     parsed_human["score_acceptable"] = parsed_human.get("review_score", 0) >= TESSL_REVIEW_MIN_SCORE
     return parsed_human
 
@@ -4685,6 +4687,7 @@ def external_review_skill(
                     review_summary = _parse_tessl_review_output(review_payload.get("stdout", ""), review_payload["status"])
                     review_payload["summary"] = review_summary
                     review_payload["minimum_score"] = TESSL_REVIEW_MIN_SCORE
+                    review_payload["target_score"] = TESSL_REVIEW_TARGET_SCORE
                     result.data["tessl_review"] = review_payload
                     if review_proc.returncode != 0:
                         result.status = "error"
@@ -4706,10 +4709,15 @@ def external_review_skill(
                     "status": "skipped",
                     "reason": "Skipped by --skip-tessl-review.",
                     "minimum_score": TESSL_REVIEW_MIN_SCORE,
+                    "target_score": TESSL_REVIEW_TARGET_SCORE,
                 }
     else:
         result.data["tessl_lint"] = {"status": "skipped"}
-        result.data["tessl_review"] = {"status": "skipped"}
+        result.data["tessl_review"] = {
+            "status": "skipped",
+            "minimum_score": TESSL_REVIEW_MIN_SCORE,
+            "target_score": TESSL_REVIEW_TARGET_SCORE,
+        }
 
     if include_snyk:
         snyk_bin = shutil.which("snyk")

@@ -12,8 +12,14 @@ metadata:
   review_cadence: quarterly
   last_reviewed: "2026-05-28"
   metadata_source: frontmatter
-  compatible_roles: default, worker, skill-inspector
-  runtime_needs: repo-owned skill source path; bounded session evidence; ./bin/ask skills external-review
+  compatible_roles:
+    - default
+    - worker
+    - skill-inspector
+  runtime_needs:
+    - repo-owned skill source path
+    - bounded session evidence
+    - ./bin/ask skills external-review
 ---
 
 # Skill Refactor

@@ -19,7 +19,7 @@ description: "Improves SKILL.md packages by fixing audit findings, adding realis
 Proof:
 
 ```bash
-./bin/ask skills external-review <target> --audit-level compat --skip-plugin-eval --json --robot
+./bin/ask skills external-review <target> --audit-level compat --json --robot
 ```
 
 ## Weak Eval Repair
@@ -36,7 +36,7 @@ After:
 
 ```yaml
 expected_artifact: "A response naming the exact audit command."
-reproduce: "./bin/ask evals run <target> --mode smoke --skip-tessl --json --robot"
+reproduce: "./bin/ask evals run <target> --mode smoke --json --robot"
 acceptance:
   - type: regex
     value: "(?is)\\./bin/ask skills audit .* --json --robot"

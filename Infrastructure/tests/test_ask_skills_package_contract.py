@@ -1112,6 +1112,44 @@ optimization:
             {"sdk_contract_incomplete", "optimization_contract_incomplete"},
         )
 
+    def test_incomplete_reference_quality_blocks_package_readiness(self) -> None:
+        frontmatter = {
+            "name": "reference-blocked-skill",
+            "description": "Reference blocked skill fixture.",
+            "metadata": {
+                "version": "1.0.0",
+                "compatible_roles": ["worker"],
+                "runtime_needs": ["filesystem"],
+                "maturity": "beta",
+                "provenance": "internal",
+                "share_readiness": "ready",
+            },
+        }
+        sdk_contract = {
+            "required_fields": {"missing": []},
+            "values": {
+                "workflow_contract": {"status": "pass"},
+                "optimization_contract": {"status": "pass"},
+                "reference_quality": {
+                    "status": "blocked_validation",
+                    "required_for_package_readiness": True,
+                    "blockers": [{"rule_id": "reference_contract_incomplete"}],
+                },
+            },
+        }
+
+        with patch.object(package_contracts, "sdk_package_contract", return_value=sdk_contract):
+            package = package_contracts.skill_package_readiness(frontmatter)
+
+        self.assertEqual(
+            package["readiness_level"],
+            "reference_quality_incomplete",
+        )
+        self.assertIn(
+            "reference_quality:reference_contract_incomplete",
+            package["install_gate"]["blocked_reasons"],
+        )
+
     def test_sdk_contract_missing_files_block_install_readiness(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir)

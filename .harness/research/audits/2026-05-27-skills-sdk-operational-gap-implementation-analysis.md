@@ -693,7 +693,7 @@ Keep `required_for_readiness: false` unless a specific skill declares a stronger
 
 **Evidence Basis:** Operational analysis warns eval/proof/readiness lanes risk fragmentation.
 
-**Code Evidence:** `Infrastructure/scripts/lib/ask/skills_sdk/package_contracts.py`; `Infrastructure/scripts/lib/ask/commands/evals.py`; `docs/agents/24-tessl-live-skill-eval-workflow.md`.
+ **Code Evidence:** `Infrastructure/scripts/lib/ask/skills_sdk/package_contracts.py`; `Infrastructure/scripts/lib/ask/commands/evals.py`; `Docs/agents/24-tessl-live-skill-eval-workflow.md`.
 
 **Risk:** Agents collapse `eval passed` into `skill ready` or `package verified` into `runtime safe`.
 
@@ -1028,4 +1028,3 @@ Best validation command to add first:
 ```
 
 Broader Codex autonomy readiness: **not yet.** The project is agent-native in intent and partially agent-native in payloads. It becomes ready for broader autonomy when the SDK doctor reducer can answer, in one place, what is source, what is generated, what is stale, what is blocked, what proof exists, what evals prove, and what the next safe command is.
-

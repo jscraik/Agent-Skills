@@ -377,9 +377,29 @@ def _resolve_optional_case_artifact_path(case_dir: Path, artifact: Optional[str]
         return None
     candidate = Path(artifact)
     if candidate.is_absolute():
-        result = candidate
-    else:
-        result = (case_dir / candidate).resolve()
+        raise ValueError("Eval case artifact paths must be repo-relative or case-relative, not absolute.")
+    result = (case_dir / candidate).resolve()
+    if workspace_root:
+        try:
+            return str(result.relative_to(workspace_root))
+        except ValueError:
+            pass
+    return str(result)
+
+
+def _resolve_existing_optional_case_artifact_path(
+    case_dir: Path,
+    artifact: Optional[str],
+    workspace_root: Optional[Path] = None,
+) -> Optional[str]:
+    if artifact is None:
+        return None
+    candidate = Path(artifact)
+    if candidate.is_absolute():
+        raise ValueError("Eval case artifact paths must be repo-relative or case-relative, not absolute.")
+    result = (case_dir / candidate).resolve()
+    if not result.is_file():
+        return None
     if workspace_root:
         try:
             return str(result.relative_to(workspace_root))
@@ -395,9 +415,20 @@ def _optional_case_string(raw: Any) -> Optional[str]:
     return text or None
 
 
+def _optional_case_artifact_string(raw: Any, *, field_name: str, case_number: int) -> Optional[str]:
+    text = _optional_case_string(raw)
+    if text is None:
+        return None
+    if Path(text).is_absolute():
+        raise ValueError(f"Case #{case_number} `{field_name}` must be repo-relative or case-relative.")
+    return text
+
+
 def _optional_float(raw: Any, *, field_name: str, case_number: int) -> Optional[float]:
     if raw is None:
         return None
+    if isinstance(raw, bool):
+        raise ValueError(f"Case #{case_number} `{field_name}` must be numeric when provided.")
     try:
         value = float(raw)
     except (TypeError, ValueError) as exc:
@@ -1021,13 +1052,13 @@ def load_evals(evals_path: Path) -> List[EvalCase]:
                 unit=_optional_case_string(c.get("unit")),
                 given=_optional_case_string(c.get("given")),
                 should=_optional_case_string(c.get("should")),
-                actual_artifact=_optional_case_string(c.get("actual_artifact")),
-                expected_artifact=_optional_case_string(c.get("expected_artifact")),
+                actual_artifact=_optional_case_artifact_string(c.get("actual_artifact"), field_name="actual_artifact", case_number=i),
+                expected_artifact=_optional_case_artifact_string(c.get("expected_artifact"), field_name="expected_artifact", case_number=i),
                 reproduce=_optional_case_string(c.get("reproduce")),
-                raw_response_artifact=_optional_case_string(c.get("raw_response_artifact")),
-                judge_detail_artifact=_optional_case_string(c.get("judge_detail_artifact")),
+                raw_response_artifact=_optional_case_artifact_string(c.get("raw_response_artifact"), field_name="raw_response_artifact", case_number=i),
+                judge_detail_artifact=_optional_case_artifact_string(c.get("judge_detail_artifact"), field_name="judge_detail_artifact", case_number=i),
                 pass_rate_threshold=pass_rate_threshold,
-                pass_rate_calibration_artifact=_optional_case_string(c.get("pass_rate_calibration_artifact")),
+                pass_rate_calibration_artifact=_optional_case_artifact_string(c.get("pass_rate_calibration_artifact"), field_name="pass_rate_calibration_artifact", case_number=i),
             )
         )
     return cases
@@ -4239,12 +4270,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     c.pass_rate_calibration_artifact,
                     workspace_root,
                 ),
-                "gate_status": (
-                    "calibrated_gate"
-                    if c.pass_rate_calibration_artifact
-                    and _resolve_optional_case_artifact_path(case_dir, c.pass_rate_calibration_artifact, workspace_root)
-                    else "advisory"
-                ),
+                "gate_status": "calibrated_gate" if _resolve_existing_optional_case_artifact_path(
+                    case_dir,
+                    c.pass_rate_calibration_artifact,
+                    workspace_root,
+                ) else "advisory",
             } if c.pass_rate_threshold is not None else None,
             "agent_eval_artifacts": {
                 "raw_response": _resolve_optional_case_artifact_path(

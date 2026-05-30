@@ -1532,6 +1532,19 @@ def skill_package_readiness(
             if isinstance(blocker, dict)
         ] or ["optimization_contract:blocked_validation"]
         blocked_reasons.extend(optimization_blockers)
+    reference_quality = sdk_contract["values"].get("reference_quality")
+    reference_blockers: list[str] = []
+    if (
+        isinstance(reference_quality, dict)
+        and reference_quality.get("required_for_package_readiness") is True
+        and reference_quality.get("status") == "blocked_validation"
+    ):
+        reference_blockers = [
+            f"reference_quality:{blocker.get('rule_id', 'blocked_validation')}"
+            for blocker in reference_quality.get("blockers", [])
+            if isinstance(blocker, dict)
+        ] or ["reference_quality:blocked_validation"]
+        blocked_reasons.extend(reference_blockers)
     if sdk_missing and not missing_identity_fields and not missing:
         readiness_level = "sdk_contract_incomplete"
         share_ready = False
@@ -1546,6 +1559,16 @@ def skill_package_readiness(
         and not workflow_blockers
     ):
         readiness_level = "optimization_contract_incomplete"
+        share_ready = False
+    if (
+        reference_blockers
+        and not missing_identity_fields
+        and not missing
+        and not sdk_missing
+        and not workflow_blockers
+        and not optimization_blockers
+    ):
+        readiness_level = "reference_quality_incomplete"
         share_ready = False
     if missing_identity_fields:
         blocked_reasons.append("identity_incomplete")

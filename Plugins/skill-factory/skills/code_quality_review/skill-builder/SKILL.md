@@ -12,8 +12,14 @@ metadata:
   review_cadence: quarterly
   last_reviewed: "2026-05-15"
   metadata_source: frontmatter
-  compatible_roles: default, worker, skill-inspector
-  runtime_needs: repo-owned skill source path; ./bin/ask skills audit and eval wrappers; Python 3 standard library validators
+  compatible_roles:
+    - default
+    - worker
+    - skill-inspector
+  runtime_needs:
+    - repo-owned skill source path
+    - ./bin/ask skills audit and eval wrappers
+    - python3 standard library validators
 ---
 
 # Skill Builder
@@ -52,7 +58,8 @@ Prefer one evidence-backed repair over broad rewriting. A score is useful only w
 5. If score/blocker is flat, undo or narrow and try the next map item. After three flat loops, stop with `blocker_notes:`.
 6. On green, run final gates. If any fail, name the gate and next patch target; do not claim release readiness.
 
-./bin/ask skills external-review <target> --audit-level compat --skip-plugin-eval --json --robot
+```bash
+./bin/ask skills external-review <target> --audit-level compat --json --robot
 ```
 
 Pass only on parsed fields: ask audit/package/release `status == "success"`; external-review lint ok plus score `>= 90` (`95+` target); Tessl live-private usage `>= max(0.90, baseline)` only when the workspace/project link is available. On failure, patch the first `errors[]`/blocker. Exit code alone never passes.

@@ -297,6 +297,8 @@ class TestAskSkillsErrors(unittest.TestCase):
         self.assertEqual(result.data["plugin_eval"]["status"], "success")
         self.assertEqual(result.data["tessl_lint"]["status"], "success")
         self.assertEqual(result.data["tessl_review"]["status"], "success")
+        self.assertEqual(result.data["tessl_review"]["target_score"], 95)
+        self.assertEqual(result.data["tessl_review"]["summary"]["target_score"], 95)
         self.assertEqual(mock_run.call_count, 3)
         for call in mock_run.call_args_list:
             self.assertNotIn("npx", call.args[0])

@@ -339,12 +339,16 @@
       },
       "values": {
         "compatible_roles": [
-          "default, worker, skill-inspector"
+          "default",
+          "worker",
+          "skill-inspector"
         ],
         "maturity": "canonical",
         "provenance": "frontmatter:Agent Skills Team:2026-05-15:canonical-source",
         "runtime_needs": [
-          "repo-owned skill source path; ./bin/ask skills audit and eval wrappers; Python 3 standard library validators"
+          "repo-owned skill source path",
+          "./bin/ask skills audit and eval wrappers",
+          "python3 standard library validators"
         ],
         "share_readiness": "ready",
         "version": "1.0.0"

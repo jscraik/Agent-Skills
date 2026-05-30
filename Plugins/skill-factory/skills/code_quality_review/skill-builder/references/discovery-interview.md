@@ -24,7 +24,7 @@ What exact skill path or package should this work improve?
 
 Ambiguous canonical source:
 
-Which canonical source/path should I edit before changing files: the plugin source under `Plugins/**/skills/**` or the generated `.agents/**` projection?
+Which canonical source/path should I edit before changing files? Edit canonical sources, not runtime projections: use the plugin source under `Plugins/**/skills/**` and do not edit generated `.agents/**` projections. See `./Docs/agents/14-path-ownership-boundaries.md`.
 
 Ambiguous evidence:
 

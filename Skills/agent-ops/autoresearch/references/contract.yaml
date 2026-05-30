@@ -135,7 +135,7 @@ optimization:
       - "evaluator/**"
   acceptance_gate:
     metric: "declared_success_metric"
-    direction: "maximize"
+    direction: "metric_direction"
     rule: "strict_improvement"
     ties: "reject"
     min_delta: 0.01
