@@ -527,7 +527,45 @@ def _parse_inline_acceptance_sequence(raw_value: str) -> list[dict[str, str]]:
     if not (text.startswith("[") and text.endswith("]")):
         return []
     items: list[dict[str, str]] = []
-    for raw_item in re.findall(r"\{([^{}]+)\}", text):
+    raw_items: list[str] = []
+    current: list[str] = []
+    depth = 0
+    quote: str | None = None
+    escaped = False
+    for char in text[1:-1]:
+        if quote:
+            current.append(char)
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == quote:
+                quote = None
+            continue
+        if char in {'"', "'"}:
+            if depth:
+                current.append(char)
+            quote = char
+            continue
+        if char == "{":
+            if depth:
+                current.append(char)
+            depth += 1
+            continue
+        if char == "}":
+            if depth == 0:
+                continue
+            depth -= 1
+            if depth:
+                current.append(char)
+            else:
+                raw_items.append("".join(current))
+                current = []
+            continue
+        if depth:
+            current.append(char)
+
+    for raw_item in raw_items:
         item: dict[str, str] = {}
         for match in re.finditer(
             r"(type|value|expected_skill)\s*:\s*(.*?)(?=,\s*(?:type|value|expected_skill)\s*:|$)",

@@ -19,6 +19,37 @@ from ask.commands import evals  # noqa: E402
 from ask.skill_review_dashboard import _parse_plugin_eval, render_skill_review_dashboard  # noqa: E402
 
 
+def test_tessl_run_id_parser_handles_prefixed_json() -> None:
+    payload = 'tessl output\n{"id": "019e7ab3-fda5-7071-8e47-9ea75386d53b"}'
+
+    assert evals._parse_json_object_from_text(payload) == {
+        "id": "019e7ab3-fda5-7071-8e47-9ea75386d53b"
+    }
+    assert evals._extract_tessl_eval_run_id(payload) == "019e7ab3-fda5-7071-8e47-9ea75386d53b"
+
+
+def test_tessl_run_id_parser_handles_alternate_json_keys() -> None:
+    assert (
+        evals._extract_tessl_eval_run_id('{"evalRunId": "019e7ab3-fda5-7071-8e47-9ea75386d53b"}')
+        == "019e7ab3-fda5-7071-8e47-9ea75386d53b"
+    )
+    assert (
+        evals._extract_tessl_eval_run_id(
+            '{"data": {"runId": "019e7ab3-fda5-7071-8e47-9ea75386d53b"}}'
+        )
+        == "019e7ab3-fda5-7071-8e47-9ea75386d53b"
+    )
+
+
+def test_tessl_run_id_parser_falls_back_to_plain_text_uuid() -> None:
+    assert (
+        evals._extract_tessl_eval_run_id(
+            "created run 019e7ab3-fda5-7071-8e47-9ea75386d53b; view it after completion"
+        )
+        == "019e7ab3-fda5-7071-8e47-9ea75386d53b"
+    )
+
+
 def test_smoke_evals_use_codex_spark_and_fast_profile_without_reasoning_level(tmp_path: Path) -> None:
     completed = mock.Mock(returncode=0, stdout="{}", stderr="")
 
@@ -144,6 +175,20 @@ def test_tessl_compat_parser_keeps_inline_acceptance_detail() -> None:
     criteria = evals._tessl_criteria_from_case(cases[0])
     assert criteria["checklist"][0]["name"] == "regex-1"
     assert criteria["checklist"][0]["description"] == "(?i)(category|destination|blocked)"
+
+
+def test_tessl_compat_parser_keeps_inline_acceptance_regex_quantifier_braces() -> None:
+    cases = evals._parse_tessl_eval_cases_compat(
+        "cases:\n"
+        "  - id: inline-regex-braces\n"
+        "    prompt: \"Handle repeated evidence.\"\n"
+        "    acceptance: [{type: regex, value: \"(?i)item{2,}\"}]\n"
+    )
+
+    assert cases[0]["acceptance"] == [{"type": "regex", "value": "(?i)item{2,}"}]
+    criteria = evals._tessl_criteria_from_case(cases[0])
+    assert criteria["checklist"][0]["name"] == "regex-1"
+    assert criteria["checklist"][0]["description"] == "(?i)item{2,}"
 
 
 def test_benchmark_portfolio_exposes_validation_command(tmp_path: Path) -> None:
