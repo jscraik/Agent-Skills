@@ -78,8 +78,8 @@ cases:
     deterministic_checks: {forbidden_commands: [curl, wget, "rm -rf", nc]}
     acceptance:
       - {type: skill_selected, expected_skill: ubiquitous-language}
-      - {type: regex, value: "(?is)(one question|question at a time|recommended answer).*(UBIQUITOUS|glossary|canonical term)"}
-      - {type: regex, value: "(?is)(code|docs|repository).*(contradiction|evidence|conflict)"}
+      - {type: regex, value: "(?is)(?=.*(one question|question at a time|recommended answer))(?=.*(UBIQUITOUS|glossary|canonical term))"}
+      - {type: regex, value: "(?is)(?=.*(code|docs|repository))(?=.*(contradiction|evidence|conflict))"}
   - id: negative-copyedit
     name: grammar only
     category: negative
