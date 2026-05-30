@@ -50,7 +50,18 @@ discovering, and syncing Codex skills, operator docs, and agent workflows.
   project-save eval lane, not a registry-publish lane: do not use `npx tessl`,
   `publish`, registry upload, or package upload commands. If Tessl reports no
   workspace/project link, classify that setup blocker directly instead of
-  re-litigating auth, sandboxing, or temp staging.
+  re-litigating auth, sandboxing, or temp staging. Tessl project identity is
+  deterministic: plugin-owned skills under `Plugins/<plugin-id>/skills/**`
+  belong to the plugin project, for example `skills-sdk/skill-factory`, and
+  standalone skills belong to their own skill project. Wrappers must check or
+  establish that project link before running the Tessl eval/install lane,
+  relinking an existing project before creating a new one. In Codex sessions,
+  source the operator-approved
+  `/Users/jamiecraik/.codex/.env` environment stream directly when the Tessl
+  workspace token is needed; never print token values or shell-expanded
+  environment contents. Treat stable `/tmp/ask-tessl-*` paths as evidence:
+  reruns must archive prior temp contents under `evidence-archive/` rather
+  than deleting generated payloads to create a clean workspace.
 
 ## Common Commands
 

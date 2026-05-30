@@ -14,6 +14,21 @@ outputs:
   - "context lifecycle stage changed or blocked"
   - "validator evidence using pass/fail/blocked/not applicable"
   - "media artifact evidence or blocked status when image generation is requested"
+permission_profile:
+  filesystem:
+    read:
+      - "target skill package"
+      - "repo validation scripts"
+      - "optional ~/.agents evidence provider summaries"
+    write:
+      - "canonical target skill package"
+      - "repo-local validation artifacts"
+  network: "only when the focused gate or external review command requires it"
+  approval_required:
+    - "global config writes"
+    - "external writes"
+    - "publishing or package upload"
+    - "destructive cleanup outside the target package"
 non_goals:
   - "unrelated implementation work outside skill scope"
 risks:

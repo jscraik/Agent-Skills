@@ -19,6 +19,50 @@ DOC_PATH = ROOT / DOC_REL_PATH
 LEDGER_PATH = ROOT / LEDGER_REL_PATH
 README_PATH = ROOT / README_REL_PATH
 VALID_STATUSES = {"open", "validated", "blocked"}
+VALID_FAILURE_CATEGORIES = {
+    "missing context",
+    "stale state",
+    "weak validation",
+    "hidden assumptions",
+    "retrieval failure",
+    "poor workflow design",
+    "runtime ambiguity",
+    "architecture drift",
+    "lack of verification",
+    "weak observability",
+    "missing guardrails",
+    "missing decomposition",
+    "unclear authority boundaries",
+    "excessive context noise",
+    "poor task routing",
+    "insufficient deterministic enforcement",
+}
+VALID_IMPROVEMENT_TYPES = {
+    "validator",
+    "schema",
+    "schema contract",
+    "schema constraint",
+    "trace event",
+    "runtime check",
+    "workflow rule",
+    "recovery handler",
+    "CI gate",
+    "repo artifact",
+    "skill improvement",
+    "context-routing improvement",
+    "governance rule",
+    "reusable primitive",
+    "implementation note",
+    "retrieval improvement",
+    "stale-state prevention",
+    "claim-vs-evidence verification",
+    "generated runtime guardrail",
+    "runtime projection guardrail",
+    "runtime persistence guardrail",
+    "doctor blocker",
+    "selection policy",
+    "eval contract",
+}
 REQUIRED_HEADERS = [
     "Date",
     "Trigger",
@@ -183,6 +227,14 @@ def _contains_steering_doc_link(text: str) -> bool:
     return bool(STEERING_DOC_LINK_RE.search(text))
 
 
+def _tag_values(text: str, label: str) -> set[str]:
+    marker = f"{label}:"
+    if marker not in text:
+        return set()
+    value_text = text.split(marker, 1)[1].split(".", 1)[0]
+    return {value.strip() for value in re.split(r";|,", value_text) if value.strip()}
+
+
 def validate(root: Path = ROOT) -> list[Finding]:
     """
     Validate the steering feedback documentation, ledger, and agent docs index under the given repository root.
@@ -217,6 +269,24 @@ def validate(root: Path = ROOT) -> list[Finding]:
             "closeout caveat",
             "changes future behavior",
             "Uptake Loop",
+            "local or systemic",
+            "sibling patterns",
+            "API philosophy",
+            "error-handling doctrine",
+            "runtime safety assumption",
+            "operational standard",
+            "lint rule",
+            "schema constraint",
+            "style rule",
+            "CI check",
+            "shared utility",
+            "reusable abstraction",
+            "architectural policy",
+            "not doing what Jamie wants",
+            "feedback signal",
+            "root operational failure",
+            "durable system improvement",
+            "known taxonomy values",
             "Required Evidence",
             "validate_steering_uptake.py",
         ]:
@@ -250,8 +320,34 @@ def validate(root: Path = ROOT) -> list[Finding]:
             guardrail = record["Durable guardrail"]
             if "Category:" not in mechanism:
                 findings.append(Finding("STEERING_LEDGER_CATEGORY_MISSING", f"Row {index} is missing a failure category in Mechanism.", _relative(ledger_path, root)))
+            else:
+                categories = _tag_values(mechanism, "Category")
+                unknown_categories = categories - VALID_FAILURE_CATEGORIES
+                if not categories:
+                    findings.append(Finding("STEERING_LEDGER_CATEGORY_MISSING", f"Row {index} has an empty failure category list.", _relative(ledger_path, root)))
+                elif unknown_categories:
+                    findings.append(
+                        Finding(
+                            "STEERING_LEDGER_CATEGORY_UNKNOWN",
+                            f"Row {index} uses unknown failure categories: {sorted(unknown_categories)}.",
+                            _relative(ledger_path, root),
+                        )
+                    )
             if "Improvement type:" not in guardrail:
                 findings.append(Finding("STEERING_LEDGER_IMPROVEMENT_TYPE_MISSING", f"Row {index} is missing a durable improvement type in Durable guardrail.", _relative(ledger_path, root)))
+            else:
+                improvement_types = _tag_values(guardrail, "Improvement type")
+                unknown_improvement_types = improvement_types - VALID_IMPROVEMENT_TYPES
+                if not improvement_types:
+                    findings.append(Finding("STEERING_LEDGER_IMPROVEMENT_TYPE_MISSING", f"Row {index} has an empty durable improvement type list.", _relative(ledger_path, root)))
+                elif unknown_improvement_types:
+                    findings.append(
+                        Finding(
+                            "STEERING_LEDGER_IMPROVEMENT_TYPE_UNKNOWN",
+                            f"Row {index} uses unknown improvement types: {sorted(unknown_improvement_types)}.",
+                            _relative(ledger_path, root),
+                        )
+                    )
 
     if not readme_path.exists():
         findings.append(Finding("AGENT_DOC_INDEX_MISSING", "Agent docs index is missing.", _relative(readme_path, root)))

@@ -453,6 +453,17 @@ def _eval_model(repo_root: Path, target: str) -> dict[str, Any]:
             "baseline_score": None,
             "status": status,
             "notes": notes,
+            "riteway": case.get("riteway") if isinstance(case.get("riteway"), dict) else None,
+            "agent_eval_artifacts": (
+                case.get("agent_eval_artifacts")
+                if isinstance(case.get("agent_eval_artifacts"), dict)
+                else None
+            ),
+            "pass_rate_policy": (
+                case.get("pass_rate_policy")
+                if isinstance(case.get("pass_rate_policy"), dict)
+                else None
+            ),
             "expected_signal_score": signal_score,
             "runner_mode": scorecard.get("runner_mode") or "unknown",
         })
@@ -577,12 +588,28 @@ def _render_eval_cases(evals: dict[str, Any]) -> str:
             if status == "passed"
             else "<td><span>Not run</span></td>"
         )
+        riteway = case.get("riteway") if isinstance(case.get("riteway"), dict) else {}
+        riteway_lines = []
+        for label, key in (
+            ("unit", "unit"),
+            ("given", "given"),
+            ("should", "should"),
+            ("actual", "actual"),
+            ("expected", "expected"),
+            ("reproduce", "reproduce"),
+        ):
+            value = riteway.get(key)
+            if value:
+                riteway_lines.append(f"{label}: {value}")
+        evidence_notes = "; ".join(str(item) for item in _as_list(case.get("notes"))) or case.get("status")
+        if riteway_lines:
+            evidence_notes = f"{evidence_notes}\n" + "\n".join(riteway_lines)
         rows.append(
             "<tr>"
             f"<td><strong>{_escape(case.get('name'))}</strong><br><span>{_escape(case.get('category'))}</span></td>"
             f"{baseline_cell}"
             f"<td class=\"score {_status_class(pct)}\">{pct}%</td>"
-            f"<td>{_escape('; '.join(_as_list(case.get('notes'))) or case.get('status'))}</td>"
+            f"<td>{_escape(evidence_notes).replace(chr(10), '<br>')}</td>"
             "</tr>"
         )
     return f"""
@@ -854,10 +881,10 @@ document.addEventListener('DOMContentLoaded', () => {{
       </div>
     </header>
     <nav class="tabs" role="tablist" aria-label="Review result sections">
-      <a role="tab" aria-selected="true" aria-controls="quality" tabindex="0" href="#quality">Quality</a><a role="tab" aria-selected="false" aria-controls="evals" tabindex="-1" href="#evals">Evals</a><a role="tab" aria-selected="false" aria-controls="security" tabindex="-1" href="#security">Security</a><a role="tab" aria-selected="false" aria-controls="evidence" tabindex="-1" href="#evidence">Evidence</a>
+      <a id="tab-quality" role="tab" aria-selected="true" aria-controls="quality" tabindex="0" href="#quality">Quality</a><a id="tab-evals" role="tab" aria-selected="false" aria-controls="evals" tabindex="-1" href="#evals">Evals</a><a id="tab-security" role="tab" aria-selected="false" aria-controls="security" tabindex="-1" href="#security">Security</a><a id="tab-evidence" role="tab" aria-selected="false" aria-controls="evidence" tabindex="-1" href="#evidence">Evidence</a>
     </nav>
 
-    <section id="quality" class="tab-panel is-active" role="tabpanel">
+    <section id="quality" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-quality">
       <div class="section-head"><div><h2>Quality</h2><p>Discovery, implementation, validation, and internal evaluator agreement.</p></div><span class="pill {_status_class(quality_score)}">{quality_score}%</span></div>
       <div class="grid">
         <div class="panel"><h3>Discovery</h3><p>Description activation quality</p><strong class="{_status_class(tessl['description_score'])}">{tessl['description_score']}%</strong></div>
@@ -880,11 +907,11 @@ document.addEventListener('DOMContentLoaded', () => {{
       <div class="suggestions"><h3>Suggestions</h3><ul>{suggestion_html}</ul></div>
     </section>
 
-    <section id="evals" class="tab-panel" role="tabpanel" hidden>
+    <section id="evals" class="tab-panel" role="tabpanel" aria-labelledby="tab-evals" hidden>
       {_render_eval_cases(evals)}
     </section>
 
-    <section id="security" class="tab-panel" role="tabpanel" hidden>
+    <section id="security" class="tab-panel" role="tabpanel" aria-labelledby="tab-security" hidden>
       <div class="section-head"><div><h2>Security</h2><p>Local security-review result, kept separate from quality so warnings cannot hide.</p></div><span class="pill {_status_class(security_score)}">{security_score}%</span></div>
       <div class="suggestions"><h3>Findings</h3><ul>{security_html}</ul></div>
       <div class="panel plugin-posture">

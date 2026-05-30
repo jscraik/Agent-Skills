@@ -10,6 +10,7 @@ import sys
 import shutil
 import tempfile
 import hashlib
+import time
 from pathlib import Path
 from ask.envelope import CallResult, ErrorObject
 from ask.skill_review_dashboard import render_skill_review_dashboard
@@ -26,6 +27,10 @@ DEFAULT_MACRO_EVAL_REPORTS_GLOB = "Infrastructure/artifacts/skills/*/*/summary.j
 TESSL_SCENARIO_TOOL_TILE = "tessl-labs/tessl-skill-eval-scenarios"
 TESSL_SCENARIO_TOOL_VERSION = "0.1.0"
 TESSL_TILE_VERSION_RE = re.compile(r"^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$")
+TESSL_LIVE_PRIVATE_MIN_SCORE = 0.90
+TESSL_LIVE_PRIVATE_TARGET_SCORE = 0.95
+TESSL_LIVE_PRIVATE_VIEW_POLL_SECONDS = 10
+TESSL_LIVE_PRIVATE_VIEW_TIMEOUT_SECONDS = 900
 
 
 EVAL_BLOCKER_TAXONOMY = {
@@ -142,6 +147,163 @@ def _as_text(value, encoding="utf-8") -> str:
     return str(value)
 
 
+def _parse_json_object_from_text(text: str) -> dict[str, object] | None:
+    stripped = text.strip()
+    if not stripped:
+        return None
+    for start in (0, stripped.find("{")):
+        if start < 0:
+            continue
+        try:
+            parsed = json.loads(stripped[start:])
+        except json.JSONDecodeError:
+            continue
+        if isinstance(parsed, dict):
+            return parsed
+    return None
+
+
+def _extract_tessl_eval_run_id(text: str) -> str | None:
+    parsed = _parse_json_object_from_text(text)
+    candidates: list[object] = []
+    if isinstance(parsed, dict):
+        candidates.extend([
+            parsed.get("id"),
+            parsed.get("evalRunId"),
+            parsed.get("eval_run_id"),
+            parsed.get("runId"),
+        ])
+        data = parsed.get("data")
+        if isinstance(data, dict):
+            candidates.extend([
+                data.get("id"),
+                data.get("evalRunId"),
+                data.get("eval_run_id"),
+                data.get("runId"),
+            ])
+    for candidate in candidates:
+        if isinstance(candidate, str) and candidate.strip():
+            return candidate.strip()
+    match = re.search(r"\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b", text, re.I)
+    return match.group(0) if match else None
+
+
+def _score_solution(solution: dict[str, object]) -> tuple[float, float]:
+    score = 0.0
+    max_score = 0.0
+    assessment_results = solution.get("assessmentResults")
+    if not isinstance(assessment_results, list):
+        return score, max_score
+    for result in assessment_results:
+        if not isinstance(result, dict):
+            continue
+        raw_score = result.get("score")
+        raw_max = result.get("max_score", 1)
+        if isinstance(raw_score, (int, float)):
+            score += float(raw_score)
+        if isinstance(raw_max, (int, float)):
+            max_score += float(raw_max)
+    return score, max_score
+
+
+def _tessl_eval_view_status(payload: dict[str, object]) -> str | None:
+    data = payload.get("data")
+    attributes = data.get("attributes") if isinstance(data, dict) else None
+    status = attributes.get("status") if isinstance(attributes, dict) else None
+    return status.strip().lower() if isinstance(status, str) and status.strip() else None
+
+
+def _tessl_eval_view_has_complete_scores(payload: dict[str, object]) -> bool:
+    data = payload.get("data")
+    attributes = data.get("attributes") if isinstance(data, dict) else None
+    scenarios = attributes.get("scenarios") if isinstance(attributes, dict) else None
+    if not isinstance(scenarios, list) or not scenarios:
+        return False
+    scored_scenarios = 0
+    for scenario in scenarios:
+        if not isinstance(scenario, dict):
+            continue
+        solutions = scenario.get("solutions")
+        if not isinstance(solutions, list) or not solutions:
+            return False
+        usage_solution = next((s for s in solutions if isinstance(s, dict) and s.get("variant") == "usage-spec"), None)
+        baseline_solution = next((s for s in solutions if isinstance(s, dict) and s.get("variant") == "baseline"), None)
+        if not isinstance(usage_solution, dict) or not isinstance(baseline_solution, dict):
+            return False
+        usage_results = usage_solution.get("assessmentResults")
+        baseline_results = baseline_solution.get("assessmentResults")
+        if not isinstance(usage_results, list) or not usage_results:
+            return False
+        if not isinstance(baseline_results, list) or not baseline_results:
+            return False
+        scored_scenarios += 1
+    return scored_scenarios > 0
+
+
+def _summarize_tessl_live_eval_view(payload: dict[str, object]) -> dict[str, object]:
+    data = payload.get("data")
+    attributes = data.get("attributes") if isinstance(data, dict) else None
+    scenarios = attributes.get("scenarios") if isinstance(attributes, dict) else None
+    if not isinstance(scenarios, list):
+        raise ValueError("Tessl eval view JSON did not include data.attributes.scenarios.")
+
+    usage_score = 0.0
+    baseline_score = 0.0
+    max_score = 0.0
+    scenario_summaries: list[dict[str, object]] = []
+
+    for scenario in scenarios:
+        if not isinstance(scenario, dict):
+            continue
+        solutions = scenario.get("solutions")
+        if not isinstance(solutions, list):
+            continue
+        usage_solution = next((s for s in solutions if isinstance(s, dict) and s.get("variant") == "usage-spec"), None)
+        baseline_solution = next((s for s in solutions if isinstance(s, dict) and s.get("variant") == "baseline"), None)
+        if not isinstance(usage_solution, dict) or not isinstance(baseline_solution, dict):
+            continue
+
+        scenario_usage, scenario_max = _score_solution(usage_solution)
+        scenario_baseline, baseline_max = _score_solution(baseline_solution)
+        if scenario_max <= 0:
+            scenario_max = baseline_max
+        usage_score += scenario_usage
+        baseline_score += scenario_baseline
+        max_score += scenario_max
+
+        scenario_summaries.append({
+            "id": scenario.get("id"),
+            "description": scenario.get("shortDescription"),
+            "usage_score": scenario_usage,
+            "baseline_score": scenario_baseline,
+            "max_score": scenario_max,
+            "regression": scenario_usage < scenario_baseline,
+        })
+
+    if max_score <= 0:
+        raise ValueError("Tessl eval view JSON did not include scored baseline and usage-spec solutions.")
+
+    usage_rate = usage_score / max_score
+    baseline_rate = baseline_score / max_score
+    improvement = None if baseline_rate == 0 else usage_rate / baseline_rate
+    regressions = [s for s in scenario_summaries if s.get("regression")]
+    return {
+        "score": usage_rate,
+        "baseline_score": baseline_rate,
+        "improvement": improvement,
+        "usage_points": usage_score,
+        "baseline_points": baseline_score,
+        "max_points": max_score,
+        "scenarios_count": len(scenario_summaries),
+        "regressions_count": len(regressions),
+        "regressions": regressions,
+        "min_score_required": TESSL_LIVE_PRIVATE_MIN_SCORE,
+        "target_score": TESSL_LIVE_PRIVATE_TARGET_SCORE,
+        "meets_min_score": usage_rate >= TESSL_LIVE_PRIVATE_MIN_SCORE,
+        "beats_baseline": usage_rate >= baseline_rate,
+    }
+
+
 def _tessl_staging_root_template() -> str:
     """Return the human-readable template for stable Tessl eval staging."""
     return str(Path(tempfile.gettempdir()) / "ask-tessl-evals" / "<skill-path>-<sha12>")
@@ -161,18 +323,21 @@ def _tessl_policy() -> dict:
         "no_registry_upload": True,
         "temp_staged_project_input_only": True,
         "stable_staging_root": _tessl_staging_root_template(),
-        "evidence_retention": "stable tmp staging is intentionally left for post-run inspection",
+        "evidence_retention": "stable tmp staging is intentionally left for post-run inspection; reruns archive previous staged evidence under evidence-archive/",
         "tessl_project_marker": "tessl.json",
         "staged_inputs": [
             "SKILL.md",
             "references/evals.yaml",
             "references/contract.yaml",
             "references/task-profile.json",
+            "assets/**/*",
             "scenarios/<case-id>/task.md",
         ],
         "network_permission_required_by_repo": False,
-        "project_save_may_use_tessl_service": False,
+        "project_save_may_use_tessl_service": "only_for_project_link_when_workspace_provided",
         "project_save_default": "compatibility_flag_not_required",
+        "project_identity_rule": "plugin skills use the plugin project name; standalone skills use the skill name",
+        "project_link_check": "when --tessl-workspace is provided, repair/link existing project first and create only when needed",
     }
 
 
@@ -185,6 +350,8 @@ def _tessl_live_private_policy(workspace: str | None = None) -> dict:
         "workspace_required": True,
         "workspace": workspace,
         "tile_name_format": "workspace/tile-name",
+        "project_identity_rule": "plugin skills use the plugin project name; standalone skills use the skill name",
+        "project_link_check": "repair/link existing project first and create only when needed",
         "native_tessl_only": True,
         "no_npx": True,
         "no_install": True,
@@ -192,6 +359,7 @@ def _tessl_live_private_policy(workspace: str | None = None) -> dict:
         "no_registry_upload": True,
         "temp_staged_tile_input_only": True,
         "stable_staging_root": _tessl_live_staging_root_template(),
+        "evidence_retention": "stable tmp staging is intentionally left for post-run inspection; reruns archive previous staged evidence under evidence-archive/",
         "tessl_project_marker": "tessl.json",
         "tile_manifest": "tile.json",
         "eval_layout": "evals/<case-id>/{task.md,criteria.json}",
@@ -203,10 +371,14 @@ def _tessl_live_private_policy(workspace: str | None = None) -> dict:
             "references/contract.yaml",
             "references/task-profile.json",
             "references/**/*",
+            "assets/**/*",
             "evals/<case-id>/task.md",
             "evals/<case-id>/criteria.json",
         ],
         "command_shape": "tessl eval run --json <staged-tile-json>",
+        "readiness_gate": "after run completion, fetch tessl eval view --json and require usage score >= 90% and usage score >= baseline; 95% remains the target",
+        "min_score_required": TESSL_LIVE_PRIVATE_MIN_SCORE,
+        "target_score": TESSL_LIVE_PRIVATE_TARGET_SCORE,
         "usage_data_opt_out": "tessl config set shareUsageData false",
     }
 
@@ -220,9 +392,12 @@ def _tessl_scenario_generation_policy(workspace: str | None = None) -> dict:
     """Return the repo's Tessl scenario-generation safety contract."""
     return {
         "enabled_by": "ask evals prepare-tessl-scenarios",
-        "purpose": "use Tessl's public scenario-generation skill without installing Tessl state into the repo root",
+        "purpose": "stage a target tile and install Tessl's public scenario-generation skill without installing Tessl state into the repo root",
+        "agent_must_generate_scenarios_after_prepare": True,
         "workspace_required": True,
         "workspace": workspace,
+        "project_identity_rule": "plugin skills use the plugin project name; standalone skills use the skill name",
+        "project_link_check": "repair/link existing project first and create only when needed",
         "scenario_tool_tile": TESSL_SCENARIO_TOOL_TILE,
         "scenario_tool_version": TESSL_SCENARIO_TOOL_VERSION,
         "allowed_install": f"{TESSL_SCENARIO_TOOL_TILE}@{TESSL_SCENARIO_TOOL_VERSION}",
@@ -234,6 +409,7 @@ def _tessl_scenario_generation_policy(workspace: str | None = None) -> dict:
         "no_registry_upload": True,
         "temp_staged_tile_input_only": True,
         "stable_staging_root": _tessl_scenario_generation_root_template(),
+        "evidence_retention": "stable tmp staging is intentionally left for post-run inspection; reruns archive previous staged evidence under evidence-archive/",
         "target_tile": "target-tile",
         "tool_project": "tool-project",
         "scenario_skill_path": ".tessl/tiles/tessl-labs/tessl-skill-eval-scenarios/creating-eval-scenarios/SKILL.md",
@@ -251,6 +427,23 @@ def _copy_if_present(source_root: Path, relative_path: str, target_root: Path) -
     target.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(source, target)
     return [relative_path]
+
+
+def _copy_tree_files_if_present(source_root: Path, relative_path: str, target_root: Path) -> list[str]:
+    source = source_root / relative_path
+    if not source.is_dir():
+        return []
+
+    copied: list[str] = []
+    for source_file in sorted(source.rglob("*")):
+        if not source_file.is_file():
+            continue
+        child_relative = source_file.relative_to(source_root).as_posix()
+        target = target_root / child_relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source_file, target)
+        copied.append(child_relative)
+    return copied
 
 
 def _yaml_scalar(value: str) -> str:
@@ -331,6 +524,61 @@ def _consume_yaml_sequence_dicts(lines: list[str], index: int, parent_indent: in
     return items, index
 
 
+def _parse_inline_acceptance_sequence(raw_value: str) -> list[dict[str, str]]:
+    text = raw_value.strip()
+    if not (text.startswith("[") and text.endswith("]")):
+        return []
+    items: list[dict[str, str]] = []
+    raw_items: list[str] = []
+    current: list[str] = []
+    depth = 0
+    quote: str | None = None
+    escaped = False
+    for char in text[1:-1]:
+        if quote:
+            current.append(char)
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == quote:
+                quote = None
+            continue
+        if char in {'"', "'"}:
+            if depth:
+                current.append(char)
+            quote = char
+            continue
+        if char == "{":
+            if depth:
+                current.append(char)
+            depth += 1
+            continue
+        if char == "}":
+            if depth == 0:
+                continue
+            depth -= 1
+            if depth:
+                current.append(char)
+            else:
+                raw_items.append("".join(current))
+                current = []
+            continue
+        if depth:
+            current.append(char)
+
+    for raw_item in raw_items:
+        item: dict[str, str] = {}
+        for match in re.finditer(
+            r"(type|value|expected_skill)\s*:\s*(.*?)(?=,\s*(?:type|value|expected_skill)\s*:|$)",
+            raw_item,
+        ):
+            item[match.group(1)] = match.group(2).strip().strip("\"'")
+        if item:
+            items.append(item)
+    return items
+
+
 def _parse_tessl_eval_cases_compat(text: str) -> list[dict[str, str]]:
     cases: list[dict[str, str]] = []
     current: dict[str, str] | None = None
@@ -363,10 +611,26 @@ def _parse_tessl_eval_cases_compat(text: str) -> list[dict[str, str]]:
         key = key.strip()
         raw_value = raw_value.strip()
         if key == "acceptance":
-            acceptance, index = _consume_yaml_sequence_dicts(lines, index + 1, indent)
+            if raw_value:
+                acceptance = _parse_inline_acceptance_sequence(raw_value)
+                index += 1
+            else:
+                acceptance, index = _consume_yaml_sequence_dicts(lines, index + 1, indent)
             current[key] = acceptance  # type: ignore[assignment]
             continue
-        if key not in {"id", "prompt"}:
+        if key not in {
+            "id",
+            "prompt",
+            "unit",
+            "given",
+            "should",
+            "actual_artifact",
+            "expected_artifact",
+            "reproduce",
+            "raw_response_artifact",
+            "judge_detail_artifact",
+            "pass_rate_calibration_artifact",
+        }:
             index += 1
             continue
         if key == "prompt" and raw_value.startswith((">", "|")):
@@ -410,6 +674,20 @@ def _parse_tessl_eval_cases(evals_path: Path) -> list[dict[str, str]]:
         if case_id is None or prompt is None:
             continue
         case = {"id": str(case_id), "prompt": str(prompt)}
+        for field in (
+            "unit",
+            "given",
+            "should",
+            "actual_artifact",
+            "expected_artifact",
+            "reproduce",
+            "raw_response_artifact",
+            "judge_detail_artifact",
+            "pass_rate_threshold",
+            "pass_rate_calibration_artifact",
+        ):
+            if raw_case.get(field) is not None:
+                case[field] = raw_case[field]  # type: ignore[assignment]
         acceptance = raw_case.get("acceptance")
         if isinstance(acceptance, list):
             case["acceptance"] = acceptance  # type: ignore[assignment]
@@ -423,17 +701,46 @@ def _write_tessl_scenarios_from_evals(source_root: Path, staged_root: Path) -> l
         case_id = case["id"].replace("/", "-")
         task_path = staged_root / "scenarios" / case_id / "task.md"
         task_path.parent.mkdir(parents=True, exist_ok=True)
-        task_path.write_text(case["prompt"].rstrip() + "\n", encoding="utf-8")
+        task_path.write_text(_tessl_task_markdown(case), encoding="utf-8")
         copied.append(str(task_path.relative_to(staged_root)))
     return copied
 
 
-def _write_tessl_project_marker(source_root: Path, staged_root: Path) -> list[str]:
+def _tessl_plugin_project_slug(source_root: Path) -> str | None:
+    parts = source_root.parts
+    for index, part in enumerate(parts):
+        if part == "Plugins" and index + 2 < len(parts) and parts[index + 2] == "skills":
+            return _safe_slug(parts[index + 1].lower())
+    return None
+
+
+def _tessl_project_slug(source_root: Path) -> str:
+    plugin_slug = _tessl_plugin_project_slug(source_root)
+    if plugin_slug:
+        return plugin_slug
+    return _safe_slug(source_root.name.lower())
+
+
+def _tessl_project_identity(source_root: Path, workspace: str | None = None) -> dict[str, str | None]:
+    slug = _tessl_project_slug(source_root)
+    owner_type = "plugin" if _tessl_plugin_project_slug(source_root) else "standalone_skill"
+    return {
+        "owner_type": owner_type,
+        "project": slug,
+        "workspace": workspace,
+        "name": f"{workspace}/{slug}" if workspace else slug,
+    }
+
+
+def _write_tessl_project_marker(
+    source_root: Path,
+    staged_root: Path,
+    workspace: str | None = None,
+) -> list[str]:
     marker_path = staged_root / "tessl.json"
-    if marker_path.exists():
-        return ["tessl.json"]
+    identity = _tessl_project_identity(source_root, workspace)
     marker_path.write_text(
-        json.dumps({"name": source_root.name}, indent=2) + "\n",
+        json.dumps({"name": identity["name"], "mode": "managed", "dependencies": {}}, indent=2) + "\n",
         encoding="utf-8",
     )
     return ["tessl.json"]
@@ -456,6 +763,39 @@ def _tessl_eval_case_id(case_id: str) -> str:
     return _safe_slug(case_id.replace("/", "-"))
 
 
+def _tessl_task_markdown(case: dict[str, object]) -> str:
+    lines: list[str] = []
+    for label, field in (("Unit", "unit"), ("Given", "given"), ("Should", "should")):
+        value = str(case.get(field) or "").strip()
+        if value:
+            lines.append(f"{label}: {value}")
+    if lines:
+        lines.append("")
+    lines.append(str(case.get("prompt") or "").rstrip())
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def _normalize_tessl_acceptance_item(item: dict[object, object]) -> dict[str, str]:
+    normalized = {str(key).strip(): str(value).strip() for key, value in item.items()}
+    if "type" in normalized or "value" in normalized or "expected_skill" in normalized:
+        return normalized
+
+    # Compact flow maps without a space after "{" parse as a key named
+    # "{type" in PyYAML. Recover those fields so Tessl rubrics keep their
+    # scoring detail instead of degrading into generic checklist rows.
+    recovered: dict[str, str] = {}
+    for key, value in normalized.items():
+        text = f"{key}: {value}".strip().strip("{} ")
+        for match in re.finditer(
+            r"(type|value|expected_skill)\s*:\s*(.*?)(?=,\s*(?:type|value|expected_skill)\s*:|$)",
+            text,
+        ):
+            field = match.group(1)
+            raw = match.group(2).strip().rstrip("}").strip()
+            recovered[field] = raw.strip("\"'")
+    return recovered or normalized
+
+
 def _tessl_criteria_from_case(case: dict[str, object]) -> dict:
     checklist: list[dict[str, object]] = []
     acceptance = case.get("acceptance")
@@ -463,8 +803,14 @@ def _tessl_criteria_from_case(case: dict[str, object]) -> dict:
         for index, item in enumerate(acceptance, start=1):
             if not isinstance(item, dict):
                 continue
-            criterion_type = str(item.get("type") or "acceptance").strip()
-            value = str(item.get("value", item.get("expected_skill", "Satisfies acceptance criterion."))).strip()
+            normalized_item = _normalize_tessl_acceptance_item(item)
+            criterion_type = str(normalized_item.get("type") or "acceptance").strip()
+            value = str(
+                normalized_item.get("value")
+                or normalized_item.get("expected_skill")
+                or case.get("expected_artifact")
+                or "Satisfies acceptance criterion."
+            ).strip()
             category = "MUST_NOT" if criterion_type.startswith(("forbidden", "must_not")) else "INTENT"
             checklist.append({
                 "name": _safe_slug(f"{criterion_type}-{index}"),
@@ -490,6 +836,23 @@ def _tessl_criteria_from_case(case: dict[str, object]) -> dict:
         "metadata": {
             "schema_version": "ask-tessl-criteria-adapter.v1",
             "source_case_id": str(case.get("id") or "unknown"),
+            "riteway": {
+                "unit": case.get("unit"),
+                "given": case.get("given"),
+                "should": case.get("should"),
+                "actual_artifact": case.get("actual_artifact"),
+                "expected_artifact": case.get("expected_artifact"),
+                "reproduce": case.get("reproduce"),
+            },
+            "agent_eval_artifacts": {
+                "raw_response": case.get("raw_response_artifact"),
+                "judge_details": case.get("judge_detail_artifact"),
+            },
+            "pass_rate_policy": {
+                "threshold": case.get("pass_rate_threshold"),
+                "calibration_artifact": case.get("pass_rate_calibration_artifact"),
+                "gate_status": "calibrated_gate" if case.get("pass_rate_calibration_artifact") else "advisory",
+            },
         },
     }
 
@@ -501,7 +864,7 @@ def _write_tessl_live_evals_from_references(source_root: Path, staged_root: Path
         case_root = staged_root / "evals" / case_id
         case_root.mkdir(parents=True, exist_ok=True)
         task_path = case_root / "task.md"
-        task_path.write_text(case["prompt"].rstrip() + "\n", encoding="utf-8")
+        task_path.write_text(_tessl_task_markdown(case), encoding="utf-8")
         criteria_path = case_root / "criteria.json"
         criteria_path.write_text(json.dumps(_tessl_criteria_from_case(case), indent=2) + "\n", encoding="utf-8")
         copied.extend([
@@ -520,8 +883,12 @@ def _write_tessl_live_project_marker(staged_root: Path, workspace: str, tile_slu
     return ["tessl.json"]
 
 
+def _tessl_live_tile_slug(source_root: Path) -> str:
+    return _tessl_project_slug(source_root)
+
+
 def _write_tessl_live_tile_manifest(source_root: Path, staged_root: Path, workspace: str) -> list[str]:
-    tile_slug = _safe_slug(source_root.name.lower())
+    tile_slug = _tessl_live_tile_slug(source_root)
     tile_version = _skill_tessl_tile_version(source_root)
     manifest = {
         "name": f"{workspace}/{tile_slug}",
@@ -592,7 +959,273 @@ def _stable_tessl_live_stage_parent(path: str) -> Path:
     return Path(tempfile.gettempdir()) / "ask-tessl-live" / f"{safe_name}-{digest}"
 
 
-def _stage_tessl_eval_source(repo_root: Path, path: str, temp_root: Path | None = None) -> tuple[Path, list[str]]:
+def _tessl_archive_suffix() -> str:
+    return dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
+
+
+def _unique_archive_dir(archive_root: Path, label: str) -> Path:
+    archive_root.mkdir(parents=True, exist_ok=True)
+    safe_label = _safe_slug(label)
+    archive_dir = archive_root / f"{_tessl_archive_suffix()}-{safe_label}"
+    while archive_dir.exists():
+        archive_dir = archive_root / f"{_tessl_archive_suffix()}-{safe_label}"
+    return archive_dir
+
+
+def _archive_stage_children(stage_root: Path, label: str) -> Path | None:
+    if not stage_root.exists():
+        return None
+    children = [child for child in stage_root.iterdir() if child.name != "evidence-archive"]
+    if not children:
+        return None
+    archive_dir = _unique_archive_dir(stage_root / "evidence-archive", label)
+    archive_dir.mkdir()
+    for child in children:
+        shutil.move(str(child), archive_dir / child.name)
+    return archive_dir
+
+
+def _archive_stage_directory(stage_dir: Path, label: str) -> Path | None:
+    if not stage_dir.exists() or not any(stage_dir.iterdir()):
+        return None
+    archive_dir = _unique_archive_dir(stage_dir.parent / "evidence-archive", label)
+    shutil.move(str(stage_dir), archive_dir)
+    return archive_dir
+
+
+def _json_or_text(text_value: str) -> object:
+    try:
+        return json.loads(text_value)
+    except json.JSONDecodeError:
+        return text_value
+
+
+def _tessl_auth_blocked(*texts: str) -> bool:
+    combined = "\n".join(texts).lower()
+    return "authenticate with tessl" in combined
+
+
+def _run_tessl_project_command(
+    tessl_path: str,
+    args: list[str],
+    cwd: Path,
+    env: dict[str, str],
+) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [tessl_path, *args],
+        cwd=str(cwd),
+        capture_output=True,
+        text=True,
+        timeout=600,
+        env=env,
+    )
+
+
+def _tessl_project_link_matches(stdout: str, *, workspace: str, project: str) -> bool:
+    parsed = _json_or_text(stdout.strip()) if stdout.strip() else None
+    if not isinstance(parsed, dict):
+        return False
+
+    def values_for(key: str, obj: object) -> set[str]:
+        values: set[str] = set()
+        if isinstance(obj, dict):
+            for item_key, item_value in obj.items():
+                if item_key in {key, f"{key}Name", f"{key}_name"} and isinstance(item_value, str):
+                    values.add(item_value)
+                values.update(values_for(key, item_value))
+        elif isinstance(obj, list):
+            for item in obj:
+                values.update(values_for(key, item))
+        return values
+
+    workspace_values = values_for("workspace", parsed)
+    project_values = values_for("project", parsed)
+    name_values = values_for("name", parsed)
+    return (
+        workspace in workspace_values
+        and (project in project_values or f"{workspace}/{project}" in name_values)
+    )
+
+
+def _ensure_tessl_project_link(
+    tessl_path: str,
+    staged_root: Path,
+    identity: dict[str, str | None],
+) -> dict[str, object]:
+    workspace = identity.get("workspace")
+    project = identity.get("project")
+    common = {
+        "identity": identity,
+        "staged_source": str(staged_root),
+        "checked": True,
+    }
+    if not workspace or not project:
+        return {
+            **common,
+            "status": "skipped",
+            "action": "workspace_not_provided",
+            "blocker": None,
+            "blocker_class": None,
+            "commands": [],
+        }
+
+    tessl_env = dict(os.environ)
+    tessl_env["TESSL_AUTO_UPDATE_INTERVAL_MINUTES"] = "0"
+    commands: list[dict[str, object]] = []
+
+    def record(action: str, process: subprocess.CompletedProcess[str]) -> None:
+        process_args = getattr(process, "args", [])
+        if not isinstance(process_args, (list, tuple)):
+            process_args = []
+        commands.append({
+            "action": action,
+            "command": " ".join(shlex.quote(str(part)) for part in process_args),
+            "exit_code": process.returncode,
+            "raw_output": process.stdout,
+            "raw_error": process.stderr,
+            "parsed_output": _json_or_text(process.stdout.strip()) if process.stdout.strip() else None,
+        })
+
+    try:
+        check = _run_tessl_project_command(tessl_path, ["project", "repair", "--json"], staged_root, tessl_env)
+        record("check", check)
+        if _tessl_auth_blocked(check.stdout, check.stderr):
+            return {
+                **common,
+                "status": "blocked",
+                "action": "check",
+                "blocker": "Tessl CLI is installed locally, but authentication is required before project link checks can run.",
+                "blocker_class": "blocked_auth",
+                "commands": commands,
+            }
+        if check.returncode == 0 and _tessl_project_link_matches(check.stdout, workspace=workspace, project=project):
+            return {
+                **common,
+                "status": "pass",
+                "action": "already_linked",
+                "blocker": None,
+                "blocker_class": None,
+                "commands": commands,
+            }
+
+        relink = _run_tessl_project_command(
+            tessl_path,
+            ["project", "repair", "--relink", "--workspace", workspace, "--project", project, "--yes", "--json"],
+            staged_root,
+            tessl_env,
+        )
+        record("relink", relink)
+        if _tessl_auth_blocked(relink.stdout, relink.stderr):
+            return {
+                **common,
+                "status": "blocked",
+                "action": "relink",
+                "blocker": "Tessl CLI is installed locally, but authentication is required before project relink can run.",
+                "blocker_class": "blocked_auth",
+                "commands": commands,
+            }
+        if relink.returncode == 0:
+            update_source = _run_tessl_project_command(
+                tessl_path,
+                ["project", "repair", "--update-source", "--yes", "--json"],
+                staged_root,
+                tessl_env,
+            )
+            record("update_source", update_source)
+            if _tessl_auth_blocked(update_source.stdout, update_source.stderr):
+                return {
+                    **common,
+                    "status": "blocked",
+                    "action": "update_source",
+                    "blocker": "Tessl CLI is installed locally, but authentication is required before project source repair can run.",
+                    "blocker_class": "blocked_auth",
+                    "commands": commands,
+                }
+            if update_source.returncode != 0:
+                return {
+                    **common,
+                    "status": "blocked",
+                    "action": "update_source",
+                    "blocker": (
+                        f"Relinked Tessl project {workspace}/{project}, but failed to update "
+                        "the recorded source for the temp-staged eval directory."
+                    ),
+                    "blocker_class": "blocked_validation",
+                    "commands": commands,
+                }
+            return {
+                **common,
+                "status": "pass",
+                "action": "relinked_existing_project_updated_source",
+                "blocker": None,
+                "blocker_class": None,
+                "commands": commands,
+            }
+
+        create = _run_tessl_project_command(
+            tessl_path,
+            ["project", "create", project, "--workspace", workspace],
+            staged_root,
+            tessl_env,
+        )
+        record("create", create)
+        if _tessl_auth_blocked(create.stdout, create.stderr):
+            return {
+                **common,
+                "status": "blocked",
+                "action": "create",
+                "blocker": "Tessl CLI is installed locally, but authentication is required before project create can run.",
+                "blocker_class": "blocked_auth",
+                "commands": commands,
+            }
+        if create.returncode == 0:
+            return {
+                **common,
+                "status": "pass",
+                "action": "created_project",
+                "blocker": None,
+                "blocker_class": None,
+                "commands": commands,
+            }
+        return {
+            **common,
+            "status": "blocked",
+            "action": "create",
+            "blocker": (
+                f"Unable to relink or create Tessl project {workspace}/{project} "
+                "for the temp-staged eval directory."
+            ),
+            "blocker_class": "blocked_validation",
+            "commands": commands,
+        }
+    except subprocess.TimeoutExpired as e:
+        return {
+            **common,
+            "status": "blocked",
+            "action": "project_link",
+            "blocker": "Tessl project link check timed out after 600 seconds.",
+            "blocker_class": "blocked_runtime",
+            "commands": commands,
+            "raw_output": _as_text(e.stdout),
+            "raw_error": _as_text(e.stderr),
+        }
+    except OSError as e:
+        return {
+            **common,
+            "status": "blocked",
+            "action": "project_link",
+            "blocker": f"Failed to run Tessl project link check: {e}",
+            "blocker_class": "blocked_runtime",
+            "commands": commands,
+        }
+
+
+def _stage_tessl_eval_source(
+    repo_root: Path,
+    path: str,
+    temp_root: Path | None = None,
+    workspace: str | None = None,
+) -> tuple[Path, list[str]]:
     repo_root_resolved = repo_root.resolve()
     source_root = (repo_root_resolved / path).resolve()
     if not source_root.is_relative_to(repo_root_resolved):
@@ -602,14 +1235,7 @@ def _stage_tessl_eval_source(repo_root: Path, path: str, temp_root: Path | None 
 
     staged_root = (temp_root / source_root.name) if temp_root else _stable_tessl_stage_parent(path)
     staged_root.mkdir(parents=True, exist_ok=True)
-    preserved_marker = staged_root / "tessl.json"
-    for child in staged_root.iterdir():
-        if child == preserved_marker:
-            continue
-        if child.is_dir():
-            shutil.rmtree(child)
-        else:
-            child.unlink()
+    _archive_stage_children(staged_root, "local-eval")
 
     copied: list[str] = []
     for relative_path in (
@@ -619,8 +1245,9 @@ def _stage_tessl_eval_source(repo_root: Path, path: str, temp_root: Path | None 
         "references/task-profile.json",
     ):
         copied.extend(_copy_if_present(source_root, relative_path, staged_root))
+    copied.extend(_copy_tree_files_if_present(source_root, "assets", staged_root))
     copied.extend(_write_tessl_scenarios_from_evals(source_root, staged_root))
-    copied.extend(_write_tessl_project_marker(source_root, staged_root))
+    copied.extend(_write_tessl_project_marker(source_root, staged_root, workspace))
 
     if not copied:
         raise FileNotFoundError(f"No Tessl eval staging files found under: {path}")
@@ -642,11 +1269,7 @@ def _stage_tessl_live_private_source(
 
     staged_root = (temp_root / source_root.name) if temp_root else _stable_tessl_live_stage_parent(path)
     staged_root.mkdir(parents=True, exist_ok=True)
-    for child in staged_root.iterdir():
-        if child.is_dir():
-            shutil.rmtree(child)
-        else:
-            child.unlink()
+    _archive_stage_children(staged_root, "live-private")
 
     copied: list[str] = []
     copied.extend(_write_tessl_live_tile_manifest(source_root, staged_root, workspace))
@@ -657,6 +1280,7 @@ def _stage_tessl_live_private_source(
         "references/task-profile.json",
     ):
         copied.extend(_copy_if_present(source_root, relative_path, staged_root))
+    copied.extend(_copy_tree_files_if_present(source_root, "assets", staged_root))
     copied.extend(_copy_tessl_live_reference_support_files(source_root, staged_root, set(copied)))
     copied.extend(_write_tessl_live_evals_from_references(source_root, staged_root))
     _validate_tessl_live_private_manifest(staged_root / "tile.json", workspace)
@@ -694,6 +1318,7 @@ def _stage_tessl_scenario_target_tile(
     if not source_root.is_dir():
         raise FileNotFoundError(f"Tessl scenario source is not a directory: {path}")
 
+    _archive_stage_directory(target_tile, "target-tile")
     _clear_directory(target_tile)
 
     copied: list[str] = []
@@ -705,12 +1330,9 @@ def _stage_tessl_scenario_target_tile(
         "references/task-profile.json",
     ):
         copied.extend(_copy_if_present(source_root, relative_path, target_tile))
+    copied.extend(_copy_tree_files_if_present(source_root, "assets", target_tile))
     copied.extend(_copy_tessl_live_reference_support_files(source_root, target_tile, set(copied)))
     _validate_tessl_live_private_manifest(target_tile / "tile.json", workspace)
-
-    generated_evals = target_tile / "evals"
-    if generated_evals.exists():
-        shutil.rmtree(generated_evals)
 
     if "SKILL.md" not in copied:
         raise FileNotFoundError(f"No SKILL.md found under Tessl scenario source: {path}")
@@ -718,6 +1340,7 @@ def _stage_tessl_scenario_target_tile(
 
 
 def _write_tessl_scenario_tool_project(tool_project: Path) -> list[str]:
+    _archive_stage_directory(tool_project, "tool-project")
     _clear_directory(tool_project)
     manifest = {
         "name": "tessl-scenario-tools",
@@ -757,7 +1380,7 @@ def _write_tessl_scenario_generation_brief(
             "",
             "1. Read the Tessl scenario skill and workflow reference above.",
             "2. Treat the staged target tile as disposable input; do not edit the live repo source.",
-            "3. Generate scenarios into target-tile/evals/ using the Tessl scenario skill format.",
+            "3. The wrapper only prepares the workspace and installs the scenario skill; you must now generate scenarios into target-tile/evals/ using the Tessl scenario skill format.",
             "4. Review the generated scenarios for instruction leakage, feasibility, and criteria totals.",
             "5. Import only reviewed, useful cases back into the canonical references/evals.yaml.",
             "6. Run the repo eval wrapper after import; do not publish or upload packages from this lane.",
@@ -826,6 +1449,7 @@ def prepare_tessl_scenario_generation(
         "target_staged_files": target_files,
         "tool_project_files": tool_files,
         "workspace": normalized_workspace,
+        "project_identity": _tessl_project_identity((repo_root / path).resolve(), normalized_workspace),
         "dry_run": dry_run,
         "scenario_tool_tile": TESSL_SCENARIO_TOOL_TILE,
         "scenario_tool_version": TESSL_SCENARIO_TOOL_VERSION,
@@ -871,6 +1495,30 @@ def prepare_tessl_scenario_generation(
                 "blocker_class": "blocked_runtime",
             },
             errors=[ErrorObject(code="ERR_RUNTIME", message="Installed native tessl CLI was not found on PATH.")],
+        )
+
+    project_link = _ensure_tessl_project_link(
+        tessl_path,
+        target_tile,
+        common["project_identity"],
+    )
+    common["project_link"] = project_link
+    if project_link.get("status") == "blocked":
+        return CallResult(
+            status="error",
+            data={
+                "status": "blocked",
+                **common,
+                "command": command_display,
+                "raw_output": "",
+                "raw_error": "",
+                "blocker": project_link.get("blocker"),
+                "blocker_class": project_link.get("blocker_class"),
+            },
+            errors=[ErrorObject(
+                code="ERR_RUNTIME" if project_link.get("blocker_class") == "blocked_runtime" else "ERR_VALIDATION",
+                message=str(project_link.get("blocker") or "Tessl project link check failed."),
+            )],
         )
 
     cmd = [tessl_path, "install", tool_spec, "--agent", "codex", "--yes"]
@@ -951,6 +1599,7 @@ def prepare_tessl_scenario_generation(
         "scenario_reference": str(scenario_reference) if scenario_reference.exists() else None,
         "scenario_generation_brief": str(brief_path),
         "generated_output": str(target_tile / "evals"),
+        "prepared_only": True,
     }
     if status == "pass":
         return CallResult(status="success", data=data)
@@ -968,6 +1617,7 @@ def _tessl_eval_result_common(
     staged_source: Path,
     copied_files: list[str],
     workspace: str,
+    project_identity: dict[str, str | None],
     dry_run: bool,
 ) -> dict:
     tile_version = None
@@ -988,6 +1638,7 @@ def _tessl_eval_result_common(
         "staged_files": copied_files,
         "staging_policy": "stable_tmp_private_tile_evidence",
         "workspace": workspace,
+        "project_identity": project_identity,
         "visibility": "private",
         "dry_run": dry_run,
         "live_private": True,
@@ -1030,6 +1681,7 @@ def _run_tessl_live_private_eval(
         staged_source=staged_source,
         copied_files=copied_files,
         workspace=normalized_workspace,
+        project_identity=_tessl_project_identity((repo_root / path).resolve(), normalized_workspace),
         dry_run=dry_run,
     )
     if dry_run:
@@ -1052,6 +1704,22 @@ def _run_tessl_live_private_eval(
             "raw_error": "",
             "blocker": "Installed native tessl CLI was not found on PATH.",
             "blocker_class": "blocked_runtime",
+        }
+
+    project_link = _ensure_tessl_project_link(
+        tessl_path,
+        staged_source,
+        common["project_identity"],
+    )
+    common["project_link"] = project_link
+    if project_link.get("status") == "blocked":
+        return {
+            "status": "blocked",
+            **common,
+            "raw_output": "",
+            "raw_error": "",
+            "blocker": project_link.get("blocker"),
+            "blocker_class": project_link.get("blocker_class"),
         }
 
     cmd = [tessl_path, "eval", "run", "--json", str(tile_path)]
@@ -1106,9 +1774,16 @@ def _run_tessl_live_private_eval(
     elif process.returncode != 0 and "project that was not found or is not accessible" in auth_text:
         status = "blocked"
         blocker = (
-            f"Tessl project {normalized_workspace}/{_safe_slug(Path(path).name.lower())} "
+            f"Tessl project {normalized_workspace}/{_tessl_live_tile_slug(repo_root / path)} "
             f"was not found or is not accessible. Create, link, or repair that project "
             f"in workspace {normalized_workspace} before running live evals."
+        )
+        blocker_class = "blocked_validation"
+    elif process.returncode != 0 and "points at a different repository or directory path" in auth_text:
+        status = "blocked"
+        blocker = (
+            "Tessl project binding points at a different source directory than the "
+            "temp-staged private eval directory."
         )
         blocker_class = "blocked_validation"
     else:
@@ -1116,10 +1791,97 @@ def _run_tessl_live_private_eval(
         blocker = None
         blocker_class = None
 
+    eval_run_id = _extract_tessl_eval_run_id(raw_output)
+    live_result_summary = None
+    view_raw_output = ""
+    view_raw_error = ""
+    view_attempts = 0
+    view_status = None
+    if status == "pass":
+        if not eval_run_id:
+            status = "blocked"
+            blocker = "Tessl private tile eval completed but did not return an eval run id for score/baseline verification."
+            blocker_class = "blocked_validation"
+        else:
+            view_cmd = [tessl_path, "eval", "view", "--json", eval_run_id]
+            try:
+                deadline = time.monotonic() + TESSL_LIVE_PRIVATE_VIEW_TIMEOUT_SECONDS
+                view_payload = None
+                while True:
+                    view_attempts += 1
+                    view_process = subprocess.run(
+                        view_cmd,
+                        cwd=str(staged_source),
+                        capture_output=True,
+                        text=True,
+                        timeout=600,
+                        env=tessl_env,
+                    )
+                    view_raw_output = view_process.stdout
+                    view_raw_error = view_process.stderr
+                    if view_process.returncode != 0:
+                        break
+                    view_payload = _parse_json_object_from_text(view_raw_output)
+                    if view_payload is None:
+                        break
+                    view_status = _tessl_eval_view_status(view_payload)
+                    if _tessl_eval_view_has_complete_scores(view_payload):
+                        break
+                    if view_status in {"failed", "error", "cancelled", "canceled"}:
+                        break
+                    if time.monotonic() >= deadline:
+                        break
+                    time.sleep(TESSL_LIVE_PRIVATE_VIEW_POLL_SECONDS)
+            except subprocess.TimeoutExpired as e:
+                status = "blocked"
+                blocker = "Tessl private tile eval view timed out while waiting for scored results."
+                blocker_class = "blocked_runtime"
+                view_raw_output = _as_text(e.stdout)
+                view_raw_error = _as_text(e.stderr)
+            except OSError as e:
+                status = "blocked"
+                blocker = f"Failed to inspect Tessl private tile eval results: {e}"
+                blocker_class = "blocked_runtime"
+                view_raw_error = str(e)
+            else:
+                if view_process.returncode != 0:
+                    status = "blocked"
+                    blocker = "Tessl private tile eval completed but result inspection failed."
+                    blocker_class = "blocked_validation"
+                else:
+                    try:
+                        if view_payload is None:
+                            raise ValueError("No JSON object found in Tessl eval view output.")
+                        if not _tessl_eval_view_has_complete_scores(view_payload):
+                            if time.monotonic() >= deadline:
+                                raise ValueError("Tessl eval view did not reach complete scored results before timeout.")
+                            raise ValueError(f"Tessl eval view is not scored yet (status={view_status or 'unknown'}).")
+                        live_result_summary = _summarize_tessl_live_eval_view(view_payload)
+                    except ValueError as e:
+                        status = "blocked"
+                        blocker = f"Failed to parse Tessl private tile eval score summary: {e}"
+                        blocker_class = "blocked_validation"
+                    else:
+                        if not live_result_summary["meets_min_score"] or not live_result_summary["beats_baseline"]:
+                            status = "fail"
+                            score_pct = round(float(live_result_summary["score"]) * 100, 2)
+                            baseline_pct = round(float(live_result_summary["baseline_score"]) * 100, 2)
+                            blocker = (
+                                "Tessl private tile eval completed but failed readiness: "
+                                f"score {score_pct}% vs baseline {baseline_pct}%."
+                            )
+                            blocker_class = None
+
     return {
         "status": status,
         **common,
         "exit_code": process.returncode,
+        "eval_run_id": eval_run_id,
+        "live_result_summary": live_result_summary,
+        "view_attempts": view_attempts,
+        "view_status": view_status,
+        "view_raw_output": view_raw_output,
+        "view_raw_error": view_raw_error,
         "raw_output": raw_output,
         "raw_error": raw_error,
         "blocker": blocker,
@@ -1127,7 +1889,13 @@ def _run_tessl_live_private_eval(
     }
 
 
-def _run_tessl_eval(repo_root: Path, path: str, *, allow_project_save: bool = False) -> dict:
+def _run_tessl_eval(
+    repo_root: Path,
+    path: str,
+    *,
+    allow_project_save: bool = False,
+    workspace: str | None = None,
+) -> dict:
     """Run the local Tessl eval lane without any registry publish/upload command."""
     _ = allow_project_save  # Compatibility flag retained; temp-staged local runs are default-safe.
     tessl_path = shutil.which("tessl")
@@ -1142,7 +1910,29 @@ def _run_tessl_eval(repo_root: Path, path: str, *, allow_project_save: bool = Fa
         }
 
     try:
-        staged_source, copied_files = _stage_tessl_eval_source(repo_root, path)
+        normalized_workspace = _validate_tessl_workspace(workspace) if workspace else None
+        staged_source, copied_files = _stage_tessl_eval_source(repo_root, path, workspace=normalized_workspace)
+        project_identity = _tessl_project_identity((repo_root / path).resolve(), normalized_workspace)
+        project_link = _ensure_tessl_project_link(tessl_path, staged_source, project_identity)
+        if project_link.get("status") == "blocked":
+            return {
+                "status": "blocked",
+                "command": command_display,
+                "source_path": path,
+                "staged_source": str(staged_source),
+                "staged_files": copied_files,
+                "staging_policy": "stable_tmp_evidence",
+                "tessl_project_marker": str(staged_source / "tessl.json"),
+                "project_identity": project_identity,
+                "project_link": project_link,
+                "workspace": normalized_workspace,
+                "evidence_retention": f"staged directory is left under {tempfile.gettempdir()}/ask-tessl-evals for inspection",
+                "raw_output": "",
+                "raw_error": "",
+                "blocker": project_link.get("blocker"),
+                "blocker_class": project_link.get("blocker_class"),
+                "policy": _tessl_policy(),
+            }
         command_display = f"tessl eval run --json {staged_source}"
         cmd = [tessl_path, "eval", "run", "--json", str(staged_source)]
         tessl_env = dict(os.environ)
@@ -1165,6 +1955,9 @@ def _run_tessl_eval(repo_root: Path, path: str, *, allow_project_save: bool = Fa
                 "staged_files": copied_files,
                 "staging_policy": "stable_tmp_evidence",
                 "tessl_project_marker": str(staged_source / "tessl.json"),
+                "project_identity": project_identity,
+                "project_link": project_link,
+                "workspace": normalized_workspace,
                 "evidence_retention": f"staged directory is left under {tempfile.gettempdir()}/ask-tessl-evals for inspection",
                 "raw_output": _as_text(e.stdout),
                 "raw_error": _as_text(e.stderr),
@@ -1181,6 +1974,9 @@ def _run_tessl_eval(repo_root: Path, path: str, *, allow_project_save: bool = Fa
                 "staged_files": copied_files,
                 "staging_policy": "stable_tmp_evidence",
                 "tessl_project_marker": str(staged_source / "tessl.json"),
+                "project_identity": project_identity,
+                "project_link": project_link,
+                "workspace": normalized_workspace,
                 "evidence_retention": f"staged directory is left under {tempfile.gettempdir()}/ask-tessl-evals for inspection",
                 "raw_output": "",
                 "raw_error": str(e),
@@ -1220,6 +2016,9 @@ def _run_tessl_eval(repo_root: Path, path: str, *, allow_project_save: bool = Fa
             "staged_files": copied_files,
             "staging_policy": "stable_tmp_evidence",
             "tessl_project_marker": str(staged_source / "tessl.json"),
+            "project_identity": project_identity,
+            "project_link": project_link,
+            "workspace": normalized_workspace,
             "evidence_retention": f"staged directory is left under {tempfile.gettempdir()}/ask-tessl-evals for inspection",
             "exit_code": process.returncode,
             "raw_output": raw_output,
@@ -1847,6 +2646,34 @@ def _scorecard_path_from_output(repo_root: Path, raw_output: str) -> Path | None
     return None
 
 
+def _write_timeout_partial_artifact(
+    repo_root: Path,
+    *,
+    skill_path: str,
+    mode: str,
+    runner: str,
+    raw_output: str,
+    raw_error: str,
+) -> str | None:
+    if not (raw_output.strip() or raw_error.strip()):
+        return None
+    artifact_root = repo_root / "Infrastructure" / "artifacts" / "evals" / "timeouts"
+    artifact_root.mkdir(parents=True, exist_ok=True)
+    stamp = _utc_now_iso().replace(":", "").replace("-", "")
+    artifact_path = artifact_root / f"{stamp}-{_safe_slug(skill_path)}-{_safe_slug(mode)}-{_safe_slug(runner)}.txt"
+    sanitized_output = _repo_relative_text(repo_root, raw_output)
+    sanitized_error = _repo_relative_text(repo_root, raw_error)
+    artifact_path.write_text(
+        "timeout_classification: timeout_partial_output\n\n"
+        "stdout:\n"
+        f"{sanitized_output}\n\n"
+        "stderr:\n"
+        f"{sanitized_error}\n",
+        encoding="utf-8",
+    )
+    return _repo_relative_path(repo_root, artifact_path)
+
+
 def _read_scorecard(path: Path | None) -> dict:
     if path is None or not path.is_file():
         return {}
@@ -1904,7 +2731,8 @@ def _write_eval_only_review_report(repo_root: Path, skill_name: str, skill_path:
                 "mode": "local_internal_only",
                 "primary_gate": "local_eval_ask_audit",
                 "plugin_eval_min_acceptable_grade": "B+",
-                "tessl_review_min_score": 95,
+                "tessl_review_min_score": 90,
+                "tessl_review_target_score": 95,
                 "codex_smoke_profile": "[profiles.fast]",
                 "tessl_eval_staging_root": tessl_staging_root,
                 "tessl_project_marker": "tessl.json",
@@ -2048,8 +2876,6 @@ def run_evals(
             smoke_model,
             "--timeout-sec",
             str(SMOKE_CASE_TIMEOUT_SECONDS),
-            "--codex-arg",
-            "--ignore-user-config",
         ])
         timeout = SMOKE_EVAL_TIMEOUT_SECONDS
     elif mode == "smoke":
@@ -2111,12 +2937,24 @@ def run_evals(
         raw_output = _as_text(e.stdout)
         raw_error = _as_text(e.stderr)
         blocker_class = _classify_eval_blocker(raw_output=raw_output, raw_error=raw_error, timed_out=True)
+        partial_artifact = _write_timeout_partial_artifact(
+            repo_root,
+            skill_path=path,
+            mode=mode,
+            runner=runner,
+            raw_output=raw_output,
+            raw_error=raw_error,
+        )
         result.status = "error"
         result.data["raw_output"] = raw_output
         result.data["raw_error"] = raw_error
         result.data["eval_status"] = blocker_class
         result.data["blocker_class"] = blocker_class
         result.data["blocker_taxonomy"] = EVAL_BLOCKER_TAXONOMY
+        result.data["timeout_classification"] = {
+            "class": blocker_class,
+            "partial_output_artifact": partial_artifact,
+        }
         _finish_eval_lifecycle(
             result,
             path=path,
@@ -2158,7 +2996,12 @@ def run_evals(
                 dry_run=tessl_live_dry_run,
             )
         else:
-            tessl_eval = _run_tessl_eval(repo_root, path, allow_project_save=allow_tessl_project_save)
+            tessl_eval = _run_tessl_eval(
+                repo_root,
+                path,
+                allow_project_save=allow_tessl_project_save,
+                workspace=tessl_workspace,
+            )
         result.data["tessl_eval"] = tessl_eval
         if tessl_eval.get("status") != "pass":
             tessl_status = str(tessl_eval.get("status") or "fail")

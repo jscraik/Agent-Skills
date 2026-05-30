@@ -1,70 +1,63 @@
 ---
 name: skill-factory-router
-description: "Routes Codex skill lifecycle requests by selecting one Skill Factory lane, mode, and handoff. Use when users ask to create a skill, skillify a workflow, fix or audit a skill, improve skill quality, analyze routing failures, install a skill, or decide whether to keep, merge, split, or retire skill guidance."
+description: "Analyzes Codex skill-management requests, selects the workflow lane, and returns selected_lane, mode, next_step, and blockers. Use when the user says create a skill, add/update/fix/review a skill, install/sync/list skills, choose a workflow, or merge/retire a skill."
 metadata:
   version: "1.0.0"
   skill-type: team_automation
+  lifecycle_state: active
+  maturity: canonical
+  owner: Agent Skills Team
+  provenance: frontmatter:Agent Skills Team:2026-05-28:canonical-source
+  share_readiness: ready
+  review_cadence: quarterly
+  last_reviewed: "2026-05-28"
+  metadata_source: frontmatter
+  compatible_roles: default, worker, skill-inspector
+  runtime_needs: repo-owned skill source path; Skill Factory skill inventory; ./bin/ask skills external-review
 ---
 
 # Skill Factory Router
 
-Choose one Skill Factory lane before loading deeper instructions or editing files.
+Select one downstream workflow for Codex skill-management requests. Return the routing handoff before loading deeper instructions.
 
-## Philosophy
+## When to use
 
-Route first, then load details. A good router narrows the work to one lane, keeps scope tight, and prevents accidental broad edits.
+Use when the user asks to create, capture, improve, audit, refactor, install, sync, or route a Codex skill and the correct Skill Factory lane is not already certain.
 
-## When To Use
+## Required inputs
 
-- The request is about creating, hardening, auditing, installing, refactoring, skillifying, evaluating, or retiring Codex skills.
-- The user names a skill, plugin skill, skill handle, runtime skill, or repeatable workflow that may become skill guidance.
-- The next step should be a lane handoff, not implementation.
+- User request or named target skill.
+- Current authority boundary: read-only routing, approved edit, install/sync, or eval execution.
+- Available evidence handle when the request depends on Tessl, Plugin Eval, validation, runtime, or session artifacts.
 
-Do not use for ordinary product implementation, generic repo maintenance, or plugin package lifecycle work that belongs to `plugin-factory`.
+## Deliverables
 
-## Inputs
+- One YAML handoff with `schema_version`, `selected_lane`, `mode`, `rationale`, `next_step`, `first_principles_check`, and `blocked_by`.
+- Expected artifacts: no source edits from the router itself; downstream lanes own review reports, eval artifacts, package outputs, and runtime evidence.
 
-- User intent and target artifact, when available.
-- Explicit skill names, plugin paths, install sources, or evidence paths.
-- Stated write authority, publication target, validation requirement, or approval boundary.
+## Discovery Interview
 
-## Outputs
-
-- Exactly one selected Skill Factory lane.
-- A mode, rationale, next step, and blocker field.
-- One first-principles check when the request could be better served by docs, scripts, hooks, validators, rules, or a direct answer.
+When target, lane, write authority, or validation requirement is missing, ask one plain-language question. Use [discovery interview](./references/discovery-interview.md) only when the ambiguity cannot be resolved from the user request.
 
 ## Decision Table
 
-| Request shape | Selected lane | Mode |
+| User says | Selected lane | Mode |
 | --- | --- | --- |
-| create a skill, draft a new skill, new SKILL.md | `.system/skill-creator` | `create` |
-| skillify this, save this workflow, make reusable guidance | `skillify` | `capture` |
-| fix this skill, improve quality, repair evals, reduce token cost | `skill-builder` | `harden` |
-| why is this skill failing, review skill health, merge or retire | `skill-refactor` | `analyze` |
-| install skill, list skills, sync skill, prove runtime visibility | `.system/skill-installer` | `install` |
+| create a skill, draft a new skill, make a new `SKILL.md` | `.system/skill-creator` | `create` |
+| skillify this workflow, save this process as a skill, make reusable guidance | `skillify` | `capture` |
+| fix this skill, improve this skill, raise Tessl score, repair evals, reduce token cost | `skill-builder` | `harden` |
+| why is this skill failing, compare duplicate skills, merge this skill, retire this skill | `skill-refactor` | `analyze` |
+| install a skill, list skills, sync skills, prove Codex can see a skill | `.system/skill-installer` | `install` |
+| copy or fork the system skill creator or installer into Skill Factory | block fork; route to the matching system lane | `create` or `install` |
 
-Explicit lane names win unless the user names multiple lanes or asks for an unsafe action.
-
-`next_handoff` must use this shape when present:
-
-- `lane`: one of the Skill Factory lanes
-- `mode`: the target lane mode
-- `condition`: the concrete completion condition for the primary lane
-- `expected_input`: structured artifacts the target lane must receive
-- `blocked_by`: blockers that prevent the handoff, or an empty list
-
-If a second lane is required and `next_handoff` is omitted, the route is
-incomplete.
+For `.system/skill-creator` or `.system/skill-installer`, attach Skill Factory references or eval contracts; do not fork the system skill body.
 
 ## Procedure
 
-1. Identify the target artifact and desired outcome.
-2. Choose exactly one primary lane.
-3. For major new-skill or broad-rewrite requests, make one first-principles check: skill vs docs vs script vs hook vs validator vs answer.
-4. Return the handoff template below.
-5. Load the selected lane only after routing is complete.
-6. If lane choice affects writes and evidence is ambiguous, ask one blocking question or state one bounded assumption.
+1. Match the request to the decision table. Explicit lane names win unless the user names multiple lanes or asks for an unsafe action.
+2. If target, authority, evidence, or lane selection is ambiguous, ask one blocking discovery question.
+3. For major new-skill or broad-rewrite requests, check whether the better answer is a skill, docs, script, hook, validator, rule, or direct answer.
+4. Return the handoff template and stop unless the user explicitly asks this router to execute the selected lane.
 
 ## Handoff Template
 
@@ -82,14 +75,11 @@ first_principles_check:
 blocked_by: null
 ```
 
-## Examples
+## Example
 
-- When the user asks, "Can you convert this successful GitHub release triage process into a skill?" -> `selected_lane: skillify`, `mode: capture`.
-- When the user says, "Tessl says this skill has weak content; inspect it and validate the fix." -> `selected_lane: skill-builder`, `mode: harden`.
-- When the user asks, "Which HE skill should we merge or retire after these session failures?" -> `selected_lane: skill-refactor`, `mode: analyze`.
-- When the user says, "Install this skill and validate Codex can see it." -> `selected_lane: .system/skill-installer`, `mode: install`.
+User: "Tessl says this skill has weak content; inspect it and validate the fix."
 
-Example return:
+Return:
 
 ```yaml
 schema_version: 1
@@ -103,46 +93,27 @@ first_principles_check:
 blocked_by: null
 ```
 
-## Constraints And Boundaries
+## Constraints
 
-- Keep routing read-only.
-- Prefer explicit user lane names unless multiple lanes or unsafe actions are requested.
-- Ask one blocking question only when target, authority, or lane selection cannot be inferred safely.
-- Redact secrets, credentials, API keys, tokens, PII, and sensitive data by default.
-
-## Execution Boundaries
-
-- Do not edit, install, sync, refresh projections, publish, or mutate trackers here.
-- Do not load every reference before selecting a lane.
-- Treat archive and deferred-store content as historical evidence, not live runtime context.
-- Redact secrets, credentials, API keys, tokens, PII, and sensitive local paths.
+- Keep routing read-only: do not edit, install, sync, publish, mutate trackers, run downstream commands, or load references before lane selection.
+- Route plugin package lifecycle work to `plugin-factory`.
+- Route system creator and installer requests to the system lanes, not forks.
+- Claim environment/auth/runtime state only from current-turn evidence, and redact secrets, tokens, PII, and sensitive local paths.
 
 ## Failure Mode
 
-If no single lane fits, return `blocked_by` with the ambiguity and the smallest question needed to route.
-
-## Gotchas
-
-- Plugin package lifecycle work belongs to `plugin-factory`, not this router.
-- Broad "review this skill" requests may mean lifecycle analysis, not immediate edits.
-- Generated overlays can mention system lanes that are not direct source-edit targets.
-
-## Anti-Patterns
-
-- Loading every Skill Factory reference before choosing a lane.
-- Doing implementation work inside the router.
-- Treating historical fixtures as current skill source.
+If no single lane fits, set `blocked_by` to the ambiguity and ask the smallest routing question.
 
 ## Validation
 
-Run `python3 Infrastructure/scripts/validation-and-linting/check_plugin_active_archive_links.py --plugin skill-factory`, `python3 Infrastructure/scripts/validation-and-linting/check_skill_factory_system_overlays.py`, `bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh`, and `python3 Infrastructure/bin/ask skills external-review Plugins/skill-factory/skills/skill-factory-router --audit-level compat --json`.
+Run `bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh` and `./bin/ask skills external-review Plugins/skill-factory/skills/skill-factory-router --audit-level compat --json`.
 
 Fail fast: stop at the first failed required gate, classify it, and do not sync, commit, publish, or install until it is fixed or explicitly blocked.
 
 ## References
 
-- Local contract, evals, and task profile: `references/`
-- Major authoring design check: `Infrastructure/references/openai-style-plugin-design-contract.md`
-- First-principles gate: `Infrastructure/references/first-principles-factory-gate.md`
-- Operator pattern map: `Plugins/skill-factory/references/operator-pattern-map.md`
-- Live deferred-context policy: `Plugins/skill-factory/references/live-deferred-context.md`
+Load only the reference needed for the selected routing question:
+
+- Package contract and evals: [references](./references/)
+- Ambiguous request questions: [discovery interview](./references/discovery-interview.md)
+- Source-repo routing policy handles: [routing policy](./references/routing-policy.md)

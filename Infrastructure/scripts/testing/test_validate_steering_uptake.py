@@ -25,6 +25,24 @@ _VALID_DOC = (
     "closeout caveat\n"
     "changes future behavior\n\n"
     "## Uptake Loop\n\n"
+    "local or systemic\n"
+    "sibling patterns\n"
+    "API philosophy\n"
+    "error-handling doctrine\n"
+    "runtime safety assumption\n"
+    "operational standard\n"
+    "lint rule\n"
+    "schema constraint\n"
+    "style rule\n"
+    "CI check\n"
+    "shared utility\n"
+    "reusable abstraction\n"
+    "architectural policy\n"
+    "not doing what Jamie wants\n"
+    "feedback signal\n"
+    "root operational failure\n"
+    "durable system improvement\n"
+    "known taxonomy values\n"
     "## Required Evidence\n\n"
     "validate_steering_uptake.py\n"
 )
@@ -262,6 +280,34 @@ def test_rejects_doc_missing_uptake_loop(tmp_path: Path) -> None:
     assert any("Uptake Loop" in f.message for f in incomplete)
 
 
+def test_rejects_doc_missing_systemic_feedback_contract(tmp_path: Path) -> None:
+    _make_valid_root(tmp_path)
+    write(
+        tmp_path / "Docs/agents/19-high-signal-steering-feedback.md",
+        "# High-Signal Steering Feedback\n\n"
+        "## Stop Rule\n\n"
+        "## Proof Before Proceeding\n\n"
+        "## Scope Closure Authority\n\n"
+        "full implementation\n"
+        "explicitly approves that scope change\n"
+        "claim-vs-evidence closeout check\n"
+        "closeout caveat\n"
+        "changes future behavior\n\n"
+        "## Uptake Loop\n\n"
+        "## Required Evidence\n\n"
+        "validate_steering_uptake.py\n",
+    )
+
+    findings = validate_steering_uptake.validate(tmp_path)
+
+    incomplete = [f for f in findings if f.code == "STEERING_DOC_INCOMPLETE"]
+    missing_messages = {f.message for f in incomplete}
+    assert any("local or systemic" in message for message in missing_messages)
+    assert any("not doing what Jamie wants" in message for message in missing_messages)
+    assert any("feedback signal" in message for message in missing_messages)
+    assert any("root operational failure" in message for message in missing_messages)
+
+
 def test_rejects_doc_missing_required_evidence(tmp_path: Path) -> None:
     _make_valid_root(tmp_path)
     write(
@@ -440,6 +486,38 @@ def test_rejects_row_with_invalid_status(tmp_path: Path) -> None:
 
     codes = {f.code for f in findings}
     assert "STEERING_LEDGER_STATUS" in codes
+
+
+def test_rejects_unknown_failure_category(tmp_path: Path) -> None:
+    _make_valid_root(tmp_path)
+    write(
+        tmp_path / ".harness/quality/steering-uptake.md",
+        "# Steering Uptake Ledger\n\n"
+        "| Date | Trigger | Failure pattern | Mechanism | Durable guardrail | Validation | Status |\n"
+        "| --- | --- | --- | --- | --- | --- | --- |\n"
+        "| 2026-05-19 | trigger | pattern | mechanism. Category: process vibes. | guardrail Improvement type: validator. | python3 validate_steering_uptake.py --json | validated |\n",
+    )
+
+    findings = validate_steering_uptake.validate(tmp_path)
+
+    codes = {f.code for f in findings}
+    assert "STEERING_LEDGER_CATEGORY_UNKNOWN" in codes
+
+
+def test_rejects_unknown_improvement_type(tmp_path: Path) -> None:
+    _make_valid_root(tmp_path)
+    write(
+        tmp_path / ".harness/quality/steering-uptake.md",
+        "# Steering Uptake Ledger\n\n"
+        "| Date | Trigger | Failure pattern | Mechanism | Durable guardrail | Validation | Status |\n"
+        "| --- | --- | --- | --- | --- | --- | --- |\n"
+        "| 2026-05-19 | trigger | pattern | mechanism. Category: missing guardrails. | guardrail Improvement type: nice reminder. | python3 validate_steering_uptake.py --json | validated |\n",
+    )
+
+    findings = validate_steering_uptake.validate(tmp_path)
+
+    codes = {f.code for f in findings}
+    assert "STEERING_LEDGER_IMPROVEMENT_TYPE_UNKNOWN" in codes
 
 
 def test_rejects_readme_without_steering_doc_link(tmp_path: Path) -> None:

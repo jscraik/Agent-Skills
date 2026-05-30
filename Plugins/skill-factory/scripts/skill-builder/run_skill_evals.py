@@ -29,6 +29,7 @@ import atexit
 import datetime as dt
 import html
 import json
+import math
 import os
 import re
 import shutil
@@ -334,9 +335,37 @@ class EvalCase:
     baseline_id: Optional[str] = None
     hard_gates: Tuple[str, ...] = ()
     expected_evidence: Tuple[str, ...] = ()
+    unit: Optional[str] = None
+    given: Optional[str] = None
+    should: Optional[str] = None
+    actual_artifact: Optional[str] = None
+    expected_artifact: Optional[str] = None
+    reproduce: Optional[str] = None
+    raw_response_artifact: Optional[str] = None
+    judge_detail_artifact: Optional[str] = None
+    pass_rate_threshold: Optional[float] = None
+    pass_rate_calibration_artifact: Optional[str] = None
 
 
 _VALID_CATEGORIES = {"happy", "edge", "negative", "pressure"}
+_RITEWAY_CASE_FIELDS = ("unit", "given", "should", "actual_artifact", "expected_artifact", "reproduce")
+_GENERIC_ACCEPTANCE_TERMS = {
+    "done",
+    "pass",
+    "passes",
+    "success",
+    "successful",
+    "valid",
+    "validation",
+    "complete",
+    "completed",
+    "works",
+    "routes",
+    "uses the skill",
+    "uses skill",
+    "skill selected",
+    "expected skill",
+}
 
 
 def _utc_now_iso() -> str:
@@ -348,15 +377,65 @@ def _resolve_optional_case_artifact_path(case_dir: Path, artifact: Optional[str]
         return None
     candidate = Path(artifact)
     if candidate.is_absolute():
-        result = candidate
-    else:
-        result = (case_dir / candidate).resolve()
+        raise ValueError("Eval case artifact paths must be repo-relative or case-relative, not absolute.")
+    result = (case_dir / candidate).resolve()
     if workspace_root:
         try:
             return str(result.relative_to(workspace_root))
         except ValueError:
             pass
     return str(result)
+
+
+def _resolve_existing_optional_case_artifact_path(
+    case_dir: Path,
+    artifact: Optional[str],
+    workspace_root: Optional[Path] = None,
+) -> Optional[str]:
+    if artifact is None:
+        return None
+    candidate = Path(artifact)
+    if candidate.is_absolute():
+        raise ValueError("Eval case artifact paths must be repo-relative or case-relative, not absolute.")
+    result = (case_dir / candidate).resolve()
+    if not result.is_file():
+        return None
+    if workspace_root:
+        try:
+            return str(result.relative_to(workspace_root))
+        except ValueError:
+            pass
+    return str(result)
+
+
+def _optional_case_string(raw: Any) -> Optional[str]:
+    if raw is None:
+        return None
+    text = str(raw).strip()
+    return text or None
+
+
+def _optional_case_artifact_string(raw: Any, *, field_name: str, case_number: int) -> Optional[str]:
+    text = _optional_case_string(raw)
+    if text is None:
+        return None
+    if Path(text).is_absolute():
+        raise ValueError(f"Case #{case_number} `{field_name}` must be repo-relative or case-relative.")
+    return text
+
+
+def _optional_float(raw: Any, *, field_name: str, case_number: int) -> Optional[float]:
+    if raw is None:
+        return None
+    if isinstance(raw, bool):
+        raise ValueError(f"Case #{case_number} `{field_name}` must be numeric when provided.")
+    try:
+        value = float(raw)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"Case #{case_number} `{field_name}` must be numeric when provided.") from exc
+    if value < 0 or value > 1:
+        raise ValueError(f"Case #{case_number} `{field_name}` must be between 0 and 1 when provided.")
+    return value
 
 
 def _normalize_eval_modes(raw: Any, *, case_number: int) -> Optional[Tuple[str, ...]]:
@@ -452,6 +531,8 @@ def _load_baselines(obj: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
 
 def _case_evidence_surfaces(case: EvalCase) -> List[str]:
     surfaces: List[str] = []
+    if case.expected_evidence:
+        surfaces.append("expected_evidence")
     if case.deterministic_checks:
         surfaces.append("deterministic_checks")
     if case.expected_signals:
@@ -461,6 +542,89 @@ def _case_evidence_surfaces(case: EvalCase) -> List[str]:
     if case.hard_gates:
         surfaces.append("hard_gates")
     return surfaces
+
+
+def _riteway_shape_missing_fields(case: EvalCase) -> List[str]:
+    return [field for field in _RITEWAY_CASE_FIELDS if not getattr(case, field)]
+
+
+def _case_uses_smoke_or_release(case: EvalCase, *, eval_mode: str) -> bool:
+    if eval_mode in {"smoke", "release"}:
+        return True
+    return bool(case.eval_modes and any(mode in {"smoke", "release"} for mode in case.eval_modes))
+
+
+def _acceptance_value(item: Assertion) -> str:
+    if isinstance(item, str):
+        text = item.strip()
+        if text.lower().startswith("regex "):
+            text = text[6:].strip().strip('"').strip("'")
+        return text
+    if isinstance(item, dict):
+        item_type = str(item.get("type") or "").strip().lower()
+        if item_type in {"jsonpath_exists", "jsonpath_equals"} and item.get("path"):
+            return str(item.get("path") or "").strip()
+        for key in ("value", "contains", "not_contains", "regex", "expected_skill", "path"):
+            if key in item:
+                return str(item.get(key) or "").strip()
+    return ""
+
+
+def _weak_acceptance_reasons(case: EvalCase) -> List[str]:
+    if case.deterministic_checks or case.expected_signals or case.output_schema or case.hard_gates:
+        return []
+    if not case.acceptance:
+        return ["no concrete acceptance assertions"]
+    values = [_acceptance_value(item).lower() for item in case.acceptance]
+    weak_values = [value for value in values if value in _GENERIC_ACCEPTANCE_TERMS or len(value) < 8]
+    if weak_values and len(weak_values) == len(values):
+        return ["acceptance only checks trigger words or generic phrases"]
+    return []
+
+
+def _riteway_case_warnings(case: EvalCase, *, eval_mode: str) -> List[str]:
+    warnings: List[str] = []
+    if _case_uses_smoke_or_release(case, eval_mode=eval_mode):
+        missing = _riteway_shape_missing_fields(case)
+        if missing:
+            emphasis = " realistic case" if case.realistic is True else ""
+            warnings.append(
+                "riteway_shape_missing"
+                f"{emphasis}: add {', '.join(missing)} so failures report unit/given/should/actual/expected/reproduce"
+            )
+    if case.pass_rate_threshold is not None and not case.pass_rate_calibration_artifact:
+        warnings.append(
+            "pass_rate_threshold_advisory: threshold is advisory until pass_rate_calibration_artifact is provided"
+        )
+    warnings.extend(f"migration_weak_acceptance: {reason}" for reason in _weak_acceptance_reasons(case))
+    return warnings
+
+
+def _riteway_case_report(
+    case: EvalCase,
+    *,
+    case_dir: Path,
+    workspace_root: Path,
+    runner_records: Mapping[str, Any],
+) -> Dict[str, Any]:
+    actual_artifact = _resolve_optional_case_artifact_path(case_dir, case.actual_artifact, workspace_root)
+    expected_artifact = _resolve_optional_case_artifact_path(case_dir, case.expected_artifact, workspace_root)
+    if actual_artifact is None:
+        for record in runner_records.values():
+            artifacts = record.get("artifacts") if isinstance(record, dict) else None
+            if isinstance(artifacts, dict) and artifacts.get("final"):
+                actual_artifact = str(artifacts["final"])
+                break
+    return {
+        "unit": case.unit or case.name,
+        "given": case.given,
+        "should": case.should,
+        "actual": actual_artifact,
+        "expected": expected_artifact,
+        "reproduce": case.reproduce,
+        "missing_fields": _riteway_shape_missing_fields(case),
+        "complete": not _riteway_shape_missing_fields(case),
+    }
 
 
 def _case_has_check_surface(case: EvalCase) -> bool:
@@ -842,6 +1006,13 @@ def load_evals(evals_path: Path) -> List[EvalCase]:
             field_name="expected_evidence",
             case_number=i,
         )
+        pass_rate_threshold = _optional_float(
+            c.get("pass_rate_threshold"),
+            field_name="pass_rate_threshold",
+            case_number=i,
+        )
+        if pass_rate_threshold is not None and not math.isfinite(pass_rate_threshold):
+            raise ValueError(f"Case #{i} `pass_rate_threshold` must be a finite number.")
 
         if baseline_type == "neutral_repo_baseline" and not neutral_baseline_approval_id:
             raise ValueError(
@@ -878,6 +1049,16 @@ def load_evals(evals_path: Path) -> List[EvalCase]:
                 baseline_id=baseline_id,
                 hard_gates=hard_gates,
                 expected_evidence=expected_evidence,
+                unit=_optional_case_string(c.get("unit")),
+                given=_optional_case_string(c.get("given")),
+                should=_optional_case_string(c.get("should")),
+                actual_artifact=_optional_case_artifact_string(c.get("actual_artifact"), field_name="actual_artifact", case_number=i),
+                expected_artifact=_optional_case_artifact_string(c.get("expected_artifact"), field_name="expected_artifact", case_number=i),
+                reproduce=_optional_case_string(c.get("reproduce")),
+                raw_response_artifact=_optional_case_artifact_string(c.get("raw_response_artifact"), field_name="raw_response_artifact", case_number=i),
+                judge_detail_artifact=_optional_case_artifact_string(c.get("judge_detail_artifact"), field_name="judge_detail_artifact", case_number=i),
+                pass_rate_threshold=pass_rate_threshold,
+                pass_rate_calibration_artifact=_optional_case_artifact_string(c.get("pass_rate_calibration_artifact"), field_name="pass_rate_calibration_artifact", case_number=i),
             )
         )
     return cases
@@ -1048,6 +1229,36 @@ def _claim_to_evidence_summary(
                 "severity": "blocking",
                 "message": f"case references unknown baseline_id={case.baseline_id!r}",
             })
+        if _case_uses_smoke_or_release(case, eval_mode=eval_mode):
+            missing_shape = _riteway_shape_missing_fields(case)
+            if missing_shape:
+                gaps.append({
+                    "type": "missing_riteway_shape",
+                    "case_id": case.id,
+                    "severity": "advisory",
+                    "missing_fields": missing_shape,
+                    "realistic": case.realistic,
+                    "message": (
+                        "smoke/release eval should declare unit, given, should, actual_artifact, "
+                        "expected_artifact, and reproduce"
+                    ),
+                })
+        weak_reasons = _weak_acceptance_reasons(case)
+        if weak_reasons:
+            gaps.append({
+                "type": "weak_acceptance_shape",
+                "case_id": case.id,
+                "severity": "advisory",
+                "reasons": weak_reasons,
+                "message": "migration pass found acceptance that only checks trigger words or generic phrases",
+            })
+        if case.pass_rate_threshold is not None and not case.pass_rate_calibration_artifact:
+            gaps.append({
+                "type": "uncalibrated_pass_rate_threshold",
+                "case_id": case.id,
+                "severity": "advisory",
+                "message": "pass-rate threshold is advisory until calibrated against labeled examples",
+            })
         gaps.extend(_hard_gate_gaps_for_case(case, eval_mode=eval_mode))
 
     report_template = str(reporting.get("report_template") or "").strip()
@@ -1174,6 +1385,38 @@ def _attach_claim_execution_results(claim_summary: Dict[str, Any], case_results:
     claim_summary["passed"] = not blocking_gaps
 
 
+def _eval_contract_migration_summary(cases: Sequence[EvalCase], *, eval_mode: str) -> Dict[str, Any]:
+    missing_shape: List[Dict[str, Any]] = []
+    weak_acceptance: List[Dict[str, Any]] = []
+    uncalibrated_thresholds: List[Dict[str, Any]] = []
+    for case in cases:
+        missing = _riteway_shape_missing_fields(case)
+        if _case_uses_smoke_or_release(case, eval_mode=eval_mode) and missing:
+            missing_shape.append({
+                "case_id": case.id,
+                "missing_fields": missing,
+                "realistic": case.realistic,
+            })
+        weak_reasons = _weak_acceptance_reasons(case)
+        if weak_reasons:
+            weak_acceptance.append({
+                "case_id": case.id,
+                "reasons": weak_reasons,
+            })
+        if case.pass_rate_threshold is not None and not case.pass_rate_calibration_artifact:
+            uncalibrated_thresholds.append({
+                "case_id": case.id,
+                "pass_rate_threshold": case.pass_rate_threshold,
+                "policy": "advisory_until_calibrated",
+            })
+    return {
+        "schema_version": "eval-contract-migration.v1",
+        "riteway_shape_missing_cases": missing_shape,
+        "weak_acceptance_cases": weak_acceptance,
+        "uncalibrated_pass_rate_thresholds": uncalibrated_thresholds,
+    }
+
+
 def _is_smoke_only_case(case: EvalCase) -> bool:
     if not case.smoke_mode:
         return False
@@ -1232,6 +1475,17 @@ def _write_junit_report(summary: Dict[str, Any], destination: Path) -> None:
             chunks.append("warnings:\n" + "\n".join(case["warnings"]))
         if case.get("tier2_findings"):
             chunks.append("tier2_findings:\n" + "\n".join(case["tier2_findings"]))
+        riteway = case.get("riteway") if isinstance(case.get("riteway"), dict) else None
+        if riteway:
+            chunks.append(
+                "riteway_failure_report:\n"
+                f"unit: {riteway.get('unit') or ''}\n"
+                f"given: {riteway.get('given') or ''}\n"
+                f"should: {riteway.get('should') or ''}\n"
+                f"actual: {riteway.get('actual') or ''}\n"
+                f"expected: {riteway.get('expected') or ''}\n"
+                f"reproduce: {riteway.get('reproduce') or ''}"
+            )
         if case.get("dir"):
             chunks.append(f"artifacts_dir:\n{case['dir']}")
         lines.append("    <system-out>")
@@ -1806,6 +2060,13 @@ def run_codex_exec(
 
     def _invoke(effective_profile: Optional[str]) -> Tuple[int, str, str]:
         cmd = _codex_exec_prefix(codex_bin)
+        # Eval cases pass prompt/context explicitly; ignoring user config keeps
+        # local MCP auth and project startup hooks from contaminating results.
+        ignore_user_config_support = _codex_supports_exec_flag(codex_bin, "--ignore-user-config")
+        if ignore_user_config_support is not False:
+            cmd.append("--ignore-user-config")
+        else:
+            warnings.append("Codex CLI does not support --ignore-user-config; eval runner continued without it.")
         cmd.extend(["--sandbox", sandbox])
 
         if ask_for_approval:
@@ -2176,11 +2437,36 @@ def _copy_codex_home_file(source_home: Path, target_home: Path, name: str) -> Op
     source = source_home / name
     if not source.exists():
         return None
+    target = target_home / name
     try:
-        shutil.copy2(source, target_home / name)
+        if name == "config.toml":
+            target.write_text(_scrub_mcp_servers_from_toml(source.read_text(encoding="utf-8")), encoding="utf-8")
+        else:
+            shutil.copy2(source, target)
     except OSError as exc:
         return f"Could not copy {source} into isolated Codex eval home: {exc}"
     return None
+
+
+def _scrub_mcp_servers_from_toml(text: str) -> str:
+    """
+    Remove MCP server tables from copied Codex eval config.
+
+    Live evals verify skill behavior through prompts and filesystem artifacts.
+    Inheriting the operator's MCP servers can make unrelated remote OAuth
+    failures look like skill failures, so isolated eval homes keep ordinary
+    Codex config but drop all [mcp_servers.*] tables.
+    """
+    kept: List[str] = []
+    skipping_mcp = False
+    for line in text.splitlines(keepends=True):
+        stripped = line.strip()
+        if stripped.startswith("["):
+            section_name = stripped.lstrip("[").rstrip("]").strip()
+            skipping_mcp = section_name == "mcp_servers" or section_name.startswith("mcp_servers.")
+        if not skipping_mcp:
+            kept.append(line)
+    return "".join(kept)
 
 
 def _isolated_codex_home_for_eval() -> Tuple[Path, List[str]]:
@@ -2440,6 +2726,13 @@ def _classify_runner_blocker(
     text = "\n".join([output_text or "", stdout_text or "", stderr_text or ""])
     low = text.lower()
 
+    if exit_code == 0 and (output_text or "").strip():
+        return None
+
+    if exit_code == 124:
+        runner_text = "\n".join([output_text or "", stdout_text or ""])
+        return "timeout_partial_output" if runner_text.strip() else "timeout_no_output"
+
     user_input_markers = [
         "user_input_requested_during_turn",
         "request_user_input",
@@ -2456,14 +2749,14 @@ def _classify_runner_blocker(
         "/login",
         "unauthenticated",
         "authentication required",
+        "invalid_grant",
+        "tokenrefreshfailed",
+        "invalid refresh token",
         "missing authenticated codex state",
         "blocked_auth",
     ]
     if any(marker in low for marker in auth_markers):
         return "blocked_auth"
-
-    if exit_code == 124:
-        return "timeout_partial_output" if text.strip() else "timeout_no_output"
 
     runtime_markers = [
         "sandbox_apply: operation not permitted",
@@ -2473,7 +2766,8 @@ def _classify_runner_blocker(
         "ran out of room in the model's context window",
         "selected model is at capacity",
         "model is at capacity",
-        "context window",
+        "you've hit your usage limit",
+        "you have hit your usage limit",
         "start a new thread",
         "blocked_runtime",
     ]
@@ -3413,6 +3707,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "round_state_summary": round_state_summary,
         "neutral_baseline_approvals_used": [],
         "claim_to_evidence": claim_to_evidence,
+        "eval_contract_migration": _eval_contract_migration_summary(cases, eval_mode=args.eval_mode),
     }
     if args.eval_mode == "release":
         summary["security_dependency_screening"] = _snyk_release_gate(
@@ -3486,7 +3781,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
         case_tier1_failures: List[str] = []
         case_tier2_findings: List[str] = []
-        case_warnings: List[str] = []
+        case_warnings: List[str] = _riteway_case_warnings(c, eval_mode=args.eval_mode)
         case_blocked_reasons: List[str] = []
         case_notes: List[str] = []
         runner_records: Dict[str, Any] = {}
@@ -3769,9 +4064,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 "artifacts": {
                     "dir": _make_relative(runner_dir, workspace_root),
                     "final": _make_relative(runner_dir / "final.txt", workspace_root),
+                    "raw_response": _make_relative(runner_dir / "final.txt", workspace_root),
                     "stdout": _make_relative(runner_dir / "stdout.txt", workspace_root),
                     "stderr": _make_relative(runner_dir / "stderr.txt", workspace_root),
                     "jsonl": _make_relative(jsonl_path, workspace_root) if jsonl_path else None,
+                    "judge_details": _make_relative(runner_dir / "result.json", workspace_root),
                 },
                 "metrics": runner_metrics,
                 "used_schema": bool(schema_path and runner_name == "codex"),
@@ -3870,9 +4167,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 baseline_record["artifacts"] = {
                     "dir": _make_relative(baseline_dir, workspace_root),
                     "final": _make_relative(baseline_dir / "final.txt", workspace_root),
+                    "raw_response": _make_relative(baseline_dir / "final.txt", workspace_root),
                     "stdout": _make_relative(baseline_dir / "stdout.txt", workspace_root),
                     "stderr": _make_relative(baseline_dir / "stderr.txt", workspace_root),
                     "jsonl": _make_relative(baseline_jsonl_path, workspace_root) if baseline_jsonl_path else None,
+                    "judge_details": _make_relative(baseline_dir / "result.json", workspace_root),
                 }
                 (baseline_dir / "result.json").write_text(
                     json.dumps(baseline_record, indent=2, ensure_ascii=False),
@@ -3942,6 +4241,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             args.tier2_mode != "fail" or (not case_tier2_failed)
         )
         case_pass = case_pass and not case_blocked
+        riteway_report = _riteway_case_report(
+            c,
+            case_dir=case_dir,
+            workspace_root=workspace_root,
+            runner_records=runner_records,
+        )
 
         case_record = {
             "id": c.id,
@@ -3957,6 +4262,32 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "why_realistic": c.why_realistic,
             "hard_gates": list(c.hard_gates),
             "expected_evidence": list(c.expected_evidence),
+            "riteway": riteway_report,
+            "pass_rate_policy": {
+                "threshold": c.pass_rate_threshold,
+                "calibration_artifact": _resolve_optional_case_artifact_path(
+                    case_dir,
+                    c.pass_rate_calibration_artifact,
+                    workspace_root,
+                ),
+                "gate_status": "calibrated_gate" if _resolve_existing_optional_case_artifact_path(
+                    case_dir,
+                    c.pass_rate_calibration_artifact,
+                    workspace_root,
+                ) else "advisory",
+            } if c.pass_rate_threshold is not None else None,
+            "agent_eval_artifacts": {
+                "raw_response": _resolve_optional_case_artifact_path(
+                    case_dir,
+                    c.raw_response_artifact,
+                    workspace_root,
+                ),
+                "judge_details": _resolve_optional_case_artifact_path(
+                    case_dir,
+                    c.judge_detail_artifact,
+                    workspace_root,
+                ),
+            },
             "evidence_surfaces": _case_evidence_surfaces(c),
             "check_evidence": _case_has_executed_check_evidence(c, runner_records),
             "comparison_inputs": dict(c.comparison_inputs) if c.comparison_inputs else None,

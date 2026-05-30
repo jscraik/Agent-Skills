@@ -155,3 +155,47 @@ cases:
     acceptance:
       - {type: skill_selected, expected_skill: testing}
       - {type: regex, value: "(?i)(just fmt|cargo test -p|specific project|broader test)"}
+  - id: edge-readable-assertion-bug-report
+    name: "readable assertion bug report shape"
+    category: edge
+    eval_modes: [smoke, release]
+    realistic: true
+    unit: testing skill assertion failure guidance
+    given: A proposed suite has friendly scenario names but opaque failure output.
+    should: Recommend failure output that states unit, given, should, actual, expected, and reproduce so each failure is a useful bug report.
+    actual_artifact: artifacts/test/failure-output.txt
+    expected_artifact: references/evals.yaml
+    reproduce: "./bin/ask evals run Skills/agent-ops/testing --mode smoke --runner codex --case edge-readable-assertion-bug-report --skip-tessl --no-dashboard --json --robot"
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Review this proposed test suite: it has friendly scenario names but failures only say assertion failed. Tighten it so each case works as a useful bug report for humans and agents."
+    deterministic_checks:
+      forbidden_commands: [curl, wget, "rm -rf", nc]
+    acceptance:
+      - {type: skill_selected, expected_skill: testing}
+      - {type: regex, value: "(?is)(unit|workflow|given|should|actual|expected|reproduc)"}
+      - {type: regex, value: "(?is)(failure|bug report|artifact|command|fixture)"}
+  - id: edge-agent-mediated-pass-rate-proof
+    name: "agent-mediated pass-rate proof"
+    category: edge
+    eval_modes: [smoke, release]
+    realistic: true
+    unit: testing skill agent-mediated eval proof guidance
+    given: A scorecard used four agent calls per assertion, a 75 percent threshold, and one timeout with partial output.
+    should: Treat the pass-rate threshold as advisory until calibrated, preserve raw responses and judge details, and classify timeout_partial_output with a partial artifact path.
+    actual_artifact: Infrastructure/artifacts/skills/testing/20260527-000000/scorecard.json
+    expected_artifact: references/evals.yaml
+    raw_response_artifact: .responses.md
+    judge_detail_artifact: judge-details.json
+    pass_rate_threshold: 0.75
+    reproduce: "./bin/ask evals run Skills/agent-ops/testing --mode smoke --runner codex --case edge-agent-mediated-pass-rate-proof --skip-tessl --no-dashboard --json --robot"
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Review the eval output in Infrastructure/artifacts/skills/testing/20260527-000000/scorecard.json: the runner called an agent four times per assertion, required a 75 percent pass rate, and one run timed out after writing partial output. Decide what can count as release proof, what artifacts must be saved, and how to classify that timeout."
+    deterministic_checks:
+      forbidden_commands: [curl, wget, "rm -rf", nc]
+    acceptance:
+      - {type: skill_selected, expected_skill: testing}
+      - {type: regex, value: "(?is)(runs|pass rate|threshold|per-assertion|release proof)"}
+      - {type: regex, value: "(?is)(raw responses|trace|artifact|timeout|partial output|blocked)"}
+      - {type: regex, value: "(?is)(deterministic|calibrated|hard gate|advisory)"}

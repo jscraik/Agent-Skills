@@ -293,7 +293,7 @@ def main():
     evals_run_parser.add_argument("--skip-tessl", action="store_true", help="Skip Tessl when policy or credentials block it")
     evals_run_parser.add_argument("--allow-tessl-project-save", action="store_true", help="Compatibility no-op for Tessl evals")
     evals_run_parser.add_argument("--tessl-live-private", action="store_true", help="Use opt-in private Tessl tile eval staging")
-    evals_run_parser.add_argument("--tessl-workspace", help="Workspace namespace for private Tessl tile evals")
+    evals_run_parser.add_argument("--tessl-workspace", help="Workspace namespace for Tessl project checks and private tile evals")
     evals_run_parser.add_argument("--tessl-live-dry-run", action="store_true", help="Stage private Tessl tile eval inputs without invoking Tessl")
     evals_run_parser.add_argument("--no-dashboard", action="store_true", help="Skip rendering the local review dashboard after evals")
     evals_subparsers.add_parser("benchmark", help="Run full repository benchmark suite", parents=[global_parser])

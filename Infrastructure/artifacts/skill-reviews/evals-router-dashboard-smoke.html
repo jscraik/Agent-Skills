@@ -144,27 +144,27 @@ document.addEventListener('DOMContentLoaded', () => {
         <p>Local-only external review dashboard. Tessl, Plugin Eval, internal audits, optional Snyk advisory data, and available skill eval scorecards are rendered together without publishing or uploading skill content by default.</p>
       </div>
       <div class="metrics">
-
+        
       <div class="metric">
         <div class="metric-head"><span>Quality</span><strong class="good">94%</strong></div>
         <div class="bar"><span class="good" style="width:94%"></span></div>
         <p>Best-practice fit from Tessl plus internal review signals.</p>
       </div>
-
-
+    
+        
       <div class="metric">
         <div class="metric-head"><span>Impact</span><strong class="good">100%</strong></div>
         <div class="bar"><span class="good" style="width:100%"></span></div>
         <p>1/1 latest eval cases passed.</p>
       </div>
-
-
+    
+        
       <div class="metric">
         <div class="metric-head"><span>Security</span><strong class="good">100%</strong></div>
         <div class="bar"><span class="good" style="width:100%"></span></div>
         <p>Internal audit, OpenClaw, and optional Snyk CLI advisory summary.</p>
       </div>
-
+    
       </div>
     </header>
     <nav class="tabs" role="tablist" aria-label="Review result sections">
@@ -202,7 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
     </section>
 
     <section id="evals" class="tab-panel" role="tabpanel" hidden>
-
+      
       <section>
         <div class="section-head">
           <div><h2>Evaluation Results</h2><p>1/1 latest eval cases passed.</p></div>
@@ -213,12 +213,12 @@ document.addEventListener('DOMContentLoaded', () => {
           <tbody><tr><td><strong>discovery interview contract</strong><br><span>happy</span></td><td><span>Passed</span></td><td class="score good">100%</td><td>passed</td></tr></tbody>
         </table>
       </section>
-
+    
     </section>
 
     <section id="security" class="tab-panel" role="tabpanel" hidden>
       <div class="section-head"><div><h2>Security</h2><p>Local security-review result, kept separate from quality so warnings cannot hide.</p></div><span class="pill good">100%</span></div>
-      <div class="suggestions"><h3>Findings</h3><ul><li>No local security warnings or errors were reported by the internal audit.</li></ul></div>
+      <div class="suggestions"><h3>Findings</h3><ul><li>Summary: 0 critical · 0 warn · 2 info</li></ul></div>
       <div class="panel plugin-posture">
         <div>
           <h3>Snyk Advisory</h3>
@@ -234,11 +234,11 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </section>
 
-    <section id="evidence" class="tab-panel" role="tabpanel" hidden>
+    <section id="evidence" class="tab-panel" role="tabpanel" aria-labelledby="tab-evidence" hidden>
       <div class="section-head"><div><h2>Evidence</h2><p>Generated from local files. These links are archive pointers, not registry uploads.</p></div></div>
       <div class="evidence-list">
-        <a href="file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skill-reviews/evals-router.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/evals-router.json</span></a>
-        <a href="file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skills/evals-router/20260517-225216-202466/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/evals-router/20260517-225216-202466/scorecard.json</span></a>
+        <a href="evals-router.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/evals-router.json</span></a>
+        <a href="../skills/evals-router/20260527-000112-998194/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/evals-router/20260527-000112-998194/scorecard.json</span></a>
         <div>Policy<br><span>local_internal_only; primary gate: local_eval_ask_audit; Plugin Eval floor: B+; Snyk: disabled_until_requested</span></div>
         <div>Generated<br><span>local report</span></div>
       </div>

@@ -152,6 +152,16 @@
     },
     "gate_summary": {
       "blocked_reasons": [
+        "sdk_contract:agent_metadata",
+        "sdk_contract:commands",
+        "sdk_contract:evals",
+        "sdk_contract:evidence_policy",
+        "sdk_contract:inputs",
+        "sdk_contract:outputs",
+        "sdk_contract:permission_profile",
+        "sdk_contract:purpose",
+        "sdk_contract:reference_contract",
+        "sdk_contract:task_profile",
         "identity_incomplete"
       ],
       "checkout_test_status": "not_run",
@@ -162,6 +172,16 @@
     "package_contract": {
       "install_gate": {
         "blocked_reasons": [
+          "sdk_contract:agent_metadata",
+          "sdk_contract:commands",
+          "sdk_contract:evals",
+          "sdk_contract:evidence_policy",
+          "sdk_contract:inputs",
+          "sdk_contract:outputs",
+          "sdk_contract:permission_profile",
+          "sdk_contract:purpose",
+          "sdk_contract:reference_contract",
+          "sdk_contract:task_profile",
           "identity_incomplete"
         ],
         "checkout_test_status": "not_run",
@@ -169,6 +189,16 @@
       },
       "promotion_gate": {
         "blocked_reasons": [
+          "sdk_contract:agent_metadata",
+          "sdk_contract:commands",
+          "sdk_contract:evals",
+          "sdk_contract:evidence_policy",
+          "sdk_contract:inputs",
+          "sdk_contract:outputs",
+          "sdk_contract:permission_profile",
+          "sdk_contract:purpose",
+          "sdk_contract:reference_contract",
+          "sdk_contract:task_profile",
           "identity_incomplete"
         ],
         "promotion_ready": false,
@@ -318,7 +348,7 @@
         "runtime_needs": [
           "repo-owned skill source path",
           "./bin/ask skills audit and eval wrappers",
-          "Python 3 standard library validators"
+          "python3 standard library validators"
         ],
         "share_readiness": "ready",
         "version": "1.0.0"
@@ -357,7 +387,7 @@
       "compatibility_status": "compatible",
       "metadata": {
         "dependencies": null,
-        "description": "Hardens existing Codex skills or plugin skills by fixing audits, improving trigger wording, reducing token cost, adding examples and evals, and rerunning validation. Use when users say fix this skill, improve skill quality, optimize token usage, make this plugin production-ready, repair skill tests, or prepare a skill for release.",
+        "description": "Reviews and improves SKILL.md packages by fixing audit findings, triggers, examples, evals, token budget, release proof, safety verdicts, comparator/baseline choices, and bounded code-lens hardening. Use when the user says improve a skill, fix a skill file, review SKILL.md, raise Tessl score, reduce context cost, add skill evals, or prepare a plugin skill for release.",
         "interface": {
           "display_name": "Skill Builder",
           "short_description": "Harden Codex skills and plugin packages with contract checks, eval coverage, and validation evidence."
@@ -393,4 +423,3 @@
     "warning_classes": []
   }
 }
-

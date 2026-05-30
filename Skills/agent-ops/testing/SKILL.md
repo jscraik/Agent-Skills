@@ -52,8 +52,10 @@ only as the repo contract and risk surface require.
 2. Classify the changed surface: unit, boundary, mock integration, e2e, security, load/stress, lifecycle closeout, docs/config, skill package, or eval artifact.
 3. Run or recommend the smallest exact behavior check that invokes production code, a real CLI/script, a validator, or a schema-backed artifact path.
 4. Add or update tests when a behavior change has no meaningful related proof.
-5. Stop at the first failed required gate; fix the smallest failing scope and rerun that gate before widening.
-6. Report exact evidence and do not claim completion for any proof path that did not run.
+5. For each meaningful test or eval case, make the bug report shape explicit: unit or workflow under test, given condition, should expectation, actual observed output or artifact, expected output or artifact, and reproduction command or fixture.
+6. When the proof is nondeterministic or agent-mediated, record run count, pass threshold, per-assertion failures, raw response or trace artifact paths, and timeout or partial-output handling before using the result for a release or closeout decision.
+7. Stop at the first failed required gate; fix the smallest failing scope and rerun that gate before widening.
+8. Report exact evidence and do not claim completion for any proof path that did not run.
 
 ## Repo Routes
 
@@ -116,6 +118,7 @@ only as the repo contract and risk surface require.
 - A stale artifact on disk is not completion evidence.
 - A missing baseline, zero denominator, or unavailable live service is not a pass.
 - A test that uses the implementation as its own oracle can hide the defect it claims to catch.
+- A readable scenario title is not enough; the assertion should still expose actual versus expected evidence and a reproduction path.
 
 ## Anti-Patterns
 

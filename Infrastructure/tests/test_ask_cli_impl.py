@@ -4554,11 +4554,13 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(output["data"]["plugin_eval"]["status"], "skipped")
         self.assertEqual(output["data"]["tessl_lint"]["status"], "skipped")
         self.assertEqual(output["data"]["policy"]["plugin_eval_min_acceptable_grade"], "B+")
-        self.assertEqual(output["data"]["policy"]["tessl_review_min_score"], 95)
+        self.assertEqual(output["data"]["policy"]["tessl_review_min_score"], 90)
+        self.assertEqual(output["data"]["policy"]["tessl_review_target_score"], 95)
         self.assertEqual(output["data"]["policy"]["tessl_project_marker"], "tessl.json")
         self.assertIn("/tmp/ask-tessl-reviews", output["data"]["policy"]["tessl_staging_root"])
-        self.assertEqual(output["data"]["review_mode_details"]["tessl_review"]["minimum_score"], 95)
-        self.assertIn("--threshold 95", output["data"]["review_mode_details"]["tessl_review"]["command"])
+        self.assertEqual(output["data"]["review_mode_details"]["tessl_review"]["minimum_score"], 90)
+        self.assertEqual(output["data"]["review_mode_details"]["tessl_review"]["target_score"], 95)
+        self.assertIn("--threshold 90", output["data"]["review_mode_details"]["tessl_review"]["command"])
         self.assertEqual(
             output["data"]["validation_commands"],
             [
