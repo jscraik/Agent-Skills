@@ -12,8 +12,8 @@ Do not hand-edit runtime projections.
 ## Table of Contents
 - [Summary](#summary)
 - [Catalog](#catalog)
-- [.Agents — Skills — .System](#.agents-skills-.system)
 - [Skills — Agent Ops](#skills-agent-ops)
+- [Skills System](#skills-system)
 
 ## Summary
 - `total_skills`: 26
@@ -22,11 +22,6 @@ Do not hand-edit runtime projections.
 - `policy_identity`: 296d65527f6072ac
 
 ## Catalog
-
-## .Agents — Skills — .System
-
-- `imagegen` — Generate or edit raster images when the task benefits from AI-created bitmap visuals such as photos, illustrations, textures, sprites, mockups, or transparent-background cutouts. Use when Codex should create a brand-new image, transform an existing image, or derive visual variants from references, and the output should be a bitmap asset rather than repo-native code or vector. Do not use when the task is better handled by editing existing SVG/vector/code-native assets, extending an established icon or logo system, or building the visual directly in HTML/CSS/canvas.
-- `openai-docs` — Use when the user asks how to build with OpenAI products or APIs and needs up-to-date official documentation with citations, help choosing the latest model for a use case, or model upgrade and prompt-upgrade guidance; prioritize OpenAI docs MCP tools, use bundled references only as helper context, and restrict any fallback browsing to official OpenAI domains.
 
 ## Skills — Agent Ops
 
@@ -51,6 +46,11 @@ Do not hand-edit runtime projections.
 - `simplify` — Review changed code for behavior-preserving simplification by removing dead code, eliminating duplication, extracting shared helpers, improving names, and tightening tests. Use when a user asks for code review, refactor, clean up PR, simplify, tidy up code, review my changes, or maintainability cleanup before merge.
 - `skill-pr-delivery` — Ship skill changes to PRs when Codex skills need source edits, rooted sync, strict audit, reviewer evidence, commit, push, and PR status.
 - `triage` — Review file-based todo findings into ready, skipped, customized, or blocked states. Use this skill when pending todo files need approval.
-- `ubiquitous-language` — Build shared project vocabulary, glossary terms, aliases, prompt translations, and agent instruction links when wording is fuzzy or overloaded.
+- `ubiquitous-language` — Build shared project vocabulary, glossary terms, aliases, prompt translations, domain-grill interviews, and agent instruction links when wording is fuzzy or overloaded.
 - `unslopify` — Audit unused functions, dead exports, orphaned modules, stale imports, unreachable code, and tech-debt cleanup candidates with evidence-backed removal guidance. Use when unused code, dead code, remove unused imports, stale-code checks, or scoped cleanup evidence are needed.
 - `verification-before-completion` — Review and validate completion claims. Use when you are about to say work is complete, fixed, passing, pushed, or ready for review.
+
+## Skills System
+
+- `imagegen` — Generate or edit raster images when the task benefits from AI-created bitmap visuals such as photos, illustrations, textures, sprites, mockups, or transparent-background cutouts. Use when Codex should create a brand-new image, transform an existing image, or derive visual variants from references, and the output should be a bitmap asset rather than repo-native code or vector. Do not use when the task is better handled by editing existing SVG/vector/code-native assets, extending an established icon or logo system, or building the visual directly in HTML/CSS/canvas.
+- `openai-docs` — Use when the user asks how to build with OpenAI products or APIs and needs up-to-date official documentation with citations, help choosing the latest model for a use case, or model upgrade and prompt-upgrade guidance; prioritize OpenAI docs MCP tools, use bundled references only as helper context, and restrict any fallback browsing to official OpenAI domains.
