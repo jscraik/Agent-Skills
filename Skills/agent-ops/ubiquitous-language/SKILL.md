@@ -1,6 +1,6 @@
 ---
 name: ubiquitous-language
-description: Build shared project vocabulary, glossary terms, aliases, prompt translations, and agent instruction links when wording is fuzzy or overloaded.
+description: Build shared project vocabulary, glossary terms, aliases, prompt translations, domain-grill interviews, and agent instruction links when wording is fuzzy or overloaded.
 metadata:
   skill-type: team_automation
 ---
@@ -17,6 +17,7 @@ Make the user's natural language more powerful instead of making the user sound 
 
 - User mentions glossary, naming, vocabulary, terminology, DDD, domain model, or shared language.
 - User says they do not know the technical term.
+- User wants a relentless domain-language grill or plan stress-test against code, project language, and documented decisions.
 - A repo has overloaded phrases that agents keep interpreting inconsistently.
 
 Do not use for ordinary symbol renaming, generic copyediting, or broad docs rewrites without reusable terminology.
@@ -43,6 +44,30 @@ Do not use for ordinary symbol renaming, generic copyediting, or broad docs rewr
 7. Add a concise pointer in the nearest active agent instruction surface.
 8. Report the highest-value terms, prompt translations, sources, and skipped evidence.
 
+## Domain Grill Mode
+
+Use this mode when the user asks to be grilled, challenged, interviewed deeply,
+or stress-tested against the project domain model.
+
+- Be persistent. Walk the design tree branch by branch until the plan, language,
+  and decision boundaries are sharp enough to act on.
+- Ask one question at a time and wait for the user's answer unless the answer
+  can be found cheaply in the repository.
+- For each question, include a recommended answer and the trade-off it implies.
+- When a user term conflicts with the active glossary, call out the conflict
+  immediately and ask which meaning should win.
+- When a user term is vague or overloaded, propose a precise canonical term and
+  the aliases to avoid.
+- Use concrete scenarios and edge cases to test whether adjacent concepts are
+  truly separate.
+- Cross-check claims against code or docs when that is cheaper than asking the
+  user; surface contradictions as evidence, not as conclusions.
+- Capture resolved terms in the active glossary as they resolve. Do not batch
+  confirmed terminology until the end.
+- Stop or pivot when the remaining uncertainty is implementation detail,
+  architecture trade-off, tracker planning, or a decision-record question owned
+  by another skill.
+
 ## UBIQUITOUS.md Format
 
 For new glossaries, prefer this structure:
@@ -68,6 +93,10 @@ _Avoid_: Client, buyer, account
 ```
 
 If automation or an existing repo contract already consumes `UBIQUITOUS_LANGUAGE.md`, preserve that filename and existing required sections while aligning new term entries to the `## Language` style.
+
+If an external skill, repo, or user calls this surface `CONTEXT.md`, translate
+that to the active local glossary name (`UBIQUITOUS.md`, `UBIQUITOUS-MAP.md`, or
+legacy `UBIQUITOUS_LANGUAGE.md`) before writing.
 
 For multi-context repositories, create or update a root `UBIQUITOUS-MAP.md`:
 
@@ -114,6 +143,9 @@ The glossary should include context description, canonical language entries, ali
 - Write only the active ubiquitous-language file, context map, and the smallest necessary agent-instruction pointer.
 - Do not run network commands, publish artifacts, change runtime projections, or edit unrelated docs for a terminology-only update.
 - Do not infer domain authority from generic code symbols; require project-specific source evidence or user wording before adding a term.
+- Do not create ADRs, Linear notes, `.harness/decisions/**`, or architecture
+  artifacts from this skill. Hand off to the repo's decision-record or
+  architecture workflow after the terminology question is resolved.
 
 ## Anti-Patterns
 
@@ -126,6 +158,8 @@ The glossary should include context description, canonical language entries, ali
 - "User says make it available, but in this repo that means workspace sync, user sync, and runtime-link verification; convert that wording into the glossary."
 - "Inspect how the word skill means source package, generated handle, and active runtime capability in different places; define the canonical terms and flag the ambiguity."
 - "Validate whether billing and fulfillment language belong in one root UBIQUITOUS.md or need a UBIQUITOUS-MAP.md."
+- "Grill this plan against the existing domain model, challenge every fuzzy
+  term, check contradictions in code, and update the glossary as terms resolve."
 
 ## Failure mode
 

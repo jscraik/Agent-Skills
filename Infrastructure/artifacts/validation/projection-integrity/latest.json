@@ -1,26 +1,10 @@
 {
   "schema_version": "projection-parity.v1",
-  "generated_at": "2026-05-12T23:21:04.712792+00:00",
+  "generated_at": "2026-05-30T00:40:54.375274+00:00",
   "mode": "verify",
   "scope": "all",
   "status": "pass",
   "results": [
-    {
-      "name": "skill-factory-skill-creator-alias",
-      "type": "symlink",
-      "status": "pass",
-      "alias": "skills-system/skill-creator",
-      "canonical": "Plugins/skill-factory/skills/scaffolding_templates/skill-creator",
-      "target": "../Plugins/skill-factory/skills/scaffolding_templates/skill-creator"
-    },
-    {
-      "name": "skill-factory-skill-installer-alias",
-      "type": "symlink",
-      "status": "pass",
-      "alias": "skills-system/skill-installer",
-      "canonical": "Plugins/skill-factory/skills/infrastructure_ops/skill-installer",
-      "target": "../Plugins/skill-factory/skills/infrastructure_ops/skill-installer"
-    },
     {
       "name": "plugin-factory-plugin-creator-alias",
       "type": "symlink",
@@ -47,9 +31,9 @@
       "extra_in_projection": [],
       "mismatched_files": [],
       "unstamped_files": [],
-      "checked_files": 65,
-      "source_manifest_sha256": "52f91a5c42554ef6252d6272fe40df83475221659105f9d87099926a7057ae11",
-      "projection_manifest_sha256": "52f91a5c42554ef6252d6272fe40df83475221659105f9d87099926a7057ae11",
+      "checked_files": 84,
+      "source_manifest_sha256": "5c976c5465d4ba78b4812f6ce2e26f9d512b3d8e3950fd242960eab4034e805f",
+      "projection_manifest_sha256": "5c976c5465d4ba78b4812f6ce2e26f9d512b3d8e3950fd242960eab4034e805f",
       "manifest_mismatch": false,
       "status": "pass"
     },
@@ -79,9 +63,9 @@
       "extra_in_projection": [],
       "mismatched_files": [],
       "unstamped_files": [],
-      "checked_files": 14,
-      "source_manifest_sha256": "82ccbc2269e444d3b9a4c19e53195f82ab13dd13c63659f7c75adbd2aa6bface",
-      "projection_manifest_sha256": "82ccbc2269e444d3b9a4c19e53195f82ab13dd13c63659f7c75adbd2aa6bface",
+      "checked_files": 69,
+      "source_manifest_sha256": "ffb9b18cb9d4f724928bdf1037849a619783cc37f87ed3abd2bd6bbb895d30f4",
+      "projection_manifest_sha256": "ffb9b18cb9d4f724928bdf1037849a619783cc37f87ed3abd2bd6bbb895d30f4",
       "manifest_mismatch": false,
       "status": "pass"
     }

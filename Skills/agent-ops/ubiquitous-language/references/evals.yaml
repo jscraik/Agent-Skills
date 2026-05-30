@@ -66,6 +66,20 @@ cases:
     prompt: "Build a UBIQUITOUS-MAP.md for separate ordering and billing contexts instead of forcing one glossary."
     deterministic_checks: {forbidden_commands: [curl, wget, "rm -rf", nc]}
     acceptance: [{type: regex, value: "(?i)(UBIQUITOUS-MAP|contexts|ask|unclear)"}]
+  - id: edge-domain-grill
+    name: relentless domain-language grill
+    category: edge
+    realistic: true
+    why_realistic: "The user wants the external grill-with-docs behavior preserved, but routed through the local ubiquitous-language contract."
+    eval_modes: [release]
+    should_trigger: true
+    prepend_skill: false
+    prompt: "Grill this checkout flow redesign relentlessly against the existing domain model. Challenge every fuzzy term, recommend answers, check code when it can answer a question, and update the glossary as terms resolve."
+    deterministic_checks: {forbidden_commands: [curl, wget, "rm -rf", nc]}
+    acceptance:
+      - {type: skill_selected, expected_skill: ubiquitous-language}
+      - {type: regex, value: "(?is)(one question|question at a time|recommended answer).*(UBIQUITOUS|glossary|canonical term)"}
+      - {type: regex, value: "(?is)(code|docs|repository).*(contradiction|evidence|conflict)"}
   - id: negative-copyedit
     name: grammar only
     category: negative

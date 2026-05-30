@@ -1,13 +1,15 @@
 schema_version: 1
 skill: ubiquitous-language
-purpose: "Convert fuzzy or overloaded project language into a durable CONTEXT.md or vocabulary surface agents can use consistently."
+purpose: "Convert fuzzy or overloaded project language into a durable UBIQUITOUS.md, UBIQUITOUS-MAP.md, legacy UBIQUITOUS_LANGUAGE.md, or repo-native vocabulary surface agents can use consistently."
 triggers:
   - "Use when the user request matches the skill scope."
+  - "Use when the user asks for a relentless domain-language grill or plan stress-test against code and documented decisions."
 non_goals:
   - "Route unrelated work away from this skill."
 inputs:
   - "current user wording"
-  - "existing CONTEXT.md or vocabulary file"
+  - "existing UBIQUITOUS.md, UBIQUITOUS-MAP.md, legacy UBIQUITOUS_LANGUAGE.md, or vocabulary file"
+  - "external CONTEXT.md naming only as an alias for the active local ubiquitous-language surface"
   - "nearby repo docs"
   - "domain evidence"
   - "ambiguities"
@@ -18,6 +20,7 @@ outputs:
   - "example dialogue"
   - "flagged ambiguities"
   - "integration note"
+  - "domain-grill question, recommendation, and resolved-term capture when requested"
 risks:
   - over_triggering
   - untrusted_input
