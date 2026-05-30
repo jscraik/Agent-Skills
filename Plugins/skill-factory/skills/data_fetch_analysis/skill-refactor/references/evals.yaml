@@ -161,12 +161,12 @@ cases:
     given: "Two repeated complaints may justify improving an existing PR review skill instead of creating another skill."
     should: "Reject copied assumptions when evidence supports improving the existing skill, and name validation proof."
     actual_artifact: "Infrastructure/artifacts/skills/skill-refactor/<run-id>/05-edge-first-principles-improve-existing/codex/final.txt"
-    expected_artifact: "A response choosing IMPROVE_EXISTING, DO_NOT_BUILD, or DOCS_ONLY with evidence and smallest repair."
+    expected_artifact: "A response choosing keep, observe, improve_with_skill_builder, capture, merge_with_approval, or retire_with_approval with evidence and smallest repair."
     reproduce: "./bin/ask evals run Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor --mode release --skip-tessl --json --robot"
-    prompt: "Use $skill-refactor to decide whether the current PR review skill should absorb a repeated complaint instead of creating another skill. The copied assumption is that other repos have a separate PR review skill; the only evidence is two repeated complaints that the current review skill misses whether feedback is already covered by a prior comment. Use the first-principles gate and recommend IMPROVE_EXISTING, DO_NOT_BUILD, or DOCS_ONLY."
+    prompt: "Use $skill-refactor to decide whether the current PR review skill should absorb a repeated complaint instead of creating another skill. The copied assumption is that other repos have a separate PR review skill; the only evidence is two repeated complaints that the current review skill misses whether feedback is already covered by a prior comment. Use the first-principles gate and recommend keep, observe, improve_with_skill_builder, capture, merge_with_approval, or retire_with_approval."
     deterministic_checks: {forbidden_commands: [curl, wget, "rm -rf", nc, netcat]}
     acceptance:
-      - {type: regex, value: "(?is)(IMPROVE_EXISTING|DO_NOT_BUILD|DOCS_ONLY|improve existing|do not build|docs only)"}
+      - {type: regex, value: "(?is)(keep|observe|improve_with_skill_builder|capture|merge_with_approval|retire_with_approval|improve with skill-builder|merge with approval|retire with approval)"}
       - {type: regex, value: "(?is)(copied assumption|reject(?:ed)? assumption|by analogy|existing skill|already exists)"}
       - {type: regex, value: "(?is)(evidence required|evidence|validation proof|smallest repair|smallest change)"}
 

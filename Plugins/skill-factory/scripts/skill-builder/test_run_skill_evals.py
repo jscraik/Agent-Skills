@@ -50,6 +50,7 @@ from run_skill_evals import (
     _is_runner_runtime_blocked,
     _is_smoke_only_case,
     _scrub_mcp_servers_from_toml,
+    _weak_acceptance_reasons,
     _write_junit_report,
     evaluate_assertions_text,
     evaluate_expected_signals,
@@ -376,6 +377,28 @@ class RunSkillEvalsModeTests(unittest.TestCase):
         self.assertEqual(cases[0].pass_rate_threshold, 0.75)
         self.assertEqual(cases[0].reproduce, "./bin/ask evals run demo")
 
+    def test_load_evals_rejects_non_finite_pass_rate_threshold(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            evals_path = Path(tmp) / "evals.yaml"
+            evals_path.write_text(
+                textwrap.dedent(
+                    """
+                    cases:
+                      - id: bad-threshold
+                        name: bad threshold
+                        prompt: Check this.
+                        acceptance:
+                          - contains: done
+                        pass_rate_threshold: .nan
+                    """
+                ).strip()
+                + "\n",
+                encoding="utf-8",
+            )
+
+            with self.assertRaisesRegex(ValueError, "pass_rate_threshold.*finite"):
+                load_evals(evals_path)
+
     def test_load_evals_parses_claim_coverage_metadata(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             evals_path = Path(tmp) / "evals.yaml"
@@ -551,6 +574,16 @@ class RunSkillEvalsModeTests(unittest.TestCase):
         self.assertIn("missing_riteway_shape", gap_types)
         self.assertIn("weak_acceptance_shape", gap_types)
         self.assertEqual(summary["blocking_gaps"], [])
+
+    def test_jsonpath_acceptance_counts_as_concrete_acceptance(self) -> None:
+        case = EvalCase(
+            id="jsonpath",
+            name="jsonpath",
+            prompt="Check JSON.",
+            acceptance=[{"type": "jsonpath_exists", "path": "$.status"}],
+        )
+
+        self.assertEqual(_weak_acceptance_reasons(case), [])
 
     def test_neutral_baseline_approvals_reject_duplicate_ids(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -1405,7 +1438,10 @@ class RunSkillEvalsModeTests(unittest.TestCase):
             (codex_home / "auth.json").write_text("{}", encoding="utf-8")
             fake_proc = unittest.mock.Mock(returncode=0, stdout="Logged in using ChatGPT\n", stderr="")
 
-            with unittest.mock.patch("run_skill_evals.sp.run", return_value=fake_proc) as mocked_run:
+            with unittest.mock.patch(
+                "run_skill_evals._codex_supports_exec_flag",
+                return_value=True,
+            ), unittest.mock.patch("run_skill_evals.sp.run", return_value=fake_proc) as mocked_run:
                 errors, warnings = _preflight_codex_live_runner(
                     workspace_root=workspace_root,
                     codex_bin=None,
@@ -1486,7 +1522,10 @@ class RunSkillEvalsModeTests(unittest.TestCase):
             output_last_message_path = workspace_root / "last.txt"
             fake_proc = unittest.mock.Mock(returncode=0, stdout="", stderr="")
 
-            with unittest.mock.patch("run_skill_evals.sp.run", return_value=fake_proc) as mocked_run:
+            with unittest.mock.patch(
+                "run_skill_evals._codex_supports_exec_flag",
+                return_value=True,
+            ), unittest.mock.patch("run_skill_evals.sp.run", return_value=fake_proc) as mocked_run:
                 rc, stdout, stderr, warnings = run_codex_exec(
                     workspace_root=workspace_root,
                     prompt="Route only.",
@@ -1507,6 +1546,48 @@ class RunSkillEvalsModeTests(unittest.TestCase):
         cmd = mocked_run.call_args.args[0]
         self.assertIn("--ignore-user-config", cmd)
         self.assertLess(cmd.index("--ignore-user-config"), cmd.index("--sandbox"))
+
+    def test_run_codex_exec_skips_ignore_user_config_when_unsupported(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            workspace_root = Path(tmpdir)
+            output_last_message_path = workspace_root / "last.txt"
+            fake_proc = unittest.mock.Mock(returncode=0, stdout="", stderr="")
+
+            with unittest.mock.patch(
+                "run_skill_evals._codex_supports_exec_flag",
+                return_value=False,
+            ), unittest.mock.patch("run_skill_evals.sp.run", return_value=fake_proc) as mocked_run:
+                rc, stdout, stderr, warnings = run_codex_exec(
+                    workspace_root=workspace_root,
+                    prompt="Route only.",
+                    output_last_message_path=output_last_message_path,
+                    output_schema_path=None,
+                    sandbox="read-only",
+                    ask_for_approval=None,
+                    model=None,
+                    profile=None,
+                    codex_home=workspace_root / ".codex",
+                    jsonl_path=None,
+                    codex_bin=None,
+                    timeout_sec=1,
+                    timeout_profile="default",
+                )
+
+        self.assertEqual((rc, stdout, stderr), (0, "", ""))
+        self.assertTrue(any("--ignore-user-config" in warning for warning in warnings))
+        cmd = mocked_run.call_args.args[0]
+        self.assertNotIn("--ignore-user-config", cmd)
+
+    def test_timeout_with_only_subprocess_stderr_is_no_output(self) -> None:
+        self.assertEqual(
+            _classify_runner_blocker(
+                output_text="",
+                stdout_text="",
+                stderr_text="Command timed out after 10 seconds",
+                exit_code=124,
+            ),
+            "timeout_no_output",
+        )
 
     def test_write_junit_report_outputs_failures(self) -> None:
         summary = {

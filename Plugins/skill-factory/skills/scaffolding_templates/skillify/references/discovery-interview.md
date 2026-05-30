@@ -19,7 +19,7 @@ When the request names a workflow but omits evidence, prefer:
 - Why this matters: skillify captures proven repeatable behavior, not transcript noise or unvalidated intention.
 - Round 1 question: Which workflow note, report, or completed session should be the source evidence?
 
-## Copy paste payload examples
+## Copy-paste payload examples
 
 Example:
 

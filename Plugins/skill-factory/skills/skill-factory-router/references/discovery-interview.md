@@ -18,7 +18,7 @@ When the request already names Skill Factory but not the lane, prefer:
 - Why this matters: creating, capturing, hardening, analyzing, and installing skills have different write and proof boundaries.
 - Round 1 question: What should this skill-factory work help you do first?
 
-## Copy paste payload examples
+## Copy-paste payload examples
 
 Example:
 

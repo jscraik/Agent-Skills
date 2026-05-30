@@ -46,8 +46,13 @@ def _normalized_trusted_sources(trusted_sources: set[str] | None = None) -> set[
 
 
 def _provenance_value_trusted(value: str, trusted_sources: set[str]) -> bool:
-    parts = [part.strip().lower() for part in value.split(":") if part.strip()]
-    return bool(parts) and any(part in trusted_sources for part in parts)
+    source = value.strip().lower()
+    if not source:
+        return False
+    if source in trusted_sources:
+        return True
+    parts = [part.strip() for part in source.split(":") if part.strip()]
+    return len(parts) >= 3 and parts[0] == "frontmatter" and parts[-1] == "canonical-source"
 
 
 def sha256_bytes(data: bytes) -> str:

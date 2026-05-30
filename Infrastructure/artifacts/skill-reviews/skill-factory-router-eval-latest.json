@@ -22,7 +22,8 @@
       "snyk_release_requirement": "release_required_for_manifest_backed_candidates",
       "tessl_eval_staging_root": "/tmp/ask-tessl-evals/<skill-path>-<sha12>",
       "tessl_project_marker": "tessl.json",
-      "tessl_review_min_score": 95
+      "tessl_review_min_score": 90,
+      "tessl_review_target_score": 95
     },
     "review_mode": "eval_only",
     "review_mode_details": {

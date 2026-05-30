@@ -290,9 +290,9 @@ def _contains_command(commands: List[str], needle: str) -> bool:
         return any(needle_norm in _command_tokens(c) for c in commands)
 
     try:
-        needle_parts = [part.lower() for part in shlex.split(needle_norm) if part.strip()]
+        needle_parts = [Path(part).name.lower() for part in shlex.split(needle_norm) if part.strip()]
     except ValueError:
-        needle_parts = [part.lower() for part in needle_norm.split() if part.strip()]
+        needle_parts = [Path(part).name.lower() for part in needle_norm.split() if part.strip()]
     if not needle_parts:
         return False
 

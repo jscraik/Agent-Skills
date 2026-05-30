@@ -286,6 +286,30 @@ class TestAskSkillsConformance(unittest.TestCase):
         self.assertFalse(verification["provenance_identity"]["trusted"])
         self.assertTrue(any(item["rule_id"] == "untrusted_provenance" for item in verification["blockers"]))
 
+    def test_directory_verify_rejects_colon_appended_trusted_provenance(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_md = Path(temp_dir) / "sample" / "SKILL.md"
+            skill_md.parent.mkdir()
+            skill_md.write_text(
+                "---\n"
+                "name: sample-skill\n"
+                "description: Use when verifying sample packages.\n"
+                "version: 1.0.0\n"
+                "compatible_roles: default\n"
+                "runtime_needs: local files\n"
+                "maturity: fixture\n"
+                "provenance: external-untrusted:agent-skills\n"
+                "share_readiness: ready\n"
+                "---\n",
+                encoding="utf-8",
+            )
+
+            verification = verify_skill_directory(REPO_ROOT, skill_md, str(skill_md.parent))
+
+        self.assertEqual(verification["status"], "blocked")
+        self.assertFalse(verification["provenance_identity"]["trusted"])
+        self.assertTrue(any(item["rule_id"] == "untrusted_provenance" for item in verification["blockers"]))
+
     def test_directory_verify_blocks_empty_reference_files(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             skill_md = Path(temp_dir) / "sample" / "SKILL.md"

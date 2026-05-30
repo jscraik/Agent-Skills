@@ -34,7 +34,7 @@ cases:
   - type: skill_selected
     expected_skill: autoresearch
   - type: regex
-    value: "(?i)(run tag|baseline|train\\.py|results\\.tsv|blocked)"
+    value: '(?i)(run tag|baseline|train\\.py|results\\.tsv|blocked)'
   realistic: true
   why_realistic: The prompt describes a concrete local agent-skills workflow with an action, artifact, or safety constraint that this skill is expected to handle.
 - id: happy-one-iteration
@@ -93,7 +93,7 @@ cases:
   - type: skill_selected
     expected_skill: autoresearch
   - type: regex
-    value: "(?i)(rejected-edits\.jsonl|rejected edit|discard|protected|regression)"
+    value: '(?i)(rejected-edits\.jsonl|rejected edit|discard|protected|regression)'
   realistic: true
   why_realistic: Rejected edits are reusable evidence for future optimizer rounds and prevent retry loops.
 - id: edge-skillopt-held-out-separation
@@ -129,7 +129,7 @@ cases:
   - type: skill_selected
     expected_skill: autoresearch
   - type: regex
-    value: "(?i)(promotion\.json|review|required|anti-cheat|canonical|SKILL\.md)"
+    value: '(?i)(promotion\.json|review|required|anti-cheat|canonical|SKILL\.md)'
   realistic: true
   why_realistic: Canonical skill source promotion must be reviewed even when the candidate artifact wins.
 - id: edge-missing-stop
@@ -164,7 +164,7 @@ cases:
   - type: skill_selected
     expected_skill: autoresearch
   - type: regex
-    value: "(?i)(blocked|gpu|tokenizer|prepare\\.py|prerequisite)"
+    value: '(?i)(blocked|gpu|tokenizer|prepare\\.py|prerequisite)'
   realistic: true
   why_realistic: The prompt describes a concrete local agent-skills workflow with an action, artifact, or safety constraint that this skill is expected to handle.
 - id: edge-crash-log
@@ -185,7 +185,7 @@ cases:
   - type: skill_selected
     expected_skill: autoresearch
   - type: regex
-    value: "(?i)(run\\.log|crash|blocked|tail|evidence)"
+    value: '(?i)(run\\.log|crash|blocked|tail|evidence)'
   realistic: false
 - id: edge-noisy-metric
   name: noisy metric decision policy

@@ -230,9 +230,11 @@ def _tessl_eval_view_has_complete_scores(payload: dict[str, object]) -> bool:
         baseline_solution = next((s for s in solutions if isinstance(s, dict) and s.get("variant") == "baseline"), None)
         if not isinstance(usage_solution, dict) or not isinstance(baseline_solution, dict):
             return False
-        if not isinstance(usage_solution.get("assessmentResults"), list):
+        usage_results = usage_solution.get("assessmentResults")
+        baseline_results = baseline_solution.get("assessmentResults")
+        if not isinstance(usage_results, list) or not usage_results:
             return False
-        if not isinstance(baseline_solution.get("assessmentResults"), list):
+        if not isinstance(baseline_results, list) or not baseline_results:
             return False
         scored_scenarios += 1
     return scored_scenarios > 0

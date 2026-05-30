@@ -90,14 +90,16 @@
           }
         },
         "max_edits": {
-          "type": "integer"
+          "type": "integer",
+          "minimum": 0
         },
         "schedule": {
           "type": "string",
           "enum": ["constant", "linear", "cosine", "autonomous"]
         },
         "floor": {
-          "type": "integer"
+          "type": "integer",
+          "minimum": 0
         },
         "protected_paths": {
           "$ref": "#/definitions/stringList"
@@ -126,10 +128,12 @@
           "enum": ["reject", "allow_with_review"]
         },
         "min_delta": {
-          "type": "number"
+          "type": "number",
+          "exclusiveMinimum": 0
         },
         "noise_runs": {
-          "type": "integer"
+          "type": "integer",
+          "minimum": 0
         },
         "guard_failure": {
           "type": "string",
@@ -138,7 +142,18 @@
         "report_test_score_only_after_acceptance": {
           "type": "boolean"
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {"rule": {"const": "min_delta"}},
+            "required": ["rule"]
+          },
+          "then": {
+            "required": ["min_delta"]
+          }
+        }
+      ]
     },
     "anti_cheat": {
       "type": "object",

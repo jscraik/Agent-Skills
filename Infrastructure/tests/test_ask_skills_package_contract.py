@@ -27,6 +27,8 @@ SUPPORTED_SCHEMA_KEYS = {
     "enum",
     "if",
     "items",
+    "exclusiveMinimum",
+    "minimum",
     "minItems",
     "minLength",
     "oneOf",
@@ -149,6 +151,12 @@ def _validate_schema_subset(
 
     if isinstance(value, str) and "minLength" in schema and len(value) < schema["minLength"]:
         raise AssertionError(f"{path} shorter than minLength {schema['minLength']}")
+
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        if "minimum" in schema and value < schema["minimum"]:
+            raise AssertionError(f"{path} lower than minimum {schema['minimum']}")
+        if "exclusiveMinimum" in schema and value <= schema["exclusiveMinimum"]:
+            raise AssertionError(f"{path} lower than or equal to exclusiveMinimum {schema['exclusiveMinimum']}")
 
     if isinstance(value, list):
         if "minItems" in schema and len(value) < schema["minItems"]:
@@ -1016,6 +1024,28 @@ optimization:
             optimization_payload,
             self.schemas,
         )
+        min_delta_payload = json.loads(json.dumps(optimization_payload))
+        min_delta_payload["acceptance_gate"] = {
+            "metric": "score",
+            "direction": "maximize",
+            "rule": "min_delta",
+            "ties": "reject",
+            "guard_failure": "discard",
+        }
+        with self.assertRaisesRegex(AssertionError, "min_delta"):
+            _validate_schema_subset(
+                self.schemas["skill-optimization-contract.v1.schema.json"],
+                min_delta_payload,
+                self.schemas,
+            )
+        negative_integer_payload = json.loads(json.dumps(optimization_payload))
+        negative_integer_payload["edit_policy"]["max_edits"] = -1
+        with self.assertRaisesRegex(AssertionError, "minimum"):
+            _validate_schema_subset(
+                self.schemas["skill-optimization-contract.v1.schema.json"],
+                negative_integer_payload,
+                self.schemas,
+            )
         self.assertEqual(optimization_contract["status"], "pass")
         self.assertTrue(optimization_contract["enabled"])
         self.assertEqual(optimization_contract["optimizer_mode"], "bounded_patch")

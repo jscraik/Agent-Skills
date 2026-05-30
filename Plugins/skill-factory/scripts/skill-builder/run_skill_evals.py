@@ -29,6 +29,7 @@ import atexit
 import datetime as dt
 import html
 import json
+import math
 import os
 import re
 import shutil
@@ -529,7 +530,10 @@ def _acceptance_value(item: Assertion) -> str:
             text = text[6:].strip().strip('"').strip("'")
         return text
     if isinstance(item, dict):
-        for key in ("value", "contains", "not_contains", "regex", "expected_skill"):
+        item_type = str(item.get("type") or "").strip().lower()
+        if item_type in {"jsonpath_exists", "jsonpath_equals"} and item.get("path"):
+            return str(item.get("path") or "").strip()
+        for key in ("value", "contains", "not_contains", "regex", "expected_skill", "path"):
             if key in item:
                 return str(item.get(key) or "").strip()
     return ""
@@ -976,6 +980,8 @@ def load_evals(evals_path: Path) -> List[EvalCase]:
             field_name="pass_rate_threshold",
             case_number=i,
         )
+        if pass_rate_threshold is not None and not math.isfinite(pass_rate_threshold):
+            raise ValueError(f"Case #{i} `pass_rate_threshold` must be a finite number.")
 
         if baseline_type == "neutral_repo_baseline" and not neutral_baseline_approval_id:
             raise ValueError(
@@ -2025,7 +2031,11 @@ def run_codex_exec(
         cmd = _codex_exec_prefix(codex_bin)
         # Eval cases pass prompt/context explicitly; ignoring user config keeps
         # local MCP auth and project startup hooks from contaminating results.
-        cmd.append("--ignore-user-config")
+        ignore_user_config_support = _codex_supports_exec_flag(codex_bin, "--ignore-user-config")
+        if ignore_user_config_support is not False:
+            cmd.append("--ignore-user-config")
+        else:
+            warnings.append("Codex CLI does not support --ignore-user-config; eval runner continued without it.")
         cmd.extend(["--sandbox", sandbox])
 
         if ask_for_approval:
@@ -2689,7 +2699,8 @@ def _classify_runner_blocker(
         return None
 
     if exit_code == 124:
-        return "timeout_partial_output" if text.strip() else "timeout_no_output"
+        runner_text = "\n".join([output_text or "", stdout_text or ""])
+        return "timeout_partial_output" if runner_text.strip() else "timeout_no_output"
 
     user_input_markers = [
         "user_input_requested_during_turn",
@@ -4228,7 +4239,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     c.pass_rate_calibration_artifact,
                     workspace_root,
                 ),
-                "gate_status": "calibrated_gate" if c.pass_rate_calibration_artifact else "advisory",
+                "gate_status": (
+                    "calibrated_gate"
+                    if c.pass_rate_calibration_artifact
+                    and _resolve_optional_case_artifact_path(case_dir, c.pass_rate_calibration_artifact, workspace_root)
+                    else "advisory"
+                ),
             } if c.pass_rate_threshold is not None else None,
             "agent_eval_artifacts": {
                 "raw_response": _resolve_optional_case_artifact_path(

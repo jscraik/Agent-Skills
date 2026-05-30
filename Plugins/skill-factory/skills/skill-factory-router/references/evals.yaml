@@ -45,14 +45,14 @@ claims:
     evidence_required: ["overbroad design warning"]
   - id: router.side_effect_safety
     statement: "Blocks hidden external writes or side effects before routing unsafe skill behavior."
-    source: "SKILL.md:Constraints And Boundaries"
+    source: "SKILL.md:Constraints"
     claim_type: safety
     risk: high
     hard_gate: true
     evidence_required: ["side-effect block"]
   - id: router.system_fork_safety
     statement: "Rejects forking system skill-creator or skill-installer bodies into Skill Factory."
-    source: "SKILL.md:Gotchas"
+    source: "SKILL.md:Constraints"
     claim_type: safety
     risk: high
     hard_gate: true

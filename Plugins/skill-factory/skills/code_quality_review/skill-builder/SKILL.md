@@ -55,7 +55,7 @@ Prefer one evidence-backed repair over broad rewriting. A score is useful only w
 ./bin/ask skills external-review <target> --audit-level compat --skip-plugin-eval --json --robot
 ```
 
-Pass only on parsed fields: ask audit/package/release `status == "success"`; external-review lint ok plus score `>= 90` (`95+` target); Tessl live-private usage `>= max(0.90, baseline)`. On failure, patch the first `errors[]`/blocker. Exit code alone never passes.
+Pass only on parsed fields: ask audit/package/release `status == "success"`; external-review lint ok plus score `>= 90` (`95+` target); Tessl live-private usage `>= max(0.90, baseline)` only when the workspace/project link is available. On failure, patch the first `errors[]`/blocker. Exit code alone never passes.
 
 ## Repair Map
 
@@ -104,7 +104,7 @@ blocker_notes: <only when blocked>
 ## Validation
 
 - Fail fast: stop at the first failed gate, do not proceed to later gates, and parse JSON fields instead of exit code alone.
-- Required release evidence: audit/package/release success, external-review lint ok, Tessl review score `>= 90`, and live-private usage `>= max(0.90, baseline)`.
+- Required release evidence: audit/package/release success, external-review lint ok, Tessl review score `>= 90`, and live-private usage `>= max(0.90, baseline)` when the workspace/project link is available.
 - References and scripts must be checked when they affect the skill behavior; weak supporting material blocks release claims.
 
 ## Failure Mode

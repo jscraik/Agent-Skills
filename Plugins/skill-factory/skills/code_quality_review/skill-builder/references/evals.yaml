@@ -99,7 +99,9 @@ cases:
     actual_artifact: "Infrastructure/artifacts/skills/skill-builder/<run-id>/03-clarification-package-ambiguous/codex/final.txt"
     expected_artifact: "One question that asks which canonical source/path should be fixed first."
     reproduce: "./bin/ask evals run Plugins/skill-factory/skills/code_quality_review/skill-builder --mode release --skip-tessl --json --robot"
-    acceptance: [{type: regex, value: "(?is)(which (path|source)|canonical (source|target)|should I (fix|treat|edit)|before editing)"}]
+    acceptance:
+      - {type: regex, value: "(?is)(which (path|source)|canonical (source|target)|should I (fix|treat|edit)|before editing)"}
+      - {type: not_regex, value: "(?s)(?:\\?[^?]*){2,}"}
   - id: plugin-only-handoff
     name: plugin handoff
     category: edge

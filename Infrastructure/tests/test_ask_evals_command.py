@@ -16,7 +16,7 @@ if str(ASK_LIB_DIR) not in sys.path:
     sys.path.insert(0, str(ASK_LIB_DIR))
 
 from ask.commands import evals  # noqa: E402
-from ask.skill_review_dashboard import _parse_plugin_eval, render_skill_review_dashboard  # noqa: E402
+from ask.skill_review_dashboard import _parse_plugin_eval, _render_eval_cases, render_skill_review_dashboard  # noqa: E402
 
 
 def test_tessl_run_id_parser_handles_prefixed_json() -> None:
@@ -48,6 +48,25 @@ def test_tessl_run_id_parser_falls_back_to_plain_text_uuid() -> None:
         )
         == "019e7ab3-fda5-7071-8e47-9ea75386d53b"
     )
+
+
+def test_tessl_eval_view_incomplete_when_assessment_results_empty() -> None:
+    payload = {
+        "data": {
+            "attributes": {
+                "scenarios": [
+                    {
+                        "solutions": [
+                            {"variant": "baseline", "assessmentResults": []},
+                            {"variant": "usage-spec", "assessmentResults": [{"score": 1, "max_score": 1}]},
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+
+    assert evals._tessl_eval_view_has_complete_scores(payload) is False
 
 
 def test_smoke_evals_use_codex_spark_and_fast_profile_without_reasoning_level(tmp_path: Path) -> None:
@@ -1725,6 +1744,21 @@ def test_review_dashboard_renders_plugin_eval_acceptance_policy(tmp_path: Path) 
     assert "Local policy accepts <code>B+</code> or better" in html_text
     assert "Acceptable as a budget guardrail" in html_text
     assert "Plugin Eval floor: B+" in html_text
+    assert 'id="tab-quality"' in html_text
+    assert 'aria-labelledby="tab-quality"' in html_text
+    assert 'id="tab-evals"' in html_text
+    assert 'aria-labelledby="tab-evals"' in html_text
+
+
+def test_review_dashboard_coerces_non_string_eval_notes() -> None:
+    html_text = _render_eval_cases({
+        "available": True,
+        "message": "done",
+        "score": 100,
+        "cases": [{"name": "case", "category": "happy", "score": 100, "notes": [1]}],
+    })
+
+    assert "1" in html_text
 
 
 def test_review_dashboard_renders_review_mode_details(tmp_path: Path) -> None:

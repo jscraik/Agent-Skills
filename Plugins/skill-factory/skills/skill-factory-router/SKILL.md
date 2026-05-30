@@ -106,7 +106,7 @@ If no single lane fits, set `blocked_by` to the ambiguity and ask the smallest r
 
 ## Validation
 
-Run `bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh` and `python3 Infrastructure/bin/ask skills external-review Plugins/skill-factory/skills/skill-factory-router --audit-level compat --json`.
+Run `bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh` and `./bin/ask skills external-review Plugins/skill-factory/skills/skill-factory-router --audit-level compat --json`.
 
 Fail fast: stop at the first failed required gate, classify it, and do not sync, commit, publish, or install until it is fixed or explicitly blocked.
 
