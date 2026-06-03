@@ -716,7 +716,7 @@ project policy explicitly makes them required for a selected release lane.
 | `skill refs ingest` | Extract, screen, curate, and promote references | context receipt |
 | `skill eval` | Run internal rubrics, datasets, and A/B checks | eval receipt |
 | `skill package` | Build manifest, package, signatures, provenance, install preview | package receipt |
-| `skill install --scope project|workspace|global --preview` | Plan and apply install scope with rollback | install receipt |
+| `skill install --scope project\|workspace\|global --preview` | Plan and apply install scope with rollback | install receipt |
 
 ### Config Interface
 
