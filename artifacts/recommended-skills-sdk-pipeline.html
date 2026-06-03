@@ -27,6 +27,8 @@
       --agent: #3f6f52;
       --knowledge: #6b5d1f;
       --doctrine: #245d70;
+      --oss: #365f37;
+      --ci: #4d5f35;
       --shadow: 0 16px 40px rgba(24, 33, 42, 0.09);
     }
 
@@ -291,6 +293,8 @@
 
     [data-collapsible][data-collapsed="true"] > *:not(:first-child),
     .pipeline[data-collapsed="true"] .pipeline-grid,
+    .pipeline[data-collapsed="true"] .oss-map,
+    .pipeline[data-collapsed="true"] .ci-map,
     .pipeline[data-collapsed="true"] .assurance,
     .pipeline[data-collapsed="true"] .band {
       display: none;
@@ -1382,6 +1386,119 @@
       padding: 22px 24px 24px;
     }
 
+    .oss-map,
+    .ci-map {
+      border-top: 1px solid var(--line);
+      background: #fbfdfb;
+      padding: 22px 24px 24px;
+    }
+
+    .ci-map {
+      background: #fdfdf8;
+    }
+
+    .oss-head,
+    .ci-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 0.42fr);
+      gap: 20px;
+      align-items: start;
+      margin-bottom: 16px;
+    }
+
+    .oss-map h2,
+    .ci-map h2 {
+      margin: 0;
+      font-size: 21px;
+      color: var(--oss);
+    }
+
+    .ci-map h2 {
+      color: var(--ci);
+    }
+
+    .oss-map p,
+    .ci-map p {
+      margin: 7px 0 0;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    .oss-note,
+    .ci-note {
+      border-left: 4px solid var(--oss);
+      padding: 10px 0 10px 14px;
+      color: #25313d;
+      background: #f4fbf4;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .ci-note {
+      border-left-color: var(--ci);
+      background: #fbfbef;
+    }
+
+    .oss-grid,
+    .ci-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .oss-card,
+    .ci-card {
+      border: 1px solid rgba(54, 95, 55, 0.28);
+      background: #fefffe;
+      min-height: 132px;
+      padding: 12px;
+      display: grid;
+      gap: 7px;
+      align-content: start;
+    }
+
+    .ci-card {
+      border-color: rgba(77, 95, 53, 0.28);
+      background: #fffffb;
+    }
+
+    .oss-card strong,
+    .ci-card strong {
+      display: block;
+      font-size: 13px;
+      color: #2f5a31;
+      line-height: 1.25;
+    }
+
+    .ci-card strong {
+      color: #46572e;
+    }
+
+    .oss-card span,
+    .ci-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .oss-card code,
+    .ci-card code {
+      font: inherit;
+      font-size: 11px;
+      color: #2f5a31;
+      background: #eef8ef;
+      border: 1px solid rgba(54, 95, 55, 0.18);
+      padding: 2px 4px;
+    }
+
+    .ci-card code {
+      color: #46572e;
+      background: #f4f7e9;
+      border-color: rgba(77, 95, 53, 0.18);
+    }
+
     .assurance-head {
       display: grid;
       grid-template-columns: minmax(0, 1fr) minmax(280px, 0.42fr);
@@ -1532,6 +1649,16 @@
       background: rgba(107, 93, 31, 0.12);
     }
 
+    .key.oss-key {
+      color: var(--oss);
+      background: rgba(54, 95, 55, 0.12);
+    }
+
+    .key.ci-key {
+      color: var(--ci);
+      background: rgba(77, 95, 53, 0.12);
+    }
+
     @media (max-width: 1120px) {
       header {
         grid-template-columns: 1fr;
@@ -1591,6 +1718,8 @@
       .testing-head,
       .plugin-head,
       .evalops-head,
+      .oss-head,
+      .ci-head,
       .risk-grid {
         grid-template-columns: 1fr 1fr;
       }
@@ -1604,7 +1733,9 @@
       .language-grid,
       .testing-grid,
       .plugin-grid,
-      .evalops-grid {
+      .evalops-grid,
+      .oss-grid,
+      .ci-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
@@ -1647,6 +1778,10 @@
       .plugin-grid,
       .evalops-head,
       .evalops-grid,
+      .oss-head,
+      .oss-grid,
+      .ci-head,
+      .ci-grid,
       .risk-grid,
       .lifecycle-head,
       .lifecycle-track,
@@ -1706,6 +1841,8 @@
         <button class="atlas-tab" type="button" aria-pressed="false" data-lane-filter="package">Package</button>
         <button class="atlas-tab" type="button" aria-pressed="false" data-lane-filter="runtime">Runtime</button>
         <button class="atlas-tab" type="button" aria-pressed="false" data-lane-filter="security">Security</button>
+        <button class="atlas-tab" type="button" aria-pressed="false" data-lane-filter="oss">OSS Stack</button>
+        <button class="atlas-tab" type="button" aria-pressed="false" data-lane-filter="ci">CI and Review</button>
         <button class="atlas-tab" type="button" aria-pressed="false" data-lane-filter="testing">Testing</button>
         <button class="atlas-tab" type="button" aria-pressed="false" data-lane-filter="evalops">Eval Ops</button>
         <button class="atlas-tab" type="button" aria-pressed="false" data-lane-filter="knowledge">Knowledge</button>
@@ -1720,6 +1857,8 @@
         <button class="atlas-mode" type="button" aria-pressed="false" data-view-mode="knowledge">Knowledge</button>
         <button class="atlas-mode" type="button" aria-pressed="false" data-view-mode="evalops">Eval Ops</button>
         <button class="atlas-mode" type="button" aria-pressed="false" data-view-mode="runtime">Runtime/Security</button>
+        <button class="atlas-mode" type="button" aria-pressed="false" data-view-mode="oss">OSS Requirements</button>
+        <button class="atlas-mode" type="button" aria-pressed="false" data-view-mode="ci">CI and Adoption</button>
         <button class="atlas-mode" type="button" aria-pressed="false" data-view-mode="outputs">Outputs</button>
       </div>
       <div class="atlas-status" aria-live="polite">Showing the full platform architecture atlas.</div>
@@ -2101,7 +2240,7 @@
         <div class="evalops-card"><strong>Eval Case Execution Contract</strong><span>Each case declares setup, input, fixtures, expected tool calls, expected state changes, forbidden actions, deterministic oracle command, judge rubric id, negative controls, adversarial mutations, teardown, and receipt schema.</span></div>
         <div class="evalops-card"><strong>Adversarial Case Families</strong><span>Prompt injection, malicious source, tool misuse, permission escalation, memory poisoning, fixture sabotage, long-context burying, stale state, rollback abuse, and handoff confusion.</span></div>
         <div class="evalops-card"><strong>Code-Based Evals</strong><span>Prefer deterministic checks for format, tool use, permissions, citations, state changes, and policy invariants.</span></div>
-        <div class="evalops-card"><strong>Tessl Private Workspace Check</strong><span>Run internal tests, rubrics, and release gates first; after they pass, generate Tessl scenarios, stage controlled inputs in a private workspace, and ingest Tessl receipts as independent post-gate evidence.</span></div>
+        <div class="evalops-card"><strong>Tessl Private Workspace Check</strong><span>Tessl is not SDK core. Run internal tests, rubric scoring, and sandbox/dev-eval external checks first; after they pass, generate Tessl scenarios, stage controlled inputs in a private workspace, and ingest Tessl receipts as third-party confirmation.</span></div>
         <div class="evalops-card"><strong>Tessl Workspace Identity</strong><span>Check or relink deterministic Tessl project identity before scenario generation; stage only controlled `/tmp` payloads, include `tessl.json`, archive prior evidence, and never point Tessl at live repo source.</span></div>
         <div class="evalops-card"><strong>Tessl Setup Blockers</strong><span>Classify missing workspace token, no project link, unavailable local runner, network denial, and auth drift separately; do not convert setup blockers into eval failures.</span></div>
         <div class="evalops-card"><strong>Tessl Evidence Boundary</strong><span>Internal rubrics remain source-of-truth; Tessl receives minimized staged payloads only after internal pass, disagreement triggers blocked/review rather than automatic failure, and imported receipts map to package digest, dataset version, and release decision.</span></div>
@@ -2126,7 +2265,7 @@
       </div>
     </section>
 
-    <section class="pipeline" aria-label="Skills SDK pipeline from source to emitted artifacts" data-collapsible data-lanes="package runtime security testing evalops knowledge plugin governance" data-views="outputs sdk">
+    <section class="pipeline" aria-label="Skills SDK pipeline from source to emitted artifacts" data-collapsible data-lanes="package runtime security testing evalops knowledge plugin governance oss ci" data-views="outputs sdk oss ci">
       <div class="pipeline-overview">
         <div>
           <h2>Compiled Package Pipeline</h2>
@@ -2145,7 +2284,7 @@
             <div class="tile"><strong>README.md</strong><span>Required: human-facing overview, purpose, installation, usage, examples, support boundaries, lifecycle status, and maintainer ownership.</span></div>
             <div class="tile"><strong>scripts/</strong><span>Optional: executable code for deterministic mechanics, checks, transforms, setup, and repeatable workflows.</span></div>
             <div class="tile"><strong>references/</strong><span>Optional: documentation, contracts, context, guardrails, eval specs, runbooks, and supporting evidence.</span></div>
-            <div class="tile"><strong>knowledge/</strong><span>Optional but strategic: formal knowledge acquisition, source trust, canon, assumptions, decisions, freshness, and distillation inputs.</span></div>
+            <div class="tile"><strong>knowledge/</strong><span>Progressive-disclosure trigger: optional for tiny skills, required when important instructions are pushed into references, context docs, runbooks, source material, or long-lived domain knowledge.</span></div>
             <div class="tile"><strong>knowledge/sources.md</strong><span>Raw source inventory with owner, type, provenance, trust level, license, fetched-at, reviewed-at, expires-at, and access boundary.</span></div>
             <div class="tile"><strong>knowledge/canon.md</strong><span>Accepted domain truth, distilled rules, stable examples, SME-reviewed guidance, and context that may be promoted into skill runtime use.</span></div>
             <div class="tile"><strong>knowledge/non-canon.md</strong><span>Rejected, deprecated, disputed, low-confidence, or out-of-scope material with rationale and recheck triggers.</span></div>
@@ -2192,7 +2331,7 @@
             <div class="tile"><strong>sdk/commands.yaml</strong><span>Public CLI/API command contract, flags, JSON output schemas, exit codes, examples, and diagnostics.</span></div>
             <div class="tile"><strong>sdk/readiness.yaml</strong><span>Owner, support channel, SLOs, alert thresholds, rollback drill, recovery target, and operational runbook.</span></div>
             <div class="tile"><strong>sdk/migrations.yaml</strong><span>Minor, Moderate, and Major change classification, compatibility rules, migration docs, affected installs, and rollback or block behavior.</span></div>
-            <div class="tile"><strong>sdk/tessl.yaml</strong><span>Optional private-workspace Tessl contract: post-internal-gate scenario generation, staged payload path, local runner identity, evidence import, and network/auth assumptions.</span></div>
+            <div class="tile"><strong>sdk/tessl.yaml</strong><span>Optional third-party confirmation contract outside SDK core: post-internal-gate scenario generation, staged payload path, local runner identity, evidence import, and network/auth assumptions.</span></div>
             <div class="tile"><strong>.codex-plugin/plugin.json</strong><span>Optional host package manifest for skills, MCP servers, apps, hooks, assets, and install metadata.</span></div>
           </div>
           <div class="arrow" aria-hidden="true">></div>
@@ -2214,7 +2353,7 @@
             <div class="tile"><strong>Compatibility Loader</strong><span>Maps OpenAI, AgentSkills, Codex, and registry contract shapes.</span></div>
             <div class="tile"><strong>Plugin Loader</strong><span>Resolves manifest paths, marketplace entries, bundled MCP maps, app mappings, hooks, assets, and installed-copy metadata.</span></div>
             <div class="tile"><strong>EvalOps Loader</strong><span>Normalizes trace schemas, datasets, judge definitions, annotation rubrics, experiment metadata, and production sampling plans.</span></div>
-            <div class="tile"><strong>Tessl Loader</strong><span>After internal rubrics pass, converts canonical eval claims and JSONL datasets into private-workspace Tessl scenarios, records runner availability, and maps results back to SDK evidence.</span></div>
+            <div class="tile"><strong>External Eval Loader</strong><span>After internal rubrics pass, exports minimized scenario packs to sandbox/dev-eval systems and, optionally, Tessl for third-party confirmation; maps external results back to SDK evidence.</span></div>
             <div class="tile"><strong>Agent Contract Loader</strong><span>Normalizes agent roles, autonomy tiers, delegation policies, handoff schemas, memory contracts, and event protocols.</span></div>
           </div>
           <div class="arrow" aria-hidden="true">></div>
@@ -2404,6 +2543,8 @@
             <div class="domain"><strong>Syntopical Comparison</strong><span>cross-source vocabulary alignment, agreements, contradictions, missing perspectives, unified model decisions, and source-weighting evidence.</span></div>
             <div class="domain"><strong>Knowledge Maintenance</strong><span>freshness cadence, owner review, stale-source behavior, contradiction resolution, and forced re-eval on knowledge changes.</span></div>
             <div class="domain"><strong>Schema Contracts</strong><span>JSON Schema, YAML/TOML validation, jq-safe JSON transforms, lockfile checks, emitted artifact compatibility.</span></div>
+            <div class="domain" data-lanes="oss package"><strong>OSS Adapter Boundary</strong><span>SDK core defines interfaces and receipt schemas; Sigstore, 1Password, BetterLeaks, OPA, ORAS, Syft, and sandbox tools plug in as replaceable adapters.</span></div>
+            <div class="domain" data-lanes="ci package testing"><strong>Fast Local Gate</strong><span>Prek runs the cheapest deterministic checks first: formatting, docs lint, schema validation, secret scan, import hygiene, and changed-file smoke checks.</span></div>
             <div class="domain"><strong>Security Review</strong><span>threat model, toxic flows, prompt injection, provenance, signing policy.</span></div>
             <div class="domain"><strong>Policy Enforcement Gateway</strong><span>Every tool call, filesystem access, network egress, MCP invocation, secret request, and state write checks active lease, sandbox profile, trust decision, and revocation feed; missing policy means deny.</span></div>
             <div class="domain"><strong>Instruction Boundary Model</strong><span>Fetched pages, tool outputs, user files, memory, and MCP results are data, never authority; taint labels survive summarization and block promotion into privileged instructions.</span></div>
@@ -2416,14 +2557,16 @@
             <div class="domain"><strong>Language Engineering</strong><span>syntax, semantics, constraints, transformations, generators, interpreters, editor services.</span></div>
             <div class="domain"><strong>Testing Strategy</strong><span>mission, quality criteria, risk models, exploratory charters, oracles, coverage, bug evidence.</span></div>
             <div class="domain"><strong>Eval Operations</strong><span>traces, spans, datasets, experiments, annotations, judges, sampling, production monitoring, and full-package quality checks beyond SKILL.md.</span></div>
+            <div class="domain" data-lanes="ci testing evalops"><strong>CI Gate Split</strong><span>CircleCI owns build, test, package, docs, compatibility, and eval lanes; GitHub Actions owns GitHub-native security signals and branch-protection checks.</span></div>
             <div class="domain"><strong>JSONL Dataset Validation</strong><span>base eval case schema, source digest, splits, oracle type, risk tags, expected behavior, and portable fixture compatibility.</span></div>
             <div class="domain"><strong>Eval Execution Contract</strong><span>setup, fixtures, expected tool calls, expected state changes, forbidden actions, oracle commands, rubric ids, negative controls, mutations, teardown, and receipt schema.</span></div>
-            <div class="domain"><strong>Tessl Private Check</strong><span>post-internal-gate scenario generation, private workspace staging, local runner availability, result ingestion, and evidence mapping.</span></div>
-            <div class="domain"><strong>Tessl Evidence Boundary</strong><span>minimized export, private workspace policy, internal-rubric source-of-truth, disagreement review state, imported receipt mapping, and release-decision impact.</span></div>
+            <div class="domain"><strong>Internal Eval Suite</strong><span>internal tests, rubric scoring, sandbox A/B comparison, context quality checks, adversarial cases, and release-gate evidence remain the SDK source of truth.</span></div>
+            <div class="domain"><strong>External Confirmation Boundary</strong><span>dev/eval sandbox checks and Tessl run only after internal pass; disagreement triggers review, not automatic release, and imported receipts map to package digest, dataset version, and decision impact.</span></div>
             <div class="domain"><strong>Plugin Packaging</strong><span>manifest, marketplace, component paths, install surface, assets, cache semantics.</span></div>
             <div class="domain"><strong>Permissions and RBAC</strong><span>roles, fine-grained access, resource inheritance, least privilege.</span></div>
             <div class="domain"><strong>RBAC Conflict Matrix</strong><span>Deny self-grant, reviewer-of-own-change, publisher-as-security-reviewer, cross-tenant connector use, stale groups, break-glass without expiry, and inherited grants wider than selectors.</span></div>
             <div class="domain"><strong>Secret Taint Barrier</strong><span>Secrets are scoped handles, not ambient env; taint tracks through prompts, tool args, logs, state, and egress, with rotation on suspected exposure.</span></div>
+            <div class="domain" data-lanes="oss security runtime"><strong>1Password Secrets Adapter</strong><span>Use 1Password Environments, CLI, service accounts, Connect, or cloud sync to inject scoped secrets without plaintext `.env` files or raw env dumps.</span></div>
             <div class="domain"><strong>Agent Principal Policy</strong><span>agent identity, human sponsor, runtime identity, host/workspace/session/run binding, loaded package digest, autonomy class, delegation depth, and revocation status.</span></div>
             <div class="domain"><strong>Authority Lease</strong><span>issuer, holder, principal, action, resource, data class, scope, expiry, renewal, revocation, fail-closed transition checks.</span></div>
             <div class="domain"><strong>Autonomy Gates</strong><span>observe, draft, execute-with-approval, bounded autonomous, privileged autonomous; transition, downgrade, expiry, tools, spend, data, and escalation.</span></div>
@@ -2433,7 +2576,8 @@
             <div class="domain"><strong>Evaluator Calibration</strong><span>ground truth, train/dev/test, TPR/TNR, inter-annotator agreement, statistical correction.</span></div>
             <div class="domain"><strong>Evaluative Evidence</strong><span>ethics, equity, representativeness, causal claims, theory of change, evidence quality.</span></div>
             <div class="domain"><strong>Runtime</strong><span>execution targets, macOS/native sandbox, isolation, command-handle proof.</span></div>
-            <div class="domain"><strong>Native Sandbox Exec</strong><span>macOS sandbox profiles, command allowlists, env allowlists, network policy, filesystem receipts.</span></div>
+            <div class="domain" data-lanes="ci security testing"><strong>Independent Review Agent</strong><span>CodeRabbit pre-push or PR review and a separate code review agent inspect changes; the reviewing agent should not be the same agent that authored the implementation.</span></div>
+            <div class="domain"><strong>Native Sandbox Exec</strong><span>macOS sandbox profiles, command allowlists, env allowlists, network policy, filesystem receipts, external-install quarantine, and eval A/B isolation.</span></div>
             <div class="domain"><strong>macOS Sandbox Escape Review</strong><span>Child-process inheritance, symlink traversal, file descriptor leakage, dynamic library loading, TCC locations, quarantine xattrs, tmpdir escape, network entitlements, and profile drift per OS version.</span></div>
             <div class="domain"><strong>Agent Behavior Evals</strong><span>delegation correctness, approval quality, refusal and escalation, handoff tests, stale-memory handling, incident replay.</span></div>
             <div class="domain"><strong>Toolchain Integrity</strong><span>pinned interpreters, uv lock verification, argv arrays, no shell eval, trusted jq filters, argv/env/cwd receipts.</span></div>
@@ -2447,6 +2591,7 @@
             <div class="domain"><strong>Decommission</strong><span>remove hooks, scheduled tasks, connector grants, cached copies, writable data, registry visibility, and active-run references.</span></div>
             <div class="domain"><strong>Operational Readiness</strong><span>owner, support channel, escalation, SLIs, error budget, page threshold, RTO/RPO, cost ceiling, eval freshness SLO, rollback drill cadence, and failure modes.</span></div>
             <div class="domain"><strong>Supply Chain Assurance</strong><span>SBOM, license scan, vulnerability scan, provenance, dependency freshness, remediation SLA.</span></div>
+            <div class="domain" data-lanes="oss security governance"><strong>OSS Supply Chain Stack</strong><span>Cosign/Sigstore for signatures, Gitsign for commits, SLSA/in-toto for provenance, Syft for SBOM, OSV/Grype/Trivy for vulnerability evidence.</span></div>
             <div class="domain"><strong>Reproducible Build and SLSA</strong><span>Source-to-artifact attestation, in-toto/SLSA provenance, reproducible hash where possible, dependency-confusion checks, maintainer/key risk, and transitive native binary review.</span></div>
             <div class="domain"><strong>Revocation Propagation</strong><span>Registry, installed cache, active runs, authority leases, connector grants, MCP servers, hooks, and state writers receive revocation within SLA; stale feed fails closed.</span></div>
             <div class="domain"><strong>Runtime Security Telemetry</strong><span>Tamper-evident events for sandbox denies, approval denials, secret access, egress attempts, MCP calls, policy mismatches, revocation hits, state quarantine, and kill-switch actions.</span></div>
@@ -2495,6 +2640,8 @@
             <div class="output"><span class="dot"></span><div><strong>Eval Suite and Docs</strong><span>Portable eval artifacts, command manifests, human-readable contract docs.</span></div></div>
             <div class="output"><span class="dot"></span><div><strong>Context Quality Report</strong><span>Reference freshness, contradiction scan, citation strength, runbook coverage, guardrail quality, dataset/schema health, and weak-context risk findings.</span></div></div>
             <div class="output"><span class="dot"></span><div><strong>Signed Package Receipt</strong><span>Digest, signer identity, trust policy, version, rollback record.</span></div></div>
+            <div class="output" data-lanes="oss security governance"><span class="dot"></span><div><strong>Sigstore Verification Bundle</strong><span>Cosign signature, certificate identity, issuer policy, Rekor transparency proof where allowed, timestamp, package digest, and offline verification material.</span></div></div>
+            <div class="output" data-lanes="oss security governance"><span class="dot"></span><div><strong>Gitsign Source Receipt</strong><span>Signed commit or tag, actor identity, OIDC issuer, source tree digest, branch, review status, and policy decision.</span></div></div>
             <div class="output"><span class="dot"></span><div><strong>Release Gate Report</strong><span>Thresholds, blocking severities, approvers, waivers, eval expiry, rollback criteria, and final decision.</span></div></div>
             <div class="output"><span class="dot"></span><div><strong>Trust Decision Report</strong><span>Allow, allow-with-review, blocked, quarantined, or rollback-required state with reason codes, next command, and affected runtime/install action.</span></div></div>
             <div class="output"><span class="dot"></span><div><strong>Install Decision Receipt</strong><span>User-facing consent preview, permission diff, connector grants, data-at-rest policy, scripts/hooks, sandbox profile, dependency changes, rollback plan, trust decision, and accepted or blocked state.</span></div></div>
@@ -2503,6 +2650,10 @@
             <div class="output"><span class="dot"></span><div><strong>Decommission Receipt</strong><span>Removed hooks, revoked connector grants, invalidated caches, writable data disposition, registry visibility change, and active-run verification.</span></div></div>
             <div class="output"><span class="dot"></span><div><strong>Operational Readiness Report</strong><span>Owner, support path, SLOs, alert thresholds, rollback drill, recovery target, and known failure modes.</span></div></div>
             <div class="output"><span class="dot"></span><div><strong>SBOM and Vulnerability Report</strong><span>Dependency inventory, license scan, vulnerability scan, provenance, freshness, and remediation SLA.</span></div></div>
+            <div class="output" data-lanes="oss security runtime"><span class="dot"></span><div><strong>Secret Broker Receipt</strong><span>1Password project or vault reference, requested secret handles, actor, audience, duration, env allowlist digest, redaction policy, and denied raw-secret exposure.</span></div></div>
+            <div class="output" data-lanes="oss security"><span class="dot"></span><div><strong>Secret Scan Report</strong><span>BetterLeaks primary result, Gitleaks or TruffleHog fallback, masked finding evidence, active-secret verification status, owner, and remediation receipt.</span></div></div>
+            <div class="output" data-lanes="ci testing governance"><span class="dot"></span><div><strong>CI Gate Receipt</strong><span>Prek result, CircleCI workflow result, GitHub security checks, CodeRabbit review state, required-check policy, waived checks, and risk-tier decision.</span></div></div>
+            <div class="output" data-lanes="ci package governance"><span class="dot"></span><div><strong>Risk Tier Decision</strong><span>Draft, Local, Scripted, Team, Privileged, or Published tier with required gates, skipped heavyweight checks, reason, owner, and next useful command.</span></div></div>
             <div class="output"><span class="dot"></span><div><strong>SDK Command Reference</strong><span>CLI/API commands, global flags, JSON schemas, exit codes, diagnostics, examples, dry-run plans, receipt paths, and troubleshooting docs.</span></div></div>
             <div class="output"><span class="dot"></span><div><strong>Diagnostics Catalog</strong><span>Stable diagnostic codes, severity, owning schema, source spans, explanations, autofix status, next commands, and executable fixture examples.</span></div></div>
             <div class="output"><span class="dot"></span><div><strong>Public API Contract</strong><span>Stable command and library surface, JSON response schemas, error taxonomy, compatibility promise, and hidden implementation responsibilities.</span></div></div>
@@ -2532,6 +2683,242 @@
         </section>
       </div>
 
+      <section class="oss-map" aria-label="Open source implementation and requirements map" data-lanes="oss package runtime security evalops plugin governance" data-views="oss runtime outputs">
+        <div class="oss-head">
+          <div>
+            <h2>OSS Implementation and Requirements Map</h2>
+            <p>These are candidate implementation adapters, not hidden SDK-core assumptions. The SDK should define stable contracts, then use OSS tools to produce verification receipts, policy decisions, scans, and release evidence.</p>
+          </div>
+          <div class="oss-note">Core rule: choose boring, inspectable OSS for deterministic mechanics; keep each tool behind an adapter so private deployments can swap public services for private, offline, or enterprise equivalents.</div>
+        </div>
+        <div class="oss-grid">
+          <div class="oss-card" data-lanes="oss security governance">
+            <strong>Package Signatures</strong>
+            <span>Default adapter: Sigstore Cosign. Sign skill packages, blobs, OCI artifacts, and release bundles by digest.</span>
+            <span><code>requires</code> signer identity, digest, trust policy, verification bundle, failure-as-blocker.</span>
+          </div>
+          <div class="oss-card" data-lanes="oss security governance">
+            <strong>Source Signing</strong>
+            <span>Default adapter: Gitsign for Git commits and release tags when keyless identity is acceptable.</span>
+            <span><code>requires</code> branch policy, signed tags, actor identity, OIDC issuer, protected review path.</span>
+          </div>
+          <div class="oss-card" data-lanes="oss security governance">
+            <strong>Transparency and Provenance</strong>
+            <span>Sigstore/Rekor, SLSA, and in-toto connect source, builder, materials, artifact digest, and release decision.</span>
+            <span><code>requires</code> public/private log choice, metadata privacy policy, offline verification path.</span>
+          </div>
+          <div class="oss-card" data-lanes="oss plugin governance">
+            <strong>Artifact Registry</strong>
+            <span>Use OCI artifacts with ORAS for portable package storage before committing to a bespoke registry.</span>
+            <span><code>requires</code> media types, manifest schema, provenance refs, install preview, rollback digest.</span>
+          </div>
+          <div class="oss-card" data-lanes="oss security runtime">
+            <strong>Secret Prevention</strong>
+            <span>Default adapter: 1Password Environments beta, plus 1Password CLI, service accounts, Connect, or cloud sync for automation.</span>
+            <span><code>requires</code> scoped handles, runtime injection, no plaintext env file, redacted logs, expiry.</span>
+          </div>
+          <div class="oss-card" data-lanes="oss security">
+            <strong>Secret Detection</strong>
+            <span>Use BetterLeaks as the preferred scan candidate; keep Gitleaks and TruffleHog as fallback or deep-verification adapters.</span>
+            <span><code>requires</code> masked evidence, active-secret policy, owner routing, rotation and remediation receipt.</span>
+          </div>
+          <div class="oss-card" data-lanes="oss security runtime">
+            <strong>Policy As Code</strong>
+            <span>Default adapter: OPA/Rego for install, runtime, RBAC, ABAC, connector, egress, and authority-lease decisions. Cedar stays a future policy adapter candidate.</span>
+            <span><code>requires</code> deny-by-default, decision logs, test fixtures, policy version, revocation feed.</span>
+          </div>
+          <div class="oss-card" data-lanes="oss security governance">
+            <strong>SBOM and Vulnerabilities</strong>
+            <span>Syft for SBOM, SPDX or CycloneDX for format, OSV-Scanner, Grype, or Trivy for vulnerability gates.</span>
+            <span><code>requires</code> license policy, severity thresholds, dependency freshness, remediation SLA.</span>
+          </div>
+          <div class="oss-card" data-lanes="oss runtime testing">
+            <strong>Sandbox Execution</strong>
+            <span>Start with a macOS sandbox-exec adapter; keep the runtime contract portable for Linux/container adapters later.</span>
+            <span><code>requires</code> filesystem, network, env, child process, native binary, and denial receipts.</span>
+          </div>
+          <div class="oss-card" data-lanes="oss testing evalops">
+            <strong>Eval and Test Harness</strong>
+            <span>Use JSONL datasets, pytest/uv Python modules, deterministic sh wrappers, jq transforms, internal rubrics, sandbox/dev-eval checks, and Tessl only as third-party confirmation.</span>
+            <span><code>requires</code> split locks, rubric versions, context evals, replay bundle, judge calibration.</span>
+          </div>
+          <div class="oss-card" data-lanes="oss package governance">
+            <strong>Version Control</strong>
+            <span>Git remains source control; semantic skill versions, signed tags, changelog, migration notes, and package digest bind releases.</span>
+            <span><code>requires</code> Minor/Moderate/Major classification, compatibility matrix, rollback record.</span>
+          </div>
+          <div class="oss-card" data-lanes="oss package runtime security">
+            <strong>Toolchain Requirements</strong>
+            <span>Markdown, YAML, JSON, jq, uv, Python modules, and thin shell wrappers are the default authoring and scripting substrate.</span>
+            <span><code>requires</code> lockfiles, parser-first transforms, no shell eval, argv/env/cwd receipts.</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="ci-map" aria-label="CI hooks review and adoption gates" data-lanes="ci package runtime security testing evalops governance" data-views="ci runtime outputs">
+        <div class="ci-head">
+          <div>
+            <h2>CI, Hooks, Review, and Adoption Gates</h2>
+            <p>The SDK should feel fast for ordinary skill authoring and strict only when risk justifies it. Local hooks, CI, security checks, and review agents are staged so authors get the next useful action instead of platform ceremony.</p>
+          </div>
+          <div class="ci-note">Adoption rule: security scales with risk. A draft skill should not pay the cost of a published privileged package, but the moment a skill asks for scripts, secrets, runtime access, or publication, the gates tighten automatically.</div>
+        </div>
+        <div class="ci-grid">
+          <div class="ci-card" data-lanes="ci package testing">
+            <strong>Prek Local Hooks</strong>
+            <span>Use Prek as the default hook runner for fast, deterministic pre-commit and optional pre-push checks.</span>
+            <span><code>gates</code> format, docs lint, schema check, secret scan, changed-file validation, lightweight smoke.</span>
+          </div>
+          <div class="ci-card" data-lanes="ci testing evalops">
+            <strong>CircleCI Main CI</strong>
+            <span>CircleCI owns heavy deterministic workflows: build, unit/integration tests, package proof, docs, compatibility, eval runs, and artifacts.</span>
+            <span><code>requires</code> restricted contexts, context policies, 1Password/secret broker integration, artifact receipts.</span>
+          </div>
+          <div class="ci-card" data-lanes="ci security governance">
+            <strong>GitHub Actions Security</strong>
+            <span>GitHub Actions owns GitHub-native trust: CodeQL, Dependabot, secret scanning, OIDC, branch protection, and required checks.</span>
+            <span><code>requires</code> least-privilege permissions, protected branches, no broad write tokens, check policy by tier.</span>
+          </div>
+          <div class="ci-card" data-lanes="ci testing governance">
+            <strong>CodeRabbit Review</strong>
+            <span>Use CodeRabbit CLI for pre-push or agent-readable review and PR review for independent, context-aware feedback.</span>
+            <span><code>requires</code> non-author reviewer lane, JSON findings where useful, false-positive triage, no blind blocking on low-risk diffs.</span>
+          </div>
+          <div class="ci-card" data-lanes="ci package governance">
+            <strong>Tier 0 Draft Skill</strong>
+            <span>Goal: preserve usefulness while shaping early ideas. Run README/SKILL.md presence, schema parse, and Prek basics only.</span>
+            <span><code>skip</code> signing, SBOM, full evals, sandbox receipts, release review.</span>
+          </div>
+          <div class="ci-card" data-lanes="ci package testing">
+            <strong>Tier 1 Local Utility</strong>
+            <span>Goal: safe personal productivity. Add lint, validate, minimal eval, references quality check, and changed-file smoke.</span>
+            <span><code>skip</code> package signature unless shared, registry, full provenance.</span>
+          </div>
+          <div class="ci-card" data-lanes="ci runtime security testing">
+            <strong>Tier 2 Scripted Skill</strong>
+            <span>Goal: scripts run safely. Add script validation, secret scan, sandbox dry run, env allowlist, parser-first review, and eval dataset.</span>
+            <span><code>block</code> shell eval, raw env dumps, unreviewed regex on critical paths.</span>
+          </div>
+          <div class="ci-card" data-lanes="ci security governance testing">
+            <strong>Tier 3 Shared Team Skill</strong>
+            <span>Goal: team reuse. Add signed package, provenance, SBOM, CodeRabbit/agent review, CircleCI checks, and owner approval.</span>
+            <span><code>requires</code> changelog, compatibility check, rollback path, support owner.</span>
+          </div>
+          <div class="ci-card" data-lanes="ci runtime security governance">
+            <strong>Tier 4 Privileged Runtime</strong>
+            <span>Goal: constrained power. Add 1Password secret broker, policy-as-code, sandbox receipt, security review, full eval suite, and reattestation.</span>
+            <span><code>block</code> missing authority lease, stale policy, weak secret tainting, unapproved egress.</span>
+          </div>
+          <div class="ci-card" data-lanes="ci security governance plugin">
+            <strong>Tier 5 Published Package</strong>
+            <span>Goal: supply-chain trust. Add Cosign, Gitsign, SLSA/in-toto, registry metadata, install preview, decommission plan, and release waiver policy.</span>
+            <span><code>requires</code> signature, provenance, SBOM, vulnerability gate, rollback, archive disposition.</span>
+          </div>
+          <div class="ci-card" data-lanes="ci governance package">
+            <strong>Golden Path CLI</strong>
+            <span>Expose simple commands while the SDK picks gates by risk tier: init, check, eval, package, publish.</span>
+            <span><code>must show</code> current tier, next useful command, blockers, evidence, and skipped heavyweight gates.</span>
+          </div>
+          <div class="ci-card" data-lanes="ci governance security">
+            <strong>Overreach Control</strong>
+            <span>Do not block adoption with maximum ceremony by default. Heavy gates activate on sharing, scripts, secrets, runtime access, registry, or publication.</span>
+            <span><code>requires</code> waiver expiry, risk owner, cost/latency budget, and escalation path.</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="ci-map" aria-label="MVP feature and scope tightening decisions" data-lanes="package runtime security testing evalops knowledge governance ci oss" data-views="ci sdk runtime">
+        <div class="ci-head">
+          <div>
+            <h2>MVP and Tightening Decisions</h2>
+            <p>This is the adoption guardrail for the whole map. The SDK can contain deep security, eval, and governance machinery, but the default author path stays small and risk-scaled.</p>
+          </div>
+          <div class="ci-note">Decision rule: build the smallest useful SDK first, then activate heavier capabilities only when a skill introduces sharing, scripts, secrets, runtime access, external installs, registry distribution, or publication.</div>
+        </div>
+        <div class="ci-grid">
+          <div class="ci-card" data-lanes="package governance">
+            <strong>Smallest Useful SDK</strong>
+            <span>V1 should be templates, schema validation, Skill IR, risk-tier classifier, `skill check`, internal eval dataset, package manifest, signing interface, Prek hooks, CI policy map, install preview, and core receipts.</span>
+            <span><code>surface</code> init, check, eval, package, verify.</span>
+          </div>
+          <div class="ci-card" data-lanes="runtime security">
+            <strong>Safe To Run Question</strong>
+            <span>A skill can run only when schema is valid, permissions are declared, secrets are scoped, sandbox policy is known, source/context trust is acceptable, and runtime blockers are resolved.</span>
+            <span><code>output</code> allow, allow-with-review, blocked, quarantined, rollback-required.</span>
+          </div>
+          <div class="ci-card" data-lanes="package security governance">
+            <strong>Optional Until Risk Rises</strong>
+            <span>Signing, SBOM, full evals, Tessl, deep security review, provenance, and release governance are not mandatory for every draft; they trigger by risk tier.</span>
+            <span><code>protects</code> adoption and early usefulness.</span>
+          </div>
+          <div class="ci-card" data-lanes="package testing security">
+            <strong>Skill IR Purpose</strong>
+            <span>Skill IR exists to power validation, security review, emitters, eval generation, docs, compatibility, and install previews. If it does not serve those jobs, it is ceremony.</span>
+            <span><code>block</code> IR fields with no validator, emitter, eval, or receipt consumer.</span>
+          </div>
+          <div class="ci-card" data-lanes="governance runtime testing">
+            <strong>Failure Model</strong>
+            <span>Missing evidence, unsafe runtime, stale context, weak eval, unsigned package, leaked secret, poisoned state, broken migration, and external setup blockers each need a clear blocked state and next command.</span>
+            <span><code>never</code> convert unknown evidence into pass.</span>
+          </div>
+          <div class="ci-card" data-lanes="governance ci">
+            <strong>Governance Is Not A Separate SDK</strong>
+            <span>Keep governance as gates, receipts, ownership, waivers, release decisions, and audit trails. Do not create a heavy Governance SDK product surface in v1.</span>
+            <span><code>defer</code> broad governance platform features.</span>
+          </div>
+          <div class="ci-card" data-lanes="oss security runtime">
+            <strong>Policy Choice</strong>
+            <span>Pick OPA/Rego as the default policy adapter because it is broad, mature, and fits deny-by-default runtime/install decisions. Keep Cedar as a later adapter if authorization modeling demands it.</span>
+            <span><code>avoid</code> exposing policy language complexity to normal skill authors.</span>
+          </div>
+          <div class="ci-card" data-lanes="plugin package governance">
+            <strong>Registry MVP</strong>
+            <span>Do not build a full marketplace early. Start with local package, install preview, digest tracking, ORAS/OCI feasibility, and signed package verification.</span>
+            <span><code>defer</code> marketplace, ranking, discovery UX, and public publishing workflows.</span>
+          </div>
+          <div class="ci-card" data-lanes="testing evalops">
+            <strong>Eval Confirmation Ladder</strong>
+            <span>Internal tests and rubrics are source-of-truth. Then run sandbox/dev-eval external checks for independent scoring. Tessl is third-party confirmation after internal pass.</span>
+            <span><code>sequence</code> internal -> sandbox/dev-eval -> Tessl.</span>
+          </div>
+          <div class="ci-card" data-lanes="knowledge package testing">
+            <strong>Knowledge Trigger Rule</strong>
+            <span>Knowledge engineering is not for every tiny skill. It activates when the 360-character skill surface pushes important instructions, context, runbooks, source truth, or examples into references.</span>
+            <span><code>check</code> freshness, accuracy, contradictions, source trust, and task usefulness.</span>
+          </div>
+          <div class="ci-card" data-lanes="runtime security testing">
+            <strong>Sandbox Where It Matters</strong>
+            <span>Sandbox external skill installs before trust, sandbox scripts/runtime execution, and use Sandbox A/B lanes to compare before/after skill behavior with LLM-as-judge and deterministic oracles.</span>
+            <span><code>not needed</code> for pure static authoring or docs-only draft checks.</span>
+          </div>
+          <div class="ci-card" data-lanes="package governance outputs">
+            <strong>Start With Five Receipts</strong>
+            <span>Do not implement every receipt upfront. Start with check, package, signature, eval, and runtime receipts; add registry, decommission, and compliance receipts when tiers require them.</span>
+            <span><code>keeps</code> evidence useful rather than noisy.</span>
+          </div>
+          <div class="ci-card" data-lanes="package runtime oss">
+            <strong>Adapter Detection</strong>
+            <span>The SDK should detect Prek, Cosign, Gitsign, 1Password, BetterLeaks, OPA, ORAS, Syft, scanners, and sandbox support, then degrade gracefully with clear install/setup guidance.</span>
+            <span><code>output</code> available, missing, misconfigured, blocked, or optional.</span>
+          </div>
+          <div class="ci-card" data-lanes="package governance">
+            <strong>Compatibility Checker</strong>
+            <span>Map Minor, Moderate, and Major changes to migration, eval, signing, docs, and release requirements so authors know why a change became expensive.</span>
+            <span><code>prevents</code> accidental breaking skill updates.</span>
+          </div>
+          <div class="ci-card" data-lanes="security runtime evalops">
+            <strong>Redaction And Taint Rules</strong>
+            <span>Prompts, logs, traces, eval outputs, memory writes, CodeRabbit findings, and review-agent artifacts must preserve secret/data taint and redact before persistence.</span>
+            <span><code>block</code> raw env dumps and secret-derived leakage.</span>
+          </div>
+          <div class="ci-card" data-lanes="governance ci package">
+            <strong>Anti-Bloat Rule</strong>
+            <span>If a feature does not improve author speed, safety proof, runtime trust, eval quality, install confidence, or release decisions, keep it out of v1.</span>
+            <span><code>question</code> what user or agent decision this feature improves.</span>
+          </div>
+        </div>
+      </section>
+
       <section class="assurance" aria-label="Skills as software package hardening layer" data-views="runtime outputs">
         <div class="assurance-head">
           <div>
@@ -2542,12 +2929,14 @@
         </div>
         <div class="risk-grid">
           <div class="risk"><strong>Version Control</strong><span>Every source, generated artifact, eval pack, and release decision is tied to a version, digest, and changelog.</span></div>
+          <div class="risk" data-lanes="oss security governance"><strong>OSS Dependency Assumption</strong><span>Sigstore, Cosign, Gitsign, BetterLeaks, 1Password, OPA, ORAS, Syft, and scanners are adapters with pinned versions, receipts, and fallback behavior, not unreviewed ambient tools.</span></div>
           <div class="risk"><strong>Surface Area Creep</strong><span>New commands, flags, schema fields, and UI states can make the SDK feel powerful but expensive to understand; doctrine gates require a clear user or agent payoff.</span></div>
           <div class="risk"><strong>Progressive Disclosure Failure</strong><span>Dumping every diagnostic, trace, permission, and receipt at once increases cognitive load; default surfaces should show the next useful action and reveal depth on demand.</span></div>
           <div class="risk"><strong>Token Waste</strong><span>Agents can burn context on duplicated docs, stale references, verbose receipts, and whole-package reads; compact summaries, source digests, and retrieval budgets are enforced.</span></div>
           <div class="risk"><strong>AX Breakdown</strong><span>Humans and agents lose trust when authority, state, evidence, next action, or handoff responsibility is unclear.</span></div>
           <div class="risk"><strong>Unprofessional Output</strong><span>Passing evals is not enough if artifacts still need cleanup; reports, README files, receipts, generated packages, and docs must be ready to use.</span></div>
           <div class="risk"><strong>Cryptographic Signature</strong><span>Packages need signer identity, digest verification, provenance, and signature failure as an install blocker.</span></div>
+          <div class="risk" data-lanes="oss security governance"><strong>Transparency Privacy Leak</strong><span>Public transparency logs can expose metadata about private skills; the SDK needs public, private, keyful/KMS, and offline verification modes.</span></div>
           <div class="risk"><strong>Key Governance</strong><span>Signing requires key identity, issuer policy, timestamping, rotation, revocation lists, and offline verification behavior.</span></div>
           <div class="risk"><strong>Guardrails and Runbooks</strong><span>References include operational runbooks, escalation paths, data handling, and prompt-injection rules.</span></div>
           <div class="risk"><strong>Context Corpus</strong><span>`references/context*.md` is useful steering, but must be freshness-checked, source-labeled, and contradiction-scanned.</span></div>
@@ -2582,6 +2971,7 @@
           <div class="risk"><strong>Separation-of-Duty Failure</strong><span>Self-approval, stale group membership, cross-tenant connector use, and break-glass without expiry can turn RBAC into ceremony.</span></div>
           <div class="risk"><strong>Agent Authority Expansion</strong><span>Agents and subagents cannot grant themselves new tools, memory writes, secrets, network, publish rights, or delegation depth.</span></div>
           <div class="risk"><strong>Secret Broker Policy</strong><span>Secrets are leased by audience, scope, actor, and duration; raw ambient env is denied and traces/memory are redacted before persistence.</span></div>
+          <div class="risk" data-lanes="oss security runtime"><strong>Secret Provider Drift</strong><span>1Password Environments is an adapter choice; beta behavior, vault permissions, service-account scope, local mounts, and CI sync need explicit receipts and fallback policy.</span></div>
           <div class="risk"><strong>Secret Taint Leakage</strong><span>Secret handles, derived values, logs, prompts, tool args, state, and traces need taint tracking or redaction can miss indirect exposure.</span></div>
           <div class="risk"><strong>Runaway Delegation</strong><span>Contain high-cost loops, repeated approval failures, unsafe tool attempts, hallucinated authority, and unresolved child-agent work.</span></div>
           <div class="risk"><strong>Floating Invocation Identity</strong><span>Every run binds agent id, host/workspace, auth session, thread/run id, model/runtime, connector account, and package digest.</span></div>
@@ -2638,6 +3028,8 @@
       <span><i class="key plugin-key"></i>plugin distribution</span>
       <span><i class="key evalops-key"></i>AI eval ops</span>
       <span><i class="key knowledge-key"></i>knowledge engineering</span>
+      <span><i class="key oss-key"></i>OSS implementation</span>
+      <span><i class="key ci-key"></i>CI and review</span>
     </div>
   </main>
   <script>
@@ -2651,6 +3043,8 @@
       knowledge: "knowledge acquisition, source trust, distillation, context engineering, and freshness",
       plugin: "Codex plugin host integration, MCP servers, apps, hooks, and marketplace packaging",
       governance: "governance, model integrity, release evidence, audit, and lifecycle decisions",
+      oss: "open source implementation adapters, requirements, receipts, and fallback policies",
+      ci: "Prek hooks, CircleCI, GitHub security, CodeRabbit review, branch protection, and risk-tiered adoption gates",
       agent: "agent identity, autonomy, delegation, approvals, handoffs, memory, incidents, and receipts"
     };
 
@@ -2658,7 +3052,7 @@
     const modes = Array.from(document.querySelectorAll(".atlas-mode"));
     const status = document.querySelector(".atlas-status");
     const laneSections = Array.from(document.querySelectorAll("[data-lanes]"));
-    const laneItems = Array.from(document.querySelectorAll(".doctrine-card, .agent-card, .life-step, .complexity-card, .model-card, .knowledge-card, .language-card, .data-card, .testing-card, .plugin-card, .evalops-card, .tile, .domain, .output, .risk, .band-item, .matrix-grid span, .matrix-grid strong"));
+    const laneItems = Array.from(document.querySelectorAll(".doctrine-card, .agent-card, .life-step, .complexity-card, .model-card, .knowledge-card, .language-card, .data-card, .testing-card, .plugin-card, .evalops-card, .oss-card, .ci-card, .tile, .domain, .output, .risk, .band-item, .matrix-grid span, .matrix-grid strong"));
     let activeLane = "all";
     let activeMode = "all";
 
@@ -2670,6 +3064,8 @@
       knowledge: "Knowledge",
       evalops: "Eval Ops",
       runtime: "Runtime/Security",
+      oss: "OSS Requirements",
+      ci: "CI and Adoption",
       outputs: "Outputs"
     };
 
