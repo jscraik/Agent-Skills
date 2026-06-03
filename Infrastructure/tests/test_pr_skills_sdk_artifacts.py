@@ -1398,6 +1398,11 @@ class TestUserLifecycleOnePageHtml(unittest.TestCase):
     ]
 
     def setUp(self):
+        self.assertTrue(
+            USER_LIFECYCLE_HTML_PATH.exists(),
+            f"User lifecycle HTML artifact not found at {USER_LIFECYCLE_HTML_PATH}. "
+            "All subsequent test failures are caused by this missing artifact."
+        )
         self._content = USER_LIFECYCLE_HTML_PATH.read_text(encoding="utf-8")
         self._doc = _parse_html(USER_LIFECYCLE_HTML_PATH)
 
