@@ -1136,7 +1136,12 @@ class TestMarkdownGapMatrix(unittest.TestCase):
         # Find the gap matrix section
         matrix_start = self._content.find("## Domain-by-Domain Gap Matrix")
         self.assertGreater(matrix_start, -1)
-        matrix_section = self._content[matrix_start:]
+        # Find the next heading after matrix_start to bound the section
+        next_heading = self._content.find("\n## ", matrix_start + 1)
+        if next_heading == -1:
+            matrix_section = self._content[matrix_start:]
+        else:
+            matrix_section = self._content[matrix_start:next_heading]
         # Data rows start with | (non-separator, non-header)
         data_rows = re.findall(
             r"^\| [A-Z][^-].*\|$", matrix_section, re.MULTILINE
