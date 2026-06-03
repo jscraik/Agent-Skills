@@ -2,6 +2,7 @@
 Structural and content validation tests for PR artifacts:
 
   - artifacts/recommended-skills-sdk-pipeline.html
+  - artifacts/skills-sdk-user-lifecycle-one-page.html
   - artifacts/reports/skills-sdk-gap-analysis-current-code-tree-2026-06-03.md
 
 Covers:
@@ -10,7 +11,7 @@ Covers:
     - Title and document language
     - All expected lane-filter tabs and view-mode buttons
     - Default aria-pressed states for controls
-    - All 15 expected sections with data-lanes attribute
+    - All expected sections with data-lanes attribute
     - CSS custom property declarations in :root
     - JavaScript section with all required function and export names
     - Decision matrix column headers and data row count
@@ -43,6 +44,9 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 HTML_PATH = REPO_ROOT / "artifacts" / "recommended-skills-sdk-pipeline.html"
+USER_LIFECYCLE_HTML_PATH = (
+    REPO_ROOT / "artifacts" / "skills-sdk-user-lifecycle-one-page.html"
+)
 MD_PATH = (
     REPO_ROOT
     / "artifacts"
@@ -319,6 +323,7 @@ class TestHtmlSections(unittest.TestCase):
 
     EXPECTED_SECTION_LABELS = {
         "AX product doctrine",
+        "Author golden path and skill check surface",
         "Agent execution and control plane",
         "Full skill lifecycle",
         "Release decision matrix",
@@ -1339,6 +1344,98 @@ class TestHtmlLaneModeConsistency(unittest.TestCase):
                         valid_views,
                         f"Section '{label}' declares unknown view '{view}'",
                     )
+
+
+class TestUserLifecycleOnePageHtml(unittest.TestCase):
+    """Validate the user-facing one-page lifecycle companion artifact."""
+
+    REQUIRED_TEXT = [
+        "Skills SDK User Lifecycle",
+        "From idea to trusted skill",
+        "skill check my-skill --json --robot",
+        "Every skill moves through eight visible states",
+        "Start with the smallest useful SDK, not the whole platform",
+        "receipt schema",
+        "skills.lock.json",
+        "quarantine path",
+        "Skill Story and Skill Use Case connect work to user value",
+        "Card = short",
+        "success guarantee",
+        "minimal guarantee",
+        "skill smell check",
+        "The SDK is a standalone CLI loaded into projects and organisations",
+        "skills-sdk.yaml",
+        "Docs explain the SDK; Skill Explorer demonstrates it",
+        "Fumadocs + Next.js + MDX",
+        "docs.yourdomain.com",
+        "skills.yourdomain.com",
+        "read-only Skill Explorer",
+        "not marketplace v1",
+        "Show the work, not just the result",
+        "Human in the loop visual surfaces",
+        "Current ask commands need a Skills SDK facade",
+        "skill refs ingest",
+        "Security should be an adapter stack plus a reviewer skill",
+        "CodeQL / Semgrep",
+        "Snyk / OSV / Grype",
+        "Users choose where a skill is installed",
+        "./.codex/skills",
+        "no silent global install",
+        "Raw sources become trusted context through an ingestion lane",
+        "source manifest",
+        "knowledge-curator skill",
+        "context receipt",
+        "Risk-scaled adoption",
+        "Receipts replace vague confidence",
+        "What stays hidden until needed",
+        "Skill Factory and Plugin Factory guide every phase",
+        "factory-router",
+        "plugin-factory",
+        "Plugin-factory surface",
+        "Default rule: skills stay skills.",
+        "A useful skill package contains more than markdown",
+        "UX plus DX becomes Agent Experience",
+    ]
+
+    def setUp(self):
+        self._content = USER_LIFECYCLE_HTML_PATH.read_text(encoding="utf-8")
+        self._doc = _parse_html(USER_LIFECYCLE_HTML_PATH)
+
+    def test_file_exists(self):
+        self.assertTrue(USER_LIFECYCLE_HTML_PATH.exists())
+
+    def test_required_user_lifecycle_text_is_present(self):
+        for expected in self.REQUIRED_TEXT:
+            with self.subTest(expected=expected):
+                self.assertIn(expected, self._content)
+
+    def test_lifecycle_has_eight_steps(self):
+        step_count = len(re.findall(r'class="step [^"]*step"', self._content))
+        self.assertEqual(step_count, 8)
+
+    def test_pipeline_links_to_user_lifecycle_artifact(self):
+        pipeline = HTML_PATH.read_text(encoding="utf-8")
+        self.assertIn("skills-sdk-user-lifecycle-one-page.html", pipeline)
+
+    def test_document_has_accessible_sections(self):
+        section_labels = [
+            element["attrs_dict"].get("aria-label")
+            for element in self._doc.elements
+            if element["tag"] == "section"
+        ]
+        self.assertIn("User command surface and skill lifecycle", section_labels)
+        self.assertIn("V1 scope discipline and deferred platform decisions", section_labels)
+        self.assertIn("Skill story and use case confirmation contract", section_labels)
+        self.assertIn("SDK distribution and organisation adoption model", section_labels)
+        self.assertIn("Developer documentation and Skill Explorer surface", section_labels)
+        self.assertIn("Human in the loop work visualisation", section_labels)
+        self.assertIn("SDK CLI facade and command orchestration", section_labels)
+        self.assertIn("Security review adapters and gates", section_labels)
+        self.assertIn("Skill install scope and placement choices", section_labels)
+        self.assertIn("Knowledge reference ingestion and curation pipeline", section_labels)
+        self.assertIn("SDK skill factory plugin and phase helpers", section_labels)
+        self.assertIn("Risk tiers receipts and progressive disclosure", section_labels)
+        self.assertIn("Outputs and doctrine", section_labels)
 
 
 class TestMarkdownNoBrokenInternalReferences(unittest.TestCase):

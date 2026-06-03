@@ -1,0 +1,1102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Skills SDK User Lifecycle</title>
+  <style>
+    :root {
+      --ink: #17202a;
+      --muted: #5b6673;
+      --line: #cbd3dc;
+      --paper: #f7f8fa;
+      --panel: #ffffff;
+      --author: #2f6f52;
+      --check: #315f7c;
+      --risk: #7a4f1f;
+      --eval: #6a5aa8;
+      --release: #8a3f63;
+      --operate: #2f6b69;
+      --plugin: #5f5576;
+      --shadow: 0 14px 34px rgba(23, 32, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      overflow-x: clip;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(247, 248, 250, 0.96)),
+        repeating-linear-gradient(90deg, rgba(23, 32, 42, 0.035) 0 1px, transparent 1px 88px),
+        repeating-linear-gradient(0deg, rgba(23, 32, 42, 0.026) 0 1px, transparent 1px 88px);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+
+    main {
+      width: min(1360px, calc(100vw - 32px));
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 22px 0 28px;
+      display: grid;
+      gap: 14px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 390px);
+      gap: 18px;
+      align-items: stretch;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 14px;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: clamp(30px, 4vw, 54px);
+      line-height: 1.02;
+      font-weight: 780;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      max-width: 900px;
+      margin-top: 9px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.45;
+    }
+
+    .mantra {
+      display: grid;
+      align-content: center;
+      gap: 8px;
+      border-left: 4px solid var(--author);
+      background: rgba(255, 255, 255, 0.72);
+      padding: 14px 0 14px 16px;
+      color: #24313c;
+    }
+
+    .mantra strong {
+      color: #2f5d42;
+      font-size: 13px;
+      text-transform: uppercase;
+    }
+
+    .mantra span {
+      font-size: 18px;
+      line-height: 1.25;
+      font-weight: 760;
+    }
+
+    .surface {
+      display: grid;
+      grid-template-columns: minmax(300px, 0.72fr) minmax(0, 1.28fr);
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    .command-card,
+    .lifecycle,
+    .risk-card,
+    .receipt-card,
+    .hidden-card,
+    .factory-card,
+    .knowledge-card,
+    .cli-card,
+    .security-card,
+    .install-card,
+    .deployment-card,
+    .hitl-card,
+    .output-card {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      border-radius: 8px;
+    }
+
+    .command-card {
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+
+    .eyebrow {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 780;
+      text-transform: uppercase;
+    }
+
+    .command-card h2,
+    .lifecycle h2 {
+      font-size: 22px;
+      line-height: 1.15;
+    }
+
+    .command-card p,
+    .lifecycle p,
+    .risk-card p,
+    .receipt-card p,
+    .hidden-card p,
+    .output-card p {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .terminal {
+      display: grid;
+      gap: 8px;
+      padding: 12px;
+      border: 1px solid #293642;
+      background: #17202a;
+      color: #f7f8fa;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 12px;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    .terminal b {
+      color: #91d5a8;
+      font-weight: 760;
+    }
+
+    .health {
+      display: grid;
+      gap: 7px;
+      padding: 12px;
+      border: 1px solid rgba(49, 95, 124, 0.28);
+      background: #f8fbfd;
+    }
+
+    .health-row {
+      display: grid;
+      grid-template-columns: 98px minmax(0, 1fr);
+      gap: 8px;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .health-row b {
+      color: #35424e;
+    }
+
+    .status-blocked {
+      color: var(--risk);
+      font-weight: 780;
+    }
+
+    .lifecycle {
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+
+    .rail {
+      display: grid;
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+      gap: 8px;
+      align-items: stretch;
+    }
+
+    .step {
+      position: relative;
+      min-height: 144px;
+      padding: 12px;
+      border: 1px solid rgba(23, 32, 42, 0.12);
+      background: #fbfcfd;
+      display: grid;
+      gap: 7px;
+      align-content: start;
+    }
+
+    .step::after {
+      content: "";
+      position: absolute;
+      top: 30px;
+      right: -8px;
+      width: 8px;
+      height: 1px;
+      background: var(--line);
+    }
+
+    .step:last-child::after {
+      display: none;
+    }
+
+    .step-index {
+      width: 28px;
+      height: 28px;
+      display: inline-grid;
+      place-items: center;
+      border: 1px solid currentColor;
+      background: #ffffff;
+      font-size: 12px;
+      font-weight: 780;
+    }
+
+    .step strong {
+      font-size: 13px;
+      line-height: 1.22;
+    }
+
+    .step span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.34;
+    }
+
+    .author-step {
+      color: var(--author);
+    }
+
+    .check-step {
+      color: var(--check);
+    }
+
+    .risk-step {
+      color: var(--risk);
+    }
+
+    .eval-step {
+      color: var(--eval);
+    }
+
+    .release-step {
+      color: var(--release);
+    }
+
+    .operate-step {
+      color: var(--operate);
+    }
+
+    .lower {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    .risk-card,
+    .receipt-card,
+    .hidden-card,
+    .factory-card,
+    .knowledge-card,
+    .cli-card,
+    .security-card,
+    .install-card,
+    .deployment-card,
+    .hitl-card,
+    .output-card {
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .risk-card h3,
+    .receipt-card h3,
+    .hidden-card h3,
+    .factory-card h3,
+    .knowledge-card h3,
+    .cli-card h3,
+    .security-card h3,
+    .install-card h3,
+    .deployment-card h3,
+    .hitl-card h3,
+    .output-card h3 {
+      font-size: 18px;
+      line-height: 1.15;
+    }
+
+    .tiers,
+    .receipts,
+    .hidden-list,
+    .factory-grid,
+    .knowledge-grid,
+    .cli-grid,
+    .security-grid,
+    .install-grid,
+    .deployment-grid,
+    .hitl-grid,
+    .outputs {
+      display: grid;
+      gap: 7px;
+    }
+
+    .tier,
+    .receipt,
+    .hidden-item,
+    .factory-skill,
+    .knowledge-item,
+    .cli-item,
+    .security-item,
+    .install-item,
+    .deployment-item,
+    .hitl-item,
+    .output {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 8px;
+      align-items: start;
+      padding: 8px;
+      border: 1px solid rgba(23, 32, 42, 0.1);
+      background: #fbfcfd;
+      font-size: 12px;
+      line-height: 1.32;
+    }
+
+    .pill {
+      display: inline-flex;
+      min-width: 62px;
+      justify-content: center;
+      border: 1px solid currentColor;
+      padding: 2px 6px;
+      color: #37424d;
+      background: #ffffff;
+      font-size: 11px;
+      font-weight: 760;
+      text-transform: uppercase;
+    }
+
+    .tier b,
+    .receipt b,
+    .hidden-item b,
+    .factory-skill b,
+    .knowledge-item b,
+    .cli-item b,
+    .security-item b,
+    .install-item b,
+    .deployment-item b,
+    .hitl-item b,
+    .output b {
+      display: block;
+      color: #27313a;
+      margin-bottom: 2px;
+    }
+
+    .tier span,
+    .receipt span,
+    .hidden-item span,
+    .factory-skill span,
+    .knowledge-item span,
+    .cli-item span,
+    .security-item span,
+    .install-item span,
+    .deployment-item span,
+    .hitl-item span,
+    .output span {
+      color: var(--muted);
+    }
+
+    .knowledge-card {
+      border-color: rgba(107, 93, 31, 0.26);
+      background: #fffef8;
+    }
+
+    .knowledge-grid {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+
+    .knowledge-item {
+      min-height: 116px;
+      align-content: start;
+      border-color: rgba(107, 93, 31, 0.18);
+      background: #ffffff;
+    }
+
+    .knowledge-item .pill {
+      color: #6b5d1f;
+    }
+
+    .cli-card {
+      border-color: rgba(49, 95, 124, 0.26);
+      background: #f8fbfd;
+    }
+
+    .security-card {
+      border-color: rgba(138, 63, 99, 0.26);
+      background: #fffafd;
+    }
+
+    .cli-grid,
+    .security-grid {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+
+    .cli-item,
+    .security-item {
+      min-height: 110px;
+      align-content: start;
+      background: #ffffff;
+    }
+
+    .cli-item {
+      border-color: rgba(49, 95, 124, 0.18);
+    }
+
+    .security-item {
+      border-color: rgba(138, 63, 99, 0.18);
+    }
+
+    .cli-item .pill {
+      color: var(--check);
+    }
+
+    .security-item .pill {
+      color: var(--release);
+    }
+
+    .install-card {
+      border-color: rgba(47, 111, 82, 0.26);
+      background: #fbfefc;
+    }
+
+    .install-grid {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+
+    .install-item {
+      min-height: 112px;
+      align-content: start;
+      border-color: rgba(47, 111, 82, 0.18);
+      background: #ffffff;
+    }
+
+    .install-item .pill {
+      color: var(--author);
+    }
+
+    .deployment-card {
+      border-color: rgba(49, 95, 124, 0.26);
+      background: #f8fbfd;
+    }
+
+    .hitl-card {
+      border-color: rgba(106, 90, 168, 0.26);
+      background: #fbfaff;
+    }
+
+    .deployment-grid,
+    .hitl-grid {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+
+    .deployment-item,
+    .hitl-item {
+      min-height: 112px;
+      align-content: start;
+      background: #ffffff;
+    }
+
+    .deployment-item {
+      border-color: rgba(49, 95, 124, 0.18);
+    }
+
+    .hitl-item {
+      border-color: rgba(106, 90, 168, 0.18);
+    }
+
+    .deployment-item .pill {
+      color: var(--check);
+    }
+
+    .hitl-item .pill {
+      color: var(--eval);
+    }
+
+    .factory {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .factory-card {
+      border-color: rgba(95, 85, 118, 0.28);
+      background: #fdfcff;
+    }
+
+    .factory-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 0.42fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .factory-head h3 {
+      color: var(--plugin);
+    }
+
+    .factory-note {
+      border-left: 4px solid var(--plugin);
+      padding: 10px 0 10px 14px;
+      background: #faf8ff;
+      color: #29313b;
+      font-size: 13px;
+      line-height: 1.38;
+    }
+
+    .factory-grid {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+
+    .factory-decision {
+      display: grid;
+      grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr) minmax(0, 1fr);
+      gap: 8px;
+      align-items: stretch;
+    }
+
+    .factory-skill {
+      min-height: 108px;
+      align-content: start;
+      border-color: rgba(95, 85, 118, 0.18);
+      background: #ffffff;
+    }
+
+    .factory-skill .pill {
+      color: var(--plugin);
+    }
+
+    .factory-route {
+      border: 1px solid rgba(95, 85, 118, 0.22);
+      background: #ffffff;
+      padding: 10px;
+      display: grid;
+      gap: 6px;
+      align-content: start;
+      font-size: 12px;
+      line-height: 1.34;
+    }
+
+    .factory-route b {
+      color: #27313a;
+    }
+
+    .factory-route span {
+      color: var(--muted);
+    }
+
+    .wide {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
+      gap: 14px;
+    }
+
+    .doctrine-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .doctrine {
+      padding: 10px;
+      border: 1px solid rgba(47, 111, 82, 0.2);
+      background: #fbfefc;
+      font-size: 12px;
+      line-height: 1.34;
+    }
+
+    .doctrine b {
+      display: block;
+      color: #315a42;
+      margin-bottom: 3px;
+    }
+
+    .doctrine span {
+      color: var(--muted);
+    }
+
+    @media (max-width: 1120px) {
+      header,
+      .surface,
+      .factory-head,
+      .wide {
+        grid-template-columns: 1fr;
+      }
+
+      .rail {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .lower {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .factory-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .knowledge-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .cli-grid,
+      .security-grid,
+      .install-grid,
+      .deployment-grid,
+      .hitl-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .factory-decision {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      main {
+        width: min(100vw - 20px, 1360px);
+        padding-top: 14px;
+      }
+
+      .rail,
+      .lower,
+      .factory-head,
+      .factory-decision,
+      .factory-grid,
+      .knowledge-grid,
+      .cli-grid,
+      .security-grid,
+      .install-grid,
+      .deployment-grid,
+      .hitl-grid,
+      .doctrine-strip {
+        grid-template-columns: 1fr;
+      }
+
+      .step {
+        min-height: auto;
+      }
+
+      .step::after {
+        display: none;
+      }
+
+      .health-row,
+      .tier,
+      .receipt,
+      .hidden-item,
+      .factory-skill,
+      .knowledge-item,
+      .cli-item,
+      .security-item,
+      .install-item,
+      .deployment-item,
+      .hitl-item,
+      .output {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media print {
+      body {
+        background: #ffffff;
+      }
+
+      main {
+        width: 100%;
+        min-height: auto;
+        padding: 0;
+      }
+
+      .command-card,
+      .lifecycle,
+      .risk-card,
+      .receipt-card,
+      .hidden-card,
+      .factory-card,
+      .knowledge-card,
+      .cli-card,
+      .security-card,
+      .install-card,
+      .deployment-card,
+      .hitl-card,
+      .output-card {
+        box-shadow: none;
+        break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <p class="eyebrow">Skills SDK user lifecycle</p>
+        <h1>From idea to trusted skill</h1>
+        <p class="subtitle">A skill starts as a small useful instruction set, then becomes a secure, testable, signed, observable software package only when its risk and reuse justify the extra gates.</p>
+      </div>
+      <aside class="mantra">
+        <strong>Product doctrine</strong>
+        <span>Thin surface. Strong guardrails. Durable memory. Professional output.</span>
+      </aside>
+    </header>
+
+    <section class="surface" aria-label="User command surface and skill lifecycle">
+      <article class="command-card">
+        <p class="eyebrow">What the user sees first</p>
+        <h2>One command explains the next move</h2>
+        <p>The SDK keeps the normal author path small. The author runs <code>skill check</code>, gets a readable health card, fixes the next blocker, and only sees deeper controls when the skill crosses a risk boundary.</p>
+        <div class="terminal" aria-label="skill check example output">
+          <span>$ skill check my-skill --json --robot</span>
+          <span><b>tier</b>: Scripted</span>
+          <span><b>status</b>: Blocked</span>
+          <span><b>next_action</b>: Fix env allowlist</span>
+          <span><b>missing</b>: sandbox receipt</span>
+        </div>
+        <div class="health" aria-label="Skill health card example">
+          <div class="health-row"><b>Skill</b><span>export-docx</span></div>
+          <div class="health-row"><b>Evidence</b><span>schema pass, eval pass, secret scan pass</span></div>
+          <div class="health-row"><b>Status</b><span class="status-blocked">Blocked until sandbox proof exists</span></div>
+        </div>
+      </article>
+
+      <article class="lifecycle">
+        <div>
+          <p class="eyebrow">Full lifecycle, compressed for users</p>
+          <h2>Every skill moves through eight visible states</h2>
+          <p>The user sees a simple rail. The SDK quietly performs schema, security, sandbox, eval, signing, and release checks behind each state.</p>
+        </div>
+        <div class="rail" aria-label="Skill lifecycle steps">
+          <div class="step author-step">
+            <span class="step-index">1</span>
+            <strong>Discover Need</strong>
+            <span>Capture the job, evidence, domain language, and useful outcome.</span>
+          </div>
+          <div class="step author-step">
+            <span class="step-index">2</span>
+            <strong>Choose Template</strong>
+            <span>Minimal, scripted, plugin, or full lifecycle starting point.</span>
+          </div>
+          <div class="step check-step">
+            <span class="step-index">3</span>
+            <strong>Author Source</strong>
+            <span>Write SKILL.md, references, runbooks, scripts, schemas, and README.</span>
+          </div>
+          <div class="step check-step">
+            <span class="step-index">4</span>
+            <strong>Run Check</strong>
+            <span>Validate schema, context quality, secrets, permissions, and blockers.</span>
+          </div>
+          <div class="step risk-step">
+            <span class="step-index">5</span>
+            <strong>Harden Risk</strong>
+            <span>Sandbox scripts, scope env vars, sign source, scan dependencies.</span>
+          </div>
+          <div class="step eval-step">
+            <span class="step-index">6</span>
+            <strong>Evaluate</strong>
+            <span>Run internal rubrics, context evals, A/B sandbox tests, and judge checks.</span>
+          </div>
+          <div class="step release-step">
+            <span class="step-index">7</span>
+            <strong>Package Release</strong>
+            <span>Create signed package, receipts, changelog, install preview, rollback.</span>
+          </div>
+          <div class="step operate-step">
+            <span class="step-index">8</span>
+            <strong>Operate Improve</strong>
+            <span>Monitor drift, incidents, stale context, updates, deprecation, archive.</span>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="factory" aria-label="V1 scope discipline and deferred platform decisions">
+      <article class="deployment-card">
+        <div class="factory-head">
+          <div>
+            <p class="eyebrow">Scope discipline</p>
+            <h3>Start with the smallest useful SDK, not the whole platform</h3>
+            <p>The SDK should preserve the strong platform vision while implementing the smallest author-facing slice first. Build contracts before dashboards, registries, marketplaces, and broad governance systems.</p>
+          </div>
+          <div class="factory-note">Rule: strong guardrails must not crush thin surface. V1 should prove schemas, risk tiers, receipts, install scopes, evals, and security adapters before expanding into platform UX.</div>
+        </div>
+        <div class="deployment-grid" aria-label="V1 scope and deferred decisions">
+          <div class="deployment-item"><span class="pill">V1 UI</span><div><b>product surface</b><span><code>skill init</code>, <code>skill check</code>, <code>skill refs ingest</code>, <code>skill eval</code>, <code>skill package</code>, <code>skill install</code>.</span></div></div>
+          <div class="deployment-item"><span class="pill">Core</span><div><b>contracts first</b><span>Schema, risk tier, install scope, receipt schema, eval dataset schema, and security adapter interface.</span></div></div>
+          <div class="deployment-item"><span class="pill">Defer</span><div><b>platform later</b><span>Marketplace, compliance receipts, broad governance, fancy HITL dashboard, Cedar default, and required Tessl.</span></div></div>
+          <div class="deployment-item"><span class="pill">State</span><div><b>lock and trust</b><span><code>skills.lock.json</code>, trust store, trusted signers, allowed registries, approved adapters, denied packages.</span></div></div>
+          <div class="deployment-item"><span class="pill">Safety</span><div><b>quarantine path</b><span>Disable unsafe skills, preserve evidence, block invocation, rollback projections, and explain next action.</span></div></div>
+        </div>
+      </article>
+    </section>
+
+    <section class="factory" aria-label="Skill story and use case confirmation contract">
+      <article class="deployment-card">
+        <div class="factory-head">
+          <div>
+            <p class="eyebrow">Intent model</p>
+            <h3>Skill Story and Skill Use Case connect work to user value</h3>
+            <p>User stories keep skill work focused on value; use cases add scope, actors, guarantees, success paths, and failure extensions for complex or privileged skills.</p>
+          </div>
+          <div class="factory-note">Card = short <code>SKILL.md</code>. Conversation = decisions, questions, assumptions, and domain context. Confirmation = evals, acceptance tests, receipts, and rubrics.</div>
+        </div>
+        <div class="deployment-grid" aria-label="Skill story and use case fields">
+          <div class="deployment-item"><span class="pill">Story</span><div><b>story.md or README</b><span>Actor, intent, outcome, risk, confirmation, and user-visible value.</span></div></div>
+          <div class="deployment-item"><span class="pill">Scope</span><div><b>skill use case</b><span>Design scope, goal level, primary actor, stakeholders and interests, trigger, and preconditions.</span></div></div>
+          <div class="deployment-item"><span class="pill">Success</span><div><b>guarantees</b><span>success guarantee, minimal guarantee, main success scenario, and observable postconditions.</span></div></div>
+          <div class="deployment-item"><span class="pill">Failure</span><div><b>extensions</b><span>Alternative paths, failure conditions, blocked states, open issues, rollback, and quarantine behavior.</span></div></div>
+          <div class="deployment-item"><span class="pill">Smell</span><div><b>skill smell check</b><span>Too broad, unclear actor, weak outcome, no eval, hidden security assumption, plugin when skill would do.</span></div></div>
+        </div>
+      </article>
+    </section>
+
+    <section class="factory" aria-label="SDK distribution and organisation adoption model">
+      <article class="deployment-card">
+        <div class="factory-head">
+          <div>
+            <p class="eyebrow">Distribution model</p>
+            <h3>The SDK is a standalone CLI loaded into projects and organisations</h3>
+            <p>The Skills SDK should be installable as a toolchain, not only embedded in this repo. It gives teams a consistent command surface while preserving project-local policy, templates, registries, and install scopes.</p>
+          </div>
+          <div class="factory-note">Best shape: standalone CLI plus optional project config. Install once for the user or org, then run inside any repo where <code>skills-sdk.yaml</code>, <code>.codex/</code>, or skill packages define local behavior.</div>
+        </div>
+        <div class="deployment-grid" aria-label="SDK adoption surfaces">
+          <div class="deployment-item"><span class="pill">CLI</span><div><b>skills-sdk</b><span>Standalone executable or package manager install for authors, agents, CI, and org tooling.</span></div></div>
+          <div class="deployment-item"><span class="pill">Project</span><div><b>skills-sdk.yaml</b><span>Repo-local config for scope, policies, registries, templates, evals, and trusted adapters.</span></div></div>
+          <div class="deployment-item"><span class="pill">Org</span><div><b>policy bundle</b><span>Organisation defaults for approved tools, signing identity, RBAC, install scopes, and release gates.</span></div></div>
+          <div class="deployment-item"><span class="pill">CI</span><div><b>check runner</b><span>CircleCI and GitHub Actions run the same checks with machine-readable receipts.</span></div></div>
+          <div class="deployment-item"><span class="pill">Agent</span><div><b>factory skills</b><span>Agents use the SDK through router, skill-factory, plugin-factory, and reviewer skills.</span></div></div>
+        </div>
+      </article>
+    </section>
+
+    <section class="factory" aria-label="Developer documentation and Skill Explorer surface">
+      <article class="deployment-card">
+        <div class="factory-head">
+          <div>
+            <p class="eyebrow">Domain and docs</p>
+            <h3>Docs explain the SDK; Skill Explorer demonstrates it</h3>
+            <p>The public surface should separate capability documentation from package discovery. Use your own domain for durable identity, but keep V1 as generated docs plus a static Skill Explorer rather than a full marketplace.</p>
+          </div>
+          <div class="factory-note">Recommended stack: Fumadocs + Next.js + MDX for developer docs, generated schema and CLI references, interactive diagrams, search, versioned docs, and static skill manifest pages.</div>
+        </div>
+        <div class="deployment-grid" aria-label="Developer documentation and Skill Explorer requirements">
+          <div class="deployment-item"><span class="pill">Docs</span><div><b>docs.yourdomain.com</b><span>Concept pages for package, manifest, permissions, signing, sandboxing, evals, runtime, install scopes, and security review.</span></div></div>
+          <div class="deployment-item"><span class="pill">Explore</span><div><b>skills.yourdomain.com</b><span>read-only Skill Explorer showing version, publisher, digest, signature, trust tier, permissions, evals, security receipts, refs, and freshness.</span></div></div>
+          <div class="deployment-item"><span class="pill">Generate</span><div><b>docs-as-code</b><span>Generate CLI reference, JSON Schema docs, TypeScript/Python type docs, receipt examples, package examples, and changelog pages from source.</span></div></div>
+          <div class="deployment-item"><span class="pill">Deploy</span><div><b>static first</b><span>Use CDN/static hosting with custom domain, preview deployments, search index, analytics, sitemap, redirects, and versioned release paths.</span></div></div>
+          <div class="deployment-item"><span class="pill">Defer</span><div><b>not marketplace v1</b><span>Publisher accounts, rankings, payments, public submissions, remote install feeds, and moderation queues wait until real adoption pressure exists.</span></div></div>
+        </div>
+      </article>
+    </section>
+
+    <section class="factory" aria-label="Human in the loop work visualisation">
+      <article class="hitl-card">
+        <div class="factory-head">
+          <div>
+            <p class="eyebrow">HITL visibility</p>
+            <h3>Show the work, not just the result</h3>
+            <p>People should feel in the loop because the SDK exposes what agents are doing, what is blocked, what evidence exists, and where human approval changes the outcome.</p>
+          </div>
+          <div class="factory-note">The interface should feel like a workbench: plan, active step, agent actions, approvals, evidence, diffs, and receipts. Hide raw logs by default, but keep them one click away.</div>
+        </div>
+        <div class="hitl-grid" aria-label="Human in the loop visual surfaces">
+          <div class="hitl-item"><span class="pill">Plan</span><div><b>phase timeline</b><span>Discover, ingest, author, check, harden, eval, package, release, operate with current state.</span></div></div>
+          <div class="hitl-item"><span class="pill">Now</span><div><b>active work card</b><span>Current command, agent, reason, risk tier, estimated cost, and expected receipt.</span></div></div>
+          <div class="hitl-item"><span class="pill">Gate</span><div><b>approval queue</b><span>Human decisions for install scope, permissions, secrets, egress, signing, waivers, and release.</span></div></div>
+          <div class="hitl-item"><span class="pill">Proof</span><div><b>evidence drawer</b><span>Checks, evals, sandbox receipts, security findings, diffs, and provenance bundled by phase.</span></div></div>
+          <div class="hitl-item"><span class="pill">Diff</span><div><b>before/after view</b><span>Skill.md, references, scripts, permissions, package manifest, and eval behavior changes.</span></div></div>
+        </div>
+      </article>
+    </section>
+
+    <section class="factory" aria-label="SDK CLI facade and command orchestration">
+      <article class="cli-card">
+        <div class="factory-head">
+          <div>
+            <p class="eyebrow">CLI changes</p>
+            <h3>Current ask commands need a Skills SDK facade</h3>
+            <p>The repo already has strong lower-level commands under <code>ask skills</code>, <code>ask repo</code>, <code>ask evals</code>, and <code>ask plugins</code>. The SDK should add a thin author-facing command layer that orchestrates those commands into one health card, receipt set, and next action.</p>
+          </div>
+          <div class="factory-note">Rule: keep <code>./bin/ask</code> as the repo control plane; add <code>skill</code> or <code>ask sdk</code> as the product facade for authors and agents.</div>
+        </div>
+        <div class="cli-grid" aria-label="Recommended Skills SDK CLI commands">
+          <div class="cli-item"><span class="pill">Core</span><div><b>skill check</b><span>Runs validate, doctor, package, security, refs, eval smoke, and emits one health card.</span></div></div>
+          <div class="cli-item"><span class="pill">Create</span><div><b>skill init</b><span>Selects template, creates source shape, README, references, fixtures, and first eval dataset.</span></div></div>
+          <div class="cli-item"><span class="pill">Refs</span><div><b>skill refs ingest</b><span>Runs deterministic extraction, normalization, safety screening, curation, and context receipt.</span></div></div>
+          <div class="cli-item"><span class="pill">Risk</span><div><b>skill tier</b><span>Classifies Draft, Local, Scripted, Shared, Privileged, or Published and explains gate changes.</span></div></div>
+          <div class="cli-item"><span class="pill">Eval</span><div><b>skill eval</b><span>Runs internal rubrics, context evals, A/B sandbox comparisons, and external confirmation handoff.</span></div></div>
+          <div class="cli-item"><span class="pill">Ship</span><div><b>skill package</b><span>Builds package, manifest, receipts, signature, install preview, compatibility, and rollback plan.</span></div></div>
+        </div>
+      </article>
+    </section>
+
+    <section class="factory" aria-label="Security review adapters and gates">
+      <article class="security-card">
+        <div class="factory-head">
+          <div>
+            <p class="eyebrow">Security review</p>
+            <h3>Security should be an adapter stack plus a reviewer skill</h3>
+            <p>A Codex Security-style plugin would be useful as the agent review layer, but deterministic scanners still need to produce receipts. Use risk tiers to decide when SAST, SCA, secrets, SBOM, IaC, container, and LLM-specific checks become blocking.</p>
+          </div>
+          <div class="factory-note">Recommended split: CodeQL/Semgrep for code, Snyk or OSV/Grype/Trivy for dependencies and containers, BetterLeaks/Gitleaks/TruffleHog for secrets, OPA for policy, and a security-reviewer skill for threat modeling and agent-specific risks.</div>
+        </div>
+        <div class="security-grid" aria-label="Security review tool stack">
+          <div class="security-item"><span class="pill">Agent</span><div><b>security-reviewer skill</b><span>Threat model, prompt injection, excessive agency, toxic flows, permissions, trust boundaries.</span></div></div>
+          <div class="security-item"><span class="pill">SAST</span><div><b>CodeQL / Semgrep</b><span>Static analysis for scripts, Python modules, shell wrappers, plugin code, and generated emitters.</span></div></div>
+          <div class="security-item"><span class="pill">SCA</span><div><b>Snyk / OSV / Grype</b><span>Dependency and vulnerability checks with severity thresholds, waivers, and remediation receipts.</span></div></div>
+          <div class="security-item"><span class="pill">Secrets</span><div><b>BetterLeaks stack</b><span>BetterLeaks primary candidate, with Gitleaks or TruffleHog fallback and rotation receipts.</span></div></div>
+          <div class="security-item"><span class="pill">Policy</span><div><b>OPA/Rego</b><span>Deny-by-default decisions for install, runtime, egress, RBAC, ABAC, and authority leases.</span></div></div>
+          <div class="security-item"><span class="pill">AI</span><div><b>OWASP LLM checks</b><span>Prompt injection, sensitive disclosure, supply chain, poisoning, excessive agency, and tool misuse.</span></div></div>
+        </div>
+      </article>
+    </section>
+
+    <section class="factory" aria-label="Skill install scope and placement choices">
+      <article class="install-card">
+        <div class="factory-head">
+          <div>
+            <p class="eyebrow">Install placement</p>
+            <h3>Users choose where a skill is installed</h3>
+            <p>The SDK should preview and install skills at the right scope. Global install is useful for personal defaults, but project-level install is essential when a skill belongs to a repo, team workflow, dependency set, or project-specific trust boundary.</p>
+          </div>
+          <div class="factory-note">Rule: no silent global install. Every install shows target path, scope, source digest, permissions, projected runtime surface, rollback path, and whether the skill affects only this project or all future projects.</div>
+        </div>
+        <div class="install-grid" aria-label="Skill installation scopes">
+          <div class="install-item"><span class="pill">Global</span><div><b>~/.codex or ~/.agents</b><span>User-wide skills available across workspaces, with explicit trust and update policy.</span></div></div>
+          <div class="install-item"><span class="pill">Project</span><div><b>./.codex/skills</b><span>Repo-local skills committed or staged with the project, isolated from unrelated workspaces.</span></div></div>
+          <div class="install-item"><span class="pill">Workspace</span><div><b>.agents/skills</b><span>Workspace projection for team or local runtime surfaces, with sync and projection receipts.</span></div></div>
+          <div class="install-item"><span class="pill">Preview</span><div><b>install plan</b><span>Shows files, permissions, trust, sandbox result, conflicts, and exact paths before writing.</span></div></div>
+          <div class="install-item"><span class="pill">Rollback</span><div><b>remove or restore</b><span>Reverts projected files, lock entries, registry metadata, and runtime surfaces by receipt.</span></div></div>
+        </div>
+      </article>
+    </section>
+
+    <section class="factory" aria-label="Knowledge reference ingestion and curation pipeline">
+      <article class="knowledge-card">
+        <div class="factory-head">
+          <div>
+            <p class="eyebrow">Knowledge refs</p>
+            <h3>Raw sources become trusted context through an ingestion lane</h3>
+            <p>Screenshots, videos, transcripts, PDFs, Markdown, and docs should enter through deterministic extraction scripts first. Skills then curate, check usefulness, detect prompt injection, and promote only proven context into references or runbooks.</p>
+          </div>
+          <div class="factory-note">Rule: scripts extract and prove; skills judge and curate. Never let raw dropped-in material become trusted skill context without provenance, quality checks, and a promotion decision.</div>
+        </div>
+        <div class="knowledge-grid" aria-label="Knowledge reference ingestion steps">
+          <div class="knowledge-item"><span class="pill">Intake</span><div><b>source manifest</b><span>File type, hash, origin, owner, capture date, freshness, license, trust level, and intended skill use.</span></div></div>
+          <div class="knowledge-item"><span class="pill">Extract</span><div><b>deterministic parsers</b><span>Docling/MarkItDown/PyMuPDF, Tesseract OCR, ffmpeg, Whisper, scene detection, Pandoc/LibreOffice.</span></div></div>
+          <div class="knowledge-item"><span class="pill">Normalize</span><div><b>canonical markdown/json</b><span>Headings, tables, frames, transcript segments, page refs, timestamps, screenshots, and citations.</span></div></div>
+          <div class="knowledge-item"><span class="pill">Screen</span><div><b>context safety check</b><span>Prompt injection, stale claims, unsupported instructions, toxic flows, secrets, URLs, and untrusted content boundaries.</span></div></div>
+          <div class="knowledge-item"><span class="pill">Curate</span><div><b>knowledge-curator skill</b><span>Distills useful task knowledge, removes clutter, resolves contradictions, and writes assumptions and glossary entries.</span></div></div>
+          <div class="knowledge-item"><span class="pill">Promote</span><div><b>context receipt</b><span>Only promoted refs enter the skill package, with eval coverage, freshness policy, source links, and rollback path.</span></div></div>
+        </div>
+      </article>
+    </section>
+
+    <section class="factory" aria-label="SDK skill factory plugin and phase helpers">
+      <article class="factory-card">
+        <div class="factory-head">
+          <div>
+            <p class="eyebrow">SDK-owned agent helpers</p>
+            <h3>Skill Factory and Plugin Factory guide every phase</h3>
+            <p>The SDK should ship dedicated agent helpers so authors can create, update, install, refactor, evaluate, release, and bundle skills or plugins without exposing every low-level command.</p>
+          </div>
+          <div class="factory-note">Default rule: skills stay skills. Use plugin-factory only when the package needs host integration, MCP servers, app surfaces, lifecycle config, dependencies, or multi-skill distribution.</div>
+        </div>
+        <div class="factory-grid" aria-label="Skill factory helper skills">
+          <div class="factory-skill"><span class="pill">Route</span><div><b>factory-router</b><span>Deterministically chooses skill-factory or plugin-factory from required host integration, MCP, apps, dependencies, and distribution signals.</span></div></div>
+          <div class="factory-skill"><span class="pill">Create</span><div><b>skill-creator</b><span>Starts from a template, captures purpose, inputs, references, README, and first eval cases.</span></div></div>
+          <div class="factory-skill"><span class="pill">Build</span><div><b>skill-builder</b><span>Adds scripts, assets, schemas, fixtures, deterministic sh/python modules, and package metadata.</span></div></div>
+          <div class="factory-skill"><span class="pill">Check</span><div><b>skill-doctor</b><span>Runs skill check, explains blockers, repairs common schema/context/security issues, and records receipts.</span></div></div>
+          <div class="factory-skill"><span class="pill">Refine</span><div><b>skill-refactor</b><span>Reshapes SKILL.md, references, runbooks, and scripts while preserving behavior and eval evidence.</span></div></div>
+          <div class="factory-skill"><span class="pill">Install</span><div><b>skill-installer</b><span>Previews external skills in sandbox, scans trust boundaries, verifies signatures, and stages safe install.</span></div></div>
+          <div class="factory-skill"><span class="pill">Migrate</span><div><b>skill-updater</b><span>Classifies Minor, Moderate, and Major changes; updates compatibility, changelog, and rollback notes.</span></div></div>
+          <div class="factory-skill"><span class="pill">Eval</span><div><b>skill-evaluator</b><span>Runs internal rubrics, context evals, A/B sandbox comparisons, and external confirmation handoff.</span></div></div>
+          <div class="factory-skill"><span class="pill">Secure</span><div><b>skill-security-reviewer</b><span>Reviews permissions, env, filesystem, network, toxic flows, prompt injection, and poisoned state risks.</span></div></div>
+          <div class="factory-skill"><span class="pill">Convert</span><div><b>skillify</b><span>Turns existing docs, scripts, workflows, or plugin behavior into a structured skill package.</span></div></div>
+          <div class="factory-skill"><span class="pill">Plugin</span><div><b>plugin-factory</b><span>Bundles skills with MCP servers, apps, lifecycle config, dependencies, and host integration when a skill alone is not enough.</span></div></div>
+          <div class="factory-skill"><span class="pill">Release</span><div><b>skill-releaser</b><span>Packages, signs, verifies, publishes or stages, and records readiness and decommission receipts.</span></div></div>
+        </div>
+        <div class="factory-decision" aria-label="Factory router decision surface">
+          <div class="factory-route"><b>factory-router</b><span>One intake, two deterministic paths. The router asks what artifact is needed, what host capabilities are required, and what lifecycle gates apply.</span></div>
+          <div class="factory-route"><b>Skill-factory surface</b><span>Create, build, doctor, refactor, install, update, evaluate, secure, skillify, and release a skill package.</span></div>
+          <div class="factory-route"><b>Plugin-factory surface</b><span>Create, scaffold, manifest, bundle skills, configure MCP/apps, manage dependencies, validate lifecycle config, package, install, publish, and upgrade a plugin.</span></div>
+        </div>
+      </article>
+    </section>
+
+    <section class="lower" aria-label="Risk tiers receipts and progressive disclosure">
+      <article class="risk-card">
+        <p class="eyebrow">Risk-scaled adoption</p>
+        <h3>Heavy gates appear only when risk rises</h3>
+        <div class="tiers">
+          <div class="tier"><span class="pill">Draft</span><div><b>Idea or docs only</b><span>Presence, schema parse, README, and basic lint.</span></div></div>
+          <div class="tier"><span class="pill">Local</span><div><b>Personal utility</b><span>Reference quality, minimal eval, changed-file smoke.</span></div></div>
+          <div class="tier"><span class="pill">Script</span><div><b>Executable behavior</b><span>Secret scan, env allowlist, macOS sandbox, deterministic script checks.</span></div></div>
+          <div class="tier"><span class="pill">Shared</span><div><b>Team reuse</b><span>Code review, signed package, provenance, SBOM, owner approval.</span></div></div>
+          <div class="tier"><span class="pill">Pub</span><div><b>Published package</b><span>Cosign, Gitsign, release gates, install preview, rollback and archive plan.</span></div></div>
+        </div>
+      </article>
+
+      <article class="receipt-card">
+        <p class="eyebrow">Evidence the user can trust</p>
+        <h3>Receipts replace vague confidence</h3>
+        <div class="receipts">
+          <div class="receipt"><span class="pill">Check</span><div><b>What passed and failed</b><span>Schema, references, secrets, permissions, compatibility, blockers.</span></div></div>
+          <div class="receipt"><span class="pill">Eval</span><div><b>Behavior proof</b><span>Dataset, rubric version, judge calibration, context quality, A/B result.</span></div></div>
+          <div class="receipt"><span class="pill">Run</span><div><b>Runtime proof</b><span>Sandbox profile, env allowlist, network policy, filesystem access, denial log.</span></div></div>
+          <div class="receipt"><span class="pill">Sign</span><div><b>Supply-chain proof</b><span>Package digest, Cosign signature, source signing, provenance bundle.</span></div></div>
+          <div class="receipt"><span class="pill">Gate</span><div><b>Release proof</b><span>Owner, waiver, expiry, rollback, install preview, state transition.</span></div></div>
+        </div>
+      </article>
+
+      <article class="hidden-card">
+        <p class="eyebrow">Progressive disclosure</p>
+        <h3>What stays hidden until needed</h3>
+        <div class="hidden-list">
+          <div class="hidden-item"><span class="pill">IR</span><div><b>Skill compiler detail</b><span>Visible only when validation, emitters, or compatibility need explanation.</span></div></div>
+          <div class="hidden-item"><span class="pill">Policy</span><div><b>OPA/Rego decisions</b><span>Shown as plain allow/block reasons unless a reviewer opens policy detail.</span></div></div>
+          <div class="hidden-item"><span class="pill">OSS</span><div><b>Tool adapters</b><span>Sigstore, 1Password, BetterLeaks, ORAS, Syft, and scanners appear as receipts.</span></div></div>
+          <div class="hidden-item"><span class="pill">Tessl</span><div><b>Third-party confirmation</b><span>Runs after internal rubrics pass, not as the SDK's first quality gate.</span></div></div>
+          <div class="hidden-item"><span class="pill">Gov</span><div><b>Readiness controls</b><span>Ownership, waivers, audits, and lifecycle gates are release mechanics, not the default UI.</span></div></div>
+        </div>
+      </article>
+    </section>
+
+    <section class="wide" aria-label="Outputs and doctrine">
+      <article class="output-card">
+        <p class="eyebrow">Professional output</p>
+        <h3>A useful skill package contains more than markdown</h3>
+        <div class="outputs">
+          <div class="output"><span class="pill">Source</span><div><b>my-skill/</b><span>SKILL.md, README, references, assets, scripts, agents/openai.yaml.</span></div></div>
+          <div class="output"><span class="pill">Context</span><div><b>Trusted references</b><span>Runbooks, context files, source notes, freshness policy, assumptions, glossary.</span></div></div>
+          <div class="output"><span class="pill">Package</span><div><b>Installable artifact</b><span>Manifest, schemas, permissions, dependency locks, signatures, provenance.</span></div></div>
+          <div class="output"><span class="pill">Runtime</span><div><b>Safe execution</b><span>Sandbox, env scope, network and filesystem boundaries, state poisoning controls.</span></div></div>
+          <div class="output"><span class="pill">Ops</span><div><b>Lifecycle memory</b><span>Eval history, incidents, decisions, changelog, rollback, deprecation, archive.</span></div></div>
+        </div>
+      </article>
+
+      <article class="output-card">
+        <p class="eyebrow">AX rule</p>
+        <h3>UX plus DX becomes Agent Experience</h3>
+        <div class="doctrine-strip">
+          <div class="doctrine"><b>Thin surface</b><span>Few commands, one next action, compact health card.</span></div>
+          <div class="doctrine"><b>Strong guardrails</b><span>Validation, sandboxing, signing, evals, release gates.</span></div>
+          <div class="doctrine"><b>Durable memory</b><span>Context, decisions, evidence, state, and provenance persist.</span></div>
+          <div class="doctrine"><b>Professional output</b><span>Packages and docs are ready for real use.</span></div>
+        </div>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

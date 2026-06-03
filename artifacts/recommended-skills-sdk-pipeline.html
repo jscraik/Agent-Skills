@@ -93,6 +93,25 @@
       background: rgba(255, 255, 255, 0.56);
     }
 
+    .artifact-link {
+      display: inline-block;
+      margin-top: 10px;
+      border: 1px solid var(--line);
+      background: #ffffff;
+      color: #26343f;
+      padding: 7px 10px;
+      font-size: 13px;
+      font-weight: 720;
+      text-decoration: none;
+    }
+
+    .artifact-link:hover,
+    .artifact-link:focus-visible {
+      border-color: #7d8a96;
+      outline: 2px solid rgba(47, 111, 143, 0.16);
+      outline-offset: 1px;
+    }
+
     .mission strong {
       display: block;
       margin-bottom: 4px;
@@ -107,6 +126,143 @@
       border: 1px solid var(--line);
       box-shadow: var(--shadow);
       padding: 22px 24px 24px;
+    }
+
+    .author-path {
+      margin-bottom: 18px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      padding: 22px 24px 24px;
+    }
+
+    .author-path-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 0.42fr);
+      gap: 20px;
+      align-items: start;
+      margin-bottom: 16px;
+    }
+
+    .author-path h2 {
+      margin: 0;
+      font-size: 22px;
+      color: var(--agent);
+    }
+
+    .author-path p {
+      margin: 7px 0 0;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    .author-note {
+      border-left: 4px solid var(--agent);
+      padding: 10px 0 10px 14px;
+      background: #f5fbf7;
+      color: #24313c;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .author-path-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(300px, 0.95fr);
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    .author-steps {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .author-card,
+    .author-step,
+    .health-card {
+      border: 1px solid rgba(63, 111, 82, 0.28);
+      background: #fbfefc;
+      padding: 12px;
+    }
+
+    .author-step {
+      display: grid;
+      align-content: start;
+      gap: 7px;
+      min-height: 112px;
+    }
+
+    .step-index {
+      width: 28px;
+      height: 28px;
+      border: 1px solid rgba(63, 111, 82, 0.42);
+      display: inline-grid;
+      place-items: center;
+      color: #2f5d42;
+      background: #ffffff;
+      font-size: 12px;
+      font-weight: 780;
+    }
+
+    .author-step strong,
+    .author-card strong,
+    .health-card strong {
+      font-size: 13px;
+      color: #315a42;
+      line-height: 1.25;
+    }
+
+    .author-step span,
+    .author-card span,
+    .health-card span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .author-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(220px, 0.75fr);
+      gap: 12px;
+      align-items: start;
+    }
+
+    .check-command {
+      display: block;
+      margin: 8px 0 0;
+      padding: 10px;
+      border: 1px solid rgba(63, 111, 82, 0.3);
+      background: #ffffff;
+      color: #26343f;
+      font-size: 13px;
+      overflow-wrap: anywhere;
+    }
+
+    .health-card {
+      display: grid;
+      gap: 7px;
+      background: #ffffff;
+    }
+
+    .health-row {
+      display: grid;
+      grid-template-columns: 94px minmax(0, 1fr);
+      gap: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .health-row b {
+      color: #37424d;
+      font-weight: 720;
+    }
+
+    .health-status {
+      color: #7a4f1f;
+      font-weight: 780;
     }
 
     .doctrine-head {
@@ -1463,6 +1619,31 @@
       background: #fffffb;
     }
 
+    .oss-labels {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .oss-label {
+      border: 1px solid rgba(54, 95, 55, 0.32);
+      background: #ffffff;
+      color: #315c34;
+      padding: 2px 6px;
+      font-size: 11px;
+      line-height: 1.2;
+      font-weight: 760;
+      text-transform: uppercase;
+    }
+
+    .oss-label.fallback,
+    .oss-label.optional,
+    .oss-label.future {
+      color: #4b5360;
+      border-color: rgba(75, 83, 96, 0.28);
+      background: #fafafa;
+    }
+
     .oss-card strong,
     .ci-card strong {
       display: block;
@@ -1706,6 +1887,8 @@
       }
 
       .assurance-head,
+      .author-path-head,
+      .author-path-grid,
       .doctrine-head,
       .governance-overlay,
       .model-head,
@@ -1739,6 +1922,10 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
+      .author-steps {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
       .matrix-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
@@ -1756,6 +1943,10 @@
 
       .domain-grid,
       .assurance-head,
+      .author-path-head,
+      .author-path-grid,
+      .author-card,
+      .author-steps,
       .doctrine-head,
       .doctrine-grid,
       .governance-overlay,
@@ -1831,6 +2022,7 @@
       <aside class="mission">
         <strong>Mission</strong>
         Thin surface. Strong guardrails. Durable memory. Professional output. A Skills SDK turns markdown artifacts into agent-native knowledge packages governed across acquisition, authoring, delegation, execution, review, evidence, signatures, rollback, and release gates.
+        <a class="artifact-link" href="./skills-sdk-user-lifecycle-one-page.html">Open user lifecycle one-page</a>
       </aside>
     </header>
 
@@ -1847,7 +2039,7 @@
         <button class="atlas-tab" type="button" aria-pressed="false" data-lane-filter="evalops">Eval Ops</button>
         <button class="atlas-tab" type="button" aria-pressed="false" data-lane-filter="knowledge">Knowledge</button>
         <button class="atlas-tab" type="button" aria-pressed="false" data-lane-filter="plugin">Plugin Host</button>
-        <button class="atlas-tab" type="button" aria-pressed="false" data-lane-filter="governance">Governance</button>
+        <button class="atlas-tab" type="button" aria-pressed="false" data-lane-filter="governance">Readiness</button>
       </div>
       <div class="atlas-modes" aria-label="Design map view modes">
         <button class="atlas-mode" type="button" aria-pressed="true" data-view-mode="all">Full Map</button>
@@ -1863,6 +2055,96 @@
       </div>
       <div class="atlas-status" aria-live="polite">Showing the full platform architecture atlas.</div>
     </nav>
+
+    <section class="author-path" aria-label="Author golden path and skill check surface" data-collapsible data-lanes="agent package security testing ci governance" data-views="overview sdk ci">
+      <div class="author-path-head">
+        <div>
+          <h2>Author Golden Path</h2>
+          <p>The first screen should show what a skill author does next, not the whole platform. Deep security, policy, eval, and release machinery stays behind progressive disclosure until risk increases.</p>
+        </div>
+        <div class="author-note">Hero command: <code>skill check</code>. It classifies the skill, runs the cheapest useful gates, explains the next blocker, and reveals heavier checks only when scripts, secrets, sharing, runtime access, or publication require them.</div>
+      </div>
+      <div class="author-path-grid">
+        <div class="author-steps" aria-label="Author golden path steps">
+          <div class="author-step" data-lanes="agent package">
+            <span class="step-index">1</span>
+            <strong>Choose Template</strong>
+            <span>Minimal, scripted, plugin, or full-lifecycle skill template with the right starting risk tier.</span>
+          </div>
+          <div class="author-step" data-lanes="package knowledge">
+            <span class="step-index">2</span>
+            <strong>Edit SKILL.md</strong>
+            <span>Keep the surface thin; push deeper instructions into references, runbooks, context files, or scripts.</span>
+          </div>
+          <div class="author-step" data-lanes="knowledge package testing security">
+            <span class="step-index">REF</span>
+            <strong>Ingest Knowledge</strong>
+            <span>Deterministic scripts extract screenshots, videos, transcripts, PDFs, docs, and Markdown; knowledge-curator skills promote only trusted context.</span>
+          </div>
+          <div class="author-step" data-lanes="ci testing security">
+            <span class="step-index">3</span>
+            <strong>Run skill check</strong>
+            <span>Schema, references, secrets, sandbox, eval, package, and release gates are selected by risk tier.</span>
+          </div>
+          <div class="author-step" data-lanes="agent package ci">
+            <span class="step-index">CLI</span>
+            <strong>Use SDK Facade</strong>
+            <span>Keep ./bin/ask as repo control plane; expose skill check, skill refs ingest, skill tier, skill eval, and skill package as the author-facing facade.</span>
+          </div>
+          <div class="author-step" data-lanes="agent package plugin ci">
+            <span class="step-index">ORG</span>
+            <strong>Load SDK Toolchain</strong>
+            <span>Standalone CLI installs into users, projects, CI, or organisations; project config controls local policies, templates, registries, and install scopes.</span>
+          </div>
+          <div class="author-step" data-lanes="agent ci governance">
+            <span class="step-index">4</span>
+            <strong>Fix Next Blocker</strong>
+            <span>One typed blocker at a time, with evidence, reason, owner, and the next useful command.</span>
+          </div>
+          <div class="author-step" data-lanes="package testing governance">
+            <span class="step-index">5</span>
+            <strong>Eval / Package / Verify</strong>
+            <span>Internal rubrics first; then sandbox/dev-eval; then Tessl as third-party confirmation after pass.</span>
+          </div>
+          <div class="author-step" data-lanes="agent package plugin">
+            <span class="step-index">SDK</span>
+            <strong>Use Factories</strong>
+            <span>factory-router deterministically chooses skill-factory or plugin-factory; plugin-factory has its own create, scaffold, manifest, bundle, validate, install, publish, and upgrade surface.</span>
+          </div>
+          <div class="author-step" data-lanes="package plugin runtime security">
+            <span class="step-index">LOC</span>
+            <strong>Choose Install Scope</strong>
+            <span>Install preview lets users choose global ~/.codex or ~/.agents, project ./.codex/skills, workspace .agents/skills, with rollback receipts.</span>
+          </div>
+          <div class="author-step" data-lanes="security ci runtime">
+            <span class="step-index">SEC</span>
+            <strong>Security Review</strong>
+            <span>security-reviewer skill plus adapters: CodeQL/Semgrep, Snyk or OSV/Grype/Trivy, BetterLeaks stack, OPA policy, and OWASP LLM checks.</span>
+          </div>
+          <div class="author-step" data-lanes="agent evalops governance ci">
+            <span class="step-index">HITL</span>
+            <strong>Show Workbench</strong>
+            <span>Visualise phase timeline, active agent action, approvals, evidence drawer, diffs, receipts, and rollback so humans stay in the loop.</span>
+          </div>
+        </div>
+        <div class="author-card" data-lanes="agent package ci testing security governance">
+          <div>
+            <strong>What skill check says</strong>
+            <span>Thin surface, strong guardrails: the command reports tier, status, next action, blockers, evidence, and skipped heavyweight checks.</span>
+            <code class="check-command">skill check my-skill --json --robot</code>
+          </div>
+          <div class="health-card" aria-label="Skill health card example">
+            <strong>Skill Health Card</strong>
+            <div class="health-row"><b>Skill</b><span>export-docx</span></div>
+            <div class="health-row"><b>Tier</b><span>Scripted</span></div>
+            <div class="health-row"><b>Status</b><span class="health-status">Blocked</span></div>
+            <div class="health-row"><b>Next action</b><span>Fix env allowlist</span></div>
+            <div class="health-row"><b>Evidence</b><span>schema pass, eval pass, secret scan pass</span></div>
+            <div class="health-row"><b>Missing</b><span>sandbox receipt</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <section class="doctrine" aria-label="AX product doctrine" data-collapsible data-lanes="agent package runtime security testing evalops knowledge plugin governance" data-views="overview sdk">
       <div class="doctrine-head">
@@ -2694,63 +2976,99 @@
         <div class="oss-grid">
           <div class="oss-card" data-lanes="oss security governance">
             <strong>Package Signatures</strong>
+            <div class="oss-labels"><span class="oss-label">default</span></div>
             <span>Default adapter: Sigstore Cosign. Sign skill packages, blobs, OCI artifacts, and release bundles by digest.</span>
             <span><code>requires</code> signer identity, digest, trust policy, verification bundle, failure-as-blocker.</span>
           </div>
           <div class="oss-card" data-lanes="oss security governance">
             <strong>Source Signing</strong>
+            <div class="oss-labels"><span class="oss-label">default</span></div>
             <span>Default adapter: Gitsign for Git commits and release tags when keyless identity is acceptable.</span>
             <span><code>requires</code> branch policy, signed tags, actor identity, OIDC issuer, protected review path.</span>
           </div>
           <div class="oss-card" data-lanes="oss security governance">
             <strong>Transparency and Provenance</strong>
+            <div class="oss-labels"><span class="oss-label optional">optional</span><span class="oss-label fallback">fallback</span></div>
             <span>Sigstore/Rekor, SLSA, and in-toto connect source, builder, materials, artifact digest, and release decision.</span>
             <span><code>requires</code> public/private log choice, metadata privacy policy, offline verification path.</span>
           </div>
           <div class="oss-card" data-lanes="oss plugin governance">
             <strong>Artifact Registry</strong>
+            <div class="oss-labels"><span class="oss-label optional">optional</span><span class="oss-label future">future</span></div>
             <span>Use OCI artifacts with ORAS for portable package storage before committing to a bespoke registry.</span>
             <span><code>requires</code> media types, manifest schema, provenance refs, install preview, rollback digest.</span>
           </div>
+          <div class="oss-card" data-lanes="oss package plugin governance">
+            <strong>Developer Docs Platform</strong>
+            <div class="oss-labels"><span class="oss-label">default</span></div>
+            <span>Use Fumadocs + Next.js + MDX for capability specification pages, interactive diagrams, versioned docs, search, and generated SDK references on your own domain.</span>
+            <span><code>requires</code> docs.yourdomain.com, MDX content model, generated CLI/schema docs, previews, sitemap, redirects, analytics, and CDN/static deployment.</span>
+          </div>
+          <div class="oss-card" data-lanes="oss package plugin governance security testing knowledge">
+            <strong>Static Skill Explorer</strong>
+            <div class="oss-labels"><span class="oss-label">default</span><span class="oss-label future">future registry</span></div>
+            <span>Start with a read-only Skill Explorer powered by package manifests and receipts before building a marketplace or public registry.</span>
+            <span><code>requires</code> skills.yourdomain.com, static skill index, version, publisher, digest, signature, trust tier, permissions, evals, security receipts, refs, freshness, and install preview links.</span>
+          </div>
           <div class="oss-card" data-lanes="oss security runtime">
             <strong>Secret Prevention</strong>
+            <div class="oss-labels"><span class="oss-label">default</span><span class="oss-label optional">optional</span></div>
             <span>Default adapter: 1Password Environments beta, plus 1Password CLI, service accounts, Connect, or cloud sync for automation.</span>
             <span><code>requires</code> scoped handles, runtime injection, no plaintext env file, redacted logs, expiry.</span>
           </div>
           <div class="oss-card" data-lanes="oss security">
             <strong>Secret Detection</strong>
+            <div class="oss-labels"><span class="oss-label">default</span><span class="oss-label fallback">fallback</span></div>
             <span>Use BetterLeaks as the preferred scan candidate; keep Gitleaks and TruffleHog as fallback or deep-verification adapters.</span>
             <span><code>requires</code> masked evidence, active-secret policy, owner routing, rotation and remediation receipt.</span>
           </div>
           <div class="oss-card" data-lanes="oss security runtime">
             <strong>Policy As Code</strong>
+            <div class="oss-labels"><span class="oss-label">default</span><span class="oss-label future">future</span></div>
             <span>Default adapter: OPA/Rego for install, runtime, RBAC, ABAC, connector, egress, and authority-lease decisions. Cedar stays a future policy adapter candidate.</span>
             <span><code>requires</code> deny-by-default, decision logs, test fixtures, policy version, revocation feed.</span>
           </div>
           <div class="oss-card" data-lanes="oss security governance">
             <strong>SBOM and Vulnerabilities</strong>
+            <div class="oss-labels"><span class="oss-label optional">optional</span></div>
             <span>Syft for SBOM, SPDX or CycloneDX for format, OSV-Scanner, Grype, or Trivy for vulnerability gates.</span>
             <span><code>requires</code> license policy, severity thresholds, dependency freshness, remediation SLA.</span>
           </div>
           <div class="oss-card" data-lanes="oss runtime testing">
             <strong>Sandbox Execution</strong>
+            <div class="oss-labels"><span class="oss-label">default</span><span class="oss-label future">future</span></div>
             <span>Start with a macOS sandbox-exec adapter; keep the runtime contract portable for Linux/container adapters later.</span>
             <span><code>requires</code> filesystem, network, env, child process, native binary, and denial receipts.</span>
           </div>
           <div class="oss-card" data-lanes="oss testing evalops">
             <strong>Eval and Test Harness</strong>
+            <div class="oss-labels"><span class="oss-label">default</span><span class="oss-label optional">optional</span></div>
             <span>Use JSONL datasets, pytest/uv Python modules, deterministic sh wrappers, jq transforms, internal rubrics, sandbox/dev-eval checks, and Tessl only as third-party confirmation.</span>
             <span><code>requires</code> split locks, rubric versions, context evals, replay bundle, judge calibration.</span>
           </div>
           <div class="oss-card" data-lanes="oss package governance">
             <strong>Version Control</strong>
+            <div class="oss-labels"><span class="oss-label">default</span></div>
             <span>Git remains source control; semantic skill versions, signed tags, changelog, migration notes, and package digest bind releases.</span>
             <span><code>requires</code> Minor/Moderate/Major classification, compatibility matrix, rollback record.</span>
           </div>
+          <div class="oss-card" data-lanes="oss package runtime security plugin">
+            <strong>Install Scope and Projection</strong>
+            <div class="oss-labels"><span class="oss-label">default</span></div>
+            <span>Support explicit global, user, workspace, and project installs. Project installs target ./.codex/skills or equivalent repo-local projection instead of mutating global state.</span>
+            <span><code>requires</code> install plan, selected scope, target paths, conflict policy, trust receipt, runtime projection, and rollback.</span>
+          </div>
           <div class="oss-card" data-lanes="oss package runtime security">
             <strong>Toolchain Requirements</strong>
+            <div class="oss-labels"><span class="oss-label">default</span></div>
             <span>Markdown, YAML, JSON, jq, uv, Python modules, and thin shell wrappers are the default authoring and scripting substrate.</span>
             <span><code>requires</code> lockfiles, parser-first transforms, no shell eval, argv/env/cwd receipts.</span>
+          </div>
+          <div class="oss-card" data-lanes="oss package ci governance">
+            <strong>Docs Toolchain Requirements</strong>
+            <div class="oss-labels"><span class="oss-label">default</span><span class="oss-label optional">optional</span></div>
+            <span>Node, pnpm, TypeScript, React, MDX, Fumadocs UI, Next.js static/export-compatible deployment, search indexing, Mermaid or diagram components, and schema/reference generators.</span>
+            <span><code>requires</code> generated docs tests, broken-link checks, accessibility checks, OpenGraph metadata, custom domain DNS, TLS, preview URLs, and release-version routing.</span>
           </div>
         </div>
       </section>
@@ -2841,6 +3159,21 @@
             <span>V1 should be templates, schema validation, Skill IR, risk-tier classifier, `skill check`, internal eval dataset, package manifest, signing interface, Prek hooks, CI policy map, install preview, and core receipts.</span>
             <span><code>surface</code> init, check, eval, package, verify.</span>
           </div>
+          <div class="ci-card" data-lanes="package ci governance">
+            <strong>V1 Scope Layers</strong>
+            <span>Separate V1 product surface from V1 core contracts and later platform capabilities. Build schemas, risk tiers, receipt schema, install scopes, eval dataset schema, and security adapter interfaces before marketplace or dashboard UX.</span>
+            <span><code>defer</code> full marketplace, compliance receipts, broad governance platform, fancy HITL dashboard, Cedar default, and required Tessl.</span>
+          </div>
+          <div class="ci-card" data-lanes="package knowledge testing governance">
+            <strong>Skill Story and Use Case</strong>
+            <span>Every skill should connect Card, Conversation, and Confirmation: short SKILL.md, captured decisions/context, and evals/receipts. Complex skills add use-case fields: scope, goal level, actor, trigger, guarantees, main success, extensions, and open issues.</span>
+            <span><code>check</code> skill story, acceptance criteria, skill smells, and confirmation coverage.</span>
+          </div>
+          <div class="ci-card" data-lanes="package runtime security governance">
+            <strong>Missing Core Contracts</strong>
+            <span>Do not leave receipt schema, deterministic exit codes, skills.lock.json, trust store, migration/diff system, quarantine, uninstall, and plain-language diagnostics implicit.</span>
+            <span><code>backbone</code> shared receipts plus clear blocker explanations.</span>
+          </div>
           <div class="ci-card" data-lanes="runtime security">
             <strong>Safe To Run Question</strong>
             <span>A skill can run only when schema is valid, permissions are declared, secrets are scoped, sandbox policy is known, source/context trust is acceptable, and runtime blockers are resolved.</span>
@@ -2875,6 +3208,11 @@
             <strong>Registry MVP</strong>
             <span>Do not build a full marketplace early. Start with local package, install preview, digest tracking, ORAS/OCI feasibility, and signed package verification.</span>
             <span><code>defer</code> marketplace, ranking, discovery UX, and public publishing workflows.</span>
+          </div>
+          <div class="ci-card" data-lanes="package plugin governance oss ci">
+            <strong>Docs And Explorer MVP</strong>
+            <span>Build public capability docs and a read-only Skill Explorer before a registry. Docs explain package contracts; the explorer demonstrates signatures, permissions, evals, receipts, freshness, trust, and install preview from static manifests.</span>
+            <span><code>surface</code> docs.yourdomain.com, skills.yourdomain.com, generated references, static skill index, and no public marketplace in v1.</span>
           </div>
           <div class="ci-card" data-lanes="testing evalops">
             <strong>Eval Confirmation Ladder</strong>
@@ -2915,6 +3253,11 @@
             <strong>Anti-Bloat Rule</strong>
             <span>If a feature does not improve author speed, safety proof, runtime trust, eval quality, install confidence, or release decisions, keep it out of v1.</span>
             <span><code>question</code> what user or agent decision this feature improves.</span>
+          </div>
+          <div class="ci-card" data-lanes="governance ci package oss">
+            <strong>Not V1 / Deferred</strong>
+            <span>Full marketplace UX, broad governance platform, Cedar as default policy, compliance receipts, public registry ranking/discovery, and full knowledge packages for tiny skills stay out of MVP.</span>
+            <span><code>defer until</code> real install volume, team sharing pressure, enterprise policy need, or release evidence demand proves the cost.</span>
           </div>
         </div>
       </section>
@@ -3042,7 +3385,7 @@
       evalops: "observability, trace review, evaluator calibration, and production evals",
       knowledge: "knowledge acquisition, source trust, distillation, context engineering, and freshness",
       plugin: "Codex plugin host integration, MCP servers, apps, hooks, and marketplace packaging",
-      governance: "governance, model integrity, release evidence, audit, and lifecycle decisions",
+      governance: "readiness gates, model integrity, release evidence, audit, and lifecycle decisions",
       oss: "open source implementation adapters, requirements, receipts, and fallback policies",
       ci: "Prek hooks, CircleCI, GitHub security, CodeRabbit review, branch protection, and risk-tiered adoption gates",
       agent: "agent identity, autonomy, delegation, approvals, handoffs, memory, incidents, and receipts"
@@ -3052,7 +3395,7 @@
     const modes = Array.from(document.querySelectorAll(".atlas-mode"));
     const status = document.querySelector(".atlas-status");
     const laneSections = Array.from(document.querySelectorAll("[data-lanes]"));
-    const laneItems = Array.from(document.querySelectorAll(".doctrine-card, .agent-card, .life-step, .complexity-card, .model-card, .knowledge-card, .language-card, .data-card, .testing-card, .plugin-card, .evalops-card, .oss-card, .ci-card, .tile, .domain, .output, .risk, .band-item, .matrix-grid span, .matrix-grid strong"));
+    const laneItems = Array.from(document.querySelectorAll(".author-step, .author-card, .health-card, .doctrine-card, .agent-card, .life-step, .complexity-card, .model-card, .knowledge-card, .language-card, .data-card, .testing-card, .plugin-card, .evalops-card, .oss-card, .ci-card, .tile, .domain, .output, .risk, .band-item, .matrix-grid span, .matrix-grid strong"));
     let activeLane = "all";
     let activeMode = "all";
 
