@@ -174,6 +174,42 @@ PLUGIN_SKILL_COLLISION_POLICIES: tuple[dict[str, Any], ...] = (
             "Plugins/cache/openai-curated/openai-developers/skills/chatgpt-app-submission",
         ),
     },
+    {
+        "name": "index",
+        "classification": "distinct_homonym",
+        "display_strategy": "qualify_all",
+        "resolution": "keep_qualified",
+        "reason": (
+            "Data Analytics and Product Design both expose plugin router skills "
+            "named index, but each routes only its own plugin family."
+        ),
+        "paths": (
+            "Plugins/cache/openai-curated-remote/data-analytics/0.1.35-cf2b8b6c00d3/skills/index",
+            "Plugins/cache/openai-curated-remote/product-design/0.1.42/skills/index",
+        ),
+        "qualified_names": {
+            "Plugins/cache/openai-curated-remote/data-analytics/0.1.35-cf2b8b6c00d3/skills/index": "data-analytics:index",
+            "Plugins/cache/openai-curated-remote/product-design/0.1.42/skills/index": "product-design:index",
+        },
+    },
+    {
+        "name": "user-context",
+        "classification": "distinct_homonym",
+        "display_strategy": "qualify_all",
+        "resolution": "keep_qualified",
+        "reason": (
+            "Data Analytics and Product Design both expose user-context skills, "
+            "but they manage different plugin-scoped state and onboarding."
+        ),
+        "paths": (
+            "Plugins/cache/openai-curated-remote/data-analytics/0.1.35-cf2b8b6c00d3/skills/user-context",
+            "Plugins/cache/openai-curated-remote/product-design/0.1.42/skills/user-context",
+        ),
+        "qualified_names": {
+            "Plugins/cache/openai-curated-remote/data-analytics/0.1.35-cf2b8b6c00d3/skills/user-context": "data-analytics:user-context",
+            "Plugins/cache/openai-curated-remote/product-design/0.1.42/skills/user-context": "product-design:user-context",
+        },
+    },
 )
 
 # Runtime projection modes. These are intentionally outside the selection

@@ -170,14 +170,15 @@ The user-facing result is not a new CLI feature. The user-facing result is confi
 ### Functional Requirements
 
 - FR-001: The scaffold MUST define logical landing zones for SDK core, schemas, runtime, packaging, signing, evals, fixtures, examples, canon docs, and decisions.
-- FR-002: The scaffold MUST define deep modules for `manifest`, `receipts`, `risk`, `install`, `sandbox`, `refs`, and `evals`.
+- FR-002: The scaffold MUST define deep modules for `manifest`, `receipts`, `risk`, `install`, `sandbox`, `refs`, `evals`, and the signing placeholder owner.
 - FR-003: The scaffold MUST preserve `./bin/ask` as the repo control plane.
 - FR-004: The scaffold MUST distinguish canonical source from generated runtime projections.
 - FR-005: Future feature issues MUST name one owning deep module and any collaborator modules.
 - FR-006: CLI handlers MAY orchestrate modules but MUST NOT own SDK business logic.
 - FR-007: The scaffold MUST include or plan minimal fixtures for Codex `SKILL.md` shape and SDK draft package shape.
 - FR-008: The scaffold MUST include validation that proves behavior compatibility or reports pre-existing blockers.
-- FR-009: The scaffold MUST block feature implementation planning until accepted.
+- FR-009: The scaffold MUST block feature implementation planning until accepted, and the implementation plan MUST include a concrete gate proof rather than prose-only refusal language.
+- FR-010: The scaffold MUST map the parent V1 product spec acceptance IDs SA-024 through SA-029 to child acceptance evidence, or explicitly keep the unmapped parent IDs blocked.
 
 ### Non-Functional Requirements
 
@@ -212,7 +213,7 @@ docs/decisions/
 | Schemas | `schemas/skills-sdk/` or `Infrastructure/schemas/skills-sdk/` | Public JSON schemas for manifest, receipts, lockfile, eval datasets, and package metadata. |
 | Runtime | `Infrastructure/scripts/lib/ask/skills_sdk/runtime/` | Runtime/sandbox interfaces, not full execution platform. |
 | Packaging | `Infrastructure/scripts/lib/ask/skills_sdk/packaging/` | Package assembly interfaces and preview-only contracts. |
-| Signing | `Infrastructure/scripts/lib/ask/skills_sdk/signing/` | Signature/provenance adapter interfaces. |
+| Signing | `Infrastructure/scripts/lib/ask/skills_sdk/signing/` | Signature/provenance placeholder contracts only; no signing execution. |
 | Evals | `Infrastructure/scripts/lib/ask/skills_sdk/evals/` | Eval dataset and result contract helpers. |
 | Fixtures | `Infrastructure/tests/fixtures/skills_sdk/` | Valid, invalid, and edge-case skill package fixtures. |
 | Examples | `examples/skills-sdk/` | Minimal/source-shape examples for docs and tests. |
@@ -270,6 +271,7 @@ New module shells MUST NOT duplicate an equivalent existing module. If an equiva
 | `sandbox` | Execution isolation adapter contract and receipts. | sandbox profile, adapter probe, receipt shape. | platform-specific command construction details. |
 | `refs` | Reference ingestion, trust boundary, freshness, promotion authority. | source manifest, promotion receipt, trust diagnostics. | raw untrusted content as instructions. |
 | `evals` | Internal datasets, rubrics, A/B comparison, eval result receipts. | dataset schema, result schema, threshold helpers. | judge implementation internals. |
+| `signing` | Signature/provenance placeholder contract for future package trust decisions. | placeholder schema, provenance receipt shape, explicit `not_run` or `blocked` status helpers. | signing execution, private keys, registry publication, trust-store mutation. |
 
 ### Dependency Direction Contract
 
@@ -282,6 +284,7 @@ New module shells MUST NOT duplicate an equivalent existing module. If an equiva
 | `sandbox` | manifest identity, receipts | install internals, eval internals |
 | `refs` | manifest, receipts, risk | sandbox command construction, eval judge internals |
 | `evals` | manifest, receipts, risk, sandbox public adapter contract | install internals, signing internals |
+| `signing` | manifest, receipts, risk | private key handling, registry publish flows, install writes, sandbox command construction |
 
 Implementation MUST add a lightweight dependency rule file or test that catches direct imports across forbidden internals.
 
@@ -296,8 +299,11 @@ Implementation MUST add a lightweight dependency rule file or test that catches 
 | macOS/native sandbox profile and A/B isolation adapter | `sandbox` | `risk`, `receipts`, `evals` | install owning command construction |
 | References, runbooks, context ingestion, freshness, trust boundary | `refs` | `manifest`, `risk`, `receipts`, `evals` | raw reference content as instructions |
 | Internal datasets, rubrics, A/B comparison, LLM-judge receipt | `evals` | `manifest`, `risk`, `sandbox`, `receipts`, `refs` | Tessl/external confirmation as required SDK gate |
+| Signature, provenance, and package trust placeholder contracts | `signing` | `manifest`, `risk`, `receipts` | signing execution, private key handling, registry publish, install writes |
 
 Future feature plans MUST cite this routing table and name one primary owner.
+
+The signing module is documentation/schema-only in JSC-391. It exists so future signing work has an owner, but this slice MUST NOT implement signing execution, key management, registry publication, or trust-store writes.
 
 ### Path Ownership Contract
 
@@ -373,7 +379,7 @@ Path resolver semantics:
 | artifact_chain_key | skills-sdk-scaffold-refactor |
 | persistent_artifacts | This spec and Linear JSC-391. |
 | live_state_refresh | required before implementation planning and before PR closeout. |
-| session_evidence_status | current local spec evidence plus live JSC-391 state observed in this session. |
+| session_evidence_status | current local spec evidence plus recorded JSC-391 link; live tracker state must be refreshed before implementation planning because local artifact validation does not prove Linear state. |
 
 ## Coding and Testing Lenses
 
@@ -426,6 +432,26 @@ The JSC-391 implementation plan MUST include the validation floor below. A requi
 - VP-009: Feature-leak negative checks prove this slice did not add new user-facing command behavior, signing execution, sandbox execution, eval execution, registry/publish behavior, or writes to global/project skill install targets.
 - VP-010: Dependency direction test or lint proves modules consume public contracts rather than forbidden internals.
 - VP-011: `AGENTS.md` or repo path ownership docs are updated, or the closeout links to the existing authoritative pointer that makes the new scaffold discoverable.
+- VP-012: Planning-gate proof shows feature implementation planning remains blocked until the JSC-391 acceptance artifact exists. Acceptable proof is one of: a `he-plan` dry-run/refusal artifact, a repo-local routing check, or current Linear dependency/status evidence that explicitly blocks feature issues on JSC-391.
+- VP-013: Parent V1 acceptance crosswalk proves whether parent SA-024 through SA-029 are satisfied by this child scaffold work, explicitly deferred, or still blocked.
+
+Compatibility receipt minimum fields:
+
+| Field | Required content |
+| --- | --- |
+| `schema_version` | Receipt schema version for baseline/post-change comparison. |
+| `phase` | `baseline` or `post_change`. |
+| `command` | Exact command string. |
+| `exit_code` | Numeric exit code or `blocked` when the command could not run. |
+| `structured_output_status` | `parsed`, `not_json`, `not_applicable`, or `blocked`. |
+| `selected_skill_handle` | Exact skill handle used for explain/prove checks, or `not_applicable`. |
+| `expected_invariant` | Behavior invariant protected by the command. |
+| `actual_invariant` | Observed behavior or blocker shape. |
+| `normalized_failure_class` | Stable class for comparing baseline and post-change failures. |
+| `regression_classification` | `preserved`, `introduced_by_scaffold`, `pre_existing`, `unrelated_dirty_worktree`, `environment_or_tooling`, or `blocked`. |
+| `evidence_ref` | Path or command output reference used for closeout. |
+
+A failure can be classified as pre-existing only when baseline and post-change receipts match on `command`, `selected_skill_handle`, `normalized_failure_class`, and `actual_invariant` shape. If those fields differ, closeout MUST classify the failure as introduced, unrelated, environment/tooling, or blocked until proven otherwise.
 
 Required compatibility command matrix:
 
@@ -438,7 +464,7 @@ Required compatibility command matrix:
 | `./bin/ask skills prove <existing-skill-handle> --json --robot` | Existing skill proof path is preserved. |
 | `./bin/ask repo closeout --changed --json --robot` | Changed-file closeout remains callable. |
 
-Implementation planning MUST discover the exact `<existing-skill-handle>` and existing unit test set before edits. A failure can be classified as pre-existing only when it appears in both baseline and post-change receipts with equivalent failure shape.
+Implementation planning MUST discover the exact `<existing-skill-handle>` and existing unit test set before edits. Baseline/post-change equivalence MUST use the compatibility receipt fields above; narrative-only comparison is not sufficient.
 
 Minimum fixture set:
 
@@ -481,10 +507,15 @@ python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lin
 ### Closeout Acceptance
 
 - SA-013: Scaffold validation proves existing behavior is preserved or reports pre-existing blockers from baseline and post-change receipts.
-- SA-014: Feature implementation planning remains blocked until JSC-391 scaffold acceptance.
+- SA-014: Feature implementation planning remains blocked until JSC-391 scaffold acceptance and the parent V1 acceptance crosswalk has no `blocked_parent_acceptance` rows.
 - SA-015: The implementation closeout reports module ownership, work mode, sensor placement, and receipt/proof status for scaffold tasks.
 - SA-016: The closeout includes a structured receipt or closeout JSON with changed paths, validation commands, pass/fail state, module map, deferred feature work, and regression classification.
 - SA-017: `AGENTS.md` or repo path ownership docs are updated, or the closeout links to the existing authoritative pointer that makes the new scaffold discoverable.
+- SA-018: A parent V1 acceptance crosswalk maps SA-024 through SA-029 to child evidence, accepted deferral, or blocked status before feature implementation planning proceeds.
+- SA-019: Work-mode tags for inferential, computational, and hybrid work are documented in the module routing or scaffold ADR, or parent SA-025 remains blocked.
+- SA-020: Sensor placement and probability/impact/detectability risk model evidence is documented in the `risk` module contract, or parent SA-026 remains blocked.
+- SA-021: Receipt proof metadata is documented in the `receipts` module contract and compatibility receipt schema, or parent SA-027 remains blocked.
+- SA-022: P1/P2 adversarial review findings are dispositioned as computational proof, accepted deferral, or evidence-backed non-applicability, or parent SA-029 remains blocked.
 
 ## Visual References / Diagrams
 
@@ -493,9 +524,11 @@ flowchart TD
   A["Current Agent Skills Kit"] --> B["JSC-391 scaffold gate"]
   B --> C["Deep module landing zones"]
   C --> D["Compatibility proof"]
-  D --> E["Feature implementation planning"]
+  D --> X["Parent V1 acceptance crosswalk"]
+  X --> E["Feature implementation planning"]
   E --> F["Skills SDK V1.0 slices"]
   B -. "blocks" .-> E
+  X -. "blocks" .-> E
 ```
 
 ## Evidence and References
@@ -525,11 +558,26 @@ flowchart TD
 
 | Linear issue | Acceptance IDs |
 | --- | --- |
-| JSC-391 | SA-001, SA-002, SA-003, SA-004, SA-005, SA-006, SA-007, SA-008, SA-009, SA-010, SA-011, SA-012, SA-013, SA-014, SA-015, SA-016, SA-017 |
+| JSC-391 | SA-001, SA-002, SA-003, SA-004, SA-005, SA-006, SA-007, SA-008, SA-009, SA-010, SA-011, SA-012, SA-013, SA-014, SA-015, SA-016, SA-017, SA-018, SA-019, SA-020, SA-021, SA-022 |
 | JSC-375 | SA-007, SA-008, SA-013 |
 | JSC-376 | SA-007, SA-014 |
 | JSC-378 | SA-002, SA-003, SA-004, SA-011 |
 | JSC-390 | SA-001 |
+
+## Parent V1 Acceptance Crosswalk
+
+The parent V1 product spec assigns SA-024 through SA-029 to JSC-391. This child spec cannot close JSC-391 for feature-planning purposes unless each parent acceptance ID has one of the statuses below recorded in the implementation plan and closeout.
+
+| Parent V1 ID | Parent requirement | Child evidence required | Closeout status rule |
+| --- | --- | --- | --- |
+| SA-024 | Agent-first scaffold gate is accepted before feature implementation planning. | SA-001 through SA-018, path-map ADR, module map, baseline/post-change receipts, and planning-gate proof. | Must be `satisfied` before feature implementation planning. |
+| SA-025 | Inferential, computational, and hybrid work-mode tags are accepted before implementation planning. | SA-019 documents where work-mode tags live and how future issues cite them. | `satisfied` or `blocked_parent_acceptance`; not implied by scaffold folders. |
+| SA-026 | Sensor placement and probability/impact/detectability risk model are accepted before implementation planning. | SA-020 documents the `risk` module's public classifier inputs/outputs and sensor placement contract. | `satisfied` or `blocked_parent_acceptance`; not implied by module naming. |
+| SA-027 | Receipt proof metadata is accepted before implementation planning. | SA-021 documents receipt metadata fields, redaction boundary, and compatibility receipt schema. | `satisfied` or `blocked_parent_acceptance`; narrative receipt summaries do not suffice. |
+| SA-028 | Module routing and progressive-disclosure contracts are accepted before implementation planning. | SA-003, SA-004, SA-011, SA-017, and routing/dependency tests or lintable rules. | Must be `satisfied` before feature implementation planning. |
+| SA-029 | P1/P2 adversarial review findings require computational proof, accepted deferral, or evidence-backed non-applicability. | SA-022 records every P1/P2 finding and one disposition with evidence. | `satisfied` or `blocked_parent_acceptance`; unresolved findings block feature implementation planning. |
+
+If any parent acceptance row is `blocked_parent_acceptance`, closeout may still finish the scaffold slice, but MUST state that JSC-391 is not accepted as the full parent pre-plan gate and feature implementation planning remains blocked.
 
 ## Open Questions
 
@@ -546,7 +594,7 @@ Proceed with JSC-391 as a scaffold/refactor spec before feature implementation p
 
 ## Handoff to he-plan
 
-`he-plan` should plan JSC-391 only. It should not plan `skill check`, install, signing, sandbox, refs, evals, or docs/explorer feature work until the scaffold implementation is accepted.
+`he-plan` should plan JSC-391 only. It should not plan `skill check`, install, signing, sandbox, refs, evals, or docs/explorer feature work until the scaffold implementation is accepted and the parent V1 acceptance crosswalk has no `blocked_parent_acceptance` rows.
 
 Plan should begin with:
 
@@ -558,7 +606,8 @@ Plan should begin with:
 6. Add minimal fixtures for valid Codex skill, invalid missing-frontmatter skill, SDK draft package, and generated-projection rejection.
 7. Add scaffold/path ownership/module routing/dependency direction tests.
 8. Run post-change compatibility checks and classify baseline versus scaffold regressions.
-9. Update JSC-391 and closeout evidence with a structured receipt.
+9. Produce planning-gate proof that feature implementation planning remains blocked until JSC-391 acceptance exists.
+10. Update JSC-391 and closeout evidence with a structured receipt and parent V1 acceptance crosswalk.
 
 No-Fog Gate:
 
@@ -567,7 +616,7 @@ No-Fog Gate:
 - Do not edit runtime projections as source.
 - Do not implement V1 features inside the scaffold slice.
 - Do not add new user-facing CLI behavior, signing execution, sandbox execution, eval execution, install writes, registry/publish behavior, or global/project skill writes.
-- Do not start feature plans until JSC-391 acceptance is proven.
+- Do not start feature plans until JSC-391 acceptance and the parent V1 crosswalk are proven.
 
 ## Appendix A. Harness Metadata / Traceability
 
@@ -627,6 +676,11 @@ acceptance_ids:
 - SA-015
 - SA-016
 - SA-017
+- SA-018
+- SA-019
+- SA-020
+- SA-021
+- SA-022
 
 authority_scope_boundary:
 
@@ -675,8 +729,12 @@ Incorporated changes:
 - Added existing `Infrastructure/scripts/lib/ask/skills_sdk/**` inventory and preserve/move/wrap/defer classification.
 - Added dependency direction, module routing, and path resolver contracts.
 - Replaced permissive validation language with a required validation floor, compatibility command matrix, fixture minimums, baseline/post-change receipts, and feature-leak negative checks.
-- Grouped acceptance into plan, implementation, and closeout phases and expanded traceability to SA-017.
+- Grouped acceptance into plan, implementation, and closeout phases and expanded traceability to SA-022.
 - Assigned open-question owners and required evidence.
+- Added parent V1 SA-024 through SA-029 acceptance crosswalk and planning-gate proof requirements.
+- Added signing as a placeholder-owned deep module without signing execution authority.
+- Added compatibility receipt fields for baseline/post-change regression classification.
+- Clarified that local artifact validation does not prove current Linear state.
 
 Validation commands:
 
