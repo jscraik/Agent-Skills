@@ -33,6 +33,8 @@ Covers:
     - Final Recommendation section
 """
 
+from __future__ import annotations
+
 import re
 import unittest
 from html.parser import HTMLParser
@@ -181,7 +183,7 @@ class TestHtmlDocumentStructure(unittest.TestCase):
 
 
 class TestHtmlLaneTabs(unittest.TestCase):
-    """All 10 lane-filter tabs must be present with correct data-lane-filter values."""
+    """All lane-filter tabs must be present with correct data-lane-filter values."""
 
     EXPECTED_LANES = {
         "all",
@@ -189,6 +191,8 @@ class TestHtmlLaneTabs(unittest.TestCase):
         "package",
         "runtime",
         "security",
+        "oss",
+        "ci",
         "testing",
         "evalops",
         "knowledge",
@@ -200,8 +204,12 @@ class TestHtmlLaneTabs(unittest.TestCase):
         self._doc = _parse_html(HTML_PATH)
         self._tabs = self._doc.find_all_with_attr("button", "data-lane-filter")
 
-    def test_tab_count_is_ten(self):
-        self.assertEqual(len(self._tabs), 10, "Expected exactly 10 lane-filter tabs")
+    def test_tab_count_matches_expected_lanes(self):
+        self.assertEqual(
+            len(self._tabs),
+            len(self.EXPECTED_LANES),
+            "Expected lane-filter tab count to match EXPECTED_LANES",
+        )
 
     def test_all_lane_filter_values_present(self):
         found = {t["attrs_dict"]["data-lane-filter"] for t in self._tabs}
@@ -242,7 +250,7 @@ class TestHtmlLaneTabs(unittest.TestCase):
 
 
 class TestHtmlViewModes(unittest.TestCase):
-    """All 8 view-mode buttons must be present with correct data-view-mode values."""
+    """All view-mode buttons must be present with correct data-view-mode values."""
 
     EXPECTED_MODES = {
         "all",
@@ -252,6 +260,8 @@ class TestHtmlViewModes(unittest.TestCase):
         "knowledge",
         "evalops",
         "runtime",
+        "oss",
+        "ci",
         "outputs",
     }
 
@@ -259,8 +269,12 @@ class TestHtmlViewModes(unittest.TestCase):
         self._doc = _parse_html(HTML_PATH)
         self._modes = self._doc.find_all_with_attr("button", "data-view-mode")
 
-    def test_mode_count_is_eight(self):
-        self.assertEqual(len(self._modes), 8, "Expected exactly 8 view-mode buttons")
+    def test_mode_count_matches_expected_modes(self):
+        self.assertEqual(
+            len(self._modes),
+            len(self.EXPECTED_MODES),
+            "Expected view-mode button count to match EXPECTED_MODES",
+        )
 
     def test_all_view_mode_values_present(self):
         found = {m["attrs_dict"]["data-view-mode"] for m in self._modes}
@@ -319,6 +333,9 @@ class TestHtmlSections(unittest.TestCase):
         "Codex plugin distribution and host integration lane",
         "AI eval operations and evaluative evidence lane",
         "Skills SDK pipeline from source to emitted artifacts",
+        "Open source implementation and requirements map",
+        "CI hooks review and adoption gates",
+        "MVP feature and scope tightening decisions",
     }
 
     def setUp(self):
@@ -328,11 +345,11 @@ class TestHtmlSections(unittest.TestCase):
             "section", "data-lanes"
         )
 
-    def test_section_count_is_fifteen(self):
+    def test_section_count_matches_expected_labels(self):
         self.assertEqual(
             len(self._sections_with_lanes),
-            15,
-            f"Expected 15 sections with data-lanes, found {len(self._sections_with_lanes)}",
+            len(self.EXPECTED_SECTION_LABELS),
+            "Expected data-lanes section count to match EXPECTED_SECTION_LABELS",
         )
 
     def test_all_expected_section_labels_present(self):
@@ -346,7 +363,7 @@ class TestHtmlSections(unittest.TestCase):
                 )
 
     def test_doctrine_section_data_lanes(self):
-        """Doctrine section must appear in all 9 non-'all' lanes."""
+        """Doctrine section must appear in all foundational non-'all' lanes."""
         doctrine_sections = [
             s
             for s in self._sections_with_lanes
@@ -1282,7 +1299,7 @@ class TestHtmlLaneModeConsistency(unittest.TestCase):
 
     VALID_LANE_VALUES = {
         "agent", "package", "runtime", "security", "testing",
-        "evalops", "knowledge", "plugin", "governance",
+        "evalops", "knowledge", "plugin", "governance", "oss", "ci",
     }
 
     def setUp(self):
@@ -1304,7 +1321,7 @@ class TestHtmlLaneModeConsistency(unittest.TestCase):
     def test_all_section_views_are_known_values(self):
         valid_views = {
             "overview", "lifecycle", "sdk", "knowledge", "evalops",
-            "runtime", "outputs",
+            "runtime", "outputs", "oss", "ci",
         }
         sections = self._doc.find_all_with_attr("section", "data-views")
         for section in sections:
