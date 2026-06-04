@@ -100,6 +100,18 @@ claims:
     status: supported
     remaining_uncertainty:
       - "No implementation slice PR has merged or been pulled back yet"
+  - id: C003
+    claim: "Jamie explicitly waived the PU-001 merged-and-pulled-before-PU-002 stop condition, and PR #222 was later confirmed merged and pulled into local main."
+    evidence_surface:
+      - "User instruction in chat on 2026-06-04 to move on to the next slice while tracking PRs together"
+      - "GitHub PR 222 in jscraik Agent-Skills"
+      - "Local main fast-forwarded to 575c96d7a docs skills-sdk add governed v1 setup"
+      - "docs/goals/skills-sdk-v1-0-product-implementation/receipts.jsonl R017"
+      - "docs/goals/skills-sdk-v1-0-product-implementation/receipts.jsonl R019"
+    route: reproduced
+    status: supported
+    remaining_uncertainty:
+      - "Root checkout still has unrelated dirty plugin marketplace files that were preserved and not touched"
 tasks:
   - id: T001
     type: pm
@@ -191,7 +203,7 @@ tasks:
   - id: T011
     type: pm
     assignee: PM
-    status: active
+    status: done
     objective: "Package PU-001 through git triage, PR creation or update, pr-green-sweep, merge tracking, and pulled-main proof before PU-002."
     inputs:
       - "docs/goals/skills-sdk-v1-0-product-implementation/goal.md"
@@ -201,7 +213,7 @@ tasks:
       - "artifacts/reviews/skills-sdk-v1-0-product-implementation/pu-001/handoff-health.md"
     constraints:
       - "Report agent-native validator lane as owner-waived, not completed by subagent"
-      - "Do not continue to PU-002 until PU-001 PR is merged and pulled back into main"
+      - "Owner waived the merged-and-pulled-before-PU-002 sequencing gate for this parallel PR-tracking run"
       - "Keep local validation, GitHub PR state, CI state, review state, merge readiness, and pulled-main truth separate"
     expected_output: "PU-001 committed, pushed, PR opened or updated, pr-green-sweep evidence recorded, merge tracked, and main pulled before PU-002"
     allowed_files: []
@@ -213,16 +225,16 @@ tasks:
       - "Local validation fails"
       - "GitHub PR state cannot be verified"
       - "PR is not merged and pulled back into main"
-    receipt_id: R017
+    receipt_id: R019
   - id: T003
     type: worker
     assignee: Worker
-    status: queued
+    status: active
     objective: "Implement PU-002 schema spine for manifest, receipt, risk, and preview."
     inputs:
       - ".harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md"
     constraints:
-      - "Run only after PU-001 passes or is explicitly waived"
+      - "Run after Jamie explicitly waived the PU-001 merged-and-pulled-before-PU-002 stop condition for parallel PR tracking"
       - "Use slice branch codex/skills-sdk-v1-0-pu-002 and isolated worktree"
     expected_output: "Versioned schemas, fixtures, validation evidence, review artifacts, PR, merge, and pulled-main proof for PU-002"
     allowed_files:

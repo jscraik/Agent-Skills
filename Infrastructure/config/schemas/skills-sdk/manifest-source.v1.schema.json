@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/manifest-source.v1.schema.json",
+  "title": "Skills SDK Manifest Source Shape v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "string", "const": "skills-sdk.manifest-source.v1"},
+    "schema_uri": {"type": "string", "const": "https://jscraik.local/agent-skills/schemas/skills-sdk/manifest-source.v1.schema.json"},
+    "source_kind": {"type": "string", "enum": ["minimal_skill", "referenced_skill", "scripted_skill", "manifest_declared_project_source", "generated_projection", "external_package", "placeholder"]},
+    "source_path": {"type": "string", "minLength": 1},
+    "skill_md_path": {"type": "string", "minLength": 1},
+    "canonical_source": {"type": "boolean"},
+    "runtime_projection": {"type": "boolean"},
+    "manifest_fields": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "optional_surfaces": {"type": "array", "items": {"type": "string", "enum": ["agents_openai_yaml", "scripts", "references", "assets", "evals", "package_manifest", "lockfile_preview"]}},
+    "acceptance_trace": {"type": "array", "minItems": 1, "items": {"type": "string", "enum": ["FR-003", "SA-003", "VP-001", "VP-021"]}}
+  },
+  "required": ["schema_version", "schema_uri", "source_kind", "source_path", "skill_md_path", "canonical_source", "runtime_projection", "manifest_fields", "optional_surfaces", "acceptance_trace"]
+}

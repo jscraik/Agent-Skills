@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/placeholder-lifecycle.v1.schema.json",
+  "title": "Skills SDK Placeholder Lifecycle v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "string", "const": "skills-sdk.placeholder-lifecycle.v1"},
+    "schema_uri": {"type": "string", "const": "https://jscraik.local/agent-skills/schemas/skills-sdk/placeholder-lifecycle.v1.schema.json"},
+    "surface": {"type": "string", "enum": ["refs", "evals", "signing", "sandbox", "security_adapter", "explorer"]},
+    "status": {"type": "string", "enum": ["not_run", "skipped_optional", "blocked"]},
+    "reason": {"type": "string", "minLength": 1},
+    "feature_executed": {"type": "boolean", "const": false},
+    "required_for_risk_tier": {"type": "boolean"},
+    "receipt_ref": {"type": "string", "minLength": 1},
+    "acceptance_trace": {"type": "array", "minItems": 1, "items": {"type": "string", "enum": ["FR-010", "SA-020", "SA-021", "VP-021"]}}
+  },
+  "required": ["schema_version", "schema_uri", "surface", "status", "reason", "feature_executed", "required_for_risk_tier", "receipt_ref", "acceptance_trace"]
+}
