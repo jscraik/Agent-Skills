@@ -104,6 +104,7 @@ from ask.skills_sdk.package_verify import (  # noqa: E402
     verify_skill_directory as _verify_skill_directory,
 )
 from ask.skills_sdk.risk import build_risk_classification as _build_risk_classification  # noqa: E402
+from ask.skills_sdk.install_preview import build_install_preview as _build_install_preview  # noqa: E402
 from skill_discovery import (  # noqa: E402
     USER_SKILL_SCOPE_PRECEDENCE,
     classify_skill_scope,
@@ -179,6 +180,7 @@ __all__ = [
     "skills_events",
     "skills_explain_boundary",
     "skills_handles",
+    "skills_sdk_install_preview",
     "skills_load_preview",
     "skills_memory",
     "skills_package",
@@ -3884,6 +3886,65 @@ def skills_sdk_check(
         "next_command": doctor.get("next_command") if isinstance(doctor, dict) else command,
     }
     result.data["skills_sdk_check"] = payload
+    return result
+
+
+def skills_sdk_install_preview(
+    repo_root: Path,
+    target: str,
+    scope: str = "project",
+) -> CallResult:
+    """Build a read-only Skills SDK install preview for one skill target."""
+    result = CallResult()
+    result.metadata["command"] = "sdk install --preview"
+    query = target.strip()
+    target_info, _audit_target = _resolve_doctor_target(repo_root, query)
+    source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
+    source_path = Path(str(source_path_value)) if source_path_value else None
+    if source_path and not source_path.is_absolute():
+        source_path = repo_root / source_path
+
+    preview = _build_install_preview(
+        repo_root,
+        query=query,
+        scope=scope,
+        source_path=source_path,
+        target_info=target_info,
+    )
+    status = "blocked" if preview["trust_state"] == "blocked" else "preview"
+    payload = {
+        "schema_version": "skills-sdk-install-preview.v1",
+        "query": query,
+        "status": status,
+        "scope": scope,
+        "canonical_source_path": source_path_value,
+        "facade_command": "skills-sdk install --preview",
+        "preview": preview,
+        "receipt": {
+            "command": "skills-sdk install --preview",
+            "status": status,
+            "mutation_performed": False,
+            "receipt_ref": preview["receipt_ref"],
+        },
+        "validation_commands": [
+            _ask_validation_command("sdk", "install", query, "--preview", "--scope", scope),
+        ],
+        "agent_summary": (
+            f"skills-sdk install preview is blocked for {query}: canonical source is missing."
+            if status == "blocked"
+            else f"skills-sdk install preview planned {len(preview['target_paths'])} path(s) for {query} without writes."
+        ),
+    }
+    result.data["skills_sdk_install_preview"] = payload
+    if status == "blocked":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=payload["agent_summary"],
+                fix_suggestion=_ask_validation_command("sdk", "check", query),
+            )
+        )
     return result
 
 

@@ -210,3 +210,37 @@ parser inline pushed Infrastructure/bin/ask to 1929 lines against a 1900-line
 limit. The SDK parser and dispatch were moved into
 Infrastructure/scripts/lib/ask/commands/sdk.py, leaving Infrastructure/bin/ask
 as the router. The final ask router count is 1899 lines, and codestyle passes.
+
+## 2026-06-04 PU-003 and PU-004 merged
+
+Jamie reported that both open PRs were merged. GitHub verification confirmed
+PR #224 and PR #225 are merged, and local \`main\` was fast-forwarded to
+\`34a8a07d2 feat(skills-sdk): add risk classifier (#225)\`. The goal board now
+treats PU-003 and PU-004 as done with merged-and-pulled receipts before PU-005
+starts.
+
+## 2026-06-04 PU-005 install preview start
+
+Started PU-005 in \`/private/tmp/agent-skills-skills-sdk-v1-0-pu-005\` on branch
+\`codex/skills-sdk-v1-0-pu-005\`. The implementation adds a preview-only
+\`skills-sdk install <target> --preview\` route that delegates through
+\`ask sdk install\`, builds a schema-shaped install preview, defaults lockfile
+modeling to \`skills.lock.json\`, and blocks non-preview installs instead of
+performing writes.
+
+Validation so far:
+\`uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_install_preview.py -q\`
+passed with 4 tests. Those tests cover schema-valid preview output, wrapper
+parity, non-preview install blocking, and direct path assertions that the
+preview builder does not create lockfile, trust, projection, receipt, or
+global-style install paths.
+
+## 2026-06-04 PU-005 local review and validation
+
+Completed the non-subagent review set for PU-005: simplify,
+improve-codebase-architecture, codex-review, testing, and ubiquitous-language.
+No required findings were reported. Focused SDK tests passed with 40 tests and
+23 subtests, ruff passed on the touched Python files, the goal board validator
+passed, bash scripts/validate-codestyle.sh passed with zero required failures
+and zero warnings, and ./bin/ask repo validate --json --robot passed with zero
+required failures and zero warnings.

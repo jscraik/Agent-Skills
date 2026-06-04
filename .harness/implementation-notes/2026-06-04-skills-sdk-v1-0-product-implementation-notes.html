@@ -394,6 +394,41 @@
         <dd>The final ask router count is 1899 lines, and codestyle passes.</dd>
       </dl>
     </article>
+    <article class="entry">
+      <h3>2026-06-04: PU-003 and PU-004 merged</h3>
+      <dl>
+        <dt>Live check</dt>
+        <dd>Jamie reported both PRs were merged. GitHub verification confirmed PR #224 and PR #225 are <code>MERGED</code>.</dd>
+        <dt>Local main</dt>
+        <dd>Local <code>main</code> fast-forwarded to <code>34a8a07d2 feat(skills-sdk): add risk classifier (#225)</code>.</dd>
+        <dt>Decision</dt>
+        <dd>Close PU-003 and PU-004 as merged-and-pulled lanes before starting PU-005. Keep root checkout dirty files separate and untouched.</dd>
+      </dl>
+    </article>
+
+    <article class="entry">
+      <h3>2026-06-04: PU-005 install preview start</h3>
+      <dl>
+        <dt>Worktree</dt>
+        <dd><code>/private/tmp/agent-skills-skills-sdk-v1-0-pu-005</code> on <code>codex/skills-sdk-v1-0-pu-005</code>.</dd>
+        <dt>Implemented</dt>
+        <dd>Added a preview-only <code>skills-sdk install &lt;target&gt; --preview</code> route through <code>ask sdk install</code>, a schema-shaped install preview builder, and default <code>skills.lock.json</code> lockfile delta modeling.</dd>
+        <dt>Boundary</dt>
+        <dd>Non-preview install is blocked in V1.0. Preview output models target paths and lockfile deltas without writing lockfile, trust-store, projection, receipt, or global-style install paths.</dd>
+        <dt>Validation</dt>
+        <dd><code>uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_install_preview.py -q</code> passed with 4 tests.</dd>
+      </dl>
+    </article>
+
+    <article class="entry">
+      <h3>2026-06-04: PU-005 local review and validation</h3>
+      <dl>
+        <dt>Reviews</dt>
+        <dd>Completed simplify, improve-codebase-architecture, codex-review, testing, and ubiquitous-language artifacts. No required findings were reported.</dd>
+        <dt>Validation</dt>
+        <dd>Focused SDK pytest passed with 40 tests and 23 subtests. <code>ruff</code>, goal board validation, <code>bash scripts/validate-codestyle.sh</code>, and <code>./bin/ask repo validate --json --robot</code> all passed.</dd>
+      </dl>
+    </article>
   </main>
 </body>
 </html>
