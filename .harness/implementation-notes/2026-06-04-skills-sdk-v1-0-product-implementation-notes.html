@@ -300,6 +300,54 @@
         <dd>Continue PU-001 into git triage and PR packaging. The waiver must stay visible in PR and closeout evidence, and PU-002 remains blocked until PU-001 is committed, pushed, opened or updated as a PR, swept green, merged, and pulled back into main.</dd>
       </dl>
     </article>
+
+    <article class="entry">
+      <h3>2026-06-04: PU-002 parallel start</h3>
+      <dl>
+        <dt>Owner instruction</dt>
+        <dd>Jamie instructed moving to the next slice while tracking and resolving PRs together. This waives the board&apos;s original merged-and-pulled-before-next-slice stop condition for PU-002 only.</dd>
+        <dt>PR #222 state</dt>
+        <dd>PR #222 remains open and separate from PU-002 local proof. It is not merged or pulled back into main; CodeRabbit remains rate-limited, and Snyk is owner-ignored.</dd>
+        <dt>Worktree</dt>
+        <dd><code>/private/tmp/agent-skills-skills-sdk-v1-0-pu-002</code> on <code>codex/skills-sdk-v1-0-pu-002</code>, based on the current PU-001 branch head.</dd>
+        <dt>Implemented</dt>
+        <dd>Added versioned Skills SDK schema-spine contracts for manifest source, check receipt, risk classification, lockfile preview, install preview, and placeholder lifecycle honesty, with valid and invalid fixtures plus focused pytest coverage.</dd>
+        <dt>Validation</dt>
+        <dd><code>UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_schema_spine.py -q</code> passed with 9 tests and 6 subtests.</dd>
+      </dl>
+    </article>
+
+    <article class="entry">
+      <h3>2026-06-04: PR 222 merged</h3>
+      <dl>
+        <dt>GitHub state</dt>
+        <dd>PR #222 is merged with merge commit <code>575c96d7a552b762445fcdf5299ddf3f453f6d3f</code>.</dd>
+        <dt>Local main</dt>
+        <dd>Local <code>main</code> fast-forwarded to <code>575c96d7a docs(skills-sdk): add governed v1 setup</code>.</dd>
+        <dt>Decision</dt>
+        <dd>Treat PU-001 as merged and pulled for the goal board. Preserve unrelated root checkout dirty files in <code>Plugins/marketplace.json</code> and <code>Plugins/synaipse-harness/</code> without staging or modifying them.</dd>
+      </dl>
+    </article>
+
+    <article class="entry">
+      <h3>2026-06-04: PU-002 local review pass</h3>
+      <dl>
+        <dt>Reviews</dt>
+        <dd>Completed simplify, improve-codebase-architecture, codex-review, testing, and ubiquitous-language artifacts for PU-002.</dd>
+        <dt>Findings</dt>
+        <dd>No required findings were reported. Testing review records the expected deferred gap that no production CLI emits these schemas until later slices.</dd>
+      </dl>
+    </article>
+
+    <article class="entry">
+      <h3>2026-06-04: PU-002 draft PR</h3>
+      <dl>
+        <dt>PR</dt>
+        <dd><a href="https://github.com/jscraik/Agent-Skills/pull/223">https://github.com/jscraik/Agent-Skills/pull/223</a></dd>
+        <dt>State</dt>
+        <dd>Opened as draft because CodeRabbit and independent reviewer evidence are pending or need explicit owner waiver before merge readiness can be claimed.</dd>
+      </dl>
+    </article>
   </main>
 </body>
 </html>

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/lockfile-preview.v1.schema.json",
+  "title": "Skills SDK Lockfile Preview v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "string", "const": "skills-sdk.lockfile-preview.v1"},
+    "schema_uri": {"type": "string", "const": "https://jscraik.local/agent-skills/schemas/skills-sdk/lockfile-preview.v1.schema.json"},
+    "lockfile_path": {"type": "string", "const": "skills.lock.json"},
+    "operation": {"type": "string", "enum": ["add", "update", "remove", "quarantine", "none"]},
+    "before_digest": {"type": ["string", "null"]},
+    "after_digest": {"type": ["string", "null"]},
+    "would_write": {"type": "boolean", "const": false},
+    "acceptance_trace": {"type": "array", "minItems": 1, "items": {"type": "string", "enum": ["FR-006", "SA-020", "SA-021", "VP-021"]}}
+  },
+  "required": ["schema_version", "schema_uri", "lockfile_path", "operation", "before_digest", "after_digest", "would_write", "acceptance_trace"]
+}

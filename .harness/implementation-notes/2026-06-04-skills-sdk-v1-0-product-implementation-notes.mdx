@@ -116,3 +116,52 @@ Decision: continue PU-001 into git triage and PR packaging. The waiver must stay
 visible in PR and closeout evidence, and PU-002 remains blocked until PU-001 is
 committed, pushed, opened or updated as a PR, swept green, merged, and pulled
 back into main.
+
+## 2026-06-04 PU-002 Parallel Start
+
+Jamie explicitly instructed moving to the next slice while tracking and
+resolving PRs together. That waives the board's original
+merged-and-pulled-before-next-slice stop condition for PU-002 only. PR #222
+remains open and must stay separate from PU-002 local proof: it is not merged,
+not pulled back into main, and CodeRabbit remains rate-limited while Snyk is
+owner-ignored.
+
+Decision: continue PU-002 from an isolated stacked worktree at
+/private/tmp/agent-skills-skills-sdk-v1-0-pu-002 on
+codex/skills-sdk-v1-0-pu-002, based on the current PU-001 branch head. This
+keeps the slice bounded while preserving the PR #222 truth lane for joint
+tracking.
+
+Implemented schema-spine contracts under
+Infrastructure/config/schemas/skills-sdk/ for manifest source, check receipt,
+risk classification, lockfile preview, install preview, and placeholder
+lifecycle honesty. Added valid and invalid fixtures plus focused pytest
+coverage using the repo's existing lightweight schema validator helper.
+
+Validation: UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache uv run --python
+3.12 pytest Infrastructure/tests/test_skills_sdk_schema_spine.py -q passed
+with 9 tests and 6 subtests.
+
+## 2026-06-04 PR 222 Merged
+
+Jamie reported that PR #222 merged. Live GitHub verification confirmed PR #222
+state MERGED with merge commit 575c96d7a552b762445fcdf5299ddf3f453f6d3f, and
+local main fast-forwarded to 575c96d7a docs(skills-sdk): add governed v1 setup.
+
+Decision: treat PU-001 as merged and pulled for the goal board. The root
+checkout still has unrelated dirty plugin marketplace files, so those remain
+unstaged and untouched while PU-002 continues in its isolated worktree.
+
+## 2026-06-04 PU-002 Local Review Pass
+
+Completed the non-subagent review set for PU-002: simplify,
+improve-codebase-architecture, codex-review, testing, and ubiquitous-language.
+No required findings were reported. Testing review records the expected
+deferred gap that no production CLI emits these schemas until later slices.
+
+## 2026-06-04 PU-002 Draft PR
+
+Opened draft PR #223 for PU-002 at
+https://github.com/jscraik/Agent-Skills/pull/223. The PR is intentionally
+draft because CodeRabbit and independent reviewer evidence are pending or need
+explicit owner waiver before merge readiness can be claimed.

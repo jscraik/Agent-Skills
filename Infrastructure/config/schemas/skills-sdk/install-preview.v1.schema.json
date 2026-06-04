@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/install-preview.v1.schema.json",
+  "title": "Skills SDK Install Preview v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "string", "const": "skills-sdk.install-preview.v1"},
+    "schema_uri": {"type": "string", "const": "https://jscraik.local/agent-skills/schemas/skills-sdk/install-preview.v1.schema.json"},
+    "scope": {"type": "string", "enum": ["project", "workspace", "global"]},
+    "target_paths": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "digest": {"type": "string", "minLength": 1},
+    "permission_summary": {"type": "array", "items": {"type": "string", "enum": ["filesystem_read", "filesystem_write", "network", "secrets", "process", "none"]}},
+    "trust_state": {"type": "string", "enum": ["trusted", "untrusted", "requires_approval", "blocked"]},
+    "conflicts": {"type": "array", "items": {"type": "string"}},
+    "lockfile_delta_preview": {"$ref": "lockfile-preview.v1.schema.json"},
+    "rollback_note": {"type": "string", "minLength": 1},
+    "mutation_performed": {"type": "boolean", "const": false},
+    "receipt_ref": {"type": "string", "minLength": 1},
+    "acceptance_trace": {"type": "array", "minItems": 1, "items": {"type": "string", "enum": ["FR-006", "FR-010", "SA-020", "SA-021", "VP-021"]}}
+  },
+  "required": ["schema_version", "schema_uri", "scope", "target_paths", "digest", "permission_summary", "trust_state", "conflicts", "lockfile_delta_preview", "rollback_note", "mutation_performed", "receipt_ref", "acceptance_trace"]
+}
