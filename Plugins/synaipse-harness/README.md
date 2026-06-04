@@ -2,6 +2,9 @@
 
 `synaipse-harness` is the compact SynAIpse lifecycle plugin. It chooses one next stage, records authority limits, and hands off through the core `sy-*` command handles.
 
+Plugin metadata points local plugin information links at this README so the
+picker has a durable operator-facing reference.
+
 It is not the `@brainwav/coding-harness` infrastructure toolchain.
 
 ## Reader Map
