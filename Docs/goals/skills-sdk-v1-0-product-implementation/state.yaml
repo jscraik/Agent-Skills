@@ -373,7 +373,7 @@ tasks:
     stop_if:
       - "Any placeholder output can be misread as implemented lifecycle capability"
       - "PR is not merged and pulled back into main"
-    receipt_id: R033
+    receipt_id: R036
   - id: T008
     type: pm
     assignee: PM
