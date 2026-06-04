@@ -3800,6 +3800,93 @@ def skills_doctor(
     return result
 
 
+def skills_sdk_check(
+    repo_root: Path,
+    target: str,
+    strict: bool = False,
+    codex_parity: bool = False,
+) -> CallResult:
+    """Run the Skills SDK check facade through the canonical skills doctor."""
+    result = skills_doctor(
+        repo_root,
+        target=target,
+        strict=strict,
+        codex_parity=codex_parity,
+    )
+    doctor = result.data.get("skill_doctor", {})
+    doctor_status = doctor.get("status") if isinstance(doctor, dict) else None
+    blockers = doctor.get("blockers", []) if isinstance(doctor, dict) else []
+    first_blocker = blockers[0] if blockers and isinstance(blockers[0], dict) else {}
+    status = {
+        "pass": "pass",
+        "warning": "warning",
+        "blocked": "blocked",
+    }.get(str(doctor_status or ""), "degraded")
+    failure_class = "none"
+    if status in {"blocked", "degraded"}:
+        failure_class = "validation_failed"
+
+    doctor_command_args = [target]
+    if strict:
+        doctor_command_args.append("--strict")
+    if codex_parity:
+        doctor_command_args.append("--codex-parity")
+    command = _skills_validation_command("doctor", *doctor_command_args)
+    facade_command = "skills-sdk check"
+    result.metadata["command"] = "sdk check"
+    receipt = {
+        "schema_version": "skills-sdk.check-receipt.v1",
+        "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/check-receipt.v1.schema.json",
+        "command": facade_command,
+        "command_version": "skills-sdk.v1",
+        "status": status,
+        "failure_class": failure_class,
+        "exit_code": 0 if result.status == "success" else 2,
+        "work_mode": "computational",
+        "proof": {
+            "type": "command_output",
+            "evidence_kind": "receipt",
+            "evidence_ref": command,
+        },
+        "sensor": {
+            "id": "skills-sdk.check.facade",
+            "placement": "preflight",
+            "required": True,
+        },
+        "actor": {"role": "agent"},
+        "approval_decision": "not_required",
+        "redaction": "not_applicable",
+        "acceptance_trace": ["FR-008", "FR-009", "SA-004", "SA-005", "VP-002"],
+    }
+    payload = {
+        "schema_version": "skills-sdk-check.v1",
+        "query": target,
+        "status": status,
+        "failure_class": failure_class,
+        "doctor_status": doctor_status,
+        "canonical_command": command,
+        "facade_command": facade_command,
+        "receipt": receipt,
+        "skill_doctor": doctor,
+        "agent_summary": (
+            f"skills-sdk check blocked for {target}: {first_blocker.get('message')}"
+            if status == "blocked"
+            else (
+                f"skills-sdk check completed for {target} with warnings."
+                if status == "warning"
+                else f"skills-sdk check passed for {target}."
+            )
+        ),
+        "validation_commands": [
+            _ask_validation_command("sdk", "check", target),
+            command,
+        ],
+        "next_command": doctor.get("next_command") if isinstance(doctor, dict) else command,
+    }
+    result.data["skills_sdk_check"] = payload
+    return result
+
+
 def skills_prove(repo_root: Path, handle: str) -> CallResult:
     """Compose an agent-facing proof scorecard for one skill handle."""
     result = CallResult()

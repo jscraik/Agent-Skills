@@ -348,31 +348,50 @@
         <dd>Opened as draft because CodeRabbit and independent reviewer evidence are pending or need explicit owner waiver before merge readiness can be claimed.</dd>
       </dl>
     </article>
+
     <article class="entry">
-      <h3>2026-06-04: PU-004 parallel start</h3>
+      <h3>2026-06-04: PR 223 merged</h3>
       <dl>
-        <dt>Main state</dt>
-        <dd>PR #223 is merged and local <code>main</code> is already at <code>0dd9460c6 feat(skills-sdk): add v1 schema spine (#223)</code>.</dd>
-        <dt>PU-003 state</dt>
-        <dd>PR #224 remains open as a draft for <code>codex/skills-sdk-v1-0-pu-003</code> and is tracked as a separate truth lane.</dd>
+        <dt>Live check</dt>
+        <dd>Jamie reported again that the PR was merged. Live GitHub verification confirmed PR #223 state <code>MERGED</code> with merge commit <code>0dd9460c60d9e463d1827c162726f6d4c19acc07</code>.</dd>
+        <dt>Local main</dt>
+        <dd>Local <code>main</code> fast-forwarded to <code>0dd9460c6</code>, and the PU-003 worktree was rebased onto <code>origin/main</code>.</dd>
         <dt>Decision</dt>
-        <dd>Start PU-004 in <code>/private/tmp/agent-skills-skills-sdk-v1-0-pu-004</code> on <code>codex/skills-sdk-v1-0-pu-004</code> because the canonical implementation plan allows PU-003 and PU-004 to proceed in parallel after PU-002. PU-005 must wait until both PU-003 and PU-004 have merged and been pulled back into main.</dd>
+        <dd>Treat PU-002 as merged and pulled for the goal board. Earlier R022 remains historical evidence from the first live check when PR #223 was still open; current state is recorded in R024.</dd>
       </dl>
     </article>
 
     <article class="entry">
-      <h3>2026-06-04: PU-004 risk classifier</h3>
+      <h3>2026-06-04: PU-003 check facade start</h3>
       <dl>
         <dt>Implemented</dt>
-        <dd>Added the static Skills SDK risk classifier in <code>Infrastructure/scripts/lib/ask/skills_sdk/risk.py</code>. It classifies skill sources as <code>docs_only</code>, <code>referenced</code>, <code>scripted</code>, <code>external</code>, or <code>placeholder</code>.</dd>
-        <dt>Doctor output</dt>
-        <dd><code>skills doctor</code> now emits a schema-valid <code>risk_classification</code> check with source kind, risk tier, sensor IDs, full sensor placement metadata, blocking behavior, receipt requirement, and acceptance trace.</dd>
-        <dt>Tradeoff</dt>
-        <dd>PU-004 records sensor placement metadata but does not execute heavy scanners, sandboxes, external adapters, package manager probes, install writes, projections, trust-store writes, or global mutations. Those stay deferred to later preview and receipt slices.</dd>
-        <dt>Reviews</dt>
-        <dd>Completed local non-subagent review artifacts for simplify, improve-codebase-architecture, codex-review, testing, and ubiquitous-language under <code>artifacts/reviews/skills-sdk-v1-0-product-implementation/pu-004/</code>.</dd>
+        <dd>Added <code>ask sdk check &lt;target&gt;</code> as a first-class command topic, routed it through canonical <code>skills_doctor</code>, emitted a <code>skills-sdk.check-receipt.v1</code> receipt, and added <code>./bin/skills-sdk</code> as a thin wrapper back to <code>ask sdk</code>.</dd>
+        <dt>Why</dt>
+        <dd>This gives authors the product-facing <code>skills-sdk check</code> surface without bypassing <code>./bin/ask</code> as the repo control plane.</dd>
         <dt>Validation</dt>
-        <dd>Focused classifier and schema tests passed, wider doctor tests passed, <code>git diff --check</code> passed, <code>bash scripts/validate-codestyle.sh</code> passed, and <code>./bin/ask repo validate --json --robot</code> passed.</dd>
+        <dd><code>./bin/ask sdk check Skills/agent-ops/simplify --json --robot</code> passed, <code>./bin/skills-sdk check Skills/agent-ops/simplify --json --robot</code> passed, and focused pytest passed with 30 tests and 23 subtests.</dd>
+      </dl>
+    </article>
+
+    <article class="entry">
+      <h3>2026-06-04: PU-003 local review pass</h3>
+      <dl>
+        <dt>Reviews</dt>
+        <dd>Completed simplify, improve-codebase-architecture, codex-review, testing, and ubiquitous-language artifacts for PU-003.</dd>
+        <dt>Finding fixed</dt>
+        <dd>The review found one command-replay issue: the SDK check payload initially duplicated <code>--json --robot</code> in <code>validation_commands</code>. That was fixed before focused tests and board validation were rerun.</dd>
+      </dl>
+    </article>
+
+    <article class="entry">
+      <h3>2026-06-04: PU-003 modularity fix</h3>
+      <dl>
+        <dt>Gate</dt>
+        <dd>Codestyle initially failed the ask CLI modularity budget because adding the SDK parser inline pushed <code>Infrastructure/bin/ask</code> to 1929 lines against a 1900-line limit.</dd>
+        <dt>Fix</dt>
+        <dd>Moved SDK parser and dispatch into <code>Infrastructure/scripts/lib/ask/commands/sdk.py</code>, leaving <code>Infrastructure/bin/ask</code> as the router.</dd>
+        <dt>Result</dt>
+        <dd>The final ask router count is 1899 lines, and codestyle passes.</dd>
       </dl>
     </article>
   </main>
