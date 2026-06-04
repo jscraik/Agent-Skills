@@ -103,6 +103,7 @@ from ask.skills_sdk.package_verify import (  # noqa: E402
     verify_archive_package as _verify_archive_package,
     verify_skill_directory as _verify_skill_directory,
 )
+from ask.skills_sdk.risk import build_risk_classification as _build_risk_classification  # noqa: E402
 from skill_discovery import (  # noqa: E402
     USER_SKILL_SCOPE_PRECEDENCE,
     classify_skill_scope,
@@ -3655,11 +3656,29 @@ def skills_doctor(
         )
 
     frontmatter: dict[str, Any] = {}
+    source_body = ""
     if source_path and source_path.is_file():
         try:
             frontmatter = _read_skill_frontmatter_fields(source_path)
+            source_body = source_path.read_text(encoding="utf-8")
         except OSError:
             frontmatter = {}
+            source_body = ""
+    risk_classification = _build_risk_classification(
+        source_path if source_path and source_path.exists() else None,
+        frontmatter,
+        source_body,
+    )
+    checks["risk_classification"] = _doctor_check(
+        "pass",
+        check_name="risk_classification",
+        classification=risk_classification,
+        sensor_ids=risk_classification["sensor_ids"],
+        risk_tier=risk_classification["risk_tier"],
+        source_kind=risk_classification["source_kind"],
+        blocking_behavior=risk_classification["blocking_behavior"],
+        receipt_required=risk_classification["receipt_required"],
+    )
     metadata_status = _capability_metadata_status(frontmatter)
     metadata_status.setdefault("sdk_layer", _doctor_sdk_layer_for("check", "capability_metadata"))
     checks["capability_metadata"] = metadata_status

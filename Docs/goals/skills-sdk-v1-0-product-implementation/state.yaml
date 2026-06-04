@@ -229,7 +229,7 @@ tasks:
   - id: T003
     type: worker
     assignee: Worker
-    status: active
+    status: done
     objective: "Implement PU-002 schema spine for manifest, receipt, risk, and preview."
     inputs:
       - ".harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md"
@@ -285,12 +285,13 @@ tasks:
   - id: T005
     type: worker
     assignee: Worker
-    status: queued
+    status: active
     objective: "Implement PU-004 risk tier classifier and sensor placement."
     inputs:
       - ".harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md"
     constraints:
-      - "Run only after PU-003 has merged and main has pulled it"
+      - "PU-004 may proceed after PU-002 schemas because the canonical plan allows PU-003 and PU-004 in parallel"
+      - "Do not start PU-005 until both PU-003 and PU-004 have merged and main has pulled them"
       - "Do not invoke live sandbox execution or external scanners unless classified as optional adapter detection"
     expected_output: "Risk classifier, sensor metadata proof, review artifacts, PR, merge, and pulled-main proof for PU-004"
     allowed_files:
@@ -305,7 +306,7 @@ tasks:
       - "./bin/ask repo closeout --changed --json --robot"
     stop_if:
       - "Risk tier changes activate heavy gates by blanket policy instead of risk evidence"
-      - "PR is not merged and pulled back into main"
+      - "PR is not merged and pulled back into main before PU-005 starts"
     receipt_id: R005
   - id: T006
     type: worker

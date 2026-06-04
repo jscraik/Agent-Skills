@@ -348,6 +348,33 @@
         <dd>Opened as draft because CodeRabbit and independent reviewer evidence are pending or need explicit owner waiver before merge readiness can be claimed.</dd>
       </dl>
     </article>
+    <article class="entry">
+      <h3>2026-06-04: PU-004 parallel start</h3>
+      <dl>
+        <dt>Main state</dt>
+        <dd>PR #223 is merged and local <code>main</code> is already at <code>0dd9460c6 feat(skills-sdk): add v1 schema spine (#223)</code>.</dd>
+        <dt>PU-003 state</dt>
+        <dd>PR #224 remains open as a draft for <code>codex/skills-sdk-v1-0-pu-003</code> and is tracked as a separate truth lane.</dd>
+        <dt>Decision</dt>
+        <dd>Start PU-004 in <code>/private/tmp/agent-skills-skills-sdk-v1-0-pu-004</code> on <code>codex/skills-sdk-v1-0-pu-004</code> because the canonical implementation plan allows PU-003 and PU-004 to proceed in parallel after PU-002. PU-005 must wait until both PU-003 and PU-004 have merged and been pulled back into main.</dd>
+      </dl>
+    </article>
+
+    <article class="entry">
+      <h3>2026-06-04: PU-004 risk classifier</h3>
+      <dl>
+        <dt>Implemented</dt>
+        <dd>Added the static Skills SDK risk classifier in <code>Infrastructure/scripts/lib/ask/skills_sdk/risk.py</code>. It classifies skill sources as <code>docs_only</code>, <code>referenced</code>, <code>scripted</code>, <code>external</code>, or <code>placeholder</code>.</dd>
+        <dt>Doctor output</dt>
+        <dd><code>skills doctor</code> now emits a schema-valid <code>risk_classification</code> check with source kind, risk tier, sensor IDs, full sensor placement metadata, blocking behavior, receipt requirement, and acceptance trace.</dd>
+        <dt>Tradeoff</dt>
+        <dd>PU-004 records sensor placement metadata but does not execute heavy scanners, sandboxes, external adapters, package manager probes, install writes, projections, trust-store writes, or global mutations. Those stay deferred to later preview and receipt slices.</dd>
+        <dt>Reviews</dt>
+        <dd>Completed local non-subagent review artifacts for simplify, improve-codebase-architecture, codex-review, testing, and ubiquitous-language under <code>artifacts/reviews/skills-sdk-v1-0-product-implementation/pu-004/</code>.</dd>
+        <dt>Validation</dt>
+        <dd>Focused classifier and schema tests passed, wider doctor tests passed, <code>git diff --check</code> passed, <code>bash scripts/validate-codestyle.sh</code> passed, and <code>./bin/ask repo validate --json --robot</code> passed.</dd>
+      </dl>
+    </article>
   </main>
 </body>
 </html>

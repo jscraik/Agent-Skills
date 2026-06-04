@@ -165,3 +165,37 @@ Opened draft PR #223 for PU-002 at
 https://github.com/jscraik/Agent-Skills/pull/223. The PR is intentionally
 draft because CodeRabbit and independent reviewer evidence are pending or need
 explicit owner waiver before merge readiness can be claimed.
+
+## 2026-06-04 PU-004 Parallel Start
+
+PR #223 is merged and local `main` is already at
+`0dd9460c6 feat(skills-sdk): add v1 schema spine (#223)`. PR #224 for
+PU-003 remains open as a draft and is tracked separately.
+
+Decision: start PU-004 in `/private/tmp/agent-skills-skills-sdk-v1-0-pu-004`
+on `codex/skills-sdk-v1-0-pu-004` because the canonical implementation plan
+allows PU-003 and PU-004 to proceed in parallel after PU-002. PU-005 must not
+start until both PU-003 and PU-004 have merged and been pulled back into main.
+
+## 2026-06-04 PU-004 Risk Classifier
+
+Implemented the static Skills SDK risk classifier in
+`Infrastructure/scripts/lib/ask/skills_sdk/risk.py`. It classifies skill
+sources as `docs_only`, `referenced`, `scripted`, `external`, or
+`placeholder`, then emits risk tier, sensor IDs, full sensor placement
+metadata, blocking behavior, receipt requirement, and acceptance trace through
+`skills doctor`.
+
+Tradeoff: PU-004 records sensor placement metadata but does not execute heavy
+scanners, sandboxes, external adapters, package manager probes, install writes,
+projections, trust-store writes, or global mutations. Those stay deferred to
+later preview and receipt slices.
+
+Review: completed local non-subagent review artifacts for simplify,
+improve-codebase-architecture, codex-review, testing, and ubiquitous-language
+under
+`artifacts/reviews/skills-sdk-v1-0-product-implementation/pu-004/`.
+
+Validation: focused classifier and schema tests passed, wider doctor tests
+passed, `git diff --check` passed, `bash scripts/validate-codestyle.sh` passed,
+and `./bin/ask repo validate --json --robot` passed.
