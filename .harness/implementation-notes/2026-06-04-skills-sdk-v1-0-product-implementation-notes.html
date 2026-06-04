@@ -429,6 +429,51 @@
         <dd>Focused SDK pytest passed with 40 tests and 23 subtests. <code>ruff</code>, goal board validation, <code>bash scripts/validate-codestyle.sh</code>, and <code>./bin/ask repo validate --json --robot</code> all passed.</dd>
       </dl>
     </article>
+
+    <article class="entry">
+      <h3>2026-06-04: PU-006 placeholder lifecycle start</h3>
+      <dl>
+        <dt>Merge lane</dt>
+        <dd>Jamie confirmed PR #226 was merged. GitHub verification showed PR #226 as <code>MERGED</code> with merge commit <code>2f25b799a95afc0257a7f9bc74ab1b493bd42f7f</code>, and local <code>main</code> fast-forwarded to that commit.</dd>
+        <dt>Worktree</dt>
+        <dd><code>/private/tmp/agent-skills-skills-sdk-v1-0-pu-006</code> on <code>codex/skills-sdk-v1-0-pu-006</code>.</dd>
+        <dt>Scope</dt>
+        <dd>PU-006 is adding honest placeholder lifecycle receipts for refs ingestion, evals, package signing, sandbox/security adapters, and static explorer contracts.</dd>
+        <dt>Boundary</dt>
+        <dd>Placeholder receipts may report <code>not_run</code>, <code>skipped_optional</code>, or <code>blocked</code>. They must not report pass, mutate state, access signing keys, run a sandbox, invoke Tessl, or publish hosted explorer output.</dd>
+      </dl>
+    </article>
+
++
+    <article class="entry">
+      <h3>2026-06-04: PU-006 command behavior proof</h3>
+      <dl>
+        <dt>Implemented</dt>
+        <dd>Added <code>ask sdk lifecycle</code> and the public <code>skills-sdk lifecycle</code> wrapper route. Output is a <code>skills-sdk-placeholder-lifecycle-set.v1</code> payload containing schema-valid <code>skills-sdk.placeholder-lifecycle.v1</code> receipts.</dd>
+        <dt>Default behavior</dt>
+        <dd><code>./bin/ask sdk lifecycle --json --robot</code> exits 0 with status <code>placeholder</code>, <code>feature_executed: false</code>, and <code>mutation_performed: false</code>.</dd>
+        <dt>Wrapper behavior</dt>
+        <dd><code>./bin/skills-sdk lifecycle --surface sandbox --json --robot</code> exits 0 and preserves the same sandbox placeholder contract through the public wrapper.</dd>
+        <dt>Fail-closed behavior</dt>
+        <dd><code>./bin/ask sdk lifecycle --risk-tier high --json --robot</code> exits 2 with status <code>blocked</code> because sandbox and security_adapter are required at that risk tier but no V1.0 adapters exist.</dd>
+        <dt>Validation</dt>
+        <dd>Focused pytest passed with 13 tests and 12 subtests. Ruff passed on the touched lifecycle, SDK command, skills implementation, and test files.</dd>
+      </dl>
+    </article>
+
++
+    <article class="entry">
+      <h3>2026-06-04: PU-006 local review and validation</h3>
+      <dl>
+        <dt>Reviews</dt>
+        <dd>Completed simplify, improve-codebase-architecture, codex-review, testing, and ubiquitous-language artifacts. No required findings were reported.</dd>
+        <dt>Validation</dt>
+        <dd>Focused lifecycle/schema pytest passed with 13 tests and 12 subtests. Broader SDK pytest passed with 44 tests and 29 subtests. Ruff, diff hygiene, goal board validation, codestyle, and repo validate all passed.</dd>
+        <dt>Current lane truth</dt>
+        <dd>PU-006 is locally implemented and validated in the feature worktree. It is not yet committed, pushed, opened as a PR, merged, or pulled back into main.</dd>
+      </dl>
+    </article>
+
   </main>
 </body>
 </html>

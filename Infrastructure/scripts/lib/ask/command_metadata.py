@@ -43,7 +43,7 @@ VALID_ACTIONS = {
         "fold",
         "init",
     ],
-    "sdk": ["check", "install"],
+    "sdk": ["check", "install", "lifecycle"],
     "reviewers": ["resolve"],
     "runtime": ["surface", "budget"],
     "plugins": ["list", "status", "doctor", "sync-local-runtime", "init", "create", "install", "import", "harden", "uninstall"],
@@ -95,8 +95,10 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
     "sdk": [
         "ask sdk check he-heartbeat --json --robot",
         "ask sdk install he-heartbeat --preview --json --robot",
+        "ask sdk lifecycle --risk-tier high --json --robot",
         "skills-sdk check he-heartbeat --json --robot",
         "skills-sdk install he-heartbeat --preview --json --robot",
+        "skills-sdk lifecycle --surface sandbox --risk-tier high --json --robot",
     ],
     "reviewers": [
         "ask reviewers resolve skillinspector --json",

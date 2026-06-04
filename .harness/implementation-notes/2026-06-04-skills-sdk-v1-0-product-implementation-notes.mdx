@@ -244,3 +244,61 @@ No required findings were reported. Focused SDK tests passed with 40 tests and
 passed, bash scripts/validate-codestyle.sh passed with zero required failures
 and zero warnings, and ./bin/ask repo validate --json --robot passed with zero
 required failures and zero warnings.
+
+## 2026-06-04 PU-006 placeholder lifecycle start
+
+Jamie confirmed PR #226 was merged. Live GitHub verification showed PR #226
+state MERGED with merge commit 2f25b799a95afc0257a7f9bc74ab1b493bd42f7f,
+and local main fast-forwarded to that commit.
+
+Started PU-006 in `/private/tmp/agent-skills-skills-sdk-v1-0-pu-006` on branch
+`codex/skills-sdk-v1-0-pu-006`. The slice is scoped to honest placeholder
+lifecycle receipts for refs ingestion, evals, package signing,
+sandbox/security adapters, and static explorer contracts.
+
+Decision: keep the placeholder command read-only and explicit. Placeholder
+receipts may report `not_run`, `skipped_optional`, or `blocked`; they must not
+report pass, mutate state, access signing keys, run a sandbox, invoke Tessl, or
+publish hosted explorer output.
+
+## 2026-06-04 PU-006 command behavior proof
+
+Implemented `ask sdk lifecycle` and the public `skills-sdk lifecycle` wrapper
+route. The command emits a `skills-sdk-placeholder-lifecycle-set.v1` payload
+containing schema-valid `skills-sdk.placeholder-lifecycle.v1` receipts for
+refs, evals, signing, sandbox, security_adapter, and explorer.
+
+Behavior proof:
+- `./bin/ask sdk lifecycle --json --robot` exits 0 with status
+  `placeholder`, `feature_executed: false`, and `mutation_performed: false`.
+- `./bin/skills-sdk lifecycle --surface sandbox --json --robot` exits 0 and
+  preserves the same sandbox placeholder contract through the public wrapper.
+- `./bin/ask sdk lifecycle --risk-tier high --json --robot` exits 2 with
+  status `blocked` because sandbox and security_adapter are required at that
+  risk tier but no V1.0 adapters exist.
+
+Focused validation:
+`uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_placeholder_lifecycle.py Infrastructure/tests/test_skills_sdk_schema_spine.py -q`
+passed with 13 tests and 12 subtests. Ruff passed on the touched lifecycle,
+SDK command, skills implementation, and test files.
+
+## 2026-06-04 PU-006 local review and validation
+
+Completed the non-subagent review set for PU-006: simplify,
+improve-codebase-architecture, codex-review, testing, and ubiquitous-language.
+No required findings were reported.
+
+Local validation is green:
+- focused lifecycle/schema pytest passed with 13 tests and 12 subtests;
+- broader SDK pytest passed with 44 tests and 29 subtests;
+- ruff passed on the touched Python files;
+- git diff --check passed;
+- goal board validation passed;
+- bash scripts/validate-codestyle.sh passed with zero required failures and zero
+  warnings;
+- ./bin/ask repo validate --json --robot passed with zero required failures and
+  zero warnings.
+
+Current lane truth: PU-006 is locally implemented and validated in the feature
+worktree. It is not yet committed, pushed, opened as a PR, merged, or pulled
+back into main.

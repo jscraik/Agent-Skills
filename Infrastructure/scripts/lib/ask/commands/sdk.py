@@ -35,6 +35,22 @@ def add_sdk_parser(
         default="project",
         help="Install scope to model in the preview",
     )
+    sdk_lifecycle_parser = sdk_subparsers.add_parser(
+        "lifecycle",
+        help="Emit honest placeholder lifecycle receipts for unavailable V1.0 surfaces",
+        parents=[global_parser],
+    )
+    sdk_lifecycle_parser.add_argument(
+        "--surface",
+        choices=["refs", "evals", "signing", "sandbox", "security_adapter", "explorer"],
+        help="Limit output to one lifecycle surface",
+    )
+    sdk_lifecycle_parser.add_argument(
+        "--risk-tier",
+        choices=["low", "medium", "high", "privileged", "published"],
+        default="medium",
+        help="Risk tier used to decide whether unavailable adapters block",
+    )
 
 
 def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
@@ -61,5 +77,11 @@ def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
             repo_root,
             target=args.target,
             scope=args.scope,
+        )
+    if args.action == "lifecycle":
+        return skills_commands.skills_sdk_placeholder_lifecycle(
+            repo_root,
+            surface=args.surface,
+            risk_tier=args.risk_tier,
         )
     return build_unknown_action_result("sdk", args.action)

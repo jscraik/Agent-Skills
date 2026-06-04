@@ -105,6 +105,9 @@ from ask.skills_sdk.package_verify import (  # noqa: E402
 )
 from ask.skills_sdk.risk import build_risk_classification as _build_risk_classification  # noqa: E402
 from ask.skills_sdk.install_preview import build_install_preview as _build_install_preview  # noqa: E402
+from ask.skills_sdk.placeholder_lifecycle import (  # noqa: E402
+    build_placeholder_lifecycle_receipts as _build_placeholder_lifecycle_receipts,
+)
 from skill_discovery import (  # noqa: E402
     USER_SKILL_SCOPE_PRECEDENCE,
     classify_skill_scope,
@@ -181,6 +184,7 @@ __all__ = [
     "skills_explain_boundary",
     "skills_handles",
     "skills_sdk_install_preview",
+    "skills_sdk_placeholder_lifecycle",
     "skills_load_preview",
     "skills_memory",
     "skills_package",
@@ -3943,6 +3947,42 @@ def skills_sdk_install_preview(
                 code="ERR_VALIDATION",
                 message=payload["agent_summary"],
                 fix_suggestion=_ask_validation_command("sdk", "check", query),
+            )
+        )
+    return result
+
+
+def skills_sdk_placeholder_lifecycle(
+    repo_root: Path,
+    surface: str | None = None,
+    risk_tier: str = "medium",
+) -> CallResult:
+    """Emit read-only placeholder lifecycle receipts for unavailable V1.0 surfaces."""
+    del repo_root
+    result = CallResult()
+    result.metadata["command"] = "sdk lifecycle"
+    lifecycle = _build_placeholder_lifecycle_receipts(surface=surface, risk_tier=risk_tier)
+    payload = {
+        **lifecycle,
+        "facade_command": "skills-sdk lifecycle",
+        "validation_commands": [
+            _ask_validation_command(
+                "sdk",
+                "lifecycle",
+                *(("--surface", surface) if surface else ()),
+                "--risk-tier",
+                risk_tier,
+            )
+        ],
+    }
+    result.data["skills_sdk_placeholder_lifecycle"] = payload
+    if lifecycle["status"] == "blocked":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=lifecycle["agent_summary"],
+                fix_suggestion="Use --risk-tier medium for optional placeholder reporting, or implement the missing adapter in a later approved slice.",
             )
         )
     return result
