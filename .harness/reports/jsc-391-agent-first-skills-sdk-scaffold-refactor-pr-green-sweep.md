@@ -45,32 +45,62 @@ Use the local JSC-391 proof bundle before commit:
 
 ## Live PR Discovery
 
-Command: /opt/homebrew/bin/gh --version -> pass (2.93.0)
-Command: /opt/homebrew/bin/gh pr status --json number,title,headRefName,headRefOid,baseRefName,url,mergeable,reviewDecision,statusCheckRollup -> blocked (gh auth unavailable)
-Command: /opt/homebrew/bin/gh pr list --state open --json number,title,headRefName,headRefOid,baseRefName,url,mergeable,reviewDecision,statusCheckRollup -> blocked (gh auth unavailable)
+Initial command: /opt/homebrew/bin/gh --version -> pass (2.93.0)
+Initial command: /opt/homebrew/bin/gh pr status --json number,title,headRefName,headRefOid,baseRefName,url,mergeable,reviewDecision,statusCheckRollup -> blocked (gh auth unavailable under default state paths)
+Initial command: /opt/homebrew/bin/gh pr list --state open --json number,title,headRefName,headRefOid,baseRefName,url,mergeable,reviewDecision,statusCheckRollup -> blocked (gh auth unavailable under default state paths)
 
-Auth checks:
+Auth recovery:
 
-- gh auth status: not logged into any GitHub hosts.
-- GH_TOKEN_present: false.
-- GITHUB_TOKEN_present: false.
+- Retried gh with temp-scoped state/cache paths: XDG_CACHE_HOME=/private/tmp/agent-skills-xdg-cache and XDG_STATE_HOME=/private/tmp/agent-skills-gh-state.
+- gh auth status: pass; authenticated as jscraik with repo/workflow scopes.
+- gh pr list --head codex/jsc-391-governed-implementation --state all --json number,title,url,state,headRefName,baseRefName,mergeable,reviewDecision,statusCheckRollup -> pass; no existing PR found before creation.
 
-Network permission was granted for the live-state attempt, so this is an authentication blocker, not a sandbox-network blocker.
+Network permission was granted for each live-state attempt. The original blocker was a Codex sandbox state-path/auth discovery issue, not a GitHub outage.
+
+## Commit, Push, And PR Update
+
+Command: git commit with PYTHON_BIN=/private/tmp/agent-skills-xdg-cache/uv/archive-v0/eWsOeC9U82alWi7e11OBQ/bin/python and MISE_TRUSTED_CONFIG_PATHS=/private/tmp/agent-skills-jsc-391-governed-implementation/.mise.toml -> pass
+
+- Commit: 4f7082adf feat(skills-sdk): add agent-first scaffold gate
+- Pre-commit validation: pass for Infrastructure and repo root.
+- Commit-message validation: pass for repo root after scoped mise trust override.
+
+Command: git push -u origin codex/jsc-391-governed-implementation with the same hook runtime overrides -> pass
+
+- Pre-push diagnostics: pass for Infrastructure and repo root.
+- Remote branch: origin/codex/jsc-391-governed-implementation
+
+Command: gh pr create --draft --base main --head codex/jsc-391-governed-implementation -> pass
+
+- PR: #221 https://github.com/jscraik/Agent-Skills/pull/221
+- State: OPEN
+- Draft: true
+- Mergeable: MERGEABLE at last live check
+- Review decision: empty at last live check
+
+PR body update:
+
+- Initial pr-template check failed because pending checklist items lacked explicit status markers and the body retained the pass/fail placeholder.
+- Updated the PR body to mark pending checklist items with **(pending)** and remove template placeholder text.
+- Closed and reopened the draft PR to force a fresh pull_request event payload because rerunning the original workflow reused the old PR body payload.
+- Latest pr-template status: pass.
 
 ## Action Queue
 
 auto_fixable_now:
 
-- Stage and commit the local JSC-391 implementation package after final local validation.
+- None in the local implementation package at this triage point.
 
 blocked_policy_or_approval:
 
-- Live PR/CI/review-thread truth is blocked until GitHub auth is available to gh or an equivalent authenticated GitHub surface is provided.
+- CodeRabbit status context reports success with message "Review skipped"; independent CodeRabbit review evidence is therefore not complete.
+- User-directed agent-swarm review was explicitly removed from this implementation lane and remains a separate follow-up.
 - Merge, admin merge, branch deletion, worktree deletion, and Linear mutation remain out of scope without explicit approval.
 
 blocked_external_ci:
 
-- CI state cannot be checked without GitHub PR/check access.
+- Snyk status context is failing because the private-test limit is exhausted: "You have used your limit of private tests".
+- Several GitHub checks were still pending at the latest closeout poll; do not claim CI green or merge readiness until they settle and are rechecked.
 
 cleanup_only:
 
@@ -78,16 +108,17 @@ cleanup_only:
 
 ## Merge And Readiness Ledger
 
-PR number: unknown
-Latest head SHA: unavailable before push/PR discovery
-Required checks: unknown
-Review decision: unknown
-Mergeability: unknown
-Review threads: unknown
-CI: unknown
+PR number: 221
+PR URL: https://github.com/jscraik/Agent-Skills/pull/221
+Latest head SHA: 4f7082adf
+Required checks: mixed; pr-template passed after PR body correction, Snyk failed on private-test limit, and additional GitHub checks were pending at the latest poll
+Review decision: empty
+Mergeability: MERGEABLE at last live check
+Review threads: not independently enumerated beyond gh statusCheckRollup/reviewDecision
+CI: not green; Snyk failed externally and pending checks remain
 Linear: not mutated
 Merge readiness: not claimed
 
 ## Next Step
 
-Commit the local implementation package, then attempt git push with network permission. If push succeeds, PR creation or update still needs authenticated GitHub CLI/API access or an existing remote PR URL discovered by another authenticated surface.
+Leave PR #221 as draft. Recheck live checks after pending GitHub jobs settle, decide whether the Snyk private-test-limit failure is waived or retried outside Codex, and attach independent review evidence when the separately requested review lane runs.
