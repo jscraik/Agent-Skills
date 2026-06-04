@@ -48,13 +48,13 @@ source_artifacts:
 
 ## Command Summary
 
-BLUF: This spec defines the smallest useful Skills SDK V1 product contract so Jamie can move from a strong platform vision into a buildable, agent-native implementation without accidentally creating a marketplace, governance platform, or dashboard before the core contracts work. It covers the V1 command surface, package identity, manifests, install scopes, risk tiers, receipts, permissions, refs ingestion, internal evals, sandbox/security gates, static docs and Skill Explorer, and the explicit non-goals that keep adoption fast. The decision is to build the Skills SDK as a thin CLI and contract layer first, backed by strong guardrails and durable receipts, while deferring full registry, marketplace, broad governance, fancy HITL UI, and required third-party confirmation. The main risk is overreach: security and platform ambition can crush skill usefulness unless every heavy gate activates by risk tier and emits a plain next action. The next action is to review this spec, resolve the open questions, then hand it to `he-plan` for a V1 implementation plan.
+BLUF: This spec defines the smallest useful Skills SDK V1 product contract so Jamie can move from a strong platform vision into a buildable, agent-native implementation without accidentally creating a marketplace, governance platform, or dashboard before the core contracts work. It covers the V1 command surface, package identity, manifests, install scopes, risk tiers, receipts, permissions, refs ingestion, internal evals, sandbox/security gates, static docs and Skill Explorer, and the explicit non-goals that keep adoption fast. The decision is to build the Skills SDK as a thin CLI and contract layer first, backed by strong guardrails and durable receipts, while deferring full registry, marketplace, broad governance, fancy HITL UI, and required third-party confirmation. The JSC-391 scaffold gate is now accepted through PR #221, so the next action is to hand this spec to `he-plan` for a bounded V1.0 implementation plan that starts with schema, receipt, command, install-scope, and risk-tier contracts.
 
-Decision Needed: Confirm this as the canonical V1 product spec before planning. The selected product name is "Skills SDK V1 Product Spec", not "Skills SDK Platform Spec".
+Decision Needed: Confirm the V1.0 planning defaults that remain outside the completed JSC-391 scaffold gate. The product spec is accepted as "Skills SDK V1 Product Spec", the extracted CLI name is `skills-sdk`, and JSC-391 scaffold acceptance is current local repo evidence.
 
 Top Risks: V1 can bloat into a public registry, docs platform, plugin marketplace, and eval platform at once; permissions and receipts can stay vague; install scope and trust identity can drift; knowledge refs can become untrusted context; static docs and Skill Explorer can be mistaken for marketplace readiness.
 
-Next Action: Run HE artifact validation, resolve open questions, then produce a plan that starts with schema, receipt, command, install-scope, and risk-tier contracts.
+Next Action: Produce the V1.0 HE plan from this spec, carrying unresolved implementation defaults as explicit plan-time decisions instead of restarting the scaffold gate.
 
 ## Enhancement Summary
 
@@ -1510,7 +1510,8 @@ flowchart TD
 - Start with schemas and receipts because every other surface consumes them.
 - Keep the first implementation slice small enough to test without building docs, explorer, and security adapters all at once.
 - Do not treat `JSC-390` as the parent tracker for the full SDK. It is a next-slice docs/explorer issue.
-- Create or promote a V1.0 parent issue before planning implementation so the next slice is not hidden inside docs scope.
+- Create or promote a V1.0 parent issue before implementation starts so the next slice is not hidden inside docs scope.
+- Treat JSC-391 scaffold acceptance as complete: PR #221 is merged and local `main` contains `c3ff670f3 feat(skills-sdk): add agent-first scaffold gate (#221)`.
 - JSC-390 owns docs and static Skill Explorer.
 - JSC-388 owns OSS adapter registry and requirements mapping.
 - JSC-386 owns registry/install/update/data-disposition UX.
@@ -1522,16 +1523,16 @@ flowchart TD
 | ID | Question | Blocking status |
 | --- | --- | --- |
 | OQ-001 | What exact domain or subdomain layout should be used for docs and Skill Explorer? | can_defer |
-| OQ-002 | Should the extracted CLI be named `skill`, `skills-sdk`, or remain `ask sdk` until extraction is proven? | blocks_extracted_cli |
-| OQ-003 | Should deny-first security precedence plus request precedence be accepted exactly as written, or should org policy be moved above user/project defaults for non-security defaults too? | blocks_implementation |
-| OQ-004 | What is the default V1 lockfile filename: `skills.lock.json`, `skill.lock.json`, or repo-specific equivalent? | blocks_install_implementation |
+| OQ-002 | Should the extracted CLI be named `skill`, `skills-sdk`, or remain `ask sdk` until extraction is proven? | resolved: `skills-sdk` |
+| OQ-003 | Should deny-first security precedence plus request precedence be accepted exactly as written, or should org policy be moved above user/project defaults for non-security defaults too? | accepted_as_written |
+| OQ-004 | What is the default V1 lockfile filename: `skills.lock.json`, `skill.lock.json`, or repo-specific equivalent? | plan_time_decision: default to `skills.lock.json` unless implementation evidence contradicts |
 | OQ-005 | Which scanner stack is mandatory in V1 versus optional adapter detection? | blocks_security_implementation |
 | OQ-006 | Should Skill Explorer be repo-local static output first, or a hosted site first? | can_defer |
 | OQ-007 | What is the first representative skill package used as the V1 fixture? | blocks_v1_fixture_plan |
 
 ## Decision
 
-Proceed with a constrained Skills SDK V1 Product Spec. Do not spec or plan the full platform first. V1 starts with product commands, schemas, receipts, install scopes, permissions, risk tiers, refs ingestion, internal evals, sandbox/security adapter contracts, and static docs/explorer generation.
+Proceed with a constrained Skills SDK V1 Product Spec. Do not spec or plan the full platform first. V1 starts with product commands, schemas, receipts, install scopes, permissions, risk tiers, refs ingestion, internal evals, sandbox/security adapter contracts, and static docs/explorer generation. The V1.0 plan uses `skills-sdk` as the extracted CLI name, preserves `./bin/ask` as the repo control plane, treats deny-first security precedence as accepted, and carries `skills.lock.json` as the default lockfile unless implementation evidence requires a narrower repo-specific equivalent.
 
 ## Evidence and References
 
@@ -1565,7 +1566,7 @@ scope:
 traceability:
 
 - Primary local artifacts: visual docs and current gap report.
-- Primary tracker artifact: JSC-390 for docs/explorer and JSC-391 for scaffold gate, with related SDK platformization issues.
+- Primary tracker artifact: JSC-390 for docs/explorer and JSC-391 for the completed scaffold gate, with related SDK platformization issues.
 
 validation:
 
@@ -1578,7 +1579,7 @@ blocked_reason: not_applicable
 
 linear_mutation_status: not_needed
 
-linear_action_required: Review whether a new parent should own the full V1 product spec; JSC-390 remains docs/explorer and JSC-391 owns the scaffold gate.
+linear_action_required: Create or promote a parent issue for the V1.0 implementation slice before implementation starts; JSC-390 remains docs/explorer and JSC-391 scaffold acceptance is complete.
 
 spec_path: `.harness/specs/2026-06-03-skills-sdk-v1-product-spec.md`
 
@@ -1639,12 +1640,12 @@ staged_paths: []
 
 handoff:
 
-- After review, hand off to `he-plan` for JSC-391 scaffold/deep-module planning before feature implementation planning.
+- After review, hand off to `he-plan` for the V1.0 schema, receipt, `skills-sdk` command, install-scope, risk-tier, and install-preview implementation plan.
 
 confidence:
 
-- high for V1 scope summary because it is tied to current visual artifacts, Linear issues, and HE spec contract.
-- medium for default tooling choices because final domain/docs stack and CLI name still require acceptance.
+- high for V1 scope summary because it is tied to current visual artifacts, Linear issues, HE spec contract, and accepted JSC-391 scaffold evidence.
+- medium for default tooling choices because final domain/docs stack, scanner mandatory set, and representative fixture still require implementation-time confirmation.
 
 ## Appendix B. Review Outcomes
 
@@ -1672,15 +1673,14 @@ he_linear_traceability_lint.py: pass
 
 Plan should begin with:
 
-1. JSC-391 scaffold/deep-module landing-zone plan.
-2. Schema and receipt contract files inside the accepted scaffold.
-3. CLI facade shape and `skill check` contract.
-4. Risk tier and install-scope model.
-5. Lockfile and trust-store model.
-6. Refs ingestion source manifest and context receipt.
-7. Internal eval dataset schema.
-8. Security adapter interface and sandbox receipt.
-9. Static docs/explorer manifest generation contract.
+1. Schema and receipt contract files inside the accepted JSC-391 scaffold.
+2. CLI facade shape and `skills-sdk check` contract.
+3. Risk tier and install-scope model.
+4. Lockfile and trust-store model, defaulting to `skills.lock.json`.
+5. Refs ingestion source manifest and context receipt placeholders.
+6. Internal eval dataset schema placeholders.
+7. Security adapter interface and sandbox receipt placeholders.
+8. Static docs/explorer manifest generation contract placeholders.
 
 No-Fog Gate:
 
@@ -1689,4 +1689,4 @@ No-Fog Gate:
 - Do not skip receipt schema.
 - Do not install globally without explicit scope.
 - Do not treat docs/explorer as proof of runtime readiness.
-- Do not start feature implementation planning before the JSC-391 scaffold gate is accepted.
+- Do not restart the JSC-391 scaffold gate; treat it as accepted through PR #221 and plan only the next bounded V1.0 slice.

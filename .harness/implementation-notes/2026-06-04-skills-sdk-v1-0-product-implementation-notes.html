@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Skills SDK V1.0 Implementation Notes</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f8fa;
+      --panel: #ffffff;
+      --ink: #18202a;
+      --muted: #5d6875;
+      --line: #d9dee6;
+      --accent: #2364aa;
+      --warn: #8a5a00;
+      --ok: #236b3a;
+      --block: #8b1e2d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+    header {
+      border-bottom: 1px solid var(--line);
+      background: var(--panel);
+      padding: 18px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    main {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    h1 {
+      font-size: 24px;
+      line-height: 1.2;
+      margin: 0 0 6px;
+      letter-spacing: 0;
+    }
+    h2 {
+      font-size: 18px;
+      margin: 28px 0 10px;
+      letter-spacing: 0;
+    }
+    p, ul, ol { margin: 0 0 12px; }
+    code {
+      background: #eef1f5;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 1px 4px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.94em;
+    }
+    .meta {
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .tile, .entry {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+    }
+    .label {
+      color: var(--muted);
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+    .status {
+      border-radius: 999px;
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1;
+      padding: 6px 8px;
+    }
+    .status.active { background: #e9f2fc; color: var(--accent); }
+    .status.pending { background: #fff5d8; color: var(--warn); }
+    .status.pass { background: #e8f5ec; color: var(--ok); }
+    .status.blocked { background: #fdebed; color: var(--block); }
+    .entry { margin-bottom: 12px; }
+    .entry h3 {
+      font-size: 16px;
+      margin: 0 0 8px;
+      letter-spacing: 0;
+    }
+    .entry dl {
+      display: grid;
+      grid-template-columns: 150px 1fr;
+      gap: 6px 12px;
+      margin: 0;
+    }
+    .entry dt {
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .entry dd { margin: 0; }
+    @media (max-width: 720px) {
+      header, main { padding: 16px; }
+      .entry dl { grid-template-columns: 1fr; }
+      .entry dt { margin-top: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Skills SDK V1.0 Implementation Notes</h1>
+    <p class="meta">Running decision log for <code>.harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md</code>.</p>
+  </header>
+  <main>
+    <section class="grid" aria-label="Current state">
+      <div class="tile">
+        <span class="label">Goal</span>
+        <span class="status active">active</span>
+        <p>Governed implementation goal created for Skills SDK V1.0.</p>
+      </div>
+      <div class="tile">
+        <span class="label">Current Slice</span>
+        <span class="status blocked">PU-001 blocked</span>
+        <p>Baseline and skill reviews passed, but named reviewer artifacts remain blocked by reviewer-runtime output loss.</p>
+      </div>
+      <div class="tile">
+        <span class="label">Browser Notes</span>
+        <span class="status active">live file</span>
+        <p>This HTML file is the visible log for decisions, changes, tradeoffs, and deviations.</p>
+      </div>
+      <div class="tile">
+        <span class="label">Local Validation</span>
+        <span class="status pass">goal board valid</span>
+        <p><code>python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py docs/goals/skills-sdk-v1-0-product-implementation</code></p>
+      </div>
+    </section>
+
+    <h2>Decisions And Tradeoffs</h2>
+    <article class="entry">
+      <h3>Use a static HTML decision log before implementation code moves</h3>
+      <dl>
+        <dt>Decision</dt>
+        <dd>Create <code>.harness/implementation-notes/2026-06-04-skills-sdk-v1-0-product-implementation-notes.html</code> and keep it open in Browser.</dd>
+        <dt>Reason</dt>
+        <dd>The plan requires a visible evidence trail, and the user explicitly asked for decisions, changes, tradeoffs, and notable deviations to stay live while implementation proceeds.</dd>
+        <dt>Tradeoff</dt>
+        <dd>A static file needs manual refresh after edits, but it avoids introducing a dev-server dependency into the repo while the SDK implementation surface is still being established.</dd>
+        <dt>Status</dt>
+        <dd><span class="status active">accepted</span></dd>
+      </dl>
+    </article>
+
+    <article class="entry">
+      <h3>Normalize the goal-board path to <code>docs/goals</code></h3>
+      <dl>
+        <dt>Decision</dt>
+        <dd>Use the repository's actual lowercase <code>docs/goals</code> path in the goal board and output artifacts.</dd>
+        <dt>Reason</dt>
+        <dd>The initial scaffold used <code>Docs/goals</code>, but git reports the existing tracked goal-board root as lowercase. Normalizing now avoids case-sensitive checkout drift.</dd>
+        <dt>Tradeoff</dt>
+        <dd>This keeps compatibility with the current macOS checkout and future stricter filesystems, while preserving the existing Goal Governor directory convention.</dd>
+        <dt>Status</dt>
+        <dd><span class="status active">accepted</span></dd>
+      </dl>
+    </article>
+
+    <h2>Open Gates</h2>
+    <article class="entry">
+      <h3>PU-001 parent tracker authority</h3>
+      <dl>
+        <dt>Plan requirement</dt>
+        <dd>Create/promote a V1.0 parent issue before implementation, or record an explicit waiver.</dd>
+        <dt>Current state</dt>
+        <dd>JSC-390 is confirmed as docs/explorer scope, JSC-391 is confirmed complete, and Linear search did not find a separate V1.0 implementation parent issue.</dd>
+        <dt>Next action</dt>
+        <dd>Proceed with local implementation under the user&apos;s implementation instruction while keeping tracker mutation as a separate truth lane. Do not claim tracker completion until a parent issue exists or Jamie explicitly waives it as a tracker action.</dd>
+      </dl>
+    </article>
+
+    <article class="entry">
+      <h3>PU-001 branch/worktree setup</h3>
+      <dl>
+        <dt>Current state</dt>
+        <dd>The primary checkout is dirty with plan/spec/review/goal setup artifacts that the implementation depends on.</dd>
+        <dt>Decision</dt>
+        <dd>First isolate those setup artifacts on <code>codex/skills-sdk-v1-0-pu-001-setup</code>, then create/use slice worktrees from committed setup state for implementation slices.</dd>
+        <dt>Reason</dt>
+        <dd>Starting PU-002 from a separate clean worktree is only meaningful after the governed plan and notes surface are safely on a branch instead of untracked on <code>main</code>.</dd>
+      </dl>
+    </article>
+
+    <h2>Running Change Log</h2>
+    <article class="entry">
+      <h3>2026-06-04: Goal setup complete</h3>
+      <dl>
+        <dt>Changed</dt>
+        <dd>Created native goal, repo-visible goal board, receipts, MDX implementation notes, and this HTML notes surface.</dd>
+        <dt>Validation</dt>
+        <dd>Goal board validator passes after adding required uncertainty strings and MDX evidence anchors.</dd>
+      </dl>
+    </article>
+
+    <article class="entry">
+      <h3>2026-06-04: PU-001 baseline refresh</h3>
+      <dl>
+        <dt>Git head</dt>
+        <dd><code>c3ff670f3 feat(skills-sdk): add agent-first scaffold gate (#221)</code></dd>
+        <dt>Git state</dt>
+        <dd><code>main...origin/main</code> with uncommitted spec, plan, review, goal board, and notes setup artifacts.</dd>
+        <dt>Linear state</dt>
+        <dd><code>JSC-390</code> is Todo docs/explorer scope. <code>JSC-391</code> is Done scaffold evidence. Search for a Skills SDK V1.0 parent implementation issue returned no results.</dd>
+        <dt>Decision</dt>
+        <dd>Do not create or promote a Linear issue without explicit tracker mutation authority. Proceed locally and keep tracker readiness as a separate caveat.</dd>
+      </dl>
+    </article>
+
+    <article class="entry">
+      <h3>2026-06-04: Setup branch created</h3>
+      <dl>
+        <dt>Branch</dt>
+        <dd><code>codex/skills-sdk-v1-0-pu-001-setup</code></dd>
+        <dt>Reason</dt>
+        <dd>The primary checkout was dirty with governed setup artifacts. Moving onto a feature branch prevents implementation setup from remaining as uncommitted work on <code>main</code>.</dd>
+        <dt>Next gate</dt>
+        <dd>Run local validation, required slice review artifacts, validator agents, git triage, PR green sweep, merge, and pull before PU-002.</dd>
+      </dl>
+    </article>
+
+    <article class="entry">
+      <h3>2026-06-04: Validator artifact blocker</h3>
+      <dl>
+        <dt>Requested validators</dt>
+        <dd><code>@adversarial-reviewer</code> and <code>@agent-native-reviewer</code></dd>
+        <dt>Observed</dt>
+        <dd>Both agents completed, but neither wrote the required artifact after the initial run or the artifact-only retry.</dd>
+        <dt>Health report</dt>
+        <dd><code>artifacts/reviews/skills-sdk-v1-0-product-implementation/pu-001/handoff-health.md</code></dd>
+        <dt>Decision</dt>
+        <dd>Stop before <code>@git-project-triage</code>, PR creation, <code>$pr-green-sweep</code>, merge, pulled-main proof, or PU-002 until the validator artifact lane is retried successfully or explicitly waived.</dd>
+      </dl>
+    </article>
+
+    <article class="entry">
+      <h3>2026-06-04: Validator retry repeated missing artifacts</h3>
+      <dl>
+        <dt>Retry</dt>
+        <dd>Spawned fresh <code>@adversarial-reviewer</code> and <code>@agent-native-reviewer</code> validator agents with explicit artifact-write and verify-before-completion instructions.</dd>
+        <dt>Observed</dt>
+        <dd>Both agents completed again, but <code>adversarial-reviewer.md</code> and <code>agent-native-reviewer.md</code> are still missing.</dd>
+        <dt>Decision</dt>
+        <dd>Continue to stop before <code>@git-project-triage</code>, PR creation, <code>$pr-green-sweep</code>, merge, pulled-main proof, or PU-002. This is a repeated validator-artifact runtime blocker, not a proven source finding.</dd>
+      </dl>
+    </article>
+
+    <article class="entry">
+      <h3>2026-06-04: Third blocked audit</h3>
+      <dl>
+        <dt>Checked</dt>
+        <dd>Current branch, goal-board validator, and filesystem search for misplaced adversarial or agent-native validator artifacts.</dd>
+        <dt>Observed</dt>
+        <dd>The goal board still passes, but the required PU-001 validator artifacts are still missing and no misplaced equivalent artifacts were found.</dd>
+        <dt>Decision</dt>
+        <dd>This is the third consecutive goal turn with the same validator-artifact blocker, so the native goal should be marked blocked rather than left active while unable to proceed.</dd>
+      </dl>
+    </article>
+
+    <article class="entry">
+      <h3>2026-06-04: Validator artifact runtime diagnosed</h3>
+      <dl>
+        <dt>Asked</dt>
+        <dd>Diagnose why the PU-001 validator artifacts are not being produced, fix the reason if possible, and continue.</dd>
+        <dt>Observed</dt>
+        <dd>Worker and adversarial artifact-write probes completed without the requested PU-001 probe artifacts. An inherited absolute-path probe spawned a nested child and still produced no requested artifact.</dd>
+        <dt>Control</dt>
+        <dd>A default final-response probe returned final content and wrote <code>artifacts/reviews/default.md</code>, proving the general subagent output channel can work.</dd>
+        <dt>Reviewer role result</dt>
+        <dd>Named <code>@adversarial-reviewer</code> and <code>@agent-native-reviewer</code> validator capture runs completed with null final content and no canonical PU-001 artifacts. A simple adversarial exact-string probe also returned null.</dd>
+        <dt>Fallback result</dt>
+        <dd>Coordinator-captured fallback review agents hung after bounded waits and stop-and-report messages, then were closed.</dd>
+        <dt>Partial recovery</dt>
+        <dd>The default adversarial-style fallback later produced a generic runtime artifact. The coordinator preserved it at <code>artifacts/reviews/skills-sdk-v1-0-product-implementation/pu-001/adversarial-reviewer.md</code> with runtime-substitution labels and retained canonical fallback metadata at <code>artifacts/reviews/skills-sdk-v1-0-product-implementation/pu-001/adversarial-reviewer-fallback-manifest.json</code>.</dd>
+        <dt>Remaining blocker</dt>
+        <dd>A second narrowed default agent-native fallback remained running after bounded waits and produced no new artifact or manifest, then was closed. PU-001 still lacks required agent-native validator evidence.</dd>
+        <dt>Waiver</dt>
+        <dd>Jamie explicitly waived the missing subagent review lane with: <code>ok don't use the subagent review then continue</code>. The waiver is recorded at <code>artifacts/reviews/skills-sdk-v1-0-product-implementation/pu-001/agent-native-reviewer.md</code>.</dd>
+        <dt>Decision</dt>
+        <dd>Continue PU-001 into git triage and PR packaging. The waiver must stay visible in PR and closeout evidence, and PU-002 remains blocked until PU-001 is committed, pushed, opened or updated as a PR, swept green, merged, and pulled back into main.</dd>
+      </dl>
+    </article>
+  </main>
+</body>
+</html>

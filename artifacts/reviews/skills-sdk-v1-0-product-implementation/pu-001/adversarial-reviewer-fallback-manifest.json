@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "artifact_type": "fallback_reviewer_manifest",
+  "slice": "PU-001",
+  "canonical_artifact_path": "artifacts/reviews/skills-sdk-v1-0-product-implementation/pu-001/adversarial-reviewer.md",
+  "source_runtime_artifact_path": "artifacts/reviews/default.md",
+  "source_runtime_manifest_path": "artifacts/agent-runs/default-019e9270-af68-7892-a1f4-8bc9106081af/manifest.json",
+  "agent_id": "019e9270-af68-7892-a1f4-8bc9106081af",
+  "agent_type": "default",
+  "runtime_substitution": "coordinator-preserved fallback because named adversarial-reviewer returned null or missing artifact output",
+  "status": "completed",
+  "retention_decision": "canonicalized_under_pu_001; generic default artifact and agent-runs probe outputs excluded from PR surface"
+}

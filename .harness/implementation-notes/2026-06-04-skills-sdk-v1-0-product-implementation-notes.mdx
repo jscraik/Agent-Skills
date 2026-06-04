@@ -1,0 +1,118 @@
+---
+schema_version: 1
+artifact_type: implementation_notes
+canonical_slug: skills-sdk-v1-0-product-implementation
+title: Skills SDK V1.0 Product Implementation Notes
+status: scaffolded
+date: 2026-06-04
+goal_path: docs/goals/skills-sdk-v1-0-product-implementation/goal.md
+plan_path: .harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md
+---
+
+# Skills SDK V1.0 Product Implementation Notes
+
+These notes are the Worker-visible implementation notebook for the governed
+Skills SDK V1.0 goal. They start as a scaffold and must be updated by each
+implementation slice with exact files changed, validation evidence, review
+artifacts, PR state, merge state, and pulled-main evidence.
+
+<GoalStatus goal="skills-sdk-v1-0-product-implementation" status="active" />
+
+## Deep Module Topology
+
+The implementation must preserve the JSC-391 module ownership map and keep
+schema, receipt, risk, install, sandbox, refs, evals, and docs/explorer
+contracts behind tested module boundaries.
+
+<DeepModuleMap
+  scope="skills-sdk-v1-0-product-implementation"
+  status="scaffolded"
+/>
+
+## Current Slice Insertion Map
+
+Current active task: PU-001 baseline refresh and parent tracker gate.
+
+<InsertionPoint
+  slice="PU-001"
+  status="active"
+/>
+
+## Runtime Truth Surface
+
+No runtime SDK command has been implemented by this goal yet. Runtime truth
+begins only after a slice records command output, receipt output, validation
+commands, and PR delivery state.
+
+<RuntimeCardState
+  route="skills-sdk"
+  status="not_implemented"
+/>
+
+## Blast Radius View
+
+Denied source surfaces include runtime projections, plugin caches, generated
+mirrors, user/global runtime roots, global installs, marketplace behavior,
+registry behavior, hosted docs publishing, real install writes, real sandbox
+execution, package signing, and required Tessl gates unless explicitly
+authorized by a later slice.
+
+<BlastRadiusMap
+  status="bounded"
+  deniedSurfaces="runtime projections; plugin caches; generated mirrors; user/global runtime roots; global installs; marketplace; registry; hosted docs publishing; real install writes; real sandbox execution; package signing; required Tessl"
+/>
+
+## Validation Coverage
+
+Initial board validation is required before implementation. Each slice must add
+its own focused validation command outcomes and reviewer artifacts before
+handoff.
+
+<ValidatorCoverage
+  status="scaffolded"
+  requiredReviews="simplify; improve-codebase-architecture; codex-review; testing; ubiquitous-language"
+  requiredValidators="adversarial-reviewer; agent-native-reviewer"
+/>
+
+## 2026-06-04 PU-001 Validator Artifact Recovery
+
+Jamie asked to diagnose why the PU-001 validator artifacts were not being
+produced and then continue. The recovery pass isolated the failure to the
+current subagent reviewer runtime rather than PU-001 source content:
+
+- worker and adversarial-reviewer artifact-write probes completed without the
+  requested PU-001 probe artifacts;
+- an inherited absolute-path probe spawned a nested child and still produced no
+  requested artifact;
+- a default final-response probe returned final content and wrote the runtime
+  default artifact, proving general subagent output can work;
+- named adversarial-reviewer and agent-native-reviewer validator capture runs
+  completed with null final content and no canonical PU-001 artifacts;
+- coordinator-captured fallback reviewers hung after bounded waits and
+  stop-and-report messages, then were closed.
+
+Partial recovery: the default adversarial-style fallback later produced a
+generic runtime artifact. The coordinator preserved that report at
+`artifacts/reviews/skills-sdk-v1-0-product-implementation/pu-001/adversarial-reviewer.md`
+with runtime-substitution labels and retained canonical fallback metadata at
+`artifacts/reviews/skills-sdk-v1-0-product-implementation/pu-001/adversarial-reviewer-fallback-manifest.json`.
+
+Remaining blocker: a second narrowed default agent-native fallback remained
+running after bounded waits and produced no new artifact or manifest, then was
+closed. Do not continue to git-project-triage, PR creation, pr-green-sweep,
+merge, pulled-main proof, or PU-002 from coordinator assertions alone. PU-001
+still needs non-null agent-native validator evidence from a working reviewer
+runtime or an explicit owner waiver for this agent-native artifact lane.
+
+## 2026-06-04 PU-001 Subagent Review Waiver
+
+Jamie explicitly waived the missing subagent review lane with: "ok don't use the
+subagent review then continue". The waiver is recorded at
+`artifacts/reviews/skills-sdk-v1-0-product-implementation/pu-001/agent-native-reviewer.md`.
+That file is a waiver artifact, not a completed `@agent-native-reviewer`
+report.
+
+Decision: continue PU-001 into git triage and PR packaging. The waiver must stay
+visible in PR and closeout evidence, and PU-002 remains blocked until PU-001 is
+committed, pushed, opened or updated as a PR, swept green, merged, and pulled
+back into main.
