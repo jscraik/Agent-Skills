@@ -1,0 +1,5 @@
+policy:
+  allow_implicit_invocation: false
+interface:
+  display_name: "SynAIpse Harness Heartbeat"
+  short_description: "Use when SynAIpse Harness work needs a recurring live-state check and stage re-entry until done, green, blocked, or cancelled."

@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "name": "synaipse-harness",
+  "version": "0.1.0",
+  "displayName": "SynAIpse",
+  "shortDescription": "AI delivery harness for route truth, evidence, and closure.",
+  "description": "SynAIpse is an AI delivery harness for choosing one next stage, preserving evidence boundaries, and handing off to explicit lifecycle skills.",
+  "author": {
+    "name": "Jamie Craik",
+    "url": "https://github.com/jscraik"
+  },
+  "homepage": "https://github.com/jscraik/Agent-Skills",
+  "repository": "https://github.com/jscraik/Agent-Skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "synaipse",
+    "harness",
+    "workflow",
+    "router",
+    "sy-router",
+    "stage-routing",
+    "handoff",
+    "evidence"
+  ],
+  "governance": {
+    "lifecycle_state": "active",
+    "maturity": "canonical",
+    "owner": "Agent Skills Team",
+    "review_cadence": "quarterly",
+    "last_reviewed": "2026-04-09",
+    "metadata_source": "plugin_manifest"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "SynAIpse",
+    "shortDescription": "AI delivery harness for route truth, evidence, and closure.",
+    "longDescription": "SynAIpse is an AI delivery harness for classifying mixed lifecycle intent, checking freshness, and returning an evidence-backed handoff to explicit stage skills in the same plugin.",
+    "developerName": "Jamie Craik",
+    "category": "Coding",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/jscraik/Agent-Skills",
+    "privacyPolicyURL": "https://github.com/jscraik/Agent-Skills/blob/main/README.md#privacy-and-data-handling",
+    "termsOfServiceURL": "https://github.com/jscraik/Agent-Skills/blob/main/LICENSE",
+    "defaultPrompt": [
+      "Use sy-router."
+    ],
+    "brandColor": "#F97316",
+    "composerIcon": "./assets/icon.png",
+    "logo": "./assets/icon.png"
+  },
+  "icon": "./assets/icon.png"
+}

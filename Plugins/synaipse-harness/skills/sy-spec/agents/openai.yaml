@@ -1,0 +1,5 @@
+policy:
+  allow_implicit_invocation: false
+interface:
+  display_name: "SynAIpse Harness Spec"
+  short_description: "Own the SynAIpse Harness spec stage by turning a brainstorm, existing spec, UI source, or..."

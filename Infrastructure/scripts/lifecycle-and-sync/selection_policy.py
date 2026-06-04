@@ -9,7 +9,7 @@ import json
 import shlex
 from typing import Any, Iterable
 
-POLICY_VERSION = "2026-04-25.v20"
+POLICY_VERSION = "2026-06-04.v21"
 
 PROJECTION_MODE_CHOICES: tuple[str, ...] = ("flat", "rooted", "hybrid")
 

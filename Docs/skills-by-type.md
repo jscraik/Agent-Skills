@@ -4,6 +4,7 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 Entries are grouped by declared semantic type; each path names the owning skill package root, including plugin-owned surfaces.
 
 ## Table of Contents
+
 - [Summary](#summary)
 - [Semantic Types](#semantic-types)
 - [Validation Notes](#validation-notes)
@@ -13,14 +14,14 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `library_api_reference`: 2
 - `product_verification`: 4
 - `data_fetch_analysis`: 3
-- `team_automation`: 37
+- `team_automation`: 54
 - `scaffolding_templates`: 16
 - `code_quality_review`: 24
 - `ci_cd_deployment`: 0
 - `runbook`: 13
 - `infrastructure_ops`: 3
 - `invalid`: 0
-- `total_tagged`: 102
+- `total_tagged`: 119
 
 ## Semantic Types
 
@@ -76,6 +77,23 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `session-workflow-miner` — `Skills/agent-ops`
 - `skill-factory-router` — `Plugins/skill-factory/skills`
 - `skill-pr-delivery` — `Skills/agent-ops`
+- `sy-brainstorm` — `Plugins/synaipse-harness/skills`
+- `sy-eval-report` — `Plugins/synaipse-harness/skills`
+- `sy-execution-plan` — `Plugins/synaipse-harness/skills`
+- `sy-fix-bugs` — `Plugins/synaipse-harness/skills`
+- `sy-heartbeat` — `Plugins/synaipse-harness/skills`
+- `sy-improve` — `Plugins/synaipse-harness/skills`
+- `sy-phase-work` — `Plugins/synaipse-harness/skills`
+- `sy-reconcile` — `Plugins/synaipse-harness/skills`
+- `sy-reframe` — `Plugins/synaipse-harness/skills`
+- `sy-reinforce` — `Plugins/synaipse-harness/skills`
+- `sy-review` — `Plugins/synaipse-harness/skills`
+- `sy-router` — `Plugins/synaipse-harness/skills`
+- `sy-spec` — `Plugins/synaipse-harness/skills`
+- `sy-strategy` — `Plugins/synaipse-harness/skills`
+- `sy-trace-plan` — `Plugins/synaipse-harness/skills`
+- `sy-tracker-plan` — `Plugins/synaipse-harness/skills`
+- `sy-work` — `Plugins/synaipse-harness/skills`
 - `triage` — `Skills/agent-ops`
 - `ubiquitous-language` — `Skills/agent-ops`
 - `video-transcript-downloader` — `Skills/content-publishing`
@@ -157,4 +175,3 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 ## Validation Notes
 
 - No invalid semantic type tags detected.
-

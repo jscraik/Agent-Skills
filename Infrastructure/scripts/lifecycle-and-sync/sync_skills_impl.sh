@@ -651,7 +651,34 @@ is_plugin_owned_skill_path() {
   esac
 }
 
+generated_command_handle_names_cmd() {
+  local command_surface_file="$repo_root/.skillsets/command-surface.json"
+  if [ ! -f "$command_surface_file" ]; then
+    return 0
+  fi
+
+  jq -r '
+    .handles[]?
+    | select(type == "object")
+    | select((.command_handle_path // "") | startswith(".agents/skills/"))
+    | .handle // empty
+  ' "$command_surface_file" 2>/dev/null || true
+}
+
+is_generated_command_handle_name() {
+  local skill_name="$1"
+  if [ -z "${generated_command_handle_names_file:-}" ] || [ ! -f "$generated_command_handle_names_file" ]; then
+    return 1
+  fi
+
+  jq -e --arg skill_name "$skill_name" 'index($skill_name) != null' \
+    "$generated_command_handle_names_file" >/dev/null
+}
+
 if [ "$skills_dir_writable" = "1" ]; then
+  generated_command_handle_names_file="$(mktemp)"
+  generated_command_handle_names_cmd | jq -Rsc 'split("\n") | map(select(length > 0)) | unique' \
+    > "$generated_command_handle_names_file"
   while IFS= read -r skill_path; do
     # Skip the root index.
     if [ "$skill_path" = "./SKILL.md" ]; then
@@ -666,6 +693,10 @@ if [ "$skills_dir_writable" = "1" ]; then
     skill_dir_abs="$repo_root/$skill_dir"
     discovered_dir="$(cd "$skill_dir_abs" 2>/dev/null && pwd || true)"
     if is_plugin_owned_skill_path "$skill_path"; then
+      if is_generated_command_handle_name "$skill_name"; then
+        echo "Preserving plugin-owned generated command handle: $skill_name"
+        continue
+      fi
       if [ -e "$skills_dir/$skill_name" ] || [ -L "$skills_dir/$skill_name" ]; then
         if rm -rf -- "${skills_dir:?}/${skill_name:?}"; then
           echo "Removed stale plugin-owned flat skill: $skill_name"
@@ -718,6 +749,7 @@ if [ "$skills_dir_writable" = "1" ]; then
     fi
     ln -s "$skill_dir_rel" "$skills_dir/$skill_name"
   done < <(all_skill_files_cmd)
+  rm -f -- "$generated_command_handle_names_file"
 
   if [ "$router_collision_count" -gt 0 ]; then
     echo "[ERROR] Aborting sync due to plugin-visible router skill collisions." >&2
@@ -1646,7 +1678,7 @@ normalize_plugin_copy() {
         .handles[]?
         | select(type == "object")
         | select((.owner // "") == $owner)
-        | select((.command_handle_path // "") | startswith(".agents/skills/"))
+        | select(((.command_handle_path // "") | startswith(".agents/skills/")) or ((.command_visibility // "") == "none"))
         | .handle // empty
       ' "$command_surface_file" 2>/dev/null || true
     )

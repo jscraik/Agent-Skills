@@ -14,6 +14,7 @@ from typing import Any
 
 from generate_skillset_manifests import build_manifest_report
 from selection_policy import ROOT_SKILL_SET_NAMES, SYSTEM_BRIDGE_SKILL_NAMES, policy_identity
+from skill_discovery import iter_plugin_skill_dirs, normalize_skill_description, parse_skill_frontmatter
 from skillset_model import repo_root
 
 HANDLE_RE = re.compile(r"^[a-z0-9][a-z0-9-]*$")
@@ -483,18 +484,73 @@ def _write_generated_text(path: Path, content: str) -> None:
             tmp.unlink()
 
 
-def build_skill_handles(*, repo_root_path: Path | None = None) -> list[CommandHandle]:
-    """Build command-visible skill handles from the canonical rooted manifest report."""
+def build_skill_handles(*, repo_root_path: Path | None = None, include_hidden: bool = False) -> list[CommandHandle]:
+    """Build command-visible skill handles from rooted manifests and plugin metadata."""
     root = repo_root_path or repo_root()
     report = build_manifest_report(root / ".skillsets", repo_root_path=root)
     handles: list[CommandHandle] = []
     for manifest in report.get("manifests", []):
         for row in manifest.get("rows", []):
             handle = _handle_from_manifest_row(row)
-            if handle.command_visibility != "none":
+            if include_hidden or handle.command_visibility != "none":
                 handles.append(handle)
+    for row in _plugin_command_surface_rows(root):
+        handle = _handle_from_manifest_row(row)
+        if include_hidden or handle.command_visibility != "none":
+            handles.append(handle)
     handles = _drop_shadowed_system_bridge_handles(handles)
     return sorted(handles, key=lambda item: (item.handle, item.owner, item.source_path or ""))
+
+
+def _plugin_command_surface_rows(root: Path) -> list[dict[str, Any]]:
+    """Return plugin-owned command handles without promoting plugins to root skill sets."""
+    rows: list[dict[str, Any]] = []
+    for skill_dir in iter_plugin_skill_dirs():
+        try:
+            rel_dir = skill_dir.relative_to(root)
+        except ValueError:
+            continue
+        parts = rel_dir.parts
+        if len(parts) < 4 or parts[0] not in {"Plugins", "plugins"} or "skills" not in parts:
+            continue
+        skills_index = parts.index("skills")
+        if skills_index < 1:
+            continue
+        plugin_name = parts[skills_index - 1]
+        if plugin_name in ROOT_SKILL_SET_NAMES:
+            continue
+        skill_md = skill_dir / "SKILL.md"
+        frontmatter = parse_skill_frontmatter(skill_md)
+        command_visibility = (
+            frontmatter.get("metadata.command_visibility")
+            or frontmatter.get("metadata.command-visibility")
+            or frontmatter.get("command_visibility")
+            or frontmatter.get("command-visibility")
+        )
+        if not command_visibility:
+            continue
+        runtime_visibility = (
+            frontmatter.get("metadata.runtime_visibility")
+            or frontmatter.get("metadata.runtime-visibility")
+            or frontmatter.get("runtime_visibility")
+            or frontmatter.get("runtime-visibility")
+            or "latent"
+        )
+        rows.append({
+            "id": frontmatter.get("name") or skill_dir.name,
+            "skill_set": plugin_name,
+            "level": frontmatter.get("metadata.level") or frontmatter.get("level") or "",
+            "source_path": (rel_dir / "SKILL.md").as_posix(),
+            "runtime_visibility": runtime_visibility,
+            "command_visibility": command_visibility,
+            "description": normalize_skill_description(frontmatter.get("description", "")),
+            "provenance": {
+                "generator": "plugin-command-surface.v1",
+                "projection_mode": "plugin-command-handles",
+                "policy_identity": policy_identity(),
+            },
+        })
+    return rows
 
 
 def _drop_shadowed_system_bridge_handles(handles: list[CommandHandle]) -> list[CommandHandle]:
@@ -759,10 +815,12 @@ def parse_command_handles(text: str, *, repo_root_path: Path | None = None) -> d
 
 
 def handles_report(*, repo_root_path: Path | None = None, include_handles: bool = True) -> dict[str, Any]:
-    handles = build_skill_handles(repo_root_path=repo_root_path)
-    surfaced_handles = _with_folded_alias_handles(handles)
+    handles = build_skill_handles(repo_root_path=repo_root_path, include_hidden=True)
+    hidden_handles = [handle for handle in handles if handle.command_visibility == "none"]
+    visible_handles = [handle for handle in handles if handle.command_visibility != "none"]
+    surfaced_handles = _with_folded_alias_handles(visible_handles)
     violations = validate_skill_handles(surfaced_handles, repo_root_path=repo_root_path)
-    command_handle_rows = _command_handle_write_rows(handles)
+    command_handle_rows = _command_handle_write_rows(visible_handles)
     command_handle_violations = [
         violation
         for row in command_handle_rows
@@ -781,9 +839,9 @@ def handles_report(*, repo_root_path: Path | None = None, include_handles: bool 
         "handle_count": len(surfaced_handles),
         "generated_command_handle_count": command_handle_count,
         "violations": violations,
-        "handles": [handle.to_dict() for handle in surfaced_handles] if include_handles else [],
+        "handles": [handle.to_dict() for handle in [*surfaced_handles, *hidden_handles]] if include_handles else [],
         "notes": [
-            "Skill handles are resolved from rooted manifest metadata.",
+            "Skill handles are resolved from rooted manifest metadata and explicit plugin command metadata.",
             "The command-surface manifest is a generated projection, not a source of truth.",
             "Generated command handles are runtime pointers for $ invocation; they are not canonical skill sources.",
             "Generated command handles are written only for handles absent from rooted runtime projection.",

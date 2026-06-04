@@ -1,0 +1,5 @@
+policy:
+  allow_implicit_invocation: false
+interface:
+  display_name: "SynAIpse Harness Phase Heartbeat"
+  short_description: "Use when approved SynAIpse plan phases need recurring wakeups, collector evidence, review gates, and local commit readiness."

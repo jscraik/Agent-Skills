@@ -10,7 +10,7 @@ remembered.
 
 This repository currently exposes **26 skills** in the default catalog: root
 routers plus policy-promoted command handles. The rooted command surface
-contains **111 generated `$` handles**, including **77 first-party handles** backed by canonical skill source across 7 topic clusters (agent-ops: 48, backend-platform: 4, content-publishing: 6, frontend-ui: 10, mobile-native: 1, product-strategy: 3, security-ops: 5). Author a capability once, route it intelligently, validate
+contains **128 generated `$` handles**, including **77 first-party handles** backed by canonical skill source across 7 topic clusters (agent-ops: 48, backend-platform: 4, content-publishing: 6, frontend-ui: 10, mobile-native: 1, product-strategy: 3, security-ops: 5). Author a capability once, route it intelligently, validate
 quality, project it safely into runtime, and keep the human and agent command
 surface small enough to use.
 

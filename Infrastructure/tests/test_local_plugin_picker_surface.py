@@ -15,7 +15,6 @@ EXPECTED_SOURCE_PLUGIN_SKILLS = {
         "he-improve",
         "he-linear-plan",
         "he-plan",
-        "he-phase-heartbeat",
         "he-phase-work",
         "he-reconcile",
         "he-reframe",
@@ -36,12 +35,27 @@ EXPECTED_SOURCE_PLUGIN_SKILLS = {
         "skill-refactor",
         "skillify",
     },
+    "synaipse-harness": {
+        "sy-brainstorm",
+        "sy-eval-report",
+        "sy-execution-plan",
+        "sy-reconcile",
+        "sy-reframe",
+        "sy-reinforce",
+        "sy-review",
+        "sy-spec",
+        "sy-strategy",
+        "sy-trace-plan",
+        "sy-tracker-plan",
+        "sy-work",
+    },
 }
 
 EXPECTED_MARKETPLACE_SOURCE_PATHS = {
     "harness-engineering": "./Plugins/harness-engineering",
     "plugin-factory": "./Plugins/plugin-factory",
     "skill-factory": "./Plugins/skill-factory",
+    "synaipse-harness": "./Plugins/synaipse-harness",
 }
 
 EXPECTED_PLUGIN_KEYWORDS = {
@@ -91,7 +105,9 @@ def _is_hidden_skill(skill_md: Path) -> bool:
     frontmatter = _read_frontmatter_text(skill_md)
     hidden_markers = (
         "runtime-visibility: hidden",
+        "runtime_visibility: hidden",
         "command-visibility: none",
+        "command_visibility: none",
         "lifecycle: deprecated",
         "lifecycle_state: archived",
     )
@@ -110,13 +126,16 @@ def _direct_visible_skill_names(skills_root: Path) -> set[str]:
 
 def _existing_command_handle_skill_names(plugin_name: str) -> set[str]:
     """
-    Collect command-handle names owned by a plugin whose declared paths point to existing regular files within the repository's .skillsets directory.
+    Collect command-handle names owned by a plugin whose declared paths point
+    inside a generated command-surface root.
     
     Parameters:
         plugin_name (str): Plugin identifier used to filter `owner` entries in the command-surface manifest.
     
     Returns:
-        set[str]: Handle names owned by `plugin_name` whose `command_handle_path` resolves inside the repository `.skillsets` directory and refers to an existing regular file.
+        set[str]: Handle names owned by `plugin_name` whose
+        `command_handle_path` resolves inside `.skillsets` or
+        `.agents/skills`.
     """
     command_surface_path = REPO_ROOT / ".skillsets" / "command-surface.json"
     if not command_surface_path.is_file():
@@ -127,7 +146,10 @@ def _existing_command_handle_skill_names(plugin_name: str) -> set[str]:
         return set()
 
     names: set[str] = set()
-    skillsets_root = (REPO_ROOT / ".skillsets").resolve()
+    command_surface_roots = (
+        (REPO_ROOT / ".skillsets").resolve(),
+        (REPO_ROOT / ".agents" / "skills").resolve(),
+    )
     for row in handles:
         if not isinstance(row, dict) or row.get("owner") != plugin_name:
             continue
@@ -139,11 +161,7 @@ def _existing_command_handle_skill_names(plugin_name: str) -> set[str]:
             continue
         try:
             handle_file = (REPO_ROOT / command_handle_path).resolve()
-            if not handle_file.is_relative_to(skillsets_root):
-                continue
-            if not (handle_file.exists() or handle_file.is_symlink()):
-                continue
-            if not handle_file.is_file():
+            if not any(handle_file.is_relative_to(root) for root in command_surface_roots):
                 continue
             names.add(handle)
         except (OSError, ValueError):
@@ -295,6 +313,8 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
                 rel = skill_md.relative_to(plugin_root).as_posix()
                 if rel.startswith("references/"):
                     continue
+                if _is_hidden_skill(skill_md):
+                    continue
                 discovered.setdefault(skill_md.parent.name, []).append(rel)
 
             duplicates = {
@@ -346,6 +366,8 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
             )
             discovered_paths: dict[str, list[str]] = {}
             for skill_md in sorted(skills_root.rglob("SKILL.md")):
+                if _is_hidden_skill(skill_md):
+                    continue
                 rel = skill_md.relative_to(skills_root).as_posix()
                 discovered_paths.setdefault(skill_md.parent.name, []).append(rel)
 
