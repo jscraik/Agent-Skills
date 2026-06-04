@@ -78,7 +78,7 @@ gate_profile:
 
 ## Stage Duties
 
-`sy-router`
+`sy-strategy`
 
 - Select the next SynAIpse stage first.
 - If routing words could trigger broad gates, apply this contract before loading

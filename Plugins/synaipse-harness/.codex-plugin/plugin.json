@@ -9,7 +9,7 @@
     "name": "Jamie Craik",
     "url": "https://github.com/jscraik"
   },
-  "homepage": "https://github.com/jscraik/Agent-Skills",
+  "homepage": "https://github.com/jscraik/Agent-Skills/tree/main/Plugins/synaipse-harness#readme",
   "repository": "https://github.com/jscraik/Agent-Skills",
   "license": "Apache-2.0",
   "keywords": [
@@ -17,7 +17,7 @@
     "harness",
     "workflow",
     "router",
-    "sy-router",
+    "sy-strategy",
     "stage-routing",
     "handoff",
     "evidence"
@@ -42,11 +42,11 @@
       "Read",
       "Write"
     ],
-    "websiteURL": "https://github.com/jscraik/Agent-Skills",
+    "websiteURL": "https://github.com/jscraik/Agent-Skills/tree/main/Plugins/synaipse-harness#readme",
     "privacyPolicyURL": "https://github.com/jscraik/Agent-Skills/blob/main/README.md#privacy-and-data-handling",
     "termsOfServiceURL": "https://github.com/jscraik/Agent-Skills/blob/main/LICENSE",
     "defaultPrompt": [
-      "Use sy-router."
+      "Use sy-strategy to choose the next SynAIpse stage."
     ],
     "brandColor": "#F97316",
     "composerIcon": "./assets/icon.png",

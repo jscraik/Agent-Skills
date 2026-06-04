@@ -795,13 +795,15 @@ class TestAskSkillsSyncSecurity(TestCase):
             plugin_cache,
             "handles_report",
             return_value={
-                "handles": [
+                "handles": [],
+                "hidden_handles": [
                     {
                         "owner": "harness-engineering",
                         "handle": "he-work",
                         "command_handle_path": ".agents/skills/he-work/SKILL.md",
+                        "command_visibility": "none",
                     }
-                ]
+                ],
             },
         ):
             logs, deletes = plugin_cache.prune_command_handle_skill_entries(
@@ -845,6 +847,41 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertTrue(any("he-work" in log for log in logs))
         self.assertEqual([str(skill_dir)], deletes)
         self.assertFalse(skill_dir.exists())
+
+    def test_plugin_cache_prune_skips_protected_skill_entry(self) -> None:
+        plugin_root = self.repo_root / ".agents" / "plugins-runtime" / "cache" / "agent-skills-local" / "harness-engineering"
+        skill_dir = plugin_root / "skills" / "he-work"
+        skill_dir.mkdir(parents=True)
+        (skill_dir / "SKILL.md").write_text("# HE Work\n", encoding="utf-8")
+        command_handle = self.repo_root / ".agents" / "skills" / "he-work" / "SKILL.md"
+        command_handle.parent.mkdir(parents=True, exist_ok=True)
+        command_handle.write_text("# Generated HE Work Handle\n", encoding="utf-8")
+
+        with (
+            mock.patch.object(
+                plugin_cache,
+                "handles_report",
+                return_value={
+                    "handles": [
+                        {
+                            "owner": "harness-engineering",
+                            "handle": "he-work",
+                            "command_handle_path": ".agents/skills/he-work/SKILL.md",
+                        }
+                    ]
+                },
+            ),
+            mock.patch.object(plugin_cache.shutil, "rmtree", side_effect=PermissionError("protected")),
+        ):
+            logs, deletes = plugin_cache.prune_command_handle_skill_entries(
+                self.repo_root,
+                "harness-engineering",
+                plugin_root,
+            )
+
+        self.assertTrue(any("Skipped protected command-handle duplicate plugin skill entry" in log for log in logs))
+        self.assertEqual([], deletes)
+        self.assertTrue(skill_dir.exists())
 
     def test_plugin_cache_prune_removes_internal_skill_category_dirs(self) -> None:
         plugin_root = self.repo_root / ".agents" / "plugins-runtime" / "cache" / "agent-skills-local" / "skill-factory"

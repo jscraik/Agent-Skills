@@ -3,7 +3,7 @@ skill: sy-strategy
 purpose: Run the explicit sy-strategy stage with bounded evidence and no router-side guessing.
 triggers:
   - explicit sy-strategy invocation
-  - sy-router selected sy-strategy as the next stage
+  - sy-strategy selected sy-strategy as the next stage
 inputs:
   - user request or routed handoff
   - current workspace root

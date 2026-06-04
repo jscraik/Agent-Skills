@@ -830,6 +830,8 @@ def handles_report(*, repo_root_path: Path | None = None, include_handles: bool 
     command_handle_count = len({
         row["handle"] for row in command_handle_rows if row["kind"] == "skill_command_handle"
     })
+    public_rows = [handle.to_dict() for handle in surfaced_handles] if include_handles else []
+    hidden_rows = [handle.to_dict() for handle in hidden_handles] if include_handles else []
     return {
         "schema_version": "command-surface.v1",
         "status": "pass" if not violations else "fail",
@@ -839,7 +841,8 @@ def handles_report(*, repo_root_path: Path | None = None, include_handles: bool 
         "handle_count": len(surfaced_handles),
         "generated_command_handle_count": command_handle_count,
         "violations": violations,
-        "handles": [handle.to_dict() for handle in [*surfaced_handles, *hidden_handles]] if include_handles else [],
+        "handles": public_rows,
+        "hidden_handles": hidden_rows,
         "notes": [
             "Skill handles are resolved from rooted manifest metadata and explicit plugin command metadata.",
             "The command-surface manifest is a generated projection, not a source of truth.",

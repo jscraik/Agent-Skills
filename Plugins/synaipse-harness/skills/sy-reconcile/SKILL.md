@@ -17,7 +17,7 @@ as separate lanes so one passing surface cannot falsely close another.
 ## When to Use
 
 Use this skill when the user needs truthful status across local and external evidence surfaces, asks what is blocking work, asks whether a PR is ready to merge, or needs conflicting progress claims reconciled. Use it only when the user names this stage,
-invokes the skill explicitly, or `sy-router` hands off to `sy-reconcile`.
+invokes the skill explicitly, or `sy-strategy` hands off to `sy-reconcile`.
 
 ## Inputs
 
@@ -45,7 +45,7 @@ Collect only the inputs needed to refresh evidence lanes:
    - Prefer current artifact contents over mailbox text.
    - Do not let local validation prove PR, CI, review, tracker, or mergeability.
 5. Recommend the next stage based on the weakest required lane:
-   - Use `sy-fix-bugs` for failing validation, `sy-work` for implementation gaps, `sy-eval-report` for closure proof, or `sy-heartbeat` for a pause/resume checkpoint.
+   - Use `sy-review` for failing validation, `sy-work` for implementation gaps, `sy-eval-report` for closure proof, or `sy-reconcile` for a pause/resume checkpoint.
 
 ## Outputs
 

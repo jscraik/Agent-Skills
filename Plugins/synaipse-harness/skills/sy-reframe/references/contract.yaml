@@ -3,7 +3,7 @@ skill: sy-reframe
 purpose: Run the explicit sy-reframe stage with bounded evidence and no router-side guessing.
 triggers:
   - explicit sy-reframe invocation
-  - sy-router selected sy-reframe as the next stage
+  - sy-strategy selected sy-reframe as the next stage
 inputs:
   - user request or routed handoff
   - current workspace root

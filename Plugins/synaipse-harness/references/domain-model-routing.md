@@ -14,7 +14,7 @@ SynAIpse Harness treats domain language as part of the delivery contract. Resolv
 - Use folded `sy-deepen-spec` mode through `sy-spec` when an existing spec, code path, or Linear issue disagrees with `UBIQUITOUS.md`, or when two concepts overlap and need scenario testing before planning.
 - Use `sy-execution-plan` only after canonical terms, relationships, and required context updates are stable enough for task decomposition.
 - Use `sy-work` when approved execution uncovers domain drift; stop and update the governing artifact or linked Linear issue before coding past the drift.
-- Use `sy-fix-bugs` when tracker wording may be using the wrong project term; reproduce only after confirming the issue meaning matches the domain model.
+- Use `sy-review` when tracker wording may be using the wrong project term; reproduce only after confirming the issue meaning matches the domain model.
 - Use `sy-review` or folded `sy-technical-review` mode when a diff, PR, spec, or plan introduces new terms, renamed concepts, or code/document mismatches.
 
 ## Ubiquitous Language Files

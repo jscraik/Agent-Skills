@@ -21,7 +21,7 @@ files, artifacts, validation, and closeout evidence. Natural triggers include
 "trace requirements", "map proof", "connect tasks to tests", "coverage gap",
 "evidence must stay connected", and "show what proves each acceptance
 criterion". Use it only when the user names this stage, invokes the skill
-explicitly, or `sy-router` hands off to `sy-trace-plan`.
+explicitly, or `sy-strategy` hands off to `sy-trace-plan`.
 
 ## Inputs
 

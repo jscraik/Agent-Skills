@@ -1775,7 +1775,7 @@
     {
       "command_handle_path": ".agents/skills/sy-reframe/SKILL.md",
       "command_visibility": "orchestrator",
-      "description": "Reframes a failed or stuck migration plan into concrete options, a chosen approach, rollback path, phases, success criteria, non-goals, and validation lanes. Use when the user asks for a migration reframe, stuck migration, failed migration plan, migration disagreement, repeated planning churn, status claims that mix local tests with PR/CI/review/tracker readiness, or sy-router selecting sy-reframe.",
+      "description": "Reframes a failed or stuck migration plan into concrete options, a chosen approach, rollback path, phases, success criteria, non-goals, and validation lanes. Use when the user asks for a migration reframe, stuck migration, failed migration plan, migration disagreement, repeated planning churn, status claims that mix local tests with PR/CI/review/tracker readiness, or sy-strategy selecting sy-reframe.",
       "handle": "sy-reframe",
       "kind": "skill",
       "level": "molecule",
@@ -1807,7 +1807,7 @@
     {
       "command_handle_path": ".agents/skills/sy-review/SKILL.md",
       "command_visibility": "orchestrator",
-      "description": "Produces severity-ranked SynAIpse Harness review findings with evidence-lane status and next-stage guidance. Use when the user says sy-review, asks for a SynAIpse code review, readiness review, risk review, PR blocker review, evidence-lane review, or sy-router selected the review stage.",
+      "description": "Produces severity-ranked SynAIpse Harness review findings with evidence-lane status and next-stage guidance. Use when the user says sy-review, asks for a SynAIpse code review, readiness review, risk review, PR blocker review, evidence-lane review, or sy-strategy selected the review stage.",
       "handle": "sy-review",
       "kind": "skill",
       "level": "molecule",
@@ -2290,7 +2290,9 @@
       },
       "runtime_visibility": "latent",
       "source_path": "Plugins/harness-engineering/skills/he-code-review/SKILL.md"
-    },
+    }
+  ],
+  "hidden_handles": [
     {
       "command_visibility": "none",
       "description": "Routes old phase-heartbeat requests into HE phase work: check the approved plan, reuse or create a 10-minute he-heartbeat only with authority, run phase gates, delegate the active slice to he-work, and stop before commit or tracker closure. Use when a user says phase heartbeat, keep this PR moving, or continue phases.",
@@ -2307,81 +2309,6 @@
       },
       "runtime_visibility": "hidden",
       "source_path": "Plugins/harness-engineering/skills/he-phase-heartbeat/SKILL.md"
-    },
-    {
-      "command_visibility": "none",
-      "description": "Debugs and validates SynAIpse Harness bugs by reproducing the failing command, repairing the error or broken test, and rerunning targeted checks. Use when the user asks to fix a bug, repair a test failure, investigate an error, or address a failing check.",
-      "handle": "sy-fix-bugs",
-      "kind": "skill",
-      "level": "atom",
-      "owner": "synaipse-harness",
-      "provenance": {
-        "generator": "plugin-command-surface.v1",
-        "policy_identity": "c83502e67b3f781e",
-        "projection_mode": "plugin-command-handles"
-      },
-      "runtime_visibility": "hidden",
-      "source_path": "Plugins/synaipse-harness/skills/sy-fix-bugs/SKILL.md"
-    },
-    {
-      "command_visibility": "none",
-      "description": "Creates SynAIpse Harness status checkpoints and resume packets by recording current state, checked evidence, stop conditions, and the next safe command. Use when the user wants to save progress, pause work, schedule a follow-up, resume later, or hand off a long-running task.",
-      "handle": "sy-heartbeat",
-      "kind": "skill",
-      "level": "atom",
-      "owner": "synaipse-harness",
-      "provenance": {
-        "generator": "plugin-command-surface.v1",
-        "policy_identity": "c83502e67b3f781e",
-        "projection_mode": "plugin-command-handles"
-      },
-      "runtime_visibility": "hidden",
-      "source_path": "Plugins/synaipse-harness/skills/sy-heartbeat/SKILL.md"
-    },
-    {
-      "command_visibility": "none",
-      "description": "Improves SynAIpse Harness skill-package artifacts by rewriting vague skill descriptions, fixing failing eval assertions, updating stage contracts, tightening references, and rerunning the failed check. Use when a SynAIpse skill needs improvement, a stage description is too vague, an eval is failing, or audit, Tessl, plugin-eval, or stage-review feedback identifies a package fix.",
-      "handle": "sy-improve",
-      "kind": "skill",
-      "level": "molecule",
-      "owner": "synaipse-harness",
-      "provenance": {
-        "generator": "plugin-command-surface.v1",
-        "policy_identity": "c83502e67b3f781e",
-        "projection_mode": "plugin-command-handles"
-      },
-      "runtime_visibility": "hidden",
-      "source_path": "Plugins/synaipse-harness/skills/sy-improve/SKILL.md"
-    },
-    {
-      "command_visibility": "none",
-      "description": "Executes one approved SynAIpse Harness phase by checking current repo state, applying only the next phase slice, running the named validation gate, and writing a next-phase handoff. Use when the user asks to continue a multi-phase plan, run the next phase, validate phase progress, pass a phase gate, perform step-by-step execution, or prepare phase-by-phase approval evidence.",
-      "handle": "sy-phase-work",
-      "kind": "skill",
-      "level": "molecule",
-      "owner": "synaipse-harness",
-      "provenance": {
-        "generator": "plugin-command-surface.v1",
-        "policy_identity": "c83502e67b3f781e",
-        "projection_mode": "plugin-command-handles"
-      },
-      "runtime_visibility": "hidden",
-      "source_path": "Plugins/synaipse-harness/skills/sy-phase-work/SKILL.md"
-    },
-    {
-      "command_visibility": "none",
-      "description": "Routes ambiguous SynAIpse Harness requests by applying route rules, asking for one missing input when needed, and returning a structured next-stage handoff. Use when a request could match two or more Harness stages or mixes artifacts, PR/review, validation, tracker, session, heartbeat, branch cleanup, or specialist routing.",
-      "handle": "sy-router",
-      "kind": "skill",
-      "level": "router",
-      "owner": "synaipse-harness",
-      "provenance": {
-        "generator": "plugin-command-surface.v1",
-        "policy_identity": "c83502e67b3f781e",
-        "projection_mode": "plugin-command-handles"
-      },
-      "runtime_visibility": "hidden",
-      "source_path": "Plugins/synaipse-harness/skills/sy-router/SKILL.md"
     }
   ],
   "notes": [

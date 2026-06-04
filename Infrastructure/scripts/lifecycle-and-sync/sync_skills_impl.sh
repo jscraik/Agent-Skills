@@ -675,6 +675,26 @@ is_generated_command_handle_name() {
     "$generated_command_handle_names_file" >/dev/null
 }
 
+is_generated_command_handle_dir() {
+  local skill_name="$1"
+  local generated_skill_md="$skills_dir/$skill_name/SKILL.md"
+
+  if [ ! -f "$generated_skill_md" ] || [ -L "$generated_skill_md" ]; then
+    return 1
+  fi
+
+  python3 - "$generated_skill_md" <<'PY'
+from pathlib import Path
+import sys
+
+text = Path(sys.argv[1]).read_text(encoding="utf-8")
+if "Internal activation entrypoint for a child skill under" not in text:
+    raise SystemExit(1)
+if "Source: " not in text:
+    raise SystemExit(1)
+PY
+}
+
 if [ "$skills_dir_writable" = "1" ]; then
   generated_command_handle_names_file="$(mktemp)"
   generated_command_handle_names_cmd | jq -Rsc 'split("\n") | map(select(length > 0)) | unique' \
@@ -694,8 +714,18 @@ if [ "$skills_dir_writable" = "1" ]; then
     discovered_dir="$(cd "$skill_dir_abs" 2>/dev/null && pwd || true)"
     if is_plugin_owned_skill_path "$skill_path"; then
       if is_generated_command_handle_name "$skill_name"; then
-        echo "Preserving plugin-owned generated command handle: $skill_name"
-        continue
+        if is_generated_command_handle_dir "$skill_name"; then
+          echo "Preserving plugin-owned generated command handle: $skill_name"
+          continue
+        fi
+        if [ -e "$skills_dir/$skill_name" ] || [ -L "$skills_dir/$skill_name" ]; then
+          if rm -rf -- "${skills_dir:?}/${skill_name:?}"; then
+            echo "Removed stale plugin-owned runtime entry before regenerating command handle: $skill_name"
+          else
+            echo "[WARN] Could not remove stale plugin-owned runtime entry $skill_name at $skills_dir (continuing anyway)."
+            continue
+          fi
+        fi
       fi
       if [ -e "$skills_dir/$skill_name" ] || [ -L "$skills_dir/$skill_name" ]; then
         if rm -rf -- "${skills_dir:?}/${skill_name:?}"; then
@@ -1335,8 +1365,14 @@ ensure_real_home_plugin_root() {
   if [ -L "$target_dir" ]; then
     case "$label" in
       profile*|home\ plugin\ root)
-        rm -f -- "$target_dir"
-        mkdir -p "$target_dir"
+        if ! rm -f -- "$target_dir" 2>/dev/null; then
+          echo "[WARN] Could not replace symlinked $label at $target_dir; skipping protected plugin root."
+          return 1
+        fi
+        if ! mkdir -p "$target_dir" 2>/dev/null; then
+          echo "[WARN] Could not create $label directory at $target_dir; skipping protected plugin root."
+          return 1
+        fi
         echo "[OK] Replaced symlinked $label with directory: $target_dir"
         return 0
         ;;
@@ -1347,8 +1383,14 @@ ensure_real_home_plugin_root() {
     fi
     if [ -n "$link_target_real" ] && python3 "$repo_root/Infrastructure/scripts/lifecycle-and-sync/path_identity.py" is-same-or-child "$canonical_plugins_real" "$link_target_real"
     then
-      rm -f -- "$target_dir"
-      mkdir -p "$target_dir"
+      if ! rm -f -- "$target_dir" 2>/dev/null; then
+        echo "[WARN] Could not replace repo-backed symlinked $label at $target_dir; skipping protected plugin root."
+        return 1
+      fi
+      if ! mkdir -p "$target_dir" 2>/dev/null; then
+        echo "[WARN] Could not create $label directory at $target_dir; skipping protected plugin root."
+        return 1
+      fi
       echo "[OK] Replaced repo-backed symlinked $label with directory: $target_dir"
       return 0
     fi
@@ -1360,14 +1402,21 @@ ensure_real_home_plugin_root() {
       echo "[WARN] Moved non-directory $label path aside: $target_dir -> $backup_path"
     else
       echo "[WARN] Could not move non-directory $label path aside; removing: $target_dir"
-      rm -f -- "$target_dir"
+      if ! rm -f -- "$target_dir" 2>/dev/null; then
+        echo "[WARN] Could not remove non-directory $label path at $target_dir; skipping protected plugin root."
+        return 1
+      fi
     fi
   fi
 
   if [ ! -e "$target_dir" ]; then
-    mkdir -p "$target_dir"
+    if ! mkdir -p "$target_dir" 2>/dev/null; then
+      echo "[WARN] Could not create $label directory at $target_dir; skipping protected plugin root."
+      return 1
+    fi
     echo "[OK] Created $label directory: $target_dir"
   fi
+  return 0
 }
 
 # sync_skill_path_file writes a small file at the specified target containing the canonicalised source directory path with a trailing slash to support loaders that expect a directory-path file.
@@ -1675,7 +1724,7 @@ normalize_plugin_copy() {
       )
     done < <(
       jq -r --arg owner "$plugin_owner" '
-        .handles[]?
+        ((.handles // []) + (.hidden_handles // []))[]
         | select(type == "object")
         | select((.owner // "") == $owner)
         | select(((.command_handle_path // "") | startswith(".agents/skills/")) or ((.command_visibility // "") == "none"))
@@ -1784,7 +1833,7 @@ sync_home_plugin_mirrors() {
     echo "[OK] Installed home plugin copy: $target_dir"
   done < <(
     jq -r '
-      def trim: gsub("^\\s+|\\s+$"; "");
+      def trim: gsub("^[[:space:]]+|[[:space:]]+$"; "");
       def is_safe_identifier: test("^[A-Za-z0-9._-]+$") and (test("/") | not) and (test("\\.\\.") | not) and (test("\\u0000") | not);
       .plugins[]?
       | select(type == "object")
@@ -1831,6 +1880,55 @@ sync_home_plugin_mirrors() {
     rm -rf -- "$existing_dir"
     echo "[OK] Removed stale home plugin entry: $existing_dir"
   done < <(find "$home_plugins_dir" -mindepth 1 -maxdepth 1 -print)
+}
+
+prune_profile_command_handle_plugin_skills() {
+  local marketplace_file="$1"
+  local profile_plugins_dir="$2"
+  local command_surface_file="$repo_root/.skillsets/command-surface.json"
+  local plugin_name=""
+  local handle=""
+  local target_dir=""
+
+  [ -f "$marketplace_file" ] || return 0
+  [ -f "$command_surface_file" ] || return 0
+  [ -d "$profile_plugins_dir" ] || return 0
+
+  while IFS= read -r plugin_name; do
+    [ -n "$plugin_name" ] || continue
+    is_safe_path_component "$plugin_name" || continue
+    while IFS= read -r handle; do
+      [ -n "$handle" ] || continue
+      is_safe_path_component "$handle" || continue
+      target_dir="$profile_plugins_dir/$plugin_name/skills/$handle"
+      if [ ! -e "$target_dir" ] && [ ! -L "$target_dir" ]; then
+        continue
+      fi
+      if rm -rf -- "$target_dir" 2>/dev/null; then
+        echo "[OK] Removed command-handle duplicate plugin skill entry: $target_dir"
+      else
+        echo "[WARN] Skipped protected command-handle duplicate plugin skill entry: $target_dir"
+      fi
+    done < <(
+      jq -r --arg plugin_name "$plugin_name" '
+        ((.handles // []) + (.hidden_handles // []))[]
+        | select((.owner // "") == $plugin_name)
+        | select(((.command_handle_path // "") | startswith(".agents/skills/")) or ((.command_visibility // "") == "none"))
+        | .handle // empty
+      ' "$command_surface_file"
+    )
+  done < <(
+    jq -r '
+      def trim: gsub("^[[:space:]]+|[[:space:]]+$"; "");
+      .plugins[]?
+      | select(type == "object")
+      | select(.source.source == "local")
+      | .name?
+      | select(type == "string")
+      | trim
+      | select(length > 0)
+    ' "$marketplace_file"
+  )
 }
 
 # Keep repo-local plugin caches aligned with the marketplace so Codex surfaces
@@ -1885,7 +1983,7 @@ sync_local_marketplace_cache() {
   : > "$tracked_marketplaces_file"
 
   jq -r '
-    def trim: gsub("^\\s+|\\s+$"; "");
+    def trim: gsub("^[[:space:]]+|[[:space:]]+$"; "");
     def is_safe_identifier: test("^[A-Za-z0-9._-]+$") and (test("/") | not) and (test("\\.\\.") | not) and (test("\\u0000") | not);
     (.name // "agent-skills-local" | tostring | trim) as $default_market
     | .plugins[]?
@@ -2043,7 +2141,7 @@ sync_versioned_local_marketplace_cache() {
   : > "$market_keep_file"
 
   jq -r '
-    def trim: gsub("^\\s+|\\s+$"; "");
+    def trim: gsub("^[[:space:]]+|[[:space:]]+$"; "");
     def is_safe_identifier: test("^[A-Za-z0-9._-]+$") and (test("/") | not) and (test("\\.\\.") | not) and (test("\\u0000") | not);
     (.name // "agent-skills-local" | tostring | trim) as $default_market
     | .plugins[]?
@@ -2258,6 +2356,9 @@ sync_codex_profile_homes() {
   local cache_source_real=""
   local profile_cache_target_real=""
   local marketplace_target=""
+  local profile_plugins_ready=0
+  local profile_plugins_root_ready=0
+  local profile_agents_plugins_ready=0
 
   while IFS= read -r profile_home; do
     [ -n "$profile_home" ] || continue
@@ -2272,14 +2373,25 @@ sync_codex_profile_homes() {
     profile_plugins="$profile_home/plugins"
     profile_plugins_root="$profile_home/Plugins"
     profile_agents_plugins="$profile_home/.agents/plugins"
-    ensure_real_home_plugin_root "$profile_plugins" "$plugins_dir" "profile plugin root"
-    ensure_real_home_plugin_root "$profile_plugins_root" "$plugins_dir" "profile Plugins root"
-    ensure_real_home_plugin_root "$profile_agents_plugins" "$plugins_dir" "profile .agents plugin root"
+    profile_plugins_ready=0
+    profile_plugins_root_ready=0
+    profile_agents_plugins_ready=0
+    if ensure_real_home_plugin_root "$profile_plugins" "$plugins_dir" "profile plugin root"; then
+      profile_plugins_ready=1
+    fi
+    if ensure_real_home_plugin_root "$profile_plugins_root" "$plugins_dir" "profile Plugins root"; then
+      profile_plugins_root_ready=1
+    fi
+    if ensure_real_home_plugin_root "$profile_agents_plugins" "$plugins_dir" "profile .agents plugin root"; then
+      profile_agents_plugins_ready=1
+    fi
 
     profile_cache_target="$profile_plugins_root/cache"
     cache_source_real="$(cd "$cache_source" 2>/dev/null && pwd -P || true)"
     profile_cache_target_real="$(cd "$profile_cache_target" 2>/dev/null && pwd -P || true)"
-    if [ "$runtime_cache_fresh" != "1" ]; then
+    if [ "$profile_plugins_root_ready" != "1" ]; then
+      skip_unwritable_sync_phase "profile cache publication" "$profile_plugins_root"
+    elif [ "$runtime_cache_fresh" != "1" ]; then
       echo "[INFO] Skipping profile cache publication because runtime cache rebuild was not fresh."
     elif [ -n "$cache_source_real" ] && [ -n "$profile_cache_target_real" ] && [ "$cache_source_real" = "$profile_cache_target_real" ]; then
       echo "[INFO] Skipping profile cache copy for identical source/target: $profile_cache_target"
@@ -2289,6 +2401,31 @@ sync_codex_profile_homes() {
     fi
     if [ "$runtime_cache_fresh" != "1" ]; then
       echo "[INFO] Skipping profile marketplace publication because runtime cache rebuild was not fresh."
+      if [ -f "$marketplace_file" ]; then
+        # Profile plugin mirrors are live picker inputs. Keep them aligned even
+        # when cache publication is skipped, otherwise stale plugin copies can
+        # duplicate generated command handles such as sy-spec and sy-work.
+        if [ "$profile_plugins_root_ready" = "1" ] && can_mutate_sync_dir "$profile_plugins_root"; then
+          sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_plugins_root"
+          prune_profile_command_handle_plugin_skills "$marketplace_file" "$profile_plugins_root"
+        else
+          skip_unwritable_sync_phase "profile Plugins mirror publication" "$profile_plugins_root"
+        fi
+        if [ "$profile_plugins_ready" = "1" ] && can_mutate_sync_dir "$profile_plugins"; then
+          sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_plugins"
+          prune_profile_command_handle_plugin_skills "$marketplace_file" "$profile_plugins"
+        else
+          skip_unwritable_sync_phase "profile plugin mirror publication" "$profile_plugins"
+        fi
+        if [ "$profile_agents_plugins_ready" = "1" ] && can_mutate_sync_dir "$profile_agents_plugins"; then
+          sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_agents_plugins"
+          prune_profile_command_handle_plugin_skills "$marketplace_file" "$profile_agents_plugins"
+        else
+          skip_unwritable_sync_phase "profile .agents plugin mirror publication" "$profile_agents_plugins"
+        fi
+      fi
+    elif [ "$profile_plugins_root_ready" != "1" ]; then
+      skip_unwritable_sync_phase "profile marketplace publication" "$profile_plugins_root"
     elif [ -f "$marketplace_file" ]; then
       marketplace_target="$profile_plugins_root/marketplace.json"
       if [ -e "$marketplace_target" ] && cmp -s "$marketplace_file" "$marketplace_target"; then
@@ -2299,10 +2436,21 @@ sync_codex_profile_homes() {
       fi
       # Keep profile-local marketplace source paths resolvable at
       # <profile-home>/Plugins/<plugin-name> for local plugin installs.
-      sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_plugins_root"
-      sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_plugins"
-      if can_mutate_sync_dir "$profile_agents_plugins"; then
+      if can_mutate_sync_dir "$profile_plugins_root"; then
+        sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_plugins_root"
+        prune_profile_command_handle_plugin_skills "$marketplace_file" "$profile_plugins_root"
+      else
+        skip_unwritable_sync_phase "profile Plugins mirror publication" "$profile_plugins_root"
+      fi
+      if [ "$profile_plugins_ready" = "1" ] && can_mutate_sync_dir "$profile_plugins"; then
+        sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_plugins"
+        prune_profile_command_handle_plugin_skills "$marketplace_file" "$profile_plugins"
+      else
+        skip_unwritable_sync_phase "profile plugin mirror publication" "$profile_plugins"
+      fi
+      if [ "$profile_agents_plugins_ready" = "1" ] && can_mutate_sync_dir "$profile_agents_plugins"; then
         sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_agents_plugins"
+        prune_profile_command_handle_plugin_skills "$marketplace_file" "$profile_agents_plugins"
       else
         skip_unwritable_sync_phase "profile .agents plugin mirror publication" "$profile_agents_plugins"
       fi
@@ -2376,9 +2524,16 @@ if [[ "$sync_scope" == "user" ]]; then
   fi
   sync_user_skills "$repo_root" "$HOME/.agents/agent-skills"
   sync_user_skills "$plugins_dir" "$HOME/.agents/plugins"
-  ensure_real_home_plugin_root "$HOME/plugins" "$plugins_dir" "home plugin root"
+  home_plugins_ready=0
+  if ensure_real_home_plugin_root "$HOME/plugins" "$plugins_dir" "home plugin root"; then
+    home_plugins_ready=1
+  fi
   sync_codex_profile_homes "$runtime_cache_root" "$plugins_dir/marketplace.json"
-  sync_home_plugin_mirrors "$plugins_dir/marketplace.json" "$plugins_dir" "$HOME/plugins"
+  if [ "$home_plugins_ready" = "1" ] && can_mutate_sync_dir "$HOME/plugins"; then
+    sync_home_plugin_mirrors "$plugins_dir/marketplace.json" "$plugins_dir" "$HOME/plugins"
+  else
+    skip_unwritable_sync_phase "home plugin mirror publication" "$HOME/plugins"
+  fi
 else
   echo "Workspace scope: skipped home runtime projections."
 fi

@@ -496,6 +496,52 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             self.assertIn("Plugin-shadowing check failed", result.stderr)
             self.assertIn("- demo-shadow", result.stderr)
 
+    def test_plugin_shadowing_check_allows_generated_command_handle_overlap(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir)
+            write_text(
+                repo_root / "plugins" / "demo-plugin" / "skills" / "demo-command" / "SKILL.md",
+                "# plugin skill",
+            )
+            write_text(
+                repo_root / ".agents" / "skills" / "demo-command" / "SKILL.md",
+                """
+                ---
+                name: demo-command
+                ---
+
+                # Demo Command
+
+                Internal activation entrypoint for a child skill under demo-plugin.
+                Source: Plugins/demo-plugin/skills/demo-command/SKILL.md
+                """,
+            )
+            write_text(
+                repo_root / ".skillsets" / "command-surface.json",
+                json.dumps(
+                    {
+                        "handles": [
+                            {
+                                "kind": "skill",
+                                "handle": "demo-command",
+                                "command_handle_path": ".agents/skills/demo-command",
+                            }
+                        ],
+                        "hidden_handles": [
+                            {
+                                "kind": "skill",
+                                "handle": "demo-hidden",
+                                "command_handle_path": ".agents/skills/demo-hidden",
+                            }
+                        ],
+                    }
+                ),
+            )
+
+            result = run_shadow_check(repo_root)
+            self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
+            self.assertIn("Plugin-shadowing check passed", result.stdout)
+
     def test_plugin_shadowing_check_ignores_plugin_fixtures(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir)

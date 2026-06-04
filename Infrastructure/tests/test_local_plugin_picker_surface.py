@@ -381,6 +381,30 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
                 f"{plugin_name} versioned plugin cache picker surface drifted",
             )
 
+    def test_delegated_home_plugin_mirror_prunes_command_handle_duplicates(self) -> None:
+        """
+        Verify the ask-engine user sync path prunes command-handle skills from home mirrors.
+        """
+        sync_source = REPO_ROOT / "Infrastructure" / "scripts" / "lib" / "ask" / "commands" / "skills_impl.py"
+        source = sync_source.read_text(encoding="utf-8")
+        mirror_function = source.split("def _refresh_home_plugin_mirrors(", 1)[1].split("def _sync_rooted_projection(", 1)[0]
+        self.assertIn("prune_command_handle_skill_entries", mirror_function)
+        self.assertIn("Skipped replacing protected home plugin mirror", mirror_function)
+        self.assertIn("except OSError as exc", mirror_function)
+        self.assertNotIn("duplicate pruning belongs to runtime cache copies", mirror_function)
+
+    def test_delegated_user_sync_refreshes_codex_profile_plugin_mirrors(self) -> None:
+        """
+        Verify the ask-engine user sync refreshes Codex profile plugin mirrors.
+        """
+        sync_source = REPO_ROOT / "Infrastructure" / "scripts" / "lib" / "ask" / "commands" / "skills_impl.py"
+        source = sync_source.read_text(encoding="utf-8")
+        user_sync = source.split("def _append_user_runtime_relinks(", 1)[1].split("def _ensure_real_plugin_mirror_root(", 1)[0]
+        self.assertIn("_codex_profile_homes(home)", user_sync)
+        self.assertIn('profile_home / "plugins"', user_sync)
+        self.assertIn('profile_home / "Plugins"', user_sync)
+        self.assertIn('profile_home / ".agents" / "plugins"', user_sync)
+
 
 if __name__ == "__main__":
     unittest.main()

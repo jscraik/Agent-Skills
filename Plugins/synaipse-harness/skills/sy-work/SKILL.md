@@ -22,7 +22,7 @@ validation artifact changes made. Natural triggers include "implement the
 approved SynAIpse spec", "patch this SynAIpse skill after audit feedback",
 "update the SynAIpse plugin metadata", "fix this Tessl finding in sy-work", and
 "complete this named SynAIpse work item". Use it only when the user names this
-stage, invokes the skill explicitly, or `sy-router` hands off to `sy-work`.
+stage, invokes the skill explicitly, or `sy-strategy` hands off to `sy-work`.
 
 ## Inputs
 
@@ -105,12 +105,12 @@ target: JSC-244
 decision: "Harden the router skill for strict audit and Tessl review"
 deliverable:
   changed_files:
-    - "Plugins/synaipse-harness/skills/sy-router/SKILL.md"
-    - "Infrastructure/artifacts/skill-reviews/sy-router-external-review.json"
+    - "Plugins/synaipse-harness/skills/sy-strategy/SKILL.md"
+    - "Infrastructure/artifacts/skill-reviews/sy-strategy-external-review.json"
   rationale: "made router trigger language and stage handoff proof concrete"
   validation:
-    - "pass: ./bin/ask skills audit Plugins/synaipse-harness/skills/sy-router --level strict --json --robot"
-    - "pass: ./bin/ask skills external-review Plugins/synaipse-harness/skills/sy-router --audit-level compat --skip-plugin-eval --json --robot"
+    - "pass: ./bin/ask skills audit Plugins/synaipse-harness/skills/sy-strategy --level strict --json --robot"
+    - "pass: ./bin/ask skills external-review Plugins/synaipse-harness/skills/sy-strategy --audit-level compat --skip-plugin-eval --json --robot"
 evidence_checked:
   - "git status --short --branch"
   - "git diff --stat"

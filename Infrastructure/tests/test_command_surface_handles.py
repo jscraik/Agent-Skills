@@ -115,9 +115,12 @@ class TestCommandSurfaceResolution(CommandSurfaceTempDirTestCase):
         self.assertGreaterEqual(payload["generated_command_handle_count"], 0)
 
         handles = {handle["handle"]: handle for handle in payload["handles"]}
+        hidden_handles = {handle["handle"]: handle for handle in payload["hidden_handles"]}
         self.assertIn("he-phase-work", handles)
         self.assertNotIn("he-compound", handles)
         self.assertNotIn("he-phase-heartbeat", handles)
+        self.assertIn("he-phase-heartbeat", hidden_handles)
+        self.assertTrue(all(handle.get("command_visibility") != "none" for handle in payload["handles"]))
 
     def test_command_surface_marks_skill_builder_as_orchestrator(self) -> None:
         payload = command_surface.resolve_skill_handle("skill-builder", repo_root_path=REPO_ROOT)
@@ -953,7 +956,7 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
         runtime_evidence = result.data["runtime_evidence"]
         card = json.loads((repo_root / runtime_evidence["runtime_card_path"]).read_text(encoding="utf-8"))
         self.assertEqual(result.status, "error")
-        self.assertEqual(proof["status"], "pass")
+        self.assertEqual(proof["status"], "fail")
         self.assertEqual(runtime_evidence["status"], "partial")
         self.assertEqual(runtime_evidence["claim_status"], "partial")
         self.assertEqual(runtime_evidence["failed_check_id"], "runtime_observability_degraded")
@@ -1043,6 +1046,8 @@ class TestCommittedCommandSurface(CommandSurfaceTempDirTestCase):
         self.assertIsInstance(payload, dict)
         self.assertIn("handles", payload)
         self.assertIsInstance(payload["handles"], list)
+        self.assertIn("hidden_handles", payload)
+        self.assertIsInstance(payload["hidden_handles"], list)
         self.assertIn("generated_from", payload)
         self.assertEqual(payload["generated_from"], "rooted_manifests")
 

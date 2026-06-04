@@ -1,6 +1,6 @@
 ---
 name: sy-reframe
-description: "Reframes a failed or stuck migration plan into concrete options, a chosen approach, rollback path, phases, success criteria, non-goals, and validation lanes. Use when the user asks for a migration reframe, stuck migration, failed migration plan, migration disagreement, repeated planning churn, status claims that mix local tests with PR/CI/review/tracker readiness, or sy-router selecting sy-reframe."
+description: "Reframes a failed or stuck migration plan into concrete options, a chosen approach, rollback path, phases, success criteria, non-goals, and validation lanes. Use when the user asks for a migration reframe, stuck migration, failed migration plan, migration disagreement, repeated planning churn, status claims that mix local tests with PR/CI/review/tracker readiness, or sy-strategy selecting sy-reframe."
 metadata:
   skill-type: team_automation
   version: "0.1.0"
@@ -23,7 +23,7 @@ validation with PR, CI, review, tracker, artifact, session, or merge-readiness
 evidence.
 
 Use it only when the user names this stage, invokes the skill explicitly, or
-`sy-router` hands off to `sy-reframe`.
+`sy-strategy` hands off to `sy-reframe`.
 
 ## Inputs
 

@@ -3,7 +3,7 @@ skill: sy-execution-plan
 purpose: Run the explicit sy-execution-plan stage with bounded evidence and no router-side guessing.
 triggers:
   - explicit sy-execution-plan invocation
-  - sy-router selected sy-execution-plan as the next stage
+  - sy-strategy selected sy-execution-plan as the next stage
 inputs:
   - user request or routed handoff
   - current workspace root

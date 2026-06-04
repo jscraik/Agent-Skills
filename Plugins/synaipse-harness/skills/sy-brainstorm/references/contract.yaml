@@ -3,7 +3,7 @@ skill: sy-brainstorm
 purpose: Run the explicit sy-brainstorm stage with bounded evidence and no router-side guessing.
 triggers:
   - explicit sy-brainstorm invocation
-  - sy-router selected sy-brainstorm as the next stage
+  - sy-strategy selected sy-brainstorm as the next stage
 inputs:
   - user request or routed handoff
   - current workspace root

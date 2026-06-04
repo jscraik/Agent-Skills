@@ -1,6 +1,6 @@
 # SynAIpse Harness Plugin
 
-`synaipse-harness` is the compact SynAIpse lifecycle router plugin. It chooses one next stage, records authority limits, and hands off to explicit stage skills in `synaipse-harness`.
+`synaipse-harness` is the compact SynAIpse lifecycle plugin. It chooses one next stage, records authority limits, and hands off through the core `sy-*` command handles.
 
 It is not the `@brainwav/coding-harness` infrastructure toolchain.
 
@@ -17,14 +17,24 @@ It is not the `@brainwav/coding-harness` infrastructure toolchain.
 
 ## Command-Facing Skills
 
-Use `sy-router` when the stage is unclear. Direct stage work lives in the companion `synaipse-harness` plugin so the router can stay cheap and always available.
+Use `sy-strategy` when the stage is unclear. Direct stage work lives in the core `sy-*` command handles so the package stays cheap, visible, and grep-friendly.
 
 Lifecycle stages are plain English. Skill IDs use `sy-` so the package stays grep-friendly and avoids collisions with generic skills.
 
 | Skill | Reader job |
 | --- | --- |
-| `sy-router` | Select the SynAIpse stage and authority boundary. |
-| `synaipse-harness:*` | Execute the selected stage after `sy-router` returns a handoff. |
+| `sy-strategy` | Decide the route, boundary, architecture, or strategy posture. |
+| `sy-reframe` | Turn a failed or stale migration plan into concrete options. |
+| `sy-brainstorm` | Explore options before a trace, tracker, spec, or plan is ready. |
+| `sy-trace-plan` | Decompose strategy, brainstorm, or reframe output into traceable work. |
+| `sy-tracker-plan` | Map trace work into tracker-ready Now/Next/Later slices. |
+| `sy-spec` | Write scoped technical specs from approved trace or tracker inputs. |
+| `sy-execution-plan` | Sequence implementation, validation, rollback, and evidence work. |
+| `sy-work` | Implement an approved spec or execution plan. |
+| `sy-review` | Produce severity-ranked review findings and next-stage guidance. |
+| `sy-eval-report` | Record closure proof after work, review, and validation. |
+| `sy-reconcile` | Recover stale, conflicting, or partially complete lifecycle state. |
+| `sy-reinforce` | Capture solved problems and update durable learning surfaces. |
 
 ## Lifecycle Flow
 
@@ -32,26 +42,25 @@ Most tracked work follows this shape. The lifecycle separates **trace decomposit
 
 ```mermaid
 flowchart LR
-  A["Rough idea or stale state"] --> B["sy-router"]
-  B --> C["strategy"]
-  C --> D["reframe"]
-  D --> E["brainstorm"]
-  E --> F["trace-plan"]
-  F --> G["tracker-plan"]
-  G --> H["slice-spec"]
-  H --> I["execution-plan"]
-  I --> J["work"]
-  J --> K["review / fix-bugs"]
-  K --> L["eval-report"]
-  L --> M["reconcile"]
-  M --> N["reinforce"]
+  A["Rough idea or stale state"] --> B["sy-strategy"]
+  B --> C["sy-reframe"]
+  C --> D["sy-brainstorm"]
+  D --> E["sy-trace-plan"]
+  E --> F["sy-tracker-plan"]
+  F --> G["sy-spec"]
+  G --> H["sy-execution-plan"]
+  H --> I["sy-work"]
+  I --> J["sy-review"]
+  J --> K["sy-eval-report"]
+  K --> L["sy-reconcile"]
+  L --> M["sy-reinforce"]
 ```
 
 The diagram is a routing aid, not a mandate. Tracker, PR, validation, and artifact evidence decide whether a stage is required or already satisfied.
 
 ## Routing
 
-Start with `sy-router` when the stage is unclear. Direct stage calls are fine when the user names an active companion skill.
+Start with `sy-strategy` when the stage is unclear. Direct stage calls are fine when the user names one of the core handles.
 
 Source of truth:
 

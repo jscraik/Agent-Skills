@@ -3,7 +3,7 @@ skill: sy-work
 purpose: Run the explicit sy-work stage with bounded evidence and no router-side guessing.
 triggers:
   - explicit sy-work invocation
-  - sy-router selected sy-work as the next stage
+  - sy-strategy selected sy-work as the next stage
 inputs:
   - user request or routed handoff
   - current workspace root

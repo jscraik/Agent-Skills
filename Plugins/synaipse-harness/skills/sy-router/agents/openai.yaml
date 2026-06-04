@@ -1,5 +1,0 @@
-policy:
-  allow_implicit_invocation: true
-interface:
-  display_name: "SynAIpse Harness Router"
-  short_description: "Analyze SynAIpse Harness requests and choose one stage plus next command. Use when intent..."

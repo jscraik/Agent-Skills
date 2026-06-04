@@ -3,7 +3,7 @@ skill: sy-trace-plan
 purpose: Run the explicit sy-trace-plan stage with bounded evidence and no router-side guessing.
 triggers:
   - explicit sy-trace-plan invocation
-  - sy-router selected sy-trace-plan as the next stage
+  - sy-strategy selected sy-trace-plan as the next stage
 inputs:
   - user request or routed handoff
   - current workspace root

@@ -17,7 +17,7 @@ handoff.
 ## When to Use
 
 Use this skill when a spec exists and the user needs implementation sequencing before code changes. Use it only when the user names this stage,
-invokes the skill explicitly, or `sy-router` hands off to `sy-execution-plan`.
+invokes the skill explicitly, or `sy-strategy` hands off to `sy-execution-plan`.
 
 ## Inputs
 

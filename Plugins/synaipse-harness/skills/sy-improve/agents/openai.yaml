@@ -1,5 +1,0 @@
-policy:
-  allow_implicit_invocation: false
-interface:
-  display_name: "SynAIpse Harness Improve"
-  short_description: "Analyze and improve an existing implementation through metric-driven, bounded iteration loops...."

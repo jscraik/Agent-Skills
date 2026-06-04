@@ -17,7 +17,7 @@ change, what must not change, how success is observed, and how rollback works.
 ## When to Use
 
 Use this skill when intent is approved and the user needs a precise SynAIpse technical spec, plugin requirements doc, stage acceptance criteria, implementation scope, or plugin/skill change contract before planning, tracker work, or implementation. Use it only when the user names this stage,
-invokes the skill explicitly, or `sy-router` hands off to `sy-spec`.
+invokes the skill explicitly, or `sy-strategy` hands off to `sy-spec`.
 
 ## Inputs
 
@@ -98,7 +98,7 @@ target: JSC-244
 decision: "Specify the SynAIpse router split"
 deliverable:
   requirements:
-    - "router plugin exposes one implicit sy-router skill"
+    - "router plugin exposes one implicit sy-strategy skill"
     - "stage plugin exposes explicit-only stage skills"
   non_goals:
     - "retire harness-engineering in the same slice"
@@ -107,7 +107,7 @@ deliverable:
     - "each stage skill Tessl review_score is greater than 90"
   validation_commands:
     - "plugin-eval analyze Plugins/synaipse-harness --format json"
-    - "./bin/ask skills external-review Plugins/synaipse-harness/skills/sy-router --audit-level compat --skip-plugin-eval --json --robot"
+    - "./bin/ask skills external-review Plugins/synaipse-harness/skills/sy-strategy --audit-level compat --skip-plugin-eval --json --robot"
   rollback:
     - "leave harness-engineering installed until SynAIpse install and rollout acceptance are checked"
 evidence_checked:

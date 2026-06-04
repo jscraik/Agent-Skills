@@ -22,9 +22,9 @@ lesson", "add a guardrail", "encode this as an eval", and "make future agents
 catch this".
 
 Use it only when the user names this stage, invokes the skill explicitly, or
-`sy-router` hands off to `sy-reinforce`. If the request is still repair,
+`sy-strategy` hands off to `sy-reinforce`. If the request is still repair,
 quality hardening, status reconciliation, or phase execution, route to
-`sy-fix-bugs`, `sy-improve`, `sy-reconcile`, or `sy-phase-work`.
+`sy-review`, `sy-review`, `sy-reconcile`, or `sy-work`.
 
 ## Inputs
 
@@ -51,7 +51,7 @@ Collect:
    - Cite fixed evidence, accepted blocker evidence, or a current artifact that
      proves the lesson is valid.
    - If the issue is unverified, stop with `blocked: unverified learning` and
-     recommend `sy-fix-bugs` or `sy-reconcile`.
+     recommend `sy-review` or `sy-reconcile`.
 
 2. Extract the reusable rule:
    - State the principle without incidental filenames or one-off wording.
@@ -126,7 +126,7 @@ state, PR mergeability, or deployment readiness.
 ## Failure Mode
 
 If the lesson is unverified, return `blocked: unverified learning` and route to
-`sy-fix-bugs` or `sy-reconcile`. If the surface is outside current authority,
+`sy-review` or `sy-reconcile`. If the surface is outside current authority,
 return `blocked: missing authority` with the proposed principle and target
 surface. If validation cannot run, return `blocked_validation`.
 

@@ -3,7 +3,7 @@ skill: sy-reconcile
 purpose: Run the explicit sy-reconcile stage with bounded evidence and no router-side guessing.
 triggers:
   - explicit sy-reconcile invocation
-  - sy-router selected sy-reconcile as the next stage
+  - sy-strategy selected sy-reconcile as the next stage
 inputs:
   - user request or routed handoff
   - current workspace root

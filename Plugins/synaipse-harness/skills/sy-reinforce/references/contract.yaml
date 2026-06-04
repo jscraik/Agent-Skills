@@ -3,7 +3,7 @@ skill: sy-reinforce
 purpose: Run the explicit sy-reinforce stage with bounded evidence and no router-side guessing.
 triggers:
   - explicit sy-reinforce invocation
-  - sy-router selected sy-reinforce as the next stage
+  - sy-strategy selected sy-reinforce as the next stage
 inputs:
   - user request or routed handoff
   - current workspace root

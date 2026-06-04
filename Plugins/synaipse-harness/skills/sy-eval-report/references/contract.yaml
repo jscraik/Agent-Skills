@@ -3,7 +3,7 @@ skill: sy-eval-report
 purpose: Run the explicit sy-eval-report stage with bounded evidence and no router-side guessing.
 triggers:
   - explicit sy-eval-report invocation
-  - sy-router selected sy-eval-report as the next stage
+  - sy-strategy selected sy-eval-report as the next stage
 inputs:
   - user request or routed handoff
   - current workspace root

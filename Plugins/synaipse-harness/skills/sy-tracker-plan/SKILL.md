@@ -20,7 +20,7 @@ Use this skill when the user wants tracker-ready work items from an approved
 spec, trace plan, replacement decision, or implementation plan. Natural
 triggers include "Linear tasks", "tracker plan", "break this into tickets",
 "task breakdown", "ticket-ready", and "execution tracking". Use it only when
-the user names this stage, invokes the skill explicitly, or `sy-router` hands
+the user names this stage, invokes the skill explicitly, or `sy-strategy` hands
 off to `sy-tracker-plan`.
 
 ## Inputs

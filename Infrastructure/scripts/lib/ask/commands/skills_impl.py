@@ -34,6 +34,7 @@ from ask.commands.memory import (  # noqa: E402
 from ask.services.plugin_cache import (  # noqa: E402
     PLUGIN_CACHE_PERMISSION_RERUN,
     plugin_cache_permission_declaration,
+    prune_command_handle_skill_entries,
     refresh_workspace_plugin_caches,
 )
 from ask.services.plugin_sources import (  # noqa: E402
@@ -6475,6 +6476,26 @@ def _append_user_runtime_relinks(
         plan["symlinks"].append({"from": str(dst), "to": str(src)})
         logs.append(_create_symlink(src, dst, dry_run, replace_existing=replace_existing))
     _refresh_home_plugin_mirrors(plan, logs, repo_root, home / "plugins", dry_run=dry_run)
+    for profile_home in _codex_profile_homes(home):
+        _refresh_home_plugin_mirrors(
+            plan, logs, repo_root, profile_home / "plugins", dry_run=dry_run, prune_command_handles=True
+        )
+        _refresh_home_plugin_mirrors(
+            plan, logs, repo_root, profile_home / "Plugins", dry_run=dry_run, prune_command_handles=True
+        )
+        _refresh_home_plugin_mirrors(
+            plan, logs, repo_root, profile_home / ".agents" / "plugins", dry_run=dry_run, prune_command_handles=True
+        )
+
+
+def _codex_profile_homes(home: Path) -> list[Path]:
+    """Return Codex profile homes that can contribute plugin picker entries."""
+    candidates = [home / ".codex"]
+    try:
+        candidates.extend(sorted(home.glob(".codex-*")))
+    except OSError:
+        pass
+    return [path for path in candidates if path.exists() and path.is_dir()]
 
 
 def _ensure_real_plugin_mirror_root(target: Path, canonical_plugins_dir: Path, dry_run: bool) -> str:
@@ -6546,6 +6567,7 @@ def _refresh_home_plugin_mirrors(
     home_plugins_dir: Path,
     *,
     dry_run: bool,
+    prune_command_handles: bool = False,
 ) -> None:
     """
     Replace the user's home plugin mirror copies from the repository's canonical Plugins/ sources.
@@ -6597,14 +6619,22 @@ def _refresh_home_plugin_mirrors(
         if dry_run:
             logs.append(f"Would replace home plugin mirror: {target_dir} <- {source_dir}")
             continue
-        if target_dir.is_symlink() or target_dir.is_file():
-            target_dir.unlink()
-        elif target_dir.exists():
-            shutil.rmtree(target_dir)
+        try:
+            if target_dir.is_symlink() or target_dir.is_file():
+                target_dir.unlink()
+            elif target_dir.exists():
+                shutil.rmtree(target_dir)
+        except OSError as exc:
+            logs.append(f"Skipped replacing protected home plugin mirror: {target_dir}: {exc}")
+            if prune_command_handles:
+                prune_logs, _prune_deletes = prune_command_handle_skill_entries(repo_root, plugin_name, target_dir)
+                logs.extend(prune_logs)
+            continue
         _copy_directory_contents(source_dir, target_dir)
         _materialize_first_level_skill_aliases(target_dir)
-        # Home mirrors are source mirrors for local marketplace paths. Command-handle
-        # duplicate pruning belongs to runtime cache copies, not source mirrors.
+        if prune_command_handles:
+            prune_logs, _prune_deletes = prune_command_handle_skill_entries(repo_root, plugin_name, target_dir)
+            logs.extend(prune_logs)
         (target_dir / marker_name).write_text(str(source_dir.resolve()) + "\n", encoding="utf-8")
         logs.append(f"Replaced home plugin mirror: {target_dir} <- {source_dir}")
 
@@ -6622,10 +6652,14 @@ def _refresh_home_plugin_mirrors(
             if dry_run:
                 logs.append(f"Would remove stale home plugin mirror: {child}")
                 continue
-            if child.is_symlink():
-                child.unlink()
-            else:
-                shutil.rmtree(child)
+            try:
+                if child.is_symlink():
+                    child.unlink()
+                else:
+                    shutil.rmtree(child)
+            except OSError as exc:
+                logs.append(f"Skipped removing protected stale home plugin mirror: {child}: {exc}")
+                continue
             logs.append(f"Removed stale home plugin mirror: {child}")
 
 

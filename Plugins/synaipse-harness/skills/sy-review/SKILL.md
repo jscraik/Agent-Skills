@@ -1,6 +1,6 @@
 ---
 name: sy-review
-description: "Produces severity-ranked SynAIpse Harness review findings with evidence-lane status and next-stage guidance. Use when the user says sy-review, asks for a SynAIpse code review, readiness review, risk review, PR blocker review, evidence-lane review, or sy-router selected the review stage."
+description: "Produces severity-ranked SynAIpse Harness review findings with evidence-lane status and next-stage guidance. Use when the user says sy-review, asks for a SynAIpse code review, readiness review, risk review, PR blocker review, evidence-lane review, or sy-strategy selected the review stage."
 metadata:
   skill-type: team_automation
   version: "0.1.0"
@@ -21,7 +21,7 @@ Use this skill when the current task is explicitly a SynAIpse Harness review:
 code review, plan review, artifact review, PR blocker review, closure-readiness
 review, or risk review for an approved stage slice. Use it only when the user
 names \`sy-review\`, invokes this skill explicitly, asks for a SynAIpse review
-stage, or \`sy-router\` hands off to \`sy-review\`.
+stage, or \`sy-strategy\` hands off to \`sy-review\`.
 
 Do not self-select this skill for a generic request like "take a look", "make
 this better", or "mark it done" unless the router or user made the review stage
@@ -56,7 +56,7 @@ Collect only the inputs needed for this review:
      the saved report under \`Infrastructure/artifacts/skill-reviews/\`.
 2. State the claim being tested in one sentence:
    - Examples: "this PR is merge-ready", "this skill passes strict audit",
-     "this plan can be handed to sy-phase-work", or "this artifact proves
+     "this plan can be handed to sy-work", or "this artifact proves
      closure".
    - If the claim is vague, narrow it to the evidence lane that can be checked
      now and mark the rest as \`not_checked\`.
@@ -93,12 +93,12 @@ Collect only the inputs needed for this review:
      deployment, or merge-readiness state unless a repo contract explicitly
      joins those lanes.
 7. Choose the next stage:
-   - \`sy-fix-bugs\` for reproduced defects or failing validation.
-   - \`sy-improve\` for skill-quality, contract, eval, or review-score defects.
+   - \`sy-review\` for reproduced defects or failing validation.
+   - \`sy-review\` for skill-quality, contract, eval, or review-score defects.
    - \`sy-reconcile\` for stale or contradictory local/PR/CI/tracker evidence.
-   - \`sy-phase-work\` when the review passes and the next approved phase should
+   - \`sy-work\` when the review passes and the next approved phase should
      execute.
-   - \`sy-heartbeat\` when continuation should be paused with a resume packet.
+   - \`sy-reconcile\` when continuation should be paused with a resume packet.
 
 ## Outputs
 
@@ -182,7 +182,7 @@ review_findings:
     expected: "score at or above the configured minimum"
     reproduce_command: "./bin/ask skills external-review Plugins/synaipse-harness/skills/sy-brainstorm --audit-level compat --skip-plugin-eval --json --robot --timeout-seconds 180 --report-path Infrastructure/artifacts/skill-reviews/sy-brainstorm-external-review.json"
     diagnostic: "stage method is too generic to satisfy the local content review"
-    remediation: "use sy-improve to make the stage procedure concrete and rerun the review"
+    remediation: "use sy-review to make the stage procedure concrete and rerun the review"
 evidence_lanes:
   local_worktree: "pass: git status --short --branch checked"
   local_validation: "fail: sy-brainstorm external review below threshold"
@@ -199,7 +199,7 @@ validation:
   - "fail: ./bin/ask skills external-review Plugins/synaipse-harness/skills/sy-brainstorm --audit-level compat --skip-plugin-eval --json --robot --timeout-seconds 180 --report-path Infrastructure/artifacts/skill-reviews/sy-brainstorm-external-review.json"
 open_risks:
   - "external PR, CI, review-thread, tracker, and mergeability lanes remain unchecked"
-next_stage: sy-improve
+next_stage: sy-review
 ~~~
 
 Input: "sy-review the handoff in .harness/audits/2026-06-04-stage-closeout.md
@@ -210,7 +210,7 @@ Output:
 schema_version: 1
 stage: sy-review
 target: ".harness/audits/2026-06-04-stage-closeout.md"
-claim_under_review: "handoff has enough evidence for sy-phase-work"
+claim_under_review: "handoff has enough evidence for sy-work"
 review_findings:
   - severity: major
     title: "Next command references a missing artifact"
@@ -218,7 +218,7 @@ review_findings:
       - ".harness/audits/2026-06-04-stage-closeout.md:next_safe_command"
       - "Infrastructure/artifacts/skill-reviews/sy-review-external-review.json"
     diagnostic: "the handoff cites an external-review report that does not exist yet"
-    remediation: "run the external-review command or switch to sy-heartbeat with the artifact marked missing"
+    remediation: "run the external-review command or switch to sy-reconcile with the artifact marked missing"
 evidence_lanes:
   local_worktree: "pass: git status --short --branch checked"
   artifact: "fail: expected review artifact missing"
@@ -230,7 +230,7 @@ validation:
   - "blocked: named review artifact was missing, so downstream phase execution was not proven"
 open_risks:
   - "phase scope may be stale until sy-reconcile refreshes local and external lanes"
-next_stage: sy-heartbeat
+next_stage: sy-reconcile
 ~~~
 
 ## Gotchas

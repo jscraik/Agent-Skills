@@ -153,16 +153,67 @@ class TestSyncSkillsShellProjection(unittest.TestCase):
         self.assertIn('rm -rf -- "$target_dir"', setup_block)
         self.assertIn('mkdir -p "$target_dir"', setup_block)
 
-    def test_unwritable_profile_agents_plugin_mirror_is_skipped(self) -> None:
+    def test_unwritable_profile_plugin_mirrors_are_skipped(self) -> None:
         script = _read_sync_impl()
 
         profile_sync = script.split("sync_codex_profile_homes()", 1)[1]
-        self.assertIn('if can_mutate_sync_dir "$profile_agents_plugins"; then', profile_sync)
+        self.assertIn('if ensure_real_home_plugin_root "$profile_plugins" "$plugins_dir" "profile plugin root"; then', profile_sync)
+        self.assertIn('if ensure_real_home_plugin_root "$profile_plugins_root" "$plugins_dir" "profile Plugins root"; then', profile_sync)
+        self.assertIn('if ensure_real_home_plugin_root "$profile_agents_plugins" "$plugins_dir" "profile .agents plugin root"; then', profile_sync)
+        self.assertIn(
+            'skip_unwritable_sync_phase "profile plugin mirror publication" "$profile_plugins"',
+            profile_sync,
+        )
+        self.assertIn(
+            'skip_unwritable_sync_phase "profile Plugins mirror publication" "$profile_plugins_root"',
+            profile_sync,
+        )
+        self.assertIn('if [ "$profile_agents_plugins_ready" = "1" ] && can_mutate_sync_dir "$profile_agents_plugins"; then', profile_sync)
         self.assertIn('sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_agents_plugins"', profile_sync)
         self.assertIn(
             'skip_unwritable_sync_phase "profile .agents plugin mirror publication" "$profile_agents_plugins"',
             profile_sync,
         )
+
+    def test_profile_plugin_mirrors_refresh_when_runtime_cache_is_stale(self) -> None:
+        script = _read_sync_impl()
+
+        stale_cache_branch = script.split(
+            'echo "[INFO] Skipping profile marketplace publication because runtime cache rebuild was not fresh."',
+            1,
+        )[1].split('elif [ -f "$marketplace_file" ]; then', 1)[0]
+        self.assertIn('sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_plugins_root"', stale_cache_branch)
+        self.assertIn('prune_profile_command_handle_plugin_skills "$marketplace_file" "$profile_plugins_root"', stale_cache_branch)
+        self.assertIn('sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_plugins"', stale_cache_branch)
+        self.assertIn('prune_profile_command_handle_plugin_skills "$marketplace_file" "$profile_plugins"', stale_cache_branch)
+        self.assertIn('sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_agents_plugins"', stale_cache_branch)
+        self.assertIn('prune_profile_command_handle_plugin_skills "$marketplace_file" "$profile_agents_plugins"', stale_cache_branch)
+
+    def test_shell_profile_plugin_prune_uses_command_surface_handles(self) -> None:
+        script = _read_sync_impl()
+
+        prune_function = script.split("prune_profile_command_handle_plugin_skills() {", 1)[1].split(
+            "# Keep repo-local plugin caches aligned",
+            1,
+        )[0]
+        self.assertIn('command_surface_file="$repo_root/.skillsets/command-surface.json"', prune_function)
+        self.assertIn('jq -r --arg plugin_name "$plugin_name"', prune_function)
+        self.assertIn('((.handles // []) + (.hidden_handles // []))[]', prune_function)
+        self.assertIn('startswith(".agents/skills/")', prune_function)
+        self.assertIn('rm -rf -- "$target_dir"', prune_function)
+
+    def test_shell_preserves_only_generated_command_handle_dirs(self) -> None:
+        script = _read_sync_impl()
+
+        self.assertIn("is_generated_command_handle_dir() {", script)
+        self.assertIn("Internal activation entrypoint for a child skill under", script)
+        self.assertIn("Removed stale plugin-owned runtime entry before regenerating command handle", script)
+        preserve_block = script.split('if is_generated_command_handle_name "$skill_name"; then', 1)[1].split(
+            'if [ -e "$skills_dir/$skill_name" ] || [ -L "$skills_dir/$skill_name" ]; then',
+            1,
+        )[0]
+        self.assertIn('if is_generated_command_handle_dir "$skill_name"; then', preserve_block)
+        self.assertIn("continue", preserve_block)
 
     def test_invalid_plugin_cache_refresh_mode_fails(self) -> None:
         result = _run_sync_script(["--workspace", "--plugin-cache-refresh", "sometimes", "--dry-run"])

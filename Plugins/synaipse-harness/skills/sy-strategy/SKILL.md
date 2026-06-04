@@ -21,7 +21,7 @@ replacement, rollout shape, stage split, hardening priority, or old-plugin
 retirement. Natural triggers include "should SynAIpse replace Harness
 Engineering", "ship it as its own plugin first", "split router and stages",
 "retire the old package", and "choose the next proof gate". Use it only when
-the user names this stage, invokes the skill explicitly, or `sy-router` hands
+the user names this stage, invokes the skill explicitly, or `sy-strategy` hands
 off to `sy-strategy`.
 
 ## Inputs

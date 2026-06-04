@@ -17,7 +17,7 @@ handoff.
 ## When to Use
 
 Use this skill when the user asks to compare options, weigh pros and cons, brainstorm approaches, evaluate alternatives, find overlooked leverage, or decide which path to take before spec, plan, tracker work, or implementation. Use it only when the user names this stage,
-invokes the skill explicitly, or `sy-router` hands off to `sy-brainstorm`.
+invokes the skill explicitly, or `sy-strategy` hands off to `sy-brainstorm`.
 
 ## Inputs
 

@@ -19,7 +19,7 @@ or reviewer see exactly what was proven, what failed, and what was not checked.
 Use this skill when the user asks for an evaluation report, validation summary,
 closeout proof, test evidence, completion receipt, or final proof packet for a
 SynAIpse Harness slice. Use it only when the user names this stage, invokes the
-skill explicitly, or `sy-router` hands off to `sy-eval-report`.
+skill explicitly, or `sy-strategy` hands off to `sy-eval-report`.
 
 ## Inputs
 
@@ -92,14 +92,14 @@ schema_version: 1
 stage: sy-eval-report
 claim: "Plugin hardening slice has local quality evidence"
 commands:
-  - command: "./bin/ask skills audit Plugins/synaipse-harness/skills/sy-router --level strict --json --robot"
+  - command: "./bin/ask skills audit Plugins/synaipse-harness/skills/sy-strategy --level strict --json --robot"
     outcome: pass
     proves: "router skill satisfies strict local audit"
   - command: "plugin-eval analyze Plugins/synaipse-harness --format json"
     outcome: pass
     proves: "router plugin scores A against Plugin Eval static checks"
 artifacts:
-  - path: "Infrastructure/artifacts/skill-reviews/sy-router-external-review.json"
+  - path: "Infrastructure/artifacts/skill-reviews/sy-strategy-external-review.json"
     kind: "Tessl review"
     status: "present"
 unchecked_lanes:

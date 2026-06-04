@@ -3,7 +3,7 @@ skill: sy-spec
 purpose: Run the explicit sy-spec stage with bounded evidence and no router-side guessing.
 triggers:
   - explicit sy-spec invocation
-  - sy-router selected sy-spec as the next stage
+  - sy-strategy selected sy-spec as the next stage
 inputs:
   - user request or routed handoff
   - current workspace root

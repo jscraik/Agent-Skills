@@ -90,7 +90,7 @@ progress from masquerading as done.
 Prefer the smallest matching gate and record exact `pass`, `fail`, or
 `blocked` outcomes.
 
-Router checks:
+Core handle checks:
 
 ```bash
 python3 -m json.tool Plugins/synaipse-harness/.codex-plugin/plugin.json
@@ -108,8 +108,8 @@ python3 Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts
 Skill checks:
 
 ```bash
-./bin/ask skills audit Plugins/synaipse-harness/skills/sy-router --level strict --json --robot
-./bin/ask skills external-review Plugins/synaipse-harness/skills/sy-router --audit-level compat --json --robot
+./bin/ask skills audit Plugins/synaipse-harness/skills/sy-strategy --level strict --json --robot
+./bin/ask skills external-review Plugins/synaipse-harness/skills/sy-strategy --audit-level compat --json --robot
 ```
 
 Run broader lifecycle release evals only when the local runner prerequisites are
@@ -118,7 +118,7 @@ converting them into skill failures.
 
 ## Handoff Rules
 
-- Use `sy-router` for stage selection and authority limits.
+- Use `sy-strategy` for stage selection and authority limits.
 - Use `synaipse-harness` for explicit stage execution after routing.
 - Use Skill Factory or Plugin Factory when the work is about generic skill or
   plugin authoring mechanics rather than HE's lifecycle contract.
