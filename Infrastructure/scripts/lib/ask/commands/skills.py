@@ -168,6 +168,7 @@ __all__ = [
     "skills_prove",
     "skills_render_preview",
     "skills_resolve",
+    "skills_sdk_check",
     "sync_skills",
     "validate_openai_skill_format",
     "validate_skill_boundaries",

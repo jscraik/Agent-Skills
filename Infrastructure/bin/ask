@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-import sys
-import argparse
-import time
+import argparse, sys, time
 from pathlib import Path
 from typing import Optional
 repo_root_path = Path(__file__).resolve().parents[1]
@@ -29,6 +27,7 @@ from ask.cli_output import (
 )
 from ask.cli_prompts import prompt_choice, prompt_nonempty, prompt_optional
 import ask.commands.skills as skills_commands
+from ask.commands.sdk import add_sdk_parser, dispatch_sdk
 from ask.commands.runtime import add_runtime_parser, dispatch_runtime
 from ask.commands.repo import (
     check_hub_stability,
@@ -181,6 +180,7 @@ def main():
     skills_memory_parser.add_argument("query", nargs="?", help="Entry id/path for read, or search query")
     skills_memory_parser.add_argument("--source", dest="source_id", help="Filter by memory source id")
     skills_memory_parser.add_argument("--limit", type=int, default=8, help="Maximum entries to return")
+    add_sdk_parser(subparsers, global_parser)
     reviewers_parser = subparsers.add_parser("reviewers", help="Reviewer/subagent handle management", parents=[global_parser])
     reviewers_subparsers = reviewers_parser.add_subparsers(dest="action")
     reviewers_resolve_parser = reviewers_subparsers.add_parser("resolve", help="Resolve a reviewer/subagent handle", parents=[global_parser])
@@ -687,6 +687,8 @@ def main():
                 "reviewers",
                 args.action,
             )
+    elif args.topic == "sdk":
+        result = dispatch_sdk(repo_root, args)
     elif args.topic == "runtime":
         result = dispatch_runtime(repo_root, args)
     elif args.topic == "plugins":

@@ -112,6 +112,18 @@ claims:
     status: supported
     remaining_uncertainty:
       - "Root checkout still has unrelated dirty plugin marketplace files that were preserved and not touched"
+  - id: C004
+    claim: "PU-002 PR #223 was later confirmed merged and pulled into local main before PU-003 closeout."
+    evidence_surface:
+      - "GitHub pull request number 223 in jscraik Agent-Skills"
+      - "PR number 223 live state MERGED on 2026-06-04"
+      - "Merge commit 0dd9460c60d9e463d1827c162726f6d4c19acc07"
+      - "Local main fast-forwarded to 0dd9460c6 feat skills-sdk add v1 schema spine"
+      - "PU-003 worktree rebased onto origin/main after the pull"
+    route: reproduced
+    status: supported
+    remaining_uncertainty:
+      - "Root checkout still has unrelated dirty plugin marketplace files that were preserved and not touched"
 tasks:
   - id: T001
     type: pm
@@ -229,7 +241,7 @@ tasks:
   - id: T003
     type: worker
     assignee: Worker
-    status: active
+    status: done
     objective: "Implement PU-002 schema spine for manifest, receipt, risk, and preview."
     inputs:
       - ".harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md"
@@ -252,16 +264,16 @@ tasks:
       - "Schema fields cannot map to source FR, SA, VP, or apparatus-lens status vocabulary"
       - "Required review artifact is missing"
       - "PR is not merged and pulled back into main"
-    receipt_id: R003
+    receipt_id: R025
   - id: T004
     type: worker
     assignee: Worker
-    status: queued
+    status: active
     objective: "Implement PU-003 skills-sdk check command facade."
     inputs:
       - ".harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md"
     constraints:
-      - "Run only after PU-002 has merged and main has pulled it"
+      - "Run after PR #223 was merged and local main was pulled to 0dd9460c6"
       - "Preserve ./bin/ask as authoritative control plane"
     expected_output: "Facade route, metadata parity, smoke output, review artifacts, PR, merge, and pulled-main proof for PU-003"
     allowed_files:

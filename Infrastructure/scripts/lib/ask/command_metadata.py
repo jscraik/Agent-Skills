@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Dict, List, Tuple
 
-VALID_TOPICS = ["repo", "skills", "reviewers", "runtime", "plugins", "evals", "graph", "mcp", "memory", "wiki", "workouts"]
+VALID_TOPICS = ["repo", "skills", "sdk", "reviewers", "runtime", "plugins", "evals", "graph", "mcp", "memory", "wiki", "workouts"]
 VALID_ACTIONS = {
     "repo": ["status", "validate", "check-stability", "doctor", "closeout", "doctor-catalog", "provider-audit", "surface"],
     "skills": [
@@ -43,6 +43,7 @@ VALID_ACTIONS = {
         "fold",
         "init",
     ],
+    "sdk": ["check"],
     "reviewers": ["resolve"],
     "runtime": ["surface", "budget"],
     "plugins": ["list", "status", "doctor", "sync-local-runtime", "init", "create", "install", "import", "harden", "uninstall"],
@@ -90,6 +91,10 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
         "ask skills route \"find the right security skill\"",
         "ask skills audit Skills/backend-platform/cli-spec --level strict",
         "ask skills external-review Skills/backend-platform/cli-spec --json",
+    ],
+    "sdk": [
+        "ask sdk check he-heartbeat --json --robot",
+        "skills-sdk check he-heartbeat --json --robot",
     ],
     "reviewers": [
         "ask reviewers resolve skillinspector --json",
@@ -200,6 +205,10 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
     ("skills", "doctor"): [
         "ask skills doctor he-heartbeat --json",
         "ask skills doctor Skills/agent-ops/autofix --strict --json",
+    ],
+    ("sdk", "check"): [
+        "ask sdk check he-heartbeat --json --robot",
+        "skills-sdk check he-heartbeat --json --robot",
     ],
     ("skills", "profiles"): [
         "ask skills profiles --json",
