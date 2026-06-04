@@ -32,5 +32,5 @@
       }
     }
   },
-  "required": ["schema_version", "schema_uri", "surface", "status", "reason", "feature_executed", "required_for_risk_tier", "receipt_ref", "acceptance_trace"]
+  "required": ["schema_version", "schema_uri", "surface", "lifecycle_stage", "status", "adapter_state", "reason", "feature_executed", "required_for_risk_tier", "receipt_ref", "acceptance_trace"]
 }

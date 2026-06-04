@@ -218,6 +218,11 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
         "ask sdk install he-heartbeat --preview --json --robot",
         "skills-sdk install he-heartbeat --preview --json --robot",
     ],
+    ("sdk", "lifecycle"): [
+        "ask sdk lifecycle --json --robot",
+        "ask sdk lifecycle --risk-tier high --json --robot",
+        "skills-sdk lifecycle --surface sandbox --risk-tier high --json --robot",
+    ],
     ("skills", "profiles"): [
         "ask skills profiles --json",
         "ask skills profiles authoring --json",

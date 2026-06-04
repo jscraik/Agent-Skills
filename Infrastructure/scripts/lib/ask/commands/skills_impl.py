@@ -3961,7 +3961,18 @@ def skills_sdk_placeholder_lifecycle(
     del repo_root
     result = CallResult()
     result.metadata["command"] = "sdk lifecycle"
-    lifecycle = _build_placeholder_lifecycle_receipts(surface=surface, risk_tier=risk_tier)
+    try:
+        lifecycle = _build_placeholder_lifecycle_receipts(surface=surface, risk_tier=risk_tier)
+    except (ValueError, KeyError, TypeError) as e:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Placeholder lifecycle builder validation failed: {e}",
+                fix_suggestion="Check that surface and risk_tier arguments match the canonical SDK contract.",
+            )
+        )
+        return result
     payload = {
         **lifecycle,
         "facade_command": "skills-sdk lifecycle",

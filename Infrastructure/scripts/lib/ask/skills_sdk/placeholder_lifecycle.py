@@ -8,7 +8,7 @@ PLACEHOLDER_LIFECYCLE_SCHEMA_VERSION = "skills-sdk.placeholder-lifecycle.v1"
 PLACEHOLDER_LIFECYCLE_SCHEMA_URI = (
     "https://jscraik.local/agent-skills/schemas/skills-sdk/placeholder-lifecycle.v1.schema.json"
 )
-PLACEHOLDER_LIFECYCLE_ACCEPTANCE_TRACE = [
+PLACEHOLDER_LIFECYCLE_ACCEPTANCE_TRACE = (
     "FR-012",
     "FR-013",
     "FR-014",
@@ -53,7 +53,7 @@ PLACEHOLDER_LIFECYCLE_ACCEPTANCE_TRACE = [
     "VP-016",
     "VP-017",
     "VP-018",
-]
+)
 
 SURFACES = ("refs", "evals", "signing", "sandbox", "security_adapter", "explorer")
 RISK_TIERS = ("low", "medium", "high", "privileged", "published")
@@ -161,9 +161,12 @@ def build_placeholder_lifecycle_receipts(
     surface: str | None = None,
 ) -> dict[str, Any]:
     """Return schema-shaped placeholder receipts for the selected lifecycle surface(s)."""
+    normalized_risk_tier = risk_tier.strip()
+    if normalized_risk_tier not in RISK_TIERS:
+        raise ValueError(f"unknown Skills SDK risk tier: {risk_tier}")
     selected_surfaces = [surface] if surface else list(SURFACES)
     receipts = [
-        build_placeholder_lifecycle_receipt(selected_surface, risk_tier)
+        build_placeholder_lifecycle_receipt(selected_surface, normalized_risk_tier)
         for selected_surface in selected_surfaces
     ]
     blocked_surfaces = [
@@ -175,14 +178,14 @@ def build_placeholder_lifecycle_receipts(
     return {
         "schema_version": "skills-sdk-placeholder-lifecycle-set.v1",
         "status": status,
-        "risk_tier": risk_tier,
+        "risk_tier": normalized_risk_tier,
         "surfaces": [receipt["surface"] for receipt in receipts],
         "blocked_surfaces": blocked_surfaces,
         "receipts": receipts,
         "feature_executed": False,
         "mutation_performed": False,
         "agent_summary": (
-            f"Skills SDK lifecycle placeholders are blocked for {', '.join(blocked_surfaces)} at {risk_tier} risk."
+            f"Skills SDK lifecycle placeholders are blocked for {', '.join(blocked_surfaces)} at {normalized_risk_tier} risk."
             if blocked_surfaces
             else f"Skills SDK lifecycle placeholders reported {len(receipts)} unimplemented surface(s) without execution."
         ),

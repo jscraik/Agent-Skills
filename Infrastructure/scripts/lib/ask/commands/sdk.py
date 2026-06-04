@@ -6,6 +6,7 @@ from pathlib import Path
 import ask.commands.skills as skills_commands
 from ask.envelope import CallResult, ErrorObject
 from ask.cli_errors import build_unknown_action_result
+from ask.skills_sdk.placeholder_lifecycle import SURFACES
 
 
 def add_sdk_parser(
@@ -42,7 +43,7 @@ def add_sdk_parser(
     )
     sdk_lifecycle_parser.add_argument(
         "--surface",
-        choices=["refs", "evals", "signing", "sandbox", "security_adapter", "explorer"],
+        choices=list(SURFACES),
         help="Limit output to one lifecycle surface",
     )
     sdk_lifecycle_parser.add_argument(

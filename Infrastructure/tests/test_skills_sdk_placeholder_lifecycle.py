@@ -22,10 +22,11 @@ FORBIDDEN_STATUSES = {"pass", "success"}
 
 def _command_env() -> dict[str, str]:
     env = os.environ.copy()
-    env.setdefault("XDG_CACHE_HOME", "/private/tmp/agent-skills-xdg-cache")
-    env.setdefault("XDG_STATE_HOME", "/private/tmp/agent-skills-xdg-state")
-    env.setdefault("MISE_CACHE_DIR", "/private/tmp/agent-skills-mise-cache")
-    env.setdefault("UV_CACHE_DIR", "/private/tmp/agent-skills-uv-cache")
+    tmp_base = tempfile.gettempdir()
+    env.setdefault("XDG_CACHE_HOME", os.path.join(tmp_base, "agent-skills-xdg-cache"))
+    env.setdefault("XDG_STATE_HOME", os.path.join(tmp_base, "agent-skills-xdg-state"))
+    env.setdefault("MISE_CACHE_DIR", os.path.join(tmp_base, "agent-skills-mise-cache"))
+    env.setdefault("UV_CACHE_DIR", os.path.join(tmp_base, "agent-skills-uv-cache"))
     env.setdefault("MISE_TRUSTED_CONFIG_PATHS", str(REPO_ROOT / ".mise.toml"))
     return env
 

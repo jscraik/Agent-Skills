@@ -21,5 +21,8 @@
   ],
   "feature_executed": false,
   "mutation_performed": false,
-  "agent_summary": "Skills SDK lifecycle placeholders reported unimplemented surfaces without execution."
+  "agent_summary": {
+    "message": "Skills SDK lifecycle placeholders reported unimplemented surfaces without execution.",
+    "count": 6
+  }
 }
