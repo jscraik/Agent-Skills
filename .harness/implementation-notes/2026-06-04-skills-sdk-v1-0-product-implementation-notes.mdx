@@ -405,3 +405,19 @@ Current lane truth: local validation is green and PR #228 exists. CodeRabbit,
 remote PR checks, review-thread truth, merge truth, and pulled-main truth still
 need fresh PR-lane evidence before this slice can be marked merged or the
 overall goal can close.
+
+## 2026-06-04 PU-007 PR green sweep
+
+PR #228 is at head `545a68ee0` after a refresh commit that reran the stale
+PR-template check. Live PR checks report CodeRabbit pass with "Review
+completed", pr-template pass, CircleCI pass, CodeQL pass, Semgrep pass, Socket
+pass, Trivy pass, Gitleaks pass, docs checks pass, and the harness gates pass.
+
+The only failing context is `security/snyk (jscraik)` with `You have used
+your limit of private tests`. Jamie explicitly waived this Snyk quota issue, so
+it remains an external owner-waived lane rather than a local implementation
+blocker.
+
+Current lane truth: PU-007 is PR-green except the owner-waived Snyk quota
+context. It is still not merged, and main has not pulled back a PU-007 merge
+commit.
