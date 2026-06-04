@@ -576,6 +576,20 @@
       </dl>
     </article>
 
+    <article class="entry">
+      <h3>2026-06-04: PU-007 merged and goal closed</h3>
+      <dl>
+        <dt>Merge</dt>
+        <dd>Jamie confirmed PR #228 was merged. GitHub verification showed PR #228 as <code>MERGED</code>, merged at <code>2026-06-04T20:26:48Z</code>, with merge commit <code>197836c0ef361d109683b23a8b342927cb02d4ea</code>.</dd>
+        <dt>Pull</dt>
+        <dd>The root checkout is on an unrelated dirty branch, so I did not switch it to <code>main</code>. I updated local <code>main</code> and <code>origin/main</code> from <code>a3697642b</code> to <code>197836c0e</code> with <code>git fetch origin main:refs/heads/main</code>, then verified the merge commit is an ancestor of local <code>main</code>.</dd>
+        <dt>Final lane truth</dt>
+        <dd>PU-001 through PU-007 now have implementation, review, validation, PR, merge, and pulled-main evidence. The Snyk private-test quota failure remains owner-waived and does not change the local implementation or goal-board truth.</dd>
+        <dt>Projection refresh</dt>
+        <dd>Final validation required refreshing generated skillset and runtime projection artifacts with <code>./bin/ask skills sync --scope workspace --projection rooted --json --robot</code> and <code>bash Infrastructure/scripts/lifecycle-and-sync/sync_projection_trees.sh all</code> before rerunning the PR-template gates.</dd>
+      </dl>
+    </article>
+
   </main>
 </body>
 </html>

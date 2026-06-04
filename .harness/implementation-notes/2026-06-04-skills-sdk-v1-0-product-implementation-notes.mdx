@@ -421,3 +421,25 @@ blocker.
 Current lane truth: PU-007 is PR-green except the owner-waived Snyk quota
 context. It is still not merged, and main has not pulled back a PU-007 merge
 commit.
+
+## 2026-06-04 PU-007 merged and goal closed
+
+Jamie confirmed PR #228 was merged. Live GitHub verification showed PR #228 as
+`MERGED`, merged at `2026-06-04T20:26:48Z`, with merge commit
+`197836c0ef361d109683b23a8b342927cb02d4ea`.
+
+Because the root checkout was on an unrelated dirty branch, I did not switch it
+to `main`. Instead, I updated the local `main` and `origin/main` refs from
+`a3697642b` to `197836c0e` with
+`git fetch origin main:refs/heads/main`, then verified that merge commit is an
+ancestor of local `main`.
+
+Final lane truth: PU-001 through PU-007 now have implementation, review,
+validation, PR, merge, and pulled-main evidence. The Snyk private-test quota
+failure remains an owner-waived external context and does not change the local
+implementation or goal-board truth.
+
+Final validation required refreshing generated skillset and runtime projection
+artifacts. I ran ./bin/ask skills sync --scope workspace --projection rooted
+--json --robot and bash Infrastructure/scripts/lifecycle-and-sync/sync_projection_trees.sh all
+before rerunning the PR-template gates.

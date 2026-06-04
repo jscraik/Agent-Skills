@@ -1,16 +1,16 @@
 version: 2
 goal:
   slug: "skills-sdk-v1-0-product-implementation"
-  status: active
+  status: done
   objective: "Implement the Skills SDK V1.0 product implementation plan through governed, reviewed, merged, and pulled slices."
   native_goal_id: "019e8ee9-dd15-7251-b216-aaca8861cc20"
   native_objective: "Follow docs/goals/skills-sdk-v1-0-product-implementation/goal.md to implement /Users/jamiecraik/dev/agent-skills/.harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md as a governed Skills SDK V1.0 goal."
-  native_status: active
+  native_status: complete
   token_budget: null
   tokens_used: 0
   time_used_seconds: 0
   native_created_at: "2026-06-04T00:00:00Z"
-  native_updated_at: "2026-06-04T00:00:00Z"
+  native_updated_at: "2026-06-04T20:35:00Z"
 completion_contract:
   outcome: "PU-001 through PU-007 are implemented or honestly blocked, with every completed slice reviewed, validated, merged, and pulled back into main before the next slice starts."
   verification_surface:
@@ -57,7 +57,7 @@ checks:
   last_verification:
     command: "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py docs/goals/skills-sdk-v1-0-product-implementation"
     outcome: pass
-    checked_at: "2026-06-04T00:00:00Z"
+    checked_at: "2026-06-04T20:35:00Z"
 artifacts:
   implementation_notes:
     path: ".harness/implementation-notes/2026-06-04-skills-sdk-v1-0-product-implementation-notes.mdx"
@@ -377,7 +377,7 @@ tasks:
   - id: T008
     type: pm
     assignee: PM
-    status: active
+    status: done
     objective: "Run PU-007 evidence packaging, reviews, closeout, and final audit after all implementation slices merge and pull back."
     inputs:
       - ".harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md"
@@ -391,6 +391,7 @@ tasks:
       - ".harness/reports/**"
       - ".harness/implementation-notes/2026-06-04-skills-sdk-v1-0-product-implementation-notes.mdx"
       - ".harness/implementation-notes/2026-06-04-skills-sdk-v1-0-product-implementation-notes.html"
+      - ".skillsets/**"
       - "Docs/goals/skills-sdk-v1-0-product-implementation/state.yaml"
       - "Docs/goals/skills-sdk-v1-0-product-implementation/receipts.jsonl"
       - "Infrastructure/GOVERNANCE/runtime-separation/current.json"
@@ -401,4 +402,4 @@ tasks:
       - "./bin/ask repo closeout --changed --json --robot"
     stop_if:
       - "Any slice lacks required review, validation, PR, merge, or pulled-main evidence"
-    receipt_id: R044
+    receipt_id: R045
