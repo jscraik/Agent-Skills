@@ -1,0 +1,368 @@
+version: 2
+goal:
+  slug: "skills-sdk-v1-0-product-implementation"
+  status: active
+  objective: "Implement the Skills SDK V1.0 product implementation plan through governed, reviewed, merged, and pulled slices."
+  native_goal_id: "019e8ee9-dd15-7251-b216-aaca8861cc20"
+  native_objective: "Follow docs/goals/skills-sdk-v1-0-product-implementation/goal.md to implement /Users/jamiecraik/dev/agent-skills/.harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md as a governed Skills SDK V1.0 goal."
+  native_status: active
+  token_budget: null
+  tokens_used: 0
+  time_used_seconds: 0
+  native_created_at: "2026-06-04T00:00:00Z"
+  native_updated_at: "2026-06-04T00:00:00Z"
+completion_contract:
+  outcome: "PU-001 through PU-007 are implemented or honestly blocked, with every completed slice reviewed, validated, merged, and pulled back into main before the next slice starts."
+  verification_surface:
+    - "Goal board validator output"
+    - "Fresh main status and pulled head before each slice"
+    - "Per-slice branch and worktree identity"
+    - "Per-slice implementation receipts and notes"
+    - "Browser-visible implementation notes HTML"
+    - "Per-slice focused validation commands and outcomes"
+    - "Per-slice simplify review artifact"
+    - "Per-slice improve-codebase-architecture review artifact"
+    - "Per-slice codex-review artifact"
+    - "Per-slice testing review artifact"
+    - "Per-slice ubiquitous-language review artifact"
+    - "Per-slice adversarial-reviewer validator artifact"
+    - "Per-slice agent-native-reviewer validator artifact"
+    - "Per-slice git-project-triage artifact"
+    - "Per-slice pr-green-sweep evidence"
+    - "Merged PR and pulled-main evidence before next slice"
+  constraints:
+    - "Govern one bounded plan slice at a time"
+    - "Start every slice from clean pulled main"
+    - "Use an isolated codex feature branch and worktree per slice"
+    - "Preserve ./bin/ask as the repo control plane"
+    - "Keep skills-sdk as the product CLI facade"
+    - "Do not hand-edit runtime projections, plugin caches, generated mirrors, user/global runtime roots, or global installs"
+    - "Do not implement marketplace, registry, hosted docs publishing, real install writes, real sandbox execution, package signing, or required Tessl unless a later approved slice authorizes it"
+    - "Keep local validation, artifacts, review, PR, CI, tracker, merge, and pulled-main truth lanes separate"
+  boundaries:
+    - "Project checkout is /Users/jamiecraik/dev/agent-skills"
+    - "Canonical plan is .harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md"
+    - "Canonical spec is .harness/specs/2026-06-03-skills-sdk-v1-product-spec.md"
+    - "Per-slice worktrees live under /private/tmp/agent-skills-skills-sdk-v1-0-<slice>"
+    - "Per-slice branches use codex/skills-sdk-v1-0-<slice>"
+    - "Review artifacts live under artifacts/reviews/skills-sdk-v1-0-product-implementation/<slice>"
+  iteration_policy: "For each slice: validate board, refresh main, create/use slice worktree and branch, implement bounded files, run focused validation, run simplify, improve-codebase-architecture, codex-review, testing, and ubiquitous-language reviews, fix accepted findings, run adversarial-reviewer and agent-native-reviewer validators, verify artifacts, run git-project-triage, push PR, complete pr-green-sweep, wait for merge, pull main, update receipts, then continue."
+  blocked_stop_condition: "Stop on invalid board state, missing tracker authority or waiver, dirty or stale main, ambiguous worktree identity, missing required review artifact, unmerged PR, missing pulled-main proof, or stale truth lane."
+rules:
+  one_active_task: true
+  require_fresh_verification: true
+  require_final_audit: true
+checks:
+  dirty_fingerprint: "codex/skills-sdk-v1-0-pu-001-setup with uncommitted plan, review, goal-board, and notes setup changes"
+  last_verification:
+    command: "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py docs/goals/skills-sdk-v1-0-product-implementation"
+    outcome: pass
+    checked_at: "2026-06-04T00:00:00Z"
+artifacts:
+  implementation_notes:
+    path: ".harness/implementation-notes/2026-06-04-skills-sdk-v1-0-product-implementation-notes.mdx"
+    format: mdx
+    status: present
+    browser_preview:
+      surface: localhost
+      status: blocked
+      blocker: "No localhost MDX renderer has been started for this goal board."
+      live_update:
+        status: blocked
+        blocker: "No live-update watcher has been started for this goal board."
+  browser_notes:
+    path: ".harness/implementation-notes/2026-06-04-skills-sdk-v1-0-product-implementation-notes.html"
+    format: html
+    status: present
+    preview:
+      surface: "http://127.0.0.1:8765/2026-06-04-skills-sdk-v1-0-product-implementation-notes.html"
+      status: active
+      evidence: "Browser tab title: Skills SDK V1.0 Implementation Notes"
+claims:
+  - id: C001
+    claim: "Skills SDK V1.0 now has a native Codex goal and repo-visible Goal Governor board."
+    evidence_surface:
+      - "docs/goals/skills-sdk-v1-0-product-implementation/goal.md"
+      - "docs/goals/skills-sdk-v1-0-product-implementation/state.yaml"
+      - ".harness/implementation-notes/2026-06-04-skills-sdk-v1-0-product-implementation-notes.html"
+      - "Native goal thread 019e8ee9-dd15-7251-b216-aaca8861cc20"
+    route: reproduced
+    status: supported
+    remaining_uncertainty:
+      - "Setup branch has not been committed, pushed, merged, or pulled back into main yet"
+  - id: C002
+    claim: "Each slice must merge and be pulled back into main before the next slice begins."
+    evidence_surface:
+      - "docs/goals/skills-sdk-v1-0-product-implementation/goal.md"
+      - ".harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md"
+      - "User instruction on 2026-06-04"
+    route: reproduced
+    status: supported
+    remaining_uncertainty:
+      - "No implementation slice PR has merged or been pulled back yet"
+tasks:
+  - id: T001
+    type: pm
+    assignee: PM
+    status: done
+    objective: "Create the native Codex goal and repo-visible Goal Governor board."
+    inputs:
+      - ".harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md"
+      - "Skills/agent-ops/goal-governor/references/goal-contract.md"
+    constraints:
+      - "No implementation code edits during goal creation"
+      - "No PR, Linear, merge, or cleanup mutation during board creation"
+    expected_output: "Native goal plus durable board"
+    allowed_files: []
+    verify:
+      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py docs/goals/skills-sdk-v1-0-product-implementation"
+    stop_if:
+      - "Native goal cannot be created"
+      - "Board validator fails"
+    receipt_id: R001
+  - id: T002
+    type: scout
+    assignee: Scout
+    status: done
+    objective: "Run PU-001 baseline refresh and parent tracker gate before implementation."
+    inputs:
+      - "docs/goals/skills-sdk-v1-0-product-implementation/goal.md"
+      - "docs/goals/skills-sdk-v1-0-product-implementation/state.yaml"
+      - ".harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md"
+      - ".harness/specs/2026-06-03-skills-sdk-v1-product-spec.md"
+    constraints:
+      - "Read-only except goal receipts, implementation notes, and PU-001 evidence"
+      - "Do not edit implementation code"
+      - "Do not mutate Linear unless explicit authority is granted"
+      - "Do not continue to PU-002 until parent tracker action is created, promoted, or explicitly waived"
+    expected_output: "PU-001 evidence packet with clean main, tracker handling, and first slice branch/worktree decision"
+    allowed_files: []
+    verify:
+      - "git status --short --branch"
+      - "git log -1 --oneline"
+      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py docs/goals/skills-sdk-v1-0-product-implementation"
+    stop_if:
+      - "main is dirty or stale and cannot be safely handled"
+      - "parent tracker authority is missing and not waived"
+      - "first slice worktree or branch ownership is ambiguous"
+    receipt_id: R002
+  - id: T009
+    type: pm
+    assignee: PM
+    status: done
+    objective: "Isolate governed setup artifacts onto a slice-owned feature branch before implementation code edits."
+    inputs:
+      - "docs/goals/skills-sdk-v1-0-product-implementation/goal.md"
+      - "docs/goals/skills-sdk-v1-0-product-implementation/state.yaml"
+      - ".harness/implementation-notes/2026-06-04-skills-sdk-v1-0-product-implementation-notes.html"
+      - ".harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md"
+    constraints:
+      - "Do not start PU-002 implementation code until setup artifacts are isolated from main"
+      - "Keep Linear mutation separate from local implementation"
+    expected_output: "Feature branch codex/skills-sdk-v1-0-pu-001-setup and clean implementation worktree decision for the next slice"
+    allowed_files: []
+    verify:
+      - "git status --short --branch"
+      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py docs/goals/skills-sdk-v1-0-product-implementation"
+    stop_if:
+      - "Setup artifacts cannot be isolated without losing user work"
+    receipt_id: R009
+  - id: T010
+    type: judge
+    assignee: Judge
+    status: done
+    objective: "Validate PU-001 with adversarial-reviewer and agent-native-reviewer artifact-first outputs."
+    inputs:
+      - "artifacts/reviews/skills-sdk-v1-0-product-implementation/pu-001/simplify.md"
+      - "artifacts/reviews/skills-sdk-v1-0-product-implementation/pu-001/improve-codebase-architecture.md"
+      - "artifacts/reviews/skills-sdk-v1-0-product-implementation/pu-001/codex-review.md"
+      - "artifacts/reviews/skills-sdk-v1-0-product-implementation/pu-001/testing.md"
+      - "artifacts/reviews/skills-sdk-v1-0-product-implementation/pu-001/ubiquitous-language.md"
+    constraints:
+      - "Do not proceed to git-project-triage, PR green-sweep, merge, pulled-main proof, or PU-002 while validator artifacts are missing"
+    expected_output: "adversarial-reviewer.md and agent-native-reviewer.md artifacts"
+    allowed_files: []
+    verify:
+      - "test -s artifacts/reviews/skills-sdk-v1-0-product-implementation/pu-001/adversarial-reviewer.md"
+      - "test -s artifacts/reviews/skills-sdk-v1-0-product-implementation/pu-001/agent-native-reviewer.md"
+    stop_if:
+      - "Validator artifact remains missing after retry"
+    receipt_id: R016
+  - id: T011
+    type: pm
+    assignee: PM
+    status: active
+    objective: "Package PU-001 through git triage, PR creation or update, pr-green-sweep, merge tracking, and pulled-main proof before PU-002."
+    inputs:
+      - "docs/goals/skills-sdk-v1-0-product-implementation/goal.md"
+      - "docs/goals/skills-sdk-v1-0-product-implementation/state.yaml"
+      - "artifacts/reviews/skills-sdk-v1-0-product-implementation/pu-001/adversarial-reviewer.md"
+      - "artifacts/reviews/skills-sdk-v1-0-product-implementation/pu-001/agent-native-reviewer.md"
+      - "artifacts/reviews/skills-sdk-v1-0-product-implementation/pu-001/handoff-health.md"
+    constraints:
+      - "Report agent-native validator lane as owner-waived, not completed by subagent"
+      - "Do not continue to PU-002 until PU-001 PR is merged and pulled back into main"
+      - "Keep local validation, GitHub PR state, CI state, review state, merge readiness, and pulled-main truth separate"
+    expected_output: "PU-001 committed, pushed, PR opened or updated, pr-green-sweep evidence recorded, merge tracked, and main pulled before PU-002"
+    allowed_files: []
+    verify:
+      - "git status --short --branch"
+      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py docs/goals/skills-sdk-v1-0-product-implementation"
+      - "git diff --check"
+    stop_if:
+      - "Local validation fails"
+      - "GitHub PR state cannot be verified"
+      - "PR is not merged and pulled back into main"
+    receipt_id: R017
+  - id: T003
+    type: worker
+    assignee: Worker
+    status: queued
+    objective: "Implement PU-002 schema spine for manifest, receipt, risk, and preview."
+    inputs:
+      - ".harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md"
+    constraints:
+      - "Run only after PU-001 passes or is explicitly waived"
+      - "Use slice branch codex/skills-sdk-v1-0-pu-002 and isolated worktree"
+    expected_output: "Versioned schemas, fixtures, validation evidence, review artifacts, PR, merge, and pulled-main proof for PU-002"
+    allowed_files:
+      - "Infrastructure/config/schemas/skills-sdk/**"
+      - "Infrastructure/tests/fixtures/skills_sdk/**"
+      - "Docs/reference/skills-sdk/**"
+      - ".harness/implementation-notes/2026-06-04-skills-sdk-v1-0-product-implementation-notes.mdx"
+      - "docs/goals/skills-sdk-v1-0-product-implementation/state.yaml"
+      - "docs/goals/skills-sdk-v1-0-product-implementation/receipts.jsonl"
+      - "artifacts/reviews/skills-sdk-v1-0-product-implementation/pu-002/**"
+    verify:
+      - "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_scaffold.py -q"
+      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py docs/goals/skills-sdk-v1-0-product-implementation"
+    stop_if:
+      - "Schema fields cannot map to source FR, SA, VP, or apparatus-lens status vocabulary"
+      - "Required review artifact is missing"
+      - "PR is not merged and pulled back into main"
+    receipt_id: R003
+  - id: T004
+    type: worker
+    assignee: Worker
+    status: queued
+    objective: "Implement PU-003 skills-sdk check command facade."
+    inputs:
+      - ".harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md"
+    constraints:
+      - "Run only after PU-002 has merged and main has pulled it"
+      - "Preserve ./bin/ask as authoritative control plane"
+    expected_output: "Facade route, metadata parity, smoke output, review artifacts, PR, merge, and pulled-main proof for PU-003"
+    allowed_files:
+      - "bin/**"
+      - "Infrastructure/bin/**"
+      - "Infrastructure/scripts/**"
+      - "Infrastructure/tests/**"
+      - "Docs/reference/skills-sdk/**"
+      - ".harness/implementation-notes/2026-06-04-skills-sdk-v1-0-product-implementation-notes.mdx"
+      - "docs/goals/skills-sdk-v1-0-product-implementation/state.yaml"
+      - "docs/goals/skills-sdk-v1-0-product-implementation/receipts.jsonl"
+      - "artifacts/reviews/skills-sdk-v1-0-product-implementation/pu-003/**"
+    verify:
+      - "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_scaffold.py -q"
+      - "./bin/ask repo closeout --changed --json --robot"
+    stop_if:
+      - "Facade bypasses ./bin/ask authority"
+      - "Command output cannot validate against schemas"
+      - "PR is not merged and pulled back into main"
+    receipt_id: R004
+  - id: T005
+    type: worker
+    assignee: Worker
+    status: queued
+    objective: "Implement PU-004 risk tier classifier and sensor placement."
+    inputs:
+      - ".harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md"
+    constraints:
+      - "Run only after PU-003 has merged and main has pulled it"
+      - "Do not invoke live sandbox execution or external scanners unless classified as optional adapter detection"
+    expected_output: "Risk classifier, sensor metadata proof, review artifacts, PR, merge, and pulled-main proof for PU-004"
+    allowed_files:
+      - "Infrastructure/**"
+      - "Docs/reference/skills-sdk/**"
+      - ".harness/implementation-notes/2026-06-04-skills-sdk-v1-0-product-implementation-notes.mdx"
+      - "docs/goals/skills-sdk-v1-0-product-implementation/state.yaml"
+      - "docs/goals/skills-sdk-v1-0-product-implementation/receipts.jsonl"
+      - "artifacts/reviews/skills-sdk-v1-0-product-implementation/pu-004/**"
+    verify:
+      - "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_scaffold.py -q"
+      - "./bin/ask repo closeout --changed --json --robot"
+    stop_if:
+      - "Risk tier changes activate heavy gates by blanket policy instead of risk evidence"
+      - "PR is not merged and pulled back into main"
+    receipt_id: R005
+  - id: T006
+    type: worker
+    assignee: Worker
+    status: queued
+    objective: "Implement PU-005 install preview and lockfile model stub."
+    inputs:
+      - ".harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md"
+    constraints:
+      - "Run only after PU-004 has merged and main has pulled it"
+      - "Preview must not write live install, trust-store, lockfile, projection, or global skill state"
+    expected_output: "Read-only install preview proof, review artifacts, PR, merge, and pulled-main proof for PU-005"
+    allowed_files:
+      - "Infrastructure/**"
+      - "Docs/examples/skills-sdk/**"
+      - "Docs/reference/skills-sdk/**"
+      - ".harness/implementation-notes/2026-06-04-skills-sdk-v1-0-product-implementation-notes.mdx"
+      - "docs/goals/skills-sdk-v1-0-product-implementation/state.yaml"
+      - "docs/goals/skills-sdk-v1-0-product-implementation/receipts.jsonl"
+      - "artifacts/reviews/skills-sdk-v1-0-product-implementation/pu-005/**"
+    verify:
+      - "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_scaffold.py -q"
+      - "./bin/ask repo closeout --changed --json --robot"
+    stop_if:
+      - "Preview mutates live state or implies installation is complete"
+      - "PR is not merged and pulled back into main"
+    receipt_id: R006
+  - id: T007
+    type: worker
+    assignee: Worker
+    status: queued
+    objective: "Implement PU-006 honest placeholder lifecycle receipts."
+    inputs:
+      - ".harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md"
+    constraints:
+      - "Run only after PU-005 has merged and main has pulled it"
+      - "Do not implement real refs ingestion, eval runner, signing, sandbox execution, or hosted explorer behavior"
+    expected_output: "Placeholder receipt proof, review artifacts, PR, merge, and pulled-main proof for PU-006"
+    allowed_files:
+      - "Infrastructure/**"
+      - "Docs/examples/skills-sdk/**"
+      - "Docs/reference/skills-sdk/**"
+      - ".harness/implementation-notes/2026-06-04-skills-sdk-v1-0-product-implementation-notes.mdx"
+      - "docs/goals/skills-sdk-v1-0-product-implementation/state.yaml"
+      - "docs/goals/skills-sdk-v1-0-product-implementation/receipts.jsonl"
+      - "artifacts/reviews/skills-sdk-v1-0-product-implementation/pu-006/**"
+    verify:
+      - "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_scaffold.py -q"
+      - "./bin/ask repo closeout --changed --json --robot"
+    stop_if:
+      - "Any placeholder output can be misread as implemented lifecycle capability"
+      - "PR is not merged and pulled back into main"
+    receipt_id: R007
+  - id: T008
+    type: pm
+    assignee: PM
+    status: queued
+    objective: "Run PU-007 evidence packaging, reviews, closeout, and final audit after all implementation slices merge and pull back."
+    inputs:
+      - ".harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md"
+      - "docs/goals/skills-sdk-v1-0-product-implementation/receipts.jsonl"
+    constraints:
+      - "Do not claim completion unless every slice has merge and pulled-main evidence"
+      - "Keep local validation, PR checks, review threads, tracker state, and merge readiness separate"
+    expected_output: "Final closeout package and Judge/PM completion receipt"
+    allowed_files: []
+    verify:
+      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py docs/goals/skills-sdk-v1-0-product-implementation"
+      - "./bin/ask repo closeout --changed --json --robot"
+    stop_if:
+      - "Any slice lacks required review, validation, PR, merge, or pulled-main evidence"
+    receipt_id: R008
