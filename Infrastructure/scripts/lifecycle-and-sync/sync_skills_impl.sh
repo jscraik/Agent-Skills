@@ -1211,6 +1211,11 @@ sync_user_skills() {
     local source_dir="$1"
     local target_dir="$2"
 
+    if [ -L "$target_dir" ]; then
+      rm -f -- "$target_dir"
+    elif [ -e "$target_dir" ] && [ ! -d "$target_dir" ]; then
+      rm -f -- "$target_dir"
+    fi
     mkdir -p "$target_dir"
 
     if command -v rsync >/dev/null 2>&1; then
@@ -1225,8 +1230,10 @@ sync_user_skills() {
 
   if [ "$mode" = "copy" ]; then
     mkdir -p "$(dirname "$target_dir")"
-    if [ -L "$target_dir" ] || [ ! -d "$target_dir" ]; then
-      rm -rf "$target_dir" || echo "[WARN] Could not replace non-directory target at $target_dir (continuing with copy)."
+    if [ -L "$target_dir" ]; then
+      rm -f -- "$target_dir" || echo "[WARN] Could not replace symlink target at $target_dir (continuing with copy)."
+    elif [ -e "$target_dir" ] && [ ! -d "$target_dir" ]; then
+      rm -f -- "$target_dir" || echo "[WARN] Could not replace non-directory target at $target_dir (continuing with copy)."
     fi
     sync_dir_copy "$source_dir" "$target_dir"
     echo "[OK] Synced directory: $target_dir"
@@ -1294,18 +1301,25 @@ ensure_real_home_plugin_root() {
   fi
 
   if [ -L "$target_dir" ]; then
+    case "$label" in
+      profile*|home\ plugin\ root)
+        rm -f -- "$target_dir"
+        mkdir -p "$target_dir"
+        echo "[OK] Replaced symlinked $label with directory: $target_dir"
+        return 0
+        ;;
+    esac
     target_link="$(readlink "$target_dir" || true)"
     if [ -n "$target_link" ]; then
       link_target_real="$(cd "$(dirname "$target_dir")" 2>/dev/null && cd "$target_link" 2>/dev/null && pwd -P || true)"
     fi
-    case "$link_target_real" in
-      "$canonical_plugins_real"|"$canonical_plugins_real"/*)
-        rm -f -- "$target_dir"
-        mkdir -p "$target_dir"
-        echo "[OK] Replaced repo-backed symlinked $label with directory: $target_dir"
-        return 0
-        ;;
-    esac
+    if [ -n "$link_target_real" ] && python3 "$repo_root/Infrastructure/scripts/lifecycle-and-sync/path_identity.py" is-same-or-child "$canonical_plugins_real" "$link_target_real"
+    then
+      rm -f -- "$target_dir"
+      mkdir -p "$target_dir"
+      echo "[OK] Replaced repo-backed symlinked $label with directory: $target_dir"
+      return 0
+    fi
   fi
 
   if [ -e "$target_dir" ] && [ ! -d "$target_dir" ]; then
@@ -2050,6 +2064,9 @@ sync_versioned_local_marketplace_cache() {
       rm -f -- "$plugin_dir"
     fi
 
+    if [ -e "$target_dir" ] || [ -L "$target_dir" ]; then
+      rm -rf -- "$target_dir"
+    fi
     mkdir -p "$target_dir"
     if command -v rsync >/dev/null 2>&1; then
       rsync -a --delete --force \
@@ -2252,7 +2269,11 @@ sync_codex_profile_homes() {
       # <profile-home>/Plugins/<plugin-name> for local plugin installs.
       sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_plugins_root"
       sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_plugins"
-      sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_agents_plugins"
+      if can_mutate_sync_dir "$profile_agents_plugins"; then
+        sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_agents_plugins"
+      else
+        skip_unwritable_sync_phase "profile .agents plugin mirror publication" "$profile_agents_plugins"
+      fi
     fi
   done < <({
     [ -d "$HOME/.codex" ] && printf '%s\n' "$HOME/.codex"

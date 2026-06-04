@@ -1,11 +1,13 @@
 import os
 import subprocess
 import unittest
+from pathlib import Path
 from typing import Optional
 
 
 SYNC_SCRIPT = "Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh"
 SYNC_IMPL_SCRIPT = "Infrastructure/scripts/lifecycle-and-sync/sync_skills_impl.sh"
+PATH_IDENTITY_SCRIPT = "Infrastructure/scripts/lifecycle-and-sync/path_identity.py"
 
 
 def _read_sync_impl() -> str:
@@ -89,6 +91,78 @@ class TestSyncSkillsShellProjection(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("plugin runtime cache refresh only", result.stdout)
         self.assertIn(".agents/plugins-runtime/cache", result.stdout)
+
+    def test_user_plugin_mirror_repairs_symlinks_before_copying(self) -> None:
+        script = _read_sync_impl()
+
+        self.assertIn(
+            'rm -f -- "$target_dir" || echo "[WARN] Could not replace symlink target',
+            script,
+        )
+        self.assertIn('profile*|home\\ plugin\\ root)', script)
+        self.assertIn('echo "[OK] Replaced symlinked $label with directory: $target_dir"', script)
+        self.assertIn(
+            'path_identity.py" is-same-or-child "$canonical_plugins_real" "$link_target_real"',
+            script,
+        )
+        self.assertNotIn("python3 - \"$canonical_plugins_real\" \"$link_target_real\"", script)
+        self.assertIn(
+            'echo "[OK] Replaced repo-backed symlinked $label with directory: $target_dir"',
+            script,
+        )
+
+    def test_path_identity_helper_detects_same_child_and_unrelated_paths(self) -> None:
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir) / "root"
+            child = root / "child"
+            sibling = Path(tmp_dir) / "sibling"
+            child.mkdir(parents=True)
+            sibling.mkdir()
+
+            same = subprocess.run(
+                ["python3", PATH_IDENTITY_SCRIPT, "is-same-or-child", str(root), str(root)],
+                check=False,
+            )
+            nested = subprocess.run(
+                ["python3", PATH_IDENTITY_SCRIPT, "is-same-or-child", str(root), str(child)],
+                check=False,
+            )
+            unrelated = subprocess.run(
+                [
+                    "python3",
+                    PATH_IDENTITY_SCRIPT,
+                    "is-same-or-child",
+                    str(root),
+                    str(sibling),
+                ],
+                check=False,
+            )
+
+        self.assertEqual(0, same.returncode)
+        self.assertEqual(0, nested.returncode)
+        self.assertEqual(1, unrelated.returncode)
+
+    def test_versioned_cache_replaces_existing_version_before_rsync(self) -> None:
+        script = _read_sync_impl()
+
+        versioned_sync = script.split("sync_versioned_local_marketplace_cache()", 1)[1]
+        setup_block = versioned_sync.split('rsync -a --delete --force \\', 1)[0]
+        self.assertIn('if [ -e "$target_dir" ] || [ -L "$target_dir" ]; then', setup_block)
+        self.assertIn('rm -rf -- "$target_dir"', setup_block)
+        self.assertIn('mkdir -p "$target_dir"', setup_block)
+
+    def test_unwritable_profile_agents_plugin_mirror_is_skipped(self) -> None:
+        script = _read_sync_impl()
+
+        profile_sync = script.split("sync_codex_profile_homes()", 1)[1]
+        self.assertIn('if can_mutate_sync_dir "$profile_agents_plugins"; then', profile_sync)
+        self.assertIn('sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_agents_plugins"', profile_sync)
+        self.assertIn(
+            'skip_unwritable_sync_phase "profile .agents plugin mirror publication" "$profile_agents_plugins"',
+            profile_sync,
+        )
 
     def test_invalid_plugin_cache_refresh_mode_fails(self) -> None:
         result = _run_sync_script(["--workspace", "--plugin-cache-refresh", "sometimes", "--dry-run"])
