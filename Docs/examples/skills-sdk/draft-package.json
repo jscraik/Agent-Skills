@@ -1,0 +1,15 @@
+{
+  "schema_version": "jsc-391-draft-package-example.v1",
+  "package_name": "example-skills-sdk-draft",
+  "status": "not_run",
+  "owning_module": "packaging",
+  "collaborators": [
+    "manifest",
+    "receipts"
+  ],
+  "feature_execution": {
+    "install_write_performed": false,
+    "registry_publication_performed": false,
+    "package_upload_performed": false
+  }
+}

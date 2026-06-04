@@ -1,0 +1,235 @@
+{
+  "schema_version": "jsc-391-pu001-baseline.v1",
+  "phase": "baseline",
+  "created_at": "2026-06-03T21:41:28Z",
+  "worktree": "/private/tmp/agent-skills-jsc-391-governed-implementation",
+  "branch": "codex/jsc-391-governed-implementation",
+  "source_revision": "0efa0c382",
+  "selected_skill_handle": "ubiquitous-language",
+  "baseline_summary": {
+    "repo_status": "pass",
+    "repo_doctor": "blocked_projection_sync",
+    "skills_list": "pass",
+    "skills_explain": "pass",
+    "skills_prove": "blocked_reachability",
+    "repo_closeout_changed": "blocked_projection_sync",
+    "sdk_import_public_contract": "pass",
+    "path_conventions": "captured"
+  },
+  "cli_receipts": [
+    {
+      "schema_version": "jsc-391-cli-compat-receipt.v1",
+      "phase": "baseline",
+      "command": "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor",
+      "exit_code": 0,
+      "structured_output_status": "plain_pass",
+      "selected_skill_handle": null,
+      "expected_invariant": "Goal Governor board validates before Scout work continues.",
+      "actual_invariant": "PASS: goal board is valid",
+      "normalized_failure_class": null,
+      "regression_classification": "baseline_pass",
+      "evidence_ref": "terminal:PASS goal board is valid"
+    },
+    {
+      "schema_version": "jsc-391-cli-compat-receipt.v1",
+      "phase": "baseline",
+      "command": "python3 bin/ask repo status --json",
+      "exit_code": 0,
+      "structured_output_status": "json_success",
+      "selected_skill_handle": null,
+      "expected_invariant": "Repository status is readable in the feature worktree.",
+      "actual_invariant": "status=success; is_git=true; repo_root_resolved=/private/tmp/agent-skills-jsc-391-governed-implementation; skills_synced=false",
+      "normalized_failure_class": null,
+      "regression_classification": "baseline_pass_with_unsynced_projection_signal",
+      "evidence_ref": "trace_id=12fe87d8-d310-4806-b157-77aaaf05a867"
+    },
+    {
+      "schema_version": "jsc-391-cli-compat-receipt.v1",
+      "phase": "baseline",
+      "command": "./bin/ask repo doctor --json --robot",
+      "exit_code": 2,
+      "structured_output_status": "json_error",
+      "selected_skill_handle": null,
+      "expected_invariant": "Doctor reports repository health or a structured blocker.",
+      "actual_invariant": "blocking=true; blocker id=projection_sync; next_command=./bin/ask skills sync --scope workspace --projection rooted --json --robot",
+      "normalized_failure_class": "workspace_projection_unsynced_in_isolated_worktree",
+      "regression_classification": "baseline_environment_blocker_not_product_regression",
+      "evidence_ref": "trace_id=1408dbfd-729b-4614-9840-32c03aa48d86"
+    },
+    {
+      "schema_version": "jsc-391-cli-compat-receipt.v1",
+      "phase": "baseline",
+      "command": "./bin/ask skills list --json --robot",
+      "exit_code": 0,
+      "structured_output_status": "json_success",
+      "selected_skill_handle": "ubiquitous-language",
+      "expected_invariant": "Skills list is callable and exposes at least one stable existing handle.",
+      "actual_invariant": "status=success; selected handle ubiquitous-language; policy_identity=ffa64b671a4e0ade; advanced_mode=false",
+      "normalized_failure_class": null,
+      "regression_classification": "baseline_pass",
+      "evidence_ref": "trace_id=c4c34384-4506-4120-a287-e9db2f606e96"
+    },
+    {
+      "schema_version": "jsc-391-cli-compat-receipt.v1",
+      "phase": "baseline",
+      "command": "./bin/ask skills explain ubiquitous-language --json --robot",
+      "exit_code": 0,
+      "structured_output_status": "json_success",
+      "selected_skill_handle": "ubiquitous-language",
+      "expected_invariant": "Selected skill can be resolved to canonical source and command-handle metadata.",
+      "actual_invariant": "canonical_source=Skills/agent-ops/ubiquitous-language/SKILL.md; generated_handle=.agents/skills/ubiquitous-language/SKILL.md; runtime_visibility=latent; reachability.status=fail",
+      "normalized_failure_class": null,
+      "regression_classification": "baseline_pass_with_reachability_warning",
+      "evidence_ref": "trace_id=13c1b241-e8d2-4613-8a7e-eb85703094ba"
+    },
+    {
+      "schema_version": "jsc-391-cli-compat-receipt.v1",
+      "phase": "baseline",
+      "command": "./bin/ask skills prove ubiquitous-language --json --robot",
+      "exit_code": 2,
+      "structured_output_status": "json_error",
+      "selected_skill_handle": "ubiquitous-language",
+      "expected_invariant": "Selected skill proof reports pass or a structured reachability blocker.",
+      "actual_invariant": "proof_status=blocked_reachability; command_handle_proof.status=fail; workspace_command_handle_exists=false; user_runtime_ready=false; command_handle_check has missing .agents/skills handles",
+      "normalized_failure_class": "workspace_command_handles_missing_in_isolated_worktree",
+      "regression_classification": "baseline_environment_blocker_not_product_regression",
+      "evidence_ref": "trace_id=9bce2c2b-5bf2-44ff-8b5e-fc8255346990"
+    },
+    {
+      "schema_version": "jsc-391-cli-compat-receipt.v1",
+      "phase": "baseline",
+      "command": "./bin/ask repo closeout --changed --json --robot",
+      "exit_code": 2,
+      "structured_output_status": "json_error",
+      "selected_skill_handle": null,
+      "expected_invariant": "Changed-file closeout reports readiness or structured blockers.",
+      "actual_invariant": "changed_file_count=6; commit_readiness.ready=false; blocker=repo_doctor_blocking caused by projection_sync",
+      "normalized_failure_class": "workspace_projection_unsynced_in_isolated_worktree",
+      "regression_classification": "baseline_environment_blocker_not_product_regression",
+      "evidence_ref": "trace_id=96ed8034-d9bc-47ad-a121-36477581b4fc"
+    }
+  ],
+  "sdk_receipts": [
+    {
+      "schema_version": "jsc-391-sdk-compat-receipt.v1",
+      "phase": "baseline",
+      "module": "ask.skills_sdk",
+      "source_path": "Infrastructure/scripts/lib/ask/skills_sdk/__init__.py",
+      "import_status": "pass",
+      "public_symbols_status": "pass",
+      "expected_public_contract": "__all__ when present, otherwise non-private module attributes after import",
+      "actual_public_contract": [],
+      "compatibility_classification": "baseline_captured",
+      "evidence_ref": "python import baseline command"
+    },
+    {
+      "schema_version": "jsc-391-sdk-compat-receipt.v1",
+      "phase": "baseline",
+      "module": "ask.skills_sdk.conformance",
+      "source_path": "Infrastructure/scripts/lib/ask/skills_sdk/conformance.py",
+      "import_status": "pass",
+      "public_symbols_status": "pass",
+      "expected_public_contract": "__all__ when present, otherwise non-private module attributes after import",
+      "actual_public_contract": ["Any", "CASE_RUNNERS", "CONFORMANCE_SCHEMA_VERSION", "Callable", "DEFAULT_SUITE", "Path", "annotations", "build_codex_config_explain", "build_codex_render_preview", "datetime", "json", "read_agents_openai_yaml_fields", "read_skill_frontmatter_fields", "run_skills_conformance", "skill_package_contract", "tempfile", "timezone", "verify_archive_package", "zipfile"],
+      "compatibility_classification": "baseline_captured",
+      "evidence_ref": "python import baseline command"
+    },
+    {
+      "schema_version": "jsc-391-sdk-compat-receipt.v1",
+      "phase": "baseline",
+      "module": "ask.skills_sdk.contracts",
+      "source_path": "Infrastructure/scripts/lib/ask/skills_sdk/contracts.py",
+      "import_status": "pass",
+      "public_symbols_status": "pass",
+      "expected_public_contract": "__all__ when present, otherwise non-private module attributes after import",
+      "actual_public_contract": ["Any", "CODEX_SKILL_PACKAGE_FIELDS", "CODEX_SKILL_PACKAGE_FRONTMATTER_FIELDS", "DOCTOR_BLOCKER_SDK_LAYERS", "DOCTOR_BLOCKER_TAXONOMY", "DOCTOR_CHECK_SDK_LAYERS", "DOCTOR_CONTRACT_SCHEMA_VERSIONS", "DOCTOR_SDK_LAYERS", "DOCTOR_WARNING_SDK_LAYERS", "DOCTOR_WARNING_TAXONOMY", "EVAL_BLOCKER_CLASSES", "PACKAGE_CONTRACT_FIELDS", "Path", "annotations", "ask_validation_command", "doctor_blocker", "doctor_contract_schema_refs", "doctor_contract_schema_versions", "doctor_sdk_layer_for", "doctor_warning", "parse_frontmatter_scalar", "read_skill_frontmatter_fields", "runtime_failure_payload", "shlex", "skill_doctor_check_summary", "skill_target_summary", "skills_validation_command", "status_from_bool"],
+      "compatibility_classification": "baseline_captured",
+      "evidence_ref": "python import baseline command"
+    },
+    {
+      "schema_version": "jsc-391-sdk-compat-receipt.v1",
+      "phase": "baseline",
+      "module": "ask.skills_sdk.package_contracts",
+      "source_path": "Infrastructure/scripts/lib/ask/skills_sdk/package_contracts.py",
+      "import_status": "pass",
+      "public_symbols_status": "pass",
+      "expected_public_contract": "__all__ when present, otherwise non-private module attributes after import",
+      "actual_public_contract": ["Any", "CODEX_SKILL_PACKAGE_ABI_EVIDENCE_FIELDS", "CODEX_SKILL_PACKAGE_ABI_SOURCE_PATH", "CODEX_SKILL_PACKAGE_FIELDS", "CODEX_SKILL_PACKAGE_FRONTMATTER_FIELDS", "CODEX_SKILL_PACKAGE_OPTIONAL_FIELDS", "CODEX_SKILL_PACKAGE_REQUIRED_FIELDS", "OPTIMIZATION_ACCEPTANCE_RULES", "OPTIMIZATION_EDIT_MODES", "OPTIMIZATION_EDIT_OPERATIONS", "OPTIMIZATION_GUARD_FAILURE_POLICIES", "OPTIMIZATION_METRIC_DIRECTIONS", "OPTIMIZATION_MODES", "OPTIMIZATION_SPLIT_ROLES", "OPTIMIZATION_TIE_POLICIES", "PACKAGE_CONTRACT_FIELDS", "Path", "SDK_PACKAGE_CONTRACT_FIELDS", "SDK_PACKAGE_CONTRACT_SCHEMA_VERSION", "SKILLFLOW_EXECUTION_MODES", "SKILLFLOW_NODE_TYPES", "SKILLFLOW_SCHEMA_PATH", "SKILLFLOW_SCHEMA_VERSION", "SKILL_OPTIMIZATION_CONTRACT_SCHEMA_PATH", "SKILL_OPTIMIZATION_CONTRACT_SCHEMA_VERSION", "SKILL_PACKAGE_COMPATIBILITY_SNAPSHOT_ID", "SKILL_PACKAGE_READINESS_SCHEMA_PATH", "SKILL_PACKAGE_READINESS_SCHEMA_VERSION", "SKILL_PACKAGE_SCHEMA_PATH", "SKILL_PACKAGE_SCHEMA_VERSION", "SKILL_PACKAGE_SNAPSHOT_PATH", "annotations", "capability_metadata_status", "codex_skill_package_abi_source", "empty_skill_package_contract", "local_evidence_provider_status", "markdown_heading_declared", "metadata_value", "normalized_command_candidate", "normalized_list", "optimization_contract", "package_field_values", "parse_frontmatter_scalar", "read_agents_openai_yaml_fields", "read_reference_contract", "read_reference_contract_fallback", "read_structured_reference", "reference_quality_contract", "refresh_package_promotion_gate", "repo_relative_path", "sdk_contract_field_present", "sdk_package_contract", "skill_agent_toml_paths", "skill_command_candidates", "skill_eval_paths", "skill_markdown_text", "skill_package_checkout_test", "skill_package_compatibility_snapshot", "skill_package_contract", "skill_package_contract_summary", "skill_package_file_path", "skill_package_gate_summary", "skill_package_readiness", "skill_package_readiness_summary", "skill_reference_files", "skillflow_contract", "yaml"],
+      "compatibility_classification": "baseline_captured",
+      "evidence_ref": "python import baseline command"
+    },
+    {
+      "schema_version": "jsc-391-sdk-compat-receipt.v1",
+      "phase": "baseline",
+      "module": "ask.skills_sdk.package_verify",
+      "source_path": "Infrastructure/scripts/lib/ask/skills_sdk/package_verify.py",
+      "import_status": "pass",
+      "public_symbols_status": "pass",
+      "expected_public_contract": "__all__ when present, otherwise non-private module attributes after import",
+      "actual_public_contract": ["Any", "PACKAGE_MANIFEST_NAMES", "PACKAGE_VERIFY_SCHEMA_VERSION", "Path", "PurePosixPath", "RUNTIME_MUTATION_SENTINELS", "TRUSTED_PROVENANCE_SOURCES", "annotations", "hashlib", "json", "normalized_list", "package_field_values", "read_skill_frontmatter_fields", "repo_relative_path", "sdk_package_contract", "sha256_bytes", "sha256_file", "skill_package_contract", "stat", "verify_archive_package", "verify_skill_directory", "zipfile"],
+      "compatibility_classification": "baseline_captured",
+      "evidence_ref": "python import baseline command"
+    },
+    {
+      "schema_version": "jsc-391-sdk-compat-receipt.v1",
+      "phase": "baseline",
+      "module": "ask.skills_sdk.runtime_adapters",
+      "source_path": "Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py",
+      "import_status": "pass",
+      "public_symbols_status": "pass",
+      "expected_public_contract": "__all__ when present, otherwise non-private module attributes after import",
+      "actual_public_contract": ["AGENTS_OTEL_STATS_RELATIVE_PATH", "Any", "CODEX_SESSION_FRESHNESS_SECONDS", "CODEX_SESSION_LOOKBACK_LIMIT", "CODEX_SESSION_TURN_EVENT_LIMIT", "Callable", "CheckCommandHandles", "EVIDENCE_RUNTIME_TARGETS", "HOME_MARKER", "Path", "RUNTIME_REACHABILITY_FAILURES", "ResolveSkillHandle", "SAFE_EVIDENCE_SEGMENT_PATTERN", "SUPPORTED_RUNTIME_TARGETS", "WORKSPACE_ROOT_MARKER", "annotations", "build_command_handle_proof", "datetime", "emit_command_handle_runtime_evidence", "invalid_runtime_target_failure", "json", "normalize_runtime_target", "re", "runtime_failure_payload", "skills_validation_command", "timezone"],
+      "compatibility_classification": "baseline_captured",
+      "evidence_ref": "python import baseline command"
+    }
+  ],
+  "path_convention_evidence": {
+    "decision_paths": [".harness/decisions/agent-skills-proof-taxonomy-and-lifecycle-adr.md", "Docs/decisions/2026-03-09-skills-graph-ui-v1-decisions.md"],
+    "preferred_jsc391_decision_path": ".harness/decisions/2026-06-03-jsc-391-skills-sdk-path-map-adr.md",
+    "schema_paths": ["Infrastructure/config/schemas/skills-sdk.project.v1.schema.json", "Infrastructure/config/schemas/skill-package.v1.schema.json"],
+    "preferred_jsc391_schema_path": "Infrastructure/config/schemas/skills-sdk/",
+    "fixture_paths": ["Infrastructure/tests/fixtures/runtime_proof/**", "Infrastructure/tests/fixtures/skill_package_snapshots/**"],
+    "preferred_jsc391_fixture_path": "Infrastructure/tests/fixtures/skills_sdk/",
+    "test_paths": ["Infrastructure/tests/test_skills_sdk_boundaries.py", "Infrastructure/tests/test_pr_skills_sdk_artifacts.py"],
+    "preferred_jsc391_test_path": "Infrastructure/tests/test_skills_sdk_boundaries.py and focused Infrastructure/tests/test_skills_sdk_*.py files",
+    "evidence_paths": [".harness/evidence/runtime-proof/**"],
+    "preferred_jsc391_evidence_path": ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/",
+    "canonical_source_boundary": "Docs/agents/14-path-ownership-boundaries.md states .agents/**, .skillsets/**, skills-codex/**, Plugins/cache/**, runtime/**, and root SKILL.md are derived/runtime surfaces and must not be hand-edited."
+  },
+  "next_worker_boundary": {
+    "task_id": "T003",
+    "plan_unit": "PU-002",
+    "objective": "Create the JSC-391 path-map ADR, existing SDK inventory, and parseable module ownership map before scaffold files are created.",
+    "allowed_files": [
+      ".harness/decisions/2026-06-03-jsc-391-skills-sdk-path-map-adr.md",
+      ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/sdk-inventory.json",
+      ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/module-ownership-map.json",
+      ".harness/implementation-notes/2026-06-03-jsc-391-agent-first-skills-sdk-scaffold-refactor-notes.mdx",
+      "Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor/state.yaml",
+      "Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor/receipts.jsonl"
+    ],
+    "verify": [
+      "test -f .harness/decisions/2026-06-03-jsc-391-skills-sdk-path-map-adr.md",
+      "test -f .harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/sdk-inventory.json",
+      "test -f .harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/module-ownership-map.json",
+      "python3 -m json.tool .harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/sdk-inventory.json >/dev/null",
+      "python3 -m json.tool .harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/module-ownership-map.json >/dev/null",
+      "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor"
+    ],
+    "stop_if": [
+      "Path ownership conflicts with existing docs",
+      "No canonical decision/schema/docs/fixture path can be selected without user decision",
+      "Existing skills_sdk source inventory is incomplete",
+      "A proposed module duplicates existing skills_sdk behavior without preserve/wrap/defer classification"
+    ]
+  },
+  "open_setup_debt": [
+    {
+      "id": "isolated_worktree_projection_sync",
+      "classification": "environment_or_generated_runtime_surface",
+      "evidence": "repo doctor and repo closeout block on projection_sync; skills prove reports missing workspace command handles.",
+      "next_command": "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
+      "reason_not_run_in_scout": "Active Scout task is read-only except governance/evidence files, and projection refresh mutates generated runtime surfaces."
+    }
+  ]
+}

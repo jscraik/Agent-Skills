@@ -1,0 +1,424 @@
+{
+  "schema_version": "jsc-391-closeout-artifact-inventory.v1",
+  "created_at": "2026-06-04T09:28:17Z",
+  "worktree": "/private/tmp/agent-skills-jsc-391-governed-implementation",
+  "branch": "codex/jsc-391-governed-implementation",
+  "changed_file_count": 63,
+  "categories": {
+    "decisions": [
+      ".harness/decisions/2026-06-03-jsc-391-skills-sdk-path-map-adr.md"
+    ],
+    "evidence": [
+      ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/closeout-artifact-inventory.json",
+      ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/module-ownership-map.json",
+      ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/parent-v1-crosswalk.md",
+      ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/placeholders/evals.json",
+      ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/placeholders/install.json",
+      ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/placeholders/manifest.json",
+      ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/placeholders/receipts.json",
+      ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/placeholders/refs.json",
+      ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/placeholders/risk.json",
+      ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/placeholders/sandbox.json",
+      ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/placeholders/signing.json",
+      ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/post-change-receipts.json",
+      ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-001-baseline.json",
+      ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/receipt-comparison.json",
+      ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/sdk-inventory.json"
+    ],
+    "reports": [
+      ".harness/reports/jsc-391-agent-first-skills-sdk-scaffold-refactor-closeout.md",
+      ".harness/reports/jsc-391-agent-first-skills-sdk-scaffold-refactor-pr-green-sweep.md"
+    ],
+    "implementation_notes": [
+      ".harness/implementation-notes/2026-06-03-jsc-391-agent-first-skills-sdk-scaffold-refactor-notes.mdx"
+    ],
+    "goal_board": [
+      "Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor/goal.md",
+      "Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor/notes/.gitkeep",
+      "Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor/receipts.jsonl",
+      "Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor/state.yaml"
+    ],
+    "docs_reference": [
+      "Docs/examples/skills-sdk/draft-package.json",
+      "Docs/reference/skills-sdk/modules.md"
+    ],
+    "schemas": [
+      "Infrastructure/config/schemas/skills-sdk/evals-placeholder.v1.schema.json",
+      "Infrastructure/config/schemas/skills-sdk/install-placeholder.v1.schema.json",
+      "Infrastructure/config/schemas/skills-sdk/manifest-placeholder.v1.schema.json",
+      "Infrastructure/config/schemas/skills-sdk/receipt-placeholder.v1.schema.json",
+      "Infrastructure/config/schemas/skills-sdk/refs-placeholder.v1.schema.json",
+      "Infrastructure/config/schemas/skills-sdk/risk-placeholder.v1.schema.json",
+      "Infrastructure/config/schemas/skills-sdk/sandbox-placeholder.v1.schema.json",
+      "Infrastructure/config/schemas/skills-sdk/signing-placeholder.v1.schema.json"
+    ],
+    "fixtures": [
+      "Infrastructure/tests/fixtures/skills_sdk/draft_package/package.json",
+      "Infrastructure/tests/fixtures/skills_sdk/generated_projection/rejected-path.json",
+      "Infrastructure/tests/fixtures/skills_sdk/invalid_missing_frontmatter/SKILL.md",
+      "Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md"
+    ],
+    "tests": [
+      "Infrastructure/tests/test_skills_sdk_scaffold.py"
+    ],
+    "reviews": [
+      "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-002/coordinator-summary.md",
+      "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-002/improve-codebase-architecture.md",
+      "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-002/simplify.md",
+      "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-002/testing.md",
+      "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-002/ubiquitous-language.md",
+      "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-003/improve-codebase-architecture.md",
+      "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-003/simplify.md",
+      "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-003/testing.md",
+      "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-003/ubiquitous-language.md",
+      "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-004/improve-codebase-architecture.md",
+      "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-004/simplify.md",
+      "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-004/testing.md",
+      "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-004/ubiquitous-language.md",
+      "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-005/improve-codebase-architecture.md",
+      "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-005/simplify.md",
+      "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-005/testing.md",
+      "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-005/ubiquitous-language.md",
+      "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-006/improve-codebase-architecture.md",
+      "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-006/simplify.md",
+      "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-006/testing.md",
+      "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-006/ubiquitous-language.md",
+      "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-007/improve-codebase-architecture.md",
+      "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-007/simplify.md",
+      "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-007/testing.md",
+      "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-007/ubiquitous-language.md"
+    ],
+    "root_runtime": []
+  },
+  "files": [
+    {
+      "path": ".harness/decisions/2026-06-03-jsc-391-skills-sdk-path-map-adr.md",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/closeout-artifact-inventory.json",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/module-ownership-map.json",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/parent-v1-crosswalk.md",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/placeholders/evals.json",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/placeholders/install.json",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/placeholders/manifest.json",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/placeholders/receipts.json",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/placeholders/refs.json",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/placeholders/risk.json",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/placeholders/sandbox.json",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/placeholders/signing.json",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/post-change-receipts.json",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-001-baseline.json",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/receipt-comparison.json",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/sdk-inventory.json",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": ".harness/implementation-notes/2026-06-03-jsc-391-agent-first-skills-sdk-scaffold-refactor-notes.mdx",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": ".harness/reports/jsc-391-agent-first-skills-sdk-scaffold-refactor-closeout.md",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": ".harness/reports/jsc-391-agent-first-skills-sdk-scaffold-refactor-pr-green-sweep.md",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "Docs/examples/skills-sdk/draft-package.json",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor/goal.md",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor/notes/.gitkeep",
+      "nonempty": true,
+      "intentional_empty": true
+    },
+    {
+      "path": "Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor/receipts.jsonl",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor/state.yaml",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "Docs/reference/skills-sdk/modules.md",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "Infrastructure/config/schemas/skills-sdk/evals-placeholder.v1.schema.json",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "Infrastructure/config/schemas/skills-sdk/install-placeholder.v1.schema.json",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "Infrastructure/config/schemas/skills-sdk/manifest-placeholder.v1.schema.json",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "Infrastructure/config/schemas/skills-sdk/receipt-placeholder.v1.schema.json",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "Infrastructure/config/schemas/skills-sdk/refs-placeholder.v1.schema.json",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "Infrastructure/config/schemas/skills-sdk/risk-placeholder.v1.schema.json",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "Infrastructure/config/schemas/skills-sdk/sandbox-placeholder.v1.schema.json",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "Infrastructure/config/schemas/skills-sdk/signing-placeholder.v1.schema.json",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "Infrastructure/tests/fixtures/skills_sdk/draft_package/package.json",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "Infrastructure/tests/fixtures/skills_sdk/generated_projection/rejected-path.json",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "Infrastructure/tests/fixtures/skills_sdk/invalid_missing_frontmatter/SKILL.md",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "Infrastructure/tests/test_skills_sdk_scaffold.py",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-002/coordinator-summary.md",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-002/improve-codebase-architecture.md",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-002/simplify.md",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-002/testing.md",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-002/ubiquitous-language.md",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-003/improve-codebase-architecture.md",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-003/simplify.md",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-003/testing.md",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-003/ubiquitous-language.md",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-004/improve-codebase-architecture.md",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-004/simplify.md",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-004/testing.md",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-004/ubiquitous-language.md",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-005/improve-codebase-architecture.md",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-005/simplify.md",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-005/testing.md",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-005/ubiquitous-language.md",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-006/improve-codebase-architecture.md",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-006/simplify.md",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-006/testing.md",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-006/ubiquitous-language.md",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-007/improve-codebase-architecture.md",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-007/simplify.md",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-007/testing.md",
+      "nonempty": true,
+      "intentional_empty": false
+    },
+    {
+      "path": "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-007/ubiquitous-language.md",
+      "nonempty": true,
+      "intentional_empty": false
+    }
+  ],
+  "missing_or_empty_files": [],
+  "intentional_empty_files": [
+    "Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor/notes/.gitkeep"
+  ],
+  "truth_lanes": {
+    "local_artifacts": "present",
+    "local_validation": "partially_passed_with_repo_closeout_blocked_by_projection_sync",
+    "runtime_projection": "blocked_projection_sync_and_command_handles",
+    "github_pr": "blocked_gh_auth_unavailable",
+    "ci": "blocked_gh_auth_unavailable",
+    "linear": "not_mutated_or_refreshed_in_pu007",
+    "review_threads": "blocked_gh_auth_unavailable",
+    "merge_readiness": "not_claimed"
+  }
+}

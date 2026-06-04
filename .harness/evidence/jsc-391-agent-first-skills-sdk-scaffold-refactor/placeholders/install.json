@@ -1,0 +1,10 @@
+{
+  "schema_version": "jsc-391-install-placeholder.v1",
+  "module": "install",
+  "status": "blocked",
+  "rationale": "JSC-391 does not perform install writes; future install behavior must be gated by receipts.",
+  "evidence_ref": "Docs/reference/skills-sdk/modules.md",
+  "target_root_class": "not_selected",
+  "decision_shape": "blocked",
+  "mutation_performed": false
+}

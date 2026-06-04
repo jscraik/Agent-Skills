@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/risk-placeholder.v1.schema.json",
+  "title": "JSC-391 Risk Placeholder Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "jsc-391-risk-placeholder.v1"
+    },
+    "module": {
+      "type": "string",
+      "const": "risk"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "not_run",
+        "skipped_optional",
+        "blocked"
+      ]
+    },
+    "rationale": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_ref": {
+      "type": "string"
+    },
+    "probability": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "unknown"
+      ]
+    },
+    "impact": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "unknown"
+      ]
+    },
+    "detectability": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "unknown"
+      ]
+    },
+    "sensor_placement": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "module",
+    "status",
+    "rationale"
+  ]
+}

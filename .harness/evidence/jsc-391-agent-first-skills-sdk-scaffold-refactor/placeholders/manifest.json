@@ -1,0 +1,12 @@
+{
+  "schema_version": "jsc-391-manifest-placeholder.v1",
+  "module": "manifest",
+  "status": "not_run",
+  "rationale": "PU-004 reserves manifest fixture shape without running package validation.",
+  "evidence_ref": "Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md",
+  "manifest_fields": [
+    "name",
+    "description"
+  ],
+  "blocker_class": "not_applicable"
+}

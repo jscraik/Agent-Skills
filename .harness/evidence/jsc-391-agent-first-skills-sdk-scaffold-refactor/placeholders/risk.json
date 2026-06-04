@@ -1,0 +1,11 @@
+{
+  "schema_version": "jsc-391-risk-placeholder.v1",
+  "module": "risk",
+  "status": "blocked",
+  "rationale": "Risk sensors are contract-defined in PU-003 but executable sensor checks are deferred to PU-005.",
+  "evidence_ref": "Docs/reference/skills-sdk/modules.md",
+  "probability": "unknown",
+  "impact": "high",
+  "detectability": "medium",
+  "sensor_placement": "PU-005 scaffold and feature-leak tests"
+}

@@ -1,0 +1,10 @@
+{
+  "schema_version": "jsc-391-evals-placeholder.v1",
+  "module": "evals",
+  "status": "blocked",
+  "rationale": "Eval dataset shape is reserved; external Tessl and live eval execution are not required for this scaffold slice.",
+  "evidence_ref": "Infrastructure/tests/fixtures/skills_sdk",
+  "dataset_ref": "Infrastructure/tests/fixtures/skills_sdk",
+  "result_status": "blocked",
+  "external_service_used": false
+}

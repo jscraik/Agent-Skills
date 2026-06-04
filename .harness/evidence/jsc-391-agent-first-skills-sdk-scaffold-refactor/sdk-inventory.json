@@ -1,0 +1,98 @@
+{
+  "schema_version": "jsc-391-sdk-inventory.v1",
+  "created_at": "2026-06-03T21:41:28Z",
+  "source_glob": "Infrastructure/scripts/lib/ask/skills_sdk/*.py",
+  "excluded_paths": [
+    "Infrastructure/scripts/lib/ask/skills_sdk/__pycache__/**"
+  ],
+  "tracked_source_count": 6,
+  "files": [
+    {
+      "path": "Infrastructure/scripts/lib/ask/skills_sdk/__init__.py",
+      "module": "ask.skills_sdk",
+      "classification": "preserve",
+      "current_ownership": "Package boundary marker for Skills SDK service modules.",
+      "public_contract": [],
+      "rationale": "No behavior to move; keep as import package marker.",
+      "future_action": "May document package-level purpose if PU-003 needs a visible module entrypoint."
+    },
+    {
+      "path": "Infrastructure/scripts/lib/ask/skills_sdk/conformance.py",
+      "module": "ask.skills_sdk.conformance",
+      "classification": "preserve",
+      "current_ownership": "Codex-parity conformance suite, modeled conformance status, live runtime parity status, fixture archive checks, and conformance evidence payloads.",
+      "public_contract": [
+        "CONFORMANCE_SCHEMA_VERSION",
+        "DEFAULT_SUITE",
+        "run_skills_conformance"
+      ],
+      "rationale": "Existing conformance behavior is active compatibility surface; do not duplicate in a new evals module during scaffold work.",
+      "future_action": "Future evals module may collaborate through documented public functions rather than importing conformance internals."
+    },
+    {
+      "path": "Infrastructure/scripts/lib/ask/skills_sdk/contracts.py",
+      "module": "ask.skills_sdk.contracts",
+      "classification": "preserve",
+      "current_ownership": "Shared skill package fields, doctor layer vocabulary, validation command builders, conservative frontmatter parsing, and runtime failure payloads.",
+      "public_contract": [
+        "CODEX_SKILL_PACKAGE_FIELDS",
+        "PACKAGE_CONTRACT_FIELDS",
+        "DOCTOR_SDK_LAYERS",
+        "ask_validation_command",
+        "skills_validation_command",
+        "read_skill_frontmatter_fields",
+        "runtime_failure_payload"
+      ],
+      "rationale": "This is the current common contract vocabulary; new deep modules should depend on its public helpers rather than redefine terms.",
+      "future_action": "PU-003 should identify which constants remain shared versus move behind module-specific public contracts in later work."
+    },
+    {
+      "path": "Infrastructure/scripts/lib/ask/skills_sdk/package_contracts.py",
+      "module": "ask.skills_sdk.package_contracts",
+      "classification": "preserve",
+      "current_ownership": "Skill package metadata, readiness, skillflow, optimization, reference-quality, ABI, and schema path contracts.",
+      "public_contract": [
+        "SKILL_PACKAGE_SCHEMA_VERSION",
+        "SKILL_PACKAGE_READINESS_SCHEMA_VERSION",
+        "SDK_PACKAGE_CONTRACT_SCHEMA_VERSION",
+        "skill_package_contract",
+        "skill_package_readiness",
+        "sdk_package_contract",
+        "skillflow_contract",
+        "optimization_contract"
+      ],
+      "rationale": "Package contract behavior already exists; JSC-391 should route future packaging work through it instead of creating a parallel module.",
+      "future_action": "Packaging module docs may wrap this file as the current owner for package metadata and readiness contracts."
+    },
+    {
+      "path": "Infrastructure/scripts/lib/ask/skills_sdk/package_verify.py",
+      "module": "ask.skills_sdk.package_verify",
+      "classification": "preserve",
+      "current_ownership": "Archive/package verification, trusted provenance, manifest validation, safe archive paths, rollback journal checks, and runtime mutation sentinels.",
+      "public_contract": [
+        "PACKAGE_VERIFY_SCHEMA_VERSION",
+        "RUNTIME_MUTATION_SENTINELS",
+        "verify_archive_package",
+        "verify_skill_directory"
+      ],
+      "rationale": "Verification behavior is active and should not be split during scaffold setup.",
+      "future_action": "Install and packaging contracts should collaborate with this verifier through public functions."
+    },
+    {
+      "path": "Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py",
+      "module": "ask.skills_sdk.runtime_adapters",
+      "classification": "preserve",
+      "current_ownership": "Runtime target normalization, command-handle proof, runtime reachability classification, runtime evidence writing, and path redaction.",
+      "public_contract": [
+        "SUPPORTED_RUNTIME_TARGETS",
+        "EVIDENCE_RUNTIME_TARGETS",
+        "build_command_handle_proof",
+        "emit_command_handle_runtime_evidence",
+        "invalid_runtime_target_failure",
+        "normalize_runtime_target"
+      ],
+      "rationale": "Existing runtime proof behavior must remain compatible; future runtime/sandbox modules must wrap or collaborate rather than duplicate reachability semantics.",
+      "future_action": "Runtime module docs should name this file as current public owner and reserve sandbox execution for a later approved slice."
+    }
+  ]
+}

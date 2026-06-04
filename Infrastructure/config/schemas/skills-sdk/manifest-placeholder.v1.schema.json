@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/manifest-placeholder.v1.schema.json",
+  "title": "JSC-391 Manifest Placeholder Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "jsc-391-manifest-placeholder.v1"
+    },
+    "module": {
+      "type": "string",
+      "const": "manifest"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "not_run",
+        "skipped_optional",
+        "blocked"
+      ]
+    },
+    "rationale": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_ref": {
+      "type": "string"
+    },
+    "manifest_fields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "blocker_class": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "module",
+    "status",
+    "rationale"
+  ]
+}

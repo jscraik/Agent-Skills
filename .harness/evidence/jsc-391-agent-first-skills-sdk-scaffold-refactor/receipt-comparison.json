@@ -1,0 +1,125 @@
+{
+  "schema_version": "jsc-391-receipt-comparison.v1",
+  "created_at": "2026-06-04T09:09:42Z",
+  "baseline_ref": ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-001-baseline.json",
+  "post_change_ref": ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/post-change-receipts.json",
+  "summary": {
+    "compatible": true,
+    "introduced_regressions": 0,
+    "unchanged_environment_blockers": [
+      "workspace_projection_unsynced_in_isolated_worktree",
+      "workspace_command_handles_missing_in_isolated_worktree"
+    ],
+    "comparison_boundary": "This comparison proves the JSC-391 scaffold artifacts did not introduce CLI or SDK public-contract regressions in the checked command matrix. It does not prove workspace projection sync, GitHub PR, CI, Linear, review-thread, or merge readiness."
+  },
+  "command_comparisons": [
+    {
+      "id": "repo_status",
+      "baseline": "pass",
+      "post_change": "pass",
+      "classification": "preserved_pass"
+    },
+    {
+      "id": "repo_doctor",
+      "baseline": "blocked_projection_sync",
+      "post_change": "blocked_projection_sync",
+      "classification": "unchanged_environment_blocker_not_product_regression"
+    },
+    {
+      "id": "skills_list",
+      "baseline": "pass",
+      "post_change": "pass",
+      "classification": "preserved_pass"
+    },
+    {
+      "id": "skills_explain",
+      "baseline": "pass_with_reachability_warning",
+      "post_change": "pass_with_reachability_warning",
+      "classification": "preserved_pass_with_existing_warning"
+    },
+    {
+      "id": "skills_prove",
+      "baseline": "blocked_reachability",
+      "post_change": "blocked_reachability",
+      "classification": "unchanged_environment_blocker_not_product_regression"
+    },
+    {
+      "id": "repo_closeout_changed",
+      "baseline": "blocked_projection_sync",
+      "post_change": "blocked_projection_sync",
+      "classification": "unchanged_environment_blocker_not_product_regression"
+    },
+    {
+      "id": "sdk_import_public_contract",
+      "baseline": "pass",
+      "post_change": "pass",
+      "classification": "preserved_public_contract"
+    },
+    {
+      "id": "focused_pytest",
+      "baseline": "not_applicable_before_pu005",
+      "post_change": "pass",
+      "classification": "new_scaffold_guard_pass"
+    }
+  ],
+  "sdk_module_comparisons": [
+    {
+      "module": "ask.skills_sdk",
+      "baseline_public_symbol_count": 0,
+      "post_change_public_symbol_count": 0,
+      "public_symbols_preserved": true,
+      "classification": "preserved_public_contract"
+    },
+    {
+      "module": "ask.skills_sdk.conformance",
+      "baseline_public_symbol_count": 19,
+      "post_change_public_symbol_count": 19,
+      "public_symbols_preserved": true,
+      "classification": "preserved_public_contract"
+    },
+    {
+      "module": "ask.skills_sdk.contracts",
+      "baseline_public_symbol_count": 28,
+      "post_change_public_symbol_count": 28,
+      "public_symbols_preserved": true,
+      "classification": "preserved_public_contract"
+    },
+    {
+      "module": "ask.skills_sdk.package_contracts",
+      "baseline_public_symbol_count": 67,
+      "post_change_public_symbol_count": 67,
+      "public_symbols_preserved": true,
+      "classification": "preserved_public_contract"
+    },
+    {
+      "module": "ask.skills_sdk.package_verify",
+      "baseline_public_symbol_count": 22,
+      "post_change_public_symbol_count": 22,
+      "public_symbols_preserved": true,
+      "classification": "preserved_public_contract"
+    },
+    {
+      "module": "ask.skills_sdk.runtime_adapters",
+      "baseline_public_symbol_count": 26,
+      "post_change_public_symbol_count": 26,
+      "public_symbols_preserved": true,
+      "classification": "preserved_public_contract"
+    }
+  ],
+  "blocked_receipts": [
+    {
+      "id": "projection_sync",
+      "baseline_failure_class": "workspace_projection_unsynced_in_isolated_worktree",
+      "post_change_failure_class": "workspace_projection_unsynced_in_isolated_worktree",
+      "owner_classification": "environment_or_generated_runtime_surface",
+      "reason_not_fixed_in_jsc391": "Projection sync mutates generated runtime surfaces that are explicitly out of scope for this scaffold slice."
+    },
+    {
+      "id": "command_handles",
+      "baseline_failure_class": "workspace_command_handles_missing_in_isolated_worktree",
+      "post_change_failure_class": "workspace_command_handles_missing_in_isolated_worktree",
+      "owner_classification": "environment_or_generated_runtime_surface",
+      "reason_not_fixed_in_jsc391": "Workspace command handles are generated runtime projection artifacts, not canonical scaffold source."
+    }
+  ]
+}
