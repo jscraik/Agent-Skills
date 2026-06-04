@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/sandbox-placeholder.v1.schema.json",
+  "title": "JSC-391 Sandbox Placeholder Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "jsc-391-sandbox-placeholder.v1"
+    },
+    "module": {
+      "type": "string",
+      "const": "sandbox"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "not_run",
+        "skipped_optional",
+        "blocked"
+      ]
+    },
+    "rationale": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_ref": {
+      "type": "string"
+    },
+    "permission_boundary": {
+      "type": "string"
+    },
+    "execution_performed": {
+      "type": "boolean",
+      "const": false
+    },
+    "unavailable_reason": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "module",
+    "status",
+    "rationale"
+  ]
+}

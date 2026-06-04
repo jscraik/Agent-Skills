@@ -1,0 +1,526 @@
+version: 2
+goal:
+  slug: "jsc-391-agent-first-skills-sdk-scaffold-refactor"
+  status: active
+  objective: "Implement JSC-391 Agent-First Skills SDK scaffold and deep module refactor through governed, validated slices."
+  native_goal_id: "019e8ee9-dd15-7251-b216-aaca8861cc20"
+  native_objective: "Implement /private/tmp/agent-skills-jsc-391-governed-implementation/.harness/plan/2026-06-03-jsc-391-agent-first-skills-sdk-scaffold-refactor-plan.md as a governed JSC-391 Agent Skills Kit goal on branch codex/jsc-391-governed-implementation in its own worktree. Execute one bounded plan slice at a time, beginning with Scout verification of PU-001 baseline evidence before any Worker edits. After each slice, run and record review checks using $simplify, $improve-codebase-architecture, $testing, and $ubiquitous-language, then run @agent-native-reviewer and @architecture-strategist with artifact-first outputs. Fix accepted findings before the slice can close. After review completion and delivery packaging, triage git/PR state with $pr-green-sweep. Keep local validation, generated artifacts, review threads, GitHub PR/CI state, Linear tracker state, and merge readiness as separate truth lanes. Preserve canonical source ownership and do not hand-edit runtime projections, plugin caches, or user/global runtime mirrors."
+  native_status: blocked
+  user_scope_update:
+    at: "2026-06-04T08:35:36Z"
+    decision: "Agent-swarm review is no longer a per-slice close blocker; it will be handled separately."
+  token_budget: null
+  tokens_used: 0
+  time_used_seconds: 0
+  native_created_at: "2026-06-03T00:00:00Z"
+  native_updated_at: "2026-06-03T00:00:00Z"
+completion_contract:
+  outcome: "JSC-391 is implemented or honestly blocked according to the canonical plan, with scaffold contracts, tests, receipts, crosswalk, reviews, and closeout evidence complete."
+  verification_surface:
+    - "Goal board validator output"
+    - "PU-001 baseline compatibility and SDK public-contract receipts"
+    - "PU-002 path-map ADR and parseable module ownership map"
+    - "PU-003 deep module contracts"
+    - "PU-004 fixture and placeholder parser checks"
+    - "PU-005 scaffold, routing, dependency, feature-leak, and path ownership tests"
+    - "PU-006 post-change receipts and parent V1 acceptance crosswalk"
+    - "PU-007 closeout and review artifacts"
+    - "Per-slice simplify, architecture, testing, and ubiquitous-language review artifacts"
+    - "Agent-native and architecture-strategist review artifacts tracked as a separate follow-up lane"
+    - "PR green-sweep git and PR triage artifacts"
+  constraints:
+    - "Use the dedicated worktree /private/tmp/agent-skills-jsc-391-governed-implementation"
+    - "Use branch codex/jsc-391-governed-implementation"
+    - "Run Scout baseline verification before Worker edits"
+    - "Use repo wrappers and canonical source paths"
+    - "Do not hand-edit runtime projections, plugin caches, or user/global runtime mirrors"
+    - "Do not implement out-of-scope V1 feature behavior"
+    - "Keep local validation, artifacts, review, PR, CI, Linear, and merge-readiness truth lanes separate"
+  boundaries:
+    - "Target repository is /private/tmp/agent-skills-jsc-391-governed-implementation"
+    - "Canonical plan is .harness/plan/2026-06-03-jsc-391-agent-first-skills-sdk-scaffold-refactor-plan.md"
+    - "Canonical spec is .harness/specs/2026-06-03-jsc-391-agent-first-skills-sdk-scaffold-refactor-spec.md"
+    - "Implementation notes are .harness/implementation-notes/2026-06-03-jsc-391-agent-first-skills-sdk-scaffold-refactor-notes.mdx"
+    - "Review artifacts live under artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor"
+    - "Runtime Projection paths and plugin caches are denied as source edits"
+  iteration_policy: "Govern one bounded plan unit at a time, validate before implementation, run required skill reviews after each slice, fix accepted findings, update receipts and notes, track agent-swarm review separately when requested, then run PR green-sweep after review and delivery packaging."
+  blocked_stop_condition: "Stop on invalid board state, missing baseline evidence, ambiguous path ownership, compatibility regression without classification, false runtime readiness, missing required local review artifacts, blocked parent acceptance claimed as done, or stale delivery truth."
+rules:
+  one_active_task: true
+  require_fresh_verification: true
+  require_final_audit: true
+checks:
+  dirty_fingerprint: "new worktree on codex/jsc-391-governed-implementation from main 0efa0c382"
+  last_verification:
+    command: "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor"
+    outcome: pass
+    checked_at: "2026-06-03T21:41:28Z"
+  last_scout:
+    command: "PU-001 baseline matrix plus SDK import/public contract baseline"
+    outcome: "pass_with_classified_setup_blockers"
+    checked_at: "2026-06-03T21:41:28Z"
+    detail: "repo status, skills list, skills explain, and SDK imports pass; repo doctor, selected skill proof, and changed closeout block on missing generated runtime projection/command handles in the isolated worktree."
+continuation_gate:
+  native_status: blocked
+  goal_active: pass
+  thread_idle: unknown
+  queued_user_input: absent
+  pending_work: present
+  auto_continue_allowed: "yes"
+  blocked_by: null
+  resumed_by_user_scope_update: "Agent-swarm review removed as a blocking requirement on 2026-06-04; native controller still records the prior blocked status."
+artifacts:
+  implementation_notes:
+    path: ".harness/implementation-notes/2026-06-03-jsc-391-agent-first-skills-sdk-scaffold-refactor-notes.mdx"
+    format: mdx
+    status: present
+    browser_preview:
+      surface: localhost
+      status: blocked
+      blocker: "No localhost MDX renderer has been started for this freshly-created goal board."
+      live_update:
+        status: blocked
+        blocker: "No live-update watcher has been started for this freshly-created goal board."
+claims:
+  - id: C001
+    claim: "JSC-391 is now a governed implementation goal in a dedicated feature worktree and branch."
+    evidence_surface:
+      - "Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor/goal.md"
+      - "Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor/state.yaml"
+      - "Native Codex goal objective for thread 019e8ee9-dd15-7251-b216-aaca8861cc20"
+    route: reproduced
+    status: supported
+    remaining_uncertainty:
+      - "PU-001 baseline evidence has not run yet"
+  - id: C002
+    claim: "Every implementation slice must pass the requested skill reviews before PR green-sweep triage; agent-swarm review is tracked separately."
+    evidence_surface:
+      - "Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor/goal.md"
+      - ".harness/plan/2026-06-03-jsc-391-agent-first-skills-sdk-scaffold-refactor-plan.md"
+      - "User scope update on 2026-06-04"
+    route: reproduced
+    status: supported
+    remaining_uncertainty:
+      - "Separate agent-swarm follow-up remains outside slice closure"
+tasks:
+  - id: T001
+    type: pm
+    assignee: PM
+    status: done
+    objective: "Create the native Codex goal, dedicated feature worktree, branch, and repo-visible Goal Governor board for JSC-391."
+    inputs:
+      - ".harness/plan/2026-06-03-jsc-391-agent-first-skills-sdk-scaffold-refactor-plan.md"
+      - "Skills/agent-ops/goal-governor/references/goal-contract.md"
+      - "UBIQUITOUS_LANGUAGE.md"
+    constraints:
+      - "No implementation code edits during board creation"
+      - "No PR, Linear, or merge mutation during board creation"
+      - "Keep primary checkout clean"
+    expected_output: "Governed implementation board and implementation-notes scaffold"
+    allowed_files: []
+    verify:
+      - "git worktree list --porcelain"
+      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor"
+    stop_if:
+      - "Worktree cannot be isolated"
+      - "Board validator fails"
+      - "Canonical plan path is missing"
+    receipt_id: R001
+  - id: T002
+    type: scout
+    assignee: Scout
+    status: done
+    objective: "Refresh PU-001 baseline compatibility and path evidence, then define the first Worker slice boundary before any implementation edit."
+    inputs:
+      - "Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor/goal.md"
+      - "Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor/state.yaml"
+      - ".harness/plan/2026-06-03-jsc-391-agent-first-skills-sdk-scaffold-refactor-plan.md"
+      - ".harness/specs/2026-06-03-jsc-391-agent-first-skills-sdk-scaffold-refactor-spec.md"
+      - "Infrastructure/scripts/lib/ask/skills_sdk"
+      - "UBIQUITOUS_LANGUAGE.md"
+    constraints:
+      - "Read-only except goal board, receipts, implementation notes, and Scout evidence artifacts"
+      - "Do not edit implementation code"
+      - "Do not mutate PR, CI, Linear, or merge state"
+      - "Stop if unrelated dirty files would contaminate closeout"
+    expected_output: "PU-001 baseline receipt packet with current commands, evidence paths, allowed files, validation commands, and stop conditions for the first Worker slice."
+    allowed_files: []
+    verify:
+      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor"
+      - "python3 bin/ask repo status --json"
+      - "./bin/ask repo doctor --json --robot"
+      - "./bin/ask skills list --json --robot"
+      - "./bin/ask repo closeout --changed --json --robot"
+    stop_if:
+      - "Baseline command cannot run and cannot be classified into a receipt"
+      - "SDK import/public-contract command matrix cannot be selected"
+      - "Worktree contains unrelated dirty files"
+    receipt_id: R002
+  - id: T003
+    type: worker
+    assignee: Worker
+    status: done
+    objective: "Create PU-002 path-map ADR, existing SDK inventory, and parseable module ownership map before adding scaffold files."
+    inputs:
+      - ".harness/plan/2026-06-03-jsc-391-agent-first-skills-sdk-scaffold-refactor-plan.md"
+      - ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-001-baseline.json"
+      - "Docs/agents/14-path-ownership-boundaries.md"
+      - "Infrastructure/tests/test_skills_sdk_boundaries.py"
+      - "Infrastructure/scripts/lib/ask/skills_sdk"
+    constraints:
+      - "Do not create scaffold files before the ADR exists"
+      - "Do not move existing SDK files in PU-002"
+      - "Do not refresh or hand-edit runtime projections in this Worker task"
+      - "Prefer preserve, wrap, or defer over duplicate modules"
+    expected_output: "Path-map ADR, tracked SDK inventory, and parseable module ownership map."
+    allowed_files:
+      - ".harness/decisions/2026-06-03-jsc-391-skills-sdk-path-map-adr.md"
+      - ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/sdk-inventory.json"
+      - ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/module-ownership-map.json"
+      - ".harness/implementation-notes/2026-06-03-jsc-391-agent-first-skills-sdk-scaffold-refactor-notes.mdx"
+      - "Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor/state.yaml"
+      - "Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor/receipts.jsonl"
+      - "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-002/coordinator-summary.md"
+      - "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-002/simplify.md"
+      - "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-002/improve-codebase-architecture.md"
+      - "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-002/testing.md"
+      - "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-002/ubiquitous-language.md"
+    verify:
+      - "test -f .harness/decisions/2026-06-03-jsc-391-skills-sdk-path-map-adr.md"
+      - "test -f .harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/sdk-inventory.json"
+      - "test -f .harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/module-ownership-map.json"
+      - "python3 -m json.tool .harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/sdk-inventory.json >/dev/null"
+      - "python3 -m json.tool .harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/module-ownership-map.json >/dev/null"
+      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor"
+    review_status:
+      checked_at: "2026-06-03T22:00:00Z"
+      local_review_artifacts:
+        - path: "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-002/simplify.md"
+          outcome: "no_findings"
+        - path: "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-002/improve-codebase-architecture.md"
+          outcome: "no_blocking_findings"
+        - path: "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-002/testing.md"
+          outcome: "pass"
+          evidence: "/private/tmp/agent-skills-xdg-cache/uv/archive-v0/eWsOeC9U82alWi7e11OBQ/bin/python -m pytest Infrastructure/tests/test_skills_sdk_boundaries.py -q -> pass, 3 passed in 0.08s"
+        - path: "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-002/ubiquitous-language.md"
+          outcome: "no_findings"
+      subagent_review_artifacts:
+        - path: "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-002/coordinator-summary.md"
+          outcome: "separate_followup_recorded"
+        - path: "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-002/agent-native-reviewer.md"
+          outcome: "deferred_separate_followup"
+          blocker: "Two independent reviewer agents completed, each followed by one artifact-only retry, but did not write the required artifact."
+        - path: "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-002/architecture-strategist.md"
+          outcome: "deferred_separate_followup"
+          blocker: "Two independent reviewer agents completed, each followed by one artifact-only retry, but did not write the required artifact."
+      close_decision: "pass_after_user_scope_update"
+      close_blockers: []
+    stop_if:
+      - "Path ownership conflicts with existing docs"
+      - "No canonical decision/schema/docs/fixture path can be selected without user decision"
+      - "Existing skills_sdk source inventory is incomplete"
+      - "A proposed module duplicates existing skills_sdk behavior without preserve/wrap/defer classification"
+    receipt_id: R003
+  - id: T004
+    type: worker
+    assignee: Worker
+    status: done
+    objective: "Define PU-003 deep module contracts and minimal landing zones without implementing V1 feature behavior."
+    inputs:
+      - ".harness/plan/2026-06-03-jsc-391-agent-first-skills-sdk-scaffold-refactor-plan.md"
+      - ".harness/decisions/2026-06-03-jsc-391-skills-sdk-path-map-adr.md"
+      - ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/module-ownership-map.json"
+      - "Docs/agents/14-path-ownership-boundaries.md"
+      - "Infrastructure/scripts/lib/ask/skills_sdk"
+    constraints:
+      - "Do not add user-facing CLI behavior"
+      - "Do not implement signing, sandbox, eval, install, registry, package upload, or global/project skill writes"
+      - "Do not duplicate behavior already owned by existing skills_sdk modules"
+      - "Keep signing documentation/schema-only with honest not_run or blocked semantics"
+    expected_output: "Deep module contract documentation and updated parseable module ownership map for manifest, receipts, risk, install, sandbox, refs, evals, and signing."
+    allowed_files:
+      - "Docs/reference/skills-sdk/modules.md"
+      - ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/module-ownership-map.json"
+      - "Infrastructure/config/schemas/skills-sdk/*.json"
+      - ".harness/implementation-notes/2026-06-03-jsc-391-agent-first-skills-sdk-scaffold-refactor-notes.mdx"
+      - "Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor/state.yaml"
+      - "Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor/receipts.jsonl"
+      - "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-003/simplify.md"
+      - "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-003/improve-codebase-architecture.md"
+      - "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-003/testing.md"
+      - "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-003/ubiquitous-language.md"
+    verify:
+      - "/usr/bin/grep -nE 'manifest|receipts|risk|install|sandbox|refs|evals|signing' Docs/reference/skills-sdk/modules.md"
+      - "/usr/bin/grep -nE 'inferential|computational|hybrid|probability|impact|detectability|proof metadata|redaction' Docs/reference/skills-sdk/modules.md"
+      - "python3 -m json.tool .harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/module-ownership-map.json >/dev/null"
+      - 'for f in Infrastructure/config/schemas/skills-sdk/*.json; do python3 -m json.tool "$f" >/dev/null || exit 1; done'
+      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor"
+    review_status:
+      checked_at: "2026-06-04T08:35:36Z"
+      local_review_artifacts:
+        - path: "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-003/simplify.md"
+          outcome: "no_findings"
+        - path: "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-003/improve-codebase-architecture.md"
+          outcome: "no_findings"
+        - path: "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-003/testing.md"
+          outcome: "no_findings"
+        - path: "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-003/ubiquitous-language.md"
+          outcome: "no_findings"
+      agent_swarm_review:
+        outcome: "separate_followup_not_required_for_slice_close"
+      close_decision: "pass"
+      close_blockers: []
+    stop_if:
+      - "A module contract requires real feature behavior to be meaningful"
+      - "A placeholder implies runtime readiness or feature availability"
+      - "A new module duplicates existing skills_sdk behavior without wrap/defer justification"
+    receipt_id: R004
+  - id: T005
+    type: worker
+    assignee: Worker
+    status: done
+    objective: "Add PU-004 minimum fixtures, examples, and parseable placeholder contracts without implying feature readiness."
+    inputs:
+      - ".harness/plan/2026-06-03-jsc-391-agent-first-skills-sdk-scaffold-refactor-plan.md"
+      - ".harness/decisions/2026-06-03-jsc-391-skills-sdk-path-map-adr.md"
+      - "Docs/reference/skills-sdk/modules.md"
+      - ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/module-ownership-map.json"
+    constraints:
+      - "Do not treat runtime projection fixtures as source"
+      - "Do not return pass for unimplemented signing, sandbox, eval, install, registry, or publish behavior"
+      - "Do not require external Tessl for this scaffold slice"
+    expected_output: "Minimal valid/invalid skill fixtures, SDK draft package fixture, generated-projection rejection fixture, and parseable placeholder instances."
+    allowed_files:
+      - "Infrastructure/tests/fixtures/skills_sdk/**"
+      - "Docs/examples/skills-sdk/**"
+      - ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/placeholders/**"
+      - ".harness/implementation-notes/2026-06-03-jsc-391-agent-first-skills-sdk-scaffold-refactor-notes.mdx"
+      - "Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor/state.yaml"
+      - "Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor/receipts.jsonl"
+      - "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-004/simplify.md"
+      - "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-004/improve-codebase-architecture.md"
+      - "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-004/testing.md"
+      - "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-004/ubiquitous-language.md"
+    verify:
+      - "find Infrastructure/tests/fixtures/skills_sdk -type f | sort"
+      - "find Docs/examples/skills-sdk -type f | sort"
+      - 'for f in .harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/placeholders/*.json; do python3 -m json.tool "$f" >/dev/null || exit 1; done'
+      - "python3 placeholder readiness guard for PU-004"
+      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor"
+    review_status:
+      checked_at: "2026-06-04T08:35:36Z"
+      local_review_artifacts:
+        - path: "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-004/simplify.md"
+          outcome: "no_findings"
+        - path: "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-004/improve-codebase-architecture.md"
+          outcome: "no_findings"
+        - path: "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-004/testing.md"
+          outcome: "no_findings"
+        - path: "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-004/ubiquitous-language.md"
+          outcome: "no_findings"
+      agent_swarm_review:
+        outcome: "separate_followup_not_required_for_slice_close"
+      close_decision: "pass"
+      close_blockers: []
+    stop_if:
+      - "A placeholder implies runtime readiness or feature availability"
+      - "A fixture writes to generated/runtime projection surfaces"
+      - "A placeholder parser check fails without a classified blocker"
+    receipt_id: R005
+  - id: T006
+    type: worker
+    assignee: Worker
+    status: done
+    objective: "Add PU-005 executable scaffold, routing, dependency, feature-leak, discoverability, and path ownership tests."
+    inputs:
+      - ".harness/plan/2026-06-03-jsc-391-agent-first-skills-sdk-scaffold-refactor-plan.md"
+      - ".harness/decisions/2026-06-03-jsc-391-skills-sdk-path-map-adr.md"
+      - ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/module-ownership-map.json"
+      - "Docs/reference/skills-sdk/modules.md"
+      - "Infrastructure/tests/fixtures/skills_sdk/**"
+      - "Infrastructure/tests/test_skills_sdk_boundaries.py"
+    constraints:
+      - "Do not add user-facing CLI behavior"
+      - "Do not add signing, sandbox, eval, install, registry, publish, upload, global/project write, or runtime projection behavior"
+      - "Tests must consume contracts or fixtures rather than asserting only broad file presence"
+      - "Do not edit generated/runtime projection surfaces"
+    expected_output: "Focused pytest coverage for scaffold structure, module routing, dependency direction, path ownership, fixture/parser behavior, discoverability, and feature-leak prevention."
+    allowed_files:
+      - "Infrastructure/tests/test_skills_sdk_boundaries.py"
+      - "Infrastructure/tests/test_skills_sdk_scaffold.py"
+      - ".harness/implementation-notes/2026-06-03-jsc-391-agent-first-skills-sdk-scaffold-refactor-notes.mdx"
+      - "Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor/state.yaml"
+      - "Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor/receipts.jsonl"
+      - "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-005/simplify.md"
+      - "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-005/improve-codebase-architecture.md"
+      - "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-005/testing.md"
+      - "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-005/ubiquitous-language.md"
+    verify:
+      - "/private/tmp/agent-skills-xdg-cache/uv/archive-v0/eWsOeC9U82alWi7e11OBQ/bin/python -m pytest Infrastructure/tests/test_skills_sdk_boundaries.py Infrastructure/tests/test_skills_sdk_scaffold.py -q"
+      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor"
+    review_status:
+      checked_at: "2026-06-04T08:35:36Z"
+      local_review_artifacts:
+        - path: "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-005/simplify.md"
+          outcome: "no_findings"
+        - path: "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-005/improve-codebase-architecture.md"
+          outcome: "no_findings"
+        - path: "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-005/testing.md"
+          outcome: "no_findings"
+        - path: "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-005/ubiquitous-language.md"
+          outcome: "no_findings"
+      agent_swarm_review:
+        outcome: "separate_followup_not_required_for_slice_close"
+      close_decision: "pass"
+      close_blockers: []
+    stop_if:
+      - "A rule cannot be tested without implementing out-of-scope behavior"
+      - "A test asserts only file presence while missing path ownership, module routing, or feature-leak behavior"
+      - "Focused pytest fails without a classified blocker"
+    receipt_id: R006
+  - id: T007
+    type: worker
+    assignee: Worker
+    status: done
+    objective: "Capture PU-006 post-change compatibility receipts and parent V1 acceptance crosswalk."
+    inputs:
+      - ".harness/plan/2026-06-03-jsc-391-agent-first-skills-sdk-scaffold-refactor-plan.md"
+      - ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-001-baseline.json"
+      - ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/module-ownership-map.json"
+      - "Infrastructure/tests/test_skills_sdk_boundaries.py"
+      - "Infrastructure/tests/test_skills_sdk_scaffold.py"
+      - ".harness/specs/2026-06-03-skills-sdk-v1-product-spec.md"
+    constraints:
+      - "Use the same compatibility command matrix as PU-001 where available"
+      - "Do not mutate Linear without explicit authorization"
+      - "Do not mark parent V1 rows accepted when evidence is missing"
+      - "Keep PR, CI, Linear, review-thread, artifact, and merge-readiness truth lanes separate"
+    expected_output: "Post-change CLI/SDK receipts, structured comparison, and parent V1 SA-024 through SA-029 acceptance crosswalk."
+    allowed_files:
+      - ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/post-change-receipts.json"
+      - ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/receipt-comparison.json"
+      - ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/parent-v1-crosswalk.md"
+      - ".harness/implementation-notes/2026-06-03-jsc-391-agent-first-skills-sdk-scaffold-refactor-notes.mdx"
+      - "Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor/state.yaml"
+      - "Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor/receipts.jsonl"
+      - "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-006/simplify.md"
+      - "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-006/improve-codebase-architecture.md"
+      - "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-006/testing.md"
+      - "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-006/ubiquitous-language.md"
+    verify:
+      - "python3 -m json.tool .harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/post-change-receipts.json >/dev/null"
+      - "python3 -m json.tool .harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/receipt-comparison.json >/dev/null"
+      - "/usr/bin/grep -nE 'SA-024|SA-025|SA-026|SA-027|SA-028|SA-029|blocked_parent_acceptance|satisfied|accepted_deferral' .harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/parent-v1-crosswalk.md"
+      - "/private/tmp/agent-skills-xdg-cache/uv/archive-v0/eWsOeC9U82alWi7e11OBQ/bin/python -m pytest Infrastructure/tests/test_skills_sdk_boundaries.py Infrastructure/tests/test_skills_sdk_scaffold.py -q"
+      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor"
+    review_status:
+      checked_at: "2026-06-04T09:13:11Z"
+      local_review_artifacts:
+        - path: "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-006/simplify.md"
+          outcome: "no_findings"
+        - path: "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-006/improve-codebase-architecture.md"
+          outcome: "no_blocking_findings"
+        - path: "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-006/testing.md"
+          outcome: "pass"
+        - path: "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-006/ubiquitous-language.md"
+          outcome: "no_findings"
+      agent_swarm_review:
+        outcome: "separate_followup_not_required_for_slice_close"
+      close_decision: "pass"
+      close_blockers: []
+    stop_if:
+      - "Baseline/post-change receipts differ in a way that cannot be classified safely"
+      - "A parent V1 row is marked satisfied without direct evidence"
+      - "Linear mutation is required but not explicitly authorized"
+    receipt_id: R007
+  - id: T008
+    type: worker
+    assignee: Worker
+    status: done
+    objective: "Prepare PU-007 closeout, review, and handoff package while keeping local validation, runtime projection setup debt, PR/CI, Linear, review-thread, artifact, and merge-readiness truth lanes separate."
+    inputs:
+      - ".harness/plan/2026-06-03-jsc-391-agent-first-skills-sdk-scaffold-refactor-plan.md"
+      - ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/post-change-receipts.json"
+      - ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/receipt-comparison.json"
+      - ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/parent-v1-crosswalk.md"
+      - "Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor/receipts.jsonl"
+      - "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/**"
+    constraints:
+      - "Do not stage, commit, push, create a PR, or mutate Linear from PU-007 without explicit authority"
+      - "Do not claim CI, PR review, mergeability, or tracker closure without live evidence"
+      - "Keep runtime projection setup blockers separate from local scaffold compatibility"
+      - "Escalate formal review swarm only if the final diff exceeds the plan trigger conditions or the user asks for it separately"
+    expected_output: "Closeout report with changed files, validation, blockers, rollback, next action, and separated truth lanes."
+    allowed_files:
+      - ".harness/reports/jsc-391-agent-first-skills-sdk-scaffold-refactor-closeout.md"
+      - ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/closeout-artifact-inventory.json"
+      - ".harness/implementation-notes/2026-06-03-jsc-391-agent-first-skills-sdk-scaffold-refactor-notes.mdx"
+      - "Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor/state.yaml"
+      - "Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor/receipts.jsonl"
+      - "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-007/simplify.md"
+      - "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-007/improve-codebase-architecture.md"
+      - "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-007/testing.md"
+      - "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-007/ubiquitous-language.md"
+    verify:
+      - "git status --short --branch"
+      - "git diff --check"
+      - "./bin/ask repo closeout --changed --json --robot"
+      - "test -s .harness/reports/jsc-391-agent-first-skills-sdk-scaffold-refactor-closeout.md"
+      - "python3 -m json.tool .harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/closeout-artifact-inventory.json >/dev/null"
+      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor"
+    review_status:
+      checked_at: "2026-06-04T09:21:02Z"
+      local_review_artifacts:
+        - path: "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-007/simplify.md"
+          outcome: "no_findings"
+        - path: "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-007/improve-codebase-architecture.md"
+          outcome: "no_blocking_findings"
+        - path: "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-007/testing.md"
+          outcome: "pass_with_repo_closeout_blocked_projection_sync"
+        - path: "artifacts/reviews/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-007/ubiquitous-language.md"
+          outcome: "no_findings"
+      agent_swarm_review:
+        outcome: "separate_followup_not_required_for_slice_close"
+      close_decision: "pass_with_runtime_projection_closeout_blocker_classified"
+      close_blockers:
+        - "repo_closeout_changed remains blocked by projection_sync, unchanged setup debt from PU-001."
+    stop_if:
+      - "A planned artifact is missing or empty"
+      - "A compatibility regression is unresolved"
+      - "PR, CI, Linear, review-thread, or merge-readiness truth is stale but claimed as current"
+      - "The parent crosswalk has a blocked_parent_acceptance row while feature-planning handoff is requested"
+    receipt_id: R008
+  - id: T009
+    type: worker
+    assignee: Worker
+    status: active
+    objective: "Run PR green-sweep git/PR triage after local review and delivery packaging, preserving separate truth lanes for local validation, runtime projection setup debt, GitHub PR/CI, review-thread state, Linear, and merge readiness."
+    inputs:
+      - ".harness/reports/jsc-391-agent-first-skills-sdk-scaffold-refactor-closeout.md"
+      - ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/closeout-artifact-inventory.json"
+      - "Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor/state.yaml"
+      - "Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor/receipts.jsonl"
+      - "Skills/agent-ops/pr-green-sweep/SKILL.md"
+    constraints:
+      - "Classify dirty paths before staging, committing, pushing, or PR mutation"
+      - "Use explicit network permission for live GitHub commands before treating API failures as service outages"
+      - "Do not claim CI, review-thread, or merge readiness without live evidence"
+      - "Do not merge, admin-merge, force-push, delete branches, delete worktrees, or mutate Linear without explicit approval for that action"
+      - "Preserve unrelated local changes"
+    expected_output: "Git/PR triage report, dirty-worktree ledger, validation surface decision, and exact blocker or next action for commit/push/PR update."
+    allowed_files:
+      - ".harness/reports/jsc-391-agent-first-skills-sdk-scaffold-refactor-pr-green-sweep.md"
+      - "Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor/state.yaml"
+      - "Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor/receipts.jsonl"
+    verify:
+      - "git status --short --branch"
+      - "git diff --check"
+      - "gh pr status --json"
+      - "gh pr list --state open --json number,title,headRefName,headRefOid,baseRefName,url,mergeable,reviewDecision,statusCheckRollup"
+      - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor"
+    stop_if:
+      - "GitHub live-state cannot be checked with network permission"
+      - "Dirty paths include unrelated or user-owned work"
+      - "Staging/commit/push/PR mutation would exceed current approval"
+      - "Required validation or external readiness is stale but would be claimed as current"
+    receipt_id: null

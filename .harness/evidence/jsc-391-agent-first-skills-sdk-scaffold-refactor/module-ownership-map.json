@@ -1,0 +1,291 @@
+{
+  "schema_version": "jsc-391-module-ownership-map.v1",
+  "created_at": "2026-06-03T21:41:28Z",
+  "adr": ".harness/decisions/2026-06-03-jsc-391-skills-sdk-path-map-adr.md",
+  "modules": [
+    {
+      "module": "manifest",
+      "owns": [
+        "Skill manifest/frontmatter field interpretation",
+        "Agent Skills package shape metadata",
+        "Manifest-declared project skill source classification"
+      ],
+      "collaborators": [
+        "packaging",
+        "install",
+        "receipts"
+      ],
+      "public_contract": [
+        "Manifest fields are parsed through ask.skills_sdk.contracts and ask.skills_sdk.package_contracts.",
+        "Manifest validation reports structured blocker classes instead of prose-only failures."
+      ],
+      "forbidden_ownership": [
+        "Runtime projection writes",
+        "Install mutation",
+        "Package archive verification internals",
+        "User-facing CLI command ownership"
+      ],
+      "source_paths": [
+        "Infrastructure/scripts/lib/ask/skills_sdk/contracts.py",
+        "Infrastructure/scripts/lib/ask/skills_sdk/package_contracts.py",
+        "Infrastructure/config/schemas/skills-sdk/manifest-placeholder.v1.schema.json"
+      ],
+      "status": "preserve_existing_plus_placeholder"
+    },
+    {
+      "module": "receipts",
+      "owns": [
+        "SDK proof metadata contract",
+        "Redaction boundary for command-backed evidence",
+        "Baseline/post-change receipt comparison vocabulary"
+      ],
+      "collaborators": [
+        "runtime",
+        "risk",
+        "evals",
+        "install"
+      ],
+      "public_contract": [
+        "Receipts include command, parsed result, blocker class, evidence ref, and redaction status.",
+        "Receipts do not claim PR, CI, Linear, or merge readiness without fresh lane-specific proof."
+      ],
+      "forbidden_ownership": [
+        "Telemetry collection implementation",
+        "Runtime command execution",
+        "Tracker mutation"
+      ],
+      "source_paths": [
+        ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/**",
+        "Infrastructure/config/schemas/skills-sdk/receipt-placeholder.v1.schema.json"
+      ],
+      "status": "placeholder_contract"
+    },
+    {
+      "module": "risk",
+      "owns": [
+        "Risk sensor placement contract",
+        "Probability, impact, and detectability vocabulary",
+        "Feature-planning refusal criteria when parent acceptance remains blocked"
+      ],
+      "collaborators": [
+        "manifest",
+        "receipts",
+        "sandbox",
+        "install"
+      ],
+      "public_contract": [
+        "Risk rows name sensor placement and probability/impact/detectability values.",
+        "Unimplemented sensors use blocked or not_run status rather than pass."
+      ],
+      "forbidden_ownership": [
+        "Security scanner execution",
+        "Sandbox execution",
+        "Signing trust decisions"
+      ],
+      "source_paths": [
+        "Docs/reference/skills-sdk/modules.md",
+        "Infrastructure/config/schemas/skills-sdk/risk-placeholder.v1.schema.json"
+      ],
+      "status": "placeholder_contract"
+    },
+    {
+      "module": "install",
+      "owns": [
+        "Install lifecycle contract",
+        "Target root classification",
+        "Promote, rollback, or blocked decision shape"
+      ],
+      "collaborators": [
+        "manifest",
+        "packaging",
+        "sandbox",
+        "receipts",
+        "risk"
+      ],
+      "public_contract": [
+        "Install is lifecycle-gated and receipt-backed.",
+        "Install placeholders never write global or project skills during JSC-391."
+      ],
+      "forbidden_ownership": [
+        "Actual install writes",
+        "Global skill mutation",
+        "Registry or marketplace publication",
+        "Runtime projection source edits"
+      ],
+      "source_paths": [
+        "Docs/reference/skills-sdk/modules.md",
+        "Infrastructure/config/schemas/skills-sdk/install-placeholder.v1.schema.json"
+      ],
+      "status": "placeholder_contract"
+    },
+    {
+      "module": "sandbox",
+      "owns": [
+        "Sandbox interface contract",
+        "Permission and environment boundary vocabulary",
+        "Safe blocked status for unavailable execution"
+      ],
+      "collaborators": [
+        "runtime",
+        "risk",
+        "install",
+        "receipts"
+      ],
+      "public_contract": [
+        "Sandbox placeholders report blocked or not_run when execution is absent.",
+        "Sandbox does not own runtime projection discovery."
+      ],
+      "forbidden_ownership": [
+        "Sandbox execution platform",
+        "Filesystem mutation",
+        "Network execution",
+        "Signing"
+      ],
+      "source_paths": [
+        "Docs/reference/skills-sdk/modules.md",
+        "Infrastructure/config/schemas/skills-sdk/sandbox-placeholder.v1.schema.json"
+      ],
+      "status": "placeholder_contract"
+    },
+    {
+      "module": "refs",
+      "owns": [
+        "Reference ingestion contract",
+        "Reference quality and provenance vocabulary",
+        "External-reference blocked status"
+      ],
+      "collaborators": [
+        "manifest",
+        "packaging",
+        "receipts"
+      ],
+      "public_contract": [
+        "Reference contracts preserve provenance and quality status.",
+        "Refs do not fetch or ingest external data in JSC-391."
+      ],
+      "forbidden_ownership": [
+        "Network fetching",
+        "External registry sync",
+        "Package publication"
+      ],
+      "source_paths": [
+        "Infrastructure/scripts/lib/ask/skills_sdk/package_contracts.py",
+        "Infrastructure/config/schemas/skills-sdk/refs-placeholder.v1.schema.json"
+      ],
+      "status": "preserve_existing_plus_placeholder"
+    },
+    {
+      "module": "evals",
+      "owns": [
+        "Eval dataset contract",
+        "Eval result placeholder semantics",
+        "Portable eval evidence shape"
+      ],
+      "collaborators": [
+        "manifest",
+        "receipts",
+        "risk"
+      ],
+      "public_contract": [
+        "Eval placeholders remain local and parseable.",
+        "External Tessl is not required for JSC-391 scaffold acceptance."
+      ],
+      "forbidden_ownership": [
+        "External Tessl execution requirement",
+        "Registry upload",
+        "Live eval service mutation"
+      ],
+      "source_paths": [
+        "Infrastructure/tests/fixtures/skills_sdk/**",
+        "Infrastructure/config/schemas/skills-sdk/evals-placeholder.v1.schema.json"
+      ],
+      "status": "placeholder_contract"
+    },
+    {
+      "module": "signing",
+      "owns": [
+        "Signing placeholder contract",
+        "Provenance vocabulary reservation",
+        "Honest not_run or blocked signing status"
+      ],
+      "collaborators": [
+        "packaging",
+        "risk",
+        "receipts"
+      ],
+      "public_contract": [
+        "Signing is documentation/schema-only in JSC-391.",
+        "Signing placeholders cannot perform key handling, signing execution, trust-store writes, registry publication, or package upload."
+      ],
+      "forbidden_ownership": [
+        "Key handling",
+        "Signing execution",
+        "Trust-store writes",
+        "Registry publication",
+        "Package upload"
+      ],
+      "source_paths": [
+        "Docs/reference/skills-sdk/modules.md",
+        "Infrastructure/config/schemas/skills-sdk/signing-placeholder.v1.schema.json"
+      ],
+      "status": "placeholder_contract"
+    },
+    {
+      "module": "runtime",
+      "owns": [
+        "Runtime target vocabulary",
+        "Command-handle proof",
+        "Runtime reachability blocker classification",
+        "Runtime evidence path redaction"
+      ],
+      "collaborators": [
+        "sandbox",
+        "receipts",
+        "risk"
+      ],
+      "public_contract": [
+        "Runtime proof uses ask.skills_sdk.runtime_adapters public functions.",
+        "Runtime absence is blocked_runtime or stale_or_drifted, not false success."
+      ],
+      "forbidden_ownership": [
+        "Sandbox execution",
+        "Global runtime mutation",
+        "CLI parser ownership"
+      ],
+      "source_paths": [
+        "Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py"
+      ],
+      "status": "preserve_existing"
+    },
+    {
+      "module": "packaging",
+      "owns": [
+        "Package metadata contract",
+        "Package readiness contract",
+        "Archive verification public contract"
+      ],
+      "collaborators": [
+        "manifest",
+        "install",
+        "refs",
+        "signing",
+        "receipts"
+      ],
+      "public_contract": [
+        "Packaging uses package_contracts.py and package_verify.py public functions.",
+        "JSC-391 packaging placeholders do not publish or upload."
+      ],
+      "forbidden_ownership": [
+        "Install mutation",
+        "Registry publication",
+        "Signing execution",
+        "Runtime projection writes"
+      ],
+      "source_paths": [
+        "Infrastructure/scripts/lib/ask/skills_sdk/package_contracts.py",
+        "Infrastructure/scripts/lib/ask/skills_sdk/package_verify.py"
+      ],
+      "status": "preserve_existing"
+    }
+  ]
+}

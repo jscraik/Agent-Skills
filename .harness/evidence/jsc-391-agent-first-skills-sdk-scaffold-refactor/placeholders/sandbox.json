@@ -1,0 +1,10 @@
+{
+  "schema_version": "jsc-391-sandbox-placeholder.v1",
+  "module": "sandbox",
+  "status": "blocked",
+  "rationale": "JSC-391 reserves sandbox vocabulary without executing sandboxed code.",
+  "evidence_ref": "Docs/reference/skills-sdk/modules.md",
+  "permission_boundary": "not_selected",
+  "execution_performed": false,
+  "unavailable_reason": "sandbox execution is out of scope for JSC-391"
+}

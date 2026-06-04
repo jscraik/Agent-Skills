@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/signing-placeholder.v1.schema.json",
+  "title": "JSC-391 Signing Placeholder Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "jsc-391-signing-placeholder.v1"
+    },
+    "module": {
+      "type": "string",
+      "const": "signing"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "not_run",
+        "skipped_optional",
+        "blocked"
+      ]
+    },
+    "rationale": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_ref": {
+      "type": "string"
+    },
+    "provenance_status": {
+      "type": "string"
+    },
+    "signing_execution_performed": {
+      "type": "boolean",
+      "const": false
+    },
+    "key_handling_performed": {
+      "type": "boolean",
+      "const": false
+    },
+    "trust_store_write_performed": {
+      "type": "boolean",
+      "const": false
+    },
+    "registry_publication_performed": {
+      "type": "boolean",
+      "const": false
+    },
+    "package_upload_performed": {
+      "type": "boolean",
+      "const": false
+    }
+  },
+  "required": [
+    "schema_version",
+    "module",
+    "status",
+    "rationale"
+  ]
+}

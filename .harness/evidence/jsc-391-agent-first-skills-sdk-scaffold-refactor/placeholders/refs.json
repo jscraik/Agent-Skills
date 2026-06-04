@@ -1,0 +1,10 @@
+{
+  "schema_version": "jsc-391-refs-placeholder.v1",
+  "module": "refs",
+  "status": "not_run",
+  "rationale": "Reference provenance shape is reserved without fetching or ingesting external data.",
+  "evidence_ref": "Docs/reference/skills-sdk/modules.md",
+  "provenance": "local_fixture_only",
+  "quality_status": "not_run",
+  "network_fetch_performed": false
+}

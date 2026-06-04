@@ -1,0 +1,10 @@
+{
+  "schema_version": "jsc-391-draft-package-fixture.v1",
+  "package_name": "skills-sdk-draft-fixture",
+  "status": "not_run",
+  "skill_source": "Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md",
+  "runtime_projection": null,
+  "registry_publication_performed": false,
+  "package_upload_performed": false,
+  "install_write_performed": false
+}

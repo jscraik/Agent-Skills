@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/evals-placeholder.v1.schema.json",
+  "title": "JSC-391 Evals Placeholder Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "jsc-391-evals-placeholder.v1"
+    },
+    "module": {
+      "type": "string",
+      "const": "evals"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "not_run",
+        "skipped_optional",
+        "blocked"
+      ]
+    },
+    "rationale": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_ref": {
+      "type": "string"
+    },
+    "dataset_ref": {
+      "type": "string"
+    },
+    "result_status": {
+      "type": "string",
+      "enum": [
+        "not_run",
+        "skipped_optional",
+        "blocked"
+      ]
+    },
+    "external_service_used": {
+      "type": "boolean",
+      "const": false
+    }
+  },
+  "required": [
+    "schema_version",
+    "module",
+    "status",
+    "rationale"
+  ]
+}

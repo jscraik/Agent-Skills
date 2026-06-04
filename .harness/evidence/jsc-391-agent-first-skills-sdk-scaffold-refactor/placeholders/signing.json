@@ -1,0 +1,13 @@
+{
+  "schema_version": "jsc-391-signing-placeholder.v1",
+  "module": "signing",
+  "status": "blocked",
+  "rationale": "Signing is documentation/schema-only in JSC-391 and must not perform key handling, signing execution, trust-store writes, registry publication, or package upload.",
+  "evidence_ref": "Docs/reference/skills-sdk/modules.md",
+  "provenance_status": "reserved_not_run",
+  "signing_execution_performed": false,
+  "key_handling_performed": false,
+  "trust_store_write_performed": false,
+  "registry_publication_performed": false,
+  "package_upload_performed": false
+}

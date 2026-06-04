@@ -1,0 +1,11 @@
+{
+  "schema_version": "jsc-391-receipts-placeholder.v1",
+  "module": "receipts",
+  "status": "not_run",
+  "rationale": "PU-004 defines receipt placeholder evidence shape; post-change comparison is owned by PU-006.",
+  "evidence_ref": "Docs/goals/jsc-391-agent-first-skills-sdk-scaffold-refactor/receipts.jsonl",
+  "command": "not_run",
+  "parsed_result": {},
+  "blocker_class": "deferred_to_pu_006",
+  "redaction_status": "not_applicable"
+}

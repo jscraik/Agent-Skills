@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/install-placeholder.v1.schema.json",
+  "title": "JSC-391 Install Placeholder Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "jsc-391-install-placeholder.v1"
+    },
+    "module": {
+      "type": "string",
+      "const": "install"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "not_run",
+        "skipped_optional",
+        "blocked"
+      ]
+    },
+    "rationale": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_ref": {
+      "type": "string"
+    },
+    "target_root_class": {
+      "type": "string"
+    },
+    "decision_shape": {
+      "type": "string",
+      "enum": [
+        "promote",
+        "rollback",
+        "blocked",
+        "not_run"
+      ]
+    },
+    "mutation_performed": {
+      "type": "boolean",
+      "const": false
+    }
+  },
+  "required": [
+    "schema_version",
+    "module",
+    "status",
+    "rationale"
+  ]
+}

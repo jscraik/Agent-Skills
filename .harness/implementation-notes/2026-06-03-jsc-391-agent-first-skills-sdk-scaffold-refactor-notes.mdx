@@ -1,0 +1,85 @@
+---
+schema_version: 1
+goal: jsc-391-agent-first-skills-sdk-scaffold-refactor
+status: initialized
+---
+
+import React from "react";
+
+export const DeepModuleMap = () => <section data-goal-component="deep-module-map" />;
+export const InsertionPoint = () => <section data-goal-component="insertion-point" />;
+export const RuntimeCardState = () => <section data-goal-component="runtime-card-state" />;
+export const BlastRadiusMap = () => <section data-goal-component="blast-radius-map" />;
+export const ValidatorCoverage = () => <section data-goal-component="validator-coverage" />;
+
+# JSC-391 Governed Implementation Notes
+
+## Deep Module Topology
+
+<DeepModuleMap />
+
+The topology is not selected yet. PU-001 must capture baseline evidence before
+PU-002 chooses physical paths for SDK core, schemas, runtime, packaging,
+signing, evals, fixtures, examples, canon docs, and decisions.
+
+## Current Slice Insertion Map
+
+<InsertionPoint />
+
+Current slice: PU-002 path-map ADR and existing SDK inventory. The selected
+paths are recorded in
+`.harness/decisions/2026-06-03-jsc-391-skills-sdk-path-map-adr.md`; the
+tracked SDK inventory and module ownership map live under
+`.harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/`.
+
+## Runtime Truth Surface
+
+<RuntimeCardState />
+
+No runtime readiness is claimed. The board requires CLI compatibility receipts,
+SDK import/public-contract receipts, review artifacts, and PR/CI/tracker truth
+to remain separate.
+
+## Blast Radius View
+
+<BlastRadiusMap />
+
+Denied source areas include runtime projections, plugin caches, user/global
+runtime mirrors, and out-of-scope feature behavior such as signing execution,
+sandbox execution, eval execution, install writes, registry, or publish flows.
+
+## Validation Coverage
+
+<ValidatorCoverage />
+
+Initial coverage includes the Goal Governor board validator, repo status,
+skills list, skills explain, SDK import/public-symbol baseline, and
+path-convention discovery. Repo doctor, selected skill proof, and changed-file
+closeout are blocked in this isolated worktree by missing generated runtime
+projection/command-handle surfaces; the Scout receipt records that as
+environment setup debt rather than product regression.
+
+PU-002 generated the path-map ADR, SDK inventory, and parseable module ownership
+map, with JSON parse checks, the focused SDK boundary pytest, and the Goal
+Governor board validator passing. On 2026-06-04, the user removed the
+agent-swarm review requirement from the slice close contract and moved that
+review to a separate follow-up lane, so PU-002 can close on the local review and
+validation evidence.
+
+PU-003 added the human-readable SDK module contracts at
+`Docs/reference/skills-sdk/modules.md` and parseable placeholder schemas under
+`Infrastructure/config/schemas/skills-sdk/`. The slice keeps feature behavior
+absent: signing, sandbox, eval, install, registry, publish, package upload, and
+global/project writes remain documentation/schema-only or blocked future work.
+
+PU-004 added minimal Skills SDK fixtures, a draft package example, a generated
+projection rejection fixture, and placeholder instances under the selected
+evidence path. Parser checks and readiness guards passed; all unimplemented
+capabilities remain `not_run` or `blocked`, never `pass`.
+
+PU-005 added executable scaffold tests in
+`Infrastructure/tests/test_skills_sdk_scaffold.py`. The focused pytest gate
+ran with the existing SDK boundary tests and passed, proving path-map selection,
+module ownership fields, docs vocabulary, schema/placeholder lockstep,
+feature-leak negative flags, fixture validity, projection rejection, and draft
+package no-publish/no-install semantics.

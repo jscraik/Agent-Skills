@@ -1,0 +1,169 @@
+{
+  "schema_version": "jsc-391-pu006-post-change-receipts.v1",
+  "phase": "post_change",
+  "created_at": "2026-06-04T09:09:42Z",
+  "worktree": "/private/tmp/agent-skills-jsc-391-governed-implementation",
+  "branch": "codex/jsc-391-governed-implementation",
+  "baseline_ref": ".harness/evidence/jsc-391-agent-first-skills-sdk-scaffold-refactor/pu-001-baseline.json",
+  "selected_skill_handle": "ubiquitous-language",
+  "summary": {
+    "repo_status": "pass",
+    "repo_doctor": "blocked_projection_sync",
+    "skills_list": "pass",
+    "skills_explain": "pass",
+    "skills_prove": "blocked_reachability",
+    "repo_closeout_changed": "blocked_projection_sync",
+    "sdk_import_public_contract": "pass",
+    "focused_pytest": "pass",
+    "introduced_compatibility_regressions": 0,
+    "unchanged_environment_blockers": [
+      "workspace_projection_unsynced_in_isolated_worktree",
+      "workspace_command_handles_missing_in_isolated_worktree"
+    ]
+  },
+  "cli_receipts": [
+    {
+      "schema_version": "jsc-391-cli-compat-receipt.v1",
+      "phase": "post_change",
+      "command": "python3 bin/ask repo status --json",
+      "exit_code": 0,
+      "structured_output_status": "json_success",
+      "selected_skill_handle": null,
+      "expected_invariant": "Repository status remains readable in the feature worktree after scaffold artifacts and tests are added.",
+      "actual_invariant": "status=success; repo_root_resolved=/private/tmp/agent-skills-jsc-391-governed-implementation; skills_synced=false",
+      "normalized_failure_class": null,
+      "regression_classification": "post_change_pass_with_unsynced_projection_signal",
+      "evidence_ref": "trace_id=885ba58b-b5cc-47c2-90aa-b15002d11b7b"
+    },
+    {
+      "schema_version": "jsc-391-cli-compat-receipt.v1",
+      "phase": "post_change",
+      "command": "./bin/ask repo doctor --json --robot",
+      "exit_code": 2,
+      "structured_output_status": "json_error",
+      "selected_skill_handle": null,
+      "expected_invariant": "Doctor reports repository health or the same structured setup blocker seen in PU-001.",
+      "actual_invariant": "blocking=true; blocker id=projection_sync; next_command=./bin/ask skills sync --scope workspace --projection rooted --json --robot",
+      "normalized_failure_class": "workspace_projection_unsynced_in_isolated_worktree",
+      "regression_classification": "unchanged_environment_blocker_not_product_regression",
+      "evidence_ref": "trace_id=fb515ff9-c332-4097-bb54-327ebadd3c40"
+    },
+    {
+      "schema_version": "jsc-391-cli-compat-receipt.v1",
+      "phase": "post_change",
+      "command": "./bin/ask skills list --json --robot",
+      "exit_code": 0,
+      "structured_output_status": "json_success",
+      "selected_skill_handle": "ubiquitous-language",
+      "expected_invariant": "Skills list remains callable and exposes the selected existing handle used by the baseline.",
+      "actual_invariant": "status=success; selected handle ubiquitous-language remains explainable; trace=d2151815-cdcb-42a8-89b6-c1b7355710dd",
+      "normalized_failure_class": null,
+      "regression_classification": "post_change_pass",
+      "evidence_ref": "trace_id=d2151815-cdcb-42a8-89b6-c1b7355710dd"
+    },
+    {
+      "schema_version": "jsc-391-cli-compat-receipt.v1",
+      "phase": "post_change",
+      "command": "./bin/ask skills explain ubiquitous-language --json --robot",
+      "exit_code": 0,
+      "structured_output_status": "json_success",
+      "selected_skill_handle": "ubiquitous-language",
+      "expected_invariant": "Selected skill still resolves to canonical source and generated command-handle metadata.",
+      "actual_invariant": "canonical_source=Skills/agent-ops/ubiquitous-language/SKILL.md; generated_handle=.agents/skills/ubiquitous-language/SKILL.md; runtime_visibility=latent",
+      "normalized_failure_class": null,
+      "regression_classification": "post_change_pass_with_reachability_warning",
+      "evidence_ref": "trace_id=c0640454-619e-4e73-91ab-7f961ce98362"
+    },
+    {
+      "schema_version": "jsc-391-cli-compat-receipt.v1",
+      "phase": "post_change",
+      "command": "./bin/ask skills prove ubiquitous-language --json --robot",
+      "exit_code": 2,
+      "structured_output_status": "json_error",
+      "selected_skill_handle": "ubiquitous-language",
+      "expected_invariant": "Selected skill proof reports pass or the same structured reachability blocker seen in PU-001.",
+      "actual_invariant": "proof_status=blocked_reachability; workspace_command_handle_exists=false; user_runtime_ready=false",
+      "normalized_failure_class": "workspace_command_handles_missing_in_isolated_worktree",
+      "regression_classification": "unchanged_environment_blocker_not_product_regression",
+      "evidence_ref": "trace_id=85858227-451c-456f-a1f1-46ded1a05888"
+    },
+    {
+      "schema_version": "jsc-391-cli-compat-receipt.v1",
+      "phase": "post_change",
+      "command": "./bin/ask repo closeout --changed --json --robot",
+      "exit_code": 2,
+      "structured_output_status": "json_error",
+      "selected_skill_handle": null,
+      "expected_invariant": "Changed-file closeout reports readiness or the same projection-sync setup blocker seen in PU-001.",
+      "actual_invariant": "changed_file_count=50; commit_readiness.ready=false; blocker=repo_doctor_blocking caused by projection_sync",
+      "normalized_failure_class": "workspace_projection_unsynced_in_isolated_worktree",
+      "regression_classification": "unchanged_environment_blocker_not_product_regression",
+      "evidence_ref": "trace_id=aac328f5-cff8-4b2b-9d26-953f62255876"
+    }
+  ],
+  "sdk_public_contract_receipt": {
+    "schema_version": "jsc-391-sdk-public-contract-receipt.v1",
+    "phase": "post_change",
+    "command": "PYTHONPATH=Infrastructure/scripts/lib python3 - <<'PY'\nimport importlib, json\nmods = [\n    \"ask.skills_sdk\",\n    \"ask.skills_sdk.conformance\",\n    \"ask.skills_sdk.contracts\",\n    \"ask.skills_sdk.package_contracts\",\n    \"ask.skills_sdk.package_verify\",\n    \"ask.skills_sdk.runtime_adapters\",\n]\nreceipts = []\nfor name in mods:\n    mod = importlib.import_module(name)\n    if hasattr(mod, \"__all__\"):\n        symbols = list(getattr(mod, \"__all__\"))\n    else:\n        symbols = [key for key in vars(mod) if not key.startswith(\"_\")]\n    receipts.append({\"module\": name, \"import_status\": \"pass\", \"public_symbols_status\": \"pass\", \"public_symbol_count\": len(symbols), \"public_symbols\": symbols})\nprint(json.dumps({\"schema_version\":\"jsc-391-sdk-public-contract-receipt.v1\",\"phase\":\"post_change\",\"modules\":receipts}, sort_keys=True))\nPY",
+    "exit_code": 0,
+    "classification": "post_change_pass_public_contract_preserved",
+    "modules": [
+      {
+        "module": "ask.skills_sdk",
+        "import_status": "pass",
+        "public_symbols_status": "pass",
+        "public_symbol_count": 0,
+        "baseline_public_symbol_count": 0,
+        "public_symbols_preserved": true
+      },
+      {
+        "module": "ask.skills_sdk.conformance",
+        "import_status": "pass",
+        "public_symbols_status": "pass",
+        "public_symbol_count": 19,
+        "baseline_public_symbol_count": 19,
+        "public_symbols_preserved": true
+      },
+      {
+        "module": "ask.skills_sdk.contracts",
+        "import_status": "pass",
+        "public_symbols_status": "pass",
+        "public_symbol_count": 28,
+        "baseline_public_symbol_count": 28,
+        "public_symbols_preserved": true
+      },
+      {
+        "module": "ask.skills_sdk.package_contracts",
+        "import_status": "pass",
+        "public_symbols_status": "pass",
+        "public_symbol_count": 67,
+        "baseline_public_symbol_count": 67,
+        "public_symbols_preserved": true
+      },
+      {
+        "module": "ask.skills_sdk.package_verify",
+        "import_status": "pass",
+        "public_symbols_status": "pass",
+        "public_symbol_count": 22,
+        "baseline_public_symbol_count": 22,
+        "public_symbols_preserved": true
+      },
+      {
+        "module": "ask.skills_sdk.runtime_adapters",
+        "import_status": "pass",
+        "public_symbols_status": "pass",
+        "public_symbol_count": 26,
+        "baseline_public_symbol_count": 26,
+        "public_symbols_preserved": true
+      }
+    ]
+  },
+  "focused_test_receipt": {
+    "schema_version": "jsc-391-focused-test-receipt.v1",
+    "phase": "post_change",
+    "command": "/private/tmp/agent-skills-xdg-cache/uv/archive-v0/eWsOeC9U82alWi7e11OBQ/bin/python -m pytest Infrastructure/tests/test_skills_sdk_boundaries.py Infrastructure/tests/test_skills_sdk_scaffold.py -q",
+    "exit_code": 0,
+    "status": "pass",
+    "output_summary": "..........                                                               [100%]\n10 passed in 0.09s"
+  }
+}

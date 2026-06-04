@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/receipt-placeholder.v1.schema.json",
+  "title": "JSC-391 Receipt Placeholder Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "jsc-391-receipts-placeholder.v1"
+    },
+    "module": {
+      "type": "string",
+      "const": "receipts"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "not_run",
+        "skipped_optional",
+        "blocked"
+      ]
+    },
+    "rationale": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_ref": {
+      "type": "string"
+    },
+    "command": {
+      "type": "string"
+    },
+    "parsed_result": {
+      "type": "object"
+    },
+    "blocker_class": {
+      "type": "string"
+    },
+    "redaction_status": {
+      "type": "string",
+      "enum": [
+        "none",
+        "redacted",
+        "not_applicable"
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "module",
+    "status",
+    "rationale"
+  ]
+}
