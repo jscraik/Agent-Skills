@@ -310,5 +310,24 @@ Local validation is green:
   zero warnings.
 
 Current lane truth: PU-006 is locally implemented and validated in the feature
-worktree. It is not yet committed, pushed, opened as a PR, merged, or pulled
-back into main.
+worktree. It has been committed, pushed, and opened as PR #227. It is not
+merged or pulled back into main.
+
+## 2026-06-04 PU-006 PR green sweep
+
+PR #227 is ready for review on head
+`5cca0be35afb0a2a80a587d35b4f6e88daafa1f8`. The PR template body was
+cleaned up, an empty refresh commit was pushed, and the stale `pr-template`
+failure now passes.
+
+Remote check truth: `gh pr checks 227 --repo jscraik/Agent-Skills --watch=false`
+reports CodeRabbit pass with "Review completed", pr-template pass, CircleCI
+pass, CodeQL pass, Semgrep pass, Trivy pass, Socket pass, docs checks pass,
+linear/risk/dependency/action/memory/check/test/audit gates pass, and only
+`security/snyk (jscraik)` fails with "You have used your limit of private
+tests". Jamie explicitly waived the Snyk quota issue earlier, so this remains
+an external owner-waived lane rather than an implementation blocker.
+
+Current lane truth: PU-006 is PR-green except the owner-waived Snyk quota
+context. It is still not merged, and main has not been pulled back with the
+PU-006 merge commit.

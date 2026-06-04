@@ -444,7 +444,6 @@
       </dl>
     </article>
 
-+
     <article class="entry">
       <h3>2026-06-04: PU-006 command behavior proof</h3>
       <dl>
@@ -470,18 +469,31 @@
         <dt>Validation</dt>
         <dd>Focused lifecycle/schema pytest passed with 13 tests and 12 subtests. Broader SDK pytest passed with 44 tests and 29 subtests. Ruff, diff hygiene, goal board validation, codestyle, and repo validate all passed.</dd>
         <dt>Current lane truth</dt>
-        <dd>PU-006 is locally implemented and validated in the feature worktree. It is not yet committed, pushed, opened as a PR, merged, or pulled back into main.</dd>
+        <dd>PU-006 is locally implemented and validated in the feature worktree. It has been committed, pushed, and opened as PR #227. It is not merged or pulled back into main.</dd>
       </dl>
     </article>
 
-+
     <article class="entry">
       <h3>2026-06-04: PU-006 draft PR opened</h3>
       <dl>
         <dt>PR</dt>
         <dd><a href="https://github.com/jscraik/Agent-Skills/pull/227">https://github.com/jscraik/Agent-Skills/pull/227</a></dd>
         <dt>State</dt>
-        <dd>Draft. Local implementation and validation are complete, but CodeRabbit, PR checks, and independent review lanes are still pending or need explicit owner waiver before merge readiness can be claimed.</dd>
+        <dd>The PR was opened as draft and then marked ready for review. CodeRabbit later reported review completed. Remote check status still needs a final refresh before merge readiness can be claimed; the Snyk private-test quota issue remains owner-waived.</dd>
+      </dl>
+    </article>
+
+    <article class="entry">
+      <h3>2026-06-04: PU-006 PR green sweep</h3>
+      <dl>
+        <dt>PR</dt>
+        <dd><a href="https://github.com/jscraik/Agent-Skills/pull/227">https://github.com/jscraik/Agent-Skills/pull/227</a> at head <code>5cca0be35afb0a2a80a587d35b4f6e88daafa1f8</code>.</dd>
+        <dt>Checks</dt>
+        <dd><code>gh pr checks 227 --repo jscraik/Agent-Skills --watch=false</code> reports CodeRabbit, pr-template, CircleCI, CodeQL, Semgrep, Trivy, Socket, docs, linear, risk, dependency, action, memory, check, test, and audit gates pass.</dd>
+        <dt>Owner-waived lane</dt>
+        <dd><code>security/snyk (jscraik)</code> still fails with <code>You have used your limit of private tests</code>. Jamie explicitly waived this Snyk quota issue earlier.</dd>
+        <dt>Current lane truth</dt>
+        <dd>PU-006 is PR-green except the owner-waived Snyk quota context. It is still not merged, and main has not been pulled back with the PU-006 merge commit.</dd>
       </dl>
     </article>
 
