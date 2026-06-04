@@ -83,7 +83,9 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertEqual(payload["risk_tier"], "high")
         self.assertEqual(payload["blocking_behavior"], "block")
         self.assertTrue(payload["receipt_required"])
-        self.assertIn("schema_spine", payload["sensor_ids"])
+        self.assertIn("static_script_scan", payload["sensor_ids"])
+        self.assertIn("sandbox_placeholder", payload["sensor_ids"])
+        self.assertEqual(payload["sensors"][0]["placement"], "source")
 
     def test_install_preview_fixture_embeds_read_only_lockfile_delta(self) -> None:
         payload = self.assert_valid("install-preview", "install-preview.json")

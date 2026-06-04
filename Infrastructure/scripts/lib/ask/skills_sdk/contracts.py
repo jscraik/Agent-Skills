@@ -66,6 +66,7 @@ DOCTOR_CHECK_SDK_LAYERS: dict[str, str] = {
     "canonical_source": "Authoring",
     "projection_ownership": "Runtime Adapters",
     "structural_audit": "Validation",
+    "risk_classification": "Validation",
     "capability_metadata": "Catalog",
     "package_readiness": "Packaging",
     "outcome_proof": "Evidence",

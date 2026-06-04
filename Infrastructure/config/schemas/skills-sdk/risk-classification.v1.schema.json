@@ -16,8 +16,36 @@
     "blocking_behavior": {"type": "string", "enum": ["block", "warn", "advisory", "skip_optional"]},
     "receipt_required": {"type": "boolean"},
     "sensor_ids": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
-    "acceptance_trace": {"type": "array", "minItems": 1, "items": {"type": "string", "enum": ["FR-003", "NFR-004", "SA-005", "VP-021"]}}
+    "sensors": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/definitions/sensor"}
+    },
+    "acceptance_trace": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": ["FR-003", "FR-018", "FR-019", "NFR-001", "NFR-002", "NFR-004", "SA-005", "SA-025", "SA-026", "SA-027", "SA-028", "VP-020", "VP-021", "VP-022"]
+      }
+    }
   },
-  "required": ["schema_version", "schema_uri", "source_kind", "risk_tier", "probability", "impact", "detectability", "cost", "blocking_behavior", "receipt_required", "sensor_ids", "acceptance_trace"],
-  "definitions": {"risk_dimension": {"type": "string", "enum": ["low", "medium", "high", "unknown"]}}
+  "required": ["schema_version", "schema_uri", "source_kind", "risk_tier", "probability", "impact", "detectability", "cost", "blocking_behavior", "receipt_required", "sensor_ids", "sensors", "acceptance_trace"],
+  "definitions": {
+    "risk_dimension": {"type": "string", "enum": ["low", "medium", "high", "unknown"]},
+    "sensor": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "placement": {"type": "string", "enum": ["source", "schema", "static", "runtime_adapter", "external_adapter", "preview"]},
+        "required": {"type": "boolean"},
+        "cost": {"type": "string", "enum": ["low", "medium", "high"]},
+        "blocking_behavior": {"type": "string", "enum": ["block", "warn", "advisory", "skip_optional"]},
+        "status": {"type": "string", "enum": ["selected", "available_not_run", "skipped_optional", "blocked"]},
+        "receipt_required": {"type": "boolean"}
+      },
+      "required": ["id", "placement", "required", "cost", "blocking_behavior", "status", "receipt_required"]
+    }
+  }
 }

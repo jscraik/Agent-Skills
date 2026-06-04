@@ -232,6 +232,7 @@
         "resolver",
         "canonical_source",
         "structural_audit",
+        "risk_classification",
         "capability_metadata",
         "package_readiness",
         "outcome_proof"
@@ -250,6 +251,9 @@
           "$ref": "#/definitions/check"
         },
         "structural_audit": {
+          "$ref": "#/definitions/check"
+        },
+        "risk_classification": {
           "$ref": "#/definitions/check"
         },
         "capability_metadata": {
