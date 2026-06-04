@@ -496,6 +496,86 @@
       </dl>
     </article>
 
+    <article class="entry">
+      <h3>2026-06-04: PU-006 merged and pulled</h3>
+      <dl>
+        <dt>Merge</dt>
+        <dd>Jamie confirmed PR #227 was merged. GitHub verification showed PR #227 as <code>MERGED</code> with merge commit <code>a3697642bddb7ffc055e334fc125ef02e47fcdd0</code>, merged at <code>2026-06-04T19:33:12Z</code>.</dd>
+        <dt>Pull</dt>
+        <dd>Local <code>main</code> fast-forwarded from <code>2f25b799a</code> to <code>a3697642b</code> with <code>git pull --ff-only origin main</code>.</dd>
+        <dt>Root dirt</dt>
+        <dd>The only overlapping dirty root file was the browser-visible notes HTML mirror. It was preserved in the narrow stash <code>codex-preserve-browser-notes-before-pu006-pull</code>; the merged main copy now contains the canonical PU-006 notes.</dd>
+      </dl>
+    </article>
+
+    <article class="entry">
+      <h3>2026-06-04: PU-007 evidence packaging start</h3>
+      <dl>
+        <dt>Worktree</dt>
+        <dd><code>/private/tmp/agent-skills-skills-sdk-v1-0-pu-007</code> on <code>codex/skills-sdk-v1-0-pu-007</code>.</dd>
+        <dt>Base</dt>
+        <dd><code>a3697642bddb7ffc055e334fc125ef02e47fcdd0</code>.</dd>
+        <dt>Scope</dt>
+        <dd>Final evidence packaging, repo closeout validation, and explicit separation of local, PR, CI, review, tracker, merge, and pulled-main lanes. Subagent review remains waived unless Jamie explicitly requests it again.</dd>
+      </dl>
+    </article>
+
+    <article class="entry">
+      <h3>2026-06-04: PU-007 fixture drift and projection sync</h3>
+      <dl>
+        <dt>Fixture repair</dt>
+        <dd>The focused SDK suite exposed a stale placeholder lifecycle schema-spine fixture missing <code>lifecycle_stage</code> and <code>adapter_state</code>. The producer and docs example already emitted those required fields, so the fixtures were updated to match the current schema.</dd>
+        <dt>Invalid fixture intent</dt>
+        <dd>The invalid placeholder lifecycle fixture still fails for the intended dishonest <code>status: pass</code> / <code>feature_executed: true</code> claim rather than an unrelated missing-field error.</dd>
+        <dt>Focused validation</dt>
+        <dd>The broader focused SDK suite passed with 44 tests and 29 subtests.</dd>
+        <dt>Projection sync</dt>
+        <dd>Repo closeout initially reported an unsynced workspace runtime projection. Running <code>./bin/ask skills sync --scope workspace --projection rooted --json --robot</code> refreshed generated <code>.skillsets/**</code> files and runtime-proof evidence. After that, <code>./bin/ask repo closeout --changed --json --robot</code> passed with commit readiness ready.</dd>
+        <dt>Nonblocking debt</dt>
+        <dd>Closeout still reports warning lanes for ask bootstrap shim identity and repo-surface ownership classification. They are diagnostic debt, not PU-007 implementation blockers.</dd>
+        <dt>Template gates</dt>
+        <dd>The stricter PR-template gates found cached projection mirror drift. Running <code>bash Infrastructure/scripts/lifecycle-and-sync/sync_projection_trees.sh all</code> reported projection-integrity status pass. After that, <code>bash scripts/validate-codestyle.sh</code>, <code>./bin/ask repo validate --json --robot</code>, and the template-required <code>memory.json</code> jq contract check all passed.</dd>
+      </dl>
+    </article>
+
+    <article class="entry">
+      <h3>2026-06-04: PU-007 local closeout package</h3>
+      <dl>
+        <dt>Report</dt>
+        <dd><code>.harness/reports/skills-sdk-v1-0-product-implementation/pu-007-closeout.md</code></dd>
+        <dt>Reviews</dt>
+        <dd>Completed simplify, improve-codebase-architecture, codex-review, testing, and ubiquitous-language artifacts for PU-007. No required findings were reported.</dd>
+        <dt>Current lane truth</dt>
+        <dd>PU-007 is locally packaged and ready for PR creation after final validation. PR, CI, merge, and pulled-main truth are still unproven for this slice. The Snyk private-test quota failure remains owner-waived only if it appears again in the PR check lane.</dd>
+      </dl>
+    </article>
+
+    <article class="entry">
+      <h3>2026-06-04: PU-007 draft PR opened</h3>
+      <dl>
+        <dt>PR</dt>
+        <dd><a href="https://github.com/jscraik/Agent-Skills/pull/228">https://github.com/jscraik/Agent-Skills/pull/228</a></dd>
+        <dt>State</dt>
+        <dd>PR #228 was opened as draft after pushing <code>codex/skills-sdk-v1-0-pu-007</code>.</dd>
+        <dt>Current lane truth</dt>
+        <dd>Local validation is green and PR #228 exists. CodeRabbit, remote PR checks, review-thread truth, merge truth, and pulled-main truth still need fresh PR-lane evidence before this slice can be marked merged or the overall goal can close.</dd>
+      </dl>
+    </article>
+
+    <article class="entry">
+      <h3>2026-06-04: PU-007 PR green sweep</h3>
+      <dl>
+        <dt>PR</dt>
+        <dd><a href="https://github.com/jscraik/Agent-Skills/pull/228">https://github.com/jscraik/Agent-Skills/pull/228</a> at head <code>545a68ee0</code>.</dd>
+        <dt>Checks</dt>
+        <dd>CodeRabbit, pr-template, CircleCI, CodeQL, Semgrep, Socket, Trivy, Gitleaks, docs checks, and harness gates pass.</dd>
+        <dt>Owner-waived lane</dt>
+        <dd><code>security/snyk (jscraik)</code> fails with <code>You have used your limit of private tests</code>. Jamie explicitly waived this Snyk quota issue earlier.</dd>
+        <dt>Current lane truth</dt>
+        <dd>PU-007 is PR-green except the owner-waived Snyk quota context. It is still not merged, and main has not pulled back a PU-007 merge commit.</dd>
+      </dl>
+    </article>
+
   </main>
 </body>
 </html>
