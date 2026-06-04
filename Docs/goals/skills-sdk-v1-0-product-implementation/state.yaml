@@ -268,7 +268,7 @@ tasks:
   - id: T004
     type: worker
     assignee: Worker
-    status: active
+    status: done
     objective: "Implement PU-003 skills-sdk check command facade."
     inputs:
       - ".harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md"
@@ -293,11 +293,11 @@ tasks:
       - "Facade bypasses ./bin/ask authority"
       - "Command output cannot validate against schemas"
       - "PR is not merged and pulled back into main"
-    receipt_id: R004
+    receipt_id: R028
   - id: T005
     type: worker
     assignee: Worker
-    status: active
+    status: done
     objective: "Implement PU-004 risk tier classifier and sensor placement."
     inputs:
       - ".harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md"
@@ -319,16 +319,17 @@ tasks:
     stop_if:
       - "Risk tier changes activate heavy gates by blanket policy instead of risk evidence"
       - "PR is not merged and pulled back into main before PU-005 starts"
-    receipt_id: R005
+    receipt_id: R029
   - id: T006
     type: worker
     assignee: Worker
-    status: queued
+    status: active
     objective: "Implement PU-005 install preview and lockfile model stub."
     inputs:
       - ".harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md"
     constraints:
       - "Run only after PU-004 has merged and main has pulled it"
+      - "PR #224 and PR #225 were verified merged, and local main was pulled to 34a8a07d2 before this worktree was created"
       - "Preview must not write live install, trust-store, lockfile, projection, or global skill state"
     expected_output: "Read-only install preview proof, review artifacts, PR, merge, and pulled-main proof for PU-005"
     allowed_files:
@@ -345,7 +346,7 @@ tasks:
     stop_if:
       - "Preview mutates live state or implies installation is complete"
       - "PR is not merged and pulled back into main"
-    receipt_id: R006
+    receipt_id: R030
   - id: T007
     type: worker
     assignee: Worker

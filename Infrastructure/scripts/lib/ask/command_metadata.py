@@ -43,7 +43,7 @@ VALID_ACTIONS = {
         "fold",
         "init",
     ],
-    "sdk": ["check"],
+    "sdk": ["check", "install"],
     "reviewers": ["resolve"],
     "runtime": ["surface", "budget"],
     "plugins": ["list", "status", "doctor", "sync-local-runtime", "init", "create", "install", "import", "harden", "uninstall"],
@@ -94,7 +94,9 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
     ],
     "sdk": [
         "ask sdk check he-heartbeat --json --robot",
+        "ask sdk install he-heartbeat --preview --json --robot",
         "skills-sdk check he-heartbeat --json --robot",
+        "skills-sdk install he-heartbeat --preview --json --robot",
     ],
     "reviewers": [
         "ask reviewers resolve skillinspector --json",
@@ -209,6 +211,10 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
     ("sdk", "check"): [
         "ask sdk check he-heartbeat --json --robot",
         "skills-sdk check he-heartbeat --json --robot",
+    ],
+    ("sdk", "install"): [
+        "ask sdk install he-heartbeat --preview --json --robot",
+        "skills-sdk install he-heartbeat --preview --json --robot",
     ],
     ("skills", "profiles"): [
         "ask skills profiles --json",

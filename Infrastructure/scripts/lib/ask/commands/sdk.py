@@ -4,7 +4,7 @@ import argparse
 from pathlib import Path
 
 import ask.commands.skills as skills_commands
-from ask.envelope import CallResult
+from ask.envelope import CallResult, ErrorObject
 from ask.cli_errors import build_unknown_action_result
 
 
@@ -22,6 +22,19 @@ def add_sdk_parser(
     sdk_check_parser.add_argument("target", help="Skill handle or repo-relative skill source path")
     sdk_check_parser.add_argument("--strict", action="store_true", help="Run strict audit instead of the default compat audit")
     sdk_check_parser.add_argument("--codex-parity", action="store_true", help="Require Codex-targeted runtime proof")
+    sdk_install_parser = sdk_subparsers.add_parser(
+        "install",
+        help="Preview a Skills SDK install without writing install state",
+        parents=[global_parser],
+    )
+    sdk_install_parser.add_argument("target", help="Skill handle or repo-relative skill source path")
+    sdk_install_parser.add_argument("--preview", action="store_true", help="Plan the install without performing writes")
+    sdk_install_parser.add_argument(
+        "--scope",
+        choices=["project", "workspace", "global"],
+        default="project",
+        help="Install scope to model in the preview",
+    )
 
 
 def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
@@ -32,5 +45,21 @@ def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
             strict=args.strict,
             codex_parity=args.codex_parity,
         )
+    if args.action == "install":
+        if not args.preview:
+            result = CallResult(status="error")
+            result.metadata["command"] = "sdk install"
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_VALIDATION",
+                    message="Skills SDK install is preview-only in V1.0; pass --preview to model writes without performing them.",
+                    fix_suggestion="ask sdk install <target> --preview --json --robot",
+                )
+            )
+            return result
+        return skills_commands.skills_sdk_install_preview(
+            repo_root,
+            target=args.target,
+            scope=args.scope,
+        )
     return build_unknown_action_result("sdk", args.action)
-
