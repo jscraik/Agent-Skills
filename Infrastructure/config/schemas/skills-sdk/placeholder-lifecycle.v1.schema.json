@@ -8,12 +8,29 @@
     "schema_version": {"type": "string", "const": "skills-sdk.placeholder-lifecycle.v1"},
     "schema_uri": {"type": "string", "const": "https://jscraik.local/agent-skills/schemas/skills-sdk/placeholder-lifecycle.v1.schema.json"},
     "surface": {"type": "string", "enum": ["refs", "evals", "signing", "sandbox", "security_adapter", "explorer"]},
+    "lifecycle_stage": {
+      "type": "string",
+      "enum": ["reference_ingestion", "evaluation", "package_signing", "sandbox_execution", "security_adapter_detection", "static_docs_explorer"]
+    },
     "status": {"type": "string", "enum": ["not_run", "skipped_optional", "blocked"]},
+    "adapter_state": {"type": "string", "enum": ["available", "missing", "misconfigured", "blocked", "optional"]},
     "reason": {"type": "string", "minLength": 1},
     "feature_executed": {"type": "boolean", "const": false},
     "required_for_risk_tier": {"type": "boolean"},
     "receipt_ref": {"type": "string", "minLength": 1},
-    "acceptance_trace": {"type": "array", "minItems": 1, "items": {"type": "string", "enum": ["FR-010", "SA-020", "SA-021", "VP-021"]}}
+    "acceptance_trace": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "FR-010", "FR-012", "FR-013", "FR-014", "FR-015", "FR-016", "FR-017", "FR-018", "FR-019", "FR-020", "FR-021", "FR-022", "FR-023",
+          "SEC-001", "SEC-002", "SEC-003", "SEC-004", "SEC-005", "SEC-006", "SEC-007", "SEC-008", "SEC-009", "SEC-010", "SEC-011",
+          "SA-007", "SA-008", "SA-009", "SA-010", "SA-011", "SA-017", "SA-018", "SA-019", "SA-020", "SA-021", "SA-022",
+          "VP-006", "VP-007", "VP-008", "VP-009", "VP-010", "VP-012", "VP-013", "VP-014", "VP-015", "VP-016", "VP-017", "VP-018", "VP-021"
+        ]
+      }
+    }
   },
-  "required": ["schema_version", "schema_uri", "surface", "status", "reason", "feature_executed", "required_for_risk_tier", "receipt_ref", "acceptance_trace"]
+  "required": ["schema_version", "schema_uri", "surface", "lifecycle_stage", "status", "adapter_state", "reason", "feature_executed", "required_for_risk_tier", "receipt_ref", "acceptance_trace"]
 }

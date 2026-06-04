@@ -170,6 +170,7 @@ __all__ = [
     "skills_resolve",
     "skills_sdk_check",
     "skills_sdk_install_preview",
+    "skills_sdk_placeholder_lifecycle",
     "sync_skills",
     "validate_openai_skill_format",
     "validate_skill_boundaries",

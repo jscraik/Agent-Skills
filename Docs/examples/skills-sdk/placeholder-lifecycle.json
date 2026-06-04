@@ -1,0 +1,28 @@
+{
+  "schema_version": "skills-sdk-placeholder-lifecycle-set.v1",
+  "status": "placeholder",
+  "risk_tier": "medium",
+  "surfaces": ["refs", "evals", "signing", "sandbox", "security_adapter", "explorer"],
+  "blocked_surfaces": [],
+  "receipts": [
+    {
+      "schema_version": "skills-sdk.placeholder-lifecycle.v1",
+      "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/placeholder-lifecycle.v1.schema.json",
+      "surface": "refs",
+      "lifecycle_stage": "reference_ingestion",
+      "status": "skipped_optional",
+      "adapter_state": "optional",
+      "reason": "Reference ingestion is reserved for a later Skills SDK milestone and was not attempted in V1.0.",
+      "feature_executed": false,
+      "required_for_risk_tier": false,
+      "receipt_ref": ".harness/receipts/skills-sdk/placeholders/refs.json",
+      "acceptance_trace": ["FR-012", "SA-008", "VP-012"]
+    }
+  ],
+  "feature_executed": false,
+  "mutation_performed": false,
+  "agent_summary": {
+    "message": "Skills SDK lifecycle placeholders reported unimplemented surfaces without execution.",
+    "count": 6
+  }
+}
