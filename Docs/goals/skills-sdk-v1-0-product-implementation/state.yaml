@@ -350,7 +350,7 @@ tasks:
   - id: T007
     type: worker
     assignee: Worker
-    status: active
+    status: done
     objective: "Implement PU-006 honest placeholder lifecycle receipts."
     inputs:
       - ".harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md"
@@ -373,11 +373,11 @@ tasks:
     stop_if:
       - "Any placeholder output can be misread as implemented lifecycle capability"
       - "PR is not merged and pulled back into main"
-    receipt_id: R036
+    receipt_id: R037
   - id: T008
     type: pm
     assignee: PM
-    status: queued
+    status: active
     objective: "Run PU-007 evidence packaging, reviews, closeout, and final audit after all implementation slices merge and pull back."
     inputs:
       - ".harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md"
@@ -386,10 +386,19 @@ tasks:
       - "Do not claim completion unless every slice has merge and pulled-main evidence"
       - "Keep local validation, PR checks, review threads, tracker state, and merge readiness separate"
     expected_output: "Final closeout package and Judge/PM completion receipt"
-    allowed_files: []
+    allowed_files:
+      - ".harness/evidence/**"
+      - ".harness/reports/**"
+      - ".harness/implementation-notes/2026-06-04-skills-sdk-v1-0-product-implementation-notes.mdx"
+      - ".harness/implementation-notes/2026-06-04-skills-sdk-v1-0-product-implementation-notes.html"
+      - "Docs/goals/skills-sdk-v1-0-product-implementation/state.yaml"
+      - "Docs/goals/skills-sdk-v1-0-product-implementation/receipts.jsonl"
+      - "Infrastructure/GOVERNANCE/runtime-separation/current.json"
+      - "Infrastructure/tests/fixtures/skills_sdk/schema_spine/**"
+      - "artifacts/reviews/skills-sdk-v1-0-product-implementation/pu-007/**"
     verify:
       - "python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py docs/goals/skills-sdk-v1-0-product-implementation"
       - "./bin/ask repo closeout --changed --json --robot"
     stop_if:
       - "Any slice lacks required review, validation, PR, merge, or pulled-main evidence"
-    receipt_id: R008
+    receipt_id: R042

@@ -331,3 +331,67 @@ an external owner-waived lane rather than an implementation blocker.
 Current lane truth: PU-006 is PR-green except the owner-waived Snyk quota
 context. It is still not merged, and main has not been pulled back with the
 PU-006 merge commit.
+
+## 2026-06-04 PU-006 merged and pulled
+
+Jamie confirmed PR #227 was merged. Live GitHub verification showed PR #227
+state MERGED with merge commit a3697642bddb7ffc055e334fc125ef02e47fcdd0,
+merged at 2026-06-04T19:33:12Z. Local main fast-forwarded from 2f25b799a to
+a3697642b with `git pull --ff-only origin main`.
+
+The only overlapping dirty root file before the pull was the browser-visible
+implementation notes HTML mirror. It was preserved in a narrow stash named
+`codex-preserve-browser-notes-before-pu006-pull`; the merged main copy now
+contains the canonical PU-006 notes.
+
+## 2026-06-04 PU-007 evidence packaging start
+
+Started PU-007 in `/private/tmp/agent-skills-skills-sdk-v1-0-pu-007` on
+branch `codex/skills-sdk-v1-0-pu-007`, based on merge commit
+a3697642bddb7ffc055e334fc125ef02e47fcdd0. Scope is final evidence packaging,
+repo closeout validation, and explicit separation of local, PR, CI, review,
+tracker, merge, and pulled-main lanes. Subagent review remains waived unless
+Jamie explicitly requests it again.
+
+## 2026-06-04 PU-007 fixture drift and projection sync
+
+The first focused PU-007 SDK validation exposed a stale schema-spine fixture:
+`Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/placeholder-lifecycle.json`
+was missing the `lifecycle_stage` and `adapter_state` fields required by the
+PU-006 placeholder lifecycle schema. The producer and docs example already
+included those fields, so I updated the valid fixture and the intentionally
+invalid fixture. The invalid fixture still fails for the intended dishonest
+`status: pass` / `feature_executed: true` claim rather than an unrelated
+missing-field error.
+
+Focused SDK validation then passed with 44 tests and 29 subtests.
+
+Repo closeout initially reported that the workspace skill runtime did not
+appear synced. I ran the canonical workspace sync:
+`./bin/ask skills sync --scope workspace --projection rooted --json --robot`.
+That refreshed generated `.skillsets/**` projection files and runtime-proof
+evidence. After the sync, `./bin/ask repo closeout --changed --json --robot`
+passed with commit readiness ready. It still reports nonblocking diagnostic
+debt for ask bootstrap shim identity and repo-surface ownership classification.
+
+The PR-template gates later found a stricter projection-integrity drift in
+cached projection mirrors. I ran the validator-suggested command,
+`bash Infrastructure/scripts/lifecycle-and-sync/sync_projection_trees.sh all`,
+which reported projection-integrity status pass. After that,
+`bash scripts/validate-codestyle.sh` and
+`./bin/ask repo validate --json --robot` both passed with zero required
+failures and zero warnings. The template-required `memory.json` jq contract
+check also passed.
+
+## 2026-06-04 PU-007 local closeout package
+
+Created the PU-007 closeout report at
+`.harness/reports/skills-sdk-v1-0-product-implementation/pu-007-closeout.md`
+and completed local review artifacts for simplify, improve-codebase-architecture,
+codex-review, testing, and ubiquitous-language. No required findings were
+reported.
+
+Current lane truth: PU-007 is locally packaged and ready for PR creation after
+final validation. PR, CI, merge, and pulled-main truth are still unproven for
+this slice. The Snyk private-test quota failure remains owner-waived only if it
+appears again in the PR check lane.
