@@ -33,13 +33,8 @@ For the product framing and proof contract, read
 
 ## First five minutes
 
-Start by proving the command surface works:
-
-```bash
-python3 bin/ask repo status --json
-```
-
-On a fresh checkout, try the bootstrap wrapper first:
+On a fresh checkout, prove the repo-local command surface before relying on
+`./bin/ask`:
 
 ```bash
 bash scripts/bootstrap-ask.sh --json
@@ -47,8 +42,8 @@ python3 bin/ask repo status --json
 ```
 
 If the bootstrap wrapper is unavailable in your shell, use
-`python3 bin/ask repo status --json` as the fallback and then follow the next
-command reported by `repo doctor`.
+`python3 bin/ask repo status --json` as the fallback. After status passes,
+follow the next command reported by `repo doctor`.
 
 For AI coding agents, use this sequence:
 
