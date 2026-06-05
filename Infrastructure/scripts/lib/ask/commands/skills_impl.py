@@ -4000,7 +4000,7 @@ def skills_sdk_project_install(
         result.data["skills_sdk_project_install"] = {
             "schema_version": "skills-sdk-project-install.v1",
             "query": query,
-            "status": "blocked",
+            "status": str(exc.receipt.get("status") or "blocked"),
             "scope": "project",
             "canonical_source_path": str(source_path) if source_path else None,
             "facade_command": "skills-sdk install --apply",
