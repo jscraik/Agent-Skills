@@ -106,7 +106,16 @@ def uninstall_project_skill(
     entry = _lockfile_entry(lockfile, skill_id, resolved_project_root)
     receipt_ref = entry.get("receipt_ref")
     source_receipt_path = (resolved_project_root / str(receipt_ref)).resolve()
-    _relative_to(source_receipt_path, resolved_project_root)
+    try:
+        _relative_to(source_receipt_path, resolved_project_root)
+    except ProjectInstallError as exc:
+        conflicts = [str(conflict) for conflict in exc.receipt.get("conflicts", [])] or ["unsafe_receipt_ref"]
+        raise ProjectCleanupError(
+            code=exc.code,
+            message=exc.message,
+            fix_suggestion=exc.fix_suggestion,
+            receipt=_blocked_receipt("uninstall", str(source_receipt_path), str(resolved_project_root), conflicts),
+        ) from exc
     source_receipt, source_digest = _load_install_receipt(source_receipt_path)
     _validate_receipt_root(source_receipt, resolved_project_root)
     plan = _uninstall_plan(entry, source_receipt, source_receipt_path, source_digest, resolved_project_root)
@@ -558,7 +567,15 @@ def _execute_cleanup(
             mutation_performed = True
             removed.append({**item, "status": "removed"})
             _prune_empty_owned_dirs(target.parent, project_root)
-        lockfile_change = _update_lockfile_after_cleanup(project_root, operation, skill_id, source_receipt_path)
+        lockfile_change = (
+            {
+                "path": DEFAULT_LOCKFILE_PATH,
+                "changed": False,
+                "reason": "partial_cleanup_preserves_lockfile_entry",
+            }
+            if skipped
+            else _update_lockfile_after_cleanup(project_root, operation, skill_id, source_receipt_path)
+        )
         if lockfile_change["changed"]:
             mutation_performed = True
         receipt = _cleanup_receipt(

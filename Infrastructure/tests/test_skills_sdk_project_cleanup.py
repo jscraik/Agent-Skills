@@ -210,6 +210,8 @@ class TestSkillsSdkProjectCleanup(unittest.TestCase):
             self.assertTrue(skill_file.exists())
             self.assertEqual(receipt["files_skipped"][0]["reason"], "modified_file_digest_mismatch")
             self.assertTrue(receipt["manual_actions"])
+            lockfile = json.loads((project_root / "skills.lock.json").read_text(encoding="utf-8"))
+            self.assertIn("valid_skill", lockfile["entries"])
 
     def test_mode_validation_fails_before_receipt_or_lockfile_loading(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -410,6 +412,34 @@ class TestSkillsSdkProjectCleanup(unittest.TestCase):
             receipt = payload["data"]["skills_sdk_project_uninstall"]["receipt"]
             self.assertFalse(receipt["mutation_performed"])
             self.assertEqual(receipt["files_blocked"][0]["reason"], "mismatched_lockfile_receipt_binding")
+
+    def test_uninstall_refuses_escaped_lockfile_receipt_ref_as_structured_receipt(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            project_root = _marked_project(Path(tmp))
+            _install_valid_skill(project_root)
+            lockfile_path = project_root / "skills.lock.json"
+            lockfile = json.loads(lockfile_path.read_text(encoding="utf-8"))
+            lockfile["entries"]["valid_skill"]["receipt_ref"] = "../outside.json"
+            lockfile_path.write_text(json.dumps(lockfile, indent=2) + "\n", encoding="utf-8")
+
+            process = _run_process(
+                sys.executable,
+                "Infrastructure/bin/ask",
+                "sdk",
+                "uninstall",
+                "valid_skill",
+                "--project-root",
+                str(project_root),
+                "--preview",
+                "--json",
+                "--robot",
+            )
+
+            self.assertEqual(process.returncode, 2, process.stdout)
+            payload = json.loads(process.stdout)
+            receipt = payload["data"]["skills_sdk_project_uninstall"]["receipt"]
+            self.assertFalse(receipt["mutation_performed"])
+            self.assertTrue(receipt["files_blocked"][0]["reason"].startswith("path_escape:"))
 
     def test_apply_blocks_symlink_and_hardlink_targets_before_mutation(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
