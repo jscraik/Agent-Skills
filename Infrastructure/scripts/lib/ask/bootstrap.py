@@ -34,6 +34,24 @@ def _is_inside_repo(path: Path, repo_root: Path) -> bool:
     return True
 
 
+def _prepend_path_entry(path_value: str | None, entry: Path) -> str:
+    entry_text = str(entry)
+    existing = path_value or ""
+    parts = [part for part in existing.split(os.pathsep) if part]
+    if entry_text in parts:
+        parts.remove(entry_text)
+    return os.pathsep.join([entry_text, *parts])
+
+
+def _default_runtime_env(repo_root: Path) -> dict[str, str]:
+    runtime_env = os.environ.copy()
+    runtime_env["PATH"] = _prepend_path_entry(
+        runtime_env.get("PATH"),
+        repo_root / "bin",
+    )
+    return runtime_env
+
+
 def _path_type(path: Path) -> str:
     if path.is_symlink():
         return "symlink"
@@ -233,7 +251,7 @@ def run_bootstrap_checks(
     python_executable: str = "python3",
 ) -> dict[str, Any]:
     resolved_repo_root = (repo_root or default_repo_root()).resolve()
-    runtime_env = env if env is not None else os.environ.copy()
+    runtime_env = env if env is not None else _default_runtime_env(resolved_repo_root)
 
     entrypoint = classify_entrypoint(resolved_repo_root, repair=repair)
     fallback = run_status_command(

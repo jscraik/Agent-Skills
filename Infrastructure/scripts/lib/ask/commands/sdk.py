@@ -38,6 +38,24 @@ def add_sdk_parser(
         default="project",
         help="Install scope to model in the preview; real installs only support project",
     )
+    sdk_rollback_parser = sdk_subparsers.add_parser(
+        "rollback",
+        help="Preview or apply receipt-proven Skills SDK project rollback",
+        parents=[global_parser],
+    )
+    sdk_rollback_parser.add_argument("--receipt", required=True, help="Path to a Skills SDK project install receipt")
+    sdk_rollback_parser.add_argument("--preview", action="store_true", help="Plan rollback without performing writes")
+    sdk_rollback_parser.add_argument("--apply", action="store_true", help="Perform rollback in an explicit project root")
+    sdk_rollback_parser.add_argument("--project-root", help="Absolute marked project root for live validation or apply")
+    sdk_uninstall_parser = sdk_subparsers.add_parser(
+        "uninstall",
+        help="Preview or apply receipt-proven Skills SDK project uninstall",
+        parents=[global_parser],
+    )
+    sdk_uninstall_parser.add_argument("skill_id", help="Installed skill id to resolve through skills.lock.json")
+    sdk_uninstall_parser.add_argument("--preview", action="store_true", help="Plan uninstall without performing writes")
+    sdk_uninstall_parser.add_argument("--apply", action="store_true", help="Perform uninstall in an explicit project root")
+    sdk_uninstall_parser.add_argument("--project-root", required=True, help="Absolute marked project root containing skills.lock.json")
     sdk_lifecycle_parser = sdk_subparsers.add_parser(
         "lifecycle",
         help="Emit honest placeholder lifecycle receipts for unavailable V1.0 surfaces",
@@ -103,6 +121,42 @@ def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
             repo_root,
             target=args.target,
             scope=args.scope,
+        )
+    if args.action == "rollback":
+        if args.preview == args.apply:
+            result = CallResult(status="error")
+            result.metadata["command"] = "sdk rollback"
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_VALIDATION",
+                    message="Skills SDK rollback requires exactly one of --preview or --apply.",
+                    fix_suggestion="ask sdk rollback --receipt <path> --preview --json --robot",
+                )
+            )
+            return result
+        return skills_commands.skills_sdk_project_rollback(
+            repo_root,
+            receipt_path=args.receipt,
+            project_root=args.project_root,
+            apply=args.apply,
+        )
+    if args.action == "uninstall":
+        if args.preview == args.apply:
+            result = CallResult(status="error")
+            result.metadata["command"] = "sdk uninstall"
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_VALIDATION",
+                    message="Skills SDK uninstall requires exactly one of --preview or --apply.",
+                    fix_suggestion="ask sdk uninstall <skill-id> --project-root /path/to/project --preview --json --robot",
+                )
+            )
+            return result
+        return skills_commands.skills_sdk_project_uninstall(
+            repo_root,
+            skill_id=args.skill_id,
+            project_root=args.project_root,
+            apply=args.apply,
         )
     if args.action == "lifecycle":
         return skills_commands.skills_sdk_placeholder_lifecycle(

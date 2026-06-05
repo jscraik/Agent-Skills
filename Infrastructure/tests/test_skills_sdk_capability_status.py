@@ -73,7 +73,7 @@ class TestSkillsSdkCapabilityStatus(unittest.TestCase):
 
         _validate_schema_subset(self.schema, payload, {"capability-status": self.schema})
         self.assertEqual(payload["summary"]["total"], len(REQUIRED_CAPABILITY_IDS))
-        self.assertEqual(payload["summary"]["mutation_performed_count"], 1)
+        self.assertEqual(payload["summary"]["mutation_performed_count"], len(MUTATING_CAPABILITY_IDS))
         self.assertEqual(set(payload["summary"]["by_status"]), ALLOWED_STATUSES)
 
     def test_matrix_rejects_implemented_without_execution(self) -> None:
@@ -150,7 +150,7 @@ class TestSkillsSdkCapabilityStatus(unittest.TestCase):
         _validate_schema_subset(self.schema, status, {"capability-status": self.schema})
         self.assertEqual(payload["status"], "success")
         self.assertEqual(status["summary"]["total"], len(REQUIRED_CAPABILITY_IDS))
-        self.assertEqual(status["summary"]["mutation_performed_count"], 1)
+        self.assertEqual(status["summary"]["mutation_performed_count"], len(MUTATING_CAPABILITY_IDS))
 
     def test_public_wrapper_preserves_status_contract(self) -> None:
         ask_payload = _run_json_command(
@@ -172,8 +172,12 @@ class TestSkillsSdkCapabilityStatus(unittest.TestCase):
         self.assertEqual(wrapper_payload["data"]["skills_sdk_status"], ask_payload["data"]["skills_sdk_status"])
         self.assertEqual(wrapper_payload["metadata"]["command"], "sdk status --json --robot")
 
-    def test_command_metadata_registers_status_route(self) -> None:
+    def test_command_metadata_registers_sdk_lifecycle_routes(self) -> None:
+        self.assertIn("rollback", VALID_ACTIONS["sdk"])
+        self.assertIn("uninstall", VALID_ACTIONS["sdk"])
         self.assertIn("status", VALID_ACTIONS["sdk"])
+        self.assertTrue(any(command.startswith("ask sdk rollback ") for command in COMMAND_EXAMPLES[("sdk", "rollback")]))
+        self.assertTrue(any(command.startswith("ask sdk uninstall ") for command in COMMAND_EXAMPLES[("sdk", "uninstall")]))
         self.assertIn("ask sdk status --json --robot", COMMAND_EXAMPLES[("sdk", "status")])
         self.assertIn("skills-sdk status --json --robot", COMMAND_EXAMPLES[("sdk", "status")])
 

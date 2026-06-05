@@ -114,6 +114,32 @@ def test_wrong_global_shim_fails_even_with_forged_repo_root(tmp_path: Path) -> N
     assert "fix_ask_path_shim_identity" in result["remediation"]["manual"]
 
 
+def test_default_checks_prefer_repo_local_ask_over_ambient_path(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    repo = _make_minimal_repo(tmp_path)
+    wrong_repo = tmp_path / "wrong-repo"
+    wrong_repo.mkdir()
+    shim_dir = tmp_path / "shim"
+    shim_dir.mkdir()
+    _write_executable(
+        shim_dir / "ask",
+        "#!/usr/bin/env python3\n"
+        "import json\n"
+        f"print(json.dumps({{'status':'success','data':{{'repo_root_resolved':{str(wrong_repo.resolve())!r}}}}}))\n",
+    )
+    monkeypatch.setenv("PATH", f"{shim_dir}{os.pathsep}{Path(sys.executable).parent}")
+
+    result = run_bootstrap_checks(repo, python_executable=sys.executable)
+
+    assert result["status"] == "success"
+    assert result["checks"]["path_discovery"]["resolved_path"] == str((repo / "bin" / "ask").resolve())
+    assert result["checks"]["shim_smoke"]["status"] == "pass"
+    assert result["checks"]["shim_smoke"]["repo_identity_status"] == "pass"
+    assert result["remediation"]["manual"] == []
+
+
 def test_unknown_fallback_failure_blocks_closure(tmp_path: Path) -> None:
     repo = _make_minimal_repo(tmp_path)
     result = run_status_command(
@@ -166,6 +192,7 @@ def test_live_bootstrap_json_contract() -> None:
     assert process.returncode == 0
     assert payload["schema_version"] == "ask-bootstrap.v1"
     assert payload["checks"]["fallback_command"]["used_shell"] is False
+    assert payload["checks"]["fallback_command"]["repo_root_resolved"] == str(REPO_ROOT.resolve())
     assert payload["checks"]["entrypoint_executable"]["path"] == "bin/ask"
 
 

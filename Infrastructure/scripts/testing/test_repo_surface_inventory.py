@@ -34,7 +34,7 @@ def test_duplicated_infrastructure_path_is_violation() -> None:
         "Infrastructure/Infrastructure/artifacts/validation/20260417T215252Z/projection-integrity.json"
     )
 
-    assert finding.classification == "unknown"
+    assert finding.classification == "classification_required"
     assert finding.status == "violation"
     assert finding.code == "duplicated_infrastructure_path"
     assert finding.blocking is True
@@ -65,34 +65,34 @@ def test_root_architecture_is_front_door_source() -> None:
 def test_stale_root_proposal_requires_relocation() -> None:
     finding = MODULE.classify_path("PROPOSED_CODE_FILE_REORGANIZATION_PLAN.md")
 
-    assert finding.classification == "unknown"
-    assert finding.status == "unknown"
-    assert finding.code == "unknown_surface"
+    assert finding.classification == "classification_required"
+    assert finding.status == "violation"
+    assert finding.code == "classification_required"
     assert finding.blocking is True
 
 
 def test_hidden_root_migration_script_requires_relocation() -> None:
     """
-    Test that a hidden root migration script is classified as an unknown surface and treated as a blocking violation.
+    Test that a hidden root migration script is classified as requiring ownership and treated as a blocking violation.
     
     Asserts the classifier marks ".move.sh" with:
-    - classification: "unknown"
-    - status: "unknown"
-    - code: "unknown_surface"
+    - classification: "classification_required"
+    - status: "violation"
+    - code: "classification_required"
     - blocking: True
     """
     finding = MODULE.classify_path(".move.sh")
 
-    assert finding.classification == "unknown"
-    assert finding.status == "unknown"
-    assert finding.code == "unknown_surface"
+    assert finding.classification == "classification_required"
+    assert finding.status == "violation"
+    assert finding.code == "classification_required"
     assert finding.blocking is True
 
 
 def test_lowercase_docs_path_is_casing_drift() -> None:
     finding = MODULE.classify_path("docs/goals/jsc-329/notes/gap-analysis.md")
 
-    assert finding.classification == "unknown"
+    assert finding.classification == "classification_required"
     assert finding.status == "violation"
     assert finding.code == "lowercase_docs_drift"
     assert finding.blocking is True
@@ -160,10 +160,21 @@ def test_skills_system_is_governed_system_skill_surface() -> None:
 def test_skills_system_stray_path_still_requires_ownership_decision() -> None:
     finding = MODULE.classify_path("skills-system/generated-skill/SKILL.md")
 
-    assert finding.classification == "unknown"
-    assert finding.status == "unknown"
+    assert finding.classification == "classification_required"
+    assert finding.status == "violation"
     assert finding.code == "ownership_decision_required"
     assert finding.blocking is True
+
+
+def test_harness_archive_is_intentional_archive_not_unknown() -> None:
+    finding = MODULE.classify_path(
+        ".harness/archive/2026-05-18-plans-and-specs/specs/2026-05-09-agent-skills-first-principles-contract-spec.md"
+    )
+
+    assert finding.classification == "intentional_archive"
+    assert finding.status == "ok"
+    assert finding.code == "harness_archive_surface"
+    assert finding.blocking is False
 
 
 def test_harness_database_is_runtime_state_violation() -> None:
@@ -201,6 +212,26 @@ def test_harness_curated_context_paths_are_classified() -> None:
             "reference",
             "harness_reference_surface",
         ),
+        ".harness/evidence/runtime-proof/testing/codex/runtime-card.json": (
+            "reference",
+            "harness_reference_surface",
+        ),
+        ".harness/implementation-notes/2026-06-04-skills-sdk-v1-0-product-implementation-notes.html": (
+            "reference",
+            "harness_reference_surface",
+        ),
+        ".harness/reports/skills-sdk-v1-0-product-implementation/pu-007-closeout.md": (
+            "reference",
+            "harness_reference_surface",
+        ),
+        ".harness/research/audits/2026-05-28-skillopt-skills-sdk-gap-analysis.md": (
+            "reference",
+            "harness_reference_surface",
+        ),
+        ".harness/reviews/2026-05-21-jsc-329-goal-governor/testing.md": (
+            "reference",
+            "harness_reference_surface",
+        ),
     }
 
     for path, (classification, code) in cases.items():
@@ -208,6 +239,13 @@ def test_harness_curated_context_paths_are_classified() -> None:
         assert finding.classification == classification
         assert finding.status == "ok"
         assert finding.code == code
+
+
+def test_current_tracked_inventory_has_no_classification_required_paths() -> None:
+    findings = MODULE.classify_paths(MODULE.git_ls_files(Path.cwd()))
+    offenders = [finding.path for finding in findings if finding.classification == "classification_required"]
+
+    assert offenders == []
 
 
 def test_harness_runtime_outputs_are_violations() -> None:

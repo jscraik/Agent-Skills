@@ -2,8 +2,10 @@
   "schema_version": "skills-sdk.capability-status.v1",
   "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/capability-status.v1.schema.json",
   "status": "truth_surface",
-  "generated_from": ".harness/specs/2026-06-05-skills-sdk-pu-009-real-project-install-lifecycle-spec.md",
+  "generated_from": ".harness/specs/2026-06-05-skills-sdk-pu-010-receipt-proven-rollback-uninstall-spec.md",
   "source_artifacts": [
+    ".harness/specs/2026-06-05-skills-sdk-pu-010-receipt-proven-rollback-uninstall-spec.md",
+    ".harness/plan/2026-06-05-skills-sdk-pu-010-receipt-proven-rollback-uninstall-execution-plan.md",
     ".harness/specs/2026-06-05-skills-sdk-pu-009-real-project-install-lifecycle-spec.md",
     ".harness/specs/2026-06-04-skills-sdk-pu-008-capability-truth-spec.md",
     ".harness/plan/2026-06-04-skills-sdk-pu-008-capability-truth-execution-plan.md",
@@ -13,6 +15,7 @@
   "validation_commands": [
     "./bin/ask sdk status --json --robot",
     "./bin/skills-sdk status --json --robot",
+    "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_project_cleanup.py -q",
     "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_project_install.py -q",
     "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_capability_status.py Infrastructure/tests/test_skills_sdk_pipeline_status_artifact.py -q"
   ],
@@ -116,8 +119,8 @@
         "Infrastructure/config/schemas/skills-sdk/install-receipt.v1.schema.json",
         "Infrastructure/config/schemas/skills-sdk/lockfile.v1.schema.json"
       ],
-      "next_slice": "Add executable rollback and uninstall flows from the install receipt.",
-      "notes": "PU-009 performs bounded project installs only when --apply and an explicit marked --project-root are supplied."
+      "next_slice": "Extend cleanup to richer restore semantics only when install receipts carry before-state proof.",
+      "notes": "PU-009 performs bounded project installs only when --apply and an explicit marked --project-root are supplied; PU-010 consumes those receipts for cleanup."
     },
     {
       "id": "trust_store",
@@ -278,26 +281,36 @@
     {
       "id": "rollback",
       "title": "Rollback",
-      "status": "deferred",
-      "owner_surface": "future install lifecycle",
+      "status": "implemented",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/project_cleanup.py",
       "pipeline_sections": ["full_skill_lifecycle", "release_decision_matrix"],
-      "feature_executed": false,
-      "mutation_performed": false,
-      "evidence_refs": [".harness/specs/2026-06-04-skills-sdk-pu-008-capability-truth-spec.md"],
-      "next_slice": "Implement only after real install writes and receipts exist.",
-      "notes": "Current no-write surfaces have no runtime rollback state."
+      "feature_executed": true,
+      "mutation_performed": true,
+      "evidence_refs": [
+        ".harness/specs/2026-06-05-skills-sdk-pu-010-receipt-proven-rollback-uninstall-spec.md",
+        "Infrastructure/scripts/lib/ask/skills_sdk/project_cleanup.py",
+        "Infrastructure/config/schemas/skills-sdk/project-cleanup-receipt.v1.schema.json",
+        "Infrastructure/tests/test_skills_sdk_project_cleanup.py"
+      ],
+      "next_slice": "Add restore-from-before-state only when install receipts can prove exact pre-install content.",
+      "notes": "Rollback is receipt-proven and bounded to explicit marked project roots for apply; preview remains non-mutating."
     },
     {
       "id": "uninstall",
       "title": "Uninstall",
-      "status": "deferred",
-      "owner_surface": "future install lifecycle",
+      "status": "implemented",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/project_cleanup.py",
       "pipeline_sections": ["full_skill_lifecycle", "public_sdk_surface"],
-      "feature_executed": false,
-      "mutation_performed": false,
-      "evidence_refs": [".harness/specs/2026-06-04-skills-sdk-pu-008-capability-truth-spec.md"],
-      "next_slice": "Implement only after installed state ownership is defined.",
-      "notes": "No installed state is written by V1.0 or PU-008."
+      "feature_executed": true,
+      "mutation_performed": true,
+      "evidence_refs": [
+        ".harness/specs/2026-06-05-skills-sdk-pu-010-receipt-proven-rollback-uninstall-spec.md",
+        "Infrastructure/scripts/lib/ask/skills_sdk/project_cleanup.py",
+        "Infrastructure/config/schemas/skills-sdk/project-cleanup-receipt.v1.schema.json",
+        "Infrastructure/tests/test_skills_sdk_project_cleanup.py"
+      ],
+      "next_slice": "Add install-instance selection if the lockfile later supports duplicate active installs for one skill id.",
+      "notes": "Uninstall resolves through skills.lock.json and the source install receipt before removing digest-matched files."
     },
     {
       "id": "compiled_package_pipeline",
