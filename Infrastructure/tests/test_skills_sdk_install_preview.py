@@ -22,10 +22,11 @@ LOCKFILE_SCHEMA_PATH = REPO_ROOT / "Infrastructure/config/schemas/skills-sdk/loc
 
 def _command_env() -> dict[str, str]:
     env = os.environ.copy()
-    env.setdefault("XDG_CACHE_HOME", "/private/tmp/agent-skills-xdg-cache")
-    env.setdefault("XDG_STATE_HOME", "/private/tmp/agent-skills-xdg-state")
-    env.setdefault("MISE_CACHE_DIR", "/private/tmp/agent-skills-mise-cache")
-    env.setdefault("UV_CACHE_DIR", "/private/tmp/agent-skills-uv-cache")
+    temp_base = Path(tempfile.gettempdir()) / "agent-skills-test"
+    env.setdefault("XDG_CACHE_HOME", str(temp_base / "xdg-cache"))
+    env.setdefault("XDG_STATE_HOME", str(temp_base / "xdg-state"))
+    env.setdefault("MISE_CACHE_DIR", str(temp_base / "mise-cache"))
+    env.setdefault("UV_CACHE_DIR", str(temp_base / "uv-cache"))
     env.setdefault("MISE_TRUSTED_CONFIG_PATHS", str(REPO_ROOT / ".mise.toml"))
     return env
 
@@ -123,6 +124,7 @@ class TestSkillsSdkInstallPreview(unittest.TestCase):
         payload = json.loads(process.stdout)
         self.assertEqual(payload["status"], "error")
         self.assertIn("--preview", payload["errors"][0]["message"])
+        self.assertIn("--apply", payload["errors"][0]["message"])
 
     def test_preview_builder_does_not_write_lockfile_trust_projection_or_global_paths(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

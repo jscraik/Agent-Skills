@@ -120,6 +120,10 @@ def skills_sdk_status(*args, **kwargs):
     return _call_impl("skills_sdk_status", *args, **kwargs)
 
 
+def skills_sdk_project_install(*args, **kwargs):
+    return _call_impl("skills_sdk_project_install", *args, **kwargs)
+
+
 _FACADE_WRAPPERS.update(
     {
         "skills_proof": skills_proof,
@@ -131,6 +135,7 @@ _FACADE_WRAPPERS.update(
         "goal_skills": goal_skills,
         "sync_skills": sync_skills,
         "skills_sdk_status": skills_sdk_status,
+        "skills_sdk_project_install": skills_sdk_project_install,
     }
 )
 
@@ -176,6 +181,7 @@ __all__ = [
     "skills_sdk_check",
     "skills_sdk_install_preview",
     "skills_sdk_placeholder_lifecycle",
+    "skills_sdk_project_install",
     "skills_sdk_status",
     "sync_skills",
     "validate_openai_skill_format",

@@ -106,6 +106,10 @@ from ask.skills_sdk.package_verify import (  # noqa: E402
 )
 from ask.skills_sdk.risk import build_risk_classification as _build_risk_classification  # noqa: E402
 from ask.skills_sdk.install_preview import build_install_preview as _build_install_preview  # noqa: E402
+from ask.skills_sdk.project_install import (  # noqa: E402
+    ProjectInstallError as _ProjectInstallError,
+    install_project_skill as _install_project_skill,
+)
 from ask.skills_sdk.placeholder_lifecycle import (  # noqa: E402
     build_placeholder_lifecycle_receipts as _build_placeholder_lifecycle_receipts,
 )
@@ -3955,6 +3959,96 @@ def skills_sdk_install_preview(
                 fix_suggestion=_ask_validation_command("sdk", "check", query),
             )
         )
+    return result
+
+
+def skills_sdk_project_install(
+    repo_root: Path,
+    target: str,
+    project_root: str | None = None,
+    scope: str = "project",
+) -> CallResult:
+    """Install one local skill into an explicit project root."""
+    result = CallResult()
+    result.metadata["command"] = "sdk install --apply"
+    query = target.strip()
+    if scope != "project":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message="Real Skills SDK installs are bounded to --scope project in PU-009.",
+                fix_suggestion="ask sdk install <target> --apply --scope project --project-root /path/to/project --json --robot",
+            )
+        )
+        return result
+    target_info, _audit_target = _resolve_doctor_target(repo_root, query)
+    source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
+    source_path = Path(str(source_path_value)) if source_path_value else None
+    if source_path and not source_path.is_absolute():
+        source_path = repo_root / source_path
+    try:
+        receipt = _install_project_skill(
+            repo_root,
+            query=query,
+            source_path=source_path,
+            target_info=target_info,
+            project_root=project_root,
+        )
+    except _ProjectInstallError as exc:
+        result.status = "error"
+        result.data["skills_sdk_project_install"] = {
+            "schema_version": "skills-sdk-project-install.v1",
+            "query": query,
+            "status": "blocked",
+            "scope": "project",
+            "canonical_source_path": str(source_path) if source_path else None,
+            "facade_command": "skills-sdk install --apply",
+            "receipt": exc.receipt,
+            "validation_commands": [
+                _ask_validation_command(
+                    "sdk",
+                    "install",
+                    query,
+                    "--apply",
+                    "--project-root",
+                    project_root or "<project-root>",
+                ),
+            ],
+            "agent_summary": exc.message,
+        }
+        result.errors.append(
+            ErrorObject(
+                code=exc.code,
+                message=exc.message,
+                fix_suggestion=exc.fix_suggestion,
+            )
+        )
+        return result
+
+    payload = {
+        "schema_version": "skills-sdk-project-install.v1",
+        "query": query,
+        "status": receipt["status"],
+        "scope": "project",
+        "canonical_source_path": str(source_path) if source_path else None,
+        "facade_command": "skills-sdk install --apply",
+        "receipt": receipt,
+        "validation_commands": [
+            _ask_validation_command(
+                "sdk",
+                "install",
+                query,
+                "--apply",
+                "--project-root",
+                project_root or "<project-root>",
+            ),
+        ],
+        "agent_summary": (
+            f"skills-sdk installed {len(receipt['files_written'])} file(s) for {query} into {receipt['target_root']}."
+        ),
+    }
+    result.data["skills_sdk_project_install"] = payload
     return result
 
 

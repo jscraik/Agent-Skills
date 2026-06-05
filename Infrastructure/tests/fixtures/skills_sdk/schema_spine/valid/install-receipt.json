@@ -1,0 +1,35 @@
+{
+  "schema_version": "skills-sdk.install-receipt.v1",
+  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/install-receipt.v1.schema.json",
+  "status": "success",
+  "operation": "install",
+  "scope": "project",
+  "source_path": "Skills/sample",
+  "source_digest": "sha256:source",
+  "target_root": "/tmp/sample-project",
+  "target_paths": [
+    ".agents/skills/sample/SKILL.md",
+    "skills.lock.json",
+    ".harness/receipts/skills-sdk/install/sample.json"
+  ],
+  "files_written": [
+    {
+      "source_path": "SKILL.md",
+      "target_path": ".agents/skills/sample/SKILL.md",
+      "digest": "sha256:file"
+    }
+  ],
+  "files_skipped": [],
+  "files_overwritten": [],
+  "conflicts": [],
+  "lockfile_path": "skills.lock.json",
+  "lockfile_before_digest": null,
+  "lockfile_after_digest": "sha256:lockfile-after",
+  "rollback_metadata": {
+    "status": "seed_only",
+    "reason": "Rollback execution is deferred; receipt metadata seeds a later lifecycle slice.",
+    "installed_files": [".agents/skills/sample/SKILL.md"]
+  },
+  "mutation_performed": true,
+  "acceptance_trace": ["PU-009-FR-001"]
+}

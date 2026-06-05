@@ -15,6 +15,7 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 from ask.command_metadata import COMMAND_EXAMPLES, VALID_ACTIONS  # noqa: E402
 from ask.skills_sdk.capability_status import (  # noqa: E402
     ALLOWED_STATUSES,
+    MUTATING_CAPABILITY_IDS,
     REQUIRED_CAPABILITY_IDS,
     CapabilityStatusError,
     build_capability_status,
@@ -72,7 +73,7 @@ class TestSkillsSdkCapabilityStatus(unittest.TestCase):
 
         _validate_schema_subset(self.schema, payload, {"capability-status": self.schema})
         self.assertEqual(payload["summary"]["total"], len(REQUIRED_CAPABILITY_IDS))
-        self.assertEqual(payload["summary"]["mutation_performed_count"], 0)
+        self.assertEqual(payload["summary"]["mutation_performed_count"], 1)
         self.assertEqual(set(payload["summary"]["by_status"]), ALLOWED_STATUSES)
 
     def test_matrix_rejects_implemented_without_execution(self) -> None:
@@ -83,12 +84,32 @@ class TestSkillsSdkCapabilityStatus(unittest.TestCase):
         with self.assertRaisesRegex(CapabilityStatusError, "cannot be implemented"):
             validate_capability_matrix(bad_matrix)
 
-    def test_matrix_rejects_mutation_claims(self) -> None:
+    def test_matrix_allows_only_approved_mutating_capabilities(self) -> None:
+        matrix = load_capability_matrix(REPO_ROOT)
+        mutating_ids = {
+            row["id"]
+            for row in matrix["capabilities"]
+            if row["mutation_performed"]
+        }
+
+        self.assertEqual(mutating_ids, MUTATING_CAPABILITY_IDS)
+
+    def test_matrix_rejects_preview_mutation_claims(self) -> None:
         matrix = load_capability_matrix(REPO_ROOT)
         bad_matrix = json.loads(json.dumps(matrix))
-        bad_matrix["capabilities"][0]["mutation_performed"] = True
+        install_preview = next(row for row in bad_matrix["capabilities"] if row["id"] == "install_preview")
+        install_preview["mutation_performed"] = True
 
         with self.assertRaisesRegex(CapabilityStatusError, "cannot report mutation_performed"):
+            validate_capability_matrix(bad_matrix)
+
+    def test_matrix_rejects_deferred_mutating_real_install(self) -> None:
+        matrix = load_capability_matrix(REPO_ROOT)
+        bad_matrix = json.loads(json.dumps(matrix))
+        real_install = next(row for row in bad_matrix["capabilities"] if row["id"] == "real_install")
+        real_install["status"] = "deferred"
+
+        with self.assertRaisesRegex(CapabilityStatusError, "cannot mutate unless implemented"):
             validate_capability_matrix(bad_matrix)
 
     def test_matrix_rejects_unknown_status(self) -> None:
@@ -129,7 +150,7 @@ class TestSkillsSdkCapabilityStatus(unittest.TestCase):
         _validate_schema_subset(self.schema, status, {"capability-status": self.schema})
         self.assertEqual(payload["status"], "success")
         self.assertEqual(status["summary"]["total"], len(REQUIRED_CAPABILITY_IDS))
-        self.assertEqual(status["summary"]["mutation_performed_count"], 0)
+        self.assertEqual(status["summary"]["mutation_performed_count"], 1)
 
     def test_public_wrapper_preserves_status_contract(self) -> None:
         ask_payload = _run_json_command(

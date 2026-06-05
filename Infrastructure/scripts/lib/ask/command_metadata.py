@@ -95,10 +95,12 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
     "sdk": [
         "ask sdk check he-heartbeat --json --robot",
         "ask sdk install he-heartbeat --preview --json --robot",
+        "ask sdk install ./Skills/sample/SKILL.md --apply --project-root /tmp/sample-project --json --robot",
         "ask sdk lifecycle --risk-tier high --json --robot",
         "ask sdk status --json --robot",
         "skills-sdk check he-heartbeat --json --robot",
         "skills-sdk install he-heartbeat --preview --json --robot",
+        "skills-sdk install ./Skills/sample/SKILL.md --apply --project-root /tmp/sample-project --json --robot",
         "skills-sdk lifecycle --surface sandbox --risk-tier high --json --robot",
         "skills-sdk status --json --robot",
     ],
@@ -218,7 +220,9 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
     ],
     ("sdk", "install"): [
         "ask sdk install he-heartbeat --preview --json --robot",
+        "ask sdk install ./Skills/sample/SKILL.md --apply --project-root /tmp/sample-project --json --robot",
         "skills-sdk install he-heartbeat --preview --json --robot",
+        "skills-sdk install ./Skills/sample/SKILL.md --apply --project-root /tmp/sample-project --json --robot",
     ],
     ("sdk", "lifecycle"): [
         "ask sdk lifecycle --json --robot",
