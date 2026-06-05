@@ -58,5 +58,3 @@
 - **next_action:** carry these safety gaps into the implementation plan before any cleanup code is written
 - **manifest_path:** /Users/jamiecraik/dev/agent-skills/artifacts/agent-runs/adversarial-reviewer-2026-06-05-pu-010-filesystem-safety/manifest.json
 
-WROTE: /Users/jamiecraik/dev/agent-skills/.harness/review-artifacts/pu-010-adversarial-filesystem-safety.md
-

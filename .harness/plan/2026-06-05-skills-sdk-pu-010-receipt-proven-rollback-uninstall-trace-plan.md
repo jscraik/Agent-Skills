@@ -125,7 +125,7 @@ Trace PU-010 from the hardened spec into implementation-ready proof rows. The ne
 | Rollback and uninstall where owned directory contains user-added file | preserve directory and report manual action | TR-015, TR-018 | Directory prune safety. |
 | Two-step journal interruption: begin apply, interrupt after journal write, rerun same cleanup command | resume safely or block with recovery payload | TR-016, TR-018 | Journal recovery semantics. |
 | `uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_project_cleanup.py -q` | pass | TR-001 to TR-023 | Local temp-project integration proof. |
-| `uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_project_install.py -q` | pass | TR-014 | PU-009 compatibility only. |
+| `uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_project_install.py -q` | pass | TR-019 | PU-009 compatibility only. |
 | `uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_capability_status.py Infrastructure/tests/test_skills_sdk_pipeline_status_artifact.py -q` | pass | TR-020, TR-023 | Local status/artifact truth only. |
 | `./bin/ask sdk status --json --robot` | pass | TR-020 | Local status truth only. |
 | `./bin/skills-sdk status --json --robot` | pass | TR-020, TR-021 | Wrapper status truth only. |

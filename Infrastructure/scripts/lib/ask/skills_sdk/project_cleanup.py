@@ -178,6 +178,13 @@ def _load_install_receipt(path: Path, *, operation: str) -> tuple[dict[str, Any]
             fix_suggestion="Pass a readable Skills SDK install receipt or repair skills.lock.json.",
             receipt=_blocked_receipt(operation, str(path), "unknown", ["missing_receipt"]),
         ) from exc
+    except OSError as exc:
+        raise ProjectCleanupError(
+            code="ERR_IO",
+            message=f"Cannot read install receipt: {path}",
+            fix_suggestion="Verify file permissions and that the receipt path is readable.",
+            receipt=_blocked_receipt(operation, str(path), "unknown", ["unreadable_receipt"]),
+        ) from exc
     except json.JSONDecodeError as exc:
         raise ProjectCleanupError(
             code="ERR_SCHEMA_INVALID",

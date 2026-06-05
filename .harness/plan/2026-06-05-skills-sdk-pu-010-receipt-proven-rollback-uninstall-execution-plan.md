@@ -125,7 +125,7 @@ next_stage: governed implementation in a feature worktree
    - before-state policy: restore only from inline before-content or approved before-state reference with digest proof; otherwise manual action
    - receipt identity: use receipt digest as minimum authority; add receipt id only if compatible with PU-009 receipts
    - duplicate install policy: refuse duplicate active skill ids unless a compatible install-instance id is added and proven
-   - journal path: project-local path under .harness/receipts/skills-sdk/cleanup/ or adjacent .harness/state/skills-sdk/cleanup/, never outside project root
+   - journal path: project-local path under .harness/state/skills-sdk/cleanup/, never outside project root
 6. Verify the worktree is isolated: git status --short --branch.
 
 Validation:

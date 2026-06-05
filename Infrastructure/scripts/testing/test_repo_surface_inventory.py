@@ -242,7 +242,7 @@ def test_harness_curated_context_paths_are_classified() -> None:
 
 
 def test_current_tracked_inventory_has_no_classification_required_paths() -> None:
-    findings = MODULE.classify_paths(MODULE.git_ls_files(Path.cwd()))
+    findings = MODULE.classify_paths(MODULE.git_ls_files(MODULE.REPO_ROOT))
     offenders = [finding.path for finding in findings if finding.classification == "classification_required"]
 
     assert offenders == []

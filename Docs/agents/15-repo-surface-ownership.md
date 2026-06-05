@@ -6,7 +6,7 @@
 - [Scope](#scope)
 - [Classifications](#classifications)
 - [Path Policy](#path-policy)
-- [Unknown Ownership](#unknown-ownership)
+- [Unclassified Ownership](#unclassified-ownership)
 - [Decision Tests](#decision-tests)
 - [Allowlist Contract](#allowlist-contract)
 - [Cleanup Rules](#cleanup-rules)
