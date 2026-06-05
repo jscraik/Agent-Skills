@@ -1,0 +1,306 @@
+{
+  "data": {
+    "ask_audit": {
+      "data": {
+        "diagnostics": {
+          "exit_code": 0,
+          "stderr": "",
+          "stdout": "\n\ud83d\udccb Diagnostic report: Plugins/synaipse-harness-stages/skills/sy-execution-plan\n--------------------------------------------------\n  \u001b[32m\u2713\u001b[0m skill directory: Found at Plugins/synaipse-harness-stages/skills/sy-execution-plan\n  \u001b[32m\u2713\u001b[0m SKILL.md: Valid YAML frontmatter with name and description\n  \u001b[32m\u2713\u001b[0m nested .git: No nested .git directory\n  \u001b[90m\u25cb\u001b[0m symlink (codex): Plugin-owned skill is not expected as a default user-runtime symlink: sy-execution-plan\n  \u001b[90m\u25cb\u001b[0m symlink (agents): Plugin-owned skill is not expected as a default user-runtime symlink: sy-execution-plan\n  \u001b[90m\u25cb\u001b[0m skill index: Plugin-owned skill is not expected in the root default visible skill index: sy-execution-plan\n  \u001b[90m\u25cb\u001b[0m task profile: No task profile found (neither legacy binding nor implicit path)\n  \u001b[32m\u2713\u001b[0m lifecycle readiness: healthy\n--------------------------------------------------\n\u2705 All checks passed\n"
+        },
+        "validation_commands": [
+          "./bin/ask skills audit Plugins/synaipse-harness-stages/skills/sy-execution-plan --json --robot"
+        ]
+      },
+      "errors": [],
+      "status": "success"
+    },
+    "plugin_eval": {
+      "status": "skipped"
+    },
+    "policy": {
+      "external_quality_judge": "tessl_local_review",
+      "mode": "local_internal_only",
+      "no_publish": true,
+      "no_registry_upload": true,
+      "plugin_eval_min_acceptable_grade": "B+",
+      "plugin_eval_role": "budget_and_ergonomics_guardrail",
+      "plugin_eval_warning_policy": "Plugin Eval warnings are visible follow-up work, but they are not release blockers when there are zero Plugin Eval failures, the grade is B+ or better, and local/Tessl gates pass.",
+      "primary_gate": "local_eval_ask_audit",
+      "publish_policy": "never publish, register, upload, or invoke npx from this lane",
+      "snyk_default": "disabled_until_requested",
+      "snyk_privacy_basis": "Snyk CLI security analysis may contact Snyk services. It is never run by default in this local-first review lane; pass --include-snyk when external Snyk advisory analysis is wanted.",
+      "snyk_release_requirement": "release_required_for_manifest_backed_candidates",
+      "snyk_role": "opt_in_local_dependency_security_screening",
+      "snyk_when_not_to_use": [
+        "pure SKILL.md-first instruction-only candidates with no supported dependency manifest, unless the user explicitly asks",
+        "routine local iteration where external networked security analysis is not needed"
+      ],
+      "snyk_when_to_use": [
+        "when a skill or plugin candidate has dependency manifests such as package.json, pyproject.toml, requirements.txt, Gemfile, go.mod, or lockfiles",
+        "when claiming release readiness for a manifest-backed skill or plugin package",
+        "when dependency files, installer scripts, generated package surfaces, or plugin runtime dependencies changed",
+        "when matching the CircleCI/Snyk security screening lane locally before or after CI",
+        "when the user explicitly asks for Snyk, dependency vulnerability screening, or external security advisory evidence"
+      ],
+      "tessl_evidence_retention": "stable tmp wrapper is intentionally left for inspection and copied-input evidence",
+      "tessl_lint_role": "stable_tile_packaging_shape_check",
+      "tessl_lint_shape": "Tessl lint expects a Tessl tile.json package. Canonical repo skills are SKILL.md-first, so this command builds a stable local tile wrapper under /tmp before linting.",
+      "tessl_project_marker": "tessl.json",
+      "tessl_review_default": "enabled_local_cli",
+      "tessl_review_min_score": 90,
+      "tessl_review_privacy_basis": "Tessl docs: Review locally from your machine; stays local; results are only visible to you.",
+      "tessl_review_role": "local_best_practice_content_review",
+      "tessl_review_target_score": 95,
+      "tessl_review_threshold_policy": "Tessl review must return reviewScore >= 90; 95+ remains the improvement target.",
+      "tessl_staging_root": "/tmp/ask-tessl-reviews/<skill-path>-<sha12>",
+      "uses_npx": false
+    },
+    "review_mode_details": {
+      "local_evals": {
+        "command": "./bin/ask evals run <path> --mode smoke|release --json --robot",
+        "role": "dynamic run-trace behavior checks for skill selection, commands, artifacts, and release gates"
+      },
+      "plugin_eval": {
+        "command": "plugin-eval analyze <path> --format markdown",
+        "role": "static budget, ergonomics, and reviewability guardrail; not a substitute for local evals"
+      },
+      "snyk": {
+        "command": "snyk test --all-projects --detection-depth=6 --severity-threshold=high --json <skill-path>",
+        "default": "disabled_until_requested",
+        "release_required": "manifest-backed candidates",
+        "role": "opt-in local dependency security screening; release-required for manifest-backed candidates",
+        "use_when": [
+          "candidate has supported dependency manifests",
+          "release-readiness is claimed for a manifest-backed package",
+          "dependency/runtime package surfaces changed",
+          "local evidence must match CircleCI/Snyk screening",
+          "user explicitly requests Snyk or dependency vulnerability evidence"
+        ]
+      },
+      "tessl_lint": {
+        "canonical_source_shape": "SKILL.md-first",
+        "command": "tessl skill lint <stable-tile.json>",
+        "role": "stable tile.json package-shape check, not a direct content finding"
+      },
+      "tessl_review": {
+        "command": "tessl skill review --json --threshold 90 <stable-skill-directory>",
+        "minimum_score": 90,
+        "publishes": false,
+        "role": "local best-practice/content review for private or work-in-progress skills",
+        "target_score": 95
+      }
+    },
+    "snyk": {
+      "reason": "Snyk is disabled by default. Use --include-snyk when external Snyk advisory analysis is wanted.",
+      "status": "skipped"
+    },
+    "target": "Plugins/synaipse-harness-stages/skills/sy-execution-plan",
+    "tessl_lint": {
+      "command": [
+        "/Users/jamiecraik/.local/bin/tessl",
+        "skill",
+        "lint",
+        "/tmp/ask-tessl-reviews/Plugins__synaipse-harness-stages__skills__sy-execution-plan-ad517fd25a6c/b27f5b04/tile.json"
+      ],
+      "exit_code": 0,
+      "status": "success",
+      "stderr": "Latest available version is 0.81.3 (currently running 0.80.0), upgrade with \"tessl cli update\"\n",
+      "stdout": "\nContext Cost\n\nSkills\n  - sy-execution-plan: 79 front-loaded, 1.3k on-demand tokens\n\nTotal: 79 front-loaded, 1.3k on-demand tokens\n\n\u2714 Tile local/sy-execution-plan@0.0.0-local is valid\n"
+    },
+    "tessl_review": {
+      "command": [
+        "/Users/jamiecraik/.local/bin/tessl",
+        "skill",
+        "review",
+        "--json",
+        "--threshold",
+        "90",
+        "/tmp/ask-tessl-reviews/Plugins__synaipse-harness-stages__skills__sy-execution-plan-ad517fd25a6c/b27f5b04/skills/sy-execution-plan"
+      ],
+      "exit_code": 0,
+      "minimum_score": 90,
+      "status": "success",
+      "stderr": "Latest available version is 0.81.3 (currently running 0.80.0), upgrade with \"tessl cli update\"\n- Reviewing skill...\n",
+      "stdout": "{\n  \"review\": {\n    \"reviewScore\": 94\n  },\n  \"validation\": {\n    \"checks\": [\n      {\n        \"name\": \"skill_md_line_count\",\n        \"status\": \"passed\",\n        \"message\": \"SKILL.md line count is 132 (<= 500)\",\n        \"details\": {\n          \"line_count\": 132,\n          \"max_lines\": 500\n        }\n      },\n      {\n        \"name\": \"frontmatter_valid\",\n        \"status\": \"passed\",\n        \"message\": \"YAML frontmatter is valid\",\n        \"details\": {\n          \"keys\": [\n            \"name\",\n            \"description\",\n            \"metadata\"\n          ]\n        }\n      },\n      {\n        \"name\": \"name_field\",\n        \"status\": \"passed\",\n        \"message\": \"'name' field is valid: 'sy-execution-plan'\",\n        \"details\": {\n          \"value\": \"sy-execution-plan\",\n          \"length\": 17\n        }\n      },\n      {\n        \"name\": \"description_field\",\n        \"status\": \"passed\",\n        \"message\": \"'description' field is valid (293 chars)\",\n        \"details\": {\n          \"length\": 293\n        }\n      },\n      {\n        \"name\": \"compatibility_field\",\n        \"status\": \"passed\",\n        \"message\": \"'compatibility' field not present (optional)\"\n      },\n      {\n        \"name\": \"allowed_tools_field\",\n        \"status\": \"passed\",\n        \"message\": \"'allowed-tools' field not present (optional)\"\n      },\n      {\n        \"name\": \"metadata_version\",\n        \"status\": \"passed\",\n        \"message\": \"'metadata.version' is present: 0.1.0\",\n        \"details\": {\n          \"version\": \"0.1.0\"\n        }\n      },\n      {\n        \"name\": \"metadata_field\",\n        \"status\": \"passed\",\n        \"message\": \"'metadata' contains 2 entries\"\n      },\n      {\n        \"name\": \"license_field\",\n        \"status\": \"passed\",\n        \"message\": \"'license' field not present (optional)\"\n      },\n      {\n        \"name\": \"frontmatter_unknown_keys\",\n        \"status\": \"passed\",\n        \"message\": \"No unknown frontmatter keys found\"\n      },\n      {\n        \"name\": \"body_present\",\n        \"status\": \"passed\",\n        \"message\": \"SKILL.md body is present\",\n        \"details\": {\n          \"body_chars\": 4634\n        }\n      }\n    ],\n    \"overallPassed\": true,\n    \"errorCount\": 0,\n    \"warningCount\": 0,\n    \"skillName\": \"sy-execution-plan\",\n    \"skillDescription\": \"Creates synAIpse Harness implementation plans with ordered steps, file targets, command examples, risk controls, validation gates, and rollback notes. Use when the user asks for an execution plan, implementation plan, task breakdown, work sequencing, or code-change plan from an approved spec.\"\n  },\n  \"descriptionJudge\": {\n    \"judgeConfig\": {\n      \"model\": \"anthropic/claude-opus-4-6\"\n    },\n    \"success\": true,\n    \"evaluation\": {\n      \"scores\": {\n        \"specificity\": {\n          \"score\": 3,\n          \"reasoning\": \"Lists multiple specific concrete actions: 'ordered steps, file targets, command examples, risk controls, validation gates, and rollback notes.' These are detailed, concrete deliverables rather than vague abstractions.\"\n        },\n        \"trigger_term_quality\": {\n          \"score\": 3,\n          \"reasoning\": \"Includes strong natural trigger terms users would say: 'execution plan', 'implementation plan', 'task breakdown', 'work sequencing', 'code-change plan', and 'approved spec'. These cover multiple natural phrasings a user might use.\"\n        },\n        \"completeness\": {\n          \"score\": 3,\n          \"reasoning\": \"Clearly answers both 'what' (creates implementation plans with ordered steps, file targets, command examples, risk controls, validation gates, rollback notes) and 'when' (explicit 'Use when...' clause listing five trigger scenarios).\"\n        },\n        \"distinctiveness_conflict_risk\": {\n          \"score\": 3,\n          \"reasoning\": \"The description is clearly scoped to 'synAIpse Harness implementation plans' from 'approved specs', which is a distinct niche. The combination of the specific product name and the plan-from-spec workflow makes it unlikely to conflict with general coding or planning skills.\"\n        }\n      },\n      \"overall_assessment\": \"This is a strong skill description that clearly communicates what it produces (implementation plans with specific components like ordered steps, file targets, risk controls, validation gates, and rollback notes), when to use it (with explicit trigger terms covering multiple natural phrasings), and is distinctly scoped to the synAIpse Harness domain. It uses proper third-person voice and is concise without being vague.\",\n      \"suggestions\": []\n    },\n    \"weightedScore\": 3,\n    \"normalizedScore\": 1\n  },\n  \"contentJudge\": {\n    \"judgeConfig\": {\n      \"model\": \"anthropic/claude-opus-4-6\"\n    },\n    \"success\": true,\n    \"evaluation\": {\n      \"scores\": {\n        \"conciseness\": {\n          \"score\": 2,\n          \"reasoning\": \"The skill is reasonably efficient but includes some sections that could be tightened\u2014e.g., the Philosophy section is somewhat generic, and the Gotchas/Anti-Patterns sections contain advice Claude likely already understands (don't run `rm -rf`, don't expand scope). The Constraints section about redacting secrets is also standard Claude behavior. However, the domain-specific content (stage boundaries, evidence lanes, validation gates) earns its place.\"\n        },\n        \"actionability\": {\n          \"score\": 3,\n          \"reasoning\": \"The skill provides concrete command examples (audit commands, plugin-eval, validate scripts), a clear procedure with numbered steps, a structured output schema with specific field names, and a complete YAML example showing expected input/output. This is highly actionable and specific to the domain.\"\n        },\n        \"workflow_clarity\": {\n          \"score\": 3,\n          \"reasoning\": \"The procedure is clearly sequenced from lowest-risk to highest-risk steps, with explicit validation gates ('fail fast: stop at the first failed required gate'), rollback notes, stop conditions, and a clear failure mode section that specifies when to halt and ask for input. The feedback loop of validate-then-proceed is well-defined.\"\n        },\n        \"progressive_disclosure\": {\n          \"score\": 3,\n          \"reasoning\": \"The skill is well-organized with clear sections (When to Use, Inputs, Procedure, Outputs, Validation, Failure Mode, Examples, etc.) and references external files only when needed (references/contract.yaml, evals.yaml, task-profile.json, archives). For a skill of this complexity, the structure is appropriate and navigable without being monolithic.\"\n        }\n      },\n      \"overall_assessment\": \"This is a well-structured execution planning skill with strong actionability and workflow clarity. It provides concrete commands, a clear sequenced procedure with validation checkpoints, and a useful structured output example. Minor verbosity in sections like Philosophy, Gotchas, and Anti-Patterns (some of which restate Claude's default behaviors) prevents a perfect conciseness score, but overall the skill is effective and well-organized.\",\n      \"suggestions\": []\n    },\n    \"weightedScore\": 2.7,\n    \"normalizedScore\": 0.8500000000000001\n  }\n}\n",
+      "summary": {
+        "minimum_score": 90,
+        "raw": {
+          "contentJudge": {
+            "evaluation": {
+              "overall_assessment": "This is a well-structured execution planning skill with strong actionability and workflow clarity. It provides concrete commands, a clear sequenced procedure with validation checkpoints, and a useful structured output example. Minor verbosity in sections like Philosophy, Gotchas, and Anti-Patterns (some of which restate Claude's default behaviors) prevents a perfect conciseness score, but overall the skill is effective and well-organized.",
+              "scores": {
+                "actionability": {
+                  "reasoning": "The skill provides concrete command examples (audit commands, plugin-eval, validate scripts), a clear procedure with numbered steps, a structured output schema with specific field names, and a complete YAML example showing expected input/output. This is highly actionable and specific to the domain.",
+                  "score": 3
+                },
+                "conciseness": {
+                  "reasoning": "The skill is reasonably efficient but includes some sections that could be tightened\u2014e.g., the Philosophy section is somewhat generic, and the Gotchas/Anti-Patterns sections contain advice Claude likely already understands (don't run `rm -rf`, don't expand scope). The Constraints section about redacting secrets is also standard Claude behavior. However, the domain-specific content (stage boundaries, evidence lanes, validation gates) earns its place.",
+                  "score": 2
+                },
+                "progressive_disclosure": {
+                  "reasoning": "The skill is well-organized with clear sections (When to Use, Inputs, Procedure, Outputs, Validation, Failure Mode, Examples, etc.) and references external files only when needed (references/contract.yaml, evals.yaml, task-profile.json, archives). For a skill of this complexity, the structure is appropriate and navigable without being monolithic.",
+                  "score": 3
+                },
+                "workflow_clarity": {
+                  "reasoning": "The procedure is clearly sequenced from lowest-risk to highest-risk steps, with explicit validation gates ('fail fast: stop at the first failed required gate'), rollback notes, stop conditions, and a clear failure mode section that specifies when to halt and ask for input. The feedback loop of validate-then-proceed is well-defined.",
+                  "score": 3
+                }
+              },
+              "suggestions": []
+            },
+            "judgeConfig": {
+              "model": "anthropic/claude-opus-4-6"
+            },
+            "normalizedScore": 0.8500000000000001,
+            "success": true,
+            "weightedScore": 2.7
+          },
+          "descriptionJudge": {
+            "evaluation": {
+              "overall_assessment": "This is a strong skill description that clearly communicates what it produces (implementation plans with specific components like ordered steps, file targets, risk controls, validation gates, and rollback notes), when to use it (with explicit trigger terms covering multiple natural phrasings), and is distinctly scoped to the synAIpse Harness domain. It uses proper third-person voice and is concise without being vague.",
+              "scores": {
+                "completeness": {
+                  "reasoning": "Clearly answers both 'what' (creates implementation plans with ordered steps, file targets, command examples, risk controls, validation gates, rollback notes) and 'when' (explicit 'Use when...' clause listing five trigger scenarios).",
+                  "score": 3
+                },
+                "distinctiveness_conflict_risk": {
+                  "reasoning": "The description is clearly scoped to 'synAIpse Harness implementation plans' from 'approved specs', which is a distinct niche. The combination of the specific product name and the plan-from-spec workflow makes it unlikely to conflict with general coding or planning skills.",
+                  "score": 3
+                },
+                "specificity": {
+                  "reasoning": "Lists multiple specific concrete actions: 'ordered steps, file targets, command examples, risk controls, validation gates, and rollback notes.' These are detailed, concrete deliverables rather than vague abstractions.",
+                  "score": 3
+                },
+                "trigger_term_quality": {
+                  "reasoning": "Includes strong natural trigger terms users would say: 'execution plan', 'implementation plan', 'task breakdown', 'work sequencing', 'code-change plan', and 'approved spec'. These cover multiple natural phrasings a user might use.",
+                  "score": 3
+                }
+              },
+              "suggestions": []
+            },
+            "judgeConfig": {
+              "model": "anthropic/claude-opus-4-6"
+            },
+            "normalizedScore": 1,
+            "success": true,
+            "weightedScore": 3
+          },
+          "review": {
+            "reviewScore": 94
+          },
+          "validation": {
+            "checks": [
+              {
+                "details": {
+                  "line_count": 132,
+                  "max_lines": 500
+                },
+                "message": "SKILL.md line count is 132 (<= 500)",
+                "name": "skill_md_line_count",
+                "status": "passed"
+              },
+              {
+                "details": {
+                  "keys": [
+                    "name",
+                    "description",
+                    "metadata"
+                  ]
+                },
+                "message": "YAML frontmatter is valid",
+                "name": "frontmatter_valid",
+                "status": "passed"
+              },
+              {
+                "details": {
+                  "length": 17,
+                  "value": "sy-execution-plan"
+                },
+                "message": "'name' field is valid: 'sy-execution-plan'",
+                "name": "name_field",
+                "status": "passed"
+              },
+              {
+                "details": {
+                  "length": 293
+                },
+                "message": "'description' field is valid (293 chars)",
+                "name": "description_field",
+                "status": "passed"
+              },
+              {
+                "message": "'compatibility' field not present (optional)",
+                "name": "compatibility_field",
+                "status": "passed"
+              },
+              {
+                "message": "'allowed-tools' field not present (optional)",
+                "name": "allowed_tools_field",
+                "status": "passed"
+              },
+              {
+                "details": {
+                  "version": "0.1.0"
+                },
+                "message": "'metadata.version' is present: 0.1.0",
+                "name": "metadata_version",
+                "status": "passed"
+              },
+              {
+                "message": "'metadata' contains 2 entries",
+                "name": "metadata_field",
+                "status": "passed"
+              },
+              {
+                "message": "'license' field not present (optional)",
+                "name": "license_field",
+                "status": "passed"
+              },
+              {
+                "message": "No unknown frontmatter keys found",
+                "name": "frontmatter_unknown_keys",
+                "status": "passed"
+              },
+              {
+                "details": {
+                  "body_chars": 4634
+                },
+                "message": "SKILL.md body is present",
+                "name": "body_present",
+                "status": "passed"
+              }
+            ],
+            "errorCount": 0,
+            "overallPassed": true,
+            "skillDescription": "Creates synAIpse Harness implementation plans with ordered steps, file targets, command examples, risk controls, validation gates, and rollback notes. Use when the user asks for an execution plan, implementation plan, task breakdown, work sequencing, or code-change plan from an approved spec.",
+            "skillName": "sy-execution-plan",
+            "warningCount": 0
+          }
+        },
+        "review_score": 94,
+        "score_acceptable": true,
+        "status": "success",
+        "target_score": 95
+      },
+      "target_score": 95
+    },
+    "tessl_tile": {
+      "auth_home": "process_home",
+      "evidence_retention": "stable_tmp_directory_left_for_post-run_inspection",
+      "mode": "stable_tmp_wrapper",
+      "reason": "Tessl lint validates tile.json packages. Canonical repo skills remain SKILL.md-first, so this command stages a local packaging-shape wrapper under /tmp.",
+      "review_path": "/tmp/ask-tessl-reviews/Plugins__synaipse-harness-stages__skills__sy-execution-plan-ad517fd25a6c/b27f5b04/skills/sy-execution-plan",
+      "skill_key": "sy-execution-plan",
+      "source_skill": "Plugins/synaipse-harness-stages/skills/sy-execution-plan",
+      "staging_root": "/tmp/ask-tessl-reviews/Plugins__synaipse-harness-stages__skills__sy-execution-plan-ad517fd25a6c/b27f5b04",
+      "support_refs_included": true,
+      "tessl_project_marker": "/tmp/ask-tessl-reviews/Plugins__synaipse-harness-stages__skills__sy-execution-plan-ad517fd25a6c/b27f5b04/tessl.json",
+      "tile_path": "/tmp/ask-tessl-reviews/Plugins__synaipse-harness-stages__skills__sy-execution-plan-ad517fd25a6c/b27f5b04/tile.json"
+    },
+    "validation_commands": [
+      "./bin/ask skills external-review Plugins/synaipse-harness-stages/skills/sy-execution-plan --audit-level compat --skip-plugin-eval --report-path Infrastructure/artifacts/skill-reviews/sy-execution-plan-external-review.json --json --robot"
+    ]
+  },
+  "errors": [],
+  "status": "success"
+}

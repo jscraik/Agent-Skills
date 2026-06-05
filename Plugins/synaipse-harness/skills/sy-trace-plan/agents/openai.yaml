@@ -1,0 +1,5 @@
+policy:
+  allow_implicit_invocation: false
+interface:
+  display_name: "SynAIpse Harness Plan"
+  short_description: "Turn specs, brainstorms, bugs, Linear issues, or feature requests into traceable SynAIpse Harness delivery plans."

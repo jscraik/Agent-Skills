@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "plugin": "synaipse-harness",
+  "router": "sy-strategy",
+  "stage_handles": {
+    "sy-strategy": "sy-strategy <strategy-or-review-request>",
+    "sy-reframe": "sy-reframe <migration-candidate>",
+    "sy-brainstorm": "sy-brainstorm <request>",
+    "sy-trace-plan": "sy-trace-plan <strategy-reframe-or-brainstorm-output>",
+    "sy-tracker-plan": "sy-tracker-plan <harness-artifacts>",
+    "sy-spec": "sy-spec <request>",
+    "sy-execution-plan": "sy-execution-plan <request>",
+    "sy-work": "sy-work <plan-or-task>",
+    "sy-review": "sy-review <review-target>",
+    "sy-eval-report": "sy-eval-report <completed-slice-or-pr>",
+    "sy-reconcile": "sy-reconcile <state-or-resume-request>",
+    "sy-reinforce": "sy-reinforce <solved-problem-or-learning-refresh>"
+  },
+  "selection_rule": "Select exactly one next stage; when authority or freshness is unclear, choose sy-reconcile or return a blocked handoff.",
+  "evidence_rule": "Report local validation, PR/CI, review, tracker, artifact, and rollout evidence as separate lanes."
+}

@@ -1,0 +1,5 @@
+policy:
+  allow_implicit_invocation: false
+interface:
+  display_name: "SynAIpse Harness Eval Report"
+  short_description: "Use when completed SynAIpse implementation slices need closure proof, drift validation, and eval-backed Linear completion guidance."

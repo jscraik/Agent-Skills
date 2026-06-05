@@ -1,0 +1,308 @@
+{
+  "data": {
+    "ask_audit": {
+      "data": {
+        "diagnostics": {
+          "exit_code": 0,
+          "stderr": "",
+          "stdout": "\n\ud83d\udccb Diagnostic report: Plugins/synaipse-harness-stages/skills/sy-brainstorm\n--------------------------------------------------\n  \u001b[32m\u2713\u001b[0m skill directory: Found at Plugins/synaipse-harness-stages/skills/sy-brainstorm\n  \u001b[32m\u2713\u001b[0m SKILL.md: Valid YAML frontmatter with name and description\n  \u001b[32m\u2713\u001b[0m nested .git: No nested .git directory\n  \u001b[90m\u25cb\u001b[0m symlink (codex): Plugin-owned skill is not expected as a default user-runtime symlink: sy-brainstorm\n  \u001b[90m\u25cb\u001b[0m symlink (agents): Plugin-owned skill is not expected as a default user-runtime symlink: sy-brainstorm\n  \u001b[90m\u25cb\u001b[0m skill index: Plugin-owned skill is not expected in the root default visible skill index: sy-brainstorm\n  \u001b[90m\u25cb\u001b[0m task profile: No task profile found (neither legacy binding nor implicit path)\n  \u001b[32m\u2713\u001b[0m lifecycle readiness: healthy\n--------------------------------------------------\n\u2705 All checks passed\n"
+        },
+        "validation_commands": [
+          "./bin/ask skills audit Plugins/synaipse-harness-stages/skills/sy-brainstorm --json --robot"
+        ]
+      },
+      "errors": [],
+      "status": "success"
+    },
+    "plugin_eval": {
+      "status": "skipped"
+    },
+    "policy": {
+      "external_quality_judge": "tessl_local_review",
+      "mode": "local_internal_only",
+      "no_publish": true,
+      "no_registry_upload": true,
+      "plugin_eval_min_acceptable_grade": "B+",
+      "plugin_eval_role": "budget_and_ergonomics_guardrail",
+      "plugin_eval_warning_policy": "Plugin Eval warnings are visible follow-up work, but they are not release blockers when there are zero Plugin Eval failures, the grade is B+ or better, and local/Tessl gates pass.",
+      "primary_gate": "local_eval_ask_audit",
+      "publish_policy": "never publish, register, upload, or invoke npx from this lane",
+      "snyk_default": "disabled_until_requested",
+      "snyk_privacy_basis": "Snyk CLI security analysis may contact Snyk services. It is never run by default in this local-first review lane; pass --include-snyk when external Snyk advisory analysis is wanted.",
+      "snyk_release_requirement": "release_required_for_manifest_backed_candidates",
+      "snyk_role": "opt_in_local_dependency_security_screening",
+      "snyk_when_not_to_use": [
+        "pure SKILL.md-first instruction-only candidates with no supported dependency manifest, unless the user explicitly asks",
+        "routine local iteration where external networked security analysis is not needed"
+      ],
+      "snyk_when_to_use": [
+        "when a skill or plugin candidate has dependency manifests such as package.json, pyproject.toml, requirements.txt, Gemfile, go.mod, or lockfiles",
+        "when claiming release readiness for a manifest-backed skill or plugin package",
+        "when dependency files, installer scripts, generated package surfaces, or plugin runtime dependencies changed",
+        "when matching the CircleCI/Snyk security screening lane locally before or after CI",
+        "when the user explicitly asks for Snyk, dependency vulnerability screening, or external security advisory evidence"
+      ],
+      "tessl_evidence_retention": "stable tmp wrapper is intentionally left for inspection and copied-input evidence",
+      "tessl_lint_role": "stable_tile_packaging_shape_check",
+      "tessl_lint_shape": "Tessl lint expects a Tessl tile.json package. Canonical repo skills are SKILL.md-first, so this command builds a stable local tile wrapper under /tmp before linting.",
+      "tessl_project_marker": "tessl.json",
+      "tessl_review_default": "enabled_local_cli",
+      "tessl_review_min_score": 90,
+      "tessl_review_privacy_basis": "Tessl docs: Review locally from your machine; stays local; results are only visible to you.",
+      "tessl_review_role": "local_best_practice_content_review",
+      "tessl_review_target_score": 95,
+      "tessl_review_threshold_policy": "Tessl review must return reviewScore >= 90; 95+ remains the improvement target.",
+      "tessl_staging_root": "/tmp/ask-tessl-reviews/<skill-path>-<sha12>",
+      "uses_npx": false
+    },
+    "review_mode_details": {
+      "local_evals": {
+        "command": "./bin/ask evals run <path> --mode smoke|release --json --robot",
+        "role": "dynamic run-trace behavior checks for skill selection, commands, artifacts, and release gates"
+      },
+      "plugin_eval": {
+        "command": "plugin-eval analyze <path> --format markdown",
+        "role": "static budget, ergonomics, and reviewability guardrail; not a substitute for local evals"
+      },
+      "snyk": {
+        "command": "snyk test --all-projects --detection-depth=6 --severity-threshold=high --json <skill-path>",
+        "default": "disabled_until_requested",
+        "release_required": "manifest-backed candidates",
+        "role": "opt-in local dependency security screening; release-required for manifest-backed candidates",
+        "use_when": [
+          "candidate has supported dependency manifests",
+          "release-readiness is claimed for a manifest-backed package",
+          "dependency/runtime package surfaces changed",
+          "local evidence must match CircleCI/Snyk screening",
+          "user explicitly requests Snyk or dependency vulnerability evidence"
+        ]
+      },
+      "tessl_lint": {
+        "canonical_source_shape": "SKILL.md-first",
+        "command": "tessl skill lint <stable-tile.json>",
+        "role": "stable tile.json package-shape check, not a direct content finding"
+      },
+      "tessl_review": {
+        "command": "tessl skill review --json --threshold 90 <stable-skill-directory>",
+        "minimum_score": 90,
+        "publishes": false,
+        "role": "local best-practice/content review for private or work-in-progress skills",
+        "target_score": 95
+      }
+    },
+    "snyk": {
+      "reason": "Snyk is disabled by default. Use --include-snyk when external Snyk advisory analysis is wanted.",
+      "status": "skipped"
+    },
+    "target": "Plugins/synaipse-harness-stages/skills/sy-brainstorm",
+    "tessl_lint": {
+      "command": [
+        "/Users/jamiecraik/.local/bin/tessl",
+        "skill",
+        "lint",
+        "/tmp/ask-tessl-reviews/Plugins__synaipse-harness-stages__skills__sy-brainstorm-51fe1b390d93/8268cd19/tile.json"
+      ],
+      "exit_code": 0,
+      "status": "success",
+      "stderr": "Latest available version is 0.81.3 (currently running 0.80.0), upgrade with \"tessl cli update\"\n",
+      "stdout": "\nContext Cost\n\nSkills\n  - sy-brainstorm: 82 front-loaded, 1.5k on-demand tokens\n\nTotal: 82 front-loaded, 1.5k on-demand tokens\n\n\u2714 Tile local/sy-brainstorm@0.0.0-local is valid\n"
+    },
+    "tessl_review": {
+      "command": [
+        "/Users/jamiecraik/.local/bin/tessl",
+        "skill",
+        "review",
+        "--json",
+        "--threshold",
+        "90",
+        "/tmp/ask-tessl-reviews/Plugins__synaipse-harness-stages__skills__sy-brainstorm-51fe1b390d93/8268cd19/skills/sy-brainstorm"
+      ],
+      "exit_code": 0,
+      "minimum_score": 90,
+      "status": "success",
+      "stderr": "Latest available version is 0.81.3 (currently running 0.80.0), upgrade with \"tessl cli update\"\n- Reviewing skill...\n",
+      "stdout": "{\n  \"review\": {\n    \"reviewScore\": 94\n  },\n  \"validation\": {\n    \"checks\": [\n      {\n        \"name\": \"skill_md_line_count\",\n        \"status\": \"passed\",\n        \"message\": \"SKILL.md line count is 143 (<= 500)\",\n        \"details\": {\n          \"line_count\": 143,\n          \"max_lines\": 500\n        }\n      },\n      {\n        \"name\": \"frontmatter_valid\",\n        \"status\": \"passed\",\n        \"message\": \"YAML frontmatter is valid\",\n        \"details\": {\n          \"keys\": [\n            \"name\",\n            \"description\",\n            \"metadata\"\n          ]\n        }\n      },\n      {\n        \"name\": \"name_field\",\n        \"status\": \"passed\",\n        \"message\": \"'name' field is valid: 'sy-brainstorm'\",\n        \"details\": {\n          \"value\": \"sy-brainstorm\",\n          \"length\": 13\n        }\n      },\n      {\n        \"name\": \"description_field\",\n        \"status\": \"passed\",\n        \"message\": \"'description' field is valid (312 chars)\",\n        \"details\": {\n          \"length\": 312\n        }\n      },\n      {\n        \"name\": \"compatibility_field\",\n        \"status\": \"passed\",\n        \"message\": \"'compatibility' field not present (optional)\"\n      },\n      {\n        \"name\": \"allowed_tools_field\",\n        \"status\": \"passed\",\n        \"message\": \"'allowed-tools' field not present (optional)\"\n      },\n      {\n        \"name\": \"metadata_version\",\n        \"status\": \"passed\",\n        \"message\": \"'metadata.version' is present: 0.1.0\",\n        \"details\": {\n          \"version\": \"0.1.0\"\n        }\n      },\n      {\n        \"name\": \"metadata_field\",\n        \"status\": \"passed\",\n        \"message\": \"'metadata' contains 2 entries\"\n      },\n      {\n        \"name\": \"license_field\",\n        \"status\": \"passed\",\n        \"message\": \"'license' field not present (optional)\"\n      },\n      {\n        \"name\": \"frontmatter_unknown_keys\",\n        \"status\": \"passed\",\n        \"message\": \"No unknown frontmatter keys found\"\n      },\n      {\n        \"name\": \"body_present\",\n        \"status\": \"passed\",\n        \"message\": \"SKILL.md body is present\",\n        \"details\": {\n          \"body_chars\": 5466\n        }\n      }\n    ],\n    \"overallPassed\": true,\n    \"errorCount\": 0,\n    \"warningCount\": 0,\n    \"skillName\": \"sy-brainstorm\",\n    \"skillDescription\": \"Analyzes synAIpse Harness plugin, router, stage, or retirement decisions by creating a decision matrix, scoring risk and reversibility, and recommending one next stage. Use when the user asks to compare lifecycle options, weigh pros and cons, brainstorm migration approaches, or decide which plugin path to take.\"\n  },\n  \"descriptionJudge\": {\n    \"judgeConfig\": {\n      \"model\": \"anthropic/claude-opus-4-6\"\n    },\n    \"success\": true,\n    \"evaluation\": {\n      \"scores\": {\n        \"specificity\": {\n          \"score\": 3,\n          \"reasoning\": \"Lists multiple specific concrete actions: 'creating a decision matrix', 'scoring risk and reversibility', and 'recommending one next stage'. These are clear, actionable outputs rather than vague language.\"\n        },\n        \"trigger_term_quality\": {\n          \"score\": 3,\n          \"reasoning\": \"Includes natural trigger terms users would say: 'compare lifecycle options', 'weigh pros and cons', 'brainstorm migration approaches', 'decide which plugin path to take', plus domain-specific terms like 'plugin', 'router', 'stage', 'retirement decisions'.\"\n        },\n        \"completeness\": {\n          \"score\": 3,\n          \"reasoning\": \"Clearly answers both 'what' (analyzes synAIpse Harness decisions by creating a decision matrix, scoring risk/reversibility, recommending next stage) and 'when' (explicit 'Use when' clause with four trigger scenarios).\"\n        },\n        \"distinctiveness_conflict_risk\": {\n          \"score\": 3,\n          \"reasoning\": \"Highly distinctive due to the specific domain (synAIpse Harness plugin lifecycle) and specific methodology (decision matrix, risk/reversibility scoring). Very unlikely to conflict with other skills given the niche terminology.\"\n        }\n      },\n      \"overall_assessment\": \"This is a well-crafted skill description that clearly defines its niche within synAIpse Harness lifecycle decisions. It specifies concrete actions (decision matrix, risk scoring, stage recommendation), includes an explicit 'Use when' clause with multiple natural trigger phrases, and is distinctive enough to avoid conflicts with other skills. The description is concise yet comprehensive.\",\n      \"suggestions\": []\n    },\n    \"weightedScore\": 3,\n    \"normalizedScore\": 1\n  },\n  \"contentJudge\": {\n    \"judgeConfig\": {\n      \"model\": \"anthropic/claude-opus-4-6\"\n    },\n    \"success\": true,\n    \"evaluation\": {\n      \"scores\": {\n        \"conciseness\": {\n          \"score\": 2,\n          \"reasoning\": \"The skill is reasonably efficient but includes some sections that could be tightened\u2014e.g., the six scoring anchors are somewhat verbose with their high/medium/low definitions, and sections like 'Philosophy', 'Gotchas', and 'Anti-Patterns' overlap with 'Constraints' and 'Execution Boundaries'. Some redundancy between Validation, Failure Mode, and Execution Boundaries.\"\n        },\n        \"actionability\": {\n          \"score\": 3,\n          \"reasoning\": \"The procedure is concrete and specific: a numbered 5-step process with defined scoring dimensions, explicit anchors for each dimension, a structured output schema, and a complete YAML example showing expected input/output. The scoring anchors provide clear, actionable criteria rather than vague guidance.\"\n        },\n        \"workflow_clarity\": {\n          \"score\": 3,\n          \"reasoning\": \"The 5-step procedure is clearly sequenced with explicit validation gates ('Fail fast: stop at the first failed required gate'), a feedback loop for missing authority ('stop and ask for that missing input'), and clear checkpoints about what evidence was and wasn't checked. The Failure Mode section provides explicit error recovery guidance.\"\n        },\n        \"progressive_disclosure\": {\n          \"score\": 3,\n          \"reasoning\": \"The skill is well-organized with clear sections and references to external files (contract.yaml, evals.yaml, task-profile.json, plugin-root) that are signaled as 'open only when needed'\u2014one level deep. Content is appropriately split between the main skill and referenced materials, with no deeply nested chains.\"\n        }\n      },\n      \"overall_assessment\": \"This is a well-structured decision-analysis skill with a clear procedure, concrete scoring anchors, and a good example. Its main weakness is moderate redundancy across the Execution Boundaries, Constraints, Validation, and Failure Mode sections, which could be consolidated. The actionability and workflow clarity are strong, with explicit validation gates and error recovery paths.\",\n      \"suggestions\": [\n        \"Consolidate 'Execution Boundaries', 'Constraints', 'Validation', and 'Failure Mode' into a single 'Guardrails' section to reduce redundancy and save tokens.\"\n      ]\n    },\n    \"weightedScore\": 2.7,\n    \"normalizedScore\": 0.8500000000000001\n  }\n}\n",
+      "summary": {
+        "minimum_score": 90,
+        "raw": {
+          "contentJudge": {
+            "evaluation": {
+              "overall_assessment": "This is a well-structured decision-analysis skill with a clear procedure, concrete scoring anchors, and a good example. Its main weakness is moderate redundancy across the Execution Boundaries, Constraints, Validation, and Failure Mode sections, which could be consolidated. The actionability and workflow clarity are strong, with explicit validation gates and error recovery paths.",
+              "scores": {
+                "actionability": {
+                  "reasoning": "The procedure is concrete and specific: a numbered 5-step process with defined scoring dimensions, explicit anchors for each dimension, a structured output schema, and a complete YAML example showing expected input/output. The scoring anchors provide clear, actionable criteria rather than vague guidance.",
+                  "score": 3
+                },
+                "conciseness": {
+                  "reasoning": "The skill is reasonably efficient but includes some sections that could be tightened\u2014e.g., the six scoring anchors are somewhat verbose with their high/medium/low definitions, and sections like 'Philosophy', 'Gotchas', and 'Anti-Patterns' overlap with 'Constraints' and 'Execution Boundaries'. Some redundancy between Validation, Failure Mode, and Execution Boundaries.",
+                  "score": 2
+                },
+                "progressive_disclosure": {
+                  "reasoning": "The skill is well-organized with clear sections and references to external files (contract.yaml, evals.yaml, task-profile.json, plugin-root) that are signaled as 'open only when needed'\u2014one level deep. Content is appropriately split between the main skill and referenced materials, with no deeply nested chains.",
+                  "score": 3
+                },
+                "workflow_clarity": {
+                  "reasoning": "The 5-step procedure is clearly sequenced with explicit validation gates ('Fail fast: stop at the first failed required gate'), a feedback loop for missing authority ('stop and ask for that missing input'), and clear checkpoints about what evidence was and wasn't checked. The Failure Mode section provides explicit error recovery guidance.",
+                  "score": 3
+                }
+              },
+              "suggestions": [
+                "Consolidate 'Execution Boundaries', 'Constraints', 'Validation', and 'Failure Mode' into a single 'Guardrails' section to reduce redundancy and save tokens."
+              ]
+            },
+            "judgeConfig": {
+              "model": "anthropic/claude-opus-4-6"
+            },
+            "normalizedScore": 0.8500000000000001,
+            "success": true,
+            "weightedScore": 2.7
+          },
+          "descriptionJudge": {
+            "evaluation": {
+              "overall_assessment": "This is a well-crafted skill description that clearly defines its niche within synAIpse Harness lifecycle decisions. It specifies concrete actions (decision matrix, risk scoring, stage recommendation), includes an explicit 'Use when' clause with multiple natural trigger phrases, and is distinctive enough to avoid conflicts with other skills. The description is concise yet comprehensive.",
+              "scores": {
+                "completeness": {
+                  "reasoning": "Clearly answers both 'what' (analyzes synAIpse Harness decisions by creating a decision matrix, scoring risk/reversibility, recommending next stage) and 'when' (explicit 'Use when' clause with four trigger scenarios).",
+                  "score": 3
+                },
+                "distinctiveness_conflict_risk": {
+                  "reasoning": "Highly distinctive due to the specific domain (synAIpse Harness plugin lifecycle) and specific methodology (decision matrix, risk/reversibility scoring). Very unlikely to conflict with other skills given the niche terminology.",
+                  "score": 3
+                },
+                "specificity": {
+                  "reasoning": "Lists multiple specific concrete actions: 'creating a decision matrix', 'scoring risk and reversibility', and 'recommending one next stage'. These are clear, actionable outputs rather than vague language.",
+                  "score": 3
+                },
+                "trigger_term_quality": {
+                  "reasoning": "Includes natural trigger terms users would say: 'compare lifecycle options', 'weigh pros and cons', 'brainstorm migration approaches', 'decide which plugin path to take', plus domain-specific terms like 'plugin', 'router', 'stage', 'retirement decisions'.",
+                  "score": 3
+                }
+              },
+              "suggestions": []
+            },
+            "judgeConfig": {
+              "model": "anthropic/claude-opus-4-6"
+            },
+            "normalizedScore": 1,
+            "success": true,
+            "weightedScore": 3
+          },
+          "review": {
+            "reviewScore": 94
+          },
+          "validation": {
+            "checks": [
+              {
+                "details": {
+                  "line_count": 143,
+                  "max_lines": 500
+                },
+                "message": "SKILL.md line count is 143 (<= 500)",
+                "name": "skill_md_line_count",
+                "status": "passed"
+              },
+              {
+                "details": {
+                  "keys": [
+                    "name",
+                    "description",
+                    "metadata"
+                  ]
+                },
+                "message": "YAML frontmatter is valid",
+                "name": "frontmatter_valid",
+                "status": "passed"
+              },
+              {
+                "details": {
+                  "length": 13,
+                  "value": "sy-brainstorm"
+                },
+                "message": "'name' field is valid: 'sy-brainstorm'",
+                "name": "name_field",
+                "status": "passed"
+              },
+              {
+                "details": {
+                  "length": 312
+                },
+                "message": "'description' field is valid (312 chars)",
+                "name": "description_field",
+                "status": "passed"
+              },
+              {
+                "message": "'compatibility' field not present (optional)",
+                "name": "compatibility_field",
+                "status": "passed"
+              },
+              {
+                "message": "'allowed-tools' field not present (optional)",
+                "name": "allowed_tools_field",
+                "status": "passed"
+              },
+              {
+                "details": {
+                  "version": "0.1.0"
+                },
+                "message": "'metadata.version' is present: 0.1.0",
+                "name": "metadata_version",
+                "status": "passed"
+              },
+              {
+                "message": "'metadata' contains 2 entries",
+                "name": "metadata_field",
+                "status": "passed"
+              },
+              {
+                "message": "'license' field not present (optional)",
+                "name": "license_field",
+                "status": "passed"
+              },
+              {
+                "message": "No unknown frontmatter keys found",
+                "name": "frontmatter_unknown_keys",
+                "status": "passed"
+              },
+              {
+                "details": {
+                  "body_chars": 5466
+                },
+                "message": "SKILL.md body is present",
+                "name": "body_present",
+                "status": "passed"
+              }
+            ],
+            "errorCount": 0,
+            "overallPassed": true,
+            "skillDescription": "Analyzes synAIpse Harness plugin, router, stage, or retirement decisions by creating a decision matrix, scoring risk and reversibility, and recommending one next stage. Use when the user asks to compare lifecycle options, weigh pros and cons, brainstorm migration approaches, or decide which plugin path to take.",
+            "skillName": "sy-brainstorm",
+            "warningCount": 0
+          }
+        },
+        "review_score": 94,
+        "score_acceptable": true,
+        "status": "success",
+        "target_score": 95
+      },
+      "target_score": 95
+    },
+    "tessl_tile": {
+      "auth_home": "process_home",
+      "evidence_retention": "stable_tmp_directory_left_for_post-run_inspection",
+      "mode": "stable_tmp_wrapper",
+      "reason": "Tessl lint validates tile.json packages. Canonical repo skills remain SKILL.md-first, so this command stages a local packaging-shape wrapper under /tmp.",
+      "review_path": "/tmp/ask-tessl-reviews/Plugins__synaipse-harness-stages__skills__sy-brainstorm-51fe1b390d93/8268cd19/skills/sy-brainstorm",
+      "skill_key": "sy-brainstorm",
+      "source_skill": "Plugins/synaipse-harness-stages/skills/sy-brainstorm",
+      "staging_root": "/tmp/ask-tessl-reviews/Plugins__synaipse-harness-stages__skills__sy-brainstorm-51fe1b390d93/8268cd19",
+      "support_refs_included": true,
+      "tessl_project_marker": "/tmp/ask-tessl-reviews/Plugins__synaipse-harness-stages__skills__sy-brainstorm-51fe1b390d93/8268cd19/tessl.json",
+      "tile_path": "/tmp/ask-tessl-reviews/Plugins__synaipse-harness-stages__skills__sy-brainstorm-51fe1b390d93/8268cd19/tile.json"
+    },
+    "validation_commands": [
+      "./bin/ask skills external-review Plugins/synaipse-harness-stages/skills/sy-brainstorm --audit-level compat --skip-plugin-eval --report-path Infrastructure/artifacts/skill-reviews/sy-brainstorm-external-review.json --json --robot"
+    ]
+  },
+  "errors": [],
+  "status": "success"
+}

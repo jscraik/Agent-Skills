@@ -1,0 +1,5 @@
+policy:
+  allow_implicit_invocation: false
+interface:
+  display_name: "SynAIpse Harness Work"
+  short_description: "Execute a plan, todo list, or tightly scoped spec with traceable progress, validation,..."
