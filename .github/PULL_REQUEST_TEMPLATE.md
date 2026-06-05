@@ -74,8 +74,8 @@ transcripts, bulky telemetry, or local absolute paths.
 
 - [ ] I did not push directly to `main`; this PR is from a dedicated branch.
 - [ ] Branch name follows policy (`codex/*` for agent-created branches).
-- [ ] Required local gates run: `bash scripts/validate-codestyle.sh`, `pnpm check`, `bash scripts/run-harness-gate.sh tooling-audit --path . --json`.
-- [ ] `scripts/validate-codestyle.sh` was treated as the enforcement point for hook env sanitization (`GIT_DIR`, `GIT_WORK_TREE`, and related `GIT_*` values are untrusted and sanitized before `pnpm run`).
+- [ ] Required local gates run: `bash scripts/validate-codestyle.sh` plus the repo, package, or surface-scoped validation commands listed in Testing.
+- [ ] `scripts/validate-codestyle.sh` was treated as the enforcement point for hook env sanitization (`GIT_DIR`, `GIT_WORK_TREE`, and related `GIT_*` values are untrusted and sanitized before delegated package scripts).
 - [ ] Any CodeRabbit Semgrep findings were either fixed or explicitly justified when warning-level-only.
 - [ ] North-star learning loop considered for changed files; relevant learning gate, review-context, promotion, or feedback evidence is listed below, or marked `n.a.` with a reason.
 - [ ] Merge is blocked until all required checks pass.
@@ -86,13 +86,13 @@ transcripts, bulky telemetry, or local absolute paths.
 - verification_commands: list exact commands run here
 - verification_outcomes: record pass/fail/blocked for each command here
 - blocked_steps_reason: none if all planned steps ran
-- Command: `bash scripts/validate-codestyle.sh` -> pass/fail
-- Command: `pnpm check` -> pass/fail
-- Command: `bash scripts/run-harness-gate.sh tooling-audit --path . --json` -> pass/fail
-- Setup: `CHANGED_FILES="<comma-separated-changed-files>"` (set before running file-scoped gates)
-- Command: `bash scripts/run-harness-gate.sh learnings gate --source .harness/learnings/coderabbit.local.json --files "$CHANGED_FILES" --json` -> pass/fail/n.a.
-- Command: `bash scripts/run-harness-gate.sh review-context --source .harness/learnings/coderabbit.local.json --files "$CHANGED_FILES" --json` -> pass/fail/n.a.
-- Command: `bash scripts/run-harness-gate.sh north-star-feedback --source .harness/learnings/coderabbit.local.json --json` -> pass/fail/n.a.
+- Command: `bash scripts/validate-codestyle.sh` -> pass/fail/n.a. with reason
+- Command: `./bin/ask repo validate --json --robot` -> pass/fail/n.a. with reason
+- Command: `./bin/ask repo closeout --changed --json --robot` -> pass/fail/n.a. with reason
+- Command: `<package-root package-manager command>` -> pass/fail/n.a. with reason; run package-manager gates only inside verified package roots
+- Setup: `CHANGED_FILES="<comma-separated-changed-files>"` (set before running any file-scoped gates)
+- Command: `<file-scoped learning/review-context gate from the owning surface>` -> pass/fail/n.a. with reason
+- Command: `<north-star feedback or steering-uptake gate from the owning surface>` -> pass/fail/n.a. with reason
 - Command: `harness pr-closeout --pr <number> --gates artifacts/pr-closeout/closeout-gates.json --json` -> pass/fail/n.a.
 - Any other command(s):
 
