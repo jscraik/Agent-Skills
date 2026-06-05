@@ -110,6 +110,11 @@ from ask.skills_sdk.project_install import (  # noqa: E402
     ProjectInstallError as _ProjectInstallError,
     install_project_skill as _install_project_skill,
 )
+from ask.skills_sdk.project_cleanup import (  # noqa: E402
+    ProjectCleanupError as _ProjectCleanupError,
+    rollback_project_install as _rollback_project_install,
+    uninstall_project_skill as _uninstall_project_skill,
+)
 from ask.skills_sdk.placeholder_lifecycle import (  # noqa: E402
     build_placeholder_lifecycle_receipts as _build_placeholder_lifecycle_receipts,
 )
@@ -194,6 +199,8 @@ __all__ = [
     "skills_handles",
     "skills_sdk_install_preview",
     "skills_sdk_placeholder_lifecycle",
+    "skills_sdk_project_rollback",
+    "skills_sdk_project_uninstall",
     "skills_sdk_status",
     "skills_load_preview",
     "skills_memory",
@@ -4049,6 +4056,148 @@ def skills_sdk_project_install(
         ),
     }
     result.data["skills_sdk_project_install"] = payload
+    return result
+
+
+def skills_sdk_project_rollback(
+    repo_root: Path,
+    receipt_path: str,
+    project_root: str | None = None,
+    apply: bool = False,
+) -> CallResult:
+    """Preview or apply receipt-proven cleanup for one project install receipt."""
+    result = CallResult()
+    mode = "--apply" if apply else "--preview"
+    result.metadata["command"] = f"sdk rollback {mode}"
+    try:
+        receipt = _rollback_project_install(
+            repo_root,
+            receipt_path=receipt_path,
+            project_root=project_root,
+            apply=apply,
+        )
+    except _ProjectCleanupError as exc:
+        result.status = "error"
+        result.data["skills_sdk_project_rollback"] = {
+            "schema_version": "skills-sdk-project-cleanup.v1",
+            "operation": "rollback",
+            "status": exc.receipt.get("status", "blocked"),
+            "mode": "apply" if apply else "preview",
+            "receipt": exc.receipt,
+            "validation_commands": [
+                _ask_validation_command(
+                    "sdk",
+                    "rollback",
+                    "--receipt",
+                    receipt_path,
+                    mode,
+                    *(("--project-root", project_root) if project_root else ()),
+                )
+            ],
+            "agent_summary": exc.message,
+        }
+        result.errors.append(
+            ErrorObject(
+                code=exc.code,
+                message=exc.message,
+                fix_suggestion=exc.fix_suggestion,
+            )
+        )
+        return result
+    payload = {
+        "schema_version": "skills-sdk-project-cleanup.v1",
+        "operation": "rollback",
+        "status": receipt["status"],
+        "mode": "apply" if apply else "preview",
+        "receipt": receipt,
+        "validation_commands": [
+            _ask_validation_command(
+                "sdk",
+                "rollback",
+                "--receipt",
+                receipt_path,
+                mode,
+                *(("--project-root", project_root) if project_root else ()),
+            )
+        ],
+        "agent_summary": (
+            f"skills-sdk rollback {receipt['status']} for {len(receipt.get('files_applied') if 'files_applied' in receipt else receipt.get('files_cleaned_up') if 'files_cleaned_up' in receipt else receipt['files_planned'])} {'applied' if receipt.get('mode') == 'apply' else 'planned'} file(s)."
+            if receipt.get('mode') == 'apply'
+            else f"skills-sdk rollback {receipt['status']} for {len(receipt['files_planned'])} planned file(s)."
+        ),
+    }
+    result.data["skills_sdk_project_rollback"] = payload
+    return result
+
+
+def skills_sdk_project_uninstall(
+    repo_root: Path,
+    skill_id: str,
+    project_root: str | None = None,
+    apply: bool = False,
+) -> CallResult:
+    """Preview or apply receipt-proven cleanup for one lockfile-resolved skill id."""
+    result = CallResult()
+    mode = "--apply" if apply else "--preview"
+    result.metadata["command"] = f"sdk uninstall {mode}"
+    try:
+        receipt = _uninstall_project_skill(
+            repo_root,
+            skill_id=skill_id,
+            project_root=project_root,
+            apply=apply,
+        )
+    except _ProjectCleanupError as exc:
+        result.status = "error"
+        result.data["skills_sdk_project_uninstall"] = {
+            "schema_version": "skills-sdk-project-cleanup.v1",
+            "operation": "uninstall",
+            "status": exc.receipt.get("status", "blocked"),
+            "mode": "apply" if apply else "preview",
+            "skill_id": skill_id,
+            "receipt": exc.receipt,
+            "validation_commands": [
+                _ask_validation_command(
+                    "sdk",
+                    "uninstall",
+                    skill_id,
+                    mode,
+                    *(("--project-root", project_root) if project_root else ()),
+                )
+            ],
+            "agent_summary": exc.message,
+        }
+        result.errors.append(
+            ErrorObject(
+                code=exc.code,
+                message=exc.message,
+                fix_suggestion=exc.fix_suggestion,
+            )
+        )
+        return result
+    payload = {
+        "schema_version": "skills-sdk-project-cleanup.v1",
+        "operation": "uninstall",
+        "status": receipt["status"],
+        "mode": "apply" if apply else "preview",
+        "skill_id": skill_id,
+        "receipt": receipt,
+        "validation_commands": [
+            _ask_validation_command(
+                "sdk",
+                "uninstall",
+                skill_id,
+                mode,
+                *(("--project-root", project_root) if project_root else ()),
+            )
+        ],
+        "agent_summary": (
+            f"skills-sdk uninstall {receipt['status']} for {skill_id} with {len(receipt.get('files_applied') if 'files_applied' in receipt else receipt.get('files_cleaned_up') if 'files_cleaned_up' in receipt else receipt['files_planned'])} {'applied' if receipt.get('mode') == 'apply' else 'planned'} file(s)."
+            if receipt.get('mode') == 'apply'
+            else f"skills-sdk uninstall {receipt['status']} for {skill_id} with {len(receipt['files_planned'])} planned file(s)."
+        ),
+    }
+    result.data["skills_sdk_project_uninstall"] = payload
     return result
 
 

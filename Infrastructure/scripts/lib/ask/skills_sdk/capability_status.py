@@ -22,7 +22,7 @@ ALLOWED_STATUSES = frozenset(
         "out_of_scope",
     }
 )
-MUTATING_CAPABILITY_IDS = frozenset({"real_install"})
+MUTATING_CAPABILITY_IDS = frozenset({"real_install", "rollback", "uninstall"})
 REQUIRED_CAPABILITY_IDS = (
     "authoring",
     "check",

@@ -494,6 +494,23 @@
       line-height: 1.45;
     }
 
+    .slice-proof {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin: 0 0 14px;
+    }
+
+    .slice-proof span {
+      border: 2px solid #2f6f52;
+      background: #f4fbf6;
+      padding: 9px 10px;
+      color: #24573f;
+      font-size: 12px;
+      font-weight: 720;
+      line-height: 1.3;
+    }
+
     .status-grid {
       width: 100%;
       border-collapse: collapse;
@@ -556,6 +573,10 @@
       .status-grid td {
         border: 0;
         padding: 4px 0;
+      }
+
+      .slice-proof {
+        grid-template-columns: 1fr;
       }
     }
 
@@ -2145,7 +2166,13 @@
 
     <section class="capability-status" aria-label="Skills SDK capability status truth" data-capability-status="skills-sdk.capability-status.v1">
       <h2>Capability Truth</h2>
-      <p>This table is the current executable truth for the Skills SDK. It separates implemented and preview-backed local surfaces from placeholders, blocked adapters, deferred roadmap lanes, and out-of-scope product surfaces.</p>
+      <p>This table is the current executable truth for the Skills SDK. It separates implemented and preview-backed local surfaces from placeholders, blocked adapters, deferred roadmap lanes, out-of-scope product surfaces, and the PU-010 guardrails that keep the status surface honest.</p>
+      <div class="slice-proof" aria-label="PU-010 proof points">
+        <span>Receipt-proven rollback and uninstall are implemented through project cleanup receipts.</span>
+        <span>Bootstrap now proves the active worktree path and shim identity before closeout.</span>
+        <span>Repo-surface policy forbids any or unknown ownership classifications.</span>
+        <span>Steering uptake is recorded and validator-backed before continuing implementation.</span>
+      </div>
       <table class="status-grid">
         <thead>
           <tr><th>Capability</th><th>Status</th><th>Owner surface</th><th>Next slice</th></tr>
@@ -2158,7 +2185,7 @@
         <tr data-capability-id="risk_classification" data-status="implemented" data-pipeline-sections="release_decision_matrix,agent_execution_control_plane,package_hardening"><td><strong>Risk classification</strong><br><span>risk_classification</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/risk.py</td><td>Connect risk tiers to real adapters only after those adapters are approved.</td></tr>
         <tr data-capability-id="install_preview" data-status="preview_only" data-pipeline-sections="author_golden_path,public_sdk_surface,full_skill_lifecycle"><td><strong>Read-only install preview</strong><br><span>install_preview</span></td><td><span class="status-pill" data-status="preview_only">preview_only</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/install_preview.py</td><td>Real install writes require a separately approved lifecycle slice.</td></tr>
         <tr data-capability-id="lockfile_preview" data-status="preview_only" data-pipeline-sections="public_sdk_surface,full_skill_lifecycle"><td><strong>Read-only lockfile preview</strong><br><span>lockfile_preview</span></td><td><span class="status-pill" data-status="preview_only">preview_only</span></td><td>Infrastructure/config/schemas/skills-sdk/lockfile-preview.v1.schema.json</td><td>Lockfile writes remain deferred until real install is approved.</td></tr>
-        <tr data-capability-id="real_install" data-status="deferred" data-pipeline-sections="full_skill_lifecycle,public_sdk_surface"><td><strong>Real install writes</strong><br><span>real_install</span></td><td><span class="status-pill" data-status="deferred">deferred</span></td><td>future Skills SDK lifecycle implementation</td><td>Approve a write-capable project install slice with rollback and trust-store policy.</td></tr>
+        <tr data-capability-id="real_install" data-status="implemented" data-pipeline-sections="full_skill_lifecycle,public_sdk_surface"><td><strong>Real install writes</strong><br><span>real_install</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/project_install.py</td><td>Extend cleanup to richer restore semantics only when install receipts carry before-state proof.</td></tr>
         <tr data-capability-id="trust_store" data-status="deferred" data-pipeline-sections="release_decision_matrix,agent_execution_control_plane"><td><strong>Trust-store mutation</strong><br><span>trust_store</span></td><td><span class="status-pill" data-status="deferred">deferred</span></td><td>future Skills SDK trust lifecycle</td><td>Define trust-store ownership and rollback before any mutation.</td></tr>
         <tr data-capability-id="refs_ingestion" data-status="placeholder_optional" data-pipeline-sections="knowledge_engineering,full_skill_lifecycle"><td><strong>Reference ingestion</strong><br><span>refs_ingestion</span></td><td><span class="status-pill" data-status="placeholder_optional">placeholder_optional</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/placeholder_lifecycle.py</td><td>Implement refs ingestion adapter with fixtures and no-network fallback.</td></tr>
         <tr data-capability-id="evals" data-status="placeholder_optional" data-pipeline-sections="eval_ops,full_skill_lifecycle,knowledge_engineering"><td><strong>Eval execution</strong><br><span>evals</span></td><td><span class="status-pill" data-status="placeholder_optional">placeholder_optional</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/placeholder_lifecycle.py</td><td>Approve an eval-runner integration with local fixtures before external execution.</td></tr>
@@ -2172,8 +2199,8 @@
         <tr data-capability-id="registry" data-status="out_of_scope" data-pipeline-sections="public_sdk_surface,full_skill_lifecycle"><td><strong>Remote registry</strong><br><span>registry</span></td><td><span class="status-pill" data-status="out_of_scope">out_of_scope</span></td><td>future external service</td><td>Requires a separately approved registry product slice.</td></tr>
         <tr data-capability-id="marketplace" data-status="out_of_scope" data-pipeline-sections="public_sdk_surface,full_skill_lifecycle"><td><strong>Marketplace</strong><br><span>marketplace</span></td><td><span class="status-pill" data-status="out_of_scope">out_of_scope</span></td><td>future external service</td><td>Requires marketplace requirements and external service authority.</td></tr>
         <tr data-capability-id="publish" data-status="out_of_scope" data-pipeline-sections="full_skill_lifecycle,release_decision_matrix"><td><strong>Publish</strong><br><span>publish</span></td><td><span class="status-pill" data-status="out_of_scope">out_of_scope</span></td><td>future release pipeline</td><td>Requires registry, signing, package attestations, and owner approval.</td></tr>
-        <tr data-capability-id="rollback" data-status="deferred" data-pipeline-sections="full_skill_lifecycle,release_decision_matrix"><td><strong>Rollback</strong><br><span>rollback</span></td><td><span class="status-pill" data-status="deferred">deferred</span></td><td>future install lifecycle</td><td>Implement only after real install writes and receipts exist.</td></tr>
-        <tr data-capability-id="uninstall" data-status="deferred" data-pipeline-sections="full_skill_lifecycle,public_sdk_surface"><td><strong>Uninstall</strong><br><span>uninstall</span></td><td><span class="status-pill" data-status="deferred">deferred</span></td><td>future install lifecycle</td><td>Implement only after installed state ownership is defined.</td></tr>
+        <tr data-capability-id="rollback" data-status="implemented" data-pipeline-sections="full_skill_lifecycle,release_decision_matrix"><td><strong>Rollback</strong><br><span>rollback</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/project_cleanup.py</td><td>Add restore-from-before-state only when install receipts can prove exact pre-install content.</td></tr>
+        <tr data-capability-id="uninstall" data-status="implemented" data-pipeline-sections="full_skill_lifecycle,public_sdk_surface"><td><strong>Uninstall</strong><br><span>uninstall</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/project_cleanup.py</td><td>Add install-instance selection if the lockfile later supports duplicate active installs for one skill id.</td></tr>
         <tr data-capability-id="compiled_package_pipeline" data-status="deferred" data-pipeline-sections="compiler_emitter_discipline,public_sdk_surface,package_hardening"><td><strong>Compiled package pipeline</strong><br><span>compiled_package_pipeline</span></td><td><span class="status-pill" data-status="deferred">deferred</span></td><td>future compiler/package pipeline</td><td>Design typed IR and compiler ownership before emitting packages.</td></tr>
         <tr data-capability-id="emitters" data-status="deferred" data-pipeline-sections="compiler_emitter_discipline,public_sdk_surface"><td><strong>Emitters</strong><br><span>emitters</span></td><td><span class="status-pill" data-status="deferred">deferred</span></td><td>future emitter adapters</td><td>Approve emitter adapter contracts and generated-output ownership.</td></tr>
         <tr data-capability-id="ci_adoption_gates" data-status="deferred" data-pipeline-sections="ci_and_adoption,release_decision_matrix"><td><strong>CI and adoption gates</strong><br><span>ci_adoption_gates</span></td><td><span class="status-pill" data-status="deferred">deferred</span></td><td>future CI integration</td><td>Define required checks and live CI proof in a PR-specific slice.</td></tr>

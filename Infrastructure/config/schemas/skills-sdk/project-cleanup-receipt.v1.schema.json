@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/project-cleanup-receipt.v1.schema.json",
+  "title": "Skills SDK Project Cleanup Receipt V1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "string", "const": "skills-sdk.project-cleanup-receipt.v1"},
+    "schema_uri": {"type": "string", "const": "https://jscraik.local/agent-skills/schemas/skills-sdk/project-cleanup-receipt.v1.schema.json"},
+    "operation": {"type": "string", "enum": ["rollback", "uninstall"]},
+    "status": {"type": "string", "enum": ["preview", "success", "partial", "blocked"]},
+    "target_root": {"type": "string"},
+    "skill_id": {"type": ["string", "null"]},
+    "source_receipt_path": {"type": "string"},
+    "source_receipt_digest": {"type": "string"},
+    "install_receipt_identity": {"type": "string"},
+    "target_root_identity": {"type": "string"},
+    "live_project_validation": {"type": "boolean"},
+    "files_planned": {"type": "array", "items": {"$ref": "#/definitions/file_action"}},
+    "files_removed": {"type": "array", "items": {"$ref": "#/definitions/file_action"}},
+    "files_restored": {"type": "array", "items": {"$ref": "#/definitions/file_action"}},
+    "files_skipped": {"type": "array", "items": {"$ref": "#/definitions/file_action"}},
+    "files_blocked": {"type": "array", "items": {"$ref": "#/definitions/file_action"}},
+    "lockfile_changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "before_digest": {"type": "string"},
+          "after_digest": {"type": "string"}
+        },
+        "required": ["before_digest", "after_digest"]
+      }
+    },
+    "directory_prune_results": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/directory_prune_result"}
+    },
+    "cleanup_journal_name": {"type": ["string", "null"]},
+    "journal_path": {"type": ["string", "null"]},
+    "manual_actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "path": {"type": "string"},
+          "reason": {"type": "string"}
+        },
+        "required": ["path", "reason"]
+      }
+    },
+    "mutation_performed": {"type": "boolean"},
+    "acceptance_trace": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "receipt_path": {"type": "string"}
+  },
+  "required": [
+    "schema_version",
+    "schema_uri",
+    "operation",
+    "status",
+    "target_root",
+    "skill_id",
+    "source_receipt_path",
+    "source_receipt_digest",
+    "install_receipt_identity",
+    "target_root_identity",
+    "live_project_validation",
+    "files_planned",
+    "files_removed",
+    "files_restored",
+    "files_skipped",
+    "files_blocked",
+    "lockfile_changes",
+    "directory_prune_results",
+    "cleanup_journal_name",
+    "journal_path",
+    "manual_actions",
+    "mutation_performed",
+    "acceptance_trace"
+  ],
+  "definitions": {
+    "file_action": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "target_path": {"type": "string"},
+        "expected_digest": {"type": "string"},
+        "current_digest": {"type": "string"},
+        "action": {"type": "string"},
+        "status": {"type": "string"},
+        "reason": {"type": "string"}
+      },
+      "required": ["target_path", "expected_digest", "action", "status", "reason"]
+    },
+    "directory_prune_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": {"type": "string"},
+        "pruned": {"type": "boolean"},
+        "reason": {"type": "string"}
+      },
+      "required": ["path", "pruned", "reason"]
+    }
+  }
+}

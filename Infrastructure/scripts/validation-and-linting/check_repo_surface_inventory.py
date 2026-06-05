@@ -226,7 +226,7 @@ def classify_path(path: str | Path) -> SurfaceFinding:
     if _starts_with(normalized, "docs"):
         return _make_finding(
             normalized,
-            classification="unknown",
+            classification="classification_required",
             status="violation",
             code="lowercase_docs_drift",
             severity="error",
@@ -239,7 +239,7 @@ def classify_path(path: str | Path) -> SurfaceFinding:
     if _starts_with(normalized, "Infrastructure/Infrastructure"):
         return _make_finding(
             normalized,
-            classification="unknown",
+            classification="classification_required",
             status="violation",
             code="duplicated_infrastructure_path",
             severity="error",
@@ -343,8 +343,8 @@ def classify_path(path: str | Path) -> SurfaceFinding:
     if _starts_with(normalized, "skills-system"):
         return _make_finding(
             normalized,
-            classification="unknown",
-            status="unknown",
+            classification="classification_required",
+            status="violation",
             code="ownership_decision_required",
             severity="error",
             blocking=True,
@@ -485,6 +485,19 @@ def classify_path(path: str | Path) -> SurfaceFinding:
             metadata={"next_steps": ["preserve_index_link_if_changed"]},
         )
 
+    if _starts_with(normalized, ".harness/archive"):
+        return _make_finding(
+            normalized,
+            classification="intentional_archive",
+            status="ok",
+            code="harness_archive_surface",
+            severity="info",
+            blocking=False,
+            reason=".harness/archive contains intentionally retained historical Harness planning and spec archives.",
+            recommendation="Keep archive indexes and retention reasons discoverable before changing archived material.",
+            metadata={"next_steps": ["preserve_archive_index_if_changed"]},
+        )
+
     if (
         _starts_with(normalized, ".harness/knowledge")
         or _starts_with(normalized, ".harness/memory")
@@ -495,9 +508,14 @@ def classify_path(path: str | Path) -> SurfaceFinding:
         or _starts_with(normalized, ".harness/ideate")
         or _starts_with(normalized, ".harness/media")
         or _starts_with(normalized, ".harness/evals")
+        or _starts_with(normalized, ".harness/evidence")
+        or _starts_with(normalized, ".harness/implementation-notes")
+        or _starts_with(normalized, ".harness/reports")
+        or _starts_with(normalized, ".harness/research")
         or _starts_with(normalized, ".harness/session-evidence")
         or _starts_with(normalized, ".harness/specs")
         or _starts_with(normalized, ".harness/plan")
+        or _starts_with(normalized, ".harness/reviews")
     ):
         return _make_finding(
             normalized,
@@ -602,13 +620,13 @@ def classify_path(path: str | Path) -> SurfaceFinding:
 
     return _make_finding(
         normalized,
-        classification="unknown",
-        status="unknown",
-        code="unknown_surface",
+        classification="classification_required",
+        status="violation",
+        code="classification_required",
         severity="error",
         blocking=True,
-        reason="No repo surface ownership rule matched this tracked path.",
-        recommendation="Classify the path in policy or add a documented allowlist entry.",
+        reason="No repo surface ownership rule matched this tracked path, and tracked paths may not use unknown or any ownership.",
+        recommendation="Classify the path in policy, add a documented allowlist entry, or remove the unowned tracked surface after reference checks.",
         metadata={"next_steps": ["inspect_owner", "update_policy_or_allowlist"]},
     )
 
