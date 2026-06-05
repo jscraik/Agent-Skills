@@ -112,8 +112,9 @@ const writeAtomicInCacheDir = async (cacheDir, destinationPath, content) => {
 };
 
 const requestManualWithCurl = async (url, { cacheDir, method, timeoutMs }) => {
-  const headerPath = tempFilePath(cacheDir, ".headers");
-  const bodyPath = tempFilePath(cacheDir, ".body");
+  const tempDir = await mkdtemp(path.join(cacheDir, ".fetch-codex-manual-"));
+  const headerPath = path.join(tempDir, "headers");
+  const bodyPath = path.join(tempDir, "body");
   const curlNames =
     process.platform === "win32" ? ["curl.exe", "curl"] : ["curl"];
   const args = [
@@ -138,24 +139,23 @@ const requestManualWithCurl = async (url, { cacheDir, method, timeoutMs }) => {
   args.push(url);
 
   let lastError;
-  for (const curlName of curlNames) {
-    try {
-      await execFileAsync(curlName, args, { windowsHide: true });
-      const [rawHeaders, body] = await Promise.all([
-        readFile(headerPath, "utf8"),
-        readFile(bodyPath, "utf8"),
-      ]);
-      const { headers, status } = parseCurlHeaders(rawHeaders);
-      return makeResponse({ body, headers, status });
-    } catch (error) {
-      lastError = error;
-      if (error?.code !== "ENOENT") break;
-    } finally {
-      await Promise.all([
-        rm(headerPath, { force: true }),
-        rm(bodyPath, { force: true }),
-      ]);
+  try {
+    for (const curlName of curlNames) {
+      try {
+        await execFileAsync(curlName, args, { windowsHide: true });
+        const [rawHeaders, body] = await Promise.all([
+          readFile(headerPath, "utf8"),
+          readFile(bodyPath, "utf8"),
+        ]);
+        const { headers, status } = parseCurlHeaders(rawHeaders);
+        return makeResponse({ body, headers, status });
+      } catch (error) {
+        lastError = error;
+        if (error?.code !== "ENOENT") break;
+      }
     }
+  } finally {
+    await rm(tempDir, { recursive: true, force: true });
   }
 
   if (lastError?.code === "ENOENT") {
