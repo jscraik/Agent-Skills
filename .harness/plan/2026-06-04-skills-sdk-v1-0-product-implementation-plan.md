@@ -588,3 +588,25 @@ Validation commands:
 - python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py .harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md
 - python3 Plugins/harness-engineering/scripts/check_bluf_structure.py .harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md --json
 - python3 Plugins/harness-engineering/scripts/check_generated_artifact_shape.py .harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md --kind plan --json
+
+## Appendix D. V1.0 Final Closeout Status
+
+Status source: `Infrastructure/config/skills-sdk/capability-matrix.v1.json`.
+
+Goal source: `Docs/goals/skills-sdk-v1-0-product-implementation/state.yaml`.
+
+Implementation notes: `.harness/implementation-notes/2026-06-04-skills-sdk-v1-0-product-implementation-notes.html`.
+
+PU-001 through PU-007 are completed historical implementation slices for the bounded V1.0 SDK. The delivered V1.0 layer is the local contract and preview layer: schema spine, `ask sdk check`, `bin/skills-sdk` delegation, risk classification, package verification, read-only install preview, lockfile preview, placeholder lifecycle receipts, and static local docs artifacts.
+
+PU-008 is the follow-on truth/status slice. It encodes the exact current capability matrix and adds `ask sdk status` plus `bin/skills-sdk status` so future agents do not read the broad pipeline artifact as completed runtime behavior.
+
+| Lane | Closeout status |
+| --- | --- |
+| Local code and focused tests | Proved by SDK tests and capability status validation. |
+| Browser pipeline artifact | Covered by status table and matrix-to-HTML tests. |
+| V1.0 spec and plan truth | Updated by this appendix and the matching spec appendix. |
+| PR, CI, review-thread, tracker, merge readiness | Must be checked live during PR closeout; local files do not prove these lanes. |
+| Registry, marketplace, publish, signing execution, sandbox execution, eval execution, real install writes, trust-store mutation, rollback, uninstall, hosted explorer publishing | Future or out-of-scope lanes until separately approved and implemented. |
+
+This appendix preserves the original implementation plan as historical planning context while making the current V1.0 completion boundary explicit.
