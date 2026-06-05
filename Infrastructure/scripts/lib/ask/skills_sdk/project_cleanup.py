@@ -753,6 +753,8 @@ def _cleanup_receipt(
         "skill_id": skill_id,
         "source_receipt_path": source_receipt_path,
         "source_receipt_digest": source_receipt_digest,
+        "install_receipt_identity": source_receipt_digest,
+        "target_root_identity": _sha256_json({"target_root": target_root}),
         "live_project_validation": live_project_validation,
         "files_planned": files_planned,
         "files_removed": removed,

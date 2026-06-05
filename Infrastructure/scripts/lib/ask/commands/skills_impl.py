@@ -4121,7 +4121,7 @@ def skills_sdk_project_rollback(
             )
         ],
         "agent_summary": (
-            f"skills-sdk rollback {receipt['status']} for {len(receipt.get('files_applied') or receipt.get('files_cleaned_up') or receipt['files_planned'])} {'applied' if receipt.get('mode') == 'apply' else 'planned'} file(s)."
+            f"skills-sdk rollback {receipt['status']} for {len(receipt.get('files_applied') if 'files_applied' in receipt else receipt.get('files_cleaned_up') if 'files_cleaned_up' in receipt else receipt['files_planned'])} {'applied' if receipt.get('mode') == 'apply' else 'planned'} file(s)."
             if receipt.get('mode') == 'apply'
             else f"skills-sdk rollback {receipt['status']} for {len(receipt['files_planned'])} planned file(s)."
         ),
@@ -4192,7 +4192,7 @@ def skills_sdk_project_uninstall(
             )
         ],
         "agent_summary": (
-            f"skills-sdk uninstall {receipt['status']} for {skill_id} with {len(receipt.get('files_applied') or receipt.get('files_cleaned_up') or receipt['files_planned'])} {'applied' if receipt.get('mode') == 'apply' else 'planned'} file(s)."
+            f"skills-sdk uninstall {receipt['status']} for {skill_id} with {len(receipt.get('files_applied') if 'files_applied' in receipt else receipt.get('files_cleaned_up') if 'files_cleaned_up' in receipt else receipt['files_planned'])} {'applied' if receipt.get('mode') == 'apply' else 'planned'} file(s)."
             if receipt.get('mode') == 'apply'
             else f"skills-sdk uninstall {receipt['status']} for {skill_id} with {len(receipt['files_planned'])} planned file(s)."
         ),
