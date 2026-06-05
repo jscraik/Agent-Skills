@@ -109,6 +109,10 @@ from ask.skills_sdk.install_preview import build_install_preview as _build_insta
 from ask.skills_sdk.placeholder_lifecycle import (  # noqa: E402
     build_placeholder_lifecycle_receipts as _build_placeholder_lifecycle_receipts,
 )
+from ask.skills_sdk.capability_status import (  # noqa: E402
+    CapabilityStatusError as _CapabilityStatusError,
+    build_capability_status as _build_capability_status,
+)
 from skill_discovery import (  # noqa: E402
     USER_SKILL_SCOPE_PRECEDENCE,
     classify_skill_scope,
@@ -186,6 +190,7 @@ __all__ = [
     "skills_handles",
     "skills_sdk_install_preview",
     "skills_sdk_placeholder_lifecycle",
+    "skills_sdk_status",
     "skills_load_preview",
     "skills_memory",
     "skills_package",
@@ -3997,6 +4002,26 @@ def skills_sdk_placeholder_lifecycle(
                 fix_suggestion="Use --risk-tier medium for optional placeholder reporting, or implement the missing adapter in a later approved slice.",
             )
         )
+    return result
+
+
+def skills_sdk_status(repo_root: Path) -> CallResult:
+    """Report the canonical Skills SDK capability truth matrix."""
+    result = CallResult()
+    result.metadata["command"] = "sdk status"
+    try:
+        status = _build_capability_status(repo_root)
+    except _CapabilityStatusError as e:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Skills SDK capability matrix validation failed: {e}",
+                fix_suggestion="Fix Infrastructure/config/skills-sdk/capability-matrix.v1.json and rerun ask sdk status.",
+            )
+        )
+        return result
+    result.data["skills_sdk_status"] = status
     return result
 
 

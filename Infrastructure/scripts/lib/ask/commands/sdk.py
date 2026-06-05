@@ -52,6 +52,11 @@ def add_sdk_parser(
         default="medium",
         help="Risk tier used to decide whether unavailable adapters block",
     )
+    sdk_subparsers.add_parser(
+        "status",
+        help="Report the Skills SDK capability truth matrix",
+        parents=[global_parser],
+    )
 
 
 def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
@@ -85,4 +90,6 @@ def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
             surface=args.surface,
             risk_tier=args.risk_tier,
         )
+    if args.action == "status":
+        return skills_commands.skills_sdk_status(repo_root)
     return build_unknown_action_result("sdk", args.action)

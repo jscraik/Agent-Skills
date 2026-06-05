@@ -1690,3 +1690,23 @@ No-Fog Gate:
 - Do not install globally without explicit scope.
 - Do not treat docs/explorer as proof of runtime readiness.
 - Do not restart the JSC-391 scaffold gate; treat it as accepted through PR #221 and plan only the next bounded V1.0 slice.
+
+## Appendix D. V1.0 Implementation Status
+
+Status source: `Infrastructure/config/skills-sdk/capability-matrix.v1.json`.
+
+Closeout source: `Docs/goals/skills-sdk-v1-0-product-implementation/state.yaml`.
+
+PU-008 adds the capability truth surface that reconciles this product spec with the implemented V1.0 SDK. The current SDK proves the local command facade, schema spine, check receipt, risk classification, package verification, read-only install preview, lockfile preview, placeholder lifecycle receipts, and static local docs artifacts. It does not claim remote registry, marketplace, publish, signing execution, sandbox execution, eval execution, real install writes, trust-store mutation, rollback, uninstall, hosted explorer publishing, CI adoption gates, compiled package emission, or package hardening as executable V1.0 product behavior.
+
+| Status | V1.0 capability ids |
+| --- | --- |
+| implemented | authoring, check, manifest_schema, receipt_schema, risk_classification, package_verify |
+| preview_only | install_preview, lockfile_preview, static_docs |
+| placeholder_optional | refs_ingestion, evals, security_adapter, skill_explorer |
+| placeholder_blocked | signing |
+| blocked_missing_adapter | sandbox |
+| deferred | real_install, trust_store, schema_registry, rollback, uninstall, compiled_package_pipeline, emitters, ci_adoption_gates, package_hardening |
+| out_of_scope | registry, marketplace, publish |
+
+Readiness boundary: this appendix records local repository capability truth only. It does not prove live PR state, CI state, review-thread state, tracker state, merge readiness, external service readiness, marketplace readiness, registry readiness, signing key readiness, sandbox provider readiness, or hosted explorer availability.
