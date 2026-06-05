@@ -25,16 +25,18 @@ def add_sdk_parser(
     sdk_check_parser.add_argument("--codex-parity", action="store_true", help="Require Codex-targeted runtime proof")
     sdk_install_parser = sdk_subparsers.add_parser(
         "install",
-        help="Preview a Skills SDK install without writing install state",
+        help="Preview or apply a bounded Skills SDK project install",
         parents=[global_parser],
     )
     sdk_install_parser.add_argument("target", help="Skill handle or repo-relative skill source path")
     sdk_install_parser.add_argument("--preview", action="store_true", help="Plan the install without performing writes")
+    sdk_install_parser.add_argument("--apply", action="store_true", help="Perform a real project install")
+    sdk_install_parser.add_argument("--project-root", help="Absolute marked project root for --apply installs")
     sdk_install_parser.add_argument(
         "--scope",
         choices=["project", "workspace", "global"],
         default="project",
-        help="Install scope to model in the preview",
+        help="Install scope to model in the preview; real installs only support project",
     )
     sdk_lifecycle_parser = sdk_subparsers.add_parser(
         "lifecycle",
@@ -68,13 +70,31 @@ def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
             codex_parity=args.codex_parity,
         )
     if args.action == "install":
+        if args.preview and args.apply:
+            result = CallResult(status="error")
+            result.metadata["command"] = "sdk install"
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_VALIDATION",
+                    message="Skills SDK install accepts either --preview or --apply, not both.",
+                    fix_suggestion="ask sdk install <target> --preview --json --robot",
+                )
+            )
+            return result
+        if args.apply:
+            return skills_commands.skills_sdk_project_install(
+                repo_root,
+                target=args.target,
+                project_root=args.project_root,
+                scope=args.scope,
+            )
         if not args.preview:
             result = CallResult(status="error")
             result.metadata["command"] = "sdk install"
             result.errors.append(
                 ErrorObject(
                     code="ERR_VALIDATION",
-                    message="Skills SDK install is preview-only in V1.0; pass --preview to model writes without performing them.",
+                    message="Skills SDK install requires --preview for read-only planning or --apply with --project-root for real project writes.",
                     fix_suggestion="ask sdk install <target> --preview --json --robot",
                 )
             )

@@ -22,6 +22,7 @@ ALLOWED_STATUSES = frozenset(
         "out_of_scope",
     }
 )
+MUTATING_CAPABILITY_IDS = frozenset({"real_install"})
 REQUIRED_CAPABILITY_IDS = (
     "authoring",
     "check",
@@ -119,8 +120,10 @@ def validate_capability_matrix(payload: dict[str, Any]) -> None:
             raise CapabilityStatusError(f"{capability_id} mutation_performed must be boolean")
         if status == "implemented" and not feature_executed:
             raise CapabilityStatusError(f"{capability_id} cannot be implemented without feature execution")
-        if mutation_performed:
-            raise CapabilityStatusError(f"{capability_id} cannot report mutation_performed in PU-008")
+        if mutation_performed and capability_id not in MUTATING_CAPABILITY_IDS:
+            raise CapabilityStatusError(f"{capability_id} cannot report mutation_performed")
+        if mutation_performed and status != "implemented":
+            raise CapabilityStatusError(f"{capability_id} cannot mutate unless implemented")
         for key in ("title", "owner_surface", "next_slice", "notes"):
             _required_string(row, key, index)
         for key in ("pipeline_sections", "evidence_refs"):
@@ -159,7 +162,8 @@ def build_capability_status(repo_root: Path) -> dict[str, Any]:
             "Skills SDK capability truth reports "
             f"{summary['feature_executed_count']} executable or preview-backed row(s), "
             f"{summary['by_status']['deferred']} deferred row(s), and "
-            f"{summary['by_status']['out_of_scope']} out-of-scope row(s); no PU-008 row performs mutation."
+            f"{summary['by_status']['out_of_scope']} out-of-scope row(s); "
+            f"{summary['mutation_performed_count']} row(s) perform bounded mutation."
         ),
     }
 

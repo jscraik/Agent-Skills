@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/install-receipt.v1.schema.json",
+  "title": "Skills SDK Install Receipt V1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "string", "const": "skills-sdk.install-receipt.v1"},
+    "schema_uri": {"type": "string", "const": "https://jscraik.local/agent-skills/schemas/skills-sdk/install-receipt.v1.schema.json"},
+    "status": {"type": "string", "enum": ["success", "blocked", "partial"]},
+    "operation": {"type": "string", "const": "install"},
+    "scope": {"type": "string", "const": "project"},
+    "source_path": {"type": "string"},
+    "source_digest": {"type": "string"},
+    "target_root": {"type": "string"},
+    "target_paths": {"type": "array", "items": {"type": "string"}},
+    "files_written": {"type": "array", "items": {"$ref": "#/definitions/file_record"}},
+    "files_skipped": {"type": "array", "items": {"$ref": "#/definitions/file_record"}},
+    "files_overwritten": {"type": "array", "items": {"$ref": "#/definitions/file_record"}},
+    "conflicts": {"type": "array", "items": {"type": "string"}},
+    "lockfile_path": {"type": ["string", "null"]},
+    "lockfile_before_digest": {"type": ["string", "null"]},
+    "lockfile_after_digest": {"type": ["string", "null"]},
+    "rollback_metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "status": {"type": "string"},
+        "reason": {"type": "string"},
+        "installed_files": {"type": "array", "items": {"type": "string"}}
+      },
+      "required": ["status", "reason", "installed_files"]
+    },
+    "mutation_performed": {"type": "boolean"},
+    "acceptance_trace": {"type": "array", "items": {"type": "string"}, "minItems": 1}
+  },
+  "required": [
+    "schema_version",
+    "schema_uri",
+    "status",
+    "operation",
+    "scope",
+    "source_path",
+    "source_digest",
+    "target_root",
+    "target_paths",
+    "files_written",
+    "files_skipped",
+    "files_overwritten",
+    "conflicts",
+    "lockfile_path",
+    "lockfile_before_digest",
+    "lockfile_after_digest",
+    "rollback_metadata",
+    "mutation_performed",
+    "acceptance_trace"
+  ],
+  "definitions": {
+    "file_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source_path": {"type": "string"},
+        "target_path": {"type": "string"},
+        "digest": {"type": "string"}
+      },
+      "required": ["source_path", "target_path", "digest"]
+    }
+  }
+}

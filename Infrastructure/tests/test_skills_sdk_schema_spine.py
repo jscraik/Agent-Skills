@@ -14,7 +14,9 @@ SCHEMA_NAMES = {
     "check-receipt": "check-receipt.v1.schema.json",
     "risk-classification": "risk-classification.v1.schema.json",
     "install-preview": "install-preview.v1.schema.json",
+    "install-receipt": "install-receipt.v1.schema.json",
     "lockfile-preview": "lockfile-preview.v1.schema.json",
+    "lockfile": "lockfile.v1.schema.json",
     "placeholder-lifecycle": "placeholder-lifecycle.v1.schema.json",
 }
 
@@ -93,6 +95,20 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertFalse(payload["mutation_performed"])
         self.assertFalse(payload["lockfile_delta_preview"]["would_write"])
         self.assertEqual(payload["lockfile_delta_preview"]["lockfile_path"], "skills.lock.json")
+
+    def test_install_receipt_fixture_embeds_real_project_mutation(self) -> None:
+        payload = self.assert_valid("install-receipt", "install-receipt.json")
+
+        self.assertTrue(payload["mutation_performed"])
+        self.assertEqual(payload["scope"], "project")
+        self.assertEqual(payload["status"], "success")
+        self.assertIn(".agents/skills/sample/SKILL.md", payload["target_paths"])
+
+    def test_lockfile_fixture_records_project_install_entry(self) -> None:
+        payload = self.assert_valid("lockfile", "lockfile.json")
+
+        self.assertIn("sample", payload["entries"])
+        self.assertEqual(payload["entries"]["sample"]["target_path"], ".agents/skills/sample")
 
     def test_placeholder_lifecycle_fixture_keeps_unimplemented_surfaces_honest(self) -> None:
         payload = self.assert_valid("placeholder-lifecycle", "placeholder-lifecycle.json")

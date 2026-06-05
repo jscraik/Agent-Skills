@@ -1,0 +1,22 @@
+{
+  "schema_version": "skills-sdk.lockfile.v1",
+  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/lockfile.v1.schema.json",
+  "generated_by": "ask skills-sdk",
+  "entries": {
+    "sample": {
+      "name": "sample",
+      "source_path": "Skills/sample",
+      "source_digest": "sha256:source",
+      "target_path": ".agents/skills/sample",
+      "receipt_ref": ".harness/receipts/skills-sdk/install/sample.json",
+      "installed_at": "2026-06-05T00:00:00Z",
+      "files": [
+        {
+          "source_path": "SKILL.md",
+          "target_path": ".agents/skills/sample/SKILL.md",
+          "digest": "sha256:file"
+        }
+      ]
+    }
+  }
+}
