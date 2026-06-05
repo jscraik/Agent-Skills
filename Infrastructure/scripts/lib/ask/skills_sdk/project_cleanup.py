@@ -57,7 +57,7 @@ def rollback_project_install(
     apply: bool,
 ) -> dict[str, Any]:
     source_receipt_path = _resolve_receipt_path(receipt_path)
-    source_receipt, source_digest = _load_install_receipt(source_receipt_path)
+    source_receipt, source_digest = _load_install_receipt(source_receipt_path, operation="rollback")
     resolved_project_root = _resolve_cleanup_root(repo_root, project_root, source_receipt, require_root=apply)
     plan = _rollback_plan(source_receipt, source_receipt_path, source_digest, resolved_project_root)
     if resolved_project_root is not None:
@@ -82,6 +82,7 @@ def rollback_project_install(
             fix_suggestion="ask sdk rollback --receipt <path> --apply --project-root /path/to/project --json --robot",
             receipt={**receipt, "status": "blocked", "files_blocked": _block_all(plan, "missing_project_root")},
         )
+    _validate_rollback_lockfile_binding(source_receipt, source_receipt_path, resolved_project_root)
     return _execute_cleanup(
         operation="rollback",
         repo_root=repo_root,
@@ -102,7 +103,7 @@ def uninstall_project_skill(
 ) -> dict[str, Any]:
     resolved_project_root = _resolve_project_root_for_cleanup(repo_root, project_root, "uninstall")
     lockfile_path = resolved_project_root / DEFAULT_LOCKFILE_PATH
-    lockfile = _load_lockfile(lockfile_path)
+    lockfile = _load_lockfile(lockfile_path, operation="uninstall")
     entry = _lockfile_entry(lockfile, skill_id, resolved_project_root)
     receipt_ref = entry.get("receipt_ref")
     source_receipt_path = (resolved_project_root / str(receipt_ref)).resolve()
@@ -116,7 +117,7 @@ def uninstall_project_skill(
             fix_suggestion=exc.fix_suggestion,
             receipt=_blocked_receipt("uninstall", str(source_receipt_path), str(resolved_project_root), conflicts),
         ) from exc
-    source_receipt, source_digest = _load_install_receipt(source_receipt_path)
+    source_receipt, source_digest = _load_install_receipt(source_receipt_path, operation="uninstall")
     _validate_receipt_root(source_receipt, resolved_project_root)
     plan = _uninstall_plan(entry, source_receipt, source_receipt_path, source_digest, resolved_project_root)
     _validate_plan_paths(plan, resolved_project_root)
@@ -167,22 +168,29 @@ def _resolve_receipt_path(value: str) -> Path:
         ) from exc
 
 
-def _load_install_receipt(path: Path) -> tuple[dict[str, Any], str]:
+def _load_install_receipt(path: Path, *, operation: str) -> tuple[dict[str, Any], str]:
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
+    except FileNotFoundError as exc:
+        raise ProjectCleanupError(
+            code="ERR_VALIDATION",
+            message=f"Install receipt does not exist: {path}",
+            fix_suggestion="Pass a readable Skills SDK install receipt or repair skills.lock.json.",
+            receipt=_blocked_receipt(operation, str(path), "unknown", ["missing_receipt"]),
+        ) from exc
     except json.JSONDecodeError as exc:
         raise ProjectCleanupError(
             code="ERR_SCHEMA_INVALID",
             message=f"Install receipt JSON is malformed: {path}",
             fix_suggestion="Pass a schema-valid Skills SDK install receipt.",
-            receipt=_blocked_receipt("rollback", str(path), "unknown", ["malformed_receipt"]),
+            receipt=_blocked_receipt(operation, str(path), "unknown", ["malformed_receipt"]),
         ) from exc
     if not isinstance(payload, dict):
         raise ProjectCleanupError(
             code="ERR_SCHEMA_INVALID",
             message="Install receipt root must be an object.",
             fix_suggestion="Pass a schema-valid Skills SDK install receipt.",
-            receipt=_blocked_receipt("rollback", str(path), "unknown", ["invalid_receipt_root"]),
+            receipt=_blocked_receipt(operation, str(path), "unknown", ["invalid_receipt_root"]),
         )
     conflicts = []
     if payload.get("schema_version") != INSTALL_RECEIPT_SCHEMA_VERSION:
@@ -207,7 +215,7 @@ def _load_install_receipt(path: Path) -> tuple[dict[str, Any], str]:
             code="ERR_SCHEMA_INVALID",
             message="Install receipt is not valid cleanup authority.",
             fix_suggestion="Pass a successful project install receipt with file metadata.",
-            receipt=_blocked_receipt("rollback", str(path), str(payload.get("target_root", "unknown")), conflicts, source_digest=digest),
+            receipt=_blocked_receipt(operation, str(path), str(payload.get("target_root", "unknown")), conflicts, source_digest=digest),
         )
     return payload, digest
 
@@ -261,13 +269,13 @@ def _validate_receipt_root(receipt: dict[str, Any], root: Path) -> None:
         )
 
 
-def _load_lockfile(path: Path) -> dict[str, Any]:
+def _load_lockfile(path: Path, *, operation: str = "uninstall") -> dict[str, Any]:
     if not path.is_file():
         raise ProjectCleanupError(
             code="ERR_VALIDATION",
-            message="skills.lock.json is required for uninstall.",
-            fix_suggestion="Run uninstall in the project root that owns the installed skill.",
-            receipt=_blocked_receipt("uninstall", "missing", str(path.parent), ["missing_lockfile"]),
+            message=f"skills.lock.json is required for {operation}.",
+            fix_suggestion=f"Run {operation} in the project root that owns the installed skill.",
+            receipt=_blocked_receipt(operation, "missing", str(path.parent), ["missing_lockfile"]),
         )
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
@@ -275,8 +283,8 @@ def _load_lockfile(path: Path) -> dict[str, Any]:
         raise ProjectCleanupError(
             code="ERR_SCHEMA_INVALID",
             message="skills.lock.json is malformed.",
-            fix_suggestion="Repair skills.lock.json or restore it from version control before uninstall.",
-            receipt=_blocked_receipt("uninstall", str(path), str(path.parent), ["malformed_lockfile"]),
+            fix_suggestion=f"Repair skills.lock.json or restore it from version control before {operation}.",
+            receipt=_blocked_receipt(operation, str(path), str(path.parent), ["malformed_lockfile"]),
         ) from exc
     if (
         not isinstance(payload, dict)
@@ -288,9 +296,32 @@ def _load_lockfile(path: Path) -> dict[str, Any]:
             code="ERR_SCHEMA_INVALID",
             message="skills.lock.json is not a supported Skills SDK lockfile.",
             fix_suggestion="Use a project lockfile written by ask sdk install --apply.",
-            receipt=_blocked_receipt("uninstall", str(path), str(path.parent), ["unsupported_lockfile_schema"]),
+            receipt=_blocked_receipt(operation, str(path), str(path.parent), ["unsupported_lockfile_schema"]),
         )
     return payload
+
+
+def _validate_rollback_lockfile_binding(receipt: dict[str, Any], receipt_path: Path, project_root: Path) -> None:
+    lockfile = _load_lockfile(project_root / DEFAULT_LOCKFILE_PATH, operation="rollback")
+    try:
+        receipt_ref = _relative_to(receipt_path, project_root)
+    except ProjectInstallError as exc:
+        conflicts = [str(conflict) for conflict in exc.receipt.get("conflicts", [])] or ["unsafe_receipt_ref"]
+        raise ProjectCleanupError(
+            code=exc.code,
+            message=exc.message,
+            fix_suggestion=exc.fix_suggestion,
+            receipt=_blocked_receipt("rollback", str(receipt_path), str(project_root), conflicts),
+        ) from exc
+    matches = [entry for entry in lockfile["entries"].values() if isinstance(entry, dict) and entry.get("receipt_ref") == receipt_ref]
+    if len(matches) != 1:
+        raise ProjectCleanupError(
+            code="ERR_CONFLICT",
+            message="Install receipt is not bound to exactly one active lockfile entry.",
+            fix_suggestion="Use the active install receipt referenced by skills.lock.json or repair the lockfile before rollback.",
+            receipt=_blocked_receipt("rollback", str(receipt_path), str(project_root), ["mismatched_lockfile_receipt_binding"]),
+        )
+    _validate_entry_receipt_files("rollback", matches[0], receipt, project_root)
 
 
 def _lockfile_entry(lockfile: dict[str, Any], skill_id: str, project_root: Path) -> dict[str, Any]:
@@ -342,14 +373,7 @@ def _rollback_plan(
     return files
 
 
-def _uninstall_plan(
-    entry: dict[str, Any],
-    receipt: dict[str, Any],
-    receipt_path: Path,
-    receipt_digest: str,
-    project_root: Path,
-) -> list[dict[str, Any]]:
-    del receipt_path, receipt_digest
+def _validate_entry_receipt_files(operation: str, entry: dict[str, Any], receipt: dict[str, Any], project_root: Path) -> list[dict[str, Any]]:
     receipt_files = {
         item.get("target_path"): item
         for item in receipt.get("files_written", [])
@@ -366,8 +390,8 @@ def _uninstall_plan(
             raise ProjectCleanupError(
                 code="ERR_CONFLICT",
                 message="Lockfile and install receipt file metadata do not match.",
-                fix_suggestion="Inspect skills.lock.json and the install receipt before uninstall.",
-                receipt=_blocked_receipt("uninstall", str(entry.get("name", "unknown")), str(project_root), ["mismatched_lockfile_receipt_binding"]),
+                fix_suggestion="Inspect skills.lock.json and the install receipt before cleanup.",
+                receipt=_blocked_receipt(operation, str(entry.get("name", "unknown")), str(project_root), ["mismatched_lockfile_receipt_binding"]),
             )
         files.append(_planned_file(target_path, digest, "remove"))
     if not files:
@@ -375,9 +399,20 @@ def _uninstall_plan(
             code="ERR_VALIDATION",
             message="Lockfile entry has no file metadata to clean up.",
             fix_suggestion="Repair skills.lock.json or perform manual cleanup.",
-            receipt=_blocked_receipt("uninstall", str(entry.get("name", "unknown")), str(project_root), ["missing_lockfile_file_metadata"]),
+            receipt=_blocked_receipt(operation, str(entry.get("name", "unknown")), str(project_root), ["missing_lockfile_file_metadata"]),
         )
     return files
+
+
+def _uninstall_plan(
+    entry: dict[str, Any],
+    receipt: dict[str, Any],
+    receipt_path: Path,
+    receipt_digest: str,
+    project_root: Path,
+) -> list[dict[str, Any]]:
+    del receipt_path, receipt_digest
+    return _validate_entry_receipt_files("uninstall", entry, receipt, project_root)
 
 
 def _planned_file(target_path: str, digest: str, action: str) -> dict[str, Any]:

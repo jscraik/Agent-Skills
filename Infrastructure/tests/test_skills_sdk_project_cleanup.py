@@ -146,6 +146,34 @@ class TestSkillsSdkProjectCleanup(unittest.TestCase):
             lockfile = json.loads((project_root / "skills.lock.json").read_text(encoding="utf-8"))
             self.assertNotIn("valid_skill", lockfile["entries"])
 
+    def test_rollback_apply_refuses_receipt_not_bound_to_lockfile(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            project_root = _marked_project(Path(tmp))
+            _install_valid_skill(project_root)
+            copied_receipt = project_root / ".harness/receipts/skills-sdk/install/copied-valid-skill.json"
+            copied_receipt.write_text(_receipt_path(project_root).read_text(encoding="utf-8"), encoding="utf-8")
+
+            process = _run_process(
+                sys.executable,
+                "Infrastructure/bin/ask",
+                "sdk",
+                "rollback",
+                "--receipt",
+                str(copied_receipt),
+                "--apply",
+                "--project-root",
+                str(project_root),
+                "--json",
+                "--robot",
+            )
+
+            self.assertEqual(process.returncode, 4, process.stdout)
+            payload = json.loads(process.stdout)
+            receipt = payload["data"]["skills_sdk_project_rollback"]["receipt"]
+            self.assertFalse(receipt["mutation_performed"])
+            self.assertEqual(receipt["files_blocked"][0]["reason"], "mismatched_lockfile_receipt_binding")
+            self.assertTrue((project_root / ".agents/skills/valid_skill/SKILL.md").exists())
+
     def test_uninstall_preview_and_apply_resolve_through_lockfile(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             project_root = _marked_project(Path(tmp))
@@ -440,6 +468,31 @@ class TestSkillsSdkProjectCleanup(unittest.TestCase):
             receipt = payload["data"]["skills_sdk_project_uninstall"]["receipt"]
             self.assertFalse(receipt["mutation_performed"])
             self.assertTrue(receipt["files_blocked"][0]["reason"].startswith("path_escape:"))
+
+    def test_uninstall_refuses_missing_lockfile_receipt_ref_as_structured_receipt(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            project_root = _marked_project(Path(tmp))
+            _install_valid_skill(project_root)
+            _receipt_path(project_root).unlink()
+
+            process = _run_process(
+                sys.executable,
+                "Infrastructure/bin/ask",
+                "sdk",
+                "uninstall",
+                "valid_skill",
+                "--project-root",
+                str(project_root),
+                "--preview",
+                "--json",
+                "--robot",
+            )
+
+            self.assertEqual(process.returncode, 2, process.stdout)
+            payload = json.loads(process.stdout)
+            receipt = payload["data"]["skills_sdk_project_uninstall"]["receipt"]
+            self.assertFalse(receipt["mutation_performed"])
+            self.assertEqual(receipt["files_blocked"][0]["reason"], "missing_receipt")
 
     def test_apply_blocks_symlink_and_hardlink_targets_before_mutation(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
