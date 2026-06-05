@@ -126,18 +126,13 @@ for root_skill_name in "${SELECTION_POLICY_ROOT_SKILL_SETS[@]:-}"; do
 done
 
 if [ -f ".skillsets/command-surface.json" ]; then
-  python3 - <<'PY' > "$command_handle_names_file"
-import json
-from pathlib import Path
-
-path = Path(".skillsets/command-surface.json")
-payload = json.loads(path.read_text(encoding="utf-8"))
-for handle in payload.get("handles", []):
-    if not isinstance(handle, dict):
-        continue
-    if handle.get("kind") == "skill" and handle.get("command_handle_path") and handle.get("handle"):
-        print(handle["handle"])
-PY
+  jq -r '
+    ((.handles // []) + (.hidden_handles // []))[]
+    | select(type == "object")
+    | select(.kind == "skill")
+    | select((.command_handle_path // "") | startswith(".agents/skills/"))
+    | .handle // empty
+  ' ".skillsets/command-surface.json" > "$command_handle_names_file"
 fi
 
 : > "$plugin_names_file"
@@ -169,7 +164,7 @@ if [ -s "$plugin_names_file" ] && [ -s "$flat_names_file" ]; then
     if is_rooted_projection_active && is_root_skill_set_name "$overlap_name"; then
       continue
     fi
-    if is_rooted_projection_active && is_command_handle_skill_name "$overlap_name"; then
+    if is_command_handle_skill_name "$overlap_name"; then
       continue
     fi
     printf '%s\n' "$overlap_name" >> "$shadowed_names_file"

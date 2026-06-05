@@ -87,9 +87,11 @@ def prune_command_handle_skill_entries(
             f"Failed to discover command handles for plugin cache pruning "
             f"(plugin={plugin_name}, root={plugin_root}): {exc}"
         ) from exc
-    handles = report.get("handles") if isinstance(report, dict) else []
-    if not isinstance(handles, list):
+    public_handles = report.get("handles", []) if isinstance(report, dict) else []
+    hidden_handles = report.get("hidden_handles", []) if isinstance(report, dict) else []
+    if not isinstance(public_handles, list) or not isinstance(hidden_handles, list):
         return [], []
+    handles = [*public_handles, *hidden_handles]
 
     handles_to_prune: set[str] = set()
     owner_handles: set[str] = set()
@@ -130,10 +132,14 @@ def prune_command_handle_skill_entries(
         for target in sorted(set(targets)):
             if not (target.exists() or target.is_symlink()):
                 continue
-            if target.is_symlink() or target.is_file():
-                target.unlink()
-            else:
-                shutil.rmtree(target)
+            try:
+                if target.is_symlink() or target.is_file():
+                    target.unlink()
+                else:
+                    shutil.rmtree(target)
+            except OSError as exc:
+                logs.append(f"Skipped protected command-handle duplicate plugin skill entry: {target}: {exc}")
+                continue
             deletes.append(str(target))
             logs.append(f"Removed command-handle duplicate plugin skill entry: {target}")
     return logs, deletes

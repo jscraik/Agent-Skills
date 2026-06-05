@@ -1,0 +1,5 @@
+policy:
+  allow_implicit_invocation: false
+interface:
+  display_name: "SynAIpse Harness Reconcile"
+  short_description: "Recover the current SynAIpse Harness lifecycle state and choose the next safe stage from repo, tracker, PR, validation, and session evidence."

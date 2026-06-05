@@ -1,0 +1,309 @@
+{
+  "data": {
+    "ask_audit": {
+      "data": {
+        "diagnostics": {
+          "exit_code": 0,
+          "stderr": "",
+          "stdout": "\n\ud83d\udccb Diagnostic report: Plugins/synaipse-harness-stages/skills/sy-improve\n--------------------------------------------------\n  \u001b[32m\u2713\u001b[0m skill directory: Found at Plugins/synaipse-harness-stages/skills/sy-improve\n  \u001b[32m\u2713\u001b[0m SKILL.md: Valid YAML frontmatter with name and description\n  \u001b[32m\u2713\u001b[0m nested .git: No nested .git directory\n  \u001b[90m\u25cb\u001b[0m symlink (codex): Plugin-owned skill is not expected as a default user-runtime symlink: sy-improve\n  \u001b[90m\u25cb\u001b[0m symlink (agents): Plugin-owned skill is not expected as a default user-runtime symlink: sy-improve\n  \u001b[90m\u25cb\u001b[0m skill index: Plugin-owned skill is not expected in the root default visible skill index: sy-improve\n  \u001b[90m\u25cb\u001b[0m task profile: No task profile found (neither legacy binding nor implicit path)\n  \u001b[32m\u2713\u001b[0m lifecycle readiness: healthy\n--------------------------------------------------\n\u2705 All checks passed\n"
+        },
+        "validation_commands": [
+          "./bin/ask skills audit Plugins/synaipse-harness-stages/skills/sy-improve --json --robot"
+        ]
+      },
+      "errors": [],
+      "status": "success"
+    },
+    "plugin_eval": {
+      "status": "skipped"
+    },
+    "policy": {
+      "external_quality_judge": "tessl_local_review",
+      "mode": "local_internal_only",
+      "no_publish": true,
+      "no_registry_upload": true,
+      "plugin_eval_min_acceptable_grade": "B+",
+      "plugin_eval_role": "budget_and_ergonomics_guardrail",
+      "plugin_eval_warning_policy": "Plugin Eval warnings are visible follow-up work, but they are not release blockers when there are zero Plugin Eval failures, the grade is B+ or better, and local/Tessl gates pass.",
+      "primary_gate": "local_eval_ask_audit",
+      "publish_policy": "never publish, register, upload, or invoke npx from this lane",
+      "snyk_default": "disabled_until_requested",
+      "snyk_privacy_basis": "Snyk CLI security analysis may contact Snyk services. It is never run by default in this local-first review lane; pass --include-snyk when external Snyk advisory analysis is wanted.",
+      "snyk_release_requirement": "release_required_for_manifest_backed_candidates",
+      "snyk_role": "opt_in_local_dependency_security_screening",
+      "snyk_when_not_to_use": [
+        "pure SKILL.md-first instruction-only candidates with no supported dependency manifest, unless the user explicitly asks",
+        "routine local iteration where external networked security analysis is not needed"
+      ],
+      "snyk_when_to_use": [
+        "when a skill or plugin candidate has dependency manifests such as package.json, pyproject.toml, requirements.txt, Gemfile, go.mod, or lockfiles",
+        "when claiming release readiness for a manifest-backed skill or plugin package",
+        "when dependency files, installer scripts, generated package surfaces, or plugin runtime dependencies changed",
+        "when matching the CircleCI/Snyk security screening lane locally before or after CI",
+        "when the user explicitly asks for Snyk, dependency vulnerability screening, or external security advisory evidence"
+      ],
+      "tessl_evidence_retention": "stable tmp wrapper is intentionally left for inspection and copied-input evidence",
+      "tessl_lint_role": "stable_tile_packaging_shape_check",
+      "tessl_lint_shape": "Tessl lint expects a Tessl tile.json package. Canonical repo skills are SKILL.md-first, so this command builds a stable local tile wrapper under /tmp before linting.",
+      "tessl_project_marker": "tessl.json",
+      "tessl_review_default": "enabled_local_cli",
+      "tessl_review_min_score": 90,
+      "tessl_review_privacy_basis": "Tessl docs: Review locally from your machine; stays local; results are only visible to you.",
+      "tessl_review_role": "local_best_practice_content_review",
+      "tessl_review_target_score": 95,
+      "tessl_review_threshold_policy": "Tessl review must return reviewScore >= 90; 95+ remains the improvement target.",
+      "tessl_staging_root": "/tmp/ask-tessl-reviews/<skill-path>-<sha12>",
+      "uses_npx": false
+    },
+    "review_mode_details": {
+      "local_evals": {
+        "command": "./bin/ask evals run <path> --mode smoke|release --json --robot",
+        "role": "dynamic run-trace behavior checks for skill selection, commands, artifacts, and release gates"
+      },
+      "plugin_eval": {
+        "command": "plugin-eval analyze <path> --format markdown",
+        "role": "static budget, ergonomics, and reviewability guardrail; not a substitute for local evals"
+      },
+      "snyk": {
+        "command": "snyk test --all-projects --detection-depth=6 --severity-threshold=high --json <skill-path>",
+        "default": "disabled_until_requested",
+        "release_required": "manifest-backed candidates",
+        "role": "opt-in local dependency security screening; release-required for manifest-backed candidates",
+        "use_when": [
+          "candidate has supported dependency manifests",
+          "release-readiness is claimed for a manifest-backed package",
+          "dependency/runtime package surfaces changed",
+          "local evidence must match CircleCI/Snyk screening",
+          "user explicitly requests Snyk or dependency vulnerability evidence"
+        ]
+      },
+      "tessl_lint": {
+        "canonical_source_shape": "SKILL.md-first",
+        "command": "tessl skill lint <stable-tile.json>",
+        "role": "stable tile.json package-shape check, not a direct content finding"
+      },
+      "tessl_review": {
+        "command": "tessl skill review --json --threshold 90 <stable-skill-directory>",
+        "minimum_score": 90,
+        "publishes": false,
+        "role": "local best-practice/content review for private or work-in-progress skills",
+        "target_score": 95
+      }
+    },
+    "snyk": {
+      "reason": "Snyk is disabled by default. Use --include-snyk when external Snyk advisory analysis is wanted.",
+      "status": "skipped"
+    },
+    "target": "Plugins/synaipse-harness-stages/skills/sy-improve",
+    "tessl_lint": {
+      "command": [
+        "/Users/jamiecraik/.local/bin/tessl",
+        "skill",
+        "lint",
+        "/tmp/ask-tessl-reviews/Plugins__synaipse-harness-stages__skills__sy-improve-129da7a86429/071cba3c/tile.json"
+      ],
+      "exit_code": 0,
+      "status": "success",
+      "stderr": "Latest available version is 0.81.3 (currently running 0.80.0), upgrade with \"tessl cli update\"\n",
+      "stdout": "\nContext Cost\n\nSkills\n  - sy-improve: 99 front-loaded, 1.7k on-demand tokens\n\nTotal: 99 front-loaded, 1.7k on-demand tokens\n\n\u2714 Tile local/sy-improve@0.0.0-local is valid\n"
+    },
+    "tessl_review": {
+      "command": [
+        "/Users/jamiecraik/.local/bin/tessl",
+        "skill",
+        "review",
+        "--json",
+        "--threshold",
+        "90",
+        "/tmp/ask-tessl-reviews/Plugins__synaipse-harness-stages__skills__sy-improve-129da7a86429/071cba3c/skills/sy-improve"
+      ],
+      "exit_code": 0,
+      "minimum_score": 90,
+      "status": "success",
+      "stderr": "Latest available version is 0.81.3 (currently running 0.80.0), upgrade with \"tessl cli update\"\n- Reviewing skill...\n",
+      "stdout": "{\n  \"review\": {\n    \"reviewScore\": 94\n  },\n  \"validation\": {\n    \"checks\": [\n      {\n        \"name\": \"skill_md_line_count\",\n        \"status\": \"passed\",\n        \"message\": \"SKILL.md line count is 139 (<= 500)\",\n        \"details\": {\n          \"line_count\": 139,\n          \"max_lines\": 500\n        }\n      },\n      {\n        \"name\": \"frontmatter_valid\",\n        \"status\": \"passed\",\n        \"message\": \"YAML frontmatter is valid\",\n        \"details\": {\n          \"keys\": [\n            \"name\",\n            \"description\",\n            \"metadata\"\n          ]\n        }\n      },\n      {\n        \"name\": \"name_field\",\n        \"status\": \"passed\",\n        \"message\": \"'name' field is valid: 'sy-improve'\",\n        \"details\": {\n          \"value\": \"sy-improve\",\n          \"length\": 10\n        }\n      },\n      {\n        \"name\": \"description_field\",\n        \"status\": \"passed\",\n        \"message\": \"'description' field is valid (381 chars)\",\n        \"details\": {\n          \"length\": 381\n        }\n      },\n      {\n        \"name\": \"compatibility_field\",\n        \"status\": \"passed\",\n        \"message\": \"'compatibility' field not present (optional)\"\n      },\n      {\n        \"name\": \"allowed_tools_field\",\n        \"status\": \"passed\",\n        \"message\": \"'allowed-tools' field not present (optional)\"\n      },\n      {\n        \"name\": \"metadata_version\",\n        \"status\": \"passed\",\n        \"message\": \"'metadata.version' is present: 0.1.0\",\n        \"details\": {\n          \"version\": \"0.1.0\"\n        }\n      },\n      {\n        \"name\": \"metadata_field\",\n        \"status\": \"passed\",\n        \"message\": \"'metadata' contains 2 entries\"\n      },\n      {\n        \"name\": \"license_field\",\n        \"status\": \"passed\",\n        \"message\": \"'license' field not present (optional)\"\n      },\n      {\n        \"name\": \"frontmatter_unknown_keys\",\n        \"status\": \"passed\",\n        \"message\": \"No unknown frontmatter keys found\"\n      },\n      {\n        \"name\": \"body_present\",\n        \"status\": \"passed\",\n        \"message\": \"SKILL.md body is present\",\n        \"details\": {\n          \"body_chars\": 6241\n        }\n      }\n    ],\n    \"overallPassed\": true,\n    \"errorCount\": 0,\n    \"warningCount\": 0,\n    \"skillName\": \"sy-improve\",\n    \"skillDescription\": \"Improves synAIpse Harness skill-package artifacts by rewriting vague skill descriptions, fixing failing eval assertions, updating stage contracts, tightening references, and rerunning the failed check. Use when a synAIpse skill needs improvement, a stage description is too vague, an eval is failing, or audit, Tessl, plugin-eval, or stage-review feedback identifies a package fix.\"\n  },\n  \"descriptionJudge\": {\n    \"judgeConfig\": {\n      \"model\": \"anthropic/claude-opus-4-6\"\n    },\n    \"success\": true,\n    \"evaluation\": {\n      \"scores\": {\n        \"specificity\": {\n          \"score\": 3,\n          \"reasoning\": \"Lists multiple specific concrete actions: 'rewriting vague skill descriptions', 'fixing failing eval assertions', 'updating stage contracts', 'tightening references', and 'rerunning the failed check'. These are clearly defined, actionable tasks.\"\n        },\n        \"trigger_term_quality\": {\n          \"score\": 3,\n          \"reasoning\": \"Includes a good range of natural trigger terms that a user in this domain would use: 'synAIpse', 'skill-package', 'vague skill descriptions', 'eval is failing', 'audit', 'Tessl', 'plugin-eval', 'stage-review', 'package fix'. These cover multiple variations of how someone might describe needing this skill.\"\n        },\n        \"completeness\": {\n          \"score\": 3,\n          \"reasoning\": \"Clearly answers both 'what' (improves skill-package artifacts by rewriting descriptions, fixing evals, updating contracts, etc.) and 'when' with an explicit 'Use when...' clause listing four distinct trigger scenarios.\"\n        },\n        \"distinctiveness_conflict_risk\": {\n          \"score\": 3,\n          \"reasoning\": \"Highly distinctive due to the specific domain terminology ('synAIpse Harness', 'skill-package artifacts', 'stage contracts', 'plugin-eval', 'Tessl'). This is unlikely to conflict with other skills given its narrow, well-defined niche.\"\n        }\n      },\n      \"overall_assessment\": \"This is a strong skill description that clearly articulates specific actions, provides explicit trigger conditions via a 'Use when...' clause, and uses domain-specific terminology that makes it highly distinguishable. The description is concise yet comprehensive, covering both what the skill does and when it should be selected.\",\n      \"suggestions\": []\n    },\n    \"weightedScore\": 3,\n    \"normalizedScore\": 1\n  },\n  \"contentJudge\": {\n    \"judgeConfig\": {\n      \"model\": \"anthropic/claude-opus-4-6\"\n    },\n    \"success\": true,\n    \"evaluation\": {\n      \"scores\": {\n        \"conciseness\": {\n          \"score\": 2,\n          \"reasoning\": \"The skill is reasonably efficient but includes some redundancy\u2014the 'When to Use' section largely restates the description, and sections like 'Failure Mode', 'Anti-Patterns', and 'Gotchas' overlap conceptually. Some phrasing could be tightened (e.g., the long enumeration of audit commands repeated multiple times).\"\n        },\n        \"actionability\": {\n          \"score\": 3,\n          \"reasoning\": \"The procedure provides concrete, specific steps with exact commands (e.g., `./bin/ask skills audit <skill-path> --level strict --json --robot`), specific file paths to edit, named classification categories, and a structured output schema with field names. The example shows a complete input/output pair with real YAML.\"\n        },\n        \"workflow_clarity\": {\n          \"score\": 3,\n          \"reasoning\": \"The 5-step procedure is clearly sequenced with explicit validation checkpoints: step 4 requires rerunning the failed command first, then adjacent gates, and includes a feedback loop (if finding remains, record details and return to step 2). The fail-fast constraint in the Validation section adds an additional safety checkpoint.\"\n        },\n        \"progressive_disclosure\": {\n          \"score\": 3,\n          \"reasoning\": \"The skill is well-structured with clear sections (Philosophy, Inputs, Procedure, Outputs, Examples, Gotchas, Anti-Patterns, References). References to external files (contract.yaml, evals.yaml, task-profile.json, plugin-root) are clearly listed at the end with one-level-deep navigation and explicit guidance on when to consult them.\"\n        }\n      },\n      \"overall_assessment\": \"This is a well-structured, actionable skill with a clear multi-step workflow, explicit validation/feedback loops, and good progressive disclosure. Its main weakness is moderate verbosity\u2014some sections are repetitive (When to Use restates the description, commands are repeated across steps, and Gotchas/Anti-Patterns/Failure Mode overlap). The concrete commands, structured output schema, and worked example are strong points.\",\n      \"suggestions\": [\n        \"Trim the 'When to Use' section since it largely duplicates the skill description; a single sentence about router handoff conditions would suffice.\",\n        \"Consolidate 'Gotchas', 'Anti-Patterns', and 'Failure Mode' into a single 'Guardrails' section to reduce overlap and save tokens.\"\n      ]\n    },\n    \"weightedScore\": 2.7,\n    \"normalizedScore\": 0.8500000000000001\n  }\n}\n",
+      "summary": {
+        "minimum_score": 90,
+        "raw": {
+          "contentJudge": {
+            "evaluation": {
+              "overall_assessment": "This is a well-structured, actionable skill with a clear multi-step workflow, explicit validation/feedback loops, and good progressive disclosure. Its main weakness is moderate verbosity\u2014some sections are repetitive (When to Use restates the description, commands are repeated across steps, and Gotchas/Anti-Patterns/Failure Mode overlap). The concrete commands, structured output schema, and worked example are strong points.",
+              "scores": {
+                "actionability": {
+                  "reasoning": "The procedure provides concrete, specific steps with exact commands (e.g., `./bin/ask skills audit <skill-path> --level strict --json --robot`), specific file paths to edit, named classification categories, and a structured output schema with field names. The example shows a complete input/output pair with real YAML.",
+                  "score": 3
+                },
+                "conciseness": {
+                  "reasoning": "The skill is reasonably efficient but includes some redundancy\u2014the 'When to Use' section largely restates the description, and sections like 'Failure Mode', 'Anti-Patterns', and 'Gotchas' overlap conceptually. Some phrasing could be tightened (e.g., the long enumeration of audit commands repeated multiple times).",
+                  "score": 2
+                },
+                "progressive_disclosure": {
+                  "reasoning": "The skill is well-structured with clear sections (Philosophy, Inputs, Procedure, Outputs, Examples, Gotchas, Anti-Patterns, References). References to external files (contract.yaml, evals.yaml, task-profile.json, plugin-root) are clearly listed at the end with one-level-deep navigation and explicit guidance on when to consult them.",
+                  "score": 3
+                },
+                "workflow_clarity": {
+                  "reasoning": "The 5-step procedure is clearly sequenced with explicit validation checkpoints: step 4 requires rerunning the failed command first, then adjacent gates, and includes a feedback loop (if finding remains, record details and return to step 2). The fail-fast constraint in the Validation section adds an additional safety checkpoint.",
+                  "score": 3
+                }
+              },
+              "suggestions": [
+                "Trim the 'When to Use' section since it largely duplicates the skill description; a single sentence about router handoff conditions would suffice.",
+                "Consolidate 'Gotchas', 'Anti-Patterns', and 'Failure Mode' into a single 'Guardrails' section to reduce overlap and save tokens."
+              ]
+            },
+            "judgeConfig": {
+              "model": "anthropic/claude-opus-4-6"
+            },
+            "normalizedScore": 0.8500000000000001,
+            "success": true,
+            "weightedScore": 2.7
+          },
+          "descriptionJudge": {
+            "evaluation": {
+              "overall_assessment": "This is a strong skill description that clearly articulates specific actions, provides explicit trigger conditions via a 'Use when...' clause, and uses domain-specific terminology that makes it highly distinguishable. The description is concise yet comprehensive, covering both what the skill does and when it should be selected.",
+              "scores": {
+                "completeness": {
+                  "reasoning": "Clearly answers both 'what' (improves skill-package artifacts by rewriting descriptions, fixing evals, updating contracts, etc.) and 'when' with an explicit 'Use when...' clause listing four distinct trigger scenarios.",
+                  "score": 3
+                },
+                "distinctiveness_conflict_risk": {
+                  "reasoning": "Highly distinctive due to the specific domain terminology ('synAIpse Harness', 'skill-package artifacts', 'stage contracts', 'plugin-eval', 'Tessl'). This is unlikely to conflict with other skills given its narrow, well-defined niche.",
+                  "score": 3
+                },
+                "specificity": {
+                  "reasoning": "Lists multiple specific concrete actions: 'rewriting vague skill descriptions', 'fixing failing eval assertions', 'updating stage contracts', 'tightening references', and 'rerunning the failed check'. These are clearly defined, actionable tasks.",
+                  "score": 3
+                },
+                "trigger_term_quality": {
+                  "reasoning": "Includes a good range of natural trigger terms that a user in this domain would use: 'synAIpse', 'skill-package', 'vague skill descriptions', 'eval is failing', 'audit', 'Tessl', 'plugin-eval', 'stage-review', 'package fix'. These cover multiple variations of how someone might describe needing this skill.",
+                  "score": 3
+                }
+              },
+              "suggestions": []
+            },
+            "judgeConfig": {
+              "model": "anthropic/claude-opus-4-6"
+            },
+            "normalizedScore": 1,
+            "success": true,
+            "weightedScore": 3
+          },
+          "review": {
+            "reviewScore": 94
+          },
+          "validation": {
+            "checks": [
+              {
+                "details": {
+                  "line_count": 139,
+                  "max_lines": 500
+                },
+                "message": "SKILL.md line count is 139 (<= 500)",
+                "name": "skill_md_line_count",
+                "status": "passed"
+              },
+              {
+                "details": {
+                  "keys": [
+                    "name",
+                    "description",
+                    "metadata"
+                  ]
+                },
+                "message": "YAML frontmatter is valid",
+                "name": "frontmatter_valid",
+                "status": "passed"
+              },
+              {
+                "details": {
+                  "length": 10,
+                  "value": "sy-improve"
+                },
+                "message": "'name' field is valid: 'sy-improve'",
+                "name": "name_field",
+                "status": "passed"
+              },
+              {
+                "details": {
+                  "length": 381
+                },
+                "message": "'description' field is valid (381 chars)",
+                "name": "description_field",
+                "status": "passed"
+              },
+              {
+                "message": "'compatibility' field not present (optional)",
+                "name": "compatibility_field",
+                "status": "passed"
+              },
+              {
+                "message": "'allowed-tools' field not present (optional)",
+                "name": "allowed_tools_field",
+                "status": "passed"
+              },
+              {
+                "details": {
+                  "version": "0.1.0"
+                },
+                "message": "'metadata.version' is present: 0.1.0",
+                "name": "metadata_version",
+                "status": "passed"
+              },
+              {
+                "message": "'metadata' contains 2 entries",
+                "name": "metadata_field",
+                "status": "passed"
+              },
+              {
+                "message": "'license' field not present (optional)",
+                "name": "license_field",
+                "status": "passed"
+              },
+              {
+                "message": "No unknown frontmatter keys found",
+                "name": "frontmatter_unknown_keys",
+                "status": "passed"
+              },
+              {
+                "details": {
+                  "body_chars": 6241
+                },
+                "message": "SKILL.md body is present",
+                "name": "body_present",
+                "status": "passed"
+              }
+            ],
+            "errorCount": 0,
+            "overallPassed": true,
+            "skillDescription": "Improves synAIpse Harness skill-package artifacts by rewriting vague skill descriptions, fixing failing eval assertions, updating stage contracts, tightening references, and rerunning the failed check. Use when a synAIpse skill needs improvement, a stage description is too vague, an eval is failing, or audit, Tessl, plugin-eval, or stage-review feedback identifies a package fix.",
+            "skillName": "sy-improve",
+            "warningCount": 0
+          }
+        },
+        "review_score": 94,
+        "score_acceptable": true,
+        "status": "success",
+        "target_score": 95
+      },
+      "target_score": 95
+    },
+    "tessl_tile": {
+      "auth_home": "process_home",
+      "evidence_retention": "stable_tmp_directory_left_for_post-run_inspection",
+      "mode": "stable_tmp_wrapper",
+      "reason": "Tessl lint validates tile.json packages. Canonical repo skills remain SKILL.md-first, so this command stages a local packaging-shape wrapper under /tmp.",
+      "review_path": "/tmp/ask-tessl-reviews/Plugins__synaipse-harness-stages__skills__sy-improve-129da7a86429/071cba3c/skills/sy-improve",
+      "skill_key": "sy-improve",
+      "source_skill": "Plugins/synaipse-harness-stages/skills/sy-improve",
+      "staging_root": "/tmp/ask-tessl-reviews/Plugins__synaipse-harness-stages__skills__sy-improve-129da7a86429/071cba3c",
+      "support_refs_included": true,
+      "tessl_project_marker": "/tmp/ask-tessl-reviews/Plugins__synaipse-harness-stages__skills__sy-improve-129da7a86429/071cba3c/tessl.json",
+      "tile_path": "/tmp/ask-tessl-reviews/Plugins__synaipse-harness-stages__skills__sy-improve-129da7a86429/071cba3c/tile.json"
+    },
+    "validation_commands": [
+      "./bin/ask skills external-review Plugins/synaipse-harness-stages/skills/sy-improve --audit-level compat --skip-plugin-eval --report-path Infrastructure/artifacts/skill-reviews/sy-improve-external-review.json --json --robot"
+    ]
+  },
+  "errors": [],
+  "status": "success"
+}

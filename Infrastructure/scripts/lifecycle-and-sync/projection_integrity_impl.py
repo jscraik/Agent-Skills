@@ -40,6 +40,7 @@ class MirrorProjection:
     tags: tuple[str, ...]
     optional_when_missing: bool = False
     follow_symlinks: bool = False
+    replace_before_sync: bool = False
     excluded_dir_names: tuple[str, ...] = ()
 
 
@@ -66,6 +67,7 @@ MIRROR_PROJECTIONS: tuple[MirrorProjection, ...] = (
         tags=("plugin-caches",),
         optional_when_missing=True,
         follow_symlinks=True,
+        replace_before_sync=True,
         excluded_dir_names=(
             "fixtures",
             "skills",
@@ -83,6 +85,7 @@ MIRROR_PROJECTIONS: tuple[MirrorProjection, ...] = (
         tags=("plugin-caches", "plugin-factory"),
         optional_when_missing=True,
         follow_symlinks=True,
+        replace_before_sync=True,
         excluded_dir_names=(
             "fixtures",
             "skills",
@@ -100,6 +103,7 @@ MIRROR_PROJECTIONS: tuple[MirrorProjection, ...] = (
         tags=("plugin-caches", "skill-factory"),
         optional_when_missing=True,
         follow_symlinks=True,
+        replace_before_sync=True,
         excluded_dir_names=(
             "fixtures",
             "skills",
@@ -665,7 +669,12 @@ def sync_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
     sync_engine = "python"
     changed_files = 0
     deleted_files = 0
-    if projection_abs.is_symlink():
+    if spec.replace_before_sync and (projection_abs.exists() or projection_abs.is_symlink()):
+        if projection_abs.is_dir() and not projection_abs.is_symlink():
+            shutil.rmtree(projection_abs)
+        else:
+            projection_abs.unlink()
+    elif projection_abs.is_symlink():
         projection_abs.unlink()
     elif projection_abs.exists() and not projection_abs.is_dir():
         projection_abs.unlink()
@@ -725,7 +734,7 @@ def sync_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
             deleted_files = len(before_files - after_files) + pruned_dirs
             changed_files = -1
         except subprocess.CalledProcessError as error:
-            if _is_rsync_permission_failure(error):
+            if spec.replace_before_sync or _is_rsync_permission_failure(error):
                 changed_files, deleted_files = _sync_mirror_python(
                     source_abs,
                     projection_abs,
