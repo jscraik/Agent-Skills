@@ -13,6 +13,7 @@ from helpers.schema_validator import _validate_schema_subset
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure/scripts/lib"))
+from ask.commands.skills_impl import skills_sdk_project_install  # noqa: E402
 from ask.skills_sdk.project_install import ProjectInstallError, install_project_skill  # noqa: E402
 
 TARGET = "Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md"
@@ -356,6 +357,33 @@ class TestSkillsSdkProjectInstall(unittest.TestCase):
             self.assertIn("target_symlink:.harness", receipt["conflicts"])
             self.assertFalse((project_root / "missing-receipts-root").exists())
 
+    def test_invalid_lockfile_path_refuses_before_copying(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            project_root = _marked_project(Path(tmp))
+            (project_root / "skills.lock.json").mkdir()
+            process = _run_process(
+                sys.executable,
+                "Infrastructure/bin/ask",
+                "sdk",
+                "install",
+                TARGET,
+                "--apply",
+                "--project-root",
+                str(project_root),
+                "--json",
+                "--robot",
+            )
+
+            self.assertEqual(process.returncode, 4, process.stdout)
+            payload = json.loads(process.stdout)
+            install_payload = payload["data"]["skills_sdk_project_install"]
+            receipt = install_payload["receipt"]
+            self.assert_receipt_valid(receipt)
+            self.assertEqual(install_payload["status"], "blocked")
+            self.assertFalse(receipt["mutation_performed"])
+            self.assertIn("metadata_invalid:skills.lock.json", receipt["conflicts"])
+            self.assertFalse((project_root / ".agents/skills/valid_skill/SKILL.md").exists())
+
     def test_partial_receipt_reports_directory_only_mutation(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)
@@ -385,6 +413,33 @@ class TestSkillsSdkProjectInstall(unittest.TestCase):
             self.assertEqual(receipt["files_written"], [])
             self.assertIn(".agents/skills/source-skill", receipt["rollback_metadata"]["installed_files"])
             self.assertTrue((project_root / ".agents/skills/source-skill").is_dir())
+
+    def test_facade_preserves_partial_receipt_status(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            project_root = _marked_project(tmp_path)
+            source_root = tmp_path / "source-skill"
+            source_root.mkdir()
+            (source_root / "SKILL.md").write_text(
+                "---\nname: source-skill\ndescription: source skill\n---\n\n# Source\n",
+                encoding="utf-8",
+            )
+
+            with mock.patch("ask.skills_sdk.project_install.shutil.copyfile", side_effect=OSError("copy failed")):
+                result = skills_sdk_project_install(
+                    REPO_ROOT,
+                    str(source_root),
+                    project_root=str(project_root),
+                    scope="project",
+                )
+
+            install_payload = result.data["skills_sdk_project_install"]
+            receipt = install_payload["receipt"]
+            self.assert_receipt_valid(receipt)
+            self.assertEqual(result.status, "error")
+            self.assertEqual(install_payload["status"], "partial")
+            self.assertEqual(receipt["status"], "partial")
+            self.assertTrue(receipt["mutation_performed"])
 
     def test_source_symlink_is_refused_before_writing(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

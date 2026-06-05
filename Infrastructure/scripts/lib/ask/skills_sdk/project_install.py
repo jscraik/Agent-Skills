@@ -85,6 +85,28 @@ def _first_symlink_in_path(root: Path, relative_path: Path) -> Path | None:
     return None
 
 
+def _metadata_path_conflicts(root: Path, relative_path: Path) -> list[str]:
+    conflicts: list[str] = []
+    current = root
+    parts = relative_path.parts
+    for index, part in enumerate(parts):
+        current = current / part
+        current_relative = _relative_to(current, root)
+        if current.is_symlink():
+            conflicts.append(f"target_symlink:{current_relative}")
+            break
+        if not current.exists():
+            continue
+        is_leaf = index == len(parts) - 1
+        if is_leaf:
+            if not current.is_file():
+                conflicts.append(f"metadata_invalid:{current_relative}")
+        elif not current.is_dir():
+            conflicts.append(f"metadata_invalid:{current_relative}")
+            break
+    return conflicts
+
+
 def _missing_parent_dirs(path: Path, root: Path) -> list[str]:
     missing: list[str] = []
     current = root
@@ -321,14 +343,12 @@ def install_project_skill(
     files_written: list[dict[str, str]] = []
     receipt_ref = _relative_to(receipt_path, resolved_project_root)
     for metadata_relative in (Path(DEFAULT_LOCKFILE_PATH), RECEIPT_DIR / f"{package_name}.json"):
-        symlink_path = _first_symlink_in_path(resolved_project_root, metadata_relative)
-        if symlink_path is not None:
-            conflicts.append(f"target_symlink:{_relative_to(symlink_path, resolved_project_root)}")
+        conflicts.extend(_metadata_path_conflicts(resolved_project_root, metadata_relative))
     if conflicts:
         raise ProjectInstallError(
             code="ERR_CONFLICT",
-            message="Refusing to write Skills SDK install metadata through a symlinked target path.",
-            fix_suggestion="Remove the symlinked metadata path or choose another project root.",
+            message="Refusing to write Skills SDK install metadata through an unsafe target path.",
+            fix_suggestion="Remove the conflicting metadata path or choose another project root.",
             receipt=_blocked_receipt(
                 source_path=str(source_root),
                 source_digest=source_digest,
