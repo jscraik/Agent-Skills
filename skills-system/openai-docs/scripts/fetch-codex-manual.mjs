@@ -2,6 +2,7 @@
 import {
   access,
   mkdir,
+  mkdtemp,
   readFile,
   rename,
   rm,
@@ -98,13 +99,17 @@ const parseCurlHeaders = (rawHeaders) => {
   };
 };
 
-const tempFilePath = (cacheDir, suffix) =>
-  path.join(
-    cacheDir,
-    `.fetch-codex-manual-${process.pid}-${Date.now()}-${Math.random()
-      .toString(16)
-      .slice(2)}${suffix}`
-  );
+const writeAtomicInCacheDir = async (cacheDir, destinationPath, content) => {
+  const tempDir = await mkdtemp(path.join(cacheDir, ".fetch-codex-manual-"));
+  const tempPath = path.join(tempDir, path.basename(destinationPath));
+
+  try {
+    await writeFile(tempPath, content, { encoding: "utf8", flag: "wx" });
+    await rename(tempPath, destinationPath);
+  } finally {
+    await rm(tempDir, { recursive: true, force: true });
+  }
+};
 
 const requestManualWithCurl = async (url, { cacheDir, method, timeoutMs }) => {
   const headerPath = tempFilePath(cacheDir, ".headers");
@@ -393,16 +398,12 @@ const readCachedManual = async (cacheDir, expectedSha256) => {
 
 const writeCachedManual = async (cacheDir, manual) => {
   await mkdir(cacheDir, { recursive: true });
-  const tmpPath = tempFilePath(cacheDir, `.${CACHE_FILE_NAME}.tmp`);
-  await writeFile(tmpPath, manual, "utf8");
-  await rename(tmpPath, cacheFilePath(cacheDir));
+  await writeAtomicInCacheDir(cacheDir, cacheFilePath(cacheDir), manual);
 };
 
 const writeOutline = async (cacheDir, outlineText) => {
   await mkdir(cacheDir, { recursive: true });
-  const tmpPath = tempFilePath(cacheDir, `.${OUTLINE_FILE_NAME}.tmp`);
-  await writeFile(tmpPath, outlineText, "utf8");
-  await rename(tmpPath, outlineFilePath(cacheDir));
+  await writeAtomicInCacheDir(cacheDir, outlineFilePath(cacheDir), outlineText);
 };
 
 const fetchCodexManual = async ({
