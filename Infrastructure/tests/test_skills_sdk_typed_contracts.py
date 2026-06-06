@@ -1,118 +1,94 @@
+from __future__ import annotations
+
 import json
-import os
+from pathlib import Path
 import subprocess
 import sys
-import tempfile
 import unittest
-from pathlib import Path
+
+from pydantic import ValidationError
+
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO_ROOT / "Infrastructure/scripts/lib"))
+sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
-from ask.skills_sdk.typed_contracts import (  # noqa: E402
-    validate_cleanup_receipt,
-    validate_install_receipt,
-    validate_lockfile,
+from ask.skills_sdk import typed_contracts as contracts  # noqa: E402
+
+
+FIXTURE_DIR = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine"
+PUBLIC_CONTRACT_MODULES = (
+    REPO_ROOT / "Infrastructure/scripts/lib/ask/skills_sdk/typed_contracts.py",
+    REPO_ROOT / "Infrastructure/scripts/lib/ask/envelope.py",
 )
 
 
-TARGET = "Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md"
-
-
-def _command_env() -> dict[str, str]:
-    env = os.environ.copy()
-    temp_base = Path(tempfile.gettempdir()) / "agent-skills-test"
-    env.setdefault("XDG_CACHE_HOME", str(temp_base / "xdg-cache"))
-    env.setdefault("XDG_STATE_HOME", str(temp_base / "xdg-state"))
-    env.setdefault("MISE_CACHE_DIR", str(temp_base / "mise-cache"))
-    env.setdefault("UV_CACHE_DIR", str(temp_base / "uv-cache"))
-    env.setdefault("MISE_TRUSTED_CONFIG_PATHS", str(REPO_ROOT / ".mise.toml"))
-    env.setdefault("ASK_SKILLS_SDK_INSTALL_TIMESTAMP", "2026-06-05T00:00:00Z")
-    return env
-
-
-def _format_command_error(args: list[str], returncode: int, stdout: str, stderr: str) -> str:
-    return f"{' '.join(args)} failed with {returncode}\nSTDOUT:\n{stdout}\nSTDERR:\n{stderr}"
-
-
-def _run_json_command(*args: str) -> dict[str, object]:
-    process = subprocess.run(
-        list(args),
-        cwd=REPO_ROOT,
-        env=_command_env(),
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    if process.returncode != 0:
-        raise AssertionError(_format_command_error(list(args), process.returncode, process.stdout, process.stderr))
-    payload = json.loads(process.stdout)
-    if not isinstance(payload, dict):
-        raise AssertionError("ask sdk command returned a non-object JSON payload")
-    return payload
-
-
-def _marked_project(tmp_path: Path) -> Path:
-    project_root = tmp_path / "target-project"
-    project_root.mkdir()
-    (project_root / "AGENTS.md").write_text("# Target Project\n", encoding="utf-8")
-    return project_root
+def _json(path: Path) -> object:
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
 class TestSkillsSdkTypedContracts(unittest.TestCase):
-    def test_install_lockfile_and_cleanup_outputs_validate_as_typed_contracts(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            project_root = _marked_project(Path(tmp))
-            install_payload = _run_json_command(
-                sys.executable,
-                "Infrastructure/bin/ask",
-                "sdk",
-                "install",
-                TARGET,
-                "--apply",
-                "--project-root",
-                str(project_root),
-                "--json",
-                "--robot",
-            )
-            install_data = install_payload["data"]
-            if not isinstance(install_data, dict):
-                raise AssertionError("install payload data is not an object")
-            install_result = install_data["skills_sdk_project_install"]
-            if not isinstance(install_result, dict):
-                raise AssertionError("install result is not an object")
-            install_receipt = validate_install_receipt(install_result["receipt"])
+    def test_valid_schema_spine_fixtures_load_through_pydantic_contracts(self) -> None:
+        cases = (
+            ("manifest-source.json", contracts.validate_manifest_source),
+            ("check-receipt.json", contracts.validate_check_receipt),
+            ("risk-classification.json", contracts.validate_risk_classification),
+            ("install-preview.json", contracts.validate_install_preview),
+            ("install-receipt.json", contracts.validate_install_receipt),
+            ("lockfile.json", contracts.validate_lockfile),
+        )
 
-            lockfile_path = project_root / "skills.lock.json"
-            if not lockfile_path.exists():
-                raise AssertionError(f"Expected lockfile not found at {lockfile_path}")
-            lockfile = validate_lockfile(json.loads(lockfile_path.read_text(encoding="utf-8")))
-            self.assertIn("valid_skill", lockfile.entries)
-            self.assertEqual(install_receipt.status, "success")
+        for filename, validator in cases:
+            with self.subTest(filename=filename):
+                model = validator(_json(FIXTURE_DIR / "valid" / filename))
+                self.assertEqual(model.model_config["extra"], "forbid")
+                self.assertTrue(model.model_config["strict"])
 
-            rollback_payload = _run_json_command(
-                sys.executable,
-                "Infrastructure/bin/ask",
-                "sdk",
-                "rollback",
-                "--receipt",
-                str(project_root / ".harness/receipts/skills-sdk/install/valid_skill.json"),
-                "--preview",
-                "--json",
-                "--robot",
-            )
-            rollback_data = rollback_payload["data"]
-            if not isinstance(rollback_data, dict):
-                raise AssertionError("rollback payload data is not an object")
-            rollback_result = rollback_data["skills_sdk_project_rollback"]
-            if not isinstance(rollback_result, dict):
-                raise AssertionError("rollback result is not an object")
-            rollback_receipt = validate_cleanup_receipt(rollback_result["receipt"])
+    def test_sdk_status_output_loads_through_status_contract(self) -> None:
+        completed = subprocess.run(
+            ["./bin/ask", "sdk", "status", "--json", "--robot"],
+            cwd=REPO_ROOT,
+            text=True,
+            capture_output=True,
+            check=True,
+        )
+        envelope = contracts.validate_robot_envelope(json.loads(completed.stdout))
+        model = contracts.validate_capability_status(envelope.data["skills_sdk_status"])
 
-            self.assertEqual(rollback_receipt.operation, "rollback")
-            self.assertEqual(rollback_receipt.status, "preview")
-            self.assertIsNone(rollback_receipt.cleanup_journal_name)
-            self.assertEqual(rollback_receipt.directory_prune_results, [])
+        self.assertEqual(model.schema_version, "skills-sdk.capability-status.v1")
+        self.assertEqual(model.summary.total, len(model.capabilities))
+        self.assertGreater(model.summary.total, 0)
+
+    def test_invalid_fixture_is_rejected_by_pydantic_contract(self) -> None:
+        with self.assertRaises(ValidationError):
+            contracts.validate_install_preview(_json(FIXTURE_DIR / "invalid" / "install-preview-writes.json"))
+
+    def test_contracts_reject_type_coercion(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "check-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["exit_code"] = "0"
+
+        with self.assertRaises(ValidationError):
+            contracts.validate_check_receipt(payload)
+
+    def test_robot_envelope_contract_accepts_standard_success_shape(self) -> None:
+        payload = {
+            "status": "success",
+            "trace_id": "trace-1",
+            "metadata": {
+                "version": "0.1.0",
+                "command": "repo validate --scope=skills-sdk",
+                "next_steps": [],
+                "correction_note": None,
+            },
+            "data": {"required_failures": 0},
+            "telemetry": {"latency_ms": 12},
+            "errors": [],
+        }
+
+        model = contracts.validate_robot_envelope(payload)
+
+        self.assertEqual(model.metadata.command, "repo validate --scope=skills-sdk")
+        self.assertEqual(model.data["required_failures"], 0)
 
 
 if __name__ == "__main__":

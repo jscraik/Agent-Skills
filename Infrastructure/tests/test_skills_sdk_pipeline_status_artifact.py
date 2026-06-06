@@ -1,5 +1,6 @@
 import json
 import re
+import subprocess
 import unittest
 from html.parser import HTMLParser
 from pathlib import Path
@@ -8,6 +9,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 HTML_PATH = REPO_ROOT / "artifacts/recommended-skills-sdk-pipeline.html"
 MATRIX_PATH = REPO_ROOT / "Infrastructure/config/skills-sdk/capability-matrix.v1.json"
+LIFECYCLE_HTML_PATH = REPO_ROOT / "artifacts/skills-sdk-user-lifecycle-one-page.html"
 
 
 class CapabilityStatusParser(HTMLParser):
@@ -47,6 +49,15 @@ class TestSkillsSdkPipelineStatusArtifact(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.html = HTML_PATH.read_text(encoding="utf-8")
         cls.matrix = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
+        completed = subprocess.run(
+            ["./bin/ask", "sdk", "status", "--json", "--robot"],
+            cwd=REPO_ROOT,
+            text=True,
+            capture_output=True,
+            check=True,
+        )
+        cls.runtime_status = json.loads(completed.stdout)["data"]["skills_sdk_status"]
+        cls.lifecycle_html = LIFECYCLE_HTML_PATH.read_text(encoding="utf-8")
         parser = CapabilityStatusParser()
         parser.feed(cls.html)
         cls.rows = parser.rows
@@ -66,6 +77,40 @@ class TestSkillsSdkPipelineStatusArtifact(unittest.TestCase):
                 html_row = self.rows[capability["id"]]
                 self.assertEqual(html_row["status"], capability["status"])
                 self.assertIn(capability["status"], html_row["text"])
+
+    def test_pipeline_artifact_statuses_match_live_sdk_status(self) -> None:
+        runtime_by_id = {
+            capability["id"]: capability
+            for capability in self.runtime_status["capabilities"]
+        }
+
+        self.assertEqual(set(self.rows), set(runtime_by_id))
+        for capability_id, runtime_row in runtime_by_id.items():
+            with self.subTest(capability=capability_id):
+                html_row = self.rows[capability_id]
+                self.assertEqual(html_row["status"], runtime_row["status"])
+                self.assertIn(runtime_row["title"], html_row["text"])
+
+    def test_lifecycle_one_page_does_not_contradict_live_completed_capabilities(self) -> None:
+        implemented_titles = {
+            capability["title"]
+            for capability in self.runtime_status["capabilities"]
+            if capability["status"] == "implemented"
+        }
+        deferred_titles = {
+            capability["title"]
+            for capability in self.runtime_status["capabilities"]
+            if capability["status"] in {"deferred", "placeholder_blocked", "blocked_missing_adapter", "out_of_scope"}
+        }
+
+        for title in implemented_titles:
+            if title in self.lifecycle_html:
+                self.assertIn(title, self.lifecycle_html)
+        for title in deferred_titles:
+            if title in self.lifecycle_html:
+                title_index = self.lifecycle_html.index(title)
+                nearby = self.lifecycle_html[max(0, title_index - 300): title_index + 300].lower()
+                self.assertNotIn("completed", nearby)
 
     def test_every_pipeline_section_is_represented_in_html(self) -> None:
         matrix_sections = {

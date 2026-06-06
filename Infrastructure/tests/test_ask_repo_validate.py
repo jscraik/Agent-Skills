@@ -15,44 +15,11 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 from ask.commands.repo import repo_validate
 
 
-class _FakePopen:
+class _FakeCompletedProcess:
     def __init__(self, lines: list[str], returncode: int = 0):
-        """
-        Initialize a fake subprocess with predetermined stdout lines and an exit code.
-        
-        Parameters:
-            lines (list[str]): Lines to be yielded by the subprocess's stdout iterator in order.
-            returncode (int): Exit code that wait() will return; defaults to 0.
-        """
-        self.stdout = iter(lines)
+        self.stdout = "".join(lines)
         self.returncode = returncode
-
-    def __enter__(self):
-        """
-        Return the context manager instance.
-        
-        Returns:
-            self: The context manager instance to be bound to the target of the `with` statement.
-        """
-        return self
-
-    def __exit__(self, exc_type, exc, tb):
-        """
-        Indicate that exceptions raised inside the context should propagate.
-        
-        @return:
-            `False` to ensure any exception raised within the context manager is not suppressed and is re-raised.
-        """
-        return False
-
-    def wait(self) -> int:
-        """
-        Return the preconfigured process exit code.
-        
-        Returns:
-            int: The configured process return code.
-        """
-        return self.returncode
+        self.args: list[str] = []
 
 
 class TestAskRepoValidate(unittest.TestCase):
@@ -69,8 +36,8 @@ class TestAskRepoValidate(unittest.TestCase):
             repo = Path(tmpdir)
             stderr = io.StringIO()
             with patch(
-                "ask.commands.repo.subprocess.Popen",
-                return_value=_FakePopen(lines, returncode=0),
+                "ask.commands.repo.subprocess.run",
+                return_value=_FakeCompletedProcess(lines, returncode=0),
             ):
                 with redirect_stderr(stderr):
                     result = repo_validate(repo, ephemeral=True)
@@ -87,8 +54,8 @@ class TestAskRepoValidate(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir:
             repo = Path(tmpdir)
             with patch(
-                "ask.commands.repo.subprocess.Popen",
-                return_value=_FakePopen(lines, returncode=1),
+                "ask.commands.repo.subprocess.run",
+                return_value=_FakeCompletedProcess(lines, returncode=1),
             ):
                 result = repo_validate(repo, ephemeral=True)
 
@@ -108,16 +75,39 @@ class TestAskRepoValidate(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir:
             repo = Path(tmpdir)
             with patch(
-                "ask.commands.repo.subprocess.Popen",
-                return_value=_FakePopen(lines, returncode=0),
-            ) as popen:
+                "ask.commands.repo.subprocess.run",
+                return_value=_FakeCompletedProcess(lines, returncode=0),
+            ) as run:
                 result = repo_validate(repo, ephemeral=True, scope="lint")
 
         self.assertEqual(result.status, "success")
         self.assertEqual(result.data["scope"], "lint")
-        cmd = popen.call_args.args[0]
+        cmd = run.call_args.args[0]
         self.assertIn("--scope", cmd)
         self.assertIn("lint", cmd)
+
+    def test_repo_validate_forwards_skills_sdk_scope_to_validate_all(self) -> None:
+        lines = [
+            "🔍 Running all validations...\n",
+            "🎯 Validation scope: skills-sdk\n",
+            "Validation summary:\n",
+            "- required_failures: 0\n",
+            "- warn_only_issues: 0\n",
+        ]
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir)
+            with patch(
+                "ask.commands.repo.subprocess.run",
+                return_value=_FakeCompletedProcess(lines, returncode=0),
+            ) as run:
+                result = repo_validate(repo, ephemeral=True, scope="skills-sdk")
+
+        self.assertEqual(result.status, "success")
+        self.assertEqual(result.data["scope"], "skills-sdk")
+        cmd = run.call_args.args[0]
+        self.assertIn("--scope", cmd)
+        self.assertIn("skills-sdk", cmd)
 
 
 if __name__ == "__main__":
