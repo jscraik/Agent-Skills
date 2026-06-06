@@ -31,20 +31,21 @@ def _command_env() -> dict[str, str]:
     return env
 
 
+def _format_command_error(args: list[str], returncode: int, stdout: str, stderr: str) -> str:
+    return f"{' '.join(args)} failed with {returncode}\nSTDOUT:\n{stdout}\nSTDERR:\n{stderr}"
+
+
 def _run_json_command(*args: str) -> dict[str, object]:
     process = subprocess.run(
         list(args),
         cwd=REPO_ROOT,
         env=_command_env(),
+        capture_output=True,
         text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
         check=False,
     )
     if process.returncode != 0:
-        raise AssertionError(
-            f"{' '.join(args)} failed with {process.returncode}\nSTDOUT:\n{process.stdout}\nSTDERR:\n{process.stderr}"
-        )
+        raise AssertionError(_format_command_error(list(args), process.returncode, process.stdout, process.stderr))
     payload = json.loads(process.stdout)
     if not isinstance(payload, dict):
         raise AssertionError("ask sdk command returned a non-object JSON payload")
@@ -82,7 +83,10 @@ class TestSkillsSdkTypedContracts(unittest.TestCase):
                 raise AssertionError("install result is not an object")
             install_receipt = validate_install_receipt(install_result["receipt"])
 
-            lockfile = validate_lockfile(json.loads((project_root / "skills.lock.json").read_text(encoding="utf-8")))
+            lockfile_path = project_root / "skills.lock.json"
+            if not lockfile_path.exists():
+                raise AssertionError(f"Expected lockfile not found at {lockfile_path}")
+            lockfile = validate_lockfile(json.loads(lockfile_path.read_text(encoding="utf-8")))
             self.assertIn("valid_skill", lockfile.entries)
             self.assertEqual(install_receipt.status, "success")
 
