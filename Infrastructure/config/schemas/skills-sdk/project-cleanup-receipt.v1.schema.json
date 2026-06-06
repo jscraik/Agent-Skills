@@ -38,7 +38,7 @@
           "before_digest": {"type": "string"},
           "after_digest": {"type": "string"}
         },
-        "required": ["path", "changed", "before_digest", "after_digest"]
+        "required": ["path", "changed", "before_digest", "after_digest", "operation", "removed_entries"]
       }
     },
     "directory_prune_results": {

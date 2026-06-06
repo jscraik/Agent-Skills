@@ -603,13 +603,16 @@ def _execute_cleanup(
     removed = []
     directory_prune_results: list[dict[str, Any]] = []
     mutation_performed = False
+    parent_dirs_to_prune: set[Path] = set()
     try:
         for item in ready:
             target = project_root / item["target_path"]
             target.unlink()
             mutation_performed = True
             removed.append({**item, "status": "removed"})
-            directory_prune_results.extend(_prune_empty_owned_dirs(target.parent, project_root))
+            parent_dirs_to_prune.add(target.parent)
+        for parent_dir in parent_dirs_to_prune:
+            directory_prune_results.extend(_prune_empty_owned_dirs(parent_dir, project_root))
         lockfile_change = (
             {
                 "path": DEFAULT_LOCKFILE_PATH,
@@ -665,7 +668,7 @@ def _update_lockfile_after_cleanup(project_root: Path, operation: str, skill_id:
     lockfile_path = project_root / DEFAULT_LOCKFILE_PATH
     before_digest = _sha256_file(lockfile_path) if lockfile_path.is_file() else None
     if not lockfile_path.is_file():
-        return {"path": DEFAULT_LOCKFILE_PATH, "changed": False, "reason": "missing_lockfile", "before_digest": before_digest, "after_digest": before_digest}
+        return {"path": DEFAULT_LOCKFILE_PATH, "changed": False, "operation": operation, "removed_entries": [], "reason": "missing_lockfile", "before_digest": before_digest, "after_digest": before_digest}
     lockfile = _load_lockfile(lockfile_path)
     receipt_ref = _relative_to(source_receipt_path, project_root)
     entries = lockfile["entries"]
@@ -675,7 +678,7 @@ def _update_lockfile_after_cleanup(project_root: Path, operation: str, skill_id:
             removed_keys.append(key)
             del entries[key]
     if not removed_keys:
-        return {"path": DEFAULT_LOCKFILE_PATH, "changed": False, "reason": "no_matching_entry", "before_digest": before_digest, "after_digest": before_digest}
+        return {"path": DEFAULT_LOCKFILE_PATH, "changed": False, "operation": operation, "removed_entries": [], "reason": "no_matching_entry", "before_digest": before_digest, "after_digest": before_digest}
     _json_atomic_replace(lockfile_path, lockfile)
     return {
         "path": DEFAULT_LOCKFILE_PATH,
