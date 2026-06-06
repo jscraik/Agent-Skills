@@ -32,6 +32,11 @@
 ## Package command map
 
 - Repository root is configuration-oriented and has no package manager install step.
+- Verified Python project roots from lockfiles:
+  - `Infrastructure/`
+- Use the Infrastructure Python project for SDK contract validation and repo-local Python dependency checks:
+  - `uv run --project Infrastructure --group test python -m pytest <target>`
+  - `uv run --project Infrastructure --group lint ruff check <target>`
 - Verified npm package roots from lockfiles:
   - `Skills/content-publishing/video-transcript-downloader/`
   - `Skills/frontend-ui/ui-ux-creative-coding/`
