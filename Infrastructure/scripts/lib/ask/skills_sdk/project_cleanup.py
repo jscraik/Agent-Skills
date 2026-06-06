@@ -601,14 +601,18 @@ def _execute_cleanup(
             receipt=receipt,
         )
     removed = []
+    directory_prune_results: list[dict[str, Any]] = []
     mutation_performed = False
+    parent_dirs_to_prune: set[Path] = set()
     try:
         for item in ready:
             target = project_root / item["target_path"]
             target.unlink()
             mutation_performed = True
             removed.append({**item, "status": "removed"})
-            _prune_empty_owned_dirs(target.parent, project_root)
+            parent_dirs_to_prune.add(target.parent)
+        for parent_dir in parent_dirs_to_prune:
+            directory_prune_results.extend(_prune_empty_owned_dirs(parent_dir, project_root))
         lockfile_change = (
             {
                 "path": DEFAULT_LOCKFILE_PATH,
@@ -632,6 +636,7 @@ def _execute_cleanup(
             skill_id=skill_id,
             journal_path=_relative_to(journal_path, project_root),
             lockfile_changes=[lockfile_change] if lockfile_change["changed"] else [],
+            directory_prune_results=directory_prune_results,
         )
         receipt_path = project_root / CLEANUP_RECEIPT_DIR / _receipt_name(operation, source_receipt_digest, skill_id)
         _json_atomic_replace(receipt_path, receipt)
@@ -649,6 +654,7 @@ def _execute_cleanup(
             live_project_validation=True,
             skill_id=skill_id,
             journal_path=_relative_to(journal_path, project_root),
+            directory_prune_results=directory_prune_results,
         )
         raise ProjectCleanupError(
             code="ERR_RUNTIME",
@@ -662,7 +668,7 @@ def _update_lockfile_after_cleanup(project_root: Path, operation: str, skill_id:
     lockfile_path = project_root / DEFAULT_LOCKFILE_PATH
     before_digest = _sha256_file(lockfile_path) if lockfile_path.is_file() else None
     if not lockfile_path.is_file():
-        return {"path": DEFAULT_LOCKFILE_PATH, "changed": False, "reason": "missing_lockfile", "before_digest": before_digest, "after_digest": before_digest}
+        return {"path": DEFAULT_LOCKFILE_PATH, "changed": False, "operation": operation, "removed_entries": [], "reason": "missing_lockfile", "before_digest": before_digest, "after_digest": before_digest}
     lockfile = _load_lockfile(lockfile_path)
     receipt_ref = _relative_to(source_receipt_path, project_root)
     entries = lockfile["entries"]
@@ -672,7 +678,7 @@ def _update_lockfile_after_cleanup(project_root: Path, operation: str, skill_id:
             removed_keys.append(key)
             del entries[key]
     if not removed_keys:
-        return {"path": DEFAULT_LOCKFILE_PATH, "changed": False, "reason": "no_matching_entry", "before_digest": before_digest, "after_digest": before_digest}
+        return {"path": DEFAULT_LOCKFILE_PATH, "changed": False, "operation": operation, "removed_entries": [], "reason": "no_matching_entry", "before_digest": before_digest, "after_digest": before_digest}
     _json_atomic_replace(lockfile_path, lockfile)
     return {
         "path": DEFAULT_LOCKFILE_PATH,
@@ -684,15 +690,20 @@ def _update_lockfile_after_cleanup(project_root: Path, operation: str, skill_id:
     }
 
 
-def _prune_empty_owned_dirs(path: Path, project_root: Path) -> None:
+def _prune_empty_owned_dirs(path: Path, project_root: Path) -> list[dict[str, Any]]:
     skill_root = project_root / ".agents" / "skills"
     current = path
+    results: list[dict[str, Any]] = []
     while current != project_root and current != skill_root.parent and current.is_relative_to(skill_root):
+        relative = _relative_to(current, project_root)
         try:
             current.rmdir()
         except OSError:
-            return
+            results.append({"path": relative, "pruned": False, "reason": "not_empty_or_unavailable"})
+            return results
+        results.append({"path": relative, "pruned": True, "reason": "empty_owned_directory"})
         current = current.parent
+    return results
 
 
 def _journal_path(project_root: Path, operation: str, source_digest: str, skill_id: str | None) -> Path:
@@ -734,6 +745,7 @@ def _cleanup_receipt(
     skill_id: str | None = None,
     journal_path: str | None = None,
     lockfile_changes: list[dict[str, Any]] | None = None,
+    directory_prune_results: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     removed = [item for item in files_planned if item["status"] == "removed"]
     skipped = [item for item in files_planned if item["status"] == "skipped"]
@@ -762,6 +774,8 @@ def _cleanup_receipt(
         "files_skipped": skipped,
         "files_blocked": blocked,
         "lockfile_changes": lockfile_changes or [],
+        "directory_prune_results": directory_prune_results or [],
+        "cleanup_journal_name": Path(journal_path).name if journal_path else None,
         "journal_path": journal_path,
         "manual_actions": manual_actions,
         "mutation_performed": mutation_performed,

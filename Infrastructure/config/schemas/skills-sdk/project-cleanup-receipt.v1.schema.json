@@ -27,10 +27,18 @@
         "type": "object",
         "additionalProperties": false,
         "properties": {
+          "path": {"type": "string"},
+          "changed": {"type": "boolean"},
+          "reason": {"type": "string"},
+          "operation": {"type": "string", "enum": ["rollback", "uninstall"]},
+          "removed_entries": {
+            "type": "array",
+            "items": {"type": "string"}
+          },
           "before_digest": {"type": "string"},
           "after_digest": {"type": "string"}
         },
-        "required": ["before_digest", "after_digest"]
+        "required": ["path", "changed", "before_digest", "after_digest", "operation", "removed_entries"]
       }
     },
     "directory_prune_results": {
