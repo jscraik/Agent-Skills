@@ -94,6 +94,7 @@ def main():
             "test",
             "audit",
             "check",
+            "skills-sdk",
             "consistency-advisory",
             "consistency-health",
         ],

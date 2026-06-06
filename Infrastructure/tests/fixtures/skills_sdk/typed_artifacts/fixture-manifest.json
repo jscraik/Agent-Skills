@@ -1,0 +1,27 @@
+{
+  "schema_version": "skills-sdk.fixture-manifest.v1",
+  "fixture_family": "typed_artifacts",
+  "fixtures": [
+    {
+      "path": "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/install-receipt.json",
+      "origin": "schema_positive",
+      "schema_version": "skills-sdk.install-receipt.v1",
+      "source_artifact_class": "json_receipt",
+      "static_fixture_rationale": "Stable positive fixture for install receipt schema and Pydantic parity."
+    },
+    {
+      "path": "Infrastructure/tests/fixtures/skills_sdk/schema_spine/invalid/install-preview-writes.json",
+      "origin": "schema_negative",
+      "schema_version": "skills-sdk.install-preview.v1",
+      "source_artifact_class": "json_receipt",
+      "static_fixture_rationale": "Stable negative fixture proving preview write claims are rejected."
+    },
+    {
+      "path": "artifacts/recommended-skills-sdk-pipeline.html",
+      "origin": "visual_projection",
+      "schema_version": "skills-sdk.capability-status.v1",
+      "source_artifact_class": "html_pipeline",
+      "static_fixture_rationale": "Visual projection cross-checked against ask sdk status."
+    }
+  ]
+}

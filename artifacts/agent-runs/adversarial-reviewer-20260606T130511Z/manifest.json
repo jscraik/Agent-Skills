@@ -1,0 +1,34 @@
+{
+  "run_id": "20260606T130511Z",
+  "agent_id": "019e9d06-522c-7311-beee-23de445e82e1",
+  "reviewer": "adversarial",
+  "status": "complete",
+  "artifact_paths": [
+    ".harness/review-artifacts/pu-011-adversarial-contract-runtime.md"
+  ],
+  "manifest_path": "artifacts/agent-runs/adversarial-reviewer-20260606T130511Z/manifest.json",
+  "findings": [
+    "No-Any scope misses the live robot envelope module.",
+    "Pydantic and JSON Schema drift is not pinned to one authority.",
+    "Validation scope can miss public envelope/output changes.",
+    "Manifest/frontmatter typing is underspecified across source and projection contracts."
+  ],
+  "failures_or_blockers": [],
+  "improvement_opportunities": [
+    "Add envelope.py to the no-Any ban scope.",
+    "Define one canonical parity rule between Pydantic models and JSON Schemas.",
+    "Name one exact validation entrypoint and fail closed on unknown scopes.",
+    "Split source frontmatter and manifest projection into separate contracts."
+  ],
+  "strengths": [
+    "The spec already acknowledges the real risk surfaces: status, receipts, lockfiles, and visual artifacts.",
+    "It correctly keeps live project mutation out of scope."
+  ],
+  "validation_evidence": [
+    "Read .harness/specs/2026-06-06-skills-sdk-pu-011-typed-artifact-contracts-spec.md lines 121-150 and 243-283.",
+    "Read Infrastructure/scripts/lib/ask/envelope.py lines 73-85.",
+    "Read Infrastructure/scripts/lib/ask/skills_sdk/typed_contracts.py and the matching JSON Schemas.",
+    "Read Infrastructure/tests/test_ask_repo_surface.py lines 29-42 and Infrastructure/scripts/validate_all_impl.sh lines 5-105."
+  ],
+  "next_action": "Revise the PU-011 spec to close the listed contract/runtime gaps before implementation planning."
+}

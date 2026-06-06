@@ -4,7 +4,7 @@ import uuid
 import re
 import os
 from dataclasses import dataclass, asdict, field
-from typing import Any, Optional
+from typing import Optional
 from enum import IntEnum
 
 
@@ -74,14 +74,14 @@ def _get_trace_id() -> str:
 class CallResult:
     status: str = "success"
     trace_id: str = field(default_factory=_get_trace_id)
-    metadata: dict[str, Any] = field(default_factory=lambda: {
+    metadata: dict[str, object] = field(default_factory=lambda: {
         "version": "0.1.0",
         "command": "unknown",
         "next_steps": [],
         "correction_note": None,
     })
-    data: dict[str, Any] = field(default_factory=dict)
-    telemetry: dict[str, Any] = field(default_factory=dict)
+    data: dict[str, object] = field(default_factory=dict)
+    telemetry: dict[str, object] = field(default_factory=dict)
     errors: list[ErrorObject] = field(default_factory=list)
 
     def to_json(self, repo_root: Optional[str] = None) -> str:
@@ -108,18 +108,24 @@ class CallResult:
             s = s.replace(home_dir, "<USER_HOME>")
             return s
 
-        def redact_errors(errors: list) -> list:
+        def redact_errors(errors: list[object]) -> list[dict[str, object]]:
             """Redact paths from error messages only."""
-            redacted = []
+            redacted: list[dict[str, object]] = []
             for err in errors:
-                redacted_err = {
-                    "code": err.get("code", ""),
-                    "message": redact_string(err.get("message", "")),
+                if not isinstance(err, dict):
+                    continue
+                code = err.get("code", "")
+                message = err.get("message", "")
+                redacted_err: dict[str, object] = {
+                    "code": str(code),
+                    "message": redact_string(str(message)),
                 }
-                if err.get("fix_suggestion"):
-                    redacted_err["fix_suggestion"] = redact_string(err["fix_suggestion"])
-                if err.get("help_url"):
-                    redacted_err["help_url"] = err["help_url"]
+                fix_suggestion = err.get("fix_suggestion")
+                if fix_suggestion:
+                    redacted_err["fix_suggestion"] = redact_string(str(fix_suggestion))
+                help_url = err.get("help_url")
+                if help_url:
+                    redacted_err["help_url"] = str(help_url)
                 redacted.append(redacted_err)
             return redacted
 

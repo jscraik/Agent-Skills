@@ -12,8 +12,8 @@ Usage: bash Infrastructure/scripts/validate_all.sh [--ephemeral|--persistent] [-
                 Infrastructure/artifacts/validation/latest. This is the default behavior.
   --fail-fast   Stop scheduling new checks after the first required failure.
   --scope       Run a named validation subset. Valid scopes: all, lint,
-                typecheck, test, audit, check, consistency-advisory,
-                consistency-health.
+                typecheck, test, audit, check, skills-sdk,
+                consistency-advisory, consistency-health.
   --changed-files
                 Scope checks to files changed in this lane. When omitted, run full validation.
   --changed-files-from
@@ -95,7 +95,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 case "$validation_scope" in
-  all|lint|typecheck|test|audit|check|consistency-advisory|consistency-health)
+  all|lint|typecheck|test|audit|check|skills-sdk|consistency-advisory|consistency-health)
     ;;
   *)
     echo "Error: unknown validation scope '$validation_scope'" >&2
@@ -252,7 +252,14 @@ check_matches_validation_scope() {
       ;;
     lint)
       case "$slug" in
-        docs-lint|ask-bootstrap-docs|steering-uptake|skill-types|openai-format|progressive-disclosure)
+        docs-lint|ask-bootstrap-docs|steering-uptake|skill-types|openai-format|progressive-disclosure|skills-sdk-typed-artifacts)
+          return 0
+          ;;
+      esac
+      ;;
+    skills-sdk)
+      case "$slug" in
+        skills-sdk-typed-artifacts)
           return 0
           ;;
       esac
@@ -316,6 +323,9 @@ should_run_check() {
       ;;
     docs-lint|ask-bootstrap-docs)
       [[ "$scope_has_docs" -eq 1 || "$scope_has_validation_core" -eq 1 ]]
+      ;;
+    skills-sdk-typed-artifacts)
+      [[ "$scope_has_skills_sdk" -eq 1 || "$scope_has_validation_core" -eq 1 ]]
       ;;
     steering-uptake)
       [[ "$scope_has_docs" -eq 1 || "$scope_has_validation_core" -eq 1 || "$scope_has_steering" -eq 1 ]]
@@ -499,6 +509,7 @@ scope_has_authoring_family=0
 scope_has_runtime_separation=0
 scope_has_validation_core=0
 scope_has_steering=0
+scope_has_skills_sdk=0
 scope_forced_validation_fallback=0
 if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
   for changed_file in "${changed_files[@]}"; do
@@ -511,6 +522,25 @@ if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
     case "$changed_file" in
       .harness/quality/steering-uptake.md)
         scope_has_steering=1
+        ;;
+    esac
+
+    case "$changed_file" in
+      Infrastructure/config/schemas/skills-sdk/*|\
+      Infrastructure/config/schemas/skills-sdk/**|\
+      Infrastructure/scripts/lib/ask/skills_sdk/*|\
+      Infrastructure/scripts/lib/ask/skills_sdk/**|\
+      Infrastructure/scripts/lib/ask/envelope.py|\
+      Infrastructure/scripts/lib/ask/commands/*|\
+      Infrastructure/scripts/lib/ask/commands/**|\
+      Infrastructure/tests/test_skills_sdk*.py|\
+      Infrastructure/tests/fixtures/skills_sdk/*|\
+      Infrastructure/tests/fixtures/skills_sdk/**|\
+      .harness/specs/*skills-sdk*.md|\
+      .harness/plan/*skills-sdk*.md|\
+      .harness/implementation-notes/*skills-sdk*|\
+      artifacts/*skills-sdk*.html)
+        scope_has_skills_sdk=1
         ;;
     esac
 
@@ -546,13 +576,14 @@ if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
       Infrastructure/scripts/validate_all.sh|\
       Infrastructure/bin/ask|\
       Infrastructure/scripts/lib/ask/*|\
+      Infrastructure/scripts/validation-and-linting/validate_skills_sdk_typed_artifacts.py|\
       Infrastructure/scripts/validation-and-linting/*)
         scope_has_validation_core=1
         ;;
     esac
   done
 
-  if [[ "$scope_has_docs" -eq 0 && "$scope_has_skill_graph" -eq 0 && "$scope_has_authoring_family" -eq 0 && "$scope_has_runtime_separation" -eq 0 && "$scope_has_validation_core" -eq 0 && "$scope_has_steering" -eq 0 ]]; then
+  if [[ "$scope_has_docs" -eq 0 && "$scope_has_skill_graph" -eq 0 && "$scope_has_authoring_family" -eq 0 && "$scope_has_runtime_separation" -eq 0 && "$scope_has_validation_core" -eq 0 && "$scope_has_steering" -eq 0 && "$scope_has_skills_sdk" -eq 0 ]]; then
     echo "🧭 Changed-files scope classification missed all known buckets; falling back to baseline required validation"
     scope_has_validation_core=1
     scope_forced_validation_fallback=1
@@ -574,6 +605,7 @@ fi
 schedule_check required docs-lint "📚 Running docs lint..." "${python_cmd[@]}" Infrastructure/scripts/docs_lint.py --mode block --config Infrastructure/docs-policy.json
 schedule_check required ask-bootstrap-docs "🧭 Verifying ask bootstrap docs..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/verify_ask_bootstrap_docs.py
 schedule_check required steering-uptake "🧭 Verifying steering uptake ledger..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py
+schedule_check required skills-sdk-typed-artifacts "🧾 Verifying Skills SDK typed artifact contracts..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/validate_skills_sdk_typed_artifacts.py --repo-root .
 schedule_check required verify-work-scope-flags "🧭 Verifying verify-work governance scope flags..." "${python_cmd[@]}" Infrastructure/scripts/verify_verify_work_scope_flags.py
 schedule_check required question-lifecycle "❓ Verifying question lifecycle contract..." "${python_cmd[@]}" Infrastructure/scripts/verify_question_lifecycle_contract.py
 schedule_check required skill-lifecycle-tests "🧪 Running lifecycle readiness tests..." "${python_cmd[@]}" Infrastructure/scripts/test_skill_lifecycle_validation.py

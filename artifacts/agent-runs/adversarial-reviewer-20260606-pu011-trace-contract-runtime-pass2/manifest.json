@@ -1,0 +1,17 @@
+{
+  "agent_id": "019e9d1b-a075-76e3-be9d-635d8313fa6a",
+  "agent_type": "adversarial-reviewer",
+  "run_id": "20260606-pu011-trace-contract-runtime-pass2",
+  "status": "complete",
+  "artifact_path": "/Users/jamiecraik/dev/agent-skills/.harness/review-artifacts/pu-011-trace-plan-adversarial-contract-runtime-pass2.md",
+  "manifest_path": "artifacts/agent-runs/adversarial-reviewer-20260606-pu011-trace-contract-runtime-pass2/manifest.json",
+  "finding_count": 4,
+  "scope": [
+    "contract/runtime traceability",
+    "robot envelope coverage",
+    "no-Any enforcement",
+    "schema/model authority",
+    "root package-manager negative proof",
+    "skills-sdk scope wiring"
+  ]
+}
