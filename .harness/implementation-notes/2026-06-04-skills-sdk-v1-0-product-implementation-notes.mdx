@@ -482,7 +482,7 @@ present, and the current CI typecheck command <code>./bin/ask repo validate
 zero warnings.
 
 The live ruff issue was in <code>Infrastructure/scripts/lib/ask/commands/skills.py</code>.
-That facade populated implementation exports through <code>globals().update(...)</code>,
+That facade populated implementation-exports through <code>globals().update(...)</code>,
 so ruff could not statically prove the names listed in <code>__all__</code>. I replaced
 the hidden dynamic export contract with explicit aliases to the implementation
 module while preserving the wrapper functions used for patchable command tests.
