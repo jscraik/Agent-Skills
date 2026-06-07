@@ -22,6 +22,16 @@ _LOCAL_PLUGIN_MARKETPLACE_ROOTS = ("Plugins", "plugins", ".agents/plugins")
 
 
 def _load_json(path: Path) -> tuple[dict[str, Any] | None, str | None]:
+    """
+    Load and validate a JSON object from the given filesystem path.
+    
+    Parameters:
+        path (Path): Path to the JSON file to read.
+    
+    Returns:
+        tuple: `(payload, None)` where `payload` is the parsed dict when the file exists and contains a JSON object;
+               `(None, error)` where `error` is a human-readable message when the file is missing, unreadable, invalid JSON, or the top-level JSON value is not an object.
+    """
     if not path.exists():
         return None, f"missing file: {path}"
     try:
@@ -34,6 +44,17 @@ def _load_json(path: Path) -> tuple[dict[str, Any] | None, str | None]:
 
 
 def _plugin_root_content_status(plugin_root: Path) -> tuple[bool, list[str]]:
+    """
+    Check whether a plugin root contains a valid plugin manifest and required skills content.
+    
+    Parameters:
+        plugin_root (Path): Filesystem path to the plugin root directory to inspect.
+    
+    Returns:
+        tuple:
+            ok (bool): `True` if the plugin manifest exists, is a valid object, and any declared `skills` path resolves inside the plugin root and contains at least one `SKILL.md`; `False` otherwise.
+            issues (list[str]): Empty when `ok` is `True`. When `ok` is `False`, contains one or more human-readable issue messages describing why the plugin root is not content-ready.
+    """
     manifest_path = plugin_root / ".codex-plugin" / "plugin.json"
     manifest_payload, manifest_error = _load_json(manifest_path)
     if manifest_payload is None:
@@ -52,6 +73,17 @@ def _plugin_root_content_status(plugin_root: Path) -> tuple[bool, list[str]]:
 
 
 def _marketplace_payload(repo_root: Path) -> tuple[dict[str, Any], str | None, Path]:
+    """
+    Find and load the repository's marketplace manifest from common candidate paths.
+    
+    Parameters:
+    	repo_root (Path): Repository root directory used as the base for candidate marketplace paths.
+    
+    Returns:
+    	payload (dict[str, Any]): Parsed JSON object from the first marketplace manifest that was successfully loaded; empty dict if a file existed but failed to parse or if none were found.
+    	error (str | None): None when a manifest was successfully loaded; an error message describing a parse/read failure for an existing candidate, or a not-found message if no candidate exists.
+    	path (Path): The filesystem path of the candidate that was loaded or the first candidate checked when none were found.
+    """
     candidates = [
         repo_root / "Plugins" / "marketplace.json",
         repo_root / "plugins" / "marketplace.json",
@@ -162,6 +194,29 @@ def _activation_state(
     installed: list[dict[str, Any]],
     marketplace: dict[str, Any],
 ) -> dict[str, Any]:
+    """
+    Builds activation metadata for discovered plugins by correlating installed plugins with marketplace entries and cache state.
+    
+    Parameters:
+        repo_root (Path): Repository root used to resolve workspace and cache paths.
+        installed (list[dict[str, Any]]): List of installed plugin entries (as produced by _installed_plugins).
+        marketplace (dict[str, Any]): Parsed marketplace payload (may be empty or contain a "plugins" list).
+    
+    Returns:
+        dict[str, Any]: Activation snapshot with keys:
+            - "plugin_count": number of plugin rows.
+            - "plugins": list of plugin rows where each row contains:
+                - name: plugin name (may be None or empty)
+                - marketplace_name: normalized marketplace name or None
+                - registered_in_marketplace: whether a marketplace entry exists for the plugin
+                - marketplace_source_path: declared local source path from the marketplace entry, if any
+                - workspace_plugin_path: original workspace-relative plugin path from `installed`
+                - repo_managed: True when the plugin is managed by the repo (not an external cached or external path)
+                - cache_present: True when any inspected cache root contained the plugin (manifest or marketplace record)
+                - cache_content_ready: True when cached plugin content passes content checks
+                - cache_active_root: path (POSIX string) to the active plugin root in cache when ready, else None
+                - cache_issues: list of human-readable issues discovered while inspecting cache/marketplace entries
+    """
     def _normalized_marketplace_name(raw: Any) -> str | None:
         if isinstance(raw, str):
             normalized = raw.strip()
@@ -175,6 +230,24 @@ def _activation_state(
         marketplace_name: str | None,
         entry: dict[str, Any] | None,
     ) -> dict[str, Any]:
+        """
+        Determine whether a plugin's cached source exists and is ready, and collect inspected paths and issues.
+        
+        Evaluates candidate marketplace identifiers derived from `entry` and `marketplace_name`, then inspects configured cache roots and Codex-style marketplace manifests to locate the plugin. Validates local marketplace source paths and delegates content checks to `_plugin_root_content_status`. Returns a consolidated status indicating whether cache content is present and considered ready, the active plugin root when ready, a list of inspected filesystem paths, and any issues found.
+        
+        Parameters:
+            plugin_name (str): The plugin name to locate.
+            marketplace_name (str | None): Optional default marketplace identifier to consider.
+            entry (dict | None): Optional marketplace entry for the plugin (may contain `marketplace` and `source.marketplace` hints).
+        
+        Returns:
+            dict: Status dictionary with the following keys:
+                present (bool): True if any relevant cache or marketplace roots were found/inspected.
+                content_ready (bool): True if a plugin root with valid content was found.
+                active_root (str | None): POSIX path to the active plugin root when `content_ready` is True, otherwise None.
+                inspected_roots (list[str]): Ordered list of filesystem paths that were inspected during lookup.
+                issues (list[str]): Collected human-readable issues explaining failures or why content is not ready.
+        """
         candidates: list[str] = []
 
         if isinstance(entry, dict):
@@ -204,12 +277,40 @@ def _activation_state(
         missing_reasons: list[str] = []
 
         def _candidate_plugin_roots(base: Path) -> list[Path]:
+            """
+            List candidate plugin root directories under a base path.
+            
+            Parameters:
+                base (Path): Path to include as the primary candidate; may be a directory or a file.
+            
+            Returns:
+                list[Path]: A list beginning with `base`. If `base` is a directory, the list is extended with its immediate child directories sorted lexicographically; otherwise the list contains only `base`.
+            """
             roots = [base]
             if base.is_dir():
                 roots.extend(sorted(child for child in base.iterdir() if child.is_dir()))
             return roots
 
         def _codex_marketplace_root_status(marketplace_root: Path) -> dict[str, Any] | None:
+            """
+            Inspect a candidate Codex marketplace root and report whether it provides ready plugin content for a given plugin.
+            
+            Parameters:
+                marketplace_root (Path): Filesystem path that should contain a Codex marketplace at
+                    `<marketplace_root>/.agents/plugins/marketplace.json`.
+            
+            Returns:
+                dict[str, Any] | None: `None` if `marketplace_root` does not exist. Otherwise a dictionary with:
+                    - present (bool): True when the marketplace root was found and inspected.
+                    - content_ready (bool): True when the marketplace contains a valid entry pointing to a
+                      directory whose plugin content passed `_plugin_root_content_status`.
+                    - active_root (str | None): POSIX path to the resolved plugin root used when `content_ready`
+                      is True; otherwise `None`.
+                    - inspected_roots (list[str]): POSIX paths that were examined during validation (manifest and
+                      candidate plugin root paths).
+                    - issues (list[str]): Human-readable reasons for failure when `content_ready` is False,
+                      or an empty list when ready.
+            """
             if not marketplace_root.exists():
                 return None
             marketplace_manifest = marketplace_root / ".agents" / "plugins" / "marketplace.json"
@@ -397,6 +498,12 @@ def _activation_state(
 
 
 def _codex_profile_homes() -> list[Path]:
+    """
+    Return the list of Codex profile home directories found under the current user's home.
+    
+    Returns:
+        profile_homes (list[Path]): A list of Paths including the directory `~/.codex` if it exists, followed by any directories matching `~/.codex-*` (sorted). The list is empty if no matching directories are present.
+    """
     home = Path.home()
     profile_homes: list[Path] = []
     default_home = home / ".codex"
@@ -407,6 +514,19 @@ def _codex_profile_homes() -> list[Path]:
 
 
 def _enabled_plugin_ids(config_path: Path) -> tuple[set[str], str | None]:
+    """
+    Extract enabled plugin IDs from a Codex TOML config file.
+    
+    Parses the given TOML `config_path` and returns the set of plugin IDs whose configuration contains `"enabled" = true`.
+    If the config file is missing or malformed the function returns an empty set and an error message describing the problem.
+    
+    Parameters:
+        config_path (Path): Path to the Codex config TOML (e.g., ~/.codex/config.toml).
+    
+    Returns:
+        tuple[set[str], str | None]: A pair where the first element is the set of enabled plugin IDs, and the second is
+        an error message string if reading or parsing failed, or `None` on success.
+    """
     if not config_path.exists():
         return set(), None
     try:
@@ -434,6 +554,26 @@ def _profile_marketplace_plugin_status(
     expected_resolved_path: Path | None = None,
     require_symlink: bool = False,
 ) -> dict[str, Any]:
+    """
+    Determine the status of a plugin entry inside a profile's local marketplace manifest.
+    
+    Parameters:
+        profile_home (Path): Path to the profile home directory (e.g. ~/.codex).
+        marketplace_path (Path): Path to the marketplace manifest file to inspect.
+        plugin_name (str): The plugin name to look up in the marketplace manifest.
+        expected_resolved_path (Path | None): If provided, validate that the plugin path resolves to this real path.
+        require_symlink (bool): If True, require the plugin path in the profile to be a symlink (compatibility alias).
+    
+    Returns:
+        dict[str, Any]: A dictionary describing the discovered status. Keys:
+            - ok (bool): True when no issues were found.
+            - marketplace_path (str): The inspected marketplace manifest path (POSIX string).
+            - source_path (str | None): The `source.path` value from the marketplace entry (as declared), or None if not present.
+            - resolved_path (str | None): The computed filesystem path for the plugin relative to the marketplace root (POSIX string), or None on failure.
+            - resolved_realpath (str | None): The realpath of `resolved_path` if the path exists, otherwise None.
+            - is_symlink (bool): True if `resolved_path` is a symlink (False when missing).
+            - issues (list[str]): A list of human-readable problems discovered (empty when ok is True).
+    """
     def _marketplace_root() -> Path:
         try:
             relative = marketplace_path.relative_to(profile_home)
@@ -532,6 +672,31 @@ def _desktop_readiness_state(
     activation: dict[str, Any],
     plugin_name: str | None,
 ) -> dict[str, Any]:
+    """
+    Analyze desktop readiness for one or more plugins by validating marketplace manifests, profile mirrors, and active config to determine whether the desktop can load each plugin.
+    
+    Parameters:
+        marketplace (dict[str, Any]): Marketplace manifest payload (may include "name" and "plugins").
+        activation (dict[str, Any]): Activation snapshot produced by `_activation_state`, containing plugin cache readiness info.
+        plugin_name (str | None): If provided, restricts checks to the named plugin; otherwise evaluates all activation plugins.
+    
+    Returns:
+        readiness (dict[str, Any]): Summary object with keys:
+            - contract: fixed contract string "plugin-desktop-readiness.v1".
+            - status: "loadable" if all evaluated plugins are desktop-loadable, otherwise "blocked".
+            - desktop_loadable (bool): true when all evaluated plugins are loadable.
+            - marketplace_name (str): normalized marketplace name used for plugin IDs.
+            - config_path (str): path to the active config file checked.
+            - config_readable (bool): whether the active config was read successfully.
+            - config_error (str | None): parse/read error message when config_readable is false.
+            - enabled_plugin_ids (list[str]): enabled plugin IDs read from active config.
+            - allowed_plugin_ids (list[str]): plugin IDs permitted by marketplace(s) and profile manifests.
+            - stale_enabled_plugin_ids (list[str]): enabled IDs that reference the current marketplace but are not allowed.
+            - active_profile_home (str): expected default profile home (typically "~/.codex").
+            - profile_homes (list[str]): discovered profile home directories inspected.
+            - plugins (list[dict[str, Any]]): per-plugin rows containing readiness booleans, detailed checks, blockers, and repair commands.
+            - blockers (list[str]): aggregated blocker codes across all evaluated plugins.
+    """
     marketplace_name = str(marketplace.get("name") or "agent-skills-local").strip() or "agent-skills-local"
     entries = marketplace.get("plugins", [])
     allowed_plugin_ids = {
@@ -704,6 +869,20 @@ def _desktop_readiness_state(
 
 
 def _run_shadowing_check(repo_root: Path) -> dict[str, Any]:
+    """
+    Run the repository's plugin-skill shadowing validation script and collect a concise result snapshot.
+    
+    Parameters:
+        repo_root (Path): Repository root directory under which the validation script is executed.
+    
+    Returns:
+        result (dict[str, Any]): A summary dictionary containing:
+            - `command`: the full command string invoked.
+            - `exit_code`: the process exit code.
+            - `ok`: `true` if `exit_code` is 0, `false` otherwise.
+            - `stdout_tail`: up to the last 8 non-empty lines of the process stdout.
+            - `stderr_tail`: up to the last 8 non-empty lines of the process stderr.
+    """
     cmd = ["bash", "Infrastructure/scripts/validation-and-linting/check_plugin_skill_shadowing.sh", "--repo-root", str(repo_root)]
     proc = subprocess.run(cmd, cwd=str(repo_root), text=True, capture_output=True, check=False)
     stdout_lines = [line for line in proc.stdout.splitlines() if line.strip()]
@@ -868,6 +1047,32 @@ def collect_plugin_state(
     plugin_name: str | None = None,
     run_doctor: bool = False,
 ) -> dict[str, Any]:
+    """
+    Collect a comprehensive read-only snapshot of plugin state for the repository.
+    
+    Parameters:
+        repo_root (Path): Repository root to inspect.
+        plugin_name (str | None): If provided, restrict results to the named plugin.
+        run_doctor (bool): If true, run additional diagnostic checks (shadowing and package quality)
+            and include their results in health checks.
+    
+    Returns:
+        dict: Snapshot containing:
+            - installed_state: { "plugin_count": int, "plugins": list[dict] } — discovered installed plugins.
+            - activation_state: dict — activation and cache inspection results produced by _activation_state.
+            - desktop_readiness_state: dict — desktop loadability assessment produced by _desktop_readiness_state.
+            - health_state: {
+                "status": "healthy" | "degraded",
+                "blockers": list[str],
+                "checks": dict — diagnostic checks including:
+                    - policy_identity
+                    - marketplace
+                    - manifests
+                    - activation (includes unregistered_plugins, missing_cache_plugins, cache_content_blockers, warnings)
+                    - plugin_shadowing (present only if run_doctor)
+                    - plugin_package_quality (present only if run_doctor)
+              }
+    """
     installed = _installed_plugins(repo_root)
     marketplace, marketplace_error, marketplace_path = _marketplace_payload(repo_root)
     activation = _activation_state(repo_root=repo_root, installed=installed, marketplace=marketplace)

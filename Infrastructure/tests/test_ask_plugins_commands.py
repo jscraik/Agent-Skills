@@ -36,13 +36,23 @@ class TestAskPluginsCommands(unittest.TestCase):
 
     def tearDown(self) -> None:
         """
-        Remove the temporary repository directory created for the test.
-
-        This performs a recursive deletion of `self.temp_dir` and its contents, ignoring any filesystem errors that occur during removal.
+        Remove the temporary repository directory created in setUp.
+        
+        Performs a recursive deletion of self.temp_dir; any filesystem errors raised during removal are ignored.
         """
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     def _write_repo_cache(self, *, plugin_name: str = "example-plugin") -> None:
+        """
+        Create a simulated runtime cache for a local plugin under the test repository.
+        
+        Writes a `.codex-plugin/plugin.json`, a sample skill markdown file at `skills/example-skill/SKILL.md`,
+        and a `marketplace.json` entry under `.agents/plugins` inside the runtime cache so tests can exercise
+        runtime-local plugin discovery and desktop-readiness checks.
+        
+        Parameters:
+            plugin_name (str): Name of the plugin directory to create (default: "example-plugin").
+        """
         plugin_root = self.repo_root / ".agents" / "plugins-runtime" / "cache" / "agent-skills-local" / plugin_name
         manifest = plugin_root / ".codex-plugin" / "plugin.json"
         manifest.parent.mkdir(parents=True, exist_ok=True)
@@ -90,6 +100,12 @@ class TestAskPluginsCommands(unittest.TestCase):
         )
 
     def _write_repo_marketplace(self, *, plugin_name: str = "example-plugin") -> None:
+        """
+        Write a repository-level Plugins/marketplace.json that lists a single local plugin.
+        
+        Parameters:
+            plugin_name (str): Plugin directory/name to reference in the marketplace (default: "example-plugin").
+        """
         marketplace = self.repo_root / "Plugins" / "marketplace.json"
         marketplace.parent.mkdir(parents=True, exist_ok=True)
         marketplace.write_text(
@@ -109,6 +125,16 @@ class TestAskPluginsCommands(unittest.TestCase):
         )
 
     def _write_profile_config(self, home: Path, content: str) -> Path:
+        """
+        Create a profile config file at `home/.codex/config.toml` with the given TOML content.
+        
+        Parameters:
+        	home (Path): Base directory to use as the user's home where the `.codex` folder will be created.
+        	content (str): TOML-formatted configuration text to write into the config file.
+        
+        Returns:
+        	Path: The path to the written `config.toml` file.
+        """
         profile_home = home / ".codex"
         profile_home.mkdir(parents=True, exist_ok=True)
         config_path = profile_home / "config.toml"
@@ -303,6 +329,11 @@ class TestAskPluginsCommands(unittest.TestCase):
         self.assertEqual(result.data["desktop_readiness_state"]["stale_enabled_plugin_ids"], [])
 
     def test_prune_stale_plugin_config_can_verify_clean_config_stability(self) -> None:
+        """
+        Verify that prune_stale_plugin_config reports a clean, stable configuration without making changes.
+        
+        Sets up a repository marketplace and runtime cache for "example-plugin", writes a profile config that enables that plugin, patches user home paths to the fake home, and calls prune_stale_plugin_config with stability_seconds=0 and verify_stable_when_clean=True. Asserts the command succeeds, reports no changes, and returns empty stale-enabled-plugin lists in the top-level result, the desktop_readiness_state, and the first stability check.
+        """
         self._write_repo_marketplace(plugin_name="example-plugin")
         self._write_repo_cache(plugin_name="example-plugin")
         fake_home = self.temp_dir / "home"
@@ -510,6 +541,14 @@ class TestAskPluginsCommands(unittest.TestCase):
         )
 
     def test_sync_local_runtime_reports_desktop_loadable_after_profile_sync_when_enabled(self) -> None:
+        """
+        Verify that syncing local runtime plugins reports the desktop as loadable when the plugin is enabled in the user's profile.
+        
+        Sets up a local plugin, repository marketplace, and runtime cache, writes a profile config that enables the plugin, patches Path.home to a fake home, runs sync_local_runtime_plugins, and asserts the sync succeeds and the returned desktop_readiness_state indicates:
+        - `desktop_loadable` is True and `blockers` is empty.
+        - The profile check for the plugin reports `source_path` as "./.agents/plugins/example-plugin", `is_symlink` is True, and `resolved_realpath` matches the resolved personal plugin path under the fake home.
+        - The personal marketplace is ready (`personal_marketplace_ready` is True) and its `source_path` is "./.codex/plugins/example-plugin".
+        """
         plugin_root = self.repo_root / "Plugins" / "example-plugin"
         manifest_path = plugin_root / ".codex-plugin" / "plugin.json"
         manifest_path.parent.mkdir(parents=True, exist_ok=True)

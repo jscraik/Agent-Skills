@@ -222,7 +222,17 @@ def requires_generated_command_handle(handle: CommandHandle) -> bool:
 
 
 def render_skill_command_handle(handle: CommandHandle) -> str:
-    """Render a minimal Codex-visible SKILL.md command handle."""
+    """
+    Render the minimal SKILL.md content for a generated runtime command handle.
+    
+    The output includes a YAML frontmatter with `name` and a short fixed `description`, followed by a human-facing body containing the handle display name, owner/source information, activation instructions, and a diagnostic `ask ... skills resolve <handle> --json` fallback.
+    
+    Parameters:
+        handle (CommandHandle): The command handle to render.
+    
+    Returns:
+        str: The full SKILL.md text to be written for the generated command handle.
+    """
     display_name = _display_name(handle)
     description = f"Internal entrypoint. Use only when named as ${handle.handle}."
     source_path = handle.source_path or "UNRESOLVED_SOURCE_PATH"
@@ -285,6 +295,19 @@ def render_openai_yaml(handle: CommandHandle) -> str:
 
 
 def _validate_command_handle_payload(handle: CommandHandle, skill_body: str) -> list[dict[str, Any]]:
+    """
+    Validate a generated SKILL.md payload for a command handle and return any detected violations.
+    
+    Parameters:
+    	handle (CommandHandle): The command handle metadata for which the payload was generated.
+    	skill_body (str): The full SKILL.md content (including optional YAML frontmatter and body).
+    
+    Returns:
+    	violations (list[dict[str, Any]]): A list of violation records. Possible violation codes:
+    		- "COMMAND_HANDLE_DESCRIPTION_BUDGET_EXCEEDED": frontmatter description exceeds the word budget.
+    		- "COMMAND_HANDLE_BODY_BUDGET_EXCEEDED": body exceeds the word budget after removing frontmatter.
+    		- "COMMAND_HANDLE_CONTAINS_FULL_WORKFLOW_MARKERS": body contains forbidden workflow marker headers.
+    """
     violations: list[dict[str, Any]] = []
     frontmatter_description = f"Internal entrypoint. Use only when named as ${handle.handle}."
     if _word_count(frontmatter_description) > MAX_COMMAND_HANDLE_DESCRIPTION_WORDS:

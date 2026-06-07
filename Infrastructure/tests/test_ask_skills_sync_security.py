@@ -786,6 +786,17 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertIn(str(target / "README.md"), report.deletes)
 
     def test_plugin_cache_refresh_writes_codex_marketplace_roots(self) -> None:
+        """
+        Verify that refresh_workspace_plugin_caches writes both runtime and versioned marketplace manifests and creates a versioned plugin cache root.
+        
+        Sets up a local plugin with a .codex-plugin manifest and a marketplace entry, runs refresh_workspace_plugin_caches, and asserts:
+        - no error is returned,
+        - a runtime marketplace manifest is written under .agents/plugins-runtime/cache/.../.agents/plugins/marketplace.json,
+        - a versioned marketplace manifest is written under Plugins/cache/.../.agents/plugins/marketplace.json,
+        - the runtime manifest references "./harness-engineering" as the plugin source path,
+        - the versioned manifest references "./harness-engineering/0.2.0" as the plugin source path,
+        - and the versioned plugin cache contains the plugin's .codex-plugin/plugin.json file.
+        """
         plugin_root = self.repo_root / "Plugins" / "harness-engineering"
         manifest = plugin_root / ".codex-plugin" / "plugin.json"
         manifest.parent.mkdir(parents=True, exist_ok=True)
@@ -865,6 +876,11 @@ class TestAskSkillsSyncSecurity(TestCase):
         )
 
     def test_plugin_cache_prune_keeps_skill_when_command_handle_file_is_missing(self) -> None:
+        """
+        Ensure plugin cache pruning does not remove a cached skill when its corresponding command-handle file is absent.
+        
+        Sets up a cached plugin skill directory and a mocked handles report that references a command handle path which does not exist on disk; verifies that prune_command_handle_skill_entries produces no logs or deletes and leaves the cached skill in place.
+        """
         plugin_root = self.repo_root / ".agents" / "plugins-runtime" / "cache" / "agent-skills-local" / "harness-engineering"
         skill_dir = plugin_root / "skills" / "he-work"
         skill_dir.mkdir(parents=True)
@@ -1036,6 +1052,11 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertTrue(any("rerun with write access to .agents/plugins-runtime/cache." in log for log in logs))
 
     def test_local_plugin_runtime_sync_skips_samefile_source_root(self) -> None:
+        """
+        Ensure that when a marketplace entry points to the same on-disk plugin source as the runtime target, the runtime sync skips copying and marks the plugin as skipped.
+        
+        Asserts that the plugin is planned and removed but not copied, that it appears in the skipped plugins list, that the `skipped_marketplace_copy` flag is set, and that the source files remain unchanged.
+        """
         marketplace = self.repo_root / "Plugins" / "marketplace.json"
         marketplace.parent.mkdir(parents=True)
         marketplace.write_text(

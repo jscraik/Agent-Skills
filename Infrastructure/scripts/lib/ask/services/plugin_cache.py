@@ -59,6 +59,18 @@ class PluginCacheRefreshError(RuntimeError):
 
 
 def _manifest_declares_skills_root(plugin_root: Path, skills_root: Path) -> bool:
+    """
+    Check whether the plugin manifest's declared `skills` path resolves to the provided skills root.
+    
+    Reads the plugin manifest at `.codex-plugin/plugin.json`, interprets the `skills` field as a relative path (allowing a leading `./`), resolves it against `plugin_root`, and compares the resolved path to `skills_root`.
+    
+    Parameters:
+        plugin_root (Path): Filesystem root of the plugin repository.
+        skills_root (Path): The skills directory path to compare against.
+    
+    Returns:
+        `true` if the manifest's `skills` field resolves to the same path as `skills_root`, `false` otherwise.
+    """
     plugin_json = plugin_root / ".codex-plugin" / "plugin.json"
     try:
         payload = json.loads(plugin_json.read_text(encoding="utf-8"))
@@ -72,7 +84,22 @@ def _manifest_declares_skills_root(plugin_root: Path, skills_root: Path) -> bool
 
 
 def plugin_cache_permission_declaration(repo_root: Path, *, mode: str = "auto") -> dict[str, str]:
-    """Return the write declaration required to refresh repo-local plugin runtime caches."""
+    """
+    Build the permission declaration required to refresh the repository's runtime plugin cache.
+    
+    Parameters:
+    	repo_root (Path): Repository root path used to resolve the runtime cache root.
+    	mode (str): Desired execution mode for the refresh (e.g., "auto").
+    
+    Returns:
+    	decl (dict[str, str]): Mapping with keys:
+    		- "mode": requested execution mode
+    		- "status": current permission check status ("not_run")
+    		- "runtime_cache_root": absolute path to the runtime cache root
+    		- "runtime_cache_root_relative": relative runtime cache path constant
+    		- "permission_requirement": human-readable permission requirement message
+    		- "rerun": instruction message to rerun with appropriate permissions
+    """
     runtime_cache_root = repo_root / RUNTIME_CACHE_RELATIVE_ROOT
     return {
         "mode": mode,
@@ -85,6 +112,16 @@ def plugin_cache_permission_declaration(repo_root: Path, *, mode: str = "auto") 
 
 
 def _codex_marketplace_entry(entry: dict[str, object], source_path: str) -> dict[str, object]:
+    """
+    Builds a Codex marketplace entry for a local plugin source.
+    
+    Parameters:
+        entry (dict[str, object]): Plugin manifest-like mapping; must contain a "name" key. May include optional "policy" and "category" keys.
+        source_path (str): Filesystem path to the plugin source to record under `source.path`.
+    
+    Returns:
+        dict[str, object]: Marketplace entry containing `name`, a `source` mapping with `source: "local"` and `path: source_path`, and any present `policy` or `category` fields.
+    """
     marketplace_entry: dict[str, object] = {
         "name": entry["name"],
         "source": {"source": "local", "path": source_path},
@@ -103,7 +140,19 @@ def _write_codex_marketplace_root(
     source_paths: dict[str, str],
     dry_run: bool,
 ) -> list[str]:
-    """Write a Codex-supported marketplace manifest under a plugin cache root."""
+    """
+    Create (or report creating) a Codex-compatible marketplace manifest JSON file under the given plugin cache root.
+    
+    Parameters:
+        marketplace_root (Path): Filesystem root under which the manifest will be created (manifest path: <marketplace_root>/.agents/plugins/marketplace.json).
+        marketplace_name (str): Name to set in the manifest `name` field.
+        entries (list[dict[str, object]]): Candidate plugin entries; each entry must contain a `name` key. Only entries whose `name` appears in `source_paths` will be included.
+        source_paths (dict[str, str]): Mapping of plugin names to their local source paths; used to populate each plugin's `source.path` in the manifest.
+        dry_run (bool): If True, do not write files and return a message describing the intended write.
+    
+    Returns:
+        list[str]: One-element list with a human-readable status message describing the planned or completed action.
+    """
     marketplace_manifest = marketplace_root / ".agents" / "plugins" / "marketplace.json"
     payload = {
         "name": marketplace_name,
@@ -126,7 +175,27 @@ def prune_command_handle_skill_entries(
     plugin_name: str,
     plugin_root: Path,
 ) -> tuple[list[str], list[str]]:
-    """Remove plugin skill entries that are already exposed by generated command handles."""
+    """
+    Remove plugin skill entries that are duplicated by generated command handles.
+    
+    Queries the command-handle registry for handles owned by `plugin_name` that point
+    at `.agents/skills/...` files present in `repo_root`, then deletes corresponding
+    entries under `plugin_root/skills`. Also removes picker-style skill folders
+    that contain `SKILL.md` matching those handles, and includes a few compatibility
+    aliases when applicable.
+    
+    Parameters:
+        repo_root (Path): Repository root used to resolve reported command-handle paths.
+        plugin_name (str): Plugin identifier used to match handle ownership.
+        plugin_root (Path): Filesystem path to the plugin; its `skills` subdirectory is pruned.
+    
+    Returns:
+        logs (list[str]): Human-readable messages about skipped or removed entries.
+        deletes (list[str]): String paths of removed filesystem targets.
+    
+    Raises:
+        PluginCacheRefreshError: If discovery of command handles fails.
+    """
     skills_root = plugin_root / "skills"
     if not skills_root.is_dir():
         return [], []
@@ -196,7 +265,18 @@ def prune_command_handle_skill_entries(
 
 
 def prune_picker_internal_skill_dirs(plugin_root: Path) -> tuple[list[str], list[str]]:
-    """Remove copied implementation and archive folders that broad picker scans can see."""
+    """
+    Remove picker-internal plugin and skills directories visible to broad picker scans.
+    
+    If the plugin's `skills` directory is explicitly declared in its `.codex-plugin/plugin.json`, the skills root is preserved and no skill-level pruning is performed. Removes files, symlinks, or directories for known picker-internal names under the plugin root and, unless preserved, under `plugin_root/skills`. Records human-readable messages for each action.
+    
+    Parameters:
+    	plugin_root (Path): Filesystem path to the plugin root directory.
+    
+    Returns:
+    	logs (list[str]): Human-readable messages describing removals and any preserved paths.
+    	deletes (list[str]): String paths of filesystem entries that were removed.
+    """
     logs: list[str] = []
     deletes: list[str] = []
     for name in sorted(PICKER_INTERNAL_PLUGIN_ROOT_DIRS):
@@ -249,7 +329,21 @@ def replace_plugin_cache_copy(
     source_dir: Path,
     target_dir: Path,
 ) -> PluginCacheRefreshReport:
-    """Replace one local plugin cache copy while preserving loader-declared skill content."""
+    """
+    Replace a local plugin cache copy with the contents of a source plugin while preserving loader-declared skill content.
+    
+    Parameters:
+        repo_root (Path): Repository root path used for context and reporting.
+        plugin_name (str): Name of the plugin being refreshed.
+        source_dir (Path): Path to the source plugin directory to copy from.
+        target_dir (Path): Path to the cache directory to replace.
+    
+    Returns:
+        PluginCacheRefreshReport: Report containing:
+            - writes: list with the written target directory path.
+            - deletes: list of paths that were removed or scheduled for removal.
+            - logs: human-readable messages describing performed actions.
+    """
     deletes: list[str] = []
     if target_dir.is_symlink() or target_dir.is_file():
         deletes.append(str(target_dir))
@@ -271,7 +365,21 @@ def refresh_workspace_plugin_caches(
     *,
     dry_run: bool,
 ) -> ErrorObject | None:
-    """Refresh repo-local plugin caches that Codex picker paths may scan."""
+    """
+    Refreshes repository-local plugin caches, updates the provided plan and logs, and writes per-cache Codex marketplace manifests.
+    
+    Mutates the supplied `plan` by setting/ updating `plan["plugin_cache_refresh"]` status, appending planned or performed `writes`/`deletes` and `plugin_cache_writes`, and may append `warnings`. Replaces or plans replacement of runtime and versioned plugin cache copies from the local marketplace entries, prunes stale cache directories, and generates `.agents/plugins/marketplace.json` under both runtime and versioned cache roots. When `dry_run` is True, records intended file system changes and marks the refresh as planned without performing destructive operations.
+    
+    Parameters:
+        plan (dict): Mutable plan object that will be updated with refresh state, writes, deletes and warnings.
+        logs (list[str]): Mutable list to which human-readable operation records are appended.
+        repo_root (Path): Repository root used to locate local marketplace entries and cache roots.
+        dry_run (bool): If True, do not perform filesystem mutations; only record planned actions.
+    
+    Returns:
+        None on success.
+        ErrorObject on failure: returned when the refresh is blocked by permissions or fails due to filesystem or validation errors; the object contains an `ERR_RUNTIME` code and a `fix_suggestion` describing how to recover.
+    """
     refresh_state = plan.setdefault(
         "plugin_cache_refresh",
         plugin_cache_permission_declaration(repo_root),

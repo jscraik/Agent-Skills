@@ -17,6 +17,11 @@ from ask.commands.plugins import doctor_plugins_state, list_plugins_state, statu
 
 class TestAskPluginsState(unittest.TestCase):
     def setUp(self) -> None:
+        """
+        Prepare an isolated temporary repository and fake home with a sample plugin fixture and runtime cache for tests.
+        
+        Sets up a temporary directory structure, patches Path.home to point at the fake home, writes a sample plugin (manifest, README, assets, and a skill file) under the repo plugins tree, writes a repository marketplace manifest referencing the sample plugin, and invokes the helper to create the corresponding runtime cache entry.
+        """
         self.temp_dir = Path(tempfile.mkdtemp(prefix="ask-plugins-state-"))
         self.repo_root = self.temp_dir / "repo"
         self.repo_root.mkdir(parents=True)
@@ -97,6 +102,20 @@ class TestAskPluginsState(unittest.TestCase):
         compatibility_symlink: bool = True,
         personal_marketplace: bool = True,
     ) -> Path:
+        """
+        Create a fake Codex profile directory under the test fake home and populate it with configuration and optional plugin mirror/marketplace entries for tests.
+        
+        Parameters:
+            enabled (bool): Whether the example plugin is marked enabled in the profile config.
+            stale_enabled (bool): If true, append an additional enabled entry for a non-existent "missing-plugin" to simulate a stale config ID.
+            source_path (str): The plugin source path to place into the profile marketplace manifest.
+            copy_plugin (bool): If true, create an official mirror of the repo plugin inside the profile's `.codex/plugins` directory.
+            compatibility_symlink (bool): When creating the compatibility location under `.agents/plugins/example-plugin`, create it as a symlink to the official mirror if true; otherwise copy the plugin directory.
+            personal_marketplace (bool): If true, write a personal marketplace manifest at the fake home `.agents/plugins/marketplace.json`.
+        
+        Returns:
+            Path: The profile home path that was created (self.fake_home / ".codex").
+        """
         profile_home = self.fake_home / ".codex"
         profile_home.mkdir(parents=True, exist_ok=True)
         config = profile_home / "config.toml"
@@ -165,6 +184,18 @@ class TestAskPluginsState(unittest.TestCase):
         with_manifest: bool = True,
         with_skill: bool = True,
     ) -> Path:
+        """
+        Create a versioned runtime cache entry for the example plugin under the test repository.
+        
+        Parameters:
+        	marketplace_name (str): Marketplace folder name under `.agents/plugins-runtime/cache` to host the plugin.
+        	version (str | None): If provided, embed the plugin under a version subdirectory (e.g. `.../example-plugin/<version>`). If `None`, place the plugin at `.../example-plugin`.
+        	with_manifest (bool): When True, write a `.codex-plugin/plugin.json` manifest into the plugin root; when False, create the plugin directory without a manifest.
+        	with_skill (bool): When True, create a minimal `skills/example-skill/SKILL.md` file inside the plugin root.
+        
+        Returns:
+        	plugin_root (Path): Filesystem path to the created plugin root (points at the version subdirectory when `version` is set).
+        """
         plugin_root = (
             self.repo_root
             / ".agents"
@@ -223,6 +254,11 @@ class TestAskPluginsState(unittest.TestCase):
         return plugin_root
 
     def tearDown(self) -> None:
+        """
+        Stop the patched Path.home and remove the temporary test directory created for the test.
+        
+        This cleans up test-side effects by stopping the home directory patcher and deleting the temporary repository/home tree (errors during removal are ignored).
+        """
         self.home_patcher.stop()
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
@@ -321,6 +357,14 @@ class TestAskPluginsState(unittest.TestCase):
         self.assertEqual(secondary_rows[0]["issues"], ["profile has no plugin marketplace manifest"])
 
     def test_status_reports_desktop_blocker_when_profile_path_is_missing(self) -> None:
+        """
+        Verify status_plugin_state marks desktop as not loadable when the profile's plugin mirror path is missing.
+        
+        Calls status_plugin_state for "example-plugin" after creating a profile configuration without copying the profile mirror, and asserts:
+        - desktop readiness reports `desktop_loadable` is False,
+        - `PLUGIN_PROFILE_MIRROR_NOT_READY` appears in blockers,
+        - one of the profile check issues contains "marketplace local source path is not a directory".
+        """
         self._write_profile_plugin(copy_plugin=False)
 
         result = status_plugin_state(self.repo_root, "example-plugin")

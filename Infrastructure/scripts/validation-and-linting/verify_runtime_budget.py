@@ -208,7 +208,17 @@ def _classified_scope_collision(collision: dict[str, Any]) -> dict[str, Any] | N
 
 
 def _scope_collision_baseline_path(path: str) -> str:
-    """Return a stable path key for intentional collision baselines."""
+    """
+    Produce a stable baseline key that normalizes plugin cache skill paths so equivalent cached artifacts map to the same collision baseline.
+    
+    When `path` refers to a plugin cache under "Plugins/cache/openai-curated" or
+    "Plugins/cache/openai-curated-remote" and contains a "skills" segment, the
+    returned baseline preserves the first four path segments and everything from
+    the "skills" segment onward; otherwise the original `path` is returned.
+    
+    Returns:
+    	normalized_path (str): The normalized baseline path, or the original input when no normalization applies.
+    """
     parts = Path(path).parts
     if (
         len(parts) >= 7
