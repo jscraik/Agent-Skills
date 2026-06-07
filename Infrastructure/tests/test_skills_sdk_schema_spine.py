@@ -132,9 +132,20 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assert_invalid("install-preview", "install-preview-writes.json")
 
     def test_project_conformance_schema_rejects_mutation_claims(self) -> None:
+        """
+        Ensures the project-conformance-receipt schema rejects fixtures that claim project mutations.
+        
+        Validates that the 'project-conformance-writes.json' fixture is invalid against the
+        'project-conformance-receipt' schema.
+        """
         self.assert_invalid("project-conformance-receipt", "project-conformance-writes.json")
 
     def test_placeholder_lifecycle_schema_rejects_pass_or_execution_claims(self) -> None:
+        """
+        Ensure the placeholder-lifecycle schema rejects fixtures that claim execution or passing.
+        
+        Asserts that the fixture "placeholder-claims-pass.json" does not conform to the placeholder-lifecycle schema and therefore validation fails.
+        """
         self.assert_invalid("placeholder-lifecycle", "placeholder-claims-pass.json")
 
 

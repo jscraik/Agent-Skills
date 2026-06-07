@@ -60,7 +60,7 @@ codex_configure_mise_sandbox_state() {
   fi
 }
 
-# codex_apply_env prepends repository, user and common package-manager bin directories to PATH, configures sandbox-safe mise state when available, and then attempts to activate `mise` for bash.
+# codex_apply_env updates PATH with common user, package-manager, and repository bin directories, configures a repository-scoped mise sandbox state, and attempts to activate mise for bash.
 codex_apply_env() {
   # Ensure repo entrypoints like `ask` resolve without requiring ./bin prefixes.
   codex_prepend_path_if_exists "$HOME/.local/bin"

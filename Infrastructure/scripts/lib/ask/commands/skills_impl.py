@@ -4140,7 +4140,21 @@ def skills_sdk_project_uninstall(
     project_root: str | None = None,
     apply: bool = False,
 ) -> CallResult:
-    """Preview or apply receipt-proven cleanup for one lockfile-resolved skill id."""
+    """
+    Generate a project uninstallation receipt for a lockfile-resolved skill and optionally apply the cleanup.
+    
+    Parameters:
+        repo_root (Path): Repository root path used to resolve and operate on the project.
+        skill_id (str): Lockfile-resolved skill identifier to uninstall.
+        project_root (str | None): Optional project root path to target; when omitted the repo-level project is used.
+        apply (bool): When True, perform the uninstall changes; when False, produce a preview-only receipt.
+    
+    Returns:
+        CallResult: Result with `data["skills_sdk_project_uninstall"]` containing a `skills-sdk-project-cleanup.v1` receipt payload
+        with keys: `schema_version`, `operation`, `status`, `mode`, `skill_id`, `receipt`, `validation_commands`, and `agent_summary`.
+        On failure (internal project cleanup error) the result has `status="error"` and `errors` contains an `ErrorObject`
+        derived from the cleanup exception; the corresponding receipt is included in the data payload.
+    """
     result = CallResult()
     mode = "--apply" if apply else "--preview"
     result.metadata["command"] = f"sdk uninstall {mode}"
@@ -4210,7 +4224,24 @@ def skills_sdk_project_conformance(
     project_root: str | None = None,
     mode: str = "status",
 ) -> CallResult:
-    """Report read-only Skills SDK project adoption and cleanup readiness."""
+    """
+    Report Skills SDK project conformance for a given repository and project location.
+    
+    Parameters:
+    	repo_root (Path): Repository root containing skills metadata.
+    	project_root (str | None): Project directory to evaluate; when None the project root is inferred.
+    	mode (str): Conformance mode, either "status" (summary) or "doctor" (detailed diagnostics).
+    
+    Returns:
+    	result (CallResult): Contains `data["skills_sdk_project_conformance"]` with a `skills-sdk-project-conformance.v1` payload:
+    		- `status`: overall conformance status from the generated receipt.
+    		- `mode`: the requested mode.
+    		- `project_root`: the provided project_root value.
+    		- `receipt`: the full conformance receipt produced by the builder.
+    		- `validation_commands`: suggested CLI command(s) to re-run the check.
+    		- `agent_summary`: short human-readable summary.
+    	On invalid `mode`, the result has `status="error"` and an `ERR_VALIDATION` ErrorObject. If the underlying receipt builder fails, the result has `status="error"`, includes the error receipt in the payload, and adds an ErrorObject derived from the builder exception.
+    """
     result = CallResult()
     result.metadata["command"] = f"sdk project {mode}"
     if mode not in {"status", "doctor"}:

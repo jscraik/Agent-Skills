@@ -121,10 +121,24 @@ def skills_sdk_status(*args, **kwargs):
 
 
 def skills_sdk_project_install(*args, **kwargs):
+    """
+    Install skills into a project via the Skills SDK.
+    
+    Returns:
+        The result of the skills SDK project installation operation (implementation-specific).
+    """
     return _call_impl("skills_sdk_project_install", *args, **kwargs)
 
 
 def skills_sdk_project_conformance(*args, **kwargs):
+    """
+    Execute the Skills SDK project conformance check for the current project.
+    
+    Runs the SDK's project conformance validator and returns the result produced by the underlying implementation.
+    
+    Returns:
+        The conformance check result produced by the implementation (format determined by the SDK).
+    """
     return _call_impl("skills_sdk_project_conformance", *args, **kwargs)
 
 

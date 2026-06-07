@@ -68,6 +68,16 @@ class TestSkillsSdkTypedContracts(unittest.TestCase):
             )
 
     def test_contracts_reject_type_coercion(self) -> None:
+        """
+        Verify that the check-receipt contract enforces strict types for fields.
+        
+        This test loads the canonical valid check-receipt fixture, changes the `exit_code`
+        value from a numeric type to the string `"0"`, and asserts that validating the
+        modified payload raises a `ValidationError`.
+        
+        Raises:
+            ValidationError: If the contract accepts the coerced `exit_code` value (test expects this).
+        """
         payload = _json(FIXTURE_DIR / "valid" / "check-receipt.json")
         self.assertIsInstance(payload, dict)
         payload["exit_code"] = "0"

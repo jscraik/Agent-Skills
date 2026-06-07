@@ -15,6 +15,18 @@ CONFORMANCE_SCHEMA_PATH = REPO_ROOT / "Infrastructure/config/schemas/skills-sdk/
 
 
 def _command_env() -> dict[str, str]:
+    """
+    Create a copy of the current process environment with deterministic defaults used by the tests for cache, state, tool caches, trust config, and install timestamp.
+    
+    The returned mapping preserves existing environment entries and only provides defaults when the corresponding keys are absent:
+    - XDG_CACHE_HOME, XDG_STATE_HOME: per-test temporary XDG dirs
+    - MISE_CACHE_DIR, UV_CACHE_DIR: per-test tool cache dirs
+    - MISE_TRUSTED_CONFIG_PATHS: repository-level trusted mise config path
+    - ASK_SKILLS_SDK_INSTALL_TIMESTAMP: fixed ISO timestamp used for deterministic installs
+    
+    Returns:
+        env (dict[str, str]): A modified environment mapping suitable for launching subprocesses in tests.
+    """
     env = os.environ.copy()
     temp_base = Path(tempfile.gettempdir()) / "agent-skills-test"
     env.setdefault("XDG_CACHE_HOME", str(temp_base / "xdg-cache"))
@@ -27,6 +39,15 @@ def _command_env() -> dict[str, str]:
 
 
 def _run_process(*args: str) -> subprocess.CompletedProcess[str]:
+    """
+    Execute a subprocess command rooted at the repository and return its completed process result.
+    
+    Parameters:
+        *args (str): Command and arguments to execute (e.g. "git", "status").
+    
+    Returns:
+        subprocess.CompletedProcess[str]: The completed process containing `stdout`, `stderr`, and `returncode`. The subprocess is executed with `cwd` set to the repository root and an environment derived from `_command_env()`, and its stdout/stderr are captured.
+    """
     return subprocess.run(
         list(args),
         cwd=REPO_ROOT,
@@ -39,6 +60,18 @@ def _run_process(*args: str) -> subprocess.CompletedProcess[str]:
 
 
 def _run_json_command(*args: str) -> dict:
+    """
+    Run a CLI command and return the JSON object parsed from its stdout.
+    
+    Parameters:
+        *args (str): Command and its arguments to execute (passed to the subprocess runner).
+    
+    Returns:
+        dict: The JSON object parsed from the command's stdout.
+    
+    Raises:
+        AssertionError: If the subprocess exits with a non-zero return code; the exception message includes the command, return code, stdout, and stderr.
+    """
     process = _run_process(*args)
     if process.returncode != 0:
         raise AssertionError(
@@ -48,6 +81,15 @@ def _run_json_command(*args: str) -> dict:
 
 
 def _marked_project(tmp_path: Path) -> Path:
+    """
+    Create a temporary project directory named "target-project" containing an AGENTS.md marker and return its path.
+    
+    Parameters:
+        tmp_path (Path): Base temporary directory in which the project directory will be created.
+    
+    Returns:
+        Path: Path to the created project root (tmp_path / "target-project").
+    """
     project_root = tmp_path / "target-project"
     project_root.mkdir()
     (project_root / "AGENTS.md").write_text("# Target Project\n", encoding="utf-8")
@@ -55,6 +97,15 @@ def _marked_project(tmp_path: Path) -> Path:
 
 
 def _install_valid_skill(project_root: Path) -> dict:
+    """
+    Install the validated fixture skill into a given project root using the test CLI wrapper.
+    
+    Parameters:
+        project_root (Path): Path to the target project root where the fixture skill should be installed.
+    
+    Returns:
+        result (dict): Parsed JSON payload emitted by the install command.
+    """
     return _run_json_command(
         sys.executable,
         "Infrastructure/bin/ask",
@@ -72,10 +123,23 @@ def _install_valid_skill(project_root: Path) -> dict:
 class TestSkillsSdkProjectConformance(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
+        """
+        Prepare class-level JSON schema fixtures for tests.
+        
+        Loads the project-conformance receipt schema from CONFORMANCE_SCHEMA_PATH into `cls.schema`
+        and populates `cls.schemas` with a mapping from the schema filename
+        "project-conformance-receipt.v1.schema.json" to that schema object.
+        """
         cls.schema = json.loads(CONFORMANCE_SCHEMA_PATH.read_text(encoding="utf-8"))
         cls.schemas = {"project-conformance-receipt.v1.schema.json": cls.schema}
 
     def assert_receipt_valid(self, payload: dict) -> None:
+        """
+        Validate a receipt payload against the test class's loaded conformance schema.
+        
+        Parameters:
+            payload (dict): The receipt JSON object to validate.
+        """
         _validate_schema_subset(self.schema, payload, self.schemas)
 
     def test_status_accepts_empty_marked_project_without_writing(self) -> None:
@@ -157,6 +221,11 @@ class TestSkillsSdkProjectConformance(unittest.TestCase):
             self.assertEqual((project_root / "skills.lock.json").read_text(encoding="utf-8"), before_lockfile)
 
     def test_status_blocks_on_missing_install_receipt(self) -> None:
+        """
+        Verify that `ask sdk project status` blocks when an installed skill's install receipt is missing and reports the correct issue and readiness.
+        
+        Asserts that the command exits with code 2, the receipt `status` is `"blocked"`, the installed skill's `issue_codes` include `"missing_receipt"`, and the installed skill's `rollback_ready` is `False`.
+        """
         with tempfile.TemporaryDirectory() as tmp:
             project_root = _marked_project(Path(tmp))
             _install_valid_skill(project_root)
@@ -183,6 +252,11 @@ class TestSkillsSdkProjectConformance(unittest.TestCase):
             self.assertFalse(receipt["installed_skills"][0]["rollback_ready"])
 
     def test_status_refuses_unmarked_project_root_before_reading_cwd(self) -> None:
+        """
+        Ensure the CLI reports an unmarked project root as unmanaged and exits without creating a lockfile.
+        
+        Runs `ask sdk project status` with `--project-root` pointing to a directory that lacks the project marker and asserts the command exits with code 2, the returned receipt validates against the conformance schema, `project_managed` is False, the first issue code includes `"missing_project_marker"`, and no `skills.lock.json` file is created.
+        """
         with tempfile.TemporaryDirectory() as tmp:
             project_root = Path(tmp) / "unmarked"
             project_root.mkdir()
@@ -232,6 +306,11 @@ class TestSkillsSdkProjectConformance(unittest.TestCase):
             self.assertEqual(receipt["issues"][0]["code"], "malformed_lockfile")
 
     def test_public_wrapper_matches_ask_project_status(self) -> None:
+        """
+        Verify the public wrapper CLI produces the same project status receipt as the main `ask` CLI after normalizing variable fields.
+        
+        Runs `Infrastructure/bin/ask sdk project status` and `bin/skills-sdk project status` against separate marked temporary projects, normalizes the `project_root` and `project_root_identity` fields in both receipts, asserts the normalized receipts are equal, and asserts the wrapper payload's `metadata["command"]` equals the expected command string constructed from the wrapper project root.
+        """
         with tempfile.TemporaryDirectory() as ask_tmp, tempfile.TemporaryDirectory() as wrapper_tmp:
             ask_root = _marked_project(Path(ask_tmp))
             wrapper_root = _marked_project(Path(wrapper_tmp))

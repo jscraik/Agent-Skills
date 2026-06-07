@@ -430,14 +430,41 @@ def validate_lockfile(payload: object) -> Lockfile:
 
 
 def validate_cleanup_receipt(payload: object) -> CleanupReceipt:
+    """
+    Validate and parse an arbitrary payload into a CleanupReceipt.
+    
+    Parameters:
+    	payload (object): Unvalidated payload (typically a dict) representing a cleanup receipt.
+    
+    Returns:
+    	cleanup_receipt (CleanupReceipt): The parsed and validated `CleanupReceipt` model instance.
+    """
     return CleanupReceipt.model_validate(payload)
 
 
 def validate_project_conformance_receipt(payload: object) -> ProjectConformanceReceipt:
+    """
+    Validate and parse an arbitrary payload into a ProjectConformanceReceipt model.
+    
+    Parameters:
+    	payload (object): Unvalidated payload to be parsed and validated against the ProjectConformanceReceipt schema.
+    
+    Returns:
+    	project_conformance_receipt (ProjectConformanceReceipt): The validated ProjectConformanceReceipt instance.
+    """
     return ProjectConformanceReceipt.model_validate(payload)
 
 
 def validate_robot_envelope(payload: object) -> RobotEnvelope:
+    """
+    Validate and parse a raw payload into a RobotEnvelope model.
+    
+    Parameters:
+        payload (object): Unvalidated input (typically a dict) representing a robot envelope.
+    
+    Returns:
+        RobotEnvelope: The validated and parsed RobotEnvelope model instance.
+    """
     return RobotEnvelope.model_validate(payload)
 
 
