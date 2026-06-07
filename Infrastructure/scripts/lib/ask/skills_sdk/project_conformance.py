@@ -132,7 +132,7 @@ def build_project_conformance_receipt(
 
         if has_corrupted_evidence:
             receipt["lockfile_status"] = "corrupted_evidence"
-            receipt["status"] = "fail"
+            receipt["status"] = "blocked"
             issue = _issue(
                 "corrupted_sdk_evidence",
                 "blocker",
@@ -156,7 +156,7 @@ def build_project_conformance_receipt(
 
         if has_installed_evidence:
             receipt["lockfile_status"] = "missing_with_installed_evidence"
-            receipt["status"] = "fail"
+            receipt["status"] = "blocked"
             issue = _issue(
                 "missing_lockfile",
                 "blocker",
