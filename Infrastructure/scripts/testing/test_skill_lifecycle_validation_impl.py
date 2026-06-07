@@ -496,7 +496,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             self.assertIn("Plugin-shadowing check failed", result.stderr)
             self.assertIn("- demo-shadow", result.stderr)
 
-    def test_plugin_shadowing_check_allows_generated_command_handle_overlap(self) -> None:
+    def test_plugin_shadowing_check_allows_command_surface_overlap(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir)
             write_text(
@@ -512,7 +512,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
 
                 # Demo Command
 
-                Internal activation entrypoint for a child skill under demo-plugin.
+                Command-surface metadata entry for a child skill under demo-plugin.
                 Source: Plugins/demo-plugin/skills/demo-command/SKILL.md
                 """,
             )
@@ -524,14 +524,14 @@ class SkillLifecycleValidationTests(unittest.TestCase):
                             {
                                 "kind": "skill",
                                 "handle": "demo-command",
-                                "command_handle_path": ".agents/skills/demo-command",
+                                "source_path": "Plugins/demo-plugin/skills/demo-command/SKILL.md",
                             }
                         ],
                         "hidden_handles": [
                             {
                                 "kind": "skill",
                                 "handle": "demo-hidden",
-                                "command_handle_path": ".agents/skills/demo-hidden",
+                                "source_path": "Plugins/demo-plugin/skills/demo-hidden/SKILL.md",
                             }
                         ],
                     }

@@ -168,16 +168,16 @@ def _load_skill_doctor_schema() -> dict:
 def _proof_result(handle: str, status: str = "pass", runtime_target: str = "any") -> CallResult:
     result = CallResult(status="success" if status == "pass" else "error")
     result.data["proof"] = {
-        "schema_version": "command-handle-proof.v1",
+        "schema_version": "command-handle-proof.v2",
         "handle": handle,
         "runtime_target": runtime_target,
         "status": status,
         "gates": {
             "resolver": status == "pass",
-            "generated_command_handle_check": status == "pass",
-            "workspace_command_handle_exists": status == "pass",
+            "canonical_source_exists": status == "pass",
             "codex_user_link": status == "pass",
-            "codex_user_command_handle_exists": status == "pass",
+            "codex_user_runtime_ready": status == "pass",
+            "user_runtime_ready": status == "pass",
         },
     }
     if status != "pass":
@@ -219,6 +219,9 @@ class TestAskSkillsDoctor(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             sandbox = Path(tmp)
             repo_root = sandbox / "repo"
+            canonical_source = repo_root / "Skills" / "agent-ops" / "autofix" / "SKILL.md"
+            canonical_source.parent.mkdir(parents=True)
+            canonical_source.write_text("---\nname: autofix\n---\n", encoding="utf-8")
             workspace_handle = repo_root / ".agents" / "skills" / "autofix" / "SKILL.md"
             workspace_handle.parent.mkdir(parents=True)
             workspace_handle.write_text("---\nname: autofix\n---\n", encoding="utf-8")
@@ -232,16 +235,11 @@ class TestAskSkillsDoctor(unittest.TestCase):
                 "status": "ok",
                 "handle": "autofix",
                 "source_path": "Skills/agent-ops/autofix/SKILL.md",
-                "command_handle_path": ".agents/skills/autofix/SKILL.md",
             }
 
             with (
                 patch("ask.commands.skills_impl.Path.home", return_value=home),
                 patch("ask.commands.skills_impl.resolve_skill_handle", return_value=resolution),
-                patch(
-                    "ask.commands.skills_impl.check_command_handles",
-                    return_value={"status": "pass", "violations": []},
-                ),
             ):
                 default_result = skills_proof(repo_root, "autofix")
                 codex_result = skills_proof(repo_root, "autofix", runtime_target="codex")
@@ -279,11 +277,6 @@ class TestAskSkillsDoctor(unittest.TestCase):
                 diagnostics["runtime_modes"]["agents_user_runtime"],
                 "root_symlink",
             )
-            missing_paths = {
-                item["runtime"]: item["path"]
-                for item in diagnostics["missing_command_handles"]
-            }
-            self.assertIn("codex_user_runtime", missing_paths)
             self.assertIn("preview_user_runtime_sync", [
                 item["kind"] for item in diagnostics["recovery_commands"]
             ])
@@ -294,10 +287,13 @@ class TestAskSkillsDoctor(unittest.TestCase):
             self.assertEqual(agents_proof["runtime_satisfied_by"], "agents_user_runtime")
             self.assertIn("agents_user_runtime_ready", agents_proof["gate_policy"]["required"])
 
-    def test_runtime_target_codex_accepts_per_handle_workspace_bridge(self) -> None:
+    def test_runtime_target_codex_rejects_per_handle_workspace_bridge(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             sandbox = Path(tmp)
             repo_root = sandbox / "repo"
+            canonical_source = repo_root / "Skills" / "agent-ops" / "autofix" / "SKILL.md"
+            canonical_source.parent.mkdir(parents=True)
+            canonical_source.write_text("---\nname: autofix\n---\n", encoding="utf-8")
             workspace_handle = repo_root / ".agents" / "skills" / "autofix" / "SKILL.md"
             workspace_handle.parent.mkdir(parents=True)
             workspace_handle.write_text("---\nname: autofix\n---\n", encoding="utf-8")
@@ -311,33 +307,26 @@ class TestAskSkillsDoctor(unittest.TestCase):
                 "status": "ok",
                 "handle": "autofix",
                 "source_path": "Skills/agent-ops/autofix/SKILL.md",
-                "command_handle_path": ".agents/skills/autofix/SKILL.md",
             }
 
             with (
                 patch("ask.commands.skills_impl.Path.home", return_value=home),
                 patch("ask.commands.skills_impl.resolve_skill_handle", return_value=resolution),
-                patch(
-                    "ask.commands.skills_impl.check_command_handles",
-                    return_value={"status": "pass", "violations": []},
-                ),
             ):
                 result = skills_proof(repo_root, "autofix", runtime_target="codex")
 
             proof = result.data["proof"]
-            self.assertEqual(result.status, "success")
-            self.assertEqual(proof["status"], "pass")
+            self.assertEqual(result.status, "error")
+            self.assertEqual(proof["status"], "fail")
             self.assertEqual(proof["runtime_target"], "codex")
-            self.assertEqual(proof["runtime_satisfied_by"], "codex_user_runtime")
+            self.assertIsNone(proof["runtime_satisfied_by"])
             self.assertFalse(proof["gates"]["codex_user_link"])
-            self.assertTrue(proof["gates"]["codex_user_command_handle_exists"])
-            self.assertTrue(proof["gates"]["codex_user_command_handle_points_to_workspace"])
-            self.assertTrue(proof["gates"]["codex_user_runtime_ready"])
+            self.assertFalse(proof["gates"]["codex_user_runtime_ready"])
             self.assertEqual(
                 proof["runtime_diagnostics"]["runtime_modes"]["codex_user_runtime"],
-                "handle_bridge",
+                "foreign_or_unmanaged_root",
             )
-            self.assertNotIn("runtime_failure", proof)
+            self.assertIn("runtime_failure", proof)
 
     def test_runtime_target_rejects_invalid_value_before_resolution(self) -> None:
         result = skills_proof(REPO_ROOT, "autofix", runtime_target="cloud")
@@ -425,7 +414,6 @@ class TestAskSkillsDoctor(unittest.TestCase):
             "status": "ok",
             "handle": "autofix",
             "source_path": "Skills/agent-ops/autofix/SKILL.md",
-            "command_handle_path": ".agents/skills/autofix/SKILL.md",
         }
 
         with (
@@ -475,7 +463,6 @@ class TestAskSkillsDoctor(unittest.TestCase):
             "status": "ok",
             "handle": "autofix",
             "source_path": "Skills/agent-ops/autofix/SKILL.md",
-            "command_handle_path": ".agents/skills/autofix/SKILL.md",
         }
 
         with (
@@ -502,7 +489,6 @@ class TestAskSkillsDoctor(unittest.TestCase):
             "status": "ok",
             "handle": "autofix",
             "source_path": "Skills/agent-ops/autofix/SKILL.md",
-            "command_handle_path": ".agents/skills/autofix/SKILL.md",
         }
         proof_calls = []
 
@@ -546,7 +532,6 @@ class TestAskSkillsDoctor(unittest.TestCase):
             "status": "ok",
             "handle": "autofix",
             "source_path": "Skills/agent-ops/autofix/SKILL.md",
-            "command_handle_path": ".agents/skills/autofix/SKILL.md",
         }
         proof_result = CallResult(status="error")
         proof_result.data["runtime_failure"] = {
@@ -582,7 +567,7 @@ class TestAskSkillsDoctor(unittest.TestCase):
         )
         _assert_skill_doctor_schema_validates(self, result.data["skill_doctor"])
 
-    def test_doctor_codex_parity_blocks_path_targets_without_command_handle(self) -> None:
+    def test_doctor_codex_parity_blocks_path_targets_without_command_surface_handle(self) -> None:
         with (
             patch("ask.commands.skills_impl.audit_skill", return_value=_audit_result()),
             patch("ask.commands.skills_impl._skill_workout_candidates", return_value=[]),
@@ -597,7 +582,7 @@ class TestAskSkillsDoctor(unittest.TestCase):
         self.assertEqual(runtime_check["runtime_target"], "codex")
         self.assertEqual(
             runtime_check["reason"],
-            "Codex parity requires a command-handle target so Codex runtime proof can run.",
+            "Codex parity requires a command-surface handle so Codex runtime proof can run.",
         )
         self.assertIn("blocked_runtime", doctor["lifecycle_event"]["outcome"]["blocker_classes"])
         _assert_skill_doctor_schema_validates(self, doctor)
@@ -607,7 +592,6 @@ class TestAskSkillsDoctor(unittest.TestCase):
             "status": "ok",
             "handle": "autofix",
             "source_path": "Skills/agent-ops/autofix/SKILL.md",
-            "command_handle_path": ".agents/skills/autofix/SKILL.md",
         }
 
         with (

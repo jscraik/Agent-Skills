@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Unit tests for generated command-handle rendering."""
+"""Unit tests for command-surface metadata behavior."""
 
 from __future__ import annotations
 
@@ -31,10 +31,15 @@ COMMAND_SURFACE = _load_module()
 
 
 class CommandSurfaceTests(unittest.TestCase):
-    def test_generated_handle_includes_portable_source_path_fallback(self) -> None:
+    def test_wrapper_generation_api_is_absent(self) -> None:
+        self.assertFalse(hasattr(COMMAND_SURFACE, "write_command_handles"))
+        self.assertFalse(hasattr(COMMAND_SURFACE, "check_command_handles"))
+        self.assertFalse(hasattr(COMMAND_SURFACE, "render_skill_command_handle"))
+        self.assertFalse(hasattr(COMMAND_SURFACE, "render_openai_yaml"))
+        self.assertFalse(hasattr(COMMAND_SURFACE, "_validate_command_handle_payload"))
+
+    def test_command_handle_serializes_without_wrapper_path(self) -> None:
         command_handle = getattr(COMMAND_SURFACE, "CommandHandle")
-        render_skill_command_handle = getattr(COMMAND_SURFACE, "render_skill_command_handle")
-        validate_command_handle_payload = getattr(COMMAND_SURFACE, "_validate_command_handle_payload")
 
         handle = command_handle(
             handle="he-work",
@@ -42,24 +47,18 @@ class CommandSurfaceTests(unittest.TestCase):
             command_visibility="target",
             runtime_visibility="latent",
             source_path="Plugins/harness-engineering/skills/he-work/SKILL.md",
-            command_handle_path=".agents/skills/he-work/SKILL.md",
             owner="harness-engineering",
             description="Execute a plan.",
             invoke_via="harness-engineering",
             level="atom",
         )
 
-        body = render_skill_command_handle(handle)
-
-        self.assertIn(
-            "Source: `Plugins/harness-engineering/skills/he-work/SKILL.md`.",
-            body,
+        payload = handle.to_dict()
+        self.assertEqual(
+            payload["source_path"],
+            "Plugins/harness-engineering/skills/he-work/SKILL.md",
         )
-        self.assertIn("If this is the Agent Skills Kit repo and `./bin/ask` exists", body)
-        self.assertIn("Otherwise, load", body)
-        self.assertIn("Keep handle, routing, and source mechanics out of user-facing replies", body)
-        self.assertIn("search only the owner skill tree", body)
-        self.assertEqual(validate_command_handle_payload(handle, body), [])
+        self.assertNotIn("command_handle_path", payload)
 
     def test_parse_command_handles_resolves_skills_and_reviewers(self) -> None:
         parse_command_handles = getattr(COMMAND_SURFACE, "parse_command_handles")
@@ -107,10 +106,8 @@ class CommandSurfaceTests(unittest.TestCase):
             "skill-inspector",
         )
 
-    def test_generated_handle_uses_unresolved_placeholder_when_source_missing(self) -> None:
+    def test_command_surface_metadata_allows_unresolved_source(self) -> None:
         command_handle = getattr(COMMAND_SURFACE, "CommandHandle")
-        render_skill_command_handle = getattr(COMMAND_SURFACE, "render_skill_command_handle")
-        validate_command_handle_payload = getattr(COMMAND_SURFACE, "_validate_command_handle_payload")
 
         handle = command_handle(
             handle="he-work",
@@ -118,17 +115,15 @@ class CommandSurfaceTests(unittest.TestCase):
             command_visibility="target",
             runtime_visibility="latent",
             source_path=None,
-            command_handle_path=".agents/skills/he-work/SKILL.md",
             owner="harness-engineering",
             description="Execute a plan.",
             invoke_via="harness-engineering",
             level="atom",
         )
 
-        body = render_skill_command_handle(handle)
-        self.assertIn("Source: `UNRESOLVED_SOURCE_PATH`.", body)
-        self.assertIn("search only the owner skill tree", body)
-        self.assertEqual(validate_command_handle_payload(handle, body), [])
+        payload = handle.to_dict()
+        self.assertNotIn("source_path", payload)
+        self.assertNotIn("command_handle_path", payload)
 
 
 if __name__ == "__main__":

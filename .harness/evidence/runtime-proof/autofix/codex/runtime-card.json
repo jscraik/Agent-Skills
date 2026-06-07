@@ -24,7 +24,7 @@
       "actor_type": "agent",
       "artifact_id": "runtime-probe-autofix-codex",
       "artifact_type": "verifier_output",
-      "consumer_contract": "Probe JSON records the raw command-handle proof used by the RuntimeCard.",
+      "consumer_contract": "Probe JSON records the raw skill runtime proof used by the RuntimeCard.",
       "generated_by": "./bin/ask skills proof autofix --runtime-target codex --json --robot",
       "mutation_scope": "evidence_write",
       "path": ".harness/evidence/runtime-proof/autofix/codex/probe.json",
@@ -42,18 +42,18 @@
   ],
   "card_id": "runtime-card-autofix-codex",
   "command_handle": "$autofix",
-  "created_at": "2026-06-04T19:46:00Z",
+  "created_at": "2026-06-07T22:44:29Z",
   "evidence_receipts": [
     {
       "artifact_path": ".harness/evidence/runtime-proof/autofix/codex/runtime-card.json",
-      "blocker": "Command handle proof failed for 'autofix'.",
+      "blocker": "Skill runtime proof failed for 'autofix'.",
       "blocker_class": "blocked_runtime",
       "claim": "$autofix is reachable in the Codex runtime.",
       "claim_status": "blocked",
       "command": "./bin/ask skills proof autofix --runtime-target codex --json --robot",
       "evidence_type": "command",
       "exit_code": 2,
-      "observed_at": "2026-06-04T19:46:00Z",
+      "observed_at": "2026-06-07T22:44:29Z",
       "probe_artifact_path": ".harness/evidence/runtime-proof/autofix/codex/probe.json",
       "probe_command": "./bin/ask skills proof autofix --runtime-target codex --json --robot",
       "probe_exit_code": 2,
@@ -70,8 +70,8 @@
   ],
   "limitations": [
     {
-      "class": "manual_session_gate",
-      "message": "Runtime reachability proves command-handle wiring; it does not execute an interactive session."
+      "class": "skill_invocation_not_asserted",
+      "message": "Codex session metadata was observed for this workspace; this proof still verifies command-surface reachability rather than a dedicated skill tool invocation event. Agents observability counters are attached when available but are not treated as per-skill invocation proof."
     }
   ],
   "mutation_scope": "evidence_write",
@@ -95,7 +95,7 @@
       },
       {
         "command": "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
-        "expected_outcome": "Refreshes .agents/skills command handles from canonical sources.",
+        "expected_outcome": "Refreshes .agents/skills from canonical frontmatter and skill sources.",
         "permission_profile": {
           "filesystem": "write workspace runtime projection",
           "network": "not required"
@@ -123,7 +123,7 @@
           "network": "not required"
         },
         "preconditions": [
-          "User runtime link or handle bridge now points at the workspace projection."
+          "User runtime link now points at the workspace projection."
         ]
       }
     ],
@@ -132,7 +132,7 @@
       "network": "not required"
     },
     "preconditions": [
-      "Run workspace and user skill sync if the runtime link or command handle is absent."
+      "Run workspace and user skill sync if the runtime link or command-surface handle is absent."
     ],
     "reason": "Preview with ./bin/ask skills sync --scope user --projection rooted --dry-run, then run workspace/user sync only if the user-runtime relink plan is acceptable.",
     "recovery_status": "blocked_runtime"
@@ -140,18 +140,6 @@
   "runtime_diagnostics": {
     "expected_workspace_runtime": "${WORKSPACE_ROOT}/.agents/skills",
     "failed_gate": "codex_user_runtime_ready",
-    "missing_command_handles": [
-      {
-        "expected_under": "${WORKSPACE_ROOT}/.agents/skills",
-        "path": "${HOME}/.codex/skills/autofix/SKILL.md",
-        "runtime": "codex_user_runtime"
-      },
-      {
-        "expected_under": "${WORKSPACE_ROOT}/.agents/skills",
-        "path": "${HOME}/.agents/skills/autofix/SKILL.md",
-        "runtime": "agents_user_runtime"
-      }
-    ],
     "recovery_commands": [
       {
         "command": "./bin/ask skills sync --scope user --projection rooted --dry-run --json --robot",
@@ -167,7 +155,7 @@
       },
       {
         "command": "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
-        "expected_outcome": "Refreshes .agents/skills command handles from canonical sources.",
+        "expected_outcome": "Refreshes .agents/skills from canonical frontmatter and skill sources.",
         "kind": "refresh_workspace_projection",
         "permission_profile": {
           "filesystem": "write workspace runtime projection",
@@ -198,13 +186,13 @@
           "network": "not required"
         },
         "preconditions": [
-          "User runtime link or handle bridge now points at the workspace projection."
+          "User runtime link now points at the workspace projection."
         ]
       }
     ],
     "recovery_risk": "User-scope sync mutates home-directory runtime links; preview with --dry-run before applying.",
     "runtime_modes": {
-      "agents_user_runtime": "foreign_or_unmanaged_root",
+      "agents_user_runtime": "root_symlink",
       "codex_user_runtime": "foreign_or_unmanaged_root"
     },
     "schema_version": "command-handle-runtime-diagnostics.v1",
@@ -212,12 +200,13 @@
   },
   "runtime_session": {
     "actor_type": "agent",
-    "created_at": "2026-06-04T19:46:00Z",
+    "created_at": "2026-06-07T22:44:29Z",
+    "latest_turn_id": "019ea3f2-881d-7802-bb20-c1dea0798d33",
     "observability": {
       "codex_log_presence": true,
-      "last_ingest_at": "2026-06-04T19:46:03.643941Z",
-      "last_logs_ingest_at": "2026-06-04T19:46:03.643941Z",
-      "last_traces_ingest_at": "2026-06-04T19:45:59.359881Z",
+      "last_ingest_at": "2026-06-07T22:44:25.348103Z",
+      "last_logs_ingest_at": "2026-06-07T22:44:25.348103Z",
+      "last_traces_ingest_at": "2026-06-07T22:30:47.968599Z",
       "logs_freshness": "fresh",
       "overall_status": "trusted",
       "plugin_backed_skill_invocation_count": 0,
@@ -232,15 +221,17 @@
         }
       ],
       "stats_path": "${HOME}/.agents/otel-collector/data/processed/stats.json",
-      "traces_freshness": "fresh"
+      "traces_freshness": "recent"
     },
     "observability_sources": [
       "agents_otel_stats"
     ],
+    "rollout_path": "${HOME}/.codex/sessions/2026/06/07/rollout-2026-06-07T17-19-34-019ea2e1-e3d6-75d1-b846-fd603a0a6f68.jsonl",
     "runtime_status": "blocked_runtime",
     "runtime_target": "codex",
-    "session_id": "runtime-proof-autofix-codex",
-    "unavailable_reason": "Command handle proof failed for 'autofix'.",
+    "session_id": "019ea2e1-e3d6-75d1-b846-fd603a0a6f68",
+    "source": "codex_rollout_jsonl",
+    "unavailable_reason": "Skill runtime proof failed for 'autofix'.",
     "visibility_status": "user_observable",
     "workspace_root": "${WORKSPACE_ROOT}"
   },
@@ -250,10 +241,23 @@
   "skill_handle": "autofix",
   "thread_runs": [
     {
+      "cwd": "${WORKSPACE_ROOT}",
+      "latest_turn_id": "019ea3f2-881d-7802-bb20-c1dea0798d33",
+      "observed_at": "2026-06-07T22:44:29Z",
+      "originator": "Codex Desktop",
+      "rollout_path": "${HOME}/.codex/sessions/2026/06/07/rollout-2026-06-07T17-19-34-019ea2e1-e3d6-75d1-b846-fd603a0a6f68.jsonl",
+      "runtime_status": "blocked_runtime",
+      "runtime_target": "codex",
+      "session_id": "019ea2e1-e3d6-75d1-b846-fd603a0a6f68",
+      "source": "codex_rollout_jsonl",
+      "thread_id": "019ea2e1-e3d6-75d1-b846-fd603a0a6f68",
+      "thread_source": "user"
+    },
+    {
       "codex_log_presence": true,
-      "last_logs_ingest_at": "2026-06-04T19:46:03.643941Z",
-      "last_traces_ingest_at": "2026-06-04T19:45:59.359881Z",
-      "observed_at": "2026-06-04T19:46:00Z",
+      "last_logs_ingest_at": "2026-06-07T22:44:25.348103Z",
+      "last_traces_ingest_at": "2026-06-07T22:30:47.968599Z",
+      "observed_at": "2026-06-07T22:44:29Z",
       "overall_status": "trusted",
       "runtime_status": "blocked_runtime",
       "runtime_target": "codex",
@@ -264,9 +268,67 @@
   ],
   "turn_events": [
     {
+      "cwd": "${WORKSPACE_ROOT}",
+      "event_type": "turn_context_observed",
+      "observed_at": "2026-06-07T16:19:50.814Z",
+      "runtime_target": "codex",
+      "source_line": 6,
+      "turn_id": "019ea2e2-20b9-7791-a3c1-c0f31be0cdd3"
+    },
+    {
+      "event_type": "task_complete",
+      "observed_at": "2026-06-07T16:24:34.056Z",
+      "runtime_target": "codex",
+      "source_line": 138,
+      "turn_id": "019ea2e2-20b9-7791-a3c1-c0f31be0cdd3"
+    },
+    {
+      "cwd": "${WORKSPACE_ROOT}",
+      "event_type": "turn_context_observed",
+      "observed_at": "2026-06-07T16:25:42.390Z",
+      "runtime_target": "codex",
+      "source_line": 142,
+      "turn_id": "019ea2e7-82f9-7602-ac97-ae45e50cea85"
+    },
+    {
+      "event_type": "patch_apply_end",
+      "observed_at": "2026-06-07T16:29:53.051Z",
+      "runtime_target": "codex",
+      "source_line": 252,
+      "turn_id": "019ea2e7-82f9-7602-ac97-ae45e50cea85"
+    },
+    {
+      "event_type": "patch_apply_end",
+      "observed_at": "2026-06-07T16:30:11.052Z",
+      "runtime_target": "codex",
+      "source_line": 257,
+      "turn_id": "019ea2e7-82f9-7602-ac97-ae45e50cea85"
+    },
+    {
+      "event_type": "patch_apply_end",
+      "observed_at": "2026-06-07T16:30:21.560Z",
+      "runtime_target": "codex",
+      "source_line": 265,
+      "turn_id": "019ea2e7-82f9-7602-ac97-ae45e50cea85"
+    },
+    {
+      "event_type": "patch_apply_end",
+      "observed_at": "2026-06-07T16:30:27.633Z",
+      "runtime_target": "codex",
+      "source_line": 270,
+      "turn_id": "019ea2e7-82f9-7602-ac97-ae45e50cea85"
+    },
+    {
+      "event_type": "patch_apply_end",
+      "observed_at": "2026-06-07T16:30:38.304Z",
+      "runtime_target": "codex",
+      "source_line": 276,
+      "turn_id": "019ea2e7-82f9-7602-ac97-ae45e50cea85"
+    },
+    {
       "codex_log_presence": true,
       "event_type": "agents_observability_stats_observed",
-      "observed_at": "2026-06-04T19:46:00Z",
+      "observed_at": "2026-06-07T22:44:29Z",
       "overall_status": "trusted",
       "plugin_backed_skill_invocation_count": 0,
       "runtime_target": "codex",
@@ -279,40 +341,22 @@
     {
       "failed_check_id": "codex_user_runtime_ready",
       "gates": {
-        "agents_user_command_handle_exists": true,
-        "agents_user_command_handle_points_to_workspace": false,
-        "agents_user_link": false,
-        "agents_user_runtime_ready": false,
-        "codex_user_command_handle_exists": false,
-        "codex_user_command_handle_points_to_workspace": false,
+        "agents_user_link": true,
+        "agents_user_runtime_ready": true,
+        "canonical_source_exists": true,
         "codex_user_link": false,
         "codex_user_runtime_ready": false,
-        "generated_command_handle_check": true,
         "resolver": true,
-        "user_runtime_ready": false,
-        "workspace_command_handle_exists": true
+        "user_runtime_ready": true
       },
       "required_gates": [
         "resolver",
-        "generated_command_handle_check",
-        "workspace_command_handle_exists",
+        "canonical_source_exists",
         "codex_user_runtime_ready"
       ],
       "runtime_diagnostics": {
         "expected_workspace_runtime": "${WORKSPACE_ROOT}/.agents/skills",
         "failed_gate": "codex_user_runtime_ready",
-        "missing_command_handles": [
-          {
-            "expected_under": "${WORKSPACE_ROOT}/.agents/skills",
-            "path": "${HOME}/.codex/skills/autofix/SKILL.md",
-            "runtime": "codex_user_runtime"
-          },
-          {
-            "expected_under": "${WORKSPACE_ROOT}/.agents/skills",
-            "path": "${HOME}/.agents/skills/autofix/SKILL.md",
-            "runtime": "agents_user_runtime"
-          }
-        ],
         "recovery_commands": [
           {
             "command": "./bin/ask skills sync --scope user --projection rooted --dry-run --json --robot",
@@ -328,7 +372,7 @@
           },
           {
             "command": "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
-            "expected_outcome": "Refreshes .agents/skills command handles from canonical sources.",
+            "expected_outcome": "Refreshes .agents/skills from canonical frontmatter and skill sources.",
             "kind": "refresh_workspace_projection",
             "permission_profile": {
               "filesystem": "write workspace runtime projection",
@@ -359,13 +403,13 @@
               "network": "not required"
             },
             "preconditions": [
-              "User runtime link or handle bridge now points at the workspace projection."
+              "User runtime link now points at the workspace projection."
             ]
           }
         ],
         "recovery_risk": "User-scope sync mutates home-directory runtime links; preview with --dry-run before applying.",
         "runtime_modes": {
-          "agents_user_runtime": "foreign_or_unmanaged_root",
+          "agents_user_runtime": "root_symlink",
           "codex_user_runtime": "foreign_or_unmanaged_root"
         },
         "schema_version": "command-handle-runtime-diagnostics.v1",

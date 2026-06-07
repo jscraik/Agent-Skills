@@ -68,7 +68,7 @@ non_goals:
   - write reframe programs
   - create noisy ADRs or decision records without a high-value architecture decision
   - implement code
-  - edit generated command handles or runtime projections as canonical source
+  - edit command-surface metadata or runtime projections as canonical source
 
 conditional_capabilities:
   - "With explicit post-plan approval, known destination, and a small confirmed object set, the skill may perform the approved Linear mutation and must report exact object IDs."

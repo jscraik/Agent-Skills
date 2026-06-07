@@ -11,7 +11,6 @@ from ask.skills_sdk.contracts import runtime_failure_payload, skills_validation_
 
 
 ResolveSkillHandle = Callable[..., dict[str, Any]]
-CheckCommandHandles = Callable[..., dict[str, Any]]
 SUPPORTED_RUNTIME_TARGETS = {"any", "codex", "agents"}
 EVIDENCE_RUNTIME_TARGETS = {"codex", "agents"}
 WORKSPACE_ROOT_MARKER = "${WORKSPACE_ROOT}"
@@ -29,8 +28,6 @@ RUNTIME_REACHABILITY_FAILURES = {
     "agents_user_runtime_ready",
     "codex_user_link",
     "agents_user_link",
-    "codex_user_command_handle_exists",
-    "agents_user_command_handle_exists",
 }
 
 
@@ -158,7 +155,7 @@ def _redact_runtime_paths(value: Any, repo_root: Path) -> Any:
 
 def _runtime_status_for_proof(proof: dict[str, Any]) -> str:
     """
-    Map a command-handle proof object to a runtime status label.
+    Map a skill runtime proof object to a runtime status label.
 
     Examines `proof["status"]` and, when not `"pass"`, inspects
     `proof["runtime_failure"]["failed_check_id"]` (defaults to `"runtime_reachability"`).
@@ -167,7 +164,7 @@ def _runtime_status_for_proof(proof: dict[str, Any]) -> str:
     `RUNTIME_REACHABILITY_FAILURES`; otherwise returns `"stale_or_drifted"`.
 
     Parameters:
-        proof (dict[str, Any]): The command-handle proof payload.
+        proof (dict[str, Any]): The skill runtime proof payload.
 
     Returns:
         str: One of `"implemented_enforced"`, `"blocked_runtime"`, or `"stale_or_drifted"` describing runtime status.
@@ -218,11 +215,9 @@ def _path_is_under(path: Path, parent: Path) -> bool:
         return False
 
 
-def _runtime_mode(link: dict[str, object], *, handle_points_to_workspace: bool) -> str:
+def _runtime_mode(link: dict[str, object]) -> str:
     if bool(link.get("points_to_workspace_runtime")):
         return "root_symlink"
-    if handle_points_to_workspace:
-        return "handle_bridge"
     if bool(link.get("exists")):
         return "foreign_or_unmanaged_root"
     return "missing_root"
@@ -244,7 +239,7 @@ def _runtime_evidence_context(
     
     Parameters:
     	repo_root (Path): Repository root used to resolve paths and write evidence files.
-    	proof (dict[str, Any]): Command-handle runtime proof object; fields inspected include `handle`, `runtime_target`, `resolution`, `status`, and `runtime_failure`.
+        proof (dict[str, Any]): Command-surface runtime proof object; fields inspected include `handle`, `runtime_target`, `resolution`, `status`, and `runtime_failure`.
     	actor_type (str): Actor type to record in the context (e.g., "agent" or "user").
     
     Returns:
@@ -747,12 +742,12 @@ def _artifact_record(
 
 def _probe_payload(context: dict[str, Any], proof: dict[str, Any]) -> dict[str, Any]:
     """
-    Build the probe payload used as the verifier output for a command-handle runtime proof.
+    Build the probe payload used as the verifier output for a skill runtime proof.
     
     Parameters:
         context (dict[str, Any]): Runtime evidence context containing keys:
             `handle`, `runtime_target`, `runtime_status`, `created_at`, `command`, and `exit_code`.
-        proof (dict[str, Any]): The command-handle proof object to embed in the probe.
+        proof (dict[str, Any]): The skill runtime proof object to embed in the probe.
     
     Returns:
         dict[str, Any]: Probe payload with the following keys:
@@ -897,7 +892,7 @@ def _recovery_plan(context: dict[str, Any]) -> dict[str, Any]:
                 "command": context["command"],
                 "preconditions": [
                     f"{_runtime_display_name(context['runtime_target'])} skill runtime points at "
-                    "the workspace command-handle projection."
+                    "the workspace command-surface projection."
                 ],
                 "permission_profile": {
                     "filesystem": "read workspace and user runtime skill links",
@@ -913,7 +908,7 @@ def _recovery_plan(context: dict[str, Any]) -> dict[str, Any]:
         "reason": recovery_reason,
         "next_commands": next_commands,
         "preconditions": [
-            "Run workspace and user skill sync if the runtime link or command handle is absent."
+            "Run workspace and user skill sync if the runtime link or command-surface handle is absent."
         ],
         "permission_profile": {
             "filesystem": "workspace evidence write and user runtime link read",
@@ -992,7 +987,7 @@ def _runtime_card_payload(
                 "class": "skill_invocation_not_asserted",
                 "message": (
                     f"{runtime_display} session metadata was observed for this workspace; this proof still verifies "
-                    "command-handle reachability rather than a dedicated skill tool invocation event. "
+                    "command-surface reachability rather than a dedicated skill tool invocation event. "
                     "Agents observability counters are attached when available but are not treated as "
                     "per-skill invocation proof."
                 ),
@@ -1003,7 +998,7 @@ def _runtime_card_payload(
             {
                 "class": "manual_session_gate",
                 "message": (
-                    "Runtime reachability proves command-handle wiring; it does not execute an interactive session."
+                    "Runtime reachability proves command-surface wiring; it does not execute an interactive session."
                 ),
             }
         ]
@@ -1065,7 +1060,7 @@ def emit_command_handle_runtime_evidence(
     
     Parameters:
         repo_root (Path): Repository root used to compute evidence output paths.
-        proof (dict[str, Any]): Command-handle proof payload that must include a `runtime_target` entry.
+        proof (dict[str, Any]): Command-surface proof payload that must include a `runtime_target` entry.
         actor_type (str): Actor classification to include in generated evidence (default: "agent").
     
     Returns:
@@ -1116,7 +1111,7 @@ def emit_command_handle_runtime_evidence(
         artifact_id=f"runtime-probe-{context['handle']}-{context['runtime_target']}",
         artifact_type="verifier_output",
         path=relative_probe_path,
-        consumer_contract="Probe JSON records the raw command-handle proof used by the RuntimeCard.",
+        consumer_contract="Probe JSON records the raw skill runtime proof used by the RuntimeCard.",
     )
     card = _runtime_card_payload(
         context,
@@ -1161,22 +1156,20 @@ def build_command_handle_proof(
     handle: str,
     runtime_target: object,
     resolve_skill_handle_fn: ResolveSkillHandle,
-    check_command_handles_fn: CheckCommandHandles,
     home_path: Path,
 ) -> dict[str, Any]:
     """
-    Build a runtime reachability proof for a generated skill command handle.
+    Build a runtime reachability proof for a skill resolved from command-surface metadata.
     
     Parameters:
     	repo_root (Path): Repository root used to resolve workspace paths.
     	handle (str): Skill handle identifier (may include a leading `$`).
     	runtime_target (object): Requested runtime target; will be normalized to a lowercase string (e.g. "any", "codex", "agents").
     	resolve_skill_handle_fn (callable): Callable used to resolve the handle to repository resolution metadata.
-    	check_command_handles_fn (callable): Callable used to validate generated command handle(s) in the workspace.
-    	home_path (Path): User home path used to inspect user runtime projections under `.codex` and `.agents`.
+	    home_path (Path): User home path used to inspect user runtime projections under `.codex` and `.agents`.
     
     Returns:
-    	proof (dict[str, Any]): A proof payload (schema_version "command-handle-proof.v2") describing gate results, validation commands, resolution and workspace/user runtime state, available runtimes, and, on failure, a `runtime_failure` entry with recovery guidance. If required runtime gates are satisfied, the payload may include a `live_runtime_invocation` hint for manual verification.
+        proof (dict[str, Any]): A proof payload describing gate results, validation commands, resolution and workspace/user runtime state, available runtimes, and, on failure, a `runtime_failure` entry with recovery guidance. If required runtime gates are satisfied, the payload may include a `live_runtime_invocation` hint for manual verification.
     """
     runtime_target = normalize_runtime_target(runtime_target)
     normalized = handle.strip().lstrip("$") or handle
@@ -1200,30 +1193,18 @@ def build_command_handle_proof(
             "available_runtimes": [],
             "runtime_satisfied_by": None,
             "resolution": None,
-            "command_handle_check": None,
             "workspace_runtime": None,
             "user_runtime_links": None,
-            "user_runtime_command_handles": None,
             "runtime_failure": runtime_failure,
         }
     resolution = resolve_skill_handle_fn(handle, repo_root_path=repo_root)
     normalized = str(resolution.get("handle", normalized))
-    handle_check = check_command_handles_fn(repo_root_path=repo_root)
-    workspace_handle = repo_root / str(resolution.get("command_handle_path", ""))
-    user_codex_handle = home_path / ".codex" / "skills" / str(normalized) / "SKILL.md"
-    user_agents_handle = home_path / ".agents" / "skills" / str(normalized) / "SKILL.md"
     codex_skills = home_path / ".codex" / "skills"
     agents_skills = home_path / ".agents" / "skills"
     expected_runtime = repo_root / ".agents" / "skills"
     source_path_value = str(resolution.get("source_path") or "").strip()
     expected_source = repo_root / source_path_value if source_path_value else None
-
-    handle_violations = [
-        violation
-        for violation in handle_check.get("violations", [])
-        if violation.get("handle") == normalized
-    ]
-    handle_check_ok = handle_check.get("status") == "pass" or not handle_violations
+    canonical_source_exists = bool(expected_source and expected_source.is_file())
 
     def link_payload(path: Path) -> dict[str, object]:
         payload: dict[str, object] = {
@@ -1239,40 +1220,20 @@ def build_command_handle_proof(
             payload["points_to_workspace_runtime"] = False
         return payload
 
-    def handle_points_to_workspace(handle_path: Path, runtime_link: dict[str, object]) -> bool:
-        if not handle_path.exists():
-            return False
-        if _path_is_under(handle_path, expected_runtime):
-            return True
-        if (
-            expected_source is not None
-            and handle_path.resolve(strict=False) == expected_source.resolve(strict=False)
-        ):
-            return True
-        return False
-
     codex_link = link_payload(codex_skills)
     agents_link = link_payload(agents_skills)
-    codex_handle_points = handle_points_to_workspace(user_codex_handle, codex_link)
-    agents_handle_points = handle_points_to_workspace(user_agents_handle, agents_link)
     gates = {
         "resolver": resolution.get("status") == "ok",
-        "generated_command_handle_check": handle_check_ok,
-        "workspace_command_handle_exists": workspace_handle.is_file(),
+        "canonical_source_exists": canonical_source_exists,
         "codex_user_link": bool(codex_link["points_to_workspace_runtime"]),
         "agents_user_link": bool(agents_link["points_to_workspace_runtime"]),
-        "codex_user_command_handle_exists": user_codex_handle.is_file(),
-        "agents_user_command_handle_exists": user_agents_handle.is_file(),
-        "codex_user_command_handle_points_to_workspace": codex_handle_points,
-        "agents_user_command_handle_points_to_workspace": agents_handle_points,
     }
     core_gates = (
         gates["resolver"],
-        gates["generated_command_handle_check"],
-        gates["workspace_command_handle_exists"],
+        gates["canonical_source_exists"],
     )
-    codex_runtime_ready = gates["codex_user_command_handle_points_to_workspace"]
-    agents_runtime_ready = gates["agents_user_command_handle_points_to_workspace"]
+    codex_runtime_ready = bool(codex_link["points_to_workspace_runtime"])
+    agents_runtime_ready = bool(agents_link["points_to_workspace_runtime"])
     user_runtime_ready = codex_runtime_ready or agents_runtime_ready
     gates["codex_user_runtime_ready"] = codex_runtime_ready
     gates["agents_user_runtime_ready"] = agents_runtime_ready
@@ -1291,8 +1252,7 @@ def build_command_handle_proof(
                 check_id
                 for check_id in (
                     "resolver",
-                    "generated_command_handle_check",
-                    "workspace_command_handle_exists",
+                    "canonical_source_exists",
                     required_runtime_gate,
                 )
                 if not gates.get(check_id)
@@ -1309,37 +1269,9 @@ def build_command_handle_proof(
         "failed_gate": failed_check_id,
         "expected_workspace_runtime": str(expected_runtime),
         "runtime_modes": {
-            "codex_user_runtime": _runtime_mode(
-                codex_link,
-                handle_points_to_workspace=codex_handle_points,
-            ),
-            "agents_user_runtime": _runtime_mode(
-                agents_link,
-                handle_points_to_workspace=agents_handle_points,
-            ),
+            "codex_user_runtime": _runtime_mode(codex_link),
+            "agents_user_runtime": _runtime_mode(agents_link),
         },
-        "missing_command_handles": [
-            {
-                "runtime": runtime_name,
-                "path": str(handle_path),
-                "expected_under": str(expected_runtime),
-            }
-            for runtime_name, handle_path, exists, points_to_workspace in (
-                (
-                    "codex_user_runtime",
-                    user_codex_handle,
-                    gates["codex_user_command_handle_exists"],
-                    gates["codex_user_command_handle_points_to_workspace"],
-                ),
-                (
-                    "agents_user_runtime",
-                    user_agents_handle,
-                    gates["agents_user_command_handle_exists"],
-                    gates["agents_user_command_handle_points_to_workspace"],
-                ),
-            )
-            if not exists or not points_to_workspace
-        ],
         "recovery_risk": (
             "User-scope sync mutates home-directory runtime links; preview with --dry-run before applying."
         ),
@@ -1371,7 +1303,7 @@ def build_command_handle_proof(
                     "filesystem": "write workspace runtime projection",
                     "network": "not required",
                 },
-                "expected_outcome": "Refreshes .agents/skills command handles from canonical sources.",
+                "expected_outcome": "Refreshes .agents/skills from canonical frontmatter and skill sources.",
             },
             {
                 "kind": "apply_user_runtime_sync",
@@ -1386,7 +1318,7 @@ def build_command_handle_proof(
             {
                 "kind": "rerun_runtime_proof",
                 "command": skills_validation_command("proof", *validation_args),
-                "preconditions": ["User runtime link or handle bridge now points at the workspace projection."],
+                "preconditions": ["User runtime link now points at the workspace projection."],
                 "permission_profile": {
                     "filesystem": "read workspace and user runtime links; write runtime-proof evidence",
                     "network": "not required",
@@ -1407,8 +1339,7 @@ def build_command_handle_proof(
         "gate_policy": {
             "required": [
                 "resolver",
-                "generated_command_handle_check",
-                "workspace_command_handle_exists",
+                "canonical_source_exists",
                 required_runtime_gate,
             ],
             "runtime_target": runtime_target,
@@ -1419,12 +1350,8 @@ def build_command_handle_proof(
             ),
             "supporting_runtime_diagnostics": [
                 "codex_user_link",
-                "codex_user_command_handle_exists",
-                "codex_user_command_handle_points_to_workspace",
                 "codex_user_runtime_ready",
                 "agents_user_link",
-                "agents_user_command_handle_exists",
-                "agents_user_command_handle_points_to_workspace",
                 "agents_user_runtime_ready",
             ],
         },
@@ -1444,27 +1371,14 @@ def build_command_handle_proof(
             else None
         ),
         "resolution": resolution,
-        "command_handle_check": {
-            key: value
-            for key, value in handle_check.items()
-            if key != "violations" or value
-        },
         "workspace_runtime": {
             "path": str(expected_runtime),
-            "command_handle_path": str(workspace_handle),
-            "command_handle_exists": workspace_handle.is_file(),
+            "canonical_source_path": str(expected_source) if expected_source else None,
+            "canonical_source_exists": canonical_source_exists,
         },
         "user_runtime_links": {
             "codex_skills": codex_link,
             "agents_skills": agents_link,
-        },
-        "user_runtime_command_handles": {
-            "codex_handle": str(user_codex_handle),
-            "codex_handle_exists": user_codex_handle.is_file(),
-            "codex_handle_points_to_workspace": codex_handle_points,
-            "agents_handle": str(user_agents_handle),
-            "agents_handle_exists": user_agents_handle.is_file(),
-            "agents_handle_points_to_workspace": agents_handle_points,
         },
         "runtime_diagnostics": runtime_diagnostics,
     }
@@ -1478,7 +1392,7 @@ def build_command_handle_proof(
             error_code="ERR_VALIDATION",
             failed_check_id=str(failed_check_id),
             path=f"gates.{failed_check_id}",
-            message=f"Command handle proof failed for '{normalized}'.",
+            message=f"Skill runtime proof failed for '{normalized}'.",
             recovery_guidance=recovery_guidance,
             validation_commands=proof["validation_commands"],
         )

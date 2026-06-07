@@ -114,7 +114,7 @@ class TestAskSkillsStarter(unittest.TestCase):
                 name="he-work",
                 source_dir=REPO_ROOT / ".agents" / "skills" / "he-work",
                 category=".agents/skills",
-                description="Generated command handle",
+                description="Command-surface handle",
             ),
             SimpleNamespace(
                 name="docs-expert",

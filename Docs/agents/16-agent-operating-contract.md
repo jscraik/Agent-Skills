@@ -50,22 +50,22 @@ Run `repo doctor-catalog` or `repo surface` only when `repo doctor` names them
 as diagnostic follow-up commands.
 
 `repo doctor` is the first health entrypoint. It composes repo status, catalog
-parity, runtime budget, command-handle health, and repo-surface diagnostic debt
+parity, runtime budget, command-surface health, and repo-surface diagnostic debt
 into one agent-facing payload with `agent_summary`, `blocking`, `blockers`,
 `next_command`, `signals`, and `diagnostic_debt`.
 
 `skills improve` is the first capability recommendation entrypoint. It wraps
-goal routing, runs command-handle proof for the selected capability, and returns
+goal routing, runs runtime reachability proof for the selected capability, and returns
 `agent_summary`, `recommended_capability`, `why`, `reachability`, `proof`, and
 one existing `next_command`.
 
-`skills explain` turns a command handle into concise use guidance. It returns
-what the capability is for, when to use it, canonical source, runtime handle,
+`skills explain` turns a command-surface handle into concise use guidance. It returns
+what the capability is for, when to use it, canonical source, runtime projection,
 validation guidance, known limitations, reachability status, and the proof
 command to run next.
 
 `skills prove` is the product-facing scorecard for capability proof. It keeps
-the existing command-handle `skills proof` payload as reachability evidence and
+the existing `skills proof` payload as reachability evidence and
 adds structural quality, analytics availability, outcome proof, and one next
 command without claiming structural or invocation evidence as outcome proof.
 

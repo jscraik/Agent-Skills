@@ -55,7 +55,7 @@ class PluginCacheRefreshReport:
 
 
 class PluginCacheRefreshError(RuntimeError):
-    """Raised when command-handle pruning cannot safely complete."""
+    """Raised when plugin cache normalization cannot safely complete."""
 
 
 def _manifest_declares_skills_root(plugin_root: Path, skills_root: Path) -> bool:
@@ -81,6 +81,34 @@ def _manifest_declares_skills_root(plugin_root: Path, skills_root: Path) -> bool
         return False
     declared = (plugin_root / raw_path.removeprefix("./")).resolve()
     return declared == skills_root.resolve()
+
+
+def _prune_nested_duplicate_skill_identities(skills_root: Path) -> tuple[list[str], list[str]]:
+    logs: list[str] = []
+    deletes: list[str] = []
+    direct_skill_names = {
+        child.name
+        for child in skills_root.iterdir()
+        if child.is_dir() and (child / "SKILL.md").is_file()
+    }
+    if not direct_skill_names:
+        return logs, deletes
+
+    duplicate_skill_dirs = {
+        skill_md.parent
+        for skill_md in skills_root.rglob("SKILL.md")
+        if skill_md.parent.parent != skills_root and skill_md.parent.name in direct_skill_names
+    }
+    for target in sorted(duplicate_skill_dirs, key=lambda path: len(path.parts), reverse=True):
+        if not (target.exists() or target.is_symlink()):
+            continue
+        if target.is_symlink() or target.is_file():
+            target.unlink()
+        else:
+            shutil.rmtree(target)
+        deletes.append(str(target))
+        logs.append(f"Removed nested duplicate plugin skill identity: {target}")
+    return logs, deletes
 
 
 def plugin_cache_permission_declaration(repo_root: Path, *, mode: str = "auto") -> dict[str, str]:
@@ -170,22 +198,21 @@ def _write_codex_marketplace_root(
     return [f"Wrote Codex marketplace manifest: {marketplace_manifest}"]
 
 
-def prune_command_handle_skill_entries(
+def prune_command_surface_duplicate_skill_entries(
     repo_root: Path,
     plugin_name: str,
     plugin_root: Path,
 ) -> tuple[list[str], list[str]]:
     """
-    Remove plugin skill entries that are duplicated by generated command handles.
+    Remove plugin skill entries that are duplicated by command-surface metadata.
     
-    Queries the command-handle registry for handles owned by `plugin_name` that point
-    at `.agents/skills/...` files present in `repo_root`, then deletes corresponding
-    entries under `plugin_root/skills`. Also removes picker-style skill folders
-    that contain `SKILL.md` matching those handles, and includes a few compatibility
-    aliases when applicable.
+    Queries the command-surface registry for handles owned by plugin_name, then deletes
+    corresponding runtime mirror entries under plugin_root/skills. This keeps
+    copied plugin mirrors from showing both the canonical plugin skill and a
+    duplicate picker entry for the same command-surface identity.
     
     Parameters:
-        repo_root (Path): Repository root used to resolve reported command-handle paths.
+        repo_root (Path): Repository root used to resolve command-surface metadata.
         plugin_name (str): Plugin identifier used to match handle ownership.
         plugin_root (Path): Filesystem path to the plugin; its `skills` subdirectory is pruned.
     
@@ -194,7 +221,7 @@ def prune_command_handle_skill_entries(
         deletes (list[str]): String paths of removed filesystem targets.
     
     Raises:
-        PluginCacheRefreshError: If discovery of command handles fails.
+        PluginCacheRefreshError: If discovery of command-surface handles fails.
     """
     skills_root = plugin_root / "skills"
     if not skills_root.is_dir():
@@ -203,7 +230,7 @@ def prune_command_handle_skill_entries(
         report = handles_report(repo_root_path=repo_root, include_handles=True)
     except Exception as exc:  # noqa: BLE001 - convert command-surface failures into sync errors.
         raise PluginCacheRefreshError(
-            f"Failed to discover command handles for plugin cache pruning "
+            f"Failed to discover command-surface handles for plugin cache pruning "
             f"(plugin={plugin_name}, root={plugin_root}): {exc}"
         ) from exc
     public_handles = report.get("handles", []) if isinstance(report, dict) else []
@@ -218,12 +245,6 @@ def prune_command_handle_skill_entries(
         if not isinstance(row, dict):
             continue
         if row.get("owner") != plugin_name:
-            continue
-        command_handle_path = str(row.get("command_handle_path") or "")
-        if not command_handle_path.startswith(".agents/skills/"):
-            continue
-        command_handle_file = repo_root / command_handle_path
-        if not (command_handle_file.exists() or command_handle_file.is_symlink()):
             continue
         handle = str(row.get("handle") or "").strip()
         if not handle or "/" in handle or ".." in handle:
@@ -257,10 +278,10 @@ def prune_command_handle_skill_entries(
                 else:
                     shutil.rmtree(target)
             except OSError as exc:
-                logs.append(f"Skipped protected command-handle duplicate plugin skill entry: {target}: {exc}")
+                logs.append(f"Skipped protected command-surface duplicate plugin skill entry: {target}: {exc}")
                 continue
             deletes.append(str(target))
-            logs.append(f"Removed command-handle duplicate plugin skill entry: {target}")
+            logs.append(f"Removed command-surface duplicate plugin skill entry: {target}")
     return logs, deletes
 
 
@@ -268,7 +289,7 @@ def prune_picker_internal_skill_dirs(plugin_root: Path) -> tuple[list[str], list
     """
     Remove picker-internal plugin and skills directories visible to broad picker scans.
     
-    If the plugin's `skills` directory is explicitly declared in its `.codex-plugin/plugin.json`, the skills root is preserved and no skill-level pruning is performed. Removes files, symlinks, or directories for known picker-internal names under the plugin root and, unless preserved, under `plugin_root/skills`. Records human-readable messages for each action.
+    If the plugin's `skills` directory is explicitly declared in its `.codex-plugin/plugin.json`, the skills root is preserved while nested skill directories that duplicate first-level skill identities are pruned. Removes files, symlinks, or directories for known picker-internal names under the plugin root and, unless preserved, under `plugin_root/skills`. Records human-readable messages for each action.
     
     Parameters:
     	plugin_root (Path): Filesystem path to the plugin root directory.
@@ -295,6 +316,9 @@ def prune_picker_internal_skill_dirs(plugin_root: Path) -> tuple[list[str], list
         return logs, deletes
     if _manifest_declares_skills_root(plugin_root, skills_root):
         logs.append(f"Preserved manifest-declared plugin skills root: {skills_root}")
+        nested_logs, nested_deletes = _prune_nested_duplicate_skill_identities(skills_root)
+        logs.extend(nested_logs)
+        deletes.extend(nested_deletes)
         return logs, deletes
 
     for name in sorted(PICKER_INTERNAL_SKILL_DIRS):

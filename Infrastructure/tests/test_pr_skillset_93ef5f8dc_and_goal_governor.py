@@ -5,7 +5,7 @@ Covers:
   - All .skillsets/*/manifest.jsonl files: source_revision bumped to "93ef5f8dc",
     old revision "83f7ab9ed" must not be present.
   - .skillsets/command-surface.json: source_revision updated to "0e372d956",
-    handle_count updated to 111, generated_command_handle_count updated to 105.
+    handle_count updated to 111; generated wrapper counts are no longer emitted.
   - .skillsets/agent-ops/manifest.jsonl: goal-governor entry has revised
     description and triggers; session-workflow-miner is a new skill entry.
   - Docs/goals/jsc-351-agent-skills-codex-abi-conformance/state.yaml: new file
@@ -591,16 +591,11 @@ class TestCommandSurfaceCountsAndRevision(unittest.TestCase):
             f"got {self._data.get('handle_count')}",
         )
 
-    def test_generated_command_handle_count_is_105(self) -> None:
+    def test_generated_command_handle_count_is_absent(self) -> None:
         """
-        Verify that the command-surface entry `generated_command_handle_count` equals 105.
+        Verify that command-surface metadata no longer reports generated wrapper counts.
         """
-        self.assertEqual(
-            self._data.get("generated_command_handle_count"),
-            EXPECTED_GENERATED_HANDLE_COUNT,
-            f"generated_command_handle_count should be {EXPECTED_GENERATED_HANDLE_COUNT}, "
-            f"got {self._data.get('generated_command_handle_count')}",
-        )
+        self.assertNotIn("generated_command_handle_count", self._data)
 
     def test_handle_count_matches_actual_handles_length(self) -> None:
         """Declared handle_count must exactly match the length of the handles list."""

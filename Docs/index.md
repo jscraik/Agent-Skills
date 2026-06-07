@@ -7,7 +7,7 @@ If you are trying to find or use skills (not edit docs), start with:
 - Skills index: `/SKILL.md`
 - Repo overview: `/README.md`
 - Projection model: `/Docs/architecture/runtime-projection-modes.md`
-- Command handles and rooted routing: `/Docs/architecture/context-budgeted-skill-trees.md`
+- Command-surface handles and rooted routing: `/Docs/architecture/context-budgeted-skill-trees.md`
 
 ## Quick Links
 
@@ -15,7 +15,7 @@ If you are trying to find or use skills (not edit docs), start with:
 | ------------------------------------------------ | ---------------------------------------------------------------------------------- |
 | Add a new skill                                  | [Guides: Recursive Skill Loop](/Docs/guides/recursive-skill-loop.md)               |
 | Understand runtime projection                    | [Runtime Projection Modes](/Docs/architecture/runtime-projection-modes.md)         |
-| Understand command handles                       | [Context-Budgeted Skill Trees](/Docs/architecture/context-budgeted-skill-trees.md) |
+| Understand command-surface handles               | [Context-Budgeted Skill Trees](/Docs/architecture/context-budgeted-skill-trees.md) |
 | Look up a script/policy                          | [Reference](/Docs/reference)                                                       |
 | Reuse a proven fix or pattern                    | [Solutions](/Docs/solutions/README.md)                                             |
 | Reuse live operational troubleshooting knowledge | [Skill Ops Wiki](/Wiki/skill-ops-wiki/README.md)                                   |

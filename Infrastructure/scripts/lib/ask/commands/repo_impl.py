@@ -28,7 +28,7 @@ DOCTOR_SIGNAL_PRIORITY = {
 }
 PACKAGE_READINESS_SENTINEL = "skill-builder"
 COMMAND_HANDLE_CHECK_COMMAND = (
-    "./bin/ask skills handles --check --no-handles --check-command-handles --json --robot"
+    "./bin/ask skills handles --check --no-handles --check-projection --json --robot"
 )
 GENERATED_SURFACE_PREFIXES = (
     ".agents/skills/",
@@ -476,14 +476,10 @@ def _command_handles_signal(handles_result: CallResult) -> dict[str, Any]:
     projection_check_raw = handles_result.data.get("command_surface_projection_check")
     projection_check = projection_check_raw if isinstance(projection_check_raw, dict) else {}
     projection_violations = projection_check.get("violations") or []
-    command_handle_check_raw = handles_result.data.get("command_handle_check")
-    command_handle_check = command_handle_check_raw if isinstance(command_handle_check_raw, dict) else {}
-    generated_violations = command_handle_check.get("violations") or []
     missing_required_checks = [
         name
         for name, payload in (
             ("command_surface_projection_check", projection_check_raw),
-            ("command_handle_check", command_handle_check_raw),
         )
         if not isinstance(payload, dict)
     ]
@@ -503,62 +499,41 @@ def _command_handles_signal(handles_result: CallResult) -> dict[str, Any]:
                 }
             ),
         },
-        "generated_command_handles": {
-            "status": command_handle_check.get("status"),
-            "command_handle_count": command_handle_check.get("command_handle_count"),
-            "checked_count": command_handle_check.get("checked_count"),
-            "violation_count": len(generated_violations),
-            "violation_codes": sorted(
-                {
-                    str(violation.get("code"))
-                    for violation in generated_violations
-                    if violation.get("code")
-                }
-            ),
-        },
         "missing_required_checks": missing_required_checks,
     }
-    generated_check_pass = command_handle_check.get("status") == "pass"
     projection_check_pass = projection_check.get("status") == "pass"
     if (
         handles_result.status == "success"
         and report.get("status") == "pass"
         and not missing_required_checks
         and projection_check_pass
-        and generated_check_pass
     ):
         return {
             "state": "pass",
             "severity": "info",
-            "summary": "Command handles validate cleanly.",
+            "summary": "Command-surface projection validates cleanly.",
             "source": "skills_handles",
             "details": details,
         }
     if missing_required_checks:
         summary = (
-            "Command-handle validation payload missing required generated check(s): "
+            "Command-surface validation payload missing required check(s): "
             + ", ".join(missing_required_checks)
             + "."
         )
-        details["failure_code"] = "command_handle_subcheck_missing"
-    elif generated_violations:
-        summary = f"Generated command-handle check found {len(generated_violations)} violation(s)."
-        details["failure_code"] = "generated_command_handle_check_failed"
+        details["failure_code"] = "command_surface_subcheck_missing"
     elif projection_violations:
         summary = f"Command-surface projection check found {len(projection_violations)} violation(s)."
         details["failure_code"] = "command_surface_projection_check_failed"
-    elif command_handle_check.get("status") != "pass":
-        summary = "Generated command-handle check failed without explicit violations."
-        details["failure_code"] = "generated_command_handle_check_status_failed"
     elif projection_check.get("status") != "pass":
         summary = "Command-surface projection check failed without explicit violations."
         details["failure_code"] = "command_surface_projection_check_status_failed"
     elif violations:
-        summary = f"Command-handle validation found {len(violations)} violation(s)."
+        summary = f"Command-surface validation found {len(violations)} violation(s)."
         details["failure_code"] = "command_surface_validation_failed"
     else:
-        summary = _error_summary(handles_result, "Command-handle validation failed.")
-        details["failure_code"] = "command_handle_validation_failed"
+        summary = _error_summary(handles_result, "Command-surface validation failed.")
+        details["failure_code"] = "command_surface_validation_failed"
     return {
         "state": "block",
         "severity": "blocker",
@@ -873,7 +848,7 @@ def _repo_status_skipped_downstream_signals(reason: str) -> dict[str, dict[str, 
             "repo_status",
         ),
         "command_handles": _skipped_signal(
-            f"Command-handle validation skipped {reason}.",
+            f"Command-surface validation skipped {reason}.",
             "repo_status",
         ),
         "capability_readiness": _skipped_signal(
@@ -958,7 +933,7 @@ def repo_doctor(repo_root: Path) -> CallResult:
                                 repo_root,
                                 check=True,
                                 include_handles=False,
-                                check_command_handle_files=True,
+                                check_projection=True,
                             )
                         )
                     ),
@@ -1211,7 +1186,7 @@ def _closeout_focused_validation(repo_root: Path, changed_files: list[str]) -> l
     Builds a prioritized list of validation commands to run for a focused closeout.
     
     Includes a core set of readiness checks (doctor, profiles, events, memory, package) and conditionally appends:
-    - a command-handle check when any changed path is within generated surface prefixes,
+    - a command-surface check when any changed path is within generated surface prefixes,
     - a runtime-evidence schema validation when any changed path points under the repository's runtime evidence root,
     - a scoped `repo validate` invocation when changed files are present, or a `repo status` check when none are present.
     
@@ -1256,7 +1231,7 @@ def _closeout_focused_validation(repo_root: Path, changed_files: list[str]) -> l
         commands.append(
             {
                 "id": "skill_handles",
-                "reason": "Validate generated command handles for changed projection files.",
+                "reason": "Validate command-surface projection for changed projection files.",
                 "command": COMMAND_HANDLE_CHECK_COMMAND,
             }
         )

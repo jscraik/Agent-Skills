@@ -129,6 +129,13 @@ SYSTEM_BRIDGE_SKILL_NAMES = {
     "skill-installer",
 }
 
+EXPECTED_CACHE_ALIAS_SKILLS = {
+    "plugin-factory": {
+        "plugin-creator",
+        "plugin-installer",
+    },
+}
+
 HIDDEN_PICKER_COMPATIBILITY_SKILLS = {
     "he-goal-governor-archive",
     "he-ideate",
@@ -172,57 +179,15 @@ def _direct_visible_skill_names(skills_root: Path) -> set[str]:
     }
 
 
-def _existing_command_handle_skill_names(plugin_name: str) -> set[str]:
-    """
-    Collect command-handle names owned by a plugin whose declared paths point
-    inside a generated command-surface root.
-    
-    Parameters:
-        plugin_name (str): Plugin identifier used to filter `owner` entries in the command-surface manifest.
-    
-    Returns:
-        set[str]: Handle names owned by `plugin_name` whose
-        `command_handle_path` resolves inside `.skillsets` or
-        `.agents/skills`.
-    """
-    command_surface_path = REPO_ROOT / ".skillsets" / "command-surface.json"
-    if not command_surface_path.is_file():
-        return set()
-    payload = json.loads(command_surface_path.read_text(encoding="utf-8"))
-    handles = payload.get("handles", [])
-    if not isinstance(handles, list):
-        return set()
-
-    names: set[str] = set()
-    command_surface_roots = (
-        (REPO_ROOT / ".skillsets").resolve(),
-        (REPO_ROOT / ".agents" / "skills").resolve(),
-    )
-    for row in handles:
-        if not isinstance(row, dict) or row.get("owner") != plugin_name:
-            continue
-        handle = row.get("handle")
-        command_handle_path = row.get("command_handle_path")
-        if not isinstance(handle, str) or not isinstance(command_handle_path, str):
-            continue
-        if "/" in handle or ".." in handle:
-            continue
-        try:
-            handle_file = (REPO_ROOT / command_handle_path).resolve()
-            if not any(handle_file.is_relative_to(root) for root in command_surface_roots):
-                continue
-            names.add(handle)
-        except (OSError, ValueError):
-            continue
-    return names
-
-
 def _expected_cache_skill_names(plugin_name: str) -> set[str]:
     return (
         EXPECTED_SOURCE_PLUGIN_SKILLS[plugin_name]
-        - _existing_command_handle_skill_names(plugin_name)
-        - HIDDEN_PICKER_COMPATIBILITY_SKILLS
-    )
+        | EXPECTED_CACHE_ALIAS_SKILLS.get(plugin_name, set())
+    ) - HIDDEN_PICKER_COMPATIBILITY_SKILLS
+
+
+def _unexpected_system_bridge_skill_names(plugin_name: str, discovered: set[str]) -> set[str]:
+    return discovered & (SYSTEM_BRIDGE_SKILL_NAMES - EXPECTED_CACHE_ALIAS_SKILLS.get(plugin_name, set()))
 
 
 class LocalPluginPickerSurfaceTests(unittest.TestCase):
@@ -340,16 +305,15 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
         """
         Verify the generated local plugin cache preserves loader-declared skills.
 
-        Duplicate suppression belongs in picker/projection surfaces, not the
-        Codex loader package cache. The runtime cache must remain a complete
-        plugin package so Codex Desktop can load the manifest-declared skills.
+        The runtime cache must remain a complete Codex loader package while
+        exposing only one visible path for each skill identity.
         """
         runtime_root = REPO_ROOT / ".agents" / "plugins-runtime" / "cache" / "agent-skills-local"
         if not runtime_root.exists():
             self.skipTest("local plugin runtime cache has not been generated")
 
         for plugin_name in EXPECTED_SOURCE_PLUGIN_SKILLS:
-            expected_skill_names = EXPECTED_SOURCE_PLUGIN_SKILLS[plugin_name] - HIDDEN_PICKER_COMPATIBILITY_SKILLS
+            expected_skill_names = _expected_cache_skill_names(plugin_name)
             plugin_root = runtime_root / plugin_name
             self.assertTrue(
                 plugin_root.is_dir(),
@@ -374,8 +338,8 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
                 f"{plugin_name} runtime cache loader package drifted",
             )
             self.assertFalse(
-                SYSTEM_BRIDGE_SKILL_NAMES & set(discovered),
-                f"{plugin_name} runtime cache should not expose system bridge skills as personal skills",
+                _unexpected_system_bridge_skill_names(plugin_name, set(discovered)),
+                f"{plugin_name} runtime cache should not expose unrelated system bridge skills as personal skills",
             )
 
     def test_versioned_plugin_cache_preserves_manifest_declared_skills(self) -> None:
@@ -391,7 +355,7 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
             self.skipTest("versioned local plugin cache has not been generated")
 
         for plugin_name in EXPECTED_SOURCE_PLUGIN_SKILLS:
-            expected_skill_names = EXPECTED_SOURCE_PLUGIN_SKILLS[plugin_name] - HIDDEN_PICKER_COMPATIBILITY_SKILLS
+            expected_skill_names = _expected_cache_skill_names(plugin_name)
             plugin_cache_root = cache_root / plugin_name
             self.assertTrue(
                 plugin_cache_root.exists(),
@@ -428,14 +392,14 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
                 f"{plugin_name} versioned plugin cache picker surface drifted",
             )
 
-    def test_delegated_home_plugin_mirror_prunes_command_handle_duplicates(self) -> None:
+    def test_delegated_home_plugin_mirror_prunes_command_surface_duplicates(self) -> None:
         """
-        Verify the ask-engine user sync path prunes command-handle skills from home mirrors.
+        Verify the ask-engine user sync path prunes command-surface duplicate skills from home mirrors.
         """
         sync_source = REPO_ROOT / "Infrastructure" / "scripts" / "lib" / "ask" / "commands" / "skills_impl.py"
         source = sync_source.read_text(encoding="utf-8")
         mirror_function = source.split("def _refresh_home_plugin_mirrors(", 1)[1].split("def _sync_rooted_projection(", 1)[0]
-        self.assertIn("prune_command_handle_skill_entries", mirror_function)
+        self.assertIn("prune_command_surface_duplicate_skill_entries", mirror_function)
         self.assertIn("Skipped replacing protected home plugin mirror", mirror_function)
         self.assertIn("except OSError as exc", mirror_function)
         self.assertNotIn("duplicate pruning belongs to runtime cache copies", mirror_function)

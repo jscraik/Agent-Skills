@@ -43,12 +43,14 @@ Skills/<topic>/<skill-name>/
 
 The `.agents/skills/` directory is a generated runtime projection consumed by
 Codex and other agent runtimes. In rooted mode it contains root router skills
-plus generated command handles such as `$he-heartbeat`.
+and runtime links, while command-visible handles are described by
+`.skillsets/command-surface.json` metadata that points back to canonical
+`SKILL.md` sources.
 
 This design:
 
 1. Keeps full workflow bodies in canonical source paths.
-2. Makes important routed skills mentionable through thin `$handle` pointers.
+2. Makes important routed skills mentionable through command-surface metadata.
 3. Keeps generated runtime and command-surface metadata reproducible.
 4. Separates resolver proof, projection proof, user sync, and live picker proof.
 

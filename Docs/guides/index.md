@@ -10,7 +10,7 @@ Good guide topics for this repo:
 
 - Add a new canonical skill under `Skills/<topic>/<skill>/SKILL.md` or `Plugins/<plugin>/skills/**/SKILL.md`
 - Run `python3 bin/ask skills sync --scope workspace --projection rooted` and confirm generated projection surfaces update
-- Validate generated command handles with `python3 bin/ask skills handles --check --json`
+- Validate command-surface metadata with `python3 bin/ask skills handles --check --json`
 - Validate a skill before you open a PR
 - Apply governance scope defaults: [hook-governance-scope-defaults.md](/Docs/guides/hook-governance-scope-defaults.md)
 - Run the recursive skill loop MVP: [recursive-skill-loop.md](/Docs/guides/recursive-skill-loop.md)

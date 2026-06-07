@@ -4,13 +4,12 @@
 
 - `python3 bin/ask skills sync --projection rooted --dry-run --json` passes.
 - `python3 bin/ask skills handles --check --json` passes for command-surface projection freshness.
-- `python3 bin/ask skills handles --check-command-handles --json` passes.
 - `python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --projection flat --json` passes.
   (This validates the current flat baseline before migration; `--projection` defaults to `flat` in `check_context_budget.py`.)
 - At least one workout has a passing scorecard.
 - `.skillsets/**` is generated, provenance-rich, and validated.
-- `.agents/skills/<handle>/SKILL.md` generated command handles exist for every
-  command-visible latent module.
+- `.skillsets/command-surface.json` resolves every command-visible latent module
+  to a canonical `SKILL.md` source.
 
 ## Dry Run
 
@@ -24,7 +23,7 @@ Confirm:
 - `validation_status` is `pass`;
 - root skill-set count is at or below 10;
 - full latent workflow bodies are not planned as first-level runtime output;
-- generated command handles are planned only as thin pointers.
+- command-surface metadata is planned as the handle index, without per-handle wrapper files.
 
 ## Apply
 
@@ -36,7 +35,6 @@ Then validate rooted budget:
 
 ```bash
 python3 bin/ask skills handles --check --json
-python3 bin/ask skills handles --check-command-handles --json
 python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --projection rooted --json
 bash Infrastructure/scripts/validate_all.sh --ephemeral
 ```
@@ -61,8 +59,8 @@ Do not collapse these gates into one proof:
    canonical `source_path`.
 2. Command-surface gate: `python3 bin/ask skills handles --check --json` passes
    and `.skillsets/command-surface.json` matches rooted manifests.
-3. Runtime-handle gate: `python3 bin/ask skills handles --check-command-handles
---json` passes and `.agents/skills/<handle>/SKILL.md` exists.
+3. Runtime-root gate: user/runtime roots link to the workspace projection; no
+   per-handle wrapper file is required.
 4. Workspace sync gate: `python3 bin/ask skills sync --scope workspace
 --projection rooted --json` succeeds.
 5. User sync gate: `python3 bin/ask skills sync --scope user --projection rooted

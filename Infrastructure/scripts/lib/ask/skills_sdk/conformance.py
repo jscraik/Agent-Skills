@@ -379,7 +379,7 @@ def _case_thin_handles(repo_root: Path, workspace: Path) -> dict[str, Any]:
     return _case(
         "thin_handles",
         "pass" if not missing else "blocked",
-        "Thin command handles carry source, hash, and resolver provenance fields.",
+        "Thin command-surface handles carry source, hash, and resolver provenance fields.",
         {"missing": missing},
     )
 

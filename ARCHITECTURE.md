@@ -84,7 +84,7 @@ schema-backed and regression-tested.
 The runtime projection plane is generated from canonical source so Codex and
 other clients can discover skills.
 
-- `.agents/**`: generated runtime projection and command handles.
+- `.agents/**`: generated runtime projection.
 - `.skillsets/**`: generated rooted manifests and command-surface projections.
 - `Plugins/cache/**`: copied or cached plugin runtime mirrors.
 - root `SKILL.md`: generated root skill index.
@@ -137,15 +137,15 @@ governance surfaces.
 | Plugin Factory | `Plugins/plugin-factory` | Plugin creation, validation, packaging, installation, and lifecycle workflows. |
 | Harness Engineering | `Plugins/harness-engineering` | Brainstorm, spec, plan, work, review, eval, reinforce, reconcile, and closeout lifecycle. |
 | Ask CLI | `Infrastructure/scripts/lib/ask` | Public command contracts behind `./bin/ask` and the reusable services that power them. |
-| Projection and routing | `Infrastructure/scripts/lifecycle-and-sync`, `.skillsets`, `.agents` | Rooted manifests, command handles, sync mechanics, picker visibility, and runtime discovery. |
+| Projection and routing | `Infrastructure/scripts/lifecycle-and-sync`, `.skillsets`, `.agents` | Rooted manifests, command-surface metadata, sync mechanics, picker visibility, and runtime discovery. |
 | Validation and tests | `Infrastructure/scripts/validation-and-linting`, `Infrastructure/tests`, `Infrastructure/scripts/testing` | Deterministic guardrails for source, projections, docs, skills, governance, and runtime parity. |
 | Governance memory | `.harness`, `Docs/goals`, `Wiki` | Specs, plans, implementation notes, receipts, quality ledgers, and operational memory. |
 
 Deep module levels appear in rooted manifests as `router`, `atom`,
 `molecule`, and `compound`. The level describes loading and routing shape,
-not importance. Root skill sets route into latent modules, while command handles
-make selected modules mentionable without loading the full workflow into runtime
-context.
+not importance. Root skill sets route into latent modules, while
+command-surface handles make selected modules mentionable without loading the
+full workflow into runtime context.
 
 **Architecture Invariant:** Deep modules should have explicit ownership, narrow
 entrypoints, and local proof. A change that crosses deep modules should update
@@ -312,8 +312,8 @@ are compatibility surfaces. They must have a generator and a freshness check.
 ### Context Budget
 
 The runtime surface is deliberately smaller than the source tree. Root skill
-sets, latent manifests, and generated command handles keep high-level routing
-visible while leaving large workflows latent until selected.
+sets and latent manifests keep high-level routing visible while
+command-surface metadata resolves selected large workflows only when needed.
 
 ### Validation
 

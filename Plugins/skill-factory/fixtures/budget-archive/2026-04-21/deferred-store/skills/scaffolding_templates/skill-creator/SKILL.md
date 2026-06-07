@@ -95,7 +95,7 @@ bash Skills/codex-agent-creator/scripts/install_role.sh --agent-name <name> --ag
 
 ## Execution Boundaries
 
-Create or reshape only canonical skill source packages, not generated runtime projections or command handles.
+Create or reshape only canonical skill source packages, not generated runtime projections or command-surface metadata.
 
 The entrypoint must keep execution ownership visible: who writes files, which artifacts are expected, when a subagent or external skill may be used, and which validation gate proves the package is ready for hardening.
 

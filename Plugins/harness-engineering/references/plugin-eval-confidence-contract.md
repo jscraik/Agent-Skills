@@ -1,13 +1,13 @@
 # Plugin Eval Confidence Contract
 
 HE confidence claims must separate static packaged-plugin cost from rooted
-runtime handle cost.
+runtime surface cost.
 
 ## Required Evidence
 
 - Run `Infrastructure/bin/plugin-eval analyze Plugins/harness-engineering --format markdown`.
 - Run `Infrastructure/bin/plugin-eval explain-budget Plugins/harness-engineering --format markdown` when the grade is below `B`.
-- Run `./bin/ask skills handles --check --check-command-handles --json` after projection changes.
+- Run `./bin/ask skills handles --check --check-projection --json --robot` after projection changes.
 - Run a sliced live smoke lane before claiming changed-skill confidence for a
   narrow lifecycle fix, for example:
   `Plugins/harness-engineering/scripts/run_lifecycle_release_evals.py --mode smoke --eval-runner codex --model gpt-5.4-mini --per-skill-timeout-sec 180 --skill he-router --case ambiguous-stage-route --json`.
@@ -21,7 +21,7 @@ runtime handle cost.
 plugin manifest, all first-level lifecycle `SKILL.md` entrypoints, and the
 deferred references/scripts/tests shipped with the plugin. A static grade such
 as `D / 63` is therefore a real packaged-source budget risk. It is not proof
-that rooted runtime command handles load the same text during ordinary use.
+that rooted runtime surfaces load the same text during ordinary use.
 
 Do not call this budget failure resolved unless one of these is true:
 

@@ -21,7 +21,7 @@ agent capabilities:
 
 1. Author capabilities once in canonical source.
 2. Route user intent to the right skill, plugin, or runtime surface.
-3. Keep context small with root routers and generated command handles.
+3. Keep context small with root routers and command-surface metadata.
 4. Validate quality, drift, runtime projection, and repo surface ownership.
 5. Diagnose capability readiness from one namespace-first command.
 6. Preserve proof that a capability is reachable and useful.
@@ -31,7 +31,7 @@ agent capabilities:
 | Outcome            | What It Means                                                                                                              | Current Proof Surface                                                                              |
 | ------------------ | -------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
 | Remember workflows | Agents can reuse local review, validation, delivery, and operating standards.                                              | `Skills/**`, `Plugins/**`, `.agents/skills/**`, `ask skills resolve`, `ask skills goal`            |
-| Keep context small | Agents see routed front doors and command handles instead of every full workflow body.                                     | `ask runtime budget --json --robot`, rooted projection, generated `$handle` surfaces               |
+| Keep context small | Agents see routed front doors and command-surface handles instead of every full workflow body.                            | `ask runtime budget --json --robot`, rooted projection, `$handle` metadata surfaces                 |
 | Prevent drift      | Canonical source, generated manifests, runtime projections, plugin caches, and artifacts have distinct ownership.          | `ask repo surface --json`, `ask repo doctor-catalog --json --robot`, repo surface ownership policy |
 | Diagnose readiness | One capability can be checked for source ownership, handle resolution, runtime reachability, audit state, metadata gaps, and outcome-proof availability. | `ask skills doctor <handle-or-path> --json --robot` |
 | Package safely     | Skill promotion can check version, compatible roles, runtime needs, maturity, provenance, and share readiness before install/share claims. | `ask skills package <handle-or-path> --json --robot` |
@@ -177,7 +177,7 @@ Baseline facts from the implementation:
 - `ask repo doctor-catalog --json --robot` verifies the canonical skill count
   `32` across README, `SKILL.md`, `ask skills list`, and route metadata.
 - `ask skills handles --json --no-handles --robot` reports `108` generated
-  command handles from rooted manifests with no command-surface violations.
+  command-surface metadata from rooted manifests with no command-surface violations.
 - `ask skills goal "use he-work to implement P5 product framing and outcome
 proof documentation for JSC-246" --json --robot` resolves to `he-work`.
 

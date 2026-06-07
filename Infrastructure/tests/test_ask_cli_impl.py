@@ -220,7 +220,7 @@ class TestAskCLI(unittest.TestCase):
             "Infrastructure/bin/ask",
             "skills",
             "route",
-            "make skill diagnostics clearer",
+            "help me",
             "--robot",
         ]
         result = _run_cli(cmd)
@@ -276,36 +276,8 @@ class TestAskCLI(unittest.TestCase):
         self.assertTrue(write["dry_run"])
         self.assertEqual(write["path"], ".skillsets/command-surface.json")
 
-    def test_skills_handles_command_handle_dry_run_contract(self):
-        """Verify ask can preview generated runtime command handles."""
-        cmd = [
-            sys.executable,
-            "Infrastructure/bin/ask",
-            "skills",
-            "handles",
-            "--write-command-handles",
-            "--dry-run",
-            "--json",
-        ]
-        result = _run_cli(cmd)
-
-        self.assertEqual(result.returncode, 0, result.stderr)
-        output = json.loads(result.stdout)
-        write = output["data"]["command_handle_write"]
-        self.assertEqual(write["status"], "pass")
-        self.assertTrue(write["dry_run"])
-        self.assertGreater(write["command_handle_count"], 0)
-        paths = {row["path"] for row in write["writes"] if row["handle"] == "he-heartbeat"}
-        self.assertEqual(
-            paths,
-            {
-                ".agents/skills/he-heartbeat/SKILL.md",
-                ".agents/skills/he-heartbeat/agents/openai.yaml",
-            },
-        )
-
     def test_skills_resolve_json_contract(self):
-        """Verify ask skills resolve returns a latent source path for a command handle."""
+        """Verify ask skills resolve returns a latent source path for a command-surface handle."""
         cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "resolve", "he-heartbeat", "--json"]
         result = _run_cli(cmd)
 
@@ -371,7 +343,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("--json --robot", result.stdout)
 
     def test_skills_proof_json_contract(self):
-        """Verify ask skills proof separates resolver, command handle, and runtime-link gates."""
+        """Verify ask skills proof separates resolver, canonical source, and runtime-link gates."""
         cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "proof", "he-heartbeat", "--json"]
         result = _run_cli(cmd)
 
@@ -381,8 +353,9 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(proof["schema_version"], "command-handle-proof.v2")
         self.assertEqual(proof["handle"], "he-heartbeat")
         self.assertIn("resolver", proof["gates"])
-        self.assertIn("generated_command_handle_check", proof["gates"])
-        self.assertIn("workspace_command_handle_exists", proof["gates"])
+        self.assertIn("canonical_source_exists", proof["gates"])
+        self.assertNotIn("generated_command_handle_check", proof["gates"])
+        self.assertNotIn("workspace_command_handle_exists", proof["gates"])
         self.assertIn("codex_user_link", proof["gates"])
         self.assertIn("user_runtime_ready", proof["gates"])
         self.assertIn("user_runtime_ready", proof["gate_policy"]["required"])
@@ -406,7 +379,7 @@ class TestAskCLI(unittest.TestCase):
         if result.returncode == 0:
             self.assertIn("Skill handle proof: $he-heartbeat", result.stdout)
             self.assertIn(
-                "required gates: resolver, generated_command_handle_check, workspace_command_handle_exists, user_runtime_ready",
+                "required gates: resolver, canonical_source_exists, user_runtime_ready",
                 result.stdout,
             )
             self.assertIn("Validation: ./bin/ask skills proof he-heartbeat --json --robot", result.stdout)
@@ -415,7 +388,7 @@ class TestAskCLI(unittest.TestCase):
             if "live invocation:" in result.stdout:
                 self.assertIn("live invocation: manual_session_gate", result.stdout)
         elif result.returncode == 2:
-            self.assertRegex(result.stdout, r"Command handle proof failed for 'he-heartbeat'")
+            self.assertRegex(result.stdout, r"Command-surface proof failed for 'he-heartbeat'")
         else:
             self.fail(f"Unexpected return code {result.returncode}, stderr: {result.stderr}")
 
@@ -896,7 +869,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(skills_explain["schema_version"], "skills-explain.v1")
         self.assertEqual(skills_explain["query"], "autofix")
         self.assertEqual(skills_explain["canonical_source"], "Skills/agent-ops/autofix/SKILL.md")
-        self.assertEqual(skills_explain["generated_handle"], ".agents/skills/autofix/SKILL.md")
+        self.assertEqual(skills_explain["command_surface_handle"], "autofix")
         self.assertIn("validation", skills_explain)
         self.assertIn("when_not_to_use", skills_explain)
 
@@ -947,7 +920,7 @@ class TestAskCLI(unittest.TestCase):
                 skills_explain = output["data"]["skills_explain"]
                 self.assertEqual(skills_explain["query"], handle)
                 self.assertEqual(skills_explain["canonical_source"], canonical_source)
-                self.assertEqual(skills_explain["generated_handle"], f".agents/skills/{handle}/SKILL.md")
+                self.assertEqual(skills_explain["command_surface_handle"], handle)
                 self.assertEqual(skills_explain["runtime_projection"], "rooted")
                 self.assertEqual(skills_explain["runtime_visibility"], "latent")
                 self.assertEqual(skills_explain["owner"], owner)
@@ -956,10 +929,10 @@ class TestAskCLI(unittest.TestCase):
 
                 explanation = output["data"]["explanation"]
                 self.assertEqual(explanation["canonical_source_path"], canonical_source)
-                self.assertEqual(explanation["runtime_projection_path"], f".agents/skills/{handle}/SKILL.md")
+                self.assertEqual(explanation["runtime_projection_path"], canonical_source)
                 self.assertEqual(
                     explanation["command_handles"],
-                    [{"handle": handle, "path": f".agents/skills/{handle}/SKILL.md", "invoke_via": owner}],
+                    [{"handle": handle, "path": canonical_source, "invoke_via": owner}],
                 )
                 self.assertTrue(explanation["validation_commands"])
                 self.assertIn("known_limitations", explanation)
@@ -1277,7 +1250,7 @@ class TestAskCLI(unittest.TestCase):
             "Infrastructure/bin/ask",
             "skills",
             "goal",
-            "make skill diagnostics clearer",
+            "help me",
             "--robot",
         ]
         result = _run_cli(cmd)
@@ -2228,7 +2201,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("Skill doctor: skill-builder", result.stdout)
         self.assertIn("Event: skill_doctor_completed", result.stdout)
         self.assertIn("Warning classes: outcome_proof_missing", result.stdout)
-        self.assertIn("Checks: missing=1, pass=7", result.stdout)
+        self.assertIn("Checks: missing=1, pass=8", result.stdout)
         self.assertIn("Validation: ./bin/ask skills doctor <handle-or-path> --json --robot", result.stdout)
         self.assertIn("Next:", result.stdout)
 
@@ -4864,7 +4837,7 @@ class TestAskCLI(unittest.TestCase):
         boundary = output["data"]["boundary_check"]
         self.assertEqual(boundary["status"], "pass")
         self.assertEqual(boundary["handle"], "he-heartbeat")
-        self.assertIn(".agents/skills/", boundary["command_handle_path"])
+        self.assertNotIn("command_handle_path", boundary)
         self.assertTrue(boundary["canonical_skill_path"])
         self.assertEqual(
             output["data"]["validation_commands"],
@@ -4886,7 +4859,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("Skill boundaries passed: $he-heartbeat", result.stdout)
         self.assertIn("Canonical source:", result.stdout)
-        self.assertIn("Command handle:", result.stdout)
+        self.assertIn("Runtime projection:", result.stdout)
         self.assertIn(
             "Validation: ./bin/ask skills validate-boundaries he-heartbeat --json --robot",
             result.stdout,

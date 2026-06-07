@@ -2,53 +2,37 @@
   "command": "./bin/ask skills proof autofix --runtime-target codex --json --robot",
   "exit_code": 2,
   "handle": "autofix",
-  "observed_at": "2026-06-04T19:46:00Z",
+  "observed_at": "2026-06-07T22:44:29Z",
   "proof": {
-    "available_runtimes": [],
-    "command_handle_check": {
-      "checked_count": 210,
-      "command_handle_count": 105,
-      "schema_version": "command-handle-check.v1",
-      "skipped": [],
-      "status": "pass"
-    },
+    "available_runtimes": [
+      "agents_user_runtime"
+    ],
     "gate_policy": {
       "required": [
         "resolver",
-        "generated_command_handle_check",
-        "workspace_command_handle_exists",
+        "canonical_source_exists",
         "codex_user_runtime_ready"
       ],
       "required_semantics": "codex_user_runtime_ready must be true for runtime_target=codex.",
       "runtime_target": "codex",
       "supporting_runtime_diagnostics": [
         "codex_user_link",
-        "codex_user_command_handle_exists",
-        "codex_user_command_handle_points_to_workspace",
         "codex_user_runtime_ready",
         "agents_user_link",
-        "agents_user_command_handle_exists",
-        "agents_user_command_handle_points_to_workspace",
         "agents_user_runtime_ready"
       ]
     },
     "gates": {
-      "agents_user_command_handle_exists": true,
-      "agents_user_command_handle_points_to_workspace": false,
-      "agents_user_link": false,
-      "agents_user_runtime_ready": false,
-      "codex_user_command_handle_exists": false,
-      "codex_user_command_handle_points_to_workspace": false,
+      "agents_user_link": true,
+      "agents_user_runtime_ready": true,
+      "canonical_source_exists": true,
       "codex_user_link": false,
       "codex_user_runtime_ready": false,
-      "generated_command_handle_check": true,
       "resolver": true,
-      "user_runtime_ready": false,
-      "workspace_command_handle_exists": true
+      "user_runtime_ready": true
     },
     "handle": "autofix",
     "resolution": {
-      "command_handle_path": ".agents/skills/autofix/SKILL.md",
       "command_visibility": "target",
       "description": "Apply approved fixes for unresolved CodeRabbit review comments, Codex P1-P3 findings, PR feedback, and code review issues with validation evidence. Use when asked to address review comments, fix review findings, clear unresolved comments, or autofix PR feedback.",
       "handle": "autofix",
@@ -58,9 +42,9 @@
       "owner": "agent-ops",
       "provenance": {
         "generator": "context-budgeted-skillsets.v1",
-        "policy_identity": "ffa64b671a4e0ade",
+        "policy_identity": "8a1c61840a1a02bf",
         "projection_mode": "rooted",
-        "source_revision": "a3697642b",
+        "source_revision": "80a13636b",
         "source_sha256": "9347ca2014f24d539744d3d38959514fd4a30fc0e391a06796115c082a0e3101"
       },
       "runtime_visibility": "latent",
@@ -70,18 +54,6 @@
     "runtime_diagnostics": {
       "expected_workspace_runtime": "${WORKSPACE_ROOT}/.agents/skills",
       "failed_gate": "codex_user_runtime_ready",
-      "missing_command_handles": [
-        {
-          "expected_under": "${WORKSPACE_ROOT}/.agents/skills",
-          "path": "${HOME}/.codex/skills/autofix/SKILL.md",
-          "runtime": "codex_user_runtime"
-        },
-        {
-          "expected_under": "${WORKSPACE_ROOT}/.agents/skills",
-          "path": "${HOME}/.agents/skills/autofix/SKILL.md",
-          "runtime": "agents_user_runtime"
-        }
-      ],
       "recovery_commands": [
         {
           "command": "./bin/ask skills sync --scope user --projection rooted --dry-run --json --robot",
@@ -97,7 +69,7 @@
         },
         {
           "command": "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
-          "expected_outcome": "Refreshes .agents/skills command handles from canonical sources.",
+          "expected_outcome": "Refreshes .agents/skills from canonical frontmatter and skill sources.",
           "kind": "refresh_workspace_projection",
           "permission_profile": {
             "filesystem": "write workspace runtime projection",
@@ -128,13 +100,13 @@
             "network": "not required"
           },
           "preconditions": [
-            "User runtime link or handle bridge now points at the workspace projection."
+            "User runtime link now points at the workspace projection."
           ]
         }
       ],
       "recovery_risk": "User-scope sync mutates home-directory runtime links; preview with --dry-run before applying.",
       "runtime_modes": {
-        "agents_user_runtime": "foreign_or_unmanaged_root",
+        "agents_user_runtime": "root_symlink",
         "codex_user_runtime": "foreign_or_unmanaged_root"
       },
       "schema_version": "command-handle-runtime-diagnostics.v1",
@@ -144,7 +116,7 @@
       "command": "skills proof",
       "error_code": "ERR_VALIDATION",
       "failed_check_id": "codex_user_runtime_ready",
-      "message": "Command handle proof failed for 'autofix'.",
+      "message": "Skill runtime proof failed for 'autofix'.",
       "path": "gates.codex_user_runtime_ready",
       "recovery_guidance": "Preview with ./bin/ask skills sync --scope user --projection rooted --dry-run, then run workspace/user sync only if the user-runtime relink plan is acceptable.",
       "schema_version": "skill-runtime-failure.v1",
@@ -156,21 +128,13 @@
     "runtime_target": "codex",
     "schema_version": "command-handle-proof.v2",
     "status": "fail",
-    "user_runtime_command_handles": {
-      "agents_handle": "${HOME}/.agents/skills/autofix/SKILL.md",
-      "agents_handle_exists": true,
-      "agents_handle_points_to_workspace": false,
-      "codex_handle": "${HOME}/.codex/skills/autofix/SKILL.md",
-      "codex_handle_exists": false,
-      "codex_handle_points_to_workspace": false
-    },
     "user_runtime_links": {
       "agents_skills": {
         "exists": true,
         "is_symlink": true,
         "path": "${HOME}/.agents/skills",
-        "points_to_workspace_runtime": false,
-        "target": "${HOME}/dev/agent-skills/.agents/skills"
+        "points_to_workspace_runtime": true,
+        "target": "${WORKSPACE_ROOT}/.agents/skills"
       },
       "codex_skills": {
         "exists": true,
@@ -184,8 +148,8 @@
       "./bin/ask skills proof autofix --runtime-target codex --json --robot"
     ],
     "workspace_runtime": {
-      "command_handle_exists": true,
-      "command_handle_path": "${WORKSPACE_ROOT}/.agents/skills/autofix/SKILL.md",
+      "canonical_source_exists": true,
+      "canonical_source_path": "${WORKSPACE_ROOT}/Skills/agent-ops/autofix/SKILL.md",
       "path": "${WORKSPACE_ROOT}/.agents/skills"
     }
   },

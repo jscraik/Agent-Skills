@@ -108,12 +108,10 @@ class TestRuntimeProofValidation(unittest.TestCase):
                     "status": "ok",
                     "handle": "autofix",
                     "source_path": "Skills/agent-ops/autofix/SKILL.md",
-                    "command_handle_path": ".agents/skills/autofix/SKILL.md",
                 },
                 "gates": {
                     "resolver": True,
-                    "generated_command_handle_check": True,
-                    "workspace_command_handle_exists": True,
+                    "canonical_source_exists": True,
                     "codex_user_runtime_ready": False,
                 },
                 "gate_policy": {"required": ["codex_user_runtime_ready"]},
@@ -128,7 +126,7 @@ class TestRuntimeProofValidation(unittest.TestCase):
                     "failed_gate": "codex_user_runtime_ready",
                     "expected_workspace_runtime": str(workspace_runtime.resolve(strict=False)),
                     "runtime_modes": {"codex_user_runtime": "missing_root"},
-                    "missing_command_handles": [
+                    "missing_runtime_roots": [
                         {
                             "runtime": "codex_user_runtime",
                             "path": str(codex_handle.resolve(strict=False)),
@@ -178,7 +176,7 @@ class TestRuntimeProofValidation(unittest.TestCase):
                 diagnostics,
             )
             self.assertEqual(
-                diagnostics["missing_command_handles"][0]["expected_under"],
+                diagnostics["missing_runtime_roots"][0]["expected_under"],
                 "${WORKSPACE_ROOT}/.agents/skills",
             )
             recovery_commands = card["recovery_plan"]["next_commands"]
@@ -259,12 +257,10 @@ class TestRuntimeProofValidation(unittest.TestCase):
                     "status": "ok",
                     "handle": "autofix",
                     "source_path": "Skills/agent-ops/autofix/SKILL.md",
-                    "command_handle_path": ".agents/skills/autofix/SKILL.md",
                 },
                 "gates": {
                     "resolver": True,
-                    "generated_command_handle_check": True,
-                    "workspace_command_handle_exists": True,
+                    "canonical_source_exists": True,
                     "codex_user_runtime_ready": True,
                 },
                 "gate_policy": {"required": ["codex_user_runtime_ready"]},
@@ -365,7 +361,6 @@ class TestRuntimeProofValidation(unittest.TestCase):
                     "status": "ok",
                     "handle": "autofix",
                     "source_path": "Skills/agent-ops/autofix/SKILL.md",
-                    "command_handle_path": ".agents/skills/autofix/SKILL.md",
                 },
                 "gates": {"codex_user_runtime_ready": True},
                 "gate_policy": {"required": ["codex_user_runtime_ready"]},
@@ -460,7 +455,6 @@ class TestRuntimeProofValidation(unittest.TestCase):
                     "status": "ok",
                     "handle": "autofix",
                     "source_path": "Skills/agent-ops/autofix/SKILL.md",
-                    "command_handle_path": ".agents/skills/autofix/SKILL.md",
                 },
                 "gates": {"codex_user_runtime_ready": True},
                 "gate_policy": {"required": ["codex_user_runtime_ready"]},
@@ -482,18 +476,19 @@ class TestRuntimeProofValidation(unittest.TestCase):
             self.assertEqual(card["runtime_session"]["runtime_status"], "partial")
             self.assertIn("session evidence is stale", card["runtime_session"]["unavailable_reason"])
 
-    def test_build_command_handle_proof_accepts_handle_bridge_without_root_symlink(self) -> None:
+    def test_build_command_handle_proof_rejects_per_handle_symlink_without_root_symlink(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir) / "repo"
             workspace_runtime = repo_root / ".agents" / "skills"
-            workspace_handle = workspace_runtime / "autofix" / "SKILL.md"
-            workspace_handle.parent.mkdir(parents=True)
-            workspace_handle.write_text("---\\nname: autofix\\n---\\n", encoding="utf-8")
+            source_handle = repo_root / "Skills" / "agent-ops" / "autofix" / "SKILL.md"
+            source_handle.parent.mkdir(parents=True)
+            source_handle.write_text("---\\nname: autofix\\n---\\n", encoding="utf-8")
+            workspace_runtime.mkdir(parents=True)
 
             home_path = repo_root / ".tmp-home"
             codex_handle = home_path / ".codex" / "skills" / "autofix" / "SKILL.md"
             codex_handle.parent.mkdir(parents=True, exist_ok=True)
-            codex_handle.symlink_to(workspace_handle)
+            codex_handle.symlink_to(source_handle)
 
             def resolve_skill_handle_fn(
                 _handle: str,
@@ -505,35 +500,24 @@ class TestRuntimeProofValidation(unittest.TestCase):
                     "status": "ok",
                     "handle": "autofix",
                     "source_path": "Skills/agent-ops/autofix/SKILL.md",
-                    "command_handle_path": ".agents/skills/autofix/SKILL.md",
                 }
-
-            def check_command_handles_fn(*, repo_root_path: Path) -> dict[str, object]:
-                del repo_root_path
-                return {"status": "pass", "violations": []}
 
             proof = runtime_adapters.build_command_handle_proof(
                 repo_root=repo_root,
                 handle="autofix",
                 runtime_target="codex",
                 resolve_skill_handle_fn=resolve_skill_handle_fn,
-                check_command_handles_fn=check_command_handles_fn,
                 home_path=home_path,
             )
 
-            self.assertEqual(proof["status"], "pass")
+            self.assertEqual(proof["status"], "fail")
             self.assertFalse(proof["gates"]["codex_user_link"])
-            self.assertTrue(proof["gates"]["codex_user_command_handle_exists"])
-            self.assertTrue(proof["gates"]["codex_user_command_handle_points_to_workspace"])
-            self.assertTrue(proof["gates"]["codex_user_runtime_ready"])
-            self.assertEqual(proof["runtime_satisfied_by"], "codex_user_runtime")
+            self.assertFalse(proof["gates"]["codex_user_runtime_ready"])
+            self.assertIsNone(proof["runtime_satisfied_by"])
             self.assertEqual(
                 proof["runtime_diagnostics"]["runtime_modes"]["codex_user_runtime"],
-                "handle_bridge",
+                "foreign_or_unmanaged_root",
             )
-            missing = proof["runtime_diagnostics"]["missing_command_handles"]
-            self.assertTrue(any(entry["runtime"] == "agents_user_runtime" for entry in missing))
-            self.assertFalse(any(entry["runtime"] == "codex_user_runtime" for entry in missing))
 
     def test_build_command_handle_proof_accepts_rooted_source_symlink(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -562,30 +546,22 @@ class TestRuntimeProofValidation(unittest.TestCase):
                     "status": "ok",
                     "handle": "autofix",
                     "source_path": "Skills/agent-ops/autofix/SKILL.md",
-                    "command_handle_path": ".agents/skills/autofix/SKILL.md",
                 }
-
-            def check_command_handles_fn(*, repo_root_path: Path) -> dict[str, object]:
-                del repo_root_path
-                return {"status": "pass", "violations": []}
 
             proof = runtime_adapters.build_command_handle_proof(
                 repo_root=repo_root,
                 handle="autofix",
                 runtime_target="agents",
                 resolve_skill_handle_fn=resolve_skill_handle_fn,
-                check_command_handles_fn=check_command_handles_fn,
                 home_path=home_path,
             )
 
             self.assertEqual(proof["status"], "pass")
             self.assertTrue(proof["gates"]["agents_user_link"])
-            self.assertTrue(proof["gates"]["agents_user_command_handle_exists"])
-            self.assertTrue(proof["gates"]["agents_user_command_handle_points_to_workspace"])
             self.assertTrue(proof["gates"]["agents_user_runtime_ready"])
             self.assertEqual(proof["runtime_satisfied_by"], "agents_user_runtime")
 
-    def test_build_command_handle_proof_rejects_poisoned_handle_under_root_symlink(self) -> None:
+    def test_build_command_handle_proof_uses_canonical_source_under_root_symlink(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir) / "repo"
             source_handle = repo_root / "Skills" / "agent-ops" / "autofix" / "SKILL.md"
@@ -615,36 +591,30 @@ class TestRuntimeProofValidation(unittest.TestCase):
                     "status": "ok",
                     "handle": "autofix",
                     "source_path": "Skills/agent-ops/autofix/SKILL.md",
-                    "command_handle_path": ".agents/skills/autofix/SKILL.md",
                 }
-
-            def check_command_handles_fn(*, repo_root_path: Path) -> dict[str, object]:
-                del repo_root_path
-                return {"status": "pass", "violations": []}
 
             proof = runtime_adapters.build_command_handle_proof(
                 repo_root=repo_root,
                 handle="autofix",
                 runtime_target="agents",
                 resolve_skill_handle_fn=resolve_skill_handle_fn,
-                check_command_handles_fn=check_command_handles_fn,
                 home_path=home_path,
             )
 
-            self.assertEqual(proof["status"], "fail")
+            self.assertEqual(proof["status"], "pass")
             self.assertTrue(proof["gates"]["agents_user_link"])
-            self.assertTrue(proof["gates"]["agents_user_command_handle_exists"])
-            self.assertFalse(proof["gates"]["agents_user_command_handle_points_to_workspace"])
-            self.assertFalse(proof["gates"]["agents_user_runtime_ready"])
-            self.assertEqual(proof["runtime_failure"]["failed_check_id"], "agents_user_runtime_ready")
+            self.assertTrue(proof["gates"]["canonical_source_exists"])
+            self.assertTrue(proof["gates"]["agents_user_runtime_ready"])
+            self.assertEqual(proof["runtime_satisfied_by"], "agents_user_runtime")
 
     def test_build_command_handle_proof_reports_blocked_runtime_with_actionable_diagnostics(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir) / "repo"
             workspace_runtime = repo_root / ".agents" / "skills"
-            workspace_handle = workspace_runtime / "autofix" / "SKILL.md"
-            workspace_handle.parent.mkdir(parents=True)
-            workspace_handle.write_text("---\\nname: autofix\\n---\\n", encoding="utf-8")
+            source_handle = repo_root / "Skills" / "agent-ops" / "autofix" / "SKILL.md"
+            source_handle.parent.mkdir(parents=True)
+            source_handle.write_text("---\\nname: autofix\\n---\\n", encoding="utf-8")
+            workspace_runtime.mkdir(parents=True)
 
             home_path = repo_root / ".tmp-home"
             (home_path / ".codex" / "skills").mkdir(parents=True, exist_ok=True)
@@ -663,19 +633,13 @@ class TestRuntimeProofValidation(unittest.TestCase):
                     "status": "ok",
                     "handle": "autofix",
                     "source_path": "Skills/agent-ops/autofix/SKILL.md",
-                    "command_handle_path": ".agents/skills/autofix/SKILL.md",
                 }
-
-            def check_command_handles_fn(*, repo_root_path: Path) -> dict[str, object]:
-                del repo_root_path
-                return {"status": "pass", "violations": []}
 
             proof = runtime_adapters.build_command_handle_proof(
                 repo_root=repo_root,
                 handle="autofix",
                 runtime_target="codex",
                 resolve_skill_handle_fn=resolve_skill_handle_fn,
-                check_command_handles_fn=check_command_handles_fn,
                 home_path=home_path,
             )
 
@@ -683,8 +647,10 @@ class TestRuntimeProofValidation(unittest.TestCase):
             runtime_failure = proof["runtime_failure"]
             self.assertEqual(runtime_failure["failed_check_id"], "codex_user_runtime_ready")
             self.assertEqual(proof["runtime_diagnostics"]["failed_gate"], "codex_user_runtime_ready")
-            missing = proof["runtime_diagnostics"]["missing_command_handles"]
-            self.assertTrue(any(entry["runtime"] == "codex_user_runtime" for entry in missing))
+            self.assertEqual(
+                proof["runtime_diagnostics"]["runtime_modes"]["codex_user_runtime"],
+                "foreign_or_unmanaged_root",
+            )
             self.assertIn("dry-run", proof["runtime_diagnostics"]["recovery_risk"])
             recovery_kinds = {entry["kind"] for entry in proof["runtime_diagnostics"]["recovery_commands"]}
             self.assertTrue(

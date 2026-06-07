@@ -290,7 +290,7 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertEqual(result.data["projection_mode"], "flat")
         self.assertEqual(result.data["projection"]["mode_source"], "cli")
 
-    def test_sync_skills_rooted_non_dry_run_writes_generated_surface(self) -> None:
+    def test_sync_skills_rooted_non_dry_run_writes_command_surface_without_handle_wrapper(self) -> None:
         he_source = self.repo_root / "Skills" / "harness-engineering" / "he-heartbeat"
         he_source.mkdir(parents=True)
         (he_source / "SKILL.md").write_text("# HE Heartbeat\n", encoding="utf-8")
@@ -307,11 +307,11 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertTrue((self.repo_root / ".agents" / "skills" / "agent-ops" / "SKILL.md").is_file())
         self.assertTrue((self.repo_root / ".skillsets" / "agent-ops" / "manifest.jsonl").is_file())
         self.assertTrue((self.repo_root / ".skillsets" / "command-surface.json").is_file())
-        self.assertTrue((self.repo_root / ".agents" / "skills" / "he-heartbeat" / "SKILL.md").is_file())
-        self.assertTrue((self.repo_root / ".agents" / "skills" / "he-heartbeat" / "agents" / "openai.yaml").is_file())
-        self.assertEqual(result.data["plan"]["command_handles"]["status"], "pass")
+        command_surface = json.loads((self.repo_root / ".skillsets" / "command-surface.json").read_text(encoding="utf-8"))
+        self.assertIn("he-heartbeat", {row["handle"] for row in command_surface["handles"]})
+        self.assertFalse((self.repo_root / ".agents" / "skills" / "he-heartbeat").exists())
 
-    def test_sync_skills_rooted_prunes_flat_symlink_before_command_handle_write(self) -> None:
+    def test_sync_skills_rooted_prunes_flat_symlink_before_rooted_projection_write(self) -> None:
         canonical_skill = self.repo_root / "Skills" / "harness-engineering" / "he-heartbeat"
         canonical_skill.mkdir(parents=True)
         source_skill_md = canonical_skill / "SKILL.md"
@@ -329,10 +329,7 @@ class TestAskSkillsSyncSecurity(TestCase):
 
         self.assertEqual(result.status, "success")
         self.assertFalse(runtime_handle.is_symlink())
-        self.assertIn(
-            "Internal activation entrypoint",
-            (runtime_handle / "SKILL.md").read_text(encoding="utf-8"),
-        )
+        self.assertFalse(runtime_handle.exists())
         self.assertEqual(source_skill_md.read_text(encoding="utf-8"), "# Canonical Source\n")
         self.assertTrue(
             any("Removed stale symlink" in item and "he-heartbeat" in item for item in result.data["logs"]),
@@ -455,8 +452,9 @@ class TestAskSkillsSyncSecurity(TestCase):
         )
         self.assertEqual(workspace_result.status, "success")
 
-        folded_handle = self.repo_root / ".agents" / "skills" / "he-ideate" / "SKILL.md"
-        self.assertTrue(folded_handle.is_file())
+        command_surface = json.loads((self.repo_root / ".skillsets" / "command-surface.json").read_text(encoding="utf-8"))
+        self.assertIn("he-ideate", {row["handle"] for row in command_surface["handles"]})
+        self.assertFalse((self.repo_root / ".agents" / "skills" / "he-ideate").exists())
 
         with mock.patch.object(Path, "home", return_value=self.fake_home):
             result = skills_commands.sync_skills(
@@ -875,12 +873,8 @@ class TestAskSkillsSyncSecurity(TestCase):
             ).is_file()
         )
 
-    def test_plugin_cache_prune_keeps_skill_when_command_handle_file_is_missing(self) -> None:
-        """
-        Ensure plugin cache pruning does not remove a cached skill when its corresponding command-handle file is absent.
-        
-        Sets up a cached plugin skill directory and a mocked handles report that references a command handle path which does not exist on disk; verifies that prune_command_handle_skill_entries produces no logs or deletes and leaves the cached skill in place.
-        """
+    def test_plugin_cache_prune_removes_skill_from_command_surface_metadata(self) -> None:
+        """Command-surface ownership is enough to prune duplicate plugin mirror entries."""
         plugin_root = self.repo_root / ".agents" / "plugins-runtime" / "cache" / "agent-skills-local" / "harness-engineering"
         skill_dir = plugin_root / "skills" / "he-work"
         skill_dir.mkdir(parents=True)
@@ -895,31 +889,27 @@ class TestAskSkillsSyncSecurity(TestCase):
                     {
                         "owner": "harness-engineering",
                         "handle": "he-work",
-                        "command_handle_path": ".agents/skills/he-work/SKILL.md",
+                        "source_path": "Plugins/harness-engineering/skills/he-work/SKILL.md",
                         "command_visibility": "none",
                     }
                 ],
             },
         ):
-            logs, deletes = plugin_cache.prune_command_handle_skill_entries(
+            logs, deletes = plugin_cache.prune_command_surface_duplicate_skill_entries(
                 self.repo_root,
                 "harness-engineering",
                 plugin_root,
             )
 
-        self.assertEqual([], logs)
-        self.assertEqual([], deletes)
-        self.assertTrue((skill_dir / "SKILL.md").exists())
+        self.assertTrue(any("he-work" in log for log in logs))
+        self.assertEqual([str(skill_dir)], deletes)
+        self.assertFalse(skill_dir.exists())
 
-    def test_plugin_cache_prune_removes_skill_when_command_handle_file_exists(self) -> None:
+    def test_plugin_cache_prune_removes_skill_from_visible_command_surface_metadata(self) -> None:
         plugin_root = self.repo_root / ".agents" / "plugins-runtime" / "cache" / "agent-skills-local" / "harness-engineering"
         skill_dir = plugin_root / "skills" / "he-work"
         skill_dir.mkdir(parents=True)
         (skill_dir / "SKILL.md").write_text("# HE Work\n", encoding="utf-8")
-        command_handle = self.repo_root / ".agents" / "skills" / "he-work" / "SKILL.md"
-        command_handle.parent.mkdir(parents=True, exist_ok=True)
-        command_handle.write_text("# Generated HE Work Handle\n", encoding="utf-8")
-
         with mock.patch.object(
             plugin_cache,
             "handles_report",
@@ -928,12 +918,12 @@ class TestAskSkillsSyncSecurity(TestCase):
                     {
                         "owner": "harness-engineering",
                         "handle": "he-work",
-                        "command_handle_path": ".agents/skills/he-work/SKILL.md",
+                        "source_path": "Plugins/harness-engineering/skills/he-work/SKILL.md",
                     }
                 ]
             },
         ):
-            logs, deletes = plugin_cache.prune_command_handle_skill_entries(
+            logs, deletes = plugin_cache.prune_command_surface_duplicate_skill_entries(
                 self.repo_root,
                 "harness-engineering",
                 plugin_root,
@@ -948,10 +938,6 @@ class TestAskSkillsSyncSecurity(TestCase):
         skill_dir = plugin_root / "skills" / "he-work"
         skill_dir.mkdir(parents=True)
         (skill_dir / "SKILL.md").write_text("# HE Work\n", encoding="utf-8")
-        command_handle = self.repo_root / ".agents" / "skills" / "he-work" / "SKILL.md"
-        command_handle.parent.mkdir(parents=True, exist_ok=True)
-        command_handle.write_text("# Generated HE Work Handle\n", encoding="utf-8")
-
         with (
             mock.patch.object(
                 plugin_cache,
@@ -961,20 +947,20 @@ class TestAskSkillsSyncSecurity(TestCase):
                         {
                             "owner": "harness-engineering",
                             "handle": "he-work",
-                            "command_handle_path": ".agents/skills/he-work/SKILL.md",
+                            "source_path": "Plugins/harness-engineering/skills/he-work/SKILL.md",
                         }
                     ]
                 },
             ),
             mock.patch.object(plugin_cache.shutil, "rmtree", side_effect=PermissionError("protected")),
         ):
-            logs, deletes = plugin_cache.prune_command_handle_skill_entries(
+            logs, deletes = plugin_cache.prune_command_surface_duplicate_skill_entries(
                 self.repo_root,
                 "harness-engineering",
                 plugin_root,
             )
 
-        self.assertTrue(any("Skipped protected command-handle duplicate plugin skill entry" in log for log in logs))
+        self.assertTrue(any("Skipped protected command-surface duplicate plugin skill entry" in log for log in logs))
         self.assertEqual([], deletes)
         self.assertTrue(skill_dir.exists())
 
@@ -1004,29 +990,35 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertIn(str(plugin_root / "skills" / "data_fetch_analysis"), deletes)
         self.assertTrue(any("picker-internal" in log for log in logs))
 
-    def test_plugin_cache_prune_preserves_manifest_declared_skills_root(self) -> None:
+    def test_plugin_cache_prune_preserves_manifest_declared_skills_root_without_duplicate_identities(self) -> None:
         plugin_root = self.repo_root / ".agents" / "plugins-runtime" / "cache" / "agent-skills-local" / "skill-factory"
         plugin_json = plugin_root / ".codex-plugin" / "plugin.json"
         plugin_json.parent.mkdir(parents=True)
         plugin_json.write_text('{"name":"skill-factory","skills":"./skills/"}', encoding="utf-8")
         public_skill_builder = plugin_root / "skills" / "skill-builder"
         category_skill_builder = plugin_root / "skills" / "code_quality_review" / "skill-builder"
+        category_skill_refactor = plugin_root / "skills" / "code_quality_review" / "skill-refactor"
         archived_skill_builder = plugin_root / "fixtures" / "budget-archive" / "skills" / "skill-builder"
         public_skill_builder.mkdir(parents=True)
         category_skill_builder.mkdir(parents=True)
+        category_skill_refactor.mkdir(parents=True)
         archived_skill_builder.mkdir(parents=True)
         (public_skill_builder / "SKILL.md").write_text("# Skill Builder\n", encoding="utf-8")
         (category_skill_builder / "SKILL.md").write_text("# Internal Skill Builder\n", encoding="utf-8")
+        (category_skill_refactor / "SKILL.md").write_text("# Internal Skill Refactor\n", encoding="utf-8")
         (archived_skill_builder / "SKILL.md").write_text("# Archived Skill Builder\n", encoding="utf-8")
 
         logs, deletes = plugin_cache.prune_picker_internal_skill_dirs(plugin_root)
 
         self.assertTrue((public_skill_builder / "SKILL.md").exists())
-        self.assertTrue((category_skill_builder / "SKILL.md").exists())
+        self.assertFalse(category_skill_builder.exists())
+        self.assertTrue((category_skill_refactor / "SKILL.md").exists())
         self.assertFalse(archived_skill_builder.exists())
         self.assertIn(str(plugin_root / "fixtures"), deletes)
+        self.assertIn(str(category_skill_builder), deletes)
         self.assertNotIn(str(plugin_root / "skills" / "code_quality_review"), deletes)
         self.assertTrue(any("Preserved manifest-declared plugin skills root" in log for log in logs))
+        self.assertTrue(any("nested duplicate plugin skill identity" in log for log in logs))
 
     def test_plugin_cache_permission_failure_returns_error(self) -> None:
         marketplace = self.repo_root / "Plugins" / "marketplace.json"

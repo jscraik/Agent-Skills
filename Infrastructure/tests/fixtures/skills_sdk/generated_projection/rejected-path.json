@@ -3,5 +3,5 @@
   "path": ".agents/skills/generated-example/SKILL.md",
   "classification": "runtime_projection",
   "scaffold_source_allowed": false,
-  "reason": "Runtime Projection paths are generated command-handle surfaces, not canonical Skills SDK scaffold source."
+  "reason": "Runtime Projection paths are generated surfaces, not canonical Skills SDK scaffold source."
 }
