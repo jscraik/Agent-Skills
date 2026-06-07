@@ -633,7 +633,19 @@ def _profile_marketplace_plugin_status(
             issues.append(f"{plugin_root.as_posix()}: marketplace local source path is not a directory")
         else:
             if require_symlink and not plugin_root.is_symlink():
-                issues.append(f"{plugin_root.as_posix()}: compatibility plugin path must be a symlink alias")
+                # On case-insensitive filesystems, allow if plugin_root and expected path refer to the same file
+                if expected_resolved_path is not None:
+                    try:
+                        import os
+                        if os.path.samefile(plugin_root, expected_resolved_path):
+                            # Same file despite case-only difference, allow it
+                            pass
+                        else:
+                            issues.append(f"{plugin_root.as_posix()}: compatibility plugin path must be a symlink alias")
+                    except (OSError, ValueError):
+                        issues.append(f"{plugin_root.as_posix()}: compatibility plugin path must be a symlink alias")
+                else:
+                    issues.append(f"{plugin_root.as_posix()}: compatibility plugin path must be a symlink alias")
             if expected_resolved_path is not None:
                 try:
                     actual_resolved = plugin_root.resolve(strict=True)

@@ -485,7 +485,8 @@ class TestAskPluginsCommands(unittest.TestCase):
         personal_plugins.parent.mkdir(parents=True)
         personal_plugins.symlink_to(self.repo_root / "Plugins", target_is_directory=True)
 
-        with patch("ask.commands.plugins.Path.home", return_value=fake_home):
+        with patch("ask.commands.plugins.Path.home", return_value=fake_home), \
+             patch("ask.plugin_state.Path.home", return_value=fake_home):
             result = sync_local_runtime_plugins(self.repo_root)
 
         self.assertEqual(result.status, "success")
@@ -605,7 +606,8 @@ class TestAskPluginsCommands(unittest.TestCase):
             encoding="utf-8",
         )
 
-        with patch("ask.commands.plugins.Path.home", return_value=fake_home):
+        with patch("ask.commands.plugins.Path.home", return_value=fake_home), \
+             patch("ask.plugin_state.Path.home", return_value=fake_home):
             result = sync_local_runtime_plugins(self.repo_root)
 
         self.assertEqual(result.status, "success")

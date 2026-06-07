@@ -38,13 +38,13 @@ Source: `L0192-L0196`
 
 Source: `L0343-L0347`
 
-## Tests as incomplete signals
+## Tests as incomplete signals — notes
 
 > have weird errors. Um flaky tests were really interesting. I said that um like AWS was AWS converges to uh truth over time, which is really
 
 Source: `L0374-L0378`
 
-## Observability
+## Observability — context
 
 > it like this is the opportunity to fix flaky tests. AI is good at it. Um, and it will and it will really help your tests if you if you just get rid of all
 

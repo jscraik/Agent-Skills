@@ -1,3 +1,5 @@
+# Talk outline — Patrick Debois: Agent enablement
+
 > **Speaker label warning:** The source transcript has no per-speaker labels and contains visible speech-to-text artefacts. The talk is single-speaker (Patrick Debois) bookended by a brief MC intro and outro. There is no captured Q&A.
 
 ## Speaker

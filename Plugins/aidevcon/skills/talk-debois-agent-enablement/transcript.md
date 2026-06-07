@@ -1,3 +1,5 @@
+# Transcript — Patrick Debois
+
 > **⚠ Speaker labels absent.** This transcript was provided without per-speaker labels and contains visible speech-to-text artefacts (e.g. "alza" likely = "AI/Eleven Labs", "deals activated without people", "tynatics", "rainbow" likely = "the repo", "Brigitte" likely = a misheard name, "two news that actually searches" likely = "tool/use that…"). The talk is single-speaker (Patrick Debois) bookended by a brief MC intro and outro. No Q&A is captured. When quoting, preserve the artefacts verbatim and optionally annotate `[transcription artefact]`; do not silently "correct" them.
 
 ## Section 1 — MC intro

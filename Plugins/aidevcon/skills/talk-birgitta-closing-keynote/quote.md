@@ -1,4 +1,4 @@
-## Quotes -- State of Play: AI Coding Assistants
+# Quotes -- State of Play: AI Coding Assistants
 
 Each quote is verbatim from `transcript.md`. `L####` ranges refer to the source line IDs in the transcript.
 

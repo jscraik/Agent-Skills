@@ -27,8 +27,8 @@ A talk on how agentic software development is reshaping engineering team composi
 For every user question, follow this sequence:
 
 1. **Locate** — Read `outline.md` to identify the section(s) most relevant to the question.
-2. **Read** — Read the identified section(s) in `transcript.md`.
-3. **Quote** — Pull safe excerpts that directly support the answer. Paraphrase only for connecting tissue, and never wrap paraphrases in quotation marks.
+2. **Read** — Read the identified section(s) in `transcript.md` for detailed context.
+3. **Quote** — Pull safe excerpts that directly support the answer. For short excerpts, you may reference `quote.md` if it contains relevant pre-extracted highlights. Paraphrase only for connecting tissue, and never wrap paraphrases in quotation marks.
 4. **Cite** — Reference the section name or timestamp (if available) so the user can verify.
 
 ## Example responses
@@ -61,7 +61,7 @@ For every user question, follow this sequence:
 
 ## Key quotes
 
-`quote.md` contains pre-extracted safe highlights from this talk, organised by theme. When formulating answers, **check `quote.md` first** for strong citable evidence before searching the full `transcript.md`.
+`quote.md` contains pre-extracted safe highlights from this talk, organised by theme. After locating the relevant section via `outline.md` and reading the full context in `transcript.md`, you may reference `quote.md` for short excerpts to use in your response.
 
 ## Safety rules for source material
 

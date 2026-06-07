@@ -1,3 +1,5 @@
+# Transcript — Maximiliano Firtman
+
 > **Speaker-label warning:** This transcript has **no per-speaker labels**. It is overwhelmingly delivered by **Maximiliano Firtman** ("Maxi"); the session host **Simon Maple** opens and closes but his words are minimal and not separately marked. The transcript also contains many speech-to-text artifacts that should be read with charity, including but not limited to:
 >
 > - "Web MCB" → **Web MCP**

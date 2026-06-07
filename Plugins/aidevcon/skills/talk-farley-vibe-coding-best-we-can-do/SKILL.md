@@ -79,7 +79,7 @@ situation and asks where they're falling short:
 4. For each dimension, give a clear verdict (covered / partial / missing)
    grounded in Farley's criteria, not your own intuition.
 5. If a dimension genuinely doesn't apply, say so explicitly and explain why.
-6. Summarise at the end: which dimensions are gaps, and what Farley said about
+6. Summarize at the end: which dimensions are gaps, and what Farley said about
    closing them (safe excerpts again).
 
 ### Draft an artifact following the speaker's specification

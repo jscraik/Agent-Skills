@@ -1487,6 +1487,8 @@ def install_plugin(
                     for error in sync_result.errors
                 ],
             }
+            if sync_result.status != "success" or sync_result.errors:
+                result.status = "error"
         if installed_name:
             readiness = collect_plugin_state(repo_root, plugin_name=installed_name)["desktop_readiness_state"]
         else:

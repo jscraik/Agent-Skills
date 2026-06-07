@@ -66,7 +66,7 @@ Adopting agentic coding successfully is not "buy licences + run training." It re
 - The mobile-app-in-3-days attempt details (acknowledged as not working well, but no post-mortem given).
 - How Odevo handles model-cost governance across 200+ engineers.
 - Security / data-privacy specifics beyond "we built DOGPT."
-- The specific identity of the second-place private tech company in Sweden ("Klarna" implied by "loan bull number one" but not stated).
+- The specific identity of the second-place private tech company in Sweden (company name unknown).
 - Whether and how the "everyone a builder" vision handles production-grade vs throwaway business-user software.
 - Any quantitative measure of the "boldness" metric the speakers advocate for.
 

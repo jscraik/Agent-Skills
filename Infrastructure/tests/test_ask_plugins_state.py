@@ -40,7 +40,7 @@ class TestAskPluginsState(unittest.TestCase):
         assets_dir.mkdir(parents=True, exist_ok=True)
         (assets_dir / "icon.png").write_bytes(b"fixture-icon")
         (assets_dir / "logo.png").write_bytes(b"fixture-logo")
-        skill = self.repo_root / "plugins" / "example-plugin" / "skills" / "example-skill" / "SKILL.md"
+        skill = self.repo_root / "Plugins" / "example-plugin" / "skills" / "example-skill" / "SKILL.md"
         skill.parent.mkdir(parents=True, exist_ok=True)
         skill.write_text(
             "---\nname: example-skill\ndescription: Example skill.\n---\n# Example Skill\n",
@@ -286,9 +286,15 @@ class TestAskPluginsState(unittest.TestCase):
         self.assertTrue(plugin_row["active_config_ready"])
         self.assertTrue(plugin_row["personal_marketplace_ready"])
         self.assertTrue(plugin_row["profile_mirror_ready"])
-        self.assertTrue(plugin_row["profile_checks"][0]["is_symlink"])
+        # Find the active profile check entry (matching active_profile_home)
+        active_profile_check = next(
+            (check for check in plugin_row["profile_checks"]
+             if check["profile_home"] == plugin_row["active_profile_home"]),
+            plugin_row["profile_checks"][0] if plugin_row["profile_checks"] else {}
+        )
+        self.assertTrue(active_profile_check["is_symlink"])
         self.assertEqual(
-            plugin_row["profile_checks"][0]["resolved_realpath"],
+            active_profile_check["resolved_realpath"],
             (self.fake_home / ".codex" / "plugins" / "example-plugin").resolve().as_posix(),
         )
         self.assertEqual(plugin_row["blockers"], [])
@@ -302,7 +308,14 @@ class TestAskPluginsState(unittest.TestCase):
         readiness = result.data["desktop_readiness_state"]
         self.assertFalse(readiness["desktop_loadable"])
         self.assertIn("PLUGIN_PROFILE_MIRROR_NOT_READY", readiness["blockers"])
-        profile_issues = readiness["plugins"][0]["profile_checks"][0]["issues"]
+        plugin_row = readiness["plugins"][0]
+        # Find the active profile check entry (matching active_profile_home)
+        active_profile_check = next(
+            (check for check in plugin_row["profile_checks"]
+             if check["profile_home"] == plugin_row["active_profile_home"]),
+            plugin_row["profile_checks"][0] if plugin_row["profile_checks"] else {}
+        )
+        profile_issues = active_profile_check["issues"]
         self.assertTrue(any("must be a symlink alias" in issue for issue in profile_issues))
 
     def test_status_blocks_when_official_personal_marketplace_is_missing(self) -> None:

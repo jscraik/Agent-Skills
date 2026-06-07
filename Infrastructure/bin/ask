@@ -1562,6 +1562,17 @@ def main():
                         if removed:
                             print(f"    removed: {', '.join(removed)}")
                     print_first_validation_command(result.data)
+                elif args.topic == "plugins" and args.action == "prune-stale-config":
+                    if result.data.get("dry_run"):
+                        print("🔍 Dry run - would prune stale plugin config:")
+                    else:
+                        print(f"✅ Pruned stale plugin config")
+                    stale = result.data.get("desktop_readiness_state", {}).get("stale_enabled_plugin_ids", [])
+                    print(f"Stale enabled plugins: {len(stale)}")
+                    if stale:
+                        for plugin_id in stale:
+                            print(f"  - {plugin_id}")
+                    print_first_validation_command(result.data)
                 elif args.topic == "plugins" and args.action in {"install", "import"}:
                     if result.data.get("dry_run"):
                         print("🔍 Dry run - would install plugin:")
@@ -1817,6 +1828,7 @@ def main():
                 "import",
                 "harden",
                 "sync-local-runtime",
+                "prune-stale-config",
                 "uninstall",
             ):
                 if "raw_output" in result.data: print(result.data["raw_output"])

@@ -45,7 +45,7 @@ When the user asks "how would Odevo/re-cinq tackle <X>?" or wants the talk's pla
 
 1. Use `outline.md` → "Named frameworks / concepts" to find the relevant element (discovery, workshops, pilot, syllabus, train-the-trainer, SDLC redesign).
 2. Read the corresponding range of `transcript.md` for the exact wording.
-3. Anchor your suggestion in a **safe excerpts** of how the speakers articulate it, then walk through application step-by-step.
+3. Anchor your suggestion in safe excerpts of how the speakers articulate it, then walk through application step-by-step.
 4. If the framework genuinely doesn't fit (e.g. user is a 5-person startup, not a 14k-employee acquisitive group), say so. Don't stretch the speakers' words.
 
 ### Audit the user's situation against the prerequisites

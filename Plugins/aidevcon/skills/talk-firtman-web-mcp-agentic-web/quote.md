@@ -2,7 +2,7 @@
 
 > Line ranges below refer to `transcript.md` sections (§N).
 
-### On the agentic-web framing
+## On the agentic-web framing
 - *"agents want to build for the web"* — §2
 - *"the web wants to run agents"* — §2
 - *"users want to browse the web using agents agentic browsers"* — §2
