@@ -2,7 +2,7 @@
   "command": "./bin/ask skills proof autofix --runtime-target codex --json --robot",
   "exit_code": 2,
   "handle": "autofix",
-  "observed_at": "2026-06-07T22:44:29Z",
+  "observed_at": "2026-06-07T22:50:49Z",
   "proof": {
     "available_runtimes": [
       "agents_user_runtime"
@@ -44,7 +44,7 @@
         "generator": "context-budgeted-skillsets.v1",
         "policy_identity": "8a1c61840a1a02bf",
         "projection_mode": "rooted",
-        "source_revision": "80a13636b",
+        "source_revision": "9a265ac75",
         "source_sha256": "9347ca2014f24d539744d3d38959514fd4a30fc0e391a06796115c082a0e3101"
       },
       "runtime_visibility": "latent",

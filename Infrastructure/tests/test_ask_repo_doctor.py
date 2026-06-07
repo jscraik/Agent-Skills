@@ -253,7 +253,7 @@ class TestAskRepoDoctor(unittest.TestCase):
             REPO_ROOT,
             check=True,
             include_handles=False,
-            check_command_handle_files=True,
+            check_projection=True,
         )
 
     def test_missing_path_shim_is_warning_not_false_pass(self) -> None:

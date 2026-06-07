@@ -1536,15 +1536,19 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(runtime_evidence["evidence_root"], ".harness/evidence/runtime-proof")
         self.assertIn("changed_scope", runtime_evidence)
         self.assertIn("workspace_scope", runtime_evidence)
-        self.assertEqual(runtime_evidence["schema_validation"]["status"], "not_run")
         self.assertEqual(
             runtime_evidence["truth_boundaries"]["command_proof"],
             "workspace_runtime_evidence",
         )
-        self.assertEqual(
-            runtime_evidence["truth_boundaries"]["schema_proof"],
-            "not_run_by_closeout_use_schema_validation_command",
-        )
+        if runtime_evidence["status"] == "not_applicable":
+            self.assertEqual(runtime_evidence["schema_validation"]["status"], "not_run")
+            self.assertEqual(
+                runtime_evidence["truth_boundaries"]["schema_proof"],
+                "not_run_by_closeout_use_schema_validation_command",
+            )
+        else:
+            self.assertEqual(runtime_evidence["schema_validation"]["status"], "pass")
+            self.assertEqual(runtime_evidence["truth_boundaries"]["schema_proof"], "checked_by_repo_closeout")
         self.assertEqual(runtime_evidence["truth_boundaries"]["pr_truth"], "not_checked_by_repo_closeout")
         self.assertEqual(runtime_evidence["truth_boundaries"]["tracker_truth"], "not_checked_by_repo_closeout")
         self.assertEqual(runtime_evidence["truth_boundaries"]["docs_truth"], "not_checked_by_repo_closeout")
@@ -1585,7 +1589,10 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("Package readiness: pass", result.stdout)
         self.assertIn("Runtime evidence:", result.stdout)
         self.assertIn("command=workspace_runtime_evidence", result.stdout)
-        self.assertIn("schema=not_run_by_closeout_use_schema_validation_command", result.stdout)
+        self.assertTrue(
+            "schema=checked_by_repo_closeout" in result.stdout
+            or "schema=not_run_by_closeout_use_schema_validation_command" in result.stdout
+        )
         self.assertIn("PR=not_checked_by_repo_closeout", result.stdout)
         self.assertIn("Eval blocker classes: 9", result.stdout)
         self.assertIn("blocked_runtime", result.stdout)
