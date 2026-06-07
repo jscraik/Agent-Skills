@@ -33,6 +33,8 @@ REQUIRED_CAPABILITY_IDS = (
     "lockfile_preview",
     "real_install",
     "project_conformance",
+    "sdk_lenses",
+    "determinism_audit",
     "trust_store",
     "refs_ingestion",
     "evals",

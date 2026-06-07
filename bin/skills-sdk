@@ -9,7 +9,7 @@ from pathlib import Path
 def main() -> None:
     repo_root = Path(__file__).resolve().parents[1]
     target = repo_root / "Infrastructure" / "bin" / "ask"
-    os.execv(str(target), [str(target), "sdk", *sys.argv[1:]])
+    os.execv(sys.executable, [sys.executable, str(target), "sdk", *sys.argv[1:]])
 
 
 if __name__ == "__main__":
