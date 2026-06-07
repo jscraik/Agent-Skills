@@ -160,7 +160,7 @@ class ProjectConformanceReceipt(_SdkContractModel):
     ]
     command: str
     mode: Literal["status", "doctor"]
-    status: Literal["pass", "warning", "blocked"]
+    status: Literal["pass", "warn", "fail", "blocked"]
     project_root: str
     project_root_identity: ProjectRootIdentity
     project_managed: bool
@@ -168,6 +168,8 @@ class ProjectConformanceReceipt(_SdkContractModel):
     lockfile_status: Literal[
         "not_checked",
         "missing",
+        "empty_not_installed",
+        "missing_with_installed_evidence",
         "valid",
         "valid_with_diagnostics",
         "invalid",

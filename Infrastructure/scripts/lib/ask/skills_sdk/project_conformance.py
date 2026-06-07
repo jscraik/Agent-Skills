@@ -33,7 +33,7 @@ PROJECT_CONFORMANCE_ACCEPTANCE_TRACE = [
 ]
 
 ConformanceMode = Literal["status", "doctor"]
-ConformanceStatus = Literal["pass", "warning", "blocked"]
+ConformanceStatus = Literal["pass", "warn", "fail", "blocked"]
 
 
 @dataclass(frozen=True)
@@ -78,7 +78,32 @@ def build_project_conformance_receipt(
         lockfile_status="missing",
         status="pass",
     )
+    # Check if lockfile is a broken symlink before treating it as missing
+    if lockfile_path.is_symlink() and not lockfile_path.is_file():
+        issue = _issue("lockfile_broken_symlink", "blocker", "skills.lock.json is a broken symlink.", DEFAULT_LOCKFILE_PATH)
+        receipt["issues"] = [issue]
+        receipt["manual_actions"] = [_manual_action("repair_lockfile", "Remove the broken symlink and regenerate skills.lock.json.", DEFAULT_LOCKFILE_PATH)]
+        receipt["lockfile_status"] = "invalid"
+        receipt["status"] = "blocked"
+        receipt["agent_summary"] = "Project conformance is blocked because skills.lock.json is a broken symlink."
+        raise _blocked_error(receipt, "skills.lock.json is a broken symlink.")
+
     if not lockfile_path.exists():
+        # Check for installed SDK evidence
+        receipt_dir = resolved_project_root / ".harness/receipts/skills-sdk/install"
+        skills_dir = resolved_project_root / ".agents/skills"
+        has_installed_evidence = (receipt_dir.exists() and any(receipt_dir.iterdir())) or (skills_dir.exists() and any(skills_dir.iterdir()))
+
+        if has_installed_evidence:
+            receipt["lockfile_status"] = "missing_with_installed_evidence"
+            receipt["status"] = "fail"
+            issue = _issue("missing_lockfile", "blocker", "skills.lock.json is missing but installed SDK evidence exists.", DEFAULT_LOCKFILE_PATH)
+            receipt["issues"] = [issue]
+            receipt["manual_actions"] = [_manual_action("regenerate_lockfile", "Regenerate skills.lock.json from install receipts or reinstall skills.", DEFAULT_LOCKFILE_PATH)]
+            receipt["agent_summary"] = "Project conformance failed because skills.lock.json is missing but installed evidence exists."
+            raise _blocked_error(receipt, "skills.lock.json is missing but installed evidence exists.")
+
+        receipt["lockfile_status"] = "empty_not_installed"
         receipt["agent_summary"] = "Project is marked for Skills SDK adoption and has no installed skills yet."
         return receipt
     if not lockfile_path.is_file():
@@ -124,8 +149,10 @@ def build_project_conformance_receipt(
     status: ConformanceStatus = "pass"
     if any(issue.get("severity") == "blocker" for issue in issues):
         status = "blocked"
+    elif any(issue.get("severity") == "warning" for issue in issues):
+        status = "warn"
     elif issues:
-        status = "warning"
+        status = "fail"
     receipt["status"] = status
     receipt["agent_summary"] = _agent_summary(receipt)
     if status == "blocked":
@@ -206,7 +233,7 @@ def _load_lockfile(path: Path, receipt: dict[str, object]) -> dict[str, object]:
     """
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as exc:
+    except (json.JSONDecodeError, UnicodeDecodeError, OSError) as exc:
         issue = _issue("malformed_lockfile", "blocker", f"skills.lock.json is malformed JSON: {exc}", DEFAULT_LOCKFILE_PATH)
         receipt["issues"] = [issue]
         receipt["manual_actions"] = [_manual_action("repair_lockfile", "Replace skills.lock.json with valid JSON.", DEFAULT_LOCKFILE_PATH)]
@@ -338,7 +365,7 @@ def _load_install_receipt_for_status(path: Path, project_root: Path) -> tuple[di
     """
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError:
+    except (json.JSONDecodeError, UnicodeDecodeError, OSError):
         return None, "sha256:malformed", ["malformed_receipt"]
     if not isinstance(payload, dict):
         return None, "sha256:invalid", ["invalid_receipt_root"]
@@ -356,7 +383,11 @@ def _load_install_receipt_for_status(path: Path, project_root: Path) -> tuple[di
     if receipt.get("mutation_performed") is not True:
         conflicts.append("source_receipt_without_mutation")
     target_root = _string_value(receipt.get("target_root"))
-    if not target_root or Path(target_root).resolve() != project_root:
+    if not target_root:
+        conflicts.append("receipt_project_root_mismatch")
+    elif not Path(target_root).is_absolute():
+        conflicts.append("receipt_relative_target_root")
+    elif Path(target_root).resolve() != project_root:
         conflicts.append("receipt_project_root_mismatch")
     if not isinstance(receipt.get("files_written"), list):
         conflicts.append("missing_files_written")

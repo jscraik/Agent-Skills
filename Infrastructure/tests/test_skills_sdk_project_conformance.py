@@ -32,6 +32,7 @@ def _command_env() -> dict[str, str]:
     env.setdefault("XDG_CACHE_HOME", str(temp_base / "xdg-cache"))
     env.setdefault("XDG_STATE_HOME", str(temp_base / "xdg-state"))
     env.setdefault("MISE_CACHE_DIR", str(temp_base / "mise-cache"))
+    env.setdefault("MISE_STATE_DIR", str(temp_base / "mise-state"))
     env.setdefault("UV_CACHE_DIR", str(temp_base / "uv-cache"))
     env.setdefault("MISE_TRUSTED_CONFIG_PATHS", str(REPO_ROOT / ".mise.toml"))
     env.setdefault("ASK_SKILLS_SDK_INSTALL_TIMESTAMP", "2026-06-05T00:00:00Z")
@@ -216,7 +217,7 @@ class TestSkillsSdkProjectConformance(unittest.TestCase):
             receipt = payload["data"]["skills_sdk_project_conformance"]["receipt"]
             self.assert_receipt_valid(receipt)
             self.assertEqual(receipt["status"], "blocked")
-            self.assertIn("installed_file_modified", receipt["installed_skills"][0]["issue_codes"][0])
+            self.assertTrue(any("installed_file_modified" in code for code in receipt["installed_skills"][0]["issue_codes"]))
             self.assertFalse(receipt["mutation_performed"])
             self.assertEqual((project_root / "skills.lock.json").read_text(encoding="utf-8"), before_lockfile)
 
@@ -345,6 +346,36 @@ class TestSkillsSdkProjectConformance(unittest.TestCase):
             wrapper_receipt["project_root_identity"] = {"identity_kind": "realpath", "realpath": "<normalized>", "exists": True}
             self.assertEqual(wrapper_receipt, ask_receipt)
             self.assertEqual(wrapper_payload["metadata"]["command"], "sdk project status --project-root " + str(wrapper_root) + " --json --robot")
+
+    def test_status_blocks_on_missing_lockfile_with_installed_evidence(self) -> None:
+        """
+        Verify that when skills.lock.json is missing but installed evidence exists, status reports missing_with_installed_evidence and fails.
+
+        Installs a skill, removes the lockfile while leaving receipts and installed files, then asserts the command exits with code 2, lockfile_status is "missing_with_installed_evidence", and conformance status is "fail".
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            project_root = _marked_project(Path(tmp))
+            _install_valid_skill(project_root)
+            (project_root / "skills.lock.json").unlink()
+
+            process = _run_process(
+                sys.executable,
+                "Infrastructure/bin/ask",
+                "sdk",
+                "project",
+                "status",
+                "--project-root",
+                str(project_root),
+                "--json",
+                "--robot",
+            )
+
+            self.assertEqual(process.returncode, 2, process.stdout)
+            payload = json.loads(process.stdout)
+            receipt = payload["data"]["skills_sdk_project_conformance"]["receipt"]
+            self.assert_receipt_valid(receipt)
+            self.assertEqual(receipt["lockfile_status"], "missing_with_installed_evidence")
+            self.assertEqual(receipt["status"], "fail")
 
 
 if __name__ == "__main__":

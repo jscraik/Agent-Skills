@@ -4262,21 +4262,16 @@ def skills_sdk_project_conformance(
         )
     except _ProjectConformanceError as exc:
         result.status = "error"
+        validation_cmd_args = ["sdk", "project", mode]
+        if project_root:
+            validation_cmd_args.extend(["--project-root", project_root])
         result.data["skills_sdk_project_conformance"] = {
             "schema_version": "skills-sdk-project-conformance.v1",
             "status": exc.receipt.get("status", "blocked"),
             "mode": mode,
             "project_root": project_root,
             "receipt": exc.receipt,
-            "validation_commands": [
-                _ask_validation_command(
-                    "sdk",
-                    "project",
-                    mode,
-                    "--project-root",
-                    project_root or "<project-root>",
-                )
-            ],
+            "validation_commands": [_ask_validation_command(*validation_cmd_args)],
             "agent_summary": exc.message,
         }
         result.errors.append(
@@ -4287,21 +4282,16 @@ def skills_sdk_project_conformance(
             )
         )
         return result
+    validation_cmd_args = ["sdk", "project", mode]
+    if project_root:
+        validation_cmd_args.extend(["--project-root", project_root])
     payload = {
         "schema_version": "skills-sdk-project-conformance.v1",
         "status": receipt["status"],
         "mode": mode,
         "project_root": project_root,
         "receipt": receipt,
-        "validation_commands": [
-            _ask_validation_command(
-                "sdk",
-                "project",
-                mode,
-                "--project-root",
-                project_root or "<project-root>",
-            )
-        ],
+        "validation_commands": [_ask_validation_command(*validation_cmd_args)],
         "agent_summary": receipt["agent_summary"],
     }
     result.data["skills_sdk_project_conformance"] = payload

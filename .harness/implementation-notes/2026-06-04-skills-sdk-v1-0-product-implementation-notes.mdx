@@ -465,10 +465,10 @@ implemented adoption gate.
 
 Validation:
 - `uv run --project Infrastructure --group test --python 3.12 pytest Infrastructure/tests/test_skills_sdk_project_conformance.py Infrastructure/tests/test_skills_sdk_schema_spine.py Infrastructure/tests/test_skills_sdk_typed_contracts.py Infrastructure/tests/test_skills_sdk_capability_status.py -q`
-  passed with 41 tests and 18 subtests.
+  — these tests succeeded with 41 tests and 18 subtests.
 - `uv run --project Infrastructure --group test --python 3.12 pytest Infrastructure/tests/test_skills_sdk_pipeline_status_artifact.py Infrastructure/tests/test_skills_sdk_capability_status.py -q`
-  passed with 23 tests and 73 subtests.
-- `./bin/ask repo validate --scope=skills-sdk --json --robot` passed with zero
+  — result: 23 tests and 73 subtests were successful.
+- `./bin/ask repo validate --scope=skills-sdk --json --robot` — validation completed with zero
   required failures and zero warnings.
 
 ## 2026-06-07 PU-012 closeout cleanup

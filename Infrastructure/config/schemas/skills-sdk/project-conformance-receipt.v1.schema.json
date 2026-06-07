@@ -40,7 +40,7 @@
       "enum": ["status", "doctor"]
     },
     "status": {
-      "enum": ["pass", "warning", "blocked"]
+      "enum": ["pass", "warn", "fail", "blocked"]
     },
     "project_root": {
       "type": "string",
@@ -69,7 +69,7 @@
       "type": ["string", "null"]
     },
     "lockfile_status": {
-      "enum": ["not_checked", "missing", "valid", "valid_with_diagnostics", "invalid", "unsupported"]
+      "enum": ["not_checked", "missing", "empty_not_installed", "missing_with_installed_evidence", "valid", "valid_with_diagnostics", "invalid", "unsupported"]
     },
     "installed_skill_count": {
       "type": "integer",
