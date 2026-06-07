@@ -937,6 +937,7 @@
           <div class="cli-item"><span class="pill">Risk</span><div><b>skill tier</b><span>Classifies Draft, Local, Scripted, Shared, Privileged, or Published and explains gate changes.</span></div></div>
           <div class="cli-item"><span class="pill">Eval</span><div><b>skill eval</b><span>Runs internal rubrics, context evals, A/B sandbox comparisons, and external confirmation handoff.</span></div></div>
           <div class="cli-item"><span class="pill">Ship</span><div><b>skill package</b><span>Builds package, manifest, receipts, signature, install preview, compatibility, and rollback plan.</span></div></div>
+          <div class="cli-item"><span class="pill">Gate</span><div><b>ask sdk project status</b><span>Checks explicit project roots, lockfiles, install receipts, and installed file digests without writing.</span></div></div>
           <div class="cli-item"><span class="pill">Clean</span><div><b>ask sdk rollback</b><span>Previews or applies receipt-proven cleanup for a prior project install.</span></div></div>
           <div class="cli-item"><span class="pill">Clean</span><div><b>ask sdk uninstall</b><span>Resolves an installed skill through skills.lock.json before removing digest-matched files.</span></div></div>
         </div>
@@ -979,6 +980,7 @@
           <div class="install-item"><span class="pill">Project</span><div><b>./.codex/skills</b><span>Repo-local skills committed or staged with the project, isolated from unrelated workspaces.</span></div></div>
           <div class="install-item"><span class="pill">Workspace</span><div><b>.agents/skills</b><span>Workspace projection for team or local runtime surfaces, with sync and projection receipts.</span></div></div>
           <div class="install-item"><span class="pill">Preview</span><div><b>install plan</b><span>Shows files, permissions, trust, sandbox result, conflicts, and exact paths before writing.</span></div></div>
+          <div class="install-item"><span class="pill">Adopt</span><div><b>project conformance</b><span>Reports whether the project root, lockfile, receipts, and installed files are ready for rollback and uninstall.</span></div></div>
           <div class="install-item"><span class="pill">Rollback</span><div><b>receipt-proven cleanup</b><span>Removes or preserves files from valid project install receipts and writes cleanup receipts for apply runs.</span></div></div>
           <div class="install-item"><span class="pill">Uninstall</span><div><b>lockfile-resolved cleanup</b><span>Uses skills.lock.json plus the source install receipt before changing project files.</span></div></div>
         </div>

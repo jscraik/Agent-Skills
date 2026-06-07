@@ -173,15 +173,34 @@ class TestSkillsSdkCapabilityStatus(unittest.TestCase):
         self.assertEqual(wrapper_payload["metadata"]["command"], "sdk status --json --robot")
 
     def test_command_metadata_registers_sdk_lifecycle_routes(self) -> None:
+        """
+        Verify SDK command metadata registers lifecycle routes and example commands.
+        
+        Asserts that VALID_ACTIONS["sdk"] includes the lifecycle actions "rollback", "uninstall", "status", and "project", and that COMMAND_EXAMPLES contains representative example command strings for each route:
+        - an "ask sdk rollback" example,
+        - an "ask sdk uninstall" example,
+        - both "ask sdk status --json --robot" and "skills-sdk status --json --robot" examples for the status route,
+        - and an "ask sdk project status --project-root /tmp/sample-project --json --robot" example for the project route.
+        """
         self.assertIn("rollback", VALID_ACTIONS["sdk"])
         self.assertIn("uninstall", VALID_ACTIONS["sdk"])
         self.assertIn("status", VALID_ACTIONS["sdk"])
+        self.assertIn("project", VALID_ACTIONS["sdk"])
         self.assertTrue(any(command.startswith("ask sdk rollback ") for command in COMMAND_EXAMPLES[("sdk", "rollback")]))
         self.assertTrue(any(command.startswith("ask sdk uninstall ") for command in COMMAND_EXAMPLES[("sdk", "uninstall")]))
         self.assertIn("ask sdk status --json --robot", COMMAND_EXAMPLES[("sdk", "status")])
         self.assertIn("skills-sdk status --json --robot", COMMAND_EXAMPLES[("sdk", "status")])
+        self.assertIn(
+            "ask sdk project status --project-root /tmp/sample-project --json --robot",
+            COMMAND_EXAMPLES[("sdk", "project")],
+        )
 
     def test_status_robot_guidance_stays_registered(self) -> None:
+        """
+        Verifies that invoking `ask sdk status` with an unrecognized argument returns an error and preserves the robot guidance metadata.
+        
+        Asserts that the process exits with a non-zero code, the JSON payload has `"status" == "error"`, the first error message mentions the unrecognized argument, the reported `metadata.command` reflects the original invocation, and `data["candidate_commands"]` includes the suggested `ask sdk status --json --robot` command.
+        """
         process = subprocess.run(
             [
                 sys.executable,

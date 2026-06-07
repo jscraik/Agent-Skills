@@ -1,0 +1,11 @@
+{
+  "agent_id": "019e9dc5-cc3b-7481-bc30-40ff038ea4f2",
+  "run_id": "019e9dc5-cc3b-7481-bc30-40ff038ea4f2",
+  "role": "adversarial-reviewer",
+  "target_repo": "/private/tmp/agent-skills-skills-sdk-pu-012-project-conformance",
+  "spec_path": "/private/tmp/agent-skills-skills-sdk-pu-012-project-conformance/.harness/specs/2026-06-06-skills-sdk-pu-012-project-conformance-adoption-gate-spec.md",
+  "report_artifact_path": "/private/tmp/agent-skills-skills-sdk-pu-012-project-conformance/.harness/reviews/pu-012-breaker-1.md",
+  "status": "complete",
+  "findings_count": 3,
+  "generated_at": "2026-06-06"
+}

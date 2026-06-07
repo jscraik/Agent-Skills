@@ -1,0 +1,25 @@
+{
+  "schema_version": "skills-sdk.project-conformance-receipt.v1",
+  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/project-conformance-receipt.v1.schema.json",
+  "command": "skills-sdk project status",
+  "mode": "status",
+  "status": "pass",
+  "project_root": "/tmp/sample-project",
+  "project_root_identity": {
+    "identity_kind": "realpath",
+    "realpath": "/tmp/sample-project",
+    "exists": true
+  },
+  "project_managed": true,
+  "lockfile_path": "skills.lock.json",
+  "lockfile_status": "valid",
+  "installed_skill_count": 0,
+  "installed_skills": [],
+  "rollback_ready_count": 0,
+  "uninstall_ready_count": 0,
+  "issues": [],
+  "manual_actions": [],
+  "mutation_performed": true,
+  "acceptance_trace": ["PU-012-FR-001"],
+  "agent_summary": "This invalid fixture claims a read-only conformance command performed mutation."
+}

@@ -17,6 +17,7 @@ SCHEMA_NAMES = {
     "install-receipt": "install-receipt.v1.schema.json",
     "lockfile-preview": "lockfile-preview.v1.schema.json",
     "lockfile": "lockfile.v1.schema.json",
+    "project-conformance-receipt": "project-conformance-receipt.v1.schema.json",
     "placeholder-lifecycle": "placeholder-lifecycle.v1.schema.json",
 }
 
@@ -110,6 +111,14 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertIn("sample", payload["entries"])
         self.assertEqual(payload["entries"]["sample"]["target_path"], ".agents/skills/sample")
 
+    def test_project_conformance_fixture_reports_read_only_project_health(self) -> None:
+        payload = self.assert_valid("project-conformance-receipt", "project-conformance-receipt.json")
+
+        self.assertEqual(payload["status"], "pass")
+        self.assertFalse(payload["mutation_performed"])
+        self.assertEqual(payload["installed_skill_count"], 1)
+        self.assertEqual(payload["rollback_ready_count"], 1)
+
     def test_placeholder_lifecycle_fixture_keeps_unimplemented_surfaces_honest(self) -> None:
         payload = self.assert_valid("placeholder-lifecycle", "placeholder-lifecycle.json")
 
@@ -122,7 +131,21 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
     def test_install_preview_schema_rejects_write_claims(self) -> None:
         self.assert_invalid("install-preview", "install-preview-writes.json")
 
+    def test_project_conformance_schema_rejects_mutation_claims(self) -> None:
+        """
+        Ensures the project-conformance-receipt schema rejects fixtures that claim project mutations.
+        
+        Validates that the 'project-conformance-writes.json' fixture is invalid against the
+        'project-conformance-receipt' schema.
+        """
+        self.assert_invalid("project-conformance-receipt", "project-conformance-writes.json")
+
     def test_placeholder_lifecycle_schema_rejects_pass_or_execution_claims(self) -> None:
+        """
+        Ensure the placeholder-lifecycle schema rejects fixtures that claim execution or passing.
+        
+        Asserts that the fixture "placeholder-claims-pass.json" does not conform to the placeholder-lifecycle schema and therefore validation fails.
+        """
         self.assert_invalid("placeholder-lifecycle", "placeholder-claims-pass.json")
 
 

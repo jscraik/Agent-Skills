@@ -32,6 +32,7 @@ REQUIRED_CAPABILITY_IDS = (
     "install_preview",
     "lockfile_preview",
     "real_install",
+    "project_conformance",
     "trust_store",
     "refs_ingestion",
     "evals",

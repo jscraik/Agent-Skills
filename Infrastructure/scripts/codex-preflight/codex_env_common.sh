@@ -42,7 +42,25 @@ codex_append_path_if_exists() {
   esac
 }
 
-# codex_apply_env prepends repository, user and common package-manager bin directories to PATH when they exist and then attempts to activate `mise` for bash.
+# codex_configure_mise_sandbox_state keeps mise trust/cache/state writes inside the current repository by default.
+codex_configure_mise_sandbox_state() {
+  local state_root="${CODEX_MISE_SANDBOX_ROOT:-$CODEX_REPO_ROOT/.cache/codex-mise}"
+  mkdir -p "$state_root/cache" "$state_root/state" "$state_root/xdg-state" 2>/dev/null || true
+
+  export MISE_CACHE_DIR="${MISE_CACHE_DIR:-$state_root/cache}"
+  export MISE_STATE_DIR="${MISE_STATE_DIR:-$state_root/state}"
+  export XDG_STATE_HOME="${XDG_STATE_HOME:-$state_root/xdg-state}"
+
+  local mise_config="$CODEX_REPO_ROOT/.mise.toml"
+  if [[ -f "$mise_config" ]]; then
+    case ":${MISE_TRUSTED_CONFIG_PATHS:-}:" in
+      *":${mise_config}:"*) ;;
+      *) export MISE_TRUSTED_CONFIG_PATHS="${MISE_TRUSTED_CONFIG_PATHS:+$MISE_TRUSTED_CONFIG_PATHS:}$mise_config" ;;
+    esac
+  fi
+}
+
+# codex_apply_env updates PATH with common user, package-manager, and repository bin directories, configures a repository-scoped mise sandbox state, and attempts to activate mise for bash.
 codex_apply_env() {
   # Ensure repo entrypoints like `ask` resolve without requiring ./bin prefixes.
   codex_prepend_path_if_exists "$HOME/.local/bin"
@@ -52,6 +70,8 @@ codex_apply_env() {
   codex_prepend_path_if_exists "/opt/homebrew/bin"
   codex_append_path_if_exists "$CODEX_REPO_ROOT/bin"
   export PATH
+
+  codex_configure_mise_sandbox_state
 
   if command -v mise >/dev/null 2>&1; then
     eval "$(mise activate bash)" >/dev/null 2>&1 || true

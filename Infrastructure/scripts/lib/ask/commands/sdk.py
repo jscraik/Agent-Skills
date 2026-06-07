@@ -13,6 +13,15 @@ def add_sdk_parser(
     subparsers: argparse._SubParsersAction,
     global_parser: argparse.ArgumentParser,
 ) -> None:
+    """
+    Register the 'sdk' CLI command and its subcommands on the provided subparsers.
+    
+    This adds the top-level "sdk" parser with subcommands: check, install, rollback, uninstall, lifecycle, status, and a nested read-only "project" group with "status" and "doctor". Each subcommand is configured with its expected arguments and shared parents.
+    
+    Parameters:
+        subparsers (argparse._SubParsersAction): The parent subparsers object to which the "sdk" parser will be attached.
+        global_parser (argparse.ArgumentParser): A parser containing global/common arguments to be included as a parent for all "sdk" subcommands.
+    """
     sdk_parser = subparsers.add_parser("sdk", help="Skills SDK product facade", parents=[global_parser])
     sdk_subparsers = sdk_parser.add_subparsers(dest="action")
     sdk_check_parser = sdk_subparsers.add_parser(
@@ -77,9 +86,44 @@ def add_sdk_parser(
         help="Report the Skills SDK capability truth matrix",
         parents=[global_parser],
     )
+    sdk_project_parser = sdk_subparsers.add_parser(
+        "project",
+        help="Inspect read-only Skills SDK project conformance",
+        parents=[global_parser],
+    )
+    sdk_project_subparsers = sdk_project_parser.add_subparsers(dest="project_action")
+    for project_action in ("status", "doctor"):
+        project_parser = sdk_project_subparsers.add_parser(
+            project_action,
+            help=f"Run read-only Skills SDK project {project_action}",
+            parents=[global_parser],
+        )
+        project_parser.add_argument(
+            "--project-root",
+            required=True,
+            help="Absolute marked project root to inspect without mutation",
+        )
 
 
 def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    """
+    Dispatches an SDK CLI action to the corresponding skills command and validates required argument combinations.
+    
+    Parameters:
+        repo_root (Path): Repository root path passed to SDK handlers.
+        args (argparse.Namespace): Parsed CLI arguments. Expected attributes vary by action:
+            - action: one of "check", "install", "rollback", "uninstall", "lifecycle", "status", "project".
+            - For "check": target, strict, codex_parity.
+            - For "install": target, preview, apply, project_root, scope.
+            - For "rollback": receipt, preview, apply, project_root.
+            - For "uninstall": skill_id, preview, apply, project_root.
+            - For "lifecycle": surface, risk_tier.
+            - For "project": project_action (e.g., "status" or "doctor"), project_root.
+            Provide only the attributes required for the chosen action.
+    
+    Returns:
+        CallResult: Result produced by the invoked skills command. If argument validation fails, returns a `CallResult` with `status="error"` and an `ERR_VALIDATION` error; if the action is unrecognized, returns an unknown-action `CallResult`.
+    """
     if args.action == "check":
         return skills_commands.skills_sdk_check(
             repo_root,
@@ -166,4 +210,12 @@ def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
         )
     if args.action == "status":
         return skills_commands.skills_sdk_status(repo_root)
+    if args.action == "project":
+        if args.project_action in {"status", "doctor"}:
+            return skills_commands.skills_sdk_project_conformance(
+                repo_root,
+                project_root=args.project_root,
+                mode=args.project_action,
+            )
+        return build_unknown_action_result("sdk", args.project_action)
     return build_unknown_action_result("sdk", args.action)

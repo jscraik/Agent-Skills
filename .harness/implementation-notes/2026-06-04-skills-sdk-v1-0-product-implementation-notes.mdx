@@ -443,3 +443,59 @@ Final validation required refreshing generated skillset and runtime projection
 artifacts. I ran ./bin/ask skills sync --scope workspace --projection rooted
 --json --robot and bash Infrastructure/scripts/lifecycle-and-sync/sync_projection_trees.sh all
 before rerunning the PR-template gates.
+
+## 2026-06-07 PU-012 project conformance adoption gate
+
+Implemented the read-only Skills SDK project conformance surface for explicit
+marked project roots. The new routes are
+`ask sdk project status --project-root <path> --json --robot`,
+`ask sdk project doctor --project-root <path> --json --robot`, and the matching
+`bin/skills-sdk project ...` wrapper commands.
+
+Decision: cleanup readiness is true only when the lockfile entry, install
+receipt, target-root identity, and installed file digests prove safe rollback
+or uninstall authority. Missing receipts, malformed lockfiles, root mismatches,
+and modified installed files fail closed with manual actions. The command never
+writes project files or SDK metadata.
+
+Contract updates: added `project-conformance-receipt.v1`, Pydantic validation,
+valid and invalid schema-spine fixtures, and capability-matrix truth for
+`project_conformance`. The SDK pipeline HTML and lifecycle one-page now show the
+implemented adoption gate.
+
+Validation:
+- `uv run --project Infrastructure --group test --python 3.12 pytest Infrastructure/tests/test_skills_sdk_project_conformance.py Infrastructure/tests/test_skills_sdk_schema_spine.py Infrastructure/tests/test_skills_sdk_typed_contracts.py Infrastructure/tests/test_skills_sdk_capability_status.py -q`
+  — these tests succeeded with 41 tests and 18 subtests.
+- `uv run --project Infrastructure --group test --python 3.12 pytest Infrastructure/tests/test_skills_sdk_pipeline_status_artifact.py Infrastructure/tests/test_skills_sdk_capability_status.py -q`
+  — result: 23 tests and 73 subtests were successful.
+- `./bin/ask repo validate --scope=skills-sdk --json --robot` — validation completed with zero
+  required failures and zero warnings.
+
+## 2026-06-07 PU-012 closeout cleanup
+
+Jamie asked to retire the remaining Python validation concerns before PR
+handoff. The previously reported broad Pyright blocker against older
+<code>scripts/check-goal-*.py</code> and <code>scripts/hook-governance/*</code>
+surfaces is not reproducible in this PU-012 worktree: those paths are not
+present, and the current CI typecheck command <code>./bin/ask repo validate
+--scope=typecheck --json --robot</code> passes with zero required failures and
+zero warnings.
+
+The live ruff issue was in <code>Infrastructure/scripts/lib/ask/commands/skills.py</code>.
+That facade populated implementation-exports through <code>globals().update(...)</code>,
+so ruff could not statically prove the names listed in <code>__all__</code>. I replaced
+the hidden dynamic export contract with explicit aliases to the implementation
+module while preserving the wrapper functions used for patchable command tests.
+
+Validation:
+- <code>uv run --project Infrastructure --group lint --python 3.12 ruff check Infrastructure/scripts/lib/ask/commands/skills.py</code>
+  passed.
+- <code>uv run --project Infrastructure --group lint --python 3.12 ruff check Infrastructure/scripts/lib/ask/skills_sdk/project_conformance.py Infrastructure/scripts/lib/ask/commands/sdk.py Infrastructure/scripts/lib/ask/commands/skills.py Infrastructure/scripts/lib/ask/commands/skills_impl.py Infrastructure/scripts/lib/ask/skills_sdk/typed_contracts.py Infrastructure/tests/test_skills_sdk_project_conformance.py Infrastructure/tests/test_skills_sdk_capability_status.py Infrastructure/tests/test_skills_sdk_schema_spine.py Infrastructure/tests/test_skills_sdk_typed_contracts.py</code>
+  passed.
+- <code>uv run --project Infrastructure --group test --python 3.12 pytest Infrastructure/tests/test_skills_sdk_project_conformance.py Infrastructure/tests/test_skills_sdk_schema_spine.py Infrastructure/tests/test_skills_sdk_typed_contracts.py Infrastructure/tests/test_skills_sdk_capability_status.py Infrastructure/tests/test_skills_sdk_pipeline_status_artifact.py -q</code>
+  passed with 48 tests and 89 subtests.
+- <code>bash scripts/validate-codestyle.sh --fast</code> passed.
+- <code>./bin/ask repo validate --scope=typecheck --json --robot</code> passed.
+- <code>./bin/ask repo validate --scope=skills-sdk --json --robot</code> passed.
+- <code>./bin/ask repo validate --json --robot</code> passed with zero required
+  failures and zero warnings.

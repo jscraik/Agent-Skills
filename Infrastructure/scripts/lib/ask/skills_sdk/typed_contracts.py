@@ -121,6 +121,71 @@ class CleanupReceipt(_SdkContractModel):
     receipt_path: str | None = None
 
 
+class ProjectRootIdentity(_SdkContractModel):
+    identity_kind: Literal["realpath", "unresolved"]
+    realpath: str
+    exists: bool | None = None
+
+
+class ProjectConformanceSkillRow(_SdkContractModel):
+    skill_id: str
+    target_path: str
+    receipt_ref: str
+    receipt_status: Literal["valid", "missing", "invalid"]
+    status: Literal["healthy", "blocked"]
+    rollback_ready: bool
+    uninstall_ready: bool
+    issue_codes: list[str]
+
+
+class ProjectConformanceIssue(_SdkContractModel):
+    code: str
+    severity: Literal["info", "warning", "blocker"]
+    message: str
+    path: str
+    skill_id: str | None
+
+
+class ProjectConformanceManualAction(_SdkContractModel):
+    action: str
+    reason: str
+    path: str
+    skill_id: str | None
+
+
+class ProjectConformanceReceipt(_SdkContractModel):
+    schema_version: Literal["skills-sdk.project-conformance-receipt.v1"]
+    schema_uri: Literal[
+        "https://jscraik.local/agent-skills/schemas/skills-sdk/project-conformance-receipt.v1.schema.json"
+    ]
+    command: str
+    mode: Literal["status", "doctor"]
+    status: Literal["pass", "warn", "fail", "blocked"]
+    project_root: str
+    project_root_identity: ProjectRootIdentity
+    project_managed: bool
+    lockfile_path: str | None
+    lockfile_status: Literal[
+        "not_checked",
+        "missing",
+        "empty_not_installed",
+        "missing_with_installed_evidence",
+        "valid",
+        "valid_with_diagnostics",
+        "invalid",
+        "unsupported",
+    ]
+    installed_skill_count: int
+    installed_skills: list[ProjectConformanceSkillRow]
+    rollback_ready_count: int
+    uninstall_ready_count: int
+    issues: list[ProjectConformanceIssue]
+    manual_actions: list[ProjectConformanceManualAction]
+    mutation_performed: Literal[False]
+    acceptance_trace: list[str]
+    agent_summary: str
+
+
 class RobotMetadata(_SdkContractModel):
     version: str
     command: str
@@ -367,10 +432,41 @@ def validate_lockfile(payload: object) -> Lockfile:
 
 
 def validate_cleanup_receipt(payload: object) -> CleanupReceipt:
+    """
+    Validate and parse an arbitrary payload into a CleanupReceipt.
+    
+    Parameters:
+    	payload (object): Unvalidated payload (typically a dict) representing a cleanup receipt.
+    
+    Returns:
+    	cleanup_receipt (CleanupReceipt): The parsed and validated `CleanupReceipt` model instance.
+    """
     return CleanupReceipt.model_validate(payload)
 
 
+def validate_project_conformance_receipt(payload: object) -> ProjectConformanceReceipt:
+    """
+    Validate and parse an arbitrary payload into a ProjectConformanceReceipt model.
+    
+    Parameters:
+    	payload (object): Unvalidated payload to be parsed and validated against the ProjectConformanceReceipt schema.
+    
+    Returns:
+    	project_conformance_receipt (ProjectConformanceReceipt): The validated ProjectConformanceReceipt instance.
+    """
+    return ProjectConformanceReceipt.model_validate(payload)
+
+
 def validate_robot_envelope(payload: object) -> RobotEnvelope:
+    """
+    Validate and parse a raw payload into a RobotEnvelope model.
+    
+    Parameters:
+        payload (object): Unvalidated input (typically a dict) representing a robot envelope.
+    
+    Returns:
+        RobotEnvelope: The validated and parsed RobotEnvelope model instance.
+    """
     return RobotEnvelope.model_validate(payload)
 
 

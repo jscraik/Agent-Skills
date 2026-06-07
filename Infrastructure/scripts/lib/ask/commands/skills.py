@@ -121,7 +121,25 @@ def skills_sdk_status(*args, **kwargs):
 
 
 def skills_sdk_project_install(*args, **kwargs):
+    """
+    Install skills into a project via the Skills SDK.
+    
+    Returns:
+        The result of the skills SDK project installation operation (implementation-specific).
+    """
     return _call_impl("skills_sdk_project_install", *args, **kwargs)
+
+
+def skills_sdk_project_conformance(*args, **kwargs):
+    """
+    Execute the Skills SDK project conformance check for the current project.
+    
+    Runs the SDK's project conformance validator and returns the result produced by the underlying implementation.
+    
+    Returns:
+        The conformance check result produced by the implementation (format determined by the SDK).
+    """
+    return _call_impl("skills_sdk_project_conformance", *args, **kwargs)
 
 
 _FACADE_WRAPPERS.update(
@@ -136,11 +154,47 @@ _FACADE_WRAPPERS.update(
         "sync_skills": sync_skills,
         "skills_sdk_status": skills_sdk_status,
         "skills_sdk_project_install": skills_sdk_project_install,
+        "skills_sdk_project_conformance": skills_sdk_project_conformance,
     }
 )
 
 _skill_sections = _impl._skill_sections
 _skill_workout_candidates = _impl._skill_workout_candidates
+
+audit_skill = _impl.audit_skill
+extract_family_fail_lines = _impl.extract_family_fail_lines
+external_review_skill = _impl.external_review_skill
+fold_skills = _impl.fold_skills
+format_capabilities_human = _impl.format_capabilities_human
+format_codex_preview_human = _impl.format_codex_preview_human
+init_skill = _impl.init_skill
+reviewers_resolve = _impl.reviewers_resolve
+route_skills = _impl.route_skills
+skills_budget = _impl.skills_budget
+skills_capabilities = _impl.skills_capabilities
+skills_codex_preview = _impl.skills_codex_preview
+skills_config_explain = _impl.skills_config_explain
+skills_conformance_run = _impl.skills_conformance_run
+skills_doctor = _impl.skills_doctor
+skills_events = _impl.skills_events
+skills_explain_boundary = _impl.skills_explain_boundary
+skills_handles = _impl.skills_handles
+skills_implicit_preview = _impl.skills_implicit_preview
+skills_inject_preview = _impl.skills_inject_preview
+skills_load_preview = _impl.skills_load_preview
+skills_memory = _impl.skills_memory
+skills_package = _impl.skills_package
+skills_package_verify = _impl.skills_package_verify
+skills_parse = _impl.skills_parse
+skills_profiles = _impl.skills_profiles
+skills_render_preview = _impl.skills_render_preview
+skills_resolve = _impl.skills_resolve
+skills_sdk_check = _impl.skills_sdk_check
+skills_sdk_install_preview = _impl.skills_sdk_install_preview
+skills_sdk_placeholder_lifecycle = _impl.skills_sdk_placeholder_lifecycle
+validate_openai_skill_format = _impl.validate_openai_skill_format
+validate_skill_boundaries = _impl.validate_skill_boundaries
+validate_skill_gate = _impl.validate_skill_gate
 
 __all__ = [
     "audit_skill",
@@ -181,6 +235,7 @@ __all__ = [
     "skills_sdk_check",
     "skills_sdk_install_preview",
     "skills_sdk_placeholder_lifecycle",
+    "skills_sdk_project_conformance",
     "skills_sdk_project_install",
     "skills_sdk_status",
     "sync_skills",
