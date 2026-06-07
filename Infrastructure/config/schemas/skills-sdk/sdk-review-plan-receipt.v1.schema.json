@@ -1,0 +1,139 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/sdk-review-plan-receipt.v1.schema.json",
+  "title": "Skills SDK review plan receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "schema_uri",
+    "status",
+    "target",
+    "target_kind",
+    "task_intent",
+    "prompt",
+    "selected_lenses",
+    "review_focus",
+    "recommended_checks",
+    "evidence_to_collect",
+    "risk_flags",
+    "next_commands",
+    "mutation_performed",
+    "receipt_written",
+    "receipt_path"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "skills-sdk.review-plan-receipt.v1"
+    },
+    "schema_uri": {
+      "const": "https://jscraik.local/agent-skills/schemas/skills-sdk/sdk-review-plan-receipt.v1.schema.json"
+    },
+    "status": {
+      "enum": ["pass", "fail"]
+    },
+    "target": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_kind": {
+      "enum": ["repo_path", "skill_source", "unresolved_handle"]
+    },
+    "task_intent": {
+      "enum": [
+        "skill_authoring",
+        "documentation_review",
+        "reference_design",
+        "agent_workflow_design",
+        "sdk_contract_review",
+        "validation_review",
+        "refactor_plan",
+        "repo_hygiene",
+        "architecture_review",
+        "security_review",
+        "data_integrity_review",
+        "api_contract_review",
+        "isolated_bugfix",
+        "pure_visual_polish",
+        "pure_ui_copy"
+      ]
+    },
+    "prompt": {
+      "type": "string",
+      "minLength": 1
+    },
+    "selected_lenses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "path", "score", "reasons"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "score": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "review_focus": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "recommended_checks": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "evidence_to_collect": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "risk_flags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "next_commands": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "mutation_performed": {
+      "const": false
+    },
+    "receipt_written": {
+      "type": "boolean"
+    },
+    "receipt_path": {
+      "type": ["string", "null"]
+    }
+  }
+}

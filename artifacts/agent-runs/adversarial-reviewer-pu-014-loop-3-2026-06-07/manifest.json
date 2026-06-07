@@ -1,0 +1,41 @@
+{
+  "reviewer": "adversarial",
+  "run_id": "pu-014-loop-3-2026-06-07",
+  "status": "complete",
+  "artifact_paths": [
+    "/private/tmp/agent-skills-skills-sdk-pu-014-lens-routed-review/.harness/reviews/pu-014/loop-3/adversarial-reviewer.md"
+  ],
+  "manifest_path": "/private/tmp/agent-skills-skills-sdk-pu-014-lens-routed-review/artifacts/agent-runs/adversarial-reviewer-pu-014-loop-3-2026-06-07/manifest.json",
+  "findings": [],
+  "failures_or_blockers": [],
+  "improvement_opportunities": [
+    "Keep the trace-plan closeout proof pointed at parsed robot JSON whenever a command returns an envelope.",
+    "Keep the public receipt contract and schema in lockstep when required fields change."
+  ],
+  "strengths": [
+    "The updated planning artifacts now describe the remaining delta instead of the already-implemented route surface.",
+    "The current test plan covers the previously missing typoed-path, repo-file, local-only, and catalog-failure branches."
+  ],
+  "validation_evidence": [
+    "Read the current spec and trace plan with line-numbered inspection.",
+    "Cross-checked the loop-1 and loop-2 review reports against the current planning artifacts.",
+    "Cross-checked the schema, review-plan builder, dispatcher, and focused tests to confirm the remaining issues were actually resolved."
+  ],
+  "useful_findings": [
+    "Parsed-envelope assertions are the right closeout proof shape for robot JSON commands.",
+    "Public contract fields should be named explicitly in both the spec and schema."
+  ],
+  "avoided_false_positive": [
+    "Did not re-flag the stale-route finding because the current spec/plan now describe the already-present route correctly.",
+    "Did not re-flag the typoed-path or repo-file findings because the current plan and tests now cover them directly.",
+    "Did not re-flag the receipt-out policy issue because the spec and builder now align on repo-root-only writes."
+  ],
+  "evidence_quality": "High for the line-numbered planning artifacts, schema, test cross-checks, and dispatcher/source corroboration.",
+  "followed_scope": true,
+  "reusable_learning": [
+    "When a planning slice is mostly about proof shape, the strongest signal is whether the closeout evidence parses the actual envelope.",
+    "A review loop is genuinely closed only when the current artifact set and the live source/tests agree."
+  ],
+  "coordinator_score": 9,
+  "next_action": "No source change needed from this review; keep the next loop focused on any newly introduced drift only."
+}

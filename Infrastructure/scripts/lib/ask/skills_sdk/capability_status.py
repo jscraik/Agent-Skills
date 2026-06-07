@@ -34,6 +34,7 @@ REQUIRED_CAPABILITY_IDS = (
     "real_install",
     "project_conformance",
     "sdk_lenses",
+    "review_plan",
     "determinism_audit",
     "trust_store",
     "refs_ingestion",

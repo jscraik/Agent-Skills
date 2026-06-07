@@ -16,6 +16,7 @@ from ask.skills_sdk.lenses import (
     validate_lens_catalog,
 )
 from ask.skills_sdk.placeholder_lifecycle import SURFACES
+from ask.skills_sdk.review_plan import build_review_plan
 
 
 def add_sdk_parser(
@@ -199,6 +200,43 @@ def add_sdk_parser(
         type=int,
         help="Limit returned candidates after deterministic priority sorting",
     )
+    sdk_review_parser = sdk_subparsers.add_parser(
+        "review",
+        help="Plan read-only SDK reviews using deterministic lens selection",
+        parents=[global_parser],
+    )
+    sdk_review_subparsers = sdk_review_parser.add_subparsers(dest="review_action", required=True)
+    sdk_review_plan_parser = sdk_review_subparsers.add_parser(
+        "plan",
+        help="Emit a schema-backed read-only review plan receipt",
+        parents=[global_parser],
+    )
+    sdk_review_plan_parser.add_argument("--target", required=True, help="Repo path or handle to review")
+    sdk_review_plan_parser.add_argument(
+        "--intent",
+        "--task-intent",
+        dest="task_intent",
+        choices=list(KNOWN_TASK_INTENTS),
+        required=True,
+        help="Normalized review intent used for lens selection",
+    )
+    sdk_review_plan_parser.add_argument("--prompt", help="Optional review prompt or summary")
+    sdk_review_plan_parser.add_argument(
+        "--repo-file",
+        action="append",
+        default=[],
+        help="Repo-relative file signal to include in review routing; repeat for multiple files",
+    )
+    sdk_review_plan_parser.add_argument(
+        "--max-lenses",
+        type=int,
+        default=4,
+        help="Maximum selected lenses to include in the review plan",
+    )
+    sdk_review_plan_parser.add_argument(
+        "--receipt-out",
+        help="Optional repo-local path for writing the review plan receipt",
+    )
 
 
 def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
@@ -318,6 +356,8 @@ def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
         return _dispatch_sdk_lenses(repo_root, args)
     if args.action == "determinism":
         return _dispatch_sdk_determinism(repo_root, args)
+    if args.action == "review":
+        return _dispatch_sdk_review(repo_root, args)
     return build_unknown_action_result("sdk", args.action)
 
 
@@ -402,3 +442,42 @@ def _dispatch_sdk_determinism(repo_root: Path, args: argparse.Namespace) -> Call
             )
         return result
     return build_unknown_action_result("sdk determinism", command_action)
+
+
+def _dispatch_sdk_review(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    result = CallResult(status="success")
+    command_action = args.review_action
+    result.metadata["command"] = f"sdk review {command_action}"
+    if command_action == "plan":
+        try:
+            review_plan = build_review_plan(
+                repo_root,
+                target=args.target,
+                task_intent=args.task_intent,
+                prompt=args.prompt,
+                repo_files=args.repo_file,
+                max_lenses=args.max_lenses,
+                receipt_out=args.receipt_out,
+            )
+        except (LensCatalogError, ValueError) as exc:
+            result.status = "error"
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_VALIDATION",
+                    message=str(exc),
+                    fix_suggestion="Run ask sdk review plan --target <path-or-handle> --intent validation_review --json --robot.",
+                )
+            )
+            return result
+        result.data["review_plan"] = review_plan
+        if review_plan["status"] != "pass":
+            result.status = "error"
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_VALIDATION",
+                    message="Skills SDK review plan could not be built.",
+                    fix_suggestion="Run ask sdk lenses validate --json --robot and fix catalog findings.",
+                )
+            )
+        return result
+    return build_unknown_action_result("sdk review", command_action)

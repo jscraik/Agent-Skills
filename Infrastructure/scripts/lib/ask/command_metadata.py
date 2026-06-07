@@ -43,7 +43,7 @@ VALID_ACTIONS = {
         "fold",
         "init",
     ],
-    "sdk": ["check", "install", "rollback", "uninstall", "lifecycle", "status", "project", "lenses", "determinism"],
+    "sdk": ["check", "install", "rollback", "uninstall", "lifecycle", "status", "project", "lenses", "determinism", "review"],
     "reviewers": ["resolve"],
     "runtime": ["surface", "budget"],
     "plugins": ["list", "status", "doctor", "sync-local-runtime", "init", "create", "install", "import", "harden", "uninstall"],
@@ -105,6 +105,7 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
         "ask sdk lenses validate --json --robot",
         "ask sdk lenses select --intent skill_authoring --prompt \"Review SKILL.md headings\" --repo-file SKILL.md --json --robot",
         "ask sdk determinism audit --scope skills --json --robot",
+        "ask sdk review plan --target Skills/agent-ops/simplify --intent validation_review --json --robot",
         "skills-sdk check he-heartbeat --json --robot",
         "skills-sdk install he-heartbeat --preview --json --robot",
         "skills-sdk install ./Skills/sample/SKILL.md --apply --project-root /tmp/sample-project --json --robot",
@@ -269,6 +270,10 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
         "ask sdk determinism audit --scope skills --json --robot",
         "ask sdk determinism audit --path Skills/agent-ops/testing --json --robot",
         "ask sdk determinism audit --limit 20 --json --robot",
+    ],
+    ("sdk", "review"): [
+        "ask sdk review plan --target Skills/agent-ops/simplify --intent validation_review --json --robot",
+        "ask sdk review plan --target Skills/agent-ops/simplify --intent validation_review --receipt-out .harness/artifacts/sdk-review-plan/simplify.json --json --robot",
     ],
     ("skills", "profiles"): [
         "ask skills profiles --json",

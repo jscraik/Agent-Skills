@@ -1,0 +1,91 @@
+{
+  "agent": "adversarial-reviewer",
+  "run_id": "pu-014-loop-2",
+  "status": "complete",
+  "artifact_paths": [
+    "/private/tmp/agent-skills-skills-sdk-pu-014-lens-routed-review/.harness/reviews/pu-014/loop-2/adversarial-reviewer.md",
+    "/private/tmp/agent-skills-skills-sdk-pu-014-lens-routed-review/artifacts/agent-runs/adversarial-reviewer-pu-014-loop-2/manifest.json"
+  ],
+  "manifest_path": "/private/tmp/agent-skills-skills-sdk-pu-014-lens-routed-review/artifacts/agent-runs/adversarial-reviewer-pu-014-loop-2/manifest.json",
+  "findings": [
+    {
+      "severity": "P2",
+      "title": "Smoke-only closeout proof can pass without proving the robot envelope contract",
+      "confidence": 0.97,
+      "validation_ownership": "introduced by current planning artifacts",
+      "evidence": [
+        ".harness/plan/2026-06-07-skills-sdk-pu-014-lens-routed-review-trace-plan.md:30-33",
+        ".harness/specs/2026-06-07-skills-sdk-pu-014-lens-routed-review-spec.md:48-49,107-128,160-171"
+      ],
+      "impacted_behavior": "A malformed envelope or missing data.review_plan can still satisfy the closeout proof.",
+      "remediation": "Assert the parsed robot JSON envelope, data.review_plan presence, schema validity, mutation_performed=false, and the stability checks already required by the spec."
+    },
+    {
+      "severity": "P2",
+      "title": "The spec still frames PU-014 as adding a route that the worktree already exposes",
+      "confidence": 0.93,
+      "validation_ownership": "introduced by current planning artifacts",
+      "evidence": [
+        ".harness/specs/2026-06-07-skills-sdk-pu-014-lens-routed-review-spec.md:23-35",
+        ".harness/plan/2026-06-07-skills-sdk-pu-014-lens-routed-review-trace-plan.md:20-26,43-78",
+        "Infrastructure/scripts/lib/ask/commands/sdk.py:203-239",
+        "Infrastructure/config/skills-sdk/capability-matrix.v1.json:170-183",
+        "artifacts/recommended-skills-sdk-pipeline.html:2195"
+      ],
+      "impacted_behavior": "The planning artifact stays one step behind the worktree truth and can send the next agent to validate the wrong delta.",
+      "remediation": "Rewrite the stage framing to describe the route as already present and limit PU-014 to receipt/schema/status hardening."
+    },
+    {
+      "severity": "P2",
+      "title": "Receipt-out policy is narrower in code than the spec currently promises",
+      "confidence": 0.86,
+      "validation_ownership": "introduced by current planning artifacts",
+      "evidence": [
+        ".harness/specs/2026-06-07-skills-sdk-pu-014-lens-routed-review-spec.md:88-90",
+        ".harness/plan/2026-06-07-skills-sdk-pu-014-lens-routed-review-trace-plan.md:35-36,63-65,80-85",
+        "Infrastructure/scripts/lib/ask/skills_sdk/review_plan.py:175-185"
+      ],
+      "impacted_behavior": "The spec implies a supported safe outside-repo receipt lane, but the plan and builder only support repo-root writes.",
+      "remediation": "Either narrow R4 to repo-root-only writes or define the outside-repo convention explicitly and add a test for it."
+    }
+  ],
+  "failures_or_blockers": [],
+  "improvement_opportunities": [
+    "Make closeout proofs parse the robot envelope instead of matching one field.",
+    "Reframe the spec so it matches the route truth already present in the worktree.",
+    "Decide whether receipt-out supports only repo-root writes or an explicit outside-repo convention."
+  ],
+  "strengths": [
+    "The plan now covers the typoed-path refusal path that loop 1 called out.",
+    "The schema and parser intent set are aligned.",
+    "The local-only builder guard is explicitly tested."
+  ],
+  "validation_evidence": [
+    "Read the updated spec and trace plan with line-numbered inspection.",
+    "Cross-checked the live worktree for the command, capability matrix, and pipeline row.",
+    "Re-read the loop-1 adversarial and autoresearch reports to verify which items were already closed."
+  ],
+  "useful_findings": [
+    "Closeout proofs should assert the parsed envelope, not a schema-version substring.",
+    "Route-truth claims need to be rewritten when the worktree already contains the route.",
+    "Receipt-path policy must be narrowed or explicitly broadened, but not left implied."
+  ],
+  "avoided_false_positive": [
+    "Did not re-flag the intent/schema parity split because the schema enum now matches KNOWN_TASK_INTENTS.",
+    "Did not re-flag the typoed repo-relative path classification bug because the plan and code now reject it explicitly.",
+    "Did not re-flag the local-only boundary because the builder tests now guard against outbound helpers."
+  ],
+  "evidence_quality": [
+    "High for the on-disk line references.",
+    "High for the stale-route finding because the current worktree shows the route and status row already exist.",
+    "Moderate for the receipt-out policy finding because the spec leaves room for an outside-repo convention that the plan never defines."
+  ],
+  "followed_scope": true,
+  "reusable_learning": [
+    "If a closeout proof is meant to prove a JSON contract, parse the JSON and assert the fields that matter.",
+    "If the live worktree already contains the route, rewrite the planning artifact to describe the remaining hardening slice only.",
+    "If a write path has to be safe, make the allowed path class explicit in one surface and test it there."
+  ],
+  "coordinator_score": 8,
+  "next_action": "update the spec or trace plan to remove the stale route framing and tighten the receipt-out closeout proof before implementation begins."
+}

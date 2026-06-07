@@ -11,6 +11,8 @@
     ".harness/specs/2026-06-04-skills-sdk-pu-008-capability-truth-spec.md",
     ".harness/plan/2026-06-04-skills-sdk-pu-008-capability-truth-execution-plan.md",
     ".harness/plan/2026-06-07-skills-sdk-main-reconciliation-route-tracker.md",
+    ".harness/specs/2026-06-07-skills-sdk-pu-014-lens-routed-review-spec.md",
+    ".harness/plan/2026-06-07-skills-sdk-pu-014-lens-routed-review-trace-plan.md",
     "artifacts/recommended-skills-sdk-pipeline.html",
     "Docs/goals/skills-sdk-v1-0-product-implementation/state.yaml"
   ],
@@ -19,7 +21,9 @@
     "./bin/skills-sdk status --json --robot",
     "./bin/ask sdk lenses validate --json --robot",
     "./bin/ask sdk lenses select --prompt 'review a skill for validation confidence' --intent validation_review --json --robot",
+    "./bin/ask sdk review plan --target Skills/agent-ops/simplify --intent validation_review --json --robot",
     "./bin/ask sdk determinism audit --scope skills --limit 10 --json --robot",
+    "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_review_plan.py -q",
     "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_project_cleanup.py -q",
     "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_project_install.py -q",
     "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_project_conformance.py -q",
@@ -161,6 +165,23 @@
       ],
       "next_slice": "Use selected lenses to route bounded reviews; keep lens selection read-only and evidence-backed.",
       "notes": "PR 242 added deterministic lens catalog validation, explain, list, and selection receipts without mutating repo state."
+    },
+    {
+      "id": "review_plan",
+      "title": "Lens-routed review plan receipts",
+      "status": "implemented",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/review_plan.py",
+      "pipeline_sections": ["agent_execution_control_plane", "knowledge_engineering", "ci_and_adoption"],
+      "feature_executed": true,
+      "mutation_performed": false,
+      "evidence_refs": [
+        "./bin/ask sdk review plan --target Skills/agent-ops/simplify --intent validation_review --json --robot",
+        "Infrastructure/scripts/lib/ask/skills_sdk/review_plan.py",
+        "Infrastructure/config/schemas/skills-sdk/sdk-review-plan-receipt.v1.schema.json",
+        "Infrastructure/tests/test_skills_sdk_review_plan.py"
+      ],
+      "next_slice": "Use review plan receipts to hand off bounded human or agent reviews without treating the receipt as review completion.",
+      "notes": "PU-014 turns deterministic lens selection into read-only review route receipts; it does not run reviewers, CI, or external services."
     },
     {
       "id": "determinism_audit",
