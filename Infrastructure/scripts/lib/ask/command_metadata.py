@@ -43,7 +43,7 @@ VALID_ACTIONS = {
         "fold",
         "init",
     ],
-    "sdk": ["check", "install", "rollback", "uninstall", "lifecycle", "status"],
+    "sdk": ["check", "install", "rollback", "uninstall", "lifecycle", "status", "project"],
     "reviewers": ["resolve"],
     "runtime": ["surface", "budget"],
     "plugins": ["list", "status", "doctor", "sync-local-runtime", "init", "create", "install", "import", "harden", "uninstall"],
@@ -100,6 +100,7 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
         "ask sdk uninstall he-heartbeat --project-root /tmp/sample-project --preview --json --robot",
         "ask sdk lifecycle --risk-tier high --json --robot",
         "ask sdk status --json --robot",
+        "ask sdk project status --project-root /tmp/sample-project --json --robot",
         "skills-sdk check he-heartbeat --json --robot",
         "skills-sdk install he-heartbeat --preview --json --robot",
         "skills-sdk install ./Skills/sample/SKILL.md --apply --project-root /tmp/sample-project --json --robot",
@@ -107,6 +108,7 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
         "skills-sdk uninstall he-heartbeat --project-root /tmp/sample-project --preview --json --robot",
         "skills-sdk lifecycle --surface sandbox --risk-tier high --json --robot",
         "skills-sdk status --json --robot",
+        "skills-sdk project doctor --project-root /tmp/sample-project --json --robot",
     ],
     "reviewers": [
         "ask reviewers resolve skillinspector --json",
@@ -246,6 +248,12 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
     ("sdk", "status"): [
         "ask sdk status --json --robot",
         "skills-sdk status --json --robot",
+    ],
+    ("sdk", "project"): [
+        "ask sdk project status --project-root /tmp/sample-project --json --robot",
+        "ask sdk project doctor --project-root /tmp/sample-project --json --robot",
+        "skills-sdk project status --project-root /tmp/sample-project --json --robot",
+        "skills-sdk project doctor --project-root /tmp/sample-project --json --robot",
     ],
     ("skills", "profiles"): [
         "ask skills profiles --json",

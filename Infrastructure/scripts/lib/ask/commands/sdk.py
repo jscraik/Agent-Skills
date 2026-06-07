@@ -77,6 +77,23 @@ def add_sdk_parser(
         help="Report the Skills SDK capability truth matrix",
         parents=[global_parser],
     )
+    sdk_project_parser = sdk_subparsers.add_parser(
+        "project",
+        help="Inspect read-only Skills SDK project conformance",
+        parents=[global_parser],
+    )
+    sdk_project_subparsers = sdk_project_parser.add_subparsers(dest="project_action")
+    for project_action in ("status", "doctor"):
+        project_parser = sdk_project_subparsers.add_parser(
+            project_action,
+            help=f"Run read-only Skills SDK project {project_action}",
+            parents=[global_parser],
+        )
+        project_parser.add_argument(
+            "--project-root",
+            required=True,
+            help="Absolute marked project root to inspect without mutation",
+        )
 
 
 def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
@@ -166,4 +183,12 @@ def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
         )
     if args.action == "status":
         return skills_commands.skills_sdk_status(repo_root)
+    if args.action == "project":
+        if args.project_action in {"status", "doctor"}:
+            return skills_commands.skills_sdk_project_conformance(
+                repo_root,
+                project_root=args.project_root,
+                mode=args.project_action,
+            )
+        return build_unknown_action_result("sdk", args.project_action)
     return build_unknown_action_result("sdk", args.action)

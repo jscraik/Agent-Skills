@@ -1,0 +1,10 @@
+{
+  "agent_id": "019e9ddf-3987-7f00-a32c-6ecf5b0b79a2",
+  "agent_type": "adversarial-reviewer",
+  "run_id": "019e9ddf-3987-7f00-a32c-6ecf5b0b79a2",
+  "status": "findings",
+  "artifact_path": "/private/tmp/agent-skills-skills-sdk-pu-012-project-conformance/.harness/reviews/pu-012-breaker-loop-1-pass-1.md",
+  "created_at": "2026-06-06T00:00:00Z",
+  "findings_count": 3,
+  "manifest_path": "/private/tmp/agent-skills-skills-sdk-pu-012-project-conformance/.harness/agent-runs/adversarial-reviewer-019e9ddf-3987-7f00-a32c-6ecf5b0b79a2/manifest.json"
+}

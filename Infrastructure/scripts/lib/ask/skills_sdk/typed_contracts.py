@@ -121,6 +121,69 @@ class CleanupReceipt(_SdkContractModel):
     receipt_path: str | None = None
 
 
+class ProjectRootIdentity(_SdkContractModel):
+    identity_kind: Literal["realpath", "unresolved"]
+    realpath: str
+    exists: bool | None = None
+
+
+class ProjectConformanceSkillRow(_SdkContractModel):
+    skill_id: str
+    target_path: str
+    receipt_ref: str
+    receipt_status: Literal["valid", "missing", "invalid"]
+    status: Literal["healthy", "blocked"]
+    rollback_ready: bool
+    uninstall_ready: bool
+    issue_codes: list[str]
+
+
+class ProjectConformanceIssue(_SdkContractModel):
+    code: str
+    severity: Literal["info", "warning", "blocker"]
+    message: str
+    path: str
+    skill_id: str | None
+
+
+class ProjectConformanceManualAction(_SdkContractModel):
+    action: str
+    reason: str
+    path: str
+    skill_id: str | None
+
+
+class ProjectConformanceReceipt(_SdkContractModel):
+    schema_version: Literal["skills-sdk.project-conformance-receipt.v1"]
+    schema_uri: Literal[
+        "https://jscraik.local/agent-skills/schemas/skills-sdk/project-conformance-receipt.v1.schema.json"
+    ]
+    command: str
+    mode: Literal["status", "doctor"]
+    status: Literal["pass", "warning", "blocked"]
+    project_root: str
+    project_root_identity: ProjectRootIdentity
+    project_managed: bool
+    lockfile_path: str | None
+    lockfile_status: Literal[
+        "not_checked",
+        "missing",
+        "valid",
+        "valid_with_diagnostics",
+        "invalid",
+        "unsupported",
+    ]
+    installed_skill_count: int
+    installed_skills: list[ProjectConformanceSkillRow]
+    rollback_ready_count: int
+    uninstall_ready_count: int
+    issues: list[ProjectConformanceIssue]
+    manual_actions: list[ProjectConformanceManualAction]
+    mutation_performed: Literal[False]
+    acceptance_trace: list[str]
+    agent_summary: str
+
+
 class RobotMetadata(_SdkContractModel):
     version: str
     command: str
@@ -368,6 +431,10 @@ def validate_lockfile(payload: object) -> Lockfile:
 
 def validate_cleanup_receipt(payload: object) -> CleanupReceipt:
     return CleanupReceipt.model_validate(payload)
+
+
+def validate_project_conformance_receipt(payload: object) -> ProjectConformanceReceipt:
+    return ProjectConformanceReceipt.model_validate(payload)
 
 
 def validate_robot_envelope(payload: object) -> RobotEnvelope:

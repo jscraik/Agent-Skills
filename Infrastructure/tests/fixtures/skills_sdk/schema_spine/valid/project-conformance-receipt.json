@@ -1,0 +1,36 @@
+{
+  "schema_version": "skills-sdk.project-conformance-receipt.v1",
+  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/project-conformance-receipt.v1.schema.json",
+  "command": "skills-sdk project status",
+  "mode": "status",
+  "status": "pass",
+  "project_root": "/tmp/sample-project",
+  "project_root_identity": {
+    "identity_kind": "realpath",
+    "realpath": "/tmp/sample-project",
+    "exists": true
+  },
+  "project_managed": true,
+  "lockfile_path": "skills.lock.json",
+  "lockfile_status": "valid",
+  "installed_skill_count": 1,
+  "installed_skills": [
+    {
+      "skill_id": "sample",
+      "target_path": ".agents/skills/sample",
+      "receipt_ref": ".harness/receipts/skills-sdk/install/sample.json",
+      "receipt_status": "valid",
+      "status": "healthy",
+      "rollback_ready": true,
+      "uninstall_ready": true,
+      "issue_codes": []
+    }
+  ],
+  "rollback_ready_count": 1,
+  "uninstall_ready_count": 1,
+  "issues": [],
+  "manual_actions": [],
+  "mutation_performed": false,
+  "acceptance_trace": ["PU-012-FR-001", "PU-012-VP-001"],
+  "agent_summary": "Project conformance passed for 1 installed skill(s); no writes were performed."
+}

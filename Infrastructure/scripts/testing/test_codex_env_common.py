@@ -240,6 +240,49 @@ class TestCodexApplyEnvBinPrepend(unittest.TestCase):
         # If PATH is exported, the subprocess sees it; just check it's non-empty
         self.assertTrue(result.stdout.strip())
 
+    def test_apply_env_sets_sandboxed_mise_state_defaults(self) -> None:
+        """codex_apply_env must keep mise cache and tracked-config state inside the repo by default."""
+        result = _source_and_run(
+            'unset MISE_CACHE_DIR MISE_STATE_DIR XDG_STATE_HOME MISE_TRUSTED_CONFIG_PATHS; '
+            'mise() { return 1; }; codex_apply_env; '
+            'printf "%s\\n%s\\n%s\\n%s" '
+            '"$MISE_CACHE_DIR" "$MISE_STATE_DIR" "$XDG_STATE_HOME" "$MISE_TRUSTED_CONFIG_PATHS"',
+            cwd=str(REPO_ROOT),
+            env={"PATH": "/usr/bin:/bin"},
+        )
+        self.assertEqual(result.returncode, 0)
+        lines = result.stdout.splitlines()
+        self.assertEqual(lines[0], str(REPO_ROOT / ".cache" / "codex-mise" / "cache"))
+        self.assertEqual(lines[1], str(REPO_ROOT / ".cache" / "codex-mise" / "state"))
+        self.assertEqual(lines[2], str(REPO_ROOT / ".cache" / "codex-mise" / "xdg-state"))
+        self.assertIn(str(REPO_ROOT / ".mise.toml"), lines[3])
+
+    def test_apply_env_preserves_existing_mise_state_overrides(self) -> None:
+        """Caller-provided mise cache/state locations remain authoritative."""
+        with tempfile.TemporaryDirectory() as tmp:
+            custom = Path(tmp)
+            env = {
+                "PATH": "/usr/bin:/bin",
+                "MISE_CACHE_DIR": str(custom / "cache"),
+                "MISE_STATE_DIR": str(custom / "state"),
+                "XDG_STATE_HOME": str(custom / "xdg-state"),
+                "MISE_TRUSTED_CONFIG_PATHS": str(custom / ".mise.toml"),
+            }
+            result = _source_and_run(
+                'mise() { return 1; }; codex_apply_env; '
+                'printf "%s\\n%s\\n%s\\n%s" '
+                '"$MISE_CACHE_DIR" "$MISE_STATE_DIR" "$XDG_STATE_HOME" "$MISE_TRUSTED_CONFIG_PATHS"',
+                cwd=str(REPO_ROOT),
+                env=env,
+            )
+            self.assertEqual(result.returncode, 0)
+            lines = result.stdout.splitlines()
+            self.assertEqual(lines[0], env["MISE_CACHE_DIR"])
+            self.assertEqual(lines[1], env["MISE_STATE_DIR"])
+            self.assertEqual(lines[2], env["XDG_STATE_HOME"])
+            self.assertIn(env["MISE_TRUSTED_CONFIG_PATHS"], lines[3].split(":"))
+            self.assertIn(str(REPO_ROOT / ".mise.toml"), lines[3].split(":"))
+
 
 # ---------------------------------------------------------------------------
 # codex_prepend_path_if_exists: existing behavior (edge cases for the new prepend)

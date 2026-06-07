@@ -176,10 +176,15 @@ class TestSkillsSdkCapabilityStatus(unittest.TestCase):
         self.assertIn("rollback", VALID_ACTIONS["sdk"])
         self.assertIn("uninstall", VALID_ACTIONS["sdk"])
         self.assertIn("status", VALID_ACTIONS["sdk"])
+        self.assertIn("project", VALID_ACTIONS["sdk"])
         self.assertTrue(any(command.startswith("ask sdk rollback ") for command in COMMAND_EXAMPLES[("sdk", "rollback")]))
         self.assertTrue(any(command.startswith("ask sdk uninstall ") for command in COMMAND_EXAMPLES[("sdk", "uninstall")]))
         self.assertIn("ask sdk status --json --robot", COMMAND_EXAMPLES[("sdk", "status")])
         self.assertIn("skills-sdk status --json --robot", COMMAND_EXAMPLES[("sdk", "status")])
+        self.assertIn(
+            "ask sdk project status --project-root /tmp/sample-project --json --robot",
+            COMMAND_EXAMPLES[("sdk", "project")],
+        )
 
     def test_status_robot_guidance_stays_registered(self) -> None:
         process = subprocess.run(

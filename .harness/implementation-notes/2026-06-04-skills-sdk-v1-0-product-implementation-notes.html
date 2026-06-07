@@ -590,6 +590,34 @@
       </dl>
     </article>
 
+    <article class="entry">
+      <h3>2026-06-07: PU-012 project conformance adoption gate</h3>
+      <dl>
+        <dt>Scope</dt>
+        <dd>Implemented the read-only Skills SDK project conformance surface for explicit marked project roots. The command inspects <code>skills.lock.json</code>, install receipts, target-root identity, and installed file digests without mutating project state.</dd>
+        <dt>Command surface</dt>
+        <dd>Added <code>ask sdk project status --project-root &lt;path&gt; --json --robot</code>, <code>ask sdk project doctor --project-root &lt;path&gt; --json --robot</code>, and matching <code>bin/skills-sdk project ...</code> wrapper behavior.</dd>
+        <dt>Decision</dt>
+        <dd>Cleanup readiness is only true when the lockfile entry, install receipt, project-root identity, and installed file digests all prove safe rollback/uninstall authority. Missing receipts, malformed lockfiles, root mismatches, and modified installed files fail closed with manual actions.</dd>
+        <dt>Contract</dt>
+        <dd>Added <code>project-conformance-receipt.v1</code>, Pydantic validation, schema-spine fixtures, and capability-matrix truth for <code>project_conformance</code>. The local pipeline HTML and lifecycle one-page now show the implemented adoption gate.</dd>
+        <dt>Validation</dt>
+        <dd><code>uv run --project Infrastructure --group test --python 3.12 pytest Infrastructure/tests/test_skills_sdk_project_conformance.py Infrastructure/tests/test_skills_sdk_schema_spine.py Infrastructure/tests/test_skills_sdk_typed_contracts.py Infrastructure/tests/test_skills_sdk_capability_status.py -q</code> passed with 41 tests and 18 subtests. <code>./bin/ask repo validate --scope=skills-sdk --json --robot</code> passed with zero required failures.</dd>
+      </dl>
+    </article>
+
+    <article class="entry">
+      <h3>2026-06-07: PU-012 closeout cleanup</h3>
+      <dl>
+        <dt>Typecheck status</dt>
+        <dd>The previously reported broad Pyright blocker against older <code>scripts/check-goal-*.py</code> and <code>scripts/hook-governance/*</code> surfaces is not reproducible in this PU-012 worktree. Those paths are not present, and <code>./bin/ask repo validate --scope=typecheck --json --robot</code> passes with zero required failures and zero warnings.</dd>
+        <dt>Ruff fix</dt>
+        <dd><code>Infrastructure/scripts/lib/ask/commands/skills.py</code> now exposes implementation exports through explicit aliases instead of relying only on <code>globals().update(...)</code>. The facade keeps the wrapper functions used by patchable command tests, while ruff can now statically verify every name in <code>__all__</code>.</dd>
+        <dt>Validation</dt>
+        <dd><code>uv run --project Infrastructure --group lint --python 3.12 ruff check Infrastructure/scripts/lib/ask/commands/skills.py</code>, the changed Python ruff set, the focused SDK pytest suite, <code>bash scripts/validate-codestyle.sh --fast</code>, <code>./bin/ask repo validate --scope=typecheck --json --robot</code>, <code>./bin/ask repo validate --scope=skills-sdk --json --robot</code>, and <code>./bin/ask repo validate --json --robot</code> all passed.</dd>
+      </dl>
+    </article>
+
   </main>
 </body>
 </html>

@@ -36,8 +36,11 @@ discovering, and syncing Codex skills, operator docs, and agent workflows.
   outages until the same command has been retried with explicit network
   permission. When a command invokes `gh`, `mise`, or `uv`, keep tool caches
   and state inside approved temp paths before treating cache warnings as the
-  blocker. Set `XDG_CACHE_HOME`, `XDG_STATE_HOME`, `MISE_CACHE_DIR`, and
-  `UV_CACHE_DIR` as applicable for the command family.
+  blocker. Set `XDG_CACHE_HOME`, `XDG_STATE_HOME`, `MISE_CACHE_DIR`,
+  `MISE_STATE_DIR`, `MISE_TRUSTED_CONFIG_PATHS`, and `UV_CACHE_DIR` as
+  applicable for the command family. In temp worktrees with a repo `.mise.toml`,
+  set `MISE_STATE_DIR` before launching the shell so mise tracked-config writes
+  do not fall back to `~/.local/state/mise`.
 - Systems-thinking posture: a fix is not complete when the named symptom is
   gone. Identify the mechanism that allowed the symptom, encode the smallest
   durable guardrail in docs, skills, scripts, or validation, and prove the

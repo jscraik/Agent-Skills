@@ -2,9 +2,10 @@
   "schema_version": "skills-sdk.capability-status.v1",
   "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/capability-status.v1.schema.json",
   "status": "truth_surface",
-  "generated_from": ".harness/specs/2026-06-05-skills-sdk-pu-010-receipt-proven-rollback-uninstall-spec.md",
+  "generated_from": ".harness/specs/2026-06-06-skills-sdk-pu-012-project-conformance-adoption-gate-spec.md",
   "source_artifacts": [
     ".harness/specs/2026-06-05-skills-sdk-pu-010-receipt-proven-rollback-uninstall-spec.md",
+    ".harness/specs/2026-06-06-skills-sdk-pu-012-project-conformance-adoption-gate-spec.md",
     ".harness/plan/2026-06-05-skills-sdk-pu-010-receipt-proven-rollback-uninstall-execution-plan.md",
     ".harness/specs/2026-06-05-skills-sdk-pu-009-real-project-install-lifecycle-spec.md",
     ".harness/specs/2026-06-04-skills-sdk-pu-008-capability-truth-spec.md",
@@ -17,6 +18,7 @@
     "./bin/skills-sdk status --json --robot",
     "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_project_cleanup.py -q",
     "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_project_install.py -q",
+    "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_project_conformance.py -q",
     "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_capability_status.py Infrastructure/tests/test_skills_sdk_pipeline_status_artifact.py -q"
   ],
   "capabilities": [
@@ -121,6 +123,23 @@
       ],
       "next_slice": "Extend cleanup to richer restore semantics only when install receipts carry before-state proof.",
       "notes": "PU-009 performs bounded project installs only when --apply and an explicit marked --project-root are supplied; PU-010 consumes those receipts for cleanup."
+    },
+    {
+      "id": "project_conformance",
+      "title": "Project conformance adoption gate",
+      "status": "implemented",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/project_conformance.py",
+      "pipeline_sections": ["ci_and_adoption", "public_sdk_surface", "full_skill_lifecycle"],
+      "feature_executed": true,
+      "mutation_performed": false,
+      "evidence_refs": [
+        ".harness/specs/2026-06-06-skills-sdk-pu-012-project-conformance-adoption-gate-spec.md",
+        "Infrastructure/scripts/lib/ask/skills_sdk/project_conformance.py",
+        "Infrastructure/tests/test_skills_sdk_project_conformance.py",
+        "Infrastructure/config/schemas/skills-sdk/project-conformance-receipt.v1.schema.json"
+      ],
+      "next_slice": "Wire project conformance into broader repo adoption policy only after the read-only SDK project gate is stable.",
+      "notes": "PU-012 inspects explicit marked project roots, lockfiles, receipts, and installed file digests without mutating project state."
     },
     {
       "id": "trust_store",

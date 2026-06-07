@@ -35,6 +35,7 @@ class TestSkillsSdkTypedContracts(unittest.TestCase):
             ("install-preview.json", contracts.validate_install_preview),
             ("install-receipt.json", contracts.validate_install_receipt),
             ("lockfile.json", contracts.validate_lockfile),
+            ("project-conformance-receipt.json", contracts.validate_project_conformance_receipt),
         )
 
         for filename, validator in cases:
@@ -61,6 +62,10 @@ class TestSkillsSdkTypedContracts(unittest.TestCase):
     def test_invalid_fixture_is_rejected_by_pydantic_contract(self) -> None:
         with self.assertRaises(ValidationError):
             contracts.validate_install_preview(_json(FIXTURE_DIR / "invalid" / "install-preview-writes.json"))
+        with self.assertRaises(ValidationError):
+            contracts.validate_project_conformance_receipt(
+                _json(FIXTURE_DIR / "invalid" / "project-conformance-writes.json")
+            )
 
     def test_contracts_reject_type_coercion(self) -> None:
         payload = _json(FIXTURE_DIR / "valid" / "check-receipt.json")

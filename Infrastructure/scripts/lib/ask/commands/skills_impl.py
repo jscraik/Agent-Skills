@@ -115,6 +115,10 @@ from ask.skills_sdk.project_cleanup import (  # noqa: E402
     rollback_project_install as _rollback_project_install,
     uninstall_project_skill as _uninstall_project_skill,
 )
+from ask.skills_sdk.project_conformance import (  # noqa: E402
+    ProjectConformanceError as _ProjectConformanceError,
+    build_project_conformance_receipt as _build_project_conformance_receipt,
+)
 from ask.skills_sdk.placeholder_lifecycle import (  # noqa: E402
     build_placeholder_lifecycle_receipts as _build_placeholder_lifecycle_receipts,
 )
@@ -4198,6 +4202,78 @@ def skills_sdk_project_uninstall(
         ),
     }
     result.data["skills_sdk_project_uninstall"] = payload
+    return result
+
+
+def skills_sdk_project_conformance(
+    repo_root: Path,
+    project_root: str | None = None,
+    mode: str = "status",
+) -> CallResult:
+    """Report read-only Skills SDK project adoption and cleanup readiness."""
+    result = CallResult()
+    result.metadata["command"] = f"sdk project {mode}"
+    if mode not in {"status", "doctor"}:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message="Skills SDK project conformance mode must be status or doctor.",
+                fix_suggestion="ask sdk project status --project-root /path/to/project --json --robot",
+            )
+        )
+        return result
+    try:
+        receipt = _build_project_conformance_receipt(
+            repo_root,
+            project_root=project_root,
+            mode=mode,
+        )
+    except _ProjectConformanceError as exc:
+        result.status = "error"
+        result.data["skills_sdk_project_conformance"] = {
+            "schema_version": "skills-sdk-project-conformance.v1",
+            "status": exc.receipt.get("status", "blocked"),
+            "mode": mode,
+            "project_root": project_root,
+            "receipt": exc.receipt,
+            "validation_commands": [
+                _ask_validation_command(
+                    "sdk",
+                    "project",
+                    mode,
+                    "--project-root",
+                    project_root or "<project-root>",
+                )
+            ],
+            "agent_summary": exc.message,
+        }
+        result.errors.append(
+            ErrorObject(
+                code=exc.code,
+                message=exc.message,
+                fix_suggestion=exc.fix_suggestion,
+            )
+        )
+        return result
+    payload = {
+        "schema_version": "skills-sdk-project-conformance.v1",
+        "status": receipt["status"],
+        "mode": mode,
+        "project_root": project_root,
+        "receipt": receipt,
+        "validation_commands": [
+            _ask_validation_command(
+                "sdk",
+                "project",
+                mode,
+                "--project-root",
+                project_root or "<project-root>",
+            )
+        ],
+        "agent_summary": receipt["agent_summary"],
+    }
+    result.data["skills_sdk_project_conformance"] = payload
     return result
 
 
