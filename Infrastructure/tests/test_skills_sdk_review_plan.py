@@ -32,6 +32,7 @@ def _command_env() -> dict[str, str]:
     env.setdefault("XDG_CACHE_HOME", str(temp_base / "xdg-cache"))
     env.setdefault("XDG_STATE_HOME", str(temp_base / "xdg-state"))
     env.setdefault("MISE_CACHE_DIR", str(temp_base / "mise-cache"))
+    env.setdefault("MISE_STATE_DIR", str(temp_base / "mise-state"))
     env.setdefault("UV_CACHE_DIR", str(temp_base / "uv-cache"))
     env.setdefault("MISE_TRUSTED_CONFIG_PATHS", str(REPO_ROOT / ".mise.toml"))
     return env

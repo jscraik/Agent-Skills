@@ -141,7 +141,7 @@ def _recommended_checks(*, target: str, target_kind: str, task_intent: str) -> l
     if target_kind == "skill_source":
         checks.append(f"./bin/ask skills doctor {target} --json --robot")
     if task_intent == "validation_review":
-        checks.append("uv run --python 3.12 pytest <focused-test-path> -q")
+        checks.append("uv run --python 3.12 pytest -q")
     return checks
 
 
