@@ -1,0 +1,10 @@
+{
+  "agent_id": "019ea2f1-5637-7183-a001-84916d15812e",
+  "agent_type": "agent-native-reviewer",
+  "run_id": "pu-014-loop-3",
+  "status": "complete",
+  "worktree": "/private/tmp/agent-skills-skills-sdk-pu-014-lens-routed-review",
+  "artifact_path": "/private/tmp/agent-skills-skills-sdk-pu-014-lens-routed-review/.harness/reviews/pu-014/loop-3/agent-native-reviewer.md",
+  "findings_count": 0,
+  "generated_at": "2026-06-07"
+}

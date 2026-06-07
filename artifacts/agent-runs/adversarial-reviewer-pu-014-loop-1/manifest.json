@@ -1,0 +1,26 @@
+{
+  "agent_id": "019ea2dd-e06b-7d22-90e5-916ab239d506",
+  "agent_type": "adversarial-reviewer",
+  "run_id": "pu-014-loop-1",
+  "worktree": "/private/tmp/agent-skills-skills-sdk-pu-014-lens-routed-review",
+  "artifact_path": "/private/tmp/agent-skills-skills-sdk-pu-014-lens-routed-review/.harness/reviews/pu-014/loop-1/adversarial-reviewer.md",
+  "status": "complete",
+  "findings_count": 3,
+  "validation": {
+    "read_only_review": true,
+    "files_read": [
+      ".harness/specs/2026-06-07-skills-sdk-pu-014-lens-routed-review-spec.md",
+      ".harness/plan/2026-06-07-skills-sdk-pu-014-lens-routed-review-trace-plan.md",
+      "Infrastructure/scripts/lib/ask/commands/sdk.py",
+      "Infrastructure/scripts/lib/ask/skills_sdk/lenses.py",
+      "Infrastructure/scripts/lib/ask/skills_sdk/review_plan.py",
+      "Infrastructure/tests/test_skills_sdk_review_plan.py",
+      "Infrastructure/tests/test_skills_sdk_capability_status.py",
+      "Infrastructure/tests/test_skills_sdk_pipeline_status_artifact.py",
+      "Infrastructure/config/skills-sdk/capability-matrix.v1.json",
+      "Infrastructure/config/schemas/skills-sdk/capability-status.v1.schema.json",
+      "Infrastructure/config/schemas/skills-sdk/sdk-review-plan-receipt.v1.schema.json",
+      "artifacts/recommended-skills-sdk-pipeline.html"
+    ]
+  }
+}

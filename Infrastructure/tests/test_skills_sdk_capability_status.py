@@ -94,11 +94,11 @@ class TestSkillsSdkCapabilityStatus(unittest.TestCase):
 
         self.assertEqual(mutating_ids, MUTATING_CAPABILITY_IDS)
 
-    def test_lenses_and_determinism_are_read_only_advisory_capabilities(self) -> None:
+    def test_lenses_review_plan_and_determinism_are_read_only_advisory_capabilities(self) -> None:
         matrix = load_capability_matrix(REPO_ROOT)
         by_id = {row["id"]: row for row in matrix["capabilities"]}
 
-        for capability_id in ("sdk_lenses", "determinism_audit"):
+        for capability_id in ("sdk_lenses", "review_plan", "determinism_audit"):
             with self.subTest(capability=capability_id):
                 capability = by_id[capability_id]
                 self.assertEqual(capability["status"], "implemented")
