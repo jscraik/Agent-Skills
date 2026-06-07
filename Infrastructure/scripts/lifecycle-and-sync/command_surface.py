@@ -224,10 +224,7 @@ def requires_generated_command_handle(handle: CommandHandle) -> bool:
 def render_skill_command_handle(handle: CommandHandle) -> str:
     """Render a minimal Codex-visible SKILL.md command handle."""
     display_name = _display_name(handle)
-    description = (
-        f"Internal entrypoint for {display_name}. "
-        f"Use only when named as ${handle.handle}."
-    )
+    description = f"Internal entrypoint. Use only when named as ${handle.handle}."
     source_path = handle.source_path or "UNRESOLVED_SOURCE_PATH"
     absolute_source_path = (
         (repo_root() / source_path).as_posix()
@@ -289,10 +286,7 @@ def render_openai_yaml(handle: CommandHandle) -> str:
 
 def _validate_command_handle_payload(handle: CommandHandle, skill_body: str) -> list[dict[str, Any]]:
     violations: list[dict[str, Any]] = []
-    frontmatter_description = (
-        f"Internal entrypoint for {_display_name(handle)}. "
-        f"Use only when named as ${handle.handle}."
-    )
+    frontmatter_description = f"Internal entrypoint. Use only when named as ${handle.handle}."
     if _word_count(frontmatter_description) > MAX_COMMAND_HANDLE_DESCRIPTION_WORDS:
         violations.append({
             "code": "COMMAND_HANDLE_DESCRIPTION_BUDGET_EXCEEDED",

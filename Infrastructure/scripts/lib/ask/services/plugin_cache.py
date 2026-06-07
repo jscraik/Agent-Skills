@@ -58,6 +58,19 @@ class PluginCacheRefreshError(RuntimeError):
     """Raised when command-handle pruning cannot safely complete."""
 
 
+def _manifest_declares_skills_root(plugin_root: Path, skills_root: Path) -> bool:
+    plugin_json = plugin_root / ".codex-plugin" / "plugin.json"
+    try:
+        payload = json.loads(plugin_json.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    raw_path = str(payload.get("skills") or "").strip()
+    if not raw_path:
+        return False
+    declared = (plugin_root / raw_path.removeprefix("./")).resolve()
+    return declared == skills_root.resolve()
+
+
 def plugin_cache_permission_declaration(repo_root: Path, *, mode: str = "auto") -> dict[str, str]:
     """Return the write declaration required to refresh repo-local plugin runtime caches."""
     runtime_cache_root = repo_root / RUNTIME_CACHE_RELATIVE_ROOT
@@ -69,6 +82,43 @@ def plugin_cache_permission_declaration(repo_root: Path, *, mode: str = "auto") 
         "permission_requirement": "write access to .agents/plugins-runtime/cache",
         "rerun": PLUGIN_CACHE_PERMISSION_RERUN,
     }
+
+
+def _codex_marketplace_entry(entry: dict[str, object], source_path: str) -> dict[str, object]:
+    marketplace_entry: dict[str, object] = {
+        "name": entry["name"],
+        "source": {"source": "local", "path": source_path},
+    }
+    for key in ("policy", "category"):
+        if key in entry:
+            marketplace_entry[key] = entry[key]
+    return marketplace_entry
+
+
+def _write_codex_marketplace_root(
+    *,
+    marketplace_root: Path,
+    marketplace_name: str,
+    entries: list[dict[str, object]],
+    source_paths: dict[str, str],
+    dry_run: bool,
+) -> list[str]:
+    """Write a Codex-supported marketplace manifest under a plugin cache root."""
+    marketplace_manifest = marketplace_root / ".agents" / "plugins" / "marketplace.json"
+    payload = {
+        "name": marketplace_name,
+        "plugins": [
+            _codex_marketplace_entry(entry, source_paths[str(entry["name"])])
+            for entry in entries
+            if str(entry.get("name") or "") in source_paths
+        ],
+    }
+    if dry_run:
+        return [f"Would write Codex marketplace manifest: {marketplace_manifest}"]
+
+    marketplace_manifest.parent.mkdir(parents=True, exist_ok=True)
+    marketplace_manifest.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return [f"Wrote Codex marketplace manifest: {marketplace_manifest}"]
 
 
 def prune_command_handle_skill_entries(
@@ -163,6 +213,9 @@ def prune_picker_internal_skill_dirs(plugin_root: Path) -> tuple[list[str], list
     skills_root = plugin_root / "skills"
     if not skills_root.is_dir():
         return logs, deletes
+    if _manifest_declares_skills_root(plugin_root, skills_root):
+        logs.append(f"Preserved manifest-declared plugin skills root: {skills_root}")
+        return logs, deletes
 
     for name in sorted(PICKER_INTERNAL_SKILL_DIRS):
         target = skills_root / name
@@ -196,7 +249,7 @@ def replace_plugin_cache_copy(
     source_dir: Path,
     target_dir: Path,
 ) -> PluginCacheRefreshReport:
-    """Replace one local plugin cache copy and prune command-handle duplicate entries."""
+    """Replace one local plugin cache copy while preserving loader-declared skill content."""
     deletes: list[str] = []
     if target_dir.is_symlink() or target_dir.is_file():
         deletes.append(str(target_dir))
@@ -207,9 +260,6 @@ def replace_plugin_cache_copy(
     materialize_first_level_skill_aliases(target_dir)
     logs, internal_deletes = prune_picker_internal_skill_dirs(target_dir)
     deletes.extend(path for path in internal_deletes if path not in deletes)
-    prune_logs, prune_deletes = prune_command_handle_skill_entries(repo_root, plugin_name, target_dir)
-    logs.extend(prune_logs)
-    deletes.extend(path for path in prune_deletes if path not in deletes)
     logs.append(f"Replaced local plugin cache: {target_dir} <- {source_dir}")
     return PluginCacheRefreshReport(writes=[str(target_dir)], deletes=deletes, logs=logs)
 
@@ -250,6 +300,8 @@ def refresh_workspace_plugin_caches(
     plan.setdefault("warnings", [])
 
     keep_plugin_names = {entry["name"] for entry in entries}
+    runtime_source_paths: dict[str, str] = {}
+    versioned_source_paths: dict[str, str] = {}
     try:
         for entry in entries:
             plugin_name = entry["name"]
@@ -266,6 +318,8 @@ def refresh_workspace_plugin_caches(
             planned_writes = [str(runtime_target), str(versioned_target)]
             plan["plugin_cache_writes"].extend(planned_writes)
             plan["writes"].extend(planned_writes)
+            runtime_source_paths[plugin_name] = f"./{plugin_name}"
+            versioned_source_paths[plugin_name] = f"./{plugin_name}/{version}"
             if dry_run:
                 refresh_state["status"] = "planned"
                 logs.append(f"Would replace local plugin cache: {runtime_target} <- {source_dir}")
@@ -296,7 +350,7 @@ def refresh_workspace_plugin_caches(
             if not cache_root.is_dir():
                 continue
             for child in sorted(cache_root.iterdir()):
-                if child.name in keep_plugin_names or not child.is_dir():
+                if child.name in {".agents", ".claude-plugin"} or child.name in keep_plugin_names or not child.is_dir():
                     continue
                 plan["deletes"].append(str(child))
                 if dry_run:
@@ -304,6 +358,31 @@ def refresh_workspace_plugin_caches(
                     continue
                 shutil.rmtree(child)
                 logs.append(f"Removed stale local plugin cache: {child}")
+
+        marketplace_writes = [
+            str(runtime_cache_root / ".agents" / "plugins" / "marketplace.json"),
+            str(versioned_cache_root / ".agents" / "plugins" / "marketplace.json"),
+        ]
+        plan["plugin_cache_writes"].extend(marketplace_writes)
+        plan["writes"].extend(marketplace_writes)
+        logs.extend(
+            _write_codex_marketplace_root(
+                marketplace_root=runtime_cache_root,
+                marketplace_name=marketplace_name,
+                entries=entries,
+                source_paths=runtime_source_paths,
+                dry_run=dry_run,
+            )
+        )
+        logs.extend(
+            _write_codex_marketplace_root(
+                marketplace_root=versioned_cache_root,
+                marketplace_name=marketplace_name,
+                entries=entries,
+                source_paths=versioned_source_paths,
+                dry_run=dry_run,
+            )
+        )
     except PermissionError as exc:
         refresh_state["status"] = "blocked"
         refresh_state["warning"] = PLUGIN_CACHE_REFRESH_PERMISSION_BLOCKED

@@ -29,6 +29,93 @@ release-readiness claim. Examples include login, upload-and-chat, access grants,
 and other workflows where capturing a planted flag is the practical proof of
 success.
 
+## Plugin Desktop Readiness
+
+Plugin install success is not the same as Codex Desktop loadability. Before
+claiming a local plugin is usable in the GUI, verify the
+`plugin-desktop-readiness.v1` contract exposed by:
+
+```bash
+./bin/ask plugins status <plugin> --json --robot
+```
+
+Use `data.desktop_readiness_state.desktop_loadable` as the claim boundary. A
+plugin is not GUI-ready until the contract proves all of these lanes:
+
+- repo plugin cache content is ready;
+- the active Codex config enables the plugin id and has no stale enabled plugin
+  ids outside the active marketplace;
+- the official personal marketplace at `~/.agents/plugins/marketplace.json`
+  resolves the plugin source path to `~/.codex/plugins/<plugin-name>`;
+- the Codex profile compatibility marketplace resolves the plugin source path
+  to a symlink alias of the same canonical plugin payload, or to a case-only
+  samefile path on case-insensitive filesystems;
+- the resolved plugin root has `.codex-plugin/plugin.json` and any
+  manifest-declared skills contain `*/SKILL.md`.
+
+Use the official personal marketplace as the canonical user-facing shape:
+`~/.agents/plugins/marketplace.json` should contain one marketplace payload for
+all local plugins, with each local `source.path` starting with `./` and staying
+inside the marketplace root. For project-local plugins materialized at
+`~/.codex/plugins/<plugin-name>`, write `./.codex/plugins/<plugin-name>`.
+The sync wrapper may also create `~/.agents/plugins/<plugin-name>` symlinks to
+the materialized plugin directory for operator discoverability.
+If `~/.agents/plugins` is symlinked into this repository, it must target a
+dedicated personal-marketplace projection such as `.agents/personal-plugins`,
+not the repo `Plugins/` source tree. On case-insensitive filesystems,
+`plugins` and `Plugins` can resolve to the same directory, so pointing the
+official personal marketplace at the repo source tree can overwrite
+`Plugins/marketplace.json` with personal `./.codex/plugins/<plugin-name>`
+paths.
+
+Keep `~/.codex/.agents/plugins/marketplace.json` as a compatibility mirror
+while Desktop/runtime compatibility requires it. That mirror must point to
+`./.agents/plugins/<plugin-name>`, and that path must be an alias to
+`~/.codex/plugins/<plugin-name>` rather than an independent copy. Repository
+source marketplaces can still use `./Plugins/<plugin-name>` because their
+marketplace root is the repo root. Plugin runtime/package caches must preserve
+manifest-declared skill content; duplicate suppression belongs in
+picker/projection surfaces, not in the loader package cache.
+
+For one-command install flows, prefer:
+
+```bash
+./bin/ask plugins install <url> --path <plugin-path> --sync-profile --require-desktop-loadable --json --robot
+```
+
+If this command is blocked by profile write permissions, report the blocker and
+rerun the profile sync with explicit write access rather than claiming the
+plugin is installed for Desktop:
+
+```bash
+./bin/ask plugins sync-local-runtime --json --robot
+```
+
+If `data.desktop_readiness_state.stale_enabled_plugin_ids` is non-empty, do not
+keep hand-editing the config. Use the wrapper repair command so the stale IDs
+come from the readiness contract and the result is rechecked across the
+post-prune stability window:
+
+```bash
+./bin/ask plugins prune-stale-config --json --robot
+```
+
+If Codex Desktop or another config writer keeps restoring the stale ID after the
+default watch window, rerun with a longer explicit window and treat a failed
+stability check as evidence that the external writer must be stopped or
+refreshed before closeout:
+
+```bash
+./bin/ask plugins prune-stale-config --stability-seconds 30 --json --robot
+```
+
+When the config is already clean but a stale ID has repeatedly reappeared, prove
+the clean state is stable before closeout:
+
+```bash
+./bin/ask plugins prune-stale-config --verify-stable-when-clean --stability-seconds 30 --json --robot
+```
+
 ## Folding Strategy
 
 If `./bin/ask skills fold source target --robot` returns confidence `>= 0.2`, fold

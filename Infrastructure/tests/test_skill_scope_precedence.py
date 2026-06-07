@@ -280,6 +280,64 @@ class TestSkillScopePrecedence(unittest.TestCase):
             "Plugins/cache/openai-curated/chatgpt-apps/skills/chatgpt-app-submission",
         )
 
+    def test_runtime_budget_classifies_curated_remote_router_homonyms(self) -> None:
+        self.assertEqual(
+            verify_runtime_budget._scope_collision_baseline_path(
+                "Plugins/cache/openai-curated-remote/data-analytics/rotating-version/skills/index"
+            ),
+            "Plugins/cache/openai-curated-remote/data-analytics/skills/index",
+        )
+        self.assertEqual(
+            verify_runtime_budget._scope_collision_baseline_path(
+                "Plugins/cache/openai-curated-remote/product-design/another-version/skills/user-context"
+            ),
+            "Plugins/cache/openai-curated-remote/product-design/skills/user-context",
+        )
+        self._write_skill(
+            "Plugins/cache/openai-curated-remote/data-analytics/rotating-version/skills/index",
+            "Data Analytics router skill.",
+        )
+        self._write_skill(
+            "Plugins/cache/openai-curated-remote/product-design/another-version/skills/index",
+            "Product Design router skill.",
+        )
+        self._write_skill(
+            "Plugins/cache/openai-curated-remote/data-analytics/rotating-version/skills/user-context",
+            "Data Analytics user context skill.",
+        )
+        self._write_skill(
+            "Plugins/cache/openai-curated-remote/product-design/another-version/skills/user-context",
+            "Product Design user context skill.",
+        )
+
+        with self._patched_repo(default_visible=set()):
+            report = verify_runtime_budget.build_report()
+
+        self.assertEqual(report["status"], "pass")
+        self.assertEqual(report["unresolved_scope_collisions"], [])
+        self.assertEqual(
+            {collision["name"] for collision in report["distinct_homonym_scope_collisions"]},
+            {"index", "user-context"},
+        )
+        by_name = {
+            collision["name"]: collision
+            for collision in report["distinct_homonym_scope_collisions"]
+        }
+        self.assertEqual(
+            by_name["index"]["qualified_names"],
+            {
+                "Plugins/cache/openai-curated-remote/data-analytics/skills/index": "data-analytics:index",
+                "Plugins/cache/openai-curated-remote/product-design/skills/index": "product-design:index",
+            },
+        )
+        self.assertEqual(
+            by_name["user-context"]["qualified_names"],
+            {
+                "Plugins/cache/openai-curated-remote/data-analytics/skills/user-context": "data-analytics:user-context",
+                "Plugins/cache/openai-curated-remote/product-design/skills/user-context": "product-design:user-context",
+            },
+        )
+
     def test_rooted_runtime_allows_primary_runtime_lane(self) -> None:
         for skill_set in verify_runtime_budget.ROOT_SKILL_SETS:
             self._write_skill(f".agents/skills/{skill_set}", f"{skill_set} root skill set.")

@@ -210,7 +210,11 @@ def _classified_scope_collision(collision: dict[str, Any]) -> dict[str, Any] | N
 def _scope_collision_baseline_path(path: str) -> str:
     """Return a stable path key for intentional collision baselines."""
     parts = Path(path).parts
-    if len(parts) >= 7 and parts[:3] == ("Plugins", "cache", "openai-curated"):
+    if (
+        len(parts) >= 7
+        and parts[:2] == ("Plugins", "cache")
+        and parts[2] in {"openai-curated", "openai-curated-remote"}
+    ):
         try:
             skills_index = parts.index("skills", 4)
         except ValueError:

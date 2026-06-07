@@ -6,11 +6,13 @@ import os
 import json
 import shutil
 import shlex
+import time
 from pathlib import Path
 from typing import Any, List, Optional
 
 from ask.envelope import CallResult, ErrorObject
 from ask.plugin_state import collect_plugin_state
+from ask.services.plugin_cache import refresh_workspace_plugin_caches
 from ask.services.plugin_sources import (
     copy_directory_contents as _copy_directory_contents,
     load_local_marketplace as _load_local_marketplace,
@@ -35,7 +37,9 @@ _PLUGIN_INSTALLER_SCRIPT_CANDIDATES = (
 _PLUGIN_BUILDER_SCRIPT_CANDIDATES = (
     "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts/plugin_builder.py",
 )
-_LOCAL_PLUGIN_ROOTS = ("Plugins", "plugins", ".agents/plugins")
+_LOCAL_PLUGIN_ROOTS = ("plugins", "Plugins", ".agents/plugins")
+_PERSONAL_PLUGIN_MARKETPLACE_ROOT = Path(".agents/plugins")
+_PROJECT_PERSONAL_PLUGIN_MARKETPLACE_ROOT = Path(".agents/personal-plugins")
 
 
 def _to_absolute_path(path: Path) -> Path:
@@ -139,6 +143,8 @@ def _plugin_install_validation_command(
     allow_untrusted_source: bool = False,
     allow_unpinned_ref: bool = False,
     dry_run: bool = False,
+    sync_profile: bool = False,
+    require_desktop_loadable: bool = False,
     action: str = "install",
 ) -> str:
     parts = ["./bin/ask", "plugins", action, url, "--path", plugin_path]
@@ -154,10 +160,374 @@ def _plugin_install_validation_command(
         parts.append("--allow-untrusted-source")
     if allow_unpinned_ref:
         parts.append("--allow-unpinned-ref")
+    if sync_profile:
+        parts.append("--sync-profile")
+    if require_desktop_loadable:
+        parts.append("--require-desktop-loadable")
     if dry_run:
         parts.append("--dry-run")
     parts.extend(["--json", "--robot"])
     return " ".join(shlex.quote(part) for part in parts)
+
+
+def _plugins_prune_stale_config_validation_command(
+    *,
+    dry_run: bool = False,
+    stability_seconds: float = 10.0,
+    stability_interval_seconds: float = 0.5,
+    verify_stable_when_clean: bool = False,
+) -> str:
+    parts = ["./bin/ask", "plugins", "prune-stale-config"]
+    if dry_run:
+        parts.append("--dry-run")
+    if stability_seconds != 10.0:
+        parts.extend(["--stability-seconds", str(stability_seconds)])
+    if stability_interval_seconds != 0.5:
+        parts.extend(["--stability-interval-seconds", str(stability_interval_seconds)])
+    if verify_stable_when_clean:
+        parts.append("--verify-stable-when-clean")
+    parts.extend(["--json", "--robot"])
+    return " ".join(shlex.quote(part) for part in parts)
+
+
+def _remove_stale_plugin_config_blocks(content: str, stale_plugin_ids: set[str]) -> tuple[str, list[str]]:
+    lines = content.splitlines(keepends=True)
+    kept: list[str] = []
+    removed: list[str] = []
+    index = 0
+    table_re = re.compile(r'^\s*\[plugins\."(?P<plugin_id>[^"]+)"\]\s*(?:#.*)?$')
+    dotted_re = re.compile(r'^\s*plugins\."(?P<plugin_id>[^"]+)"\.enabled\s*=')
+
+    while index < len(lines):
+        line = lines[index]
+        table_match = table_re.match(line.rstrip("\r\n"))
+        if table_match and table_match.group("plugin_id") in stale_plugin_ids:
+            plugin_id = table_match.group("plugin_id")
+            removed.append(plugin_id)
+            index += 1
+            while index < len(lines) and not lines[index].lstrip().startswith("["):
+                index += 1
+            while kept and kept[-1].strip() == "" and (not lines[index:] or lines[index].strip() == ""):
+                kept.pop()
+            continue
+
+        dotted_match = dotted_re.match(line)
+        if dotted_match and dotted_match.group("plugin_id") in stale_plugin_ids:
+            removed.append(dotted_match.group("plugin_id"))
+            index += 1
+            continue
+
+        kept.append(line)
+        index += 1
+
+    return "".join(kept), sorted(set(removed))
+
+
+def _marketplace_source_path_for_runtime_root(runtime_root: Path, plugin_name: str) -> str:
+    relative_runtime_root = runtime_root.name
+    if runtime_root.name == "plugins" and runtime_root.parent.name == ".agents":
+        relative_runtime_root = ".agents/plugins"
+    return f"./{relative_runtime_root}/{plugin_name}"
+
+
+def _runtime_marketplace_payload(entries: list[dict[str, Any]], *, runtime_root: Path) -> dict[str, Any]:
+    return {
+        "name": "agent-skills-local",
+        "plugins": [
+            {
+                **{
+                    key: value
+                    for key, value in entry.items()
+                    if key not in {"path", "source"}
+                },
+                "source": {
+                    "source": "local",
+                    "path": _marketplace_source_path_for_runtime_root(runtime_root, str(entry["name"])),
+                },
+            }
+            for entry in entries
+        ],
+    }
+
+
+def _personal_marketplace_payload(entries: list[dict[str, Any]]) -> dict[str, Any]:
+    return {
+        "name": "agent-skills-local",
+        "plugins": [
+            {
+                **{
+                    key: value
+                    for key, value in entry.items()
+                    if key not in {"path", "source"}
+                },
+                "source": {
+                    "source": "local",
+                    "path": f"./.codex/plugins/{entry['name']}",
+                },
+            }
+            for entry in entries
+        ],
+    }
+
+
+def _sync_personal_marketplace(
+    *,
+    home: Path,
+    repo_root: Path,
+    marketplace_entries: list[dict[str, Any]],
+    dry_run: bool,
+) -> dict[str, Any]:
+    marketplace_root = home / _PERSONAL_PLUGIN_MARKETPLACE_ROOT
+    project_marketplace_root = repo_root / _PROJECT_PERSONAL_PLUGIN_MARKETPLACE_ROOT
+    marketplace_target = marketplace_root / "marketplace.json"
+    symlinked_plugins: list[str] = []
+    skipped_symlinks: list[str] = []
+    planned_plugins = [str(entry["name"]) for entry in marketplace_entries]
+    repointed_marketplace_root = False
+
+    if not dry_run:
+        marketplace_root.parent.mkdir(parents=True, exist_ok=True)
+        project_marketplace_root.mkdir(parents=True, exist_ok=True)
+        unsafe_repo_roots = [repo_root / "Plugins", repo_root / "plugins"]
+        if marketplace_root.is_symlink():
+            try:
+                resolved_marketplace_root = marketplace_root.resolve(strict=True)
+            except OSError:
+                resolved_marketplace_root = None
+            if resolved_marketplace_root is not None:
+                points_at_repo_source = False
+                for repo_source_root in unsafe_repo_roots:
+                    try:
+                        points_at_repo_source = repo_source_root.exists() and resolved_marketplace_root.samefile(repo_source_root)
+                    except OSError:
+                        points_at_repo_source = False
+                    if points_at_repo_source:
+                        break
+                if points_at_repo_source:
+                    marketplace_root.unlink()
+                    marketplace_root.symlink_to(project_marketplace_root, target_is_directory=True)
+                    repointed_marketplace_root = True
+        marketplace_root.mkdir(parents=True, exist_ok=True)
+        marketplace_target.write_text(
+            json.dumps(_personal_marketplace_payload(marketplace_entries), indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+
+    for entry in marketplace_entries:
+        plugin_name = str(entry["name"])
+        link_path = marketplace_root / plugin_name
+        target_path = home / ".codex" / "plugins" / plugin_name
+        if dry_run:
+            continue
+        if link_path.is_symlink():
+            if link_path.resolve() == target_path.resolve():
+                skipped_symlinks.append(plugin_name)
+                continue
+            link_path.unlink()
+        elif link_path.exists():
+            skipped_symlinks.append(plugin_name)
+            continue
+        if target_path.exists():
+            link_path.symlink_to(target_path)
+            symlinked_plugins.append(plugin_name)
+        else:
+            skipped_symlinks.append(plugin_name)
+
+    return {
+        "runtime_root": str(marketplace_root),
+        "marketplace_target": str(marketplace_target),
+        "planned_plugins": planned_plugins,
+        "copied_plugins": [],
+        "skipped_plugins": [],
+        "removed_entries": [],
+        "pruned_plugins": [],
+        "skipped_marketplace_copy": False,
+        "symlinked_plugins": symlinked_plugins,
+        "skipped_symlinks": skipped_symlinks,
+        "official_personal_marketplace": True,
+        "project_marketplace_root": str(project_marketplace_root),
+        "personal_marketplace_symlink_target": (
+            str(marketplace_root.resolve()) if marketplace_root.exists() else None
+        ),
+        "repointed_marketplace_root": repointed_marketplace_root,
+        "dry_run": dry_run,
+    }
+
+
+def prune_stale_plugin_config(
+    repo_root: Path,
+    *,
+    dry_run: bool = False,
+    stability_seconds: float = 10.0,
+    stability_interval_seconds: float = 0.5,
+    verify_stable_when_clean: bool = False,
+) -> CallResult:
+    result = CallResult()
+    result.data["validation_commands"] = [
+        _plugins_prune_stale_config_validation_command(
+            dry_run=dry_run,
+            stability_seconds=stability_seconds,
+            stability_interval_seconds=stability_interval_seconds,
+            verify_stable_when_clean=verify_stable_when_clean,
+        )
+    ]
+    result.data["dry_run"] = dry_run
+    result.data["stability_seconds"] = stability_seconds
+    result.data["stability_interval_seconds"] = stability_interval_seconds
+    result.data["verify_stable_when_clean"] = verify_stable_when_clean
+
+    if stability_seconds < 0:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message="stability_seconds must be greater than or equal to 0.",
+                fix_suggestion="Pass --stability-seconds 0 or a positive number.",
+            )
+        )
+        return result
+    if stability_interval_seconds <= 0:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message="stability_interval_seconds must be greater than 0.",
+                fix_suggestion="Pass a positive --stability-interval-seconds value.",
+            )
+        )
+        return result
+
+    readiness = collect_plugin_state(repo_root)["desktop_readiness_state"]
+    stale_plugin_ids = sorted(readiness.get("stale_enabled_plugin_ids", []))
+    config_path_value = readiness.get("config_path")
+    config_path = Path(config_path_value) if isinstance(config_path_value, str) else Path.home() / ".codex" / "config.toml"
+
+    result.data["config_path"] = str(config_path)
+    result.data["stale_enabled_plugin_ids"] = stale_plugin_ids
+    if not stale_plugin_ids:
+        result.data["message"] = "No stale enabled plugin IDs found in active Codex config."
+        result.data["changed"] = False
+        result.data["removed_plugin_ids"] = []
+        if verify_stable_when_clean and not dry_run:
+            post_readiness, stability_checks = _watch_stale_plugin_stability(
+                repo_root,
+                stability_seconds=stability_seconds,
+                stability_interval_seconds=stability_interval_seconds,
+            )
+            result.data["desktop_readiness_state"] = post_readiness
+            result.data["stability_checks"] = stability_checks
+            if post_readiness.get("stale_enabled_plugin_ids"):
+                result.status = "error"
+                result.errors.append(
+                    ErrorObject(
+                        code="ERR_VALIDATION",
+                        message="Stale enabled plugin IDs appeared while verifying clean active Codex config.",
+                        fix_suggestion=(
+                            "An external Codex Desktop/config writer is reintroducing stale plugin IDs. "
+                            "Restart Codex Desktop, then rerun ./bin/ask plugins prune-stale-config "
+                            "--verify-stable-when-clean --json --robot."
+                        ),
+                    )
+                )
+        return result
+
+    try:
+        content = config_path.read_text(encoding="utf-8")
+    except OSError as exc:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_IO",
+                message=f"Failed to read active Codex config: {exc}",
+                fix_suggestion=f"Check permissions for {config_path}.",
+            )
+        )
+        return result
+
+    updated, removed_plugin_ids = _remove_stale_plugin_config_blocks(content, set(stale_plugin_ids))
+    result.data["removed_plugin_ids"] = removed_plugin_ids
+    result.data["changed"] = bool(removed_plugin_ids)
+    if sorted(removed_plugin_ids) != stale_plugin_ids:
+        missing = sorted(set(stale_plugin_ids) - set(removed_plugin_ids))
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message="Active Codex config has stale enabled plugin IDs that could not be removed safely.",
+                fix_suggestion=f"Remove these stale plugin IDs manually from {config_path}: {', '.join(missing)}",
+            )
+        )
+        return result
+
+    if dry_run:
+        result.data["message"] = "Dry run - would remove stale enabled plugin IDs from active Codex config."
+        return result
+
+    try:
+        config_path.write_text(updated, encoding="utf-8")
+    except OSError as exc:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_IO",
+                message=f"Failed to write active Codex config: {exc}",
+                fix_suggestion=f"Check write permissions for {config_path}.",
+            )
+        )
+        return result
+
+    post_readiness, stability_checks = _watch_stale_plugin_stability(
+        repo_root,
+        stability_seconds=stability_seconds,
+        stability_interval_seconds=stability_interval_seconds,
+    )
+    result.data["desktop_readiness_state"] = post_readiness
+    result.data["stability_checks"] = stability_checks
+    result.data["message"] = "Removed stale enabled plugin IDs from active Codex config."
+    if post_readiness.get("stale_enabled_plugin_ids"):
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message="Stale enabled plugin IDs reappeared after pruning active Codex config.",
+                fix_suggestion=(
+                    "An external Codex Desktop/config writer is reintroducing stale plugin IDs. "
+                    "Restart Codex Desktop, then rerun ./bin/ask plugins prune-stale-config --json --robot."
+                ),
+            )
+        )
+    return result
+
+
+def _watch_stale_plugin_stability(
+    repo_root: Path,
+    *,
+    stability_seconds: float,
+    stability_interval_seconds: float,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    stability_checks: list[dict[str, Any]] = []
+    post_readiness = collect_plugin_state(repo_root)["desktop_readiness_state"]
+    stability_checks.append(
+        {
+            "attempt": 0,
+            "stale_enabled_plugin_ids": post_readiness.get("stale_enabled_plugin_ids", []),
+        }
+    )
+    deadline = time.monotonic() + stability_seconds
+    attempt = 1
+    while time.monotonic() < deadline:
+        if post_readiness.get("stale_enabled_plugin_ids"):
+            break
+        time.sleep(min(stability_interval_seconds, max(deadline - time.monotonic(), 0)))
+        post_readiness = collect_plugin_state(repo_root)["desktop_readiness_state"]
+        stability_checks.append(
+            {
+                "attempt": attempt,
+                "stale_enabled_plugin_ids": post_readiness.get("stale_enabled_plugin_ids", []),
+            }
+        )
+        attempt += 1
+    return post_readiness, stability_checks
 
 
 def _plugin_harden_validation_command(
@@ -257,6 +627,7 @@ def _normalize_plugin_name(raw_name: str) -> str:
 def _sync_one_runtime_root(
     *,
     runtime_root: Path,
+    canonical_runtime_root: Path | None = None,
     repo_root: Path,
     marketplace_path: Path,
     marketplace_entries: list[dict[str, Any]],
@@ -265,12 +636,14 @@ def _sync_one_runtime_root(
     """
     Replaces local plugin runtime mirrors from the repository's local marketplace entries.
 
-    Replaces only the repository-local plugins listed in `marketplace_entries`
-    inside `runtime_root`. Non-local plugin cache entries are preserved. Stale
-    local mirrors (directories bearing the `.codex-repo-plugin-source` marker)
-    that are no longer declared in `marketplace_entries` are removed. When
-    `dry_run` is True no filesystem mutations are performed; a report of
-    planned/copied/replaced/pruned names is still returned.
+    The canonical runtime root receives one materialized plugin payload. Other
+    runtime roots receive symlink aliases to the canonical payload so compatibility
+    paths cannot drift into independent plugin copies. Non-local plugin cache
+    entries are preserved. Stale local mirrors (directories bearing the
+    `.codex-repo-plugin-source` marker) that are no longer declared in
+    `marketplace_entries` are removed. When `dry_run` is True no filesystem
+    mutations are performed; a report of planned/copied/replaced/pruned names is
+    still returned.
 
     Parameters:
         runtime_root (Path): Absolute path to the runtime profile directory to synchronize.
@@ -296,10 +669,15 @@ def _sync_one_runtime_root(
 
     planned_plugins: list[str] = []
     copied_plugins: list[str] = []
+    symlinked_plugins: list[str] = []
+    skipped_plugins: list[str] = []
     removed_entries: list[str] = []
     pruned_plugins: list[str] = []
     marketplace_target = runtime_root / "marketplace.json"
+    skipped_marketplace_copy = False
     marker_name = ".codex-repo-plugin-source"
+    canonical_root = canonical_runtime_root or runtime_root
+    materializes_payload = runtime_root == canonical_root
 
     resolved_sources: list[tuple[str, Path]] = []
     for entry in marketplace_entries:
@@ -311,19 +689,55 @@ def _sync_one_runtime_root(
         resolved_sources.append((plugin_name, source_dir))
 
     if not dry_run:
-        shutil.copy2(marketplace_path, marketplace_target)
+        if marketplace_target.exists() and marketplace_path.samefile(marketplace_target):
+            skipped_marketplace_copy = True
+        else:
+            marketplace_target.write_text(
+                json.dumps(
+                    _runtime_marketplace_payload(marketplace_entries, runtime_root=runtime_root),
+                    indent=2,
+                    sort_keys=True,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
 
     keep_names = {plugin_name for plugin_name, _ in resolved_sources}
     for plugin_name, source_dir in resolved_sources:
         planned_plugins.append(plugin_name)
         target_dir = runtime_root / plugin_name
+        canonical_target_dir = canonical_root / plugin_name
         if target_dir.exists() or target_dir.is_symlink():
             removed_entries.append(plugin_name)
         if not dry_run:
-            _copy_directory_contents(source_dir, target_dir)
-            _materialize_first_level_skill_aliases(target_dir)
-            (target_dir / marker_name).write_text(str(source_dir.resolve()) + "\n", encoding="utf-8")
-            copied_plugins.append(plugin_name)
+            if materializes_payload:
+                if target_dir.exists() and source_dir.samefile(target_dir):
+                    skipped_plugins.append(plugin_name)
+                    continue
+                if target_dir.is_symlink():
+                    target_dir.unlink()
+                _copy_directory_contents(source_dir, target_dir)
+                _materialize_first_level_skill_aliases(target_dir)
+                (target_dir / marker_name).write_text(str(source_dir.resolve()) + "\n", encoding="utf-8")
+                copied_plugins.append(plugin_name)
+                continue
+
+            if not canonical_target_dir.exists():
+                raise FileNotFoundError(
+                    f"Canonical local plugin payload missing for '{plugin_name}': {canonical_target_dir}"
+                )
+            if target_dir.is_symlink():
+                if target_dir.resolve() == canonical_target_dir.resolve():
+                    skipped_plugins.append(plugin_name)
+                    continue
+                target_dir.unlink()
+            elif target_dir.exists():
+                if target_dir.is_dir():
+                    shutil.rmtree(target_dir)
+                else:
+                    target_dir.unlink()
+            target_dir.symlink_to(canonical_target_dir, target_is_directory=True)
+            symlinked_plugins.append(plugin_name)
 
     # Prune stale local plugin mirrors no longer declared in the marketplace.
     reserved = {"marketplace.json", "cache"}
@@ -348,8 +762,12 @@ def _sync_one_runtime_root(
         "marketplace_target": str(marketplace_target),
         "planned_plugins": planned_plugins,
         "copied_plugins": copied_plugins,
+        "symlinked_plugins": symlinked_plugins,
+        "skipped_plugins": skipped_plugins,
         "removed_entries": removed_entries,
         "pruned_plugins": pruned_plugins,
+        "skipped_marketplace_copy": skipped_marketplace_copy,
+        "materializes_payload": materializes_payload,
         "dry_run": dry_run,
     }
 
@@ -359,8 +777,9 @@ def sync_local_runtime_plugins(repo_root: Path, *, dry_run: bool = False) -> Cal
     Replaces repository-local plugin runtime mirrors in each Codex profile from canonical `Plugins/` sources.
 
     Use this after changing or updating any local plugin source or
-    `Plugins/marketplace.json`. Runtime plugin mirrors are copied directories,
-    not symlinks, so they must be replaced to make plugin changes visible.
+    `Plugins/marketplace.json`. The profile-local `plugins/` root is the only
+    materialized payload root; compatibility roots are symlink aliases to that
+    payload so loader-visible paths cannot become competing plugin copies.
 
     Parameters:
         repo_root (Path): Path to the repository root containing the Plugins/ tree and Plugins/marketplace.json.
@@ -410,17 +829,50 @@ def sync_local_runtime_plugins(repo_root: Path, *, dry_run: bool = False) -> Cal
 
     runtime_reports: list[dict[str, Any]] = []
     for profile_home in profile_homes:
+        canonical_runtime_root = profile_home / "plugins"
         for relative_root in _LOCAL_PLUGIN_ROOTS:
             runtime_root = profile_home / relative_root
+            if relative_root != "plugins" and canonical_runtime_root.exists() and runtime_root.exists():
+                try:
+                    same_runtime_root = runtime_root.samefile(canonical_runtime_root)
+                except OSError:
+                    same_runtime_root = False
+                if same_runtime_root:
+                    runtime_reports.append(
+                        {
+                            "runtime_root": str(runtime_root),
+                            "marketplace_target": str(runtime_root / "marketplace.json"),
+                            "planned_plugins": [str(entry["name"]) for entry in entries],
+                            "copied_plugins": [],
+                            "symlinked_plugins": [],
+                            "skipped_plugins": [str(entry["name"]) for entry in entries],
+                            "removed_entries": [],
+                            "pruned_plugins": [],
+                            "skipped_marketplace_copy": True,
+                            "materializes_payload": False,
+                            "skipped_samefile_runtime_root": True,
+                            "dry_run": dry_run,
+                        }
+                    )
+                    continue
             runtime_reports.append(
                 _sync_one_runtime_root(
                     runtime_root=runtime_root,
+                    canonical_runtime_root=canonical_runtime_root,
                     repo_root=repo_root,
                     marketplace_path=marketplace_path,
                     marketplace_entries=entries,
                     dry_run=dry_run,
                 )
             )
+    runtime_reports.append(
+        _sync_personal_marketplace(
+            home=home,
+            repo_root=repo_root,
+            marketplace_entries=entries,
+            dry_run=dry_run,
+        )
+    )
 
     result.status = "success"
     result.data["message"] = "Replaced local-plugin runtime mirrors."
@@ -428,6 +880,7 @@ def sync_local_runtime_plugins(repo_root: Path, *, dry_run: bool = False) -> Cal
     result.data["plugin_names"] = [entry["name"] for entry in entries]
     result.data["runtime_reports"] = runtime_reports
     result.data["dry_run"] = dry_run
+    result.data["desktop_readiness_state"] = collect_plugin_state(repo_root)["desktop_readiness_state"]
     return result
 
 
@@ -698,6 +1151,8 @@ def install_plugin(
     validation_level: str = "compat",
     allow_untrusted_source: bool = False,
     allow_unpinned_ref: bool = False,
+    sync_profile: bool = False,
+    require_desktop_loadable: bool = False,
     dry_run: bool = False,
     action: str = "install",
 ) -> CallResult:
@@ -732,6 +1187,8 @@ def install_plugin(
         validation_level=validation_level,
         allow_untrusted_source=allow_untrusted_source,
         allow_unpinned_ref=allow_unpinned_ref,
+        sync_profile=sync_profile,
+        require_desktop_loadable=require_desktop_loadable,
         dry_run=dry_run,
         action=action,
     )
@@ -767,6 +1224,8 @@ def install_plugin(
             next_step += f" --ref {ref}"
         result.metadata["next_steps"] = [next_step]
         result.data["canonical_dest"] = canonical_dest
+        result.data["sync_profile"] = sync_profile
+        result.data["require_desktop_loadable"] = require_desktop_loadable
         return result
 
     # Resolve installer helper only when actually running the installer
@@ -843,6 +1302,46 @@ def install_plugin(
             result.data["message"] = "Installed plugin."
         if installed_path:
             result.data["target_path"] = installed_path
+        cache_plan: dict[str, Any] = {}
+        cache_logs: list[str] = []
+        cache_error = refresh_workspace_plugin_caches(cache_plan, cache_logs, repo_root, dry_run=False)
+        result.data["plugin_cache_refresh"] = cache_plan.get("plugin_cache_refresh", {})
+        result.data["plugin_cache_logs"] = cache_logs
+        if cache_error is not None:
+            result.data["plugin_cache_error"] = {
+                "code": cache_error.code,
+                "message": cache_error.message,
+                "fix_suggestion": cache_error.fix_suggestion,
+            }
+        if sync_profile:
+            sync_result = sync_local_runtime_plugins(repo_root, dry_run=False)
+            result.data["profile_sync"] = {
+                "status": sync_result.status,
+                "data": sync_result.data,
+                "errors": [
+                    {
+                        "code": error.code,
+                        "message": error.message,
+                        "fix_suggestion": error.fix_suggestion,
+                    }
+                    for error in sync_result.errors
+                ],
+            }
+        if installed_name:
+            readiness = collect_plugin_state(repo_root, plugin_name=installed_name)["desktop_readiness_state"]
+        else:
+            readiness = collect_plugin_state(repo_root)["desktop_readiness_state"]
+        result.data["desktop_readiness_state"] = readiness
+        result.data["desktop_loadable"] = bool(readiness.get("desktop_loadable"))
+        if require_desktop_loadable and not result.data["desktop_loadable"]:
+            result.status = "error"
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_VALIDATION",
+                    message="Plugin installed, but Codex Desktop readiness is blocked.",
+                    fix_suggestion="Inspect data.desktop_readiness_state.blockers and run the listed repair commands.",
+                )
+            )
         return result
 
     result.status = "error"

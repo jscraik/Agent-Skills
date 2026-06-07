@@ -785,6 +785,85 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertEqual((target / "README.md").read_text(encoding="utf-8"), "fresh\n")
         self.assertIn(str(target / "README.md"), report.deletes)
 
+    def test_plugin_cache_refresh_writes_codex_marketplace_roots(self) -> None:
+        plugin_root = self.repo_root / "Plugins" / "harness-engineering"
+        manifest = plugin_root / ".codex-plugin" / "plugin.json"
+        manifest.parent.mkdir(parents=True, exist_ok=True)
+        (plugin_root / "skills" / "he-work").mkdir(parents=True)
+        (plugin_root / "skills" / "he-work" / "SKILL.md").write_text("# HE Work\n", encoding="utf-8")
+        manifest.write_text(
+            json.dumps(
+                {
+                    "schema_version": 1,
+                    "name": "harness-engineering",
+                    "version": "0.2.0",
+                    "description": "Harness workflows.",
+                    "skills": "./skills/",
+                }
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        marketplace = self.repo_root / "Plugins" / "marketplace.json"
+        marketplace.write_text(
+            json.dumps(
+                {
+                    "name": "agent-skills-local",
+                    "plugins": [
+                        {
+                            "name": "harness-engineering",
+                            "source": {"source": "local", "path": "./Plugins/harness-engineering"},
+                        }
+                    ],
+                }
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        plan: dict[str, object] = {}
+        logs: list[str] = []
+
+        error = plugin_cache.refresh_workspace_plugin_caches(plan, logs, self.repo_root, dry_run=False)
+
+        self.assertIsNone(error)
+        runtime_manifest = (
+            self.repo_root
+            / ".agents"
+            / "plugins-runtime"
+            / "cache"
+            / "agent-skills-local"
+            / ".agents"
+            / "plugins"
+            / "marketplace.json"
+        )
+        versioned_manifest = (
+            self.repo_root
+            / "Plugins"
+            / "cache"
+            / "agent-skills-local"
+            / ".agents"
+            / "plugins"
+            / "marketplace.json"
+        )
+        self.assertTrue(runtime_manifest.is_file())
+        self.assertTrue(versioned_manifest.is_file())
+        runtime_payload = json.loads(runtime_manifest.read_text(encoding="utf-8"))
+        versioned_payload = json.loads(versioned_manifest.read_text(encoding="utf-8"))
+        self.assertEqual(runtime_payload["plugins"][0]["source"]["path"], "./harness-engineering")
+        self.assertEqual(versioned_payload["plugins"][0]["source"]["path"], "./harness-engineering/0.2.0")
+        self.assertTrue(
+            (
+                self.repo_root
+                / "Plugins"
+                / "cache"
+                / "agent-skills-local"
+                / "harness-engineering"
+                / "0.2.0"
+                / ".codex-plugin"
+                / "plugin.json"
+            ).is_file()
+        )
+
     def test_plugin_cache_prune_keeps_skill_when_command_handle_file_is_missing(self) -> None:
         plugin_root = self.repo_root / ".agents" / "plugins-runtime" / "cache" / "agent-skills-local" / "harness-engineering"
         skill_dir = plugin_root / "skills" / "he-work"
@@ -909,6 +988,30 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertIn(str(plugin_root / "skills" / "data_fetch_analysis"), deletes)
         self.assertTrue(any("picker-internal" in log for log in logs))
 
+    def test_plugin_cache_prune_preserves_manifest_declared_skills_root(self) -> None:
+        plugin_root = self.repo_root / ".agents" / "plugins-runtime" / "cache" / "agent-skills-local" / "skill-factory"
+        plugin_json = plugin_root / ".codex-plugin" / "plugin.json"
+        plugin_json.parent.mkdir(parents=True)
+        plugin_json.write_text('{"name":"skill-factory","skills":"./skills/"}', encoding="utf-8")
+        public_skill_builder = plugin_root / "skills" / "skill-builder"
+        category_skill_builder = plugin_root / "skills" / "code_quality_review" / "skill-builder"
+        archived_skill_builder = plugin_root / "fixtures" / "budget-archive" / "skills" / "skill-builder"
+        public_skill_builder.mkdir(parents=True)
+        category_skill_builder.mkdir(parents=True)
+        archived_skill_builder.mkdir(parents=True)
+        (public_skill_builder / "SKILL.md").write_text("# Skill Builder\n", encoding="utf-8")
+        (category_skill_builder / "SKILL.md").write_text("# Internal Skill Builder\n", encoding="utf-8")
+        (archived_skill_builder / "SKILL.md").write_text("# Archived Skill Builder\n", encoding="utf-8")
+
+        logs, deletes = plugin_cache.prune_picker_internal_skill_dirs(plugin_root)
+
+        self.assertTrue((public_skill_builder / "SKILL.md").exists())
+        self.assertTrue((category_skill_builder / "SKILL.md").exists())
+        self.assertFalse(archived_skill_builder.exists())
+        self.assertIn(str(plugin_root / "fixtures"), deletes)
+        self.assertNotIn(str(plugin_root / "skills" / "code_quality_review"), deletes)
+        self.assertTrue(any("Preserved manifest-declared plugin skills root" in log for log in logs))
+
     def test_plugin_cache_permission_failure_returns_error(self) -> None:
         marketplace = self.repo_root / "Plugins" / "marketplace.json"
         marketplace.parent.mkdir(parents=True)
@@ -931,6 +1034,32 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertEqual(plan["plugin_cache_refresh"]["status"], "blocked")
         self.assertTrue(any("Skipped workspace plugin cache refresh after permission failure" in log for log in logs))
         self.assertTrue(any("rerun with write access to .agents/plugins-runtime/cache." in log for log in logs))
+
+    def test_local_plugin_runtime_sync_skips_samefile_source_root(self) -> None:
+        marketplace = self.repo_root / "Plugins" / "marketplace.json"
+        marketplace.parent.mkdir(parents=True)
+        marketplace.write_text(
+            '{"name":"agent-skills-local","plugins":[{"name":"harness-engineering","source":{"source":"local","path":"./Plugins/harness-engineering"}}]}',
+            encoding="utf-8",
+        )
+        source = self.repo_root / "Plugins" / "harness-engineering"
+        source.mkdir(parents=True)
+        (source / "README.md").write_text("canonical\n", encoding="utf-8")
+
+        report = plugins_commands._sync_one_runtime_root(
+            runtime_root=self.repo_root / "Plugins",
+            repo_root=self.repo_root,
+            marketplace_path=marketplace,
+            marketplace_entries=[{"name": "harness-engineering", "path": "./Plugins/harness-engineering"}],
+            dry_run=False,
+        )
+
+        self.assertEqual(["harness-engineering"], report["planned_plugins"])
+        self.assertEqual(["harness-engineering"], report["removed_entries"])
+        self.assertEqual([], report["copied_plugins"])
+        self.assertEqual(["harness-engineering"], report["skipped_plugins"])
+        self.assertTrue(report["skipped_marketplace_copy"])
+        self.assertEqual("canonical\n", (source / "README.md").read_text(encoding="utf-8"))
 
     def test_sync_skills_can_skip_plugin_runtime_cache_refresh(self) -> None:
         with (

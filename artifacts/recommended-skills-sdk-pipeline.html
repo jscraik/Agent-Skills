@@ -511,6 +511,33 @@
       line-height: 1.3;
     }
 
+    .next-slice-proof {
+      display: grid;
+      grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr);
+      gap: 12px;
+      align-items: stretch;
+      border: 2px solid #2f6f52;
+      background: #f4fbf6;
+      margin: 0 0 14px;
+      padding: 12px;
+    }
+
+    .next-slice-proof strong {
+      display: block;
+      color: #24573f;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+    }
+
+    .next-slice-proof span,
+    .next-slice-proof code {
+      color: #24313c;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
     .status-grid {
       width: 100%;
       border-collapse: collapse;
@@ -575,7 +602,8 @@
         padding: 4px 0;
       }
 
-      .slice-proof {
+      .slice-proof,
+      .next-slice-proof {
         grid-template-columns: 1fr;
       }
     }
@@ -777,6 +805,54 @@
       color: #24313c;
       font-size: 14px;
       line-height: 1.4;
+    }
+
+    .lifecycle-status {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .lifecycle-status-card {
+      border: 1px solid var(--line);
+      background: #ffffff;
+      padding: 11px;
+      min-height: 104px;
+    }
+
+    .lifecycle-status-card[data-state="done"] {
+      border: 2px solid #2f6f52;
+      background: #f4fbf6;
+    }
+
+    .lifecycle-status-card[data-state="partial"] {
+      border: 2px solid #2f6f8f;
+      background: #edf6fa;
+    }
+
+    .lifecycle-status-card[data-state="blocked"] {
+      border: 2px solid #8a3f63;
+      background: #faedf3;
+    }
+
+    .lifecycle-status-card[data-state="deferred"] {
+      border: 2px solid #7d8791;
+      background: #f4f6f8;
+    }
+
+    .lifecycle-status-card strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 13px;
+      color: #24313c;
+    }
+
+    .lifecycle-status-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
     }
 
     .lifecycle-track {
@@ -1969,6 +2045,7 @@
         grid-template-columns: 1fr;
       }
 
+      .lifecycle-status,
       .lifecycle-track {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
@@ -2083,6 +2160,7 @@
       .ci-grid,
       .risk-grid,
       .lifecycle-head,
+      .lifecycle-status,
       .lifecycle-track,
       .band {
         grid-template-columns: 1fr;
@@ -2177,6 +2255,16 @@
         <span>Repo-surface policy forbids any or unknown ownership classifications.</span>
         <span>Steering uptake is recorded and validator-backed before continuing implementation.</span>
       </div>
+      <div class="next-slice-proof" aria-label="PU-015 sync point">
+        <div>
+          <strong>PU-015 sync point</strong>
+          <span><code>review_plan</code> is implemented. The next SDK slice should consume those receipts and produce bounded review handoff receipts.</span>
+        </div>
+        <div>
+          <strong>Capability truth alignment</strong>
+          <span>PU-015 belongs after <code>sdk_lenses</code> and <code>review_plan</code>, before real agent execution. It should validate a review-plan receipt, refuse stale or mismatched inputs, record reviewer roles and required artifacts, and avoid claiming the review is complete.</span>
+        </div>
+      </div>
       <table class="status-grid">
         <thead>
           <tr><th>Capability</th><th>Status</th><th>Owner surface</th><th>Next slice</th></tr>
@@ -2188,7 +2276,7 @@
         <tr data-capability-id="receipt_schema" data-status="implemented" data-pipeline-sections="release_decision_matrix,ci_and_adoption"><td><strong>Check receipt schema</strong><br><span>receipt_schema</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/config/schemas/skills-sdk/check-receipt.v1.schema.json</td><td>Add receipt families for later executable install or publish lanes.</td></tr>
         <tr data-capability-id="risk_classification" data-status="implemented" data-pipeline-sections="release_decision_matrix,agent_execution_control_plane,package_hardening"><td><strong>Risk classification</strong><br><span>risk_classification</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/risk.py</td><td>Connect risk tiers to real adapters only after those adapters are approved.</td></tr>
         <tr data-capability-id="install_preview" data-status="preview_only" data-pipeline-sections="author_golden_path,public_sdk_surface,full_skill_lifecycle"><td><strong>Read-only install preview</strong><br><span>install_preview</span></td><td><span class="status-pill" data-status="preview_only">preview_only</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/install_preview.py</td><td>Real install writes require a separately approved lifecycle slice.</td></tr>
-        <tr data-capability-id="lockfile_preview" data-status="preview_only" data-pipeline-sections="public_sdk_surface,full_skill_lifecycle"><td><strong>Read-only lockfile preview</strong><br><span>lockfile_preview</span></td><td><span class="status-pill" data-status="preview_only">preview_only</span></td><td>Infrastructure/config/schemas/skills-sdk/lockfile-preview.v1.schema.json</td><td>Lockfile writes remain deferred until real install is approved.</td></tr>
+        <tr data-capability-id="lockfile_preview" data-status="preview_only" data-pipeline-sections="public_sdk_surface,full_skill_lifecycle"><td><strong>Read-only lockfile preview</strong><br><span>lockfile_preview</span></td><td><span class="status-pill" data-status="preview_only">preview_only</span></td><td>Infrastructure/config/schemas/skills-sdk/lockfile-preview.v1.schema.json</td><td>Lockfile write/update is covered by PU-009 real project install receipts.</td></tr>
         <tr data-capability-id="real_install" data-status="implemented" data-pipeline-sections="full_skill_lifecycle,public_sdk_surface"><td><strong>Real install writes</strong><br><span>real_install</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/project_install.py</td><td>Extend cleanup to richer restore semantics only when install receipts carry before-state proof.</td></tr>
         <tr data-capability-id="project_conformance" data-status="implemented" data-pipeline-sections="ci_and_adoption,public_sdk_surface,full_skill_lifecycle"><td><strong>Project conformance adoption gate</strong><br><span>project_conformance</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/project_conformance.py</td><td>Wire project conformance into broader repo adoption policy only after the read-only SDK project gate is stable.</td></tr>
         <tr data-capability-id="sdk_lenses" data-status="implemented" data-pipeline-sections="agent_execution_control_plane,knowledge_engineering,ci_and_adoption"><td><strong>SDK lens selection</strong><br><span>sdk_lenses</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/lenses.py</td><td>Use selected lenses to route bounded reviews; keep lens selection read-only and evidence-backed.</td></tr>
@@ -2356,6 +2444,44 @@
           <p>The package pipeline below is the compile and release center. The full lifecycle wraps it with discovery, operation, monitoring, update, rollback, and retirement.</p>
         </div>
         <div class="lifecycle-note">A skill is not done when it validates. It stays alive through runtime evidence, user feedback, security findings, stale context, dependency drift, and revoke or deprecation decisions.</div>
+      </div>
+      <div class="lifecycle-status" aria-label="Full Skill Lifecycle implementation status">
+        <div class="lifecycle-status-card" data-state="done">
+          <strong>Done: source, schema, check, receipts</strong>
+          <span>Canonical authoring, SDK check facade, manifest schema, receipt schema, risk classification, and typed artifact validation are implemented.</span>
+        </div>
+        <div class="lifecycle-status-card" data-state="done">
+          <strong>Done: project install lifecycle</strong>
+          <span>Install preview, real project install, lockfile updates through install receipts, project conformance, rollback, and uninstall are implemented or preview-backed.</span>
+        </div>
+        <div class="lifecycle-status-card" data-state="done">
+          <strong>Done: advisory review control plane</strong>
+          <span>SDK lenses, lens-routed review plans, and determinism audit are implemented as read-only evidence surfaces.</span>
+        </div>
+        <div class="lifecycle-status-card" data-state="partial">
+          <strong>Next: PU-015 review handoff</strong>
+          <span>Review-plan receipts need a bounded handoff receipt before any human or agent review lane can be tracked without confusing handoff with completion.</span>
+        </div>
+        <div class="lifecycle-status-card" data-state="partial">
+          <strong>Partial: local docs and previews</strong>
+          <span>Static HTML artifacts and preview commands are available, but hosted explorer publishing and remote registry surfaces remain outside the implemented SDK.</span>
+        </div>
+        <div class="lifecycle-status-card" data-state="blocked">
+          <strong>Blocked: signing and sandbox</strong>
+          <span>Signing needs key ownership and redaction policy. Sandbox needs a selected provider and adapter contract before execution receipts can be real.</span>
+        </div>
+        <div class="lifecycle-status-card" data-state="deferred">
+          <strong>Deferred: refs and eval adapters</strong>
+          <span>Reference ingestion, local eval runner fixtures, and security adapter discovery are still placeholder or optional lanes.</span>
+        </div>
+        <div class="lifecycle-status-card" data-state="deferred">
+          <strong>Deferred: package compiler and emitters</strong>
+          <span>Typed IR ownership, compiled package pipeline, emitter adapter contracts, package hardening, and CI adoption gates still need scoped slices.</span>
+        </div>
+        <div class="lifecycle-status-card" data-state="deferred">
+          <strong>Out of scope: hosted product surfaces</strong>
+          <span>Registry, marketplace, and publish are intentionally outside the current local SDK until service authority, signing, and package attestations are approved.</span>
+        </div>
       </div>
       <div class="governance-overlay" aria-label="Lifecycle governance overlay">
         <div class="governance-card"><strong>Lifecycle State Machine</strong><span>candidate -> draft -> signed -> staged -> GA -> suspended/quarantined -> deprecated -> archived -> decommissioned, with allowed reversals and blocked transitions.</span></div>

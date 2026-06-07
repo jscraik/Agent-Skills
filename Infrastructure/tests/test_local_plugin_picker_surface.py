@@ -6,6 +6,53 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 EXPECTED_SOURCE_PLUGIN_SKILLS = {
+    "aidevcon": {
+        "talk-azriel-executable-specs",
+        "talk-baker-sadogursky-context-engineering-skills",
+        "talk-batey-building-product-teams-age-of-ai",
+        "talk-birgitta-closing-keynote",
+        "talk-cormack-tests-lie-observability-ai",
+        "talk-debois-agent-enablement",
+        "talk-douglas-training-ai-on-your-own-code",
+        "talk-dubnov-merge-rate-ai-adoption",
+        "talk-farley-vibe-coding-best-we-can-do",
+        "talk-firtman-web-mcp-agentic-web",
+        "talk-foxwell-reinvention-dev-team",
+        "talk-groetzinger-skills-everywhere",
+        "talk-jones-odevo-ai-native-transformation",
+        "talk-jourdan-pipelines-to-prompts",
+        "talk-katsioloudes-code-security-ai",
+        "talk-kerr-bipolar-disorder-dysregulation-ai",
+        "talk-kushwaha-benchmarking-agent-era",
+        "talk-lamis-context-engineering-dreaming",
+        "talk-lawson-agent-experience",
+        "talk-lopopolo-harness-engineering",
+        "talk-luebken-embedding-pi-coding-agent",
+        "talk-maleix-collective-intelligence",
+        "talk-maple-aind-devcon-welcome",
+        "talk-marsden-agent-desktops",
+        "talk-martinelli-spec-driven-development",
+        "talk-moss-skills-team-workflow",
+        "talk-obstbaum-willoughby-vibes-to-metrics",
+        "talk-overweg-one-brain-no-filtering",
+        "talk-podjarny-skills-are-the-new-code",
+        "talk-roberts-ai-native-brownfield",
+        "talk-roberts-brownfield-ai-native",
+        "talk-ruiz-agents-on-canvas-tldraw",
+        "talk-scheire-artificial-intelligence",
+        "talk-selajev-docker-sandboxes-agents",
+        "talk-sloan-harness-engineering-beyond-code",
+        "talk-smith-connecting-context-future-transports",
+        "talk-stack-humans-architect-ai-writes-code",
+        "talk-stoneham-product-brain",
+        "talk-syme-agentic-repository-automation",
+        "talk-tal-skills-security",
+        "talk-thomas-ai-native-engineering",
+        "talk-trieloff-browser-agents",
+        "talk-walter-runtime-intelligence-agents",
+        "talk-wilson-cq-stack-overflow-for-agents",
+        "talk-wotherspoon-humans-vs-slop",
+    },
     "harness-engineering": {
         "he-brainstorm",
         "he-code-review",
@@ -52,6 +99,7 @@ EXPECTED_SOURCE_PLUGIN_SKILLS = {
 }
 
 EXPECTED_MARKETPLACE_SOURCE_PATHS = {
+    "aidevcon": "./Plugins/aidevcon",
     "harness-engineering": "./Plugins/harness-engineering",
     "plugin-factory": "./Plugins/plugin-factory",
     "skill-factory": "./Plugins/skill-factory",
@@ -288,21 +336,20 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
                 f"{plugin_name} manifest should not advertise hidden system-bridge skills",
             )
 
-    def test_runtime_cache_does_not_duplicate_command_handle_skills(self) -> None:
+    def test_runtime_cache_preserves_manifest_declared_skills(self) -> None:
         """
-        Verify the generated local plugin cache cannot duplicate real command handles.
+        Verify the generated local plugin cache preserves loader-declared skills.
 
-        The Codex picker has historically scanned plugin cache contents more broadly than
-        the manifest-declared skills root. This guard fails when the runtime cache prunes
-        plugin skills based on stale generated metadata, contains real command-handle-owned
-        skills, duplicates skill names inside a plugin, or exposes system bridge skills.
+        Duplicate suppression belongs in picker/projection surfaces, not the
+        Codex loader package cache. The runtime cache must remain a complete
+        plugin package so Codex Desktop can load the manifest-declared skills.
         """
         runtime_root = REPO_ROOT / ".agents" / "plugins-runtime" / "cache" / "agent-skills-local"
         if not runtime_root.exists():
             self.skipTest("local plugin runtime cache has not been generated")
 
         for plugin_name in EXPECTED_SOURCE_PLUGIN_SKILLS:
-            expected_skill_names = _expected_cache_skill_names(plugin_name)
+            expected_skill_names = EXPECTED_SOURCE_PLUGIN_SKILLS[plugin_name] - HIDDEN_PICKER_COMPATIBILITY_SKILLS
             plugin_root = runtime_root / plugin_name
             self.assertTrue(
                 plugin_root.is_dir(),
@@ -324,27 +371,27 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
             self.assertEqual(
                 set(discovered),
                 expected_skill_names,
-                f"{plugin_name} runtime cache picker surface drifted",
+                f"{plugin_name} runtime cache loader package drifted",
             )
             self.assertFalse(
                 SYSTEM_BRIDGE_SKILL_NAMES & set(discovered),
                 f"{plugin_name} runtime cache should not expose system bridge skills as personal skills",
             )
 
-    def test_versioned_plugin_cache_does_not_duplicate_command_handle_skills(self) -> None:
+    def test_versioned_plugin_cache_preserves_manifest_declared_skills(self) -> None:
         """
-        Verify the local versioned plugin cache does not expose real command-handle-owned skills.
+        Verify the local versioned plugin cache preserves loader-declared skills.
 
-        Some picker paths still inspect Plugins/cache/agent-skills-local/<plugin>/<version>/skills.
-        This guard keeps that cache aligned with the first-level plugin surface, except for
-        plugin skills that have an actual generated `.agents/skills/<handle>` command surface.
+        Some loader paths still inspect
+        "Plugins/cache/agent-skills-local/<plugin>/<version>/skills".
+        Keep that package cache aligned with the first-level plugin surface.
         """
         cache_root = REPO_ROOT / "Plugins" / "cache" / "agent-skills-local"
         if not cache_root.exists():
             self.skipTest("versioned local plugin cache has not been generated")
 
         for plugin_name in EXPECTED_SOURCE_PLUGIN_SKILLS:
-            expected_skill_names = _expected_cache_skill_names(plugin_name)
+            expected_skill_names = EXPECTED_SOURCE_PLUGIN_SKILLS[plugin_name] - HIDDEN_PICKER_COMPATIBILITY_SKILLS
             plugin_cache_root = cache_root / plugin_name
             self.assertTrue(
                 plugin_cache_root.exists(),

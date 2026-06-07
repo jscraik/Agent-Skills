@@ -70,12 +70,6 @@ MIRROR_PROJECTIONS: tuple[MirrorProjection, ...] = (
         replace_before_sync=True,
         excluded_dir_names=(
             "fixtures",
-            "skills",
-            "team_automation",
-            "code_quality_review",
-            "scaffolding_templates",
-            "infrastructure_ops",
-            "data_fetch_analysis",
         ),
     ),
     MirrorProjection(
@@ -88,12 +82,6 @@ MIRROR_PROJECTIONS: tuple[MirrorProjection, ...] = (
         replace_before_sync=True,
         excluded_dir_names=(
             "fixtures",
-            "skills",
-            "team_automation",
-            "code_quality_review",
-            "scaffolding_templates",
-            "infrastructure_ops",
-            "data_fetch_analysis",
         ),
     ),
     MirrorProjection(
@@ -106,12 +94,6 @@ MIRROR_PROJECTIONS: tuple[MirrorProjection, ...] = (
         replace_before_sync=True,
         excluded_dir_names=(
             "fixtures",
-            "skills",
-            "team_automation",
-            "code_quality_review",
-            "scaffolding_templates",
-            "infrastructure_ops",
-            "data_fetch_analysis",
         ),
     ),
 )

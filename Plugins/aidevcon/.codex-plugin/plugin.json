@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "name": "aidevcon",
+  "version": "0.100.8",
+  "description": "AI Native DevCon 2026 London sessions as interactive Codex skills.",
+  "author": {
+    "name": "AI Native DevCon",
+    "url": "https://github.com/ainativedev"
+  },
+  "homepage": "https://github.com/ainativedev/aidevcon-2026-ldn",
+  "repository": "https://github.com/ainativedev/aidevcon-2026-ldn",
+  "license": "UNLICENSED",
+  "keywords": [
+    "plugin",
+    "aidevcon",
+    "ai-native-devcon",
+    "conference",
+    "codex",
+    "tessl"
+  ],
+  "governance": {
+    "lifecycle_state": "incubating",
+    "maturity": "experimental",
+    "owner": "Agent Skills Team",
+    "review_cadence": "monthly",
+    "last_reviewed": "2026-06-07",
+    "metadata_source": "plugin_manifest"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "AI Native DevCon 2026 London",
+    "shortDescription": "Explore AI Native DevCon 2026 London talk transcripts, outlines, and quotes.",
+    "longDescription": "A local Codex plugin wrapping the Tessl tile ainativedev/aidevcon-2026-ldn@0.100.8. It contains one skill per AI Native DevCon 2026 London session, each grounded in bundled transcript, outline, and quote files.",
+    "developerName": "AI Native DevCon",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read"
+    ],
+    "websiteURL": "https://github.com/ainativedev/aidevcon-2026-ldn",
+    "privacyPolicyURL": "https://github.com/ainativedev/aidevcon-2026-ldn",
+    "termsOfServiceURL": "https://github.com/ainativedev/aidevcon-2026-ldn",
+    "defaultPrompt": [
+      "Help me explore AI Native DevCon 2026 London sessions."
+    ],
+    "brandColor": "#3B82F6"
+  }
+}
