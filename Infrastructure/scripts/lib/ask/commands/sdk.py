@@ -6,6 +6,15 @@ from pathlib import Path
 import ask.commands.skills as skills_commands
 from ask.envelope import CallResult, ErrorObject
 from ask.cli_errors import build_unknown_action_result
+from ask.skills_sdk.determinism import audit_skill_determinism
+from ask.skills_sdk.lenses import (
+    KNOWN_TASK_INTENTS,
+    LensCatalogError,
+    explain_lens,
+    list_lenses,
+    select_lenses,
+    validate_lens_catalog,
+)
 from ask.skills_sdk.placeholder_lifecycle import SURFACES
 
 
@@ -103,6 +112,93 @@ def add_sdk_parser(
             required=True,
             help="Absolute marked project root to inspect without mutation",
         )
+    sdk_lenses_parser = sdk_subparsers.add_parser(
+        "lenses",
+        help="List, explain, validate, or select generic SDK lenses",
+        parents=[global_parser],
+    )
+    sdk_lenses_subparsers = sdk_lenses_parser.add_subparsers(dest="lenses_action", required=True)
+    sdk_lenses_list_parser = sdk_lenses_subparsers.add_parser(
+        "list",
+        help="List the shared SDK lens catalog",
+        parents=[global_parser],
+    )
+    sdk_lenses_explain_parser = sdk_lenses_subparsers.add_parser(
+        "explain",
+        help="Explain one shared SDK lens",
+        parents=[global_parser],
+    )
+    sdk_lenses_explain_parser.add_argument("lens_id", help="Lens id, for example lens.progressive-disclosure")
+    sdk_lenses_validate_parser = sdk_lenses_subparsers.add_parser(
+        "validate",
+        help="Validate the shared SDK lens catalog",
+        parents=[global_parser],
+    )
+    sdk_lenses_select_parser = sdk_lenses_subparsers.add_parser(
+        "select",
+        help="Select shared SDK lenses for a task using deterministic signals",
+        parents=[global_parser],
+    )
+    sdk_lenses_select_parser.add_argument("--prompt", required=True, help="Task prompt or summary to route through lenses")
+    sdk_lenses_select_parser.add_argument("--skill", help="Optional skill handle or path receiving the lenses")
+    sdk_lenses_select_parser.add_argument(
+        "--intent",
+        "--task-intent",
+        dest="task_intent",
+        choices=list(KNOWN_TASK_INTENTS),
+        help="Optional normalized task intent; inferred from prompt when omitted",
+    )
+    sdk_lenses_select_parser.add_argument(
+        "--repo-file",
+        action="append",
+        default=[],
+        help="Repo-relative file signal to include in selection; repeat for multiple files",
+    )
+    sdk_lenses_select_parser.add_argument(
+        "--max-lenses",
+        type=int,
+        default=4,
+        help="Maximum selected lenses to return",
+    )
+    for parser_with_registry in (
+        sdk_lenses_parser,
+        sdk_lenses_list_parser,
+        sdk_lenses_explain_parser,
+        sdk_lenses_validate_parser,
+        sdk_lenses_select_parser,
+    ):
+        parser_with_registry.add_argument(
+            "--registry",
+            help="Optional repo-relative or absolute lens registry path",
+        )
+    sdk_determinism_parser = sdk_subparsers.add_parser(
+        "determinism",
+        help="Find skill guidance that can become deterministic SDK checks",
+        parents=[global_parser],
+    )
+    sdk_determinism_subparsers = sdk_determinism_parser.add_subparsers(dest="determinism_action", required=True)
+    sdk_determinism_audit_parser = sdk_determinism_subparsers.add_parser(
+        "audit",
+        help="Audit skills for prompt-only rules that can become validators, schemas, or selectors",
+        parents=[global_parser],
+    )
+    sdk_determinism_audit_parser.add_argument(
+        "--scope",
+        choices=["skills"],
+        default="skills",
+        help="Audit scope; currently scans canonical skill source roots",
+    )
+    sdk_determinism_audit_parser.add_argument(
+        "--path",
+        action="append",
+        default=[],
+        help="Skill directory or SKILL.md path to audit; repeat for multiple paths",
+    )
+    sdk_determinism_audit_parser.add_argument(
+        "--limit",
+        type=int,
+        help="Limit returned candidates after deterministic priority sorting",
+    )
 
 
 def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
@@ -218,4 +314,91 @@ def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
                 mode=args.project_action,
             )
         return build_unknown_action_result("sdk", args.project_action)
+    if args.action == "lenses":
+        return _dispatch_sdk_lenses(repo_root, args)
+    if args.action == "determinism":
+        return _dispatch_sdk_determinism(repo_root, args)
     return build_unknown_action_result("sdk", args.action)
+
+
+def _dispatch_sdk_lenses(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    result = CallResult(status="success")
+    command_action = args.lenses_action
+    result.metadata["command"] = f"sdk lenses {command_action}"
+    try:
+        if command_action == "list":
+            result.data["lens_catalog"] = list_lenses(repo_root, registry_path=args.registry)
+            return result
+        if command_action == "explain":
+            result.data["lens"] = explain_lens(repo_root, args.lens_id, registry_path=args.registry)
+            return result
+        if command_action == "validate":
+            validation = validate_lens_catalog(repo_root, registry_path=args.registry)
+            result.data["lens_catalog_validation"] = validation
+            if validation["status"] != "pass":
+                result.status = "error"
+                result.errors.append(
+                    ErrorObject(
+                        code="ERR_VALIDATION",
+                        message="Shared SDK lens catalog validation failed.",
+                        fix_suggestion="Run ask sdk lenses validate --json --robot and fix the reported findings.",
+                    )
+                )
+            return result
+        if command_action == "select":
+            selection = select_lenses(
+                repo_root,
+                prompt=args.prompt,
+                task_intent=args.task_intent,
+                repo_files=args.repo_file,
+                max_lenses=args.max_lenses,
+                skill=args.skill,
+                registry_path=args.registry,
+            )
+            result.data["lens_selection"] = selection
+            if selection["status"] != "pass":
+                result.status = "error"
+                result.errors.append(
+                    ErrorObject(
+                        code="ERR_VALIDATION",
+                        message="Shared SDK lens selection could not run because catalog validation failed.",
+                        fix_suggestion="Run ask sdk lenses validate --json --robot and fix the reported findings.",
+                    )
+                )
+            return result
+    except LensCatalogError as exc:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=str(exc),
+                fix_suggestion="Run ask sdk lenses validate --json --robot to inspect the shared lens catalog.",
+            )
+        )
+        return result
+    return build_unknown_action_result("sdk lenses", command_action)
+
+
+def _dispatch_sdk_determinism(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    result = CallResult(status="success")
+    command_action = args.determinism_action
+    result.metadata["command"] = f"sdk determinism {command_action}"
+    if command_action == "audit":
+        try:
+            result.data["determinism_audit"] = audit_skill_determinism(
+                repo_root,
+                scope=args.scope,
+                paths=args.path,
+                limit=args.limit,
+            )
+        except ValueError as exc:
+            result.status = "error"
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_VALIDATION",
+                    message=str(exc),
+                    fix_suggestion="Run ask sdk determinism audit --scope skills --json --robot.",
+                )
+            )
+        return result
+    return build_unknown_action_result("sdk determinism", command_action)

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jscraik.local/agent-skills/schemas/skill-lens-selection.v1.schema.json",
+  "title": "Skill SDK Lens Selection",
+  "type": "object",
+  "required": ["schema_version", "status", "task_intent", "selected_lenses"],
+  "properties": {
+    "schema_version": {"const": "skill-lens-selection.v1"},
+    "status": {"enum": ["pass", "fail"]},
+    "skill": {"type": "string"},
+    "task_intent": {"type": "string"},
+    "selected_lenses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "path", "score", "reasons"],
+        "properties": {
+          "id": {"type": "string"},
+          "path": {"type": "string"},
+          "score": {"type": "integer"},
+          "reasons": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    }
+  }
+}

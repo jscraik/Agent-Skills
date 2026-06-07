@@ -100,6 +100,9 @@ DOCTOR_CONTRACT_SCHEMA_VERSIONS: dict[str, str] = {
     "profiles": "skill-operation-profiles.v1",
     "package": "skill-package-readiness.v1",
     "memory": "skill-memory-provider.v1",
+    "lens_registry": "skill-lens-registry.v1",
+    "lens_selection": "skill-lens-selection.v1",
+    "determinism_audit": "skill-determinism-audit.v1",
 }
 
 EVAL_BLOCKER_CLASSES: list[str] = [

@@ -1,0 +1,81 @@
+version: 1
+catalog_id: sdk.global-lenses
+
+lenses:
+  - id: lens.progressive-disclosure
+    path: lenses/progressive-disclosure.md
+    priority: 90
+    triggers:
+      keywords:
+        - progressive disclosure
+        - references
+        - hot path
+        - context budget
+        - SKILL.md
+        - heading
+        - optional heading
+        - agent usability
+      task_intents:
+        - skill_authoring
+        - documentation_review
+        - reference_design
+        - agent_workflow_design
+        - sdk_contract_review
+      file_signals:
+        - SKILL.md
+        - references/
+        - schemas/
+        - AGENTS.md
+        - README.md
+
+  - id: lens.testing-confidence
+    path: lenses/testing-confidence.md
+    priority: 85
+    triggers:
+      keywords:
+        - test
+        - tests
+        - validation
+        - regression
+        - confidence
+        - CI
+        - eval
+        - fixture
+      task_intents:
+        - validation_review
+        - refactor_plan
+        - skill_authoring
+        - sdk_contract_review
+      file_signals:
+        - tests/
+        - test/
+        - pytest.ini
+        - vitest.config.ts
+        - playwright.config.ts
+        - .github/workflows/
+        - references/evals.yaml
+
+  - id: lens.operator-evidence
+    path: lenses/operator-evidence.md
+    priority: 88
+    triggers:
+      keywords:
+        - evidence
+        - proof
+        - receipt
+        - closeout
+        - handoff
+        - validation gate
+        - blocked
+        - runtime truth
+      task_intents:
+        - validation_review
+        - agent_workflow_design
+        - sdk_contract_review
+        - repo_hygiene
+      file_signals:
+        - .harness/
+        - artifacts/
+        - AGENTS.md
+        - README.md
+        - scripts/
