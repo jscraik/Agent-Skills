@@ -94,6 +94,18 @@ class TestSkillsSdkCapabilityStatus(unittest.TestCase):
 
         self.assertEqual(mutating_ids, MUTATING_CAPABILITY_IDS)
 
+    def test_lenses_and_determinism_are_read_only_advisory_capabilities(self) -> None:
+        matrix = load_capability_matrix(REPO_ROOT)
+        by_id = {row["id"]: row for row in matrix["capabilities"]}
+
+        for capability_id in ("sdk_lenses", "determinism_audit"):
+            with self.subTest(capability=capability_id):
+                capability = by_id[capability_id]
+                self.assertEqual(capability["status"], "implemented")
+                self.assertTrue(capability["feature_executed"])
+                self.assertFalse(capability["mutation_performed"])
+                self.assertTrue(any("./bin/ask sdk" in ref for ref in capability["evidence_refs"]))
+
     def test_matrix_rejects_preview_mutation_claims(self) -> None:
         matrix = load_capability_matrix(REPO_ROOT)
         bad_matrix = json.loads(json.dumps(matrix))

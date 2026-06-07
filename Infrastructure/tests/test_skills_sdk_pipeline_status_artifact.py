@@ -1,6 +1,7 @@
 import json
 import re
 import subprocess
+import sys
 import unittest
 from html.parser import HTMLParser
 from pathlib import Path
@@ -50,7 +51,7 @@ class TestSkillsSdkPipelineStatusArtifact(unittest.TestCase):
         cls.html = HTML_PATH.read_text(encoding="utf-8")
         cls.matrix = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
         completed = subprocess.run(
-            ["./bin/ask", "sdk", "status", "--json", "--robot"],
+            [sys.executable, "Infrastructure/bin/ask", "sdk", "status", "--json", "--robot"],
             cwd=REPO_ROOT,
             text=True,
             capture_output=True,
