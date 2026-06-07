@@ -518,7 +518,7 @@ class TestAskPluginsState(unittest.TestCase):
             activation_plugin["cache_issues"],
         )
 
-    def test_doctor_treats_missing_cache_as_blocker(self) -> None:
+    def test_doctor_treats_missing_cache_as_warning(self) -> None:
         cache_root = self.repo_root / ".agents" / "plugins-runtime" / "cache"
         shutil.rmtree(cache_root, ignore_errors=True)
 
@@ -533,11 +533,11 @@ class TestAskPluginsState(unittest.TestCase):
         ):
             result = doctor_plugins_state(self.repo_root)
 
-        self.assertEqual(result.status, "error")
-        self.assertEqual(result.data["health_state"]["status"], "degraded")
+        self.assertEqual(result.status, "success")
+        self.assertEqual(result.data["health_state"]["status"], "healthy")
         activation = result.data["health_state"]["checks"]["activation"]
         self.assertTrue(activation["missing_cache_plugins"])
-        self.assertTrue(activation["cache_content_blockers"])
+        self.assertFalse(activation["cache_content_blockers"])
         self.assertTrue(activation["warnings"])
 
     def test_status_plugin_state_errors_when_missing(self) -> None:

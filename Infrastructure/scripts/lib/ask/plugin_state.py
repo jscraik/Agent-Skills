@@ -1147,7 +1147,10 @@ def collect_plugin_state(
             "issues": item.get("cache_issues", []),
         }
         for item in activation_rows
-        if item.get("name") and item.get("repo_managed") and not item.get("cache_content_ready")
+        if item.get("name")
+        and item.get("repo_managed")
+        and item.get("cache_present")
+        and not item.get("cache_content_ready")
     ]
     activation_warnings: list[str] = []
     if marketplace_error:
