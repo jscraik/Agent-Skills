@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/sdk-review-plan-trace.v1.schema.json",
+  "title": "Skills SDK review plan trace v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "schema_uri",
+    "receipt_path",
+    "receipt_instance_id",
+    "receipt_sha256",
+    "repo_root",
+    "head_sha",
+    "branch",
+    "branch_policy",
+    "target_input",
+    "target_identity",
+    "target_resolved_path",
+    "target_content_digest",
+    "target_digest_status",
+    "created_by_command"
+  ],
+  "properties": {
+    "schema_version": {"const": "skills-sdk.review-plan-trace.v1"},
+    "schema_uri": {
+      "const": "https://jscraik.local/agent-skills/schemas/skills-sdk/sdk-review-plan-trace.v1.schema.json"
+    },
+    "receipt_path": {"type": "string", "minLength": 1},
+    "receipt_instance_id": {"type": "string", "minLength": 1},
+    "receipt_sha256": {"type": "string", "minLength": 64},
+    "repo_root": {"type": "string", "minLength": 1},
+    "head_sha": {"type": "string", "minLength": 1},
+    "branch": {"type": "string", "minLength": 1},
+    "branch_policy": {"const": "same_head_required"},
+    "target_input": {"type": "string", "minLength": 1},
+    "target_identity": {"type": "string", "minLength": 1},
+    "target_resolved_path": {"type": ["string", "null"]},
+    "target_content_digest": {"type": ["string", "null"]},
+    "target_digest_status": {"enum": ["available", "unsupported_directory", "not_applicable_unresolved_handle"]},
+    "created_by_command": {"type": "string", "minLength": 1}
+  }
+}

@@ -2250,6 +2250,7 @@
         <span>Project conformance is implemented as a read-only adoption gate for marked project roots.</span>
         <span>SDK lenses are implemented as deterministic read-only review selection receipts.</span>
         <span>Lens-routed review plans are implemented as read-only advisory handoff receipts.</span>
+        <span>Review handoff receipts are implemented as read-only verified handoff receipts that do not prove reviewer completion.</span>
         <span>Determinism audit is implemented as an advisory read-only candidate report.</span>
         <span>Bootstrap now proves the active worktree path and shim identity before closeout.</span>
         <span>Repo-surface policy forbids any or unknown ownership classifications.</span>
@@ -2260,11 +2261,11 @@
       <div class="next-slice-proof" aria-label="PU-015 sync point">
         <div>
           <strong>PU-015 sync point</strong>
-          <span><code>review_plan</code> is implemented. The next SDK slice should consume those receipts and produce bounded review handoff receipts.</span>
+          <span><code>review_handoff</code> is implemented. The next SDK slice should execute bounded reviewer lanes from verified handoff receipts without confusing handoff with completion.</span>
         </div>
         <div>
           <strong>Capability truth alignment</strong>
-          <span>PU-015 belongs after <code>sdk_lenses</code> and <code>review_plan</code>, before real agent execution. It should validate a review-plan receipt, refuse stale or mismatched inputs, record reviewer roles and required artifacts, and avoid claiming the review is complete.</span>
+          <span>PU-015 sits after <code>sdk_lenses</code> and <code>review_plan</code>, before real agent execution. It validates a review-plan receipt, refuses stale or mismatched inputs, records reviewer roles and required artifacts, and avoids claiming the review is complete.</span>
         </div>
       </div>
       <table class="status-grid">
@@ -2283,6 +2284,7 @@
         <tr data-capability-id="project_conformance" data-status="implemented" data-pipeline-sections="ci_and_adoption,public_sdk_surface,full_skill_lifecycle"><td><strong>Project conformance adoption gate</strong><br><span>project_conformance</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/project_conformance.py</td><td>Wire project conformance into broader repo adoption policy only after the read-only SDK project gate is stable.</td></tr>
         <tr data-capability-id="sdk_lenses" data-status="implemented" data-pipeline-sections="agent_execution_control_plane,knowledge_engineering,ci_and_adoption"><td><strong>SDK lens selection</strong><br><span>sdk_lenses</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/lenses.py</td><td>Use selected lenses to route bounded reviews; keep lens selection read-only and evidence-backed.</td></tr>
         <tr data-capability-id="review_plan" data-status="implemented" data-pipeline-sections="agent_execution_control_plane,knowledge_engineering,ci_and_adoption"><td><strong>Lens-routed review plan receipts</strong><br><span>review_plan</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/review_plan.py</td><td>Use review plan receipts to hand off bounded human or agent reviews without treating the receipt as review completion.</td></tr>
+        <tr data-capability-id="review_handoff" data-status="implemented" data-pipeline-sections="agent_execution_control_plane,knowledge_engineering,ci_and_adoption"><td><strong>Review handoff receipts</strong><br><span>review_handoff</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/review_handoff.py</td><td>Execute bounded reviewer agents only after handoff receipts define roles, required artifacts, and not-proven lanes.</td></tr>
         <tr data-capability-id="determinism_audit" data-status="implemented" data-pipeline-sections="agent_execution_control_plane,knowledge_engineering,ci_and_adoption"><td><strong>Determinism audit</strong><br><span>determinism_audit</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/determinism.py</td><td>Promote individual audit candidates through scoped validator or skill-authoring slices after owner review.</td></tr>
         <tr data-capability-id="trust_store" data-status="deferred" data-pipeline-sections="release_decision_matrix,agent_execution_control_plane"><td><strong>Trust-store mutation</strong><br><span>trust_store</span></td><td><span class="status-pill" data-status="deferred">deferred</span></td><td>future Skills SDK trust lifecycle</td><td>Define trust-store ownership and rollback before any mutation.</td></tr>
         <tr data-capability-id="refs_ingestion" data-status="placeholder_optional" data-pipeline-sections="knowledge_engineering,full_skill_lifecycle"><td><strong>Reference ingestion</strong><br><span>refs_ingestion</span></td><td><span class="status-pill" data-status="placeholder_optional">placeholder_optional</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/placeholder_lifecycle.py</td><td>Implement refs ingestion adapter with fixtures and no-network fallback.</td></tr>
@@ -2459,11 +2461,11 @@
         </div>
         <div class="lifecycle-status-card" data-state="done">
           <strong>Done: advisory review control plane</strong>
-          <span>SDK lenses, lens-routed review plans, and determinism audit are implemented as read-only evidence surfaces.</span>
+          <span>SDK lenses, lens-routed review plans, review handoff receipts, and determinism audit are implemented as read-only evidence surfaces.</span>
         </div>
         <div class="lifecycle-status-card" data-state="partial">
-          <strong>Next: PU-015 review handoff</strong>
-          <span>Review-plan receipts need a bounded handoff receipt before any human or agent review lane can be tracked without confusing handoff with completion.</span>
+          <strong>Next: reviewer execution</strong>
+          <span>Verified handoff receipts can now feed bounded human or agent review lanes without treating handoff as completed review evidence.</span>
         </div>
         <div class="lifecycle-status-card" data-state="partial">
           <strong>Partial: local docs and previews</strong>

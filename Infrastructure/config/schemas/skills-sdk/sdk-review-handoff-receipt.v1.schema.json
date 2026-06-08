@@ -1,0 +1,95 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/sdk-review-handoff-receipt.v1.schema.json",
+  "title": "Skills SDK review handoff receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "schema_uri",
+    "status",
+    "source_review_plan",
+    "source_context",
+    "source_trace",
+    "target",
+    "target_kind",
+    "task_intent",
+    "selected_lenses",
+    "reviewer_roles",
+    "required_artifacts",
+    "evidence_boundaries",
+    "not_proven",
+    "next_commands",
+    "mutation_performed",
+    "receipt_written",
+    "receipt_path"
+  ],
+  "properties": {
+    "schema_version": {"const": "skills-sdk.review-handoff-receipt.v1"},
+    "schema_uri": {
+      "const": "https://jscraik.local/agent-skills/schemas/skills-sdk/sdk-review-handoff-receipt.v1.schema.json"
+    },
+    "status": {"const": "pass"},
+    "source_review_plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "schema_version", "receipt_sha256", "receipt_instance_id"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "schema_version": {"const": "skills-sdk.review-plan-receipt.v1"},
+        "receipt_sha256": {"type": "string", "minLength": 64},
+        "receipt_instance_id": {"type": "string", "minLength": 1}
+      }
+    },
+    "source_context": {
+      "$ref": "sdk-review-plan-receipt.v1.schema.json#/definitions/source_context"
+    },
+    "source_trace": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "receipt_sha256", "receipt_instance_id", "branch_policy"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "receipt_sha256": {"type": "string", "minLength": 64},
+        "receipt_instance_id": {"type": "string", "minLength": 1},
+        "branch_policy": {"const": "same_head_required"}
+      }
+    },
+    "target": {"type": "string", "minLength": 1},
+    "target_kind": {"enum": ["repo_path", "skill_source"]},
+    "task_intent": {"type": "string", "minLength": 1},
+    "selected_lenses": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "reviewer_roles": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "required_artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "evidence_boundaries": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "not_proven": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "next_commands": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "mutation_performed": {"const": false},
+    "receipt_written": {"type": "boolean"},
+    "receipt_path": {"type": ["string", "null"]}
+  }
+}

@@ -19,6 +19,9 @@ SCHEMA_NAMES = {
     "lockfile": "lockfile.v1.schema.json",
     "project-conformance-receipt": "project-conformance-receipt.v1.schema.json",
     "placeholder-lifecycle": "placeholder-lifecycle.v1.schema.json",
+    "review-plan-receipt": "sdk-review-plan-receipt.v1.schema.json",
+    "review-plan-trace": "sdk-review-plan-trace.v1.schema.json",
+    "review-handoff-receipt": "sdk-review-handoff-receipt.v1.schema.json",
 }
 
 
@@ -124,6 +127,26 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
 
         self.assertIn(payload["status"], {"not_run", "skipped_optional", "blocked"})
         self.assertFalse(payload["feature_executed"])
+
+    def test_review_plan_fixture_records_source_context_for_handoff(self) -> None:
+        payload = self.assert_valid("review-plan-receipt", "review-plan-receipt.json")
+
+        self.assertEqual(payload["source_context"]["branch_policy"], "same_head_required")
+        self.assertEqual(payload["source_context"]["target_digest_status"], "available")
+        self.assertFalse(payload["mutation_performed"])
+
+    def test_review_plan_trace_fixture_records_sidecar_integrity(self) -> None:
+        payload = self.assert_valid("review-plan-trace", "review-plan-trace.json")
+
+        self.assertEqual(payload["schema_version"], "skills-sdk.review-plan-trace.v1")
+        self.assertEqual(payload["branch_policy"], "same_head_required")
+
+    def test_review_handoff_fixture_keeps_completion_lanes_not_proven(self) -> None:
+        payload = self.assert_valid("review-handoff-receipt", "review-handoff-receipt.json")
+
+        self.assertEqual(payload["source_review_plan"]["schema_version"], "skills-sdk.review-plan-receipt.v1")
+        self.assertIn("reviewers_completed", payload["not_proven"])
+        self.assertFalse(payload["mutation_performed"])
 
     def test_receipt_schema_rejects_non_contract_status_names(self) -> None:
         self.assert_invalid("check-receipt", "check-receipt-pass-placeholder.json")

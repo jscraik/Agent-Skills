@@ -18,12 +18,15 @@ from ask.command_metadata import COMMAND_EXAMPLES, VALID_ACTIONS  # noqa: E402
 from ask.commands.sdk import _dispatch_sdk_review  # noqa: E402
 from ask.skills_sdk.lenses import KNOWN_TASK_INTENTS, LensCatalogError  # noqa: E402
 from ask.skills_sdk.review_plan import (  # noqa: E402
+    TRACE_DIR,
+    canonical_receipt_digest,
     REVIEW_PLAN_SCHEMA_VERSION,
     build_review_plan,
 )
 
 
 SCHEMA_PATH = REPO_ROOT / "Infrastructure/config/schemas/skills-sdk/sdk-review-plan-receipt.v1.schema.json"
+TRACE_SCHEMA_PATH = REPO_ROOT / "Infrastructure/config/schemas/skills-sdk/sdk-review-plan-trace.v1.schema.json"
 
 
 def _command_env() -> dict[str, str]:
@@ -61,6 +64,7 @@ class TestSkillsSdkReviewPlan(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+        cls.trace_schema = json.loads(TRACE_SCHEMA_PATH.read_text(encoding="utf-8"))
 
     def test_review_plan_receipt_is_schema_valid_for_skill_target(self) -> None:
         receipt = build_review_plan(
@@ -77,6 +81,9 @@ class TestSkillsSdkReviewPlan(unittest.TestCase):
         self.assertFalse(receipt["mutation_performed"])
         self.assertFalse(receipt["receipt_written"])
         self.assertIsNone(receipt["receipt_path"])
+        self.assertEqual(receipt["source_context"]["branch_policy"], "same_head_required")
+        self.assertEqual(receipt["source_context"]["target_digest_status"], "available")
+        self.assertEqual(receipt["source_context"]["target_resolved_path"], "Skills/agent-ops/simplify")
         self.assertGreaterEqual(len(receipt["selected_lenses"]), 1)
 
     def test_review_plan_selection_and_next_commands_are_deterministic(self) -> None:
@@ -214,9 +221,19 @@ class TestSkillsSdkReviewPlan(unittest.TestCase):
             self.assertTrue(receipt_path.exists())
             written = json.loads(receipt_path.read_text(encoding="utf-8"))
             _validate_schema_subset(self.schema, written, {"sdk-review-plan": self.schema})
+            trace_path = REPO_ROOT / TRACE_DIR / f"{canonical_receipt_digest(written)}.trace.json"
+            self.assertTrue(trace_path.exists())
+            trace = json.loads(trace_path.read_text(encoding="utf-8"))
+            _validate_schema_subset(self.trace_schema, trace, {"sdk-review-plan-trace": self.trace_schema})
+            self.assertEqual(trace["receipt_path"], ".harness/artifacts/sdk-review-plan/test-review-plan.json")
+            self.assertEqual(trace["receipt_instance_id"], written["source_context"]["receipt_instance_id"])
         finally:
             if receipt_path.exists():
                 receipt_path.unlink()
+            if "written" in locals():
+                trace_path = REPO_ROOT / TRACE_DIR / f"{canonical_receipt_digest(written)}.trace.json"
+                if trace_path.exists():
+                    trace_path.unlink()
 
     def test_handle_like_target_is_classified_without_file_claim(self) -> None:
         receipt = build_review_plan(
@@ -228,6 +245,35 @@ class TestSkillsSdkReviewPlan(unittest.TestCase):
 
         self.assertEqual(receipt["target_kind"], "unresolved_handle")
         self.assertIn("target_not_resolved_to_repo_path", receipt["risk_flags"])
+        self.assertEqual(receipt["source_context"]["target_digest_status"], "not_applicable_unresolved_handle")
+        self.assertIsNone(receipt["source_context"]["target_resolved_path"])
+
+    def test_directory_target_with_symlink_fails_closed_before_digesting_external_content(self) -> None:
+        target_dir = REPO_ROOT / ".harness/artifacts/sdk-review-plan/symlink-target"
+        target_dir.mkdir(parents=True, exist_ok=True)
+        local_file = target_dir / "local.txt"
+        symlink_path = target_dir / "linked-outside.txt"
+        try:
+            local_file.write_text("local\n", encoding="utf-8")
+            with tempfile.TemporaryDirectory() as temp_dir:
+                outside_file = Path(temp_dir) / "outside.txt"
+                outside_file.write_text("outside\n", encoding="utf-8")
+                symlink_path.symlink_to(outside_file)
+
+                with self.assertRaisesRegex(ValueError, "target directory contains symlink"):
+                    build_review_plan(
+                        REPO_ROOT,
+                        target=".harness/artifacts/sdk-review-plan/symlink-target",
+                        task_intent="validation_review",
+                        max_lenses=1,
+                    )
+        finally:
+            if symlink_path.exists() or symlink_path.is_symlink():
+                symlink_path.unlink()
+            if local_file.exists():
+                local_file.unlink()
+            if target_dir.exists():
+                target_dir.rmdir()
 
     def test_typoed_repo_relative_path_fails_instead_of_becoming_handle(self) -> None:
         payload = _run_json_command(
