@@ -332,16 +332,34 @@
       "notes": "PU-008 does not add remote registry behavior."
     },
     {
-      "id": "marketplace",
-      "title": "Marketplace",
+      "id": "local_plugin_readiness",
+      "title": "Local Codex plugin readiness",
+      "status": "implemented",
+      "owner_surface": "Infrastructure/scripts/lib/ask/commands/plugins.py plus plugin validators",
+      "pipeline_sections": ["public_sdk_surface", "full_skill_lifecycle", "ci_and_adoption"],
+      "feature_executed": true,
+      "mutation_performed": false,
+      "evidence_refs": [
+        "Infrastructure/scripts/lib/ask/commands/plugins.py",
+        "Infrastructure/tests/test_ask_plugins_state.py",
+        "Infrastructure/tests/test_ask_plugins_commands.py",
+        "Infrastructure/tests/test_local_plugin_picker_surface.py",
+        "artifacts/recommended-skills-sdk-pipeline.html"
+      ],
+      "next_slice": "Keep validating official package shape, marketplace source paths, installed cache copy, active config enablement, skills visibility, and optional hook trust as separate proof lanes.",
+      "notes": "Local Codex plugin readiness is a generic Desktop readiness contract, not a remote marketplace service."
+    },
+    {
+      "id": "remote_marketplace",
+      "title": "Remote marketplace service",
       "status": "out_of_scope",
       "owner_surface": "future external service",
       "pipeline_sections": ["public_sdk_surface", "full_skill_lifecycle"],
       "feature_executed": false,
       "mutation_performed": false,
       "evidence_refs": [".harness/specs/2026-06-04-skills-sdk-pu-008-capability-truth-spec.md"],
-      "next_slice": "Requires marketplace requirements and external service authority.",
-      "notes": "Marketplace behavior is outside V1.0 and PU-008."
+      "next_slice": "Requires marketplace requirements and external service authority; it must not be confused with local marketplace.json readiness.",
+      "notes": "Remote marketplace behavior is outside V1.0 and remains separate from local Codex marketplace.json readiness."
     },
     {
       "id": "publish",
