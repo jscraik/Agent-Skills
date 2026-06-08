@@ -1559,23 +1559,11 @@ def main():
                             print(f"    removed: {', '.join(removed)}")
                     print_first_validation_command(result.data)
                 elif args.topic == "plugins" and args.action == "prune-stale-config":
-                    # Read stale IDs from correct location (dry-run path vs nested path)
-                    stale = result.data.get("stale_enabled_plugin_ids", [])
-                    if not stale:
-                        stale = result.data.get("desktop_readiness_state", {}).get("stale_enabled_plugin_ids", [])
-
-                    # Print contextual message based on dry_run and stale count
+                    stale = result.data.get("stale_enabled_plugin_ids", []) or result.data.get("desktop_readiness_state", {}).get("stale_enabled_plugin_ids", [])
                     if result.data.get("dry_run"):
-                        if stale:
-                            print("🔍 Dry run - would prune stale plugin config:")
-                        else:
-                            print("🔍 Dry run - no stale plugin config to prune")
+                        print("🔍 Dry run - would prune stale plugin config:" if stale else "🔍 Dry run - no stale plugin config to prune")
                     else:
-                        if stale:
-                            print(f"✅ Pruned stale plugin config")
-                        else:
-                            print("✅ No stale plugin config to prune")
-
+                        print("✅ Pruned stale plugin config" if stale else "✅ No stale plugin config to prune")
                     if stale:
                         print(f"Stale enabled plugins: {len(stale)}")
                         for plugin_id in stale:
