@@ -26,7 +26,7 @@ Use this policy when `he-router` must choose one Harness Engineering stage. Appl
 12. Repo intent, architecture review, structural triage, strategic direction, ADR compression, or core invariant compression routes to `he-strategy`.
 13. High-leverage architectural migration/reframe program generation routes to `he-reframe`; legacy `he-refactor` prompts route there for compatibility.
 14. Linear execution orchestration, milestone/parent issue mapping, Now/Next/Later/Do Not Create classification, or Portfolio Ops routing routes to `he-linear-plan`.
-15. Approved phase-loop continuation, 10 minute heartbeat scheduling, phase gates before scoped `git add`, Linear phase updates, collector stale-evidence stop rules, or keeping `he-work` moving until review routes to `he-phase-work`.
+15. Approved phase-loop continuation, 10-minute heartbeat scheduling, phase gates before scoped `git add`, Linear phase updates, collector stale-evidence stop rules, or keeping `he-work` moving until review routes to `he-phase-work`.
 16. Harden/deepen an existing spec or plan routes through folded deepen modes.
 17. New lifecycle work flows `he-brainstorm` -> `he-strategy` or `he-reframe` when cognition/migration is needed -> `he-linear-plan` when tracker routing is needed -> `he-spec` -> `he-plan` -> `he-work`; approved recurring execution continues through `he-phase-work`.
 18. QA intake routes by expected-behavior clarity: clear bugs to `he-fix-bugs`, unclear behavior to `he-brainstorm`/`he-spec`, sequencing to `he-plan`.
