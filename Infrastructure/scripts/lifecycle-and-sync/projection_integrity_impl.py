@@ -1085,6 +1085,7 @@ def verify_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
             transformed_source,
             follow_symlinks=spec.follow_symlinks,
             excluded_dir_names=normalize_excluded_dir_names(spec.excluded_dir_names),
+            keep_duplicates=True,
         )
         source_abs = transformed_source
 
