@@ -53,6 +53,8 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 # if [ "$runtime_cache_rebuild_blocked" = "0" ]; then
 # flat_projection_rebuilt=1
 # if [ "$flat_projection_rebuilt" = "1" ]; then
+# sync_user_skills "$skills_dir" "$HOME/.agents/skills"
+# sync_user_skills "$skills_dir" "$HOME/.codex/skills"
 # if [ "$runtime_cache_fresh" != "1" ]; then
 # Skipping home skills sync because flat runtime skill projection was not rebuilt.
 # Skipping profile cache publication because runtime cache rebuild was not fresh.
