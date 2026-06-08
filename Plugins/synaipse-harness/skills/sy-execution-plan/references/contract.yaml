@@ -46,4 +46,5 @@ observability: >-
   Record the current stage, selected authority, source artifacts read, allowed write boundary, validation outcome, evidence refs, blocker class, and next-stage handoff without storing secrets or sensitive data.
 rollback_procedure: >-
   Restore this skill directory from git, rerun plugin validation, and refresh generated projections through the SDK sync wrapper.
-
+rollback_procedure: >-
+  Restore this skill directory from git, rerun plugin validation, and refresh generated projections through the SDK sync wrapper.
