@@ -107,6 +107,7 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
         "ask sdk determinism audit --scope skills --json --robot",
         "ask sdk review plan --target Skills/agent-ops/simplify --intent validation_review --json --robot",
         "ask sdk review handoff --plan .harness/artifacts/sdk-review-plan/simplify.json --target Skills/agent-ops/simplify --intent validation_review --json --robot",
+        "ask sdk review verify --handoff .harness/artifacts/sdk-review-handoff/simplify.json --json --robot",
         "skills-sdk check he-heartbeat --json --robot",
         "skills-sdk install he-heartbeat --preview --json --robot",
         "skills-sdk install ./Skills/sample/SKILL.md --apply --project-root /tmp/sample-project --json --robot",
@@ -276,6 +277,7 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
         "ask sdk review plan --target Skills/agent-ops/simplify --intent validation_review --json --robot",
         "ask sdk review plan --target Skills/agent-ops/simplify --intent validation_review --receipt-out .harness/artifacts/sdk-review-plan/simplify.json --json --robot",
         "ask sdk review handoff --plan .harness/artifacts/sdk-review-plan/simplify.json --target Skills/agent-ops/simplify --intent validation_review --json --robot",
+        "ask sdk review verify --handoff .harness/artifacts/sdk-review-handoff/simplify.json --json --robot",
     ],
     ("skills", "profiles"): [
         "ask skills profiles --json",

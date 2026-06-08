@@ -98,7 +98,7 @@ class TestSkillsSdkCapabilityStatus(unittest.TestCase):
         matrix = load_capability_matrix(REPO_ROOT)
         by_id = {row["id"]: row for row in matrix["capabilities"]}
 
-        for capability_id in ("sdk_lenses", "review_plan", "review_handoff", "determinism_audit"):
+        for capability_id in ("sdk_lenses", "review_plan", "review_handoff", "review_verification", "determinism_audit"):
             with self.subTest(capability=capability_id):
                 capability = by_id[capability_id]
                 self.assertEqual(capability["status"], "implemented")

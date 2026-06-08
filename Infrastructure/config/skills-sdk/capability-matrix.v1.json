@@ -2,7 +2,7 @@
   "schema_version": "skills-sdk.capability-status.v1",
   "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/capability-status.v1.schema.json",
   "status": "truth_surface",
-  "generated_from": ".harness/specs/2026-06-08-skills-sdk-pu-015-review-handoff-receipts-spec.md",
+  "generated_from": ".harness/specs/2026-06-08-skills-sdk-pu-016-review-artifact-verification-spec.md",
   "source_artifacts": [
     ".harness/specs/2026-06-05-skills-sdk-pu-010-receipt-proven-rollback-uninstall-spec.md",
     ".harness/specs/2026-06-06-skills-sdk-pu-012-project-conformance-adoption-gate-spec.md",
@@ -15,6 +15,8 @@
     ".harness/plan/2026-06-07-skills-sdk-pu-014-lens-routed-review-trace-plan.md",
     ".harness/specs/2026-06-08-skills-sdk-pu-015-review-handoff-receipts-spec.md",
     ".harness/plan/2026-06-08-skills-sdk-pu-015-review-handoff-receipts-trace-plan.md",
+    ".harness/specs/2026-06-08-skills-sdk-pu-016-review-artifact-verification-spec.md",
+    ".harness/plan/2026-06-08-skills-sdk-pu-016-review-artifact-verification-plan.md",
     "artifacts/recommended-skills-sdk-pipeline.html",
     "Docs/goals/skills-sdk-v1-0-product-implementation/state.yaml"
   ],
@@ -25,9 +27,11 @@
     "./bin/ask sdk lenses select --prompt 'review a skill for validation confidence' --intent validation_review --json --robot",
     "./bin/ask sdk review plan --target Skills/agent-ops/simplify --intent validation_review --receipt-out .harness/artifacts/sdk-review-plan/simplify.json --json --robot",
     "./bin/ask sdk review handoff --plan .harness/artifacts/sdk-review-plan/simplify.json --target Skills/agent-ops/simplify --intent validation_review --json --robot",
+    "./bin/ask sdk review verify --handoff .harness/artifacts/sdk-review-handoff/simplify.json --json --robot",
     "./bin/ask sdk determinism audit --scope skills --limit 10 --json --robot",
     "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_review_plan.py -q",
     "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_review_handoff.py -q",
+    "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_review_verify.py -q",
     "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_project_cleanup.py -q",
     "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_project_install.py -q",
     "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_project_conformance.py -q",
@@ -203,6 +207,23 @@
       ],
       "next_slice": "Execute bounded reviewer agents only after handoff receipts define roles, required artifacts, and not-proven lanes.",
       "notes": "PU-015 consumes verified review-plan receipts and emits read-only review handoff receipts; it does not run reviewers, CI, or external services."
+    },
+    {
+      "id": "review_verification",
+      "title": "Review artifact verification receipts",
+      "status": "implemented",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/review_verify.py",
+      "pipeline_sections": ["agent_execution_control_plane", "knowledge_engineering", "ci_and_adoption"],
+      "feature_executed": true,
+      "mutation_performed": false,
+      "evidence_refs": [
+        "./bin/ask sdk review verify --handoff .harness/artifacts/sdk-review-handoff/simplify.json --json --robot",
+        "Infrastructure/scripts/lib/ask/skills_sdk/review_verify.py",
+        "Infrastructure/config/schemas/skills-sdk/sdk-review-verification-receipt.v1.schema.json",
+        "Infrastructure/tests/test_skills_sdk_review_verify.py"
+      ],
+      "next_slice": "Add governed reviewer execution only after local required-artifact verification is stable and still separated from external PR, CI, review-thread, tracker, and merge-readiness lanes.",
+      "notes": "PU-016 consumes review handoff receipts and verifies required local review artifacts without running reviewers or external services."
     },
     {
       "id": "determinism_audit",
