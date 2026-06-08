@@ -26,7 +26,7 @@ When runtime behavior differs from source, check these surfaces before changing
 skill logic:
 
 1. canonical source: `Plugins/harness-engineering/**`
-2. generated command handles: `.agents/skills/he-*/SKILL.md`
+2. command-surface handles: `.skillsets/command-surface.json` entries for `he-*`
 3. plugin runtime/cache mirrors: `Plugins/cache/**` and local plugin runtime
    copies
 4. generated route, deferred-context, and authority artifacts

@@ -1,0 +1,143 @@
+{
+  "name": "ainativedev/aidevcon-2026-ldn",
+  "version": "0.100.8",
+  "summary": "AI Native DevCon 2026 London — all conference sessions as interactive skills",
+  "private": false,
+  "skills": {
+    "talk-luebken-embedding-pi-coding-agent": {
+      "path": "talk-luebken-embedding-pi-coding-agent/SKILL.md"
+    },
+    "talk-thomas-ai-native-engineering": {
+      "path": "talk-thomas-ai-native-engineering/SKILL.md"
+    },
+    "talk-scheire-artificial-intelligence": {
+      "path": "talk-scheire-artificial-intelligence/SKILL.md"
+    },
+    "talk-stoneham-product-brain": {
+      "path": "talk-stoneham-product-brain/SKILL.md"
+    },
+    "talk-batey-building-product-teams-age-of-ai": {
+      "path": "talk-batey-building-product-teams-age-of-ai/SKILL.md"
+    },
+    "talk-lawson-agent-experience": {
+      "path": "talk-lawson-agent-experience/SKILL.md"
+    },
+    "talk-katsioloudes-code-security-ai": {
+      "path": "talk-katsioloudes-code-security-ai/SKILL.md"
+    },
+    "talk-debois-agent-enablement": {
+      "path": "talk-debois-agent-enablement/SKILL.md"
+    },
+    "talk-walter-runtime-intelligence-agents": {
+      "path": "talk-walter-runtime-intelligence-agents/SKILL.md"
+    },
+    "talk-jourdan-pipelines-to-prompts": {
+      "path": "talk-jourdan-pipelines-to-prompts/SKILL.md"
+    },
+    "talk-marsden-agent-desktops": {
+      "path": "talk-marsden-agent-desktops/SKILL.md"
+    },
+    "talk-sloan-harness-engineering-beyond-code": {
+      "path": "talk-sloan-harness-engineering-beyond-code/SKILL.md"
+    },
+    "talk-maleix-collective-intelligence": {
+      "path": "talk-maleix-collective-intelligence/SKILL.md"
+    },
+    "talk-wotherspoon-humans-vs-slop": {
+      "path": "talk-wotherspoon-humans-vs-slop/SKILL.md"
+    },
+    "talk-martinelli-spec-driven-development": {
+      "path": "talk-martinelli-spec-driven-development/SKILL.md"
+    },
+    "talk-jones-odevo-ai-native-transformation": {
+      "path": "talk-jones-odevo-ai-native-transformation/SKILL.md"
+    },
+    "talk-overweg-one-brain-no-filtering": {
+      "path": "talk-overweg-one-brain-no-filtering/SKILL.md"
+    },
+    "talk-groetzinger-skills-everywhere": {
+      "path": "talk-groetzinger-skills-everywhere/SKILL.md"
+    },
+    "talk-podjarny-skills-are-the-new-code": {
+      "path": "talk-podjarny-skills-are-the-new-code/SKILL.md"
+    },
+    "talk-birgitta-closing-keynote": {
+      "path": "talk-birgitta-closing-keynote/SKILL.md"
+    },
+    "talk-roberts-brownfield-ai-native": {
+      "path": "talk-roberts-brownfield-ai-native/SKILL.md"
+    },
+    "talk-roberts-ai-native-brownfield": {
+      "path": "talk-roberts-ai-native-brownfield/SKILL.md"
+    },
+    "talk-stack-humans-architect-ai-writes-code": {
+      "path": "talk-stack-humans-architect-ai-writes-code/SKILL.md"
+    },
+    "talk-foxwell-reinvention-dev-team": {
+      "path": "talk-foxwell-reinvention-dev-team/SKILL.md"
+    },
+    "talk-douglas-training-ai-on-your-own-code": {
+      "path": "talk-douglas-training-ai-on-your-own-code/SKILL.md"
+    },
+    "talk-moss-skills-team-workflow": {
+      "path": "talk-moss-skills-team-workflow/SKILL.md"
+    },
+    "talk-farley-vibe-coding-best-we-can-do": {
+      "path": "talk-farley-vibe-coding-best-we-can-do/SKILL.md"
+    },
+    "talk-maple-aind-devcon-welcome": {
+      "path": "talk-maple-aind-devcon-welcome/SKILL.md"
+    },
+    "talk-azriel-executable-specs": {
+      "path": "talk-azriel-executable-specs/SKILL.md"
+    },
+    "talk-baker-sadogursky-context-engineering-skills": {
+      "path": "talk-baker-sadogursky-context-engineering-skills/SKILL.md"
+    },
+    "talk-lamis-context-engineering-dreaming": {
+      "path": "talk-lamis-context-engineering-dreaming/SKILL.md"
+    },
+    "talk-syme-agentic-repository-automation": {
+      "path": "talk-syme-agentic-repository-automation/SKILL.md"
+    },
+    "talk-lopopolo-harness-engineering": {
+      "path": "talk-lopopolo-harness-engineering/SKILL.md"
+    },
+    "talk-tal-skills-security": {
+      "path": "talk-tal-skills-security/SKILL.md"
+    },
+    "talk-trieloff-browser-agents": {
+      "path": "talk-trieloff-browser-agents/SKILL.md"
+    },
+    "talk-ruiz-agents-on-canvas-tldraw": {
+      "path": "talk-ruiz-agents-on-canvas-tldraw/SKILL.md"
+    },
+    "talk-firtman-web-mcp-agentic-web": {
+      "path": "talk-firtman-web-mcp-agentic-web/SKILL.md"
+    },
+    "talk-dubnov-merge-rate-ai-adoption": {
+      "path": "talk-dubnov-merge-rate-ai-adoption/SKILL.md"
+    },
+    "talk-selajev-docker-sandboxes-agents": {
+      "path": "talk-selajev-docker-sandboxes-agents/SKILL.md"
+    },
+    "talk-wilson-cq-stack-overflow-for-agents": {
+      "path": "talk-wilson-cq-stack-overflow-for-agents/SKILL.md"
+    },
+    "talk-kerr-bipolar-disorder-dysregulation-ai": {
+      "path": "talk-kerr-bipolar-disorder-dysregulation-ai/SKILL.md"
+    },
+    "talk-kushwaha-benchmarking-agent-era": {
+      "path": "talk-kushwaha-benchmarking-agent-era/SKILL.md"
+    },
+    "talk-smith-connecting-context-future-transports": {
+      "path": "talk-smith-connecting-context-future-transports/SKILL.md"
+    },
+    "talk-obstbaum-willoughby-vibes-to-metrics": {
+      "path": "talk-obstbaum-willoughby-vibes-to-metrics/SKILL.md"
+    },
+    "talk-cormack-tests-lie-observability-ai": {
+      "path": "talk-cormack-tests-lie-observability-ai/SKILL.md"
+    }
+  }
+}

@@ -144,6 +144,15 @@
         },
         "memory": {
           "$ref": "#/definitions/schemaRef"
+        },
+        "lens_registry": {
+          "$ref": "#/definitions/schemaRef"
+        },
+        "lens_selection": {
+          "$ref": "#/definitions/schemaRef"
+        },
+        "determinism_audit": {
+          "$ref": "#/definitions/schemaRef"
         }
       }
     },

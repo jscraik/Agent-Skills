@@ -12,14 +12,23 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from ask.commands.plugins import doctor_plugins_state, list_plugins_state, status_plugin_state
+from ask.commands.plugins import doctor_plugins_state, list_plugins_state, status_plugin_state  # noqa: E402
 
 
 class TestAskPluginsState(unittest.TestCase):
     def setUp(self) -> None:
+        """
+        Prepare an isolated temporary repository and fake home with a sample plugin fixture and runtime cache for tests.
+        
+        Sets up a temporary directory structure, patches Path.home to point at the fake home, writes a sample plugin (manifest, README, assets, and a skill file) under the repo plugins tree, writes a repository marketplace manifest referencing the sample plugin, and invokes the helper to create the corresponding runtime cache entry.
+        """
         self.temp_dir = Path(tempfile.mkdtemp(prefix="ask-plugins-state-"))
         self.repo_root = self.temp_dir / "repo"
         self.repo_root.mkdir(parents=True)
+        self.fake_home = self.temp_dir / "home"
+        self.fake_home.mkdir(parents=True)
+        self.home_patcher = patch("ask.plugin_state.Path.home", return_value=self.fake_home)
+        self.home_patcher.start()
 
         plugin_manifest = self.repo_root / "plugins" / "example-plugin" / ".codex-plugin" / "plugin.json"
         plugin_manifest.parent.mkdir(parents=True, exist_ok=True)
@@ -31,6 +40,12 @@ class TestAskPluginsState(unittest.TestCase):
         assets_dir.mkdir(parents=True, exist_ok=True)
         (assets_dir / "icon.png").write_bytes(b"fixture-icon")
         (assets_dir / "logo.png").write_bytes(b"fixture-logo")
+        skill = self.repo_root / "Plugins" / "example-plugin" / "skills" / "example-skill" / "SKILL.md"
+        skill.parent.mkdir(parents=True, exist_ok=True)
+        skill.write_text(
+            "---\nname: example-skill\ndescription: Example skill.\n---\n# Example Skill\n",
+            encoding="utf-8",
+        )
         plugin_manifest.write_text(
             json.dumps(
                 {
@@ -75,19 +90,180 @@ class TestAskPluginsState(unittest.TestCase):
             + "\n",
             encoding="utf-8",
         )
+        self._write_runtime_cache_plugin()
 
-    def tearDown(self) -> None:
-        shutil.rmtree(self.temp_dir, ignore_errors=True)
+    def _write_profile_plugin(
+        self,
+        *,
+        enabled: bool = True,
+        stale_enabled: bool = False,
+        source_path: str = "./.agents/plugins/example-plugin",
+        copy_plugin: bool = True,
+        compatibility_symlink: bool = True,
+        personal_marketplace: bool = True,
+    ) -> Path:
+        """
+        Create a fake Codex profile directory under the test fake home and populate it with configuration and optional plugin mirror/marketplace entries for tests.
+        
+        Parameters:
+            enabled (bool): Whether the example plugin is marked enabled in the profile config.
+            stale_enabled (bool): If true, append an additional enabled entry for a non-existent "missing-plugin" to simulate a stale config ID.
+            source_path (str): The plugin source path to place into the profile marketplace manifest.
+            copy_plugin (bool): If true, create an official mirror of the repo plugin inside the profile's `.codex/plugins` directory.
+            compatibility_symlink (bool): When creating the compatibility location under `.agents/plugins/example-plugin`, create it as a symlink to the official mirror if true; otherwise copy the plugin directory.
+            personal_marketplace (bool): If true, write a personal marketplace manifest at the fake home `.agents/plugins/marketplace.json`.
+        
+        Returns:
+            Path: The profile home path that was created (self.fake_home / ".codex").
+        """
+        profile_home = self.fake_home / ".codex"
+        profile_home.mkdir(parents=True, exist_ok=True)
+        config = profile_home / "config.toml"
+        enabled_value = "true" if enabled else "false"
+        config.write_text(
+            f'[plugins."example-plugin@agent-skills-local"]\n'
+            f"enabled = {enabled_value}\n",
+            encoding="utf-8",
+        )
+        if stale_enabled:
+            with config.open("a", encoding="utf-8") as handle:
+                handle.write('\n[plugins."missing-plugin@agent-skills-local"]\nenabled = true\n')
+        marketplace = profile_home / ".agents" / "plugins" / "marketplace.json"
+        marketplace.parent.mkdir(parents=True, exist_ok=True)
+        marketplace.write_text(
+            json.dumps(
+                {
+                    "name": "agent-skills-local",
+                    "plugins": [
+                        {
+                            "name": "example-plugin",
+                            "source": {"source": "local", "path": source_path},
+                        }
+                    ],
+                }
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        if copy_plugin:
+            source = self.repo_root / "plugins" / "example-plugin"
+            official_target = self.fake_home / ".codex" / "plugins" / "example-plugin"
+            shutil.rmtree(official_target, ignore_errors=True)
+            shutil.copytree(source, official_target)
+            target = profile_home / ".agents" / "plugins" / "example-plugin"
+            shutil.rmtree(target, ignore_errors=True)
+            if compatibility_symlink:
+                target.symlink_to(official_target, target_is_directory=True)
+            else:
+                shutil.copytree(source, target)
+        if personal_marketplace:
+            personal_marketplace_path = self.fake_home / ".agents" / "plugins" / "marketplace.json"
+            personal_marketplace_path.parent.mkdir(parents=True, exist_ok=True)
+            personal_marketplace_path.write_text(
+                json.dumps(
+                    {
+                        "name": "agent-skills-local",
+                        "plugins": [
+                            {
+                                "name": "example-plugin",
+                                "source": {"source": "local", "path": "./.codex/plugins/example-plugin"},
+                            }
+                        ],
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+        return profile_home
 
-    def test_list_plugins_state_returns_grouped_snapshot(self) -> None:
-        (
+    def _write_runtime_cache_plugin(
+        self,
+        marketplace_name: str = "agent-skills-local",
+        *,
+        version: str | None = None,
+        with_manifest: bool = True,
+        with_skill: bool = True,
+    ) -> Path:
+        """
+        Create a versioned runtime cache entry for the example plugin under the test repository.
+        
+        Parameters:
+        	marketplace_name (str): Marketplace folder name under `.agents/plugins-runtime/cache` to host the plugin.
+        	version (str | None): If provided, embed the plugin under a version subdirectory (e.g. `.../example-plugin/<version>`). If `None`, place the plugin at `.../example-plugin`.
+        	with_manifest (bool): When True, write a `.codex-plugin/plugin.json` manifest into the plugin root; when False, create the plugin directory without a manifest.
+        	with_skill (bool): When True, create a minimal `skills/example-skill/SKILL.md` file inside the plugin root.
+        
+        Returns:
+        	plugin_root (Path): Filesystem path to the created plugin root (points at the version subdirectory when `version` is set).
+        """
+        plugin_root = (
             self.repo_root
             / ".agents"
             / "plugins-runtime"
             / "cache"
-            / "agent-skills-local"
+            / marketplace_name
             / "example-plugin"
-        ).mkdir(parents=True, exist_ok=True)
+        )
+        shutil.rmtree(plugin_root, ignore_errors=True)
+        if version is not None:
+            plugin_root = plugin_root / version
+        if with_manifest:
+            manifest = plugin_root / ".codex-plugin" / "plugin.json"
+            manifest.parent.mkdir(parents=True, exist_ok=True)
+            manifest.write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "name": "example-plugin",
+                        "version": "0.1.0",
+                        "description": "Example plugin",
+                        "skills": "./skills/",
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+        else:
+            plugin_root.mkdir(parents=True, exist_ok=True)
+        if with_skill:
+            skill = plugin_root / "skills" / "example-skill" / "SKILL.md"
+            skill.parent.mkdir(parents=True, exist_ok=True)
+            skill.write_text(
+                "---\nname: example-skill\ndescription: Example skill.\n---\n# Example Skill\n",
+                encoding="utf-8",
+            )
+        marketplace_root = self.repo_root / ".agents" / "plugins-runtime" / "cache" / marketplace_name
+        marketplace_manifest = marketplace_root / ".agents" / "plugins" / "marketplace.json"
+        marketplace_manifest.parent.mkdir(parents=True, exist_ok=True)
+        source_path = "./example-plugin" if version is None else f"./example-plugin/{version}"
+        marketplace_manifest.write_text(
+            json.dumps(
+                {
+                    "name": marketplace_name,
+                    "plugins": [
+                        {
+                            "name": "example-plugin",
+                            "source": {"source": "local", "path": source_path},
+                        }
+                    ],
+                }
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        return plugin_root
+
+    def tearDown(self) -> None:
+        """
+        Stop the patched Path.home and remove the temporary test directory created for the test.
+        
+        This cleans up test-side effects by stopping the home directory patcher and deleting the temporary repository/home tree (errors during removal are ignored).
+        """
+        self.home_patcher.stop()
+        shutil.rmtree(self.temp_dir, ignore_errors=True)
+
+    def test_list_plugins_state_returns_grouped_snapshot(self) -> None:
+        self._write_runtime_cache_plugin()
         result = list_plugins_state(self.repo_root)
         self.assertEqual(result.status, "success")
         self.assertIn("installed_state", result.data)
@@ -96,6 +272,133 @@ class TestAskPluginsState(unittest.TestCase):
         self.assertEqual(result.data["installed_state"]["plugin_count"], 1)
         self.assertEqual(result.data["activation_state"]["plugin_count"], 1)
         self.assertEqual(result.data["health_state"]["status"], "healthy")
+        self.assertFalse(result.data["desktop_readiness_state"]["desktop_loadable"])
+
+    def test_status_reports_desktop_loadable_when_profile_config_and_mirror_are_ready(self) -> None:
+        self._write_profile_plugin()
+
+        result = status_plugin_state(self.repo_root, "example-plugin")
+
+        self.assertEqual(result.status, "success")
+        readiness = result.data["desktop_readiness_state"]
+        self.assertTrue(readiness["desktop_loadable"])
+        plugin_row = readiness["plugins"][0]
+        self.assertTrue(plugin_row["active_config_ready"])
+        self.assertTrue(plugin_row["personal_marketplace_ready"])
+        self.assertTrue(plugin_row["profile_mirror_ready"])
+        # Find the active profile check entry (matching active_profile_home)
+        active_profile_check = next(
+            (check for check in plugin_row["profile_checks"]
+             if check["profile_home"] == plugin_row["active_profile_home"]),
+            plugin_row["profile_checks"][0] if plugin_row["profile_checks"] else {}
+        )
+        self.assertTrue(active_profile_check["is_symlink"])
+        self.assertEqual(
+            active_profile_check["resolved_realpath"],
+            (self.fake_home / ".codex" / "plugins" / "example-plugin").resolve().as_posix(),
+        )
+        self.assertEqual(plugin_row["blockers"], [])
+
+    def test_status_blocks_when_compatibility_mirror_is_copied_directory(self) -> None:
+        self._write_profile_plugin(compatibility_symlink=False)
+
+        result = status_plugin_state(self.repo_root, "example-plugin")
+
+        self.assertEqual(result.status, "success")
+        readiness = result.data["desktop_readiness_state"]
+        self.assertFalse(readiness["desktop_loadable"])
+        self.assertIn("PLUGIN_PROFILE_MIRROR_NOT_READY", readiness["blockers"])
+        plugin_row = readiness["plugins"][0]
+        # Find the active profile check entry (matching active_profile_home)
+        active_profile_check = next(
+            (check for check in plugin_row["profile_checks"]
+             if check["profile_home"] == plugin_row["active_profile_home"]),
+            plugin_row["profile_checks"][0] if plugin_row["profile_checks"] else {}
+        )
+        profile_issues = active_profile_check["issues"]
+        self.assertTrue(any("must be a symlink alias" in issue for issue in profile_issues))
+
+    def test_status_blocks_when_official_personal_marketplace_is_missing(self) -> None:
+        self._write_profile_plugin(personal_marketplace=False)
+
+        result = status_plugin_state(self.repo_root, "example-plugin")
+
+        self.assertEqual(result.status, "success")
+        readiness = result.data["desktop_readiness_state"]
+        self.assertFalse(readiness["desktop_loadable"])
+        self.assertIn("PLUGIN_PERSONAL_MARKETPLACE_NOT_READY", readiness["blockers"])
+        plugin_row = readiness["plugins"][0]
+        self.assertFalse(plugin_row["personal_marketplace_ready"])
+        self.assertEqual(
+            plugin_row["personal_marketplace_check"]["marketplace_path"],
+            (self.fake_home / ".agents" / "plugins" / "marketplace.json").as_posix(),
+        )
+
+    def test_status_uses_toml_parser_for_active_config_truth(self) -> None:
+        profile_home = self._write_profile_plugin(enabled=False)
+        (profile_home / "config.toml").write_text(
+            'plugins."example-plugin@agent-skills-local".enabled = true\n',
+            encoding="utf-8",
+        )
+
+        result = status_plugin_state(self.repo_root, "example-plugin")
+
+        self.assertEqual(result.status, "success")
+        readiness = result.data["desktop_readiness_state"]
+        self.assertTrue(readiness["desktop_loadable"])
+        self.assertEqual(readiness["enabled_plugin_ids"], ["example-plugin@agent-skills-local"])
+
+    def test_status_ignores_broken_secondary_profile_for_default_desktop_loadability(self) -> None:
+        self._write_profile_plugin()
+        secondary_profile = self.fake_home / ".codex-preview"
+        secondary_profile.mkdir(parents=True, exist_ok=True)
+
+        result = status_plugin_state(self.repo_root, "example-plugin")
+
+        self.assertEqual(result.status, "success")
+        readiness = result.data["desktop_readiness_state"]
+        self.assertTrue(readiness["desktop_loadable"])
+        plugin_row = readiness["plugins"][0]
+        self.assertTrue(plugin_row["profile_mirror_ready"])
+        self.assertTrue(plugin_row["personal_marketplace_ready"])
+        self.assertIn(secondary_profile.as_posix(), plugin_row["profile_homes"])
+        secondary_rows = [
+            row
+            for row in plugin_row["profile_checks"]
+            if row["profile_home"] == secondary_profile.as_posix()
+        ]
+        self.assertEqual(secondary_rows[0]["issues"], ["profile has no plugin marketplace manifest"])
+
+    def test_status_reports_desktop_blocker_when_profile_path_is_missing(self) -> None:
+        """
+        Verify status_plugin_state marks desktop as not loadable when the profile's plugin mirror path is missing.
+        
+        Calls status_plugin_state for "example-plugin" after creating a profile configuration without copying the profile mirror, and asserts:
+        - desktop readiness reports `desktop_loadable` is False,
+        - `PLUGIN_PROFILE_MIRROR_NOT_READY` appears in blockers,
+        - one of the profile check issues contains "marketplace local source path is not a directory".
+        """
+        self._write_profile_plugin(copy_plugin=False)
+
+        result = status_plugin_state(self.repo_root, "example-plugin")
+
+        self.assertEqual(result.status, "success")
+        readiness = result.data["desktop_readiness_state"]
+        self.assertFalse(readiness["desktop_loadable"])
+        self.assertIn("PLUGIN_PROFILE_MIRROR_NOT_READY", readiness["blockers"])
+        profile_issues = readiness["plugins"][0]["profile_checks"][0]["issues"]
+        self.assertTrue(any("marketplace local source path is not a directory" in issue for issue in profile_issues))
+
+    def test_status_reports_desktop_blocker_for_stale_enabled_config_id(self) -> None:
+        self._write_profile_plugin(stale_enabled=True)
+
+        result = status_plugin_state(self.repo_root, "example-plugin")
+
+        self.assertEqual(result.status, "success")
+        readiness = result.data["desktop_readiness_state"]
+        self.assertFalse(readiness["desktop_loadable"])
+        self.assertIn("PLUGIN_ACTIVE_CONFIG_STALE_IDS", readiness["blockers"])
+        self.assertEqual(readiness["stale_enabled_plugin_ids"], ["missing-plugin@agent-skills-local"])
 
     def test_list_plugins_state_detects_openai_curated_cache(self) -> None:
         marketplace = self.repo_root / ".agents" / "plugins" / "marketplace.json"
@@ -103,15 +406,7 @@ class TestAskPluginsState(unittest.TestCase):
         payload["name"] = "openai-curated"
         marketplace.write_text(json.dumps(payload) + "\n", encoding="utf-8")
 
-        cache_dir = (
-            self.repo_root
-            / ".agents"
-            / "plugins-runtime"
-            / "cache"
-            / "openai-curated"
-            / "example-plugin"
-        )
-        cache_dir.mkdir(parents=True, exist_ok=True)
+        self._write_runtime_cache_plugin("openai-curated")
 
         result = list_plugins_state(self.repo_root)
         self.assertEqual(result.status, "success")
@@ -119,6 +414,7 @@ class TestAskPluginsState(unittest.TestCase):
         self.assertEqual(len(activation_plugins), 1)
         self.assertEqual(activation_plugins[0]["name"], "example-plugin")
         self.assertTrue(activation_plugins[0]["cache_present"])
+        self.assertTrue(activation_plugins[0]["cache_content_ready"])
 
     def test_list_plugins_state_accepts_legacy_local_cache_family(self) -> None:
         marketplace = self.repo_root / ".agents" / "plugins" / "marketplace.json"
@@ -126,15 +422,7 @@ class TestAskPluginsState(unittest.TestCase):
         payload["name"] = "local"
         marketplace.write_text(json.dumps(payload) + "\n", encoding="utf-8")
 
-        legacy_cache_dir = (
-            self.repo_root
-            / ".agents"
-            / "plugins-runtime"
-            / "cache"
-            / "agent-skills-local"
-            / "example-plugin"
-        )
-        legacy_cache_dir.mkdir(parents=True, exist_ok=True)
+        self._write_runtime_cache_plugin()
 
         result = list_plugins_state(self.repo_root)
         self.assertEqual(result.status, "success")
@@ -142,6 +430,93 @@ class TestAskPluginsState(unittest.TestCase):
         activation_plugin = result.data["activation_state"]["plugins"][0]
         self.assertEqual(activation_plugin["marketplace_name"], "local")
         self.assertTrue(activation_plugin["cache_present"])
+        self.assertTrue(activation_plugin["cache_content_ready"])
+
+    def test_list_plugins_state_accepts_versioned_cache_content(self) -> None:
+        self._write_runtime_cache_plugin(version="0.1.0")
+
+        result = list_plugins_state(self.repo_root)
+        self.assertEqual(result.status, "success")
+        self.assertEqual(result.data["health_state"]["status"], "healthy")
+        activation_plugin = result.data["activation_state"]["plugins"][0]
+        self.assertTrue(activation_plugin["cache_present"])
+        self.assertTrue(activation_plugin["cache_content_ready"])
+        self.assertTrue(activation_plugin["cache_active_root"].endswith("/example-plugin/0.1.0"))
+
+    def test_list_plugins_state_rejects_cache_without_manifest_declared_skills(self) -> None:
+        shutil.rmtree(
+            self.repo_root / ".agents" / "plugins-runtime" / "cache" / "agent-skills-local" / "example-plugin",
+            ignore_errors=True,
+        )
+        self._write_runtime_cache_plugin(with_skill=False)
+
+        result = list_plugins_state(self.repo_root)
+        self.assertEqual(result.status, "success")
+        self.assertEqual(result.data["health_state"]["status"], "degraded")
+        activation_plugin = result.data["activation_state"]["plugins"][0]
+        self.assertTrue(activation_plugin["cache_present"])
+        self.assertFalse(activation_plugin["cache_content_ready"])
+        self.assertTrue(activation_plugin["cache_issues"])
+        blockers = result.data["health_state"]["blockers"]
+        self.assertTrue(any("PLUGIN_RUNTIME_CONTENT_MISSING" in blocker for blocker in blockers))
+
+    def test_list_plugins_state_rejects_cache_without_codex_marketplace_manifest(self) -> None:
+        marketplace_manifest = (
+            self.repo_root
+            / ".agents"
+            / "plugins-runtime"
+            / "cache"
+            / "agent-skills-local"
+            / ".agents"
+            / "plugins"
+            / "marketplace.json"
+        )
+        marketplace_manifest.unlink()
+
+        result = list_plugins_state(self.repo_root)
+
+        self.assertEqual(result.status, "success")
+        self.assertEqual(result.data["health_state"]["status"], "degraded")
+        activation_plugin = result.data["activation_state"]["plugins"][0]
+        self.assertTrue(activation_plugin["cache_present"])
+        self.assertFalse(activation_plugin["cache_content_ready"])
+        self.assertTrue(
+            any("missing Codex marketplace manifest" in issue for issue in activation_plugin["cache_issues"]),
+            activation_plugin["cache_issues"],
+        )
+
+    def test_list_plugins_state_rejects_broken_sibling_codex_marketplace_root(self) -> None:
+        sibling_root = self.repo_root / "Plugins" / "cache" / "agent-skills-local" / "example-plugin" / "0.1.0"
+        manifest = sibling_root / ".codex-plugin" / "plugin.json"
+        manifest.parent.mkdir(parents=True, exist_ok=True)
+        manifest.write_text(
+            json.dumps(
+                {
+                    "schema_version": 1,
+                    "name": "example-plugin",
+                    "version": "0.1.0",
+                    "description": "Example plugin",
+                    "skills": "./skills/",
+                }
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        skill = sibling_root / "skills" / "example-skill" / "SKILL.md"
+        skill.parent.mkdir(parents=True, exist_ok=True)
+        skill.write_text("---\nname: example-skill\ndescription: Example skill.\n---\n", encoding="utf-8")
+
+        result = list_plugins_state(self.repo_root)
+
+        self.assertEqual(result.status, "success")
+        self.assertEqual(result.data["health_state"]["status"], "degraded")
+        activation_plugin = result.data["activation_state"]["plugins"][0]
+        self.assertTrue(activation_plugin["cache_present"])
+        self.assertFalse(activation_plugin["cache_content_ready"])
+        self.assertTrue(
+            any("Plugins/cache/agent-skills-local" in issue for issue in activation_plugin["cache_issues"]),
+            activation_plugin["cache_issues"],
+        )
 
     def test_doctor_treats_missing_cache_as_warning(self) -> None:
         cache_root = self.repo_root / ".agents" / "plugins-runtime" / "cache"
@@ -162,6 +537,7 @@ class TestAskPluginsState(unittest.TestCase):
         self.assertEqual(result.data["health_state"]["status"], "healthy")
         activation = result.data["health_state"]["checks"]["activation"]
         self.assertTrue(activation["missing_cache_plugins"])
+        self.assertFalse(activation["cache_content_blockers"])
         self.assertTrue(activation["warnings"])
 
     def test_status_plugin_state_errors_when_missing(self) -> None:

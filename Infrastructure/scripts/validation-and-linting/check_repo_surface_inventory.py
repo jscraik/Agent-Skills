@@ -397,10 +397,10 @@ def classify_path(path: str | Path) -> SurfaceFinding:
             normalized,
             classification="generated_tracked",
             status="ok",
-            code="generated_command_handle",
+            code="command_surface_handle",
             severity="info",
             blocking=False,
-            reason="Generated command handles are tracked compatibility surfaces.",
+            reason="Command-surface handles are tracked compatibility metadata surfaces.",
             recommendation="Regenerate through sync rather than hand-editing.",
             metadata={"next_steps": ["validate_projection_if_changed"]},
         )

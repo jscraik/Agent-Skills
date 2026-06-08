@@ -1,6 +1,6 @@
 # SynAIpse Harness Plugin
 
-`synaipse-harness` is the compact SynAIpse lifecycle plugin. It chooses one next stage, records authority limits, and hands off through the core `sy-*` command handles.
+`synaipse-harness` is the compact SynAIpse lifecycle plugin. It chooses one next stage, records authority limits, and hands off through the core `sy-*` command-surface handles.
 
 Plugin metadata points local plugin information links at this README so the
 picker has a durable operator-facing reference.
@@ -20,7 +20,7 @@ It is not the `@brainwav/coding-harness` infrastructure toolchain.
 
 ## Command-Facing Skills
 
-Use `sy-strategy` when the stage is unclear. Direct stage work lives in the core `sy-*` command handles so the package stays cheap, visible, and grep-friendly.
+Use `sy-strategy` when the stage is unclear. Direct stage work lives behind the core `sy-*` command-surface handles so the package stays cheap, visible, and grep-friendly.
 
 Lifecycle stages are plain English. Skill IDs use `sy-` so the package stays grep-friendly and avoids collisions with generic skills.
 

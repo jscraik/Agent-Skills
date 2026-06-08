@@ -24,7 +24,6 @@ from selection_policy import (  # type: ignore  # noqa: E402
     SYSTEM_BRIDGE_SKILL_NAMES,
     policy_identity,
 )
-from command_surface import build_command_surface_handles  # type: ignore  # noqa: E402
 from skill_discovery import (  # type: ignore  # noqa: E402
     HIDDEN_FLAT_SKILL_NAMES as DISCOVERY_HIDDEN_FLAT_SKILL_NAMES,
     PLUGIN_HIDDEN_LANE_SKILL_NAMES as DISCOVERY_PLUGIN_HIDDEN_LANE_SKILL_NAMES,
@@ -208,9 +207,23 @@ def _classified_scope_collision(collision: dict[str, Any]) -> dict[str, Any] | N
 
 
 def _scope_collision_baseline_path(path: str) -> str:
-    """Return a stable path key for intentional collision baselines."""
+    """
+    Produce a stable baseline key that normalizes plugin cache skill paths so equivalent cached artifacts map to the same collision baseline.
+    
+    When `path` refers to a plugin cache under "Plugins/cache/openai-curated" or
+    "Plugins/cache/openai-curated-remote" and contains a "skills" segment, the
+    returned baseline preserves the first four path segments and everything from
+    the "skills" segment onward; otherwise the original `path` is returned.
+    
+    Returns:
+    	normalized_path (str): The normalized baseline path, or the original input when no normalization applies.
+    """
     parts = Path(path).parts
-    if len(parts) >= 7 and parts[:3] == ("Plugins", "cache", "openai-curated"):
+    if (
+        len(parts) >= 7
+        and parts[:2] == ("Plugins", "cache")
+        and parts[2] in {"openai-curated", "openai-curated-remote"}
+    ):
         try:
             skills_index = parts.index("skills", 4)
         except ValueError:
@@ -286,15 +299,6 @@ def _first_level_skill_names() -> list[str]:
     return names
 
 
-def _generated_command_handle_names() -> set[str]:
-    """Return command handles intentionally projected as first-level runtime entries."""
-    return {
-        handle.handle
-        for handle in build_command_surface_handles()
-        if handle.kind == "skill" and handle.command_handle_path and handle.handle not in ROOT_SKILL_SETS
-    }
-
-
 def _active_projection_mode(first_level_names: set[str]) -> str:
     if ROOT_SKILL_SETS <= first_level_names:
         return "rooted"
@@ -348,9 +352,8 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
     first_level = set(_first_level_skill_names())
     projection_mode = _active_projection_mode(first_level)
     rooted_mode = projection_mode == "rooted"
-    command_handle_names = _generated_command_handle_names() if rooted_mode else set()
     root_skill_set_count = len(first_level & ROOT_SKILL_SETS)
-    bridge_exposed = sorted((first_level & BRIDGE_SKILLS) - command_handle_names)
+    bridge_exposed = sorted(first_level & BRIDGE_SKILLS)
     policy_default = set(DEFAULT_VISIBLE_FLAT_SKILL_NAMES)
     higher_precedence_names = {
         entry["name"]
@@ -423,7 +426,7 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
     if rooted_mode:
         missing_roots = sorted(ROOT_SKILL_SETS - first_level)
         allowed_rooted_first_level = ROOT_SKILL_SETS | {"codex-primary-runtime"}
-        unexpected_first_level = sorted(first_level - allowed_rooted_first_level - command_handle_names)
+        unexpected_first_level = sorted(first_level - allowed_rooted_first_level)
         if missing_roots or unexpected_first_level:
             violations.append({
                 "code": "ROOTED_POLICY_NAME_DRIFT",
@@ -499,7 +502,7 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
         "catalog_default_skill_names": sorted(catalog_names),
         "system_bridge_skills": sorted(BRIDGE_SKILLS),
         "first_level_bridge_skills": bridge_exposed,
-        "generated_command_handle_names": sorted(command_handle_names),
+        "command_surface_handle_names": [],
         "policy_default_skill_names": sorted(policy_default),
         "effective_default_policy_skill_names": sorted(expected_default),
         "default_visible_skill_names": sorted(default_names),

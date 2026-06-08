@@ -19,7 +19,7 @@ Do not hand-edit runtime projections.
 - `total_skills`: 26
 - `catalog_source`: default user-visible catalog surface
 - `visibility`: default
-- `policy_identity`: c83502e67b3f781e
+- `policy_identity`: 8a1c61840a1a02bf
 
 ## Catalog
 

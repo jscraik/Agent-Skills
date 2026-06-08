@@ -29,7 +29,7 @@ class TestUpdateReadmeCatalogText(unittest.TestCase):
         content = (
             "# Agent Skills\n\n"
             "A governed **Agent Skills Kit** repository for Codex and AI coding agents.\n"
-            "Author skills once, validate quality, expose `$` command handles, and sync\n"
+            "Author skills once, validate quality, expose `$` command-surface handles, and sync\n"
             "routed skills and plugins into runtime projections through the `ask` CLI.\n\n"
             "Body.\n"
         )
@@ -69,7 +69,7 @@ class TestUpdateReadmeCatalogText(unittest.TestCase):
             "# Agent Skills\n\n"
             f"{CURRENT_AGENT_SKILLS_KIT_SENTENCE}\n\n"
             "A governed **Agent Skills Kit** repository for Codex and AI coding agents.\n"
-            "Author skills once, validate quality, expose `$` command handles, and sync\n"
+            "Author skills once, validate quality, expose `$` command-surface handles, and sync\n"
             "routed skills and plugins into runtime projections through the `ask` CLI.\n\n"
             "Body.\n"
         )

@@ -10,6 +10,7 @@ import os
 import shutil
 import contextlib
 import subprocess
+import tempfile
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -42,6 +43,7 @@ class MirrorProjection:
     follow_symlinks: bool = False
     replace_before_sync: bool = False
     excluded_dir_names: tuple[str, ...] = ()
+    plugin_cache_package: bool = False
 
 
 SYMLINK_PROJECTIONS: tuple[SymlinkProjection, ...] = (
@@ -70,13 +72,8 @@ MIRROR_PROJECTIONS: tuple[MirrorProjection, ...] = (
         replace_before_sync=True,
         excluded_dir_names=(
             "fixtures",
-            "skills",
-            "team_automation",
-            "code_quality_review",
-            "scaffolding_templates",
-            "infrastructure_ops",
-            "data_fetch_analysis",
         ),
+        plugin_cache_package=True,
     ),
     MirrorProjection(
         name="cache-plugin-factory",
@@ -88,13 +85,8 @@ MIRROR_PROJECTIONS: tuple[MirrorProjection, ...] = (
         replace_before_sync=True,
         excluded_dir_names=(
             "fixtures",
-            "skills",
-            "team_automation",
-            "code_quality_review",
-            "scaffolding_templates",
-            "infrastructure_ops",
-            "data_fetch_analysis",
         ),
+        plugin_cache_package=True,
     ),
     MirrorProjection(
         name="cache-skill-factory",
@@ -106,13 +98,8 @@ MIRROR_PROJECTIONS: tuple[MirrorProjection, ...] = (
         replace_before_sync=True,
         excluded_dir_names=(
             "fixtures",
-            "skills",
-            "team_automation",
-            "code_quality_review",
-            "scaffolding_templates",
-            "infrastructure_ops",
-            "data_fetch_analysis",
         ),
+        plugin_cache_package=True,
     ),
 )
 
@@ -680,6 +667,27 @@ def sync_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
         projection_abs.unlink()
     projection_abs.mkdir(parents=True, exist_ok=True)
 
+    if spec.plugin_cache_package:
+        changed_files, deleted_files, package_logs = _replace_plugin_cache_package_copy(
+            source_abs,
+            projection_abs,
+            follow_symlinks=spec.follow_symlinks,
+            excluded_dir_names=normalize_excluded_dir_names(spec.excluded_dir_names),
+            keep_duplicates=True,
+        )
+        return {
+            "name": spec.name,
+            "type": "mirror",
+            "status": "synced",
+            "source": spec.source_path,
+            "projection": spec.projection_path,
+            "sync_engine": "plugin-cache-package",
+            "changed_files": changed_files,
+            "deleted_files": deleted_files,
+            "stamped_files": 0,
+            "logs": package_logs,
+        }
+
     excluded_dirs = normalize_excluded_dir_names(spec.excluded_dir_names)
 
     def _prune_excluded_dirs(root: Path, excluded: tuple[str, ...]) -> int:
@@ -936,6 +944,58 @@ def _sync_mirror_python(
     return changed_files, deleted_files
 
 
+def _prune_nested_duplicate_skill_identities(skills_root: Path) -> tuple[list[str], int]:
+    logs: list[str] = []
+    deletes = 0
+    direct_skill_names = {
+        child.name
+        for child in skills_root.iterdir()
+        if child.is_dir() and (child / "SKILL.md").is_file()
+    }
+    if not direct_skill_names:
+        return logs, deletes
+
+    duplicate_skill_dirs = {
+        skill_md.parent
+        for skill_md in skills_root.rglob("SKILL.md")
+        if skill_md.parent.parent != skills_root and skill_md.parent.name in direct_skill_names
+    }
+    for target in sorted(duplicate_skill_dirs, key=lambda path: len(path.parts), reverse=True):
+        if not (target.exists() or target.is_symlink()):
+            continue
+        if target.is_symlink() or target.is_file():
+            target.unlink()
+        else:
+            shutil.rmtree(target)
+        deletes += 1
+        logs.append(f"Removed nested duplicate plugin skill identity: {target}")
+    return logs, deletes
+
+
+def _replace_plugin_cache_package_copy(
+    source_abs: Path,
+    projection_abs: Path,
+    *,
+    follow_symlinks: bool,
+    excluded_dir_names: Iterable[str],
+    keep_duplicates: bool = False,
+) -> tuple[int, int, list[str]]:
+    changed_files, deleted_files = _sync_mirror_python(
+        source_abs,
+        projection_abs,
+        follow_symlinks=follow_symlinks,
+        excluded_dir_names=excluded_dir_names,
+    )
+    logs: list[str] = []
+    skills_root = projection_abs / "skills"
+    if not keep_duplicates and skills_root.is_dir():
+        nested_logs, nested_deletes = _prune_nested_duplicate_skill_identities(skills_root)
+        logs.extend(nested_logs)
+        deleted_files += nested_deletes
+    logs.append(f"Replaced plugin cache package projection: {projection_abs} <- {source_abs}")
+    return changed_files, deleted_files, logs
+
+
 def _is_rsync_permission_failure(error: subprocess.CalledProcessError) -> bool:
     """
     Detect whether an rsync CalledProcessError indicates a permission-style failure appropriate for falling back to a Python sync.
@@ -961,7 +1021,7 @@ def verify_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
     """
     Verify that a projection directory mirrors its source directory and report any drift.
 
-    Performs a path-by-path comparison between `spec.source_path` and `spec.projection_path` (relative to `repo_root`), normalising stampable text files by removing the generated projection header before comparison, and computes manifest digests for both sides.
+    Performs a path-by-path comparison between `spec.source_path` and `spec.projection_path` (relative to `repo_root`), normalising stampable text files by removing the generated projection header before comparison, and computes manifest digests for both sides. Plugin cache package mirrors are compared against the transformed cache package shape instead of stamped source bytes.
 
     Parameters:
         repo_root (Path): Repository root used to resolve the spec's paths.
@@ -1015,164 +1075,182 @@ def verify_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
         result.update({"status": "drift", "reason": "projection_not_directory"})
         return result
 
-    excluded_dirs = normalize_excluded_dir_names(spec.excluded_dir_names)
-    source_files = {
-        rel.as_posix(): rel
-        for rel in iter_files(
+    temp_dir: tempfile.TemporaryDirectory[str] | None = None
+    if spec.plugin_cache_package:
+        temp_dir = tempfile.TemporaryDirectory(prefix=f"{spec.name}-expected-")
+        transformed_source = Path(temp_dir.name) / source_abs.name
+        transformed_source.mkdir(parents=True, exist_ok=True)
+        _replace_plugin_cache_package_copy(
             source_abs,
-            excluded_dirs,
+            transformed_source,
             follow_symlinks=spec.follow_symlinks,
+            excluded_dir_names=normalize_excluded_dir_names(spec.excluded_dir_names),
+            keep_duplicates=True,
         )
-    }
-    projection_files = {
-        rel.as_posix(): rel for rel in iter_files(projection_abs, excluded_dirs)
-    }
-    source_manifest_hashes: dict[str, str] = {}
-    for rel_key, rel in source_files.items():
-        source_file = source_abs / rel
-        if source_file.is_symlink() and not spec.follow_symlinks:
-            source_manifest_hashes[rel_key] = hash_text(f"symlink:{os.readlink(source_file)}")
-        else:
+        source_abs = transformed_source
+
+    excluded_dirs = normalize_excluded_dir_names(spec.excluded_dir_names)
+    try:
+        source_files = {
+            rel.as_posix(): rel
+            for rel in iter_files(
+                source_abs,
+                excluded_dirs,
+                follow_symlinks=spec.follow_symlinks,
+            )
+        }
+        projection_files = {
+            rel.as_posix(): rel for rel in iter_files(projection_abs, excluded_dirs)
+        }
+        source_manifest_hashes: dict[str, str] = {}
+        for rel_key, rel in source_files.items():
+            source_file = source_abs / rel
+            if source_file.is_symlink() and not spec.follow_symlinks:
+                source_manifest_hashes[rel_key] = hash_text(f"symlink:{os.readlink(source_file)}")
+            else:
+                try:
+                    source_manifest_hashes[rel_key] = hash_bytes(source_file.read_bytes())
+                except OSError:
+                    source_manifest_hashes[rel_key] = hash_text("unreadable_source")
+        projection_manifest_hashes: dict[str, str] = {}
+        for rel_key, rel in projection_files.items():
+            projection_file = projection_abs / rel
+            if projection_file.is_symlink() and not spec.follow_symlinks:
+                projection_manifest_hashes[rel_key] = hash_text(f"symlink:{os.readlink(projection_file)}")
+                continue
             try:
-                source_manifest_hashes[rel_key] = hash_bytes(source_file.read_bytes())
+                projection_bytes = projection_file.read_bytes()
             except OSError:
-                source_manifest_hashes[rel_key] = hash_text("unreadable_source")
-    projection_manifest_hashes: dict[str, str] = {}
-    for rel_key, rel in projection_files.items():
-        projection_file = projection_abs / rel
-        if projection_file.is_symlink() and not spec.follow_symlinks:
-            projection_manifest_hashes[rel_key] = hash_text(f"symlink:{os.readlink(projection_file)}")
-            continue
-        try:
-            projection_bytes = projection_file.read_bytes()
-        except OSError:
-            projection_manifest_hashes[rel_key] = hash_text("unreadable_projection")
-            continue
-        if rel.suffix not in STAMPABLE_SUFFIXES:
-            projection_manifest_hashes[rel_key] = hash_bytes(projection_bytes)
-            continue
-        try:
-            projection_text = projection_bytes.decode("utf-8")
-        except UnicodeDecodeError:
-            projection_manifest_hashes[rel_key] = hash_bytes(projection_bytes)
-            continue
-        normalized_projection, _ = strip_projection_header(projection_text, rel.suffix)
-        projection_manifest_hashes[rel_key] = hash_text(normalized_projection)
+                projection_manifest_hashes[rel_key] = hash_text("unreadable_projection")
+                continue
+            if spec.plugin_cache_package or rel.suffix not in STAMPABLE_SUFFIXES:
+                projection_manifest_hashes[rel_key] = hash_bytes(projection_bytes)
+                continue
+            try:
+                projection_text = projection_bytes.decode("utf-8")
+            except UnicodeDecodeError:
+                projection_manifest_hashes[rel_key] = hash_bytes(projection_bytes)
+                continue
+            normalized_projection, _ = strip_projection_header(projection_text, rel.suffix)
+            projection_manifest_hashes[rel_key] = hash_text(normalized_projection)
 
-    missing_in_projection = sorted(set(source_files) - set(projection_files))
-    extra_in_projection = sorted(set(projection_files) - set(source_files))
-    mismatched_files: list[dict[str, str]] = []
-    unstamped_files: list[str] = []
+        missing_in_projection = sorted(set(source_files) - set(projection_files))
+        extra_in_projection = sorted(set(projection_files) - set(source_files))
+        mismatched_files: list[dict[str, str]] = []
+        unstamped_files: list[str] = []
 
-    for rel_key in sorted(set(source_files) & set(projection_files)):
-        rel = source_files[rel_key]
-        source_file = source_abs / rel
-        projection_file = projection_abs / rel
+        for rel_key in sorted(set(source_files) & set(projection_files)):
+            rel = source_files[rel_key]
+            source_file = source_abs / rel
+            projection_file = projection_abs / rel
 
-        if (source_file.is_symlink() or projection_file.is_symlink()) and not spec.follow_symlinks:
-            if source_file.is_symlink() and projection_file.is_symlink():
-                source_target = os.readlink(source_file)
-                projection_target = os.readlink(projection_file)
-                if source_target != projection_target:
+            if (source_file.is_symlink() or projection_file.is_symlink()) and not spec.follow_symlinks:
+                if source_file.is_symlink() and projection_file.is_symlink():
+                    source_target = os.readlink(source_file)
+                    projection_target = os.readlink(projection_file)
+                    if source_target != projection_target:
+                        mismatched_files.append(
+                            {
+                                "path": rel_key,
+                                "reason": "symlink_target_mismatch",
+                                "source_sha256": hash_text(f"symlink:{source_target}"),
+                                "projection_sha256": hash_text(f"symlink:{projection_target}"),
+                            }
+                        )
+                else:
+                    source_kind = "symlink" if source_file.is_symlink() else "file"
+                    projection_kind = "symlink" if projection_file.is_symlink() else "file"
                     mismatched_files.append(
                         {
                             "path": rel_key,
-                            "reason": "symlink_target_mismatch",
-                            "source_sha256": hash_text(f"symlink:{source_target}"),
-                            "projection_sha256": hash_text(f"symlink:{projection_target}"),
+                            "reason": "symlink_kind_mismatch",
+                            "source_sha256": hash_text(source_kind),
+                            "projection_sha256": hash_text(projection_kind),
                         }
                     )
-            else:
-                source_kind = "symlink" if source_file.is_symlink() else "file"
-                projection_kind = "symlink" if projection_file.is_symlink() else "file"
+                continue
+
+            try:
+                source_bytes = source_file.read_bytes()
+            except OSError:
+                projection_sha = hash_text("missing")
+                if projection_file.exists():
+                    try:
+                        projection_sha = hash_bytes(projection_file.read_bytes())
+                    except OSError:
+                        projection_sha = hash_text("unreadable_projection")
                 mismatched_files.append(
                     {
                         "path": rel_key,
-                        "reason": "symlink_kind_mismatch",
-                        "source_sha256": hash_text(source_kind),
-                        "projection_sha256": hash_text(projection_kind),
+                        "reason": "unreadable_file",
+                        "source_sha256": hash_text("unreadable_source"),
+                        "projection_sha256": projection_sha,
                     }
                 )
-            continue
-
-        try:
-            source_bytes = source_file.read_bytes()
-        except OSError:
-            projection_sha = hash_text("missing")
-            if projection_file.exists():
-                try:
-                    projection_sha = hash_bytes(projection_file.read_bytes())
-                except OSError:
-                    projection_sha = hash_text("unreadable_projection")
-            mismatched_files.append(
-                {
-                    "path": rel_key,
-                    "reason": "unreadable_file",
-                    "source_sha256": hash_text("unreadable_source"),
-                    "projection_sha256": projection_sha,
-                }
-            )
-            continue
-        try:
-            projection_bytes = projection_file.read_bytes()
-        except OSError:
-            mismatched_files.append(
-                {
-                    "path": rel_key,
-                    "reason": "unreadable_file",
-                    "source_sha256": hash_bytes(source_bytes),
-                    "projection_sha256": hash_text("unreadable_projection"),
-                }
-            )
-            continue
-
-        if rel.suffix in STAMPABLE_SUFFIXES:
+                continue
             try:
-                source_text = source_bytes.decode("utf-8")
-                projection_text = projection_bytes.decode("utf-8")
-            except UnicodeDecodeError:
+                projection_bytes = projection_file.read_bytes()
+            except OSError:
                 mismatched_files.append(
                     {
                         "path": rel_key,
-                        "reason": "expected_utf8_projection_text",
+                        "reason": "unreadable_file",
                         "source_sha256": hash_bytes(source_bytes),
-                        "projection_sha256": hash_bytes(projection_bytes),
+                        "projection_sha256": hash_text("unreadable_projection"),
                     }
                 )
                 continue
 
-            expected_header = projection_header_for((Path(spec.source_path) / rel).as_posix(), rel.suffix)
-            header_line = detect_projection_header(projection_text, rel.suffix)
-            normalized_projection, had_header = strip_projection_header(projection_text, rel.suffix)
-            if not had_header or header_line != expected_header:
-                unstamped_files.append(rel_key)
-            if source_text != normalized_projection:
+            if rel.suffix in STAMPABLE_SUFFIXES and not spec.plugin_cache_package:
+                try:
+                    source_text = source_bytes.decode("utf-8")
+                    projection_text = projection_bytes.decode("utf-8")
+                except UnicodeDecodeError:
+                    mismatched_files.append(
+                        {
+                            "path": rel_key,
+                            "reason": "expected_utf8_projection_text",
+                            "source_sha256": hash_bytes(source_bytes),
+                            "projection_sha256": hash_bytes(projection_bytes),
+                        }
+                    )
+                    continue
+
+                expected_header = projection_header_for((Path(spec.source_path) / rel).as_posix(), rel.suffix)
+                header_line = detect_projection_header(projection_text, rel.suffix)
+                normalized_projection, had_header = strip_projection_header(projection_text, rel.suffix)
+                if not had_header or header_line != expected_header:
+                    unstamped_files.append(rel_key)
+                if source_text != normalized_projection:
+                    mismatched_files.append(
+                        {
+                            "path": rel_key,
+                            "reason": "content_mismatch",
+                            "source_sha256": hash_bytes(source_bytes),
+                            "projection_sha256": hash_bytes(projection_bytes),
+                        }
+                    )
+            elif source_bytes != projection_bytes:
+                reason = "content_mismatch" if rel.suffix in STAMPABLE_SUFFIXES else "binary_mismatch"
                 mismatched_files.append(
                     {
                         "path": rel_key,
-                        "reason": "content_mismatch",
-                        "source_sha256": hash_bytes(source_bytes),
-                        "projection_sha256": hash_bytes(projection_bytes),
-                    }
-                )
-        else:
-            if source_bytes != projection_bytes:
-                mismatched_files.append(
-                    {
-                        "path": rel_key,
-                        "reason": "binary_mismatch",
+                        "reason": reason,
                         "source_sha256": hash_bytes(source_bytes),
                         "projection_sha256": hash_bytes(projection_bytes),
                     }
                 )
 
-    source_manifest_sha = manifest_digest(source_manifest_hashes)
-    projection_manifest_sha = manifest_digest(projection_manifest_hashes)
-    manifest_mismatch = source_manifest_sha != projection_manifest_sha
+        source_manifest_sha = manifest_digest(source_manifest_hashes)
+        projection_manifest_sha = manifest_digest(projection_manifest_hashes)
+        manifest_mismatch = source_manifest_sha != projection_manifest_sha
+    finally:
+        if temp_dir is not None:
+            temp_dir.cleanup()
 
     result.update(
         {
-            "policy": "hash-manifest-plus-path-diff",
+            "policy": "plugin-cache-package-transform" if spec.plugin_cache_package else "hash-manifest-plus-path-diff",
             "missing_in_projection": missing_in_projection,
             "extra_in_projection": extra_in_projection,
             "mismatched_files": mismatched_files,

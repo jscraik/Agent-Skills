@@ -34,7 +34,7 @@ from ask.commands.memory import (  # noqa: E402
 from ask.services.plugin_cache import (  # noqa: E402
     PLUGIN_CACHE_PERMISSION_RERUN,
     plugin_cache_permission_declaration,
-    prune_command_handle_skill_entries,
+    prune_command_surface_duplicate_skill_entries,
     refresh_workspace_plugin_caches,
 )
 from ask.services.plugin_sources import (  # noqa: E402
@@ -142,13 +142,11 @@ from projection_engine import (  # noqa: E402
     normalize_projection_mode,
 )
 from command_surface import (  # noqa: E402
-    check_command_handles,
     check_command_surface_projection,
     handles_report,
     parse_command_handles,
     resolve_reviewer_handle,
     resolve_skill_handle,
-    write_command_handles,
     write_command_surface_projection,
 )
 from generate_root_skill_sets import build_roots, write_roots  # noqa: E402
@@ -849,11 +847,11 @@ def _starter_entries(entries: list, archetype: str, limit: int) -> list:
 
 
 def _command_handle_owner_index(repo_root: Path) -> dict[str, str]:
-    """Return generated command-handle owners keyed by handle name."""
+    """Return command-surface owners keyed by handle name."""
     try:
         report = handles_report(repo_root_path=repo_root, include_handles=True)
     except Exception as exc:  # noqa: BLE001 - command-surface errors must not break skill listing.
-        print(f"warning: failed to load command-handle owner index: {exc}", file=sys.stderr)
+        print(f"warning: failed to load command-surface owner index: {exc}", file=sys.stderr)
         return {}
     handles = report.get("handles") if isinstance(report, dict) else []
     if not isinstance(handles, list):
@@ -870,7 +868,7 @@ def _command_handle_owner_index(repo_root: Path) -> dict[str, str]:
 
 
 def _entry_matches_category(entry, category_token: str, owner_by_handle: dict[str, str], repo_root: Path) -> bool:
-    """Match a skill-list category against path/category plus generated handle ownership."""
+    """Match a skill-list category against path/category plus command-surface ownership."""
     searchable = [
         str(getattr(entry, "category", "")),
         str(getattr(entry, "name", "")),
@@ -980,7 +978,7 @@ def _refresh_catalog_projections(repo_root: Path, dry_run: bool = False) -> list
             count=1,
         )
         updated_readme = re.sub(
-            r"(?:A governed \*\*Agent Skills Kit\*\* repository for Codex and AI coding agents\. Author skills once, validate quality, expose `\$` command handles, and sync routed skills and plugins into runtime projections through the `ask` CLI\.\n\n)+(?=A governed \*\*Agent Skills Kit\*\* repository for Codex and AI coding agents\.\nAuthor skills once)",
+            r"(?:A governed \*\*Agent Skills Kit\*\* repository for Codex and AI coding agents\. Author skills once, validate quality, expose `\$` command-surface handles, and sync routed skills and plugins into runtime projections through the `ask` CLI\.\n\n)+(?=A governed \*\*Agent Skills Kit\*\* repository for Codex and AI coding agents\.\nAuthor skills once)",
             "",
             updated_readme,
         )
@@ -1226,12 +1224,10 @@ def skills_handles(
     check: bool = False,
     include_handles: bool = True,
     write_projection: bool = False,
-    write_command_handle_files: bool = False,
     check_projection: bool = False,
-    check_command_handle_files: bool = False,
     dry_run: bool = False,
 ) -> CallResult:
-    """Return or validate the rooted command-handle surface."""
+    """Return or validate the rooted command-surface metadata."""
     result = CallResult()
     result.metadata["command"] = "skills handles"
     report = handles_report(repo_root_path=repo_root, include_handles=include_handles)
@@ -1244,10 +1240,6 @@ def skills_handles(
         validation_args.append("--write-projection")
     if check_projection:
         validation_args.append("--check-projection")
-    if write_command_handle_files:
-        validation_args.append("--write-command-handles")
-    if check_command_handle_files:
-        validation_args.append("--check-command-handles")
     if dry_run:
         validation_args.append("--dry-run")
     report["validation_commands"] = [_skills_validation_command("handles", *validation_args)]
@@ -1264,27 +1256,18 @@ def skills_handles(
         result.data["command_surface_projection_check"] = check_command_surface_projection(
             repo_root_path=repo_root,
         )
-    if write_command_handle_files:
-        result.data["command_handle_write"] = write_command_handles(
-            repo_root_path=repo_root,
-            dry_run=dry_run,
-        )
-    if check_command_handle_files:
-        result.data["command_handle_check"] = check_command_handles(repo_root_path=repo_root)
     if check and report["status"] != "pass":
         result.status = "error"
         result.errors.append(
             ErrorObject(
                 code="ERR_VALIDATION",
-                message="Command-handle validation failed.",
-                fix_suggestion="Inspect data.violations, fix command-handle metadata, and rerun `ask skills handles --check --json`.",
+                message="Command-surface validation failed.",
+                fix_suggestion="Inspect data.violations, fix command-surface metadata, and rerun `ask skills handles --check --json`.",
             )
         )
     for key, message in (
         ("command_surface_projection_write", "Command-surface projection write failed."),
         ("command_surface_projection_check", "Command-surface projection check failed."),
-        ("command_handle_write", "Command-handle generation failed."),
-        ("command_handle_check", "Command-handle validation failed."),
     ):
         payload = result.data.get(key)
         if payload and payload.get("status") != "pass":
@@ -1293,7 +1276,7 @@ def skills_handles(
                 ErrorObject(
                     code="ERR_VALIDATION",
                     message=message,
-                    fix_suggestion="Inspect data.violations and data.command_handle_write.violations, then fix handle metadata or command-handle budgets.",
+                    fix_suggestion="Inspect data.violations, then fix handle metadata or command-surface projection drift.",
                 )
             )
     return result
@@ -1335,7 +1318,7 @@ def skills_parse(repo_root: Path, request_text: str) -> CallResult:
         result.errors.append(
             ErrorObject(
                 code="ERR_VALIDATION",
-                message="One or more command handles in the prompt could not be resolved.",
+                message="One or more command-surface handles in the prompt could not be resolved.",
                 fix_suggestion="Inspect data.parse.unresolved, then rerun with valid $ skill and @ reviewer handles.",
             )
         )
@@ -1344,7 +1327,7 @@ def skills_parse(repo_root: Path, request_text: str) -> CallResult:
 
 def skills_proof(repo_root: Path, handle: str, runtime_target: str = "any") -> CallResult:
     """
-    Prove that a command-handle is reachable from the workspace and user runtime targets.
+    Prove that a command-surface handle is reachable from the workspace and user runtime targets.
     
     Parameters:
         repo_root (Path): Repository root used to resolve skill sources and workspace context.
@@ -1365,7 +1348,6 @@ def skills_proof(repo_root: Path, handle: str, runtime_target: str = "any") -> C
         handle=handle,
         runtime_target=runtime_target,
         resolve_skill_handle_fn=resolve_skill_handle,
-        check_command_handles_fn=check_command_handles,
         home_path=Path.home(),
     )
     normalized = proof["handle"]
@@ -1398,7 +1380,7 @@ def skills_proof(repo_root: Path, handle: str, runtime_target: str = "any") -> C
         message = (
             f"Invalid runtime target '{runtime_target}'."
             if failure.get("failed_check_id") == "runtime_target"
-            else f"Command handle proof failed for '{normalized}'."
+            else f"Command-surface proof failed for '{normalized}'."
         )
         result.status = "error"
         result.errors.append(
@@ -3112,7 +3094,7 @@ def _skill_doctor_operation_context() -> dict[str, Any]:
 
 
 def _resolve_doctor_target(repo_root: Path, target: str) -> tuple[dict[str, Any], str | None]:
-    """Resolve a doctor target as either a command handle or a repo-owned path."""
+    """Resolve a doctor target as either a command-surface handle or a repo-owned path."""
     query = target.strip()
     looks_like_path = "/" in query or query.endswith(".md") or query.startswith(".")
     if looks_like_path:
@@ -3568,7 +3550,7 @@ def skills_doctor(
         checks["resolver"] = _doctor_check(
             "skipped",
             check_name="resolver",
-            reason="Path targets are audited as canonical source; command-handle proof requires a handle.",
+            reason="Path targets are audited as canonical source; runtime proof requires a handle.",
         )
         if codex_parity:
             checks["runtime_reachability"] = _doctor_check(
@@ -3576,12 +3558,12 @@ def skills_doctor(
                 check_name="runtime_reachability",
                 codex_parity=True,
                 runtime_target="codex",
-                reason="Codex parity requires a command-handle target so Codex runtime proof can run.",
+                reason="Codex parity requires a command-surface handle so Codex runtime proof can run.",
             )
             blockers.append(
                 _doctor_blocker(
                     "blocked_runtime",
-                    "Codex parity requires a command-handle target.",
+                    "Codex parity requires a command-surface handle.",
                 )
             )
 
@@ -3600,8 +3582,6 @@ def skills_doctor(
         )
 
     projection_path_value = None
-    if isinstance(resolution, dict):
-        projection_path_value = resolution.get("command_handle_path")
     target_path_value = target_info.get("target_path")
     source_ownership = _skill_root_ownership_for_path(
         str(source_path_value) if source_path_value else None,
@@ -3627,7 +3607,7 @@ def skills_doctor(
         repo_root=repo_root,
     )
     ownership_status = "pass"
-    if source_exists and target_ownership.get("classification") in {
+    if target_ownership.get("classification") in {
         "generated_runtime_projection",
         "client_runtime_config",
     }:
@@ -4589,7 +4569,7 @@ def explain_skill(repo_root: Path, handle: str) -> CallResult:
             ErrorObject(
                 code="ERR_VALIDATION",
                 message=f"Skill handle '{normalized}' resolved without a canonical source path.",
-                fix_suggestion="Regenerate command handles and rerun `./bin/ask skills explain`.",
+                fix_suggestion="Regenerate the command-surface projection and rerun `./bin/ask skills explain`.",
             )
         )
         return result
@@ -4606,7 +4586,7 @@ def explain_skill(repo_root: Path, handle: str) -> CallResult:
                 ErrorObject(
                     code="ERR_PATH_TRAVERSAL",
                     message=f"Skill handle '{normalized}' resolved outside the repository root.",
-                    fix_suggestion="Regenerate command handles and rerun `./bin/ask skills explain`.",
+                    fix_suggestion="Regenerate the command-surface projection and rerun `./bin/ask skills explain`.",
                 )
             )
             return result
@@ -4626,7 +4606,7 @@ def explain_skill(repo_root: Path, handle: str) -> CallResult:
             ErrorObject(
                 code="ERR_VALIDATION",
                 message=f"Resolved source for '{normalized}' is missing: {source_path}",
-                fix_suggestion="Regenerate command handles and rerun `./bin/ask skills explain`.",
+                fix_suggestion="Regenerate the command-surface projection and rerun `./bin/ask skills explain`.",
             )
         )
         return result
@@ -4656,7 +4636,7 @@ def explain_skill(repo_root: Path, handle: str) -> CallResult:
         "schema_version": "skills-explain.v1",
         "query": handle,
         "canonical_source": resolution.get("source_path"),
-        "generated_handle": resolution.get("command_handle_path"),
+        "command_surface_handle": normalized,
         "runtime_projection": (resolution.get("provenance") or {}).get("projection_mode"),
         "runtime_visibility": resolution.get("runtime_visibility"),
         "owner": resolution.get("owner"),
@@ -4668,6 +4648,23 @@ def explain_skill(repo_root: Path, handle: str) -> CallResult:
         "overlaps": [],
         "ambiguity_notes": [],
     }
+    # Determine runtime projection path - check if a file-backed projection exists
+    runtime_projection_path = None
+    projection_note = None
+    canonical_source_path = resolution.get("source_path")
+
+    if canonical_source_path:
+        # Check for file-backed runtime projection in .agents/skills
+        potential_projection = repo_root / ".agents" / "skills" / normalized / "SKILL.md"
+        if potential_projection.is_file():
+            try:
+                runtime_projection_path = str(potential_projection.relative_to(repo_root))
+            except ValueError:
+                runtime_projection_path = None
+                projection_note = "projection_outside_repo"
+        else:
+            projection_note = "projection_not_file_backed"
+
     explanation = {
         "schema_version": "skill-explanation.v1",
         "status": "resolved",
@@ -4676,13 +4673,14 @@ def explain_skill(repo_root: Path, handle: str) -> CallResult:
         "what_it_is": description,
         "when_to_use": when_to_use,
         "when_not_to_use": when_not_to_use,
-        "canonical_source_path": resolution.get("source_path"),
-        "runtime_projection_path": resolution.get("command_handle_path"),
+        "canonical_source_path": canonical_source_path,
+        "runtime_projection_path": runtime_projection_path,
         "command_handles": [
             {
                 "handle": normalized,
-                "path": resolution.get("command_handle_path"),
+                "path": runtime_projection_path,
                 "invoke_via": resolution.get("invoke_via"),
+                "projection_note": projection_note,
             }
         ],
         "required_validation": required_validation,
@@ -5466,18 +5464,15 @@ def skills_explain_boundary(repo_root: Path, handle: str) -> CallResult:
 
     resolution = result.data.get("resolution", {})
     canonical_path = resolution.get("canonical_skill_path") or resolution.get("source_path")
-    command_handle_path = resolution.get("command_handle_path")
     projection_risks: list[str] = []
-    if command_handle_path:
-        projection_risks.append("Do not hand-edit generated command handles under .agents/skills/**.")
-    if canonical_path and command_handle_path and canonical_path != command_handle_path:
+    if canonical_path:
         projection_risks.append("Edit the canonical source path and regenerate or verify projections after changes.")
 
     boundary = {
         "handle": resolution.get("handle", handle.lstrip("$")),
         "status": "pass",
         "canonical_skill_path": canonical_path,
-        "command_handle_path": command_handle_path,
+        "runtime_projection_path": canonical_path,
         "invoke_via": resolution.get("invoke_via"),
         "command_visibility": resolution.get("command_visibility"),
         "notes": projection_risks,
@@ -5601,7 +5596,7 @@ def _skill_install_intake_decision(repo_root: Path, skill_name: str, target_path
             "required_when": "manifest-backed candidate is promoted or release readiness is claimed",
             "not_applicable_when": "pure SKILL.md-first instruction-only candidate has no supported dependency manifest",
         },
-        "promotion_rule": "Do not add a command handle, route as canonical, blend into an owner skill, or make a Release-Readiness Claim until required gates pass.",
+        "promotion_rule": "Do not add a command-surface handle, route as canonical, blend into an owner skill, or make a Release-Readiness Claim until required gates pass.",
     }
 
 
@@ -6024,7 +6019,7 @@ def route_skills(
                 "skill_name": exact_candidate.name,
                 "skill_path": exact_candidate.path,
                 "confidence": 1.0,
-                "rationale": ["exact command handle match"],
+                "rationale": ["exact command-surface handle match"],
                 "risk_tier": "low",
             }
         ]
@@ -6210,7 +6205,7 @@ def goal_skills(
 
 
 def _candidate_handle(candidate: dict[str, Any]) -> str:
-    """Return the best command-handle spelling for a routed candidate."""
+    """Return the best command-surface handle spelling for a routed candidate."""
     name = str(candidate.get("name") or "").strip().lstrip("$")
     if name:
         return name
@@ -6271,7 +6266,7 @@ def _improve_tokens(text: str) -> set[str]:
 
 
 def _fallback_improvement_candidate(repo_root: Path, goal_text: str) -> dict[str, Any] | None:
-    """Select one command handle when formal goal routing is too ambiguous."""
+    """Select one command-surface handle when formal goal routing is too ambiguous."""
     request_tokens = _improve_tokens(goal_text)
     if not request_tokens:
         return None
@@ -6289,10 +6284,10 @@ def _fallback_improvement_candidate(repo_root: Path, goal_text: str) -> dict[str
         row = handle_rows.get(normalized_hint)
         if required_tokens.issubset(request_tokens) and row:
             return {
-                "candidate_id": f"skill:{row.get('handle')}::{row.get('command_handle_path')}",
+                "candidate_id": f"skill:{row.get('handle')}::{row.get('source_path')}",
                 "candidate_type": row.get("kind", "skill"),
                 "name": row.get("handle"),
-                "path": row.get("command_handle_path"),
+                "path": row.get("source_path"),
                 "confidence": 0.85,
                 "rationale": [
                     rationale,
@@ -6319,13 +6314,13 @@ def _fallback_improvement_candidate(repo_root: Path, goal_text: str) -> dict[str
     if score < 2 and normalized_handle not in request_tokens:
         return None
     return {
-        "candidate_id": f"skill:{row.get('handle')}::{row.get('command_handle_path')}",
+        "candidate_id": f"skill:{row.get('handle')}::{row.get('source_path')}",
         "candidate_type": row.get("kind", "skill"),
         "name": row.get("handle"),
-        "path": row.get("command_handle_path"),
+        "path": row.get("source_path"),
         "confidence": round(min(0.95, 0.45 + (score * 0.1)), 2),
         "rationale": [
-            "fallback command-handle description match",
+            "fallback command-surface description match",
             "matched terms=" + ",".join(sorted(overlap)),
         ],
         "scope_rank": 2,
@@ -6345,13 +6340,13 @@ def _improvement_route_state(route_decision_status: str | None, *, proof_failed:
     return "blocked_dependency", "goal routing did not produce a usable decision"
 
 
-def _proof_missing_workspace_command_handle(proof: dict[str, Any]) -> bool:
+def _proof_missing_workspace_source(proof: dict[str, Any]) -> bool:
     if not isinstance(proof, dict):
         return False
     gates = proof.get("gates")
     if not isinstance(gates, dict):
         return False
-    return gates.get("resolver") is False or gates.get("workspace_command_handle_exists") is False
+    return gates.get("resolver") is False or gates.get("canonical_source_exists") is False
 
 
 def improve_skills(
@@ -6432,14 +6427,6 @@ def improve_skills(
     required_gates_passed = all(bool(gates.get(gate)) for gate in required)
     user_runtime_ready = bool(
         gates.get("user_runtime_ready")
-        or (
-            gates.get("codex_user_link")
-            and gates.get("codex_user_command_handle_exists")
-        )
-        or (
-            gates.get("agents_user_link")
-            and gates.get("agents_user_command_handle_exists")
-        )
     )
     rationale = recommended.get("rationale") or []
     capability = {
@@ -6456,7 +6443,7 @@ def improve_skills(
     if fallback_used:
         improvement["status"] = "resolved_with_fallback"
         improvement["route_state"] = "resolved_with_fallback"
-        improvement["route_state_reason"] = "fallback command-handle description match selected one reachable capability"
+        improvement["route_state_reason"] = "fallback command-surface description match selected one reachable capability"
     improvement["reachability"] = {
         "status": "pass" if proof_result.status == "success" else "fail",
         "proof_status": proof.get("status") if isinstance(proof, dict) else "fail",
@@ -6477,10 +6464,12 @@ def improve_skills(
     if proof_result.status == "success":
         return result
 
+    proof_has_gates = isinstance(gates, dict) and bool(gates)
     fallback_after_unreachable_route = (
         not fallback_used
         and route_decision_status == "resolved"
-        and _proof_missing_workspace_command_handle(proof)
+        and proof_has_gates
+        and _proof_missing_workspace_source(proof)
     )
     if fallback_after_unreachable_route:
         fallback = _fallback_improvement_candidate(repo_root, goal_text)
@@ -6500,7 +6489,7 @@ def improve_skills(
                 improvement["status"] = "resolved_with_fallback"
                 improvement["route_state"] = "resolved_with_fallback"
                 improvement["route_state_reason"] = (
-                    "fallback command-handle description match replaced an unreachable routed capability"
+                    "fallback command-surface description match replaced an unreachable routed capability"
                 )
                 improvement["recommended_capability"] = {
                     "handle": fallback_handle,
@@ -6843,13 +6832,13 @@ def _append_user_runtime_relinks(
     _refresh_home_plugin_mirrors(plan, logs, repo_root, home / "plugins", dry_run=dry_run)
     for profile_home in _codex_profile_homes(home):
         _refresh_home_plugin_mirrors(
-            plan, logs, repo_root, profile_home / "plugins", dry_run=dry_run, prune_command_handles=True
+            plan, logs, repo_root, profile_home / "plugins", dry_run=dry_run, prune_command_surface_duplicates=True
         )
         _refresh_home_plugin_mirrors(
-            plan, logs, repo_root, profile_home / "Plugins", dry_run=dry_run, prune_command_handles=True
+            plan, logs, repo_root, profile_home / "Plugins", dry_run=dry_run, prune_command_surface_duplicates=True
         )
         _refresh_home_plugin_mirrors(
-            plan, logs, repo_root, profile_home / ".agents" / "plugins", dry_run=dry_run, prune_command_handles=True
+            plan, logs, repo_root, profile_home / ".agents" / "plugins", dry_run=dry_run, prune_command_surface_duplicates=True
         )
 
 
@@ -6932,12 +6921,12 @@ def _refresh_home_plugin_mirrors(
     home_plugins_dir: Path,
     *,
     dry_run: bool,
-    prune_command_handles: bool = False,
+    prune_command_surface_duplicates: bool = False,
 ) -> None:
     """
     Replace the user's home plugin mirror copies from the repository's canonical Plugins/ sources.
 
-    When run, ensure the home plugins mirror root is a real directory (not a repository-backed symlink), then for each plugin listed in Plugins/marketplace.json replace the corresponding directory under home_plugins_dir with a copy of the repository source, materialize first-level skill aliases, attempt pruning of duplicate command-handle entries, and write a marker file recording the repository source. In dry-run mode, only record planned actions in logs and the provided plan structure.
+    When run, ensure the home plugins mirror root is a real directory (not a repository-backed symlink), then for each plugin listed in Plugins/marketplace.json replace the corresponding directory under home_plugins_dir with a copy of the repository source, materialize first-level skill aliases, prune duplicate command-surface entries, and write a marker file recording the repository source. In dry-run mode, only record planned actions in logs and the provided plan structure.
 
     Parameters:
         plan (dict): Operation plan that will be mutated with a mirror plan and per-plugin entries.
@@ -6991,14 +6980,14 @@ def _refresh_home_plugin_mirrors(
                 shutil.rmtree(target_dir)
         except OSError as exc:
             logs.append(f"Skipped replacing protected home plugin mirror: {target_dir}: {exc}")
-            if prune_command_handles:
-                prune_logs, _prune_deletes = prune_command_handle_skill_entries(repo_root, plugin_name, target_dir)
+            if prune_command_surface_duplicates:
+                prune_logs, _prune_deletes = prune_command_surface_duplicate_skill_entries(repo_root, plugin_name, target_dir)
                 logs.extend(prune_logs)
             continue
         _copy_directory_contents(source_dir, target_dir)
         _materialize_first_level_skill_aliases(target_dir)
-        if prune_command_handles:
-            prune_logs, _prune_deletes = prune_command_handle_skill_entries(repo_root, plugin_name, target_dir)
+        if prune_command_surface_duplicates:
+            prune_logs, _prune_deletes = prune_command_surface_duplicate_skill_entries(repo_root, plugin_name, target_dir)
             logs.extend(prune_logs)
         (target_dir / marker_name).write_text(str(source_dir.resolve()) + "\n", encoding="utf-8")
         logs.append(f"Replaced home plugin mirror: {target_dir} <- {source_dir}")
@@ -7041,29 +7030,21 @@ def _sync_rooted_projection(
     root_report = build_roots(skills_dir, repo_root_path=repo_root)
     manifest_report = build_manifest_report(repo_root / ".skillsets", repo_root_path=repo_root)
     command_surface_write = write_command_surface_projection(repo_root_path=repo_root, dry_run=True)
-    command_handle_write = write_command_handles(repo_root_path=repo_root, dry_run=True)
     plan["root_skill_sets"] = _public_root_report(root_report)
     plan["skillset_manifests"] = _public_manifest_report(manifest_report)
     plan["command_surface"] = command_surface_write
-    plan["command_handles"] = {
-        key: value
-        for key, value in command_handle_write.items()
-        if key != "writes"
-    }
     plan["unmapped_entries"] = root_report.get("unmapped", [])
 
     violations = [
         *root_report.get("violations", []),
         *manifest_report.get("violations", []),
         *command_surface_write.get("violations", []),
-        *command_handle_write.get("violations", []),
     ]
     plan["violations"] = violations
     if (
         root_report.get("status") != "pass"
         or manifest_report.get("status") != "pass"
         or command_surface_write.get("status") != "pass"
-        or command_handle_write.get("status") != "pass"
     ):
         plan["validation_status"] = "fail"
         plan["warnings"].extend([str(violation.get("code", violation)) for violation in violations])
@@ -7083,7 +7064,6 @@ def _sync_rooted_projection(
     for manifest in manifest_report.get("manifests", []):
         plan["writes"].append(manifest["path"])
     plan["writes"].append(command_surface_write["path"])
-    plan["writes"].extend(row["path"] for row in command_handle_write.get("writes", []))
 
     if dry_run:
         logs.append("Dry-run rooted projection: root skills and manifests validated without mutation.")
@@ -7105,7 +7085,6 @@ def _sync_rooted_projection(
             root_writes = write_roots(root_report, skills_dir, repo_root_path=repo_root)
             manifest_writes = write_manifests(manifest_report, repo_root / ".skillsets")
             command_surface_write = write_command_surface_projection(repo_root_path=repo_root, dry_run=False)
-            command_handle_write = write_command_handles(repo_root_path=repo_root, dry_run=False)
         except (OSError, ValueError) as exc:
             plan["validation_status"] = "fail"
             plan["warnings"].append("ROOTED_PROJECTION_WRITE_FAILED")
@@ -7120,10 +7099,6 @@ def _sync_rooted_projection(
         logs.extend(f"Wrote rooted projection file: {item['path']}" for item in root_writes)
         logs.extend(f"Wrote skill-set manifest: {item['path']} ({item['count']} rows)" for item in manifest_writes)
         logs.append(f"Wrote command-surface projection: {command_surface_write['path']}")
-        logs.append(
-            "Wrote generated command handles: "
-            f"{command_handle_write['command_handle_count']} handles ({command_handle_write['write_count']} files)"
-        )
         for log in prune_logs:
             plan["deletes"].append(log)
             logs.append(log)

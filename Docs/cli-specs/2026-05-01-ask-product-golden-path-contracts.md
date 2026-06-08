@@ -437,7 +437,7 @@ Required data fields:
 
 Required behavior:
 
-- Compose resolver, command-handle proof, canonical-source, audit, metadata,
+- Compose resolver, runtime proof, canonical-source, audit, metadata,
   and outcome-proof availability signals for one capability.
 - Emit `target_summary` with the resolved query, target kind, handle, and
   canonical source path so callers can assert which capability was inspected.
@@ -574,7 +574,7 @@ Required data fields:
 
 Required behavior:
 
-- Resolve either a command handle or canonical source path without writing files.
+- Resolve either a command-surface handle or canonical source path without writing files.
 - Read package metadata from top-level frontmatter and nested `metadata`.
 - Treat missing canonical source as blocked.
 - Treat incomplete package metadata as warning by default; with `--strict`,

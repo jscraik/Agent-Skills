@@ -3,9 +3,9 @@
 Agent Skills Kit is the governed repository for teaching Codex and other AI
 coding agents how this workspace works.
 
-Use it to author skills once, validate them, expose small `$` command handles,
-and project the right capabilities into runtime without turning every workflow
-into prompt context.
+Use it to author skills once, validate them, expose small `$` command-surface
+handles, and project the right capabilities into runtime without turning every
+workflow into prompt context.
 
 The short version:
 
@@ -69,7 +69,7 @@ That path answers:
 
 | Reader job              | Start here                                                    | Why                                                                                             |
 | ----------------------- | ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| Check repo health       | `./bin/ask repo doctor --json --robot`                        | Combines repo status, catalog parity, runtime budget, command handles, and surface diagnostics. |
+| Check repo health       | `./bin/ask repo doctor --json --robot`                        | Combines repo status, catalog parity, runtime budget, command-surface metadata, and surface diagnostics. |
 | Find a skill for a task | `./bin/ask skills improve "<goal>" --json --robot`            | Routes the goal to one capability and returns the next useful command.                          |
 | Understand a skill      | `./bin/ask skills explain <handle> --json --robot`            | Resolves the handle to source, usage, limits, and proof.                                        |
 | Prove a skill           | `./bin/ask skills prove <handle> --json --robot`              | Reports reachability, quality, analytics, and outcome-proof state without merging those lanes.  |
@@ -123,9 +123,10 @@ This repo separates source, generated projections, and live runtime visibility.
 | `.agents/skills/**`                   | Runtime projection consumed by Codex and agent runtimes   | Regenerate only        |
 | `~/.agents/skills`, `~/.codex/skills` | User runtime links to the active projection               | Refresh with user sync |
 
-A generated command handle, such as
-`.agents/skills/he-heartbeat/SKILL.md`, is a pointer that makes
-`$he-heartbeat` mentionable. It is not the real workflow.
+Command-surface metadata in `.skillsets/command-surface.json` makes handles
+such as `$he-heartbeat` mentionable and resolves them to canonical
+`SKILL.md` source. It is not a generated wrapper file and it is not the real
+workflow.
 
 Resolve command-visible skill handles with:
 
@@ -205,7 +206,7 @@ Root wrappers under `bin/**` and `scripts/**` forward into
 - [Skill Management](Docs/agents/17-skill-management.md) - install, audit,
   fold, and line-budget policy.
 - [Runtime Projection Modes](Docs/architecture/runtime-projection-modes.md) -
-  flat/rooted projection modes, command handles, and sync scope.
+  flat/rooted projection modes, command-surface metadata, and sync scope.
 - [CLI Specification](Docs/cli-specs/2026-04-06-ask-cli-spec.md) - full command
   reference.
 - [Product Golden Path Command Contracts](Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md) -

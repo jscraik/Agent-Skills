@@ -41,7 +41,7 @@ non_goals:
   - implementing product code
   - running multiple HE stages in one router response
   - replacing `he-reconcile` lifecycle orchestration when orchestration is needed
-  - mutating generated command handles/runtime projections as source
+  - mutating command-surface metadata/runtime projections as source
   - handling non-Harness media, spreadsheet, or generic repo requests
   - granting implementation, external tracker mutation, destructive cleanup, sync/install, or closure authority
 

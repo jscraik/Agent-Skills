@@ -99,7 +99,7 @@ Before removing the obsolete `he-compound` package, prove:
   Project Brain status, and Local Memory indexing status
 - `evals.yaml` contains cases for old compound full capture and schema-driven
   `docs/solutions` preservation
-- command handles and picker projection resolve `he-reinforce`, not
+- command-surface handles and picker projection resolve `he-reinforce`, not
   `he-compound`
 - lifecycle routing docs describe `he-compound` as removed/replaced, not as a
   compatibility skill

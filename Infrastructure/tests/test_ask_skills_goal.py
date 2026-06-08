@@ -8,7 +8,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from ask.commands.skills import _skill_audit_target, goal_skills, improve_skills  # noqa: E402
+from ask.commands.skills_impl import _skill_audit_target, goal_skills, improve_skills  # noqa: E402
 from ask.envelope import CallResult  # noqa: E402
 
 
@@ -32,29 +32,28 @@ def _proof_result(handle: str, status: str = "pass") -> CallResult:
     result = CallResult()
     result.status = "success" if status == "pass" else "error"
     result.data["proof"] = {
-        "schema_version": "command-handle-proof.v1",
+        "schema_version": "command-handle-proof.v2",
         "handle": handle,
         "status": status,
         "gates": {
             "resolver": True,
-            "generated_command_handle_check": True,
-            "workspace_command_handle_exists": True,
+            "canonical_source_exists": True,
             "codex_user_link": True,
             "agents_user_link": True,
-            "codex_user_command_handle_exists": True,
-            "agents_user_command_handle_exists": True,
+            "codex_user_runtime_ready": True,
+            "agents_user_runtime_ready": True,
+            "user_runtime_ready": True,
         },
         "gate_policy": {
             "required": [
                 "resolver",
-                "generated_command_handle_check",
-                "workspace_command_handle_exists",
+                "canonical_source_exists",
                 "codex_user_link",
-                "codex_user_command_handle_exists",
+                "user_runtime_ready",
             ],
             "supporting_runtime_diagnostics": [
                 "agents_user_link",
-                "agents_user_command_handle_exists",
+                "agents_user_runtime_ready",
             ],
         },
     }
@@ -65,29 +64,28 @@ def _unreachable_catalog_proof(handle: str) -> CallResult:
     result = CallResult()
     result.status = "error"
     result.data["proof"] = {
-        "schema_version": "command-handle-proof.v1",
+        "schema_version": "command-handle-proof.v2",
         "handle": handle,
         "status": "fail",
         "gates": {
             "resolver": False,
-            "generated_command_handle_check": True,
-            "workspace_command_handle_exists": False,
+            "canonical_source_exists": False,
             "codex_user_link": False,
             "agents_user_link": True,
-            "codex_user_command_handle_exists": False,
-            "agents_user_command_handle_exists": False,
+            "codex_user_runtime_ready": False,
+            "agents_user_runtime_ready": False,
+            "user_runtime_ready": False,
         },
         "gate_policy": {
             "required": [
                 "resolver",
-                "generated_command_handle_check",
-                "workspace_command_handle_exists",
+                "canonical_source_exists",
                 "codex_user_link",
-                "codex_user_command_handle_exists",
+                "user_runtime_ready",
             ],
             "supporting_runtime_diagnostics": [
                 "agents_user_link",
-                "agents_user_command_handle_exists",
+                "agents_user_runtime_ready",
             ],
         },
     }
@@ -110,21 +108,21 @@ class TestAskSkillsGoal(unittest.TestCase):
             "decision_status": "resolved",
             "policy_identity": "abc123def4567890",
             "selected_candidates": [
-                {"candidate_id": "skill:a", "candidate_type": "skill", "name": "a", "path": "auth/a", "confidence": 0.9, "rationale": ["best"]},
-                {"candidate_id": "skill:b", "candidate_type": "skill", "name": "b", "path": "auth/b", "confidence": 0.8, "rationale": ["alt1"]},
-                {"candidate_id": "skill:c", "candidate_type": "skill", "name": "c", "path": "auth/c", "confidence": 0.7, "rationale": ["alt2"]},
+                {"candidate_id": "skill:autofix", "candidate_type": "skill", "name": "autofix", "path": "Skills/agent-ops/autofix/SKILL.md", "confidence": 0.9, "rationale": ["best"]},
+                {"candidate_id": "skill:simplify", "candidate_type": "skill", "name": "simplify", "path": "Skills/agent-ops/simplify/SKILL.md", "confidence": 0.8, "rationale": ["alt1"]},
+                {"candidate_id": "skill:testing", "candidate_type": "skill", "name": "testing", "path": "Skills/agent-ops/testing/SKILL.md", "confidence": 0.7, "rationale": ["alt2"]},
             ],
             "considered_candidates": [],
         }
-        with patch("ask.commands.skills.route_skills", return_value=_route_result(route_decision)):
+        with patch("ask.commands.skills_impl.route_skills", return_value=_route_result(route_decision)):
             result = goal_skills(REPO_ROOT, "build auth flow", top_k=3, considered_limit=20)
 
         self.assertEqual(result.status, "success")
         goal = result.data["goal_decision"]
         self.assertEqual(goal["schema_version"], "goal-decision.v1")
         self.assertEqual(goal["decision_status"], "resolved")
-        self.assertEqual(goal["recommended_candidate"]["name"], "a")
-        self.assertEqual([c["name"] for c in goal["alternative_candidates"]], ["b", "c"])
+        self.assertEqual(goal["recommended_candidate"]["name"], "autofix")
+        self.assertEqual([c["name"] for c in goal["alternative_candidates"]], ["simplify", "testing"])
         self.assertEqual(goal["failure_class"], None)
         self.assertEqual(goal["operator_action"], None)
 
@@ -146,7 +144,7 @@ class TestAskSkillsGoal(unittest.TestCase):
                 {"name": "y", "path": "backend/y", "confidence": 0.79},
             ],
         }
-        with patch("ask.commands.skills.route_skills", return_value=_route_result(route_decision)):
+        with patch("ask.commands.skills_impl.route_skills", return_value=_route_result(route_decision)):
             result = goal_skills(REPO_ROOT, "help me pick", top_k=3, considered_limit=20)
 
         self.assertEqual(result.status, "error")
@@ -173,8 +171,8 @@ class TestAskSkillsGoal(unittest.TestCase):
             "considered_candidates": [],
         }
         with (
-            patch("ask.commands.skills.route_skills", return_value=_route_result(route_decision)),
-            patch("ask.commands.skills.skills_proof", return_value=_proof_result("autofix")),
+            patch("ask.commands.skills_impl.route_skills", return_value=_route_result(route_decision)),
+            patch("ask.commands.skills_impl.skills_proof", return_value=_proof_result("autofix")),
         ):
             result = improve_skills(REPO_ROOT, "fix PR review comments", top_k=3, considered_limit=20)
 
@@ -206,7 +204,7 @@ class TestAskSkillsGoal(unittest.TestCase):
                 {"name": "x", "path": "backend/x", "confidence": 0.81},
             ],
         }
-        with patch("ask.commands.skills.route_skills", return_value=_route_result(route_decision)):
+        with patch("ask.commands.skills_impl.route_skills", return_value=_route_result(route_decision)):
             result = improve_skills(REPO_ROOT, "help me pick", top_k=3, considered_limit=20)
 
         self.assertEqual(result.status, "error")
@@ -233,7 +231,6 @@ class TestAskSkillsGoal(unittest.TestCase):
                 {
                     "handle": "autofix",
                     "kind": "skill",
-                    "command_handle_path": ".agents/skills/autofix/SKILL.md",
                     "owner": "agent-ops",
                     "description": "Fix PR review feedback and unresolved review comments.",
                     "invoke_via": "agent-ops",
@@ -242,9 +239,9 @@ class TestAskSkillsGoal(unittest.TestCase):
             ]
         }
         with (
-            patch("ask.commands.skills.route_skills", return_value=_route_result(route_decision)),
-            patch("ask.commands.skills.handles_report", return_value=handles),
-            patch("ask.commands.skills.skills_proof", return_value=_proof_result("autofix")),
+            patch("ask.commands.skills_impl.route_skills", return_value=_route_result(route_decision)),
+            patch("ask.commands.skills_impl.handles_report", return_value=handles),
+            patch("ask.commands.skills_impl.skills_proof", return_value=_proof_result("autofix")),
         ):
             result = improve_skills(
                 REPO_ROOT,
@@ -259,7 +256,7 @@ class TestAskSkillsGoal(unittest.TestCase):
         self.assertEqual(improvement["route_state"], "resolved_with_fallback")
         self.assertEqual(improvement["goal_decision_status"], "intent_unresolved")
         self.assertEqual(improvement["recommended_capability"]["handle"], "autofix")
-        self.assertIn("fallback command-handle description match", improvement["why"])
+        self.assertIn("fallback command-surface description match", improvement["why"])
 
     def test_improve_fallback_accepts_exact_single_token_handle(self) -> None:
         route_decision = {
@@ -276,7 +273,6 @@ class TestAskSkillsGoal(unittest.TestCase):
                 {
                     "handle": "autofix",
                     "kind": "skill",
-                    "command_handle_path": ".agents/skills/autofix/SKILL.md",
                     "owner": "agent-ops",
                     "description": "Fix PR review feedback and unresolved review comments.",
                     "invoke_via": "agent-ops",
@@ -285,9 +281,9 @@ class TestAskSkillsGoal(unittest.TestCase):
             ]
         }
         with (
-            patch("ask.commands.skills.route_skills", return_value=_route_result(route_decision)),
-            patch("ask.commands.skills.handles_report", return_value=handles),
-            patch("ask.commands.skills.skills_proof", return_value=_proof_result("autofix")),
+            patch("ask.commands.skills_impl.route_skills", return_value=_route_result(route_decision)),
+            patch("ask.commands.skills_impl.handles_report", return_value=handles),
+            patch("ask.commands.skills_impl.skills_proof", return_value=_proof_result("autofix")),
         ):
             result = improve_skills(REPO_ROOT, "autofix", top_k=3, considered_limit=20)
 
@@ -315,8 +311,8 @@ class TestAskSkillsGoal(unittest.TestCase):
             "considered_candidates": [],
         }
         with (
-            patch("ask.commands.skills.route_skills", return_value=_route_result(route_decision)),
-            patch("ask.commands.skills.skills_proof", return_value=_proof_result("autofix", status="fail")),
+            patch("ask.commands.skills_impl.route_skills", return_value=_route_result(route_decision)),
+            patch("ask.commands.skills_impl.skills_proof", return_value=_proof_result("autofix", status="fail")),
         ):
             result = improve_skills(REPO_ROOT, "fix PR review comments", top_k=3, considered_limit=20)
 
@@ -349,7 +345,6 @@ class TestAskSkillsGoal(unittest.TestCase):
                 {
                     "handle": "he-fix-bugs",
                     "kind": "skill",
-                    "command_handle_path": ".agents/skills/he-fix-bugs/SKILL.md",
                     "owner": "harness-engineering",
                     "description": "Diagnose and fix HE test, QA, CI, validation, or regression blockers.",
                     "invoke_via": "harness-engineering",
@@ -364,9 +359,9 @@ class TestAskSkillsGoal(unittest.TestCase):
             return _proof_result(handle, status=status)
 
         with (
-            patch("ask.commands.skills.route_skills", return_value=_route_result(route_decision)),
-            patch("ask.commands.skills.handles_report", return_value=handles),
-            patch("ask.commands.skills.skills_proof", side_effect=proof_for_handle),
+            patch("ask.commands.skills_impl.route_skills", return_value=_route_result(route_decision)),
+            patch("ask.commands.skills_impl.handles_report", return_value=handles),
+            patch("ask.commands.skills_impl.skills_proof", side_effect=proof_for_handle),
         ):
             result = improve_skills(REPO_ROOT, "fix validation blockers after review", top_k=3, considered_limit=20)
 
@@ -396,7 +391,6 @@ class TestAskSkillsGoal(unittest.TestCase):
                 {
                     "handle": "triage",
                     "kind": "skill",
-                    "command_handle_path": ".agents/skills/triage/SKILL.md",
                     "owner": "agent-ops",
                     "description": "Review file-based todo findings into ready, skipped, customized, or blocked states.",
                     "invoke_via": "agent-ops",
@@ -405,7 +399,6 @@ class TestAskSkillsGoal(unittest.TestCase):
                 {
                     "handle": "he-code-review",
                     "kind": "skill",
-                    "command_handle_path": ".agents/skills/he-code-review/SKILL.md",
                     "owner": "harness-engineering",
                     "description": "Review HE diffs for closure risk. Use when PR, commit, or readiness evidence is needed.",
                     "invoke_via": "harness-engineering",
@@ -414,9 +407,9 @@ class TestAskSkillsGoal(unittest.TestCase):
             ]
         }
         with (
-            patch("ask.commands.skills.route_skills", return_value=_route_result(route_decision)),
-            patch("ask.commands.skills.handles_report", return_value=handles),
-            patch("ask.commands.skills.skills_proof", return_value=_proof_result("he-code-review")),
+            patch("ask.commands.skills_impl.route_skills", return_value=_route_result(route_decision)),
+            patch("ask.commands.skills_impl.handles_report", return_value=handles),
+            patch("ask.commands.skills_impl.skills_proof", return_value=_proof_result("he-code-review")),
         ):
             result = improve_skills(
                 REPO_ROOT,
@@ -461,7 +454,6 @@ class TestAskSkillsGoal(unittest.TestCase):
                 {
                     "handle": "he-fix-bugs",
                     "kind": "skill",
-                    "command_handle_path": ".agents/skills/he-fix-bugs/SKILL.md",
                     "owner": "harness-engineering",
                     "description": "Diagnose and fix HE test, QA, CI, validation, or regression blockers.",
                     "invoke_via": "harness-engineering",
@@ -471,9 +463,9 @@ class TestAskSkillsGoal(unittest.TestCase):
         }
 
         with (
-            patch("ask.commands.skills.route_skills", return_value=_route_result(route_decision)),
-            patch("ask.commands.skills.handles_report", return_value=handles),
-            patch("ask.commands.skills.skills_proof", return_value=proof_error),
+            patch("ask.commands.skills_impl.route_skills", return_value=_route_result(route_decision)),
+            patch("ask.commands.skills_impl.handles_report", return_value=handles),
+            patch("ask.commands.skills_impl.skills_proof", return_value=proof_error),
         ):
             result = improve_skills(REPO_ROOT, "fix validation blockers after review", top_k=3, considered_limit=20)
 
@@ -516,8 +508,8 @@ class TestAskSkillsGoal(unittest.TestCase):
             ]
         }
         with (
-            patch("ask.commands.skills.route_skills", return_value=_route_result(route_decision)),
-            patch("ask.commands.skills.handles_report", return_value=handles),
+            patch("ask.commands.skills_impl.route_skills", return_value=_route_result(route_decision)),
+            patch("ask.commands.skills_impl.handles_report", return_value=handles),
         ):
             result = improve_skills(
                 REPO_ROOT,

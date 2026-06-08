@@ -6,6 +6,53 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 EXPECTED_SOURCE_PLUGIN_SKILLS = {
+    "aidevcon": {
+        "talk-azriel-executable-specs",
+        "talk-baker-sadogursky-context-engineering-skills",
+        "talk-batey-building-product-teams-age-of-ai",
+        "talk-birgitta-closing-keynote",
+        "talk-cormack-tests-lie-observability-ai",
+        "talk-debois-agent-enablement",
+        "talk-douglas-training-ai-on-your-own-code",
+        "talk-dubnov-merge-rate-ai-adoption",
+        "talk-farley-vibe-coding-best-we-can-do",
+        "talk-firtman-web-mcp-agentic-web",
+        "talk-foxwell-reinvention-dev-team",
+        "talk-groetzinger-skills-everywhere",
+        "talk-jones-odevo-ai-native-transformation",
+        "talk-jourdan-pipelines-to-prompts",
+        "talk-katsioloudes-code-security-ai",
+        "talk-kerr-bipolar-disorder-dysregulation-ai",
+        "talk-kushwaha-benchmarking-agent-era",
+        "talk-lamis-context-engineering-dreaming",
+        "talk-lawson-agent-experience",
+        "talk-lopopolo-harness-engineering",
+        "talk-luebken-embedding-pi-coding-agent",
+        "talk-maleix-collective-intelligence",
+        "talk-maple-aind-devcon-welcome",
+        "talk-marsden-agent-desktops",
+        "talk-martinelli-spec-driven-development",
+        "talk-moss-skills-team-workflow",
+        "talk-obstbaum-willoughby-vibes-to-metrics",
+        "talk-overweg-one-brain-no-filtering",
+        "talk-podjarny-skills-are-the-new-code",
+        "talk-roberts-ai-native-brownfield",
+        "talk-roberts-brownfield-ai-native",
+        "talk-ruiz-agents-on-canvas-tldraw",
+        "talk-scheire-artificial-intelligence",
+        "talk-selajev-docker-sandboxes-agents",
+        "talk-sloan-harness-engineering-beyond-code",
+        "talk-smith-connecting-context-future-transports",
+        "talk-stack-humans-architect-ai-writes-code",
+        "talk-stoneham-product-brain",
+        "talk-syme-agentic-repository-automation",
+        "talk-tal-skills-security",
+        "talk-thomas-ai-native-engineering",
+        "talk-trieloff-browser-agents",
+        "talk-walter-runtime-intelligence-agents",
+        "talk-wilson-cq-stack-overflow-for-agents",
+        "talk-wotherspoon-humans-vs-slop",
+    },
     "harness-engineering": {
         "he-brainstorm",
         "he-code-review",
@@ -52,6 +99,7 @@ EXPECTED_SOURCE_PLUGIN_SKILLS = {
 }
 
 EXPECTED_MARKETPLACE_SOURCE_PATHS = {
+    "aidevcon": "./Plugins/aidevcon",
     "harness-engineering": "./Plugins/harness-engineering",
     "plugin-factory": "./Plugins/plugin-factory",
     "skill-factory": "./Plugins/skill-factory",
@@ -79,6 +127,13 @@ SYSTEM_BRIDGE_SKILL_NAMES = {
     "plugin-installer",
     "skill-creator",
     "skill-installer",
+}
+
+EXPECTED_CACHE_ALIAS_SKILLS = {
+    "plugin-factory": {
+        "plugin-creator",
+        "plugin-installer",
+    },
 }
 
 HIDDEN_PICKER_COMPATIBILITY_SKILLS = {
@@ -124,57 +179,15 @@ def _direct_visible_skill_names(skills_root: Path) -> set[str]:
     }
 
 
-def _existing_command_handle_skill_names(plugin_name: str) -> set[str]:
-    """
-    Collect command-handle names owned by a plugin whose declared paths point
-    inside a generated command-surface root.
-    
-    Parameters:
-        plugin_name (str): Plugin identifier used to filter `owner` entries in the command-surface manifest.
-    
-    Returns:
-        set[str]: Handle names owned by `plugin_name` whose
-        `command_handle_path` resolves inside `.skillsets` or
-        `.agents/skills`.
-    """
-    command_surface_path = REPO_ROOT / ".skillsets" / "command-surface.json"
-    if not command_surface_path.is_file():
-        return set()
-    payload = json.loads(command_surface_path.read_text(encoding="utf-8"))
-    handles = payload.get("handles", [])
-    if not isinstance(handles, list):
-        return set()
-
-    names: set[str] = set()
-    command_surface_roots = (
-        (REPO_ROOT / ".skillsets").resolve(),
-        (REPO_ROOT / ".agents" / "skills").resolve(),
-    )
-    for row in handles:
-        if not isinstance(row, dict) or row.get("owner") != plugin_name:
-            continue
-        handle = row.get("handle")
-        command_handle_path = row.get("command_handle_path")
-        if not isinstance(handle, str) or not isinstance(command_handle_path, str):
-            continue
-        if "/" in handle or ".." in handle:
-            continue
-        try:
-            handle_file = (REPO_ROOT / command_handle_path).resolve()
-            if not any(handle_file.is_relative_to(root) for root in command_surface_roots):
-                continue
-            names.add(handle)
-        except (OSError, ValueError):
-            continue
-    return names
-
-
 def _expected_cache_skill_names(plugin_name: str) -> set[str]:
     return (
         EXPECTED_SOURCE_PLUGIN_SKILLS[plugin_name]
-        - _existing_command_handle_skill_names(plugin_name)
-        - HIDDEN_PICKER_COMPATIBILITY_SKILLS
-    )
+        | EXPECTED_CACHE_ALIAS_SKILLS.get(plugin_name, set())
+    ) - HIDDEN_PICKER_COMPATIBILITY_SKILLS
+
+
+def _unexpected_system_bridge_skill_names(plugin_name: str, discovered: set[str]) -> set[str]:
+    return discovered & (SYSTEM_BRIDGE_SKILL_NAMES - EXPECTED_CACHE_ALIAS_SKILLS.get(plugin_name, set()))
 
 
 class LocalPluginPickerSurfaceTests(unittest.TestCase):
@@ -288,14 +301,12 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
                 f"{plugin_name} manifest should not advertise hidden system-bridge skills",
             )
 
-    def test_runtime_cache_does_not_duplicate_command_handle_skills(self) -> None:
+    def test_runtime_cache_preserves_manifest_declared_skills(self) -> None:
         """
-        Verify the generated local plugin cache cannot duplicate real command handles.
+        Verify the generated local plugin cache preserves loader-declared skills.
 
-        The Codex picker has historically scanned plugin cache contents more broadly than
-        the manifest-declared skills root. This guard fails when the runtime cache prunes
-        plugin skills based on stale generated metadata, contains real command-handle-owned
-        skills, duplicates skill names inside a plugin, or exposes system bridge skills.
+        The runtime cache must remain a complete Codex loader package while
+        exposing only one visible path for each skill identity.
         """
         runtime_root = REPO_ROOT / ".agents" / "plugins-runtime" / "cache" / "agent-skills-local"
         if not runtime_root.exists():
@@ -324,20 +335,20 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
             self.assertEqual(
                 set(discovered),
                 expected_skill_names,
-                f"{plugin_name} runtime cache picker surface drifted",
+                f"{plugin_name} runtime cache loader package drifted",
             )
             self.assertFalse(
-                SYSTEM_BRIDGE_SKILL_NAMES & set(discovered),
-                f"{plugin_name} runtime cache should not expose system bridge skills as personal skills",
+                _unexpected_system_bridge_skill_names(plugin_name, set(discovered)),
+                f"{plugin_name} runtime cache should not expose unrelated system bridge skills as personal skills",
             )
 
-    def test_versioned_plugin_cache_does_not_duplicate_command_handle_skills(self) -> None:
+    def test_versioned_plugin_cache_preserves_manifest_declared_skills(self) -> None:
         """
-        Verify the local versioned plugin cache does not expose real command-handle-owned skills.
+        Verify the local versioned plugin cache preserves loader-declared skills.
 
-        Some picker paths still inspect Plugins/cache/agent-skills-local/<plugin>/<version>/skills.
-        This guard keeps that cache aligned with the first-level plugin surface, except for
-        plugin skills that have an actual generated `.agents/skills/<handle>` command surface.
+        Some loader paths still inspect
+        "Plugins/cache/agent-skills-local/<plugin>/<version>/skills".
+        Keep that package cache aligned with the first-level plugin surface.
         """
         cache_root = REPO_ROOT / "Plugins" / "cache" / "agent-skills-local"
         if not cache_root.exists():
@@ -381,14 +392,14 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
                 f"{plugin_name} versioned plugin cache picker surface drifted",
             )
 
-    def test_delegated_home_plugin_mirror_prunes_command_handle_duplicates(self) -> None:
+    def test_delegated_home_plugin_mirror_prunes_command_surface_duplicates(self) -> None:
         """
-        Verify the ask-engine user sync path prunes command-handle skills from home mirrors.
+        Verify the ask-engine user sync path prunes command-surface duplicate skills from home mirrors.
         """
         sync_source = REPO_ROOT / "Infrastructure" / "scripts" / "lib" / "ask" / "commands" / "skills_impl.py"
         source = sync_source.read_text(encoding="utf-8")
         mirror_function = source.split("def _refresh_home_plugin_mirrors(", 1)[1].split("def _sync_rooted_projection(", 1)[0]
-        self.assertIn("prune_command_handle_skill_entries", mirror_function)
+        self.assertIn("prune_command_surface_duplicate_skill_entries", mirror_function)
         self.assertIn("Skipped replacing protected home plugin mirror", mirror_function)
         self.assertIn("except OSError as exc", mirror_function)
         self.assertNotIn("duplicate pruning belongs to runtime cache copies", mirror_function)

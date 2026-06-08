@@ -55,7 +55,6 @@ PROVENANCE_REQUIRED_FIELDS = {
     "source_sha256",
 }
 HANDLE_REQUIRED_FIELDS = {
-    "command_handle_path",
     "command_visibility",
     "description",
     "handle",
@@ -112,12 +111,9 @@ class TestCommandSurfaceJsonStructure(unittest.TestCase):
         """handle_count must equal the actual number of entries in the handles array."""
         self.assertEqual(self.data["handle_count"], len(self.handles))
 
-    def test_generated_command_handle_count_equals_handle_count(self) -> None:
-        """generated_command_handle_count must agree with handle_count."""
-        self.assertEqual(
-            self.data["generated_command_handle_count"],
-            self.data["handle_count"],
-        )
+    def test_generated_command_handle_count_is_absent(self) -> None:
+        """Command-surface metadata must not advertise generated wrapper files."""
+        self.assertNotIn("generated_command_handle_count", self.data)
 
     def test_handle_count_is_not_empty(self) -> None:
         """The rooted command surface must expose generated handles without hard-coding churn."""
@@ -233,17 +229,11 @@ class TestCommandSurfaceJsonStructure(unittest.TestCase):
                     f"Handle '{handle.get('handle')}' missing source_sha256",
                 )
 
-    def test_command_handle_path_starts_with_agents_skills(self) -> None:
-        """Generated command handles must live under .agents/skills/."""
+    def test_handles_do_not_include_command_handle_path(self) -> None:
+        """Command-surface rows are metadata only and do not point to wrapper files."""
         for handle in self.handles:
             with self.subTest(handle=handle.get("handle")):
-                path = handle.get("command_handle_path", "")
-                if handle.get("handle") in SYSTEM_BRIDGE_HANDLES and not path:
-                    continue
-                self.assertTrue(
-                    path.startswith(".agents/skills/"),
-                    f"Handle '{handle.get('handle')}' has unexpected path: {path}",
-                )
+                self.assertNotIn("command_handle_path", handle)
 
     def test_source_paths_start_with_skills_or_plugins(self) -> None:
         """source_path must point into canonical source trees or system bridges."""

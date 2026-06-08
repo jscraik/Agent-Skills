@@ -52,8 +52,8 @@ overlap_names_file="$(mktemp "${TMPDIR:-/tmp}/plugin-flat-overlap.XXXXXX")"
 shadowed_names_file="$(mktemp "${TMPDIR:-/tmp}/plugin-shadowed-overlap.XXXXXX")"
 system_bridge_names_file="$(mktemp "${TMPDIR:-/tmp}/system-bridge-skill-names.XXXXXX")"
 root_skill_names_file="$(mktemp "${TMPDIR:-/tmp}/root-skill-set-names.XXXXXX")"
-command_handle_names_file="$(mktemp "${TMPDIR:-/tmp}/command-handle-skill-names.XXXXXX")"
-trap 'rm -f "$plugin_names_file" "$flat_names_file" "$overlap_names_file" "$shadowed_names_file" "$system_bridge_names_file" "$root_skill_names_file" "$command_handle_names_file"' EXIT
+command_surface_names_file="$(mktemp "${TMPDIR:-/tmp}/command-surface-skill-names.XXXXXX")"
+trap 'rm -f "$plugin_names_file" "$flat_names_file" "$overlap_names_file" "$shadowed_names_file" "$system_bridge_names_file" "$root_skill_names_file" "$command_surface_names_file"' EXIT
 
 selection_policy_shell="$(
   python3 "$selection_policy_path" --format shell
@@ -94,8 +94,8 @@ is_root_skill_set_name() {
 
 is_command_handle_skill_name() {
   local skill_name="$1"
-  [ -s "$command_handle_names_file" ] || return 1
-  grep -Fxq "$skill_name" "$command_handle_names_file"
+  [ -s "$command_surface_names_file" ] || return 1
+  grep -Fxq "$skill_name" "$command_surface_names_file"
 }
 
 # Only treat bridge names as intentional when the top-level skill path is a
@@ -130,9 +130,9 @@ if [ -f ".skillsets/command-surface.json" ]; then
     ((.handles // []) + (.hidden_handles // []))[]
     | select(type == "object")
     | select(.kind == "skill")
-    | select((.command_handle_path // "") | startswith(".agents/skills/"))
+    | select((.source_path // "") | endswith("/SKILL.md"))
     | .handle // empty
-  ' ".skillsets/command-surface.json" > "$command_handle_names_file"
+  ' ".skillsets/command-surface.json" > "$command_surface_names_file"
 fi
 
 : > "$plugin_names_file"

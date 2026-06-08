@@ -49,10 +49,9 @@ Index for repository automation, validation, and maintenance scripts.
 - `command_surface.py`
   - Builds `.skillsets/command-surface.json` from rooted manifests.
   - Validates duplicate handles, missing canonical sources, missing `invoke_via`
-    on target handles, generated command-handle drift, and reviewer separation.
+    on target handles, projection drift, and reviewer separation.
   - Public wrappers:
     - `python3 bin/ask skills handles --check --json`
-    - `python3 bin/ask skills handles --check-command-handles --json`
     - `python3 bin/ask reviewers resolve <handle> --json`
 - `sync_mcp.py`
 - `skill_catalog.py`

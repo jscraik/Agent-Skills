@@ -45,6 +45,7 @@ from ask.commands.plugins import (
     install_plugin,
     harden_plugin,
     list_plugins_state,
+    prune_stale_plugin_config,
     sync_local_runtime_plugins,
     status_plugin_state,
     doctor_plugins_state,
@@ -139,18 +140,16 @@ def main():
     skills_implicit_preview_parser.add_argument("--command", required=True, help="Shell command text to inspect")
     skills_implicit_preview_parser.add_argument("--workdir", help="Working directory used to resolve relative command paths")
     skills_handles_parser = skills_subparsers.add_parser("handles", help="List or validate command-visible skill handles", parents=[global_parser])
-    skills_handles_parser.add_argument("--check", action="store_true", help="Fail when command-handle validation finds drift")
+    skills_handles_parser.add_argument("--check", action="store_true", help="Fail when command-surface validation finds drift")
     skills_handles_parser.add_argument("--no-handles", action="store_true", help="Omit the full handle list from JSON output")
     skills_handles_parser.add_argument("--write-projection", action="store_true", help="Write .skillsets/command-surface.json from rooted manifests")
     skills_handles_parser.add_argument("--check-projection", action="store_true", help="Verify .skillsets/command-surface.json matches rooted manifests")
-    skills_handles_parser.add_argument("--write-command-handles", action="store_true", help="Write generated runtime command handles for non-root handles")
-    skills_handles_parser.add_argument("--check-command-handles", action="store_true", help="Verify generated runtime command handles exist and match rooted manifests")
-    skills_handles_parser.add_argument("--dry-run", action="store_true", help="Preview generated projection or command-handle writes without changing files")
+    skills_handles_parser.add_argument("--dry-run", action="store_true", help="Preview generated projection writes without changing files")
     skills_resolve_parser = skills_subparsers.add_parser("resolve", help="Resolve a command-visible skill handle", parents=[global_parser])
     skills_resolve_parser.add_argument("handle", help="Skill handle to resolve, with or without leading $")
     skills_parse_parser = skills_subparsers.add_parser("parse", help="Parse and resolve $ skill and @ reviewer handles from a prompt", parents=[global_parser])
     skills_parse_parser.add_argument("request", nargs="+", help="Prompt text containing $ skill and @ reviewer handles")
-    skills_proof_parser = skills_subparsers.add_parser("proof", help="Prove a command handle reaches workspace and user runtime surfaces", parents=[global_parser])
+    skills_proof_parser = skills_subparsers.add_parser("proof", help="Prove a command-surface handle reaches workspace and user runtime surfaces", parents=[global_parser])
     skills_proof_parser.add_argument("handle", help="Skill handle to prove, with or without leading $")
     skills_proof_parser.add_argument("--runtime-target", default="any", help="Runtime that must satisfy proof: any, codex, or agents")
     skills_subparsers.add_parser("prove", help="Show a skill proof scorecard", parents=[global_parser]).add_argument("handle", nargs="+", help="Skill handle or goal to prove")
@@ -240,11 +239,14 @@ def main():
     def _add_plugin_init_args(parser):
         parser.add_argument("name", help="Name of the new plugin")
         parser.add_argument("--category", default="third-party", help="Plugin category under Plugins/ (default: third-party)")
-        parser.add_argument("--with-marketplace", action="store_true", help="Add to local marketplace")
-        parser.add_argument("--with-scripts", action="store_true", help="Add scripts directory")
-        parser.add_argument("--with-assets", action="store_true", help="Add assets directory")
-        parser.add_argument("--with-references", action="store_true", help="Add references directory")
-        parser.add_argument("--with-workflows", action="store_true", help="Add workflows directory")
+        for flag, help_text in (
+            ("--with-marketplace", "Add to local marketplace"),
+            ("--with-scripts", "Add scripts directory"),
+            ("--with-assets", "Add assets directory"),
+            ("--with-references", "Add references directory"),
+            ("--with-workflows", "Add workflows directory"),
+        ):
+            parser.add_argument(flag, action="store_true", help=help_text)
     def _add_plugin_install_args(parser):
         parser.add_argument("url", help="GitHub URL of the plugin source")
         parser.add_argument("--path", required=True, help="Plugin directory path inside source repo")
@@ -252,8 +254,13 @@ def main():
         parser.add_argument("--ref", help="Pinned Git ref to install (recommended: commit SHA)")
         parser.add_argument("--dest", default="Plugins/third-party", help="Destination directory relative to repo root")
         parser.add_argument("--validation-level", choices=["strict", "compat"], default="compat", help="Installer validation depth")
-        parser.add_argument("--allow-untrusted-source", action="store_true", help="Allow non-allowlisted source repos")
-        parser.add_argument("--allow-unpinned-ref", action="store_true", help="Allow non-SHA refs (e.g. main)")
+        for flag, help_text in (
+            ("--allow-untrusted-source", "Allow non-allowlisted source repos"),
+            ("--allow-unpinned-ref", "Allow non-SHA refs"),
+            ("--sync-profile", "Refresh Codex profile plugin mirrors"),
+            ("--require-desktop-loadable", "Fail unless Desktop-loadable"),
+        ):
+            parser.add_argument(flag, action="store_true", help=help_text)
         parser.add_argument("--dry-run", action="store_true", help="Preview installation without writing")
     plugins_subparsers.add_parser("list", help="List plugin lifecycle state", parents=[global_parser])
     plugins_status_parser = plugins_subparsers.add_parser("status", help="Show state for one plugin", parents=[global_parser])
@@ -265,6 +272,11 @@ def main():
         parents=[global_parser],
     )
     plugins_sync_runtime_parser.add_argument("--dry-run", action="store_true", help="Preview runtime sync without writing")
+    plugins_prune_stale_parser = plugins_subparsers.add_parser("prune-stale-config", help="Remove stale enabled local plugin IDs", parents=[global_parser])
+    plugins_prune_stale_parser.add_argument("--dry-run", action="store_true", help="Preview config pruning without writing")
+    plugins_prune_stale_parser.add_argument("--stability-seconds", type=float, default=10.0, help="Seconds to watch for stale IDs")
+    plugins_prune_stale_parser.add_argument("--stability-interval-seconds", type=float, default=0.5, help="Seconds between checks")
+    plugins_prune_stale_parser.add_argument("--verify-stable-when-clean", action="store_true", help="Watch even when already clean")
     plugins_init_parser = plugins_subparsers.add_parser("init", help="Initialize a new plugin scaffold", parents=[global_parser])
     _add_plugin_init_args(plugins_init_parser)
     plugins_create_parser = plugins_subparsers.add_parser("create", help="Alias for plugins init", parents=[global_parser])
@@ -572,8 +584,6 @@ def main():
                 include_handles=not args.no_handles,
                 write_projection=args.write_projection,
                 check_projection=args.check_projection,
-                write_command_handle_files=args.write_command_handles,
-                check_command_handle_files=args.check_command_handles,
                 dry_run=args.dry_run,
             )
         elif args.action == "resolve":
@@ -701,6 +711,8 @@ def main():
             result = doctor_plugins_state(repo_root)
         elif args.action == "sync-local-runtime":
             result = sync_local_runtime_plugins(repo_root, dry_run=args.dry_run)
+        elif args.action == "prune-stale-config":
+            result = prune_stale_plugin_config(repo_root, dry_run=args.dry_run, stability_seconds=args.stability_seconds, stability_interval_seconds=args.stability_interval_seconds, verify_stable_when_clean=args.verify_stable_when_clean)
         elif args.action in {"init", "create"}:
             companion = [
                 name
@@ -721,40 +733,13 @@ def main():
                 action=args.action,
             )
         elif args.action in {"install", "import"}:
-            result = install_plugin(
-                repo_root,
-                url=args.url,
-                plugin_path=args.path,
-                name=args.name,
-                ref=args.ref,
-                dest=args.dest,
-                validation_level=args.validation_level,
-                allow_untrusted_source=args.allow_untrusted_source,
-                allow_unpinned_ref=args.allow_unpinned_ref,
-                dry_run=args.dry_run,
-                action=args.action,
-            )
+            result = install_plugin(repo_root, url=args.url, plugin_path=args.path, name=args.name, ref=args.ref, dest=args.dest, validation_level=args.validation_level, allow_untrusted_source=args.allow_untrusted_source, allow_unpinned_ref=args.allow_unpinned_ref, sync_profile=args.sync_profile, require_desktop_loadable=args.require_desktop_loadable, dry_run=args.dry_run, action=args.action)
         elif args.action == "harden":
-            result = harden_plugin(
-                repo_root,
-                plugin_path=args.plugin_path,
-                require_marketplace=not args.no_require_marketplace,
-                marketplace_path=args.marketplace_path,
-                run_compat=not args.skip_compat,
-                run_marketplace_audit=not args.skip_marketplace_audit,
-                allow_legacy_marketplace_path=not args.strict_marketplace_path,
-            )
+            result = harden_plugin(repo_root, plugin_path=args.plugin_path, require_marketplace=not args.no_require_marketplace, marketplace_path=args.marketplace_path, run_compat=not args.skip_compat, run_marketplace_audit=not args.skip_marketplace_audit, allow_legacy_marketplace_path=not args.strict_marketplace_path)
         elif args.action == "uninstall":
-            result = uninstall_plugin(
-                repo_root,
-                name=args.name,
-                dry_run=args.dry_run,
-            )
+            result = uninstall_plugin(repo_root, name=args.name, dry_run=args.dry_run)
         else:
-            result = build_unknown_action_result(
-                "plugins",
-                args.action,
-            )
+            result = build_unknown_action_result("plugins", args.action)
     elif args.topic == "evals":
         if args.action == "run":
             result = run_evals(
@@ -1497,8 +1482,8 @@ def main():
                     print("✅ Skill boundaries passed: $" + str(handle))
                     if boundary.get("canonical_skill_path"):
                         print(f"Canonical source: {boundary.get('canonical_skill_path')}")
-                    if boundary.get("command_handle_path"):
-                        print(f"Command handle: {boundary.get('command_handle_path')}")
+                    if boundary.get("runtime_projection_path"):
+                        print(f"Runtime projection: {boundary.get('runtime_projection_path')}")
                     notes = boundary.get("notes") or []
                     for note in notes:
                         print(f"Note: {note}")
@@ -1572,6 +1557,17 @@ def main():
                         removed = report.get("removed_entries") or []
                         if removed:
                             print(f"    removed: {', '.join(removed)}")
+                    print_first_validation_command(result.data)
+                elif args.topic == "plugins" and args.action == "prune-stale-config":
+                    stale = result.data.get("stale_enabled_plugin_ids", []) or result.data.get("desktop_readiness_state", {}).get("stale_enabled_plugin_ids", [])
+                    if result.data.get("dry_run"):
+                        print("🔍 Dry run - would prune stale plugin config:" if stale else "🔍 Dry run - no stale plugin config to prune")
+                    else:
+                        print("✅ Pruned stale plugin config" if stale else "✅ No stale plugin config to prune")
+                    if stale:
+                        print(f"Stale enabled plugins: {len(stale)}")
+                        for plugin_id in stale:
+                            print(f"  - {plugin_id}")
                     print_first_validation_command(result.data)
                 elif args.topic == "plugins" and args.action in {"install", "import"}:
                     if result.data.get("dry_run"):
@@ -1828,6 +1824,7 @@ def main():
                 "import",
                 "harden",
                 "sync-local-runtime",
+                "prune-stale-config",
                 "uninstall",
             ):
                 if "raw_output" in result.data: print(result.data["raw_output"])

@@ -10,14 +10,14 @@ from pathlib import Path
 
 CURRENT_AGENT_SKILLS_KIT_SENTENCE = (
     "A governed **Agent Skills Kit** repository for Codex and AI coding agents. "
-    "Author skills once, validate quality, expose `$` command handles, and sync "
+    "Author skills once, validate quality, expose `$` command-surface handles, and sync "
     "routed skills and plugins into runtime projections through the `ask` CLI."
 )
 
 SUMMARY_PATTERNS: tuple[str, ...] = (
     (
         r"A governed \*\*Agent Skills Kit\*\* repository for Codex and AI coding agents\.\s+"
-        r"Author skills once, validate quality, expose `\$` command handles, and sync\s+"
+        r"Author skills once, validate quality, expose `\$` command-surface handles, and sync\s+"
         r"routed skills and plugins into runtime projections through the `ask` CLI\."
     ),
     (

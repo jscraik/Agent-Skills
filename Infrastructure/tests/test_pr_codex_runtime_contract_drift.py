@@ -10,7 +10,7 @@ Covers the specific changes introduced in this PR:
 
 2. .skillsets/command-surface.json:
    - source_revision bumped to "18cadc255" (from "f8d418165")
-   - handle_count / generated_command_handle_count reduced from 108 to 106
+   - handle_count reduced from 108 to 106; generated wrapper counts are absent
    - "imagegen" skill entry removed entirely
    - codex-automation-architect: level changed from "compound" to "molecule",
      command_visibility changed from "orchestrator" to "target",
@@ -399,13 +399,8 @@ class TestCommandSurfaceHandleCount(unittest.TestCase):
             f"Expected handle_count=106, got {self.data.get('handle_count')}",
         )
 
-    def test_generated_command_handle_count_is_106(self):
-        self.assertEqual(
-            self.data.get("generated_command_handle_count"),
-            106,
-            f"Expected generated_command_handle_count=106, "
-            f"got {self.data.get('generated_command_handle_count')}",
-        )
+    def test_generated_command_handle_count_is_absent(self):
+        self.assertNotIn("generated_command_handle_count", self.data)
 
     def test_handle_count_matches_actual_handles_array_length(self):
         self.assertEqual(
@@ -414,11 +409,10 @@ class TestCommandSurfaceHandleCount(unittest.TestCase):
             "handle_count field does not match actual handles array length",
         )
 
-    def test_generated_count_matches_handle_count(self):
-        self.assertEqual(
-            self.data["generated_command_handle_count"],
-            self.data["handle_count"],
-        )
+    def test_no_handle_has_command_handle_path(self):
+        for handle in self.handles:
+            with self.subTest(handle=handle.get("handle")):
+                self.assertNotIn("command_handle_path", handle)
 
     def test_not_108(self):
         """Regression: count must not revert to old value of 108."""
@@ -460,14 +454,14 @@ class TestImagegenSkillRemoved(unittest.TestCase):
                     f"Unexpected imagegen source_path found in handle '{handle.get('handle')}'",
                 )
 
-    def test_no_imagegen_command_handle_path(self):
+    def test_no_imagegen_command_surface_metadata(self):
         for handle in self.handles:
             with self.subTest(handle=handle.get("handle")):
-                path = handle.get("command_handle_path", "")
+                path = json.dumps(handle, sort_keys=True)
                 self.assertNotIn(
                     "imagegen",
                     path,
-                    f"Unexpected imagegen command_handle_path in handle '{handle.get('handle')}'",
+                    f"Unexpected imagegen metadata in handle '{handle.get('handle')}'",
                 )
 
 

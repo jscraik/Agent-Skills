@@ -1251,33 +1251,15 @@ class TestCommandSurfaceJsonJsc351Contract(unittest.TestCase):
         cls.data = json.loads(COMMAND_SURFACE_PATH.read_text(encoding="utf-8"))
         cls.handles: list[dict] = cls.data.get("handles", [])
 
-    def test_generated_command_handle_count_does_not_exceed_handle_count(self) -> None:
-        """System bridge handles may have no generated command handle path.
+    def test_generated_command_handle_count_is_absent(self) -> None:
+        """The command surface is metadata only and has no generated wrapper count."""
+        self.assertNotIn("generated_command_handle_count", self.data)
 
-        JSC-351 PU-011 established that system bridge skill names must not produce
-        first-level generated command handles, so generated_command_handle_count
-        may be strictly less than handle_count.
-        """
-        self.assertLessEqual(
-            self.data["generated_command_handle_count"],
-            self.data["handle_count"],
-            "generated_command_handle_count must not exceed handle_count",
-        )
-
-    def test_handles_without_command_handle_path_are_system_bridges(self) -> None:
-        """Only explicit system bridge handles may omit command_handle_path.
-
-        Non-system-bridge handles must always have a non-empty command_handle_path.
-        """
+    def test_handles_do_not_include_command_handle_path(self) -> None:
+        """No command-surface handle may point at a generated wrapper file."""
         for handle in self.handles:
-            path = handle.get("command_handle_path", "")
-            if not path:
-                with self.subTest(handle=handle.get("handle")):
-                    self.assertIn(
-                        handle.get("handle"),
-                        SYSTEM_BRIDGE_HANDLES,
-                        f"Handle '{handle.get('handle')}' has empty command_handle_path but is not a system bridge",
-                    )
+            with self.subTest(handle=handle.get("handle")):
+                self.assertNotIn("command_handle_path", handle)
 
     def test_handles_count_matches_handles_array_length(self) -> None:
         self.assertEqual(
@@ -1293,17 +1275,13 @@ class TestCommandSurfaceJsonJsc351Contract(unittest.TestCase):
             "rooted_manifests",
         )
 
-    def test_handles_from_skills_tree_have_agents_skills_handle_path(self) -> None:
-        """JSC-351 requires generated command handles to live under .agents/skills/."""
+    def test_handles_from_skills_tree_resolve_to_canonical_skill_md(self) -> None:
+        """Command-surface metadata resolves directly to canonical SKILL.md source."""
         for handle in self.handles:
             src = handle.get("source_path", "")
-            path = handle.get("command_handle_path", "")
-            if src.startswith("Skills/") and path:
+            if src.startswith("Skills/"):
                 with self.subTest(handle=handle.get("handle")):
-                    self.assertTrue(
-                        path.startswith(".agents/skills/"),
-                        f"Handle '{handle.get('handle')}' from Skills/ has path not under .agents/skills/: {path}",
-                    )
+                    self.assertTrue(src.endswith("/SKILL.md"), src)
 
     def test_no_handle_references_old_source_revision(self) -> None:
         """The command surface must not reference the pre-JSC-351 source revision."""

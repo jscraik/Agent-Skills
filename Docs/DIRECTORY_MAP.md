@@ -51,7 +51,7 @@ Common subdirectory patterns inside each skill:
 | Path                          | Purpose                                           |
 | ----------------------------- | ------------------------------------------------- |
 | `/Plugins/`                   | Plugin packages and plugin manifests              |
-| `/.agents/skills/`            | Generated runtime projection and command handles  |
+| `/.agents/skills/`            | Generated runtime projection                      |
 | `/.skillsets/`                | Generated rooted manifests and command surface    |
 | `/brand/`                     | Brand assets and visual references                |
 | `/Infrastructure/references/` | Shared contracts and cross-cutting reference docs |
