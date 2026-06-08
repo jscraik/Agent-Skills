@@ -1,0 +1,10 @@
+{
+  "run_id": "2026-06-08-pu015-final-check",
+  "reviewer": "adversarial-reviewer",
+  "artifact_path": "/private/tmp/agent-skills-pu-015-review-handoff/artifacts/reviews/skills-sdk-pu-015-review-handoff/adversarial-reviewer.md",
+  "status": "green",
+  "source_files": [
+    "/private/tmp/agent-skills-pu-015-review-handoff/.harness/specs/2026-06-08-skills-sdk-pu-015-review-handoff-receipts-spec.md",
+    "/private/tmp/agent-skills-pu-015-review-handoff/.harness/plan/2026-06-08-skills-sdk-pu-015-review-handoff-receipts-trace-plan.md"
+  ]
+}

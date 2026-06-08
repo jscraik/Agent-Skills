@@ -17,6 +17,7 @@
     "recommended_checks",
     "evidence_to_collect",
     "risk_flags",
+    "source_context",
     "next_commands",
     "mutation_performed",
     "receipt_written",
@@ -119,6 +120,9 @@
         "minLength": 1
       }
     },
+    "source_context": {
+      "$ref": "#/definitions/source_context"
+    },
     "next_commands": {
       "type": "array",
       "items": {
@@ -134,6 +138,45 @@
     },
     "receipt_path": {
       "type": ["string", "null"]
+    }
+  },
+  "definitions": {
+    "source_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repo_root",
+        "head_sha",
+        "branch",
+        "branch_policy",
+        "receipt_instance_id",
+        "receipt_created_at",
+        "target_input",
+        "target_kind",
+        "target_identity",
+        "target_resolved_path",
+        "target_content_digest",
+        "target_digest_status",
+        "provenance_risk_flags"
+      ],
+      "properties": {
+        "repo_root": {"type": "string", "minLength": 1},
+        "head_sha": {"type": "string", "minLength": 1},
+        "branch": {"type": "string", "minLength": 1},
+        "branch_policy": {"const": "same_head_required"},
+        "receipt_instance_id": {"type": "string", "minLength": 1},
+        "receipt_created_at": {"type": "string", "minLength": 1},
+        "target_input": {"type": "string", "minLength": 1},
+        "target_kind": {"enum": ["repo_path", "skill_source", "unresolved_handle"]},
+        "target_identity": {"type": "string", "minLength": 1},
+        "target_resolved_path": {"type": ["string", "null"]},
+        "target_content_digest": {"type": ["string", "null"]},
+        "target_digest_status": {"enum": ["available", "unsupported_directory", "not_applicable_unresolved_handle"]},
+        "provenance_risk_flags": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
     }
   }
 }

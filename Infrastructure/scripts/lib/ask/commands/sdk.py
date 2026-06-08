@@ -16,6 +16,7 @@ from ask.skills_sdk.lenses import (
     validate_lens_catalog,
 )
 from ask.skills_sdk.placeholder_lifecycle import SURFACES
+from ask.skills_sdk.review_handoff import build_review_handoff
 from ask.skills_sdk.review_plan import build_review_plan
 
 
@@ -236,6 +237,25 @@ def add_sdk_parser(
     sdk_review_plan_parser.add_argument(
         "--receipt-out",
         help="Optional repo-local path for writing the review plan receipt",
+    )
+    sdk_review_handoff_parser = sdk_review_subparsers.add_parser(
+        "handoff",
+        help="Emit a schema-backed read-only review handoff receipt from a review plan receipt",
+        parents=[global_parser],
+    )
+    sdk_review_handoff_parser.add_argument("--plan", required=True, help="Repo-local review plan receipt path")
+    sdk_review_handoff_parser.add_argument("--target", required=True, help="Repo path or handle from the source review plan")
+    sdk_review_handoff_parser.add_argument(
+        "--intent",
+        "--task-intent",
+        dest="task_intent",
+        choices=list(KNOWN_TASK_INTENTS),
+        required=True,
+        help="Normalized review intent from the source review plan",
+    )
+    sdk_review_handoff_parser.add_argument(
+        "--receipt-out",
+        help="Optional repo-local path for writing the review handoff receipt",
     )
 
 
@@ -479,5 +499,30 @@ def _dispatch_sdk_review(repo_root: Path, args: argparse.Namespace) -> CallResul
                     fix_suggestion="Run ask sdk lenses validate --json --robot and fix catalog findings.",
                 )
             )
+        return result
+    if command_action == "handoff":
+        try:
+            review_handoff = build_review_handoff(
+                repo_root,
+                plan_path=args.plan,
+                target=args.target,
+                task_intent=args.task_intent,
+                receipt_out=args.receipt_out,
+            )
+        except ValueError as exc:
+            result.status = "error"
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_VALIDATION",
+                    message=str(exc),
+                    fix_suggestion=(
+                        "Run ask sdk review plan --target <path> --intent validation_review "
+                        "--receipt-out .harness/artifacts/sdk-review-plan/<name>.json --json --robot, "
+                        "then retry ask sdk review handoff with matching --plan, --target, and --intent."
+                    ),
+                )
+            )
+            return result
+        result.data["review_handoff"] = review_handoff
         return result
     return build_unknown_action_result("sdk review", command_action)

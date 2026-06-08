@@ -1,0 +1,44 @@
+{
+  "schema_version": "skills-sdk.review-handoff-receipt.v1",
+  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/sdk-review-handoff-receipt.v1.schema.json",
+  "status": "pass",
+  "source_review_plan": {
+    "path": ".harness/artifacts/sdk-review-plan/fixture.json",
+    "schema_version": "skills-sdk.review-plan-receipt.v1",
+    "receipt_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "receipt_instance_id": "fixture-review-plan"
+  },
+  "source_context": {
+    "repo_root": "/tmp/agent-skills",
+    "head_sha": "0123456789abcdef",
+    "branch": "codex/skills-sdk-pu-015-review-handoff",
+    "branch_policy": "same_head_required",
+    "receipt_instance_id": "fixture-review-plan",
+    "receipt_created_at": "2026-06-08T00:00:00Z",
+    "target_input": "Skills/agent-ops/simplify",
+    "target_kind": "skill_source",
+    "target_identity": "path:Skills/agent-ops/simplify",
+    "target_resolved_path": "Skills/agent-ops/simplify",
+    "target_content_digest": "59a735136f044d5d20ca5f77784716044c8d3a586d304208b262b33ed08e0c5b",
+    "target_digest_status": "available",
+    "provenance_risk_flags": []
+  },
+  "source_trace": {
+    "path": ".harness/artifacts/sdk-review-plan/traces/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.trace.json",
+    "receipt_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "receipt_instance_id": "fixture-review-plan",
+    "branch_policy": "same_head_required"
+  },
+  "target": "Skills/agent-ops/simplify",
+  "target_kind": "skill_source",
+  "task_intent": "validation_review",
+  "selected_lenses": ["lens.testing-confidence"],
+  "reviewer_roles": ["correctness-reviewer", "testing-reviewer"],
+  "required_artifacts": ["artifacts/reviews/sdk-review-handoff/Skills-agent-ops-simplify/review-summary.md"],
+  "evidence_boundaries": ["review handoff receipt does not prove reviewer execution"],
+  "not_proven": ["reviewers_completed", "ci_passed"],
+  "next_commands": ["./bin/ask sdk review handoff --plan .harness/artifacts/sdk-review-plan/fixture.json --target Skills/agent-ops/simplify --intent validation_review --json --robot"],
+  "mutation_performed": false,
+  "receipt_written": true,
+  "receipt_path": ".harness/artifacts/sdk-review-handoff/fixture.json"
+}
