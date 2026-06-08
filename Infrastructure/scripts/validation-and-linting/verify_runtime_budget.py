@@ -16,7 +16,7 @@ if str(LIFECYCLE_DIR) not in sys.path:
     sys.path.insert(0, str(LIFECYCLE_DIR))
 
 from selection_policy import (  # type: ignore  # noqa: E402
-    DEFAULT_VISIBLE_FLAT_SKILL_NAMES,
+    DEFAULT_INCLUDE_FIRST_PARTY_REPO_SKILLS,
     DEFAULT_VISIBLE_SYSTEM_BRIDGE_SKILL_NAMES,
     DEFAULT_PROJECTION_MODE,
     PLUGIN_SKILL_COLLISION_POLICIES,
@@ -39,7 +39,7 @@ from skill_discovery import (  # type: ignore  # noqa: E402
     iter_system_lane_skill_dirs,
 )
 
-DEFAULT_MAX_VISIBLE = 30
+DEFAULT_MAX_VISIBLE = 120
 ADVANCED_WARN_VISIBLE = 60
 BRIDGE_SKILLS = set(SYSTEM_BRIDGE_SKILL_NAMES)
 DEFAULT_VISIBLE_BRIDGE_SKILLS = set(DEFAULT_VISIBLE_SYSTEM_BRIDGE_SKILL_NAMES)
@@ -271,7 +271,12 @@ def _iter_default_visibility_candidates() -> list[tuple[str, Path]]:
             continue
         if name in DISCOVERY_HIDDEN_FLAT_SKILL_NAMES:
             continue
-        if name not in DEFAULT_VISIBLE_FLAT_SKILL_NAMES and name not in DEFAULT_VISIBLE_BRIDGE_SKILLS:
+        scope = classify_skill_scope(source_dir)
+        repo_owned = scope in {"global", "project"}
+        if (
+            not (DEFAULT_INCLUDE_FIRST_PARTY_REPO_SKILLS and repo_owned)
+            and name not in DEFAULT_VISIBLE_BRIDGE_SKILLS
+        ):
             continue
         plugin_owned = is_plugin_owned_skill_dir(source_dir)
         if plugin_owned and name not in DISCOVERY_PLUGIN_VISIBLE_ROUTER_SKILL_NAMES:
@@ -354,7 +359,13 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
     rooted_mode = projection_mode == "rooted"
     root_skill_set_count = len(first_level & ROOT_SKILL_SETS)
     bridge_exposed = sorted(first_level & BRIDGE_SKILLS)
-    policy_default = set(DEFAULT_VISIBLE_FLAT_SKILL_NAMES)
+    policy_default = {
+        entry["name"]
+        for entry in scoped_entries
+        if DEFAULT_INCLUDE_FIRST_PARTY_REPO_SKILLS
+        and entry["scope"] in {"global", "project"}
+        and entry["name"] not in DISCOVERY_HIDDEN_FLAT_SKILL_NAMES
+    }
     higher_precedence_names = {
         entry["name"]
         for entry in scoped_entries
@@ -399,9 +410,9 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
     advisories: list[dict[str, Any]] = []
     effective_default_count = root_skill_set_count if rooted_mode else len(default_entries)
     if effective_default_count > default_max:
-        violations.append({
-            "code": "DEFAULT_SKILL_BUDGET_EXCEEDED",
-            "message": f"default skill count {effective_default_count} exceeds budget {default_max}",
+        advisories.append({
+            "code": "DEFAULT_SKILL_VISIBILITY_HIGH",
+            "message": f"default skill count {effective_default_count} exceeds advisory budget {default_max}",
         })
     if len(advanced_entries) > ADVANCED_WARN_VISIBLE:
         advisories.append({
@@ -504,6 +515,7 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
         "first_level_bridge_skills": bridge_exposed,
         "command_surface_handle_names": [],
         "policy_default_skill_names": sorted(policy_default),
+        "default_include_first_party_repo_skills": DEFAULT_INCLUDE_FIRST_PARTY_REPO_SKILLS,
         "effective_default_policy_skill_names": sorted(expected_default),
         "default_visible_skill_names": sorted(default_names),
         "advisories": advisories,

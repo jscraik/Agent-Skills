@@ -50,12 +50,12 @@ class TestSkillScopePrecedence(unittest.TestCase):
             mock.patch.object(skill_discovery, "REPO_SCAN_ROOTS", ("Skills",)),
             mock.patch.object(skill_discovery, "POLICY_PLUGIN_SKILL_ROOT_GLOB", "./Plugins/*/skills"),
             mock.patch.object(skill_discovery, "HIDDEN_FLAT_SKILL_NAMES", set()),
-            mock.patch.object(skill_discovery, "DEFAULT_VISIBLE_FLAT_SKILL_NAMES", set(visible)),
+            mock.patch.object(skill_discovery, "DEFAULT_INCLUDE_FIRST_PARTY_REPO_SKILLS", True),
             mock.patch.object(skill_discovery, "DEFAULT_VISIBLE_SYSTEM_BRIDGE_SKILL_NAMES", {"imagegen"}),
             mock.patch.object(skill_discovery, "PLUGIN_VISIBLE_ROUTER_SKILL_NAMES", set(visible)),
             mock.patch.object(skill_discovery, "PLUGIN_HIDDEN_LANE_SKILL_NAMES", set()),
             mock.patch.object(verify_runtime_budget, "REPO_ROOT", self.repo_root),
-            mock.patch.object(verify_runtime_budget, "DEFAULT_VISIBLE_FLAT_SKILL_NAMES", tuple(visible)),
+            mock.patch.object(verify_runtime_budget, "DEFAULT_INCLUDE_FIRST_PARTY_REPO_SKILLS", True),
             mock.patch.object(verify_runtime_budget, "DEFAULT_VISIBLE_BRIDGE_SKILLS", {"imagegen"}),
         ):
             yield

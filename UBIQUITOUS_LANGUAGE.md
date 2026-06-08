@@ -4,7 +4,7 @@
 
 - Scope: `agent-skills` repository operations, skill authoring, skill sync, and runtime visibility.
 - Sources: current conversation, `AGENTS.md`, `README.md`, `Docs/agents/14-path-ownership-boundaries.md`, `Docs/agents/13-workflow-and-safety-guidance.md`, `Infrastructure/scripts/lifecycle-and-sync/selection_policy.py`, `Infrastructure/references/skill-validation-reporting-contract.md`, `skills-system/skill-installer/SKILL.md`, `skills-system/skill-installer/references/skill-factory/install-flows.md`, and `Skills/agent-ops/ubiquitous-language/SKILL.md`.
-- Last updated: 2026-05-16
+- Last updated: 2026-06-08
 
 ## Canonical Terms
 
@@ -25,8 +25,8 @@
 | **Plugin Runtime Mirror** | A real copied plugin tree, such as `~/plugins` or a Codex profile `Plugins/`, refreshed from canonical `~/dev/agent-skills/Plugins` so marketplace paths resolve without aliasing repo source. | plugin symlink, canonical plugin root | High |
 | **Workspace Sync** | The operation `./bin/ask skills sync --scope workspace` that refreshes repo-local runtime projections and the generated root `SKILL.md` index. | sync the repo, update links | High |
 | **User Sync** | The operation `./bin/ask skills sync --scope user` that points user-level runtime skill directories at the current workspace projection. | install skills, make Codex see it | High |
-| **Visible Runtime Surface** | The bounded default skill list exposed by `DEFAULT_VISIBLE_FLAT_SKILL_NAMES` to control always-loaded skill context. | skill list, visible skills | High |
-| **Advanced Repo Discovery** | Repository scan mode that can find skills not promoted into the default visible runtime surface. | hidden skill, missing skill | Medium |
+| **Visible Runtime Surface** | The default picker-readable projection emitted from typed canonical skill and plugin sources, with hidden, system bridge, and plugin collision policies applied. | skill list, visible skills | High |
+| **Advanced Repo Discovery** | Repository scan mode that includes hidden/internal or non-default plugin/system lanes for diagnostics without changing picker eligibility. | hidden skill, missing skill | Medium |
 | **Feature Worktree** | A separate checkout and branch used for isolated feature work without disturbing dirty changes in the primary checkout. | worktree, clean checkout | High |
 | **Projection Refresh Lane** | A bounded change path where generated projections are refreshed from canonical sources instead of hand-edited. | sync pass, generated update | Medium |
 | **Strict Skill Audit** | The `./bin/ask skills audit <path> --level strict` check that validates skill structure, runtime links, security gates, family benchmarks, and readiness. | check the skill, make sure it works | High |
@@ -62,9 +62,9 @@
 | "sync my skills" | Refresh the active workspace projection and point user runtime links at it. | "Run `./bin/ask skills sync --scope workspace --json`, then `./bin/ask skills sync --scope user --json`, and verify `~/.codex/skills` points at this worktree." |
 | "find the ubiquitous-language skill" | Locate the canonical skill source and determine whether the runtime projection exposes it. | "Search `Skills/**`, `Plugins/**`, `.agents/skills/**`, and `./bin/ask skills list --json` for `ubiquitous-language`, then report source path and runtime visibility separately." |
 | "so you will not be able to use it?" | Distinguish manual filesystem access from formal runtime skill availability. | "Check whether the skill is available through the active `~/.codex/skills` projection; if not, state whether it can still be read manually from disk." |
-| "proceed" | Carry out the previously described corrective path. | "Copy the missing canonical skill into this feature worktree, promote it to the visible runtime surface if needed, sync workspace and user scopes, then validate discoverability." |
+| "proceed" | Carry out the previously described corrective path. | "Copy the missing canonical skill into this feature worktree if needed, sync workspace and user scopes from the typed inventory, then validate discoverability." |
 | "run the skill" | Execute the skill workflow in the current repo scope and produce its expected artifact. | "Use `$ubiquitous-language` to create or update repo-root `UBIQUITOUS_LANGUAGE.md`, citing source files and validating the output file exists." |
-| "make it available" | Ensure Codex runtime discovery can see a skill, not just that source files exist. | "Add the skill to the default visible runtime surface when appropriate, run workspace and user sync, and verify `./bin/ask skills list --json` includes it." |
+| "make it available" | Ensure Codex runtime discovery can see a skill, not just that source files exist. | "Verify the skill has a typed canonical source, run workspace and user sync, and verify `./bin/ask skills list --json` includes it." |
 | "check it works" | Produce fresh evidence for the changed surface. | "Run the smallest relevant validation command for the changed skill or sync policy and report exact pass/fail/blocker output." |
 | "update the plugin" | Change the canonical plugin source and refresh materialized runtime mirrors. | "Patch `Plugins/<plugin>`, run the relevant plugin validation, then run `./bin/ask skills sync --scope user --projection rooted` or `./bin/ask plugins sync-local-runtime` so copied plugin mirrors are replaced." |
 | "install this external skill" | Run **External Skill Intake** before writing canonical source. | "Run `./bin/ask skills install <github-url> --dry-run --json --robot`, inspect `data.intake_decision`, then install, blend, keep separate, reject, or stop for a human ownership choice." |
@@ -90,8 +90,9 @@
 - **Agent Skills Standard** compatibility means preserving `SKILL.md` package shape, progressive disclosure, optional `scripts/`/`references/`/`assets/`, and portable evals. It does not by itself decide whether a local path is canonical or generated.
 - A **Command Surface Handle** exists only to make a routed skill mentionable, for example `$he-heartbeat`; the real workflow remains in the resolved **Canonical Skill Source**. If `./bin/ask` is unavailable outside this repository, search the owner skill tree for the exact handle and load the canonical `SKILL.md` source.
 - `~/.agents/plugins` is a live symlink to canonical `Plugins/`, while **Plugin Runtime Mirrors** such as `~/plugins` are real copied directories and must be refreshed after plugin source or marketplace changes.
-- A skill can exist in **Advanced Repo Discovery** while remaining absent from the **Visible Runtime Surface**.
-- The **Visible Runtime Surface** is controlled by `DEFAULT_VISIBLE_FLAT_SKILL_NAMES`, not by the mere presence of a `SKILL.md` file.
+- First-party canonical skills under `Skills/**` are part of the **Visible Runtime Surface** unless they are explicitly hidden by selection policy.
+- Plugin-owned skills under `Plugins/**/skills/**` remain plugin-scoped. They become picker-readable through plugin runtime roots and collision policy, not by being flattened into first-party skill projection.
+- The **Visible Runtime Surface** is controlled by typed source ownership, hidden-skill policy, system bridge policy, plugin collision policy, and generated projection freshness. Do not maintain a separate hand-written first-party allowlist.
 - A **Feature Worktree** can intentionally diverge from the primary checkout; uncommitted skills in the primary checkout are not automatically present in the feature worktree.
 - **Strict Skill Audit** depends on local runtime health; a **Mise Trust Blocker** must be fixed before treating audit failure as a skill defect.
 - **External Skill Intake** produces an **Intake Decision** before canonical writes; `reject_duplicate` and `needs_human_choice` stop the install path.
@@ -109,9 +110,9 @@
 >
 > **Domain expert:** "Only if the active runtime projection exposes it. Source existence and runtime visibility are related but not the same."
 >
-> **Dev:** "Why did `ubiquitous-language` not appear after copying it?"
+> **Dev:** "Why did `prek-pro` not appear even though `ask skills list` found it?"
 >
-> **Domain expert:** "Because it existed in the canonical source tree but was not yet part of the visible runtime surface. Add it to the selection policy, sync, and verify with `./bin/ask skills list --json`."
+> **Domain expert:** "Because the runtime projection was still using a legacy curated flat surface. The deterministic SDK shape projects first-party canonical skills by type and ownership; sync, then verify with `./bin/ask skills load-preview --json`."
 
 ## Flagged Ambiguities
 
@@ -120,7 +121,7 @@
 - "Sync" can mean **Workspace Sync**, **User Sync**, or a lower-level projection refresh script. Recommendation: default to both `./bin/ask skills sync --scope workspace` and `./bin/ask skills sync --scope user` when the user says "sync my skills."
 - "Use it" can mean manually reading a skill's instructions or invoking it through runtime skill discovery. Recommendation: answer both availability paths when a skill was just added.
 - "Worktree" can mean the original dirty checkout or the new feature checkout. Recommendation: name the absolute path when reporting where commands ran.
-- "Make it visible" can mean adding files to source control or adding a skill to **Visible Runtime Surface**. Recommendation: verify with `./bin/ask skills list --json`, not only `find`.
+- "Make it visible" can mean adding files to source control, refreshing runtime projection, or enabling the plugin runtime root. Recommendation: verify with `./bin/ask skills list --json` and `./bin/ask skills load-preview --json`, not only `find`.
 - "Stub" is overloaded. Recommendation: say **Command Surface Handle** for `$`-mentionable metadata routes and reserve "stub" for test doubles or temporary executable placeholders.
 
 ## Agent Integration
@@ -131,9 +132,9 @@
 
 ## Decisions
 
-- `ubiquitous-language` is intentionally included in `DEFAULT_VISIBLE_FLAT_SKILL_NAMES` because it governs how terse user language maps to repo-native agent actions; revisit only if default skill-context pressure becomes a measured problem.
+- First-party skill picker eligibility is deterministic from canonical source ownership and hidden policy. `prek-pro`, `ubiquitous-language`, and other first-party `Skills/**` entries must not need per-skill allowlist edits.
 
 ## Open Questions
 
 - Should this glossary become a maintained repository contract linked from `AGENTS.md`, or remain an operator aid until the vocabulary stabilizes?
-- Should the repo add a dedicated validation check that flags a canonical skill copied into `Skills/**` but absent from both the visible runtime surface and documented advanced discovery paths?
+- Should the repo add a dedicated validation check that flags a canonical skill copied into `Skills/**` but absent from the generated runtime projection after sync?

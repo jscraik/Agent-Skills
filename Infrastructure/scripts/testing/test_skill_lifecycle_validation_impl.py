@@ -621,22 +621,22 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         )
         self.assertEqual(missing, [])
 
-    def test_unslopify_is_default_visible_for_formal_cleanup_routing(self) -> None:
+    def test_first_party_skills_are_default_visible_for_picker_routing(self) -> None:
         """
-        Keep Unslopify available as a formal default skill, not only a manual fallback.
+        Keep first-party canonical skills available on the default picker surface.
 
-        Other project sessions depend on this cleanup skill being present in the
-        generated registry so agents do not report it as unavailable and then
-        improvise the workflow manually.
+        Command handles no longer carry the broad skill surface. The deterministic
+        SDK projection therefore exposes repo-owned canonical skills by default
+        unless the policy explicitly hides them.
         """
         selection_policy = load_selection_policy_module()
         repo_root = Path(__file__).resolve().parents[3]
-        skill_path = repo_root / "Skills" / "agent-ops" / "unslopify" / "SKILL.md"
+        skill_path = repo_root / "Skills" / "agent-ops" / "prek-pro" / "SKILL.md"
 
-        self.assertIn("unslopify", selection_policy.DEFAULT_VISIBLE_FLAT_SKILL_NAMES)
+        self.assertTrue(selection_policy.DEFAULT_INCLUDE_FIRST_PARTY_REPO_SKILLS)
         self.assertTrue(skill_path.is_file())
         skill_text = skill_path.read_text(encoding="utf-8")
-        self.assertIn("runtime_visibility: flat", skill_text)
+        self.assertIn("lifecycle_state: active", skill_text)
 
     def test_catalog_default_surface_matches_default_discovery_surface(self) -> None:
         """
@@ -759,7 +759,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         self.assertEqual(runtime_policy.active_projection_mode(["agent-ops", "autofix"]), "mixed")
         self.assertTrue(runtime_policy.is_default_visible_skill_name("agent-ops"))
         self.assertTrue(runtime_policy.is_default_visible_skill_name("autofix"))
-        self.assertFalse(runtime_policy.is_default_visible_skill_name("hidden-latent-skill"))
+        self.assertFalse(runtime_policy.is_default_visible_skill_name("browser"))
         mixed_report = runtime_policy.runtime_surface_report(["agent-ops", "autofix"])
         self.assertEqual(mixed_report.projection_mode, "mixed")
         self.assertFalse(mixed_report.is_valid_projection)
@@ -969,19 +969,20 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             "Plugins/cache/agent-skills-local/skill-factory/version/skills/skill-factory-router",
         )
 
-    def test_skill_discovery_auto_advanced_includes_repo_non_default_skills(self) -> None:
+    def test_skill_discovery_auto_default_includes_first_party_repo_skills(self) -> None:
         """
-        Ensure auto+advanced discovery keeps non-default repository skills visible.
+        Ensure auto discovery keeps first-party repository skills picker-visible.
 
-        When flat runtime projection exists, default discovery should still follow
-        flat policy, while advanced discovery must augment with canonical repo
-        roots so non-default skills do not disappear after sync.
+        When flat runtime projection exists, default discovery follows the
+        source-backed runtime projection. Advanced discovery still augments with
+        canonical repo roots so source-only entries remain diagnosable.
         """
         skill_discovery = load_skill_discovery_module()
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir).resolve()
             flat_root = repo_root / ".agents" / "skills"
             system_root = flat_root / ".system"
+            repo_default_skill_root = repo_root / "Skills" / "engineering" / "autofix"
             repo_skill_root = repo_root / "Skills" / "engineering" / "diagram-cli"
 
             write_text(
@@ -995,11 +996,21 @@ class SkillLifecycleValidationTests(unittest.TestCase):
                 """,
             )
             write_text(
+                repo_default_skill_root / "SKILL.md",
+                """
+                ---
+                name: autofix
+                description: "default source skill"
+                ---
+                # autofix
+                """,
+            )
+            write_text(
                 repo_skill_root / "SKILL.md",
                 """
                 ---
                 name: diagram-cli
-                description: "non-default repo skill"
+                description: "source-only repo skill"
                 ---
                 # diagram-cli
                 """,
@@ -1071,7 +1082,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         self.assertIn("SELECTION_POLICY_REPO_SCAN_ROOTS", content)
         self.assertIn("SELECTION_POLICY_EXCLUDED_SEGMENTS", content)
         self.assertIn("SELECTION_POLICY_HIDDEN_FLAT_SKILLS", content)
-        self.assertIn("SELECTION_POLICY_DEFAULT_VISIBLE_FLAT_SKILLS", content)
+        self.assertIn("SELECTION_POLICY_DEFAULT_INCLUDE_FIRST_PARTY_REPO_SKILLS", content)
         self.assertIn("SELECTION_POLICY_PLUGIN_VISIBLE_ROUTER_SKILLS", content)
         self.assertIn("SELECTION_POLICY_PLUGIN_HIDDEN_LANE_SKILLS", content)
         self.assertIn("projection_integrity.py", content)

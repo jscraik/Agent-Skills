@@ -9,7 +9,7 @@ import json
 import shlex
 from typing import Any, Iterable
 
-POLICY_VERSION = "2026-06-04.v21"
+POLICY_VERSION = "2026-06-08.v22"
 
 PROJECTION_MODE_CHOICES: tuple[str, ...] = ("flat", "rooted", "hybrid")
 
@@ -56,35 +56,9 @@ HIDDEN_FLAT_SKILL_NAMES: tuple[str, ...] = (
     "skillgrade-setup",
 )
 
-# Default flat-runtime surface to keep skill-context pressure bounded.
-# Skills outside this list remain available in repository scan modes but are
-# excluded from the default always-loaded flat skill view.
-DEFAULT_VISIBLE_FLAT_SKILL_NAMES: tuple[str, ...] = (
-    "agents-md",
-    "keep-codex-fast",
-    "autofix",
-    "autoresearch",
-    "bootstrap",
-    "codex-agent-creator",
-    "codex-automation-architect",
-    "codex-hooks-builder",
-    "codex-review",
-    "code-fixes-triage",
-    "coding-harness",
-    "context7",
-    "docs-expert",
-    "fix-mise",
-    "improve-codebase-architecture",
-    "npm-release",
-    "pnpm-manager",
-    "project-brain",
-    "simplify",
-    "skill-pr-delivery",
-    "triage",
-    "ubiquitous-language",
-    "unslopify",
-    "verification-before-completion",
-)
+# Deterministic SDK shape: every first-party canonical skill under REPO_SCAN_ROOTS
+# belongs on the default flat runtime projection unless explicitly hidden above.
+DEFAULT_INCLUDE_FIRST_PARTY_REPO_SKILLS = True
 
 # Plugin-owned skills stay on their plugin first-level picker surface. Do not
 # promote them into flat runtime discovery, or Codex can render duplicate rows.
@@ -253,7 +227,7 @@ def payload() -> dict[str, Any]:
             - "plugin_skill_root_glob": str
             - "excluded_scan_segments": list[str]
             - "hidden_flat_skill_names": list[str]
-            - "default_visible_flat_skill_names": list[str]
+            - "default_include_first_party_repo_skills": bool
             - "plugin_visible_router_skill_names": list[str]
             - "plugin_hidden_lane_skill_names": list[str]
             - "system_bridge_skill_names": list[str]
@@ -267,7 +241,7 @@ def payload() -> dict[str, Any]:
         "plugin_skill_root_glob": PLUGIN_SKILL_ROOT_GLOB,
         "excluded_scan_segments": list(EXCLUDED_SCAN_SEGMENTS),
         "hidden_flat_skill_names": list(HIDDEN_FLAT_SKILL_NAMES),
-        "default_visible_flat_skill_names": list(DEFAULT_VISIBLE_FLAT_SKILL_NAMES),
+        "default_include_first_party_repo_skills": DEFAULT_INCLUDE_FIRST_PARTY_REPO_SKILLS,
         "plugin_visible_router_skill_names": list(PLUGIN_VISIBLE_ROUTER_SKILL_NAMES),
         "plugin_hidden_lane_skill_names": list(PLUGIN_HIDDEN_LANE_SKILL_NAMES),
         "system_bridge_skill_names": list(SYSTEM_BRIDGE_SKILL_NAMES),
@@ -304,7 +278,7 @@ def render_shell() -> str:
         _shell_array("SELECTION_POLICY_REPO_SCAN_ROOTS", repo_scan_roots_with_prefix()),
         _shell_array("SELECTION_POLICY_EXCLUDED_SEGMENTS", EXCLUDED_SCAN_SEGMENTS),
         _shell_array("SELECTION_POLICY_HIDDEN_FLAT_SKILLS", HIDDEN_FLAT_SKILL_NAMES),
-        _shell_array("SELECTION_POLICY_DEFAULT_VISIBLE_FLAT_SKILLS", DEFAULT_VISIBLE_FLAT_SKILL_NAMES),
+        f"SELECTION_POLICY_DEFAULT_INCLUDE_FIRST_PARTY_REPO_SKILLS={int(DEFAULT_INCLUDE_FIRST_PARTY_REPO_SKILLS)}",
         _shell_array(
             "SELECTION_POLICY_PLUGIN_VISIBLE_ROUTER_SKILLS",
             PLUGIN_VISIBLE_ROUTER_SKILL_NAMES,
