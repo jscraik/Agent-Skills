@@ -51,9 +51,11 @@ domain_model:
   closure_impact: blocks_spec|blocks_plan|blocks_work|blocks_review|blocks_eval|none
 ```
 
-Keep empty lists only when the concept is genuinely not relevant. Unknown
-identity, invariant, lifecycle, or translation ownership is a blocker for the
-stage that would otherwise harden behavior.
+Keep empty lists (`[]`) only when the concept is genuinely not applicable to
+this work (e.g., no aggregates in a pure read-only query surface). Use explicit
+`unknown` values or `unresolved_model_questions` entries when identity,
+invariant, lifecycle, or translation ownership is unknown—that signals a blocker
+for the stage that would otherwise harden behavior.
 
 ## Stage Gates
 
