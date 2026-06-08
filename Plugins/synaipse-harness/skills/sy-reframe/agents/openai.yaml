@@ -1,5 +1,10 @@
 policy:
   allow_implicit_invocation: false
 interface:
-  display_name: "SynAIpse Harness Reframe"
-  short_description: "Generate staged architectural reframe programs with rollback, eval proof, and Linear-ready mapping."
+  display_name: "SynAIpse Reframe"
+  short_description: "Turn a stuck, stale, or unsafe frame into a smaller viable direction with rollback and decision boundaries."
+routing:
+  handle: "sy-reframe"
+  sdk_stage: "reframe"
+  previous_stage: "strategy"
+  next_stage: "brainstorm"

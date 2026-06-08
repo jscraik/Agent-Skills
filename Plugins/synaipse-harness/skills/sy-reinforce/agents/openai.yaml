@@ -1,5 +1,11 @@
 policy:
   allow_implicit_invocation: false
 interface:
-  display_name: "SynAIpse Harness Reinforce"
-  short_description: "Capture verified solved problems and refresh stale SynAIpse learning artifacts with evidence, redaction, overlap checks, and Project Brain alignment."
+  display_name: "SynAIpse Reinforce"
+  short_description: "Turn a verified failure or learning into a durable guardrail, validator, doc, eval, or skill-reference update."
+routing:
+  handle: "sy-reinforce"
+  sdk_stage: "reinforce"
+  previous_stage: "reconcile"
+  next_stage: "strategy"
+

@@ -1,5 +1,11 @@
 policy:
   allow_implicit_invocation: false
 interface:
-  display_name: "SynAIpse Harness Eval Report"
-  short_description: "Use when completed SynAIpse implementation slices need closure proof, drift validation, and eval-backed Linear completion guidance."
+  display_name: "SynAIpse Eval Report"
+  short_description: "Record closure proof with exact commands, outcomes, artifact paths, untested lanes, and residual risk."
+routing:
+  handle: "sy-eval-report"
+  sdk_stage: "eval-report"
+  previous_stage: "review"
+  next_stage: "reconcile"
+

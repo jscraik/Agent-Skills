@@ -373,6 +373,10 @@ echo "[family-gate] validating active plugin archive links"
 python3 Infrastructure/scripts/validation-and-linting/check_plugin_active_archive_links.py --plugin skill-factory
 echo "[family-gate] active plugin archive links passed"
 
+echo "[family-gate] validating SDK deterministic stage skill shape"
+"${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/check_sdk_stage_skill_shape.py
+echo "[family-gate] SDK deterministic stage skill shape passed"
+
 echo "[family-gate] validating skill-factory system overlays"
 python3 Infrastructure/scripts/validation-and-linting/check_skill_factory_system_overlays.py
 echo "[family-gate] skill-factory system overlays passed"
@@ -434,6 +438,7 @@ if command -v "$ruff_bin" >/dev/null 2>&1; then
   # are excluded to avoid pre-existing E401 violations in unrelated tooling.
   family_py_scripts=(
     Infrastructure/scripts/validation-and-linting/validate_first_principles_gate.py
+    Infrastructure/scripts/validation-and-linting/check_sdk_stage_skill_shape.py
     Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py
     "${skill_builder_scripts_dir}/yaml_frontmatter.py"
     "${skill_builder_scripts_dir}/skill_gate.py"

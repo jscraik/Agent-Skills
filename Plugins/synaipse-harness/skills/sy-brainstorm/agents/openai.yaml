@@ -1,5 +1,10 @@
 policy:
   allow_implicit_invocation: false
 interface:
-  display_name: "SynAIpse Harness Brainstorm"
-  short_description: "Clarify ambiguous SynAIpse Harness ideas, expected behavior, tradeoffs, and requirements before spec, plan, work, or bug routing."
+  display_name: "SynAIpse Brainstorm"
+  short_description: "Explore options and trade-offs before traceable work is ready, without pretending exploration is a plan."
+routing:
+  handle: "sy-brainstorm"
+  sdk_stage: "brainstorm"
+  previous_stage: "reframe"
+  next_stage: "trace-plan"

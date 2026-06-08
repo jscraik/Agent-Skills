@@ -1,24 +1,48 @@
 schema_version: 1
 skill: sy-eval-report
-purpose: Run the explicit sy-eval-report stage with bounded evidence and no router-side guessing.
+stage: eval-report
+previous_stage: review
+next_stage: reconcile
+purpose: >-
+  Record closure proof with exact commands, outcomes, artifact paths, untested lanes, and residual risk.
 triggers:
   - explicit sy-eval-report invocation
-  - sy-strategy selected sy-eval-report as the next stage
+  - explicit eval-report stage request
+  - strategy or previous-stage handoff to eval-report
+preconditions:
+  - canonical source and active worktree are identified
+  - required previous-stage artifact is present or blocker is returned
+  - authority for writes is explicit
 inputs:
   - user request or routed handoff
-  - current workspace root
-  - relevant artifact, tracker, PR, validation, or session evidence when available
+  - repository and branch context
+  - relevant artifact, tracker, PR, validation, or session evidence
 outputs:
-  - stage result that follows SKILL.md procedure
-  - exact validation status using pass, fail, or blocked
-  - authority and external-write limits
+  - schema_version
+  - stage: eval-report
+  - status: pass|fail|blocked|not_checked
+  - evidence_refs
+  - blocked_by
+  - next_stage: reconcile
+allowed_writes:
+  - .harness/evals/** reports; no tracker, PR, CI, or merge-state mutation.
+forbidden_writes:
+  - generated runtime projections as source
+  - external tracker, PR, CI, release, or deployment mutation without authorization
+  - claims that collapse local, PR, CI, review, tracker, artifact, and merge-readiness lanes
+exit_criteria:
+  - output names the current stage and status
+  - evidence lanes are separated
+  - handoff names reconcile or a blocker
 non_goals:
-  - implicit invocation from generic requests
-  - cross-stage completion claims
-  - external mutation without explicit authorization
+  - completing another lifecycle stage
+  - broad rewrite outside the selected stage
+  - hidden mutation of runtime or external state
 risks:
-  - stale or contradictory evidence
-  - collapsed proof lanes across local validation, CI, reviews, tracker, and merge readiness
-  - accidental tracker, GitHub, branch, or artifact mutation
-archive:
-  full_reference_source: .harness/archives/synaipse-harness-full/plugin-root
+  - stale evidence
+  - wrong-stage routing
+  - local-only proof being mistaken for delivery readiness
+observability: >-
+  Record the current stage, selected authority, source artifacts read, allowed write boundary, validation outcome, evidence refs, blocker class, and next-stage handoff without storing secrets or sensitive data.
+rollback_procedure: >-
+  Restore this skill directory from git, rerun plugin validation, and refresh generated projections through the SDK sync wrapper.

@@ -20,7 +20,7 @@ stage_arc_boundary:
     freshness_required: fresh|allowed_stale|not_applicable
     not_proof: "<chat, transcript, provenance, green CI, or local artifact limits>"
   active_arc:
-    owned_stage: sy-strategy|sy-brainstorm|sy-spec|sy-execution-plan|sy-work|sy-review|sy-review|sy-review|sy-reconcile|sy-reinforce|sy-reconcile|sy-eval-report|sy-strategy|sy-reframe|sy-tracker-plan|sy-work|sy-work
+    owned_stage: sy-strategy|sy-reframe|sy-brainstorm|sy-trace-plan|sy-tracker-plan|sy-slice-spec|sy-execution-plan|sy-work|sy-review|sy-eval-report|sy-reconcile|sy-reinforce
     allowed_actions: "<read, artifact write, repo edit, external mutation, schedule>"
     forbidden_actions: "<actions outside this stage>"
     mutation_boundary: none|local_artifact|repo_edit|external_mutation|destructive

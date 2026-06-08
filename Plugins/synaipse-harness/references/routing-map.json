@@ -1,16 +1,46 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "plugin": "synaipse-harness",
   "router": "sy-strategy",
+  "stage_template": "Infrastructure/references/sdk-stage-skill-template.md",
+  "upstream_reference_index": "Plugins/synaipse-harness/references/upstream/harness-engineering-context.yaml",
+  "lifecycle_stage_order": [
+    "strategy",
+    "reframe",
+    "brainstorm",
+    "trace-plan",
+    "tracker-plan",
+    "slice-spec",
+    "execution-plan",
+    "work",
+    "review",
+    "eval-report",
+    "reconcile",
+    "reinforce"
+  ],
+  "stages": [
+    {"stage": "strategy", "handle": "sy-strategy", "previous_stage": null, "next_stage": "reframe"},
+    {"stage": "reframe", "handle": "sy-reframe", "previous_stage": "strategy", "next_stage": "brainstorm"},
+    {"stage": "brainstorm", "handle": "sy-brainstorm", "previous_stage": "reframe", "next_stage": "trace-plan"},
+    {"stage": "trace-plan", "handle": "sy-trace-plan", "previous_stage": "brainstorm", "next_stage": "tracker-plan"},
+    {"stage": "tracker-plan", "handle": "sy-tracker-plan", "previous_stage": "trace-plan", "next_stage": "slice-spec"},
+    {"stage": "slice-spec", "handle": "sy-slice-spec", "previous_stage": "tracker-plan", "next_stage": "execution-plan"},
+    {"stage": "execution-plan", "handle": "sy-execution-plan", "previous_stage": "slice-spec", "next_stage": "work"},
+    {"stage": "work", "handle": "sy-work", "previous_stage": "execution-plan", "next_stage": "review"},
+    {"stage": "review", "handle": "sy-review", "previous_stage": "work", "next_stage": "eval-report"},
+    {"stage": "eval-report", "handle": "sy-eval-report", "previous_stage": "review", "next_stage": "reconcile"},
+    {"stage": "reconcile", "handle": "sy-reconcile", "previous_stage": "eval-report", "next_stage": "reinforce"},
+    {"stage": "reinforce", "handle": "sy-reinforce", "previous_stage": "reconcile", "next_stage": "strategy"}
+  ],
   "stage_handles": {
     "sy-strategy": "sy-strategy <strategy-or-review-request>",
     "sy-reframe": "sy-reframe <migration-candidate>",
     "sy-brainstorm": "sy-brainstorm <request>",
     "sy-trace-plan": "sy-trace-plan <strategy-reframe-or-brainstorm-output>",
     "sy-tracker-plan": "sy-tracker-plan <harness-artifacts>",
-    "sy-spec": "sy-spec <request>",
-    "sy-execution-plan": "sy-execution-plan <request>",
-    "sy-work": "sy-work <plan-or-task>",
+    "sy-slice-spec": "sy-slice-spec <selected-trace-or-tracker-slice>",
+    "sy-execution-plan": "sy-execution-plan <approved-slice-spec>",
+    "sy-work": "sy-work <approved-execution-plan-or-task>",
     "sy-review": "sy-review <review-target>",
     "sy-eval-report": "sy-eval-report <completed-slice-or-pr>",
     "sy-reconcile": "sy-reconcile <state-or-resume-request>",
@@ -19,3 +49,4 @@
   "selection_rule": "Select exactly one next stage; when authority or freshness is unclear, choose sy-reconcile or return a blocked handoff.",
   "evidence_rule": "Report local validation, PR/CI, review, tracker, artifact, and rollout evidence as separate lanes."
 }
+
