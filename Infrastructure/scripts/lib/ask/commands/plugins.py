@@ -1493,7 +1493,7 @@ def install_plugin(
                 error_message = sync_result.message if hasattr(sync_result, 'message') and sync_result.message else "Profile sync failed"
                 if sync_result.errors:
                     error_details = "; ".join([
-                        f"{e.get('message', 'unknown error')}" for e in result.data["sync_profile_errors"]
+                        f"{e.message}" for e in sync_result.errors
                     ])
                     error_message = f"{error_message}: {error_details}"
                 result.errors.append(ErrorObject(
