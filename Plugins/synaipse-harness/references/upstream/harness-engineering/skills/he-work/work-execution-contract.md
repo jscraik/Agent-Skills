@@ -2,7 +2,10 @@
 
 - Lanes: `plan-led`, `todo-led`, or `small-spec-direct`. Route medium/high-risk raw specs, migrations, cross-service work, and vague bare requests to `he-plan`.
 - Intake: read linked artifacts fully and extract active IDs, Linear issue, branch, PR target, invariants, non-goals, validation gates, deferred questions, execution notes, patterns, file paths, and any active thread goal.
-- Execution slice: for coding-harness-managed work, load `Plugins/harness-engineering/references/execution-slice-contract.md` and verify the todo/plan maps to one selected milestone, parent issue, reframe phase, or execution slice before editing.
+- Execution slice: for coding-harness-managed work, load
+  `Plugins/synaipse-harness/references/upstream/harness-engineering/execution-slice-contract.md`
+  and verify the todo/plan maps to one selected milestone, parent issue,
+  reframe phase, or execution slice before editing.
 - Goal alignment: use `/goal` only as continuity state. If the active goal conflicts with the current tracker/artifact/branch/PR chain, stop before editing and resolve the mismatch.
 - Current truth: do not assume the newest dated artifact is active. Resolve via status/frontmatter, Linear links, branch/PR metadata, and repo convention.
 - Durable truth: `update_plan` is live run state only. The plan/spec/todo changes only for real contract drift or required final status.

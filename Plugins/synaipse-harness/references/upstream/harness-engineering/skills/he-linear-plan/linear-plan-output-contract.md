@@ -131,7 +131,7 @@ instead of inventing a literal `Type > Bug` label.
 If classification is unclear, keep the issue in Triage and ask. Prefer updating an
 existing issue over creating a duplicate.
 
-When the live workspace lacks a required mapped label, set `label_status: blocked`
+When the live workspace lacks a required label from the mapping, set `label_status: blocked`
 or `partial` and include a reusable ready-to-create label payload. Do
 not silently weaken the mapping by dropping type, roadmap, repo/location, policy,
 or operating labels.
@@ -298,8 +298,8 @@ Preferred formats:
 
 - Mermaid issue tree for milestone, parent, and sub-issue shape
 - Mermaid dependency map for blockers and execution order
-- markdown table for Now / Next / Later / Do Not Create
-- markdown table for eval gates and delivery evidence
+- Markdown table for Now / Next / Later / Do Not Create
+- Markdown table for eval gates and delivery evidence
 
 If no visual adds value, write `Not needed` and say why. Apply the shared
 generated-media and proof rules from

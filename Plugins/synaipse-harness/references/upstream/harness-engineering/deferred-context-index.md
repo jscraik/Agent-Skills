@@ -134,11 +134,11 @@ budget trimming; move deep context to references with a clear route.
 
 `he-spec`:
 
-- `Plugins/harness-engineering/references/he-spec-doctrine.md`
-- `Plugins/harness-engineering/skills/he-spec/references/autoresearch-2026-05-02.md`
-- `Plugins/harness-engineering/skills/he-spec/references/codex-and-session-evidence.md`
-- `Plugins/harness-engineering/skills/he-spec/references/spec-artifact-contract.md`
-- `Plugins/harness-engineering/skills/he-spec/references/spec-mode-rules.md`
+- `Plugins/synaipse-harness/references/upstream/harness-engineering/he-spec-doctrine.md`
+- `Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-spec/autoresearch-2026-05-02.md`
+- `Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-spec/codex-and-session-evidence.md`
+- `Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-spec/spec-artifact-contract.md`
+- `Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-spec/spec-mode-rules.md`
 
 `he-plan`:
 
@@ -305,15 +305,19 @@ Write a dated `.harness/linear/**-linear-plan.md` artifact or return
 
 Current routes:
 
-- he-plan contracts: `references/skills/he-plan/plan-artifact-contract.md`,
-  `references/skills/he-plan/planning-depth.md`, and
-  `references/skills/he-plan/post-plan-handoff.md`.
-- he-strategy contracts: `references/skills/he-strategy/strategy-output-contract.md`
+- he-plan contracts:
+  `Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-plan/plan-artifact-contract.md`,
+  `Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-plan/planning-depth.md`,
+  and
+  `Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-plan/post-plan-handoff.md`.
+- he-strategy contracts:
+  `Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-strategy/strategy-output-contract.md`
   and the shared first-principles/domain context contracts.
 - he-linear-plan contracts:
-  `references/skills/he-linear-plan/linear-plan-output-contract.md`,
-  `references/skills/he-linear-plan/linear-filing-rule.md`, and
-  `references/closure-mutation-contract.md`.
+  `Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-linear-plan/linear-plan-output-contract.md`,
+  `Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-linear-plan/linear-filing-rule.md`,
+  and
+  `Plugins/synaipse-harness/references/upstream/harness-engineering/closure-mutation-contract.md`.
 
 ## 2026-05-18 HE Entrypoint Follow-Up Disposition
 
@@ -350,7 +354,8 @@ Disposition:
 
 - `he-linear-plan` moved-to-reference: Linear output shape, filing rules,
   source-prompt preservation, closure and mutation boundaries, subagent policy,
-  and package checks live in `references/skills/he-linear-plan/**`,
+  and package checks live in
+  `Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-linear-plan/**`,
   `references/closure-mutation-contract.md`, and
   `references/subagent-call-contract.md`.
   Relocation evidence:
@@ -358,7 +363,8 @@ Use when approved `.harness` cognition needs Linear routing: target project,
 - `he-plan` moved-to-reference: plan artifact shape, planning depth,
   post-plan handoff, source evidence, validation, rollback, enforcement
   contracts, and generated-artifact checks live in
-  `references/skills/he-plan/**` and the shared lifecycle contracts.
+  `Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-plan/**`
+  and the shared lifecycle contracts.
   Relocation evidence:
 Plans are execution contracts, not chat checklists. They preserve source
 - `he-strategy` moved-to-reference: strategy output shape, first-principles

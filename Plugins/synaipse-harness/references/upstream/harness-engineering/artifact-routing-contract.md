@@ -71,7 +71,7 @@ frontmatter conservative enough for simple parsers:
 
 - Start the file with a single YAML frontmatter block delimited by `---`.
 - Keep scalar values on one line unless the field is explicitly a YAML list.
-- Quote scalar values that contain `: `, ` #`, brackets, braces, or commas.
+- Quote scalar values that contain `:`, `#`, brackets, braces, or commas.
 - Keep `canonical_slug` lowercase kebab-case and stable across the chain.
 - Match date-prefixed filenames to frontmatter `date`.
 - Match frontmatter `title` to the first H1 exactly.

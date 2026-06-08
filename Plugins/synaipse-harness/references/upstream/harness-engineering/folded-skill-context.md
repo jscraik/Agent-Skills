@@ -120,14 +120,18 @@ Disposition:
 - intentionally-discarded: broken fragments, repeated descriptions, and copied
   heading text that added cost without preserving unique operational meaning.
 
-Relocation anchors required by the progressive-disclosure gate:
-Relocation anchors required by the progressive-disclosure gate:
+Relocation anchors required by the progressive-disclosure gate are preserved in
+the SynAIpse stage shells and retained upstream references. Use
+`Plugins/synaipse-harness/skills/sy-work/SKILL.md` for active execution-stage
+shape and
+`Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-work/work-execution-contract.md`
+for retained upstream execution doctrine.
 
 Progressive-disclosure relocation required these anchors: `validation`, `blackboard_delta`, `artifact_path`, `next_stage`, `live_linear_blocker`, `retained_references`, `handoff`, `blocked_reason`, `redaction_status`, `writes`, `spec_path`, `acceptance_ids`, `confidence`, and `slack_policy`.
 ## Preserved He-Code-Review Productization Context
 
 The 2026-05-13 productization pass compacted
-`Plugins/harness-engineering/skills/he-code-review/SKILL.md` while keeping its
+`Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-code-review/review-policy-index.md` while keeping its
 review policy in stage references. The active entrypoint now routes to the
 policy index and shared HE contracts; the preserved line below anchors the
 removed context for the progressive-disclosure relocation gate.
@@ -146,7 +150,7 @@ Disposition:
 ## Preserved He-Compound Productization Context
 
 The 2026-05-13 productization pass folded
-`Plugins/harness-engineering/skills/he-compound/SKILL.md` into the active
+the retained upstream compound-review context into the active
 state-reconstruction and routing contracts. The preserved line below anchors
 the removed entrypoint context for the progressive-disclosure relocation gate.
 
@@ -181,7 +185,7 @@ Disposition:
 ## Discarded He-Router Productization Prompt Rot
 
 The 2026-05-15 HE productization refinement pass removed duplicated tail text
-from Plugins/harness-engineering/skills/he-router/SKILL.md. The valid
+from `Plugins/synaipse-harness/skills/sy-reframe/SKILL.md`. The valid
 context-disposition rule already exists above and in the active router; the
 closure-vs-mutation concern now routes to closure-mutation-contract.md.
 

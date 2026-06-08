@@ -13,7 +13,7 @@ user asks for intent, architecture review, and triage together, use
 `repo-cognition-pipeline` and load `repo-cognition-pipeline.md`.
 
 For equivalence checks, load
-`Plugins/harness-engineering/references/source-prompt-coverage-contract.md`;
+`Plugins/synaipse-harness/references/upstream/harness-engineering/source-prompt-coverage-contract.md`;
 matching artifact names alone do not prove coverage.
 
 ## Preserved Requirements

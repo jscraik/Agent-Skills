@@ -9,6 +9,6 @@ Read when strengthening an existing plan or preparing handoff.
   challenge gaps, contradictions, unsupported scope, weak validation, and missing
   handoff evidence before deeper planning or implementation.
 - After material revision, run document review and address any blocker-grade findings before `he-work`.
-- If the user asks to deepen an existing plan, load folded `he-deepen-plan` context from `Plugins/harness-engineering/references/folded-skill-context.md`.
+- If the user asks to deepen an existing plan, load folded `he-deepen-plan` context from `Plugins/synaipse-harness/references/upstream/harness-engineering/folded-skill-context.md`.
 
-Full retained notes: `Plugins/harness-engineering/references/he-plan-doctrine.md`.
+Full retained notes: `Plugins/synaipse-harness/references/upstream/harness-engineering/he-plan-doctrine.md`.

@@ -12,7 +12,7 @@ artifacts are evidence.
 
 If the source slice was created from an original prompt comparison, old manual
 workflow, plugin comparison, or sampled upstream pass, also load
-`Plugins/harness-engineering/references/source-prompt-coverage-contract.md` and
+`Plugins/synaipse-harness/references/upstream/harness-engineering/source-prompt-coverage-contract.md` and
 inherit its coverage limits before recommending Linear closure.
 
 ## Proof Rules

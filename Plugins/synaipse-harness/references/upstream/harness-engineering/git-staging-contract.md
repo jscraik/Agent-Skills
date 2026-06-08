@@ -23,8 +23,8 @@ turn. Staging is a handoff hygiene step, not a commit step.
 ## Safety Rules
 
 - Do not run `git add .`, `git add -A`, or broad path globs from a dirty repo.
-- Do not stage unrelated user edits, generated cache churn, secrets, credentials,
-  local env files, or files outside the selected HE scope.
+- Leave unrelated user edits, generated cache churn, secrets, credentials, local
+  env files, and files outside the selected HE scope unstaged.
 - Do not commit unless the user explicitly asks for commit/push/PR.
 - Do not use staging as validation proof. Validation still needs commands,
   artifact checks, review evidence, or explicit blockers.

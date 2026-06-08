@@ -47,7 +47,7 @@ Before deep review, classify closed, draft, automated, trivial, already-reviewed
   projection changes: action parity, capability discovery, context injection,
   shared workspace/truth surface, entity completion, integration feedback,
   prompt-native composability, and explicit completion or resume signal. Use
-  `Plugins/harness-engineering/references/agent-native-audit-scorecard.md` for
+  `Plugins/synaipse-harness/references/upstream/harness-engineering/agent-native-audit-scorecard.md` for
   dimensions, closure rules, and output fields.
 - Changed-scope simplification review should route to the external `simplify`
   specialist through `specialist-skill-steering-contract.md`; HE keeps the

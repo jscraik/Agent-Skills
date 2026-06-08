@@ -7,7 +7,9 @@ authority, risk posture, or closure recommendation.
 
 ## Core Rule
 
-Explore first. Ask second. Ask once per unresolved decision branch.
+Explore first. Ask second. Ask once per unresolved decision branch. In
+`domain_interview`, a branch means one distinct unresolved domain-model
+decision, not every missing detail inside the same decision.
 
 When the platform blocking question tool is available, use it
 (`request_user_input`, `AskUserQuestion`, or `ask_user`). If no blocking

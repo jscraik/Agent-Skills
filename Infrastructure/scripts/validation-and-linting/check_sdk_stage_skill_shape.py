@@ -86,6 +86,11 @@ LEGACY_REFERENCE_TERMS = (
 
 MARKDOWN_LINK_RE = re.compile(r"(?<!!)\[[^\]]+\]\(([^)]+)\)")
 
+REFERENCE_AUDIT_CERTIFICATIONS = {
+    "structure_and_links_only",
+    "not_certified",
+}
+
 
 def repo_root() -> Path:
     return Path(__file__).resolve().parents[3]
@@ -159,16 +164,11 @@ def validate_copied_reference_links(root: Path, reference_path: Path) -> None:
             )
 
 
-def validate_synaipse_reference_quality(root: Path) -> None:
-    index_path = (
-        root
-        / "Plugins/synaipse-harness/references/upstream/harness-engineering-context.yaml"
-    )
-    if not index_path.exists():
-        return
-
-    payload = load_yaml(index_path)
-    copied_root = root / "Plugins/synaipse-harness/references/upstream/harness-engineering"
+def _validate_quality_audit_structure(
+    root: Path,
+    payload: dict,
+    index_path: Path,
+) -> list[dict]:
     references = payload.get("references")
     quality_audit = payload.get("quality_audit")
     if not isinstance(quality_audit, dict):
@@ -179,69 +179,99 @@ def validate_synaipse_reference_quality(root: Path) -> None:
         fail(
             f"{index_path.relative_to(root)} reference_count must equal listed references"
         )
+    return references
+
+
+def _validate_reference_entry(
+    root: Path,
+    row: dict,
+    copied_root: Path,
+    index_path: Path,
+) -> tuple[str, bool, bool]:
+    if not isinstance(row, dict):
+        fail(f"{index_path.relative_to(root)} references entries must be mappings")
+    ref_path_text = row.get("path")
+    if not isinstance(ref_path_text, str):
+        fail(f"{index_path.relative_to(root)} reference missing path")
+    ref_path = root / ref_path_text
+    if not ref_path.exists():
+        fail(f"{index_path.relative_to(root)} points at missing reference: {ref_path_text}")
+    try:
+        ref_path.resolve().relative_to(copied_root.resolve())
+    except ValueError:
+        fail(f"{ref_path_text} must stay inside SynAIpse copied upstream reference root")
+
+    status = row.get("adoption_status")
+    if status not in REFERENCE_STATUS_VALUES:
+        fail(f"{ref_path_text} has invalid or missing adoption_status: {status!r}")
+    stage_map = row.get("stage_map")
+    if not isinstance(stage_map, list) or not stage_map:
+        fail(f"{ref_path_text} must declare at least one SynAIpse stage_map entry")
+    invalid_stages = sorted(stage for stage in stage_map if stage not in SYNAIPSE_STAGE_NAMES)
+    if invalid_stages:
+        fail(f"{ref_path_text} has invalid SynAIpse stage_map entries: {invalid_stages}")
+
+    notes = row.get("quality_notes")
+    if not isinstance(notes, dict):
+        fail(f"{ref_path_text} missing quality_notes")
+    stale_terms = notes.get("stale_terms")
+    if not isinstance(stale_terms, list):
+        fail(f"{ref_path_text} quality_notes.stale_terms must be a list")
+    if notes.get("accuracy_certification") not in REFERENCE_AUDIT_CERTIFICATIONS:
+        fail(f"{ref_path_text} has invalid quality_notes.accuracy_certification")
+
+    detected_text = ref_path_text
+    is_markdown = ref_path.suffix == ".md"
+    if is_markdown:
+        detected_text += "\n" + ref_path.read_text(encoding="utf-8")
+        validate_copied_reference_links(root, ref_path)
+        if notes.get("link_check") != "passed":
+            fail(f"{ref_path_text} Markdown reference must record link_check: passed")
+    elif notes.get("link_check") != "not_markdown":
+        fail(f"{ref_path_text} non-Markdown reference must record link_check: not_markdown")
+    detected_terms = sorted(term for term in LEGACY_REFERENCE_TERMS if term in detected_text)
+
+    if sorted(stale_terms) != detected_terms:
+        fail(
+            f"{ref_path_text} stale_terms drifted: expected {detected_terms}, "
+            f"got {sorted(stale_terms)}"
+        )
+    if detected_terms and status == "adopted":
+        fail(f"{ref_path_text} cannot be adopted while legacy HE terms remain")
+
+    needs_rewrite = status == "needs_synaipse_rewrite"
+    if needs_rewrite and not row.get("rewrite_reason"):
+        fail(f"{ref_path_text} needs_synaipse_rewrite requires rewrite_reason")
+    return ref_path_text, is_markdown, needs_rewrite
+
+
+def validate_synaipse_reference_quality(root: Path) -> None:
+    index_path = (
+        root
+        / "Plugins/synaipse-harness/references/upstream/harness-engineering-context.yaml"
+    )
+    if not index_path.exists():
+        return
+
+    payload = load_yaml(index_path)
+    copied_root = root / "Plugins/synaipse-harness/references/upstream/harness-engineering"
+    references = _validate_quality_audit_structure(root, payload, index_path)
 
     indexed_paths: set[str] = set()
     markdown_count = 0
     rewrite_needed = 0
     for row in references:
-        if not isinstance(row, dict):
-            fail(f"{index_path.relative_to(root)} references entries must be mappings")
-        ref_path_text = row.get("path")
-        if not isinstance(ref_path_text, str):
-            fail(f"{index_path.relative_to(root)} reference missing path")
+        ref_path_text, is_markdown, needs_rewrite = _validate_reference_entry(
+            root,
+            row,
+            copied_root,
+            index_path,
+        )
         indexed_paths.add(ref_path_text)
-        ref_path = root / ref_path_text
-        if not ref_path.exists():
-            fail(f"{index_path.relative_to(root)} points at missing reference: {ref_path_text}")
-        try:
-            ref_path.resolve().relative_to(copied_root.resolve())
-        except ValueError:
-            fail(f"{ref_path_text} must stay inside SynAIpse copied upstream reference root")
-
-        status = row.get("adoption_status")
-        if status not in REFERENCE_STATUS_VALUES:
-            fail(f"{ref_path_text} has invalid or missing adoption_status: {status!r}")
-        stage_map = row.get("stage_map")
-        if not isinstance(stage_map, list) or not stage_map:
-            fail(f"{ref_path_text} must declare at least one SynAIpse stage_map entry")
-        invalid_stages = sorted(stage for stage in stage_map if stage not in SYNAIPSE_STAGE_NAMES)
-        if invalid_stages:
-            fail(f"{ref_path_text} has invalid SynAIpse stage_map entries: {invalid_stages}")
-
-        notes = row.get("quality_notes")
-        if not isinstance(notes, dict):
-            fail(f"{ref_path_text} missing quality_notes")
-        stale_terms = notes.get("stale_terms")
-        if not isinstance(stale_terms, list):
-            fail(f"{ref_path_text} quality_notes.stale_terms must be a list")
-        if notes.get("accuracy_certification") not in {
-            "structure_and_links_only",
-            "not_certified",
-        }:
-            fail(f"{ref_path_text} has invalid quality_notes.accuracy_certification")
-
-        detected_text = ref_path_text
-        if ref_path.suffix == ".md":
+        if is_markdown:
             markdown_count += 1
-            detected_text += "\n" + ref_path.read_text(encoding="utf-8")
-            validate_copied_reference_links(root, ref_path)
-            if notes.get("link_check") != "passed":
-                fail(f"{ref_path_text} Markdown reference must record link_check: passed")
-        elif notes.get("link_check") != "not_markdown":
-            fail(f"{ref_path_text} non-Markdown reference must record link_check: not_markdown")
-        detected_terms = sorted(term for term in LEGACY_REFERENCE_TERMS if term in detected_text)
-
-        if sorted(stale_terms) != detected_terms:
-            fail(
-                f"{ref_path_text} stale_terms drifted: expected {detected_terms}, "
-                f"got {sorted(stale_terms)}"
-            )
-        if detected_terms and status == "adopted":
-            fail(f"{ref_path_text} cannot be adopted while legacy HE terms remain")
-        if status == "needs_synaipse_rewrite":
+        if needs_rewrite:
             rewrite_needed += 1
-            if not row.get("rewrite_reason"):
-                fail(f"{ref_path_text} needs_synaipse_rewrite requires rewrite_reason")
 
     actual_paths = {
         path.relative_to(root).as_posix()

@@ -30,7 +30,8 @@ or external systems and authorization is unclear, stop with `blocked` or
 `awaiting_user_choice`.
 
 When `awaiting_user_choice` is selected, apply
-`Plugins/harness-engineering/references/interactive-steering-contract.md`: use
+`Plugins/synaipse-harness/references/upstream/harness-engineering/interactive-steering-contract.md`:
+use
 the platform blocking question tool when available, ask once with the valid
 next-stage choices, and record `interactive_status`. In headless or autonomous
 mode, do not ask; record `interactive_status: autonomous_assumption`, the

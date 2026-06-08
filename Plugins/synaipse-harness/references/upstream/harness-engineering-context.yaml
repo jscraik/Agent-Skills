@@ -388,7 +388,6 @@ references:
   stage_map: *id001
   quality_notes:
     stale_terms:
-    - Harness Engineering
     - he-brainstorm
     - he-code-review
     - he-improve
@@ -615,8 +614,7 @@ references:
   stage_map:
   - eval-report
   quality_notes:
-    stale_terms:
-    - he-router
+    stale_terms: []
     link_check: passed
     accuracy_certification: not_certified
   rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be

@@ -2,7 +2,7 @@
 
 Read when: improving or validating `he-spec` from session evidence, live Codex behavior, and Agent Skills Kit spec conventions.
 
-Target: `Plugins/harness-engineering/skills/he-spec`.
+Target: `Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-spec`.
 
 Stop condition: 10 bounded loops; keep only improvements that increase traceability, grounding, or validation readiness without bloating active context.
 

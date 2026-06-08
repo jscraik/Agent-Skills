@@ -3,7 +3,7 @@
 Harness Engineering stages must resolve helper roles through the same path before calling or recommending subagents.
 
 ## Required Flow
-1. Load the selected stage policy from `Plugins/harness-engineering/references/routing-map.json`.
+1. Load the selected stage policy from `Plugins/synaipse-harness/references/routing-map.json`.
 2. Read available roles from `~/.codex/agents/manifest.json`, supporting both a top-level array and an object with `.agents[]`.
 3. Use the exact role names from `routing-map.json`; do not add `he-*` aliases or rename roles before lookup.
 4. Call `spawn_agent(agent_type=<role>)` only for roles present in the manifest and allowed by the selected stage policy.

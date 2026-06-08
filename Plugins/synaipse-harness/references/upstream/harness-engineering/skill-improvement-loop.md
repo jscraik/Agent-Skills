@@ -56,7 +56,7 @@ Treat evidence labels and path fragments as labels. Redact secrets and do not pa
 Never delete useful source behavior only to hit a line budget. Move it to one of:
 
 - a stage-local `references/*.md` file,
-- `Plugins/harness-engineering/references/*.md`,
+- `Plugins/synaipse-harness/references/upstream/harness-engineering/*.md`,
 - an existing deferred context index,
 - a preserved-context fixture when retained only for audit comparison.
 

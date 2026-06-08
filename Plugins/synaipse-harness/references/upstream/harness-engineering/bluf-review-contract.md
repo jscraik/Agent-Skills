@@ -181,7 +181,7 @@ The HE BLUF contract applies these public writing patterns:
 
 ## Validation
 
-Run `python3 Plugins/harness-engineering/scripts/check_bluf_structure.py
+Run `python3 Plugins/synaipse-harness/scripts/check_bluf_structure.py
 <artifact.md> --json` for non-trivial generated artifacts when the repository
 has the HE plugin available. If the script is unavailable, validate by reviewing
 the generated artifact against the No-Fog Gate and record `pass`, `fail`, or

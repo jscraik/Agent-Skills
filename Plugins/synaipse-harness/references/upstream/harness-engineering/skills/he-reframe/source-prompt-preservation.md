@@ -8,7 +8,7 @@ routing.
 
 When a reframe candidate comes from an HE strategy/review that was compared
 against an original prompt method, also load
-`Plugins/harness-engineering/references/source-prompt-coverage-contract.md`.
+`Plugins/synaipse-harness/references/upstream/harness-engineering/source-prompt-coverage-contract.md`.
 The reframe program must inherit upstream evidence depth and coverage gaps
 instead of converting sampled cognition into repo-wide migration authority.
 

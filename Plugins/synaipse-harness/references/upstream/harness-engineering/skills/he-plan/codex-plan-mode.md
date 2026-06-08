@@ -8,4 +8,4 @@ Read when `he-plan` is used inside Codex or when plan/chat behavior affects hand
 - Ask only for material preferences, tradeoffs, or choices that cannot be discovered from sources.
 - If a plan is revised after feedback, output a complete replacement artifact rather than partial deltas.
 
-Full retained notes: `Plugins/harness-engineering/references/he-plan-doctrine.md`.
+Full retained notes: `Plugins/synaipse-harness/references/upstream/harness-engineering/he-plan-doctrine.md`.

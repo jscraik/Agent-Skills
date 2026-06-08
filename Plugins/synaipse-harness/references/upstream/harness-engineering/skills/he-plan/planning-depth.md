@@ -8,4 +8,4 @@ Read when choosing plan depth, source handling, or a scope checkpoint.
 - Reclassify lightweight work to standard when research finds external contract surfaces: env vars, exported APIs, CLI flags, CI, shared types, or docs consumed by other systems.
 - Use a synthesis checkpoint when the agent has made important inferences. Split it into Stated, Inferred, and Out of scope; route unconfirmed inferred bets to Assumptions in headless artifacts.
 
-Full retained notes: `Plugins/harness-engineering/references/he-plan-doctrine.md`.
+Full retained notes: `Plugins/synaipse-harness/references/upstream/harness-engineering/he-plan-doctrine.md`.

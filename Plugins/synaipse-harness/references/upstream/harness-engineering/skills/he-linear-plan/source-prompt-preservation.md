@@ -5,7 +5,7 @@ Execution Orchestration Prompt.
 
 When a Linear plan consumes artifacts produced from an original prompt
 comparison, also load
-`Plugins/harness-engineering/references/source-prompt-coverage-contract.md`.
+`Plugins/synaipse-harness/references/upstream/harness-engineering/source-prompt-coverage-contract.md`.
 Linear plans must inherit upstream source-prompt coverage limits instead of
 turning partial cognition into broad execution authority.
 

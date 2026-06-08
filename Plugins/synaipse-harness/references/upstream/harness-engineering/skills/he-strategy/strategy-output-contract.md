@@ -93,4 +93,5 @@ outputs must include `Direct Strategic Critique`: strongest leverage, biggest
 drag, highest-risk contradiction, and one hard recommendation.
 
 When no fresh reference material is supplied, use
-`../../references/skills/he-strategy/architecture-lens-canon.md` and mark status `internal-canon`.
+`Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-strategy/architecture-lens-canon.md`
+and mark status `internal-canon`.

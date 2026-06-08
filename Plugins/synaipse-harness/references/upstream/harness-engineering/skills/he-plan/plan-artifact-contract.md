@@ -7,7 +7,8 @@ or docs paths may be read as source evidence, but replacement plans should move
 to the Harness artifact root.
 
 Use the shared Artifact Identity contract in
-`Plugins/harness-engineering/references/artifact-routing-contract.md`. Tracked
+`Plugins/synaipse-harness/references/upstream/harness-engineering/artifact-routing-contract.md`.
+Tracked
 plans may use dated filenames such as
 `.harness/plan/YYYY-MM-DD-architecture-JSC-283-packaged-skill-behavior-assurance-plan.md`,
 but the stable chain key is `canonical_slug:
@@ -18,10 +19,10 @@ jsc-283-packaged-skill-behavior-assurance`, not the date.
 - Preserve source IDs from Linear, requirements, specs, actors, flows, acceptance examples, and UI validation criteria when supplied.
 - Include concrete test scenarios with input, action, and expected outcome. Feature-bearing units need test file paths.
 - Keep execution-time unknowns explicit. Do not pretend exact helper names, query shapes, or runtime discoveries are settled.
-- Use `Plugins/harness-engineering/references/spec-plan-runtime-boundary-contract.md` for strict scope/downscope authority, runtime persistence, proof boundaries, and coding/testing lens fields.
+- Use `Plugins/synaipse-harness/references/upstream/harness-engineering/spec-plan-runtime-boundary-contract.md` for strict scope/downscope authority, runtime persistence, proof boundaries, and coding/testing lens fields.
 - For tracked work, include a Linear/spec/plan/PR matrix with PR evidence left pending until delivery.
 - For tracked work, run `python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py <plan-path>` and `python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py <plan-path>`.
-- For non-trivial generated plans, also run `python3 Plugins/harness-engineering/scripts/check_bluf_structure.py <plan-path> --json` and `python3 Plugins/harness-engineering/scripts/check_generated_artifact_shape.py <plan-path> --kind plan --json` so the opening BLUF, execution-first body, Enforcement Contract, plan units, source mapping, rollback, handoff, and visual-reference decision are validated before handoff.
+- For non-trivial generated plans, also run `python3 Plugins/synaipse-harness/scripts/check_bluf_structure.py <plan-path> --json` and `python3 Plugins/synaipse-harness/scripts/check_generated_artifact_shape.py <plan-path> --kind plan --json` so the opening BLUF, execution-first body, Enforcement Contract, plan units, source mapping, rollback, handoff, and visual-reference decision are validated before handoff.
 
 ## Execution-First Plan Template
 
@@ -171,12 +172,12 @@ Visual reference requirements:
   risk, validation, or rollback.
 - Apply the shared visual contract for generated media persistence, proof
   rules, and compact not-needed reasons:
-  `Plugins/harness-engineering/references/visual-reference-contract.md`.
+  `Plugins/synaipse-harness/references/upstream/harness-engineering/visual-reference-contract.md`.
 
 ## BLUF Review Surface
 
 For non-trivial durable plans, apply
-`Plugins/harness-engineering/references/bluf-review-contract.md`.
+`Plugins/synaipse-harness/references/upstream/harness-engineering/bluf-review-contract.md`.
 
 Keep the existing plan substance. Add:
 
@@ -196,4 +197,4 @@ Do not turn the plan into duplicate simple/full documents. The BLUF paragraph is
 the opening bottom line; the rest of the plan is the evidence and execution
 contract.
 
-Full retained notes: `Plugins/harness-engineering/references/he-plan-doctrine.md`.
+Full retained notes: `Plugins/synaipse-harness/references/upstream/harness-engineering/he-plan-doctrine.md`.

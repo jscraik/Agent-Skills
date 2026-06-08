@@ -6,7 +6,7 @@ decides whether a domain boundary needs an ADR.
 
 ## Core Rule
 
-`UBIQUITOUS.md` is a glossary and nothing else. It records project-specific
+`UBIQUITOUS_LANGUAGE.md` is the canonical glossary and nothing else. It records project-specific
 language so later specs, plans, code, reviews, and tracker updates use the same
 terms. It must not become a specification, scratch pad, implementation decision
 log, schema note, API contract, or task list.
@@ -15,10 +15,12 @@ log, schema note, API contract, or task list.
 
 - If `UBIQUITOUS-MAP.md` exists, read it and update the context-specific
   ubiquitous language file for the current topic.
-- If a root `UBIQUITOUS.md` exists, treat the repo as single-context unless the
-  topic clearly spans multiple bounded contexts.
-- If neither exists, create a root `UBIQUITOUS.md` lazily only after the first
-  project-specific term is resolved.
+- If a root `UBIQUITOUS_LANGUAGE.md` exists, treat the repo as single-context
+  unless the topic clearly spans multiple bounded contexts.
+- If only `UBIQUITOUS.md` exists, treat it as a compatibility alias for
+  `UBIQUITOUS_LANGUAGE.md`.
+- If neither exists, create a root `UBIQUITOUS_LANGUAGE.md` lazily only after the
+  first project-specific term is resolved.
 - Read legacy `CONTEXT.md` or `CONTEXT-MAP.md` as compatibility evidence, but do
   not create new legacy context files.
 
@@ -67,7 +69,8 @@ relationships between contexts.
 
 ## ADR Boundary
 
-Glossary choices belong in `UBIQUITOUS.md`. Durable architectural or domain
+Glossary choices belong in `UBIQUITOUS_LANGUAGE.md` or its compatibility alias
+`UBIQUITOUS.md`. Durable architectural or domain
 boundary decisions belong under `.harness/decisions/ADR-###-<slug>.md` only when
 all three ADR criteria are true:
 

@@ -8,4 +8,3 @@ routing:
   sdk_stage: "tracker-plan"
   previous_stage: "trace-plan"
   next_stage: "slice-spec"
-

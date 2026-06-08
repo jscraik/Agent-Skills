@@ -7,7 +7,8 @@ Durable spec markdown is written under `.harness/specs/**.md`. Read legacy
 Harness artifact root.
 
 Use the shared Artifact Identity contract in
-`Plugins/harness-engineering/references/artifact-routing-contract.md`. Tracked
+`Plugins/synaipse-harness/references/upstream/harness-engineering/artifact-routing-contract.md`.
+Tracked
 specs may use dated and issue-prefixed filenames such as
 `.harness/specs/YYYY-MM-DD-jsc-283-packaged-skill-behavior-assurance-spec.md`;
 the stable chain key is `canonical_slug:
@@ -72,7 +73,7 @@ Normative language:
   `FR-*`, `NFR-*`, or `SA-*` IDs.
 - Do not mix implementation task sequencing into the spec body; put likely
   execution ordering in `Implementation Notes` or the `he-plan` handoff.
-- Use `Plugins/harness-engineering/references/spec-plan-runtime-boundary-contract.md`
+- Use `Plugins/synaipse-harness/references/upstream/harness-engineering/spec-plan-runtime-boundary-contract.md`
   for strict scope, proof, runtime persistence, and coding/testing lens fields.
 
 Scenario and conformance requirements:
@@ -187,13 +188,14 @@ Visual reference requirements:
   acceptance decision.
 - Apply the shared visual contract for generated media persistence, proof
   rules, and compact not-needed reasons:
-  `Plugins/harness-engineering/references/visual-reference-contract.md`.
+  `Plugins/synaipse-harness/references/upstream/harness-engineering/visual-reference-contract.md`.
 
-Status metadata: every tracked spec output must expose `linear_mutation_status` as `not_needed`, `confirmation_required`, `blocked`, `created`, `updated`, or `deferred_to_he-linear-plan`.
-
-If live Linear tracking is missing, include `linear_action_required` with target project, issue type, proposed title, ready-to-create/update payload, required confirmation, and blocker.
-
-A local `.harness` artifact is not proof that live Linear state exists.
+Status metadata: every tracked spec output must expose `linear_mutation_status` as
+`not_needed`, `confirmation_required`, `blocked`, `created`, `updated`, or
+`deferred_to_he-linear-plan`. If live Linear tracking is missing, include
+`linear_action_required` with target project, issue type, proposed title,
+ready-to-create/update payload, required confirmation, and blocker. A local
+`.harness` artifact is not proof that live Linear state exists.
 
 ## Decision Placement
 
@@ -228,7 +230,7 @@ coverage depends on implementation discovery, mark the exact discovery as a
 ## BLUF Review Surface
 
 For non-trivial durable specs, apply
-`Plugins/harness-engineering/references/bluf-review-contract.md`.
+`Plugins/synaipse-harness/references/upstream/harness-engineering/bluf-review-contract.md`.
 
 Keep the existing spec substance. Add:
 
@@ -255,4 +257,19 @@ Sections: overview, components, states, tokens, flows, accessibility, responsive
 
 ## Verification
 
-Verify required frontmatter and sections, stable `SA` or `VAC` IDs, tracked-work Linear traceability, explicit `linear_mutation_status`, `python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py <spec-path>`, and `python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py <spec-path>` for tracked specs. For non-trivial generated specs, also run `python3 Plugins/harness-engineering/scripts/check_bluf_structure.py <spec-path> --json` and `python3 Plugins/harness-engineering/scripts/check_generated_artifact_shape.py <spec-path> --kind spec --json` so reader-first structure, IDs, conformance rules, authority/scope fields, proof/runtime persistence, coding/testing lenses, the Enforcement Contract, and visual-reference decisions are validated before handoff.
+Verify required frontmatter and sections, stable `SA` or `VAC` IDs, tracked-work
+Linear traceability, and explicit `linear_mutation_status`.
+
+For tracked specs, run:
+
+- `python3 Infrastructure/scripts/validation-and-linting/he_artifact_identity_lint.py <spec-path>`
+- `python3 Infrastructure/scripts/validation-and-linting/he_linear_traceability_lint.py <spec-path>`
+
+For non-trivial generated specs, also run:
+
+- `python3 Plugins/synaipse-harness/scripts/check_bluf_structure.py <spec-path> --json`
+- `python3 Plugins/synaipse-harness/scripts/check_generated_artifact_shape.py <spec-path> --kind spec --json`
+
+These checks validate reader-first structure, IDs, conformance rules,
+authority/scope fields, proof/runtime persistence, coding/testing lenses, the
+Enforcement Contract, and visual-reference decisions before handoff.
