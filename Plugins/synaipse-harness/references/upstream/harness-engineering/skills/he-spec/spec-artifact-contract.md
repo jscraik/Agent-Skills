@@ -189,7 +189,11 @@ Visual reference requirements:
   rules, and compact not-needed reasons:
   `Plugins/harness-engineering/references/visual-reference-contract.md`.
 
-Status metadata: every tracked spec output must expose `linear_mutation_status` as `not_needed`, `confirmation_required`, `blocked`, `created`, `updated`, or `deferred_to_he-linear-plan`. If live Linear tracking is missing, include `linear_action_required` with target project, issue type, proposed title, ready-to-create/update payload, required confirmation, and blocker. A local `.harness` artifact is not proof that live Linear state exists.
+Status metadata: every tracked spec output must expose `linear_mutation_status` as `not_needed`, `confirmation_required`, `blocked`, `created`, `updated`, or `deferred_to_he-linear-plan`.
+
+If live Linear tracking is missing, include `linear_action_required` with target project, issue type, proposed title, ready-to-create/update payload, required confirmation, and blocker.
+
+A local `.harness` artifact is not proof that live Linear state exists.
 
 ## Decision Placement
 
