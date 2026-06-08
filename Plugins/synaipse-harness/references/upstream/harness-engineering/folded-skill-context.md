@@ -121,24 +121,9 @@ Disposition:
   heading text that added cost without preserving unique operational meaning.
 
 Relocation anchors required by the progressive-disclosure gate:
-`validation`, `blackboard_delta`, `artifact_path`, `next_stage`,
-Return `schema_version: 1` when structured, plus mode, side-effect class, severity-ranked findings, traceability, blockers, verdict, reproduction status, security review, behavior proof, work candidate, repeated-failure route, blackboard delta, and next handoff. Use `.harness/review/**.md` with Artifact Identity frontmatter for durable review artifacts.
-artifacts, closure recommendation, follow-up work, blockers, next handoff, and
-repeated-failure learning when applicable, residual risk, and next handoff.
-risk, blackboard delta when durable state changes, and next handoff.
-`live_linear_blocker` when expected live tracking is blocked. Bug work includes
-Run approved Harness Engineering work through recurring, evidence-first phase wakeups with scope checks, review gates, and explicit stop rules before any local commit.
-`blackboard_delta`, and evidence-tied `confidence`.
-`retained_references`, `validation`, `handoff`, and `blocked_reason`.
-phases, rollback, Linear mapping, eval proof, future-agent guardrails, and
-`redaction_status`, `writes`, `blocked_reason`, and `handoff`.
-`spec_path`, `acceptance_ids`, `handoff`, and evidence-tied `confidence`.
-future-agent guidance, validation outcomes, evidence traceability, and direct
-Return schema_version when structured. schema_version: 1, changed files, validation, blockers, rollback, next handoff, slack_policy, and blackboard_delta.
-Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
-references and index it in `../../references/deferred-context-index.md`.
-Redact secrets; do not create cron workarounds for short thread follow-up. Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text. Keep scope tight: start with 2-3 focused surfaces and expand only when the next heartbeat needs more context.
+Relocation anchors required by the progressive-disclosure gate:
 
+Progressive-disclosure relocation required these anchors: `validation`, `blackboard_delta`, `artifact_path`, `next_stage`, `live_linear_blocker`, `retained_references`, `handoff`, `blocked_reason`, `redaction_status`, `writes`, `spec_path`, `acceptance_ids`, `confidence`, and `slack_policy`.
 ## Preserved He-Code-Review Productization Context
 
 The 2026-05-13 productization pass compacted
