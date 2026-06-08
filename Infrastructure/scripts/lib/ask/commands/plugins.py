@@ -1489,6 +1489,17 @@ def install_plugin(
             }
             if sync_result.status != "success" or sync_result.errors:
                 result.status = "error"
+                # Construct ErrorObject for top-level error collection
+                error_message = sync_result.message if hasattr(sync_result, 'message') and sync_result.message else "Profile sync failed"
+                if sync_result.errors:
+                    error_details = "; ".join([
+                        f"{e.get('message', 'unknown error')}" for e in result.data["sync_profile_errors"]
+                    ])
+                    error_message = f"{error_message}: {error_details}"
+                result.errors.append(ErrorObject(
+                    code="ERR_PROFILE_SYNC",
+                    message=error_message
+                ))
         if installed_name:
             readiness = collect_plugin_state(repo_root, plugin_name=installed_name)["desktop_readiness_state"]
         else:

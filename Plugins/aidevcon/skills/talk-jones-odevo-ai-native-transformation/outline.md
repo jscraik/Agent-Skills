@@ -88,7 +88,7 @@ This transcript has several speech-to-text errors that should be preserved but f
 - "magenta coding" → "agentic coding"
 - "a gentle coding" → "agentic coding"
 - "DOGPT" → likely a custom GPT product name spelled phonetically
-- "loan bull" → likely "Klarna" (the Swedish fintech, context "number one private tech co in Sweden")
+- "loan bull" → transcription unclear / company unknown (context "number one private tech co in Sweden")
 - "the dopamine in Russia" → "the dopamine rush"
 - "teacher parity" → "feature parity"
 - "Ralph Wiggum loops" → unclear, possibly a coding-agent loop pattern name

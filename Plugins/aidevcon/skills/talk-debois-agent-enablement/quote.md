@@ -2,7 +2,7 @@
 
 > Quotes preserve transcription artefacts. Section references map to `transcript.md`.
 
-### On the core mindset shift
+## On the core mindset shift
 
 1. **"We're not building the thing we're building the thing that builds the thing."** — Section 2. Tag: thesis/mindset.
 
@@ -12,13 +12,13 @@
 
 1. **"Every time you do something. Think about not repeating this again."** — Section 3. Tag: repeatability/heuristic.
 
-### On agents as team members
+## On agents as team members
 
 1. **"They're not only helping the humans. They're helping the agents as well. Because they're team members."** — Section 4. Tag: team-lead/mental-model.
 
 1. **"My agents are team members too how did I find gold KPI and we are measuring the performance how I made them play well with my team?"** — Section 4. Tag: team-lead/KPIs.
 
-### On metrics & practices
+## On metrics & practices
 
 1. **"One of the metrics that I really like is how many turns does an agent need to do. To do the right thing?"** — Section 4. Tag: metric/turns-per-task.
 
@@ -26,7 +26,7 @@
 
 1. **"You used to be the coding rock star. You kind of have to translate it almost into you're the amazing context provider … the great like agent whisperer."** — Section 4. Tag: skill-shift/context-provider.
 
-### On platform & shared infrastructure
+## On platform & shared infrastructure
 
 1. **"Within Tessl we have now five or six harnesses being built. Which is great for learning but probably only a few should survive."** — Section 3. Tag: harness/standardisation.
 
@@ -36,7 +36,7 @@
 
 1. **"I built the skill that's great I want to share that with somebody else look at it like yeah I'll like it for 99% let me kind of change that one bit and then becomes a fork."** — Section 5. Tag: extensibility/forking.
 
-### On organisation & VP-level
+## On organisation & VP-level
 
 1. **"Ownership drives improvement and otherwise it just get followed between the parts."** — Section 6. Tag: VP/ownership.
 
@@ -44,7 +44,7 @@
 
 1. **"We want to avoid the quick wins of war and actually make that enablement team much like a platform team it requires an investment."** — Section 6. Tag: investment/long-term.
 
-### On the meta-model
+## On the meta-model
 
 1. **"There is no playbook."** — Section 7. Tag: humility/state-of-the-art.
 
@@ -52,6 +52,6 @@
 
 1. **"Continuous integration. Continuous delivery. … For me that is the step of continuous learning."** — Section 7. Tag: continuous-learning/era-framing.
 
-### On good-for-agents = good-for-people
+## On good-for-agents = good-for-people
 
 1. **"Everything that's good for you that we've been advocating for years on good engineering practices. Is actually good for agents. And what's good for agents. Seems to be good for people."** — Section 2. Tag: thesis/symmetry.
