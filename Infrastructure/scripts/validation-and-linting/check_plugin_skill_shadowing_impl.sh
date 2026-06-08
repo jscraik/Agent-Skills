@@ -125,14 +125,10 @@ for root_skill_name in "${SELECTION_POLICY_ROOT_SKILL_SETS[@]:-}"; do
   printf '%s\n' "$root_skill_name" >> "$root_skill_names_file"
 done
 
-if [ -f ".skillsets/command-surface.json" ]; then
-  jq -r '
-    ((.handles // []) + (.hidden_handles // []))[]
-    | select(type == "object")
-    | select(.kind == "skill")
-    | select((.source_path // "") | endswith("/SKILL.md"))
-    | .handle // empty
-  ' ".skillsets/command-surface.json" > "$command_surface_names_file"
+if [ -d .agents/skills ]; then
+  find -L .agents/skills -mindepth 2 -maxdepth 2 -type f -name 'SKILL.md' 2>/dev/null \
+    | awk -F/ '{print $(NF-1)}' \
+    | sort -u > "$command_surface_names_file"
 fi
 
 : > "$plugin_names_file"

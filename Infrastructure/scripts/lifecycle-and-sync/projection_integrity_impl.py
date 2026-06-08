@@ -673,6 +673,7 @@ def sync_mirror(repo_root: Path, spec: MirrorProjection) -> dict[str, object]:
             projection_abs,
             follow_symlinks=spec.follow_symlinks,
             excluded_dir_names=normalize_excluded_dir_names(spec.excluded_dir_names),
+            keep_duplicates=True,
         )
         return {
             "name": spec.name,
@@ -977,6 +978,7 @@ def _replace_plugin_cache_package_copy(
     *,
     follow_symlinks: bool,
     excluded_dir_names: Iterable[str],
+    keep_duplicates: bool = False,
 ) -> tuple[int, int, list[str]]:
     changed_files, deleted_files = _sync_mirror_python(
         source_abs,
@@ -986,7 +988,7 @@ def _replace_plugin_cache_package_copy(
     )
     logs: list[str] = []
     skills_root = projection_abs / "skills"
-    if skills_root.is_dir():
+    if not keep_duplicates and skills_root.is_dir():
         nested_logs, nested_deletes = _prune_nested_duplicate_skill_identities(skills_root)
         logs.extend(nested_logs)
         deleted_files += nested_deletes

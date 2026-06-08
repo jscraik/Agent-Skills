@@ -4648,6 +4648,23 @@ def explain_skill(repo_root: Path, handle: str) -> CallResult:
         "overlaps": [],
         "ambiguity_notes": [],
     }
+    # Determine runtime projection path - check if a file-backed projection exists
+    runtime_projection_path = None
+    projection_note = None
+    canonical_source_path = resolution.get("source_path")
+
+    if canonical_source_path:
+        # Check for file-backed runtime projection in .agents/skills
+        potential_projection = repo_root / ".agents" / "skills" / normalized / "SKILL.md"
+        if potential_projection.is_file():
+            try:
+                runtime_projection_path = str(potential_projection.relative_to(repo_root))
+            except ValueError:
+                runtime_projection_path = None
+                projection_note = "projection_outside_repo"
+        else:
+            projection_note = "projection_not_file_backed"
+
     explanation = {
         "schema_version": "skill-explanation.v1",
         "status": "resolved",
@@ -4656,13 +4673,14 @@ def explain_skill(repo_root: Path, handle: str) -> CallResult:
         "what_it_is": description,
         "when_to_use": when_to_use,
         "when_not_to_use": when_not_to_use,
-        "canonical_source_path": resolution.get("source_path"),
-        "runtime_projection_path": resolution.get("source_path"),
+        "canonical_source_path": canonical_source_path,
+        "runtime_projection_path": runtime_projection_path,
         "command_handles": [
             {
                 "handle": normalized,
-                "path": resolution.get("source_path"),
+                "path": runtime_projection_path,
                 "invoke_via": resolution.get("invoke_via"),
+                "projection_note": projection_note,
             }
         ],
         "required_validation": required_validation,
