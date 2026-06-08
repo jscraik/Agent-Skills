@@ -428,11 +428,11 @@ else
   echo "[WARN] $skills_dir is not writable; skipping stale symlink cleanup."
 fi
 
-# Remove hidden/internal skills and skills outside the default policy from the
-# flat runtime surface so they do not appear as user-selectable skills in Codex.
+# Remove hidden/internal skills from the flat runtime surface so they do not
+# appear as user-selectable skills in Codex.
 # Lifecycle bridge skills stay available through the hidden `.system` lane.
 hidden_flat_skills=("${SELECTION_POLICY_HIDDEN_FLAT_SKILLS[@]}")
-default_visible_flat_skills=("${SELECTION_POLICY_DEFAULT_VISIBLE_FLAT_SKILLS[@]}")
+default_include_first_party_repo_skills="${SELECTION_POLICY_DEFAULT_INCLUDE_FIRST_PARTY_REPO_SKILLS:-1}"
 plugin_visible_router_skills=("${SELECTION_POLICY_PLUGIN_VISIBLE_ROUTER_SKILLS[@]}")
 plugin_hidden_lane_skills=("${SELECTION_POLICY_PLUGIN_HIDDEN_LANE_SKILLS[@]}")
 if declare -p SELECTION_POLICY_SYSTEM_BRIDGE_SKILLS >/dev/null 2>&1; then
@@ -447,15 +447,6 @@ router_collision_count=0
 is_hidden_flat_skill_name() {
   local skill_name="$1"
   case " ${hidden_flat_skills[*]} " in
-    *" $skill_name "*) return 0 ;;
-    *) return 1 ;;
-  esac
-}
-# is_default_visible_flat_skill_name returns success (exit code 0) when the
-# supplied skill name belongs to the default flat-runtime surface.
-is_default_visible_flat_skill_name() {
-  local skill_name="$1"
-  case " ${default_visible_flat_skills[*]} " in
     *" $skill_name "*) return 0 ;;
     *) return 1 ;;
   esac
@@ -688,8 +679,8 @@ if [ "$skills_dir_writable" = "1" ]; then
         continue
       fi
       echo "Including plugin-owned skill in flat runtime list: $skill_name"
-    elif ! is_default_visible_flat_skill_name "$skill_name"; then
-      echo "Skipping non-default flat skill: $skill_name"
+    elif [ "$default_include_first_party_repo_skills" != "1" ]; then
+      echo "Skipping first-party flat skill because repo-skill projection is disabled: $skill_name"
       continue
     fi
     # Relative path from $skills_dir (.agents/skills/) back to the skill source.

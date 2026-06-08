@@ -15,7 +15,7 @@ The short version:
 - `./bin/ask` is the public repo command surface.
 - Runtime counts drift by design. Ask the CLI for current truth instead of
   trusting a README number.
-- Catalog parity marker: **26 canonical skills**. Regenerate this marker with
+- Catalog parity marker: **79 canonical skills**. Regenerate this marker with
   the repo skill sync when catalog membership changes.
 
 For the product framing and proof contract, read

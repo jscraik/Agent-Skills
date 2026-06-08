@@ -7,14 +7,13 @@ from dataclasses import dataclass
 from typing import Iterable
 
 from selection_policy import (
-    DEFAULT_VISIBLE_FLAT_SKILL_NAMES,
+    DEFAULT_INCLUDE_FIRST_PARTY_REPO_SKILLS,
     HIDDEN_FLAT_SKILL_NAMES,
     PLUGIN_HIDDEN_LANE_SKILL_NAMES,
     PLUGIN_VISIBLE_ROUTER_SKILL_NAMES,
     ROOT_SKILL_SET_NAMES,
 )
 
-DEFAULT_VISIBLE_FLAT_SKILLS = set(DEFAULT_VISIBLE_FLAT_SKILL_NAMES)
 HIDDEN_FLAT_SKILLS = set(HIDDEN_FLAT_SKILL_NAMES)
 PLUGIN_HIDDEN_LANE_SKILLS = set(PLUGIN_HIDDEN_LANE_SKILL_NAMES)
 PLUGIN_VISIBLE_ROUTER_SKILLS = set(PLUGIN_VISIBLE_ROUTER_SKILL_NAMES)
@@ -45,7 +44,7 @@ def runtime_surface_report(first_level_names: Iterable[str]) -> RuntimeSurfaceRe
     """Classify a runtime surface and return first-level policy drift details."""
     actual = {name for name in first_level_names if name}
     root_names = actual & ROOT_SKILL_SETS
-    flat_names = actual & DEFAULT_VISIBLE_FLAT_SKILLS
+    flat_names = actual - ROOT_SKILL_SETS
 
     if root_names and actual - ROOT_SKILL_SETS:
         projection_mode = PROJECTION_MIXED
@@ -55,7 +54,7 @@ def runtime_surface_report(first_level_names: Iterable[str]) -> RuntimeSurfaceRe
         expected = set(ROOT_SKILL_SETS)
     else:
         projection_mode = PROJECTION_FLAT
-        expected = set(DEFAULT_VISIBLE_FLAT_SKILLS)
+        expected = set(actual) if DEFAULT_INCLUDE_FIRST_PARTY_REPO_SKILLS else set()
 
     return RuntimeSurfaceReport(
         projection_mode=projection_mode,
@@ -77,7 +76,7 @@ def is_default_visible_skill_name(name: str, *, plugin_owned: bool = False) -> b
     """Return whether a skill name belongs on the default runtime discovery surface."""
     if name in HIDDEN_FLAT_SKILLS:
         return False
-    if name not in DEFAULT_VISIBLE_FLAT_SKILLS and name not in ROOT_SKILL_SETS:
+    if not DEFAULT_INCLUDE_FIRST_PARTY_REPO_SKILLS and name not in ROOT_SKILL_SETS:
         return False
     if plugin_owned and name not in PLUGIN_VISIBLE_ROUTER_SKILLS:
         return False
@@ -91,7 +90,7 @@ def expected_first_level_runtime_names(projection_mode: str) -> set[str]:
     if projection_mode == PROJECTION_ROOTED:
         return set(ROOT_SKILL_SETS)
     if projection_mode == PROJECTION_FLAT:
-        return set(DEFAULT_VISIBLE_FLAT_SKILLS)
+        return set()
     raise ValueError(f"Unsupported projection mode: {projection_mode}")
 
 

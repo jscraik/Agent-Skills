@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Dict, Iterable, List
 
 from selection_policy import (
-    DEFAULT_VISIBLE_FLAT_SKILL_NAMES as POLICY_DEFAULT_VISIBLE_FLAT_SKILL_NAMES,
+    DEFAULT_INCLUDE_FIRST_PARTY_REPO_SKILLS,
     DEFAULT_VISIBLE_SYSTEM_BRIDGE_SKILL_NAMES as POLICY_DEFAULT_VISIBLE_SYSTEM_BRIDGE_SKILL_NAMES,
     EXCLUDED_SCAN_SEGMENTS as POLICY_EXCLUDED_SCAN_SEGMENTS,
     HIDDEN_FLAT_SKILL_NAMES as POLICY_HIDDEN_FLAT_SKILL_NAMES,
@@ -36,7 +36,6 @@ EXCLUDED_REPO_SCAN_SEGMENTS = set(POLICY_EXCLUDED_SCAN_SEGMENTS)
 # Keep hidden/internal skills out of runtime discovery. This mirrors
 # Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh hidden_flat_skills.
 HIDDEN_FLAT_SKILL_NAMES = set(POLICY_HIDDEN_FLAT_SKILL_NAMES)
-DEFAULT_VISIBLE_FLAT_SKILL_NAMES = set(POLICY_DEFAULT_VISIBLE_FLAT_SKILL_NAMES)
 DEFAULT_VISIBLE_SYSTEM_BRIDGE_SKILL_NAMES = set(POLICY_DEFAULT_VISIBLE_SYSTEM_BRIDGE_SKILL_NAMES)
 PLUGIN_VISIBLE_ROUTER_SKILL_NAMES = set(POLICY_PLUGIN_VISIBLE_ROUTER_SKILL_NAMES)
 PLUGIN_HIDDEN_LANE_SKILL_NAMES = set(POLICY_PLUGIN_HIDDEN_LANE_SKILL_NAMES)
@@ -192,6 +191,23 @@ def _iter_repo_skill_dirs() -> Iterable[Path]:
     return dirs
 
 
+def _has_first_party_repo_skill_name(name: str) -> bool:
+    """Return whether a skill name exists under the configured first-party source roots."""
+    if not name:
+        return False
+    for root_name in REPO_SCAN_ROOTS:
+        root = REPO_ROOT / root_name
+        if not root.is_dir():
+            continue
+        for skill_md in root.rglob("SKILL.md"):
+            rel_parts = skill_md.relative_to(root).parts
+            if any(part in EXCLUDED_REPO_SCAN_SEGMENTS for part in rel_parts):
+                continue
+            if skill_md.parent.name == name:
+                return True
+    return False
+
+
 def _iter_plugin_skill_dirs() -> Iterable[Path]:
     """
     Return plugin-provided skill directories that contain a SKILL.md file.
@@ -259,11 +275,15 @@ def is_skill_visible(name: str, source_dir: Path, visibility: str) -> bool:
     if visibility == "advanced":
         return name not in HIDDEN_FLAT_SKILL_NAMES
     plugin_owned = _is_plugin_owned_skill_dir(source_dir)
-    system_owned = classify_skill_scope(source_dir) == "system"
+    scope = classify_skill_scope(source_dir)
+    repo_owned = scope in {"global", "project"}
+    runtime_owned = scope == "primary-runtime"
+    runtime_repo_projection = runtime_owned and _has_first_party_repo_skill_name(name)
+    system_owned = scope == "system"
     if name in HIDDEN_FLAT_SKILL_NAMES:
         return False
     if (
-        name not in DEFAULT_VISIBLE_FLAT_SKILL_NAMES
+        not (DEFAULT_INCLUDE_FIRST_PARTY_REPO_SKILLS and (repo_owned or runtime_repo_projection))
         and name not in ROOT_SKILL_SET_NAMES
         and not (system_owned and name in DEFAULT_VISIBLE_SYSTEM_BRIDGE_SKILL_NAMES)
     ):
@@ -631,7 +651,7 @@ def render_index(entries: List[SkillEntry], source: str = "auto", visibility: st
         "Canonical skills live in categorized folders below.",
         "",
         "Runtime projection is mode-dependent:",
-        "- `flat`: selected allowlisted skills are projected directly.",
+        "- `flat`: first-party repo skills are projected directly unless explicitly hidden.",
         "- `rooted`: only root skill sets are projected; latent modules route through `.skillsets/**` manifests.",
         "- `hybrid`: deferred until a named consumer and budget gate exist.",
         "",
