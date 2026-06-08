@@ -23,7 +23,7 @@
     "./bin/skills-sdk status --json --robot",
     "./bin/ask sdk lenses validate --json --robot",
     "./bin/ask sdk lenses select --prompt 'review a skill for validation confidence' --intent validation_review --json --robot",
-    "./bin/ask sdk review plan --target Skills/agent-ops/simplify --intent validation_review --json --robot",
+    "./bin/ask sdk review plan --target Skills/agent-ops/simplify --intent validation_review --receipt-out .harness/artifacts/sdk-review-plan/simplify.json --json --robot",
     "./bin/ask sdk review handoff --plan .harness/artifacts/sdk-review-plan/simplify.json --target Skills/agent-ops/simplify --intent validation_review --json --robot",
     "./bin/ask sdk determinism audit --scope skills --limit 10 --json --robot",
     "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_review_plan.py -q",

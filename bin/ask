@@ -15,9 +15,14 @@ def _uv_executable() -> Optional[str]:
     if discovered:
         return discovered
     for candidate in ("/opt/homebrew/bin/uv", "/usr/local/bin/uv"):
-        if Path(candidate).exists():
+        if _is_executable_file(candidate):
             return candidate
     return None
+
+
+def _is_executable_file(candidate: str) -> bool:
+    candidate_path = Path(candidate)
+    return candidate_path.is_file() and os.access(candidate_path, os.X_OK)
 
 
 def _exec_target(repo_root: Path, target: Path, args: list[str]) -> None:

@@ -5,6 +5,7 @@ import json
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Callable
 
 from ask.skills_sdk.lenses import select_lenses
 
@@ -29,11 +30,18 @@ def build_review_plan(
     repo_files: list[str] | None = None,
     max_lenses: int = 4,
     receipt_out: str | None = None,
+    id_provider: Callable[[], str] | None = None,
+    clock_provider: Callable[[], datetime] | None = None,
 ) -> dict[str, object]:
     if max_lenses < 1:
         raise ValueError("max_lenses must be at least 1.")
 
-    source_context = _source_context(repo_root, target)
+    source_context = _source_context(
+        repo_root,
+        target,
+        id_provider=id_provider or _default_id_provider,
+        clock_provider=clock_provider or _default_clock_provider,
+    )
     target_kind = str(source_context["target_kind"])
     prompt_text = prompt or _default_prompt(target=target, task_intent=task_intent, target_kind=target_kind)
     target_files = _repo_file_signals(target=target, target_kind=target_kind, repo_files=repo_files or [])
@@ -102,15 +110,35 @@ def build_review_plan(
     return receipt
 
 
-def _source_context(repo_root: Path, target: str) -> dict[str, object]:
+def _default_id_provider() -> str:
+    return str(uuid.uuid4())
+
+
+def _default_clock_provider() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+def _format_receipt_created_at(created_at: datetime) -> str:
+    if created_at.tzinfo is None or created_at.utcoffset() is None:
+        raise ValueError("clock_provider must return a timezone-aware datetime.")
+    return created_at.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+
+
+def _source_context(
+    repo_root: Path,
+    target: str,
+    *,
+    id_provider: Callable[[], str],
+    clock_provider: Callable[[], datetime],
+) -> dict[str, object]:
     target_info = _target_info(repo_root, target)
     return {
         "repo_root": str(repo_root.resolve()),
         "head_sha": _head_sha(repo_root),
         "branch": _branch_name(repo_root),
         "branch_policy": "same_head_required",
-        "receipt_instance_id": str(uuid.uuid4()),
-        "receipt_created_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+        "receipt_instance_id": id_provider(),
+        "receipt_created_at": _format_receipt_created_at(clock_provider()),
         "target_input": target,
         "target_kind": target_info["target_kind"],
         "target_identity": target_info["target_identity"],

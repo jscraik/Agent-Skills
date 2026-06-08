@@ -9,7 +9,7 @@ from ask.skills_sdk.review_plan import (
     canonical_receipt_digest,
     _head_sha,
     _repo_relative,
-    _source_context,
+    _target_info,
 )
 
 
@@ -31,12 +31,21 @@ def build_review_handoff(
     source_plan = _load_json_object(source_plan_path)
     _validate_source_plan_shape(source_plan)
 
-    if source_plan["task_intent"] != task_intent:
+    source_context_raw = source_plan.get("source_context")
+    if not isinstance(source_context_raw, dict):
+        raise ValueError("source review plan source_context must be an object.")
+    source_context = source_context_raw
+
+    plan_intent = source_plan.get("task_intent")
+    if not isinstance(plan_intent, str) or not plan_intent:
+        raise ValueError("source review plan task_intent must be a non-empty string.")
+    if plan_intent != task_intent:
         raise ValueError("handoff intent must match the source review plan intent.")
 
-    source_context = source_plan["source_context"]
-    if not isinstance(source_context, dict):
-        raise ValueError("source review plan source_context must be an object.")
+    _validate_source_context(repo_root, source_context=source_context, target=target)
+    receipt_instance_id = source_context.get("receipt_instance_id")
+    if not isinstance(receipt_instance_id, str) or not receipt_instance_id:
+        raise ValueError("source_context receipt_instance_id must be a non-empty string.")
 
     receipt_sha256 = canonical_receipt_digest(source_plan)
     trace_path = repo_root / TRACE_DIR / f"{receipt_sha256}.trace.json"
@@ -48,7 +57,6 @@ def build_review_handoff(
         source_plan_path=source_plan_path,
         receipt_sha256=receipt_sha256,
     )
-    _validate_source_context(repo_root, source_context=source_context, target=target)
 
     receipt: dict[str, object] = {
         "schema_version": REVIEW_HANDOFF_SCHEMA_VERSION,
@@ -58,7 +66,7 @@ def build_review_handoff(
             "path": _repo_relative(repo_root, source_plan_path),
             "schema_version": source_plan["schema_version"],
             "receipt_sha256": receipt_sha256,
-            "receipt_instance_id": source_context["receipt_instance_id"],
+            "receipt_instance_id": receipt_instance_id,
         },
         "source_context": source_context,
         "source_trace": {
@@ -118,6 +126,9 @@ def _validate_source_plan_shape(source_plan: dict[str, object]) -> None:
         raise ValueError("source review plan must have pass status.")
     if "source_context" not in source_plan:
         raise ValueError("source review plan is missing source_context.")
+    target = source_plan.get("target")
+    if not isinstance(target, str) or not target:
+        raise ValueError("source review plan target must be a non-empty string.")
     if source_plan.get("receipt_written") is not True:
         raise ValueError("source review plan must be written with --receipt-out before handoff.")
     receipt_path = source_plan.get("receipt_path")
@@ -136,13 +147,16 @@ def _validate_trace(
     source_plan_path: Path,
     receipt_sha256: str,
 ) -> None:
-    source_context = source_plan["source_context"]
-    if not isinstance(source_context, dict):
+    source_context_raw = source_plan.get("source_context")
+    if not isinstance(source_context_raw, dict):
         raise ValueError("source review plan source_context must be an object.")
+    receipt_instance_id = source_context_raw.get("receipt_instance_id")
+    if not isinstance(receipt_instance_id, str) or not receipt_instance_id:
+        raise ValueError("source_context receipt_instance_id must be a non-empty string.")
     expected = {
         "schema_version": "skills-sdk.review-plan-trace.v1",
         "receipt_sha256": receipt_sha256,
-        "receipt_instance_id": source_context["receipt_instance_id"],
+        "receipt_instance_id": receipt_instance_id,
         "branch_policy": "same_head_required",
     }
     for key, expected_value in expected.items():
@@ -162,7 +176,7 @@ def _validate_trace(
         "target_content_digest",
         "target_digest_status",
     ):
-        if trace.get(key) != source_context.get(key):
+        if trace.get(key) != source_context_raw.get(key):
             raise ValueError(f"review plan trace {key} does not match source_context.")
 
 
@@ -198,7 +212,7 @@ def _validate_source_context(repo_root: Path, *, source_context: dict[str, objec
     if source_context["provenance_risk_flags"]:
         raise ValueError("review handoff requires empty provenance_risk_flags.")
 
-    current_context = _source_context(repo_root, target)
+    current_target_info = _target_info(repo_root, target)
     for key in (
         "target_kind",
         "target_identity",
@@ -206,7 +220,7 @@ def _validate_source_context(repo_root: Path, *, source_context: dict[str, objec
         "target_content_digest",
         "target_digest_status",
     ):
-        if current_context.get(key) != source_context.get(key):
+        if current_target_info.get(key) != source_context.get(key):
             raise ValueError(f"source_context {key} is stale or mismatched.")
 
 

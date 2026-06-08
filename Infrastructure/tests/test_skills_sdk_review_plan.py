@@ -4,9 +4,10 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from datetime import datetime, timezone
+from pathlib import Path
 from types import SimpleNamespace
 from unittest import mock
-from pathlib import Path
 
 from helpers.schema_validator import _validate_schema_subset
 
@@ -107,6 +108,30 @@ class TestSkillsSdkReviewPlan(unittest.TestCase):
             [lens["id"] for lens in second["selected_lenses"]],
         )
         self.assertEqual(first["next_commands"], second["next_commands"])
+
+    def test_review_plan_accepts_injected_receipt_id_and_clock(self) -> None:
+        receipt = build_review_plan(
+            REPO_ROOT,
+            target="Skills/agent-ops/simplify",
+            task_intent="validation_review",
+            max_lenses=1,
+            id_provider=lambda: "receipt-test-id",
+            clock_provider=lambda: datetime(2026, 6, 8, 12, 0, tzinfo=timezone.utc),
+        )
+
+        self.assertEqual(receipt["source_context"]["receipt_instance_id"], "receipt-test-id")
+        self.assertEqual(receipt["source_context"]["receipt_created_at"], "2026-06-08T12:00:00Z")
+
+    def test_review_plan_rejects_naive_injected_clock(self) -> None:
+        with self.assertRaisesRegex(ValueError, "timezone-aware"):
+            build_review_plan(
+                REPO_ROOT,
+                target="Skills/agent-ops/simplify",
+                task_intent="validation_review",
+                max_lenses=1,
+                id_provider=lambda: "receipt-test-id",
+                clock_provider=lambda: datetime(2026, 6, 8, 12, 0),
+            )
 
     def test_all_known_intents_fit_public_receipt_schema(self) -> None:
         for task_intent in KNOWN_TASK_INTENTS:
@@ -249,11 +274,12 @@ class TestSkillsSdkReviewPlan(unittest.TestCase):
         self.assertIsNone(receipt["source_context"]["target_resolved_path"])
 
     def test_directory_target_with_symlink_fails_closed_before_digesting_external_content(self) -> None:
-        target_dir = REPO_ROOT / ".harness/artifacts/sdk-review-plan/symlink-target"
-        target_dir.mkdir(parents=True, exist_ok=True)
-        local_file = target_dir / "local.txt"
-        symlink_path = target_dir / "linked-outside.txt"
-        try:
+        artifacts_dir = REPO_ROOT / ".harness/artifacts/sdk-review-plan"
+        artifacts_dir.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(prefix="symlink-target-", dir=artifacts_dir) as temp_dir:
+            target_dir = Path(temp_dir)
+            local_file = target_dir / "local.txt"
+            symlink_path = target_dir / "linked-outside.txt"
             local_file.write_text("local\n", encoding="utf-8")
             with tempfile.TemporaryDirectory() as temp_dir:
                 outside_file = Path(temp_dir) / "outside.txt"
@@ -263,17 +289,10 @@ class TestSkillsSdkReviewPlan(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "target directory contains symlink"):
                     build_review_plan(
                         REPO_ROOT,
-                        target=".harness/artifacts/sdk-review-plan/symlink-target",
+                        target=str(target_dir.relative_to(REPO_ROOT)),
                         task_intent="validation_review",
                         max_lenses=1,
                     )
-        finally:
-            if symlink_path.exists() or symlink_path.is_symlink():
-                symlink_path.unlink()
-            if local_file.exists():
-                local_file.unlink()
-            if target_dir.exists():
-                target_dir.rmdir()
 
     def test_typoed_repo_relative_path_fails_instead_of_becoming_handle(self) -> None:
         payload = _run_json_command(

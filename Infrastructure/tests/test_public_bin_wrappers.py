@@ -101,6 +101,32 @@ class TestPublicBinWrappers(unittest.TestCase):
 
         self.assertEqual(raised.exception.code, 127)
 
+    def test_ask_ignores_non_executable_fallback_uv_candidates(self) -> None:
+        wrapper = _load_wrapper("ask_wrapper_non_executable_uv", REPO_ROOT / "bin/ask")
+
+        with (
+            mock.patch.object(wrapper.shutil, "which", return_value=None),
+            mock.patch.object(wrapper, "_is_executable_file", return_value=False) as executable_check,
+        ):
+            self.assertIsNone(wrapper._uv_executable())
+
+        executable_check.assert_has_calls(
+            [mock.call("/opt/homebrew/bin/uv"), mock.call("/usr/local/bin/uv")]
+        )
+
+    def test_skills_sdk_ignores_non_executable_fallback_uv_candidates(self) -> None:
+        wrapper = _load_wrapper("skills_sdk_wrapper_non_executable_uv", REPO_ROOT / "bin/skills-sdk")
+
+        with (
+            mock.patch.object(wrapper.shutil, "which", return_value=None),
+            mock.patch.object(wrapper, "_is_executable_file", return_value=False) as executable_check,
+        ):
+            self.assertIsNone(wrapper._uv_executable())
+
+        executable_check.assert_has_calls(
+            [mock.call("/opt/homebrew/bin/uv"), mock.call("/usr/local/bin/uv")]
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

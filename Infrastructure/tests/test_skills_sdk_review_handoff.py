@@ -67,13 +67,16 @@ class TestSkillsSdkReviewHandoff(unittest.TestCase):
         self._cleanup_paths()
 
     def _cleanup_paths(self) -> None:
+        if self.plan_path.exists():
+            try:
+                plan = json.loads(self.plan_path.read_text(encoding="utf-8"))
+            except json.JSONDecodeError:
+                plan = None
+            if isinstance(plan, dict):
+                self._remove_trace_for_plan(plan)
         for path in (self.plan_path, self.handoff_path):
             if path.exists():
                 path.unlink()
-        trace_dir = REPO_ROOT / TRACE_DIR
-        if trace_dir.exists():
-            for trace_path in trace_dir.glob("*.trace.json"):
-                trace_path.unlink()
 
     def _write_plan(self, *, target: str = "Skills/agent-ops/simplify", intent: str = "validation_review") -> dict:
         payload = _run_json_command(
@@ -92,6 +95,11 @@ class TestSkillsSdkReviewHandoff(unittest.TestCase):
             "--robot",
         )
         return payload["data"]["review_plan"]
+
+    def _remove_trace_for_plan(self, plan: dict[str, object]) -> None:
+        trace_path = REPO_ROOT / TRACE_DIR / f"{canonical_receipt_digest(plan)}.trace.json"
+        if trace_path.exists():
+            trace_path.unlink()
 
     def test_handoff_receipt_is_schema_valid_and_does_not_claim_review_completion(self) -> None:
         plan = self._write_plan()
@@ -161,9 +169,8 @@ class TestSkillsSdkReviewHandoff(unittest.TestCase):
         self.assertTrue(self.handoff_path.exists())
 
     def test_handoff_refuses_missing_trace_sidecar(self) -> None:
-        self._write_plan()
-        for trace_path in (REPO_ROOT / TRACE_DIR).glob("*.trace.json"):
-            trace_path.unlink()
+        plan = self._write_plan()
+        self._remove_trace_for_plan(plan)
 
         with self.assertRaisesRegex(ValueError, "required JSON file does not exist"):
             build_review_handoff(
@@ -194,11 +201,10 @@ class TestSkillsSdkReviewHandoff(unittest.TestCase):
 
     def test_handoff_accepts_diagnostic_branch_label_drift_on_same_head(self) -> None:
         plan = self._write_plan()
+        self._remove_trace_for_plan(plan)
         plan["source_context"]["branch"] = "diagnostic-renamed-branch"
         self.plan_path.write_text(json.dumps(plan, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         receipt_sha256 = canonical_receipt_digest(plan)
-        for old_trace in (REPO_ROOT / TRACE_DIR).glob("*.trace.json"):
-            old_trace.unlink()
         trace_path = REPO_ROOT / TRACE_DIR / f"{receipt_sha256}.trace.json"
         trace = {
             "schema_version": "skills-sdk.review-plan-trace.v1",
@@ -291,6 +297,37 @@ class TestSkillsSdkReviewHandoff(unittest.TestCase):
                 task_intent="architecture_review",
             )
 
+    def test_handoff_refuses_malformed_source_context_before_trace_lookup(self) -> None:
+        plan = self._write_plan()
+        self._remove_trace_for_plan(plan)
+        plan["source_context"] = "not-an-object"
+        self.plan_path.write_text(json.dumps(plan, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+        with self.assertRaisesRegex(ValueError, "source_context must be an object"):
+            build_review_handoff(
+                REPO_ROOT,
+                plan_path=".harness/artifacts/sdk-review-plan/test-handoff-plan.json",
+                target="Skills/agent-ops/simplify",
+                task_intent="validation_review",
+            )
+
+    def test_handoff_refuses_missing_receipt_instance_id_before_trace_lookup(self) -> None:
+        plan = self._write_plan()
+        self._remove_trace_for_plan(plan)
+        source_context = plan["source_context"]
+        if not isinstance(source_context, dict):
+            raise AssertionError("fixture source_context should be an object")
+        source_context.pop("receipt_instance_id", None)
+        self.plan_path.write_text(json.dumps(plan, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+        with self.assertRaisesRegex(ValueError, "receipt_instance_id"):
+            build_review_handoff(
+                REPO_ROOT,
+                plan_path=".harness/artifacts/sdk-review-plan/test-handoff-plan.json",
+                target="Skills/agent-ops/simplify",
+                task_intent="validation_review",
+            )
+
     def test_handoff_refuses_unresolved_handle_plan(self) -> None:
         self._write_plan(target="simplify")
 
@@ -305,12 +342,12 @@ class TestSkillsSdkReviewHandoff(unittest.TestCase):
     def test_handoff_rejects_symlink_output_escape(self) -> None:
         self._write_plan()
         escape_dir = REPO_ROOT / ".harness/artifacts/sdk-review-handoff/escape"
-        outside_dir = REPO_ROOT.parent / "handoff-outside"
         if escape_dir.exists() or escape_dir.is_symlink():
             escape_dir.unlink()
-        outside_dir.mkdir(exist_ok=True)
-        escape_dir.symlink_to(outside_dir, target_is_directory=True)
-        try:
+        escape_dir.parent.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(prefix="handoff-outside-") as temp_dir:
+            outside_dir = Path(temp_dir)
+            escape_dir.symlink_to(outside_dir, target_is_directory=True)
             with self.assertRaisesRegex(ValueError, "receipt_out must resolve inside the repository root"):
                 build_review_handoff(
                     REPO_ROOT,
@@ -319,13 +356,8 @@ class TestSkillsSdkReviewHandoff(unittest.TestCase):
                     task_intent="validation_review",
                     receipt_out=".harness/artifacts/sdk-review-handoff/escape/out.json",
                 )
-        finally:
             if escape_dir.exists() or escape_dir.is_symlink():
                 escape_dir.unlink()
-            outside_output = outside_dir / "out.json"
-            if outside_output.exists():
-                outside_output.unlink()
-            outside_dir.rmdir()
 
     def test_handoff_builder_uses_local_inputs_only(self) -> None:
         self._write_plan()
