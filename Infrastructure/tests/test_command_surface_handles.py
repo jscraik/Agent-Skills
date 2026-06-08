@@ -466,6 +466,61 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
         self.assertTrue(proof["gates"]["codex_user_link"])
         self.assertTrue(proof["gates"]["codex_user_runtime_ready"])
 
+    def test_skills_proof_dedupes_codex_and_agents_aliases(self) -> None:
+        """Codex and Agents home roots are duplicate aliases when they resolve to one projection."""
+        repo_root = self.temp_dir / "repo"
+        self._write_he_heartbeat_source(repo_root)
+        _write_command_surface_metadata(repo_root)
+        skills_dir = repo_root / ".agents" / "skills"
+
+        home = self.temp_dir / "home"
+        codex_skills = home / ".codex" / "skills"
+        agents_skills = home / ".agents" / "skills"
+        codex_skills.parent.mkdir(parents=True)
+        agents_skills.parent.mkdir(parents=True)
+        codex_skills.symlink_to(skills_dir)
+        agents_skills.symlink_to(skills_dir)
+
+        with mock.patch("pathlib.Path.home", return_value=home):
+            result = skills_proof(repo_root, "he-heartbeat")
+
+        proof = result.data["proof"]
+        aliases = proof["runtime_diagnostics"]["runtime_aliases"]
+        self.assertEqual(result.status, "success")
+        self.assertTrue(proof["gates"]["user_runtime_alias_consistent"])
+        self.assertEqual(aliases["status"], "deduped_aliases")
+        self.assertEqual(aliases["distinct_runtime_identity_count"], 1)
+        self.assertEqual(aliases["dedupe_identity"], str(skills_dir.resolve()))
+
+    def test_skills_proof_rejects_split_brain_user_runtime_aliases(self) -> None:
+        """User runtime roots must not silently point at different SDK projections."""
+        repo_root = self.temp_dir / "repo"
+        self._write_he_heartbeat_source(repo_root)
+        _write_command_surface_metadata(repo_root)
+        skills_dir = repo_root / ".agents" / "skills"
+        stale_runtime = self.temp_dir / "stale" / ".agents" / "skills"
+        stale_runtime.mkdir(parents=True)
+
+        home = self.temp_dir / "home"
+        codex_skills = home / ".codex" / "skills"
+        agents_skills = home / ".agents" / "skills"
+        codex_skills.parent.mkdir(parents=True)
+        agents_skills.parent.mkdir(parents=True)
+        codex_skills.symlink_to(skills_dir)
+        agents_skills.symlink_to(stale_runtime)
+
+        with mock.patch("pathlib.Path.home", return_value=home):
+            result = skills_proof(repo_root, "he-heartbeat")
+
+        proof = result.data["proof"]
+        aliases = proof["runtime_diagnostics"]["runtime_aliases"]
+        self.assertEqual(result.status, "error")
+        self.assertEqual(proof["status"], "fail")
+        self.assertFalse(proof["gates"]["user_runtime_alias_consistent"])
+        self.assertEqual(proof["runtime_failure"]["failed_check_id"], "user_runtime_alias_consistent")
+        self.assertEqual(aliases["status"], "split_brain")
+        self.assertEqual(aliases["distinct_runtime_identity_count"], 2)
+
     def test_skills_proof_runtime_target_codex_passes_with_codex_runtime(self) -> None:
         """Codex-targeted proof must pass when the Codex runtime link reaches the workspace."""
         repo_root = self.temp_dir / "repo"

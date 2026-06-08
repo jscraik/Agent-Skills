@@ -1213,20 +1213,29 @@ def build_command_handle_proof(
             "is_symlink": path.is_symlink(),
         }
         if path.is_symlink():
-            payload["target"] = str(path.resolve())
-            payload["points_to_workspace_runtime"] = path.resolve() == expected_runtime.resolve()
+            resolved = path.resolve()
+            payload["target"] = str(resolved)
+            payload["dedupe_identity"] = str(resolved)
+            payload["points_to_workspace_runtime"] = resolved == expected_runtime.resolve()
         else:
             payload["target"] = None
+            payload["dedupe_identity"] = str(path.resolve()) if path.exists() else None
             payload["points_to_workspace_runtime"] = False
         return payload
 
     codex_link = link_payload(codex_skills)
     agents_link = link_payload(agents_skills)
+    runtime_aliases = _runtime_alias_projection_status(
+        codex_link,
+        agents_link,
+        expected_runtime=expected_runtime,
+    )
     gates = {
         "resolver": resolution.get("status") == "ok",
         "canonical_source_exists": canonical_source_exists,
         "codex_user_link": bool(codex_link["points_to_workspace_runtime"]),
         "agents_user_link": bool(agents_link["points_to_workspace_runtime"]),
+        "user_runtime_alias_consistent": runtime_aliases["status"] != "split_brain",
     }
     core_gates = (
         gates["resolver"],
@@ -1243,7 +1252,7 @@ def build_command_handle_proof(
         "codex": "codex_user_runtime_ready",
         "agents": "agents_user_runtime_ready",
     }[runtime_target]
-    required_runtime_ready = bool(gates[required_runtime_gate])
+    required_runtime_ready = bool(gates[required_runtime_gate]) and gates["user_runtime_alias_consistent"]
     failed_check_id = (
         None
         if all(core_gates) and required_runtime_ready
@@ -1254,6 +1263,7 @@ def build_command_handle_proof(
                     "resolver",
                     "canonical_source_exists",
                     required_runtime_gate,
+                    "user_runtime_alias_consistent",
                 )
                 if not gates.get(check_id)
             ),
@@ -1272,6 +1282,7 @@ def build_command_handle_proof(
             "codex_user_runtime": _runtime_mode(codex_link),
             "agents_user_runtime": _runtime_mode(agents_link),
         },
+        "runtime_aliases": runtime_aliases,
         "recovery_risk": (
             "User-scope sync mutates home-directory runtime links; preview with --dry-run before applying."
         ),
@@ -1353,6 +1364,7 @@ def build_command_handle_proof(
                 "codex_user_runtime_ready",
                 "agents_user_link",
                 "agents_user_runtime_ready",
+                "user_runtime_alias_consistent",
             ],
         },
         "available_runtimes": [
@@ -1409,3 +1421,46 @@ def build_command_handle_proof(
             "operator_action": operator_action,
         }
     return proof
+
+
+def _runtime_alias_projection_status(
+    codex_link: dict[str, object],
+    agents_link: dict[str, object],
+    *,
+    expected_runtime: Path,
+) -> dict[str, object]:
+    """Describe whether user runtime roots are duplicate aliases or split projections."""
+    expected_identity = str(expected_runtime.resolve())
+    identities = {
+        name: identity
+        for name, identity in (
+            ("codex_user_runtime", codex_link.get("dedupe_identity")),
+            ("agents_user_runtime", agents_link.get("dedupe_identity")),
+        )
+        if isinstance(identity, str) and identity
+    }
+    distinct_identities = sorted(set(identities.values()))
+    ready_identities = {
+        name: identity
+        for name, identity in identities.items()
+        if identity == expected_identity
+    }
+
+    if len(identities) >= 2 and len(distinct_identities) > 1:
+        status = "split_brain"
+    elif len(ready_identities) >= 2:
+        status = "deduped_aliases"
+    elif len(ready_identities) == 1:
+        status = "single_runtime"
+    else:
+        status = "missing_or_foreign"
+
+    return {
+        "schema_version": "skill-runtime-aliases.v1",
+        "status": status,
+        "dedupe_identity": expected_identity if ready_identities else None,
+        "distinct_runtime_identity_count": len(distinct_identities),
+        "root_identities": identities,
+        "expected_workspace_runtime": expected_identity,
+        "dedupe_rule": "Codex and Agents user skill roots are aliases when their resolved paths match.",
+    }
