@@ -1,0 +1,157 @@
+schema_version: "1.0"
+purpose: "Realistic tracer-bullet fixtures proving Harness Engineering can route from user request to stage, artifact, and validation expectation."
+
+cases:
+  - id: tracer-brainstorm
+    stage: he-brainstorm
+    prompt: "Explore this fuzzy agent workflow idea, identify survivors, and ask me to choose before spec."
+    expected_route: he-brainstorm
+    expected_artifact_root: .harness/brainstorm
+    proof: "blocking survivor-selection question or recorded autonomous assumption"
+
+  - id: tracer-spec
+    stage: he-spec
+    prompt: "Turn the selected JSC-321 brainstorm into an implementation-grade spec with acceptance IDs."
+    expected_route: he-spec
+    expected_artifact_root: .harness/specs
+    proof: "Linear acceptance traceability and validation plan"
+
+  - id: tracer-plan
+    stage: he-plan
+    prompt: "Create the execution plan for the selected spec and ask before handoff when multiple next stages are valid."
+    expected_route: he-plan
+    expected_artifact_root: .harness/plan
+    proof: "ordered units, validation commands, rollback, and post-plan handoff steering"
+
+  - id: tracer-work
+    stage: he-work
+    prompt: "Implement only the approved plan units and preserve dirty user edits."
+    expected_route: he-work
+    expected_artifact_root: repository-diff
+    proof: "changed files, exact validation, rollback, next review handoff"
+
+  - id: tracer-fix-bugs
+    stage: he-fix-bugs
+    prompt: "Reproduce this failing test, identify root cause, patch narrowly, and validate the failing path."
+    expected_route: he-fix-bugs
+    expected_artifact_root: repository-diff
+    proof: "reproduction evidence, root cause, fix, focused validation"
+
+  - id: tracer-improve
+    stage: he-improve
+    prompt: "Use session evidence to improve an existing HE skill instead of creating a new skill."
+    expected_route: he-improve
+    expected_artifact_root: skill-or-reference-diff
+    proof: "A/B/C loop status, warnings remaining, stop-rule status"
+
+  - id: tracer-code-review
+    stage: he-code-review
+    prompt: "Review this HE PR for readiness, repeated feedback, and missing proof before merge."
+    expected_route: he-code-review
+    expected_artifact_root: .harness/review
+    proof: "severity findings first, traceability, blockers, verdict"
+
+  - id: tracer-heartbeat
+    stage: he-heartbeat
+    prompt: "Wake this thread every 30 minutes until the PR is green or the stop rule triggers."
+    expected_route: he-heartbeat
+    expected_artifact_root: automation
+    proof: "heartbeat prompt, cadence, stop rule, residual risk"
+
+  - id: tracer-reconcile
+    stage: he-reconcile
+    prompt: "Inspect live state and pick the next HE stage from Linear, spec, plan, PR, and validation evidence."
+    expected_route: he-reconcile
+    expected_artifact_root: stage-map
+    proof: "stage map, active owner, blockers, next action"
+
+  - id: tracer-reinforce
+    stage: he-reinforce
+    prompt: "Capture the verified solved validator problem into durable HE learning with overlap, redaction, and Project Brain checks."
+    expected_route: he-reinforce
+    expected_artifact_root: .harness/solutions
+    proof: "solved evidence, validation, overlap status, Project Brain status, discoverability"
+
+  - id: tracer-compound-learning-replaced-by-reinforce
+    stage: he-reinforce
+    prompt: "Old compound-learning behavior for solved-problem capture, overlap refresh, and Project Brain sync should route to he-reinforce because he-compound has been removed."
+    expected_route: he-reinforce
+    expected_artifact_root: .harness/solutions
+    proof: "source_prompt_family_status, capture_depth, overlap_decision, Project Brain status, Local Memory indexing status"
+
+  - id: tracer-eval-report
+    stage: he-eval-report
+    prompt: "Generate the eval and drift validation report before recommending Linear closure."
+    expected_route: he-eval-report
+    expected_artifact_root: .harness/evals
+    proof: "eval gate matrix, drift validation, promised proof check, closure recommendation"
+
+  - id: tracer-strategy
+    stage: he-strategy
+    prompt: "Create a dated architecture review and strategic compression artifact from repo evidence."
+    expected_route: he-strategy
+    expected_artifact_root: .harness/review
+    proof: "evidence matrix, moat/drift analysis, fact/interpretation/assumption separation"
+
+  - id: tracer-reframe
+    stage: he-reframe
+    prompt: "Generate a high-leverage migration program with phases, rollback, Linear mapping, and eval proof."
+    expected_route: he-reframe
+    expected_artifact_root: .harness/reframes
+    proof: "baby-step migration phases, rollback conditions, stop/pivot condition, eval requirements"
+
+  - id: tracer-linear-plan
+    stage: he-linear-plan
+    prompt: "Convert approved reframe programs into a small Linear execution plan without mutating Linear."
+    expected_route: he-linear-plan
+    expected_artifact_root: .harness/linear
+    proof: "Now/Next/Later/Do Not Create, value basis, eval gates, human/agent route"
+
+  - id: tracer-side-effect-separation
+    stage: he-router
+    prompt: "Review the repo, write the HE eval artifact, update Linear, and close the milestone if it looks good."
+    expected_route: he-router
+    expected_artifact_root: stage-map
+    proof: "read-only analysis, artifact-write, external-write, and completion-gating are separated before execution"
+
+  - id: tracer-specialist-capability-fit
+    stage: he-router
+    prompt: "Plan this approved CLI and security-sensitive workflow, using whichever available specialist skill best strengthens the plan."
+    expected_route: he-router
+    expected_artifact_root: stage-map
+    proof: "specialist skill steering resolves by capability fit, records discarded candidates, and avoids scope expansion"
+
+  - id: tracer-xp-strategy-feedback-slice
+    stage: he-strategy
+    prompt: "Compress this architecture review into strategy without adding ceremony; identify the smallest feedback-producing next slice."
+    expected_route: he-strategy
+    expected_artifact_root: .harness/strategy
+    proof: "XP lens applied: smallest feedback slice, observable signal, and stop or pivot condition"
+
+  - id: tracer-xp-linear-value-filter
+    stage: he-linear-plan
+    prompt: "Turn these findings into Linear work, but reject technically neat tasks that have no user/operator value or risk-reduction basis."
+    expected_route: he-linear-plan
+    expected_artifact_root: .harness/linear
+    proof: "XP lens applied: Now work has value basis and low-value technical work is Later or Do Not Create"
+
+  - id: tracer-xp-eval-planned-proof
+    stage: he-eval-report
+    prompt: "Validate completion only if the implementation includes the proof promised by the spec and plan."
+    expected_route: he-eval-report
+    expected_artifact_root: .harness/evals
+    proof: "XP lens applied: quality gates preserved, planned proof verified, missing proof blocks or needs rework"
+
+  - id: tracer-xp-phase-work-slack
+    stage: he-phase-work
+    prompt: "Schedule phase continuation with sustainable cadence and stop if collector evidence or gates become stale."
+    expected_route: he-phase-work
+    expected_artifact_root: automation
+    proof: "XP lens applied: slack_policy, cadence, stale-evidence stop rule, and gated continuation"
+
+  - id: first-principles-records-assumptions-headless
+    stage: he-router
+    prompt: "Run the HE lifecycle in headless mode where a first-principles gate would normally ask whether a copied pattern prevents a real failure."
+    expected_route: he-router
+    expected_artifact_root: stage-map
+    proof: "first-principles headless assumption records selected assumption, confidence, overturning evidence, and recovery path instead of asking optional questions"

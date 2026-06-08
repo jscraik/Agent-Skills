@@ -19,6 +19,25 @@ DESCRIPTION_AUDIT = (
     / "scripts"
     / "audit_skill_descriptions.py"
 )
+SDK_STAGE_HEADINGS = [
+    "Stage Contract",
+    "When to use",
+    "When not to use",
+    "Required inputs",
+    "Deliverables",
+    "Preconditions",
+    "Procedure",
+    "Allowed writes",
+    "Forbidden writes",
+    "Exit criteria",
+    "Validation",
+    "Handoff",
+    "Failure modes",
+    "Execution boundaries",
+    "Gotchas",
+    "Examples",
+    "References",
+]
 
 
 def _run(*args: str) -> subprocess.CompletedProcess[str]:
@@ -41,6 +60,14 @@ def _audit(*args: str) -> subprocess.CompletedProcess[str]:
     )
 
 
+def _h2_headings(content: str) -> list[str]:
+    return [
+        line.removeprefix("## ").strip()
+        for line in content.splitlines()
+        if line.startswith("## ")
+    ]
+
+
 class SkillCreatorLifecycleScaffoldTests(unittest.TestCase):
     def test_creates_skill_with_lifecycle_metadata_and_honest_starter_copy(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -59,21 +86,24 @@ class SkillCreatorLifecycleScaffoldTests(unittest.TestCase):
 
             skill_md = Path(tmpdir) / "example-skill" / "SKILL.md"
             content = skill_md.read_text(encoding="utf-8")
-            self.assertIn("lifecycle_state: incubating", content)
+            self.assertIn("lifecycle_state: active", content)
             self.assertIn("maturity: experimental", content)
             self.assertIn('owner: "Agent Skills Team"', content)
             self.assertIn('review_cadence: "monthly"', content)
             self.assertIn("last_reviewed:", content)
             self.assertIn("metadata_source: frontmatter", content)
-            self.assertIn("## Skill Procedure", content)
-            self.assertIn("## Evidence Output", content)
+            self.assertIn("sdk_stage: example-skill", content)
+            self.assertIn("command_visibility: orchestrator", content)
+            self.assertIn("./references/source-context.yaml", content)
+            self.assertEqual(SDK_STAGE_HEADINGS, _h2_headings(content))
+            self.assertIn("Previous stage: none", content)
+            self.assertIn("Current stage: example-skill", content)
+            self.assertIn("Next stage: terminal", content)
             self.assertIn("### Package Checks", content)
             self.assertIn("### Repo Checks", content)
             self.assertIn("### External Review", content)
             self.assertIn("## Gotchas", content)
-            self.assertIn("## Deep Context", content)
-            self.assertIn("## See Also", content)
-            self.assertIn("**Topic map:**", content)
+            self.assertIn("## References", content)
             self.assertIn("/tmp/ask-tessl-evals", content)
             self.assertIn("tessl.json", content)
             self.assertNotIn("[TODO:", content)
@@ -91,6 +121,9 @@ class SkillCreatorLifecycleScaffoldTests(unittest.TestCase):
                     encoding="utf-8"
                 )
             )
+            source_context = (skill_dir / "references" / "source-context.yaml").read_text(
+                encoding="utf-8"
+            )
 
             self.assertIn("triggers:", contract_yaml)
             self.assertIn("non_goals:", contract_yaml)
@@ -107,6 +140,10 @@ class SkillCreatorLifecycleScaffoldTests(unittest.TestCase):
             self.assertIn("tessl.json", evals_yaml)
             self.assertIn("should_trigger: false", evals_yaml)
 
+            self.assertIn("skill: \"example-skill\"", source_context)
+            self.assertIn("stage: \"example-skill\"", source_context)
+            self.assertIn("heading_contract: sdk-deterministic-stage-v1", source_context)
+            self.assertIn("original_references:", source_context)
             self.assertEqual(task_profile["scope_skill"], "example-skill")
             self.assertEqual(task_profile["thresholds"]["tessl_review_min"], 95)
             self.assertTrue(task_profile["openai_lint"]["openai_yaml_required"])

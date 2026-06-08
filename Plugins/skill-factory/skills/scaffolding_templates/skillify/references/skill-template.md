@@ -1,56 +1,131 @@
 # Skillify SKILL.md Template
 
-Copy this template only after the candidate passes the evidence-discovery criteria and the smallest-form decision is `skill`.
+Copy this template only after the candidate passes the evidence-discovery criteria
+and the smallest-form decision is skill.
+
+For deterministic SDK stage skills, preserve this exact heading order. The repo
+validator enforces it for every SKILL.md with metadata.sdk_stage, and also
+requires references/source-context.yaml for template and source-context provenance.
 
 Template:
 
     ---
     name: <skill-name>
-    description: "Performs <concrete action> for <domain>. Use when the user says <natural trigger>, <alternate trigger>, or needs <release/eval outcome>."
+    description: "Performs <concrete stage action> for <domain>. Use when the user says <natural trigger>, <alternate trigger>, or needs <stage outcome>."
     metadata:
       version: "1.0.0"
-      skill-type: <category>
+      skill-type: team_automation
+      sdk_stage: <stage-name>
+      lifecycle_state: active
+      command_visibility: orchestrator
     ---
 
     # <Skill Name>
 
-    ## When To Use
+    ## Stage Contract
 
-    - <repeatable trigger backed by evidence>
-    - <alternate natural-language trigger>
+    Previous stage: <previous-stage-or-none>
+    Current stage: <stage-name>
+    Next stage: <next-stage-or-terminal>
 
-    ## Inputs
+    Stage purpose: <one sentence purpose>
+
+    ## When to use
+
+    Use when <repeatable trigger backed by evidence>.
+
+    ## When not to use
+
+    Do not use when <anti-trigger or narrower owner applies>.
+
+    ## Required inputs
 
     - <required path, artifact, report, or user-provided context>
 
-    ## Workflow
+    ## Deliverables
+
+    - <required artifact, response schema, command output, or handoff field>
+
+    ## Preconditions
+
+    - <freshness, authority, source ownership, or dependency condition>
+
+    ## Procedure
 
     1. Confirm the canonical source path and applicable instructions.
-    2. Read the smallest evidence surface needed for the request.
-    3. Produce the required output shape.
+    2. Read the smallest evidence surface needed for the stage.
+    3. Produce only the required stage deliverable.
     4. Run the validation command and stop at the first failed gate.
 
-    ## Output Template
+    ## Allowed writes
 
-    schema_version: 1
-    status: pass|blocked
-    source_evidence: [<path or command>]
-    validation:
-      - command: <exact command>
-        outcome: pass|fail|blocked
-    blocked_by: null
+    <paths, artifacts, or systems this stage may mutate>
 
-    ## Execution Boundaries
+    ## Forbidden writes
 
-    - Do not widen scope beyond the named workflow.
-    - Redact secrets and sensitive data by default.
-    - Return `blocked_by` instead of inventing missing evidence.
+    - <generated surfaces, external systems, or downstream-stage outputs>
 
-    ## Anti-Patterns
+    ## Exit criteria
 
-    - Packaging one-off work, private logs, or contradictory guidance.
-    - Claiming readiness from skipped validation.
+    - <conditions required before handoff>
 
     ## Validation
 
-    Run `./bin/ask skills audit <skill-path> --level strict --json --robot`. Fail fast at the first failed gate.
+    Run ./bin/ask skills audit <skill-path> --level strict --json --robot. Fail fast at the first failed gate.
+
+    ## Handoff
+
+    Hand off to <next-stage> only after exit criteria pass; otherwise return a blocker.
+
+    ## Failure modes
+
+    - <blocker class>: <required recovery action>
+
+    ## Execution boundaries
+
+    - Do not widen scope beyond the named stage.
+    - Redact secrets and sensitive data by default.
+    - Return blocked_by instead of inventing missing evidence.
+
+    ## Gotchas
+
+    - <recurring mistake and safer alternative>
+
+    ## Examples
+
+    - Good: <minimal positive example>
+    - Bad: <minimal negative example>
+
+    ## References
+
+    - Contract: [contract](./references/contract.yaml)
+    - Eval cases: [evals](./references/evals.yaml)
+    - Task profile: [task profile](./references/task-profile.json)
+    - Source context: [source context](./references/source-context.yaml)
+
+Source context companion:
+
+    schema_version: 1
+    skill: <skill-name>
+    stage: <stage-name>
+    template:
+      path: Infrastructure/references/sdk-stage-skill-template.md
+      validator: Infrastructure/scripts/validation-and-linting/check_sdk_stage_skill_shape.py
+      heading_contract: sdk-deterministic-stage-v1
+    original_references:
+      - path: <source reference path>
+        purpose: <why this reference shaped the skill>
+        load_when: <when this reference should be loaded during execution>
+    archived_context: []
+    stage_companions:
+      - path: references/contract.yaml
+        purpose: machine-readable stage contract
+      - path: references/evals.yaml
+        purpose: deterministic trigger and behavior eval cases
+      - path: references/task-profile.json
+        purpose: reviewer and picker-facing task profile
+    provenance_policy:
+      canonical_source: <skill directory>
+      context_loading: Load SKILL.md first, then source-context.yaml when provenance or deferred context is needed.
+      projection_rule: Runtime caches and home skill roots are generated projections, not source.
+      template_rule: Preserve the fixed SDK stage heading order.

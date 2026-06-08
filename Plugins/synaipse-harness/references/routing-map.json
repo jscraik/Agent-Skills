@@ -2,6 +2,8 @@
   "schema_version": 2,
   "plugin": "synaipse-harness",
   "router": "sy-strategy",
+  "stage_template": "Infrastructure/references/sdk-stage-skill-template.md",
+  "upstream_reference_index": "Plugins/synaipse-harness/references/upstream/harness-engineering-context.yaml",
   "lifecycle_stage_order": [
     "strategy",
     "reframe",

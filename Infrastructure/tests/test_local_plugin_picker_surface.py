@@ -149,6 +149,26 @@ EXPECTED_SYNAIPSE_LIFECYCLE = [
     ("reinforce", "sy-reinforce", "reconcile", "strategy"),
 ]
 
+EXPECTED_SYNAIPSE_STAGE_HEADINGS = [
+    "Stage Contract",
+    "When to use",
+    "When not to use",
+    "Required inputs",
+    "Deliverables",
+    "Preconditions",
+    "Procedure",
+    "Allowed writes",
+    "Forbidden writes",
+    "Exit criteria",
+    "Validation",
+    "Handoff",
+    "Failure modes",
+    "Execution boundaries",
+    "Gotchas",
+    "Examples",
+    "References",
+]
+
 LEGACY_SYNAIPSE_SKILL_NAMES = {
     "sy-spec",
     "sy-phase-work",
@@ -192,6 +212,15 @@ def _read_frontmatter_text(skill_md: Path) -> str:
     if end == -1:
         return ""
     return raw[4:end]
+
+
+
+def _markdown_h2_headings(skill_md: Path) -> list[str]:
+    headings = []
+    for line in skill_md.read_text(encoding="utf-8").splitlines():
+        if line.startswith("## "):
+            headings.append(line.removeprefix("## ").strip())
+    return headings
 
 
 def _is_hidden_skill(skill_md: Path) -> bool:
@@ -319,6 +348,11 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
 
         self.assertEqual(expected_handles, [entry["handle"] for entry in routing_map["stages"]])
         self.assertEqual(expected_stages, routing_map["lifecycle_stage_order"])
+        self.assertEqual("Infrastructure/references/sdk-stage-skill-template.md", routing_map["stage_template"])
+        self.assertEqual(
+            "Plugins/synaipse-harness/references/upstream/harness-engineering-context.yaml",
+            routing_map["upstream_reference_index"],
+        )
         self.assertEqual(set(expected_handles), direct_skill_names)
         self.assertFalse(
             LEGACY_SYNAIPSE_SKILL_NAMES & direct_skill_names,
@@ -336,6 +370,10 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
             for path in (skill_md, contract, evals, task_profile, openai_metadata):
                 self.assertTrue(path.exists(), f"{handle} should include {path.relative_to(skill_dir)}")
 
+            self.assertEqual(EXPECTED_SYNAIPSE_STAGE_HEADINGS, _markdown_h2_headings(skill_md))
+            source_context = (skill_dir / "references" / "source-context.yaml").read_text(encoding="utf-8")
+            self.assertIn("Plugins/synaipse-harness/references/upstream/harness-engineering-context.yaml", source_context)
+            self.assertIn("load_when:", source_context)
             skill_frontmatter = _read_frontmatter_text(skill_md)
             self.assertIn(f"name: {handle}", skill_frontmatter)
             self.assertIn(f"sdk_stage: {stage}", skill_frontmatter)

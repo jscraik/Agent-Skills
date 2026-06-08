@@ -85,7 +85,7 @@ Create this minimal package: `<skill-name>/SKILL.md`, `references/contract.yaml`
 
 Add `scripts/`, `assets/`, or extra references only when needed.
 
-Minimal `SKILL.md` body: frontmatter with `name`, trigger-rich `description`, and `metadata.version`; then `When To Use`, `Inputs`, `Workflow`, `Output Template`, `Execution Boundaries`, `Anti-Patterns`, and `Validation` sections. Use [skill template](./references/skill-template.md) for the copy-paste scaffold.
+Minimal SDK stage SKILL.md body: frontmatter with name, trigger-rich description, metadata.version, and metadata.sdk_stage; then the fixed headings from Infrastructure/references/sdk-stage-skill-template.md. Use [skill template](./references/skill-template.md) for the copy-paste scaffold.
 
 ## Output Template
 
