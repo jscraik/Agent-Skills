@@ -1,28 +1,28 @@
 ---
-name: sy-reinforce
-description: "Create a durable guardrail, validator, doc, eval, or skill-reference update from a verified failure or learning. Use when the user asks to capture learning, prevent recurrence, encode review feedback, or refresh stale guidance."
+name: sy-slice-spec
+description: "Create one selected trace or tracker slice spec with acceptance criteria, constraints, validation, and exit conditions. Use when exactly one slice has been selected and needs a buildable contract before implementation planning."
 metadata:
   skill-type: team_automation
   version: "0.1.0"
   level: molecule
   command_visibility: orchestrator
-  sdk_stage: reinforce
+  sdk_stage: slice-spec
   lifecycle_state: active
   owner: SynAIpse Harness
 ---
-# SynAIpse Harness Reinforce
+# SynAIpse Harness Slice Spec
 
 ## Stage Contract
 
-Previous stage: reconcile
-Current stage: reinforce
-Next stage: strategy
+Previous stage: tracker-plan
+Current stage: slice-spec
+Next stage: execution-plan
 
-Stage purpose: Turn a verified failure or learning into a durable guardrail, validator, doc, eval, or skill-reference update.
+Stage purpose: Specify one selected trace or tracker slice with acceptance criteria, constraints, validation, and exit conditions.
 
 ## When To Use
 
-Use when the user asks to capture learning, prevent recurrence, encode review feedback, or refresh stale guidance.
+Use when exactly one slice has been selected and needs a buildable contract before implementation planning.
 
 ## When Not To Use
 
@@ -50,13 +50,13 @@ Do not use this stage to skip the lifecycle, merge evidence lanes, mutate extern
 
 1. Restate the active repo, branch, requested stage, and available evidence.
 2. Check the previous-stage artifact or explain why it is not required.
-3. Perform only the work owned by reinforce.
+3. Perform only the work owned by slice-spec.
 4. Record evidence refs and classify each lane as pass, fail, blocked, or not_checked.
-5. Emit the next-stage handoff to strategy or a blocker with the smallest recovery step.
+5. Emit the next-stage handoff to execution-plan or a blocker with the smallest recovery step.
 
 ## Allowed Writes
 
-The smallest durable surface that prevents recurrence: docs, validators, evals, references, or learning ledgers.
+.harness/specs/** slice specs; no implementation plan, code edits, or tracker closure.
 
 ## Forbidden Writes
 
@@ -66,9 +66,9 @@ The smallest durable surface that prevents recurrence: docs, validators, evals, 
 
 ## Exit Criteria
 
-- The output states stage: reinforce and one clear status.
+- The output states stage: slice-spec and one clear status.
 - Evidence lanes are separated and cite concrete commands, files, artifacts, or blockers.
-- The handoff names strategy as the next stage unless the work is blocked or intentionally terminal.
+- The handoff names execution-plan as the next stage unless the work is blocked or intentionally terminal.
 
 ## Validation
 
@@ -76,7 +76,7 @@ Fail fast: stop at the first failed required gate, classify the blocker, and do 
 
 ## Handoff
 
-Return the stage artifact or blocker, then hand off to strategy only after this stage's exit criteria are satisfied.
+Return the stage artifact or blocker, then hand off to execution-plan only after this stage's exit criteria are satisfied.
 
 ## Failure Modes
 

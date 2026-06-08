@@ -10,8 +10,8 @@ SynAIpse Harness treats domain language as part of the delivery contract. Resolv
 ## Routing
 
 - Use `sy-brainstorm` when language is still fuzzy, several words may name the same concept, or the team needs one focused question at a time before picking direction. Use `domain_interview` mode when the user asks to be interviewed through the design tree or to update ubiquitous language inline.
-- Use `sy-spec` when the work needs its first implementation-grade behavior contract and domain terms shape acceptance criteria.
-- Use folded `sy-deepen-spec` mode through `sy-spec` when an existing spec, code path, or Linear issue disagrees with `UBIQUITOUS.md`, or when two concepts overlap and need scenario testing before planning.
+- Use `sy-slice-spec` when the work needs its first implementation-grade behavior contract and domain terms shape acceptance criteria.
+- Use folded `sy-deepen-spec` mode through `sy-slice-spec` when an existing spec, code path, or Linear issue disagrees with `UBIQUITOUS.md`, or when two concepts overlap and need scenario testing before planning.
 - Use `sy-execution-plan` only after canonical terms, relationships, and required context updates are stable enough for task decomposition.
 - Use `sy-work` when approved execution uncovers domain drift; stop and update the governing artifact or linked Linear issue before coding past the drift.
 - Use `sy-review` when tracker wording may be using the wrong project term; reproduce only after confirming the issue meaning matches the domain model.

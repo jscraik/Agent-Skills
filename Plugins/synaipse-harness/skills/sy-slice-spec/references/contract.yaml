@@ -1,14 +1,14 @@
 schema_version: 1
-skill: sy-eval-report
-stage: eval-report
-previous_stage: review
-next_stage: reconcile
+skill: sy-slice-spec
+stage: slice-spec
+previous_stage: tracker-plan
+next_stage: execution-plan
 purpose: >-
-  Record closure proof with exact commands, outcomes, artifact paths, untested lanes, and residual risk.
+  Specify one selected trace or tracker slice with acceptance criteria, constraints, validation, and exit conditions.
 triggers:
-  - explicit sy-eval-report invocation
-  - explicit eval-report stage request
-  - strategy or previous-stage handoff to eval-report
+  - explicit sy-slice-spec invocation
+  - explicit slice-spec stage request
+  - strategy or previous-stage handoff to slice-spec
 preconditions:
   - canonical source and active worktree are identified
   - required previous-stage artifact is present or blocker is returned
@@ -19,13 +19,13 @@ inputs:
   - relevant artifact, tracker, PR, validation, or session evidence
 outputs:
   - schema_version
-  - stage: eval-report
+  - stage: slice-spec
   - status: pass|fail|blocked|not_checked
   - evidence_refs
   - blocked_by
-  - next_stage: reconcile
+  - next_stage: execution-plan
 allowed_writes:
-  - .harness/evals/** reports; no tracker, PR, CI, or merge-state mutation.
+  - .harness/specs/** slice specs; no implementation plan, code edits, or tracker closure.
 forbidden_writes:
   - generated runtime projections as source
   - external tracker, PR, CI, release, or deployment mutation without authorization
@@ -33,7 +33,7 @@ forbidden_writes:
 exit_criteria:
   - output names the current stage and status
   - evidence lanes are separated
-  - handoff names reconcile or a blocker
+  - handoff names execution-plan or a blocker
 non_goals:
   - completing another lifecycle stage
   - broad rewrite outside the selected stage

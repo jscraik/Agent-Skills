@@ -1,5 +1,11 @@
 policy:
   allow_implicit_invocation: false
 interface:
-  display_name: "SynAIpse Harness Code Review"
-  short_description: "Review PRs, branches, diffs, and workflow artifacts for package-level go/no-go readiness with..."
+  display_name: "SynAIpse Review"
+  short_description: "Review the completed slice for correctness, risk, evidence gaps, and next-stage blockers."
+routing:
+  handle: "sy-review"
+  sdk_stage: "review"
+  previous_stage: "work"
+  next_stage: "eval-report"
+

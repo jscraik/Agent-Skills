@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0",
-  "profile_id": "Plugins-synaipse-harness-skills-team_automation-sy-execution-plan",
-  "scope_skill": "Plugins/synaipse-harness/skills/sy-execution-plan",
+  "profile_id": "Plugins-synaipse-harness-skills-team_automation-sy-slice-spec",
+  "scope_skill": "Plugins/synaipse-harness/skills/sy-slice-spec",
   "scope_profile": "Plugins",
-  "sdk_stage": "execution-plan",
+  "sdk_stage": "slice-spec",
   "rubric_version": "2026-06-08",
   "evaluator_version": "v1",
   "persona_set_id": "default-v1",
@@ -42,7 +42,7 @@
     "human_baseline_minutes": 45.0,
     "ai_process_minutes": 15.0,
     "probability_of_success": 0.75,
-    "rationale": "Stage-local SynAIpse Execution Plan work with explicit evidence boundaries."
+    "rationale": "Stage-local SynAIpse Slice Spec work with explicit evidence boundaries."
   },
   "learning_posture": {
     "supported": [

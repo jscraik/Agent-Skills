@@ -31,7 +31,7 @@ Lifecycle stages are plain English. Skill IDs use `sy-` so the package stays gre
 | `sy-brainstorm` | Explore options before a trace, tracker, spec, or plan is ready. |
 | `sy-trace-plan` | Decompose strategy, brainstorm, or reframe output into traceable work. |
 | `sy-tracker-plan` | Map trace work into tracker-ready Now/Next/Later slices. |
-| `sy-spec` | Write scoped technical specs from approved trace or tracker inputs. |
+| `sy-slice-spec` | Write scoped technical specs from approved trace or tracker inputs. |
 | `sy-execution-plan` | Sequence implementation, validation, rollback, and evidence work. |
 | `sy-work` | Implement an approved spec or execution plan. |
 | `sy-review` | Produce severity-ranked review findings and next-stage guidance. |
@@ -50,7 +50,7 @@ flowchart LR
   C --> D["sy-brainstorm"]
   D --> E["sy-trace-plan"]
   E --> F["sy-tracker-plan"]
-  F --> G["sy-spec"]
+  F --> G["sy-slice-spec"]
   G --> H["sy-execution-plan"]
   H --> I["sy-work"]
   I --> J["sy-review"]
@@ -73,10 +73,10 @@ Source of truth:
 
 ## Traceability
 
-Tracked work should carry the same trace/spec/plan/PR chain through brainstorm, trace planning, tracker planning, slice spec, execution plan, work, and review. Non-trivial tracked work must resolve or create the Linear issue through `references/linear-tracker-gate.md`; blocked tracker writes must return a ready-to-create payload instead of silently continuing.
+Tracked work should carry the same trace plan, tracker plan, slice spec, execution plan, PR, review, eval, reconcile, and reinforce chain through the lifecycle. Non-trivial tracked work must resolve or create the Linear issue through `references/linear-tracker-gate.md`; blocked tracker writes must return a ready-to-create payload instead of silently continuing.
 
 For existing tracked trace plans or tracker plans, run `references/linear-delta-capture-gate.md`
-before `sy-spec`, execution `sy-execution-plan`, or `sy-work` consumes
+before `sy-slice-spec`, execution `sy-execution-plan`, or `sy-work` consumes
 `.harness/linear/<repo-name>-linear-plan.md`. New or changed Linear issues are
 captured into the plan as classified deltas first, then at most one admitted
 item becomes the current or next execution slice.

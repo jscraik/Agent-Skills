@@ -1,0 +1,11 @@
+policy:
+  allow_implicit_invocation: false
+interface:
+  display_name: "SynAIpse Slice Spec"
+  short_description: "Specify one selected trace or tracker slice with acceptance criteria, constraints, validation, and exit conditions."
+routing:
+  handle: "sy-slice-spec"
+  sdk_stage: "slice-spec"
+  previous_stage: "tracker-plan"
+  next_stage: "execution-plan"
+

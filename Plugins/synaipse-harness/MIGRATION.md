@@ -15,5 +15,5 @@ Installable skill IDs keep the `sy-` prefix to avoid collisions with other skill
 ## Split planning
 
 - `sy-trace-plan`: decomposes intent into trace bullets.
-- `sy-spec`: specifies one selected trace bullet.
+- `sy-slice-spec`: specifies one selected trace bullet.
 - `sy-execution-plan`: sequences implementation for that specified slice.
