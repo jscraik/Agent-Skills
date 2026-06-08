@@ -3,281 +3,1542 @@ source_plugin: harness-engineering
 target_plugin: synaipse-harness
 source_status: retiring
 ownership: copied-into-synaipse
-purpose: >-
-  Preserve the full Harness Engineering reference corpus inside SynAIpse so
-  SynAIpse lifecycle skills remain self-contained after the Harness Engineering
-  plugin is retired.
+purpose: Preserve the full Harness Engineering reference corpus inside SynAIpse so SynAIpse lifecycle
+  skills remain self-contained after the Harness Engineering plugin is retired.
 source_root: Plugins/harness-engineering/references
 copied_root: Plugins/synaipse-harness/references/upstream/harness-engineering
 reference_count: 90
 references:
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/agent-native-audit-scorecard.md
-    purpose: Copied Harness Engineering reference for agent native audit scorecard.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/agent-native-compression-contract.md
-    purpose: Copied Harness Engineering reference for agent native compression contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/artifact-classification-and-traceability.md
-    purpose: Copied Harness Engineering reference for artifact classification and traceability.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/artifact-routing-contract.md
-    purpose: Copied Harness Engineering reference for artifact routing contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/bluf-review-contract.md
-    purpose: Copied Harness Engineering reference for bluf review contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/brainstorm-topic-coverage-contract.md
-    purpose: Copied Harness Engineering reference for brainstorm topic coverage contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/closure-mutation-contract.md
-    purpose: Copied Harness Engineering reference for closure mutation contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/codex-native-memory-baseline.md
-    purpose: Copied Harness Engineering reference for codex native memory baseline.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/codex-provenance-contract.md
-    purpose: Copied Harness Engineering reference for codex provenance contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/coding-harness-command-bridge.md
-    purpose: Copied Harness Engineering reference for coding harness command bridge.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/deferred-context-index.md
-    purpose: Copied Harness Engineering reference for deferred context index.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/design-complexity-contract.md
-    purpose: Copied Harness Engineering reference for design complexity contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/deterministic-stage-routing.md
-    purpose: Copied Harness Engineering reference for deterministic stage routing.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/document-review-finding-tiers.md
-    purpose: Copied Harness Engineering reference for document review finding tiers.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/domain-context-contract.md
-    purpose: Copied Harness Engineering reference for domain context contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/domain-model-production-contract.md
-    purpose: Copied Harness Engineering reference for domain model production contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/domain-model-routing.md
-    purpose: Copied Harness Engineering reference for domain model routing.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/execution-slice-contract.md
-    purpose: Copied Harness Engineering reference for execution slice contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/first-principles-contract.md
-    purpose: Copied Harness Engineering reference for first principles contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/folded-skill-context.md
-    purpose: Copied Harness Engineering reference for folded skill context.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/gate-selection-contract.md
-    purpose: Copied Harness Engineering reference for gate selection contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/git-staging-contract.md
-    purpose: Copied Harness Engineering reference for git staging contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/goal-continuity.md
-    purpose: Copied Harness Engineering reference for goal continuity.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/he-eval-report-evals.yaml
-    purpose: Copied Harness Engineering YAML contract for he eval report evals.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/he-plan-doctrine.md
-    purpose: Copied Harness Engineering reference for he plan doctrine.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/he-spec-doctrine.md
-    purpose: Copied Harness Engineering reference for he spec doctrine.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/interactive-steering-contract.md
-    purpose: Copied Harness Engineering reference for interactive steering contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/lifecycle-exit-contract.md
-    purpose: Copied Harness Engineering reference for lifecycle exit contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/lifecycle-tracer-evals.yaml
-    purpose: Copied Harness Engineering YAML contract for lifecycle tracer evals.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/linear-delta-capture-gate.md
-    purpose: Copied Harness Engineering reference for linear delta capture gate.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/linear-tracker-gate.md
-    purpose: Copied Harness Engineering reference for linear tracker gate.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/operator-shape.md
-    purpose: Copied Harness Engineering reference for operator shape.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/plugin-eval-confidence-contract.md
-    purpose: Copied Harness Engineering reference for plugin eval confidence contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/plugin-hook-capability-contract.md
-    purpose: Copied Harness Engineering reference for plugin hook capability contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/pr-safety-trace-contract.md
-    purpose: Copied Harness Engineering reference for pr safety trace contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/pragmatic-operating-invariants.md
-    purpose: Copied Harness Engineering reference for pragmatic operating invariants.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/pragmatic-programmer-review-contract.md
-    purpose: Copied Harness Engineering reference for pragmatic programmer review contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/qa-intake-routing.md
-    purpose: Copied Harness Engineering reference for qa intake routing.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/routing-map.json
-    purpose: Copied Harness Engineering JSON schema or routing data for routing map.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/session-evidence-contract.md
-    purpose: Copied Harness Engineering reference for session evidence contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/session-evidence-extraction.md
-    purpose: Copied Harness Engineering reference for session evidence extraction.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/session-evidence-skillify-triage.md
-    purpose: Copied Harness Engineering reference for session evidence skillify triage.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/session-evidence-trace-context.md
-    purpose: Copied Harness Engineering reference for session evidence trace context.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/skill-improvement-loop.md
-    purpose: Copied Harness Engineering reference for skill improvement loop.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-code-review/review-loop-patterns.md
-    purpose: Copied Harness Engineering reference for review loop patterns.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-code-review/review-mode-contract.md
-    purpose: Copied Harness Engineering reference for review mode contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-code-review/review-policy-index.md
-    purpose: Copied Harness Engineering reference for review policy index.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-eval-report/drift-taxonomy.md
-    purpose: Copied Harness Engineering reference for drift taxonomy.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-eval-report/eval-report-contract.md
-    purpose: Copied Harness Engineering reference for eval report contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-eval-report/eval-report-schema.json
-    purpose: Copied Harness Engineering JSON schema or routing data for eval report schema.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-eval-report/eval-report-template.md
-    purpose: Copied Harness Engineering reference for eval report template.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-eval-report/linear-completion-policy.md
-    purpose: Copied Harness Engineering reference for linear completion policy.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-linear-plan/linear-filing-rule.md
-    purpose: Copied Harness Engineering reference for linear filing rule.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-linear-plan/linear-plan-output-contract.md
-    purpose: Copied Harness Engineering reference for linear plan output contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-linear-plan/source-prompt-preservation.md
-    purpose: Copied Harness Engineering reference for source prompt preservation.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-plan/codex-plan-mode.md
-    purpose: Copied Harness Engineering reference for codex plan mode.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-plan/deepening-review.md
-    purpose: Copied Harness Engineering reference for deepening review.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-plan/plan-artifact-contract.md
-    purpose: Copied Harness Engineering reference for plan artifact contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-plan/planning-depth.md
-    purpose: Copied Harness Engineering reference for planning depth.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-plan/post-plan-handoff.md
-    purpose: Copied Harness Engineering reference for post plan handoff.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-plan/professional-confidence-review.md
-    purpose: Copied Harness Engineering reference for professional confidence review.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-plan/test-strategy.md
-    purpose: Copied Harness Engineering reference for test strategy.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-plan/visual-communication.md
-    purpose: Copied Harness Engineering reference for visual communication.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-reframe/architecture-evolution-compression.md
-    purpose: Copied Harness Engineering reference for architecture evolution compression.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-reframe/reframe-program-contract.md
-    purpose: Copied Harness Engineering reference for reframe program contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-reframe/source-prompt-preservation.md
-    purpose: Copied Harness Engineering reference for source prompt preservation.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-spec/autoresearch-2026-05-02.md
-    purpose: Copied Harness Engineering reference for autoresearch 2026 05 02.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-spec/codex-and-session-evidence.md
-    purpose: Copied Harness Engineering reference for codex and session evidence.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-spec/spec-artifact-contract.md
-    purpose: Copied Harness Engineering reference for spec artifact contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-spec/spec-mode-rules.md
-    purpose: Copied Harness Engineering reference for spec mode rules.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-strategy/architecture-lens-canon.md
-    purpose: Copied Harness Engineering reference for architecture lens canon.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-strategy/repo-cognition-pipeline.md
-    purpose: Copied Harness Engineering reference for repo cognition pipeline.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-strategy/source-prompt-preservation.md
-    purpose: Copied Harness Engineering reference for source prompt preservation.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-strategy/strategy-output-contract.md
-    purpose: Copied Harness Engineering reference for strategy output contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-work/codex-execution-lessons.md
-    purpose: Copied Harness Engineering reference for codex execution lessons.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-work/execution-modes.md
-    purpose: Copied Harness Engineering reference for execution modes.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-work/handoff-and-shipping.md
-    purpose: Copied Harness Engineering reference for handoff and shipping.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-work/work-execution-contract.md
-    purpose: Copied Harness Engineering reference for work execution contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/solution-capture-contract.md
-    purpose: Copied Harness Engineering reference for solution capture contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/source-prompt-coverage-contract.md
-    purpose: Copied Harness Engineering reference for source prompt coverage contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/spec-plan-runtime-boundary-contract.md
-    purpose: Copied Harness Engineering reference for spec plan runtime boundary contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/specialist-skill-steering-contract.md
-    purpose: Copied Harness Engineering reference for specialist skill steering contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/stage-arc-boundary-contract.md
-    purpose: Copied Harness Engineering reference for stage arc boundary contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/stage-context-contract.md
-    purpose: Copied Harness Engineering reference for stage context contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/subagent-call-contract.md
-    purpose: Copied Harness Engineering reference for subagent call contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/subagent-routing.md
-    purpose: Copied Harness Engineering reference for subagent routing.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/ubiquitous-language-contract.md
-    purpose: Copied Harness Engineering reference for ubiquitous language contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/ui-plan-routing-contract.md
-    purpose: Copied Harness Engineering reference for ui plan routing contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/visual-reference-contract.md
-    purpose: Copied Harness Engineering reference for visual reference contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering/xp-operating-contract.md
-    purpose: Copied Harness Engineering reference for xp operating contract.
-    load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific context is needed for this stage
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/agent-native-audit-scorecard.md
+  purpose: Copied Harness Engineering reference for agent native audit scorecard.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - review
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/agent-native-compression-contract.md
+  purpose: Copied Harness Engineering reference for agent native compression contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - reinforce
+  quality_notes:
+    stale_terms:
+    - he-code-review
+    - he-improve
+    - he-plan
+    - he-reconcile
+    - he-spec
+    - he-work
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/artifact-classification-and-traceability.md
+  purpose: Copied Harness Engineering reference for artifact classification and traceability.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: adopted
+  stage_map:
+  - trace-plan
+  - slice-spec
+  quality_notes:
+    stale_terms: []
+    link_check: passed
+    accuracy_certification: structure_and_links_only
+  rewrite_reason: No legacy Harness Engineering lifecycle terms detected by the reference-quality validator.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/artifact-routing-contract.md
+  purpose: Copied Harness Engineering reference for artifact routing contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - execution-plan
+  quality_notes:
+    stale_terms:
+    - he-brainstorm
+    - he-code-review
+    - he-eval-report
+    - he-linear-plan
+    - he-phase-work
+    - he-plan
+    - he-reconcile
+    - he-reframe
+    - he-reinforce
+    - he-spec
+    - he-strategy
+    - he-work
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/bluf-review-contract.md
+  purpose: Copied Harness Engineering reference for bluf review contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - review
+  quality_notes:
+    stale_terms:
+    - he-code-review
+    - he-eval-report
+    - he-improve
+    - he-linear-plan
+    - he-plan
+    - he-reconcile
+    - he-reframe
+    - he-spec
+    - he-strategy
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/brainstorm-topic-coverage-contract.md
+  purpose: Copied Harness Engineering reference for brainstorm topic coverage contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - brainstorm
+  quality_notes:
+    stale_terms:
+    - he-brainstorm
+    - he-code-review
+    - he-eval-report
+    - he-linear-plan
+    - he-plan
+    - he-reframe
+    - he-spec
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/closure-mutation-contract.md
+  purpose: Copied Harness Engineering reference for closure mutation contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: adopted
+  stage_map:
+  - work
+  - reconcile
+  quality_notes:
+    stale_terms: []
+    link_check: passed
+    accuracy_certification: structure_and_links_only
+  rewrite_reason: No legacy Harness Engineering lifecycle terms detected by the reference-quality validator.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/codex-native-memory-baseline.md
+  purpose: Copied Harness Engineering reference for codex native memory baseline.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - reinforce
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/codex-provenance-contract.md
+  purpose: Copied Harness Engineering reference for codex provenance contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - reconcile
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/coding-harness-command-bridge.md
+  purpose: Copied Harness Engineering reference for coding harness command bridge.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - work
+  quality_notes:
+    stale_terms:
+    - he-brainstorm
+    - he-code-review
+    - he-plan
+    - he-reconcile
+    - he-reinforce
+    - he-spec
+    - he-work
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/deferred-context-index.md
+  purpose: Copied Harness Engineering reference for deferred context index.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map: &id001
+  - strategy
+  - reframe
+  - brainstorm
+  - trace-plan
+  - tracker-plan
+  - slice-spec
+  - execution-plan
+  - work
+  - review
+  - eval-report
+  - reconcile
+  - reinforce
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    - he-brainstorm
+    - he-code-review
+    - he-eval-report
+    - he-heartbeat
+    - he-linear-plan
+    - he-phase-work
+    - he-plan
+    - he-reframe
+    - he-spec
+    - he-strategy
+    - he-work
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/design-complexity-contract.md
+  purpose: Copied Harness Engineering reference for design complexity contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map: *id001
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    - he-brainstorm
+    - he-code-review
+    - he-fix-bugs
+    - he-heartbeat
+    - he-improve
+    - he-plan
+    - he-reconcile
+    - he-reinforce
+    - he-router
+    - he-spec
+    - he-work
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/deterministic-stage-routing.md
+  purpose: Copied Harness Engineering reference for deterministic stage routing.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - execution-plan
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    - he-brainstorm
+    - he-code-review
+    - he-eval-report
+    - he-fix-bugs
+    - he-heartbeat
+    - he-improve
+    - he-linear-plan
+    - he-phase-work
+    - he-plan
+    - he-reconcile
+    - he-reframe
+    - he-reinforce
+    - he-router
+    - he-spec
+    - he-strategy
+    - he-work
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/document-review-finding-tiers.md
+  purpose: Copied Harness Engineering reference for document review finding tiers.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: adopted
+  stage_map:
+  - review
+  quality_notes:
+    stale_terms: []
+    link_check: passed
+    accuracy_certification: structure_and_links_only
+  rewrite_reason: No legacy Harness Engineering lifecycle terms detected by the reference-quality validator.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/domain-context-contract.md
+  purpose: Copied Harness Engineering reference for domain context contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - reframe
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    - he-brainstorm
+    - he-code-review
+    - he-plan
+    - he-reconcile
+    - he-reinforce
+    - he-spec
+    - he-work
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/domain-model-production-contract.md
+  purpose: Copied Harness Engineering reference for domain model production contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - strategy
+  - slice-spec
+  quality_notes:
+    stale_terms:
+    - he-brainstorm
+    - he-code-review
+    - he-eval-report
+    - he-plan
+    - he-router
+    - he-spec
+    - he-strategy
+    - he-work
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/domain-model-routing.md
+  purpose: Copied Harness Engineering reference for domain model routing.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - slice-spec
+  - execution-plan
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    - he-brainstorm
+    - he-code-review
+    - he-fix-bugs
+    - he-plan
+    - he-spec
+    - he-work
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/execution-slice-contract.md
+  purpose: Copied Harness Engineering reference for execution slice contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - slice-spec
+  - execution-plan
+  quality_notes:
+    stale_terms:
+    - he-plan
+    - he-spec
+    - he-work
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/first-principles-contract.md
+  purpose: Copied Harness Engineering reference for first principles contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - strategy
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/folded-skill-context.md
+  purpose: Copied Harness Engineering reference for folded skill context.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map: *id001
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    - he-brainstorm
+    - he-code-review
+    - he-improve
+    - he-phase-work
+    - he-plan
+    - he-reconcile
+    - he-reinforce
+    - he-router
+    - he-spec
+    - he-work
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/gate-selection-contract.md
+  purpose: Copied Harness Engineering reference for gate selection contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - execution-plan
+  quality_notes:
+    stale_terms:
+    - he-brainstorm
+    - he-code-review
+    - he-eval-report
+    - he-plan
+    - he-router
+    - he-spec
+    - he-work
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/git-staging-contract.md
+  purpose: Copied Harness Engineering reference for git staging contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: adopted
+  stage_map:
+  - work
+  quality_notes:
+    stale_terms: []
+    link_check: passed
+    accuracy_certification: structure_and_links_only
+  rewrite_reason: No legacy Harness Engineering lifecycle terms detected by the reference-quality validator.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/goal-continuity.md
+  purpose: Copied Harness Engineering reference for goal continuity.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - reinforce
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    - he-heartbeat
+    - he-reconcile
+    - he-router
+    - he-work
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/he-eval-report-evals.yaml
+  purpose: Copied Harness Engineering YAML contract for he eval report evals.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - eval-report
+  quality_notes:
+    stale_terms:
+    - he-eval-report
+    link_check: not_markdown
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/he-plan-doctrine.md
+  purpose: Copied Harness Engineering reference for he plan doctrine.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map: *id001
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    - he-plan
+    - he-work
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/he-spec-doctrine.md
+  purpose: Copied Harness Engineering reference for he spec doctrine.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - slice-spec
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    - he-plan
+    - he-spec
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/interactive-steering-contract.md
+  purpose: Copied Harness Engineering reference for interactive steering contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map: *id001
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    - he-brainstorm
+    - he-code-review
+    - he-eval-report
+    - he-linear-plan
+    - he-plan
+    - he-reconcile
+    - he-reframe
+    - he-router
+    - he-spec
+    - he-strategy
+    - he-work
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/lifecycle-exit-contract.md
+  purpose: Copied Harness Engineering reference for lifecycle exit contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - trace-plan
+  quality_notes:
+    stale_terms:
+    - he-brainstorm
+    - he-code-review
+    - he-fix-bugs
+    - he-heartbeat
+    - he-improve
+    - he-plan
+    - he-reconcile
+    - he-reinforce
+    - he-router
+    - he-spec
+    - he-work
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/lifecycle-tracer-evals.yaml
+  purpose: Copied Harness Engineering YAML contract for lifecycle tracer evals.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: adopted
+  stage_map:
+  - trace-plan
+  - eval-report
+  quality_notes:
+    stale_terms: []
+    link_check: not_markdown
+    accuracy_certification: structure_and_links_only
+  rewrite_reason: No legacy Harness Engineering lifecycle terms detected by the reference-quality validator.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/linear-delta-capture-gate.md
+  purpose: Copied Harness Engineering reference for linear delta capture gate.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - tracker-plan
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    - he-plan
+    - he-spec
+    - he-work
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/linear-tracker-gate.md
+  purpose: Copied Harness Engineering reference for linear tracker gate.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - tracker-plan
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    - he-brainstorm
+    - he-plan
+    - he-spec
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/operator-shape.md
+  purpose: Copied Harness Engineering reference for operator shape.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - strategy
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/plugin-eval-confidence-contract.md
+  purpose: Copied Harness Engineering reference for plugin eval confidence contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - eval-report
+  quality_notes:
+    stale_terms:
+    - he-router
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/plugin-hook-capability-contract.md
+  purpose: Copied Harness Engineering reference for plugin hook capability contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map: *id001
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/pr-safety-trace-contract.md
+  purpose: Copied Harness Engineering reference for pr safety trace contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - trace-plan
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/pragmatic-operating-invariants.md
+  purpose: Copied Harness Engineering reference for pragmatic operating invariants.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - strategy
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/pragmatic-programmer-review-contract.md
+  purpose: Copied Harness Engineering reference for pragmatic programmer review contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - strategy
+  - review
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/qa-intake-routing.md
+  purpose: Copied Harness Engineering reference for qa intake routing.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - execution-plan
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    - he-brainstorm
+    - he-fix-bugs
+    - he-plan
+    - he-spec
+    - he-work
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/routing-map.json
+  purpose: Copied Harness Engineering JSON schema or routing data for routing map.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: adopted
+  stage_map:
+  - execution-plan
+  quality_notes:
+    stale_terms: []
+    link_check: not_markdown
+    accuracy_certification: structure_and_links_only
+  rewrite_reason: No legacy Harness Engineering lifecycle terms detected by the reference-quality validator.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/session-evidence-contract.md
+  purpose: Copied Harness Engineering reference for session evidence contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - reconcile
+  quality_notes:
+    stale_terms:
+    - he-fix-bugs
+    - he-heartbeat
+    - he-improve
+    - he-reconcile
+    - he-reinforce
+    - he-work
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/session-evidence-extraction.md
+  purpose: Copied Harness Engineering reference for session evidence extraction.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - reconcile
+  quality_notes:
+    stale_terms:
+    - he-plan
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/session-evidence-skillify-triage.md
+  purpose: Copied Harness Engineering reference for session evidence skillify triage.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: adopted
+  stage_map:
+  - reconcile
+  quality_notes:
+    stale_terms: []
+    link_check: passed
+    accuracy_certification: structure_and_links_only
+  rewrite_reason: No legacy Harness Engineering lifecycle terms detected by the reference-quality validator.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/session-evidence-trace-context.md
+  purpose: Copied Harness Engineering reference for session evidence trace context.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: adopted
+  stage_map:
+  - trace-plan
+  - reconcile
+  quality_notes:
+    stale_terms: []
+    link_check: passed
+    accuracy_certification: structure_and_links_only
+  rewrite_reason: No legacy Harness Engineering lifecycle terms detected by the reference-quality validator.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/skill-improvement-loop.md
+  purpose: Copied Harness Engineering reference for skill improvement loop.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: adopted
+  stage_map:
+  - reinforce
+  quality_notes:
+    stale_terms: []
+    link_check: passed
+    accuracy_certification: structure_and_links_only
+  rewrite_reason: No legacy Harness Engineering lifecycle terms detected by the reference-quality validator.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-code-review/review-loop-patterns.md
+  purpose: Copied Harness Engineering reference for review loop patterns.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - review
+  quality_notes:
+    stale_terms:
+    - he-code-review
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-code-review/review-mode-contract.md
+  purpose: Copied Harness Engineering reference for review mode contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - review
+  quality_notes:
+    stale_terms:
+    - he-code-review
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-code-review/review-policy-index.md
+  purpose: Copied Harness Engineering reference for review policy index.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - review
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    - he-code-review
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-eval-report/drift-taxonomy.md
+  purpose: Copied Harness Engineering reference for drift taxonomy.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - eval-report
+  quality_notes:
+    stale_terms:
+    - he-eval-report
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-eval-report/eval-report-contract.md
+  purpose: Copied Harness Engineering reference for eval report contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - eval-report
+  quality_notes:
+    stale_terms:
+    - he-eval-report
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-eval-report/eval-report-schema.json
+  purpose: Copied Harness Engineering JSON schema or routing data for eval report schema.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - eval-report
+  quality_notes:
+    stale_terms:
+    - he-eval-report
+    link_check: not_markdown
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-eval-report/eval-report-template.md
+  purpose: Copied Harness Engineering reference for eval report template.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - eval-report
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    - he-eval-report
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-eval-report/linear-completion-policy.md
+  purpose: Copied Harness Engineering reference for linear completion policy.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - tracker-plan
+  - eval-report
+  quality_notes:
+    stale_terms:
+    - he-eval-report
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-linear-plan/linear-filing-rule.md
+  purpose: Copied Harness Engineering reference for linear filing rule.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - tracker-plan
+  quality_notes:
+    stale_terms:
+    - he-linear-plan
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-linear-plan/linear-plan-output-contract.md
+  purpose: Copied Harness Engineering reference for linear plan output contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - tracker-plan
+  quality_notes:
+    stale_terms:
+    - he-linear-plan
+    - he-reframe
+    - he-strategy
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-linear-plan/source-prompt-preservation.md
+  purpose: Copied Harness Engineering reference for source prompt preservation.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - reframe
+  - tracker-plan
+  quality_notes:
+    stale_terms:
+    - he-linear-plan
+    - he-reframe
+    - he-strategy
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-plan/codex-plan-mode.md
+  purpose: Copied Harness Engineering reference for codex plan mode.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - trace-plan
+  - execution-plan
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    - he-plan
+    - he-work
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-plan/deepening-review.md
+  purpose: Copied Harness Engineering reference for deepening review.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - review
+  quality_notes:
+    stale_terms:
+    - he-plan
+    - he-work
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-plan/plan-artifact-contract.md
+  purpose: Copied Harness Engineering reference for plan artifact contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - trace-plan
+  quality_notes:
+    stale_terms:
+    - he-plan
+    - he-work
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-plan/planning-depth.md
+  purpose: Copied Harness Engineering reference for planning depth.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - trace-plan
+  - execution-plan
+  quality_notes:
+    stale_terms:
+    - he-plan
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-plan/post-plan-handoff.md
+  purpose: Copied Harness Engineering reference for post plan handoff.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - work
+  quality_notes:
+    stale_terms:
+    - he-code-review
+    - he-eval-report
+    - he-plan
+    - he-work
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-plan/professional-confidence-review.md
+  purpose: Copied Harness Engineering reference for professional confidence review.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - review
+  - eval-report
+  quality_notes:
+    stale_terms:
+    - he-plan
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-plan/test-strategy.md
+  purpose: Copied Harness Engineering reference for test strategy.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - strategy
+  quality_notes:
+    stale_terms:
+    - he-plan
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-plan/visual-communication.md
+  purpose: Copied Harness Engineering reference for visual communication.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - trace-plan
+  - execution-plan
+  quality_notes:
+    stale_terms:
+    - he-plan
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-reframe/architecture-evolution-compression.md
+  purpose: Copied Harness Engineering reference for architecture evolution compression.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - strategy
+  - reframe
+  - reinforce
+  quality_notes:
+    stale_terms:
+    - he-linear-plan
+    - he-reframe
+    - he-strategy
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-reframe/reframe-program-contract.md
+  purpose: Copied Harness Engineering reference for reframe program contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - reframe
+  quality_notes:
+    stale_terms:
+    - he-reframe
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-reframe/source-prompt-preservation.md
+  purpose: Copied Harness Engineering reference for source prompt preservation.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - reframe
+  quality_notes:
+    stale_terms:
+    - he-reframe
+    - he-strategy
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-spec/autoresearch-2026-05-02.md
+  purpose: Copied Harness Engineering reference for autoresearch 2026 05 02.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - slice-spec
+  quality_notes:
+    stale_terms:
+    - he-spec
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-spec/codex-and-session-evidence.md
+  purpose: Copied Harness Engineering reference for codex and session evidence.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - slice-spec
+  - reconcile
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    - he-plan
+    - he-spec
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-spec/spec-artifact-contract.md
+  purpose: Copied Harness Engineering reference for spec artifact contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - slice-spec
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    - he-linear-plan
+    - he-plan
+    - he-spec
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-spec/spec-mode-rules.md
+  purpose: Copied Harness Engineering reference for spec mode rules.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - slice-spec
+  quality_notes:
+    stale_terms:
+    - he-plan
+    - he-spec
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-strategy/architecture-lens-canon.md
+  purpose: Copied Harness Engineering reference for architecture lens canon.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - strategy
+  quality_notes:
+    stale_terms:
+    - he-strategy
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-strategy/repo-cognition-pipeline.md
+  purpose: Copied Harness Engineering reference for repo cognition pipeline.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - strategy
+  quality_notes:
+    stale_terms:
+    - he-strategy
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-strategy/source-prompt-preservation.md
+  purpose: Copied Harness Engineering reference for source prompt preservation.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - strategy
+  - reframe
+  quality_notes:
+    stale_terms:
+    - he-strategy
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-strategy/strategy-output-contract.md
+  purpose: Copied Harness Engineering reference for strategy output contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - strategy
+  quality_notes:
+    stale_terms:
+    - he-strategy
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-work/codex-execution-lessons.md
+  purpose: Copied Harness Engineering reference for codex execution lessons.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - execution-plan
+  - work
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    - he-work
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-work/execution-modes.md
+  purpose: Copied Harness Engineering reference for execution modes.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - execution-plan
+  - work
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    - he-work
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-work/handoff-and-shipping.md
+  purpose: Copied Harness Engineering reference for handoff and shipping.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - work
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    - he-code-review
+    - he-work
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/skills/he-work/work-execution-contract.md
+  purpose: Copied Harness Engineering reference for work execution contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - execution-plan
+  - work
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    - he-code-review
+    - he-plan
+    - he-work
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/solution-capture-contract.md
+  purpose: Copied Harness Engineering reference for solution capture contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - reconcile
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    - he-reinforce
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/source-prompt-coverage-contract.md
+  purpose: Copied Harness Engineering reference for source prompt coverage contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - reframe
+  - trace-plan
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    - he-linear-plan
+    - he-plan
+    - he-reframe
+    - he-spec
+    - he-strategy
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/spec-plan-runtime-boundary-contract.md
+  purpose: Copied Harness Engineering reference for spec plan runtime boundary contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - slice-spec
+  quality_notes:
+    stale_terms:
+    - he-plan
+    - he-spec
+    - he-work
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/specialist-skill-steering-contract.md
+  purpose: Copied Harness Engineering reference for specialist skill steering contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - slice-spec
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    - he-brainstorm
+    - he-code-review
+    - he-eval-report
+    - he-plan
+    - he-spec
+    - he-work
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/stage-arc-boundary-contract.md
+  purpose: Copied Harness Engineering reference for stage arc boundary contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map: *id001
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    - he-brainstorm
+    - he-code-review
+    - he-eval-report
+    - he-fix-bugs
+    - he-heartbeat
+    - he-improve
+    - he-linear-plan
+    - he-phase-work
+    - he-plan
+    - he-reconcile
+    - he-reframe
+    - he-reinforce
+    - he-router
+    - he-spec
+    - he-strategy
+    - he-work
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/stage-context-contract.md
+  purpose: Copied Harness Engineering reference for stage context contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - execution-plan
+  quality_notes:
+    stale_terms:
+    - he-brainstorm
+    - he-code-review
+    - he-eval-report
+    - he-fix-bugs
+    - he-heartbeat
+    - he-improve
+    - he-linear-plan
+    - he-phase-work
+    - he-plan
+    - he-reconcile
+    - he-reframe
+    - he-reinforce
+    - he-router
+    - he-spec
+    - he-strategy
+    - he-work
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/subagent-call-contract.md
+  purpose: Copied Harness Engineering reference for subagent call contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - execution-plan
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/subagent-routing.md
+  purpose: Copied Harness Engineering reference for subagent routing.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - execution-plan
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    - he-work
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/ubiquitous-language-contract.md
+  purpose: Copied Harness Engineering reference for ubiquitous language contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map: *id001
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    - he-brainstorm
+    - he-strategy
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/ui-plan-routing-contract.md
+  purpose: Copied Harness Engineering reference for ui plan routing contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - execution-plan
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    - he-code-review
+    - he-plan
+    - he-reconcile
+    - he-spec
+    - he-work
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/visual-reference-contract.md
+  purpose: Copied Harness Engineering reference for visual reference contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map: *id001
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering/xp-operating-contract.md
+  purpose: Copied Harness Engineering reference for xp operating contract.
+  load_when: upstream Harness Engineering behavior, source parity, doctrine, evidence boundaries, or reference-specific
+    context is needed for this stage
+  adoption_status: needs_synaipse_rewrite
+  stage_map:
+  - strategy
+  quality_notes:
+    stale_terms:
+    - Harness Engineering
+    - he-eval-report
+    - he-linear-plan
+    - he-phase-work
+    - he-plan
+    - he-reframe
+    - he-strategy
+    - he-work
+    link_check: passed
+    accuracy_certification: not_certified
+  rewrite_reason: Contains legacy Harness Engineering names or he-* lifecycle references that must be
+    rewritten before this can be treated as SynAIpse-native doctrine.
+quality_audit:
+  schema_version: 1
+  status_values:
+  - adopted
+  - needs_synaipse_rewrite
+  - legacy_context_only
+  - archive_candidate
+  - remove_candidate
+  required_fields:
+  - adoption_status
+  - stage_map
+  - quality_notes.stale_terms
+  - quality_notes.link_check
+  - quality_notes.accuracy_certification
+  stale_term_policy: References with Harness Engineering or he-* lifecycle terms are not certified as
+    SynAIpse-native; they must be marked needs_synaipse_rewrite or legacy_context_only until rewritten.
+  link_policy: Every relative Markdown link in copied upstream Markdown references must resolve inside
+    the repository.
+  accuracy_policy: The index records structural and terminology audit status; adopted means no legacy
+    lifecycle terms were detected, not that domain claims were externally re-proven.

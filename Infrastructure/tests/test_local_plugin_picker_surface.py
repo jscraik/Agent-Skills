@@ -399,6 +399,36 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
             self.assertIn(f'sdk_stage: "{stage}"', openai_text)
             self.assertIn(f'handle: "{handle}"', openai_text)
 
+    def test_synaipse_harness_upstream_references_are_quality_audited(self) -> None:
+        """
+        Verify copied Harness Engineering context is indexed with explicit SynAIpse quality status.
+        """
+        index_path = (
+            REPO_ROOT
+            / "Plugins"
+            / "synaipse-harness"
+            / "references"
+            / "upstream"
+            / "harness-engineering-context.yaml"
+        )
+        index_text = index_path.read_text(encoding="utf-8")
+
+        self.assertIn("reference_count: 90", index_text)
+        self.assertEqual(90, index_text.count("- path: "))
+        self.assertIn("quality_audit:", index_text)
+        self.assertIn("adopted", index_text)
+        self.assertIn("needs_synaipse_rewrite", index_text)
+        self.assertEqual(90, index_text.count("adoption_status: "))
+        self.assertEqual(90, index_text.count("stage_map:"))
+        self.assertEqual(90, index_text.count("quality_notes:"))
+        self.assertEqual(90, index_text.count("accuracy_certification:"))
+        self.assertIn("stale_terms:", index_text)
+        self.assertIn("Harness Engineering", index_text)
+        self.assertIn(
+            "Contains legacy Harness Engineering names or he-* lifecycle references",
+            index_text,
+        )
+
     def test_local_plugins_expose_openai_metadata_for_first_level_skills(self) -> None:
         """
         Verify each expected first-level skill directory contains an agents/openai.yaml metadata file.
