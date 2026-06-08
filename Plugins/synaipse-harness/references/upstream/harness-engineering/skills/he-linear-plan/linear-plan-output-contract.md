@@ -303,4 +303,4 @@ Preferred formats:
 
 If no visual adds value, write `Not needed` and say why. Apply the shared
 generated-media and proof rules from
-`Plugins/harness-engineering/references/visual-reference-contract.md`.
+`Plugins/synaipse-harness/references/upstream/harness-engineering/visual-reference-contract.md`.
