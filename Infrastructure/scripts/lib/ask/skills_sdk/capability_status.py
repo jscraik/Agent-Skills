@@ -36,6 +36,7 @@ REQUIRED_CAPABILITY_IDS = (
     "sdk_lenses",
     "review_plan",
     "review_handoff",
+    "review_verification",
     "determinism_audit",
     "trust_store",
     "refs_ingestion",
