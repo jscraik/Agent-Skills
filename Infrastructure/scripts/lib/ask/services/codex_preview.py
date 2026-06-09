@@ -504,11 +504,11 @@ def _is_hidden_skill_frontmatter(skill_md: Path) -> bool:
         return False
     metadata = frontmatter.get("metadata") if isinstance(frontmatter.get("metadata"), dict) else {}
     hidden_markers = {
-        str(frontmatter.get("runtime_visibility") or frontmatter.get("runtime-visibility") or ""),
-        str(frontmatter.get("command_visibility") or frontmatter.get("command-visibility") or ""),
-        str(frontmatter.get("lifecycle_state") or frontmatter.get("lifecycle-state") or ""),
-        str(frontmatter.get("lifecycle") or ""),
-        str(metadata.get("runtime_visibility") or metadata.get("runtime-visibility") or ""),
+        str(frontmatter.get("runtime_visibility") or frontmatter.get("runtime-visibility") or "").strip().lower(),
+        str(frontmatter.get("command_visibility") or frontmatter.get("command-visibility") or "").strip().lower(),
+        str(frontmatter.get("lifecycle_state") or frontmatter.get("lifecycle-state") or "").strip().lower(),
+        str(frontmatter.get("lifecycle") or "").strip().lower(),
+        str(metadata.get("runtime_visibility") or metadata.get("runtime-visibility") or "").strip().lower(),
     }
     return bool(hidden_markers & {"hidden", "none", "archived", "deprecated"})
 
