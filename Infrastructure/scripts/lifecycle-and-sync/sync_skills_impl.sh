@@ -2447,6 +2447,7 @@ if [[ "$sync_scope" == "user" ]]; then
   remove_legacy_home_skill_symlinks
   if [ "$flat_projection_rebuilt" = "1" ]; then
     sync_user_skills "$skills_dir" "$HOME/.agents/skills"
+    sync_user_skills "$skills_dir" "$HOME/.codex/skills"
   else
     echo "[INFO] Skipping home skills sync because flat runtime skill projection was not rebuilt."
   fi

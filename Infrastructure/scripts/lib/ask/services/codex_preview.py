@@ -30,6 +30,25 @@ CODEX_PREVIEW_DEFAULT_CHAR_BUDGET = 8000
 CODEX_PREVIEW_CONTEXT_WINDOW_PERCENT = 2
 CODEX_PREVIEW_DESCRIPTION_TRUNCATION_WARNING_THRESHOLD_CHARS = 100
 CODEX_PREVIEW_APPROX_BYTES_PER_TOKEN = 4
+FIRST_PARTY_SKILL_SCAN_ROOT = "Skills"
+FIRST_PARTY_SKILL_EXCLUDED_SEGMENTS = {
+    "_archive",
+    "agents",
+    "assets",
+    "examples",
+    "fixtures",
+    "references",
+    "rules",
+    "scripts",
+    "templates",
+}
+FIRST_PARTY_SKILL_HIDDEN_NAMES = {
+    "browser",
+    "circleci",
+    "linear",
+    "skillgrade-graders",
+    "skillgrade-setup",
+}
 
 
 def _ask_validation_command(*args: str) -> str:
@@ -478,6 +497,103 @@ def _skill_preview_metadata(repo_root: Path, skill_md: Path, scope: str, root_pa
     return payload
 
 
+def _is_hidden_skill_frontmatter(skill_md: Path) -> bool:
+    try:
+        frontmatter = _read_skill_frontmatter_fields(skill_md)
+    except Exception:
+        return False
+    metadata = frontmatter.get("metadata") if isinstance(frontmatter.get("metadata"), dict) else {}
+    hidden_markers = {
+        str(frontmatter.get("runtime_visibility") or frontmatter.get("runtime-visibility") or "").strip().lower(),
+        str(frontmatter.get("command_visibility") or frontmatter.get("command-visibility") or "").strip().lower(),
+        str(frontmatter.get("lifecycle_state") or frontmatter.get("lifecycle-state") or "").strip().lower(),
+        str(frontmatter.get("lifecycle") or "").strip().lower(),
+        str(metadata.get("runtime_visibility") or metadata.get("runtime-visibility") or "").strip().lower(),
+    }
+    return bool(hidden_markers & {"hidden", "none", "archived", "deprecated"})
+
+
+def _first_party_skill_inventory(repo_root: Path) -> list[dict[str, str]]:
+    """Return picker-eligible first-party repo skills from canonical Skills/** source."""
+    skills_root = repo_root / FIRST_PARTY_SKILL_SCAN_ROOT
+    if not skills_root.is_dir():
+        return []
+
+    inventory: list[dict[str, str]] = []
+    for skill_md in sorted(skills_root.rglob("SKILL.md")):
+        try:
+            rel_parts = skill_md.relative_to(skills_root).parts
+        except ValueError:
+            continue
+        if any(part in FIRST_PARTY_SKILL_EXCLUDED_SEGMENTS for part in rel_parts):
+            continue
+        name = skill_md.parent.name
+        if name in FIRST_PARTY_SKILL_HIDDEN_NAMES:
+            continue
+        if _is_hidden_skill_frontmatter(skill_md):
+            continue
+        try:
+            source_path = skill_md.parent.relative_to(repo_root).as_posix()
+        except ValueError:
+            source_path = skill_md.parent.as_posix()
+        inventory.append({"name": name, "source_path": source_path})
+    return inventory
+
+
+def _append_first_party_projection_blocker(
+    payload: dict[str, Any],
+    repo_root: Path,
+    skills: list[dict[str, Any]],
+) -> None:
+    """
+    Mark the preview partial when canonical first-party skills are not loadable.
+
+    This protects the SDK projection contract: every visible first-party skill
+    under Skills/** must be reachable through the modeled Codex loader roots
+    after workspace and user sync. Plugin-scoped skills are handled separately
+    by the runtime plugin root lane.
+    """
+    expected = _first_party_skill_inventory(repo_root)
+    if not expected:
+        return
+    reachable_source_paths = {
+        str(skill.get("path") or "").removesuffix("/SKILL.md")
+        for skill in skills
+    }
+    missing = [
+        item
+        for item in expected
+        if item["source_path"] not in reachable_source_paths
+    ]
+    payload["first_party_projection"] = {
+        "schema_version": "first-party-skill-projection.v1",
+        "expected_count": len(expected),
+        "reachable_count": len(expected) - len(missing),
+        "missing_count": len(missing),
+        "missing_skills": missing,
+        "status": "pass" if not missing else "blocked",
+        "fix_suggestion": "./bin/ask skills sync --scope workspace --json --robot && ./bin/ask skills sync --scope user --json --robot",
+    }
+    if missing:
+        payload["blocked_checks"].append(
+            {
+                "id": "first_party_runtime_projection",
+                "status": "blocked",
+                "reason": (
+                    "Canonical first-party skills under Skills/** are not all reachable "
+                    "through the modeled Codex loader roots; refresh workspace and user "
+                    "runtime projections before claiming picker coverage."
+                ),
+                "source_files": [
+                    "Infrastructure/scripts/lib/ask/services/codex_preview.py",
+                    "Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh",
+                ],
+                "missing_count": len(missing),
+                "missing_skills": missing,
+            }
+        )
+
+
 def _dedupe_preview_roots(roots: list[dict[str, Any]]) -> list[dict[str, Any]]:
     seen: set[str] = set()
     deduped: list[dict[str, Any]] = []
@@ -649,7 +765,6 @@ def build_codex_load_preview(repo_root: Path) -> dict[str, Any]:
                 ["codex-rs/core-skills/src/loader.rs"],
             )
         )
-    _refresh_preview_status_and_source_basis(base)
     base.update(
         {
             "roots": roots,
@@ -666,6 +781,8 @@ def build_codex_load_preview(repo_root: Path) -> dict[str, Any]:
             "agent_summary": f"Modeled {len(skills)} Codex-loadable skill(s) from {sum(1 for root in roots if root.get('exists'))} existing root(s).",
         }
     )
+    _append_first_party_projection_blocker(base, repo_root, skills)
+    _refresh_preview_status_and_source_basis(base)
     return base
 
 
