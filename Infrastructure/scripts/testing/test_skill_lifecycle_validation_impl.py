@@ -21,6 +21,7 @@ SCRIPT = REPO_ROOT / "Infrastructure" / "scripts" / "validation-and-linting" / "
 SHADOW_SCRIPT = REPO_ROOT / "Infrastructure" / "scripts" / "validation-and-linting" / "check_plugin_skill_shadowing.sh"
 SELECTION_POLICY_SCRIPT = REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync" / "selection_policy.py"
 SKILL_DISCOVERY_SCRIPT = REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync" / "skill_discovery.py"
+CODEX_PREVIEW_SCRIPT = REPO_ROOT / "Infrastructure" / "scripts" / "lib" / "ask" / "services" / "codex_preview.py"
 RUNTIME_SURFACE_POLICY_SCRIPT = (
     REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync" / "runtime_surface_policy.py"
 )
@@ -72,6 +73,16 @@ def load_validator_module():
     spec = importlib.util.spec_from_file_location("verify_skill_catalog_freshness", SCRIPT)
     if spec is None or spec.loader is None:
         raise RuntimeError(f"Failed to load validator module from {SCRIPT}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def load_codex_preview_module():
+    spec = importlib.util.spec_from_file_location("codex_preview", CODEX_PREVIEW_SCRIPT)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"Failed to load Codex preview module from {CODEX_PREVIEW_SCRIPT}")
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
@@ -1202,6 +1213,61 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         self.assertIn('if [ "$runtime_cache_fresh" != "1" ]; then', content)
         self.assertIn("Skipping home skills sync because flat runtime skill projection was not rebuilt.", content)
         self.assertIn("Skipping profile cache publication because runtime cache rebuild was not fresh.", content)
+
+    def test_sync_script_relinks_both_home_skill_roots(self) -> None:
+        """
+        Ensure user sync updates both interoperable and Codex-native home skill roots.
+
+        Codex can read from ~/.agents/skills and ~/.codex/skills. Both must
+        point at the same regenerated projection so stale links cannot make
+        skills appear in one project/profile but disappear in another.
+        """
+        content = SYNC_SCRIPT.read_text(encoding="utf-8")
+        self.assertIn('sync_user_skills "$skills_dir" "$HOME/.agents/skills"', content)
+        self.assertIn('sync_user_skills "$skills_dir" "$HOME/.codex/skills"', content)
+
+    def test_codex_load_preview_blocks_missing_first_party_projection(self) -> None:
+        """
+        Verify load-preview reports every missing canonical first-party skill.
+        """
+        module = load_codex_preview_module()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir)
+            for name in ["prek-pro", "improve-codebase-architecture"]:
+                write_text(
+                    repo / "Skills" / "agent-ops" / name / "SKILL.md",
+                    f"""
+                    ---
+                    name: {name}
+                    description: Review {name} configuration.
+                    ---
+
+                    # {name}
+                    """,
+                )
+            (repo / ".agents" / "skills").mkdir(parents=True)
+
+            with mock.patch.object(module, "_codex_runtime_source_identity") as source_identity:
+                source_identity.return_value = {
+                    "schema_version": "codex-runtime-source-identity.v1",
+                    "source_repo": "openai/codex",
+                    "source_files": [],
+                    "modeled_rule_version": "test",
+                    "status": "identified",
+                    "revision": "test",
+                    "relevant_source_dirty": False,
+                    "unavailable_reason": None,
+                }
+                preview = module.build_codex_load_preview(repo)
+
+            projection = preview["first_party_projection"]
+            blocker_ids = {check["id"] for check in preview["blocked_checks"]}
+            missing_names = {skill["name"] for skill in projection["missing_skills"]}
+            self.assertEqual("blocked", projection["status"])
+            self.assertEqual(2, projection["missing_count"])
+            self.assertEqual({"prek-pro", "improve-codebase-architecture"}, missing_names)
+            self.assertIn("first_party_runtime_projection", blocker_ids)
+            self.assertEqual("partial", preview["status"])
 
     def test_sync_script_regenerates_versioned_visible_local_cache_roots(self) -> None:
         """
