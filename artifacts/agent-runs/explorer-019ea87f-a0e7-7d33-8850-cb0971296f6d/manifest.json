@@ -1,0 +1,60 @@
+{
+  "run_id": "019ea87f-a0e7-7d33-8850-cb0971296f6d",
+  "agent_type": "explorer",
+  "task": "Reproduce and characterize direct ./bin/ask startup failure",
+  "repo": "/Users/jamiecraik/dev/agent-skills",
+  "handoff_worktree": "/private/tmp/agent-skills-pu-015-review-handoff",
+  "artifact_path": "artifacts/reviews/explorer.md",
+  "manifest_path": "artifacts/agent-runs/explorer-019ea87f-a0e7-7d33-8850-cb0971296f6d/manifest.json",
+  "commands": [
+    {
+      "command": "pwd",
+      "cwd": "/Users/jamiecraik/dev/agent-skills",
+      "outcome": "pass",
+      "evidence": "/Users/jamiecraik/dev/agent-skills"
+    },
+    {
+      "command": "git status --short --branch",
+      "cwd": "/Users/jamiecraik/dev/agent-skills",
+      "outcome": "pass",
+      "evidence": "branch codex/skills-sdk-capability-matrix-html-alignment; dirty worktree present"
+    },
+    {
+      "command": "ls -la /private/tmp/agent-skills-pu-015-review-handoff",
+      "cwd": "/Users/jamiecraik/dev/agent-skills",
+      "outcome": "pass",
+      "evidence": "handoff worktree exists"
+    },
+    {
+      "command": "./bin/ask repo status --json --robot",
+      "cwd": "/private/tmp/agent-skills-pu-015-review-handoff",
+      "outcome": "pass",
+      "evidence": "current Codex shell uses mise Python 3.12.13"
+    },
+    {
+      "command": "env -i PATH=/usr/bin:/bin ./bin/ask repo status --json --robot",
+      "cwd": "/private/tmp/agent-skills-pu-015-review-handoff",
+      "outcome": "fail",
+      "evidence": "ImportError: cannot import name 'UTC' from 'datetime' under Xcode Python 3.9.6"
+    },
+    {
+      "command": "env -i PATH=/usr/bin:/bin ./bin/ask --help",
+      "cwd": "/private/tmp/agent-skills-pu-015-review-handoff",
+      "outcome": "fail",
+      "evidence": "same ImportError before dispatch/help"
+    },
+    {
+      "command": "env -i PATH=/usr/bin:/bin ./bin/ask sdk status --json --robot",
+      "cwd": "/private/tmp/agent-skills-pu-015-review-handoff",
+      "outcome": "fail",
+      "evidence": "same ImportError before dispatch"
+    },
+    {
+      "command": "mise exec -- python Infrastructure/bin/ask repo status --json --robot",
+      "cwd": "/private/tmp/agent-skills-pu-015-review-handoff",
+      "outcome": "pass",
+      "evidence": "explicit repo runtime Python 3.12.13 succeeds"
+    }
+  ],
+  "status": "complete"
+}

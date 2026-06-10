@@ -1,3 +1,0 @@
-interface:
-  display_name: "Harness Engineering Strategy"
-  short_description: "Compress repo intent, architecture review, triage, strategy, ADR, and core invariant artifacts."

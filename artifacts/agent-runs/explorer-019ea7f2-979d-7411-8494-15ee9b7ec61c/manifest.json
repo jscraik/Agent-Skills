@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "agent_id": "019ea7f2-979d-7411-8494-15ee9b7ec61c",
+  "agent_type": "explorer",
+  "task": "synaipse_live_files_probe",
+  "cwd": "/Users/jamiecraik/dev/agent-skills",
+  "status": "completed",
+  "artifacts": [
+    {
+      "path": "artifacts/reviews/explorer.md",
+      "kind": "review_report",
+      "required": true
+    }
+  ],
+  "commands_run": [
+    "pwd",
+    "find Plugins -maxdepth 3 -iname "*synaipse*" -print",
+    "rg -n "SynAIpse|synaipse|synaipse-harness" Plugins Tests Infrastructure Docs .github -g "!*node_modules*" -g "!*__pycache__*"",
+    "find Plugins/synaipse-harness -maxdepth 4 -type f | sort",
+    "find Plugins/synaipse-harness/skills -maxdepth 2 -print | sort",
+    "ls -la Plugins/synaipse-harness/skills",
+    "find Plugins/cache/agent-skills-local/synaipse-harness -maxdepth 4 -type f -name SKILL.md | sort",
+    "find Plugins/synaipse-harness/skills -maxdepth 2 -type l -exec ls -la {} \;",
+    "nl -ba Plugins/synaipse-harness/.codex-plugin/plugin.json | sed -n "1,220p"",
+    "nl -ba Plugins/marketplace.json | sed -n "45,75p"",
+    "nl -ba Plugins/synaipse-harness/references/routing-map.json | sed -n "1,240p"",
+    "nl -ba Docs/skills-by-type.md | sed -n "70,95p"",
+    "rg -n "^(name|description):|^# " Plugins/cache/agent-skills-local/synaipse-harness/0.1.0/skills/*/SKILL.md",
+    "rg -n "display_name|short_description|description:" Plugins/cache/agent-skills-local/synaipse-harness/0.1.0/skills/*/agents/openai.yaml",
+    "find Plugins/cache/agent-skills-local/synaipse-harness/0.1.0/skills -maxdepth 1 -mindepth 1 -type d -exec basename {} \; | sort",
+    "git status --short --branch",
+    "git ls-files Plugins/synaipse-harness/skills Plugins/synaipse-harness/.codex-plugin/plugin.json Plugins/marketplace.json Docs/skills-by-type.md",
+    "git ls-files --deleted Plugins/synaipse-harness/skills",
+    "git ls-files --deleted Plugins/synaipse-harness/skills | wc -l",
+    "find Plugins/cache/agent-skills-local/synaipse-harness/0.1.0/skills -maxdepth 2 -type f -name SKILL.md | wc -l",
+    "find Plugins/synaipse-harness/skills -maxdepth 2 -type f | wc -l",
+    "rg -n "synaipse-harness|SynAIpse|sy-strategy|sy-reconcile|sy-work" Infrastructure/tests Infrastructure/scripts -g "!*__pycache__*"",
+    "nl -ba Infrastructure/tests/test_local_plugin_picker_surface.py | sed -n "75,112p"",
+    "nl -ba Plugins/synaipse-harness/README.md | sed -n "27,55p"",
+    "nl -ba Plugins/synaipse-harness/MIGRATION.md | sed -n "1,20p""
+  ],
+  "notes": [
+    "Canonical Plugins/synaipse-harness/skills is empty except .DS_Store in the live worktree.",
+    "git ls-files --deleted reports 73 tracked deleted files under Plugins/synaipse-harness/skills.",
+    "Installed cache still contains 12 sy-* SKILL.md descriptors."
+  ]
+}

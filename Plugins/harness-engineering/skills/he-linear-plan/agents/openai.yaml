@@ -1,3 +1,0 @@
-interface:
-  display_name: "Harness Engineering Linear Plan"
-  short_description: "Map harness cognition into small Linear milestones, parent issues, eval gates, and execution routing."

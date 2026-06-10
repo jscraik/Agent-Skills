@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "run_id": "20260608T152318Z",
+  "agent_role": "adversarial-reviewer",
+  "status": "complete",
+  "repo": {
+    "repository": "agent-skills",
+    "branch": "codex/skills-sdk-capability-matrix-html-alignment",
+    "headSha": "18ecfcd1050cde05c31b56ca773dda322035fe21",
+    "cwd": "/Users/jamiecraik/dev/agent-skills"
+  },
+  "task": {
+    "id": "pu-015-review-handoff",
+    "objective": "Adversarially review the PU-015 skills SDK review-handoff spec and trace plan.",
+    "coordinator": "/root"
+  },
+  "inputs": [
+    "/private/tmp/agent-skills-pu-015-review-handoff/.harness/specs/2026-06-08-skills-sdk-pu-015-review-handoff-receipts-spec.md",
+    "/private/tmp/agent-skills-pu-015-review-handoff/.harness/plan/2026-06-08-skills-sdk-pu-015-review-handoff-receipts-trace-plan.md",
+    "/private/tmp/agent-skills-pu-015-review-handoff/Infrastructure/config/schemas/skills-sdk/sdk-review-plan-receipt.v1.schema.json",
+    "/private/tmp/agent-skills-pu-015-review-handoff/Infrastructure/scripts/lib/ask/commands/sdk.py"
+  ],
+  "outputs": [
+    "artifacts/reviews/skills-sdk-pu-015-review-handoff/adversarial-reviewer.md",
+    "artifacts/agent-runs/adversarial-reviewer-20260608T152318Z/manifest.json"
+  ],
+  "provenance": {
+    "contractHash": "uncomputed",
+    "promptHash": "uncomputed",
+    "startedAt": "2026-06-08T15:23:18Z",
+    "completedAt": "2026-06-08T15:23:18Z"
+  },
+  "accountability": {
+    "artifact_paths": [
+      "artifacts/reviews/skills-sdk-pu-015-review-handoff/adversarial-reviewer.md"
+    ],
+    "findings": [
+      {
+        "severity": "high",
+        "title": "Self-reported provenance can be edited into a copied receipt and still pass handoff checks",
+        "impacted_behavior": "A copied review-plan receipt can be rewritten to match the current repo state and then accepted as if it were produced locally."
+      },
+      {
+        "severity": "medium",
+        "title": "The trace plan never actually proves the explicit handoff write path it promises",
+        "impacted_behavior": "A handoff implementation can ignore or reject repo-local writes and still satisfy the listed validation commands."
+      }
+    ],
+    "failures_or_blockers": [],
+    "improvement_opportunities": [
+      "Add an origin signal outside the receipt body for provenance validation.",
+      "Add a dedicated handoff write smoke that uses --receipt-out."
+    ],
+    "strengths": [
+      "Clear separation between review handoff packaging and review execution.",
+      "The updated spec now closes the earlier optional target/intent and symlink-escape concerns on paper."
+    ],
+    "validation_evidence": [
+      "Line-numbered inspection of the spec, trace plan, parser contract, and schema completed successfully.",
+      "Live repo branch and HEAD were confirmed before reviewing the artifacts."
+    ],
+    "next_action": "Tighten provenance and add a write-path smoke so the handoff contract is proven both read-only and explicit-write capable.",
+    "local_memory": {
+      "method": "cli",
+      "status": "not_needed",
+      "evidence": "Live spec, plan, schema, and parser evidence were sufficient; no memory-derived facts were needed for the review"
+    },
+    "positive_performance": {
+      "useful_findings": [
+        "self-reported provenance is not enough to reject edited copies",
+        "validation commands do not cover explicit handoff writes"
+      ],
+      "avoided_false_positive": [
+        "did not re-flag the optional target/intent hole",
+        "did not re-flag stale HEAD / target digest checks",
+        "did not re-flag symlink escape handling"
+      ],
+      "evidence_quality": "Strong because the review cross-checked the planning artifacts against the live parser contract and the trace plan's own validation list.",
+      "followed_scope": "Stayed on the review-handoff planning slice and did not drift into implementation or external state.",
+      "reusable_learning": [
+        "Any provenance field that can be recomputed from the same mutable file is not enough by itself to prove origin.",
+        "If a spec promises write behavior, the validation lane has to exercise a real write path, not just a read-only smoke."
+      ],
+      "coordinator_score": 8
+    }
+  }
+}

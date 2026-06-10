@@ -1,0 +1,62 @@
+{
+  "agent": "explorer",
+  "agent_id": "019ea78d-450b-7102-9fce-47d76229ee33",
+  "run_id": "019ea78d-450b-7102-9fce-47d76229ee33",
+  "task": "inspect PR #245 live CI status and failing logs",
+  "repo": "/Users/jamiecraik/dev/agent-skills",
+  "pr": {
+    "number": 245,
+    "url": "https://github.com/jscraik/Agent-Skills/pull/245",
+    "head_ref": "codex/plugin-sdk-desktop-readiness",
+    "head_sha": "c2ffc744ed25a2d35560eb5917302bec6c3dbdd6",
+    "base_ref": "main",
+    "state": "OPEN",
+    "merge_state_status": "BLOCKED"
+  },
+  "artifacts": {
+    "review": "artifacts/reviews/explorer.md",
+    "manifest": "artifacts/agent-runs/explorer-019ea78d-450b-7102-9fce-47d76229ee33/manifest.json"
+  },
+  "commands": [
+    "gh auth status",
+    "git status --short --branch",
+    "git rev-parse HEAD",
+    "git remote -v",
+    "gh pr view 245 --repo jscraik/Agent-Skills --json number,title,url,state,isDraft,headRefName,headRefOid,baseRefName,mergeStateStatus,statusCheckRollup,commits",
+    "gh run view 27143070643 --repo jscraik/Agent-Skills --json databaseId,name,workflowName,conclusion,status,url,event,headBranch,headSha,jobs",
+    "gh run view 27143071089 --repo jscraik/Agent-Skills --json databaseId,name,workflowName,conclusion,status,url,event,headBranch,headSha,jobs",
+    "/opt/homebrew/bin/gh run view --repo jscraik/Agent-Skills --job 80113428832 --log",
+    "/opt/homebrew/bin/gh run view --repo jscraik/Agent-Skills --job 80113448363 --log",
+    "/opt/homebrew/bin/gh run view --repo jscraik/Agent-Skills --job 80113446751 --log",
+    "git diff --cached --name-status",
+    "git diff --cached -- Infrastructure/scripts/lifecycle-and-sync/projection_integrity_impl.py Infrastructure/scripts/validation-and-linting/check_plugin_skill_shadowing_impl.sh Infrastructure/artifacts/validation/projection-integrity/latest.json"
+  ],
+  "findings": [
+    {
+      "check": "authoring-family-gate",
+      "classification": "repo-owned",
+      "summary": "Projection verify reports drift for cache-plugin-factory and cache-skill-factory immediately after sync."
+    },
+    {
+      "check": "test",
+      "classification": "repo-owned",
+      "summary": "Lifecycle readiness test test_plugin_shadowing_check_fails_with_overlap returns 0 instead of non-zero."
+    },
+    {
+      "check": "check",
+      "classification": "repo-owned",
+      "summary": "Same lifecycle readiness test failure as test."
+    },
+    {
+      "check": "security/snyk (jscraik)",
+      "classification": "external",
+      "summary": "External Snyk status context is ERROR."
+    },
+    {
+      "check": "CodeRabbit",
+      "classification": "pending",
+      "summary": "CodeRabbit status context is PENDING."
+    }
+  ],
+  "status": "complete"
+}

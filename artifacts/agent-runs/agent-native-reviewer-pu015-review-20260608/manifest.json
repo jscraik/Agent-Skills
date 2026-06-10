@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "run_id": "pu015-review-20260608",
+  "agent_role": "agent-native-reviewer",
+  "status": "complete",
+  "repo": {
+    "repository": "https://github.com/jscraik/Agent-Skills",
+    "branch": "codex/skills-sdk-capability-matrix-html-alignment",
+    "headSha": "18ecfcd1050cde05c31b56ca773dda322035fe21",
+    "cwd": "/Users/jamiecraik/dev/agent-skills"
+  },
+  "task": {
+    "id": "pu015_agent_native_review_3",
+    "objective": "Review PU-015 spec and trace plan for remaining blockers and write the review artifact.",
+    "coordinator": "/root/pu015_agent_native_review_3"
+  },
+  "inputs": [
+    "/private/tmp/agent-skills-pu-015-review-handoff/.harness/specs/2026-06-08-skills-sdk-pu-015-review-handoff-receipts-spec.md",
+    "/private/tmp/agent-skills-pu-015-review-handoff/.harness/plan/2026-06-08-skills-sdk-pu-015-review-handoff-receipts-trace-plan.md"
+  ],
+  "outputs": [
+    "artifacts/reviews/skills-sdk-pu-015-review-handoff/agent-native-reviewer.md"
+  ],
+  "provenance": {
+    "contractHash": "65791da20149bcdcd9d7cc5d5aeb27713d120b50370859ff1587f6d6637f8392",
+    "promptHash": "3a3b84a1e980f7d95f47e6a9868250aa7259fde02e64251f6a18bdac617e70a7",
+    "startedAt": "2026-06-08T15:30:35Z",
+    "completedAt": "2026-06-08T15:30:35Z"
+  },
+  "accountability": {
+    "artifact_paths": [
+      "artifacts/reviews/skills-sdk-pu-015-review-handoff/agent-native-reviewer.md"
+    ],
+    "findings": [
+      {
+        "severity": "none",
+        "evidence": "N/A",
+        "impacted_behavior": "N/A",
+        "remediation": "none",
+        "confidence": "high",
+        "ownership": "n/a"
+      }
+    ],
+    "failures_or_blockers": [],
+    "improvement_opportunities": [
+      "Keep the eventual implementation tests aligned with the spec's exact fail-closed cases, especially canonical digest recomputation and symlink escape coverage."
+    ],
+    "strengths": [
+      "The spec now explicitly requires source provenance, trace integrity, fail-closed handling, and output containment.",
+      "The trace plan now turns those requirements into a concrete implementation and validation sequence."
+    ],
+    "validation_evidence": [
+      "zsh -lc 'sed -n '1,260p' /private/tmp/agent-skills-pu-015-review-handoff/.harness/specs/2026-06-08-skills-sdk-pu-015-review-handoff-receipts-spec.md' -> pass",
+      "zsh -lc 'sed -n '1,260p' /private/tmp/agent-skills-pu-015-review-handoff/.harness/plan/2026-06-08-skills-sdk-pu-015-review-handoff-receipts-trace-plan.md' -> pass",
+      "zsh -lc 'nl -ba /private/tmp/agent-skills-pu-015-review-handoff/.harness/specs/2026-06-08-skills-sdk-pu-015-review-handoff-receipts-spec.md | sed -n '1,260p'' -> pass",
+      "zsh -lc 'nl -ba /private/tmp/agent-skills-pu-015-review-handoff/.harness/plan/2026-06-08-skills-sdk-pu-015-review-handoff-receipts-trace-plan.md | sed -n '1,260p'' -> pass"
+    ],
+    "next_action": "Proceed with PU-015 implementation using the reviewed spec and trace plan as the governing contract.",
+    "local_memory": {
+      "method": "cli",
+      "status": "not_needed",
+      "evidence": "The review was self-contained in the provided spec and trace-plan files."
+    },
+    "positive_performance": {
+      "useful_findings": [
+        "The documents now cover the previously missing provenance, trace, output containment, and local-only guardrails."
+      ],
+      "avoided_false_positive": [
+        "I did not report absent implementation code as a defect in a spec and plan review."
+      ],
+      "evidence_quality": "High, because the reviewed files name exact fields, failure modes, and validation targets.",
+      "followed_scope": "Yes, the review stayed on the spec and trace plan only.",
+      "reusable_learning": "Pairing mutable review receipts with a repo-local trace sidecar is the key fail-closed pattern here.",
+      "coordinator_score": 10
+    }
+  }
+}

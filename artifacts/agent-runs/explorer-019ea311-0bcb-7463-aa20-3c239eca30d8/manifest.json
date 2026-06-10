@@ -1,0 +1,32 @@
+{
+  "agent_id": "019ea311-0bcb-7463-aa20-3c239eca30d8",
+  "agent_type": "explorer",
+  "task": "Investigate local aidevcon plugin runtime visibility contracts",
+  "status": "completed",
+  "artifacts": [
+    {
+      "path": "artifacts/reviews/explorer.md",
+      "kind": "review_report",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "command": "rg -n \"aidevcon|agent-skills-local|marketplace|marketplaces|Plugins/cache|plugins-runtime|plugins\" /Users/jamiecraik/.codex/memories/MEMORY.md /Users/jamiecraik/dev/agent-skills -g \"*.md\" -g \"*.py\" -g \"*.ts\" -g \"*.tsx\" -g \"*.yaml\" -g \"*.yml\" -g \"*.json\" -g \"*.toml\"",
+      "result": "pass"
+    },
+    {
+      "command": "./bin/ask plugins status aidevcon --json --robot",
+      "result": "pass"
+    },
+    {
+      "command": "./bin/ask plugins doctor --json --robot",
+      "result": "pass"
+    },
+    {
+      "command": "find ... -path \"*/SKILL.md\" -type f | wc -l",
+      "result": "pass"
+    }
+  ],
+  "manifest_path": "artifacts/agent-runs/explorer-019ea311-0bcb-7463-aa20-3c239eca30d8/manifest.json"
+}

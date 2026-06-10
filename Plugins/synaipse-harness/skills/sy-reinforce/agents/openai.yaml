@@ -1,5 +1,0 @@
-policy:
-  allow_implicit_invocation: false
-interface:
-  display_name: "SynAIpse Harness Reinforce"
-  short_description: "Capture verified solved problems and refresh stale SynAIpse learning artifacts with evidence, redaction, overlap checks, and Project Brain alignment."

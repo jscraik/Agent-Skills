@@ -1,0 +1,60 @@
+{
+  "schema_version": "agent-run-manifest.v1",
+  "agent_id": "019ea7bf-1769-7413-9a2a-9667db1a82fc",
+  "agent_type": "default",
+  "task": "inventory first-party Skills/*/* SKILL.md entries versus .agents/skills visible entries",
+  "repo": "/Users/jamiecraik/dev/agent-skills",
+  "branch_observed": "codex/skills-sdk-capability-matrix-html-alignment",
+  "artifact_path": "artifacts/reviews/default.md",
+  "manifest_path": "artifacts/agent-runs/default-019ea7bf-1769-7413-9a2a-9667db1a82fc/manifest.json",
+  "status": "complete",
+  "source_edits": [],
+  "artifact_edits": [
+    "artifacts/reviews/default.md",
+    "artifacts/agent-runs/default-019ea7bf-1769-7413-9a2a-9667db1a82fc/manifest.json"
+  ],
+  "commands": [
+    {
+      "command": "git status --short --branch",
+      "outcome": "pass"
+    },
+    {
+      "command": "./bin/ask skills list --json --robot",
+      "outcome": "pass"
+    },
+    {
+      "command": "python3 inventory script over Skills/*/*/SKILL.md and selection_policy.py constants",
+      "outcome": "pass"
+    },
+    {
+      "command": "./bin/ask skills explain prek-pro --json --robot",
+      "outcome": "pass"
+    },
+    {
+      "command": "./bin/ask skills prove prek-pro --json --robot",
+      "outcome": "pass_reachability_structure_missing_outcome_proof"
+    },
+    {
+      "command": "./bin/ask skills audit Skills/agent-ops/prek-pro --level strict --json --robot",
+      "outcome": "pass_with_warnings"
+    },
+    {
+      "command": "./bin/ask skills handles --json --robot",
+      "outcome": "pass"
+    },
+    {
+      "command": "rg -n '\"id\": \"prek-pro\"' .skillsets/agent-ops/manifest.jsonl",
+      "outcome": "pass"
+    }
+  ],
+  "summary": {
+    "first_party_two_level_skill_count": 77,
+    "agents_skills_first_level_count": 10,
+    "visible_flat_allowlist_count": 24,
+    "first_party_hidden_by_flat_allowlist_count": 53,
+    "first_party_duplicate_names_count": 0,
+    "first_party_intentionally_hidden_by_policy_count": 0,
+    "prek_pro_status": "active_validated_latent_reachable_without_outcome_proof",
+    "recommended_rule": "keep rooted default; promote latent skills to flat only with repeated demand, strict audit, command proof, outcome proof, no overlap, and explicit policy reason"
+  }
+}

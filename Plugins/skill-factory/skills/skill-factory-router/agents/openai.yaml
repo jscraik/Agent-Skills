@@ -1,3 +1,0 @@
-interface:
-  display_name: "Skill Factory Router"
-  short_description: "Route skill lifecycle requests to a Skill Factory lane. Use when users ask to create, harden,..."

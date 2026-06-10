@@ -1,1 +1,0 @@
-../../../../fixtures/budget-archive/2026-04-21/deferred-store/skills/scaffolding_templates/plugin-creator/scripts/render_plugin_creator_templates.py

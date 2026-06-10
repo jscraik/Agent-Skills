@@ -1,0 +1,93 @@
+{
+  "agent_id": "019ea37a-9dd1-77e1-8cdf-f67c3421756f",
+  "agent_type": "explorer",
+  "run_id": "019ea37a-9dd1-77e1-8cdf-f67c3421756f",
+  "task": "Check whether current MCP resources/templates expose the codex repo or plugin docs; inspect local MCP/resource config when relevant; return codex-repo MCP availability and plugin path contract evidence.",
+  "status": "completed",
+  "artifact_path": "artifacts/reviews/explorer.md",
+  "manifest_path": "artifacts/agent-runs/explorer-019ea37a-9dd1-77e1-8cdf-f67c3421756f/manifest.json",
+  "evidence": {
+    "mcp_resources": {
+      "status": "pass",
+      "finding": "Current session resources were limited to creative_production_mcp and datascienceWidgets UI widgets; no codex-repo or plugin-doc resources."
+    },
+    "mcp_resource_templates": {
+      "status": "pass",
+      "finding": "Current session resourceTemplates list was empty."
+    },
+    "local_codex_config": {
+      "status": "pass",
+      "finding": "/Users/jamiecraik/.codex/config.toml declares optional [mcp_servers.codex-repo] at https://codex-doc.brainwav.io/mcp."
+    },
+    "plugin_path_contract": {
+      "status": "pass",
+      "finding": "Docs/agents/14-path-ownership-boundaries.md declares Plugins/<plugin>/** as canonical plugin source and Plugins/cache/** plus .agents/** as runtime/projection surfaces."
+    }
+  },
+  "commands": [
+    {
+      "command": "list_mcp_resources({})",
+      "outcome": "pass"
+    },
+    {
+      "command": "list_mcp_resource_templates({})",
+      "outcome": "pass"
+    },
+    {
+      "command": "git status --short --branch",
+      "outcome": "pass"
+    },
+    {
+      "command": "cat AGENTS.md",
+      "outcome": "pass"
+    },
+    {
+      "command": "rg -n MCP/search terms across agent-skills and codex",
+      "outcome": "pass"
+    },
+    {
+      "command": "nl -ba Docs/agents/14-path-ownership-boundaries.md",
+      "outcome": "pass"
+    },
+    {
+      "command": "nl -ba Docs/agents/17-skill-management.md",
+      "outcome": "pass"
+    },
+    {
+      "command": "nl -ba UBIQUITOUS_LANGUAGE.md",
+      "outcome": "pass"
+    },
+    {
+      "command": "sed -n 350,380p /Users/jamiecraik/.codex/config.toml",
+      "outcome": "pass"
+    },
+    {
+      "command": "sed -n 540,575p /Users/jamiecraik/.codex/config.toml",
+      "outcome": "pass"
+    },
+    {
+      "command": "sed -n 880,910p /Users/jamiecraik/.codex/config.toml",
+      "outcome": "pass"
+    },
+    {
+      "command": "cat /Users/jamiecraik/dev/codex/codex-rs/app-server-protocol/schema/typescript/v2/McpServerStatus.ts",
+      "outcome": "pass"
+    },
+    {
+      "command": "cat /Users/jamiecraik/dev/codex/codex-rs/app-server-protocol/schema/typescript/v2/ListMcpServerStatusParams.ts",
+      "outcome": "pass"
+    },
+    {
+      "command": "sed -n 1,220p /Users/jamiecraik/dev/codex/codex-rs/utils/plugins/src/lib.rs",
+      "outcome": "pass"
+    },
+    {
+      "command": "sed -n 190,245p /Users/jamiecraik/dev/codex/codex-rs/core-skills/src/injection.rs",
+      "outcome": "pass"
+    }
+  ],
+  "limitations": [
+    "Did not run codex mcp list; this report distinguishes configured codex-repo MCP from current session resource/template exposure.",
+    "No source files were modified beyond the required report and manifest artifacts."
+  ]
+}

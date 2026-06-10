@@ -1,5 +1,0 @@
-policy:
-  allow_implicit_invocation: false
-interface:
-  display_name: "SynAIpse Harness Brainstorm"
-  short_description: "Clarify ambiguous SynAIpse Harness ideas, expected behavior, tradeoffs, and requirements before spec, plan, work, or bug routing."

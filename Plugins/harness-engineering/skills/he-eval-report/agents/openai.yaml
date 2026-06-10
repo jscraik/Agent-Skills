@@ -1,3 +1,0 @@
-interface:
-  display_name: "Harness Engineering Eval Report"
-  short_description: "Use when completed HE implementation slices need closure proof, drift validation, and eval-backed Linear completion guidance."

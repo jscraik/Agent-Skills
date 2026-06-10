@@ -1,1 +1,0 @@
-../../../../fixtures/budget-archive/2026-04-21/deferred-store/skills/scaffolding_templates/plugin-creator/scripts/check_plugin_creator_template_drift.py

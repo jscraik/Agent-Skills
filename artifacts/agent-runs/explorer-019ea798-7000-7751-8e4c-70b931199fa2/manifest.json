@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "agent_id": "019ea798-7000-7751-8e4c-70b931199fa2",
+  "agent_type": "explorer",
+  "task": "Inspect Skill Factory and skill installer guidance relevant to skill picker browseability/listing.",
+  "cwd": "/Users/jamiecraik/dev/agent-skills",
+  "branch_observed": "codex/plugin-sdk-desktop-readiness",
+  "artifacts": [
+    {
+      "path": "artifacts/reviews/explorer.md",
+      "type": "review_report",
+      "status": "written"
+    }
+  ],
+  "commands_observed": [
+    "pwd",
+    "git status --short --branch",
+    "rg --files ...",
+    "rg -n ...",
+    "sed -n ...",
+    "nl -ba ...",
+    "jq '.' Plugins/skill-factory/.codex-plugin/plugin.json"
+  ],
+  "validation": [
+    {
+      "command": "test -s artifacts/reviews/explorer.md",
+      "outcome": "pass"
+    },
+    {
+      "command": "test -s artifacts/agent-runs/explorer-019ea798-7000-7751-8e4c-70b931199fa2/manifest.json",
+      "outcome": "pass"
+    }
+  ]
+}

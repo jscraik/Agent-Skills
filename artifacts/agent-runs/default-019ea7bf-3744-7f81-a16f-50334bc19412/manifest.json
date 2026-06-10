@@ -1,0 +1,35 @@
+{
+  "schema_version": "agent-run-manifest.v1",
+  "agent_id": "019ea7bf-3744-7f81-a16f-50334bc19412",
+  "agent_type": "default",
+  "run_id": "019ea7bf-3744-7f81-a16f-50334bc19412",
+  "cwd": "/Users/jamiecraik/dev/agent-skills",
+  "branch": "codex/skills-sdk-capability-matrix-html-alignment",
+  "head_sha": "18ecfcd1050cde05c31b56ca773dda322035fe21",
+  "base_ref": "origin/main",
+  "base_sha": "27c76e46a60809beff70376c4615aeed00ea4149",
+  "artifact_path": "artifacts/reviews/default.md",
+  "manifest_path": "artifacts/agent-runs/default-019ea7bf-3744-7f81-a16f-50334bc19412/manifest.json",
+  "status": "completed",
+  "findings_count": 0,
+  "validation": [
+    {
+      "command": "git diff --check origin/main...HEAD",
+      "outcome": "pass"
+    },
+    {
+      "command": "XDG_CACHE_HOME=/private/tmp/agent-skills-xdg-cache XDG_STATE_HOME=/private/tmp/agent-skills-xdg-state MISE_CACHE_DIR=/private/tmp/agent-skills-mise-cache MISE_STATE_DIR=/private/tmp/agent-skills-mise-state MISE_TRUSTED_CONFIG_PATHS=/Users/jamiecraik/dev/agent-skills/.mise.toml UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_capability_status.py Infrastructure/tests/test_skills_sdk_pipeline_status_artifact.py -q",
+      "outcome": "pass",
+      "evidence": "24 passed, 84 subtests passed"
+    },
+    {
+      "command": "XDG_CACHE_HOME=/private/tmp/agent-skills-xdg-cache XDG_STATE_HOME=/private/tmp/agent-skills-xdg-state MISE_CACHE_DIR=/private/tmp/agent-skills-mise-cache MISE_STATE_DIR=/private/tmp/agent-skills-mise-state MISE_TRUSTED_CONFIG_PATHS=/Users/jamiecraik/dev/agent-skills/.mise.toml UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache ./bin/ask sdk status --json --robot",
+      "outcome": "pass",
+      "evidence": "success; total 32; local_plugin_readiness implemented true; remote_marketplace out_of_scope false"
+    }
+  ],
+  "residual_risk": [
+    "Repository-wide closeout and full ask repo validate were not run.",
+    "Live Codex Desktop picker state was not verified in this review lane."
+  ]
+}

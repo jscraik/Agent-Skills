@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "agent": "explorer",
+  "run_id": "019ea311-6fc6-7261-874a-f74e4762779b",
+  "task": "Read-only scan docs/tests for local plugin runtime and picker contracts",
+  "status": "complete",
+  "artifacts": [
+    {
+      "path": "artifacts/reviews/explorer.md",
+      "kind": "review",
+      "required": true
+    }
+  ],
+  "edits": [
+    "artifacts/reviews/explorer.md",
+    "artifacts/agent-runs/explorer-019ea311-6fc6-7261-874a-f74e4762779b/manifest.json"
+  ],
+  "validation": [
+    {
+      "command": "test -s artifacts/reviews/explorer.md",
+      "status": "pass"
+    },
+    {
+      "command": "test -s artifacts/agent-runs/explorer-019ea311-6fc6-7261-874a-f74e4762779b/manifest.json",
+      "status": "pass"
+    },
+    {
+      "command": "jq . artifacts/agent-runs/explorer-019ea311-6fc6-7261-874a-f74e4762779b/manifest.json >/dev/null",
+      "status": "pass"
+    }
+  ]
+}

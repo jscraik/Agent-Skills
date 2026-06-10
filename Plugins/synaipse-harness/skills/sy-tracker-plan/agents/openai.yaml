@@ -1,5 +1,0 @@
-policy:
-  allow_implicit_invocation: false
-interface:
-  display_name: "SynAIpse Harness Linear Plan"
-  short_description: "Map harness cognition into small Linear milestones, parent issues, eval gates, and execution routing."

@@ -1,0 +1,17 @@
+{
+  "branch": "codex/skills-sdk-capability-matrix-html-alignment",
+  "branch_policy": "same_head_required",
+  "created_by_command": "./bin/ask sdk review plan --target Skills/agent-ops/simplify --intent validation_review --receipt-out .harness/artifacts/sdk-review-plan/test-review-plan.json --json --robot",
+  "head_sha": "18ecfcd1050cde05c31b56ca773dda322035fe21",
+  "receipt_instance_id": "cfc540e0-4ff2-43b4-aa9a-a6c5301e6276",
+  "receipt_path": ".harness/artifacts/sdk-review-plan/test-review-plan.json",
+  "receipt_sha256": "38f41022a1953f24b9603ae4b82dcda2f60b3e2fb140a876d2b4b2a18caf197a",
+  "repo_root": "/Users/jamiecraik/dev/agent-skills",
+  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/sdk-review-plan-trace.v1.schema.json",
+  "schema_version": "skills-sdk.review-plan-trace.v1",
+  "target_content_digest": "59a735136f044d5d20ca5f77784716044c8d3a586d304208b262b33ed08e0c5b",
+  "target_digest_status": "pass",
+  "target_identity": "path:Skills/agent-ops/simplify",
+  "target_input": "Skills/agent-ops/simplify",
+  "target_path": "Skills/agent-ops/simplify"
+}

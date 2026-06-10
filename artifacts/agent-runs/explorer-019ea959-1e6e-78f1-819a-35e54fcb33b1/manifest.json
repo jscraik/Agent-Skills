@@ -1,0 +1,14 @@
+{
+  "schema_version": "agent-run-manifest.v1",
+  "agent_id": "019ea959-1e6e-78f1-819a-35e54fcb33b1",
+  "agent_type": "explorer",
+  "status": "completed_read_only",
+  "workspace": "/Users/jamiecraik/dev/agent-skills-synaipse-lifecycle-clean",
+  "artifact_path": "artifacts/reviews/explorer.md",
+  "manifest_path": "artifacts/agent-runs/explorer-019ea959-1e6e-78f1-819a-35e54fcb33b1/manifest.json",
+  "notes": [
+    "Read-only source inspection only.",
+    "Worktree was detached and had unresolved conflicts before inspection.",
+    "Commands used command-local MISE_TRUSTED_CONFIG_PATHS because .mise.toml was untrusted."
+  ]
+}

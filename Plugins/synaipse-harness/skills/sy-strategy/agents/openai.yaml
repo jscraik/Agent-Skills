@@ -1,5 +1,0 @@
-policy:
-  allow_implicit_invocation: false
-interface:
-  display_name: "SynAIpse Harness Strategy"
-  short_description: "Compress repo intent, architecture review, triage, strategy, ADR, and core invariant artifacts."

@@ -1,5 +1,0 @@
-policy:
-  allow_implicit_invocation: false
-interface:
-  display_name: "SynAIpse Harness Code Review"
-  short_description: "Review PRs, branches, diffs, and workflow artifacts for package-level go/no-go readiness with..."

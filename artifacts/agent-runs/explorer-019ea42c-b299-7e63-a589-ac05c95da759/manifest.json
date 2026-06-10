@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "agent_id": "019ea42c-b299-7e63-a589-ac05c95da759",
+  "agent_type": "explorer",
+  "task": "inspect legacy generated command/control handle references and propose replacement wording",
+  "status": "complete",
+  "artifact_path": "artifacts/reviews/explorer.md",
+  "manifest_path": "artifacts/agent-runs/explorer-019ea42c-b299-7e63-a589-ac05c95da759/manifest.json",
+  "source_docs_inspected": [
+    "UBIQUITOUS_LANGUAGE.md",
+    "README.md",
+    "ARCHITECTURE.md",
+    "Docs/** active index, architecture, concepts, product, reference, runbook surfaces",
+    "Plugins/harness-engineering/references/plugin-eval-confidence-contract.md",
+    "Plugins/cache/agent-skills-local/harness-engineering/0.1.0/** relevant AGENTS and confidence contract cache copy"
+  ],
+  "mutated_source_docs": false
+}

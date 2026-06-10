@@ -1,0 +1,30 @@
+{
+  "agent_id": "019ea94d-288c-7fe0-b191-53b9707dc218",
+  "agent_type": "explorer",
+  "artifact_path": "artifacts/reviews/explorer.md",
+  "cwd": "/Users/jamiecraik/dev/agent-skills",
+  "manifest_path": "artifacts/agent-runs/explorer-019ea94d-288c-7fe0-b191-53b9707dc218/manifest.json",
+  "outputs": [
+    "artifacts/reviews/explorer.md"
+  ],
+  "status": "complete",
+  "task": "Inspect live Skills SDK code/test surfaces, capability matrix/status, review handoff receipts, and pipeline status.",
+  "validation": [
+    {
+      "command": "git status --short --branch",
+      "outcome": "pass"
+    },
+    {
+      "command": "./bin/ask sdk status --json --robot",
+      "outcome": "pass"
+    },
+    {
+      "command": "test -s artifacts/reviews/explorer.md",
+      "outcome": "pass"
+    },
+    {
+      "command": "test -s artifacts/agent-runs/explorer-019ea94d-288c-7fe0-b191-53b9707dc218/manifest.json",
+      "outcome": "pass"
+    }
+  ]
+}

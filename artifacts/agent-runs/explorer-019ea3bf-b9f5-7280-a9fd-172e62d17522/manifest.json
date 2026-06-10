@@ -1,0 +1,19 @@
+{
+  "agent_id": "019ea3bf-b9f5-7280-a9fd-172e62d17522",
+  "agent_type": "explorer",
+  "task": "prepare_pr_body_draft",
+  "artifact_path": "artifacts/reviews/explorer.md",
+  "status": "complete",
+  "inputs": [
+    ".github/PULL_REQUEST_TEMPLATE.md",
+    "AGENTS.md",
+    "CONTRIBUTING.md",
+    "UBIQUITOUS_LANGUAGE.md",
+    "git status --short --branch",
+    "git diff --cached --name-status",
+    "git diff --cached --stat"
+  ],
+  "output": "template_compliant_markdown_final_answer",
+  "blockers": []
+}
+

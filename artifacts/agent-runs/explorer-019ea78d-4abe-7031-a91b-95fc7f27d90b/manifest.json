@@ -1,0 +1,34 @@
+{
+  "agent_id": "019ea78d-4abe-7031-a91b-95fc7f27d90b",
+  "agent_type": "explorer",
+  "run_id": "019ea78d-4abe-7031-a91b-95fc7f27d90b",
+  "repo": "/Users/jamiecraik/dev/agent-skills",
+  "task": "worktree_probe",
+  "report_path": "artifacts/reviews/explorer.md",
+  "manifest_path": "artifacts/agent-runs/explorer-019ea78d-4abe-7031-a91b-95fc7f27d90b/manifest.json",
+  "status": "complete",
+  "observed_branch": "codex/plugin-sdk-desktop-readiness",
+  "observed_head": "c2ffc744ed25a2d35560eb5917302bec6c3dbdd6",
+  "observed_upstream": "origin/codex/plugin-sdk-desktop-readiness",
+  "observed_upstream_sha": "c2ffc744ed25a2d35560eb5917302bec6c3dbdd6",
+  "ahead": 0,
+  "behind": 0,
+  "network_fetch_run": false,
+  "transition_observed": "initial read saw e3a60fbf970f65ae5fc68124eb982cd6116b23e1 behind upstream by 2; final read saw HEAD equal upstream at c2ffc744ed25a2d35560eb5917302bec6c3dbdd6",
+  "tracked_changes": {
+    "staged": [],
+    "unstaged": [
+      "Infrastructure/artifacts/validation/projection-integrity/latest.json",
+      "Infrastructure/scripts/lifecycle-and-sync/projection_integrity_impl.py",
+      "Infrastructure/scripts/validation-and-linting/check_plugin_skill_shadowing_impl.sh"
+    ]
+  },
+  "tracked_change_diffstat": "3 files changed, 16 insertions(+), 11 deletions(-)",
+  "untracked_hazards": [
+    "artifacts/agent-runs/**",
+    "artifacts/reviews/circleci.md",
+    "artifacts/reviews/code-simplicity-reviewer.md",
+    "artifacts/reviews/explorer.md",
+    "artifacts/reviews/git-project-triage.md"
+  ]
+}
