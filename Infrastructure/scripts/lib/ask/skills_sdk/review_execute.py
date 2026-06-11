@@ -406,6 +406,8 @@ def _load_json_object(path: Path, *, label: str) -> dict[str, Any]:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except FileNotFoundError as exc:
         raise ValueError(f"{label} does not exist.") from exc
+    except (IsADirectoryError, NotADirectoryError) as exc:
+        raise ValueError(f"{label} must resolve to a file path.") from exc
     except UnicodeDecodeError as exc:
         raise ValueError(f"{label} must be valid UTF-8 JSON.") from exc
     except json.JSONDecodeError as exc:

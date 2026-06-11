@@ -70,6 +70,9 @@ class TestSkillsSdkReviewExecute(unittest.TestCase):
         self._cleanup_paths()
 
     def _cleanup_paths(self) -> None:
+        for parent_path in (self.handoff_path.parent, self.execute_path.parent):
+            if parent_path.is_file():
+                parent_path.unlink()
         if self.plan_path.exists():
             try:
                 plan = json.loads(self.plan_path.read_text(encoding="utf-8"))
@@ -81,7 +84,10 @@ class TestSkillsSdkReviewExecute(unittest.TestCase):
                     trace_path.unlink()
         for path in (self.plan_path, self.handoff_path, self.execute_path):
             if path.exists():
-                path.unlink()
+                if path.is_dir():
+                    shutil.rmtree(path)
+                else:
+                    path.unlink()
         if self.artifact_dir.exists():
             shutil.rmtree(self.artifact_dir)
 
@@ -391,6 +397,50 @@ class TestSkillsSdkReviewExecute(unittest.TestCase):
                 REPO_ROOT,
                 handoff_path=".harness/artifacts/sdk-review-handoff/test-execute-handoff.json",
             )
+
+    def test_cli_execute_reports_directory_handoff_as_validation_error(self) -> None:
+        self.handoff_path.mkdir(parents=True, exist_ok=True)
+
+        payload = _run_json_command(
+            sys.executable,
+            "Infrastructure/bin/ask",
+            "sdk",
+            "review",
+            "execute",
+            "--handoff",
+            ".harness/artifacts/sdk-review-handoff/test-execute-handoff.json",
+            "--json",
+            "--robot",
+            expect_success=False,
+        )
+
+        self.assertEqual(payload["status"], "error")
+        self.assertEqual(payload["errors"][0]["code"], "ERR_VALIDATION")
+        self.assertIn("review handoff receipt must resolve to a file path", payload["errors"][0]["message"])
+
+    def test_cli_execute_reports_handoff_with_file_parent_as_validation_error(self) -> None:
+        parent_path = self.handoff_path.parent
+        if parent_path.exists():
+            shutil.rmtree(parent_path)
+        parent_path.parent.mkdir(parents=True, exist_ok=True)
+        parent_path.write_text("not a directory\n", encoding="utf-8")
+
+        payload = _run_json_command(
+            sys.executable,
+            "Infrastructure/bin/ask",
+            "sdk",
+            "review",
+            "execute",
+            "--handoff",
+            ".harness/artifacts/sdk-review-handoff/test-execute-handoff.json",
+            "--json",
+            "--robot",
+            expect_success=False,
+        )
+
+        self.assertEqual(payload["status"], "error")
+        self.assertEqual(payload["errors"][0]["code"], "ERR_VALIDATION")
+        self.assertIn("review handoff receipt must resolve to a file path", payload["errors"][0]["message"])
 
     def test_cli_execute_reports_invalid_utf8_handoff_as_validation_error(self) -> None:
         self.handoff_path.parent.mkdir(parents=True, exist_ok=True)
