@@ -13,5 +13,5 @@
   "target_digest_status": "pass",
   "target_identity": "path:Skills/agent-ops/simplify",
   "target_input": "Skills/agent-ops/simplify",
-  "target_path": "Skills/agent-ops/simplify"
+  "target_resolved_path": "Skills/agent-ops/simplify"
 }
