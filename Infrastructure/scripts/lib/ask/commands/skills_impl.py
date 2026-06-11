@@ -5903,6 +5903,13 @@ def _scope_rank_for_path(repo_root: Path, skill_path: str) -> int:
     return max_precedence + len(REPO_SCAN_ROOTS) + 2
 
 
+def _canonical_repo_relative_path(path: str) -> str:
+    parts = Path(path).parts
+    if parts and parts[0] == "plugins":
+        return Path("Plugins", *parts[1:]).as_posix()
+    return path
+
+
 def _exact_handle_sort_key(candidate: EligibleCandidate) -> tuple[int, int, str]:
     path = candidate.path.removeprefix("./")
     bridge_rank = 1 if path.startswith(".agents/") else 0
@@ -5952,7 +5959,7 @@ def route_skills(
     for entry in discover_catalog_entries():
         if not entry.source_dir.is_relative_to(repo_root):
             continue
-        rel_path = entry.source_dir.relative_to(repo_root).as_posix()
+        rel_path = _canonical_repo_relative_path(entry.source_dir.relative_to(repo_root).as_posix())
         candidate = EligibleCandidate(
             name=entry.name,
             path=rel_path,
@@ -5966,7 +5973,7 @@ def route_skills(
     for entry in discover_catalog_entries(advanced=True):
         if not entry.source_dir.is_relative_to(repo_root):
             continue
-        rel_path = entry.source_dir.relative_to(repo_root).as_posix()
+        rel_path = _canonical_repo_relative_path(entry.source_dir.relative_to(repo_root).as_posix())
         candidate = EligibleCandidate(
             name=entry.name,
             path=rel_path,
@@ -5994,7 +6001,7 @@ def route_skills(
                 continue
             if not entry.source_dir.is_relative_to(repo_root):
                 continue
-            rel_path = entry.source_dir.relative_to(repo_root).as_posix()
+            rel_path = _canonical_repo_relative_path(entry.source_dir.relative_to(repo_root).as_posix())
             candidate = EligibleCandidate(
                 name=entry.name,
                 path=rel_path,

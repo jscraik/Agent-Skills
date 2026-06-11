@@ -9,7 +9,7 @@ import json
 import shlex
 from typing import Any, Iterable
 
-POLICY_VERSION = "2026-06-08.v22"
+POLICY_VERSION = "2026-06-11.v23"
 
 PROJECTION_MODE_CHOICES: tuple[str, ...] = ("flat", "rooted", "hybrid")
 
@@ -93,6 +93,33 @@ DEFAULT_VISIBLE_SYSTEM_BRIDGE_SKILL_NAMES: tuple[str, ...] = (
 # one skill exposed by two plugin families and should dedupe to the canonical
 # owning plugin. Distinct homonyms share a short handle but must stay qualified
 # by plugin name so the picker does not imply they are interchangeable.
+
+
+def _same_capability_plugin_cache_policy(
+    *,
+    name: str,
+    canonical_plugin: str,
+    duplicate_plugin: str,
+    canonical_family: str = "openai-curated",
+    duplicate_family: str = "openai-curated-remote",
+) -> dict[str, Any]:
+    canonical_path = f"Plugins/cache/{canonical_family}/{canonical_plugin}/skills/{name}"
+    duplicate_path = f"Plugins/cache/{duplicate_family}/{duplicate_plugin}/skills/{name}"
+    return {
+        "name": name,
+        "classification": "same_capability",
+        "display_strategy": "dedupe_to_canonical",
+        "resolution": "suppress_duplicate",
+        "reason": (
+            f"{canonical_plugin} appears in both curated and remote plugin caches; "
+            "the curated bundle is canonical for this repository runtime."
+        ),
+        "paths": (canonical_path, duplicate_path),
+        "canonical_path": canonical_path,
+        "suppressed_paths": (duplicate_path,),
+    }
+
+
 PLUGIN_SKILL_COLLISION_POLICIES: tuple[dict[str, Any], ...] = (
     {
         "name": "agents-sdk",
@@ -184,6 +211,39 @@ PLUGIN_SKILL_COLLISION_POLICIES: tuple[dict[str, Any], ...] = (
             "Plugins/cache/openai-curated-remote/product-design/skills/user-context": "product-design:user-context",
         },
     },
+    *(
+        _same_capability_plugin_cache_policy(
+            name=name,
+            canonical_plugin="github",
+            duplicate_plugin="github",
+        )
+        for name in (
+            "gh-address-comments",
+            "gh-fix-ci",
+            "github",
+            "yeet",
+        )
+    ),
+    _same_capability_plugin_cache_policy(
+        name="linear",
+        canonical_plugin="linear",
+        duplicate_plugin="linear",
+    ),
+    *(
+        _same_capability_plugin_cache_policy(
+            name=name,
+            canonical_plugin="slack",
+            duplicate_plugin="slack",
+        )
+        for name in (
+            "slack",
+            "slack-channel-summarization",
+            "slack-daily-digest",
+            "slack-notification-triage",
+            "slack-outgoing-message",
+            "slack-reply-drafting",
+        )
+    ),
 )
 
 # Runtime projection modes. These are intentionally outside the selection

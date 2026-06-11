@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import re
 import sys
+import json
 from pathlib import Path
 
 try:
@@ -14,32 +15,101 @@ except ImportError:  # pragma: no cover - exercised only in stripped runtimes
 
 
 EXPECTED_STAGE_HEADINGS = [
-    "Stage Contract",
     "When to use",
-    "When not to use",
     "Required inputs",
     "Deliverables",
-    "Preconditions",
     "Procedure",
-    "Allowed writes",
-    "Forbidden writes",
-    "Exit criteria",
     "Validation",
     "Handoff",
     "Failure modes",
-    "Execution boundaries",
     "Gotchas",
-    "Examples",
     "References",
 ]
 
+REQUIRED_YAML_KEYS = {
+    Path("references/contract.yaml"): {
+        "schema_version",
+        "skill",
+        "stage",
+        "preconditions",
+        "allowed_writes",
+        "forbidden_writes",
+        "execution_boundaries",
+        "exit_criteria",
+    },
+    Path("references/evals.yaml"): {
+        "schema_version",
+        "skill",
+        "stage",
+        "eval_scenarios",
+        "success_criteria",
+    },
+    Path("references/source-context.yaml"): {
+        "schema_version",
+        "skill",
+        "stage",
+        "template",
+        "original_references",
+        "references",
+        "load_when",
+        "provenance_policy",
+        "allowed_claims",
+        "forbidden_claims",
+        "freshness",
+        "context_budget",
+    },
+    Path("agents/openai.yaml"): {
+        "schema_version",
+        "skill",
+        "stage",
+        "role",
+        "instructions",
+        "tool_policy",
+        "output_contract",
+    },
+}
+
+REQUIRED_JSON_KEYS = {
+    Path("references/task-profile.json"): {
+        "schema_version",
+        "skill",
+        "stage",
+        "task_type",
+        "inputs",
+        "outputs",
+        "validation_profile",
+    },
+}
+
 REQUIRED_COMPANION_FILES = [
-    Path("references/contract.yaml"),
-    Path("references/evals.yaml"),
-    Path("references/task-profile.json"),
-    Path("references/source-context.yaml"),
-    Path("agents/openai.yaml"),
+    *REQUIRED_YAML_KEYS.keys(),
+    *REQUIRED_JSON_KEYS.keys(),
 ]
+
+SOURCE_CONTEXT_REFERENCE_KEYS = {
+    "path",
+    "kind",
+    "provenance",
+    "load_when",
+    "allowed_claims",
+    "forbidden_claims",
+    "freshness",
+    "context_budget",
+    "claim_scope",
+    "bounded_unit",
+}
+
+REFERENCE_KINDS = {
+    "expert_viewpoint",
+    "evidence_packet",
+    "prior_art",
+    "runbook",
+    "rubric",
+    "substantial_context",
+    "composite_runbook",
+    "stage_companion",
+    "upstream_pack_export",
+}
 
 SYNAIPSE_STAGE_NAMES = {
     "strategy",
@@ -133,6 +203,103 @@ def load_yaml(path: Path) -> dict:
     if not isinstance(payload, dict):
         fail(f"{path} must contain a YAML mapping")
     return payload
+
+
+def load_json(path: Path) -> dict:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        fail(f"{path} must contain a JSON object")
+    return payload
+
+
+def missing_keys(payload: dict, required: set[str]) -> list[str]:
+    return sorted(key for key in required if key not in payload)
+
+
+def validate_required_mapping(
+    root: Path,
+    skill_dir: Path,
+    relative_path: Path,
+    required: set[str],
+) -> dict:
+    path = skill_dir / relative_path
+    if not path.exists():
+        fail(f"{skill_dir.relative_to(root)} missing {relative_path}")
+    payload = load_yaml(path)
+    missing = missing_keys(payload, required)
+    if missing:
+        fail(f"{path.relative_to(root)} missing required keys: {missing}")
+    return payload
+
+
+def validate_required_json(
+    root: Path,
+    skill_dir: Path,
+    relative_path: Path,
+    required: set[str],
+) -> dict:
+    path = skill_dir / relative_path
+    if not path.exists():
+        fail(f"{skill_dir.relative_to(root)} missing {relative_path}")
+    payload = load_json(path)
+    missing = missing_keys(payload, required)
+    if missing:
+        fail(f"{path.relative_to(root)} missing required keys: {missing}")
+    return payload
+
+
+def validate_source_context_references(
+    root: Path,
+    skill_dir: Path,
+    payload: dict,
+    source_context: Path,
+) -> None:
+    references = payload.get("references")
+    if not isinstance(references, list) or not references:
+        fail(f"{source_context.relative_to(root)} references must be a non-empty list")
+
+    for index, row in enumerate(references):
+        if not isinstance(row, dict):
+            fail(f"{source_context.relative_to(root)} references[{index}] must be a mapping")
+        missing = missing_keys(row, SOURCE_CONTEXT_REFERENCE_KEYS)
+        if missing:
+            fail(
+                f"{source_context.relative_to(root)} references[{index}] "
+                f"missing required keys: {missing}"
+            )
+        kind = row.get("kind")
+        if kind not in REFERENCE_KINDS:
+            fail(
+                f"{source_context.relative_to(root)} references[{index}] "
+                f"has invalid kind: {kind!r}"
+            )
+
+        ref_path_text = row.get("path")
+        if not isinstance(ref_path_text, str) or not ref_path_text.strip():
+            fail(f"{source_context.relative_to(root)} references[{index}] path must be a string")
+
+        if kind == "upstream_pack_export":
+            continue
+
+        if ref_path_text.startswith(("http://", "https://", "/")):
+            fail(
+                f"{source_context.relative_to(root)} references[{index}] "
+                "must not require an absolute or remote runtime path"
+            )
+
+        if row.get("bounded_unit") is not True:
+            fail(
+                f"{source_context.relative_to(root)} references[{index}] "
+                "must declare bounded_unit: true"
+            )
+
+        if ref_path_text.startswith("references/") and ref_path_text.endswith(".md"):
+            local_reference = skill_dir / ref_path_text
+            if not local_reference.exists():
+                fail(
+                    f"{source_context.relative_to(root)} references[{index}] "
+                    f"points at missing SDK-local reference: {ref_path_text}"
+                )
 
 
 def relative_markdown_links(path: Path) -> list[str]:
@@ -318,15 +485,19 @@ def main() -> int:
         if "lifecycle_state: active" not in frontmatter_text:
             fail(f"{skill_md.relative_to(root)} missing lifecycle_state: active")
 
-        for companion in REQUIRED_COMPANION_FILES:
-            if not (skill_dir / companion).exists():
-                fail(f"{skill_dir.relative_to(root)} missing {companion}")
+        for companion, required_keys in REQUIRED_YAML_KEYS.items():
+            validate_required_mapping(root, skill_dir, companion, required_keys)
+
+        for companion, required_keys in REQUIRED_JSON_KEYS.items():
+            validate_required_json(root, skill_dir, companion, required_keys)
 
         skill_text = skill_md.read_text(encoding="utf-8")
         if "./references/source-context.yaml" not in skill_text:
             fail(f"{skill_md.relative_to(root)} must link references/source-context.yaml")
 
         source_context = skill_dir / "references/source-context.yaml"
+        source_payload = load_yaml(source_context)
+        validate_source_context_references(root, skill_dir, source_payload, source_context)
         source_text = source_context.read_text(encoding="utf-8")
         upstream_index = (
             root
@@ -346,15 +517,7 @@ def main() -> int:
             )
             if not copied_domain_model.exists():
                 fail("synaipse-harness missing copied domain-model-routing.md")
-        required_source_markers = (
-            "schema_version:",
-            "skill:",
-            "stage:",
-            "template:",
-            "original_references:",
-            "load_when:",
-            "provenance_policy:",
-        )
+        required_source_markers = tuple(f"{key}:" for key in REQUIRED_YAML_KEYS[source_context.relative_to(skill_dir)])
         missing_markers = [marker for marker in required_source_markers if marker not in source_text]
         if missing_markers:
             fail(

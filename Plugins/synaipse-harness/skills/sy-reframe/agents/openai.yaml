@@ -1,10 +1,21 @@
 policy:
   allow_implicit_invocation: false
 interface:
-  display_name: "SynAIpse Reframe"
-  short_description: "Turn a stuck, stale, or unsafe frame into a smaller viable direction with rollback and decision boundaries."
+  display_name: SynAIpse Reframe
+  short_description: Turn a stuck, stale, or unsafe frame into a smaller viable direction with rollback and decision boundaries.
 routing:
-  handle: "sy-reframe"
-  sdk_stage: "reframe"
-  previous_stage: "strategy"
-  next_stage: "brainstorm"
+  handle: sy-reframe
+  sdk_stage: reframe
+  previous_stage: strategy
+  next_stage: brainstorm
+schema_version: 1
+skill: sy-reframe
+stage: reframe
+role: governed_sdk_stage_agent
+instructions:
+- Load SKILL.md first and follow the compact operator-facing procedure.
+- Load references/source-context.yaml only when companion governance or provenance is needed.
+tool_policy:
+  default: follow_repo_and_skill_contracts
+output_contract:
+  format: stage_result

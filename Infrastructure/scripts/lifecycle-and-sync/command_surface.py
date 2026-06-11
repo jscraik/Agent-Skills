@@ -233,7 +233,7 @@ def _plugin_command_surface_rows(root: Path) -> list[dict[str, Any]]:
             "id": frontmatter.get("name") or skill_dir.name,
             "skill_set": plugin_name,
             "level": frontmatter.get("metadata.level") or frontmatter.get("level") or "",
-            "source_path": (rel_dir / "SKILL.md").as_posix(),
+            "source_path": _canonical_source_path((rel_dir / "SKILL.md").as_posix()),
             "runtime_visibility": runtime_visibility,
             "command_visibility": command_visibility,
             "description": normalize_skill_description(frontmatter.get("description", "")),
@@ -251,6 +251,13 @@ def _plugin_command_surface_rows(root: Path) -> list[dict[str, Any]]:
         ):
             rows_by_key[key] = row
     return list(rows_by_key.values())
+
+
+def _canonical_source_path(path: str) -> str:
+    parts = Path(path).parts
+    if parts and parts[0] == "plugins":
+        return Path("Plugins", *parts[1:]).as_posix()
+    return path
 
 
 def _drop_shadowed_system_bridge_handles(handles: list[CommandHandle]) -> list[CommandHandle]:

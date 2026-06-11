@@ -20,24 +20,27 @@ DESCRIPTION_AUDIT = (
     / "audit_skill_descriptions.py"
 )
 SDK_STAGE_HEADINGS = [
-    "Stage Contract",
     "When to use",
-    "When not to use",
     "Required inputs",
     "Deliverables",
-    "Preconditions",
     "Procedure",
-    "Allowed writes",
-    "Forbidden writes",
-    "Exit criteria",
     "Validation",
     "Handoff",
     "Failure modes",
-    "Execution boundaries",
     "Gotchas",
-    "Examples",
     "References",
 ]
+
+REMOVED_GOVERNANCE_HEADINGS = {
+    "Stage Contract",
+    "When not to use",
+    "Preconditions",
+    "Allowed writes",
+    "Forbidden writes",
+    "Exit criteria",
+    "Execution boundaries",
+    "Examples",
+}
 
 
 def _run(*args: str) -> subprocess.CompletedProcess[str]:
@@ -96,16 +99,12 @@ class SkillCreatorLifecycleScaffoldTests(unittest.TestCase):
             self.assertIn("command_visibility: orchestrator", content)
             self.assertIn("./references/source-context.yaml", content)
             self.assertEqual(SDK_STAGE_HEADINGS, _h2_headings(content))
-            self.assertIn("Previous stage: none", content)
-            self.assertIn("Current stage: example-skill", content)
-            self.assertIn("Next stage: terminal", content)
+            self.assertFalse(REMOVED_GOVERNANCE_HEADINGS.intersection(_h2_headings(content)))
             self.assertIn("### Package Checks", content)
             self.assertIn("### Repo Checks", content)
             self.assertIn("### External Review", content)
             self.assertIn("## Gotchas", content)
             self.assertIn("## References", content)
-            self.assertIn("/tmp/ask-tessl-evals", content)
-            self.assertIn("tessl.json", content)
             self.assertNotIn("[TODO:", content)
             self.assertNotIn("TODO", content)
 
@@ -124,7 +123,17 @@ class SkillCreatorLifecycleScaffoldTests(unittest.TestCase):
             source_context = (skill_dir / "references" / "source-context.yaml").read_text(
                 encoding="utf-8"
             )
+            openai_yaml = (skill_dir / "agents" / "openai.yaml").read_text(
+                encoding="utf-8"
+            )
 
+            self.assertIn("skill: \"example-skill\"", contract_yaml)
+            self.assertIn("stage: \"example-skill\"", contract_yaml)
+            self.assertIn("preconditions:", contract_yaml)
+            self.assertIn("allowed_writes:", contract_yaml)
+            self.assertIn("forbidden_writes:", contract_yaml)
+            self.assertIn("execution_boundaries:", contract_yaml)
+            self.assertIn("exit_criteria:", contract_yaml)
             self.assertIn("triggers:", contract_yaml)
             self.assertIn("non_goals:", contract_yaml)
             self.assertIn("risks:", contract_yaml)
@@ -133,7 +142,11 @@ class SkillCreatorLifecycleScaffoldTests(unittest.TestCase):
             self.assertIn("min_review_score: 95", contract_yaml)
 
             self.assertIn('schema_version: "2.0"', evals_yaml)
+            self.assertIn('skill: "example-skill"', evals_yaml)
+            self.assertIn('stage: "example-skill"', evals_yaml)
             self.assertIn('skill_name: "example-skill"', evals_yaml)
+            self.assertIn("eval_scenarios:", evals_yaml)
+            self.assertIn("success_criteria:", evals_yaml)
             self.assertIn("prompt-injection-pressure", evals_yaml)
             self.assertIn("tessl-staging-awareness", evals_yaml)
             self.assertIn("/tmp/ask-tessl-evals", evals_yaml)
@@ -142,11 +155,31 @@ class SkillCreatorLifecycleScaffoldTests(unittest.TestCase):
 
             self.assertIn("skill: \"example-skill\"", source_context)
             self.assertIn("stage: \"example-skill\"", source_context)
-            self.assertIn("heading_contract: sdk-deterministic-stage-v1", source_context)
+            self.assertIn("heading_contract: sdk-compact-stage-v1", source_context)
             self.assertIn("original_references:", source_context)
+            self.assertIn("references:", source_context)
+            self.assertIn("allowed_claims:", source_context)
+            self.assertIn("forbidden_claims:", source_context)
+            self.assertIn("freshness:", source_context)
+            self.assertIn("context_budget:", source_context)
+            self.assertIn("claim_scope:", source_context)
+            self.assertIn("bounded_unit: true", source_context)
+            self.assertEqual(task_profile["skill"], "example-skill")
+            self.assertEqual(task_profile["stage"], "example-skill")
+            self.assertEqual(task_profile["task_type"], "governed_sdk_stage_skill")
+            self.assertIn("inputs", task_profile)
+            self.assertIn("outputs", task_profile)
+            self.assertIn("validation_profile", task_profile)
             self.assertEqual(task_profile["scope_skill"], "example-skill")
             self.assertEqual(task_profile["thresholds"]["tessl_review_min"], 95)
             self.assertTrue(task_profile["openai_lint"]["openai_yaml_required"])
+            self.assertIn("schema_version: 1", openai_yaml)
+            self.assertIn('skill: "example-skill"', openai_yaml)
+            self.assertIn('stage: "example-skill"', openai_yaml)
+            self.assertIn("role: governed_sdk_stage_agent", openai_yaml)
+            self.assertIn("instructions:", openai_yaml)
+            self.assertIn("tool_policy:", openai_yaml)
+            self.assertIn("output_contract:", openai_yaml)
 
     def test_requires_owner_for_governed_scaffold(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

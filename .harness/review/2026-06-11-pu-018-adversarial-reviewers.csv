@@ -1,0 +1,4 @@
+id,focus
+contract-boundary,"Review the PU-018 trace plan and slice spec for product-contract contradictions, incorrect stage ownership, heading-shape ambiguity, and KnowledgeOS boundary leakage."
+implementation-readiness,"Review the PU-018 trace plan and slice spec for missing implementation acceptance criteria, validator/scaffold/test migration gaps, and ambiguous proof commands."
+evidence-risk,"Review the PU-018 trace plan and slice spec for evidence-lane overclaims, unverified assumptions, PR/CI/review readiness leakage, and reference/KnowledgeOS validation risk."

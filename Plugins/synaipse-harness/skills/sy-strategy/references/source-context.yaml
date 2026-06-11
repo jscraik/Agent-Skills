@@ -4,39 +4,179 @@ stage: strategy
 template:
   path: Infrastructure/references/sdk-stage-skill-template.md
   validator: Infrastructure/scripts/validation-and-linting/check_sdk_stage_skill_shape.py
-  heading_contract: sdk-deterministic-stage-v1
+  heading_contract: sdk-compact-stage-v1
 original_references:
-  - path: Plugins/synaipse-harness/references/upstream/harness-engineering-context.yaml
-    purpose: copied Harness Engineering reference corpus owned by SynAIpse Harness
-    load_when: the stage needs copied Harness Engineering doctrine, source parity, or a reference not listed directly in this file
-  - path: Plugins/synaipse-harness/references/deterministic-stage-routing.md
-    purpose: deterministic stage routing rules and tie-breakers
-    load_when: stage selection, tie-breaking, or next-stage routing is ambiguous
-  - path: Plugins/synaipse-harness/references/stage-arc-boundary-contract.md
-    purpose: evidence lane and lifecycle boundary contract
-    load_when: local, PR, CI, review, tracker, artifact, or merge-readiness evidence lanes could be collapsed
-  - path: Plugins/synaipse-harness/references/gate-selection-contract.md
-    purpose: freshness and source traceability gates
-    load_when: source freshness, provenance, or validation proof requirements are unclear
-  - path: Plugins/synaipse-harness/references/domain-model-routing.md
-    purpose: SynAIpse Harness domain terms and routing language
-    load_when: domain language, product behavior, workflow state, integration, persistence, or closure confidence affects routing or handoff
-  - path: Plugins/synaipse-harness/references/deferred-context-index.md
-    purpose: compact index of deferred imported context
-    load_when: the compact active references are insufficient and archived imported context may be needed
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering-context.yaml
+  purpose: copied Harness Engineering reference corpus owned by SynAIpse Harness
+  load_when: the stage needs copied Harness Engineering doctrine, source parity, or a reference not listed directly in this file
+- path: Plugins/synaipse-harness/references/deterministic-stage-routing.md
+  purpose: deterministic stage routing rules and tie-breakers
+  load_when: stage selection, tie-breaking, or next-stage routing is ambiguous
+- path: Plugins/synaipse-harness/references/stage-arc-boundary-contract.md
+  purpose: evidence lane and lifecycle boundary contract
+  load_when: local, PR, CI, review, tracker, artifact, or merge-readiness evidence lanes could be collapsed
+- path: Plugins/synaipse-harness/references/gate-selection-contract.md
+  purpose: freshness and source traceability gates
+  load_when: source freshness, provenance, or validation proof requirements are unclear
+- path: Plugins/synaipse-harness/references/domain-model-routing.md
+  purpose: SynAIpse Harness domain terms and routing language
+  load_when: domain language, product behavior, workflow state, integration, persistence, or closure confidence affects routing or handoff
+- path: Plugins/synaipse-harness/references/deferred-context-index.md
+  purpose: compact index of deferred imported context
+  load_when: the compact active references are insufficient and archived imported context may be needed
 archived_context:
-  - path: .harness/archives/synaipse-harness-budget-trim-20260604/Plugins/synaipse-harness/references/
-    purpose: preserved full imported context trimmed out of active SKILL.md files
-    load_when: active references point to deferred context needed to resolve a blocker or preserve source parity
+- path: ".harness/archives/synaipse-harness-budget-trim-20260604/Plugins/synaipse-harness/references/"
+  purpose: preserved full imported context trimmed out of active SKILL.md files
+  load_when: active references point to deferred context needed to resolve a blocker or preserve source parity
 stage_companions:
-  - path: references/contract.yaml
-    purpose: machine-readable stage contract
-  - path: references/evals.yaml
-    purpose: deterministic trigger and behavior eval cases
-  - path: references/task-profile.json
-    purpose: reviewer and picker-facing task profile
+- path: references/contract.yaml
+  purpose: machine-readable stage contract
+- path: references/evals.yaml
+  purpose: deterministic trigger and behavior eval cases
+- path: references/task-profile.json
+  purpose: reviewer and picker-facing task profile
 provenance_policy:
   canonical_source: Plugins/synaipse-harness/skills/sy-strategy/
   context_loading: Load SKILL.md first, then this source-context.yaml only when provenance or deferred context is needed.
   projection_rule: Runtime caches, home skill roots, and plugin cache outputs are generated projections, not source.
-  template_rule: Keep the fixed heading order in the SDK stage template and validate it through the SDK stage shape validator.
+  template_rule: Keep the compact fixed heading order in the SDK stage template and validate it through the SDK stage shape validator.
+references:
+- path: references/contract.yaml
+  kind: stage_companion
+  provenance: SynAIpse Harness governed stage package
+  load_when: SKILL.md is insufficient and this stage_contract context is needed
+  allowed_claims:
+  - stage_contract context for this governed stage
+  forbidden_claims:
+  - runtime readiness
+  - PR readiness
+  - CI readiness
+  freshness: repo_current
+  context_budget: small
+  claim_scope: stage_contract
+  bounded_unit: true
+- path: references/evals.yaml
+  kind: stage_companion
+  provenance: SynAIpse Harness governed stage package
+  load_when: SKILL.md is insufficient and this eval_contract context is needed
+  allowed_claims:
+  - eval_contract context for this governed stage
+  forbidden_claims:
+  - runtime readiness
+  - PR readiness
+  - CI readiness
+  freshness: repo_current
+  context_budget: small
+  claim_scope: eval_contract
+  bounded_unit: true
+- path: references/task-profile.json
+  kind: stage_companion
+  provenance: SynAIpse Harness governed stage package
+  load_when: SKILL.md is insufficient and this task_profile context is needed
+  allowed_claims:
+  - task_profile context for this governed stage
+  forbidden_claims:
+  - runtime readiness
+  - PR readiness
+  - CI readiness
+  freshness: repo_current
+  context_budget: small
+  claim_scope: task_profile
+  bounded_unit: true
+- path: Plugins/synaipse-harness/references/upstream/harness-engineering-context.yaml
+  kind: upstream_pack_export
+  provenance: SynAIpse Harness governed stage package
+  load_when: SKILL.md is insufficient and this upstream_context_index context is needed
+  allowed_claims:
+  - upstream_context_index context for this governed stage
+  forbidden_claims:
+  - runtime readiness
+  - PR readiness
+  - CI readiness
+  freshness: repo_current
+  context_budget: small
+  claim_scope: upstream_context_index
+  bounded_unit: true
+- path: Plugins/synaipse-harness/references/deterministic-stage-routing.md
+  kind: runbook
+  provenance: SynAIpse Harness governed stage package
+  load_when: SKILL.md is insufficient and this stage_routing context is needed
+  allowed_claims:
+  - stage_routing context for this governed stage
+  forbidden_claims:
+  - runtime readiness
+  - PR readiness
+  - CI readiness
+  freshness: repo_current
+  context_budget: small
+  claim_scope: stage_routing
+  bounded_unit: true
+- path: Plugins/synaipse-harness/references/stage-arc-boundary-contract.md
+  kind: runbook
+  provenance: SynAIpse Harness governed stage package
+  load_when: SKILL.md is insufficient and this evidence_boundaries context is needed
+  allowed_claims:
+  - evidence_boundaries context for this governed stage
+  forbidden_claims:
+  - runtime readiness
+  - PR readiness
+  - CI readiness
+  freshness: repo_current
+  context_budget: small
+  claim_scope: evidence_boundaries
+  bounded_unit: true
+- path: Plugins/synaipse-harness/references/gate-selection-contract.md
+  kind: runbook
+  provenance: SynAIpse Harness governed stage package
+  load_when: SKILL.md is insufficient and this validation_gates context is needed
+  allowed_claims:
+  - validation_gates context for this governed stage
+  forbidden_claims:
+  - runtime readiness
+  - PR readiness
+  - CI readiness
+  freshness: repo_current
+  context_budget: small
+  claim_scope: validation_gates
+  bounded_unit: true
+- path: Plugins/synaipse-harness/references/domain-model-routing.md
+  kind: substantial_context
+  provenance: SynAIpse Harness governed stage package
+  load_when: SKILL.md is insufficient and this domain_model context is needed
+  allowed_claims:
+  - domain_model context for this governed stage
+  forbidden_claims:
+  - runtime readiness
+  - PR readiness
+  - CI readiness
+  freshness: repo_current
+  context_budget: small
+  claim_scope: domain_model
+  bounded_unit: true
+- path: Plugins/synaipse-harness/references/deferred-context-index.md
+  kind: substantial_context
+  provenance: SynAIpse Harness governed stage package
+  load_when: SKILL.md is insufficient and this deferred_context context is needed
+  allowed_claims:
+  - deferred_context context for this governed stage
+  forbidden_claims:
+  - runtime readiness
+  - PR readiness
+  - CI readiness
+  freshness: repo_current
+  context_budget: small
+  claim_scope: deferred_context
+  bounded_unit: true
+load_when:
+- SKILL.md is insufficient to answer provenance, deferred context, or companion governance questions.
+allowed_claims:
+- compact operator-facing instructions are governed by PU-018
+- companion files own governance detail
+forbidden_claims:
+- local skill package evidence proves PR, CI, tracker, hosted explorer, or merge readiness
+freshness:
+  generated_at: '2026-06-11'
+  review_required: true
+context_budget:
+  default: load SKILL.md first
+  expanded: load source-context.yaml and only the referenced companion needed for the task

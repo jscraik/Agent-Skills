@@ -169,6 +169,17 @@ def write_openai_yaml(skill_dir, skill_name, raw_overrides):
         return None
 
     interface_lines = [
+        "schema_version: 1",
+        f"skill: {yaml_quote(skill_name)}",
+        f"stage: {yaml_quote(skill_name)}",
+        "role: governed_sdk_stage_agent",
+        "instructions:",
+        "  - Load SKILL.md first and follow the compact operator-facing procedure.",
+        "  - Load references/source-context.yaml only when companion governance or provenance is needed.",
+        "tool_policy:",
+        "  default: follow_repo_and_skill_contracts",
+        "output_contract:",
+        "  format: stage_result",
         "interface:",
         f"  display_name: {yaml_quote(display_name)}",
         f"  short_description: {yaml_quote(short_description)}",

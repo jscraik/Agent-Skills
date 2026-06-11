@@ -50,5 +50,27 @@
       "execute"
     ],
     "default": "guided"
+  },
+  "skill": "sy-brainstorm",
+  "stage": "brainstorm",
+  "task_type": "governed_sdk_stage_skill",
+  "inputs": [
+    "user request or routed handoff",
+    "repository and branch context",
+    "relevant artifact, tracker, PR, validation, or session evidence"
+  ],
+  "outputs": [
+    "schema_version",
+    "stage",
+    "status",
+    "evidence_refs",
+    "blocked_by",
+    "next_stage"
+  ],
+  "validation_profile": {
+    "required_validator": "Infrastructure/scripts/validation-and-linting/check_sdk_stage_skill_shape.py",
+    "required_commands": [
+      "/Users/jamiecraik/.venvs/pyyaml/bin/python Infrastructure/scripts/validation-and-linting/check_sdk_stage_skill_shape.py"
+    ]
   }
 }

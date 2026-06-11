@@ -210,10 +210,11 @@ def _scope_collision_baseline_path(path: str) -> str:
     """
     Produce a stable baseline key that normalizes plugin cache skill paths so equivalent cached artifacts map to the same collision baseline.
     
-    When `path` refers to a plugin cache under "Plugins/cache/openai-curated" or
-    "Plugins/cache/openai-curated-remote" and contains a "skills" segment, the
-    returned baseline preserves the first four path segments and everything from
-    the "skills" segment onward; otherwise the original `path` is returned.
+    When `path` refers to a plugin cache under "Plugins/cache/openai-curated",
+    "plugins/cache/openai-curated", or their openai-curated-remote equivalents,
+    and contains a "skills" segment, the returned baseline preserves the
+    canonical cache family, plugin name, and everything from the "skills"
+    segment onward. Otherwise the original `path` is returned.
     
     Returns:
     	normalized_path (str): The normalized baseline path, or the original input when no normalization applies.
@@ -221,7 +222,8 @@ def _scope_collision_baseline_path(path: str) -> str:
     parts = Path(path).parts
     if (
         len(parts) >= 7
-        and parts[:2] == ("Plugins", "cache")
+        and parts[0] in {"Plugins", "plugins"}
+        and parts[1] == "cache"
         and parts[2] in {"openai-curated", "openai-curated-remote"}
     ):
         try:
@@ -229,7 +231,7 @@ def _scope_collision_baseline_path(path: str) -> str:
         except ValueError:
             return path
         if skills_index + 1 < len(parts):
-            return str(Path(*parts[:4], *parts[skills_index:]))
+            return str(Path("Plugins", "cache", parts[2], parts[3], *parts[skills_index:]))
     return path
 
 

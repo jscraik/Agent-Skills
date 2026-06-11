@@ -205,6 +205,12 @@ class TestSkillScopePrecedence(unittest.TestCase):
         )
         self.assertEqual(
             verify_runtime_budget._scope_collision_baseline_path(
+                "plugins/cache/openai-curated/cloudflare/rotating-version/skills/agents-sdk"
+            ),
+            "Plugins/cache/openai-curated/cloudflare/skills/agents-sdk",
+        )
+        self.assertEqual(
+            verify_runtime_budget._scope_collision_baseline_path(
                 "Plugins/cache/openai-curated/openai-developers/another-version/extra/skills/agents-sdk"
             ),
             "Plugins/cache/openai-curated/openai-developers/skills/agents-sdk",
@@ -336,6 +342,76 @@ class TestSkillScopePrecedence(unittest.TestCase):
                 "Plugins/cache/openai-curated-remote/data-analytics/skills/user-context": "data-analytics:user-context",
                 "Plugins/cache/openai-curated-remote/product-design/skills/user-context": "product-design:user-context",
             },
+        )
+
+    def test_runtime_budget_classifies_curated_remote_connector_duplicates(self) -> None:
+        for name in ("gh-address-comments", "gh-fix-ci", "github", "yeet"):
+            self._write_skill(
+                f"plugins/cache/openai-curated/github/current/skills/{name}",
+                f"Curated GitHub {name} skill.",
+            )
+            self._write_skill(
+                f"plugins/cache/openai-curated-remote/github/latest/skills/{name}",
+                f"Remote GitHub {name} skill.",
+            )
+        self._write_skill(
+            "plugins/cache/openai-curated/linear/current/skills/linear",
+            "Curated Linear skill.",
+        )
+        self._write_skill(
+            "plugins/cache/openai-curated-remote/linear/latest/skills/linear",
+            "Remote Linear skill.",
+        )
+        for name in (
+            "slack",
+            "slack-channel-summarization",
+            "slack-daily-digest",
+            "slack-notification-triage",
+            "slack-outgoing-message",
+            "slack-reply-drafting",
+        ):
+            self._write_skill(
+                f"plugins/cache/openai-curated/slack/current/skills/{name}",
+                f"Curated Slack {name} skill.",
+            )
+            self._write_skill(
+                f"plugins/cache/openai-curated-remote/slack/latest/skills/{name}",
+                f"Remote Slack {name} skill.",
+            )
+
+        with self._patched_repo(default_visible=set()):
+            report = verify_runtime_budget.build_report()
+
+        self.assertEqual(report["status"], "pass")
+        self.assertEqual(report["unresolved_scope_collisions"], [])
+        expected = {
+            "gh-address-comments",
+            "gh-fix-ci",
+            "github",
+            "linear",
+            "slack",
+            "slack-channel-summarization",
+            "slack-daily-digest",
+            "slack-notification-triage",
+            "slack-outgoing-message",
+            "slack-reply-drafting",
+            "yeet",
+        }
+        self.assertLessEqual(
+            expected,
+            {collision["name"] for collision in report["same_capability_scope_collisions"]},
+        )
+        by_name = {
+            collision["name"]: collision
+            for collision in report["same_capability_scope_collisions"]
+        }
+        self.assertEqual(
+            by_name["github"]["canonical_path"],
+            "Plugins/cache/openai-curated/github/skills/github",
+        )
+        self.assertEqual(
+            by_name["slack"]["suppressed_candidates"][0]["path"],
+            "plugins/cache/openai-curated-remote/slack/latest/skills/slack",
         )
 
     def test_rooted_runtime_allows_primary_runtime_lane(self) -> None:

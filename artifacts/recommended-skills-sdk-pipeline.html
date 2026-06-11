@@ -2251,6 +2251,7 @@
         <span>SDK lenses are implemented as deterministic read-only review selection receipts.</span>
         <span>Lens-routed review plans are implemented as read-only review plan receipts.</span>
         <span>Review handoff receipts define reviewer roles, required artifacts, and not-proven lanes without proving reviewer completion.</span>
+        <span>Governed review execution materializes required local review artifacts from handoff receipts and keeps external readiness unproven.</span>
         <span>Determinism audit is implemented as an advisory read-only candidate report.</span>
         <span>Bootstrap now proves the active worktree path and shim identity before closeout.</span>
         <span>Repo-surface policy forbids any or unknown ownership classifications.</span>
@@ -2258,14 +2259,14 @@
         <span>Codex desktop plugin readiness is split into package, marketplace, cache, config, skills, and hook trust proof lanes.</span>
         <span>Command-surface files are metadata only; canonical SKILL.md source and plugin manifests remain the runtime truth.</span>
       </div>
-      <div class="next-slice-proof" aria-label="PU-016 sync point">
+      <div class="next-slice-proof" aria-label="PU-018 sync point">
         <div>
-          <strong>PU-016 sync point</strong>
-          <span><code>review_verification</code> is implemented. The next SDK slice can add governed reviewer execution only after local artifact verification remains separate from external readiness lanes.</span>
+          <strong>PU-018 sync point</strong>
+          <span><code>review_execution</code> is implemented, and the local governed stage shape contract now uses compact <code>SKILL.md</code> authoring, structured governance in companion files, and bounded source-context reference metadata.</span>
         </div>
         <div>
-          <strong>Capability truth alignment</strong>
-          <span>PU-016 sits after <code>review_handoff</code>, before real agent execution. It verifies repo-contained, non-empty required review artifacts and keeps CI, PR, review-thread, tracker, and merge-readiness lanes unproven.</span>
+          <strong>PU-018 shape correction</strong>
+          <span>The SDK stage validator, scaffold, and migrated SynAIpse stage packages now enforce the agreed product shape: thin operator instructions in <code>SKILL.md</code>, contracts and provenance in <code>references/*.yaml</code>/<code>agents/openai.yaml</code>, and focused Markdown references. KnowledgeOS ingestion remains a later portable-pack slice, not a runtime dependency.</span>
         </div>
       </div>
       <table class="status-grid">
@@ -2285,6 +2286,7 @@
         <tr data-capability-id="sdk_lenses" data-status="implemented" data-pipeline-sections="agent_execution_control_plane,knowledge_engineering,ci_and_adoption"><td><strong>SDK lens selection</strong><br><span>sdk_lenses</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/lenses.py</td><td>Use selected lenses to route bounded reviews; keep lens selection read-only and evidence-backed.</td></tr>
         <tr data-capability-id="review_plan" data-status="implemented" data-pipeline-sections="agent_execution_control_plane,knowledge_engineering,ci_and_adoption"><td><strong>Lens-routed review plan receipts</strong><br><span>review_plan</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/review_plan.py</td><td>Use review plan receipts to hand off bounded human or agent reviews without treating the receipt as review completion.</td></tr>
         <tr data-capability-id="review_handoff" data-status="implemented" data-pipeline-sections="agent_execution_control_plane,knowledge_engineering,ci_and_adoption"><td><strong>Review handoff receipts</strong><br><span>review_handoff</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/review_handoff.py</td><td>Execute bounded reviewer agents only after handoff receipts define roles, required artifacts, and not-proven lanes.</td></tr>
+        <tr data-capability-id="review_execution" data-status="implemented" data-pipeline-sections="agent_execution_control_plane,knowledge_engineering,ci_and_adoption"><td><strong>Governed local review artifact execution</strong><br><span>review_execution</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/review_execute.py</td><td>Define SDK knowledge capsule ingestion only after portable upstream pack export boundaries are specified; PU-018 does not add a KnowledgeOS runtime dependency.</td></tr>
         <tr data-capability-id="review_verification" data-status="implemented" data-pipeline-sections="agent_execution_control_plane,knowledge_engineering,ci_and_adoption"><td><strong>Review artifact verification receipts</strong><br><span>review_verification</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/review_verify.py</td><td>Add governed reviewer execution only after local required-artifact verification is stable and still separated from external PR, CI, review-thread, tracker, and merge-readiness lanes.</td></tr>
         <tr data-capability-id="determinism_audit" data-status="implemented" data-pipeline-sections="agent_execution_control_plane,knowledge_engineering,ci_and_adoption"><td><strong>Determinism audit</strong><br><span>determinism_audit</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/determinism.py</td><td>Promote individual audit candidates through scoped validator or skill-authoring slices after owner review.</td></tr>
         <tr data-capability-id="trust_store" data-status="deferred" data-pipeline-sections="release_decision_matrix,agent_execution_control_plane"><td><strong>Trust-store mutation</strong><br><span>trust_store</span></td><td><span class="status-pill" data-status="deferred">deferred</span></td><td>future Skills SDK trust lifecycle</td><td>Define trust-store ownership and rollback before any mutation.</td></tr>
@@ -2329,12 +2331,12 @@
           <div class="author-step" data-lanes="package knowledge">
             <span class="step-index">2</span>
             <strong>Edit SKILL.md</strong>
-            <span>Keep the surface thin; push deeper instructions into references, runbooks, context files, or scripts.</span>
+            <span>Keep the surface thin: trigger, inputs, procedure, validation, handoff, failure modes, gotchas, and references. Do not force governance detail into visible headings.</span>
           </div>
           <div class="author-step" data-lanes="knowledge package testing security">
             <span class="step-index">REF</span>
             <strong>Ingest Knowledge</strong>
-            <span>Deterministic scripts extract screenshots, videos, transcripts, PDFs, docs, and Markdown; knowledge-curator skills promote only trusted context.</span>
+            <span>Deterministic scripts extract screenshots, videos, transcripts, PDFs, docs, and Markdown; each expert viewpoint or evidence source becomes one bounded reference file.</span>
           </div>
           <div class="author-step" data-lanes="ci testing security">
             <span class="step-index">3</span>
@@ -2859,10 +2861,10 @@
           </div>
           <div class="stack">
             <div class="tile"><strong>my-skill/</strong><span>Canonical skill package root. Everything below is source input unless emitted as a runtime projection.</span></div>
-            <div class="tile"><strong>SKILL.md</strong><span>Required: instructions, metadata, trigger guidance, intent, and author-facing package contract.</span></div>
+            <div class="tile"><strong>SKILL.md</strong><span>Required: compact operator instructions, metadata, trigger guidance, procedure, validation, handoff, failure modes, gotchas, and reference links.</span></div>
             <div class="tile"><strong>README.md</strong><span>Required: human-facing overview, purpose, installation, usage, examples, support boundaries, lifecycle status, and maintainer ownership.</span></div>
             <div class="tile"><strong>scripts/</strong><span>Optional: executable code for deterministic mechanics, checks, transforms, setup, and repeatable workflows.</span></div>
-            <div class="tile"><strong>references/</strong><span>Optional: documentation, contracts, context, guardrails, eval specs, runbooks, and supporting evidence.</span></div>
+            <div class="tile"><strong>references/</strong><span>Optional by package, governed by risk: structured contracts plus one focused Markdown file per expert viewpoint, evidence source, prior-art note, or substantial context unit.</span></div>
             <div class="tile"><strong>knowledge/</strong><span>Progressive-disclosure trigger: optional for tiny skills, required when important instructions are pushed into references, context docs, runbooks, source material, or long-lived domain knowledge.</span></div>
             <div class="tile"><strong>knowledge/sources.md</strong><span>Raw source inventory with owner, type, provenance, trust level, license, fetched-at, reviewed-at, expires-at, and access boundary.</span></div>
             <div class="tile"><strong>knowledge/canon.md</strong><span>Accepted domain truth, distilled rules, stable examples, SME-reviewed guidance, and context that may be promoted into skill runtime use.</span></div>
@@ -2888,8 +2890,9 @@
             <div class="tile"><strong>knowledge/knowledge-network.md</strong><span>Domain leads, frontline users, external experts, reviewers, runtime owners, and feedback channels that sustain package knowledge.</span></div>
             <div class="tile"><strong>assets/</strong><span>Optional: templates, examples, resources, icons, screenshots, fixtures, and generated-output inputs.</span></div>
             <div class="tile"><strong>schemas/</strong><span>Optional but strongly recommended: JSON Schema contracts for Skill IR, manifests, eval specs, reports, and emitted artifacts.</span></div>
-            <div class="tile"><strong>references/contract.yaml</strong><span>Purpose, inputs, outputs, permissions, workflow, optimization policy.</span></div>
-            <div class="tile"><strong>references/context*.md</strong><span>Curated domain context, examples, constraints, prior decisions, and memory.</span></div>
+            <div class="tile"><strong>references/contract.yaml</strong><span>Purpose, inputs, outputs, permissions, workflow, allowed writes, forbidden writes, boundaries, and optimization policy.</span></div>
+            <div class="tile"><strong>references/source-context.yaml</strong><span>Index of reference provenance, load conditions, allowed claims, forbidden claims, freshness, and context budget.</span></div>
+            <div class="tile"><strong>references/*.md</strong><span>One bounded expert point of view, evidence packet, prior-art source, runbook, or substantial context unit per file; do not mix unrelated authorities.</span></div>
             <div class="tile"><strong>references/guardrails/</strong><span>Prompt-injection rules, toxic-flow blocks, data handling, runbooks.</span></div>
             <div class="tile"><strong>references/evals.yaml</strong><span>Claims, realistic cases, boundaries, regression expectations.</span></div>
             <div class="tile"><strong>references/evals/*.jsonl</strong><span>Optional portable dataset cases using the base eval schema: id, claim, setup, input, context refs, fixtures, expected behavior, oracle, expected tool calls, state deltas, forbidden actions, evaluator type, rubric id, risk tags, split, source digest, teardown, mutation family, and metadata.</span></div>

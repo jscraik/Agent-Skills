@@ -114,21 +114,8 @@ metadata:
 
 # {skill_title}
 
-## Stage Contract
-
-Previous stage: none
-Current stage: {skill_name}
-Next stage: terminal
-
-Stage purpose: <one sentence purpose for {skill_title}>.
-
 ## When to use
 - Use this skill when the task matches the frontmatter description and the agent needs the deterministic stage workflow for {skill_title}.
-
-## When not to use
-- The task is outside this skill scope.
-- A narrower, more specific skill exists for the same request.
-- The required inputs are unavailable and guessing would change user intent or execution safety.
 
 ## Required inputs
 - User goal or task statement.
@@ -140,31 +127,12 @@ Stage purpose: <one sentence purpose for {skill_title}>.
 - Validation evidence: exact commands run and their pass, fail, or blocked outcome.
 - Claim boundary: what the evidence proves and what it does not prove.
 
-## Preconditions
-- Confirm the task matches the skill description and does not match a narrower skill.
-- Resolve the concrete target: files, handles, artifacts, runtime surface, or user decision needed for this run.
-- Confirm canonical source ownership before writing.
-
 ## Procedure
 1. Confirm the requested stage and applicable instructions.
 2. Load only the references needed for the current slice.
 3. Execute the smallest skill-specific workflow that produces verifiable evidence.
 4. Record produced artifacts, validation commands, and any blocked steps.
 5. Return the next safe command or stop reason in agent-facing language.
-
-## Allowed writes
-- Editable source of truth: this skill directory.
-- Generated or staged evidence: package outputs, eval artifacts, Tessl staging copies, and review reports.
-
-## Forbidden writes
-- Runtime projections, caches, or user home skill roots as source.
-- External systems, credentials, or production state without explicit authorization.
-- Downstream-stage artifacts that this skill does not own.
-
-## Exit criteria
-- Required artifacts exist and are non-empty, or the response includes the promised structured fields.
-- Automated validation has a recorded pass, fail, or blocked outcome.
-- Remaining risks and follow-up ownership are explicit.
 
 ## Validation
 Run the narrowest applicable checks before claiming the skill is ready:
@@ -190,23 +158,11 @@ Run the narrowest applicable checks before claiming the skill is ready:
 - Missing validation runner: report blocked with the exact missing command.
 - Repeated validation failure: stop after the same blocker repeats and name the next smallest patch.
 
-## Execution boundaries
-- Redact secrets and sensitive data by default in prompts, outputs, temporary evidence, and copied artifacts.
-- Tessl input must be staged through the repo wrapper under /tmp/ask-tessl-evals or /tmp/ask-tessl-reviews.
-- The staged package must include SKILL.md, references/evals.yaml, tessl.json, and synthesized scenarios/<case-id>/task.md files.
-- Treat Tessl review score below 95 as blocking for release readiness.
-- Treat a missing Tessl workspace or project link as a setup blocker, not as a skill-quality failure.
-- Do not run Tessl directly against the live repository source tree.
-- Do not use npx tessl, publish, registry upload, or package upload commands in this eval lane.
-
 ## Gotchas
+- Do not use this skill when the task is outside this skill scope, a narrower skill exists, or required inputs are unavailable.
 - Do not edit runtime projections when the canonical skill source lives elsewhere.
 - Do not claim release readiness from skipped validation.
 - Keep detailed examples in references/ instead of bloating the entrypoint.
-
-## Examples
-- Good: cite the source path, run the focused validation, and report exact pass/fail/blocker evidence.
-- Bad: infer readiness from source existence or generated projection freshness alone.
 
 ## References
 - SDK stage template: Infrastructure/references/sdk-stage-skill-template.md
@@ -296,6 +252,8 @@ Note: This is a text placeholder. Actual assets can be any file type.
 """
 
 CONTRACT_TEMPLATE = """schema_version: "1.0"
+skill: "__SKILL_NAME__"
+stage: "__SKILL_NAME__"
 purpose: "Define the package contract, execution boundaries, and evidence expectations for this skill."
 behavior_type: "guidance"
 execution_mode: "prose"
@@ -315,6 +273,25 @@ outputs:
     description: "The completed workflow result or an explicit blocker."
   - name: "evidence"
     description: "Commands, artifacts, traces, or review outputs proving the result."
+preconditions:
+  - "Confirm the task matches the skill description and does not match a narrower skill."
+  - "Resolve the concrete target: files, handles, artifacts, runtime surface, or user decision needed for this run."
+  - "Confirm canonical source ownership before writing."
+allowed_writes:
+  - "Editable source of truth: this skill directory."
+  - "Generated or staged evidence: package outputs, eval artifacts, Tessl staging copies, and review reports."
+forbidden_writes:
+  - "Runtime projections, caches, or user home skill roots as source."
+  - "External systems, credentials, or production state without explicit authorization."
+  - "Downstream-stage artifacts that this skill does not own."
+execution_boundaries:
+  - "Redact secrets and sensitive data by default in prompts, outputs, temporary evidence, and copied artifacts."
+  - "Stage Tessl input through the repo wrapper under /tmp/ask-tessl-evals or /tmp/ask-tessl-reviews."
+  - "Do not run Tessl directly against the live repository source tree."
+exit_criteria:
+  - "Required artifacts exist and are non-empty, or the response includes the promised structured fields."
+  - "Automated validation has a recorded pass, fail, or blocked outcome."
+  - "Remaining risks and follow-up ownership are explicit."
 non_goals:
   - "Broad repository rewrites outside the requested skill workflow."
   - "Runtime readiness claims that are not supported by evidence."
@@ -378,6 +355,8 @@ workflow:
 """
 
 EVALS_TEMPLATE = """schema_version: "2.0"
+skill: "__SKILL_NAME__"
+stage: "__SKILL_NAME__"
 skill_name: "__SKILL_NAME__"
 claims:
   - "The skill routes only matching requests."
@@ -393,6 +372,20 @@ baselines:
   required_modes:
     - smoke
     - release
+eval_scenarios:
+  - "happy-path"
+  - "missing-inputs"
+  - "non-trigger-general-chat"
+  - "prompt-injection-pressure"
+  - "evidence-reporting"
+  - "tessl-staging-awareness"
+  - "broad-request-pressure"
+  - "runtime-projection-boundary"
+  - "overbroad-readiness-claim"
+success_criteria:
+  - "Matching requests trigger the skill."
+  - "Non-matching requests do not trigger the skill."
+  - "Evidence and readiness boundaries are reported honestly."
 cases:
   - id: "happy-path"
     name: "Runs the core workflow with clear inputs"
@@ -535,6 +528,9 @@ cases:
 
 TASK_PROFILE_TEMPLATE = """{
   "schema_version": "1.0",
+  "skill": "__SKILL_NAME__",
+  "stage": "__SKILL_NAME__",
+  "task_type": "governed_sdk_stage_skill",
   "profile_id": "__SKILL_NAME__-authoring-profile",
   "scope_skill": "__SKILL_NAME__",
   "scope_profile": "skill-package-contract",
@@ -553,6 +549,22 @@ TASK_PROFILE_TEMPLATE = """{
     "The skill reports evidence and claim boundaries honestly.",
     "The Tessl staging and review expectations are explicit."
   ],
+  "inputs": [
+    "user goal or task statement",
+    "target paths, handles, artifacts, or runtime surfaces",
+    "permission or safety constraints"
+  ],
+  "outputs": [
+    "completed workflow result or explicit blocker",
+    "validation evidence",
+    "claim boundary"
+  ],
+  "validation_profile": {
+    "required_validator": "Infrastructure/scripts/validation-and-linting/check_sdk_stage_skill_shape.py",
+    "required_commands": [
+      "/Users/jamiecraik/.venvs/pyyaml/bin/python Infrastructure/scripts/validation-and-linting/check_sdk_stage_skill_shape.py"
+    ]
+  },
   "delegation": {
     "agent_review_required": false,
     "human_review_required_for_release": true
@@ -579,11 +591,61 @@ stage: "__SKILL_NAME__"
 template:
   path: Infrastructure/references/sdk-stage-skill-template.md
   validator: Infrastructure/scripts/validation-and-linting/check_sdk_stage_skill_shape.py
-  heading_contract: sdk-deterministic-stage-v1
+  heading_contract: sdk-compact-stage-v1
 original_references:
   - path: SKILL.md
     purpose: initial generated skill body
     load_when: provenance for the generated starter body is needed
+references:
+  - path: references/contract.yaml
+    kind: stage_companion
+    provenance: scaffolded SDK governance companion
+    load_when: stage contract, write boundaries, or exit criteria are needed
+    allowed_claims:
+      - companion governance contract
+    forbidden_claims:
+      - runtime readiness
+    freshness: generated_with_skill
+    context_budget: small
+    claim_scope: governance
+    bounded_unit: true
+  - path: references/evals.yaml
+    kind: stage_companion
+    provenance: scaffolded SDK eval companion
+    load_when: trigger and behavior eval expectations are needed
+    allowed_claims:
+      - eval scenario contract
+    forbidden_claims:
+      - external review completion
+    freshness: generated_with_skill
+    context_budget: small
+    claim_scope: evals
+    bounded_unit: true
+  - path: references/task-profile.json
+    kind: stage_companion
+    provenance: scaffolded SDK task profile companion
+    load_when: reviewer, picker, or validation profile metadata is needed
+    allowed_claims:
+      - task profile contract
+    forbidden_claims:
+      - production readiness
+    freshness: generated_with_skill
+    context_budget: small
+    claim_scope: task_profile
+    bounded_unit: true
+load_when:
+  - SKILL.md is insufficient to answer provenance, deferred context, or companion governance questions.
+allowed_claims:
+  - compact operator-facing instructions are generated from the SDK stage template
+  - companion files own governance detail
+forbidden_claims:
+  - generated scaffold content proves runtime readiness
+freshness:
+  generated_at: scaffold_time
+  review_required: true
+context_budget:
+  default: load SKILL.md first
+  expanded: load this source context and only the referenced companion needed for the task
 archived_context: []
 stage_companions:
   - path: references/contract.yaml
@@ -596,7 +658,7 @@ provenance_policy:
   canonical_source: "__SKILL_NAME__/"
   context_loading: Load SKILL.md first, then source-context.yaml when provenance or deferred context is needed.
   projection_rule: Runtime caches, home skill roots, and plugin cache outputs are generated projections, not source.
-  template_rule: Keep the fixed heading order in the SDK stage template and validate it through the SDK stage shape validator.
+  template_rule: Keep the compact fixed heading order in the SDK stage template and validate it through the SDK stage shape validator.
 """
 
 
@@ -701,7 +763,7 @@ def create_sdk_contract_files(skill_dir, skill_name, skill_title, last_reviewed)
     references_dir = skill_dir / "references"
     references_dir.mkdir(exist_ok=True)
     required_files = {
-        "contract.yaml": CONTRACT_TEMPLATE,
+        "contract.yaml": CONTRACT_TEMPLATE.replace("__SKILL_NAME__", skill_name),
         "evals.yaml": EVALS_TEMPLATE.replace("__SKILL_NAME__", skill_name),
         "task-profile.json": (
             TASK_PROFILE_TEMPLATE.replace("__SKILL_NAME__", skill_name)
