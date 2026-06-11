@@ -448,7 +448,20 @@ preflight_local_memory_shell_fallback() {
 	local daemon_log="${HOME}/.local-memory/daemon.log"
 	if [[ -f "${daemon_log}" ]]; then
 		local migration_line
-		migration_line="$(tail -n 300 "${daemon_log}" | rg -n '"pending_migrations"|"target_version"|"current_version"' -m 1 || true)"
+		migration_line="$(python3 - "${daemon_log}" <<'PY'
+from collections import deque
+import pathlib
+import re
+import sys
+
+path = pathlib.Path(sys.argv[1])
+pattern = re.compile(r'"pending_migrations"|"target_version"|"current_version"')
+for index, line in enumerate(deque(path.open(encoding="utf-8", errors="replace"), maxlen=300), start=1):
+    if pattern.search(line):
+        print(f"{index}:{line.rstrip()}")
+        break
+PY
+		)"
 		if [[ -n "${migration_line}" ]]; then
 			echo 'ℹ️ migration status signal found in daemon log'
 		else

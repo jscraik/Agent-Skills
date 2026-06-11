@@ -194,18 +194,22 @@ if should_probe "$PROJ_TYPE" "framework-config"; then
       continue
     fi
 
-    # Conservative regex: match "port:" + digits, then verify nothing non-numeric
-    # follows (rejects variable references like "port: process.env.PORT || 3000").
-    local_line=$(grep -E 'port:[[:space:]]*["'"'"']?[0-9]+' "$cfg" 2>/dev/null | head -1)
-    if [ -z "$local_line" ]; then continue; fi
+    local_port=$(python3 - "$cfg" <<'PY'
+import pathlib
+import re
+import sys
 
-    local_port=$(printf '%s' "$local_line" | grep -Eo 'port:[[:space:]]*["'"'"']?[0-9]+["'"'"']?' | head -1 | grep -Eo '[0-9]+')
+pattern = re.compile(r"port:\s*[\"']?(\d+)[\"']?(?=\s*[,})]?$)")
+for line in pathlib.Path(sys.argv[1]).read_text(encoding="utf-8", errors="replace").splitlines():
+    match = pattern.search(line)
+    if match:
+        print(match.group(1))
+        break
+PY
+    )
     if [ -n "$local_port" ]; then
-      local_after=$(printf '%s' "$local_line" | sed "s/.*port:[[:space:]]*[\"']*${local_port}[\"']*//" )
-      if [ -z "$local_after" ] || printf '%s' "$local_after" | grep -qE '^[[:space:],})]*$'; then
-        echo "$local_port"
-        exit 0
-      fi
+      echo "$local_port"
+      exit 0
     fi
   done
 fi
@@ -215,7 +219,18 @@ fi
 if should_probe "$PROJ_TYPE" "puma"; then
   puma_file="$PROJECT_ROOT/config/puma.rb"
   if [ -f "$puma_file" ]; then
-    puma_port=$(grep -Eo 'port[[:space:]]+[0-9]+' "$puma_file" 2>/dev/null | head -1 | grep -Eo '[0-9]+')
+    puma_port=$(python3 - "$puma_file" <<'PY'
+import pathlib
+import re
+import sys
+
+for line in pathlib.Path(sys.argv[1]).read_text(encoding="utf-8", errors="replace").splitlines():
+    match = re.search(r"\bport\s+(\d+)\b", line)
+    if match:
+        print(match.group(1))
+        break
+PY
+    )
     if [ -n "$puma_port" ]; then
       echo "$puma_port"
       exit 0
@@ -229,10 +244,19 @@ if should_probe "$PROJ_TYPE" "procfile"; then
   procfile="$PROJECT_ROOT/Procfile.dev"
   if [ -f "$procfile" ]; then
     # Extract the web line
-    web_line=$(grep -E '^web:' "$procfile" 2>/dev/null | head -1)
+    web_line=$(python3 - "$procfile" <<'PY'
+import pathlib
+import sys
+
+for line in pathlib.Path(sys.argv[1]).read_text(encoding="utf-8", errors="replace").splitlines():
+    if line.startswith("web:"):
+        print(line)
+        break
+PY
+    )
     if [ -n "$web_line" ]; then
       # Match -p <n>, -p<n>, --port <n>, -p=<n>, --port=<n>
-      proc_port=$(printf '%s' "$web_line" | grep -Eo '(-p[= ]*|--port[= ]+)[0-9]+' | head -1 | grep -Eo '[0-9]+')
+      proc_port=$(printf '%s' "$web_line" | python3 -c 'import re, sys; match=re.search(r"(?:-p[= ]*|--port[= ]+)(\d+)", sys.stdin.read()); print(match.group(1) if match else "")')
       if [ -n "$proc_port" ]; then
         echo "$proc_port"
         exit 0
@@ -247,7 +271,18 @@ if should_probe "$PROJ_TYPE" "docker-compose"; then
   compose_file="$PROJECT_ROOT/docker-compose.yml"
   if [ -f "$compose_file" ]; then
     # Simple line-anchored grep for port mappings: - "NNNN:NNNN" or - NNNN:NNNN
-    compose_port=$(grep -Eo '^[[:space:]]*-[[:space:]]*"?[0-9]+:[0-9]+"?' "$compose_file" 2>/dev/null | head -1 | grep -Eo '[0-9]+' | head -1)
+    compose_port=$(python3 - "$compose_file" <<'PY'
+import pathlib
+import re
+import sys
+
+for line in pathlib.Path(sys.argv[1]).read_text(encoding="utf-8", errors="replace").splitlines():
+    match = re.search(r"^\s*-\s*\"?(\d+):\d+\"?", line)
+    if match:
+        print(match.group(1))
+        break
+PY
+    )
     if [ -n "$compose_port" ]; then
       echo "$compose_port"
       exit 0
@@ -261,7 +296,16 @@ if should_probe "$PROJ_TYPE" "package-json"; then
   pkg_file="$PROJECT_ROOT/package.json"
   if [ -f "$pkg_file" ]; then
     # Look for --port or -p in dev/start scripts
-    pkg_port=$(grep -Eo '(-p[= ]+|--port[= ]+)[0-9]+' "$pkg_file" 2>/dev/null | head -1 | grep -Eo '[0-9]+')
+    pkg_port=$(python3 - "$pkg_file" <<'PY'
+import pathlib
+import re
+import sys
+
+text = pathlib.Path(sys.argv[1]).read_text(encoding="utf-8", errors="replace")
+match = re.search(r"(?:-p[= ]+|--port[= ]+)(\d+)", text)
+print(match.group(1) if match else "")
+PY
+    )
     if [ -n "$pkg_port" ]; then
       echo "$pkg_port"
       exit 0

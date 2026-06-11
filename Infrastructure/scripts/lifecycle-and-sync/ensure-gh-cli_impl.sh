@@ -51,7 +51,7 @@ verify_gh() {
   if have_cmd gh; then
     echo "[OK] GitHub CLI found: $(command -v gh)"
     if gh --version >/dev/null 2>&1; then
-      gh --version | sed -n '1p'
+      gh --version | python3 -c 'import sys; print(next((line.rstrip("\n") for line in sys.stdin), ""))'
     fi
     return 0
   fi

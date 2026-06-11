@@ -48,7 +48,7 @@ run_case() {
   set -e
 
   local run_dir
-  run_dir="$(printf '%s\n' "$output" | rg -o "\\[recursive-loop\\] out_dir=.*" | tail -n1 | sed 's/.*out_dir=//' || true)"
+  run_dir="$(printf '%s\n' "$output" | python3 -c 'import re, sys; matches=[m.group(1) for line in sys.stdin for m in [re.search(r"\\[recursive-loop\\] out_dir=(.*)", line)]]; print(matches[-1] if matches else "")')"
   if [[ -z "$run_dir" ]]; then
     run_dir=""
   fi

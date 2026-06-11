@@ -76,16 +76,30 @@ normalized_checksum() {
 
 	case "$rel_path" in
 		*/diagram-context.md)
-			sed '/^Generated: /d' "$file" | shasum -a 256 | awk '{print $1}'
+			python3 - "$file" <<'PY'
+import hashlib
+import pathlib
+import sys
+
+lines = pathlib.Path(sys.argv[1]).read_text(encoding="utf-8").splitlines(keepends=True)
+payload = "".join(line for line in lines if not line.startswith("Generated: ")).encode()
+print(hashlib.sha256(payload).hexdigest())
+PY
 			;;
 		*/diagram-context.meta.json)
-			jq -c 'del(.generated_at, .last_generated_epoch, .changed, .context_sha256)' "$file" | shasum -a 256 | awk '{print $1}'
+			jq -c 'del(.generated_at, .last_generated_epoch, .changed, .context_sha256)' "$file" | python3 -c 'import hashlib, sys; print(hashlib.sha256(sys.stdin.buffer.read()).hexdigest())'
 			;;
 		*/manifest.json)
-			jq -c 'del(.generatedAt)' "$file" | shasum -a 256 | awk '{print $1}'
+			jq -c 'del(.generatedAt)' "$file" | python3 -c 'import hashlib, sys; print(hashlib.sha256(sys.stdin.buffer.read()).hexdigest())'
 			;;
 		*)
-			shasum -a 256 "$file" | awk '{print $1}'
+			python3 - "$file" <<'PY'
+import hashlib
+import pathlib
+import sys
+
+print(hashlib.sha256(pathlib.Path(sys.argv[1]).read_bytes()).hexdigest())
+PY
 			;;
 	esac
 }

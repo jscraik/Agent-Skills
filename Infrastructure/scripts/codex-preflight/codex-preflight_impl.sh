@@ -572,7 +572,9 @@ main() {
 	local branch_name
 	branch_name="$(git -C "${WORKSPACE_ROOT}" rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
 	echo "git branch: ${branch_name:-HEAD}"
-	echo "clean?: $(git -C "${WORKSPACE_ROOT}" status --porcelain -- . | wc -l | tr -d ' ') changes"
+	local change_count
+	change_count="$(git -C "${WORKSPACE_ROOT}" status --porcelain -- . | python3 -c 'import sys; print(sum(1 for _ in sys.stdin))')"
+	echo "clean?: ${change_count} changes"
 
 	if [[ "${local_memory_mode}" != 'off' ]]; then
 		if ! preflight_local_memory_gold; then

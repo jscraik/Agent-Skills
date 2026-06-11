@@ -304,9 +304,16 @@ TMP_CONTEXT="$TMP_DIR/diagram-context.md"
 	done
 } > "$TMP_CONTEXT"
 
-CONTEXT_SHA="$(shasum -a 256 "$TMP_CONTEXT" | awk '{print $1}')"
+CONTEXT_SHA="$(python3 - "$TMP_CONTEXT" <<'PY'
+import hashlib
+import pathlib
+import sys
+
+print(hashlib.sha256(pathlib.Path(sys.argv[1]).read_bytes()).hexdigest())
+PY
+)"
 GIT_HEAD="$(git -C "$ROOT_DIR" rev-parse --short HEAD 2>/dev/null || echo "unknown")"
-DIAGRAM_COUNT="$(ls "$TMP_DIR/diagrams"/*.mmd | wc -l | tr -d ' ')"
+DIAGRAM_COUNT="$(find "$TMP_DIR/diagrams" -maxdepth 1 -type f -name '*.mmd' | python3 -c 'import sys; print(sum(1 for _ in sys.stdin))')"
 CHANGED=true
 
 if [[ -f "$CONTEXT_FILE" ]] && cmp -s "$TMP_CONTEXT" "$CONTEXT_FILE"; then
