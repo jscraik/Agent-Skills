@@ -1,11 +1,21 @@
 policy:
   allow_implicit_invocation: false
 interface:
-  display_name: "SynAIpse Slice Spec"
-  short_description: "Specify one selected trace or tracker slice with acceptance criteria, constraints, validation, and exit conditions."
+  display_name: SynAIpse Slice Spec
+  short_description: Specify one selected trace or tracker slice with acceptance criteria, constraints, validation, and exit conditions.
 routing:
-  handle: "sy-slice-spec"
-  sdk_stage: "slice-spec"
-  previous_stage: "tracker-plan"
-  next_stage: "execution-plan"
-
+  handle: sy-slice-spec
+  sdk_stage: slice-spec
+  previous_stage: tracker-plan
+  next_stage: execution-plan
+schema_version: 1
+skill: sy-slice-spec
+stage: slice-spec
+role: governed_sdk_stage_agent
+instructions:
+- Load SKILL.md first and follow the compact operator-facing procedure.
+- Load references/source-context.yaml only when companion governance or provenance is needed.
+tool_policy:
+  default: follow_repo_and_skill_contracts
+output_contract:
+  format: stage_result

@@ -2,7 +2,7 @@
   "schema_version": "skills-sdk.capability-status.v1",
   "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/capability-status.v1.schema.json",
   "status": "truth_surface",
-  "generated_from": ".harness/specs/2026-06-08-skills-sdk-pu-016-review-artifact-verification-spec.md",
+  "generated_from": ".harness/specs/2026-06-11-skills-sdk-pu-018-compact-stage-skill-shape-spec.md",
   "source_artifacts": [
     ".harness/specs/2026-06-05-skills-sdk-pu-010-receipt-proven-rollback-uninstall-spec.md",
     ".harness/specs/2026-06-06-skills-sdk-pu-012-project-conformance-adoption-gate-spec.md",
@@ -17,6 +17,9 @@
     ".harness/plan/2026-06-08-skills-sdk-pu-015-review-handoff-receipts-trace-plan.md",
     ".harness/specs/2026-06-08-skills-sdk-pu-016-review-artifact-verification-spec.md",
     ".harness/plan/2026-06-08-skills-sdk-pu-016-review-artifact-verification-plan.md",
+    ".harness/specs/2026-06-11-skills-sdk-pu-017-governed-review-execution-spec.md",
+    ".harness/specs/2026-06-11-skills-sdk-pu-018-compact-stage-skill-shape-spec.md",
+    ".harness/plan/2026-06-11-skills-sdk-pu-018-compact-stage-skill-shape-plan.md",
     "artifacts/recommended-skills-sdk-pipeline.html",
     "Docs/goals/skills-sdk-v1-0-product-implementation/state.yaml"
   ],
@@ -27,8 +30,12 @@
     "./bin/ask sdk lenses select --prompt 'review a skill for validation confidence' --intent validation_review --json --robot",
     "./bin/ask sdk review plan --target Skills/agent-ops/simplify --intent validation_review --receipt-out .harness/artifacts/sdk-review-plan/simplify.json --json --robot",
     "./bin/ask sdk review handoff --plan .harness/artifacts/sdk-review-plan/simplify.json --target Skills/agent-ops/simplify --intent validation_review --json --robot",
+    "./bin/ask sdk review execute --handoff .harness/artifacts/sdk-review-handoff/simplify.json --json --robot",
     "./bin/ask sdk review verify --handoff .harness/artifacts/sdk-review-handoff/simplify.json --json --robot",
     "./bin/ask sdk determinism audit --scope skills --limit 10 --json --robot",
+    "/Users/jamiecraik/.venvs/pyyaml/bin/python Infrastructure/scripts/validation-and-linting/check_sdk_stage_skill_shape.py",
+    "python3 -m unittest Infrastructure.scripts.testing.test_skill_creator_lifecycle_scaffold -v",
+    "python3 -m unittest Infrastructure.scripts.testing.test_sdk_stage_skill_shape_validator -v",
     "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_review_plan.py -q",
     "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_review_handoff.py -q",
     "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_review_verify.py -q",
@@ -224,10 +231,13 @@
         "./bin/ask sdk review execute --handoff .harness/artifacts/sdk-review-handoff/simplify.json --json --robot",
         "Infrastructure/scripts/lib/ask/skills_sdk/review_execute.py",
         "Infrastructure/config/schemas/skills-sdk/sdk-review-execution-receipt.v1.schema.json",
-        "Infrastructure/tests/test_skills_sdk_review_execute.py"
+        "Infrastructure/tests/test_skills_sdk_review_execute.py",
+        "/Users/jamiecraik/.venvs/pyyaml/bin/python Infrastructure/scripts/validation-and-linting/check_sdk_stage_skill_shape.py",
+        "python3 -m unittest Infrastructure.scripts.testing.test_skill_creator_lifecycle_scaffold -v",
+        "python3 -m unittest Infrastructure.scripts.testing.test_sdk_stage_skill_shape_validator -v"
       ],
-      "next_slice": "Render review plan, handoff, execution, and verification receipts into the local HTML evidence console without claiming hosted explorer readiness.",
-      "notes": "PU-017 materializes required local review artifacts from review handoff receipts and preserves explicit not-proven lanes for independent approval, CI, PR, review-thread, tracker, and merge-readiness state."
+      "next_slice": "Define SDK knowledge capsule ingestion only after portable upstream pack export boundaries are specified; PU-018 does not add a KnowledgeOS runtime dependency.",
+      "notes": "PU-017 materializes required local review artifacts from review handoff receipts. PU-018 locally implements compact governed stage skill shape through validator, scaffold, migrated stage packages, and bounded source-context reference metadata while preserving explicit not-proven lanes for independent approval, CI, PR, review-thread, tracker, and merge-readiness state."
     },
     {
       "id": "review_verification",

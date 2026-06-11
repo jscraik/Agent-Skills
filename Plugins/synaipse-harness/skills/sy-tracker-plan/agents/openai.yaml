@@ -1,10 +1,21 @@
 policy:
   allow_implicit_invocation: false
 interface:
-  display_name: "SynAIpse Tracker Plan"
-  short_description: "Translate trace bullets into tracker-ready slices with dependencies, labels, acceptance fields, and validation placeholders."
+  display_name: SynAIpse Tracker Plan
+  short_description: Translate trace bullets into tracker-ready slices with dependencies, labels, acceptance fields, and validation placeholders.
 routing:
-  handle: "sy-tracker-plan"
-  sdk_stage: "tracker-plan"
-  previous_stage: "trace-plan"
-  next_stage: "slice-spec"
+  handle: sy-tracker-plan
+  sdk_stage: tracker-plan
+  previous_stage: trace-plan
+  next_stage: slice-spec
+schema_version: 1
+skill: sy-tracker-plan
+stage: tracker-plan
+role: governed_sdk_stage_agent
+instructions:
+- Load SKILL.md first and follow the compact operator-facing procedure.
+- Load references/source-context.yaml only when companion governance or provenance is needed.
+tool_policy:
+  default: follow_repo_and_skill_contracts
+output_contract:
+  format: stage_result

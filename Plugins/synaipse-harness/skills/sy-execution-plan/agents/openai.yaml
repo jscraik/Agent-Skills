@@ -1,11 +1,21 @@
 policy:
   allow_implicit_invocation: false
 interface:
-  display_name: "SynAIpse Execution Plan"
-  short_description: "Sequence how to implement one approved slice, including file targets, validation gates, rollback, and proof lanes."
+  display_name: SynAIpse Execution Plan
+  short_description: Sequence how to implement one approved slice, including file targets, validation gates, rollback, and proof lanes.
 routing:
-  handle: "sy-execution-plan"
-  sdk_stage: "execution-plan"
-  previous_stage: "slice-spec"
-  next_stage: "work"
-
+  handle: sy-execution-plan
+  sdk_stage: execution-plan
+  previous_stage: slice-spec
+  next_stage: work
+schema_version: 1
+skill: sy-execution-plan
+stage: execution-plan
+role: governed_sdk_stage_agent
+instructions:
+- Load SKILL.md first and follow the compact operator-facing procedure.
+- Load references/source-context.yaml only when companion governance or provenance is needed.
+tool_policy:
+  default: follow_repo_and_skill_contracts
+output_contract:
+  format: stage_result

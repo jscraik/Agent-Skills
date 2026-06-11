@@ -141,6 +141,14 @@ def rel(path: Path, repo_root_path: Path | None = None) -> str:
         return path.as_posix()
 
 
+def canonical_source_path(path: str) -> str:
+    """Return the manifest/projection spelling for a repo-relative source path."""
+    parts = Path(path).parts
+    if parts and parts[0] == "plugins":
+        return Path("Plugins", *parts[1:]).as_posix()
+    return path
+
+
 def source_revision(repo_root_path: Path | None = None) -> str:
     git_bin = shutil.which("git")
     if not git_bin:
@@ -427,7 +435,7 @@ def canonical_source_path_for_row(
         and source_dir.parent.name in {".system", "skills-system"}
     ):
         return f"skills-system/{source_dir.name}/SKILL.md"
-    return rel(source_dir / "SKILL.md", repo_root_path)
+    return canonical_source_path(rel(source_dir / "SKILL.md", repo_root_path))
 
 
 def build_skill_modules(repo_root_path: Path | None = None) -> tuple[list[SkillModule], list[dict[str, str]]]:
