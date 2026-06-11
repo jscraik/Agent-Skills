@@ -1,1 +1,14 @@
-../../../../../fixtures/budget-archive/2026-04-21/deferred-store/skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex/.app.json
+{
+  "schema_version": 1,
+  "name": "arscontexta-codex",
+  "display_name": "Ars Contexta (Codex Starter)",
+  "description": "Starter plugin package for operating Ars Contexta vault workflows from Codex.",
+  "surfaces": [
+    "skills",
+    "prompts"
+  ],
+  "source": {
+    "repo": "https://github.com/agenticnotetaking/arscontexta.git",
+    "commit": "2acfd5cc4473c4d06c46be63df748e77e00e2746"
+  }
+}

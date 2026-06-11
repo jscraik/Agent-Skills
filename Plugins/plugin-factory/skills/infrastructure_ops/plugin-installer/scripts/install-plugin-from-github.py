@@ -1,1 +1,10 @@
-../../../../fixtures/budget-archive/2026-04-21/deferred-store/skills/infrastructure_ops/plugin-installer/scripts/install-plugin-from-github.py
+#!/usr/bin/env python3
+"""CLI wrapper for install-plugin-from-github implementation."""
+
+from __future__ import annotations
+
+from pathlib import Path
+import runpy
+
+if __name__ == "__main__":
+    runpy.run_path(str(Path(__file__).with_suffix(".pyw")), run_name="__main__")

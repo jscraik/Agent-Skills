@@ -1,0 +1,9 @@
+{
+  "agent_id": "019ea42c-aac8-7613-aa55-6bf475ba66b1",
+  "agent_type": "explorer",
+  "task": "Read-only inspect legacy command-handle references in selected tests and report minimal semantic replacements.",
+  "artifacts": [
+    "artifacts/reviews/explorer.md"
+  ],
+  "status": "completed"
+}

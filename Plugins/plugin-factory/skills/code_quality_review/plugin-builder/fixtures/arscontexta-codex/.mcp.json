@@ -1,1 +1,12 @@
-../../../../../fixtures/budget-archive/2026-04-21/deferred-store/skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex/.mcp.json
+{
+  "schema_version": 1,
+  "mcpServers": {
+    "arscontexta_placeholder": {
+      "command": "echo",
+      "args": [
+        "Configure Ars Contexta MCP integration for your vault environment"
+      ],
+      "notes": "Placeholder only: replace with real MCP server command for your target environment."
+    }
+  }
+}

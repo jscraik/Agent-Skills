@@ -1,0 +1,39 @@
+{
+  "run_id": "code-simplicity-reviewer-20260607T220000Z",
+  "agent_type": "code-simplicity-reviewer",
+  "status": "review_complete",
+  "artifact_path": "/Users/jamiecraik/dev/agent-skills/artifacts/reviews/code-simplicity-reviewer.md",
+  "findings": [
+    {
+      "severity": "high",
+      "file": "Infrastructure/scripts/lifecycle-and-sync/command_surface.py:208-346",
+      "impacted_behavior": "Legacy generated-handle compatibility mode cannot emit files even when enabled.",
+      "remediation": "Restore a single env-gated predicate or remove the compatibility surface.",
+      "confidence": "high",
+      "validation_ownership": "introduced_by_current_patch"
+    },
+    {
+      "severity": "medium",
+      "file": "Infrastructure/scripts/lifecycle-and-sync/projection_integrity_impl.py:37-46,670-688,1018-1087",
+      "impacted_behavior": "Plugin-cache package handling now forks the generic mirror model for a narrow special case.",
+      "remediation": "Move the package-copy normalization into a dedicated helper or explicit call sites.",
+      "confidence": "medium",
+      "validation_ownership": "introduced_by_current_patch"
+    }
+  ],
+  "validation_evidence": [
+    "python3 -m pytest Infrastructure/tests/test_local_plugin_picker_surface.py -q -> pass",
+    "ASK_ENABLE_COMMAND_HANDLE_FILES=1 python3 -m pytest Infrastructure/tests/test_ask_skills_sync_security.py::TestAskSkillsSyncSecurity::test_sync_skills_rooted_non_dry_run_writes_generated_surface -q -> fail",
+    "python3 -m pytest Infrastructure/tests/test_ask_skills_sync_security.py -vv -x -> failed at test_sync_skills_rooted_non_dry_run_writes_generated_surface"
+  ],
+  "blockers": [],
+  "improvement_opportunities": [
+    "Make the legacy handle mode explicit or delete it.",
+    "Keep plugin-cache normalization out of the generic projection model."
+  ],
+  "strengths": [
+    "Removed generated-handle CLI switches from the entrypoint.",
+    "Added focused regression coverage for plugin-cache package handling."
+  ],
+  "next_action": "Decide whether the repo should keep a real legacy generated-handle compatibility mode."
+}

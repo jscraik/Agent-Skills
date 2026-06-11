@@ -1,0 +1,15 @@
+{
+  "agent": "explorer",
+  "agent_id": "019ea3f5-a308-71a3-b14b-693b162f884a",
+  "artifact_path": "artifacts/reviews/explorer.md",
+  "manifest_path": "artifacts/agent-runs/explorer-019ea3f5-a308-71a3-b14b-693b162f884a/manifest.json",
+  "status": "complete",
+  "source_edits": [],
+  "validation": [
+    {
+      "command": "python3 -m pytest -q Infrastructure/tests/test_local_plugin_picker_surface.py::LocalPluginPickerSurfaceTests::test_runtime_cache_preserves_manifest_declared_skills Infrastructure/tests/test_local_plugin_picker_surface.py::LocalPluginPickerSurfaceTests::test_versioned_plugin_cache_preserves_manifest_declared_skills",
+      "outcome": "fail",
+      "reason": "current runtime cache exposes duplicate plugin-factory skill identities; versioned cache passed in this checkout"
+    }
+  ]
+}

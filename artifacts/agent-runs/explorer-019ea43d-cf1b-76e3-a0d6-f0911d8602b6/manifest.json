@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "agent_id": "019ea43d-cf1b-76e3-a0d6-f0911d8602b6",
+  "agent_type": "explorer",
+  "run_id": "019ea43d-cf1b-76e3-a0d6-f0911d8602b6",
+  "task": "Prepare PR #245 triage lane commands and surfaces for branch codex/plugin-sdk-desktop-readiness",
+  "cwd": "/Users/jamiecraik/dev/agent-skills",
+  "requested_pr": 245,
+  "requested_branch": "codex/plugin-sdk-desktop-readiness",
+  "artifacts": [
+    {
+      "path": "artifacts/reviews/explorer.md",
+      "type": "triage_prep_report",
+      "required": true
+    }
+  ],
+  "commands_executed": [
+    "pwd && git status --short --branch && rg -n ...",
+    "rg -n ... /Users/jamiecraik/.codex/memories/MEMORY.md ...",
+    "sed -n ... Docs/solutions/2026-05-19-codex-sandbox-live-pr-sweep-permissions.md Docs/agents/13-workflow-and-safety-guidance.md .github/PULL_REQUEST_TEMPLATE.md Skills/agent-ops/goal-governor/scripts/write_pr_triage_report.py",
+    "sed -n ... GitHub, CircleCI, and CodeRabbit SKILL.md files",
+    "nl -ba /Users/jamiecraik/.codex/memories/MEMORY.md | sed -n ...",
+    "ls -ld artifacts artifacts/reviews artifacts/agent-runs && date -u",
+    "mkdir -p artifacts/agent-runs/explorer-019ea43d-cf1b-76e3-a0d6-f0911d8602b6 artifacts/reviews"
+  ],
+  "network_commands_executed": [],
+  "status": "prepared",
+  "manifest_path": "artifacts/agent-runs/explorer-019ea43d-cf1b-76e3-a0d6-f0911d8602b6/manifest.json"
+}

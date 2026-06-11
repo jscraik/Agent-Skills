@@ -1,0 +1,27 @@
+{
+  "schema_version": "agent-run-manifest.v1",
+  "agent": "explorer",
+  "run_id": "html-pipeline-source-probe-20260608",
+  "task": "Determine whether artifacts/recommended-skills-sdk-pipeline.html is generated or hand-authored.",
+  "cwd": "/Users/jamiecraik/dev/agent-skills",
+  "inputs": [
+    "artifacts/recommended-skills-sdk-pipeline.html",
+    "Infrastructure/tests/test_skills_sdk_pipeline_status_artifact.py",
+    "Infrastructure/tests/test_pr_skills_sdk_artifacts.py",
+    "Infrastructure/config/skills-sdk/capability-matrix.v1.json",
+    ".harness/specs/2026-06-04-skills-sdk-pu-008-capability-truth-spec.md",
+    ".harness/specs/2026-06-06-skills-sdk-pu-011-typed-artifact-contracts-spec.md",
+    ".harness/specs/2026-06-07-skills-sdk-pu-014-lens-routed-review-spec.md",
+    ".harness/plan/2026-06-06-skills-sdk-pu-011-typed-artifact-contracts-tracker-plan.md"
+  ],
+  "outputs": [
+    "artifacts/reviews/explorer.md"
+  ],
+  "commands": [
+    "rg -n \"recommended-skills-sdk-pipeline|skills-sdk-pipeline|recommended-skills\" /Users/jamiecraik/.codex/memories/MEMORY.md /Users/jamiecraik/dev/agent-skills || true",
+    "rg -n \"recommended-skills-sdk-pipeline.html|HTML_PATH|CapabilityStatusParser|data-capability-status|static_docs|review_plan\" Infrastructure/tests/test_skills_sdk_pipeline_status_artifact.py Infrastructure/tests/test_pr_skills_sdk_artifacts.py Infrastructure/tests/test_skills_sdk_review_plan.py Infrastructure/config/skills-sdk/capability-matrix.v1.json .harness/specs/2026-06-04-skills-sdk-pu-008-capability-truth-spec.md .harness/specs/2026-06-06-skills-sdk-pu-011-typed-artifact-contracts-spec.md .harness/specs/2026-06-07-skills-sdk-pu-014-lens-routed-review-spec.md .harness/plan/2026-06-06-skills-sdk-pu-011-typed-artifact-contracts-tracker-plan.md",
+    "git log --follow --name-status --oneline -- artifacts/recommended-skills-sdk-pipeline.html | head -120",
+    "git show --stat --oneline 350c828b9 -- artifacts/recommended-skills-sdk-pipeline.html"
+  ],
+  "conclusion": "The pipeline HTML is a static hand-authored artifact. Edit it directly for visual/content changes, but change runtime capability truth in the runtime owner and capability matrix first, then sync the HTML and run the status artifact validator."
+}

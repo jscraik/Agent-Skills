@@ -1,1 +1,3 @@
-../../../../fixtures/budget-archive/2026-04-21/deferred-store/skills/scaffolding_templates/plugin-creator/agents/openai.yaml
+interface:
+  display_name: "Plugin Creator"
+  short_description: "Scaffold a minimal Codex plugin package and optional marketplace entry."

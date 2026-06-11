@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "run_id": "pu015-review-handoff-commit-audit",
+  "auditor": "delivery-state-auditor",
+  "scope": {
+    "repo": "/private/tmp/agent-skills-pu-015-review-handoff",
+    "branch": "codex/skills-sdk-pu-015-review-handoff",
+    "head_sha": "2a4e5d809f5d079136b3dbd2fc91b89d8467247d"
+  },
+  "artifact_path": "artifacts/reviews/delivery-state-auditor.md",
+  "commands": [
+    "git rev-parse --show-toplevel && git status --short --branch",
+    "git diff --stat -- . ':(exclude)artifacts'",
+    "git status --short --untracked-files=all",
+    "git ls-files '.harness/plan/*' '.harness/specs/*' | head -n 20",
+    "git diff --check",
+    "git rev-parse HEAD",
+    "head -n 40 .harness/plan/2026-06-08-skills-sdk-pu-015-review-handoff-receipts-trace-plan.md",
+    "head -n 40 .harness/specs/2026-06-08-skills-sdk-pu-015-review-handoff-receipts-spec.md",
+    "head -n 40 Infrastructure/scripts/lib/ask/skills_sdk/review_handoff.py",
+    "head -n 40 Infrastructure/config/schemas/skills-sdk/sdk-review-handoff-receipt.v1.schema.json",
+    "head -n 40 Infrastructure/tests/test_skills_sdk_review_handoff.py",
+    "local-memory bootstrap --mode minimal --include_questions --session_id 'repo:agent-skills/task:pu-015' --json",
+    "local-memory search 'pu-015 review handoff receipts trace plan skills-sdk' --session_filter_mode all --json"
+  ],
+  "status": "complete"
+}

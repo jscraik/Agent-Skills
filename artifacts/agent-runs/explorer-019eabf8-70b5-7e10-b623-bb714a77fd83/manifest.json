@@ -1,0 +1,33 @@
+{
+  "agent_id": "019eabf8-70b5-7e10-b623-bb714a77fd83",
+  "agent_type": "explorer",
+  "run_id": "019eabf8-70b5-7e10-b623-bb714a77fd83",
+  "task": "Inspect GitHub PR 252 in jscraik/Agent-Skills",
+  "mode": "read-only",
+  "repo": "jscraik/Agent-Skills",
+  "pr": 252,
+  "report_path": "artifacts/reviews/explorer.md",
+  "manifest_path": "artifacts/agent-runs/explorer-019eabf8-70b5-7e10-b623-bb714a77fd83/manifest.json",
+  "commands": [
+    {
+      "command": "zsh -lc 'gh pr view 252 --repo jscraik/Agent-Skills --json number,title,state,isDraft,headRefName,headRefOid,headRepositoryOwner,headRepository,isCrossRepository,baseRefName,baseRefOid,mergeStateStatus,mergeable,reviewDecision,statusCheckRollup,url,updatedAt,createdAt,author'",
+      "outcome": "pass"
+    },
+    {
+      "command": "zsh -lc 'gh pr checks 252 --repo jscraik/Agent-Skills --watch=false --json name,state,workflow,link,startedAt,completedAt,bucket,description,event'",
+      "outcome": "stdout_empty; not used for conclusions"
+    }
+  ],
+  "summary": {
+    "state": "OPEN",
+    "draft": false,
+    "merge_state_status": "UNSTABLE",
+    "mergeable": "MERGEABLE",
+    "head_ref": "codex/skills-sdk-pu-016-review-verify",
+    "base_ref": "main",
+    "failing_checks": [
+      "pr-template"
+    ]
+  },
+  "status": "complete"
+}

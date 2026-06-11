@@ -1,0 +1,43 @@
+{
+  "run_id": "pu015-review-handoff-20260608T170500Z",
+  "agent_type": "architecture-strategist",
+  "status": "complete",
+  "repo_root": "/Users/jamiecraik/dev/agent-skills",
+  "review_root": "/private/tmp/agent-skills-pu-015-review-handoff",
+  "artifact_path": "/Users/jamiecraik/dev/agent-skills/artifacts/reviews/architecture-strategist.md",
+  "manifest_path": "/Users/jamiecraik/dev/agent-skills/artifacts/agent-runs/architecture-strategist-pu015-review-handoff-20260608T170500Z/manifest.json",
+  "findings": [
+    {
+      "severity": "high",
+      "summary": "Branch freshness is enforced as a hard gate even though the spec says branch is diagnostic only.",
+      "evidence": [
+        "/private/tmp/agent-skills-pu-015-review-handoff/.harness/specs/2026-06-08-skills-sdk-pu-015-review-handoff-receipts-spec.md:54-60",
+        "/private/tmp/agent-skills-pu-015-review-handoff/Infrastructure/scripts/lib/ask/skills_sdk/review_handoff.py:176-181",
+        "/private/tmp/agent-skills-pu-015-review-handoff/Infrastructure/scripts/lib/ask/skills_sdk/review_handoff.py:189-192"
+      ]
+    },
+    {
+      "severity": "medium",
+      "summary": "Handoff does not explicitly reject non-written source plans before emitting next-command guidance.",
+      "evidence": [
+        "/private/tmp/agent-skills-pu-015-review-handoff/Infrastructure/scripts/lib/ask/skills_sdk/review_plan.py:88-100",
+        "/private/tmp/agent-skills-pu-015-review-handoff/Infrastructure/scripts/lib/ask/skills_sdk/review_handoff.py:116-125",
+        "/private/tmp/agent-skills-pu-015-review-handoff/Infrastructure/scripts/lib/ask/skills_sdk/review_handoff.py:229-235"
+      ]
+    },
+    {
+      "severity": "medium",
+      "summary": "Provenance status vocabulary diverges between spec and implementation/schema.",
+      "evidence": [
+        "/private/tmp/agent-skills-pu-015-review-handoff/.harness/specs/2026-06-08-skills-sdk-pu-015-review-handoff-receipts-spec.md:54-74",
+        "/private/tmp/agent-skills-pu-015-review-handoff/Infrastructure/scripts/lib/ask/skills_sdk/review_plan.py:145-152",
+        "/private/tmp/agent-skills-pu-015-review-handoff/Infrastructure/config/schemas/skills-sdk/sdk-review-plan-receipt.v1.schema.json:143-173"
+      ]
+    }
+  ],
+  "validation_evidence": [
+    "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_review_plan.py Infrastructure/tests/test_skills_sdk_review_handoff.py -q"
+  ],
+  "failures_or_blockers": [],
+  "next_action": "Reconcile the branch freshness rule and provenance vocabulary before merging the handoff surface."
+}

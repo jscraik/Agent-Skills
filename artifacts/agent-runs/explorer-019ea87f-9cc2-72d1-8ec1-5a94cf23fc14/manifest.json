@@ -1,0 +1,37 @@
+{
+  "schema_version": "agent-run-manifest.v1",
+  "agent_type": "explorer",
+  "agent_id": "019ea87f-9cc2-72d1-8ec1-5a94cf23fc14",
+  "task": "Investigate ask launcher, Python version selection, mise interaction, and temp worktree behavior",
+  "status": "complete",
+  "source_edits": [],
+  "artifacts": [
+    {
+      "path": "artifacts/reviews/explorer.md",
+      "kind": "review_report",
+      "required": true
+    }
+  ],
+  "evidence": [
+    "bin/ask",
+    "Infrastructure/bin/ask",
+    "Infrastructure/scripts/lib/ask/context.py",
+    "Infrastructure/scripts/lib/ask/bootstrap.py",
+    "Infrastructure/scripts/lib/ask/commands/repo_impl.py",
+    "Infrastructure/scripts/codex-preflight/codex_env_common.sh",
+    "Infrastructure/scripts/lifecycle-and-sync/prepare-worktree.sh",
+    ".mise.toml",
+    "Infrastructure/scripts/testing/test_ask_bootstrap.py",
+    "Infrastructure/tests/test_ask_cli_impl.py",
+    "Infrastructure/tests/test_ask_repo_doctor.py",
+    "Infrastructure/scripts/testing/test_codex_env_common.py",
+    "Infrastructure/scripts/testing/test_codex_environment_toml.py"
+  ],
+  "validation": [
+    {
+      "command": "read-only inspection with rg/find/ls/nl",
+      "outcome": "pass",
+      "notes": "Mapped launcher and bootstrap paths; no tests executed."
+    }
+  ]
+}

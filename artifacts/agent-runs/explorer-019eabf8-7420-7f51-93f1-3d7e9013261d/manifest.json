@@ -1,0 +1,45 @@
+{
+  "agent_id": "019eabf8-7420-7f51-93f1-3d7e9013261d",
+  "agent_type": "explorer",
+  "run_id": "019eabf8-7420-7f51-93f1-3d7e9013261d",
+  "timestamp_utc": "2026-06-09T10:42:48Z",
+  "repository": "jscraik/Agent-Skills",
+  "cwd": "/Users/jamiecraik/dev/agent-skills",
+  "task": "Inspect CodeRabbit status and review comments for PR 252",
+  "pr": {
+    "number": 252,
+    "url": "https://github.com/jscraik/Agent-Skills/pull/252",
+    "head_ref": "codex/skills-sdk-pu-016-review-verify",
+    "head_sha": "d63c2a84b280c1a1dabfbba7089303fabb37e15f"
+  },
+  "artifacts": {
+    "review": "artifacts/reviews/explorer.md",
+    "manifest": "artifacts/agent-runs/explorer-019eabf8-7420-7f51-93f1-3d7e9013261d/manifest.json"
+  },
+  "commands": [
+    {
+      "command": "gh pr view 252 --repo jscraik/Agent-Skills --json number,title,state,isDraft,headRefName,headRefOid,baseRefName,reviewDecision,statusCheckRollup,comments,reviews,latestReviews,url,mergeable,author",
+      "outcome": "pass"
+    },
+    {
+      "command": "gh api repos/jscraik/Agent-Skills/pulls/252/reviews --paginate",
+      "outcome": "pass"
+    },
+    {
+      "command": "gh api repos/jscraik/Agent-Skills/pulls/252/comments --paginate",
+      "outcome": "pass"
+    },
+    {
+      "command": "gh api repos/jscraik/Agent-Skills/issues/252/comments --paginate",
+      "outcome": "pass"
+    }
+  ],
+  "result": {
+    "actionable_coderabbit_findings": 0,
+    "submitted_reviews": 0,
+    "line_review_comments": 0,
+    "coderabbit_status_context": "SUCCESS",
+    "coderabbit_review_execution": "blocked_by_rate_or_usage_limit"
+  },
+  "status": "complete"
+}

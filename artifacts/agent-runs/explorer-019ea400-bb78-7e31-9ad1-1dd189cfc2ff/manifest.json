@@ -1,0 +1,16 @@
+{
+  "agent_id": "019ea400-bb78-7e31-9ad1-1dd189cfc2ff",
+  "agent_type": "explorer",
+  "task": "Map tests/docs for generated command handle files legacy opt-in",
+  "artifact_path": "artifacts/reviews/explorer.md",
+  "status": "completed",
+  "inputs": [
+    "Infrastructure/tests",
+    "UBIQUITOUS_LANGUAGE.md",
+    "Docs/agents",
+    "Docs/reference"
+  ],
+  "outputs": [
+    "artifacts/reviews/explorer.md"
+  ]
+}

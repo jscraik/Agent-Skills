@@ -1,0 +1,44 @@
+{
+  "agent_id": "019ea7e2-4077-76d0-9e04-126db76874f6",
+  "agent_type": "explorer",
+  "task": "Inspect Codex Desktop skill picker roots for prek-pro across main and PR worktrees",
+  "status": "completed",
+  "artifacts": [
+    {
+      "path": "artifacts/reviews/explorer.md",
+      "type": "review_report",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "command": "rg -n skill picker/picker/.agents skills/manifest/plugin cache/config references across MEMORY.md and repo docs",
+      "outcome": "pass"
+    },
+    {
+      "command": "compare .agents/skills/prek-pro, .codex/skills/prek-pro, .skillsets, and canonical sources in both worktrees",
+      "outcome": "pass"
+    },
+    {
+      "command": "./bin/ask skills list --json --robot",
+      "cwd": "/Users/jamiecraik/dev/agent-skills",
+      "outcome": "pass"
+    },
+    {
+      "command": "./bin/ask skills list --advanced --json --robot",
+      "cwd": "/Users/jamiecraik/dev/agent-skills",
+      "outcome": "pass"
+    },
+    {
+      "command": "./bin/ask skills list --json --robot",
+      "cwd": "/Users/jamiecraik/dev/agent-skills-skill-picker-pr",
+      "outcome": "blocked",
+      "reason": "mise refused untrusted .mise.toml"
+    },
+    {
+      "command": "inspect /Users/jamiecraik/.codex/config.toml and home skill/plugin roots with read-only additional permission",
+      "outcome": "pass"
+    }
+  ],
+  "manifest_path": "artifacts/agent-runs/explorer-019ea7e2-4077-76d0-9e04-126db76874f6/manifest.json"
+}
