@@ -45,7 +45,6 @@ MAPPING = {
     "gen-skill-graph.py": "skill-graph",
     "query-graph.py": "skill-graph",
     "build-adjacency-yaml.py": "skill-graph",
-    "graph-diff.py": "skill-graph",
     "bootstrap_recursive_skill_graph_artifacts.py": "skill-graph",
     "check-diagram-freshness.sh": "skill-graph",
     "refresh-diagram-context.sh": "skill-graph",

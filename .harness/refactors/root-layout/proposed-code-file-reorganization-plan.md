@@ -44,7 +44,7 @@ This domain manages the highly specific capability of verifying separation of to
 
 #### **C. `skill-graph/`** *(Moving ~10 files)*
 Code that operates the local DAG logic and dependencies between skills.
-* **Files:** `gen-skill-graph.py`, `query-graph.py`, `build-adjacency-yaml.py`, `graph-diff.py`, `bootstrap_recursive_skill_graph_artifacts.py`
+* **Files:** `gen-skill-graph.py`, `query-graph.py`, `build-adjacency-yaml.py`, `bootstrap_recursive_skill_graph_artifacts.py`
 * **Justification:** Abstract math/graph operations shouldn't mix with basic bash lintings.
 
 #### **D. `validation-and-linting/`** *(Moving 20+ files)*

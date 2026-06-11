@@ -422,15 +422,6 @@
     "called_scripts": [],
     "docstring": "extract_last_json_line prints the last input line that begins with `{`"
   },
-  "graph-diff.py": {
-    "type": "python",
-    "size": 3207,
-    "imports": [
-      "json"
-    ],
-    "called_scripts": [],
-    "docstring": "graph-diff.py  \u2014  Compare two skill-edges JSON snapshots and print a summary."
-  },
   "check-semgrep-changed.sh": {
     "type": "shell",
     "size": 2146,

@@ -2258,6 +2258,7 @@
         <span>Steering uptake is recorded and validator-backed before continuing implementation.</span>
         <span>Codex desktop plugin readiness is split into package, marketplace, cache, config, skills, and hook trust proof lanes.</span>
         <span>Command-surface files are metadata only; canonical SKILL.md source and plugin manifests remain the runtime truth.</span>
+        <span>Legacy Skill Graph Diff comments are retired and are not Skills SDK evidence.</span>
       </div>
       <div class="next-slice-proof" aria-label="PU-018 sync point">
         <div>
@@ -2267,6 +2268,10 @@
         <div>
           <strong>PU-018 shape correction</strong>
           <span>The SDK stage validator, scaffold, and migrated SynAIpse stage packages now enforce the agreed product shape: thin operator instructions in <code>SKILL.md</code>, contracts and provenance in <code>references/*.yaml</code>/<code>agents/openai.yaml</code>, and focused Markdown references. KnowledgeOS ingestion remains a later portable-pack slice, not a runtime dependency.</span>
+        </div>
+        <div>
+          <strong>Next slice: PU-019</strong>
+          <span>Define SDK Knowledge Capsule Ingestion: portable upstream pack intake, selected capsule vendoring, digest/provenance recording, and local validation without depending on a KnowledgeOS checkout at runtime.</span>
         </div>
       </div>
       <table class="status-grid">
@@ -2286,11 +2291,11 @@
         <tr data-capability-id="sdk_lenses" data-status="implemented" data-pipeline-sections="agent_execution_control_plane,knowledge_engineering,ci_and_adoption"><td><strong>SDK lens selection</strong><br><span>sdk_lenses</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/lenses.py</td><td>Use selected lenses to route bounded reviews; keep lens selection read-only and evidence-backed.</td></tr>
         <tr data-capability-id="review_plan" data-status="implemented" data-pipeline-sections="agent_execution_control_plane,knowledge_engineering,ci_and_adoption"><td><strong>Lens-routed review plan receipts</strong><br><span>review_plan</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/review_plan.py</td><td>Use review plan receipts to hand off bounded human or agent reviews without treating the receipt as review completion.</td></tr>
         <tr data-capability-id="review_handoff" data-status="implemented" data-pipeline-sections="agent_execution_control_plane,knowledge_engineering,ci_and_adoption"><td><strong>Review handoff receipts</strong><br><span>review_handoff</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/review_handoff.py</td><td>Execute bounded reviewer agents only after handoff receipts define roles, required artifacts, and not-proven lanes.</td></tr>
-        <tr data-capability-id="review_execution" data-status="implemented" data-pipeline-sections="agent_execution_control_plane,knowledge_engineering,ci_and_adoption"><td><strong>Governed local review artifact execution</strong><br><span>review_execution</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/review_execute.py</td><td>Define SDK knowledge capsule ingestion only after portable upstream pack export boundaries are specified; PU-018 does not add a KnowledgeOS runtime dependency.</td></tr>
+        <tr data-capability-id="review_execution" data-status="implemented" data-pipeline-sections="agent_execution_control_plane,knowledge_engineering,ci_and_adoption"><td><strong>Governed local review artifact execution</strong><br><span>review_execution</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/review_execute.py</td><td>PU-019 should define SDK knowledge capsule ingestion from portable upstream packs; PU-018 does not add a KnowledgeOS runtime dependency.</td></tr>
         <tr data-capability-id="review_verification" data-status="implemented" data-pipeline-sections="agent_execution_control_plane,knowledge_engineering,ci_and_adoption"><td><strong>Review artifact verification receipts</strong><br><span>review_verification</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/review_verify.py</td><td>Add governed reviewer execution only after local required-artifact verification is stable and still separated from external PR, CI, review-thread, tracker, and merge-readiness lanes.</td></tr>
         <tr data-capability-id="determinism_audit" data-status="implemented" data-pipeline-sections="agent_execution_control_plane,knowledge_engineering,ci_and_adoption"><td><strong>Determinism audit</strong><br><span>determinism_audit</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/determinism.py</td><td>Promote individual audit candidates through scoped validator or skill-authoring slices after owner review.</td></tr>
         <tr data-capability-id="trust_store" data-status="deferred" data-pipeline-sections="release_decision_matrix,agent_execution_control_plane"><td><strong>Trust-store mutation</strong><br><span>trust_store</span></td><td><span class="status-pill" data-status="deferred">deferred</span></td><td>future Skills SDK trust lifecycle</td><td>Define trust-store ownership and rollback before any mutation.</td></tr>
-        <tr data-capability-id="refs_ingestion" data-status="placeholder_optional" data-pipeline-sections="knowledge_engineering,full_skill_lifecycle"><td><strong>Reference ingestion</strong><br><span>refs_ingestion</span></td><td><span class="status-pill" data-status="placeholder_optional">placeholder_optional</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/placeholder_lifecycle.py</td><td>Implement refs ingestion adapter with fixtures and no-network fallback.</td></tr>
+        <tr data-capability-id="refs_ingestion" data-status="placeholder_optional" data-pipeline-sections="knowledge_engineering,full_skill_lifecycle"><td><strong>Reference ingestion / knowledge capsules</strong><br><span>refs_ingestion</span></td><td><span class="status-pill" data-status="placeholder_optional">placeholder_optional</span></td><td>Future PU-019 Skills SDK ingestion slice</td><td>Specify portable upstream pack intake, selected capsule vendoring, source digests, claim scopes, freshness, and no-network fixtures before implementing an adapter.</td></tr>
         <tr data-capability-id="evals" data-status="placeholder_optional" data-pipeline-sections="eval_ops,full_skill_lifecycle,knowledge_engineering"><td><strong>Eval execution</strong><br><span>evals</span></td><td><span class="status-pill" data-status="placeholder_optional">placeholder_optional</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/placeholder_lifecycle.py</td><td>Approve an eval-runner integration with local fixtures before external execution.</td></tr>
         <tr data-capability-id="package_verify" data-status="implemented" data-pipeline-sections="author_golden_path,compiler_emitter_discipline,package_hardening"><td><strong>Package verification</strong><br><span>package_verify</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/package_verify.py</td><td>Connect package verification to signed publish only after signing is approved.</td></tr>
         <tr data-capability-id="signing" data-status="placeholder_blocked" data-pipeline-sections="release_decision_matrix,full_skill_lifecycle,package_hardening"><td><strong>Package signing</strong><br><span>signing</span></td><td><span class="status-pill" data-status="placeholder_blocked">placeholder_blocked</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/placeholder_lifecycle.py</td><td>Approve key ownership, signing adapter, and redaction policy.</td></tr>
@@ -2467,8 +2472,8 @@
           <span>SDK lenses, lens-routed review plans, review handoff receipts, and determinism audit are implemented as read-only evidence surfaces.</span>
         </div>
         <div class="lifecycle-status-card" data-state="partial">
-          <strong>Next: reviewer execution</strong>
-          <span>Verified handoff receipts can now feed bounded human or agent review lanes without treating handoff as completed review evidence.</span>
+          <strong>Next: PU-019 knowledge capsules</strong>
+          <span>PU-018 leaves KnowledgeOS and similar systems as portable upstream sources. The next slice should define how selected capsules are imported, vendored, digested, and validated without making the SDK depend on an external authoring project at runtime.</span>
         </div>
         <div class="lifecycle-status-card" data-state="partial">
           <strong>Partial: local docs and previews</strong>
@@ -2646,6 +2651,7 @@
         <div class="knowledge-card"><strong>Organizational Memory</strong><span>Capture corrections, incidents, SME changes, user feedback, and decision history as maintained package knowledge.</span></div>
         <div class="knowledge-card"><strong>Knowledge Ownership Network</strong><span>Use middle-out ownership: domain leads connect strategic goals, frontline evidence, external experts, and runtime feedback.</span></div>
         <div class="knowledge-card"><strong>Knowledge Certification Track</strong><span>Skill authors learn domain modeling, note capture, reading across sources, unbiased discovery, and tacit-to-explicit knowledge transfer.</span></div>
+        <div class="knowledge-card"><strong>PU-019 Capsule Boundary</strong><span>Portable upstream packs can feed the SDK only through selected, vendored capsules with source ids, digests, claim scope, freshness, validation evidence, and no runtime dependency on the upstream authoring project.</span></div>
       </div>
     </section>
 

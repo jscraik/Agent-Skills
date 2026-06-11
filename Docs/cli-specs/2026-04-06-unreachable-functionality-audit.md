@@ -22,14 +22,17 @@
 ## 1. Dead UI Controls (CLI Arguments Defined but Not Used)
 
 ### Issue: `--dry-run` for `ask skills install`
+
 **Location:** `bin/ask` line 302, 529
 
 **Problem:**
+
 - Argument defined: `skills_install_parser.add_argument("--dry-run", action="store_true", help="Preview installation")`
 - NOT passed to function: `install_skill(repo_root, url=args.url, remediate=args.remediate, dest=args.dest)`
 - Missing: `dry_run=args.dry_run`
 
 **Wiring Fix:**
+
 ```python
 # In bin/ask, line 529, change:
 result = install_skill(repo_root, url=args.url, remediate=args.remediate, dest=args.dest)
@@ -38,10 +41,12 @@ result = install_skill(repo_root, url=args.url, remediate=args.remediate, dest=a
 ```
 
 **Also requires:**
+
 - Update `Infrastructure/scripts/lib/ask/commands/skills.py::install_skill()` signature to accept `dry_run: bool = False`
 - Pass `--dry-run` to underlying `install-skill-from-github.py` if it supports it, or implement preview logic
 
 **Verification:**
+
 ```bash
 ./bin/ask skills install https://github.com/user/repo --dry-run
 # Should: Show preview without making changes
@@ -53,11 +58,13 @@ result = install_skill(repo_root, url=args.url, remediate=args.remediate, dest=a
 ## 2. Orphaned Standalone Scripts (Implemented but No CLI Integration)
 
 ### 2.1 `Infrastructure/scripts/lifecycle-and-sync/sync_mcp.py`
+
 **Purpose:** Sync MCP (Model Context Protocol) configuration between Codex and Codex
 **Lines of Code:** ~150
 **Status:** Fully implemented but unreachable
 
 **Wiring Fix:**
+
 ```python
 # Add to bin/ask:
 # 1. New subparser:
@@ -72,6 +79,7 @@ result = install_skill(repo_root, url=args.url, remediate=args.remediate, dest=a
 ```
 
 **Verification:**
+
 ```bash
 ./bin/ask mcp sync
 # Should: Sync MCP configuration between Codex and Codex
@@ -80,11 +88,13 @@ result = install_skill(repo_root, url=args.url, remediate=args.remediate, dest=a
 ---
 
 ### 2.2 `Infrastructure/scripts/lifecycle-and-sync/check-hub-stability.py`
+
 **Purpose:** CI gate to block deletion/rename of stable skills
 **Lines of Code:** ~80
 **Status:** Implemented, has `--changed-files` flag, not integrated
 
 **Wiring Fix:**
+
 ```python
 # Add to `ask repo validate` or as new `ask repo check-stability`:
 # Option 1: Integrate into validate
@@ -97,6 +107,7 @@ result = install_skill(repo_root, url=args.url, remediate=args.remediate, dest=a
 ```
 
 **Verification:**
+
 ```bash
 ./bin/ask repo check-stability --changed-files file1 file2
 # Should: Exit 1 if stable skills deleted/renamed without deprecation
@@ -105,11 +116,13 @@ result = install_skill(repo_root, url=args.url, remediate=args.remediate, dest=a
 ---
 
 ### 2.3 `Infrastructure/scripts/lifecycle-and-sync/skill_router_metrics.py`
+
 **Purpose:** Router metrics calculation
 **Lines of Code:** ~100
 **Status:** Standalone script, no CLI integration
 
 **Wiring Fix:**
+
 ```python
 # Add to ask graph:
 # graph_subparsers.add_parser("metrics", help="Show router metrics")
@@ -119,11 +132,13 @@ result = install_skill(repo_root, url=args.url, remediate=args.remediate, dest=a
 ---
 
 ### 2.4 `Infrastructure/scripts/lifecycle-and-sync/skill_spotlight.py`
+
 **Purpose:** Skill spotlight/reporting
 **Lines of Code:** ~80
 **Status:** Standalone script, no CLI integration
 
 **Wiring Fix:**
+
 ```python
 # Add to ask skills or ask graph as "spotlight" or "report" command
 ```
@@ -131,11 +146,13 @@ result = install_skill(repo_root, url=args.url, remediate=args.remediate, dest=a
 ---
 
 ### 2.5 `Infrastructure/scripts/lifecycle-and-sync/run_skill_genome_loop.py`
+
 **Purpose:** Run skill genome processing loop
 **Lines of Code:** ~150
 **Status:** Standalone script, no CLI integration
 
 **Wiring Fix:**
+
 ```python
 # Add to ask evals:
 # evals_subparsers.add_parser("genome", help="Run skill genome loop")
@@ -145,23 +162,24 @@ result = install_skill(repo_root, url=args.url, remediate=args.remediate, dest=a
 
 ### 2.6 Analysis/Build Scripts (No CLI Wiring)
 
-| Script | Purpose | Wiring Option |
-|--------|---------|---------------|
-| `build_learning_posture_pilot_summary.py` | Generate pilot summaries | Add to `ask repo report` |
-| `build_skill_state_map.py` | Build state maps | Add to `ask graph state` |
-| `review_candidates.py` | Review skill candidates | Add to `ask skills review` |
-| `graph-diff.py` | Diff skill graphs | Add to `ask graph diff` |
-| `gen-skill-graph.py` | Generate skill graph | Add to `ask graph generate` |
-| `compute-edge-weights.py` | Compute edge weights | Add to `ask graph weights` |
+| Script                                    | Purpose                  | Wiring Option               |
+| ----------------------------------------- | ------------------------ | --------------------------- |
+| `build_learning_posture_pilot_summary.py` | Generate pilot summaries | Add to `ask repo report`    |
+| `build_skill_state_map.py`                | Build state maps         | Add to `ask graph state`    |
+| `review_candidates.py`                    | Review skill candidates  | Add to `ask skills review`  |
+| `gen-skill-graph.py`                      | Generate skill graph     | Add to `ask graph generate` |
+| `compute-edge-weights.py`                 | Compute edge weights     | Add to `ask graph weights`  |
 
 ---
 
 ## 3. Unused Error Codes (Defined but Never Emitted)
 
 ### Issue: `ERR_PATH_TRAVERSAL` and `ERR_CONFLICT`
+
 **Location:** `bin/ask` lines 39, 41
 
 **Current State:**
+
 ```python
 ERROR_MAP = {
     "ERR_PATH_TRAVERSAL": 2,  # Never used
@@ -170,10 +188,12 @@ ERROR_MAP = {
 ```
 
 **Intended Use:**
+
 - `ERR_PATH_TRAVERSAL`: Should be emitted when path escapes repo root
 - `ERR_CONFLICT`: Should be emitted when operations conflict (e.g., sync conflicts)
 
 **Wiring Fix for PATH_TRAVERSAL:**
+
 ```python
 # In audit_skill() or other path-handling functions:
 from pathlib import Path
@@ -188,6 +208,7 @@ def safe_resolve_path(repo_root: Path, user_path: str) -> Path:
 ```
 
 **Verification:**
+
 ```bash
 ./bin/ask skills audit /etc/passwd
 # Should: Exit 2 with ERR_PATH_TRAVERSAL
@@ -199,14 +220,17 @@ def safe_resolve_path(repo_root: Path, user_path: str) -> Path:
 ## 4. Partially Implemented Features
 
 ### 4.1 `ask plugins init` companion folders
+
 **Working:** `--with-marketplace`, `--with-scripts`, `--with-assets`, `--with-references`, `--with-workflows`
 **Verified:** All wired correctly in bin/ask lines 318-326 and dispatched at line 537
 
 ### 4.2 `ask skills fold` sensitivity parameter
+
 **Working:** `--sensitivity` argument passed to fold_skills()
 **Verified:** Line 535 passes `sensitivity=args.sensitivity`
 
 ### 4.3 Graph command filters
+
 **Working:** `--topic-filter`, `--tier`, `--depth`, `--reverse`
 **Verified:** All wired in bin/ask lines 341-364 and dispatched lines 547-559
 
@@ -214,28 +238,32 @@ def safe_resolve_path(repo_root: Path, user_path: str) -> Path:
 
 ## 5. Summary Table
 
-| Category | Count | Items |
-|----------|-------|-------|
-| Dead UI Controls | 1 | `--dry-run` for install |
-| Orphaned Scripts | 9 | sync_mcp, check-hub-stability, skill_router_metrics, skill_spotlight, run_skill_genome_loop, build_*, review_candidates, graph-diff, gen-skill-graph |
-| Unused Error Codes | 2 | ERR_PATH_TRAVERSAL, ERR_CONFLICT |
-| **Total Issues** | **12** | |
+| Category           | Count  | Items                                                                                                                                     |
+| ------------------ | ------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Dead UI Controls   | 1      | `--dry-run` for install                                                                                                                   |
+| Orphaned Scripts   | 8      | sync_mcp, check-hub-stability, skill_router_metrics, skill_spotlight, run_skill_genome_loop, build_*, review_candidates, gen-skill-graph |
+| Unused Error Codes | 2      | ERR_PATH_TRAVERSAL, ERR_CONFLICT                                                                                                          |
+| **Total Issues**   | **11** |                                                                                                                                           |
 
 ---
 
 ## 6. Recommended Priority
 
 ### P1 (Fix Immediately)
+
 1. **Remove or wire `--dry-run`** – Currently misleading users
 
 ### P2 (Add CLI Integration)
+
 2. **sync_mcp** – High value for MCP users
 3. **check-hub-stability** – Important for CI/CD
 
 ### P3 (Nice to Have)
+
 4. **skill_router_metrics** – Expose via `ask graph metrics`
 5. **skill_spotlight** – Expose via `ask skills spotlight`
 6. **Analysis scripts** – Add to `ask repo report` or similar
 
 ### P4 (Cleanup)
+
 7. **Remove unused error codes** or implement path traversal checking
