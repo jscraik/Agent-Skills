@@ -78,7 +78,7 @@
           "path": {"type": "string", "minLength": 1},
           "status": {"enum": ["pass", "fail"]},
           "action": {"enum": ["written", "preserved", "blocked"]},
-          "reason": {"enum": ["ok", "already_present", "not_file"]},
+          "reason": {"enum": ["ok", "already_present", "not_file", "parent_not_directory"]},
           "exists": {"type": "boolean"},
           "is_file": {"type": "boolean"},
           "byte_size": {"type": "integer", "minimum": 0},

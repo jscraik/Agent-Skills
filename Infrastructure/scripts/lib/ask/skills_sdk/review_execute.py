@@ -26,11 +26,12 @@ def build_review_execution(
     source_handoff_path = _safe_repo_path(repo_root, handoff_path, label="handoff path")
     source_handoff = _load_json_object(source_handoff_path, label="review handoff receipt")
     _validate_handoff_shape(source_handoff)
+    artifact_paths = _resolve_required_artifact_paths(repo_root, source_handoff["required_artifacts"])
 
     executed_at = _format_timestamp((clock_provider or _default_clock_provider)())
     artifact_results = [
-        _materialize_artifact(repo_root, source_handoff, artifact, executed_at=executed_at)
-        for artifact in source_handoff["required_artifacts"]
+        _materialize_artifact(repo_root, source_handoff, artifact, path, executed_at=executed_at)
+        for artifact, path in artifact_paths
     ]
     failed_artifacts = [result["path"] for result in artifact_results if result["status"] != "pass"]
     receipt: dict[str, Any] = {
@@ -109,19 +110,26 @@ def _validate_handoff_shape(source_handoff: dict[str, Any]) -> None:
             raise ValueError(f"source review handoff {key} must be a non-empty string.")
 
 
+def _resolve_required_artifact_paths(repo_root: Path, artifacts: list[str]) -> list[tuple[str, Path]]:
+    return [(artifact, _safe_repo_path(repo_root, artifact, label="required artifact")) for artifact in artifacts]
+
+
 def _materialize_artifact(
     repo_root: Path,
     source_handoff: dict[str, Any],
     artifact: str,
+    path: Path,
     *,
     executed_at: str,
 ) -> dict[str, Any]:
-    path = _safe_repo_path(repo_root, artifact, label="required artifact")
     if path.exists() and not path.is_file():
         return _artifact_result(repo_root, path, status="fail", action="blocked", reason="not_file")
 
     if path.exists() and path.stat().st_size > 0:
         return _artifact_result(repo_root, path, status="pass", action="preserved", reason="already_present")
+
+    if path.parent.exists() and not path.parent.is_dir():
+        return _artifact_result(repo_root, path, status="fail", action="blocked", reason="parent_not_directory")
 
     path.parent.mkdir(parents=True, exist_ok=True)
     content = _artifact_content(source_handoff, artifact, executed_at=executed_at)
