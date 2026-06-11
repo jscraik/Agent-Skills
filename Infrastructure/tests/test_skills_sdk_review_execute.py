@@ -274,6 +274,53 @@ class TestSkillsSdkReviewExecute(unittest.TestCase):
         for artifact in handoff["required_artifacts"]:
             self.assertFalse((REPO_ROOT / artifact).exists())
 
+    def test_execution_rejects_required_artifact_ancestor_pair_before_writing(self) -> None:
+        handoff = self._write_handoff()
+        parent_artifact = self.artifact_dir / "review-summary.md"
+        child_artifact = parent_artifact / "nested-evidence.json"
+        handoff["required_artifacts"] = [
+            parent_artifact.relative_to(REPO_ROOT).as_posix(),
+            child_artifact.relative_to(REPO_ROOT).as_posix(),
+        ]
+        self.handoff_path.write_text(json.dumps(handoff, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+        with self.assertRaisesRegex(ValueError, "required artifact paths must be distinct and non-overlapping"):
+            build_review_execution(
+                REPO_ROOT,
+                handoff_path=".harness/artifacts/sdk-review-handoff/test-execute-handoff.json",
+            )
+
+        self.assertFalse(parent_artifact.exists())
+        self.assertFalse(child_artifact.exists())
+
+    def test_execution_rejects_receipt_out_inside_required_artifact_before_writing(self) -> None:
+        handoff = self._write_handoff()
+        artifact_path = Path(handoff["required_artifacts"][0])
+
+        with self.assertRaisesRegex(ValueError, "receipt_out must be distinct"):
+            build_review_execution(
+                REPO_ROOT,
+                handoff_path=".harness/artifacts/sdk-review-handoff/test-execute-handoff.json",
+                receipt_out=(artifact_path / "execution-receipt.json").as_posix(),
+            )
+
+        for artifact in handoff["required_artifacts"]:
+            self.assertFalse((REPO_ROOT / artifact).exists())
+
+    def test_execution_rejects_receipt_out_parent_of_required_artifact_before_writing(self) -> None:
+        handoff = self._write_handoff()
+        first_artifact = Path(handoff["required_artifacts"][0])
+
+        with self.assertRaisesRegex(ValueError, "receipt_out must be distinct"):
+            build_review_execution(
+                REPO_ROOT,
+                handoff_path=".harness/artifacts/sdk-review-handoff/test-execute-handoff.json",
+                receipt_out=first_artifact.parent.as_posix(),
+            )
+
+        for artifact in handoff["required_artifacts"]:
+            self.assertFalse((REPO_ROOT / artifact).exists())
+
     def test_cli_execute_reports_parent_file_collision_as_failed_artifact(self) -> None:
         handoff = self._write_handoff()
         parent_collision = self.artifact_dir / "parent-file"

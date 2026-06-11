@@ -133,7 +133,16 @@ def _validate_handoff_shape(source_handoff: dict[str, Any]) -> None:
 
 
 def _resolve_required_artifact_paths(repo_root: Path, artifacts: list[str]) -> list[tuple[str, Path]]:
-    return [(artifact, _safe_repo_path(repo_root, artifact, label="required artifact")) for artifact in artifacts]
+    artifact_paths = [(artifact, _safe_repo_path(repo_root, artifact, label="required artifact")) for artifact in artifacts]
+    _validate_required_artifact_paths_do_not_overlap(artifact_paths)
+    return artifact_paths
+
+
+def _validate_required_artifact_paths_do_not_overlap(artifact_paths: list[tuple[str, Path]]) -> None:
+    for index, (_artifact, path) in enumerate(artifact_paths):
+        for _other_artifact, other_path in artifact_paths[index + 1 :]:
+            if _paths_overlap(path, other_path):
+                raise ValueError("required artifact paths must be distinct and non-overlapping.")
 
 
 def _resolve_receipt_output_path(
@@ -146,13 +155,27 @@ def _resolve_receipt_output_path(
     if receipt_out is None:
         return None
     output_path = _safe_repo_path(repo_root, receipt_out, label="receipt_out")
-    if output_path == handoff_path or output_path in artifact_paths:
-        raise ValueError("receipt_out must be distinct from the handoff and required artifact paths.")
+    if any(_paths_overlap(output_path, blocked_path) for blocked_path in [handoff_path, *artifact_paths]):
+        raise ValueError(
+            "receipt_out must be distinct from and non-overlapping with the handoff and required artifact paths."
+        )
     if output_path.exists() and not output_path.is_file():
         raise ValueError("receipt_out must resolve to a file path.")
     if _parent_file_collision(repo_root, output_path):
         raise ValueError("receipt_out parent must resolve to a directory path.")
     return output_path
+
+
+def _paths_overlap(path: Path, other_path: Path) -> bool:
+    return path == other_path or _path_is_inside(path, other_path) or _path_is_inside(other_path, path)
+
+
+def _path_is_inside(path: Path, parent_path: Path) -> bool:
+    try:
+        path.relative_to(parent_path)
+    except ValueError:
+        return False
+    return path != parent_path
 
 
 def _materialize_artifact(
