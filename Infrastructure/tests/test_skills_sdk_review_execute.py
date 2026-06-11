@@ -235,6 +235,19 @@ class TestSkillsSdkReviewExecute(unittest.TestCase):
 
         self.assertFalse((REPO_ROOT / valid_artifact).exists())
 
+    def test_execution_prevalidates_receipt_out_before_writing_artifacts(self) -> None:
+        handoff = self._write_handoff()
+
+        with self.assertRaisesRegex(ValueError, "receipt_out must resolve inside the repository root"):
+            build_review_execution(
+                REPO_ROOT,
+                handoff_path=".harness/artifacts/sdk-review-handoff/test-execute-handoff.json",
+                receipt_out="../execution.json",
+            )
+
+        for artifact in handoff["required_artifacts"]:
+            self.assertFalse((REPO_ROOT / artifact).exists())
+
     def test_cli_execute_reports_parent_file_collision_as_failed_artifact(self) -> None:
         handoff = self._write_handoff()
         parent_collision = self.artifact_dir / "parent-file"
@@ -263,6 +276,35 @@ class TestSkillsSdkReviewExecute(unittest.TestCase):
         self.assertEqual(receipt["status"], "fail")
         self.assertFalse(receipt["review_execution_completed"])
         self.assertEqual(receipt["failed_artifacts"], handoff["required_artifacts"])
+        self.assertEqual(receipt["artifact_results"][0]["action"], "blocked")
+        self.assertEqual(receipt["artifact_results"][0]["reason"], "parent_not_directory")
+
+    def test_cli_execute_reports_deep_parent_file_collision_as_failed_artifact(self) -> None:
+        handoff = self._write_handoff()
+        parent_collision = self.artifact_dir / "parent-file"
+        parent_collision.parent.mkdir(parents=True, exist_ok=True)
+        parent_collision.write_text("not a directory\n", encoding="utf-8")
+        handoff["required_artifacts"] = [
+            parent_collision.relative_to(REPO_ROOT).as_posix() + "/nested/review-summary.md",
+        ]
+        self.handoff_path.write_text(json.dumps(handoff, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+        payload = _run_json_command(
+            sys.executable,
+            "Infrastructure/bin/ask",
+            "sdk",
+            "review",
+            "execute",
+            "--handoff",
+            ".harness/artifacts/sdk-review-handoff/test-execute-handoff.json",
+            "--json",
+            "--robot",
+            expect_success=False,
+        )
+
+        receipt = payload["data"]["review_execution"]
+        self.assertEqual(payload["status"], "error")
+        self.assertEqual(receipt["status"], "fail")
         self.assertEqual(receipt["artifact_results"][0]["action"], "blocked")
         self.assertEqual(receipt["artifact_results"][0]["reason"], "parent_not_directory")
 

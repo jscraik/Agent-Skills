@@ -27,6 +27,7 @@ def build_review_execution(
     source_handoff = _load_json_object(source_handoff_path, label="review handoff receipt")
     _validate_handoff_shape(source_handoff)
     artifact_paths = _resolve_required_artifact_paths(repo_root, source_handoff["required_artifacts"])
+    output_path = _resolve_receipt_output_path(repo_root, receipt_out)
 
     executed_at = _format_timestamp((clock_provider or _default_clock_provider)())
     blocked_artifact_results = [
@@ -82,9 +83,7 @@ def build_review_execution(
         "receipt_written": False,
         "receipt_path": None,
     }
-    if receipt_out:
-        output_path = _safe_repo_path(repo_root, receipt_out, label="receipt_out")
-        output_path.parent.mkdir(parents=True, exist_ok=True)
+    if output_path is not None:
         receipt["receipt_written"] = True
         receipt["receipt_path"] = _repo_relative(repo_root, output_path)
         output_path.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -131,6 +130,18 @@ def _resolve_required_artifact_paths(repo_root: Path, artifacts: list[str]) -> l
     return [(artifact, _safe_repo_path(repo_root, artifact, label="required artifact")) for artifact in artifacts]
 
 
+def _resolve_receipt_output_path(repo_root: Path, receipt_out: str | None) -> Path | None:
+    if receipt_out is None:
+        return None
+    output_path = _safe_repo_path(repo_root, receipt_out, label="receipt_out")
+    if output_path.exists() and not output_path.is_file():
+        raise ValueError("receipt_out must resolve to a file path.")
+    if _parent_file_collision(repo_root, output_path):
+        raise ValueError("receipt_out parent must resolve to a directory path.")
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    return output_path
+
+
 def _materialize_artifact(
     repo_root: Path,
     source_handoff: dict[str, Any],
@@ -156,9 +167,20 @@ def _materialize_artifact(
 def _artifact_blocker(repo_root: Path, path: Path) -> dict[str, Any] | None:
     if path.exists() and not path.is_file():
         return _artifact_result(repo_root, path, status="fail", action="blocked", reason="not_file")
-    if path.parent.exists() and not path.parent.is_dir():
+    if _parent_file_collision(repo_root, path):
         return _artifact_result(repo_root, path, status="fail", action="blocked", reason="parent_not_directory")
     return None
+
+
+def _parent_file_collision(repo_root: Path, path: Path) -> bool:
+    resolved_repo = repo_root.resolve()
+    parent = path.parent.resolve()
+    while True:
+        if parent.exists():
+            return not parent.is_dir()
+        if parent == resolved_repo or parent.parent == parent:
+            return False
+        parent = parent.parent
 
 
 def _artifact_content(
