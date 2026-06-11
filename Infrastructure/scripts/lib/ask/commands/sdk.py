@@ -17,6 +17,7 @@ from ask.skills_sdk.lenses import (
 )
 from ask.skills_sdk.placeholder_lifecycle import SURFACES
 from ask.skills_sdk.review_handoff import build_review_handoff
+from ask.skills_sdk.review_execute import build_review_execution
 from ask.skills_sdk.review_plan import build_review_plan
 from ask.skills_sdk.review_verify import build_review_verification
 
@@ -257,6 +258,16 @@ def add_sdk_parser(
     sdk_review_handoff_parser.add_argument(
         "--receipt-out",
         help="Optional repo-local path for writing the review handoff receipt",
+    )
+    sdk_review_execute_parser = sdk_review_subparsers.add_parser(
+        "execute",
+        help="Materialize required local review artifacts from a review handoff receipt",
+        parents=[global_parser],
+    )
+    sdk_review_execute_parser.add_argument("--handoff", required=True, help="Repo-local review handoff receipt path")
+    sdk_review_execute_parser.add_argument(
+        "--receipt-out",
+        help="Optional repo-local path for writing the review execution receipt",
     )
     sdk_review_verify_parser = sdk_review_subparsers.add_parser(
         "verify",
@@ -535,6 +546,38 @@ def _dispatch_sdk_review(repo_root: Path, args: argparse.Namespace) -> CallResul
             )
             return result
         result.data["review_handoff"] = review_handoff
+        return result
+    if command_action == "execute":
+        try:
+            review_execution = build_review_execution(
+                repo_root,
+                handoff_path=args.handoff,
+                receipt_out=args.receipt_out,
+            )
+        except ValueError as exc:
+            result.status = "error"
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_VALIDATION",
+                    message=str(exc),
+                    fix_suggestion=(
+                        "Run ask sdk review handoff --plan <plan-receipt> --target <path> "
+                        "--intent validation_review --receipt-out <handoff-receipt> --json --robot, "
+                        "then retry ask sdk review execute with --handoff <handoff-receipt>."
+                    ),
+                )
+            )
+            return result
+        result.data["review_execution"] = review_execution
+        if review_execution["status"] != "pass":
+            result.status = "error"
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_VALIDATION",
+                    message="Skills SDK review execution could not materialize every required artifact.",
+                    fix_suggestion="Repair every path in data.review_execution.failed_artifacts.",
+                )
+            )
         return result
     if command_action == "verify":
         try:

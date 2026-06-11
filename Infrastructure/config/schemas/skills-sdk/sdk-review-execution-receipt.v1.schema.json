@@ -1,0 +1,113 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/sdk-review-execution-receipt.v1.schema.json",
+  "title": "Skills SDK review execution receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "schema_uri",
+    "status",
+    "source_review_handoff",
+    "target",
+    "target_kind",
+    "task_intent",
+    "reviewer_roles",
+    "required_artifacts",
+    "execution_mode",
+    "runner",
+    "artifact_results",
+    "review_execution_completed",
+    "failed_artifacts",
+    "evidence_boundaries",
+    "not_proven",
+    "next_commands",
+    "mutation_performed",
+    "receipt_written",
+    "receipt_path"
+  ],
+  "properties": {
+    "schema_version": {"const": "skills-sdk.review-execution-receipt.v1"},
+    "schema_uri": {
+      "const": "https://jscraik.local/agent-skills/schemas/skills-sdk/sdk-review-execution-receipt.v1.schema.json"
+    },
+    "status": {"enum": ["pass", "fail"]},
+    "source_review_handoff": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "schema_version", "receipt_sha256", "receipt_path"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "schema_version": {"const": "skills-sdk.review-handoff-receipt.v1"},
+        "receipt_sha256": {"type": "string", "minLength": 64},
+        "receipt_path": {"type": ["string", "null"]}
+      }
+    },
+    "target": {"type": "string", "minLength": 1},
+    "target_kind": {"enum": ["repo_path", "skill_source"]},
+    "task_intent": {"type": "string", "minLength": 1},
+    "reviewer_roles": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "required_artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "execution_mode": {"const": "local_governed_artifact_execution"},
+    "runner": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version", "external_services_used"],
+      "properties": {
+        "name": {"const": "skills-sdk-local-review-executor"},
+        "version": {"const": "skills-sdk.review-execution-receipt.v1"},
+        "external_services_used": {"const": false}
+      }
+    },
+    "artifact_results": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "status", "action", "reason", "exists", "is_file", "byte_size", "sha256"],
+        "properties": {
+          "path": {"type": "string", "minLength": 1},
+          "status": {"enum": ["pass", "fail"]},
+          "action": {"enum": ["written", "preserved", "blocked"]},
+          "reason": {"enum": ["ok", "already_present", "not_file"]},
+          "exists": {"type": "boolean"},
+          "is_file": {"type": "boolean"},
+          "byte_size": {"type": "integer", "minimum": 0},
+          "sha256": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "review_execution_completed": {"type": "boolean"},
+    "failed_artifacts": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    },
+    "evidence_boundaries": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "not_proven": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "next_commands": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "mutation_performed": {"const": true},
+    "receipt_written": {"type": "boolean"},
+    "receipt_path": {"type": ["string", "null"]}
+  }
+}

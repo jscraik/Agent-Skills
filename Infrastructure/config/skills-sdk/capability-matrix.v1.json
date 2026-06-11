@@ -209,6 +209,27 @@
       "notes": "PU-015 consumes verified review-plan receipts and emits read-only review handoff receipts; it does not run reviewers, CI, or external services."
     },
     {
+      "id": "review_execution",
+      "title": "Governed local review artifact execution",
+      "status": "implemented",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/review_execute.py",
+      "pipeline_sections": [
+        "agent_execution_control_plane",
+        "knowledge_engineering",
+        "ci_and_adoption"
+      ],
+      "feature_executed": true,
+      "mutation_performed": true,
+      "evidence_refs": [
+        "./bin/ask sdk review execute --handoff .harness/artifacts/sdk-review-handoff/simplify.json --json --robot",
+        "Infrastructure/scripts/lib/ask/skills_sdk/review_execute.py",
+        "Infrastructure/config/schemas/skills-sdk/sdk-review-execution-receipt.v1.schema.json",
+        "Infrastructure/tests/test_skills_sdk_review_execute.py"
+      ],
+      "next_slice": "Render review plan, handoff, execution, and verification receipts into the local HTML evidence console without claiming hosted explorer readiness.",
+      "notes": "PU-017 materializes required local review artifacts from review handoff receipts and preserves explicit not-proven lanes for independent approval, CI, PR, review-thread, tracker, and merge-readiness state."
+    },
+    {
       "id": "review_verification",
       "title": "Review artifact verification receipts",
       "status": "implemented",
