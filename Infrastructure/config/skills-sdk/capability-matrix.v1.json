@@ -286,15 +286,15 @@
     },
     {
       "id": "refs_ingestion",
-      "title": "Reference ingestion",
+      "title": "Reference ingestion / knowledge capsules",
       "status": "placeholder_optional",
-      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/placeholder_lifecycle.py",
+      "owner_surface": "Future PU-019 Skills SDK ingestion slice",
       "pipeline_sections": ["knowledge_engineering", "full_skill_lifecycle"],
       "feature_executed": false,
       "mutation_performed": false,
       "evidence_refs": ["./bin/ask sdk lifecycle --surface refs --json --robot", "Infrastructure/tests/test_skills_sdk_placeholder_lifecycle.py"],
-      "next_slice": "Implement refs ingestion adapter with fixtures and no-network fallback.",
-      "notes": "Lifecycle output reports refs as an optional reserved surface for medium risk."
+      "next_slice": "Specify portable upstream pack intake, selected capsule vendoring, source digests, claim scopes, freshness, and no-network fixtures before implementing an adapter.",
+      "notes": "PU-019 should define reference ingestion as governed knowledge capsule intake without making the SDK depend on an external authoring project at runtime."
     },
     {
       "id": "evals",
