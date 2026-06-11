@@ -176,7 +176,7 @@ if [ -n "$FOUND_FILES" ]; then
     # A file at apps/web/next.config.js has dir apps/web (1 slash = depth 2).
     # A file at a/b/c/d/next.config.js has dir a/b/c/d (3 slashes = depth 4 = too deep).
     # We want maxdepth 3 for the directory, meaning at most 2 slashes in fdir.
-    slash_count=$(echo "$fdir" | tr -cd '/' | wc -c | tr -d ' ')
+    slash_count=$(python3 -c 'import sys; print(sys.argv[1].count("/"))' "$fdir")
     if [ "$slash_count" -gt 2 ]; then
       continue
     fi
@@ -205,7 +205,7 @@ if [ -n "$RAILS_HITS" ]; then
     rdir="${rdir#./}"
     if [ "$rdir" != "." ] && [ -n "$rdir" ]; then
       # Enforce depth cap for Rails hits too
-      slash_count=$(echo "$rdir" | tr -cd '/' | wc -c | tr -d ' ')
+      slash_count=$(python3 -c 'import sys; print(sys.argv[1].count("/"))' "$rdir")
       if [ "$slash_count" -le 2 ]; then
         MONO_HITS["rails@${rdir}"]=1
       fi

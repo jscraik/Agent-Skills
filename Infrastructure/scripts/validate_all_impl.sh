@@ -367,7 +367,14 @@ run_check() {
       echo "  ❌ Failed (see $log_file)"
       if [[ -s "$log_file" ]]; then
         echo "  -- ${slug} log tail --"
-        tail -80 "$log_file" | sed 's/^/  | /'
+        python3 - "$log_file" <<'PY'
+from collections import deque
+import pathlib
+import sys
+
+for line in deque(pathlib.Path(sys.argv[1]).open(encoding="utf-8", errors="replace"), maxlen=80):
+    print(f"  | {line.rstrip()}")
+PY
         echo "  -- end ${slug} log tail --"
       fi
     else

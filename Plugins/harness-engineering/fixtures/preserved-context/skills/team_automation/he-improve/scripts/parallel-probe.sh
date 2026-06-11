@@ -66,13 +66,13 @@ fi
 
 SQLITE_FILES=$(find "${SCAN_PATHS[@]}" -maxdepth 4 -type f \( -name '*.db' -o -name '*.sqlite' -o -name '*.sqlite3' \) ! -path '*/.git/*' ! -path '*/node_modules/*' ! -path '*/.context/*' ! -path '*/.worktrees/*' 2>/dev/null | head -10 || true)
 if [[ -n "$SQLITE_FILES" ]]; then
-  FILE_COUNT=$(echo "$SQLITE_FILES" | wc -l | tr -d ' ')
+  FILE_COUNT=$(printf '%s\n' "$SQLITE_FILES" | python3 -c 'import sys; print(sum(1 for line in sys.stdin if line.rstrip("\n")))')
   add_blocker "shared_file" "Found $FILE_COUNT SQLite file(s) in probe scope." "Copy DB files into each experiment worktree."
 fi
 
 LOCK_FILES=$(find "${SCAN_PATHS[@]}" -maxdepth 4 -type f \( -name '*.lock' -o -name '*.pid' \) ! -path '*/.git/*' ! -path '*/node_modules/*' ! -path '*/.context/*' ! -path '*/.worktrees/*' ! -name 'package-lock.json' ! -name 'yarn.lock' ! -name 'bun.lock' ! -name 'bun.lockb' ! -name 'Gemfile.lock' ! -name 'poetry.lock' ! -name 'Cargo.lock' 2>/dev/null | head -10 || true)
 if [[ -n "$LOCK_FILES" ]]; then
-  FILE_COUNT=$(echo "$LOCK_FILES" | wc -l | tr -d ' ')
+  FILE_COUNT=$(printf '%s\n' "$LOCK_FILES" | python3 -c 'import sys; print(sum(1 for line in sys.stdin if line.rstrip("\n")))')
   add_blocker "lock_file" "Found $FILE_COUNT lock/PID file(s) that may cause contention." "Clean lock files or run serial mode."
 fi
 
