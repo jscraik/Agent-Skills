@@ -13,10 +13,10 @@
   "commands_run": [
     "date -u +%Y%m%dT%H%M%SZ",
     "git status --short --branch",
-    "find /private/tmp/agent-skills-pu-015-review-handoff -maxdepth 4 \( -name '*spec*.md' -o -name '*plan*.md' -o -name '*.md' \)",
+    "find /private/tmp/agent-skills-pu-015-review-handoff -maxdepth 4 \\( -name '*spec*.md' -o -name '*plan*.md' -o -name '*.md' \\)",
     "nl -ba /private/tmp/agent-skills-pu-015-review-handoff/.harness/specs/2026-06-08-skills-sdk-pu-015-review-handoff-receipts-spec.md | sed -n '1,260p'",
     "nl -ba /private/tmp/agent-skills-pu-015-review-handoff/.harness/plan/2026-06-08-skills-sdk-pu-015-review-handoff-receipts-trace-plan.md | sed -n '1,260p'",
-    "rg -n "review_plan|source_context|target_digest_status|provenance_risk_flags|trace sidecar|receipt_sha256|directory digest|handle" /private/tmp/agent-skills-pu-015-review-handoff/Infrastructure /private/tmp/agent-skills-pu-015-review-handoff/.harness",
+    "rg -n \"review_plan|source_context|target_digest_status|provenance_risk_flags|trace sidecar|receipt_sha256|directory digest|handle\" /private/tmp/agent-skills-pu-015-review-handoff/Infrastructure /private/tmp/agent-skills-pu-015-review-handoff/.harness",
     "test -s artifacts/reviews/skills-sdk-pu-015-review-handoff/adversarial-reviewer.md",
     "test -s artifacts/agent-runs/adversarial-reviewer-20260608T153128Z/manifest.json"
   ],
