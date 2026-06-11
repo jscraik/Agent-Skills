@@ -1,0 +1,10 @@
+policy:
+  allow_implicit_invocation: false
+interface:
+  display_name: "SynAIpse Tracker Plan"
+  short_description: "Translate trace bullets into tracker-ready slices with dependencies, labels, acceptance fields, and validation placeholders."
+routing:
+  handle: "sy-tracker-plan"
+  sdk_stage: "tracker-plan"
+  previous_stage: "trace-plan"
+  next_stage: "slice-spec"

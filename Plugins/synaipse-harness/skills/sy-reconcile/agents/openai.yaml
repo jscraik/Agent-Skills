@@ -1,0 +1,11 @@
+policy:
+  allow_implicit_invocation: false
+interface:
+  display_name: "SynAIpse Reconcile"
+  short_description: "Recover stale or conflicting lifecycle state by separating local, PR, CI, review, tracker, artifact, and session truth."
+routing:
+  handle: "sy-reconcile"
+  sdk_stage: "reconcile"
+  previous_stage: "eval-report"
+  next_stage: "reinforce"
+

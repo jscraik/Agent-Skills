@@ -1,0 +1,3 @@
+interface:
+  display_name: "Plugin Factory Router"
+  short_description: "Route plugin lifecycle requests to the correct Plugin Factory lane. Use when users ask broadly to create, harden, or install a plugin."

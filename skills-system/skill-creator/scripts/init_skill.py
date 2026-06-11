@@ -102,43 +102,69 @@ SKILL_TEMPLATE = """---
 name: {skill_name}
 description: "{description}"
 metadata:
-  lifecycle_state: incubating
+  lifecycle_state: active
   maturity: experimental
   owner: "{owner}"
   review_cadence: "{review_cadence}"
   last_reviewed: "{last_reviewed}"
   metadata_source: frontmatter
+  sdk_stage: {skill_name}
+  command_visibility: orchestrator
 ---
 
 # {skill_title}
 
-## Use When
-- Use this skill when the task matches the frontmatter description and the agent needs a focused workflow for {skill_title}.
-- Prefer this skill when its required inputs are available or can be discovered without broad repository loading.
+## Stage Contract
 
-## Do Not Use When
+Previous stage: none
+Current stage: {skill_name}
+Next stage: terminal
+
+Stage purpose: <one sentence purpose for {skill_title}>.
+
+## When to use
+- Use this skill when the task matches the frontmatter description and the agent needs the deterministic stage workflow for {skill_title}.
+
+## When not to use
 - The task is outside this skill scope.
 - A narrower, more specific skill exists for the same request.
 - The required inputs are unavailable and guessing would change user intent or execution safety.
 
-## Required Inputs
+## Required inputs
 - User goal or task statement.
 - Target paths, handles, artifacts, or runtime surfaces needed by the workflow.
 - Permission or safety constraints that affect commands, tools, network access, or writes.
 
-## Skill Procedure
-1. Confirm the task matches the skill description and does not match a narrower skill.
-2. Resolve the concrete target: files, handles, artifacts, runtime surface, or user decision needed for this run.
-3. Load only the references needed for the current slice.
-4. Execute the smallest skill-specific workflow that produces verifiable evidence.
-5. Record produced artifacts, validation commands, and any blocked steps.
-6. Return the next safe command or stop reason in agent-facing language.
-
-## Evidence Output
+## Deliverables
 - Primary artifact: the file, report, patch, command output, or decision packet produced by this skill.
 - Validation evidence: exact commands run and their pass, fail, or blocked outcome.
-- Blocker format: state the blocker class, missing input or failing command, and the next safe recovery step.
-- Claim boundary: state what the evidence proves and what it does not prove.
+- Claim boundary: what the evidence proves and what it does not prove.
+
+## Preconditions
+- Confirm the task matches the skill description and does not match a narrower skill.
+- Resolve the concrete target: files, handles, artifacts, runtime surface, or user decision needed for this run.
+- Confirm canonical source ownership before writing.
+
+## Procedure
+1. Confirm the requested stage and applicable instructions.
+2. Load only the references needed for the current slice.
+3. Execute the smallest skill-specific workflow that produces verifiable evidence.
+4. Record produced artifacts, validation commands, and any blocked steps.
+5. Return the next safe command or stop reason in agent-facing language.
+
+## Allowed writes
+- Editable source of truth: this skill directory.
+- Generated or staged evidence: package outputs, eval artifacts, Tessl staging copies, and review reports.
+
+## Forbidden writes
+- Runtime projections, caches, or user home skill roots as source.
+- External systems, credentials, or production state without explicit authorization.
+- Downstream-stage artifacts that this skill does not own.
+
+## Exit criteria
+- Required artifacts exist and are non-empty, or the response includes the promised structured fields.
+- Automated validation has a recorded pass, fail, or blocked outcome.
+- Remaining risks and follow-up ownership are explicit.
 
 ## Validation
 Run the narrowest applicable checks before claiming the skill is ready:
@@ -156,7 +182,16 @@ Run the narrowest applicable checks before claiming the skill is ready:
 ### External Review
 - python3 Infrastructure/bin/ask skills external-review <skill-path> --audit-level compat --json --robot
 
-## Tessl / External Review
+## Handoff
+- Return the produced artifact, validation evidence, blocker class, and next safe stage or owner.
+
+## Failure modes
+- Missing target, gate/score, or edit authority: ask one focused blocker question.
+- Missing validation runner: report blocked with the exact missing command.
+- Repeated validation failure: stop after the same blocker repeats and name the next smallest patch.
+
+## Execution boundaries
+- Redact secrets and sensitive data by default in prompts, outputs, temporary evidence, and copied artifacts.
 - Tessl input must be staged through the repo wrapper under /tmp/ask-tessl-evals or /tmp/ask-tessl-reviews.
 - The staged package must include SKILL.md, references/evals.yaml, tessl.json, and synthesized scenarios/<case-id>/task.md files.
 - Treat Tessl review score below 95 as blocking for release readiness.
@@ -164,36 +199,18 @@ Run the narrowest applicable checks before claiming the skill is ready:
 - Do not run Tessl directly against the live repository source tree.
 - Do not use npx tessl, publish, registry upload, or package upload commands in this eval lane.
 
-## Agent Contract
-- Editable source of truth: this skill directory.
-- Generated or staged evidence: package outputs, eval artifacts, Tessl staging copies, and review reports.
-- Readiness claim allowed only when validation evidence supports the specific claim.
-- What this proves: package shape, declared workflow quality, eval coverage, and external-review compatibility for this skill.
-- What this does not prove: live runtime behavior, security posture, or unrelated repository readiness.
-
 ## Gotchas
 - Do not edit runtime projections when the canonical skill source lives elsewhere.
-- Do not confuse an eval pass with complete production readiness.
-- Keep hot-path instructions short; move deep examples and long references into references/.
-- Preserve deterministic evidence paths so another agent can replay the result.
+- Do not claim release readiness from skipped validation.
+- Keep detailed examples in references/ instead of bloating the entrypoint.
 
-## Deep Context
-Load these only when the task requires more than the hot-path procedure:
+## Examples
+- Good: cite the source path, run the focused validation, and report exact pass/fail/blocker evidence.
+- Bad: infer readiness from source existence or generated projection freshness alone.
 
-- references/contract.yaml for package boundaries, risks, evidence policy, and rollback.
-- references/evals.yaml for smoke and release eval coverage.
-- references/task-profile.json for reviewer expectations, thresholds, and lint policy.
-- workflows/skillflow.json only when a slice of the skill has hardened into deterministic mechanics; SKILL.md remains the judgment layer.
-- agents/openai.yaml for agent-facing display metadata.
-
-## See Also
-**Topic map:** SKILL.md is the judgment and hot-path workflow; workflows/skillflow.json is optional deterministic mechanics; references/contract.yaml defines the package contract; references/evals.yaml defines eval coverage; references/task-profile.json defines reviewer expectations; agents/openai.yaml defines display metadata.
-
-- references/contract.yaml for the package contract.
-- references/evals.yaml for smoke and release eval cases.
-- references/task-profile.json for evaluator persona, thresholds, and review policy.
-- workflows/skillflow.json for validated deterministic graph slices when execution_mode is deterministic_flow or hybrid.
-- agents/openai.yaml for agent-facing display metadata.
+## References
+- SDK stage template: Infrastructure/references/sdk-stage-skill-template.md
+- Source context: [source context](./references/source-context.yaml)
 """
 
 EXAMPLE_SCRIPT = '''#!/usr/bin/env python3
@@ -317,6 +334,7 @@ observability:
   evidence_paths:
     - "references/evals.yaml"
     - "references/task-profile.json"
+    - "references/source-context.yaml"
     - "/tmp/ask-tessl-evals"
     - "/tmp/ask-tessl-reviews"
 evidence_policy:
@@ -555,6 +573,33 @@ TASK_PROFILE_TEMPLATE = """{
 }
 """
 
+SOURCE_CONTEXT_TEMPLATE = """schema_version: 1
+skill: "__SKILL_NAME__"
+stage: "__SKILL_NAME__"
+template:
+  path: Infrastructure/references/sdk-stage-skill-template.md
+  validator: Infrastructure/scripts/validation-and-linting/check_sdk_stage_skill_shape.py
+  heading_contract: sdk-deterministic-stage-v1
+original_references:
+  - path: SKILL.md
+    purpose: initial generated skill body
+    load_when: provenance for the generated starter body is needed
+archived_context: []
+stage_companions:
+  - path: references/contract.yaml
+    purpose: machine-readable stage contract
+  - path: references/evals.yaml
+    purpose: deterministic trigger and behavior eval cases
+  - path: references/task-profile.json
+    purpose: reviewer and picker-facing task profile
+provenance_policy:
+  canonical_source: "__SKILL_NAME__/"
+  context_loading: Load SKILL.md first, then source-context.yaml when provenance or deferred context is needed.
+  projection_rule: Runtime caches, home skill roots, and plugin cache outputs are generated projections, not source.
+  template_rule: Keep the fixed heading order in the SDK stage template and validate it through the SDK stage shape validator.
+"""
+
+
 
 def normalize_skill_name(skill_name):
     """Normalize a skill name to lowercase hyphen-case."""
@@ -663,6 +708,7 @@ def create_sdk_contract_files(skill_dir, skill_name, skill_title, last_reviewed)
             .replace("__SKILL_TITLE__", skill_title)
             .replace("__LAST_REVIEWED__", last_reviewed)
         ),
+        "source-context.yaml": SOURCE_CONTEXT_TEMPLATE.replace("__SKILL_NAME__", skill_name),
     }
     for filename, content in required_files.items():
         path = references_dir / filename

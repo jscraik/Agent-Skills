@@ -1,0 +1,11 @@
+policy:
+  allow_implicit_invocation: false
+interface:
+  display_name: "SynAIpse Trace Plan"
+  short_description: "Break the whole job into traceable bullets that connect intent, evidence, acceptance, and proof gaps."
+routing:
+  handle: "sy-trace-plan"
+  sdk_stage: "trace-plan"
+  previous_stage: "brainstorm"
+  next_stage: "tracker-plan"
+

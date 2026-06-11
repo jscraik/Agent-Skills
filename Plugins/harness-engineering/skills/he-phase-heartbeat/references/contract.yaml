@@ -1,0 +1,116 @@
+schema_version: 1
+
+purpose: >
+  Continue approved Harness Engineering phase work under a 10-minute heartbeat,
+  using session-collector evidence, phase gates, staging rules, tracker-update
+  boundaries, and pre-commit review gates to keep long execution loops traceable.
+
+triggers:
+  - user names he-phase-work for approved phase execution
+  - user asks to monitor HE plan phases over time
+  - user asks to keep he-work going until reviewed or committed
+  - user asks for a heartbeat that runs simplify, bug fixing, or code review before commit
+  - repeated session-collector evidence shows the same HE phase workflow recurs
+
+inputs:
+  - workspace path, plan path or issue/PR target, cadence, stop condition
+  - session-collector bundle path or permission to generate one from ~/.agents/session-collector
+  - dirty worktree state and expected validation commands
+  - selected phase and review gate policy
+  - authority for repo writes, external writes, local commits, and automation changes
+  - authority for git staging and Linear or tracker updates
+
+outputs:
+  - heartbeat id, cadence, destination, target, and stop condition
+  - collector bundle path and evidence artifacts used
+  - active phase, changed files, review gates, validation, and commit status
+  - git_staging_status and linear_update_status for phase-boundary actions
+  - blocker, smallest recovery step, slack_policy, blackboard_delta, and next wake-up
+
+non_goals:
+  - creating implementation plans from vague requirements
+  - replacing he-work, he-heartbeat, he-fix-bugs, he-code-review, or simplify
+  - unattended merge, deploy, tracker closure, force-push, or destructive cleanup
+
+risks:
+  - stale chat memory; mitigate by reading live plan, git state, and collector bundle first
+  - duplicate heartbeats; mitigate by searching existing automations before creating one
+  - broad commits; mitigate by staging only the completed phase diff
+  - unauthorized tracker or staging side effects; mitigate by blocking Linear updates and git add unless authority is explicit
+  - review gate theater; mitigate by making he-fix-bugs conditional on failing evidence
+  - unsustainable cadence; mitigate by setting slack_policy and stopping when evidence is stale or gates are blocked
+  - source/runtime drift; mitigate by editing canonical plugin source and refreshing projections through repo wrappers
+  - false release confidence; mitigate by separating strict audit, Plugin Eval budget, release eval, cache sync, and runtime visibility evidence
+
+execution_boundaries:
+  owned_actions:
+    - schedule and gate approved phase continuation
+    - delegate active phase implementation to he-work
+    - record phase evidence and blocker state
+  forbidden_without_approval:
+    - destructive cleanup
+    - force-push, merge, deploy, tracker closure, review-thread resolution
+    - broad commits or unrelated staging
+    - git staging or tracker updates without explicit authority for the exact target
+    - secret access
+  generated_surfaces:
+    - .agents/**
+    - .skillsets/**
+    - Plugins/cache/**
+
+observability: >
+  Record target, cadence, heartbeat id, collector bundle path, active phase,
+  validation commands and outcomes, review gate results, git_staging_status,
+  linear_update_status, commit status, blocker, slack_policy, and stop rule status.
+
+rollback_procedure: >
+  Pause or delete the heartbeat, preserve the last bundle path and phase evidence,
+  revert only the phase diff if rollback is required, and reroute the remaining
+  work through he-router or he-work.
+
+operator_contract:
+  description_contract: "Harness Engineering stage: verbs, artifacts, lifecycle boundary, and authority constraints."
+  immediate_operator_path:
+    first_action: "Read the phase state and resume packet before creating a bounded checkpoint."
+    proceed_rule: "Infer harmless missing details conservatively; ask only when stage ownership, destructive behavior, tracker mutation, publication, external writes, or closure proof would change."
+  source_order:
+    - "local AGENTS.md and canonical repo or .harness artifacts"
+    - "current live tracker, PR, branch, runtime, or validation state before mutation or closure"
+    - "HE references, routing map, source docs, dependency source, and project contracts"
+    - "user confirmation for irreversible, external, destructive, credential, or broad-scope action"
+  tool_resolution:
+    preferred: "repo wrapper or HE script documented for this stage"
+    fallback: "read-only local inspection with the missing tool or permission reported"
+    doctor_or_status: "run the smallest status, resolve, audit, or validation command when tool state affects the result"
+  freshness_rule:
+    discovery: "Cached, indexed, or deferred references may locate candidates and background context."
+    action_state: "Use live targeted reads before writes, tracker updates, closure decisions, or status changes."
+    readback: "After writes or mutations, verify only the changed surface unless package, release, or lifecycle scope requires more."
+  scope_defaults:
+    default: "smallest HE stage, artifact, issue, phase, or approved slice implied by the request"
+    broaden_when:
+      - "shared lifecycle contract or routing behavior changes"
+      - "tracker, PR, package, release, or projection behavior changes"
+      - "validation proves adjacent artifacts must move together"
+  boundaries:
+    forbidden_without_explicit_request:
+      - "tracker mutation or external publication"
+      - "destructive file, branch, data, or workspace operation"
+      - "credential, secret, permission, or auth-scope expansion"
+      - "completion or closure claim without proof"
+    no_drift:
+      - "do not turn HE stages into generic productivity or implementation prompts"
+      - "do not put long gotcha lists, rubrics, examples, or validation matrices in the hot path"
+      - "do not use archive, deferred, or cache paths as active stage authority"
+  retry_and_stop:
+    retry: "Retry transient tool, network, UI, or validation discovery failures once when safe and cheap."
+    stop: "Stop after bounded retry with exact blocker, attempted fallback, and the next safe HE action."
+  validation_tiers:
+    fast: "touched-file format, schema, route, or stage-specific lint/check"
+    standard: "stage audit, routing proof, smoke eval, or repository wrapper for changed behavior"
+    deep: "release eval, projection, security, marketplace, tracker, or cross-stage checks only for package-impacting changes"
+  concise_output:
+    default_fields: ["changed_artifacts", "important_decisions", "validation", "residual_risks", "next_stage_or_blocker"]
+    full_ledger_when: ["closure proof", "release", "tracker mutation", "multi-stage migration", "explicit user request"]
+  references:
+    - "Plugins/harness-engineering/references/operator-shape.md"

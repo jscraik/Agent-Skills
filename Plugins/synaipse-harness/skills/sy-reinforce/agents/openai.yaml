@@ -1,0 +1,11 @@
+policy:
+  allow_implicit_invocation: false
+interface:
+  display_name: "SynAIpse Reinforce"
+  short_description: "Turn a verified failure or learning into a durable guardrail, validator, doc, eval, or skill-reference update."
+routing:
+  handle: "sy-reinforce"
+  sdk_stage: "reinforce"
+  previous_stage: "reconcile"
+  next_stage: "strategy"
+

@@ -1,0 +1,3 @@
+interface:
+  display_name: "Plugin Router"
+  short_description: "Front-door router for the Plugin Factory plugin. Use when users ask generally to create,..."

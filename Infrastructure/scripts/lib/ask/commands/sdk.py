@@ -18,6 +18,7 @@ from ask.skills_sdk.lenses import (
 from ask.skills_sdk.placeholder_lifecycle import SURFACES
 from ask.skills_sdk.review_handoff import build_review_handoff
 from ask.skills_sdk.review_plan import build_review_plan
+from ask.skills_sdk.review_verify import build_review_verification
 
 
 def add_sdk_parser(
@@ -256,6 +257,16 @@ def add_sdk_parser(
     sdk_review_handoff_parser.add_argument(
         "--receipt-out",
         help="Optional repo-local path for writing the review handoff receipt",
+    )
+    sdk_review_verify_parser = sdk_review_subparsers.add_parser(
+        "verify",
+        help="Verify required local artifacts from a review handoff receipt without external readiness claims",
+        parents=[global_parser],
+    )
+    sdk_review_verify_parser.add_argument("--handoff", required=True, help="Repo-local review handoff receipt path")
+    sdk_review_verify_parser.add_argument(
+        "--receipt-out",
+        help="Optional repo-local path for writing the review verification receipt",
     )
 
 
@@ -524,5 +535,37 @@ def _dispatch_sdk_review(repo_root: Path, args: argparse.Namespace) -> CallResul
             )
             return result
         result.data["review_handoff"] = review_handoff
+        return result
+    if command_action == "verify":
+        try:
+            review_verification = build_review_verification(
+                repo_root,
+                handoff_path=args.handoff,
+                receipt_out=args.receipt_out,
+            )
+        except ValueError as exc:
+            result.status = "error"
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_VALIDATION",
+                    message=str(exc),
+                    fix_suggestion=(
+                        "Run ask sdk review handoff --plan <plan-receipt> --target <path> "
+                        "--intent validation_review --receipt-out <handoff-receipt> --json --robot, "
+                        "then retry ask sdk review verify with --handoff <handoff-receipt>."
+                    ),
+                )
+            )
+            return result
+        result.data["review_verification"] = review_verification
+        if review_verification["status"] != "pass":
+            result.status = "error"
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_VALIDATION",
+                    message="Skills SDK review artifacts are missing or invalid.",
+                    fix_suggestion="Create or repair every path in data.review_verification.missing_or_invalid_artifacts.",
+                )
+            )
         return result
     return build_unknown_action_result("sdk review", command_action)

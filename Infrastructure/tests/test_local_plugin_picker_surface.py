@@ -90,7 +90,7 @@ EXPECTED_SOURCE_PLUGIN_SKILLS = {
         "sy-reframe",
         "sy-reinforce",
         "sy-review",
-        "sy-spec",
+        "sy-slice-spec",
         "sy-strategy",
         "sy-trace-plan",
         "sy-tracker-plan",
@@ -118,6 +118,64 @@ EXPECTED_PLUGIN_KEYWORDS = {
         "skill-refactor",
         "skillify",
     },
+    "synaipse-harness": {
+        "sy-strategy",
+        "sy-reframe",
+        "sy-brainstorm",
+        "sy-trace-plan",
+        "sy-tracker-plan",
+        "sy-slice-spec",
+        "sy-execution-plan",
+        "sy-work",
+        "sy-review",
+        "sy-eval-report",
+        "sy-reconcile",
+        "sy-reinforce",
+    },
+}
+
+EXPECTED_SYNAIPSE_LIFECYCLE = [
+    ("strategy", "sy-strategy", None, "reframe"),
+    ("reframe", "sy-reframe", "strategy", "brainstorm"),
+    ("brainstorm", "sy-brainstorm", "reframe", "trace-plan"),
+    ("trace-plan", "sy-trace-plan", "brainstorm", "tracker-plan"),
+    ("tracker-plan", "sy-tracker-plan", "trace-plan", "slice-spec"),
+    ("slice-spec", "sy-slice-spec", "tracker-plan", "execution-plan"),
+    ("execution-plan", "sy-execution-plan", "slice-spec", "work"),
+    ("work", "sy-work", "execution-plan", "review"),
+    ("review", "sy-review", "work", "eval-report"),
+    ("eval-report", "sy-eval-report", "review", "reconcile"),
+    ("reconcile", "sy-reconcile", "eval-report", "reinforce"),
+    ("reinforce", "sy-reinforce", "reconcile", "strategy"),
+]
+
+EXPECTED_SYNAIPSE_STAGE_HEADINGS = [
+    "Stage Contract",
+    "When to use",
+    "When not to use",
+    "Required inputs",
+    "Deliverables",
+    "Preconditions",
+    "Procedure",
+    "Allowed writes",
+    "Forbidden writes",
+    "Exit criteria",
+    "Validation",
+    "Handoff",
+    "Failure modes",
+    "Execution boundaries",
+    "Gotchas",
+    "Examples",
+    "References",
+]
+
+LEGACY_SYNAIPSE_SKILL_NAMES = {
+    "sy-spec",
+    "sy-phase-work",
+    "sy-improve",
+    "sy-fix-bugs",
+    "sy-router",
+    "sy-heartbeat",
 }
 
 SYSTEM_BRIDGE_SKILL_NAMES = {
@@ -154,6 +212,15 @@ def _read_frontmatter_text(skill_md: Path) -> str:
     if end == -1:
         return ""
     return raw[4:end]
+
+
+
+def _markdown_h2_headings(skill_md: Path) -> list[str]:
+    headings = []
+    for line in skill_md.read_text(encoding="utf-8").splitlines():
+        if line.startswith("## "):
+            headings.append(line.removeprefix("## ").strip())
+    return headings
 
 
 def _is_hidden_skill(skill_md: Path) -> bool:
@@ -265,6 +332,102 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
                 expected_skill_names,
                 f"{plugin_name} first-level plugin picker surface drifted",
             )
+
+    def test_synaipse_harness_uses_deterministic_sdk_lifecycle_shape(self) -> None:
+        """
+        Verify SynAIpse exposes exactly the canonical stage lifecycle and SDK metadata files.
+        """
+        plugin_root = REPO_ROOT / "Plugins" / "synaipse-harness"
+        skills_root = plugin_root / "skills"
+        routing_map_path = plugin_root / "references" / "routing-map.json"
+        routing_map = json.loads(routing_map_path.read_text(encoding="utf-8"))
+
+        expected_stages = [stage for stage, _, _, _ in EXPECTED_SYNAIPSE_LIFECYCLE]
+        expected_handles = [handle for _, handle, _, _ in EXPECTED_SYNAIPSE_LIFECYCLE]
+        direct_skill_names = _direct_visible_skill_names(skills_root)
+
+        self.assertEqual(expected_handles, [entry["handle"] for entry in routing_map["stages"]])
+        self.assertEqual(expected_stages, routing_map["lifecycle_stage_order"])
+        self.assertEqual("Infrastructure/references/sdk-stage-skill-template.md", routing_map["stage_template"])
+        self.assertEqual(
+            "Plugins/synaipse-harness/references/upstream/harness-engineering-context.yaml",
+            routing_map["upstream_reference_index"],
+        )
+        self.assertEqual(set(expected_handles), direct_skill_names)
+        self.assertFalse(
+            LEGACY_SYNAIPSE_SKILL_NAMES & direct_skill_names,
+            "SynAIpse should not expose legacy or compatibility skills as picker entries",
+        )
+
+        for stage, handle, previous_stage, next_stage in EXPECTED_SYNAIPSE_LIFECYCLE:
+            skill_dir = skills_root / handle
+            skill_md = skill_dir / "SKILL.md"
+            contract = skill_dir / "references" / "contract.yaml"
+            evals = skill_dir / "references" / "evals.yaml"
+            task_profile = skill_dir / "references" / "task-profile.json"
+            openai_metadata = skill_dir / "agents" / "openai.yaml"
+
+            for path in (skill_md, contract, evals, task_profile, openai_metadata):
+                self.assertTrue(path.exists(), f"{handle} should include {path.relative_to(skill_dir)}")
+
+            self.assertEqual(EXPECTED_SYNAIPSE_STAGE_HEADINGS, _markdown_h2_headings(skill_md))
+            source_context = (skill_dir / "references" / "source-context.yaml").read_text(encoding="utf-8")
+            self.assertIn("Plugins/synaipse-harness/references/upstream/harness-engineering-context.yaml", source_context)
+            self.assertIn("load_when:", source_context)
+            skill_frontmatter = _read_frontmatter_text(skill_md)
+            self.assertIn(f"name: {handle}", skill_frontmatter)
+            self.assertIn(f"sdk_stage: {stage}", skill_frontmatter)
+            self.assertIn("lifecycle_state: active", skill_frontmatter)
+            self.assertIn("command_visibility: orchestrator", skill_frontmatter)
+
+            contract_text = contract.read_text(encoding="utf-8")
+            expected_previous = previous_stage if previous_stage is not None else "none"
+            self.assertIn(f"skill: {handle}", contract_text)
+            self.assertIn(f"stage: {stage}", contract_text)
+            self.assertIn(f"previous_stage: {expected_previous}", contract_text)
+            self.assertIn(f"next_stage: {next_stage}", contract_text)
+
+            evals_text = evals.read_text(encoding="utf-8")
+            self.assertIn(f'skill_name: "{handle}"', evals_text)
+            self.assertIn(f'stage: "{stage}"', evals_text)
+
+            profile_payload = json.loads(task_profile.read_text(encoding="utf-8"))
+            self.assertEqual(f"Plugins/synaipse-harness/skills/{handle}", profile_payload["scope_skill"])
+            self.assertEqual(stage, profile_payload["sdk_stage"])
+
+            openai_text = openai_metadata.read_text(encoding="utf-8")
+            self.assertIn(f'sdk_stage: "{stage}"', openai_text)
+            self.assertIn(f'handle: "{handle}"', openai_text)
+
+    def test_synaipse_harness_upstream_references_are_quality_audited(self) -> None:
+        """
+        Verify copied Harness Engineering context is indexed with explicit SynAIpse quality status.
+        """
+        index_path = (
+            REPO_ROOT
+            / "Plugins"
+            / "synaipse-harness"
+            / "references"
+            / "upstream"
+            / "harness-engineering-context.yaml"
+        )
+        index_text = index_path.read_text(encoding="utf-8")
+
+        self.assertIn("reference_count: 90", index_text)
+        self.assertEqual(90, index_text.count("- path: "))
+        self.assertIn("quality_audit:", index_text)
+        self.assertIn("adopted", index_text)
+        self.assertIn("needs_synaipse_rewrite", index_text)
+        self.assertEqual(90, index_text.count("adoption_status: "))
+        self.assertEqual(90, index_text.count("stage_map:"))
+        self.assertEqual(90, index_text.count("quality_notes:"))
+        self.assertEqual(90, index_text.count("accuracy_certification:"))
+        self.assertIn("stale_terms:", index_text)
+        self.assertIn("Harness Engineering", index_text)
+        self.assertIn(
+            "Contains legacy Harness Engineering names or he-* lifecycle references",
+            index_text,
+        )
 
     def test_local_plugins_expose_openai_metadata_for_first_level_skills(self) -> None:
         """

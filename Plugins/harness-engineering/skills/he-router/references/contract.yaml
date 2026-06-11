@@ -1,0 +1,119 @@
+schema_version: 1
+
+purpose: >
+  Route incoming Harness Engineering requests to the correct single lifecycle
+  stage and return one recommended next step.
+
+triggers:
+  - user asks for Harness Engineering help but does not specify a stage
+  - stage selection is ambiguous across ideation, spec, plan, optimization, implementation, or review
+  - user asks where domain-model, ubiquitous-language, `CONTEXT.md`, glossary, terminology, or domain drift work belongs
+  - user asks to run a QA session, report bugs conversationally, or turn feedback into Linear issues
+  - user asks to use prior sessions, archived sessions, session-collector output, or repeated failures to improve or resume Harness Engineering work
+  - user asks where to resume the Harness Engineering workflow
+
+inputs:
+  - user request text
+  - optional artifact paths
+  - optional constraints such as timeline, risk, or rollout sensitivity
+
+outputs:
+  - "route_preview_version: 1 for new structured handoffs"
+  - "schema_version: he-router.route-preview.v1 for schema-bound structured output"
+  - one selected HE stage
+  - folded mode when the user names a compatibility stage that now lives under a parent stage
+  - matched deterministic rule
+  - why_not list for rejected adjacent candidates
+  - authority_limit explaining what the router cannot do
+  - safe_to_continue boolean that never authorizes implementation, external mutation, destructive cleanup, sync/install, or closure by itself
+  - blocked_reason and missing_input when blocked
+  - handoff_payload with the minimum selected-stage context
+  - confidence value such as high, medium, or blocked
+  - one-sentence rationale
+  - one recommended next step
+  - source_path when available
+  - discarded adjacent candidates when broad keywords could over-route
+  - "XP operating artifact: blackboard_delta when route choice changes durable workflow state or user intent"
+  - lifecycle exit status fields when routing is part of an active HE handoff
+  - missing input when blocked
+
+non_goals:
+  - implementing product code
+  - running multiple HE stages in one router response
+  - replacing `he-reconcile` lifecycle orchestration when orchestration is needed
+  - mutating command-surface metadata/runtime projections as source
+  - handling non-Harness media, spreadsheet, or generic repo requests
+  - granting implementation, external tracker mutation, destructive cleanup, sync/install, or closure authority
+
+risks:
+  - wrong-stage routing; mitigate with explicit rule checks and one blocking clarification when needed
+  - domain-model route confusion; mitigate by routing fuzzy language to `he-brainstorm`, first contract work to `he-spec`, existing spec contradictions to `he-spec mode:deepen-spec`, execution drift to `he-work`, and review drift to `he-code-review`
+  - stage sprawl; mitigate by enforcing exactly one primary active stage and folding compatibility stages into parent-stage modes
+  - generic handoff text; mitigate by requiring one stage-specific next step
+  - optimize-vs-implement confusion; mitigate by routing measurable experiment loops to `he-improve`
+  - refine-vs-implement confusion; mitigate by routing browser-first polish loops to `he-improve mode:refine`
+  - debug-vs-implement confusion; mitigate by routing root-cause bug loops to `he-fix-bugs`
+  - QA-intake-vs-debug confusion; mitigate by routing clear conversational bug reports to `he-fix-bugs`, unclear expected behavior to `he-brainstorm` or `he-spec`, and multi-issue sequencing to `he-plan`
+  - session-evidence-vs-implementation confusion; mitigate by routing plugin/workflow improvements to `he-improve`, active lifecycle drift to `he-reconcile`, solved learning refresh to `he-reinforce`, recurring waits to `he-heartbeat`, concrete derived tasks to `he-work`, and bug/root-cause evidence to `he-fix-bugs`
+  - branch-hygiene-vs-debug confusion; mitigate by routing stale branch cleanup requests to `he-router mode:prune-branches`
+  - lifecycle step skipping; mitigate with deterministic precedence for review, diagnosis, TDD, refinement, optimization, and artifact deepening before generic implementation
+  - generated-source confusion; mitigate by editing only canonical plugin source
+  - external-action overreach; mitigate by keeping router-only authority read-only
+  - media-routing confusion; mitigate by treating pure visual requests as non-triggers unless they are HE evidence
+  - false continuation; mitigate by making safe_to_continue advisory and subordinate to selected-stage authority, validation freshness, and closure proof
+
+observability: >
+  Track stage selection accuracy, discarded adjacent candidates, mapped-role
+  fallback frequency, authority_limit usage, blocked_reason frequency,
+  validation outcomes, runtime visibility, and Plugin Eval cost signals.
+
+rollback_procedure: >
+  Restore the previous contract/evals/task-profile files from git, then rerun
+  strict skill audit and plugin-builder validation before re-promoting.
+
+operator_contract:
+  description_contract: "Harness Engineering stage: verbs, artifacts, lifecycle boundary, and authority constraints."
+  immediate_operator_path:
+    first_action: "Resolve the smallest matching HE stage with ./bin/ask skills resolve he-router --json when available, then inspect only routing-critical evidence."
+    proceed_rule: "Infer harmless missing details conservatively; ask only when stage ownership, destructive behavior, tracker mutation, publication, external writes, or closure proof would change."
+  source_order:
+    - "local AGENTS.md and canonical repo or .harness artifacts"
+    - "current live tracker, PR, branch, runtime, or validation state before mutation or closure"
+    - "HE references, routing map, source docs, dependency source, and project contracts"
+    - "user confirmation for irreversible, external, destructive, credential, or broad-scope action"
+  tool_resolution:
+    preferred: "repo wrapper or HE script documented for this stage"
+    fallback: "read-only local inspection with the missing tool or permission reported"
+    doctor_or_status: "run the smallest status, resolve, audit, or validation command when tool state affects the result"
+  freshness_rule:
+    discovery: "Cached, indexed, or deferred references may locate candidates and background context."
+    action_state: "Use live targeted reads before writes, tracker updates, closure decisions, or status changes."
+    readback: "After writes or mutations, verify only the changed surface unless package, release, or lifecycle scope requires more."
+  scope_defaults:
+    default: "smallest HE stage, artifact, issue, phase, or approved slice implied by the request"
+    broaden_when:
+      - "shared lifecycle contract or routing behavior changes"
+      - "tracker, PR, package, release, or projection behavior changes"
+      - "validation proves adjacent artifacts must move together"
+  boundaries:
+    forbidden_without_explicit_request:
+      - "tracker mutation or external publication"
+      - "destructive file, branch, data, or workspace operation"
+      - "credential, secret, permission, or auth-scope expansion"
+      - "completion or closure claim without proof"
+    no_drift:
+      - "do not turn HE stages into generic productivity or implementation prompts"
+      - "do not put long gotcha lists, rubrics, examples, or validation matrices in the hot path"
+      - "do not use archive, deferred, or cache paths as active stage authority"
+  retry_and_stop:
+    retry: "Retry transient tool, network, UI, or validation discovery failures once when safe and cheap."
+    stop: "Stop after bounded retry with exact blocker, attempted fallback, and the next safe HE action."
+  validation_tiers:
+    fast: "touched-file format, schema, route, or stage-specific lint/check"
+    standard: "stage audit, routing proof, smoke eval, or repository wrapper for changed behavior"
+    deep: "release eval, projection, security, marketplace, tracker, or cross-stage checks only for package-impacting changes"
+  concise_output:
+    default_fields: ["changed_artifacts", "important_decisions", "validation", "residual_risks", "next_stage_or_blocker"]
+    full_ledger_when: ["closure proof", "release", "tracker mutation", "multi-stage migration", "explicit user request"]
+  references:
+    - "Plugins/harness-engineering/references/operator-shape.md"

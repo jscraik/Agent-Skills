@@ -1,0 +1,49 @@
+schema_version: 1
+skill: sy-trace-plan
+stage: trace-plan
+previous_stage: brainstorm
+next_stage: tracker-plan
+purpose: >-
+  Break the whole job into traceable bullets that connect intent, evidence, acceptance, and proof gaps.
+triggers:
+  - explicit sy-trace-plan invocation
+  - explicit trace-plan stage request
+  - strategy or previous-stage handoff to trace-plan
+preconditions:
+  - canonical source and active worktree are identified
+  - required previous-stage artifact is present or blocker is returned
+  - authority for writes is explicit
+inputs:
+  - user request or routed handoff
+  - repository and branch context
+  - relevant artifact, tracker, PR, validation, or session evidence
+outputs:
+  - schema_version
+  - stage: trace-plan
+  - status: pass|fail|blocked|not_checked
+  - evidence_refs
+  - blocked_by
+  - next_stage: tracker-plan
+allowed_writes:
+  - .harness/traces/** for trace maps; no tracker mutation, slice spec, or implementation.
+forbidden_writes:
+  - generated runtime projections as source
+  - external tracker, PR, CI, release, or deployment mutation without authorization
+  - claims that collapse local, PR, CI, review, tracker, artifact, and merge-readiness lanes
+exit_criteria:
+  - output names the current stage and status
+  - evidence lanes are separated
+  - handoff names tracker-plan or a blocker
+non_goals:
+  - completing another lifecycle stage
+  - broad rewrite outside the selected stage
+  - hidden mutation of runtime or external state
+risks:
+  - stale evidence
+  - wrong-stage routing
+  - local-only proof being mistaken for delivery readiness
+observability: >-
+  Record the current stage, selected authority, source artifacts read, allowed write boundary, validation outcome, evidence refs, blocker class, and next-stage handoff without storing secrets or sensitive data.
+rollback_procedure: >-
+  Restore this skill directory from git, rerun plugin validation, and refresh generated projections through the SDK sync wrapper.
+

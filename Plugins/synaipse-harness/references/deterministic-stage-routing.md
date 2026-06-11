@@ -28,8 +28,8 @@ Use this policy when `sy-strategy` must choose one SynAIpse Harness stage. Apply
 14. Linear execution orchestration, milestone/parent issue mapping, Now/Next/Later/Do Not Create classification, or Portfolio Ops routing routes to `sy-tracker-plan`.
 15. Approved phase-loop continuation, 10 minute heartbeat scheduling, phase gates before scoped `git add`, Linear phase updates, collector stale-evidence stop rules, or keeping `sy-work` moving until review routes to `sy-work`.
 16. Harden/deepen an existing spec or plan routes through folded deepen modes.
-17. New lifecycle work flows `sy-brainstorm` -> `sy-strategy` or `sy-reframe` when cognition/migration is needed -> `sy-tracker-plan` when tracker routing is needed -> `sy-spec` -> `sy-execution-plan` -> `sy-work`; approved recurring execution continues through `sy-work`.
-18. QA intake routes by expected-behavior clarity: clear bugs to `sy-review`, unclear behavior to `sy-brainstorm`/`sy-spec`, sequencing to `sy-execution-plan`.
+17. New lifecycle work follows the canonical stage order: `sy-strategy` -> `sy-reframe` -> `sy-brainstorm` -> `sy-trace-plan` -> `sy-tracker-plan` -> `sy-slice-spec` -> `sy-execution-plan` -> `sy-work` -> `sy-review` -> `sy-eval-report` -> `sy-reconcile` -> `sy-reinforce`.
+18. QA intake routes by expected-behavior clarity: clear bugs to `sy-review`, unclear behavior to `sy-brainstorm`/`sy-slice-spec`, sequencing to `sy-execution-plan`.
 19. If still ambiguous, apply `interactive-steering-contract.md` and ask once
     for the missing source artifact or lifecycle state.
 
@@ -38,7 +38,7 @@ Use this policy when `sy-strategy` must choose one SynAIpse Harness stage. Apply
 Folded names remain router aliases and modes, not first-class packaged skills:
 
 - `sy-ideate` -> `sy-brainstorm`
-- `sy-deepen-spec` -> `sy-spec`
+- `sy-deepen-spec` -> `sy-slice-spec`
 - `sy-execution-plan` -> `sy-execution-plan`
 - `sy-tdd` -> `sy-work`
 - `sy-technical-review` / `sy-reliability-review` -> `sy-review`

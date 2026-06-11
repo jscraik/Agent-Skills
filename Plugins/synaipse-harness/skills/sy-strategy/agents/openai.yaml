@@ -1,0 +1,11 @@
+policy:
+  allow_implicit_invocation: false
+interface:
+  display_name: "SynAIpse Strategy"
+  short_description: "Decide the lifecycle route, authority boundary, and evidence posture before downstream planning or work begins."
+routing:
+  handle: "sy-strategy"
+  sdk_stage: "strategy"
+  previous_stage: "none"
+  next_stage: "reframe"
+

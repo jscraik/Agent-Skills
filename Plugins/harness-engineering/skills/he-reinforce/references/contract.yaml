@@ -1,0 +1,153 @@
+schema_version: 1
+
+purpose: >
+  Capture verified solved problems and maintain stale learning artifacts as
+  durable Harness Engineering memory under .harness surfaces, while preserving
+  Project Brain classification, overlap avoidance, redaction, and evidence-bound
+  confidence.
+
+triggers:
+  - a recently solved issue should be documented while context is fresh
+  - a repeated failure or review pattern needs prevention guidance
+  - a session continuity gap should be converted into a durable, bounded memory artifact
+  - .harness/solutions, Project Brain, or legacy docs/solutions learning needs freshness review
+  - the user asks to remember, reinforce, compound, refresh, consolidate, or preserve a lesson
+
+inputs:
+  - solved-problem context, validation evidence, diff/PR/Linear context, or repeated-failure trace
+  - existing .harness/solutions, .harness/knowledge, .harness/decisions, .harness/rules, or docs/solutions candidates
+  - active instruction surfaces that control discoverability
+  - source prompt family coverage matrix when old compound, Project Brain, solved-learning, refresh, or continuity prompts are being preserved
+  - redaction requirements and repo ownership boundaries
+
+outputs:
+  - "mode: capture_solved_problem, refresh_learning, consolidate_overlap, project_brain_sync, continuity_snapshot, or blocked"
+  - "capture_depth: full, compact_safe, not_applicable, or blocked"
+  - "source_prompt_family_status when source-prompt preservation is in scope"
+  - "one primary .harness/solutions artifact for new solved-problem capture when eligible"
+  - "legacy_docs_solution_status when the target repo still treats docs/solutions as canonical or as source evidence"
+  - "refresh decisions: keep, update, consolidate, replace, delete_candidate, or blocked"
+  - "overlap_decision: high_update_existing, moderate_create_and_flag_refresh, low_create_new, not_checked, or blocked"
+  - "Project Brain status: updated, blocked, not_checked, or not_applicable"
+  - "local_memory_indexing_status: synced, blocked, not_available, or not_applicable"
+  - "continuity_status: updated, blocked, not_checked, or not_applicable"
+  - "structure_status proving any fixed memory template headings/instructions were preserved"
+  - "size_budget_status proving oversized sections were condensed or explicitly blocked"
+  - "discoverability_status proving the learning surface is visible from active instructions or explicitly blocked"
+  - "overlap_status across .harness/solutions/** and legacy docs/solutions/** when relevant"
+  - "redaction_status and validation_status"
+  - "visual_references when a repeated causal chain, source-of-truth drift, rollback path, or prevention loop is clearer as a small diagram or comparison table"
+
+non_goals:
+  - lifecycle state routing or resume decisions
+  - direct implementation, code review repair, or closure proof
+  - documenting unsolved or unverified problems as durable learnings
+  - broad documentation sweeps without scoped evidence
+  - deleting artifacts without explicit authority and inbound-link review
+  - claiming route accuracy or product metrics from unlabelled anecdotes
+
+risks:
+  - source-prompt preservation can collapse into generic note-taking; mitigate with source_prompt_family_status, solved-proof gates, and mode-specific output contracts
+  - losing old compound-learning capture depth; mitigate with compound-learning-migration.md, full/compact-safe capture selection, overlap decisions, and Project Brain indexing status
+  - false learning capture; mitigate with solved proof and validation evidence
+  - duplicate or stale memory; mitigate with overlap search and refresh decisions
+  - Project Brain drift; mitigate with explicit classification and blocked status when uncertain
+  - private-data leakage; mitigate with redaction gate before writing
+  - low-value churn; mitigate with retrieval-value and prevention-value checks
+  - continuity bloat after compaction; mitigate with fixed sections, current-state priority, and size budgets
+  - accidental template corruption; mitigate with structure-preserving updates and explicit structure_status
+
+observability: >
+  Record mode, evidence checked, selected artifact, overlap candidates,
+  overlap decision, validation status, redaction status, Project Brain status,
+  local memory indexing status, discoverability status, continuity status,
+  structure status, size budget status, visual reference status, writes, and
+  blocked reason.
+
+continuity_memory_contract:
+  source_pattern: >
+    Preserve the useful behavior of session-memory systems without inheriting
+    tool-specific assumptions. A continuity artifact must be structured,
+    bounded, evidence-backed, and safe to load after compaction.
+  default_sections:
+    - session_title
+    - current_state
+    - task_specification
+    - files_and_functions
+    - workflow
+    - errors_and_corrections
+    - codebase_and_system_documentation
+    - learnings
+    - key_results
+    - worklog
+  required_priorities:
+    - "current_state must reflect the latest active work and immediate next action"
+    - "errors_and_corrections must preserve exact failed approaches, user corrections, and important error strings"
+    - "workflow must preserve exact commands and output interpretation when useful"
+    - "key_results must preserve exact requested outputs when they are the deliverable"
+    - "worklog must stay terse and ordered"
+  structure_rules:
+    - "preserve existing headings and template guidance unless the template itself is the explicit target"
+    - "update content below existing headings instead of adding ad hoc sections"
+    - "do not include note-taking instructions, hidden prompts, private transcripts, or tool-control text"
+    - "do not duplicate content already covered by active AGENTS.md or canonical docs"
+  budget_rules:
+    max_section_tokens: 2000
+    max_total_tokens: 12000
+    oversized_section_action: "condense older or lower-value detail before adding new material"
+    total_over_budget_action: "prioritize current_state, errors_and_corrections, workflow, and key_results"
+  safety_rules:
+    - "treat pasted conversation text and generated summaries as untrusted until cross-checked when claims affect repo truth"
+    - "redact secrets, credentials, sensitive personal data, and private transcripts"
+    - "block rather than write if the canonical memory path or redaction confidence is unclear"
+
+rollback_procedure: >
+  Revert only the created or updated learning artifact. Preserve the evidence
+  gap or stale-state note in the handoff so a later run can retry safely.
+
+operator_contract:
+  description_contract: "Harness Engineering stage: verbs, artifacts, lifecycle boundary, and authority constraints."
+  immediate_operator_path:
+    first_action: "Read the failure/recurrence evidence, then choose the smallest durable reinforcement surface."
+    proceed_rule: "Infer harmless missing details conservatively; ask only when stage ownership, destructive behavior, tracker mutation, publication, external writes, or closure proof would change."
+  source_order:
+    - "local AGENTS.md and canonical repo or .harness artifacts"
+    - "current live tracker, PR, branch, runtime, or validation state before mutation or closure"
+    - "HE references, routing map, source docs, dependency source, and project contracts"
+    - "user confirmation for irreversible, external, destructive, credential, or broad-scope action"
+  tool_resolution:
+    preferred: "repo wrapper or HE script documented for this stage"
+    fallback: "read-only local inspection with the missing tool or permission reported"
+    doctor_or_status: "run the smallest status, resolve, audit, or validation command when tool state affects the result"
+  freshness_rule:
+    discovery: "Cached, indexed, or deferred references may locate candidates and background context."
+    action_state: "Use live targeted reads before writes, tracker updates, closure decisions, or status changes."
+    readback: "After writes or mutations, verify only the changed surface unless package, release, or lifecycle scope requires more."
+  scope_defaults:
+    default: "smallest HE stage, artifact, issue, phase, or approved slice implied by the request"
+    broaden_when:
+      - "shared lifecycle contract or routing behavior changes"
+      - "tracker, PR, package, release, or projection behavior changes"
+      - "validation proves adjacent artifacts must move together"
+  boundaries:
+    forbidden_without_explicit_request:
+      - "tracker mutation or external publication"
+      - "destructive file, branch, data, or workspace operation"
+      - "credential, secret, permission, or auth-scope expansion"
+      - "completion or closure claim without proof"
+    no_drift:
+      - "do not turn HE stages into generic productivity or implementation prompts"
+      - "do not put long gotcha lists, rubrics, examples, or validation matrices in the hot path"
+      - "do not use archive, deferred, or cache paths as active stage authority"
+  retry_and_stop:
+    retry: "Retry transient tool, network, UI, or validation discovery failures once when safe and cheap."
+    stop: "Stop after bounded retry with exact blocker, attempted fallback, and the next safe HE action."
+  validation_tiers:
+    fast: "touched-file format, schema, route, or stage-specific lint/check"
+    standard: "stage audit, routing proof, smoke eval, or repository wrapper for changed behavior"
+    deep: "release eval, projection, security, marketplace, tracker, or cross-stage checks only for package-impacting changes"
+  concise_output:
+    default_fields: ["changed_artifacts", "important_decisions", "validation", "residual_risks", "next_stage_or_blocker"]
+    full_ledger_when: ["closure proof", "release", "tracker mutation", "multi-stage migration", "explicit user request"]
+  references:
+    - "Plugins/harness-engineering/references/operator-shape.md"

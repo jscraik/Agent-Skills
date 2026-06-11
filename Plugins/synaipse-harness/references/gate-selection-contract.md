@@ -24,7 +24,7 @@ gate_profile:
     safe_to_close: "<proof needed before completion>"
     block_next_stage: "<condition that blocks handoff>"
   evidence_basis: direct|repo|linear|harness|external|reasoned
-  downstream_route: sy-brainstorm|sy-spec|sy-execution-plan|sy-work|sy-review|sy-eval-report|blocked
+  downstream_route: sy-brainstorm|sy-slice-spec|sy-execution-plan|sy-work|sy-review|sy-eval-report|blocked
 ```
 
 ## Risk Classes
@@ -86,7 +86,7 @@ gate_profile:
 - Ask once when the risk class or downstream route is consequential and cannot
   be determined from evidence.
 
-`sy-spec`
+`sy-slice-spec`
 
 - Convert the selected risk class into acceptance criteria and validation gates.
 - Keep non-applicable heavy gates explicit so future agents do not reintroduce

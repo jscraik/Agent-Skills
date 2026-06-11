@@ -1,0 +1,11 @@
+policy:
+  allow_implicit_invocation: false
+interface:
+  display_name: "SynAIpse Execution Plan"
+  short_description: "Sequence how to implement one approved slice, including file targets, validation gates, rollback, and proof lanes."
+routing:
+  handle: "sy-execution-plan"
+  sdk_stage: "execution-plan"
+  previous_stage: "slice-spec"
+  next_stage: "work"
+

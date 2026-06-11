@@ -1,0 +1,49 @@
+schema_version: 1
+skill: sy-review
+stage: review
+previous_stage: work
+next_stage: eval-report
+purpose: >-
+  Review the completed slice for correctness, risk, evidence gaps, and next-stage blockers.
+triggers:
+  - explicit sy-review invocation
+  - explicit review stage request
+  - strategy or previous-stage handoff to review
+preconditions:
+  - canonical source and active worktree are identified
+  - required previous-stage artifact is present or blocker is returned
+  - authority for writes is explicit
+inputs:
+  - user request or routed handoff
+  - repository and branch context
+  - relevant artifact, tracker, PR, validation, or session evidence
+outputs:
+  - schema_version
+  - stage: review
+  - status: pass|fail|blocked|not_checked
+  - evidence_refs
+  - blocked_by
+  - next_stage: eval-report
+allowed_writes:
+  - Review artifacts under .harness/reviews/** when requested; no implementation unless separately routed to work.
+forbidden_writes:
+  - generated runtime projections as source
+  - external tracker, PR, CI, release, or deployment mutation without authorization
+  - claims that collapse local, PR, CI, review, tracker, artifact, and merge-readiness lanes
+exit_criteria:
+  - output names the current stage and status
+  - evidence lanes are separated
+  - handoff names eval-report or a blocker
+non_goals:
+  - completing another lifecycle stage
+  - broad rewrite outside the selected stage
+  - hidden mutation of runtime or external state
+risks:
+  - stale evidence
+  - wrong-stage routing
+  - local-only proof being mistaken for delivery readiness
+observability: >-
+  Record the current stage, selected authority, source artifacts read, allowed write boundary, validation outcome, evidence refs, blocker class, and next-stage handoff without storing secrets or sensitive data.
+rollback_procedure: >-
+  Restore this skill directory from git, rerun plugin validation, and refresh generated projections through the SDK sync wrapper.
+

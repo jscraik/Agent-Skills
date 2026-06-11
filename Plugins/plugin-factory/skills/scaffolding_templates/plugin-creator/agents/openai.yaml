@@ -1,0 +1,3 @@
+interface:
+  display_name: "Plugin Creator"
+  short_description: "Scaffold a minimal Codex plugin package and optional marketplace entry."
