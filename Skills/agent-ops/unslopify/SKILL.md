@@ -39,20 +39,24 @@ Escalate architectural redesigns, API boundary changes, migrations, and cross-su
 ## Required Gates
 
 1. `<agent-skills-root>/bin/ask skills resolve unslopify --json`
-2. `<agent-skills-root>/bin/ask skills handles --check --json`
-3. Strict skill audit for package changes.
-4. Plugin Eval when trigger wording, cost, package shape, or eval behavior changed.
-5. Workspace sync proof before runtime claims when projection changed.
+2. `<agent-skills-root>/bin/ask skills proof unslopify --runtime-target codex --json --robot`
+3. `<agent-skills-root>/bin/ask skills handles --check --json`
+4. Strict skill audit for package changes.
+5. Plugin Eval when trigger wording, cost, package shape, or eval behavior changed.
+6. Workspace sync proof before runtime claims when projection changed.
 
 Stop if any gate fails.
 
 Runtime visibility checks such as
-`<agent-skills-root>/bin/ask skills route unslopify --json` are required only
-before claiming route availability, invocation readiness, or projection health.
-Use `./bin/ask ...` only when the active workspace is the Agent Skills Kit root.
-If catalog parity drift blocks routing, report runtime visibility as blocked and
-continue only with already-loaded canonical skill review or package hardening
-that does not depend on route availability.
+`<agent-skills-root>/bin/ask skills route unslopify --json` prove routing
+metadata only; they do not replace proof. Use `./bin/ask ...` only when the
+active workspace is the Agent Skills Kit root.
+
+If runtime proof, route visibility, or user runtime links are blocked, do not
+run this skill by reading canonical `SKILL.md` text as a fallback. Stop and
+repair or sync the runtime surface, or explicitly reframe the task as source
+inspection/package hardening and say that `$unslopify` was not available as a
+runtime skill.
 
 ## Required inputs
 

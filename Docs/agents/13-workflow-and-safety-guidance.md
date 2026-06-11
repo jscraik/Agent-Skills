@@ -93,6 +93,35 @@ This patches the generated git hook shims to set
 with broader home-directory write access. Run the installer, then rerun the
 normal hook-enforced commit or push path.
 
+### Worktree Removal And Runtime Links
+
+Before removing or pruning a worktree, check whether any user-level runtime
+links, plugin marketplaces, generated projections, active config paths, or
+tooling state point into that worktree. A worktree can be obsolete as a git
+branch while still serving a live runtime surface.
+
+At minimum, inspect these links before deletion when working in this repository:
+
+```bash
+ls -ld ~/.agents/skills ~/.codex/skills ~/.agents/plugins ~/.codex/plugins 2>/dev/null || true
+find -L ~/.agents/skills -maxdepth 3 -name SKILL.md | sed -n '1,20p'
+find -L ~/.codex/skills -maxdepth 3 -name SKILL.md | sed -n '1,20p'
+```
+
+If a runtime link points at the worktree being removed, repoint it to the active
+workspace projection or run the owning sync command before deleting the
+worktree. After deletion, verify the visible runtime surface, not just git
+state:
+
+```bash
+./bin/ask skills sync --scope workspace --json --robot
+./bin/ask skills load-preview --json --robot
+./bin/ask skills proof unslopify --runtime-target codex --json --robot
+```
+
+Do not report worktree cleanup as complete when it leaves dangling user runtime
+links or makes skills disappear from the modeled Codex loader roots.
+
 ## Configuration Files
 
 For YAML schema changes and configuration files, validate against the schema immediately after editing. Do not assume syntax is correct without verification.

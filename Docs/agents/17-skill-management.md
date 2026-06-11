@@ -8,6 +8,38 @@ instructions while preserving the commands agents need when working on skills.
 Before changing skills, sync policy, runtime projections, or agent-facing docs,
 read [UBIQUITOUS_LANGUAGE.md](/UBIQUITOUS_LANGUAGE.md).
 
+## User Runtime Links
+
+Home-directory skill links are live runtime surfaces, not disposable local
+shortcuts. Before deleting a worktree, pruning a branch checkout, or moving a
+projection directory, verify that `~/.agents/skills` and `~/.codex/skills` do
+not point into the removed tree. If they do, repair the link or run the owning
+sync command first, then prove visibility with:
+
+```bash
+./bin/ask skills load-preview --json --robot
+./bin/ask skills proof unslopify --runtime-target codex --json --robot
+find -L ~/.agents/skills -maxdepth 4 -name SKILL.md
+find -L ~/.codex/skills -maxdepth 4 -name SKILL.md
+```
+
+Treat a dangling runtime link as a runtime outage even when the git cleanup was
+otherwise correct. The repo is clean only in the git lane; picker readiness is a
+separate runtime-projection lane.
+
+## Runtime Proof Before Skill Use
+
+Canonical skill source existence is not runtime authorization. When a user,
+workflow, or handoff asks an agent to use `$<skill>`, a failed runtime proof,
+route check, or user-runtime-link check blocks active use of that skill.
+
+Reading `SKILL.md` directly is allowed only for source inspection, repair,
+audit, or package hardening. In that mode, report the claim boundary plainly:
+the canonical source was inspected, but the runtime skill was not available.
+Do not apply the skill procedure as if the runtime invocation succeeded, and
+do not claim the skill was used until the runtime surface is repaired and
+proved.
+
 ## Install Failure Recovery
 
 ```bash
