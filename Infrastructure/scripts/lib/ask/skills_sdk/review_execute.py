@@ -27,7 +27,12 @@ def build_review_execution(
     source_handoff = _load_json_object(source_handoff_path, label="review handoff receipt")
     _validate_handoff_shape(source_handoff)
     artifact_paths = _resolve_required_artifact_paths(repo_root, source_handoff["required_artifacts"])
-    output_path = _resolve_receipt_output_path(repo_root, receipt_out)
+    output_path = _resolve_receipt_output_path(
+        repo_root,
+        receipt_out,
+        handoff_path=source_handoff_path,
+        artifact_paths=[path for _artifact, path in artifact_paths],
+    )
 
     executed_at = _format_timestamp((clock_provider or _default_clock_provider)())
     blocked_artifact_results = [
@@ -86,6 +91,7 @@ def build_review_execution(
     if output_path is not None:
         receipt["receipt_written"] = True
         receipt["receipt_path"] = _repo_relative(repo_root, output_path)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return receipt
 
@@ -130,15 +136,22 @@ def _resolve_required_artifact_paths(repo_root: Path, artifacts: list[str]) -> l
     return [(artifact, _safe_repo_path(repo_root, artifact, label="required artifact")) for artifact in artifacts]
 
 
-def _resolve_receipt_output_path(repo_root: Path, receipt_out: str | None) -> Path | None:
+def _resolve_receipt_output_path(
+    repo_root: Path,
+    receipt_out: str | None,
+    *,
+    handoff_path: Path,
+    artifact_paths: list[Path],
+) -> Path | None:
     if receipt_out is None:
         return None
     output_path = _safe_repo_path(repo_root, receipt_out, label="receipt_out")
+    if output_path == handoff_path or output_path in artifact_paths:
+        raise ValueError("receipt_out must be distinct from the handoff and required artifact paths.")
     if output_path.exists() and not output_path.is_file():
         raise ValueError("receipt_out must resolve to a file path.")
     if _parent_file_collision(repo_root, output_path):
         raise ValueError("receipt_out parent must resolve to a directory path.")
-    output_path.parent.mkdir(parents=True, exist_ok=True)
     return output_path
 
 

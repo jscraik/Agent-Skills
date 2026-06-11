@@ -248,6 +248,32 @@ class TestSkillsSdkReviewExecute(unittest.TestCase):
         for artifact in handoff["required_artifacts"]:
             self.assertFalse((REPO_ROOT / artifact).exists())
 
+    def test_execution_rejects_receipt_out_matching_handoff_before_writing_artifacts(self) -> None:
+        handoff = self._write_handoff()
+
+        with self.assertRaisesRegex(ValueError, "receipt_out must be distinct"):
+            build_review_execution(
+                REPO_ROOT,
+                handoff_path=".harness/artifacts/sdk-review-handoff/test-execute-handoff.json",
+                receipt_out=".harness/artifacts/sdk-review-handoff/test-execute-handoff.json",
+            )
+
+        for artifact in handoff["required_artifacts"]:
+            self.assertFalse((REPO_ROOT / artifact).exists())
+
+    def test_execution_rejects_receipt_out_matching_required_artifact_before_writing(self) -> None:
+        handoff = self._write_handoff()
+
+        with self.assertRaisesRegex(ValueError, "receipt_out must be distinct"):
+            build_review_execution(
+                REPO_ROOT,
+                handoff_path=".harness/artifacts/sdk-review-handoff/test-execute-handoff.json",
+                receipt_out=handoff["required_artifacts"][0],
+            )
+
+        for artifact in handoff["required_artifacts"]:
+            self.assertFalse((REPO_ROOT / artifact).exists())
+
     def test_cli_execute_reports_parent_file_collision_as_failed_artifact(self) -> None:
         handoff = self._write_handoff()
         parent_collision = self.artifact_dir / "parent-file"
