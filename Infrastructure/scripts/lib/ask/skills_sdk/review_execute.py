@@ -29,9 +29,26 @@ def build_review_execution(
     artifact_paths = _resolve_required_artifact_paths(repo_root, source_handoff["required_artifacts"])
 
     executed_at = _format_timestamp((clock_provider or _default_clock_provider)())
+    blocked_artifact_results = [
+        _artifact_blocker(repo_root, path)
+        for _artifact, path in artifact_paths
+    ]
+    known_failed_artifacts = [
+        result["path"]
+        for result in blocked_artifact_results
+        if result is not None
+    ]
     artifact_results = [
-        _materialize_artifact(repo_root, source_handoff, artifact, path, executed_at=executed_at)
-        for artifact, path in artifact_paths
+        _materialize_artifact(
+            repo_root,
+            source_handoff,
+            artifact,
+            path,
+            executed_at=executed_at,
+            blocked_result=blocked_result,
+            failed_artifacts=known_failed_artifacts,
+        )
+        for (artifact, path), blocked_result in zip(artifact_paths, blocked_artifact_results, strict=True)
     ]
     failed_artifacts = [result["path"] for result in artifact_results if result["status"] != "pass"]
     receipt: dict[str, Any] = {
@@ -121,30 +138,47 @@ def _materialize_artifact(
     path: Path,
     *,
     executed_at: str,
+    blocked_result: dict[str, Any] | None,
+    failed_artifacts: list[str],
 ) -> dict[str, Any]:
-    if path.exists() and not path.is_file():
-        return _artifact_result(repo_root, path, status="fail", action="blocked", reason="not_file")
+    if blocked_result is not None:
+        return blocked_result
 
     if path.exists() and path.stat().st_size > 0:
         return _artifact_result(repo_root, path, status="pass", action="preserved", reason="already_present")
 
-    if path.parent.exists() and not path.parent.is_dir():
-        return _artifact_result(repo_root, path, status="fail", action="blocked", reason="parent_not_directory")
-
     path.parent.mkdir(parents=True, exist_ok=True)
-    content = _artifact_content(source_handoff, artifact, executed_at=executed_at)
+    content = _artifact_content(source_handoff, artifact, executed_at=executed_at, failed_artifacts=failed_artifacts)
     path.write_text(content, encoding="utf-8")
     return _artifact_result(repo_root, path, status="pass", action="written", reason="ok")
 
 
-def _artifact_content(source_handoff: dict[str, Any], artifact: str, *, executed_at: str) -> str:
+def _artifact_blocker(repo_root: Path, path: Path) -> dict[str, Any] | None:
+    if path.exists() and not path.is_file():
+        return _artifact_result(repo_root, path, status="fail", action="blocked", reason="not_file")
+    if path.parent.exists() and not path.parent.is_dir():
+        return _artifact_result(repo_root, path, status="fail", action="blocked", reason="parent_not_directory")
+    return None
+
+
+def _artifact_content(
+    source_handoff: dict[str, Any],
+    artifact: str,
+    *,
+    executed_at: str,
+    failed_artifacts: list[str],
+) -> str:
     name = Path(artifact).name
     if name == "review-summary.md":
         return _review_summary(source_handoff, executed_at=executed_at)
     if name == "reviewer-findings.json":
         return json.dumps(_reviewer_findings(source_handoff, executed_at=executed_at), indent=2, sort_keys=True) + "\n"
     if name == "validation-evidence.json":
-        return json.dumps(_validation_evidence(source_handoff, executed_at=executed_at), indent=2, sort_keys=True) + "\n"
+        return json.dumps(
+            _validation_evidence(source_handoff, executed_at=executed_at, failed_artifacts=failed_artifacts),
+            indent=2,
+            sort_keys=True,
+        ) + "\n"
     if artifact.endswith(".json"):
         return json.dumps(_generic_json_artifact(source_handoff, artifact, executed_at=executed_at), indent=2, sort_keys=True) + "\n"
     return _generic_text_artifact(source_handoff, artifact, executed_at=executed_at)
@@ -193,20 +227,25 @@ def _reviewer_findings(source_handoff: dict[str, Any], *, executed_at: str) -> d
     }
 
 
-def _validation_evidence(source_handoff: dict[str, Any], *, executed_at: str) -> dict[str, Any]:
+def _validation_evidence(source_handoff: dict[str, Any], *, executed_at: str, failed_artifacts: list[str]) -> dict[str, Any]:
+    command: dict[str, Any] = {
+        "command": "./bin/ask sdk review execute --handoff <handoff-receipt> --json --robot",
+        "outcome": "fail" if failed_artifacts else "pass",
+        "evidence": (
+            "required local review artifacts were not fully materialized from the handoff receipt"
+            if failed_artifacts
+            else "required local review artifacts materialized from the handoff receipt"
+        ),
+    }
+    if failed_artifacts:
+        command["failed_artifacts"] = failed_artifacts
     return {
         "schema_version": "skills-sdk.validation-evidence.v1",
-        "status": "local_execution_recorded",
+        "status": "local_execution_failed" if failed_artifacts else "local_execution_recorded",
         "target": source_handoff["target"],
         "task_intent": source_handoff["task_intent"],
         "executed_at": executed_at,
-        "commands": [
-            {
-                "command": "./bin/ask sdk review execute --handoff <handoff-receipt> --json --robot",
-                "outcome": "pass",
-                "evidence": "required local review artifacts materialized from the handoff receipt",
-            }
-        ],
+        "commands": [command],
         "not_proven": _not_proven_after_execution(source_handoff),
     }
 
@@ -309,6 +348,8 @@ def _load_json_object(path: Path, *, label: str) -> dict[str, Any]:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except FileNotFoundError as exc:
         raise ValueError(f"{label} does not exist.") from exc
+    except UnicodeDecodeError as exc:
+        raise ValueError(f"{label} must be valid UTF-8 JSON.") from exc
     except json.JSONDecodeError as exc:
         raise ValueError(f"{label} is invalid JSON: {exc}") from exc
     if not isinstance(payload, dict):

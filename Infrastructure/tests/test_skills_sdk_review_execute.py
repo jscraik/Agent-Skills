@@ -215,6 +215,11 @@ class TestSkillsSdkReviewExecute(unittest.TestCase):
         self.assertEqual(receipt["failed_artifacts"], [handoff["required_artifacts"][0]])
         self.assertEqual(first_result["action"], "blocked")
         self.assertEqual(first_result["reason"], "not_file")
+        validation_evidence_path = REPO_ROOT / handoff["required_artifacts"][2]
+        validation_evidence = json.loads(validation_evidence_path.read_text(encoding="utf-8"))
+        self.assertEqual(validation_evidence["status"], "local_execution_failed")
+        self.assertEqual(validation_evidence["commands"][0]["outcome"], "fail")
+        self.assertEqual(validation_evidence["commands"][0]["failed_artifacts"], [handoff["required_artifacts"][0]])
 
     def test_execution_prevalidates_all_required_artifact_paths_before_writing(self) -> None:
         handoff = self._write_handoff()
@@ -271,6 +276,27 @@ class TestSkillsSdkReviewExecute(unittest.TestCase):
                 REPO_ROOT,
                 handoff_path=".harness/artifacts/sdk-review-handoff/test-execute-handoff.json",
             )
+
+    def test_cli_execute_reports_invalid_utf8_handoff_as_validation_error(self) -> None:
+        self.handoff_path.parent.mkdir(parents=True, exist_ok=True)
+        self.handoff_path.write_bytes(b"\xff\xfe")
+
+        payload = _run_json_command(
+            sys.executable,
+            "Infrastructure/bin/ask",
+            "sdk",
+            "review",
+            "execute",
+            "--handoff",
+            ".harness/artifacts/sdk-review-handoff/test-execute-handoff.json",
+            "--json",
+            "--robot",
+            expect_success=False,
+        )
+
+        self.assertEqual(payload["status"], "error")
+        self.assertEqual(payload["errors"][0]["code"], "ERR_VALIDATION")
+        self.assertIn("review handoff receipt must be valid UTF-8 JSON", payload["errors"][0]["message"])
 
 
 if __name__ == "__main__":
