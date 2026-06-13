@@ -117,6 +117,7 @@ class TestAskSkillsSyncSecurity(TestCase):
     def test_sync_skills_user_scope_clears_stale_worktree_agents_plugins_symlink(self) -> None:
         stale_worktree_plugins = Path(self.temp_dir) / "agent-skills-old-worktree" / "Plugins"
         stale_worktree_plugins.mkdir(parents=True)
+        (stale_worktree_plugins.parent / ".git").mkdir()
         user_plugins = self.fake_home / ".agents" / "plugins"
         user_plugins.parent.mkdir(parents=True, exist_ok=True)
         user_plugins.symlink_to(stale_worktree_plugins, target_is_directory=True)
@@ -132,6 +133,32 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertFalse(user_plugins.is_symlink())
         self.assertIn(
             f"Replaced symlinked personal plugin marketplace root with directory: {user_plugins}",
+            result.data["logs"],
+        )
+
+    def test_sync_skills_user_scope_preserves_non_repo_agents_plugins_symlink(self) -> None:
+        personal_marketplace = Path(self.temp_dir) / "managed-personal-marketplace"
+        personal_marketplace.mkdir()
+        (personal_marketplace / "marketplace.json").write_text("[]\n", encoding="utf-8")
+        user_plugins = self.fake_home / ".agents" / "plugins"
+        user_plugins.parent.mkdir(parents=True, exist_ok=True)
+        user_plugins.symlink_to(personal_marketplace, target_is_directory=True)
+
+        with (
+            mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]),
+            mock.patch.object(Path, "home", return_value=self.fake_home),
+        ):
+            result = skills_commands.sync_skills(self.repo_root, scope="user", dry_run=False)
+
+        self.assertEqual(result.status, "success")
+        self.assertTrue(user_plugins.is_symlink())
+        self.assertEqual(user_plugins.resolve(strict=False), personal_marketplace.resolve(strict=False))
+        self.assertIn(
+            f"Preserved personal plugin marketplace symlink: {user_plugins}",
+            result.data["logs"],
+        )
+        self.assertIn(
+            f"Skipped home plugin mirror refresh for preserved personal plugin marketplace symlink: {user_plugins}",
             result.data["logs"],
         )
 
@@ -156,7 +183,7 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertGreaterEqual(result.data["plan"]["mutation_counts"]["deletes"], 1)
         self.assertGreaterEqual(result.data["plan"]["mutation_counts"]["writes"], 1)
         self.assertIn(
-            f"Replaced symlinked personal plugin marketplace root with directory: {user_plugins}",
+            f"Would replace symlinked personal plugin marketplace root with directory: {user_plugins}",
             result.data["logs"],
         )
 
@@ -176,7 +203,7 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertFalse(user_plugins.is_symlink())
         self.assertEqual((user_plugins / "README.md").read_text(encoding="utf-8"), "user owned\n")
         self.assertIn(
-            f"Personal plugin marketplace root is already a directory or absent: {user_plugins}",
+            f"Personal plugin marketplace root is already a directory: {user_plugins}",
             result.data["logs"],
         )
 

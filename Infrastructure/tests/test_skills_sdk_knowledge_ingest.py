@@ -6,6 +6,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from typing import Optional
 
 import yaml
 
@@ -30,11 +31,11 @@ def _command_env() -> dict[str, str]:
     return env
 
 
-def _write_skill(repo_root: Path) -> Path:
+def _write_skill(repo_root: Path, *, workflow_heading: str = "Procedure", source_context: bool = True) -> Path:
     skill_dir = repo_root / "Skills" / "agent-ops" / "improve-agent-native"
     (skill_dir / "references").mkdir(parents=True)
     (skill_dir / "SKILL.md").write_text(
-        """---
+        f"""---
 name: improve-agent-native
 description: "Audit repo harness readiness."
 metadata:
@@ -47,7 +48,7 @@ metadata:
 
 Use for audits.
 
-## Procedure
+## {workflow_heading}
 
 1. Inspect repo evidence.
 
@@ -57,26 +58,27 @@ Use for audits.
 """,
         encoding="utf-8",
     )
-    (skill_dir / "references" / "source-context.yaml").write_text(
-        yaml.safe_dump(
-            {
-                "schema_version": 1,
-                "skill": "improve-agent-native",
-                "references": [
-                    {
-                        "path": "references/source-context.yaml",
-                        "kind": "package_companion",
-                    }
-                ],
-            },
-            sort_keys=False,
-        ),
-        encoding="utf-8",
-    )
+    if source_context:
+        (skill_dir / "references" / "source-context.yaml").write_text(
+            yaml.safe_dump(
+                {
+                    "schema_version": 1,
+                    "skill": "improve-agent-native",
+                    "references": [
+                        {
+                            "path": "references/source-context.yaml",
+                            "kind": "package_companion",
+                        }
+                    ],
+                },
+                sort_keys=False,
+            ),
+            encoding="utf-8",
+        )
     return skill_dir
 
 
-def _write_extraction(root: Path, *, leak: bool = False) -> Path:
+def _write_extraction(root: Path, *, leak: bool = False, vendored_demand_override: Optional[dict] = None) -> Path:
     extraction = root / "knowledge-OS" / "exports" / "extractions" / "improve-agent-native"
     refs = extraction / "references"
     capsules = refs / "knowledge-capsules"
@@ -112,13 +114,24 @@ def _write_extraction(root: Path, *, leak: bool = False) -> Path:
     }
     (extraction / "extraction-plan.yaml").write_text(yaml.safe_dump(plan, sort_keys=False), encoding="utf-8")
     (extraction / "knowledge-demand.yaml").write_text(yaml.safe_dump(demand, sort_keys=False), encoding="utf-8")
-    (refs / "knowledge-demand.yaml").write_text(yaml.safe_dump(demand, sort_keys=False), encoding="utf-8")
+    vendored_demand = vendored_demand_override or demand
+    (refs / "knowledge-demand.yaml").write_text(yaml.safe_dump(vendored_demand, sort_keys=False), encoding="utf-8")
     (refs / "knowledge-capsule.manifest.yaml").write_text(yaml.safe_dump(manifest, sort_keys=False), encoding="utf-8")
     capsule_text = "# Harness Evidence Boundary\n\nUse evidence before readiness claims.\n"
     if leak:
         capsule_text += "/Users/jamiecraik/dev/knowledge-OS/private-source.md\n"
     (capsules / "harness-evidence-boundary.md").write_text(capsule_text, encoding="utf-8")
     return extraction
+
+
+def _write_skill_gate(repo_root: Path) -> Path:
+    gate = repo_root / "Plugins" / "skill-factory" / "scripts" / "skill-builder" / "skill_gate.py"
+    gate.parent.mkdir(parents=True)
+    gate.write_text(
+        "import sys\nprint('gate ok')\nraise SystemExit(0)\n",
+        encoding="utf-8",
+    )
+    return gate
 
 
 class TestSkillsSdkKnowledgeIngest(unittest.TestCase):
@@ -187,6 +200,100 @@ class TestSkillsSdkKnowledgeIngest(unittest.TestCase):
                 "references:local_absolute_path_leak:references/knowledge-capsules/harness-evidence-boundary.md",
                 payload["findings"],
             )
+
+    def test_vendored_demand_policy_is_validated(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "agent-skills"
+            root.mkdir()
+            _write_skill(root)
+            bad_vendored_demand = {
+                "schema_version": "knowledge-os.knowledge-demand.v1",
+                "skill": {
+                    "skill_id": "improve-agent-native",
+                    "declared_name": "improve-agent-native",
+                    "writable_root": "Skills/agent-ops/improve-agent-native",
+                },
+                "runtime_dependency_policy": {
+                    "requires_knowledge_os_at_runtime": True,
+                    "raw_sources_included": False,
+                    "local_absolute_paths_required": False,
+                },
+            }
+            extraction = _write_extraction(Path(tmp), vendored_demand_override=bad_vendored_demand)
+
+            payload = build_knowledge_ingest(
+                root,
+                extraction=str(extraction),
+                skill="Skills/agent-ops/improve-agent-native",
+                apply=True,
+                preflight_security=False,
+            )
+
+            self.assertEqual(payload["status"], "blocked")
+            self.assertIn(
+                "references/knowledge-demand:requires_knowledge_os_at_runtime_not_false",
+                payload["findings"],
+            )
+            self.assertIn("references/knowledge-demand:differs_from_root_knowledge-demand", payload["findings"])
+
+    def test_preflight_resolves_canonical_plugins_skill_gate(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "agent-skills"
+            root.mkdir()
+            _write_skill(root)
+            _write_skill_gate(root)
+            extraction = _write_extraction(Path(tmp))
+
+            payload = build_knowledge_ingest(
+                root,
+                extraction=str(extraction),
+                skill="Skills/agent-ops/improve-agent-native",
+                apply=False,
+                preflight_security=True,
+            )
+
+            self.assertEqual(payload["status"], "preview")
+            self.assertEqual(payload["staged_preflight"]["status"], "pass")
+
+    def test_apply_adds_routing_under_workflow_heading(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "agent-skills"
+            root.mkdir()
+            skill_dir = _write_skill(root, workflow_heading="Workflow")
+            extraction = _write_extraction(Path(tmp))
+
+            payload = build_knowledge_ingest(
+                root,
+                extraction=str(extraction),
+                skill="Skills/agent-ops/improve-agent-native",
+                apply=True,
+                preflight_security=False,
+            )
+
+            self.assertEqual(payload["status"], "applied")
+            skill_text = (skill_dir / "SKILL.md").read_text(encoding="utf-8")
+            self.assertIn("## Workflow", skill_text)
+            self.assertIn("Do not load all capsules by default", skill_text)
+
+    def test_apply_creates_source_context_when_missing(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "agent-skills"
+            root.mkdir()
+            skill_dir = _write_skill(root, source_context=False)
+            extraction = _write_extraction(Path(tmp))
+
+            payload = build_knowledge_ingest(
+                root,
+                extraction=str(extraction),
+                skill="Skills/agent-ops/improve-agent-native",
+                apply=True,
+                preflight_security=False,
+            )
+
+            self.assertEqual(payload["status"], "applied")
+            source_context = yaml.safe_load((skill_dir / "references" / "source-context.yaml").read_text(encoding="utf-8"))
+            paths = {entry["path"] for entry in source_context["references"]}
+            self.assertIn("references/knowledge-capsule.manifest.yaml", paths)
 
     def test_cli_requires_preview_or_apply(self) -> None:
         process = subprocess.run(

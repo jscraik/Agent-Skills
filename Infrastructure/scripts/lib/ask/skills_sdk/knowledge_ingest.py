@@ -9,6 +9,8 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
+from ask.skills_sdk.lenses import LensCatalogError, _parse_minimal_yaml
+
 
 SCHEMA_VERSION = "skills-sdk-knowledge-ingest.v1"
 ROUTING_TEXT = (
@@ -36,6 +38,10 @@ def build_knowledge_ingest(
     source_files = _collect_reference_files(extraction_root)
     plan = _load_yaml(extraction_root / "extraction-plan.yaml", label="extraction-plan.yaml")
     demand = _load_yaml(extraction_root / "knowledge-demand.yaml", label="knowledge-demand.yaml")
+    vendored_demand = _load_yaml(
+        extraction_root / "references" / "knowledge-demand.yaml",
+        label="references/knowledge-demand.yaml",
+    )
     manifest = _load_yaml(
         extraction_root / "references" / "knowledge-capsule.manifest.yaml",
         label="references/knowledge-capsule.manifest.yaml",
@@ -51,7 +57,10 @@ def build_knowledge_ingest(
         manifest=manifest,
         findings=findings,
     )
-    _validate_runtime_policy(demand, findings)
+    _validate_runtime_policy(demand, findings, label="knowledge-demand")
+    _validate_runtime_policy(vendored_demand, findings, label="references/knowledge-demand")
+    if vendored_demand != demand:
+        findings.append("references/knowledge-demand:differs_from_root_knowledge-demand")
     _validate_source_files(extraction_root, source_files, findings)
     preflight = (
         _preflight_security_gate(repo_root, skill_dir, extraction_root, source_files)
@@ -207,17 +216,17 @@ def _validate_skill_identity(
             findings.append(f"{label}:writable_root_mismatch:{writable_root}!={skill_rel}")
 
 
-def _validate_runtime_policy(demand: dict[str, Any], findings: list[str]) -> None:
+def _validate_runtime_policy(demand: dict[str, Any], findings: list[str], *, label: str) -> None:
     policy = demand.get("runtime_dependency_policy")
     if not isinstance(policy, dict):
-        findings.append("knowledge-demand:missing_runtime_dependency_policy")
+        findings.append(f"{label}:missing_runtime_dependency_policy")
         return
     if policy.get("requires_knowledge_os_at_runtime") is not False:
-        findings.append("knowledge-demand:requires_knowledge_os_at_runtime_not_false")
+        findings.append(f"{label}:requires_knowledge_os_at_runtime_not_false")
     if policy.get("raw_sources_included") is not False:
-        findings.append("knowledge-demand:raw_sources_included_not_false")
+        findings.append(f"{label}:raw_sources_included_not_false")
     if policy.get("local_absolute_paths_required") is not False:
-        findings.append("knowledge-demand:local_absolute_paths_required_not_false")
+        findings.append(f"{label}:local_absolute_paths_required_not_false")
 
 
 def _validate_source_files(extraction_root: Path, source_files: list[Path], findings: list[str]) -> None:
@@ -242,9 +251,17 @@ def _update_skill_routing(skill_md: Path) -> None:
     text = skill_md.read_text(encoding="utf-8")
     if ROUTING_TEXT in text:
         return
-    marker = "## Procedure\n"
-    if marker not in text:
-        raise ValueError("SKILL.md must contain a Procedure section for knowledge capsule routing.")
+    marker = _routing_insertion_marker(text)
+    if marker is None:
+        reference_marker = "## References\n"
+        capsule_section = "## Knowledge Capsules\n\n" + ROUTING_TEXT + "\n\n"
+        if reference_marker in text:
+            before_refs, refs = text.split(reference_marker, 1)
+            updated = before_refs.rstrip() + "\n\n" + capsule_section + reference_marker + refs
+        else:
+            updated = text.rstrip() + "\n\n" + capsule_section
+        skill_md.write_text(_append_reference_links(updated), encoding="utf-8")
+        return
     before, after = text.split(marker, 1)
     next_heading = after.find("\n## ")
     if next_heading == -1:
@@ -253,7 +270,20 @@ def _update_skill_routing(skill_md: Path) -> None:
     else:
         procedure = after[:next_heading].rstrip() + "\n\n" + ROUTING_TEXT + "\n"
         updated = before + marker + procedure + after[next_heading:]
+    skill_md.write_text(_append_reference_links(updated), encoding="utf-8")
+
+
+def _routing_insertion_marker(text: str) -> str | None:
+    for heading in ("Procedure", "Workflow", "Runtime Activation"):
+        marker = f"## {heading}\n"
+        if marker in text:
+            return marker
+    return None
+
+
+def _append_reference_links(text: str) -> str:
     reference_marker = "## References\n"
+    updated = text
     if reference_marker in updated:
         before_refs, refs = updated.split(reference_marker, 1)
         for ref in (
@@ -264,11 +294,19 @@ def _update_skill_routing(skill_md: Path) -> None:
             if ref not in refs:
                 refs = refs.rstrip() + "\n" + ref + "\n"
         updated = before_refs + reference_marker + refs
-    skill_md.write_text(updated.rstrip() + "\n", encoding="utf-8")
+    return updated.rstrip() + "\n"
 
 
 def _update_source_context(source_context: Path) -> None:
-    loaded = _load_yaml(source_context, label="references/source-context.yaml")
+    if source_context.is_file():
+        loaded = _load_yaml(source_context, label="references/source-context.yaml")
+    else:
+        skill_dir = source_context.parent.parent
+        loaded = {
+            "schema_version": 1,
+            "skill": _skill_name(skill_dir / "SKILL.md"),
+            "references": [],
+        }
     references = loaded.setdefault("references", [])
     if not isinstance(references, list):
         raise ValueError("references/source-context.yaml references must be a list.")
@@ -388,13 +426,15 @@ def _preflight_security_gate(
 
 
 def _resolve_skill_gate_script(repo_root: Path) -> Path:
-    repo_local = repo_root / "plugins" / "skill-factory" / "scripts" / "skill-builder" / "skill_gate.py"
-    if repo_local.is_file():
-        return repo_local
+    for plugins_root in ("Plugins", "plugins"):
+        repo_local = repo_root / plugins_root / "skill-factory" / "scripts" / "skill-builder" / "skill_gate.py"
+        if repo_local.is_file():
+            return repo_local
     module_repo = Path(__file__).resolve().parents[5]
-    module_local = module_repo / "plugins" / "skill-factory" / "scripts" / "skill-builder" / "skill_gate.py"
-    if module_local.is_file():
-        return module_local
+    for plugins_root in ("Plugins", "plugins"):
+        module_local = module_repo / plugins_root / "skill-factory" / "scripts" / "skill-builder" / "skill_gate.py"
+        if module_local.is_file():
+            return module_local
     raise ValueError("skill-factory security gate script is missing.")
 
 
@@ -434,16 +474,10 @@ def _yaml_safe_load_text(text: str, *, label: str) -> Any:
     )
     if ruby is not None:
         return json.loads(ruby.stdout)
-    process = _run_uv_yaml_helper(
-        (
-            "import json,sys,yaml; "
-            "payload=yaml.safe_load(sys.stdin.read()); "
-            "print(json.dumps(payload))"
-        ),
-        text,
-        label=label,
-    )
-    return json.loads(process.stdout)
+    try:
+        return _parse_minimal_yaml(text)
+    except LensCatalogError as exc:
+        raise ValueError(f"{label} requires YAML syntax unsupported by the built-in parser.") from exc
 
 
 def _yaml_safe_dump_data(data: Any) -> str:
@@ -456,44 +490,7 @@ def _yaml_safe_dump_data(data: Any) -> str:
     )
     if ruby is not None:
         return ruby.stdout
-    process = _run_uv_yaml_helper(
-        (
-            "import json,sys,yaml; "
-            "payload=json.loads(sys.stdin.read()); "
-            "print(yaml.safe_dump(payload, sort_keys=False, allow_unicode=True), end='')"
-        ),
-        json.dumps(data),
-        label="YAML dump",
-    )
-    return process.stdout
-
-
-def _run_uv_yaml_helper(code: str, stdin: str, *, label: str) -> subprocess.CompletedProcess[str]:
-    command = [
-        "uv",
-        "run",
-        "--with",
-        "pyyaml",
-        "--python",
-        "3.12",
-        "python",
-        "-c",
-        code,
-    ]
-    try:
-        process = subprocess.run(
-            command,
-            input=stdin,
-            text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            check=False,
-        )
-    except FileNotFoundError as exc:
-        raise ValueError("PyYAML is required for Skills SDK knowledge ingest, and uv fallback is unavailable.") from exc
-    if process.returncode != 0:
-        raise ValueError(f"{label} could not be parsed as YAML: {process.stderr.strip()}")
-    return process
+    return json.dumps(data, indent=2, ensure_ascii=False) + "\n"
 
 
 def _run_ruby_yaml_helper(code: str, stdin: str) -> subprocess.CompletedProcess[str] | None:
