@@ -5,7 +5,7 @@ import json
 import os
 import shutil
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -376,7 +376,7 @@ def install_project_skill(
 
         installed_at_value = installed_at or os.environ.get("ASK_SKILLS_SDK_INSTALL_TIMESTAMP")
         if not installed_at_value:
-            installed_at_value = datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+            installed_at_value = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
         lockfile = _load_lockfile(lockfile_path)
         lockfile["entries"][package_name] = {
             "name": package_name,

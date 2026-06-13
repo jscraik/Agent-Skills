@@ -1,0 +1,37 @@
+---
+schema_version: knowledge-os.knowledge-demand.v1
+skill:
+  skill_id: improve-agent-native
+  declared_name: improve-agent-native
+  entrypoint_path: Skills/agent-ops/improve-agent-native/SKILL.md
+  canonical_skill_path: Skills/agent-ops/improve-agent-native/SKILL.md
+  writable_root: Skills/agent-ops/improve-agent-native
+  apply_target_path: Skills/agent-ops/improve-agent-native/SKILL.md
+knowledge_signals:
+- agents_md
+- skill_routing
+- evidence_boundary
+- review_feedback
+- brownfield_readiness
+needed_facets:
+- pack.harness-engineering:evidence_boundary
+- pack.harness-engineering:review_feedback
+- pack.harness-engineering:skill_routing
+- pack.harness-engineering:brownfield_readiness
+- pack.harness-engineering:pr_lifecycle
+- pack.ryan-lopopolo-principal-engineering:environment_design
+- pack.ryan-lopopolo-principal-engineering:repo_knowledge
+- pack.ryan-lopopolo-principal-engineering:mechanical_boundaries
+- pack.ryan-lopopolo-principal-engineering:continuous_cleanup
+- pack.ryan-lopopolo-principal-engineering:agent_operating_model
+- pack.ryan-lopopolo-principal-engineering:safety_policy
+- pack.ryan-lopopolo-principal-engineering:long_term_coherence
+- pack.ryan-lopopolo-principal-engineering:maintenance_supply_chain
+- pack.ryan-lopopolo-principal-engineering:stakeholder_alignment
+- pack.ryan-lopopolo-principal-engineering:adoption_economics
+- pack.ryan-lopopolo-principal-engineering:quality_standards
+- pack.ryan-lopopolo-principal-engineering:sociotechnical_adoption
+runtime_dependency_policy:
+  requires_knowledge_os_at_runtime: false
+  raw_sources_included: false
+  local_absolute_paths_required: false

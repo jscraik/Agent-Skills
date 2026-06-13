@@ -54,7 +54,7 @@ def build_review_execution(
             blocked_result=blocked_result,
             failed_artifacts=known_failed_artifacts,
         )
-        for (artifact, path), blocked_result in zip(artifact_paths, blocked_artifact_results, strict=True)
+        for (artifact, path), blocked_result in zip(artifact_paths, blocked_artifact_results)
     ]
     failed_artifacts = [result["path"] for result in artifact_results if result["status"] != "pass"]
     receipt: dict[str, Any] = {

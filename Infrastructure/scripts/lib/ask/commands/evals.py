@@ -5,6 +5,7 @@ import json
 import os
 import re
 import shlex
+import signal
 import subprocess
 import sys
 import shutil
@@ -331,7 +332,7 @@ def _tessl_policy() -> dict:
             "references/contract.yaml",
             "references/task-profile.json",
             "assets/**/*",
-            "scenarios/<case-id>/task.md",
+            "scenarios/<case-id>/{task.md,criteria.json}",
         ],
         "network_permission_required_by_repo": False,
         "project_save_may_use_tessl_service": "only_for_project_link_when_workspace_provided",
@@ -630,6 +631,7 @@ def _parse_tessl_eval_cases_compat(text: str) -> list[dict[str, str]]:
             "raw_response_artifact",
             "judge_detail_artifact",
             "pass_rate_calibration_artifact",
+            "tessl_live_private",
         }:
             index += 1
             continue
@@ -685,24 +687,49 @@ def _parse_tessl_eval_cases(evals_path: Path) -> list[dict[str, str]]:
             "judge_detail_artifact",
             "pass_rate_threshold",
             "pass_rate_calibration_artifact",
+            "tessl_live_private",
         ):
             if raw_case.get(field) is not None:
                 case[field] = raw_case[field]  # type: ignore[assignment]
         acceptance = raw_case.get("acceptance")
         if isinstance(acceptance, list):
             case["acceptance"] = acceptance  # type: ignore[assignment]
+        tessl = raw_case.get("tessl")
+        if isinstance(tessl, dict):
+            case["tessl"] = tessl  # type: ignore[assignment]
         cases.append(case)
     return cases
+
+
+def _case_tessl_enabled(raw_case: dict[object, object], *, lane: str) -> bool:
+    flat_key = f"tessl_{lane}"
+    flat_value = raw_case.get(flat_key)
+    if flat_value is False or str(flat_value).strip().lower() == "false":
+        return False
+    tessl = raw_case.get("tessl")
+    if not isinstance(tessl, dict):
+        return True
+    lane_value = tessl.get(lane)
+    if lane_value is False:
+        return False
+    enabled = tessl.get("enabled")
+    return enabled is not False
 
 
 def _write_tessl_scenarios_from_evals(source_root: Path, staged_root: Path) -> list[str]:
     copied: list[str] = []
     for case in _parse_tessl_eval_cases(source_root / "references" / "evals.yaml"):
         case_id = case["id"].replace("/", "-")
-        task_path = staged_root / "scenarios" / case_id / "task.md"
-        task_path.parent.mkdir(parents=True, exist_ok=True)
+        case_root = staged_root / "scenarios" / case_id
+        case_root.mkdir(parents=True, exist_ok=True)
+        task_path = case_root / "task.md"
         task_path.write_text(_tessl_task_markdown(case), encoding="utf-8")
-        copied.append(str(task_path.relative_to(staged_root)))
+        criteria_path = case_root / "criteria.json"
+        criteria_path.write_text(json.dumps(_tessl_criteria_from_case(case), indent=2) + "\n", encoding="utf-8")
+        copied.extend([
+            str(task_path.relative_to(staged_root)),
+            str(criteria_path.relative_to(staged_root)),
+        ])
     return copied
 
 
@@ -860,6 +887,8 @@ def _tessl_criteria_from_case(case: dict[str, object]) -> dict:
 def _write_tessl_live_evals_from_references(source_root: Path, staged_root: Path) -> list[str]:
     copied: list[str] = []
     for case in _parse_tessl_eval_cases(source_root / "references" / "evals.yaml"):
+        if not _case_tessl_enabled(case, lane="live_private"):
+            continue
         case_id = _tessl_eval_case_id(str(case["id"]))
         case_root = staged_root / "evals" / case_id
         case_root.mkdir(parents=True, exist_ok=True)
@@ -972,16 +1001,39 @@ def _unique_archive_dir(archive_root: Path, label: str) -> Path:
     return archive_dir
 
 
+def _sanitize_tessl_archive_ingestable_dirs(archive_root: Path) -> None:
+    if not archive_root.exists():
+        return
+    for child in sorted((path for path in archive_root.rglob("*") if path.is_dir()), key=lambda path: len(path.parts), reverse=True):
+        if child.name not in {"evals", "scenarios"}:
+            continue
+        target = child.with_name(f"archived-{child.name}")
+        suffix = 1
+        while target.exists():
+            target = child.with_name(f"archived-{child.name}-{suffix}")
+            suffix += 1
+        shutil.move(str(child), target)
+
+
 def _archive_stage_children(stage_root: Path, label: str) -> Path | None:
     if not stage_root.exists():
         return None
-    children = [child for child in stage_root.iterdir() if child.name != "evidence-archive"]
+    archive_root = stage_root.parent / f"{stage_root.name}-evidence-archive"
+    legacy_archive_root = stage_root / "evidence-archive"
+    if legacy_archive_root.exists():
+        legacy_archive_dir = _unique_archive_dir(archive_root, "legacy-evidence-archive")
+        legacy_archive_dir.parent.mkdir(parents=True, exist_ok=True)
+        shutil.move(str(legacy_archive_root), legacy_archive_dir)
+    _sanitize_tessl_archive_ingestable_dirs(archive_root)
+    children = list(stage_root.iterdir())
     if not children:
         return None
-    archive_dir = _unique_archive_dir(stage_root / "evidence-archive", label)
+    archive_dir = _unique_archive_dir(archive_root, label)
     archive_dir.mkdir()
     for child in children:
-        shutil.move(str(child), archive_dir / child.name)
+        archived_name = f"archived-{child.name}" if child.name in {"evals", "scenarios"} else child.name
+        shutil.move(str(child), archive_dir / archived_name)
+    _sanitize_tessl_archive_ingestable_dirs(archive_root)
     return archive_dir
 
 
@@ -998,6 +1050,21 @@ def _json_or_text(text_value: str) -> object:
         return json.loads(text_value)
     except json.JSONDecodeError:
         return text_value
+
+
+def _tessl_json_status(process: subprocess.CompletedProcess[str]) -> str | None:
+    parsed = _json_or_text(process.stdout.strip()) if process.stdout.strip() else None
+    if isinstance(parsed, dict):
+        status = parsed.get("status") or parsed.get("outcome")
+        if isinstance(status, str):
+            return status.lower()
+    return None
+
+
+def _tessl_process_succeeded(process: subprocess.CompletedProcess[str]) -> bool:
+    if process.returncode != 0:
+        return False
+    return _tessl_json_status(process) != "error"
 
 
 def _tessl_auth_blocked(*texts: str) -> bool:
@@ -1018,6 +1085,27 @@ def _run_tessl_project_command(
         text=True,
         timeout=600,
         env=env,
+    )
+
+
+def _signal_name_for_returncode(returncode: int) -> str | None:
+    if returncode >= 0:
+        return None
+    signal_number = abs(returncode)
+    try:
+        return signal.Signals(signal_number).name
+    except ValueError:
+        return f"signal {signal_number}"
+
+
+def _tessl_signal_blocker(process: subprocess.CompletedProcess[str], *, lane: str) -> str | None:
+    signal_name = _signal_name_for_returncode(process.returncode)
+    if not signal_name:
+        return None
+    return (
+        f"Tessl {lane} command was terminated by {signal_name} "
+        f"(return code {process.returncode}) before completing. This is a local "
+        "native CLI, sandbox, or OS runtime blocker, not a skill assessment result."
     )
 
 
@@ -1077,10 +1165,12 @@ def _ensure_tessl_project_link(
         process_args = getattr(process, "args", [])
         if not isinstance(process_args, (list, tuple)):
             process_args = []
+        signal_name = _signal_name_for_returncode(process.returncode)
         commands.append({
             "action": action,
             "command": " ".join(shlex.quote(str(part)) for part in process_args),
             "exit_code": process.returncode,
+            "signal": signal_name,
             "raw_output": process.stdout,
             "raw_error": process.stderr,
             "parsed_output": _json_or_text(process.stdout.strip()) if process.stdout.strip() else None,
@@ -1089,6 +1179,15 @@ def _ensure_tessl_project_link(
     try:
         check = _run_tessl_project_command(tessl_path, ["project", "repair", "--json"], staged_root, tessl_env)
         record("check", check)
+        if blocker := _tessl_signal_blocker(check, lane="project repair check"):
+            return {
+                **common,
+                "status": "blocked",
+                "action": "check",
+                "blocker": blocker,
+                "blocker_class": "blocked_runtime",
+                "commands": commands,
+            }
         if _tessl_auth_blocked(check.stdout, check.stderr):
             return {
                 **common,
@@ -1115,6 +1214,15 @@ def _ensure_tessl_project_link(
             tessl_env,
         )
         record("relink", relink)
+        if blocker := _tessl_signal_blocker(relink, lane="project relink"):
+            return {
+                **common,
+                "status": "blocked",
+                "action": "relink",
+                "blocker": blocker,
+                "blocker_class": "blocked_runtime",
+                "commands": commands,
+            }
         if _tessl_auth_blocked(relink.stdout, relink.stderr):
             return {
                 **common,
@@ -1124,7 +1232,7 @@ def _ensure_tessl_project_link(
                 "blocker_class": "blocked_auth",
                 "commands": commands,
             }
-        if relink.returncode == 0:
+        if _tessl_process_succeeded(relink):
             update_source = _run_tessl_project_command(
                 tessl_path,
                 ["project", "repair", "--update-source", "--yes", "--json"],
@@ -1132,6 +1240,15 @@ def _ensure_tessl_project_link(
                 tessl_env,
             )
             record("update_source", update_source)
+            if blocker := _tessl_signal_blocker(update_source, lane="project source repair"):
+                return {
+                    **common,
+                    "status": "blocked",
+                    "action": "update_source",
+                    "blocker": blocker,
+                    "blocker_class": "blocked_runtime",
+                    "commands": commands,
+                }
             if _tessl_auth_blocked(update_source.stdout, update_source.stderr):
                 return {
                     **common,
@@ -1164,11 +1281,20 @@ def _ensure_tessl_project_link(
 
         create = _run_tessl_project_command(
             tessl_path,
-            ["project", "create", project, "--workspace", workspace],
+            ["project", "create", "--new", "--workspace", workspace, project],
             staged_root,
             tessl_env,
         )
         record("create", create)
+        if blocker := _tessl_signal_blocker(create, lane="project create"):
+            return {
+                **common,
+                "status": "blocked",
+                "action": "create",
+                "blocker": blocker,
+                "blocker_class": "blocked_runtime",
+                "commands": commands,
+            }
         if _tessl_auth_blocked(create.stdout, create.stderr):
             return {
                 **common,
@@ -1178,7 +1304,7 @@ def _ensure_tessl_project_link(
                 "blocker_class": "blocked_auth",
                 "commands": commands,
             }
-        if create.returncode == 0:
+        if _tessl_process_succeeded(create):
             return {
                 **common,
                 "status": "pass",
@@ -1988,7 +2114,11 @@ def _run_tessl_eval(
         raw_output = process.stdout
         raw_error = process.stderr
         auth_text = f"{raw_output}\n{raw_error}".lower()
-        if process.returncode != 0 and "authenticate with tessl" in auth_text:
+        if signal_blocker := _tessl_signal_blocker(process, lane="eval"):
+            status = "blocked"
+            blocker = signal_blocker
+            blocker_class = "blocked_runtime"
+        elif process.returncode != 0 and "authenticate with tessl" in auth_text:
             status = "blocked"
             blocker = "Tessl CLI is installed locally, but authentication is required before evals can run."
             blocker_class = "blocked_auth"

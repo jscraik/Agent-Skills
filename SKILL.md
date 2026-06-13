@@ -22,7 +22,7 @@ Do not hand-edit runtime projections.
 - [Skills System](#skills-system)
 
 ## Summary
-- `total_skills`: 79
+- `total_skills`: 80
 - `catalog_source`: default user-visible catalog surface
 - `visibility`: default
 - `policy_identity`: 0c8f622f6c1cc0c6
@@ -55,6 +55,7 @@ Do not hand-edit runtime projections.
 - `frontend-design` — Analyze ambiguous frontend design requests and route the right UI owner. Use this skill when broad design intent needs classification before implementation.
 - `go` — Best practices for working with Go codebases. Use when writing, debugging, or exploring Go code, including reading dependency sources and documentation.
 - `goal-governor` — Use when a Codex goal/task is stuck, hanging, not finishing, or needs status. Reads goal.md, state.yaml, receipts.jsonl; syncs reported status with board files; fixes invalid state.yaml; classifies blockers; decides done. Not for ordinary reviews or one-off fixes.
+- `improve-agent-native` — Check if a repository is ready for AI coding agents. Use when you need to audit repo agent compatibility, review AGENTS.md, find missing test/build commands, evaluate docs quality, or produce a file-evidence scorecard with specific fixes.
 - `improve-codebase-architecture` — Use when reviewing or improving codebase architecture needs deeper module boundaries, clearer context language, better interfaces, stronger testability, or Linear-backed decisions.
 - `insight-report` — Generate local Codex usage reports. Use when users ask for usage analytics, weekly insights, session summaries, telemetry patterns, or prompting help.
 - `javascript-pro` — Create and debug modern JavaScript code with ES6+, async patterns, and Node.js APIs. Use when working on runtime behavior, promises, or browser and Node compatibility.
