@@ -148,6 +148,15 @@ residual_risk:
   - score is based on static repo inspection, not executed runtime proof
 ```
 
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[agents-md]] | Repair AGENTS.md routing, authority, or instruction-shape defects found by the audit |
+| [[testing]] | Select repo-native validation and classify proof gaps after audit findings |
+
+**Topic map:** [[agent-ops]]
+
 ## References
 
 - `references/contract.yaml`
