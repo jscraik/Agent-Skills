@@ -14,6 +14,7 @@ from typing import Any
 
 DEFAULT_RUNTIME_PROOF_HANDLE = "he-heartbeat"
 DEFAULT_RUNTIME_PROOF_EVIDENCE_DIR = ""
+DARWIN_CONFSTR_WARNING = "warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead"
 
 
 def parse_args() -> argparse.Namespace:
@@ -70,14 +71,25 @@ def _run_json(repo_root: Path, command: list[str], timeout_seconds: int) -> tupl
     except subprocess.TimeoutExpired as exc:
         raise SystemExit(f"{' '.join(command)} timed out after {timeout_seconds}s") from exc
 
+    stdout = _strip_known_platform_stdout_noise(proc.stdout)
     try:
-        payload = json.loads(proc.stdout)
+        payload = json.loads(stdout)
     except json.JSONDecodeError as exc:
         raise SystemExit(f"{' '.join(command)} did not emit JSON: {exc}") from exc
 
     if not isinstance(payload, dict):
         raise SystemExit(f"{' '.join(command)} did not emit a JSON object")
     return proc.returncode, payload
+
+
+def _strip_known_platform_stdout_noise(stdout: str) -> str:
+    """Remove known macOS hook-runner warnings that can precede wrapper JSON."""
+    lines = stdout.splitlines()
+    while lines and lines[0].endswith(DARWIN_CONFSTR_WARNING):
+        lines.pop(0)
+    if not lines:
+        return stdout
+    return "\n".join(lines) + ("\n" if stdout.endswith("\n") else "")
 
 
 def _assert_envelope(

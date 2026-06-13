@@ -116,6 +116,29 @@ class VerifyWrapperContractFixturesTests(unittest.TestCase):
             ["runtime-proof:simplify:/tmp/custom-proof"],
         )
 
+    def test_run_json_ignores_darwin_confstr_warning_preamble(self) -> None:
+        proc = mock.Mock()
+        proc.returncode = 0
+        proc.stdout = (
+            "python3: warning: confstr() failed with code 5: couldn't get path of "
+            'DARWIN_USER_TEMP_DIR; using /tmp instead\n{"status":"success"}\n'
+        )
+
+        with mock.patch.object(self.module.subprocess, "run", return_value=proc):
+            exit_code, payload = self.module._run_json(REPO_ROOT, ["ask"], 45)
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(payload, {"status": "success"})
+
+    def test_run_json_rejects_unknown_stdout_preamble(self) -> None:
+        proc = mock.Mock()
+        proc.returncode = 0
+        proc.stdout = 'unexpected warning\n{"status":"success"}\n'
+
+        with mock.patch.object(self.module.subprocess, "run", return_value=proc):
+            with self.assertRaisesRegex(SystemExit, "ask did not emit JSON"):
+                self.module._run_json(REPO_ROOT, ["ask"], 45)
+
     def test_conformance_blocked_runtime_envelope_may_exit_nonzero(self) -> None:
         """
         Verifies that runtime conformance may be allowed to fail when a blocked runtime envelope contains a blocker for the live config layer.
