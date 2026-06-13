@@ -15,7 +15,7 @@ except ImportError:  # pragma: no cover - exercised in lean runtimes
     yaml = None
 
 
-ALLOWED_ROOT = {"goal.md", "state.yaml", "receipts.jsonl", "notes"}
+ALLOWED_ROOT = {"goal.md", "state.yaml", "receipts.jsonl", "notes", "current-route.json"}
 TASK_TYPES = {"scout", "judge", "worker", "pm"}
 ASSIGNEES = {"Scout", "Judge", "Worker", "PM"}
 STATUSES = {"queued", "active", "blocked", "done"}

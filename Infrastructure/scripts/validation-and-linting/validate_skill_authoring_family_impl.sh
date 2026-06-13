@@ -346,7 +346,11 @@ he_progressive_args=()
 if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
   he_progressive_args=(--changed-files "${changed_files[@]}")
 fi
-bash Infrastructure/scripts/validation-and-linting/validate_he_progressive_disclosure.sh "${he_progressive_args[@]}"
+if [[ ${#he_progressive_args[@]} -gt 0 ]]; then
+  bash Infrastructure/scripts/validation-and-linting/validate_he_progressive_disclosure.sh "${he_progressive_args[@]}"
+else
+  bash Infrastructure/scripts/validation-and-linting/validate_he_progressive_disclosure.sh
+fi
 echo "[family-gate] harness-engineering progressive-disclosure contract passed"
 
 echo "[family-gate] validating harness-engineering operator shape"

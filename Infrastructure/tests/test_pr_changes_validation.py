@@ -65,7 +65,7 @@ HANDLE_REQUIRED_FIELDS = {
     "runtime_visibility",
     "source_path",
 }
-VALID_COMMAND_VISIBILITY = {"target", "orchestrator", "reviewer"}
+VALID_COMMAND_VISIBILITY = {"target", "orchestrator", "reviewer", "direct"}
 VALID_LEVELS = {"atom", "molecule", "compound", "reference", "router"}
 VALID_RISK = {"low", "medium", "high"}
 
@@ -168,13 +168,13 @@ class TestCommandSurfaceJsonStructure(unittest.TestCase):
                     f"Handle '{handle.get('handle')}' has wrong policy_identity",
                 )
 
-    def test_all_handles_runtime_visibility_is_latent(self) -> None:
-        """Every handle must have runtime_visibility='latent' (latent-load policy)."""
+    def test_all_handles_runtime_visibility_is_supported(self) -> None:
+        """Every handle must use a supported runtime_visibility policy."""
         for handle in self.handles:
             with self.subTest(handle=handle.get("handle")):
-                self.assertEqual(
+                self.assertIn(
                     handle.get("runtime_visibility"),
-                    "latent",
+                    {"latent", "flat", "root", "hidden"},
                     f"Handle '{handle.get('handle')}' has wrong runtime_visibility",
                 )
 
@@ -381,13 +381,13 @@ class TestManifestJsonlStructure(unittest.TestCase):
                     f"Row '{entry['row'].get('id')}' has invalid level",
                 )
 
-    def test_runtime_visibility_is_latent(self) -> None:
-        """All manifest rows must use the latent-load runtime_visibility policy."""
+    def test_runtime_visibility_is_supported(self) -> None:
+        """All manifest rows must use a supported runtime_visibility policy."""
         for entry in self.manifest_rows:
             with self.subTest(id=entry["row"].get("id"), file=entry["file"].name):
-                self.assertEqual(
+                self.assertIn(
                     entry["row"].get("runtime_visibility"),
-                    "latent",
+                    {"latent", "flat", "root", "hidden"},
                     f"Row '{entry['row'].get('id')}' has unexpected runtime_visibility",
                 )
 

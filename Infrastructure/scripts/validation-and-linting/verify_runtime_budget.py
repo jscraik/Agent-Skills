@@ -24,6 +24,7 @@ from selection_policy import (  # type: ignore  # noqa: E402
     SYSTEM_BRIDGE_SKILL_NAMES,
     policy_identity,
 )
+from rooted_projection_runtime import direct_runtime_names_from_skillsets  # type: ignore  # noqa: E402
 from skill_discovery import (  # type: ignore  # noqa: E402
     HIDDEN_FLAT_SKILL_NAMES as DISCOVERY_HIDDEN_FLAT_SKILL_NAMES,
     PLUGIN_HIDDEN_LANE_SKILL_NAMES as DISCOVERY_PLUGIN_HIDDEN_LANE_SKILL_NAMES,
@@ -359,7 +360,9 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
     first_level = set(_first_level_skill_names())
     projection_mode = _active_projection_mode(first_level)
     rooted_mode = projection_mode == "rooted"
+    direct_runtime_names = direct_runtime_names_from_skillsets(REPO_ROOT / ".skillsets") if rooted_mode else set()
     root_skill_set_count = len(first_level & ROOT_SKILL_SETS)
+    rooted_visible_names = ROOT_SKILL_SETS | direct_runtime_names
     bridge_exposed = sorted(first_level & BRIDGE_SKILLS)
     policy_default = {
         entry["name"]
@@ -382,7 +385,7 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
     }
     # Real system bridge sources stay discoverable in default repo catalogs even
     # though plugin-backed bridge aliases remain hidden behind plugin routing.
-    expected_default = (ROOT_SKILL_SETS if rooted_mode else policy_default) | system_default
+    expected_default = (rooted_visible_names if rooted_mode else policy_default) | system_default
     default_names = {entry.name for entry in default_entries}
     catalog_names = {entry.name for entry in catalog_entries}
     extra_default = sorted(default_names - expected_default)
@@ -390,7 +393,7 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
     catalog_only_default_names = sorted(catalog_names - default_names)
     discovery_only_default_names = sorted(default_names - catalog_names)
     estimated_description_words = (
-        sum(_skill_file_word_count(entry) for entry in first_level_entries if entry["name"] in ROOT_SKILL_SETS)
+        sum(_skill_file_word_count(entry) for entry in first_level_entries if entry["name"] in rooted_visible_names)
         if rooted_mode
         else sum(_word_count(entry.description) for entry in default_entries)
     )
@@ -410,7 +413,7 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
 
     violations: list[dict[str, Any]] = []
     advisories: list[dict[str, Any]] = []
-    effective_default_count = root_skill_set_count if rooted_mode else len(default_entries)
+    effective_default_count = len(first_level & rooted_visible_names) if rooted_mode else len(default_entries)
     if effective_default_count > default_max:
         advisories.append({
             "code": "DEFAULT_SKILL_VISIBILITY_HIGH",
@@ -438,14 +441,15 @@ def build_report(default_max: int = DEFAULT_MAX_VISIBLE) -> dict[str, Any]:
         })
     if rooted_mode:
         missing_roots = sorted(ROOT_SKILL_SETS - first_level)
-        allowed_rooted_first_level = ROOT_SKILL_SETS | {"codex-primary-runtime"}
+        allowed_rooted_first_level = rooted_visible_names | {"codex-primary-runtime"}
         unexpected_first_level = sorted(first_level - allowed_rooted_first_level)
         if missing_roots or unexpected_first_level:
             violations.append({
                 "code": "ROOTED_POLICY_NAME_DRIFT",
-                "message": "rooted first-level runtime entries differ from root skill-set policy",
+                "message": "rooted first-level runtime entries differ from root skill-set policy and declared direct handles",
                 "extra": unexpected_first_level,
                 "missing": missing_roots,
+                "expected_direct_names": sorted(direct_runtime_names),
             })
     elif projection_mode == "mixed":
         missing_roots = sorted(ROOT_SKILL_SETS - first_level)

@@ -1,0 +1,23 @@
+{
+  "artifact_path": ".harness/evidence/runtime-proof/unslopify/codex/runtime-card.json",
+  "blocker": "Codex runtime observability is degraded; runtime evidence cannot claim live pass while telemetry reports overall_status='trusted' and skill_invocation_event_count=0.",
+  "blocker_class": "partial",
+  "claim": "$unslopify is reachable in the Codex runtime.",
+  "claim_status": "partial",
+  "command": "./bin/ask skills proof unslopify --runtime-target codex --json --robot",
+  "evidence_type": "command",
+  "exit_code": 2,
+  "observed_at": "2026-06-13T11:18:16Z",
+  "probe_artifact_path": ".harness/evidence/runtime-proof/unslopify/codex/probe.json",
+  "probe_command": "./bin/ask skills proof unslopify --runtime-target codex --json --robot",
+  "probe_exit_code": 2,
+  "receipt_id": "runtime-proof-unslopify-codex",
+  "runtime_status": "partial",
+  "runtime_target": "codex",
+  "source_paths": [
+    "Skills/agent-ops/unslopify/SKILL.md",
+    "Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py",
+    "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+  ],
+  "verifier": "ask.skills.proof"
+}

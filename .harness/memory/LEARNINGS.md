@@ -261,3 +261,7 @@ Repo-specific agent knowledge base. Append-only.
 **2026-06-07 [Codex]:** Compatibility plugin mirrors are aliases, not payload owners -> local plugin sync must materialize exactly one profile payload at `~/.codex/plugins/<plugin-name>`, make loader-visible compatibility paths such as `~/.codex/.agents/plugins/<plugin-name>` symlink to that payload, skip case-only samefile roots such as `Plugins` vs `plugins`, and make Desktop readiness fail when a compatibility path is an independent copied directory or resolves to a different realpath.
 
 **2026-06-07 [Codex]:** Symlinking the official personal marketplace into the project is safe only when it targets a dedicated personal projection, not the repo plugin source tree -> on case-insensitive filesystems, `plugins` and `Plugins` can be the same directory, so `~/.agents/plugins -> <repo>/plugins` can overwrite `Plugins/marketplace.json` with personal `./.codex/plugins/<plugin-name>` paths; use `<repo>/.agents/personal-plugins` as the symlink target and keep repo marketplaces on `./Plugins/<plugin-name>`.
+
+**2026-06-13 [Codex]:** Bash command 'zsh' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:3646583035)
+
+**2026-06-13 [Codex]:** Bash command 'zsh' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:3432406106)

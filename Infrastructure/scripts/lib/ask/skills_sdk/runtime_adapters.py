@@ -1205,6 +1205,11 @@ def build_command_handle_proof(
     source_path_value = str(resolution.get("source_path") or "").strip()
     expected_source = repo_root / source_path_value if source_path_value else None
     canonical_source_exists = bool(expected_source and expected_source.is_file())
+    command_visibility = str(resolution.get("command_visibility") or "").strip().lower()
+    runtime_visibility = str(resolution.get("runtime_visibility") or "").strip().lower()
+    requires_direct_projection = command_visibility == "direct" or runtime_visibility in {"flat", "root"}
+    direct_projection_skill = expected_runtime / normalized / "SKILL.md"
+    direct_projection_exists = bool(direct_projection_skill.is_file())
 
     def link_payload(path: Path) -> dict[str, object]:
         payload: dict[str, object] = {
@@ -1233,6 +1238,7 @@ def build_command_handle_proof(
     gates = {
         "resolver": resolution.get("status") == "ok",
         "canonical_source_exists": canonical_source_exists,
+        "direct_runtime_projection": (not requires_direct_projection) or direct_projection_exists,
         "codex_user_link": bool(codex_link["points_to_workspace_runtime"]),
         "agents_user_link": bool(agents_link["points_to_workspace_runtime"]),
         "user_runtime_alias_consistent": runtime_aliases["status"] != "split_brain",
@@ -1240,6 +1246,7 @@ def build_command_handle_proof(
     core_gates = (
         gates["resolver"],
         gates["canonical_source_exists"],
+        gates["direct_runtime_projection"],
     )
     codex_runtime_ready = bool(codex_link["points_to_workspace_runtime"])
     agents_runtime_ready = bool(agents_link["points_to_workspace_runtime"])
@@ -1262,6 +1269,7 @@ def build_command_handle_proof(
                 for check_id in (
                     "resolver",
                     "canonical_source_exists",
+                    "direct_runtime_projection",
                     required_runtime_gate,
                     "user_runtime_alias_consistent",
                 )
@@ -1283,6 +1291,13 @@ def build_command_handle_proof(
             "agents_user_runtime": _runtime_mode(agents_link),
         },
         "runtime_aliases": runtime_aliases,
+        "direct_runtime_projection": {
+            "required": requires_direct_projection,
+            "path": str(direct_projection_skill),
+            "exists": direct_projection_exists,
+            "command_visibility": command_visibility,
+            "runtime_visibility": runtime_visibility,
+        },
         "recovery_risk": (
             "User-scope sync mutates home-directory runtime links; preview with --dry-run before applying."
         ),
@@ -1351,6 +1366,7 @@ def build_command_handle_proof(
             "required": [
                 "resolver",
                 "canonical_source_exists",
+                "direct_runtime_projection",
                 required_runtime_gate,
             ],
             "runtime_target": runtime_target,
@@ -1365,6 +1381,7 @@ def build_command_handle_proof(
                 "agents_user_link",
                 "agents_user_runtime_ready",
                 "user_runtime_alias_consistent",
+                "direct_runtime_projection",
             ],
         },
         "available_runtimes": [
@@ -1408,7 +1425,7 @@ def build_command_handle_proof(
             recovery_guidance=recovery_guidance,
             validation_commands=proof["validation_commands"],
         )
-    if required_runtime_ready:
+    if proof["status"] == "pass":
         runtime = proof["runtime_satisfied_by"]
         operator_action = (
             "Open or reload a Codex session and verify the handle appears in the picker or can be invoked as a $ handle."

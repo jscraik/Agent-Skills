@@ -1226,6 +1226,57 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         self.assertIn('sync_user_skills "$skills_dir" "$HOME/.agents/skills"', content)
         self.assertIn('sync_user_skills "$skills_dir" "$HOME/.codex/skills"', content)
 
+    def test_user_runtime_relink_postcondition_rejects_case_drift(self) -> None:
+        """
+        User sync must not report success when a home skill root points at a stale casing variant.
+
+        On macOS, a path like agent-skills and Agent-Skills may resolve to the
+        same checkout on a case-insensitive volume, but Codex picker state is
+        path-string sensitive. The postcondition therefore requires the literal
+        symlink target to match the active checkout path, not only a permissive
+        filesystem identity.
+        """
+        skills_impl = load_skills_impl_module()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            home = root / "home"
+            skills_dir = root / "dev" / "agent-skills" / ".agents" / "skills"
+            stale_dir = root / "dev" / "Agent-Skills" / ".agents" / "skills"
+            skills_dir.mkdir(parents=True)
+            (home / ".agents").mkdir(parents=True)
+            (home / ".codex").mkdir(parents=True)
+            (home / ".agents" / "skills").symlink_to(skills_dir)
+            (home / ".codex" / "skills").symlink_to(stale_dir)
+            plan: dict[str, object] = {}
+
+            errors = skills_impl._verify_user_runtime_relinks(plan, home, skills_dir, dry_run=False)
+
+            self.assertEqual(1, len(errors))
+            checks = plan["user_runtime_link_checks"]["checks"]
+            codex_check = next(check for check in checks if check["label"] == "codex_user_runtime")
+            self.assertEqual("fail", codex_check["status"])
+            self.assertFalse(codex_check["literal_target_matches"])
+            self.assertIn("USER_RUNTIME_LINK", errors[0].message.upper().replace(" ", "_"))
+
+    def test_user_runtime_relink_postcondition_accepts_exact_targets(self) -> None:
+        """User sync postcondition passes when both runtime links target the active projection exactly."""
+        skills_impl = load_skills_impl_module()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            home = root / "home"
+            skills_dir = root / "dev" / "agent-skills" / ".agents" / "skills"
+            skills_dir.mkdir(parents=True)
+            (home / ".agents").mkdir(parents=True)
+            (home / ".codex").mkdir(parents=True)
+            (home / ".agents" / "skills").symlink_to(skills_dir)
+            (home / ".codex" / "skills").symlink_to(skills_dir)
+            plan: dict[str, object] = {}
+
+            errors = skills_impl._verify_user_runtime_relinks(plan, home, skills_dir, dry_run=False)
+
+            self.assertEqual([], errors)
+            self.assertEqual("pass", plan["user_runtime_link_checks"]["status"])
+
     def test_codex_load_preview_blocks_missing_first_party_projection(self) -> None:
         """
         Verify load-preview reports every missing canonical first-party skill.

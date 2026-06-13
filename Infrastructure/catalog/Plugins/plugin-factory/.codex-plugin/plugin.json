@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "name": "plugin-factory",
+  "version": "0.1.0",
+  "description": "Plugin authoring toolkit with router, builder, creator, and installer lanes.",
+  "author": {
+    "name": "Jamie Craik",
+    "url": "https://github.com/jscraik"
+  },
+  "homepage": "https://github.com/jscraik/Agent-Skills",
+  "repository": "https://github.com/jscraik/Agent-Skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "plugin",
+    "plugin-factory",
+    "plugin-factory-router",
+    "plugin-router",
+    "plugin-builder",
+    "codex"
+  ],
+  "governance": {
+    "lifecycle_state": "active",
+    "maturity": "canonical",
+    "owner": "Agent Skills Team",
+    "review_cadence": "quarterly",
+    "last_reviewed": "2026-04-08",
+    "metadata_source": "plugin_manifest"
+  },
+  "skills": "./skills/",
+  "hooks": "./hooks/hooks.json",
+  "interface": {
+    "displayName": "Plugin Factory",
+    "shortDescription": "Route, create, harden, and install Codex plugins",
+    "longDescription": "A Codex plugin package that exposes plugin-factory-router, plugin-router, and plugin-builder in the picker. Plugin creator and installer bridge skills remain available through the System surface.",
+    "developerName": "Jamie Craik",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/jscraik/Agent-Skills",
+    "privacyPolicyURL": "https://github.com/jscraik/Agent-Skills/blob/main/README.md#privacy-and-data-handling",
+    "termsOfServiceURL": "https://github.com/jscraik/Agent-Skills/blob/main/LICENSE",
+    "defaultPrompt": [
+      "Route this plugin task to the right lane."
+    ],
+    "brandColor": "#3B82F6",
+    "composerIcon": "./assets/icon.png",
+    "logo": "./assets/icon.png"
+  },
+  "icon": "./assets/icon.png"
+}

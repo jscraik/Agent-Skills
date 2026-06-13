@@ -1,0 +1,325 @@
+{
+  "actor_type": "agent",
+  "artifacts": [
+    {
+      "actor_type": "agent",
+      "artifact_id": "runtime-card-improve-agent-native-agents",
+      "artifact_type": "runtime_card",
+      "consumer_contract": "RuntimeCard v1 consumed by validate_runtime_cards.py and governed closeout.",
+      "generated_by": "./bin/ask skills proof improve-agent-native --runtime-target agents --json --robot",
+      "mutation_scope": "evidence_write",
+      "path": ".harness/evidence/runtime-proof/improve-agent-native/agents/runtime-card.json",
+      "source_identity": {
+        "source_paths": [
+          "Skills/agent-ops/improve-agent-native/SKILL.md",
+          "Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py",
+          "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+        ]
+      },
+      "validation_status": "pass",
+      "visibility_status": "user_observable",
+      "workspace_root": "${WORKSPACE_ROOT}"
+    },
+    {
+      "actor_type": "agent",
+      "artifact_id": "runtime-probe-improve-agent-native-agents",
+      "artifact_type": "verifier_output",
+      "consumer_contract": "Probe JSON records the raw skill runtime proof used by the RuntimeCard.",
+      "generated_by": "./bin/ask skills proof improve-agent-native --runtime-target agents --json --robot",
+      "mutation_scope": "evidence_write",
+      "path": ".harness/evidence/runtime-proof/improve-agent-native/agents/probe.json",
+      "source_identity": {
+        "source_paths": [
+          "Skills/agent-ops/improve-agent-native/SKILL.md",
+          "Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py",
+          "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+        ]
+      },
+      "validation_status": "pass",
+      "visibility_status": "user_observable",
+      "workspace_root": "${WORKSPACE_ROOT}"
+    }
+  ],
+  "card_id": "runtime-card-improve-agent-native-agents",
+  "command_handle": "$improve-agent-native",
+  "created_at": "2026-06-13T17:17:32Z",
+  "evidence_receipts": [
+    {
+      "artifact_path": ".harness/evidence/runtime-proof/improve-agent-native/agents/runtime-card.json",
+      "blocker_class": "none",
+      "claim": "$improve-agent-native is reachable in the Agents runtime.",
+      "claim_status": "pass",
+      "command": "./bin/ask skills proof improve-agent-native --runtime-target agents --json --robot",
+      "evidence_type": "command",
+      "exit_code": 0,
+      "observed_at": "2026-06-13T17:17:32Z",
+      "probe_artifact_path": ".harness/evidence/runtime-proof/improve-agent-native/agents/probe.json",
+      "probe_command": "./bin/ask skills proof improve-agent-native --runtime-target agents --json --robot",
+      "probe_exit_code": 0,
+      "receipt_id": "runtime-proof-improve-agent-native-agents",
+      "runtime_status": "implemented_enforced",
+      "runtime_target": "agents",
+      "source_paths": [
+        "Skills/agent-ops/improve-agent-native/SKILL.md",
+        "Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py",
+        "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+      ],
+      "verifier": "ask.skills.proof"
+    }
+  ],
+  "limitations": [
+    {
+      "class": "manual_session_gate",
+      "message": "Runtime reachability proves command-surface wiring; it does not execute an interactive session."
+    }
+  ],
+  "mutation_scope": "evidence_write",
+  "permission_profile": {
+    "filesystem": "workspace evidence write",
+    "network": "not required"
+  },
+  "recovery_plan": {
+    "expected_outcome": "Operator can rerun the proof command and inspect schema-valid runtime evidence.",
+    "next_commands": [
+      {
+        "command": "./bin/ask skills sync --scope user --projection rooted --dry-run --json --robot",
+        "expected_outcome": "Reports whether ~/.codex/skills or ~/.agents/skills would be relinked before mutation.",
+        "permission_profile": {
+          "filesystem": "read workspace and user runtime links",
+          "network": "not required"
+        },
+        "preconditions": [
+          "Workspace rooted projection validates cleanly."
+        ]
+      },
+      {
+        "command": "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
+        "expected_outcome": "Refreshes .agents/skills from canonical frontmatter and skill sources.",
+        "permission_profile": {
+          "filesystem": "write workspace runtime projection",
+          "network": "not required"
+        },
+        "preconditions": [
+          "Canonical skill sources are ready to project."
+        ]
+      },
+      {
+        "command": "./bin/ask skills sync --scope user --projection rooted --json --robot",
+        "expected_outcome": "Makes user-level Codex and Agents skill runtimes point at the workspace projection.",
+        "permission_profile": {
+          "filesystem": "write home-directory runtime links",
+          "network": "not required"
+        },
+        "preconditions": [
+          "Dry-run output is acceptable to the operator."
+        ]
+      },
+      {
+        "command": "./bin/ask skills proof improve-agent-native --runtime-target agents --json --robot",
+        "expected_outcome": "Updates runtime evidence with pass or a narrower blocked_runtime reason.",
+        "permission_profile": {
+          "filesystem": "read workspace and user runtime links; write runtime-proof evidence",
+          "network": "not required"
+        },
+        "preconditions": [
+          "User runtime link now points at the workspace projection."
+        ]
+      }
+    ],
+    "permission_profile": {
+      "filesystem": "workspace evidence write and user runtime link read",
+      "network": "not required"
+    },
+    "preconditions": [
+      "Run workspace and user skill sync if the runtime link or command-surface handle is absent."
+    ],
+    "reason": "$improve-agent-native is reachable in the Agents runtime.",
+    "recovery_status": "implemented_enforced"
+  },
+  "runtime_diagnostics": {
+    "expected_workspace_runtime": "${WORKSPACE_ROOT}/.agents/skills",
+    "failed_gate": null,
+    "recovery_commands": [
+      {
+        "command": "./bin/ask skills sync --scope user --projection rooted --dry-run --json --robot",
+        "expected_outcome": "Reports whether ~/.codex/skills or ~/.agents/skills would be relinked before mutation.",
+        "kind": "preview_user_runtime_sync",
+        "permission_profile": {
+          "filesystem": "read workspace and user runtime links",
+          "network": "not required"
+        },
+        "preconditions": [
+          "Workspace rooted projection validates cleanly."
+        ]
+      },
+      {
+        "command": "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
+        "expected_outcome": "Refreshes .agents/skills from canonical frontmatter and skill sources.",
+        "kind": "refresh_workspace_projection",
+        "permission_profile": {
+          "filesystem": "write workspace runtime projection",
+          "network": "not required"
+        },
+        "preconditions": [
+          "Canonical skill sources are ready to project."
+        ]
+      },
+      {
+        "command": "./bin/ask skills sync --scope user --projection rooted --json --robot",
+        "expected_outcome": "Makes user-level Codex and Agents skill runtimes point at the workspace projection.",
+        "kind": "apply_user_runtime_sync",
+        "permission_profile": {
+          "filesystem": "write home-directory runtime links",
+          "network": "not required"
+        },
+        "preconditions": [
+          "Dry-run output is acceptable to the operator."
+        ]
+      },
+      {
+        "command": "./bin/ask skills proof improve-agent-native --runtime-target agents --json --robot",
+        "expected_outcome": "Updates runtime evidence with pass or a narrower blocked_runtime reason.",
+        "kind": "rerun_runtime_proof",
+        "permission_profile": {
+          "filesystem": "read workspace and user runtime links; write runtime-proof evidence",
+          "network": "not required"
+        },
+        "preconditions": [
+          "User runtime link now points at the workspace projection."
+        ]
+      }
+    ],
+    "recovery_risk": "User-scope sync mutates home-directory runtime links; preview with --dry-run before applying.",
+    "runtime_aliases": {
+      "dedupe_identity": "${WORKSPACE_ROOT}/.agents/skills",
+      "dedupe_rule": "Codex and Agents user skill roots are aliases when their resolved paths match.",
+      "distinct_runtime_identity_count": 1,
+      "expected_workspace_runtime": "${WORKSPACE_ROOT}/.agents/skills",
+      "root_identities": {
+        "agents_user_runtime": "${WORKSPACE_ROOT}/.agents/skills",
+        "codex_user_runtime": "${WORKSPACE_ROOT}/.agents/skills"
+      },
+      "schema_version": "skill-runtime-aliases.v1",
+      "status": "deduped_aliases"
+    },
+    "runtime_modes": {
+      "agents_user_runtime": "root_symlink",
+      "codex_user_runtime": "root_symlink"
+    },
+    "schema_version": "command-handle-runtime-diagnostics.v1",
+    "selected_runtime_target": "agents"
+  },
+  "runtime_session": {
+    "actor_type": "agent",
+    "created_at": "2026-06-13T17:17:32Z",
+    "runtime_status": "implemented_enforced",
+    "runtime_target": "agents",
+    "session_id": "runtime-proof-improve-agent-native-agents",
+    "visibility_status": "user_observable",
+    "workspace_root": "${WORKSPACE_ROOT}"
+  },
+  "runtime_status": "implemented_enforced",
+  "runtime_target": "agents",
+  "schema_version": 1,
+  "skill_handle": "improve-agent-native",
+  "thread_runs": [],
+  "turn_events": [],
+  "verifier_results": [
+    {
+      "failed_check_id": null,
+      "gates": {
+        "agents_user_link": true,
+        "agents_user_runtime_ready": true,
+        "canonical_source_exists": true,
+        "codex_user_link": true,
+        "codex_user_runtime_ready": true,
+        "resolver": true,
+        "user_runtime_alias_consistent": true,
+        "user_runtime_ready": true
+      },
+      "required_gates": [
+        "resolver",
+        "canonical_source_exists",
+        "agents_user_runtime_ready"
+      ],
+      "runtime_diagnostics": {
+        "expected_workspace_runtime": "${WORKSPACE_ROOT}/.agents/skills",
+        "failed_gate": null,
+        "recovery_commands": [
+          {
+            "command": "./bin/ask skills sync --scope user --projection rooted --dry-run --json --robot",
+            "expected_outcome": "Reports whether ~/.codex/skills or ~/.agents/skills would be relinked before mutation.",
+            "kind": "preview_user_runtime_sync",
+            "permission_profile": {
+              "filesystem": "read workspace and user runtime links",
+              "network": "not required"
+            },
+            "preconditions": [
+              "Workspace rooted projection validates cleanly."
+            ]
+          },
+          {
+            "command": "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
+            "expected_outcome": "Refreshes .agents/skills from canonical frontmatter and skill sources.",
+            "kind": "refresh_workspace_projection",
+            "permission_profile": {
+              "filesystem": "write workspace runtime projection",
+              "network": "not required"
+            },
+            "preconditions": [
+              "Canonical skill sources are ready to project."
+            ]
+          },
+          {
+            "command": "./bin/ask skills sync --scope user --projection rooted --json --robot",
+            "expected_outcome": "Makes user-level Codex and Agents skill runtimes point at the workspace projection.",
+            "kind": "apply_user_runtime_sync",
+            "permission_profile": {
+              "filesystem": "write home-directory runtime links",
+              "network": "not required"
+            },
+            "preconditions": [
+              "Dry-run output is acceptable to the operator."
+            ]
+          },
+          {
+            "command": "./bin/ask skills proof improve-agent-native --runtime-target agents --json --robot",
+            "expected_outcome": "Updates runtime evidence with pass or a narrower blocked_runtime reason.",
+            "kind": "rerun_runtime_proof",
+            "permission_profile": {
+              "filesystem": "read workspace and user runtime links; write runtime-proof evidence",
+              "network": "not required"
+            },
+            "preconditions": [
+              "User runtime link now points at the workspace projection."
+            ]
+          }
+        ],
+        "recovery_risk": "User-scope sync mutates home-directory runtime links; preview with --dry-run before applying.",
+        "runtime_aliases": {
+          "dedupe_identity": "${WORKSPACE_ROOT}/.agents/skills",
+          "dedupe_rule": "Codex and Agents user skill roots are aliases when their resolved paths match.",
+          "distinct_runtime_identity_count": 1,
+          "expected_workspace_runtime": "${WORKSPACE_ROOT}/.agents/skills",
+          "root_identities": {
+            "agents_user_runtime": "${WORKSPACE_ROOT}/.agents/skills",
+            "codex_user_runtime": "${WORKSPACE_ROOT}/.agents/skills"
+          },
+          "schema_version": "skill-runtime-aliases.v1",
+          "status": "deduped_aliases"
+        },
+        "runtime_modes": {
+          "agents_user_runtime": "root_symlink",
+          "codex_user_runtime": "root_symlink"
+        },
+        "schema_version": "command-handle-runtime-diagnostics.v1",
+        "selected_runtime_target": "agents"
+      },
+      "runtime_target": "agents",
+      "status": "pass",
+      "verifier": "ask.skills.proof"
+    }
+  ],
+  "visibility_status": "user_observable",
+  "workspace_root": "${WORKSPACE_ROOT}"
+}

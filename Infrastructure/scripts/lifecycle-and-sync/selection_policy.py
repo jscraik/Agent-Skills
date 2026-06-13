@@ -128,6 +128,28 @@ PLUGIN_SKILL_COLLISION_POLICIES: tuple[dict[str, Any], ...] = (
         "resolution": "keep_qualified",
         "reason": (
             "Cloudflare and OpenAI Developers both ship an agents-sdk skill, "
+            "but they target different runtime platforms; the remote OpenAI "
+            "Developers cache entry is the same OpenAI capability as its "
+            "curated cache entry."
+        ),
+        "paths": (
+            "Plugins/cache/openai-curated/cloudflare/skills/agents-sdk",
+            "Plugins/cache/openai-curated/openai-developers/skills/agents-sdk",
+            "Plugins/cache/openai-curated-remote/openai-developers/skills/agents-sdk",
+        ),
+        "qualified_names": {
+            "Plugins/cache/openai-curated/cloudflare/skills/agents-sdk": "cloudflare:agents-sdk",
+            "Plugins/cache/openai-curated/openai-developers/skills/agents-sdk": "openai-developers:agents-sdk",
+            "Plugins/cache/openai-curated-remote/openai-developers/skills/agents-sdk": "openai-developers:agents-sdk",
+        },
+    },
+    {
+        "name": "agents-sdk",
+        "classification": "distinct_homonym",
+        "display_strategy": "qualify_all",
+        "resolution": "keep_qualified",
+        "reason": (
+            "Cloudflare and OpenAI Developers both ship an agents-sdk skill, "
             "but they target different runtime platforms."
         ),
         "paths": (
@@ -228,6 +250,95 @@ PLUGIN_SKILL_COLLISION_POLICIES: tuple[dict[str, Any], ...] = (
         name="linear",
         canonical_plugin="linear",
         duplicate_plugin="linear",
+    ),
+    *(
+        _same_capability_plugin_cache_policy(
+            name=name,
+            canonical_plugin="build-web-data-visualization",
+            duplicate_plugin="build-web-data-visualization",
+        )
+        for name in (
+            "accessibility-and-inclusive-visualization",
+            "canvas2d-data-visualization",
+            "d3-data-visualization",
+            "dashboards-and-real-time-visualization",
+            "data-visualization",
+            "gantt-chart-visualization",
+            "geospatial-and-cartographic-visualization",
+            "grammar-of-graphics-and-declarative-visualization",
+            "node-link-and-diagram-layout",
+            "react-and-nextjs-data-visualization",
+            "reports-pdfs-and-slide-automation",
+            "scrollytelling-and-parallax-data-visualization",
+            "statistical-and-uncertainty-visualization",
+            "testing-data-visualizations",
+            "threejs-data-visualization",
+            "typescript-data-visualization-engineering",
+            "uml-and-software-architecture-visualization",
+            "visualization-strategy-and-critique",
+        )
+    ),
+    *(
+        _same_capability_plugin_cache_policy(
+            name=name,
+            canonical_plugin="circleci",
+            duplicate_plugin="circleci",
+        )
+        for name in (
+            "builds",
+            "chunk",
+            "cli",
+            "config",
+        )
+    ),
+    _same_capability_plugin_cache_policy(
+        name="coderabbit-review",
+        canonical_plugin="coderabbit",
+        duplicate_plugin="coderabbit",
+    ),
+    *(
+        _same_capability_plugin_cache_policy(
+            name=name,
+            canonical_plugin="codex-security",
+            duplicate_plugin="codex-security",
+        )
+        for name in (
+            "attack-path-analysis",
+            "deep-security-scan",
+            "finding-discovery",
+            "fix-finding",
+            "security-diff-scan",
+            "security-scan",
+            "threat-model",
+            "validation",
+        )
+    ),
+    *(
+        _same_capability_plugin_cache_policy(
+            name=name,
+            canonical_plugin="openai-developers",
+            duplicate_plugin="openai-developers",
+        )
+        for name in (
+            "build-chatgpt-app",
+            "chatgpt-app-submission",
+            "openai-api-troubleshooting",
+            "openai-platform-api-key",
+        )
+    ),
+    *(
+        _same_capability_plugin_cache_policy(
+            name=name,
+            canonical_plugin="plugin-eval",
+            duplicate_plugin="plugin-eval",
+        )
+        for name in (
+            "evaluate-plugin",
+            "evaluate-skill",
+            "improve-skill",
+            "metric-pack-designer",
+            "plugin-eval",
+        )
     ),
     *(
         _same_capability_plugin_cache_policy(

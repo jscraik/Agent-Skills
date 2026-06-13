@@ -767,6 +767,32 @@ class TestCommittedManifestProjection(unittest.TestCase):
 
 
 class TestContextBudgetReport(ContextBudgetTempDirTestCase):
+    def test_context_budget_allows_declared_direct_rooted_runtime_handle(self) -> None:
+        direct_manifest = {
+            "manifests": [{
+                "path": ".skillsets/agent-ops/manifest.jsonl",
+                "rows": [{
+                    "id": "improve-agent-native",
+                    "runtime_visibility": "flat",
+                    "source_path": "Skills/agent-ops/improve-agent-native/SKILL.md",
+                }],
+            }],
+            "manifest_count": 1,
+            "module_count": 1,
+            "unmapped": [],
+            "violations": [],
+        }
+        runtime_entries = list(ROOT_SKILL_SET_NAMES) + ["improve-agent-native"]
+        with (
+            mock.patch.object(check_context_budget, "build_manifest_report", return_value=direct_manifest),
+            mock.patch.object(check_context_budget, "first_level_runtime_entries", return_value=runtime_entries),
+            mock.patch.object(check_context_budget, "validate_written_manifest_provenance", return_value=[]),
+        ):
+            report = check_context_budget.validate_context_budget(projection_mode="rooted")
+
+        codes = {violation["code"] for violation in report["violations"]}
+        self.assertNotIn("LATENT_SKILLS_EXPOSED_FIRST_LEVEL", codes)
+
     def test_context_budget_reports_missing_manifest_files_in_rooted_mode(self) -> None:
         with (
             mock.patch.object(

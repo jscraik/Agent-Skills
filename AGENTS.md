@@ -47,24 +47,31 @@ discovering, and syncing Codex skills, operator docs, and agent workflows.
   guardrail prevents the same class of failure from reaching Jamie again.
 - Tessl eval contract: when running skill/plugin evals, run the installed local
   `tessl` CLI automatically through the repo wrapper, stage only controlled
-  input under `/tmp`, synthesize Tessl `scenarios/<case-id>/task.md` files from
-  canonical `references/evals.yaml`, include a `tessl.json` project marker in
-  the staged payload, and never point Tessl at the live repo source. This is a
-  project-save eval lane, not a registry-publish lane: do not use `npx tessl`,
-  `publish`, registry upload, or package upload commands. If Tessl reports no
-  workspace/project link, classify that setup blocker directly instead of
-  re-litigating auth, sandboxing, or temp staging. Tessl project identity is
+  input under `/tmp`, synthesize Tessl
+  `scenarios/<case-id>/{task.md,criteria.json}` files from canonical
+  `references/evals.yaml`, include a `tessl.json` project marker in the
+  staged payload, and never point Tessl at the live repo source. A controlled
+  copy of that staged payload may be uploaded to Jamie's private Tessl workspace
+  for assessment; this is a workspace/project eval lane, not a public registry
+  or publish lane. Do not use `npx tessl`, `publish`, registry upload, or
+  package upload commands. If Tessl reports no workspace/project link, classify
+  that setup blocker directly instead of re-litigating auth, sandboxing, or temp
+  staging. Tessl project identity is
   deterministic: plugin-owned skills under `Plugins/<plugin-id>/skills/**`
   belong to the plugin project, for example `skills-sdk/skill-factory`, and
   standalone skills belong to their own skill project. Wrappers must check or
   establish that project link before running the Tessl eval/install lane,
-  relinking an existing project before creating a new one. In Codex sessions,
+  relinking an existing project before creating a new one. The operator-provided
+  workspace name is binding evidence; do not substitute a personal workspace
+  when the requested or visible Tessl workspace is `skills-sdk` or another
+  product workspace. In Codex sessions,
   source the operator-approved
   `/Users/jamiecraik/.codex/.env` environment stream directly when the Tessl
   workspace token is needed; never print token values or shell-expanded
   environment contents. Treat stable `/tmp/ask-tessl-*` paths as evidence:
-  reruns must archive prior temp contents under `evidence-archive/` rather
-  than deleting generated payloads to create a clean workspace.
+  reruns must archive prior temp contents to a sibling evidence archive rather
+  than deleting generated payloads or keeping stale scenarios under the current
+  upload root.
 
 ## Common Commands
 

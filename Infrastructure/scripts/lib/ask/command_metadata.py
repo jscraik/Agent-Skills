@@ -43,7 +43,7 @@ VALID_ACTIONS = {
         "fold",
         "init",
     ],
-    "sdk": ["check", "install", "rollback", "uninstall", "lifecycle", "status", "project", "lenses", "determinism", "review"],
+    "sdk": ["check", "install", "rollback", "uninstall", "lifecycle", "status", "knowledge", "project", "lenses", "determinism", "review"],
     "reviewers": ["resolve"],
     "runtime": ["surface", "budget"],
     "plugins": ["list", "status", "doctor", "sync-local-runtime", "init", "create", "install", "import", "harden", "uninstall"],
@@ -100,6 +100,7 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
         "ask sdk uninstall he-heartbeat --project-root /tmp/sample-project --preview --json --robot",
         "ask sdk lifecycle --risk-tier high --json --robot",
         "ask sdk status --json --robot",
+        "ask sdk knowledge ingest --extraction /path/to/extraction --skill Skills/agent-ops/example --preview --json --robot",
         "ask sdk project status --project-root /tmp/sample-project --json --robot",
         "ask sdk lenses list --json --robot",
         "ask sdk lenses validate --json --robot",
@@ -116,6 +117,7 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
         "skills-sdk uninstall he-heartbeat --project-root /tmp/sample-project --preview --json --robot",
         "skills-sdk lifecycle --surface sandbox --risk-tier high --json --robot",
         "skills-sdk status --json --robot",
+        "skills-sdk knowledge ingest --extraction /path/to/extraction --skill Skills/agent-ops/example --preview --json --robot",
         "skills-sdk project doctor --project-root /tmp/sample-project --json --robot",
     ],
     "reviewers": [
@@ -268,6 +270,10 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
         "ask sdk lenses validate --json --robot",
         "ask sdk lenses explain lens.progressive-disclosure --json --robot",
         "ask sdk lenses select --intent skill_authoring --prompt \"Review SKILL.md headings\" --repo-file SKILL.md --json --robot",
+    ],
+    ("sdk", "knowledge"): [
+        "ask sdk knowledge ingest --extraction /path/to/extraction --skill Skills/agent-ops/example --preview --json --robot",
+        "ask sdk knowledge ingest --extraction /path/to/extraction --skill Skills/agent-ops/example --apply --run-proof --json --robot",
     ],
     ("sdk", "determinism"): [
         "ask sdk determinism audit --scope skills --json --robot",

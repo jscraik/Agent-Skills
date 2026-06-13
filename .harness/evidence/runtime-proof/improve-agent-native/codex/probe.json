@@ -1,0 +1,168 @@
+{
+  "command": "./bin/ask skills proof improve-agent-native --runtime-target codex --json --robot",
+  "exit_code": 2,
+  "handle": "improve-agent-native",
+  "observed_at": "2026-06-13T17:16:41Z",
+  "proof": {
+    "available_runtimes": [
+      "codex_user_runtime",
+      "agents_user_runtime"
+    ],
+    "gate_policy": {
+      "required": [
+        "resolver",
+        "canonical_source_exists",
+        "codex_user_runtime_ready"
+      ],
+      "required_semantics": "codex_user_runtime_ready must be true for runtime_target=codex.",
+      "runtime_target": "codex",
+      "supporting_runtime_diagnostics": [
+        "codex_user_link",
+        "codex_user_runtime_ready",
+        "agents_user_link",
+        "agents_user_runtime_ready",
+        "user_runtime_alias_consistent"
+      ]
+    },
+    "gates": {
+      "agents_user_link": true,
+      "agents_user_runtime_ready": true,
+      "canonical_source_exists": true,
+      "codex_user_link": true,
+      "codex_user_runtime_ready": true,
+      "resolver": true,
+      "user_runtime_alias_consistent": true,
+      "user_runtime_ready": true
+    },
+    "handle": "improve-agent-native",
+    "live_runtime_invocation": {
+      "operator_action": "Open or reload a Codex session and verify the handle appears in the picker or can be invoked as a $ handle.",
+      "runtime_satisfied_by": "codex_user_runtime",
+      "status": "manual_session_gate"
+    },
+    "resolution": {
+      "command_visibility": "direct",
+      "description": "Check if a repository is ready for AI coding agents. Use when you need to audit repo agent compatibility, review AGENTS.md, find missing test/build commands, evaluate docs quality, or produce a file-evidence scorecard with specific fixes.",
+      "handle": "improve-agent-native",
+      "kind": "skill",
+      "level": "molecule",
+      "owner": "agent-ops",
+      "provenance": {
+        "generator": "context-budgeted-skillsets.v1",
+        "policy_identity": "0c8f622f6c1cc0c6",
+        "projection_mode": "rooted",
+        "source_revision": "d2df8ca64",
+        "source_sha256": "fae06a88bdbf0ef46ec00e34e0b0ecc12c174621d27b3cb46b9cc122694e8cab"
+      },
+      "runtime_visibility": "flat",
+      "source_path": "Skills/agent-ops/improve-agent-native/SKILL.md",
+      "status": "ok"
+    },
+    "runtime_diagnostics": {
+      "expected_workspace_runtime": "${WORKSPACE_ROOT}/.agents/skills",
+      "failed_gate": null,
+      "recovery_commands": [
+        {
+          "command": "./bin/ask skills sync --scope user --projection rooted --dry-run --json --robot",
+          "expected_outcome": "Reports whether ~/.codex/skills or ~/.agents/skills would be relinked before mutation.",
+          "kind": "preview_user_runtime_sync",
+          "permission_profile": {
+            "filesystem": "read workspace and user runtime links",
+            "network": "not required"
+          },
+          "preconditions": [
+            "Workspace rooted projection validates cleanly."
+          ]
+        },
+        {
+          "command": "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
+          "expected_outcome": "Refreshes .agents/skills from canonical frontmatter and skill sources.",
+          "kind": "refresh_workspace_projection",
+          "permission_profile": {
+            "filesystem": "write workspace runtime projection",
+            "network": "not required"
+          },
+          "preconditions": [
+            "Canonical skill sources are ready to project."
+          ]
+        },
+        {
+          "command": "./bin/ask skills sync --scope user --projection rooted --json --robot",
+          "expected_outcome": "Makes user-level Codex and Agents skill runtimes point at the workspace projection.",
+          "kind": "apply_user_runtime_sync",
+          "permission_profile": {
+            "filesystem": "write home-directory runtime links",
+            "network": "not required"
+          },
+          "preconditions": [
+            "Dry-run output is acceptable to the operator."
+          ]
+        },
+        {
+          "command": "./bin/ask skills proof improve-agent-native --runtime-target codex --json --robot",
+          "expected_outcome": "Updates runtime evidence with pass or a narrower blocked_runtime reason.",
+          "kind": "rerun_runtime_proof",
+          "permission_profile": {
+            "filesystem": "read workspace and user runtime links; write runtime-proof evidence",
+            "network": "not required"
+          },
+          "preconditions": [
+            "User runtime link now points at the workspace projection."
+          ]
+        }
+      ],
+      "recovery_risk": "User-scope sync mutates home-directory runtime links; preview with --dry-run before applying.",
+      "runtime_aliases": {
+        "dedupe_identity": "${WORKSPACE_ROOT}/.agents/skills",
+        "dedupe_rule": "Codex and Agents user skill roots are aliases when their resolved paths match.",
+        "distinct_runtime_identity_count": 1,
+        "expected_workspace_runtime": "${WORKSPACE_ROOT}/.agents/skills",
+        "root_identities": {
+          "agents_user_runtime": "${WORKSPACE_ROOT}/.agents/skills",
+          "codex_user_runtime": "${WORKSPACE_ROOT}/.agents/skills"
+        },
+        "schema_version": "skill-runtime-aliases.v1",
+        "status": "deduped_aliases"
+      },
+      "runtime_modes": {
+        "agents_user_runtime": "root_symlink",
+        "codex_user_runtime": "root_symlink"
+      },
+      "schema_version": "command-handle-runtime-diagnostics.v1",
+      "selected_runtime_target": "codex"
+    },
+    "runtime_satisfied_by": "codex_user_runtime",
+    "runtime_target": "codex",
+    "schema_version": "command-handle-proof.v2",
+    "status": "pass",
+    "user_runtime_links": {
+      "agents_skills": {
+        "dedupe_identity": "${WORKSPACE_ROOT}/.agents/skills",
+        "exists": true,
+        "is_symlink": true,
+        "path": "${HOME}/.agents/skills",
+        "points_to_workspace_runtime": true,
+        "target": "${WORKSPACE_ROOT}/.agents/skills"
+      },
+      "codex_skills": {
+        "dedupe_identity": "${WORKSPACE_ROOT}/.agents/skills",
+        "exists": true,
+        "is_symlink": true,
+        "path": "${HOME}/.codex/skills",
+        "points_to_workspace_runtime": true,
+        "target": "${WORKSPACE_ROOT}/.agents/skills"
+      }
+    },
+    "validation_commands": [
+      "./bin/ask skills proof improve-agent-native --runtime-target codex --json --robot"
+    ],
+    "workspace_runtime": {
+      "canonical_source_exists": true,
+      "canonical_source_path": "${WORKSPACE_ROOT}/Skills/agent-ops/improve-agent-native/SKILL.md",
+      "path": "${WORKSPACE_ROOT}/.agents/skills"
+    }
+  },
+  "runtime_status": "partial",
+  "runtime_target": "codex",
+  "schema_version": "command-handle-runtime-probe.v1"
+}

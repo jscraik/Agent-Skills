@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import json
 import shutil
 from pathlib import Path
 
@@ -11,6 +12,7 @@ from selection_policy import ROOT_SKILL_SET_NAMES
 
 
 ROOT_SKILL_SET_NAMES_SET = set(ROOT_SKILL_SET_NAMES)
+DIRECT_ROOTED_RUNTIME_VISIBILITIES = {"flat", "root"}
 
 
 def is_generated_root_skill_dir(path: Path) -> bool:
@@ -67,7 +69,86 @@ def prune_unowned_skillset_files(skillsets_dir: Path, dry_run: bool = False) -> 
     return logs
 
 
-def validate_workspace_runtime(skills_dir: Path, *, repo_root_path: Path | None = None) -> list[dict[str, object]]:
+def _direct_runtime_rows_from_manifest_report(manifest_report: dict[str, object]) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    manifests = manifest_report.get("manifests") if isinstance(manifest_report, dict) else None
+    if not isinstance(manifests, list):
+        return rows
+    for manifest in manifests:
+        if not isinstance(manifest, dict):
+            continue
+        manifest_rows = manifest.get("rows")
+        if not isinstance(manifest_rows, list):
+            continue
+        for row in manifest_rows:
+            if not isinstance(row, dict):
+                continue
+            runtime_visibility = str(row.get("runtime_visibility") or "latent").strip().lower()
+            source_path = str(row.get("source_path") or "").strip()
+            handle = str(row.get("id") or row.get("handle") or "").strip()
+            if (
+                runtime_visibility in DIRECT_ROOTED_RUNTIME_VISIBILITIES
+                and handle
+                and source_path.startswith("Skills/")
+            ):
+                rows.append({
+                    "handle": handle,
+                    "source_path": source_path,
+                    "runtime_visibility": runtime_visibility,
+                })
+    return sorted(rows, key=lambda row: (row["handle"], row["source_path"]))
+
+
+def direct_runtime_rows_from_skillsets(skillsets_dir: Path) -> list[dict[str, str]]:
+    """Return first-party direct runtime rows from generated rooted manifests."""
+    rows: list[dict[str, str]] = []
+    if not skillsets_dir.is_dir():
+        return rows
+    for manifest_path in sorted(skillsets_dir.glob("*/manifest.jsonl")):
+        try:
+            lines = manifest_path.read_text(encoding="utf-8").splitlines()
+        except OSError:
+            continue
+        manifest_rows: list[dict[str, object]] = []
+        for line in lines:
+            if not line.strip():
+                continue
+            try:
+                payload = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if isinstance(payload, dict):
+                manifest_rows.append(payload)
+        rows.extend(_direct_runtime_rows_from_manifest_report({"manifests": [{"rows": manifest_rows}]}))
+    deduped = {(row["handle"], row["source_path"]): row for row in rows}
+    return sorted(deduped.values(), key=lambda row: (row["handle"], row["source_path"]))
+
+
+def direct_runtime_rows_from_manifest_report(manifest_report: dict[str, object]) -> list[dict[str, str]]:
+    """Return first-party direct runtime rows from an in-memory manifest report."""
+    deduped = {
+        (row["handle"], row["source_path"]): row
+        for row in _direct_runtime_rows_from_manifest_report(manifest_report)
+    }
+    return sorted(deduped.values(), key=lambda row: (row["handle"], row["source_path"]))
+
+
+def direct_runtime_names_from_manifest_report(manifest_report: dict[str, object]) -> set[str]:
+    """Return first-level runtime names required by direct rooted handles."""
+    return {row["handle"] for row in direct_runtime_rows_from_manifest_report(manifest_report)}
+
+
+def direct_runtime_names_from_skillsets(skillsets_dir: Path) -> set[str]:
+    """Return first-level runtime names required by current rooted manifests."""
+    return {row["handle"] for row in direct_runtime_rows_from_skillsets(skillsets_dir)}
+
+
+def validate_workspace_runtime(
+    skills_dir: Path,
+    *,
+    repo_root_path: Path | None = None,
+    direct_runtime_names: set[str] | None = None,
+) -> list[dict[str, object]]:
     """Return rooted-projection runtime violations for a workspace .agents/skills directory."""
     if not skills_dir.is_dir():
         return [{
@@ -75,6 +156,13 @@ def validate_workspace_runtime(skills_dir: Path, *, repo_root_path: Path | None 
             "message": f"Workspace runtime directory is missing: {skills_dir}",
         }]
 
+    root = repo_root_path or skills_dir.parents[2]
+    expected_direct_names = (
+        set(direct_runtime_names)
+        if direct_runtime_names is not None
+        else direct_runtime_names_from_skillsets(root / ".skillsets")
+    )
+    expected_names = ROOT_SKILL_SET_NAMES_SET | expected_direct_names
     first_level = sorted(
         item.name
         for item in skills_dir.iterdir()
@@ -82,20 +170,17 @@ def validate_workspace_runtime(skills_dir: Path, *, repo_root_path: Path | None 
     )
     surface = runtime_surface_report(first_level)
     violations: list[dict[str, object]] = []
+    actual_names = set(first_level)
 
-    if surface.projection_mode == PROJECTION_MIXED:
-        violations.append({
-            "code": "ROOTED_WORKSPACE_MIXED_PROJECTION",
-            "message": "workspace first-level runtime entries mix rooted roots with non-root entries",
-            "missing": surface.missing_first_level_names,
-            "extra": surface.extra_first_level_names,
-        })
-    elif surface.missing_first_level_names or surface.extra_first_level_names:
+    unexpected = sorted(actual_names - expected_names)
+    missing = sorted(expected_names - actual_names)
+    if unexpected or missing:
         violations.append({
             "code": "ROOTED_WORKSPACE_POLICY_NAME_DRIFT",
-            "message": "workspace first-level runtime entries differ from rooted policy",
-            "missing": surface.missing_first_level_names,
-            "extra": surface.extra_first_level_names,
+            "message": "workspace first-level runtime entries differ from rooted policy and declared direct handles",
+            "missing": missing,
+            "extra": unexpected,
+            "expected_direct_names": sorted(expected_direct_names),
         })
 
     non_generated_roots = sorted(

@@ -63,6 +63,14 @@ VALID_IMPROVEMENT_TYPES = {
     "selection policy",
     "eval contract",
 }
+OPEN_VALIDATION_MARKERS = {
+    "pending",
+    "blocked",
+    "in progress",
+    "after push",
+    "next proof",
+    "not claimed",
+}
 REQUIRED_HEADERS = [
     "Date",
     "Trigger",
@@ -286,6 +294,7 @@ def validate(root: Path = ROOT) -> list[Finding]:
             "feedback signal",
             "root operational failure",
             "durable system improvement",
+            "explicit remaining proof",
             "known taxonomy values",
             "Required Evidence",
             "validate_steering_uptake.py",
@@ -314,6 +323,16 @@ def validate(root: Path = ROOT) -> list[Finding]:
                     findings.append(Finding("STEERING_LEDGER_FIELD_EMPTY", f"Row {index} has weak value for {field}.", _relative(ledger_path, root)))
             if record["Status"] not in VALID_STATUSES:
                 findings.append(Finding("STEERING_LEDGER_STATUS", f"Row {index} has invalid status {record['Status']!r}.", _relative(ledger_path, root)))
+            if record["Status"] == "open":
+                validation_text = record["Validation"].lower()
+                if not any(marker in validation_text for marker in OPEN_VALIDATION_MARKERS):
+                    findings.append(
+                        Finding(
+                            "STEERING_LEDGER_OPEN_UNCLEAR",
+                            f"Row {index} is open but does not name the pending, blocked, in-progress, after-push, next-proof, or not-claimed condition.",
+                            _relative(ledger_path, root),
+                        )
+                    )
             if record["Status"] == "validated" and "validate_steering_uptake.py" not in record["Validation"]:
                 findings.append(Finding("STEERING_LEDGER_VALIDATION_WEAK", f"Row {index} marked validated without steering validator evidence.", _relative(ledger_path, root)))
             mechanism = record["Mechanism"]

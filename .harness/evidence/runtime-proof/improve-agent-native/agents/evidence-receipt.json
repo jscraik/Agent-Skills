@@ -1,0 +1,22 @@
+{
+  "artifact_path": ".harness/evidence/runtime-proof/improve-agent-native/agents/runtime-card.json",
+  "blocker_class": "none",
+  "claim": "$improve-agent-native is reachable in the Agents runtime.",
+  "claim_status": "pass",
+  "command": "./bin/ask skills proof improve-agent-native --runtime-target agents --json --robot",
+  "evidence_type": "command",
+  "exit_code": 0,
+  "observed_at": "2026-06-13T17:17:32Z",
+  "probe_artifact_path": ".harness/evidence/runtime-proof/improve-agent-native/agents/probe.json",
+  "probe_command": "./bin/ask skills proof improve-agent-native --runtime-target agents --json --robot",
+  "probe_exit_code": 0,
+  "receipt_id": "runtime-proof-improve-agent-native-agents",
+  "runtime_status": "implemented_enforced",
+  "runtime_target": "agents",
+  "source_paths": [
+    "Skills/agent-ops/improve-agent-native/SKILL.md",
+    "Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py",
+    "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+  ],
+  "verifier": "ask.skills.proof"
+}
