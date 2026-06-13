@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "name": "skill-factory",
+  "version": "0.1.0",
+  "description": "Bundle for routing, hardening, analyzing, skillifying, proving Codex skills, and attaching local references to Codex system authoring skills.",
+  "author": {
+    "name": "Jamie Craik",
+    "url": "https://github.com/jscraik"
+  },
+  "homepage": "https://github.com/jscraik/Agent-Skills",
+  "repository": "https://github.com/jscraik/Agent-Skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "plugin",
+    "skill-factory",
+    "skill-factory-router",
+    "skill-builder",
+    "skill-refactor",
+    "skillify",
+    "codex"
+  ],
+  "governance": {
+    "lifecycle_state": "active",
+    "maturity": "canonical",
+    "owner": "Agent Skills Team",
+    "review_cadence": "quarterly",
+    "last_reviewed": "2026-04-08",
+    "metadata_source": "plugin_manifest"
+  },
+  "skills": "./skills/",
+  "hooks": "./hooks/hooks.json",
+  "interface": {
+    "displayName": "Skill Factory",
+    "shortDescription": "Route, create, harden, analyze, skillify, and install Codex skills",
+    "longDescription": "A Codex plugin package that exposes skill-factory-router, skill-builder, skill-refactor, and skillify as Skill Factory lifecycle lanes, while extending the Codex .system skill-creator and skill-installer with local Skill Factory references and evals. Use it to route ambiguous skill work, harden existing skills or plugins, analyze session and evaluation evidence, capture repeatable workflows, and prove runtime visibility.",
+    "developerName": "Jamie Craik",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/jscraik/Agent-Skills",
+    "privacyPolicyURL": "https://github.com/jscraik/Agent-Skills/blob/main/README.md#privacy-and-data-handling",
+    "termsOfServiceURL": "https://github.com/jscraik/Agent-Skills/blob/main/LICENSE",
+    "defaultPrompt": [
+      "Help me create or improve a Codex skill."
+    ],
+    "brandColor": "#3B82F6",
+    "composerIcon": "./assets/icon.png",
+    "logo": "./assets/icon.png"
+  },
+  "icon": "./assets/icon.png"
+}
