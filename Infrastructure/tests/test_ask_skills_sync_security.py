@@ -58,10 +58,54 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertTrue((self.fake_home / ".agents" / "skills").is_symlink())
         self.assertTrue((self.fake_home / ".codex" / "skills").is_symlink())
         self.assertTrue((self.fake_home / ".agents" / "agent-skills").is_symlink())
-        self.assertTrue((self.fake_home / ".agents" / "plugins").is_symlink())
+        self.assertFalse((self.fake_home / ".agents" / "plugins").exists())
         self.assertTrue((self.fake_home / "plugins").is_dir())
         self.assertFalse((self.fake_home / "plugins").is_symlink())
         self.assertEqual(result.data["projection_mode"], "flat")
+
+    def test_sync_skills_user_scope_clears_repo_backed_agents_plugins_symlink(self) -> None:
+        user_plugins = self.fake_home / ".agents" / "plugins"
+        user_plugins.parent.mkdir(parents=True, exist_ok=True)
+        user_plugins.symlink_to(self.repo_root / "Plugins", target_is_directory=True)
+
+        with (
+            mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]),
+            mock.patch.object(Path, "home", return_value=self.fake_home),
+        ):
+            result = skills_commands.sync_skills(self.repo_root, scope="user", dry_run=False)
+
+        self.assertEqual(result.status, "success")
+        self.assertTrue(user_plugins.is_dir())
+        self.assertFalse(user_plugins.is_symlink())
+        self.assertIn(
+            f"Replaced repo-backed personal plugin marketplace symlink with directory: {user_plugins}",
+            result.data["logs"],
+        )
+
+    def test_sync_skills_user_scope_dry_run_plans_agents_plugins_cleanup(self) -> None:
+        user_plugins = self.fake_home / ".agents" / "plugins"
+        user_plugins.parent.mkdir(parents=True, exist_ok=True)
+        user_plugins.symlink_to(self.repo_root / "Plugins", target_is_directory=True)
+
+        with (
+            mock.patch.object(skills_commands, "discover_skill_entries", return_value=[]),
+            mock.patch.object(Path, "home", return_value=self.fake_home),
+        ):
+            result = skills_commands.sync_skills(self.repo_root, scope="user", dry_run=True)
+
+        self.assertEqual(result.status, "success")
+        self.assertTrue(user_plugins.is_symlink())
+        self.assertIn(
+            f"Remove repo-backed personal plugin marketplace symlink: {user_plugins}",
+            result.data["plan"]["deletes"],
+        )
+        self.assertIn(str(user_plugins), result.data["plan"]["writes"])
+        self.assertGreaterEqual(result.data["plan"]["mutation_counts"]["deletes"], 1)
+        self.assertGreaterEqual(result.data["plan"]["mutation_counts"]["writes"], 1)
+        self.assertIn(
+            f"Replaced repo-backed personal plugin marketplace symlink with directory: {user_plugins}",
+            result.data["logs"],
+        )
 
     def test_sync_skills_user_scope_preserves_existing_agents_plugins_directory(self) -> None:
         user_plugins = self.fake_home / ".agents" / "plugins"
@@ -79,7 +123,7 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertFalse(user_plugins.is_symlink())
         self.assertEqual((user_plugins / "README.md").read_text(encoding="utf-8"), "user owned\n")
         self.assertIn(
-            f"Skipped existing non-symlink path: {user_plugins}",
+            f"Personal plugin marketplace root is not repo-backed symlink: {user_plugins}",
             result.data["logs"],
         )
 
@@ -397,6 +441,16 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertIn("ROOTED_PROJECTION_WRITE_FAILED", result.data["plan"]["warnings"])
 
     def test_sync_skills_rooted_user_scope_validates_workspace_before_relink(self) -> None:
+        rooted_entry = self.repo_root / ".agents" / "skills" / "agent-ops"
+        rooted_entry.mkdir(parents=True)
+        (rooted_entry / "SKILL.md").write_text(
+            "---\nskill-type: root-skill-set\nprojection-mode: rooted\n---\n# Agent Ops\n",
+            encoding="utf-8",
+        )
+        flat_entry = self.repo_root / ".agents" / "skills" / "safe-skill"
+        flat_entry.mkdir(parents=True)
+        (flat_entry / "SKILL.md").write_text("# Safe Skill\n", encoding="utf-8")
+
         with mock.patch.object(Path, "home", return_value=self.fake_home):
             result = skills_commands.sync_skills(
                 self.repo_root,
@@ -407,7 +461,7 @@ class TestAskSkillsSyncSecurity(TestCase):
 
         self.assertEqual(result.status, "error")
         self.assertEqual(result.errors[0].code, "ERR_VALIDATION")
-        self.assertIn("ROOTED_WORKSPACE", result.data["plan"]["warnings"][0])
+        self.assertIn("ROOTED_WORKSPACE_MIXED_PROJECTION", result.data["plan"]["warnings"][0])
         self.assertFalse((self.fake_home / ".agents" / "skills").exists())
 
     def test_sync_skills_rooted_user_scope_relinks_after_workspace_validation(self) -> None:
@@ -431,7 +485,7 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertTrue((self.fake_home / ".agents" / "skills").is_symlink())
         self.assertTrue((self.fake_home / ".codex" / "skills").is_symlink())
         self.assertTrue((self.fake_home / ".agents" / "agent-skills").is_symlink())
-        self.assertTrue((self.fake_home / ".agents" / "plugins").is_symlink())
+        self.assertFalse((self.fake_home / ".agents" / "plugins").exists())
         self.assertTrue((self.fake_home / "plugins").is_dir())
         self.assertFalse((self.fake_home / "plugins").is_symlink())
         self.assertEqual(result.data["projection_mode"], "rooted")
