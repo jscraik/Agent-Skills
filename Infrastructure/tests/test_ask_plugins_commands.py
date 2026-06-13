@@ -429,6 +429,63 @@ class TestAskPluginsCommands(unittest.TestCase):
             ["./bin/ask plugins sync-local-runtime --dry-run --json --robot"],
         )
 
+    def test_sync_local_runtime_write_failure_returns_robot_error(self) -> None:
+        self._write_repo_marketplace(plugin_name="example-plugin")
+        plugin_root = self.repo_root / "Plugins" / "example-plugin"
+        manifest_path = plugin_root / ".codex-plugin" / "plugin.json"
+        manifest_path.parent.mkdir(parents=True, exist_ok=True)
+        manifest_path.write_text("{}\n", encoding="utf-8")
+
+        fake_home = self.temp_dir / "home"
+        (fake_home / ".codex").mkdir(parents=True)
+
+        with (
+            patch("ask.commands.plugins.Path.home", return_value=fake_home),
+            patch(
+                "ask.commands.plugins._sync_one_runtime_root",
+                side_effect=PermissionError("runtime mirror denied"),
+            ),
+        ):
+            result = sync_local_runtime_plugins(self.repo_root)
+
+        self.assertEqual(result.status, "error")
+        self.assertEqual(result.errors[0].code, "ERR_RUNTIME")
+        self.assertIn("runtime mirror denied", result.errors[0].message)
+        self.assertEqual(
+            result.data["validation_commands"],
+            ["./bin/ask plugins sync-local-runtime --json --robot"],
+        )
+        self.assertEqual(result.data["profile_homes"], [str(fake_home / ".codex")])
+        self.assertEqual(result.data["plugin_names"], ["example-plugin"])
+
+    def test_sync_local_runtime_dry_run_reports_personal_marketplace_plan(self) -> None:
+        self._write_repo_marketplace(plugin_name="example-plugin")
+        plugin_root = self.repo_root / "Plugins" / "example-plugin"
+        manifest_path = plugin_root / ".codex-plugin" / "plugin.json"
+        manifest_path.parent.mkdir(parents=True, exist_ok=True)
+        manifest_path.write_text(
+            json.dumps({"schema_version": 1, "name": "example-plugin", "version": "0.1.0"}),
+            encoding="utf-8",
+        )
+        fake_home = self.temp_dir / "home"
+        profile_home = fake_home / ".codex"
+        (profile_home / "plugins" / "example-plugin").mkdir(parents=True)
+        personal_root = fake_home / ".agents" / "plugins"
+        personal_root.parent.mkdir(parents=True)
+        personal_root.symlink_to(self.repo_root / "Plugins", target_is_directory=True)
+
+        with patch("ask.commands.plugins.Path.home", return_value=fake_home):
+            result = sync_local_runtime_plugins(self.repo_root, dry_run=True)
+
+        self.assertEqual(result.status, "success")
+        reports = {Path(report["runtime_root"]).as_posix(): report for report in result.data["runtime_reports"]}
+        personal_report = reports[personal_root.as_posix()]
+        self.assertTrue(personal_root.is_symlink())
+        self.assertFalse(personal_report["repointed_marketplace_root"])
+        self.assertTrue(personal_report["planned_repoint_marketplace_root"])
+        self.assertEqual(personal_report["symlinked_plugins"], [])
+        self.assertEqual(personal_report["planned_symlinked_plugins"], ["example-plugin"])
+
     def test_sync_local_runtime_skips_samefile_marketplace_copy(self) -> None:
         plugin_root = self.repo_root / "Plugins" / "example-plugin"
         manifest_path = plugin_root / ".codex-plugin" / "plugin.json"

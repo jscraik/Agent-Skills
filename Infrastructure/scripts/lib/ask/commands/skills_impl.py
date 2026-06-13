@@ -6826,16 +6826,22 @@ def _append_user_runtime_relinks(
     dry_run: bool,
 ) -> None:
     home = Path.home()
-    plugins_dir = repo_root / "Plugins"
     targets = [
         (skills_dir, home / ".agents" / "skills", True),
         (skills_dir, home / ".codex" / "skills", True),
         (repo_root, home / ".agents" / "agent-skills", True),
-        (plugins_dir, home / ".agents" / "plugins", False),
     ]
     for src, dst, replace_existing in targets:
         plan["symlinks"].append({"from": str(dst), "to": str(src)})
         logs.append(_create_symlink(src, dst, dry_run, replace_existing=replace_existing))
+    logs.append(
+        _clear_repo_backed_personal_plugin_root(
+            repo_root,
+            home / ".agents" / "plugins",
+            dry_run=dry_run,
+            plan=plan,
+        )
+    )
     _refresh_home_plugin_mirrors(plan, logs, repo_root, home / "plugins", dry_run=dry_run)
     for profile_home in _codex_profile_homes(home):
         _refresh_home_plugin_mirrors(
@@ -6847,6 +6853,34 @@ def _append_user_runtime_relinks(
         _refresh_home_plugin_mirrors(
             plan, logs, repo_root, profile_home / ".agents" / "plugins", dry_run=dry_run, prune_command_surface_duplicates=True
         )
+
+
+def _clear_repo_backed_personal_plugin_root(repo_root: Path, target: Path, *, dry_run: bool, plan: dict) -> str:
+    """Remove the legacy personal plugin marketplace symlink to repo source."""
+    if not target.is_symlink():
+        return f"Personal plugin marketplace root is not repo-backed symlink: {target}"
+    resolved_target = target.resolve(strict=False)
+    repo_plugin_roots = [repo_root / "Plugins", repo_root / "plugins"]
+    points_at_repo_plugins = False
+    for repo_plugin_root in repo_plugin_roots:
+        resolved_repo_plugin_root = repo_plugin_root.resolve(strict=False)
+        if resolved_target == resolved_repo_plugin_root:
+            points_at_repo_plugins = True
+            break
+        try:
+            points_at_repo_plugins = resolved_repo_plugin_root.exists() and resolved_target.samefile(resolved_repo_plugin_root)
+        except OSError:
+            points_at_repo_plugins = False
+        if points_at_repo_plugins:
+            break
+    if not points_at_repo_plugins:
+        return f"Personal plugin marketplace root is not repo-backed symlink: {target}"
+    plan["deletes"].append(f"Remove repo-backed personal plugin marketplace symlink: {target}")
+    plan["writes"].append(str(target))
+    if not dry_run:
+        target.unlink()
+        target.mkdir(parents=True, exist_ok=True)
+    return f"Replaced repo-backed personal plugin marketplace symlink with directory: {target}"
 
 
 def _codex_profile_homes(home: Path) -> list[Path]:

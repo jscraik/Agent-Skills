@@ -9,6 +9,7 @@ dependencies = [
 
 [dependency-groups]
 test = [
+  "PyYAML>=6.0.2,<7",
   "pytest>=9.0.3,<10",
 ]
 lint = [

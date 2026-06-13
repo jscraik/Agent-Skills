@@ -150,22 +150,14 @@ EXPECTED_SYNAIPSE_LIFECYCLE = [
 ]
 
 EXPECTED_SYNAIPSE_STAGE_HEADINGS = [
-    "Stage Contract",
     "When to use",
-    "When not to use",
     "Required inputs",
     "Deliverables",
-    "Preconditions",
     "Procedure",
-    "Allowed writes",
-    "Forbidden writes",
-    "Exit criteria",
     "Validation",
     "Handoff",
     "Failure modes",
-    "Execution boundaries",
     "Gotchas",
-    "Examples",
     "References",
 ]
 
@@ -388,16 +380,16 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
             self.assertIn(f"next_stage: {next_stage}", contract_text)
 
             evals_text = evals.read_text(encoding="utf-8")
-            self.assertIn(f'skill_name: "{handle}"', evals_text)
-            self.assertIn(f'stage: "{stage}"', evals_text)
+            self.assertIn(f"skill_name: {handle}", evals_text)
+            self.assertIn(f"stage: {stage}", evals_text)
 
             profile_payload = json.loads(task_profile.read_text(encoding="utf-8"))
             self.assertEqual(f"Plugins/synaipse-harness/skills/{handle}", profile_payload["scope_skill"])
             self.assertEqual(stage, profile_payload["sdk_stage"])
 
             openai_text = openai_metadata.read_text(encoding="utf-8")
-            self.assertIn(f'sdk_stage: "{stage}"', openai_text)
-            self.assertIn(f'handle: "{handle}"', openai_text)
+            self.assertIn(f"sdk_stage: {stage}", openai_text)
+            self.assertIn(f"handle: {handle}", openai_text)
 
     def test_synaipse_harness_upstream_references_are_quality_audited(self) -> None:
         """

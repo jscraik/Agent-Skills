@@ -380,43 +380,50 @@ def _sync_personal_marketplace(
           - copied_plugins, skipped_plugins, removed_entries, pruned_plugins: lists reserved for other sync variants (empty here).
           - skipped_marketplace_copy: boolean (False here).
           - symlinked_plugins: list of plugin names that were symlinked during this run.
+          - planned_symlinked_plugins: list of plugin names that would be symlinked during a dry run.
           - skipped_symlinks: list of plugin names that were not symlinked and the reason is either existing wrong file, missing target, or identical existing symlink.
           - official_personal_marketplace: True when the marketplace root is the canonical personal marketplace.
           - project_marketplace_root: path to the repository-local personal marketplace root.
           - personal_marketplace_symlink_target: resolved target of the marketplace root symlink when present, otherwise None.
           - repointed_marketplace_root: True if an existing symlinked marketplace root was repointed to the project marketplace root.
+          - planned_repoint_marketplace_root: True if dry-run detected a marketplace root repoint.
           - dry_run: echoes the input dry_run flag.
     """
     marketplace_root = home / _PERSONAL_PLUGIN_MARKETPLACE_ROOT
     project_marketplace_root = repo_root / _PROJECT_PERSONAL_PLUGIN_MARKETPLACE_ROOT
     marketplace_target = marketplace_root / "marketplace.json"
     symlinked_plugins: list[str] = []
+    planned_symlinked_plugins: list[str] = []
     skipped_symlinks: list[str] = []
     planned_plugins = [str(entry["name"]) for entry in marketplace_entries]
     repointed_marketplace_root = False
+    planned_repoint_marketplace_root = False
+    unsafe_repo_roots = [repo_root / "Plugins", repo_root / "plugins"]
+
+    if marketplace_root.is_symlink():
+        try:
+            resolved_marketplace_root = marketplace_root.resolve(strict=True)
+        except OSError:
+            resolved_marketplace_root = None
+        if resolved_marketplace_root is not None:
+            points_at_repo_source = False
+            for repo_source_root in unsafe_repo_roots:
+                try:
+                    points_at_repo_source = repo_source_root.exists() and resolved_marketplace_root.samefile(repo_source_root)
+                except OSError:
+                    points_at_repo_source = False
+                if points_at_repo_source:
+                    break
+            if points_at_repo_source:
+                planned_repoint_marketplace_root = True
+                if not dry_run:
+                    marketplace_root.unlink()
+                    marketplace_root.symlink_to(project_marketplace_root, target_is_directory=True)
+                    repointed_marketplace_root = True
 
     if not dry_run:
         marketplace_root.parent.mkdir(parents=True, exist_ok=True)
         project_marketplace_root.mkdir(parents=True, exist_ok=True)
-        unsafe_repo_roots = [repo_root / "Plugins", repo_root / "plugins"]
-        if marketplace_root.is_symlink():
-            try:
-                resolved_marketplace_root = marketplace_root.resolve(strict=True)
-            except OSError:
-                resolved_marketplace_root = None
-            if resolved_marketplace_root is not None:
-                points_at_repo_source = False
-                for repo_source_root in unsafe_repo_roots:
-                    try:
-                        points_at_repo_source = repo_source_root.exists() and resolved_marketplace_root.samefile(repo_source_root)
-                    except OSError:
-                        points_at_repo_source = False
-                    if points_at_repo_source:
-                        break
-                if points_at_repo_source:
-                    marketplace_root.unlink()
-                    marketplace_root.symlink_to(project_marketplace_root, target_is_directory=True)
-                    repointed_marketplace_root = True
         marketplace_root.mkdir(parents=True, exist_ok=True)
         marketplace_target.write_text(
             json.dumps(_personal_marketplace_payload(marketplace_entries), indent=2, sort_keys=True) + "\n",
@@ -427,6 +434,10 @@ def _sync_personal_marketplace(
         plugin_name = str(entry["name"])
         link_path = marketplace_root / plugin_name
         target_path = home / ".codex" / "plugins" / plugin_name
+        root_will_repoint = planned_repoint_marketplace_root
+        if target_path.exists() and (root_will_repoint or not link_path.exists() or link_path.is_symlink()):
+            if root_will_repoint or not link_path.is_symlink() or link_path.resolve() != target_path.resolve():
+                planned_symlinked_plugins.append(plugin_name)
         if dry_run:
             continue
         if link_path.is_symlink():
@@ -453,6 +464,7 @@ def _sync_personal_marketplace(
         "pruned_plugins": [],
         "skipped_marketplace_copy": False,
         "symlinked_plugins": symlinked_plugins,
+        "planned_symlinked_plugins": planned_symlinked_plugins,
         "skipped_symlinks": skipped_symlinks,
         "official_personal_marketplace": True,
         "project_marketplace_root": str(project_marketplace_root),
@@ -460,6 +472,7 @@ def _sync_personal_marketplace(
             str(marketplace_root.resolve()) if marketplace_root.exists() else None
         ),
         "repointed_marketplace_root": repointed_marketplace_root,
+        "planned_repoint_marketplace_root": planned_repoint_marketplace_root,
         "dry_run": dry_run,
     }
 
@@ -985,51 +998,66 @@ def sync_local_runtime_plugins(repo_root: Path, *, dry_run: bool = False) -> Cal
         )
 
     runtime_reports: list[dict[str, Any]] = []
-    for profile_home in profile_homes:
-        canonical_runtime_root = profile_home / "plugins"
-        for relative_root in _LOCAL_PLUGIN_ROOTS:
-            runtime_root = profile_home / relative_root
-            if relative_root != "plugins" and canonical_runtime_root.exists() and runtime_root.exists():
-                try:
-                    same_runtime_root = runtime_root.samefile(canonical_runtime_root)
-                except OSError:
-                    same_runtime_root = False
-                if same_runtime_root:
-                    runtime_reports.append(
-                        {
-                            "runtime_root": str(runtime_root),
-                            "marketplace_target": str(runtime_root / "marketplace.json"),
-                            "planned_plugins": [str(entry["name"]) for entry in entries],
-                            "copied_plugins": [],
-                            "symlinked_plugins": [],
-                            "skipped_plugins": [str(entry["name"]) for entry in entries],
-                            "removed_entries": [],
-                            "pruned_plugins": [],
-                            "skipped_marketplace_copy": True,
-                            "materializes_payload": False,
-                            "skipped_samefile_runtime_root": True,
-                            "dry_run": dry_run,
-                        }
+    try:
+        for profile_home in profile_homes:
+            canonical_runtime_root = profile_home / "plugins"
+            for relative_root in _LOCAL_PLUGIN_ROOTS:
+                runtime_root = profile_home / relative_root
+                if relative_root != "plugins" and canonical_runtime_root.exists() and runtime_root.exists():
+                    try:
+                        same_runtime_root = runtime_root.samefile(canonical_runtime_root)
+                    except OSError:
+                        same_runtime_root = False
+                    if same_runtime_root:
+                        runtime_reports.append(
+                            {
+                                "runtime_root": str(runtime_root),
+                                "marketplace_target": str(runtime_root / "marketplace.json"),
+                                "planned_plugins": [str(entry["name"]) for entry in entries],
+                                "copied_plugins": [],
+                                "symlinked_plugins": [],
+                                "skipped_plugins": [str(entry["name"]) for entry in entries],
+                                "removed_entries": [],
+                                "pruned_plugins": [],
+                                "skipped_marketplace_copy": True,
+                                "materializes_payload": False,
+                                "skipped_samefile_runtime_root": True,
+                                "dry_run": dry_run,
+                            }
+                        )
+                        continue
+                runtime_reports.append(
+                    _sync_one_runtime_root(
+                        runtime_root=runtime_root,
+                        canonical_runtime_root=canonical_runtime_root,
+                        repo_root=repo_root,
+                        marketplace_path=marketplace_path,
+                        marketplace_entries=entries,
+                        dry_run=dry_run,
                     )
-                    continue
-            runtime_reports.append(
-                _sync_one_runtime_root(
-                    runtime_root=runtime_root,
-                    canonical_runtime_root=canonical_runtime_root,
-                    repo_root=repo_root,
-                    marketplace_path=marketplace_path,
-                    marketplace_entries=entries,
-                    dry_run=dry_run,
                 )
+        runtime_reports.append(
+            _sync_personal_marketplace(
+                home=home,
+                repo_root=repo_root,
+                marketplace_entries=entries,
+                dry_run=dry_run,
             )
-    runtime_reports.append(
-        _sync_personal_marketplace(
-            home=home,
-            repo_root=repo_root,
-            marketplace_entries=entries,
-            dry_run=dry_run,
         )
-    )
+    except OSError as exc:
+        error_result = _runtime_error_result(
+            f"Failed to sync local-plugin runtime mirrors: {exc}",
+            fix_suggestion=(
+                "Grant write access to the Codex plugin runtime mirror directories "
+                "or rerun with --dry-run to inspect the planned writes."
+            ),
+            validation_command=validation_command,
+        )
+        error_result.data["profile_homes"] = [str(path) for path in profile_homes]
+        error_result.data["plugin_names"] = [entry["name"] for entry in entries]
+        error_result.data["runtime_reports"] = runtime_reports
+        error_result.data["dry_run"] = dry_run
+        return error_result
 
     result.status = "success"
     result.data["message"] = "Replaced local-plugin runtime mirrors."
