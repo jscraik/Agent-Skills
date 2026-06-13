@@ -547,6 +547,7 @@ def test_evals_run_native_tessl_by_default_with_temp_staged_source(tmp_path: Pat
         "references/contract.yaml",
         "assets/example.png",
         "scenarios/smoke-example/task.md",
+        "scenarios/smoke-example/criteria.json",
         "tessl.json",
     ]
     assert result.data["tessl_eval"]["policy"]["no_registry_upload"] is True
@@ -625,6 +626,48 @@ def test_evals_live_private_dry_run_stages_private_tile_shape(tmp_path: Path) ->
     assert (staged_source / "assets" / "example.png").read_bytes() == b"png"
     assert (staged_source / "tessl.json").exists()
     assert not (staged_source / "secret-not-staged.txt").exists()
+
+
+def test_evals_live_private_skips_local_only_cases(tmp_path: Path) -> None:
+    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
+    skill_root = _write_example_skill(tmp_path)
+    (skill_root / "references" / "evals.yaml").write_text(
+        (
+            "cases:\n"
+            "  - id: local-negative\n"
+            "    prompt: \"Write a poem instead of auditing.\"\n"
+            "    tessl_live_private: false\n"
+            "    acceptance:\n"
+            "      - type: not_contains\n"
+            "        value: example-skill\n"
+            "  - id: live-pressure\n"
+            "    prompt: \"Audit the repository for agent readiness.\"\n"
+            "    acceptance:\n"
+            "      - type: expected_signal\n"
+            "        value: Produces an audit finding.\n"
+        ),
+        encoding="utf-8",
+    )
+
+    with mock.patch.object(evals.subprocess, "run", return_value=completed):
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/example-skill",
+            mode="smoke",
+            tessl_live_private=True,
+            tessl_workspace="jscraik",
+            tessl_live_dry_run=True,
+        )
+
+    assert result.status == "success"
+    tessl_eval = result.data["tessl_eval"]
+    staged_files = tessl_eval["staged_files"]
+    staged_source = Path(tessl_eval["staged_source"])
+    assert "evals/live-pressure/task.md" in staged_files
+    assert "evals/live-pressure/criteria.json" in staged_files
+    assert not any("local-negative" in path for path in staged_files)
+    assert not (staged_source / "evals" / "local-negative").exists()
+    assert (staged_source / "evals" / "live-pressure" / "task.md").exists()
 
 
 def test_evals_live_private_uses_plugin_project_identity(tmp_path: Path) -> None:
@@ -784,7 +827,94 @@ def test_tessl_project_link_creates_after_missing_existing_project(tmp_path: Pat
 
     assert link["status"] == "pass"
     assert link["action"] == "created_project"
-    assert calls[-1] == ["/usr/local/bin/tessl", "project", "create", "skill-factory", "--workspace", "skills-sdk"]
+    assert calls[-1] == [
+        "/usr/local/bin/tessl",
+        "project",
+        "create",
+        "--new",
+        "--workspace",
+        "skills-sdk",
+        "skill-factory",
+    ]
+
+
+def test_tessl_project_link_creates_when_relink_json_status_is_error(tmp_path: Path) -> None:
+    staged_root = tmp_path / "staged"
+    staged_root.mkdir()
+    calls: list[list[str]] = []
+
+    def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
+        calls.append(cmd)
+        if cmd[1:4] == ["project", "repair", "--json"]:
+            return mock.Mock(
+                returncode=0,
+                stdout='{"status":"match","workspaceName":"jscraik","projectName":"improve-agent-native"}',
+                stderr="",
+                args=cmd,
+            )
+        if "--relink" in cmd:
+            return mock.Mock(
+                returncode=0,
+                stdout='{"status":"error","message":"Project not found in workspace skills-sdk: improve-agent-native"}',
+                stderr="",
+                args=cmd,
+            )
+        if cmd[1:3] == ["project", "create"]:
+            return mock.Mock(returncode=0, stdout="created\n", stderr="", args=cmd)
+        raise AssertionError(f"unexpected command: {cmd}")
+
+    with mock.patch.object(evals.subprocess, "run", side_effect=fake_run):
+        link = evals._ensure_tessl_project_link(
+            "/usr/local/bin/tessl",
+            staged_root,
+            {
+                "owner_type": "standalone_skill",
+                "workspace": "skills-sdk",
+                "project": "improve-agent-native",
+                "name": "skills-sdk/improve-agent-native",
+            },
+        )
+
+    assert link["status"] == "pass"
+    assert link["action"] == "created_project"
+    assert calls[-1] == [
+        "/usr/local/bin/tessl",
+        "project",
+        "create",
+        "--new",
+        "--workspace",
+        "skills-sdk",
+        "improve-agent-native",
+    ]
+    assert not any("--update-source" in call for call in calls)
+
+
+def test_tessl_project_link_classifies_signal_kill_as_runtime_blocker(tmp_path: Path) -> None:
+    staged_root = tmp_path / "staged"
+    staged_root.mkdir()
+
+    def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
+        return mock.Mock(returncode=-9, stdout="", stderr="", args=cmd)
+
+    with mock.patch.object(evals.subprocess, "run", side_effect=fake_run):
+        link = evals._ensure_tessl_project_link(
+            "/usr/local/bin/tessl",
+            staged_root,
+            {
+                "owner_type": "standalone_skill",
+                "workspace": "jscraik",
+                "project": "improve-agent-native",
+                "name": "jscraik/improve-agent-native",
+            },
+        )
+
+    assert link["status"] == "blocked"
+    assert link["action"] == "check"
+    assert link["blocker_class"] == "blocked_runtime"
+    assert "SIGKILL" in link["blocker"]
+    assert "not a skill assessment result" in link["blocker"]
+    assert link["commands"][0]["exit_code"] == -9
+    assert link["commands"][0]["signal"] == "SIGKILL"
 
 
 def test_tessl_project_link_updates_source_after_relink(tmp_path: Path) -> None:
@@ -817,6 +947,45 @@ def test_tessl_project_link_updates_source_after_relink(tmp_path: Path) -> None:
     assert link["status"] == "pass"
     assert link["action"] == "relinked_existing_project_updated_source"
     assert calls[-1] == ["/usr/local/bin/tessl", "project", "repair", "--update-source", "--yes", "--json"]
+
+
+def test_tessl_archive_retains_prior_scenarios_without_ingestable_path(tmp_path: Path) -> None:
+    staged_root = tmp_path / "staged"
+    prior_task = staged_root / "scenarios" / "old-case" / "task.md"
+    prior_task.parent.mkdir(parents=True)
+    prior_task.write_text("prior scenario evidence\n", encoding="utf-8")
+
+    archive_dir = evals._archive_stage_children(staged_root, "local-eval")
+
+    assert archive_dir is not None
+    assert archive_dir.parent == tmp_path / "staged-evidence-archive"
+    assert not (archive_dir / "scenarios").exists()
+    assert (archive_dir / "archived-scenarios" / "old-case" / "task.md").read_text(encoding="utf-8") == (
+        "prior scenario evidence\n"
+    )
+
+
+def test_tessl_archive_sanitizes_existing_ingestable_archive_paths(tmp_path: Path) -> None:
+    staged_root = tmp_path / "staged"
+    stale_task = staged_root / "evidence-archive" / "old-run" / "scenarios" / "old-case" / "task.md"
+    stale_task.parent.mkdir(parents=True)
+    stale_task.write_text("stale scenario evidence\n", encoding="utf-8")
+    current_task = staged_root / "scenarios" / "current-case" / "task.md"
+    current_task.parent.mkdir(parents=True)
+    current_task.write_text("current scenario evidence\n", encoding="utf-8")
+
+    archive_dir = evals._archive_stage_children(staged_root, "local-eval")
+    external_archive_root = tmp_path / "staged-evidence-archive"
+
+    assert archive_dir is not None
+    assert not (staged_root / "evidence-archive").exists()
+    assert (
+        next(external_archive_root.glob("*legacy-evidence-archive/old-run/archived-scenarios/old-case/task.md"))
+    ).read_text(encoding="utf-8") == "stale scenario evidence\n"
+    assert not (archive_dir / "scenarios").exists()
+    assert (archive_dir / "archived-scenarios" / "current-case" / "task.md").read_text(encoding="utf-8") == (
+        "current scenario evidence\n"
+    )
 
 
 def test_timeout_partial_artifact_sanitizes_repo_paths(tmp_path: Path) -> None:
@@ -1210,10 +1379,12 @@ def test_evals_stage_folded_yaml_prompts_for_tessl(tmp_path: Path) -> None:
 
     copied = evals._write_tessl_scenarios_from_evals(skill_root, staged_root)
 
-    assert copied == ["scenarios/folded-prompt/task.md"]
+    assert copied == ["scenarios/folded-prompt/task.md", "scenarios/folded-prompt/criteria.json"]
     assert (
         staged_root / "scenarios" / "folded-prompt" / "task.md"
     ).read_text(encoding="utf-8") == "Investigate the target workflow and preserve the whole prompt.\n"
+    criteria = json.loads((staged_root / "scenarios" / "folded-prompt" / "criteria.json").read_text(encoding="utf-8"))
+    assert criteria["type"] == "weighted_checklist"
 
 
 def test_evals_fallback_parser_preserves_literal_block_relative_indent(tmp_path: Path) -> None:
@@ -1233,7 +1404,7 @@ def test_evals_fallback_parser_preserves_literal_block_relative_indent(tmp_path:
 
     copied = evals._write_tessl_scenarios_from_evals(skill_root, staged_root)
 
-    assert copied == ["scenarios/literal-prompt/task.md"]
+    assert copied == ["scenarios/literal-prompt/task.md", "scenarios/literal-prompt/criteria.json"]
     assert (
         staged_root / "scenarios" / "literal-prompt" / "task.md"
     ).read_text(encoding="utf-8") == "  def example():\n      return 1\ndone\n"

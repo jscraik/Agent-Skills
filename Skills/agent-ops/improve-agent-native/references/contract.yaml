@@ -1,0 +1,36 @@
+schema_version: 1
+skill: improve-agent-native
+purpose: "Check whether a repository is ready for AI coding agents to follow guidance, run checks, and leave useful proof."
+triggers:
+  - "Use when a repo needs an AI coding agent readiness check, repo agent compatibility audit, AGENTS.md review, missing test/build command report, docs quality review, proof-loop gap report, or specific fixes."
+non_goals:
+  - "Enterprise process design by default."
+  - "Broad architecture rewrites."
+  - "Implementation without explicit edit authority."
+inputs:
+  - "target repository path or diff"
+  - "audit mode: scorecard, recommendations, AGENTS audit, docs audit, validation-entrypoint audit, proof-loop audit, or source trace"
+  - "repo-native validation commands when present"
+outputs:
+  - "readiness score or no-score rationale"
+  - "what is working"
+  - "highest-leverage gaps"
+  - "keep/move/delete guidance audit"
+  - "specific fixes"
+  - "file-path evidence"
+risks:
+  - over_triggering
+  - importing_heavy_process
+  - stale_guidance
+  - weak_proof
+safety:
+  untrusted_inputs: true
+  destructive_commands: false
+  redact_secrets: true
+validation:
+  - strict_skill_audit
+  - package_verify
+  - family_benchmark
+  - command_surface_projection_check
+observability: "Report exact files inspected, commands run, outcomes, and blockers."
+rollback_procedure: "Remove the skill package and regenerate command-surface projection."

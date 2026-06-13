@@ -1,7 +1,5 @@
 ---
 name: agents-md
-description: Use when reviewing, creating, shrinking, or refactoring AGENTS.md, agent setup, agent prompts, system instructions, routing rules, or repo guidance that need scoped routing, dedupe, contradiction fixes, or progressive disclosure.
-
 description: Use when reviewing, creating, shrinking, or refactoring AGENTS.md agent instructions, agent config files, routing rules, or repository guidance that need scoped routing, dedupe, contradiction fixes, progressive disclosure, and cleaned instruction surfaces.
 metadata:
   version: 0.1.0

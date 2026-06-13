@@ -1,0 +1,689 @@
+---
+schema_version: knowledge-os.knowledge-capsule-manifest.v1
+skill:
+  skill_id: improve-agent-native
+  declared_name: improve-agent-native
+  entrypoint_path: Skills/agent-ops/improve-agent-native/SKILL.md
+  canonical_skill_path: Skills/agent-ops/improve-agent-native/SKILL.md
+  writable_root: Skills/agent-ops/improve-agent-native
+  apply_target_path: Skills/agent-ops/improve-agent-native/SKILL.md
+upstream_pack:
+  pack_id: pack.harness-engineering
+  export_root: exports/packs/pack.harness-engineering
+  snapshot_digest: sha256:2ef402d1e246bc223af3100b26ef8df3549e2875f6cb54c71a2df5a80ebbc096
+upstream_packs:
+- pack_id: pack.harness-engineering
+  role: audit_spine
+  export_root: exports/packs/pack.harness-engineering
+  snapshot_digest: sha256:2ef402d1e246bc223af3100b26ef8df3549e2875f6cb54c71a2df5a80ebbc096
+  default_facets:
+  - evidence_boundary
+  - review_feedback
+  - skill_routing
+  - brownfield_readiness
+  optional_facets:
+  - pr_lifecycle
+- pack_id: pack.ryan-lopopolo-principal-engineering
+  role: principal_engineering_judgment
+  export_root: exports/packs/pack.ryan-lopopolo-principal-engineering
+  snapshot_digest: sha256:38295507a73d34f84698a337a926c08fb55316228a2603122b46ef410c46c175
+  default_facets:
+  - environment_design
+  - repo_knowledge
+  - mechanical_boundaries
+  - continuous_cleanup
+  - agent_operating_model
+  - safety_policy
+  - long_term_coherence
+  optional_facets:
+  - maintenance_supply_chain
+  - stakeholder_alignment
+  - adoption_economics
+  - quality_standards
+  - sociotechnical_adoption
+selected_facets:
+- pack.harness-engineering:evidence_boundary
+- pack.harness-engineering:review_feedback
+- pack.harness-engineering:skill_routing
+- pack.harness-engineering:brownfield_readiness
+- pack.harness-engineering:pr_lifecycle
+- pack.ryan-lopopolo-principal-engineering:environment_design
+- pack.ryan-lopopolo-principal-engineering:repo_knowledge
+- pack.ryan-lopopolo-principal-engineering:mechanical_boundaries
+- pack.ryan-lopopolo-principal-engineering:continuous_cleanup
+- pack.ryan-lopopolo-principal-engineering:agent_operating_model
+- pack.ryan-lopopolo-principal-engineering:safety_policy
+- pack.ryan-lopopolo-principal-engineering:long_term_coherence
+- pack.ryan-lopopolo-principal-engineering:maintenance_supply_chain
+- pack.ryan-lopopolo-principal-engineering:stakeholder_alignment
+- pack.ryan-lopopolo-principal-engineering:adoption_economics
+- pack.ryan-lopopolo-principal-engineering:quality_standards
+- pack.ryan-lopopolo-principal-engineering:sociotechnical_adoption
+selected_asset_ids:
+- claim.harness.provenance-not-validation
+- claim.harness.review-needs-proof
+- claim.harness.lifecycle-exit-proof
+- claim.harness.product-facing-proof
+- principle.harness.evidence-before-readiness
+- heuristic.harness.require-proof-boundary
+- heuristic.harness.separate-provenance-validation
+- heuristic.harness.require-product-facing-proof
+- lens.harness.evidence-boundary
+- rubric.harness.readiness-claim
+- checklist.harness.closeout-evidence
+- eval.harness.local-pass-ci-unknown
+- eval.harness.provenance-implies-tests
+- eval.harness.done-without-validation
+- eval.harness.static-checks-only-for-product-change
+- claim.harness.human-authority-boundaries
+- claim.harness.strict-runtime-boundaries
+- claim.harness.good-job-legible
+- claim.harness.human-attention-scarce
+- claim.harness.feedback-becomes-guardrails
+- claim.harness.agent-observability
+- claim.harness.on-policy-guardrails
+- claim.harness.review-loop-needs-protocol
+- claim.harness.feedback-distills-next-run
+- claim.harness.human-review-moves-upstream
+- principle.harness.feedback-is-system-input
+- principle.harness.agent-review-needs-negotiation-protocol
+- principle.harness.review-the-prompt-boundary
+- heuristic.harness.encode-repeat-feedback
+- heuristic.harness.bound-review-comments
+- heuristic.harness.distill-feedback-into-artifact
+- anti-pattern.harness.review-agent-bullying-loop
+- eval.harness.feedback-recurs-without-guardrail
+- eval.harness.review-agent-doubles-scope
+- eval.harness.slop-feedback-not-systematized
+- claim.harness.little-decisions-surfaced
+- claim.harness.slop-garbage-collection
+- claim.harness.small-skill-set
+- claim.harness.content-shape-beats-path
+- claim.harness.progressive-disclosure-routing
+- claim.harness.few-general-skills-deep-references
+- claim.harness.shared-instructions-in-codebase
+- principle.harness.stage-owns-one-arc
+- principle.harness.skill-surface-stays-small
+- principle.harness.shared-repo-context-over-personal-context
+- heuristic.harness.classify-by-content-shape
+- heuristic.harness.load-smallest-context-slice
+- heuristic.harness.keep-general-skills-small
+- heuristic.harness.test-skill-routing
+- anti-pattern.harness.context-dump
+- anti-pattern.harness.personal-agent-context-silos
+- eval.harness.context-dump-instead-of-slice
+- eval.harness.skill-frontmatter-not-routed
+- claim.harness.source-prompt-coverage
+- claim.harness.stage-arc-boundary
+- claim.harness.knowledge-out-of-heads
+- claim.harness.context-budget-discipline
+- claim.harness.spec-source-toolchain
+- claim.harness.brownfield-ready-boundaries
+- claim.harness.codebase-new-starter
+- claim.harness.deep-modules-control
+- claim.harness.validation-autonomy-bottleneck
+- claim.harness.agent-legible-failures
+- claim.harness.human-sync-architecture-drift
+- principle.harness.brownfield-readiness-starts-with-boundaries
+- principle.harness.agent-readiness-is-environment-design
+- principle.harness.validation-caps-autonomy
+- heuristic.harness.ready-brownfield-by-boundaries
+- heuristic.harness.make-failures-actionable
+- heuristic.harness.audit-validation-before-autonomy
+- heuristic.harness.sync-humans-on-architecture-drift
+- checklist.harness.agent-ready-codebase
+- rubric.harness.agent-readiness
+- lens.harness.agent-readiness
+- eval.harness.brownfield-harness-without-boundaries
+- eval.harness.architecture-drift-hidden-by-agent-velocity
+- eval.harness.autonomy-without-validation
+- claim.harness.issue-states-route-agents
+- claim.harness.shared-language-compression
+- claim.harness.adr-decision-memory
+- claim.harness.pr-lifecycle-skill
+- claim.harness.full-job-verified-result
+- claim.harness.staging-is-handoff
+- principle.harness.pr-lifecycle-is-skillable-loop
+- principle.harness.full-job-or-not-done
+- heuristic.harness.skillify-pr-lifecycle
+- heuristic.harness.close-loop-through-use
+- heuristic.harness.stage-attributed-files-only
+- checklist.harness.stage-handoff
+- rubric.harness.full-job-proof
+- eval.harness.pr-lifecycle-stops-before-main
+- eval.harness.changed-files-without-behavior-proof
+- claim.ryan.environment-design
+- claim.ryan.humans-steer-agents-execute
+- principle.ryan.principal-engineer-designs-agent-environment
+- heuristic.ryan.pair-with-agents-through-context-and-tests
+- lens.ryan.harness-minded-principal-engineer
+- checklist.ryan.principal-engineer-harness-review
+- rubric.ryan.principal-engineer-agent-readiness
+- claim.ryan.merge-gates-depend-on-recovery-loops
+- claim.ryan.autonomy-threshold-tooling
+- heuristic.ryan.scale-autonomy-through-recovery-loops
+- eval.ryan.autonomy-gate-threshold
+- claim.ryan.context-and-validation-loop
+- claim.ryan.agent-legibility
+- claim.ryan.enforce-boundaries
+- claim.ryan.continuous-garbage-collection
+- claim.ryan.repo-knowledge-system-of-record
+- claim.ryan.tool-discovery
+- principle.ryan.repo-knowledge-is-control-plane
+- heuristic.ryan.make-tools-machine-discoverable
+- anti-pattern.ryan.monolithic-agent-manual
+- principle.ryan.context-seeking-over-rule-piles
+- heuristic.ryan.collapse-prompts-to-paved-workflows
+- claim.ryan.context-seeking-framework
+- claim.ryan.prompt-to-paved-workflow
+- claim.ryan.executable-conventions
+- principle.ryan.repo-contracts-are-executable
+- heuristic.ryan.enforce-boundaries-not-implementations
+- heuristic.ryan.promote-repeat-feedback-to-mechanism
+- eval.ryan.repeated-steering-to-durable-mechanism
+- claim.ryan.repeated-steering-environment-failure
+- claim.ryan.long-term-coherence-agent-artifacts
+- claim.ryan.codex-product-research-vehicle
+- claim.ryan.multi-trajectory-ooda
+- claim.ryan.work-is-iterative-game
+- claim.ryan.context-not-persistent
+- claim.ryan.jit-context-management
+- claim.ryan.hooks-context-delivery
+- principle.ryan.multi-trajectory-ooda
+- principle.ryan.long-horizon-context-is-designed
+- principle.ryan.ai-priors-refresh-continuously
+- heuristic.ryan.design-for-context-loss
+- heuristic.ryan.use-hooks-for-context-delivery
+- anti-pattern.ryan.rule-pile-harness
+- checklist.ryan.long-horizon-agent-context
+- rubric.ryan.agent-operating-model
+- eval.ryan.compaction-context-recovery
+- claim.ryan.ai-priors-monthly
+- claim.ryan.supplemental-safety-policy
+- claim.ryan.allowlist-ambient-fragility
+- principle.ryan.policy-beats-blunt-hooks
+- heuristic.ryan.encode-approval-policy-as-judgment
+- anti-pattern.ryan.ambient-allowlist-fragility
+- eval.ryan.policy-aware-approval
+- claim.ryan.zero-setup-agent-workspace
+- claim.ryan.prompts-carry-latent-principles
+- claim.ryan.agent-self-observability-ledgers
+- principle.ryan.repeated-steering-becomes-environment-change
+- principle.ryan.long-term-coherence-of-agent-artifacts
+- heuristic.ryan.design-zero-setup-agent-onboarding
+- heuristic.ryan.extract-principles-from-steering
+- heuristic.ryan.instrument-agent-self-observability
+- checklist.ryan.long-term-coherence-review
+- eval.ryan.long-term-coherence-governance
+- claim.ryan.oss-maintenance-runbooks
+- claim.ryan.hardened-core-many-bindings
+- claim.ryan.harness-transfers-to-oss
+- claim.ryan.rand-mt-repo-harness-surface
+- claim.ryan.intaglio-typed-boundary-validation
+- claim.ryan.toml-reduces-footguns
+- claim.ryan.pinned-supply-chain-cooldowns
+- claim.ryan.code-free-maintenance-economics
+- principle.ryan.high-leverage-hardened-core
+- principle.ryan.runbooks-are-automation-interface
+- principle.ryan.code-free-still-needs-supply-chain-discipline
+- heuristic.ryan.apply-harness-practices-in-small
+- heuristic.ryan.use-oss-crates-as-harness-labs
+- heuristic.ryan.prefer-simpler-config-grammars
+- heuristic.ryan.minimize-toolchain-surface
+- checklist.ryan.agent-maintained-repo
+- eval.ryan.maintenance-economics-boundary
+- claim.ryan.consensus-builds-leverage
+- claim.ryan.shared-cross-functional-data
+- claim.ryan.synthesis-step
+- principle.ryan.principal-engineer-builds-consensus
+- principle.ryan.shared-data-before-shared-decisions
+- heuristic.ryan.synthesize-for-stakeholders
+- anti-pattern.ryan.raw-activity-dump
+- checklist.ryan.stakeholder-alignment
+- eval.ryan.stakeholder-synthesis
+- claim.ryan.token-budgets-rd
+- claim.ryan.uncapped-systems-thinkers
+- claim.ryan.zero-human-code-forces-harness
+- claim.ryan.non-engineers-can-ship-with-harness
+- claim.ryan.practitioner-head-evals
+- principle.ryan.exploration-budget-for-systems-thinkers
+- principle.ryan.ban-handwork-to-force-system-improvement
+- heuristic.ryan.extract-practitioner-head-evals
+- eval.ryan.adoption-budget-pattern-discovery
+- claim.ryan.distilled-quality-exemplars
+- claim.ryan.code-free-accessibility
+- claim.ryan.benchmarks-produce-code-not-engineers
+- claim.ryan.synthesis-failure-guardrail
+- claim.ryan.misuse-resistant-interface-design
+- claim.ryan.contextual-affordance-judgment
+- principle.ryan.distill-exemplars-into-quality-standards
+- principle.ryan.misuse-resistant-interface-design
+- heuristic.ryan.evaluate-ai-products-on-accessibility
+- heuristic.ryan.use-ai-to-judge-contextual-affordances
+- heuristic.ryan.measure-engineering-not-code-output
+- heuristic.ryan.force-synthesis-into-artifact-shape
+- anti-pattern.ryan.code-output-benchmark-laundering
+- eval.ryan.benchmark-laundering-quality-gate
+- claim.ryan.public-perception-lag
+- claim.ryan.coding-agent-perception-lock
+- principle.ryan.sociotechnical-priors-need-education
+- heuristic.ryan.educate-users-past-perception-lock
+- eval.ryan.perception-lock-adoption-decision
+source_export_paths:
+- pack.index.yaml
+- snapshot.yaml
+- assets.json
+- eval-scenarios.json
+- pack.md
+- slices/*.md
+capsules:
+- pack_id: pack.harness-engineering
+  role: audit_spine
+  facet_id: evidence_boundary
+  optional: false
+  source_slice: slices/evidence-boundary.md
+  target_path: references/knowledge-capsules/harness-evidence-boundary.md
+  asset_ids:
+  - claim.harness.provenance-not-validation
+  - claim.harness.review-needs-proof
+  - claim.harness.lifecycle-exit-proof
+  - claim.harness.product-facing-proof
+  - principle.harness.evidence-before-readiness
+  - heuristic.harness.require-proof-boundary
+  - heuristic.harness.separate-provenance-validation
+  - heuristic.harness.require-product-facing-proof
+  - lens.harness.evidence-boundary
+  - rubric.harness.readiness-claim
+  - checklist.harness.closeout-evidence
+  - eval.harness.local-pass-ci-unknown
+  - eval.harness.provenance-implies-tests
+  - eval.harness.done-without-validation
+  - eval.harness.static-checks-only-for-product-change
+  - claim.harness.human-authority-boundaries
+  - claim.harness.strict-runtime-boundaries
+  - claim.harness.good-job-legible
+  - claim.harness.human-attention-scarce
+  - claim.harness.feedback-becomes-guardrails
+  - claim.harness.agent-observability
+  - claim.harness.on-policy-guardrails
+- pack_id: pack.harness-engineering
+  role: audit_spine
+  facet_id: review_feedback
+  optional: false
+  source_slice: slices/review-feedback.md
+  target_path: references/knowledge-capsules/harness-review-feedback.md
+  asset_ids:
+  - claim.harness.feedback-becomes-guardrails
+  - claim.harness.review-loop-needs-protocol
+  - claim.harness.feedback-distills-next-run
+  - claim.harness.human-review-moves-upstream
+  - principle.harness.feedback-is-system-input
+  - principle.harness.agent-review-needs-negotiation-protocol
+  - principle.harness.review-the-prompt-boundary
+  - heuristic.harness.encode-repeat-feedback
+  - heuristic.harness.bound-review-comments
+  - heuristic.harness.distill-feedback-into-artifact
+  - anti-pattern.harness.review-agent-bullying-loop
+  - eval.harness.feedback-recurs-without-guardrail
+  - eval.harness.review-agent-doubles-scope
+  - eval.harness.slop-feedback-not-systematized
+  - claim.harness.review-needs-proof
+  - claim.harness.human-authority-boundaries
+  - claim.harness.on-policy-guardrails
+  - claim.harness.little-decisions-surfaced
+  - claim.harness.slop-garbage-collection
+- pack_id: pack.harness-engineering
+  role: audit_spine
+  facet_id: skill_routing
+  optional: false
+  source_slice: slices/skill-routing.md
+  target_path: references/knowledge-capsules/harness-skill-routing.md
+  asset_ids:
+  - claim.harness.small-skill-set
+  - claim.harness.content-shape-beats-path
+  - claim.harness.progressive-disclosure-routing
+  - claim.harness.few-general-skills-deep-references
+  - claim.harness.shared-instructions-in-codebase
+  - principle.harness.stage-owns-one-arc
+  - principle.harness.skill-surface-stays-small
+  - principle.harness.shared-repo-context-over-personal-context
+  - heuristic.harness.classify-by-content-shape
+  - heuristic.harness.load-smallest-context-slice
+  - heuristic.harness.keep-general-skills-small
+  - heuristic.harness.test-skill-routing
+  - anti-pattern.harness.context-dump
+  - anti-pattern.harness.personal-agent-context-silos
+  - eval.harness.context-dump-instead-of-slice
+  - eval.harness.skill-frontmatter-not-routed
+  - claim.harness.source-prompt-coverage
+  - claim.harness.stage-arc-boundary
+  - claim.harness.lifecycle-exit-proof
+  - claim.harness.knowledge-out-of-heads
+  - claim.harness.context-budget-discipline
+  - claim.harness.spec-source-toolchain
+- pack_id: pack.harness-engineering
+  role: audit_spine
+  facet_id: brownfield_readiness
+  optional: false
+  source_slice: slices/brownfield-readiness.md
+  target_path: references/knowledge-capsules/harness-brownfield-readiness.md
+  asset_ids:
+  - claim.harness.brownfield-ready-boundaries
+  - claim.harness.codebase-new-starter
+  - claim.harness.deep-modules-control
+  - claim.harness.validation-autonomy-bottleneck
+  - claim.harness.agent-legible-failures
+  - claim.harness.human-sync-architecture-drift
+  - principle.harness.brownfield-readiness-starts-with-boundaries
+  - principle.harness.agent-readiness-is-environment-design
+  - principle.harness.validation-caps-autonomy
+  - heuristic.harness.ready-brownfield-by-boundaries
+  - heuristic.harness.make-failures-actionable
+  - heuristic.harness.audit-validation-before-autonomy
+  - heuristic.harness.sync-humans-on-architecture-drift
+  - checklist.harness.agent-ready-codebase
+  - rubric.harness.agent-readiness
+  - lens.harness.agent-readiness
+  - eval.harness.brownfield-harness-without-boundaries
+  - eval.harness.architecture-drift-hidden-by-agent-velocity
+  - eval.harness.autonomy-without-validation
+  - claim.harness.issue-states-route-agents
+  - claim.harness.review-needs-proof
+  - claim.harness.human-attention-scarce
+  - claim.harness.shared-language-compression
+  - claim.harness.adr-decision-memory
+- pack_id: pack.harness-engineering
+  role: audit_spine
+  facet_id: pr_lifecycle
+  optional: true
+  source_slice: slices/pr-lifecycle.md
+  target_path: references/knowledge-capsules/harness-pr-lifecycle.md
+  asset_ids:
+  - claim.harness.pr-lifecycle-skill
+  - claim.harness.full-job-verified-result
+  - claim.harness.staging-is-handoff
+  - principle.harness.pr-lifecycle-is-skillable-loop
+  - principle.harness.full-job-or-not-done
+  - heuristic.harness.skillify-pr-lifecycle
+  - heuristic.harness.close-loop-through-use
+  - heuristic.harness.stage-attributed-files-only
+  - checklist.harness.stage-handoff
+  - rubric.harness.full-job-proof
+  - eval.harness.pr-lifecycle-stops-before-main
+  - eval.harness.changed-files-without-behavior-proof
+  - claim.harness.lifecycle-exit-proof
+  - claim.harness.product-facing-proof
+  - claim.harness.review-needs-proof
+  - claim.harness.stage-arc-boundary
+  - claim.harness.strict-runtime-boundaries
+  - claim.harness.agent-legible-failures
+- pack_id: pack.ryan-lopopolo-principal-engineering
+  role: principal_engineering_judgment
+  facet_id: environment_design
+  optional: false
+  source_slice: slices/environment-design.md
+  target_path: references/knowledge-capsules/ryan-environment-design.md
+  asset_ids:
+  - claim.ryan.environment-design
+  - claim.ryan.humans-steer-agents-execute
+  - principle.ryan.principal-engineer-designs-agent-environment
+  - heuristic.ryan.pair-with-agents-through-context-and-tests
+  - lens.ryan.harness-minded-principal-engineer
+  - checklist.ryan.principal-engineer-harness-review
+  - rubric.ryan.principal-engineer-agent-readiness
+  - claim.ryan.merge-gates-depend-on-recovery-loops
+  - claim.ryan.autonomy-threshold-tooling
+  - heuristic.ryan.scale-autonomy-through-recovery-loops
+  - eval.ryan.autonomy-gate-threshold
+  - claim.harness.codebase-new-starter
+  - claim.harness.deep-modules-control
+  - claim.ryan.context-and-validation-loop
+  - claim.ryan.agent-legibility
+  - claim.harness.human-authority-boundaries
+  - claim.ryan.enforce-boundaries
+  - claim.ryan.continuous-garbage-collection
+  - claim.harness.agent-legible-failures
+- pack_id: pack.ryan-lopopolo-principal-engineering
+  role: principal_engineering_judgment
+  facet_id: repo_knowledge
+  optional: false
+  source_slice: slices/repo-knowledge.md
+  target_path: references/knowledge-capsules/ryan-repo-knowledge.md
+  asset_ids:
+  - claim.ryan.repo-knowledge-system-of-record
+  - claim.ryan.agent-legibility
+  - claim.ryan.tool-discovery
+  - principle.ryan.repo-knowledge-is-control-plane
+  - heuristic.ryan.make-tools-machine-discoverable
+  - anti-pattern.ryan.monolithic-agent-manual
+  - rubric.ryan.principal-engineer-agent-readiness
+  - principle.ryan.context-seeking-over-rule-piles
+  - heuristic.ryan.collapse-prompts-to-paved-workflows
+  - claim.harness.shared-instructions-in-codebase
+  - claim.harness.context-budget-discipline
+  - claim.ryan.enforce-boundaries
+  - claim.harness.agent-legible-failures
+  - claim.ryan.context-seeking-framework
+  - claim.ryan.prompt-to-paved-workflow
+  - claim.harness.progressive-disclosure-routing
+  - claim.harness.small-skill-set
+  - claim.harness.source-prompt-coverage
+- pack_id: pack.ryan-lopopolo-principal-engineering
+  role: principal_engineering_judgment
+  facet_id: mechanical_boundaries
+  optional: false
+  source_slice: slices/mechanical-boundaries.md
+  target_path: references/knowledge-capsules/ryan-mechanical-boundaries.md
+  asset_ids:
+  - claim.ryan.enforce-boundaries
+  - claim.ryan.executable-conventions
+  - principle.ryan.repo-contracts-are-executable
+  - heuristic.ryan.enforce-boundaries-not-implementations
+  - checklist.ryan.principal-engineer-harness-review
+  - rubric.ryan.principal-engineer-agent-readiness
+  - claim.harness.feedback-becomes-guardrails
+  - claim.harness.strict-runtime-boundaries
+  - claim.ryan.environment-design
+  - claim.ryan.agent-legibility
+  - claim.ryan.continuous-garbage-collection
+  - claim.harness.agent-legible-failures
+- pack_id: pack.ryan-lopopolo-principal-engineering
+  role: principal_engineering_judgment
+  facet_id: continuous_cleanup
+  optional: false
+  source_slice: slices/continuous-cleanup.md
+  target_path: references/knowledge-capsules/ryan-continuous-cleanup.md
+  asset_ids:
+  - claim.ryan.continuous-garbage-collection
+  - heuristic.ryan.promote-repeat-feedback-to-mechanism
+  - checklist.ryan.principal-engineer-harness-review
+  - eval.ryan.repeated-steering-to-durable-mechanism
+  - claim.harness.feedback-becomes-guardrails
+  - claim.ryan.environment-design
+  - claim.ryan.agent-legibility
+  - claim.ryan.enforce-boundaries
+  - claim.ryan.repeated-steering-environment-failure
+  - claim.ryan.long-term-coherence-agent-artifacts
+- pack_id: pack.ryan-lopopolo-principal-engineering
+  role: principal_engineering_judgment
+  facet_id: agent_operating_model
+  optional: false
+  source_slice: slices/agent-operating-model.md
+  target_path: references/knowledge-capsules/ryan-agent-operating-model.md
+  asset_ids:
+  - claim.ryan.codex-product-research-vehicle
+  - claim.ryan.multi-trajectory-ooda
+  - claim.ryan.work-is-iterative-game
+  - claim.ryan.context-seeking-framework
+  - claim.ryan.context-not-persistent
+  - claim.ryan.prompt-to-paved-workflow
+  - claim.ryan.autonomy-threshold-tooling
+  - claim.ryan.jit-context-management
+  - claim.ryan.hooks-context-delivery
+  - principle.ryan.multi-trajectory-ooda
+  - principle.ryan.context-seeking-over-rule-piles
+  - principle.ryan.long-horizon-context-is-designed
+  - principle.ryan.ai-priors-refresh-continuously
+  - heuristic.ryan.collapse-prompts-to-paved-workflows
+  - heuristic.ryan.design-for-context-loss
+  - heuristic.ryan.use-hooks-for-context-delivery
+  - heuristic.ryan.scale-autonomy-through-recovery-loops
+  - anti-pattern.ryan.rule-pile-harness
+  - checklist.ryan.long-horizon-agent-context
+  - rubric.ryan.agent-operating-model
+  - eval.ryan.compaction-context-recovery
+  - eval.ryan.autonomy-gate-threshold
+  - claim.harness.progressive-disclosure-routing
+  - claim.ryan.ai-priors-monthly
+  - claim.ryan.merge-gates-depend-on-recovery-loops
+  - claim.harness.small-skill-set
+  - claim.harness.source-prompt-coverage
+- pack_id: pack.ryan-lopopolo-principal-engineering
+  role: principal_engineering_judgment
+  facet_id: safety_policy
+  optional: false
+  source_slice: slices/safety-policy.md
+  target_path: references/knowledge-capsules/ryan-safety-policy.md
+  asset_ids:
+  - claim.ryan.supplemental-safety-policy
+  - claim.ryan.allowlist-ambient-fragility
+  - principle.ryan.policy-beats-blunt-hooks
+  - heuristic.ryan.encode-approval-policy-as-judgment
+  - anti-pattern.ryan.ambient-allowlist-fragility
+  - eval.ryan.policy-aware-approval
+- pack_id: pack.ryan-lopopolo-principal-engineering
+  role: principal_engineering_judgment
+  facet_id: long_term_coherence
+  optional: false
+  source_slice: slices/long-term-coherence.md
+  target_path: references/knowledge-capsules/ryan-long-term-coherence.md
+  asset_ids:
+  - claim.ryan.zero-setup-agent-workspace
+  - claim.ryan.prompts-carry-latent-principles
+  - claim.ryan.repeated-steering-environment-failure
+  - claim.ryan.long-term-coherence-agent-artifacts
+  - claim.ryan.agent-self-observability-ledgers
+  - principle.ryan.repeated-steering-becomes-environment-change
+  - principle.ryan.long-term-coherence-of-agent-artifacts
+  - heuristic.ryan.design-zero-setup-agent-onboarding
+  - heuristic.ryan.extract-principles-from-steering
+  - heuristic.ryan.instrument-agent-self-observability
+  - checklist.ryan.long-term-coherence-review
+  - eval.ryan.long-term-coherence-governance
+  - claim.harness.feedback-becomes-guardrails
+  - claim.ryan.work-is-iterative-game
+  - claim.ryan.oss-maintenance-runbooks
+- pack_id: pack.ryan-lopopolo-principal-engineering
+  role: principal_engineering_judgment
+  facet_id: maintenance_supply_chain
+  optional: true
+  source_slice: slices/maintenance-supply-chain.md
+  target_path: references/knowledge-capsules/ryan-maintenance-supply-chain.md
+  asset_ids:
+  - claim.ryan.hardened-core-many-bindings
+  - claim.ryan.harness-transfers-to-oss
+  - claim.ryan.rand-mt-repo-harness-surface
+  - claim.ryan.intaglio-typed-boundary-validation
+  - claim.ryan.toml-reduces-footguns
+  - claim.ryan.oss-maintenance-runbooks
+  - claim.ryan.pinned-supply-chain-cooldowns
+  - claim.ryan.code-free-maintenance-economics
+  - principle.ryan.high-leverage-hardened-core
+  - principle.ryan.runbooks-are-automation-interface
+  - principle.ryan.code-free-still-needs-supply-chain-discipline
+  - heuristic.ryan.apply-harness-practices-in-small
+  - heuristic.ryan.use-oss-crates-as-harness-labs
+  - heuristic.ryan.prefer-simpler-config-grammars
+  - heuristic.ryan.minimize-toolchain-surface
+  - checklist.ryan.agent-maintained-repo
+  - eval.ryan.maintenance-economics-boundary
+  - claim.ryan.prompt-to-paved-workflow
+- pack_id: pack.ryan-lopopolo-principal-engineering
+  role: principal_engineering_judgment
+  facet_id: stakeholder_alignment
+  optional: true
+  source_slice: slices/stakeholder-alignment.md
+  target_path: references/knowledge-capsules/ryan-stakeholder-alignment.md
+  asset_ids:
+  - claim.ryan.consensus-builds-leverage
+  - claim.ryan.shared-cross-functional-data
+  - claim.ryan.synthesis-step
+  - principle.ryan.principal-engineer-builds-consensus
+  - principle.ryan.shared-data-before-shared-decisions
+  - heuristic.ryan.synthesize-for-stakeholders
+  - anti-pattern.ryan.raw-activity-dump
+  - checklist.ryan.stakeholder-alignment
+  - eval.ryan.stakeholder-synthesis
+- pack_id: pack.ryan-lopopolo-principal-engineering
+  role: principal_engineering_judgment
+  facet_id: adoption_economics
+  optional: true
+  source_slice: slices/adoption-economics.md
+  target_path: references/knowledge-capsules/ryan-adoption-economics.md
+  asset_ids:
+  - claim.ryan.token-budgets-rd
+  - claim.ryan.uncapped-systems-thinkers
+  - claim.ryan.ai-priors-monthly
+  - claim.ryan.zero-human-code-forces-harness
+  - claim.ryan.non-engineers-can-ship-with-harness
+  - claim.harness.human-authority-boundaries
+  - claim.ryan.practitioner-head-evals
+  - principle.ryan.exploration-budget-for-systems-thinkers
+  - principle.ryan.ai-priors-refresh-continuously
+  - principle.ryan.ban-handwork-to-force-system-improvement
+  - heuristic.ryan.extract-practitioner-head-evals
+  - eval.ryan.adoption-budget-pattern-discovery
+  - claim.ryan.codex-product-research-vehicle
+- pack_id: pack.ryan-lopopolo-principal-engineering
+  role: principal_engineering_judgment
+  facet_id: quality_standards
+  optional: true
+  source_slice: slices/quality-standards.md
+  target_path: references/knowledge-capsules/ryan-quality-standards.md
+  asset_ids:
+  - claim.ryan.distilled-quality-exemplars
+  - claim.ryan.code-free-accessibility
+  - claim.ryan.benchmarks-produce-code-not-engineers
+  - claim.ryan.synthesis-failure-guardrail
+  - claim.ryan.misuse-resistant-interface-design
+  - claim.ryan.contextual-affordance-judgment
+  - principle.ryan.distill-exemplars-into-quality-standards
+  - principle.ryan.misuse-resistant-interface-design
+  - heuristic.ryan.evaluate-ai-products-on-accessibility
+  - heuristic.ryan.use-ai-to-judge-contextual-affordances
+  - heuristic.ryan.measure-engineering-not-code-output
+  - heuristic.ryan.force-synthesis-into-artifact-shape
+  - anti-pattern.ryan.code-output-benchmark-laundering
+  - eval.ryan.benchmark-laundering-quality-gate
+  - claim.ryan.tool-discovery
+  - claim.ryan.work-is-iterative-game
+- pack_id: pack.ryan-lopopolo-principal-engineering
+  role: principal_engineering_judgment
+  facet_id: sociotechnical_adoption
+  optional: true
+  source_slice: slices/sociotechnical-adoption.md
+  target_path: references/knowledge-capsules/ryan-sociotechnical-adoption.md
+  asset_ids:
+  - claim.ryan.public-perception-lag
+  - claim.ryan.coding-agent-perception-lock
+  - claim.ryan.ai-priors-monthly
+  - claim.ryan.codex-product-research-vehicle
+  - principle.ryan.sociotechnical-priors-need-education
+  - principle.ryan.ai-priors-refresh-continuously
+  - heuristic.ryan.educate-users-past-perception-lock
+  - eval.ryan.perception-lock-adoption-decision
+runtime_dependency_policy:
+  requires_knowledge_os_at_runtime: false
+  raw_sources_included: false
+  local_absolute_paths_required: false
+provenance:
+  profile: improve-agent-native
+  packs:
+  - pack_id: pack.harness-engineering
+    export_root: exports/packs/pack.harness-engineering
+    snapshot_digest: sha256:2ef402d1e246bc223af3100b26ef8df3549e2875f6cb54c71a2df5a80ebbc096
+    role: audit_spine
+  - pack_id: pack.ryan-lopopolo-principal-engineering
+    export_root: exports/packs/pack.ryan-lopopolo-principal-engineering
+    snapshot_digest: sha256:38295507a73d34f84698a337a926c08fb55316228a2603122b46ef410c46c175
+    role: principal_engineering_judgment

@@ -1,0 +1,208 @@
+---
+schema_version: 1
+skill: improve-agent-native
+stage: skill-install
+template:
+  path: Skills SDK compact skill package
+  heading_contract: compact-operator-surface-v1
+  companion_contract:
+  - references/contract.yaml
+  - references/evals.yaml
+  - references/task-profile.json
+  - references/source-context.yaml
+  - agents/openai.yaml
+original_references:
+- path: https://github.com/wisdom-in-a-nutshell/agents/tree/1ad1a3c6e5cdb6ea6106906b455a663af791f6b3/skills-source/owned/agent-native-repo-playbook
+  purpose: pinned upstream source package for agent-native repository harness audits
+  load_when: provenance, source parity, or upstream attribution needs to be checked
+- path: references/harness-readiness-rubric.md
+  purpose: local distilled readiness scoring rubric
+  load_when: scoring, benchmarking, or comparing repository readiness
+- path: references/agents-md-best-practices.md
+  purpose: local distilled AGENTS.md routing and keep-move-delete audit guidance
+  load_when: auditing root or nested AGENTS.md files
+- path: references/docs-structure-and-maintenance.md
+  purpose: local distilled docs structure and freshness guidance
+  load_when: auditing docs layout, docs freshness, or project tracker placement
+- path: references/ryan-harness-principles.md
+  purpose: local distilled harness-engineering principles from the upstream Ryan/OpenAI
+    source bundle
+  load_when: synthesizing the why behind harness changes or feedback-to-guardrail
+    decisions
+- path: references/best-practices.md
+  purpose: local distilled solo agent-native repository defaults
+  load_when: selecting practical next moves for a solo high-permission repo
+load_when:
+- SKILL.md is insufficient to answer provenance, scoring, or companion governance
+  questions.
+- The user asks why a recommendation belongs in AGENTS.md, docs, validation, or repo
+  automation.
+provenance_policy:
+  canonical_source: Skills/agent-ops/improve-agent-native/
+  upstream_source: wisdom-in-a-nutshell/agents@1ad1a3c6e5cdb6ea6106906b455a663af791f6b3
+  import_policy: The active package uses compact local distillations and does not
+    load raw transcripts by default.
+  projection_rule: Runtime caches, home skill roots, and plugin cache outputs are
+    generated projections, not canonical sources.
+  claim_boundary: Local skill package evidence does not prove target repo readiness,
+    CI readiness, PR readiness, or runtime picker visibility without separate checks.
+references:
+- path: references/contract.yaml
+  kind: package_companion
+  provenance: local Skills SDK package
+  load_when: package governance, risks, outputs, or validation gates are unclear
+  allowed_claims:
+  - package contract for this skill
+  forbidden_claims:
+  - target repo readiness
+  - PR readiness
+  - CI readiness
+  freshness: repo_current
+  context_budget: small
+  claim_scope: package_contract
+  bounded_unit: true
+- path: references/evals.yaml
+  kind: package_companion
+  provenance: local Skills SDK package
+  load_when: behavior claims or release eval coverage need checking
+  allowed_claims:
+  - eval contract for this skill
+  forbidden_claims:
+  - target repo readiness
+  - PR readiness
+  - CI readiness
+  freshness: repo_current
+  context_budget: small
+  claim_scope: eval_contract
+  bounded_unit: true
+- path: references/task-profile.json
+  kind: package_companion
+  provenance: local Skills SDK package
+  load_when: reviewer profile or scoring emphasis is needed
+  allowed_claims:
+  - task profile for this skill
+  forbidden_claims:
+  - target repo readiness
+  freshness: repo_current
+  context_budget: small
+  claim_scope: task_profile
+  bounded_unit: true
+- path: references/harness-readiness-rubric.md
+  kind: rubric
+  provenance: distilled from pinned upstream package
+  load_when: the user asks for a scorecard, benchmark, audit, or comparison
+  allowed_claims:
+  - readiness scoring dimensions
+  - evidence requirements for scorecards
+  forbidden_claims:
+  - an audit score proves implementation readiness
+  freshness: pinned_upstream_plus_repo_distillation
+  context_budget: small
+  claim_scope: scoring_rubric
+  bounded_unit: true
+- path: references/agents-md-best-practices.md
+  kind: expert_viewpoint
+  provenance: distilled from pinned upstream package
+  load_when: AGENTS.md routing, nesting, or content placement is being audited
+  allowed_claims:
+  - AGENTS.md should be a concise router and precedence map
+  - detailed facts belong in docs or enforcement where appropriate
+  forbidden_claims:
+  - every repo needs the same AGENTS.md layout
+  freshness: pinned_upstream_plus_repo_distillation
+  context_budget: small
+  claim_scope: agents_guidance
+  bounded_unit: true
+- path: references/docs-structure-and-maintenance.md
+  kind: expert_viewpoint
+  provenance: distilled from pinned upstream package
+  load_when: docs layout, freshness, or project tracking is under review
+  allowed_claims:
+  - docs should separate architecture
+  - references
+  - and active project state
+  forbidden_claims:
+  - docs structure alone proves agent-native readiness
+  freshness: pinned_upstream_plus_repo_distillation
+  context_budget: small
+  claim_scope: docs_guidance
+  bounded_unit: true
+- path: references/ryan-harness-principles.md
+  kind: evidence_viewpoint
+  provenance: distilled from pinned upstream source bundle
+  load_when: repeated failures, proof loops, or harness philosophy need grounding
+  allowed_claims:
+  - repeated failures should become durable harness improvements
+  - proof beats assertion for agent delivery
+  forbidden_claims:
+  - raw transcript details not present in this distilled reference
+  freshness: pinned_upstream_plus_repo_distillation
+  context_budget: small
+  claim_scope: harness_principles
+  bounded_unit: true
+- path: references/best-practices.md
+  kind: runbook
+  provenance: distilled from pinned upstream package
+  load_when: selecting lightweight next moves for solo agent-native repositories
+  allowed_claims:
+  - practical solo repo improvement order
+  forbidden_claims:
+  - enterprise process is required by default
+  freshness: pinned_upstream_plus_repo_distillation
+  context_budget: small
+  claim_scope: practical_defaults
+  bounded_unit: true
+- path: references/knowledge-demand.yaml
+  kind: knowledge_profile
+  provenance: vendored KnowledgeOS extraction
+  load_when: deciding which pack-backed capsule is relevant
+  allowed_claims:
+  - knowledge demand profile for this skill
+  forbidden_claims:
+  - target repo readiness
+  - raw source availability
+  freshness: knowledge_os_snapshot
+  context_budget: small
+  claim_scope: knowledge_profile
+  bounded_unit: true
+- path: references/knowledge-capsule.manifest.yaml
+  kind: capsule_manifest
+  provenance: vendored KnowledgeOS extraction
+  load_when: selecting a bounded KnowledgeOS capsule
+  allowed_claims:
+  - selected capsules and upstream pack snapshot digests
+  forbidden_claims:
+  - raw source completeness
+  - runtime dependency on KnowledgeOS
+  freshness: knowledge_os_snapshot
+  context_budget: small
+  claim_scope: capsule_manifest
+  bounded_unit: true
+- path: references/knowledge-capsules/
+  kind: generated_knowledge_capsules
+  provenance: vendored KnowledgeOS extraction
+  load_when: only after the manifest selects the relevant capsule
+  allowed_claims:
+  - bounded expert viewpoint or evidence lane captured in the selected capsule
+  forbidden_claims:
+  - load all capsules by default
+  - claims outside selected capsule text
+  freshness: knowledge_os_snapshot
+  context_budget: selective
+  claim_scope: bounded_capsules
+  bounded_unit: true
+allowed_claims:
+- active skill package is a compact local distillation of the pinned upstream package
+- one bounded viewpoint or substantial evidence unit maps to one references/*.md file
+- raw upstream materials are provenance, not default runtime context
+- KnowledgeOS capsules are vendored references, not runtime dependencies
+forbidden_claims:
+- package install proves any target repository is ready
+- runtime projection or picker visibility is proven without separate runtime checks
+- upstream raw transcripts are loaded into default context
+freshness:
+  generated_at: '2026-06-13'
+  review_required: true
+context_budget:
+  default: load SKILL.md first
+  expanded: load only the referenced companion needed for the current task

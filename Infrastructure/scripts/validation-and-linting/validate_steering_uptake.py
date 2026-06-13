@@ -308,7 +308,7 @@ def validate(root: Path = ROOT) -> list[Finding]:
             if len(row) != len(REQUIRED_HEADERS):
                 findings.append(Finding("STEERING_LEDGER_ROW_WIDTH", f"Row {index} has {len(row)} cells, expected {len(REQUIRED_HEADERS)}.", _relative(ledger_path, root)))
                 continue
-            record = dict(zip(REQUIRED_HEADERS, row, strict=True))
+            record = dict(zip(REQUIRED_HEADERS, row))
             for field in REQUIRED_HEADERS:
                 if not record[field] or record[field].lower() in {"none", "n/a", "todo"}:
                     findings.append(Finding("STEERING_LEDGER_FIELD_EMPTY", f"Row {index} has weak value for {field}.", _relative(ledger_path, root)))
