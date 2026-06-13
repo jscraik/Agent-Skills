@@ -6860,6 +6860,71 @@ def _append_user_runtime_relinks(
         )
 
 
+def _verify_user_runtime_relinks(plan: dict, home: Path, skills_dir: Path, *, dry_run: bool) -> list[ErrorObject]:
+    """Verify home runtime skill links point at this checkout's projection after user sync."""
+    expected_target = str(skills_dir)
+    expected_resolved = skills_dir.resolve(strict=False)
+    checks: list[dict[str, Any]] = []
+    errors: list[ErrorObject] = []
+    if dry_run:
+        plan["user_runtime_link_checks"] = {
+            "status": "not_run",
+            "reason": "dry_run",
+            "expected_target": expected_target,
+            "checks": checks,
+        }
+        return errors
+
+    for label, link in (
+        ("agents_user_runtime", home / ".agents" / "skills"),
+        ("codex_user_runtime", home / ".codex" / "skills"),
+    ):
+        check: dict[str, Any] = {
+            "label": label,
+            "path": str(link),
+            "expected_target": expected_target,
+            "exists": link.exists(),
+            "is_symlink": link.is_symlink(),
+            "target": None,
+            "resolved_target": None,
+            "literal_target_matches": False,
+            "resolved_target_matches": False,
+            "status": "fail",
+        }
+        if link.is_symlink():
+            try:
+                target_text = os.readlink(link)
+                resolved_target = link.resolve(strict=False)
+            except OSError as exc:
+                check["error"] = str(exc)
+            else:
+                check["target"] = target_text
+                check["resolved_target"] = str(resolved_target)
+                check["literal_target_matches"] = target_text == expected_target
+                check["resolved_target_matches"] = resolved_target == expected_resolved
+        if check["is_symlink"] and check["literal_target_matches"] and check["resolved_target_matches"]:
+            check["status"] = "pass"
+        else:
+            errors.append(
+                ErrorObject(
+                    code="ERR_RUNTIME",
+                    message=f"User runtime link {link} does not point at the active workspace projection.",
+                    fix_suggestion=(
+                        "Run ./bin/ask skills sync --scope user --projection rooted --json --robot "
+                        "from the intended checkout and verify the link target casing matches exactly."
+                    ),
+                )
+            )
+        checks.append(check)
+
+    plan["user_runtime_link_checks"] = {
+        "status": "pass" if not errors else "fail",
+        "expected_target": expected_target,
+        "checks": checks,
+    }
+    return errors
+
+
 def _clear_symlinked_personal_plugin_root(repo_root: Path, target: Path, *, dry_run: bool, plan: dict) -> str:
     """Remove legacy personal plugin marketplace root symlinks before mirror sync."""
     if not target.is_symlink():
@@ -7334,6 +7399,21 @@ def sync_skills(
                 result.data["projection_mode"] = projection_decision.projection_mode
                 return result
             _append_user_runtime_relinks(plan, logs, repo_root, skills_dir, dry_run=dry_run)
+            relink_errors = _verify_user_runtime_relinks(plan, Path.home(), skills_dir, dry_run=dry_run)
+            if relink_errors:
+                plan["validation_status"] = "fail"
+                plan["warnings"].append("USER_RUNTIME_LINK_POSTCONDITION_FAILED")
+                result.errors.extend(relink_errors)
+                return _finalize_skill_sync_result(
+                    result,
+                    plan,
+                    logs,
+                    projection_decision,
+                    scope=scope,
+                    dry_run=dry_run,
+                    status="error",
+                    plugin_cache_refresh=plugin_cache_refresh,
+                )
             plan["validation_status"] = "pass"
             return _finalize_skill_sync_result(
                 result,
@@ -7517,6 +7597,21 @@ def sync_skills(
     elif scope == "user":
         try:
             _append_user_runtime_relinks(plan, logs, repo_root, skills_dir, dry_run=dry_run)
+            relink_errors = _verify_user_runtime_relinks(plan, Path.home(), skills_dir, dry_run=dry_run)
+            if relink_errors:
+                plan["validation_status"] = "fail"
+                plan["warnings"].append("USER_RUNTIME_LINK_POSTCONDITION_FAILED")
+                result.errors.extend(relink_errors)
+                return _finalize_skill_sync_result(
+                    result,
+                    plan,
+                    logs,
+                    projection_decision,
+                    scope=scope,
+                    dry_run=dry_run,
+                    status="error",
+                    plugin_cache_refresh=plugin_cache_refresh,
+                )
         except OSError as exc:
             plan["validation_status"] = "fail"
             plan["warnings"].append("USER_RUNTIME_LINK_SYNC_FAILED")
