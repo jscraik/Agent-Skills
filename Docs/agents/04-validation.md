@@ -90,22 +90,31 @@ stable evidence directory `/tmp/ask-tessl-evals/<skill-path>-<sha12>`, then run
 `tessl eval run --json <staged-temp-source>`; do not point Tessl at the live
 skill or plugin source tree. The hard boundary is registry upload: use native
 `tessl`, no `npx tessl`, no publish, no registry upload, and no package upload
-path.
+path. A controlled copy of the staged payload may be uploaded to Jamie's private
+Tessl workspace for assessment; do not describe that private workspace eval as a
+public publish, registry upload, or leak.
 
 The staging layer must adapt repo-native eval metadata into Tessl's expected
 project shape: copy the skill entrypoint and eval reference files, synthesize
-`scenarios/<case-id>/task.md` from `references/evals.yaml`, and include a
-minimal `tessl.json` project marker. Project identity is deterministic:
+`scenarios/<case-id>/task.md` plus `scenarios/<case-id>/criteria.json` from
+`references/evals.yaml`, and include a minimal `tessl.json` project marker.
+Project identity is deterministic:
 plugin-owned skills under `Plugins/<plugin-id>/skills/**` use the plugin
 project, while standalone skills use the skill project. When a Tessl workspace
 is provided, the wrapper must check the staged project link before evals run,
 relink an existing project first, and create a project only when relink proves
-one does not already exist. Leave the staged directory in place so the copied
+one does not already exist. The requested workspace is part of the evidence
+contract: a run requested for `skills-sdk` must create, link, list, and be
+reported under `skills-sdk`, not under a personal workspace with the same
+project name. Leave the staged directory in place so the copied
 inputs, synthesized Tessl tasks, and Tessl project marker remain inspectable
-evidence. Reruns must archive prior staged contents under `evidence-archive/`
-before refreshing current inputs; do not delete temp evidence to get a clean
-workspace. Do not duplicate eval cases by hand unless the canonical eval format
-changes.
+evidence. Reruns must archive prior staged contents to a sibling archive such
+as `/tmp/ask-tessl-evals/<skill-path>-<sha12>-evidence-archive/` before
+refreshing current inputs; do not delete temp evidence to get a clean
+workspace. Do not keep historical `scenarios/`, `evals/`, or
+`criteria.json` evidence under the staged upload root, because Tessl may ingest
+stale evidence as current scenarios. Do not duplicate eval cases by hand unless
+the canonical eval format changes.
 
 The live Tessl workflow is a separate explicit lane. Use
 `./bin/ask evals run <skill-path> --tessl-live-private --tessl-workspace <workspace>`
@@ -179,6 +188,14 @@ documented Tessl outage, policy block, or intentionally scoped debug run. If
 Tessl reports that no existing project safely matches the staged directory,
 classify it as a Tessl workspace/project-link setup blocker; do not loop back
 to auth, sandbox, temp-staging, or registry-upload explanations.
+
+If the native Tessl subprocess exits with a negative return code such as `-9`
+and produces no stdout or stderr, classify it as `blocked_runtime` with the
+terminating signal name, for example `SIGKILL`. Do not continue into fallback
+project relink/create attempts, and do not call the skill failed or reviewed.
+Treat the preserved `/tmp/ask-tessl-*` directory as the evidence packet for
+the staged inputs and diagnose the local Tessl CLI, sandbox, or OS runtime
+separately before rerunning the same wrapper lane.
 
 `ask skills external-review` is the durable second-check entrypoint for the
 external-review ladder. It runs strict audit, local Plugin Eval, and native

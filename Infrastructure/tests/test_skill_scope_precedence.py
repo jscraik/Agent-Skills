@@ -1,3 +1,4 @@
+import json
 import shutil
 import sys
 import tempfile
@@ -418,6 +419,32 @@ class TestSkillScopePrecedence(unittest.TestCase):
         for skill_set in verify_runtime_budget.ROOT_SKILL_SETS:
             self._write_skill(f".agents/skills/{skill_set}", f"{skill_set} root skill set.")
         self._write_skill(".agents/skills/codex-primary-runtime", "Bundled primary runtime skills.")
+
+        with self._patched_repo(default_visible=set()):
+            report = verify_runtime_budget.build_report()
+
+        self.assertEqual(report["projection_mode"], "rooted")
+        self.assertNotIn(
+            "ROOTED_POLICY_NAME_DRIFT",
+            {violation["code"] for violation in report["violations"]},
+        )
+
+    def test_rooted_runtime_allows_declared_direct_first_party_skill(self) -> None:
+        for skill_set in verify_runtime_budget.ROOT_SKILL_SETS:
+            self._write_skill(f".agents/skills/{skill_set}", f"{skill_set} root skill set.")
+        self._write_skill(".agents/skills/improve-agent-native", "Direct first-party skill.")
+        source = self._write_skill("Skills/agent-ops/improve-agent-native", "Canonical direct skill.")
+        manifest = self.repo_root / ".skillsets" / "agent-ops" / "manifest.jsonl"
+        manifest.parent.mkdir(parents=True)
+        manifest.write_text(
+            json.dumps({
+                "id": "improve-agent-native",
+                "runtime_visibility": "flat",
+                "source_path": source.relative_to(self.repo_root).as_posix() + "/SKILL.md",
+            })
+            + "\n",
+            encoding="utf-8",
+        )
 
         with self._patched_repo(default_visible=set()):
             report = verify_runtime_budget.build_report()

@@ -628,6 +628,7 @@ policy:
             ],
         )
         self.assertTrue(sdk_contract["progressive_disclosure"]["skill_md_under_500_lines"])
+
         self.assertTrue(sdk_contract["progressive_disclosure"]["agent_metadata_declared"])
         self.assertTrue(sdk_contract["progressive_disclosure"]["references_contract_declared"])
         self.assertTrue(sdk_contract["values"]["evals"]["declared"])
@@ -697,6 +698,33 @@ policy:
             [provider["name"] for provider in providers["providers"]],
             ["otel_collector", "session_collector", "observability_stack"],
         )
+
+    def test_structured_reference_fallback_preserves_top_level_lists(self) -> None:
+        text = """---
+schema_version: '2.0'
+skill_name: example
+claims:
+- id: global-target-repository
+  statement: Uses active repository.
+cases:
+- id: smoke-discovery
+  name: Discovery
+"""
+
+        with tempfile.NamedTemporaryFile("w", suffix=".yaml", encoding="utf-8") as handle:
+            handle.write(text)
+            handle.flush()
+            with patch.object(package_contracts, "yaml", None):
+                loaded, error = package_contracts.read_structured_reference(Path(handle.name))
+
+        self.assertIsNone(error)
+        self.assertIsInstance(loaded, dict)
+        if not isinstance(loaded, dict):
+            self.fail("expected structured reference fallback to return a dict")
+        self.assertIsInstance(loaded.get("claims"), list)
+        self.assertIsInstance(loaded.get("cases"), list)
+        self.assertTrue(loaded["claims"])
+        self.assertTrue(loaded["cases"])
 
     def test_sdk_contract_accepts_optional_valid_skillflow(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

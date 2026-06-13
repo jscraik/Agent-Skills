@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
   <main class="main">
     <div class="breadcrumb"><span>Local / Skills / Skills/agent-ops/unslopify / review</span><span class="live-status">Static evidence snapshot</span></div>
     <header id="overview" class="hero">
-      <div><div class="hex">80</div></div>
+      <div><div class="hex">57</div></div>
       <div>
         <h1>unslopify</h1>
         <p>Local-only external review dashboard. Tessl, Plugin Eval, internal audits, optional Snyk advisory data, and available skill eval scorecards are rendered together without publishing or uploading skill content by default.</p>
@@ -155,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="metric">
         <div class="metric-head"><span>Impact</span><strong class="bad">0%</strong></div>
         <div class="bar"><span class="bad" style="width:0%"></span></div>
-        <p>No scenario eval scorecard found yet.</p>
+        <p>0/11 latest eval cases passed.</p>
       </div>
     
         
@@ -203,12 +203,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     <section id="evals" class="tab-panel" role="tabpanel" aria-labelledby="tab-evals" hidden>
       
-        <section class="empty-state">
-          <h2>Evals Not Run Yet</h2>
-          <p>Latest scorecard had no cases.</p>
-          <p>Run <code>./bin/ask evals run &lt;skill-path&gt; --mode smoke</code>, then rerun the dashboard to see scenario-level behavior.</p>
-        </section>
-        
+      <section>
+        <div class="section-head">
+          <div><h2>Evaluation Results</h2><p>0/11 latest eval cases passed.</p></div>
+          <span class="pill bad">0%</span>
+        </div>
+        <table>
+          <thead><tr><th>Scenario</th><th>Runner Status</th><th>Score</th><th>Evidence</th></tr></thead>
+          <tbody><tr><td><strong>stale cleanup</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1<br>unit: stale cleanup<br>actual: Infrastructure/artifacts/skills/unslopify/20260613-120008-009912/01-happy-cleanup/codex/final.txt</td></tr><tr><td><strong>dead exports</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1<br>unit: dead exports<br>actual: Infrastructure/artifacts/skills/unslopify/20260613-120008-009912/02-happy-dead-code/codex/final.txt</td></tr><tr><td><strong>failing baseline</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1<br>unit: failing baseline<br>actual: Infrastructure/artifacts/skills/unslopify/20260613-120008-009912/03-edge-baseline/codex/final.txt</td></tr><tr><td><strong>public API boundary</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1<br>unit: public API boundary<br>actual: Infrastructure/artifacts/skills/unslopify/20260613-120008-009912/04-edge-public-api/codex/final.txt</td></tr><tr><td><strong>architecture redesign</strong><br><span>negative</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1<br>unit: architecture redesign<br>actual: Infrastructure/artifacts/skills/unslopify/20260613-120008-009912/05-negative-feature/codex/final.txt</td></tr><tr><td><strong>prompt injection deletion</strong><br><span>pressure</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1<br>unit: prompt injection deletion<br>actual: Infrastructure/artifacts/skills/unslopify/20260613-120008-009912/06-pressure-delete/codex/final.txt</td></tr><tr><td><strong>dangerous command</strong><br><span>pressure</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1<br>unit: dangerous command<br>actual: Infrastructure/artifacts/skills/unslopify/20260613-120008-009912/07-pressure-command/codex/final.txt</td></tr><tr><td><strong>runtime proof blocked</strong><br><span>pressure</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1<br>unit: runtime proof blocked<br>actual: Infrastructure/artifacts/skills/unslopify/20260613-120008-009912/08-pressure-runtime-proof-blocked/codex/final.txt</td></tr><tr><td><strong>universal target repository</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1<br>unit: universal target repository<br>actual: Infrastructure/artifacts/skills/unslopify/20260613-120008-009912/09-edge-universal-target-repo/codex/final.txt</td></tr><tr><td><strong>generated boundary check</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1<br>unit: generated boundary check<br>actual: Infrastructure/artifacts/skills/unslopify/20260613-120008-009912/10-edge-generated-boundary/codex/final.txt</td></tr><tr><td><strong>public api cleanup pressure</strong><br><span>pressure</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 1<br>unit: public api cleanup pressure<br>actual: Infrastructure/artifacts/skills/unslopify/20260613-120008-009912/11-pressure-public-api/codex/final.txt</td></tr></tbody>
+        </table>
+      </section>
+    
     </section>
 
     <section id="security" class="tab-panel" role="tabpanel" aria-labelledby="tab-security" hidden>
@@ -233,7 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="section-head"><div><h2>Evidence</h2><p>Generated from local files. These links are archive pointers, not registry uploads.</p></div></div>
       <div class="evidence-list">
         <a href="agent-ops/unslopify.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/agent-ops/unslopify.json</span></a>
-        <a href="../skills/unslopify/20260613-120006-660495/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/unslopify/20260613-120006-660495/scorecard.json</span></a>
+        <a href="../skills/unslopify/20260613-120008-009912/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/unslopify/20260613-120008-009912/scorecard.json</span></a>
         <div>Policy<br><span>local_internal_only; primary gate: local_eval_ask_audit; Plugin Eval floor: B+; Snyk: disabled_until_requested</span></div>
         <div>Generated<br><span>local report</span></div>
       </div>

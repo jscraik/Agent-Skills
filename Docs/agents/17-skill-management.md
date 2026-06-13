@@ -91,14 +91,16 @@ all local plugins, with each local `source.path` starting with `./` and staying
 inside the marketplace root. For project-local plugins materialized at
 `~/.codex/plugins/<plugin-name>`, write `./.codex/plugins/<plugin-name>`.
 The sync wrapper may also create `~/.agents/plugins/<plugin-name>` symlinks to
-the materialized plugin directory for operator discoverability.
-If `~/.agents/plugins` is symlinked into this repository, it must target a
-dedicated personal-marketplace projection such as `.agents/personal-plugins`,
-not the repo `Plugins/` source tree. On case-insensitive filesystems,
-`plugins` and `Plugins` can resolve to the same directory, so pointing the
-official personal marketplace at the repo source tree can overwrite
-`Plugins/marketplace.json` with personal `./.codex/plugins/<plugin-name>`
-paths.
+the materialized plugin directory for operator discoverability. The
+`~/.agents/plugins` root itself must stay a real directory on each macOS host,
+not a symlink to a repo, feature worktree, or profile mirror. On
+case-insensitive filesystems, `plugins` and `Plugins` can resolve to the
+same directory, so pointing the official personal marketplace at the repo
+source tree can overwrite `Plugins/marketplace.json` with personal
+`./.codex/plugins/<plugin-name>` paths. On multi-machine setups, a root symlink
+can also point at a checkout that only exists on one Intel or Apple Silicon Mac,
+making the Desktop picker drop local plugins after sync, prune, or worktree
+cleanup.
 
 Keep `~/.codex/.agents/plugins/marketplace.json` as a compatibility mirror
 while Desktop/runtime compatibility requires it. That mirror must point to

@@ -3,6 +3,22 @@ skill: unslopify
 purpose: "Audit and clean code slop with scoped discovery, evidence, and safe change planning before edits."
 triggers:
   - "Use when you need to remove unused code, stale exports, dead paths, weak types, or fragile cleanup opportunities with low architectural risk."
+runtime_contract:
+  scope: global
+  target_repository: "Use the active working repository as the cleanup target; do not default to Agent Skills Kit unless the user is repairing this package."
+  activation_gate: "Claim runtime skill use only when unslopify is available through the active Codex command surface."
+  source_inspection_fallback: "Reading the canonical SKILL.md directly is package/source inspection, not runtime skill activation."
+package_maintenance:
+  applies_when:
+    - "editing the unslopify package"
+    - "syncing or publishing runtime projections"
+    - "claiming package or runtime readiness"
+  required_gates:
+    - "<agent-skills-root>/bin/ask skills resolve unslopify --json"
+    - "<agent-skills-root>/bin/ask skills proof unslopify --runtime-target codex --json --robot"
+    - "<agent-skills-root>/bin/ask skills handles --check --json"
+    - "strict skill audit"
+    - "external review or Plugin Eval when package wording, shape, or eval behavior changed"
 non_goals:
   - "Broad design rewrites, contract migration, or package boundary changes."
   - "Changing public APIs, migrations, persisted data formats, or external integrations."
@@ -26,6 +42,8 @@ safety:
   redact_secrets: true
   destructive_commands: false
 validation:
+  - runtime_activation_or_explicit_source_inspection_classification
+  - repo_native_target_validation
   - plugin_eval_grade_a
   - strict_skill_audit
 observability: "Report exact validation commands, outcomes, and blockers."

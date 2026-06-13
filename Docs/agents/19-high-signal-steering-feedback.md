@@ -23,6 +23,12 @@ If no durable change is possible in the current environment, record the item as
 `blocked` in the ledger with the concrete blocker and do not describe it as
 fixed.
 
+If the durable change has started but proof is not complete, keep the ledger row
+`open` and state the remaining proof explicitly. An open row must name the
+pending, blocked, in-progress, after-push, next-proof, or not-claimed condition
+in its validation evidence so future agents cannot mistake an unresolved uptake
+lane for a completed guardrail.
+
 Do not resume ordinary implementation after repeated steering until the proof
 artifact exists, the validation command has run, and the final report separates
 the operational failure from the original delivery task. Treat prompt-only intent,
@@ -168,6 +174,7 @@ Every ledger entry must include:
 - the durable guardrail path.
 - the validation command or blocker, including evidence that the improvement
   changes future behavior.
+- for `open` status, the explicit remaining proof or blocker condition.
 - the repo artifact, implementation note, or other documented surface that
   preserves the rule for future agents.
 - status: `open`, `validated`, or `blocked`.

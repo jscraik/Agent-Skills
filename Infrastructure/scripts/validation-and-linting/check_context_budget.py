@@ -20,6 +20,7 @@ if str(RUNTIME_SEP_DIR) not in sys.path:
 
 from generate_root_skill_sets import build_roots  # type: ignore  # noqa: E402
 from generate_skillset_manifests import build_manifest_report  # type: ignore  # noqa: E402
+from rooted_projection_runtime import direct_runtime_names_from_manifest_report  # type: ignore  # noqa: E402
 from selection_policy import ROOT_SKILL_SET_NAMES, policy_identity  # type: ignore  # noqa: E402
 from yaml_compat import load_yaml_mapping  # type: ignore  # noqa: E402
 
@@ -303,7 +304,7 @@ def validate_context_budget(*, projection_mode: str = "flat") -> dict[str, Any]:
     if int(routing_config["max_candidates_returned"]) > 3:
         violations.append({"code": "ROUTER_CANDIDATE_BUDGET_TOO_HIGH"})
     if projection_mode == "rooted":
-        allowed = ALLOWED_FIRST_LEVEL_MANIFEST_ROOTS
+        allowed = ALLOWED_FIRST_LEVEL_MANIFEST_ROOTS | direct_runtime_names_from_manifest_report(manifest_report)
         latent_first_level = [name for name in runtime_entries if name not in allowed]
         if latent_first_level:
             violations.append({

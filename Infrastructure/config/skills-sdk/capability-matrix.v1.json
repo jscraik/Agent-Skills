@@ -287,14 +287,17 @@
     {
       "id": "refs_ingestion",
       "title": "Reference ingestion / knowledge capsules",
-      "status": "placeholder_optional",
-      "owner_surface": "Future PU-019 Skills SDK ingestion slice",
+      "status": "implemented",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/knowledge_ingest.py",
       "pipeline_sections": ["knowledge_engineering", "full_skill_lifecycle"],
-      "feature_executed": false,
-      "mutation_performed": false,
-      "evidence_refs": ["./bin/ask sdk lifecycle --surface refs --json --robot", "Infrastructure/tests/test_skills_sdk_placeholder_lifecycle.py"],
-      "next_slice": "Specify portable upstream pack intake, selected capsule vendoring, source digests, claim scopes, freshness, and no-network fixtures before implementing an adapter.",
-      "notes": "PU-019 should define reference ingestion as governed knowledge capsule intake without making the SDK depend on an external authoring project at runtime."
+      "feature_executed": true,
+      "mutation_performed": true,
+      "evidence_refs": [
+        "./bin/ask sdk knowledge ingest --extraction /Users/jamiecraik/dev/knowledge-OS/exports/extractions/improve-agent-native --skill Skills/agent-ops/improve-agent-native --apply --run-proof --json --robot",
+        "Infrastructure/tests/test_skills_sdk_knowledge_ingest.py"
+      ],
+      "next_slice": "Generalize the KnowledgeOS extraction contract into schema-backed no-network fixtures and add runtime projection proof for vendored capsule discoverability.",
+      "notes": "PU-019 now has a first implemented Skills SDK consumer lane: validate a portable KnowledgeOS extraction, preflight the staged skill package, vendor references into the skill, update capsule routing, and run package proof without making runtime depend on KnowledgeOS."
     },
     {
       "id": "evals",

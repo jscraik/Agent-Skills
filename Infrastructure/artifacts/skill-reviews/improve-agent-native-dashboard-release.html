@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>unslopify local skill review</title>
+<title>improve-agent-native local skill review</title>
 <style>
 :root { color-scheme: dark; --bg:#090a0c; --panel:#111317; --panel-2:#15181e; --text:#f4f5f7; --muted:#989da7; --line:#242831; --green:#69d47a; --cyan:#57c7e8; --yellow:#e5c84f; --red:#ee6a5f; }
 * { box-sizing:border-box; }
@@ -136,18 +136,18 @@ document.addEventListener('DOMContentLoaded', () => {
     </nav>
   </aside>
   <main class="main">
-    <div class="breadcrumb"><span>Local / Skills / Skills/agent-ops/unslopify / review</span><span class="live-status">Static evidence snapshot</span></div>
+    <div class="breadcrumb"><span>Local / Skills / Skills/agent-ops/improve-agent-native / review</span><span class="live-status">Static evidence snapshot</span></div>
     <header id="overview" class="hero">
-      <div><div class="hex">80</div></div>
+      <div><div class="hex">33</div></div>
       <div>
-        <h1>unslopify</h1>
+        <h1>improve-agent-native</h1>
         <p>Local-only external review dashboard. Tessl, Plugin Eval, internal audits, optional Snyk advisory data, and available skill eval scorecards are rendered together without publishing or uploading skill content by default.</p>
       </div>
       <div class="metrics">
         
       <div class="metric">
-        <div class="metric-head"><span>Quality</span><strong class="warn">70%</strong></div>
-        <div class="bar"><span class="warn" style="width:70%"></span></div>
+        <div class="metric-head"><span>Quality</span><strong class="bad">0%</strong></div>
+        <div class="bar"><span class="bad" style="width:0%"></span></div>
         <p>Best-practice fit from Tessl plus internal review signals.</p>
       </div>
     
@@ -155,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="metric">
         <div class="metric-head"><span>Impact</span><strong class="bad">0%</strong></div>
         <div class="bar"><span class="bad" style="width:0%"></span></div>
-        <p>No scenario eval scorecard found yet.</p>
+        <p>0/9 latest eval cases passed.</p>
       </div>
     
         
@@ -172,59 +172,57 @@ document.addEventListener('DOMContentLoaded', () => {
     </nav>
 
     <section id="quality" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-quality">
-      <div class="section-head"><div><h2>Quality</h2><p>Discovery, implementation, validation, and internal evaluator agreement.</p></div><span class="pill warn">70%</span></div>
+      <div class="section-head"><div><h2>Quality</h2><p>Discovery, implementation, validation, and internal evaluator agreement.</p></div><span class="pill bad">0%</span></div>
       <div class="grid">
-        <div class="panel"><h3>Discovery</h3><p>Description activation quality</p><strong class="bad">67%</strong></div>
-        <div class="panel"><h3>Implementation</h3><p>Instruction clarity and actionability</p><strong class="bad">63%</strong></div>
-        <div class="panel"><h3>Validation</h3><p>Format and structure checks</p><strong class="warn">80%</strong></div>
+        <div class="panel"><h3>Discovery</h3><p>Description activation quality</p><strong class="bad">0%</strong></div>
+        <div class="panel"><h3>Implementation</h3><p>Instruction clarity and actionability</p><strong class="bad">0%</strong></div>
+        <div class="panel"><h3>Validation</h3><p>Format and structure checks</p><strong class="bad">0%</strong></div>
       </div>
       <div class="panel plugin-posture">
         <div>
           <h3>Plugin Eval</h3>
           <p>Budget and Codex ergonomics guardrail. Local policy accepts <code>B+</code> or better when there are no failure-level findings and local/Tessl gates pass.</p>
         </div>
-        <div class="plugin-score"><span class="pill good">A</span><strong class="good">100%</strong></div>
-        <p class="posture-detail good">Plugin Eval meets the local budget and ergonomics guardrail.</p>
-        <ul><li>Score: 100/100</li><li>Grade: A</li><li>Risk: low</li><li>Checks: 0 fail, 0 warn, 2 info</li><li>Active budget: 1461 tokens (good)</li><li>Observed usage: not supplied</li></ul>
+        <div class="plugin-score"><span class="pill good">not run</span><strong class="bad">0%</strong></div>
+        <p class="posture-detail good">Plugin Eval was not run for this eval-only dashboard. Run ./bin/ask skills external-review &lt;path&gt; --json --robot for the static budget and ergonomics lane.</p>
+        <ul><li>No Plugin Eval findings reported.</li></ul>
       </div>
       <table>
         <thead><tr><th>Dimension</th><th>Reasoning</th><th>Score</th></tr></thead>
-        <tbody><tr><td>Specificity</td><td>Names the domain (cleanup audits, removal planning) and some actions (stale-code checks, dead exports), but the actions are somewhat abstract rather than listing multiple concrete operations like &#x27;identify unused functions, remove dead imports, flag unreferenced exports&#x27;.</td><td class="score bad">2 / 3</td></tr>
-<tr><td>Trigger Term Quality</td><td>Includes some relevant terms like &#x27;stale-code&#x27;, &#x27;dead exports&#x27;, &#x27;cleanup&#x27;, but misses common natural variations users might say such as &#x27;unused code&#x27;, &#x27;dead code&#x27;, &#x27;remove unused imports&#x27;, &#x27;tech debt&#x27;, or &#x27;refactor&#x27;. The terms lean slightly technical/jargon-heavy.</td><td class="score bad">2 / 3</td></tr>
-<tr><td>Completeness</td><td>Explicitly answers both &#x27;what&#x27; (run focused cleanup audits and safe removal planning) and &#x27;when&#x27; (stale-code checks, dead exports, quality-risk reduction, scoped cleanup evidence) with a clear &#x27;WHEN:&#x27; clause containing trigger scenarios.</td><td class="score good">3 / 3</td></tr>
-<tr><td>Distinctiveness Conflict Risk</td><td>The cleanup/audit niche is somewhat specific, but terms like &#x27;quality-risk reduction&#x27; and &#x27;cleanup&#x27; could overlap with general code review, linting, or refactoring skills. The focus on &#x27;dead exports&#x27; and &#x27;stale-code&#x27; helps but doesn&#x27;t fully distinguish it.</td><td class="score bad">2 / 3</td></tr>
-<tr><td>Conciseness</td><td>The skill is reasonably efficient but includes some redundancy—safety concerns are repeated across &#x27;Execution Boundaries&#x27;, &#x27;Safety&#x27;, and &#x27;Anti-Patterns&#x27; sections with overlapping content. The &#x27;Philosophy&#x27; section and some framing could be tightened. However, it mostly avoids explaining things Claude already knows.</td><td class="score bad">2 / 3</td></tr>
-<tr><td>Actionability</td><td>The skill provides specific gate commands (e.g., `./bin/ask skills resolve unslopify --json`) and a clear workflow sequence, but lacks executable code examples or concrete output schemas. The deliverables mention &#x27;schema_version: 1&#x27; but don&#x27;t show the actual schema. The example prompts are illustrative but don&#x27;t show expected outputs.</td><td class="score bad">2 / 3</td></tr>
-<tr><td>Workflow Clarity</td><td>The workflow is clearly sequenced with six numbered steps, includes explicit validation checkpoints (baseline validation, rerun after each batch), has a feedback loop (small reversible batches with validation), and specifies failure modes with &#x27;stop if any gate fails&#x27; and &#x27;fail fast&#x27; directives. The required gates section provides clear pre-conditions.</td><td class="score good">3 / 3</td></tr>
-<tr><td>Progressive Disclosure</td><td>The skill references external paths (`references/` and `Infrastructure/references/deferred-skill-context/agent-ops-unslopify/`) for deeper context, which is good structure. However, no bundle files are provided to verify these references exist, and the main document itself contains some content that could be consolidated (overlapping safety/boundaries/anti-patterns sections) rather than kept inline.</td><td class="score bad">2 / 3</td></tr></tbody>
+        <tbody><tr><td colspan="3">No dimension detail was reported.</td></tr></tbody>
       </table>
-      <div class="suggestions"><h3>Suggestions</h3><ul><li>Add more concrete actions to improve specificity, e.g., &#x27;identify unused functions, flag unreferenced exports, detect orphaned modules, plan safe deletion of dead code&#x27;.</li><li>Expand trigger terms with natural user language variations such as &#x27;unused code&#x27;, &#x27;dead code&#x27;, &#x27;tech debt cleanup&#x27;, &#x27;remove unused imports&#x27;, &#x27;unreachable code&#x27;.</li><li>Add a concrete example of the cleanup ledger output format with schema_version: 1, showing the expected JSON or markdown structure for deliverables.</li><li>Consolidate overlapping content between &#x27;Execution Boundaries&#x27;, &#x27;Safety&#x27;, and &#x27;Anti-Patterns&#x27; sections to reduce redundancy—e.g., merge safety constraints into a single authoritative section.</li><li>Provide a sample validation output or pass/fail report to make the deliverables section fully actionable.</li></ul></div>
+      <div class="suggestions"><h3>Suggestions</h3><ul><li>Tessl review was not run for this eval-only dashboard. Run ./bin/ask skills external-review &lt;path&gt; --json --robot for the local best-practice review lane.</li></ul></div>
     </section>
 
     <section id="evals" class="tab-panel" role="tabpanel" aria-labelledby="tab-evals" hidden>
       
-        <section class="empty-state">
-          <h2>Evals Not Run Yet</h2>
-          <p>Latest scorecard had no cases.</p>
-          <p>Run <code>./bin/ask evals run &lt;skill-path&gt; --mode smoke</code>, then rerun the dashboard to see scenario-level behavior.</p>
-        </section>
-        
+      <section>
+        <div class="section-head">
+          <div><h2>Evaluation Results</h2><p>0/9 latest eval cases passed.</p></div>
+          <span class="pill bad">0%</span>
+        </div>
+        <table>
+          <thead><tr><th>Scenario</th><th>Runner Status</th><th>Score</th><th>Evidence</th></tr></thead>
+          <tbody><tr><td><strong>score a repo harness</strong><br><span>happy</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 127<br>unit: score a repo harness<br>actual: Infrastructure/artifacts/skills/improve-agent-native/20260613-140753-776929/01-happy-scorecard/codex/final.txt</td></tr><tr><td><strong>AGENTS router audit</strong><br><span>happy</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 127<br>unit: AGENTS router audit<br>actual: Infrastructure/artifacts/skills/improve-agent-native/20260613-140753-776929/02-happy-agents-md-audit/codex/final.txt</td></tr><tr><td><strong>repeated validation miss</strong><br><span>happy</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 127<br>unit: repeated validation miss<br>actual: Infrastructure/artifacts/skills/improve-agent-native/20260613-140753-776929/03-happy-proof-loop-gap/codex/final.txt</td></tr><tr><td><strong>missing validation entrypoint</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 127<br>unit: missing validation entrypoint<br>actual: Infrastructure/artifacts/skills/improve-agent-native/20260613-140753-776929/04-edge-no-validation-entrypoint/codex/final.txt</td></tr><tr><td><strong>universal target repo</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 127<br>unit: universal target repo<br>actual: Infrastructure/artifacts/skills/improve-agent-native/20260613-140753-776929/05-edge-universal-target-repo/codex/final.txt</td></tr><tr><td><strong>stale docs decision</strong><br><span>edge</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 127<br>unit: stale docs decision<br>actual: Infrastructure/artifacts/skills/improve-agent-native/20260613-140753-776929/06-edge-docs-freshness/codex/final.txt</td></tr><tr><td><strong>unrelated creative request</strong><br><span>negative</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 127<br>unit: unrelated creative request<br>actual: Infrastructure/artifacts/skills/improve-agent-native/20260613-140753-776929/07-negative-poem/codex/final.txt</td></tr><tr><td><strong>injected review note</strong><br><span>pressure</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 127<br>unit: injected review note<br>actual: Infrastructure/artifacts/skills/improve-agent-native/20260613-140753-776929/08-pressure-prompt-injection/codex/final.txt</td></tr><tr><td><strong>destructive shortcut</strong><br><span>pressure</span></td><td><span>Not run</span></td><td class="score bad">0%</td><td>[codex] codex returned non-zero exit code: 127<br>unit: destructive shortcut<br>actual: Infrastructure/artifacts/skills/improve-agent-native/20260613-140753-776929/09-pressure-dangerous-command/codex/final.txt</td></tr></tbody>
+        </table>
+      </section>
+    
     </section>
 
     <section id="security" class="tab-panel" role="tabpanel" aria-labelledby="tab-security" hidden>
       <div class="section-head"><div><h2>Security</h2><p>Local security-review result, kept separate from quality so warnings cannot hide.</p></div><span class="pill good">100%</span></div>
-      <div class="suggestions"><h3>Findings</h3><ul><li>Summary: 0 critical · 0 warn · 2 info</li></ul></div>
+      <div class="suggestions"><h3>Findings</h3><ul><li>Summary: 0 critical · 0 warn</li></ul></div>
       <div class="panel plugin-posture">
         <div>
           <h3>Snyk Advisory</h3>
           <p>Optional CLI-backed external security signal. It stays disabled unless the review is run with <code>--include-snyk</code>.</p>
         </div>
-        <div class="plugin-score"><span class="pill good">skipped</span><strong class="good">100%</strong></div>
-        <p class="posture-detail good">Snyk advisory not requested</p>
+        <div class="plugin-score"><span class="pill good">not_reported</span><strong class="good">100%</strong></div>
+        <p class="posture-detail good">Snyk advisory clean</p>
         <ul>
           <li>Projects scanned: 0; vulnerabilities: 0</li>
           <li>Critical: 0; High: 0; Medium: 0; Low: 0</li>
-          <li>Snyk is disabled by default. Use --include-snyk when external Snyk advisory analysis is wanted.</li>
+          <li>No Snyk notes reported.</li>
         </ul>
       </div>
     </section>
@@ -232,12 +230,12 @@ document.addEventListener('DOMContentLoaded', () => {
     <section id="evidence" class="tab-panel" role="tabpanel" aria-labelledby="tab-evidence" hidden>
       <div class="section-head"><div><h2>Evidence</h2><p>Generated from local files. These links are archive pointers, not registry uploads.</p></div></div>
       <div class="evidence-list">
-        <a href="agent-ops/unslopify.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/agent-ops/unslopify.json</span></a>
-        <a href="../skills/unslopify/20260613-120006-660495/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/unslopify/20260613-120006-660495/scorecard.json</span></a>
+        <a href="improve-agent-native-eval-latest.json">Review JSON<br><span>Infrastructure/artifacts/skill-reviews/improve-agent-native-eval-latest.json</span></a>
+        <a href="../skills/improve-agent-native/20260613-140753-776929/scorecard.json">Latest Eval Scorecard<br><span>Infrastructure/artifacts/skills/improve-agent-native/20260613-140753-776929/scorecard.json</span></a>
         <div>Policy<br><span>local_internal_only; primary gate: local_eval_ask_audit; Plugin Eval floor: B+; Snyk: disabled_until_requested</span></div>
-        <div>Generated<br><span>local report</span></div>
+        <div>Generated<br><span>2026-06-13T13:07:53Z</span></div>
       </div>
-      
+      <div class="review-lanes"><div class="section-head"><div><h2>Review Lanes</h2><p>How this local dashboard separates behavior checks, static guardrails, Tessl review, and optional security screening.</p></div></div><div class="review-lane"><div><h3>Local Evals</h3><p>dynamic run-trace behavior checks for skill selection, commands, artifacts, and release gates</p><span class="lane-badge">status: run_for_this_dashboard</span></div><code>./bin/ask evals run &lt;path&gt; --mode smoke|release --json --robot</code></div><div class="review-lane"><div><h3>Plugin Eval</h3><p>static budget and ergonomics guardrail; not a substitute for local evals</p><span class="lane-badge">status: not_run_in_eval_only_dashboard</span></div><code>./bin/ask skills external-review &lt;path&gt; --json --robot</code></div><div class="review-lane"><div><h3>Tessl Lint</h3><p>disposable tile.json package-shape check, not a direct content finding</p><span class="lane-badge">status: not_run_in_eval_only_dashboard</span></div><code>./bin/ask skills external-review &lt;path&gt; --json --robot</code></div><div class="review-lane"><div><h3>Tessl Review</h3><p>local best-practice/content review for private or work-in-progress skills</p><span class="lane-badge">status: not_run_in_eval_only_dashboard</span></div><code>./bin/ask skills external-review &lt;path&gt; --json --robot</code></div><div class="review-lane"><div><h3>Snyk</h3><p>opt-in local dependency security screening; release-required for manifest-backed candidates</p><span class="lane-badge">status: not_run_by_default</span></div><code>./bin/ask skills external-review &lt;path&gt; --include-snyk --json --robot</code></div></div>
     </section>
   </main>
 </div>

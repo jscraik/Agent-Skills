@@ -25,7 +25,7 @@ Do not hand-edit runtime projections.
 - `total_skills`: 80
 - `catalog_source`: default user-visible catalog surface
 - `visibility`: default
-- `policy_identity`: 0c8f622f6c1cc0c6
+- `policy_identity`: fc91c0972b133d30
 
 ## Catalog
 
@@ -75,7 +75,7 @@ Do not hand-edit runtime projections.
 - `triage` — Review file-based todo findings into ready, skipped, customized, or blocked states. Use this skill when pending todo files need approval.
 - `typescript` — Use when authoring or reviewing TypeScript code that requires strict type safety, explicit module contracts, and predictable runtime boundaries.
 - `ubiquitous-language` — Build shared project vocabulary, glossary terms, aliases, prompt translations, domain-grill interviews, and agent instruction links when wording is fuzzy or overloaded.
-- `unslopify` — Audit unused functions, dead exports, orphaned modules, stale imports, unreachable code, and tech-debt cleanup candidates with evidence-backed removal guidance. Use when unused code, dead code, remove unused imports, stale-code checks, or scoped cleanup evidence are needed.
+- `unslopify` — Audit dead code, stale exports, unused imports, and cleanup candidates. Use when scoped cleanup needs evidence, rollback notes, and repo-native validation.
 - `uv-python-project-setup` — Create, repair, and validate uv Python project setup. Use when initializing Python apps or libraries, managing uv dependencies, virtual environments, or CI-ready uv workflows.
 - `vale` — Install, repair, and validate Vale prose linting. Use when users need Vale config, style sync, docs lint gates, or broken Vale workflow diagnosis.
 - `verification-before-completion` — Review and validate completion claims. Use when you are about to say work is complete, fixed, passing, pushed, or ready for review.

@@ -259,6 +259,20 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
             encoding="utf-8",
         )
 
+    def _write_direct_first_party_source(self, repo_root: Path) -> None:
+        source = repo_root / "Skills" / "agent-ops" / "improve-agent-native"
+        source.mkdir(parents=True)
+        (source / "SKILL.md").write_text(
+            "---\n"
+            "name: improve-agent-native\n"
+            "metadata:\n"
+            "  runtime_visibility: flat\n"
+            "  command_visibility: target\n"
+            "---\n"
+            "# Improve Agent Native\n",
+            encoding="utf-8",
+        )
+
     def _assert_runtime_card_valid(self, repo_root: Path, card_path: Path) -> None:
         """
         Validate a runtime card file using the repository's runtime-card validator.
@@ -313,6 +327,28 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
         self.assertFalse(proof["gates"]["codex_user_runtime_ready"])
         self.assertFalse(proof["gates"]["codex_user_link"])
         self.assertFalse(proof["gates"]["agents_user_link"])
+
+    def test_skills_proof_requires_direct_picker_projection_for_direct_handles(self) -> None:
+        repo_root = self.temp_dir / "repo"
+        self._write_direct_first_party_source(repo_root)
+        skills_dir = _write_command_surface_metadata(repo_root)
+
+        home = self.temp_dir / "home"
+        agents_skills = home / ".agents" / "skills"
+        agents_skills.parent.mkdir(parents=True)
+        agents_skills.symlink_to(skills_dir)
+
+        with mock.patch("pathlib.Path.home", return_value=home):
+            result = skills_proof(repo_root, "improve-agent-native")
+
+        proof = result.data["proof"]
+        self.assertEqual(result.status, "error")
+        self.assertEqual(proof["status"], "fail")
+        self.assertTrue(proof["gates"]["resolver"])
+        self.assertTrue(proof["gates"]["canonical_source_exists"])
+        self.assertFalse(proof["gates"]["direct_runtime_projection"])
+        self.assertEqual(proof["runtime_failure"]["failed_check_id"], "direct_runtime_projection")
+        self.assertIn("direct_runtime_projection", proof["gate_policy"]["required"])
 
     def test_skills_proof_passes_when_agents_runtime_is_linked(self) -> None:
         """

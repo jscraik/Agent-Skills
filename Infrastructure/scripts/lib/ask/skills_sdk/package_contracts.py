@@ -258,7 +258,7 @@ def read_structured_reference(path: Path) -> tuple[dict[str, Any] | list[Any] | 
         return None, "structured reference must parse to an object or list"
     if suffix in {".yaml", ".yml"}:
         if yaml is None:
-            loaded = read_reference_contract_fallback(text)
+            loaded = read_structured_reference_fallback(text)
             return loaded, None
         try:
             loaded = yaml.safe_load(text)
@@ -268,6 +268,40 @@ def read_structured_reference(path: Path) -> tuple[dict[str, Any] | list[Any] | 
             return loaded, None
         return None, "structured reference must parse to an object or list"
     return None, None
+
+
+def read_structured_reference_fallback(text: str) -> dict[str, Any]:
+    """Parse enough top-level YAML shape for reference presence checks.
+
+    This is intentionally not a general YAML parser. It lets the public ask
+    wrapper validate reference-quality core fields in Python runtimes where
+    PyYAML is unavailable.
+    """
+    fields: dict[str, Any] = {}
+    current_sequence_key: str | None = None
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped or stripped == "---" or stripped.startswith("#"):
+            continue
+        indent = len(line) - len(line.lstrip(" "))
+        if indent == 0 and not stripped.startswith("- ") and ":" in stripped:
+            key, value = stripped.split(":", 1)
+            key = key.strip()
+            value = value.strip()
+            if value:
+                fields[key] = parse_frontmatter_scalar(value)
+                current_sequence_key = None
+            else:
+                fields[key] = []
+                current_sequence_key = key
+            continue
+        if current_sequence_key and stripped.startswith("- "):
+            values = fields.setdefault(current_sequence_key, [])
+            if not isinstance(values, list):
+                values = []
+                fields[current_sequence_key] = values
+            values.append(parse_frontmatter_scalar(stripped[2:].strip()))
+    return fields
 
 
 def read_reference_contract_fallback(text: str) -> dict[str, Any]:

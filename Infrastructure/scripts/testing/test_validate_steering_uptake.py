@@ -42,6 +42,7 @@ _VALID_DOC = (
     "feedback signal\n"
     "root operational failure\n"
     "durable system improvement\n"
+    "explicit remaining proof\n"
     "known taxonomy values\n"
     "## Required Evidence\n\n"
     "validate_steering_uptake.py\n"
@@ -557,9 +558,9 @@ def test_accepts_markdown_steering_doc_link(tmp_path: Path) -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_accepts_open_status_row(tmp_path: Path) -> None:
+def test_accepts_open_status_row_with_remaining_proof(tmp_path: Path) -> None:
     """
-    Verify that a ledger row with Status 'open' produces no status-related findings.
+    Verify that a ledger row with Status 'open' is accepted when it names remaining proof.
 
     Creates a valid repository root, writes a ledger with a single row whose `Status` is `open`,
     runs the validator, and asserts there are no findings with codes `STEERING_LEDGER_STATUS`
@@ -571,13 +572,31 @@ def test_accepts_open_status_row(tmp_path: Path) -> None:
         "# Steering Uptake Ledger\n\n"
         "| Date | Trigger | Failure pattern | Mechanism | Durable guardrail | Validation | Status |\n"
         "| --- | --- | --- | --- | --- | --- | --- |\n"
-        "| 2026-05-19 | trigger | pattern | mechanism | guardrail | command to run | open |\n",
+        "| 2026-05-19 | trigger | pattern | mechanism. Category: missing guardrails. | guardrail Improvement type: validator. | command to run; next proof: rerun the production gate | open |\n",
     )
 
     findings = validate_steering_uptake.validate(tmp_path)
 
-    status_findings = [f for f in findings if f.code in {"STEERING_LEDGER_STATUS", "STEERING_LEDGER_VALIDATION_WEAK"}]
+    status_findings = [
+        f for f in findings
+        if f.code in {"STEERING_LEDGER_STATUS", "STEERING_LEDGER_VALIDATION_WEAK", "STEERING_LEDGER_OPEN_UNCLEAR"}
+    ]
     assert status_findings == []
+
+
+def test_rejects_open_status_row_without_remaining_proof(tmp_path: Path) -> None:
+    _make_valid_root(tmp_path)
+    write(
+        tmp_path / ".harness/quality/steering-uptake.md",
+        "# Steering Uptake Ledger\n\n"
+        "| Date | Trigger | Failure pattern | Mechanism | Durable guardrail | Validation | Status |\n"
+        "| --- | --- | --- | --- | --- | --- | --- |\n"
+        "| 2026-05-19 | trigger | pattern | mechanism. Category: missing guardrails. | guardrail Improvement type: validator. | command to run | open |\n",
+    )
+
+    findings = validate_steering_uptake.validate(tmp_path)
+
+    assert any(finding.code == "STEERING_LEDGER_OPEN_UNCLEAR" for finding in findings)
 
 
 def test_accepts_blocked_status_row(tmp_path: Path) -> None:

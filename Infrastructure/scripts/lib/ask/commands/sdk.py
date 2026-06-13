@@ -15,6 +15,7 @@ from ask.skills_sdk.lenses import (
     select_lenses,
     validate_lens_catalog,
 )
+from ask.skills_sdk.knowledge_ingest import build_knowledge_ingest
 from ask.skills_sdk.placeholder_lifecycle import SURFACES
 from ask.skills_sdk.review_handoff import build_review_handoff
 from ask.skills_sdk.review_execute import build_review_execution
@@ -99,6 +100,22 @@ def add_sdk_parser(
         help="Report the Skills SDK capability truth matrix",
         parents=[global_parser],
     )
+    sdk_knowledge_parser = sdk_subparsers.add_parser(
+        "knowledge",
+        help="Vendor portable knowledge bundles into skill packages",
+        parents=[global_parser],
+    )
+    sdk_knowledge_subparsers = sdk_knowledge_parser.add_subparsers(dest="knowledge_action", required=True)
+    sdk_knowledge_ingest_parser = sdk_knowledge_subparsers.add_parser(
+        "ingest",
+        help="Validate and vendor a KnowledgeOS extraction into a skill package",
+        parents=[global_parser],
+    )
+    sdk_knowledge_ingest_parser.add_argument("--extraction", required=True, help="KnowledgeOS extraction directory")
+    sdk_knowledge_ingest_parser.add_argument("--skill", required=True, help="Repo-local skill directory or SKILL.md")
+    sdk_knowledge_ingest_parser.add_argument("--preview", action="store_true", help="Validate and report writes without mutating")
+    sdk_knowledge_ingest_parser.add_argument("--apply", action="store_true", help="Vendor references and update skill routing")
+    sdk_knowledge_ingest_parser.add_argument("--run-proof", action="store_true", help="Run package audit and verify after apply")
     sdk_project_parser = sdk_subparsers.add_parser(
         "project",
         help="Inspect read-only Skills SDK project conformance",
@@ -386,6 +403,8 @@ def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
         )
     if args.action == "status":
         return skills_commands.skills_sdk_status(repo_root)
+    if args.action == "knowledge":
+        return _dispatch_sdk_knowledge(repo_root, args)
     if args.action == "project":
         if args.project_action in {"status", "doctor"}:
             return skills_commands.skills_sdk_project_conformance(
@@ -401,6 +420,69 @@ def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
     if args.action == "review":
         return _dispatch_sdk_review(repo_root, args)
     return build_unknown_action_result("sdk", args.action)
+
+
+def _dispatch_sdk_knowledge(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    result = CallResult(status="success")
+    command_action = args.knowledge_action
+    result.metadata["command"] = f"sdk knowledge {command_action}"
+    if command_action == "ingest":
+        if args.preview == args.apply:
+            result.status = "error"
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_VALIDATION",
+                    message="Skills SDK knowledge ingest requires exactly one of --preview or --apply.",
+                    fix_suggestion=(
+                        "Run ask sdk knowledge ingest --extraction <KnowledgeOS extraction> "
+                        "--skill <skill path> --preview --json --robot."
+                    ),
+                )
+            )
+            return result
+        if args.run_proof and not args.apply:
+            result.status = "error"
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_VALIDATION",
+                    message="--run-proof is only valid with --apply.",
+                    fix_suggestion="Run knowledge ingest with --apply --run-proof or drop --run-proof for preview.",
+                )
+            )
+            return result
+        try:
+            payload = build_knowledge_ingest(
+                repo_root,
+                extraction=args.extraction,
+                skill=args.skill,
+                apply=args.apply,
+                run_proof=args.run_proof,
+            )
+        except ValueError as exc:
+            result.status = "error"
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_VALIDATION",
+                    message=str(exc),
+                    fix_suggestion=(
+                        "Check that --extraction is a KnowledgeOS extraction with references/ and "
+                        "--skill is a repo-local Skills SDK package."
+                    ),
+                )
+            )
+            return result
+        result.data["knowledge_ingest"] = payload
+        if payload["status"] not in {"preview", "applied"}:
+            result.status = "error"
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_VALIDATION",
+                    message="Skills SDK knowledge ingest was blocked by extraction validation findings.",
+                    fix_suggestion="Fix the reported knowledge_ingest.findings before applying.",
+                )
+            )
+        return result
+    return build_unknown_action_result("sdk knowledge", command_action)
 
 
 def _dispatch_sdk_lenses(repo_root: Path, args: argparse.Namespace) -> CallResult:
