@@ -302,7 +302,7 @@ class TestSkillsetRouting(ContextBudgetTempDirTestCase):
         )
 
         self.assertEqual(payload["status"], "selected")
-        self.assertEqual(payload["selected"]["id"], "he-router")
+        self.assertEqual(payload["selected"]["id"], "he-reconcile")
         self.assertIn("qa-intake-by-clarity", payload["candidates"][0]["reason"])
 
     def test_harness_engineering_stage_correctness_questions_route_to_router(self) -> None:
@@ -322,7 +322,7 @@ class TestSkillsetRouting(ContextBudgetTempDirTestCase):
                 )
 
                 self.assertEqual(payload["status"], "selected")
-                self.assertEqual(payload["selected"]["id"], "he-router")
+                self.assertEqual(payload["selected"]["id"], "he-reconcile")
                 self.assertIn("stage-correctness-question", payload["candidates"][0]["reason"])
 
     def test_harness_engineering_direct_stage_with_whether_stays_direct(self) -> None:
@@ -350,7 +350,7 @@ class TestSkillsetRouting(ContextBudgetTempDirTestCase):
         )
 
         self.assertEqual(payload["status"], "selected")
-        self.assertEqual(payload["selected"]["id"], "he-router")
+        self.assertEqual(payload["selected"]["id"], "he-reconcile")
         self.assertIn("named-stage-ambiguity", payload["candidates"][0]["reason"])
 
     def test_harness_engineering_routes_cross_repo_skill_routing_defects_to_fix_bugs(self) -> None:

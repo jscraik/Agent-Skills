@@ -1,6 +1,6 @@
 ---
 name: skill-refactor
-description: "Analyzes bounded skill evidence, classifies root causes, and recommends a lifecycle lane such as keep, observe, improve with skill-builder, merge with approval, or retire with approval. Use when a skill is not working, a skill is not triggering correctly, evals or Tessl disagree, repeated failures need debugging, or skill performance issues need evidence-backed repair handoff items."
+description: "Analyzes bounded skill evidence, classifies root causes, and recommends a lifecycle lane such as keep, observe, improve through Skill Factory hardening, merge with approval, or retire with approval. Use when a skill is not working, a skill is not triggering correctly, evals or Tessl disagree, repeated failures need debugging, or skill performance issues need evidence-backed repair handoff items."
 metadata:
   version: "1.0.0"
   skill-type: data_fetch_analysis
@@ -39,7 +39,7 @@ Decide from bounded evidence; prefer narrow, reversible lifecycle moves.
 ## Do Not Use When
 
 - New skill creation -> `skillify` or `skill-creator`.
-- Hardening a known existing skill -> `skill-builder`.
+- Hardening a known existing skill -> Skill Factory hardening workflow.
 - Install, sync, publish, or runtime projection mutation.
 - Evidence is missing, untrusted, too broad, or requires external/destructive action.
 
@@ -55,7 +55,7 @@ Prefer bounded reports over raw transcripts. Summarize sensitive evidence instea
 
 - One lifecycle lane: keep, observe, improve, capture, merge or fold with approval, or retire with approval.
 - Evidence strength and root-cause labels.
-- Concrete repair items when the next step is `skill-builder`.
+- Concrete repair items when the next step is Skill Factory hardening.
 
 ## Discovery Interview
 
@@ -74,11 +74,11 @@ Evidence routing lives in [evidence routing](./references/evidence-routing.md). 
 3. Group findings by root cause.
 4. Assign evidence strength.
 5. Recommend one lane: keep, observe, improve, capture, merge/fold with approval, or retire with approval.
-6. If recommending `skill-builder`, include concrete repair items: target file, finding class, expected gate, minimum patch surface, and blocker.
+6. If recommending Skill Factory hardening, include concrete repair items: target file, finding class, expected gate, minimum patch surface, and blocker.
 
 ## Validation Checkpoints
 
-Each finding cites one current source, uses one primary root-cause label, and stops at the first failed gate. Merge, fold, retire, install, publish, and projection refresh decisions become explicit approval handoffs. `skill-builder` handoffs name target file, finding class, expected gate, minimum patch surface, and residual risk.
+Each finding cites one current source, uses one primary root-cause label, and stops at the first failed gate. Merge, fold, retire, install, publish, and projection refresh decisions become explicit approval handoffs. `skill-factory-router` handoffs name target file, finding class, expected gate, minimum patch surface, and residual risk.
 
 ## Root Cause Labels
 
@@ -126,7 +126,7 @@ Expected output:
 ```yaml
 schema_version: 1
 mode: skill_lifecycle_analysis
-scope: skill-builder
+scope: skill-factory-router
 evidence_strength: moderate
 evidence_anchors:
   - source: /tmp/ask-tessl-reviews/.../skill-review.json
@@ -136,7 +136,7 @@ root_causes:
     evidence: description completeness low and user trigger mismatch
 recommendation: improve_with_skill_builder
 builder_repair_items:
-  - target_file: Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md
+  - target_file: Plugins/skill-factory/skills/code_quality_review/skill-factory-router/SKILL.md
     finding_class: trigger
 validation_status: fail
 blocked_by: null

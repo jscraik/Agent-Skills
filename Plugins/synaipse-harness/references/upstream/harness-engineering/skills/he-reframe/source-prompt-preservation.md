@@ -69,7 +69,7 @@ be read as source evidence; do not create new legacy-root programs by default.
 ## Boundary From Skill Refactoring
 
 `he-reframe` is for repository architecture migration programs. It should not
-replace `skill-factory`, `skill-builder`, or a future `skill-refactor` skill for
+replace `skill-factory`, `skill-factory-router`, or a future `skill-refactor` skill for
 changing the internals of an individual skill package.
 
 ## Prevent Reframe Theater

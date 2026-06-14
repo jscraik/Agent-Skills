@@ -12,14 +12,79 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 from ask.commands.skills_impl import skills_package  # noqa: E402
 
 
+def _write_minimal_sdk_package_companions(skill_dir: Path) -> None:
+    agents_dir = skill_dir / "agents"
+    references_dir = skill_dir / "references"
+    agents_dir.mkdir(parents=True, exist_ok=True)
+    references_dir.mkdir(parents=True, exist_ok=True)
+    (agents_dir / "openai.yaml").write_text(
+        """interface:
+  short_description: Test package fixture.
+dependencies: {}
+policy:
+  permissions: read-only
+""",
+        encoding="utf-8",
+    )
+    (references_dir / "contract.yaml").write_text(
+        """schema_version: 1
+purpose: Test SDK package contract.
+inputs: [user_request]
+outputs: [package_readiness]
+commands:
+  - "./bin/ask skills package packaged-skill --json --robot"
+permission_profile:
+  filesystem:
+    read:
+      - "target skill package"
+      - "repo validation scripts"
+    write: []
+observability: "Report package validation status and blockers."
+""",
+        encoding="utf-8",
+    )
+    (references_dir / "evals.yaml").write_text(
+        """schema_version: "2.0"
+skill_name: packaged-skill
+claims:
+  - id: package.fixture.ready
+    statement: "The fixture reports package readiness from declared metadata and SDK companions."
+    source: "SKILL.md"
+    claim_type: governance
+    risk: medium
+    hard_gate: true
+    evidence_required: ["package output"]
+cases:
+  - id: package-smoke
+    name: package smoke
+    category: happy
+    should_trigger: true
+    prompt: "Package this skill."
+    expected_behavior: "Reports package readiness."
+""",
+        encoding="utf-8",
+    )
+    (references_dir / "task-profile.json").write_text(
+        """{
+  "schema_version": "1.0",
+  "profile_id": "package-fixture",
+  "criteria": [
+    {"id": "package_readiness", "threshold": 0.8, "weight": 1.0, "critical": true}
+  ]
+}
+""",
+        encoding="utf-8",
+    )
+
+
 class TestAskSkillsPackage(unittest.TestCase):
     def test_package_reports_versioned_role_ready_contract(self) -> None:
         with patch("ask.commands.skills_impl.resolve_skill_handle", return_value={
             "status": "ok",
-            "handle": "skill-builder",
-            "source_path": "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md",
+            "handle": "skill-factory-router",
+            "source_path": "Plugins/skill-factory/skills/skill-factory-router/SKILL.md",
         }):
-            result = skills_package(REPO_ROOT, "skill-builder")
+            result = skills_package(REPO_ROOT, "skill-factory-router")
 
         self.assertEqual(result.status, "success")
         package = result.data["skill_package"]
@@ -53,10 +118,10 @@ class TestAskSkillsPackage(unittest.TestCase):
     def test_package_strict_accepts_complete_package_metadata(self) -> None:
         with patch("ask.commands.skills_impl.resolve_skill_handle", return_value={
             "status": "ok",
-            "handle": "skill-builder",
-            "source_path": "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md",
+            "handle": "skill-factory-router",
+            "source_path": "Plugins/skill-factory/skills/skill-factory-router/SKILL.md",
         }):
-            result = skills_package(REPO_ROOT, "skill-builder", strict=True)
+            result = skills_package(REPO_ROOT, "skill-factory-router", strict=True)
 
         self.assertEqual(result.status, "success")
         package = result.data["skill_package"]
@@ -133,6 +198,7 @@ metadata:
 """,
                 encoding="utf-8",
             )
+            _write_minimal_sdk_package_companions(skill_dir)
 
             result = skills_package(repo_root, "Skills/agent-ops/packaged-skill")
 
@@ -176,6 +242,7 @@ share_readiness: ready
 """,
                 encoding="utf-8",
             )
+            _write_minimal_sdk_package_companions(skill_dir)
 
             result = skills_package(repo_root, "Skills/agent-ops/packaged-skill")
 
@@ -210,6 +277,7 @@ metadata:
 """,
                 encoding="utf-8",
             )
+            _write_minimal_sdk_package_companions(skill_dir)
 
             result = skills_package(repo_root, "Skills/agent-ops/packaged-skill")
 
@@ -249,6 +317,7 @@ metadata:
 """,
                 encoding="utf-8",
             )
+            _write_minimal_sdk_package_companions(skill_dir)
 
             result = skills_package(repo_root, "Skills/agent-ops/packaged-skill", checkout_test=True)
 
@@ -279,10 +348,10 @@ metadata:
     def test_package_checkout_test_records_skill_builder_evidence(self) -> None:
         with patch("ask.commands.skills_impl.resolve_skill_handle", return_value={
             "status": "ok",
-            "handle": "skill-builder",
-            "source_path": "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md",
+            "handle": "skill-factory-router",
+            "source_path": "Plugins/skill-factory/skills/skill-factory-router/SKILL.md",
         }):
-            result = skills_package(REPO_ROOT, "skill-builder", checkout_test=True)
+            result = skills_package(REPO_ROOT, "skill-factory-router", checkout_test=True)
 
         self.assertEqual(result.status, "success")
         package = result.data["skill_package"]
@@ -290,7 +359,7 @@ metadata:
         checkout = package["package_contract"]["install_gate"]["checkout_test"]
         self.assertEqual(checkout["status"], "pass")
         self.assertIn(
-            "source_path:Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md",
+            "source_path:Plugins/skill-factory/skills/skill-factory-router/SKILL.md",
             checkout["evidence"],
         )
         self.assertIn("package_metadata_complete:true", checkout["evidence"])
@@ -355,6 +424,7 @@ metadata:
 """,
                 encoding="utf-8",
             )
+            _write_minimal_sdk_package_companions(skill_dir)
 
             result = skills_package(repo_root, "Skills/agent-ops/packaged-skill", checkout_test=True)
 

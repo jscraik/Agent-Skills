@@ -1,12 +1,12 @@
 # Deterministic Stage Routing
 
-Use this policy when `he-router` must choose one Harness Engineering stage. Apply the highest-priority matching rule from `routing-map.json`; return exactly one next skill invocation.
+Use this policy when `he-reconcile` must choose one Harness Engineering stage. Apply the highest-priority matching rule from `routing-map.json`; return exactly one next skill invocation.
 
 ## Decision Order
 
 1. Direct valid `he-*` stage mention wins unless the user asks whether it is correct.
-2. Multiple named stages or "which stage" questions stay in `he-router`.
-3. Heartbeat, monitor, wake-up, poll, until-green/merged/done language routes to `he-heartbeat`.
+2. Multiple named stages or "which stage" questions stay in `he-reconcile`.
+3. Heartbeat, monitor, wake-up, poll, until-green/merged/done language routes to `he-phase-work`.
 4. Stale branch cleanup routes through the folded `he-prune-branches` compatibility mode.
 5. Implemented branch, PR, merge, review comments, readiness, or go/no-go language routes to review before more work.
 6. Eval report, drift validation, closure proof, safe-to-close, Linear completion recommendation, Definition of Done, or `.harness/evals` language routes to `he-eval-report`.
@@ -20,7 +20,7 @@ Use this policy when `he-router` must choose one Harness Engineering stage. Appl
     - missing validation, weak proof, false completion, or closure uncertainty -> `he-eval-report`;
     - missing durable guardrail after repeated steering -> `he-reinforce`;
     - approved implementation repair with current plan/spec boundary -> `he-work`;
-    - scheduled continuation or until-green/merged/done monitoring -> `he-heartbeat`;
+    - scheduled continuation or until-green/merged/done monitoring -> `he-phase-work`;
     - broad pattern improvement without a selected implementation slice -> `he-improve`.
     If multiple bullets match, choose the first bullet with fresh evidence. If freshness is unknown, block for one live refresh step instead of guessing.
 12. Repo intent, architecture review, structural triage, strategic direction, ADR compression, or core invariant compression routes to `he-strategy`.
@@ -46,16 +46,16 @@ Folded names remain router aliases and modes, not first-class packaged skills:
 - `he-refactor` -> `he-reframe`
 - lifecycle state refresh -> `he-reconcile`
 - old compound-learning, `he-compound`, or `he-compound-refresh` solved-problem capture -> `he-reinforce`
-- `he-prune-branches` -> `he-router` branch-hygiene handoff
+- `he-prune-branches` -> `he-reconcile` branch-hygiene handoff
 - `he-phase-heartbeat` -> `he-phase-work`
 
 ## Examples
 
-- "Should we use `he-work` or `he-code-review` next?" -> `he-router`.
+- "Should we use `he-work` or `he-code-review` next?" -> `he-reconcile`.
 - "The branch is implemented, please check it" -> `he-code-review`.
 - "Generate the eval and drift validation report before closing the Linear milestone" -> `he-eval-report`.
 - "Start by writing the failing regression" -> `he-work mode:tdd`.
-- "Wake this thread every 10m until PR 137 is green" -> `he-heartbeat`.
+- "Wake this thread every 10m until PR 137 is green" -> `he-phase-work`.
 - "Use archived sessions to find HE improvements" -> `he-improve`.
 - "Write the repo intent, architecture review, and triage artifacts" -> `he-strategy`.
 - "Create a staged migration program for the routing cleanup" -> `he-reframe`.

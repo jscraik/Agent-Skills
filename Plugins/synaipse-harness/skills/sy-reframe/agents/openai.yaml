@@ -6,7 +6,7 @@ interface:
 routing:
   handle: sy-reframe
   sdk_stage: reframe
-  previous_stage: strategy
+  previous_stage: none
   next_stage: brainstorm
 schema_version: 1
 skill: sy-reframe

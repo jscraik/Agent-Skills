@@ -17,13 +17,13 @@ It is not the `@brainwav/coding-harness` infrastructure toolchain.
 
 ## Command-Facing Skills
 
-Use `he-router` when the stage is unclear. The other command-facing skills are
+Use `he-reconcile` when the stage is unclear. The other command-facing skills are
 direct entrypoints when the user names the stage or the stage is already
 obvious.
 
 | Skill | Reader job |
 | --- | --- |
-| `he-router` | Select the HE stage and authority boundary. |
+| `he-reconcile` | Select the HE stage and authority boundary. |
 | `he-brainstorm` | Explore options before committing to spec, plan, Linear, or implementation. |
 | `he-strategy` | Capture strategy, architecture review, triage, ADR, or core invariant context. |
 | `he-reframe` | Create rollback-safe migration or structural-change programs. |
@@ -38,7 +38,7 @@ obvious.
 | `he-improve` | Improve HE skills, references, contracts, or evals from concrete evidence. |
 | `he-reconcile` | Recover lifecycle state, tracker/artifact conflicts, or resume routing. |
 | `he-reinforce` | Capture solved problems, stale learning refreshes, and Project Brain syncs. |
-| `he-heartbeat` | Schedule lightweight follow-ups; phase execution belongs to `he-phase-work`. |
+| `he-phase-work` | Schedule lightweight follow-ups; phase execution belongs to `he-phase-work`. |
 
 Compatibility and internal handles are retained so old prompts still route:
 `he-refactor` maps to `he-reframe`, `he-phase-heartbeat` maps to
@@ -53,7 +53,7 @@ artifact already proves the missing decision.
 
 ```mermaid
 flowchart LR
-  A["Rough idea or stale state"] --> B["he-router"]
+  A["Rough idea or stale state"] --> B["he-reconcile"]
   B --> C["he-brainstorm or he-strategy"]
   C --> D["he-reframe or he-linear-plan"]
   D --> E["he-spec"]
@@ -70,7 +70,7 @@ artifact evidence decide whether a stage is required or already satisfied.
 
 ## Routing
 
-Start with `he-router` when the stage is unclear. Direct stage calls are fine when the user names an active skill. Folded legacy names are aliases or modes, not packaged skills:
+Start with `he-reconcile` when the stage is unclear. Direct stage calls are fine when the user names an active skill. Folded legacy names are aliases or modes, not packaged skills:
 
 - `he-ideate` -> `he-brainstorm`
 - `he-deepen-spec` -> `he-spec`
@@ -82,7 +82,7 @@ Start with `he-router` when the stage is unclear. Direct stage calls are fine wh
 - `he-phase-heartbeat` -> `he-phase-work`
 - old compound-learning or `he-compound-refresh` solved-problem refresh -> `he-reinforce`
 - lifecycle state refresh -> `he-reconcile`
-- `he-prune-branches` -> `he-router` branch-hygiene handoff
+- `he-prune-branches` -> `he-reconcile` branch-hygiene handoff
 
 Source of truth:
 
@@ -209,11 +209,11 @@ Use Codex `/goal` for explicit long-running continuation only. A goal preserves 
 Validate plugin contract and marketplace registration:
 
 ```sh
-python3 Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts/plugin_builder.py validate Plugins/harness-engineering --require-marketplace --marketplace-path .agents/Plugins/marketplace.json
+python3 Plugins/plugin-factory/skills/code_quality_review/plugin-factory-router/scripts/plugin_builder.py validate Plugins/harness-engineering --require-marketplace --marketplace-path .agents/Plugins/marketplace.json
 ```
 
 Audit marketplace alignment:
 
 ```sh
-python3 Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts/plugin_builder.py audit-marketplace --marketplace-path .agents/Plugins/marketplace.json --plugins-path Plugins
+python3 Plugins/plugin-factory/skills/code_quality_review/plugin-factory-router/scripts/plugin_builder.py audit-marketplace --marketplace-path .agents/Plugins/marketplace.json --plugins-path Plugins
 ```

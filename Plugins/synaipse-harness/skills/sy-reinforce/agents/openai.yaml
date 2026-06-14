@@ -7,7 +7,7 @@ routing:
   handle: sy-reinforce
   sdk_stage: reinforce
   previous_stage: reconcile
-  next_stage: strategy
+  next_stage: reframe
 schema_version: 1
 skill: sy-reinforce
 stage: reinforce

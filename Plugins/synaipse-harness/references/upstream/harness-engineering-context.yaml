@@ -207,9 +207,8 @@ references:
     - he-brainstorm
     - he-code-review
     - he-eval-report
-    - he-heartbeat
-    - he-linear-plan
     - he-phase-work
+    - he-linear-plan
     - he-plan
     - he-reframe
     - he-spec
@@ -231,12 +230,11 @@ references:
     - he-brainstorm
     - he-code-review
     - he-fix-bugs
-    - he-heartbeat
+    - he-phase-work
     - he-improve
     - he-plan
     - he-reconcile
     - he-reinforce
-    - he-router
     - he-spec
     - he-work
     link_check: passed
@@ -257,15 +255,13 @@ references:
     - he-code-review
     - he-eval-report
     - he-fix-bugs
-    - he-heartbeat
+    - he-phase-work
     - he-improve
     - he-linear-plan
-    - he-phase-work
     - he-plan
     - he-reconcile
     - he-reframe
     - he-reinforce
-    - he-router
     - he-spec
     - he-strategy
     - he-work
@@ -320,7 +316,7 @@ references:
     - he-code-review
     - he-eval-report
     - he-plan
-    - he-router
+    - he-reconcile
     - he-spec
     - he-strategy
     - he-work
@@ -395,7 +391,6 @@ references:
     - he-plan
     - he-reconcile
     - he-reinforce
-    - he-router
     - he-spec
     - he-work
     link_check: passed
@@ -415,7 +410,7 @@ references:
     - he-code-review
     - he-eval-report
     - he-plan
-    - he-router
+    - he-reconcile
     - he-spec
     - he-work
     link_check: passed
@@ -444,9 +439,8 @@ references:
   quality_notes:
     stale_terms:
     - Harness Engineering
-    - he-heartbeat
+    - he-phase-work
     - he-reconcile
-    - he-router
     - he-work
     link_check: passed
     accuracy_certification: not_certified
@@ -513,7 +507,6 @@ references:
     - he-plan
     - he-reconcile
     - he-reframe
-    - he-router
     - he-spec
     - he-strategy
     - he-work
@@ -533,12 +526,11 @@ references:
     - he-brainstorm
     - he-code-review
     - he-fix-bugs
-    - he-heartbeat
+    - he-phase-work
     - he-improve
     - he-plan
     - he-reconcile
     - he-reinforce
-    - he-router
     - he-spec
     - he-work
     link_check: passed
@@ -716,7 +708,7 @@ references:
   quality_notes:
     stale_terms:
     - he-fix-bugs
-    - he-heartbeat
+    - he-phase-work
     - he-improve
     - he-reconcile
     - he-reinforce
@@ -1378,15 +1370,13 @@ references:
     - he-code-review
     - he-eval-report
     - he-fix-bugs
-    - he-heartbeat
+    - he-phase-work
     - he-improve
     - he-linear-plan
-    - he-phase-work
     - he-plan
     - he-reconcile
     - he-reframe
     - he-reinforce
-    - he-router
     - he-spec
     - he-strategy
     - he-work
@@ -1407,15 +1397,13 @@ references:
     - he-code-review
     - he-eval-report
     - he-fix-bugs
-    - he-heartbeat
+    - he-phase-work
     - he-improve
     - he-linear-plan
-    - he-phase-work
     - he-plan
     - he-reconcile
     - he-reframe
     - he-reinforce
-    - he-router
     - he-spec
     - he-strategy
     - he-work

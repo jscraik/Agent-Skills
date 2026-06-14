@@ -141,10 +141,9 @@ AGENT_NATIVE_CONTRACTS = (
 RELOCATION_GUARD_SKILL_FILES = {
     "skills-system/skill-creator",
     "skills-system/skill-installer",
-    "plugins/skill-factory/skills/code_quality_review/skill-builder",
+    "plugins/skill-factory/skills/skill-factory-router",
     "plugins/plugin-factory/skills/plugin-factory-router",
     "plugins/plugin-factory/skills/scaffolding_templates/plugin-creator",
-    "plugins/plugin-factory/skills/code_quality_review/plugin-builder",
     "plugins/plugin-factory/skills/infrastructure_ops/plugin-installer",
     "plugins/plugin-factory/skills/team_automation/plugin-router",
 }

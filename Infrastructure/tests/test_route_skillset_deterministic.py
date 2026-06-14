@@ -11,19 +11,20 @@ ROUTE_SCRIPT = str(
 SOURCE_PATHS = {
     "he-brainstorm": "Plugins/harness-engineering/skills/he-brainstorm/SKILL.md",
     "he-code-review": "Plugins/harness-engineering/skills/he-code-review/SKILL.md",
-    "he-heartbeat": "Plugins/harness-engineering/skills/he-heartbeat/SKILL.md",
+    "he-phase-work": "Plugins/harness-engineering/skills/he-phase-work/SKILL.md",
     "he-ideate": "Plugins/harness-engineering/skills/team_automation/he-ideate/SKILL.md",
     "he-phase-work": "Plugins/harness-engineering/skills/he-phase-work/SKILL.md",
-    "he-router": "Plugins/harness-engineering/skills/he-router/SKILL.md",
+    "he-reconcile": "Plugins/harness-engineering/skills/he-reconcile/SKILL.md",
+    "he-reconcile": "Plugins/harness-engineering/skills/he-reconcile/SKILL.md",
     "he-technical-review": "Plugins/harness-engineering/skills/code_quality_review/he-technical-review/SKILL.md",
     "he-tdd": "Plugins/harness-engineering/skills/team_automation/he-tdd/SKILL.md",
     "he-work": "Plugins/harness-engineering/skills/he-work/SKILL.md",
-    "plugin-builder": "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/SKILL.md",
+    "plugin-factory-router": "Plugins/plugin-factory/skills/plugin-factory-router/SKILL.md",
     "plugin-creator": "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/SKILL.md",
     "plugin-factory-router": "Plugins/plugin-factory/skills/plugin-factory-router/SKILL.md",
     "plugin-installer": "Plugins/plugin-factory/skills/infrastructure_ops/plugin-installer/SKILL.md",
     "plugin-router": "Plugins/plugin-factory/skills/team_automation/plugin-router/SKILL.md",
-    "skill-builder": "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md",
+    "skill-factory-router": "Plugins/skill-factory/skills/skill-factory-router/SKILL.md",
     "skill-creator": "Plugins/skill-factory/skills/scaffolding_templates/skill-creator/SKILL.md",
     "skill-factory-router": "Plugins/skill-factory/skills/skill-factory-router/SKILL.md",
     "skill-refactor": "Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor/SKILL.md",
@@ -97,7 +98,7 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
             "plugin-factory",
             "create a new plugin",
             [
-                _row("plugin-builder", "Harden and validate plugin packages."),
+                _row("plugin-factory-router", "Harden and validate plugin packages."),
                 _row("plugin-creator", "Scaffold a minimal Codex plugin package."),
                 _row("plugin-factory-router", "Route plugin work."),
             ],
@@ -111,7 +112,7 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
             "plugin-factory",
             "create and validate a new plugin",
             [
-                _row("plugin-builder", "Harden and validate plugin packages."),
+                _row("plugin-factory-router", "Harden and validate plugin packages."),
                 _row("plugin-creator", "Scaffold a minimal Codex plugin package."),
                 _row("plugin-factory-router", "Route plugin work."),
             ],
@@ -124,7 +125,7 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
             "plugin-factory",
             "repair plugin visibility after import",
             [
-                _row("plugin-builder", "Harden and validate plugin packages."),
+                _row("plugin-factory-router", "Harden and validate plugin packages."),
                 _row("plugin-creator", "Scaffold a minimal Codex plugin package."),
                 _row("plugin-factory-router", "Route plugin work."),
                 _row("plugin-installer", "Install validated plugins with provenance and rollback safety."),
@@ -137,9 +138,9 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
     def test_plugin_factory_internal_lane_mentions_route_to_router(self) -> None:
         payload = self._route(
             "plugin-factory",
-            "should I use plugin-builder or plugin-router for this package?",
+            "should I use plugin-factory-router or plugin-router for this package?",
             [
-                _row("plugin-builder", "Harden and validate plugin packages."),
+                _row("plugin-factory-router", "Harden and validate plugin packages."),
                 _row("plugin-factory-router", "Route plugin work."),
                 _row("plugin-router", "Route plugin tasks."),
             ],
@@ -153,7 +154,7 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
             "skill-factory",
             "create a new skill",
             [
-                _row("skill-builder", "Harden and validate skills."),
+                _row("skill-factory-router", "Harden and validate skills."),
                 _row("skill-creator", "Guide for creating effective skills."),
                 _row("skill-factory-router", "Route skill work."),
             ],
@@ -166,7 +167,7 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
             "skill-factory",
             "turn this session workflow into a reusable skill",
             [
-                _row("skill-builder", "Harden and validate skills."),
+                _row("skill-factory-router", "Harden and validate skills."),
                 _row("skill-factory-router", "Route skill work."),
                 _row("skillify", "Turn repeated workflows into skills."),
             ],
@@ -180,7 +181,7 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
             "skill-factory",
             "CodeRabbit and Codex keep leaving the same review feedback on this skill; analyze whether the context package needs to adapt",
             [
-                _row("skill-builder", "Harden and validate skills."),
+                _row("skill-factory-router", "Harden and validate skills."),
                 _row("skill-factory-router", "Route skill work."),
                 _row("skill-refactor", "Analyze skill reliability from evidence."),
             ],
@@ -194,7 +195,7 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
             "skill-factory",
             "review this skill package before release",
             [
-                _row("skill-builder", "Harden and validate skills."),
+                _row("skill-factory-router", "Harden and validate skills."),
                 _row("skill-factory-router", "Route skill work."),
                 _row("skill-refactor", "Analyze skill reliability from evidence."),
             ],
@@ -207,7 +208,7 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
             "skill-factory",
             "fix a failing unit test in ordinary app code; no skill changes are needed",
             [
-                _row("skill-builder", "Harden and validate skills."),
+                _row("skill-factory-router", "Harden and validate skills."),
                 _row("skill-creator", "Guide for creating effective skills."),
                 _row("skill-factory-router", "Route skill work."),
             ],
@@ -225,7 +226,7 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
             [
                 _row("he-brainstorm", "Shape ambiguous requirements and compare directions."),
                 _row("he-ideate", "Generate and compare implementation opportunities."),
-                _row("he-router", "Route Harness Engineering stages."),
+                _row("he-reconcile", "Reconcile Harness Engineering stages."),
             ],
         )
 
@@ -238,7 +239,7 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
             "run he-technical-review on the PR comments",
             [
                 _row("he-code-review", "Review PRs for readiness and technical risk."),
-                _row("he-router", "Route Harness Engineering stages."),
+                _row("he-reconcile", "Route Harness Engineering stages."),
                 _row("he-technical-review", "Deep technical review."),
             ],
         )
@@ -257,7 +258,7 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
             "CodeRabbit and Codex keep flagging the same missing validation evidence; review this HE PR and say whether the skill or eval context needs a follow-up",
             [
                 _row("he-code-review", "Review PRs for readiness and technical risk."),
-                _row("he-router", "Route Harness Engineering stages."),
+                _row("he-reconcile", "Route Harness Engineering stages."),
             ],
         )
 
@@ -266,21 +267,21 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
 
     def test_harness_engineering_folded_stage_correctness_still_routes_to_router(self) -> None:
         """
-        Verifies that questions about a stage's correctness route to the harness-engineering router.
+        Verifies that questions about a stage's correctness route to HE reconcile.
         
-        Calls the routing helper with a task asking whether "he-tdd" is appropriate and three candidate stages; asserts the router ("he-router") is selected and that the top candidate's reason includes "stage-correctness-question".
+        Calls the routing helper with a task asking whether "he-tdd" is appropriate and three candidate stages; asserts HE reconcile is selected and that the top candidate's reason includes "stage-correctness-question".
         """
         payload = self._route(
             "harness-engineering",
             "is he-tdd right for this request?",
             [
-                _row("he-router", "Route Harness Engineering stages."),
+                _row("he-reconcile", "Reconcile Harness Engineering stages."),
                 _row("he-tdd", "Test-first implementation."),
                 _row("he-work", "Implement approved work."),
             ],
         )
 
-        self.assertEqual(payload["selected"]["id"], "he-router")
+        self.assertEqual(payload["selected"]["id"], "he-reconcile")
         self.assertIn("stage-correctness-question", payload["candidates"][0]["reason"])
 
     def test_harness_engineering_phase_work_beats_direct_he_work(self) -> None:
@@ -288,9 +289,9 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
             "harness-engineering",
             "create a heartbeat to monitor he-work phases and run simplify plus code review before each commit",
             [
-                _row("he-heartbeat", "Automate HE wakeups and monitoring loops."),
+                _row("he-phase-work", "Automate HE wakeups and monitoring loops."),
                 _row("he-phase-work", "Run approved HE plans phase-by-phase under a heartbeat with review gates before git add."),
-                _row("he-router", "Route Harness Engineering stages."),
+                _row("he-reconcile", "Route Harness Engineering stages."),
                 _row("he-work", "Build approved HE changes in verified slices."),
             ],
         )
@@ -304,7 +305,7 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
             skillsets_dir = fixture_root / ".skillsets"
             rows = [
                 _row("he-brainstorm", "Shape ambiguous requirements and compare directions."),
-                _row("he-router", "Route Harness Engineering stages."),
+                _row("he-reconcile", "Route Harness Engineering stages."),
             ]
             _write_source_files(fixture_root, rows)
             _write_manifest(skillsets_dir, "harness-engineering", rows)

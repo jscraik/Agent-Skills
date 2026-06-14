@@ -7,7 +7,7 @@ purpose: Specify one selected trace or tracker slice with acceptance criteria, c
 triggers:
 - explicit sy-slice-spec invocation
 - explicit slice-spec stage request
-- strategy or previous-stage handoff to slice-spec
+- previous-stage handoff to slice-spec
 preconditions:
 - canonical source and active worktree are identified
 - required previous-stage artifact is present or blocker is returned

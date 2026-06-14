@@ -11,7 +11,7 @@
 This document defines review-time governance for AI-authored changes and AI-centered skill infrastructure updates in this repository.
 
 ## Authoring-family review scope
-For changes touching skill authoring family behavior (`skill-builder`, `skill-creator`, `skill-installer`, `plugin-creator`), reviewers must require the `authoring-family-gate` CI job.
+For changes touching skill authoring family behavior (`skill-factory-router`, `skill-creator`, `skill-installer`, `plugin-creator`), reviewers must require the `authoring-family-gate` CI job.
 
 The gate is implemented by:
 - `bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh`

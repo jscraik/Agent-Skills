@@ -735,8 +735,8 @@ _SKILL_INSTALLER_SCRIPT_CANDIDATES = (
 )
 
 _SKILL_BUILDER_SCRIPT_DIR_CANDIDATES = (
-    "Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts",
-    "plugins/skill-factory/skills/code_quality_review/skill-builder/scripts",
+    "Plugins/skill-factory/scripts/skill-builder",
+    "plugins/skill-factory/scripts/skill-builder",
 )
 
 
@@ -5852,7 +5852,7 @@ def fold_skills(repo_root: Path, source: str, target: str, sensitivity: float = 
         result.errors.append(ErrorObject(
             code="ERR_DEPENDENCY",
             message="Skill router or builder catalog not available.",
-            fix_suggestion="Restore the skill-builder catalog/router scripts or use skills route for current routing checks.",
+            fix_suggestion="Restore the Skill Factory script namespace or use skills route for current routing checks.",
         ))
         return result
 
@@ -6082,7 +6082,7 @@ def route_skills(
                 code="ERR_DEPENDENCY",
                 message="Skill router module is not available.",
                 fix_suggestion=(
-                    "Ensure Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/skill_router.py "
+                    "Ensure Plugins/skill-factory/scripts/skill-builder/skill_router.py "
                     "exists and rerun."
                 ),
             )
@@ -6710,13 +6710,19 @@ def _is_generated_root_skill_dir(path: Path) -> bool:
     return "skill-type: root-skill-set" in head and "projection-mode: rooted" in head
 
 
-def _prune_generated_root_skill_dirs(target_dir: Path, keep_names: set[str], *, dry_run: bool = False) -> list[str]:
+def _prune_generated_root_skill_dirs(
+    target_dir: Path,
+    keep_names: set[str],
+    *,
+    dry_run: bool = False,
+    preserve_keep_names: bool = True,
+) -> list[str]:
     """Remove generated rooted runtime directories that do not belong to the requested projection."""
     logs: list[str] = []
     if not target_dir.exists():
         return logs
     for item in sorted(target_dir.iterdir()):
-        if item.name.startswith(".") or item.name in keep_names:
+        if item.name.startswith(".") or (preserve_keep_names and item.name in keep_names):
             continue
         if not _is_generated_root_skill_dir(item):
             continue
@@ -6731,6 +6737,9 @@ SYSTEM_BRIDGE_ALIAS_MARKER = ".agent-skills-system-bridge-alias.json"
 
 def _is_generated_system_bridge_alias(item: Path, system_source: Path) -> bool:
     if item.is_symlink():
+        raw_target = Path(os.readlink(item))
+        if raw_target == Path(".system") / item.name or raw_target.parts[-2:] == (".system", item.name):
+            return True
         try:
             return item.resolve(strict=True) == system_source.resolve(strict=True)
         except OSError:
@@ -7545,7 +7554,12 @@ def sync_skills(
                 ):
                     plan["deletes"].append(log)
                     logs.append(log)
-            for log in _prune_generated_root_skill_dirs(skills_dir, keep_names, dry_run=dry_run):
+            for log in _prune_generated_root_skill_dirs(
+                skills_dir,
+                keep_names,
+                dry_run=dry_run,
+                preserve_keep_names=False,
+            ):
                 plan["deletes"].append(log)
                 logs.append(log)
             for entry in entries:

@@ -36,7 +36,7 @@ SKIP_PATH_PARTS = {
 }
 
 PILOT_SKILL_PROFILE_PATHS = {
-    "Plugins/skill-factory/skills/code_quality_review/skill-builder",
+    "Plugins/skill-factory/skills/skill-factory-router",
     "Skills/frontend-ui/agentation",
     "Skills/agent-ops/systematic-debugging",
     "Skills/product-strategy/interview-me",
@@ -48,12 +48,9 @@ VALID_MATURITY_LEVELS = {"experimental", "validated", "canonical"}
 VALID_METADATA_SOURCES = {"frontmatter", "plugin_manifest", "inherited"}
 GOVERNED_SKILL_PATHS = {
     "Skills/agent-ops/coding-harness/SKILL.md",
-    "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/SKILL.md",
-    "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md",
+    "Plugins/skill-factory/skills/skill-factory-router/SKILL.md",
 }
-GOVERNED_PLUGIN_ALIAS_ENFORCED_PATHS = {
-    "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/SKILL.md",
-}
+GOVERNED_PLUGIN_ALIAS_ENFORCED_PATHS: set[str] = set()
 GOVERNED_PLUGIN_MANIFEST_PATHS = {
     "Plugins/skill-factory/.codex-plugin/plugin.json",
 }
@@ -118,8 +115,7 @@ GOVERNED_PLUGIN_ALIAS_ENFORCED_NAMES = {
     if "/" in _normalize_rel(rel)
 }
 GOVERNED_SKILL_DISPLAY_BY_NAME = {
-    "plugin-builder": "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/SKILL.md",
-    "skill-builder": "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md",
+    "skill-factory-router": "Plugins/skill-factory/skills/skill-factory-router/SKILL.md",
 }
 
 

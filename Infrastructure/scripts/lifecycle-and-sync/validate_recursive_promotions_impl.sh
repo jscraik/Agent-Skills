@@ -224,8 +224,7 @@ trap 'rm -f "$results_jsonl"' EXIT
 
 # Resolve validator only when we actually have promotion files to validate
 validator_candidates=(
-  "Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/validate_recursive_promotion.py"
-  "Plugins/skill-factory/skills/skill-builder/scripts/validate_recursive_promotion.py"
+  "Plugins/skill-factory/scripts/skill-builder/validate_recursive_promotion.py"
 )
 validator=""
 for candidate in "${validator_candidates[@]}"; do

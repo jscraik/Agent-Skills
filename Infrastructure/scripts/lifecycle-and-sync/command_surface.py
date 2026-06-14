@@ -103,8 +103,6 @@ def _command_visibility_for(row: dict[str, Any]) -> str:
         return "none"
     if module_id.endswith("-router") or level in {"router", "compound"}:
         return "orchestrator"
-    if module_id in {"skill-builder", "plugin-builder"}:
-        return "orchestrator"
     if str(row.get("runtime_visibility", "latent")) in {"root", "flat"}:
         return "direct"
     return "target"
@@ -534,7 +532,7 @@ def handles_report(*, repo_root_path: Path | None = None, include_handles: bool 
         "policy_identity": policy_identity(),
         "generated_from": "rooted_manifests",
         "projection_path": COMMAND_SURFACE_PATH.as_posix(),
-        "handle_count": len(surfaced_handles),
+        "handle_count": len(public_rows),
         "violations": violations,
         "handles": public_rows,
         "hidden_handles": hidden_rows,
@@ -553,9 +551,9 @@ def command_surface_projection(*, repo_root_path: Path | None = None, include_ha
 
 
 def write_command_surface_projection(*, repo_root_path: Path | None = None, dry_run: bool = False) -> dict[str, Any]:
-    """Write or preview the generated command-surface manifest."""
+    """Write or preview the generated command-surface manifest without handle rows."""
     root = repo_root_path or repo_root()
-    payload = command_surface_projection(repo_root_path=root, include_handles=True)
+    payload = command_surface_projection(repo_root_path=root, include_handles=False)
     destination = root / COMMAND_SURFACE_PATH
     serialized = json.dumps(payload, indent=2, sort_keys=True) + "\n"
     if not dry_run:
@@ -573,9 +571,9 @@ def write_command_surface_projection(*, repo_root_path: Path | None = None, dry_
 
 
 def check_command_surface_projection(*, repo_root_path: Path | None = None) -> dict[str, Any]:
-    """Verify the committed command-surface projection matches rooted manifests."""
+    """Verify the committed command-surface projection is the no-handle projection."""
     root = repo_root_path or repo_root()
-    payload = command_surface_projection(repo_root_path=root, include_handles=True)
+    payload = command_surface_projection(repo_root_path=root, include_handles=False)
     destination = root / COMMAND_SURFACE_PATH
     violations = list(payload.get("violations", []))
 

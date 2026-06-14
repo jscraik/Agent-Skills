@@ -12,7 +12,6 @@ on:
       - "skills-system/skill-installer/**"
 
       - "Plugins/skill-factory/references/skill-builder/**"
-      - "Plugins/skill-factory/skills/code_quality_review/skill-builder/Infrastructure/scripts/**"
       - "Plugins/skill-factory/skills/infrastructure_ops/skill-installer/Infrastructure/scripts/install-skill-from-github.py"
       - "Plugins/skill-factory/skills/infrastructure_ops/skill-installer/scripts/install-skill-from-github.py"
       - "Infrastructure/scripts/validate_skill_authoring_family.sh"

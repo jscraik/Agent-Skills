@@ -27,7 +27,7 @@ Route before acting. A plugin task should enter exactly one lane with clear trus
 ## Deliverables
 
 - `schema_version: "1"` when structured output is requested.
-- One selected lane (`plugin-creator`, `plugin-builder`, `plugin-installer`, or `plugin-router` follow-up).
+- One selected lane (`plugin-creator`, `plugin-installer`, `plugin-router` follow-up, or plugin hardening through the factory router).
 - One-sentence rationale for the lane selection.
 - One exact next command or prompt to execute.
 - Plugin design checkpoint when authoring, rebuilding, auditing, or packaging:

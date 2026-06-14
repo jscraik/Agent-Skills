@@ -14,7 +14,7 @@ from pathlib import Path
 
 
 DEFAULT_SKILLS = (
-    "he-router",
+    "he-reconcile",
     "he-spec",
     "he-code-review",
     "he-strategy",

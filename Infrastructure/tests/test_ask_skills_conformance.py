@@ -346,7 +346,7 @@ class TestAskSkillsConformance(unittest.TestCase):
         )
 
     def test_handle_verify_preserves_branch_rule_evidence(self) -> None:
-        result = skills_package_verify(REPO_ROOT, "skill-builder")
+        result = skills_package_verify(REPO_ROOT, "skill-factory-router")
 
         self.assertEqual(result.status, "success")
         verification = result.data["skill_package_verification"]

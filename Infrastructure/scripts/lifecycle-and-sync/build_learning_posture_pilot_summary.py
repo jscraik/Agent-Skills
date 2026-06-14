@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Tuple
 
 PILOT_SKILLS = [
-    "Skills/skill-builder",
+    "Plugins/skill-factory/skills/skill-factory-router",
     "frontend/tools/agentation",
     "Skills/systematic-debugging",
     "interview/interview-me",

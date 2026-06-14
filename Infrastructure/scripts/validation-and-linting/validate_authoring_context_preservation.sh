@@ -8,7 +8,7 @@ cd "$repo_root"
 marker="Apply the context-disposition policy"
 
 skills=(
-  "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md"
+  "Plugins/skill-factory/skills/skill-factory-router/SKILL.md"
   "skills-system/skill-creator/references/skill-factory/foundations.md"
   "skills-system/skill-installer/references/skill-factory/install-flows.md"
   "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/SKILL.md"

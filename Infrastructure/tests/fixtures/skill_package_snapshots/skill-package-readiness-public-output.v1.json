@@ -339,16 +339,12 @@
       },
       "values": {
         "compatible_roles": [
-          "default",
-          "worker",
-          "skill-inspector"
+          "default, worker, skill-inspector"
         ],
         "maturity": "canonical",
-        "provenance": "frontmatter:Agent Skills Team:2026-05-15:canonical-source",
+        "provenance": "frontmatter:Agent Skills Team:2026-05-28:canonical-source",
         "runtime_needs": [
-          "repo-owned skill source path",
-          "./bin/ask skills audit and eval wrappers",
-          "python3 standard library validators"
+          "repo-owned skill source path; Skill Factory skill inventory; ./bin/ask skills external-review"
         ],
         "share_readiness": "ready",
         "version": "1.0.0"
@@ -387,16 +383,16 @@
       "compatibility_status": "compatible",
       "metadata": {
         "dependencies": null,
-        "description": "Reviews and improves SKILL.md packages by fixing audit findings, triggers, examples, evals, token budget, release proof, safety verdicts, comparator/baseline choices, and bounded code-lens hardening. Use when the user says improve a skill, fix a skill file, review SKILL.md, raise Tessl score, reduce context cost, add skill evals, or prepare a plugin skill for release.",
+        "description": "Analyzes Codex skill-management requests, selects the workflow lane, and returns selected_lane, mode, next_step, and blockers. Use when the user says create a skill, add/update/fix/review a skill, install/sync/list skills, choose a workflow, or merge/retire a skill.",
         "interface": {
-          "display_name": "Skill Builder",
-          "short_description": "Harden Codex skills and plugin packages with contract checks, eval coverage, and validation evidence."
+          "display_name": "Skill Factory Router",
+          "short_description": "Route skill lifecycle requests to a Skill Factory lane. Use when users ask to create, harden,..."
         },
-        "name": "skill-builder",
+        "name": "skill-factory-router",
         "plugin_id": null,
         "policy": null,
         "scope": null,
-        "short_description": "Harden Codex skills and plugin packages with contract checks, eval coverage, and validation evidence."
+        "short_description": "Route skill lifecycle requests to a Skill Factory lane. Use when users ask to create, harden,..."
       },
       "optional_fields": {
         "present": [
@@ -413,8 +409,8 @@
       },
       "schema_version": "skill-package.v1",
       "source_files": {
-        "agents_openai_yaml": "Plugins/skill-factory/skills/code_quality_review/skill-builder/agents/openai.yaml",
-        "skill_md": "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md"
+        "agents_openai_yaml": "Plugins/skill-factory/skills/skill-factory-router/agents/openai.yaml",
+        "skill_md": "Plugins/skill-factory/skills/skill-factory-router/SKILL.md"
       }
     },
     "status": "pass",

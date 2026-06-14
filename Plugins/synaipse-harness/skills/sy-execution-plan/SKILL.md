@@ -57,7 +57,7 @@ Return the stage artifact or blocker, then hand off to work only after this stag
 
 - Similar legacy names may exist in caches or older Harness Engineering packages; do not expose them as SynAIpse active skills.
 - A local artifact can explain work, but it does not prove remote PR, CI, tracker, or deployment state.
-- If multiple stages seem plausible, route to sy-strategy instead of doing blended stage work.
+- If multiple stages seem plausible, route to sy-reframe instead of doing blended stage work.
 
 ## References
 

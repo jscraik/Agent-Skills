@@ -7,7 +7,7 @@ purpose: Recover stale or conflicting lifecycle state by separating local, PR, C
 triggers:
 - explicit sy-reconcile invocation
 - explicit reconcile stage request
-- strategy or previous-stage handoff to reconcile
+- previous-stage handoff to reconcile
 preconditions:
 - canonical source and active worktree are identified
 - required previous-stage artifact is present or blocker is returned

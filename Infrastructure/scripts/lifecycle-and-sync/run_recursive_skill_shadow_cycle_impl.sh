@@ -132,9 +132,9 @@ if [[ ${#profiles[@]} -eq 0 ]]; then
 fi
 
 example_profile="Docs/skill-graphs/schemas/examples/ui-skills-profile.example.json"
-loop_script="Skills/skill-builder/Infrastructure/scripts/recursive_skill_loop.py"
-report_script="Skills/skill-builder/Infrastructure/scripts/build_recursive_skill_shadow_report.py"
-arscontexta_queue_script="Skills/skill-builder/Infrastructure/scripts/build_arscontexta_intervention_queue.py"
+loop_script="Plugins/skill-factory/scripts/skill-builder/recursive_skill_loop.py"
+report_script="Plugins/skill-factory/scripts/skill-builder/build_recursive_skill_shadow_report.py"
+arscontexta_queue_script="Plugins/skill-factory/scripts/skill-builder/build_arscontexta_intervention_queue.py"
 shadow_md="Docs/skill-graphs/pilots/ui-skills-shadow-results.md"
 readout_md="Docs/skill-graphs/pilots/ui-skills-pilot-readout.md"
 arscontexta_queue_md="Docs/skill-graphs/pilots/arscontexta-intervention-queue.md"

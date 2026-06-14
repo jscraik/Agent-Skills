@@ -30,7 +30,7 @@ Route by intended outcome:
 - Coverage-gap, workflow-capture, or skillify candidate from collector evidence -> `he-improve` first, then [session evidence skillify triage](session-evidence-skillify-triage.md); only invoke `skill-factory:skillify` after triage returns `skillify-new-skill`.
 - Stale lifecycle handoff, repeated gate failure, or unclear resume state -> `he-reconcile`.
 - Solved repeated failure or stale learning document -> `he-reinforce`.
-- Waiting on PR, CI, review, Linear, deploy, or validation state -> `he-heartbeat`.
+- Waiting on PR, CI, review, Linear, deploy, or validation state -> `he-phase-work`.
 - Concrete implementation derived from evidence -> `he-work`.
 - Correctness or safety validation from evidence -> `he-technical-review`.
 - Reproduction, deterministic error, or root cause -> `he-fix-bugs`.

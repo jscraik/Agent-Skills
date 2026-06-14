@@ -24,7 +24,8 @@ CI mode policy:
 - This keeps local-memory preflight as warning-only in CI while preserving fail-closed enforcement for contract/eval/security gate failures.
 
 This gate enforces contract/eval/security behavior for:
-- `Skills/skill-builder`
+- `Plugins/skill-factory/skills/skill-factory-router`
+- `Plugins/skill-factory/scripts/skill-builder`
 - `Skills/skill-creator`
 - `Skills/skill-installer`
 - `Skills/plugin-creator`

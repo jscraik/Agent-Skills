@@ -29,7 +29,7 @@ outputs:
 
 non_goals:
   - creating implementation plans from vague requirements
-  - replacing he-work, he-heartbeat, he-fix-bugs, he-code-review, or simplify
+  - replacing he-work, he-phase-work, he-fix-bugs, he-code-review, or simplify
   - unattended merge, deploy, tracker closure, force-push, or destructive cleanup
 
 risks:
@@ -66,7 +66,7 @@ observability: >
 rollback_procedure: >
   Pause or delete the heartbeat, preserve the last bundle path and phase evidence,
   revert only the phase diff if rollback is required, and reroute the remaining
-  work through he-router or he-work.
+  work through he-reconcile or he-work.
 
 operator_contract:
   description_contract: "Harness Engineering stage: verbs, artifacts, lifecycle boundary, and authority constraints."

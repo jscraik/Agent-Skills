@@ -7,7 +7,7 @@ purpose: Record closure proof with exact commands, outcomes, artifact paths, unt
 triggers:
 - explicit sy-eval-report invocation
 - explicit eval-report stage request
-- strategy or previous-stage handoff to eval-report
+- previous-stage handoff to eval-report
 preconditions:
 - canonical source and active worktree are identified
 - required previous-stage artifact is present or blocker is returned

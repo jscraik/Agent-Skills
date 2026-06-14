@@ -257,31 +257,27 @@ class SkillLifecycleValidationTests(unittest.TestCase):
             self.assertIn("governed plugin manifest missing `governance.owner`", result.stdout)
             self.assertIn("blocked=1", result.stdout)
 
-    def test_governed_symlink_alias_is_enforced_in_strict_mode(self) -> None:
+    def test_governed_skill_is_enforced_in_strict_mode(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root = Path(tmpdir)
-            canonical_dir = repo_root / "plugins" / "plugin-factory" / "skills" / "plugin-builder"
+            canonical_dir = repo_root / "Plugins" / "skill-factory" / "skills" / "skill-factory-router"
             canonical_dir.mkdir(parents=True, exist_ok=True)
             write_text(
                 canonical_dir / "SKILL.md",
                 """
                 ---
-                name: plugin-builder
-                description: "Canonical plugin-builder skill missing lifecycle metadata."
+                name: skill-factory-router
+                description: "Canonical skill-factory-router skill missing lifecycle metadata."
                 ---
 
-                # Plugin Builder
+                # Skill Factory Router
                 """,
             )
 
-            alias = repo_root / "utilities" / "plugin-builder"
-            alias.parent.mkdir(parents=True, exist_ok=True)
-            alias.symlink_to("../Plugins/plugin-factory/skills/code_quality_review/plugin-builder", target_is_directory=True)
-
             result = run_validator(repo_root)
             self.assertNotEqual(result.returncode, 0, result.stderr or result.stdout)
-            self.assertIn("Plugins/plugin-factory/skills/code_quality_review/plugin-builder/SKILL.md [skill]", result.stdout)
-            self.assertIn("missing_metadata: governed skill missing `lifecycle_state`", result.stdout)
+            self.assertIn("Plugins/skill-factory/skills/skill-factory-router/SKILL.md [packaged_skill]", result.stdout)
+            self.assertIn("pilot skill missing Infrastructure/references/task-profile.json", result.stdout)
 
     def test_cached_and_fixture_skills_are_skipped_from_catalog_duplicates(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

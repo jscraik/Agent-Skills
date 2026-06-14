@@ -63,7 +63,7 @@ Canonical installs must not stop at copied source. Before promoting a command ha
 
 - Route to `.system/skill-installer` when the user intent is list/install/visibility on already-authored skills.
 - Route to `.system/skill-creator` when the user asks to create, restructure, or rewrite skill package content.
-- Route to `skill-builder` when the user asks to harden, benchmark, or gate-readiness-check an existing skill package.
+- Route to `skill-factory-router` when the user asks to harden, benchmark, or gate-readiness-check an existing skill package; the router selects the current hardening workflow.
 - If a single request mixes install plus restructuring/hardening, split the response into phases and state the active phase explicitly before running commands.
 
 ## Boundary failure signatures
@@ -71,9 +71,9 @@ Canonical installs must not stop at copied source. Before promoting a command ha
 - Symptom: an external skill is copied before checking for local overlap.
   - Fix: stop, run the intake comparison, and either blend, keep separate, reject, or ask for ownership choice.
 - Symptom: install flow starts rewriting contracts/evals before any source-resolution step.
-  - Fix: route content restructuring to `skill-creator` or `skill-builder`, then return to install flow.
+  - Fix: route content restructuring to `skill-creator` or `skill-factory-router`, then return to install flow.
 - Symptom: readiness claims are made without strict audit or benchmark evidence.
-  - Fix: hand off to `skill-builder` before claiming release readiness.
+  - Fix: hand off through `skill-factory-router` before claiming release readiness.
 - Symptom: user asks only "what can I install?" but response launches hardening commands.
   - Fix: stay in list/install mode and keep hardening out of scope unless explicitly requested.
 

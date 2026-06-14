@@ -147,10 +147,8 @@ LEGACY_REFERENCE_TERMS = (
     "he-eval-report",
     "he-reconcile",
     "he-reinforce",
-    "he-router",
     "he-phase-work",
     "he-fix-bugs",
-    "he-heartbeat",
     "he-improve",
 )
 

@@ -358,7 +358,7 @@ class TestRecoveryResultBuilders(unittest.TestCase):
         self.assert_recovery_data(
             result,
             ["./bin/ask skills list --json --robot"],
-            ["ask skills resolve he-heartbeat --json"],
+            ["ask skills resolve he-phase-work --json"],
             "Closest action guess: 'ask skills resolve'.",
         )
 
@@ -370,8 +370,8 @@ class TestRecoveryResultBuilders(unittest.TestCase):
             result.data["candidate_commands"],
             [
                 'ask skills improve "fix PR review comments faster" --json --robot',
-                "ask skills explain he-heartbeat --json --robot",
-                "ask skills doctor he-heartbeat --json --robot",
+                "ask skills explain he-phase-work --json --robot",
+                "ask skills doctor he-phase-work --json --robot",
             ],
         )
 
@@ -379,7 +379,7 @@ class TestRecoveryResultBuilders(unittest.TestCase):
         result = build_helpful_error(None, None, ["prove"])
 
         self.assertEqual(result.data["validation_commands"], ["./bin/ask skills list --json --robot"])
-        self.assertEqual(result.data["candidate_commands"], ["ask skills prove he-heartbeat --json"])
+        self.assertEqual(result.data["candidate_commands"], ["ask skills prove he-phase-work --json"])
 
     def test_helpful_error_uses_ambiguous_recovery_commands(self):
         for args in ((None, None, ["list"]), ("list", None, ["list"])):
@@ -417,8 +417,8 @@ class TestRecoveryResultBuilders(unittest.TestCase):
             result.data["candidate_commands"],
             [
                 'ask skills improve "fix PR review comments faster" --json --robot',
-                "ask skills explain he-heartbeat --json --robot",
-                "ask skills doctor he-heartbeat --json --robot",
+                "ask skills explain he-phase-work --json --robot",
+                "ask skills doctor he-phase-work --json --robot",
             ],
         )
         self.assertEqual(result.errors[0].fix_suggestion, "Closest topic guess: 'ask skills'.")
@@ -431,8 +431,8 @@ class TestRecoveryResultBuilders(unittest.TestCase):
             result.data["candidate_commands"],
             [
                 'ask skills improve "fix PR review comments faster" --json --robot',
-                "ask skills explain he-heartbeat --json --robot",
-                "ask skills doctor he-heartbeat --json --robot",
+                "ask skills explain he-phase-work --json --robot",
+                "ask skills doctor he-phase-work --json --robot",
             ],
         )
         self.assertEqual(result.errors[0].fix_suggestion, "Closest topic guess: 'ask skills'.")
@@ -448,8 +448,8 @@ class TestRecoveryResultBuilders(unittest.TestCase):
                 ("zzz", None, ["zzz"]),
                 [
                     'ask skills improve "fix PR review comments faster" --json --robot',
-                    "ask skills explain he-heartbeat --json --robot",
-                    "ask skills doctor he-heartbeat --json --robot",
+                    "ask skills explain he-phase-work --json --robot",
+                    "ask skills doctor he-phase-work --json --robot",
                 ],
             ),
             ((None, None, ["zzz"]), None),
@@ -485,7 +485,7 @@ class TestRecoveryResultBuilders(unittest.TestCase):
         self.assert_recovery_data(
             result,
             ["./bin/ask skills list --json --robot"],
-            ["ask skills resolve he-heartbeat --json"],
+            ["ask skills resolve he-phase-work --json"],
             "Closest action guess: 'ask skills resolve'.",
         )
 
@@ -502,7 +502,7 @@ class TestRecoveryResultBuilders(unittest.TestCase):
         self.assert_recovery_data(
             result,
             ["./bin/ask skills list --json --robot"],
-            ["ask skills resolve he-heartbeat --json"],
+            ["ask skills resolve he-phase-work --json"],
         )
 
 
@@ -568,8 +568,8 @@ class TestExampleCommands(unittest.TestCase):
             result,
             [
                 'ask skills improve "fix PR review comments faster" --json --robot',
-                "ask skills explain he-heartbeat --json --robot",
-                "ask skills doctor he-heartbeat --json --robot",
+                "ask skills explain he-phase-work --json --robot",
+                "ask skills doctor he-phase-work --json --robot",
             ],
         )
 
@@ -591,7 +591,7 @@ class TestExampleCommands(unittest.TestCase):
     def test_skills_doctor_returns_command_specific_examples(self):
         result = _example_commands("skills", "doctor", limit=2)
 
-        self.assertEqual(result[0], "ask skills doctor he-heartbeat --json")
+        self.assertEqual(result[0], "ask skills doctor he-phase-work --json")
         self.assertIn("Skills/agent-ops/autofix", result[1])
 
     def test_skills_events_returns_command_specific_examples(self):

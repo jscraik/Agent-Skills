@@ -1,6 +1,6 @@
 ---
 name: he-phase-heartbeat
-description: "Routes old phase-heartbeat requests into HE phase work: check the approved plan, reuse or create a 10-minute he-heartbeat only with authority, run phase gates, delegate the active slice to he-work, and stop before commit or tracker closure. Use when a user says phase heartbeat, keep this PR moving, or continue phases."
+description: "Routes old phase-heartbeat requests into HE phase work: check the approved plan, reuse or create a 10-minute continuation only with authority, run phase gates, delegate the active slice to he-work, and stop before commit or tracker closure. Use when a user says phase heartbeat, keep this PR moving, or continue phases."
 metadata:
   version: 1.0.0
   runtime_visibility: hidden
@@ -22,7 +22,7 @@ does not authorize implementation, staging, commits, Linear updates, or closure.
   review gates, and an explicit stop rule before commit or tracker updates.
 
 ## When Not to Use
-- Use `he-heartbeat` for lightweight reminders that do not execute phases.
+- Use plain reminders for lightweight nudges that do not execute phases.
 - Use `he-work` for a single bounded implementation with no recurrence.
 - Use `he-plan` or `he-spec` if the plan or phase sequence is not approved.
 
@@ -45,7 +45,7 @@ low-signal text.
 
 1. Confirm the approved plan path, target issue/PR, workspace, branch, dirty
    state, active phase, validation command, and stop condition.
-2. Reuse an existing matching 10 minute `he-heartbeat`; create one only when
+2. Reuse an existing matching 10 minute `he-phase-work`; create one only when
    automation authority is explicit.
 3. Check collector or live-state evidence. If evidence is stale, missing, or
    unredacted, set `slack_policy: blocked` and stop.
@@ -61,7 +61,7 @@ schema_version: 1
 selected_stage: he-phase-work
 compatibility_source: he-phase-heartbeat
 target: JSC-246 account settings
-heartbeat_id: he-heartbeat:JSC-246
+heartbeat_id: he-phase-work:JSC-246
 active_phase: "phase 1: validate current artifact"
 live_state_checked: true
 validation:

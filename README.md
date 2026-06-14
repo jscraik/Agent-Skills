@@ -89,7 +89,7 @@ syntax mistakes and returns structured errors when intent is ambiguous.
 ./bin/ask skills resolve <handle> --json --robot
 ./bin/ask reviewers resolve <handle> --json --robot
 ./bin/ask graph find security --tier stable
-./bin/ask graph related skill-builder --depth 2
+./bin/ask graph related skill-factory-router --depth 2
 ```
 
 ### Validate and prove
@@ -123,15 +123,14 @@ This repo separates source, generated projections, and live runtime visibility.
 | `.agents/skills/**`                   | Runtime projection consumed by Codex and agent runtimes   | Regenerate only        |
 | `~/.agents/skills`, `~/.codex/skills` | User runtime links to the active projection               | Refresh with user sync |
 
-Command-surface metadata in `.skillsets/command-surface.json` makes handles
-such as `$he-heartbeat` mentionable and resolves them to canonical
-`SKILL.md` source. It is not a generated wrapper file and it is not the real
-workflow.
+Command-surface metadata in `.skillsets/command-surface.json` is generated
+review/route metadata. Retired command handles must not remain there, and the
+file is not the real workflow.
 
-Resolve command-visible skill handles with:
+Resolve canonical skill handles with:
 
 ```bash
-./bin/ask skills resolve he-heartbeat --json --robot
+./bin/ask skills resolve improve-agent-native --json --robot
 ```
 
 Resolve reviewer or subagent handles with:

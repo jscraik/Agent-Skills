@@ -26,7 +26,7 @@ DOCTOR_SIGNAL_PRIORITY = {
     "package_readiness": 57,
     "repo_surface": 60,
 }
-PACKAGE_READINESS_SENTINEL = "skill-builder"
+PACKAGE_READINESS_SENTINEL = "skill-factory-router"
 COMMAND_HANDLE_CHECK_COMMAND = (
     "./bin/ask skills handles --check --no-handles --check-projection --json --robot"
 )

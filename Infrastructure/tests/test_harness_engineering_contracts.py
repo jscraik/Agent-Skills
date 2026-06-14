@@ -18,7 +18,7 @@ def test_lifecycle_tracer_covers_main_stages() -> None:
         "he-fix-bugs",
         "he-improve",
         "he-code-review",
-        "he-heartbeat",
+        "he-phase-work",
         "he-reconcile",
         "he-reinforce",
         "he-eval-report",

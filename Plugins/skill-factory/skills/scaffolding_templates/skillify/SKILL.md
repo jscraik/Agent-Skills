@@ -157,7 +157,7 @@ the smallest command, permission, or source artifact needed to unblock them.
 
 ## Handoff
 
-- Existing skill hardening -> `skill-builder`.
+- Existing skill hardening -> `skill-factory-router`.
 - Skill health or keep/merge/retire analysis -> `skill-refactor`.
 - Install, list, sync, or runtime visibility proof -> `skill-installer`.
 - Plugin package lifecycle work -> `plugin-factory`.

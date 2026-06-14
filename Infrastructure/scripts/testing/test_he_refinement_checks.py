@@ -64,7 +64,7 @@ def test_migration_report_covers_active_he_skills():
     reported_skills = sorted(row["skill"] for row in rows)
 
     assert reported_skills == active_skills
-    assert len(rows) >= 17
+    assert len(rows) == len(active_skills)
     assert all(row["operator_contract"] == "present" for row in rows)
 
 

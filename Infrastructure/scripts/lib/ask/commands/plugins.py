@@ -35,11 +35,13 @@ _PLUGIN_INSTALLER_SCRIPT_CANDIDATES = (
     "Plugins/plugin-factory/skills/infrastructure_ops/plugin-installer/scripts/install-plugin-from-github.py",
 )
 _PLUGIN_BUILDER_SCRIPT_CANDIDATES = (
-    "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts/plugin_builder.py",
+    "Plugins/plugin-factory/scripts/plugin-builder/plugin_builder.py",
 )
 _LOCAL_PLUGIN_ROOTS = ("plugins", "Plugins", ".agents/plugins")
 _PERSONAL_PLUGIN_MARKETPLACE_ROOT = Path(".agents/plugins")
 _PROJECT_PERSONAL_PLUGIN_MARKETPLACE_ROOT = Path(".agents/personal-plugins")
+_REPO_PLUGIN_RUNTIME_CACHE_ROOT = Path(".agents/plugins-runtime/cache/agent-skills-local")
+_NON_LOADABLE_PLUGIN_SKILL_PARTS = {"fixtures", "budget-archive", "preserved-context"}
 
 
 def _to_absolute_path(path: Path) -> Path:
@@ -351,6 +353,19 @@ def _personal_marketplace_payload(entries: list[dict[str, Any]]) -> dict[str, An
     }
 
 
+def _looks_like_materialized_plugin_payload(path: Path) -> bool:
+    """Return true when a marketplace child is a local plugin payload, not arbitrary user data."""
+    return (
+        path.is_dir()
+        and not path.is_symlink()
+        and (
+            (path / ".codex-plugin" / "plugin.json").is_file()
+            or (path / "plugin.json").is_file()
+            or (path / "marketplace.json").is_file()
+        )
+    )
+
+
 def _sync_personal_marketplace(
     *,
     home: Path,
@@ -395,6 +410,7 @@ def _sync_personal_marketplace(
     symlinked_plugins: list[str] = []
     planned_symlinked_plugins: list[str] = []
     skipped_symlinks: list[str] = []
+    replaced_materialized_plugins: list[str] = []
     planned_plugins = [str(entry["name"]) for entry in marketplace_entries]
     repointed_marketplace_root = False
     planned_repoint_marketplace_root = False
@@ -446,8 +462,12 @@ def _sync_personal_marketplace(
                 continue
             link_path.unlink()
         elif link_path.exists():
-            skipped_symlinks.append(plugin_name)
-            continue
+            if target_path.exists() and _looks_like_materialized_plugin_payload(link_path):
+                shutil.rmtree(link_path)
+                replaced_materialized_plugins.append(plugin_name)
+            else:
+                skipped_symlinks.append(plugin_name)
+                continue
         if target_path.exists():
             link_path.symlink_to(target_path)
             symlinked_plugins.append(plugin_name)
@@ -464,6 +484,7 @@ def _sync_personal_marketplace(
         "pruned_plugins": [],
         "skipped_marketplace_copy": False,
         "symlinked_plugins": symlinked_plugins,
+        "replaced_materialized_plugins": replaced_materialized_plugins,
         "planned_symlinked_plugins": planned_symlinked_plugins,
         "skipped_symlinks": skipped_symlinks,
         "official_personal_marketplace": True,
@@ -794,6 +815,29 @@ def _normalize_plugin_name(raw_name: str) -> str:
     return normalized
 
 
+def _prune_non_loadable_plugin_skill_manifests(plugin_root: Path) -> list[str]:
+    """Remove archive/fixture SKILL.md files from materialized runtime payloads."""
+    removed: list[str] = []
+    if not plugin_root.is_dir():
+        return removed
+    skills_root = plugin_root / "skills"
+    for skill_md in sorted(plugin_root.rglob("SKILL.md")):
+        relative = skill_md.relative_to(plugin_root)
+        relative_parts = set(relative.parts[:-1])
+        if not (relative_parts & _NON_LOADABLE_PLUGIN_SKILL_PARTS):
+            if (
+                skills_root.is_dir()
+                and skill_md.parent.parent != skills_root
+                and (skills_root / skill_md.parent.name / "SKILL.md").is_file()
+            ):
+                pass
+            else:
+                continue
+        skill_md.unlink()
+        removed.append(relative.as_posix())
+    return removed
+
+
 def _sync_one_runtime_root(
     *,
     runtime_root: Path,
@@ -843,6 +887,7 @@ def _sync_one_runtime_root(
     skipped_plugins: list[str] = []
     removed_entries: list[str] = []
     pruned_plugins: list[str] = []
+    pruned_non_loadable_skill_manifests: list[dict[str, Any]] = []
     marketplace_target = runtime_root / "marketplace.json"
     skipped_marketplace_copy = False
     marker_name = ".codex-repo-plugin-source"
@@ -888,6 +933,11 @@ def _sync_one_runtime_root(
                     target_dir.unlink()
                 _copy_directory_contents(source_dir, target_dir)
                 _materialize_first_level_skill_aliases(target_dir)
+                removed_manifests = _prune_non_loadable_plugin_skill_manifests(target_dir)
+                if removed_manifests:
+                    pruned_non_loadable_skill_manifests.append(
+                        {"plugin": plugin_name, "skill_manifests": removed_manifests}
+                    )
                 (target_dir / marker_name).write_text(str(source_dir.resolve()) + "\n", encoding="utf-8")
                 copied_plugins.append(plugin_name)
                 continue
@@ -936,6 +986,7 @@ def _sync_one_runtime_root(
         "skipped_plugins": skipped_plugins,
         "removed_entries": removed_entries,
         "pruned_plugins": pruned_plugins,
+        "pruned_non_loadable_skill_manifests": pruned_non_loadable_skill_manifests,
         "skipped_marketplace_copy": skipped_marketplace_copy,
         "materializes_payload": materializes_payload,
         "dry_run": dry_run,
@@ -1036,6 +1087,15 @@ def sync_local_runtime_plugins(repo_root: Path, *, dry_run: bool = False) -> Cal
                         dry_run=dry_run,
                     )
                 )
+        runtime_reports.append(
+            _sync_one_runtime_root(
+                runtime_root=repo_root / _REPO_PLUGIN_RUNTIME_CACHE_ROOT,
+                repo_root=repo_root,
+                marketplace_path=marketplace_path,
+                marketplace_entries=entries,
+                dry_run=dry_run,
+            )
+        )
         runtime_reports.append(
             _sync_personal_marketplace(
                 home=home,
@@ -1561,7 +1621,7 @@ def harden_plugin(
     allow_legacy_marketplace_path: bool = True,
 ) -> CallResult:
     """
-    Run the plugin-builder hardening steps (validate, optional compatibility audit, optional marketplace audit) for a plugin package.
+    Run the plugin hardening steps (validate, optional compatibility audit, optional marketplace audit) for a plugin package.
 
     Parameters:
         repo_root (Path): Repository root used as the working directory and base for resolving relative paths.
@@ -1591,8 +1651,8 @@ def harden_plugin(
         repo_root,
         _PLUGIN_BUILDER_SCRIPT_CANDIDATES,
         fix_suggestion=(
-            "Ensure plugin-builder sources are available in either "
-            "Skills/ or Plugins/plugin-factory/."
+            "Restore the Plugin Factory hardening implementation under "
+            "Plugins/plugin-factory/scripts/plugin-builder/ or route through plugin-factory-router."
         ),
     )
     if resolve_error:

@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "plugin": "harness-engineering",
-  "entrypoint": "he-router",
+  "entrypoint": "he-reconcile",
   "route_samples": {
-    "he-router": "This HE request could be he-spec, he-plan, or he-work; choose the right stage without guessing.",
+    "he-reconcile": "This HE request could be he-spec, he-plan, or he-work; choose the right stage without guessing.",
     "he-eval-report": "Generate the eval report and drift validation before Linear completion.",
     "he-strategy": "Create a repository intent and architecture review with moat analysis.",
     "he-reframe": "Generate a high-leverage reframe program with rollback conditions.",
@@ -30,7 +30,7 @@
     {
       "priority": 15,
       "rule": "stage-correctness-question",
-      "route": "he-router",
+      "route": "he-reconcile",
       "signals": [
         "right stage",
         "correct stage",
@@ -43,7 +43,7 @@
     {
       "priority": 16,
       "rule": "named-stage-ambiguity",
-      "route": "he-router",
+      "route": "he-reconcile",
       "signals": [
         "multiple named he-* stages",
         "he-* or he-*"
@@ -67,9 +67,9 @@
     {
       "priority": 18,
       "rule": "recurring-control-loop",
-      "route": "he-heartbeat",
+      "route": "he-phase-work",
       "signals": [
-        "he-heartbeat",
+        "he-phase-work",
         "heartbeat",
         "keep checking",
         "monitor until",
@@ -99,7 +99,7 @@
     {
       "priority": 20,
       "rule": "workflow-hygiene",
-      "route": "he-router",
+      "route": "he-reconcile",
       "folded_from": "he-prune-branches",
       "signals": [
         "he-prune-branches",
@@ -288,7 +288,7 @@
     {
       "priority": 57,
       "rule": "session-evidence-routing",
-      "route": "he-router",
+      "route": "he-reconcile",
       "signals": [
         "previous sessions",
         "archived sessions",
@@ -348,7 +348,7 @@
     {
       "priority": 80,
       "rule": "qa-intake-by-clarity",
-      "route": "he-router",
+      "route": "he-reconcile",
       "signals": [
         "QA",
         "QA session",
@@ -386,7 +386,7 @@
     {
       "priority": 90,
       "rule": "ask-once-when-blocked",
-      "route": "he-router",
+      "route": "he-reconcile",
       "signals": [
         "no artifact state",
         "conflicting lifecycle state",
@@ -402,7 +402,7 @@
     "he-fix-bugs": "$harness-engineering:he-fix-bugs <bug-or-qa-report>",
     "he-improve": "$harness-engineering:he-improve <measurement-goal>",
     "he-code-review": "$harness-engineering:he-code-review <review-target>",
-    "he-heartbeat": "$harness-engineering:he-heartbeat <target-and-cadence>",
+    "he-phase-work": "$harness-engineering:he-phase-work <target-and-cadence>",
     "he-reconcile": "$harness-engineering:he-reconcile <state-or-resume-request>",
     "he-reinforce": "$harness-engineering:he-reinforce <solved-problem-or-learning-refresh>",
     "he-eval-report": "$harness-engineering:he-eval-report <completed-slice-or-pr>",
@@ -545,7 +545,7 @@
     ]
   },
   "subagent_stage_map": {
-    "he-router": {
+    "he-reconcile": {
       "policy": "manual-only",
       "baseline_roles": [],
       "conditional_roles": [
@@ -702,7 +702,7 @@
         "swift-ios-reviewer"
       ]
     },
-    "he-heartbeat": {
+    "he-phase-work": {
       "policy": "conditional",
       "baseline_roles": [
         "repo-research-analyst",

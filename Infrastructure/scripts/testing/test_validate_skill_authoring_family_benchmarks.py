@@ -250,14 +250,14 @@ See [details](./references/details.md).
         """
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
-            skill_rel = "Plugins/skill-factory/skills/code_quality_review/skill-builder"
+            skill_rel = "plugins/skill-factory/skills/skill-factory-router"
             skill_dir = root / skill_rel
             refs_dir = skill_dir / "references"
             refs_dir.mkdir(parents=True, exist_ok=True)
             (refs_dir / "note.md").write_text("# note\n", encoding="utf-8")
             (skill_dir / "SKILL.md").write_text(
                 """---
-name: skill-builder
+name: skill-factory-router
 description: test
 ---
 
@@ -305,20 +305,20 @@ No relocation signposts on purpose.
 
     def test_context_relocation_guard_accepts_infrastructure_reference_links(self) -> None:
         """
-        Ensure links pointing to Infrastructure/references/... are accepted by the context relocation reference-link validation for the skill-builder sample.
+        Ensure links pointing to Infrastructure/references/... are accepted by the context relocation reference-link validation for the Skill Factory router sample.
         
         Creates a temporary skill fixture with a local governance reference and a SKILL.md containing required relocation signposting and a reference link that targets Infrastructure/references/governance-contract.md, then asserts that _validate_context_relocation produces no findings.
         """
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
-            skill_rel = "Plugins/skill-factory/skills/code_quality_review/skill-builder"
+            skill_rel = "plugins/skill-factory/skills/skill-factory-router"
             skill_dir = root / skill_rel
             refs_dir = skill_dir / "references"
             refs_dir.mkdir(parents=True, exist_ok=True)
             (refs_dir / "governance-contract.md").write_text("# contract\n", encoding="utf-8")
             (skill_dir / "SKILL.md").write_text(
                 """---
-name: skill-builder
+name: skill-factory-router
 description: test
 ---
 
@@ -341,14 +341,14 @@ See [governance](Infrastructure/references/governance-contract.md).
         """
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
-            skill_rel = "Plugins/skill-factory/skills/code_quality_review/skill-builder"
+            skill_rel = "plugins/skill-factory/skills/skill-factory-router"
             skill_dir = root / skill_rel
             refs_dir = skill_dir / "references"
             refs_dir.mkdir(parents=True, exist_ok=True)
             (refs_dir / "details.md").write_text("# details\n", encoding="utf-8")
             (skill_dir / "SKILL.md").write_text(
                 """---
-name: skill-builder
+name: skill-factory-router
 description: never drop required context
 ---
 

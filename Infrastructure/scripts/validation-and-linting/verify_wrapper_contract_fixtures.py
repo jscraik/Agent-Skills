@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any
 
 
-DEFAULT_RUNTIME_PROOF_HANDLE = "he-heartbeat"
+DEFAULT_RUNTIME_PROOF_HANDLE = "he-phase-work"
 DEFAULT_RUNTIME_PROOF_EVIDENCE_DIR = ""
 DARWIN_CONFSTR_WARNING = "warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead"
 

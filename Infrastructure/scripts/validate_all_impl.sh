@@ -641,7 +641,7 @@ if [[ ${#skill_family_changed_files_args[@]} -gt 0 ]]; then
   skill_authoring_family_cmd+=("${skill_family_changed_files_args[@]}")
 fi
 schedule_check required skill-authoring-family "👨‍👩‍👧‍👦 Validating skill authoring family gate..." "${skill_authoring_family_cmd[@]}"
-schedule_check required skill-graph-profiles "🕸️  Validating skill graph profile contracts..." "${python_cmd[@]}" Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/validate_skill_graph_profiles.py --repo-root . --expected-count 0 --profile-index-out "$run_dir/skill-graph-profile-index.json" --wave-readiness-out "$run_dir/skill-graph-wave-readiness.json"
+schedule_check required skill-graph-profiles "🕸️  Validating skill graph profile contracts..." "${python_cmd[@]}" Plugins/skill-factory/scripts/skill-builder/validate_skill_graph_profiles.py --repo-root . --expected-count 0 --profile-index-out "$run_dir/skill-graph-profile-index.json" --wave-readiness-out "$run_dir/skill-graph-wave-readiness.json"
 schedule_check required gotcha-store "🧠 Validating gotcha candidate store..." "${python_cmd[@]}" Infrastructure/scripts/gotcha_pipeline.py validate
 selection_contract_cmd=("${python_cmd[@]}" Infrastructure/scripts/verify_selection_contract.py --artifact "$run_dir/routing-quality.json")
 if [[ "$output_mode" == "persistent" ]]; then

@@ -11,7 +11,7 @@ on:
       - "Docs/skill-graphs/governance/recursive-loop-approvers.sig"
       - "Infrastructure/scripts/human_promote_recursive_run.sh"
       - "Infrastructure/scripts/validate_recursive_promotions.sh"
-      - "Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/validate_recursive_promotion.py"
+      - "Plugins/skill-factory/scripts/skill-builder/validate_recursive_promotion.py"
       - ".github/workflows/recursive-promotion-gate.yml"
   workflow_dispatch:
 

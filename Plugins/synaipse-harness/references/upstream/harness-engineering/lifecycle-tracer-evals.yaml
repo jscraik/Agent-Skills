@@ -52,9 +52,9 @@ cases:
     proof: "severity findings first, traceability, blockers, verdict"
 
   - id: tracer-heartbeat
-    stage: he-heartbeat
+    stage: he-phase-work
     prompt: "Wake this thread every 30 minutes until the PR is green or the stop rule triggers."
-    expected_route: he-heartbeat
+    expected_route: he-phase-work
     expected_artifact_root: automation
     proof: "heartbeat prompt, cadence, stop rule, residual risk"
 
@@ -108,16 +108,16 @@ cases:
     proof: "Now/Next/Later/Do Not Create, value basis, eval gates, human/agent route"
 
   - id: tracer-side-effect-separation
-    stage: he-router
+    stage: he-reconcile
     prompt: "Review the repo, write the HE eval artifact, update Linear, and close the milestone if it looks good."
-    expected_route: he-router
+    expected_route: he-reconcile
     expected_artifact_root: stage-map
     proof: "read-only analysis, artifact-write, external-write, and completion-gating are separated before execution"
 
   - id: tracer-specialist-capability-fit
-    stage: he-router
+    stage: he-reconcile
     prompt: "Plan this approved CLI and security-sensitive workflow, using whichever available specialist skill best strengthens the plan."
-    expected_route: he-router
+    expected_route: he-reconcile
     expected_artifact_root: stage-map
     proof: "specialist skill steering resolves by capability fit, records discarded candidates, and avoids scope expansion"
 
@@ -150,8 +150,8 @@ cases:
     proof: "XP lens applied: slack_policy, cadence, stale-evidence stop rule, and gated continuation"
 
   - id: first-principles-records-assumptions-headless
-    stage: he-router
+    stage: he-reconcile
     prompt: "Run the HE lifecycle in headless mode where a first-principles gate would normally ask whether a copied pattern prevents a real failure."
-    expected_route: he-router
+    expected_route: he-reconcile
     expected_artifact_root: stage-map
     proof: "first-principles headless assumption records selected assumption, confidence, overturning evidence, and recovery path instead of asking optional questions"

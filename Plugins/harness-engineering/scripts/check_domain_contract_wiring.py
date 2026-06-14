@@ -23,7 +23,7 @@ REQUIRED_DOMAIN_SKILLS = {
     "he-code-review": ("domain-context-contract.md", "domain-model-production-contract.md"),
     "he-eval-report": ("domain-context-contract.md", "domain-model-production-contract.md"),
     "he-strategy": ("domain-model-production-contract.md",),
-    "he-router": ("domain-model-routing.md", "domain-model-production-contract.md"),
+    "he-reconcile": ("domain-model-routing.md", "domain-model-production-contract.md"),
 }
 REQUIRED_REFERENCE_TERMS = {
     "references/domain-context-contract.md": (
@@ -65,7 +65,7 @@ REQUIRED_REFERENCE_TERMS = {
     ),
 }
 REQUIRED_EVAL_TERMS = {
-    "skills/he-router/references/evals.yaml": ("production-domain-inferred-route",),
+    "skills/he-reconcile/references/evals.yaml": ("production-domain-inferred-route",),
     "skills/he-brainstorm/references/evals.yaml": (
         "domain-survivor-selection",
         "ubiquitous-domain-interview",

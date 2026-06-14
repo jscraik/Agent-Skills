@@ -2,12 +2,12 @@ schema_version: 1
 skill: sy-reinforce
 stage: reinforce
 previous_stage: reconcile
-next_stage: strategy
+next_stage: reframe
 purpose: Turn a verified failure or learning into a durable guardrail, validator, doc, eval, or skill-reference update.
 triggers:
 - explicit sy-reinforce invocation
 - explicit reinforce stage request
-- strategy or previous-stage handoff to reinforce
+- previous-stage handoff to reinforce
 preconditions:
 - canonical source and active worktree are identified
 - required previous-stage artifact is present or blocker is returned
@@ -22,7 +22,7 @@ outputs:
 - status: pass|fail|blocked|not_checked
 - evidence_refs
 - blocked_by
-- next_stage: strategy
+- next_stage: reframe
 allowed_writes:
 - The smallest durable surface that prevents recurrence: docs, validators, evals, references, or learning ledgers.
 forbidden_writes:

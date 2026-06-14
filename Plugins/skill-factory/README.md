@@ -19,12 +19,12 @@ The plugin manifest is [`.codex-plugin/plugin.json`](./.codex-plugin/plugin.json
 |---|---|---|
 | `skill-factory-router` | [`skills/skill-factory-router/`](./skills/skill-factory-router/) | A request needs classification before execution. |
 | `skill-creator` | [`skills/scaffolding_templates/skill-creator/`](./skills/scaffolding_templates/skill-creator/) | A new skill or draft package needs its first usable shape. |
-| `skill-builder` | [`skills/code_quality_review/skill-builder/`](./skills/code_quality_review/skill-builder/) | An existing skill or plugin needs evidence-backed hardening, budget reduction, eval coverage, safety checks, or release readiness. |
+| `skill-factory-router` | [`skills/skill-factory-router/`](./skills/skill-factory-router/) | Existing skill hardening, budget, eval, safety, or release-readiness work needs routing to the current repair workflow. |
 | `skill-refactor` | [`skills/data_fetch_analysis/skill-refactor/`](./skills/data_fetch_analysis/skill-refactor/) | Session or portfolio evidence should drive keep, improve, merge, split, retire, or redirect decisions. |
 | `skillify` | [`skills/scaffolding_templates/skillify/`](./skills/scaffolding_templates/skillify/) | A completed repeatable workflow should become a durable skill package. |
 | `skill-installer` | [`skills/infrastructure_ops/skill-installer/`](./skills/infrastructure_ops/skill-installer/) | An already valid skill needs listing, install, sync, or runtime visibility checks. |
 
-The flat paths [`skills/skill-builder/`](./skills/skill-builder/), [`skills/skill-refactor/`](./skills/skill-refactor/), and [`skills/skillify/`](./skills/skillify/) are compatibility links to the category-owned paths above. Prefer the category path when changing source.
+The flat paths [`skills/skill-refactor/`](./skills/skill-refactor/) and [`skills/skillify/`](./skills/skillify/) are compatibility links to the category-owned paths above. Prefer the category path when changing source.
 
 ## Factory Lifecycle
 
@@ -34,7 +34,7 @@ flowchart LR
   Router --> Creator["skill-creator<br/>Create first usable skill shape"]
   Router --> Skillify["skillify<br/>Capture completed repeatable workflow"]
   Router --> Refactor["skill-refactor<br/>Analyze evidence and recommend direction"]
-  Creator --> Builder["skill-builder<br/>Harden package until pass or blocked"]
+  Creator --> Builder["skill-factory-router<br/>Route repair until pass or blocked"]
   Skillify --> Builder
   Refactor --> Builder
   Builder --> Installer["skill-installer<br/>Install, sync, and prove visibility"]
@@ -49,13 +49,13 @@ Use this flow as the default handoff path. A lane may stop early only when it re
 |---|---|---|
 | Create a new skill or evolve a draft package into a usable first shape. | `skill-creator` | Release hardening, install proof, or portfolio analysis. |
 | Convert a completed repeated workflow into a durable skill package. | `skillify` | Capturing exploratory or one-off work as if it were repeatable. |
-| Improve, tighten, test, or release-harden an existing skill or plugin. | `skill-builder` | First-draft creation, install/sync operations, or read-only portfolio decisions. |
+| Improve, tighten, test, or release-harden an existing skill or plugin. | `skill-factory-router` | First-draft creation, install/sync operations, or read-only portfolio decisions. |
 | Analyze session, review, validation, or Plugin Eval evidence for keep/improve/merge/split/retire direction. | `skill-refactor` | Editing source unless the user explicitly approves the recommended repair lane. |
 | List, install, sync, or prove runtime visibility for an already valid skill. | `skill-installer` | Source creation or hardening. |
 
-`skill-builder` is the repair lane, not the factory front door. It should patch canonical source until its gate passes or a blocker is explicit. For uncertain requests, route through `skill-factory-router` first and let it choose exactly one downstream lane.
+`skill-factory-router` is the factory front door for repair requests. It selects the current hardening workflow, then the selected lane patches canonical source until its gate passes or a blocker is explicit.
 
-Use Skill Builder for builder-style output: `builder_result`, `diff_summary`, severity-ranked findings, exact validation outcomes, security notes, a handoff lane only when another skill should take over, and one evidence-backed next step.
+Use the routed hardening workflow for builder-style output: `builder_result`, `diff_summary`, severity-ranked findings, exact validation outcomes, security notes, a handoff lane only when another skill should take over, and one evidence-backed next step.
 
 ## Context Lifecycle
 
@@ -65,7 +65,7 @@ Skills are context packages. Durable changes should move through generate, test,
 
 Edit canonical plugin source under [`Plugins/skill-factory/`](../skill-factory/). Do not hand-edit generated runtime projections or copied plugin mirrors.
 
-Category paths such as [`skills/code_quality_review/skill-builder/`](./skills/code_quality_review/skill-builder/) are source-owned. Flat paths such as [`skills/skill-builder/`](./skills/skill-builder/) are compatibility links. Confirm the real path with `readlink` or `find -L` before patching.
+Category paths are source-owned. Flat compatibility links are runtime conveniences. Confirm the real path with `readlink` or `find -L` before patching.
 
 Runtime cache paths under `Plugins/cache/**` are projections and should not be edited as source. Keep examples, scripts, and references with the skill package that owns them, and do not move user-facing skills between categories without updating discovery metadata and validation.
 
@@ -73,11 +73,11 @@ Runtime cache paths under `Plugins/cache/**` are projections and should not be e
 
 ```sh
 jq empty Plugins/skill-factory/.codex-plugin/plugin.json
-python3 Plugins/plugin-factory/skills/plugin-builder/scripts/plugin_builder.py validate Plugins/skill-factory --require-marketplace --marketplace-path .agents/Plugins/marketplace.json
+./bin/ask plugins status skill-factory --json --robot
 python3 Infrastructure/scripts/lifecycle-and-sync/route_skillset.py --skill-set skill-factory --task "<request>" --json
 Infrastructure/bin/plugin-eval analyze Plugins/skill-factory --format markdown
-Infrastructure/bin/plugin-eval analyze Plugins/skill-factory/skills/code_quality_review/skill-builder --format markdown
-PYTHON_BIN=/Users/jamiecraik/.venvs/pyyaml/bin/python ./bin/ask skills audit Plugins/skill-factory/skills/code_quality_review/skill-builder --level strict --json
+Infrastructure/bin/plugin-eval analyze Plugins/skill-factory/skills/skill-factory-router --format markdown
+PYTHON_BIN=/Users/jamiecraik/.venvs/pyyaml/bin/python ./bin/ask skills audit Plugins/skill-factory/skills/skill-factory-router --level strict --json
 bash Infrastructure/scripts/validation-and-linting/lint_openai_skill_format.sh --mode strict
 bash Infrastructure/scripts/validation-and-linting/lint_progressive_disclosure.sh --mode warn
 ```

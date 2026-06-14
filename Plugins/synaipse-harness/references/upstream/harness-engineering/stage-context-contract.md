@@ -11,7 +11,7 @@ When structured context is needed, carry this shape:
 ```yaml
 schema_version: 1
 stage_context:
-  selected_stage: he-router|he-brainstorm|he-spec|he-plan|he-work|he-code-review|he-fix-bugs|he-improve|he-reconcile|he-reinforce|he-heartbeat|he-eval-report|he-strategy|he-reframe|he-linear-plan|he-phase-work
+  selected_stage: he-reconcile|he-brainstorm|he-spec|he-plan|he-work|he-code-review|he-fix-bugs|he-improve|he-reconcile|he-reinforce|he-phase-work|he-eval-report|he-strategy|he-reframe|he-linear-plan|he-phase-work
   selected_slice: "<milestone, parent issue, reframe phase, or execution slice>"
   stage_arc_boundary_status: pass|blocked|not_applicable
   slice_status: resolved|blocked|not_applicable

@@ -101,8 +101,8 @@ python3 Plugins/harness-engineering/scripts/check_deferred_context_index.py Plug
 Plugin checks:
 
 ```bash
-python3 Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts/plugin_builder.py validate Plugins/harness-engineering --require-marketplace --marketplace-path .agents/Plugins/marketplace.json
-python3 Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts/plugin_builder.py audit-marketplace --marketplace-path .agents/Plugins/marketplace.json --plugins-path Plugins
+python3 Plugins/plugin-factory/scripts/plugin-factory-router/plugin_builder.py validate Plugins/harness-engineering --require-marketplace --marketplace-path .agents/Plugins/marketplace.json
+python3 Plugins/plugin-factory/scripts/plugin-factory-router/plugin_builder.py audit-marketplace --marketplace-path .agents/Plugins/marketplace.json --plugins-path Plugins
 ```
 
 Skill checks:
@@ -117,7 +117,7 @@ converting them into skill failures.
 
 ## Handoff Rules
 
-- Use `he-router` for stage selection and authority limits.
+- Use `he-reconcile` for stage selection and authority limits.
 - Use `he-reframe` for staged migration programs.
 - Use `he-linear-plan` for Linear-ready tracking plans and mutation status.
 - Use `he-eval-report` for closure proof.

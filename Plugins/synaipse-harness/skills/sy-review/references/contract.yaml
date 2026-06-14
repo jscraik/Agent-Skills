@@ -7,7 +7,7 @@ purpose: Review the completed slice for correctness, risk, evidence gaps, and ne
 triggers:
 - explicit sy-review invocation
 - explicit review stage request
-- strategy or previous-stage handoff to review
+- previous-stage handoff to review
 preconditions:
 - canonical source and active worktree are identified
 - required previous-stage artifact is present or blocker is returned
