@@ -324,6 +324,19 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
         self.assertFalse(proof["gates"]["codex_user_runtime_ready"])
         self.assertFalse(proof["gates"]["codex_user_link"])
         self.assertFalse(proof["gates"]["agents_user_link"])
+        recovery_commands = proof["runtime_diagnostics"]["recovery_commands"]
+        self.assertEqual(
+            recovery_commands[0]["command"],
+            "./bin/ask skills sync --scope user --projection rooted --dry-run --json --robot",
+        )
+        self.assertEqual(
+            recovery_commands[1]["command"],
+            "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
+        )
+        self.assertEqual(
+            recovery_commands[2]["command"],
+            "./bin/ask skills sync --scope user --projection rooted --json --robot",
+        )
 
     def test_skills_proof_requires_direct_picker_projection_for_direct_handles(self) -> None:
         repo_root = self.temp_dir / "repo"

@@ -667,15 +667,15 @@ class TestRuntimeProofValidation(unittest.TestCase):
             }
             self.assertEqual(
                 recovery_commands["preview_user_runtime_sync"],
-                "./bin/ask skills sync --scope user --projection flat --dry-run --json --robot",
+                "./bin/ask skills sync --scope user --projection rooted --dry-run --json --robot",
             )
             self.assertEqual(
                 recovery_commands["refresh_workspace_projection"],
-                "./bin/ask skills sync --scope workspace --projection flat --json --robot",
+                "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
             )
             self.assertEqual(
                 recovery_commands["apply_user_runtime_sync"],
-                "./bin/ask skills sync --scope user --projection flat --json --robot",
+                "./bin/ask skills sync --scope user --projection rooted --json --robot",
             )
 
     def test_schema_files_accept_valid_runtime_card_fixture(self) -> None:

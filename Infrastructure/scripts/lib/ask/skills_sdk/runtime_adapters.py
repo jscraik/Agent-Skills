@@ -29,7 +29,7 @@ RUNTIME_REACHABILITY_FAILURES = {
     "codex_user_link",
     "agents_user_link",
 }
-DEFAULT_RECOVERY_PROJECTION_MODE = "flat"
+DEFAULT_RECOVERY_PROJECTION_MODE = "rooted"
 
 
 def normalize_runtime_target(runtime_target: object) -> str:
@@ -88,6 +88,15 @@ def _proof_recovery_projection_mode(
     command_visibility: str,
     runtime_visibility: str,
 ) -> str:
+    """
+    Choose the projection mode used in runtime-proof recovery commands.
+
+    Direct handles and explicitly flat runtime rows need the flat picker projection.
+    Rooted rows and latent target handles need the rooted projection because those
+    handles are invoked through generated root skill-set directories. Unknown
+    visibility combinations default to rooted so recovery refreshes the broadest
+    command surface without pruning target handle roots.
+    """
     if runtime_visibility == "root":
         return "rooted"
     if runtime_visibility == "flat" or command_visibility == "direct":

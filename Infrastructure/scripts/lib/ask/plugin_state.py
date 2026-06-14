@@ -5,9 +5,16 @@ from __future__ import annotations
 import json
 import subprocess
 import sys
-import tomllib
 from pathlib import Path
 from typing import Any
+
+try:
+    import tomllib
+except ModuleNotFoundError:  # pragma: no cover - exercised on macOS system Python 3.9.
+    try:
+        import tomli as tomllib  # type: ignore[no-redef]
+    except ModuleNotFoundError:
+        tomllib = None  # type: ignore[assignment]
 
 SCRIPTS_ROOT = Path(__file__).resolve().parents[2]
 if str(SCRIPTS_ROOT) not in sys.path:
@@ -529,6 +536,8 @@ def _enabled_plugin_ids(config_path: Path) -> tuple[set[str], str | None]:
     """
     if not config_path.exists():
         return set(), None
+    if tomllib is None:
+        return set(), "failed to parse active config: tomli/tomllib not available"
     try:
         payload = tomllib.loads(config_path.read_text(encoding="utf-8"))
     except OSError as exc:
