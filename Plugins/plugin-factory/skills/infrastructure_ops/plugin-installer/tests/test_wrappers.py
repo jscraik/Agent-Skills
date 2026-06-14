@@ -2,6 +2,7 @@
 """Smoke checks for plugin-installer script wrappers."""
 
 import importlib.util
+from contextlib import contextmanager
 from importlib.machinery import SourceFileLoader
 from pathlib import Path
 import sys
@@ -13,6 +14,34 @@ def find_repo_root(start: Path) -> Path:
         if (candidate / ".git").exists() and (candidate / "Plugins").is_dir():
             return candidate
     raise AssertionError(f"Unable to find repository root from {start}")
+
+
+@contextmanager
+def temp_sys_path(path: Path):
+    path_str = str(path)
+    inserted = False
+    if path_str not in sys.path:
+        sys.path.insert(0, path_str)
+        inserted = True
+    try:
+        yield
+    finally:
+        if inserted:
+            try:
+                sys.path.remove(path_str)
+            except ValueError:
+                pass
+
+
+def load_installer_impl(module_name: str, impl_path: Path):
+    with temp_sys_path(impl_path.parent):
+        loader = SourceFileLoader(module_name, str(impl_path))
+        spec = importlib.util.spec_from_file_location(module_name, impl_path, loader=loader)
+        assert spec is not None
+        assert spec.loader is not None
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+    return module
 
 
 def test_installer_wrapper_points_to_impl() -> None:
@@ -48,15 +77,7 @@ def test_strict_installer_resolves_relocated_plugin_builder() -> None:
         / "install-plugin-from-github.pyw"
     )
     expected_builder = repo_root / "Plugins" / "plugin-factory" / "scripts" / "plugin-builder" / "plugin_builder.py"
-    script_dir = impl_path.parent
-    if str(script_dir) not in sys.path:
-        sys.path.insert(0, str(script_dir))
-    loader = SourceFileLoader("plugin_installer_impl_test", str(impl_path))
-    spec = importlib.util.spec_from_file_location("plugin_installer_impl_test", impl_path, loader=loader)
-    assert spec is not None
-    assert spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    module = load_installer_impl("plugin_installer_impl_test", impl_path)
 
     assert module._plugin_builder_script() == expected_builder
 
@@ -74,15 +95,7 @@ def test_strict_installer_resolves_installed_plugin_mirror_builder() -> None:
         / "scripts"
         / "install-plugin-from-github.pyw"
     )
-    script_dir = impl_path.parent
-    if str(script_dir) not in sys.path:
-        sys.path.insert(0, str(script_dir))
-    loader = SourceFileLoader("plugin_installer_impl_mirror_test", str(impl_path))
-    spec = importlib.util.spec_from_file_location("plugin_installer_impl_mirror_test", impl_path, loader=loader)
-    assert spec is not None
-    assert spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    module = load_installer_impl("plugin_installer_impl_mirror_test", impl_path)
 
     with tempfile.TemporaryDirectory(prefix="plugin-installer-mirror-") as temp_dir:
         mirror_root = Path(temp_dir) / ".codex" / "plugins" / "plugin-factory"
