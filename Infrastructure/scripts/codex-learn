@@ -108,7 +108,9 @@ analyze_failures() {
 	echo -e "${BLUE}Analyzing failure patterns...${NC}"
 	echo ""
 
-	mapfile -t files < <(find "${LEARN_DIR}" -maxdepth 1 -type f -name '*.json' ! -name 'suggestions.json' | sort)
+	while IFS= read -r file; do
+		files+=("${file}")
+	done < <(find "${LEARN_DIR}" -maxdepth 1 -type f -name '*.json' ! -name 'suggestions.json' | sort)
 	if (( ${#files[@]} == 0 )); then
 		echo "No failures recorded yet."
 		echo "Failures are recorded automatically when preflight detects issues."
@@ -194,7 +196,9 @@ EOF
 list_failures() {
 	local files=()
 
-	mapfile -t files < <(find "${LEARN_DIR}" -maxdepth 1 -type f -name '*.json' ! -name 'suggestions.json' | sort -r)
+	while IFS= read -r file; do
+		files+=("${file}")
+	done < <(find "${LEARN_DIR}" -maxdepth 1 -type f -name '*.json' ! -name 'suggestions.json' | sort -r)
 	if (( ${#files[@]} == 0 )); then
 		echo "No failures recorded."
 		return 0
