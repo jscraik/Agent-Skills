@@ -10,7 +10,7 @@ on:
       - "Docs/skill-graphs/governance/recursive-loop-approvers.yaml"
       - "Docs/skill-graphs/governance/recursive-loop-approvers.sig"
       - "Infrastructure/scripts/human_promote_recursive_run.sh"
-      - "Infrastructure/scripts/validate_recursive_promotions.sh"
+      - "Infrastructure/scripts/lifecycle-and-sync/validate_recursive_promotions.sh"
       - "Plugins/skill-factory/scripts/skill-builder/validate_recursive_promotion.py"
       - ".github/workflows/recursive-promotion-gate.yml"
   workflow_dispatch:
@@ -33,7 +33,7 @@ jobs:
       - name: Validate changed promotion decisions
         if: github.event_name == 'pull_request'
         run: |
-          bash Infrastructure/scripts/validate_recursive_promotions.sh \
+          bash Infrastructure/scripts/lifecycle-and-sync/validate_recursive_promotions.sh \
             --changed-only \
             --base-sha "${{ github.event.pull_request.base.sha }}" \
             --head-sha "${{ github.event.pull_request.head.sha }}" \
@@ -43,7 +43,7 @@ jobs:
       - name: Validate all promotion decisions (manual)
         if: github.event_name != 'pull_request'
         run: |
-          bash Infrastructure/scripts/validate_recursive_promotions.sh \
+          bash Infrastructure/scripts/lifecycle-and-sync/validate_recursive_promotions.sh \
             --report-json Infrastructure/artifacts/skill-graphs/pilot/promotion-validation-report.json \
             --strict-runs
 
