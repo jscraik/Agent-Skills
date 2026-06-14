@@ -29,6 +29,7 @@ RUNTIME_REACHABILITY_FAILURES = {
     "codex_user_link",
     "agents_user_link",
 }
+DEFAULT_RECOVERY_PROJECTION_MODE = "flat"
 
 
 def normalize_runtime_target(runtime_target: object) -> str:
@@ -80,6 +81,18 @@ def _utc_now() -> str:
         str: ISO-8601 UTC timestamp (e.g. '2024-05-01T12:00:00Z')
     """
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def _proof_recovery_projection_mode(
+    *,
+    command_visibility: str,
+    runtime_visibility: str,
+) -> str:
+    if runtime_visibility == "root":
+        return "rooted"
+    if runtime_visibility == "flat" or command_visibility == "direct":
+        return "flat"
+    return DEFAULT_RECOVERY_PROJECTION_MODE
 
 
 def _parse_utc_timestamp(value: object) -> datetime | None:
@@ -1281,6 +1294,10 @@ def build_command_handle_proof(
     validation_args = [str(normalized)]
     if runtime_target != "any":
         validation_args.extend(["--runtime-target", runtime_target])
+    recovery_projection_mode = _proof_recovery_projection_mode(
+        command_visibility=command_visibility,
+        runtime_visibility=runtime_visibility,
+    )
     runtime_diagnostics = {
         "schema_version": "command-handle-runtime-diagnostics.v1",
         "selected_runtime_target": runtime_target,
@@ -1309,10 +1326,10 @@ def build_command_handle_proof(
                     "--scope",
                     "user",
                     "--projection",
-                    "rooted",
+                    recovery_projection_mode,
                     "--dry-run",
                 ),
-                "preconditions": ["Workspace rooted projection validates cleanly."],
+                "preconditions": [f"Workspace {recovery_projection_mode} projection validates cleanly."],
                 "permission_profile": {
                     "filesystem": "read workspace and user runtime links",
                     "network": "not required",
@@ -1323,7 +1340,13 @@ def build_command_handle_proof(
             },
             {
                 "kind": "refresh_workspace_projection",
-                "command": skills_validation_command("sync", "--scope", "workspace", "--projection", "rooted"),
+                "command": skills_validation_command(
+                    "sync",
+                    "--scope",
+                    "workspace",
+                    "--projection",
+                    recovery_projection_mode,
+                ),
                 "preconditions": ["Canonical skill sources are ready to project."],
                 "permission_profile": {
                     "filesystem": "write workspace runtime projection",
@@ -1333,7 +1356,13 @@ def build_command_handle_proof(
             },
             {
                 "kind": "apply_user_runtime_sync",
-                "command": skills_validation_command("sync", "--scope", "user", "--projection", "rooted"),
+                "command": skills_validation_command(
+                    "sync",
+                    "--scope",
+                    "user",
+                    "--projection",
+                    recovery_projection_mode,
+                ),
                 "preconditions": ["Dry-run output is acceptable to the operator."],
                 "permission_profile": {
                     "filesystem": "write home-directory runtime links",
@@ -1413,7 +1442,7 @@ def build_command_handle_proof(
     }
     if proof["status"] != "pass":
         recovery_guidance = (
-            "Preview with ./bin/ask skills sync --scope user --projection rooted --dry-run, "
+            f"Preview with ./bin/ask skills sync --scope user --projection {recovery_projection_mode} --dry-run, "
             "then run workspace/user sync only if the user-runtime relink plan is acceptable."
         )
         proof["runtime_failure"] = runtime_failure_payload(

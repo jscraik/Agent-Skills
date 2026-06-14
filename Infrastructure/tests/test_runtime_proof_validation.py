@@ -661,6 +661,22 @@ class TestRuntimeProofValidation(unittest.TestCase):
                     "rerun_runtime_proof",
                 }.issubset(recovery_kinds)
             )
+            recovery_commands = {
+                entry["kind"]: entry["command"]
+                for entry in proof["runtime_diagnostics"]["recovery_commands"]
+            }
+            self.assertEqual(
+                recovery_commands["preview_user_runtime_sync"],
+                "./bin/ask skills sync --scope user --projection flat --dry-run --json --robot",
+            )
+            self.assertEqual(
+                recovery_commands["refresh_workspace_projection"],
+                "./bin/ask skills sync --scope workspace --projection flat --json --robot",
+            )
+            self.assertEqual(
+                recovery_commands["apply_user_runtime_sync"],
+                "./bin/ask skills sync --scope user --projection flat --json --robot",
+            )
 
     def test_schema_files_accept_valid_runtime_card_fixture(self) -> None:
         payload = json.loads((FIXTURES_DIR / "valid-runtime-card.json").read_text(encoding="utf-8"))
