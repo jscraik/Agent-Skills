@@ -78,7 +78,7 @@ gate_profile:
 
 ## Stage Duties
 
-`he-router`
+`he-reconcile`
 
 - Select the next HE stage first.
 - If routing words could trigger broad gates, apply this contract before loading

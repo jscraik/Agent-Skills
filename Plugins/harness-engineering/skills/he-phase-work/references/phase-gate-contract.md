@@ -3,7 +3,7 @@
 Read when: collector commands, required artifacts, phase-exit sequence, stop rules, report fields, or the detail relocated out of `SKILL.md` is needed during a phase work.
 
 Use this contract when a 10 minute Harness Engineering heartbeat is keeping `he-work` alive across plan phases.
-Do not substitute `he-heartbeat` for stale evidence inside an approved phase
+Do not substitute `he-phase-work` for stale evidence inside an approved phase
 loop; stale phase evidence is a stop condition for `he-phase-work`.
 
 ## Evidence Intake

@@ -10,7 +10,7 @@ runtime surface cost.
 - Run `./bin/ask skills handles --check --check-projection --json --robot` after projection changes.
 - Run a sliced live smoke lane before claiming changed-skill confidence for a
   narrow lifecycle fix, for example:
-  `Plugins/harness-engineering/scripts/run_lifecycle_release_evals.py --mode smoke --eval-runner codex --model gpt-5.4-mini --per-skill-timeout-sec 180 --skill he-router --case ambiguous-stage-route --json`.
+  `Plugins/harness-engineering/scripts/run_lifecycle_release_evals.py --mode smoke --eval-runner codex --model gpt-5.4-mini --per-skill-timeout-sec 180 --skill he-reconcile --case ambiguous-stage-route --json`.
 - Run the full live release lane before claiming plugin-wide release confidence:
   `Plugins/harness-engineering/scripts/run_lifecycle_release_evals.py --mode release --json`.
 - Run `./bin/ask skills sync --scope workspace --projection rooted --json` and classify any cache refresh blocker by plugin.

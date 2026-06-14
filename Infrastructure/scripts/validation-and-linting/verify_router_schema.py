@@ -22,12 +22,8 @@ def _discover_repo_root() -> Path:
 
 REPO_ROOT = _discover_repo_root()
 schema_lib_candidates = [
-    REPO_ROOT / "utilities" / "skill-builder" / "scripts",
-    REPO_ROOT / "Skills" / "skill-builder" / "scripts",
-    REPO_ROOT / "plugins" / "skill-factory" / "skills" / "code_quality_review" / "skill-builder" / "scripts",
-    REPO_ROOT / "Plugins" / "skill-factory" / "skills" / "code_quality_review" / "skill-builder" / "scripts",
-    REPO_ROOT / "plugins" / "skill-factory" / "skills" / "skill-builder" / "scripts",
-    REPO_ROOT / "Plugins" / "skill-factory" / "skills" / "skill-builder" / "scripts",
+    REPO_ROOT / "plugins" / "skill-factory" / "scripts" / "skill-builder",
+    REPO_ROOT / "Plugins" / "skill-factory" / "scripts" / "skill-builder",
 ]
 for schema_lib in schema_lib_candidates:
     if schema_lib.exists() and str(schema_lib) not in sys.path:

@@ -13,7 +13,7 @@ Keep HE routing compact without losing folded stage context. Folded names are co
 | `he-refine` | `he-improve` | refinement | `fixtures/preserved-context/skills/team_automation/he-refine/` |
 | old `he-compound` learning | `he-reinforce` | solved-problem capture and Project Brain learning | `fixtures/preserved-context/skills/team_automation/he-compound/` |
 | `he-compound-refresh` | `he-reinforce` | refresh durable learning | `fixtures/preserved-context/skills/team_automation/he-compound-refresh/` |
-| `he-prune-branches` | `he-router` | `agent-ops` branch hygiene | `fixtures/preserved-context/skills/team_automation/he-prune-branches/` |
+| `he-prune-branches` | `he-reconcile` | `agent-ops` branch hygiene | `fixtures/preserved-context/skills/team_automation/he-prune-branches/` |
 | `he-tdd` | `he-work` | test-first | `fixtures/preserved-context/skills/team_automation/he-tdd/` |
 | `he-technical-review` | `he-code-review` | technical critique | `fixtures/preserved-context/skills/code_quality_review/he-technical-review/` |
 | `he-reliability-review` | `he-code-review` | reliability critique | `fixtures/preserved-context/skills/code_quality_review/he-reliability-review/` |
@@ -23,7 +23,7 @@ Keep HE routing compact without losing folded stage context. Folded names are co
 - Direct user mentions of a folded name must route to the parent stage, not the folded skill.
 - Prefer the parent-stage command plus `mode: <folded mode>` unless the user needs a compatibility entrypoint.
 - Do not summarize or trim away mode details for token budget reasons. Move long material into references and add it to this map or `deferred-context-index.md`.
-- Keep branch pruning out of the HE parent-stage surface. Use `he-router` only to classify the request and hand off to `agent-ops` branch hygiene.
+- Keep branch pruning out of the HE parent-stage surface. Use `he-reconcile` only to classify the request and hand off to `agent-ops` branch hygiene.
 - Keep folded names available through router aliases and parent modes. Re-add a picker entry only for a concrete standalone use case.
 - Preserve valid `ce-docs-review` behavior inside `he-spec` and `he-plan` as a
   lightweight document review/deepening pass. It should strengthen source
@@ -196,7 +196,7 @@ Disposition:
 ## Discarded He-Router Productization Prompt Rot
 
 The 2026-05-15 HE productization refinement pass removed duplicated tail text
-from Plugins/harness-engineering/skills/he-router/SKILL.md. The valid
+from Plugins/harness-engineering/skills/he-reconcile/SKILL.md. The valid
 context-disposition rule already exists above and in the active router; the
 closure-vs-mutation concern now routes to closure-mutation-contract.md.
 

@@ -68,7 +68,7 @@ HE_FOLDED_STAGE_ALIASES = {
     "he-deepen-spec": "he-spec",
     "he-ideate": "he-brainstorm",
     "he-phase-heartbeat": "he-phase-work",
-    "he-prune-branches": "he-router",
+    "he-prune-branches": "he-reconcile",
     "he-refactor": "he-reframe",
     "he-refine": "he-improve",
     "he-reliability-review": "he-code-review",
@@ -328,7 +328,7 @@ def harness_engineering_override(
     ]
     distinct_mentioned_stages = sorted(set(mentioned_stages))
     resolved_mentioned_stages = sorted({resolve_he_stage_alias(stage) for stage in distinct_mentioned_stages})
-    router_row = row_by_id(rows, "he-router")
+    router_row = row_by_id(rows, "he-reconcile")
     if len(resolved_mentioned_stages) > 1 and router_row:
         return {
             "row": router_row,
@@ -383,7 +383,7 @@ def harness_engineering_override(
                     "reason": reason,
                 }
         if " or " in route or " -> " in route:
-            row = row_by_id(rows, "he-router")
+            row = row_by_id(rows, "he-reconcile")
             if row:
                 return {
                     "row": row,
@@ -413,7 +413,7 @@ def factory_override(skill_set: str, task: str, rows: list[dict[str, Any]]) -> d
     row_ids = {str(row.get("id")) for row in rows}
 
     if skill_set == "plugin-factory":
-        internal_plugin_lanes = {"plugin-builder", "plugin-router"}
+        internal_plugin_lanes = {"plugin-factory-router", "plugin-router"}
         if task_tokens := tokenize(task):
             if internal_plugin_lanes & task_tokens:
                 router_row = row_by_id(rows, "plugin-factory-router")
@@ -477,7 +477,7 @@ def factory_override(skill_set: str, task: str, rows: list[dict[str, Any]]) -> d
                 {"plugin", "plugins"},
             ),
             (
-                "plugin-builder",
+                "plugin-factory-router",
                 "harden-plugin",
                 {"harden", "validate", "audit", "release", "package", "convert", "build"},
                 {"plugin", "plugins"},
@@ -509,7 +509,7 @@ def factory_override(skill_set: str, task: str, rows: list[dict[str, Any]]) -> d
                 {"skill", "skills"},
             ),
             (
-                "skill-builder",
+                "skill-factory-router",
                 "harden-skill",
                 {"harden", "validate", "audit", "release", "package", "eval", "benchmark"},
                 {"skill", "skills"},

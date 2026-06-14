@@ -412,7 +412,7 @@ class TestAskRepoDoctor(unittest.TestCase):
     def test_closeout_changed_skill_source_with_projection_update_requires_handle_validation(self) -> None:
         changed_files = [
             ".skillsets/harness-engineering/manifest.jsonl",
-            "Plugins/harness-engineering/skills/he-router/SKILL.md",
+            "Plugins/harness-engineering/skills/he-reconcile/SKILL.md",
         ]
         with patch("ask.commands.repo_impl.collect_changed_files", return_value=changed_files), patch(
             "ask.commands.repo_impl.repo_doctor",

@@ -59,7 +59,7 @@ for the stage that would otherwise harden behavior.
 
 ## Stage Gates
 
-- `he-router`: infer domain-model routing from production semantics, not only
+- `he-reconcile`: infer domain-model routing from production semantics, not only
   explicit domain-model wording.
 - `he-brainstorm`: ask the blocking question that separates duplicate concepts,
   false cognates, or unclear bounded contexts.

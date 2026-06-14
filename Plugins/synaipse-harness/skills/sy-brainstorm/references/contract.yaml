@@ -7,7 +7,7 @@ purpose: Explore options and trade-offs before traceable work is ready, without 
 triggers:
 - explicit sy-brainstorm invocation
 - explicit brainstorm stage request
-- strategy or previous-stage handoff to brainstorm
+- previous-stage handoff to brainstorm
 preconditions:
 - canonical source and active worktree are identified
 - required previous-stage artifact is present or blocker is returned

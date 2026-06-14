@@ -1,13 +1,13 @@
 schema_version: 1
 skill: sy-reframe
 stage: reframe
-previous_stage: strategy
+previous_stage: none
 next_stage: brainstorm
 purpose: Turn a stuck, stale, or unsafe frame into a smaller viable direction with rollback and decision boundaries.
 triggers:
 - explicit sy-reframe invocation
 - explicit reframe stage request
-- strategy or previous-stage handoff to reframe
+- previous-stage handoff to reframe
 preconditions:
 - canonical source and active worktree are identified
 - required previous-stage artifact is present or blocker is returned

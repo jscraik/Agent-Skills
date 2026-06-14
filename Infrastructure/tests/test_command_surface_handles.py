@@ -34,7 +34,7 @@ class CommandSurfaceTempDirTestCase(unittest.TestCase):
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
 
-def _write_runtime_projection(repo_root: Path, handle: str = "he-heartbeat") -> Path:
+def _write_runtime_projection(repo_root: Path, handle: str = "he-phase-work") -> Path:
     skills_dir = repo_root / ".agents" / "skills"
     skills_dir.mkdir(parents=True, exist_ok=True)
     source_dir = repo_root / "Plugins" / "harness-engineering" / "skills" / handle
@@ -50,15 +50,12 @@ def _write_command_surface_metadata(repo_root: Path) -> Path:
 
 
 class TestCommandSurfaceResolution(CommandSurfaceTempDirTestCase):
-    def test_command_surface_resolves_latent_skill_handles(self) -> None:
+    def test_command_surface_rejects_retired_skill_handles(self) -> None:
         payload = command_surface.resolve_skill_handle("he-heartbeat", repo_root_path=REPO_ROOT)
 
-        self.assertEqual(payload["status"], "ok")
+        self.assertEqual(payload["status"], "error")
+        self.assertEqual(payload["error_code"], "unknown_handle")
         self.assertEqual(payload["handle"], "he-heartbeat")
-        self.assertEqual(payload["kind"], "skill")
-        self.assertEqual(payload["command_visibility"], "target")
-        self.assertEqual(payload["invoke_via"], "harness-engineering")
-        self.assertTrue(payload["source_path"].endswith("/he-heartbeat/SKILL.md"))
 
     def test_command_surface_resolves_folded_he_aliases(self) -> None:
         aliases = {
@@ -135,11 +132,11 @@ class TestCommandSurfaceResolution(CommandSurfaceTempDirTestCase):
         self.assertIn("he-phase-heartbeat", hidden_handles)
         self.assertTrue(all(handle.get("command_visibility") != "none" for handle in payload["handles"]))
 
-    def test_command_surface_marks_skill_builder_as_orchestrator(self) -> None:
-        payload = command_surface.resolve_skill_handle("skill-builder", repo_root_path=REPO_ROOT)
+    def test_command_surface_marks_skill_factory_router_as_orchestrator(self) -> None:
+        payload = command_surface.resolve_skill_handle("skill-factory-router", repo_root_path=REPO_ROOT)
 
         self.assertEqual(payload["status"], "ok")
-        self.assertEqual(payload["handle"], "skill-builder")
+        self.assertEqual(payload["handle"], "skill-factory-router")
         self.assertEqual(payload["command_visibility"], "orchestrator")
         self.assertIsNone(payload.get("invoke_via"))
 
@@ -214,21 +211,21 @@ class TestCommandSurfaceNoWrapperGeneration(CommandSurfaceTempDirTestCase):
     def test_command_surface_validation_rejects_duplicate_normalized_handles(self) -> None:
         handles = [
             command_surface.CommandHandle(
-                handle="he-heartbeat",
+                handle="duplicate-handle",
                 kind="skill",
                 command_visibility="target",
                 runtime_visibility="latent",
-                source_path="Plugins/harness-engineering/skills/he-heartbeat/SKILL.md",
+                source_path="Plugins/harness-engineering/skills/he-phase-heartbeat/SKILL.md",
                 owner="harness-engineering",
                 description="one",
                 invoke_via="harness-engineering",
             ),
             command_surface.CommandHandle(
-                handle="he_heartbeat",
+                handle="duplicate_handle",
                 kind="skill",
                 command_visibility="target",
                 runtime_visibility="latent",
-                source_path="Plugins/harness-engineering/skills/he-heartbeat/SKILL.md",
+                source_path="Plugins/harness-engineering/skills/he-phase-heartbeat/SKILL.md",
                 owner="harness-engineering",
                 description="two",
                 invoke_via="harness-engineering",
@@ -243,19 +240,19 @@ class TestCommandSurfaceNoWrapperGeneration(CommandSurfaceTempDirTestCase):
 
 
 class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
-    def _write_he_heartbeat_source(self, repo_root: Path) -> None:
+    def _write_he_phase_work_source(self, repo_root: Path) -> None:
         """
-        Create a minimal `he-heartbeat` skill source under `Plugins/harness-engineering/skills` in the given repository.
+        Create a minimal `he-phase-work` skill source under `Plugins/harness-engineering/skills` in the given repository.
         
-        Writes a `SKILL.md` file containing frontmatter with `name: he-heartbeat` and a heading, creating parent directories as needed.
+        Writes a `SKILL.md` file containing frontmatter with `name: he-phase-work` and a heading, creating parent directories as needed.
         
         Parameters:
         	repo_root (Path): Filesystem path to the repository root where the plugin source directory will be created.
         """
-        source = repo_root / "Plugins" / "harness-engineering" / "skills" / "he-heartbeat"
+        source = repo_root / "Plugins" / "harness-engineering" / "skills" / "he-phase-work"
         source.mkdir(parents=True)
         (source / "SKILL.md").write_text(
-            "---\nname: he-heartbeat\n---\n# HE Heartbeat\n",
+            "---\nname: he-phase-work\n---\n# HE Phase Work\n",
             encoding="utf-8",
         )
 
@@ -305,19 +302,19 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
     def test_skills_proof_requires_user_runtime_link(self) -> None:
         """skills_proof must fail when user runtime handles exist but are not symlinked to workspace."""
         repo_root = self.temp_dir / "repo"
-        self._write_he_heartbeat_source(repo_root)
+        self._write_he_phase_work_source(repo_root)
         _write_command_surface_metadata(repo_root)
 
         home = self.temp_dir / "home"
         codex_skills = home / ".codex" / "skills"
         agents_skills = home / ".agents" / "skills"
-        (codex_skills / "he-heartbeat").mkdir(parents=True)
-        (agents_skills / "he-heartbeat").mkdir(parents=True)
-        (codex_skills / "he-heartbeat" / "SKILL.md").write_text("# stale\n", encoding="utf-8")
-        (agents_skills / "he-heartbeat" / "SKILL.md").write_text("# stale\n", encoding="utf-8")
+        (codex_skills / "he-phase-work").mkdir(parents=True)
+        (agents_skills / "he-phase-work").mkdir(parents=True)
+        (codex_skills / "he-phase-work" / "SKILL.md").write_text("# stale\n", encoding="utf-8")
+        (agents_skills / "he-phase-work" / "SKILL.md").write_text("# stale\n", encoding="utf-8")
 
         with mock.patch("pathlib.Path.home", return_value=home):
-            result = skills_proof(repo_root, "he-heartbeat")
+            result = skills_proof(repo_root, "he-phase-work")
 
         proof = result.data["proof"]
         self.assertEqual(proof["status"], "fail")
@@ -362,7 +359,7 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
         and does not create a `.harness/evidence` directory in the repository.
         """
         repo_root = self.temp_dir / "repo"
-        self._write_he_heartbeat_source(repo_root)
+        self._write_he_phase_work_source(repo_root)
         _write_command_surface_metadata(repo_root)
         skills_dir = repo_root / ".agents" / "skills"
 
@@ -372,7 +369,7 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
         agents_skills.symlink_to(skills_dir)
 
         with mock.patch("pathlib.Path.home", return_value=home):
-            result = skills_proof(repo_root, "he-heartbeat")
+            result = skills_proof(repo_root, "he-phase-work")
 
         proof = result.data["proof"]
         self.assertEqual(proof["status"], "pass")
@@ -394,7 +391,7 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
     def test_skills_proof_runtime_target_agents_writes_runtime_card(self) -> None:
         """Explicit Agents-targeted proof writes schema-valid evidence artifacts."""
         repo_root = self.temp_dir / "repo"
-        self._write_he_heartbeat_source(repo_root)
+        self._write_he_phase_work_source(repo_root)
         _write_command_surface_metadata(repo_root)
         skills_dir = repo_root / ".agents" / "skills"
 
@@ -404,7 +401,7 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
         agents_skills.symlink_to(skills_dir)
 
         with mock.patch("pathlib.Path.home", return_value=home):
-            result = skills_proof(repo_root, "he-heartbeat", runtime_target="agents")
+            result = skills_proof(repo_root, "he-phase-work", runtime_target="agents")
 
         runtime_evidence = result.data["runtime_evidence"]
         card_path = repo_root / runtime_evidence["runtime_card_path"]
@@ -431,7 +428,7 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
     def test_skills_proof_runtime_target_codex_rejects_agents_only_runtime(self) -> None:
         """Codex-targeted proof must not pass because the agents runtime is linked."""
         repo_root = self.temp_dir / "repo"
-        self._write_he_heartbeat_source(repo_root)
+        self._write_he_phase_work_source(repo_root)
         _write_command_surface_metadata(repo_root)
         skills_dir = repo_root / ".agents" / "skills"
 
@@ -441,7 +438,7 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
         agents_skills.symlink_to(skills_dir)
 
         with mock.patch("pathlib.Path.home", return_value=home):
-            result = skills_proof(repo_root, "he-heartbeat", runtime_target="codex")
+            result = skills_proof(repo_root, "he-phase-work", runtime_target="codex")
 
         proof = result.data["proof"]
         self.assertEqual(result.status, "error")
@@ -454,7 +451,7 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
         self.assertIn("codex_user_runtime_ready", proof["gate_policy"]["required"])
         self.assertEqual(
             proof["validation_commands"],
-            ["./bin/ask skills proof he-heartbeat --runtime-target codex --json --robot"],
+            ["./bin/ask skills proof he-phase-work --runtime-target codex --json --robot"],
         )
         runtime_evidence = result.data["runtime_evidence"]
         card_path = repo_root / runtime_evidence["runtime_card_path"]
@@ -471,7 +468,7 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
         self.assertEqual(card["visibility_status"], "user_observable")
         self.assertEqual(
             card["artifacts"][0]["source_identity"]["source_paths"][0],
-            "Plugins/harness-engineering/skills/he-heartbeat/SKILL.md",
+            "Plugins/harness-engineering/skills/he-phase-work/SKILL.md",
         )
         self.assertEqual(receipt["claim_status"], "blocked")
         self.assertEqual(receipt["runtime_status"], "blocked_runtime")
@@ -483,7 +480,7 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
     def test_skills_proof_passes_with_linked_codex_runtime(self) -> None:
         """skills_proof must pass when the Codex Desktop runtime link reaches the workspace."""
         repo_root = self.temp_dir / "repo"
-        self._write_he_heartbeat_source(repo_root)
+        self._write_he_phase_work_source(repo_root)
         _write_command_surface_metadata(repo_root)
         skills_dir = repo_root / ".agents" / "skills"
 
@@ -493,7 +490,7 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
         codex_skills.symlink_to(skills_dir)
 
         with mock.patch("pathlib.Path.home", return_value=home):
-            result = skills_proof(repo_root, "he-heartbeat")
+            result = skills_proof(repo_root, "he-phase-work")
 
         proof = result.data["proof"]
         self.assertEqual(proof["status"], "pass")
@@ -505,7 +502,7 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
     def test_skills_proof_dedupes_codex_and_agents_aliases(self) -> None:
         """Codex and Agents home roots are duplicate aliases when they resolve to one projection."""
         repo_root = self.temp_dir / "repo"
-        self._write_he_heartbeat_source(repo_root)
+        self._write_he_phase_work_source(repo_root)
         _write_command_surface_metadata(repo_root)
         skills_dir = repo_root / ".agents" / "skills"
 
@@ -518,7 +515,7 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
         agents_skills.symlink_to(skills_dir)
 
         with mock.patch("pathlib.Path.home", return_value=home):
-            result = skills_proof(repo_root, "he-heartbeat")
+            result = skills_proof(repo_root, "he-phase-work")
 
         proof = result.data["proof"]
         aliases = proof["runtime_diagnostics"]["runtime_aliases"]
@@ -531,7 +528,7 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
     def test_skills_proof_rejects_split_brain_user_runtime_aliases(self) -> None:
         """User runtime roots must not silently point at different SDK projections."""
         repo_root = self.temp_dir / "repo"
-        self._write_he_heartbeat_source(repo_root)
+        self._write_he_phase_work_source(repo_root)
         _write_command_surface_metadata(repo_root)
         skills_dir = repo_root / ".agents" / "skills"
         stale_runtime = self.temp_dir / "stale" / ".agents" / "skills"
@@ -546,7 +543,7 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
         agents_skills.symlink_to(stale_runtime)
 
         with mock.patch("pathlib.Path.home", return_value=home):
-            result = skills_proof(repo_root, "he-heartbeat")
+            result = skills_proof(repo_root, "he-phase-work")
 
         proof = result.data["proof"]
         aliases = proof["runtime_diagnostics"]["runtime_aliases"]
@@ -560,7 +557,7 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
     def test_skills_proof_runtime_target_codex_passes_with_codex_runtime(self) -> None:
         """Codex-targeted proof must pass when the Codex runtime link reaches the workspace."""
         repo_root = self.temp_dir / "repo"
-        self._write_he_heartbeat_source(repo_root)
+        self._write_he_phase_work_source(repo_root)
         _write_command_surface_metadata(repo_root)
         skills_dir = repo_root / ".agents" / "skills"
 
@@ -570,7 +567,7 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
         codex_skills.symlink_to(skills_dir)
 
         with mock.patch("pathlib.Path.home", return_value=home):
-            result = skills_proof(repo_root, "he-heartbeat", runtime_target="codex")
+            result = skills_proof(repo_root, "he-phase-work", runtime_target="codex")
 
         proof = result.data["proof"]
         self.assertEqual(result.status, "success")
@@ -587,7 +584,7 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
     def test_skills_proof_runtime_target_codex_downgrades_degraded_observability(self) -> None:
         """Explicit Codex proof must not stay green when attached observability is degraded."""
         repo_root = self.temp_dir / "repo"
-        self._write_he_heartbeat_source(repo_root)
+        self._write_he_phase_work_source(repo_root)
         _write_command_surface_metadata(repo_root)
         skills_dir = repo_root / ".agents" / "skills"
 
@@ -613,7 +610,7 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
         )
 
         with mock.patch("pathlib.Path.home", return_value=home):
-            result = skills_proof(repo_root, "he-heartbeat", runtime_target="codex")
+            result = skills_proof(repo_root, "he-phase-work", runtime_target="codex")
 
         proof = result.data["proof"]
         runtime_evidence = result.data["runtime_evidence"]
@@ -630,17 +627,17 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
     def test_skills_proof_runtime_target_codex_rejects_per_handle_runtime_symlink(self) -> None:
         """Codex-targeted proof requires the user runtime root to point at the workspace."""
         repo_root = self.temp_dir / "repo"
-        self._write_he_heartbeat_source(repo_root)
+        self._write_he_phase_work_source(repo_root)
         _write_command_surface_metadata(repo_root)
-        handle_dir = repo_root / ".agents" / "skills" / "he-heartbeat"
+        handle_dir = repo_root / ".agents" / "skills" / "he-phase-work"
 
         home = self.temp_dir / "home"
         codex_skills = home / ".codex" / "skills"
         codex_skills.mkdir(parents=True)
-        (codex_skills / "he-heartbeat").symlink_to(handle_dir)
+        (codex_skills / "he-phase-work").symlink_to(handle_dir)
 
         with mock.patch("pathlib.Path.home", return_value=home):
-            result = skills_proof(repo_root, "he-heartbeat", runtime_target="codex")
+            result = skills_proof(repo_root, "he-phase-work", runtime_target="codex")
 
         proof = result.data["proof"]
         diagnostics = proof["runtime_diagnostics"]
@@ -725,6 +722,18 @@ class TestCommittedCommandSurface(CommandSurfaceTempDirTestCase):
             len(payload["handles"]),
             "handle_count must equal len(handles)",
         )
+
+    def test_committed_command_surface_exports_no_handle_rows(self) -> None:
+        """The committed command surface must not preserve old skill handle rows."""
+        surface_path = REPO_ROOT / ".skillsets" / "command-surface.json"
+        if not surface_path.exists():
+            self.skipTest("command-surface.json not present in repo")
+
+        payload = json.loads(surface_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(payload.get("handle_count"), 0)
+        self.assertEqual(payload.get("handles"), [])
+        self.assertEqual(payload.get("hidden_handles"), [])
 
     def test_committed_command_surface_has_no_generated_wrapper_fields(self) -> None:
         """The command surface must stay metadata-only, with no generated wrapper fields."""

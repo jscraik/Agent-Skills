@@ -7,7 +7,7 @@ purpose: Sequence how to implement one approved slice, including file targets, v
 triggers:
 - explicit sy-execution-plan invocation
 - explicit execution-plan stage request
-- strategy or previous-stage handoff to execution-plan
+- previous-stage handoff to execution-plan
 preconditions:
 - canonical source and active worktree are identified
 - required previous-stage artifact is present or blocker is returned

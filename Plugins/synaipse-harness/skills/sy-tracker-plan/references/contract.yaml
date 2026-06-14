@@ -7,7 +7,7 @@ purpose: Translate trace bullets into tracker-ready slices with dependencies, la
 triggers:
 - explicit sy-tracker-plan invocation
 - explicit tracker-plan stage request
-- strategy or previous-stage handoff to tracker-plan
+- previous-stage handoff to tracker-plan
 preconditions:
 - canonical source and active worktree are identified
 - required previous-stage artifact is present or blocker is returned

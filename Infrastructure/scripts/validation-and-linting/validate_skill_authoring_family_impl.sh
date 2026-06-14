@@ -155,7 +155,7 @@ fi
 echo "[family-gate] Harness Engineering subagent routing passed"
 
 skill_dirs=(
-  "Plugins/skill-factory/skills/code_quality_review/skill-builder"
+  "Plugins/skill-factory/skills/skill-factory-router"
   "skills-system/skill-creator"
   "skills-system/skill-installer"
   "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator"
@@ -168,15 +168,13 @@ is_system_overlay_skill() {
   esac
 }
 skill_builder_dir_candidates=(
-  "Plugins/skill-factory/skills/code_quality_review/skill-builder"
-  "Plugins/skill-factory/skills/skill-builder"
-  "plugins/skill-factory/skills/code_quality_review/skill-builder"
-  "plugins/skill-factory/skills/skill-builder"
+  "Plugins/skill-factory/scripts/skill-builder"
+  "plugins/skill-factory/scripts/skill-builder"
 )
 skill_builder_scripts_dir=""
 for candidate in "${skill_builder_dir_candidates[@]}"; do
-  if [[ -f "${candidate}/scripts/skill_gate.py" ]]; then
-    skill_builder_scripts_dir="${candidate}/scripts"
+  if [[ -f "${candidate}/skill_gate.py" ]]; then
+    skill_builder_scripts_dir="${candidate}"
     break
   fi
 done
@@ -526,7 +524,9 @@ if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
   run_plugin_hooks_pytest=0
   run_first_principles_gate_pytest=0
 
-  if changed_files_match "Plugins/skill-factory/skills/code_quality_review/skill-builder/*" || \
+  if changed_files_match "Plugins/skill-factory/skills/skill-factory-router/*" || \
+     changed_files_match "Plugins/skill-factory/scripts/skill-builder/*" || \
+     changed_files_match "Plugins/skill-factory/references/skill-builder/*" || \
      changed_files_match "skills-system/skill-creator/*" || \
      changed_files_match "skills-system/skill-installer/*" || \
      changed_files_match "Plugins/harness-engineering/skills/*" || \
@@ -537,7 +537,6 @@ if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
      changed_files_match "Plugins/harness-engineering/scripts/check_reference_integrity.py" || \
      changed_files_match "Plugins/harness-engineering/scripts/check_lifecycle_mutation_contract.py" || \
      changed_files_match "Plugins/harness-engineering/scripts/report_legacy_migration.py" || \
-     changed_files_match "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/*" || \
      changed_files_match "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/*" || \
      changed_files_match "Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh" || \
      changed_files_match "Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py" || \
@@ -600,12 +599,16 @@ fi
 
 if [[ "$run_skill_gate_unittest" -eq 1 ]]; then
   echo "[family-gate] running skill_gate unit-test shim..."
-  skill_gate_unittest_path="$(cd "$skill_builder_scripts_dir" && pwd -P)/test_skill_gate.py"
-  if [[ ! -f "$skill_gate_unittest_path" ]]; then
-    echo "[family-gate] ERROR: missing skill-gate unit-test target"
-    exit 2
-  fi
-  if ! "${python_cmd[@]}" "$skill_gate_unittest_path"; then
+  skill_gate_unittest_paths=(
+    "$(cd "$skill_builder_scripts_dir" && pwd -P)/test_skill_gate_contract_evals.py"
+  )
+  for skill_gate_unittest_path in "${skill_gate_unittest_paths[@]}"; do
+    if [[ ! -f "$skill_gate_unittest_path" ]]; then
+      echo "[family-gate] ERROR: missing skill-gate unit-test target: $skill_gate_unittest_path"
+      exit 2
+    fi
+  done
+  if ! "${python_cmd[@]}" "${skill_gate_unittest_paths[@]}"; then
     echo "[family-gate] ERROR: skill_gate unit tests failed — fix before proceeding"
     exit 2
   fi

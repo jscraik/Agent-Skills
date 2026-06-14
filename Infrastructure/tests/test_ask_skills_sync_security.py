@@ -233,8 +233,8 @@ class TestAskSkillsSyncSecurity(TestCase):
         (plugin_source / ".codex-plugin").mkdir()
         (plugin_source / ".codex-plugin" / "plugin.json").write_text("{}", encoding="utf-8")
         (plugin_source / "skills").mkdir()
-        (plugin_source / "skills" / "he-heartbeat").mkdir()
-        (plugin_source / "skills" / "he-heartbeat" / "SKILL.md").write_text("fresh\n", encoding="utf-8")
+        (plugin_source / "skills" / "he-phase-work").mkdir()
+        (plugin_source / "skills" / "he-phase-work" / "SKILL.md").write_text("fresh\n", encoding="utf-8")
         (self.repo_root / "Plugins" / "marketplace.json").write_text(
             '{"plugins":[{"name":"harness-engineering","source":{"source":"local","path":"./Plugins/harness-engineering"}}]}\n',
             encoding="utf-8",
@@ -251,7 +251,7 @@ class TestAskSkillsSyncSecurity(TestCase):
 
         self.assertEqual(result.status, "success")
         self.assertFalse((stale_target / "stale.txt").exists())
-        self.assertEqual((stale_target / "skills" / "he-heartbeat" / "SKILL.md").read_text(encoding="utf-8"), "fresh\n")
+        self.assertEqual((stale_target / "skills" / "he-phase-work" / "SKILL.md").read_text(encoding="utf-8"), "fresh\n")
         self.assertTrue((stale_target / ".codex-repo-plugin-source").is_file())
         self.assertTrue(
             any("Replaced home plugin mirror" in item for item in result.data["logs"]),
@@ -262,8 +262,8 @@ class TestAskSkillsSyncSecurity(TestCase):
         plugin_source = self.repo_root / "Plugins" / "harness-engineering"
         plugin_source.mkdir(parents=True)
         (plugin_source / "skills").mkdir()
-        (plugin_source / "skills" / "he-heartbeat").mkdir()
-        (plugin_source / "skills" / "he-heartbeat" / "SKILL.md").write_text("fresh\n", encoding="utf-8")
+        (plugin_source / "skills" / "he-phase-work").mkdir()
+        (plugin_source / "skills" / "he-phase-work" / "SKILL.md").write_text("fresh\n", encoding="utf-8")
         marketplace_path = self.repo_root / "Plugins" / "marketplace.json"
         marketplace_path.write_text(
             '{"plugins":[{"name":"harness-engineering","source":{"source":"local","path":"./Plugins/harness-engineering"}}]}\n',
@@ -289,7 +289,7 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertEqual(report["removed_entries"], ["harness-engineering"])
         self.assertTrue((curated_plugin / "marker.txt").is_file())
         self.assertFalse((stale_local / "stale.txt").exists())
-        self.assertEqual((stale_local / "skills" / "he-heartbeat" / "SKILL.md").read_text(encoding="utf-8"), "fresh\n")
+        self.assertEqual((stale_local / "skills" / "he-phase-work" / "SKILL.md").read_text(encoding="utf-8"), "fresh\n")
 
     def test_local_plugin_runtime_sync_prunes_stale_marked_plugins(self) -> None:
         plugin_a = self.repo_root / "Plugins" / "plugin-a"
@@ -415,7 +415,7 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertEqual(result.data["projection"]["mode_source"], "cli")
 
     def test_sync_skills_rooted_non_dry_run_writes_command_surface_without_handle_wrapper(self) -> None:
-        he_source = self.repo_root / "Skills" / "harness-engineering" / "he-heartbeat"
+        he_source = self.repo_root / "Skills" / "harness-engineering" / "he-phase-work"
         he_source.mkdir(parents=True)
         (he_source / "SKILL.md").write_text("# HE Heartbeat\n", encoding="utf-8")
 
@@ -432,8 +432,8 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertTrue((self.repo_root / ".skillsets" / "agent-ops" / "manifest.jsonl").is_file())
         self.assertTrue((self.repo_root / ".skillsets" / "command-surface.json").is_file())
         command_surface = json.loads((self.repo_root / ".skillsets" / "command-surface.json").read_text(encoding="utf-8"))
-        self.assertIn("he-heartbeat", {row["handle"] for row in command_surface["handles"]})
-        self.assertFalse((self.repo_root / ".agents" / "skills" / "he-heartbeat").exists())
+        self.assertIn("he-phase-work", {row["handle"] for row in command_surface["handles"]})
+        self.assertFalse((self.repo_root / ".agents" / "skills" / "he-phase-work").exists())
 
     def test_sync_skills_rooted_projects_declared_direct_first_party_skill(self) -> None:
         direct_source = self.repo_root / "Skills" / "agent-ops" / "improve-agent-native"
@@ -470,11 +470,11 @@ class TestAskSkillsSyncSecurity(TestCase):
         )
 
     def test_sync_skills_rooted_prunes_flat_symlink_before_rooted_projection_write(self) -> None:
-        canonical_skill = self.repo_root / "Skills" / "harness-engineering" / "he-heartbeat"
+        canonical_skill = self.repo_root / "Skills" / "harness-engineering" / "he-phase-work"
         canonical_skill.mkdir(parents=True)
         source_skill_md = canonical_skill / "SKILL.md"
         source_skill_md.write_text("# Canonical Source\n", encoding="utf-8")
-        runtime_handle = self.repo_root / ".agents" / "skills" / "he-heartbeat"
+        runtime_handle = self.repo_root / ".agents" / "skills" / "he-phase-work"
         runtime_handle.parent.mkdir(parents=True, exist_ok=True)
         runtime_handle.symlink_to(canonical_skill)
 
@@ -490,7 +490,48 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertFalse(runtime_handle.exists())
         self.assertEqual(source_skill_md.read_text(encoding="utf-8"), "# Canonical Source\n")
         self.assertTrue(
-            any("Removed stale symlink" in item and "he-heartbeat" in item for item in result.data["logs"]),
+            any("Removed stale symlink" in item and "he-phase-work" in item for item in result.data["logs"]),
+            result.data["logs"],
+        )
+
+    def test_sync_skills_flat_replaces_generated_root_dir_with_canonical_symlink(self) -> None:
+        canonical_skill = self.repo_root / "Skills" / "agent-ops" / "agent-ops"
+        canonical_skill.mkdir(parents=True)
+        (canonical_skill / "SKILL.md").write_text("# Canonical Agent Ops\n", encoding="utf-8")
+
+        runtime_handle = self.repo_root / ".agents" / "skills" / "agent-ops"
+        runtime_handle.mkdir(parents=True)
+        (runtime_handle / "SKILL.md").write_text(
+            "---\n"
+            "metadata:\n"
+            "  skill-type: root-skill-set\n"
+            "  projection-mode: rooted\n"
+            "---\n"
+            "# Rooted Agent Ops\n",
+            encoding="utf-8",
+        )
+
+        fake_entry = SimpleNamespace(
+            name="agent-ops",
+            source_dir=canonical_skill,
+            category="Skills/agent-ops",
+            description="Agent ops.",
+        )
+        with mock.patch.object(skills_commands, "discover_skill_entries", return_value=[fake_entry]):
+            result = skills_commands.sync_skills(
+                self.repo_root,
+                scope="workspace",
+                dry_run=False,
+                projection="flat",
+                plugin_cache_refresh="skip",
+            )
+
+        self.assertEqual(result.status, "success")
+        self.assertTrue(runtime_handle.is_symlink())
+        self.assertEqual(os.readlink(runtime_handle), "../../Skills/agent-ops/agent-ops")
+        self.assertEqual((runtime_handle / "SKILL.md").read_text(encoding="utf-8"), "# Canonical Agent Ops\n")
+        self.assertTrue(
+            any("Removed generated root skill set" in item and "agent-ops" in item for item in result.data["logs"]),
             result.data["logs"],
         )
 
@@ -883,6 +924,36 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertEqual(result.status, "success")
         self.assertFalse(bridge_link.exists())
         self.assertTrue((skills_dir / ".system").is_symlink())
+        self.assertTrue(
+            any("Removed first-level system bridge alias" in item and "imagegen" in item for item in result.data["logs"]),
+            result.data["logs"],
+        )
+
+    def test_sync_skills_workspace_prunes_system_lane_bridge_symlinks(self) -> None:
+        skills_dir = self.repo_root / ".agents" / "skills"
+        system_source = self.repo_root / "skills-system" / "imagegen"
+        system_source.mkdir(parents=True)
+        (system_source / "SKILL.md").write_text("# Imagegen\n", encoding="utf-8")
+        (skills_dir / ".system").symlink_to(Path("../../skills-system"))
+        bridge_link = skills_dir / "imagegen"
+        bridge_link.symlink_to(Path(".system/imagegen"))
+
+        fake_entry = SimpleNamespace(
+            name="imagegen",
+            source_dir=system_source,
+            category="skills-system",
+            description="Generate images.",
+        )
+        with mock.patch("ask.commands.skills_impl.discover_skill_entries", return_value=[fake_entry]):
+            result = skills_commands.sync_skills(
+                self.repo_root,
+                scope="workspace",
+                dry_run=False,
+                projection="flat",
+            )
+
+        self.assertEqual(result.status, "success")
+        self.assertFalse(bridge_link.exists())
         self.assertTrue(
             any("Removed first-level system bridge alias" in item and "imagegen" in item for item in result.data["logs"]),
             result.data["logs"],

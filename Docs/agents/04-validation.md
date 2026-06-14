@@ -52,7 +52,7 @@
   - Re-read [managed-asset-lifecycle.md](/Docs/reference/managed-asset-lifecycle.md) before editing.
   - Keep lifecycle truth in the authoritative in-file source, not a sidecar-first shadow registry.
   - Treat derived catalogs or indexes as stale until regenerated when they disagree with the authoritative source.
-  - Use [skill-factory plugin manifest](/Plugins/skill-factory/.codex-plugin/plugin.json) as the phase-one plugin proof target and [skill-factory packaged skill-builder](/Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md) as the phase-one packaged-skill proof target. The `skill-builder`, `skill-creator`, `skill-installer`, and `plugin-creator` factory skills live in `Plugins/skill-factory/` and `Plugins/plugin-factory/` respectively.
+  - Use [skill-factory plugin manifest](/Plugins/skill-factory/.codex-plugin/plugin.json) as the phase-one plugin proof target and [skill-factory router](/Plugins/skill-factory/skills/skill-factory-router/SKILL.md) as the packaged-skill proof target. Skill hardening scripts live under `Plugins/skill-factory/scripts/skill-builder/`; runtime skills live under `Plugins/skill-factory/skills/` and `Plugins/plugin-factory/skills/`.
 
 ## Config-sensitive checks
 
@@ -137,9 +137,9 @@ or policy before any live service call.
 
 For plugin-owned skills under `Plugins/<plugin-id>/skills/**`, `<tile-name>`
 is the plugin id, not the leaf skill directory. For example, live private
-validation of `Plugins/skill-factory/skills/code_quality_review/skill-builder`
+validation of `Plugins/skill-factory/skills/skill-factory-router`
 must stage and save to `<workspace>/skill-factory` while keeping the
-`skills` manifest entry for `skill-builder`.
+`skills` manifest entries aligned to the surviving Skill Factory skills.
 
 The live-private lane is still not a publish lane. Do not run `tessl install`,
 `tessl skill publish`, `tessl tile publish`, `tessl tile pack`, registry upload,
@@ -242,7 +242,8 @@ That script enforces equivalent governance for:
 
 - `Plugins/skill-factory/skills/*/skill-creator`
 - `Plugins/skill-factory/skills/*/skill-installer`
-- `Plugins/skill-factory/skills/*/skill-builder`
+- `Plugins/skill-factory/skills/skill-factory-router`
+- `Plugins/skill-factory/scripts/skill-builder`
 - `Plugins/plugin-factory/skills/*/plugin-creator`
 
 Validation behavior includes:

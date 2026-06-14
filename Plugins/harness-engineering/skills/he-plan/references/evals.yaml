@@ -146,7 +146,7 @@ cases:
     realistic: true
     should_trigger: true
     prepend_skill: false
-    prompt: "Plan a reversible local he-router wording fix without forcing the full architecture review pipeline."
+    prompt: "Plan a reversible local he-reconcile wording fix without forcing the full architecture review pipeline."
     deterministic_checks: *safe
     acceptance: [{type: regex, value: "(?is)(Type 2|reversible|fast|smallest|not required|skipped|first.?principles)"}]
   - id: plugin-hooks-feature-gated-plan

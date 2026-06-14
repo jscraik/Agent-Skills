@@ -16,7 +16,7 @@
     "synaipse",
     "harness",
     "workflow",
-    "sy-strategy",
+    "sy-reframe",
     "sy-reframe",
     "sy-brainstorm",
     "sy-trace-plan",
@@ -55,7 +55,7 @@
     "privacyPolicyURL": "https://github.com/jscraik/Agent-Skills/blob/main/README.md#privacy-and-data-handling",
     "termsOfServiceURL": "https://github.com/jscraik/Agent-Skills/blob/main/LICENSE",
     "defaultPrompt": [
-      "Use sy-strategy to choose the next SynAIpse stage."
+      "Use sy-reframe to choose the next SynAIpse stage."
     ],
     "brandColor": "#F97316",
     "composerIcon": "./assets/icon.png",

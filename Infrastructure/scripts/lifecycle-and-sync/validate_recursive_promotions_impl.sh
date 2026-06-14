@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+script_dir="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+if repo_root="$(git -C "$script_dir" rev-parse --show-toplevel 2>/dev/null)"; then
+  :
+else
+  repo_root="$(cd "$script_dir/../../.." && pwd -P)"
+fi
 cd "$repo_root"
 
 changed_only=0
@@ -224,8 +229,7 @@ trap 'rm -f "$results_jsonl"' EXIT
 
 # Resolve validator only when we actually have promotion files to validate
 validator_candidates=(
-  "Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/validate_recursive_promotion.py"
-  "Plugins/skill-factory/skills/skill-builder/scripts/validate_recursive_promotion.py"
+  "Plugins/skill-factory/scripts/skill-builder/validate_recursive_promotion.py"
 )
 validator=""
 for candidate in "${validator_candidates[@]}"; do

@@ -69,10 +69,10 @@ cases:
     deterministic_checks: {required_commands: ["bash"]}
     acceptance: [{type: contains, value: "blocked"}]
   - id: negative-other-lane
-    name: plugin builder nonmatch
+    name: plugin factory router nonmatch
     category: negative
     eval_modes: [release]
     should_trigger: false
     prepend_skill: false
-    prompt: "Use plugin-builder to draft marketing copy for a launch post."
+    prompt: "Use plugin-factory-router to draft marketing copy for a launch post."
     acceptance: [{type: not_contains, value: "skill-installer"}]

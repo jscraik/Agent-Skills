@@ -20,7 +20,7 @@ stage_arc_boundary:
     freshness_required: fresh|allowed_stale|not_applicable
     not_proof: "<chat, transcript, provenance, green CI, or local artifact limits>"
   active_arc:
-    owned_stage: he-router|he-brainstorm|he-spec|he-plan|he-work|he-code-review|he-fix-bugs|he-improve|he-reconcile|he-reinforce|he-heartbeat|he-eval-report|he-strategy|he-reframe|he-linear-plan|he-phase-work|he-phase-heartbeat
+    owned_stage: he-reconcile|he-brainstorm|he-spec|he-plan|he-work|he-code-review|he-fix-bugs|he-improve|he-reconcile|he-reinforce|he-phase-work|he-eval-report|he-strategy|he-reframe|he-linear-plan|he-phase-work|he-phase-heartbeat
     allowed_actions: "<read, artifact write, repo edit, external mutation, schedule>"
     forbidden_actions: "<actions outside this stage>"
     mutation_boundary: none|local_artifact|repo_edit|external_mutation|destructive

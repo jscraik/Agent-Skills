@@ -131,9 +131,9 @@ the canonical SKILL.md version represents the behavior being evaluated.
 
 For plugin-owned skills under `Plugins/<plugin-id>/skills/**`, `<tile-name>`
 is the plugin id rather than the leaf skill directory. For example,
-`Plugins/skill-factory/skills/code_quality_review/skill-builder` stages as
-`<workspace>/skill-factory` while the tile manifest still exposes the
-`skill-builder` skill entry.
+`Plugins/skill-factory/skills/skill-factory-router` stages as
+`<workspace>/skill-factory` while the tile manifest exposes the surviving
+Skill Factory skill entries.
 
 Tessl tile evals attach to a Tessl project using that same
 `<workspace>/<tile-name>` identity. The wrapper must check that staged project

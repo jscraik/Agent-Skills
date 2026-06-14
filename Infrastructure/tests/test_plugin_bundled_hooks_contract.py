@@ -12,10 +12,8 @@ PLUGIN_BUILDER = (
     REPO_ROOT
     / "Plugins"
     / "plugin-factory"
-    / "skills"
-    / "code_quality_review"
-    / "plugin-builder"
     / "scripts"
+    / "plugin-builder"
     / "plugin_builder.pyw"
 )
 PLUGIN_CREATOR = (
@@ -37,11 +35,10 @@ FACTORY_GATE_REFERENCE = (
 )
 FACTORY_GATE_LANE_RELS = (
     "skills-system/skill-creator/references/skill-factory/foundations.md",
-    "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md",
+    "Plugins/skill-factory/skills/skill-factory-router/SKILL.md",
     "Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor/SKILL.md",
     "Plugins/skill-factory/skills/scaffolding_templates/skillify/SKILL.md",
     "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator/SKILL.md",
-    "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/SKILL.md",
     "Plugins/plugin-factory/skills/team_automation/plugin-router/SKILL.md",
 )
 FACTORY_GATE_LANES = tuple(REPO_ROOT / rel for rel in FACTORY_GATE_LANE_RELS)

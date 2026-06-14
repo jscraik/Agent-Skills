@@ -4,9 +4,9 @@ Use this at the end of every active HE stage so downstream agents know status, p
 
 ## Active Spine
 
-`he-router -> he-brainstorm -> he-spec -> he-plan -> he-work -> he-code-review -> he-fix-bugs -> he-work|done`
+`he-reconcile -> he-brainstorm -> he-spec -> he-plan -> he-work -> he-code-review -> he-fix-bugs -> he-work|done`
 
-Use `he-improve` for measured improvement, `he-reconcile` for cross-stage state reconciliation, `he-reinforce` for solved-problem capture or learning refresh, and `he-heartbeat` for wake/re-check loops.
+Use `he-improve` for measured improvement, `he-reconcile` for cross-stage state reconciliation, `he-reinforce` for solved-problem capture or learning refresh, and `he-phase-work` for wake/re-check loops.
 
 Folded stages are modes, not the default route:
 
@@ -40,7 +40,7 @@ When structured output is requested, or when handing off to another HE stage, em
 
 ```yaml
 schema_version: 1
-he_stage: he-router|he-brainstorm|he-spec|he-plan|he-work|he-code-review|he-fix-bugs|he-improve|he-reconcile|he-reinforce|he-heartbeat
+he_stage: he-reconcile|he-brainstorm|he-spec|he-plan|he-work|he-code-review|he-fix-bugs|he-improve|he-reconcile|he-reinforce|he-phase-work
 mode: "<stage mode or folded mode>"
 tracker_status: resolved|created|blocked|not_applicable|user_opted_out
 artifact_status: none|drafted|updated|validated|not_applicable
@@ -76,7 +76,7 @@ domain_model:
   core_domain_relevance: core|supporting|generic|unknown|not_applicable
   closure_impact: blocks_spec|blocks_plan|blocks_work|blocks_review|blocks_eval|none
 exit_status: ready_for_next_stage|blocked|done
-next_stage: he-brainstorm|he-spec|he-plan|he-work|he-code-review|he-fix-bugs|he-improve|he-reconcile|he-reinforce|he-heartbeat|done
+next_stage: he-brainstorm|he-spec|he-plan|he-work|he-code-review|he-fix-bugs|he-improve|he-reconcile|he-reinforce|he-phase-work|done
 missing_inputs: []
 evidence:
   linear: "<issue key/url or blocker>"
@@ -113,7 +113,7 @@ For short chat responses, summarize the same fields without losing blocker, trac
 
 ## Stage Minimums
 
-- `he-router`: selected stage, confidence, matched rule, missing input if blocked.
+- `he-reconcile`: selected stage, confidence, matched rule, missing input if blocked.
 - `he-brainstorm`: problem frame, scope tier, spec decision, Linear tracker state for durable handoff, `.harness/brainstorm` or folded `.harness/ideate` artifact when written, next stage.
 - `he-spec`: accepted behavior contract for one selected milestone, parent issue, reframe phase, or execution slice; stable acceptance IDs; Linear Work Item Contract; `.harness/specs` artifact; explicit In Scope and Out of Scope boundaries; next planning slice.
 - `he-plan`: stable units, dependencies, tests, rollback, `.harness/plan` artifact, Linear/spec/plan/PR traceability matrix, and proof the plan stays inside the selected execution slice.
@@ -123,7 +123,7 @@ For short chat responses, summarize the same fields without losing blocker, trac
 - `he-improve`: baseline, measured delta, accepted/rejected experiment, rollback posture.
 - `he-reconcile`: mode, earliest incomplete stage, stage exit evidence, next exact stage.
 - `he-reinforce`: solved status, selected learning artifact, Project Brain status, discoverability, and validation evidence.
-- `he-heartbeat`: live checks, cadence, stop conditions, next stage when the heartbeat wakes.
+- `he-phase-work`: live checks, cadence, stop conditions, next stage when the heartbeat wakes.
 
 ## Coding Harness Managed Repos
 

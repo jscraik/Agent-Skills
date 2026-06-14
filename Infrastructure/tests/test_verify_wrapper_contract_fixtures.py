@@ -92,7 +92,7 @@ class VerifyWrapperContractFixturesTests(unittest.TestCase):
         self.assertEqual(completed[0], "runtime-separation")
         self.assertRegex(
             completed[1],
-            r"^runtime-proof:he-heartbeat:/tmp/jsc-364-wrapper-codex-parity-.+",
+            r"^runtime-proof:he-phase-work:/tmp/jsc-364-wrapper-codex-parity-.+",
         )
 
     def test_runtime_separation_flag_preserves_legacy_fixture_scope(self) -> None:
@@ -101,7 +101,7 @@ class VerifyWrapperContractFixturesTests(unittest.TestCase):
     def test_runtime_proof_flag_runs_only_proof_plane_fixtures(self) -> None:
         self.assertRegex(
             self._run_main("--runtime-proof")[0],
-            r"^runtime-proof:he-heartbeat:/tmp/jsc-364-wrapper-codex-parity-.+",
+            r"^runtime-proof:he-phase-work:/tmp/jsc-364-wrapper-codex-parity-.+",
         )
 
     def test_runtime_proof_fixture_target_can_be_overridden(self) -> None:
@@ -156,7 +156,7 @@ class VerifyWrapperContractFixturesTests(unittest.TestCase):
             self.module._assert_runtime_proof_fixtures(
                 REPO_ROOT,
                 45,
-                handle="he-heartbeat",
+                handle="he-phase-work",
                 evidence_dir="/tmp/proof",
             )
 
@@ -169,7 +169,7 @@ class VerifyWrapperContractFixturesTests(unittest.TestCase):
 
         with mock.patch.object(self.module, "_assert_envelope", fake_assert_envelope):
             with self.assertRaisesRegex(SystemExit, "live_parity_status is invalid"):
-                self.module._assert_runtime_proof_fixtures(REPO_ROOT, 45, handle="he-heartbeat", evidence_dir="/tmp/proof")
+                self.module._assert_runtime_proof_fixtures(REPO_ROOT, 45, handle="he-phase-work", evidence_dir="/tmp/proof")
 
     def test_conformance_rejects_non_object_blocked_runtime(self) -> None:
         """
@@ -184,7 +184,7 @@ class VerifyWrapperContractFixturesTests(unittest.TestCase):
 
         with mock.patch.object(self.module, "_assert_envelope", fake_assert_envelope):
             with self.assertRaisesRegex(SystemExit, "blocked_runtime is not an object"):
-                self.module._assert_runtime_proof_fixtures(REPO_ROOT, 45, handle="he-heartbeat", evidence_dir="/tmp/proof")
+                self.module._assert_runtime_proof_fixtures(REPO_ROOT, 45, handle="he-phase-work", evidence_dir="/tmp/proof")
 
     def test_conformance_rejects_blocked_runtime_without_blockers(self) -> None:
         """
@@ -199,7 +199,7 @@ class VerifyWrapperContractFixturesTests(unittest.TestCase):
 
         with mock.patch.object(self.module, "_assert_envelope", fake_assert_envelope):
             with self.assertRaisesRegex(SystemExit, "must be a non-empty list"):
-                self.module._assert_runtime_proof_fixtures(REPO_ROOT, 45, handle="he-heartbeat", evidence_dir="/tmp/proof")
+                self.module._assert_runtime_proof_fixtures(REPO_ROOT, 45, handle="he-phase-work", evidence_dir="/tmp/proof")
 
     def test_conformance_rejects_truthy_non_list_blockers(self) -> None:
         """
@@ -214,7 +214,7 @@ class VerifyWrapperContractFixturesTests(unittest.TestCase):
 
         with mock.patch.object(self.module, "_assert_envelope", fake_assert_envelope):
             with self.assertRaisesRegex(SystemExit, "must be a non-empty list"):
-                self.module._assert_runtime_proof_fixtures(REPO_ROOT, 45, handle="he-heartbeat", evidence_dir="/tmp/proof")
+                self.module._assert_runtime_proof_fixtures(REPO_ROOT, 45, handle="he-phase-work", evidence_dir="/tmp/proof")
 
     def test_conformance_rejects_non_object_blocker_entries(self) -> None:
         _calls, fake_assert_envelope = self._runtime_proof_envelope_stub(
@@ -224,7 +224,7 @@ class VerifyWrapperContractFixturesTests(unittest.TestCase):
 
         with mock.patch.object(self.module, "_assert_envelope", fake_assert_envelope):
             with self.assertRaisesRegex(SystemExit, r"blockers\[0\] is not an object"):
-                self.module._assert_runtime_proof_fixtures(REPO_ROOT, 45, handle="he-heartbeat", evidence_dir="/tmp/proof")
+                self.module._assert_runtime_proof_fixtures(REPO_ROOT, 45, handle="he-phase-work", evidence_dir="/tmp/proof")
 
     def test_conformance_rejects_error_envelope_with_valid_nested_payload(self) -> None:
         _calls, fake_assert_envelope = self._runtime_proof_envelope_stub(
@@ -235,7 +235,7 @@ class VerifyWrapperContractFixturesTests(unittest.TestCase):
 
         with mock.patch.object(self.module, "_assert_envelope", fake_assert_envelope):
             with self.assertRaisesRegex(SystemExit, "returned error envelope"):
-                self.module._assert_runtime_proof_fixtures(REPO_ROOT, 45, handle="he-heartbeat", evidence_dir="/tmp/proof")
+                self.module._assert_runtime_proof_fixtures(REPO_ROOT, 45, handle="he-phase-work", evidence_dir="/tmp/proof")
 
     def test_assert_path_reports_missing_path(self) -> None:
         self.assertEqual(self.module._assert_path({"data": {"proof": "ok"}}, "cmd", ["data", "proof"]), "ok")
@@ -281,7 +281,7 @@ class VerifyWrapperContractFixturesTests(unittest.TestCase):
             """
             Create a test stub for _assert_envelope that records the call and returns synthetic envelope payloads based on the invoked command.
             
-            This function appends (command, require_success) to the enclosing `calls` list and asserts that `repo_root` equals REPO_ROOT and `timeout_seconds` equals 45. For commands whose slice command[1:4] equals ["skills", "explain", "he-heartbeat"] it returns an explanation payload containing `reachability.proof_command` and `next_command`. For commands whose slice equals ["skills", "proof", "he-heartbeat"] it returns a proof payload with `schema_version`, `status`, `gates` and `gate_policy`. For all other commands it returns a conformance-style envelope whose top-level `status` is taken from the surrounding `conformance_envelope_status` and whose `data.skills_conformance` includes `schema_version`, `model_contract_status`, `live_parity_status`, and `blocked_runtime`.
+            This function appends (command, require_success) to the enclosing `calls` list and asserts that `repo_root` equals REPO_ROOT and `timeout_seconds` equals 45. For commands whose slice command[1:4] equals ["skills", "explain", "he-phase-work"] it returns an explanation payload containing `reachability.proof_command` and `next_command`. For commands whose slice equals ["skills", "proof", "he-phase-work"] it returns a proof payload with `schema_version`, `status`, `gates` and `gate_policy`. For all other commands it returns a conformance-style envelope whose top-level `status` is taken from the surrounding `conformance_envelope_status` and whose `data.skills_conformance` includes `schema_version`, `model_contract_status`, `live_parity_status`, and `blocked_runtime`.
             
             Parameters:
                 repo_root (Path): Repository root path expected to match REPO_ROOT.
@@ -295,16 +295,16 @@ class VerifyWrapperContractFixturesTests(unittest.TestCase):
             calls.append((command, require_success))
             self.assertEqual(repo_root, REPO_ROOT)
             self.assertEqual(timeout_seconds, 45)
-            if command[1:4] == ["skills", "explain", "he-heartbeat"]:
+            if command[1:4] == ["skills", "explain", "he-phase-work"]:
                 return {
                     "data": {
                         "explanation": {
-                            "reachability": {"proof_command": "./bin/ask skills proof he-heartbeat --json --robot"},
-                            "next_command": "./bin/ask skills proof he-heartbeat --json --robot",
+                            "reachability": {"proof_command": "./bin/ask skills proof he-phase-work --json --robot"},
+                            "next_command": "./bin/ask skills proof he-phase-work --json --robot",
                         }
                     }
                 }
-            if command[1:4] == ["skills", "proof", "he-heartbeat"]:
+            if command[1:4] == ["skills", "proof", "he-phase-work"]:
                 return {
                     "data": {
                         "proof": {

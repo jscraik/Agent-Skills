@@ -29,7 +29,7 @@ class LifecycleReleaseEvalSummaryTests(unittest.TestCase):
                 "--eval-runner",
                 "codex",
                 "--skill",
-                "he-router",
+                "he-reconcile",
                 "--model",
                 "gpt-5.4",
                 "--json",
@@ -52,7 +52,7 @@ class LifecycleReleaseEvalSummaryTests(unittest.TestCase):
         with mock.patch("run_lifecycle_release_evals.subprocess.run", return_value=completed) as run:
             result = _run_skill_builder_eval(
                 Path("/tmp/repo"),
-                "he-router",
+                "he-reconcile",
                 "release",
                 "codex",
                 (),
@@ -81,7 +81,7 @@ class LifecycleReleaseEvalSummaryTests(unittest.TestCase):
         with mock.patch("run_lifecycle_release_evals.subprocess.run", return_value=completed) as run:
             result = _run_skill_builder_eval(
                 Path("/tmp/repo"),
-                "he-router",
+                "he-reconcile",
                 "release",
                 "codex",
                 (),
@@ -145,7 +145,7 @@ class LifecycleReleaseEvalSummaryTests(unittest.TestCase):
         )
         results = [
             {
-                "skill": "he-router",
+                "skill": "he-reconcile",
                 "returncode": 124,
                 "status": "timeout",
                 "timeout_seconds": 300,
@@ -192,7 +192,7 @@ class LifecycleReleaseEvalSummaryTests(unittest.TestCase):
         breakdown = summary["failure_breakdown"]
 
         self.assertEqual(summary["status"], "fail")
-        self.assertEqual([item["skill"] for item in breakdown["timeout_failures"]], ["he-router"])
+        self.assertEqual([item["skill"] for item in breakdown["timeout_failures"]], ["he-reconcile"])
         self.assertEqual([item["skill"] for item in breakdown["content_failures"]], ["he-spec"])
         self.assertEqual([item["skill"] for item in breakdown["tool_preflight_failures"]], ["he-work"])
         self.assertEqual(
@@ -245,7 +245,7 @@ class LifecycleReleaseEvalSummaryTests(unittest.TestCase):
         ):
             run_case.side_effect = [
                 {
-                    "skill": "he-router",
+                    "skill": "he-reconcile",
                     "returncode": 0,
                     "status": "success",
                     "decision": "pass",
@@ -259,7 +259,7 @@ class LifecycleReleaseEvalSummaryTests(unittest.TestCase):
                     "errors": [],
                 },
                 {
-                    "skill": "he-router",
+                    "skill": "he-reconcile",
                     "returncode": 1,
                     "status": "error",
                     "decision": "fail",
@@ -283,7 +283,7 @@ class LifecycleReleaseEvalSummaryTests(unittest.TestCase):
 
             result = run_skill(
                 Path("/tmp/repo"),
-                "he-router",
+                "he-reconcile",
                 "release",
                 "codex",
                 (),
@@ -406,7 +406,7 @@ class LifecycleReleaseEvalSummaryTests(unittest.TestCase):
             mock.patch("run_lifecycle_release_evals._run_skill_builder_eval") as run_case,
         ):
             run_case.return_value = {
-                "skill": "he-router",
+                "skill": "he-reconcile",
                 "returncode": 0,
                 "status": "success",
                 "decision": "pass",
@@ -423,7 +423,7 @@ class LifecycleReleaseEvalSummaryTests(unittest.TestCase):
 
             result = run_skill(
                 Path("/tmp/repo"),
-                "he-router",
+                "he-reconcile",
                 "release",
                 "codex",
                 (),
@@ -452,7 +452,7 @@ class LifecycleReleaseEvalSummaryTests(unittest.TestCase):
             mock.patch("run_lifecycle_release_evals._run_skill_builder_eval") as run_case,
         ):
             run_case.return_value = {
-                "skill": "he-router",
+                "skill": "he-reconcile",
                 "returncode": 1,
                 "status": "error",
                 "decision": "fail",
@@ -483,7 +483,7 @@ class LifecycleReleaseEvalSummaryTests(unittest.TestCase):
 
             result = run_skill(
                 Path("/tmp/repo"),
-                "he-router",
+                "he-reconcile",
                 "release",
                 "codex",
                 (),
@@ -511,7 +511,7 @@ class LifecycleReleaseEvalSummaryTests(unittest.TestCase):
             mock.patch("run_lifecycle_release_evals._run_skill_builder_eval") as run_case,
         ):
             run_case.return_value = {
-                "skill": "he-router",
+                "skill": "he-reconcile",
                 "returncode": 1,
                 "status": "error",
                 "decision": "fail",
@@ -542,7 +542,7 @@ class LifecycleReleaseEvalSummaryTests(unittest.TestCase):
 
             result = run_skill(
                 Path("/tmp/repo"),
-                "he-router",
+                "he-reconcile",
                 "release",
                 "codex",
                 (),

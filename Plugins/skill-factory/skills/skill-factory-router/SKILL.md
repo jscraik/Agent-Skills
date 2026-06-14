@@ -45,19 +45,27 @@ When target, lane, write authority, or validation requirement is missing, ask on
 | --- | --- | --- |
 | create a skill, draft a new skill, make a new `SKILL.md` | `.system/skill-creator` | `create` |
 | skillify this workflow, save this process as a skill, make reusable guidance | `skillify` | `capture` |
-| fix this skill, improve this skill, raise Tessl score, repair evals, reduce token cost | `skill-builder` | `harden` |
+| fix this skill, improve this skill, raise Tessl score, repair evals, reduce token cost | Skill Factory hardening workflow | `harden` |
 | why is this skill failing, compare duplicate skills, merge this skill, retire this skill | `skill-refactor` | `analyze` |
 | install a skill, list skills, sync skills, prove Codex can see a skill | `.system/skill-installer` | `install` |
 | copy or fork the system skill creator or installer into Skill Factory | block fork; route to the matching system lane | `create` or `install` |
 
 For `.system/skill-creator` or `.system/skill-installer`, attach Skill Factory references or eval contracts; do not fork the system skill body.
 
+## Philosophy
+
+Route to the smallest durable factory surface that can prove the result. Prefer existing system lanes, validators, scripts, and references over new skill bodies when they already encode the contract.
+
 ## Procedure
+
+Apply the context-disposition policy: move important still-valid context to references, and intentionally discard stale, duplicated, unsafe, superseded, or low-signal text.
 
 1. Match the request to the decision table. Explicit lane names win unless the user names multiple lanes or asks for an unsafe action.
 2. If target, authority, evidence, or lane selection is ambiguous, ask one blocking discovery question.
 3. For major new-skill or broad-rewrite requests, check whether the better answer is a skill, docs, script, hook, validator, rule, or direct answer.
 4. Return the handoff template and stop unless the user explicitly asks this router to execute the selected lane.
+
+Use `Infrastructure/references/first-principles-factory-gate.md` as the factory gate for broad create, harden, merge, or retire decisions.
 
 ## Handoff Template
 
@@ -65,7 +73,7 @@ Return:
 
 ```yaml
 schema_version: 1
-selected_lane: .system/skill-creator|skillify|skill-builder|skill-refactor|.system/skill-installer
+selected_lane: .system/skill-creator|skillify|skill-factory-router|skill-refactor|.system/skill-installer
 mode: create|capture|harden|analyze|install
 rationale: <one sentence tied to the request shape>
 next_step: <specific skill or system lane to load next>
@@ -83,10 +91,10 @@ Return:
 
 ```yaml
 schema_version: 1
-selected_lane: skill-builder
+selected_lane: skill-factory-router
 mode: harden
 rationale: The user has an existing skill with Tessl and local audit findings.
-next_step: Load skill-builder, patch the canonical target skill, then rerun strict audit and local external review.
+next_step: Use the Skill Factory hardening workflow, patch the canonical target skill, then rerun strict audit and local external review.
 first_principles_check:
   required: false
   result: not_checked
@@ -100,9 +108,27 @@ blocked_by: null
 - Route system creator and installer requests to the system lanes, not forks.
 - Claim environment/auth/runtime state only from current-turn evidence, and redact secrets, tokens, PII, and sensitive local paths.
 
+## Execution Boundaries
+
+- This router only selects a lane and reports the next action.
+- Downstream lanes own source edits, runtime sync, external review, Tessl evals, packaging, publishing, and install proof.
+- A route decision is not proof that a skill is installed, visible in Codex, or passing evals.
+
+## Anti-Patterns
+
+- Do not resurrect retired handles as skill packages to satisfy a route, projection, or test.
+- Do not copy the system skill creator or installer into Skill Factory when the system lane can be referenced.
+- Do not treat plugin-cache visibility, command-surface rows, and flat skill symlinks as the same proof surface.
+
 ## Failure Mode
 
 If no single lane fits, set `blocked_by` to the ambiguity and ask the smallest routing question.
+
+## Gotchas
+
+- `skill-builder` may appear as an implementation script namespace; it must not reappear as an advertised skill handle.
+- Runtime picker visibility depends on regenerated projections and local sync, not only canonical source edits.
+- Use exact current evidence before claiming Tessl, plugin cache, command surface, or Codex picker state.
 
 ## Validation
 
@@ -114,6 +140,7 @@ Fail fast: stop at the first failed required gate, classify it, and do not sync,
 
 Load only the reference needed for the selected routing question:
 
-- Package contract and evals: [references](./references/)
-- Ambiguous request questions: [discovery interview](./references/discovery-interview.md)
-- Source-repo routing policy handles: [routing policy](./references/routing-policy.md)
+Read when:
+- You need package contract or eval expectations: [contract](./references/contract.yaml), [evals](./references/evals.yaml), [task profile](./references/task-profile.json).
+- You need ambiguous request questions: [discovery interview](./references/discovery-interview.md).
+- You need source-repo routing policy handles: [routing policy](./references/routing-policy.md).

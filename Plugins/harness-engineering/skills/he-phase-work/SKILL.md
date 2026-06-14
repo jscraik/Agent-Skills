@@ -1,6 +1,6 @@
 ---
 name: he-phase-work
-description: "Runs approved Harness Engineering plans in recurring phases: check live state, wake with he-heartbeat, execute only the active he-work slice, verify gates, update Linear only with approval, and stop before unsafe staging or closure. Use when a plan, issue, or PR needs continued phase-by-phase execution."
+description: "Runs approved Harness Engineering plans in recurring phases: check live state, confirm continuation authority, execute only the active he-work slice, verify gates, update Linear only with approval, and stop before unsafe staging or closure. Use when a plan, issue, or PR needs continued phase-by-phase execution."
 metadata:
   version: 1.0.0
   skill-type: team_automation

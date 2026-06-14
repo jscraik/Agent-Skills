@@ -1,6 +1,6 @@
 # Deferred Context Index
 
-Use this compact index only when sy-strategy needs extra context after reading its
+Use this compact index only when sy-reframe needs extra context after reading its
 SKILL.md.
 
 - deterministic-stage-routing.md: deterministic routing rules and tie-breakers.

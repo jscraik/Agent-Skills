@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 
-TARGET_SKILLS = {"he-eval-report", "he-linear-plan", "he-reconcile", "he-router"}
+TARGET_SKILLS = {"he-eval-report", "he-linear-plan", "he-reconcile"}
 REQUIRED_TERMS = {
     "closure": "closure state missing",
     "mutation": "mutation state missing",

@@ -25,7 +25,7 @@ the tool is unavailable, ask one concise plain-text question and stop.
 
 ## Ask When
 
-- `he-router`: more than one lifecycle stage remains valid after deterministic
+- `he-reconcile`: more than one lifecycle stage remains valid after deterministic
   routing and the missing source artifact or lifecycle state would change the
   selected stage.
 - `he-brainstorm`: multiple warranted survivors remain and selecting one would

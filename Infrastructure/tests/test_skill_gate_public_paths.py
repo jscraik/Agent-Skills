@@ -87,7 +87,7 @@ class SkillGatePublicPathTests(unittest.TestCase):
     def test_repo_scheme_links_resolve_without_path_warnings(self) -> None:
         doc = self._doc(
             SKILL_GATE,
-            "See [gate](repo:Plugins/skill-factory/skills/code_quality_review/skill-builder/scripts/skill_gate.py).",
+            "See [gate](repo:Plugins/skill-factory/scripts/skill-builder/skill_gate.py).",
         )
 
         codes = {finding.code for finding in self.module.check_path_safety(doc)}

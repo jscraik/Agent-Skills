@@ -1,11 +1,10 @@
 {
   "schema_version": 2,
   "plugin": "synaipse-harness",
-  "router": "sy-strategy",
+  "router": "sy-reframe",
   "stage_template": "Infrastructure/references/sdk-stage-skill-template.md",
   "upstream_reference_index": "Plugins/synaipse-harness/references/upstream/harness-engineering-context.yaml",
   "lifecycle_stage_order": [
-    "strategy",
     "reframe",
     "brainstorm",
     "trace-plan",
@@ -19,8 +18,7 @@
     "reinforce"
   ],
   "stages": [
-    {"stage": "strategy", "handle": "sy-strategy", "previous_stage": null, "next_stage": "reframe"},
-    {"stage": "reframe", "handle": "sy-reframe", "previous_stage": "strategy", "next_stage": "brainstorm"},
+    {"stage": "reframe", "handle": "sy-reframe", "previous_stage": null, "next_stage": "brainstorm"},
     {"stage": "brainstorm", "handle": "sy-brainstorm", "previous_stage": "reframe", "next_stage": "trace-plan"},
     {"stage": "trace-plan", "handle": "sy-trace-plan", "previous_stage": "brainstorm", "next_stage": "tracker-plan"},
     {"stage": "tracker-plan", "handle": "sy-tracker-plan", "previous_stage": "trace-plan", "next_stage": "slice-spec"},
@@ -30,10 +28,9 @@
     {"stage": "review", "handle": "sy-review", "previous_stage": "work", "next_stage": "eval-report"},
     {"stage": "eval-report", "handle": "sy-eval-report", "previous_stage": "review", "next_stage": "reconcile"},
     {"stage": "reconcile", "handle": "sy-reconcile", "previous_stage": "eval-report", "next_stage": "reinforce"},
-    {"stage": "reinforce", "handle": "sy-reinforce", "previous_stage": "reconcile", "next_stage": "strategy"}
+    {"stage": "reinforce", "handle": "sy-reinforce", "previous_stage": "reconcile", "next_stage": "reframe"}
   ],
   "stage_handles": {
-    "sy-strategy": "sy-strategy <strategy-or-review-request>",
     "sy-reframe": "sy-reframe <migration-candidate>",
     "sy-brainstorm": "sy-brainstorm <request>",
     "sy-trace-plan": "sy-trace-plan <strategy-reframe-or-brainstorm-output>",
@@ -49,4 +46,3 @@
   "selection_rule": "Select exactly one next stage; when authority or freshness is unclear, choose sy-reconcile or return a blocked handoff.",
   "evidence_rule": "Report local validation, PR/CI, review, tracker, artifact, and rollout evidence as separate lanes."
 }
-

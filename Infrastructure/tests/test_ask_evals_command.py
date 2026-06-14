@@ -672,10 +672,10 @@ def test_evals_live_private_skips_local_only_cases(tmp_path: Path) -> None:
 
 def test_evals_live_private_uses_plugin_project_identity(tmp_path: Path) -> None:
     completed = mock.Mock(returncode=0, stdout="{}", stderr="")
-    skill_root = tmp_path / "Plugins" / "skill-factory" / "skills" / "code_quality_review" / "skill-builder"
+    skill_root = tmp_path / "Plugins" / "skill-factory" / "skills" / "code_quality_review" / "skill-factory-router"
     (skill_root / "references").mkdir(parents=True)
     (skill_root / "SKILL.md").write_text(
-        '---\nname: skill-builder\nmetadata:\n  version: "1.2.3"\n---\n'
+        '---\nname: skill-factory-router\nmetadata:\n  version: "1.2.3"\n---\n'
         "# Skill Builder\n\nBuild and improve skills.\n",
         encoding="utf-8",
     )
@@ -694,7 +694,7 @@ def test_evals_live_private_uses_plugin_project_identity(tmp_path: Path) -> None
     with mock.patch.object(evals.subprocess, "run", return_value=completed):
         result = evals.run_evals(
             tmp_path,
-            "Plugins/skill-factory/skills/code_quality_review/skill-builder",
+            "Plugins/skill-factory/skills/skill-factory-router",
             mode="smoke",
             tessl_live_private=True,
             tessl_workspace="skills-sdk",
@@ -707,15 +707,15 @@ def test_evals_live_private_uses_plugin_project_identity(tmp_path: Path) -> None
     tile_manifest = json.loads((staged_source / "tile.json").read_text(encoding="utf-8"))
     project_marker = json.loads((staged_source / "tessl.json").read_text(encoding="utf-8"))
     assert tile_manifest["name"] == "skills-sdk/skill-factory"
-    assert tile_manifest["skills"]["skill-builder"]["path"] == "SKILL.md"
+    assert tile_manifest["skills"]["skill-factory-router"]["path"] == "SKILL.md"
     assert project_marker["name"] == "skills-sdk/skill-factory"
 
 
 def test_evals_run_uses_plugin_project_identity_when_workspace_is_set(tmp_path: Path) -> None:
-    skill_root = tmp_path / "Plugins" / "skill-factory" / "skills" / "code_quality_review" / "skill-builder"
+    skill_root = tmp_path / "Plugins" / "skill-factory" / "skills" / "code_quality_review" / "skill-factory-router"
     (skill_root / "references").mkdir(parents=True)
     (skill_root / "SKILL.md").write_text(
-        '---\nname: skill-builder\nmetadata:\n  version: "1.2.3"\n---\n# Skill Builder\n',
+        '---\nname: skill-factory-router\nmetadata:\n  version: "1.2.3"\n---\n# Skill Builder\n',
         encoding="utf-8",
     )
     (skill_root / "references" / "evals.yaml").write_text(
@@ -749,7 +749,7 @@ def test_evals_run_uses_plugin_project_identity_when_workspace_is_set(tmp_path: 
     ):
         result = evals.run_evals(
             tmp_path,
-            "Plugins/skill-factory/skills/code_quality_review/skill-builder",
+            "Plugins/skill-factory/skills/skill-factory-router",
             mode="smoke",
             tessl_workspace="skills-sdk",
         )

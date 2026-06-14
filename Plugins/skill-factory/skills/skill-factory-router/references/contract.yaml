@@ -5,6 +5,27 @@ triggers: [skill_creation, skill_hardening, skill_installation, skill_refactor, 
 non_goals: [ordinary_product_work, plugin_packaging, broad_repo_maintenance]
 inputs: [user_request, optional_repo_path, optional_skill_path, optional_evidence]
 outputs: [selected_lane, rationale, next_invocation, blocked_missing_input]
+commands:
+  - "bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh"
+  - "./bin/ask skills external-review Plugins/skill-factory/skills/skill-factory-router --audit-level compat --json"
+  - "./bin/ask skills package skill-factory-router --json --robot"
+permission_profile:
+  filesystem:
+    read:
+      - "user request and declared target skill path"
+      - "Skill Factory skill inventory"
+      - "Skill Factory references needed for the selected lane"
+      - "repo validation scripts and package-readiness schemas"
+    write: []
+  shell:
+    allowed:
+      - "declared validation commands"
+      - "read-only skill routing and package inspection commands"
+    forbidden:
+      - "source mutation from the router lane"
+      - "runtime projection edits from the router lane"
+      - "publishing, package upload, or external writes"
+  network: "not required for routing; only downstream external-review or Tessl lanes may request network validation"
 risks: [overbroad_skill_surface, ambiguous_triggers, unsafe_mutation, hidden_context_load]
 safety: {untrusted_inputs: true, redact_secrets: true, route_before_execution: true}
 design_contract:

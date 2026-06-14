@@ -486,6 +486,100 @@ class TestAskPluginsCommands(unittest.TestCase):
         self.assertEqual(personal_report["symlinked_plugins"], [])
         self.assertEqual(personal_report["planned_symlinked_plugins"], ["example-plugin"])
 
+    def test_sync_local_runtime_replaces_materialized_personal_plugin_payload(self) -> None:
+        self._write_repo_marketplace(plugin_name="example-plugin")
+        plugin_root = self.repo_root / "Plugins" / "example-plugin"
+        manifest_path = plugin_root / ".codex-plugin" / "plugin.json"
+        manifest_path.parent.mkdir(parents=True, exist_ok=True)
+        manifest_path.write_text(
+            json.dumps({"schema_version": 1, "name": "example-plugin", "version": "0.1.0"}),
+            encoding="utf-8",
+        )
+
+        fake_home = self.temp_dir / "home"
+        profile_plugin = fake_home / ".codex" / "plugins" / "example-plugin"
+        profile_plugin.mkdir(parents=True)
+        (profile_plugin / ".codex-plugin").mkdir()
+        (profile_plugin / ".codex-plugin" / "plugin.json").write_text(
+            json.dumps({"schema_version": 1, "name": "example-plugin", "version": "0.1.0"}),
+            encoding="utf-8",
+        )
+        stale_personal_plugin = fake_home / ".agents" / "plugins" / "example-plugin"
+        stale_personal_plugin.mkdir(parents=True)
+        (stale_personal_plugin / ".codex-plugin").mkdir()
+        (stale_personal_plugin / ".codex-plugin" / "plugin.json").write_text(
+            json.dumps({"schema_version": 1, "name": "example-plugin", "version": "old"}),
+            encoding="utf-8",
+        )
+
+        with patch("ask.commands.plugins.Path.home", return_value=fake_home):
+            result = sync_local_runtime_plugins(self.repo_root)
+
+        self.assertEqual(result.status, "success")
+        personal_plugin = fake_home / ".agents" / "plugins" / "example-plugin"
+        self.assertTrue(personal_plugin.is_symlink())
+        self.assertEqual(personal_plugin.resolve(), profile_plugin.resolve())
+        reports = {Path(report["runtime_root"]).as_posix(): report for report in result.data["runtime_reports"]}
+        personal_report = reports[(fake_home / ".agents" / "plugins").as_posix()]
+        self.assertEqual(personal_report["replaced_materialized_plugins"], ["example-plugin"])
+
+    def test_sync_local_runtime_replaces_stale_repo_plugin_runtime_cache(self) -> None:
+        self._write_repo_marketplace(plugin_name="example-plugin")
+        plugin_root = self.repo_root / "Plugins" / "example-plugin"
+        manifest_path = plugin_root / ".codex-plugin" / "plugin.json"
+        manifest_path.parent.mkdir(parents=True, exist_ok=True)
+        manifest_path.write_text(
+            json.dumps({"schema_version": 1, "name": "example-plugin", "version": "0.1.0"}),
+            encoding="utf-8",
+        )
+        current_skill = plugin_root / "skills" / "current-skill" / "SKILL.md"
+        current_skill.parent.mkdir(parents=True)
+        current_skill.write_text("---\nname: current-skill\ndescription: Current skill.\n---\n", encoding="utf-8")
+
+        stale_cache = (
+            self.repo_root
+            / ".agents"
+            / "plugins-runtime"
+            / "cache"
+            / "agent-skills-local"
+            / "example-plugin"
+        )
+        stale_skill = stale_cache / "skills" / "deleted-skill" / "SKILL.md"
+        stale_skill.parent.mkdir(parents=True)
+        stale_skill.write_text("---\nname: deleted-skill\ndescription: Deleted.\n---\n", encoding="utf-8")
+
+        fake_home = self.temp_dir / "home"
+        (fake_home / ".codex").mkdir(parents=True)
+        with patch("ask.commands.plugins.Path.home", return_value=fake_home):
+            result = sync_local_runtime_plugins(self.repo_root)
+
+        self.assertEqual(result.status, "success")
+        self.assertFalse(stale_skill.exists())
+        self.assertTrue(
+            (
+                self.repo_root
+                / ".agents"
+                / "plugins-runtime"
+                / "cache"
+                / "agent-skills-local"
+                / "example-plugin"
+                / "skills"
+                / "current-skill"
+                / "SKILL.md"
+            ).is_file()
+        )
+        reports = {Path(report["runtime_root"]).as_posix(): report for report in result.data["runtime_reports"]}
+        repo_cache_report = reports[
+            (
+                self.repo_root
+                / ".agents"
+                / "plugins-runtime"
+                / "cache"
+                / "agent-skills-local"
+            ).as_posix()
+        ]
+        self.assertEqual(repo_cache_report["copied_plugins"], ["example-plugin"])
+
     def test_sync_local_runtime_skips_samefile_marketplace_copy(self) -> None:
         plugin_root = self.repo_root / "Plugins" / "example-plugin"
         manifest_path = plugin_root / ".codex-plugin" / "plugin.json"

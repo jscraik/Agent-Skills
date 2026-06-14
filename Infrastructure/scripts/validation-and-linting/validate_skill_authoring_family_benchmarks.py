@@ -2,7 +2,7 @@
 """Deterministic benchmark checks for the skill-authoring family.
 
 This script enforces equivalent contract/eval/security baseline requirements for:
-- Plugins/skill-factory/skills/code_quality_review/skill-builder
+- Plugins/skill-factory/skills/skill-factory-router
 - Plugins/skill-factory/skills/scaffolding_templates/skill-creator
 - Plugins/skill-factory/skills/infrastructure_ops/skill-installer
 - Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator
@@ -79,20 +79,18 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 # Severity ranking for baseline regression comparison (higher = worse)
 SEVERITY_RANK = {"INFO": 0, "WARN": 1, "FAIL": 2}
 _SKILL_BUILDER_ROOT_CANDIDATES = (
-    REPO_ROOT / "Plugins" / "skill-factory" / "skills" / "code_quality_review" / "skill-builder",
-    REPO_ROOT / "plugins" / "skill-factory" / "skills" / "code_quality_review" / "skill-builder",
-    REPO_ROOT / "Plugins" / "skill-factory" / "skills" / "skill-builder",
-    REPO_ROOT / "plugins" / "skill-factory" / "skills" / "skill-builder",
+    REPO_ROOT / "Plugins" / "skill-factory",
+    REPO_ROOT / "plugins" / "skill-factory",
 )
 _SKILL_BUILDER_ROOT = next(
     (candidate for candidate in _SKILL_BUILDER_ROOT_CANDIDATES if candidate.exists()),
     _SKILL_BUILDER_ROOT_CANDIDATES[0],
 )
-_SCHEMA_DIR = _SKILL_BUILDER_ROOT / "references"
+_SCHEMA_DIR = _SKILL_BUILDER_ROOT / "references" / "skill-builder"
 _CONTRACT_SCHEMA_PATH = _SCHEMA_DIR / "contract.schema.yaml"
 _EVALS_SCHEMA_PATH = _SCHEMA_DIR / "evals.schema.yaml"
 DEFAULT_FAMILY_SKILLS = (
-    "Plugins/skill-factory/skills/code_quality_review/skill-builder",
+    "Plugins/skill-factory/skills/skill-factory-router",
     "skills-system/skill-creator",
     "skills-system/skill-installer",
     "Plugins/plugin-factory/skills/scaffolding_templates/plugin-creator",
@@ -145,7 +143,7 @@ _RECOMMENDED_CONTRACT_KEYS = {"rollback_procedure", "observability"}
 
 # Family members that must apply context disposition via progressive disclosure.
 _RELOCATION_GUARD_SKILLS = {
-    "plugins/skill-factory/skills/code_quality_review/skill-builder",
+    "plugins/skill-factory/skills/skill-factory-router",
 }
 
 _CONTEXT_POLICY_PATTERNS = (

@@ -58,26 +58,23 @@ EXPECTED_SOURCE_PLUGIN_SKILLS = {
         "he-code-review",
         "he-eval-report",
         "he-fix-bugs",
-        "he-heartbeat",
         "he-improve",
         "he-linear-plan",
         "he-plan",
+        "he-phase-heartbeat",
         "he-phase-work",
         "he-reconcile",
         "he-reframe",
         "he-reinforce",
-        "he-router",
         "he-spec",
         "he-strategy",
         "he-work",
     },
     "plugin-factory": {
-        "plugin-builder",
         "plugin-factory-router",
         "plugin-router",
     },
     "skill-factory": {
-        "skill-builder",
         "skill-factory-router",
         "skill-refactor",
         "skillify",
@@ -91,7 +88,6 @@ EXPECTED_SOURCE_PLUGIN_SKILLS = {
         "sy-reinforce",
         "sy-review",
         "sy-slice-spec",
-        "sy-strategy",
         "sy-trace-plan",
         "sy-tracker-plan",
         "sy-work",
@@ -110,16 +106,13 @@ EXPECTED_PLUGIN_KEYWORDS = {
     "plugin-factory": {
         "plugin-factory-router",
         "plugin-router",
-        "plugin-builder",
     },
     "skill-factory": {
         "skill-factory-router",
-        "skill-builder",
         "skill-refactor",
         "skillify",
     },
     "synaipse-harness": {
-        "sy-strategy",
         "sy-reframe",
         "sy-brainstorm",
         "sy-trace-plan",
@@ -135,8 +128,7 @@ EXPECTED_PLUGIN_KEYWORDS = {
 }
 
 EXPECTED_SYNAIPSE_LIFECYCLE = [
-    ("strategy", "sy-strategy", None, "reframe"),
-    ("reframe", "sy-reframe", "strategy", "brainstorm"),
+    ("reframe", "sy-reframe", None, "brainstorm"),
     ("brainstorm", "sy-brainstorm", "reframe", "trace-plan"),
     ("trace-plan", "sy-trace-plan", "brainstorm", "tracker-plan"),
     ("tracker-plan", "sy-tracker-plan", "trace-plan", "slice-spec"),
@@ -146,7 +138,7 @@ EXPECTED_SYNAIPSE_LIFECYCLE = [
     ("review", "sy-review", "work", "eval-report"),
     ("eval-report", "sy-eval-report", "review", "reconcile"),
     ("reconcile", "sy-reconcile", "eval-report", "reinforce"),
-    ("reinforce", "sy-reinforce", "reconcile", "strategy"),
+    ("reinforce", "sy-reinforce", "reconcile", "reframe"),
 ]
 
 EXPECTED_SYNAIPSE_STAGE_HEADINGS = [
@@ -168,6 +160,7 @@ LEGACY_SYNAIPSE_SKILL_NAMES = {
     "sy-fix-bugs",
     "sy-router",
     "sy-heartbeat",
+    "sy-strategy",
 }
 
 SYSTEM_BRIDGE_SKILL_NAMES = {
@@ -319,9 +312,10 @@ class LocalPluginPickerSurfaceTests(unittest.TestCase):
         for plugin_name, expected_skill_names in EXPECTED_SOURCE_PLUGIN_SKILLS.items():
             skills_root = REPO_ROOT / "Plugins" / plugin_name / "skills"
             direct_skill_names = _direct_visible_skill_names(skills_root)
+            expected_visible_skill_names = expected_skill_names - HIDDEN_PICKER_COMPATIBILITY_SKILLS
             self.assertEqual(
                 direct_skill_names,
-                expected_skill_names,
+                expected_visible_skill_names,
                 f"{plugin_name} first-level plugin picker surface drifted",
             )
 

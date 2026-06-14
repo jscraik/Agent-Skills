@@ -270,17 +270,17 @@ class TestAskSkillsPackageContract(unittest.TestCase):
     def test_skill_package_schema_accepts_codex_metadata_contract(self) -> None:
         with patch("ask.commands.skills_impl.resolve_skill_handle", return_value={
             "status": "ok",
-            "handle": "skill-builder",
-            "source_path": "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md",
+            "handle": "skill-factory-router",
+            "source_path": "Plugins/skill-factory/skills/skill-factory-router/SKILL.md",
         }):
-            package = skills_package(REPO_ROOT, "skill-builder").data["skill_package"]
+            package = skills_package(REPO_ROOT, "skill-factory-router").data["skill_package"]
 
         contract = package["skill_package_contract"]
         _validate_schema_subset(self.schemas["skill-package.v1.schema.json"], contract, self.schemas)
         self.assertEqual(contract["schema_version"], "skill-package.v1")
         self.assertEqual(contract["required_fields"]["missing"], [])
         self.assertEqual(contract["compatibility_status"], "compatible")
-        self.assertEqual(contract["metadata"]["name"], "skill-builder")
+        self.assertEqual(contract["metadata"]["name"], "skill-factory-router")
         self.assertEqual(
             contract["codex_abi_source"]["path"],
             "codex-rs/core-skills/src/model.rs",
@@ -289,7 +289,7 @@ class TestAskSkillsPackageContract(unittest.TestCase):
         self.assertIn("interface", contract["optional_fields"]["present"])
         self.assertEqual(
             contract["metadata"]["interface"]["display_name"],
-            "Skill Builder",
+            "Skill Factory Router",
         )
 
     def test_skill_package_contract_merges_agents_openai_policy_and_dependencies(self) -> None:
@@ -318,7 +318,7 @@ policy:
 dependencies:
   openai_tool: required
   required_skills:
-    - skill-builder
+    - skill-factory-router
   tools:
     - type: mcp
       name: browser
@@ -339,7 +339,7 @@ policy:
                 "frontmatter_tool": "required",
                 "openai_tool": "required",
                 "required_skills": [
-                    "skill-builder",
+                    "skill-factory-router",
                 ],
                 "tools": [
                     {
@@ -372,7 +372,7 @@ name: codex-package
 description: Codex package metadata fixture.
 dependencies:
   required_skills:
-    - skill-builder
+    - skill-factory-router
   tools:
     - browser
 policy:
@@ -387,7 +387,7 @@ policy:
 
             frontmatter = read_skill_frontmatter_fields(skill_md)
 
-        self.assertEqual(frontmatter["dependencies"]["required_skills"], ["skill-builder"])
+        self.assertEqual(frontmatter["dependencies"]["required_skills"], ["skill-factory-router"])
         self.assertEqual(frontmatter["dependencies"]["tools"], ["browser"])
         self.assertEqual(frontmatter["policy"]["permissions"], ["network"])
 
@@ -417,7 +417,7 @@ description: Codex package metadata fixture.
   short_description: OpenAI package fixture.
 dependencies:
   required_skills:
-    - skill-builder
+    - skill-factory-router
   tools:
     - type: mcp
       name: browser
@@ -436,7 +436,7 @@ policy:
                 )
 
         self.assertEqual(contract["metadata"]["short_description"], "OpenAI package fixture.")
-        self.assertEqual(contract["metadata"]["dependencies"]["required_skills"], ["skill-builder"])
+        self.assertEqual(contract["metadata"]["dependencies"]["required_skills"], ["skill-factory-router"])
         self.assertEqual(
             contract["metadata"]["dependencies"]["tools"],
             [{"type": "mcp", "name": "browser"}],
@@ -508,10 +508,10 @@ policy:
     def test_skill_package_schema_rejects_unknown_contract_keys(self) -> None:
         with patch("ask.commands.skills_impl.resolve_skill_handle", return_value={
             "status": "ok",
-            "handle": "skill-builder",
-            "source_path": "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md",
+            "handle": "skill-factory-router",
+            "source_path": "Plugins/skill-factory/skills/skill-factory-router/SKILL.md",
         }):
-            contract = skills_package(REPO_ROOT, "skill-builder").data["skill_package"][
+            contract = skills_package(REPO_ROOT, "skill-factory-router").data["skill_package"][
                 "skill_package_contract"
             ]
         contract["unexpected_contract_key"] = True
@@ -528,10 +528,10 @@ policy:
     def test_skill_package_schema_rejects_unknown_metadata_keys(self) -> None:
         with patch("ask.commands.skills_impl.resolve_skill_handle", return_value={
             "status": "ok",
-            "handle": "skill-builder",
-            "source_path": "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md",
+            "handle": "skill-factory-router",
+            "source_path": "Plugins/skill-factory/skills/skill-factory-router/SKILL.md",
         }):
-            contract = skills_package(REPO_ROOT, "skill-builder").data["skill_package"][
+            contract = skills_package(REPO_ROOT, "skill-factory-router").data["skill_package"][
                 "skill_package_contract"
             ]
         contract["metadata"]["unexpected_metadata_key"] = True
@@ -548,10 +548,10 @@ policy:
     def test_package_readiness_schema_accepts_public_package_payload(self) -> None:
         with patch("ask.commands.skills_impl.resolve_skill_handle", return_value={
             "status": "ok",
-            "handle": "skill-builder",
-            "source_path": "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md",
+            "handle": "skill-factory-router",
+            "source_path": "Plugins/skill-factory/skills/skill-factory-router/SKILL.md",
         }):
-            package = skills_package(REPO_ROOT, "skill-builder").data["skill_package"]
+            package = skills_package(REPO_ROOT, "skill-factory-router").data["skill_package"]
 
         _validate_schema_subset(
             self.schemas["skill-package-readiness.v1.schema.json"],
@@ -576,10 +576,10 @@ policy:
     def test_package_payload_exposes_sdk_contract_and_optional_observability(self) -> None:
         with patch("ask.commands.skills_impl.resolve_skill_handle", return_value={
             "status": "ok",
-            "handle": "skill-builder",
-            "source_path": "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md",
+            "handle": "skill-factory-router",
+            "source_path": "Plugins/skill-factory/skills/skill-factory-router/SKILL.md",
         }):
-            package = skills_package(REPO_ROOT, "skill-builder").data["skill_package"]
+            package = skills_package(REPO_ROOT, "skill-factory-router").data["skill_package"]
 
         sdk_contract = package["package_contract"]["sdk_contract"]
         self.assertEqual(sdk_contract["schema_version"], "skill-sdk-contract.v1")
@@ -596,11 +596,11 @@ policy:
         self.assertIn("evidence_policy", sdk_contract["required_fields"]["present"])
         self.assertEqual(
             sdk_contract["values"]["agent_metadata"]["path"],
-            "Plugins/skill-factory/skills/code_quality_review/skill-builder/agents/openai.yaml",
+            "Plugins/skill-factory/skills/skill-factory-router/agents/openai.yaml",
         )
         self.assertEqual(
             sdk_contract["values"]["reference_contract"]["path"],
-            "Plugins/skill-factory/skills/code_quality_review/skill-builder/references/contract.yaml",
+            "Plugins/skill-factory/skills/skill-factory-router/references/contract.yaml",
         )
         self.assertEqual(
             sdk_contract["values"]["reference_quality"]["policy"],
@@ -617,14 +617,15 @@ policy:
         )
         self.assertEqual(
             sdk_contract["values"]["task_profile"]["path"],
-            "Plugins/skill-factory/skills/code_quality_review/skill-builder/references/task-profile.json",
+            "Plugins/skill-factory/skills/skill-factory-router/references/task-profile.json",
         )
         self.assertEqual(
             sdk_contract["values"]["permission_profile"]["filesystem"]["read"],
             [
-                "target skill package",
-                "repo validation scripts",
-                "optional ~/.agents evidence provider summaries",
+                "user request and declared target skill path",
+                "Skill Factory skill inventory",
+                "Skill Factory references needed for the selected lane",
+                "repo validation scripts and package-readiness schemas",
             ],
         )
         self.assertTrue(sdk_contract["progressive_disclosure"]["skill_md_under_500_lines"])
@@ -635,7 +636,7 @@ policy:
         self.assertTrue(sdk_contract["progressive_disclosure"]["task_profile_declared"])
         self.assertFalse(sdk_contract["progressive_disclosure"]["agent_tomls_declared"])
         self.assertIn(
-            "Plugins/skill-factory/skills/code_quality_review/skill-builder/references/evals.yaml",
+            "Plugins/skill-factory/skills/skill-factory-router/references/evals.yaml",
             sdk_contract["values"]["evals"]["paths"],
         )
         self.assertFalse(
@@ -646,7 +647,7 @@ policy:
         )
         self.assertEqual(
             sdk_contract["agent_contract"]["source_of_truth"],
-            "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md",
+            "Plugins/skill-factory/skills/skill-factory-router/SKILL.md",
         )
         self.assertIn(
             "claim_eval_pass_as_runtime_proof",
@@ -1220,10 +1221,10 @@ metadata:
     def test_package_readiness_schema_requires_sdk_contract(self) -> None:
         with patch("ask.commands.skills_impl.resolve_skill_handle", return_value={
             "status": "ok",
-            "handle": "skill-builder",
-            "source_path": "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md",
+            "handle": "skill-factory-router",
+            "source_path": "Plugins/skill-factory/skills/skill-factory-router/SKILL.md",
         }):
-            package = skills_package(REPO_ROOT, "skill-builder").data["skill_package"]
+            package = skills_package(REPO_ROOT, "skill-factory-router").data["skill_package"]
 
         package["package_contract"].pop("sdk_contract")
 
@@ -1242,8 +1243,7 @@ metadata:
             / "Plugins"
             / "skill-factory"
             / "skills"
-            / "code_quality_review"
-            / "skill-builder"
+            / "skill-factory-router"
             / "SKILL.md"
         )
         with patch.object(package_contracts, "yaml", None):
@@ -1255,23 +1255,23 @@ metadata:
 
         self.assertEqual(
             contract["values"]["purpose"],
-            "Operational contract for skill-builder routing and execution boundaries.",
+            "Route skill lifecycle requests to exactly one skill-factory lane before execution.",
         )
         self.assertIn("inputs", contract["required_fields"]["present"])
         self.assertIn("outputs", contract["required_fields"]["present"])
         self.assertEqual(
             contract["values"]["permission_profile"]["filesystem"]["write"],
-            ["canonical target skill package", "repo-local validation artifacts"],
+            [],
         )
         self.assertTrue(contract["progressive_disclosure"]["references_contract_declared"])
 
     def test_package_readiness_schema_rejects_payload_without_snapshot_identity(self) -> None:
         with patch("ask.commands.skills_impl.resolve_skill_handle", return_value={
             "status": "ok",
-            "handle": "skill-builder",
-            "source_path": "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md",
+            "handle": "skill-factory-router",
+            "source_path": "Plugins/skill-factory/skills/skill-factory-router/SKILL.md",
         }):
-            package = skills_package(REPO_ROOT, "skill-builder").data["skill_package"]
+            package = skills_package(REPO_ROOT, "skill-factory-router").data["skill_package"]
 
         package.pop("compatibility_snapshot")
 
@@ -1287,10 +1287,10 @@ metadata:
     def test_package_readiness_schema_rejects_unknown_top_level_keys(self) -> None:
         with patch("ask.commands.skills_impl.resolve_skill_handle", return_value={
             "status": "ok",
-            "handle": "skill-builder",
-            "source_path": "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md",
+            "handle": "skill-factory-router",
+            "source_path": "Plugins/skill-factory/skills/skill-factory-router/SKILL.md",
         }):
-            package = skills_package(REPO_ROOT, "skill-builder").data["skill_package"]
+            package = skills_package(REPO_ROOT, "skill-factory-router").data["skill_package"]
         package["unexpected_contract_key"] = True
 
         with self.assertRaises(AssertionError) as context:
@@ -1306,10 +1306,10 @@ metadata:
         snapshots = _load_snapshot()
         with patch("ask.commands.skills_impl.resolve_skill_handle", return_value={
             "status": "ok",
-            "handle": "skill-builder",
-            "source_path": "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md",
+            "handle": "skill-factory-router",
+            "source_path": "Plugins/skill-factory/skills/skill-factory-router/SKILL.md",
         }):
-            valid_package = skills_package(REPO_ROOT, "skill-builder").data["skill_package"]
+            valid_package = skills_package(REPO_ROOT, "skill-factory-router").data["skill_package"]
         with patch("ask.commands.skills_impl.resolve_skill_handle", return_value={
             "status": "ok",
             "handle": "missing-skill",

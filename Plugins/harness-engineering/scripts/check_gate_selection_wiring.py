@@ -26,7 +26,7 @@ REQUIRED_SNIPPETS = {
         "Do not load broad domain, strategy, refactor, Linear, security, specialist, or eval gates unless",
         "Do not claim release confidence while lifecycle evals time out",
     ],
-    "skills/he-router/SKILL.md": [
+    "skills/he-reconcile/SKILL.md": [
         "gate selection contract",
         "smallest sufficient gate profile",
         "references/gate-selection-contract.md",
@@ -48,7 +48,7 @@ REQUIRED_SNIPPETS = {
 }
 
 REQUIRED_EVAL_IDS = {
-    "skills/he-router/references/evals.yaml": [
+    "skills/he-reconcile/references/evals.yaml": [
         "gate-selection-trivial-docs-negative",
         "gate-selection-mixed-smallest-set",
     ],

@@ -38,7 +38,7 @@ def validate_map(plugin_root: Path, *, run_router_samples: bool) -> tuple[list[s
     skill_stages = {
         path.parent.name
         for path in (plugin_root / "skills").glob("he-*/SKILL.md")
-        if path.parent.name not in {"he-phase-heartbeat", "he-router"}
+        if path.parent.name not in {"he-phase-heartbeat"}
     }
     for stage in sorted(expected_stages):
         if stage not in templates:

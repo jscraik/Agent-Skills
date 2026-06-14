@@ -101,15 +101,15 @@ plugin-eval analyze Plugins/synaipse-harness --format json
 Plugin checks:
 
 ```bash
-python3 Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts/plugin_builder.py validate Plugins/synaipse-harness --require-marketplace --marketplace-path .agents/Plugins/marketplace.json
-python3 Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts/plugin_builder.py audit-marketplace --marketplace-path .agents/Plugins/marketplace.json --plugins-path Plugins
+python3 Plugins/plugin-factory/scripts/plugin-factory-router/plugin_builder.py validate Plugins/synaipse-harness --require-marketplace --marketplace-path .agents/Plugins/marketplace.json
+python3 Plugins/plugin-factory/scripts/plugin-factory-router/plugin_builder.py audit-marketplace --marketplace-path .agents/Plugins/marketplace.json --plugins-path Plugins
 ```
 
 Skill checks:
 
 ```bash
-./bin/ask skills audit Plugins/synaipse-harness/skills/sy-strategy --level strict --json --robot
-./bin/ask skills external-review Plugins/synaipse-harness/skills/sy-strategy --audit-level compat --json --robot
+./bin/ask skills audit Plugins/synaipse-harness/skills/sy-reframe --level strict --json --robot
+./bin/ask skills external-review Plugins/synaipse-harness/skills/sy-reframe --audit-level compat --json --robot
 ```
 
 Run broader lifecycle release evals only when the local runner prerequisites are
@@ -118,7 +118,7 @@ converting them into skill failures.
 
 ## Handoff Rules
 
-- Use `sy-strategy` for stage selection and authority limits.
+- Use `sy-reframe` for stage selection and authority limits.
 - Use `synaipse-harness` for explicit stage execution after routing.
 - Use Skill Factory or Plugin Factory when the work is about generic skill or
   plugin authoring mechanics rather than HE's lifecycle contract.

@@ -204,7 +204,7 @@ def validate_stage_entrypoints(changed_files: set[Path] | None = None) -> list[V
 
 def validate_router_fragments() -> list[ValidationError]:
     errors: list[ValidationError] = []
-    for path in sorted((SKILLS_ROOT / "he-router/references").glob("*.md")):
+    for path in sorted((SKILLS_ROOT / "he-reconcile/references").glob("*.md")):
         text = path.read_text(encoding="utf-8")
         if "preferring `he-*` roles" in text or "has no `he-*` mapping" in text:
             errors.append(

@@ -278,29 +278,29 @@ class TestAskCLI(unittest.TestCase):
 
     def test_skills_resolve_json_contract(self):
         """Verify ask skills resolve returns a latent source path for a command-surface handle."""
-        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "resolve", "he-heartbeat", "--json"]
+        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "resolve", "he-phase-work", "--json"]
         result = _run_cli(cmd)
 
         self.assertEqual(result.returncode, 0, result.stderr)
         output = json.loads(result.stdout)
         resolution = output["data"]["resolution"]
         self.assertEqual(resolution["status"], "ok")
-        self.assertEqual(resolution["handle"], "he-heartbeat")
+        self.assertEqual(resolution["handle"], "he-phase-work")
         self.assertEqual(resolution["command_visibility"], "target")
         self.assertEqual(resolution["invoke_via"], "harness-engineering")
         self.assertEqual(
             resolution["validation_commands"],
-            ["./bin/ask skills resolve he-heartbeat --json --robot"],
+            ["./bin/ask skills resolve he-phase-work --json --robot"],
         )
 
     def test_skills_resolve_human_output_exposes_validation(self):
         """Verify ask skills resolve renders its validation command."""
-        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "resolve", "he-heartbeat", "--robot"]
+        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "resolve", "he-phase-work", "--robot"]
         result = _run_cli(cmd)
 
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn("Skill handle: $he-heartbeat", result.stdout)
-        self.assertIn("Validation: ./bin/ask skills resolve he-heartbeat --json --robot", result.stdout)
+        self.assertIn("Skill handle: $he-phase-work", result.stdout)
+        self.assertIn("Validation: ./bin/ask skills resolve he-phase-work --json --robot", result.stdout)
 
     def test_skills_parse_json_contract(self):
         """Verify ask skills parse reports resolved mentions and its validation command."""
@@ -344,14 +344,14 @@ class TestAskCLI(unittest.TestCase):
 
     def test_skills_proof_json_contract(self):
         """Verify ask skills proof separates resolver, canonical source, and runtime-link gates."""
-        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "proof", "he-heartbeat", "--json"]
+        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "proof", "he-phase-work", "--json"]
         result = _run_cli(cmd)
 
         self.assertTrue(result.stdout.strip(), result.stderr)
         output = json.loads(result.stdout)
         proof = output["data"]["proof"]
         self.assertEqual(proof["schema_version"], "command-handle-proof.v2")
-        self.assertEqual(proof["handle"], "he-heartbeat")
+        self.assertEqual(proof["handle"], "he-phase-work")
         self.assertIn("resolver", proof["gates"])
         self.assertIn("canonical_source_exists", proof["gates"])
         self.assertNotIn("generated_command_handle_check", proof["gates"])
@@ -364,7 +364,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("agents_user_link", proof["gate_policy"]["supporting_runtime_diagnostics"])
         self.assertEqual(
             proof["validation_commands"],
-            ["./bin/ask skills proof he-heartbeat --json --robot"],
+            ["./bin/ask skills proof he-phase-work --json --robot"],
         )
         if proof["gates"].get("user_runtime_ready"):
             self.assertEqual(proof["live_runtime_invocation"]["status"], "manual_session_gate")
@@ -373,28 +373,28 @@ class TestAskCLI(unittest.TestCase):
 
     def test_skills_proof_human_output(self):
         """Verify ask skills proof has a useful non-JSON success render."""
-        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "proof", "he-heartbeat"]
+        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "proof", "he-phase-work"]
         result = _run_cli(cmd)
 
         if result.returncode == 0:
-            self.assertIn("Skill handle proof: $he-heartbeat", result.stdout)
+            self.assertIn("Skill handle proof: $he-phase-work", result.stdout)
             self.assertIn(
                 "required gates: resolver, canonical_source_exists, user_runtime_ready",
                 result.stdout,
             )
-            self.assertIn("Validation: ./bin/ask skills proof he-heartbeat --json --robot", result.stdout)
+            self.assertIn("Validation: ./bin/ask skills proof he-phase-work --json --robot", result.stdout)
             if "runtime satisfied by:" in result.stdout:
                 self.assertRegex(result.stdout, r"runtime satisfied by: (codex_user_runtime|agents_user_runtime)")
             if "live invocation:" in result.stdout:
                 self.assertIn("live invocation: manual_session_gate", result.stdout)
         elif result.returncode == 2:
-            self.assertRegex(result.stdout, r"Command-surface proof failed for 'he-heartbeat'")
+            self.assertRegex(result.stdout, r"Command-surface proof failed for 'he-phase-work'")
         else:
             self.fail(f"Unexpected return code {result.returncode}, stderr: {result.stderr}")
 
     def test_skills_prove_json_contract(self):
         """Verify ask skills prove separates reachability, quality, analytics, and outcome proof."""
-        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "prove", "he-heartbeat", "--json"]
+        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "prove", "he-phase-work", "--json"]
         result = _run_cli(cmd)
 
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -402,7 +402,7 @@ class TestAskCLI(unittest.TestCase):
         output = json.loads(result.stdout)
         skill_proof = output["data"]["skill_proof"]
         self.assertEqual(skill_proof["schema_version"], "skill-proof-scorecard.v1")
-        self.assertEqual(skill_proof["handle"], "he-heartbeat")
+        self.assertEqual(skill_proof["handle"], "he-phase-work")
         self.assertIn("reachability", skill_proof)
         self.assertIn("structural_quality", skill_proof)
         self.assertIn("analytics", skill_proof)
@@ -412,11 +412,11 @@ class TestAskCLI(unittest.TestCase):
 
     def test_skills_prove_human_output(self):
         """Verify ask skills prove renders the scorecard in non-JSON mode."""
-        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "prove", "he-heartbeat", "--robot"]
+        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "prove", "he-phase-work", "--robot"]
         result = _run_cli(cmd)
 
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn("Skill proof scorecard: $he-heartbeat", result.stdout)
+        self.assertIn("Skill proof scorecard: $he-phase-work", result.stdout)
         self.assertIn("reachability: pass", result.stdout)
         self.assertIn("structural_quality: pass", result.stdout)
         self.assertIn("analytics: unavailable_or_legacy", result.stdout)
@@ -453,7 +453,7 @@ class TestAskCLI(unittest.TestCase):
                 handle.write(
                     json.dumps(
                         {
-                            "skill_id": "he-heartbeat",
+                            "skill_id": "he-phase-work",
                             "plugin_id": "harness-engineering",
                             "turn_id_hash": "turn_123",
                             "thread_id_hash": "thread_123",
@@ -471,7 +471,7 @@ class TestAskCLI(unittest.TestCase):
 
             env = os.environ.copy()
             env["SKILL_TELEMETRY_DIR"] = telemetry_dir
-            cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "prove", "he-heartbeat", "--json"]
+            cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "prove", "he-phase-work", "--json"]
             result = _run_cli(cmd, env=env)
 
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -497,7 +497,7 @@ class TestAskCLI(unittest.TestCase):
                 try:
                     from ask.skill_analytics import skill_invocation_analytics
 
-                    analytics = skill_invocation_analytics(Path.cwd(), "he-heartbeat")
+                    analytics = skill_invocation_analytics(Path.cwd(), "he-phase-work")
                 finally:
                     sys.path.remove(lib_path)
 
@@ -513,11 +513,11 @@ class TestAskCLI(unittest.TestCase):
             os.makedirs(telemetry_dir, exist_ok=True)
             with open(os.path.join(telemetry_dir, "skill-invocations.jsonl"), "w", encoding="utf-8") as handle:
                 handle.write("{not-json\n")
-                handle.write(json.dumps({"skill_id": "he-heartbeat", "timestamp": "2026-05-07T10:00:00Z"}) + "\n")
+                handle.write(json.dumps({"skill_id": "he-phase-work", "timestamp": "2026-05-07T10:00:00Z"}) + "\n")
 
             env = os.environ.copy()
             env["SKILL_TELEMETRY_DIR"] = telemetry_dir
-            cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "prove", "he-heartbeat", "--json"]
+            cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "prove", "he-phase-work", "--json"]
             result = _run_cli(cmd, env=env)
 
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -566,7 +566,7 @@ class TestAskCLI(unittest.TestCase):
                     "open",
                     selective_open,
                 ):
-                    analytics = skill_analytics.skill_invocation_analytics(Path.cwd(), "he-heartbeat")
+                    analytics = skill_analytics.skill_invocation_analytics(Path.cwd(), "he-phase-work")
         finally:
             sys.path.remove(lib_path)
 
@@ -622,7 +622,7 @@ class TestAskCLI(unittest.TestCase):
                 "handle": "security-reviewer",
                 "resolution": {
                     "handle": "security-reviewer",
-                    "source_path": "Plugins/harness-engineering/skills/he-heartbeat/SKILL.md",
+                    "source_path": "Plugins/harness-engineering/skills/he-phase-heartbeat/SKILL.md",
                 },
             }
 
@@ -693,11 +693,11 @@ class TestAskCLI(unittest.TestCase):
             failed_reachability = CallResult(status="error")
             failed_reachability.data["proof"] = {
                 "status": "fail",
-                "handle": "he-heartbeat",
+                "handle": "he-phase-work",
                 "resolution": {
                     "status": "ok",
-                    "handle": "he-heartbeat",
-                    "source_path": "Plugins/harness-engineering/skills/he-heartbeat/SKILL.md",
+                    "handle": "he-phase-work",
+                    "source_path": "Plugins/harness-engineering/skills/he-phase-heartbeat/SKILL.md",
                 },
             }
             failed_reachability.errors.append(
@@ -720,13 +720,13 @@ class TestAskCLI(unittest.TestCase):
                 "skill_invocation_analytics",
                 return_value={"status": "unavailable_or_legacy"},
             ):
-                result = skills_commands.skills_prove(Path.cwd(), "he-heartbeat")
+                result = skills_commands.skills_prove(Path.cwd(), "he-phase-work")
         finally:
             sys.path.remove(lib_path)
 
         improve_mock.assert_not_called()
         self.assertEqual(result.status, "error")
-        self.assertEqual(result.data["skill_proof"]["handle"], "he-heartbeat")
+        self.assertEqual(result.data["skill_proof"]["handle"], "he-phase-work")
         self.assertEqual(result.data["skill_proof"]["proof_status"], "blocked_reachability")
         self.assertEqual(
             result.data["skill_proof"]["validation_commands"],
@@ -759,7 +759,7 @@ class TestAskCLI(unittest.TestCase):
 
             with tempfile.TemporaryDirectory() as temp_dir:
                 repo_root = Path(temp_dir)
-                false_positive = repo_root / ".workouts" / "he-heartbeat-but-not-referenced"
+                false_positive = repo_root / ".workouts" / "he-phase-work-but-not-referenced"
                 false_positive.mkdir(parents=True)
                 false_positive.joinpath("workout.yaml").write_text(
                     "id: unrelated\nskills:\n  - other-skill\n",
@@ -768,13 +768,13 @@ class TestAskCLI(unittest.TestCase):
                 explicit_match = repo_root / ".workouts" / "explicit-outcome"
                 explicit_match.mkdir(parents=True)
                 explicit_match.joinpath("workout.yaml").write_text(
-                    "id: outcome\nhandles:\n  - he-heartbeat\n",
+                    "id: outcome\nhandles:\n  - he-phase-work\n",
                     encoding="utf-8",
                 )
                 target_module_match = repo_root / ".workouts" / "target-module-outcome"
                 target_module_match.mkdir(parents=True)
                 target_module_match.joinpath("workout.yaml").write_text(
-                    "id: outcome-target\ntarget_module: he-heartbeat\n",
+                    "id: outcome-target\ntarget_module: he-phase-work\n",
                     encoding="utf-8",
                 )
 
@@ -847,11 +847,11 @@ class TestAskCLI(unittest.TestCase):
                 telemetry_dir = repo_root / "telemetry"
                 telemetry_dir.mkdir(parents=True)
                 telemetry_dir.joinpath("skill-invocations.jsonl").write_text(
-                    json.dumps({"skill_id": "he-heartbeat", "timestamp": "2026-05-07T10:00:00Z"}) + "\n",
+                    json.dumps({"skill_id": "he-phase-work", "timestamp": "2026-05-07T10:00:00Z"}) + "\n",
                     encoding="utf-8",
                 )
                 with mock.patch.dict(os.environ, {"SKILL_TELEMETRY_DIR": "telemetry"}):
-                    analytics = skill_invocation_analytics(repo_root, "he-heartbeat")
+                    analytics = skill_invocation_analytics(repo_root, "he-phase-work")
         finally:
             sys.path.remove(lib_path)
 
@@ -893,17 +893,17 @@ class TestAskCLI(unittest.TestCase):
 
     def test_skills_explain_human_output_exposes_validation(self):
         """Verify ask skills explain renders its primary validation command."""
-        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "explain", "skill-builder", "--robot"]
+        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "explain", "skill-factory-router", "--robot"]
         result = _run_cli(cmd)
 
         self.assertEqual(result.returncode, 0, f"skills explain output: {result.stdout}\nstderr: {result.stderr}")
-        self.assertIn("ℹ️  Skill: $skill-builder (resolved)", result.stdout)
-        self.assertIn("Source: Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md", result.stdout)
+        self.assertIn("ℹ️  Skill: $skill-factory-router (resolved)", result.stdout)
+        self.assertIn("Source: Plugins/skill-factory/skills/skill-factory-router/SKILL.md", result.stdout)
         self.assertIn(
-            "Validation: ./bin/ask skills audit Plugins/skill-factory/skills/code_quality_review/skill-builder --level strict --json --robot",
+            "Validation: ./bin/ask skills audit Plugins/skill-factory/skills/skill-factory-router --level strict --json --robot",
             result.stdout,
         )
-        self.assertIn("Next: ./bin/ask skills proof skill-builder --json --robot", result.stdout)
+        self.assertIn("Next: ./bin/ask skills proof skill-factory-router --json --robot", result.stdout)
 
     def test_skills_explain_golden_path_fields_for_he_and_non_he_handles(self):
         """Verify explain exposes source, runtime, validation, and proof handoff."""
@@ -1148,8 +1148,8 @@ class TestAskCLI(unittest.TestCase):
             output["data"]["candidate_commands"],
             [
                 'ask skills improve "fix PR review comments faster" --json --robot',
-                "ask skills explain he-heartbeat --json --robot",
-                "ask skills doctor he-heartbeat --json --robot",
+                "ask skills explain he-phase-work --json --robot",
+                "ask skills doctor he-phase-work --json --robot",
             ],
         )
 
@@ -1196,7 +1196,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(output["errors"][0]["code"], "ERR_VALIDATION")
         self.assertIn("argument syntax is invalid", output["errors"][0]["message"])
         self.assertEqual(output["data"]["validation_commands"], ["./bin/ask skills list --json --robot"])
-        self.assertEqual(output["data"]["candidate_commands"], ["ask skills resolve he-heartbeat --json"])
+        self.assertEqual(output["data"]["candidate_commands"], ["ask skills resolve he-phase-work --json"])
 
     def test_skills_missing_action_exposes_validation(self):
         """Verify incomplete skills commands expose the read-only recovery command."""
@@ -1372,7 +1372,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(package.get("state"), "pass")
         self.assertEqual(package.get("source"), "skills_package")
         self.assertEqual(package["details"]["schema_version"], "skill-package-readiness.v1")
-        self.assertEqual(package["details"]["target"], "skill-builder")
+        self.assertEqual(package["details"]["target"], "skill-factory-router")
         self.assertEqual(package["details"]["promotion_status"], "ready")
         self.assertTrue(package["details"]["promotion_ready"])
         self.assertTrue(package["details"]["install_ready"])
@@ -1398,7 +1398,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("Capability readiness: pass (0 profile gaps, 0 event gaps)", result.stdout)
         self.assertIn("Memory readiness: pass", result.stdout)
         self.assertIn("extension-like-read-only", result.stdout)
-        self.assertIn("Package readiness: pass (skill-builder, 0 missing fields)", result.stdout)
+        self.assertIn("Package readiness: pass (skill-factory-router, 0 missing fields)", result.stdout)
 
     def test_repo_doctor_help_mentions_agent_health_entrypoint(self):
         """Verify `ask repo doctor --help` exposes the agent health wording."""
@@ -1524,7 +1524,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertFalse(any("{" in key for key in memory["by_freshness"]))
         package = closeout["package_readiness"]
         self.assertEqual(package["status"], "pass")
-        self.assertEqual(package["target"], "skill-builder")
+        self.assertEqual(package["target"], "skill-factory-router")
         self.assertEqual(package["promotion_status"], "ready")
         self.assertTrue(package["promotion_ready"])
         self.assertTrue(package["install_ready"])
@@ -1671,7 +1671,7 @@ class TestAskCLI(unittest.TestCase):
 
     def test_skills_package_command(self):
         """Verify ask skills package exposes package readiness metadata."""
-        cmd = ["python3", "Infrastructure/bin/ask", "skills", "package", "skill-builder", "--json", "--robot"]
+        cmd = ["python3", "Infrastructure/bin/ask", "skills", "package", "skill-factory-router", "--json", "--robot"]
         result = _run_cli(cmd)
 
         self.assertEqual(result.returncode, 0, f"skills package failed: {result.stderr}")
@@ -1679,7 +1679,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(output["status"], "success")
         package = output["data"]["skill_package"]
         self.assertEqual(package["schema_version"], "skill-package-readiness.v1")
-        self.assertEqual(package["target_summary"]["handle"], "skill-builder")
+        self.assertEqual(package["target_summary"]["handle"], "skill-factory-router")
         self.assertEqual(package["target_summary"]["target_kind"], package["target_kind"])
         self.assertIn("version", package["package_contract"]["required_fields"]["present"])
         self.assertEqual(package["readiness_summary"]["readiness_level"], package["package_contract"]["readiness_level"])
@@ -1713,7 +1713,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(package["lifecycle_events"][1]["details"]["gate_summary"], package["gate_summary"])
         self.assertEqual(package["lifecycle_event"], package["lifecycle_events"][1])
         self.assertEqual(package["lifecycle_events"][1]["event_identity"]["event_type"], "package_readiness_checked")
-        self.assertEqual(package["lifecycle_events"][1]["event_identity"]["subject_key"], "skill-builder")
+        self.assertEqual(package["lifecycle_events"][1]["event_identity"]["subject_key"], "skill-factory-router")
         self.assertEqual(
             package["lifecycle_events"][1]["contract_schemas"]["lifecycle_event"],
             "capability-lifecycle-event.v1",
@@ -1745,7 +1745,7 @@ class TestAskCLI(unittest.TestCase):
             "Infrastructure/bin/ask",
             "skills",
             "package",
-            "skill-builder",
+            "skill-factory-router",
             "extra",
             "--json",
             "--robot",
@@ -1764,7 +1764,7 @@ class TestAskCLI(unittest.TestCase):
             "Infrastructure/bin/ask",
             "skills",
             "package",
-            "skill-builder",
+            "skill-factory-router",
             "--expected-sha256",
             "0" * 64,
             "--json",
@@ -1785,7 +1785,7 @@ class TestAskCLI(unittest.TestCase):
             "skills",
             "package",
             "verify",
-            "skill-builder",
+            "skill-factory-router",
             "--strict",
             "--json",
             "--robot",
@@ -1799,11 +1799,11 @@ class TestAskCLI(unittest.TestCase):
 
     def test_skills_package_human_output(self):
         """Verify ask skills package has a useful non-JSON readiness render."""
-        cmd = ["python3", "Infrastructure/bin/ask", "skills", "package", "skill-builder", "--robot"]
+        cmd = ["python3", "Infrastructure/bin/ask", "skills", "package", "skill-factory-router", "--robot"]
         result = _run_cli(cmd)
 
         self.assertEqual(result.returncode, 0, f"skills package output: {result.stdout}\nstderr: {result.stderr}")
-        self.assertIn("Skill package: skill-builder", result.stdout)
+        self.assertIn("Skill package: skill-factory-router", result.stdout)
         self.assertIn("Event: package_readiness_checked", result.stdout)
         self.assertIn("Readiness level: share_ready", result.stdout)
         self.assertIn("Compatible roles: default, worker, skill-inspector", result.stdout)
@@ -1822,7 +1822,7 @@ class TestAskCLI(unittest.TestCase):
             "Infrastructure/bin/ask",
             "skills",
             "package",
-            "skill-builder",
+            "skill-factory-router",
             "--checkout-test",
             "--json",
             "--robot",
@@ -1842,7 +1842,7 @@ class TestAskCLI(unittest.TestCase):
 
     def test_skills_package_strict_command_accepts_complete_metadata(self):
         """Verify ask skills package --strict accepts complete package metadata."""
-        cmd = ["python3", "Infrastructure/bin/ask", "skills", "package", "skill-builder", "--strict", "--json", "--robot"]
+        cmd = ["python3", "Infrastructure/bin/ask", "skills", "package", "skill-factory-router", "--strict", "--json", "--robot"]
         result = _run_cli(cmd)
 
         self.assertEqual(result.returncode, 0, f"skills package strict output: {result.stdout}\nstderr: {result.stderr}")
@@ -2198,14 +2198,14 @@ class TestAskCLI(unittest.TestCase):
             "Infrastructure/bin/ask",
             "skills",
             "doctor",
-            "skill-builder",
+            "skill-factory-router",
             "--strict",
             "--robot",
         ]
         result = _run_cli(cmd)
 
         self.assertEqual(result.returncode, 0, f"skills doctor output: {result.stdout}\nstderr: {result.stderr}")
-        self.assertIn("Skill doctor: skill-builder", result.stdout)
+        self.assertIn("Skill doctor: skill-factory-router", result.stdout)
         self.assertIn("Event: skill_doctor_completed", result.stdout)
         self.assertIn("Warning classes: outcome_proof_missing", result.stdout)
         self.assertIn("Checks: missing=1, pass=8", result.stdout)
@@ -4520,7 +4520,7 @@ class TestAskCLI(unittest.TestCase):
             "Infrastructure/bin/ask",
             "skills",
             "external-review",
-            "Plugins/skill-factory/skills/code_quality_review/skill-builder",
+            "Plugins/skill-factory/skills/skill-factory-router",
             "--skip-plugin-eval",
             "--skip-tessl",
             "--json",
@@ -4545,7 +4545,7 @@ class TestAskCLI(unittest.TestCase):
             output["data"]["validation_commands"],
             [
                 "./bin/ask skills external-review "
-                "Plugins/skill-factory/skills/code_quality_review/skill-builder "
+                "Plugins/skill-factory/skills/skill-factory-router "
                 "--skip-plugin-eval --skip-tessl --json --robot"
             ],
         )
@@ -4557,7 +4557,7 @@ class TestAskCLI(unittest.TestCase):
             "Infrastructure/bin/ask",
             "skills",
             "external-review",
-            "Plugins/skill-factory/skills/code_quality_review/skill-builder",
+            "Plugins/skill-factory/skills/skill-factory-router",
             "--skip-plugin-eval",
             "--skip-tessl",
             "--robot",
@@ -4571,7 +4571,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("tessl_lint: skipped", result.stdout)
         self.assertIn(
             "Validation: ./bin/ask skills external-review "
-            "Plugins/skill-factory/skills/code_quality_review/skill-builder "
+            "Plugins/skill-factory/skills/skill-factory-router "
             "--skip-plugin-eval --skip-tessl --json --robot",
             result.stdout,
         )
@@ -4697,7 +4697,7 @@ class TestAskCLI(unittest.TestCase):
             "Infrastructure/bin/ask",
             "skills",
             "audit",
-            "Plugins/skill-factory/skills/code_quality_review/skill-builder",
+            "Plugins/skill-factory/skills/skill-factory-router",
             "--json",
         ]
         result = _run_cli(cmd)
@@ -4710,7 +4710,7 @@ class TestAskCLI(unittest.TestCase):
             output["data"]["validation_commands"],
             [
                 "./bin/ask skills audit "
-                "Plugins/skill-factory/skills/code_quality_review/skill-builder --json --robot"
+                "Plugins/skill-factory/skills/skill-factory-router --json --robot"
             ],
         )
 
@@ -4721,7 +4721,7 @@ class TestAskCLI(unittest.TestCase):
             "Infrastructure/bin/ask",
             "skills",
             "audit",
-            "Plugins/skill-factory/skills/code_quality_review/skill-builder",
+            "Plugins/skill-factory/skills/skill-factory-router",
             "--robot",
         ]
         result = _run_cli(cmd)
@@ -4730,7 +4730,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("Audit passed:", result.stdout)
         self.assertIn(
             "Validation: ./bin/ask skills audit "
-            "Plugins/skill-factory/skills/code_quality_review/skill-builder --json --robot",
+            "Plugins/skill-factory/skills/skill-factory-router --json --robot",
             result.stdout,
         )
 
@@ -4741,7 +4741,7 @@ class TestAskCLI(unittest.TestCase):
             "Infrastructure/bin/ask",
             "skills",
             "validate-openai-format",
-            "Plugins/skill-factory/skills/code_quality_review/skill-builder",
+            "Plugins/skill-factory/skills/skill-factory-router",
             "--json",
         ]
         result = _run_cli(cmd)
@@ -4756,7 +4756,7 @@ class TestAskCLI(unittest.TestCase):
             output["data"]["validation_commands"],
             [
                 "./bin/ask skills validate-openai-format "
-                "Plugins/skill-factory/skills/code_quality_review/skill-builder --mode strict --json --robot"
+                "Plugins/skill-factory/skills/skill-factory-router --mode strict --json --robot"
             ],
         )
 
@@ -4767,7 +4767,7 @@ class TestAskCLI(unittest.TestCase):
             "Infrastructure/bin/ask",
             "skills",
             "validate-openai-format",
-            "Plugins/skill-factory/skills/code_quality_review/skill-builder",
+            "Plugins/skill-factory/skills/skill-factory-router",
             "--robot",
         ]
         result = _run_cli(cmd)
@@ -4776,7 +4776,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("OpenAI skill format passed:", result.stdout)
         self.assertIn(
             "Validation: ./bin/ask skills validate-openai-format "
-            "Plugins/skill-factory/skills/code_quality_review/skill-builder --mode strict --json --robot",
+            "Plugins/skill-factory/skills/skill-factory-router --mode strict --json --robot",
             result.stdout,
         )
 
@@ -4787,7 +4787,7 @@ class TestAskCLI(unittest.TestCase):
             "Infrastructure/bin/ask",
             "skills",
             "validate-skill-gate",
-            "Plugins/skill-factory/skills/code_quality_review/skill-builder",
+            "Plugins/skill-factory/skills/skill-factory-router",
             "--json",
         ]
         result = _run_cli(cmd)
@@ -4802,7 +4802,7 @@ class TestAskCLI(unittest.TestCase):
             output["data"]["validation_commands"],
             [
                 "./bin/ask skills validate-skill-gate "
-                "Plugins/skill-factory/skills/code_quality_review/skill-builder --json --robot"
+                "Plugins/skill-factory/skills/skill-factory-router --json --robot"
             ],
         )
 
@@ -4813,7 +4813,7 @@ class TestAskCLI(unittest.TestCase):
             "Infrastructure/bin/ask",
             "skills",
             "validate-skill-gate",
-            "Plugins/skill-factory/skills/code_quality_review/skill-builder",
+            "Plugins/skill-factory/skills/skill-factory-router",
             "--robot",
         ]
         result = _run_cli(cmd)
@@ -4822,7 +4822,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("Skill gate passed:", result.stdout)
         self.assertIn(
             "Validation: ./bin/ask skills validate-skill-gate "
-            "Plugins/skill-factory/skills/code_quality_review/skill-builder --json --robot",
+            "Plugins/skill-factory/skills/skill-factory-router --json --robot",
             result.stdout,
         )
 
@@ -4833,7 +4833,7 @@ class TestAskCLI(unittest.TestCase):
             "Infrastructure/bin/ask",
             "skills",
             "validate-boundaries",
-            "he-heartbeat",
+            "he-phase-work",
             "--json",
         ]
         result = _run_cli(cmd)
@@ -4843,12 +4843,12 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(output["status"], "success")
         boundary = output["data"]["boundary_check"]
         self.assertEqual(boundary["status"], "pass")
-        self.assertEqual(boundary["handle"], "he-heartbeat")
+        self.assertEqual(boundary["handle"], "he-phase-work")
         self.assertNotIn("command_handle_path", boundary)
         self.assertTrue(boundary["canonical_skill_path"])
         self.assertEqual(
             output["data"]["validation_commands"],
-            ["./bin/ask skills validate-boundaries he-heartbeat --json --robot"],
+            ["./bin/ask skills validate-boundaries he-phase-work --json --robot"],
         )
 
     def test_skills_validate_boundaries_human_output_exposes_validation(self):
@@ -4858,17 +4858,17 @@ class TestAskCLI(unittest.TestCase):
             "Infrastructure/bin/ask",
             "skills",
             "validate-boundaries",
-            "he-heartbeat",
+            "he-phase-work",
             "--robot",
         ]
         result = _run_cli(cmd)
 
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn("Skill boundaries passed: $he-heartbeat", result.stdout)
+        self.assertIn("Skill boundaries passed: $he-phase-work", result.stdout)
         self.assertIn("Canonical source:", result.stdout)
         self.assertIn("Runtime projection:", result.stdout)
         self.assertIn(
-            "Validation: ./bin/ask skills validate-boundaries he-heartbeat --json --robot",
+            "Validation: ./bin/ask skills validate-boundaries he-phase-work --json --robot",
             result.stdout,
         )
 

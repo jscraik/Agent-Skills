@@ -20,13 +20,13 @@ It is not the `@brainwav/coding-harness` infrastructure toolchain.
 
 ## Command-Facing Skills
 
-Use `sy-strategy` when the stage is unclear. Direct stage work lives behind the core `sy-*` command-surface handles so the package stays cheap, visible, and grep-friendly.
+Use `sy-reframe` when the stage is unclear. Direct stage work lives behind the core `sy-*` command-surface handles so the package stays cheap, visible, and grep-friendly.
 
 Lifecycle stages are plain English. Skill IDs use `sy-` so the package stays grep-friendly and avoids collisions with generic skills.
 
 | Skill | Reader job |
 | --- | --- |
-| `sy-strategy` | Decide the route, boundary, architecture, or strategy posture. |
+| `sy-reframe` | Decide the route, boundary, architecture, or strategy posture. |
 | `sy-reframe` | Turn a failed or stale migration plan into concrete options. |
 | `sy-brainstorm` | Explore options before a trace, tracker, spec, or plan is ready. |
 | `sy-trace-plan` | Decompose strategy, brainstorm, or reframe output into traceable work. |
@@ -45,7 +45,7 @@ Most tracked work follows this shape. The lifecycle separates **trace decomposit
 
 ```mermaid
 flowchart LR
-  A["Rough idea or stale state"] --> B["sy-strategy"]
+  A["Rough idea or stale state"] --> B["sy-reframe"]
   B --> C["sy-reframe"]
   C --> D["sy-brainstorm"]
   D --> E["sy-trace-plan"]
@@ -63,7 +63,7 @@ The diagram is a routing aid, not a mandate. Tracker, PR, validation, and artifa
 
 ## Routing
 
-Start with `sy-strategy` when the stage is unclear. Direct stage calls are fine when the user names one of the core handles.
+Start with `sy-reframe` when the stage is unclear. Direct stage calls are fine when the user names one of the core handles.
 
 Source of truth:
 
@@ -100,7 +100,7 @@ closure from implementation status alone; use the eval artifact to record
 validation evidence, drift posture, proof artifacts, and completion safety.
 
 Strategy, architectural review, triage, ADR compression, and core invariant
-compression belong to `sy-strategy`. These artifacts are cognition context, not
+compression belong to `sy-reframe`. These artifacts are cognition context, not
 implementation authority, until admitted by a reframe, Linear, spec, or plan
 artifact. New lifecycle artifacts prefer dated Linear filenames such as
 `YYYY-MM-DD-JSC-###-<slug>-strategy.md`; stable names are reserved for living
@@ -190,11 +190,11 @@ Use Codex `/goal` for explicit long-running continuation only. A goal preserves 
 Validate plugin contract and marketplace registration:
 
 ```sh
-python3 Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts/plugin_builder.py validate Plugins/synaipse-harness --require-marketplace --marketplace-path .agents/Plugins/marketplace.json
+python3 Plugins/plugin-factory/skills/code_quality_review/plugin-factory-router/scripts/plugin_builder.py validate Plugins/synaipse-harness --require-marketplace --marketplace-path .agents/Plugins/marketplace.json
 ```
 
 Audit marketplace alignment:
 
 ```sh
-python3 Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts/plugin_builder.py audit-marketplace --marketplace-path .agents/Plugins/marketplace.json --plugins-path Plugins
+python3 Plugins/plugin-factory/skills/code_quality_review/plugin-factory-router/scripts/plugin_builder.py audit-marketplace --marketplace-path .agents/Plugins/marketplace.json --plugins-path Plugins
 ```

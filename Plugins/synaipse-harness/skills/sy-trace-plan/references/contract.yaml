@@ -7,7 +7,7 @@ purpose: Break the whole job into traceable bullets that connect intent, evidenc
 triggers:
 - explicit sy-trace-plan invocation
 - explicit trace-plan stage request
-- strategy or previous-stage handoff to trace-plan
+- previous-stage handoff to trace-plan
 preconditions:
 - canonical source and active worktree are identified
 - required previous-stage artifact is present or blocker is returned
