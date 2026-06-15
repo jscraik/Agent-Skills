@@ -15,6 +15,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
 from ask.command_metadata import COMMAND_EXAMPLES, VALID_ACTIONS  # noqa: E402
+from ask.commands import evals as eval_commands  # noqa: E402
 from ask.skills_sdk.knowledge_ingest import build_knowledge_ingest  # noqa: E402
 
 ASK_PYTHON = shutil.which("python3.14") or shutil.which("python3.12") or sys.executable
@@ -78,7 +79,14 @@ Use for audits.
     return skill_dir
 
 
-def _write_extraction(root: Path, *, leak: bool = False, vendored_demand_override: Optional[dict] = None) -> Path:
+def _write_extraction(
+    root: Path,
+    *,
+    leak: bool = False,
+    vendored_demand_override: Optional[dict] = None,
+    include_evals: bool = False,
+    eval_files: str = "both",
+) -> Path:
     extraction = root / "knowledge-OS" / "exports" / "extractions" / "improve-agent-native"
     refs = extraction / "references"
     capsules = refs / "knowledge-capsules"
@@ -112,6 +120,8 @@ def _write_extraction(root: Path, *, leak: bool = False, vendored_demand_overrid
         "skill": skill_payload,
         "selected_facets": ["pack.harness-engineering:evidence_boundary"],
     }
+    if include_evals:
+        manifest["selected_asset_ids"] = ["eval.harness.local-pass-ci-unknown"]
     (extraction / "extraction-plan.yaml").write_text(yaml.safe_dump(plan, sort_keys=False), encoding="utf-8")
     (extraction / "knowledge-demand.yaml").write_text(yaml.safe_dump(demand, sort_keys=False), encoding="utf-8")
     vendored_demand = vendored_demand_override or demand
@@ -121,6 +131,34 @@ def _write_extraction(root: Path, *, leak: bool = False, vendored_demand_overrid
     if leak:
         capsule_text += "/Users/jamiecraik/dev/knowledge-OS/private-source.md\n"
     (capsules / "harness-evidence-boundary.md").write_text(capsule_text, encoding="utf-8")
+    if include_evals and eval_files in {"both", "scenarios"}:
+        (refs / "eval-scenarios.json").write_text(
+            json.dumps(
+                [
+                    {
+                        "id": "eval.harness.local-pass-ci-unknown",
+                        "type": "eval-scenario",
+                        "title": "Local Pass Does Not Prove CI",
+                        "payload": {
+                            "given": "Local validation passed but remote CI is unchecked.",
+                            "should": "Report local pass and CI unknown as separate claims.",
+                            "expected_failure": "Claiming merge readiness from local checks alone.",
+                            "reproduce_with": "references/evals/eval.harness.local-pass-ci-unknown.md",
+                        },
+                    }
+                ],
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+    if include_evals and eval_files in {"both", "fixtures"}:
+        evals = refs / "evals"
+        evals.mkdir()
+        (evals / "eval.harness.local-pass-ci-unknown.md").write_text(
+            "# Local Pass Does Not Prove CI\n\nKeep CI and local validation as separate proof lanes.\n",
+            encoding="utf-8",
+        )
     return extraction
 
 
@@ -175,10 +213,107 @@ class TestSkillsSdkKnowledgeIngest(unittest.TestCase):
             self.assertTrue((skill_dir / "references" / "knowledge-capsules" / "harness-evidence-boundary.md").is_file())
             skill_text = (skill_dir / "SKILL.md").read_text(encoding="utf-8")
             self.assertIn("Do not load all capsules by default", skill_text)
+            self.assertNotIn("references/eval-scenarios.json", skill_text)
+            self.assertNotIn("references/evals/", skill_text)
             source_context = yaml.safe_load((skill_dir / "references" / "source-context.yaml").read_text(encoding="utf-8"))
             paths = {entry["path"] for entry in source_context["references"]}
             self.assertIn("references/knowledge-capsule.manifest.yaml", paths)
             self.assertIn("references/knowledge-capsules/", paths)
+            self.assertNotIn("references/eval-scenarios.json", paths)
+            self.assertNotIn("references/evals/", paths)
+            self.assertNotIn(
+                "KnowledgeOS-selected eval scenarios must be wired through references/evals.yaml before Tessl proof",
+                source_context.get("allowed_claims", []),
+            )
+
+    def test_apply_vendors_knowledge_eval_scenarios_and_fixtures(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "agent-skills"
+            root.mkdir()
+            skill_dir = _write_skill(root)
+            extraction = _write_extraction(Path(tmp), include_evals=True)
+
+            payload = build_knowledge_ingest(
+                root,
+                extraction=str(extraction),
+                skill="Skills/agent-ops/improve-agent-native/SKILL.md",
+                apply=True,
+                preflight_security=False,
+            )
+
+            self.assertEqual(payload["status"], "applied")
+            copied = {item["source"] for item in payload["copied_files"]}
+            self.assertIn("references/eval-scenarios.json", copied)
+            self.assertIn("references/evals/eval.harness.local-pass-ci-unknown.md", copied)
+            scenarios = json.loads((skill_dir / "references" / "eval-scenarios.json").read_text(encoding="utf-8"))
+            self.assertEqual(scenarios[0]["id"], "eval.harness.local-pass-ci-unknown")
+            skill_text = (skill_dir / "SKILL.md").read_text(encoding="utf-8")
+            self.assertIn("references/eval-scenarios.json", skill_text)
+            self.assertIn("references/evals/", skill_text)
+            source_context = yaml.safe_load((skill_dir / "references" / "source-context.yaml").read_text(encoding="utf-8"))
+            paths = {entry["path"] for entry in source_context["references"]}
+            self.assertIn("references/eval-scenarios.json", paths)
+            self.assertIn("references/evals/", paths)
+            self.assertIn(
+                "KnowledgeOS-selected eval scenarios must be wired through references/evals.yaml before Tessl proof",
+                source_context.get("allowed_claims", []),
+            )
+
+    def test_apply_routes_eval_scenarios_only_when_scenario_json_is_copied(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "agent-skills"
+            root.mkdir()
+            skill_dir = _write_skill(root)
+            extraction = _write_extraction(Path(tmp), include_evals=True, eval_files="scenarios")
+
+            payload = build_knowledge_ingest(
+                root,
+                extraction=str(extraction),
+                skill="Skills/agent-ops/improve-agent-native/SKILL.md",
+                apply=True,
+                preflight_security=False,
+            )
+
+            self.assertEqual(payload["status"], "applied")
+            skill_text = (skill_dir / "SKILL.md").read_text(encoding="utf-8")
+            self.assertIn("references/eval-scenarios.json", skill_text)
+            self.assertNotIn("references/evals/", skill_text)
+            source_context = yaml.safe_load((skill_dir / "references" / "source-context.yaml").read_text(encoding="utf-8"))
+            paths = {entry["path"] for entry in source_context["references"]}
+            self.assertIn("references/eval-scenarios.json", paths)
+            self.assertNotIn("references/evals/", paths)
+            self.assertNotIn(
+                "KnowledgeOS-selected eval scenarios must be wired through references/evals.yaml before Tessl proof",
+                source_context.get("allowed_claims", []),
+            )
+
+    def test_apply_routes_eval_fixtures_only_when_fixture_files_are_copied(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "agent-skills"
+            root.mkdir()
+            skill_dir = _write_skill(root)
+            extraction = _write_extraction(Path(tmp), include_evals=True, eval_files="fixtures")
+
+            payload = build_knowledge_ingest(
+                root,
+                extraction=str(extraction),
+                skill="Skills/agent-ops/improve-agent-native/SKILL.md",
+                apply=True,
+                preflight_security=False,
+            )
+
+            self.assertEqual(payload["status"], "applied")
+            skill_text = (skill_dir / "SKILL.md").read_text(encoding="utf-8")
+            self.assertNotIn("references/eval-scenarios.json", skill_text)
+            self.assertIn("references/evals/", skill_text)
+            source_context = yaml.safe_load((skill_dir / "references" / "source-context.yaml").read_text(encoding="utf-8"))
+            paths = {entry["path"] for entry in source_context["references"]}
+            self.assertNotIn("references/eval-scenarios.json", paths)
+            self.assertIn("references/evals/", paths)
+            self.assertNotIn(
+                "KnowledgeOS-selected eval scenarios must be wired through references/evals.yaml before Tessl proof",
+                source_context.get("allowed_claims", []),
+            )
 
     def test_local_absolute_path_leak_blocks_apply(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -198,6 +333,54 @@ class TestSkillsSdkKnowledgeIngest(unittest.TestCase):
             self.assertEqual(payload["status"], "blocked")
             self.assertIn(
                 "references:local_absolute_path_leak:references/knowledge-capsules/harness-evidence-boundary.md",
+                payload["findings"],
+            )
+
+    def test_invalid_utf8_reference_blocks_apply_with_finding(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "agent-skills"
+            root.mkdir()
+            _write_skill(root)
+            extraction = _write_extraction(Path(tmp))
+            bad_reference = extraction / "references" / "knowledge-capsules" / "invalid-utf8.md"
+            bad_reference.write_bytes(b"\xff\xfe\x00")
+
+            payload = build_knowledge_ingest(
+                root,
+                extraction=str(extraction),
+                skill="Skills/agent-ops/improve-agent-native",
+                apply=True,
+                preflight_security=False,
+            )
+
+            self.assertEqual(payload["status"], "blocked")
+            self.assertIn(
+                "references:invalid_utf8:references/knowledge-capsules/invalid-utf8.md",
+                payload["findings"],
+            )
+
+    def test_duplicate_eval_scenario_ids_block_apply(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "agent-skills"
+            root.mkdir()
+            _write_skill(root)
+            extraction = _write_extraction(Path(tmp), include_evals=True)
+            scenarios_path = extraction / "references" / "eval-scenarios.json"
+            scenarios = json.loads(scenarios_path.read_text(encoding="utf-8"))
+            scenarios.append(dict(scenarios[0]))
+            scenarios_path.write_text(json.dumps(scenarios, indent=2) + "\n", encoding="utf-8")
+
+            payload = build_knowledge_ingest(
+                root,
+                extraction=str(extraction),
+                skill="Skills/agent-ops/improve-agent-native",
+                apply=True,
+                preflight_security=False,
+            )
+
+            self.assertEqual(payload["status"], "blocked")
+            self.assertIn(
+                "references:invalid_eval_scenarios_json:references/eval-scenarios.json:1:duplicate_eval_id:eval.harness.local-pass-ci-unknown",
                 payload["findings"],
             )
 
@@ -329,6 +512,43 @@ class TestSkillsSdkKnowledgeIngest(unittest.TestCase):
         self.assertTrue(
             any(command.startswith("ask sdk knowledge ingest ") for command in COMMAND_EXAMPLES[("sdk", "knowledge")])
         )
+
+    def test_current_improve_agent_native_knowledge_evals_are_wired_to_tessl_source(self) -> None:
+        skill_dir = REPO_ROOT / "Skills" / "agent-ops" / "improve-agent-native"
+        manifest = yaml.safe_load((skill_dir / "references" / "knowledge-capsule.manifest.yaml").read_text(encoding="utf-8"))
+        selected_eval_ids = {
+            asset_id
+            for asset_id in manifest.get("selected_asset_ids", [])
+            if isinstance(asset_id, str) and asset_id.startswith("eval.")
+        }
+        evals = yaml.safe_load((skill_dir / "references" / "evals.yaml").read_text(encoding="utf-8"))
+        tessl_case_ids = {case["id"] for case in evals.get("cases", [])}
+        tessl_case_fixtures = {
+            case.get("knowledge_pack", {}).get("fixture")
+            for case in evals.get("cases", [])
+            if isinstance(case.get("knowledge_pack"), dict)
+        }
+        scenario_payload = json.loads((skill_dir / "references" / "eval-scenarios.json").read_text(encoding="utf-8"))
+        scenario_ids = {scenario["id"] for scenario in scenario_payload}
+        fixture_paths = {
+            f"references/evals/{asset_id}.md"
+            for asset_id in selected_eval_ids
+        }
+
+        self.assertTrue(selected_eval_ids)
+        self.assertEqual(set(), selected_eval_ids - scenario_ids)
+        self.assertEqual(set(), selected_eval_ids - tessl_case_ids)
+        self.assertEqual(set(), fixture_paths - tessl_case_fixtures)
+        for fixture_path in fixture_paths:
+            self.assertTrue((skill_dir / fixture_path).is_file(), fixture_path)
+
+    def test_current_improve_agent_native_evals_are_behavioral_not_keyword_only(self) -> None:
+        evals_path = REPO_ROOT / "Skills" / "agent-ops" / "improve-agent-native" / "references" / "evals.yaml"
+        cases = eval_commands._parse_tessl_eval_cases(evals_path)
+        findings = eval_commands._tessl_eval_quality_findings(cases)
+
+        self.assertTrue(cases)
+        self.assertEqual([], findings)
 
 
 if __name__ == "__main__":

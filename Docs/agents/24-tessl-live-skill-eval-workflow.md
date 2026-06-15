@@ -151,6 +151,11 @@ Treat Tessl scores as evidence, not proof by themselves.
 - A live-private command is not green merely because `tessl eval run`
   completed. The wrapper must inspect `tessl eval view --json <run-id>` and
   compare usage-spec results against baseline before reporting readiness.
+- If `tessl eval view --json <run-id>` reports `failureReason.code` as
+  `EVAL_QUOTA_EXCEEDED`, classify the live-private lane as
+  `blocked_environment`. Do not submit another live eval until the quota reset
+  or quota increase is available; use dry-run staging and local scenario
+  quality gates only.
 - The live-private readiness gate is: usage-spec score is at least 90% and is
   not below the baseline score. A 95%+ score remains the improvement target.
   A lower score, lower baseline comparison, or

@@ -148,24 +148,31 @@ def _as_text(value, encoding="utf-8") -> str:
     return str(value)
 
 
-def _parse_json_object_from_text(text: str) -> dict[str, object] | None:
+def _parse_json_value_from_text(text: str) -> object | None:
     stripped = text.strip()
     if not stripped:
         return None
-    for start in (0, stripped.find("{")):
-        if start < 0:
+    decoder = json.JSONDecoder()
+    for start, char in enumerate(stripped):
+        if char not in {"{", "["}:
             continue
         try:
-            parsed = json.loads(stripped[start:])
+            parsed, _ = decoder.raw_decode(stripped[start:])
         except json.JSONDecodeError:
             continue
-        if isinstance(parsed, dict):
-            return parsed
+        return parsed
+    return None
+
+
+def _parse_json_object_from_text(text: str) -> dict[str, object] | None:
+    parsed = _parse_json_value_from_text(text)
+    if isinstance(parsed, dict):
+        return parsed
     return None
 
 
 def _extract_tessl_eval_run_id(text: str) -> str | None:
-    parsed = _parse_json_object_from_text(text)
+    parsed = _parse_json_value_from_text(text)
     candidates: list[object] = []
     if isinstance(parsed, dict):
         candidates.extend([
@@ -182,6 +189,24 @@ def _extract_tessl_eval_run_id(text: str) -> str | None:
                 data.get("eval_run_id"),
                 data.get("runId"),
             ])
+    elif isinstance(parsed, list):
+        for item in parsed:
+            if not isinstance(item, dict):
+                continue
+            candidates.extend([
+                item.get("id"),
+                item.get("evalRunId"),
+                item.get("eval_run_id"),
+                item.get("runId"),
+            ])
+            data = item.get("data")
+            if isinstance(data, dict):
+                candidates.extend([
+                    data.get("id"),
+                    data.get("evalRunId"),
+                    data.get("eval_run_id"),
+                    data.get("runId"),
+                ])
     for candidate in candidates:
         if isinstance(candidate, str) and candidate.strip():
             return candidate.strip()
@@ -214,6 +239,17 @@ def _tessl_eval_view_status(payload: dict[str, object]) -> str | None:
     return status.strip().lower() if isinstance(status, str) and status.strip() else None
 
 
+def _tessl_eval_view_failure_reason(payload: dict[str, object]) -> tuple[str, str] | None:
+    data = payload.get("data")
+    attributes = data.get("attributes") if isinstance(data, dict) else None
+    reason = attributes.get("failureReason") if isinstance(attributes, dict) else None
+    if not isinstance(reason, dict):
+        return None
+    code = str(reason.get("code") or "EVAL_FAILED").strip()
+    message = str(reason.get("message") or "Tessl eval failed before scored results were available.").strip()
+    return code, message
+
+
 def _tessl_eval_view_has_complete_scores(payload: dict[str, object]) -> bool:
     data = payload.get("data")
     attributes = data.get("attributes") if isinstance(data, dict) else None
@@ -239,6 +275,10 @@ def _tessl_eval_view_has_complete_scores(payload: dict[str, object]) -> bool:
             return False
         scored_scenarios += 1
     return scored_scenarios > 0
+
+
+def _is_discovery_smoke_filter_blocker(raw_error: object) -> bool:
+    return "discovery-smoke runner requires eval cases with `smoke_mode`" in _as_text(raw_error)
 
 
 def _summarize_tessl_live_eval_view(payload: dict[str, object]) -> dict[str, object]:
@@ -288,6 +328,10 @@ def _summarize_tessl_live_eval_view(payload: dict[str, object]) -> dict[str, obj
     baseline_rate = baseline_score / max_score
     improvement = None if baseline_rate == 0 else usage_rate / baseline_rate
     regressions = [s for s in scenario_summaries if s.get("regression")]
+    baseline_ties = [
+        s for s in scenario_summaries
+        if s.get("usage_score") == s.get("baseline_score")
+    ]
     return {
         "score": usage_rate,
         "baseline_score": baseline_rate,
@@ -298,10 +342,12 @@ def _summarize_tessl_live_eval_view(payload: dict[str, object]) -> dict[str, obj
         "scenarios_count": len(scenario_summaries),
         "regressions_count": len(regressions),
         "regressions": regressions,
+        "baseline_ties_count": len(baseline_ties),
+        "baseline_ties": baseline_ties,
         "min_score_required": TESSL_LIVE_PRIVATE_MIN_SCORE,
         "target_score": TESSL_LIVE_PRIVATE_TARGET_SCORE,
         "meets_min_score": usage_rate >= TESSL_LIVE_PRIVATE_MIN_SCORE,
-        "beats_baseline": usage_rate >= baseline_rate,
+        "beats_baseline": usage_rate > baseline_rate,
     }
 
 
@@ -377,7 +423,7 @@ def _tessl_live_private_policy(workspace: str | None = None) -> dict:
             "evals/<case-id>/criteria.json",
         ],
         "command_shape": "tessl eval run --json <staged-tile-json>",
-        "readiness_gate": "after run completion, fetch tessl eval view --json and require usage score >= 90% and usage score >= baseline; 95% remains the target",
+        "readiness_gate": "after run completion, fetch tessl eval view --json and require usage score >= 90% and usage score > baseline; 95% remains the target",
         "min_score_required": TESSL_LIVE_PRIVATE_MIN_SCORE,
         "target_score": TESSL_LIVE_PRIVATE_TARGET_SCORE,
         "usage_data_opt_out": "tessl config set shareUsageData false",
@@ -495,6 +541,23 @@ def _consume_yaml_block(lines: list[str], index: int, parent_indent: int, style:
     return "\n".join(block_lines), index
 
 
+def _consume_yaml_plain_scalar(lines: list[str], index: int, parent_indent: int, raw_value: str) -> tuple[str, int]:
+    parts = [_yaml_scalar(raw_value)]
+    while index < len(lines):
+        raw_line = lines[index]
+        if not raw_line.strip():
+            break
+        indent = len(raw_line) - len(raw_line.lstrip(" "))
+        stripped = raw_line.strip()
+        if indent <= parent_indent or stripped.startswith("- "):
+            break
+        if re.match(r"^[A-Za-z0-9_-]+\s*:", stripped):
+            break
+        parts.append(stripped)
+        index += 1
+    return " ".join(part for part in parts if part), index
+
+
 def _consume_yaml_sequence_dicts(lines: list[str], index: int, parent_indent: int) -> tuple[list[dict[str, str]], int]:
     items: list[dict[str, str]] = []
     current: dict[str, str] | None = None
@@ -507,6 +570,8 @@ def _consume_yaml_sequence_dicts(lines: list[str], index: int, parent_indent: in
         if indent <= parent_indent:
             break
         stripped = raw_line.strip()
+        if current is not None and not stripped.startswith("- ") and indent <= parent_indent + 1:
+            break
         if stripped.startswith("- "):
             if current:
                 items.append(current)
@@ -517,7 +582,13 @@ def _consume_yaml_sequence_dicts(lines: list[str], index: int, parent_indent: in
                 continue
         if current is not None and ":" in stripped:
             key, raw_value = stripped.split(":", 1)
-            current[key.strip()] = _yaml_scalar(raw_value.strip())
+            key = key.strip()
+            raw_value = raw_value.strip()
+            if raw_value.startswith((">", "|")):
+                current[key], index = _consume_yaml_block(lines, index + 1, indent, raw_value)
+                continue
+            current[key], index = _consume_yaml_plain_scalar(lines, index + 1, indent, raw_value)
+            continue
         index += 1
 
     if current:
@@ -601,10 +672,14 @@ def _parse_tessl_eval_cases_compat(text: str) -> list[dict[str, str]]:
             index += 1
             continue
         if stripped.startswith("- "):
+            item_text = stripped[2:].strip()
+            if not item_text.startswith("id:") and current is not None:
+                index += 1
+                continue
             if current and current.get("id") and current.get("prompt"):
                 cases.append(current)
             current = {}
-            stripped = stripped[2:].strip()
+            stripped = item_text
         if current is None or ":" not in stripped:
             index += 1
             continue
@@ -616,7 +691,15 @@ def _parse_tessl_eval_cases_compat(text: str) -> list[dict[str, str]]:
                 acceptance = _parse_inline_acceptance_sequence(raw_value)
                 index += 1
             else:
-                acceptance, index = _consume_yaml_sequence_dicts(lines, index + 1, indent)
+                sequence_parent_indent = indent
+                for lookahead in lines[index + 1:]:
+                    if not lookahead.strip():
+                        continue
+                    lookahead_indent = len(lookahead) - len(lookahead.lstrip(" "))
+                    if lookahead.strip().startswith("- "):
+                        sequence_parent_indent = lookahead_indent - 1
+                    break
+                acceptance, index = _consume_yaml_sequence_dicts(lines, index + 1, sequence_parent_indent)
             current[key] = acceptance  # type: ignore[assignment]
             continue
         if key not in {
@@ -635,11 +718,10 @@ def _parse_tessl_eval_cases_compat(text: str) -> list[dict[str, str]]:
         }:
             index += 1
             continue
-        if key == "prompt" and raw_value.startswith((">", "|")):
+        if raw_value.startswith((">", "|")):
             current[key], index = _consume_yaml_block(lines, index + 1, indent, raw_value)
             continue
-        current[key] = _yaml_scalar(raw_value)
-        index += 1
+        current[key], index = _consume_yaml_plain_scalar(lines, index + 1, indent, raw_value)
 
     if current and current.get("id") and current.get("prompt"):
         cases.append(current)
@@ -701,6 +783,157 @@ def _parse_tessl_eval_cases(evals_path: Path) -> list[dict[str, str]]:
     return cases
 
 
+BEHAVIORAL_TESSL_ACCEPTANCE_TYPES = {
+    "expected_signal",
+    "skill_selected",
+    "artifact_exists",
+    "artifact_contains",
+    "command_success",
+    "forbidden_signal",
+    "must_not",
+    "must_not_claim",
+    "must_not_do",
+    "not_contains",
+    "output_schema",
+}
+KEYWORD_ONLY_TESSL_ACCEPTANCE_TYPES = {"regex", "not_regex", "contains", "not_contains"}
+PROVENANCE_FIXTURE_PATH_RE = re.compile(r"(?i)\breferences/evals/[^\s]+\.md\b")
+PROVENANCE_ONLY_VERBS_RE = re.compile(r"(?i)\b(names?|cites?|references?|points?\s+to|lists?)\b")
+GENERIC_EXPECTED_SIGNAL_RE = re.compile(
+    r"(?is)^\s*demonstrates\s+the\s+skill-specific\s+behavior\s+in\s+this\s+case\s+should\s+contract\s*:"
+)
+
+
+def _acceptance_type(item: object) -> str:
+    if not isinstance(item, dict):
+        return ""
+    return str(_normalize_tessl_acceptance_item(item).get("type") or "acceptance").strip()
+
+
+def _is_provenance_only_signal(value: str) -> bool:
+    normalized = " ".join(value.split())
+    return (
+        bool(PROVENANCE_FIXTURE_PATH_RE.search(normalized))
+        and bool(PROVENANCE_ONLY_VERBS_RE.search(normalized))
+        and "evidence" in normalized.lower()
+    )
+
+
+def _case_has_behavioral_acceptance(case: dict[str, object]) -> bool:
+    acceptance = case.get("acceptance")
+    if not isinstance(acceptance, list):
+        return False
+    types = {_acceptance_type(item) for item in acceptance}
+    return bool(types & BEHAVIORAL_TESSL_ACCEPTANCE_TYPES)
+
+
+def _case_has_skill_lift_acceptance(case: dict[str, object]) -> bool:
+    acceptance = case.get("acceptance")
+    if not isinstance(acceptance, list):
+        return False
+    for item in acceptance:
+        if not isinstance(item, dict):
+            continue
+        normalized = _normalize_tessl_acceptance_item(item)
+        item_type = str(normalized.get("type") or "acceptance").strip()
+        value = str(normalized.get("value") or normalized.get("expected_skill") or "").strip()
+        if item_type in {"skill_selected", "artifact_exists", "artifact_contains", "command_success", "output_schema"}:
+            return True
+        if item_type.startswith(("forbidden", "must_not")):
+            return True
+        if (
+            item_type == "expected_signal"
+            and value
+            and not _is_provenance_only_signal(value)
+            and not GENERIC_EXPECTED_SIGNAL_RE.match(value)
+        ):
+            return True
+    return False
+
+
+def _case_has_keyword_only_acceptance(case: dict[str, object]) -> bool:
+    acceptance = case.get("acceptance")
+    if not isinstance(acceptance, list) or not acceptance:
+        return False
+    types = {_acceptance_type(item) for item in acceptance}
+    return bool(types) and types <= KEYWORD_ONLY_TESSL_ACCEPTANCE_TYPES
+
+
+def _case_has_scenario_context(case: dict[str, object]) -> bool:
+    fields = [str(case.get(field) or "").strip() for field in ("unit", "given", "should")]
+    if all(fields):
+        return True
+    prompt = str(case.get("prompt") or "").strip()
+    return prompt.count("\n") >= 3 and len(prompt) >= 240
+
+
+def _tessl_eval_quality_findings(cases: list[dict[str, object]]) -> list[dict[str, str]]:
+    findings: list[dict[str, str]] = []
+    for case in cases:
+        case_id = str(case.get("id") or "unknown")
+        if not _case_has_scenario_context(case):
+            findings.append({
+                "case_id": case_id,
+                "code": "missing_scenario_context",
+                "message": (
+                    "Tessl eval cases must include unit/given/should context or an equivalent "
+                    "structured prompt so the scorer can judge behaviour, not only keywords."
+                ),
+            })
+        if not _case_has_behavioral_acceptance(case):
+            findings.append({
+                "case_id": case_id,
+                "code": "missing_behavioral_acceptance",
+                "message": (
+                    "Tessl eval cases must include at least one behavioural acceptance item "
+                    "such as expected_signal, skill_selected, artifact_exists, command_success, "
+                    "or a must_not/forbidden signal."
+                ),
+            })
+        elif not _case_has_skill_lift_acceptance(case):
+            findings.append({
+                "case_id": case_id,
+                "code": "missing_skill_lift_acceptance",
+                "message": (
+                    "Tessl eval cases must include at least one acceptance item that tests "
+                    "the skill's behaviour. Provenance-only fixture-path signals are useful "
+                    "supporting evidence, but they do not prove the skill improves the answer."
+                ),
+            })
+        if _case_has_keyword_only_acceptance(case):
+            findings.append({
+                "case_id": case_id,
+                "code": "keyword_only_acceptance",
+                "message": (
+                    "Regex and contains checks are allowed only as supporting evidence; they "
+                    "cannot be the whole Tessl scoring contract because baseline runs can pass "
+                    "them without demonstrating skill lift."
+                ),
+            })
+    return findings
+
+
+def _assert_tessl_eval_quality(cases: list[dict[str, object]], *, source: Path) -> None:
+    if not cases:
+        raise ValueError(
+            f"Tessl eval quality gate failed for {source}: no Tessl eval cases were selected. "
+            "Add structured behavioural scenarios before staging or uploading Tessl assessments."
+        )
+    findings = _tessl_eval_quality_findings(cases)
+    if not findings:
+        return
+    summary = "; ".join(
+        f"{finding['case_id']}:{finding['code']}" for finding in findings[:12]
+    )
+    if len(findings) > 12:
+        summary += f"; +{len(findings) - 12} more"
+    raise ValueError(
+        f"Tessl eval quality gate failed for {source}: {summary}. "
+        "Convert seed or internal evals into structured, skill-specific behavioural scenarios "
+        "before staging or uploading Tessl assessments."
+    )
+
+
 def _case_tessl_enabled(raw_case: dict[object, object], *, lane: str) -> bool:
     flat_key = f"tessl_{lane}"
     flat_value = raw_case.get(flat_key)
@@ -718,7 +951,9 @@ def _case_tessl_enabled(raw_case: dict[object, object], *, lane: str) -> bool:
 
 def _write_tessl_scenarios_from_evals(source_root: Path, staged_root: Path) -> list[str]:
     copied: list[str] = []
-    for case in _parse_tessl_eval_cases(source_root / "references" / "evals.yaml"):
+    evals_path = source_root / "references" / "evals.yaml"
+    cases = _parse_tessl_eval_cases(evals_path)
+    for case in cases:
         case_id = case["id"].replace("/", "-")
         case_root = staged_root / "scenarios" / case_id
         case_root.mkdir(parents=True, exist_ok=True)
@@ -886,9 +1121,13 @@ def _tessl_criteria_from_case(case: dict[str, object]) -> dict:
 
 def _write_tessl_live_evals_from_references(source_root: Path, staged_root: Path) -> list[str]:
     copied: list[str] = []
-    for case in _parse_tessl_eval_cases(source_root / "references" / "evals.yaml"):
-        if not _case_tessl_enabled(case, lane="live_private"):
-            continue
+    evals_path = source_root / "references" / "evals.yaml"
+    cases = [
+        case for case in _parse_tessl_eval_cases(evals_path)
+        if _case_tessl_enabled(case, lane="live_private")
+    ]
+    _assert_tessl_eval_quality(cases, source=evals_path)
+    for case in cases:
         case_id = _tessl_eval_case_id(str(case["id"]))
         case_root = staged_root / "evals" / case_id
         case_root.mkdir(parents=True, exist_ok=True)
@@ -1979,6 +2218,16 @@ def _run_tessl_live_private_eval(
                         if view_payload is None:
                             raise ValueError("No JSON object found in Tessl eval view output.")
                         if not _tessl_eval_view_has_complete_scores(view_payload):
+                            failure_reason = _tessl_eval_view_failure_reason(view_payload)
+                            if failure_reason:
+                                failure_code, failure_message = failure_reason
+                                if failure_code == "EVAL_QUOTA_EXCEEDED":
+                                    blocker_class = "blocked_environment"
+                                else:
+                                    blocker_class = "blocked_validation"
+                                raise ValueError(
+                                    f"Tessl eval run failed before scoring: {failure_code}: {failure_message}"
+                                )
                             if time.monotonic() >= deadline:
                                 raise ValueError("Tessl eval view did not reach complete scored results before timeout.")
                             raise ValueError(f"Tessl eval view is not scored yet (status={view_status or 'unknown'}).")
@@ -1986,7 +2235,7 @@ def _run_tessl_live_private_eval(
                     except ValueError as e:
                         status = "blocked"
                         blocker = f"Failed to parse Tessl private tile eval score summary: {e}"
-                        blocker_class = "blocked_validation"
+                        blocker_class = blocker_class or "blocked_validation"
                     else:
                         if not live_result_summary["meets_min_score"] or not live_result_summary["beats_baseline"]:
                             status = "fail"
@@ -2990,6 +3239,67 @@ def run_evals(
         "tessl_live_private_policy": _tessl_live_private_policy(tessl_workspace) if tessl_live_private else None,
     }
 
+    if tessl_live_dry_run and not tessl_live_private:
+        result.status = "error"
+        result.data["raw_output"] = ""
+        result.data["raw_error"] = ""
+        result.data["eval_status"] = "blocked_validation"
+        result.data["blocker_class"] = "blocked_validation"
+        result.data["blocker_taxonomy"] = EVAL_BLOCKER_TAXONOMY
+        result.data["tessl_eval"] = {
+            "status": "blocked",
+            "blocker": "--tessl-live-dry-run requires --tessl-live-private.",
+            "blocker_class": "blocked_validation",
+        }
+        result.errors.append(ErrorObject(
+            code="ERR_VALIDATION",
+            message="--tessl-live-dry-run requires --tessl-live-private.",
+        ))
+        return result
+
+    if tessl_live_private and tessl_live_dry_run:
+        _start_eval_lifecycle(result, path=path, mode=mode, runner=runner)
+        result.status = "success"
+        result.data["raw_output"] = ""
+        result.data["raw_error"] = ""
+        result.data["eval_status"] = "pass"
+        result.data["local_eval_status"] = "skipped_tessl_live_dry_run"
+        result.data["blocker_class"] = None
+        result.data["blocker_taxonomy"] = EVAL_BLOCKER_TAXONOMY
+        result.data["tessl_dry_run_note"] = (
+            "Tessl live-private dry-run validates the staged private Tessl payload only. "
+            "Run without --tessl-live-dry-run after local audit/package gates pass to execute remote assessment."
+        )
+        tessl_eval = _run_tessl_live_private_eval(
+            repo_root,
+            path,
+            workspace=tessl_workspace,
+            dry_run=True,
+        )
+        result.data["tessl_eval"] = tessl_eval
+        if tessl_eval.get("status") != "pass":
+            blocker_class = tessl_eval.get("blocker_class") or "blocked_validation"
+            result.status = "error"
+            result.data["eval_status"] = blocker_class or str(tessl_eval.get("status") or "fail")
+            result.data["blocker_class"] = blocker_class
+            result.data["tessl_eval_status"] = result.data["eval_status"]
+            result.data["tessl_blocker_class"] = blocker_class
+            result.errors.append(ErrorObject(
+                code="ERR_RUNTIME" if tessl_eval.get("status") == "blocked" else "ERR_VALIDATION",
+                    message=f"Tessl eval {tessl_eval.get('status')}: {tessl_eval.get('blocker') or 'see data.tessl_eval'}",
+                ))
+            _finish_eval_lifecycle(
+                result,
+                path=path,
+                mode=mode,
+                runner=runner,
+                eval_status=result.data["eval_status"],
+                blocker_class=blocker_class,
+            )
+        else:
+            _finish_eval_lifecycle(result, path=path, mode=mode, runner=runner, eval_status="pass")
+        return result
+
     cmd = [
         sys.executable, f"{SKILL_BUILDER_SCRIPTS}/run_skill_evals.py",
         path,
@@ -3158,6 +3468,34 @@ def run_evals(
                 code="ERR_RUNTIME" if tessl_eval.get("status") == "blocked" else "ERR_VALIDATION",
                 message=f"Tessl eval {tessl_eval.get('status')}: {tessl_eval.get('blocker') or 'see data.tessl_eval'}",
             ))
+        elif (
+            tessl_live_private
+            and tessl_live_dry_run
+            and result.status == "error"
+            and runner == "discovery-smoke"
+            and _is_discovery_smoke_filter_blocker(result.data.get("raw_error"))
+        ):
+            result.status = "success"
+            result.data["local_eval_status"] = result.data.get("eval_status")
+            result.data["eval_status"] = "pass"
+            result.data["blocker_class"] = None
+            result.data["tessl_dry_run_note"] = (
+                "Tessl live-private dry-run staged successfully. The discovery-smoke "
+                "runner had no smoke_mode cases, so it is recorded as local_eval_status "
+                "instead of failing the Tessl staging lane."
+            )
+            result.errors = [
+                error
+                for error in result.errors
+                if not (
+                    error.code == "ERR_VALIDATION"
+                    and error.message == "Evaluation run failed."
+                )
+            ]
+            lifecycle_events = result.data.setdefault("lifecycle_events", [])
+            if lifecycle_events and lifecycle_events[-1].get("event_type") in {"eval_completed", "eval_blocked"}:
+                lifecycle_events.pop()
+            _finish_eval_lifecycle(result, path=path, mode=mode, runner=runner, eval_status="pass")
 
     return result
 
