@@ -108,13 +108,6 @@ class TestAskSkillsStarter(unittest.TestCase):
         self.assertTrue(result.data.get("visible_only"))
 
     def test_visible_only_wins_over_advanced_compat_alias(self) -> None:
-        """
-        Validate that the visible_only parameter takes precedence over advanced when both are specified.
-        
-        When list_skills is called with both advanced=True and visible_only=True, the visible_only
-        behavior should override, causing discover_catalog_entries to be called with advanced=False,
-        and the result metadata to reflect visible mode with advanced_mode set to false.
-        """
         entries = [
             SimpleNamespace(
                 name="coderabbit",
@@ -204,6 +197,314 @@ class TestAskSkillsStarter(unittest.TestCase):
         self.assertNotIn("he-review", all_starter_handles)
         self.assertIn("he-code-review", STARTER_ARCHETYPES["delivery"])
         self.assertIn("he-code-review", STARTER_ARCHETYPES["review"])
+
+    def test_unknown_archetype_falls_back_to_general(self) -> None:
+        """
+        An unknown archetype key must resolve to "general" in the result payload.
+
+        Verifies that list_skills with starter=True and an archetype key not present
+        in STARTER_ARCHETYPES reports starter_archetype == "general".
+        """
+        general_names = list(STARTER_ARCHETYPES["general"])
+        entries = [
+            SimpleNamespace(
+                name=name,
+                source_dir=REPO_ROOT / "Skills" / "agent-ops" / name,
+                category="Skills/agent-ops",
+                description=name,
+            )
+            for name in general_names[:3]
+        ]
+        with patch("ask.commands.skills.discover_catalog_entries", return_value=entries):
+            result = list_skills(REPO_ROOT, starter=True, archetype="nonexistent-archetype", limit=3)
+
+        self.assertEqual(result.status, "success")
+        self.assertEqual(result.data["starter_archetype"], "general")
+        self.assertTrue(result.data["starter_mode"])
+
+    def test_starter_limit_zero_coerced_to_one(self) -> None:
+        """
+        A limit of 0 must be coerced to 1, returning exactly one skill.
+        """
+        entries = [
+            SimpleNamespace(
+                name="he-plan",
+                source_dir=REPO_ROOT / "plugins" / "harness-engineering" / "skills" / "he-plan",
+                category="Plugins/harness-engineering/skills",
+                description="he-plan",
+            ),
+            SimpleNamespace(
+                name="he-work",
+                source_dir=REPO_ROOT / "plugins" / "harness-engineering" / "skills" / "he-work",
+                category="Plugins/harness-engineering/skills",
+                description="he-work",
+            ),
+        ]
+        with patch("ask.commands.skills.discover_catalog_entries", return_value=entries):
+            result = list_skills(REPO_ROOT, starter=True, archetype="delivery", limit=0)
+
+        self.assertEqual(result.status, "success")
+        self.assertEqual(result.data["starter_limit"], 1)
+        self.assertEqual(len(result.data["skills"]), 1)
+
+    def test_starter_mode_fills_from_remaining_when_archetype_insufficient(self) -> None:
+        """
+        When fewer archetype-preferred skills are available than the limit, the result
+        is padded with non-archetype entries from the catalog in input order.
+        """
+        entries = [
+            SimpleNamespace(
+                name="he-plan",
+                source_dir=REPO_ROOT / "plugins" / "harness-engineering" / "skills" / "he-plan",
+                category="Plugins/harness-engineering/skills",
+                description="he-plan",
+            ),
+            SimpleNamespace(
+                name="extra-skill-a",
+                source_dir=REPO_ROOT / "Skills" / "agent-ops" / "extra-skill-a",
+                category="Skills/agent-ops",
+                description="extra-a",
+            ),
+            SimpleNamespace(
+                name="extra-skill-b",
+                source_dir=REPO_ROOT / "Skills" / "agent-ops" / "extra-skill-b",
+                category="Skills/agent-ops",
+                description="extra-b",
+            ),
+        ]
+        # delivery archetype: he-plan, he-work, he-code-review, coding-harness, docs-expert
+        # Only he-plan is present; limit=3 => he-plan + extra-skill-a + extra-skill-b
+        with patch("ask.commands.skills.discover_catalog_entries", return_value=entries):
+            result = list_skills(REPO_ROOT, starter=True, archetype="delivery", limit=3)
+
+        self.assertEqual(result.status, "success")
+        names = [item["name"] for item in result.data["skills"]]
+        self.assertEqual(len(names), 3)
+        self.assertEqual(names[0], "he-plan")
+        self.assertIn("extra-skill-a", names)
+        self.assertIn("extra-skill-b", names)
+
+    def test_category_filter_forces_advanced_discovery(self) -> None:
+        """
+        Providing a category argument must call discover_catalog_entries(advanced=True)
+        even when advanced=False is the default.
+        """
+        entries = [
+            SimpleNamespace(
+                name="docs-expert",
+                source_dir=REPO_ROOT / "Skills" / "agent-ops" / "docs-expert",
+                category="Skills/agent-ops",
+                description="docs",
+            ),
+        ]
+        with patch("ask.commands.skills.discover_catalog_entries", return_value=entries) as mock_discover, \
+             patch("ask.commands.skills.handles_report", return_value={"handles": []}):
+            result = list_skills(REPO_ROOT, category="agent-ops")
+
+        mock_discover.assert_called_once_with(advanced=True)
+        self.assertEqual(result.status, "success")
+        self.assertTrue(result.data.get("advanced_mode"))
+
+    def test_visible_only_with_category_suppresses_visible_only_mode(self) -> None:
+        """
+        When both visible_only and category are provided, category takes precedence
+        and the result should report advanced_mode=True, inventory_mode="repo".
+        """
+        entries = [
+            SimpleNamespace(
+                name="docs-expert",
+                source_dir=REPO_ROOT / "Skills" / "agent-ops" / "docs-expert",
+                category="Skills/agent-ops",
+                description="docs",
+            ),
+        ]
+        with patch("ask.commands.skills.discover_catalog_entries", return_value=entries) as mock_discover, \
+             patch("ask.commands.skills.handles_report", return_value={"handles": []}):
+            result = list_skills(REPO_ROOT, category="agent-ops", visible_only=True)
+
+        mock_discover.assert_called_once_with(advanced=True)
+        self.assertEqual(result.status, "success")
+        self.assertFalse(result.data.get("visible_only"))
+        self.assertEqual(result.data.get("inventory_mode"), "repo")
+
+    def test_starter_mode_validation_command_includes_archetype_and_limit(self) -> None:
+        """
+        Starter mode must emit a validation command containing --archetype and --limit flags.
+        """
+        entries = [
+            SimpleNamespace(
+                name="he-plan",
+                source_dir=REPO_ROOT / "plugins" / "harness-engineering" / "skills" / "he-plan",
+                category="Plugins/harness-engineering/skills",
+                description="he-plan",
+            ),
+        ]
+        with patch("ask.commands.skills.discover_catalog_entries", return_value=entries):
+            result = list_skills(REPO_ROOT, starter=True, archetype="delivery", limit=5)
+
+        self.assertEqual(result.status, "success")
+        validation_cmd = result.data["validation_commands"][0]
+        self.assertIn("--archetype", validation_cmd)
+        self.assertIn("delivery", validation_cmd)
+        self.assertIn("--limit", validation_cmd)
+        self.assertIn("5", validation_cmd)
+        self.assertIn("starter", validation_cmd)
+
+    def test_all_starter_archetypes_are_non_empty(self) -> None:
+        """Every archetype in STARTER_ARCHETYPES must contain at least one skill handle."""
+        for name, handles in STARTER_ARCHETYPES.items():
+            self.assertGreater(len(handles), 0, f"Archetype '{name}' is unexpectedly empty")
+
+    def test_starter_archetypes_have_no_internal_duplicates(self) -> None:
+        """No archetype should list the same skill handle more than once."""
+        for name, handles in STARTER_ARCHETYPES.items():
+            self.assertEqual(
+                len(handles),
+                len(set(handles)),
+                f"Archetype '{name}' contains duplicate handles: {handles}",
+            )
+
+    def test_docs_archetype_present_and_contains_docs_expert(self) -> None:
+        """The 'docs' archetype must exist and include docs-expert."""
+        self.assertIn("docs", STARTER_ARCHETYPES)
+        self.assertIn("docs-expert", STARTER_ARCHETYPES["docs"])
+
+    def test_starter_mode_empty_entries_returns_empty_skills(self) -> None:
+        """
+        When the catalog is empty, starter mode must return an empty skills list
+        with status == "success" (not raise).
+        """
+        with patch("ask.commands.skills.discover_catalog_entries", return_value=[]):
+            result = list_skills(REPO_ROOT, starter=True, archetype="delivery", limit=5)
+
+        self.assertEqual(result.status, "success")
+        self.assertEqual(result.data["skills"], [])
+        self.assertTrue(result.data["starter_mode"])
+
+
+class TestManifestJsonlSchema(unittest.TestCase):
+    """Validate the structure of manifest.jsonl files updated in this PR."""
+
+    MANIFEST_DIR = REPO_ROOT / ".skillsets"
+    REQUIRED_TOP_LEVEL_FIELDS = {
+        "description",
+        "exclusions",
+        "id",
+        "level",
+        "metadata_status",
+        "provenance",
+        "risk",
+        "runtime_visibility",
+        "scope",
+        "skill_set",
+        "source_path",
+        "triggers",
+    }
+    REQUIRED_PROVENANCE_FIELDS = {
+        "generator",
+        "policy_identity",
+        "projection_mode",
+        "source_revision",
+        "source_sha256",
+    }
+    EXPECTED_SOURCE_REVISION = "5983ceeb"
+
+    def _iter_manifest_records(self):
+        """Yield (manifest_path, record_dict) for every record in every manifest.jsonl."""
+        import json
+
+        for manifest_path in sorted(self.MANIFEST_DIR.glob("*/manifest.jsonl")):
+            with manifest_path.open(encoding="utf-8") as fh:
+                for lineno, raw_line in enumerate(fh, start=1):
+                    line = raw_line.strip()
+                    if not line:
+                        continue
+                    record = json.loads(line)
+                    yield manifest_path, lineno, record
+
+    def test_all_manifest_records_have_required_fields(self) -> None:
+        """Every record in every manifest.jsonl must contain the standard top-level fields."""
+        for manifest_path, lineno, record in self._iter_manifest_records():
+            missing = self.REQUIRED_TOP_LEVEL_FIELDS - record.keys()
+            self.assertFalse(
+                missing,
+                f"{manifest_path}:{lineno} is missing fields: {missing}",
+            )
+
+    def test_all_manifest_records_have_required_provenance_fields(self) -> None:
+        """Every provenance block must contain the standard provenance sub-fields."""
+        for manifest_path, lineno, record in self._iter_manifest_records():
+            provenance = record.get("provenance", {})
+            missing = self.REQUIRED_PROVENANCE_FIELDS - provenance.keys()
+            self.assertFalse(
+                missing,
+                f"{manifest_path}:{lineno} provenance is missing fields: {missing}",
+            )
+
+    def test_all_manifest_records_have_updated_source_revision(self) -> None:
+        """Every manifest record's provenance.source_revision must equal the new revision."""
+        for manifest_path, lineno, record in self._iter_manifest_records():
+            actual = record["provenance"]["source_revision"]
+            self.assertEqual(
+                actual,
+                self.EXPECTED_SOURCE_REVISION,
+                f"{manifest_path}:{lineno} has source_revision={actual!r}, "
+                f"expected {self.EXPECTED_SOURCE_REVISION!r}",
+            )
+
+    def test_all_manifest_records_have_non_empty_id_and_description(self) -> None:
+        """Every manifest record must have a non-empty id and description."""
+        for manifest_path, lineno, record in self._iter_manifest_records():
+            self.assertTrue(
+                record.get("id", "").strip(),
+                f"{manifest_path}:{lineno} has an empty or missing 'id'",
+            )
+            self.assertTrue(
+                record.get("description", "").strip(),
+                f"{manifest_path}:{lineno} has an empty or missing 'description'",
+            )
+
+    def test_all_manifest_records_have_non_empty_triggers(self) -> None:
+        """Every manifest record's triggers list must be a list (empty lists are allowed)."""
+        for manifest_path, lineno, record in self._iter_manifest_records():
+            self.assertIsInstance(
+                record.get("triggers"),
+                list,
+                f"{manifest_path}:{lineno} 'triggers' is not a list",
+            )
+
+    def test_manifest_ids_are_unique_within_each_skillset(self) -> None:
+        """Within a single manifest.jsonl file, skill ids must be unique."""
+        import json
+
+        for manifest_path in sorted(self.MANIFEST_DIR.glob("*/manifest.jsonl")):
+            seen_ids: list[str] = []
+            with manifest_path.open(encoding="utf-8") as fh:
+                for raw_line in fh:
+                    line = raw_line.strip()
+                    if not line:
+                        continue
+                    record = json.loads(line)
+                    seen_ids.append(record["id"])
+            self.assertEqual(
+                len(seen_ids),
+                len(set(seen_ids)),
+                f"{manifest_path} contains duplicate skill ids",
+            )
+
+    def test_manifest_source_paths_are_non_empty_strings(self) -> None:
+        """Every record's source_path must be a non-empty string."""
+        for manifest_path, lineno, record in self._iter_manifest_records():
+            source_path = record.get("source_path", "")
+            self.assertIsInstance(
+                source_path,
+                str,
+                f"{manifest_path}:{lineno} source_path is not a string",
+            )
+            self.assertTrue(
+                source_path.strip(),
+                f"{manifest_path}:{lineno} source_path is empty",
+            )
 
 
 if __name__ == "__main__":
