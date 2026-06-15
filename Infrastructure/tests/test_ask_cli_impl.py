@@ -137,6 +137,8 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(output["status"], "success")
         self.assertIn("skills", output["data"])
         self.assertIsInstance(output["data"]["skills"], list)
+        self.assertTrue(output["data"].get("advanced_mode"))
+        self.assertEqual(output["data"].get("inventory_mode"), "repo")
         self.assertEqual(
             output["data"]["validation_commands"],
             ["./bin/ask skills list --json --robot"],
@@ -156,7 +158,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("Validation: ./bin/ask skills list --json --robot", result.stdout)
 
     def test_skills_list_advanced_flag(self):
-        """CA1: Verify ask skills list --advanced toggles advanced_mode in JSON output."""
+        """CA1: Verify ask skills list --advanced remains a full-inventory compatibility alias."""
         cmd = ["python3", "Infrastructure/bin/ask", "skills", "list", "--advanced", "--json"]
         result = _run_cli(cmd)
 
@@ -164,9 +166,50 @@ class TestAskCLI(unittest.TestCase):
         output = json.loads(result.stdout)
         self.assertEqual(output["status"], "success")
         self.assertTrue(output["data"].get("advanced_mode"))
+        self.assertEqual(output["data"].get("inventory_mode"), "repo")
         self.assertEqual(
             output["data"]["validation_commands"],
             ["./bin/ask skills list --advanced --json --robot"],
+        )
+
+    def test_skills_list_visible_only_flag(self):
+        """Verify ask skills list --visible-only exposes the narrower visible inventory."""
+        cmd = ["python3", "Infrastructure/bin/ask", "skills", "list", "--visible-only", "--json"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        self.assertFalse(output["data"].get("advanced_mode"))
+        self.assertEqual(output["data"].get("inventory_mode"), "visible")
+        self.assertTrue(output["data"].get("visible_only"))
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask skills list --visible-only --json --robot"],
+        )
+
+    def test_skills_list_visible_only_wins_over_advanced_alias(self):
+        """Verify mixed compatibility flags report one coherent visible inventory."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "list",
+            "--advanced",
+            "--visible-only",
+            "--json",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        self.assertFalse(output["data"].get("advanced_mode"))
+        self.assertEqual(output["data"].get("inventory_mode"), "visible")
+        self.assertTrue(output["data"].get("visible_only"))
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask skills list --visible-only --json --robot"],
         )
 
     def test_skills_budget_json_contract(self):
@@ -1196,7 +1239,11 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(output["errors"][0]["code"], "ERR_VALIDATION")
         self.assertIn("argument syntax is invalid", output["errors"][0]["message"])
         self.assertEqual(output["data"]["validation_commands"], ["./bin/ask skills list --json --robot"])
-        self.assertEqual(output["data"]["candidate_commands"], ["ask skills resolve he-phase-work --json"])
+        self.assertEqual(len(output["data"]["candidate_commands"]), 1)
+        self.assertRegex(
+            output["data"]["candidate_commands"][0],
+            r"^ask skills resolve [a-z0-9-]+ --json$",
+        )
 
     def test_skills_missing_action_exposes_validation(self):
         """Verify incomplete skills commands expose the read-only recovery command."""

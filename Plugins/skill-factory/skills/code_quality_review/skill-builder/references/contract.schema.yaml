@@ -1,0 +1,23 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+type: object
+required: [schema_version, purpose, triggers, inputs, outputs, non_goals, risks]
+properties:
+  schema_version: {type: [string, number]}
+  purpose: {type: string}
+  triggers:
+    type: array
+    minItems: 1
+  inputs:
+    type: array
+    minItems: 1
+  outputs:
+    type: array
+    minItems: 1
+  non_goals:
+    type: array
+    minItems: 1
+  risks:
+    type: array
+    minItems: 1
+  rollback_procedure: {type: string}
+  observability: {type: string}

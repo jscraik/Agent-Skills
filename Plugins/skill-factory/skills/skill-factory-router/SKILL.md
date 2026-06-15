@@ -116,7 +116,8 @@ blocked_by: null
 
 ## Anti-Patterns
 
-- Do not resurrect retired handles as skill packages to satisfy a route, projection, or test.
+- Do not resurrect retired flat command handles, generated aliases, or
+  projection-only manifest rows to satisfy a route, projection, or test.
 - Do not copy the system skill creator or installer into Skill Factory when the system lane can be referenced.
 - Do not treat plugin-cache visibility, command-surface rows, and flat skill symlinks as the same proof surface.
 
@@ -126,7 +127,9 @@ If no single lane fits, set `blocked_by` to the ambiguity and ask the smallest r
 
 ## Gotchas
 
-- `skill-builder` may appear as an implementation script namespace; it must not reappear as an advertised skill handle.
+- `skill-builder` is a canonical package under
+  `skills/code_quality_review/skill-builder`; keep flat command handles and
+  generated aliases separate from that source package.
 - Runtime picker visibility depends on regenerated projections and local sync, not only canonical source edits.
 - Use exact current evidence before claiming Tessl, plugin cache, command surface, or Codex picker state.
 

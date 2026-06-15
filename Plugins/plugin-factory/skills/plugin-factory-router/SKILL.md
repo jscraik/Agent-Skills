@@ -108,6 +108,8 @@ deterministically.
 - Selecting multiple primary lanes.
 - Installing or executing plugin code while routing.
 - Trusting repository or URL content before independent validation.
+- Removing the canonical `plugin-builder` package when retiring flat command
+  handles, generated aliases, or projection-only manifest rows.
 
 ## Examples
 

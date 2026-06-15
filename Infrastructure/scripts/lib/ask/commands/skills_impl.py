@@ -1067,6 +1067,7 @@ def list_skills(
     archetype: str = "general",
     limit: int = 12,
     advanced: bool = False,
+    visible_only: bool = False,
 ) -> CallResult:
     """
     List discovered catalog skills within the repository, optionally filtered by category or reduced to a deterministic starter subset.
@@ -1077,13 +1078,15 @@ def list_skills(
         starter (bool): When true, return a deterministic subset selected by `archetype` and limited by `limit`.
         archetype (str): Archetype key used to pick starter skills; unknown keys fall back to "general".
         limit (int): Maximum number of skills to return when `starter` is true; coerced to at least 1.
-        advanced (bool): Include advanced/hidden-lane catalog entries when true; otherwise use the default listing.
+        advanced (bool): Backward-compatible no-op alias for the full repo inventory.
+        visible_only (bool): When true, return only the narrower picker/runtime-visible subset.
 
     Returns:
         CallResult: Result with `status == "success"` and `data` containing:
             - "skills": list of objects with `name`, `path` (repo-relative when possible), `category`, and `description`
             - "policy_identity": current policy identity string
-            - "advanced_mode": boolean reflecting the `advanced` parameter
+            - "advanced_mode": boolean showing whether full repo inventory discovery was used
+            - "inventory_mode": "repo" for the full repo inventory or "visible" for the narrower subset
             - When `starter` is true, also includes:
                 - "starter_mode": true
                 - "starter_archetype": resolved archetype key
@@ -1091,7 +1094,8 @@ def list_skills(
     """
     result = CallResult()
     category_token = category.lower().strip() if category else ""
-    discovery_advanced = bool(advanced or category_token)
+    explicit_visible_only = bool(visible_only and not category_token)
+    discovery_advanced = bool(category_token or (not explicit_visible_only and not starter))
     entries = [
         entry
         for entry in discover_catalog_entries(advanced=discovery_advanced)
@@ -1113,12 +1117,16 @@ def list_skills(
     result.data["skills"] = skills_data
     result.data["policy_identity"] = get_policy_identity()
     result.data["advanced_mode"] = discovery_advanced
+    result.data["inventory_mode"] = "repo" if discovery_advanced else "visible"
+    result.data["visible_only"] = explicit_visible_only
     validation_action = "starter" if starter else "list"
     validation_args: list[str] = []
     if category:
         validation_args.extend(["--category", category])
-    if advanced and not starter:
+    if advanced and not starter and not explicit_visible_only:
         validation_args.append("--advanced")
+    if explicit_visible_only and not starter:
+        validation_args.append("--visible-only")
     if starter:
         validation_args.extend(["--archetype", archetype])
         validation_args.extend(["--limit", str(max(1, int(limit)))])
@@ -5580,7 +5588,7 @@ def _skill_install_intake_decision(repo_root: Path, skill_name: str, target_path
             "needs_human_choice",
         ],
         "pre_install_checks": [
-            "inventory existing skills with ./bin/ask skills list --advanced --json",
+            "inventory existing skills with ./bin/ask skills list --json --robot",
             "search Skills/**, Plugins/**/skills/**, and skills-system/** for overlap",
             "compare intent, trigger wording, scripts/assets, safety boundaries, and closeout contract",
             "return an Intake Decision before writing canonical source",

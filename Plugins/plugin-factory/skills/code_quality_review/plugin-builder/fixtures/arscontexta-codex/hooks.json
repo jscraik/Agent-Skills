@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "echo",
+        "args": [
+          "Fixture SessionStart hook"
+        ],
+        "timeout": 3
+      }
+    ],
+    "Stop": []
+  }
+}

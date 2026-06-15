@@ -27,8 +27,10 @@ class TestAskSkillsStarter(unittest.TestCase):
             SimpleNamespace(name="other-skill", source_dir=REPO_ROOT / "utilities" / "other", category="utilities", description="other"),
         ]
 
-        with patch("ask.commands.skills.discover_catalog_entries", return_value=entries):
+        with patch("ask.commands.skills.discover_catalog_entries", return_value=entries) as mocked_discover:
             result = list_skills(REPO_ROOT, starter=True, archetype="delivery", limit=3)
+
+        mocked_discover.assert_called_once_with(advanced=False)
 
         self.assertEqual(result.status, "success")
         self.assertTrue(result.data["starter_mode"])
@@ -36,14 +38,14 @@ class TestAskSkillsStarter(unittest.TestCase):
         names = [item["name"] for item in result.data["skills"]]
         self.assertEqual(names, ["he-plan", "he-work", "coding-harness"])
 
-    def test_default_list_hides_coderabbit_lane_skills(self) -> None:
+    def test_default_list_uses_full_repo_inventory(self) -> None:
         """
-        Verify default skill listing hides plugin lane skills while preserving standalone simplify.
+        Verify default skill listing uses full repo inventory.
         
         Mocks canonical entries that include one router skill, one coderabbit lane skill under
         Plugins/coderabbit/skills, and a standalone simplify skill under Skills/agent-ops. Calls
-        list_skills with default options and asserts the result includes router + standalone simplify
-        (while hidden plugin lanes are excluded).
+        list_skills with default options and asserts the result includes router, lane, and
+        standalone skills from the repo catalog.
         """
         entries = [
             SimpleNamespace(
@@ -66,10 +68,35 @@ class TestAskSkillsStarter(unittest.TestCase):
             ),
         ]
 
-        filtered = [entries[0], entries[2]]
-
-        with patch("ask.commands.skills.discover_catalog_entries", return_value=filtered) as mocked_discover:
+        with patch("ask.commands.skills.discover_catalog_entries", return_value=entries) as mocked_discover:
             result = list_skills(REPO_ROOT)
+
+        mocked_discover.assert_called_once_with(advanced=True)
+
+        self.assertEqual(result.status, "success")
+        names = [item["name"] for item in result.data["skills"]]
+        self.assertEqual(names, ["coderabbit", "code-review", "simplify"])
+        self.assertTrue(result.data.get("advanced_mode"))
+        self.assertEqual(result.data.get("inventory_mode"), "repo")
+
+    def test_visible_only_list_hides_coderabbit_lane_skills(self) -> None:
+        entries = [
+            SimpleNamespace(
+                name="coderabbit",
+                source_dir=REPO_ROOT / "plugins" / "coderabbit" / "skills" / "coderabbit",
+                category="Plugins/coderabbit/skills",
+                description="router",
+            ),
+            SimpleNamespace(
+                name="simplify",
+                source_dir=REPO_ROOT / "Skills" / "agent-ops" / "simplify",
+                category="Skills/agent-ops",
+                description="standalone",
+            ),
+        ]
+
+        with patch("ask.commands.skills.discover_catalog_entries", return_value=entries) as mocked_discover:
+            result = list_skills(REPO_ROOT, visible_only=True)
 
         mocked_discover.assert_called_once_with(advanced=False)
 
@@ -77,6 +104,31 @@ class TestAskSkillsStarter(unittest.TestCase):
         names = [item["name"] for item in result.data["skills"]]
         self.assertEqual(names, ["coderabbit", "simplify"])
         self.assertFalse(result.data.get("advanced_mode"))
+        self.assertEqual(result.data.get("inventory_mode"), "visible")
+        self.assertTrue(result.data.get("visible_only"))
+
+    def test_visible_only_wins_over_advanced_compat_alias(self) -> None:
+        entries = [
+            SimpleNamespace(
+                name="coderabbit",
+                source_dir=REPO_ROOT / "plugins" / "coderabbit" / "skills" / "coderabbit",
+                category="Plugins/coderabbit/skills",
+                description="router",
+            ),
+        ]
+
+        with patch("ask.commands.skills.discover_catalog_entries", return_value=entries) as mocked_discover:
+            result = list_skills(REPO_ROOT, advanced=True, visible_only=True)
+
+        mocked_discover.assert_called_once_with(advanced=False)
+        self.assertEqual(result.status, "success")
+        self.assertFalse(result.data.get("advanced_mode"))
+        self.assertEqual(result.data.get("inventory_mode"), "visible")
+        self.assertTrue(result.data.get("visible_only"))
+        self.assertEqual(
+            result.data["validation_commands"],
+            ["./bin/ask skills list --visible-only --json --robot"],
+        )
 
     def test_advanced_list_includes_coderabbit_lane_skills(self) -> None:
         entries = [
