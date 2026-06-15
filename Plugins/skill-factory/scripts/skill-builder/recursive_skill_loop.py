@@ -925,7 +925,7 @@ def retrieve_and_rank_lessons(
         guidance = normalize_lesson_lines(row.get("guidance"))
         checkpoints = normalize_lesson_lines(row.get("checkpoints"))
         source_note = normalize_lesson_text(row.get("source_note"))
-        arscontexta_stage = normalize_lesson_text(row.get("arscontexta_stage"))
+        methodology_stage = normalize_lesson_text(row.get("methodology_stage"))
         ranked.append(
             {
                 "lesson_id": lesson_id,
@@ -944,7 +944,7 @@ def retrieve_and_rank_lessons(
                 "guidance": guidance,
                 "checkpoints": checkpoints,
                 "source_note": source_note,
-                "arscontexta_stage": arscontexta_stage,
+                "methodology_stage": methodology_stage,
             }
         )
 
@@ -979,8 +979,8 @@ def retrieve_and_rank_lessons(
                 lines.append("- Checkpoints:")
                 for entry in item["checkpoints"]:
                     lines.append(f"  - {entry}")
-            if item["arscontexta_stage"]:
-                lines.append(f"- Ars Contexta stage: {item['arscontexta_stage']}")
+            if item["methodology_stage"]:
+                lines.append(f"- Methodology stage: {item['methodology_stage']}")
             if item["source_note"]:
                 lines.append(f"- Source note: {item['source_note']}")
         injection_text = "\n".join(lines)

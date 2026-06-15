@@ -412,7 +412,7 @@ def parse_args() -> argparse.Namespace:
     today = datetime.now(timezone.utc).date().isoformat()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", default=str(ROOT), help="Repository root")
-    parser.add_argument("--expected-count", type=int, default=72, help="Expected active skill count")
+    parser.add_argument("--expected-count", type=int, default=73, help="Expected active skill count")
     parser.add_argument(
         "--profile-index-out",
         default="Infrastructure/artifacts/skill-graphs/onboarding/profile-index.json",

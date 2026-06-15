@@ -95,9 +95,9 @@ Read when:
 
 ## Validation
 
-```bash
+~~~bash
 bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh
-```
+~~~
 
 Fail fast: stop at first failed gate and report blocker text.
 

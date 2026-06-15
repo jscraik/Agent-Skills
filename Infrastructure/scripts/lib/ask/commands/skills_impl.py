@@ -888,6 +888,21 @@ def _entry_matches_category(entry, category_token: str, owner_by_handle: dict[st
     return any(category_token in value.lower() for value in searchable if value)
 
 
+def _entry_visible_for_picker(entry, repo_root: Path) -> bool:
+    """Return whether an entry belongs in the narrow picker-visible inventory."""
+    source_dir = getattr(entry, "source_dir", None)
+    if not isinstance(source_dir, Path):
+        return False
+    try:
+        rel_parts = source_dir.relative_to(repo_root).parts
+    except ValueError:
+        return False
+    lower_parts = tuple(part.lower() for part in rel_parts)
+    if len(lower_parts) >= 4 and lower_parts[0] == "plugins" and lower_parts[2] == "skills":
+        return lower_parts[1] == lower_parts[3]
+    return True
+
+
 def _refresh_catalog_projections(repo_root: Path, dry_run: bool = False) -> list[str]:
     """
     Regenerate root catalog projections from the default catalog surface.
@@ -1095,13 +1110,18 @@ def list_skills(
     """
     result = CallResult()
     category_token = category.lower().strip() if category else ""
-    explicit_visible_only = bool(visible_only and not category_token)
-    discovery_advanced = bool(category_token or (not explicit_visible_only and not starter))
+    explicit_visible_only = bool(visible_only)
+    discovery_advanced = bool(
+        (category_token and not explicit_visible_only)
+        or (not explicit_visible_only and not starter)
+    )
     entries = [
         entry
         for entry in discover_catalog_entries(advanced=discovery_advanced)
         if entry.source_dir.is_relative_to(repo_root)
     ]
+    if explicit_visible_only:
+        entries = [entry for entry in entries if _entry_visible_for_picker(entry, repo_root)]
     if starter:
         entries = _starter_entries(entries, archetype=archetype, limit=limit)
     skills_data = []
@@ -5539,7 +5559,7 @@ def _skill_install_intake_decision(repo_root: Path, skill_name: str, target_path
     """
     Analyze existing repository skills for naming/path conflicts and determine installation compatibility.
     
-    Scans Skills/** for existing skills with similar names or directory names, determines an installation
+    Scans the canonical catalog for existing skills with similar names or directory names, determines an installation
     outcome based on conflict severity (install_new, keep_separate, needs_human_choice, reject_duplicate),
     and returns a comprehensive intake decision payload with overlapping candidates, pre-install checks,
     compatibility requirements, and post-install gates.
@@ -5550,14 +5570,23 @@ def _skill_install_intake_decision(repo_root: Path, skill_name: str, target_path
     """
     normalized_name = skill_name.lower().strip()
     matches: list[dict[str, Any]] = []
-    for skill_md in sorted(repo_root.glob("Skills/**/SKILL.md")):
-        skill_dir = skill_md.parent
+    catalog_entries = sorted(
+        (
+            entry
+            for entry in discover_catalog_entries(advanced=True)
+            if entry.source_dir.is_relative_to(repo_root)
+        ),
+        key=lambda entry: entry.source_dir.relative_to(repo_root).as_posix(),
+    )
+    for entry in catalog_entries:
+        skill_dir = entry.source_dir
+        skill_md = skill_dir / "SKILL.md"
         try:
             frontmatter = _read_skill_frontmatter_fields(skill_md)
         except OSError:
             frontmatter = {}
-        local_name = str(frontmatter.get("name") or skill_dir.name)
-        local_description = str(frontmatter.get("description") or "")
+        local_name = str(frontmatter.get("name") or entry.name or skill_dir.name)
+        local_description = str(frontmatter.get("description") or entry.description or "")
         name_ratio = difflib.SequenceMatcher(None, normalized_name, local_name.lower()).ratio()
         path_ratio = difflib.SequenceMatcher(None, normalized_name, skill_dir.name.lower()).ratio()
         score = max(name_ratio, path_ratio)

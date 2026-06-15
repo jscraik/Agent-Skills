@@ -5,8 +5,8 @@ Use this when hardening skill-factory output or explaining why a skill run is bl
 ## Required Ladder
 
 1. Run `./bin/ask skills audit <target> --level strict --json --robot`.
-2. Run `./bin/ask evals run <target> --mode smoke --json --robot`.
-3. Run `python3 Infrastructure/bin/ask skills external-review <target> --audit-level compat --json`.
+2. Then run `./bin/ask evals run <target> --mode smoke --json --robot`.
+3. Next, execute `python3 Infrastructure/bin/ask skills external-review <target> --audit-level compat --json`.
 
 Stop at the first failed required gate unless the user explicitly asks for a full matrix.
 

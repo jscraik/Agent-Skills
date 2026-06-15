@@ -12,8 +12,8 @@ import unittest
 from pathlib import Path
 
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
-SCRIPT_PATH = REPO_ROOT / "utilities" / "skill-builder" / "scripts" / "recursive_skill_loop.py"
+REPO_ROOT = Path(__file__).resolve().parents[4]
+SCRIPT_PATH = Path(__file__).with_name("recursive_skill_loop.py")
 PROFILE_PATH = (
     REPO_ROOT / "docs" / "skill-graphs" / "schemas" / "examples" / "ui-skills-profile.example.json"
 )
@@ -249,7 +249,7 @@ class RecursiveLoopCaptureTests(unittest.TestCase):
                 "Did the guidance restate a complete state matrix?",
                 "Did the guidance define focus, contrast, and reduced-motion requirements?",
             ],
-            "arscontexta_stage": "documentation",
+            "methodology_stage": "documentation",
             "source_note": "/docs/skill-graphs/pilots/interventions/frontend-ui-design-accessibility-before-polish.md",
         }
         lessons_file.write_text(json.dumps(row) + "\n", encoding="utf-8")
@@ -268,11 +268,11 @@ class RecursiveLoopCaptureTests(unittest.TestCase):
         self.assertEqual(selected["summary"], row["summary"])
         self.assertEqual(selected["guidance"], row["guidance"])
         self.assertEqual(selected["checkpoints"], row["checkpoints"])
-        self.assertEqual(selected["arscontexta_stage"], "documentation")
+        self.assertEqual(selected["methodology_stage"], "documentation")
         self.assertIn("Summary: Front-load accessibility and state coverage before decorative polish.", injection["injection_text"])
         self.assertIn("Restate default, loading, empty, error, and disabled states before proposing embellishment.", injection["injection_text"])
         self.assertIn("Did the guidance define focus, contrast, and reduced-motion requirements?", injection["injection_text"])
-        self.assertIn("Ars Contexta stage: documentation", injection["injection_text"])
+        self.assertIn("Methodology stage: documentation", injection["injection_text"])
         self.assertIn(
             "Source note: /docs/skill-graphs/pilots/interventions/frontend-ui-design-accessibility-before-polish.md",
             injection["injection_text"],

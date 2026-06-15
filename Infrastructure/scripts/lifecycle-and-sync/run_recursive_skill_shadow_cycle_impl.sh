@@ -134,16 +134,13 @@ fi
 example_profile="Docs/skill-graphs/schemas/examples/ui-skills-profile.example.json"
 loop_script="Plugins/skill-factory/scripts/skill-builder/recursive_skill_loop.py"
 report_script="Plugins/skill-factory/scripts/skill-builder/build_recursive_skill_shadow_report.py"
-arscontexta_queue_script="Plugins/skill-factory/scripts/skill-builder/build_arscontexta_intervention_queue.py"
 shadow_md="Docs/skill-graphs/pilots/ui-skills-shadow-results.md"
 readout_md="Docs/skill-graphs/pilots/ui-skills-pilot-readout.md"
-arscontexta_queue_md="Docs/skill-graphs/pilots/arscontexta-intervention-queue.md"
 dashboard_json="Infrastructure/artifacts/skill-graphs/pilot/shadow-dashboard.json"
 baseline_snapshot_json="Infrastructure/artifacts/skill-graphs/pilot/shadow-baseline.json"
 daily_health_md="Docs/skill-graphs/telemetry/daily-skill-health.md"
 failure_patterns_jsonl="Infrastructure/artifacts/skill-graphs/telemetry/failure-pattern-candidates.jsonl"
 promotion_queue_md="Infrastructure/artifacts/skill-graphs/telemetry/promotion-queue.md"
-arscontexta_queue_json="Infrastructure/artifacts/skill-graphs/telemetry/arscontexta-intervention-queue.json"
 
 echo "[shadow-cycle] runs_per_profile=${runs_per_profile}"
 echo "[shadow-cycle] window_days=${window_days}"
@@ -242,15 +239,7 @@ python3 "$report_script" \
   --failure-patterns-jsonl "$failure_patterns_jsonl" \
   --promotion-queue-md "$promotion_queue_md"
 
-python3 "$arscontexta_queue_script" \
-  --runs-root "$out_root" \
-  --pilot-profiles-file "$profiles_file" \
-  --dashboard-json "$dashboard_json" \
-  --failure-patterns-jsonl "$failure_patterns_jsonl" \
-  --output-json "$arscontexta_queue_json" \
-  --output-md "$arscontexta_queue_md"
-
-for output in "$shadow_md" "$readout_md" "$arscontexta_queue_md" "$dashboard_json" "$baseline_snapshot_json" "$daily_health_md" "$failure_patterns_jsonl" "$promotion_queue_md" "$arscontexta_queue_json"; do
+for output in "$shadow_md" "$readout_md" "$dashboard_json" "$baseline_snapshot_json" "$daily_health_md" "$failure_patterns_jsonl" "$promotion_queue_md"; do
   require_file_nonempty "$output" "$(basename "$output")"
 done
 

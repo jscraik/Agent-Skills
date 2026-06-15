@@ -8,7 +8,10 @@ Use this reference when `hooks/` are requested in a plugin scaffold or conversio
 - Provide traceable source anchors for conversion decisions.
 
 ## Baseline Revision
-- Local verification against `/Users/jamiecraik/dev/codex` on 2026-05-09.
+- Verify against a Codex checkout at a recorded commit hash; source anchors
+  below are relative to that checkout root.
+- Historical baseline: local verification on 2026-05-09. The original local
+  checkout path is intentionally omitted because it is not reproducible.
 
 ## Template scaffold workflow
 

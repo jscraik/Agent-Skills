@@ -19,7 +19,7 @@ permission_profile:
     read:
       - "target skill package"
       - "repo validation scripts"
-      - "optional ~/.agents evidence provider summaries"
+      - "optional evidence provider summaries when a repo documents the source path"
     write:
       - "canonical target skill package"
       - "repo-local validation artifacts"
@@ -37,7 +37,7 @@ risks:
   - "runtime projection edits can silently drift from canonical source"
   - "generated media can be falsely claimed if cache-copy and existence checks are skipped"
 output_contract:
-  schema_version: "1"
+  schema_version: "1.1"
   required_fields:
     - "schema_version"
     - "mode"

@@ -62,9 +62,6 @@ if str(LIFECYCLE_SYNC_DIR) not in sys.path:
     sys.path.insert(0, str(LIFECYCLE_SYNC_DIR))
 from canonical_skill_roots import CANONICAL_STANDALONE_SKILL_ROOTS  # noqa: E402
 
-CODEX_AGENT_WRITER = (
-    REPO_ROOT / "utilities" / "codex-agent-creator" / "scripts" / "write_role_config.sh"
-)
 DOCS_EXPERT_ASSETS = REPO_ROOT / "Infrastructure" / "references" / "deferred-skill-context" / "agent-ops-docs-expert" / "assets"
 DEFAULT_INSTALL_POLICY = "AVAILABLE"
 DEFAULT_AUTH_POLICY = "ON_INSTALL"
@@ -2266,35 +2263,31 @@ def _plugin_agent_instructions(plugin_name: str) -> str:
     )
 
 
+def _toml_multiline_string(value: str) -> str:
+    return '"""' + value.replace('"""', '\"\"\"') + '"""'
+
+
 def _scaffold_plugin_agent(plugin_root: Path, agent_name: str, force: bool) -> str:
     output_path = plugin_root / "agents" / f"{agent_name}.toml"
     if output_path.exists():
-        return f"codex-agent-builder: kept existing plugin agent at {output_path}"
+        return f"plugin-builder: kept existing plugin agent at {output_path}"
 
-    command = [
-        "bash",
-        str(CODEX_AGENT_WRITER),
-        "--output",
-        str(output_path),
-        "--role-name",
-        agent_name,
-        "--model",
-        "gpt-5.4-mini",
-        "--reasoning",
-        "medium",
-        "--developer-instructions",
-        _plugin_agent_instructions(agent_name),
-        "--sandbox-mode",
-        "workspace-write",
-        "--network-access",
-        "false",
-        "--writable-roots",
-        str(plugin_root),
-    ]
-    output = _run_helper(command, f"codex-agent-builder scaffold for {agent_name}")
-    if force and output:
-        return f"codex-agent-builder: created {output_path}\n{output}"
-    return f"codex-agent-builder: created {output_path}"
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    description = (
+        f"Handles {agent_name} plugin workflows inside the generated plugin package."
+    )
+    payload = "\n".join(
+        [
+            f'name = "{agent_name}"',
+            f'description = "{description}"',
+            f"developer_instructions = {_toml_multiline_string(_plugin_agent_instructions(agent_name))}",
+            'model = "gpt-5.4-mini"',
+            'model_reasoning_effort = "medium"',
+            "",
+        ]
+    )
+    output_path.write_text(payload, encoding="utf-8")
+    return f"plugin-builder: created {output_path}"
 
 
 def _detect_deprecated_command_files(plugin_root: Path, resolved_paths: dict[str, list[dict[str, Any]]]) -> list[str]:

@@ -2,6 +2,7 @@ import sys
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
+from typing import Any, Iterator
 from unittest.mock import patch
 
 
@@ -9,7 +10,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from ask.commands.skills import STARTER_ARCHETYPES, list_skills
+from ask.commands.skills import STARTER_ARCHETYPES, _skill_install_intake_decision, list_skills
 
 
 class TestAskSkillsStarter(unittest.TestCase):
@@ -80,12 +81,19 @@ class TestAskSkillsStarter(unittest.TestCase):
         self.assertEqual(result.data.get("inventory_mode"), "repo")
 
     def test_visible_only_list_hides_coderabbit_lane_skills(self) -> None:
+        """Verify visible-only mode excludes plugin lane skills from inventory."""
         entries = [
             SimpleNamespace(
                 name="coderabbit",
                 source_dir=REPO_ROOT / "plugins" / "coderabbit" / "skills" / "coderabbit",
                 category="Plugins/coderabbit/skills",
                 description="router",
+            ),
+            SimpleNamespace(
+                name="code-review",
+                source_dir=REPO_ROOT / "plugins" / "coderabbit" / "skills" / "code-review",
+                category="Plugins/coderabbit/skills",
+                description="lane",
             ),
             SimpleNamespace(
                 name="simplify",
@@ -103,11 +111,13 @@ class TestAskSkillsStarter(unittest.TestCase):
         self.assertEqual(result.status, "success")
         names = [item["name"] for item in result.data["skills"]]
         self.assertEqual(names, ["coderabbit", "simplify"])
+        self.assertNotIn("code-review", names)
         self.assertFalse(result.data.get("advanced_mode"))
         self.assertEqual(result.data.get("inventory_mode"), "visible")
         self.assertTrue(result.data.get("visible_only"))
 
     def test_visible_only_wins_over_advanced_compat_alias(self) -> None:
+        """Verify visible-only mode takes precedence over the advanced alias."""
         entries = [
             SimpleNamespace(
                 name="coderabbit",
@@ -128,6 +138,61 @@ class TestAskSkillsStarter(unittest.TestCase):
         self.assertEqual(
             result.data["validation_commands"],
             ["./bin/ask skills list --visible-only --json --robot"],
+        )
+
+    def test_visible_only_wins_when_category_is_set(self) -> None:
+        """Verify visible-only mode stays active when filtering by category."""
+        entries = [
+            SimpleNamespace(
+                name="coderabbit",
+                source_dir=REPO_ROOT / "plugins" / "coderabbit" / "skills" / "coderabbit",
+                category="Plugins/coderabbit/skills",
+                description="router",
+            ),
+        ]
+
+        with patch("ask.commands.skills.discover_catalog_entries", return_value=entries) as mocked_discover:
+            result = list_skills(REPO_ROOT, category="coderabbit", visible_only=True)
+
+        mocked_discover.assert_called_once_with(advanced=False)
+        self.assertEqual(result.status, "success")
+        self.assertFalse(result.data.get("advanced_mode"))
+        self.assertEqual(result.data.get("inventory_mode"), "visible")
+        self.assertTrue(result.data.get("visible_only"))
+        self.assertEqual(
+            result.data["validation_commands"],
+            ["./bin/ask skills list --category coderabbit --visible-only --json --robot"],
+        )
+
+    def test_install_intake_scans_plugin_owned_canonical_skills(self) -> None:
+        """Verify intake detects conflicts with plugin-owned canonical skills."""
+        entries = [
+            SimpleNamespace(
+                name="plugin-builder",
+                source_dir=REPO_ROOT
+                / "Plugins"
+                / "plugin-factory"
+                / "skills"
+                / "code_quality_review"
+                / "plugin-builder",
+                category="Plugins/plugin-factory/skills",
+                description="plugin builder",
+            ),
+        ]
+
+        with patch("ask.commands.skills_impl.discover_catalog_entries", return_value=entries) as mocked_discover:
+            decision = _skill_install_intake_decision(
+                REPO_ROOT,
+                "plugin-builder",
+                REPO_ROOT / "Skills" / "agent-ops" / "plugin-builder",
+            )
+
+        mocked_discover.assert_called_once_with(advanced=True)
+        self.assertEqual(decision["schema_version"], "skill-install-intake.v1")
+        self.assertEqual(decision["outcome"], "needs_human_choice")
+        self.assertEqual(
+            decision["local_overlap_candidates"][0]["path"],
+            "Plugins/plugin-factory/skills/code_quality_review/plugin-builder",
         )
 
     def test_advanced_list_includes_coderabbit_lane_skills(self) -> None:
@@ -305,10 +370,10 @@ class TestAskSkillsStarter(unittest.TestCase):
         self.assertEqual(result.status, "success")
         self.assertTrue(result.data.get("advanced_mode"))
 
-    def test_visible_only_with_category_suppresses_visible_only_mode(self) -> None:
+    def test_visible_only_with_category_preserves_visible_only_mode(self) -> None:
         """
-        When both visible_only and category are provided, category takes precedence
-        and the result should report advanced_mode=True, inventory_mode="repo".
+        When both visible_only and category are provided, visible-only mode
+        remains active and the category filter narrows that inventory.
         """
         entries = [
             SimpleNamespace(
@@ -322,10 +387,11 @@ class TestAskSkillsStarter(unittest.TestCase):
              patch("ask.commands.skills.handles_report", return_value={"handles": []}):
             result = list_skills(REPO_ROOT, category="agent-ops", visible_only=True)
 
-        mock_discover.assert_called_once_with(advanced=True)
+        mock_discover.assert_called_once_with(advanced=False)
         self.assertEqual(result.status, "success")
-        self.assertFalse(result.data.get("visible_only"))
-        self.assertEqual(result.data.get("inventory_mode"), "repo")
+        self.assertFalse(result.data.get("advanced_mode"))
+        self.assertTrue(result.data.get("visible_only"))
+        self.assertEqual(result.data.get("inventory_mode"), "visible")
 
     def test_starter_mode_validation_command_includes_archetype_and_limit(self) -> None:
         """
@@ -386,7 +452,7 @@ class TestManifestJsonlSchema(unittest.TestCase):
     """Validate the structure of manifest.jsonl files updated in this PR."""
 
     MANIFEST_DIR = REPO_ROOT / ".skillsets"
-    REQUIRED_TOP_LEVEL_FIELDS = {
+    REQUIRED_TOP_LEVEL_FIELDS: frozenset[str] = frozenset({
         "description",
         "exclusions",
         "id",
@@ -399,14 +465,14 @@ class TestManifestJsonlSchema(unittest.TestCase):
         "skill_set",
         "source_path",
         "triggers",
-    }
-    REQUIRED_PROVENANCE_FIELDS = {
+    })
+    REQUIRED_PROVENANCE_FIELDS: frozenset[str] = frozenset({
         "generator",
         "policy_identity",
         "projection_mode",
         "source_revision",
         "source_sha256",
-    }
+    })
     EXPECTED_SOURCE_REVISION = "5983ceeb"
 
     def _iter_manifest_records(self) -> Iterator[tuple[Path, int, dict[str, Any]]]:

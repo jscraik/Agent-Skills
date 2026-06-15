@@ -1,21 +1,22 @@
 # Current Codex Plugin Runtime Contract
 
-This reference captures Codex plugin facts from the current `~/dev/codex`
-runtime. Use it to harden plugin packages without confusing package validity
-with runtime availability.
+This reference captures Codex plugin facts from a checked-out Codex runtime.
+Use it to harden plugin packages without confusing package validity with
+runtime availability. Record the exact Codex commit used for verification next
+to any refreshed evidence.
 
 ## Source Anchors
 
 - Plugin manifest parsing:
-  `/Users/jamiecraik/dev/codex/codex-rs/core-plugins/src/manifest.rs`
+  `codex-rs/core-plugins/src/manifest.rs`
 - Plugin loading and extraction:
-  `/Users/jamiecraik/dev/codex/codex-rs/core-plugins/src/loader.rs`
+  `codex-rs/core-plugins/src/loader.rs`
 - Startup sync and cache behavior:
-  `/Users/jamiecraik/dev/codex/codex-rs/core-plugins/src/startup_sync.rs`
+  `codex-rs/core-plugins/src/startup_sync.rs`
 - MCP tool discovery:
-  `/Users/jamiecraik/dev/codex/codex-rs/tools/src/tool_discovery.rs`
+  `codex-rs/tools/src/tool_discovery.rs`
 - MCP tool execution:
-  `/Users/jamiecraik/dev/codex/codex-rs/tools/src/mcp_tool.rs`
+  `codex-rs/tools/src/mcp_tool.rs`
 
 ## Manifest Paths
 

@@ -14,8 +14,7 @@ def test_skill_gate_help() -> None:
     result = subprocess.run(
         [sys.executable, str(script), "--help"],
         check=False,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        capture_output=True,
         text=True,
     )
     assert result.returncode == 0, result.stderr

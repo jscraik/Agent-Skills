@@ -1745,7 +1745,7 @@ class RunSkillEvalsModeTests(unittest.TestCase):
 
                     What should this skill help you do?
 
-                    ## Copy paste payload examples
+                    ## Copy-paste payload examples
 
                     ## Round 6: Confirmation
 
@@ -1879,7 +1879,7 @@ class RunSkillEvalsModeTests(unittest.TestCase):
             )
             (skill_dir / "package.json").write_text('{"name":"demo-skill"}\n', encoding="utf-8")
             (refs_dir / "discovery-interview.md").write_text(
-                "## Request user input mini-templates\n\nWhat should this skill do?\n\n## Copy paste payload examples\n",
+                "## Request user input mini-templates\n\nWhat should this skill do?\n\n## Copy-paste payload examples\n",
                 encoding="utf-8",
             )
             (refs_dir / "evals.yaml").write_text(
@@ -2062,7 +2062,7 @@ class RunSkillEvalsModeTests(unittest.TestCase):
 
                     Which documentation surface should this update target first?
 
-                    ## Copy paste payload examples
+                    ## Copy-paste payload examples
 
                     ## Round 6: Confirmation
 
@@ -2144,7 +2144,7 @@ class RunSkillEvalsModeTests(unittest.TestCase):
 
                     What should this skill help you do?
 
-                    ## Copy paste payload examples
+                    ## Copy-paste payload examples
                     """
                 ).strip()
                 + "\n",
@@ -2242,7 +2242,7 @@ class RunSkillEvalsModeTests(unittest.TestCase):
 
                     What should this skill help you do?
 
-                    ## Copy paste payload examples
+                    ## Copy-paste payload examples
                     """
                 ).strip()
                 + "\n",

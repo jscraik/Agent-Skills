@@ -16,7 +16,7 @@ Why this matters: skill-builder must patch canonical source and keep one focused
 
 Am I allowed to edit the canonical skill source, or should I only review and report?
 
-## Copy paste payload examples
+## Copy-paste payload examples
 
 Ambiguous target:
 
