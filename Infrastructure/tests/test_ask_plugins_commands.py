@@ -803,10 +803,8 @@ class TestAskPluginsCommands(unittest.TestCase):
             self.repo_root
             / "Plugins"
             / "plugin-factory"
-            / "skills"
-            / "code_quality_review"
-            / "plugin-builder"
             / "scripts"
+            / "plugin-builder"
             / "plugin_builder.py"
         )
         builder_script.parent.mkdir(parents=True, exist_ok=True)

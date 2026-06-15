@@ -324,6 +324,19 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
         self.assertFalse(proof["gates"]["codex_user_runtime_ready"])
         self.assertFalse(proof["gates"]["codex_user_link"])
         self.assertFalse(proof["gates"]["agents_user_link"])
+        recovery_commands = proof["runtime_diagnostics"]["recovery_commands"]
+        self.assertEqual(
+            recovery_commands[0]["command"],
+            "./bin/ask skills sync --scope user --projection rooted --dry-run --json --robot",
+        )
+        self.assertEqual(
+            recovery_commands[1]["command"],
+            "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
+        )
+        self.assertEqual(
+            recovery_commands[2]["command"],
+            "./bin/ask skills sync --scope user --projection rooted --json --robot",
+        )
 
     def test_skills_proof_requires_direct_picker_projection_for_direct_handles(self) -> None:
         repo_root = self.temp_dir / "repo"
@@ -345,6 +358,20 @@ class TestCommandHandleProof(CommandSurfaceTempDirTestCase):
         self.assertTrue(proof["gates"]["canonical_source_exists"])
         self.assertFalse(proof["gates"]["direct_runtime_projection"])
         self.assertEqual(proof["runtime_failure"]["failed_check_id"], "direct_runtime_projection")
+        self.assertIn("--projection flat --dry-run", proof["runtime_failure"]["recovery_guidance"])
+        recovery_commands = proof["runtime_diagnostics"]["recovery_commands"]
+        self.assertEqual(
+            recovery_commands[0]["command"],
+            "./bin/ask skills sync --scope user --projection flat --dry-run --json --robot",
+        )
+        self.assertEqual(
+            recovery_commands[1]["command"],
+            "./bin/ask skills sync --scope workspace --projection flat --json --robot",
+        )
+        self.assertEqual(
+            recovery_commands[2]["command"],
+            "./bin/ask skills sync --scope user --projection flat --json --robot",
+        )
         self.assertIn("direct_runtime_projection", proof["gate_policy"]["required"])
 
     def test_skills_proof_passes_when_agents_runtime_is_linked(self) -> None:

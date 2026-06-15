@@ -209,11 +209,11 @@ Use Codex `/goal` for explicit long-running continuation only. A goal preserves 
 Validate plugin contract and marketplace registration:
 
 ```sh
-python3 Plugins/plugin-factory/skills/code_quality_review/plugin-factory-router/scripts/plugin_builder.py validate Plugins/harness-engineering --require-marketplace --marketplace-path .agents/Plugins/marketplace.json
+python3 Plugins/plugin-factory/scripts/plugin-builder/plugin_builder.py validate Plugins/harness-engineering --require-marketplace --marketplace-path .agents/Plugins/marketplace.json
 ```
 
 Audit marketplace alignment:
 
 ```sh
-python3 Plugins/plugin-factory/skills/code_quality_review/plugin-factory-router/scripts/plugin_builder.py audit-marketplace --marketplace-path .agents/Plugins/marketplace.json --plugins-path Plugins
+python3 Plugins/plugin-factory/scripts/plugin-builder/plugin_builder.py audit-marketplace --marketplace-path .agents/Plugins/marketplace.json --plugins-path Plugins
 ```

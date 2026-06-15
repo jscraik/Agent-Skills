@@ -842,6 +842,12 @@ def _write_json_atomic(path: str, payload: dict[str, object]) -> None:
 
 def _plugin_builder_script() -> Path:
     script_path = Path(__file__).resolve()
+    plugin_root: Path | None = None
+    for candidate in script_path.parents:
+        if candidate.name == "plugin-factory" and (candidate / "skills").is_dir():
+            plugin_root = candidate
+            break
+
     repo_root: Path | None = None
     for candidate in script_path.parents:
         if (candidate / ".git").exists() and (candidate / "scripts").is_dir():
@@ -850,18 +856,22 @@ def _plugin_builder_script() -> Path:
     if repo_root is None:
         repo_root = script_path.parents[5]
 
-    candidates = (
+    candidates = []
+    if plugin_root is not None:
+        candidates.append(plugin_root / "scripts" / "plugin-builder" / "plugin_builder.py")
+    candidates.extend([
+        repo_root / "Plugins" / "plugin-factory" / "scripts" / "plugin-builder" / "plugin_builder.py",
         repo_root / "Plugins" / "plugin-factory" / "skills" / "code_quality_review" / "plugin-builder" / "scripts" / "plugin_builder.py",
         repo_root / "plugins" / "plugin-factory" / "skills" / "plugin-builder" / "scripts" / "plugin_builder.py",
         repo_root / "plugins" / "plugin-factory" / "skills" / "code_quality_review" / "plugin-builder" / "scripts" / "plugin_builder.py",
         repo_root / "utilities" / "plugin-builder" / "scripts" / "plugin_builder.py",
-    )
+    ])
     for candidate in candidates:
         if candidate.exists():
             return candidate
     raise InstallError(
-        "Plugin validator script not found under Plugins/plugin-factory/skills/code_quality_review/plugin-builder "
-        "or Skills/plugin-builder."
+        "Plugin validator script not found under Plugins/plugin-factory/scripts/plugin-builder "
+        "or a legacy plugin-builder location."
     )
 
 

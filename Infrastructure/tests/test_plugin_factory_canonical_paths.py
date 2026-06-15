@@ -25,10 +25,8 @@ PLUGIN_BUILDER_SCRIPT = (
     REPO_ROOT
     / "Plugins"
     / "plugin-factory"
-    / "skills"
-    / "code_quality_review"
-    / "plugin-builder"
     / "scripts"
+    / "plugin-builder"
     / "plugin_builder.pyw"
 )
 PLUGIN_CREATOR_SKILL = (

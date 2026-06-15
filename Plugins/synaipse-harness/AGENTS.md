@@ -101,8 +101,8 @@ plugin-eval analyze Plugins/synaipse-harness --format json
 Plugin checks:
 
 ```bash
-python3 Plugins/plugin-factory/scripts/plugin-factory-router/plugin_builder.py validate Plugins/synaipse-harness --require-marketplace --marketplace-path .agents/Plugins/marketplace.json
-python3 Plugins/plugin-factory/scripts/plugin-factory-router/plugin_builder.py audit-marketplace --marketplace-path .agents/Plugins/marketplace.json --plugins-path Plugins
+python3 Plugins/plugin-factory/scripts/plugin-builder/plugin_builder.py validate Plugins/synaipse-harness --require-marketplace --marketplace-path .agents/Plugins/marketplace.json
+python3 Plugins/plugin-factory/scripts/plugin-builder/plugin_builder.py audit-marketplace --marketplace-path .agents/Plugins/marketplace.json --plugins-path Plugins
 ```
 
 Skill checks:
