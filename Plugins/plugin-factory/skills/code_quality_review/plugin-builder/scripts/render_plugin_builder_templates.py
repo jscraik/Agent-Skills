@@ -41,6 +41,17 @@ DEFAULT_CONTEXT: dict[str, str] = {
 
 
 def build_context(*, use_defaults: bool, json_context: dict[str, str], cli_context: dict[str, str]) -> dict[str, str]:
+    """
+    Build a template context by merging provided contexts with optional defaults.
+    
+    Parameters:
+    	use_defaults (bool): Whether to seed the context with DEFAULT_CONTEXT
+    	json_context (dict[str, str]): Context loaded from a JSON file
+    	cli_context (dict[str, str]): Context from CLI variable overrides
+    
+    Returns:
+    	dict[str, str]: A merged context dictionary for template rendering
+    """
     return build_context_with_defaults(
         default_context=DEFAULT_CONTEXT,
         use_defaults=use_defaults,
@@ -50,6 +61,12 @@ def build_context(*, use_defaults: bool, json_context: dict[str, str], cli_conte
 
 
 def render_from_paths(*, template_path: Path, context: dict[str, str]) -> str:
+    """
+    Render a template file with the provided context variables.
+    
+    Returns:
+        str: Rendered template content.
+    """
     return render_from_path(template_path=template_path, context=context)
 
 
@@ -84,6 +101,19 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 
 def main(argv: list[str] | None = None) -> int:
+    """
+    Render a plugin-builder hooks template.
+    
+    Parses command-line arguments to load template variables from JSON and CLI
+    overrides, combines them with an optional default context, renders the
+    template, and outputs the result to a file or stdout.
+    
+    Parameters:
+        argv: Optional list of command-line arguments; if None, uses sys.argv.
+    
+    Returns:
+        Exit code: 0 on successful render and output, 1 if template rendering fails.
+    """
     args = parse_args(argv)
     template_path = Path(args.template).expanduser().resolve()
     output_path = Path(args.output).expanduser().resolve()

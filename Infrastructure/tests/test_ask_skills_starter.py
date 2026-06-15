@@ -108,6 +108,13 @@ class TestAskSkillsStarter(unittest.TestCase):
         self.assertTrue(result.data.get("visible_only"))
 
     def test_visible_only_wins_over_advanced_compat_alias(self) -> None:
+        """
+        Validate that the visible_only parameter takes precedence over advanced when both are specified.
+        
+        When list_skills is called with both advanced=True and visible_only=True, the visible_only
+        behavior should override, causing discover_catalog_entries to be called with advanced=False,
+        and the result metadata to reflect visible mode with advanced_mode set to false.
+        """
         entries = [
             SimpleNamespace(
                 name="coderabbit",

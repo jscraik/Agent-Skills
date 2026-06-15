@@ -1071,7 +1071,7 @@ def list_skills(
 ) -> CallResult:
     """
     List discovered catalog skills within the repository, optionally filtered by category or reduced to a deterministic starter subset.
-
+    
     Parameters:
         repo_root (Path): Repository root used to filter discovered catalog entries; entries outside this root are excluded.
         category (Optional[str]): Case-insensitive substring applied to each entry's category; omit to include all categories.
@@ -1080,13 +1080,14 @@ def list_skills(
         limit (int): Maximum number of skills to return when `starter` is true; coerced to at least 1.
         advanced (bool): Backward-compatible no-op alias for the full repo inventory.
         visible_only (bool): When true, return only the narrower picker/runtime-visible subset.
-
+    
     Returns:
         CallResult: Result with `status == "success"` and `data` containing:
             - "skills": list of objects with `name`, `path` (repo-relative when possible), `category`, and `description`
             - "policy_identity": current policy identity string
             - "advanced_mode": boolean showing whether full repo inventory discovery was used
             - "inventory_mode": "repo" for the full repo inventory or "visible" for the narrower subset
+            - "visible_only": boolean indicating whether the narrower runtime-visible subset was explicitly requested
             - When `starter` is true, also includes:
                 - "starter_mode": true
                 - "starter_archetype": resolved archetype key

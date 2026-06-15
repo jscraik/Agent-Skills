@@ -21,6 +21,12 @@ from render_plugin_builder_templates import (
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    """
+    Parse command-line arguments for template drift checking.
+    
+    Returns:
+    	argparse.Namespace: Namespace object containing parsed arguments, including template path, output path, variables, and configuration flags.
+    """
     parser = argparse.ArgumentParser(description="Check drift for plugin-builder hooks template output.")
     parser.add_argument("--template", default=str(DEFAULT_TEMPLATE_PATH), help="Path to template file.")
     parser.add_argument("--output", default=str(DEFAULT_OUTPUT_PATH), help="Path to rendered output file.")
@@ -33,6 +39,16 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 
 def main(argv: list[str] | None = None) -> int:
+    """
+    Render a template with provided context and compare against an existing output file.
+    
+    In update mode (--update), writes the rendered content to the output file. In check mode,
+    compares the actual and expected content and reports any drift with a unified diff.
+    
+    Returns:
+        int: Exit code 0 on successful render/update or if no drift is detected,
+             1 on render errors, missing output file, or detected drift.
+    """
     args = parse_args(argv)
     template_path = Path(args.template).expanduser().resolve()
     output_path = Path(args.output).expanduser().resolve()

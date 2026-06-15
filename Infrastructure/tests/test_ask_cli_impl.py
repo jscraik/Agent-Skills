@@ -120,13 +120,14 @@ class TestAskCLI(unittest.TestCase):
 
     def test_skills_list(self):
         """
-        Validate that the CLI `ask skills list --json` exposes a skills catalogue with the expected envelope and fields.
-
+        Validate that `ask skills list --json` returns a skills catalogue with required envelope, mode settings, and skill fields.
+        
         Checks:
-        - the process exits successfully (return code 0),
-        - top-level `status` equals "success",
-        - `data.skills` is present and is a list,
-        - if the list is non-empty, the first skill contains `name` and `path`.
+        - Exit code 0 and `status` equals "success".
+        - `data.skills` is present as a list.
+        - `advanced_mode` is true and `inventory_mode` equals "repo".
+        - `validation_commands` contains the expected replay command.
+        - If non-empty, first skill contains `name` and `path`.
         """
         cmd = ["python3", "Infrastructure/bin/ask", "skills", "list", "--json"]
         result = _run_cli(cmd)
@@ -1229,7 +1230,11 @@ class TestAskCLI(unittest.TestCase):
         )
 
     def test_argument_error_exposes_candidate_commands(self):
-        """Verify intent-known parser errors expose machine-readable example commands."""
+        """
+        Verify that missing required arguments in known commands expose candidate command examples.
+        
+        Tests that when a required argument is omitted (e.g., `skills resolve --json --robot` without a skill identifier), the error response includes candidate commands matching the expected argument pattern.
+        """
         cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "resolve", "--json", "--robot"]
         result = _run_cli(cmd)
 

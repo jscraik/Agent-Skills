@@ -7,6 +7,9 @@ from pathlib import Path
 
 
 def test_skill_gate_help() -> None:
+    """
+    Verify that skill_gate.py executes successfully with --help and outputs its name.
+    """
     script = Path(__file__).with_name("skill_gate.py")
     result = subprocess.run(
         [sys.executable, str(script), "--help"],
