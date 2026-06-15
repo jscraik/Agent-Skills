@@ -867,10 +867,8 @@ def _relative_repo_source_path(
         raise ValueError(
             f"Plugin root '{resolved_plugin_root}' must stay within repo root '{repo_root}'."
         )
-    rel_parts = list(resolved_plugin_root.relative_to(repo_root).parts)
-    if rel_parts and rel_parts[0].lower() == "plugins":
-        rel_parts[0] = "Plugins"
-    return f"./{'/'.join(rel_parts)}"
+    relative_plugin_root = resolved_plugin_root.relative_to(repo_root).as_posix()
+    return f"./{relative_plugin_root}"
 
 
 def _marketplace_source_path_hint(
@@ -1616,7 +1614,7 @@ def _render_readme_template(plugin_name: str, enabled_surfaces: dict[str, bool])
         .replace("- Optional: <editor plugins>, <CLI helpers>", "- Optional: `jq`, `yq`, and Codex runtime tooling for deeper validation")
         .replace(
             "# commands the repo actually supports",
-            f"uv run python {PLUGIN_BUILDER_COMMAND} scaffold {plugin_name} --path plugins --with-skills --with-marketplace",
+            f"uv run python {PLUGIN_BUILDER_COMMAND} scaffold {plugin_name} --path Plugins --with-skills --with-marketplace",
         )
         .replace(
             "### 2) Run it\n```sh\n```\n",
@@ -1628,13 +1626,13 @@ def _render_readme_template(plugin_name: str, enabled_surfaces: dict[str, bool])
         .replace("### Do <task> to achieve <result>", "### Add or refine plugin-owned skills")
         .replace("- What you get:", "- What you get: a `skills/<skill>/` bundle generated through `skill-builder`")
         .replace("- Steps:\n```sh\n```\n- Verify:", "- Steps:\n```sh\n"
-            f"uv run python {PLUGIN_BUILDER_COMMAND} scaffold {plugin_name} --path plugins --with-skills --force\n"
+            f"uv run python {PLUGIN_BUILDER_COMMAND} scaffold {plugin_name} --path Plugins --with-skills --force\n"
             "```\n- Verify: confirm `skills/<skill>/SKILL.md`, `Infrastructure/references/`, `Infrastructure/scripts/`, `assets/`, and `agents/openai.yaml` exist\n")
         .replace("### Configure <thing> so that <result>", "### Validate package integrity before publishing")
         .replace("- Options table (if applicable):", "- Package surfaces:\n" + surface_lines + "\n")
         .replace("### Symptom: <what the reader sees>", "### Symptom: validation reports missing plugin-owned surfaces")
         .replace("Cause:\nFix:\n```sh\n```\n", "Cause: the scaffold was partial or a helper-generated surface was removed.\nFix:\n```sh\n"
-            f"uv run python {PLUGIN_BUILDER_COMMAND} scaffold {plugin_name} --path plugins --with-skills --with-agents --force\n"
+            f"uv run python {PLUGIN_BUILDER_COMMAND} scaffold {plugin_name} --path Plugins --with-skills --with-agents --force\n"
             "```\n")
         .replace("- [ ] <criterion 1>", "- [ ] manifest exists at `.codex-plugin/plugin.json`")
         .replace("- [ ] <criterion 2>", "- [ ] plugin-owned skills and agents were scaffolded through shared builders when requested")
@@ -1700,7 +1698,7 @@ def _package_guide_template(plugin_name: str, enabled_surfaces: dict[str, bool])
         .replace("- Options table (if applicable):", "- Package tree:\n" + surface_lines + "\n")
         .replace("### Symptom: <what the reader sees>", "### Symptom: a plugin surface exists but does not match the owning helper contract")
         .replace("Cause:\nFix:\n```sh\n```\n", "Cause: the surface was hand-edited or generated with the wrong helper.\nFix:\n```sh\n"
-            f"uv run python {PLUGIN_BUILDER_COMMAND} scaffold {plugin_name} --path plugins --with-skills --with-agents --force\n"
+            f"uv run python {PLUGIN_BUILDER_COMMAND} scaffold {plugin_name} --path Plugins --with-skills --with-agents --force\n"
             "```\n")
         .replace("- [ ] <criterion 1>", "- [ ] helper ownership of each surface is documented")
         .replace("- [ ] <criterion 2>", "- [ ] package layout matches the manifest and generated docs")

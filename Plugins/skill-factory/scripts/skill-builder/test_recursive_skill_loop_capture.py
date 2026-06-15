@@ -9,13 +9,14 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import unittest.mock
 from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 SCRIPT_PATH = Path(__file__).with_name("recursive_skill_loop.py")
 PROFILE_PATH = (
-    REPO_ROOT / "docs" / "skill-graphs" / "schemas" / "examples" / "ui-skills-profile.example.json"
+    REPO_ROOT / "Docs" / "skill-graphs" / "schemas" / "examples" / "ui-skills-profile.example.json"
 )
 MODULE_SPEC = importlib.util.spec_from_file_location("recursive_skill_loop_module", SCRIPT_PATH)
 assert MODULE_SPEC and MODULE_SPEC.loader

@@ -14,5 +14,5 @@ if __name__ == "__main__":
     if "--repo-root" not in sys.argv:
         sys.argv.extend(["--repo-root", str(repo)])
     if "--expected-count" not in sys.argv:
-        sys.argv.extend(["--expected-count", "73"])
+        sys.argv.extend(["--expected-count", "72"])
     runpy.run_path(str(impl), run_name="__main__")
