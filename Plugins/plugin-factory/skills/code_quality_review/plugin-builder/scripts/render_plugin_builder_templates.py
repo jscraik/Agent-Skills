@@ -24,6 +24,19 @@ from _template_utils import (  # noqa: E402
     unified_diff_lines,
 )
 
+__all__ = [
+    "DEFAULT_OUTPUT_PATH",
+    "DEFAULT_TEMPLATE_PATH",
+    "TemplateRenderError",
+    "build_context",
+    "ensure_trailing_newline",
+    "load_json_context",
+    "parse_key_value",
+    "print_diff_lines",
+    "render_from_paths",
+    "unified_diff_lines",
+]
+
 TEMPLATE_DIR = SKILL_DIR / "templates"
 REFERENCE_DIR = SKILL_DIR / "references"
 
@@ -32,11 +45,11 @@ DEFAULT_OUTPUT_PATH = REFERENCE_DIR / "hooks.template.json"
 
 DEFAULT_CONTEXT: dict[str, str] = {
     "SESSION_START_MATCHER": ".*",
-    "SESSION_START_COMMAND": "./Infrastructure/scripts/hooks/session_start_check.sh",
+    "SESSION_START_COMMAND": "${PLUGIN_ROOT}/Infrastructure/scripts/hooks/session_start_check.sh",
     "SESSION_START_TIMEOUT_SECONDS": "30",
     "SESSION_START_STATUS_MESSAGE": "Validating session startup contract",
     "STOP_MATCHER": ".*",
-    "STOP_COMMAND": "./Infrastructure/scripts/hooks/stop_guard.sh",
+    "STOP_COMMAND": "${PLUGIN_ROOT}/Infrastructure/scripts/hooks/stop_guard.sh",
     "STOP_TIMEOUT_SECONDS": "15",
     "STOP_STATUS_MESSAGE": "Evaluating stop hook guardrails",
 }

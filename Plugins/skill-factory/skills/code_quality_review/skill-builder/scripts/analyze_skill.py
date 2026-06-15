@@ -3,7 +3,24 @@ from pathlib import Path
 import runpy
 import sys
 
-impl = Path(__file__).resolve().parents[4] / "scripts" / "skill-builder" / "analyze_skill.py"
+
+def find_impl() -> Path:
+    current = Path(__file__).resolve()
+    for ancestor in current.parents:
+        candidate = (
+            ancestor
+            / "Plugins"
+            / "skill-factory"
+            / "scripts"
+            / "skill-builder"
+            / "analyze_skill.py"
+        )
+        if candidate.is_file():
+            return candidate
+    raise FileNotFoundError(f"Implementation not found for wrapper: {current}")
+
+
+impl = find_impl()
 if not impl.is_file():
     raise FileNotFoundError(f"Implementation not found: {impl}")
 impl_dir = str(impl.parent)

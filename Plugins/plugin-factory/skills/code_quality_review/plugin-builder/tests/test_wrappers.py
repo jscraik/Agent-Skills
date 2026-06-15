@@ -2,13 +2,14 @@
 """Smoke checks for plugin-builder script wrappers."""
 
 from pathlib import Path
+import subprocess
 import sys
 
 HELPERS_ROOT = Path(__file__).resolve().parents[3]
 if str(HELPERS_ROOT) not in sys.path:
     sys.path.insert(0, str(HELPERS_ROOT))
 
-from tests_shared import find_repo_root
+from tests_shared import find_repo_root  # noqa: E402
 
 
 def test_plugin_builder_wrapper_points_to_impl() -> None:
@@ -34,3 +35,42 @@ def test_plugin_builder_wrapper_points_to_impl() -> None:
     wrapper_source = script_path.read_text(encoding="utf-8")
     assert "runpy.run_path" in wrapper_source
     assert ".pyw" in wrapper_source
+
+
+def test_scaffold_writes_curated_docs_under_infrastructure_references(tmp_path: Path) -> None:
+    """Verify scaffold output matches the curated docs contract used by audit-compat."""
+    current = Path(__file__).resolve()
+    repo_root = find_repo_root(current)
+    script_path = (
+        repo_root
+        / "Plugins"
+        / "plugin-factory"
+        / "skills"
+        / "code_quality_review"
+        / "plugin-builder"
+        / "scripts"
+        / "plugin_builder.py"
+    )
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(script_path),
+            "scaffold",
+            "codex-docs-path-smoke",
+            "--path",
+            str(tmp_path),
+            "--force",
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+    plugin_root = tmp_path / "codex-docs-path-smoke"
+    references_root = plugin_root / "Infrastructure" / "references"
+    assert (references_root / "operational-spec.md").exists()
+    assert (references_root / "package-guide.md").exists()
+    assert (references_root / "deconflict-report.md").exists()
+    assert not (plugin_root / "references").exists()

@@ -16,20 +16,20 @@ Use this reference when `hooks/` are requested in a plugin scaffold or conversio
 ## Template scaffold workflow
 
 Canonical scaffold files for this skill:
-- `Infrastructure/templates/hooks.json.tmpl`
-- rendered baseline: `Infrastructure/references/hooks.template.json`
+- `templates/hooks.json.tmpl`
+- rendered baseline: `references/hooks.template.json`
 
 Render / refresh:
 
 ```bash
-python3 Plugins/plugin-factory/skills/code_quality_review/plugin-builder/Infrastructure/scripts/render_plugin_builder_templates.py
-python3 Plugins/plugin-factory/skills/code_quality_review/plugin-builder/Infrastructure/scripts/check_plugin_builder_template_drift.py --update
+python3 Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts/render_plugin_builder_templates.py
+python3 Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts/check_plugin_builder_template_drift.py --update
 ```
 
 Verify no drift:
 
 ```bash
-python3 Plugins/plugin-factory/skills/code_quality_review/plugin-builder/Infrastructure/scripts/check_plugin_builder_template_drift.py
+python3 Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts/check_plugin_builder_template_drift.py
 ```
 
 ## Official source anchors

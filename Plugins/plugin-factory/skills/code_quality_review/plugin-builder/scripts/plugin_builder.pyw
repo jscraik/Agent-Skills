@@ -3426,8 +3426,9 @@ def _run_scaffold(args: argparse.Namespace) -> int:
     write_text(plugin_root / "README.md", _render_readme_template(plugin_name, enabled_surfaces), args.force)
     write_text(plugin_root / "LICENSE", _license_template(), args.force)
 
+    references_dir = plugin_root / "Infrastructure" / "references"
     write_text(
-        plugin_root / "references" / "operational-spec.md",
+        references_dir / "operational-spec.md",
         _operational_spec_template(
             plugin_name,
             enabled_surfaces=enabled_surfaces,
@@ -3437,12 +3438,12 @@ def _run_scaffold(args: argparse.Namespace) -> int:
         args.force,
     )
     write_text(
-        plugin_root / "references" / "deconflict-report.md",
+        references_dir / "deconflict-report.md",
         _deconflict_report_template(overlap_report),
         args.force,
     )
     write_text(
-        plugin_root / "references" / "package-guide.md",
+        references_dir / "package-guide.md",
         _package_guide_template(plugin_name, enabled_surfaces),
         args.force,
     )
@@ -3582,7 +3583,7 @@ def _run_validate(args: argparse.Namespace) -> int:
                 "Local plugin overlap detected in sibling plugin directory. "
                 "Review Infrastructure/references/deconflict-report.md and confirm merge/fold/improve intent."
             )
-            deconflict_report_path = plugin_root / "references" / "deconflict-report.md"
+            deconflict_report_path = plugin_root / "Infrastructure" / "references" / "deconflict-report.md"
             if not deconflict_report_path.exists():
                 add_finding(
                     "warning",
