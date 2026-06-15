@@ -19,6 +19,20 @@ from ask.commands import evals  # noqa: E402
 from ask.skill_review_dashboard import _parse_plugin_eval, _render_eval_cases, render_skill_review_dashboard  # noqa: E402
 
 
+EXAMPLE_TESSL_EVAL_YAML = """cases:
+  - id: smoke-example
+    unit: example skill behavioural proof
+    given: A user needs the example skill to guide a repository handoff.
+    should: Produce a concrete handoff that separates evidence from readiness claims.
+    prompt: "Do the example task."
+    acceptance:
+      - type: regex
+        value: "(?is)(example|task)"
+      - type: expected_signal
+        value: Separates evidence from readiness claims while completing the example task.
+"""
+
+
 def test_tessl_run_id_parser_handles_prefixed_json() -> None:
     payload = 'tessl output\n{"id": "019e7ab3-fda5-7071-8e47-9ea75386d53b"}'
 
@@ -208,6 +222,151 @@ def test_tessl_compat_parser_keeps_inline_acceptance_regex_quantifier_braces() -
     criteria = evals._tessl_criteria_from_case(cases[0])
     assert criteria["checklist"][0]["name"] == "regex-1"
     assert criteria["checklist"][0]["description"] == "(?i)item{2,}"
+
+
+def test_tessl_compat_parser_accepts_serializer_style_case_lists() -> None:
+    cases = evals._parse_tessl_eval_cases_compat(
+        "---\n"
+        "schema_version: '2.0'\n"
+        "cases:\n"
+        "- id: serialized-case\n"
+        "  eval_modes:\n"
+        "  - smoke\n"
+        "  - release\n"
+        "  prompt: |-\n"
+        "    Assess repeated steering.\n"
+        "  acceptance:\n"
+        "  - type: regex\n"
+        "    value: '(?is)(durable|guardrail)'\n"
+        "  - type: expected_signal\n"
+        "    value: Names references/evals/eval.example.md.\n"
+    )
+
+    assert len(cases) == 1
+    assert cases[0]["id"] == "serialized-case"
+    assert cases[0]["prompt"] == "Assess repeated steering."
+    assert cases[0]["acceptance"] == [
+        {"type": "regex", "value": "(?is)(durable|guardrail)"},
+        {"type": "expected_signal", "value": "Names references/evals/eval.example.md."},
+    ]
+
+
+def test_tessl_compat_parser_stops_acceptance_before_sibling_context_fields() -> None:
+    cases = evals._parse_tessl_eval_cases_compat(
+        "cases:\n"
+        "- id: serialized-context-after-acceptance\n"
+        "  prompt: Assess repo readiness.\n"
+        "  acceptance:\n"
+        "  - type: regex\n"
+        "    value: (?is)(repo|readiness)\n"
+        "  - type: expected_signal\n"
+        "    value: Separates local evidence from readiness claims.\n"
+        "  unit: repo readiness proof\n"
+        "  given: A user asks whether the repo is ready.\n"
+        "  should: Separate local evidence from readiness claims.\n"
+    )
+
+    assert cases[0]["unit"] == "repo readiness proof"
+    assert cases[0]["given"] == "A user asks whether the repo is ready."
+    assert cases[0]["should"] == "Separate local evidence from readiness claims."
+    assert cases[0]["acceptance"] == [
+        {"type": "regex", "value": "(?is)(repo|readiness)"},
+        {"type": "expected_signal", "value": "Separates local evidence from readiness claims."},
+    ]
+
+
+def test_tessl_eval_quality_rejects_keyword_only_cases() -> None:
+    cases = [{
+        "id": "weak-keywords",
+        "prompt": "Audit this repository.",
+        "acceptance": [
+            {"type": "regex", "value": "(?is)(audit|repo|proof)"},
+        ],
+    }]
+
+    findings = evals._tessl_eval_quality_findings(cases)
+
+    assert {finding["code"] for finding in findings} == {
+        "missing_scenario_context",
+        "missing_behavioral_acceptance",
+        "keyword_only_acceptance",
+    }
+
+
+def test_tessl_eval_quality_rejects_provenance_only_knowledgeos_signal() -> None:
+    cases = [{
+        "id": "eval.harness.seed-only",
+        "unit": "seed only",
+        "given": "A KnowledgeOS seed scenario was imported.",
+        "should": "Convert the seed into a skill-specific behavioural eval.",
+        "prompt": "Assess the repository and produce an evidence-backed answer.",
+        "acceptance": [
+            {"type": "regex", "value": "(?is)(evidence|repo)"},
+            {
+                "type": "expected_signal",
+                "value": (
+                    "Names the skill-local KnowledgeOS eval fixture path "
+                    "references/evals/eval.harness.seed-only.md as part of the evidence boundary."
+                ),
+            },
+        ],
+    }]
+
+    findings = evals._tessl_eval_quality_findings(cases)
+
+    assert [finding["code"] for finding in findings] == ["missing_skill_lift_acceptance"]
+
+
+def test_tessl_eval_quality_rejects_generic_should_contract_signal() -> None:
+    cases = [{
+        "id": "generic-should-contract",
+        "unit": "generic expected signal",
+        "given": "A seed eval has been converted from a knowledge capsule.",
+        "should": "Separate evidence from readiness claims.",
+        "prompt": "Assess the repository handoff.",
+        "acceptance": [
+            {"type": "regex", "value": "(?is)(evidence|readiness)"},
+            {
+                "type": "expected_signal",
+                "value": (
+                    "Demonstrates the skill-specific behavior in this case Should contract: "
+                    "Separate evidence from readiness claims."
+                ),
+            },
+        ],
+    }]
+
+    findings = evals._tessl_eval_quality_findings(cases)
+
+    assert [finding["code"] for finding in findings] == ["missing_skill_lift_acceptance"]
+
+
+def test_tessl_eval_quality_accepts_behavioral_scenario() -> None:
+    cases = [{
+        "id": "useful-scenario",
+        "unit": "repo validation proof boundary",
+        "given": "A user asks whether a PR is ready after local tests ran but CI has not been checked.",
+        "should": "Separate local validation truth from remote CI and merge-readiness truth.",
+        "prompt": "Advise the next action for the repository handoff.",
+        "acceptance": [
+            {"type": "regex", "value": "(?is)(local|CI|merge)"},
+            {
+                "type": "expected_signal",
+                "value": "Separates local test evidence from CI and merge-readiness claims before recommending next action.",
+            },
+        ],
+    }]
+
+    assert evals._tessl_eval_quality_findings(cases) == []
+
+
+def test_extract_tessl_eval_run_id_accepts_array_json_response() -> None:
+    output = (
+        "- Running 32 scenarios...\n"
+        '[{"evalRunId":"019ecad5-c50c-75ab-91d4-50209e9f3d8a","scenariosCount":32}]\n'
+    )
+
+    assert evals._extract_tessl_eval_run_id(output) == "019ecad5-c50c-75ab-91d4-50209e9f3d8a"
 
 
 def test_benchmark_portfolio_exposes_validation_command(tmp_path: Path) -> None:
@@ -439,7 +598,7 @@ def _write_example_skill(tmp_path: Path) -> Path:
         encoding="utf-8",
     )
     (references / "evals.yaml").write_text(
-        'cases:\n  - id: smoke-example\n    prompt: "Do the example task."\n',
+        EXAMPLE_TESSL_EVAL_YAML,
         encoding="utf-8",
     )
     (references / "contract.yaml").write_text("version: 1\n", encoding="utf-8")
@@ -515,9 +674,9 @@ def test_evals_run_native_tessl_by_default_with_temp_staged_source(tmp_path: Pat
         assert (staged_source / "assets" / "example.png").read_bytes() == b"png"
         assert (staged_source / "tessl.json").exists()
         assert (staged_source / "scenarios" / "smoke-example" / "task.md").exists()
-        assert (
-            staged_source / "scenarios" / "smoke-example" / "task.md"
-        ).read_text(encoding="utf-8") == "Do the example task.\n"
+        task_text = (staged_source / "scenarios" / "smoke-example" / "task.md").read_text(encoding="utf-8")
+        assert task_text.startswith("Unit: example skill behavioural proof\n")
+        assert task_text.endswith("Do the example task.\n")
         assert not (staged_source / "secret-not-staged.txt").exists()
         return completed
 
@@ -574,10 +733,15 @@ def test_evals_live_private_dry_run_stages_private_tile_shape(tmp_path: Path) ->
         (
             "cases:\n"
             "  - id: smoke-example\n"
+            "    unit: example private tile proof\n"
+            "    given: A private Tessl dry-run stages a skill package for assessment.\n"
+            "    should: Preserve package shape and prove the skill-specific eval can be scored.\n"
             "    prompt: \"Do the example task.\"\n"
             "    acceptance:\n"
+            "      - type: regex\n"
+            "        value: \"(?is)(example|task)\"\n"
             "      - type: expected_signal\n"
-            "        value: Uses the example skill.\n"
+            "        value: Preserves package shape and proves the skill-specific eval can be scored.\n"
         ),
         encoding="utf-8",
     )
@@ -593,7 +757,7 @@ def test_evals_live_private_dry_run_stages_private_tile_shape(tmp_path: Path) ->
         )
 
     assert result.status == "success"
-    assert run.call_count == 1
+    assert run.call_count == 0
     tessl_eval = result.data["tessl_eval"]
     assert tessl_eval["status"] == "pass"
     assert tessl_eval["dry_run"] is True
@@ -614,18 +778,54 @@ def test_evals_live_private_dry_run_stages_private_tile_shape(tmp_path: Path) ->
     assert tile_manifest["version"] == "2.3.4"
     assert tile_manifest["private"] is True
     assert tile_manifest["skills"]["example-skill"]["path"] == "SKILL.md"
-    assert (staged_source / "evals" / "smoke-example" / "task.md").read_text(encoding="utf-8") == (
-        "Do the example task.\n"
-    )
+    task_text = (staged_source / "evals" / "smoke-example" / "task.md").read_text(encoding="utf-8")
+    assert task_text.startswith("Unit: example private tile proof\n")
+    assert task_text.endswith("Do the example task.\n")
     criteria = json.loads((staged_source / "evals" / "smoke-example" / "criteria.json").read_text(encoding="utf-8"))
     assert criteria["type"] == "weighted_checklist"
-    assert criteria["checklist"][0]["description"] == "Uses the example skill."
+    descriptions = [item["description"] for item in criteria["checklist"]]
+    assert "(?is)(example|task)" in descriptions
+    assert "Preserves package shape and proves the skill-specific eval can be scored." in descriptions
     assert (staged_source / "references" / "runtime-boundary.md").read_text(encoding="utf-8") == (
         "Runtime boundary details.\n"
     )
     assert (staged_source / "assets" / "example.png").read_bytes() == b"png"
     assert (staged_source / "tessl.json").exists()
     assert not (staged_source / "secret-not-staged.txt").exists()
+
+
+def test_evals_live_private_dry_run_is_not_failed_by_discovery_smoke_filter(tmp_path: Path) -> None:
+    completed = mock.Mock(
+        returncode=1,
+        stdout="",
+        stderr=(
+            "ERROR: discovery-smoke runner requires eval cases with `smoke_mode`; "
+            "none matched the selected filters. Use a live runner such as `codex` "
+            "for behavior evals, or add discovery-specific smoke_mode cases.\n"
+        ),
+    )
+    _write_example_skill(tmp_path)
+
+    with mock.patch.object(evals.subprocess, "run", return_value=completed):
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/example-skill",
+            mode="release",
+            runner="discovery-smoke",
+            tessl_live_private=True,
+            tessl_workspace="skills-sdk",
+            tessl_live_dry_run=True,
+            dashboard=False,
+        )
+
+    assert result.status == "success"
+    assert result.errors == []
+    assert result.data["local_eval_status"] == "skipped_tessl_live_dry_run"
+    assert result.data["eval_status"] == "pass"
+    assert result.data["blocker_class"] is None
+    assert result.data["tessl_eval"]["status"] == "pass"
+    assert result.data["tessl_eval"]["dry_run"] is True
+    assert "staged private Tessl payload" in result.data["tessl_dry_run_note"]
 
 
 def test_evals_live_private_skips_local_only_cases(tmp_path: Path) -> None:
@@ -641,10 +841,15 @@ def test_evals_live_private_skips_local_only_cases(tmp_path: Path) -> None:
             "      - type: not_contains\n"
             "        value: example-skill\n"
             "  - id: live-pressure\n"
+            "    unit: example live pressure proof\n"
+            "    given: A user asks for an agent-readiness audit.\n"
+            "    should: Produce a concrete audit finding instead of generic readiness language.\n"
             "    prompt: \"Audit the repository for agent readiness.\"\n"
             "    acceptance:\n"
+            "      - type: regex\n"
+            "        value: \"(?is)(audit|readiness)\"\n"
             "      - type: expected_signal\n"
-            "        value: Produces an audit finding.\n"
+            "        value: Produces a concrete audit finding instead of generic readiness language.\n"
         ),
         encoding="utf-8",
     )
@@ -672,7 +877,7 @@ def test_evals_live_private_skips_local_only_cases(tmp_path: Path) -> None:
 
 def test_evals_live_private_uses_plugin_project_identity(tmp_path: Path) -> None:
     completed = mock.Mock(returncode=0, stdout="{}", stderr="")
-    skill_root = tmp_path / "Plugins" / "skill-factory" / "skills" / "code_quality_review" / "skill-factory-router"
+    skill_root = tmp_path / "Plugins" / "skill-factory" / "skills" / "skill-factory-router"
     (skill_root / "references").mkdir(parents=True)
     (skill_root / "SKILL.md").write_text(
         '---\nname: skill-factory-router\nmetadata:\n  version: "1.2.3"\n---\n'
@@ -683,10 +888,15 @@ def test_evals_live_private_uses_plugin_project_identity(tmp_path: Path) -> None
         (
             "cases:\n"
             "  - id: plugin-scope\n"
+            "    unit: plugin project identity proof\n"
+            "    given: A plugin-owned skill is staged for a private Tessl assessment.\n"
+            "    should: Preserve plugin project identity rather than using the nested skill name as the project.\n"
             "    prompt: \"Improve the plugin-owned skill.\"\n"
             "    acceptance:\n"
+            "      - type: regex\n"
+            "        value: \"(?is)(plugin|project)\"\n"
             "      - type: expected_signal\n"
-            "        value: Preserves plugin project identity.\n"
+            "        value: Preserves plugin project identity rather than using the nested skill name as the project.\n"
         ),
         encoding="utf-8",
     )
@@ -712,14 +922,26 @@ def test_evals_live_private_uses_plugin_project_identity(tmp_path: Path) -> None
 
 
 def test_evals_run_uses_plugin_project_identity_when_workspace_is_set(tmp_path: Path) -> None:
-    skill_root = tmp_path / "Plugins" / "skill-factory" / "skills" / "code_quality_review" / "skill-factory-router"
+    skill_root = tmp_path / "Plugins" / "skill-factory" / "skills" / "skill-factory-router"
     (skill_root / "references").mkdir(parents=True)
     (skill_root / "SKILL.md").write_text(
         '---\nname: skill-factory-router\nmetadata:\n  version: "1.2.3"\n---\n# Skill Builder\n',
         encoding="utf-8",
     )
     (skill_root / "references" / "evals.yaml").write_text(
-        'cases:\n  - id: plugin-scope\n    prompt: "Improve the plugin skill."\n',
+        (
+            "cases:\n"
+            "  - id: plugin-scope\n"
+            "    unit: plugin project identity proof\n"
+            "    given: A plugin-owned skill is staged for Tessl.\n"
+            "    should: Preserve plugin project identity when workspace is set.\n"
+            "    prompt: \"Improve the plugin skill.\"\n"
+            "    acceptance:\n"
+            "      - type: regex\n"
+            "        value: \"(?is)(plugin|skill)\"\n"
+            "      - type: expected_signal\n"
+            "        value: Preserves plugin project identity when workspace is set.\n"
+        ),
         encoding="utf-8",
     )
 
@@ -1018,10 +1240,10 @@ def test_evals_live_private_requires_workspace(tmp_path: Path) -> None:
             mode="smoke",
             tessl_live_private=True,
             tessl_live_dry_run=True,
-        )
+    )
 
     assert result.status == "error"
-    assert run.call_count == 1
+    assert run.call_count == 0
     tessl_eval = result.data["tessl_eval"]
     assert tessl_eval["status"] == "blocked"
     assert tessl_eval["blocker_class"] == "blocked_validation"
@@ -1188,6 +1410,66 @@ def test_evals_live_private_fails_when_score_is_below_baseline(tmp_path: Path) -
     assert tessl_eval["live_result_summary"]["regressions_count"] == 1
 
 
+def test_evals_live_private_fails_when_skill_only_ties_baseline(tmp_path: Path) -> None:
+    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
+    completed_eval = mock.Mock(returncode=0, stdout='{"id":"019e6ac8-08eb-75fb-8fbb-e2346517f82d"}', stderr="")
+    completed_view = mock.Mock(
+        returncode=0,
+        stdout=json.dumps({
+            "data": {
+                "attributes": {
+                    "scenarios": [
+                        {
+                            "shortDescription": "non-discriminating perfect score",
+                            "solutions": [
+                                {
+                                    "variant": "baseline",
+                                    "assessmentResults": [{"score": 1, "max_score": 1}],
+                                },
+                                {
+                                    "variant": "usage-spec",
+                                    "assessmentResults": [{"score": 1, "max_score": 1}],
+                                },
+                            ],
+                        }
+                    ]
+                }
+            }
+        }),
+        stderr="",
+    )
+    _write_example_skill(tmp_path)
+
+    def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
+        if cmd[1:3] == ["eval", "run"]:
+            return completed_eval
+        if cmd[1:3] == ["eval", "view"]:
+            return completed_view
+        return completed
+
+    with (
+        mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
+        mock.patch.object(evals.subprocess, "run", side_effect=fake_run),
+    ):
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/example-skill",
+            mode="smoke",
+            tessl_live_private=True,
+            tessl_workspace="jscraik",
+        )
+
+    assert result.status == "error"
+    tessl_eval = result.data["tessl_eval"]
+    assert tessl_eval["status"] == "fail"
+    assert "score 100.0% vs baseline 100.0%" in tessl_eval["blocker"]
+    summary = tessl_eval["live_result_summary"]
+    assert summary["meets_min_score"] is True
+    assert summary["beats_baseline"] is False
+    assert summary["baseline_ties_count"] == 1
+    assert summary["regressions_count"] == 0
+
+
 def test_evals_live_private_polls_until_view_scores_are_complete(tmp_path: Path) -> None:
     completed = mock.Mock(returncode=0, stdout="{}", stderr="")
     completed_eval = mock.Mock(returncode=0, stdout='{"id":"019e6ac8-08eb-75fb-8fbb-e2346517f82d"}', stderr="")
@@ -1215,10 +1497,10 @@ def test_evals_live_private_polls_until_view_scores_are_complete(tmp_path: Path)
                 "attributes": {
                     "status": "completed",
                     "scenarios": [{
-                        "solutions": [
-                            {"variant": "baseline", "assessmentResults": [{"score": 1, "max_score": 1}]},
-                            {"variant": "usage-spec", "assessmentResults": [{"score": 1, "max_score": 1}]},
-                        ],
+                            "solutions": [
+                                {"variant": "baseline", "assessmentResults": [{"score": 0, "max_score": 1}]},
+                                {"variant": "usage-spec", "assessmentResults": [{"score": 1, "max_score": 1}]},
+                            ],
                     }],
                 }
             }
@@ -1255,6 +1537,58 @@ def test_evals_live_private_polls_until_view_scores_are_complete(tmp_path: Path)
     assert tessl_eval["view_attempts"] == 2
     assert tessl_eval["view_status"] == "completed"
     assert tessl_eval["live_result_summary"]["score"] == 1
+
+
+def test_evals_live_private_reports_tessl_quota_blocker(tmp_path: Path) -> None:
+    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
+    completed_eval = mock.Mock(
+        returncode=0,
+        stdout='[{"evalRunId":"019ecadc-9870-7323-8098-58145a211f26","scenariosCount":32}]',
+        stderr="",
+    )
+    failed_view = mock.Mock(
+        returncode=0,
+        stdout=json.dumps({
+            "data": {
+                "attributes": {
+                    "status": "failed",
+                    "failureReason": {
+                        "code": "EVAL_QUOTA_EXCEEDED",
+                        "message": "Your organisation has reached its daily eval limit.",
+                    },
+                    "scenarios": [{"solutions": []}],
+                }
+            }
+        }),
+        stderr="",
+    )
+    _write_example_skill(tmp_path)
+
+    def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
+        if cmd[1:3] == ["eval", "run"]:
+            return completed_eval
+        if cmd[1:3] == ["eval", "view"]:
+            return failed_view
+        return completed
+
+    with (
+        mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
+        mock.patch.object(evals.subprocess, "run", side_effect=fake_run),
+    ):
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/example-skill",
+            mode="smoke",
+            tessl_live_private=True,
+            tessl_workspace="jscraik",
+        )
+
+    assert result.status == "error"
+    tessl_eval = result.data["tessl_eval"]
+    assert tessl_eval["status"] == "blocked"
+    assert tessl_eval["blocker_class"] == "blocked_environment"
+    assert "EVAL_QUOTA_EXCEEDED" in tessl_eval["blocker"]
+    assert tessl_eval["eval_run_id"] == "019ecadc-9870-7323-8098-58145a211f26"
 
 
 def test_prepare_tessl_scenario_generation_dry_run_stages_target_tile(tmp_path: Path) -> None:
@@ -1369,9 +1703,17 @@ def test_evals_stage_folded_yaml_prompts_for_tessl(tmp_path: Path) -> None:
         (
             "cases:\n"
             "  - id: folded-prompt\n"
+            "    unit: folded prompt preservation proof\n"
+            "    given: A serialized YAML prompt uses folded block syntax.\n"
+            "    should: Preserve the whole prompt while keeping behavioural scoring criteria.\n"
             "    prompt: >-\n"
             "      Investigate the target workflow\n"
             "      and preserve the whole prompt.\n"
+            "    acceptance:\n"
+            "      - type: regex\n"
+            "        value: \"(?is)(workflow|prompt)\"\n"
+            "      - type: expected_signal\n"
+            "        value: Preserves the whole prompt while keeping behavioural scoring criteria.\n"
         ),
         encoding="utf-8",
     )
@@ -1380,9 +1722,9 @@ def test_evals_stage_folded_yaml_prompts_for_tessl(tmp_path: Path) -> None:
     copied = evals._write_tessl_scenarios_from_evals(skill_root, staged_root)
 
     assert copied == ["scenarios/folded-prompt/task.md", "scenarios/folded-prompt/criteria.json"]
-    assert (
-        staged_root / "scenarios" / "folded-prompt" / "task.md"
-    ).read_text(encoding="utf-8") == "Investigate the target workflow and preserve the whole prompt.\n"
+    task_text = (staged_root / "scenarios" / "folded-prompt" / "task.md").read_text(encoding="utf-8")
+    assert task_text.startswith("Unit: folded prompt preservation proof\n")
+    assert task_text.endswith("Investigate the target workflow and preserve the whole prompt.\n")
     criteria = json.loads((staged_root / "scenarios" / "folded-prompt" / "criteria.json").read_text(encoding="utf-8"))
     assert criteria["type"] == "weighted_checklist"
 
@@ -1393,10 +1735,18 @@ def test_evals_fallback_parser_preserves_literal_block_relative_indent(tmp_path:
         (
             "cases:\n"
             "  - id: literal-prompt\n"
+            "    unit: literal prompt preservation proof\n"
+            "    given: A serialized YAML prompt uses a literal code block.\n"
+            "    should: Preserve literal indentation while keeping behavioural scoring criteria.\n"
             "    prompt: |\n"
             "        def example():\n"
             "            return 1\n"
             "      done\n"
+            "    acceptance:\n"
+            "      - type: regex\n"
+            "        value: \"(?is)(def example|done)\"\n"
+            "      - type: expected_signal\n"
+            "        value: Preserves literal indentation while keeping behavioural scoring criteria.\n"
         ),
         encoding="utf-8",
     )
@@ -1405,9 +1755,9 @@ def test_evals_fallback_parser_preserves_literal_block_relative_indent(tmp_path:
     copied = evals._write_tessl_scenarios_from_evals(skill_root, staged_root)
 
     assert copied == ["scenarios/literal-prompt/task.md", "scenarios/literal-prompt/criteria.json"]
-    assert (
-        staged_root / "scenarios" / "literal-prompt" / "task.md"
-    ).read_text(encoding="utf-8") == "  def example():\n      return 1\ndone\n"
+    task_text = (staged_root / "scenarios" / "literal-prompt" / "task.md").read_text(encoding="utf-8")
+    assert task_text.startswith("Unit: literal prompt preservation proof\n")
+    assert task_text.endswith("  def example():\n      return 1\ndone\n")
 
 
 def test_evals_classify_malformed_yaml_as_blocked_validation(tmp_path: Path) -> None:

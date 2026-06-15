@@ -1,4 +1,3 @@
----
 schema_version: 1
 skill: improve-agent-native
 stage: skill-install
@@ -191,11 +190,39 @@ references:
   context_budget: selective
   claim_scope: bounded_capsules
   bounded_unit: true
+- path: references/eval-scenarios.json
+  kind: knowledge_eval_scenarios
+  provenance: vendored KnowledgeOS extraction
+  load_when: checking selected KnowledgeOS eval scenario metadata
+  allowed_claims:
+  - selected eval scenario IDs, prompts, and expected failure modes
+  forbidden_claims:
+  - runtime dependency on KnowledgeOS
+  - Tessl result quality without execution evidence
+  freshness: knowledge_os_snapshot
+  context_budget: small
+  claim_scope: eval_scenarios
+  bounded_unit: true
+- path: references/evals/
+  kind: knowledge_eval_fixtures
+  provenance: vendored KnowledgeOS extraction
+  load_when: only when a selected scenario fixture needs detail beyond references/evals.yaml
+  allowed_claims:
+  - fixture detail for selected KnowledgeOS eval scenarios
+  forbidden_claims:
+  - load all fixtures by default
+  - claims outside selected fixture text
+  freshness: knowledge_os_snapshot
+  context_budget: selective
+  claim_scope: eval_fixture_detail
+  bounded_unit: true
 allowed_claims:
 - active skill package is a compact local distillation of the pinned upstream package
 - one bounded viewpoint or substantial evidence unit maps to one references/*.md file
 - raw upstream materials are provenance, not default runtime context
 - KnowledgeOS capsules are vendored references, not runtime dependencies
+- KnowledgeOS-selected eval scenarios must be wired through references/evals.yaml
+  before Tessl proof
 forbidden_claims:
 - package install proves any target repository is ready
 - runtime projection or picker visibility is proven without separate runtime checks

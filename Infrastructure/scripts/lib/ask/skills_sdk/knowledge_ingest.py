@@ -20,7 +20,9 @@ ROUTING_TEXT = (
     "brownfield-readiness gaps. Prefer Ryan capsules for environment design, "
     "repo knowledge, mechanical boundaries, safety policy, operating model, and "
     "long-term coherence. Do not load all capsules by default; select the "
-    "smallest relevant capsule from the manifest."
+    "smallest relevant capsule from the manifest. When checking behavior proof, "
+    "use the KnowledgeOS eval scenario IDs wired through `references/evals.yaml`; "
+    "the vendored scenario files are evidence, not an alternate eval runner."
 )
 
 
@@ -230,7 +232,11 @@ def _validate_runtime_policy(demand: dict[str, Any], findings: list[str], *, lab
 
 
 def _validate_source_files(extraction_root: Path, source_files: list[Path], findings: list[str]) -> None:
-    allowed_names = {"references/knowledge-demand.yaml", "references/knowledge-capsule.manifest.yaml"}
+    allowed_names = {
+        "references/knowledge-demand.yaml",
+        "references/knowledge-capsule.manifest.yaml",
+        "references/eval-scenarios.json",
+    }
     for source_file in source_files:
         if source_file.is_symlink():
             findings.append(f"references:symlink_not_allowed:{source_file.name}")
@@ -240,11 +246,36 @@ def _validate_source_files(extraction_root: Path, source_files: list[Path], find
             pass
         elif relative.startswith("references/knowledge-capsules/") and relative.endswith(".md"):
             pass
+        elif relative.startswith("references/evals/") and relative.endswith(".md"):
+            pass
         else:
             findings.append(f"references:unsupported_file:{relative}")
         text = source_file.read_text(encoding="utf-8")
         if "/Users/" in text or "/private/" in text or "/Volumes/" in text:
             findings.append(f"references:local_absolute_path_leak:{relative}")
+        if relative == "references/eval-scenarios.json":
+            _validate_eval_scenarios_json(text, findings, relative=relative)
+
+
+def _validate_eval_scenarios_json(text: str, findings: list[str], *, relative: str) -> None:
+    try:
+        payload = json.loads(text)
+    except json.JSONDecodeError as exc:
+        findings.append(f"references:invalid_eval_scenarios_json:{relative}:{exc.msg}")
+        return
+    if not isinstance(payload, list):
+        findings.append(f"references:invalid_eval_scenarios_json:{relative}:not_list")
+        return
+    for index, scenario in enumerate(payload):
+        if not isinstance(scenario, dict):
+            findings.append(f"references:invalid_eval_scenarios_json:{relative}:{index}:not_object")
+            continue
+        scenario_id = scenario.get("id")
+        scenario_payload = scenario.get("payload")
+        if not isinstance(scenario_id, str) or not scenario_id.startswith("eval."):
+            findings.append(f"references:invalid_eval_scenarios_json:{relative}:{index}:missing_eval_id")
+        if not isinstance(scenario_payload, dict):
+            findings.append(f"references:invalid_eval_scenarios_json:{relative}:{index}:missing_payload")
 
 
 def _update_skill_routing(skill_md: Path) -> None:
@@ -290,6 +321,8 @@ def _append_reference_links(text: str) -> str:
             "- `references/knowledge-demand.yaml`",
             "- `references/knowledge-capsule.manifest.yaml`",
             "- `references/knowledge-capsules/`",
+            "- `references/eval-scenarios.json`",
+            "- `references/evals/`",
         ):
             if ref not in refs:
                 refs = refs.rstrip() + "\n" + ref + "\n"
@@ -347,6 +380,30 @@ def _update_source_context(source_context: Path) -> None:
             "claim_scope": "bounded_capsules",
             "bounded_unit": True,
         },
+        {
+            "path": "references/eval-scenarios.json",
+            "kind": "knowledge_eval_scenarios",
+            "provenance": "vendored KnowledgeOS extraction",
+            "load_when": "checking selected KnowledgeOS eval scenario metadata",
+            "allowed_claims": ["selected eval scenario IDs, prompts, and expected failure modes"],
+            "forbidden_claims": ["runtime dependency on KnowledgeOS", "Tessl result quality without execution evidence"],
+            "freshness": "knowledge_os_snapshot",
+            "context_budget": "small",
+            "claim_scope": "eval_scenarios",
+            "bounded_unit": True,
+        },
+        {
+            "path": "references/evals/",
+            "kind": "knowledge_eval_fixtures",
+            "provenance": "vendored KnowledgeOS extraction",
+            "load_when": "only when a selected scenario fixture needs detail beyond references/evals.yaml",
+            "allowed_claims": ["fixture detail for selected KnowledgeOS eval scenarios"],
+            "forbidden_claims": ["load all fixtures by default", "claims outside selected fixture text"],
+            "freshness": "knowledge_os_snapshot",
+            "context_budget": "selective",
+            "claim_scope": "eval_fixture_detail",
+            "bounded_unit": True,
+        },
     ]
     existing_paths = {str(item.get("path")) for item in references if isinstance(item, dict)}
     for entry in entries:
@@ -358,6 +415,14 @@ def _update_source_context(source_context: Path) -> None:
         and "KnowledgeOS capsules are vendored references, not runtime dependencies" not in allowed_claims
     ):
         allowed_claims.append("KnowledgeOS capsules are vendored references, not runtime dependencies")
+    if (
+        isinstance(allowed_claims, list)
+        and "KnowledgeOS-selected eval scenarios must be wired through references/evals.yaml before Tessl proof"
+        not in allowed_claims
+    ):
+        allowed_claims.append(
+            "KnowledgeOS-selected eval scenarios must be wired through references/evals.yaml before Tessl proof"
+        )
     source_context.write_text(_yaml_safe_dump_data(loaded), encoding="utf-8")
 
 

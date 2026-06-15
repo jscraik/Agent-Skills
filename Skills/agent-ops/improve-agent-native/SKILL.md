@@ -89,6 +89,7 @@ residual_risk:
 7. Start with 2-3 focused surfaces before expanding scope. When mistakes repeat, recommend the smallest mechanical guardrail: check, validator, script, doc boundary, or runtime route fix.
 
 For pack-backed judgment, read `references/knowledge-capsule.manifest.yaml`, then load only the relevant capsule: harness for proof/routing/review/PR/brownfield gaps, Ryan for environment/repo/boundary/safety/operating-model questions.
+When a KnowledgeOS-backed capsule or eval fixture informs the answer, name the exact skill-local reference path used, such as `references/knowledge-capsules/<capsule>.md` or `references/evals/<scenario-id>.md`, inside the evidence boundary.
 
 ## Execution boundaries
 
@@ -172,3 +173,5 @@ residual_risk:
 - `references/knowledge-demand.yaml`
 - `references/knowledge-capsule.manifest.yaml`
 - `references/knowledge-capsules/`
+- `references/eval-scenarios.json`
+- `references/evals/`
