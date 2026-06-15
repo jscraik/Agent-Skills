@@ -211,10 +211,18 @@ class TestSkillsSdkKnowledgeIngest(unittest.TestCase):
             self.assertTrue((skill_dir / "references" / "knowledge-capsules" / "harness-evidence-boundary.md").is_file())
             skill_text = (skill_dir / "SKILL.md").read_text(encoding="utf-8")
             self.assertIn("Do not load all capsules by default", skill_text)
+            self.assertNotIn("references/eval-scenarios.json", skill_text)
+            self.assertNotIn("references/evals/", skill_text)
             source_context = yaml.safe_load((skill_dir / "references" / "source-context.yaml").read_text(encoding="utf-8"))
             paths = {entry["path"] for entry in source_context["references"]}
             self.assertIn("references/knowledge-capsule.manifest.yaml", paths)
             self.assertIn("references/knowledge-capsules/", paths)
+            self.assertNotIn("references/eval-scenarios.json", paths)
+            self.assertNotIn("references/evals/", paths)
+            self.assertNotIn(
+                "KnowledgeOS-selected eval scenarios must be wired through references/evals.yaml before Tessl proof",
+                source_context.get("allowed_claims", []),
+            )
 
     def test_apply_vendors_knowledge_eval_scenarios_and_fixtures(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -237,10 +245,17 @@ class TestSkillsSdkKnowledgeIngest(unittest.TestCase):
             self.assertIn("references/evals/eval.harness.local-pass-ci-unknown.md", copied)
             scenarios = json.loads((skill_dir / "references" / "eval-scenarios.json").read_text(encoding="utf-8"))
             self.assertEqual(scenarios[0]["id"], "eval.harness.local-pass-ci-unknown")
+            skill_text = (skill_dir / "SKILL.md").read_text(encoding="utf-8")
+            self.assertIn("references/eval-scenarios.json", skill_text)
+            self.assertIn("references/evals/", skill_text)
             source_context = yaml.safe_load((skill_dir / "references" / "source-context.yaml").read_text(encoding="utf-8"))
             paths = {entry["path"] for entry in source_context["references"]}
             self.assertIn("references/eval-scenarios.json", paths)
             self.assertIn("references/evals/", paths)
+            self.assertIn(
+                "KnowledgeOS-selected eval scenarios must be wired through references/evals.yaml before Tessl proof",
+                source_context.get("allowed_claims", []),
+            )
 
     def test_local_absolute_path_leak_blocks_apply(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

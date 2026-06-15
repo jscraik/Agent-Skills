@@ -20,9 +20,12 @@ ROUTING_TEXT = (
     "brownfield-readiness gaps. Prefer Ryan capsules for environment design, "
     "repo knowledge, mechanical boundaries, safety policy, operating model, and "
     "long-term coherence. Do not load all capsules by default; select the "
-    "smallest relevant capsule from the manifest. When checking behavior proof, "
-    "use the KnowledgeOS eval scenario IDs wired through `references/evals.yaml`; "
-    "the vendored scenario files are evidence, not an alternate eval runner."
+    "smallest relevant capsule from the manifest."
+)
+EVAL_ROUTING_TEXT = (
+    "When checking behavior proof, use the KnowledgeOS eval scenario IDs wired "
+    "through `references/evals.yaml`; the vendored scenario files are evidence, "
+    "not an alternate eval runner."
 )
 
 
@@ -73,6 +76,7 @@ def build_knowledge_ingest(
         findings.append("staged_security_gate_failed")
 
     copied: list[dict[str, Any]] = []
+    include_eval_references = _has_eval_reference_files(extraction_root, source_files)
     for source_file in source_files:
         relative = source_file.relative_to(extraction_root).as_posix()
         target = skill_dir / relative
@@ -133,8 +137,11 @@ def build_knowledge_ingest(
         target = skill_dir / source_file.relative_to(extraction_root)
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source_file, target)
-    _update_skill_routing(skill_dir / "SKILL.md")
-    _update_source_context(skill_dir / "references" / "source-context.yaml")
+    _update_skill_routing(skill_dir / "SKILL.md", include_eval_references=include_eval_references)
+    _update_source_context(
+        skill_dir / "references" / "source-context.yaml",
+        include_eval_references=include_eval_references,
+    )
     if run_proof:
         receipt["proof_results"] = _run_proof(repo_root, receipt["validation_commands"])
         if any(item["status"] != "pass" for item in receipt["proof_results"]):
@@ -172,6 +179,14 @@ def _collect_reference_files(extraction_root: Path) -> list[Path]:
     if not files:
         raise ValueError("KnowledgeOS extraction references directory is empty.")
     return files
+
+
+def _has_eval_reference_files(extraction_root: Path, source_files: list[Path]) -> bool:
+    for source_file in source_files:
+        relative = source_file.relative_to(extraction_root).as_posix()
+        if relative == "references/eval-scenarios.json" or relative.startswith("references/evals/"):
+            return True
+    return False
 
 
 def _load_yaml(path: Path, *, label: str) -> dict[str, Any]:
@@ -287,30 +302,37 @@ def _validate_eval_scenarios_json(text: str, findings: list[str], *, relative: s
             findings.append(f"references:invalid_eval_scenarios_json:{relative}:{index}:missing_payload")
 
 
-def _update_skill_routing(skill_md: Path) -> None:
+def _update_skill_routing(skill_md: Path, *, include_eval_references: bool) -> None:
     text = skill_md.read_text(encoding="utf-8")
-    if ROUTING_TEXT in text:
+    routing_text = _routing_text(include_eval_references=include_eval_references)
+    if routing_text in text:
         return
     marker = _routing_insertion_marker(text)
     if marker is None:
         reference_marker = "## References\n"
-        capsule_section = "## Knowledge Capsules\n\n" + ROUTING_TEXT + "\n\n"
+        capsule_section = "## Knowledge Capsules\n\n" + routing_text + "\n\n"
         if reference_marker in text:
             before_refs, refs = text.split(reference_marker, 1)
             updated = before_refs.rstrip() + "\n\n" + capsule_section + reference_marker + refs
         else:
             updated = text.rstrip() + "\n\n" + capsule_section
-        skill_md.write_text(_append_reference_links(updated), encoding="utf-8")
+        skill_md.write_text(
+            _append_reference_links(updated, include_eval_references=include_eval_references),
+            encoding="utf-8",
+        )
         return
     before, after = text.split(marker, 1)
     next_heading = after.find("\n## ")
     if next_heading == -1:
-        procedure = after.rstrip() + "\n\n" + ROUTING_TEXT + "\n"
+        procedure = after.rstrip() + "\n\n" + routing_text + "\n"
         updated = before + marker + procedure
     else:
-        procedure = after[:next_heading].rstrip() + "\n\n" + ROUTING_TEXT + "\n"
+        procedure = after[:next_heading].rstrip() + "\n\n" + routing_text + "\n"
         updated = before + marker + procedure + after[next_heading:]
-    skill_md.write_text(_append_reference_links(updated), encoding="utf-8")
+    skill_md.write_text(
+        _append_reference_links(updated, include_eval_references=include_eval_references),
+        encoding="utf-8",
+    )
 
 
 def _routing_insertion_marker(text: str) -> str | None:
@@ -321,25 +343,35 @@ def _routing_insertion_marker(text: str) -> str | None:
     return None
 
 
-def _append_reference_links(text: str) -> str:
+def _routing_text(*, include_eval_references: bool) -> str:
+    if include_eval_references:
+        return ROUTING_TEXT + " " + EVAL_ROUTING_TEXT
+    return ROUTING_TEXT
+
+
+def _append_reference_links(text: str, *, include_eval_references: bool) -> str:
     reference_marker = "## References\n"
     updated = text
     if reference_marker in updated:
         before_refs, refs = updated.split(reference_marker, 1)
-        for ref in (
+        reference_links = [
             "- `references/knowledge-demand.yaml`",
             "- `references/knowledge-capsule.manifest.yaml`",
             "- `references/knowledge-capsules/`",
-            "- `references/eval-scenarios.json`",
-            "- `references/evals/`",
-        ):
+        ]
+        if include_eval_references:
+            reference_links.extend([
+                "- `references/eval-scenarios.json`",
+                "- `references/evals/`",
+            ])
+        for ref in reference_links:
             if ref not in refs:
                 refs = refs.rstrip() + "\n" + ref + "\n"
         updated = before_refs + reference_marker + refs
     return updated.rstrip() + "\n"
 
 
-def _update_source_context(source_context: Path) -> None:
+def _update_source_context(source_context: Path, *, include_eval_references: bool) -> None:
     if source_context.is_file():
         loaded = _load_yaml(source_context, label="references/source-context.yaml")
     else:
@@ -389,31 +421,37 @@ def _update_source_context(source_context: Path) -> None:
             "claim_scope": "bounded_capsules",
             "bounded_unit": True,
         },
-        {
-            "path": "references/eval-scenarios.json",
-            "kind": "knowledge_eval_scenarios",
-            "provenance": "vendored KnowledgeOS extraction",
-            "load_when": "checking selected KnowledgeOS eval scenario metadata",
-            "allowed_claims": ["selected eval scenario IDs, prompts, and expected failure modes"],
-            "forbidden_claims": ["runtime dependency on KnowledgeOS", "Tessl result quality without execution evidence"],
-            "freshness": "knowledge_os_snapshot",
-            "context_budget": "small",
-            "claim_scope": "eval_scenarios",
-            "bounded_unit": True,
-        },
-        {
-            "path": "references/evals/",
-            "kind": "knowledge_eval_fixtures",
-            "provenance": "vendored KnowledgeOS extraction",
-            "load_when": "only when a selected scenario fixture needs detail beyond references/evals.yaml",
-            "allowed_claims": ["fixture detail for selected KnowledgeOS eval scenarios"],
-            "forbidden_claims": ["load all fixtures by default", "claims outside selected fixture text"],
-            "freshness": "knowledge_os_snapshot",
-            "context_budget": "selective",
-            "claim_scope": "eval_fixture_detail",
-            "bounded_unit": True,
-        },
     ]
+    if include_eval_references:
+        entries.extend([
+            {
+                "path": "references/eval-scenarios.json",
+                "kind": "knowledge_eval_scenarios",
+                "provenance": "vendored KnowledgeOS extraction",
+                "load_when": "checking selected KnowledgeOS eval scenario metadata",
+                "allowed_claims": ["selected eval scenario IDs, prompts, and expected failure modes"],
+                "forbidden_claims": [
+                    "runtime dependency on KnowledgeOS",
+                    "Tessl result quality without execution evidence",
+                ],
+                "freshness": "knowledge_os_snapshot",
+                "context_budget": "small",
+                "claim_scope": "eval_scenarios",
+                "bounded_unit": True,
+            },
+            {
+                "path": "references/evals/",
+                "kind": "knowledge_eval_fixtures",
+                "provenance": "vendored KnowledgeOS extraction",
+                "load_when": "only when a selected scenario fixture needs detail beyond references/evals.yaml",
+                "allowed_claims": ["fixture detail for selected KnowledgeOS eval scenarios"],
+                "forbidden_claims": ["load all fixtures by default", "claims outside selected fixture text"],
+                "freshness": "knowledge_os_snapshot",
+                "context_budget": "selective",
+                "claim_scope": "eval_fixture_detail",
+                "bounded_unit": True,
+            },
+        ])
     existing_paths = {str(item.get("path")) for item in references if isinstance(item, dict)}
     for entry in entries:
         if entry["path"] not in existing_paths:
@@ -425,7 +463,8 @@ def _update_source_context(source_context: Path) -> None:
     ):
         allowed_claims.append("KnowledgeOS capsules are vendored references, not runtime dependencies")
     if (
-        isinstance(allowed_claims, list)
+        include_eval_references
+        and isinstance(allowed_claims, list)
         and "KnowledgeOS-selected eval scenarios must be wired through references/evals.yaml before Tessl proof"
         not in allowed_claims
     ):
@@ -472,8 +511,12 @@ def _preflight_security_gate(
             target = staged_skill / source_file.relative_to(extraction_root)
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(source_file, target)
-        _update_skill_routing(staged_skill / "SKILL.md")
-        _update_source_context(staged_skill / "references" / "source-context.yaml")
+        include_eval_references = _has_eval_reference_files(extraction_root, source_files)
+        _update_skill_routing(staged_skill / "SKILL.md", include_eval_references=include_eval_references)
+        _update_source_context(
+            staged_skill / "references" / "source-context.yaml",
+            include_eval_references=include_eval_references,
+        )
         gate_script = _resolve_skill_gate_script(repo_root)
         process = subprocess.run(
             [
