@@ -275,6 +275,44 @@ def test_tessl_compat_parser_stops_acceptance_before_sibling_context_fields() ->
     ]
 
 
+def test_tessl_compat_parser_preserves_wrapped_plain_scalars() -> None:
+    cases = evals._parse_tessl_eval_cases_compat(
+        "cases:\n"
+        "- id: wrapped-context\n"
+        "  unit: repo readiness proof\n"
+        "  given: A repo has scattered docs, validation entrypoints,\n"
+        "    and proof loops.\n"
+        "  should: Return a bounded scorecard that names exact files,\n"
+        "    separates local proof from merge readiness, and recommends next fixes.\n"
+        "  prompt: Assess the repository for agent-native readiness,\n"
+        "    then produce a concise action queue.\n"
+        "  acceptance:\n"
+        "  - type: expected_signal\n"
+        "    value: Names exact files and separates local proof from merge readiness\n"
+        "      before recommending next fixes.\n"
+    )
+
+    assert cases[0]["given"] == (
+        "A repo has scattered docs, validation entrypoints, and proof loops."
+    )
+    assert cases[0]["should"] == (
+        "Return a bounded scorecard that names exact files, separates local proof "
+        "from merge readiness, and recommends next fixes."
+    )
+    assert cases[0]["prompt"] == (
+        "Assess the repository for agent-native readiness, then produce a concise action queue."
+    )
+    assert cases[0]["acceptance"] == [
+        {
+            "type": "expected_signal",
+            "value": (
+                "Names exact files and separates local proof from merge readiness before "
+                "recommending next fixes."
+            ),
+        }
+    ]
+
+
 def test_tessl_eval_quality_rejects_keyword_only_cases() -> None:
     cases = [{
         "id": "weak-keywords",
@@ -826,6 +864,35 @@ def test_evals_live_private_dry_run_is_not_failed_by_discovery_smoke_filter(tmp_
     assert result.data["tessl_eval"]["status"] == "pass"
     assert result.data["tessl_eval"]["dry_run"] is True
     assert "staged private Tessl payload" in result.data["tessl_dry_run_note"]
+
+
+def test_evals_live_private_dry_run_failure_records_blocked_lifecycle(tmp_path: Path) -> None:
+    _write_example_skill(tmp_path)
+
+    with mock.patch.object(
+        evals,
+        "_run_tessl_live_private_eval",
+        return_value={
+            "status": "blocked",
+            "blocker": "Tessl workspace is required.",
+            "blocker_class": "blocked_validation",
+        },
+    ):
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/example-skill",
+            mode="release",
+            runner="discovery-smoke",
+            tessl_live_private=True,
+            tessl_live_dry_run=True,
+            dashboard=False,
+        )
+
+    assert result.status == "error"
+    assert result.data["eval_status"] == "blocked_validation"
+    assert result.data["lifecycle_event"]["event_type"] == "eval_blocked"
+    assert result.data["lifecycle_event"]["outcome"]["status"] == "blocked_validation"
+    assert result.data["lifecycle_events"][-1]["event_type"] == "eval_blocked"
 
 
 def test_evals_live_private_skips_local_only_cases(tmp_path: Path) -> None:

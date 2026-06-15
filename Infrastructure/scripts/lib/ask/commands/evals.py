@@ -545,6 +545,23 @@ def _consume_yaml_block(lines: list[str], index: int, parent_indent: int, style:
     return "\n".join(block_lines), index
 
 
+def _consume_yaml_plain_scalar(lines: list[str], index: int, parent_indent: int, raw_value: str) -> tuple[str, int]:
+    parts = [_yaml_scalar(raw_value)]
+    while index < len(lines):
+        raw_line = lines[index]
+        if not raw_line.strip():
+            break
+        indent = len(raw_line) - len(raw_line.lstrip(" "))
+        stripped = raw_line.strip()
+        if indent <= parent_indent or stripped.startswith("- "):
+            break
+        if re.match(r"^[A-Za-z0-9_-]+\s*:", stripped):
+            break
+        parts.append(stripped)
+        index += 1
+    return " ".join(part for part in parts if part), index
+
+
 def _consume_yaml_sequence_dicts(lines: list[str], index: int, parent_indent: int) -> tuple[list[dict[str, str]], int]:
     items: list[dict[str, str]] = []
     current: dict[str, str] | None = None
@@ -569,7 +586,13 @@ def _consume_yaml_sequence_dicts(lines: list[str], index: int, parent_indent: in
                 continue
         if current is not None and ":" in stripped:
             key, raw_value = stripped.split(":", 1)
-            current[key.strip()] = _yaml_scalar(raw_value.strip())
+            key = key.strip()
+            raw_value = raw_value.strip()
+            if raw_value.startswith((">", "|")):
+                current[key], index = _consume_yaml_block(lines, index + 1, indent, raw_value)
+                continue
+            current[key], index = _consume_yaml_plain_scalar(lines, index + 1, indent, raw_value)
+            continue
         index += 1
 
     if current:
@@ -699,11 +722,10 @@ def _parse_tessl_eval_cases_compat(text: str) -> list[dict[str, str]]:
         }:
             index += 1
             continue
-        if key == "prompt" and raw_value.startswith((">", "|")):
+        if raw_value.startswith((">", "|")):
             current[key], index = _consume_yaml_block(lines, index + 1, indent, raw_value)
             continue
-        current[key] = _yaml_scalar(raw_value)
-        index += 1
+        current[key], index = _consume_yaml_plain_scalar(lines, index + 1, indent, raw_value)
 
     if current and current.get("id") and current.get("prompt"):
         cases.append(current)
@@ -3222,7 +3244,6 @@ def run_evals(
             "Tessl live-private dry-run validates the staged private Tessl payload only. "
             "Run without --tessl-live-dry-run after local audit/package gates pass to execute remote assessment."
         )
-        _finish_eval_lifecycle(result, path=path, mode=mode, runner=runner, eval_status="pass")
         tessl_eval = _run_tessl_live_private_eval(
             repo_root,
             path,
@@ -3231,7 +3252,7 @@ def run_evals(
         )
         result.data["tessl_eval"] = tessl_eval
         if tessl_eval.get("status") != "pass":
-            blocker_class = tessl_eval.get("blocker_class")
+            blocker_class = tessl_eval.get("blocker_class") or "blocked_validation"
             result.status = "error"
             result.data["eval_status"] = blocker_class or str(tessl_eval.get("status") or "fail")
             result.data["blocker_class"] = blocker_class
@@ -3239,8 +3260,18 @@ def run_evals(
             result.data["tessl_blocker_class"] = blocker_class
             result.errors.append(ErrorObject(
                 code="ERR_RUNTIME" if tessl_eval.get("status") == "blocked" else "ERR_VALIDATION",
-                message=f"Tessl eval {tessl_eval.get('status')}: {tessl_eval.get('blocker') or 'see data.tessl_eval'}",
-            ))
+                    message=f"Tessl eval {tessl_eval.get('status')}: {tessl_eval.get('blocker') or 'see data.tessl_eval'}",
+                ))
+            _finish_eval_lifecycle(
+                result,
+                path=path,
+                mode=mode,
+                runner=runner,
+                eval_status=result.data["eval_status"],
+                blocker_class=blocker_class,
+            )
+        else:
+            _finish_eval_lifecycle(result, path=path, mode=mode, runner=runner, eval_status="pass")
         return result
 
     cmd = [
