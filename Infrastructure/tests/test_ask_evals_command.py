@@ -942,7 +942,7 @@ def test_evals_live_private_dry_run_failure_records_blocked_lifecycle(tmp_path: 
             "blocker": "Tessl workspace is required.",
             "blocker_class": "blocked_validation",
         },
-    ):
+    ) as run_live_private:
         result = evals.run_evals(
             tmp_path,
             "Skills/example-skill",
@@ -950,9 +950,11 @@ def test_evals_live_private_dry_run_failure_records_blocked_lifecycle(tmp_path: 
             runner="discovery-smoke",
             tessl_live_private=True,
             tessl_live_dry_run=True,
+            tessl_workspace="skills-sdk",
             dashboard=False,
         )
 
+    run_live_private.assert_called_once()
     assert result.status == "error"
     assert result.data["eval_status"] == "blocked_validation"
     assert result.data["lifecycle_event"]["event_type"] == "eval_blocked"
