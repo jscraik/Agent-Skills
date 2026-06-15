@@ -85,6 +85,7 @@ def _write_extraction(
     leak: bool = False,
     vendored_demand_override: Optional[dict] = None,
     include_evals: bool = False,
+    eval_files: str = "both",
 ) -> Path:
     extraction = root / "knowledge-OS" / "exports" / "extractions" / "improve-agent-native"
     refs = extraction / "references"
@@ -130,7 +131,7 @@ def _write_extraction(
     if leak:
         capsule_text += "/Users/jamiecraik/dev/knowledge-OS/private-source.md\n"
     (capsules / "harness-evidence-boundary.md").write_text(capsule_text, encoding="utf-8")
-    if include_evals:
+    if include_evals and eval_files in {"both", "scenarios"}:
         (refs / "eval-scenarios.json").write_text(
             json.dumps(
                 [
@@ -151,6 +152,7 @@ def _write_extraction(
             + "\n",
             encoding="utf-8",
         )
+    if include_evals and eval_files in {"both", "fixtures"}:
         evals = refs / "evals"
         evals.mkdir()
         (evals / "eval.harness.local-pass-ci-unknown.md").write_text(
@@ -253,6 +255,62 @@ class TestSkillsSdkKnowledgeIngest(unittest.TestCase):
             self.assertIn("references/eval-scenarios.json", paths)
             self.assertIn("references/evals/", paths)
             self.assertIn(
+                "KnowledgeOS-selected eval scenarios must be wired through references/evals.yaml before Tessl proof",
+                source_context.get("allowed_claims", []),
+            )
+
+    def test_apply_routes_eval_scenarios_only_when_scenario_json_is_copied(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "agent-skills"
+            root.mkdir()
+            skill_dir = _write_skill(root)
+            extraction = _write_extraction(Path(tmp), include_evals=True, eval_files="scenarios")
+
+            payload = build_knowledge_ingest(
+                root,
+                extraction=str(extraction),
+                skill="Skills/agent-ops/improve-agent-native/SKILL.md",
+                apply=True,
+                preflight_security=False,
+            )
+
+            self.assertEqual(payload["status"], "applied")
+            skill_text = (skill_dir / "SKILL.md").read_text(encoding="utf-8")
+            self.assertIn("references/eval-scenarios.json", skill_text)
+            self.assertNotIn("references/evals/", skill_text)
+            source_context = yaml.safe_load((skill_dir / "references" / "source-context.yaml").read_text(encoding="utf-8"))
+            paths = {entry["path"] for entry in source_context["references"]}
+            self.assertIn("references/eval-scenarios.json", paths)
+            self.assertNotIn("references/evals/", paths)
+            self.assertNotIn(
+                "KnowledgeOS-selected eval scenarios must be wired through references/evals.yaml before Tessl proof",
+                source_context.get("allowed_claims", []),
+            )
+
+    def test_apply_routes_eval_fixtures_only_when_fixture_files_are_copied(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "agent-skills"
+            root.mkdir()
+            skill_dir = _write_skill(root)
+            extraction = _write_extraction(Path(tmp), include_evals=True, eval_files="fixtures")
+
+            payload = build_knowledge_ingest(
+                root,
+                extraction=str(extraction),
+                skill="Skills/agent-ops/improve-agent-native/SKILL.md",
+                apply=True,
+                preflight_security=False,
+            )
+
+            self.assertEqual(payload["status"], "applied")
+            skill_text = (skill_dir / "SKILL.md").read_text(encoding="utf-8")
+            self.assertNotIn("references/eval-scenarios.json", skill_text)
+            self.assertIn("references/evals/", skill_text)
+            source_context = yaml.safe_load((skill_dir / "references" / "source-context.yaml").read_text(encoding="utf-8"))
+            paths = {entry["path"] for entry in source_context["references"]}
+            self.assertNotIn("references/eval-scenarios.json", paths)
+            self.assertIn("references/evals/", paths)
+            self.assertNotIn(
                 "KnowledgeOS-selected eval scenarios must be wired through references/evals.yaml before Tessl proof",
                 source_context.get("allowed_claims", []),
             )

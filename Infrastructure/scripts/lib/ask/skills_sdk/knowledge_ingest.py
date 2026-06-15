@@ -76,7 +76,7 @@ def build_knowledge_ingest(
         findings.append("staged_security_gate_failed")
 
     copied: list[dict[str, Any]] = []
-    include_eval_references = _has_eval_reference_files(extraction_root, source_files)
+    eval_routes = _eval_reference_routes(extraction_root, source_files)
     for source_file in source_files:
         relative = source_file.relative_to(extraction_root).as_posix()
         target = skill_dir / relative
@@ -137,10 +137,10 @@ def build_knowledge_ingest(
         target = skill_dir / source_file.relative_to(extraction_root)
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source_file, target)
-    _update_skill_routing(skill_dir / "SKILL.md", include_eval_references=include_eval_references)
+    _update_skill_routing(skill_dir / "SKILL.md", eval_routes=eval_routes)
     _update_source_context(
         skill_dir / "references" / "source-context.yaml",
-        include_eval_references=include_eval_references,
+        eval_routes=eval_routes,
     )
     if run_proof:
         receipt["proof_results"] = _run_proof(repo_root, receipt["validation_commands"])
@@ -181,12 +181,15 @@ def _collect_reference_files(extraction_root: Path) -> list[Path]:
     return files
 
 
-def _has_eval_reference_files(extraction_root: Path, source_files: list[Path]) -> bool:
+def _eval_reference_routes(extraction_root: Path, source_files: list[Path]) -> dict[str, bool]:
+    routes = {"scenarios": False, "fixtures": False}
     for source_file in source_files:
         relative = source_file.relative_to(extraction_root).as_posix()
-        if relative == "references/eval-scenarios.json" or relative.startswith("references/evals/"):
-            return True
-    return False
+        if relative == "references/eval-scenarios.json":
+            routes["scenarios"] = True
+        elif relative.startswith("references/evals/"):
+            routes["fixtures"] = True
+    return routes
 
 
 def _load_yaml(path: Path, *, label: str) -> dict[str, Any]:
@@ -302,9 +305,9 @@ def _validate_eval_scenarios_json(text: str, findings: list[str], *, relative: s
             findings.append(f"references:invalid_eval_scenarios_json:{relative}:{index}:missing_payload")
 
 
-def _update_skill_routing(skill_md: Path, *, include_eval_references: bool) -> None:
+def _update_skill_routing(skill_md: Path, *, eval_routes: dict[str, bool]) -> None:
     text = skill_md.read_text(encoding="utf-8")
-    routing_text = _routing_text(include_eval_references=include_eval_references)
+    routing_text = _routing_text(eval_routes=eval_routes)
     if routing_text in text:
         return
     marker = _routing_insertion_marker(text)
@@ -317,7 +320,7 @@ def _update_skill_routing(skill_md: Path, *, include_eval_references: bool) -> N
         else:
             updated = text.rstrip() + "\n\n" + capsule_section
         skill_md.write_text(
-            _append_reference_links(updated, include_eval_references=include_eval_references),
+            _append_reference_links(updated, eval_routes=eval_routes),
             encoding="utf-8",
         )
         return
@@ -330,7 +333,7 @@ def _update_skill_routing(skill_md: Path, *, include_eval_references: bool) -> N
         procedure = after[:next_heading].rstrip() + "\n\n" + routing_text + "\n"
         updated = before + marker + procedure + after[next_heading:]
     skill_md.write_text(
-        _append_reference_links(updated, include_eval_references=include_eval_references),
+        _append_reference_links(updated, eval_routes=eval_routes),
         encoding="utf-8",
     )
 
@@ -343,13 +346,13 @@ def _routing_insertion_marker(text: str) -> str | None:
     return None
 
 
-def _routing_text(*, include_eval_references: bool) -> str:
-    if include_eval_references:
+def _routing_text(*, eval_routes: dict[str, bool]) -> str:
+    if eval_routes["scenarios"] and eval_routes["fixtures"]:
         return ROUTING_TEXT + " " + EVAL_ROUTING_TEXT
     return ROUTING_TEXT
 
 
-def _append_reference_links(text: str, *, include_eval_references: bool) -> str:
+def _append_reference_links(text: str, *, eval_routes: dict[str, bool]) -> str:
     reference_marker = "## References\n"
     updated = text
     if reference_marker in updated:
@@ -359,11 +362,10 @@ def _append_reference_links(text: str, *, include_eval_references: bool) -> str:
             "- `references/knowledge-capsule.manifest.yaml`",
             "- `references/knowledge-capsules/`",
         ]
-        if include_eval_references:
-            reference_links.extend([
-                "- `references/eval-scenarios.json`",
-                "- `references/evals/`",
-            ])
+        if eval_routes["scenarios"]:
+            reference_links.append("- `references/eval-scenarios.json`")
+        if eval_routes["fixtures"]:
+            reference_links.append("- `references/evals/`")
         for ref in reference_links:
             if ref not in refs:
                 refs = refs.rstrip() + "\n" + ref + "\n"
@@ -371,7 +373,7 @@ def _append_reference_links(text: str, *, include_eval_references: bool) -> str:
     return updated.rstrip() + "\n"
 
 
-def _update_source_context(source_context: Path, *, include_eval_references: bool) -> None:
+def _update_source_context(source_context: Path, *, eval_routes: dict[str, bool]) -> None:
     if source_context.is_file():
         loaded = _load_yaml(source_context, label="references/source-context.yaml")
     else:
@@ -422,8 +424,8 @@ def _update_source_context(source_context: Path, *, include_eval_references: boo
             "bounded_unit": True,
         },
     ]
-    if include_eval_references:
-        entries.extend([
+    if eval_routes["scenarios"]:
+        entries.append(
             {
                 "path": "references/eval-scenarios.json",
                 "kind": "knowledge_eval_scenarios",
@@ -438,7 +440,10 @@ def _update_source_context(source_context: Path, *, include_eval_references: boo
                 "context_budget": "small",
                 "claim_scope": "eval_scenarios",
                 "bounded_unit": True,
-            },
+            }
+        )
+    if eval_routes["fixtures"]:
+        entries.append(
             {
                 "path": "references/evals/",
                 "kind": "knowledge_eval_fixtures",
@@ -450,8 +455,8 @@ def _update_source_context(source_context: Path, *, include_eval_references: boo
                 "context_budget": "selective",
                 "claim_scope": "eval_fixture_detail",
                 "bounded_unit": True,
-            },
-        ])
+            }
+        )
     existing_paths = {str(item.get("path")) for item in references if isinstance(item, dict)}
     for entry in entries:
         if entry["path"] not in existing_paths:
@@ -463,7 +468,8 @@ def _update_source_context(source_context: Path, *, include_eval_references: boo
     ):
         allowed_claims.append("KnowledgeOS capsules are vendored references, not runtime dependencies")
     if (
-        include_eval_references
+        eval_routes["scenarios"]
+        and eval_routes["fixtures"]
         and isinstance(allowed_claims, list)
         and "KnowledgeOS-selected eval scenarios must be wired through references/evals.yaml before Tessl proof"
         not in allowed_claims
@@ -511,11 +517,11 @@ def _preflight_security_gate(
             target = staged_skill / source_file.relative_to(extraction_root)
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(source_file, target)
-        include_eval_references = _has_eval_reference_files(extraction_root, source_files)
-        _update_skill_routing(staged_skill / "SKILL.md", include_eval_references=include_eval_references)
+        eval_routes = _eval_reference_routes(extraction_root, source_files)
+        _update_skill_routing(staged_skill / "SKILL.md", eval_routes=eval_routes)
         _update_source_context(
             staged_skill / "references" / "source-context.yaml",
-            include_eval_references=include_eval_references,
+            eval_routes=eval_routes,
         )
         gate_script = _resolve_skill_gate_script(repo_root)
         process = subprocess.run(
