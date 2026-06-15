@@ -409,7 +409,7 @@ class TestManifestJsonlSchema(unittest.TestCase):
     }
     EXPECTED_SOURCE_REVISION = "5983ceeb"
 
-    def _iter_manifest_records(self):
+    def _iter_manifest_records(self) -> Iterator[tuple[Path, int, dict[str, Any]]]:
         """
         Yield parsed JSON records from manifest.jsonl files with location metadata.
         
