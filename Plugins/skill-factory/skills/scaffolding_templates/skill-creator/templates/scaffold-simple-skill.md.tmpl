@@ -1,0 +1,55 @@
+---
+name: {skill_name}
+description: "{description}"
+metadata:
+  lifecycle_state: {lifecycle_state}
+  maturity: {maturity}
+  owner: {owner}
+  review_cadence: {review_cadence}
+  last_reviewed: {last_reviewed}
+  metadata_source: frontmatter
+---
+
+# {skill_title}
+
+This scaffold starts in `{lifecycle_state}` state with `{maturity}` maturity. Replace the starter guidance before treating it as active or broadly reusable.
+
+## Working Agreement
+- Follow the repo's `AGENTS.md` for local rules and validation.
+- Keep deep reference material in `Infrastructure/references/`.
+- Keep reusable automation in `Infrastructure/scripts/`.
+
+## When To Use
+- Replace with the real user ask this skill should own.
+
+## When Not To Use
+- Replace with neighboring asks this skill should reject or reroute.
+
+## Inputs
+- Replace with the concrete files, repos, APIs, schemas, or constraints the finished skill needs.
+- Ask clarifying questions only for genuine gaps.
+
+## Outputs
+- Replace with the concrete outputs, paths, and formats the skill should produce.
+- Write local deliverables to `./Infrastructure/artifacts/` when an artifact is needed.
+
+## Constraints And Safety
+- Redact secrets and private data by default.
+- If networking is required, specify the minimal domain allowlist and gate it behind explicit opt-in.
+- Destructive actions require explicit confirmation.
+
+## Workflow
+1. Replace with the smallest reliable workflow for this skill.
+2. Use progressive disclosure: keep `SKILL.md` short and move depth into references and scripts.
+3. End by listing changed files, commands run, and validation results.
+
+## Validation
+- Replace with the commands, tests, or checks that prove this skill is safe to use.
+- Fail fast: if a gate fails, stop and report the failure before continuing.
+
+## Gotchas
+- Replace with the recurring mistake or misconception this skill should call out early.
+
+## Examples
+- Triggering prompt: "Replace with a realistic triggering prompt."
+- Non-triggering prompt: "Replace with a realistic non-triggering prompt."

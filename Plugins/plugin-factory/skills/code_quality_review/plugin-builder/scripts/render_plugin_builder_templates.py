@@ -9,7 +9,7 @@ from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 SKILL_DIR = SCRIPT_DIR.parent
-FAMILY_SKILLS_DIR = SCRIPT_DIR.parents[1]
+FAMILY_SKILLS_DIR = SCRIPT_DIR.parents[2]
 if str(FAMILY_SKILLS_DIR) not in sys.path:
     sys.path.insert(0, str(FAMILY_SKILLS_DIR))
 

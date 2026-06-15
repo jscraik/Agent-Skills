@@ -49,9 +49,9 @@ Codex builds:
 ## Command Matrix
 
 ```bash
-uv run python Skills/plugin-builder/Infrastructure/scripts/plugin_builder.py inspect-source <source>
-uv run python Skills/plugin-builder/Infrastructure/scripts/plugin_builder.py validate <plugin-path> --require-marketplace --marketplace-path .agents/Plugins/marketplace.json
-uv run python Skills/plugin-builder/Infrastructure/scripts/plugin_builder.py audit-compat <plugin-path> --marketplace-path .agents/Plugins/marketplace.json
+uv run python Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts/plugin_builder.py inspect-source <source>
+uv run python Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts/plugin_builder.py validate <plugin-path> --require-marketplace --marketplace-path .agents/Plugins/marketplace.json
+uv run python Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts/plugin_builder.py audit-compat <plugin-path> --marketplace-path .agents/Plugins/marketplace.json
 python3 -m unittest Infrastructure.tests.test_plugin_bundled_hooks_contract -v
 ```
 

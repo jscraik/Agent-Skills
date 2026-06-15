@@ -42,9 +42,12 @@ def _discover_repo_root_for_contract() -> Path:
 
 
 _REPO_ROOT_FOR_CONTRACT = _discover_repo_root_for_contract()
-_SHARED_SKILL_CONTRACT_DIR = _REPO_ROOT_FOR_CONTRACT / "scripts"
+_SHARED_SKILL_CONTRACT_DIR = _REPO_ROOT_FOR_CONTRACT / "Infrastructure" / "scripts"
 if str(_SHARED_SKILL_CONTRACT_DIR) not in sys.path:
     sys.path.insert(0, str(_SHARED_SKILL_CONTRACT_DIR))
+_LIFECYCLE_SYNC_DIR = _SHARED_SKILL_CONTRACT_DIR / "lifecycle-and-sync"
+if str(_LIFECYCLE_SYNC_DIR) not in sys.path:
+    sys.path.insert(0, str(_LIFECYCLE_SYNC_DIR))
 
 from canonical_skill_roots import (  # noqa: E402
     find_plugin_skill_root_for_output,

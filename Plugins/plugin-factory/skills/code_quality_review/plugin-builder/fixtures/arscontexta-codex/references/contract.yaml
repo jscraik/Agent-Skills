@@ -17,6 +17,6 @@ assumptions:
   - Upstream is Codex-oriented; this package is Codex starter guidance.
   - Semantic search integration is optional and may be absent in target vaults.
 outputs:
-  plugin_package_path: Skills/plugin-builder/fixtures/arscontexta-codex
+  plugin_package_path: Plugins/plugin-factory/skills/code_quality_review/plugin-builder/fixtures/arscontexta-codex
   primary_skill: skills/arscontexta/SKILL.md
   starter_reference: Infrastructure/references/arscontexta-quickstart.md

@@ -274,15 +274,15 @@ The curated `openai/plugins` repo commonly adds richer metadata on top of the ru
 ## Enforced script commands
 
 ```bash
-python3 Skills/plugin-builder/Infrastructure/scripts/plugin_builder.py inspect-source <path/to/source-repo-or-plugin>
-python3 Skills/plugin-builder/Infrastructure/scripts/plugin_builder.py inspect-local <plugin-name> --path plugins
-python3 Skills/plugin-builder/Infrastructure/scripts/plugin_builder.py scaffold <plugin-name> --path plugins --with-marketplace --archetype coding_tool
-python3 Skills/plugin-builder/Infrastructure/scripts/plugin_builder.py scaffold <plugin-name> --path plugins --from-source-path <path/to/source-repo-or-plugin> --with-marketplace
-python3 Skills/plugin-builder/Infrastructure/scripts/plugin_builder.py validate <path/to/plugin> --require-marketplace --marketplace-path .agents/Plugins/marketplace.json
-python3 Skills/plugin-builder/Infrastructure/scripts/plugin_builder.py audit-compat <path/to/plugin> --marketplace-path .agents/Plugins/marketplace.json
-python3 Skills/plugin-builder/Infrastructure/scripts/plugin_builder.py audit-marketplace --marketplace-path .agents/Plugins/marketplace.json --plugins-path plugins
-python3 Skills/plugin-builder/Infrastructure/scripts/plugin_builder.py normalize-marketplace --marketplace-path .agents/Plugins/marketplace.json --plugins-path plugins --write
-python3 Skills/plugin-builder/Infrastructure/scripts/plugin_builder.py validate <path/to/plugin> --show-terminology-map
+python3 Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts/plugin_builder.py inspect-source <path/to/source-repo-or-plugin>
+python3 Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts/plugin_builder.py inspect-local <plugin-name> --path plugins
+python3 Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts/plugin_builder.py scaffold <plugin-name> --path plugins --with-marketplace --archetype coding_tool
+python3 Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts/plugin_builder.py scaffold <plugin-name> --path plugins --from-source-path <path/to/source-repo-or-plugin> --with-marketplace
+python3 Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts/plugin_builder.py validate <path/to/plugin> --require-marketplace --marketplace-path .agents/Plugins/marketplace.json
+python3 Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts/plugin_builder.py audit-compat <path/to/plugin> --marketplace-path .agents/Plugins/marketplace.json
+python3 Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts/plugin_builder.py audit-marketplace --marketplace-path .agents/Plugins/marketplace.json --plugins-path plugins
+python3 Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts/plugin_builder.py normalize-marketplace --marketplace-path .agents/Plugins/marketplace.json --plugins-path plugins --write
+python3 Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts/plugin_builder.py validate <path/to/plugin> --show-terminology-map
 ```
 
 ## Source inspection support

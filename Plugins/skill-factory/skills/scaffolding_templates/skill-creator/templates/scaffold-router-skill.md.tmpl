@@ -1,0 +1,66 @@
+---
+name: {skill_name}
+description: "{description}"
+metadata:
+  lifecycle_state: {lifecycle_state}
+  maturity: {maturity}
+  owner: {owner}
+  review_cadence: {review_cadence}
+  last_reviewed: {last_reviewed}
+  metadata_source: frontmatter
+---
+
+# {skill_title}
+
+This router scaffold starts in `{lifecycle_state}` state with `{maturity}` maturity. Replace the starter routes before treating it as active or broadly reusable.
+
+## Working Agreement
+- Follow the repo's `AGENTS.md` for local rules and validation.
+- Keep route details in `workflows/` when the router needs multi-step branches.
+- Keep deep reference material in `Infrastructure/references/`.
+
+## When To Use
+- Replace with the routing asks this skill should own.
+
+## When Not To Use
+- Replace with nearby asks this router should reject or hand off.
+
+## Inputs
+- Replace with the minimum user signal needed before routing.
+- Ask follow-up questions only when the route cannot be selected safely.
+
+## Outputs
+- Replace with the routed output contract, including paths and formats.
+
+## Constraints And Safety
+- Redact secrets and private data by default.
+- Prefer read-only checks before mutating actions.
+- Destructive actions require explicit confirmation.
+
+## Intake
+Replace this line with the one concise routing question the user should answer.
+
+## Routes
+| Response | Workflow |
+|---|---|
+| 1 | `workflows/option-1.md` |
+| 2 | `workflows/option-2.md` |
+| 3 | `workflows/option-3.md` |
+
+## Workflow
+1. Ask one intake question and capture the response.
+2. Match the response to the route table and select one workflow.
+3. Read the chosen workflow fully, then execute it exactly.
+4. End with created or modified files, commands run, and route rationale.
+
+## Validation
+- Validate route selection before execution.
+- Fail fast if route criteria are ambiguous or checks fail.
+- Verify outputs match the chosen workflow contract.
+
+## Gotchas
+- Replace with the routing misconception or common failure pattern this router should surface early.
+
+## Examples
+- Triggering prompt: "Replace with a realistic routing request."
+- Non-triggering prompt: "Replace with a realistic non-routing request."

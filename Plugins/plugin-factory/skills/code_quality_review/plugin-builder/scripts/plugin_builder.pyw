@@ -50,7 +50,10 @@ def _discover_repo_root() -> Path:
 REPO_ROOT = _discover_repo_root()
 DEFAULT_PLUGIN_PARENT = REPO_ROOT / "Plugins" / "third-party"
 DEFAULT_MARKETPLACE_PATH = REPO_ROOT / ".agents" / "Plugins" / "marketplace.json"
-SKILL_BUILDER_INIT = REPO_ROOT / "Skills" / "skill-builder" / "scripts" / "init_skill.py"
+PLUGIN_BUILDER_COMMAND = (
+    "Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts/plugin_builder.py"
+)
+SKILL_BUILDER_INIT = REPO_ROOT / "Plugins" / "skill-factory" / "scripts" / "skill-builder" / "init_skill.py"
 SHARED_SKILL_CONTRACT_DIR = REPO_ROOT / "Infrastructure" / "scripts"
 if str(SHARED_SKILL_CONTRACT_DIR) not in sys.path:
     sys.path.insert(0, str(SHARED_SKILL_CONTRACT_DIR))
@@ -62,7 +65,7 @@ from canonical_skill_roots import CANONICAL_STANDALONE_SKILL_ROOTS  # noqa: E402
 CODEX_AGENT_WRITER = (
     REPO_ROOT / "utilities" / "codex-agent-creator" / "scripts" / "write_role_config.sh"
 )
-DOCS_EXPERT_ASSETS = REPO_ROOT / "product" / "docs" / "docs-expert" / "assets"
+DOCS_EXPERT_ASSETS = REPO_ROOT / "Infrastructure" / "references" / "deferred-skill-context" / "agent-ops-docs-expert" / "assets"
 DEFAULT_INSTALL_POLICY = "AVAILABLE"
 DEFAULT_AUTH_POLICY = "ON_INSTALL"
 DEFAULT_CATEGORY = "Productivity"
@@ -1616,25 +1619,25 @@ def _render_readme_template(plugin_name: str, enabled_surfaces: dict[str, bool])
         .replace("- Optional: <editor plugins>, <CLI helpers>", "- Optional: `jq`, `yq`, and Codex runtime tooling for deeper validation")
         .replace(
             "# commands the repo actually supports",
-            f"uv run python Skills/plugin-builder/Infrastructure/scripts/plugin_builder.py scaffold {plugin_name} --path plugins --with-skills --with-marketplace",
+            f"uv run python {PLUGIN_BUILDER_COMMAND} scaffold {plugin_name} --path plugins --with-skills --with-marketplace",
         )
         .replace(
             "### 2) Run it\n```sh\n```\n",
             "### 2) Run it\n```sh\n"
-            f"uv run python Skills/plugin-builder/Infrastructure/scripts/plugin_builder.py validate Plugins/{plugin_name} --require-marketplace --marketplace-path .agents/Plugins/marketplace.json\n"
+            f"uv run python {PLUGIN_BUILDER_COMMAND} validate Plugins/{plugin_name} --require-marketplace --marketplace-path .agents/Plugins/marketplace.json\n"
             "```\n",
         )
         .replace("- <what success looks like>", "- The plugin manifest validates and the package surfaces exist at the expected relative paths")
         .replace("### Do <task> to achieve <result>", "### Add or refine plugin-owned skills")
         .replace("- What you get:", "- What you get: a `skills/<skill>/` bundle generated through `skill-builder`")
         .replace("- Steps:\n```sh\n```\n- Verify:", "- Steps:\n```sh\n"
-            f"uv run python Skills/plugin-builder/Infrastructure/scripts/plugin_builder.py scaffold {plugin_name} --path plugins --with-skills --force\n"
+            f"uv run python {PLUGIN_BUILDER_COMMAND} scaffold {plugin_name} --path plugins --with-skills --force\n"
             "```\n- Verify: confirm `skills/<skill>/SKILL.md`, `Infrastructure/references/`, `Infrastructure/scripts/`, `assets/`, and `agents/openai.yaml` exist\n")
         .replace("### Configure <thing> so that <result>", "### Validate package integrity before publishing")
         .replace("- Options table (if applicable):", "- Package surfaces:\n" + surface_lines + "\n")
         .replace("### Symptom: <what the reader sees>", "### Symptom: validation reports missing plugin-owned surfaces")
         .replace("Cause:\nFix:\n```sh\n```\n", "Cause: the scaffold was partial or a helper-generated surface was removed.\nFix:\n```sh\n"
-            f"uv run python Skills/plugin-builder/Infrastructure/scripts/plugin_builder.py scaffold {plugin_name} --path plugins --with-skills --with-agents --force\n"
+            f"uv run python {PLUGIN_BUILDER_COMMAND} scaffold {plugin_name} --path plugins --with-skills --with-agents --force\n"
             "```\n")
         .replace("- [ ] <criterion 1>", "- [ ] manifest exists at `.codex-plugin/plugin.json`")
         .replace("- [ ] <criterion 2>", "- [ ] plugin-owned skills and agents were scaffolded through shared builders when requested")
@@ -1684,7 +1687,7 @@ def _package_guide_template(plugin_name: str, enabled_surfaces: dict[str, bool])
         .replace(
             "### 2) Run it\n```sh\n```\n",
             "### 2) Run it\n```sh\n"
-            f"uv run python Skills/plugin-builder/Infrastructure/scripts/plugin_builder.py validate Plugins/{plugin_name}\n"
+            f"uv run python {PLUGIN_BUILDER_COMMAND} validate Plugins/{plugin_name}\n"
             "```\n",
         )
         .replace("- <what success looks like>", "- Every declared surface exists and helper-owned folders are in the expected locations")
@@ -1700,7 +1703,7 @@ def _package_guide_template(plugin_name: str, enabled_surfaces: dict[str, bool])
         .replace("- Options table (if applicable):", "- Package tree:\n" + surface_lines + "\n")
         .replace("### Symptom: <what the reader sees>", "### Symptom: a plugin surface exists but does not match the owning helper contract")
         .replace("Cause:\nFix:\n```sh\n```\n", "Cause: the surface was hand-edited or generated with the wrong helper.\nFix:\n```sh\n"
-            f"uv run python Skills/plugin-builder/Infrastructure/scripts/plugin_builder.py scaffold {plugin_name} --path plugins --with-skills --with-agents --force\n"
+            f"uv run python {PLUGIN_BUILDER_COMMAND} scaffold {plugin_name} --path plugins --with-skills --with-agents --force\n"
             "```\n")
         .replace("- [ ] <criterion 1>", "- [ ] helper ownership of each surface is documented")
         .replace("- [ ] <criterion 2>", "- [ ] package layout matches the manifest and generated docs")
@@ -2237,6 +2240,12 @@ def _scaffold_plugin_skill(skill_root: Path, skill_name: str, force: bool) -> st
         str(skill_root),
         "--target",
         "codex",
+        "--description",
+        f"Use when working on the {skill_name} plugin workflow.",
+        "--owner",
+        DEFAULT_OWNER,
+        "--review-cadence",
+        "quarterly",
         "--resources",
         "scripts,references,assets",
     ]
