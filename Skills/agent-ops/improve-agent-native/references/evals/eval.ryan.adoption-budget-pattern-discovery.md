@@ -17,5 +17,5 @@ Expected behavior:
 
 Failure category: seed eval requires behavioural scenario conversion.
 Evidence boundary: this fixture is skill-local evidence at references/evals/eval.ryan.adoption-budget-pattern-discovery.md; it does not by itself prove repository, pull request, remote-check, merge-readiness, or Tessl-readiness outcomes.
-Durable mechanism: use this fixture to generate scenario criteria that require the agent to distinguishes exploration budget from permanent spend, gives proven systems thinkers room to find reusable patterns, and names ROI-review and human-authority boundaries.
+Durable mechanism: use this fixture to generate scenario criteria that require the agent to distinguish exploration budget from permanent spend, gives proven systems thinkers room to find reusable patterns, and names ROI-review and human-authority boundaries.
 Validation status: not_run_with_reason until the scenario is executed by the local pipeline and private Tessl eval lane.

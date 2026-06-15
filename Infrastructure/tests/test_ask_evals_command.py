@@ -42,6 +42,15 @@ def test_tessl_run_id_parser_handles_prefixed_json() -> None:
     assert evals._extract_tessl_eval_run_id(payload) == "019e7ab3-fda5-7071-8e47-9ea75386d53b"
 
 
+def test_tessl_json_parser_skips_bracketed_log_prefix_and_trailing_text() -> None:
+    assert evals._parse_json_value_from_text(
+        '[info] preparing eval\n[{"evalRunId": "019e7ab3-fda5-7071-8e47-9ea75386d53b"}]'
+    ) == [{"evalRunId": "019e7ab3-fda5-7071-8e47-9ea75386d53b"}]
+    assert evals._parse_json_value_from_text(
+        '{"id": "019e7ab3-fda5-7071-8e47-9ea75386d53b"}\ntrailing log text'
+    ) == {"id": "019e7ab3-fda5-7071-8e47-9ea75386d53b"}
+
+
 def test_tessl_run_id_parser_handles_alternate_json_keys() -> None:
     assert (
         evals._extract_tessl_eval_run_id('{"evalRunId": "019e7ab3-fda5-7071-8e47-9ea75386d53b"}')
@@ -353,6 +362,38 @@ def test_tessl_eval_quality_rejects_provenance_only_knowledgeos_signal() -> None
     findings = evals._tessl_eval_quality_findings(cases)
 
     assert [finding["code"] for finding in findings] == ["missing_skill_lift_acceptance"]
+
+
+def test_tessl_eval_quality_rejects_broader_provenance_only_signal() -> None:
+    cases = [{
+        "id": "eval.harness.seed-only",
+        "unit": "seed only",
+        "given": "A KnowledgeOS seed scenario was imported.",
+        "should": "Convert the seed into a skill-specific behavioural eval.",
+        "prompt": "Assess the repository and produce an evidence-backed answer.",
+        "acceptance": [
+            {"type": "regex", "value": "(?is)(evidence|repo)"},
+            {
+                "type": "expected_signal",
+                "value": "Cites references/evals/eval.harness.seed-only.md as evidence.",
+            },
+        ],
+    }]
+
+    findings = evals._tessl_eval_quality_findings(cases)
+
+    assert [finding["code"] for finding in findings] == ["missing_skill_lift_acceptance"]
+
+
+def test_tessl_eval_quality_rejects_empty_case_set(tmp_path: Path) -> None:
+    source = tmp_path / "references" / "evals.yaml"
+
+    try:
+        evals._assert_tessl_eval_quality([], source=source)
+    except ValueError as exc:
+        assert "no Tessl eval cases were selected" in str(exc)
+    else:
+        raise AssertionError("empty Tessl case set should fail quality gate")
 
 
 def test_tessl_eval_quality_rejects_generic_should_contract_signal() -> None:
@@ -864,6 +905,8 @@ def test_evals_live_private_dry_run_is_not_failed_by_discovery_smoke_filter(tmp_
     assert result.data["tessl_eval"]["status"] == "pass"
     assert result.data["tessl_eval"]["dry_run"] is True
     assert "staged private Tessl payload" in result.data["tessl_dry_run_note"]
+    assert result.data["lifecycle_event"]["event_type"] == "eval_completed"
+    assert result.data["lifecycle_event"]["outcome"]["status"] == "pass"
 
 
 def test_evals_live_private_dry_run_failure_records_blocked_lifecycle(tmp_path: Path) -> None:

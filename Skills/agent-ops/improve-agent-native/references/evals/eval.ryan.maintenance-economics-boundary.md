@@ -21,5 +21,5 @@ feature quickly and code generation is cheap.
 
 Failure category: seed eval requires behavioural scenario conversion.
 Evidence boundary: this fixture is skill-local evidence at references/evals/eval.ryan.maintenance-economics-boundary.md; it does not by itself prove repository, pull request, remote-check, merge-readiness, or Tessl-readiness outcomes.
-Durable mechanism: use this fixture to generate scenario criteria that require the agent to balances maintenance burden, supply-chain risk, pinning, cooldown policy, and replacement options before adding or retaining a dependency.
+Durable mechanism: use this fixture to generate scenario criteria that require the agent to balance maintenance burden, supply-chain risk, pinning, cooldown policy, and replacement options before adding or retaining a dependency.
 Validation status: not_run_with_reason until the scenario is executed by the local pipeline and private Tessl eval lane.

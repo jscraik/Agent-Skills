@@ -23,5 +23,5 @@ repository has generated lockfiles.
 
 Failure category: seed eval requires behavioural scenario conversion.
 Evidence boundary: this fixture is skill-local evidence at references/evals/eval.ryan.policy-aware-approval.md; it does not by itself prove repository, pull request, remote-check, merge-readiness, or Tessl-readiness outcomes.
-Durable mechanism: use this fixture to generate scenario criteria that require the agent to evaluates command approval against policy intent, managed-file ownership, PATH/tooling assumptions, and generated-artifact risk instead of prefix shape alone.
+Durable mechanism: use this fixture to generate scenario criteria that require the agent to evaluate command approval against policy intent, managed-file ownership, PATH/tooling assumptions, and generated-artifact risk instead of prefix shape alone.
 Validation status: not_run_with_reason until the scenario is executed by the local pipeline and private Tessl eval lane.

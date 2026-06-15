@@ -263,6 +263,54 @@ class TestSkillsSdkKnowledgeIngest(unittest.TestCase):
                 payload["findings"],
             )
 
+    def test_invalid_utf8_reference_blocks_apply_with_finding(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "agent-skills"
+            root.mkdir()
+            _write_skill(root)
+            extraction = _write_extraction(Path(tmp))
+            bad_reference = extraction / "references" / "knowledge-capsules" / "invalid-utf8.md"
+            bad_reference.write_bytes(b"\xff\xfe\x00")
+
+            payload = build_knowledge_ingest(
+                root,
+                extraction=str(extraction),
+                skill="Skills/agent-ops/improve-agent-native",
+                apply=True,
+                preflight_security=False,
+            )
+
+            self.assertEqual(payload["status"], "blocked")
+            self.assertIn(
+                "references:invalid_utf8:references/knowledge-capsules/invalid-utf8.md",
+                payload["findings"],
+            )
+
+    def test_duplicate_eval_scenario_ids_block_apply(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "agent-skills"
+            root.mkdir()
+            _write_skill(root)
+            extraction = _write_extraction(Path(tmp), include_evals=True)
+            scenarios_path = extraction / "references" / "eval-scenarios.json"
+            scenarios = json.loads(scenarios_path.read_text(encoding="utf-8"))
+            scenarios.append(dict(scenarios[0]))
+            scenarios_path.write_text(json.dumps(scenarios, indent=2) + "\n", encoding="utf-8")
+
+            payload = build_knowledge_ingest(
+                root,
+                extraction=str(extraction),
+                skill="Skills/agent-ops/improve-agent-native",
+                apply=True,
+                preflight_security=False,
+            )
+
+            self.assertEqual(payload["status"], "blocked")
+            self.assertIn(
+                "references:invalid_eval_scenarios_json:references/eval-scenarios.json:1:duplicate_eval_id:eval.harness.local-pass-ci-unknown",
+                payload["findings"],
+            )
+
     def test_vendored_demand_policy_is_validated(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "agent-skills"

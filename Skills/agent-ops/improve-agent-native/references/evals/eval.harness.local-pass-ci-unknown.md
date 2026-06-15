@@ -10,5 +10,5 @@ This is the portable SDK reproduction contract for the eval scenario. The Knowle
 
 Failure category: seed eval requires behavioural scenario conversion.
 Evidence boundary: this fixture is skill-local evidence at references/evals/eval.harness.local-pass-ci-unknown.md; it does not by itself prove repository, pull request, remote-check, merge-readiness, or Tessl-readiness outcomes.
-Durable mechanism: use this fixture to generate scenario criteria that require the agent to separates local test evidence from CI and merge-readiness truth, reporting CI as unchecked or unknown unless current remote evidence was inspected.
+Durable mechanism: use this fixture to generate scenario criteria that require the agent to separate local test evidence from CI and merge-readiness truth, reporting CI as unchecked or unknown unless current remote evidence was inspected.
 Validation status: not_run_with_reason until the scenario is executed by the local pipeline and private Tessl eval lane.

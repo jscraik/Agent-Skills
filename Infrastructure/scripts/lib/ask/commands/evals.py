@@ -152,16 +152,12 @@ def _parse_json_value_from_text(text: str) -> object | None:
     stripped = text.strip()
     if not stripped:
         return None
-    starts = [0]
-    for token in ("{", "["):
-        index = stripped.find(token)
-        if index >= 0 and index not in starts:
-            starts.append(index)
-    for start in starts:
-        if start < 0:
+    decoder = json.JSONDecoder()
+    for start, char in enumerate(stripped):
+        if char not in {"{", "["}:
             continue
         try:
-            parsed = json.loads(stripped[start:])
+            parsed, _ = decoder.raw_decode(stripped[start:])
         except json.JSONDecodeError:
             continue
         return parsed
@@ -463,8 +459,8 @@ def _tessl_scenario_generation_policy(workspace: str | None = None) -> dict:
         "evidence_retention": "stable tmp staging is intentionally left for post-run inspection; reruns archive previous staged evidence under evidence-archive/",
         "target_tile": "target-tile",
         "tool_project": "tool-project",
-        "scenario_skill_path": ".tessl/plugins/tessl-labs/tessl-skill-eval-scenarios/creating-eval-scenarios/SKILL.md",
-        "scenario_reference_path": ".tessl/plugins/tessl-labs/tessl-skill-eval-scenarios/creating-eval-scenarios/references/scenario-generation.md",
+        "scenario_skill_path": ".tessl/tiles/tessl-labs/tessl-skill-eval-scenarios/creating-eval-scenarios/SKILL.md",
+        "scenario_reference_path": ".tessl/tiles/tessl-labs/tessl-skill-eval-scenarios/creating-eval-scenarios/references/scenario-generation.md",
         "generated_output": "target-tile/evals/",
         "canonical_import_target": "references/evals.yaml after review",
     }
@@ -801,9 +797,8 @@ BEHAVIORAL_TESSL_ACCEPTANCE_TYPES = {
     "output_schema",
 }
 KEYWORD_ONLY_TESSL_ACCEPTANCE_TYPES = {"regex", "not_regex", "contains", "not_contains"}
-PROVENANCE_ONLY_SIGNAL_RE = re.compile(
-    r"(?is)^\s*names?\s+the\s+skill-local\s+knowledgeos\s+eval\s+fixture\s+path\s+references/evals/[^\s]+\.md\s+as\s+part\s+of\s+the\s+evidence\s+boundary\.?\s*$"
-)
+PROVENANCE_FIXTURE_PATH_RE = re.compile(r"(?i)\breferences/evals/[^\s]+\.md\b")
+PROVENANCE_ONLY_VERBS_RE = re.compile(r"(?i)\b(names?|cites?|references?|points?\s+to|lists?)\b")
 GENERIC_EXPECTED_SIGNAL_RE = re.compile(
     r"(?is)^\s*demonstrates\s+the\s+skill-specific\s+behavior\s+in\s+this\s+case\s+should\s+contract\s*:"
 )
@@ -813,6 +808,15 @@ def _acceptance_type(item: object) -> str:
     if not isinstance(item, dict):
         return ""
     return str(_normalize_tessl_acceptance_item(item).get("type") or "acceptance").strip()
+
+
+def _is_provenance_only_signal(value: str) -> bool:
+    normalized = " ".join(value.split())
+    return (
+        bool(PROVENANCE_FIXTURE_PATH_RE.search(normalized))
+        and bool(PROVENANCE_ONLY_VERBS_RE.search(normalized))
+        and "evidence" in normalized.lower()
+    )
 
 
 def _case_has_behavioral_acceptance(case: dict[str, object]) -> bool:
@@ -840,7 +844,7 @@ def _case_has_skill_lift_acceptance(case: dict[str, object]) -> bool:
         if (
             item_type == "expected_signal"
             and value
-            and not PROVENANCE_ONLY_SIGNAL_RE.fullmatch(value)
+            and not _is_provenance_only_signal(value)
             and not GENERIC_EXPECTED_SIGNAL_RE.match(value)
         ):
             return True
@@ -910,6 +914,11 @@ def _tessl_eval_quality_findings(cases: list[dict[str, object]]) -> list[dict[st
 
 
 def _assert_tessl_eval_quality(cases: list[dict[str, object]], *, source: Path) -> None:
+    if not cases:
+        raise ValueError(
+            f"Tessl eval quality gate failed for {source}: no Tessl eval cases were selected. "
+            "Add structured behavioural scenarios before staging or uploading Tessl assessments."
+        )
     findings = _tessl_eval_quality_findings(cases)
     if not findings:
         return
@@ -1718,10 +1727,10 @@ def _write_tessl_scenario_generation_brief(
     tool_project: Path,
 ) -> Path:
     brief_path = staged_root / "scenario-generation-brief.md"
-    scenario_skill = tool_project / ".tessl/plugins/tessl-labs/tessl-skill-eval-scenarios/creating-eval-scenarios/SKILL.md"
+    scenario_skill = tool_project / ".tessl/tiles/tessl-labs/tessl-skill-eval-scenarios/creating-eval-scenarios/SKILL.md"
     scenario_reference = (
         tool_project
-        / ".tessl/plugins/tessl-labs/tessl-skill-eval-scenarios/creating-eval-scenarios/references/scenario-generation.md"
+        / ".tessl/tiles/tessl-labs/tessl-skill-eval-scenarios/creating-eval-scenarios/references/scenario-generation.md"
     )
     brief_path.write_text(
         "\n".join([
@@ -1931,10 +1940,10 @@ def prepare_tessl_scenario_generation(
         blocker = None
         blocker_class = None
 
-    scenario_skill = tool_project / ".tessl/plugins/tessl-labs/tessl-skill-eval-scenarios/creating-eval-scenarios/SKILL.md"
+    scenario_skill = tool_project / ".tessl/tiles/tessl-labs/tessl-skill-eval-scenarios/creating-eval-scenarios/SKILL.md"
     scenario_reference = (
         tool_project
-        / ".tessl/plugins/tessl-labs/tessl-skill-eval-scenarios/creating-eval-scenarios/references/scenario-generation.md"
+        / ".tessl/tiles/tessl-labs/tessl-skill-eval-scenarios/creating-eval-scenarios/references/scenario-generation.md"
     )
     brief_path = _write_tessl_scenario_generation_brief(
         staged_root,
@@ -3465,6 +3474,10 @@ def run_evals(
                     and error.message == "Evaluation run failed."
                 )
             ]
+            lifecycle_events = result.data.setdefault("lifecycle_events", [])
+            if lifecycle_events and lifecycle_events[-1].get("event_type") in {"eval_completed", "eval_blocked"}:
+                lifecycle_events.pop()
+            _finish_eval_lifecycle(result, path=path, mode=mode, runner=runner, eval_status="pass")
 
     return result
 

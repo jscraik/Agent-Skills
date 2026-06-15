@@ -10,5 +10,5 @@ This is the portable SDK reproduction contract for the eval scenario. The Knowle
 
 Failure category: seed eval requires behavioural scenario conversion.
 Evidence boundary: this fixture is skill-local evidence at references/evals/eval.harness.pr-lifecycle-stops-before-main.md; it does not by itself prove repository, pull request, remote-check, merge-readiness, or Tessl-readiness outcomes.
-Durable mechanism: use this fixture to generate scenario criteria that require the agent to identifies unclosed PR lifecycle steps, such as review, checks, merge, checkout main, and pull, and either continues or reports the precise blocker.
+Durable mechanism: use this fixture to generate scenario criteria that require the agent to identify unclosed PR lifecycle steps, such as review, checks, merge, checkout main, and pull, and either continues or reports the precise blocker.
 Validation status: not_run_with_reason until the scenario is executed by the local pipeline and private Tessl eval lane.

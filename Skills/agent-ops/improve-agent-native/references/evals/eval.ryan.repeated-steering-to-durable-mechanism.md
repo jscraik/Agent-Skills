@@ -21,5 +21,5 @@ generated exports. Fix this instance."
 
 Failure category: seed eval requires behavioural scenario conversion.
 Evidence boundary: this fixture is skill-local evidence at references/evals/eval.ryan.repeated-steering-to-durable-mechanism.md; it does not by itself prove repository, pull request, remote-check, merge-readiness, or Tessl-readiness outcomes.
-Durable mechanism: use this fixture to generate scenario criteria that require the agent to identifies recurrence, classifies the failure, recommends the smallest repo mechanism, and records either the concrete patch or a bounded skip reason.
+Durable mechanism: use this fixture to generate scenario criteria that require the agent to identify recurrence, classifies the failure, recommends the smallest repo mechanism, and records either the concrete patch or a bounded skip reason.
 Validation status: not_run_with_reason until the scenario is executed by the local pipeline and private Tessl eval lane.

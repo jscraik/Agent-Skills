@@ -250,7 +250,11 @@ def _validate_source_files(extraction_root: Path, source_files: list[Path], find
             pass
         else:
             findings.append(f"references:unsupported_file:{relative}")
-        text = source_file.read_text(encoding="utf-8")
+        try:
+            text = source_file.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            findings.append(f"references:invalid_utf8:{relative}")
+            continue
         if "/Users/" in text or "/private/" in text or "/Volumes/" in text:
             findings.append(f"references:local_absolute_path_leak:{relative}")
         if relative == "references/eval-scenarios.json":
@@ -266,6 +270,7 @@ def _validate_eval_scenarios_json(text: str, findings: list[str], *, relative: s
     if not isinstance(payload, list):
         findings.append(f"references:invalid_eval_scenarios_json:{relative}:not_list")
         return
+    seen_ids: set[str] = set()
     for index, scenario in enumerate(payload):
         if not isinstance(scenario, dict):
             findings.append(f"references:invalid_eval_scenarios_json:{relative}:{index}:not_object")
@@ -274,6 +279,10 @@ def _validate_eval_scenarios_json(text: str, findings: list[str], *, relative: s
         scenario_payload = scenario.get("payload")
         if not isinstance(scenario_id, str) or not scenario_id.startswith("eval."):
             findings.append(f"references:invalid_eval_scenarios_json:{relative}:{index}:missing_eval_id")
+        elif scenario_id in seen_ids:
+            findings.append(f"references:invalid_eval_scenarios_json:{relative}:{index}:duplicate_eval_id:{scenario_id}")
+        else:
+            seen_ids.add(scenario_id)
         if not isinstance(scenario_payload, dict):
             findings.append(f"references:invalid_eval_scenarios_json:{relative}:{index}:missing_payload")
 

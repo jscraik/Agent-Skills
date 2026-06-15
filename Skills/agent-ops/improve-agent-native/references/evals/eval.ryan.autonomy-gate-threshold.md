@@ -39,5 +39,5 @@ Current evidence:
 
 Failure category: seed eval requires behavioural scenario conversion.
 Evidence boundary: this fixture is skill-local evidence at references/evals/eval.ryan.autonomy-gate-threshold.md; it does not by itself prove repository, pull request, remote-check, merge-readiness, or Tessl-readiness outcomes.
-Durable mechanism: use this fixture to generate scenario criteria that require the agent to evaluates validation, remediation, feedback uptake, escalation, rollback, and human-authority boundaries before recommending an autonomy gate posture.
+Durable mechanism: use this fixture to generate scenario criteria that require the agent to evaluate validation, remediation, feedback uptake, escalation, rollback, and human-authority boundaries before recommending an autonomy gate posture.
 Validation status: not_run_with_reason until the scenario is executed by the local pipeline and private Tessl eval lane.

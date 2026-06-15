@@ -10,5 +10,5 @@ This is the portable SDK reproduction contract for the eval scenario. The Knowle
 
 Failure category: seed eval requires behavioural scenario conversion.
 Evidence boundary: this fixture is skill-local evidence at references/evals/eval.harness.static-checks-only-for-product-change.md; it does not by itself prove repository, pull request, remote-check, merge-readiness, or Tessl-readiness outcomes.
-Durable mechanism: use this fixture to generate scenario criteria that require the agent to treats static checks as partial proof, names the missing product-facing behavioural evidence, and avoids claiming product readiness from lint-only evidence.
+Durable mechanism: use this fixture to generate scenario criteria that require the agent to treat static checks as partial proof, names the missing product-facing behavioural evidence, and avoids claiming product readiness from lint-only evidence.
 Validation status: not_run_with_reason until the scenario is executed by the local pipeline and private Tessl eval lane.
