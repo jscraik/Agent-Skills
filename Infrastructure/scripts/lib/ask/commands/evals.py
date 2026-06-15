@@ -953,7 +953,6 @@ def _write_tessl_scenarios_from_evals(source_root: Path, staged_root: Path) -> l
     copied: list[str] = []
     evals_path = source_root / "references" / "evals.yaml"
     cases = _parse_tessl_eval_cases(evals_path)
-    _assert_tessl_eval_quality(cases, source=evals_path)
     for case in cases:
         case_id = case["id"].replace("/", "-")
         case_root = staged_root / "scenarios" / case_id
@@ -3240,6 +3239,24 @@ def run_evals(
         "tessl_live_private_policy": _tessl_live_private_policy(tessl_workspace) if tessl_live_private else None,
     }
 
+    if tessl_live_dry_run and not tessl_live_private:
+        result.status = "error"
+        result.data["raw_output"] = ""
+        result.data["raw_error"] = ""
+        result.data["eval_status"] = "blocked_validation"
+        result.data["blocker_class"] = "blocked_validation"
+        result.data["blocker_taxonomy"] = EVAL_BLOCKER_TAXONOMY
+        result.data["tessl_eval"] = {
+            "status": "blocked",
+            "blocker": "--tessl-live-dry-run requires --tessl-live-private.",
+            "blocker_class": "blocked_validation",
+        }
+        result.errors.append(ErrorObject(
+            code="ERR_VALIDATION",
+            message="--tessl-live-dry-run requires --tessl-live-private.",
+        ))
+        return result
+
     if tessl_live_private and tessl_live_dry_run:
         _start_eval_lifecycle(result, path=path, mode=mode, runner=runner)
         result.status = "success"
@@ -3452,7 +3469,8 @@ def run_evals(
                 message=f"Tessl eval {tessl_eval.get('status')}: {tessl_eval.get('blocker') or 'see data.tessl_eval'}",
             ))
         elif (
-            tessl_live_dry_run
+            tessl_live_private
+            and tessl_live_dry_run
             and result.status == "error"
             and runner == "discovery-smoke"
             and _is_discovery_smoke_filter_blocker(result.data.get("raw_error"))

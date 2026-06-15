@@ -340,6 +340,28 @@ def test_tessl_eval_quality_rejects_keyword_only_cases() -> None:
     }
 
 
+def test_ordinary_tessl_staging_allows_legacy_keyword_cases(tmp_path: Path) -> None:
+    skill_root = _write_example_skill(tmp_path)
+    (skill_root / "references" / "evals.yaml").write_text(
+        (
+            "cases:\n"
+            "  - id: legacy-regex\n"
+            "    prompt: Audit this repository.\n"
+            "    acceptance:\n"
+            "      - type: regex\n"
+            "        value: \"(?is)(audit|repository)\"\n"
+        ),
+        encoding="utf-8",
+    )
+    staged_root = tmp_path / "staged"
+
+    copied = evals._write_tessl_scenarios_from_evals(skill_root, staged_root)
+
+    assert copied == ["scenarios/legacy-regex/task.md", "scenarios/legacy-regex/criteria.json"]
+    assert (staged_root / "scenarios" / "legacy-regex" / "task.md").exists()
+    assert (staged_root / "scenarios" / "legacy-regex" / "criteria.json").exists()
+
+
 def test_tessl_eval_quality_rejects_provenance_only_knowledgeos_signal() -> None:
     cases = [{
         "id": "eval.harness.seed-only",
@@ -936,6 +958,27 @@ def test_evals_live_private_dry_run_failure_records_blocked_lifecycle(tmp_path: 
     assert result.data["lifecycle_event"]["event_type"] == "eval_blocked"
     assert result.data["lifecycle_event"]["outcome"]["status"] == "blocked_validation"
     assert result.data["lifecycle_events"][-1]["event_type"] == "eval_blocked"
+
+
+def test_evals_rejects_dry_run_without_live_private(tmp_path: Path) -> None:
+    _write_example_skill(tmp_path)
+
+    with mock.patch.object(evals.subprocess, "run") as run:
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/example-skill",
+            mode="release",
+            runner="discovery-smoke",
+            tessl_live_dry_run=True,
+            dashboard=False,
+        )
+
+    assert result.status == "error"
+    assert result.data["eval_status"] == "blocked_validation"
+    assert result.data["blocker_class"] == "blocked_validation"
+    assert result.data["tessl_eval"]["blocker"] == "--tessl-live-dry-run requires --tessl-live-private."
+    assert result.errors[0].code == "ERR_VALIDATION"
+    run.assert_not_called()
 
 
 def test_evals_live_private_skips_local_only_cases(tmp_path: Path) -> None:
