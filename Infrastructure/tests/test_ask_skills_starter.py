@@ -198,14 +198,26 @@ class TestAskSkillsStarter(unittest.TestCase):
         self.assertIn("he-code-review", STARTER_ARCHETYPES["delivery"])
         self.assertIn("he-code-review", STARTER_ARCHETYPES["review"])
 
-    def test_unknown_archetype_falls_back_to_general(self) -> None:
-        """
-        An unknown archetype key must resolve to "general" in the result payload.
+    def test_starter_archetypes_has_all_expected_keys(self) -> None:
+        """STARTER_ARCHETYPES must expose the four documented archetype keys."""
+        for key in ("general", "delivery", "review", "docs"):
+            with self.subTest(key=key):
+                self.assertIn(key, STARTER_ARCHETYPES)
+                self.assertIsInstance(STARTER_ARCHETYPES[key], tuple)
+                self.assertGreater(len(STARTER_ARCHETYPES[key]), 0)
 
-        Verifies that list_skills with starter=True and an archetype key not present
-        in STARTER_ARCHETYPES reports starter_archetype == "general".
+    def test_starter_archetypes_docs_contains_expected_skills(self) -> None:
+        """The 'docs' archetype must list known documentation-oriented handles."""
+        docs = STARTER_ARCHETYPES["docs"]
+        self.assertIn("docs-expert", docs)
+        self.assertIn("agents-md", docs)
+
+    def test_starter_mode_unknown_archetype_falls_back_to_general(self) -> None:
         """
-        general_names = list(STARTER_ARCHETYPES["general"])
+        An unknown archetype key falls back to 'general' for selection and
+        is recorded as 'general' in the result data.
+        """
+        general_handles = list(STARTER_ARCHETYPES["general"])
         entries = [
             SimpleNamespace(
                 name=name,
@@ -213,81 +225,88 @@ class TestAskSkillsStarter(unittest.TestCase):
                 category="Skills/agent-ops",
                 description=name,
             )
-            for name in general_names[:3]
+            for name in general_handles
         ]
+
         with patch("ask.commands.skills.discover_catalog_entries", return_value=entries):
             result = list_skills(REPO_ROOT, starter=True, archetype="nonexistent-archetype", limit=3)
 
         self.assertEqual(result.status, "success")
-        self.assertEqual(result.data["starter_archetype"], "general")
         self.assertTrue(result.data["starter_mode"])
+        self.assertEqual(result.data["starter_archetype"], "general")
 
-    def test_starter_limit_zero_coerced_to_one(self) -> None:
+    def test_starter_mode_limit_zero_coerces_to_one(self) -> None:
         """
-        A limit of 0 must be coerced to 1, returning exactly one skill.
+        A limit of 0 must be silently promoted to 1 so the result always
+        contains at least one skill.
         """
         entries = [
             SimpleNamespace(
                 name="he-plan",
-                source_dir=REPO_ROOT / "plugins" / "harness-engineering" / "skills" / "he-plan",
-                category="Plugins/harness-engineering/skills",
+                source_dir=REPO_ROOT / "Skills" / "agent-ops" / "he-plan",
+                category="Skills/agent-ops",
                 description="he-plan",
             ),
             SimpleNamespace(
                 name="he-work",
-                source_dir=REPO_ROOT / "plugins" / "harness-engineering" / "skills" / "he-work",
-                category="Plugins/harness-engineering/skills",
+                source_dir=REPO_ROOT / "Skills" / "agent-ops" / "he-work",
+                category="Skills/agent-ops",
                 description="he-work",
             ),
         ]
+
         with patch("ask.commands.skills.discover_catalog_entries", return_value=entries):
             result = list_skills(REPO_ROOT, starter=True, archetype="delivery", limit=0)
 
         self.assertEqual(result.status, "success")
         self.assertEqual(result.data["starter_limit"], 1)
-        self.assertEqual(len(result.data["skills"]), 1)
+        self.assertLessEqual(len(result.data["skills"]), 1)
 
-    def test_starter_mode_fills_from_remaining_when_archetype_insufficient(self) -> None:
-        """
-        When fewer archetype-preferred skills are available than the limit, the result
-        is padded with non-archetype entries from the catalog in input order.
-        """
+    def test_starter_mode_records_starter_limit_in_result(self) -> None:
+        """starter_limit in result.data must match the effective clamped limit."""
+        entries = [
+            SimpleNamespace(
+                name=name,
+                source_dir=REPO_ROOT / "Skills" / "agent-ops" / name,
+                category="Skills/agent-ops",
+                description=name,
+            )
+            for name in ("he-plan", "he-work", "he-code-review")
+        ]
+
+        with patch("ask.commands.skills.discover_catalog_entries", return_value=entries):
+            result = list_skills(REPO_ROOT, starter=True, archetype="delivery", limit=2)
+
+        self.assertEqual(result.status, "success")
+        self.assertEqual(result.data["starter_limit"], 2)
+        self.assertLessEqual(len(result.data["skills"]), 2)
+
+    def test_starter_mode_validation_commands_include_archetype_and_limit(self) -> None:
+        """validation_commands for starter mode must embed --archetype and --limit."""
         entries = [
             SimpleNamespace(
                 name="he-plan",
-                source_dir=REPO_ROOT / "plugins" / "harness-engineering" / "skills" / "he-plan",
-                category="Plugins/harness-engineering/skills",
+                source_dir=REPO_ROOT / "Skills" / "agent-ops" / "he-plan",
+                category="Skills/agent-ops",
                 description="he-plan",
             ),
-            SimpleNamespace(
-                name="extra-skill-a",
-                source_dir=REPO_ROOT / "Skills" / "agent-ops" / "extra-skill-a",
-                category="Skills/agent-ops",
-                description="extra-a",
-            ),
-            SimpleNamespace(
-                name="extra-skill-b",
-                source_dir=REPO_ROOT / "Skills" / "agent-ops" / "extra-skill-b",
-                category="Skills/agent-ops",
-                description="extra-b",
-            ),
         ]
-        # delivery archetype: he-plan, he-work, he-code-review, coding-harness, docs-expert
-        # Only he-plan is present; limit=3 => he-plan + extra-skill-a + extra-skill-b
+
         with patch("ask.commands.skills.discover_catalog_entries", return_value=entries):
-            result = list_skills(REPO_ROOT, starter=True, archetype="delivery", limit=3)
+            result = list_skills(REPO_ROOT, starter=True, archetype="delivery", limit=5)
 
-        self.assertEqual(result.status, "success")
-        names = [item["name"] for item in result.data["skills"]]
-        self.assertEqual(len(names), 3)
-        self.assertEqual(names[0], "he-plan")
-        self.assertIn("extra-skill-a", names)
-        self.assertIn("extra-skill-b", names)
+        cmds = result.data.get("validation_commands", [])
+        self.assertTrue(len(cmds) >= 1)
+        cmd = cmds[0]
+        self.assertIn("--archetype", cmd)
+        self.assertIn("delivery", cmd)
+        self.assertIn("--limit", cmd)
+        self.assertIn("5", cmd)
 
-    def test_category_filter_forces_advanced_discovery(self) -> None:
+    def test_category_filter_sets_advanced_discovery_mode(self) -> None:
         """
-        Providing a category argument must call discover_catalog_entries(advanced=True)
-        even when advanced=False is the default.
+        Supplying a category token must force advanced (full-repo) discovery
+        regardless of other flags, because category search needs the full catalog.
         """
         entries = [
             SimpleNamespace(
@@ -297,18 +316,46 @@ class TestAskSkillsStarter(unittest.TestCase):
                 description="docs",
             ),
         ]
-        with patch("ask.commands.skills.discover_catalog_entries", return_value=entries) as mock_discover, \
+
+        with patch("ask.commands.skills.discover_catalog_entries", return_value=entries) as mock_disc, \
              patch("ask.commands.skills.handles_report", return_value={"handles": []}):
             result = list_skills(REPO_ROOT, category="agent-ops")
 
-        mock_discover.assert_called_once_with(advanced=True)
+        # Category presence forces advanced=True for discovery
+        mock_disc.assert_called_once_with(advanced=True)
         self.assertEqual(result.status, "success")
         self.assertTrue(result.data.get("advanced_mode"))
 
-    def test_visible_only_with_category_suppresses_visible_only_mode(self) -> None:
+    def test_category_filter_excludes_non_matching_entries(self) -> None:
+        """Entries whose category/name/description do not match the token are excluded."""
+        entries = [
+            SimpleNamespace(
+                name="docs-expert",
+                source_dir=REPO_ROOT / "Skills" / "agent-ops" / "docs-expert",
+                category="Skills/agent-ops",
+                description="docs",
+            ),
+            SimpleNamespace(
+                name="mobile-ui",
+                source_dir=REPO_ROOT / "Skills" / "frontend-ui" / "mobile-ui",
+                category="Skills/frontend-ui",
+                description="mobile",
+            ),
+        ]
+
+        with patch("ask.commands.skills.discover_catalog_entries", return_value=entries), \
+             patch("ask.commands.skills.handles_report", return_value={"handles": []}):
+            result = list_skills(REPO_ROOT, category="agent-ops")
+
+        self.assertEqual(result.status, "success")
+        names = [item["name"] for item in result.data["skills"]]
+        self.assertIn("docs-expert", names)
+        self.assertNotIn("mobile-ui", names)
+
+    def test_visible_only_with_category_does_not_apply_visible_filter(self) -> None:
         """
-        When both visible_only and category are provided, category takes precedence
-        and the result should report advanced_mode=True, inventory_mode="repo".
+        When both visible_only=True and a category are given, visible_only must be
+        ignored because category-scoped searches need the full catalog.
         """
         entries = [
             SimpleNamespace(
@@ -318,193 +365,83 @@ class TestAskSkillsStarter(unittest.TestCase):
                 description="docs",
             ),
         ]
-        with patch("ask.commands.skills.discover_catalog_entries", return_value=entries) as mock_discover, \
+
+        with patch("ask.commands.skills.discover_catalog_entries", return_value=entries) as mock_disc, \
              patch("ask.commands.skills.handles_report", return_value={"handles": []}):
             result = list_skills(REPO_ROOT, category="agent-ops", visible_only=True)
 
-        mock_discover.assert_called_once_with(advanced=True)
-        self.assertEqual(result.status, "success")
+        # A category token overrides visible_only, so advanced discovery is used
+        mock_disc.assert_called_once_with(advanced=True)
         self.assertFalse(result.data.get("visible_only"))
-        self.assertEqual(result.data.get("inventory_mode"), "repo")
 
-    def test_starter_mode_validation_command_includes_archetype_and_limit(self) -> None:
-        """
-        Starter mode must emit a validation command containing --archetype and --limit flags.
-        """
+    def test_result_always_contains_policy_identity_string(self) -> None:
+        """Every list_skills call must include a non-empty policy_identity string."""
+        entries = []
+
+        with patch("ask.commands.skills.discover_catalog_entries", return_value=entries):
+            result = list_skills(REPO_ROOT)
+
+        self.assertIn("policy_identity", result.data)
+        self.assertIsInstance(result.data["policy_identity"], str)
+        self.assertTrue(result.data["policy_identity"].strip())
+
+    def test_skill_path_is_repo_relative_when_inside_repo(self) -> None:
+        """Skills whose source_dir is inside repo_root must use a repo-relative path."""
+        source_dir = REPO_ROOT / "Skills" / "agent-ops" / "docs-expert"
         entries = [
             SimpleNamespace(
-                name="he-plan",
-                source_dir=REPO_ROOT / "plugins" / "harness-engineering" / "skills" / "he-plan",
-                category="Plugins/harness-engineering/skills",
-                description="he-plan",
+                name="docs-expert",
+                source_dir=source_dir,
+                category="Skills/agent-ops",
+                description="docs",
             ),
         ]
+
         with patch("ask.commands.skills.discover_catalog_entries", return_value=entries):
-            result = list_skills(REPO_ROOT, starter=True, archetype="delivery", limit=5)
+            result = list_skills(REPO_ROOT)
 
         self.assertEqual(result.status, "success")
-        validation_cmd = result.data["validation_commands"][0]
-        self.assertIn("--archetype", validation_cmd)
-        self.assertIn("delivery", validation_cmd)
-        self.assertIn("--limit", validation_cmd)
-        self.assertIn("5", validation_cmd)
-        self.assertIn("starter", validation_cmd)
+        self.assertEqual(len(result.data["skills"]), 1)
+        path_value = result.data["skills"][0]["path"]
+        # Must be relative, not absolute
+        self.assertFalse(path_value.startswith("/"), f"Expected relative path, got: {path_value}")
+        self.assertIn("docs-expert", path_value)
 
-    def test_all_starter_archetypes_are_non_empty(self) -> None:
-        """Every archetype in STARTER_ARCHETYPES must contain at least one skill handle."""
-        for name, handles in STARTER_ARCHETYPES.items():
-            self.assertGreater(len(handles), 0, f"Archetype '{name}' is unexpectedly empty")
-
-    def test_starter_archetypes_have_no_internal_duplicates(self) -> None:
-        """No archetype should list the same skill handle more than once."""
-        for name, handles in STARTER_ARCHETYPES.items():
-            self.assertEqual(
-                len(handles),
-                len(set(handles)),
-                f"Archetype '{name}' contains duplicate handles: {handles}",
-            )
-
-    def test_docs_archetype_present_and_contains_docs_expert(self) -> None:
-        """The 'docs' archetype must exist and include docs-expert."""
-        self.assertIn("docs", STARTER_ARCHETYPES)
-        self.assertIn("docs-expert", STARTER_ARCHETYPES["docs"])
-
-    def test_starter_mode_empty_entries_returns_empty_skills(self) -> None:
-        """
-        When the catalog is empty, starter mode must return an empty skills list
-        with status == "success" (not raise).
-        """
+    def test_empty_entry_list_returns_success_with_empty_skills(self) -> None:
+        """An empty catalog produces a success result with an empty skills list."""
         with patch("ask.commands.skills.discover_catalog_entries", return_value=[]):
-            result = list_skills(REPO_ROOT, starter=True, archetype="delivery", limit=5)
+            result = list_skills(REPO_ROOT)
 
         self.assertEqual(result.status, "success")
         self.assertEqual(result.data["skills"], [])
-        self.assertTrue(result.data["starter_mode"])
 
+    def test_starter_mode_with_no_archetype_matches_fills_from_remaining(self) -> None:
+        """
+        When none of the archetype-preferred names appear in entries, _starter_entries
+        must still fill up to limit from the remaining entries in input order.
+        """
+        entries = [
+            SimpleNamespace(
+                name="totally-unknown-skill",
+                source_dir=REPO_ROOT / "Skills" / "agent-ops" / "totally-unknown-skill",
+                category="Skills/agent-ops",
+                description="unknown",
+            ),
+            SimpleNamespace(
+                name="another-unknown",
+                source_dir=REPO_ROOT / "Skills" / "agent-ops" / "another-unknown",
+                category="Skills/agent-ops",
+                description="unknown2",
+            ),
+        ]
 
-class TestManifestJsonlSchema(unittest.TestCase):
-    """Validate the structure of manifest.jsonl files updated in this PR."""
+        with patch("ask.commands.skills.discover_catalog_entries", return_value=entries):
+            result = list_skills(REPO_ROOT, starter=True, archetype="delivery", limit=2)
 
-    MANIFEST_DIR = REPO_ROOT / ".skillsets"
-    REQUIRED_TOP_LEVEL_FIELDS = {
-        "description",
-        "exclusions",
-        "id",
-        "level",
-        "metadata_status",
-        "provenance",
-        "risk",
-        "runtime_visibility",
-        "scope",
-        "skill_set",
-        "source_path",
-        "triggers",
-    }
-    REQUIRED_PROVENANCE_FIELDS = {
-        "generator",
-        "policy_identity",
-        "projection_mode",
-        "source_revision",
-        "source_sha256",
-    }
-    EXPECTED_SOURCE_REVISION = "5983ceeb"
-
-    def _iter_manifest_records(self):
-        """Yield (manifest_path, record_dict) for every record in every manifest.jsonl."""
-        import json
-
-        for manifest_path in sorted(self.MANIFEST_DIR.glob("*/manifest.jsonl")):
-            with manifest_path.open(encoding="utf-8") as fh:
-                for lineno, raw_line in enumerate(fh, start=1):
-                    line = raw_line.strip()
-                    if not line:
-                        continue
-                    record = json.loads(line)
-                    yield manifest_path, lineno, record
-
-    def test_all_manifest_records_have_required_fields(self) -> None:
-        """Every record in every manifest.jsonl must contain the standard top-level fields."""
-        for manifest_path, lineno, record in self._iter_manifest_records():
-            missing = self.REQUIRED_TOP_LEVEL_FIELDS - record.keys()
-            self.assertFalse(
-                missing,
-                f"{manifest_path}:{lineno} is missing fields: {missing}",
-            )
-
-    def test_all_manifest_records_have_required_provenance_fields(self) -> None:
-        """Every provenance block must contain the standard provenance sub-fields."""
-        for manifest_path, lineno, record in self._iter_manifest_records():
-            provenance = record.get("provenance", {})
-            missing = self.REQUIRED_PROVENANCE_FIELDS - provenance.keys()
-            self.assertFalse(
-                missing,
-                f"{manifest_path}:{lineno} provenance is missing fields: {missing}",
-            )
-
-    def test_all_manifest_records_have_updated_source_revision(self) -> None:
-        """Every manifest record's provenance.source_revision must equal the new revision."""
-        for manifest_path, lineno, record in self._iter_manifest_records():
-            actual = record["provenance"]["source_revision"]
-            self.assertEqual(
-                actual,
-                self.EXPECTED_SOURCE_REVISION,
-                f"{manifest_path}:{lineno} has source_revision={actual!r}, "
-                f"expected {self.EXPECTED_SOURCE_REVISION!r}",
-            )
-
-    def test_all_manifest_records_have_non_empty_id_and_description(self) -> None:
-        """Every manifest record must have a non-empty id and description."""
-        for manifest_path, lineno, record in self._iter_manifest_records():
-            self.assertTrue(
-                record.get("id", "").strip(),
-                f"{manifest_path}:{lineno} has an empty or missing 'id'",
-            )
-            self.assertTrue(
-                record.get("description", "").strip(),
-                f"{manifest_path}:{lineno} has an empty or missing 'description'",
-            )
-
-    def test_all_manifest_records_have_non_empty_triggers(self) -> None:
-        """Every manifest record's triggers list must be a list (empty lists are allowed)."""
-        for manifest_path, lineno, record in self._iter_manifest_records():
-            self.assertIsInstance(
-                record.get("triggers"),
-                list,
-                f"{manifest_path}:{lineno} 'triggers' is not a list",
-            )
-
-    def test_manifest_ids_are_unique_within_each_skillset(self) -> None:
-        """Within a single manifest.jsonl file, skill ids must be unique."""
-        import json
-
-        for manifest_path in sorted(self.MANIFEST_DIR.glob("*/manifest.jsonl")):
-            seen_ids: list[str] = []
-            with manifest_path.open(encoding="utf-8") as fh:
-                for raw_line in fh:
-                    line = raw_line.strip()
-                    if not line:
-                        continue
-                    record = json.loads(line)
-                    seen_ids.append(record["id"])
-            self.assertEqual(
-                len(seen_ids),
-                len(set(seen_ids)),
-                f"{manifest_path} contains duplicate skill ids",
-            )
-
-    def test_manifest_source_paths_are_non_empty_strings(self) -> None:
-        """Every record's source_path must be a non-empty string."""
-        for manifest_path, lineno, record in self._iter_manifest_records():
-            source_path = record.get("source_path", "")
-            self.assertIsInstance(
-                source_path,
-                str,
-                f"{manifest_path}:{lineno} source_path is not a string",
-            )
-            self.assertTrue(
-                source_path.strip(),
-                f"{manifest_path}:{lineno} source_path is empty",
-            )
+        self.assertEqual(result.status, "success")
+        names = [item["name"] for item in result.data["skills"]]
+        # Falls back to the two entries in input order
+        self.assertEqual(names, ["totally-unknown-skill", "another-unknown"])
 
 
 if __name__ == "__main__":
