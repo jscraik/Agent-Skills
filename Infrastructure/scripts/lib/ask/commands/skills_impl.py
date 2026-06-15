@@ -5536,7 +5536,18 @@ def _resolve_canonical_install_dest(repo_root: Path, dest: str) -> tuple[Path, s
 
 
 def _skill_install_intake_decision(repo_root: Path, skill_name: str, target_path: Path) -> dict[str, Any]:
-    """Return the pre-install compatibility and overlap policy for an external skill."""
+    """
+    Analyze existing repository skills for naming/path conflicts and determine installation compatibility.
+    
+    Scans Skills/** for existing skills with similar names or directory names, determines an installation
+    outcome based on conflict severity (install_new, keep_separate, needs_human_choice, reject_duplicate),
+    and returns a comprehensive intake decision payload with overlapping candidates, pre-install checks,
+    compatibility requirements, and post-install gates.
+    
+    Returns:
+        Intake decision dictionary (schema: skill-install-intake.v1) containing outcome determination, matched
+        candidates, policy requirements, and operational gates for pre-install validation and post-install promotion.
+    """
     normalized_name = skill_name.lower().strip()
     matches: list[dict[str, Any]] = []
     for skill_md in sorted(repo_root.glob("Skills/**/SKILL.md")):

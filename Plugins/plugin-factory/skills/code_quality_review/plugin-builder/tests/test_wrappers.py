@@ -13,9 +13,7 @@ from tests_shared import find_repo_root
 
 def test_plugin_builder_wrapper_points_to_impl() -> None:
     """
-    Validate that the plugin-builder wrapper script exists and correctly references its implementation file.
-    
-    Asserts that the wrapper script at `Plugins/plugin-factory/skills/code_quality_review/plugin-builder/scripts/plugin_builder.py` and its corresponding `.pyw` implementation both exist, and that the wrapper source contains `runpy.run_path` and references `.pyw`.
+    Verify that the plugin-builder wrapper script exists and correctly references its .pyw implementation.
     """
     current = Path(__file__).resolve()
     repo_root = find_repo_root(current)

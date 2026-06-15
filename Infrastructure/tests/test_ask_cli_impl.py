@@ -150,7 +150,9 @@ class TestAskCLI(unittest.TestCase):
             self.assertIn("path", skill)
 
     def test_skills_list_human_output_exposes_validation(self):
-        """Verify ask skills list renders its validation command."""
+        """
+        Verify that the human-readable skills list output includes discovery confirmation and a validation replay command.
+        """
         cmd = ["python3", "Infrastructure/bin/ask", "skills", "list", "--robot"]
         result = _run_cli(cmd)
 

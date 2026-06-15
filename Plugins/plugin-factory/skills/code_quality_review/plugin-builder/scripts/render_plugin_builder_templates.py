@@ -102,11 +102,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 def main(argv: list[str] | None = None) -> int:
     """
-    Render a plugin-builder hooks template.
+    Render a plugin-builder hooks template using configuration from files and command-line arguments.
     
-    Parses command-line arguments to load template variables from JSON and CLI
-    overrides, combines them with an optional default context, renders the
-    template, and outputs the result to a file or stdout.
+    Loads template variables from a JSON file and CLI overrides, merges them with optional defaults, renders the template, and writes the output to a file or stdout.
     
     Parameters:
         argv: Optional list of command-line arguments; if None, uses sys.argv.
