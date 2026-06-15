@@ -55,6 +55,7 @@ bash Infrastructure/scripts/lifecycle-and-sync/run_recursive_skill_shadow_cycle.
 ```
 
 This generates/updates:
+
 - `/docs/skill-graphs/pilots/ui-skills-shadow-results.md`
 - `/docs/skill-graphs/pilots/ui-skills-pilot-readout.md`
 - `/Infrastructure/artifacts/skill-graphs/pilot/shadow-dashboard.json`
@@ -62,6 +63,7 @@ This generates/updates:
 ## Expected output
 
 A run directory with:
+
 - `run.json`
 - `iteration_journal.jsonl`
 - `promotion_decision.json` (draft decision artifact)
@@ -95,7 +97,9 @@ python3 "$HOME/.codex/Infrastructure/scripts/plan-graph-lint.py" Docs/plans/2026
 ## Next step: human promotion gate
 
 After successful runs, use:
+
 - [Guide: Human Promotion Gate](/docs/guides/recursive-promotion-gate.md)
 
 Related:
+
 - [Skill graphs index](/docs/skill-graphs)
