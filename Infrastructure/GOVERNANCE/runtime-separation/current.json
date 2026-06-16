@@ -9,7 +9,7 @@
         "blocker_id": null,
         "command": "bin/ask plugins doctor --json",
         "drift_class": null,
-        "evidence_ref": "sha256:aabbc4c10ddc26fbf12f34ec329bd7a0a08c7f245de2163b78eb8cb0457814c2",
+        "evidence_ref": "sha256:56819819b9e00ccad7e4a3f2fe1acabb86498c09a6e7dbe9deb33dc8b97305f7",
         "normalized_fields": {
           "activation_plugins": [
             {
@@ -49,23 +49,23 @@
           "installed_plugins": [
             {
               "name": "aidevcon",
-              "path": "plugins/aidevcon"
+              "path": "Plugins/aidevcon"
             },
             {
               "name": "harness-engineering",
-              "path": "plugins/harness-engineering"
+              "path": "Plugins/harness-engineering"
             },
             {
               "name": "plugin-factory",
-              "path": "plugins/plugin-factory"
+              "path": "Plugins/plugin-factory"
             },
             {
               "name": "skill-factory",
-              "path": "plugins/skill-factory"
+              "path": "Plugins/skill-factory"
             },
             {
               "name": "synaipse-harness",
-              "path": "plugins/synaipse-harness"
+              "path": "Plugins/synaipse-harness"
             }
           ],
           "status": "success"
@@ -78,7 +78,7 @@
           "blocker_id": null,
           "command": "bin/ask plugins status aidevcon --json",
           "drift_class": null,
-          "evidence_ref": "sha256:23c3b3333b99f4bb4f418ec06cb00fbc4f22e80817cf2f5b8c6ba5b7fe6da694",
+          "evidence_ref": "sha256:6a13dd1311113089ab8402b6b730bba2fae0574c2a444bdb971a6a4dc62d64ec",
           "normalized_fields": {
             "activation_plugin": {
               "cache_present": true,
@@ -89,7 +89,7 @@
             "command": "plugins status aidevcon --json",
             "installed_plugin": {
               "name": "aidevcon",
-              "path": "plugins/aidevcon"
+              "path": "Plugins/aidevcon"
             },
             "plugin_id": "aidevcon",
             "status": "success"
@@ -101,7 +101,7 @@
           "blocker_id": null,
           "command": "bin/ask plugins status harness-engineering --json",
           "drift_class": null,
-          "evidence_ref": "sha256:35c455388f81105ebd68c9d46977f7965f50ec1dbd36206fac3b7fdb8da5d4ef",
+          "evidence_ref": "sha256:8ef7ca3867485d59940d84b36ca59bb35c8265d8dc2ce0c820f2e598d26da522",
           "normalized_fields": {
             "activation_plugin": {
               "cache_present": true,
@@ -112,7 +112,7 @@
             "command": "plugins status harness-engineering --json",
             "installed_plugin": {
               "name": "harness-engineering",
-              "path": "plugins/harness-engineering"
+              "path": "Plugins/harness-engineering"
             },
             "plugin_id": "harness-engineering",
             "status": "success"
@@ -124,7 +124,7 @@
           "blocker_id": null,
           "command": "bin/ask plugins status plugin-factory --json",
           "drift_class": null,
-          "evidence_ref": "sha256:5342664b57cc13016734ceb129bb15dacdd725d500acc247ef9a58586bc363f2",
+          "evidence_ref": "sha256:468d9f9a2b1236e5f79c1f3e5445c3e8ef0392720dab5e6c120f686249d56351",
           "normalized_fields": {
             "activation_plugin": {
               "cache_present": true,
@@ -135,7 +135,7 @@
             "command": "plugins status plugin-factory --json",
             "installed_plugin": {
               "name": "plugin-factory",
-              "path": "plugins/plugin-factory"
+              "path": "Plugins/plugin-factory"
             },
             "plugin_id": "plugin-factory",
             "status": "success"
@@ -147,7 +147,7 @@
           "blocker_id": null,
           "command": "bin/ask plugins status skill-factory --json",
           "drift_class": null,
-          "evidence_ref": "sha256:b14ee31f8ac9d442d5a1838dd82177e302d778fa7c31981c34e8a77ddb348781",
+          "evidence_ref": "sha256:bc6242b3121336232dc7797899a2c556605fe429b8974f34970903b6f98b2c75",
           "normalized_fields": {
             "activation_plugin": {
               "cache_present": true,
@@ -158,7 +158,7 @@
             "command": "plugins status skill-factory --json",
             "installed_plugin": {
               "name": "skill-factory",
-              "path": "plugins/skill-factory"
+              "path": "Plugins/skill-factory"
             },
             "plugin_id": "skill-factory",
             "status": "success"
@@ -170,7 +170,7 @@
           "blocker_id": null,
           "command": "bin/ask plugins status synaipse-harness --json",
           "drift_class": null,
-          "evidence_ref": "sha256:6bd4dc29624ce39d0fe96281b6fe52757165b5fe8bac585e976296ea53bc2127",
+          "evidence_ref": "sha256:516a6f7b5e9a7d6547b52e85530c910861fba88ec1b5385f7de7e6ec886cbf79",
           "normalized_fields": {
             "activation_plugin": {
               "cache_present": true,
@@ -181,7 +181,7 @@
             "command": "plugins status synaipse-harness --json",
             "installed_plugin": {
               "name": "synaipse-harness",
-              "path": "plugins/synaipse-harness"
+              "path": "Plugins/synaipse-harness"
             },
             "plugin_id": "synaipse-harness",
             "status": "success"
@@ -194,7 +194,7 @@
         "blocker_id": null,
         "command": "bin/ask repo doctor-catalog --strict --json",
         "drift_class": null,
-        "evidence_ref": "sha256:7949dad6519223d09ec03ab5829d248d51074c78bb696387f23e11c83b9cf6cf",
+        "evidence_ref": "sha256:2460aab65a911903589f982af5bd21471ac6a63e71ff606dffc4d5848cc20d94",
         "normalized_fields": {
           "command": "repo doctor-catalog --strict --json",
           "decision_status": "resolved",
@@ -209,7 +209,7 @@
         "blocker_id": null,
         "command": "bin/ask repo status --json",
         "drift_class": null,
-        "evidence_ref": "sha256:8ee4aec14791b71c8cf98aefb68e1bc055bcc65be06411b4fdea6f47a9e5962a",
+        "evidence_ref": "sha256:8fce0303d8294b8ab1ee343f0fc3e7293f36ec7b80446f989b1f9d23743bb31e",
         "normalized_fields": {
           "command": "repo status --json",
           "is_git": true,
@@ -237,29 +237,29 @@
         "blocker_id": null,
         "command": "bin/ask skills list --json",
         "drift_class": null,
-        "evidence_ref": "sha256:c30f9e306a57b49a3e9c299763181b0dd6c86d00c7deeee7825af622ff4e9488",
+        "evidence_ref": "sha256:20a143285e3ead5a265d8f6ee8a1e605787259ea1d21b813e2dcc93e7c9a6e7c",
         "normalized_fields": {
           "command": "skills list --json",
           "sample_names": [
-            "imagegen",
-            "openai-docs",
-            "agents-md",
-            "alignment-checkpoint",
-            "autofix",
-            "autoresearch",
-            "bash-hygiene",
-            "biome-linting",
-            "bootstrap",
-            "code-fixes-triage"
+            "talk-azriel-executable-specs",
+            "talk-baker-sadogursky-context-engineering-skills",
+            "talk-batey-building-product-teams-age-of-ai",
+            "talk-birgitta-closing-keynote",
+            "talk-cormack-tests-lie-observability-ai",
+            "talk-debois-agent-enablement",
+            "talk-douglas-training-ai-on-your-own-code",
+            "talk-dubnov-merge-rate-ai-adoption",
+            "talk-farley-vibe-coding-best-we-can-do",
+            "talk-firtman-web-mcp-agentic-web"
           ],
-          "skill_count": 80,
+          "skill_count": 271,
           "status": "success"
         },
         "returncode": 0,
         "subject_id": "skills"
       }
     },
-    "command_checks_digest": "44e2eabff5d7a50a730b5d8b1e60d0c9a8c14c4b88fb10fc961672be65982cb3",
+    "command_checks_digest": "5f209cb526d3c4e2ee1a4ca6a88f616ab8bf9335a348984e1a698d123c855380",
     "discovery_identity": "b38de3eb81b58706c0465bed3e6a60b4ebb7ae3df3f1056716dce2b6079a2e98",
     "duplicate_shadow_drift_classes": {
       "plugins_doctor": null,
@@ -288,7 +288,7 @@
         "asset_relpath": ".codex-plugin/plugin.json",
         "catalog_resolution": "Infrastructure/catalog/Plugins/aidevcon",
         "consumer_id": "plugins_status.aidevcon",
-        "evidence_ref": "sha256:23c3b3333b99f4bb4f418ec06cb00fbc4f22e80817cf2f5b8c6ba5b7fe6da694",
+        "evidence_ref": "sha256:6a13dd1311113089ab8402b6b730bba2fae0574c2a444bdb971a6a4dc62d64ec",
         "legacy_resolution": "./Plugins/aidevcon",
         "parity_result": "pass",
         "plugin_id": "aidevcon",
@@ -298,7 +298,7 @@
         "asset_relpath": ".codex-plugin/plugin.json",
         "catalog_resolution": "Infrastructure/catalog/Plugins/harness-engineering",
         "consumer_id": "plugins_status.harness-engineering",
-        "evidence_ref": "sha256:35c455388f81105ebd68c9d46977f7965f50ec1dbd36206fac3b7fdb8da5d4ef",
+        "evidence_ref": "sha256:8ef7ca3867485d59940d84b36ca59bb35c8265d8dc2ce0c820f2e598d26da522",
         "legacy_resolution": "./Plugins/harness-engineering",
         "parity_result": "pass",
         "plugin_id": "harness-engineering",
@@ -308,7 +308,7 @@
         "asset_relpath": ".codex-plugin/plugin.json",
         "catalog_resolution": "Infrastructure/catalog/Plugins/plugin-factory",
         "consumer_id": "plugins_status.plugin-factory",
-        "evidence_ref": "sha256:5342664b57cc13016734ceb129bb15dacdd725d500acc247ef9a58586bc363f2",
+        "evidence_ref": "sha256:468d9f9a2b1236e5f79c1f3e5445c3e8ef0392720dab5e6c120f686249d56351",
         "legacy_resolution": "./Plugins/plugin-factory",
         "parity_result": "pass",
         "plugin_id": "plugin-factory",
@@ -318,7 +318,7 @@
         "asset_relpath": ".codex-plugin/plugin.json",
         "catalog_resolution": "Infrastructure/catalog/Plugins/skill-factory",
         "consumer_id": "plugins_status.skill-factory",
-        "evidence_ref": "sha256:b14ee31f8ac9d442d5a1838dd82177e302d778fa7c31981c34e8a77ddb348781",
+        "evidence_ref": "sha256:bc6242b3121336232dc7797899a2c556605fe429b8974f34970903b6f98b2c75",
         "legacy_resolution": "./Plugins/skill-factory",
         "parity_result": "pass",
         "plugin_id": "skill-factory",
@@ -328,7 +328,7 @@
         "asset_relpath": ".codex-plugin/plugin.json",
         "catalog_resolution": "Infrastructure/catalog/Plugins/synaipse-harness",
         "consumer_id": "plugins_status.synaipse-harness",
-        "evidence_ref": "sha256:6bd4dc29624ce39d0fe96281b6fe52757165b5fe8bac585e976296ea53bc2127",
+        "evidence_ref": "sha256:516a6f7b5e9a7d6547b52e85530c910861fba88ec1b5385f7de7e6ec886cbf79",
         "legacy_resolution": "./Plugins/synaipse-harness",
         "parity_result": "pass",
         "plugin_id": "synaipse-harness",

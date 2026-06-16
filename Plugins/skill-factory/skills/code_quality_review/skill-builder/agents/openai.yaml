@@ -1,0 +1,3 @@
+interface:
+  display_name: "Skill Builder"
+  short_description: "Harden Codex skills and plugin packages with contract checks, eval coverage, and validation evidence."

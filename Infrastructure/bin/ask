@@ -121,7 +121,8 @@ def main():
     skills_subparsers = skills_parser.add_subparsers(dest="action")
     skills_list_parser = skills_subparsers.add_parser("list", help="List discovered skills", parents=[global_parser])
     skills_list_parser.add_argument("--category", help="Filter by category")
-    skills_list_parser.add_argument("--advanced", action="store_true", help="Include lane skills hidden in default listings")
+    skills_list_parser.add_argument("--advanced", action="store_true", help="Compatibility alias; full repo inventory is now the default")
+    skills_list_parser.add_argument("--visible-only", action="store_true", help="Show only the narrower picker/runtime-visible skill subset")
     skills_list_parser.add_argument("--starter", action="store_true", help="Return starter-mode curated skills")
     skills_list_parser.add_argument("--archetype", default="general", help="Starter archetype (general|delivery|review|docs)")
     skills_list_parser.add_argument("--limit", type=int, default=12, help="Max starter skills to return")
@@ -559,6 +560,7 @@ def main():
                 archetype=args.archetype,
                 limit=args.limit,
                 advanced=args.advanced,
+                visible_only=args.visible_only,
             )
         elif args.action == "budget":
             result = skills_commands.skills_budget(repo_root, default_max=args.default_max)

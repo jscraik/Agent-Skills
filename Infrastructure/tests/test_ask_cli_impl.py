@@ -120,13 +120,14 @@ class TestAskCLI(unittest.TestCase):
 
     def test_skills_list(self):
         """
-        Validate that the CLI `ask skills list --json` exposes a skills catalogue with the expected envelope and fields.
-
+        Validate that `ask skills list --json` returns a skills catalogue with required envelope, mode settings, and skill fields.
+        
         Checks:
-        - the process exits successfully (return code 0),
-        - top-level `status` equals "success",
-        - `data.skills` is present and is a list,
-        - if the list is non-empty, the first skill contains `name` and `path`.
+        - Exit code 0 and `status` equals "success".
+        - `data.skills` is present as a list.
+        - `advanced_mode` is true and `inventory_mode` equals "repo".
+        - `validation_commands` contains the expected replay command.
+        - If non-empty, first skill contains `name` and `path`.
         """
         cmd = ["python3", "Infrastructure/bin/ask", "skills", "list", "--json"]
         result = _run_cli(cmd)
@@ -137,6 +138,8 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(output["status"], "success")
         self.assertIn("skills", output["data"])
         self.assertIsInstance(output["data"]["skills"], list)
+        self.assertTrue(output["data"].get("advanced_mode"))
+        self.assertEqual(output["data"].get("inventory_mode"), "repo")
         self.assertEqual(
             output["data"]["validation_commands"],
             ["./bin/ask skills list --json --robot"],
@@ -147,7 +150,9 @@ class TestAskCLI(unittest.TestCase):
             self.assertIn("path", skill)
 
     def test_skills_list_human_output_exposes_validation(self):
-        """Verify ask skills list renders its validation command."""
+        """
+        Verify that the human-readable skills list output includes discovery confirmation and a validation replay command.
+        """
         cmd = ["python3", "Infrastructure/bin/ask", "skills", "list", "--robot"]
         result = _run_cli(cmd)
 
@@ -156,7 +161,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("Validation: ./bin/ask skills list --json --robot", result.stdout)
 
     def test_skills_list_advanced_flag(self):
-        """CA1: Verify ask skills list --advanced toggles advanced_mode in JSON output."""
+        """CA1: Verify ask skills list --advanced remains a full-inventory compatibility alias."""
         cmd = ["python3", "Infrastructure/bin/ask", "skills", "list", "--advanced", "--json"]
         result = _run_cli(cmd)
 
@@ -164,9 +169,50 @@ class TestAskCLI(unittest.TestCase):
         output = json.loads(result.stdout)
         self.assertEqual(output["status"], "success")
         self.assertTrue(output["data"].get("advanced_mode"))
+        self.assertEqual(output["data"].get("inventory_mode"), "repo")
         self.assertEqual(
             output["data"]["validation_commands"],
             ["./bin/ask skills list --advanced --json --robot"],
+        )
+
+    def test_skills_list_visible_only_flag(self):
+        """Verify ask skills list --visible-only exposes the narrower visible inventory."""
+        cmd = ["python3", "Infrastructure/bin/ask", "skills", "list", "--visible-only", "--json"]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        self.assertFalse(output["data"].get("advanced_mode"))
+        self.assertEqual(output["data"].get("inventory_mode"), "visible")
+        self.assertTrue(output["data"].get("visible_only"))
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask skills list --visible-only --json --robot"],
+        )
+
+    def test_skills_list_visible_only_wins_over_advanced_alias(self):
+        """Verify mixed compatibility flags report one coherent visible inventory."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "list",
+            "--advanced",
+            "--visible-only",
+            "--json",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        self.assertFalse(output["data"].get("advanced_mode"))
+        self.assertEqual(output["data"].get("inventory_mode"), "visible")
+        self.assertTrue(output["data"].get("visible_only"))
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask skills list --visible-only --json --robot"],
         )
 
     def test_skills_budget_json_contract(self):
@@ -1186,7 +1232,11 @@ class TestAskCLI(unittest.TestCase):
         )
 
     def test_argument_error_exposes_candidate_commands(self):
-        """Verify intent-known parser errors expose machine-readable example commands."""
+        """
+        Verify that missing required arguments in known commands expose candidate command examples.
+        
+        Tests that when a required argument is omitted (e.g., `skills resolve --json --robot` without a skill identifier), the error response includes candidate commands matching the expected argument pattern.
+        """
         cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "resolve", "--json", "--robot"]
         result = _run_cli(cmd)
 
@@ -1196,7 +1246,11 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(output["errors"][0]["code"], "ERR_VALIDATION")
         self.assertIn("argument syntax is invalid", output["errors"][0]["message"])
         self.assertEqual(output["data"]["validation_commands"], ["./bin/ask skills list --json --robot"])
-        self.assertEqual(output["data"]["candidate_commands"], ["ask skills resolve he-phase-work --json"])
+        self.assertEqual(len(output["data"]["candidate_commands"]), 1)
+        self.assertRegex(
+            output["data"]["candidate_commands"][0],
+            r"^ask skills resolve [a-z0-9-]+ --json$",
+        )
 
     def test_skills_missing_action_exposes_validation(self):
         """Verify incomplete skills commands expose the read-only recovery command."""

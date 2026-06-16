@@ -1,0 +1,4 @@
+# Fixture/sample plugin packages are test data for conversion workflows.
+# Exclude them from strict recursive scanner heuristics (PI/security lint),
+# while still allowing direct validation when explicitly targeted.
+fixtures/**

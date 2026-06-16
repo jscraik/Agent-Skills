@@ -55,15 +55,15 @@ bash Infrastructure/scripts/lifecycle-and-sync/run_recursive_skill_shadow_cycle.
 ```
 
 This generates/updates:
+
 - `/docs/skill-graphs/pilots/ui-skills-shadow-results.md`
 - `/docs/skill-graphs/pilots/ui-skills-pilot-readout.md`
-- `/docs/skill-graphs/pilots/arscontexta-intervention-queue.md`
 - `/Infrastructure/artifacts/skill-graphs/pilot/shadow-dashboard.json`
-- `/Infrastructure/artifacts/skill-graphs/telemetry/arscontexta-intervention-queue.json`
 
 ## Expected output
 
 A run directory with:
+
 - `run.json`
 - `iteration_journal.jsonl`
 - `promotion_decision.json` (draft decision artifact)
@@ -74,7 +74,7 @@ A run directory with:
 - `run_blocker.json` / `rollback_recommendation.json` on blocked or kill-switch paths
 
 Start-of-run retrieval uses canonical lessons from `--lessons-jsonl` filtered by `{scope_skill, scope_profile}`.
-Canonical lesson rows can now carry `title`, `summary`, `guidance`, `checkpoints`, `arscontexta_stage`, and `source_note`, and the loop injects that content directly into the candidate prompt when auto-apply is enabled.
+Canonical lesson rows can now carry `title`, `summary`, `guidance`, `checkpoints`, `methodology_stage`, and `source_note`, and the loop injects that content directly into the candidate prompt when auto-apply is enabled.
 Low-confidence lessons are retained but down-ranked and flagged in injected lesson attribution.
 Default rollout mode is `observe_only` (capture on, auto-apply off). Use `--rollout-mode active` to enable lesson injection.
 Default uplift gate mode is `enforce`; use `--uplift-gate-mode observe` for pilot dry-runs when counterfactual sample sizes are intentionally sparse.
@@ -87,8 +87,6 @@ immediately and should keep using
 
 Optional debug traces are written only when `--emit-debug-artifacts` is set and stored under `run/debug/`.
 
-After the shadow report is built, the cycle now also creates an Ars Contexta intervention queue that turns repeated failure and recovery patterns into retrieval-ready operator guidance. Treat that queue as the synthesis layer; keep the shadow dashboard as the scoring and promotion gate.
-
 ## Verify graph plans
 
 ```bash
@@ -99,7 +97,9 @@ python3 "$HOME/.codex/Infrastructure/scripts/plan-graph-lint.py" Docs/plans/2026
 ## Next step: human promotion gate
 
 After successful runs, use:
+
 - [Guide: Human Promotion Gate](/docs/guides/recursive-promotion-gate.md)
 
 Related:
+
 - [Skill graphs index](/docs/skill-graphs)

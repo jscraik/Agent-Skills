@@ -888,6 +888,21 @@ def _entry_matches_category(entry, category_token: str, owner_by_handle: dict[st
     return any(category_token in value.lower() for value in searchable if value)
 
 
+def _entry_visible_for_picker(entry, repo_root: Path) -> bool:
+    """Return whether an entry belongs in the narrow picker-visible inventory."""
+    source_dir = getattr(entry, "source_dir", None)
+    if not isinstance(source_dir, Path):
+        return False
+    try:
+        rel_parts = source_dir.relative_to(repo_root).parts
+    except ValueError:
+        return False
+    lower_parts = tuple(part.lower() for part in rel_parts)
+    if len(lower_parts) >= 4 and lower_parts[0] == "plugins" and lower_parts[2] == "skills":
+        return lower_parts[1] == lower_parts[3]
+    return True
+
+
 def _refresh_catalog_projections(repo_root: Path, dry_run: bool = False) -> list[str]:
     """
     Regenerate root catalog projections from the default catalog surface.
@@ -1067,23 +1082,27 @@ def list_skills(
     archetype: str = "general",
     limit: int = 12,
     advanced: bool = False,
+    visible_only: bool = False,
 ) -> CallResult:
     """
     List discovered catalog skills within the repository, optionally filtered by category or reduced to a deterministic starter subset.
-
+    
     Parameters:
         repo_root (Path): Repository root used to filter discovered catalog entries; entries outside this root are excluded.
         category (Optional[str]): Case-insensitive substring applied to each entry's category; omit to include all categories.
         starter (bool): When true, return a deterministic subset selected by `archetype` and limited by `limit`.
         archetype (str): Archetype key used to pick starter skills; unknown keys fall back to "general".
         limit (int): Maximum number of skills to return when `starter` is true; coerced to at least 1.
-        advanced (bool): Include advanced/hidden-lane catalog entries when true; otherwise use the default listing.
-
+        advanced (bool): Backward-compatible no-op alias for the full repo inventory.
+        visible_only (bool): When true, return only the narrower picker/runtime-visible subset.
+    
     Returns:
         CallResult: Result with `status == "success"` and `data` containing:
             - "skills": list of objects with `name`, `path` (repo-relative when possible), `category`, and `description`
             - "policy_identity": current policy identity string
-            - "advanced_mode": boolean reflecting the `advanced` parameter
+            - "advanced_mode": boolean showing whether full repo inventory discovery was used
+            - "inventory_mode": "repo" for the full repo inventory or "visible" for the narrower subset
+            - "visible_only": boolean indicating whether the narrower runtime-visible subset was explicitly requested
             - When `starter` is true, also includes:
                 - "starter_mode": true
                 - "starter_archetype": resolved archetype key
@@ -1091,12 +1110,18 @@ def list_skills(
     """
     result = CallResult()
     category_token = category.lower().strip() if category else ""
-    discovery_advanced = bool(advanced or category_token)
+    explicit_visible_only = bool(visible_only)
+    discovery_advanced = bool(
+        (category_token and not explicit_visible_only)
+        or (not explicit_visible_only and not starter)
+    )
     entries = [
         entry
         for entry in discover_catalog_entries(advanced=discovery_advanced)
         if entry.source_dir.is_relative_to(repo_root)
     ]
+    if explicit_visible_only:
+        entries = [entry for entry in entries if _entry_visible_for_picker(entry, repo_root)]
     if starter:
         entries = _starter_entries(entries, archetype=archetype, limit=limit)
     skills_data = []
@@ -1113,12 +1138,16 @@ def list_skills(
     result.data["skills"] = skills_data
     result.data["policy_identity"] = get_policy_identity()
     result.data["advanced_mode"] = discovery_advanced
+    result.data["inventory_mode"] = "repo" if discovery_advanced else "visible"
+    result.data["visible_only"] = explicit_visible_only
     validation_action = "starter" if starter else "list"
     validation_args: list[str] = []
     if category:
         validation_args.extend(["--category", category])
-    if advanced and not starter:
+    if advanced and not starter and not explicit_visible_only:
         validation_args.append("--advanced")
+    if explicit_visible_only and not starter:
+        validation_args.append("--visible-only")
     if starter:
         validation_args.extend(["--archetype", archetype])
         validation_args.extend(["--limit", str(max(1, int(limit)))])
@@ -5527,17 +5556,37 @@ def _resolve_canonical_install_dest(repo_root: Path, dest: str) -> tuple[Path, s
 
 
 def _skill_install_intake_decision(repo_root: Path, skill_name: str, target_path: Path) -> dict[str, Any]:
-    """Return the pre-install compatibility and overlap policy for an external skill."""
+    """
+    Analyze existing repository skills for naming/path conflicts and determine installation compatibility.
+    
+    Scans the canonical catalog for existing skills with similar names or directory names, determines an installation
+    outcome based on conflict severity (install_new, keep_separate, needs_human_choice, reject_duplicate),
+    and returns a comprehensive intake decision payload with overlapping candidates, pre-install checks,
+    compatibility requirements, and post-install gates.
+    
+    Returns:
+        Intake decision dictionary (schema: skill-install-intake.v1) containing outcome determination, matched
+        candidates, policy requirements, and operational gates for pre-install validation and post-install promotion.
+    """
     normalized_name = skill_name.lower().strip()
     matches: list[dict[str, Any]] = []
-    for skill_md in sorted(repo_root.glob("Skills/**/SKILL.md")):
-        skill_dir = skill_md.parent
+    catalog_entries = sorted(
+        (
+            entry
+            for entry in discover_catalog_entries(advanced=True)
+            if entry.source_dir.is_relative_to(repo_root)
+        ),
+        key=lambda entry: entry.source_dir.relative_to(repo_root).as_posix(),
+    )
+    for entry in catalog_entries:
+        skill_dir = entry.source_dir
+        skill_md = skill_dir / "SKILL.md"
         try:
             frontmatter = _read_skill_frontmatter_fields(skill_md)
         except OSError:
             frontmatter = {}
-        local_name = str(frontmatter.get("name") or skill_dir.name)
-        local_description = str(frontmatter.get("description") or "")
+        local_name = str(frontmatter.get("name") or entry.name or skill_dir.name)
+        local_description = str(frontmatter.get("description") or entry.description or "")
         name_ratio = difflib.SequenceMatcher(None, normalized_name, local_name.lower()).ratio()
         path_ratio = difflib.SequenceMatcher(None, normalized_name, skill_dir.name.lower()).ratio()
         score = max(name_ratio, path_ratio)
@@ -5580,7 +5629,7 @@ def _skill_install_intake_decision(repo_root: Path, skill_name: str, target_path
             "needs_human_choice",
         ],
         "pre_install_checks": [
-            "inventory existing skills with ./bin/ask skills list --advanced --json",
+            "inventory existing skills with ./bin/ask skills list --json --robot",
             "search Skills/**, Plugins/**/skills/**, and skills-system/** for overlap",
             "compare intent, trigger wording, scripts/assets, safety boundaries, and closeout contract",
             "return an Intake Decision before writing canonical source",

@@ -77,6 +77,10 @@ cd "$repo_root"
 python_cmd=(python3)
 python_cmd_display="python3"
 pyyaml_venv_python="$HOME/.venvs/pyyaml/bin/python"
+uv_tool_env=()
+if [[ -z "${UV_CACHE_DIR:-}" ]]; then
+  uv_tool_env=(env UV_CACHE_DIR="${TMPDIR:-/tmp}/agent-skills-uv-cache")
+fi
 
 use_pyyaml_venv_python() {
   [[ -x "$pyyaml_venv_python" ]] || return 1
@@ -88,18 +92,18 @@ use_pyyaml_venv_python() {
 
 use_uv_python_launcher() {
   command -v uv >/dev/null 2>&1 || return 1
-  uv run --python 3.12 --with pytest --with pyyaml --with jsonschema python -c "import pytest, yaml, jsonschema" >/dev/null 2>&1 || return 1
-  python_cmd=(uv run --python 3.12 --with pytest --with pyyaml --with jsonschema python)
-  python_cmd_display="uv run --python 3.12 --with pytest --with pyyaml --with jsonschema python"
+  "${uv_tool_env[@]}" uv run --no-project --python 3.12 --with pytest --with pyyaml --with jsonschema python -c "import pytest, yaml, jsonschema" >/dev/null 2>&1 || return 1
+  python_cmd=("${uv_tool_env[@]}" uv run --no-project --python 3.12 --with pytest --with pyyaml --with jsonschema python)
+  python_cmd_display="${uv_tool_env[*]:+env UV_CACHE_DIR=<temp> }uv run --no-project --python 3.12 --with pytest --with pyyaml --with jsonschema python"
   return 0
 }
 
 use_mise_python_launcher() {
   command -v mise >/dev/null 2>&1 || return 1
   command -v uv >/dev/null 2>&1 || return 1
-  mise exec -- uv run --python 3.12 --with pytest --with pyyaml --with jsonschema python -c "import pytest, yaml, jsonschema" >/dev/null 2>&1 || return 1
-  python_cmd=(mise exec -- uv run --python 3.12 --with pytest --with pyyaml --with jsonschema python)
-  python_cmd_display="mise exec -- uv run --python 3.12 --with pytest --with pyyaml --with jsonschema python"
+  "${uv_tool_env[@]}" mise exec -- uv run --no-project --python 3.12 --with pytest --with pyyaml --with jsonschema python -c "import pytest, yaml, jsonschema" >/dev/null 2>&1 || return 1
+  python_cmd=("${uv_tool_env[@]}" mise exec -- uv run --no-project --python 3.12 --with pytest --with pyyaml --with jsonschema python)
+  python_cmd_display="${uv_tool_env[*]:+env UV_CACHE_DIR=<temp> }mise exec -- uv run --no-project --python 3.12 --with pytest --with pyyaml --with jsonschema python"
   return 0
 }
 

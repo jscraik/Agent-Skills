@@ -30,7 +30,7 @@
   "interface": {
     "displayName": "Plugin Factory",
     "shortDescription": "Route, create, harden, and install Codex plugins",
-    "longDescription": "A Codex plugin package that exposes plugin-factory-router and plugin-router in the picker. Plugin creator and installer bridge skills remain available through the System surface.",
+    "longDescription": "A Codex plugin package that exposes plugin-factory-router, plugin-builder, and plugin-router lanes. Plugin creator and installer bridge skills remain available through the System surface.",
     "developerName": "Jamie Craik",
     "category": "Productivity",
     "capabilities": [
