@@ -12,13 +12,15 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
-from skill_discovery import (
-    REPO_ROOT,
-    classify_skill_scope,
-    discover_skill_entries,
-    normalize_skill_description,
-    parse_skill_frontmatter,
+from selection_policy import (
+    EXCLUDED_SCAN_SEGMENTS,
+    HIDDEN_FLAT_SKILL_NAMES,
+    PLUGIN_SKILL_COLLISION_POLICIES,
+    PLUGIN_SKILL_ROOT_GLOB,
+    REPO_SCAN_ROOTS,
+    SYSTEM_BRIDGE_SKILL_NAMES,
 )
+from skill_discovery import REPO_ROOT, classify_skill_scope, normalize_skill_description, parse_skill_frontmatter
 
 
 @dataclass(frozen=True)
@@ -113,21 +115,193 @@ def _record_from_skill_dir(handle: str, skill_dir: Path, *, root: Path) -> SdkSk
     )
 
 
-def build_sdk_skill_records(*, repo_root_path: Path | None = None, visibility: str = "default") -> list[SdkSkillRecord]:
-    """Return SDK skill records from flat runtime first, then canonical source."""
+def _is_excluded_skill_path(skill_md: Path, scan_root: Path) -> bool:
+    try:
+        rel_parts = skill_md.relative_to(scan_root).parts
+    except ValueError:
+        return True
+    return any(part in EXCLUDED_SCAN_SEGMENTS for part in rel_parts)
+
+
+def _iter_flat_skill_dirs(root: Path) -> list[tuple[str, Path]]:
+    flat_root = root / ".agents" / "skills"
+    if not flat_root.is_dir():
+        return []
+    rows: list[tuple[str, Path]] = []
+    for item in sorted(flat_root.iterdir()):
+        if item.name.startswith("."):
+            continue
+        if item.is_dir() and (item / "SKILL.md").exists():
+            rows.append((item.name, item))
+    return rows
+
+
+def _iter_repo_skill_dirs(root: Path) -> list[tuple[str, Path]]:
+    rows: list[tuple[str, Path]] = []
+    for root_name in REPO_SCAN_ROOTS:
+        scan_root = root / root_name
+        if not scan_root.is_dir():
+            continue
+        for skill_md in sorted(scan_root.rglob("SKILL.md")):
+            if _is_excluded_skill_path(skill_md, scan_root):
+                continue
+            fm = parse_skill_frontmatter(skill_md)
+            handle = str(fm.get("name") or skill_md.parent.name).strip()
+            if handle:
+                rows.append((handle, skill_md.parent))
+    return rows
+
+
+def _plugin_scan_patterns() -> list[str]:
+    patterns: set[str] = set()
+    for raw_pattern in (*PLUGIN_SKILL_ROOT_GLOB.split(), "./Plugins/cache/*/*/*/skills"):
+        if not raw_pattern:
+            continue
+        patterns.add(raw_pattern)
+        if raw_pattern.endswith("/*/skills"):
+            nested_pattern = raw_pattern[: -len("/*/skills")] + "/*/*/skills"
+            patterns.add(nested_pattern)
+    return sorted(patterns)
+
+
+def _cache_plugin_source_root(plugin_root: Path, root: Path) -> str | None:
+    try:
+        rel_parts = plugin_root.relative_to(root).parts
+    except ValueError:
+        return None
+    if len(rel_parts) >= 6 and rel_parts[0] == "Plugins" and rel_parts[1] == "cache" and rel_parts[-1] == "skills":
+        return rel_parts[3]
+    return None
+
+
+def _iter_plugin_skill_dirs(root: Path) -> list[tuple[str, Path]]:
+    rows: list[tuple[str, Path]] = []
+    seen_roots: set[str] = set()
+    for pattern in _plugin_scan_patterns():
+        for plugin_root in sorted(root.glob(pattern)):
+            try:
+                plugin_root_key = plugin_root.resolve().as_posix()
+            except OSError:
+                plugin_root_key = plugin_root.as_posix()
+            if plugin_root_key in seen_roots or not plugin_root.is_dir():
+                continue
+            seen_roots.add(plugin_root_key)
+            cache_rel = _cache_plugin_source_root(plugin_root, root)
+            if cache_rel and (root / "Plugins" / cache_rel / "skills").is_dir():
+                continue
+            for skill_md in sorted(plugin_root.rglob("SKILL.md")):
+                if _is_excluded_skill_path(skill_md, plugin_root):
+                    continue
+                fm = parse_skill_frontmatter(skill_md)
+                handle = str(fm.get("name") or skill_md.parent.name).strip()
+                if handle:
+                    rows.append((handle, skill_md.parent))
+    return rows
+
+
+def _iter_system_skill_dirs(root: Path) -> list[tuple[str, Path]]:
+    rows: list[tuple[str, Path]] = []
+    for system_root in (root / ".agents" / "skills" / ".system", root / "skills-system"):
+        if not system_root.is_dir():
+            continue
+        for item in sorted(system_root.iterdir()):
+            if not item.is_dir() or not (item / "SKILL.md").exists():
+                continue
+            fm = parse_skill_frontmatter(item / "SKILL.md")
+            handle = str(fm.get("name") or item.name).strip()
+            if handle:
+                rows.append((handle, item))
+        if rows:
+            break
+    return rows
+
+
+def build_sdk_skill_record_candidates(
+    *, repo_root_path: Path | None = None, visibility: str = "default"
+) -> list[SdkSkillRecord]:
+    """Return all root-aware SDK skill candidates before duplicate collapse."""
     root = (repo_root_path or REPO_ROOT).resolve()
     records: list[SdkSkillRecord] = []
-    seen: set[str] = set()
-    for entry in discover_skill_entries(source="auto", visibility=visibility):
-        handle = entry.name
-        if handle in seen:
+    for handle, skill_dir in (
+        *_iter_flat_skill_dirs(root),
+        *_iter_repo_skill_dirs(root),
+        *_iter_plugin_skill_dirs(root),
+        *_iter_system_skill_dirs(root),
+    ):
+        if visibility != "advanced" and handle in HIDDEN_FLAT_SKILL_NAMES:
             continue
-        record = _record_from_skill_dir(handle, entry.source_dir, root=root)
+        if visibility == "advanced" and handle in HIDDEN_FLAT_SKILL_NAMES:
+            continue
+        record = _record_from_skill_dir(handle, skill_dir, root=root)
         if record is None:
             continue
         records.append(record)
-        seen.add(handle)
+    return sorted(records, key=lambda item: (item.scope, item.owner, item.handle, item.source_path))
+
+
+def build_sdk_skill_records(
+    *, repo_root_path: Path | None = None, visibility: str = "default"
+) -> list[SdkSkillRecord]:
+    """Return SDK skill records from flat runtime first, then canonical source."""
+    records: list[SdkSkillRecord] = []
+    seen: set[str] = set()
+    for record in build_sdk_skill_record_candidates(repo_root_path=repo_root_path, visibility=visibility):
+        if record.handle in seen:
+            continue
+        records.append(record)
+        seen.add(record.handle)
     return sorted(records, key=lambda item: (item.scope, item.owner, item.handle))
+
+
+def _distinct_records(records: list[SdkSkillRecord]) -> list[SdkSkillRecord]:
+    distinct: list[SdkSkillRecord] = []
+    seen: set[tuple[str, str]] = set()
+    for record in records:
+        key = (record.handle, record.source_path)
+        if key in seen:
+            continue
+        distinct.append(record)
+        seen.add(key)
+    return distinct
+
+
+def _collision_policy_path(path: str) -> str:
+    parts = Path(path).parts
+    if parts and parts[-1] == "SKILL.md":
+        parts = parts[:-1]
+    if len(parts) >= 7 and parts[0] in {"Plugins", "plugins"} and parts[1] == "cache":
+        return "/".join(("Plugins", "cache", parts[2], parts[3], *parts[5:]))
+    if parts and parts[0] == "plugins":
+        return "/".join(("Plugins", *parts[1:]))
+    return "/".join(parts)
+
+
+def _policy_manages_collision(handle: str, source_paths: set[str]) -> bool:
+    normalized_paths = {_collision_policy_path(path) for path in source_paths}
+    if handle in SYSTEM_BRIDGE_SKILL_NAMES and any(
+        path.startswith(".agents/skills/.system/") for path in normalized_paths
+    ):
+        return True
+    for policy in PLUGIN_SKILL_COLLISION_POLICIES:
+        policy_paths = {_collision_policy_path(str(path)) for path in policy.get("paths", ())}
+        if normalized_paths and normalized_paths.issubset(policy_paths):
+            return True
+    return False
+
+
+def sdk_duplicate_handle_violations(records: list[SdkSkillRecord]) -> list[dict[str, str]]:
+    """Return duplicate SDK handle violations after policy-managed collisions."""
+    source_paths_by_handle: dict[str, set[str]] = {}
+    for record in records:
+        source_paths_by_handle.setdefault(record.handle, set()).add(_collision_policy_path(record.source_path))
+    violations: list[dict[str, str]] = []
+    for handle, source_paths in sorted(source_paths_by_handle.items()):
+        if len(source_paths) <= 1:
+            continue
+        if _policy_manages_collision(handle, source_paths):
+            continue
+        violations.append({"code": "DUPLICATE_SDK_SKILL_HANDLE", "handle": handle})
+    return violations
 
 
 def resolve_sdk_skill_handle(handle: str, *, repo_root_path: Path | None = None) -> dict[str, Any]:
@@ -141,11 +315,11 @@ def resolve_sdk_skill_handle(handle: str, *, repo_root_path: Path | None = None)
             "operator_action": "Pass a skill handle such as agents-md.",
         }
 
-    matches = [
+    matches = _distinct_records([
         record
-        for record in build_sdk_skill_records(repo_root_path=repo_root_path, visibility="advanced")
+        for record in build_sdk_skill_record_candidates(repo_root_path=repo_root_path, visibility="advanced")
         if record.handle == requested or record.name == requested
-    ]
+    ])
     if not matches:
         return {
             "status": "error",

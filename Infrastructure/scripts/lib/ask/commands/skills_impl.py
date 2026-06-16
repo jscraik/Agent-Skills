@@ -146,7 +146,11 @@ from command_surface import (  # noqa: E402
     resolve_reviewer_handle,
     resolve_skill_handle,
 )
-from sdk_skill_registry import build_sdk_skill_records  # noqa: E402
+from sdk_skill_registry import (  # noqa: E402
+    build_sdk_skill_record_candidates,
+    build_sdk_skill_records,
+    sdk_duplicate_handle_violations,
+)
 from ask.catalog_parity import compute_catalog_parity  # noqa: E402
 from ask.selection_contract import (  # noqa: E402
     EligibleCandidate,
@@ -1230,13 +1234,10 @@ def skills_handles(
             )
         )
 
+    candidates = build_sdk_skill_record_candidates(repo_root_path=repo_root, visibility="advanced")
     records = build_sdk_skill_records(repo_root_path=repo_root, visibility="advanced")
     handles = [record.to_resolution() for record in records] if include_handles else []
-    duplicate_names = sorted({record.handle for record in records if sum(1 for item in records if item.handle == record.handle) > 1})
-    violations = [
-        {"code": "DUPLICATE_SDK_SKILL_HANDLE", "handle": handle}
-        for handle in duplicate_names
-    ]
+    violations = sdk_duplicate_handle_violations(candidates)
     report = {
         "schema_version": "sdk-skill-handles.v1",
         "status": "fail" if violations else "pass",

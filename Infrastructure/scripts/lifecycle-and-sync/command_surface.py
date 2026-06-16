@@ -10,7 +10,12 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
-from sdk_skill_registry import build_sdk_skill_records, resolve_sdk_skill_handle
+from sdk_skill_registry import (
+    build_sdk_skill_record_candidates,
+    build_sdk_skill_records,
+    resolve_sdk_skill_handle,
+    sdk_duplicate_handle_violations,
+)
 from selection_policy import policy_identity
 
 SKILL_MENTION_RE = re.compile(r"(?<![\w./-])\$([a-z][a-z0-9-]*)")
@@ -173,19 +178,10 @@ def parse_sdk_references(text: str, *, repo_root_path: Path | None = None) -> di
 
 
 def handles_report(*, repo_root_path: Path | None = None, include_handles: bool = True) -> dict[str, Any]:
+    candidates = build_sdk_skill_record_candidates(repo_root_path=repo_root_path, visibility="advanced")
     records = build_sdk_skill_records(repo_root_path=repo_root_path, visibility="advanced")
     public_rows = [record.to_resolution() for record in records] if include_handles else []
-    duplicate_handles = sorted(
-        {
-            record.handle
-            for record in records
-            if sum(1 for item in records if item.handle == record.handle) > 1
-        }
-    )
-    violations = [
-        {"code": "DUPLICATE_SDK_SKILL_HANDLE", "handle": handle}
-        for handle in duplicate_handles
-    ]
+    violations = sdk_duplicate_handle_violations(candidates)
     return {
         "schema_version": "sdk-skill-handles.v1",
         "status": "pass" if not violations else "fail",
