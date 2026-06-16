@@ -17,12 +17,14 @@ sys.path.insert(0, str(LIFECYCLE_DIR))
 sys.path.insert(0, str(ASK_LIB_DIR))
 
 import command_surface  # noqa: E402
+import diagnose_skill as diagnose_skill_module  # noqa: E402
 from ask.commands.skills import skills_handles, skills_proof  # noqa: E402
 
 
 def tearDownModule() -> None:  # noqa: N802 - unittest module hook
     sys.path[:] = _ORIGINAL_SYS_PATH
     sys.modules.pop("command_surface", None)
+    sys.modules.pop("diagnose_skill", None)
     sys.modules.pop("ask.commands.skills", None)
 
 
@@ -140,6 +142,36 @@ class TestSdkSkillResolution(SdkSkillRegistryTempDirTestCase):
         ):
             with self.subTest(symbol=symbol):
                 self.assertFalse(hasattr(command_surface, symbol))
+
+    def test_aggregate_diagnostics_do_not_require_generated_workspace_projection(self) -> None:
+        repo_root = self.temp_dir / "repo"
+        source = _write_skill_source(repo_root, "foo")
+        _link_flat_projection(repo_root, "foo", source)
+
+        with (
+            mock.patch.object(diagnose_skill_module, "REPO_ROOT", repo_root),
+            mock.patch.object(diagnose_skill_module, "SKILLS_DIR", repo_root / ".agents-missing" / "skills"),
+            mock.patch.object(diagnose_skill_module, "SKILL_INDEX", repo_root / "SKILL.md"),
+            mock.patch.object(
+                diagnose_skill_module,
+                "CODEX_SKILLS",
+                self.temp_dir / "home" / ".codex" / "skills",
+            ),
+            mock.patch.object(
+                diagnose_skill_module,
+                "AGENTS_SKILLS",
+                self.temp_dir / "home" / ".agents" / "skills",
+            ),
+        ):
+            targeted = diagnose_skill_module.diagnose_skill("foo")
+            aggregate = diagnose_skill_module.diagnose_skill("foo", require_workspace_projection=False)
+
+        targeted_projection = next(result for result in targeted if result.check == "workspace projection")
+        aggregate_projection = next(result for result in aggregate if result.check == "workspace projection")
+
+        self.assertEqual(targeted_projection.status, "fail")
+        self.assertEqual(aggregate_projection.status, "warn")
+        self.assertIn("skills sync --scope workspace", aggregate_projection.details)
 
 
 class TestSdkSkillProof(SdkSkillRegistryTempDirTestCase):

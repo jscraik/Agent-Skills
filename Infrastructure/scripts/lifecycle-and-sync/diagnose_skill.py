@@ -180,14 +180,17 @@ def check_symlink(skill_name: str, target_dir: Path, label: str, allow_real_dir:
     return DiagnosticResult(f"symlink ({label})", "pass", f"Symlink OK in {target_dir}")
 
 
-def check_workspace_flat_projection(skill_name: str) -> DiagnosticResult:
+def check_workspace_flat_projection(skill_name: str, *, required: bool = True) -> DiagnosticResult:
     """Check the SDK-flat workspace projection for a skill."""
     projected = SKILLS_DIR / skill_name / "SKILL.md"
     if not projected.is_file():
+        status = "fail" if required else "warn"
         return DiagnosticResult(
             "workspace projection",
-            "fail",
+            status,
             f"SDK-flat projection missing: {projected.relative_to(REPO_ROOT)}",
+            "Run ./bin/ask skills sync --scope workspace --projection flat --json --robot "
+            "to materialize generated workspace projections.",
         )
     return DiagnosticResult(
         "workspace projection",
@@ -356,7 +359,7 @@ def check_lifecycle_readiness(skill_dir: Path) -> DiagnosticResult:
     return DiagnosticResult("lifecycle readiness", "pass", "healthy")
 
 
-def diagnose_skill(skill_name: str) -> List[DiagnosticResult]:
+def diagnose_skill(skill_name: str, *, require_workspace_projection: bool = True) -> List[DiagnosticResult]:
     """Run all diagnostic checks for a skill."""
     results: List[DiagnosticResult] = []
 
@@ -387,7 +390,12 @@ def diagnose_skill(skill_name: str) -> List[DiagnosticResult]:
             and resolution.get("runtime_visibility") == "flat"
         )
         if sdk_flat:
-            results.append(check_workspace_flat_projection(resolved_skill_name))
+            results.append(
+                check_workspace_flat_projection(
+                    resolved_skill_name,
+                    required=require_workspace_projection,
+                )
+            )
             results.append(check_symlink(resolved_skill_name, CODEX_SKILLS, "codex"))
             results.append(check_symlink(resolved_skill_name, AGENTS_SKILLS, "agents"))
         elif rooted_skill_set := rooted_manifest_skill_set(skill_dir):
@@ -501,7 +509,7 @@ def diagnose_all_skills() -> int:
     advisory_skills: List[str] = []
 
     for skill_name in skill_names:
-        results = diagnose_skill(skill_name)
+        results = diagnose_skill(skill_name, require_workspace_projection=False)
         fails = sum(1 for r in results if r.status == "fail")
         warns = sum(1 for r in results if r.status == "warn")
         infos = sum(1 for r in results if r.status == "info")
