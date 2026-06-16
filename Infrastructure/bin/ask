@@ -1139,6 +1139,13 @@ def main():
                         f"status={report.get('status')}"
                     )
                     print_first_validation_command(result.data)
+                elif args.topic == "repo" and args.action == "yaml-inspect":
+                    payload = result.data.get("yaml", {})
+                    print(f"✅ YAML inspect: {payload.get('path', args.path)}")
+                    if payload.get("query"):
+                        print(f"  Query: {payload.get('query')}")
+                        print(f"  Value: {payload.get('query_value')!r}")
+                    print_first_validation_command(result.data)
                 elif args.topic == "skills" and args.action == "list":
                     print(f"Discovered {len(result.data['skills'])} skills:")
                     for skill in result.data["skills"]:

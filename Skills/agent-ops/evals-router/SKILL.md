@@ -12,8 +12,8 @@ metadata:
   review_cadence: quarterly
   last_reviewed: "2026-06-16"
   metadata_source: frontmatter
-  compatible_roles: default, worker, skill-inspector
-  runtime_needs: eval traces, scorer outputs, judge prompts, labels, and repo-owned eval wrappers
+  compatible_roles: [default, worker, skill-inspector]
+  runtime_needs: [eval traces, scorer outputs, judge prompts, labels, repo-owned eval wrappers]
 ---
 
 # Evals Router

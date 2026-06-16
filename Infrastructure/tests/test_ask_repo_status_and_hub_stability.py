@@ -116,6 +116,22 @@ class TestRepoYamlInspect(unittest.TestCase):
         self.assertEqual(result.data["yaml"]["query_value"], "alpha")
         self.assertIn("repo yaml-inspect sample.yaml", result.data["validation_commands"][0])
 
+    def test_repo_yaml_inspect_converts_yaml_objects_to_jsonable_values(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir)
+            (repo / "sample.yaml").write_text(
+                "created: 2024-01-15\nmy_set: !!set\n  alpha: null\n",
+                encoding="utf-8",
+            )
+
+            timestamp = repo_yaml_inspect(repo, "sample.yaml", query="created")
+            yaml_set = repo_yaml_inspect(repo, "sample.yaml", query="my_set")
+
+        self.assertEqual(timestamp.status, "success")
+        self.assertEqual(timestamp.data["yaml"]["query_value"], "2024-01-15")
+        self.assertEqual(yaml_set.status, "success")
+        self.assertIn("alpha", yaml_set.data["yaml"]["query_value"])
+
     def test_repo_yaml_inspect_rejects_paths_outside_repo(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             repo = Path(tmpdir)

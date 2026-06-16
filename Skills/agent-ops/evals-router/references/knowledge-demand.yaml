@@ -12,7 +12,7 @@ knowledge_signals:
 - trace_error_analysis
 - deterministic_evaluator_design
 - judge_calibration
-- regression_closeout
+- regression_loop
 - production_guardrails
 needed_facets:
 - pack.evals-testing:trace_error_analysis

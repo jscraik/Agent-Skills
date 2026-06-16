@@ -29,44 +29,6 @@ def _load_impl() -> ModuleType:
 
 
 _impl = _load_impl()
-globals().update({name: value for name, value in vars(_impl).items() if not name.startswith("_")})
-
-__all__ = [
-    "Any",
-    "COMMAND_HANDLE_CHECK_COMMAND",
-    "CANONICAL_SKILL_PREFIXES",
-    "CallResult",
-    "DOCTOR_SIGNAL_PRIORITY",
-    "ErrorCode",
-    "ErrorObject",
-    "GENERATED_SURFACE_PREFIXES",
-    "List",
-    "PACKAGE_READINESS_SENTINEL",
-    "Path",
-    "SCRIPT_TIMEOUT_SECONDS",
-    "annotations",
-    "build_golden_path_payload",
-    "check_hub_stability",
-    "collect_changed_files",
-    "compute_catalog_parity",
-    "doctor_catalog",
-    "json",
-    "provider_audit",
-    "re",
-    "repo_closeout",
-    "repo_doctor",
-    "repo_status",
-    "repo_yaml_inspect",
-    "repo_surface",
-    "repo_validate",
-    "run_bootstrap_checks",
-    "shlex",
-    "skills_budget",
-    "skills_events",
-    "skills_handles",
-    "skills_memory",
-    "skills_package",
-    "skills_profiles",
-    "subprocess",
-    "sys",
-]
+_exports = {name: value for name, value in vars(_impl).items() if not name.startswith("_")}
+globals().update(_exports)
+__all__ = sorted(_exports)

@@ -116,7 +116,26 @@ class TestAskCLI(unittest.TestCase):
         output = json.loads(result.stdout)
         self.assertEqual(output["status"], "success")
         self.assertEqual(output["data"]["yaml"]["query_value"], "smoke-discovery-target")
-        self.assertIn("python", output["data"]["python_command"])
+        self.assertEqual(output["data"]["python_command"], "uv run --no-project --with PyYAML python -")
+
+    def test_repo_yaml_inspect_human_output_renders_result(self):
+        """Verify YAML inspection has a visible non-JSON success output."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "repo",
+            "yaml-inspect",
+            "Skills/agent-ops/improve-agent-native/references/evals.yaml",
+            "--query",
+            "cases.0.id",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"yaml-inspect output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("YAML inspect: Skills/agent-ops/improve-agent-native/references/evals.yaml", result.stdout)
+        self.assertIn("Query: cases.0.id", result.stdout)
+        self.assertIn("Value: 'smoke-discovery-target'", result.stdout)
 
     def test_repo_missing_action_exposes_validation(self):
         """Verify incomplete repo commands expose the read-only recovery command."""

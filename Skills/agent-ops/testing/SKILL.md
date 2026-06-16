@@ -97,7 +97,7 @@ Use this evidence block for failing or blocked checks:
 
 ## Knowledge Capsules
 
-- Start with the [knowledge capsule index](references/knowledge-capsules.md) and load only the capsule matching the proof question:
+- Start with the [knowledge capsule index](references/knowledge-capsules.md) and load the smallest relevant capsule set for the proof question:
   trace error analysis, deterministic evaluator design, judge calibration, regression loop, or production guardrails.
 - For the capsule inventory and provenance, read [knowledge capsule manifest](references/knowledge-capsule.manifest.yaml) and [knowledge demand](references/knowledge-demand.yaml).
 - For compact anti-pattern examples, read the matching scenario notes under [references/evals](references/evals/).

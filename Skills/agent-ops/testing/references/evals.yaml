@@ -159,10 +159,10 @@ cases:
     acceptance:
       - {type: skill_selected, expected_skill: testing}
       - {type: expected_signal, value: "Classifies an uncalibrated judge score as advisory or blocked for release proof."}
-      - {type: expected_signal, value: "Requires held-out labels, TPR or TNR, prompt or model version, and raw artifacts before using the judge as a gate."}
+      - {type: expected_signal, value: "Requires held-out labels, separate TPR and TNR, prompt version and model version, and raw artifacts before using the judge as a gate."}
       - {type: not_regex, value: "(?is)high agreement alone.*sufficient validation.*release gate"}
       - {type: regex, value: "(?is)(advisory|blocked).*?(release proof|required gate|readiness)"}
-      - {type: regex, value: "(?is)(held-out|TPR|TNR|false positive|false negative|confusion).*?(prompt version|raw artifact|reproduc)"}
+      - {type: regex, value: "(?is)(held-out).*?(TPR|true positive).*?(TNR|true negative).*?(prompt version).*?(model version).*?(raw artifact|reproduc)"}
   - id: edge-score-without-action
     name: "score without action"
     category: edge
@@ -194,7 +194,7 @@ cases:
     unit: testing skill production guardrail boundary
     given: A team has offline eval trend metrics for an AI workflow but no online guardrail plan for high-risk failures.
     should: Separate measurement from prevention, ask for the primary metric and guardrail checks, and avoid claiming production readiness from the offline trend alone.
-    actual_artifact: references/knowledge-capsules/evals-production-guardrails.md
+    actual_artifact: references/evals/eval.evals.production-guardrails-without-online-safety.md
     expected_artifact: references/knowledge-capsules/evals-production-guardrails.md
     expected_failure: The testing skill treats offline eval improvement as sufficient production safety evidence.
     reproduce: "./bin/ask evals run Skills/agent-ops/testing --mode smoke --runner codex --case edge-production-guardrails-without-online-safety --skip-tessl --no-dashboard --json --robot"

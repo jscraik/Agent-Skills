@@ -1,6 +1,6 @@
 # Knowledge Capsules
 
-Load only the capsule that matches the testing proof question.
+Load the smallest relevant capsule set for the testing proof question.
 
 - [Trace error analysis](knowledge-capsules/evals-trace-error-analysis.md): use before dashboards, judges, or aggregate claims when traces, failure taxonomy, sampling, or coverage dimensions are missing.
 - [Deterministic evaluator design](knowledge-capsules/evals-deterministic-evaluator-design.md): use when a behavior can be checked by code, schemas, parsers, fixtures, invariants, or artifact comparison.

@@ -172,13 +172,22 @@ def project(value, query):
         raise KeyError(part)
     return current
 
+def to_jsonable(value):
+    if isinstance(value, dict):
+        return {str(key): to_jsonable(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [to_jsonable(item) for item in value]
+    if value is None or isinstance(value, (str, int, float, bool)):
+        return value
+    return str(value)
+
 payload = yaml.safe_load(path.read_text(encoding="utf-8"))
 selected = project(payload, query)
 summary = {
     "root_type": type(payload).__name__,
     "query": query,
     "query_type": type(selected).__name__,
-    "query_value": selected,
+    "query_value": to_jsonable(selected),
 }
 if isinstance(payload, dict):
     summary["top_level_keys"] = sorted(str(key) for key in payload.keys())
