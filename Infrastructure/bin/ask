@@ -1136,8 +1136,20 @@ def main():
                     print_first_validation_command(result.data)
                 elif args.topic == "repo" and args.action == "yaml-inspect":
                     payload = result.data.get("yaml", {})
-                    detail = f" query={payload.get('query')} value={payload.get('query_value')!r}" if payload.get("query") else ""
-                    print(f"✅ YAML inspect: {payload.get('path', args.path)}{detail}")
+                    if payload.get("query"):
+                        detail = f" query={payload.get('query')} value={payload.get('query_value')!r}"
+                        print(f"✅ YAML inspect: {result.data.get('path', args.path)}{detail}")
+                    else:
+                        root_type = payload.get('root_type', 'unknown')
+                        top_level_keys = payload.get('top_level_keys')
+                        item_count = payload.get('item_count')
+                        summary_parts = [f"root_type={root_type}"]
+                        if top_level_keys is not None:
+                            summary_parts.append(f"top_level_keys={top_level_keys}")
+                        if item_count is not None:
+                            summary_parts.append(f"item_count={item_count}")
+                        summary = " ".join(summary_parts)
+                        print(f"✅ YAML inspect: {result.data.get('path', args.path)} {summary}")
                     print_first_validation_command(result.data)
                 elif args.topic == "skills" and args.action == "list":
                     print(f"Discovered {len(result.data['skills'])} skills:")

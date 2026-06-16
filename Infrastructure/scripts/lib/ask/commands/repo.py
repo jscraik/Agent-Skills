@@ -29,6 +29,21 @@ def _load_impl() -> ModuleType:
 
 
 _impl = _load_impl()
-_exports = {name: value for name, value in vars(_impl).items() if not name.startswith("_")}
-globals().update(_exports)
-__all__ = sorted(_exports)
+
+# Explicit list of public command functions to export
+__all__ = [
+    "check_hub_stability",
+    "collect_changed_files",
+    "doctor_catalog",
+    "provider_audit",
+    "repo_closeout",
+    "repo_doctor",
+    "repo_status",
+    "repo_surface",
+    "repo_validate",
+    "repo_yaml_inspect",
+]
+
+# Populate only the symbols listed in __all__ from the implementation module
+for name in __all__:
+    globals()[name] = getattr(_impl, name)

@@ -131,6 +131,9 @@ class TestRepoYamlInspect(unittest.TestCase):
         self.assertEqual(timestamp.data["yaml"]["query_value"], "2024-01-15")
         self.assertEqual(yaml_set.status, "success")
         self.assertIn("alpha", yaml_set.data["yaml"]["query_value"])
+        # Verify JSON serializability of query_value
+        import json
+        json.dumps(yaml_set.data["yaml"]["query_value"])
 
     def test_repo_yaml_inspect_rejects_paths_outside_repo(self):
         with tempfile.TemporaryDirectory() as tmpdir:

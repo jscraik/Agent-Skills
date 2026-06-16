@@ -169,7 +169,7 @@ cases:
       - {type: skill_selected, expected_skill: testing}
       - {type: not_regex, value: "(?is)high agreement alone.*sufficient validation.*release gate"}
       - {type: regex, value: "(?is)(advisory|blocked).*?(release proof|required gate|readiness)"}
-      - {type: regex, value: "(?is)(held-out).*?(TPR|true positive).*?(TNR|true negative).*?(prompt version).*?(model version).*?(raw artifact|reproduc)"}
+      - {type: regex, value: "(?is)(?=.*held-out)(?=.*(TPR|true positive))(?=.*(TNR|true negative))(?=.*prompt version)(?=.*model version)(?=.*(raw artifact|reproduc)).*"}
     expected_signals:
       must_include:
         - uncalibrated judge score advisory blocked release proof
