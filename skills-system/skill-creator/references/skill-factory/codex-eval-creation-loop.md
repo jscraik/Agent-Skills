@@ -24,6 +24,8 @@ evals, and evidence in this repo's formats.
   cite the output, run trace, file, or command evidence.
 - Analyze the evals themselves. A passing assertion that only checks a filename,
   trigger word, or shallow phrase is weak evidence.
+- Treat a perfect no-skill baseline as a weak-eval signal. If the comparator
+  already scores 100%, the eval may prove task easiness instead of skill value.
 - Let repeated run behavior shape the skill. If every run recreates the same
   helper or reference lookup, add a bundled script, asset, or reference.
 - Iterate from the combination of deterministic results, qualitative review,
@@ -68,6 +70,8 @@ evals, and evidence in this repo's formats.
    - record `pass`, `fail`, or `blocked`; do not use vague readiness language
    - flag weak evals that would pass a bad output, cannot be verified, or miss
      the main outcome
+   - flag non-discriminative evals where the no-skill or previous-skill
+     comparator reaches the same score as the improved skill, especially 100%
    - note repeated helper creation, unnecessary commands, high token use, and
      brittle recovery loops as skill-improvement signals
 

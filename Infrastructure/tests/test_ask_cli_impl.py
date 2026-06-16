@@ -97,6 +97,27 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("Success:", result.stdout)
         self.assertIn("Validation: ./bin/ask repo status --json --robot", result.stdout)
 
+    def test_repo_yaml_inspect_cli_uses_managed_pyyaml(self):
+        """Verify YAML inspection works through ask instead of bare system python."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "repo",
+            "yaml-inspect",
+            "Skills/agent-ops/improve-agent-native/references/evals.yaml",
+            "--query",
+            "cases.0.id",
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"yaml-inspect output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        self.assertEqual(output["data"]["yaml"]["query_value"], "smoke-discovery-target")
+        self.assertIn("python", output["data"]["python_command"])
+
     def test_repo_missing_action_exposes_validation(self):
         """Verify incomplete repo commands expose the read-only recovery command."""
         cmd = ["python3", "Infrastructure/bin/ask", "repo", "--json", "--robot"]

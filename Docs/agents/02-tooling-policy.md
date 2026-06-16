@@ -28,6 +28,10 @@
 
 - Keep command snippets backed by repo files before documenting them.
 - Prefer one-shot, reproducible commands.
+- For ad hoc YAML inspection, do not run bare system Python imports because
+  system Python may not have PyYAML. Use the repo wrapper instead:
+  `./bin/ask repo yaml-inspect <repo-relative-yaml> --json --robot`, with
+  `--query <dotted.path>` when only one nested value is needed.
 
 ## Package command map
 

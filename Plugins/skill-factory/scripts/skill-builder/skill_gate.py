@@ -6,7 +6,7 @@ Gold-standard gate for Codex agent skills.
 
 Enforces:
 - Codex frontmatter validity + selection quality (WHAT + WHEN)
-- Required SKILL.md sections (MUST)
+- SDK/package-required fields as failures; house-style SKILL.md sections as warnings
 - Progressive disclosure budgets (MUST)
 - Contract + eval coverage (MUST)
 - Basic safety hygiene (redaction language; fail-fast gating)
@@ -704,9 +704,12 @@ def check_required_sections(doc: SkillDoc, *, require_philosophy: bool) -> List[
     for key, aliases in required.items():
         if not present(aliases):
             out.append(Finding(
-                Level.FAIL,
+                Level.WARN,
                 f"SEC_{key.upper()}_MISSING",
-                f"Missing required section: {key.replace('_', ' ')} (add a ## heading).",
+                (
+                    f"Missing house-style section: {key.replace('_', ' ')}. "
+                    "This is not an SDK-required header; add it only when it improves browseability."
+                ),
             ))
 
     critical_content: Dict[str, List[str]] = {
@@ -721,16 +724,16 @@ def check_required_sections(doc: SkillDoc, *, require_philosophy: bool) -> List[
             # The missing-section finding above is already clearer when the heading is absent.
             if present(aliases):
                 out.append(Finding(
-                    Level.FAIL,
+                    Level.WARN,
                     f"SEC_{key.upper()}_EMPTY",
-                    f"Required section has no content: {key.replace('_', ' ')}.",
+                    f"House-style section has no content: {key.replace('_', ' ')}.",
                 ))
             continue
         if len(text) < 20 or placeholder_pattern.fullmatch(text):
             out.append(Finding(
-                Level.FAIL,
+                Level.WARN,
                 f"SEC_{key.upper()}_THIN",
-                f"Required section is too thin to be operational: {key.replace('_', ' ')}.",
+                f"House-style section is too thin to be operational: {key.replace('_', ' ')}.",
             ))
 
     for key, aliases in should.items():

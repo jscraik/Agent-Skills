@@ -6,6 +6,7 @@ from __future__ import annotations
 import json
 import io
 import os
+import subprocess as sp
 import sys
 import tempfile
 import textwrap
@@ -53,6 +54,7 @@ from run_skill_evals import (
     _scrub_mcp_servers_from_toml,
     _weak_acceptance_reasons,
     _write_junit_report,
+    evaluate_assertions_json,
     evaluate_assertions_text,
     evaluate_expected_signals,
     load_evals,
@@ -93,6 +95,31 @@ class RunSkillEvalsModeTests(unittest.TestCase):
         )
 
         self.assertEqual(failures, ["regex failed: /(?i)red_signal/"])
+
+    def test_legacy_expected_signal_acceptance_is_non_blocking(self) -> None:
+        assertions = [
+            {"type": "expected_signal", "value": "Names a durable guardrail."},
+            {"type": "contains", "value": "guardrail"},
+        ]
+
+        self.assertEqual(
+            evaluate_assertions_text(
+                "Recommend a validator guardrail.",
+                assertions,
+                skill_name="improve-agent-native",
+                selected_skill=True,
+            ),
+            [],
+        )
+        self.assertEqual(
+            evaluate_assertions_json(
+                {"recommendation": "validator guardrail"},
+                assertions,
+                skill_name="improve-agent-native",
+                selected_skill=True,
+            ),
+            [],
+        )
 
     def test_contains_assertions_are_case_insensitive_for_agent_prose(self) -> None:
         self.assertEqual(
@@ -1622,6 +1649,42 @@ class RunSkillEvalsModeTests(unittest.TestCase):
         self.assertTrue(any("--ignore-user-config" in warning for warning in warnings))
         cmd = mocked_run.call_args.args[0]
         self.assertNotIn("--ignore-user-config", cmd)
+
+    def test_run_codex_exec_retries_no_output_timeout_once(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            workspace_root = Path(tmpdir)
+            output_last_message_path = workspace_root / "last.txt"
+            fake_proc = unittest.mock.Mock(returncode=0, stdout="done", stderr="")
+
+            with unittest.mock.patch(
+                "run_skill_evals._codex_supports_exec_flag",
+                return_value=True,
+            ), unittest.mock.patch(
+                "run_skill_evals.sp.run",
+                side_effect=[
+                    sp.TimeoutExpired(cmd=["codex"], timeout=1),
+                    fake_proc,
+                ],
+            ) as mocked_run:
+                rc, stdout, stderr, warnings = run_codex_exec(
+                    workspace_root=workspace_root,
+                    prompt="Route only.",
+                    output_last_message_path=output_last_message_path,
+                    output_schema_path=None,
+                    sandbox="read-only",
+                    ask_for_approval=None,
+                    model=None,
+                    profile=None,
+                    codex_home=workspace_root / ".codex",
+                    jsonl_path=None,
+                    codex_bin=None,
+                    timeout_sec=1,
+                    timeout_profile="default",
+                )
+
+        self.assertEqual((rc, stdout, stderr), (0, "done", ""))
+        self.assertEqual(mocked_run.call_count, 2)
+        self.assertTrue(any("retrying once" in warning for warning in warnings))
 
     def test_timeout_with_only_subprocess_stderr_is_no_output(self) -> None:
         self.assertEqual(

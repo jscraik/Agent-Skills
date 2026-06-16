@@ -56,6 +56,7 @@ __all__ = [
     "repo_closeout",
     "repo_doctor",
     "repo_status",
+    "repo_yaml_inspect",
     "repo_surface",
     "repo_validate",
     "run_bootstrap_checks",

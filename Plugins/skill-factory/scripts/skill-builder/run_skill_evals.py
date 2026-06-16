@@ -1650,6 +1650,12 @@ def evaluate_assertions_text(
             )
             if msg:
                 failures.append(msg)
+        elif t == "expected_signal":
+            # Legacy eval files used acceptance.expected_signal as a human-readable
+            # quality note before top-level expected_signals became executable.
+            # Keep it non-blocking so old release cases do not fail before the
+            # supported expected_signals contract can score them.
+            continue
         else:
             failures.append(f"unsupported assertion type for text output: {t!r}")
     return failures
@@ -1677,6 +1683,8 @@ def evaluate_assertions_json(
                     selected_skill=selected_skill,
                 )
             )
+            continue
+        if t == "expected_signal":
             continue
 
         if t == "jsonpath_equals":
@@ -2116,6 +2124,14 @@ def run_codex_exec(
         return proc.returncode, proc.stdout, proc.stderr
 
     rc, stdout, stderr = _invoke(profile)
+
+    if rc == 124 and not stdout.strip() and stderr.startswith("codex exec timed out after "):
+        warnings.append("Codex timed out without output; retrying once with a fresh exec process.")
+        if output_last_message_path.exists():
+            output_last_message_path.unlink()
+        if jsonl_path and jsonl_path.exists():
+            jsonl_path.unlink()
+        rc, stdout, stderr = _invoke(profile)
 
     if (
         rc != 0

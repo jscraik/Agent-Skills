@@ -11,6 +11,7 @@ from ask.bootstrap import run_bootstrap_checks
 from ask.envelope import CallResult, ErrorCode, ErrorObject
 from ask.catalog_parity import compute_catalog_parity
 from ask.commands.skills import skills_budget, skills_events, skills_handles, skills_memory, skills_package, skills_profiles
+from ask.commands.skills_impl import _get_python_command, _subprocess_env_with_uv_cache
 from ask.golden_path import build_golden_path_payload
 
 SCRIPT_TIMEOUT_SECONDS = 60
@@ -85,6 +86,156 @@ def repo_status(repo_root: Path, verbose: bool = False) -> CallResult:
     skills_dir = repo_root / ".agents" / "skills"
     is_synced = skills_dir.is_dir() and any(skills_dir.iterdir())
     result.data["skills_synced"] = is_synced
+
+    result.status = "success"
+    return result
+
+
+def repo_yaml_inspect(repo_root: Path, path: str, query: str | None = None) -> CallResult:
+    """Parse a repo YAML file through the managed PyYAML interpreter.
+
+    This command exists so agents do not reach for ad hoc system-python snippets
+    that depend on the system interpreter having PyYAML installed.
+    """
+    result = CallResult()
+    target = (repo_root / path).resolve()
+    try:
+        target.relative_to(repo_root.resolve())
+    except ValueError:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code=ErrorCode.ERR_PATH_TRAVERSAL,
+                message=f"YAML path must stay inside the repository: {path}",
+                fix_suggestion="Pass a repo-relative YAML file path.",
+            )
+        )
+        return result
+    if not target.exists() or not target.is_file():
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code=ErrorCode.ERR_VALIDATION,
+                message=f"YAML file not found: {path}",
+                fix_suggestion="Pass an existing repo-relative YAML file path.",
+            )
+        )
+        return result
+
+    python_cmd = _get_python_command(["pyyaml"])
+    command_display = " ".join(shlex.quote(part) for part in [*python_cmd, "-"])
+    result.data["validation_commands"] = [
+        " ".join(
+            [
+                "./bin/ask",
+                "repo",
+                "yaml-inspect",
+                shlex.quote(path),
+                *( ["--query", shlex.quote(query)] if query else [] ),
+                "--json",
+                "--robot",
+            ]
+        )
+    ]
+    result.data["python_command"] = command_display
+    result.data["path"] = str(target.relative_to(repo_root.resolve()))
+
+    inspector = '''
+import json
+import sys
+from pathlib import Path
+import yaml
+
+path = Path(sys.argv[1])
+query = sys.argv[2] if len(sys.argv) > 2 and sys.argv[2] else None
+
+def project(value, query):
+    current = value
+    if not query:
+        return current
+    for raw_part in query.split("."):
+        if not raw_part:
+            raise KeyError("empty query segment")
+        part = raw_part
+        if isinstance(current, dict):
+            if part not in current:
+                raise KeyError(part)
+            current = current[part]
+            continue
+        if isinstance(current, list):
+            try:
+                index = int(part)
+            except ValueError as exc:
+                raise KeyError(part) from exc
+            current = current[index]
+            continue
+        raise KeyError(part)
+    return current
+
+payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+selected = project(payload, query)
+summary = {
+    "root_type": type(payload).__name__,
+    "query": query,
+    "query_type": type(selected).__name__,
+    "query_value": selected,
+}
+if isinstance(payload, dict):
+    summary["top_level_keys"] = sorted(str(key) for key in payload.keys())
+if isinstance(payload, list):
+    summary["item_count"] = len(payload)
+if isinstance(selected, dict):
+    summary["query_keys"] = sorted(str(key) for key in selected.keys())
+if isinstance(selected, list):
+    summary["query_item_count"] = len(selected)
+print(json.dumps(summary, ensure_ascii=False))
+'''
+    try:
+        completed = subprocess.run(
+            [*python_cmd, "-", str(target), query or ""],
+            input=inspector,
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=SCRIPT_TIMEOUT_SECONDS,
+            env=_subprocess_env_with_uv_cache(),
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code=ErrorCode.ERR_DEPENDENCY,
+                message=f"Unable to inspect YAML with managed PyYAML interpreter: {exc}",
+                fix_suggestion="Run ./bin/ask repo doctor --json --robot and verify uv or a PyYAML-capable Python is available.",
+            )
+        )
+        return result
+
+    if completed.returncode != 0:
+        result.status = "error"
+        result.data["stderr"] = completed.stderr
+        result.errors.append(
+            ErrorObject(
+                code=ErrorCode.ERR_VALIDATION,
+                message=f"YAML inspection failed for {path}.",
+                fix_suggestion=completed.stderr.strip() or "Check YAML syntax and query path.",
+            )
+        )
+        return result
+
+    try:
+        result.data["yaml"] = json.loads(completed.stdout)
+    except json.JSONDecodeError as exc:
+        result.status = "error"
+        result.data["stdout"] = completed.stdout
+        result.errors.append(
+            ErrorObject(
+                code=ErrorCode.ERR_RUNTIME,
+                message=f"YAML inspector returned non-JSON output: {exc}",
+                fix_suggestion="Inspect the managed Python command output and rerun repo yaml-inspect.",
+            )
+        )
+        return result
 
     result.status = "success"
     return result

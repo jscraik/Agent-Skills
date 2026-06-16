@@ -1,0 +1,26 @@
+---
+schema_version: knowledge-os.knowledge-demand.v1
+skill:
+  skill_id: testing
+  declared_name: testing
+  entrypoint_path: Skills/agent-ops/testing/SKILL.md
+  canonical_skill_path: Skills/agent-ops/testing/SKILL.md
+  writable_root: Skills/agent-ops/testing
+  apply_target_path: Skills/agent-ops/testing/SKILL.md
+knowledge_signals:
+- validation_route_selection
+- eval_artifact_proof
+- deterministic_evaluator_design
+- judge_calibration
+- regression_closeout
+- production_guardrails
+needed_facets:
+- pack.evals-testing:trace_error_analysis
+- pack.evals-testing:deterministic_evaluator_design
+- pack.evals-testing:judge_calibration
+- pack.evals-testing:regression_loop
+- pack.evals-testing:production_guardrails
+runtime_dependency_policy:
+  requires_knowledge_os_at_runtime: false
+  raw_sources_included: false
+  local_absolute_paths_required: false

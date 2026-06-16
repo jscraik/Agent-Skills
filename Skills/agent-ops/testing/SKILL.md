@@ -1,8 +1,19 @@
 ---
 name: testing
-description: Select, run, and report repo-native test and validation evidence. Use when users ask what tests to run, ask to validate a change, fix failing tests, design test coverage, build eval proof, classify validation failures, or prove behavior before closeout.
+description: Select, run, parse, and report repo-native validation evidence, including test commands, failure ownership, coverage gaps, eval artifacts, deterministic scorers, judge calibration, and regression proof. Use when users ask what tests to run, ask to validate a change, fix failing tests, design test coverage, build eval proof, classify validation failures, or prove behavior before closeout.
 metadata:
+  version: "1.0.0"
   skill-type: code_quality_review
+  lifecycle_state: active
+  maturity: canonical
+  owner: Agent Skills Team
+  provenance: frontmatter:Agent Skills Team:2026-06-16:canonical-source
+  share_readiness: ready
+  review_cadence: quarterly
+  last_reviewed: "2026-06-16"
+  metadata_source: frontmatter
+  compatible_roles: default, worker, skill-inspector
+  runtime_needs: target repo and changed files; repo-owned validation wrappers or package scripts; exact command output or artifact evidence
 ---
 
 # Testing
@@ -10,19 +21,18 @@ metadata:
 Select the smallest real proof that exercises the changed behavior, then widen
 only as the repo contract and risk surface require.
 
-## Philosophy
-
-- Testing is proof selection, not command volume.
-- Repo-native contracts beat guessed defaults.
-- Exact behavior proof comes before broad confidence claims.
-- Artifacts, schemas, and deterministic checks decide required gates; reviewers and LLM judges advise unless calibrated.
-
 ## When To Use
 
 - Choosing validation for code, docs, config, workflow, skill, or eval changes.
 - Fixing failing tests or classifying validation failure ownership.
 - Designing test coverage for a behavior, workflow, skill, or harness change.
 - Proving completion before a handoff, PR, merge, release, or closeout claim.
+
+## Philosophy
+
+- Testing is proof selection, not command volume.
+- Repo-native contracts beat guessed defaults.
+- Artifacts, schemas, and deterministic checks decide required gates; reviewers and LLM judges advise unless calibrated.
 
 ## Avoid
 
@@ -52,10 +62,31 @@ only as the repo contract and risk surface require.
 2. Classify the changed surface: unit, boundary, mock integration, e2e, security, load/stress, lifecycle closeout, docs/config, skill package, or eval artifact.
 3. Run or recommend the smallest exact behavior check that invokes production code, a real CLI/script, a validator, or a schema-backed artifact path.
 4. Add or update tests when a behavior change has no meaningful related proof.
-5. For each meaningful test or eval case, make the bug report shape explicit: unit or workflow under test, given condition, should expectation, actual observed output or artifact, expected output or artifact, and reproduction command or fixture.
+5. For each meaningful test or eval case, write the failure report in the template below.
 6. When the proof is nondeterministic or agent-mediated, record run count, pass threshold, per-assertion failures, raw response or trace artifact paths, and timeout or partial-output handling before using the result for a release or closeout decision.
-7. Stop at the first failed required gate; fix the smallest failing scope and rerun that gate before widening.
-8. Report exact evidence and do not claim completion for any proof path that did not run.
+7. For eval proof, require traces or equivalent artifacts before dashboards or judges, name the failure taxonomy and sampling dimensions, prefer deterministic evaluators for objective checks, calibrate judges before release claims, and turn fixed failures into regression cases.
+8. Stop at the first failed required gate; fix the smallest failing scope and rerun that gate before widening.
+9. Report exact evidence and do not claim completion for any proof path that did not run.
+
+## Command Templates
+
+Use repo-owned commands, replacing examples with the discovered wrapper.
+
+- Focused behavior proof before a broad gate: run ./bin/ask <changed-command> --json --robot.
+- Report focused proof as: Command: ./bin/ask <changed-command> --json --robot -> pass|fail|blocked (<reason>).
+- Same-gate rerun after an in-scope test fix: run pnpm run test:related or the discovered repo-owned equivalent.
+- Report reruns as: Command: pnpm run test:related -> pass (reran the failing gate after the fix).
+
+Use this evidence block for failing or blocked checks:
+
+- Unit or workflow: <path, command, or behavior under test>
+- Given: <fixture, input, state, or user flow>
+- Should: <required behavior or artifact>
+- Actual: <observed output, assertion, trace, or artifact>
+- Expected: <expected output, assertion, trace, or artifact>
+- Reproduce: <exact command or fixture path>
+- Ownership: current patch | pre-existing | unrelated dirty worktree | environment/tooling | missing credential | expected fixture stderr | unknown
+- Status: pass | fail | blocked
 
 ## Repo Routes
 
@@ -64,24 +95,18 @@ only as the repo contract and risk surface require.
 - For local eval runners and artifact contracts, read [eval artifact proof](references/eval-artifact-proof.md).
 - For repo-specific commands, especially Codex Rust work, read [repo route matrix](references/repo-route-matrix.md).
 
+## Knowledge Capsules
+
+- Start with the [knowledge capsule index](references/knowledge-capsules.md) and load only the capsule matching the proof question:
+  trace error analysis, deterministic evaluator design, judge calibration, regression loop, or production guardrails.
+- For the capsule inventory and provenance, read [knowledge capsule manifest](references/knowledge-capsule.manifest.yaml) and [knowledge demand](references/knowledge-demand.yaml).
+- For compact anti-pattern examples, read the matching scenario notes under [references/evals](references/evals/).
+- When converting capsule scenarios into eval cases, preserve the given, should, expected-failure, and reproduce fields so failures explain the missing proof rather than only matching a broad regex.
+
 ## Persona Lenses
 
 - For review-style test strategy work, read [testing persona lenses](references/persona-lenses.md).
-- Use the Weinberg Information lens when a plan needs evidence-quality,
-  decision, sampling, or false-certainty pressure.
-- Use the xUnit Pattern lens when automated tests need clearer setup, exercise,
-  verification, teardown, fixtures, or assertions.
-- Use the Classic Test Design lens when a plan needs expected-result discipline,
-  invalid inputs, side-effect checks, regression retention, or error clustering.
-- Use the Key Examples lens when acceptance criteria have too many scenarios,
-  hidden concepts, mixed validation/processing, or confused coverage purpose.
-- Use the Property-Based lens when invariants, generators, shrinking, stateful
-  behavior, or targeted search can expose more than hand-picked examples.
-- Use the Issue Reproduction lens when bug validation needs fail-before and
-  pass-after proof, existing test-convention reuse, or change-coverage evidence.
-- Use the Explore It Charter, Persona, Entity/State/Sequence, and
-  Ecosystem/Intermittent lenses when discovery, roles, lifecycle transitions,
-  no-UI surfaces, or flaky boundary behavior matter.
+- Use the matching lens for evidence quality, expected results, fixtures/assertions, invariants, issue reproduction, role coverage, lifecycle transitions, no-UI surfaces, or flaky boundary behavior.
 - Lenses shape questions and charters; deterministic commands, schemas, artifacts, and calibrated evals still decide required gates.
 
 ## Execution Boundaries
@@ -96,7 +121,6 @@ only as the repo contract and risk surface require.
 - Use repo-owned wrappers and documented command contracts where they exist.
 - Do not run destructive commands as part of validation unless the user explicitly requested that exact operation and the repo contract allows it.
 - Do not print tokens, credentials, private URLs, or sensitive fixture content.
-- Do not treat unavailable network, credentials, sandbox permissions, or unrelated dirty worktree state as a code failure without evidence.
 
 ## Validation
 
@@ -110,27 +134,28 @@ only as the repo contract and risk surface require.
 
 - If repo instructions and command contracts conflict, stop and resolve the contradiction before editing.
 - If a failure repeats twice, stop retrying blindly; classify the mechanism and add the smallest durable guardrail or tracked exception before resuming.
-- If validation is blocked by network, credentials, permissions, sandboxing, missing tools, or unrelated dirty worktree state, report it as blocked rather than weakening the proof claim.
+- If validation is blocked by network, credentials, permissions, sandboxing, missing tools, or unrelated dirty worktree state, report it as blocked instead of a code failure.
+- Do not use a broad green suite, stale artifact, missing baseline, zero denominator, unavailable live service, or uncalibrated judge as proof of the touched path.
+- Do not run guessed defaults, rewrite tests to match broken behavior, or use the implementation as its own oracle without an independent expected result.
 
 ## Gotchas
 
-- A broad green suite does not prove a touched command path ran.
-- A stale artifact on disk is not completion evidence.
-- A missing baseline, zero denominator, or unavailable live service is not a pass.
-- A test that uses the implementation as its own oracle can hide the defect it claims to catch.
-- A readable scenario title is not enough; the assertion should still expose actual versus expected evidence and a reproduction path.
+- A broad green suite, stale artifact, or readable scenario title is not exact behavior proof.
+- Missing baselines, zero denominators, unavailable live services, and fixture stderr need explicit classification.
+- Eval assertions should expose actual versus expected evidence and a reproduction path.
 
 ## Anti-Patterns
 
-- Running npm test in a repo that documents a different wrapper.
-- Rewriting tests to match broken behavior without validating the requirement.
-- Retrying the same failing command repeatedly without classifying the blocker.
-- Promoting an LLM judge score into a required gate without calibration artifacts.
+- Running guessed default commands when a repo wrapper exists.
+- Rewriting tests to match broken behavior before validating the requirement.
+- Promoting judge scores into release gates without calibration artifacts.
 
 ## Examples
 
 - "When the user asks: pnpm run test:related is red after I changed src/lib/pr-closeout.ts; classify ownership, fix the in-scope failure, and rerun the same command."
 - "When the user asks: I changed Infrastructure/bin/ask artifact-routine behavior; validate it with the smallest production CLI proof before the broad gate."
+- Report exact command evidence as: Command: pnpm run test:related -> fail (current patch; src/lib/pr-closeout.ts assertion mismatch).
+- Report blocked proof as: Command: ./bin/ask artifact-routine --json --robot -> blocked (missing fixture; nearest check ./bin/ask artifact-routine --help passed).
 - "When the user asks: tests/parser_roundtrip_test.py has three examples for parse/render; use the Property-Based lens to add an invariant and preserve any generated counterexample as a regression."
 - "When the user asks: issue JSC-241 was fixed without a reproduction test; prove a pre-fix fail and post-fix pass using the closest existing test file."
 
@@ -139,6 +164,7 @@ only as the repo contract and risk surface require.
 - Start with this active contract.
 - Load only the reference needed for the current repo and change surface.
 - Keep command matrices, assurance layers, persona lenses, eval artifact rules, and repo-specific routes in references so the entrypoint stays small.
+- Load knowledge capsules only when the work involves proof strategy, deterministic evaluators, judge calibration, regression loops, or production guardrails.
 
 ## See Also
 

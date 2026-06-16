@@ -14,6 +14,7 @@ import hashlib
 import time
 from pathlib import Path
 from ask.envelope import CallResult, ErrorObject
+from ask.commands.skills_impl import _get_python_command, _subprocess_env_with_uv_cache
 from ask.skill_review_dashboard import render_skill_review_dashboard
 
 
@@ -3301,7 +3302,8 @@ def run_evals(
         return result
 
     cmd = [
-        sys.executable, f"{SKILL_BUILDER_SCRIPTS}/run_skill_evals.py",
+        *_get_python_command(["pyyaml"]),
+        f"{SKILL_BUILDER_SCRIPTS}/run_skill_evals.py",
         path,
         "--eval-mode", mode,
         "--runner", runner,
@@ -3330,7 +3332,14 @@ def run_evals(
     _start_eval_lifecycle(result, path=path, mode=mode, runner=runner)
 
     try:
-        process = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True, timeout=timeout)
+        process = subprocess.run(
+            cmd,
+            cwd=str(repo_root),
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            env=_subprocess_env_with_uv_cache(),
+        )
         result.data["raw_output"] = _repo_relative_text(repo_root, process.stdout)
         result.data["raw_error"] = _repo_relative_text(repo_root, process.stderr)
         result.data["eval_status"] = "pass" if process.returncode == 0 else "fail"

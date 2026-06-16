@@ -8,7 +8,9 @@ This is the portable SDK reproduction contract for the eval scenario. The Knowle
 
 ## Skill-Local Evidence Boundary
 
-Failure category: seed eval requires behavioural scenario conversion.
+Failure category: context-overload validation gap.
+Assessment: narrow rule locator first. For this scenario, the relevant evidence is the single validation-rule clause or clause ID that governs the requested check, not broad doctrine corpora, unrelated skill files, or historical notes.
 Evidence boundary: this fixture is skill-local evidence at references/evals/eval.harness.context-dump-instead-of-slice.md; it does not by itself prove repository, pull request, remote-check, merge-readiness, or Tessl-readiness outcomes.
-Durable mechanism: use this fixture to generate scenario criteria that require the agent to use the narrow rule locator, clause ID, or directly relevant reference first and avoids dumping broad unrelated context before the task requires it.
-Validation status: not_run_with_reason until the scenario is executed by the local pipeline and private Tessl eval lane.
+Narrow-slice decision: use the rule locator, clause ID, or directly relevant reference first; follow deeper references only when the clause itself requires them or when the first slice is insufficient.
+Durable mechanism: add or refresh a rule-locator checklist that records selected clause, searched scope, siblings intentionally skipped, and the reason any deeper references were loaded.
+Validation status: blocked until the narrow clause is inspected and the selected scope is recorded; broad repository or Tessl readiness remains outside this fixture's evidence boundary.

@@ -13,7 +13,7 @@ What exact eval, trace folder, judge prompt, scorecard, dashboard, skill, or wor
 
 Why this matters: eval work must stay tied to the real evidence source before changing prompts, validators, dashboards, or success thresholds.
 
-## Copy paste payload examples
+## Copy-paste payload examples
 
 Ambiguous target:
 
