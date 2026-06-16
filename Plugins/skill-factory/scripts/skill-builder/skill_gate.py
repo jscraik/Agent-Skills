@@ -752,6 +752,12 @@ def check_workflow_fail_fast(doc: SkillDoc, *, require_fail_fast: bool) -> List[
 
     validation_text = _find_section_text(doc.body, ["validation", "checks", "verify", "gates", "acceptance"])
     if not validation_text:
+        if require_fail_fast:
+            out.append(Finding(
+                Level.FAIL,
+                "WF_FAIL_FAST_REQUIRED",
+                "Validation section MUST specify fail-fast behavior (stop at first failed gate; do not proceed).",
+            ))
         return out
 
     signals = ["fail fast", "do not proceed", "stop", "abort", "on failure", "if fails", "must stop", "exit early"]

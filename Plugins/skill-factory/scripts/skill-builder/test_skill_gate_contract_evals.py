@@ -12,7 +12,13 @@ from pathlib import Path
 os.environ["SKILL_GATE_DISABLE_CLI"] = "1"
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from skill_gate import Level, SkillDoc, check_contract_and_evals, check_required_sections
+from skill_gate import (
+    Level,
+    SkillDoc,
+    check_contract_and_evals,
+    check_required_sections,
+    check_workflow_fail_fast,
+)
 
 
 class SkillGateContractEvalTests(unittest.TestCase):
@@ -41,6 +47,36 @@ metadata:
 
         self.assertTrue(findings)
         self.assertFalse([finding for finding in findings if finding.level == Level.FAIL])
+
+    def test_require_fail_fast_fails_when_validation_section_absent(self) -> None:
+        doc = SkillDoc(
+            path=Path("SKILL.md"),
+            raw="""---
+name: sample
+description: Validate strict fail-fast behavior.
+metadata:
+  version: "1.0.0"
+---
+# Sample
+
+## Workflow
+
+Run the focused gate.
+""",
+            frontmatter={
+                "name": "sample",
+                "description": "Validate strict fail-fast behavior.",
+                "metadata": {"version": "1.0.0"},
+            },
+            body="# Sample\n\n## Workflow\n\nRun the focused gate.\n",
+            fm_start_line=1,
+            fm_end_line=6,
+        )
+
+        findings = check_workflow_fail_fast(doc, require_fail_fast=True)
+
+        self.assertEqual([finding.code for finding in findings], ["WF_FAIL_FAST_REQUIRED"])
+        self.assertEqual(findings[0].level, Level.FAIL)
 
     def test_missing_gold_files_report_skill_local_references_paths(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
