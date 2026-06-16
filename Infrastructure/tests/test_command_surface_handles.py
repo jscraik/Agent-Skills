@@ -132,12 +132,23 @@ class TestCommandSurfaceResolution(CommandSurfaceTempDirTestCase):
         self.assertIn("he-phase-heartbeat", hidden_handles)
         self.assertTrue(all(handle.get("command_visibility") != "none" for handle in payload["handles"]))
 
+    def test_resolution_prefers_sdk_flat_registry_over_legacy_manifest(self) -> None:
+        payload = command_surface.resolve_skill_handle("agents-md", repo_root_path=REPO_ROOT)
+
+        self.assertEqual(payload["status"], "ok")
+        self.assertEqual(payload["handle"], "agents-md")
+        self.assertEqual(payload["handle_source"], "sdk_flat_registry")
+        self.assertEqual(payload["runtime_visibility"], "flat")
+        self.assertEqual(payload["provenance"]["projection_mode"], "flat")
+        self.assertEqual(payload["runtime_projection_path"], ".agents/skills/agents-md/SKILL.md")
+
     def test_command_surface_marks_skill_factory_router_as_orchestrator(self) -> None:
         payload = command_surface.resolve_skill_handle("skill-factory-router", repo_root_path=REPO_ROOT)
 
         self.assertEqual(payload["status"], "ok")
         self.assertEqual(payload["handle"], "skill-factory-router")
-        self.assertEqual(payload["command_visibility"], "orchestrator")
+        self.assertEqual(payload["handle_source"], "sdk_flat_registry")
+        self.assertIn(payload["projection_mode"], {"flat", "source"})
         self.assertIsNone(payload.get("invoke_via"))
 
     def test_reviewer_resolver_keeps_reviewers_out_of_skill_namespace(self) -> None:

@@ -143,17 +143,17 @@ def main():
     skills_implicit_preview_parser = skills_subparsers.add_parser("implicit-preview", help="Preview Codex implicit skill invocation attribution", parents=[global_parser])
     skills_implicit_preview_parser.add_argument("--command", required=True, help="Shell command text to inspect")
     skills_implicit_preview_parser.add_argument("--workdir", help="Working directory used to resolve relative command paths")
-    skills_handles_parser = skills_subparsers.add_parser("handles", help="List or validate command-visible skill handles", parents=[global_parser])
-    skills_handles_parser.add_argument("--check", action="store_true", help="Fail when command-surface validation finds drift")
+    skills_handles_parser = skills_subparsers.add_parser("handles", help="List or validate SDK-visible skill handles", parents=[global_parser])
+    skills_handles_parser.add_argument("--check", action="store_true", help="Fail when SDK handle validation finds drift")
     skills_handles_parser.add_argument("--no-handles", action="store_true", help="Omit the full handle list from JSON output")
-    skills_handles_parser.add_argument("--write-projection", action="store_true", help="Write .skillsets/command-surface.json from rooted manifests")
-    skills_handles_parser.add_argument("--check-projection", action="store_true", help="Verify .skillsets/command-surface.json matches rooted manifests")
-    skills_handles_parser.add_argument("--dry-run", action="store_true", help="Preview generated projection writes without changing files")
-    skills_resolve_parser = skills_subparsers.add_parser("resolve", help="Resolve a command-visible skill handle", parents=[global_parser])
+    skills_handles_parser.add_argument("--write-projection", action="store_true", help="Removed flag; use skills sync --projection flat")
+    skills_handles_parser.add_argument("--check-projection", action="store_true", help="Removed flag; use skills handles --check")
+    skills_handles_parser.add_argument("--dry-run", action="store_true", help="Accepted only with removed projection flags")
+    skills_resolve_parser = skills_subparsers.add_parser("resolve", help="Resolve an SDK-visible skill handle", parents=[global_parser])
     skills_resolve_parser.add_argument("handle", help="Skill handle to resolve, with or without leading $")
-    skills_parse_parser = skills_subparsers.add_parser("parse", help="Parse and resolve $ skill and @ reviewer handles from a prompt", parents=[global_parser])
-    skills_parse_parser.add_argument("request", nargs="+", help="Prompt text containing $ skill and @ reviewer handles")
-    skills_proof_parser = skills_subparsers.add_parser("proof", help="Prove a command-surface handle reaches workspace and user runtime surfaces", parents=[global_parser])
+    skills_parse_parser = skills_subparsers.add_parser("parse", help="Parse and resolve SDK skill mentions and @ reviewer roles from a prompt", parents=[global_parser])
+    skills_parse_parser.add_argument("request", nargs="+", help="Prompt text containing SDK skill mentions and @ reviewer roles")
+    skills_proof_parser = skills_subparsers.add_parser("proof", help="Prove an SDK skill handle reaches workspace and user runtime surfaces", parents=[global_parser])
     skills_proof_parser.add_argument("handle", help="Skill handle to prove, with or without leading $")
     skills_proof_parser.add_argument("--runtime-target", default="any", help="Runtime that must satisfy proof: any, codex, or agents")
     skills_subparsers.add_parser("prove", help="Show a skill proof scorecard", parents=[global_parser]).add_argument("handle", nargs="+", help="Skill handle or goal to prove")
@@ -208,7 +208,7 @@ def main():
     skills_sync_parser = skills_subparsers.add_parser("sync", help="Synchronize skill symlinks", parents=[global_parser])
     skills_sync_parser.add_argument("--scope", choices=["user", "workspace"], default="workspace", help="Tier to sync")
     skills_sync_parser.add_argument("--dry-run", action="store_true", help="Preview changes")
-    skills_sync_parser.add_argument("--projection", help="Runtime projection mode: flat, rooted, or skill-tree alias for rooted")
+    skills_sync_parser.add_argument("--projection", help="Runtime projection mode: flat")
     skills_sync_parser.add_argument("--plugin-cache-refresh", choices=["auto", "skip", "only"], default="auto", help="Plugin runtime cache refresh mode")
     skills_audit_parser = skills_subparsers.add_parser("audit", help="Run audits on a skill", parents=[global_parser])
     skills_audit_parser.add_argument("path", help="Path to the skill directory")
@@ -1206,7 +1206,7 @@ def main():
                     )
                     print_first_validation_command(preview)
                 elif args.topic == "skills" and args.action == "handles":
-                    surface = result.data.get("command_surface", {})
+                    surface = result.data.get("sdk_handles", {})
                     print(
                         "✅ Skill handles: "
                         f"{surface.get('handle_count', 0)} handle(s), status={surface.get('status')}"
@@ -1219,15 +1219,14 @@ def main():
                         print(f"  Violations: {len(violations)}")
                 elif args.topic == "skills" and args.action == "resolve":
                     resolution = result.data.get("resolution", {})
-                    print(f"✅ Skill handle: ${resolution.get('handle')}")
-                    print(f"  Visibility: {resolution.get('command_visibility')}")
+                    print(f"✅ Skill handle: {resolution.get('handle')}")
+                    print(f"  Runtime visibility: {resolution.get('runtime_visibility')}")
+                    print(f"  Handle source: {resolution.get('handle_source')}")
                     print(f"  Source: {resolution.get('source_path')}")
-                    if resolution.get("invoke_via"):
-                        print(f"  Invoke via: {resolution.get('invoke_via')}")
                     print_first_validation_command(resolution)
                 elif args.topic == "skills" and args.action == "proof":
                     proof = result.data.get("proof", {})
-                    print(f"✅ Skill handle proof: ${proof.get('handle')} ({proof.get('status')})")
+                    print(f"✅ Skill handle proof: {proof.get('handle')} ({proof.get('status')})")
                     if proof.get("runtime_satisfied_by"):
                         print(f"  runtime satisfied by: {proof.get('runtime_satisfied_by')}")
                     gate_policy = proof.get("gate_policy") or {}
@@ -1371,7 +1370,7 @@ def main():
                     resolution = result.data.get("resolution", {})
                     handle = resolution.get("canonical_handle") or resolution.get("handle")
                     print(f"✅ Reviewer handle: @{handle}")
-                    print(f"  Visibility: {resolution.get('command_visibility')}")
+                    print(f"  Handle source: {resolution.get('handle_source') or resolution.get('kind')}")
                     print(f"  Source: {resolution.get('source_path')}")
                     print_first_validation_command(resolution)
                 elif args.topic == "runtime" and args.action in ("surface", "budget"):

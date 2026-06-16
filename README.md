@@ -3,15 +3,14 @@
 Agent Skills Kit is the governed repository for teaching Codex and other AI
 coding agents how this workspace works.
 
-Use it to author skills once, validate them, expose small `$` command-surface
-handles, and project the right capabilities into runtime without turning every
-workflow into prompt context.
+Use it to author skills once, validate them, expose SDK skill names, and project
+the right capabilities into flat runtime without turning every workflow into
+prompt context.
 
 The short version:
 
 - Canonical skill source lives in `Skills/**` and `Plugins/*/skills/**`.
-- Generated runtime and command surfaces live in `.agents/**` and
-  `.skillsets/**`.
+- Generated runtime surfaces live in `.agents/**`.
 - `./bin/ask` is the public repo command surface.
 - Runtime counts drift by design. Ask the CLI for current truth instead of
   trusting a README number.
@@ -69,7 +68,7 @@ That path answers:
 
 | Reader job              | Start here                                                    | Why                                                                                                      |
 | ----------------------- | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| Check repo health       | `./bin/ask repo doctor --json --robot`                        | Combines repo status, catalog parity, runtime budget, command-surface metadata, and surface diagnostics. |
+| Check repo health       | `./bin/ask repo doctor --json --robot`                        | Combines repo status, catalog parity, runtime budget, SDK projection metadata, and surface diagnostics. |
 | Find a skill for a task | `./bin/ask skills improve "<goal>" --json --robot`            | Routes the goal to one capability and returns the next useful command.                                   |
 | Understand a skill      | `./bin/ask skills explain <handle> --json --robot`            | Resolves the handle to source, usage, limits, and proof.                                                 |
 | Prove a skill           | `./bin/ask skills prove <handle> --json --robot`              | Reports reachability, quality, analytics, and outcome-proof state without merging those lanes.           |
@@ -119,13 +118,12 @@ This repo separates source, generated projections, and live runtime visibility.
 | ------------------------------------- | --------------------------------------------------------- | ---------------------- |
 | `Skills/<topic>/<skill>/SKILL.md`     | Canonical first-party skill source                        | Edit here              |
 | `Plugins/<plugin>/skills/**/SKILL.md` | Canonical plugin-owned skill source                       | Edit here              |
-| `.skillsets/**`                       | Generated rooted manifests and command-surface projection | Regenerate only        |
 | `.agents/skills/**`                   | Runtime projection consumed by Codex and agent runtimes   | Regenerate only        |
 | `~/.agents/skills`, `~/.codex/skills` | User runtime links to the active projection               | Refresh with user sync |
 
-Command-surface metadata in `.skillsets/command-surface.json` is generated
-review/route metadata. Retired command handles must not remain there, and the
-file is not the real workflow.
+SDK-flat metadata is generated from canonical skill sources. Obsolete rooted
+manifests and command-surface files are not SDK inputs and should not be used as
+operator handles.
 
 Resolve canonical skill handles with:
 
@@ -186,7 +184,6 @@ agent-skills/
 |-- Docs/                     # Agent guidance, architecture, specs, and product docs
 |-- Wiki/                     # Skill Ops Wiki notes, playbooks, and learnings
 |-- .agents/skills/           # Runtime projection; regenerate only
-|-- .skillsets/               # Generated rooted manifests; regenerate only
 `-- .workouts/                # Canonical skill workout fixtures
 ```
 
@@ -205,7 +202,7 @@ Root wrappers under `bin/**` and `scripts/**` forward into
 - [Skill Management](Docs/agents/17-skill-management.md) - install, audit,
   fold, and line-budget policy.
 - [Runtime Projection Modes](Docs/architecture/runtime-projection-modes.md) -
-  flat/rooted projection modes, command-surface metadata, and sync scope.
+  SDK-flat projection, SDK skill names, and sync scope.
 - [CLI Specification](Docs/cli-specs/2026-04-06-ask-cli-spec.md) - full command
   reference.
 - [Product Golden Path Command Contracts](Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md) -

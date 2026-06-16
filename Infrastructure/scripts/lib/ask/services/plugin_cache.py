@@ -18,11 +18,7 @@ LIFECYCLE_SYNC_ROOT = SCRIPTS_ROOT / "lifecycle-and-sync"
 if str(LIFECYCLE_SYNC_ROOT) not in sys.path:
     sys.path.append(str(LIFECYCLE_SYNC_ROOT))
 
-from command_surface import (
-    FOLDED_SKILL_HANDLE_ALIASES,
-    HIDDEN_COMPATIBILITY_COMMAND_HANDLES,
-    handles_report,
-)
+from command_surface import handles_report
 
 RUNTIME_CACHE_RELATIVE_ROOT = Path(".agents/plugins-runtime/cache")
 PLUGIN_CACHE_REFRESH_PERMISSION_BLOCKED = "PLUGIN_CACHE_REFRESH_PERMISSION_BLOCKED"
@@ -204,15 +200,15 @@ def prune_command_surface_duplicate_skill_entries(
     plugin_root: Path,
 ) -> tuple[list[str], list[str]]:
     """
-    Remove plugin skill entries that are duplicated by command-surface metadata.
+    Remove plugin skill entries that are duplicated by SDK registry metadata.
     
-    Queries the command-surface registry for handles owned by plugin_name, then deletes
+    Queries the SDK registry for handles owned by plugin_name, then deletes
     corresponding runtime mirror entries under plugin_root/skills. This keeps
     copied plugin mirrors from showing both the canonical plugin skill and a
-    duplicate picker entry for the same command-surface identity.
+    duplicate picker entry for the same SDK skill identity.
     
     Parameters:
-        repo_root (Path): Repository root used to resolve command-surface metadata.
+        repo_root (Path): Repository root used to resolve SDK registry metadata.
         plugin_name (str): Plugin identifier used to match handle ownership.
         plugin_root (Path): Filesystem path to the plugin; its `skills` subdirectory is pruned.
     
@@ -221,16 +217,16 @@ def prune_command_surface_duplicate_skill_entries(
         deletes (list[str]): String paths of removed filesystem targets.
     
     Raises:
-        PluginCacheRefreshError: If discovery of command-surface handles fails.
+        PluginCacheRefreshError: If SDK registry discovery fails.
     """
     skills_root = plugin_root / "skills"
     if not skills_root.is_dir():
         return [], []
     try:
         report = handles_report(repo_root_path=repo_root, include_handles=True)
-    except Exception as exc:  # noqa: BLE001 - convert command-surface failures into sync errors.
+    except Exception as exc:  # noqa: BLE001 - convert SDK registry failures into sync errors.
         raise PluginCacheRefreshError(
-            f"Failed to discover command-surface handles for plugin cache pruning "
+            f"Failed to discover SDK skill handles for plugin cache pruning "
             f"(plugin={plugin_name}, root={plugin_root}): {exc}"
         ) from exc
     public_handles = report.get("handles", []) if isinstance(report, dict) else []
@@ -240,7 +236,6 @@ def prune_command_surface_duplicate_skill_entries(
     handles = [*public_handles, *hidden_handles]
 
     handles_to_prune: set[str] = set()
-    owner_handles: set[str] = set()
     for row in handles:
         if not isinstance(row, dict):
             continue
@@ -249,16 +244,7 @@ def prune_command_surface_duplicate_skill_entries(
         handle = str(row.get("handle") or "").strip()
         if not handle or "/" in handle or ".." in handle:
             continue
-        owner_handles.add(handle)
         handles_to_prune.add(handle)
-    for alias, target in FOLDED_SKILL_HANDLE_ALIASES.items():
-        if alias not in HIDDEN_COMPATIBILITY_COMMAND_HANDLES:
-            continue
-        if target in owner_handles and "/" not in alias and ".." not in alias:
-            handles_to_prune.add(alias)
-    for hidden_handle in HIDDEN_COMPATIBILITY_COMMAND_HANDLES:
-        if hidden_handle in owner_handles and "/" not in hidden_handle and ".." not in hidden_handle:
-            handles_to_prune.add(hidden_handle)
 
     logs: list[str] = []
     deletes: list[str] = []
@@ -278,10 +264,10 @@ def prune_command_surface_duplicate_skill_entries(
                 else:
                     shutil.rmtree(target)
             except OSError as exc:
-                logs.append(f"Skipped protected command-surface duplicate plugin skill entry: {target}: {exc}")
+                logs.append(f"Skipped protected SDK duplicate plugin skill entry: {target}: {exc}")
                 continue
             deletes.append(str(target))
-            logs.append(f"Removed command-surface duplicate plugin skill entry: {target}")
+            logs.append(f"Removed SDK duplicate plugin skill entry: {target}")
     return logs, deletes
 
 

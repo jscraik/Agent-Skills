@@ -1001,7 +1001,8 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(skills_explain["schema_version"], "skills-explain.v1")
         self.assertEqual(skills_explain["query"], "autofix")
         self.assertEqual(skills_explain["canonical_source"], "Skills/agent-ops/autofix/SKILL.md")
-        self.assertEqual(skills_explain["command_surface_handle"], "autofix")
+        self.assertEqual(skills_explain["skill_handle"], "autofix")
+        self.assertEqual(skills_explain["handle_source"], "sdk_flat_registry")
         self.assertIn("validation", skills_explain)
         self.assertIn("when_not_to_use", skills_explain)
 
@@ -1013,7 +1014,7 @@ class TestAskCLI(unittest.TestCase):
             "agent_summary",
             "canonical_source_path",
             "runtime_projection_path",
-            "command_handles",
+            "skill_handles",
             "required_validation",
             "validation_commands",
             "known_limitations",
@@ -1037,10 +1038,10 @@ class TestAskCLI(unittest.TestCase):
         )
         self.assertIn("Next: ./bin/ask skills proof skill-factory-router --json --robot", result.stdout)
 
-    def test_skills_explain_golden_path_fields_for_he_and_non_he_handles(self):
+    def test_skills_explain_golden_path_fields_for_flat_handles(self):
         """Verify explain exposes source, runtime, validation, and proof handoff."""
         for handle, canonical_source, owner in (
-            ("he-spec", "Plugins/harness-engineering/skills/he-spec/SKILL.md", "harness-engineering"),
+            ("agents-md", "Skills/agent-ops/agents-md/SKILL.md", "agent-ops"),
             ("simplify", "Skills/agent-ops/simplify/SKILL.md", "agent-ops"),
         ):
             with self.subTest(handle=handle):
@@ -1052,19 +1053,28 @@ class TestAskCLI(unittest.TestCase):
                 skills_explain = output["data"]["skills_explain"]
                 self.assertEqual(skills_explain["query"], handle)
                 self.assertEqual(skills_explain["canonical_source"], canonical_source)
-                self.assertEqual(skills_explain["command_surface_handle"], handle)
-                self.assertEqual(skills_explain["runtime_projection"], "rooted")
-                self.assertEqual(skills_explain["runtime_visibility"], "latent")
+                self.assertEqual(skills_explain["skill_handle"], handle)
+                self.assertEqual(skills_explain["handle_source"], "sdk_flat_registry")
+                self.assertIn(skills_explain["runtime_projection"], {"flat", "source"})
+                self.assertIn(skills_explain["runtime_visibility"], {"flat", "source"})
                 self.assertEqual(skills_explain["owner"], owner)
                 self.assertIn("validation", skills_explain)
                 self.assertIn("ambiguity_notes", skills_explain)
 
                 explanation = output["data"]["explanation"]
                 self.assertEqual(explanation["canonical_source_path"], canonical_source)
-                self.assertEqual(explanation["runtime_projection_path"], canonical_source)
+                if skills_explain["runtime_projection"] == "flat":
+                    self.assertEqual(explanation["runtime_projection_path"], f".agents/skills/{handle}/SKILL.md")
+                else:
+                    self.assertIsNone(explanation["runtime_projection_path"])
                 self.assertEqual(
-                    explanation["command_handles"],
-                    [{"handle": handle, "path": canonical_source, "invoke_via": owner}],
+                    explanation["skill_handles"],
+                    [{
+                        "handle": handle,
+                        "path": explanation["runtime_projection_path"],
+                        "projection_note": None if explanation["runtime_projection_path"] else "projection_not_file_backed",
+                        "handle_source": "sdk_flat_registry",
+                    }],
                 )
                 self.assertTrue(explanation["validation_commands"])
                 self.assertIn("known_limitations", explanation)

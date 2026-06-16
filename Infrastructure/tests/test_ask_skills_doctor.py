@@ -567,7 +567,7 @@ class TestAskSkillsDoctor(unittest.TestCase):
         )
         _assert_skill_doctor_schema_validates(self, result.data["skill_doctor"])
 
-    def test_doctor_codex_parity_blocks_path_targets_without_command_surface_handle(self) -> None:
+    def test_doctor_codex_parity_blocks_path_targets_without_skill_handle(self) -> None:
         with (
             patch("ask.commands.skills_impl.audit_skill", return_value=_audit_result()),
             patch("ask.commands.skills_impl._skill_workout_candidates", return_value=[]),
@@ -582,7 +582,7 @@ class TestAskSkillsDoctor(unittest.TestCase):
         self.assertEqual(runtime_check["runtime_target"], "codex")
         self.assertEqual(
             runtime_check["reason"],
-            "Codex parity requires a command-surface handle so Codex runtime proof can run.",
+            "Codex parity requires an SDK skill handle so Codex runtime proof can run.",
         )
         self.assertIn("blocked_runtime", doctor["lifecycle_event"]["outcome"]["blocker_classes"])
         _assert_skill_doctor_schema_validates(self, doctor)

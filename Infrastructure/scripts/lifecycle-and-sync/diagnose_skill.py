@@ -180,6 +180,22 @@ def check_symlink(skill_name: str, target_dir: Path, label: str, allow_real_dir:
     return DiagnosticResult(f"symlink ({label})", "pass", f"Symlink OK in {target_dir}")
 
 
+def check_workspace_flat_projection(skill_name: str) -> DiagnosticResult:
+    """Check the SDK-flat workspace projection for a skill."""
+    projected = SKILLS_DIR / skill_name / "SKILL.md"
+    if not projected.is_file():
+        return DiagnosticResult(
+            "workspace projection",
+            "fail",
+            f"SDK-flat projection missing: {projected.relative_to(REPO_ROOT)}",
+        )
+    return DiagnosticResult(
+        "workspace projection",
+        "pass",
+        f"SDK-flat projection OK: {projected.relative_to(REPO_ROOT)}",
+    )
+
+
 def is_plugin_owned_skill(skill_arg: str, skill_dir: Path) -> bool:
     """Return whether the audited skill is plugin-owned and not expected in the default runtime index."""
     candidate = Path(skill_arg).expanduser()
@@ -364,8 +380,17 @@ def diagnose_skill(skill_name: str) -> List[DiagnosticResult]:
         results.append(check_plugin_runtime_surface(resolved_skill_name, "agents"))
         results.append(check_plugin_skill_index(resolved_skill_name))
     else:
-        rooted_skill_set = rooted_manifest_skill_set(skill_dir)
-        if rooted_skill_set:
+        resolution = resolve_skill_handle(resolved_skill_name, repo_root_path=REPO_ROOT)
+        sdk_flat = (
+            resolution.get("status") == "ok"
+            and resolution.get("handle_source") == "sdk_flat_registry"
+            and resolution.get("runtime_visibility") == "flat"
+        )
+        if sdk_flat:
+            results.append(check_workspace_flat_projection(resolved_skill_name))
+            results.append(check_symlink(resolved_skill_name, CODEX_SKILLS, "codex"))
+            results.append(check_symlink(resolved_skill_name, AGENTS_SKILLS, "agents"))
+        elif rooted_skill_set := rooted_manifest_skill_set(skill_dir):
             results.append(check_rooted_latent_runtime_surface(resolved_skill_name, rooted_skill_set, "codex"))
             results.append(check_rooted_latent_runtime_surface(resolved_skill_name, rooted_skill_set, "agents"))
         else:

@@ -22,16 +22,14 @@ DOCTOR_SIGNAL_PRIORITY = {
     "projection_sync": 20,
     "catalog_parity": 30,
     "runtime_budget": 40,
-    "command_handles": 50,
+    "sdk_handles": 50,
     "capability_readiness": 55,
     "memory_readiness": 56,
     "package_readiness": 57,
     "repo_surface": 60,
 }
 PACKAGE_READINESS_SENTINEL = "skill-factory-router"
-COMMAND_HANDLE_CHECK_COMMAND = (
-    "./bin/ask skills handles --check --no-handles --check-projection --json --robot"
-)
+SDK_HANDLE_CHECK_COMMAND = "./bin/ask skills handles --check --no-handles --json --robot"
 GENERATED_SURFACE_PREFIXES = (
     ".agents/skills/",
     ".skillsets/",
@@ -526,7 +524,7 @@ def _projection_sync_signal(status_result: CallResult) -> dict[str, Any]:
         "severity": "blocker",
         "summary": "Workspace skill runtime does not appear synced.",
         "source": "repo_status",
-        "next_command": "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
+        "next_command": "./bin/ask skills sync --scope workspace --projection flat --json --robot",
         "details": {"skills_synced": False},
     }
 
@@ -669,76 +667,33 @@ def _runtime_budget_signal(runtime_result: CallResult) -> dict[str, Any]:
     }
 
 
-def _command_handles_signal(handles_result: CallResult) -> dict[str, Any]:
-    report = handles_result.data.get("command_surface", {})
+def _sdk_handles_signal(handles_result: CallResult) -> dict[str, Any]:
+    report = handles_result.data.get("sdk_handles", {})
     violations = report.get("violations") or []
-    projection_check_raw = handles_result.data.get("command_surface_projection_check")
-    projection_check = projection_check_raw if isinstance(projection_check_raw, dict) else {}
-    projection_violations = projection_check.get("violations") or []
-    missing_required_checks = [
-        name
-        for name, payload in (
-            ("command_surface_projection_check", projection_check_raw),
-        )
-        if not isinstance(payload, dict)
-    ]
     details = {
         "status": report.get("status"),
         "handle_count": report.get("handle_count"),
         "violation_count": len(violations),
-        "command_surface_projection": {
-            "status": projection_check.get("status"),
-            "path": projection_check.get("path"),
-            "violation_count": len(projection_violations),
-            "violation_codes": sorted(
-                {
-                    str(violation.get("code"))
-                    for violation in projection_violations
-                    if violation.get("code")
-                }
-            ),
-        },
-        "missing_required_checks": missing_required_checks,
     }
-    projection_check_pass = projection_check.get("status") == "pass"
-    if (
-        handles_result.status == "success"
-        and report.get("status") == "pass"
-        and not missing_required_checks
-        and projection_check_pass
-    ):
+    if handles_result.status == "success" and report.get("status") == "pass":
         return {
             "state": "pass",
             "severity": "info",
-            "summary": "Command-surface projection validates cleanly.",
+            "summary": "SDK skill handles validate cleanly.",
             "source": "skills_handles",
             "details": details,
         }
-    if missing_required_checks:
-        summary = (
-            "Command-surface validation payload missing required check(s): "
-            + ", ".join(missing_required_checks)
-            + "."
-        )
-        details["failure_code"] = "command_surface_subcheck_missing"
-    elif projection_violations:
-        summary = f"Command-surface projection check found {len(projection_violations)} violation(s)."
-        details["failure_code"] = "command_surface_projection_check_failed"
-    elif projection_check.get("status") != "pass":
-        summary = "Command-surface projection check failed without explicit violations."
-        details["failure_code"] = "command_surface_projection_check_status_failed"
-    elif violations:
-        summary = f"Command-surface validation found {len(violations)} violation(s)."
-        details["failure_code"] = "command_surface_validation_failed"
+    if violations:
+        summary = f"SDK handle validation found {len(violations)} violation(s)."
     else:
-        summary = _error_summary(handles_result, "Command-surface validation failed.")
-        details["failure_code"] = "command_surface_validation_failed"
+        summary = _error_summary(handles_result, "SDK handle validation failed.")
+    details["failure_code"] = "sdk_handle_validation_failed"
     return {
         "state": "block",
         "severity": "blocker",
         "summary": summary,
         "source": "skills_handles",
-        "next_command": COMMAND_HANDLE_CHECK_COMMAND,
+        "next_command": SDK_HANDLE_CHECK_COMMAND,
         "details": details,
     }
 
@@ -1046,8 +1001,8 @@ def _repo_status_skipped_downstream_signals(reason: str) -> dict[str, dict[str, 
             f"Runtime budget skipped {reason}.",
             "repo_status",
         ),
-        "command_handles": _skipped_signal(
-            f"Command-surface validation skipped {reason}.",
+        "sdk_handles": _skipped_signal(
+            f"SDK handle validation skipped {reason}.",
             "repo_status",
         ),
         "capability_readiness": _skipped_signal(
@@ -1126,13 +1081,12 @@ def repo_doctor(repo_root: Path) -> CallResult:
                     "runtime_budget": _safe_signal(
                         lambda: _runtime_budget_signal(skills_budget(repo_root))
                     ),
-                    "command_handles": _safe_signal(
-                        lambda: _command_handles_signal(
+                    "sdk_handles": _safe_signal(
+                        lambda: _sdk_handles_signal(
                             skills_handles(
                                 repo_root,
                                 check=True,
                                 include_handles=False,
-                                check_projection=True,
                             )
                         )
                     ),
@@ -1239,12 +1193,12 @@ def _closeout_sync_report(changed_files: list[str]) -> dict[str, Any]:
     if canonical_skill_changed and not projection_update_present:
         commands.extend(
             [
-                "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
-                COMMAND_HANDLE_CHECK_COMMAND,
+                "./bin/ask skills sync --scope workspace --projection flat --json --robot",
+                SDK_HANDLE_CHECK_COMMAND,
             ]
         )
     elif generated_changed:
-        validation_commands.append(COMMAND_HANDLE_CHECK_COMMAND)
+        validation_commands.append(SDK_HANDLE_CHECK_COMMAND)
     return {
         "needed": bool(commands),
         "commands": commands,
@@ -1385,7 +1339,7 @@ def _closeout_focused_validation(repo_root: Path, changed_files: list[str]) -> l
     Builds a prioritized list of validation commands to run for a focused closeout.
     
     Includes a core set of readiness checks (doctor, profiles, events, memory, package) and conditionally appends:
-    - a command-surface check when any changed path is within generated surface prefixes,
+    - an SDK handle check when any changed path is within generated surface prefixes,
     - a runtime-evidence schema validation when any changed path points under the repository's runtime evidence root,
     - a scoped `repo validate` invocation when changed files are present, or a `repo status` check when none are present.
     
@@ -1430,8 +1384,8 @@ def _closeout_focused_validation(repo_root: Path, changed_files: list[str]) -> l
         commands.append(
             {
                 "id": "skill_handles",
-                "reason": "Validate command-surface projection for changed projection files.",
-                "command": COMMAND_HANDLE_CHECK_COMMAND,
+                "reason": "Validate SDK handle projection for changed projection files.",
+                "command": SDK_HANDLE_CHECK_COMMAND,
             }
         )
     if any(_is_runtime_evidence_path(repo_root, path) for path in changed_files):
@@ -1597,7 +1551,7 @@ def _runtime_card_summary(repo_root: Path, path: Path) -> dict[str, Any]:
                 - "card_id"
                 - "created_at"
                 - "skill_handle"
-                - "command_handle"
+                - "sdk_skill_name"
                 - "runtime_target"
                 - "runtime_status"
                 - "workspace_root"
@@ -1644,7 +1598,7 @@ def _runtime_card_summary(repo_root: Path, path: Path) -> dict[str, Any]:
         "card_id": payload.get("card_id"),
         "created_at": payload.get("created_at"),
         "skill_handle": payload.get("skill_handle"),
-        "command_handle": payload.get("command_handle"),
+        "sdk_skill_name": payload.get("sdk_skill_name") or payload.get("skill_handle"),
         "runtime_target": payload.get("runtime_target"),
         "runtime_status": payload.get("runtime_status"),
         "workspace_root": payload.get("workspace_root"),
