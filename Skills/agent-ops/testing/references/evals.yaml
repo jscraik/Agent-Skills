@@ -114,11 +114,11 @@ cases:
       - {type: regex, value: "(?is)(trace|artifact).*?(failure taxonom|failure categor|error analysis|bounded sample)"}
       - {type: regex, value: "(?is)(dimension|sample|product-specific|coverage).*?(before|rather than).*?(dashboard|metric)"}
     expected_signals:
-      must_include:
+      required_terms:
         - traces or equivalent artifacts
         - product-specific failure taxonomy
         - dimensional sampling
-      must_not_include:
+      forbidden_terms:
         - generic helpfulness dashboard adequate before error analysis
   - id: edge-objective-check-sent-to-judge
     name: "objective check sent to judge"
@@ -143,10 +143,10 @@ cases:
       - {type: regex, value: "(?is)(deterministic|code|schema|parser|assertion).*?(before|instead of|rather than).*?(judge|LLM)"}
       - {type: regex, value: "(?is)(known good|known passing).*?(known bad|known failing|fixture)"}
     expected_signals:
-      must_include:
+      required_terms:
         - deterministic code schema parser assertion checks
         - known passing and failing fixtures
-      must_not_include:
+      forbidden_terms:
         - LLM judge preferred proof schema validity
   - id: edge-unvalidated-judge-overclaims
     name: "unvalidated judge overclaims"
@@ -171,10 +171,10 @@ cases:
       - {type: regex, value: "(?is)(advisory|blocked).*?(release proof|required gate|readiness)"}
       - {type: regex, value: "(?is)(?=.*held-out)(?=.*(TPR|true positive))(?=.*(TNR|true negative))(?=.*prompt version)(?=.*model version)(?=.*(raw artifact|reproduc)).*"}
     expected_signals:
-      must_include:
+      required_terms:
         - uncalibrated judge score advisory blocked release proof
         - held-out labels TPR TNR prompt version model version raw artifacts
-      must_not_include:
+      forbidden_terms:
         - high agreement alone sufficient validation release gate
   - id: edge-score-without-action
     name: "score without action"
@@ -198,10 +198,10 @@ cases:
       - {type: regex, value: "(?is)(incomplete|not.*?proof|not.*?verified|blocked).*?(score|dashboard|pass rate)"}
       - {type: regex, value: "(?is)(root cause|fix path|rerun command|regression case|close.*loop)"}
     expected_signals:
-      must_include:
+      required_terms:
         - root cause fix path rerun command retained regression evidence
         - improvement loop evidence
-      must_not_include:
+      forbidden_terms:
         - higher eval score alone proves behavior improved
   - id: edge-production-guardrails-without-online-safety
     name: "production guardrails without online safety"
@@ -223,10 +223,10 @@ cases:
       - {type: skill_selected, expected_skill: testing}
       - {type: not_regex, value: "(?is)production readiness.*proven.*offline eval trend alone"}
     expected_signals:
-      must_include:
+      required_terms:
         - offline measurement online guardrails prevention
         - primary metrics instrumentation guardrail checks
-      must_not_include:
+      forbidden_terms:
         - production readiness proven offline eval trend alone
   - id: happy-persona-lens-strategy
     name: "persona lenses for validation strategy"
