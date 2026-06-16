@@ -112,7 +112,7 @@ cases:
       - {type: skill_selected, expected_skill: testing}
       - {type: expected_signal, value: "Requires traces or equivalent artifacts before designing dashboard metrics or judge outputs."}
       - {type: expected_signal, value: "Asks for product-specific failure taxonomy and dimensional sampling before aggregate metrics."}
-      - {type: must_not_claim, value: "A generic helpfulness dashboard is adequate before error analysis."}
+      - {type: not_regex, value: "(?is)generic helpfulness dashboard.*adequate.*before error analysis"}
       - {type: regex, value: "(?is)(trace|artifact).*?(failure taxonom|failure categor|error analysis|bounded sample)"}
       - {type: regex, value: "(?is)(dimension|sample|product-specific|coverage).*?(before|rather than).*?(dashboard|metric)"}
   - id: edge-objective-check-sent-to-judge
@@ -136,7 +136,7 @@ cases:
       - {type: skill_selected, expected_skill: testing}
       - {type: expected_signal, value: "Routes objective properties to deterministic code, schema, parser, or assertion checks before LLM judging."}
       - {type: expected_signal, value: "Requires known passing and failing fixtures for the evaluator itself before trusting its result."}
-      - {type: must_not_claim, value: "An LLM judge is the preferred proof for schema validity or required-field presence."}
+      - {type: not_regex, value: "(?is)LLM judge.*preferred proof.*(schema validity|required-field presence)"}
       - {type: regex, value: "(?is)(deterministic|code|schema|parser|assertion).*?(before|instead of|rather than).*?(judge|LLM)"}
       - {type: regex, value: "(?is)(known good|known passing).*?(known bad|known failing|fixture)"}
   - id: edge-unvalidated-judge-overclaims
@@ -160,7 +160,7 @@ cases:
       - {type: skill_selected, expected_skill: testing}
       - {type: expected_signal, value: "Classifies an uncalibrated judge score as advisory or blocked for release proof."}
       - {type: expected_signal, value: "Requires held-out labels, TPR or TNR, prompt or model version, and raw artifacts before using the judge as a gate."}
-      - {type: must_not_claim, value: "High agreement alone is sufficient validation for a release gate."}
+      - {type: not_regex, value: "(?is)high agreement alone.*sufficient validation.*release gate"}
       - {type: regex, value: "(?is)(advisory|blocked).*?(release proof|required gate|readiness)"}
       - {type: regex, value: "(?is)(held-out|TPR|TNR|false positive|false negative|confusion).*?(prompt version|raw artifact|reproduc)"}
   - id: edge-score-without-action
@@ -183,7 +183,7 @@ cases:
       - {type: skill_selected, expected_skill: testing}
       - {type: expected_signal, value: "Treats the score as incomplete proof until root cause, fix path, rerun command, and retained regression evidence are present."}
       - {type: expected_signal, value: "Asks for the improvement loop evidence before claiming behavior improved."}
-      - {type: must_not_claim, value: "A higher eval score alone proves the behavior improved."}
+      - {type: not_regex, value: "(?is)higher eval score alone.*proves.*behavior improved"}
       - {type: regex, value: "(?is)(incomplete|not.*?proof|not.*?verified|blocked).*?(score|dashboard|pass rate)"}
       - {type: regex, value: "(?is)(root cause|fix path|rerun command|regression case|close.*loop)"}
   - id: edge-production-guardrails-without-online-safety
@@ -206,7 +206,7 @@ cases:
       - {type: skill_selected, expected_skill: testing}
       - {type: expected_signal, value: "Separates offline measurement from online guardrails or prevention for high-risk production failures."}
       - {type: expected_signal, value: "Names primary metrics, instrumentation, and guardrail checks as required production-readiness evidence."}
-      - {type: must_not_claim, value: "Production readiness is proven by the offline eval trend alone."}
+      - {type: not_regex, value: "(?is)production readiness.*proven.*offline eval trend alone"}
   - id: happy-persona-lens-strategy
     name: "persona lenses for validation strategy"
     category: happy

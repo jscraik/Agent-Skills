@@ -2114,8 +2114,16 @@ def run_codex_exec(
             )
         except FileNotFoundError:
             return 127, "", "codex CLI not found on PATH. Install it (for example: npm i -g @openai/codex)."
-        except sp.TimeoutExpired:
-            return 124, "", f"codex exec timed out after {timeout} seconds."
+        except sp.TimeoutExpired as exc:
+            stdout = exc.stdout or ""
+            stderr = exc.stderr or ""
+            if isinstance(stdout, bytes):
+                stdout = stdout.decode("utf-8", errors="replace")
+            if isinstance(stderr, bytes):
+                stderr = stderr.decode("utf-8", errors="replace")
+            timeout_message = f"codex exec timed out after {timeout} seconds."
+            stderr = f"{stderr.rstrip()}\n{timeout_message}".strip()
+            return 124, stdout, stderr
 
         if jsonl_path:
             jsonl_path.parent.mkdir(parents=True, exist_ok=True)

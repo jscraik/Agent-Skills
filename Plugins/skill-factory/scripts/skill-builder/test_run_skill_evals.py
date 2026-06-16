@@ -1686,6 +1686,46 @@ class RunSkillEvalsModeTests(unittest.TestCase):
         self.assertEqual(mocked_run.call_count, 2)
         self.assertTrue(any("retrying once" in warning for warning in warnings))
 
+    def test_run_codex_exec_preserves_timeout_partial_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            workspace_root = Path(tmpdir)
+            output_last_message_path = workspace_root / "last.txt"
+
+            with unittest.mock.patch(
+                "run_skill_evals._codex_supports_exec_flag",
+                return_value=True,
+            ), unittest.mock.patch(
+                "run_skill_evals.sp.run",
+                side_effect=sp.TimeoutExpired(
+                    cmd=["codex"],
+                    timeout=1,
+                    output="partial stdout",
+                    stderr="partial stderr",
+                ),
+            ) as mocked_run:
+                rc, stdout, stderr, warnings = run_codex_exec(
+                    workspace_root=workspace_root,
+                    prompt="Route only.",
+                    output_last_message_path=output_last_message_path,
+                    output_schema_path=None,
+                    sandbox="read-only",
+                    ask_for_approval=None,
+                    model=None,
+                    profile=None,
+                    codex_home=workspace_root / ".codex",
+                    jsonl_path=None,
+                    codex_bin=None,
+                    timeout_sec=1,
+                    timeout_profile="default",
+                )
+
+        self.assertEqual(rc, 124)
+        self.assertEqual(stdout, "partial stdout")
+        self.assertIn("partial stderr", stderr)
+        self.assertIn("codex exec timed out after 1.0 seconds.", stderr)
+        self.assertEqual(mocked_run.call_count, 1)
+        self.assertEqual(warnings, [])
+
     def test_timeout_with_only_subprocess_stderr_is_no_output(self) -> None:
         self.assertEqual(
             _classify_runner_blocker(

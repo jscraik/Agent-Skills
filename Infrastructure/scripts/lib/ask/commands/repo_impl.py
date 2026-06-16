@@ -11,7 +11,7 @@ from ask.bootstrap import run_bootstrap_checks
 from ask.envelope import CallResult, ErrorCode, ErrorObject
 from ask.catalog_parity import compute_catalog_parity
 from ask.commands.skills import skills_budget, skills_events, skills_handles, skills_memory, skills_package, skills_profiles
-from ask.commands.skills_impl import _get_python_command, _subprocess_env_with_uv_cache
+from ask.commands.skills_impl import _subprocess_env_with_uv_cache
 from ask.golden_path import build_golden_path_payload
 
 SCRIPT_TIMEOUT_SECONDS = 60
@@ -122,7 +122,7 @@ def repo_yaml_inspect(repo_root: Path, path: str, query: str | None = None) -> C
         )
         return result
 
-    python_cmd = _get_python_command(["pyyaml"])
+    python_cmd = ["uv", "run", "--no-project", "--with", "PyYAML", "python"]
     command_display = " ".join(shlex.quote(part) for part in [*python_cmd, "-"])
     result.data["validation_commands"] = [
         " ".join(
