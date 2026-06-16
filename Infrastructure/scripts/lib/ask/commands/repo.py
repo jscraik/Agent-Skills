@@ -29,9 +29,21 @@ def _load_impl() -> ModuleType:
 
 
 _impl = _load_impl()
+SCRIPT_TIMEOUT_SECONDS = _impl.SCRIPT_TIMEOUT_SECONDS
+check_hub_stability = _impl.check_hub_stability
+collect_changed_files = _impl.collect_changed_files
+doctor_catalog = _impl.doctor_catalog
+provider_audit = _impl.provider_audit
+repo_closeout = _impl.repo_closeout
+repo_doctor = _impl.repo_doctor
+repo_status = _impl.repo_status
+repo_surface = _impl.repo_surface
+repo_validate = _impl.repo_validate
+repo_yaml_inspect = _impl.repo_yaml_inspect
+subprocess = _impl.subprocess
 
-# Explicit list of public command functions to export
 __all__ = [
+    "SCRIPT_TIMEOUT_SECONDS",
     "check_hub_stability",
     "collect_changed_files",
     "doctor_catalog",
@@ -42,8 +54,5 @@ __all__ = [
     "repo_surface",
     "repo_validate",
     "repo_yaml_inspect",
+    "subprocess",
 ]
-
-# Populate only the symbols listed in __all__ from the implementation module
-for name in __all__:
-    globals()[name] = getattr(_impl, name)

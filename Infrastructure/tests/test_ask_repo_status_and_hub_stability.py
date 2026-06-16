@@ -18,6 +18,7 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync"))
 
 from ask.commands.repo import repo_status, repo_yaml_inspect, check_hub_stability, provider_audit
+from ask.commands.repo_impl import _managed_pyyaml_python_command
 
 
 # ---------------------------------------------------------------------------
@@ -105,6 +106,20 @@ class TestRepoStatus(unittest.TestCase):
 
 
 class TestRepoYamlInspect(unittest.TestCase):
+    def test_managed_pyyaml_python_command_prefers_local_python_bin(self):
+        calls = []
+
+        def fake_run(cmd, **_kwargs):
+            calls.append(cmd)
+            return subprocess.CompletedProcess(cmd, 0, "", "")
+
+        with patch.dict("os.environ", {"PYTHON_BIN": "/tmp/local-python"}, clear=False):
+            with patch("ask.commands.repo_impl.subprocess.run", side_effect=fake_run):
+                command = _managed_pyyaml_python_command()
+
+        self.assertEqual(command, ["/tmp/local-python"])
+        self.assertEqual(calls[0], ["/tmp/local-python", "-c", "import yaml"])
+
     def test_repo_yaml_inspect_reads_yaml_with_managed_pyyaml(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             repo = Path(tmpdir)
@@ -131,8 +146,6 @@ class TestRepoYamlInspect(unittest.TestCase):
         self.assertEqual(timestamp.data["yaml"]["query_value"], "2024-01-15")
         self.assertEqual(yaml_set.status, "success")
         self.assertIn("alpha", yaml_set.data["yaml"]["query_value"])
-        # Verify JSON serializability of query_value
-        import json
         json.dumps(yaml_set.data["yaml"]["query_value"])
 
     def test_repo_yaml_inspect_rejects_paths_outside_repo(self):

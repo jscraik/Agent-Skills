@@ -2197,6 +2197,9 @@ def run_codex_exec(
                 stdout = stdout.decode("utf-8", errors="replace")
             if isinstance(stderr, bytes):
                 stderr = stderr.decode("utf-8", errors="replace")
+            if jsonl_path and stdout:
+                jsonl_path.parent.mkdir(parents=True, exist_ok=True)
+                jsonl_path.write_text(stdout, encoding="utf-8")
             timeout_message = f"codex exec timed out after {timeout} seconds."
             stderr = f"{stderr.rstrip()}\n{timeout_message}".strip()
             # Preserve partial JSONL data before returning
@@ -2213,7 +2216,8 @@ def run_codex_exec(
 
     rc, stdout, stderr = _invoke(profile)
 
-    if rc == 124 and not stdout.strip() and stderr.startswith("codex exec timed out after "):
+    has_last_message_artifact = output_last_message_path.exists() and output_last_message_path.read_text(encoding="utf-8").strip()
+    if rc == 124 and not stdout.strip() and not has_last_message_artifact and stderr.startswith("codex exec timed out after "):
         warnings.append("Codex timed out without output; retrying once with a fresh exec process.")
         # Only delete output_last_message_path if no usable artifact exists
         if output_last_message_path.exists():

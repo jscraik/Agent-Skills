@@ -1138,7 +1138,7 @@ def main():
                     payload = result.data.get("yaml", {})
                     if payload.get("query"):
                         detail = f" query={payload.get('query')} value={payload.get('query_value')!r}"
-                        print(f"✅ YAML inspect: {result.data.get('path', args.path)}{detail}")
+                        print(f"✅ YAML inspect: {result.data.get('path', payload.get('path', args.path))}{detail}")
                     else:
                         root_type = payload.get('root_type', 'unknown')
                         top_level_keys = payload.get('top_level_keys')
@@ -1149,7 +1149,7 @@ def main():
                         if item_count is not None:
                             summary_parts.append(f"item_count={item_count}")
                         summary = " ".join(summary_parts)
-                        print(f"✅ YAML inspect: {result.data.get('path', args.path)} {summary}")
+                        print(f"✅ YAML inspect: {result.data.get('path', payload.get('path', args.path))} {summary}")
                     print_first_validation_command(result.data)
                 elif args.topic == "skills" and args.action == "list":
                     print(f"Discovered {len(result.data['skills'])} skills:")

@@ -1727,6 +1727,7 @@ class RunSkillEvalsModeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir:
             workspace_root = Path(tmpdir)
             output_last_message_path = workspace_root / "last.txt"
+            jsonl_path = workspace_root / "trace.jsonl"
 
             with unittest.mock.patch(
                 "run_skill_evals._codex_supports_exec_flag",
@@ -1750,17 +1751,57 @@ class RunSkillEvalsModeTests(unittest.TestCase):
                     model=None,
                     profile=None,
                     codex_home=workspace_root / ".codex",
-                    jsonl_path=None,
+                    jsonl_path=jsonl_path,
                     codex_bin=None,
                     timeout_sec=1,
                     timeout_profile="default",
                 )
+
+            persisted_jsonl = jsonl_path.read_text(encoding="utf-8")
 
         self.assertEqual(rc, 124)
         self.assertEqual(stdout, "partial stdout")
         self.assertIn("partial stderr", stderr)
         self.assertIn("codex exec timed out after 1.0 seconds.", stderr)
         self.assertEqual(mocked_run.call_count, 1)
+        self.assertEqual(warnings, [])
+        self.assertEqual(persisted_jsonl, "partial stdout")
+
+    def test_run_codex_exec_keeps_last_message_artifact_on_timeout(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            workspace_root = Path(tmpdir)
+            output_last_message_path = workspace_root / "last.txt"
+            output_last_message_path.write_text("partial final message", encoding="utf-8")
+
+            with unittest.mock.patch(
+                "run_skill_evals._codex_supports_exec_flag",
+                return_value=True,
+            ), unittest.mock.patch(
+                "run_skill_evals.sp.run",
+                side_effect=sp.TimeoutExpired(cmd=["codex"], timeout=1),
+            ) as mocked_run:
+                rc, stdout, stderr, warnings = run_codex_exec(
+                    workspace_root=workspace_root,
+                    prompt="Route only.",
+                    output_last_message_path=output_last_message_path,
+                    output_schema_path=None,
+                    sandbox="read-only",
+                    ask_for_approval=None,
+                    model=None,
+                    profile=None,
+                    codex_home=workspace_root / ".codex",
+                    jsonl_path=None,
+                    codex_bin=None,
+                    timeout_sec=1,
+                    timeout_profile="default",
+                )
+
+            last_message = output_last_message_path.read_text(encoding="utf-8")
+
+        self.assertEqual((rc, stdout), (124, ""))
+        self.assertIn("codex exec timed out after 1.0 seconds.", stderr)
+        self.assertEqual(mocked_run.call_count, 1)
+        self.assertEqual(last_message, "partial final message")
         self.assertEqual(warnings, [])
 
     def test_timeout_with_only_subprocess_stderr_is_no_output(self) -> None:

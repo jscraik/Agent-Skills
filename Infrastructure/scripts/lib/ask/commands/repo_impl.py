@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import shlex
 import subprocess
@@ -91,6 +92,44 @@ def repo_status(repo_root: Path, verbose: bool = False) -> CallResult:
     return result
 
 
+def _can_import_yaml_with(command: List[str]) -> bool:
+    try:
+        completed = subprocess.run(
+            [*command, "-c", "import yaml"],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=10,
+            env=_subprocess_env_with_uv_cache(),
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    return completed.returncode == 0
+
+
+def _managed_pyyaml_python_command() -> List[str]:
+    candidates: List[List[str]] = []
+    python_bin = os.environ.get("PYTHON_BIN")
+    if python_bin:
+        candidates.append([python_bin])
+    candidates.append([sys.executable])
+
+    preferred = Path.home() / ".venvs" / "pyyaml" / "bin" / "python"
+    if preferred.exists():
+        candidates.append([str(preferred)])
+
+    seen: set[tuple[str, ...]] = set()
+    for candidate in candidates:
+        key = tuple(candidate)
+        if key in seen:
+            continue
+        seen.add(key)
+        if _can_import_yaml_with(candidate):
+            return candidate
+
+    return ["uv", "run", "--no-project", "--with", "PyYAML", "python"]
+
+
 def repo_yaml_inspect(repo_root: Path, path: str, query: str | None = None) -> CallResult:
     """Parse a repo YAML file through the managed PyYAML interpreter.
 
@@ -122,7 +161,7 @@ def repo_yaml_inspect(repo_root: Path, path: str, query: str | None = None) -> C
         )
         return result
 
-    python_cmd = ["uv", "run", "--no-project", "--with", "PyYAML", "python"]
+    python_cmd = _managed_pyyaml_python_command()
     command_display = " ".join(shlex.quote(part) for part in [*python_cmd, "-"])
     result.data["validation_commands"] = [
         " ".join(
