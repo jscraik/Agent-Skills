@@ -46,7 +46,7 @@
     {
       "artifact_path": ".harness/evidence/runtime-proof/agents-md/codex/runtime-card.json",
       "blocker_class": "none",
-      "claim": "$agents-md is reachable in the Codex runtime.",
+      "claim": "agents-md is reachable in the Codex runtime.",
       "claim_status": "pass",
       "command": "./bin/ask skills proof agents-md --runtime-target codex --json --robot",
       "evidence_type": "command",
@@ -132,7 +132,7 @@
     "preconditions": [
       "Run workspace and user skill sync if the SDK skill handle or runtime link is absent."
     ],
-    "reason": "$agents-md is reachable in the Codex runtime.",
+    "reason": "agents-md is reachable in the Codex runtime.",
     "recovery_status": "implemented_enforced"
   },
   "runtime_diagnostics": {

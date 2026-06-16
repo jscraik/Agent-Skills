@@ -8,7 +8,7 @@ they must not participate in SDK skill resolution.
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 from typing import Any
 
@@ -95,7 +95,13 @@ def _record_from_skill_dir(handle: str, skill_dir: Path, *, root: Path) -> SdkSk
         or (source_parts[1] if len(source_parts) > 1 and source_parts[0] == "Plugins" else "")
     )
     description = normalize_skill_description(fm.get("metadata.short-description") or fm.get("description", ""))
-    runtime_visibility = "flat" if runtime_projection_path else str(metadata_visibility or "source")
+    declared_runtime_visibility = str(metadata_visibility or "").strip().lower()
+    if declared_runtime_visibility == "hidden":
+        runtime_visibility = "hidden"
+    elif runtime_projection_path:
+        runtime_visibility = "flat"
+    else:
+        runtime_visibility = str(metadata_visibility or "source")
 
     return SdkSkillRecord(
         handle=handle,
@@ -154,7 +160,11 @@ def _iter_repo_skill_dirs(root: Path) -> list[tuple[str, Path]]:
 
 def _plugin_scan_patterns() -> list[str]:
     patterns: set[str] = set()
-    for raw_pattern in (*PLUGIN_SKILL_ROOT_GLOB.split(), "./Plugins/cache/*/*/*/skills"):
+    for raw_pattern in (
+        *PLUGIN_SKILL_ROOT_GLOB.split(),
+        "./Plugins/cache/*/*/skills",
+        "./Plugins/cache/*/*/*/skills",
+    ):
         if not raw_pattern:
             continue
         patterns.add(raw_pattern)
@@ -169,7 +179,7 @@ def _cache_plugin_source_root(plugin_root: Path, root: Path) -> str | None:
         rel_parts = plugin_root.relative_to(root).parts
     except ValueError:
         return None
-    if len(rel_parts) >= 6 and rel_parts[0] == "Plugins" and rel_parts[1] == "cache" and rel_parts[-1] == "skills":
+    if rel_parts[:2] == ("Plugins", "cache") and len(rel_parts) >= 5 and rel_parts[-1] == "skills":
         return rel_parts[3]
     return None
 
@@ -235,6 +245,9 @@ def build_sdk_skill_record_candidates(
         record = _record_from_skill_dir(handle, skill_dir, root=root)
         if record is None:
             continue
+        if record.runtime_visibility == "hidden":
+            continue
+        record = _apply_qualified_collision_policy(record)
         records.append(record)
     return sorted(records, key=lambda item: (item.scope, item.owner, item.handle, item.source_path))
 
@@ -276,6 +289,35 @@ def _collision_policy_path(path: str) -> str:
     return "/".join(parts)
 
 
+def _qualified_policy_name(handle: str, source_path: str) -> str | None:
+    normalized_path = _collision_policy_path(source_path)
+    for policy in PLUGIN_SKILL_COLLISION_POLICIES:
+        if policy.get("resolution") != "keep_qualified":
+            continue
+        if policy.get("name") != handle:
+            continue
+        qualified_names = {
+            _collision_policy_path(str(path)): str(name)
+            for path, name in dict(policy.get("qualified_names", {})).items()
+        }
+        qualified_name = qualified_names.get(normalized_path)
+        if qualified_name:
+            return qualified_name
+    return None
+
+
+def _apply_qualified_collision_policy(record: SdkSkillRecord) -> SdkSkillRecord:
+    qualified_name = _qualified_policy_name(record.handle, record.source_path)
+    if not qualified_name or qualified_name == record.handle:
+        return record
+    provenance = dict(record.provenance)
+    provenance.update({
+        "qualified_from": record.handle,
+        "qualification_policy": "keep_qualified",
+    })
+    return replace(record, handle=qualified_name, name=qualified_name, provenance=provenance)
+
+
 def _policy_manages_collision(handle: str, source_paths: set[str]) -> bool:
     normalized_paths = {_collision_policy_path(path) for path in source_paths}
     if handle in SYSTEM_BRIDGE_SKILL_NAMES and any(
@@ -283,9 +325,22 @@ def _policy_manages_collision(handle: str, source_paths: set[str]) -> bool:
     ):
         return True
     for policy in PLUGIN_SKILL_COLLISION_POLICIES:
+        if policy.get("resolution") != "suppress_duplicate":
+            continue
         policy_paths = {_collision_policy_path(str(path)) for path in policy.get("paths", ())}
         if normalized_paths and normalized_paths.issubset(policy_paths):
             return True
+    for policy in PLUGIN_SKILL_COLLISION_POLICIES:
+        if policy.get("resolution") != "keep_qualified":
+            continue
+        qualified_names = {
+            _collision_policy_path(str(path)): str(name)
+            for path, name in dict(policy.get("qualified_names", {})).items()
+        }
+        if normalized_paths and normalized_paths.issubset(qualified_names.keys()):
+            mapped_names = {qualified_names[path] for path in normalized_paths}
+            if mapped_names == {handle}:
+                return True
     return False
 
 
@@ -327,6 +382,8 @@ def resolve_sdk_skill_handle(handle: str, *, repo_root_path: Path | None = None)
             "handle": requested,
             "operator_action": "Run ./bin/ask skills list --json --robot to list SDK-visible skills.",
         }
+    if len(matches) > 1 and _policy_manages_collision(requested, {match.source_path for match in matches}):
+        matches = sorted(matches, key=lambda item: (item.scope, item.owner, item.handle, item.source_path))[:1]
     if len(matches) > 1:
         return {
             "status": "error",

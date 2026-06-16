@@ -81,11 +81,12 @@ def refresh_readme_catalog_text(content: str, catalog_count: int | str) -> str:
                 "Failed to refresh README governed-repository sentence; expected # Agent Skills heading."
             )
 
-    content = re.sub(
-        rf"(?:{SUMMARY_PATTERNS[0]}\s*\n\s*){{2,}}",
-        CURRENT_AGENT_SKILLS_KIT_SENTENCE + "\n\n",
-        content,
-    )
+    for pattern in SUMMARY_PATTERNS:
+        content = re.sub(
+            rf"(?:{pattern}\s*\n\s*){{2,}}",
+            CURRENT_AGENT_SKILLS_KIT_SENTENCE + "\n\n",
+            content,
+        )
     content = re.sub(
         r"This repository currently exposes \*\*\d+ skills\*\* in the default catalog",
         f"This repository currently exposes **{catalog_count} skills** in the default catalog",

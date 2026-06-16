@@ -23,6 +23,7 @@ DOCTOR_SIGNAL_PRIORITY = {
     "catalog_parity": 30,
     "runtime_budget": 40,
     "sdk_handles": 50,
+    "command_handles": 50,
     "capability_readiness": 55,
     "memory_readiness": 56,
     "package_readiness": 57,
@@ -30,6 +31,7 @@ DOCTOR_SIGNAL_PRIORITY = {
 }
 PACKAGE_READINESS_SENTINEL = "skill-factory-router"
 SDK_HANDLE_CHECK_COMMAND = "./bin/ask skills handles --check --no-handles --json --robot"
+COMMAND_HANDLE_CHECK_COMMAND = SDK_HANDLE_CHECK_COMMAND
 GENERATED_SURFACE_PREFIXES = (
     ".agents/skills/",
     ".skillsets/",
@@ -668,14 +670,14 @@ def _runtime_budget_signal(runtime_result: CallResult) -> dict[str, Any]:
 
 
 def _sdk_handles_signal(handles_result: CallResult) -> dict[str, Any]:
-    report = handles_result.data.get("sdk_handles", {})
+    report = handles_result.data.get("sdk_handles") or handles_result.data.get("command_surface", {})
     violations = report.get("violations") or []
     details = {
         "status": report.get("status"),
         "handle_count": report.get("handle_count"),
         "violation_count": len(violations),
     }
-    if handles_result.status == "success" and report.get("status") == "pass":
+    if report.get("status") == "pass" and not violations:
         return {
             "state": "pass",
             "severity": "info",
@@ -992,6 +994,10 @@ def _skipped_signal(summary: str, source: str) -> dict[str, Any]:
 
 
 def _repo_status_skipped_downstream_signals(reason: str) -> dict[str, dict[str, Any]]:
+    sdk_handles = _skipped_signal(
+        f"SDK handle validation skipped {reason}.",
+        "repo_status",
+    )
     return {
         "catalog_parity": _skipped_signal(
             f"Catalog parity skipped {reason}.",
@@ -1001,10 +1007,8 @@ def _repo_status_skipped_downstream_signals(reason: str) -> dict[str, dict[str, 
             f"Runtime budget skipped {reason}.",
             "repo_status",
         ),
-        "sdk_handles": _skipped_signal(
-            f"SDK handle validation skipped {reason}.",
-            "repo_status",
-        ),
+        "sdk_handles": sdk_handles,
+        "command_handles": sdk_handles,
         "capability_readiness": _skipped_signal(
             f"Capability readiness skipped {reason}.",
             "repo_status",
@@ -1073,6 +1077,15 @@ def repo_doctor(repo_root: Path) -> CallResult:
                 )
             )
         else:
+            sdk_handles_signal = _safe_signal(
+                lambda: _sdk_handles_signal(
+                    skills_handles(
+                        repo_root,
+                        check=True,
+                        include_handles=False,
+                    )
+                )
+            )
             signals.update(
                 {
                     "catalog_parity": _safe_signal(
@@ -1081,15 +1094,8 @@ def repo_doctor(repo_root: Path) -> CallResult:
                     "runtime_budget": _safe_signal(
                         lambda: _runtime_budget_signal(skills_budget(repo_root))
                     ),
-                    "sdk_handles": _safe_signal(
-                        lambda: _sdk_handles_signal(
-                            skills_handles(
-                                repo_root,
-                                check=True,
-                                include_handles=False,
-                            )
-                        )
-                    ),
+                    "sdk_handles": sdk_handles_signal,
+                    "command_handles": sdk_handles_signal,
                     "capability_readiness": _safe_signal(
                         lambda: _capability_readiness_signal(
                             skills_profiles(repo_root),
@@ -1115,11 +1121,15 @@ def repo_doctor(repo_root: Path) -> CallResult:
                     ),
                 }
             )
+    golden_path_signals = dict(signals)
+    if "command_handles" in golden_path_signals:
+        golden_path_signals.pop("sdk_handles", None)
     payload = build_golden_path_payload(
-        signals=signals,
+        signals=golden_path_signals,
         normal_next_command=_repo_validation_command("status"),
         signal_priorities=DOCTOR_SIGNAL_PRIORITY,
     )
+    payload["signals"] = signals
     result.data["doctor"] = payload
     result.data.update(payload)
     result.status = "error" if payload["blocking"] else "success"

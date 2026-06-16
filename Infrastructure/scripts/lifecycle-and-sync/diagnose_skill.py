@@ -363,6 +363,23 @@ def diagnose_skill(skill_name: str, *, require_workspace_projection: bool = True
     """Run all diagnostic checks for a skill."""
     results: List[DiagnosticResult] = []
 
+    candidate_arg = Path(skill_name).expanduser()
+    resolver_required = not candidate_arg.exists() and "/" not in skill_name and "\\" not in skill_name
+    resolution = resolve_skill_handle(skill_name, repo_root_path=REPO_ROOT) if resolver_required else {}
+    if resolver_required and resolution.get("status") != "ok":
+        results.append(
+            DiagnosticResult(
+                "SDK resolver",
+                "fail",
+                f"SDK resolver could not resolve {skill_name}: {resolution.get('error_code', 'unknown_error')}",
+                str(
+                    resolution.get("operator_action")
+                    or "Run ./bin/ask skills list --json --robot to inspect SDK-visible skills."
+                ),
+            )
+        )
+        return results
+
     # Find skill directory
     skill_dir = find_skill_dir(skill_name)
     if not skill_dir:

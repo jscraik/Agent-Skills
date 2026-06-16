@@ -73,7 +73,11 @@ class TestSdkSkillResolution(SdkSkillRegistryTempDirTestCase):
         self.assertEqual(payload["handle"], "he-heartbeat")
 
     def test_resolution_prefers_sdk_flat_registry(self) -> None:
-        payload = command_surface.resolve_skill_handle("agents-md", repo_root_path=REPO_ROOT)
+        repo_root = self.temp_dir / "repo"
+        source = _write_skill_source(repo_root, "agents-md")
+        _link_flat_projection(repo_root, "agents-md", source)
+
+        payload = command_surface.resolve_skill_handle("agents-md", repo_root_path=repo_root)
 
         self.assertEqual(payload["status"], "ok")
         self.assertEqual(payload["handle"], "agents-md")
@@ -84,6 +88,24 @@ class TestSdkSkillResolution(SdkSkillRegistryTempDirTestCase):
         self.assertNotIn("command_visibility", payload)
         self.assertNotIn("invoke_via", payload)
         self.assertNotIn("command_handle", json.dumps(payload))
+
+    def test_sdk_resolution_keeps_hidden_runtime_skills_private(self) -> None:
+        repo_root = self.temp_dir / "repo"
+        skill_dir = _write_skill_source(repo_root, "he-phase-heartbeat", root="Plugins/harness-engineering/skills")
+        skill_dir.joinpath("SKILL.md").write_text(
+            "---\n"
+            "name: he-phase-heartbeat\n"
+            "description: Hidden runtime lane.\n"
+            "runtime_visibility: hidden\n"
+            "---\n"
+            "# he-phase-heartbeat\n",
+            encoding="utf-8",
+        )
+
+        payload = command_surface.resolve_skill_handle("he-phase-heartbeat", repo_root_path=repo_root)
+
+        self.assertEqual(payload["status"], "error")
+        self.assertEqual(payload["error_code"], "unknown_handle")
 
     def test_sdk_discovery_honors_repo_root_path(self) -> None:
         repo_root = self.temp_dir / "repo"
@@ -116,6 +138,39 @@ class TestSdkSkillResolution(SdkSkillRegistryTempDirTestCase):
             "DUPLICATE_SDK_SKILL_HANDLE",
             {violation["code"] for violation in result.data["violations"]},
         )
+
+    def test_keep_qualified_plugin_collisions_use_sdk_flat_names(self) -> None:
+        repo_root = self.temp_dir / "repo"
+        _write_skill_source(
+            repo_root,
+            "agents-sdk",
+            root="Plugins/cache/openai-curated/cloudflare/3e1ccdb3/skills",
+        )
+        _write_skill_source(
+            repo_root,
+            "agents-sdk",
+            root="Plugins/cache/openai-curated/openai-developers/3e1ccdb3/skills",
+        )
+        _write_skill_source(
+            repo_root,
+            "agents-sdk",
+            root="Plugins/cache/openai-curated-remote/openai-developers/1.2.2/skills",
+        )
+
+        report = command_surface.handles_report(repo_root_path=repo_root)
+        handles = {entry["handle"] for entry in report["handles"]}
+        cloudflare = command_surface.resolve_skill_handle("cloudflare:agents-sdk", repo_root_path=repo_root)
+        openai = command_surface.resolve_skill_handle("openai-developers:agents-sdk", repo_root_path=repo_root)
+        raw = command_surface.resolve_skill_handle("agents-sdk", repo_root_path=repo_root)
+
+        self.assertEqual(report["status"], "pass")
+        self.assertIn("cloudflare:agents-sdk", handles)
+        self.assertIn("openai-developers:agents-sdk", handles)
+        self.assertNotIn("agents-sdk", handles)
+        self.assertEqual(cloudflare["status"], "ok")
+        self.assertEqual(openai["status"], "ok")
+        self.assertEqual(raw["status"], "error")
+        self.assertEqual(raw["error_code"], "unknown_handle")
 
     def test_reviewer_resolver_keeps_reviewers_out_of_skill_namespace(self) -> None:
         manifest = self.temp_dir / "agents.json"

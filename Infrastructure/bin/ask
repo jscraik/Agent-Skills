@@ -1214,7 +1214,7 @@ def main():
                     if result.data.get("policy_identity"):
                         print(f"  Policy identity: {result.data['policy_identity']}")
                     print_first_validation_command(surface)
-                    violations = result.data.get("violations", [])
+                    violations = surface.get("violations", [])
                     if violations:
                         print(f"  Violations: {len(violations)}")
                 elif args.topic == "skills" and args.action == "resolve":

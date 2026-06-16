@@ -507,7 +507,7 @@ def refresh_workspace_plugin_caches(
         plan["warnings"].append(PLUGIN_CACHE_REFRESH_PERMISSION_BLOCKED)
         logs.append(
             "Skipped workspace plugin cache refresh after permission failure: "
-            f"{exc}. Rooted skill projections and manifests may still be current; "
+            f"{exc}. SDK-flat plugin caches and manifests may still be stale; "
             f"{PLUGIN_CACHE_PERMISSION_RERUN}"
         )
         return ErrorObject(

@@ -1506,7 +1506,7 @@ CAPABILITY_LIFECYCLE_EVENT_CONSUMERS: dict[str, dict[str, Any]] = {
     },
     "manifest_changed": {
         "profiles": ["authoring", "plugin-share", "live-mutation"],
-        "producer_commands": [_skills_validation_command("handles", "--write-projection")],
+        "producer_commands": [_skills_validation_command("sync", "--scope", "workspace", "--projection", "flat")],
         "observer_commands": [_skills_validation_command("handles", "--check")],
     },
 }
@@ -3725,7 +3725,7 @@ def skills_doctor(
     )
     next_command = str(next_command_decision["command"])
 
-    handle_label = "$" + str(normalized_handle) if normalized_handle else query
+    handle_label = str(normalized_handle) if normalized_handle else query
     lifecycle_event = _capability_lifecycle_event(
         event_type="skill_doctor_completed",
         query=query,
@@ -4423,9 +4423,9 @@ def skills_prove(repo_root: Path, handle: str) -> CallResult:
         "handle": normalized,
         "proof_status": proof_status,
         "agent_summary": (
-            f"${normalized} is reachable and structurally valid, but outcome proof is not present."
+            f"{normalized} is reachable and structurally valid, but outcome proof is not present."
             if proof_status == "reachable_without_outcome_proof"
-            else f"${normalized} proof is blocked at {proof_status.replace('blocked_', '').replace('_', ' ')}."
+            else f"{normalized} proof is blocked at {proof_status.replace('blocked_', '').replace('_', ' ')}."
         ),
         "reachability": {
             "status": reachability_status,
@@ -4620,7 +4620,7 @@ def explain_skill(repo_root: Path, handle: str) -> CallResult:
         "query": handle,
         "canonical_source": resolution.get("source_path"),
         "skill_handle": normalized,
-        "handle_source": resolution.get("handle_source") or "legacy_adapter",
+        "handle_source": resolution.get("handle_source") or "sdk_flat_registry",
         "runtime_projection": (resolution.get("provenance") or {}).get("projection_mode"),
         "runtime_visibility": resolution.get("runtime_visibility"),
         "owner": resolution.get("owner"),
@@ -4670,7 +4670,7 @@ def explain_skill(repo_root: Path, handle: str) -> CallResult:
                 "handle": normalized,
                 "path": runtime_projection_path,
                 "projection_note": projection_note,
-                "handle_source": resolution.get("handle_source") or "legacy_adapter",
+                "handle_source": resolution.get("handle_source") or "sdk_flat_registry",
             }
         ],
         "required_validation": required_validation,
@@ -6470,9 +6470,9 @@ def improve_skills(
     }
     improvement["proof"] = proof
     improvement["agent_summary"] = (
-        f"Recommended ${handle} for this goal."
+        f"Recommended {handle} for this goal."
         if proof_result.status == "success"
-        else f"Recommended ${handle}, but reachability proof failed."
+        else f"Recommended {handle}, but reachability proof failed."
     )
     improvement["next_command"] = _skills_validation_command("proof", handle)
     improvement["validation_commands"] = [improvement["next_command"]]
@@ -6529,7 +6529,7 @@ def improve_skills(
                 }
                 improvement["proof"] = fallback_proof
                 improvement["agent_summary"] = (
-                    f"Recommended ${fallback_handle} after routed ${handle} failed reachability."
+                    f"Recommended {fallback_handle} after routed {handle} failed reachability."
                 )
                 improvement["next_command"] = _skills_validation_command("proof", fallback_handle)
                 improvement["validation_commands"] = [improvement["next_command"]]

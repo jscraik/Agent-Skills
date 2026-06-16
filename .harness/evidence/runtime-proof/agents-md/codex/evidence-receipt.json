@@ -1,7 +1,7 @@
 {
   "artifact_path": ".harness/evidence/runtime-proof/agents-md/codex/runtime-card.json",
   "blocker_class": "none",
-  "claim": "$agents-md is reachable in the Codex runtime.",
+  "claim": "agents-md is reachable in the Codex runtime.",
   "claim_status": "pass",
   "command": "./bin/ask skills proof agents-md --runtime-target codex --json --robot",
   "evidence_type": "command",

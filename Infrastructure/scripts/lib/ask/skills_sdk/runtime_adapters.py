@@ -1224,6 +1224,7 @@ def build_sdk_skill_proof(
     requires_direct_projection = runtime_visibility == "flat"
     direct_projection_skill = expected_runtime / normalized / "SKILL.md"
     direct_projection_exists = bool(direct_projection_skill.is_file())
+    direct_runtime_projection_ready = direct_projection_exists
 
     def link_payload(path: Path) -> dict[str, object]:
         payload: dict[str, object] = {
@@ -1252,7 +1253,7 @@ def build_sdk_skill_proof(
     gates = {
         "resolver": resolution.get("status") == "ok",
         "canonical_source_exists": canonical_source_exists,
-        "direct_runtime_projection": (not requires_direct_projection) or direct_projection_exists,
+        "direct_runtime_projection": direct_runtime_projection_ready,
         "codex_user_link": bool(codex_link["points_to_workspace_runtime"]),
         "agents_user_link": bool(agents_link["points_to_workspace_runtime"]),
         "user_runtime_alias_consistent": runtime_aliases["status"] != "split_brain",

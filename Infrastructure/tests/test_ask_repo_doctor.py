@@ -253,7 +253,6 @@ class TestAskRepoDoctor(unittest.TestCase):
             REPO_ROOT,
             check=True,
             include_handles=False,
-            check_projection=True,
         )
 
     def test_missing_path_shim_is_warning_not_false_pass(self) -> None:
@@ -373,7 +372,7 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertTrue(closeout["sync"]["needed"])
         self.assertEqual(
             closeout["next_command"],
-            "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
+            "./bin/ask skills sync --scope workspace --projection flat --json --robot",
         )
 
     def test_closeout_changed_plugin_reference_does_not_require_sync(self) -> None:
@@ -406,7 +405,7 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertTrue(closeout["sync"]["needed"])
         self.assertEqual(
             closeout["next_command"],
-            "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
+            "./bin/ask skills sync --scope workspace --projection flat --json --robot",
         )
 
     def test_closeout_changed_skill_source_with_projection_update_requires_handle_validation(self) -> None:
@@ -1006,7 +1005,7 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertEqual(doctor["blockers"][0]["id"], "projection_sync")
         self.assertEqual(
             doctor["next_command"],
-            "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
+            "./bin/ask skills sync --scope workspace --projection flat --json --robot",
         )
         self.assertEqual(doctor["signals"]["catalog_parity"]["state"], "skipped")
         self.assertEqual(doctor["signals"]["runtime_budget"]["state"], "skipped")
@@ -1084,11 +1083,11 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertEqual(result.status, "error")
         self.assertEqual(
             doctor["signals"]["command_handles"]["summary"],
-            "Command-surface validation found 3 violation(s).",
+            "SDK handle validation found 3 violation(s).",
         )
         self.assertEqual(
             doctor["signals"]["command_handles"]["details"]["failure_code"],
-            "command_surface_validation_failed",
+            "sdk_handle_validation_failed",
         )
 
     def test_command_surface_violations_block_repo_doctor(self) -> None:
@@ -1107,20 +1106,16 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertEqual(command_signal["state"], "block")
         self.assertEqual(
             command_signal["summary"],
-            "Command-surface validation found 2 violation(s).",
+            "SDK handle validation found 2 violation(s).",
         )
         self.assertEqual(doctor["next_command"], COMMAND_HANDLE_CHECK_COMMAND)
         self.assertEqual(
             command_signal["details"]["failure_code"],
-            "command_surface_validation_failed",
+            "sdk_handle_validation_failed",
         )
         self.assertEqual(command_signal["details"]["violation_count"], 2)
-        self.assertEqual(
-            command_signal["details"]["failure_code"],
-            "command_surface_validation_failed",
-        )
 
-    def test_command_surface_projection_drift_is_classified_separately(self) -> None:
+    def test_removed_projection_drift_does_not_block_sdk_handle_signal(self) -> None:
         with patch("ask.commands.repo_impl.repo_status", return_value=_status_result()), patch(
             "ask.commands.repo_impl.doctor_catalog",
             return_value=_catalog_result(),
@@ -1132,15 +1127,12 @@ class TestAskRepoDoctor(unittest.TestCase):
 
         doctor = result.data["doctor"]
         command_signal = doctor["signals"]["command_handles"]
-        self.assertEqual(result.status, "error")
-        self.assertEqual(
-            command_signal["summary"],
-            "Command-surface projection check found 1 violation(s).",
-        )
-        self.assertEqual(command_signal["details"]["failure_code"], "command_surface_projection_check_failed")
-        self.assertEqual(command_signal["details"]["command_surface_projection"]["violation_count"], 1)
+        self.assertEqual(result.status, "success")
+        self.assertEqual(command_signal["state"], "pass")
+        self.assertEqual(command_signal["summary"], "SDK skill handles validate cleanly.")
+        self.assertNotIn("failure_code", command_signal["details"])
 
-    def test_command_surface_projection_check_failure_without_violations_blocks_repo_doctor(self) -> None:
+    def test_removed_projection_check_failure_does_not_block_sdk_handle_signal(self) -> None:
         with patch("ask.commands.repo_impl.repo_status", return_value=_status_result()), patch(
             "ask.commands.repo_impl.doctor_catalog",
             return_value=_catalog_result(),
@@ -1152,19 +1144,11 @@ class TestAskRepoDoctor(unittest.TestCase):
 
         doctor = result.data["doctor"]
         command_signal = doctor["signals"]["command_handles"]
-        self.assertEqual(result.status, "error")
-        self.assertEqual(command_signal["state"], "block")
-        self.assertEqual(
-            command_signal["details"]["failure_code"],
-            "command_surface_projection_check_status_failed",
-        )
-        self.assertEqual(
-            command_signal["summary"],
-            "Command-surface projection check failed without explicit violations.",
-        )
-        self.assertEqual(command_signal["details"]["command_surface_projection"]["status"], "fail")
-        self.assertEqual(command_signal["details"]["command_surface_projection"]["violation_count"], 0)
-        self.assertEqual(doctor["next_command"], COMMAND_HANDLE_CHECK_COMMAND)
+        self.assertEqual(result.status, "success")
+        self.assertEqual(command_signal["state"], "pass")
+        self.assertEqual(command_signal["summary"], "SDK skill handles validate cleanly.")
+        self.assertNotIn("failure_code", command_signal["details"])
+        self.assertEqual(doctor["next_command"], "./bin/ask repo status --json --robot")
 
     def test_non_git_repo_status_gates_downstream_checks(self) -> None:
         with patch("ask.commands.repo_impl.repo_status", return_value=_status_result(is_git=False)), patch(

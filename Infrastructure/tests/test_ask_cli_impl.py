@@ -2897,7 +2897,7 @@ class TestAskCLI(unittest.TestCase):
         )
         self.assertEqual(
             events["event_consumers"]["manifest_changed"]["producer_commands"],
-            ["./bin/ask skills handles --write-projection --json --robot"],
+            ["./bin/ask skills sync --scope workspace --projection flat --json --robot"],
         )
         self.assertEqual(
             events["event_consumers"]["projection_synced"]["observer_commands"],
