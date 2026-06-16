@@ -35,6 +35,7 @@ from ask.commands.repo import (
     provider_audit,
     repo_closeout,
     repo_doctor,
+    repo_yaml_inspect,
     repo_status,
     repo_surface,
     repo_validate,
@@ -102,6 +103,8 @@ def main():
         help="Run a named validation subset for CI check-name parity",
     )
     repo_validate_parser.add_argument("--changed-files", nargs="+", default=[], help="Scope validation to these changed files")
+    repo_yaml_parser = repo_subparsers.add_parser("yaml-inspect", help="Parse a repo YAML file with the managed PyYAML interpreter", parents=[global_parser])
+    repo_yaml_parser.add_argument("path", help="Repo-relative YAML file path"); repo_yaml_parser.add_argument("--query", help="Optional dotted query path, including numeric list indexes")
     repo_stability_parser = repo_subparsers.add_parser("check-stability", help="Check stable skills not deleted without deprecation", parents=[global_parser])
     repo_stability_parser.add_argument("--changed-files", nargs="+", default=[], help="Changed SKILL.md files to check")
     repo_subparsers.add_parser("doctor", help="Agent-facing repository health entrypoint", description="Agent-facing repository health entrypoint", parents=[global_parser])
@@ -534,6 +537,8 @@ def main():
                 scope=args.scope,
                 changed_files=args.changed_files or [],
             )
+        elif args.action == "yaml-inspect":
+            result = repo_yaml_inspect(repo_root, args.path, query=args.query)
         elif args.action == "check-stability":
             result = check_hub_stability(repo_root, changed_files=args.changed_files or [])
         elif args.action == "doctor":
@@ -1119,20 +1124,20 @@ def main():
                         )
                 elif args.topic == "repo" and args.action == "provider-audit":
                     report = result.data.get("provider_policy", {})
-                    print(
-                        "✅ Provider policy: "
-                        f"{report.get('status')} ({report.get('violation_count', 0)} violation(s))"
-                    )
+                    print("✅ Provider policy: "
+                          f"{report.get('status')} ({report.get('violation_count', 0)} violation(s))")
                     print_first_validation_command(result.data)
                 elif args.topic == "repo" and args.action == "surface":
                     report = result.data.get("repo_surface", {})
                     summary = report.get("summary", {})
-                    print(
-                        "✅ Repo surface: "
-                        f"{summary.get('total_paths', 0)} tracked path(s), "
-                        f"{summary.get('blocking_findings', 0)} blocking finding(s), "
-                        f"status={report.get('status')}"
-                    )
+                    print(f"✅ Repo surface: {summary.get('total_paths', 0)} tracked path(s), "
+                          f"{summary.get('blocking_findings', 0)} blocking finding(s), "
+                          f"status={report.get('status')}")
+                    print_first_validation_command(result.data)
+                elif args.topic == "repo" and args.action == "yaml-inspect":
+                    payload = result.data.get("yaml", {})
+                    detail = f" query={payload.get('query')} value={payload.get('query_value')!r}" if payload.get("query") else " " + " ".join(f"{name}={payload.get(name)}" for name in ("root_type", "top_level_keys", "item_count") if payload.get(name) is not None)
+                    print(f"✅ YAML inspect: {result.data.get('path', payload.get('path', args.path))}{detail}")
                     print_first_validation_command(result.data)
                 elif args.topic == "skills" and args.action == "list":
                     print(f"Discovered {len(result.data['skills'])} skills:")
@@ -1863,16 +1868,11 @@ def main():
                 print("\n📚 Graph examples:\n   ask graph find security\n   ask graph related skill-builder --depth 2\n   ask graph chain skill-creator skill-installer\n   ask graph info cli-spec")
             elif args.topic == "repo":
                 print_first_validation_command(result.data)
-                if args.action == "validate":
-                    print(result.data.get("raw_output", ""))
+                if args.action == "validate": print(result.data.get("raw_output", ""))
                 if args.action == "check-stability" and "errors" in result.data:
-                    for e in result.data["errors"]:
-                        print(f"   ERROR: {e}")
+                    for e in result.data["errors"]: print(f"   ERROR: {e}")
                 if args.action == "doctor" and "doctor" in result.data:
-                    for line in render_golden_path_summary(
-                        result.data["doctor"],
-                        indent="   ",
-                    ):
+                    for line in render_golden_path_summary(result.data["doctor"], indent="   "):
                         print(line)
                 if args.action == "surface" and "repo_surface" in result.data:
                     summary = result.data["repo_surface"].get("summary", {})

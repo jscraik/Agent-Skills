@@ -1,0 +1,175 @@
+---
+schema_version: knowledge-os.knowledge-capsule-manifest.v1
+skill:
+  skill_id: testing
+  declared_name: testing
+  entrypoint_path: Skills/agent-ops/testing/SKILL.md
+  canonical_skill_path: Skills/agent-ops/testing/SKILL.md
+  writable_root: Skills/agent-ops/testing
+  apply_target_path: Skills/agent-ops/testing/SKILL.md
+upstream_pack:
+  pack_id: pack.evals-testing
+  export_root: exports/packs/pack.evals-testing
+  snapshot_digest: sha256:1bde4cb82c920a252697ea8d31a9b70ad1b7831930528e220c033ca9aa850595
+upstream_packs:
+- pack_id: pack.evals-testing
+  role: testing_evidence_design
+  export_root: exports/packs/pack.evals-testing
+  snapshot_digest: sha256:1bde4cb82c920a252697ea8d31a9b70ad1b7831930528e220c033ca9aa850595
+  default_facets:
+  - trace_error_analysis
+  - deterministic_evaluator_design
+  - judge_calibration
+  - regression_loop
+  optional_facets:
+  - production_guardrails
+selected_facets:
+- pack.evals-testing:trace_error_analysis
+- pack.evals-testing:deterministic_evaluator_design
+- pack.evals-testing:judge_calibration
+- pack.evals-testing:regression_loop
+- pack.evals-testing:production_guardrails
+selected_asset_ids:
+- claim.evals.traces-before-evals
+- claim.evals.error-analysis-before-judges
+- claim.evals.dimensions-sample-user-space
+- claim.evals.measurement-supports-decisions
+- claim.evals.productivity-requires-goal
+- claim.evals.testing-models-can-be-flawed
+- claim.evals.intuition-needs-observable-justification
+- claim.evals.exploration-is-sampling
+- claim.evals.abduction-guides-test-investigation
+- claim.evals.coverage-is-multidimensional
+- principle.evals.failure-taxonomy-before-automation
+- checklist.evals.trace-error-analysis
+- lens.evals.testing-proof-selection
+- eval.evals.dashboard-without-error-analysis
+- claim.evals.code-evals-are-deterministic
+- claim.evals.judge-validation-needs-tpr-tnr
+- claim.evals.evals-close-loop
+- claim.evals.production-needs-online-guardrails
+- claim.evals.experiments-need-valid-metrics
+- claim.evals.evals-need-known-good-bad-cases
+- claim.evals.experimentation-discovers-unknowns
+- principle.evals.evaluators-are-tested-artifacts
+- heuristic.evals.prefer-code-for-objective-checks
+- eval.evals.objective-check-sent-to-judge
+- claim.evals.corrected-rates-need-intervals
+- heuristic.evals.calibrate-judge-before-scale
+- rubric.evals.judge-readiness
+- eval.evals.unvalidated-judge-overclaims
+- heuristic.evals.close-loop-through-regressions
+- eval.evals.score-without-action
+source_export_paths:
+- pack.index.yaml
+- snapshot.yaml
+- assets.json
+- eval-scenarios.json
+- pack.md
+- slices/*.md
+capsules:
+- pack_id: pack.evals-testing
+  role: testing_evidence_design
+  facet_id: trace_error_analysis
+  optional: false
+  source_slice: slices/trace-error-analysis.md
+  target_path: references/knowledge-capsules/evals-trace-error-analysis.md
+  asset_ids:
+  - claim.evals.traces-before-evals
+  - claim.evals.error-analysis-before-judges
+  - claim.evals.dimensions-sample-user-space
+  - claim.evals.measurement-supports-decisions
+  - claim.evals.productivity-requires-goal
+  - claim.evals.testing-models-can-be-flawed
+  - claim.evals.intuition-needs-observable-justification
+  - claim.evals.exploration-is-sampling
+  - claim.evals.abduction-guides-test-investigation
+  - claim.evals.coverage-is-multidimensional
+  - principle.evals.failure-taxonomy-before-automation
+  - checklist.evals.trace-error-analysis
+  - lens.evals.testing-proof-selection
+  - eval.evals.dashboard-without-error-analysis
+  - claim.evals.code-evals-are-deterministic
+  - claim.evals.judge-validation-needs-tpr-tnr
+  - claim.evals.evals-close-loop
+  - claim.evals.production-needs-online-guardrails
+  - claim.evals.experiments-need-valid-metrics
+- pack_id: pack.evals-testing
+  role: testing_evidence_design
+  facet_id: deterministic_evaluator_design
+  optional: false
+  source_slice: slices/deterministic-evaluator-design.md
+  target_path: references/knowledge-capsules/evals-deterministic-evaluator-design.md
+  asset_ids:
+  - claim.evals.code-evals-are-deterministic
+  - claim.evals.evals-need-known-good-bad-cases
+  - claim.evals.experimentation-discovers-unknowns
+  - claim.evals.testing-models-can-be-flawed
+  - principle.evals.evaluators-are-tested-artifacts
+  - heuristic.evals.prefer-code-for-objective-checks
+  - eval.evals.objective-check-sent-to-judge
+- pack_id: pack.evals-testing
+  role: testing_evidence_design
+  facet_id: judge_calibration
+  optional: false
+  source_slice: slices/judge-calibration.md
+  target_path: references/knowledge-capsules/evals-judge-calibration.md
+  asset_ids:
+  - claim.evals.judge-validation-needs-tpr-tnr
+  - claim.evals.corrected-rates-need-intervals
+  - claim.evals.experiments-need-valid-metrics
+  - principle.evals.evaluators-are-tested-artifacts
+  - heuristic.evals.calibrate-judge-before-scale
+  - rubric.evals.judge-readiness
+  - eval.evals.unvalidated-judge-overclaims
+  - claim.evals.code-evals-are-deterministic
+  - claim.evals.evals-need-known-good-bad-cases
+  - claim.evals.experimentation-discovers-unknowns
+- pack_id: pack.evals-testing
+  role: testing_evidence_design
+  facet_id: regression_loop
+  optional: false
+  source_slice: slices/regression-loop.md
+  target_path: references/knowledge-capsules/evals-regression-loop.md
+  asset_ids:
+  - claim.evals.evals-close-loop
+  - claim.evals.evals-need-known-good-bad-cases
+  - claim.evals.experimentation-discovers-unknowns
+  - claim.evals.abduction-guides-test-investigation
+  - claim.evals.coverage-is-multidimensional
+  - heuristic.evals.close-loop-through-regressions
+  - eval.evals.score-without-action
+- pack_id: pack.evals-testing
+  role: testing_evidence_design
+  facet_id: production_guardrails
+  optional: true
+  source_slice: slices/production-guardrails.md
+  target_path: references/knowledge-capsules/evals-production-guardrails.md
+  asset_ids:
+  - claim.evals.production-needs-online-guardrails
+  - claim.evals.experiments-need-valid-metrics
+  - claim.evals.code-evals-are-deterministic
+  - heuristic.evals.prefer-code-for-objective-checks
+  - lens.evals.testing-proof-selection
+  - claim.evals.testing-models-can-be-flawed
+  - claim.evals.traces-before-evals
+  - claim.evals.judge-validation-needs-tpr-tnr
+  - claim.evals.evals-close-loop
+  - claim.evals.measurement-supports-decisions
+  - claim.evals.productivity-requires-goal
+  - claim.evals.intuition-needs-observable-justification
+  - claim.evals.exploration-is-sampling
+  - claim.evals.abduction-guides-test-investigation
+  - claim.evals.coverage-is-multidimensional
+runtime_dependency_policy:
+  requires_knowledge_os_at_runtime: false
+  raw_sources_included: false
+  local_absolute_paths_required: false
+provenance:
+  profile: testing
+  profile_digest: sha256:c77ec12bff9f6b6cefdd704dc77fecb2f6caa03f72cca9bd7a32669fc9859b85
+  packs:
+  - pack_id: pack.evals-testing
+    export_root: exports/packs/pack.evals-testing
+    snapshot_digest: sha256:1bde4cb82c920a252697ea8d31a9b70ad1b7831930528e220c033ca9aa850595
+    role: testing_evidence_design

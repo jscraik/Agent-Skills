@@ -4,6 +4,16 @@ description: "Use when evaluating LLM or RAG outputs: audit eval coverage, analy
 metadata:
   version: "1.0.0"
   skill-type: code_quality_review
+  lifecycle_state: active
+  maturity: canonical
+  owner: Agent Skills Team
+  provenance: frontmatter:Agent Skills Team:2026-06-16:canonical-source
+  share_readiness: ready
+  review_cadence: quarterly
+  last_reviewed: "2026-06-16"
+  metadata_source: frontmatter
+  compatible_roles: [default, worker, skill-inspector]
+  runtime_needs: [eval traces, scorer outputs, judge prompts, labels, repo-owned eval wrappers]
 ---
 
 # Evals Router
@@ -132,6 +142,16 @@ Output: route to `write-judge-prompt`, require labeled pass/fail examples, and m
 
 ## Progressive Disclosure
 - Start with this active contract.
+- Read when: route decisions need KnowledgeOS-derived eval grounding for trace
+  error analysis, deterministic evaluator design, judge calibration, regression
+  loops, or production guardrails:
+  `references/knowledge-capsules/evals-trace-error-analysis.md`,
+  `references/knowledge-capsules/evals-deterministic-evaluator-design.md`,
+  `references/knowledge-capsules/evals-judge-calibration.md`,
+  `references/knowledge-capsules/evals-regression-loop.md`, and
+  `references/knowledge-capsules/evals-production-guardrails.md`. Use
+  `references/knowledge-capsule.manifest.yaml` for provenance and selected
+  facet coverage.
 - Read when: eval design needs actor-goal, use-case, XP feedback-loop, or acceptance-path lenses: `Infrastructure/references/software-literature-expert-lens-pack.md` and the Evals Router row in `Infrastructure/references/software-literature-skill-expertise-map.md`.
 - Read when: eval design needs Cookbook-derived failure taxonomies, judge calibration, structured output, or multimodal eval patterns: `Infrastructure/references/openai-cookbook-expert-lens-pack.md` and `Infrastructure/references/openai-cookbook-skill-expertise-map.md`.
 - Read when: eval design needs OTel-inspired local traces, Braintrust-like

@@ -17,7 +17,8 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync"))
 
-from ask.commands.repo import repo_status, check_hub_stability, provider_audit
+from ask.commands.repo import repo_status, repo_yaml_inspect, check_hub_stability, provider_audit
+from ask.commands.repo_impl import _managed_pyyaml_python_command
 
 
 # ---------------------------------------------------------------------------
@@ -102,6 +103,58 @@ class TestRepoStatus(unittest.TestCase):
         for key in ("repo_root", "repo_root_resolved", "is_git", "skills_synced"):
             with self.subTest(key=key):
                 self.assertIn(key, result.data)
+
+
+class TestRepoYamlInspect(unittest.TestCase):
+    def test_managed_pyyaml_python_command_prefers_local_python_bin(self):
+        calls = []
+
+        def fake_run(cmd, **_kwargs):
+            calls.append(cmd)
+            return subprocess.CompletedProcess(cmd, 0, "", "")
+
+        with patch.dict("os.environ", {"PYTHON_BIN": "/tmp/local-python"}, clear=False):
+            with patch("ask.commands.repo_impl.subprocess.run", side_effect=fake_run):
+                command = _managed_pyyaml_python_command()
+
+        self.assertEqual(command, ["/tmp/local-python"])
+        self.assertEqual(calls[0], ["/tmp/local-python", "-c", "import yaml"])
+
+    def test_repo_yaml_inspect_reads_yaml_with_managed_pyyaml(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir)
+            (repo / "sample.yaml").write_text("cases:\n  - id: alpha\n", encoding="utf-8")
+
+            result = repo_yaml_inspect(repo, "sample.yaml", query="cases.0.id")
+
+        self.assertEqual(result.status, "success")
+        self.assertEqual(result.data["yaml"]["query_value"], "alpha")
+        self.assertIn("repo yaml-inspect sample.yaml", result.data["validation_commands"][0])
+
+    def test_repo_yaml_inspect_converts_yaml_objects_to_jsonable_values(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir)
+            (repo / "sample.yaml").write_text(
+                "created: 2024-01-15\nmy_set: !!set\n  alpha: null\n",
+                encoding="utf-8",
+            )
+
+            timestamp = repo_yaml_inspect(repo, "sample.yaml", query="created")
+            yaml_set = repo_yaml_inspect(repo, "sample.yaml", query="my_set")
+
+        self.assertEqual(timestamp.status, "success")
+        self.assertEqual(timestamp.data["yaml"]["query_value"], "2024-01-15")
+        self.assertEqual(yaml_set.status, "success")
+        self.assertIn("alpha", yaml_set.data["yaml"]["query_value"])
+        json.dumps(yaml_set.data["yaml"]["query_value"])
+
+    def test_repo_yaml_inspect_rejects_paths_outside_repo(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir)
+            result = repo_yaml_inspect(repo, "../outside.yaml")
+
+        self.assertEqual(result.status, "error")
+        self.assertEqual(result.errors[0].code, "ERR_PATH_TRAVERSAL")
 
 
 # ---------------------------------------------------------------------------

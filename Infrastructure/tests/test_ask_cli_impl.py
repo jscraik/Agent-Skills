@@ -97,6 +97,92 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("Success:", result.stdout)
         self.assertIn("Validation: ./bin/ask repo status --json --robot", result.stdout)
 
+    def test_repo_yaml_inspect_cli_uses_managed_pyyaml(self):
+        """Verify YAML inspection works through ask instead of bare system python."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "repo",
+            "yaml-inspect",
+            "Skills/agent-ops/improve-agent-native/references/evals.yaml",
+            "--query",
+            "cases.0.id",
+            "--json",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"yaml-inspect output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        self.assertEqual(output["data"]["yaml"]["query_value"], "smoke-discovery-target")
+        self.assertTrue(output["data"]["python_command"].endswith(" -"))
+        self.assertNotIn("mise exec", output["data"]["python_command"])
+        self.assertNotIn("mise", output["data"]["python_command"])
+
+    def test_repo_yaml_inspect_serializes_yaml_dates(self):
+        """Verify YAML inspection emits JSON-safe values for YAML scalar types."""
+        repo_root = Path(__file__).resolve().parents[2]
+        with tempfile.TemporaryDirectory(dir=repo_root) as tmp_dir:
+            yaml_path = Path(tmp_dir) / "dates.yaml"
+            yaml_path.write_text("released_on: 2026-06-16\n", encoding="utf-8")
+            relative_path = yaml_path.relative_to(repo_root)
+            cmd = [
+                "python3",
+                "Infrastructure/bin/ask",
+                "repo",
+                "yaml-inspect",
+                str(relative_path),
+                "--query",
+                "released_on",
+                "--json",
+                "--robot",
+            ]
+
+            result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"yaml-inspect output: {result.stdout}\nstderr: {result.stderr}")
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        self.assertEqual(output["data"]["yaml"]["query_type"], "date")
+        self.assertEqual(output["data"]["yaml"]["query_value"], "2026-06-16")
+
+    def test_repo_yaml_inspect_human_output_renders_result(self):
+        """Verify YAML inspection has a visible non-JSON success output."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "repo",
+            "yaml-inspect",
+            "Skills/agent-ops/improve-agent-native/references/evals.yaml",
+            "--query",
+            "cases.0.id",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"yaml-inspect output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("YAML inspect: Skills/agent-ops/improve-agent-native/references/evals.yaml", result.stdout)
+        self.assertIn("query=cases.0.id", result.stdout)
+        self.assertIn("value='smoke-discovery-target'", result.stdout)
+
+    def test_repo_yaml_inspect_human_output_renders_summary_without_query(self):
+        """Verify root YAML inspection renders summary metadata without a query."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "repo",
+            "yaml-inspect",
+            "Skills/agent-ops/improve-agent-native/references/evals.yaml",
+            "--robot",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, f"yaml-inspect output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("root_type=dict", result.stdout)
+        self.assertIn("top_level_keys=", result.stdout)
+        self.assertNotIn("item_count=None", result.stdout)
+
     def test_repo_missing_action_exposes_validation(self):
         """Verify incomplete repo commands expose the read-only recovery command."""
         cmd = ["python3", "Infrastructure/bin/ask", "repo", "--json", "--robot"]

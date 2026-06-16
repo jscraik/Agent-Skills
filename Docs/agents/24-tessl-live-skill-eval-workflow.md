@@ -76,7 +76,11 @@ repo state, review every scenario for:
 
 - direct coverage of actual skill instructions
 - self-contained task setup
+- a plausible no-skill failure mode, so the scenario can show skill lift rather
+  than merely general agent competence
 - no instruction leakage from the rubric into task.md
+- no task wording that names the exact skill-specific concepts being scored
+  unless those concepts are user-facing domain language
 - no reliance on hidden files, local credentials, network-only behavior, or
   proprietary software
 - criteria that are file-observable, binary where possible, and total 100
@@ -151,6 +155,12 @@ Treat Tessl scores as evidence, not proof by themselves.
 - A live-private command is not green merely because `tessl eval run`
   completed. The wrapper must inspect `tessl eval view --json <run-id>` and
   compare usage-spec results against baseline before reporting readiness.
+- If both usage-spec and baseline are 100%, classify the run as
+  pass_but_non_discriminative for improvement evidence. The skill may be
+  correct, but the scenario set did not prove uplift. Tighten scenarios before
+  using the run as improvement proof.
+- Interpret Tessl's Improvement card as a ratio. A score of 100% and baseline
+  of 100% displays as 1x, meaning no observed uplift over baseline.
 - If `tessl eval view --json <run-id>` reports `failureReason.code` as
   `EVAL_QUOTA_EXCEEDED`, classify the live-private lane as
   `blocked_environment`. Do not submit another live eval until the quota reset

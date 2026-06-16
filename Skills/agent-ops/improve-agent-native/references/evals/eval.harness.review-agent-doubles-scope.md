@@ -8,7 +8,10 @@ This is the portable SDK reproduction contract for the eval scenario. The Knowle
 
 ## Skill-Local Evidence Boundary
 
-Failure category: seed eval requires behavioural scenario conversion.
+Failure category: review-scope expansion.
+Assessment: preserve the original delivery boundary. Blocking review items are defects that make the requested fix incorrect, unsafe, untested, or impossible to validate. Deferrable items are broad redesign, cleanup, naming polish, architectural preference, or future-hardening comments that do not block the original fix.
 Evidence boundary: this fixture is skill-local evidence at references/evals/eval.harness.review-agent-doubles-scope.md; it does not by itself prove repository, pull request, remote-check, merge-readiness, or Tessl-readiness outcomes.
-Durable mechanism: use this fixture to generate scenario criteria that require the agent to separate current blocking defects from backlog or scope-expanding review comments, preserving the original delivery boundary while naming deferred follow-up explicitly.
-Validation status: not_run_with_reason until the scenario is executed by the local pipeline and private Tessl eval lane.
+Blocking bucket: current correctness defects, missing validation for the touched behavior, or review findings tied directly to the requested change.
+Deferred bucket: backlog improvements, optional refactors, adjacent redesign, and scope-expanding review suggestions.
+Durable mechanism: review triage note with two headings, blocking_now and deferred_follow_up, plus a short reason for each deferred item.
+Validation status: blocked until blocking_now is empty or explicitly accepted by the maintainer; deferred_follow_up remains outside the current delivery proof.

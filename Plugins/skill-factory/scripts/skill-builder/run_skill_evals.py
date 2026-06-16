@@ -1581,6 +1581,78 @@ def _contains_text(haystack: str, needle: str) -> bool:
     return needle.casefold() in haystack.casefold()
 
 
+_EXPECTED_SIGNAL_STOPWORDS = {
+    "about",
+    "after",
+    "against",
+    "available",
+    "before",
+    "being",
+    "between",
+    "could",
+    "does",
+    "from",
+    "into",
+    "instead",
+    "keeps",
+    "names",
+    "should",
+    "that",
+    "their",
+    "them",
+    "then",
+    "this",
+    "treats",
+    "until",
+    "when",
+    "with",
+    "without",
+}
+
+
+def _expected_signal_terms(value: Any) -> List[str]:
+    text = _to_text_blob(value).casefold()
+    terms: List[str] = []
+    seen = set()
+    for token in re.findall(r"[a-z0-9][a-z0-9_-]{2,}", text):
+        term = token[:-1] if len(token) > 4 and token.endswith("s") else token
+        if term in _EXPECTED_SIGNAL_STOPWORDS:
+            continue
+        if term not in seen:
+            seen.add(term)
+            terms.append(term)
+    return terms
+
+
+def _evaluate_expected_signal_assertion(output_text: str, expected: Any) -> Optional[str]:
+    expected_text = _to_text_blob(expected)
+    if _contains_text(output_text, expected_text):
+        return None
+
+    expected_terms = _expected_signal_terms(expected_text)
+    if not expected_terms:
+        if not _contains_text(output_text, expected_text):
+            return f"expected_signal failed: {expected_text!r}"
+        return None
+
+    output_terms = set(_expected_signal_terms(output_text))
+    matched = [term for term in expected_terms if term in output_terms]
+    required_count = max(1, (len(expected_terms) + 1) // 2)
+    if len(expected_terms) >= 8:
+        required_count = max(4, required_count)
+
+    if len(matched) >= required_count:
+        return None
+
+    missing = [term for term in expected_terms if term not in output_terms]
+    preview = ", ".join(missing[:6])
+    return (
+        "expected_signal failed: "
+        f"matched {len(matched)}/{len(expected_terms)} signal terms "
+        f"(required {required_count}); missing: {preview}"
+    )
+
+
 def _evaluate_skill_selection_assertion(
     assertion: Dict[str, Any],
     *,
@@ -1650,6 +1722,10 @@ def evaluate_assertions_text(
             )
             if msg:
                 failures.append(msg)
+        elif t == "expected_signal":
+            msg = _evaluate_expected_signal_assertion(text, v)
+            if msg:
+                failures.append(msg)
         else:
             failures.append(f"unsupported assertion type for text output: {t!r}")
     return failures
@@ -1667,7 +1743,15 @@ def evaluate_assertions_json(
         a = _normalize_assert(raw)
         t = a["type"]
 
-        if t in {"contains", "not_contains", "regex", "not_regex", "skill_selected", "skill_not_selected"}:
+        if t in {
+            "contains",
+            "not_contains",
+            "regex",
+            "not_regex",
+            "skill_selected",
+            "skill_not_selected",
+            "expected_signal",
+        }:
             text = json.dumps(obj, ensure_ascii=False, indent=2)
             failures.extend(
                 evaluate_assertions_text(
@@ -2106,8 +2190,23 @@ def run_codex_exec(
             )
         except FileNotFoundError:
             return 127, "", "codex CLI not found on PATH. Install it (for example: npm i -g @openai/codex)."
-        except sp.TimeoutExpired:
-            return 124, "", f"codex exec timed out after {timeout} seconds."
+        except sp.TimeoutExpired as exc:
+            stdout = exc.stdout or ""
+            stderr = exc.stderr or ""
+            if isinstance(stdout, bytes):
+                stdout = stdout.decode("utf-8", errors="replace")
+            if isinstance(stderr, bytes):
+                stderr = stderr.decode("utf-8", errors="replace")
+            if jsonl_path and stdout:
+                jsonl_path.parent.mkdir(parents=True, exist_ok=True)
+                jsonl_path.write_text(stdout, encoding="utf-8")
+            timeout_message = f"codex exec timed out after {timeout} seconds."
+            stderr = f"{stderr.rstrip()}\n{timeout_message}".strip()
+            # Preserve partial JSONL data before returning
+            if jsonl_path and stdout:
+                jsonl_path.parent.mkdir(parents=True, exist_ok=True)
+                jsonl_path.write_text(stdout, encoding="utf-8")
+            return 124, stdout, stderr
 
         if jsonl_path:
             jsonl_path.parent.mkdir(parents=True, exist_ok=True)
@@ -2116,6 +2215,21 @@ def run_codex_exec(
         return proc.returncode, proc.stdout, proc.stderr
 
     rc, stdout, stderr = _invoke(profile)
+
+    has_last_message_artifact = output_last_message_path.exists() and output_last_message_path.read_text(encoding="utf-8").strip()
+    if rc == 124 and not stdout.strip() and not has_last_message_artifact and stderr.startswith("codex exec timed out after "):
+        warnings.append("Codex timed out without output; retrying once with a fresh exec process.")
+        # Only delete output_last_message_path if no usable artifact exists
+        if output_last_message_path.exists():
+            try:
+                content = output_last_message_path.read_text(encoding="utf-8").strip()
+                if not content:
+                    output_last_message_path.unlink()
+            except Exception:
+                output_last_message_path.unlink()
+        if jsonl_path and jsonl_path.exists():
+            jsonl_path.unlink()
+        rc, stdout, stderr = _invoke(profile)
 
     if (
         rc != 0

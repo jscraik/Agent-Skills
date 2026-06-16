@@ -95,11 +95,15 @@ def test_tessl_eval_view_incomplete_when_assessment_results_empty() -> None:
 def test_smoke_evals_use_codex_spark_and_fast_profile_without_reasoning_level(tmp_path: Path) -> None:
     completed = mock.Mock(returncode=0, stdout="{}", stderr="")
 
-    with mock.patch.object(evals.subprocess, "run", return_value=completed) as run:
+    with (
+        mock.patch.object(evals, "_pyyaml_eval_python_command", return_value=["managed-python"]),
+        mock.patch.object(evals.subprocess, "run", return_value=completed) as run,
+    ):
         result = evals.run_evals(tmp_path, "Plugins/example-skill", mode="smoke", skip_tessl=True)
 
     assert result.status == "success"
     cmd = run.call_args.args[0]
+    assert cmd[:2] == ["managed-python", "Plugins/skill-factory/scripts/skill-builder/run_skill_evals.py"]
     assert "--model" in cmd
     assert cmd[cmd.index("--model") + 1] == "gpt-5.3-codex-spark"
     assert "--profile" in cmd
@@ -111,6 +115,26 @@ def test_smoke_evals_use_codex_spark_and_fast_profile_without_reasoning_level(tm
     assert "--reasoning-effort" not in cmd
     assert "--codex-arg" not in cmd
     assert "--ignore-user-config" not in cmd
+    assert run.call_args.kwargs["env"]["PYTHONDONTWRITEBYTECODE"] == "1"
+
+
+def test_evals_pyyaml_runner_bypasses_mise_project_resolution(monkeypatch) -> None:
+    monkeypatch.delenv("PYTHON_BIN", raising=False)
+    monkeypatch.setattr(evals, "sys", mock.Mock(executable="/system/python"))
+    monkeypatch.setattr(evals.Path, "home", staticmethod(lambda: Path("/missing-home")))
+    monkeypatch.setattr(evals.shutil, "which", lambda name: "/usr/bin/python3" if name == "python3" else None)
+    supports = mock.Mock(return_value=False)
+    monkeypatch.setattr(evals, "_python_command_supports_packages", supports)
+
+    command = evals._pyyaml_eval_python_command()
+
+    assert command == ["uv", "run", "--no-project", "--with", "PyYAML", "python"]
+    assert command[0] != "mise"
+    assert "--no-project" in command
+    assert supports.call_args_list == [
+        mock.call(["/system/python"], ["pyyaml"]),
+        mock.call(["/usr/bin/python3"], ["pyyaml"]),
+    ]
 
 
 def test_smoke_evals_accept_model_override_for_quota_recovery(tmp_path: Path) -> None:
@@ -648,7 +672,10 @@ def test_macro_eval_report_uses_claim_gap_when_case_has_no_finding(tmp_path: Pat
 def test_smoke_evals_can_use_discovery_smoke_without_codex_args(tmp_path: Path) -> None:
     completed = mock.Mock(returncode=0, stdout="{}", stderr="")
 
-    with mock.patch.object(evals.subprocess, "run", return_value=completed) as run:
+    with (
+        mock.patch.object(evals, "_pyyaml_eval_python_command", return_value=["managed-python"]),
+        mock.patch.object(evals.subprocess, "run", return_value=completed) as run,
+    ):
         result = evals.run_evals(
             tmp_path,
             "Plugins/example-skill",
@@ -659,6 +686,7 @@ def test_smoke_evals_can_use_discovery_smoke_without_codex_args(tmp_path: Path) 
 
     assert result.status == "success"
     cmd = run.call_args.args[0]
+    assert cmd[:2] == ["managed-python", "Plugins/skill-factory/scripts/skill-builder/run_skill_evals.py"]
     assert "--runner" in cmd
     assert cmd[cmd.index("--runner") + 1] == "discovery-smoke"
     assert "--model" not in cmd
@@ -674,7 +702,10 @@ def test_evals_resolve_runtime_projection_to_canonical_source(tmp_path: Path) ->
     (canonical / "evals.yaml").write_text("cases: []\n", encoding="utf-8")
     completed = mock.Mock(returncode=0, stdout="{}", stderr="")
 
-    with mock.patch.object(evals.subprocess, "run", return_value=completed) as run:
+    with (
+        mock.patch.object(evals, "_pyyaml_eval_python_command", return_value=["managed-python"]),
+        mock.patch.object(evals.subprocess, "run", return_value=completed) as run,
+    ):
         result = evals.run_evals(
             tmp_path,
             ".agents/skills/evals-router",
@@ -687,7 +718,8 @@ def test_evals_resolve_runtime_projection_to_canonical_source(tmp_path: Path) ->
     assert result.status == "success"
     assert result.data["requested_path"] == ".agents/skills/evals-router"
     assert result.data["resolved_skill_path"] == "Skills/agent-ops/evals-router"
-    assert run.call_args.args[0][2] == "Skills/agent-ops/evals-router"
+    cmd = run.call_args.args[0]
+    assert cmd[cmd.index("Plugins/skill-factory/scripts/skill-builder/run_skill_evals.py") + 1] == "Skills/agent-ops/evals-router"
 
 
 def _write_example_skill(tmp_path: Path) -> Path:
@@ -1932,6 +1964,7 @@ def test_evals_classify_malformed_yaml_as_blocked_validation(tmp_path: Path) -> 
     with (
         mock.patch.dict(sys.modules, {"yaml": FakeYaml}),
         mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
+        mock.patch.object(evals, "_pyyaml_eval_python_command", return_value=["managed-python"]),
         mock.patch.object(evals.subprocess, "run", return_value=completed),
     ):
         result = evals.run_evals(

@@ -14,6 +14,7 @@ import hashlib
 import time
 from pathlib import Path
 from ask.envelope import CallResult, ErrorObject
+from ask.commands.skills_impl import _python_command_supports_packages, _subprocess_env_with_uv_cache
 from ask.skill_review_dashboard import render_skill_review_dashboard
 
 
@@ -32,6 +33,36 @@ TESSL_LIVE_PRIVATE_MIN_SCORE = 0.90
 TESSL_LIVE_PRIVATE_TARGET_SCORE = 0.95
 TESSL_LIVE_PRIVATE_VIEW_POLL_SECONDS = 10
 TESSL_LIVE_PRIVATE_VIEW_TIMEOUT_SECONDS = 900
+
+
+def _pyyaml_eval_python_command() -> list[str]:
+    """Return a PyYAML-capable Python command without invoking mise project resolution."""
+    candidates: list[list[str]] = []
+    configured = os.environ.get("PYTHON_BIN", "").strip()
+    if configured:
+        candidates.append(shlex.split(configured))
+
+    candidates.append([sys.executable])
+
+    pyyaml_venv_python = Path.home() / ".venvs" / "pyyaml" / "bin" / "python"
+    if pyyaml_venv_python.exists():
+        candidates.append([str(pyyaml_venv_python)])
+
+    for name in ["python3", "python"]:
+        python_path = shutil.which(name)
+        if python_path:
+            candidates.append([python_path])
+
+    seen: set[tuple[str, ...]] = set()
+    for candidate in candidates:
+        key = tuple(candidate)
+        if key in seen:
+            continue
+        seen.add(key)
+        if _python_command_supports_packages(candidate, ["pyyaml"]):
+            return candidate
+
+    return ["uv", "run", "--no-project", "--with", "PyYAML", "python"]
 
 
 EVAL_BLOCKER_TAXONOMY = {
@@ -3301,7 +3332,8 @@ def run_evals(
         return result
 
     cmd = [
-        sys.executable, f"{SKILL_BUILDER_SCRIPTS}/run_skill_evals.py",
+        *_pyyaml_eval_python_command(),
+        f"{SKILL_BUILDER_SCRIPTS}/run_skill_evals.py",
         path,
         "--eval-mode", mode,
         "--runner", runner,
@@ -3330,7 +3362,14 @@ def run_evals(
     _start_eval_lifecycle(result, path=path, mode=mode, runner=runner)
 
     try:
-        process = subprocess.run(cmd, cwd=str(repo_root), capture_output=True, text=True, timeout=timeout)
+        process = subprocess.run(
+            cmd,
+            cwd=str(repo_root),
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            env=_subprocess_env_with_uv_cache(),
+        )
         result.data["raw_output"] = _repo_relative_text(repo_root, process.stdout)
         result.data["raw_error"] = _repo_relative_text(repo_root, process.stderr)
         result.data["eval_status"] = "pass" if process.returncode == 0 else "fail"
