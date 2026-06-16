@@ -110,11 +110,16 @@ cases:
     prompt: "A team wants a generic helpfulness dashboard for an AI workflow, but they have not reviewed traces or named product-specific failure modes. Select the testing proof route and say what must happen before dashboard metrics."
     acceptance:
       - {type: skill_selected, expected_skill: testing}
-      - {type: expected_signal, value: "Requires traces or equivalent artifacts before designing dashboard metrics or judge outputs."}
-      - {type: expected_signal, value: "Asks for product-specific failure taxonomy and dimensional sampling before aggregate metrics."}
       - {type: not_regex, value: "(?is)generic helpfulness dashboard.*adequate.*before error analysis"}
       - {type: regex, value: "(?is)(trace|artifact).*?(failure taxonom|failure categor|error analysis|bounded sample)"}
       - {type: regex, value: "(?is)(dimension|sample|product-specific|coverage).*?(before|rather than).*?(dashboard|metric)"}
+    expected_signals:
+      must_include:
+        - traces or equivalent artifacts
+        - product-specific failure taxonomy
+        - dimensional sampling
+      must_not_include:
+        - generic helpfulness dashboard adequate before error analysis
   - id: edge-objective-check-sent-to-judge
     name: "objective check sent to judge"
     category: edge
@@ -134,11 +139,15 @@ cases:
     prompt: "Please validate the release gate in repo src/assistants/messaging/handoff.ts for an AI assistant that emits JSON handoff packets and SMS follow-up text. The proposed eval sends JSON schema validity, required-field presence, and markdown-in-SMS detection to an LLM judge because the team already has a judge pipeline. Route the proof mechanism and name the evaluator evidence needed before trusting the gate."
     acceptance:
       - {type: skill_selected, expected_skill: testing}
-      - {type: expected_signal, value: "Routes objective properties to deterministic code, schema, parser, or assertion checks before LLM judging."}
-      - {type: expected_signal, value: "Requires known passing and failing fixtures for the evaluator itself before trusting its result."}
       - {type: not_regex, value: "(?is)LLM judge.*preferred proof.*(schema validity|required-field presence)"}
       - {type: regex, value: "(?is)(deterministic|code|schema|parser|assertion).*?(before|instead of|rather than).*?(judge|LLM)"}
       - {type: regex, value: "(?is)(known good|known passing).*?(known bad|known failing|fixture)"}
+    expected_signals:
+      must_include:
+        - deterministic code schema parser assertion checks
+        - known passing and failing fixtures
+      must_not_include:
+        - LLM judge preferred proof schema validity
   - id: edge-unvalidated-judge-overclaims
     name: "unvalidated judge overclaims"
     category: edge
@@ -158,11 +167,15 @@ cases:
     prompt: "Please review repo apps/agent-workflow/evals/release-report.md before a product team ships an agent workflow. The eval report says the LLM judge has high agreement with reviewer notes, but it does not include held-out test results, false-positive or false-negative counts, prompt version, model version, thresholds, or raw artifact paths. Validate what can be claimed and what evidence is still needed before the judge can become a release gate."
     acceptance:
       - {type: skill_selected, expected_skill: testing}
-      - {type: expected_signal, value: "Classifies an uncalibrated judge score as advisory or blocked for release proof."}
-      - {type: expected_signal, value: "Requires held-out labels, separate TPR and TNR, prompt version and model version, and raw artifacts before using the judge as a gate."}
       - {type: not_regex, value: "(?is)high agreement alone.*sufficient validation.*release gate"}
       - {type: regex, value: "(?is)(advisory|blocked).*?(release proof|required gate|readiness)"}
       - {type: regex, value: "(?is)(held-out).*?(TPR|true positive).*?(TNR|true negative).*?(prompt version).*?(model version).*?(raw artifact|reproduc)"}
+    expected_signals:
+      must_include:
+        - uncalibrated judge score advisory blocked release proof
+        - held-out labels TPR TNR prompt version model version raw artifacts
+      must_not_include:
+        - high agreement alone sufficient validation release gate
   - id: edge-score-without-action
     name: "score without action"
     category: edge
@@ -181,11 +194,15 @@ cases:
     prompt: "An eval dashboard improved from 62 to 81 and lists failures, but the closeout has no root cause, fix path, rerun command, or retained regression case. Decide whether behavior improvement is proven."
     acceptance:
       - {type: skill_selected, expected_skill: testing}
-      - {type: expected_signal, value: "Treats the score as incomplete proof until root cause, fix path, rerun command, and retained regression evidence are present."}
-      - {type: expected_signal, value: "Asks for the improvement loop evidence before claiming behavior improved."}
       - {type: not_regex, value: "(?is)higher eval score alone.*proves.*behavior improved"}
       - {type: regex, value: "(?is)(incomplete|not.*?proof|not.*?verified|blocked).*?(score|dashboard|pass rate)"}
       - {type: regex, value: "(?is)(root cause|fix path|rerun command|regression case|close.*loop)"}
+    expected_signals:
+      must_include:
+        - root cause fix path rerun command retained regression evidence
+        - improvement loop evidence
+      must_not_include:
+        - higher eval score alone proves behavior improved
   - id: edge-production-guardrails-without-online-safety
     name: "production guardrails without online safety"
     category: edge
@@ -204,9 +221,13 @@ cases:
     prompt: "A team reports that their offline AI eval trend has improved for the last three runs and asks whether the production rollout is ready. They have not described online guardrails, high-risk failure prevention, primary experiment metrics, or instrumentation. Select the testing proof route and state what evidence is still missing."
     acceptance:
       - {type: skill_selected, expected_skill: testing}
-      - {type: expected_signal, value: "Separates offline measurement from online guardrails or prevention for high-risk production failures."}
-      - {type: expected_signal, value: "Names primary metrics, instrumentation, and guardrail checks as required production-readiness evidence."}
       - {type: not_regex, value: "(?is)production readiness.*proven.*offline eval trend alone"}
+    expected_signals:
+      must_include:
+        - offline measurement online guardrails prevention
+        - primary metrics instrumentation guardrail checks
+      must_not_include:
+        - production readiness proven offline eval trend alone
   - id: happy-persona-lens-strategy
     name: "persona lenses for validation strategy"
     category: happy

@@ -96,15 +96,25 @@ class RunSkillEvalsModeTests(unittest.TestCase):
 
         self.assertEqual(failures, ["regex failed: /(?i)red_signal/"])
 
-    def test_legacy_expected_signal_acceptance_is_non_blocking(self) -> None:
+    def test_expected_signal_acceptance_is_executable_for_text_and_json(self) -> None:
         assertions = [
-            {"type": "expected_signal", "value": "Names a durable guardrail."},
-            {"type": "contains", "value": "guardrail"},
+            {
+                "type": "expected_signal",
+                "value": (
+                    "Starts from inspected traces, labels, metrics, or files and names "
+                    "the smallest next validation step instead of treating trust as a "
+                    "generic quality score."
+                ),
+            },
+            {"type": "regex", "value": "(validation|evidence|scope|workflow)"},
         ]
 
         self.assertEqual(
             evaluate_assertions_text(
-                "Recommend a validator guardrail.",
+                (
+                    "I inspected the trace and label evidence, then identified the "
+                    "smallest next validation step before changing the workflow."
+                ),
                 assertions,
                 skill_name="improve-agent-native",
                 selected_skill=True,
@@ -113,13 +123,40 @@ class RunSkillEvalsModeTests(unittest.TestCase):
         )
         self.assertEqual(
             evaluate_assertions_json(
-                {"recommendation": "validator guardrail"},
+                {
+                    "evidence": "inspected trace labels",
+                    "next_check": "smallest validation step",
+                    "quality": "not a generic trust score",
+                },
                 assertions,
                 skill_name="improve-agent-native",
                 selected_skill=True,
             ),
             [],
         )
+
+    def test_expected_signal_acceptance_fails_vague_regex_only_response(self) -> None:
+        assertions = [
+            {
+                "type": "expected_signal",
+                "value": (
+                    "Starts from inspected traces, labels, metrics, or files and names "
+                    "the smallest next validation step instead of treating trust as a "
+                    "generic quality score."
+                ),
+            },
+            {"type": "regex", "value": "(validation|evidence|scope|workflow)"},
+        ]
+
+        failures = evaluate_assertions_text(
+            "The workflow needs validation evidence and clearer scope.",
+            assertions,
+            skill_name="improve-agent-native",
+            selected_skill=True,
+        )
+
+        self.assertEqual(len(failures), 1)
+        self.assertIn("expected_signal failed", failures[0])
 
     def test_contains_assertions_are_case_insensitive_for_agent_prose(self) -> None:
         self.assertEqual(

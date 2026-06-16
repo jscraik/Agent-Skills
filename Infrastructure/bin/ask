@@ -1124,27 +1124,20 @@ def main():
                         )
                 elif args.topic == "repo" and args.action == "provider-audit":
                     report = result.data.get("provider_policy", {})
-                    print(
-                        "✅ Provider policy: "
-                        f"{report.get('status')} ({report.get('violation_count', 0)} violation(s))"
-                    )
+                    print("✅ Provider policy: "
+                          f"{report.get('status')} ({report.get('violation_count', 0)} violation(s))")
                     print_first_validation_command(result.data)
                 elif args.topic == "repo" and args.action == "surface":
                     report = result.data.get("repo_surface", {})
                     summary = report.get("summary", {})
-                    print(
-                        "✅ Repo surface: "
-                        f"{summary.get('total_paths', 0)} tracked path(s), "
-                        f"{summary.get('blocking_findings', 0)} blocking finding(s), "
-                        f"status={report.get('status')}"
-                    )
+                    print(f"✅ Repo surface: {summary.get('total_paths', 0)} tracked path(s), "
+                          f"{summary.get('blocking_findings', 0)} blocking finding(s), "
+                          f"status={report.get('status')}")
                     print_first_validation_command(result.data)
                 elif args.topic == "repo" and args.action == "yaml-inspect":
                     payload = result.data.get("yaml", {})
-                    print(f"✅ YAML inspect: {payload.get('path', args.path)}")
-                    if payload.get("query"):
-                        print(f"  Query: {payload.get('query')}")
-                        print(f"  Value: {payload.get('query_value')!r}")
+                    detail = f" query={payload.get('query')} value={payload.get('query_value')!r}" if payload.get("query") else ""
+                    print(f"✅ YAML inspect: {payload.get('path', args.path)}{detail}")
                     print_first_validation_command(result.data)
                 elif args.topic == "skills" and args.action == "list":
                     print(f"Discovered {len(result.data['skills'])} skills:")

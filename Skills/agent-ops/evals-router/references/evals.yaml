@@ -72,7 +72,12 @@ cases:
     acceptance:
       - {type: skill_selected, expected_skill: evals-router}
       - {type: regex, value: "(?i)(validation|evidence|scope|workflow)"}
-      - {type: expected_signal, value: "Starts from inspected traces, labels, metrics, or files and names the smallest next validation step instead of treating trust as a generic quality score."}
+    expected_signals:
+      must_include:
+        - trace inspection
+        - smallest next validation step
+      must_not_include:
+        - generic quality score
   - id: happy-explicit
     name: explicit request
     category: happy
@@ -90,7 +95,12 @@ cases:
     acceptance:
       - {type: skill_selected, expected_skill: evals-router}
       - {type: regex, value: "(?i)(validation|evidence|blocked|pass)"}
-      - {type: expected_signal, value: "Returns a concrete eval route and next check rather than generic testing advice."}
+    expected_signals:
+      must_include:
+        - concrete eval route
+        - next check
+      must_not_include:
+        - generic testing advice
   - id: route-eval-audit
     name: route eval audit
     category: happy
@@ -108,7 +118,13 @@ cases:
     acceptance:
       - {type: skill_selected, expected_skill: evals-router}
       - {type: regex, value: "(?i)(eval-audit|audit|misleading|coverage|metrics)"}
-      - {type: expected_signal, value: "Prioritizes coverage and metric-validity findings over dashboard cosmetics or broad model-quality claims."}
+    expected_signals:
+      must_include:
+        - coverage
+        - metric validity
+      must_not_include:
+        - dashboard cosmetics
+        - broad model quality claims
     deterministic_checks: {forbidden_commands: [curl, wget, "rm -rf", nc]}
   - id: route-error-analysis
     name: route error analysis
@@ -127,7 +143,12 @@ cases:
     acceptance:
       - {type: skill_selected, expected_skill: evals-router}
       - {type: regex, value: "(?i)(error-analysis|failure categor|taxonomy|trace)"}
-      - {type: expected_signal, value: "Requires trace-derived failure categories before proposing dashboards, judges, or automated evals."}
+    expected_signals:
+      must_include:
+        - trace-derived failure categories
+      must_not_include:
+        - dashboards before failure categories
+        - judges before failure categories
     deterministic_checks: {forbidden_commands: [curl, wget, "rm -rf", nc]}
   - id: route-write-judge-prompt
     name: route judge prompt
@@ -146,7 +167,10 @@ cases:
     acceptance:
       - {type: skill_selected, expected_skill: evals-router}
       - {type: regex, value: "(?i)(write-judge-prompt|judge|pass/fail|binary|failure mode)"}
-      - {type: expected_signal, value: "Frames the judge as one binary subjective criterion and requires labeled pass/fail examples before release evidence."}
+    expected_signals:
+      must_include:
+        - binary subjective criterion
+        - labeled pass/fail examples
     deterministic_checks: {forbidden_commands: [curl, wget, "rm -rf", nc]}
   - id: route-validate-evaluator
     name: route evaluator validation
@@ -165,7 +189,11 @@ cases:
     acceptance:
       - {type: skill_selected, expected_skill: evals-router}
       - {type: regex, value: "(?i)(validate-evaluator|TPR|TNR|human labels|calibrat|held-out)"}
-      - {type: expected_signal, value: "Treats agreement as insufficient without separate true-positive, true-negative, and held-out calibration evidence."}
+    expected_signals:
+      must_include:
+        - true-positive
+        - true-negative
+        - held-out calibration evidence
     deterministic_checks: {forbidden_commands: [curl, wget, "rm -rf", nc]}
   - id: route-generate-synthetic-data
     name: route synthetic data
@@ -184,7 +212,10 @@ cases:
     acceptance:
       - {type: skill_selected, expected_skill: evals-router}
       - {type: regex, value: "(?i)(generate-synthetic-data|synthetic|dimensions|failure areas|coverage gaps)"}
-      - {type: expected_signal, value: "Targets synthetic cases to named risk dimensions and keeps them subordinate to representative real traces when available."}
+    expected_signals:
+      must_include:
+        - named risk dimensions
+        - representative real traces
     deterministic_checks: {forbidden_commands: [curl, wget, "rm -rf", nc]}
   - id: route-evaluate-rag
     name: route RAG evaluation
@@ -203,7 +234,12 @@ cases:
     acceptance:
       - {type: skill_selected, expected_skill: evals-router}
       - {type: regex, value: "(?i)(evaluate-rag|retrieval|generation|faithfulness|Recall@k)"}
-      - {type: expected_signal, value: "Separates retriever evidence from answer faithfulness instead of collapsing RAG quality into one score."}
+    expected_signals:
+      must_include:
+        - retriever evidence
+        - answer faithfulness
+      must_not_include:
+        - one score
     deterministic_checks: {forbidden_commands: [curl, wget, "rm -rf", nc]}
   - id: route-build-review-interface
     name: route review interface
