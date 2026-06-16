@@ -370,6 +370,32 @@ class TestAskSkillsStarter(unittest.TestCase):
         self.assertEqual(result.status, "success")
         self.assertTrue(result.data.get("advanced_mode"))
 
+    def test_category_filter_excludes_non_matching_entries(self) -> None:
+        """Entries whose category/name/description do not match the token are excluded."""
+        entries = [
+            SimpleNamespace(
+                name="docs-expert",
+                source_dir=REPO_ROOT / "Skills" / "agent-ops" / "docs-expert",
+                category="Skills/agent-ops",
+                description="docs",
+            ),
+            SimpleNamespace(
+                name="mobile-ui",
+                source_dir=REPO_ROOT / "Skills" / "frontend-ui" / "mobile-ui",
+                category="Skills/frontend-ui",
+                description="mobile",
+            ),
+        ]
+
+        with patch("ask.commands.skills.discover_catalog_entries", return_value=entries), \
+             patch("ask.commands.skills.handles_report", return_value={"handles": []}):
+            result = list_skills(REPO_ROOT, category="agent-ops")
+
+        self.assertEqual(result.status, "success")
+        names = [item["name"] for item in result.data["skills"]]
+        self.assertIn("docs-expert", names)
+        self.assertNotIn("mobile-ui", names)
+
     def test_visible_only_with_category_preserves_visible_only_mode(self) -> None:
         """
         When both visible_only and category are provided, visible-only mode
@@ -447,6 +473,34 @@ class TestAskSkillsStarter(unittest.TestCase):
         self.assertEqual(result.data["skills"], [])
         self.assertTrue(result.data["starter_mode"])
 
+    def test_starter_mode_with_no_archetype_matches_fills_from_remaining(self) -> None:
+        """
+        When none of the archetype-preferred names appear in entries, _starter_entries
+        must still fill up to limit from the remaining entries in input order.
+        """
+        entries = [
+            SimpleNamespace(
+                name="totally-unknown-skill",
+                source_dir=REPO_ROOT / "Skills" / "agent-ops" / "totally-unknown-skill",
+                category="Skills/agent-ops",
+                description="unknown",
+            ),
+            SimpleNamespace(
+                name="another-unknown",
+                source_dir=REPO_ROOT / "Skills" / "agent-ops" / "another-unknown",
+                category="Skills/agent-ops",
+                description="unknown2",
+            ),
+        ]
+
+        with patch("ask.commands.skills.discover_catalog_entries", return_value=entries):
+            result = list_skills(REPO_ROOT, starter=True, archetype="delivery", limit=2)
+
+        self.assertEqual(result.status, "success")
+        names = [item["name"] for item in result.data["skills"]]
+        # Falls back to the two entries in input order.
+        self.assertEqual(names, ["totally-unknown-skill", "another-unknown"])
+
 
 class TestManifestJsonlSchema(unittest.TestCase):
     """Validate the structure of manifest.jsonl files updated in this PR."""
@@ -473,7 +527,7 @@ class TestManifestJsonlSchema(unittest.TestCase):
         "source_revision",
         "source_sha256",
     })
-    EXPECTED_SOURCE_REVISION = "05764a0d"
+    EXPECTED_SOURCE_REVISION = "8edaf73f"
 
     def _iter_manifest_records(self) -> Iterator[tuple[Path, int, dict[str, Any]]]:
         """

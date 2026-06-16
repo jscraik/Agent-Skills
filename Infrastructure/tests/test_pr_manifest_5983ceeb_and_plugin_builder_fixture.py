@@ -2,7 +2,7 @@
 Structural validation tests for files changed in this PR.
 
 Covers:
-  - All .skillsets/*/manifest.jsonl files: source_revision updated to "05764a0d",
+  - All .skillsets/*/manifest.jsonl files: source_revision updated to "8edaf73f",
     old revision "6cda095d5" not present anywhere.
   - Plugins/plugin-factory/.codex-plugin/plugin.json: required fields present.
 """
@@ -16,7 +16,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 
 SKILLSET_MANIFEST_PATHS = sorted(REPO_ROOT.glob(".skillsets/*/manifest.jsonl"))
 
-_NEW_REVISION = "05764a0d"
+_NEW_REVISION = "8edaf73f"
 _OLD_REVISION = "6cda095d5"
 
 PLUGIN_FACTORY_PLUGIN_JSON = (
@@ -50,8 +50,8 @@ def _load_jsonl(path: Path) -> list[dict[str, Any]]:
 # ---------------------------------------------------------------------------
 
 
-class TestManifestSourceRevisionIs05764a0d(unittest.TestCase):
-    """Every manifest entry must carry the new source_revision '05764a0d'."""
+class TestManifestSourceRevisionIs8edaf73f(unittest.TestCase):
+    """Every manifest entry must carry the new source_revision '8edaf73f'."""
 
     MANIFEST_NAMES = (
         "agent-ops",
