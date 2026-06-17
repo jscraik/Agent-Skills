@@ -180,6 +180,25 @@ def check_symlink(skill_name: str, target_dir: Path, label: str, allow_real_dir:
     return DiagnosticResult(f"symlink ({label})", "pass", f"Symlink OK in {target_dir}")
 
 
+def check_workspace_flat_projection(skill_name: str, *, required: bool = True) -> DiagnosticResult:
+    """Check the SDK-flat workspace projection for a skill."""
+    projected = SKILLS_DIR / skill_name / "SKILL.md"
+    if not projected.is_file():
+        status = "fail" if required else "warn"
+        return DiagnosticResult(
+            "workspace projection",
+            status,
+            f"SDK-flat projection missing: {projected.relative_to(REPO_ROOT)}",
+            "Run ./bin/ask skills sync --scope workspace --projection flat --json --robot "
+            "to materialize generated workspace projections.",
+        )
+    return DiagnosticResult(
+        "workspace projection",
+        "pass",
+        f"SDK-flat projection OK: {projected.relative_to(REPO_ROOT)}",
+    )
+
+
 def is_plugin_owned_skill(skill_arg: str, skill_dir: Path) -> bool:
     """Return whether the audited skill is plugin-owned and not expected in the default runtime index."""
     candidate = Path(skill_arg).expanduser()
@@ -340,9 +359,26 @@ def check_lifecycle_readiness(skill_dir: Path) -> DiagnosticResult:
     return DiagnosticResult("lifecycle readiness", "pass", "healthy")
 
 
-def diagnose_skill(skill_name: str) -> List[DiagnosticResult]:
+def diagnose_skill(skill_name: str, *, require_workspace_projection: bool = True) -> List[DiagnosticResult]:
     """Run all diagnostic checks for a skill."""
     results: List[DiagnosticResult] = []
+
+    candidate_arg = Path(skill_name).expanduser()
+    resolver_required = not candidate_arg.exists() and "/" not in skill_name and "\\" not in skill_name
+    resolution = resolve_skill_handle(skill_name, repo_root_path=REPO_ROOT) if resolver_required else {}
+    if resolver_required and resolution.get("status") != "ok":
+        results.append(
+            DiagnosticResult(
+                "SDK resolver",
+                "fail",
+                f"SDK resolver could not resolve {skill_name}: {resolution.get('error_code', 'unknown_error')}",
+                str(
+                    resolution.get("operator_action")
+                    or "Run ./bin/ask skills list --json --robot to inspect SDK-visible skills."
+                ),
+            )
+        )
+        return results
 
     # Find skill directory
     skill_dir = find_skill_dir(skill_name)
@@ -364,8 +400,22 @@ def diagnose_skill(skill_name: str) -> List[DiagnosticResult]:
         results.append(check_plugin_runtime_surface(resolved_skill_name, "agents"))
         results.append(check_plugin_skill_index(resolved_skill_name))
     else:
-        rooted_skill_set = rooted_manifest_skill_set(skill_dir)
-        if rooted_skill_set:
+        resolution = resolve_skill_handle(resolved_skill_name, repo_root_path=REPO_ROOT)
+        sdk_flat = (
+            resolution.get("status") == "ok"
+            and resolution.get("handle_source") == "sdk_flat_registry"
+            and resolution.get("runtime_visibility") == "flat"
+        )
+        if sdk_flat:
+            results.append(
+                check_workspace_flat_projection(
+                    resolved_skill_name,
+                    required=require_workspace_projection,
+                )
+            )
+            results.append(check_symlink(resolved_skill_name, CODEX_SKILLS, "codex"))
+            results.append(check_symlink(resolved_skill_name, AGENTS_SKILLS, "agents"))
+        elif rooted_skill_set := rooted_manifest_skill_set(skill_dir):
             results.append(check_rooted_latent_runtime_surface(resolved_skill_name, rooted_skill_set, "codex"))
             results.append(check_rooted_latent_runtime_surface(resolved_skill_name, rooted_skill_set, "agents"))
         else:
@@ -476,7 +526,7 @@ def diagnose_all_skills() -> int:
     advisory_skills: List[str] = []
 
     for skill_name in skill_names:
-        results = diagnose_skill(skill_name)
+        results = diagnose_skill(skill_name, require_workspace_projection=False)
         fails = sum(1 for r in results if r.status == "fail")
         warns = sum(1 for r in results if r.status == "warn")
         infos = sum(1 for r in results if r.status == "info")

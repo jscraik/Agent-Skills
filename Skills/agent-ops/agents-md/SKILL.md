@@ -2,8 +2,30 @@
 name: agents-md
 description: Use when reviewing, creating, shrinking, or refactoring AGENTS.md agent instructions, agent config files, routing rules, or repository guidance that need scoped routing, dedupe, contradiction fixes, progressive disclosure, and cleaned instruction surfaces.
 metadata:
-  version: 0.1.0
-  skill-type: code_quality_review
+  version: 0.2.0
+  skill-type: runbook
+  lifecycle_state: active
+  maturity: validated
+  owner: agent-ops
+  review_cadence: quarterly
+  metadata_source: frontmatter
+  risk: medium
+  projection: flat
+  handles:
+    - agents-md
+  canonical_handle: agents-md
+  runtime_visibility: flat
+  category: maintenance
+  scope: global
+  compatible_roles:
+    - default
+    - worker
+  runtime_needs:
+    - filesystem
+    - shell
+    - repo-validation
+  provenance: frontmatter:agent-skills:canonical-source
+  share_readiness: ready
 ---
 
 # Agents Md
@@ -51,12 +73,6 @@ Start with 2-3 focused surfaces before expanding scope.
 9. Preserve Project Brain, Local Memory, handoff files, review-swarm contracts, CODESTYLE routes, glossary links, and steering-uptake mechanisms when repo evidence makes them binding.
 10. Validate formatting, links, contradictions, discovery behavior, and workflow claims.
 
-5. Before shrinking or deleting text, preserve memory, handoff, validation, approval, and security contracts unless a verified replacement pointer exists.
-6. Build a context ledger before deleting or moving text. Use the routing categories in `references/agents-md-guidance.md`.
-7. Move durable detail into linked docs only when it reduces always-loaded budget and leaves a discoverable Context Pointer from the owning instruction surface.
-8. Preserve Project Brain, Local Memory, handoff files, review-swarm contracts, and CODESTYLE routes when repo evidence makes them binding.
-9. Validate formatting, links, contradictions, discovery behavior, and workflow claims.
-
 ## Constraints
 - Redact secrets and sensitive data by default.
 - Keep writes scoped to the requested repo or artifact surface.
@@ -76,14 +92,6 @@ Start with 2-3 focused surfaces before expanding scope.
 - If validation fails, fix the first failure class and rerun the same gate before broadening.
 - Refuse removals of memory, handoff, validation, approval, or security contracts without verified replacements.
 
-## Discovery Interview
-
-- Ask one round at a time.
-- Use a plain-language question.
-- Explain why this matters for the current skill decision.
-- avoid dumping the whole interview plan at once.
-- Read `references/discovery-interview.md` when the request is underspecified.
-
 - If file reads are blocked or a requested change would remove memory, handoff, validation, approval, or security contracts without a verified replacement, refuse that part and report the risk.
 
 ## Gotchas
@@ -101,10 +109,6 @@ Start with 2-3 focused surfaces before expanding scope.
 - "Add Jamie's repeated-steering rule to `agent-skills/AGENTS.md`; require uptake evidence before ordinary work resumes and point long detail to `Docs/agents/19-high-signal-steering-feedback.md`."
 - "Shrink `coding-harness/AGENTS.md` without losing zero-setup setup, Project Brain/Local Memory, CODESTYLE, or exact-path validation."
 - "In `payments-api`, root `AGENTS.md` says `npm test`, docs say `pnpm test`, and CI runs `bun test`; ask which command policy wins before editing."
-
-- `payments-api`: root AGENTS says `npm test`, docs say `pnpm test`, CI runs `bun test`; identify active scope and ask which command policy wins.
-- `coding-harness/AGENTS.md`: shrink the file while preserving Local Memory, review-swarm artifacts, and handoff rules behind verified Context Pointers.
-- `field-app/apps/mobile/AGENTS.md`: compare mobile and root scopes, then classify what stays local, moves to docs, or has dead links.
 
 ## Output Format
 Use compact markdown labels when applicable: `Decision required:`, `Context ledger:`, `Context Pointer map:`, `Preservation rule:`, `Validation:`, and `Blocked:`. Report commands as `pass`, `fail`, or `blocked`.
@@ -126,8 +130,6 @@ Rewrite example:
 ## Progressive Disclosure
 - Read `references/agents-md-guidance.md` for AGENTS precedence, Context Pointer categories, and portable operating-system patterns from agent-skills and coding-harness.
 - Read `references/discovery-interview.md` when the request is underspecified.
-
 - Load archived references, scripts, prompts, templates, or assets only when the active workflow needs that exact detail.
-- Read `references/agents-md-guidance.md` for AGENTS precedence and Context Pointer categories.
 - Route Harness Engineering plan guidance through the harness-engineering skill instead of loading its files here.
 - Keep the active path compact without removing important context for budget trimming.

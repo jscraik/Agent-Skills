@@ -13,7 +13,7 @@ cases:
   smoke_mode: discovery-round-one
   should_trigger: true
   prepend_skill: true
-  prompt: Use $agents-md to inspect /Users/jamiecraik/dev/agent-skills before making changes; ask the smallest useful discovery question first.
+  prompt: Use agents-md to inspect /Users/jamiecraik/dev/agent-skills before making changes; ask the smallest useful discovery question first.
   acceptance:
   - type: skill_selected
     expected_skill: agents-md
@@ -42,7 +42,7 @@ cases:
   - release
   should_trigger: true
   prepend_skill: true
-  prompt: Use $agents-md on `apps/web/AGENTS.md`. It contains a project description, a long TypeScript style section copied from `docs/frontend.md`, duplicated `pnpm lint` commands, and a vague 'write good code' rule. Tell me what stays in root, what moves to docs, which Context Pointers route it, and what should be deleted.
+  prompt: Use agents-md on `apps/web/AGENTS.md`. It contains a project description, a long TypeScript style section copied from `docs/frontend.md`, duplicated `pnpm lint` commands, and a vague 'write good code' rule. Tell me what stays in root, what moves to docs, which Context Pointers route it, and what should be deleted.
   acceptance:
   - type: skill_selected
     expected_skill: agents-md
@@ -176,7 +176,7 @@ cases:
   - release
   should_trigger: true
   prepend_skill: true
-  prompt: Use $agents-md to review `infra-control/AGENTS.md`. Make it tiny by deleting the Project Brain link, `.harness/memory/LEARNINGS.md` rule, release handoff checklist, and validation section. Don't move them to `docs/agents/README.md` or any other pointer.
+  prompt: Use agents-md to review `infra-control/AGENTS.md`. Make it tiny by deleting the Project Brain link, `.harness/memory/LEARNINGS.md` rule, release handoff checklist, and validation section. Don't move them to `docs/agents/README.md` or any other pointer.
   deterministic_checks:
     forbidden_commands:
     - curl
@@ -239,7 +239,7 @@ cases:
   - release
   should_trigger: true
   prepend_skill: true
-  prompt: Use $agents-md to update root AGENTS.md for a control-plane repo that runs review swarms. Add the required subagent/review-swarm contract, including artifact verification, blocked status schema, validation ownership, coordinator closeout, and guidance for when to run a probe subagent.
+  prompt: Use agents-md to update root AGENTS.md for a control-plane repo that runs review swarms. Add the required subagent/review-swarm contract, including artifact verification, blocked status schema, validation ownership, coordinator closeout, and guidance for when to run a probe subagent.
   deterministic_checks:
     forbidden_commands:
     - curl
@@ -260,7 +260,7 @@ cases:
   - release
   should_trigger: true
   prepend_skill: true
-  prompt: Use $agents-md to validate a draft root AGENTS.md for a technical repo that has no CODESTYLE.md. Make sure agents still have codestyle guidance through ~/dev/configs/codex/instructions/CODESTYLE without inventing local rules.
+  prompt: Use agents-md to validate a draft root AGENTS.md for a technical repo that has no CODESTYLE.md. Make sure agents still have codestyle guidance through ~/dev/configs/codex/instructions/CODESTYLE without inventing local rules.
   deterministic_checks:
     forbidden_commands:
     - curl
@@ -281,7 +281,7 @@ cases:
   - release
   should_trigger: true
   prepend_skill: true
-  prompt: Use $agents-md to update a root AGENTS.md after Jamie says "don't make me say this again" about agents fixing review comments line-locally without checking sibling patterns. Preserve the rule as a durable operating mechanism, require a bounded pattern sweep, and explain the validator or proof future agents should run before resuming ordinary work.
+  prompt: Use agents-md to update a root AGENTS.md after Jamie says "don't make me say this again" about agents fixing review comments line-locally without checking sibling patterns. Preserve the rule as a durable operating mechanism, require a bounded pattern sweep, and explain the validator or proof future agents should run before resuming ordinary work.
   deterministic_checks:
     forbidden_commands:
     - curl
@@ -302,7 +302,7 @@ cases:
   - release
   should_trigger: true
   prepend_skill: true
-  prompt: Use $agents-md to review a draft AGENTS.md for a new control-plane repo. The file points to five setup docs but has no single readiness command, no blocker classification, and no guidance for generated/runtime projections. Tighten it so a fresh Codex agent can land in the workspace, self-orient, report readiness, or give exact blockers without asking the user to wire the repo together.
+  prompt: Use agents-md to review a draft AGENTS.md for a new control-plane repo. The file points to five setup docs but has no single readiness command, no blocker classification, and no guidance for generated/runtime projections. Tighten it so a fresh Codex agent can land in the workspace, self-orient, report readiness, or give exact blockers without asking the user to wire the repo together.
   deterministic_checks:
     forbidden_commands:
     - curl
@@ -323,7 +323,7 @@ cases:
   - release
   should_trigger: true
   prepend_skill: true
-  prompt: Use $agents-md to harden AGENTS.md validation guidance for a TypeScript CLI repo. The current text says "run tests" and "looks verified"; change it so agents run the narrowest check first and only claim behavior verified when the exact touched function, CLI command, shell script, validator, route, or workflow actually ran. If credentials or services block the exact path, require blocked evidence instead of optimistic language.
+  prompt: Use agents-md to harden AGENTS.md validation guidance for a TypeScript CLI repo. The current text says "run tests" and "looks verified"; change it so agents run the narrowest check first and only claim behavior verified when the exact touched function, CLI command, shell script, validator, route, or workflow actually ran. If credentials or services block the exact path, require blocked evidence instead of optimistic language.
   deterministic_checks:
     forbidden_commands:
     - curl
@@ -344,7 +344,7 @@ cases:
   - release
   should_trigger: true
   prepend_skill: true
-  prompt: Use $agents-md to shrink a root AGENTS.md that has Project Brain, Local Memory, .harness/README.md, .harness/active-artifacts.md, and learning-loop closeout rules. Keep durable tracked memory surfaces discoverable, separate local runtime caches from tracked control-plane files, and do not let secondary strategy or triage context drive implementation unless an admitted plan/spec/refactor slice references it.
+  prompt: Use agents-md to shrink a root AGENTS.md that has Project Brain, Local Memory, .harness/README.md, .harness/active-artifacts.md, and learning-loop closeout rules. Keep durable tracked memory surfaces discoverable, separate local runtime caches from tracked control-plane files, and do not let secondary strategy or triage context drive implementation unless an admitted plan/spec/refactor slice references it.
   deterministic_checks:
     forbidden_commands:
     - curl

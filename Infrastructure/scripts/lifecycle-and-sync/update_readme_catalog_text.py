@@ -10,8 +10,8 @@ from pathlib import Path
 
 CURRENT_AGENT_SKILLS_KIT_SENTENCE = (
     "A governed **Agent Skills Kit** repository for Codex and AI coding agents. "
-    "Author skills once, validate quality, expose `$` command-surface handles, and sync "
-    "routed skills and plugins into runtime projections through the `ask` CLI."
+    "Author skills once, validate quality, expose SDK skill names, and sync "
+    "routed skills and plugins into flat runtime projections through the `ask` CLI."
 )
 
 SUMMARY_PATTERNS: tuple[str, ...] = (
@@ -19,6 +19,11 @@ SUMMARY_PATTERNS: tuple[str, ...] = (
         r"A governed \*\*Agent Skills Kit\*\* repository for Codex and AI coding agents\.\s+"
         r"Author skills once, validate quality, expose `\$` command-surface handles, and sync\s+"
         r"routed skills and plugins into runtime projections through the `ask` CLI\."
+    ),
+    (
+        r"A governed \*\*Agent Skills Kit\*\* repository for Codex and AI coding agents\.\s+"
+        r"Author skills once, validate quality, expose SDK skill names, and sync\s+"
+        r"routed skills and plugins into flat runtime projections through the `ask` CLI\."
     ),
     (
         r"A governed \*\*Agent Skills Kit\*\* repository of \*\*\d+ skills\*\* "
@@ -76,11 +81,12 @@ def refresh_readme_catalog_text(content: str, catalog_count: int | str) -> str:
                 "Failed to refresh README governed-repository sentence; expected # Agent Skills heading."
             )
 
-    content = re.sub(
-        rf"(?:{SUMMARY_PATTERNS[0]}\s*\n\s*){{2,}}",
-        CURRENT_AGENT_SKILLS_KIT_SENTENCE + "\n\n",
-        content,
-    )
+    for pattern in SUMMARY_PATTERNS:
+        content = re.sub(
+            rf"(?:{pattern}\s*\n\s*){{2,}}",
+            CURRENT_AGENT_SKILLS_KIT_SENTENCE + "\n\n",
+            content,
+        )
     content = re.sub(
         r"This repository currently exposes \*\*\d+ skills\*\* in the default catalog",
         f"This repository currently exposes **{catalog_count} skills** in the default catalog",

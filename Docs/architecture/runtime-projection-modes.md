@@ -1,61 +1,37 @@
-# Runtime Projection Modes
+# Runtime Projection Mode
 
-## Modes
+## Current Mode
+
+Agent Skills Kit supports one active runtime projection mode: `flat`.
 
 `flat`:
 
-- default projection mode when no override is supplied;
-- projects the allowlisted first-level skill surface;
-- keeps hidden/system bridge skills out of first-level runtime discovery.
+- projects SDK-visible skills directly under `.agents/skills/<skill>/SKILL.md`;
+- uses the canonical skill name as the runtime handle;
+- keeps hidden/system bridge skills out of first-level runtime discovery;
+- treats canonical `Skills/**/SKILL.md` and `Plugins/*/skills/**/SKILL.md` as the source of truth.
 
-`rooted`:
-
-- projects only root skill sets;
-- writes latent routing manifests under `.skillsets/**`;
-- writes generated command-surface metadata under `.skillsets/command-surface.json`;
-- keeps command-visible handle metadata in `.skillsets/command-surface.json`,
-  pointing at canonical `SKILL.md` sources;
-- keeps atom, molecule, compound, router, and reference modules latent until
-  selected.
-
-`hybrid`:
-
-- deferred;
-- must not mutate runtime surfaces until a named consumer and budget test exist.
+Generated rooted manifests and command-surface metadata are obsolete. They are not SDK inputs, not runtime handles, and not a compatibility mode operators should select.
 
 ## Scope
 
-`ask skills sync --scope workspace` mutates repository runtime projection
-surfaces.
+`ask skills sync --scope workspace` mutates repository runtime projection surfaces.
 
-`ask skills sync --scope user` relinks user-facing runtime paths after the
-repository projection is prepared.
+`ask skills sync --scope user` relinks user-facing runtime paths after the repository projection is prepared.
 
-The legacy shell flag `sync_skills.sh --project-local` maps to the canonical
-workspace scope.
+The legacy shell flag `sync_skills.sh --project-local` maps to the canonical workspace scope.
 
-For non-flat projection modes, the legacy shell sync wrapper delegates to the
-same `ask skills sync` engine so projection semantics do not drift by entry
-point.
+## SDK Skill Names
 
-## Command Surface
-
-Rooted projection separates mentionability from full workflow loading. The
-command surface is metadata in `.skillsets/command-surface.json`; it lets users
-write `$he-heartbeat` while the workflow remains in the resolved canonical
-`SKILL.md` source path. The SDK does not generate per-handle wrapper files.
-
-Use the public command surfaces for proof:
+Use SDK skill names directly:
 
 ```bash
-ask skills resolve he-heartbeat --json
-ask skills handles --check --json
-ask reviewers resolve skillinspector --json
+./bin/ask skills resolve agents-md --json --robot
+./bin/ask skills handles --check --json --robot
+./bin/ask skills prove agents-md --json --robot
 ```
 
-Do not treat resolver output alone as proof that a handle is visible in Codex.
-Resolver, generated command-surface projection, generated runtime handle,
-workspace sync, user sync, and live invocation are separate acceptance gates.
+Resolver output is only one gate. Source resolution, workspace projection, user runtime links, runtime budget, and live invocation evidence remain separate acceptance gates.
 
 ## Reporting
 
@@ -66,23 +42,19 @@ Use the runtime topic for projection and budget reports:
 ./bin/ask runtime budget --json --robot
 ```
 
-`ask runtime surface` reports the current visible runtime entries, hidden system
-lane entries, plugin/local/global scope counts, duplicate names, largest
-descriptions, and estimated description token cost.
+`ask runtime surface` reports the current visible runtime entries, hidden system lane entries, plugin/local/global scope counts, duplicate names, largest descriptions, and estimated description token cost.
 
-`ask runtime budget` runs the same report as a gate and exits nonzero if the
-runtime budget fails.
+`ask runtime budget` runs the same report as a gate and exits nonzero if the runtime budget fails.
 
 ## Environment
 
-`SYNC_SKILLS_PROJECTION_MODE` supplies a default mode when no `--projection`
-argument is passed.
+`SYNC_SKILLS_PROJECTION_MODE` may be set to `flat` or omitted. Other values are rejected by SDK validation.
 
 CLI arguments win over environment variables.
 
-## Rollback
+## Recovery
 
-Use flat mode as the escape hatch:
+Use flat mode as the recovery path:
 
 ```bash
 ./bin/ask skills sync --scope workspace --projection flat --json --robot

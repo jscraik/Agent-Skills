@@ -1001,7 +1001,8 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(skills_explain["schema_version"], "skills-explain.v1")
         self.assertEqual(skills_explain["query"], "autofix")
         self.assertEqual(skills_explain["canonical_source"], "Skills/agent-ops/autofix/SKILL.md")
-        self.assertEqual(skills_explain["command_surface_handle"], "autofix")
+        self.assertEqual(skills_explain["skill_handle"], "autofix")
+        self.assertEqual(skills_explain["handle_source"], "sdk_flat_registry")
         self.assertIn("validation", skills_explain)
         self.assertIn("when_not_to_use", skills_explain)
 
@@ -1013,7 +1014,7 @@ class TestAskCLI(unittest.TestCase):
             "agent_summary",
             "canonical_source_path",
             "runtime_projection_path",
-            "command_handles",
+            "skill_handles",
             "required_validation",
             "validation_commands",
             "known_limitations",
@@ -1037,10 +1038,10 @@ class TestAskCLI(unittest.TestCase):
         )
         self.assertIn("Next: ./bin/ask skills proof skill-factory-router --json --robot", result.stdout)
 
-    def test_skills_explain_golden_path_fields_for_he_and_non_he_handles(self):
+    def test_skills_explain_golden_path_fields_for_flat_handles(self):
         """Verify explain exposes source, runtime, validation, and proof handoff."""
         for handle, canonical_source, owner in (
-            ("he-spec", "Plugins/harness-engineering/skills/he-spec/SKILL.md", "harness-engineering"),
+            ("agents-md", "Skills/agent-ops/agents-md/SKILL.md", "agent-ops"),
             ("simplify", "Skills/agent-ops/simplify/SKILL.md", "agent-ops"),
         ):
             with self.subTest(handle=handle):
@@ -1052,19 +1053,28 @@ class TestAskCLI(unittest.TestCase):
                 skills_explain = output["data"]["skills_explain"]
                 self.assertEqual(skills_explain["query"], handle)
                 self.assertEqual(skills_explain["canonical_source"], canonical_source)
-                self.assertEqual(skills_explain["command_surface_handle"], handle)
-                self.assertEqual(skills_explain["runtime_projection"], "rooted")
-                self.assertEqual(skills_explain["runtime_visibility"], "latent")
+                self.assertEqual(skills_explain["skill_handle"], handle)
+                self.assertEqual(skills_explain["handle_source"], "sdk_flat_registry")
+                self.assertIn(skills_explain["runtime_projection"], {"flat", "source"})
+                self.assertIn(skills_explain["runtime_visibility"], {"flat", "source"})
                 self.assertEqual(skills_explain["owner"], owner)
                 self.assertIn("validation", skills_explain)
                 self.assertIn("ambiguity_notes", skills_explain)
 
                 explanation = output["data"]["explanation"]
                 self.assertEqual(explanation["canonical_source_path"], canonical_source)
-                self.assertEqual(explanation["runtime_projection_path"], canonical_source)
+                if skills_explain["runtime_projection"] == "flat":
+                    self.assertEqual(explanation["runtime_projection_path"], f".agents/skills/{handle}/SKILL.md")
+                else:
+                    self.assertIsNone(explanation["runtime_projection_path"])
                 self.assertEqual(
-                    explanation["command_handles"],
-                    [{"handle": handle, "path": canonical_source, "invoke_via": owner}],
+                    explanation["skill_handles"],
+                    [{
+                        "handle": handle,
+                        "path": explanation["runtime_projection_path"],
+                        "projection_note": None if explanation["runtime_projection_path"] else "projection_not_file_backed",
+                        "handle_source": "sdk_flat_registry",
+                    }],
                 )
                 self.assertTrue(explanation["validation_commands"])
                 self.assertIn("known_limitations", explanation)
@@ -2887,7 +2897,7 @@ class TestAskCLI(unittest.TestCase):
         )
         self.assertEqual(
             events["event_consumers"]["manifest_changed"]["producer_commands"],
-            ["./bin/ask skills handles --write-projection --json --robot"],
+            ["./bin/ask skills sync --scope workspace --projection flat --json --robot"],
         )
         self.assertEqual(
             events["event_consumers"]["projection_synced"]["observer_commands"],
@@ -4530,34 +4540,55 @@ class TestAskCLI(unittest.TestCase):
 
     def test_skills_sync_projection_reaches_engine(self):
         """Verify --projection is dispatched and cannot be silently ignored."""
-        for mode in ("flat", "rooted"):
-            with self.subTest(mode=mode):
-                cmd = [
-                    "python3",
-                    "Infrastructure/bin/ask",
-                    "skills",
-                    "sync",
-                    "--scope",
-                    "workspace",
-                    "--projection",
-                    mode,
-                    "--dry-run",
-                    "--json",
-                ]
-                result = _run_cli(cmd)
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "sync",
+            "--scope",
+            "workspace",
+            "--projection",
+            "flat",
+            "--dry-run",
+            "--json",
+        ]
+        result = _run_cli(cmd)
 
-                self.assertEqual(result.returncode, 0, result.stderr)
-                output = json.loads(result.stdout)
-                self.assertEqual(output["status"], "success")
-                self.assertEqual(output["data"]["projection_mode"], mode)
-                self.assertEqual(output["data"]["projection"]["engine"], "projection_engine.py")
-                self.assertEqual(
-                    output["data"]["validation_commands"],
-                    [f"./bin/ask skills sync --dry-run --projection {mode} --json --robot"],
-                )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        self.assertEqual(output["data"]["projection_mode"], "flat")
+        self.assertEqual(output["data"]["projection"]["engine"], "projection_engine.py")
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask skills sync --dry-run --projection flat --json --robot"],
+        )
 
-    def test_skills_sync_rooted_alias_dry_run_reports_canonical_mode(self):
-        """Rooted aliases must report the canonical projection mode in dry-run plans."""
+    def test_skills_sync_rejects_removed_rooted_projection(self):
+        """Rooted mode is removed from the SDK-flat sync contract."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "sync",
+            "--scope",
+            "workspace",
+            "--projection",
+            "rooted",
+            "--dry-run",
+            "--json",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertNotEqual(result.returncode, 0)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        self.assertIsNone(output["data"]["projection_mode"])
+        self.assertEqual(output["data"]["requested_projection_mode"], "rooted")
+        self.assertEqual(output["errors"][0]["code"], "ERR_INVALID_PROJECTION_MODE")
+
+    def test_skills_sync_rejects_removed_skill_tree_alias(self):
+        """Rooted aliases are removed with rooted mode."""
         cmd = [
             "python3",
             "Infrastructure/bin/ask",
@@ -4572,12 +4603,12 @@ class TestAskCLI(unittest.TestCase):
         ]
         result = _run_cli(cmd)
 
-        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertNotEqual(result.returncode, 0)
         output = json.loads(result.stdout)
-        self.assertEqual(output["status"], "success")
-        self.assertEqual(output["data"]["projection_mode"], "rooted")
-        self.assertEqual(output["data"]["projection"]["requested_mode"], "skill-tree")
-        self.assertEqual(output["data"]["plan"]["validation_status"], "pass")
+        self.assertEqual(output["status"], "error")
+        self.assertIsNone(output["data"]["projection_mode"])
+        self.assertEqual(output["data"]["requested_projection_mode"], "skill-tree")
+        self.assertEqual(output["errors"][0]["code"], "ERR_INVALID_PROJECTION_MODE")
 
     def test_skills_sync_rejects_deferred_hybrid_projection(self):
         """Hybrid remains out of mutating scope until a named consumer exists."""

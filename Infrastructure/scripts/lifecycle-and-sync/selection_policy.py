@@ -11,7 +11,7 @@ from typing import Any, Iterable
 
 POLICY_VERSION = "2026-06-11.v23"
 
-PROJECTION_MODE_CHOICES: tuple[str, ...] = ("flat", "rooted", "hybrid")
+PROJECTION_MODE_CHOICES: tuple[str, ...] = ("flat", "hybrid")
 
 ROOT_SKILL_SET_NAMES: tuple[str, ...] = (
     "agent-ops",
@@ -363,11 +363,8 @@ PLUGIN_SKILL_COLLISION_POLICIES: tuple[dict[str, Any], ...] = (
 DEFAULT_PROJECTION_MODE = "flat"
 SUPPORTED_PROJECTION_MODES: tuple[str, ...] = (
     "flat",
-    "rooted",
 )
-PROJECTION_MODE_ALIASES: dict[str, str] = {
-    "skill-tree": "rooted",
-}
+PROJECTION_MODE_ALIASES: dict[str, str] = {}
 DEFERRED_PROJECTION_MODES: tuple[str, ...] = (
     "hybrid",
 )

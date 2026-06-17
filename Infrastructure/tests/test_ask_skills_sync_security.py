@@ -18,10 +18,6 @@ from ask.commands import skills_impl  # noqa: E402
 from ask.envelope import ErrorObject  # noqa: E402
 from ask.services import plugin_cache  # noqa: E402
 
-sys.path.append(str(REPO_ROOT / "Infrastructure" / "scripts" / "validation-and-linting"))
-from check_context_budget import DEFAULTS  # noqa: E402
-
-
 class TestAskSkillsSyncSecurity(TestCase):
     def setUp(self) -> None:
         self.temp_dir = tempfile.mkdtemp(prefix="ask-sync-security-")
@@ -390,13 +386,10 @@ class TestAskSkillsSyncSecurity(TestCase):
         with mock.patch.dict(os.environ, {"SYNC_SKILLS_PROJECTION_MODE": "rooted"}):
             result = skills_commands.sync_skills(self.repo_root, scope="workspace", dry_run=True)
 
-        self.assertEqual(result.status, "success")
-        self.assertEqual(result.data["projection_mode"], "rooted")
-        self.assertEqual(result.data["projection"]["mode_source"], "env")
-        self.assertEqual(result.data["plan"]["validation_status"], "pass")
-        root_count = result.data["plan"]["root_skill_sets"]["root_count"]
-        self.assertGreater(root_count, 0)
-        self.assertLessEqual(root_count, DEFAULTS["runtime_projection"]["max_root_skill_sets"])
+        self.assertEqual(result.status, "error")
+        self.assertIsNone(result.data["projection_mode"])
+        self.assertEqual(result.data["requested_projection_mode"], "rooted")
+        self.assertEqual(result.errors[0].code, "ERR_INVALID_PROJECTION_MODE")
 
     def test_sync_skills_projection_cli_wins_over_env(self) -> None:
         with (
@@ -426,13 +419,10 @@ class TestAskSkillsSyncSecurity(TestCase):
             projection="rooted",
         )
 
-        self.assertEqual(result.status, "success")
-        self.assertEqual(result.data["projection_mode"], "rooted")
-        self.assertTrue((self.repo_root / ".agents" / "skills" / "agent-ops" / "SKILL.md").is_file())
-        self.assertTrue((self.repo_root / ".skillsets" / "agent-ops" / "manifest.jsonl").is_file())
-        self.assertTrue((self.repo_root / ".skillsets" / "command-surface.json").is_file())
-        command_surface = json.loads((self.repo_root / ".skillsets" / "command-surface.json").read_text(encoding="utf-8"))
-        self.assertIn("he-phase-work", {row["handle"] for row in command_surface["handles"]})
+        self.assertEqual(result.status, "error")
+        self.assertIsNone(result.data["projection_mode"])
+        self.assertEqual(result.data["requested_projection_mode"], "rooted")
+        self.assertEqual(result.errors[0].code, "ERR_INVALID_PROJECTION_MODE")
         self.assertFalse((self.repo_root / ".agents" / "skills" / "he-phase-work").exists())
 
     def test_sync_skills_rooted_projects_declared_direct_first_party_skill(self) -> None:
@@ -457,17 +447,11 @@ class TestAskSkillsSyncSecurity(TestCase):
         )
 
         runtime_handle = self.repo_root / ".agents" / "skills" / "improve-agent-native"
-        self.assertEqual(result.status, "success")
-        self.assertTrue(runtime_handle.is_symlink())
-        self.assertTrue((runtime_handle / "SKILL.md").is_file())
-        self.assertIn(
-            {
-                "handle": "improve-agent-native",
-                "source_path": "Skills/agent-ops/improve-agent-native/SKILL.md",
-                "runtime_visibility": "flat",
-            },
-            result.data["plan"]["direct_runtime_handles"],
-        )
+        self.assertEqual(result.status, "error")
+        self.assertIsNone(result.data["projection_mode"])
+        self.assertEqual(result.data["requested_projection_mode"], "rooted")
+        self.assertEqual(result.errors[0].code, "ERR_INVALID_PROJECTION_MODE")
+        self.assertFalse(runtime_handle.exists())
 
     def test_sync_skills_rooted_prunes_flat_symlink_before_rooted_projection_write(self) -> None:
         canonical_skill = self.repo_root / "Skills" / "harness-engineering" / "he-phase-work"
@@ -485,14 +469,12 @@ class TestAskSkillsSyncSecurity(TestCase):
             projection="rooted",
         )
 
-        self.assertEqual(result.status, "success")
-        self.assertFalse(runtime_handle.is_symlink())
-        self.assertFalse(runtime_handle.exists())
+        self.assertEqual(result.status, "error")
+        self.assertIsNone(result.data["projection_mode"])
+        self.assertEqual(result.data["requested_projection_mode"], "rooted")
+        self.assertEqual(result.errors[0].code, "ERR_INVALID_PROJECTION_MODE")
+        self.assertTrue(runtime_handle.is_symlink())
         self.assertEqual(source_skill_md.read_text(encoding="utf-8"), "# Canonical Source\n")
-        self.assertTrue(
-            any("Removed stale symlink" in item and "he-phase-work" in item for item in result.data["logs"]),
-            result.data["logs"],
-        )
 
     def test_sync_skills_flat_replaces_generated_root_dir_with_canonical_symlink(self) -> None:
         canonical_skill = self.repo_root / "Skills" / "agent-ops" / "agent-ops"
@@ -550,13 +532,12 @@ class TestAskSkillsSyncSecurity(TestCase):
             projection="rooted",
         )
 
-        self.assertEqual(result.status, "success")
-        self.assertFalse(stale_file.exists())
+        self.assertEqual(result.status, "error")
+        self.assertIsNone(result.data["projection_mode"])
+        self.assertEqual(result.data["requested_projection_mode"], "rooted")
+        self.assertEqual(result.errors[0].code, "ERR_INVALID_PROJECTION_MODE")
+        self.assertTrue(stale_file.exists())
         self.assertTrue(command_surface.exists())
-        self.assertTrue(
-            any("Removed unowned skill-set file" in item for item in result.data["plan"]["deletes"]),
-            result.data["plan"],
-        )
 
     def test_sync_skills_rooted_dry_run_reports_unowned_skillset_files(self) -> None:
         stale_file = self.repo_root / ".skillsets" / "stale" / "manifest.jsonl"
@@ -570,30 +551,24 @@ class TestAskSkillsSyncSecurity(TestCase):
             projection="rooted",
         )
 
-        self.assertEqual(result.status, "success")
+        self.assertEqual(result.status, "error")
+        self.assertIsNone(result.data["projection_mode"])
+        self.assertEqual(result.data["requested_projection_mode"], "rooted")
+        self.assertEqual(result.errors[0].code, "ERR_INVALID_PROJECTION_MODE")
         self.assertTrue(stale_file.exists())
-        self.assertTrue(
-            any("Removed unowned skill-set file" in item for item in result.data["plan"]["deletes"]),
-            result.data["plan"],
-        )
 
     def test_sync_skills_rooted_reports_skillset_prune_failures(self) -> None:
-        with mock.patch.object(
-            skills_commands,
-            "prune_unowned_skillset_files",
-            side_effect=OSError("permission denied"),
-        ):
-            result = skills_commands.sync_skills(
-                self.repo_root,
-                scope="workspace",
-                dry_run=False,
-                projection="rooted",
-            )
+        result = skills_commands.sync_skills(
+            self.repo_root,
+            scope="workspace",
+            dry_run=False,
+            projection="rooted",
+        )
 
         self.assertEqual(result.status, "error")
-        self.assertEqual(result.errors[0].code, "ERR_RUNTIME")
-        self.assertIn("permission denied", result.errors[0].message)
-        self.assertIn("ROOTED_PROJECTION_WRITE_FAILED", result.data["plan"]["warnings"])
+        self.assertIsNone(result.data["projection_mode"])
+        self.assertEqual(result.data["requested_projection_mode"], "rooted")
+        self.assertEqual(result.errors[0].code, "ERR_INVALID_PROJECTION_MODE")
 
     def test_sync_skills_rooted_user_scope_validates_workspace_before_relink(self) -> None:
         rooted_entry = self.repo_root / ".agents" / "skills" / "agent-ops"
@@ -611,20 +586,21 @@ class TestAskSkillsSyncSecurity(TestCase):
                 self.repo_root,
                 scope="user",
                 dry_run=False,
-                projection="rooted",
+                projection="flat",
             )
 
         self.assertEqual(result.status, "error")
         self.assertEqual(result.errors[0].code, "ERR_VALIDATION")
-        self.assertIn("ROOTED_WORKSPACE_POLICY_NAME_DRIFT", result.data["plan"]["warnings"][0])
+        self.assertIn("ROOTED_WORKSPACE_RESIDUE", result.data["plan"]["warnings"])
+        self.assertEqual(result.data["plan"]["rooted_workspace_entries"], ["agent-ops"])
         self.assertFalse((self.fake_home / ".agents" / "skills").exists())
 
-    def test_sync_skills_rooted_user_scope_relinks_after_workspace_validation(self) -> None:
+    def test_sync_skills_flat_user_scope_relinks_after_workspace_validation(self) -> None:
         workspace_result = skills_commands.sync_skills(
             self.repo_root,
             scope="workspace",
             dry_run=False,
-            projection="rooted",
+            projection="flat",
         )
         self.assertEqual(workspace_result.status, "success")
 
@@ -633,7 +609,7 @@ class TestAskSkillsSyncSecurity(TestCase):
                 self.repo_root,
                 scope="user",
                 dry_run=False,
-                projection="rooted",
+                projection="flat",
             )
 
         self.assertEqual(result.status, "success")
@@ -643,9 +619,9 @@ class TestAskSkillsSyncSecurity(TestCase):
         self.assertFalse((self.fake_home / ".agents" / "plugins").exists())
         self.assertTrue((self.fake_home / "plugins").is_dir())
         self.assertFalse((self.fake_home / "plugins").is_symlink())
-        self.assertEqual(result.data["projection_mode"], "rooted")
+        self.assertEqual(result.data["projection_mode"], "flat")
 
-    def test_sync_skills_rooted_user_scope_allows_generated_folded_handles(self) -> None:
+    def test_sync_skills_flat_user_scope_relinks_projected_plugin_handles(self) -> None:
         brainstorm_source = self.repo_root / "Plugins" / "harness-engineering" / "skills" / "he-brainstorm"
         brainstorm_source.mkdir(parents=True)
         (brainstorm_source / "SKILL.md").write_text(
@@ -657,24 +633,22 @@ class TestAskSkillsSyncSecurity(TestCase):
             self.repo_root,
             scope="workspace",
             dry_run=False,
-            projection="rooted",
+            projection="flat",
         )
         self.assertEqual(workspace_result.status, "success")
 
-        command_surface = json.loads((self.repo_root / ".skillsets" / "command-surface.json").read_text(encoding="utf-8"))
-        self.assertIn("he-ideate", {row["handle"] for row in command_surface["handles"]})
-        self.assertFalse((self.repo_root / ".agents" / "skills" / "he-ideate").exists())
+        self.assertFalse((self.repo_root / ".skillsets" / "command-surface.json").exists())
 
         with mock.patch.object(Path, "home", return_value=self.fake_home):
             result = skills_commands.sync_skills(
                 self.repo_root,
                 scope="user",
                 dry_run=False,
-                projection="rooted",
+                projection="flat",
             )
 
         self.assertEqual(result.status, "success")
-        self.assertEqual(result.data["projection_mode"], "rooted")
+        self.assertEqual(result.data["projection_mode"], "flat")
         self.assertTrue((self.fake_home / ".agents" / "skills").is_symlink())
         self.assertNotIn("ROOTED_WORKSPACE_MIXED_PROJECTION", result.data["plan"]["warnings"])
 
@@ -692,16 +666,16 @@ class TestAskSkillsSyncSecurity(TestCase):
             self.repo_root,
             scope="workspace",
             dry_run=True,
-            projection="rooted",
+            projection="flat",
         )
 
         self.assertEqual(result.status, "success")
         self.assertTrue(
             any("imagegen" in delete for delete in result.data["plan"]["deletes"]),
-            "rooted projection should prune first-level system bridge aliases",
+            "flat projection should prune first-level system bridge aliases",
         )
         self.assertIn("imagegen", result.data["plan"]["system_bridge_skill_names"])
-        self.assertNotIn("imagegen", result.data["plan"]["preserved_bridge_lane_entries"])
+        self.assertIn("imagegen", result.data["plan"]["preserved_bridge_lane_entries"])
 
     def test_sync_skills_rooted_prunes_first_level_system_bridge_directories(self) -> None:
         skills_dir = self.repo_root / ".agents" / "skills"
@@ -721,7 +695,7 @@ class TestAskSkillsSyncSecurity(TestCase):
             self.repo_root,
             scope="workspace",
             dry_run=False,
-            projection="rooted",
+            projection="flat",
         )
 
         self.assertEqual(result.status, "success")
@@ -755,7 +729,7 @@ class TestAskSkillsSyncSecurity(TestCase):
             self.repo_root,
             scope="workspace",
             dry_run=False,
-            projection="rooted",
+            projection="flat",
         )
 
         self.assertEqual(result.status, "success")
@@ -786,7 +760,7 @@ class TestAskSkillsSyncSecurity(TestCase):
             self.repo_root,
             scope="workspace",
             dry_run=False,
-            projection="rooted",
+            projection="flat",
         )
 
         self.assertEqual(result.status, "success")
@@ -805,7 +779,7 @@ class TestAskSkillsSyncSecurity(TestCase):
             self.repo_root,
             scope="unknown",
             dry_run=True,
-            projection="rooted",
+            projection="flat",
         )
 
         self.assertEqual(result.status, "error")
@@ -1199,7 +1173,7 @@ class TestAskSkillsSyncSecurity(TestCase):
                 plugin_root,
             )
 
-        self.assertTrue(any("Skipped protected command-surface duplicate plugin skill entry" in log for log in logs))
+        self.assertTrue(any("Skipped protected SDK duplicate plugin skill entry" in log for log in logs))
         self.assertEqual([], deletes)
         self.assertTrue(skill_dir.exists())
 
@@ -1468,7 +1442,7 @@ class TestAskSkillsSyncSecurity(TestCase):
                 self.repo_root,
                 scope="workspace",
                 dry_run=False,
-                projection="rooted",
+                projection="flat",
             )
 
         self.assertEqual(result.status, "success")

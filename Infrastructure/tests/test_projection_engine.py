@@ -19,23 +19,23 @@ class TestProjectionEngine(unittest.TestCase):
         self.assertEqual(decision.projection_mode, "flat")
         self.assertEqual(decision.mode_source, "default")
 
-    def test_env_projection_mode_is_used_when_cli_missing(self) -> None:
-        decision = normalize_projection_mode(env={"SYNC_SKILLS_PROJECTION_MODE": "rooted"})
+    def test_env_projection_mode_rejects_removed_rooted_mode(self) -> None:
+        with self.assertRaises(ProjectionModeError) as ctx:
+            normalize_projection_mode(env={"SYNC_SKILLS_PROJECTION_MODE": "rooted"})
 
-        self.assertEqual(decision.projection_mode, "rooted")
-        self.assertEqual(decision.mode_source, "env")
+        self.assertEqual(ctx.exception.code, "ERR_INVALID_PROJECTION_MODE")
 
     def test_cli_projection_mode_wins_over_env(self) -> None:
-        decision = normalize_projection_mode("flat", env={"SYNC_SKILLS_PROJECTION_MODE": "rooted"})
+        decision = normalize_projection_mode("flat", env={"SYNC_SKILLS_PROJECTION_MODE": "hybrid"})
 
         self.assertEqual(decision.projection_mode, "flat")
         self.assertEqual(decision.mode_source, "cli")
 
-    def test_skill_tree_alias_maps_to_rooted(self) -> None:
-        decision = normalize_projection_mode("skill-tree", env={})
+    def test_skill_tree_alias_is_removed_with_rooted_mode(self) -> None:
+        with self.assertRaises(ProjectionModeError) as ctx:
+            normalize_projection_mode("skill-tree", env={})
 
-        self.assertEqual(decision.projection_mode, "rooted")
-        self.assertEqual(decision.alias_of, "rooted")
+        self.assertEqual(ctx.exception.code, "ERR_INVALID_PROJECTION_MODE")
 
     def test_hybrid_is_deferred(self) -> None:
         with self.assertRaises(ProjectionModeError) as ctx:

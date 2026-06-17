@@ -29,7 +29,7 @@ RUNTIME_REACHABILITY_FAILURES = {
     "codex_user_link",
     "agents_user_link",
 }
-DEFAULT_RECOVERY_PROJECTION_MODE = "rooted"
+DEFAULT_RECOVERY_PROJECTION_MODE = "flat"
 
 
 def normalize_runtime_target(runtime_target: object) -> str:
@@ -85,22 +85,15 @@ def _utc_now() -> str:
 
 def _proof_recovery_projection_mode(
     *,
-    command_visibility: str,
     runtime_visibility: str,
 ) -> str:
     """
     Choose the projection mode used in runtime-proof recovery commands.
 
-    Direct handles and explicitly flat runtime rows need the flat picker projection.
-    Rooted rows and latent target handles need the rooted projection because those
-    handles are invoked through generated root skill-set directories. Unknown
-    visibility combinations default to rooted so recovery refreshes the broadest
-    command surface without pruning target handle roots.
+    SDK runtime proof always recovers through flat projection. Rooted projection
+    is no longer a supported SDK recovery path.
     """
-    if runtime_visibility == "root":
-        return "rooted"
-    if runtime_visibility == "flat" or command_visibility == "direct":
-        return "flat"
+    _ = runtime_visibility
     return DEFAULT_RECOVERY_PROJECTION_MODE
 
 
@@ -773,7 +766,7 @@ def _probe_payload(context: dict[str, Any], proof: dict[str, Any]) -> dict[str, 
     
     Returns:
         dict[str, Any]: Probe payload with the following keys:
-            `schema_version` (str): Payload schema identifier (`"command-handle-runtime-probe.v1"`).
+            `schema_version` (str): Payload schema identifier (`"sdk-skill-runtime-probe.v1"`).
             `handle` (str): Normalized skill handle.
             `runtime_target` (str): Target runtime name (e.g., `"codex"`, `"agents"`).
             `runtime_status` (str): Derived runtime status (e.g., `"implemented_enforced"`, `"blocked_runtime"`).
@@ -783,7 +776,7 @@ def _probe_payload(context: dict[str, Any], proof: dict[str, Any]) -> dict[str, 
             `proof` (dict[str, Any]): The embedded raw proof object.
     """
     return {
-        "schema_version": "command-handle-runtime-probe.v1",
+        "schema_version": "sdk-skill-runtime-probe.v1",
         "handle": context["handle"],
         "runtime_target": context["runtime_target"],
         "runtime_status": context["runtime_status"],
@@ -914,7 +907,7 @@ def _recovery_plan(context: dict[str, Any]) -> dict[str, Any]:
                 "command": context["command"],
                 "preconditions": [
                     f"{_runtime_display_name(context['runtime_target'])} skill runtime points at "
-                    "the workspace command-surface projection."
+                    "the workspace SDK-flat projection."
                 ],
                 "permission_profile": {
                     "filesystem": "read workspace and user runtime skill links",
@@ -930,7 +923,7 @@ def _recovery_plan(context: dict[str, Any]) -> dict[str, Any]:
         "reason": recovery_reason,
         "next_commands": next_commands,
         "preconditions": [
-            "Run workspace and user skill sync if the runtime link or command-surface handle is absent."
+            "Run workspace and user skill sync if the SDK skill handle or runtime link is absent."
         ],
         "permission_profile": {
             "filesystem": "workspace evidence write and user runtime link read",
@@ -1009,7 +1002,7 @@ def _runtime_card_payload(
                 "class": "skill_invocation_not_asserted",
                 "message": (
                     f"{runtime_display} session metadata was observed for this workspace; this proof still verifies "
-                    "command-surface reachability rather than a dedicated skill tool invocation event. "
+                    "SDK-flat runtime reachability rather than a dedicated skill tool invocation event. "
                     "Agents observability counters are attached when available but are not treated as "
                     "per-skill invocation proof."
                 ),
@@ -1020,7 +1013,7 @@ def _runtime_card_payload(
             {
                 "class": "manual_session_gate",
                 "message": (
-                    "Runtime reachability proves command-surface wiring; it does not execute an interactive session."
+                    "Runtime reachability proves SDK-flat wiring; it does not execute an interactive session."
                 ),
             }
         ]
@@ -1032,7 +1025,7 @@ def _runtime_card_payload(
         "runtime_target": context["runtime_target"],
         "runtime_status": context["runtime_status"],
         "skill_handle": context["handle"],
-        "command_handle": "$" + context["handle"],
+        "sdk_skill_name": context["handle"],
         "runtime_session": runtime_session,
         "thread_runs": thread_runs,
         "turn_events": turn_events,
@@ -1069,7 +1062,7 @@ def _runtime_card_payload(
     }
 
 
-def emit_command_handle_runtime_evidence(
+def emit_sdk_skill_runtime_evidence(
     *,
     repo_root: Path,
     proof: dict[str, Any],
@@ -1172,7 +1165,7 @@ def emit_command_handle_runtime_evidence(
     }
 
 
-def build_command_handle_proof(
+def build_sdk_skill_proof(
     *,
     repo_root: Path,
     handle: str,
@@ -1181,14 +1174,14 @@ def build_command_handle_proof(
     home_path: Path,
 ) -> dict[str, Any]:
     """
-    Build a runtime reachability proof for a skill resolved from command-surface metadata.
+    Build a runtime reachability proof for an SDK-flat skill handle.
     
     Parameters:
-    	repo_root (Path): Repository root used to resolve workspace paths.
-    	handle (str): Skill handle identifier (may include a leading `$`).
-    	runtime_target (object): Requested runtime target; will be normalized to a lowercase string (e.g. "any", "codex", "agents").
-    	resolve_skill_handle_fn (callable): Callable used to resolve the handle to repository resolution metadata.
-	    home_path (Path): User home path used to inspect user runtime projections under `.codex` and `.agents`.
+        repo_root (Path): Repository root used to resolve workspace paths.
+        handle (str): Skill name identifier. A leading `$` mention marker is normalized away.
+        runtime_target (object): Requested runtime target; will be normalized to a lowercase string (e.g. "any", "codex", "agents").
+        resolve_skill_handle_fn (callable): Callable used to resolve the handle to repository resolution metadata.
+        home_path (Path): User home path used to inspect user runtime projections under `.codex` and `.agents`.
     
     Returns:
         proof (dict[str, Any]): A proof payload describing gate results, validation commands, resolution and workspace/user runtime state, available runtimes, and, on failure, a `runtime_failure` entry with recovery guidance. If required runtime gates are satisfied, the payload may include a `live_runtime_invocation` hint for manual verification.
@@ -1198,7 +1191,7 @@ def build_command_handle_proof(
     if runtime_target not in SUPPORTED_RUNTIME_TARGETS:
         runtime_failure = invalid_runtime_target_failure(normalized, runtime_target)
         return {
-            "schema_version": "command-handle-proof.v2",
+            "schema_version": "sdk-skill-proof.v1",
             "handle": normalized,
             "runtime_target": runtime_target,
             "status": "fail",
@@ -1227,11 +1220,15 @@ def build_command_handle_proof(
     source_path_value = str(resolution.get("source_path") or "").strip()
     expected_source = repo_root / source_path_value if source_path_value else None
     canonical_source_exists = bool(expected_source and expected_source.is_file())
-    command_visibility = str(resolution.get("command_visibility") or "").strip().lower()
     runtime_visibility = str(resolution.get("runtime_visibility") or "").strip().lower()
-    requires_direct_projection = command_visibility == "direct" or runtime_visibility in {"flat", "root"}
-    direct_projection_skill = expected_runtime / normalized / "SKILL.md"
+    requires_direct_projection = runtime_visibility == "flat"
+    runtime_projection_path = str(resolution.get("runtime_projection_path") or "").strip()
+    if runtime_projection_path:
+        direct_projection_skill = repo_root / runtime_projection_path
+    else:
+        direct_projection_skill = expected_runtime / normalized / "SKILL.md"
     direct_projection_exists = bool(direct_projection_skill.is_file())
+    direct_runtime_projection_ready = (not requires_direct_projection) or direct_projection_exists
 
     def link_payload(path: Path) -> dict[str, object]:
         payload: dict[str, object] = {
@@ -1260,7 +1257,7 @@ def build_command_handle_proof(
     gates = {
         "resolver": resolution.get("status") == "ok",
         "canonical_source_exists": canonical_source_exists,
-        "direct_runtime_projection": (not requires_direct_projection) or direct_projection_exists,
+        "direct_runtime_projection": direct_runtime_projection_ready,
         "codex_user_link": bool(codex_link["points_to_workspace_runtime"]),
         "agents_user_link": bool(agents_link["points_to_workspace_runtime"]),
         "user_runtime_alias_consistent": runtime_aliases["status"] != "split_brain",
@@ -1304,11 +1301,10 @@ def build_command_handle_proof(
     if runtime_target != "any":
         validation_args.extend(["--runtime-target", runtime_target])
     recovery_projection_mode = _proof_recovery_projection_mode(
-        command_visibility=command_visibility,
         runtime_visibility=runtime_visibility,
     )
     runtime_diagnostics = {
-        "schema_version": "command-handle-runtime-diagnostics.v1",
+        "schema_version": "sdk-skill-runtime-diagnostics.v1",
         "selected_runtime_target": runtime_target,
         "failed_gate": failed_check_id,
         "expected_workspace_runtime": str(expected_runtime),
@@ -1321,7 +1317,6 @@ def build_command_handle_proof(
             "required": requires_direct_projection,
             "path": str(direct_projection_skill),
             "exists": direct_projection_exists,
-            "command_visibility": command_visibility,
             "runtime_visibility": runtime_visibility,
         },
         "recovery_risk": (
@@ -1392,7 +1387,7 @@ def build_command_handle_proof(
         ],
     }
     proof = {
-        "schema_version": "command-handle-proof.v2",
+        "schema_version": "sdk-skill-proof.v1",
         "handle": normalized,
         "runtime_target": runtime_target,
         "status": "pass" if all(core_gates) and required_runtime_ready else "fail",

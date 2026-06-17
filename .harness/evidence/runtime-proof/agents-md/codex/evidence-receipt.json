@@ -1,0 +1,22 @@
+{
+  "artifact_path": ".harness/evidence/runtime-proof/agents-md/codex/runtime-card.json",
+  "blocker_class": "none",
+  "claim": "agents-md is reachable in the Codex runtime.",
+  "claim_status": "pass",
+  "command": "./bin/ask skills proof agents-md --runtime-target codex --json --robot",
+  "evidence_type": "command",
+  "exit_code": 0,
+  "observed_at": "2026-06-16T21:08:09Z",
+  "probe_artifact_path": ".harness/evidence/runtime-proof/agents-md/codex/probe.json",
+  "probe_command": "./bin/ask skills proof agents-md --runtime-target codex --json --robot",
+  "probe_exit_code": 0,
+  "receipt_id": "runtime-proof-agents-md-codex",
+  "runtime_status": "implemented_enforced",
+  "runtime_target": "codex",
+  "source_paths": [
+    "Skills/agent-ops/agents-md/SKILL.md",
+    "Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py",
+    "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+  ],
+  "verifier": "ask.skills.proof"
+}

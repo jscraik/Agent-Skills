@@ -2,10 +2,8 @@
 
 Canonical skills live in categorized folders below.
 
-Runtime projection is mode-dependent:
-- `flat`: first-party repo skills are projected directly unless explicitly hidden.
-- `rooted`: only root skill sets are projected; latent modules route through `.skillsets/**` manifests.
-- `hybrid`: deferred until a named consumer and budget gate exist.
+Runtime projection defaults to SDK-flat: first-party repo skills are projected directly unless explicitly hidden.
+SDK skill names are the public runtime handles; generated rooted manifests and command-surface metadata are obsolete.
 
 Do not hand-edit runtime projections.
 
@@ -34,7 +32,7 @@ Do not hand-edit runtime projections.
 - `agents-md` — Use when reviewing, creating, shrinking, or refactoring AGENTS.md agent instructions, agent config files, routing rules, or repository guidance that need scoped routing, dedupe, contradiction fixes, progressive disclosure, and cleaned instruction surfaces.
 - `alignment-checkpoint` — Create, review, and validate an alignment checkpoint. Use when a request is ambiguous, high-stakes, multi-step, or requires explicit approval before tool use.
 - `autofix` — Apply approved fixes for unresolved CodeRabbit review comments, Codex P1-P3 findings, PR feedback, and code review issues with validation evidence. Use when asked to address review comments, fix review findings, clear unresolved comments, or autofix PR feedback.
-- `autoresearch` — Run bounded automated experiment iterations by recording baselines, applying hypothesis patches, comparing metrics, protecting regression guards, and deciding keep, discard, rollback, or block. Use when $autoresearch is named or a repo/skill needs evidence-backed research, metric tracking, or safe optimisation loops.
+- `autoresearch` — Run bounded automated experiment iterations by recording baselines, applying hypothesis patches, comparing metrics, protecting regression guards, and deciding keep, discard, rollback, or block. Use when autoresearch is named or a repo/skill needs evidence-backed research, metric tracking, or safe optimisation loops.
 - `bash-hygiene` — Review, create, and validate Bash scripts when shell work needs strict mode, quoting safety, portability, or interpreter-compatible behavior.
 - `biome-linting` — Analyze, fix, and validate Biome linting workflows. Use when JavaScript or TypeScript projects need Biome commands, diagnostics, safe fixes, or CI lint gates.
 - `bootstrap` — Create, diagnose, and validate a local dev bootstrap. Use when the user asks to clone a repo, install toolchains, install dependencies, and prove the project runs.
