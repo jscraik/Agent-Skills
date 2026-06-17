@@ -101,6 +101,7 @@ class TestSdkSkillResolution(SdkSkillRegistryTempDirTestCase):
             "# he-phase-heartbeat\n",
             encoding="utf-8",
         )
+        _link_flat_projection(repo_root, "he-phase-heartbeat", skill_dir)
 
         payload = command_surface.resolve_skill_handle("he-phase-heartbeat", repo_root_path=repo_root)
 

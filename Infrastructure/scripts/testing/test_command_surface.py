@@ -39,7 +39,7 @@ class CommandSurfaceTests(unittest.TestCase):
         self.assertFalse(hasattr(COMMAND_SURFACE, "_validate_command_handle_payload"))
 
     def test_reviewer_role_serializes_without_removed_wrapper_path(self) -> None:
-        reviewer_role = getattr(COMMAND_SURFACE, "ReviewerRole")
+        reviewer_role = COMMAND_SURFACE.ReviewerRole
 
         role = reviewer_role(
             handle="skill-inspector",
@@ -58,9 +58,9 @@ class CommandSurfaceTests(unittest.TestCase):
         self.assertNotIn("command_visibility", payload)
 
     def test_parse_sdk_references_resolves_skills_and_reviewers(self) -> None:
-        parse_sdk_references = getattr(COMMAND_SURFACE, "parse_sdk_references")
-        original_skill_resolver = getattr(COMMAND_SURFACE, "resolve_skill_handle")
-        original_reviewer_resolver = getattr(COMMAND_SURFACE, "resolve_reviewer_handle")
+        parse_sdk_references = COMMAND_SURFACE.parse_sdk_references
+        original_skill_resolver = COMMAND_SURFACE.resolve_skill_handle
+        original_reviewer_resolver = COMMAND_SURFACE.resolve_reviewer_handle
 
         def fake_skill_resolver(handle: str, **_: object) -> dict[str, object]:
             return {
@@ -100,7 +100,7 @@ class CommandSurfaceTests(unittest.TestCase):
         )
 
     def test_reviewer_role_metadata_allows_unresolved_source(self) -> None:
-        reviewer_role = getattr(COMMAND_SURFACE, "ReviewerRole")
+        reviewer_role = COMMAND_SURFACE.ReviewerRole
 
         role = reviewer_role(
             handle="he-work",
