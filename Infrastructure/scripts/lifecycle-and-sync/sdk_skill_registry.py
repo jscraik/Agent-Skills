@@ -258,7 +258,11 @@ def build_sdk_skill_records(
     """Return SDK skill records from flat runtime first, then canonical source."""
     records: list[SdkSkillRecord] = []
     seen: set[str] = set()
-    for record in build_sdk_skill_record_candidates(repo_root_path=repo_root_path, visibility=visibility):
+    candidates = sorted(
+        build_sdk_skill_record_candidates(repo_root_path=repo_root_path, visibility=visibility),
+        key=_record_publish_priority,
+    )
+    for record in candidates:
         if record.handle in seen:
             continue
         records.append(record)
@@ -287,6 +291,43 @@ def _collision_policy_path(path: str) -> str:
     if parts and parts[0] == "plugins":
         return "/".join(("Plugins", *parts[1:]))
     return "/".join(parts)
+
+
+def _suppress_duplicate_policy_rank(record: SdkSkillRecord) -> int:
+    normalized_path = _collision_policy_path(record.source_path)
+    for policy in PLUGIN_SKILL_COLLISION_POLICIES:
+        if policy.get("resolution") != "suppress_duplicate":
+            continue
+        if policy.get("name") != record.handle:
+            continue
+        canonical_path = _collision_policy_path(str(policy.get("canonical_path") or ""))
+        suppressed_paths = {
+            _collision_policy_path(str(path))
+            for path in policy.get("suppressed_paths", ())
+        }
+        policy_paths = {
+            _collision_policy_path(str(path))
+            for path in policy.get("paths", ())
+        }
+        if normalized_path == canonical_path:
+            return 0
+        if normalized_path in suppressed_paths:
+            return 2
+        if normalized_path in policy_paths:
+            return 1
+    return 0
+
+
+def _record_publish_priority(record: SdkSkillRecord) -> tuple[str, int, int, str, str, str]:
+    runtime_rank = 0 if record.runtime_projection_path else 1
+    return (
+        record.handle,
+        _suppress_duplicate_policy_rank(record),
+        runtime_rank,
+        record.scope,
+        record.owner,
+        record.source_path,
+    )
 
 
 def _qualified_policy_name(handle: str, source_path: str) -> str | None:
@@ -383,7 +424,7 @@ def resolve_sdk_skill_handle(handle: str, *, repo_root_path: Path | None = None)
             "operator_action": "Run ./bin/ask skills list --json --robot to list SDK-visible skills.",
         }
     if len(matches) > 1 and _policy_manages_collision(requested, {match.source_path for match in matches}):
-        matches = sorted(matches, key=lambda item: (item.scope, item.owner, item.handle, item.source_path))[:1]
+        matches = sorted(matches, key=_record_publish_priority)[:1]
     if len(matches) > 1:
         return {
             "status": "error",

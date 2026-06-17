@@ -18,7 +18,7 @@ from sdk_skill_registry import (
 )
 from selection_policy import policy_identity
 
-SKILL_MENTION_RE = re.compile(r"(?<![\w./-])\$([a-z][a-z0-9-]*)")
+SKILL_MENTION_RE = re.compile(r"(?<![\w./-])\$([a-z][a-z0-9-]*(?::[a-z][a-z0-9-]*)?)(?![:\w-])")
 REVIEWER_MENTION_RE = re.compile(r"(?<![\w./-])@([A-Za-z0-9][A-Za-z0-9_-]*)")
 REVIEWER_MANIFEST = Path(
     os.environ.get("CODEX_AGENTS_MANIFEST", Path.home() / ".codex" / "agents" / "manifest.json")

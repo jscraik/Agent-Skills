@@ -173,6 +173,30 @@ class TestSdkSkillResolution(SdkSkillRegistryTempDirTestCase):
         self.assertEqual(raw["status"], "error")
         self.assertEqual(raw["error_code"], "unknown_handle")
 
+    def test_suppress_duplicate_plugin_collision_prefers_canonical_cache_record(self) -> None:
+        repo_root = self.temp_dir / "repo"
+        _write_skill_source(
+            repo_root,
+            "github",
+            root="Plugins/cache/openai-curated/github/3e1ccdb3/skills",
+        )
+        _write_skill_source(
+            repo_root,
+            "github",
+            root="Plugins/cache/openai-curated-remote/github/0.1.2/skills",
+        )
+
+        report = command_surface.handles_report(repo_root_path=repo_root)
+        payload = command_surface.resolve_skill_handle("github", repo_root_path=repo_root)
+
+        self.assertEqual(report["status"], "pass")
+        self.assertEqual(payload["status"], "ok")
+        self.assertEqual(
+            payload["source_path"],
+            "Plugins/cache/openai-curated/github/3e1ccdb3/skills/github/SKILL.md",
+        )
+        self.assertNotIn("openai-curated-remote", payload["source_path"])
+
     def test_reviewer_resolver_keeps_reviewers_out_of_skill_namespace(self) -> None:
         manifest = self.temp_dir / "agents.json"
         manifest.write_text(
@@ -308,6 +332,31 @@ class TestSdkSkillProof(SdkSkillRegistryTempDirTestCase):
         self.assertTrue(proof["gates"]["user_runtime_ready"])
         self.assertEqual(result.data["runtime_evidence"]["status"], "skipped")
         self.assertFalse((repo_root / ".harness" / "evidence").exists())
+
+    def test_skills_proof_uses_projection_path_for_qualified_handles(self) -> None:
+        repo_root = self.temp_dir / "repo"
+        source = _write_skill_source(
+            repo_root,
+            "agents-sdk",
+            root="Plugins/cache/openai-curated/cloudflare/3e1ccdb3/skills",
+        )
+        skills_dir = _link_flat_projection(repo_root, "agents-sdk", source)
+
+        home = self.temp_dir / "home"
+        agents_skills = home / ".agents" / "skills"
+        agents_skills.parent.mkdir(parents=True)
+        agents_skills.symlink_to(skills_dir)
+
+        with mock.patch("pathlib.Path.home", return_value=home):
+            result = skills_proof(repo_root, "cloudflare:agents-sdk", runtime_target="agents")
+
+        proof = result.data["proof"]
+        direct_projection = proof["runtime_diagnostics"]["direct_runtime_projection"]
+        self.assertEqual(result.status, "success")
+        self.assertEqual(proof["status"], "pass")
+        self.assertTrue(proof["gates"]["direct_runtime_projection"])
+        self.assertTrue(direct_projection["path"].endswith(".agents/skills/agents-sdk/SKILL.md"))
+        self.assertNotIn("cloudflare:agents-sdk", direct_projection["path"])
 
     def test_skills_proof_runtime_target_agents_writes_runtime_card(self) -> None:
         repo_root = self.temp_dir / "repo"

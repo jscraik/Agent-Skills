@@ -4540,34 +4540,55 @@ class TestAskCLI(unittest.TestCase):
 
     def test_skills_sync_projection_reaches_engine(self):
         """Verify --projection is dispatched and cannot be silently ignored."""
-        for mode in ("flat", "rooted"):
-            with self.subTest(mode=mode):
-                cmd = [
-                    "python3",
-                    "Infrastructure/bin/ask",
-                    "skills",
-                    "sync",
-                    "--scope",
-                    "workspace",
-                    "--projection",
-                    mode,
-                    "--dry-run",
-                    "--json",
-                ]
-                result = _run_cli(cmd)
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "sync",
+            "--scope",
+            "workspace",
+            "--projection",
+            "flat",
+            "--dry-run",
+            "--json",
+        ]
+        result = _run_cli(cmd)
 
-                self.assertEqual(result.returncode, 0, result.stderr)
-                output = json.loads(result.stdout)
-                self.assertEqual(output["status"], "success")
-                self.assertEqual(output["data"]["projection_mode"], mode)
-                self.assertEqual(output["data"]["projection"]["engine"], "projection_engine.py")
-                self.assertEqual(
-                    output["data"]["validation_commands"],
-                    [f"./bin/ask skills sync --dry-run --projection {mode} --json --robot"],
-                )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        self.assertEqual(output["data"]["projection_mode"], "flat")
+        self.assertEqual(output["data"]["projection"]["engine"], "projection_engine.py")
+        self.assertEqual(
+            output["data"]["validation_commands"],
+            ["./bin/ask skills sync --dry-run --projection flat --json --robot"],
+        )
 
-    def test_skills_sync_rooted_alias_dry_run_reports_canonical_mode(self):
-        """Rooted aliases must report the canonical projection mode in dry-run plans."""
+    def test_skills_sync_rejects_removed_rooted_projection(self):
+        """Rooted mode is removed from the SDK-flat sync contract."""
+        cmd = [
+            "python3",
+            "Infrastructure/bin/ask",
+            "skills",
+            "sync",
+            "--scope",
+            "workspace",
+            "--projection",
+            "rooted",
+            "--dry-run",
+            "--json",
+        ]
+        result = _run_cli(cmd)
+
+        self.assertNotEqual(result.returncode, 0)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "error")
+        self.assertIsNone(output["data"]["projection_mode"])
+        self.assertEqual(output["data"]["requested_projection_mode"], "rooted")
+        self.assertEqual(output["errors"][0]["code"], "ERR_INVALID_PROJECTION_MODE")
+
+    def test_skills_sync_rejects_removed_skill_tree_alias(self):
+        """Rooted aliases are removed with rooted mode."""
         cmd = [
             "python3",
             "Infrastructure/bin/ask",
@@ -4582,12 +4603,12 @@ class TestAskCLI(unittest.TestCase):
         ]
         result = _run_cli(cmd)
 
-        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertNotEqual(result.returncode, 0)
         output = json.loads(result.stdout)
-        self.assertEqual(output["status"], "success")
-        self.assertEqual(output["data"]["projection_mode"], "rooted")
-        self.assertEqual(output["data"]["projection"]["requested_mode"], "skill-tree")
-        self.assertEqual(output["data"]["plan"]["validation_status"], "pass")
+        self.assertEqual(output["status"], "error")
+        self.assertIsNone(output["data"]["projection_mode"])
+        self.assertEqual(output["data"]["requested_projection_mode"], "skill-tree")
+        self.assertEqual(output["errors"][0]["code"], "ERR_INVALID_PROJECTION_MODE")
 
     def test_skills_sync_rejects_deferred_hybrid_projection(self):
         """Hybrid remains out of mutating scope until a named consumer exists."""

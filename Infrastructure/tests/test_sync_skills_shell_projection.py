@@ -55,21 +55,21 @@ class TestSyncSkillsShellProjection(unittest.TestCase):
             script.index("Skipping plugin-owned skill from flat projection"),
         )
 
-    def test_rooted_projection_delegates_to_ask_engine_in_dry_run(self) -> None:
+    def test_removed_rooted_projection_fails_closed_in_dry_run(self) -> None:
         result = _run_sync_script(["--workspace", "--projection", "rooted", "--dry-run"])
 
-        self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn("rooted", result.stdout)
-        self.assertIn("Dry-run rooted projection", result.stdout)
+        self.assertEqual(result.returncode, 2)
+        output = result.stdout + result.stderr
+        self.assertIn("Unsupported projection mode 'rooted'", output)
 
     def test_project_local_is_legacy_workspace_alias(self) -> None:
-        result = _run_sync_script(["--project-local", "--projection", "rooted", "--dry-run"])
+        result = _run_sync_script(["--project-local", "--projection", "flat", "--dry-run"])
 
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn("rooted", result.stdout)
+        self.assertIn("flat", result.stdout)
 
     def test_invalid_scope_fails_before_projection_policy(self) -> None:
-        result = _run_sync_script(["--projection", "rooted"], env={"SYNC_SKILLS_SCOPE": "elsewhere"})
+        result = _run_sync_script(["--projection", "flat"], env={"SYNC_SKILLS_SCOPE": "elsewhere"})
 
         self.assertEqual(result.returncode, 2)
         self.assertIn("Invalid sync scope: elsewhere", result.stderr)

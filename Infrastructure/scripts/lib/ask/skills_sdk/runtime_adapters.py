@@ -1222,7 +1222,11 @@ def build_sdk_skill_proof(
     canonical_source_exists = bool(expected_source and expected_source.is_file())
     runtime_visibility = str(resolution.get("runtime_visibility") or "").strip().lower()
     requires_direct_projection = runtime_visibility == "flat"
-    direct_projection_skill = expected_runtime / normalized / "SKILL.md"
+    runtime_projection_path = str(resolution.get("runtime_projection_path") or "").strip()
+    if runtime_projection_path:
+        direct_projection_skill = repo_root / runtime_projection_path
+    else:
+        direct_projection_skill = expected_runtime / normalized / "SKILL.md"
     direct_projection_exists = bool(direct_projection_skill.is_file())
     direct_runtime_projection_ready = direct_projection_exists
 
