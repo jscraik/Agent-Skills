@@ -204,7 +204,7 @@ def removed_projection_payload(action: str) -> dict[str, Any]:
         "schema_version": "sdk-removed-projection.v1",
         "status": "error",
         "action": action,
-        "error_code": "ERR_REMOVED_PROJECTION",
+        "error_code": "ERR_INVALID_PROJECTION_MODE",
         "message": "Removed projection generation is not part of the SDK skill path.",
         "fix_suggestion": "Use ./bin/ask skills sync --scope workspace --projection flat --json --robot and ./bin/ask skills handles --check --json --robot.",
         "violations": [{"code": "REMOVED_PROJECTION_GENERATION"}],

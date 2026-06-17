@@ -1228,7 +1228,7 @@ def skills_handles(
         result.status = "error"
         result.errors.append(
             ErrorObject(
-                code="ERR_REMOVED_PROJECTION",
+                code="ERR_INVALID_PROJECTION_MODE",
                 message="Removed projection flags are not part of the SDK handles path.",
                 fix_suggestion="Use ./bin/ask skills sync --scope workspace --projection flat --json --robot, then rerun ./bin/ask skills handles --check --json --robot.",
             )
@@ -1248,6 +1248,11 @@ def skills_handles(
         "validation_commands": [_skills_validation_command("handles", *validation_args)],
     }
     result.data["sdk_handles"] = report
+    result.data["command_surface"] = {
+        **report,
+        "schema_version": "command-surface.v1",
+        "generated_from": "sdk_flat_registry_compat_alias",
+    }
     result.data["handles"] = handles
     result.data["violations"] = violations
     result.data["policy_identity"] = get_policy_identity()
@@ -3103,7 +3108,7 @@ def _resolve_doctor_target(repo_root: Path, target: str) -> tuple[dict[str, Any]
     resolution = resolve_skill_handle(query, repo_root_path=repo_root)
     audit_target = _skill_audit_target(repo_root, resolution) if resolution.get("status") == "ok" else None
     return {
-        "target_kind": "skill_handle",
+        "target_kind": "command_handle",
         "handle": resolution.get("handle", query.lstrip("$")),
         "source_path": resolution.get("source_path"),
         "source_exists": bool(audit_target and (repo_root / audit_target / "SKILL.md").is_file()),
@@ -6738,6 +6743,13 @@ def _prune_generated_root_skill_dirs(
     return logs
 
 
+def _generated_root_skill_dir_names(target_dir: Path) -> list[str]:
+    """Return generated rooted projection entries still present in the flat runtime lane."""
+    if not target_dir.exists():
+        return []
+    return sorted(item.name for item in target_dir.iterdir() if _is_generated_root_skill_dir(item))
+
+
 SYSTEM_BRIDGE_ALIAS_MARKER = ".agent-skills-system-bridge-alias.json"
 
 
@@ -7382,6 +7394,34 @@ def sync_skills(
             )
     elif scope == "user":
         try:
+            rooted_entries = _generated_root_skill_dir_names(skills_dir)
+            if rooted_entries:
+                plan["validation_status"] = "fail"
+                plan["warnings"].append("ROOTED_WORKSPACE_RESIDUE")
+                plan["rooted_workspace_entries"] = rooted_entries
+                result.errors.append(
+                    ErrorObject(
+                        code="ERR_VALIDATION",
+                        message=(
+                            "Workspace runtime still contains generated rooted skill-set entries: "
+                            + ", ".join(rooted_entries)
+                        ),
+                        fix_suggestion=(
+                            "Run ./bin/ask skills sync --scope workspace --projection flat --json --robot "
+                            "before relinking user runtime skills."
+                        ),
+                    )
+                )
+                return _finalize_skill_sync_result(
+                    result,
+                    plan,
+                    logs,
+                    projection_decision,
+                    scope=scope,
+                    dry_run=dry_run,
+                    status="error",
+                    plugin_cache_refresh=plugin_cache_refresh,
+                )
             _append_user_runtime_relinks(plan, logs, repo_root, skills_dir, dry_run=dry_run)
             relink_errors = _verify_user_runtime_relinks(plan, Path.home(), skills_dir, dry_run=dry_run)
             if relink_errors:
