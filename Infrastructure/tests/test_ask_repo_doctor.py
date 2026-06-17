@@ -131,6 +131,26 @@ def _handles_projection_check_failed_without_violations_result() -> CallResult:
     )
 
 
+def _package_result() -> CallResult:
+    return _result(
+        data={
+            "skill_package": {
+                "status": "ready",
+                "target": "skill-factory-router",
+                "handle": "skill-factory-router",
+                "readiness_level": "ready",
+                "promotion_status": "ready",
+                "checkout_test_status": "pass",
+                "missing_fields": [],
+                "blocked_reasons": [],
+                "install_ready": True,
+                "promotion_ready": True,
+                "share_ready": True,
+            }
+        },
+    )
+
+
 def _surface_result(warning_count: int = 0) -> CallResult:
     blocking_counts = {"tracked_historical_artifact": warning_count} if warning_count else {}
     return _result(
@@ -229,6 +249,9 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.bootstrap_patch = patch("ask.commands.repo_impl.run_bootstrap_checks", return_value=_bootstrap_proof())
         self.bootstrap_patch.start()
         self.addCleanup(self.bootstrap_patch.stop)
+        self.package_patch = patch("ask.commands.repo_impl.skills_package", return_value=_package_result())
+        self.package_patch.start()
+        self.addCleanup(self.package_patch.stop)
 
     def test_all_pass_returns_existing_inspection_next_command(self) -> None:
         with patch("ask.commands.repo_impl.repo_status", return_value=_status_result()), patch(
