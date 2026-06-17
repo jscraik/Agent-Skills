@@ -11,7 +11,7 @@
     "runtime_target": "codex",
     "runtime_status": "blocked_runtime",
     "created_at": "2026-05-24T22:30:00Z",
-    "workspace_root": "/Users/jamiecraik/dev/agent-skills",
+    "workspace_root": "${WORKSPACE_ROOT}",
     "actor_type": "agent",
     "visibility_status": "user_observable",
     "unavailable_reason": "Codex runtime unavailable in fixture mode"
@@ -29,7 +29,7 @@
         ],
         "source_hash": "fixture-sha"
       },
-      "workspace_root": "/Users/jamiecraik/dev/agent-skills",
+      "workspace_root": "${WORKSPACE_ROOT}",
       "actor_type": "agent",
       "mutation_scope": "evidence_write",
       "visibility_status": "user_observable",
@@ -70,7 +70,7 @@
     "network": "not_required",
     "filesystem": "evidence_write"
   },
-  "workspace_root": "/Users/jamiecraik/dev/agent-skills",
+  "workspace_root": "${WORKSPACE_ROOT}",
   "actor_type": "agent",
   "mutation_scope": "evidence_write",
   "visibility_status": "user_observable",

@@ -61,7 +61,7 @@ class TestRuntimeProofValidation(unittest.TestCase):
             repo_root = Path(temp_dir) / "repo"
             repo_root.mkdir()
             proof = {
-                "schema_version": "command-handle-proof.v2",
+                "schema_version": "sdk-skill-proof.v1",
                 "handle": "../escape",
                 "runtime_target": "codex",
                 "status": "fail",
@@ -73,7 +73,7 @@ class TestRuntimeProofValidation(unittest.TestCase):
                 },
             }
 
-            summary = runtime_adapters.emit_command_handle_runtime_evidence(
+            summary = runtime_adapters.emit_sdk_skill_runtime_evidence(
                 repo_root=repo_root,
                 proof=proof,
                 actor_type="agent",
@@ -100,7 +100,7 @@ class TestRuntimeProofValidation(unittest.TestCase):
             workspace_handle.write_text("---\nname: autofix\n---\n", encoding="utf-8")
             codex_handle = repo_root / ".tmp-home" / ".codex" / "skills" / "autofix" / "SKILL.md"
             proof = {
-                "schema_version": "command-handle-proof.v2",
+                "schema_version": "sdk-skill-proof.v1",
                 "handle": "autofix",
                 "runtime_target": "codex",
                 "status": "fail",
@@ -121,7 +121,7 @@ class TestRuntimeProofValidation(unittest.TestCase):
                     "recovery_guidance": "Preview user runtime sync before applying it.",
                 },
                 "runtime_diagnostics": {
-                    "schema_version": "command-handle-runtime-diagnostics.v1",
+                    "schema_version": "sdk-skill-runtime-diagnostics.v1",
                     "selected_runtime_target": "codex",
                     "failed_gate": "codex_user_runtime_ready",
                     "expected_workspace_runtime": str(workspace_runtime.resolve(strict=False)),
@@ -136,8 +136,8 @@ class TestRuntimeProofValidation(unittest.TestCase):
                     "recovery_commands": [
                         {
                             "kind": "preview_user_runtime_sync",
-                            "command": "./bin/ask skills sync --scope user --projection rooted --dry-run --json --robot",
-                            "preconditions": ["Workspace rooted projection validates cleanly."],
+                            "command": "./bin/ask skills sync --scope user --projection flat --dry-run --json --robot",
+                            "preconditions": ["Workspace flat projection validates cleanly."],
                             "permission_profile": {
                                 "filesystem": "read workspace and user runtime links",
                                 "network": "not required",
@@ -158,7 +158,7 @@ class TestRuntimeProofValidation(unittest.TestCase):
                 },
             }
 
-            summary = runtime_adapters.emit_command_handle_runtime_evidence(
+            summary = runtime_adapters.emit_sdk_skill_runtime_evidence(
                 repo_root=repo_root,
                 proof=proof,
                 actor_type="agent",
@@ -182,7 +182,7 @@ class TestRuntimeProofValidation(unittest.TestCase):
             recovery_commands = card["recovery_plan"]["next_commands"]
             self.assertEqual(
                 recovery_commands[0]["command"],
-                "./bin/ask skills sync --scope user --projection rooted --dry-run --json --robot",
+                "./bin/ask skills sync --scope user --projection flat --dry-run --json --robot",
             )
             self.assertEqual(
                 recovery_commands[1]["command"],
@@ -249,7 +249,7 @@ class TestRuntimeProofValidation(unittest.TestCase):
                 encoding="utf-8",
             )
             proof = {
-                "schema_version": "command-handle-proof.v2",
+                "schema_version": "sdk-skill-proof.v1",
                 "handle": "autofix",
                 "runtime_target": "codex",
                 "status": "pass",
@@ -266,7 +266,7 @@ class TestRuntimeProofValidation(unittest.TestCase):
                 "gate_policy": {"required": ["codex_user_runtime_ready"]},
             }
 
-            summary = runtime_adapters.emit_command_handle_runtime_evidence(
+            summary = runtime_adapters.emit_sdk_skill_runtime_evidence(
                 repo_root=repo_root,
                 proof=proof,
                 actor_type="agent",
@@ -353,7 +353,7 @@ class TestRuntimeProofValidation(unittest.TestCase):
                 encoding="utf-8",
             )
             proof = {
-                "schema_version": "command-handle-proof.v2",
+                "schema_version": "sdk-skill-proof.v1",
                 "handle": "autofix",
                 "runtime_target": "codex",
                 "status": "pass",
@@ -366,7 +366,7 @@ class TestRuntimeProofValidation(unittest.TestCase):
                 "gate_policy": {"required": ["codex_user_runtime_ready"]},
             }
 
-            summary = runtime_adapters.emit_command_handle_runtime_evidence(
+            summary = runtime_adapters.emit_sdk_skill_runtime_evidence(
                 repo_root=repo_root,
                 proof=proof,
                 actor_type="agent",
@@ -447,7 +447,7 @@ class TestRuntimeProofValidation(unittest.TestCase):
                 encoding="utf-8",
             )
             proof = {
-                "schema_version": "command-handle-proof.v2",
+                "schema_version": "sdk-skill-proof.v1",
                 "handle": "autofix",
                 "runtime_target": "codex",
                 "status": "pass",
@@ -460,7 +460,7 @@ class TestRuntimeProofValidation(unittest.TestCase):
                 "gate_policy": {"required": ["codex_user_runtime_ready"]},
             }
 
-            summary = runtime_adapters.emit_command_handle_runtime_evidence(
+            summary = runtime_adapters.emit_sdk_skill_runtime_evidence(
                 repo_root=repo_root,
                 proof=proof,
                 actor_type="agent",
@@ -476,7 +476,7 @@ class TestRuntimeProofValidation(unittest.TestCase):
             self.assertEqual(card["runtime_session"]["runtime_status"], "partial")
             self.assertIn("session evidence is stale", card["runtime_session"]["unavailable_reason"])
 
-    def test_build_command_handle_proof_rejects_per_handle_symlink_without_root_symlink(self) -> None:
+    def test_build_sdk_skill_proof_rejects_per_handle_symlink_without_user_runtime_link(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir) / "repo"
             workspace_runtime = repo_root / ".agents" / "skills"
@@ -500,9 +500,10 @@ class TestRuntimeProofValidation(unittest.TestCase):
                     "status": "ok",
                     "handle": "autofix",
                     "source_path": "Skills/agent-ops/autofix/SKILL.md",
+                    "runtime_visibility": "flat",
                 }
 
-            proof = runtime_adapters.build_command_handle_proof(
+            proof = runtime_adapters.build_sdk_skill_proof(
                 repo_root=repo_root,
                 handle="autofix",
                 runtime_target="codex",
@@ -519,7 +520,7 @@ class TestRuntimeProofValidation(unittest.TestCase):
                 "foreign_or_unmanaged_root",
             )
 
-    def test_build_command_handle_proof_accepts_rooted_source_symlink(self) -> None:
+    def test_build_sdk_skill_proof_accepts_flat_source_symlink(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir) / "repo"
             source_handle = repo_root / "Skills" / "agent-ops" / "autofix" / "SKILL.md"
@@ -546,9 +547,10 @@ class TestRuntimeProofValidation(unittest.TestCase):
                     "status": "ok",
                     "handle": "autofix",
                     "source_path": "Skills/agent-ops/autofix/SKILL.md",
+                    "runtime_visibility": "flat",
                 }
 
-            proof = runtime_adapters.build_command_handle_proof(
+            proof = runtime_adapters.build_sdk_skill_proof(
                 repo_root=repo_root,
                 handle="autofix",
                 runtime_target="agents",
@@ -561,7 +563,7 @@ class TestRuntimeProofValidation(unittest.TestCase):
             self.assertTrue(proof["gates"]["agents_user_runtime_ready"])
             self.assertEqual(proof["runtime_satisfied_by"], "agents_user_runtime")
 
-    def test_build_command_handle_proof_uses_canonical_source_under_root_symlink(self) -> None:
+    def test_build_sdk_skill_proof_uses_canonical_source_under_user_runtime_link(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir) / "repo"
             source_handle = repo_root / "Skills" / "agent-ops" / "autofix" / "SKILL.md"
@@ -591,9 +593,10 @@ class TestRuntimeProofValidation(unittest.TestCase):
                     "status": "ok",
                     "handle": "autofix",
                     "source_path": "Skills/agent-ops/autofix/SKILL.md",
+                    "runtime_visibility": "flat",
                 }
 
-            proof = runtime_adapters.build_command_handle_proof(
+            proof = runtime_adapters.build_sdk_skill_proof(
                 repo_root=repo_root,
                 handle="autofix",
                 runtime_target="agents",
@@ -607,14 +610,16 @@ class TestRuntimeProofValidation(unittest.TestCase):
             self.assertTrue(proof["gates"]["agents_user_runtime_ready"])
             self.assertEqual(proof["runtime_satisfied_by"], "agents_user_runtime")
 
-    def test_build_command_handle_proof_reports_blocked_runtime_with_actionable_diagnostics(self) -> None:
+    def test_build_sdk_skill_proof_reports_blocked_runtime_with_actionable_diagnostics(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir) / "repo"
             workspace_runtime = repo_root / ".agents" / "skills"
             source_handle = repo_root / "Skills" / "agent-ops" / "autofix" / "SKILL.md"
             source_handle.parent.mkdir(parents=True)
             source_handle.write_text("---\\nname: autofix\\n---\\n", encoding="utf-8")
-            workspace_runtime.mkdir(parents=True)
+            workspace_handle_dir = workspace_runtime / "autofix"
+            workspace_handle_dir.parent.mkdir(parents=True)
+            workspace_handle_dir.symlink_to(source_handle.parent)
 
             home_path = repo_root / ".tmp-home"
             (home_path / ".codex" / "skills").mkdir(parents=True, exist_ok=True)
@@ -633,9 +638,10 @@ class TestRuntimeProofValidation(unittest.TestCase):
                     "status": "ok",
                     "handle": "autofix",
                     "source_path": "Skills/agent-ops/autofix/SKILL.md",
+                    "runtime_visibility": "flat",
                 }
 
-            proof = runtime_adapters.build_command_handle_proof(
+            proof = runtime_adapters.build_sdk_skill_proof(
                 repo_root=repo_root,
                 handle="autofix",
                 runtime_target="codex",
@@ -667,15 +673,15 @@ class TestRuntimeProofValidation(unittest.TestCase):
             }
             self.assertEqual(
                 recovery_commands["preview_user_runtime_sync"],
-                "./bin/ask skills sync --scope user --projection rooted --dry-run --json --robot",
+                "./bin/ask skills sync --scope user --projection flat --dry-run --json --robot",
             )
             self.assertEqual(
                 recovery_commands["refresh_workspace_projection"],
-                "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
+                "./bin/ask skills sync --scope workspace --projection flat --json --robot",
             )
             self.assertEqual(
                 recovery_commands["apply_user_runtime_sync"],
-                "./bin/ask skills sync --scope user --projection rooted --json --robot",
+                "./bin/ask skills sync --scope user --projection flat --json --robot",
             )
 
     def test_schema_files_accept_valid_runtime_card_fixture(self) -> None:
@@ -725,7 +731,13 @@ class TestRuntimeProofValidation(unittest.TestCase):
         self.assertEqual(conditional_requirements[("claim_status", ("blocked", "partial"))], {"blocker"})
 
     def test_validator_accepts_valid_runtime_card_fixture(self) -> None:
-        process = self.run_validator(str(FIXTURES_DIR / "valid-runtime-card.json"), "--require-shared-workspace", "--json")
+        process = self.run_validator(
+            str(FIXTURES_DIR / "valid-runtime-card.json"),
+            "--require-shared-workspace",
+            "--workspace-root",
+            "${WORKSPACE_ROOT}",
+            "--json",
+        )
 
         self.assertEqual(process.returncode, 0, process.stdout + process.stderr)
         payload = json.loads(process.stdout)
@@ -769,13 +781,21 @@ class TestRuntimeProofValidation(unittest.TestCase):
         self.assertIn("visibility_status", fields)
 
     def test_shared_workspace_gate_rejects_foreign_workspace_root(self) -> None:
-        process = self.run_validator(
-            str(FIXTURES_DIR / "valid-runtime-card.json"),
-            "--require-shared-workspace",
-            "--workspace-root",
-            "/tmp/other-checkout",
-            "--json",
-        )
+        with tempfile.TemporaryDirectory() as temp_dir:
+            fixture = json.loads((FIXTURES_DIR / "valid-runtime-card.json").read_text(encoding="utf-8"))
+            fixture["workspace_root"] = str(REPO_ROOT)
+            fixture["runtime_session"]["workspace_root"] = str(REPO_ROOT)
+            fixture["artifacts"][0]["workspace_root"] = str(REPO_ROOT)
+            explicit_workspace_fixture = Path(temp_dir) / "valid-runtime-card-explicit-workspace.json"
+            explicit_workspace_fixture.write_text(json.dumps(fixture), encoding="utf-8")
+
+            process = self.run_validator(
+                str(explicit_workspace_fixture),
+                "--require-shared-workspace",
+                "--workspace-root",
+                "/tmp/other-checkout",
+                "--json",
+            )
 
         self.assertNotEqual(process.returncode, 0)
         payload = json.loads(process.stdout)
