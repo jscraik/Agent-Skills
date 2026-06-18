@@ -1160,6 +1160,36 @@ def test_tessl_live_private_accepts_generated_yaml_cases(tmp_path: Path) -> None
     assert manifest["generated_fixture_cases"] == 0
 
 
+def test_tessl_eval_cases_compat_reads_yaml_generated_tessl_metadata() -> None:
+    cases = evals._parse_tessl_eval_cases_compat(
+        """
+cases:
+  - id: yaml-generated
+    unit: yaml generated scenario
+    given: A reviewed generated scenario was imported into references/evals.yaml.
+    should: Treat the YAML-imported scenario as generated scenario evidence.
+    prompt: Review the architecture handoff.
+    tessl:
+      generated: true
+      source: references/evals.yaml
+"""
+    )
+
+    assert cases == [
+        {
+            "id": "yaml-generated",
+            "unit": "yaml generated scenario",
+            "given": "A reviewed generated scenario was imported into references/evals.yaml.",
+            "should": "Treat the YAML-imported scenario as generated scenario evidence.",
+            "prompt": "Review the architecture handoff.",
+            "tessl": {
+                "generated": True,
+                "source": "references/evals.yaml",
+            },
+        }
+    ]
+
+
 def test_tessl_live_private_stages_generated_fixture_scenarios(tmp_path: Path) -> None:
     skill_root = _write_example_skill(tmp_path)
     (skill_root / "references" / "contract.yaml").write_text(
@@ -1779,6 +1809,21 @@ def test_tessl_eval_list_count_rejects_unknown_nested_lists() -> None:
     }
 
     assert evals._tessl_eval_list_count(json.dumps(payload)) is None
+
+
+def test_tessl_eval_list_count_accepts_prefixed_json_output() -> None:
+    stdout = (
+        "Fetching workspace eval runs...\n"
+        + json.dumps({
+            "status": "ok",
+            "runs": [
+                {"id": "eval-run-1"},
+                {"id": "eval-run-2"},
+            ],
+        })
+    )
+
+    assert evals._tessl_eval_list_count(stdout) == 2
 
 
 def test_tessl_run_budget_preflight_blocks_at_reserve(tmp_path: Path) -> None:

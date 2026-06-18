@@ -624,6 +624,18 @@ def _yaml_scalar(value: str) -> str:
     return value
 
 
+def _yaml_compat_value(value: str) -> object:
+    scalar = _yaml_scalar(value)
+    lowered = scalar.lower()
+    if lowered == "true":
+        return True
+    if lowered == "false":
+        return False
+    if lowered in {"null", "none", "~"}:
+        return None
+    return scalar
+
+
 def _consume_yaml_block(lines: list[str], index: int, parent_indent: int, style: str) -> tuple[str, int]:
     raw_block_lines: list[str] = []
     while index < len(lines):
@@ -720,6 +732,35 @@ def _consume_yaml_sequence_dicts(lines: list[str], index: int, parent_indent: in
     return items, index
 
 
+def _consume_yaml_mapping(lines: list[str], index: int, parent_indent: int) -> tuple[dict[str, object], int]:
+    item: dict[str, object] = {}
+    while index < len(lines):
+        raw_line = lines[index]
+        if not raw_line.strip():
+            index += 1
+            continue
+        indent = len(raw_line) - len(raw_line.lstrip(" "))
+        if indent <= parent_indent:
+            break
+        stripped = raw_line.strip()
+        if stripped.startswith("- ") or ":" not in stripped:
+            index += 1
+            continue
+        key, raw_value = stripped.split(":", 1)
+        key = key.strip()
+        raw_value = raw_value.strip()
+        if raw_value.startswith((">", "|")):
+            item[key], index = _consume_yaml_block(lines, index + 1, indent, raw_value)
+            continue
+        if raw_value:
+            value, index = _consume_yaml_plain_scalar(lines, index + 1, indent, raw_value)
+            item[key] = _yaml_compat_value(value)
+            continue
+        item[key] = {}
+        index += 1
+    return item, index
+
+
 def _parse_inline_acceptance_sequence(raw_value: str) -> list[dict[str, str]]:
     text = raw_value.strip()
     if not (text.startswith("[") and text.endswith("]")):
@@ -775,9 +816,9 @@ def _parse_inline_acceptance_sequence(raw_value: str) -> list[dict[str, str]]:
     return items
 
 
-def _parse_tessl_eval_cases_compat(text: str) -> list[dict[str, str]]:
-    cases: list[dict[str, str]] = []
-    current: dict[str, str] | None = None
+def _parse_tessl_eval_cases_compat(text: str) -> list[dict[str, object]]:
+    cases: list[dict[str, object]] = []
+    current: dict[str, object] | None = None
     in_cases = False
     lines = text.splitlines()
     index = 0
@@ -826,6 +867,13 @@ def _parse_tessl_eval_cases_compat(text: str) -> list[dict[str, str]]:
                 acceptance, index = _consume_yaml_sequence_dicts(lines, index + 1, sequence_parent_indent)
             current[key] = acceptance  # type: ignore[assignment]
             continue
+        if key == "tessl":
+            if raw_value:
+                index += 1
+                continue
+            tessl, index = _consume_yaml_mapping(lines, index + 1, indent)
+            current[key] = tessl
+            continue
         if key not in {
             "id",
             "prompt",
@@ -852,7 +900,7 @@ def _parse_tessl_eval_cases_compat(text: str) -> list[dict[str, str]]:
     return cases
 
 
-def _parse_tessl_eval_cases(evals_path: Path) -> list[dict[str, str]]:
+def _parse_tessl_eval_cases(evals_path: Path) -> list[dict[str, object]]:
     if not evals_path.exists():
         return []
 
@@ -873,7 +921,7 @@ def _parse_tessl_eval_cases(evals_path: Path) -> list[dict[str, str]]:
             return compat_cases
         raise ValueError(f"Failed to parse Tessl eval cases from {evals_path}: {e}") from e
     raw_cases = loaded.get("cases", []) if isinstance(loaded, dict) else []
-    cases: list[dict[str, str]] = []
+    cases: list[dict[str, object]] = []
     for raw_case in raw_cases:
         if not isinstance(raw_case, dict):
             continue
@@ -1839,7 +1887,7 @@ def _tessl_project_link_matches(stdout: str, *, workspace: str, project: str) ->
 
 
 def _tessl_eval_list_count(stdout: str) -> int | None:
-    parsed = _json_or_text(stdout.strip()) if stdout.strip() else None
+    parsed = _parse_json_value_from_text(stdout) if stdout.strip() else None
     if isinstance(parsed, list):
         return len(parsed)
     if not isinstance(parsed, dict):
