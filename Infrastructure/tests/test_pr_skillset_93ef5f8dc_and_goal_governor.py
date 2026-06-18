@@ -2,7 +2,7 @@
 Structural and content validation tests for files changed in this PR.
 
 Covers:
-  - All .skillsets/*/manifest.jsonl files: source_revision bumped to "0ad896ee2",
+  - All .skillsets/*/manifest.jsonl files: source_revision bumped to "635638fb0",
     old revision "83f7ab9ed" must not be present.
   - .skillsets/command-surface.json: source_revision updated to "0e372d956",
     handle_count updated to 111; generated wrapper counts are no longer emitted.
@@ -43,7 +43,7 @@ LEARNINGS_MD_PATH = REPO_ROOT / ".harness" / "memory" / "LEARNINGS.md"
 
 # The source_revision bumped to this value for all manifest.jsonl files in
 # this PR.
-NEW_MANIFEST_REVISION = "0ad896ee2"
+NEW_MANIFEST_REVISION = "635638fb0"
 
 # The old source_revision that must no longer appear in any manifest.
 OLD_MANIFEST_REVISION = "83f7ab9ed"
@@ -91,12 +91,12 @@ def _load_jsonl(path: Path) -> list[dict[str, Any]]:
 
 
 # ---------------------------------------------------------------------------
-# Manifest source_revision bump: "83f7ab9ed" -> "0ad896ee2"
+# Manifest source_revision bump: "83f7ab9ed" -> "635638fb0"
 # ---------------------------------------------------------------------------
 
 
 class TestManifestRevisionBump(unittest.TestCase):
-    """All manifest.jsonl files must use the new source_revision "0ad896ee2"."""
+    """All manifest.jsonl files must use the new source_revision "635638fb0"."""
 
     def _assert_all_revisions(self, path: Path, expected: str) -> None:
         """
