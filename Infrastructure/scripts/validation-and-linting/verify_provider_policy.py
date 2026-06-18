@@ -25,7 +25,8 @@ DEFAULT_EXCLUDED_DIRS = {
     "node_modules",
 }
 DEFAULT_EXCLUDED_PREFIXES = {
-    ".agents",
+    ".agents/plugins-runtime/cache",
+    ".agents/skills",
     ".harness/artifacts",
     ".skillsets",
     ".workouts",

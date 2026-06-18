@@ -56,7 +56,9 @@ class VerifyProviderPolicyTests(unittest.TestCase):
         module = load_verify_provider_policy_module()
         sampled_paths = list(module._iter_repo_paths())  # pylint: disable=protected-access
         self.assertNotIn(".agents/skills/example/SKILL.md", sampled_paths)
-        self.assertFalse(any(path.startswith(".agents/") for path in sampled_paths))
+        self.assertIn(".agents/workflows/sync-skills.md", sampled_paths)
+        self.assertFalse(any(path.startswith(".agents/skills/") for path in sampled_paths))
+        self.assertFalse(any(path.startswith(".agents/plugins-runtime/cache/") for path in sampled_paths))
         self.assertFalse(any(path.startswith(".skillsets/") for path in sampled_paths))
         self.assertFalse(any(path.startswith("Infrastructure/artifacts/") for path in sampled_paths))
         self.assertFalse(any(path.startswith("Plugins/cache/") for path in sampled_paths))
