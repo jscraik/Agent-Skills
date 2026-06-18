@@ -1,3 +1,0 @@
-Yes. I’ll run unattended by default and only stop for questions that are genuinely blocking or risky.
-
-For non-blocking choices, I’ll make a conservative repo-aligned assumption, keep moving, and record it clearly in the final handoff with the validation evidence. I’ll also preserve user work, use the repo wrappers like `./bin/ask`, and follow the AGENTS.md guidance for this tree.

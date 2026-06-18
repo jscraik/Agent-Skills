@@ -1,1 +1,0 @@
-Validate the keep-codex-fast helper without touching my real Codex state.

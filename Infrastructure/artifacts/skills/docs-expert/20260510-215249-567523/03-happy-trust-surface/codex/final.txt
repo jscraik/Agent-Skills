@@ -1,8 +1,0 @@
-I couldn’t inspect or update the docs from this session because every local shell call is being blocked by the sandbox with `sandbox_apply: Operation not permitted`.
-
-If you want, paste the contents of:
-
-- `/Users/jamiecraik/dev/agent-skills/repo/app/SECURITY.md`
-- `/Users/jamiecraik/dev/agent-skills/repo/app/SUPPORT.md`
-
-and I’ll compare them and give you the exact documentation-only patch to apply.

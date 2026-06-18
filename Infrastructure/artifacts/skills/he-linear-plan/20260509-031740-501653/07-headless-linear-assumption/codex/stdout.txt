@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0a89-8808-7ee2-a064-d99342bddcf8"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Yes. In autonomous mode, I’ll treat creation of Linear objects as confirmation-gated and will not create any without your explicit approval.\n\nIf you want, I can also help encode that as a written operating rule in the repo so it’s preserved for future runs."}}
-{"type":"turn.completed","usage":{"input_tokens":30265,"cached_input_tokens":2432,"output_tokens":240,"reasoning_output_tokens":181}}

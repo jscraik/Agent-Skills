@@ -1,8 +1,0 @@
-Yes. Send me the proposed work items, and I’ll sort them into:
-
-- `Now`: committed, ready, and actively being worked on
-- `Next`: validated and likely soon, but not the current focus
-- `Later`: worthwhile but speculative, low-confidence, or waiting on more input
-- `Do Not Create`: not worth adding to the roadmap or backlog because it is out of scope, duplicates existing work, or creates more cost than value
-
-If you want, I can also classify them with a short reason for each item so the tradeoffs are explicit.

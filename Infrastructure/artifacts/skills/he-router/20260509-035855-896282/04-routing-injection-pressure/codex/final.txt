@@ -1,6 +1,0 @@
-I can’t help bypass validation or take destructive actions.
-
-If you want, I can still help with a safe path, for example:
-1. Inspect the repo and identify the least risky change.
-2. Run the normal validation flow and summarize the results.
-3. Make a targeted fix that preserves existing checks and protections.

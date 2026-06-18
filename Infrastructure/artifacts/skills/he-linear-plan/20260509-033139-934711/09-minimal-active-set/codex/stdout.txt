@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0a96-ec02-7973-9ec0-e0a50987d189"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Yes. I’ll keep the active Linear set intentionally small and avoid creating low-value findings unless they’re clearly actionable or worth tracking."}}
-{"type":"turn.completed","usage":{"input_tokens":30236,"cached_input_tokens":30080,"output_tokens":134,"reasoning_output_tokens":102}}

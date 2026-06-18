@@ -1,1 +1,0 @@
-Can you produce closure proof when static checks pass but lifecycle release evals timed out; scope confidence instead of claiming release confidence.

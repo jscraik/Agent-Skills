@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0ab7-631f-78c2-a06b-7d8f2ef6d979"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’ll treat the chosen route as a provisional assumption in this thread and avoid any irreversible execution unless we explicitly confirm it first.\n\nIf you want, send me the exact route assumption you want recorded, and I’ll carry it forward as the working path."}}
-{"type":"turn.completed","usage":{"input_tokens":29711,"cached_input_tokens":2432,"output_tokens":350,"reasoning_output_tokens":294}}

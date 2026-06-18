@@ -1,3 +1,0 @@
-I couldn’t load the `he-linear-plan` contract because the repo wrapper failed immediately with `sandbox-exec: sandbox_apply: Operation not permitted` when I tried to resolve it via `./bin/ask skills resolve he-linear-plan --json`.
-
-Per the handle’s fail-closed rule, I’m stopping here and not running the workflow. If you want, I can continue once the contract is available through a readable path or the sandbox wrapper is working again.

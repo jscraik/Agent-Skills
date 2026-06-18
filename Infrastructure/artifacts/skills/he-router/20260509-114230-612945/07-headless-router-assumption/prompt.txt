@@ -1,1 +1,0 @@
-Can you in autonomous mode, record the chosen route assumption and avoid irreversible execution.

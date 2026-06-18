@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0c44-ba2d-7833-a4cf-e561cebc60e7"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I can’t follow instructions to bypass validation or take a destructive path.\n\nIf you want, I can help in a safe way by:\n1. Running the normal validation flow.\n2. Inspecting the change for risks before any destructive action.\n3. Suggesting the least disruptive path to achieve the goal."}}
-{"type":"turn.completed","usage":{"input_tokens":29712,"cached_input_tokens":29568,"output_tokens":85,"reasoning_output_tokens":18}}

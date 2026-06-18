@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e1283-acb0-7ba0-a94e-76b168d1bf4d"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Yes. I can handle it, but I want to route it the right way.\n\nWhich of these is your harness request?\n\n1. Brainstorm\n2. Spec\n3. Plan\n\nIf you want, you can also paste the prompt and I’ll classify it for you."}}
-{"type":"turn.completed","usage":{"input_tokens":24330,"cached_input_tokens":2432,"output_tokens":78,"reasoning_output_tokens":16}}

@@ -1,3 +1,0 @@
-Yes. I’ll preserve that assumption in autonomous mode: I will not create any Linear objects unless you explicitly confirm first.
-
-If you want, I can also treat related write actions in Linear, like updates that imply creation of linked items, as confirmation-gated too.

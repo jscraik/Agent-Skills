@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0a4f-802e-7c03-acfc-ccf01879fb63"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Yes. I’ll keep the active Linear set deliberately small, prioritize only high-signal items, and avoid creating low-value or noisy findings. If something looks marginal, I’ll hold it out rather than polluting the queue."}}
-{"type":"turn.completed","usage":{"input_tokens":30267,"cached_input_tokens":0,"output_tokens":159,"reasoning_output_tokens":108}}

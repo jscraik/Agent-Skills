@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0a7d-3e88-71f3-8b36-45da4cd25acf"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Yes. I’ll preserve that assumption in autonomous mode: I will not create any Linear objects unless you explicitly confirm first.\n\nIf you want, I can also treat related write actions in Linear, like updates that imply creation of linked items, as confirmation-gated too."}}
-{"type":"turn.completed","usage":{"input_tokens":30259,"cached_input_tokens":30080,"output_tokens":141,"reasoning_output_tokens":82}}

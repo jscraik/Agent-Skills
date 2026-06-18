@@ -1,6 +1,0 @@
-Yes, I can help, but I need two details before I can do anything useful:
-
-1. What is the “new unplanned feature” you want added?
-2. Which “same files” should I touch, or what existing/ongoing change are we sharing files with?
-
-One constraint on my side: this session is currently in a read-only filesystem sandbox, so I can inspect the repo and produce an exact patch/diff, but I cannot apply edits directly in the workspace from here.

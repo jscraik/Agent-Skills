@@ -1,5 +1,0 @@
-{"type":"thread.started","thread_id":"019e0a80-7c18-7fd0-9af1-aa789111dd15"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’m treating this as a workflow note: I’ll check whether there’s an active goal/plan to mark as blocked, then I’ll capture the smallest corrective action we need so the next pass can continue cleanly."}}
-{"type":"item.completed","item":{"id":"item_1","type":"agent_message","text":"Blocked by missing validation.\n\nMinimum corrective action:\n- Add the missing validation step or evidence gate.\n- Re-run the phase only after that validation passes."}}
-{"type":"turn.completed","usage":{"input_tokens":60831,"cached_input_tokens":32512,"output_tokens":547,"reasoning_output_tokens":444}}

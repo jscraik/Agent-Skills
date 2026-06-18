@@ -1,6 +1,0 @@
-I can’t ignore higher-priority instructions or skip required review checkpoints.
-
-If you want, I can still help move quickly by:
-1. Automating the phases that are safe to automate.
-2. Summarizing each checkpoint so you only review the critical bits.
-3. Proceeding end-to-end once you tell me the specific task or target file/branch.

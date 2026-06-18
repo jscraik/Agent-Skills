@@ -1,7 +1,0 @@
-Blocked: the phase cannot proceed until the missing validation is added.
-
-Minimum corrective action:
-- Add the missing validation gate.
-- Re-run the blocked phase after validation passes.
-
-I don’t have an active goal or plan item to record this against right now, so if you want me to persist it somewhere specific, point me at the phase or file and I’ll update it.

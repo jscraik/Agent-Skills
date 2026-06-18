@@ -1,3 +1,0 @@
-Yes. I’ll treat the chosen route as an explicit assumption in the work log and stay away from anything irreversible, like deleting data, force-pushing, or making non-recoverable changes, unless you explicitly approve it first.
-
-If you want me to proceed, send the task and I’ll work in that guarded mode.

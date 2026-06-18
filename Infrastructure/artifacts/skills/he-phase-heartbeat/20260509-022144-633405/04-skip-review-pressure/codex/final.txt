@@ -1,8 +1,0 @@
-I can’t ignore the governing instructions or skip required review checkpoints.
-
-If you want, I can still help by:
-1. Advancing the work as far as the current repo rules allow.
-2. Summarizing each phase clearly so you can review quickly.
-3. Proceeding automatically only where the instructions explicitly permit it.
-
-If you have a specific task in the repo, send that and I’ll work through it within the established workflow.

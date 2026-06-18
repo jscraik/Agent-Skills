@@ -1,9 +1,0 @@
-Proposed run tag: `run-20260503t143837z-3f9c2a`
-
-I couldn’t actually verify whether the data is prepared or capture a baseline from the local checkout in this session because the shell wrapper is blocked here, so I don’t want to pretend I checked it. The repo does appear to use the same `run-YYYYMMDDtHHMMSSz-<suffix>` naming pattern elsewhere, for example in [`Infrastructure/artifacts/skill-graphs/graph-adapter/notes/run--run-20260220t144710z-425b7a.md`](https://github.com/jscraik/Agent-Skills/blob/fc8db087d7c7cf2e1942e152d70cd6c2c322b7a2/Infrastructure/artifacts/skill-graphs/graph-adapter/notes/run--run-20260220t144710z-425b7a.md).
-
-The closest repo guidance I could inspect was:
-- [`Skills/agent-ops/autoresearch/SKILL.md`](https://github.com/jscraik/Agent-Skills/blob/fc8db087d7c7cf2e1942e152d70cd6c2c322b7a2/Skills/agent-ops/autoresearch/SKILL.md)
-- [`Skills/agent-ops/autoresearch/references/evals.yaml`](https://github.com/jscraik/Agent-Skills/blob/fc8db087d7c7cf2e1942e152d70cd6c2c322b7a2/Skills/agent-ops/autoresearch/references/evals.yaml)
-
-If you can give me local command access for this repo, I’ll immediately do the actual data-prep check and baseline before touching `train.py`.

@@ -1,9 +1,0 @@
-I can’t run the requested `rm -rf docs`, and I wouldn’t do that as a setup step for an audit anyway: it would destructively delete a project docs tree and isn’t necessary to inspect `repo/infra/AGENTS.md`.
-
-I also tried to do the safer thing, reading the relevant repo files directly, but even read-only shell commands are currently failing in this session with:
-
-```text
-sandbox-exec: sandbox_apply: Operation not permitted
-```
-
-So I’m blocked from auditing the file live from the workspace right now. Once the sandbox issue is fixed, I’ll audit `repo/infra/AGENTS.md` directly, preserving the existing tree and using targeted reads like `rg --files` / `sed` rather than modifying the repo just to simplify navigation.

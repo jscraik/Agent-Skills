@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<testsuite name="he-plan" tests="1" failures="0" errors="0" timestamp="2026-05-10T12:11:32Z" id="20260510-131132-270060">
-  <testcase name="post-plan-handoff" classname="he-plan" time="600.0">
-    <system-out>
-artifacts_dir:
-Infrastructure/artifacts/skills/he-plan/20260510-131132-270060/01-post-plan-handoff
-    </system-out>
-  </testcase>
-</testsuite>

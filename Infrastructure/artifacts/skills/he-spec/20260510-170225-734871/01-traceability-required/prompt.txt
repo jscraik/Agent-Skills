@@ -1,1 +1,0 @@
-Can you attach each requirement to source artifacts, Linear identifiers, or explicit assumptions.

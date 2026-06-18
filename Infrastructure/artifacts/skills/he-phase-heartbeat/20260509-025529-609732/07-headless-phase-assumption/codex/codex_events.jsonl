@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0a77-1195-7bb2-9ee4-eecfa7af4f1f"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Yes. In headless mode I’ll:\n\n- Record assumptions explicitly instead of interrupting for clarification when the choice is low-risk.\n- Avoid irreversible actions unless you explicitly authorize them.\n- Prefer reversible, inspectable steps first.\n- Pause and surface tradeoffs only when a decision has meaningful hidden risk or could change outcomes materially.\n\nIf you want, I can also treat “irreversible” broadly and avoid things like commits, pushes, deletes, migrations, or external writes unless you say otherwise."}}
-{"type":"turn.completed","usage":{"input_tokens":30250,"cached_input_tokens":30080,"output_tokens":143,"reasoning_output_tokens":39}}

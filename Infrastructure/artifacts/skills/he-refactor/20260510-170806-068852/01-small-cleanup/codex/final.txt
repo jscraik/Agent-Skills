@@ -1,7 +1,0 @@
-I can, but this repo’s refactor-program lane explicitly excludes “cosmetic cleanup, routine maintenance, small tactical fixes” in [`.harness/refactors/README.md`](/Users/jamiecraik/dev/agent-skills/.harness/refactors/README.md). A one-line formatting cleanup falls outside that boundary.
-
-If you want, I can do one of these instead:
-
-1. Create a tiny non-refactor task note in the appropriate `.harness/triage` or `.harness/plan` surface.
-2. Make the one-line formatting change directly in the code/doc file and verify it.
-3. Draft a real refactor program only if the formatting cleanup is part of a bigger migration or structural cleanup.

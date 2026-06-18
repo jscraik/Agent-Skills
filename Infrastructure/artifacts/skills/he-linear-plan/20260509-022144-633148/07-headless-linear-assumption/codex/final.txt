@@ -1,3 +1,0 @@
-Yes. I’ll keep that assumption in autonomous mode: no Linear objects will be created unless you explicitly confirm first.
-
-If you want, I can also treat this as a standing workflow rule for future Linear-related work in this repo.

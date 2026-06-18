@@ -1,5 +1,0 @@
-{"type":"thread.started","thread_id":"019e0c61-c8bc-7302-b276-96c9db52bf29"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’m going to pause on assumptions and ask one quick choice so we can route this the right way the first time."}}
-{"type":"item.completed","item":{"id":"item_1","type":"agent_message","text":"Which kind of harness request is this?\n\n1. Brainstorm\n2. Spec\n3. Plan"}}
-{"type":"turn.completed","usage":{"input_tokens":52617,"cached_input_tokens":48384,"output_tokens":224,"reasoning_output_tokens":60}}

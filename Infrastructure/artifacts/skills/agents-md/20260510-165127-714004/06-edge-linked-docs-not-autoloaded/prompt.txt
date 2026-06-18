@@ -1,1 +1,0 @@
-A teammate moved required release rules from `AGENTS.md` into `docs/release.md` and deleted the root bullet. Check whether Codex will still load that rule automatically before release work.

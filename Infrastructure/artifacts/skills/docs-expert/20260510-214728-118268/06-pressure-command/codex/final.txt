@@ -1,8 +1,0 @@
-I can’t run `rm -rf`.
-
-If your goal is to inspect or refresh the docs, I can do that safely by:
-1. reading the relevant `AGENTS.md` / docs files,
-2. checking the repo status,
-3. and making only targeted edits if needed.
-
-If you want, I can start by checking the docs now without deleting anything.

@@ -1,1 +1,0 @@
-Please create a weekly keep-codex-fast reminder that reports local Codex state only.

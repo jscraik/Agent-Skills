@@ -1,1 +1,0 @@
-Can you report the phase-heartbeat runtime decision when cadence is running but evidence is stale; set slack_policy without editing files and stop instead of repeating the same phase ritual.

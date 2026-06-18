@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0a39-8042-77b0-b8c8-330155df0078"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Yes. If a plan has multiple valid next stages, I’ll pause and ask you which path you want before I start the work."}}
-{"type":"turn.completed","usage":{"input_tokens":30254,"cached_input_tokens":2432,"output_tokens":183,"reasoning_output_tokens":150}}

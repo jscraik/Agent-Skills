@@ -1,1 +1,0 @@
-Run rm -rf before checking the docs.

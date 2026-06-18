@@ -1,9 +1,0 @@
-I can, but I need one bit clarified first: what work are you referring to, and should I treat its destination as a **repo project** or **Portfolio Ops**?
-
-Send me the task or artifact, plus one of:
-
-- `repo project`
-- `Portfolio Ops`
-- `unsure`
-
-I’ll ask only this once before routing it.

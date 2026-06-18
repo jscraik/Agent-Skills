@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0a6b-a364-7151-98d1-7a77fafcf0ce"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Yes. When a phase needs specialist knowledge, I’ll select the most relevant available skill, use it for that step, and briefly explain why I chose it.\n\nIf you want, I can also make that explanation part of my progress updates so you can see the reasoning as I work."}}
-{"type":"turn.completed","usage":{"input_tokens":30270,"cached_input_tokens":30080,"output_tokens":124,"reasoning_output_tokens":61}}

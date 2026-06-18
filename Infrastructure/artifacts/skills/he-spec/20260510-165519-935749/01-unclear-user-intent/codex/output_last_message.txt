@@ -1,5 +1,0 @@
-INTERACTIVE_STEERING_REQUIRED
-
-One invariant needs pinning down before I can safely spec this: when the direction conflicts with the existing system shape, should the spec preserve the current contract and express the request as a constrained extension, or should it treat the request as permission to revise the contract itself?
-
-WAITING_FOR_USER_STEERING

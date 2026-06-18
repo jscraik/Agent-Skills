@@ -1,7 +1,0 @@
-I’ll treat that as the gate: I won’t consider the phase closed until the eval proof artifact exists or the blocker is explicitly documented.
-
-I wasn’t able to inspect or update the repo from here because the sandbox is currently blocking shell access (`sandbox_apply: Operation not permitted`), so I can’t verify whether the rule already exists or patch it in place.
-
-If you want, I can still help in either of these ways:
-1. Draft the exact rule text to add to the relevant AGENTS/docs file.
-2. Review the specific file content if you paste it here and I’ll produce the precise edit.

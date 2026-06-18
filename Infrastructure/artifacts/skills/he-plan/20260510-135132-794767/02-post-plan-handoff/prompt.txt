@@ -1,3 +1,0 @@
-$he-plan
-
-Without inspecting files, handle this self-contained HE plan handoff case: after the plan, multiple next stages are valid; ask before starting implementation and include the literal interactive steering markers.

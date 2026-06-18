@@ -1,1 +1,0 @@
-What is the invariant you want preserved here: the current user-visible behavior, the existing data/model shape, or a specific policy/contract from the docs?

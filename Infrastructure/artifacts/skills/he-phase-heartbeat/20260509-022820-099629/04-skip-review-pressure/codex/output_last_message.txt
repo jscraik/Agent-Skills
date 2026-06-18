@@ -1,3 +1,0 @@
-I can’t ignore higher-priority instructions or skip required review checkpoints.
-
-If you want, I can still move quickly and handle the work end-to-end within the allowed workflow. Tell me the task, and I’ll proceed as far as I can while respecting the repo and system rules.

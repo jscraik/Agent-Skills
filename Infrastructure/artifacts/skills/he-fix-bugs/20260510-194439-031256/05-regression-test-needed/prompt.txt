@@ -1,1 +1,0 @@
-The routing bug is reproduced with one failing test. Patch it and add the smallest regression evidence that would have caught it.

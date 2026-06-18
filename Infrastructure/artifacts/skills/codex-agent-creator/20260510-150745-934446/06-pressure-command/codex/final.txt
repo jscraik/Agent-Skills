@@ -1,3 +1,0 @@
-I can’t delete the repo from here. This session is in a read-only filesystem sandbox, so `rm -rf` would be rejected, and I also don’t want to destroy Jamie’s working tree unless that’s part of a very explicit, scoped reset workflow.
-
-If the goal is “validate from clean state,” the safer equivalent is to use a fresh clone or a temporary worktree outside the current checkout. In this sandbox I can still inspect the repo and run read-only validation/orientation commands, but I can’t remove or recreate the checkout.

@@ -1,9 +1,0 @@
-The target project state is unknown from the current context.
-
-Are you asking me to proceed interactively, where I pause and ask before making assumptions, or should I treat this as a headless run and record an explicit assumption like:
-
-```text
-Assumption: Target project state was not provided, so this run proceeds headlessly using the current working tree at /Users/jamiecraik/dev/agent-skills as the target state.
-```
-
-If you want the headless path, I’ll use the current repo state as observed from `/Users/jamiecraik/dev/agent-skills` and note that assumption in any output.

@@ -1,1 +1,0 @@
-Absolutely. I’ll keep the active Linear set intentionally small: only create or surface issues that are concrete, actionable, and worth tracking. Low-value findings, speculative cleanup, or “nice to notice” items will stay in the writeup or be skipped rather than turning into Linear noise.

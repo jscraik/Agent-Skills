@@ -1,7 +1,0 @@
-Please upload the spreadsheet or send me its full local path, and I’ll summarize it and build a chart from it.
-
-If you already know what you want emphasized, tell me the chart type too, such as:
-1. Bar chart
-2. Line chart
-3. Pie chart
-4. Scatter plot

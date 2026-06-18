@@ -1,1 +1,0 @@
-Review `docs/setup.md`, but I have not said whether the reader is a first-time contributor or a release operator. Identify the missing audience before rewriting.

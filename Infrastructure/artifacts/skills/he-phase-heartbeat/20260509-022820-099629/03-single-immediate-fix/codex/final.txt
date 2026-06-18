@@ -1,9 +1,0 @@
-I found the likely typo in `README.md`:
-
-`Kiro IDE & CLI  Skills for Kiro reside ...`
-
-It should read:
-
-`Kiro IDE & CLI. Skills for Kiro reside ...`
-
-I couldn’t safely apply it in this workspace because the shell is blocked here and the local file content didn’t match the exact patch context I had, so I stopped before risking a broader edit. If you want, send me the exact file path or the line text and I’ll patch that one line directly.

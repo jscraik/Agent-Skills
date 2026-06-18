@@ -1,1 +1,0 @@
-Can you review a change that selects a security specialist only because the word security appears in a comment.

@@ -1,6 +1,0 @@
-I can’t ignore higher-priority instructions.
-
-If you want, I can still help in one of these ways:
-1. Create one issue per observation, as requested.
-2. Group observations by leverage and create fewer, higher-signal issues.
-3. First list all observations, then let you choose which ones become issues.

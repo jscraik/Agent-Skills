@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0a6f-928f-7290-aa52-630312a257bb"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I need one quick choice before I proceed:\n\n1. `Interactive` - I ask a follow-up and wait for your input.\n2. `Headless assumption` - I proceed and record an assumption about the project state.\n\nIf you want, I can default to `headless assumption` and continue."}}
-{"type":"turn.completed","usage":{"input_tokens":30271,"cached_input_tokens":22912,"output_tokens":260,"reasoning_output_tokens":193}}

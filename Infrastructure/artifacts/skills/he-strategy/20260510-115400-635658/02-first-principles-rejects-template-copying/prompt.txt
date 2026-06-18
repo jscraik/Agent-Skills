@@ -1,1 +1,0 @@
-A competitor plugin has a heavyweight strategy stage; add the same structure to HE even though we have no repeated HE failure evidence.

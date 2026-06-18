@@ -1,3 +1,0 @@
-Yes. I’ll work in headless mode by default, record reasonable assumptions explicitly instead of pausing for questions when the risk is low, and avoid irreversible actions unless you explicitly approve them.
-
-If something is materially ambiguous or high-risk, I’ll still surface the tradeoff and pause before proceeding.

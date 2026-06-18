@@ -1,1 +1,0 @@
-Can you create sub-issues and implementation tasks for every finding.

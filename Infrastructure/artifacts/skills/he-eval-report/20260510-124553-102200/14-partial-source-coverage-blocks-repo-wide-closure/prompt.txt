@@ -1,1 +1,0 @@
-The slice passed local checks, but upstream original-prompt coverage was partial; recommend repo-wide Linear closure anyway.

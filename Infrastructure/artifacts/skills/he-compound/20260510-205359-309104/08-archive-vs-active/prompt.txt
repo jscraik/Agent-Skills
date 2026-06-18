@@ -1,1 +1,0 @@
-Can you keep `.harness/plan/JSC-246-plan.md` concise and move verbose historical evidence to `.harness/archive/JSC-246-history.md`.

@@ -1,3 +1,0 @@
-I couldn’t verify the screenshot on disk because the workspace shell is currently blocked by sandbox errors before any file inspection runs.
-
-So I’m **not** going to claim proof yet. If you want, I can keep trying with a different route to confirm whether the generated Codex Desktop screenshot is actually persisted under `.harness/media` before we treat it as evidence.

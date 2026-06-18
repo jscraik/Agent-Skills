@@ -1,9 +1,0 @@
-I can do that, but I’m blocked from reading the repo right now because local commands are failing with a sandbox error: `sandbox-exec: sandbox_apply: Operation not permitted`.
-
-If you want, send me one of these and I’ll map them immediately:
-1. The file or doc that lists the parent issues.
-2. The parent issue IDs or titles pasted here.
-
-Once I have that, I’ll return a compact mapping like:
-
-- `Parent issue` -> `build gate`, `test gate`, `drift gate`, `routing gate`, `rollback gate`

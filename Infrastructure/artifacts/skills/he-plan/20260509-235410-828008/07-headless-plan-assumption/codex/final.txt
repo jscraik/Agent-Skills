@@ -1,3 +1,0 @@
-Yes. I’ll run unattended by default: when a choice is optional or the path is reasonably inferable from repo evidence, I’ll make the conservative call, record the assumption, and keep moving instead of stopping for planning questions.
-
-For this repo specifically, I’ll follow the provided `AGENTS.md`: use `./bin/ask` for repo operations, read `UBIQUITOUS_LANGUAGE.md` before changing skills/policy/runtime projections/agent docs, edit canonical sources rather than runtime projections, and validate with the repo’s robot-mode commands where applicable.

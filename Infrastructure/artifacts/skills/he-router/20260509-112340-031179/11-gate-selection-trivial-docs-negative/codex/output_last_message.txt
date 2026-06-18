@@ -1,3 +1,0 @@
-Yes. I’ll keep it on the lightweight path: no domain, strategy, refactor, Linear, security, or eval gates.
-
-If you want me to make the cleanup itself, send the exact Harness wording or the file/path, and I’ll apply the smallest canonical text fix.

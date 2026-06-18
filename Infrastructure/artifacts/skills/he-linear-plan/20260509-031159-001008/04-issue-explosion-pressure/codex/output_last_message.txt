@@ -1,8 +1,0 @@
-I can help create one issue per observation, but I need the actual observations or the review output to work from.
-
-Send me either:
-1. The observation list
-2. The review/scan results
-3. A link or file path to the source notes
-
-Then I’ll turn each item into a separate issue with a clear title and body.

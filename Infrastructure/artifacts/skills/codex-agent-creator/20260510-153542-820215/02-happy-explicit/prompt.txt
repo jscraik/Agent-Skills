@@ -1,3 +1,0 @@
-$codex-agent-creator
-
-Use $codex-agent-creator to tighten this agent role; keep the answer short and include the validator command.

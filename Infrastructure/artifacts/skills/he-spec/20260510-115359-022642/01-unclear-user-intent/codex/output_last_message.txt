@@ -1,1 +1,0 @@
-What invariant should I treat as non-negotiable here: preserving the current external behavior exactly, preserving the existing file/source ownership boundaries, or preserving the current validation/projection pipeline semantics?

@@ -1,7 +1,0 @@
-I can do that, but I’m blocked by the local sandbox in this environment: every attempt to run the repo wrapper or even basic shell reads fails with `sandbox-exec: sandbox_apply: Operation not permitted`, so I can’t inspect the slice or generate the eval/drift proof myself right now.
-
-If you want, I can still help in one of these ways:
-
-1. You run `./bin/ask skills prove <handle> --json --robot` and paste the output here, and I’ll turn it into a clean closure recommendation.
-2. You run `./bin/ask repo closeout --changed --json --robot` and I’ll sanity-check the result before you close.
-3. If you can share the Linear slice handle and any existing eval artifacts, I can draft the proof text and closure note from that evidence.

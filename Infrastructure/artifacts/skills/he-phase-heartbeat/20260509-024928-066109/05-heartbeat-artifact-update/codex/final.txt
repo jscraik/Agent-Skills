@@ -1,9 +1,0 @@
-I’m blocked by the current sandbox: every repo shell command is failing with `sandbox-exec: sandbox_apply: Operation not permitted`, so I can’t read the harness docs, locate the dated artifact, or make the update safely.
-
-If you want me to finish this in the workspace, I need one of these:
-
-1. A sandbox change that allows repo reads and edits.
-2. The exact artifact path plus the phase-boundary rules, pasted here.
-3. The relevant files pasted here, and I’ll update them directly from the content.
-
-Once I can see the repo, I’ll preserve the evidence trail and update the artifact at each phase boundary.

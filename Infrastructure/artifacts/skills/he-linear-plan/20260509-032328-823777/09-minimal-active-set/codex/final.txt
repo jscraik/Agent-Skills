@@ -1,3 +1,0 @@
-Yes. I’ll keep the active Linear set intentionally small and avoid creating low-value findings unless they’re clearly actionable or materially reduce risk.
-
-If you want, I can also turn that into a short repo policy line for the relevant agent docs.

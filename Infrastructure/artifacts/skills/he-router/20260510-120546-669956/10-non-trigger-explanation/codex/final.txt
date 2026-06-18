@@ -1,9 +1,0 @@
-Yes. Send me the spreadsheet file path, or attach/upload the spreadsheet here, and tell me what kind of chart you want if you have a preference.
-
-A few useful options:
-
-- **Summary:** overall trends, totals, averages, outliers, missing values, top/bottom categories
-- **Chart types:** bar chart, line chart, pie/donut chart, scatter plot, stacked bar, pivot-style summary chart
-- **Output:** I can describe the findings, create a chart spec, or if write access is available, add the chart into a new/updated spreadsheet
-
-One note: the current environment is read-only and shell commands are being blocked by the sandbox, so I can’t yet inspect local files or write a modified workbook from the repo path. If you attach the spreadsheet contents or provide the data directly, I can summarize and build the chart from that.

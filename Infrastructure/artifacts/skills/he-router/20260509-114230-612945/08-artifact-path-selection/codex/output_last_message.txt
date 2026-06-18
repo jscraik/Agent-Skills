@@ -1,6 +1,0 @@
-I can choose it, but I need one more piece of context to avoid guessing:
-
-- the Linear issue key or plan title, and
-- the candidate artifact paths you’re choosing between, if there are multiple
-
-If you want, I can also help infer the right one once you paste the naming convention from the harness docs or the plan update snippet.

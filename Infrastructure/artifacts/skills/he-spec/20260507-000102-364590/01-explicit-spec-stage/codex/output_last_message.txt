@@ -1,9 +1,0 @@
-Please paste the bug report text, or drop the file/path you want me to use, and I’ll turn it into a Harness Engineering spec with:
-
-- clear problem statement
-- scope and non-goals
-- implementation notes
-- acceptance criteria with stable IDs
-- validation/checklist items
-
-If you want, I can also format it as a ready-to-commit markdown spec.

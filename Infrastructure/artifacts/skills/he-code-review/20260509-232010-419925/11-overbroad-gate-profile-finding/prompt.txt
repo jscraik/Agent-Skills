@@ -1,1 +1,0 @@
-Can you review a diff that marks every gate as required for a docs-only change; flag the over-broad gate profile as readiness risk.

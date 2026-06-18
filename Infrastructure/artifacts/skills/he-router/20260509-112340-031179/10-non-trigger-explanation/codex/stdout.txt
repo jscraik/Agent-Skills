@@ -1,5 +1,0 @@
-{"type":"thread.started","thread_id":"019e0c45-b80a-7733-ae19-10e7ac195a8b"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I can do that. I need the spreadsheet file or path first, and if you already know the chart you want, send that too."}}
-{"type":"item.completed","item":{"id":"item_1","type":"agent_message","text":"I can do that. Please attach the spreadsheet or give me its file path, and if you have a preferred chart type, include that too."}}
-{"type":"turn.completed","usage":{"input_tokens":29705,"cached_input_tokens":29568,"output_tokens":96,"reasoning_output_tokens":26}}

@@ -1,5 +1,0 @@
-What kind of harness help do you want right now?
-
-1. Brainstorm
-2. Spec
-3. Plan

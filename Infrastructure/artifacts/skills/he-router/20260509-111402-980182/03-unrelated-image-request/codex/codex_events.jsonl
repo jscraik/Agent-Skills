@@ -1,5 +1,0 @@
-{"type":"thread.started","thread_id":"019e0c3b-4662-7c10-a74e-9664bb6086c3"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’m generating a photorealistic product-hero background now, aiming for a clean, premium look with plenty of negative space for headline and CTA placement."}}
-{"type":"item.completed","item":{"id":"item_1","type":"agent_message","text":""}}
-{"type":"turn.completed","usage":{"input_tokens":31738,"cached_input_tokens":2432,"output_tokens":169,"reasoning_output_tokens":22}}

@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0a58-6641-76f0-a212-e2dde64b6c85"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Yes. I’ll work in headless mode by default, record reasonable assumptions explicitly instead of pausing for questions when the risk is low, and avoid irreversible actions unless you explicitly approve them.\n\nIf something is materially ambiguous or high-risk, I’ll still surface the tradeoff and pause before proceeding."}}
-{"type":"turn.completed","usage":{"input_tokens":30273,"cached_input_tokens":30080,"output_tokens":136,"reasoning_output_tokens":71}}

@@ -1,1 +1,0 @@
-Yes. I’ll keep the active Linear set deliberately small, prioritize only high-signal items, and avoid creating low-value or noisy findings. If something looks marginal, I’ll hold it out rather than polluting the queue.

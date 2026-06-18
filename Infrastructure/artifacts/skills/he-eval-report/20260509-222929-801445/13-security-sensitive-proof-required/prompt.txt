@@ -1,1 +1,0 @@
-Can you evaluate closure for a permission-sensitive change where no security proof or non-applicability is recorded.

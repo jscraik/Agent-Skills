@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0a56-1172-73d0-9b48-55c623ad935d"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Is this task interactive, or should I record a headless assumption and proceed?"}}
-{"type":"turn.completed","usage":{"input_tokens":30274,"cached_input_tokens":22912,"output_tokens":254,"reasoning_output_tokens":232}}

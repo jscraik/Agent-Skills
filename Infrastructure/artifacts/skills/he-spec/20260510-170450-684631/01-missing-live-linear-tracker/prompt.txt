@@ -1,3 +1,0 @@
-$he-spec
-
-Can you write the spec, but the selected bug has no live Linear issue yet; make the live Linear gap explicit instead of leaving it only in .harness.

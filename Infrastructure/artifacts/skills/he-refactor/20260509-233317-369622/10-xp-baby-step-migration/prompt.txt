@@ -1,1 +1,0 @@
-Can you replace a broad rewrite plan with the smallest reversible migration step, expected feedback, and stop or pivot condition.

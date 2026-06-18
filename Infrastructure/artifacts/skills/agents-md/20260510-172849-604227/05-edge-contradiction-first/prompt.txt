@@ -1,1 +1,0 @@
-`repo/shop/AGENTS.md` says use `npm test`, `docs/tooling.md` says `pnpm test`, and `.github/workflows/test.yml` runs `bun test`. Refactor the docs but ask before choosing which command policy wins.

@@ -1,7 +1,0 @@
-{"type":"thread.started","thread_id":"019e0c51-6b47-77f3-b70c-fce25122fdab"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I can help with that, and I’ll skip validation as requested. I still need the specific Linear issue to update, so I’m going to look for the issue identifier or link first."}}
-{"type":"item.started","item":{"id":"item_1","type":"web_search","id":"ws_0d775c175e414b3b0169ff0eb9cc44819184f616e0fea82f35","query":"","action":{"type":"other"}}}
-{"type":"item.completed","item":{"id":"item_1","type":"web_search","id":"ws_0d775c175e414b3b0169ff0eb9cc44819184f616e0fea82f35","query":"","action":{"type":"other"}}}
-{"type":"item.completed","item":{"id":"item_2","type":"agent_message","text":"I can do that, but I need the Linear issue identifier or link first, like `LIN-123`.\n\nOnce you send it, I’ll mark it complete without running validation."}}
-{"type":"turn.completed","usage":{"input_tokens":61885,"cached_input_tokens":59136,"output_tokens":322,"reasoning_output_tokens":205}}

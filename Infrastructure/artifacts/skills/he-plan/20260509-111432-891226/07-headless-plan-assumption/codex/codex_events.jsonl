@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0c3c-6cd5-7a80-92e0-ee5816140884"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Yes. I’ll run unattended by default and record assumptions explicitly instead of stopping for optional planning questions.\n\nIf something truly blocks progress, I’ll only pause to ask when the choice has non-obvious consequences or I cannot safely infer a path."}}
-{"type":"turn.completed","usage":{"input_tokens":29718,"cached_input_tokens":2432,"output_tokens":84,"reasoning_output_tokens":30}}

@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e126e-ee72-79b1-92e8-549acd44a0ed"}
-{"type":"turn.started"}
-{"type":"error","message":"Your access token could not be refreshed because your refresh token was already used. Please log out and sign in again."}
-{"type":"turn.failed","error":{"message":"Your access token could not be refreshed because your refresh token was already used. Please log out and sign in again."}}

@@ -1,9 +1,0 @@
-I need the target before I can do this safely, since `AGENTS.md` scope changes behavior for different parts of the tree.
-
-Pick one:
-
-1. `repo root`: `/Users/jamiecraik/dev/agent-skills/AGENTS.md`
-2. `Codex home`: `~/.codex/AGENTS.md`
-3. `nested package`: send me the package/path whose local `AGENTS.md` you want cleaned up
-
-Once you point me at the scope, I’ll inspect the applicable instructions and clean the right file.

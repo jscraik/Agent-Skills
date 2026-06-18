@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0c3b-a5b4-73d3-8959-fe6e617edfdf"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Yes. I’ll stop after the plan and, if there are multiple valid next stages, I’ll present the options and wait for your choice before starting implementation."}}
-{"type":"turn.completed","usage":{"input_tokens":29721,"cached_input_tokens":22400,"output_tokens":122,"reasoning_output_tokens":84}}

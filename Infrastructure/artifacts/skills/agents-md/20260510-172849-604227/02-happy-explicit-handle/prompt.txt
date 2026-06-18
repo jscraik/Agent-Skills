@@ -1,3 +1,0 @@
-$agents-md
-
-Use $agents-md on `apps/web/AGENTS.md`. It contains a project description, a long TypeScript style section copied from `docs/frontend.md`, duplicated `pnpm lint` commands, and a vague 'write good code' rule. Tell me what stays in root, what moves to docs, which Context Pointers route it, and what should be deleted.

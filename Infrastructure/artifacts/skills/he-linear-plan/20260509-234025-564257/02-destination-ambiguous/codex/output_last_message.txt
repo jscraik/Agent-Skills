@@ -1,3 +1,0 @@
-Yep. Before I route or start the work: should this belong to a specific repo project in `/Users/jamiecraik/dev/agent-skills`, or should I treat it as **Portfolio Ops** work?
-
-Send me the destination and the actual task, and I’ll proceed from there.

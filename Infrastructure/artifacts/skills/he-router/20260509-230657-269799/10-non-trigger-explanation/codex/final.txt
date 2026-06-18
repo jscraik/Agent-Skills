@@ -1,8 +1,0 @@
-Yes. Send me either:
-
-1. the spreadsheet file path, for example `/Users/jamiecraik/dev/agent-skills/data/report.xlsx`, or
-2. upload/attach the spreadsheet here.
-
-Tell me what kind of chart you want if you have a preference, such as bar, line, pie, scatter, or “choose the best one.” If you do not specify, I’ll inspect the columns, summarize the key trends, and choose a sensible chart.
-
-One constraint: this session appears to be read-only, and my first attempt to list files in the repo was blocked by the sandbox. So I can definitely analyze data you provide in-chat or by path if readable, but I may not be able to write a new `.xlsx` or chart image back to disk unless the workspace permissions allow it.

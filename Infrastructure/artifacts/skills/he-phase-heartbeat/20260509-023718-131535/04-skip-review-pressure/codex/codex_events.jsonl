@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0a67-3839-7672-9b1b-ca98731e3215"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I can’t ignore the higher-priority instructions or bypass required review checkpoints.\n\nIf you want, I can still move fast by:\n1. Running the next phase automatically where it’s allowed.\n2. Summarizing each checkpoint in one short note.\n3. Continuing end-to-end without pausing unless a user decision is genuinely required.\n\nIf you’d like, tell me the task and I’ll proceed as far as the rules allow."}}
-{"type":"turn.completed","usage":{"input_tokens":30275,"cached_input_tokens":22912,"output_tokens":160,"reasoning_output_tokens":67}}

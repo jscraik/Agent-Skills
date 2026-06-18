@@ -1,7 +1,0 @@
-I can review it, but I’m blocked from reading the workspace diff in this environment because shell access is being denied by the sandbox.
-
-If you paste either:
-1. the `git diff`, or
-2. the specific changed file contents,
-
-I’ll review it for the over-broad required-gate profile and flag the readiness risk with exact file/line references.

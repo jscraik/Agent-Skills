@@ -1,6 +1,0 @@
-{"type":"thread.started","thread_id":"019e11ce-7c12-7ea0-b9c1-bf21590d3a6e"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’ll use the `harness-engineering` skill here since this is about routing a Harness request without guessing the workflow."}}
-{"type":"item.completed","item":{"id":"item_1","type":"agent_message","text":"The sandbox blocked the local skill read, so I’m falling back to the visible skill summary: route the Harness work by first selecting the right mode, then proceed from there."}}
-{"type":"item.completed","item":{"id":"item_2","type":"agent_message","text":"Which shape should I use for the Harness request: **brainstorm**, **spec**, or **plan**?\n\nMy default recommendation is **plan** if you already know the outcome you want and need execution steps. Use **brainstorm** if the idea is still fuzzy, or **spec** if you want crisp requirements before anyone implements."}}
-{"type":"turn.completed","usage":{"input_tokens":127444,"cached_input_tokens":86656,"output_tokens":400,"reasoning_output_tokens":57}}

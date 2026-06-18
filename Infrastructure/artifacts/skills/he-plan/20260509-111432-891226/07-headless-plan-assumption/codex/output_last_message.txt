@@ -1,3 +1,0 @@
-Yes. I’ll run unattended by default and record assumptions explicitly instead of stopping for optional planning questions.
-
-If something truly blocks progress, I’ll only pause to ask when the choice has non-obvious consequences or I cannot safely infer a path.

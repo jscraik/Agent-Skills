@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0ea2-07cc-7e30-ac94-b71b8f909913"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Yes. I’ll preserve that assumption for autonomous work:\n\nNo Linear objects will be created without explicit confirmation from you first.\n\nThat includes new issues, projects, comments, labels, links, or any other write action in Linear. I can still read/search Linear context if needed, summarize candidates, draft proposed objects, and ask for confirmation before creating or modifying anything."}}
-{"type":"turn.completed","usage":{"input_tokens":31489,"cached_input_tokens":31104,"output_tokens":106,"reasoning_output_tokens":28}}

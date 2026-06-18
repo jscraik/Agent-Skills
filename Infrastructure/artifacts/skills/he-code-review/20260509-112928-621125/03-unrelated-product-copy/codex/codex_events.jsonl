@@ -1,5 +1,0 @@
-{"type":"thread.started","thread_id":"019e0c4a-3699-7362-82a5-218321501878"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I can do that. Send me the current headline and, if you want, the vibe you’re after for the playfulness, like witty, cheeky, whimsical, or polished-fun."}}
-{"type":"item.completed","item":{"id":"item_1","type":"agent_message","text":"I can do that. Send me the current headline and, if you want, the vibe you’re after for the playfulness, like witty, cheeky, whimsical, or polished-fun."}}
-{"type":"turn.completed","usage":{"input_tokens":29716,"cached_input_tokens":22400,"output_tokens":119,"reasoning_output_tokens":28}}

@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0ab5-eca4-7dd2-93d9-7192390045b1"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Which kind of harness work is this?\n\n1. `brainstorm` - explore ideas and tradeoffs\n2. `spec` - define requirements and edge cases\n3. `plan` - turn an agreed direction into an execution plan\n\nReply with `1`, `2`, or `3`."}}
-{"type":"turn.completed","usage":{"input_tokens":26205,"cached_input_tokens":1920,"output_tokens":178,"reasoning_output_tokens":112}}

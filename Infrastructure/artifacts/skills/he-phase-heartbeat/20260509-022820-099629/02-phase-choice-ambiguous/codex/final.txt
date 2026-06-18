@@ -1,3 +1,0 @@
-Yes. If there are multiple valid next stages after the plan, I’ll pause and ask you which one you want before starting work.
-
-If you want, I can also present the options in a short list with tradeoffs so it’s easier to choose.

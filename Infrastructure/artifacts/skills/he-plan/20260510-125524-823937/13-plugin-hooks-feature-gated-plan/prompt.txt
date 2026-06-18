@@ -1,1 +1,0 @@
-Can you plan adding bundled plugin hooks and treat plugin_hooks as optional feature-gated behavior, with fallback validation because hooks may be disabled.

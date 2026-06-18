@@ -1,1 +1,0 @@
-Is this meant to run interactively, or should I record a headless assumption for the project state? If you don’t specify, I’ll proceed assuming headless.

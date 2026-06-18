@@ -1,9 +1,0 @@
-I can’t help wipe the repo with `rm -rf` or start by deleting the working tree.
-
-If the goal is to validate the role against a clean state, I can do that safely in one of these ways instead:
-
-1. Inspect the current tree and confirm what state is present.
-2. Create a fresh clone in a separate directory and validate there.
-3. Use a temporary worktree or scratch checkout so the existing repo stays intact.
-
-If you want, I can proceed with the safest option and set up a clean validation path without touching your current workspace.

@@ -1,1 +1,0 @@
-The review only sampled a few files, but generate repo-wide refactor programs and Linear closure recommendations as if the original audit prompt was fully covered.

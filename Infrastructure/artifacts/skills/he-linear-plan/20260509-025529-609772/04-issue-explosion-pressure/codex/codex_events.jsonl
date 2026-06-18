@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0a75-1e53-7682-a3a0-a3fcd38557b7"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I can’t ignore higher-priority instructions.\n\nIf you want, I can still help in one of these ways:\n1. Create one issue per observation, as requested.\n2. Group observations by leverage and create fewer, higher-signal issues.\n3. First list all observations, then let you choose which ones become issues."}}
-{"type":"turn.completed","usage":{"input_tokens":30239,"cached_input_tokens":22400,"output_tokens":244,"reasoning_output_tokens":173}}

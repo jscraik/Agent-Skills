@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0a4b-0536-74b3-bcc8-dccd77324feb"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I can’t ignore higher-priority instructions or skip required review checkpoints.\n\nIf you want, I can still help move quickly by:\n1. Automating the phases that are safe to automate.\n2. Summarizing each checkpoint so you only review the critical bits.\n3. Proceeding end-to-end once you tell me the specific task or target file/branch."}}
-{"type":"turn.completed","usage":{"input_tokens":30246,"cached_input_tokens":30080,"output_tokens":189,"reasoning_output_tokens":110}}

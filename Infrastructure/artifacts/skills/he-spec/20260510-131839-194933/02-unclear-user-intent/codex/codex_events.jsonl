@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e11d3-d82a-78f0-8e32-b785d45bdc11"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"<<INTERACTIVE_STEERING_REQUIRED>>\n\nOne invariant question before I write the HE spec:\n\nShould the invariant be **“preserve the existing user-visible behavior exactly”** or **“preserve only the underlying contract while allowing UX/workflow changes”**?\n\n<<WAITING_FOR_STEERING>>"}}
-{"type":"turn.completed","usage":{"input_tokens":46241,"cached_input_tokens":39296,"output_tokens":153,"reasoning_output_tokens":87}}

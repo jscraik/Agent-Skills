@@ -1,1 +1,0 @@
-Audit `repo/payments/README.md`: it says to run npm test at the repo root, but `.github/workflows/test.yml` may use a wrapper. Inspect the command contract and rewrite the setup section if that claim is stale.

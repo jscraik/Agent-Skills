@@ -1,5 +1,0 @@
-{"type":"thread.started","thread_id":"019e1266-2fe4-73e1-bfea-be2a060de9bc"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Happy to. I’ll ask once up front so I don’t steer the request into the wrong shape."}}
-{"type":"item.completed","item":{"id":"item_1","type":"agent_message","text":"Got it. I asked once for the request mode: `Plan`, `Brainstorm`, or `Spec`.\n\nSince no option came back yet, send me the harness request plus whichever mode you want, and I’ll handle it in that shape instead of guessing."}}
-{"type":"turn.completed","usage":{"input_tokens":83850,"cached_input_tokens":43776,"output_tokens":283,"reasoning_output_tokens":82}}

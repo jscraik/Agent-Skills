@@ -1,6 +1,0 @@
-I can make that change, but I’m blocked by the current environment: every local shell/filesystem command is failing with `sandbox_apply: Operation not permitted`, so I can’t inspect or edit the repo safely.
-
-If you want, I can still help in either of these ways:
-
-1. I can draft the exact wording and patch plan for the autonomous-mode closure behavior change.
-2. If you can provide the specific file or snippet that asks for the status choice, I’ll tell you exactly what to change there.

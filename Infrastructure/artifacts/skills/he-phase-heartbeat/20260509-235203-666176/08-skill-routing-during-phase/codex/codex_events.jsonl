@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0ef2-3bc5-72d2-8d7d-25837c25509b"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Yes. When a phase needs specialist knowledge, I’ll explicitly select the best available skill, say which one I’m using, and give a brief reason before applying it.\n\nI’ll keep it lightweight, for example:\n\n`Using skill-factory because this touches canonical skill authoring and repo governance.`\n\nor\n\n`Using github:gh-address-comments because this phase needs PR review-thread state and actionable comment resolution.`\n\nI’ll also avoid carrying a skill forward automatically across turns unless it is re-mentioned or the new task clearly triggers it again."}}
-{"type":"turn.completed","usage":{"input_tokens":46100,"cached_input_tokens":39296,"output_tokens":112,"reasoning_output_tokens":0}}

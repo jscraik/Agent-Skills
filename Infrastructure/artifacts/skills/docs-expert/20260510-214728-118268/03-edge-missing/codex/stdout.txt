@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e13a6-0ef2-7d90-9dd0-1f000ec4c7ff"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Before I rewrite it, we need one missing piece: who is the setup guide for?\n\nA few common options:\n1. New contributors\n2. End users\n3. Internal engineers\n4. Operators or admins\n5. A general audience\n\nIf you want, I can also rewrite it in a neutral style that works for the broadest possible reader, but the tone and level of detail will be much better if you pick one audience."}}
-{"type":"turn.completed","usage":{"input_tokens":30281,"cached_input_tokens":2432,"output_tokens":119,"reasoning_output_tokens":24}}

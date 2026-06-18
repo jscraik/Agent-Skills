@@ -1,3 +1,0 @@
-$keep-codex-fast
-
-Codex is crawling today; use $keep-codex-fast and tell me what is bloated, but do not delete anything. My sessions are symlinked to ExternalSSD.

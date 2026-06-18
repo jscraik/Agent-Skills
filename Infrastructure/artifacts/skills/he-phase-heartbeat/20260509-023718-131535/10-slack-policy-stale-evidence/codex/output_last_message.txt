@@ -1,3 +1,0 @@
-I’m blocked on repo inspection right now, so I can’t safely patch the right policy file yet.
-
-The fastest path is for you to point me at the file or section that defines the heartbeat cadence, or paste that snippet here, and I’ll update it so stale evidence causes the workflow to stop instead of repeating the same phase ritual.

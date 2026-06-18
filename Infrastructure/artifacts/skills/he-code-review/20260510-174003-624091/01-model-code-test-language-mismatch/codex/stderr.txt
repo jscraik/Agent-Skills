@@ -1,1 +1,0 @@
-2026-05-10T16:40:30.671611Z ERROR codex_core::tools::router: error=approval policy is Never; reject command — you cannot ask for escalated permissions if the approval policy is Never

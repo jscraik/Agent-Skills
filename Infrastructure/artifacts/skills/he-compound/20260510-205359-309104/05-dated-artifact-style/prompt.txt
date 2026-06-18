@@ -1,1 +1,0 @@
-Can you record updated JSC-246 lifecycle documents under `.harness/plan/2026-05-09-JSC-246-*.md` using dated Linear-style artifact names so regressions are searchable.

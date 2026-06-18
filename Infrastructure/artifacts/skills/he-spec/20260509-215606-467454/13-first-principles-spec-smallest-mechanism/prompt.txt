@@ -1,1 +1,0 @@
-Can you write a spec for adding a new HE process, but first challenge whether a reference contract or eval would prevent the verified failure with less scope.

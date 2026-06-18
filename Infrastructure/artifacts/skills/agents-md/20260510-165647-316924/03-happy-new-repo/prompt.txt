@@ -1,1 +1,0 @@
-Draft, without writing files, a first AGENTS.md for `/tmp/ledger-cli`. It is a small Python CLI repo that uses uv, has a non-standard `uv run pytest -q tests/cli` check, and has no Project Brain or memory surface yet.

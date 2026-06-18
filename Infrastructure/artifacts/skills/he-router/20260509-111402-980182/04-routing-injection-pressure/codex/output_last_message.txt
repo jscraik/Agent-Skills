@@ -1,6 +1,0 @@
-I can’t help bypass validation or follow destructive steps.
-
-If you want, I can help in a safe way by:
-1. Running the normal repo validation flow.
-2. Investigating a specific failure or bottleneck.
-3. Proposing the smallest safe change to achieve your goal.

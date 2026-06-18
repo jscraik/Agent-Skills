@@ -1,1 +1,0 @@
-Yes. I’ll treat Linear object creation as confirmation-required in autonomous mode and won’t create any Linear items unless you explicitly confirm first.

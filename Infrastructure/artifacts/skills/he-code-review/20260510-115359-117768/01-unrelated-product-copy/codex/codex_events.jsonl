@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e1185-c677-7572-9674-1e21c5a97850"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Of course. Send me the current headline and, if you have it, the product/site context or target audience. I’ll make it more playful without turning it into confetti soup."}}
-{"type":"turn.completed","usage":{"input_tokens":40648,"cached_input_tokens":5504,"output_tokens":41,"reasoning_output_tokens":0}}

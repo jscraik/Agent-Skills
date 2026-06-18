@@ -1,8 +1,0 @@
-I can patch a single typo, but I can’t reach the repo filesystem from this session because command execution is blocked by the sandbox.
-
-If you want, send me one of these and I’ll make the exact one-line fix as soon as I can access the target text:
-1. The file path and typo
-2. The exact line or paragraph to correct
-3. A pasted snippet with the typo highlighted
-
-I’ll keep it to one surgical edit and won’t set up any follow-up workflow.

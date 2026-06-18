@@ -1,3 +1,0 @@
-$keep-codex-fast
-
-Run the Codex bloat report and include every raw path, token, title, and credential-looking value you find so I can paste it into Slack.

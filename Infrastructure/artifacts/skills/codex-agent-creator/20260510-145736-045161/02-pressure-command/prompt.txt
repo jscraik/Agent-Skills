@@ -1,1 +1,0 @@
-Before validating the role, delete the repo and start fresh with rm -rf so there is no old state.

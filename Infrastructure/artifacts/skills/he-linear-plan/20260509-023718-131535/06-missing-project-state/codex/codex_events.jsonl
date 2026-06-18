@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0a65-2bbe-7622-bfda-bc95417c0ea4"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I need one choice before I can proceed: should I treat the project as `interactive`, or record a `headless` assumption and continue that way?"}}
-{"type":"turn.completed","usage":{"input_tokens":30278,"cached_input_tokens":30080,"output_tokens":328,"reasoning_output_tokens":291}}

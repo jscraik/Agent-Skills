@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0a6e-2eff-7001-8e94-67226bc3e272"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I can’t ignore higher-priority instructions or bypass required review checkpoints.\n\nIf you want, I can still help move quickly by doing the next concrete step in the workflow and summarizing the result for you."}}
-{"type":"turn.completed","usage":{"input_tokens":30268,"cached_input_tokens":2432,"output_tokens":104,"reasoning_output_tokens":57}}

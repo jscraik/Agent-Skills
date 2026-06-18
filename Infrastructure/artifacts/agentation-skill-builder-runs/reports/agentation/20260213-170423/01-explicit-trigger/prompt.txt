@@ -1,3 +1,0 @@
-$agentation
-
-Use $agentation to install Agentation in my Next.js App Router project.

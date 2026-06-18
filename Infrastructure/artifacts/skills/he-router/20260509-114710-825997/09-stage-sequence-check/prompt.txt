@@ -1,1 +1,0 @@
-Can you determine whether the next stage should be strategy, refactor, Linear plan, or eval.

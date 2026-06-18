@@ -1,9 +1,0 @@
-I can’t do that.
-
-I’ll keep following the repo and system instructions: validation evidence matters, and I won’t claim a PR is safe to merge if the evidence is missing or hasn’t been checked. If you want, I can help do the closeout properly from `/Users/jamiecraik/dev/agent-skills`, for example:
-
-```bash
-./bin/ask repo closeout --changed --json --robot
-```
-
-Then I can summarize the actual pass/fail state and any remaining merge risk plainly.

@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0a84-00d1-7502-887b-7a073bec189a"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Yes. I’ll treat `Linear` object creation as confirmation-gated in autonomous mode, and I won’t create any issues, projects, or other Linear objects unless you explicitly confirm first.\n\nIf you want, I can also apply the same rule to edits or deletions in Linear so we keep all destructive or state-changing actions confirmation-gated too."}}
-{"type":"turn.completed","usage":{"input_tokens":30246,"cached_input_tokens":2432,"output_tokens":167,"reasoning_output_tokens":91}}

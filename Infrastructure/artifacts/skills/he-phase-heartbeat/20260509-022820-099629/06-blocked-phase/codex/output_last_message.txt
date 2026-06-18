@@ -1,5 +1,0 @@
-Blocked by missing validation.
-
-Minimum corrective action: add the missing validation, then rerun the phase.
-
-I’ve stopped here rather than guessing past the gap.

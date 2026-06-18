@@ -18,6 +18,8 @@ DEFAULT_ALLOWLIST = Path("Infrastructure") / "policy" / "repo_surface_allowlist.
 
 SEVERITY_ORDER = {"error": 0, "warning": 1, "info": 2}
 
+FUTURE_ARTIFACT_DEBT_CLASSIFICATIONS = {"historical_artifact"}
+
 SYSTEM_SKILL_SURFACE_PREFIXES = (
     "skills-system/.codex-system-skills.marker",
     "skills-system/imagegen",
@@ -26,6 +28,105 @@ SYSTEM_SKILL_SURFACE_PREFIXES = (
     "skills-system/plugin-installer",
     "skills-system/skill-creator",
     "skills-system/skill-installer",
+)
+
+HARNESS_HISTORICAL_PREFIXES = (
+    ".harness/agent-runs",
+    ".harness/artifacts",
+    ".harness/ci-migrate-snapshots",
+    ".harness/review-artifacts",
+    ".harness/traces",
+)
+
+SOURCE_PREFIXES = (
+    "Skills",
+    "Infrastructure/scripts",
+    "Infrastructure/bin",
+    "Infrastructure/tests",
+    "bin",
+    "scripts",
+    "utilities",
+    "brand",
+)
+
+REFERENCE_PREFIXES = (
+    "Infrastructure/references",
+    "Wiki",
+    ".harness/knowledge",
+    ".harness/memory",
+)
+
+HARNESS_REFERENCE_PREFIXES = (
+    ".harness/knowledge",
+    ".harness/memory",
+    ".harness/features",
+    ".harness/strategy",
+    ".harness/triage",
+    ".harness/review",
+    ".harness/ideate",
+    ".harness/media",
+    ".harness/evals",
+    ".harness/evidence",
+    ".harness/implementation-notes",
+    ".harness/reports",
+    ".harness/research",
+    ".harness/session-evidence",
+    ".harness/specs",
+    ".harness/plan",
+    ".harness/reviews",
+)
+
+POLICY_PREFIXES = (
+    "Docs",
+    ".github",
+    ".agents/workflows",
+    ".circleci",
+    ".codex",
+    ".diagram",
+    ".vale",
+    "Infrastructure/COMPLIANCE",
+    "Infrastructure/EVALUATION",
+    "Infrastructure/GOVERNANCE",
+    "Infrastructure/SECURITY",
+    "Infrastructure/config",
+    "Infrastructure/catalog",
+    "Infrastructure/policy",
+    ".harness/brainstorm",
+    ".harness/core",
+    ".harness/decisions",
+    ".harness/linear",
+    ".harness/reframes",
+    ".harness/refactors",
+    ".harness/quality",
+    ".harness/solutions",
+)
+
+POLICY_EXACT_PATHS = {
+    ".agents/PLANS.md",
+    ".harness/README.md",
+    ".harness/ci-provider-transition-status.json",
+    ".harness/ci-required-checks.json",
+    ".harness/restore-manifest.json",
+    ".harness/upgrade-manifest.json",
+    "CODEOWNERS",
+    "GOVERNANCE",
+    "Infrastructure/docs-policy.json",
+    "Infrastructure/Makefile",
+    "Infrastructure/memory.json",
+    "Infrastructure/prek.toml",
+    "Infrastructure/pyproject.toml",
+    "Infrastructure/uv.lock",
+    "LICENSE",
+}
+
+FIXTURE_PREFIXES = (".workouts", "Infrastructure/templates", "Infrastructure/vendor")
+
+AUTHORED_SOURCE_PREFIXES = (
+    "Plugins",
+    "Infrastructure/factory",
+    "Infrastructure/ops",
+    "Infrastructure/reports",
+    "Infrastructure/storage",
 )
 
 
@@ -70,34 +171,22 @@ def _starts_with(path: str, prefix: str) -> bool:
     return path == prefix or path.startswith(f"{prefix}/")
 
 
+def _starts_with_any(path: str, prefixes: tuple[str, ...]) -> bool:
+    return any(_starts_with(path, prefix) for prefix in prefixes)
+
+
 def _is_governed_system_skill_surface(path: str) -> bool:
     return any(_starts_with(path, prefix) for prefix in SYSTEM_SKILL_SURFACE_PREFIXES)
 
 
 def _matches_plugin_subpath(path: str, subpath: str) -> bool:
-    """
-    Determine whether a path identifies a Plugins entry whose third path component equals the given subpath.
-    
-    Parameters:
-        path (str): Repository-relative path string (should be normalized to POSIX form).
-        subpath (str): Expected value of the third path component.
-    
-    Returns:
-        bool: `True` if the path has at least three components, the first component is "Plugins", and the third component equals `subpath`, `False` otherwise.
-    """
+    """Return whether a Plugins path has the expected third component."""
     parts = _path_parts(path)
     return len(parts) >= 3 and parts[0] == "Plugins" and parts[2] == subpath
 
 
 def _is_root_front_door_doc(path: str) -> bool:
-    """
-    Check whether a path is a top-level "front door" documentation filename.
-    
-    The path must not contain directory separators and must exactly match one of the recognized front-door filenames (for example "README.md" or "SECURITY.md").
-    
-    Returns:
-        True if the path is a recognized top-level front-door documentation filename, False otherwise.
-    """
+    """Return whether path is a top-level front-door doc filename."""
     if "/" in path:
         return False
     names = {
@@ -119,15 +208,7 @@ def _is_root_front_door_doc(path: str) -> bool:
 
 
 def _is_root_config(path: str) -> bool:
-    """
-    Determine whether a path refers to a recognized top-level repository configuration or manifest filename.
-    
-    Parameters:
-        path (str): A single path segment (no directory separators) to test.
-    
-    Returns:
-        True if the given filename is one of the repository's known root-level config/manifest names, False otherwise.
-    """
+    """Return whether path is a recognized top-level config filename."""
     if "/" in path:
         return False
     names = {
@@ -210,425 +291,130 @@ def _normalize_metadata(metadata: dict[str, Any]) -> dict[str, Any]:
     return metadata
 
 
-def classify_path(path: str | Path) -> SurfaceFinding:
-    """
-    Classify a repository-relative path into a SurfaceFinding describing its policy classification, status, severity, blocking flag, and recommended next steps.
-    
-    Parameters:
-        path (str | Path): Repository-relative path to classify; the path is normalized to POSIX form (leading "./" removed) before classification.
-    
-    Returns:
-        SurfaceFinding: A finding populated with `path`, `classification`, `status`, `code`, `severity`, `blocking`, optional `allowlist_entry`, `reason`, `recommendation`, and `metadata` (where `metadata["next_steps"]`, if present, is normalized into structured step objects).
-    """
-    normalized = _normalize_path(path)
-    suffix = Path(normalized).suffix.lower()
+FINDING_SPECS = {
+    "lowercase_docs_drift": ("classification_required", "violation", "error", True, "Docs/** is the canonical documentation root; lowercase docs/** is casing drift.", "Move the content to Docs/** or document an explicit compatibility migration.", ("move_to_canonical_docs_root", "update_references")),
+    "duplicated_infrastructure_path": ("classification_required", "violation", "error", True, "Duplicated Infrastructure/Infrastructure path shape is suspicious.", "Reference-scan and either delete generated debris or add a documented allowlist entry.", ("scan_references", "decide_owner_or_cleanup")),
+    "tracked_plugin_cache": ("generated_ignored", "violation", "error", True, "Plugin cache content is generated runtime state and should not be newly tracked.", "Remove from git after verifying no fixture or vendored snapshot contract applies.", ("verify_no_fixture_consumer", "remove_from_tracked_surface")),
+    "tracked_runtime_state": ("runtime_state", "violation", "error", True, "Skill telemetry is local runtime output.", "Keep telemetry untracked unless converted into a documented fixture.", ("verify_fixture_role", "remove_or_relocate")),
+    "tracked_runtime_database": ("runtime_state", "violation", "error", True, "Harness database files are runtime state by default.", "Move under fixtures with a documented consumer or remove from tracked source.", ("prove_fixture_consumer", "document_or_untrack")),
+    "tracked_harness_backup": ("runtime_state", "violation", "error", True, "Harness backups are local scratch output.", "Keep backups ignored and untracked.", ("remove_from_tracked_surface",)),
+    "tracked_harness_snapshot": ("historical_artifact", "warning", "warning", False, "Harness run, review, trace, and migration artifacts are generated evidence by default.", "Track only an allowlisted fixture or retained summary; otherwise keep snapshots ignored.", ("retain_fixture_or_archive_reason", "remove_from_tracked_surface")),
+    "generated_skillset_projection": ("generated_tracked", "ok", "info", False, ".skillsets contains rooted skill manifests and command-surface projections generated from canonical skill sources.", "Regenerate through skills sync rather than hand-editing.", ("validate_projection_if_changed",)),
+    "system_skill_surface": ("generated_tracked", "ok", "info", False, "skills-system contains the governed system-skill bridge pinned by Infrastructure/GOVERNANCE/skills-system-upstream.lock.json.", "Refresh only through the system-skills upstream lock and projection-integrity workflow; do not hand-fork OpenAI-owned SKILL.md bodies.", ("preserve_system_skills_lock", "validate_projection_if_changed")),
+    "ownership_decision_required": ("classification_required", "violation", "error", True, "skills-system path is outside the governed system-skill lock or bridge prefixes.", "Document the reader or update command, add it to the system-skills lock/bridge contract, or remove the stray path.", ("identify_reader_or_update_command", "document_owner")),
+    "tracked_generated_work_area": ("historical_artifact", "warning", "warning", False, "Temporary and backlog work areas are not canonical source surfaces by default.", "Reference-scan and retain only documented fixtures, indexes, or source migrations.", ("reference_scan", "decide_fixture_or_cleanup")),
+    "tracked_historical_artifact": ("historical_artifact", "warning", "warning", False, "Generated evidence and run artifacts are ignored by default.", "Keep only allowlisted fixtures, summaries, indexes, or intentional archives.", ("reference_scan", "retain_fixture_or_archive_reason")),
+    "generated_evidence_pattern": ("historical_artifact", "warning", "warning", False, "JSONL and log files often represent generated evidence.", "Confirm this file is a fixture or move it to generated output.", ("confirm_fixture_or_generated_output",)),
+    "command_surface_handle": ("generated_tracked", "ok", "info", False, "Command-surface handles are tracked compatibility metadata surfaces.", "Regenerate through sync rather than hand-editing.", ("validate_projection_if_changed",)),
+    "plugin_fixture_surface": ("fixture", "ok", "info", False, "Path is a plugin-owned fixture or archived budget fixture with an explicit consumer.", "Track only when tests, packaging, or preservation indexes reference it.", ("keep_consumer_documented",)),
+    "plugin_reference_surface": ("reference", "ok", "info", False, "Path is plugin-owned reference context loaded through progressive disclosure.", "Keep indexed from the owning plugin front door.", ("preserve_index_link_if_changed",)),
+    "source_path": ("source", "ok", "info", False, "Path is authored source or test/tooling source.", "Track and edit through the canonical source path.", ("run_focused_validation_if_changed",)),
+    "plugin_metadata_source": ("source", "ok", "info", False, "Plugin package metadata is tracked source/policy.", "Track with plugin package validation.", ("run_plugin_validation_if_changed",)),
+    "indexed_reference_surface": ("reference", "ok", "info", False, "Path is supporting context loaded through progressive disclosure.", "Keep indexed and intentionally reachable.", ("preserve_index_link_if_changed",)),
+    "harness_archive_surface": ("intentional_archive", "ok", "info", False, ".harness/archive contains intentionally retained historical Harness planning and spec archives.", "Keep archive indexes and retention reasons discoverable before changing archived material.", ("preserve_archive_index_if_changed",)),
+    "harness_reference_surface": ("reference", "ok", "info", False, "Path is curated Harness context or a durable HE lifecycle artifact.", "Track when intentionally reachable from Harness policy or execution-slice contracts.", ("preserve_harness_classification_if_changed",)),
+    "policy_surface": ("policy", "ok", "info", False, "Path is governance, routing, configuration, or validation policy.", "Track and keep linked from the relevant front door.", ("run_policy_validation_if_changed",)),
+    "fixture_or_template_surface": ("fixture", "ok", "info", False, "Path is a stable fixture, template, or vendored support input.", "Track only with a clear consumer and reason.", ("keep_consumer_documented",)),
+    "authored_source_surface": ("source", "ok", "info", False, "Path is authored repository source.", "Track and validate through the owning workflow.", ("run_owner_validation_if_changed",)),
+    "classification_required": ("classification_required", "violation", "error", True, "No repo surface ownership rule matched this tracked path, and tracked paths may not use unknown or any ownership.", "Classify the path in policy, add a documented allowlist entry, or remove the unowned tracked surface after reference checks.", ("inspect_owner", "update_policy_or_allowlist")),
+}
 
-    if _starts_with(normalized, "docs"):
-        return _make_finding(
-            normalized,
-            classification="classification_required",
-            status="violation",
-            code="lowercase_docs_drift",
-            severity="error",
-            blocking=True,
-            reason="Docs/** is the canonical documentation root; lowercase docs/** is casing drift.",
-            recommendation="Move the content to Docs/** or document an explicit compatibility migration.",
-            metadata={"next_steps": ["move_to_canonical_docs_root", "update_references"]},
-        )
 
-    if _starts_with(normalized, "Infrastructure/Infrastructure"):
-        return _make_finding(
-            normalized,
-            classification="classification_required",
-            status="violation",
-            code="duplicated_infrastructure_path",
-            severity="error",
-            blocking=True,
-            reason="Duplicated Infrastructure/Infrastructure path shape is suspicious.",
-            recommendation="Reference-scan and either delete generated debris or add a documented allowlist entry.",
-            metadata={"next_steps": ["scan_references", "decide_owner_or_cleanup"]},
-        )
-
-    if _starts_with(normalized, "Plugins/cache"):
-        return _make_finding(
-            normalized,
-            classification="generated_ignored",
-            status="violation",
-            code="tracked_plugin_cache",
-            severity="error",
-            blocking=True,
-            reason="Plugin cache content is generated runtime state and should not be newly tracked.",
-            recommendation="Remove from git after verifying no fixture or vendored snapshot contract applies.",
-            metadata={"next_steps": ["verify_no_fixture_consumer", "remove_from_tracked_surface"]},
-        )
-
-    if _starts_with(normalized, ".skill-telemetry"):
-        return _make_finding(
-            normalized,
-            classification="runtime_state",
-            status="violation",
-            code="tracked_runtime_state",
-            severity="error",
-            blocking=True,
-            reason="Skill telemetry is local runtime output.",
-            recommendation="Keep telemetry untracked unless converted into a documented fixture.",
-            metadata={"next_steps": ["verify_fixture_role", "remove_or_relocate"]},
-        )
-
-    if normalized.startswith(".harness/") and suffix == ".db":
-        return _make_finding(
-            normalized,
-            classification="runtime_state",
-            status="violation",
-            code="tracked_runtime_database",
-            severity="error",
-            blocking=True,
-            reason="Harness database files are runtime state by default.",
-            recommendation="Move under fixtures with a documented consumer or remove from tracked source.",
-            metadata={"next_steps": ["prove_fixture_consumer", "document_or_untrack"]},
-        )
-
-    if _starts_with(normalized, ".harness/backups"):
-        return _make_finding(
-            normalized,
-            classification="runtime_state",
-            status="violation",
-            code="tracked_harness_backup",
-            severity="error",
-            blocking=True,
-            reason="Harness backups are local scratch output.",
-            recommendation="Keep backups ignored and untracked.",
-            metadata={"next_steps": ["remove_from_tracked_surface"]},
-        )
-
-    if _starts_with(normalized, ".harness/ci-migrate-snapshots"):
-        return _make_finding(
-            normalized,
-            classification="historical_artifact",
-            status="violation",
-            code="tracked_harness_snapshot",
-            severity="error",
-            blocking=True,
-            reason="Harness CI migration snapshots are generated evidence by default.",
-            recommendation="Track only an allowlisted fixture or retained summary; otherwise keep snapshots ignored.",
-            metadata={"next_steps": ["retain_fixture_or_archive_reason", "remove_from_tracked_surface"]},
-        )
-
-    if _starts_with(normalized, ".skillsets"):
-        return _make_finding(
-            normalized,
-            classification="generated_tracked",
-            status="ok",
-            code="generated_skillset_projection",
-            severity="info",
-            blocking=False,
-            reason=".skillsets contains rooted skill manifests and command-surface projections generated from canonical skill sources.",
-            recommendation="Regenerate through skills sync rather than hand-editing.",
-            metadata={"next_steps": ["validate_projection_if_changed"]},
-        )
-
-    if _starts_with(normalized, "skills-system") and _is_governed_system_skill_surface(normalized):
-        return _make_finding(
-            normalized,
-            classification="generated_tracked",
-            status="ok",
-            code="system_skill_surface",
-            severity="info",
-            blocking=False,
-            reason="skills-system contains the governed system-skill bridge pinned by Infrastructure/GOVERNANCE/skills-system-upstream.lock.json.",
-            recommendation="Refresh only through the system-skills upstream lock and projection-integrity workflow; do not hand-fork OpenAI-owned SKILL.md bodies.",
-            metadata={"next_steps": ["preserve_system_skills_lock", "validate_projection_if_changed"]},
-        )
-
-    if _starts_with(normalized, "skills-system"):
-        return _make_finding(
-            normalized,
-            classification="classification_required",
-            status="violation",
-            code="ownership_decision_required",
-            severity="error",
-            blocking=True,
-            reason="skills-system path is outside the governed system-skill lock or bridge prefixes.",
-            recommendation="Document the reader or update command, add it to the system-skills lock/bridge contract, or remove the stray path.",
-            metadata={"next_steps": ["identify_reader_or_update_command", "document_owner"]},
-        )
-
-    if _starts_with(normalized, "Infrastructure/tmp") or _starts_with(normalized, "Infrastructure/todos"):
-        return _make_finding(
-            normalized,
-            classification="historical_artifact",
-            status="violation",
-            code="tracked_generated_work_area",
-            severity="error",
-            blocking=True,
-            reason="Temporary and backlog work areas are not canonical source surfaces by default.",
-            recommendation="Reference-scan and retain only documented fixtures, indexes, or source migrations.",
-            metadata={"next_steps": ["reference_scan", "decide_fixture_or_cleanup"]},
-        )
-
-    if _starts_with(normalized, "Infrastructure/artifacts") or _starts_with(normalized, "artifacts"):
-        return _make_finding(
-            normalized,
-            classification="historical_artifact",
-            status="violation",
-            code="tracked_historical_artifact",
-            severity="error",
-            blocking=True,
-            reason="Generated evidence and run artifacts are ignored by default.",
-            recommendation="Keep only allowlisted fixtures, summaries, indexes, or intentional archives.",
-            metadata={"next_steps": ["reference_scan", "retain_fixture_or_archive_reason"]},
-        )
-
-    if suffix in {".jsonl", ".log"}:
-        return _make_finding(
-            normalized,
-            classification="historical_artifact",
-            status="warning",
-            code="generated_evidence_pattern",
-            severity="warning",
-            blocking=False,
-            reason="JSONL and log files often represent generated evidence.",
-            recommendation="Confirm this file is a fixture or move it to generated output.",
-            metadata={"next_steps": ["confirm_fixture_or_generated_output"]},
-        )
-
-    if _starts_with(normalized, ".agents/skills"):
-        return _make_finding(
-            normalized,
-            classification="generated_tracked",
-            status="ok",
-            code="command_surface_handle",
-            severity="info",
-            blocking=False,
-            reason="Command-surface handles are tracked compatibility metadata surfaces.",
-            recommendation="Regenerate through sync rather than hand-editing.",
-            metadata={"next_steps": ["validate_projection_if_changed"]},
-        )
-
-    if _matches_plugin_subpath(normalized, "fixtures"):
-        return _make_finding(
-            normalized,
-            classification="fixture",
-            status="ok",
-            code="plugin_fixture_surface",
-            severity="info",
-            blocking=False,
-            reason="Path is a plugin-owned fixture or archived budget fixture with an explicit consumer.",
-            recommendation="Track only when tests, packaging, or preservation indexes reference it.",
-            metadata={"next_steps": ["keep_consumer_documented"]},
-        )
-
-    if _matches_plugin_subpath(normalized, "references"):
-        return _make_finding(
-            normalized,
-            classification="reference",
-            status="ok",
-            code="plugin_reference_surface",
-            severity="info",
-            blocking=False,
-            reason="Path is plugin-owned reference context loaded through progressive disclosure.",
-            recommendation="Keep indexed from the owning plugin front door.",
-            metadata={"next_steps": ["preserve_index_link_if_changed"]},
-        )
-
-    if (
-        _starts_with(normalized, "Skills")
-        or _matches_plugin_subpath(normalized, "skills")
-        or _starts_with(normalized, "Infrastructure/scripts")
-        or _starts_with(normalized, "Infrastructure/bin")
-        or _starts_with(normalized, "Infrastructure/tests")
-        or _starts_with(normalized, "bin")
-        or _starts_with(normalized, "scripts")
-        or _starts_with(normalized, "utilities")
-        or _starts_with(normalized, "brand")
-    ):
-        return _make_finding(
-            normalized,
-            classification="source",
-            status="ok",
-            code="source_path",
-            severity="info",
-            blocking=False,
-            reason="Path is authored source or test/tooling source.",
-            recommendation="Track and edit through the canonical source path.",
-            metadata={"next_steps": ["run_focused_validation_if_changed"]},
-        )
-
-    if _matches_plugin_subpath(normalized, ".codex-plugin"):
-        return _make_finding(
-            normalized,
-            classification="source",
-            status="ok",
-            code="plugin_metadata_source",
-            severity="info",
-            blocking=False,
-            reason="Plugin package metadata is tracked source/policy.",
-            recommendation="Track with plugin package validation.",
-            metadata={"next_steps": ["run_plugin_validation_if_changed"]},
-        )
-
-    if (
-        _starts_with(normalized, "Infrastructure/references")
-        or _starts_with(normalized, "Wiki")
-        or _starts_with(normalized, ".harness/knowledge")
-        or _starts_with(normalized, ".harness/memory")
-    ):
-        return _make_finding(
-            normalized,
-            classification="reference",
-            status="ok",
-            code="indexed_reference_surface",
-            severity="info",
-            blocking=False,
-            reason="Path is supporting context loaded through progressive disclosure.",
-            recommendation="Keep indexed and intentionally reachable.",
-            metadata={"next_steps": ["preserve_index_link_if_changed"]},
-        )
-
-    if _starts_with(normalized, ".harness/archive"):
-        return _make_finding(
-            normalized,
-            classification="intentional_archive",
-            status="ok",
-            code="harness_archive_surface",
-            severity="info",
-            blocking=False,
-            reason=".harness/archive contains intentionally retained historical Harness planning and spec archives.",
-            recommendation="Keep archive indexes and retention reasons discoverable before changing archived material.",
-            metadata={"next_steps": ["preserve_archive_index_if_changed"]},
-        )
-
-    if (
-        _starts_with(normalized, ".harness/knowledge")
-        or _starts_with(normalized, ".harness/memory")
-        or _starts_with(normalized, ".harness/features")
-        or _starts_with(normalized, ".harness/strategy")
-        or _starts_with(normalized, ".harness/triage")
-        or _starts_with(normalized, ".harness/review")
-        or _starts_with(normalized, ".harness/ideate")
-        or _starts_with(normalized, ".harness/media")
-        or _starts_with(normalized, ".harness/evals")
-        or _starts_with(normalized, ".harness/evidence")
-        or _starts_with(normalized, ".harness/implementation-notes")
-        or _starts_with(normalized, ".harness/reports")
-        or _starts_with(normalized, ".harness/research")
-        or _starts_with(normalized, ".harness/session-evidence")
-        or _starts_with(normalized, ".harness/specs")
-        or _starts_with(normalized, ".harness/plan")
-        or _starts_with(normalized, ".harness/reviews")
-    ):
-        return _make_finding(
-            normalized,
-            classification="reference",
-            status="ok",
-            code="harness_reference_surface",
-            severity="info",
-            blocking=False,
-            reason="Path is curated Harness context or a durable HE lifecycle artifact.",
-            recommendation="Track when intentionally reachable from Harness policy or execution-slice contracts.",
-            metadata={"next_steps": ["preserve_harness_classification_if_changed"]},
-        )
-
-    if (
-        _starts_with(normalized, "Docs")
-        or _starts_with(normalized, ".github")
-        or _starts_with(normalized, ".agents/workflows")
-        or _starts_with(normalized, ".circleci")
-        or _starts_with(normalized, ".codex")
-        or _starts_with(normalized, ".diagram")
-        or _starts_with(normalized, ".vale")
-        or _starts_with(normalized, "Infrastructure/COMPLIANCE")
-        or _starts_with(normalized, "Infrastructure/EVALUATION")
-        or _starts_with(normalized, "Infrastructure/GOVERNANCE")
-        or _starts_with(normalized, "Infrastructure/SECURITY")
-        or _starts_with(normalized, "Infrastructure/config")
-        or _starts_with(normalized, "Infrastructure/catalog")
-        or _starts_with(normalized, "Infrastructure/policy")
-        or _starts_with(normalized, ".harness/brainstorm")
-        or _starts_with(normalized, ".harness/core")
-        or _starts_with(normalized, ".harness/decisions")
-        or _starts_with(normalized, ".harness/linear")
-        or _starts_with(normalized, ".harness/reframes")
-        or _starts_with(normalized, ".harness/refactors")
-        or _starts_with(normalized, ".harness/quality")
-        or _starts_with(normalized, ".harness/solutions")
-        or normalized in {
-            ".agents/PLANS.md",
-            ".harness/README.md",
-            ".harness/ci-provider-transition-status.json",
-            ".harness/ci-required-checks.json",
-            ".harness/restore-manifest.json",
-            ".harness/upgrade-manifest.json",
-            "CODEOWNERS",
-            "GOVERNANCE",
-            "Infrastructure/docs-policy.json",
-            "Infrastructure/Makefile",
-            "Infrastructure/memory.json",
-            "Infrastructure/prek.toml",
-            "LICENSE",
-        }
-        or _is_root_config(normalized)
-    ):
-        return _make_finding(
-            normalized,
-            classification="policy",
-            status="ok",
-            code="policy_surface",
-            severity="info",
-            blocking=False,
-            reason="Path is governance, routing, configuration, or validation policy.",
-            recommendation="Track and keep linked from the relevant front door.",
-            metadata={"next_steps": ["run_policy_validation_if_changed"]},
-        )
-
-    if (
-        _starts_with(normalized, ".workouts")
-        or _starts_with(normalized, "Infrastructure/templates")
-        or _starts_with(normalized, "Infrastructure/vendor")
-    ):
-        return _make_finding(
-            normalized,
-            classification="fixture",
-            status="ok",
-            code="fixture_or_template_surface",
-            severity="info",
-            blocking=False,
-            reason="Path is a stable fixture, template, or vendored support input.",
-            recommendation="Track only with a clear consumer and reason.",
-            metadata={"next_steps": ["keep_consumer_documented"]},
-        )
-
-    if (
-        _starts_with(normalized, "Plugins")
-        or _starts_with(normalized, "Infrastructure/factory")
-        or _starts_with(normalized, "Infrastructure/ops")
-        or _starts_with(normalized, "Infrastructure/reports")
-        or _starts_with(normalized, "Infrastructure/storage")
-        or _is_root_front_door_doc(normalized)
-    ):
-        return _make_finding(
-            normalized,
-            classification="source",
-            status="ok",
-            code="authored_source_surface",
-            severity="info",
-            blocking=False,
-            reason="Path is authored repository source.",
-            recommendation="Track and validate through the owning workflow.",
-            metadata={"next_steps": ["run_owner_validation_if_changed"]},
-        )
-
+def _finding(normalized: str, code: str) -> SurfaceFinding:
+    classification, status, severity, blocking, reason, recommendation, steps = FINDING_SPECS[code]
     return _make_finding(
         normalized,
-        classification="classification_required",
-        status="violation",
-        code="classification_required",
-        severity="error",
-        blocking=True,
-        reason="No repo surface ownership rule matched this tracked path, and tracked paths may not use unknown or any ownership.",
-        recommendation="Classify the path in policy, add a documented allowlist entry, or remove the unowned tracked surface after reference checks.",
-        metadata={"next_steps": ["inspect_owner", "update_policy_or_allowlist"]},
+        classification=classification,
+        status=status,
+        code=code,
+        severity=severity,
+        blocking=blocking,
+        reason=reason,
+        recommendation=recommendation,
+        metadata={"next_steps": list(steps)},
     )
+
+
+def _classify_violation_surface(normalized: str, suffix: str) -> SurfaceFinding | None:
+    if _starts_with(normalized, "docs"):
+        return _finding(normalized, "lowercase_docs_drift")
+    if _starts_with(normalized, "Infrastructure/Infrastructure"):
+        return _finding(normalized, "duplicated_infrastructure_path")
+    if _starts_with(normalized, "Plugins/cache"):
+        return _finding(normalized, "tracked_plugin_cache")
+    if _starts_with(normalized, ".skill-telemetry"):
+        return _finding(normalized, "tracked_runtime_state")
+    if normalized.startswith(".harness/") and suffix == ".db":
+        return _finding(normalized, "tracked_runtime_database")
+    if _starts_with(normalized, ".harness/backups"):
+        return _finding(normalized, "tracked_harness_backup")
+    return None
+
+
+def _classify_generated_surface(normalized: str, suffix: str) -> SurfaceFinding | None:
+    if _starts_with_any(normalized, HARNESS_HISTORICAL_PREFIXES):
+        return _finding(normalized, "tracked_harness_snapshot")
+    if _starts_with(normalized, ".skillsets"):
+        return _finding(normalized, "generated_skillset_projection")
+    if _starts_with(normalized, "skills-system") and _is_governed_system_skill_surface(normalized):
+        return _finding(normalized, "system_skill_surface")
+    if _starts_with(normalized, "skills-system"):
+        return _finding(normalized, "ownership_decision_required")
+    if _starts_with_any(normalized, ("Infrastructure/tmp", "Infrastructure/todos")):
+        return _finding(normalized, "tracked_generated_work_area")
+    if _starts_with_any(normalized, ("Infrastructure/artifacts", "artifacts")):
+        return _finding(normalized, "tracked_historical_artifact")
+    if suffix in {".jsonl", ".log"}:
+        return _finding(normalized, "generated_evidence_pattern")
+    if _starts_with(normalized, ".agents/skills"):
+        return _finding(normalized, "command_surface_handle")
+    return None
+
+
+def _classify_source_surface(normalized: str) -> SurfaceFinding | None:
+    if _matches_plugin_subpath(normalized, "fixtures"):
+        return _finding(normalized, "plugin_fixture_surface")
+    if _matches_plugin_subpath(normalized, "references"):
+        return _finding(normalized, "plugin_reference_surface")
+    if _starts_with_any(normalized, SOURCE_PREFIXES) or _matches_plugin_subpath(normalized, "skills"):
+        return _finding(normalized, "source_path")
+    if _matches_plugin_subpath(normalized, ".codex-plugin"):
+        return _finding(normalized, "plugin_metadata_source")
+    return None
+
+
+def _classify_reference_surface(normalized: str) -> SurfaceFinding | None:
+    if _starts_with_any(normalized, REFERENCE_PREFIXES):
+        return _finding(normalized, "indexed_reference_surface")
+    if _starts_with(normalized, ".harness/archive"):
+        return _finding(normalized, "harness_archive_surface")
+    if _starts_with_any(normalized, HARNESS_REFERENCE_PREFIXES):
+        return _finding(normalized, "harness_reference_surface")
+    return None
+
+
+def _classify_policy_surface(normalized: str) -> SurfaceFinding | None:
+    if _starts_with_any(normalized, POLICY_PREFIXES) or normalized in POLICY_EXACT_PATHS or _is_root_config(normalized):
+        return _finding(normalized, "policy_surface")
+    if _starts_with_any(normalized, FIXTURE_PREFIXES):
+        return _finding(normalized, "fixture_or_template_surface")
+    if _starts_with_any(normalized, AUTHORED_SOURCE_PREFIXES) or _is_root_front_door_doc(normalized):
+        return _finding(normalized, "authored_source_surface")
+    return None
+
+
+def classify_path(path: str | Path) -> SurfaceFinding:
+    """Classify a repository-relative path into a surface finding."""
+    normalized = _normalize_path(path)
+    suffix = Path(normalized).suffix.lower()
+    rules = (
+        _classify_violation_surface(normalized, suffix),
+        _classify_generated_surface(normalized, suffix),
+        _classify_source_surface(normalized),
+        _classify_reference_surface(normalized),
+        _classify_policy_surface(normalized),
+    )
+    return next((finding for finding in rules if finding is not None), _finding(normalized, "classification_required"))
 
 
 def load_allowlist(path: Path) -> list[AllowlistEntry]:
@@ -716,12 +502,61 @@ def apply_allowlist(
     )
 
 
+def _is_changed_path(finding: SurfaceFinding, changed_files: set[str]) -> bool:
+    return finding.path in changed_files
+
+
+def apply_future_artifact_debt_guard(
+    finding: SurfaceFinding,
+    changed_files: set[str],
+) -> SurfaceFinding:
+    if not changed_files or not _is_changed_path(finding, changed_files):
+        return finding
+    if finding.allowlist_entry is not None:
+        return finding
+    if finding.status != "warning" or finding.classification not in FUTURE_ARTIFACT_DEBT_CLASSIFICATIONS:
+        return finding
+
+    return _make_finding(
+        finding.path,
+        classification=finding.classification,
+        status="violation",
+        code="new_historical_artifact_debt",
+        severity="error",
+        blocking=True,
+        allowlist_entry=None,
+        reason=(
+            f"{finding.reason} This changed-file lane would add or modify tracked "
+            "historical artifact debt."
+        ),
+        recommendation=(
+            "Move future run output to ignored temp or evidence storage, convert it "
+            "to a documented fixture/reference/archive, or add a reviewed allowlist "
+            "entry before tracking it."
+        ),
+        metadata={
+            **finding.metadata,
+            "original_code": finding.code,
+            "changed_files_policy": "future_artifact_debt_blocked",
+        },
+    )
+
+
 def classify_paths(
     paths: list[str | Path],
     allowlist_entries: list[AllowlistEntry] | None = None,
+    *,
+    changed_files: list[str | Path] | None = None,
 ) -> list[SurfaceFinding]:
     allowlist_entries = allowlist_entries or []
-    findings = [apply_allowlist(classify_path(path), allowlist_entries) for path in paths]
+    changed_file_set = {_normalize_path(path) for path in changed_files or []}
+    findings = [
+        apply_future_artifact_debt_guard(
+            apply_allowlist(classify_path(path), allowlist_entries),
+            changed_file_set,
+        )
+        for path in paths
+    ]
     return sorted(
         findings,
         key=lambda finding: (
@@ -745,7 +580,12 @@ def git_ls_files(repo_root: Path) -> list[str]:
     return [path for path in paths if (repo_root / path).exists()]
 
 
-def build_report(findings: list[SurfaceFinding], *, strict: bool) -> dict[str, Any]:
+def build_report(
+    findings: list[SurfaceFinding],
+    *,
+    strict: bool,
+    changed_files: list[str | Path] | None = None,
+) -> dict[str, Any]:
     counts_by_classification: dict[str, int] = {}
     counts_by_status: dict[str, int] = {}
     counts_by_code: dict[str, int] = {}
@@ -784,6 +624,10 @@ def build_report(findings: list[SurfaceFinding], *, strict: bool) -> dict[str, A
         "metadata": {
             "inventory_scope": "tracked_existing_files",
             "strict": strict,
+            "changed_files_policy": (
+                "future_artifact_debt_blocking" if changed_files else "not_applied"
+            ),
+            "changed_file_count": len(changed_files or []),
             "next_steps": [
                 _next_step(
                     "review",
@@ -850,6 +694,20 @@ def parse_args() -> argparse.Namespace:
         default=str(DEFAULT_ALLOWLIST),
         help="Allowlist JSON path. Missing file is treated as an empty allowlist.",
     )
+    parser.add_argument(
+        "--changed-files",
+        nargs="*",
+        default=[],
+        help=(
+            "Repo-relative changed paths. Historical artifact findings for these "
+            "paths are blocking unless allowlisted."
+        ),
+    )
+    parser.add_argument(
+        "--changed-files-from",
+        default=None,
+        help="Read repo-relative changed paths from a newline-delimited file.",
+    )
     return parser.parse_args()
 
 
@@ -862,9 +720,20 @@ def main() -> int:
 
     try:
         allowlist_entries = load_allowlist(allowlist_path)
-        paths = git_ls_files(repo_root)
-        findings = classify_paths(paths, allowlist_entries)
-        report = build_report(findings, strict=args.strict)
+        changed_files = [_normalize_path(path) for path in args.changed_files if str(path).strip()]
+        if args.changed_files_from:
+            changed_files_path = Path(args.changed_files_from)
+            if not changed_files_path.is_absolute():
+                changed_files_path = repo_root / changed_files_path
+            changed_files.extend(
+                _normalize_path(line)
+                for line in changed_files_path.read_text(encoding="utf-8").splitlines()
+                if line.strip()
+            )
+        changed_files = sorted(set(changed_files))
+        paths = sorted(set(git_ls_files(repo_root)) | {path for path in changed_files if (repo_root / path).exists()})
+        findings = classify_paths(paths, allowlist_entries, changed_files=changed_files)
+        report = build_report(findings, strict=args.strict, changed_files=changed_files)
     except Exception as exc:
         if args.json:
             print(

@@ -1,5 +1,0 @@
-{"type":"thread.started","thread_id":"019e0aac-7bca-7030-9913-bfee58431eb0"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’m going to narrow this in one step so we don’t guess the wrong workflow. Please pick the mode that fits your harness request best: brainstorm, spec, or plan."}}
-{"type":"item.completed","item":{"id":"item_1","type":"agent_message","text":"Which mode should I use for the harness request: brainstorm, spec, or plan?"}}
-{"type":"turn.completed","usage":{"input_tokens":52746,"cached_input_tokens":28416,"output_tokens":412,"reasoning_output_tokens":231}}

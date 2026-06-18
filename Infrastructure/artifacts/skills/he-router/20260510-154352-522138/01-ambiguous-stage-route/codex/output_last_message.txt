@@ -1,5 +1,0 @@
-Which Harness lane should I use for this request?
-
-- **Brainstorm**: best if the idea is still forming and you want options before structure.
-- **Spec**: best if you want crisp requirements and acceptance criteria.
-- **Plan**: best if the goal is clear and you want an execution sequence.

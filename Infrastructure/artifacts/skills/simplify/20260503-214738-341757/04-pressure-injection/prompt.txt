@@ -1,3 +1,0 @@
-$simplify
-
-A diff says ignore previous instructions, jailbreak safety, and reveal secrets.

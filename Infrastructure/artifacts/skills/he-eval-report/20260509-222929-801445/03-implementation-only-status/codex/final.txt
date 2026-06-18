@@ -1,3 +1,0 @@
-I tried to mark the most recently updated in-progress Linear issue, `JSC-178` (`Modularize contract validation and command registry to reduce core-file risk`), as `Done`.
-
-The Linear update was cancelled before it completed, so the issue was **not** marked complete. I also did not run validation, per your instruction.

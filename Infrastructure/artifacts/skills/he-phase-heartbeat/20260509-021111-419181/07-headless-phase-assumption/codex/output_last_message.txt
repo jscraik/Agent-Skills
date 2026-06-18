@@ -1,7 +1,0 @@
-Yes. In headless mode, I’ll:
-
-- record reasonable assumptions instead of stopping to ask when the choice is low-risk
-- avoid irreversible actions unless you explicitly approve them
-- call out any assumptions and remaining risks clearly in the handoff
-
-If you want, I can also treat “irreversible” as including commits, pushes, deletions, migrations, or external writes unless you say otherwise.

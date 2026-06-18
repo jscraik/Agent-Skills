@@ -1,5 +1,0 @@
-I can, but I need one bit of clarification first: what artifact should I update?
-
-Do you want me to add guidance like “when the target project state is unknown, ask whether the session is interactive; if not interactive, record a headless assumption” to an existing skill/doc in this repo, or are you asking me to apply that rule to my current behavior?
-
-Also, this session is currently in a read-only sandbox, so I can inspect files and suggest the exact patch, but I won’t be able to write changes unless the environment is restarted with write access.

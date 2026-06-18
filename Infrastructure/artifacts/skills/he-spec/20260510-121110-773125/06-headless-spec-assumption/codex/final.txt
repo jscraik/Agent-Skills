@@ -1,9 +1,0 @@
-I can’t run the `$he-spec` workflow in this session because both required loading paths are blocked:
-
-- `./bin/ask skills resolve he-spec --json` failed before repo code ran:
-  `sandbox-exec: sandbox_apply: Operation not permitted`
-- Directly reading `Plugins/harness-engineering/skills/he-spec/SKILL.md` also failed with the same sandbox error, even for a plain `sed` read.
-
-The handle’s instructions say to fail closed if the real contract cannot load, so I should not write the spec from guesswork. No files were changed.
-
-To unblock this, I need either the contents of `Plugins/harness-engineering/skills/he-spec/SKILL.md` pasted here, or a session where read commands in `/Users/jamiecraik/dev/agent-skills` can execute. Once I have the contract, I can write the spec in autonomous mode and record assumptions where clarification would normally be asked.

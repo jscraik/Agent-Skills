@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<testsuite name="he-spec" tests="1" failures="0" errors="0" timestamp="2026-05-10T11:02:58Z" id="20260510-120258-798967">
-  <testcase name="unclear-user-intent" classname="he-spec" time="600.0">
-    <system-out>
-artifacts_dir:
-Infrastructure/artifacts/skills/he-spec/20260510-120258-798967/01-unclear-user-intent
-    </system-out>
-  </testcase>
-</testsuite>

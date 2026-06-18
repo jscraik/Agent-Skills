@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<testsuite name="he-compound" tests="1" failures="0" errors="0" timestamp="2026-05-10T12:40:50Z" id="20260510-134050-602415">
-  <testcase name="repeated-review-failure-state" classname="he-compound" time="600.0">
-    <system-out>
-artifacts_dir:
-Infrastructure/artifacts/skills/he-compound/20260510-134050-602415/01-repeated-review-failure-state
-    </system-out>
-  </testcase>
-</testsuite>

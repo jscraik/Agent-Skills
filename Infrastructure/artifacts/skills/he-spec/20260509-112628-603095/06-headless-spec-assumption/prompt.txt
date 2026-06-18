@@ -1,1 +1,0 @@
-Can you write the spec in autonomous mode and record assumptions where clarification would normally be asked.

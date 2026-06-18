@@ -1,7 +1,0 @@
-I can generate it, but I’m missing the one thing that anchors the proof to the right slice: the Linear issue key or the slice artifact name.
-
-Right now I’m blocked on two fronts:
-- Local repo commands are failing in this environment, so I can’t inspect the canonical files directly.
-- The Linear context available here doesn’t expose the slice identifier automatically.
-
-If you send me the Linear issue key, I’ll produce the eval and drift proof in the right format and then tell you whether closure looks safe.

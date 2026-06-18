@@ -280,7 +280,7 @@ check_matches_validation_scope() {
       ;;
     audit)
       case "$slug" in
-        skill-catalog|plugin-shadowing|provider-policy|runtime-budget|context-budget|projection-integrity|path-ownership-boundaries|selection-contract|runtime-separation-*)
+        skill-catalog|plugin-shadowing|provider-policy|repo-surface-inventory|runtime-budget|context-budget|projection-integrity|path-ownership-boundaries|selection-contract|runtime-separation-*)
           return 0
           ;;
       esac
@@ -609,9 +609,15 @@ if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
   skill_family_changed_files_args=(--changed-files "${changed_files[@]}")
 fi
 
+repo_surface_inventory_cmd=("${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py --strict)
+if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
+  repo_surface_inventory_cmd+=(--changed-files "${changed_files[@]}")
+fi
+
 schedule_check required docs-lint "📚 Running docs lint..." "${python_cmd[@]}" Infrastructure/scripts/docs_lint.py --mode block --config Infrastructure/docs-policy.json
 schedule_check required ask-bootstrap-docs "🧭 Verifying ask bootstrap docs..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/verify_ask_bootstrap_docs.py
 schedule_check required steering-uptake "🧭 Verifying steering uptake ledger..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py
+schedule_check required repo-surface-inventory "🧭 Enforcing repo surface ownership..." "${repo_surface_inventory_cmd[@]}"
 schedule_check required skills-sdk-typed-artifacts "🧾 Verifying Skills SDK typed artifact contracts..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/validate_skills_sdk_typed_artifacts.py --repo-root .
 schedule_check required verify-work-scope-flags "🧭 Verifying verify-work governance scope flags..." "${python_cmd[@]}" Infrastructure/scripts/verify_verify_work_scope_flags.py
 schedule_check required question-lifecycle "❓ Verifying question lifecycle contract..." "${python_cmd[@]}" Infrastructure/scripts/verify_question_lifecycle_contract.py

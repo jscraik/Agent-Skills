@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0a95-12e6-7973-ad53-ef29f9416f6e"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"If the target project state is unknown, I’ll ask whether to proceed interactively; if not, I’ll record a headless assumption and continue.\n\nIf you want, I can also rewrite that as a shorter policy note or a user-facing prompt."}}
-{"type":"turn.completed","usage":{"input_tokens":30238,"cached_input_tokens":2432,"output_tokens":399,"reasoning_output_tokens":343}}

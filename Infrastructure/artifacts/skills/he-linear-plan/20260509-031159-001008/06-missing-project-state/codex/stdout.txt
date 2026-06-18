@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0a83-e11a-7ec0-95ff-e5364991329f"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I don’t know the target project state yet.\n\nChoose one:\n1. `Interactive` - I pause and ask as needed before making assumptions.\n2. `Headless` - I record a headless assumption and proceed without further prompts.\n\nIf you want, reply with `interactive` or `headless`."}}
-{"type":"turn.completed","usage":{"input_tokens":30247,"cached_input_tokens":30080,"output_tokens":162,"reasoning_output_tokens":94}}

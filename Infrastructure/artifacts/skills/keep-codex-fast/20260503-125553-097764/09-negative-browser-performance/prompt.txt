@@ -1,1 +1,0 @@
-My React page is slow after loading a big table; profile the browser render path.

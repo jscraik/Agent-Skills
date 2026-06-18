@@ -1,5 +1,0 @@
-{"type":"thread.started","thread_id":"019e0c54-e679-75c2-b101-44e4d450112a"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’m going to pause and pin down the mode first so we don’t guess wrong. You want a harness request, and the right next step depends on whether you want brainstorming, a spec, or a concrete plan."}}
-{"type":"item.completed","item":{"id":"item_1","type":"agent_message","text":"Which kind of harness request do you want to make right now?\n\n1. Brainstorm\n2. Spec\n3. Plan"}}
-{"type":"turn.completed","usage":{"input_tokens":52640,"cached_input_tokens":48384,"output_tokens":252,"reasoning_output_tokens":57}}

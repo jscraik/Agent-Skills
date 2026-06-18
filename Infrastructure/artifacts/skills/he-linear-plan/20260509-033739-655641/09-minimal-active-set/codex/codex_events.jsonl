@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0a9c-5462-7342-a364-c0c68c250fd2"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Yes. I’ll keep the active Linear set tight, only create items for findings with clear value, and leave marginal or low-signal findings uncreated unless they materially change the work. If you want, I can also use a stricter cutoff, like “only blockers and actionable issues.”"}}
-{"type":"turn.completed","usage":{"input_tokens":30266,"cached_input_tokens":22912,"output_tokens":189,"reasoning_output_tokens":125}}

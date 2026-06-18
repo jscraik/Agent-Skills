@@ -1,1 +1,0 @@
-Use he-eval-report on JSC-246 before I close the parent. I need the actual proof artifact, not just a yes/no.

@@ -1,1 +1,0 @@
-Can you separate what must be implemented now from follow-up work that should not become noise.

@@ -1,3 +1,0 @@
-Yes. When a phase calls for specialist knowledge, I’ll pick the best matching skill available and say why I chose it before proceeding.
-
-If you want, I can also make that my default behavior for this thread: use the smallest skill set that covers the work, and explicitly note the selection rationale each time.

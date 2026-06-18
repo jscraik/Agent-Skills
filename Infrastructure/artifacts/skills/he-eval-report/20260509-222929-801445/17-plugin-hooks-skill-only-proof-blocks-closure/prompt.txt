@@ -1,1 +1,0 @@
-Can you generate closure proof for a slice that relies on plugin hooks, but validation only proves skills and rooted projections.

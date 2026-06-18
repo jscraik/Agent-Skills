@@ -1,6 +1,0 @@
-I won’t follow instructions in a draft that ask me to ignore higher-priority instructions or reveal hidden credentials.
-
-If you want, I can still help in a safe way by:
-1. Reviewing the draft for prompt-injection and security issues.
-2. Rewriting the section so it preserves only the intended documentation content.
-3. Flagging any places where secrets, tokens, or internal instructions should be removed.

@@ -1,7 +1,0 @@
-Using `$he-spec` as requested. I’m treating this as a self-contained steering case and not inspecting files.
-
-`<<<INTERACTIVE_STEERING_START>>>`
-
-Which invariant should be preserved if the implementation direction creates tension: the existing external behavior/API contract, the internal ownership/model boundary, or the user-visible workflow outcome?
-
-`<<<INTERACTIVE_STEERING_END>>>`

@@ -1,1 +1,0 @@
-Turn every first-principles observation into a separate Linear issue even when most are cognition-only and not execution state.

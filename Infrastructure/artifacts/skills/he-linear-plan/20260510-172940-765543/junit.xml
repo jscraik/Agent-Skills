@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<testsuite name="he-linear-plan" tests="1" failures="0" errors="0" timestamp="2026-05-10T16:29:40Z" id="20260510-172940-765543">
-  <testcase name="live-linear-confirmation-required" classname="he-linear-plan" time="90.0">
-    <system-out>
-artifacts_dir:
-Infrastructure/artifacts/skills/he-linear-plan/20260510-172940-765543/01-live-linear-confirmation-required
-    </system-out>
-  </testcase>
-</testsuite>
