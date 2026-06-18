@@ -1804,11 +1804,7 @@ def run_gate(
     findings.extend(check_codex_frontmatter(doc, min_desc_len=min_desc_len))
     findings.extend(check_progressive_disclosure(doc, max_lines=max_lines, max_codeblock_lines=max_codeblock_lines))
     findings.extend(check_required_sections(doc, require_philosophy=require_philosophy))
-    for finding in check_canonical_header_order(doc):
-        if finding.code == "SEC_CANONICAL_HEADER_ORDER":
-            findings.append(Finding(Level.WARN, finding.code, finding.message, finding.evidence))
-        else:
-            findings.append(finding)
+    findings.extend(check_canonical_header_order(doc))
     findings.extend(check_workflow_fail_fast(doc, require_fail_fast=require_fail_fast))
     findings.extend(check_redaction_language(doc, require_redaction=require_redaction))
     findings.extend(check_schema_version_signal(doc))
