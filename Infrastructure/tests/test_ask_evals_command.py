@@ -1757,6 +1757,30 @@ def test_tessl_run_budget_preflight_blocks_when_capacity_unknown(tmp_path: Path)
     assert "could not determine remaining capacity" in preflight["blocker"]
 
 
+def test_tessl_eval_list_count_rejects_error_payload_lists() -> None:
+    payload = {
+        "status": "error",
+        "errors": [
+            {"message": "workspace quota is unavailable"},
+            {"message": "retry later"},
+        ],
+    }
+
+    assert evals._tessl_eval_list_count(json.dumps(payload)) is None
+
+
+def test_tessl_eval_list_count_rejects_unknown_nested_lists() -> None:
+    payload = {
+        "status": "ok",
+        "metadata": {
+            "warnings": [{"message": "not a run"}],
+            "workspace": {"limits": [1, 2, 3]},
+        },
+    }
+
+    assert evals._tessl_eval_list_count(json.dumps(payload)) is None
+
+
 def test_tessl_run_budget_preflight_blocks_at_reserve(tmp_path: Path) -> None:
     used_runs = [{} for _ in range(evals.TESSL_WORKSPACE_RUN_LIMIT - evals.TESSL_WORKSPACE_RUN_RESERVE)]
 

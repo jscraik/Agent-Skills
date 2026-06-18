@@ -1838,23 +1838,13 @@ def _tessl_project_link_matches(stdout: str, *, workspace: str, project: str) ->
     )
 
 
-def _collect_json_lists(value: object) -> list[list[object]]:
-    lists: list[list[object]] = []
-    if isinstance(value, list):
-        lists.append(value)
-        for item in value:
-            lists.extend(_collect_json_lists(item))
-    elif isinstance(value, dict):
-        for item in value.values():
-            lists.extend(_collect_json_lists(item))
-    return lists
-
-
 def _tessl_eval_list_count(stdout: str) -> int | None:
     parsed = _json_or_text(stdout.strip()) if stdout.strip() else None
     if isinstance(parsed, list):
         return len(parsed)
     if not isinstance(parsed, dict):
+        return None
+    if parsed.get("status") == "error" or parsed.get("ok") is False:
         return None
     for key in ("evals", "runs", "items", "nodes", "data", "results"):
         value = parsed.get(key)
@@ -1864,8 +1854,7 @@ def _tessl_eval_list_count(stdout: str) -> int | None:
             nested = _tessl_eval_list_count(json.dumps(value))
             if nested is not None:
                 return nested
-    lists = _collect_json_lists(parsed)
-    return max((len(items) for items in lists), default=None)
+    return None
 
 
 def _tessl_run_budget_preflight(
