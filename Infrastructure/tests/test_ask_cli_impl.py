@@ -1522,7 +1522,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(package.get("state"), "pass")
         self.assertEqual(package.get("source"), "skills_package")
         self.assertEqual(package["details"]["schema_version"], "skill-package-readiness.v1")
-        self.assertEqual(package["details"]["target"], "skill-factory-router")
+        self.assertEqual(package["details"]["target"], "Plugins/skill-factory/skills/skill-factory-router")
         self.assertEqual(package["details"]["promotion_status"], "ready")
         self.assertTrue(package["details"]["promotion_ready"])
         self.assertTrue(package["details"]["install_ready"])
@@ -1548,7 +1548,10 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("Capability readiness: pass (0 profile gaps, 0 event gaps)", result.stdout)
         self.assertIn("Memory readiness: pass", result.stdout)
         self.assertIn("extension-like-read-only", result.stdout)
-        self.assertIn("Package readiness: pass (skill-factory-router, 0 missing fields)", result.stdout)
+        self.assertIn(
+            "Package readiness: pass (Plugins/skill-factory/skills/skill-factory-router, 0 missing fields)",
+            result.stdout,
+        )
 
     def test_repo_doctor_help_mentions_agent_health_entrypoint(self):
         """Verify `ask repo doctor --help` exposes the agent health wording."""
@@ -1674,7 +1677,7 @@ class TestAskCLI(unittest.TestCase):
         self.assertFalse(any("{" in key for key in memory["by_freshness"]))
         package = closeout["package_readiness"]
         self.assertEqual(package["status"], "pass")
-        self.assertEqual(package["target"], "skill-factory-router")
+        self.assertEqual(package["target"], "Plugins/skill-factory/skills/skill-factory-router")
         self.assertEqual(package["promotion_status"], "ready")
         self.assertTrue(package["promotion_ready"])
         self.assertTrue(package["install_ready"])

@@ -1,0 +1,37 @@
+---
+schema_version: knowledge-os.knowledge-demand.v1
+skill:
+  skill_id: improve-codebase-architecture
+  declared_name: improve-codebase-architecture
+  entrypoint_path: Skills/agent-ops/improve-codebase-architecture/SKILL.md
+  canonical_skill_path: Skills/agent-ops/improve-codebase-architecture/SKILL.md
+  writable_root: Skills/agent-ops/improve-codebase-architecture
+  apply_target_path: Skills/agent-ops/improve-codebase-architecture/SKILL.md
+knowledge_signals:
+- agent_safe_boundary
+- patch_vs_interface_decision
+- deep_module_design
+- bounded_context_language
+- integration_boundary_contract
+- data_ownership_consistency
+- legacy_seam_characterization
+- pattern_fit_liability
+- architecture_tracer_proof
+- architecture_drift_human_sync
+- knowledge_capsule_quality
+needed_facets:
+- pack.codebase-architecture:agent_safe_boundary_proof
+- pack.codebase-architecture:patch_vs_interface_decision
+- pack.codebase-architecture:deep_module_symptom_map
+- pack.codebase-architecture:bounded_context_language_map
+- pack.codebase-architecture:integration_boundary_contract
+- pack.codebase-architecture:architecture_tracer_proof
+- pack.codebase-architecture:data_ownership_and_consistency
+- pack.codebase-architecture:legacy_seam_characterization
+- pack.codebase-architecture:pattern_fit_and_liability
+- pack.codebase-architecture:architecture_drift_human_sync
+- pack.codebase-architecture:knowledge_capsule_quality
+runtime_dependency_policy:
+  requires_knowledge_os_at_runtime: false
+  raw_sources_included: false
+  local_absolute_paths_required: false

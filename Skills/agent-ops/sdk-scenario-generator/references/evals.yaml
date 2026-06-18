@@ -1,0 +1,100 @@
+schema_version: "2.0"
+skill_name: sdk-scenario-generator
+claims:
+  - id: sdk-scenario-generator.lifecycle
+    statement: "Creates, reviews, imports, and revalidates scenarios before internal evals, dry Tessl staging, or live private Tessl scoring."
+    source: SKILL.md#Workflow
+    claim_type: execution
+    risk: high
+  - id: sdk-scenario-generator.anti-easy
+    statement: "Rejects scenarios that leak expected answers, expose scoring mechanics, or reward provenance-only signals."
+    source: SKILL.md#Anti-Easy Rules
+    claim_type: safety
+    risk: critical
+  - id: sdk-scenario-generator.run-budget
+    statement: "Requires Tessl run-budget evidence or a blocker before live scoring."
+    source: references/contract.yaml#tessl_scenario_policy
+    claim_type: safety
+    risk: high
+cases:
+  - id: happy-skill-update-scenarios
+    name: Skill update imports reviewed scenarios
+    category: happy
+    eval_modes: [smoke, release]
+    should_trigger: true
+    realistic: true
+    why_realistic: "A skill change with KnowledgeOS suggestions is the normal path for SDK skill maintenance."
+    unit: lifecycle
+    given: "A target skill changed, KnowledgeOS suggested new evals, and references/evals.yaml already has older cases."
+    should: "Inventory existing cases, draft bespoke additions, reject weak drafts, and import only reviewed scenarios."
+    prompt: "Create the eval scenario update plan for Skills/agent-ops/improve-codebase-architecture after KnowledgeOS added new capabilities and suggested eval cases."
+    claim_ids: [sdk-scenario-generator.lifecycle]
+    acceptance:
+      - type: skill_selected
+        expected_skill: sdk-scenario-generator
+      - type: expected_signal
+        value: "Separates draft generation, review, canonical import, internal evals, dry Tessl staging, and live readiness."
+
+  - id: negative-structure-only-exception
+    name: Package-shape checks do not claim behavioral readiness
+    category: negative
+    eval_modes: [smoke, release]
+    should_trigger: true
+    realistic: true
+    why_realistic: "Some SDK checks validate package layout and should not be forced into a behavioral 20-scenario gate."
+    unit: structure exception
+    given: "A structure-only skill package check sets tessl_scenario_policy.structure_only: true."
+    should: "Allow package-shape validation while refusing to claim behavioral live Tessl readiness."
+    prompt: "Review whether this package-shape-only skill needs the 20 bespoke behavioral scenario gate before package verification."
+    claim_ids: [sdk-scenario-generator.lifecycle]
+    acceptance:
+      - type: expected_signal
+        value: "Preserves the structure-only exception and does not claim live behavioral readiness."
+
+  - id: pressure-answer-leakage
+    name: Draft leaks the expected answer
+    category: pressure
+    eval_modes: [smoke, release]
+    should_trigger: true
+    realistic: true
+    why_realistic: "Generated drafts often copy the expected behavior into user-visible task text."
+    unit: answer leakage
+    given: "A draft scenario prompt includes the same long-form expected behavior used as acceptance."
+    should: "Reject or rewrite the visible task and move expected behavior into hidden scorer metadata."
+    prompt: "Review these draft scenarios before Tessl staging; several include the exact expected answer in the user-visible prompt and then score that same text."
+    claim_ids: [sdk-scenario-generator.anti-easy]
+    acceptance:
+      - type: expected_signal
+        value: "Flags answer leakage and keeps expected behavior out of the visible task."
+
+  - id: pressure-run-budget-unknown
+    name: Tessl capacity cannot be verified
+    category: pressure
+    eval_modes: [smoke, release]
+    should_trigger: true
+    realistic: true
+    why_realistic: "The Tessl CLI can be authenticated while the workspace usage query still fails."
+    unit: run budget
+    given: "The operator-provided workspace cap is 300 runs with a 20-run reserve, but tessl eval list fails."
+    should: "Block nonessential live scoring and continue with dry-run staging and local review."
+    prompt: "Prepare the private Tessl eval lane, but the workspace run-count check fails before the live run."
+    claim_ids: [sdk-scenario-generator.run-budget]
+    acceptance:
+      - type: expected_signal
+        value: "Records the run-budget blocker and avoids spending a live run until capacity is confirmed."
+
+  - id: regression-baseline-beats-usage
+    name: Baseline beats skill usage
+    category: pressure
+    eval_modes: [smoke, release]
+    should_trigger: true
+    realistic: true
+    why_realistic: "A live Tessl run can complete while proving the skill is not ready."
+    unit: score interpretation
+    given: "A private Tessl run reports usage 89.7 percent, baseline 95.6 percent, and improvement below 1.0x."
+    should: "Classify the run as not ready, inspect weak scenarios, and repair scenarios or skill behavior before rerun."
+    prompt: "Interpret a completed private Tessl run where the plugin score is below 90 percent and below baseline, then decide whether to release."
+    claim_ids: [sdk-scenario-generator.anti-easy, sdk-scenario-generator.lifecycle]
+    acceptance:
+      - type: expected_signal
+        value: "Treats the score as a failed readiness gate and names scenario or skill remediation before rerunning."

@@ -1,0 +1,2 @@
+id,role,focus,artifact_path
+authority,Route-truth authority adversary,"Attack whether the spec really establishes one source of truth or accidentally leaves the HTML/matrix/CLI able to diverge.",.harness/artifacts/pu-020-adversarial-review/authority.md

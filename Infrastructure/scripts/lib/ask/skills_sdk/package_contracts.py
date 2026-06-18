@@ -53,6 +53,7 @@ SDK_PACKAGE_CONTRACT_FIELDS: tuple[str, ...] = (
     "evals",
     "task_profile",
     "evidence_policy",
+    "budget_classification",
     "optimization_contract",
 )
 SKILLFLOW_NODE_TYPES: set[str] = {
@@ -1125,6 +1126,35 @@ def reference_quality_contract(repo_root: Path | None, skill_md: Path | None) ->
                         }
                     )
 
+    reference_contract = read_reference_contract(skill_md)
+    tessl_policy = reference_contract.get("tessl_scenario_policy")
+    if isinstance(tessl_policy, dict) and tessl_policy.get("structure_only") is not True:
+        scenario_drift_review = tessl_policy.get("scenario_drift_review")
+        missing_review = []
+        if not isinstance(scenario_drift_review, dict):
+            missing_review = ["scenario_drift_review"]
+        else:
+            for field in ("required_after_skill_change", "review_decisions", "review_surfaces"):
+                value = scenario_drift_review.get(field)
+                if not value:
+                    missing_review.append(field)
+        checks.append(
+            {
+                "name": "tessl_scenario_drift_review",
+                "status": "pass" if not missing_review else "blocked_validation",
+                "path": "references/contract.yaml",
+                "missing": missing_review,
+            }
+        )
+        if missing_review:
+            blockers.append(
+                {
+                    "rule_id": "tessl_scenario_drift_review_missing",
+                    "path": "references/contract.yaml",
+                    "message": "Live Tessl scenario policy must declare scenario drift review after skill changes.",
+                }
+            )
+
     status = "blocked_validation" if blockers else "pass"
     return {
         "schema_version": "skill-reference-quality.v1",
@@ -1314,6 +1344,7 @@ def sdk_package_contract(
             "path": task_profile_path,
         },
         "evidence_policy": evidence_policy,
+        "budget_classification": reference_contract.get("budget_classification"),
         "workflow_contract": workflow_contract,
         "optimization_contract": optimization_readiness,
     }

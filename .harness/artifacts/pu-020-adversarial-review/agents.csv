@@ -1,0 +1,4 @@
+id,role,focus,artifact_path
+authority,Route-truth authority adversary,"Attack whether the spec really establishes one source of truth or accidentally leaves the HTML/matrix/CLI able to diverge.",.harness/artifacts/pu-020-adversarial-review/authority.md
+proof,Test and proof adversary,"Attack whether the acceptance tests prove the claim and whether the blocked mise/uv path weakens the slice.",.harness/artifacts/pu-020-adversarial-review/proof.md
+architecture,Architecture and context-load adversary,"Attack whether the slice adds planning clutter, worsens artifact ownership, or hides a larger SDK architecture issue.",.harness/artifacts/pu-020-adversarial-review/architecture.md

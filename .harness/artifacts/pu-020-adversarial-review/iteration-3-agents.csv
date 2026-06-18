@@ -1,0 +1,4 @@
+id,role,focus,artifact_path
+authority,Route-truth authority adversary,"Final re-review. Report only currently valid route-truth authority findings after wrapper parity was added.",.harness/artifacts/pu-020-adversarial-review/iteration-3-authority.md
+proof,Test and proof adversary,"Final re-review. Report only currently valid proof or test gaps after public wrapper parity was added.",.harness/artifacts/pu-020-adversarial-review/iteration-3-proof.md
+architecture,Architecture and context-load adversary,"Final re-review. Report only currently valid architecture, provenance, or context-load issues after all fixes.",.harness/artifacts/pu-020-adversarial-review/iteration-3-architecture.md

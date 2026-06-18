@@ -10,6 +10,35 @@ This is a controlled staging workflow. It is not a registry-publish workflow.
 Agents must keep the live repository source, Tessl tool install state, generated
 scenario drafts, and final canonical eval cases separate.
 
+Every create or update cycle that will use live Tessl scoring must run the
+scenario-prep lane before the live-private lane, unless the work is explicitly a
+structure-only package check. The live-private lane consumes only reviewed
+canonical skill assets; it does not generate scenarios during scoring.
+When `SKILL.md`, core references, behavior claims, triggers, constraints, or
+output contracts change, review scenario drift before live scoring: classify
+existing scenarios as keep, update, remove, or add, then update canonical eval
+assets before staging Tessl.
+For behavioral skills, live Tessl scoring requires at least 20 gold-standard
+structured scenarios. Use generic SDK structure/layout scenarios for package
+shape and bespoke skill-specific scenarios for behavior; do not pad the count
+with duplicated, weak, or self-referential cases.
+
+Use $evals-router for scenario quality review. The route must verify the
+assertion contract before changing the skill: each scenario needs a realistic
+user-facing condition, one primary failure mode, a comparator expectation
+against no-skill or baseline behavior, deterministic checks where possible, and
+a weak-eval critique. Scenarios that only prove trigger words, filenames,
+generic phrases, or rubric copying are not gold-standard scenarios.
+
+Before scenario scoring, run Tessl's skill review lane when activation,
+best-practice quality, or static score is in doubt. Use the repo wrapper when a
+wrapper exists; otherwise run the native CLI only against a temporary copied
+skill directory, not the live repo source. `tessl skill review --optimize` may
+suggest or apply edits, but accepted changes must be transferred back to the
+canonical skill source and revalidated through the SDK gates below. Do not use a
+private live eval score, static review score, or GitHub badge score as a
+substitute for the scenario-based readiness gate.
+
 ## Hard Boundaries
 
 - Use the installed native tessl CLI only.
@@ -38,15 +67,15 @@ The command writes a stable evidence directory:
     /tmp/ask-tessl-scenario-generation/<skill-path>-<sha12>/
       scenario-generation-brief.md
       target-tile/
-        tile.json
+        .tessl-plugin/plugin.json
         tessl.json
-        SKILL.md
-        references/
+        skills/<skill-name>/SKILL.md
+        skills/<skill-name>/references/
       tool-project/
         tessl.json
         .tessl/tiles/tessl-labs/tessl-skill-eval-scenarios/
 
-target-tile is the disposable tile-shaped input for scenario creation.
+target-tile is the disposable plugin-shaped input for scenario creation.
 tool-project is the only place where the Tessl scenario tile may be installed.
 The installed tile is pinned as tessl-labs/tessl-skill-eval-scenarios@0.1.0.
 The wrapper stops at preparation and install; it does not generate scenario
@@ -78,21 +107,40 @@ repo state, review every scenario for:
 - self-contained task setup
 - a plausible no-skill failure mode, so the scenario can show skill lift rather
   than merely general agent competence
+- a clear comparator expectation: no-skill, previous-skill, wrong-skill, or
+  local-owner baseline should plausibly miss the required behavior
 - no instruction leakage from the rubric into task.md
+- no exact expected-answer text copied into task.md, given, should, or the
+  user prompt
 - no task wording that names the exact skill-specific concepts being scored
   unless those concepts are user-facing domain language
+- no scoring-mechanics language such as Tessl, fixture, generated scenario,
+  rubric, criteria, hidden expected behavior, or "use this skill"
 - no reliance on hidden files, local credentials, network-only behavior, or
   proprietary software
-- criteria that are file-observable, binary where possible, and total 100
+- criteria that are file-observable, binary where possible, and test one
+  assertion each
+- a difficulty tag and anti-easy note describing why a strong baseline might
+  still fail
 - realistic timeout and output size
 - non-duplication with existing references/evals.yaml cases
 
 Only after review should an agent translate useful generated cases into the
-canonical skill eval source:
+canonical skill eval sources:
 
     <skill-path>/references/evals.yaml
+    <skill-path>/references/evals/*.md
 
-Do not commit target-tile/evals/ directly.
+Use `references/evals.yaml` for the skill-owned case index and
+`references/evals/*.md` for reviewed generated fixture evidence. Do not commit
+target-tile/evals/ directly.
+
+After any skill change, run a scenario drift review even when no new scenarios
+were generated. Compare the changed skill contract with `references/evals.yaml`,
+`references/evals/*.md`, and any knowledge capsules that provide eval evidence.
+For each affected scenario, record the decision as keep, update, remove, or add.
+Do not carry stale scenarios into live Tessl scoring just because they passed
+before the skill changed.
 
 ## Live Private Eval
 
@@ -104,29 +152,57 @@ Start with a dry run when proving shape:
 
     ./bin/ask evals run <skill-path> --tessl-live-private --tessl-workspace <workspace> --tessl-live-dry-run --json --robot
 
-The wrapper stages a private tile under:
+The wrapper stages a private plugin package under:
 
     /tmp/ask-tessl-live/<skill-path>-<sha12>/
-      tile.json
+      .tessl-plugin/plugin.json
       tessl.json
-      SKILL.md
-      references/
+      skills/<skill-name>/SKILL.md
+      skills/<skill-name>/references/
+      scenario-sources.json
       evals/<case-id>/task.md
       evals/<case-id>/criteria.json
       evidence-archive/<timestamp>-live-private/   # only after reruns
 
-The staged tile.json must use:
+Root `evals/` must sit beside `.tessl-plugin/` in the staged plugin root.
+`.tessl-plugin/plugin.json` must use the workspace-prefixed package name,
+preserve `private: true`, and declare a real skill path, for example:
 
     {
-      "name": "<workspace>/<tile-name>",
+      "name": "<workspace>/<plugin-name>",
       "version": "<SKILL.md metadata.version>",
+      "description": "Private live eval plugin for <skill-name>.",
       "private": true,
-      "skills": {
-        "<tile-name>": {
-          "path": "SKILL.md"
-        }
-      }
+      "skills": "./skills/"
     }
+
+`.tessl-plugin/plugin.json` is the only live-private package manifest. Do not
+stage `tile.json` as a compatibility fallback, and do not point plugin
+`skills` at a missing directory, a root that does not contain a discoverable
+`SKILL.md`, or a live repo path outside the staged package.
+
+The staged `scenario-sources.json` records how many cases came from
+`references/evals.yaml` and how many reviewed generated cases came from
+`references/evals/*.md`. For normal skill create/update work, a live-private run
+is blocked when reviewed generated scenarios are missing. Use the structure-only
+exception only for package-shape checks that are not claiming behavioral skill
+readiness.
+
+For behavioral skill readiness, the live-private staging gate also requires at
+least 20 gold-standard structured scenarios. A lower count can be used only as
+transition or diagnostic evidence, not as professional readiness evidence.
+
+Before running live Tessl, check the workspace run budget. Treat 300 live eval
+runs as the operator-provided limit unless Tessl reports a different
+operator-approved limit, and preserve at least 20 runs as a remediation reserve.
+The preferred preflight is:
+
+    tessl eval list --json --workspace <workspace> --limit 300
+
+If the preflight fails or remaining capacity is unknown, block nonessential live
+scoring. Continue with SDK scenario generation, internal evals, dry-run staging,
+and scenario quality review until capacity is confirmed. Record the blocker and
+the fallback evidence in the skill contract or run report.
 
 The wrapper reads the Tessl tile version from SKILL.md frontmatter, preferring
 metadata.version and falling back to a top-level version field. This value must
@@ -136,17 +212,17 @@ the canonical SKILL.md version represents the behavior being evaluated.
 For plugin-owned skills under `Plugins/<plugin-id>/skills/**`, `<tile-name>`
 is the plugin id rather than the leaf skill directory. For example,
 `Plugins/skill-factory/skills/skill-factory-router` stages as
-`<workspace>/skill-factory` while the tile manifest exposes the surviving
+`<workspace>/skill-factory` while the plugin manifest exposes the surviving
 Skill Factory skill entries.
 
-Tessl tile evals attach to a Tessl project using that same
-`<workspace>/<tile-name>` identity. The wrapper must check that staged project
+Tessl plugin evals attach to a Tessl project using that same
+`<workspace>/<plugin-name>` identity. The wrapper must check that staged project
 link before running live evals, relink an existing project first, and create the
 project only when the relink path proves it does not already exist:
 
     tessl project repair --workspace <workspace>
     tessl project link --workspace <workspace>
-    tessl project create --workspace <workspace> <tile-name>
+    tessl project create --workspace <workspace> <plugin-name>
 
 ## Reading Results
 
@@ -166,10 +242,16 @@ Treat Tessl scores as evidence, not proof by themselves.
   `blocked_environment`. Do not submit another live eval until the quota reset
   or quota increase is available; use dry-run staging and local scenario
   quality gates only.
+- If the live run would exceed the 300-run workspace budget or consume the
+  20-run reserve, classify the lane as `blocked_environment` for live scoring
+  and continue with dry-run/local validation only.
 - The live-private readiness gate is: usage-spec score is at least 90% and is
   not below the baseline score. A 95%+ score remains the improvement target.
   A lower score, lower baseline comparison, or
   missing viewable score summary is a failed or blocked gate, not a pass.
+- If the score UI shows an in-progress or lower live score, that live score is
+  the active readiness lane even if local Tessl review or Plugin Eval produced a
+  higher static score.
 - If with-context scores exceed baseline, inspect which criteria improved and
   decide whether to preserve the current skill behavior.
 - If with-context scores are below baseline, inspect failing scenarios before
@@ -211,11 +293,23 @@ Before claiming completion:
 
 - prepare-tessl-scenarios --dry-run passed for the target skill when using
   scenario generation.
+- For every create/update skill flow that will run live Tessl, bespoke generated
+  scenarios were prepared, reviewed, and imported before live scoring, unless
+  `references/contract.yaml` explicitly declares a structure-only exception.
+- Scenario drift was reviewed after the latest skill change, and stale, weak, or
+  obsolete scenarios were updated, removed, or replaced before live scoring.
 - Live scenario tool install, if run, installed only into tool-project.
 - Root tessl.json, .tessl/, .codex/, .mcp.json, AGENTS.md, and CLAUDE.md were
   not modified by Tessl setup.
 - Generated scenarios were reviewed before canonical import.
-- The staged tile.json version matches the canonical SKILL.md frontmatter
+- The live staged `scenario-sources.json` shows both skill-owned eval cases and
+  reviewed generated fixture cases for non-structure runs.
+- The live staged `scenario-sources.json` shows at least 20 gold-standard
+  structured scenarios for behavioral skill readiness, or the run is explicitly
+  recorded as transition/diagnostic evidence.
+- Tessl workspace run capacity was checked or explicitly estimated, with the
+  300-run limit and 20-run remediation reserve preserved.
+- The staged `.tessl-plugin/plugin.json` version matches the canonical SKILL.md frontmatter
   version for the skill behavior being evaluated.
 - Focused Python tests for the wrapper passed.
 - The exact command outcomes and staged paths were reported.
