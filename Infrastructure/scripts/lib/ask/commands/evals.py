@@ -509,7 +509,7 @@ def _tessl_live_private_policy(workspace: str | None = None) -> dict:
             "evals/<case-id>/task.md",
             "evals/<case-id>/criteria.json",
         ],
-        "command_shape": "tessl eval run --json --workspace <workspace> --yes <staged-plugin-dir>",
+        "command_shape": "tessl eval run --json --workspace <workspace> <staged-plugin-dir>",
         "scenario_gate": "skill-owned references/evals.yaml plus reviewed generated scenarios are required before live scoring; behavioral skills need at least 20 gold-standard scenarios; structure-only checks must opt out explicitly",
         "min_scenarios_required": TESSL_LIVE_PRIVATE_MIN_SCENARIOS,
         "run_limit_policy": {
@@ -1989,7 +1989,6 @@ def _tessl_live_private_eval_run_command(
         "--json",
         "--workspace",
         workspace,
-        "--yes",
         str(staged_source),
     ]
 
@@ -2646,11 +2645,11 @@ def _run_tessl_live_private_eval(
     dry_run: bool = False,
 ) -> dict:
     """Run or preview the opt-in private Tessl plugin eval lane."""
-    command_display = "tessl eval run --json --workspace <workspace> --yes <staged-plugin-dir>"
+    command_display = "tessl eval run --json --workspace <workspace> <staged-plugin-dir>"
     try:
         normalized_workspace = _validate_tessl_workspace(workspace)
         staged_source, copied_files = _stage_tessl_live_private_source(repo_root, path, normalized_workspace)
-        command_display = f"tessl eval run --json --workspace {normalized_workspace} --yes {staged_source}"
+        command_display = f"tessl eval run --json --workspace {normalized_workspace} {staged_source}"
     except (OSError, ValueError) as e:
         return {
             "status": "blocked",

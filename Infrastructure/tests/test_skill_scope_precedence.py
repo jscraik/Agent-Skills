@@ -122,6 +122,19 @@ class TestSkillScopePrecedence(unittest.TestCase):
         self.assertEqual(entry.source_dir, repo_skill.resolve())
         self.assertFalse(rendered.endswith("\n\n"))
 
+    def test_render_index_uses_heading_slug_for_system_lane_toc(self) -> None:
+        entry = skill_discovery.SkillEntry(
+            name="imagegen",
+            source_dir=self.repo_root / ".agents" / "skills" / ".system" / "imagegen",
+            category=".agents/skills/.system",
+            description="System bridge skill.",
+        )
+
+        rendered = skill_discovery.render_index([entry], source="catalog", visibility="default")
+
+        self.assertIn("[.Agents — Skills — .System](#agents-skills-system)", rendered)
+        self.assertIn("## .Agents — Skills — .System", rendered)
+
     def test_flat_runtime_system_lane_prefers_runtime_projection(self) -> None:
         runtime_system_dir = self._write_skill(".agents/skills/.system/imagegen", "Runtime system skill.")
         self._write_skill("skills-system/imagegen", "Tracked system skill.")

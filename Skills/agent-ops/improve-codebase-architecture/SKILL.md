@@ -66,8 +66,7 @@ Use exact commands when this package changes:
 ./bin/ask skills package verify Skills/agent-ops/improve-codebase-architecture --json --robot
 uv run --python 3.12 --with pyyaml --with jsonschema python Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py --skill Skills/agent-ops/improve-codebase-architecture --format json
 ./bin/plugin-eval analyze Skills/agent-ops/improve-codebase-architecture --format json
-./bin/ask evals prepare Skills/agent-ops/improve-codebase-architecture --mode smoke --tessl-workspace skills-sdk --dry-run --json --robot
-./bin/ask evals prepare Skills/agent-ops/improve-codebase-architecture --mode smoke --tessl-workspace skills-sdk --json --robot
+./bin/ask evals prepare-tessl-scenarios Skills/agent-ops/improve-codebase-architecture --tessl-workspace skills-sdk --dry-run --json --robot
 ./bin/ask evals run Skills/agent-ops/improve-codebase-architecture --mode smoke --tessl-live-private --tessl-workspace skills-sdk --json --robot
 ~~~
 

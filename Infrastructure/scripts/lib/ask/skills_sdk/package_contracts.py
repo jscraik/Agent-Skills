@@ -1142,17 +1142,18 @@ def reference_quality_contract(repo_root: Path | None, skill_md: Path | None) ->
             allowed_decisions = {"keep", "update", "add", "remove"}
             if (
                 not isinstance(review_decisions, list)
-                or not review_decisions
                 or any(not isinstance(item, str) or item not in allowed_decisions for item in review_decisions)
-                or set(review_decisions) != allowed_decisions
+                or {item for item in review_decisions if isinstance(item, str)} != allowed_decisions
             ):
                 missing_review.append("review_decisions")
             review_surfaces = scenario_drift_review.get("review_surfaces")
-            if (
-                not isinstance(review_surfaces, list)
-                or not review_surfaces
-                or any(not isinstance(item, str) or not item.strip() for item in review_surfaces)
-            ):
+            required_surfaces = {"references/evals.yaml", "references/evals/*.md"}
+            surfaces_set = (
+                {item.strip() for item in review_surfaces if isinstance(item, str) and item.strip()}
+                if isinstance(review_surfaces, list)
+                else set()
+            )
+            if not required_surfaces.issubset(surfaces_set):
                 missing_review.append("review_surfaces")
         checks.append(
             {

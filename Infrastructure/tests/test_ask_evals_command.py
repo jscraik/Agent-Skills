@@ -1913,8 +1913,9 @@ def test_evals_live_private_invokes_tessl_with_workspace_and_plugin_manifest(tmp
     assert len(eval_view_calls) == 1
     tessl_cmd = eval_run_calls[0]
     assert tessl_cmd[:4] == ["/usr/local/bin/tessl", "eval", "run", "--json"]
-    assert tessl_cmd[4:7] == ["--workspace", "jscraik", "--yes"]
-    staged_source = Path(tessl_cmd[7])
+    assert tessl_cmd[4:6] == ["--workspace", "jscraik"]
+    assert "--yes" not in tessl_cmd
+    staged_source = Path(tessl_cmd[6])
     assert staged_source.is_dir()
     view_cmd = eval_view_calls[0]
     assert view_cmd == [
@@ -1938,7 +1939,7 @@ def test_evals_live_private_invokes_tessl_with_workspace_and_plugin_manifest(tmp
     assert "install" not in tessl_cmd
     assert "registry" not in tessl_cmd
     assert result.data["tessl_eval"]["policy"]["command_shape"] == (
-        "tessl eval run --json --workspace <workspace> --yes <staged-plugin-dir>"
+        "tessl eval run --json --workspace <workspace> <staged-plugin-dir>"
     )
     assert result.data["tessl_eval"]["live_result_summary"]["meets_min_score"] is True
     assert result.data["tessl_eval"]["live_result_summary"]["beats_baseline"] is True

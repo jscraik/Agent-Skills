@@ -1229,6 +1229,50 @@ tessl_scenario_policy:
             {blocker["rule_id"] for blocker in contract["blockers"]},
         )
 
+    def test_reference_quality_requires_complete_scenario_drift_review_policy(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "partial-scenario-policy-skill"
+            references_dir = skill_dir / "references"
+            references_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: partial-scenario-policy-skill
+description: Partial scenario policy fixture.
+version: "1.0.0"
+---
+
+# Partial Scenario Policy Skill
+""",
+                encoding="utf-8",
+            )
+            (references_dir / "contract.yaml").write_text(
+                """purpose: Test complete scenario drift metadata semantics.
+inputs:
+  - skill changes
+outputs:
+  - scenario review decision
+tessl_scenario_policy:
+  structure_only: false
+  scenario_drift_review:
+    required_after_skill_change: true
+    review_decisions:
+      - keep
+    review_surfaces:
+      - SKILL.md
+""",
+                encoding="utf-8",
+            )
+
+            contract = package_contracts.reference_quality_contract(repo_root, skill_md)
+
+        drift_check = next(
+            check for check in contract["checks"] if check["name"] == "tessl_scenario_drift_review"
+        )
+        self.assertEqual(drift_check["status"], "blocked_validation")
+        self.assertEqual(drift_check["missing"], ["review_decisions", "review_surfaces"])
+
     def test_sdk_contract_missing_files_block_install_readiness(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir)
