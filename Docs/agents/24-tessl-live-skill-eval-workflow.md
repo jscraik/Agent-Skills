@@ -23,7 +23,7 @@ structured scenarios. Use generic SDK structure/layout scenarios for package
 shape and bespoke skill-specific scenarios for behavior; do not pad the count
 with duplicated, weak, or self-referential cases.
 
-Use $evals-router for scenario quality review. The route must verify the
+Use `evals-router` for scenario quality review. The route must verify the
 assertion contract before changing the skill: each scenario needs a realistic
 user-facing condition, one primary failure mode, a comparator expectation
 against no-skill or baseline behavior, deterministic checks where possible, and
