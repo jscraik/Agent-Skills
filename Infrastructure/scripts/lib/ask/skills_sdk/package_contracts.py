@@ -1144,6 +1144,7 @@ def reference_quality_contract(repo_root: Path | None, skill_md: Path | None) ->
                 not isinstance(review_decisions, list)
                 or not review_decisions
                 or any(not isinstance(item, str) or item not in allowed_decisions for item in review_decisions)
+                or set(review_decisions) != allowed_decisions
             ):
                 missing_review.append("review_decisions")
             review_surfaces = scenario_drift_review.get("review_surfaces")

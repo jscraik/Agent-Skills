@@ -7,7 +7,6 @@ Local code/test truth reviewed in `/Users/jamiecraik/dev/agent-skills`: the curr
 Validation evidence:
 - Command: `python3 -m pytest Infrastructure/tests/test_skills_sdk_capability_status.py Infrastructure/tests/test_skills_sdk_pipeline_status_artifact.py -q` -> blocked (ambient Xcode Python has no `pytest` module)
 - Command: `UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_capability_status.py Infrastructure/tests/test_skills_sdk_pipeline_status_artifact.py -q` -> pass (30 passed in 0.91s)
-- Canonical command note: repo guidance prefers the uv-mediated Python 3.12 form for this lane when ambient Python lacks pytest; pin this form in test-running docs or CI entries that cite this evidence.
 
 This proves only local code/test truth for the capability matrix, SDK status artifact parser, and static HTML projection checks. It does not prove the separate wrapper-regression gap recorded in iteration-2-proof, CI, PR state, review-thread state, tracker state, hosted docs, or merge readiness.
 
