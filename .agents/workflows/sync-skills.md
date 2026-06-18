@@ -46,20 +46,20 @@ Rebuilds the Agent Skills Kit workspace projection and refreshes Codex runtime l
 ls -la ~/.agents/skills ~/.codex/skills
 ```
 
-5. Confirm expected results:
+1. Confirm expected results:
    - Workspace sync reports success
    - User sync reports success
    - Runtime links resolve to the current checkout projection
    - No `WARN` or `REFUSED` lines in sync output
 
-6. If skill count is 0 or a link is missing, run diagnostics:
+2. If skill count is 0 or a link is missing, run diagnostics:
 
 ```bash
 ./bin/ask repo doctor --json --robot
 ./bin/ask repo closeout --changed --json --robot
 ```
 
-7. Restart the Codex session if runtime discovery still shows a stale skill list after sync and diagnostics pass.
+3. Restart the Codex session if runtime discovery still shows a stale skill list after sync and diagnostics pass.
 
 ---
 
@@ -75,5 +75,5 @@ ls -la ~/.agents/skills ~/.codex/skills
 |---------|-------|-----|
 | Runtime link points at another checkout | `POLICY_FAIL` | Re-run user sync from the intended checkout |
 | Skill list is stale after sync | `VALIDATION_ERROR` | Run repo doctor and inspect runtime link output |
-| `./bin/ask` is unavailable | `SYSTEM_ERROR` | Run `bash scripts/bootstrap-ask.sh --json` |
+| `./bin/ask` is unavailable | `SYSTEM_ERROR` | Run `bash scripts/bootstrap-ask.sh --json` then verify with `./bin/ask --version` |
 | Sync output includes `REFUSED` | `POLICY_FAIL` | Stop and fix the named ownership or projection blocker |
