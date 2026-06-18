@@ -128,7 +128,7 @@ stage a plugin-shaped package under
 `weighted_checklist` criteria shape. Include local `references/**` support
 files beside the staged skill so Tessl plugin discovery and skill-relative links
 resolve from the plugin root. Run
-`tessl eval run --json --workspace <workspace> <staged-plugin-root>`.
+`tessl eval run --json --workspace <workspace> <staged-plugin-dir>`.
 Stage `tessl.json` for the same
 `<workspace>/<plugin-name>` identity because Tessl saves eval runs to a project.
 Before invoking Tessl evals, the wrapper must check that project link, relink an
