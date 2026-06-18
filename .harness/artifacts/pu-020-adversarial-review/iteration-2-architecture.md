@@ -17,8 +17,8 @@ No currently valid architecture findings.
 
 The prior ownership risks are fixed in the current patched state:
 
-- HTML authority-bearing cells are now parsed and compared against live SDK status for owner surface and next slice in Infrastructure/tests/test_skills_sdk_pipeline_status_artifact.py:16-58 and Infrastructure/tests/test_skills_sdk_pipeline_status_artifact.py:129-139.
-- Source-artifact PU IDs are now rejected as Next or Next slice labels in Infrastructure/tests/test_skills_sdk_pipeline_status_artifact.py:152-159.
+- HTML authority-bearing cells are now parsed and compared against live SDK status for owner surface and next slice in Infrastructure/tests/test_skills_sdk_pipeline_status_artifact.py:16-58 and Infrastructure/tests/test_skills_sdk_pipeline_status_artifact.py:147-157.
+- Source-artifact PU IDs are now rejected as Next or Next slice labels in Infrastructure/tests/test_skills_sdk_pipeline_status_artifact.py:170-177.
 - The top-level matrix generated_from remains on the stable capability-truth contract, not the PU-020 declutter spec, in Infrastructure/config/skills-sdk/capability-matrix.v1.json:5.
 - The PU-020 HTML labels now say Current rather than Next in artifacts/recommended-skills-sdk-pipeline.html:2273 and artifacts/recommended-skills-sdk-pipeline.html:2475.
 - The static docs row stays preview-only and projection-only in Infrastructure/config/skills-sdk/capability-matrix.v1.json:365-374 and artifacts/recommended-skills-sdk-pipeline.html:2304.
