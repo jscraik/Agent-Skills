@@ -46,6 +46,8 @@ Rebuilds the Agent Skills Kit workspace projection and refreshes Codex runtime l
 ls -la ~/.agents/skills ~/.codex/skills
 ```
 
+## Checks
+
 1. Confirm expected results:
    - Workspace sync reports success
    - User sync reports success
@@ -75,5 +77,5 @@ ls -la ~/.agents/skills ~/.codex/skills
 |---------|-------|-----|
 | Runtime link points at another checkout | `POLICY_FAIL` | Re-run user sync from the intended checkout |
 | Skill list is stale after sync | `VALIDATION_ERROR` | Run repo doctor and inspect runtime link output |
-| `./bin/ask` is unavailable | `SYSTEM_ERROR` | Run `bash scripts/bootstrap-ask.sh --json` then verify with `./bin/ask --version` |
+| `./bin/ask` is unavailable | `SYSTEM_ERROR` | Run `bash scripts/bootstrap-ask.sh --json`, then `python3 bin/ask repo status --json` |
 | Sync output includes `REFUSED` | `POLICY_FAIL` | Stop and fix the named ownership or projection blocker |

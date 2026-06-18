@@ -300,6 +300,45 @@ class TestSkillScopePrecedence(unittest.TestCase):
             "Plugins/cache/openai-curated/chatgpt-apps/skills/chatgpt-app-submission",
         )
 
+    def test_runtime_budget_classifies_bundled_latest_version_duplicates(self) -> None:
+        self.assertEqual(
+            verify_runtime_budget._scope_collision_baseline_path(
+                "Plugins/cache/openai-bundled/chrome/26.611.62324/skills/control-chrome"
+            ),
+            "Plugins/cache/openai-bundled/chrome/versioned/skills/control-chrome",
+        )
+        self.assertEqual(
+            verify_runtime_budget._scope_collision_baseline_path(
+                "Plugins/cache/openai-bundled/chrome/latest/skills/control-chrome"
+            ),
+            "Plugins/cache/openai-bundled/chrome/latest/skills/control-chrome",
+        )
+        self._write_skill(
+            "Plugins/cache/openai-bundled/chrome/26.611.62324/skills/control-chrome",
+            "Bundled Chrome versioned skill.",
+        )
+        self._write_skill(
+            "Plugins/cache/openai-bundled/chrome/latest/skills/control-chrome",
+            "Bundled Chrome latest skill.",
+        )
+
+        with self._patched_repo(default_visible=set()):
+            report = verify_runtime_budget.build_report()
+
+        self.assertEqual(report["status"], "pass")
+        self.assertEqual(report["unresolved_scope_collisions"], [])
+        self.assertEqual(len(report["same_capability_scope_collisions"]), 1)
+        collision = report["same_capability_scope_collisions"][0]
+        self.assertEqual(collision["name"], "control-chrome")
+        self.assertEqual(
+            collision["canonical_path"],
+            "Plugins/cache/openai-bundled/chrome/latest/skills/control-chrome",
+        )
+        self.assertEqual(
+            [candidate["path"] for candidate in collision["suppressed_candidates"]],
+            ["Plugins/cache/openai-bundled/chrome/26.611.62324/skills/control-chrome"],
+        )
+
     def test_runtime_budget_classifies_curated_remote_router_homonyms(self) -> None:
         self.assertEqual(
             verify_runtime_budget._scope_collision_baseline_path(

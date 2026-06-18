@@ -1130,7 +1130,10 @@ def reference_quality_contract(repo_root: Path | None, skill_md: Path | None) ->
 
     reference_contract = read_reference_contract(skill_md)
     tessl_policy = reference_contract.get("tessl_scenario_policy")
-    if isinstance(tessl_policy, dict) and tessl_policy.get("structure_only") is not True:
+    if isinstance(tessl_policy, dict) and not (
+        tessl_policy.get("structure_only") is True
+        or tessl_policy.get("structure_check_only") is True
+    ):
         scenario_drift_review = tessl_policy.get("scenario_drift_review")
         missing_review = []
         if not isinstance(scenario_drift_review, dict):

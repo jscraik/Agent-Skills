@@ -215,7 +215,9 @@ def _scope_collision_baseline_path(path: str) -> str:
     "plugins/cache/openai-curated", or their openai-curated-remote equivalents,
     and contains a "skills" segment, the returned baseline preserves the
     canonical cache family, plugin name, and everything from the "skills"
-    segment onward. Otherwise the original `path` is returned.
+    segment onward. Bundled plugin cache paths preserve `latest` and collapse
+    concrete version directories to `versioned`. Otherwise the original `path`
+    is returned.
     
     Returns:
     	normalized_path (str): The normalized baseline path, or the original input when no normalization applies.
@@ -233,6 +235,19 @@ def _scope_collision_baseline_path(path: str) -> str:
             return path
         if skills_index + 1 < len(parts):
             return str(Path("Plugins", "cache", parts[2], parts[3], *parts[skills_index:]))
+    if (
+        len(parts) >= 7
+        and parts[0] in {"Plugins", "plugins"}
+        and parts[1] == "cache"
+        and parts[2] == "openai-bundled"
+    ):
+        try:
+            skills_index = parts.index("skills", 4)
+        except ValueError:
+            return path
+        if skills_index + 1 < len(parts):
+            version_key = "latest" if parts[4] == "latest" else "versioned"
+            return str(Path("Plugins", "cache", parts[2], parts[3], version_key, *parts[skills_index:]))
     return path
 
 

@@ -23,7 +23,7 @@
   do not carry the repo-local `PREK_HOME` patch.
 - `bash Infrastructure/scripts/validation-and-linting/verify-work.sh` (project-local default scope)
 - `bash Infrastructure/scripts/validation-and-linting/verify-work.sh --workspace-governance` (explicit workspace scope)
-- `bash Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh` (blocks direct edits to runtime/projection surfaces including `.agents/**`, `Plugins/cache/**`, and `runtime/**`)
+- `bash Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh` (blocks direct edits to runtime/projection surfaces including `.agents/skills/**`, `.agents/plugins-runtime/cache/**`, `Plugins/cache/**`, and `runtime/**`)
   - projection-refresh exception only: `PATH_OWNERSHIP_ALLOW_CACHE_WRITES=1 bash Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh`
   - default scope is staged diff locally and base-ref diff in CI; override with `PATH_OWNERSHIP_GUARD_SCOPE`.
 - `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`
