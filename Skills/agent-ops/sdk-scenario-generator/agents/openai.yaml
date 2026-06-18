@@ -1,0 +1,7 @@
+interface:
+  display_name: SDK Scenario Generator
+  short_description: "$sdk-scenario-generator - Create gold-standard SDK eval scenarios"
+  default_prompt: "$sdk-scenario-generator "
+policy:
+  allow_implicit_invocation: false
+  requires_explicit_skill_route: true

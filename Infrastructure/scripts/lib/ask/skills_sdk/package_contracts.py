@@ -55,6 +55,9 @@ SDK_PACKAGE_CONTRACT_FIELDS: tuple[str, ...] = (
     "evidence_policy",
     "optimization_contract",
 )
+SDK_PACKAGE_ADVISORY_CONTRACT_FIELDS: tuple[str, ...] = (
+    "budget_classification",
+)
 SKILLFLOW_NODE_TYPES: set[str] = {
     "command",
     "llm",
@@ -1125,6 +1128,53 @@ def reference_quality_contract(repo_root: Path | None, skill_md: Path | None) ->
                         }
                     )
 
+    reference_contract = read_reference_contract(skill_md)
+    tessl_policy = reference_contract.get("tessl_scenario_policy")
+    if isinstance(tessl_policy, dict) and not (
+        tessl_policy.get("structure_only") is True
+        or tessl_policy.get("structure_check_only") is True
+    ):
+        scenario_drift_review = tessl_policy.get("scenario_drift_review")
+        missing_review = []
+        if not isinstance(scenario_drift_review, dict):
+            missing_review = ["scenario_drift_review"]
+        else:
+            if scenario_drift_review.get("required_after_skill_change") is not True:
+                missing_review.append("required_after_skill_change")
+            review_decisions = scenario_drift_review.get("review_decisions")
+            allowed_decisions = {"keep", "update", "add", "remove"}
+            if (
+                not isinstance(review_decisions, list)
+                or any(not isinstance(item, str) or item not in allowed_decisions for item in review_decisions)
+                or {item for item in review_decisions if isinstance(item, str)} != allowed_decisions
+            ):
+                missing_review.append("review_decisions")
+            review_surfaces = scenario_drift_review.get("review_surfaces")
+            required_surfaces = {"references/evals.yaml", "references/evals/*.md"}
+            surfaces_set = (
+                {item.strip() for item in review_surfaces if isinstance(item, str) and item.strip()}
+                if isinstance(review_surfaces, list)
+                else set()
+            )
+            if not required_surfaces.issubset(surfaces_set):
+                missing_review.append("review_surfaces")
+        checks.append(
+            {
+                "name": "tessl_scenario_drift_review",
+                "status": "pass" if not missing_review else "blocked_validation",
+                "path": "references/contract.yaml",
+                "missing": missing_review,
+            }
+        )
+        if missing_review:
+            blockers.append(
+                {
+                    "rule_id": "tessl_scenario_drift_review_missing",
+                    "path": "references/contract.yaml",
+                    "message": "Live Tessl scenario policy must declare scenario drift review after skill changes.",
+                }
+            )
+
     status = "blocked_validation" if blockers else "pass"
     return {
         "schema_version": "skill-reference-quality.v1",
@@ -1314,6 +1364,7 @@ def sdk_package_contract(
             "path": task_profile_path,
         },
         "evidence_policy": evidence_policy,
+        "budget_classification": reference_contract.get("budget_classification"),
         "workflow_contract": workflow_contract,
         "optimization_contract": optimization_readiness,
     }

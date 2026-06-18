@@ -122,6 +122,19 @@ class TestSkillScopePrecedence(unittest.TestCase):
         self.assertEqual(entry.source_dir, repo_skill.resolve())
         self.assertFalse(rendered.endswith("\n\n"))
 
+    def test_render_index_uses_heading_slug_for_system_lane_toc(self) -> None:
+        entry = skill_discovery.SkillEntry(
+            name="imagegen",
+            source_dir=self.repo_root / ".agents" / "skills" / ".system" / "imagegen",
+            category=".agents/skills/.system",
+            description="System bridge skill.",
+        )
+
+        rendered = skill_discovery.render_index([entry], source="catalog", visibility="default")
+
+        self.assertIn("[.Agents — Skills — .System](#agents-skills-system)", rendered)
+        self.assertIn("## .Agents — Skills — .System", rendered)
+
     def test_flat_runtime_system_lane_prefers_runtime_projection(self) -> None:
         runtime_system_dir = self._write_skill(".agents/skills/.system/imagegen", "Runtime system skill.")
         self._write_skill("skills-system/imagegen", "Tracked system skill.")
@@ -285,6 +298,45 @@ class TestSkillScopePrecedence(unittest.TestCase):
         self.assertEqual(
             by_name["chatgpt-app-submission"]["canonical_path"],
             "Plugins/cache/openai-curated/chatgpt-apps/skills/chatgpt-app-submission",
+        )
+
+    def test_runtime_budget_classifies_bundled_latest_version_duplicates(self) -> None:
+        self.assertEqual(
+            verify_runtime_budget._scope_collision_baseline_path(
+                "Plugins/cache/openai-bundled/chrome/26.611.62324/skills/control-chrome"
+            ),
+            "Plugins/cache/openai-bundled/chrome/versioned/skills/control-chrome",
+        )
+        self.assertEqual(
+            verify_runtime_budget._scope_collision_baseline_path(
+                "Plugins/cache/openai-bundled/chrome/latest/skills/control-chrome"
+            ),
+            "Plugins/cache/openai-bundled/chrome/latest/skills/control-chrome",
+        )
+        self._write_skill(
+            "Plugins/cache/openai-bundled/chrome/26.611.62324/skills/control-chrome",
+            "Bundled Chrome versioned skill.",
+        )
+        self._write_skill(
+            "Plugins/cache/openai-bundled/chrome/latest/skills/control-chrome",
+            "Bundled Chrome latest skill.",
+        )
+
+        with self._patched_repo(default_visible=set()):
+            report = verify_runtime_budget.build_report()
+
+        self.assertEqual(report["status"], "pass")
+        self.assertEqual(report["unresolved_scope_collisions"], [])
+        self.assertEqual(len(report["same_capability_scope_collisions"]), 1)
+        collision = report["same_capability_scope_collisions"][0]
+        self.assertEqual(collision["name"], "control-chrome")
+        self.assertEqual(
+            collision["canonical_path"],
+            "Plugins/cache/openai-bundled/chrome/latest/skills/control-chrome",
+        )
+        self.assertEqual(
+            [candidate["path"] for candidate in collision["suppressed_candidates"]],
+            ["Plugins/cache/openai-bundled/chrome/26.611.62324/skills/control-chrome"],
         )
 
     def test_runtime_budget_classifies_curated_remote_router_homonyms(self) -> None:

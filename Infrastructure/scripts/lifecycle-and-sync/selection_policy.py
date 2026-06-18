@@ -122,6 +122,24 @@ def _same_capability_plugin_cache_policy(
 
 PLUGIN_SKILL_COLLISION_POLICIES: tuple[dict[str, Any], ...] = (
     {
+        "name": "control-chrome",
+        "classification": "same_capability",
+        "display_strategy": "dedupe_to_canonical",
+        "resolution": "suppress_duplicate",
+        "reason": (
+            "The bundled Chrome plugin exposes both a concrete version cache "
+            "and a latest cache alias; latest is canonical for runtime routing."
+        ),
+        "paths": (
+            "Plugins/cache/openai-bundled/chrome/latest/skills/control-chrome",
+            "Plugins/cache/openai-bundled/chrome/versioned/skills/control-chrome",
+        ),
+        "canonical_path": "Plugins/cache/openai-bundled/chrome/latest/skills/control-chrome",
+        "suppressed_paths": (
+            "Plugins/cache/openai-bundled/chrome/versioned/skills/control-chrome",
+        ),
+    },
+    {
         "name": "agents-sdk",
         "classification": "distinct_homonym",
         "display_strategy": "qualify_all",

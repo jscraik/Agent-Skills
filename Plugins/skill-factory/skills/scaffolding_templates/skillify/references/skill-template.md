@@ -30,62 +30,61 @@ Template:
 
     Stage purpose: <one sentence purpose>
 
-    ## When to use
+    ## Philosophy
+
+    <principles that keep the stage bounded, evidence-backed, and safe>
+
+    ## When To Use
 
     Use when <repeatable trigger backed by evidence>.
 
-    ## When not to use
+    ## Avoid
 
     Do not use when <anti-trigger or narrower owner applies>.
 
-    ## Required inputs
+    ## Inputs
 
     - <required path, artifact, report, or user-provided context>
 
-    ## Deliverables
+    ## Outputs
 
     - <required artifact, response schema, command output, or handoff field>
 
-    ## Preconditions
-
-    - <freshness, authority, source ownership, or dependency condition>
-
     ## Procedure
+
+    Preconditions: <freshness, authority, source ownership, or dependency condition>.
 
     1. Confirm the canonical source path and applicable instructions.
     2. Read the smallest evidence surface needed for the stage.
     3. Produce only the required stage deliverable.
     4. Run the validation command and stop at the first failed gate.
 
-    ## Allowed writes
+    ## Constraints
 
-    <paths, artifacts, or systems this stage may mutate>
+    Allowed writes: <paths, artifacts, or systems this stage may mutate>.
+    Forbidden writes:
 
-    ## Forbidden writes
+    - <generated surfaces, external systems, or downstream-stage outputs>.
 
-    - <generated surfaces, external systems, or downstream-stage outputs>
-
-    ## Exit criteria
+    Exit criteria:
 
     - <conditions required before handoff>
 
-    ## Validation
+    Handoff: to <next-stage> only after exit criteria pass; otherwise return a blocker.
 
-    Run ./bin/ask skills audit <skill-path> --level strict --json --robot. Fail fast at the first failed gate.
-
-    ## Handoff
-
-    Hand off to <next-stage> only after exit criteria pass; otherwise return a blocker.
-
-    ## Failure modes
-
-    - <blocker class>: <required recovery action>
-
-    ## Execution boundaries
+    ## Execution Boundaries
 
     - Do not widen scope beyond the named stage.
     - Redact secrets and sensitive data by default.
     - Return blocked_by instead of inventing missing evidence.
+
+    ## Failure Mode
+
+    - <blocker class>: <required recovery action>
+
+    ## Validation
+
+    Run ./bin/ask skills audit <skill-path> --level strict --json --robot. Fail fast at the first failed gate.
 
     ## Gotchas
 

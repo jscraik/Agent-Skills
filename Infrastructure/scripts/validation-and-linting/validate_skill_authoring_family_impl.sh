@@ -77,7 +77,7 @@ cd "$repo_root"
 python_cmd=(python3)
 python_cmd_display="python3"
 pyyaml_venv_python="$HOME/.venvs/pyyaml/bin/python"
-uv_tool_env=()
+uv_tool_env=(env)
 if [[ -z "${UV_CACHE_DIR:-}" ]]; then
   uv_tool_env=(env UV_CACHE_DIR="${TMPDIR:-/tmp}/agent-skills-uv-cache")
 fi

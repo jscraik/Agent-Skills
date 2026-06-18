@@ -86,7 +86,18 @@ _SKILL_BUILDER_ROOT = next(
     (candidate for candidate in _SKILL_BUILDER_ROOT_CANDIDATES if candidate.exists()),
     _SKILL_BUILDER_ROOT_CANDIDATES[0],
 )
-_SCHEMA_DIR = _SKILL_BUILDER_ROOT / "references" / "skill-builder"
+_SCHEMA_DIR_CANDIDATES = (
+    _SKILL_BUILDER_ROOT / "skills" / "code_quality_review" / "skill-builder" / "references",
+    _SKILL_BUILDER_ROOT / "references" / "skill-builder",
+)
+_SCHEMA_DIR = next(
+    (
+        candidate
+        for candidate in _SCHEMA_DIR_CANDIDATES
+        if (candidate / "contract.schema.yaml").exists() and (candidate / "evals.schema.yaml").exists()
+    ),
+    _SCHEMA_DIR_CANDIDATES[0],
+)
 _CONTRACT_SCHEMA_PATH = _SCHEMA_DIR / "contract.schema.yaml"
 _EVALS_SCHEMA_PATH = _SCHEMA_DIR / "evals.schema.yaml"
 DEFAULT_FAMILY_SKILLS = (

@@ -20,6 +20,10 @@ metadata:
 
 Select one downstream workflow for Codex skill-management requests. Return the routing handoff before loading deeper instructions.
 
+## Philosophy
+
+Route to the smallest durable factory surface that can prove the result. Prefer existing system lanes, validators, scripts, and references over new skill bodies when they already encode the contract.
+
 ## When to use
 
 Use when the user asks to create, capture, improve, audit, refactor, install, sync, or route a Codex skill and the correct Skill Factory lane is not already certain.
@@ -51,10 +55,6 @@ When target, lane, write authority, or validation requirement is missing, ask on
 | copy or fork the system skill creator or installer into Skill Factory | block fork; route to the matching system lane | `create` or `install` |
 
 For `.system/skill-creator` or `.system/skill-installer`, attach Skill Factory references or eval contracts; do not fork the system skill body.
-
-## Philosophy
-
-Route to the smallest durable factory surface that can prove the result. Prefer existing system lanes, validators, scripts, and references over new skill bodies when they already encode the contract.
 
 ## Procedure
 
@@ -114,16 +114,15 @@ blocked_by: null
 - Downstream lanes own source edits, runtime sync, external review, Tessl evals, packaging, publishing, and install proof.
 - A route decision is not proof that a skill is installed, visible in Codex, or passing evals.
 
-## Anti-Patterns
-
-- Do not resurrect retired flat command handles, generated aliases, or
-  projection-only manifest rows to satisfy a route, projection, or test.
-- Do not copy the system skill creator or installer into Skill Factory when the system lane can be referenced.
-- Do not treat plugin-cache visibility, command-surface rows, and flat skill symlinks as the same proof surface.
-
 ## Failure Mode
 
 If no single lane fits, set `blocked_by` to the ambiguity and ask the smallest routing question.
+
+## Validation
+
+Run `bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh` and `./bin/ask skills external-review Plugins/skill-factory/skills/skill-factory-router --audit-level compat --json`.
+
+Fail fast: stop at the first failed required gate, classify it, and do not sync, commit, publish, or install until it is fixed or explicitly blocked.
 
 ## Gotchas
 
@@ -133,11 +132,12 @@ If no single lane fits, set `blocked_by` to the ambiguity and ask the smallest r
 - Runtime picker visibility depends on regenerated projections and local sync, not only canonical source edits.
 - Use exact current evidence before claiming Tessl, plugin cache, command surface, or Codex picker state.
 
-## Validation
+## Anti-Patterns
 
-Run `bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh` and `./bin/ask skills external-review Plugins/skill-factory/skills/skill-factory-router --audit-level compat --json`.
-
-Fail fast: stop at the first failed required gate, classify it, and do not sync, commit, publish, or install until it is fixed or explicitly blocked.
+- Do not resurrect retired flat command handles, generated aliases, or
+  projection-only manifest rows to satisfy a route, projection, or test.
+- Do not copy the system skill creator or installer into Skill Factory when the system lane can be referenced.
+- Do not treat plugin-cache visibility, command-surface rows, and flat skill symlinks as the same proof surface.
 
 ## References
 

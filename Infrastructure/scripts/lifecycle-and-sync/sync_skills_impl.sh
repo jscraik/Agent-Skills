@@ -431,10 +431,12 @@ fi
 # Remove hidden/internal skills from the flat runtime surface so they do not
 # appear as user-selectable skills in Codex.
 # Lifecycle bridge skills stay available through the hidden `.system` lane.
+set +u
 hidden_flat_skills=("${SELECTION_POLICY_HIDDEN_FLAT_SKILLS[@]}")
 default_include_first_party_repo_skills="${SELECTION_POLICY_DEFAULT_INCLUDE_FIRST_PARTY_REPO_SKILLS:-1}"
 plugin_visible_router_skills=("${SELECTION_POLICY_PLUGIN_VISIBLE_ROUTER_SKILLS[@]}")
 plugin_hidden_lane_skills=("${SELECTION_POLICY_PLUGIN_HIDDEN_LANE_SKILLS[@]}")
+set -u
 if declare -p SELECTION_POLICY_SYSTEM_BRIDGE_SKILLS >/dev/null 2>&1; then
   system_bridge_skills=("${SELECTION_POLICY_SYSTEM_BRIDGE_SKILLS[@]}")
 else

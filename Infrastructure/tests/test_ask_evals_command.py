@@ -92,6 +92,61 @@ def test_tessl_eval_view_incomplete_when_assessment_results_empty() -> None:
     assert evals._tessl_eval_view_has_complete_scores(payload) is False
 
 
+def test_tessl_live_summary_flags_missing_observable_output_regressions() -> None:
+    payload = {
+        "data": {
+            "attributes": {
+                "scenarios": [
+                    {
+                        "id": "scenario-1",
+                        "path": "interface-contract-migration",
+                        "shortDescription": "Unit: public interface",
+                        "solutions": [
+                            {
+                                "variant": "baseline",
+                                "assessmentResults": [
+                                    {
+                                        "name": "expected_signal-1",
+                                        "score": 1,
+                                        "max_score": 1,
+                                        "reasoning": "The response created a migration decision artifact.",
+                                    }
+                                ],
+                            },
+                            {
+                                "variant": "usage-spec",
+                                "assessmentResults": [
+                                    {
+                                        "name": "expected_signal-1",
+                                        "score": 0,
+                                        "max_score": 1,
+                                        "reasoning": (
+                                            "No agent response artifact is present in the solution; "
+                                            "only the fixture/skill package files are included."
+                                        ),
+                                    }
+                                ],
+                            },
+                        ],
+                    }
+                ]
+            }
+        }
+    }
+
+    summary = evals._summarize_tessl_live_eval_view(payload)
+
+    assert summary["score"] == 0
+    assert summary["baseline_score"] == 1
+    assert summary["regressions_count"] == 1
+    assert summary["evidence_shape_regressions_count"] == 1
+    regression = summary["evidence_shape_regressions"][0]
+    assert regression["path"] == "interface-contract-migration"
+    assert regression["usage_missing_observable_output"] is True
+    assert regression["baseline_missing_observable_output"] is False
+    assert regression["usage_failed_criteria"][0]["name"] == "expected_signal-1"
+
+
 def test_smoke_evals_use_codex_spark_and_fast_profile_without_reasoning_level(tmp_path: Path) -> None:
     completed = mock.Mock(returncode=0, stdout="{}", stderr="")
 
@@ -381,7 +436,11 @@ def test_ordinary_tessl_staging_allows_legacy_keyword_cases(tmp_path: Path) -> N
 
     copied = evals._write_tessl_scenarios_from_evals(skill_root, staged_root)
 
-    assert copied == ["scenarios/legacy-regex/task.md", "scenarios/legacy-regex/criteria.json"]
+    assert copied == [
+        "scenario-sources.json",
+        "scenarios/legacy-regex/task.md",
+        "scenarios/legacy-regex/criteria.json",
+    ]
     assert (staged_root / "scenarios" / "legacy-regex" / "task.md").exists()
     assert (staged_root / "scenarios" / "legacy-regex" / "criteria.json").exists()
 
@@ -407,7 +466,10 @@ def test_tessl_eval_quality_rejects_provenance_only_knowledgeos_signal() -> None
 
     findings = evals._tessl_eval_quality_findings(cases)
 
-    assert [finding["code"] for finding in findings] == ["missing_skill_lift_acceptance"]
+    assert [finding["code"] for finding in findings] == [
+        "missing_skill_lift_acceptance",
+        "fixture_path_acceptance",
+    ]
 
 
 def test_tessl_eval_quality_rejects_broader_provenance_only_signal() -> None:
@@ -428,7 +490,10 @@ def test_tessl_eval_quality_rejects_broader_provenance_only_signal() -> None:
 
     findings = evals._tessl_eval_quality_findings(cases)
 
-    assert [finding["code"] for finding in findings] == ["missing_skill_lift_acceptance"]
+    assert [finding["code"] for finding in findings] == [
+        "missing_skill_lift_acceptance",
+        "fixture_path_acceptance",
+    ]
 
 
 def test_tessl_eval_quality_rejects_empty_case_set(tmp_path: Path) -> None:
@@ -464,6 +529,94 @@ def test_tessl_eval_quality_rejects_generic_should_contract_signal() -> None:
     findings = evals._tessl_eval_quality_findings(cases)
 
     assert [finding["code"] for finding in findings] == ["missing_skill_lift_acceptance"]
+
+
+def test_tessl_eval_quality_rejects_answer_leakage() -> None:
+    leaked_answer = (
+        "Classifies the boundary as risky, names missing caller proof, requests a "
+        "tracer, and blocks autonomous edits until regression evidence exists."
+    )
+    cases = [{
+        "id": "leaked-answer",
+        "unit": "boundary proof",
+        "given": "A module boundary looks clean but lacks caller proof.",
+        "should": leaked_answer,
+        "prompt": "Review the boundary before agents edit it.",
+        "acceptance": [
+            {
+                "type": "expected_signal",
+                "value": leaked_answer,
+            },
+        ],
+    }]
+
+    findings = evals._tessl_eval_quality_findings(cases)
+
+    assert [finding["code"] for finding in findings] == ["answer_leakage"]
+
+
+def test_tessl_eval_quality_flags_unstaged_repo_paths() -> None:
+    cases = [{
+        "id": "unstaged-path",
+        "unit": "architecture review",
+        "given": "A repo-root module is named directly.",
+        "should": "Review the target from available evidence.",
+        "prompt": "Review Infrastructure/scripts/lifecycle-and-sync/command_surface.py before changing it.",
+        "acceptance": [
+            {
+                "type": "expected_signal",
+                "value": "Names source-of-truth and caller proof.",
+            },
+        ],
+    }]
+
+    findings = evals._tessl_eval_quality_findings(cases)
+
+    assert "unstaged_repo_path_reference" in {finding["code"] for finding in findings}
+
+
+def test_tessl_eval_quality_flags_unstaged_repo_paths_in_acceptance() -> None:
+    cases = [{
+        "id": "unstaged-acceptance-path",
+        "unit": "architecture review",
+        "given": "A remote Tessl scenario refers to a repo-local proof artifact.",
+        "should": "Use staged package context only.",
+        "prompt": "Review the staged package context.",
+        "acceptance": [
+            {
+                "type": "expected_signal",
+                "value": "Cites .harness/artifacts/pu-020-adversarial-review/proof.md.",
+            },
+            {
+                "type": "skill_selected",
+                "expected_skill": "Mentions Docs/agents/24-tessl-live-skill-eval-workflow.md.",
+            },
+        ],
+    }]
+
+    findings = evals._tessl_eval_quality_findings(cases)
+
+    assert "unstaged_repo_path_reference" in {finding["code"] for finding in findings}
+
+
+def test_tessl_eval_quality_allows_package_relative_paths() -> None:
+    cases = [{
+        "id": "package-path",
+        "unit": "architecture review",
+        "given": "A package-local contract file is available in the staged Tessl tile.",
+        "should": "Review the package contract from available evidence.",
+        "prompt": "Review SKILL.md and references/contract.yaml before changing this package.",
+        "acceptance": [
+            {
+                "type": "expected_signal",
+                "value": "Names source-of-truth and caller proof.",
+            },
+        ],
+    }]
+
+    findings = evals._tessl_eval_quality_findings(cases)
+
+    assert "unstaged_repo_path_reference" not in {finding["code"] for finding in findings}
 
 
 def test_tessl_eval_quality_accepts_behavioral_scenario() -> None:
@@ -734,7 +887,10 @@ def _write_example_skill(tmp_path: Path) -> Path:
         EXAMPLE_TESSL_EVAL_YAML,
         encoding="utf-8",
     )
-    (references / "contract.yaml").write_text("version: 1\n", encoding="utf-8")
+    (references / "contract.yaml").write_text(
+        "version: 1\ntessl_scenario_policy:\n  structure_only: true\n",
+        encoding="utf-8",
+    )
     (skill_root / "secret-not-staged.txt").write_text("do not copy\n", encoding="utf-8")
     return skill_root
 
@@ -752,10 +908,14 @@ def test_evals_run_native_tessl_without_project_save_approval_flag(tmp_path: Pat
             "Skills/example-skill",
             mode="smoke",
             allow_tessl_project_save=False,
-        )
+    )
 
     assert result.status == "success"
-    assert run.call_count == 2
+    commands = [call.args[0] for call in run.call_args_list]
+    tessl_eval_runs = [cmd for cmd in commands if cmd[1:3] == ["eval", "run"]]
+    assert len(tessl_eval_runs) == 1
+    assert not any(cmd[1:3] == ["project", "create"] for cmd in commands)
+    assert not any(cmd[1:3] == ["project", "repair"] for cmd in commands)
     tessl_eval = result.data["tessl_eval"]
     assert tessl_eval["status"] == "pass"
     assert "ask-tessl-evals" in tessl_eval["staged_source"]
@@ -822,11 +982,13 @@ def test_evals_run_native_tessl_by_default_with_temp_staged_source(tmp_path: Pat
             "Skills/example-skill",
             mode="smoke",
             allow_tessl_project_save=True,
-        )
+    )
 
     assert result.status == "success"
-    assert run.call_count == 2
-    tessl_cmd = run.call_args_list[-1].args[0]
+    commands = [call.args[0] for call in run.call_args_list]
+    tessl_eval_runs = [cmd for cmd in commands if cmd[1:3] == ["eval", "run"]]
+    assert len(tessl_eval_runs) == 1
+    tessl_cmd = tessl_eval_runs[0]
     assert tessl_cmd[:4] == ["/usr/local/bin/tessl", "eval", "run", "--json"]
     assert tessl_cmd[4] != "Skills/example-skill"
     assert "publish" not in tessl_cmd
@@ -838,6 +1000,7 @@ def test_evals_run_native_tessl_by_default_with_temp_staged_source(tmp_path: Pat
         "references/evals.yaml",
         "references/contract.yaml",
         "assets/example.png",
+        "scenario-sources.json",
         "scenarios/smoke-example/task.md",
         "scenarios/smoke-example/criteria.json",
         "tessl.json",
@@ -848,7 +1011,7 @@ def test_evals_run_native_tessl_by_default_with_temp_staged_source(tmp_path: Pat
     assert result.data["tessl_eval"]["policy"]["project_save_default"] == "compatibility_flag_not_required"
 
 
-def test_evals_live_private_dry_run_stages_private_tile_shape(tmp_path: Path) -> None:
+def test_evals_live_private_dry_run_stages_private_plugin_shape(tmp_path: Path) -> None:
     completed = mock.Mock(returncode=0, stdout="{}", stderr="")
     skill_root = _write_example_skill(tmp_path)
     (skill_root / "SKILL.md").write_text(
@@ -866,7 +1029,7 @@ def test_evals_live_private_dry_run_stages_private_tile_shape(tmp_path: Path) ->
         (
             "cases:\n"
             "  - id: smoke-example\n"
-            "    unit: example private tile proof\n"
+            "    unit: example private plugin proof\n"
             "    given: A private Tessl dry-run stages a skill package for assessment.\n"
             "    should: Preserve package shape and prove the skill-specific eval can be scored.\n"
             "    prompt: \"Do the example task.\"\n"
@@ -901,18 +1064,20 @@ def test_evals_live_private_dry_run_stages_private_tile_shape(tmp_path: Path) ->
     assert tessl_eval["policy"]["no_publish"] is True
     assert tessl_eval["policy"]["no_install"] is True
     assert tessl_eval["policy"]["no_registry_upload"] is True
-    assert tessl_eval["policy"]["tile_private_required"] is True
+    assert tessl_eval["policy"]["plugin_private_required"] is True
     assert tessl_eval["tessl_project_marker"].endswith("/tessl.json")
-    assert tessl_eval["tile_version"] == "2.3.4"
+    assert tessl_eval["plugin_version"] == "2.3.4"
 
     staged_source = Path(tessl_eval["staged_source"])
-    tile_manifest = json.loads((staged_source / "tile.json").read_text(encoding="utf-8"))
-    assert tile_manifest["name"] == "jscraik/example-skill"
-    assert tile_manifest["version"] == "2.3.4"
-    assert tile_manifest["private"] is True
-    assert tile_manifest["skills"]["example-skill"]["path"] == "SKILL.md"
+    assert not (staged_source / "tile.json").exists()
+    plugin_manifest = json.loads((staged_source / ".tessl-plugin" / "plugin.json").read_text(encoding="utf-8"))
+    assert plugin_manifest["name"] == "jscraik/example-skill"
+    assert plugin_manifest["version"] == "2.3.4"
+    assert plugin_manifest["private"] is True
+    assert plugin_manifest["skills"] == "./skills/"
+    assert (staged_source / "skills" / "example-skill" / "SKILL.md").is_file()
     task_text = (staged_source / "evals" / "smoke-example" / "task.md").read_text(encoding="utf-8")
-    assert task_text.startswith("Unit: example private tile proof\n")
+    assert task_text.startswith("Unit: example private plugin proof\n")
     assert task_text.endswith("Do the example task.\n")
     criteria = json.loads((staged_source / "evals" / "smoke-example" / "criteria.json").read_text(encoding="utf-8"))
     assert criteria["type"] == "weighted_checklist"
@@ -925,6 +1090,184 @@ def test_evals_live_private_dry_run_stages_private_tile_shape(tmp_path: Path) ->
     assert (staged_source / "assets" / "example.png").read_bytes() == b"png"
     assert (staged_source / "tessl.json").exists()
     assert not (staged_source / "secret-not-staged.txt").exists()
+
+
+def test_tessl_live_private_requires_generated_scenarios_unless_structure_only(tmp_path: Path) -> None:
+    skill_root = _write_example_skill(tmp_path)
+    (skill_root / "references" / "contract.yaml").write_text("version: 1\n", encoding="utf-8")
+
+    try:
+        evals._stage_tessl_live_private_source(tmp_path, "Skills/example-skill", "skills-sdk", temp_root=tmp_path / "stage")
+    except ValueError as exc:
+        message = str(exc)
+    else:
+        raise AssertionError("expected live Tessl staging to require generated scenarios")
+
+    assert "require reviewed generated scenarios" in message
+    assert "prepare-tessl-scenarios" in message
+
+
+def test_tessl_structure_only_policy_only_reads_tessl_scenario_policy(tmp_path: Path) -> None:
+    skill_root = _write_example_skill(tmp_path)
+    contract_path = skill_root / "references" / "contract.yaml"
+    contract_path.write_text(
+        "version: 1\n"
+        "unrelated_policy:\n"
+        "  structure_only: true\n",
+        encoding="utf-8",
+    )
+
+    assert evals._tessl_structure_only_scenario_policy(skill_root) is False
+
+    contract_path.write_text(
+        "version: 1\n"
+        "tessl_scenario_policy:\n"
+        "  structure_only: true\n",
+        encoding="utf-8",
+    )
+
+    assert evals._tessl_structure_only_scenario_policy(skill_root) is True
+
+
+def test_tessl_live_private_accepts_generated_yaml_cases(tmp_path: Path) -> None:
+    skill_root = _write_example_skill(tmp_path)
+    (skill_root / "references" / "contract.yaml").write_text("version: 1\n", encoding="utf-8")
+    cases = [
+        {
+            "id": "yaml-generated",
+            "unit": "yaml generated scenario",
+            "given": "A reviewed generated scenario was imported into references/evals.yaml.",
+            "should": "Treat the YAML-imported scenario as generated scenario evidence.",
+            "prompt": "Review the architecture handoff.",
+            "acceptance": [
+                {
+                    "type": "expected_signal",
+                    "value": "Recognizes the YAML-imported generated scenario as reviewed Tessl evidence.",
+                }
+            ],
+            "tessl": {"generated": True, "source": "references/evals.yaml"},
+        }
+    ]
+
+    merged, manifest = evals._merge_tessl_cases_with_generated_fixtures(
+        skill_root,
+        cases,
+        require_generated=True,
+    )
+
+    assert merged == cases
+    assert manifest["generated_yaml_cases"] == 1
+    assert manifest["generated_fixture_cases"] == 0
+
+
+def test_tessl_eval_cases_compat_reads_yaml_generated_tessl_metadata() -> None:
+    cases = evals._parse_tessl_eval_cases_compat(
+        """
+cases:
+  - id: yaml-generated
+    unit: yaml generated scenario
+    given: A reviewed generated scenario was imported into references/evals.yaml.
+    should: Treat the YAML-imported scenario as generated scenario evidence.
+    prompt: Review the architecture handoff.
+    tessl:
+      generated: true
+      source: references/evals.yaml
+"""
+    )
+
+    assert cases == [
+        {
+            "id": "yaml-generated",
+            "unit": "yaml generated scenario",
+            "given": "A reviewed generated scenario was imported into references/evals.yaml.",
+            "should": "Treat the YAML-imported scenario as generated scenario evidence.",
+            "prompt": "Review the architecture handoff.",
+            "tessl": {
+                "generated": True,
+                "source": "references/evals.yaml",
+            },
+        }
+    ]
+
+
+def test_tessl_live_private_stages_generated_fixture_scenarios(tmp_path: Path) -> None:
+    skill_root = _write_example_skill(tmp_path)
+    (skill_root / "references" / "contract.yaml").write_text(
+        "version: 1\n"
+        "tessl_scenario_policy:\n"
+        "  structure_only: true\n",
+        encoding="utf-8",
+    )
+    fixture_dir = skill_root / "references" / "evals"
+    fixture_dir.mkdir()
+    (fixture_dir / "eval.arch.boundary-proof.md").write_text(
+        (
+            "# eval.arch.boundary-proof: Boundary Proof\n\n"
+            "Knowledge claim: The skill should block unsafe architecture claims without caller proof.\n"
+            "Behavior under test: Architecture boundary proof classification.\n"
+            "Expected agent move: Classifies the boundary as risky, names missing caller proof, and recommends a tracer.\n"
+            "Failure mode: Treats tidy module names as sufficient proof.\n"
+            "Given: A module boundary looks clean but has no caller evidence, characterization test, or tracer path.\n"
+            "Should: Classify the boundary as risky and request proof before autonomous edits.\n"
+            "Expected failure: Treats tidy module names as sufficient proof.\n"
+        ),
+        encoding="utf-8",
+    )
+
+    staged_source, copied = evals._stage_tessl_live_private_source(
+        tmp_path,
+        "Skills/example-skill",
+        "skills-sdk",
+        temp_root=tmp_path / "stage",
+    )
+
+    manifest = json.loads((staged_source / "scenario-sources.json").read_text(encoding="utf-8"))
+    assert manifest["skill_owned_cases"] == 1
+    assert manifest["generated_fixture_cases"] == 1
+    assert manifest["structure_only_exception"] is True
+    assert "scenario-sources.json" in copied
+    assert "references/evals/eval.arch.boundary-proof.md" in copied
+    generated_case = staged_source / "evals" / "generated-eval.arch.boundary-proof" / "task.md"
+    assert generated_case.exists()
+    criteria = json.loads(
+        (staged_source / "evals" / "generated-eval.arch.boundary-proof" / "criteria.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert criteria["metadata"]["source"] == "references/evals/eval.arch.boundary-proof.md"
+    descriptions = [item["description"] for item in criteria["checklist"]]
+    assert any("Classifies the boundary as risky" in item for item in descriptions)
+
+
+def test_tessl_live_private_requires_twenty_behavioral_scenarios(tmp_path: Path) -> None:
+    skill_root = _write_example_skill(tmp_path)
+    (skill_root / "references" / "contract.yaml").write_text("version: 1\n", encoding="utf-8")
+    fixture_dir = skill_root / "references" / "evals"
+    fixture_dir.mkdir()
+    (fixture_dir / "eval.arch.boundary-proof.md").write_text(
+        (
+            "# eval.arch.boundary-proof: Boundary Proof\n\n"
+            "Expected agent move: Classifies the boundary as risky, names missing caller proof, and recommends a tracer.\n"
+            "Given: A module boundary looks clean but has no caller evidence, characterization test, or tracer path.\n"
+            "Should: Classify the boundary as risky and request proof before autonomous edits.\n"
+        ),
+        encoding="utf-8",
+    )
+
+    try:
+        evals._stage_tessl_live_private_source(
+            tmp_path,
+            "Skills/example-skill",
+            "skills-sdk",
+            temp_root=tmp_path / "stage",
+        )
+    except ValueError as exc:
+        message = str(exc)
+    else:
+        raise AssertionError("expected behavioral live staging to require 20 scenarios")
+
+    assert "require at least 20 gold-standard structured scenarios" in message
+    assert "Found 2" in message
 
 
 def test_evals_live_private_dry_run_is_not_failed_by_discovery_smoke_filter(tmp_path: Path) -> None:
@@ -1040,6 +1383,10 @@ def test_evals_live_private_skips_local_only_cases(tmp_path: Path) -> None:
         ),
         encoding="utf-8",
     )
+    (skill_root / "references" / "contract.yaml").write_text(
+        "version: 1\ntessl_scenario_policy:\n  structure_only: true\n",
+        encoding="utf-8",
+    )
 
     with mock.patch.object(evals.subprocess, "run", return_value=completed):
         result = evals.run_evals(
@@ -1087,6 +1434,10 @@ def test_evals_live_private_uses_plugin_project_identity(tmp_path: Path) -> None
         ),
         encoding="utf-8",
     )
+    (skill_root / "references" / "contract.yaml").write_text(
+        "version: 1\ntessl_scenario_policy:\n  structure_only: true\n",
+        encoding="utf-8",
+    )
 
     with mock.patch.object(evals.subprocess, "run", return_value=completed):
         result = evals.run_evals(
@@ -1101,10 +1452,12 @@ def test_evals_live_private_uses_plugin_project_identity(tmp_path: Path) -> None
     assert result.status == "success"
     tessl_eval = result.data["tessl_eval"]
     staged_source = Path(tessl_eval["staged_source"])
-    tile_manifest = json.loads((staged_source / "tile.json").read_text(encoding="utf-8"))
+    plugin_manifest = json.loads((staged_source / ".tessl-plugin" / "plugin.json").read_text(encoding="utf-8"))
     project_marker = json.loads((staged_source / "tessl.json").read_text(encoding="utf-8"))
-    assert tile_manifest["name"] == "skills-sdk/skill-factory"
-    assert tile_manifest["skills"]["skill-factory-router"]["path"] == "SKILL.md"
+    assert not (staged_source / "tile.json").exists()
+    assert plugin_manifest["name"] == "skills-sdk/skill-factory"
+    assert plugin_manifest["skills"] == "./skills/"
+    assert (staged_source / "skills" / "skill-factory-router" / "SKILL.md").is_file()
     assert project_marker["name"] == "skills-sdk/skill-factory"
 
 
@@ -1177,17 +1530,17 @@ def test_tessl_project_link_relinks_mismatched_existing_project(tmp_path: Path) 
 
     def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
         calls.append(cmd)
-        if cmd[1:4] == ["project", "repair", "--json"]:
+        if "--relink" in cmd:
+            return mock.Mock(returncode=0, stdout='{"status":"relinked"}', stderr="", args=cmd)
+        if "--update-source" in cmd:
+            return mock.Mock(returncode=0, stdout='{"status":"updated"}', stderr="", args=cmd)
+        if cmd[1:3] == ["project", "repair"] and "--json" in cmd:
             return mock.Mock(
                 returncode=0,
                 stdout='{"workspace":"old-workspace","project":"old-project","name":"old-workspace/old-project"}',
                 stderr="",
                 args=cmd,
             )
-        if "--relink" in cmd:
-            return mock.Mock(returncode=0, stdout='{"status":"relinked"}', stderr="", args=cmd)
-        if "--update-source" in cmd:
-            return mock.Mock(returncode=0, stdout='{"status":"updated"}', stderr="", args=cmd)
         raise AssertionError(f"unexpected command: {cmd}")
 
     with mock.patch.object(evals.subprocess, "run", side_effect=fake_run):
@@ -1214,10 +1567,10 @@ def test_tessl_project_link_creates_after_missing_existing_project(tmp_path: Pat
 
     def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
         calls.append(cmd)
-        if cmd[1:4] == ["project", "repair", "--json"]:
-            return mock.Mock(returncode=1, stdout='{"status":"needs_repair"}', stderr="", args=cmd)
         if "--relink" in cmd:
             return mock.Mock(returncode=1, stdout="", stderr="Project not found", args=cmd)
+        if cmd[1:3] == ["project", "repair"] and "--json" in cmd:
+            return mock.Mock(returncode=1, stdout='{"status":"needs_repair"}', stderr="", args=cmd)
         if cmd[1:3] == ["project", "create"]:
             return mock.Mock(returncode=0, stdout="created\n", stderr="", args=cmd)
         raise AssertionError(f"unexpected command: {cmd}")
@@ -1254,17 +1607,17 @@ def test_tessl_project_link_creates_when_relink_json_status_is_error(tmp_path: P
 
     def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
         calls.append(cmd)
-        if cmd[1:4] == ["project", "repair", "--json"]:
-            return mock.Mock(
-                returncode=0,
-                stdout='{"status":"match","workspaceName":"jscraik","projectName":"improve-agent-native"}',
-                stderr="",
-                args=cmd,
-            )
         if "--relink" in cmd:
             return mock.Mock(
                 returncode=0,
                 stdout='{"status":"error","message":"Project not found in workspace skills-sdk: improve-agent-native"}',
+                stderr="",
+                args=cmd,
+            )
+        if cmd[1:3] == ["project", "repair"] and "--json" in cmd:
+            return mock.Mock(
+                returncode=0,
+                stdout='{"status":"match","workspaceName":"jscraik","projectName":"improve-agent-native"}',
                 stderr="",
                 args=cmd,
             )
@@ -1333,12 +1686,12 @@ def test_tessl_project_link_updates_source_after_relink(tmp_path: Path) -> None:
 
     def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
         calls.append(cmd)
-        if cmd[1:4] == ["project", "repair", "--json"]:
-            return mock.Mock(returncode=1, stdout='{"status":"needs_repair","allowedActions":["relink","update_source"]}', stderr="", args=cmd)
         if "--relink" in cmd:
             return mock.Mock(returncode=0, stdout='{"status":"relinked"}', stderr="", args=cmd)
         if "--update-source" in cmd:
             return mock.Mock(returncode=0, stdout='{"status":"updated"}', stderr="", args=cmd)
+        if cmd[1:3] == ["project", "repair"] and "--json" in cmd:
+            return mock.Mock(returncode=1, stdout='{"status":"needs_repair","allowedActions":["relink","update_source"]}', stderr="", args=cmd)
         raise AssertionError(f"unexpected command: {cmd}")
 
     with mock.patch.object(evals.subprocess, "run", side_effect=fake_run):
@@ -1416,6 +1769,83 @@ def test_timeout_partial_artifact_sanitizes_repo_paths(tmp_path: Path) -> None:
     assert "Skills/example/output.txt" in payload
 
 
+def test_tessl_run_budget_preflight_blocks_when_capacity_unknown(tmp_path: Path) -> None:
+    def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
+        assert cmd[1:3] == ["eval", "list"]
+        return mock.Mock(returncode=0, stdout='{"unexpected":"shape"}', stderr="", args=cmd)
+
+    with mock.patch.object(evals.subprocess, "run", side_effect=fake_run):
+        preflight = evals._tessl_run_budget_preflight(
+            "/usr/local/bin/tessl",
+            "skills-sdk",
+            tmp_path,
+            {},
+        )
+
+    assert preflight["status"] == "blocked"
+    assert preflight["blocker_class"] == "blocked_validation"
+    assert "could not determine remaining capacity" in preflight["blocker"]
+
+
+def test_tessl_eval_list_count_rejects_error_payload_lists() -> None:
+    payload = {
+        "status": "error",
+        "errors": [
+            {"message": "workspace quota is unavailable"},
+            {"message": "retry later"},
+        ],
+    }
+
+    assert evals._tessl_eval_list_count(json.dumps(payload)) is None
+
+
+def test_tessl_eval_list_count_rejects_unknown_nested_lists() -> None:
+    payload = {
+        "status": "ok",
+        "metadata": {
+            "warnings": [{"message": "not a run"}],
+            "workspace": {"limits": [1, 2, 3]},
+        },
+    }
+
+    assert evals._tessl_eval_list_count(json.dumps(payload)) is None
+
+
+def test_tessl_eval_list_count_accepts_prefixed_json_output() -> None:
+    stdout = (
+        "Fetching workspace eval runs...\n"
+        + json.dumps({
+            "status": "ok",
+            "runs": [
+                {"id": "eval-run-1"},
+                {"id": "eval-run-2"},
+            ],
+        })
+    )
+
+    assert evals._tessl_eval_list_count(stdout) == 2
+
+
+def test_tessl_run_budget_preflight_blocks_at_reserve(tmp_path: Path) -> None:
+    used_runs = [{} for _ in range(evals.TESSL_WORKSPACE_RUN_LIMIT - evals.TESSL_WORKSPACE_RUN_RESERVE)]
+
+    def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
+        assert cmd[1:3] == ["eval", "list"]
+        return mock.Mock(returncode=0, stdout=json.dumps(used_runs), stderr="", args=cmd)
+
+    with mock.patch.object(evals.subprocess, "run", side_effect=fake_run):
+        preflight = evals._tessl_run_budget_preflight(
+            "/usr/local/bin/tessl",
+            "skills-sdk",
+            tmp_path,
+            {},
+        )
+
+    assert preflight["status"] == "blocked"
+    assert preflight["blocker_class"] == "blocked_environment"
+    assert preflight["remaining_runs"] == evals.TESSL_WORKSPACE_RUN_RESERVE
+
+
 def test_evals_live_private_requires_workspace(tmp_path: Path) -> None:
     completed = mock.Mock(returncode=0, stdout="{}", stderr="")
     _write_example_skill(tmp_path)
@@ -1458,7 +1888,7 @@ def test_evals_live_private_rejects_invalid_workspace(tmp_path: Path) -> None:
     assert "workspace" in tessl_eval["blocker"].lower()
 
 
-def test_evals_live_private_invokes_tessl_with_workspace_and_tile_manifest(tmp_path: Path) -> None:
+def test_evals_live_private_invokes_tessl_with_workspace_and_plugin_manifest(tmp_path: Path) -> None:
     completed = mock.Mock(returncode=0, stdout="{}", stderr="")
     completed_eval = mock.Mock(returncode=0, stdout='{"id":"019e6ac8-08eb-75fb-8fbb-e2346517f82d"}', stderr="")
     completed_view = mock.Mock(
@@ -1488,13 +1918,15 @@ def test_evals_live_private_invokes_tessl_with_workspace_and_tile_manifest(tmp_p
     _write_example_skill(tmp_path)
 
     def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
-        if cmd[1:4] == ["project", "repair", "--json"]:
+        if cmd[1:3] == ["project", "repair"] and "--json" in cmd:
             return mock.Mock(
                 returncode=0,
                 stdout='{"workspace":"jscraik","project":"example-skill","name":"jscraik/example-skill"}',
                 stderr="",
                 args=cmd,
             )
+        if cmd[1:3] == ["eval", "list"]:
+            return mock.Mock(returncode=0, stdout="[]", stderr="", args=cmd)
         if cmd[1:3] == ["eval", "run"]:
             return completed_eval
         if cmd[1:3] == ["eval", "view"]:
@@ -1511,14 +1943,26 @@ def test_evals_live_private_invokes_tessl_with_workspace_and_tile_manifest(tmp_p
             mode="smoke",
             tessl_live_private=True,
             tessl_workspace="jscraik",
-        )
+    )
 
     assert result.status == "success"
-    assert run.call_count == 4
-    tessl_cmd = run.call_args_list[-2].args[0]
+    eval_run_calls = [
+        call.args[0] for call in run.call_args_list
+        if call.args[0][1:3] == ["eval", "run"]
+    ]
+    eval_view_calls = [
+        call.args[0] for call in run.call_args_list
+        if call.args[0][1:3] == ["eval", "view"]
+    ]
+    assert len(eval_run_calls) == 1
+    assert len(eval_view_calls) == 1
+    tessl_cmd = eval_run_calls[0]
     assert tessl_cmd[:4] == ["/usr/local/bin/tessl", "eval", "run", "--json"]
-    assert tessl_cmd[4].endswith("/tile.json")
-    view_cmd = run.call_args_list[-1].args[0]
+    assert tessl_cmd[4:6] == ["--workspace", "jscraik"]
+    assert "--yes" not in tessl_cmd
+    staged_source = Path(tessl_cmd[6])
+    assert staged_source.is_dir()
+    view_cmd = eval_view_calls[0]
     assert view_cmd == [
         "/usr/local/bin/tessl",
         "eval",
@@ -1526,14 +1970,21 @@ def test_evals_live_private_invokes_tessl_with_workspace_and_tile_manifest(tmp_p
         "--json",
         "019e6ac8-08eb-75fb-8fbb-e2346517f82d",
     ]
-    staged_manifest = json.loads(Path(tessl_cmd[4]).read_text(encoding="utf-8"))
+    assert not (staged_source / "tile.json").exists()
+    staged_manifest = json.loads(
+        (staged_source / ".tessl-plugin" / "plugin.json").read_text(encoding="utf-8")
+    )
     assert staged_manifest["name"] == "jscraik/example-skill"
+    assert staged_manifest["version"] == "1.2.3"
+    assert staged_manifest["description"] == "Private live eval plugin for example-skill."
     assert staged_manifest["private"] is True
+    assert staged_manifest["skills"] == "./skills/"
+    assert (staged_source / "skills" / "example-skill" / "SKILL.md").is_file()
     assert "publish" not in tessl_cmd
     assert "install" not in tessl_cmd
     assert "registry" not in tessl_cmd
     assert result.data["tessl_eval"]["policy"]["command_shape"] == (
-        "tessl eval run --json <staged-tile-json>"
+        "tessl eval run --json --workspace <workspace> <staged-plugin-dir>"
     )
     assert result.data["tessl_eval"]["live_result_summary"]["meets_min_score"] is True
     assert result.data["tessl_eval"]["live_result_summary"]["beats_baseline"] is True
@@ -1570,6 +2021,8 @@ def test_evals_live_private_fails_when_score_is_below_baseline(tmp_path: Path) -
     _write_example_skill(tmp_path)
 
     def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
+        if cmd[1:3] == ["eval", "list"]:
+            return mock.Mock(returncode=0, stdout="[]", stderr="", args=cmd)
         if cmd[1:3] == ["eval", "run"]:
             return completed_eval
         if cmd[1:3] == ["eval", "view"]:
@@ -1628,6 +2081,8 @@ def test_evals_live_private_fails_when_skill_only_ties_baseline(tmp_path: Path) 
     _write_example_skill(tmp_path)
 
     def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
+        if cmd[1:3] == ["eval", "list"]:
+            return mock.Mock(returncode=0, stdout="[]", stderr="", args=cmd)
         if cmd[1:3] == ["eval", "run"]:
             return completed_eval
         if cmd[1:3] == ["eval", "view"]:
@@ -1699,6 +2154,8 @@ def test_evals_live_private_polls_until_view_scores_are_complete(tmp_path: Path)
 
     def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
         nonlocal view_calls
+        if cmd[1:3] == ["eval", "list"]:
+            return mock.Mock(returncode=0, stdout="[]", stderr="", args=cmd)
         if cmd[1:3] == ["eval", "run"]:
             return completed_eval
         if cmd[1:3] == ["eval", "view"]:
@@ -1752,6 +2209,8 @@ def test_evals_live_private_reports_tessl_quota_blocker(tmp_path: Path) -> None:
     _write_example_skill(tmp_path)
 
     def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
+        if cmd[1:3] == ["eval", "list"]:
+            return mock.Mock(returncode=0, stdout="[]", stderr="", args=cmd)
         if cmd[1:3] == ["eval", "run"]:
             return completed_eval
         if cmd[1:3] == ["eval", "view"]:
@@ -1806,10 +2265,13 @@ def test_prepare_tessl_scenario_generation_dry_run_stages_target_tile(tmp_path: 
     assert not (target_tile / "evals").exists()
     assert (tool_project / "tessl.json").is_file()
     assert Path(result.data["scenario_generation_brief"]).is_file()
-    manifest = json.loads((target_tile / "tile.json").read_text(encoding="utf-8"))
+    assert not (target_tile / "tile.json").exists()
+    manifest = json.loads((target_tile / ".tessl-plugin" / "plugin.json").read_text(encoding="utf-8"))
     assert manifest["name"] == "skills-sdk/example-skill"
     assert manifest["version"] == "1.2.3"
     assert manifest["private"] is True
+    assert manifest["skills"] == "./skills/"
+    assert result.data["target_plugin_manifest"].endswith("/.tessl-plugin/plugin.json")
     assert result.data["policy"]["no_repo_root_install"] is True
     assert result.data["policy"]["allowed_install_scope"] == "temp tool project only"
 
@@ -1908,7 +2370,11 @@ def test_evals_stage_folded_yaml_prompts_for_tessl(tmp_path: Path) -> None:
 
     copied = evals._write_tessl_scenarios_from_evals(skill_root, staged_root)
 
-    assert copied == ["scenarios/folded-prompt/task.md", "scenarios/folded-prompt/criteria.json"]
+    assert copied == [
+        "scenario-sources.json",
+        "scenarios/folded-prompt/task.md",
+        "scenarios/folded-prompt/criteria.json",
+    ]
     task_text = (staged_root / "scenarios" / "folded-prompt" / "task.md").read_text(encoding="utf-8")
     assert task_text.startswith("Unit: folded prompt preservation proof\n")
     assert task_text.endswith("Investigate the target workflow and preserve the whole prompt.\n")
@@ -1941,7 +2407,11 @@ def test_evals_fallback_parser_preserves_literal_block_relative_indent(tmp_path:
 
     copied = evals._write_tessl_scenarios_from_evals(skill_root, staged_root)
 
-    assert copied == ["scenarios/literal-prompt/task.md", "scenarios/literal-prompt/criteria.json"]
+    assert copied == [
+        "scenario-sources.json",
+        "scenarios/literal-prompt/task.md",
+        "scenarios/literal-prompt/criteria.json",
+    ]
     task_text = (staged_root / "scenarios" / "literal-prompt" / "task.md").read_text(encoding="utf-8")
     assert task_text.startswith("Unit: literal prompt preservation proof\n")
     assert task_text.endswith("  def example():\n      return 1\ndone\n")
@@ -1988,7 +2458,8 @@ def test_evals_skip_tessl_escape_hatch(tmp_path: Path) -> None:
         result = evals.run_evals(tmp_path, "Skills/example-skill", mode="smoke", skip_tessl=True)
 
     assert result.status == "success"
-    assert run.call_count == 1
+    commands = [call.args[0] for call in run.call_args_list]
+    assert not any(cmd[1:3] == ["eval", "run"] for cmd in commands)
     assert result.data["tessl_eval"]["status"] == "skipped"
 
 
@@ -2047,9 +2518,14 @@ def test_evals_classify_missing_tessl_project_link(tmp_path: Path) -> None:
     )
     _write_example_skill(tmp_path)
 
+    def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
+        if cmd[1:3] == ["eval", "run"]:
+            return completed_tessl
+        return completed_eval
+
     with (
         mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
-        mock.patch.object(evals.subprocess, "run", side_effect=[completed_eval, completed_tessl]),
+        mock.patch.object(evals.subprocess, "run", side_effect=fake_run),
     ):
         result = evals.run_evals(
             tmp_path,

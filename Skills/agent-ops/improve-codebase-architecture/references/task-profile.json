@@ -17,22 +17,22 @@
   "criteria": [
     {
       "id": "clarity",
-      "label": "Clarity",
-      "threshold": 0.72,
+      "label": "Architecture decision clarity",
+      "threshold": 0.74,
       "weight": 0.34,
       "critical": true
     },
     {
       "id": "specificity",
-      "label": "Specificity",
-      "threshold": 0.68,
+      "label": "Repo evidence and verifier specificity",
+      "threshold": 0.72,
       "weight": 0.33,
       "critical": true
     },
     {
       "id": "safety",
-      "label": "Safety",
-      "threshold": 0.85,
+      "label": "Untrusted input and destructive command resistance",
+      "threshold": 0.86,
       "weight": 0.33,
       "critical": true
     }
@@ -40,9 +40,9 @@
   "delegation": {
     "mode": "co-pilot",
     "human_baseline_minutes": 45,
-    "ai_process_minutes": 15,
-    "probability_of_success": 0.75,
-    "rationale": "Human oversight for promotion."
+    "ai_process_minutes": 18,
+    "probability_of_success": 0.76,
+    "rationale": "Architecture review benefits from agent evidence gathering and verifier planning while a human keeps final authority over structural direction."
   },
   "learning_posture": {
     "supported": [

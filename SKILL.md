@@ -20,10 +20,10 @@ Do not hand-edit runtime projections.
 - [Skills System](#skills-system)
 
 ## Summary
-- `total_skills`: 80
-- `catalog_source`: default user-visible catalog surface
+- `total_skills`: 81
+- `catalog_source`: auto-resolved catalog source
 - `visibility`: default
-- `policy_identity`: fc91c0972b133d30
+- `policy_identity`: f766f7003e860bce
 
 ## Catalog
 
@@ -32,7 +32,7 @@ Do not hand-edit runtime projections.
 - `agents-md` — Use when reviewing, creating, shrinking, or refactoring AGENTS.md agent instructions, agent config files, routing rules, or repository guidance that need scoped routing, dedupe, contradiction fixes, progressive disclosure, and cleaned instruction surfaces.
 - `alignment-checkpoint` — Create, review, and validate an alignment checkpoint. Use when a request is ambiguous, high-stakes, multi-step, or requires explicit approval before tool use.
 - `autofix` — Apply approved fixes for unresolved CodeRabbit review comments, Codex P1-P3 findings, PR feedback, and code review issues with validation evidence. Use when asked to address review comments, fix review findings, clear unresolved comments, or autofix PR feedback.
-- `autoresearch` — Run bounded automated experiment iterations by recording baselines, applying hypothesis patches, comparing metrics, protecting regression guards, and deciding keep, discard, rollback, or block. Use when autoresearch is named or a repo/skill needs evidence-backed research, metric tracking, or safe optimisation loops.
+- `autoresearch` — Run bounded automated experiment iterations by recording baselines, applying hypothesis patches, comparing metrics, protecting regression guards, and deciding keep, discard, rollback, or block. Use when $autoresearch is named or a repo/skill needs evidence-backed research, metric tracking, or safe optimisation loops.
 - `bash-hygiene` — Review, create, and validate Bash scripts when shell work needs strict mode, quoting safety, portability, or interpreter-compatible behavior.
 - `biome-linting` — Analyze, fix, and validate Biome linting workflows. Use when JavaScript or TypeScript projects need Biome commands, diagnostics, safe fixes, or CI lint gates.
 - `bootstrap` — Create, diagnose, and validate a local dev bootstrap. Use when the user asks to clone a repo, install toolchains, install dependencies, and prove the project runs.
@@ -54,7 +54,7 @@ Do not hand-edit runtime projections.
 - `go` — Best practices for working with Go codebases. Use when writing, debugging, or exploring Go code, including reading dependency sources and documentation.
 - `goal-governor` — Use when a Codex goal/task is stuck, hanging, not finishing, or needs status. Reads goal.md, state.yaml, receipts.jsonl; syncs reported status with board files; fixes invalid state.yaml; classifies blockers; decides done. Not for ordinary reviews or one-off fixes.
 - `improve-agent-native` — Check if a repository or agent-facing product surface is ready for AI coding agents. Use when you need to audit repo agent compatibility, review AGENTS.md, find missing test/build commands, evaluate docs quality, assess tool/action parity, or produce a file-evidence scorecard with specific fixes.
-- `improve-codebase-architecture` — Use when reviewing or improving codebase architecture needs deeper module boundaries, clearer context language, better interfaces, stronger testability, or Linear-backed decisions.
+- `improve-codebase-architecture` — Review code architecture, code quality, dependency graphs, coupling, technical debt, modularization, ownership, and test seams. Use when refactors, restructuring, tightly coupled code, or architecture decisions need proof-backed options.
 - `insight-report` — Generate local Codex usage reports. Use when users ask for usage analytics, weekly insights, session summaries, telemetry patterns, or prompting help.
 - `javascript-pro` — Create and debug modern JavaScript code with ES6+, async patterns, and Node.js APIs. Use when working on runtime behavior, promises, or browser and Node compatibility.
 - `keep-codex-fast` — Diagnose Codex Desktop or CLI local-state bloat and safe recovery options. Use when sessions, archived history, logs, worktrees, or stale Codex config may be making Codex feel slow.
@@ -65,6 +65,7 @@ Do not hand-edit runtime projections.
 - `production-deployment` — Plan, execute, and validate production deployments when rollout safety, health checks, observability, rollback, or production-parity verification is required.
 - `project-brain` — Create, validate, and repair Project Brain .harness memory files when setting up Project Brain, saving repo learnings, recording decisions, or preserving quality rules.
 - `rust-pro` — Create and review Rust 1.75+ systems code with ownership-safe async patterns and production error handling. Use when building or debugging Rust services that need performance and reliability.
+- `sdk-scenario-generator` — Create, review, and maintain gold-standard Skills SDK eval scenarios before internal evals, dry Tessl staging, or live private Tessl scoring. Use when creating or updating a skill, importing KnowledgeOS or Tessl scenario suggestions, checking scenario drift, hardening evals that are too easy, or preparing a minimum 20-scenario live Tessl set.
 - `session-workflow-miner` — Analyze recent Codex session evidence for repeated manual workflows and route them to skills, subagents, validators, or no artifact when Jamie asks what he keeps doing manually.
 - `simplify` — Review changed code for behavior-preserving simplification by removing dead code, eliminating duplication, extracting shared helpers, improving names, and tightening tests. Use when a user asks for code review, refactor, clean up PR, simplify, tidy up code, review my changes, or maintainability cleanup before merge.
 - `skill-pr-delivery` — Ship skill changes to PRs when Codex skills need source edits, rooted sync, strict audit, reviewer evidence, commit, push, and PR status.

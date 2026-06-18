@@ -23,7 +23,7 @@
   do not carry the repo-local `PREK_HOME` patch.
 - `bash Infrastructure/scripts/validation-and-linting/verify-work.sh` (project-local default scope)
 - `bash Infrastructure/scripts/validation-and-linting/verify-work.sh --workspace-governance` (explicit workspace scope)
-- `bash Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh` (blocks direct edits to runtime/projection surfaces including `.agents/**`, `Plugins/cache/**`, and `runtime/**`)
+- `bash Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh` (blocks direct edits to runtime/projection surfaces including `.agents/skills/**`, `.agents/plugins-runtime/cache/**`, `Plugins/cache/**`, and `runtime/**`)
   - projection-refresh exception only: `PATH_OWNERSHIP_ALLOW_CACHE_WRITES=1 bash Infrastructure/scripts/validation-and-linting/check_path_ownership_boundaries.sh`
   - default scope is staged diff locally and base-ref diff in CI; override with `PATH_OWNERSHIP_GUARD_SCOPE`.
 - `bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`
@@ -119,21 +119,22 @@ the canonical eval format changes.
 The live Tessl workflow is a separate explicit lane. Use
 `./bin/ask evals run <skill-path> --tessl-live-private --tessl-workspace <workspace>`
 only when the operator asks for live private Tessl evidence. This lane must
-stage a tile-shaped package under
-`/tmp/ask-tessl-live/<skill-path>-<sha12>`, write `tile.json` with
-`"name": "<workspace>/<tile-name>"` and `"private": true`, include the skill
-through the `skills` manifest field, and convert eval cases into
+stage a plugin-shaped package under
+`/tmp/ask-tessl-live/<skill-path>-<sha12>`, write
+`.tessl-plugin/plugin.json` with `"name": "<workspace>/<plugin-name>"`,
+`"private": true`, and `"skills": "./skills/"`, copy the skill package to
+`skills/<skill-name>/SKILL.md`, omit `tile.json`, and convert eval cases into
 `evals/<case-id>/task.md` plus `evals/<case-id>/criteria.json` using Tessl's
 `weighted_checklist` criteria shape. Include local `references/**` support
-files so Tessl tile validation can resolve links from `SKILL.md`. Run
-`tessl eval run --json <staged-tile-json>`; the workspace is enforced by the
-private `tile.json` name `<workspace>/<tile-name>`, because Tessl tile evals
-reject `--workspace`. Stage `tessl.json` for the same
-`<workspace>/<tile-name>` identity because Tessl saves eval runs to a project
-even for tile eval sources. Before invoking Tessl evals, the wrapper must check
-that project link, relink an existing project first, and create the project only
-when needed. Start with `--tessl-live-dry-run` when proving package shape
-or policy before any live service call.
+files beside the staged skill so Tessl plugin discovery and skill-relative links
+resolve from the plugin root. Run
+`tessl eval run --json --workspace <workspace> <staged-plugin-dir>`.
+Stage `tessl.json` for the same
+`<workspace>/<plugin-name>` identity because Tessl saves eval runs to a project.
+Before invoking Tessl evals, the wrapper must check that project link, relink an
+existing project first, and create the project only when needed. Start with
+`--tessl-live-dry-run` when proving package shape or policy before any live
+service call.
 
 For plugin-owned skills under `Plugins/<plugin-id>/skills/**`, `<tile-name>`
 is the plugin id, not the leaf skill directory. For example, live private

@@ -1,113 +1,153 @@
 schema_version: 2
 skill: improve-codebase-architecture
-purpose: "Recommend proof-backed architecture moves from fresh repo evidence and shared user design decisions."
+purpose: "Proof-backed architecture decisions from current repo evidence."
 triggers:
-  - "Architecture, module-boundary, interface, design-quality, or testability review."
-  - "Context-language, durable terminology, or Linear-backed design decision."
+  - architecture review
+  - dependency graph
+  - modularization
+  - ownership boundary
+  - patch-vs-interface decision
 non_goals:
-  - "Ordinary behavior-preserving cleanup."
-  - "Narrow bug fixes or local test repairs."
-  - "First-draft skill or plugin authoring."
-  - "Architecture ceremony without current repo evidence."
+  - one-line bug fix
+  - plain formatting cleanup
+  - dependency upgrade without design pressure
 inputs:
+  - target_path
   - user_request
-  - target_repo_or_area
-  - ubiquitous_language_surface
-  - harness_decision_surface
-  - fresh_evidence
-  - tracker_or_workpad
-  - reference_texts
+  - AGENTS.md
+  - CODESTYLE.md
+  - callers
+  - tests
+  - public_interfaces
+  - decision_records
+  - tracker_context
 outputs:
-  - schema_version
-  - capability_surface
-  - complexity_symptoms
   - fresh_evidence
   - missing_evidence
-  - reviewer_coverage
-  - experience_lenses
   - agent_safe_boundary
   - patch_design
   - interface_design
-  - grilling_loop
   - request_user_input
-  - selected_design_decision
   - recommended_first_move
   - tracer_proof
-  - decision_surface
   - validation
+  - decision_surface
   - confidence
-agent_safe_boundary:
-  statuses: [safe, risky, blocked]
-  required_fields: [status, owner_layer, public_interface, seam_tests, caller_contract, blast_radius, blocker]
-  safe_requires: "Stable public interface, hidden implementation, caller-observable seam/regression proof, and an edit mostly inside one owner layer."
-  risky_when: "Tests are weak, callers depend on hidden behavior, imports route around the public surface, or the layer map is unclear."
-  blocked_when: "No public interface, no tracer path, unknown callers, missing test command, or unresolved ownership."
-decision_surface:
-  required_fields: [location, write_status, blocker]
-  location: "Concrete .harness path, Linear issue/comment, or repo-approved decision surface."
-  write_status: "written, blocked, or not_applicable with exact reason."
-capability_surface:
-  required_fields: [repo_read, repo_write, reviewer_agents, request_user_input, tracker_or_decision_write]
-reviewer_coverage:
-  expected_roles: [agent-native-reviewer, api-contract-reviewer, architecture-strategist]
-  unavailable_behavior: "Continue locally and mark the role blocked with the exact missing capability or runtime blocker."
-experience_lenses:
-  reference: "../../../../Infrastructure/references/software-literature-expert-lens-pack.md"
-  companion_map: "../../../../Infrastructure/references/software-literature-skill-expertise-map.md"
-  max_selected: 4
-  default_architecture_lenses: [Deep Module Examiner, Architectural Pattern Cartographer, Pattern Catalog Skeptic, Pragmatic Delivery Partner]
-  conditional_lenses: [Data-Intensive Systems Critic, Domain Language Guardian, Integration Pattern Mechanic, Refactoring Catalog Operator, Micro-Refactoring Surgeon, XP Feedback Coach]
-  validity_rule: "Use literature lenses as experience-derived questions over local repo evidence, never as authority by themselves."
-  required_fields: [selected, mode, evidence_trigger, findings, blocked_or_not_applicable_reason]
-grilling_loop:
-  statuses: [active, complete, blocked]
-  required_fields: [status, current_question, recommended_answer, decision_dependency, answered_by_code_exploration, next_question_blocked_until_user_feedback]
-  one_question_rule: "Ask at most one grilling question per response and wait for feedback before continuing."
-  explore_first_rule: "If code, tests, docs, vocabulary, or .harness evidence can answer the question, explore instead of asking."
-  blocked_when: "request_user_input is unavailable, the decision dependency is unknown, or user feedback is required before the next branch."
+commands:
+  - "./bin/ask skills audit Skills/agent-ops/improve-codebase-architecture --level strict --json --robot"
+  - "./bin/ask skills package verify Skills/agent-ops/improve-codebase-architecture --json --robot"
+  - "uv run --python 3.12 --with pyyaml --with jsonschema python Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py --skill Skills/agent-ops/improve-codebase-architecture --format json"
+  - "./bin/plugin-eval analyze Skills/agent-ops/improve-codebase-architecture --format json"
+  - "./bin/ask evals run Skills/agent-ops/improve-codebase-architecture --mode smoke --tessl-live-private --tessl-workspace skills-sdk --json --robot"
+permission_profile:
+  filesystem:
+    read:
+      - target_path
+      - AGENTS.md
+      - CODESTYLE.md
+      - docs
+      - tests
+      - references
+    write:
+      - target_path
+  network:
+    required: false
+    allowed_when: "Only for explicitly requested external validation lanes such as private Tessl workspace scoring."
+evidence_policy:
+  summary: "Local repo files decide architecture claims; KnowledgeOS capsules and eval fixtures are evidence assets, not runtime authority."
+  required:
+    - fresh local evidence before recommendation
+    - caller-visible proof before safe boundary claim
+    - explicit user choice before structural patch-vs-interface selection
+    - exact validation commands with pass, fail, or blocked outcomes
+budget_classification:
+  runtime_context:
+    - references/architecture-practice-contract.md
+    - references/classification-cheatsheet.md
+    - references/deepening-workflow.md
+    - references/discovery-interview.md
+    - references/output-schema.md
+  evidence_assets:
+    - references/contract.yaml
+    - references/evals.yaml
+    - references/evals/**
+    - references/examples.md
+    - references/scenario-review.md
+    - references/knowledge-demand.yaml
+    - references/source-context.yaml
+    - references/task-profile.json
+    - references/knowledge-capsule.manifest.yaml
+    - references/knowledge-capsules/**
+tessl_scenario_policy:
+  structure_only: false
+  version_policy:
+    live_run_package_changes_require_semver_bump: true
+    current_live_version: "0.1.6"
+    rule: "Before a live Tessl run, bump metadata.version when SKILL.md, references/evals.yaml, references/evals/*.md, references/contract.yaml, or runtime-context references changed since the previous live run. Identical retry runs may reuse the same version."
+  current_live_readiness:
+    package_version: "0.1.6"
+    status: pending_matching_live_run
+    reason: "No recorded live Tessl run in this contract proves package version 0.1.6. Do not treat superseded 0.1.1 evidence as active readiness."
+    required_evidence: "Record the matching private Tessl run id, package version, scenario count, usage score, baseline score, improvement, and CLI recomputation before marking 0.1.6 completed_ready."
+  live_private_requires:
+    - skill_owned_cases: references/evals.yaml
+    - generated_reviewed_fixtures: references/evals/*.md
+  generated_before_run: true
+  min_gold_scenarios: 20
+  current_reviewed_scenarios: 26
+  tessl_run_budget:
+    workspace_run_limit: 300
+    reserve_runs: 20
+    action_when_remaining_unknown: "Use dry-run/local validation only until remaining live-run capacity is confirmed."
+    action_when_at_or_below_reserve: "Block nonessential live Tessl runs and preserve capacity for remediation."
+  scenario_generation_lane: "./bin/ask evals prepare-tessl-scenarios Skills/agent-ops/improve-codebase-architecture --tessl-workspace skills-sdk --json --robot"
+  scenario_drift_review:
+    required_after_skill_change: true
+    review_surfaces:
+      - SKILL.md
+      - references/evals.yaml
+      - references/evals/*.md
+      - references/scenario-review.md
+      - references/knowledge-capsules/**
+    review_decisions:
+      - keep
+      - update
+      - add
+      - remove
+    must_finish_before:
+      - "./bin/ask evals run Skills/agent-ops/improve-codebase-architecture --mode smoke --tessl-live-private --tessl-workspace skills-sdk --json --robot"
+  last_proven_live_run:
+    run_id: "019ed7c8-dda2-744a-ab7b-9cf7a22fb1fa"
+    workspace: skills-sdk
+    package_version: "0.1.1"
+    status: completed_ready_superseded
+    scenarios: 20
+    usage_score: 0.98
+    baseline_score: 0.97
+    improvement: 1.01
+    cli_checklist_usage_score: 0.9875
+    cli_checklist_baseline_score: 0.975
+    cli_checklist_improvement: 1.0128
+    readiness_reason: "Usage was above the 90% minimum and above baseline in both Tessl UI card evidence and CLI recomputed checklist evidence for package version 0.1.1 only."
+    superseded_by_package_version: "0.1.2"
+    superseded_reason: "The skill behavior, classification references, output schema, and canonical lift scenarios changed after this run; the run remains evidence for 0.1.1 only."
+  prior_transition_run:
+    run_id: "019ed79f-c74a-75e8-b945-933f4f418b65"
+    workspace: skills-sdk
+    status: completed_not_ready
+    scenarios: 20
+    usage_score: 0.9375
+    baseline_score: 0.9625
+    improvement: 0.974
+    reason_not_ready: "Above 90% and 20 scenarios, but still below baseline."
+    weak_scenarios:
+      - explicit route
+      - safety
 risks:
   - over_triggering
   - untrusted_input
-  - validation_drift
   - premature_redesign
-  - autonomous_design_choice
-  - untested_deep_module
-  - complexity_displacement
-  - runtime_visibility_overclaim
-  - undiscoverable_decision
-  - vocabulary_drift
-  - adr_relitigation
-  - multi_question_grilling
-  - premature_interface_selection
-safety:
-  untrusted_inputs: true
-  redact_secrets: true
-  destructive_commands: false
-  generated_projection_edits_forbidden: true
-collaboration:
-  request_user_input_required: true
-  required_before:
-    - "selecting patch_design versus interface_design for structural work"
-    - "changing interfaces, seams, adapters, ownership, or dependency strategy"
-    - "changing durable terminology, ADRs, Linear decisions, or decision records"
-    - "choosing validation strategy, tracer proof, rollback, or implementation plan for a deepening move"
-  unavailable_behavior: "Return request_user_input as blocked with the exact design decision that requires user input; do not select the design path autonomously."
-validation:
-  - strict_skill_audit
-  - skill_gate
-  - openai_skill_format
-  - smoke_evals_when_available
-  - release_evals_when_available
-  - package_boundary_checks
-  - plugin_eval
-  - tracer_proof_or_blocker
-  - request_user_input_checkpoint_or_blocker
-  - agent_safe_boundary_classification
-  - reviewer_coverage_or_blocker
-  - experience_lenses_or_not_applicable
-  - decision_surface_location_or_blocker
-  - vocabulary_surface_or_blocker
-  - harness_decision_surface_or_blocker
-  - grilling_loop_state_or_blocker
-observability: "Report exact files inspected, commands run, pass/fail/blocked/not applicable outcomes, and blocked validators with concrete blocker text."
-rollback_procedure: "Revert scoped skill-package edits, then rerun strict audit, skill gate, OpenAI format, evals where available, boundary checks, and Plugin Eval."
+  - treating generated projections as canonical
+  - claiming architecture safety from tests alone
+observability: "Report file and line evidence, dependency direction, caller-visible behavior, exact verifier output, and blocker class."
+rollback_procedure: "Revert scoped edits, restore prior public interface behavior, and rerun the narrowest verifier plus package gates."

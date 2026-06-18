@@ -162,6 +162,89 @@ def _find_section_text(body: str, aliases: Sequence[str]) -> str:
     return ""
 
 
+_CANONICAL_SKILLS_SDK_SECTION_ORDER: List[Tuple[str, str, List[str]]] = [
+    ("philosophy", "Philosophy", ["philosophy", "principles", "mental model"]),
+    ("when_to_use", "When To Use", ["when to use", "usage", "triggers", "invocation"]),
+    ("avoid", "Avoid", ["avoid", "when not to use", "anti-trigger"]),
+    ("inputs", "Inputs", ["inputs", "preconditions", "assumptions", "requirements"]),
+    ("outputs", "Outputs", ["outputs", "output format", "deliverables", "result"]),
+    ("procedure", "Procedure/Workflow", ["workflow", "procedure", "steps", "process"]),
+    ("constraints", "Constraints", ["constraints", "safety", "safety boundaries", "approval boundaries", "security constraints"]),
+    ("execution_boundaries", "Execution Boundaries", [
+        "execution boundaries",
+        "boundary map",
+        "ownership boundaries",
+        "codex harness placement",
+        "command boundaries",
+        "human approval",
+    ]),
+    ("failure_mode", "Failure Mode", [
+        "failure mode",
+        "failure modes",
+        "failure handling",
+        "failure behavior",
+        "repair behavior",
+        "repair loop",
+        "stopping conditions",
+        "rollback path",
+        "handoff rules",
+    ]),
+    ("validation", "Validation", ["validation", "checks", "verify", "acceptance", "gates"]),
+    ("gotchas", "Gotchas", ["gotchas", "operational traps", "known traps", "known failure modes", "false confidence risks"]),
+    ("antipatterns", "Anti-Patterns", ["anti-pattern", "anti patterns", "pitfalls"]),
+    ("examples", "Examples", ["examples", "example prompts"]),
+    ("progressive_disclosure", "Progressive Disclosure/References", ["progressive disclosure", "references"]),
+]
+
+
+def _matches_section_alias(title: str, aliases: Sequence[str]) -> bool:
+    normalized = re.sub(r"[^a-z0-9]+", " ", title.lower()).strip()
+    for alias in aliases:
+        normalized_alias = re.sub(r"[^a-z0-9]+", " ", alias.lower()).strip()
+        if normalized == normalized_alias or normalized_alias in normalized:
+            return True
+    return False
+
+
+def check_canonical_header_order(doc: SkillDoc) -> List[Finding]:
+    out: List[Finding] = []
+    h2s = _h2_titles(doc.body)
+    first_positions: Dict[str, Tuple[int, str, str]] = {}
+
+    for index, title in enumerate(h2s):
+        for key, canonical, aliases in _CANONICAL_SKILLS_SDK_SECTION_ORDER:
+            if key not in first_positions and _matches_section_alias(title, aliases):
+                first_positions[key] = (index, title, canonical)
+                break
+
+    seen: List[Tuple[str, str, int]] = []
+    previous_index = -1
+    previous_canonical = ""
+    for key, canonical, _aliases in _CANONICAL_SKILLS_SDK_SECTION_ORDER:
+        position = first_positions.get(key)
+        if position is None:
+            continue
+        index, actual_title, _ = position
+        if index < previous_index:
+            actual_order = " > ".join(title for _key, title, _index in sorted(seen + [(key, actual_title, index)], key=lambda item: item[2]))
+            expected_order = " > ".join(label for _key, label, _aliases in _CANONICAL_SKILLS_SDK_SECTION_ORDER if _key in first_positions)
+            out.append(Finding(
+                Level.FAIL,
+                "SEC_CANONICAL_HEADER_ORDER",
+                (
+                    f"SKILL.md headers must follow the canonical Skills SDK order. "
+                    f"'{actual_title}' appears before '{previous_canonical}'."
+                ),
+                evidence=f"actual: {actual_order}; expected: {expected_order}",
+            ))
+            return out
+        previous_index = index
+        previous_canonical = canonical
+        seen.append((key, actual_title, index))
+
+    return out
+
+
 def _code_fence_blocks(body: str) -> List[str]:
     blocks: List[str] = []
     for m in re.finditer(r"```[^\n]*\n(.*?)\n```", body, flags=re.DOTALL):
@@ -1721,6 +1804,7 @@ def run_gate(
     findings.extend(check_codex_frontmatter(doc, min_desc_len=min_desc_len))
     findings.extend(check_progressive_disclosure(doc, max_lines=max_lines, max_codeblock_lines=max_codeblock_lines))
     findings.extend(check_required_sections(doc, require_philosophy=require_philosophy))
+    findings.extend(check_canonical_header_order(doc))
     findings.extend(check_workflow_fail_fast(doc, require_fail_fast=require_fail_fast))
     findings.extend(check_redaction_language(doc, require_redaction=require_redaction))
     findings.extend(check_schema_version_signal(doc))

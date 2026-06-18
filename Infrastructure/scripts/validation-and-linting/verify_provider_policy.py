@@ -8,18 +8,32 @@ import fnmatch
 import json
 import os
 from pathlib import Path
+from collections.abc import Iterator
 from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_POLICY = REPO_ROOT / "Infrastructure" / "config" / "provider-policy.json"
 DEFAULT_EXCLUDED_DIRS = {
+    ".cache",
     ".git",
     ".mypy_cache",
     ".pytest_cache",
     ".ruff_cache",
     ".venv",
     "__pycache__",
+    "cache",
     "node_modules",
+}
+DEFAULT_EXCLUDED_PREFIXES = {
+    ".agents/plugins-runtime/cache",
+    ".agents/skills",
+    ".harness/artifacts",
+    ".skillsets",
+    ".workouts",
+    "Infrastructure/artifacts",
+    "artifacts",
+    "plugins/cache",
+    "Plugins/cache",
 }
 
 
@@ -77,16 +91,27 @@ def _matches_allowed(rel_path: str, patterns: list[str]) -> bool:
     return False
 
 
-def _iter_repo_paths() -> list[str]:
-    paths: list[str] = []
+def _is_excluded_prefix(rel_path: str) -> bool:
+    return any(rel_path == prefix or rel_path.startswith(f"{prefix}/") for prefix in DEFAULT_EXCLUDED_PREFIXES)
+
+
+def _iter_repo_paths() -> Iterator[str]:
     for root, dirnames, filenames in os.walk(REPO_ROOT, topdown=True):
-        dirnames[:] = [name for name in dirnames if name not in DEFAULT_EXCLUDED_DIRS]
         root_path = Path(root)
-        for dirname in dirnames:
-            paths.append(_rel(root_path / dirname))
-        for filename in filenames:
-            paths.append(_rel(root_path / filename))
-    return sorted(paths)
+        rel_root = _rel(root_path) if root_path != REPO_ROOT else ""
+        kept_dirnames: list[str] = []
+        for dirname in sorted(dirnames):
+            rel_dir = f"{rel_root}/{dirname}" if rel_root else dirname
+            if dirname in DEFAULT_EXCLUDED_DIRS or _is_excluded_prefix(rel_dir):
+                continue
+            kept_dirnames.append(dirname)
+            yield rel_dir
+        dirnames[:] = kept_dirnames
+        for filename in sorted(filenames):
+            rel_file = f"{rel_root}/{filename}" if rel_root else filename
+            if _is_excluded_prefix(rel_file):
+                continue
+            yield rel_file
 
 
 def build_report(policy_path: Path = DEFAULT_POLICY) -> dict[str, Any]:

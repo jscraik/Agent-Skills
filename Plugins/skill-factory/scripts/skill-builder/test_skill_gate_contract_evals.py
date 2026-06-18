@@ -15,6 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from skill_gate import (
     Level,
     SkillDoc,
+    check_canonical_header_order,
     check_contract_and_evals,
     check_required_sections,
     check_workflow_fail_fast,
@@ -47,6 +48,55 @@ metadata:
 
         self.assertTrue(findings)
         self.assertFalse([finding for finding in findings if finding.level == Level.FAIL])
+
+    def test_canonical_header_order_accepts_sdk_order(self) -> None:
+        doc = SkillDoc(
+            path=Path("SKILL.md"),
+            raw="",
+            frontmatter={},
+            body=(
+                "# Sample\n\n"
+                "## Philosophy\n\nA.\n"
+                "## When To Use\n\nB.\n"
+                "## Avoid\n\nC.\n"
+                "## Inputs\n\nD.\n"
+                "## Outputs\n\nE.\n"
+                "## Workflow\n\nF.\n"
+                "## Security Constraints\n\nG.\n"
+                "## Execution Boundaries\n\nH.\n"
+                "## Failure Mode\n\nI.\n"
+                "## Validation\n\nJ.\n"
+                "## Gotchas\n\nK.\n"
+                "## Anti-Patterns\n\nL.\n"
+                "## Examples\n\nM.\n"
+            ),
+            fm_start_line=1,
+            fm_end_line=1,
+        )
+
+        self.assertEqual(check_canonical_header_order(doc), [])
+
+    def test_canonical_header_order_flags_inputs_before_when_to_use(self) -> None:
+        doc = SkillDoc(
+            path=Path("SKILL.md"),
+            raw="",
+            frontmatter={},
+            body=(
+                "# Sample\n\n"
+                "## Philosophy\n\nA.\n"
+                "## Inputs\n\nD.\n"
+                "## When To Use\n\nB.\n"
+                "## Outputs\n\nE.\n"
+                "## Workflow\n\nF.\n"
+            ),
+            fm_start_line=1,
+            fm_end_line=1,
+        )
+
+        findings = check_canonical_header_order(doc)
+
+        self.assertEqual([finding.code for finding in findings], ["SEC_CANONICAL_HEADER_ORDER"])
+        self.assertEqual(findings[0].level, Level.FAIL)
 
     def test_require_fail_fast_fails_when_validation_section_absent(self) -> None:
         doc = SkillDoc(

@@ -1,0 +1,86 @@
+schema_version: "2.0"
+skill_name: sdk-scenario-generator
+purpose: "Create and maintain Skills SDK eval scenarios that are realistic, difficult, and Tessl-ready without answer leakage."
+triggers:
+  - creating or updating a skill that will run internal or Tessl evals
+  - importing KnowledgeOS or Tessl-generated scenario suggestions
+  - reviewing scenario drift after a skill behavior change
+  - diagnosing live Tessl scores that tie or trail baseline
+inputs:
+  - target_skill_path
+  - target_skill_contract
+  - existing_evals
+  - knowledgeos_extraction_optional
+  - tessl_scenario_drafts_optional
+  - previous_tessl_runs_optional
+  - plugin_eval_report_optional
+outputs:
+  - scenario_inventory
+  - reviewed_scenario_patches
+  - anti_easy_findings
+  - tessl_run_budget_evidence
+  - live_readiness_decision
+non_goals:
+  - generating easy scenarios to improve the score cosmetically
+  - claiming behavioral readiness from structure-only package checks
+  - publishing or uploading Tessl packages from scenario preparation
+risks:
+  - answer leakage in user-visible task text
+  - baseline tie or baseline win misreported as success
+  - stale scenarios after skill behavior changes
+  - live Tessl run budget exhaustion
+permission_profile:
+  network: false
+  filesystem:
+    read:
+      - target skill package
+      - KnowledgeOS extraction
+      - Tessl scenario drafts
+      - prior eval artifacts
+    write:
+      - target skill references/evals.yaml
+      - target skill references/evals/*.md
+      - target skill references/scenario-review.md
+budget_classification:
+  evidence_assets:
+    - references/gold-scenario-contract.md
+    - references/evals.yaml
+  runtime_context:
+    - SKILL.md
+tessl_scenario_policy:
+  structure_only: false
+  min_gold_scenarios: 20
+  live_private_min_usage_score: 0.90
+  live_private_must_not_underperform_baseline: true
+  workspace_run_limit: 300
+  workspace_run_limit_source: operator_provided_limit
+  remediation_reserve_runs: 20
+  capacity_preflight:
+    preferred_command: "tessl eval list --json --workspace <workspace> --limit 300"
+    if_unknown: "block_nonessential_live_scoring"
+  scenario_drift_review:
+    required_after_skill_change: true
+    review_surfaces:
+      - SKILL.md
+      - references/contract.yaml
+      - references/evals.yaml
+      - references/evals/*.md
+      - references/knowledge-capsules/**
+      - previous_tessl_runs
+    review_decisions:
+      - keep
+      - update
+      - add
+      - remove
+commands:
+  skills_audit: "./bin/ask skills audit Skills/agent-ops/sdk-scenario-generator --level strict --json --robot"
+  external_review: "./bin/ask skills external-review Skills/agent-ops/sdk-scenario-generator --json --robot"
+  package_verify: "./bin/ask skills package verify Skills/agent-ops/sdk-scenario-generator --json --robot"
+  smoke_eval: "./bin/ask evals run Skills/agent-ops/sdk-scenario-generator --mode smoke --json --robot"
+  plugin_eval: "./bin/plugin-eval analyze Skills/agent-ops/sdk-scenario-generator --format json"
+conditional_commands:
+  prepare_tessl_scenarios: "./bin/ask evals prepare-tessl-scenarios Skills/agent-ops/sdk-scenario-generator --tessl-workspace skills-sdk --json --robot"
+  tessl_dry_run_after_ladder: "./bin/ask evals run Skills/agent-ops/sdk-scenario-generator --mode smoke --tessl-live-private --tessl-workspace skills-sdk --tessl-live-dry-run --json --robot"
+readiness_blockers:
+  prepare_tessl_scenarios: "blocked until Tessl workspace auth and project link are available"
+  tessl_dry_run: "blocked until reviewed references/evals/*.md fixtures and scenario-sources.json prove at least 20 gold-standard scenarios"

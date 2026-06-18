@@ -380,7 +380,7 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertEqual(closeout["changed_files"], [])
         self.assertEqual(closeout["next_command"], "./bin/ask repo status --json --robot")
 
-    def test_closeout_changed_skill_source_requires_sync_before_validation(self) -> None:
+    def test_closeout_changed_skill_source_requires_handle_validation(self) -> None:
         changed_files = ["Skills/product-strategy/example/SKILL.md"]
         with patch("ask.commands.repo_impl.collect_changed_files", return_value=changed_files), patch(
             "ask.commands.repo_impl.repo_doctor",
@@ -393,6 +393,12 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertFalse(closeout["commit_readiness"]["ready"])
         self.assertIn("sync_required", closeout["commit_readiness"]["blockers"])
         self.assertTrue(closeout["sync"]["needed"])
+        self.assertFalse(closeout["sync"]["flat_source_projection_present"])
+        self.assertEqual(
+            closeout["sync"]["commands"],
+            ["./bin/ask skills sync --scope workspace --projection flat --json --robot"],
+        )
+        self.assertEqual(closeout["sync"]["validation_commands"], [COMMAND_HANDLE_CHECK_COMMAND])
         self.assertEqual(
             closeout["next_command"],
             "./bin/ask skills sync --scope workspace --projection flat --json --robot",
@@ -415,7 +421,7 @@ class TestAskRepoDoctor(unittest.TestCase):
             "Plugins/harness-engineering/references/xp-operating-contract.md --json --robot",
         )
 
-    def test_closeout_changed_plugin_skill_requires_sync(self) -> None:
+    def test_closeout_changed_plugin_skill_requires_handle_validation(self) -> None:
         changed_files = ["Plugins/harness-engineering/skills/goal-governor/SKILL.md"]
         with patch("ask.commands.repo_impl.collect_changed_files", return_value=changed_files), patch(
             "ask.commands.repo_impl.repo_doctor",
@@ -425,7 +431,15 @@ class TestAskRepoDoctor(unittest.TestCase):
 
         closeout = result.data["repo_closeout"]
         self.assertEqual(result.status, "error")
+        self.assertFalse(closeout["commit_readiness"]["ready"])
+        self.assertIn("sync_required", closeout["commit_readiness"]["blockers"])
         self.assertTrue(closeout["sync"]["needed"])
+        self.assertFalse(closeout["sync"]["flat_source_projection_present"])
+        self.assertEqual(
+            closeout["sync"]["commands"],
+            ["./bin/ask skills sync --scope workspace --projection flat --json --robot"],
+        )
+        self.assertEqual(closeout["sync"]["validation_commands"], [COMMAND_HANDLE_CHECK_COMMAND])
         self.assertEqual(
             closeout["next_command"],
             "./bin/ask skills sync --scope workspace --projection flat --json --robot",
@@ -447,6 +461,7 @@ class TestAskRepoDoctor(unittest.TestCase):
         self.assertTrue(closeout["commit_readiness"]["ready"])
         self.assertFalse(closeout["sync"]["needed"])
         self.assertTrue(closeout["sync"]["projection_update_present"])
+        self.assertFalse(closeout["sync"]["flat_source_projection_present"])
         self.assertEqual(closeout["sync"]["commands"], [])
         self.assertEqual(
             closeout["sync"]["validation_commands"],

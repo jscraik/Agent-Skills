@@ -64,6 +64,12 @@ Prefer one evidence-backed repair over broad rewriting. A score is useful only w
 
 Pass only on parsed fields: ask audit/package/release `status == "success"`; external-review lint ok plus score `>= 90` (`95+` target); Tessl live-private usage, the private Tessl workspace/project evaluation lane, `>= max(0.90, baseline)` only when the workspace/project link is available. On failure, patch the first `errors[]`/blocker. Exit code alone never passes.
 
+Before any live-private Tessl score for a created or updated skill, run the SDK scenario-prep lane, use sdk-scenario-generator with the installed Tessl scenario skill to generate bespoke scenarios for that exact skill, review them, and import useful cases into canonical skill assets. The live-private lane must stage both `references/evals.yaml` skill-owned cases and reviewed generated scenarios from `references/evals/*.md`; structure-only package checks are the only explicit exception.
+After every skill change, review scenario drift before live scoring: compare changed triggers, constraints, outputs, references, and behavior claims with `references/evals.yaml` and `references/evals/*.md`, then classify scenarios as keep, update, add, or remove.
+Before live Tessl scoring, bump the skill or plugin package version whenever the staged package changed since the previous live run. Identical retry runs may reuse the same version, but changed SKILL.md, scenarios, contract, or runtime-context references must not be scored under the previous tile version.
+Behavioral skills need at least 20 gold-standard structured scenarios before live Tessl readiness scoring. Generic structure/layout scenarios can prove SDK shape, but bespoke scenarios must prove the skill-specific behavior. Do not pad the count with duplicate, weak, or scoring-mechanics scenarios.
+Before any live Tessl run, check the workspace run budget. Treat 300 live eval runs as the operator-provided limit unless Tessl reports a different operator-approved limit, and preserve a 20-run remediation reserve. If capacity is unknown or below reserve, use dry-run/local gates instead of burning a live run.
+
 ## Repair Map
 
 - Repeated guidance -> delete the duplicate `SKILL.md` sentence; same score gate improves.
@@ -107,11 +113,19 @@ blocker_notes: <only when blocked>
 - Edit canonical skill sources, package-owned references, and eval fixtures only after confirming path ownership.
 - Use repo wrappers first. Patch scripts only when the wrapper failure proves the script is the repair target.
 - Tessl lanes stage controlled copies under `/tmp`; preserve temp evidence and never point Tessl at live repo source.
+- For create/update skill work, do not run live Tessl scoring until bespoke generated scenarios have been prepared, reviewed, imported, and counted in the staged `scenario-sources.json`; use `./bin/ask evals prepare-tessl-scenarios <target> --tessl-workspace <workspace> --json --robot` for the prep lane.
+- When a skill changes, do not reuse the old scenario set blindly; update, add, or remove scenarios so the eval suite still matches the skill contract.
+- For behavioral skill readiness, do not run live Tessl until the canonical scenario set has at least 20 gold-standard structured scenarios. Runs below 20 are transition diagnostics, not readiness proof.
+- Do not run live Tessl when the workspace is near the 300-run limit or would consume the 20-run remediation reserve.
 
 ## Validation
 
 - Fail fast: stop at the first failed gate, do not proceed to later gates, and parse JSON fields instead of exit code alone.
 - Required release evidence: audit/package/release success, external-review lint ok, Tessl review score `>= 90`, and live-private usage `>= max(0.90, baseline)` when the workspace/project link is available.
+- Live-private release evidence also requires scenario-source proof: `scenario-sources.json` must show skill-owned eval cases and reviewed generated fixture cases, unless the package contract explicitly declares a structure-only exception.
+- Live-private release evidence for behavioral skills requires `scenario-sources.json` to show at least 20 gold-standard structured scenarios.
+- Live-private release evidence requires Tessl run-budget proof or an explicit blocker that preserves the 300-run operator-provided workspace limit and 20-run remediation reserve.
+- Live-private release evidence requires scenario drift review after the latest skill change; stale or obsolete scenarios block professional readiness even when the live run completes.
 - References and scripts must be checked when they affect the skill behavior; weak supporting material blocks release claims.
 
 ## Failure Mode
@@ -133,6 +147,7 @@ Return the Output Contract with exact validation commands, outcomes, changed fil
 - Editing only `SKILL.md` while leaving bad references, scripts, or eval fixtures untouched.
 - Creating fresh temp directories by deleting old Tessl evidence.
 - Claiming pass from a completed command when parsed score, baseline, or readiness fields fail.
+- Running live Tessl directly after editing a skill without first refreshing or confirming bespoke generated scenarios for that skill.
 
 ## Examples
 

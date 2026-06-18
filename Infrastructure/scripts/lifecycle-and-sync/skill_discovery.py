@@ -619,6 +619,15 @@ def _category_heading(category: str) -> str:
     return " — ".join(words)
 
 
+def _markdown_heading_slug(heading: str) -> str:
+    slug = heading.strip().lower()
+    slug = re.sub(r"`+", "", slug)
+    slug = re.sub(r"[^\w\s-]", "", slug)
+    slug = re.sub(r"\s+", "-", slug)
+    slug = re.sub(r"-{2,}", "-", slug)
+    return slug.strip("-")
+
+
 def render_index(entries: List[SkillEntry], source: str = "auto", visibility: str = "default") -> str:
     """
     Render a Markdown catalogue of the provided skill entries grouped by category.
@@ -660,8 +669,8 @@ def render_index(entries: List[SkillEntry], source: str = "auto", visibility: st
         "- [Catalog](#catalog)",
     ]
     for category in sorted_categories:
-        slug = category.replace("/", "-").replace(" ", "-").lower()
-        lines.append(f"- [{_category_heading(category)}](#{slug})")
+        heading = _category_heading(category)
+        lines.append(f"- [{heading}](#{_markdown_heading_slug(heading)})")
 
     source_label = {
         "flat": "`.agents/skills` flat runtime view",

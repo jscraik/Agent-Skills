@@ -2,7 +2,7 @@
   "schema_version": "skills-sdk.capability-status.v1",
   "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/capability-status.v1.schema.json",
   "status": "truth_surface",
-  "generated_from": ".harness/specs/2026-06-11-skills-sdk-pu-018-compact-stage-skill-shape-spec.md",
+  "generated_from": ".harness/specs/2026-06-04-skills-sdk-pu-008-capability-truth-spec.md",
   "source_artifacts": [
     ".harness/specs/2026-06-05-skills-sdk-pu-010-receipt-proven-rollback-uninstall-spec.md",
     ".harness/specs/2026-06-06-skills-sdk-pu-012-project-conformance-adoption-gate-spec.md",
@@ -20,6 +20,8 @@
     ".harness/specs/2026-06-11-skills-sdk-pu-017-governed-review-execution-spec.md",
     ".harness/specs/2026-06-11-skills-sdk-pu-018-compact-stage-skill-shape-spec.md",
     ".harness/plan/2026-06-11-skills-sdk-pu-018-compact-stage-skill-shape-plan.md",
+    ".harness/specs/2026-06-17-skills-sdk-pu-020-route-truth-declutter-spec.md",
+    ".harness/plan/2026-06-17-skills-sdk-pu-020-route-truth-declutter-plan.md",
     "artifacts/recommended-skills-sdk-pipeline.html",
     "Docs/goals/skills-sdk-v1-0-product-implementation/state.yaml"
   ],
@@ -236,7 +238,7 @@
         "python3 -m unittest Infrastructure.scripts.testing.test_skill_creator_lifecycle_scaffold -v",
         "python3 -m unittest Infrastructure.scripts.testing.test_sdk_stage_skill_shape_validator -v"
       ],
-      "next_slice": "Define SDK knowledge capsule ingestion only after portable upstream pack export boundaries are specified; PU-018 does not add a KnowledgeOS runtime dependency.",
+      "next_slice": "Keep review execution receipts routed through SDK status truth before broadening reviewer execution or external readiness claims.",
       "notes": "PU-017 materializes required local review artifacts from review handoff receipts. PU-018 locally implements compact governed stage skill shape through validator, scaffold, migrated stage packages, and bounded source-context reference metadata while preserving explicit not-proven lanes for independent approval, CI, PR, review-thread, tracker, and merge-readiness state."
     },
     {
@@ -296,7 +298,7 @@
         "./bin/ask sdk knowledge ingest --extraction /Users/jamiecraik/dev/knowledge-OS/exports/extractions/improve-agent-native --skill Skills/agent-ops/improve-agent-native --apply --run-proof --json --robot",
         "Infrastructure/tests/test_skills_sdk_knowledge_ingest.py"
       ],
-      "next_slice": "Generalize the KnowledgeOS extraction contract into schema-backed no-network fixtures and add runtime projection proof for vendored capsule discoverability.",
+      "next_slice": "After the route-truth declutter slice, add no-network fixture coverage and runtime projection proof for vendored capsule discoverability.",
       "notes": "PU-019 now has a first implemented Skills SDK consumer lane: validate a portable KnowledgeOS extraction, preflight the staged skill package, vendor references into the skill, update capsule routing, and run package proof without making runtime depend on KnowledgeOS."
     },
     {
@@ -368,8 +370,8 @@
       "feature_executed": true,
       "mutation_performed": false,
       "evidence_refs": ["artifacts/recommended-skills-sdk-pipeline.html", ".harness/implementation-notes/2026-06-04-skills-sdk-v1-0-product-implementation-notes.html"],
-      "next_slice": "Hosted explorer publishing remains separate from static local docs.",
-      "notes": "Local browser artifacts exist, but no hosted docs pipeline is claimed."
+      "next_slice": "Keep the HTML artifacts projection-only from SDK capability status before any hosted explorer or docs expansion.",
+      "notes": "Local browser artifacts exist as visual projections of ./bin/ask sdk status; no hosted docs pipeline is claimed."
     },
     {
       "id": "skill_explorer",

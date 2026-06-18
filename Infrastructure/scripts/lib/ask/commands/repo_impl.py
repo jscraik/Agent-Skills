@@ -29,9 +29,12 @@ DOCTOR_SIGNAL_PRIORITY = {
     "package_readiness": 57,
     "repo_surface": 60,
 }
-PACKAGE_READINESS_SENTINEL = "skill-factory-router"
+# Plugin router skills are intentionally hidden from SDK-flat public handle
+# resolution, so closeout must validate package readiness through source truth.
+PACKAGE_READINESS_SENTINEL = "Plugins/skill-factory/skills/skill-factory-router"
 SDK_HANDLE_CHECK_COMMAND = "./bin/ask skills handles --check --no-handles --json --robot"
 COMMAND_HANDLE_CHECK_COMMAND = SDK_HANDLE_CHECK_COMMAND
+SKILLS_SYNC_COMMAND = "./bin/ask skills sync --scope workspace --projection flat --json --robot"
 GENERATED_SURFACE_PREFIXES = (
     ".agents/skills/",
     ".skillsets/",
@@ -1199,15 +1202,11 @@ def _closeout_sync_report(changed_files: list[str]) -> dict[str, Any]:
     ]
     commands = []
     validation_commands = []
+    if canonical_skill_changed and not generated_changed:
+        commands.append(SKILLS_SYNC_COMMAND)
+    flat_source_projection_present = False
     projection_update_present = bool(canonical_skill_changed and generated_changed)
-    if canonical_skill_changed and not projection_update_present:
-        commands.extend(
-            [
-                "./bin/ask skills sync --scope workspace --projection flat --json --robot",
-                SDK_HANDLE_CHECK_COMMAND,
-            ]
-        )
-    elif generated_changed:
+    if canonical_skill_changed or generated_changed:
         validation_commands.append(SDK_HANDLE_CHECK_COMMAND)
     return {
         "needed": bool(commands),
@@ -1216,6 +1215,7 @@ def _closeout_sync_report(changed_files: list[str]) -> dict[str, Any]:
         "generated_changed_files": generated_changed,
         "canonical_skill_changed_files": canonical_skill_changed,
         "projection_update_present": projection_update_present,
+        "flat_source_projection_present": flat_source_projection_present,
     }
 
 

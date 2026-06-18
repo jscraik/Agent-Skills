@@ -1,69 +1,81 @@
 ---
-description: Sync agent skills to all runtimes (Antigravity, Claude Code, Codex) and repair broken slash-command discovery
+description: Sync Agent Skills Kit projections and repair Codex skill discovery
 ---
 
 # /sync-skills
 
-Rebuilds the skill projection for all agent runtimes and restores Antigravity slash-command discovery when `/` shows no skills.
+Rebuilds the Agent Skills Kit workspace projection and refreshes Codex runtime links when skills are missing or stale.
 
 ## When to use
 
-- Skills are missing from the Antigravity `/` slash-command menu
+- Skills are missing from Codex runtime discovery
 - You added a new skill and want it live without restarting
-- `~/.gemini/antigravity/skills` symlink is missing or stale
-- MCP tools are not showing up in Antigravity
-- You want to verify the full sync chain is healthy
+- `~/.agents/skills` or `~/.codex/skills` points at a stale projection
+- You want to verify the workspace and user sync chain is healthy
 
 ---
 
 ## Steps
 
 // turbo
-1. Run skill sync from the repo root:
+1. Refresh the workspace projection from the repo root:
+
 ```bash
-bash /Users/jamiecraik/dev/Agent-Skills/Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh
+./bin/ask skills sync --scope workspace --json --robot
 ```
 
 // turbo
-2. Sync MCP config for Antigravity:
+2. Refresh user runtime links:
+
 ```bash
-python3 /Users/jamiecraik/dev/Agent-Skills/Infrastructure/scripts/lifecycle-and-sync/sync_mcp.py
+./bin/ask skills sync --scope user --json --robot
 ```
 
 // turbo
-3. Verify the output links are correct:
+3. Verify projected runtime discovery:
+
 ```bash
-echo "=== skills symlink ===" && ls -la ~/.gemini/antigravity/skills
-echo "=== skills.txt ===" && cat ~/.gemini/antigravity/skills.txt
-echo "=== skill count ===" && ls ~/.gemini/antigravity/skills/ | wc -l
+./bin/ask skills list --json --robot
+./bin/ask skills load-preview --json --robot
 ```
 
-4. Confirm results — expected:
-   - `~/.gemini/antigravity/skills` → symlink to `…/Agent-Skills/skills-antigravity`
-   - `skills.txt` contains the path to `skills-antigravity/`
-   - Skill count ≥ 80
+// turbo
+4. Verify the user links resolve into this checkout:
+
+```bash
+ls -la ~/.agents/skills ~/.codex/skills
+```
+
+## Checks
+
+1. Confirm expected results:
+   - Workspace sync reports success
+   - User sync reports success
+   - Runtime links resolve to the current checkout projection
    - No `WARN` or `REFUSED` lines in sync output
 
-5. If skill count is 0 or symlink is missing, run the diagnostic:
+2. If skill count is 0 or a link is missing, run diagnostics:
+
 ```bash
-python3 /Users/jamiecraik/dev/Agent-Skills/Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py --all 2>&1 | head -40
+./bin/ask repo doctor --json --robot
+./bin/ask repo closeout --changed --json --robot
 ```
 
-6. **Restart Antigravity** or type `/refresh` in this chat to pick up the updated skill list.
+3. Restart the Codex session if runtime discovery still shows a stale skill list after sync and diagnostics pass.
 
 ---
 
 ## Invariants (do not break)
 
-- `skills-antigravity/` must NOT be a symlink (security guard will abort sync)
-- `~/.gemini/antigravity/skills` must resolve inside the repo root
-- MCP config at `~/.gemini/antigravity/mcp_config.json` must be valid JSON after step 2
+- Edit canonical skill sources under `Skills/**` or `Plugins/**/skills/**`, not generated runtime projections.
+- `.agents/skills/**` is a generated runtime projection in this repo.
+- `~/.agents/skills` and `~/.codex/skills` must resolve to the current approved projection.
 
 ## Error codes
 
 | Symptom | Error | Fix |
 |---------|-------|-----|
-| `Refusing to use symlinked path` | `POLICY_FAIL` | Remove stale symlink: `rm skills-antigravity && mkdir skills-antigravity` |
-| `cat: mcp_config.json: No such file or directory` | `SYSTEM_ERROR` | Re-run step 2; check `~/.codex/config.toml` exists |
-| Skills count = 0 after sync | `VALIDATION_ERROR` | Check `skill_files_cmd` category dirs exist (`auth/`, `backend/`, etc.) |
-| `tomli` import error | `SYSTEM_ERROR` | `pip3 install tomli` |
+| Runtime link points at another checkout | `POLICY_FAIL` | Re-run user sync from the intended checkout |
+| Skill list is stale after sync | `VALIDATION_ERROR` | Run repo doctor and inspect runtime link output |
+| `./bin/ask` is unavailable | `SYSTEM_ERROR` | Run `bash scripts/bootstrap-ask.sh --json`, then `python3 bin/ask repo status --json` |
+| Sync output includes `REFUSED` | `POLICY_FAIL` | Stop and fix the named ownership or projection blocker |
