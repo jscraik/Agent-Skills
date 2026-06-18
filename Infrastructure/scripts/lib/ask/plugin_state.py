@@ -280,6 +280,7 @@ def _activation_state(
             repo_root / "plugins" / "cache",
             repo_root / "Plugins" / "cache",
         )
+        authoritative_cache_root = cache_roots[0]
         inspected_roots: list[str] = []
         missing_reasons: list[str] = []
 
@@ -403,18 +404,20 @@ def _activation_state(
                 if marketplace_status["content_ready"]:
                     codex_marketplace_ready.append(marketplace_status)
                     continue
+                marketplace_status["authoritative_cache_root"] = cache_root == authoritative_cache_root
                 codex_marketplace_failures.append(marketplace_status)
         if codex_marketplace_failures:
             for failure in codex_marketplace_failures:
                 inspected_roots.extend(failure["inspected_roots"])
                 missing_reasons.extend(failure["issues"])
-            return {
-                "present": True,
-                "content_ready": False,
-                "active_root": None,
-                "inspected_roots": inspected_roots,
-                "issues": missing_reasons,
-            }
+            if any(failure.get("authoritative_cache_root") for failure in codex_marketplace_failures):
+                return {
+                    "present": True,
+                    "content_ready": False,
+                    "active_root": None,
+                    "inspected_roots": inspected_roots,
+                    "issues": missing_reasons,
+                }
         if codex_marketplace_ready:
             return codex_marketplace_ready[0]
 
@@ -436,6 +439,14 @@ def _activation_state(
                         "inspected_roots": inspected_roots,
                         "issues": [],
                     }
+        if codex_marketplace_failures:
+            return {
+                "present": True,
+                "content_ready": False,
+                "active_root": None,
+                "inspected_roots": inspected_roots,
+                "issues": missing_reasons,
+            }
         return {
             "present": bool(inspected_roots),
             "content_ready": False,

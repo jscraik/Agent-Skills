@@ -485,7 +485,7 @@ class TestAskPluginsState(unittest.TestCase):
             activation_plugin["cache_issues"],
         )
 
-    def test_list_plugins_state_rejects_broken_sibling_codex_marketplace_root(self) -> None:
+    def test_list_plugins_state_ignores_broken_sibling_cache_when_authoritative_cache_is_ready(self) -> None:
         sibling_root = self.repo_root / "Plugins" / "cache" / "agent-skills-local" / "example-plugin" / "0.1.0"
         manifest = sibling_root / ".codex-plugin" / "plugin.json"
         manifest.parent.mkdir(parents=True, exist_ok=True)
@@ -509,14 +509,11 @@ class TestAskPluginsState(unittest.TestCase):
         result = list_plugins_state(self.repo_root)
 
         self.assertEqual(result.status, "success")
-        self.assertEqual(result.data["health_state"]["status"], "degraded")
+        self.assertEqual(result.data["health_state"]["status"], "healthy")
         activation_plugin = result.data["activation_state"]["plugins"][0]
         self.assertTrue(activation_plugin["cache_present"])
-        self.assertFalse(activation_plugin["cache_content_ready"])
-        self.assertTrue(
-            any("Plugins/cache/agent-skills-local" in issue for issue in activation_plugin["cache_issues"]),
-            activation_plugin["cache_issues"],
-        )
+        self.assertTrue(activation_plugin["cache_content_ready"])
+        self.assertEqual(activation_plugin["cache_issues"], [])
 
     def test_doctor_treats_missing_cache_as_warning(self) -> None:
         cache_root = self.repo_root / ".agents" / "plugins-runtime" / "cache"
