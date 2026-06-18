@@ -1179,6 +1179,56 @@ optimization:
             package["install_gate"]["blocked_reasons"],
         )
 
+    def test_reference_quality_validates_scenario_drift_review_shape(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "scenario-policy-skill"
+            references_dir = skill_dir / "references"
+            references_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: scenario-policy-skill
+description: Scenario policy fixture.
+version: "1.0.0"
+---
+
+# Scenario Policy Skill
+""",
+                encoding="utf-8",
+            )
+            (references_dir / "contract.yaml").write_text(
+                """purpose: Test scenario drift metadata shape.
+inputs:
+  - skill changes
+outputs:
+  - scenario review decision
+tessl_scenario_policy:
+  structure_only: false
+  scenario_drift_review:
+    required_after_skill_change: "yes"
+    review_decisions: keep
+    review_surfaces:
+      - ""
+""",
+                encoding="utf-8",
+            )
+
+            contract = package_contracts.reference_quality_contract(repo_root, skill_md)
+
+        drift_check = next(
+            check for check in contract["checks"] if check["name"] == "tessl_scenario_drift_review"
+        )
+        self.assertEqual(drift_check["status"], "blocked_validation")
+        self.assertEqual(
+            drift_check["missing"],
+            ["required_after_skill_change", "review_decisions", "review_surfaces"],
+        )
+        self.assertIn(
+            "tessl_scenario_drift_review_missing",
+            {blocker["rule_id"] for blocker in contract["blockers"]},
+        )
+
     def test_sdk_contract_missing_files_block_install_readiness(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir)

@@ -121,7 +121,7 @@ The live Tessl workflow is a separate explicit lane. Use
 only when the operator asks for live private Tessl evidence. This lane must
 stage a plugin-shaped package under
 `/tmp/ask-tessl-live/<skill-path>-<sha12>`, write
-`.tessl-plugin/plugin.json` with `"name": "<workspace>/<tile-name>"`,
+`.tessl-plugin/plugin.json` with `"name": "<workspace>/<plugin-name>"`,
 `"private": true`, and `"skills": "./skills/"`, copy the skill package to
 `skills/<skill-name>/SKILL.md`, omit `tile.json`, and convert eval cases into
 `evals/<case-id>/task.md` plus `evals/<case-id>/criteria.json` using Tessl's
@@ -129,7 +129,7 @@ stage a plugin-shaped package under
 files beside the staged skill so Tessl plugin discovery and skill-relative links
 resolve from the plugin root. Run `tessl eval run --json --workspace <workspace>
 --yes <staged-plugin-root>`. Stage `tessl.json` for the same
-`<workspace>/<tile-name>` identity because Tessl saves eval runs to a project.
+`<workspace>/<plugin-name>` identity because Tessl saves eval runs to a project.
 Before invoking Tessl evals, the wrapper must check that project link, relink an
 existing project first, and create the project only when needed. Start with
 `--tessl-live-dry-run` when proving package shape or policy before any live

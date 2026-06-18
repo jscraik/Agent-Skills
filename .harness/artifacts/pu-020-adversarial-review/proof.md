@@ -14,24 +14,24 @@ It does not prove CI, PR state, review-thread state, tracker state, hosted docs,
 
 # Findings
 
-## P2: HTML projection tests do not prove row content is projected from the matrix
+## P2: External readiness lanes remain unverified
 
-The acceptance claim says `artifacts/recommended-skills-sdk-pipeline.html` remains a projection of `./bin/ask sdk status --json --robot` and `Infrastructure/config/skills-sdk/capability-matrix.v1.json` rather than a second planning authority. The current tests prove row presence, status vocabulary, runtime status, and title text, but they do not assert that each HTML row's owner surface or next-slice cell equals the runtime/matrix row.
+The acceptance claim says `artifacts/recommended-skills-sdk-pipeline.html` remains a projection of `./bin/ask sdk status --json --robot` and `Infrastructure/config/skills-sdk/capability-matrix.v1.json` rather than a second planning authority. The current tests now also assert owner-surface and next-slice parity; the remaining proof gaps are external readiness lanes.
 
 Evidence:
 
 - `Infrastructure/tests/test_skills_sdk_pipeline_status_artifact.py:88` checks matrix capability IDs equal parsed HTML row IDs.
 - `Infrastructure/tests/test_skills_sdk_pipeline_status_artifact.py:93` checks HTML status attributes/text match matrix statuses.
 - `Infrastructure/tests/test_skills_sdk_pipeline_status_artifact.py:100` checks runtime IDs, statuses, and titles appear in HTML rows.
-- `Infrastructure/tests/test_skills_sdk_pipeline_status_artifact.py:113` only forbids exact completed-PU `Next` / `Next slice` advertisements derived from implemented capability `notes`.
-- `Infrastructure/config/skills-sdk/capability-matrix.v1.json:301` defines the implemented `refs_ingestion` next slice, and `artifacts/recommended-skills-sdk-pipeline.html:2298` currently matches it, but that equality is not asserted.
+- `Infrastructure/tests/test_skills_sdk_pipeline_status_artifact.py:147` checks owner-surface and next-slice parity against live SDK status.
+- `Infrastructure/tests/test_skills_sdk_pipeline_status_artifact.py:170` rejects source-artifact PU IDs as `Next` / `Next slice` labels.
 
-Why this matters: a stale non-PU next-slice claim, a stale owner surface, or a stale next-slice sentence that does not use the exact `Next: PU-id` pattern could pass the acceptance tests while still making the HTML table a second planning authority. The current implementation happens to look aligned in the checked slice, but the test proof is narrower than the claim.
+Why this matters: local projection parity does not prove CI, PR state, review-thread state, tracker state, hosted docs, or merge readiness.
 
-Smallest durable fix: extend `CapabilityStatusParser` to capture table cells by row, then assert for every capability that the HTML owner-surface cell and next-slice cell equal the runtime status row. Keep the existing completed-PU guard as an additional regression check.
+Smallest durable fix: keep external readiness as a separate closeout lane and check those surfaces directly before making release or merge-readiness claims.
 
 # Recommendation
 
-Keep the slice, but tighten the acceptance proof before treating it as done. The blocked mise/uv concern did not reproduce in this review when cache/state paths were pinned to temp locations; both SDK wrapper commands and the uv pytest lane passed locally. The remaining weakness is proof quality: the tests should compare the HTML row content against the runtime/matrix row for owner surface and next slice, not just status/title plus a narrow PU regex. That is the smallest fix that makes the test suite prove the route-truth declutter claim without adding a new dashboard, registry, eval runner, projection mode, plugin, or skill.
+Keep the slice, but keep readiness claims lane-separated. The blocked mise/uv concern did not reproduce in this review when cache/state paths were pinned to temp locations; both SDK wrapper commands and the uv pytest lane passed locally. The remaining weakness is external proof coverage, not local owner-surface or next-slice projection parity.
 
 WROTE: .harness/artifacts/pu-020-adversarial-review/proof.md

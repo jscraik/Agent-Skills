@@ -73,6 +73,14 @@ tessl_scenario_policy:
       - add
       - remove
 commands:
+  skills_audit: "./bin/ask skills audit Skills/agent-ops/sdk-scenario-generator --level strict --json --robot"
+  external_review: "./bin/ask skills external-review Skills/agent-ops/sdk-scenario-generator --json --robot"
   package_verify: "./bin/ask skills package verify Skills/agent-ops/sdk-scenario-generator --json --robot"
-  tessl_dry_run: "./bin/ask evals run Skills/agent-ops/sdk-scenario-generator --mode smoke --tessl-live-private --tessl-workspace skills-sdk --tessl-live-dry-run --json --robot"
+  smoke_eval: "./bin/ask evals run Skills/agent-ops/sdk-scenario-generator --mode smoke --json --robot"
   plugin_eval: "./bin/plugin-eval analyze Skills/agent-ops/sdk-scenario-generator --format json"
+conditional_commands:
+  prepare_tessl_scenarios: "./bin/ask evals prepare-tessl-scenarios Skills/agent-ops/sdk-scenario-generator --tessl-workspace skills-sdk --json --robot"
+  tessl_dry_run_after_ladder: "./bin/ask evals run Skills/agent-ops/sdk-scenario-generator --mode smoke --tessl-live-private --tessl-workspace skills-sdk --tessl-live-dry-run --json --robot"
+readiness_blockers:
+  prepare_tessl_scenarios: "blocked until Tessl workspace auth and project link are available"
+  tessl_dry_run: "blocked until reviewed references/evals/*.md fixtures and scenario-sources.json prove at least 20 gold-standard scenarios"

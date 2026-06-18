@@ -48,11 +48,11 @@ Avoidance: Require local forces, at least one real variation or extension need, 
 - Source boundaries: local_source_reference
 - Derived from claims: claim.arch.patterns-need-forces-and-liabilities
 
-Knowledge claim: The reviewer rejects the pattern as premature, names the missing forces, and recommends the smallest behavior-preserving move.
-Behavior under test: The reviewer rejects the pattern as premature, names the missing forces, and recommends the smallest behavior-preserving move.
+Knowledge claim: Pattern introductions without visible local forces, stable variation, and explicit liabilities deserve rejection.
+Behavior under test: The reviewer recognizes a premature pattern, names the missing technical or organizational forces, and proposes a behavior-preserving alternative.
 Failure mode: The reviewer praises the pattern because it matches a book category while ignoring local forces and liabilities.
-Expected agent move: The reviewer rejects the pattern as premature, names the missing forces, and recommends the smallest behavior-preserving move.
-Skill lift target: The reviewer rejects the pattern as premature, names the missing forces, and recommends the smallest behavior-preserving move.
+Expected agent move: Reject the proposed pattern, list the missing forces and liabilities, and recommend the smallest reversible move.
+Skill lift target: Improve judgment about when architectural patterns are warranted instead of rewarding pattern-name recognition.
 Proof route: references/evals.yaml
 Fixture path: references/evals/eval.arch.pattern-name-launders-no-variation.md
 Promotion status: candidate

@@ -1136,10 +1136,23 @@ def reference_quality_contract(repo_root: Path | None, skill_md: Path | None) ->
         if not isinstance(scenario_drift_review, dict):
             missing_review = ["scenario_drift_review"]
         else:
-            for field in ("required_after_skill_change", "review_decisions", "review_surfaces"):
-                value = scenario_drift_review.get(field)
-                if not value:
-                    missing_review.append(field)
+            if scenario_drift_review.get("required_after_skill_change") is not True:
+                missing_review.append("required_after_skill_change")
+            review_decisions = scenario_drift_review.get("review_decisions")
+            allowed_decisions = {"keep", "update", "add", "remove"}
+            if (
+                not isinstance(review_decisions, list)
+                or not review_decisions
+                or any(not isinstance(item, str) or item not in allowed_decisions for item in review_decisions)
+            ):
+                missing_review.append("review_decisions")
+            review_surfaces = scenario_drift_review.get("review_surfaces")
+            if (
+                not isinstance(review_surfaces, list)
+                or not review_surfaces
+                or any(not isinstance(item, str) or not item.strip() for item in review_surfaces)
+            ):
+                missing_review.append("review_surfaces")
         checks.append(
             {
                 "name": "tessl_scenario_drift_review",

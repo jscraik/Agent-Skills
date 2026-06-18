@@ -527,7 +527,7 @@ class TestManifestJsonlSchema(unittest.TestCase):
         "source_revision",
         "source_sha256",
     })
-    EXPECTED_SOURCE_REVISION = "8edaf73f"
+    EXPECTED_SOURCE_REVISION = "0ad896ee2"
 
     def _iter_manifest_records(self) -> Iterator[tuple[Path, int, dict[str, Any]]]:
         """

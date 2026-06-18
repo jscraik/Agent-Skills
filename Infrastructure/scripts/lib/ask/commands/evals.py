@@ -996,7 +996,38 @@ def _tessl_structure_only_scenario_policy(source_root: Path) -> bool:
     if not contract_path.exists():
         return False
     text = contract_path.read_text(encoding="utf-8")
-    return bool(re.search(r"(?m)^\s*(structure_only|structure_check_only):\s*true\s*$", text))
+
+    def compat_policy_enabled() -> bool:
+        in_policy = False
+        policy_indent = 0
+        for line in text.splitlines():
+            stripped = line.strip()
+            if not stripped or stripped.startswith("#"):
+                continue
+            indent = len(line) - len(line.lstrip(" "))
+            if re.match(r"^tessl_scenario_policy\s*:\s*$", stripped):
+                in_policy = True
+                policy_indent = indent
+                continue
+            if in_policy and indent <= policy_indent:
+                in_policy = False
+            if in_policy and re.match(r"^(structure_only|structure_check_only)\s*:\s*true\s*$", stripped):
+                return True
+        return False
+
+    try:
+        import yaml  # type: ignore
+    except ImportError:
+        return compat_policy_enabled()
+    try:
+        loaded = yaml.safe_load(text) or {}
+    except yaml.YAMLError:
+        return compat_policy_enabled()
+    policy = loaded.get("tessl_scenario_policy") if isinstance(loaded, dict) else None
+    return isinstance(policy, dict) and (
+        policy.get("structure_only") is True
+        or policy.get("structure_check_only") is True
+    )
 
 
 def _merge_tessl_cases_with_generated_fixtures(
@@ -1006,6 +1037,11 @@ def _merge_tessl_cases_with_generated_fixtures(
     require_generated: bool,
 ) -> tuple[list[dict[str, object]], dict[str, object]]:
     generated_cases = _parse_generated_eval_fixtures(source_root)
+    generated_yaml_cases = [
+        case
+        for case in base_cases
+        if isinstance(case.get("tessl"), dict) and case["tessl"].get("generated") is True
+    ]
     by_id: dict[str, dict[str, object]] = {str(case.get("id")): case for case in base_cases}
     duplicate_ids: list[str] = []
     for case in generated_cases:
@@ -1018,6 +1054,7 @@ def _merge_tessl_cases_with_generated_fixtures(
     manifest = {
         "schema_version": "ask-tessl-scenario-sources.v1",
         "skill_owned_cases": len(base_cases),
+        "generated_yaml_cases": len(generated_yaml_cases),
         "generated_fixture_cases": len(generated_cases),
         "duplicate_generated_case_ids": duplicate_ids,
         "structure_only_exception": _tessl_structure_only_scenario_policy(source_root),
@@ -1026,7 +1063,12 @@ def _merge_tessl_cases_with_generated_fixtures(
             {"path": "references/evals/*.md", "case_count": len(generated_cases), "kind": "generated_reviewed"},
         ],
     }
-    if require_generated and not manifest["structure_only_exception"] and not generated_cases:
+    if (
+        require_generated
+        and not manifest["structure_only_exception"]
+        and not generated_cases
+        and not generated_yaml_cases
+    ):
         raise ValueError(
             "Tessl live-private evals require reviewed generated scenarios before scoring. "
             "Run ./bin/ask evals prepare-tessl-scenarios <skill> --tessl-workspace <workspace> --json --robot, "
@@ -1061,7 +1103,9 @@ GENERIC_GENERATED_SHOULD = (
     "a safe first move, and the proof that would change the decision."
 )
 UNSTAGED_TESSL_REPO_PATH_RE = re.compile(
-    r"(?<![A-Za-z0-9_./-])(?:Infrastructure|Skills|Plugins|\.agents|\.codex)/[^\s,;:)\]}\"']+"
+    r"(?<![A-Za-z0-9_./-])"
+    r"(?:Infrastructure|Skills|Plugins|Docs|docs|skills-system|runtime|\.agents|\.codex|\.harness|\.skillsets)"
+    r"/[^\s,;:)\]}\"']+"
 )
 
 
@@ -1165,10 +1209,20 @@ def _case_has_answer_leakage(case: dict[str, object]) -> bool:
 
 
 def _case_has_unstaged_repo_path_reference(case: dict[str, object]) -> bool:
-    visible_text = "\n".join(
+    text_parts = [
         str(case.get(field) or "") for field in ("prompt", "unit", "given", "should")
-    )
-    return bool(UNSTAGED_TESSL_REPO_PATH_RE.search(visible_text))
+    ]
+    acceptance = case.get("acceptance")
+    if isinstance(acceptance, list):
+        for item in acceptance:
+            if not isinstance(item, dict):
+                continue
+            normalized = _normalize_tessl_acceptance_item(item)
+            text_parts.extend([
+                str(normalized.get("value") or ""),
+                str(normalized.get("expected_skill") or ""),
+            ])
+    return bool(UNSTAGED_TESSL_REPO_PATH_RE.search("\n".join(text_parts)))
 
 
 def _case_has_scenario_context(case: dict[str, object]) -> bool:

@@ -575,6 +575,30 @@ def test_tessl_eval_quality_flags_unstaged_repo_paths() -> None:
     assert "unstaged_repo_path_reference" in {finding["code"] for finding in findings}
 
 
+def test_tessl_eval_quality_flags_unstaged_repo_paths_in_acceptance() -> None:
+    cases = [{
+        "id": "unstaged-acceptance-path",
+        "unit": "architecture review",
+        "given": "A remote Tessl scenario refers to a repo-local proof artifact.",
+        "should": "Use staged package context only.",
+        "prompt": "Review the staged package context.",
+        "acceptance": [
+            {
+                "type": "expected_signal",
+                "value": "Cites .harness/artifacts/pu-020-adversarial-review/proof.md.",
+            },
+            {
+                "type": "skill_selected",
+                "expected_skill": "Mentions Docs/agents/24-tessl-live-skill-eval-workflow.md.",
+            },
+        ],
+    }]
+
+    findings = evals._tessl_eval_quality_findings(cases)
+
+    assert "unstaged_repo_path_reference" in {finding["code"] for finding in findings}
+
+
 def test_tessl_eval_quality_allows_package_relative_paths() -> None:
     cases = [{
         "id": "package-path",
@@ -1081,6 +1105,59 @@ def test_tessl_live_private_requires_generated_scenarios_unless_structure_only(t
 
     assert "require reviewed generated scenarios" in message
     assert "prepare-tessl-scenarios" in message
+
+
+def test_tessl_structure_only_policy_only_reads_tessl_scenario_policy(tmp_path: Path) -> None:
+    skill_root = _write_example_skill(tmp_path)
+    contract_path = skill_root / "references" / "contract.yaml"
+    contract_path.write_text(
+        "version: 1\n"
+        "unrelated_policy:\n"
+        "  structure_only: true\n",
+        encoding="utf-8",
+    )
+
+    assert evals._tessl_structure_only_scenario_policy(skill_root) is False
+
+    contract_path.write_text(
+        "version: 1\n"
+        "tessl_scenario_policy:\n"
+        "  structure_only: true\n",
+        encoding="utf-8",
+    )
+
+    assert evals._tessl_structure_only_scenario_policy(skill_root) is True
+
+
+def test_tessl_live_private_accepts_generated_yaml_cases(tmp_path: Path) -> None:
+    skill_root = _write_example_skill(tmp_path)
+    (skill_root / "references" / "contract.yaml").write_text("version: 1\n", encoding="utf-8")
+    cases = [
+        {
+            "id": "yaml-generated",
+            "unit": "yaml generated scenario",
+            "given": "A reviewed generated scenario was imported into references/evals.yaml.",
+            "should": "Treat the YAML-imported scenario as generated scenario evidence.",
+            "prompt": "Review the architecture handoff.",
+            "acceptance": [
+                {
+                    "type": "expected_signal",
+                    "value": "Recognizes the YAML-imported generated scenario as reviewed Tessl evidence.",
+                }
+            ],
+            "tessl": {"generated": True, "source": "references/evals.yaml"},
+        }
+    ]
+
+    merged, manifest = evals._merge_tessl_cases_with_generated_fixtures(
+        skill_root,
+        cases,
+        require_generated=True,
+    )
+
+    assert merged == cases
+    assert manifest["generated_yaml_cases"] == 1
+    assert manifest["generated_fixture_cases"] == 0
 
 
 def test_tessl_live_private_stages_generated_fixture_scenarios(tmp_path: Path) -> None:

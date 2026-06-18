@@ -13,6 +13,8 @@ Local code/test truth is healthy for the patched route-truth slice:
 
 This proves the current local matrix/status/HTML route can load, the HTML declares the status command and matrix source, source artifacts exist, authority-bearing row cells match live SDK status, and checked stale `Next` / `Next slice` PU labels are absent for implemented-note and source-artifact PUs.
 
+Status scope: this proof document reports `issues_found` because wrapper regression protection was still missing at iteration 2. That gap does not negate the sibling authority document's narrower `pass` for table-cell alignment and source-artifact stale-next checks; it is a separate downstream proof lane.
+
 It does not prove CI, PR state, review-thread state, tracker state, hosted docs, external SDK readiness, or merge readiness.
 
 # Findings

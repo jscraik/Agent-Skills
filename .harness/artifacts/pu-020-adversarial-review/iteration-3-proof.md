@@ -4,6 +4,8 @@ pass
 
 Local code/test truth for the PU-020 route-truth declutter slice is sound in the current patched state.
 
+Line-number references in this proof are point-in-time snapshots. Re-verify them after any change to the referenced tests, matrix, or HTML artifact; behavior claims should continue to be checked by the named tests and searches.
+
 Validation evidence:
 - Command: `python3 -m pytest Infrastructure/tests/test_skills_sdk_capability_status.py Infrastructure/tests/test_skills_sdk_pipeline_status_artifact.py -q` -> pass (31 passed, 157 subtests passed in 0.83s)
 - Command: `python3 bin/ask sdk status --json --robot` -> pass

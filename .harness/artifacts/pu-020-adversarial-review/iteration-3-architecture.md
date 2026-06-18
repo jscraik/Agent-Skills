@@ -17,6 +17,7 @@ This proves local code/test and wrapper status behavior for the scoped route-tru
 No currently valid architecture, provenance, or context-load findings.
 
 The current patched state keeps authority and provenance aligned:
+- The wrapper-regression-protection gap identified in iteration 2 is closed by `test_public_wrappers_emit_same_sdk_status_payload` in `Infrastructure/tests/test_skills_sdk_pipeline_status_artifact.py:129`-`146`, which runs both `bin/ask` and `bin/skills-sdk` and asserts SDK status payload parity.
 - The HTML projection declares `./bin/ask sdk status --json --robot` and `Infrastructure/config/skills-sdk/capability-matrix.v1.json` as its sources at `artifacts/recommended-skills-sdk-pipeline.html:2245`-`2247`.
 - The matrix keeps `generated_from` on the stable capability-truth contract and includes the PU-020 spec and plan in `source_artifacts` at `Infrastructure/config/skills-sdk/capability-matrix.v1.json:5` and `Infrastructure/config/skills-sdk/capability-matrix.v1.json:23`-`24`.
 - The static docs capability remains `preview_only`, non-mutating, and projection-only in the matrix and HTML at `Infrastructure/config/skills-sdk/capability-matrix.v1.json:365`-`374` and `artifacts/recommended-skills-sdk-pipeline.html:2304`.

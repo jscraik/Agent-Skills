@@ -91,9 +91,10 @@ Fix the scenario set before rerunning live Tessl unless per-scenario evidence pr
 ## Validation
 
 - `./bin/ask skills package verify <skill-path> --json --robot`
-- `./bin/ask evals run <skill-path> --mode smoke --tessl-live-private --tessl-workspace <workspace> --tessl-live-dry-run --json --robot`
 - `./bin/plugin-eval analyze <skill-path> --format json`
-- Live Tessl only after dry-run and run-budget gates pass.
+- Run Tessl scenario preparation only when the workspace auth/project link is available.
+- For behavioral skills, run Tessl dry-run staging only after `references/evals.yaml`, reviewed `references/evals/*.md` fixtures, and `scenario-sources.json` prove the minimum gold-scenario set exists.
+- Live Tessl only after dry-run staging and run-budget gates pass.
 - Fail fast at the first failed gate and classify the blocker before rerunning.
 
 ## Gotchas

@@ -84,20 +84,11 @@ tessl_scenario_policy:
     live_run_package_changes_require_semver_bump: true
     current_live_version: "0.1.6"
     rule: "Before a live Tessl run, bump metadata.version when SKILL.md, references/evals.yaml, references/evals/*.md, references/contract.yaml, or runtime-context references changed since the previous live run. Identical retry runs may reuse the same version."
-  active_live_run:
-    run_id: "019ed7c8-dda2-744a-ab7b-9cf7a22fb1fa"
-    workspace: skills-sdk
-    tile_version: "0.1.1"
-    status: completed_ready
-    created_at: "2026-06-17T22:52:05.921Z"
-    updated_at: "2026-06-17T22:59:02.810Z"
-    ui_usage_score: 0.98
-    ui_baseline_score: 0.97
-    ui_improvement: 1.01
-    cli_checklist_usage_score: 0.9875
-    cli_checklist_baseline_score: 0.975
-    cli_checklist_improvement: 1.0128
-    note: "Completed after scenario prompts were updated to require durable decision-note artifacts. Tessl UI card shows 98% usage, 97% baseline, 1.01x improvement; CLI recomputed weighted checklist for this exact run shows 98.75% usage, 97.5% baseline, 1.013x improvement, with zero below-baseline scenario rows. Both pass readiness because usage is >= 90% and above baseline."
+  current_live_readiness:
+    package_version: "0.1.6"
+    status: pending_matching_live_run
+    reason: "No recorded live Tessl run in this contract proves package version 0.1.6. Do not treat superseded 0.1.1 evidence as active readiness."
+    required_evidence: "Record the matching private Tessl run id, package version, scenario count, usage score, baseline score, improvement, and CLI recomputation before marking 0.1.6 completed_ready."
   live_private_requires:
     - skill_owned_cases: references/evals.yaml
     - generated_reviewed_fixtures: references/evals/*.md
@@ -125,11 +116,11 @@ tessl_scenario_policy:
       - remove
     must_finish_before:
       - "./bin/ask evals run Skills/agent-ops/improve-codebase-architecture --mode smoke --tessl-live-private --tessl-workspace skills-sdk --json --robot"
-  latest_transition_run:
+  last_proven_live_run:
     run_id: "019ed7c8-dda2-744a-ab7b-9cf7a22fb1fa"
     workspace: skills-sdk
-    tile_version: "0.1.1"
-    status: completed_ready
+    package_version: "0.1.1"
+    status: completed_ready_superseded
     scenarios: 20
     usage_score: 0.98
     baseline_score: 0.97
@@ -137,7 +128,7 @@ tessl_scenario_policy:
     cli_checklist_usage_score: 0.9875
     cli_checklist_baseline_score: 0.975
     cli_checklist_improvement: 1.0128
-    readiness_reason: "Usage is above the 90% minimum and above baseline in both Tessl UI card evidence and CLI recomputed checklist evidence."
+    readiness_reason: "Usage was above the 90% minimum and above baseline in both Tessl UI card evidence and CLI recomputed checklist evidence for package version 0.1.1 only."
     superseded_by_package_version: "0.1.2"
     superseded_reason: "The skill behavior, classification references, output schema, and canonical lift scenarios changed after this run; the run remains evidence for 0.1.1 only."
   prior_transition_run:

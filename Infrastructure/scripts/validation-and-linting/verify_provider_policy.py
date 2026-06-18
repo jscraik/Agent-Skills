@@ -99,14 +99,14 @@ def _iter_repo_paths() -> Iterator[str]:
         root_path = Path(root)
         rel_root = _rel(root_path) if root_path != REPO_ROOT else ""
         kept_dirnames: list[str] = []
-        for dirname in dirnames:
+        for dirname in sorted(dirnames):
             rel_dir = f"{rel_root}/{dirname}" if rel_root else dirname
             if dirname in DEFAULT_EXCLUDED_DIRS or _is_excluded_prefix(rel_dir):
                 continue
             kept_dirnames.append(dirname)
             yield rel_dir
         dirnames[:] = kept_dirnames
-        for filename in filenames:
+        for filename in sorted(filenames):
             rel_file = f"{rel_root}/{filename}" if rel_root else filename
             if _is_excluded_prefix(rel_file):
                 continue
