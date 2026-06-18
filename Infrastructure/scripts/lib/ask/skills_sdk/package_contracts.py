@@ -53,8 +53,10 @@ SDK_PACKAGE_CONTRACT_FIELDS: tuple[str, ...] = (
     "evals",
     "task_profile",
     "evidence_policy",
-    "budget_classification",
     "optimization_contract",
+)
+SDK_PACKAGE_ADVISORY_CONTRACT_FIELDS: tuple[str, ...] = (
+    "budget_classification",
 )
 SKILLFLOW_NODE_TYPES: set[str] = {
     "command",

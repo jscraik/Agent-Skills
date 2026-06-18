@@ -884,10 +884,14 @@ def test_evals_run_native_tessl_without_project_save_approval_flag(tmp_path: Pat
             "Skills/example-skill",
             mode="smoke",
             allow_tessl_project_save=False,
-        )
+    )
 
     assert result.status == "success"
-    assert run.call_count == 2
+    commands = [call.args[0] for call in run.call_args_list]
+    tessl_eval_runs = [cmd for cmd in commands if cmd[1:3] == ["eval", "run"]]
+    assert len(tessl_eval_runs) == 1
+    assert not any(cmd[1:3] == ["project", "create"] for cmd in commands)
+    assert not any(cmd[1:3] == ["project", "repair"] for cmd in commands)
     tessl_eval = result.data["tessl_eval"]
     assert tessl_eval["status"] == "pass"
     assert "ask-tessl-evals" in tessl_eval["staged_source"]
@@ -954,11 +958,13 @@ def test_evals_run_native_tessl_by_default_with_temp_staged_source(tmp_path: Pat
             "Skills/example-skill",
             mode="smoke",
             allow_tessl_project_save=True,
-        )
+    )
 
     assert result.status == "success"
-    assert run.call_count == 2
-    tessl_cmd = run.call_args_list[-1].args[0]
+    commands = [call.args[0] for call in run.call_args_list]
+    tessl_eval_runs = [cmd for cmd in commands if cmd[1:3] == ["eval", "run"]]
+    assert len(tessl_eval_runs) == 1
+    tessl_cmd = tessl_eval_runs[0]
     assert tessl_cmd[:4] == ["/usr/local/bin/tessl", "eval", "run", "--json"]
     assert tessl_cmd[4] != "Skills/example-skill"
     assert "publish" not in tessl_cmd
@@ -1417,6 +1423,10 @@ def test_tessl_project_link_relinks_mismatched_existing_project(tmp_path: Path) 
 
     def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
         calls.append(cmd)
+        if "--relink" in cmd:
+            return mock.Mock(returncode=0, stdout='{"status":"relinked"}', stderr="", args=cmd)
+        if "--update-source" in cmd:
+            return mock.Mock(returncode=0, stdout='{"status":"updated"}', stderr="", args=cmd)
         if cmd[1:3] == ["project", "repair"] and "--json" in cmd:
             return mock.Mock(
                 returncode=0,
@@ -1424,10 +1434,6 @@ def test_tessl_project_link_relinks_mismatched_existing_project(tmp_path: Path) 
                 stderr="",
                 args=cmd,
             )
-        if "--relink" in cmd:
-            return mock.Mock(returncode=0, stdout='{"status":"relinked"}', stderr="", args=cmd)
-        if "--update-source" in cmd:
-            return mock.Mock(returncode=0, stdout='{"status":"updated"}', stderr="", args=cmd)
         raise AssertionError(f"unexpected command: {cmd}")
 
     with mock.patch.object(evals.subprocess, "run", side_effect=fake_run):
@@ -1454,10 +1460,10 @@ def test_tessl_project_link_creates_after_missing_existing_project(tmp_path: Pat
 
     def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
         calls.append(cmd)
-        if cmd[1:3] == ["project", "repair"] and "--json" in cmd:
-            return mock.Mock(returncode=1, stdout='{"status":"needs_repair"}', stderr="", args=cmd)
         if "--relink" in cmd:
             return mock.Mock(returncode=1, stdout="", stderr="Project not found", args=cmd)
+        if cmd[1:3] == ["project", "repair"] and "--json" in cmd:
+            return mock.Mock(returncode=1, stdout='{"status":"needs_repair"}', stderr="", args=cmd)
         if cmd[1:3] == ["project", "create"]:
             return mock.Mock(returncode=0, stdout="created\n", stderr="", args=cmd)
         raise AssertionError(f"unexpected command: {cmd}")
@@ -1494,17 +1500,17 @@ def test_tessl_project_link_creates_when_relink_json_status_is_error(tmp_path: P
 
     def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
         calls.append(cmd)
-        if cmd[1:3] == ["project", "repair"] and "--json" in cmd:
-            return mock.Mock(
-                returncode=0,
-                stdout='{"status":"match","workspaceName":"jscraik","projectName":"improve-agent-native"}',
-                stderr="",
-                args=cmd,
-            )
         if "--relink" in cmd:
             return mock.Mock(
                 returncode=0,
                 stdout='{"status":"error","message":"Project not found in workspace skills-sdk: improve-agent-native"}',
+                stderr="",
+                args=cmd,
+            )
+        if cmd[1:3] == ["project", "repair"] and "--json" in cmd:
+            return mock.Mock(
+                returncode=0,
+                stdout='{"status":"match","workspaceName":"jscraik","projectName":"improve-agent-native"}',
                 stderr="",
                 args=cmd,
             )
@@ -1573,12 +1579,12 @@ def test_tessl_project_link_updates_source_after_relink(tmp_path: Path) -> None:
 
     def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
         calls.append(cmd)
-        if cmd[1:3] == ["project", "repair"] and "--json" in cmd:
-            return mock.Mock(returncode=1, stdout='{"status":"needs_repair","allowedActions":["relink","update_source"]}', stderr="", args=cmd)
         if "--relink" in cmd:
             return mock.Mock(returncode=0, stdout='{"status":"relinked"}', stderr="", args=cmd)
         if "--update-source" in cmd:
             return mock.Mock(returncode=0, stdout='{"status":"updated"}', stderr="", args=cmd)
+        if cmd[1:3] == ["project", "repair"] and "--json" in cmd:
+            return mock.Mock(returncode=1, stdout='{"status":"needs_repair","allowedActions":["relink","update_source"]}', stderr="", args=cmd)
         raise AssertionError(f"unexpected command: {cmd}")
 
     with mock.patch.object(evals.subprocess, "run", side_effect=fake_run):
@@ -1654,6 +1660,44 @@ def test_timeout_partial_artifact_sanitizes_repo_paths(tmp_path: Path) -> None:
     payload = (tmp_path / artifact).read_text(encoding="utf-8")
     assert str(tmp_path) not in payload
     assert "Skills/example/output.txt" in payload
+
+
+def test_tessl_run_budget_preflight_blocks_when_capacity_unknown(tmp_path: Path) -> None:
+    def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
+        assert cmd[1:3] == ["eval", "list"]
+        return mock.Mock(returncode=0, stdout='{"unexpected":"shape"}', stderr="", args=cmd)
+
+    with mock.patch.object(evals.subprocess, "run", side_effect=fake_run):
+        preflight = evals._tessl_run_budget_preflight(
+            "/usr/local/bin/tessl",
+            "skills-sdk",
+            tmp_path,
+            {},
+        )
+
+    assert preflight["status"] == "blocked"
+    assert preflight["blocker_class"] == "blocked_validation"
+    assert "could not determine remaining capacity" in preflight["blocker"]
+
+
+def test_tessl_run_budget_preflight_blocks_at_reserve(tmp_path: Path) -> None:
+    used_runs = [{} for _ in range(evals.TESSL_WORKSPACE_RUN_LIMIT - evals.TESSL_WORKSPACE_RUN_RESERVE)]
+
+    def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
+        assert cmd[1:3] == ["eval", "list"]
+        return mock.Mock(returncode=0, stdout=json.dumps(used_runs), stderr="", args=cmd)
+
+    with mock.patch.object(evals.subprocess, "run", side_effect=fake_run):
+        preflight = evals._tessl_run_budget_preflight(
+            "/usr/local/bin/tessl",
+            "skills-sdk",
+            tmp_path,
+            {},
+        )
+
+    assert preflight["status"] == "blocked"
+    assert preflight["blocker_class"] == "blocked_environment"
+    assert preflight["remaining_runs"] == evals.TESSL_WORKSPACE_RUN_RESERVE
 
 
 def test_evals_live_private_requires_workspace(tmp_path: Path) -> None:
@@ -1735,6 +1779,8 @@ def test_evals_live_private_invokes_tessl_with_workspace_and_plugin_manifest(tmp
                 stderr="",
                 args=cmd,
             )
+        if cmd[1:3] == ["eval", "list"]:
+            return mock.Mock(returncode=0, stdout="[]", stderr="", args=cmd)
         if cmd[1:3] == ["eval", "run"]:
             return completed_eval
         if cmd[1:3] == ["eval", "view"]:
@@ -1828,6 +1874,8 @@ def test_evals_live_private_fails_when_score_is_below_baseline(tmp_path: Path) -
     _write_example_skill(tmp_path)
 
     def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
+        if cmd[1:3] == ["eval", "list"]:
+            return mock.Mock(returncode=0, stdout="[]", stderr="", args=cmd)
         if cmd[1:3] == ["eval", "run"]:
             return completed_eval
         if cmd[1:3] == ["eval", "view"]:
@@ -1886,6 +1934,8 @@ def test_evals_live_private_fails_when_skill_only_ties_baseline(tmp_path: Path) 
     _write_example_skill(tmp_path)
 
     def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
+        if cmd[1:3] == ["eval", "list"]:
+            return mock.Mock(returncode=0, stdout="[]", stderr="", args=cmd)
         if cmd[1:3] == ["eval", "run"]:
             return completed_eval
         if cmd[1:3] == ["eval", "view"]:
@@ -1957,6 +2007,8 @@ def test_evals_live_private_polls_until_view_scores_are_complete(tmp_path: Path)
 
     def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
         nonlocal view_calls
+        if cmd[1:3] == ["eval", "list"]:
+            return mock.Mock(returncode=0, stdout="[]", stderr="", args=cmd)
         if cmd[1:3] == ["eval", "run"]:
             return completed_eval
         if cmd[1:3] == ["eval", "view"]:
@@ -2010,6 +2062,8 @@ def test_evals_live_private_reports_tessl_quota_blocker(tmp_path: Path) -> None:
     _write_example_skill(tmp_path)
 
     def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
+        if cmd[1:3] == ["eval", "list"]:
+            return mock.Mock(returncode=0, stdout="[]", stderr="", args=cmd)
         if cmd[1:3] == ["eval", "run"]:
             return completed_eval
         if cmd[1:3] == ["eval", "view"]:
@@ -2257,7 +2311,8 @@ def test_evals_skip_tessl_escape_hatch(tmp_path: Path) -> None:
         result = evals.run_evals(tmp_path, "Skills/example-skill", mode="smoke", skip_tessl=True)
 
     assert result.status == "success"
-    assert run.call_count == 1
+    commands = [call.args[0] for call in run.call_args_list]
+    assert not any(cmd[1:3] == ["eval", "run"] for cmd in commands)
     assert result.data["tessl_eval"]["status"] == "skipped"
 
 
@@ -2316,9 +2371,14 @@ def test_evals_classify_missing_tessl_project_link(tmp_path: Path) -> None:
     )
     _write_example_skill(tmp_path)
 
+    def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
+        if cmd[1:3] == ["eval", "run"]:
+            return completed_tessl
+        return completed_eval
+
     with (
         mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
-        mock.patch.object(evals.subprocess, "run", side_effect=[completed_eval, completed_tessl]),
+        mock.patch.object(evals.subprocess, "run", side_effect=fake_run),
     ):
         result = evals.run_evals(
             tmp_path,

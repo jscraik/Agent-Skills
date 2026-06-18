@@ -1784,6 +1784,156 @@ def _tessl_project_link_matches(stdout: str, *, workspace: str, project: str) ->
     )
 
 
+def _collect_json_lists(value: object) -> list[list[object]]:
+    lists: list[list[object]] = []
+    if isinstance(value, list):
+        lists.append(value)
+        for item in value:
+            lists.extend(_collect_json_lists(item))
+    elif isinstance(value, dict):
+        for item in value.values():
+            lists.extend(_collect_json_lists(item))
+    return lists
+
+
+def _tessl_eval_list_count(stdout: str) -> int | None:
+    parsed = _json_or_text(stdout.strip()) if stdout.strip() else None
+    if isinstance(parsed, list):
+        return len(parsed)
+    if not isinstance(parsed, dict):
+        return None
+    for key in ("evals", "runs", "items", "nodes", "data", "results"):
+        value = parsed.get(key)
+        if isinstance(value, list):
+            return len(value)
+        if isinstance(value, dict):
+            nested = _tessl_eval_list_count(json.dumps(value))
+            if nested is not None:
+                return nested
+    lists = _collect_json_lists(parsed)
+    return max((len(items) for items in lists), default=None)
+
+
+def _tessl_run_budget_preflight(
+    tessl_path: str,
+    workspace: str,
+    staged_root: Path,
+    env: dict[str, str],
+) -> dict[str, object]:
+    command = [
+        tessl_path,
+        "eval",
+        "list",
+        "--json",
+        "--workspace",
+        workspace,
+        "--limit",
+        str(TESSL_WORKSPACE_RUN_LIMIT),
+    ]
+    try:
+        process = subprocess.run(
+            command,
+            cwd=str(staged_root),
+            capture_output=True,
+            text=True,
+            timeout=TESSL_PROJECT_LINK_TIMEOUT_SECONDS,
+            env=env,
+        )
+    except subprocess.TimeoutExpired as exc:
+        return {
+            "status": "blocked",
+            "blocker_class": "blocked_runtime",
+            "blocker": "Tessl workspace run-budget preflight timed out before live scoring.",
+            "command": " ".join(shlex.quote(str(part)) for part in command),
+            "raw_output": _as_text(exc.stdout),
+            "raw_error": _as_text(exc.stderr),
+        }
+    except OSError as exc:
+        return {
+            "status": "blocked",
+            "blocker_class": "blocked_runtime",
+            "blocker": f"Failed to run Tessl workspace run-budget preflight: {exc}",
+            "command": " ".join(shlex.quote(str(part)) for part in command),
+            "raw_output": "",
+            "raw_error": str(exc),
+        }
+
+    command_text = " ".join(shlex.quote(str(part)) for part in command)
+    if blocker := _tessl_signal_blocker(process, lane="eval list run-budget preflight"):
+        return {
+            "status": "blocked",
+            "blocker_class": "blocked_runtime",
+            "blocker": blocker,
+            "command": command_text,
+            "exit_code": process.returncode,
+            "raw_output": process.stdout,
+            "raw_error": process.stderr,
+        }
+    if _tessl_auth_blocked(process.stdout, process.stderr):
+        return {
+            "status": "blocked",
+            "blocker_class": "blocked_auth",
+            "blocker": "Tessl CLI is installed locally, but authentication is required before run-budget preflight can run.",
+            "command": command_text,
+            "exit_code": process.returncode,
+            "raw_output": process.stdout,
+            "raw_error": process.stderr,
+        }
+    if process.returncode != 0:
+        return {
+            "status": "blocked",
+            "blocker_class": "blocked_runtime",
+            "blocker": "Tessl workspace run-budget preflight failed before live scoring.",
+            "command": command_text,
+            "exit_code": process.returncode,
+            "raw_output": process.stdout,
+            "raw_error": process.stderr,
+        }
+
+    used_runs = _tessl_eval_list_count(process.stdout)
+    if used_runs is None:
+        return {
+            "status": "blocked",
+            "blocker_class": "blocked_validation",
+            "blocker": (
+                "Tessl workspace run-budget preflight could not determine remaining "
+                "capacity; blocking live scoring to preserve the configured reserve."
+            ),
+            "command": command_text,
+            "exit_code": process.returncode,
+            "raw_output": process.stdout,
+            "raw_error": process.stderr,
+            "workspace_run_limit": TESSL_WORKSPACE_RUN_LIMIT,
+            "reserve_runs": TESSL_WORKSPACE_RUN_RESERVE,
+        }
+
+    remaining_runs = max(TESSL_WORKSPACE_RUN_LIMIT - used_runs, 0)
+    status = "pass" if remaining_runs > TESSL_WORKSPACE_RUN_RESERVE else "blocked"
+    blocker = None
+    blocker_class = None
+    if status == "blocked":
+        blocker = (
+            f"Tessl workspace {workspace} has {remaining_runs} of "
+            f"{TESSL_WORKSPACE_RUN_LIMIT} runs remaining, which is at or below the "
+            f"{TESSL_WORKSPACE_RUN_RESERVE}-run reserve. Use dry-run/local evidence "
+            "before spending another live eval run."
+        )
+        blocker_class = "blocked_environment"
+    return {
+        "status": status,
+        "blocker": blocker,
+        "blocker_class": blocker_class,
+        "command": command_text,
+        "exit_code": process.returncode,
+        "raw_output": process.stdout,
+        "raw_error": process.stderr,
+        "workspace_run_limit": TESSL_WORKSPACE_RUN_LIMIT,
+        "reserve_runs": TESSL_WORKSPACE_RUN_RESERVE,
+        "used_runs": used_runs,
+        "remaining_runs": remaining_runs,
+    }
+
+
 def _ensure_tessl_project_link(
     tessl_path: str,
     staged_root: Path,
@@ -2502,6 +2652,25 @@ def _run_tessl_live_private_eval(
             "blocker_class": project_link.get("blocker_class"),
         }
 
+    tessl_env = dict(os.environ)
+    tessl_env["TESSL_AUTO_UPDATE_INTERVAL_MINUTES"] = "0"
+    run_budget_preflight = _tessl_run_budget_preflight(
+        tessl_path,
+        normalized_workspace,
+        staged_source,
+        tessl_env,
+    )
+    common["run_budget_preflight"] = run_budget_preflight
+    if run_budget_preflight.get("status") == "blocked":
+        return {
+            "status": "blocked",
+            **common,
+            "raw_output": str(run_budget_preflight.get("raw_output") or ""),
+            "raw_error": str(run_budget_preflight.get("raw_error") or ""),
+            "blocker": run_budget_preflight.get("blocker"),
+            "blocker_class": run_budget_preflight.get("blocker_class"),
+        }
+
     cmd = [
         tessl_path,
         "eval",
@@ -2512,8 +2681,6 @@ def _run_tessl_live_private_eval(
         "--yes",
         str(staged_source),
     ]
-    tessl_env = dict(os.environ)
-    tessl_env["TESSL_AUTO_UPDATE_INTERVAL_MINUTES"] = "0"
     try:
         process = subprocess.run(
             cmd,

@@ -389,16 +389,19 @@ class TestAskRepoDoctor(unittest.TestCase):
             result = repo_closeout(REPO_ROOT, changed=True)
 
         closeout = result.data["repo_closeout"]
-        self.assertEqual(result.status, "success")
-        self.assertTrue(closeout["commit_readiness"]["ready"])
-        self.assertNotIn("sync_required", closeout["commit_readiness"]["blockers"])
-        self.assertFalse(closeout["sync"]["needed"])
-        self.assertTrue(closeout["sync"]["flat_source_projection_present"])
-        self.assertEqual(closeout["sync"]["commands"], [])
+        self.assertEqual(result.status, "error")
+        self.assertFalse(closeout["commit_readiness"]["ready"])
+        self.assertIn("sync_required", closeout["commit_readiness"]["blockers"])
+        self.assertTrue(closeout["sync"]["needed"])
+        self.assertFalse(closeout["sync"]["flat_source_projection_present"])
+        self.assertEqual(
+            closeout["sync"]["commands"],
+            ["./bin/ask skills sync --scope workspace --projection flat --json --robot"],
+        )
         self.assertEqual(closeout["sync"]["validation_commands"], [COMMAND_HANDLE_CHECK_COMMAND])
         self.assertEqual(
             closeout["next_command"],
-            COMMAND_HANDLE_CHECK_COMMAND,
+            "./bin/ask skills sync --scope workspace --projection flat --json --robot",
         )
 
     def test_closeout_changed_plugin_reference_does_not_require_sync(self) -> None:
@@ -427,14 +430,19 @@ class TestAskRepoDoctor(unittest.TestCase):
             result = repo_closeout(REPO_ROOT, changed=True)
 
         closeout = result.data["repo_closeout"]
-        self.assertEqual(result.status, "success")
-        self.assertFalse(closeout["sync"]["needed"])
-        self.assertTrue(closeout["sync"]["flat_source_projection_present"])
-        self.assertEqual(closeout["sync"]["commands"], [])
+        self.assertEqual(result.status, "error")
+        self.assertFalse(closeout["commit_readiness"]["ready"])
+        self.assertIn("sync_required", closeout["commit_readiness"]["blockers"])
+        self.assertTrue(closeout["sync"]["needed"])
+        self.assertFalse(closeout["sync"]["flat_source_projection_present"])
+        self.assertEqual(
+            closeout["sync"]["commands"],
+            ["./bin/ask skills sync --scope workspace --projection flat --json --robot"],
+        )
         self.assertEqual(closeout["sync"]["validation_commands"], [COMMAND_HANDLE_CHECK_COMMAND])
         self.assertEqual(
             closeout["next_command"],
-            COMMAND_HANDLE_CHECK_COMMAND,
+            "./bin/ask skills sync --scope workspace --projection flat --json --robot",
         )
 
     def test_closeout_changed_skill_source_with_projection_update_requires_handle_validation(self) -> None:
