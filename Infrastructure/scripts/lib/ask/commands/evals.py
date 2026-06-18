@@ -1934,6 +1934,23 @@ def _tessl_run_budget_preflight(
     }
 
 
+def _tessl_live_private_eval_run_command(
+    tessl_path: str,
+    workspace: str,
+    staged_source: Path,
+) -> list[str]:
+    return [
+        tessl_path,
+        "eval",
+        "run",
+        "--json",
+        "--workspace",
+        workspace,
+        "--yes",
+        str(staged_source),
+    ]
+
+
 def _ensure_tessl_project_link(
     tessl_path: str,
     staged_root: Path,
@@ -2671,16 +2688,7 @@ def _run_tessl_live_private_eval(
             "blocker_class": run_budget_preflight.get("blocker_class"),
         }
 
-    cmd = [
-        tessl_path,
-        "eval",
-        "run",
-        "--json",
-        "--workspace",
-        normalized_workspace,
-        "--yes",
-        str(staged_source),
-    ]
+    cmd = _tessl_live_private_eval_run_command(tessl_path, normalized_workspace, staged_source)
     try:
         process = subprocess.run(
             cmd,
