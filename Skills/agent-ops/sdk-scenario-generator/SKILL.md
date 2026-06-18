@@ -115,3 +115,10 @@ Fix the scenario set before rerunning live Tessl unless per-scenario evidence pr
 - Read `references/gold-scenario-contract.md` for required shape and anti-easy gates.
 - Read `references/contract.yaml` for package contract, run budget, and live Tessl thresholds.
 - Read `references/evals.yaml` for starter scenarios that validate this skill.
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[evals-router]] | Choose the eval route, assertion contract, and evidence lane before scenario generation |
+| [[skill-builder]] | Repair skill gates, check scenario drift, and validate release readiness |
