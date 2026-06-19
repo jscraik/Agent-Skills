@@ -17,21 +17,21 @@
   "criteria": [
     {
       "id": "clarity",
-      "label": "Instructional clarity",
+      "label": "Clarity",
       "threshold": 0.72,
       "weight": 0.34,
       "critical": true
     },
     {
       "id": "specificity",
-      "label": "Concrete implementation detail",
+      "label": "Specificity",
       "threshold": 0.68,
       "weight": 0.33,
       "critical": true
     },
     {
       "id": "safety",
-      "label": "Safety/compliance",
+      "label": "Safety",
       "threshold": 0.85,
       "weight": 0.33,
       "critical": true
@@ -42,14 +42,14 @@
     "human_baseline_minutes": 45,
     "ai_process_minutes": 15,
     "probability_of_success": 0.75,
-    "rationale": "Co-pilot mode default: advisory guidance with controlled rollout and human oversight for promotions."
+    "rationale": "Human oversight for promotion."
   },
   "learning_posture": {
     "supported": [
+      "learn",
       "guided",
       "execute"
     ],
-    "default": "guided",
-    "rationale": "Deferred skill context should preserve human-reviewable guidance while allowing execution after repo evidence is established."
+    "default": "guided"
   }
 }

@@ -619,6 +619,278 @@ def test_tessl_eval_quality_allows_package_relative_paths() -> None:
     assert "unstaged_repo_path_reference" not in {finding["code"] for finding in findings}
 
 
+def _calibrated_guardrail_case(**overrides: object) -> dict[str, object]:
+    case: dict[str, object] = {
+        "id": "calibrated-hallucination-guardrail",
+        "unit": "hallucination guardrail",
+        "given": "A support-agent answer must stay grounded in a source-of-truth policy.",
+        "should": (
+            "Evaluate each sentence against source-of-truth evidence using factual accuracy, "
+            "relevance, policy compliance, and contextual coherence."
+        ),
+        "prompt": (
+            "Design a hallucination guardrail judge with labeled pass/fail examples, ordinary "
+            "and adversarial cases, machine-readable JSON output, precision/recall calibration, "
+            "and first-class outcomes judge_parse_error, judge_schema_error, "
+            "judge_semantic_fail, and judge_pass."
+        ),
+        "raw_response_artifact": "references/evals/artifacts/judge-raw-output.json",
+        "judge_raw_output_artifact": "references/evals/artifacts/judge-raw-output.json",
+        "judge_parse_error_artifact": "references/evals/artifacts/judge-parse-error.json",
+        "judge_schema_error_artifact": "references/evals/artifacts/judge-schema-error.json",
+        "positive_example_artifact": "references/evals/examples/guardrail-pass.json",
+        "negative_example_artifact": "references/evals/examples/guardrail-fail.json",
+        "synthetic": True,
+        "label": "pass",
+        "risk_dimension": "policy-grounding",
+        "source_policy_artifact": "references/evals/policies/source-of-truth.md",
+        "judge_temperature": 0.2,
+        "judge_runs": 3,
+        "sample_count": 40,
+        "pass_rate_threshold": 0.95,
+        "acceptance": [
+            {
+                "type": "expected_signal",
+                "value": (
+                    "Requires labeled ordinary and adversarial examples plus precision and "
+                    "recall calibration before the guardrail becomes release evidence."
+                ),
+            },
+            {
+                "type": "output_schema",
+                "value": (
+                    "Returns structured JSON with sentence_results[], overall_verdict, "
+                    "failure_reason, and source_references[]. Unsupported factual claim "
+                    "aggregation is fail-closed. A pass decision requires exact supporting "
+                    "source_references, while a fail decision records a separate rationale."
+                ),
+            },
+        ],
+    }
+    case.update(overrides)
+    return case
+
+
+def test_tessl_eval_quality_rejects_vague_hallucination_guardrail() -> None:
+    cases = [{
+        "id": "vague-hallucination-guardrail",
+        "unit": "hallucination guardrail",
+        "given": "A user wants a guardrail for hallucinations.",
+        "should": "Check truthfulness and relevance.",
+        "prompt": "Build a hallucination guardrail for this skill eval.",
+        "acceptance": [
+            {
+                "type": "expected_signal",
+                "value": "Says whether the answer is truthful and relevant.",
+            },
+        ],
+    }]
+
+    findings = evals._tessl_eval_quality_findings(cases)
+
+    assert "guardrail_missing_calibration_shape" in {finding["code"] for finding in findings}
+    assert "guardrail_missing_paired_examples" in {finding["code"] for finding in findings}
+    assert "guardrail_missing_judge_outcomes" in {finding["code"] for finding in findings}
+    assert "guardrail_missing_response_schema" in {finding["code"] for finding in findings}
+    assert "guardrail_missing_source_reference_quality" in {finding["code"] for finding in findings}
+
+
+def test_tessl_eval_quality_rejects_mixed_guardrail_terminology() -> None:
+    cases = [{
+        "id": "mixed-guardrail-terms",
+        "unit": "hallucination guardrail",
+        "given": "A support assistant answer must stay grounded in a knowledge base policy.",
+        "should": (
+            "Evaluate each sentence against source-of-truth evidence using factual accuracy, "
+            "relevance, policy compliance, and contextual coherence."
+        ),
+        "prompt": (
+            "Design a hallucination guardrail for the agent with labeled pass/fail examples, "
+            "ordinary and adversarial cases, machine-readable JSON output, and precision/recall "
+            "calibration."
+        ),
+        "positive_example_artifact": "references/evals/examples/guardrail-pass.json",
+        "negative_example_artifact": "references/evals/examples/guardrail-fail.json",
+        "judge_raw_output_artifact": "references/evals/artifacts/judge-raw-output.json",
+        "judge_parse_error_artifact": "references/evals/artifacts/judge-parse-error.json",
+        "judge_schema_error_artifact": "references/evals/artifacts/judge-schema-error.json",
+        "acceptance": [
+            {
+                "type": "output_schema",
+                "value": (
+                    "Returns structured JSON with sentence_results[], overall_verdict, "
+                    "failure_reason, and source_references[]. Unsupported factual claim "
+                    "aggregation is fail-closed. A pass decision requires exact supporting "
+                    "source_references, while a fail decision records a separate rationale."
+                ),
+            },
+            {
+                "type": "expected_signal",
+                "value": (
+                    "Requires precision and recall calibration before release evidence and "
+                    "uses outcomes judge_parse_error, judge_schema_error, "
+                    "judge_semantic_fail, and judge_pass."
+                ),
+            },
+        ],
+    }]
+
+    findings = evals._tessl_eval_quality_findings(cases)
+
+    assert "guardrail_mixed_terminology" in {finding["code"] for finding in findings}
+
+
+def test_tessl_eval_quality_accepts_calibrated_hallucination_guardrail() -> None:
+    cases = [_calibrated_guardrail_case()]
+
+    assert evals._tessl_eval_quality_findings(cases) == []
+
+
+def test_tessl_eval_quality_rejects_guardrail_without_failure_outcomes() -> None:
+    case = _calibrated_guardrail_case(
+        prompt=(
+            "Design a hallucination guardrail judge with labeled pass/fail examples, ordinary "
+            "and adversarial cases, machine-readable JSON output, and precision/recall calibration."
+        ),
+        judge_raw_output_artifact=None,
+    )
+
+    findings = evals._tessl_eval_quality_findings([case])
+
+    assert "guardrail_missing_judge_outcomes" in {finding["code"] for finding in findings}
+
+
+def test_tessl_eval_quality_rejects_guardrail_without_whole_response_schema() -> None:
+    case = _calibrated_guardrail_case(
+        acceptance=[
+            {
+                "type": "expected_signal",
+                "value": "Requires labeled examples and precision/recall calibration.",
+            },
+            {
+                "type": "output_schema",
+                "value": "Returns structured JSON with per-sentence factual accuracy evidence.",
+            },
+        ],
+    )
+
+    findings = evals._tessl_eval_quality_findings([case])
+
+    assert "guardrail_missing_response_schema" in {finding["code"] for finding in findings}
+
+
+def test_tessl_eval_quality_rejects_missing_source_reference_quality() -> None:
+    case = _calibrated_guardrail_case(
+        acceptance=[
+            {
+                "type": "expected_signal",
+                "value": (
+                    "Requires labeled ordinary and adversarial examples plus precision and "
+                    "recall calibration before the guardrail becomes release evidence."
+                ),
+            },
+            {
+                "type": "output_schema",
+                "value": (
+                    "Returns structured JSON with sentence_results[], overall_verdict, "
+                    "failure_reason, and source_references[]. Unsupported factual claim "
+                    "aggregation is fail-closed."
+                ),
+            },
+        ],
+    )
+
+    findings = evals._tessl_eval_quality_findings([case])
+
+    assert "guardrail_missing_source_reference_quality" in {finding["code"] for finding in findings}
+
+
+def test_tessl_eval_quality_flags_synthetic_guardrail_label_imbalance() -> None:
+    cases = [
+        _calibrated_guardrail_case(id="synthetic-pass-one", label="pass"),
+        _calibrated_guardrail_case(id="synthetic-pass-two", label="pass"),
+    ]
+
+    findings = evals._tessl_eval_quality_findings(cases)
+
+    assert "guardrail_synthetic_label_imbalance" in {finding["code"] for finding in findings}
+
+
+def test_tessl_eval_quality_accepts_balanced_synthetic_guardrail_labels() -> None:
+    cases = [
+        _calibrated_guardrail_case(id="synthetic-pass", label="pass"),
+        _calibrated_guardrail_case(id="synthetic-fail", label="fail"),
+    ]
+
+    findings = evals._tessl_eval_quality_findings(cases)
+
+    assert "guardrail_synthetic_label_imbalance" not in {finding["code"] for finding in findings}
+
+
+def test_tessl_eval_quality_rejects_temperature_without_sample_count() -> None:
+    case = _calibrated_guardrail_case(judge_runs=None, sample_count=None)
+
+    findings = evals._tessl_eval_quality_findings([case])
+
+    assert "judge_sampling_missing_repeat_count" in {finding["code"] for finding in findings}
+
+
+def test_tessl_criteria_preserves_guardrail_calibration_examples() -> None:
+    case = _calibrated_guardrail_case()
+
+    criteria = evals._tessl_criteria_from_case(case)
+
+    assert criteria["metadata"]["calibration_examples"] == {
+        "positive": "references/evals/examples/guardrail-pass.json",
+        "negative": "references/evals/examples/guardrail-fail.json",
+    }
+
+
+def test_tessl_criteria_preserves_guardrail_extended_metadata() -> None:
+    case = _calibrated_guardrail_case()
+
+    criteria = evals._tessl_criteria_from_case(case)
+    metadata = criteria["metadata"]
+
+    assert metadata["agent_eval_artifacts"] == {
+        "raw_response": "references/evals/artifacts/judge-raw-output.json",
+        "judge_details": None,
+        "judge_raw_output": "references/evals/artifacts/judge-raw-output.json",
+        "judge_parse_error": "references/evals/artifacts/judge-parse-error.json",
+        "judge_schema_error": "references/evals/artifacts/judge-schema-error.json",
+    }
+    assert metadata["judge_failure_outcomes"] == {
+        "parse_error": "judge_parse_error",
+        "schema_error": "judge_schema_error",
+        "semantic_fail": "judge_semantic_fail",
+        "pass": "judge_pass",
+    }
+    assert metadata["guardrail_output_contract"] == {
+        "sentence_results": "required",
+        "overall_verdict": "required",
+        "failure_reason": "required",
+        "source_references": "required_for_pass_decisions",
+        "unsupported_factual_claim": "fail_closed",
+        "fail_rationale": "separate_from_pass_reference",
+    }
+    assert metadata["synthetic_case"] == {
+        "enabled": True,
+        "label": "pass",
+        "risk_dimension": "policy-grounding",
+        "source_policy_artifact": "references/evals/policies/source-of-truth.md",
+    }
+    assert metadata["judge_sampling"] == {
+        "temperature": 0.2,
+        "runs": 3,
+        "sample_count": 40,
+    }
+    assert metadata["pass_rate_policy"] == {
+        "threshold": 0.95,
+        "calibration_artifact": None,
+        "gate_status": "advisory",
+    }
+
+
 def test_tessl_eval_quality_accepts_behavioral_scenario() -> None:
     cases = [{
         "id": "useful-scenario",
@@ -1785,6 +2057,31 @@ def test_tessl_run_budget_preflight_blocks_when_capacity_unknown(tmp_path: Path)
     assert preflight["status"] == "blocked"
     assert preflight["blocker_class"] == "blocked_validation"
     assert "could not determine remaining capacity" in preflight["blocker"]
+    assert preflight["capacity_source"] == "unparseable_eval_list"
+
+
+def test_tessl_run_budget_preflight_blocks_when_eval_list_unavailable(tmp_path: Path) -> None:
+    def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
+        assert cmd[1:3] == ["eval", "list"]
+        return mock.Mock(
+            returncode=1,
+            stdout="",
+            stderr="- Fetching eval runs...\n✖ Failed to fetch eval runs\n",
+            args=cmd,
+        )
+
+    with mock.patch.object(evals.subprocess, "run", side_effect=fake_run):
+        preflight = evals._tessl_run_budget_preflight(
+            "/usr/local/bin/tessl",
+            "skills-sdk",
+            tmp_path,
+            {},
+        )
+
+    assert preflight["status"] == "blocked"
+    assert preflight["blocker_class"] == "blocked_runtime"
+    assert "could not fetch run history" in preflight["blocker"]
+    assert preflight["capacity_source"] == "unavailable_eval_list"
 
 
 def test_tessl_eval_list_count_rejects_error_payload_lists() -> None:
@@ -1824,6 +2121,63 @@ def test_tessl_eval_list_count_accepts_prefixed_json_output() -> None:
     )
 
     assert evals._tessl_eval_list_count(stdout) == 2
+
+
+def test_tessl_pending_run_preflight_blocks_existing_project_run(tmp_path: Path) -> None:
+    payload = {
+        "data": [
+            {
+                "id": "019edf73-3fdc-749d-b470-cc10e941715e",
+                "type": "eval-run",
+                "attributes": {
+                    "status": "pending",
+                    "metadata": {
+                        "tileName": "skills-sdk/autoreview",
+                        "tileVersion": "0.1.0",
+                    },
+                },
+            }
+        ]
+    }
+
+    def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
+        assert cmd[1:3] == ["eval", "list"]
+        assert "--status" not in cmd
+        assert "--tile" not in cmd
+        return mock.Mock(returncode=0, stdout=json.dumps(payload), stderr="", args=cmd)
+
+    with mock.patch.object(evals.subprocess, "run", side_effect=fake_run):
+        preflight = evals._tessl_pending_run_preflight(
+            "/usr/local/bin/tessl",
+            "skills-sdk",
+            "autoreview",
+            tmp_path,
+            {},
+        )
+
+    assert preflight["status"] == "blocked"
+    assert preflight["blocker_class"] == "blocked_environment"
+    assert preflight["pending_eval_run_ids"] == ["019edf73-3fdc-749d-b470-cc10e941715e"]
+    assert "inspect that run instead" in preflight["blocker"]
+
+
+def test_tessl_pending_run_preflight_blocks_unparseable_history(tmp_path: Path) -> None:
+    def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
+        assert cmd[1:3] == ["eval", "list"]
+        return mock.Mock(returncode=0, stdout='{"unexpected":"shape"}', stderr="", args=cmd)
+
+    with mock.patch.object(evals.subprocess, "run", side_effect=fake_run):
+        preflight = evals._tessl_pending_run_preflight(
+            "/usr/local/bin/tessl",
+            "skills-sdk",
+            "autoreview",
+            tmp_path,
+            {},
+        )
+
+    assert preflight["status"] == "blocked"
+    assert preflight["blocker_class"] == "blocked_validation"
+    assert "could not parse run history" in preflight["blocker"]
 
 
 def test_tessl_run_budget_preflight_blocks_at_reserve(tmp_path: Path) -> None:
@@ -1896,6 +2250,16 @@ def test_evals_live_private_invokes_tessl_with_workspace_and_plugin_manifest(tmp
         stdout=json.dumps({
             "data": {
                 "attributes": {
+                    "agent": "claude",
+                    "model": "deepseek-v4-flash",
+                    "scorerAgent": "glm",
+                    "scorerModel": "glm-5.1",
+                    "usage": {
+                        "meanTurns": 20,
+                        "p95Turns": 37,
+                        "totalTokens": 12345,
+                        "estimatedCostUsd": 0.0236,
+                    },
                     "scenarios": [
                         {
                             "solutions": [
@@ -1986,8 +2350,78 @@ def test_evals_live_private_invokes_tessl_with_workspace_and_plugin_manifest(tmp
     assert result.data["tessl_eval"]["policy"]["command_shape"] == (
         "tessl eval run --json --workspace <workspace> <staged-plugin-dir>"
     )
-    assert result.data["tessl_eval"]["live_result_summary"]["meets_min_score"] is True
-    assert result.data["tessl_eval"]["live_result_summary"]["beats_baseline"] is True
+    assert result.data["tessl_eval"]["policy"]["duplicate_run_guard"].startswith("before live scoring")
+    summary = result.data["tessl_eval"]["live_result_summary"]
+    assert summary["meets_min_score"] is True
+    assert summary["beats_baseline"] is True
+    assert summary["model_selection"] == {
+        "agent": "claude",
+        "model": "deepseek-v4-flash",
+        "scorer_agent": "glm",
+        "scorer_model": "glm-5.1",
+        "quality_floor_before_cost": True,
+        "cost_is_secondary_to_score": True,
+    }
+    assert summary["comparative_quality"]["with_skill_score"] == 1
+    assert summary["comparative_quality"]["without_skill_score"] == 0
+    assert summary["cost_observability"]["turn_metrics_available"] is True
+    assert summary["cost_observability"]["token_metrics_available"] is True
+    assert summary["cost_observability"]["cost_metrics_available"] is True
+    assert summary["cost_observability"]["turn_metrics"]["usage.meanTurns"] == 20
+    assert summary["cost_observability"]["turn_metrics"]["usage.p95Turns"] == 37
+    assert summary["cost_observability"]["token_metrics"]["usage.totalTokens"] == 12345
+    assert summary["cost_observability"]["cost_metrics"]["usage.estimatedCostUsd"] == 0.0236
+
+
+def test_evals_live_private_blocks_before_submit_when_pending_run_exists(tmp_path: Path) -> None:
+    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
+    pending_payload = {
+        "data": [
+            {
+                "id": "019edf73-3fdc-749d-b470-cc10e941715e",
+                "type": "eval-run",
+                "attributes": {
+                    "status": "pending",
+                    "metadata": {"tileName": "jscraik/example-skill"},
+                },
+            }
+        ]
+    }
+    _write_example_skill(tmp_path)
+
+    def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
+        if cmd[1:3] == ["project", "repair"] and "--json" in cmd:
+            return mock.Mock(
+                returncode=0,
+                stdout='{"workspace":"jscraik","project":"example-skill","name":"jscraik/example-skill"}',
+                stderr="",
+                args=cmd,
+            )
+        if cmd[1:3] == ["eval", "list"]:
+            return mock.Mock(returncode=0, stdout=json.dumps(pending_payload), stderr="", args=cmd)
+        if cmd[1:3] == ["eval", "run"]:
+            raise AssertionError("duplicate pending run guard must block before tessl eval run")
+        return completed
+
+    with (
+        mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
+        mock.patch.object(evals.subprocess, "run", side_effect=fake_run),
+    ):
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/example-skill",
+            mode="smoke",
+            tessl_live_private=True,
+            tessl_workspace="jscraik",
+        )
+
+    assert result.status == "error"
+    tessl_eval = result.data["tessl_eval"]
+    assert tessl_eval["status"] == "blocked"
+    assert tessl_eval["blocker_class"] == "blocked_environment"
+    assert tessl_eval["pending_run_preflight"]["pending_eval_run_ids"] == [
+        "019edf73-3fdc-749d-b470-cc10e941715e"
+    ]
 
 
 def test_evals_live_private_fails_when_score_is_below_baseline(tmp_path: Path) -> None:
