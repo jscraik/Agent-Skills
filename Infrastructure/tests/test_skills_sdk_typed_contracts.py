@@ -104,6 +104,14 @@ class TestSkillsSdkTypedContracts(unittest.TestCase):
         with self.assertRaises(ValidationError):
             contracts.validate_package_hardening_receipt(payload)
 
+    def test_package_hardening_contract_rejects_empty_included_file_items(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "package-hardening-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["included_files"] = [""]
+
+        with self.assertRaises(ValidationError):
+            contracts.validate_package_hardening_receipt(payload)
+
     def test_eval_run_contract_rejects_mutation_claims(self) -> None:
         payload = _json(FIXTURE_DIR / "valid" / "eval-run-receipt.json")
         self.assertIsInstance(payload, dict)
