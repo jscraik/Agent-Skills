@@ -1,9 +1,0 @@
-The target project state is unknown, so I need one choice before I proceed:
-
-1. `Interactive`
-   I’ll pause for confirmations where needed.
-
-2. `Headless assumption`
-   I’ll assume a non-interactive, CLI-only workflow and keep moving.
-
-Reply with `1` or `2`.

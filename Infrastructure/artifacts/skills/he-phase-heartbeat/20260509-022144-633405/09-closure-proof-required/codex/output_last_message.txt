@@ -1,1 +1,0 @@
-I’ll keep the phase open until either the eval proof artifact exists or I’ve stated the blocker explicitly. I won’t mark it closed early.

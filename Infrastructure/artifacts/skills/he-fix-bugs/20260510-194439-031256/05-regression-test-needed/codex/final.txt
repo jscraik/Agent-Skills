@@ -1,8 +1,0 @@
-I’m blocked by the current environment: the local shell is refusing every filesystem command with `sandbox_apply: Operation not permitted`, so I can’t inspect the failing test, patch the code, or add the regression test from here.
-
-If you can share one of these, I can continue immediately:
-1. The failing test name and failure output.
-2. The relevant files or a pasted snippet of the routing code and test.
-3. A way to run the repo commands in this session so I can read and edit the tree.
-
-Once I have that, I’ll make the smallest fix and add the narrowest regression evidence that catches it.

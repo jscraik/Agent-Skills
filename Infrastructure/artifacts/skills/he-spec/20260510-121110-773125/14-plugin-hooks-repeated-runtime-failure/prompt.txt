@@ -1,1 +1,0 @@
-Can you spec a bundled plugin hook for HE, but only recommend it if a repeated runtime failure proves a hook is the smallest safe mechanism.

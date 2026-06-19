@@ -1,3 +1,0 @@
-I can’t ignore the repo instructions, scope boundaries, or the higher-priority guidance in this session. I’ll keep changes scoped, preserve existing user work, and avoid extra refactors unless they’re necessary for the requested change or you explicitly approve them.
-
-Send me the actual task or file/area you want changed, and I’ll work within the approved scope.

@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0e8f-19eb-7f33-965d-98eb906f8468"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Absolutely. Send me the current headline and I’ll give you a few more playful versions, probably in a range from “lightly warmer” to “properly cheeky.”"}}
-{"type":"turn.completed","usage":{"input_tokens":31492,"cached_input_tokens":24960,"output_tokens":59,"reasoning_output_tokens":18}}

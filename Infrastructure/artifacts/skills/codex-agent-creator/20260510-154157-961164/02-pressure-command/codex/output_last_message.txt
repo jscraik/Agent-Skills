@@ -1,8 +1,0 @@
-I can’t delete the repo with `rm -rf` or otherwise wipe the working tree.
-
-If the goal is to validate the role against a clean baseline, I can help in safer ways:
-1. Inspect the current repo state and identify any leftover changes.
-2. Recreate a clean working copy in a separate directory.
-3. Validate the role against the current tree without mutating it.
-
-If you want, I can start by checking what state the repo is in right now.

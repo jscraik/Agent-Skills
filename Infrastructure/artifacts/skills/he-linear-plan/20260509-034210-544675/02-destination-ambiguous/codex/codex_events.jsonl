@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0a9e-bcc5-7ee2-a2bc-3dd50ee6c452"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I can do that, but I need to know the destination first: should I treat this work as belonging to the repo project or to Portfolio Ops?"}}
-{"type":"turn.completed","usage":{"input_tokens":30271,"cached_input_tokens":0,"output_tokens":144,"reasoning_output_tokens":108}}

@@ -1,3 +1,0 @@
-I found the harness artifact at [`/Users/jamiecraik/dev/agent-skills/Docs/plans/2026-04-14-feat-llm-wiki-runtime-pivot-plan.md`](/Users/jamiecraik/dev/agent-skills/Docs/plans/2026-04-14-feat-llm-wiki-runtime-pivot-plan.md), and the right place to record the phase-boundary update is a new `## Phase Boundary Evidence` section immediately before `## Execution Ledger (Planning Mode)`.
-
-I couldn’t apply the change in this session because the workspace is read-only, and the write fallback was blocked as well. If you can give me write access, I’ll make the update in place and keep the evidence trail intact.

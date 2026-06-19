@@ -1,1 +1,0 @@
-Can you plan a domain-sensitive change where the Account aggregate boundary and lifecycle ownership determine implementation order.

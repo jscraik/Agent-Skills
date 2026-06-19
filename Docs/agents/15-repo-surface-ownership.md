@@ -111,6 +111,32 @@ Those labels hide authority boundaries. When ownership cannot be proven, emit
 | `skills-system/<locked-or-bridge>/**`                 | `generated_tracked`                 | Preserve governed system-skill bridge content pinned by `Infrastructure/GOVERNANCE/skills-system-upstream.lock.json`; refresh only through the system-skills lock and projection-integrity workflow.                                                        |
 | `Infrastructure/Infrastructure/**`                    | `classification_required` violation | Treat duplicated path shape as suspicious until allowlisted with reason.                                                                                                                                                                                    |
 
+## Future Artifact Rule
+
+Historical artifact debt is split into two lanes:
+
+- Existing tracked historical artifacts remain advisory diagnostic debt until a
+  cleanup slice can classify and remove them safely.
+- Any changed file that classifies as `historical_artifact` is blocking unless
+  it has a reviewed allowlist entry or is converted into a fixture, reference,
+  summary, index, or intentional archive.
+
+Use this rule to keep the legacy backlog visible without letting new generated
+evidence, logs, event streams, or run output enter the repository as ordinary
+tracked source. The changed-files gate is:
+
+```bash
+python3 Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py --strict --changed-files <path>...
+```
+
+If the gate reports `new_historical_artifact_debt`, do one of:
+
+1. Move the output to ignored temp or evidence storage.
+2. Convert the artifact candidate into a documented fixture/reference/archive
+   with a reader and retention reason.
+3. Add a reviewed entry to `Infrastructure/policy/repo_surface_allowlist.json`
+   with owner and review date.
+
 ## Unclassified Ownership
 
 Unclassified ownership is a blocker, not a delete signal.

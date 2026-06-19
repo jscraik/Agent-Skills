@@ -1,7 +1,0 @@
-Yes. Before I treat a report-style task as fully closed, I’ll ask you to choose one of:
-
-- `accept` the report as-is
-- `challenge` it, meaning I should stress-test the conclusions and look for weak assumptions
-- `rework` it, meaning I should revise the report before closure
-
-I’ll make that an explicit checkpoint before final closure when the task involves a report.

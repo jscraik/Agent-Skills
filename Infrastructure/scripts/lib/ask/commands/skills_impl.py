@@ -710,16 +710,15 @@ class _RouterSkill:
 
 STARTER_ARCHETYPES = {
     "general": (
-        "he-brainstorm",
-        "he-spec",
-        "he-plan",
-        "he-work",
-        "he-technical-review",
+        "autofix",
+        "testing",
+        "simplify",
+        "improve-codebase-architecture",
         "docs-expert",
         "context7",
     ),
-    "delivery": ("he-plan", "he-work", "he-code-review", "coding-harness", "docs-expert"),
-    "review": ("he-technical-review", "he-code-review", "he-reliability-review", "autofix"),
+    "delivery": ("pr-green-sweep", "testing", "autofix", "coding-harness", "docs-expert"),
+    "review": ("improve-codebase-architecture", "he-code-review", "autofix", "testing"),
     "docs": ("agents-md", "docs-expert", "context7", "openai-docs"),
 }
 
@@ -1229,8 +1228,8 @@ def skills_handles(
         result.errors.append(
             ErrorObject(
                 code="ERR_INVALID_PROJECTION_MODE",
-                message="Removed projection flags are not part of the SDK handles path.",
-                fix_suggestion="Use ./bin/ask skills sync --scope workspace --projection flat --json --robot, then rerun ./bin/ask skills handles --check --json --robot.",
+                message="Removed projection flags are not part of the SDK target registry path.",
+                fix_suggestion="Use ./bin/ask skills sync --scope workspace --projection flat --json --robot, then rerun ./bin/ask skills list --json --robot.",
             )
         )
 
@@ -1261,8 +1260,8 @@ def skills_handles(
         result.errors.append(
             ErrorObject(
                 code="ERR_VALIDATION",
-                message="SDK skill handle validation failed.",
-                fix_suggestion="Inspect data.violations, fix SDK skill metadata, and rerun ./bin/ask skills handles --check --json --robot.",
+                message="SDK skill target validation failed.",
+                fix_suggestion="Inspect data.violations, fix SDK skill metadata, and rerun ./bin/ask skills list --json --robot.",
             )
         )
     return result
@@ -1507,12 +1506,12 @@ CAPABILITY_LIFECYCLE_EVENT_CONSUMERS: dict[str, dict[str, Any]] = {
     "projection_synced": {
         "profiles": ["authoring", "live-mutation"],
         "producer_commands": [_skills_validation_command("sync")],
-        "observer_commands": [_skills_validation_command("handles", "--check")],
+        "observer_commands": [_skills_validation_command("list")],
     },
     "manifest_changed": {
         "profiles": ["authoring", "plugin-share", "live-mutation"],
         "producer_commands": [_skills_validation_command("sync", "--scope", "workspace", "--projection", "flat")],
-        "observer_commands": [_skills_validation_command("handles", "--check")],
+        "observer_commands": [_skills_validation_command("list")],
     },
 }
 
@@ -2090,7 +2089,7 @@ def skills_events(repo_root: Path, event_type: str | None = None) -> CallResult:
         "validation_commands": [
             _skills_validation_command("events"),
             "./bin/ask skills events <event-type> --json --robot",
-            _skills_validation_command("handles", "--check", "--no-handles"),
+            _skills_validation_command("list"),
         ],
         "eval_blocker_classes": {
             blocker_class: DOCTOR_BLOCKER_TAXONOMY[blocker_class]
@@ -2239,7 +2238,7 @@ def _skill_profiles_operation_context() -> dict[str, Any]:
             "events": ["authoring", "package-review", "plugin-share", "eval", "live-mutation"],
         },
         "validation_commands": [
-            _skills_validation_command("handles", "--check", "--no-handles"),
+            _skills_validation_command("list"),
             _skills_validation_command("events"),
         ],
     }
@@ -2594,11 +2593,10 @@ def _skill_root_ownership_for_path(
 
     path = repo_relative_path.strip().strip("/")
     parts = Path(path).parts
+    normalized_parts = _repo_relative_path_parts(path)
     manifest_ownership = _manifest_skill_root_ownership(repo_root, path)
     if manifest_ownership:
         return manifest_ownership
-
-    normalized_parts = _repo_relative_path_parts(path)
     if normalized_parts[:2] == (".agents", "skills"):
         return {
             "path": path,
@@ -3087,6 +3085,7 @@ def _resolve_doctor_target(repo_root: Path, target: str) -> tuple[dict[str, Any]
     looks_like_path = "/" in query or query.endswith(".md") or query.startswith(".")
     if looks_like_path:
         target_path, target_path_value = _normalize_skill_target_path(query)
+        requested_path_value = Path(query).as_posix()
         resolved_path, path_error = _validate_repo_relative_skill_path(repo_root, query)
         if path_error:
             return {
@@ -3101,6 +3100,7 @@ def _resolve_doctor_target(repo_root: Path, target: str) -> tuple[dict[str, Any]
             "handle": None,
             "source_path": source_rel,
             "target_path": target_path_value,
+            "requested_path": requested_path_value,
             "source_exists": source.is_file(),
             "resolution": None,
         }, Path(source_rel).parent.as_posix() if source_rel else target_path.as_posix()
@@ -3570,9 +3570,10 @@ def skills_doctor(
         )
 
     projection_path_value = None
-    target_path_value = target_info.get("target_path")
+    target_path_value = target_info.get("requested_path") or target_info.get("target_path")
+    ownership_source_path = target_path_value if target_kind != "skill_handle" else source_path_value
     source_ownership = _skill_root_ownership_for_path(
-        str(source_path_value) if source_path_value else None,
+        str(ownership_source_path) if ownership_source_path else None,
         repo_root=repo_root,
     )
     target_ownership = (
@@ -5867,7 +5868,21 @@ def fold_skills(repo_root: Path, source: str, target: str, sensitivity: float = 
         ))
         return result
 
-    catalog = builder_catalog.load_catalog(repo_root)
+    try:
+        catalog = builder_catalog.load_catalog(repo_root)
+    except Exception as exc:  # noqa: BLE001 - convert optional Skill Factory loader failures into ASK errors.
+        result.status = "error"
+        result.data["dependency_status"] = {
+            "skill_catalog": "load_failed",
+            "skill_router": "available",
+            "error": str(exc),
+        }
+        result.errors.append(ErrorObject(
+            code="ERR_DEPENDENCY",
+            message="Skill router or builder catalog not available.",
+            fix_suggestion="Inspect data.dependency_status.error or use skills route for current routing checks.",
+        ))
+        return result
     source_skill = next((s for s in catalog.skills if s.name == source or str(s.skill_path).endswith(source)), None)
     target_skill = next((s for s in catalog.skills if s.name == target or str(s.skill_path).endswith(target)), None)
 
@@ -6259,23 +6274,23 @@ _IMPROVE_STOPWORDS = frozenset({
 _IMPROVE_HANDLE_HINTS = (
     (
         frozenset({"validation", "blockers", "fix"}),
-        "he-fix-bugs",
-        "fallback HE validation-blocker intent hint",
+        "autofix",
+        "fallback validation-blocker intent hint",
     ),
     (
         frozenset({"review", "implementation", "spec"}),
         "he-code-review",
-        "fallback HE implementation-review intent hint",
+        "fallback implementation-review intent hint",
     ),
     (
         frozenset({"monitor", "long", "running", "phase"}),
-        "he-phase-work",
-        "fallback HE phase-monitoring intent hint",
+        "pr-green-sweep",
+        "fallback PR sweep and long-running validation intent hint",
     ),
     (
         frozenset({"linear", "backed", "spec"}),
-        "he-spec",
-        "fallback HE spec intent hint",
+        "cli-spec",
+        "fallback spec intent hint",
     ),
 )
 

@@ -1,8 +1,0 @@
-I can’t run `rm -rf` in this environment, and I don’t want to risk deleting your workspace state.
-
-If you want a clean start, I can help with one of these safer options:
-1. Inspect and summarize the current repo state, then validate from there.
-2. Create a fresh working branch or a new empty workspace path if your environment supports it.
-3. Help you identify exactly which files or generated artifacts to remove manually without touching the whole repo.
-
-If you want, I can start by checking the current state and then we’ll validate the role from the live tree.

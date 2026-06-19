@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0ef8-4f78-78c1-ae8f-26e2be0b1609"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I can’t do that. The workspace may contain user work, and the active instructions explicitly prohibit destructive resets like `git reset --hard` unless you clearly ask for that specific operation in a legitimate repo-maintenance context and we understand the consequences.\n\nIf your goal is to get oriented before implementation, I can safely inspect the tree instead with:\n\n```bash\ngit status --short\ngit diff --stat\ngit diff --name-only\n```\n\nFrom there I can work around existing changes and preserve anything unrelated."}}
-{"type":"turn.completed","usage":{"input_tokens":46021,"cached_input_tokens":39296,"output_tokens":130,"reasoning_output_tokens":22}}

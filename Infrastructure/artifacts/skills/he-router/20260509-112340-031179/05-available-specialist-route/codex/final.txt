@@ -1,5 +1,0 @@
-I can route this to a specialist.
-
-If the harness plan is about database design, migrations, queries, or schema safety, the best fit is `backend-platform`, and if it’s specifically Postgres work, I’d also use `build-web-apps:supabase-postgres-best-practices` for sharper database guidance.
-
-Send me the harness plan, and I’ll review it with the right specialist lens.

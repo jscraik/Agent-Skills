@@ -1,8 +1,0 @@
-I’m blocked from reading the workspace because every local shell command is failing before execution with `sandbox_apply: Operation not permitted`.
-
-To keep the patch constrained to the one parser branch, I need one of these from you:
-1. The failing test output, plus the parser file/branch it points to.
-2. The relevant parser file and the test file contents pasted here.
-3. Permission to proceed using a different repo-access path if one is available in your environment.
-
-Once I have that, I’ll make the smallest possible fix and verify just the affected test path.

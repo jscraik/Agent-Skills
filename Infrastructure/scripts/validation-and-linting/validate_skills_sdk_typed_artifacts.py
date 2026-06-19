@@ -14,6 +14,7 @@ from typing import Iterable, Sequence
 
 FORBIDDEN_ROOT_PACKAGE_FILES = (
     "package.json",
+    "package-lock.json",
     "pnpm-lock.yaml",
     "yarn.lock",
     "pyproject.toml",
@@ -114,20 +115,6 @@ def validate_root_package_boundary(repo_root: Path) -> ValidationCheck:
                 )
             )
 
-    npm_lock = repo_root / "package-lock.json"
-    if npm_lock.exists():
-        if (repo_root / "package.json").exists() or not _is_empty_root_package_lock(npm_lock):
-            issues.append(
-                ValidationIssue(
-                    code="skills_sdk_root_package_lock_forbidden",
-                    message=(
-                        "The root package-lock.json may only remain as the existing empty stub; "
-                        "new root npm dependency state belongs outside the Skills SDK typing slice."
-                    ),
-                    path=_repo_relative(npm_lock, repo_root),
-                )
-            )
-
     for name in ALLOWED_INFRASTRUCTURE_PACKAGE_FILES:
         candidate = repo_root / name
         if not candidate.exists():
@@ -151,19 +138,6 @@ def validate_root_package_boundary(repo_root: Path) -> ValidationCheck:
         id="root_package_boundary",
         status="pass",
         summary="root package-manager boundary is enforced",
-    )
-
-
-def _is_empty_root_package_lock(path: Path) -> bool:
-    try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError:
-        return False
-    return (
-        payload.get("lockfileVersion") == 3
-        and payload.get("requires") is True
-        and payload.get("packages") == {}
-        and set(payload).issubset({"name", "lockfileVersion", "requires", "packages"})
     )
 
 

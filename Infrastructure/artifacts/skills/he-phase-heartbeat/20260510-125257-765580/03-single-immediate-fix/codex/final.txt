@@ -1,3 +1,0 @@
-Send me the typo plus the file path or a nearby phrase, and I’ll keep it to that single patch.
-
-One constraint: this session is currently in a read-only filesystem sandbox, so I can inspect and give you the exact patch, but I may not be able to apply it directly unless the environment allows writes in a later turn.

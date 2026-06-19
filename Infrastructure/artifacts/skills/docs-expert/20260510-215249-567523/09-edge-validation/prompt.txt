@@ -1,1 +1,0 @@
-Validate the docs pass for `docs/cli.md` and list exact files or commands used as evidence before marking the rewrite complete.

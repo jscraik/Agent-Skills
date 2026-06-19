@@ -1,3 +1,0 @@
-I can do that, but I need the plan text or the file path first.
-
-For the CLI-behavior section, the best specialist to apply is `cli-agent-readiness-reviewer` if the goal is to judge whether the plan is actually good for agent use on a CLI. If you paste the section or point me at the file, I’ll review just that part with that lens and keep it focused.

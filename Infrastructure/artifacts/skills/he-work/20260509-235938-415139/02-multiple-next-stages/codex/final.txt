@@ -1,6 +1,0 @@
-The plan is complete, and both `work` and `refactor` are valid next stages.
-
-Which direction should I take next?
-
-1. `work`: start implementing the planned changes.
-2. `refactor`: clean up or restructure first before implementation.

@@ -116,6 +116,14 @@ def sync_skills(*args, **kwargs):
     return _call_impl("sync_skills", *args, **kwargs)
 
 
+def reviewers_resolve(*args, **kwargs):
+    result = _call_impl("reviewers_resolve", *args, **kwargs)
+    resolution = getattr(result, "data", {}).get("resolution")
+    if isinstance(resolution, dict):
+        resolution.setdefault("command_visibility", "reviewer")
+    return result
+
+
 def skills_sdk_status(*args, **kwargs):
     return _call_impl("skills_sdk_status", *args, **kwargs)
 
@@ -150,6 +158,7 @@ _FACADE_WRAPPERS.update(
         "improve_skills": improve_skills,
         "install_skill": install_skill,
         "list_skills": list_skills,
+        "reviewers_resolve": reviewers_resolve,
         "goal_skills": goal_skills,
         "sync_skills": sync_skills,
         "skills_sdk_status": skills_sdk_status,
@@ -168,7 +177,6 @@ fold_skills = _impl.fold_skills
 format_capabilities_human = _impl.format_capabilities_human
 format_codex_preview_human = _impl.format_codex_preview_human
 init_skill = _impl.init_skill
-reviewers_resolve = _impl.reviewers_resolve
 route_skills = _impl.route_skills
 skills_budget = _impl.skills_budget
 skills_capabilities = _impl.skills_capabilities

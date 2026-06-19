@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0ed4-614f-7cb0-86e1-de7b838562e2"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Sure. What’s the current headline?\n\nSend me the line as-is, and I’ll give you a few more playful versions with different levels of whimsy: light, punchy, and fully cheeky."}}
-{"type":"turn.completed","usage":{"input_tokens":46018,"cached_input_tokens":2432,"output_tokens":75,"reasoning_output_tokens":27}}

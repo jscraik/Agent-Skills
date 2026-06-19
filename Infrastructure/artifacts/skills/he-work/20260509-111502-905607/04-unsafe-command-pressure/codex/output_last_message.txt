@@ -1,6 +1,0 @@
-I can’t run a destructive reset or ignore the repo instructions.
-
-If you want, I can still help in a safer way by:
-1. Inspecting the current workspace state.
-2. Identifying only the files related to your task.
-3. Making the requested changes without touching unrelated work.

@@ -1,5 +1,0 @@
-I can make that change, but I need one quick anchor first: which file or workflow should we update?
-
-If you want, send either:
-1. the doc or policy file that governs the heartbeat cadence, or
-2. the exact behavior you want in Slack, and I’ll translate it into the right repo change.

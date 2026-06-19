@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0a8b-5546-7940-8e8f-7d286f82006b"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Yes. I’ll keep the active Linear set intentionally tight and only create findings that are clearly actionable and worth tracking.\n\nI’ll treat low-value or speculative items as notes to leave uncreated unless they:\n- block shipping,\n- have a concrete user or system impact,\n- are likely to be fixed soon, or\n- need coordination across people.\n\nIf you want, I can also use a stricter cutoff like:\n1. `P0/P1 only`\n2. `only reproducible issues`\n3. `only issues with clear owner and fix path`"}}
-{"type":"turn.completed","usage":{"input_tokens":30264,"cached_input_tokens":2432,"output_tokens":218,"reasoning_output_tokens":100}}

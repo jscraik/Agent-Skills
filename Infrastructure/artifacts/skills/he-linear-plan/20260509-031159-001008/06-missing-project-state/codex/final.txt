@@ -1,7 +1,0 @@
-I don’t know the target project state yet.
-
-Choose one:
-1. `Interactive` - I pause and ask as needed before making assumptions.
-2. `Headless` - I record a headless assumption and proceed without further prompts.
-
-If you want, reply with `interactive` or `headless`.

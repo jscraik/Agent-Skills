@@ -1,3 +1,0 @@
-$codex-agent-creator
-
-Review this proposed Codex role and separate verified facts, assumptions, inferred risks, and unknowns before editing.

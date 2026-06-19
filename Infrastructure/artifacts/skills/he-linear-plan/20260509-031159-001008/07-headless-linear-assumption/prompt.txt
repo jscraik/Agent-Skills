@@ -1,1 +1,0 @@
-Can you in autonomous mode, preserve the assumption that no Linear objects are created without confirmation.

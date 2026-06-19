@@ -1,3 +1,0 @@
-$docs-expert
-
-Use $docs-expert to audit this release runbook against the scripts.

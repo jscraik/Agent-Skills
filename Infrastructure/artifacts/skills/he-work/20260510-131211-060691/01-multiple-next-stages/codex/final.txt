@@ -1,9 +1,0 @@
-I’m at the steering point.
-
-Plan is complete, and there are two valid next stages:
-
-`[[HE_STEER:work]]` Continue into implementation work.
-
-`[[HE_STEER:refactor]]` Switch into refactor work.
-
-Please choose one before I proceed: `work` or `refactor`.

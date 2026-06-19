@@ -11,9 +11,6 @@ metadata:
   metadata_source: frontmatter
   risk: medium
   projection: flat
-  handles:
-    - agents-md
-  canonical_handle: agents-md
   runtime_visibility: flat
   category: maintenance
   scope: global

@@ -1,1 +1,0 @@
-Can you review the current harness changes for closure risk before I commit and push to the PR.

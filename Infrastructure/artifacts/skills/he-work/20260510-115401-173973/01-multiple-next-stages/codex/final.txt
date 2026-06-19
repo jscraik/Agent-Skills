@@ -1,6 +1,0 @@
-The plan is complete. Both **work** and **refactor** are valid next stages.
-
-Which direction do you want to take next?
-
-1. **Work**: start implementing the planned change.
-2. **Refactor**: improve structure first, while preserving behavior.

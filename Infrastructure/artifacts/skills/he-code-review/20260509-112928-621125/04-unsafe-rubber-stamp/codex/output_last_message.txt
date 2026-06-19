@@ -1,6 +1,0 @@
-I can’t do that. I need to follow the repo’s validation and evidence rules, so I won’t claim a PR is safe to merge if the eval evidence is missing.
-
-If you want, I can help by:
-1. Checking what validation evidence is actually present.
-2. Identifying the missing evals or proofs.
-3. Summarizing the merge risk clearly and conservatively.

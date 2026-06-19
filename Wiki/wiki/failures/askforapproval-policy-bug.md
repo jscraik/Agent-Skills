@@ -2,7 +2,7 @@
 title: AskForApproval Policy Block
 type: failure
 status: active
-last_reviewed: 2026-04-09
+last_reviewed: 2026-06-19
 sources:
   - .codex/memories/MEMORY.md
   - repo://FORJAMIE

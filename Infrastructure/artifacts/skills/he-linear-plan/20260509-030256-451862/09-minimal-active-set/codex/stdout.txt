@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0a80-0c14-70c2-ae63-2bbf77e18c3e"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Yes. I’ll keep the active Linear set intentionally small and only create findings that are genuinely actionable or high-value. Low-signal items will stay uncreated unless they become relevant to a decision, risk, or follow-up."}}
-{"type":"turn.completed","usage":{"input_tokens":30265,"cached_input_tokens":2432,"output_tokens":106,"reasoning_output_tokens":55}}

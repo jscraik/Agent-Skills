@@ -1,1 +1,0 @@
-Can you in unattended mode, record strategic assumptions instead of blocking on optional questions.

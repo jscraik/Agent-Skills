@@ -282,6 +282,42 @@ def _distinct_records(records: list[SdkSkillRecord]) -> list[SdkSkillRecord]:
     return distinct
 
 
+def _requested_source_paths(requested: str, root: Path) -> set[str]:
+    candidate = Path(requested)
+    if not (candidate.parts and ("/" in requested or requested.endswith(".md"))):
+        return set()
+    if candidate.is_absolute():
+        try:
+            candidate = candidate.resolve().relative_to(root.resolve())
+        except (OSError, ValueError):
+            return set()
+    values = {candidate.as_posix()}
+    if candidate.name == "SKILL.md":
+        values.add(candidate.parent.as_posix())
+    else:
+        values.add((candidate / "SKILL.md").as_posix())
+    return values
+
+
+def _resolve_sdk_skill_source_path(requested: str, root: Path) -> list[SdkSkillRecord]:
+    source_paths = _requested_source_paths(requested, root)
+    if not source_paths:
+        return []
+    return _distinct_records([
+        record
+        for record in build_sdk_skill_record_candidates(repo_root_path=root, visibility="advanced")
+        if record.source_path in source_paths or Path(record.source_path).parent.as_posix() in source_paths
+    ])
+
+
+def _resolve_sdk_skill_name(requested: str, root: Path) -> list[SdkSkillRecord]:
+    return _distinct_records([
+        record
+        for record in build_sdk_skill_record_candidates(repo_root_path=root, visibility="advanced")
+        if record.handle == requested or record.name == requested
+    ])
+
+
 def _collision_policy_path(path: str) -> str:
     parts = Path(path).parts
     if parts and parts[-1] == "SKILL.md":
@@ -411,11 +447,8 @@ def resolve_sdk_skill_handle(handle: str, *, repo_root_path: Path | None = None)
             "operator_action": "Pass a skill handle such as agents-md.",
         }
 
-    matches = _distinct_records([
-        record
-        for record in build_sdk_skill_record_candidates(repo_root_path=repo_root_path, visibility="advanced")
-        if record.handle == requested or record.name == requested
-    ])
+    root = repo_root_path or REPO_ROOT
+    matches = _resolve_sdk_skill_source_path(requested, root) or _resolve_sdk_skill_name(requested, root)
     if not matches:
         return {
             "status": "error",

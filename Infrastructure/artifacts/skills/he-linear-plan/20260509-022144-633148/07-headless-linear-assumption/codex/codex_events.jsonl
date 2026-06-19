@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0a56-2c7b-7ad2-9627-9504f2b75367"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Yes. I’ll keep that assumption in autonomous mode: no Linear objects will be created unless you explicitly confirm first.\n\nIf you want, I can also treat this as a standing workflow rule for future Linear-related work in this repo."}}
-{"type":"turn.completed","usage":{"input_tokens":30273,"cached_input_tokens":30080,"output_tokens":157,"reasoning_output_tokens":105}}

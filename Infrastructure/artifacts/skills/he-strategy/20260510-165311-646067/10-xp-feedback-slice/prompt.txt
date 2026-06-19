@@ -1,1 +1,0 @@
-Can you compress the strategy into the smallest feedback-producing next slice and name the stop or pivot condition.

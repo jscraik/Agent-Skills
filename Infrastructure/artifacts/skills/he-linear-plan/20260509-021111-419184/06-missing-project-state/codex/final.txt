@@ -1,1 +1,0 @@
-I don’t have the target project state yet. Should I treat this as an interactive session and ask before proceeding, or record a headless assumption and continue?

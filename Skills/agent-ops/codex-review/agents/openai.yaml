@@ -1,7 +1,7 @@
 interface:
   display_name: "Codex Review"
-  short_description: "$codex-review - Codex Review entrypoint"
-  default_prompt: "$codex-review "
+  short_description: "Codex Review entrypoint"
+  default_prompt: "Use Codex Review. "
 
 policy:
   allow_implicit_invocation: false

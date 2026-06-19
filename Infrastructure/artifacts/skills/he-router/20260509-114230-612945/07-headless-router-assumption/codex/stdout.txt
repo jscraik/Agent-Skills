@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0c56-4e5e-71e1-b696-eb15910580df"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’ll treat this as an autonomy constraint for the session:\n\n- I’ll record the route assumption before taking action.\n- I’ll avoid irreversible execution unless you explicitly approve it.\n- I’ll prefer reversible, inspectable steps and stop to sanity-check if a choice has meaningful risk.\n\nIf you want, I can also make that assumption explicit in the next work update as:\n`Chosen route assumption: proceed with reversible actions only unless the user authorizes irreversible execution.`"}}
-{"type":"turn.completed","usage":{"input_tokens":29702,"cached_input_tokens":29568,"output_tokens":193,"reasoning_output_tokens":95}}

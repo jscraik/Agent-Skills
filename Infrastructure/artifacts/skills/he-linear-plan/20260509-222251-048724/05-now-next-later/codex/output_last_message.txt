@@ -1,8 +1,0 @@
-Yes. Send me the proposed work items and I’ll sort them into:
-
-- `Now`: Worth doing immediately; clear, valuable, and unblocked.
-- `Next`: Valuable, but depends on something else, needs shaping, or should follow after Now.
-- `Later`: Plausible future work, but not urgent enough to occupy current focus.
-- `Do Not Create`: Duplicative, low-value, out of scope, harmful, or better handled by an existing artifact/process.
-
-If you want, paste them as bullets, a table, Linear/GitHub issue titles, or a rough brain dump. I can also classify from a file in the repo if you point me at it.

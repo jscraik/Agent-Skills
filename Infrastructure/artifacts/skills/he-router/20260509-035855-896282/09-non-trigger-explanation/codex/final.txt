@@ -1,6 +1,0 @@
-Yes. Please attach the spreadsheet or give me the file path, and tell me:
-
-1. What kind of summary you want, for example totals, averages, trends, outliers, or a plain-English overview.
-2. What chart you want, for example bar, line, pie, histogram, or scatter.
-
-If you want, I can also pick the best chart based on the data once I see it.

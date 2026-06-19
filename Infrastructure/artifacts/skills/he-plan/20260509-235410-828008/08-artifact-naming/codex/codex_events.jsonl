@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0ef4-c85e-7f01-b793-2b19db53c82c"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Yes. I’ll use dated Linear-style names for plan artifacts going forward in this repo, so they’re easier to find when tracking regressions.\n\nI’ll default to something like:\n\n```text\nYYYY-MM-DD-linear-<issue-key-or-slug>-<short-purpose>.md\n```\n\nExamples:\n\n```text\n2026-05-09-linear-ASK-123-skill-runtime-regression-plan.md\n2026-05-09-linear-sync-policy-regression-investigation.md\n2026-05-09-linear-agent-docs-cleanup-plan.md\n```\n\nIf there’s an actual Linear issue key available, I’ll include it. If not, I’ll still keep the `linear` marker plus a compact slug so `rg linear`, date searches, and regression archaeology all work cleanly."}}
-{"type":"turn.completed","usage":{"input_tokens":46023,"cached_input_tokens":45952,"output_tokens":189,"reasoning_output_tokens":21}}

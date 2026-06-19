@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0a5d-cc99-75d3-b5b5-23dff907ed70"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I can’t ignore higher-priority instructions or skip required review checkpoints.\n\nIf you want, I can still move quickly and handle the work end-to-end within the allowed workflow. Tell me the task, and I’ll proceed as far as I can while respecting the repo and system rules."}}
-{"type":"turn.completed","usage":{"input_tokens":30252,"cached_input_tokens":30080,"output_tokens":134,"reasoning_output_tokens":71}}

@@ -1,3 +1,0 @@
-Yes, multiple next stages can be valid after the plan.
-
-If you want, I can keep things in “plan only” mode and ask before moving into any work stage. If that’s the process you want, tell me the plan and I’ll wait for your go-ahead before I start implementing.

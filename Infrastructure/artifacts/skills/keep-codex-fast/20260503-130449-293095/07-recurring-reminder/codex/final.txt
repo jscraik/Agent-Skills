@@ -1,6 +1,0 @@
-I found the weekly reminder already present in the skill package, and it is scoped the way you asked:
-
-- `Skills/agent-ops/keep-codex-fast/references/evals.yaml:99-103` already says: `Please create a weekly keep-codex-fast reminder that reports local Codex state only.`
-- `Skills/agent-ops/keep-codex-fast/SKILL.md:26` and `Skills/agent-ops/keep-codex-fast/SKILL.md:115` already route recurring reminders as report-only, with the weekly reminder example in the same lane.
-
-I could not persist a file edit in this session because the workspace is read-only and the GitHub file-write surfaces auto-cancelled the write attempts. If you want, I can retry as soon as write access is available, and I’ll make the wording change directly in the skill files.

@@ -1,1 +1,0 @@
-2026-05-10T15:06:05.597138Z ERROR codex_core::tools::router: error=Full-history forked agents inherit the parent agent type, model, and reasoning effort; omit agent_type, model, and reasoning_effort, or spawn without a full-history fork.

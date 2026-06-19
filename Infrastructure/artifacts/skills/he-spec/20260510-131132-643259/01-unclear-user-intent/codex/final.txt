@@ -1,9 +1,0 @@
-<INTERACTIVE_STEERING_REQUIRED>
-
-Before I write or steer the HE spec, which invariant should be preserved as non-negotiable?
-
-1. **Behavioral invariant:** the externally observable behavior must stay the same, even if internal structure or naming changes.
-2. **Structural invariant:** the current architecture, ownership boundaries, and file/module shape must stay stable, even if behavior is clarified or tightened.
-3. **Policy invariant:** the governing contract/rules must remain authoritative, and implementation details should bend around that.
-
-<WAITING_FOR_USER_STEERING>

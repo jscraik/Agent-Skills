@@ -1,7 +1,0 @@
-Yes. I’ll treat that as a hard phase-exit rule:
-
-- I will not mark a phase complete until an eval proof artifact exists.
-- If I cannot produce that artifact, I’ll keep the phase open and state the blocker explicitly.
-- The closeout will include exact evidence: artifact path, command run, pass/fail result, or the concrete blocker preventing proof generation.
-
-Given the current workspace is read-only in this session, I can inspect and validate, but I can’t create or modify the proof artifact here. If the next step requires writing the artifact, I’ll call that out as the blocker rather than pretending the phase is closed.

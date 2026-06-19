@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0a75-6ea0-7213-809d-bc0b5638d412"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I can handle that either way.\n\n1. `Interactive` - I pause and ask you the missing state before proceeding.\n2. `Headless` - I record a reasonable assumption and continue without waiting.\n\nIf you want, reply with `interactive` or `headless`, and I’ll follow that mode."}}
-{"type":"turn.completed","usage":{"input_tokens":30242,"cached_input_tokens":30080,"output_tokens":194,"reasoning_output_tokens":126}}

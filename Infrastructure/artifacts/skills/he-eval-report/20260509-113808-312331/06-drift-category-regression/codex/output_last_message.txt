@@ -1,9 +1,0 @@
-I can do that, but I can’t inspect the finished slice from this session because the repo shell is blocked by the sandbox right now.
-
-If you point me at one of these, I’ll classify it across `architecture`, `routing`, `context`, `governance`, `agent-native`, and `moat drift`:
-
-1. The changed files or folder path
-2. The diff / PR text
-3. The specific slice name from the repo docs
-
-If you want, I can also give you a quick scoring rubric first so we can classify it consistently once you share the slice.

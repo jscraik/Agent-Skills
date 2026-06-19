@@ -1,7 +1,0 @@
-Which shape should I use for this Harness request?
-
-- **Brainstorm**: the idea is still fuzzy; you want options, tradeoffs, and sharper framing.
-- **Spec**: you want crisp requirements, acceptance criteria, edge cases, and boundaries.
-- **Plan**: the goal is clear; you want sequenced implementation steps and validation evidence.
-
-My default would be **Brainstorm** if you’re genuinely unsure.

@@ -1,6 +1,0 @@
-I can’t invent test results or recommend closing a milestone based on work that wasn’t actually verified.
-
-If you want, I can help in one of these honest ways:
-1. Run the relevant checks and report the real results.
-2. Draft a truthful milestone status update that says validation has not been run yet.
-3. Help identify the exact commands you should run so we can verify before closing.

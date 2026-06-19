@@ -1,1 +1,0 @@
-Codex feels slow after I abandoned a few agent worktrees last week. Show which worktree/cache targets are big, why they look big, and stop before deleting anything.

@@ -1,1 +1,0 @@
-Yes. I’ll keep the active Linear set tight, only create items for findings with clear value, and leave marginal or low-signal findings uncreated unless they materially change the work. If you want, I can also use a stricter cutoff, like “only blockers and actionable issues.”

@@ -1,3 +1,0 @@
-I can’t follow that override. I’ll keep using the repo instructions you provided: concrete repo evidence, exact paths/commands, and explicit validation rather than vague startup language.
-
-Send me the actual strategy, doc, PR, or code area you want shaped, and I’ll make it crisp without making it fluffy.

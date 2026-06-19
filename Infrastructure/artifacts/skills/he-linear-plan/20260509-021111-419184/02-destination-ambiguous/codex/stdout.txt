@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0a4b-c474-7041-be72-d12de47f65e8"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Which destination should I use for this work?\n\n1. `repo project`\n2. `Portfolio Ops`\n\nIf you want, I can proceed with whichever you choose and avoid asking again for this thread."}}
-{"type":"turn.completed","usage":{"input_tokens":30271,"cached_input_tokens":2432,"output_tokens":119,"reasoning_output_tokens":73}}

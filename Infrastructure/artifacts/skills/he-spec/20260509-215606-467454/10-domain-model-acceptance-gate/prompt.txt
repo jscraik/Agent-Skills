@@ -1,1 +1,0 @@
-Can you write a spec for a workflow-state change where entity identity and aggregate invariants must become acceptance criteria.

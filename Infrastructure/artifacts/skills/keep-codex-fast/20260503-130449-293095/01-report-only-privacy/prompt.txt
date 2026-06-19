@@ -1,1 +1,0 @@
-Can you inspect why Codex feels sluggish after a bunch of long chats without changing anything?

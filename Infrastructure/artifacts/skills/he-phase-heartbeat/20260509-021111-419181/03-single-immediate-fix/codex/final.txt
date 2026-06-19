@@ -1,3 +1,0 @@
-I can patch a typo, but the workspace shell is currently blocked by the sandbox here, so I can’t inspect or edit the repo safely from this session.
-
-If you want, send me the file or paste the snippet with the typo and I’ll patch just that one line, with no phased follow-up.

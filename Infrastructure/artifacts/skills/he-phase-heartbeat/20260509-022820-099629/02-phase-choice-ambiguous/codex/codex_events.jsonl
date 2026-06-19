@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0a5a-4dc1-7322-9f36-5728ffe3bf2e"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Yes. If there are multiple valid next stages after the plan, I’ll pause and ask you which one you want before starting work.\n\nIf you want, I can also present the options in a short list with tradeoffs so it’s easier to choose."}}
-{"type":"turn.completed","usage":{"input_tokens":30253,"cached_input_tokens":2432,"output_tokens":239,"reasoning_output_tokens":182}}

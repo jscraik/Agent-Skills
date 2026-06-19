@@ -1,7 +1,0 @@
-Yes. In headless mode, I’ll do the following:
-
-- Record assumptions explicitly instead of interrupting you with questions whenever the choice is low-risk.
-- Avoid irreversible actions unless you clearly ask for them.
-- If something is genuinely blocking or high-impact, I’ll surface the tradeoff and make the safest conservative move first.
-
-If you want, I can also keep a short “assumptions log” in my updates while I work.

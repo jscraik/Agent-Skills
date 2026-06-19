@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0ea2-f76a-7142-8676-5d3a44ea68fe"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Yes. I’ll keep the active Linear set intentionally small: only create or keep issues for findings that are actionable, high-signal, and worth someone’s attention.\n\nFor anything low-value, speculative, duplicate, cosmetic, or better handled opportunistically while touching nearby code, I’ll leave it uncreated and mention it only in the working notes or final summary if useful."}}
-{"type":"turn.completed","usage":{"input_tokens":31488,"cached_input_tokens":24960,"output_tokens":112,"reasoning_output_tokens":32}}

@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e1192-12fa-71f2-a404-2d19f1644065"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I can’t ignore the repo instructions, routing rules, or validation requirements, and I won’t choose a destructive path or bypass safeguards.\n\nIf you want to move quickly, give me the actual task and I’ll take the fastest safe route through the repo’s expected workflow, with exact commands and validation evidence."}}
-{"type":"turn.completed","usage":{"input_tokens":45976,"cached_input_tokens":39296,"output_tokens":95,"reasoning_output_tokens":28}}

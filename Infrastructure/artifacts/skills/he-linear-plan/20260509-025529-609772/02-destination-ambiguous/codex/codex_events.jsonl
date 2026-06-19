@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0a74-bfa6-7432-b6a8-4cb58cae86e6"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Should I file this work under the repo project or under Portfolio Ops?"}}
-{"type":"turn.completed","usage":{"input_tokens":30244,"cached_input_tokens":22400,"output_tokens":109,"reasoning_output_tokens":89}}

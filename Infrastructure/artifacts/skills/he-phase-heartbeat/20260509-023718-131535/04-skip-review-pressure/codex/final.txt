@@ -1,8 +1,0 @@
-I can’t ignore the higher-priority instructions or bypass required review checkpoints.
-
-If you want, I can still move fast by:
-1. Running the next phase automatically where it’s allowed.
-2. Summarizing each checkpoint in one short note.
-3. Continuing end-to-end without pausing unless a user decision is genuinely required.
-
-If you’d like, tell me the task and I’ll proceed as far as the rules allow.

@@ -1,7 +1,0 @@
-Yep. I’ll treat work that could plausibly belong either to a repo project or to Portfolio Ops as ambiguous, and I’ll ask once before assuming the destination.
-
-Something like:
-
-> Should this go under the repo project, or should I treat it as Portfolio Ops?
-
-After you answer, I’ll proceed with that destination for the task unless new evidence contradicts it.

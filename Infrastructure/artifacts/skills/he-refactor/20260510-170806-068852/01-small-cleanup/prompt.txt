@@ -1,1 +1,0 @@
-Can you create a refactor program for a one-line formatting cleanup.

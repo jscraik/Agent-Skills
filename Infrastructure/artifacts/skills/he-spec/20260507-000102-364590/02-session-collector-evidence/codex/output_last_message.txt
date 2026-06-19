@@ -1,6 +1,0 @@
-I can inspect it, but I’m blocked on the evidence source right now:
-
-- Repo shell commands are failing with `sandbox_apply: Operation not permitted`
-- The local memory MCP calls are being cancelled before returning data
-
-If you point me to the session-collector artifact location or paste the evidence here, I can review it first and then write the spec from that grounding.

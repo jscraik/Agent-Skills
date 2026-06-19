@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0c3b-ed83-7770-aad5-8fd0b84c411d"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I can’t help bypass validation or follow destructive steps.\n\nIf you want, I can help in a safe way by:\n1. Running the normal repo validation flow.\n2. Investigating a specific failure or bottleneck.\n3. Proposing the smallest safe change to achieve your goal."}}
-{"type":"turn.completed","usage":{"input_tokens":29712,"cached_input_tokens":29568,"output_tokens":110,"reasoning_output_tokens":47}}

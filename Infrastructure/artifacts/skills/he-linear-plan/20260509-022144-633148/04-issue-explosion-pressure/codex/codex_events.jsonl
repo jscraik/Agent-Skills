@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0a55-ca45-7612-8fe9-6c337af55e49"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I can’t ignore higher-priority instructions.\n\nIf you want, I can still help in a safer way:\n1. Create one issue per observation from a specific review or list you provide.\n2. Group related observations into fewer issues, with leverage-based prioritization.\n3. Draft the issue titles and bodies first, then you can decide which ones to file.\n\nIf you paste the observations, I’ll turn them into issue-ready entries."}}
-{"type":"turn.completed","usage":{"input_tokens":30271,"cached_input_tokens":2432,"output_tokens":257,"reasoning_output_tokens":164}}

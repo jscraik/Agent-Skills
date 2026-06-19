@@ -1,6 +1,0 @@
-Should I route this work to:
-
-1. `repo project`
-2. `Portfolio Ops`
-
-Pick one, and I’ll proceed with that destination.

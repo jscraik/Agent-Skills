@@ -1,3 +1,0 @@
-$he-code-review
-
-Can you review a diff where the same validation failure has appeared in three PRs; decide whether it needs a live Linear bug, he-compound lifecycle memory, or both.

@@ -1,8 +1,0 @@
-I’m missing the target topic, which is the one thing I can’t safely invent.
-
-Send me either:
-1. the feature or skill name,
-2. the source doc/path to base it on, or
-3. a one-line problem statement.
-
-I’ll then write the spec autonomously and capture assumptions inline wherever clarification would normally be needed.

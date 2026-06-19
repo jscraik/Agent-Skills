@@ -1,8 +1,0 @@
-Yes. If there are multiple valid next stages after a plan, I’ll pause and ask you which direction you want before starting any work.
-
-If you want, I can also format those options as:
-1. `Option A`
-2. `Option B`
-3. `Option C`
-
-so it’s easy to choose.

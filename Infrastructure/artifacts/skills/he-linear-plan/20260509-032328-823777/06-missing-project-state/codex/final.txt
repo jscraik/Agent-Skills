@@ -1,1 +1,0 @@
-Should I treat this as an interactive session, or should I record a headless assumption and continue non-interactively?

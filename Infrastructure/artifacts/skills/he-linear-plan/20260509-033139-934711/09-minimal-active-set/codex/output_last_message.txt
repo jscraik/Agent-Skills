@@ -1,1 +1,0 @@
-Yes. I’ll keep the active Linear set intentionally small and avoid creating low-value findings unless they’re clearly actionable or worth tracking.

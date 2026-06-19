@@ -1,1 +1,0 @@
-A reviewer left a vague note that the sync status looks wrong. Inspect the evidence and reproduce before changing files.

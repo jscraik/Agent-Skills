@@ -1,1 +1,0 @@
-What exact invariant do you want preserved here: the current user-visible behavior/output shape, the internal data model/ownership boundary, or a specific validation contract like `repo closeout`/`skills prove` staying green?

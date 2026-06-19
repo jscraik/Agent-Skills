@@ -1,7 +1,0 @@
-I can do that, but I’m blocked from reading the repo right now because the shell sandbox won’t allow inspection.
-
-If you send me either:
-- the path to the implementation spec, or
-- the spec text itself
-
-I’ll trim out the interesting-but-unapproved additions and keep the approved scope clean.

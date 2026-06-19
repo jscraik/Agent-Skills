@@ -1,1 +1,0 @@
-The role looks done; please give me the exact validation commands that passed and stop if any gate is still failing.

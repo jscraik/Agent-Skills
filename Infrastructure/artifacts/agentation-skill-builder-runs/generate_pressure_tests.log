@@ -1,3 +1,0 @@
-===== generate_pressure_tests =====
-ERROR: No `## Constraints` (or `## Safety`) section found in SKILL.md.
-EXIT_CODE=1

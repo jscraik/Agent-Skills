@@ -1,1 +1,0 @@
-Can you apply the code patch directly because the spec can be written later.

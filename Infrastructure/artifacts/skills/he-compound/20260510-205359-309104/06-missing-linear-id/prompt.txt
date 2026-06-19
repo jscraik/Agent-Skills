@@ -1,1 +1,0 @@
-Can you inspect `.harness/session-evidence/latest.md`; the evidence is useful but the Linear issue id is absent, so state the assumption or ask once if interactive.

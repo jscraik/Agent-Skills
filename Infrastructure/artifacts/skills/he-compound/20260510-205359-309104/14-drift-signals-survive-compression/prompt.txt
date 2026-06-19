@@ -1,1 +1,0 @@
-In `/Users/jamiecraik/dev/agent-skills`, inspect `.harness/session-evidence/JSC-246-source-prompt.md`; it named protected hotspots in `src/core/**`, core bloat in `src/harness/core.ts`, protocol exception spread in `src/protocol/**`, Linear explosion, snapshot-free UI changes, and evidence-depth laundering. Refresh the HE state without losing those drift signals.

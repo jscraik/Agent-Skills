@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e11b0-d34f-7831-96dc-2d4be5593175"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I can do that. Quick check before I assume the destination: should this guidance be added to this repo’s agent instructions, or does it belong under Portfolio Ops?\n\nI’m reading your sentence as a standing routing rule along the lines of: “If work could belong either to a repo project or to Portfolio Ops, ask once before choosing the destination.”"}}
-{"type":"turn.completed","usage":{"input_tokens":46018,"cached_input_tokens":2432,"output_tokens":137,"reasoning_output_tokens":61}}

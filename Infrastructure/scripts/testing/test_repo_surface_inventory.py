@@ -24,9 +24,30 @@ def test_artifact_event_stream_is_historical_artifact() -> None:
     finding = MODULE.classify_path("artifacts/skill-graphs/runs/20260401/events.jsonl")
 
     assert finding.classification == "historical_artifact"
-    assert finding.status == "violation"
+    assert finding.status == "warning"
     assert finding.code == "tracked_historical_artifact"
-    assert finding.blocking is True
+    assert finding.blocking is False
+
+
+def test_harness_review_artifact_is_nonblocking_historical_evidence() -> None:
+    finding = MODULE.classify_path(".harness/review-artifacts/pu-010-adversarial-cli-tests-status.md")
+
+    assert finding.classification == "historical_artifact"
+    assert finding.status == "warning"
+    assert finding.code == "tracked_harness_snapshot"
+    assert finding.blocking is False
+
+
+def test_infrastructure_package_policy_files_are_policy_surface() -> None:
+    cases = ["Infrastructure/pyproject.toml", "Infrastructure/uv.lock"]
+
+    for path in cases:
+        finding = MODULE.classify_path(path)
+
+        assert finding.classification == "policy"
+        assert finding.status == "ok"
+        assert finding.code == "policy_surface"
+        assert finding.blocking is False
 
 
 def test_duplicated_infrastructure_path_is_violation() -> None:
@@ -249,21 +270,11 @@ def test_current_tracked_inventory_has_no_classification_required_paths() -> Non
 
 
 def test_harness_runtime_outputs_are_violations() -> None:
-    """
-    Verifies that selected `.harness/` runtime output paths are classified as violations.
+    finding = MODULE.classify_path(".harness/backups/abc.bak")
 
-    Asserts each path produces a finding with status "violation", `blocking` set to True, and the expected violation `code`.
-    """
-    cases = {
-        ".harness/backups/abc.bak": "tracked_harness_backup",
-        ".harness/ci-migrate-snapshots/snapshot.json": "tracked_harness_snapshot",
-    }
-
-    for path, code in cases.items():
-        finding = MODULE.classify_path(path)
-        assert finding.status == "violation"
-        assert finding.blocking is True
-        assert finding.code == code
+    assert finding.status == "violation"
+    assert finding.blocking is True
+    assert finding.code == "tracked_harness_backup"
 
 
 def test_json_report_has_required_fields_and_deterministic_order() -> None:
@@ -308,12 +319,56 @@ def test_json_report_has_required_fields_and_deterministic_order() -> None:
         assert {"type", "command", "rationale"} <= step.keys()
 
 
-def test_non_strict_report_status_warns_when_blockers_exist() -> None:
+def test_non_strict_report_status_warns_when_warnings_exist() -> None:
     findings = MODULE.classify_paths(["artifacts/run/events.jsonl"])
     report = MODULE.build_report(findings, strict=False)
 
     assert report["status"] == "warning"
+    assert report["summary"]["blocking_findings"] == 0
+    assert report["summary"]["counts_by_status"] == {"warning": 1}
+
+
+def test_changed_historical_artifact_debt_blocks_future_artifacts() -> None:
+    findings = MODULE.classify_paths(
+        ["artifacts/run/events.jsonl"],
+        changed_files=["artifacts/run/events.jsonl"],
+    )
+    report = MODULE.build_report(
+        findings,
+        strict=True,
+        changed_files=["artifacts/run/events.jsonl"],
+    )
+
+    [finding] = findings
+    assert finding.classification == "historical_artifact"
+    assert finding.status == "violation"
+    assert finding.severity == "error"
+    assert finding.blocking is True
+    assert finding.code == "new_historical_artifact_debt"
+    assert finding.metadata["original_code"] == "tracked_historical_artifact"
+    assert finding.metadata["changed_files_policy"] == "future_artifact_debt_blocked"
+    assert report["status"] == "error"
     assert report["summary"]["blocking_findings"] == 1
+    assert report["metadata"]["changed_files_policy"] == "future_artifact_debt_blocking"
+
+
+def test_unchanged_historical_artifact_backlog_remains_advisory() -> None:
+    findings = MODULE.classify_paths(
+        ["artifacts/run/events.jsonl"],
+        changed_files=["Skills/agent-ops/example/SKILL.md"],
+    )
+    report = MODULE.build_report(
+        findings,
+        strict=True,
+        changed_files=["Skills/agent-ops/example/SKILL.md"],
+    )
+
+    [finding] = findings
+    assert finding.code == "tracked_historical_artifact"
+    assert finding.status == "warning"
+    assert finding.blocking is False
+    assert report["status"] == "warning"
+    assert report["summary"]["blocking_findings"] == 0
 
 
 def test_allowlist_downgrades_matching_blocker_to_warning() -> None:
@@ -335,6 +390,29 @@ def test_allowlist_downgrades_matching_blocker_to_warning() -> None:
     assert finding.allowlist_entry == "historical-artifact-fixture"
 
 
+def test_allowlisted_changed_historical_artifact_remains_advisory() -> None:
+    entry = MODULE.AllowlistEntry(
+        id="historical-artifact-fixture",
+        match_type="prefix",
+        pattern="artifacts/fixture",
+        classification="historical_artifact",
+        reason="Stable fixture retained for regression coverage.",
+        owner="test",
+        review_after="2026-06-01",
+    )
+
+    [finding] = MODULE.classify_paths(
+        ["artifacts/fixture/events.jsonl"],
+        [entry],
+        changed_files=["artifacts/fixture/events.jsonl"],
+    )
+
+    assert finding.status == "warning"
+    assert finding.blocking is False
+    assert finding.allowlist_entry == "historical-artifact-fixture"
+    assert finding.code == "tracked_historical_artifact"
+
+
 def test_cli_json_mode_writes_json_only_stdout() -> None:
     result = subprocess.run(
         [sys.executable, str(SCRIPT_PATH), "--json"],
@@ -349,7 +427,7 @@ def test_cli_json_mode_writes_json_only_stdout() -> None:
     assert result.stderr == ""
 
 
-def test_cli_strict_json_mode_fails_with_json_only_stdout() -> None:
+def test_cli_strict_json_mode_passes_without_blockers() -> None:
     result = subprocess.run(
         [sys.executable, str(SCRIPT_PATH), "--strict", "--json"],
         text=True,
@@ -358,8 +436,7 @@ def test_cli_strict_json_mode_fails_with_json_only_stdout() -> None:
     )
 
     payload = json.loads(result.stdout)
-    assert result.returncode == 1
-    assert payload["status"] == "error"
-    assert payload["findings"][0]["blocking"] is True
-    assert payload["findings"][0]["severity"] == "error"
+    assert result.returncode == 0
+    assert payload["status"] in {"ok", "warning"}
+    assert payload["summary"]["blocking_findings"] == 0
     assert result.stderr == ""

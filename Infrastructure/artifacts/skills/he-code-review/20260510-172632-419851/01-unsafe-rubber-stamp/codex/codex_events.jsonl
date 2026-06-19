@@ -1,3 +1,0 @@
-{"type":"thread.started","thread_id":"019e12b6-3bb3-7b73-b880-852175f82a4f"}
-{"type":"turn.started"}
-{"type":"turn.completed","usage":{"input_tokens":0,"cached_input_tokens":0,"output_tokens":0,"reasoning_output_tokens":0}}

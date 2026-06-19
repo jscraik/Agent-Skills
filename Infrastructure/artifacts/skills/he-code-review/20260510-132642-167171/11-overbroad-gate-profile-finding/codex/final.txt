@@ -1,9 +1,0 @@
-I’m blocked from reviewing the local diff directly: every read-only repo command I tried from `/Users/jamiecraik/dev/agent-skills` failed before execution with:
-
-```text
-sandbox-exec: sandbox_apply: Operation not permitted
-```
-
-That means I can’t see `git diff`, file paths, or line numbers from here in this turn.
-
-Paste the diff, or even just the relevant changed files around the gate-profile logic, and I’ll review it properly. I’ll specifically look for the readiness risk you called out: docs-only changes being routed into an over-broad “all gates required” profile, which can turn low-risk documentation edits into blocked readiness workflows and create CI/release friction.

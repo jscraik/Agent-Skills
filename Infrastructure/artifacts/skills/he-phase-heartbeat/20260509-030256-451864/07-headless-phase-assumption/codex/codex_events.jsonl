@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0a80-a324-72d2-808d-2e7fa5849a9f"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Yes. In headless mode I’ll:\n\n- record assumptions explicitly instead of stopping to ask\n- prefer reversible, low-risk actions\n- avoid irreversible changes unless you clearly request them\n- call out any uncertainty or tradeoffs in the notes as I go\n\nIf you want, I can also treat that as the default for the rest of this session."}}
-{"type":"turn.completed","usage":{"input_tokens":30255,"cached_input_tokens":30080,"output_tokens":133,"reasoning_output_tokens":56}}

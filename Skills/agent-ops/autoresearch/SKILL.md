@@ -1,6 +1,6 @@
 ---
 name: autoresearch
-description: Run bounded automated experiment iterations by recording baselines, applying hypothesis patches, comparing metrics, protecting regression guards, and deciding keep, discard, rollback, or block. Use when $autoresearch is named or a repo/skill needs evidence-backed research, metric tracking, or safe optimisation loops.
+description: Run bounded automated experiment iterations by recording baselines, applying hypothesis patches, comparing metrics, protecting regression guards, and deciding keep, discard, rollback, or block. Use when automated research is requested or a repo/skill needs evidence-backed research, metric tracking, or safe optimisation loops.
 metadata:
   version: 0.1.0
   skill-type: team_automation

@@ -1,1 +1,0 @@
-Clean up the AGENTS setup for my checkout, but I have not said whether I mean `~/.codex/AGENTS.md`, the repo root, or a nested package.

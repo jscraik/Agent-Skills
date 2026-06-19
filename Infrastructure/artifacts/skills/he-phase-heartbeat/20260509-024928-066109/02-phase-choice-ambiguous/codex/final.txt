@@ -1,3 +1,0 @@
-Yes. We can treat the plan as having multiple valid next stages, then pause and ask you which one to take before doing any work.
-
-If you want, I can follow that pattern for the current task and present the next-stage options first.

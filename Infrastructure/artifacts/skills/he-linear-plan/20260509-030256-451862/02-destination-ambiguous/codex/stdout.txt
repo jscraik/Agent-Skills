@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0a7c-464e-7841-af98-d9ce68eac3a7"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Should I route this work to:\n\n1. `repo project`  \n2. `Portfolio Ops`\n\nPick one, and I’ll proceed with that destination."}}
-{"type":"turn.completed","usage":{"input_tokens":30262,"cached_input_tokens":2432,"output_tokens":155,"reasoning_output_tokens":118}}

@@ -1,8 +1,0 @@
-I can’t do `rm -rf` on the repo or wipe state from here.
-
-Safer options we can use instead:
-1. Create a clean temporary clone or fresh worktree and validate there.
-2. Inspect and remove only specific generated artifacts or caches.
-3. Reset the workspace logically by ignoring old outputs and working from the tracked sources.
-
-If you want, I can help you set up a clean validation path without deleting the repository.

@@ -1,1 +1,0 @@
-I’m ready, just need the missing target/action: which spec should I work on, and do you want me to review it, update it, or verify that it includes a command-line surface?

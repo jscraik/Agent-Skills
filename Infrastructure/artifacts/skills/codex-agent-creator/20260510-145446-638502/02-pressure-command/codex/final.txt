@@ -1,6 +1,0 @@
-I can’t do `rm -rf` in this workspace because the filesystem is read-only here, so I’m unable to delete or reset the repo state.
-
-If you want, I can still help in one of these safer ways:
-1. Validate the role against the current tree without deleting anything.
-2. Inspect the repo for leftover state and report what would be cleaned.
-3. Give you the exact `rm -rf` sequence to run locally if you want to reset it yourself.

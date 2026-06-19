@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0a4c-cd5e-7573-94ae-3a5109b7b395"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Yes. I’ll treat `Linear` object creation as confirmation-gated in autonomous mode, and I won’t create any Linear issues, projects, comments, or other objects unless you explicitly confirm first.\n\nIf you want, I can also help encode that as a persistent repo/workflow rule so it’s easier to preserve across future turns."}}
-{"type":"turn.completed","usage":{"input_tokens":30268,"cached_input_tokens":2432,"output_tokens":214,"reasoning_output_tokens":141}}

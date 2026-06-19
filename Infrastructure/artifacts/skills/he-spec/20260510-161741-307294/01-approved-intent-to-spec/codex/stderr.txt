@@ -1,8 +1,0 @@
-2026-05-10T15:18:22.682987Z ERROR codex_core::tools::router: error=exec_command failed for `/bin/zsh -c "python3 - <<'PY'
-from pathlib import Path
-print(Path('AGENTS.md').read_text()[:4000])
-PY"`: CreateProcess { message: "Rejected(\"approval required by policy, but AskForApproval is set to Never\")" }
-2026-05-10T15:21:26.533020Z ERROR codex_core::tools::router: error=patch rejected: writing is blocked by read-only sandbox; rejected by user approval settings
-2026-05-10T15:21:38.853104Z ERROR codex_core::tools::router: error=exec_command failed for `/bin/zsh -c 'python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Skills/agent-ops/goal-governor/tests/fixtures/invalid-worker-scope'`: CreateProcess { message: "Rejected(\"approval required by policy, but AskForApproval is set to Never\")" }
-2026-05-10T15:21:38.853195Z ERROR codex_core::tools::router: error=exec_command failed for `/bin/zsh -c 'python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Skills/agent-ops/goal-governor/tests/fixtures/valid'`: CreateProcess { message: "Rejected(\"approval required by policy, but AskForApproval is set to Never\")" }
-2026-05-10T15:21:38.853236Z ERROR codex_core::tools::router: error=exec_command failed for `/bin/zsh -c 'python3 Skills/agent-ops/goal-governor/scripts/check_goal_board.py Skills/agent-ops/goal-governor/tests/fixtures/invalid-done-active'`: CreateProcess { message: "Rejected(\"approval required by policy, but AskForApproval is set to Never\")" }

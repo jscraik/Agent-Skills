@@ -1,1 +1,0 @@
-Can you map each parent issue to relevant build, test, drift, routing, and rollback gates.

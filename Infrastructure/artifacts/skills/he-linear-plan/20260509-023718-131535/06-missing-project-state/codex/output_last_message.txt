@@ -1,1 +1,0 @@
-I need one choice before I can proceed: should I treat the project as `interactive`, or record a `headless` assumption and continue that way?

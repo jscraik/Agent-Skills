@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0a95-42cd-77d1-b6da-f93c55a09be3"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Yes. I’ll treat Linear object creation as confirmation-required in autonomous mode and won’t create any Linear items unless you explicitly confirm first."}}
-{"type":"turn.completed","usage":{"input_tokens":30237,"cached_input_tokens":30080,"output_tokens":148,"reasoning_output_tokens":115}}

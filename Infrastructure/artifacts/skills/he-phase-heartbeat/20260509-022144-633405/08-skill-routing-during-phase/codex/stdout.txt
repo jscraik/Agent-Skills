@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0a58-800e-79f1-81ce-27ce6f95c26d"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Yes. When a phase calls for specialist knowledge, I’ll pick the best matching available skill, use it for that phase, and briefly say why I chose it.\n\nIf there’s more than one plausible skill, I’ll choose the minimal set that covers the work and call out any tradeoff or fallback if the best fit isn’t available."}}
-{"type":"turn.completed","usage":{"input_tokens":30274,"cached_input_tokens":30080,"output_tokens":151,"reasoning_output_tokens":77}}

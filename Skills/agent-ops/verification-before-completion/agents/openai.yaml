@@ -1,7 +1,7 @@
 interface:
   display_name: "Verification Before Completion"
-  short_description: "$verification-before-completion - Verification Before Completion entrypoint"
-  default_prompt: "$verification-before-completion "
+  short_description: "Verification Before Completion entrypoint"
+  default_prompt: "Use Verification Before Completion. "
 
 policy:
   allow_implicit_invocation: false

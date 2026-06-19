@@ -1,9 +1,0 @@
-I need one concrete scope before touching anything, because each `AGENTS.md` changes a different instruction layer.
-
-Pick one:
-
-1. **Repo root**: `/Users/jamiecraik/dev/agent-skills/AGENTS.md`
-2. **User config**: `~/.codex/AGENTS.md`
-3. **Nested package**: send me the package/folder path, for example `skills/foo/AGENTS.md` or `packages/bar`
-
-Also noting the practical blocker: this session is currently in a read-only sandbox, so I can help review and draft the cleanup, but I won’t be able to write the file from here unless the environment changes.

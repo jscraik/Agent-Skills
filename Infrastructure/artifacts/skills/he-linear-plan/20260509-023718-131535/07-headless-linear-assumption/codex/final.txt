@@ -1,1 +1,0 @@
-Yes. I’ll treat Linear object creation as confirmation-required in autonomous mode, and I won’t create any Linear issue, project, cycle, comment, or other object unless you explicitly confirm it first.

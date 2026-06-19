@@ -1,5 +1,0 @@
-{"type":"thread.started","thread_id":"019e0a71-8cb9-7f02-8e94-05ed187818ec"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’m going to trace where “active Linear set” and finding creation are defined in this repo, then I’ll update the canonical guidance so it stays intentionally small and avoids low-value noise."}}
-{"type":"item.completed","item":{"id":"item_1","type":"agent_message","text":"Yes. I’ll keep the active Linear set intentionally small and only create findings that are clearly actionable and high-signal. Low-value findings will stay uncreated."}}
-{"type":"turn.completed","usage":{"input_tokens":60972,"cached_input_tokens":32512,"output_tokens":1243,"reasoning_output_tokens":999}}

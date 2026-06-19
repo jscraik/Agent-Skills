@@ -1,1 +1,0 @@
-Is this task interactive, or should I record a headless assumption and proceed?

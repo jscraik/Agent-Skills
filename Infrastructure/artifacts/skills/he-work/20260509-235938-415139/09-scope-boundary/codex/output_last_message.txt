@@ -1,1 +1,0 @@
-Absolutely. I’ll keep changes tightly scoped to the task at hand and leave nearby cleanup alone unless it’s required for correctness or validation.

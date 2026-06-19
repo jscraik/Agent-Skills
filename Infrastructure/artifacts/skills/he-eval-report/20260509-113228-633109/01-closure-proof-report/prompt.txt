@@ -1,1 +1,0 @@
-Can you generate the eval and drift proof for this completed Linear slice before recommending closure.

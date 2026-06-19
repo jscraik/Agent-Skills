@@ -194,7 +194,7 @@ Use the smallest lane set that changes the next safe action:
 | CircleCI plugin / CLI | Failed workflows, job logs, reruns, and exact CI blocker classification |
 | Snyk CLI | Opt-in dependency security screening; release-required for manifest-backed candidates |
 | `$context7` / CLI | Current external library, API, or CLI docs when a blocker depends on them |
-| `$improve-codebase-architecture` | Structural blockers: ownership drift, boundary confusion, repeated workaround fixes |
+| Improve Codebase Architecture | Structural blockers: ownership drift, boundary confusion, repeated workaround fixes |
 | `$simplify` | Behavior-preserving cleanup after the active fix is understood |
 | `he-router` prune-branches | Post-merge branch/worktree cleanup with merge proof |
 

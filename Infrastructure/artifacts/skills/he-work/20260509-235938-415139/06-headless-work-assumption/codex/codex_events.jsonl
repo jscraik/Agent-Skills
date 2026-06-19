@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0ef8-c46c-7ae2-b683-b358eb24ef43"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Yes. I’ll run unattended by default and only stop for questions that are genuinely blocking or risky.\n\nFor non-blocking choices, I’ll make a conservative repo-aligned assumption, keep moving, and record it clearly in the final handoff with the validation evidence. I’ll also preserve user work, use the repo wrappers like `./bin/ask`, and follow the AGENTS.md guidance for this tree."}}
-{"type":"turn.completed","usage":{"input_tokens":46022,"cached_input_tokens":39296,"output_tokens":109,"reasoning_output_tokens":21}}

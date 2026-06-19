@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<testsuite name="he-work" tests="1" failures="0" errors="0" timestamp="2026-05-10T11:10:44Z" id="20260510-121044-725329">
-  <testcase name="unplanned-work" classname="he-work" time="60.0">
-    <system-out>
-artifacts_dir:
-Infrastructure/artifacts/skills/he-work/20260510-121044-725329/01-unplanned-work
-    </system-out>
-  </testcase>
-</testsuite>

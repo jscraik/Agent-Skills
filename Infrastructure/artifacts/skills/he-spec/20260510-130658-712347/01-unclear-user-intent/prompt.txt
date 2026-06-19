@@ -1,3 +1,0 @@
-$he-spec
-
-Without inspecting files, handle this self-contained HE spec steering case: the request is directionally clear but the invariant is ambiguous; ask one high-signal question and include the literal interactive steering markers.

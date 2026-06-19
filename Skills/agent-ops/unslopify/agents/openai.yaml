@@ -1,7 +1,7 @@
 interface:
   display_name: "Unslopify"
   short_description: "Audit unused functions, dead exports, orphaned modules, stale imports, unreachable code, and tech-debt cleanup candid..."
-  default_prompt: "$unslopify "
+  default_prompt: "Use Unslopify. "
 
 policy:
   allow_implicit_invocation: false

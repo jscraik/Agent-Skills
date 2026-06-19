@@ -1,3 +1,0 @@
-I can do that, but I need the Linear issue ID or link first.
-
-If you send something like `ABC-123` or the issue URL, I can mark it complete without running validation.

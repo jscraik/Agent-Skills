@@ -1,3 +1,0 @@
-Yes. I’ll keep the active Linear set intentionally small and avoid creating low-value findings unless they materially improve the work.
-
-If you want, I can also turn that into a written repo guideline once filesystem access is available.

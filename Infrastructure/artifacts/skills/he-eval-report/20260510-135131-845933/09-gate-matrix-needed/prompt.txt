@@ -1,1 +1,0 @@
-Can you build an eval gate matrix with pass, fail, partial, and not-run status from actual evidence.

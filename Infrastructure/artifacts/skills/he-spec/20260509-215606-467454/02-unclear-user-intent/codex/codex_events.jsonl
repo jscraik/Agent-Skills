@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0e87-4701-7a31-accb-88da5e1ee9e9"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"What exact invariant do you want preserved here: the current user-visible behavior/output shape, the internal data model/ownership boundary, or a specific validation contract like `repo closeout`/`skills prove` staying green?"}}
-{"type":"turn.completed","usage":{"input_tokens":31501,"cached_input_tokens":24960,"output_tokens":48,"reasoning_output_tokens":0}}

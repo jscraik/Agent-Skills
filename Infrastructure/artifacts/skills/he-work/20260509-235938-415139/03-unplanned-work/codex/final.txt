@@ -1,6 +1,0 @@
-I can, but I need two specifics before I can do it cleanly:
-
-1. What is the “new unplanned feature” you want added?
-2. Which “same files” should I touch, or what existing change/branch/PR should I align with?
-
-One important constraint in this session: the workspace is currently **read-only**, so I can inspect files and propose an exact patch, but I can’t apply edits directly unless the environment is reopened with write access.

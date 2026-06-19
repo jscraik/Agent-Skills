@@ -1,7 +1,7 @@
 interface:
   display_name: "Fix Mise"
-  short_description: "$fix-mise - Fix Mise entrypoint"
-  default_prompt: "$fix-mise "
+  short_description: "Fix Mise entrypoint"
+  default_prompt: "Use Fix Mise. "
 
 policy:
   allow_implicit_invocation: false

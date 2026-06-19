@@ -1,7 +1,0 @@
-Got it. I’d record the closure rationale along these lines:
-
-> Local validation for the slice passed. Upstream original-prompt coverage remains partial, but the remaining gap appears to be coverage-quality context rather than a blocker for the repo-wide objective. Recommendation: proceed with repo-wide Linear closure, noting the partial upstream coverage as residual evidence context rather than keeping the work open.
-
-If you want the tighter Linear-ready version:
-
-> Closing repo-wide: slice passed local checks. Upstream original-prompt coverage was partial, but no blocking failure remains; residual coverage context is noted for follow-up rather than holding closure.

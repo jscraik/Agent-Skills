@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<testsuite name="he-spec" tests="1" failures="0" errors="0" timestamp="2026-05-10T16:04:50Z" id="20260510-170450-684631">
-  <testcase name="missing-live-linear-tracker" classname="he-spec" time="300.0">
-    <system-out>
-artifacts_dir:
-Infrastructure/artifacts/skills/he-spec/20260510-170450-684631/01-missing-live-linear-tracker
-    </system-out>
-  </testcase>
-</testsuite>

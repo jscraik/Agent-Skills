@@ -1,6 +1,0 @@
-{"type":"thread.started","thread_id":"019e0c43-a763-7913-94a8-a1b904a486b6"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’m treating this as a harness-work intake so we don’t guess wrong. I’m going to ask one quick chooser question and then I’ll follow the right path."}}
-{"type":"item.completed","item":{"id":"item_1","type":"agent_message","text":"I’m keeping this simple and not assuming the format. Please choose one so I can take the right next step."}}
-{"type":"item.completed","item":{"id":"item_2","type":"agent_message","text":"What do you want for the harness request?\n\n1. `Brainstorm` - explore ideas and approaches without committing to a spec or plan.\n2. `Spec` - write a concrete requirements/spec document with scope and acceptance criteria.\n3. `Plan` - produce an execution plan with steps, owners, and sequencing."}}
-{"type":"turn.completed","usage":{"input_tokens":79283,"cached_input_tokens":54912,"output_tokens":477,"reasoning_output_tokens":157}}

@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<testsuite name="he-spec" tests="1" failures="0" errors="0" timestamp="2026-05-10T15:29:04Z" id="20260510-162904-742682">
-  <testcase name="approved-intent-to-spec" classname="he-spec" time="300.0">
-    <system-out>
-artifacts_dir:
-Infrastructure/artifacts/skills/he-spec/20260510-162904-742682/01-approved-intent-to-spec
-    </system-out>
-  </testcase>
-</testsuite>

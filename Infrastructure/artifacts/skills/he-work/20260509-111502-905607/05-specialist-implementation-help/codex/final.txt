@@ -1,7 +1,0 @@
-I can do that, but I need one missing piece: which approved slice or branch should I work on, and what CLI behavior change do you want made?
-
-If you already know the target, send either:
-1. The slice name or ticket/PR link
-2. The exact CLI behavior you want changed
-
-Once I have that, I’ll pick the most relevant specialist path for CLI work and implement it.

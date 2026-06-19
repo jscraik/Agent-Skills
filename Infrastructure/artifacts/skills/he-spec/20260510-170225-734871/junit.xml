@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<testsuite name="he-spec" tests="1" failures="0" errors="0" timestamp="2026-05-10T16:02:25Z" id="20260510-170225-734871">
-  <testcase name="traceability-required" classname="he-spec" time="300.0">
-    <system-out>
-artifacts_dir:
-Infrastructure/artifacts/skills/he-spec/20260510-170225-734871/01-traceability-required
-    </system-out>
-  </testcase>
-</testsuite>

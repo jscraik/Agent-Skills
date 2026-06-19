@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<testsuite name="he-router" tests="1" failures="0" errors="0" timestamp="2026-05-10T15:45:00Z" id="20260510-164500-928675">
-  <testcase name="generated-handle-source-boundary" classname="he-router" time="300.0">
-    <system-out>
-artifacts_dir:
-Infrastructure/artifacts/skills/he-router/20260510-164500-928675/01-generated-handle-source-boundary
-    </system-out>
-  </testcase>
-</testsuite>

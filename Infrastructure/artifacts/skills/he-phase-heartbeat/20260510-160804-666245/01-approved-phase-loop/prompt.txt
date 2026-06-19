@@ -1,1 +1,0 @@
-Please run the approved HE phase loop with collector evidence, phase checkpoints, proof gates, and explicit stop conditions.

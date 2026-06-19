@@ -1,3 +1,0 @@
-I can do that. Quick check before I assume the destination: should this guidance be added to this repo’s agent instructions, or does it belong under Portfolio Ops?
-
-I’m reading your sentence as a standing routing rule along the lines of: “If work could belong either to a repo project or to Portfolio Ops, ask once before choosing the destination.”

@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0a4f-caca-7f32-a919-9ac77fac677e"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Yes. In headless mode, I’ll:\n\n- record reasonable assumptions instead of stopping to ask when the choice is low-risk\n- avoid irreversible actions unless you explicitly approve them\n- call out any assumptions and remaining risks clearly in the handoff\n\nIf you want, I can also treat “irreversible” as including commits, pushes, deletions, migrations, or external writes unless you say otherwise."}}
-{"type":"turn.completed","usage":{"input_tokens":30247,"cached_input_tokens":30080,"output_tokens":139,"reasoning_output_tokens":52}}

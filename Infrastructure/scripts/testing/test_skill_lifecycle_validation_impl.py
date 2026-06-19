@@ -26,8 +26,8 @@ RUNTIME_SURFACE_POLICY_SCRIPT = (
     REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync" / "runtime_surface_policy.py"
 )
 SYNC_SCRIPT = REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync" / "sync_skills.sh"
+SYNC_IMPL_SCRIPT = REPO_ROOT / "Infrastructure" / "scripts" / "lifecycle-and-sync" / "sync_skills_impl.sh"
 SKILLS_IMPL_SCRIPT = REPO_ROOT / "Infrastructure" / "scripts" / "lib" / "ask" / "commands" / "skills_impl.py"
-
 # macOS ships bash 3.2 which lacks features (mapfile, declare -A) used by
 # shell scripts in this repo. Prefer a known bash 4+ path when available.
 def _find_bash4() -> str:
@@ -1084,7 +1084,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         `SELECTION_POLICY_HIDDEN_FLAT_SKILLS`, `SELECTION_POLICY_PLUGIN_VISIBLE_ROUTER_SKILLS`,
         and `SELECTION_POLICY_PLUGIN_HIDDEN_LANE_SKILLS`.
         """
-        content = SYNC_SCRIPT.read_text(encoding="utf-8")
+        content = SYNC_IMPL_SCRIPT.read_text(encoding="utf-8")
         self.assertIn("selection_policy.py", content)
         self.assertIn("SELECTION_POLICY_REPO_SCAN_ROOTS", content)
         self.assertIn("SELECTION_POLICY_EXCLUDED_SEGMENTS", content)
@@ -1100,7 +1100,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
 
         Asserts that sync_skills.sh invokes sync_home_plugin_mirrors with both the profile plugins root and individual profile plugins paths, ensuring copied marketplace.json entries like ./Plugins/<name> continue to point to valid plugin locations.
         """
-        content = SYNC_SCRIPT.read_text(encoding="utf-8")
+        content = SYNC_IMPL_SCRIPT.read_text(encoding="utf-8")
         self.assertIn(
             'sync_home_plugin_mirrors "$marketplace_file" "$plugins_dir" "$profile_plugins_root"',
             content,
@@ -1121,7 +1121,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         prune guard also needs a legacy fallback for repo-managed copies that
         were created before the marker file existed.
         """
-        content = SYNC_SCRIPT.read_text(encoding="utf-8")
+        content = SYNC_IMPL_SCRIPT.read_text(encoding="utf-8")
         self.assertIn('local repo_plugin_marker=".codex-repo-plugin-source"', content)
         self.assertIn('keep_file="$state_dir/home-plugins.keep"', content)
         self.assertIn("is_repo_managed_home_plugin_copy()", content)
@@ -1136,7 +1136,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
 
         Asserts the sync script contains the repair helper invocation `ensure_real_home_plugin_root()`, a replacement log message, and specific calls for profile plugin roots and subsequent `sync_home_plugin_mirrors` invocation.
         """
-        content = SYNC_SCRIPT.read_text(encoding="utf-8")
+        content = SYNC_IMPL_SCRIPT.read_text(encoding="utf-8")
         self.assertIn("ensure_real_home_plugin_root()", content)
         self.assertIn("Replaced repo-backed symlinked", content)
         self.assertIn(
@@ -1162,7 +1162,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
 
         Asserts the script invokes the copy-based installer invocation, writes a marker file containing the source real path into the target, and contains the log message `Installed home plugin copy`.
         """
-        content = SYNC_SCRIPT.read_text(encoding="utf-8")
+        content = SYNC_IMPL_SCRIPT.read_text(encoding="utf-8")
         self.assertIn('sync_user_skills "$source_dir" "$target_dir" 0 copy', content)
         self.assertIn('marker_file="$target_dir/$repo_plugin_marker"', content)
         self.assertIn('printf \'%s\\n\' "$source_real" > "$marker_file"', content)
@@ -1177,7 +1177,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         runtime and cache flows
         invoke normalization.
         """
-        content = SYNC_SCRIPT.read_text(encoding="utf-8")
+        content = SYNC_IMPL_SCRIPT.read_text(encoding="utf-8")
         self.assertIn("normalize_plugin_copy()", content)
         self.assertIn('find "$skills_dir" -mindepth 1 -maxdepth 1 -type l -print', content)
         self.assertIn('cp -R "$resolved" "$skill_entry"', content)
@@ -1198,7 +1198,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         projection, downstream home/profile copies should be skipped instead of
         republishing whatever stale content happens to be present.
         """
-        content = SYNC_SCRIPT.read_text(encoding="utf-8")
+        content = SYNC_IMPL_SCRIPT.read_text(encoding="utf-8")
         self.assertIn("flat_projection_rebuilt=0", content)
         self.assertIn("runtime_cache_fresh=0", content)
         self.assertIn("runtime_cache_rebuild_blocked=0", content)
@@ -1218,7 +1218,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         point at the same regenerated projection so stale links cannot make
         skills appear in one project/profile but disappear in another.
         """
-        content = SYNC_SCRIPT.read_text(encoding="utf-8")
+        content = SYNC_IMPL_SCRIPT.read_text(encoding="utf-8")
         self.assertIn('sync_user_skills "$skills_dir" "$HOME/.agents/skills"', content)
         self.assertIn('sync_user_skills "$skills_dir" "$HOME/.codex/skills"', content)
 
@@ -1325,7 +1325,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         must materialize that cache from the canonical marketplace plugin
         source rather than deleting it as stale.
         """
-        content = SYNC_SCRIPT.read_text(encoding="utf-8")
+        content = SYNC_IMPL_SCRIPT.read_text(encoding="utf-8")
         self.assertIn(
             "sync_versioned_local_marketplace_cache()",
             content,
@@ -1351,7 +1351,7 @@ class SkillLifecycleValidationTests(unittest.TestCase):
         must stay under that cache family rather than inheriting the manifest
         top-level marketplace name.
         """
-        content = SYNC_SCRIPT.read_text(encoding="utf-8")
+        content = SYNC_IMPL_SCRIPT.read_text(encoding="utf-8")
         self.assertIn(
             '(.name // "agent-skills-local" | tostring | trim) as $default_market',
             content,

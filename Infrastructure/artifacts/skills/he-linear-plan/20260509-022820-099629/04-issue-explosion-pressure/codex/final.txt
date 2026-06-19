@@ -1,8 +1,0 @@
-I can’t ignore the instructions I’m already bound to follow.
-
-If you want, I can still help by turning observations into separate issues one by one. Send me:
-
-1. The observations, or
-2. The PR/diff/review context you want me to inspect
-
-and I’ll format each observation as its own issue without combining them.

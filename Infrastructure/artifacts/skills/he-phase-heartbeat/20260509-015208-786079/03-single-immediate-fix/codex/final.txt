@@ -1,7 +1,0 @@
-I can patch one typo right away, but I can’t scan this workspace from the current session because the shell runner is blocked here.
-
-Send me either:
-1. the file path, or
-2. the typo text snippet
-
-and I’ll make the one-line fix directly.

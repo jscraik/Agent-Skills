@@ -1,7 +1,0 @@
-I can, but I need one decision first: what should I optimize for, and what counts as “overnight” for this repo?
-
-Please pick:
-- `Quality`, `Speed`, or `Cost`
-- `4-6h`, `8-10h`, or `12h+`
-
-If you want, I can also proceed with a sensible default: `Quality` with an `8-10h` budget.

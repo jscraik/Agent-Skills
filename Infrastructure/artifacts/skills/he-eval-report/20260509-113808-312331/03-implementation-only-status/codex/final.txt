@@ -1,3 +1,0 @@
-I can do that, but I need the Linear issue identifier or link first, like `LIN-123`.
-
-Once you send it, I’ll mark it complete without running validation.

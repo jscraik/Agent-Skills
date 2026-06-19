@@ -1,1 +1,0 @@
-Inspect `.agents/skills/docs-expert/SKILL.md`; it looks stale, but find the canonical source before editing anything under the generated projection.

@@ -1,7 +1,0 @@
-I’ll route this through the database-specialist path when we work the harness plan, using the most relevant expertise available for schema, query, and migration concerns.
-
-For this repo, the best fit is:
-- `backend-platform` for the harness/system context
-- `build-web-apps:supabase-postgres-best-practices` if the plan touches Postgres or SQL design
-
-If you want, send me the harness plan or the specific database section and I’ll take the specialist route from there.

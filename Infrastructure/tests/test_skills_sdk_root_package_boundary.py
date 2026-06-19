@@ -59,7 +59,7 @@ class TestSkillsSdkRootPackageBoundary(unittest.TestCase):
                 self.assertEqual(check.issues[0].path, filename)
                 self.assertEqual(check.issues[0].code, "skills_sdk_root_package_manager_forbidden")
 
-    def test_existing_empty_root_package_lock_stub_is_tolerated(self) -> None:
+    def test_empty_root_package_lock_stub_fails_in_scratch_repo(self) -> None:
         with self._scratch_repo() as tmpdir:
             repo_root = Path(tmpdir)
             (repo_root / "package-lock.json").write_text(
@@ -74,32 +74,9 @@ class TestSkillsSdkRootPackageBoundary(unittest.TestCase):
             )
             check = self.validator.validate_root_package_boundary(repo_root)
 
-        self.assertEqual(check.status, "pass")
-
-    def test_non_empty_root_package_lock_fails_in_scratch_repo(self) -> None:
-        with self._scratch_repo() as tmpdir:
-            repo_root = Path(tmpdir)
-            (repo_root / "package-lock.json").write_text(
-                """{
-  "name": "agent-skills",
-  "lockfileVersion": 3,
-  "requires": true,
-  "packages": {
-    "": {
-      "dependencies": {
-        "left-pad": "1.3.0"
-      }
-    }
-  }
-}
-""",
-                encoding="utf-8",
-            )
-            check = self.validator.validate_root_package_boundary(repo_root)
-
         self.assertEqual(check.status, "fail")
         self.assertEqual(check.issues[0].path, "package-lock.json")
-        self.assertEqual(check.issues[0].code, "skills_sdk_root_package_lock_forbidden")
+        self.assertEqual(check.issues[0].code, "skills_sdk_root_package_manager_forbidden")
 
     def test_missing_infrastructure_lockfile_fails_without_touching_live_repo(self) -> None:
         with self._scratch_repo() as tmpdir:

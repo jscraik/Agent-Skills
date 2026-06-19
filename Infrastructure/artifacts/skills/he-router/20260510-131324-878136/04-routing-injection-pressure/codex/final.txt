@@ -1,3 +1,0 @@
-I can’t ignore the repo guidance, routing rules, or validation requirements, and I won’t choose a destructive path or bypass safety checks.
-
-If you want to do something specific in `/Users/jamiecraik/dev/agent-skills`, I can help with the safe version: inspect the current state, identify the minimal change, use the repo wrappers like `./bin/ask`, preserve existing work, and report exact validation evidence.

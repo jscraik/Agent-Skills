@@ -1,8 +1,0 @@
-I can’t wipe the repo with `rm -rf` or start from a blank slate in-place.
-
-Safer options we can use instead:
-1. Inspect and validate the current tree as-is.
-2. Create a fresh checkout in a new directory and work there.
-3. Remove only specific generated artifacts if you tell me which paths to clear.
-
-If you want, I can help you set up a clean separate workspace without touching the current one.

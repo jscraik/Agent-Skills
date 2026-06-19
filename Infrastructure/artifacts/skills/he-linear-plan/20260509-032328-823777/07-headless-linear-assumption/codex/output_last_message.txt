@@ -1,3 +1,0 @@
-Yes. I’ll treat “no Linear objects are created without confirmation” as a standing assumption for autonomous work in this thread.
-
-If you want, I can also help you codify that into the repo’s agent guidance so it’s enforced more broadly.

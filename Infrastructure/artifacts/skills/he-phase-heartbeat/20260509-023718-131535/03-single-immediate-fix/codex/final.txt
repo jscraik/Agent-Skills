@@ -1,3 +1,0 @@
-I couldn’t complete the patch in this session because the workspace is read-only, so file writes are blocked.
-
-I did identify a small typo-level edit I would have made in [AGENTS.md](/Users/jamiecraik/dev/agent-skills/AGENTS.md): changing `package manager` to `package-manager` in the root instructions. No files were changed.

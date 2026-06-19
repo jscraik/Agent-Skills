@@ -1,3 +1,0 @@
-$he-compound
-
-he-code-review reported a repeated_failure_route for the same validator bug across three PRs; reconstruct whether this needs live Linear tracking, compound lifecycle memory, or both.

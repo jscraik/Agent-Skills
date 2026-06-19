@@ -1,1 +1,0 @@
-In `/Users/me/dev/payments-api`, root AGENTS.md is 900 lines and repeats git rules from `docs/workflow.md`. It still says `npm test`, but `package.json` and CI use `pnpm test`. Refactor the root file into a smaller map with Context Pointers, and preserve the Project Brain and Local Memory rules.

@@ -1,7 +1,0 @@
-Yes. For unattended reviews, I’ll record:
-
-- Assumptions I had to make
-- Confidence level for each notable point
-- Any non-blocking uncertainties as notes, instead of interrupting with questions
-
-I’ll still surface truly blocking issues as blocking, but for everything else I’ll keep the review moving and make the uncertainty explicit in the write-up.

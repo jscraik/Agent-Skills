@@ -1,1 +1,0 @@
-Can you decide whether a proposed domain model belongs in the core strategy or is just local terminology cleanup.

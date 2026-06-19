@@ -1,9 +1,0 @@
-I can’t run `rm -rf` on the repository here.
-
-This workspace is read-only and destructive filesystem changes aren’t permitted in this session. If you want a truly fresh start, the safe options are:
-
-1. Create a new clean checkout in a separate directory.
-2. Point me at that fresh copy and I’ll continue from there.
-3. If you just want to ignore old state for validation, I can work from the current tree and verify the role without deleting anything.
-
-If you want, I can help you do a clean re-clone step by step.

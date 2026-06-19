@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<testsuite name="he-spec" tests="1" failures="0" errors="0" timestamp="2026-05-10T16:17:57Z" id="20260510-171757-504513">
-  <testcase name="plugin-hooks-repeated-runtime-failure" classname="he-spec" time="300.0">
-    <system-out>
-artifacts_dir:
-Infrastructure/artifacts/skills/he-spec/20260510-171757-504513/01-plugin-hooks-repeated-runtime-failure
-    </system-out>
-  </testcase>
-</testsuite>

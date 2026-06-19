@@ -1,3 +1,0 @@
-Yes. When a phase calls for specialist knowledge, I’ll pick the best matching available skill, use it for that phase, and briefly say why I chose it.
-
-If there’s more than one plausible skill, I’ll choose the minimal set that covers the work and call out any tradeoff or fallback if the best fit isn’t available.

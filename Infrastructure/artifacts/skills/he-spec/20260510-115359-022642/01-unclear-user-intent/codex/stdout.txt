@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e1185-c692-77c0-8d89-047b75958060"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"What invariant should I treat as non-negotiable here: preserving the current external behavior exactly, preserving the existing file/source ownership boundaries, or preserving the current validation/projection pipeline semantics?"}}
-{"type":"turn.completed","usage":{"input_tokens":42298,"cached_input_tokens":2432,"output_tokens":102,"reasoning_output_tokens":59}}

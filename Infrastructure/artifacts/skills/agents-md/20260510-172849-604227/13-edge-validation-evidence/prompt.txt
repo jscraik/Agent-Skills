@@ -1,1 +1,0 @@
-After refactoring `repo/api/AGENTS.md`, report the exact commands you ran and whether each passed, failed, or was blocked.

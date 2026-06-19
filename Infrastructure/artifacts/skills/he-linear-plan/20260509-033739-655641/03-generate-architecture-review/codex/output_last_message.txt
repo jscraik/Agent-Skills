@@ -1,7 +1,0 @@
-Yes. I can turn the Linear execution plan into a full architecture review document.
-
-I just need one concrete input to anchor it:
-1. The Linear plan text itself, or
-2. The file path if it already exists in the repo.
-
-If you want, I can also use a standard architecture review structure with sections like context, goals, constraints, proposed architecture, alternatives, risks, migration plan, and open questions.

@@ -252,7 +252,7 @@ check_matches_validation_scope() {
       ;;
     lint)
       case "$slug" in
-        docs-lint|ask-bootstrap-docs|steering-uptake|skill-types|openai-format|progressive-disclosure|skills-sdk-typed-artifacts)
+        docs-lint|ask-bootstrap-docs|steering-uptake|no-command-handles|ask-cli-modularity|skill-types|openai-format|progressive-disclosure|skills-sdk-typed-artifacts)
           return 0
           ;;
       esac
@@ -280,7 +280,7 @@ check_matches_validation_scope() {
       ;;
     audit)
       case "$slug" in
-        skill-catalog|plugin-shadowing|provider-policy|runtime-budget|context-budget|projection-integrity|path-ownership-boundaries|selection-contract|runtime-separation-*)
+        skill-catalog|plugin-shadowing|provider-policy|repo-surface-inventory|runtime-budget|context-budget|projection-integrity|path-ownership-boundaries|selection-contract|runtime-separation-*)
           return 0
           ;;
       esac
@@ -324,14 +324,23 @@ should_run_check() {
     docs-lint|ask-bootstrap-docs)
       [[ "$scope_has_docs" -eq 1 || "$scope_has_validation_core" -eq 1 ]]
       ;;
+    no-command-handles)
+      [[ "$scope_has_docs" -eq 1 || "$scope_has_skill_graph" -eq 1 || "$scope_has_validation_core" -eq 1 ]]
+      ;;
     skills-sdk-typed-artifacts)
       [[ "$scope_has_skills_sdk" -eq 1 || "$scope_has_validation_core" -eq 1 ]]
       ;;
     steering-uptake)
       [[ "$scope_has_docs" -eq 1 || "$scope_has_validation_core" -eq 1 || "$scope_has_steering" -eq 1 ]]
       ;;
-    verify-work-scope-flags|question-lifecycle|skills-system-upstream-lock|provider-policy|selection-contract|router-schema|ask-cli-modularity|selection-gate-severity)
+    verify-work-scope-flags|question-lifecycle|skills-system-upstream-lock|provider-policy|selection-contract|router-schema|selection-gate-severity)
       [[ "$scope_has_validation_core" -eq 1 ]]
+      ;;
+    repo-surface-inventory)
+      return 0
+      ;;
+    ask-cli-modularity)
+      [[ "$scope_has_validation_core" -eq 1 || "$scope_has_python_quality" -eq 1 ]]
       ;;
     skill-lifecycle-tests|skill-catalog|plugin-shadowing|runtime-budget|context-budget|projection-integrity|path-ownership-boundaries|skill-types|openai-format|progressive-disclosure|skill-graph-profiles|gotcha-store)
       [[ "$scope_has_skill_graph" -eq 1 ]]
@@ -517,6 +526,7 @@ scope_has_runtime_separation=0
 scope_has_validation_core=0
 scope_has_steering=0
 scope_has_skills_sdk=0
+scope_has_python_quality=0
 scope_forced_validation_fallback=0
 if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
   for changed_file in "${changed_files[@]}"; do
@@ -580,6 +590,12 @@ if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
     esac
 
     case "$changed_file" in
+      *.py|Infrastructure/bin/ask)
+        scope_has_python_quality=1
+        ;;
+    esac
+
+    case "$changed_file" in
       Infrastructure/scripts/validate_all.sh|\
       Infrastructure/bin/ask|\
       Infrastructure/scripts/lib/ask/*|\
@@ -590,7 +606,7 @@ if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
     esac
   done
 
-  if [[ "$scope_has_docs" -eq 0 && "$scope_has_skill_graph" -eq 0 && "$scope_has_authoring_family" -eq 0 && "$scope_has_runtime_separation" -eq 0 && "$scope_has_validation_core" -eq 0 && "$scope_has_steering" -eq 0 && "$scope_has_skills_sdk" -eq 0 ]]; then
+  if [[ "$scope_has_docs" -eq 0 && "$scope_has_skill_graph" -eq 0 && "$scope_has_authoring_family" -eq 0 && "$scope_has_runtime_separation" -eq 0 && "$scope_has_validation_core" -eq 0 && "$scope_has_steering" -eq 0 && "$scope_has_skills_sdk" -eq 0 && "$scope_has_python_quality" -eq 0 ]]; then
     echo "🧭 Changed-files scope classification missed all known buckets; falling back to baseline required validation"
     scope_has_validation_core=1
     scope_forced_validation_fallback=1
@@ -609,9 +625,16 @@ if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
   skill_family_changed_files_args=(--changed-files "${changed_files[@]}")
 fi
 
+repo_surface_inventory_cmd=("${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py --strict)
+if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
+  repo_surface_inventory_cmd+=(--changed-files "${changed_files[@]}")
+fi
+
 schedule_check required docs-lint "📚 Running docs lint..." "${python_cmd[@]}" Infrastructure/scripts/docs_lint.py --mode block --config Infrastructure/docs-policy.json
 schedule_check required ask-bootstrap-docs "🧭 Verifying ask bootstrap docs..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/verify_ask_bootstrap_docs.py
 schedule_check required steering-uptake "🧭 Verifying steering uptake ledger..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py
+schedule_check required no-command-handles "🧭 Verifying command-handle guidance is retired..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/validate_no_command_handles.py
+schedule_check required repo-surface-inventory "🧭 Enforcing repo surface ownership..." "${repo_surface_inventory_cmd[@]}"
 schedule_check required skills-sdk-typed-artifacts "🧾 Verifying Skills SDK typed artifact contracts..." "${python_cmd[@]}" Infrastructure/scripts/validation-and-linting/validate_skills_sdk_typed_artifacts.py --repo-root .
 schedule_check required verify-work-scope-flags "🧭 Verifying verify-work governance scope flags..." "${python_cmd[@]}" Infrastructure/scripts/verify_verify_work_scope_flags.py
 schedule_check required question-lifecycle "❓ Verifying question lifecycle contract..." "${python_cmd[@]}" Infrastructure/scripts/verify_question_lifecycle_contract.py
@@ -649,7 +672,11 @@ if [[ "$output_mode" == "persistent" ]]; then
 fi
 schedule_check required selection-contract "🎯 Verifying selection contract fixtures..." "${selection_contract_cmd[@]}"
 schedule_check required router-schema "🛡️  Verifying router schema tooling..." "${python_cmd[@]}" Infrastructure/scripts/verify_router_schema.py --input "$run_dir/routing-quality.json" --fail-on-sensitive-fields
-schedule_check required ask-cli-modularity "🧱 Verifying ask CLI modularity..." "${python_cmd[@]}" Infrastructure/scripts/verify_ask_cli_modularity.py
+ask_cli_modularity_cmd=("${python_cmd[@]}" Infrastructure/scripts/verify_ask_cli_modularity.py)
+if [[ "$changed_files_mode" -eq 1 && ${#changed_files[@]} -gt 0 ]]; then
+  ask_cli_modularity_cmd+=(--changed-files "${changed_files[@]}")
+fi
+schedule_check required ask-cli-modularity "🧱 Verifying ask CLI modularity..." "${ask_cli_modularity_cmd[@]}"
 
 runtime_artifact_targets=(
   "GOVERNANCE/runtime-separation/current.json"

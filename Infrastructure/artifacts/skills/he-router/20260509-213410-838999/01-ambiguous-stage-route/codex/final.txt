@@ -1,3 +1,0 @@
-Got it. I’ll ask exactly once when a Harness request could be `brainstorm`, `spec`, or `plan`, instead of guessing the lane.
-
-I attempted to load the `harness-engineering` skill instructions, but the sandbox blocked the read with `sandbox_apply: Operation not permitted`, so I’m applying the routing behavior directly from your request and the available skill summary.

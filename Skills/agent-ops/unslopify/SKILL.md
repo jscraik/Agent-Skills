@@ -11,10 +11,7 @@ metadata:
   metadata_source: frontmatter
   risk: medium
   projection: flat
-  handles: "unslopify, $unslopify"
-  canonical_handle: unslopify
   runtime_visibility: flat
-  command_visibility: target
   category: maintenance
   scope: global
   compatible_roles:

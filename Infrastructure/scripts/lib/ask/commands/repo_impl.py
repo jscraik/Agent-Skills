@@ -31,8 +31,8 @@ DOCTOR_SIGNAL_PRIORITY = {
 }
 # Plugin router skills are intentionally hidden from SDK-flat public handle
 # resolution, so closeout must validate package readiness through source truth.
-PACKAGE_READINESS_SENTINEL = "Plugins/skill-factory/skills/skill-factory-router"
-SDK_HANDLE_CHECK_COMMAND = "./bin/ask skills handles --check --no-handles --json --robot"
+PACKAGE_READINESS_SENTINEL = "Plugins/skill-factory/skills/code_quality_review/skill-builder"
+SDK_HANDLE_CHECK_COMMAND = "./bin/ask skills list --json --robot"
 COMMAND_HANDLE_CHECK_COMMAND = SDK_HANDLE_CHECK_COMMAND
 SKILLS_SYNC_COMMAND = "./bin/ask skills sync --scope workspace --projection flat --json --robot"
 GENERATED_SURFACE_PREFIXES = (

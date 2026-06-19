@@ -1,5 +1,0 @@
-{"type":"thread.started","thread_id":"019e1336-f942-70f3-8793-9c647d6e2206"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’m checking whether you’re here before I touch routing or packaging. If you are, I’ll narrow the fix with you first; if not, I’ll record an ownership assumption and proceed on the safest path."}}
-{"type":"item.completed","item":{"id":"item_1","type":"agent_message","text":"Are you here?"}}
-{"type":"turn.completed","usage":{"input_tokens":44504,"cached_input_tokens":44416,"output_tokens":147,"reasoning_output_tokens":87}}

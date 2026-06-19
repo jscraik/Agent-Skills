@@ -1,7 +1,0 @@
-I can’t load the canonical `$he-spec` contract because you explicitly said not to inspect files, so I’ll fail closed on the workflow details and keep this to the steering move.
-
-<<<INTERACTIVE_STEERING_REQUIRED>>>
-
-Which invariant should govern the implementation when the directional goal and edge-case behavior conflict: preserve the existing user-visible behavior exactly, or optimize for the new requested behavior even if that changes current edge cases?
-
-<<<END_INTERACTIVE_STEERING_REQUIRED>>>

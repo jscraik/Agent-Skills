@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e0a6f-22a1-78f3-bc7d-d54cf7761117"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Yes. In headless mode, I’ll:\n\n- Record assumptions explicitly instead of interrupting with questions when I can make a reasonable choice.\n- Prefer reversible actions and avoid anything irreversible unless you explicitly ask for it.\n- Call out any important tradeoffs or uncertainty in the notes so you can review them later.\n\nIf you want, I can also keep assumptions in a short `Assumptions` section in progress updates while I work."}}
-{"type":"turn.completed","usage":{"input_tokens":30269,"cached_input_tokens":30080,"output_tokens":204,"reasoning_output_tokens":111}}

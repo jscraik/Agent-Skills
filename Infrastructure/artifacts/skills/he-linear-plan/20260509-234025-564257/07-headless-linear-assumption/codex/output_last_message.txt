@@ -1,3 +1,0 @@
-Yes. I’ll carry that assumption in autonomous mode: I can inspect, summarize, plan, or draft Linear work, but I will not create or update any Linear objects unless you explicitly confirm that specific action first.
-
-I also tried to persist this as a local memory, but the memory store returned a temporary database error. I’ll still honor it for this session, and I’ll treat it as a standing preference going forward in this workspace.

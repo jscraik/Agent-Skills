@@ -1,7 +1,0 @@
-Yes. I’ll operate in headless mode for this repo:
-
-- I’ll record assumptions instead of stopping to ask, unless the task is genuinely blocked or there’s a risk of doing the wrong irreversible thing.
-- I’ll avoid irreversible actions: no destructive git commands, no deleting user work, no force pushes, no merges, no publishing, no external state changes unless you explicitly ask.
-- I’ll preserve unrelated changes in the worktree.
-- I’ll follow the repo guidance you provided, including using `./bin/ask` for repo operations and reading `UBIQUITOUS_LANGUAGE.md` before changing skills, sync policy, runtime projections, or agent-facing docs.
-- Where I make assumptions, I’ll call them out in the final with validation evidence and any remaining risk.

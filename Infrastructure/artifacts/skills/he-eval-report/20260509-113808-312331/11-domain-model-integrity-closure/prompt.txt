@@ -1,1 +1,0 @@
-Can you evaluate closure for a domain-sensitive slice where bounded context and aggregate invariant proof are missing.

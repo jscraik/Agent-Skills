@@ -1,2 +1,0 @@
-WARNING: proceeding, even though we could not update PATH: Operation not permitted (os error 1)
-Error: failed to initialize in-process app-server client: Operation not permitted (os error 1)
