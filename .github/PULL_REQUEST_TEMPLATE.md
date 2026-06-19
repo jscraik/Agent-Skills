@@ -76,7 +76,7 @@ transcripts, bulky telemetry, or local absolute paths.
 - [ ] Branch name follows policy (`codex/*` for agent-created branches).
 - [ ] Required local gates run: `bash scripts/validate-codestyle.sh` plus the repo, package, or surface-scoped validation commands listed in Testing.
 - [ ] `scripts/validate-codestyle.sh` was treated as the enforcement point for hook env sanitization (`GIT_DIR`, `GIT_WORK_TREE`, and related `GIT_*` values are untrusted and sanitized before delegated package scripts).
-- [ ] Any CodeRabbit Semgrep findings were either fixed or explicitly justified when warning-level-only.
+- [ ] **(Pending)** Any CodeRabbit Semgrep findings were either fixed or explicitly justified when warning-level-only.
 - [ ] North-star learning loop considered for changed files; relevant learning gate, review-context, promotion, or feedback evidence is listed below, or marked `n.a.` with a reason.
 - [ ] Merge is blocked until all required checks pass.
 - [ ] I will delete branch/worktree after merge.
