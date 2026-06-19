@@ -1,7 +1,7 @@
 interface:
   display_name: "Codex Agent Creator"
-  short_description: "$codex-agent-creator - Codex Agent Creator entrypoint"
-  default_prompt: "$codex-agent-creator "
+  short_description: "Codex Agent Creator entrypoint"
+  default_prompt: "Use Codex Agent Creator. "
 
 policy:
   allow_implicit_invocation: false

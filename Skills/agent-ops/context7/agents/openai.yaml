@@ -1,7 +1,7 @@
 interface:
   display_name: "Context7"
-  short_description: "$context7 - Context7 entrypoint"
-  default_prompt: "$context7 "
+  short_description: "Context7 entrypoint"
+  default_prompt: "Use Context7. "
 
 policy:
   allow_implicit_invocation: false

@@ -1,4 +1,4 @@
 interface:
   display_name: "Improve Agent Native"
   short_description: "Check repo readiness for AI coding agents."
-  default_prompt: "Use $improve-agent-native to check whether this repository is ready for AI coding agents. Review AGENTS.md, docs quality, missing test/build commands, proof-loop gaps, and produce a file-evidence scorecard with specific fixes."
+  default_prompt: "Use Improve Agent Native to check whether this repository is ready for AI coding agents. Review AGENTS.md, docs quality, missing test/build commands, proof-loop gaps, and produce a file-evidence scorecard with specific fixes."

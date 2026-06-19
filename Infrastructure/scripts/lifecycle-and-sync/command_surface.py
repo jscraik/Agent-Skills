@@ -183,18 +183,18 @@ def handles_report(*, repo_root_path: Path | None = None, include_handles: bool 
     public_rows = [record.to_resolution() for record in records] if include_handles else []
     violations = sdk_duplicate_handle_violations(candidates)
     return {
-        "schema_version": "sdk-skill-handles.v1",
+        "schema_version": "sdk-skill-targets.v1",
         "status": "pass" if not violations else "fail",
         "policy_identity": policy_identity(),
         "generated_from": "sdk_flat_registry",
         "projection_path": None,
-        "handle_count": len(records),
+        "target_count": len(records),
         "violations": violations,
-        "handles": public_rows,
-        "hidden_handles": [],
+        "targets": public_rows,
+        "hidden_targets": [],
         "notes": [
-            "Skill handles resolve from the SDK-flat registry and canonical SKILL.md frontmatter.",
-            "Projection writes are handled by workspace flat sync; handles report is read-only.",
+            "Skill targets resolve from the SDK-flat registry and canonical SKILL.md frontmatter.",
+            "Projection writes are handled by workspace flat sync; target reports are read-only.",
         ],
     }
 
@@ -206,6 +206,6 @@ def removed_projection_payload(action: str) -> dict[str, Any]:
         "action": action,
         "error_code": "ERR_INVALID_PROJECTION_MODE",
         "message": "Removed projection generation is not part of the SDK skill path.",
-        "fix_suggestion": "Use ./bin/ask skills sync --scope workspace --projection flat --json --robot and ./bin/ask skills handles --check --json --robot.",
+        "fix_suggestion": "Use ./bin/ask skills sync --scope workspace --projection flat --json --robot and ./bin/ask skills list --json --robot.",
         "violations": [{"code": "REMOVED_PROJECTION_GENERATION"}],
     }

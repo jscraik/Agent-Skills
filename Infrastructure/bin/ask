@@ -64,6 +64,7 @@ from ask.commands.mcp import sync_mcp
 from ask.commands.memory import memory_list, memory_read, memory_search
 from ask.commands.wiki import wiki_lint, wiki_ingest, wiki_add, wiki_query, wiki_add_asset
 from ask.commands.workouts import add_workouts_parser, dispatch_workouts, render_workouts_human
+from ask.rendering.plugins import render_plugins_human
 def main():
     start_time = time.time()
     prepared_args = prepare_args(sys.argv[1:])
@@ -143,28 +144,28 @@ def main():
     skills_implicit_preview_parser = skills_subparsers.add_parser("implicit-preview", help="Preview Codex implicit skill invocation attribution", parents=[global_parser])
     skills_implicit_preview_parser.add_argument("--command", required=True, help="Shell command text to inspect")
     skills_implicit_preview_parser.add_argument("--workdir", help="Working directory used to resolve relative command paths")
-    skills_handles_parser = skills_subparsers.add_parser("handles", help="List or validate SDK-visible skill handles", parents=[global_parser])
-    skills_handles_parser.add_argument("--check", action="store_true", help="Fail when SDK handle validation finds drift")
-    skills_handles_parser.add_argument("--no-handles", action="store_true", help="Omit the full handle list from JSON output")
+    skills_handles_parser = skills_subparsers.add_parser("handles", help="Inspect SDK-visible skill target registry", parents=[global_parser])
+    skills_handles_parser.add_argument("--check", action="store_true", help="Fail when SDK skill target validation finds drift")
+    skills_handles_parser.add_argument("--no-handles", action="store_true", help="Omit the full target list from JSON output")
     skills_handles_parser.add_argument("--write-projection", action="store_true", help="Removed flag; use skills sync --projection flat")
-    skills_handles_parser.add_argument("--check-projection", action="store_true", help="Removed flag; use skills handles --check")
+    skills_handles_parser.add_argument("--check-projection", action="store_true", help="Removed flag; use skills sync --projection flat, then skills list")
     skills_handles_parser.add_argument("--dry-run", action="store_true", help="Accepted only with removed projection flags")
-    skills_resolve_parser = skills_subparsers.add_parser("resolve", help="Resolve an SDK-visible skill handle", parents=[global_parser])
-    skills_resolve_parser.add_argument("handle", help="Skill handle to resolve, with or without leading $")
+    skills_resolve_parser = skills_subparsers.add_parser("resolve", help="Resolve an SDK-visible skill target or source path", parents=[global_parser])
+    skills_resolve_parser.add_argument("handle", help="Skill target or repo-relative source path to resolve")
     skills_parse_parser = skills_subparsers.add_parser("parse", help="Parse and resolve SDK skill mentions and @ reviewer roles from a prompt", parents=[global_parser])
     skills_parse_parser.add_argument("request", nargs="+", help="Prompt text containing SDK skill mentions and @ reviewer roles")
-    skills_proof_parser = skills_subparsers.add_parser("proof", help="Prove an SDK skill handle reaches workspace and user runtime surfaces", parents=[global_parser])
-    skills_proof_parser.add_argument("handle", help="Skill handle to prove, with or without leading $")
+    skills_proof_parser = skills_subparsers.add_parser("proof", help="Prove an SDK skill target reaches workspace and user runtime surfaces", parents=[global_parser])
+    skills_proof_parser.add_argument("handle", help="Skill target or source path to prove")
     skills_proof_parser.add_argument("--runtime-target", default="any", help="Runtime that must satisfy proof: any, codex, or agents")
-    skills_subparsers.add_parser("prove", help="Show a skill proof scorecard", parents=[global_parser]).add_argument("handle", nargs="+", help="Skill handle or goal to prove")
-    skills_subparsers.add_parser("explain", help="Explain when and how to use a skill handle", parents=[global_parser]).add_argument("handle", help="Skill handle to explain")
-    skills_doctor_parser = skills_subparsers.add_parser("doctor", help="Diagnose readiness for one skill handle or source path", parents=[global_parser])
-    skills_doctor_parser.add_argument("target", help="Skill handle or repo-relative skill source path")
+    skills_subparsers.add_parser("prove", help="Show a skill proof scorecard", parents=[global_parser]).add_argument("handle", nargs="+", help="Skill target, source path, or goal to prove")
+    skills_subparsers.add_parser("explain", help="Explain when and how to use a skill target or source path", parents=[global_parser]).add_argument("handle", help="Skill target or source path to explain")
+    skills_doctor_parser = skills_subparsers.add_parser("doctor", help="Diagnose readiness for one skill target or source path", parents=[global_parser])
+    skills_doctor_parser.add_argument("target", help="Skill target or repo-relative skill source path")
     skills_doctor_parser.add_argument("--strict", action="store_true", help="Run strict audit instead of the default compat audit")
     skills_doctor_parser.add_argument("--codex-parity", action="store_true", help="Require Codex-targeted runtime proof before reporting SDK conformance")
     skills_package_parser = skills_subparsers.add_parser("package", help="Report or verify package readiness for one skill", parents=[global_parser])
-    skills_package_parser.add_argument("target", help="Skill handle, repo-relative skill source path, or 'verify'")
-    skills_package_parser.add_argument("verify_target", nargs="?", help="Skill handle, source path, or package archive to verify when target is 'verify'")
+    skills_package_parser.add_argument("target", help="Skill target, repo-relative skill source path, or 'verify'")
+    skills_package_parser.add_argument("verify_target", nargs="?", help="Skill target, source path, or package archive to verify when target is 'verify'")
     skills_package_parser.add_argument("--strict", action="store_true", help="Fail when package readiness metadata is incomplete")
     skills_package_parser.add_argument("--checkout-test", action="store_true", help="Run read-only local checkout evidence for the install gate")
     skills_package_parser.add_argument("--expected-sha256", help="Expected package archive digest for verify mode")
@@ -223,8 +224,8 @@ def main():
     skills_openai_parser = skills_subparsers.add_parser("validate-openai-format", help="Run the canonical OpenAI skill format validator", parents=[global_parser])
     skills_openai_parser.add_argument("path", help="Path to the skill directory")
     skills_openai_parser.add_argument("--mode", choices=["warn", "strict"], default="strict", help="Validation mode")
-    skills_boundaries_parser = skills_subparsers.add_parser("validate-boundaries", help="Show canonical-versus-projection ownership for a skill handle", parents=[global_parser])
-    skills_boundaries_parser.add_argument("handle", help="Skill handle to validate, with or without leading $")
+    skills_boundaries_parser = skills_subparsers.add_parser("validate-boundaries", help="Show canonical-versus-projection ownership for a skill target", parents=[global_parser])
+    skills_boundaries_parser.add_argument("handle", help="Skill target or source path to validate")
     skills_install_parser = skills_subparsers.add_parser("install", help="Install a skill from GitHub", parents=[global_parser])
     skills_install_parser.add_argument("url", help="GitHub URL of the skill")
     skills_install_parser.add_argument("--dest", default="Skills/github", help="Repo-relative canonical category directory under Skills/ (default: Skills/github)")
@@ -1208,8 +1209,8 @@ def main():
                 elif args.topic == "skills" and args.action == "handles":
                     surface = result.data.get("sdk_handles", {})
                     print(
-                        "✅ Skill handles: "
-                        f"{surface.get('handle_count', 0)} handle(s), status={surface.get('status')}"
+                        "✅ Skill targets: "
+                        f"{surface.get('handle_count', 0)} target(s), status={surface.get('status')}"
                     )
                     if result.data.get("policy_identity"):
                         print(f"  Policy identity: {result.data['policy_identity']}")
@@ -1219,14 +1220,14 @@ def main():
                         print(f"  Violations: {len(violations)}")
                 elif args.topic == "skills" and args.action == "resolve":
                     resolution = result.data.get("resolution", {})
-                    print(f"✅ Skill handle: {resolution.get('handle')}")
+                    print(f"✅ Skill target: {resolution.get('handle')}")
                     print(f"  Runtime visibility: {resolution.get('runtime_visibility')}")
-                    print(f"  Handle source: {resolution.get('handle_source')}")
+                    print(f"  Target source: {resolution.get('handle_source')}")
                     print(f"  Source: {resolution.get('source_path')}")
                     print_first_validation_command(resolution)
                 elif args.topic == "skills" and args.action == "proof":
                     proof = result.data.get("proof", {})
-                    print(f"✅ Skill handle proof: {proof.get('handle')} ({proof.get('status')})")
+                    print(f"✅ Skill target proof: {proof.get('handle')} ({proof.get('status')})")
                     if proof.get("runtime_satisfied_by"):
                         print(f"  runtime satisfied by: {proof.get('runtime_satisfied_by')}")
                     gate_policy = proof.get("gate_policy") or {}
@@ -1370,7 +1371,7 @@ def main():
                     resolution = result.data.get("resolution", {})
                     handle = resolution.get("canonical_handle") or resolution.get("handle")
                     print(f"✅ Reviewer handle: @{handle}")
-                    print(f"  Handle source: {resolution.get('handle_source') or resolution.get('kind')}")
+                    print(f"  Target source: {resolution.get('handle_source') or resolution.get('kind')}")
                     print(f"  Source: {resolution.get('source_path')}")
                     print_first_validation_command(resolution)
                 elif args.topic == "runtime" and args.action in ("surface", "budget"):
@@ -1528,87 +1529,8 @@ def main():
                 elif args.topic == "skills" and args.action == "init":
                     print(f"✅ {result.data['message']}")
                     print_first_validation_command(result.data)
-                elif args.topic == "plugins" and args.action in {"init", "create"}:
-                    print(f"✅ {result.data['message']}")
-                    print(result.data.get("raw_output", ""))
-                    created_manual = result.data.get("created_manual_folders", [])
-                    if created_manual:
-                        print("Created companion folders:")
-                        for folder in created_manual:
-                            print(f"  - {folder}")
-                elif args.topic == "plugins" and args.action in {"list", "status", "doctor"}:
-                    installed_state = result.data.get("installed_state", {})
-                    activation_state = result.data.get("activation_state", {})
-                    health_state = result.data.get("health_state", {})
-                    print(f"Plugins installed: {installed_state.get('plugin_count', 0)}")
-                    for plugin in installed_state.get("plugins", []):
-                        print(f"  - {plugin.get('name')} ({plugin.get('path')})")
-                    print(f"Activation entries: {activation_state.get('plugin_count', 0)}")
-                    print(f"Health status: {health_state.get('status', 'unknown')}")
-                    blockers = health_state.get("blockers", [])
-                    if blockers:
-                        print("Blockers:")
-                        for blocker in blockers:
-                            print(f"  - {blocker}")
-                    print_first_validation_command(result.data)
-                elif args.topic == "plugins" and args.action == "sync-local-runtime":
-                    if result.data.get("dry_run"):
-                        print("🔍 Dry run - would replace local-plugin runtime mirrors:")
-                    else:
-                        print(f"✅ {result.data.get('message', 'Replaced local-plugin runtime mirrors.')}")
-                    print(f"Profiles: {len(result.data.get('profile_homes', []))}")
-                    print(f"Plugins: {', '.join(result.data.get('plugin_names', []))}")
-                    for report in result.data.get("runtime_reports", []):
-                        print(f"  - {report.get('runtime_root')}")
-                        removed = report.get("removed_entries") or []
-                        if removed:
-                            print(f"    removed: {', '.join(removed)}")
-                    print_first_validation_command(result.data)
-                elif args.topic == "plugins" and args.action == "prune-stale-config":
-                    stale = result.data.get("stale_enabled_plugin_ids", []) or result.data.get("desktop_readiness_state", {}).get("stale_enabled_plugin_ids", [])
-                    if result.data.get("dry_run"):
-                        print("🔍 Dry run - would prune stale plugin config:" if stale else "🔍 Dry run - no stale plugin config to prune")
-                    else:
-                        print("✅ Pruned stale plugin config" if stale else "✅ No stale plugin config to prune")
-                    if stale:
-                        print(f"Stale enabled plugins: {len(stale)}")
-                        for plugin_id in stale:
-                            print(f"  - {plugin_id}")
-                    print_first_validation_command(result.data)
-                elif args.topic == "plugins" and args.action in {"install", "import"}:
-                    if result.data.get("dry_run"):
-                        print("🔍 Dry run - would install plugin:")
-                        print(f"   URL: {result.data.get('url')}")
-                        print(f"   Source path: {result.data.get('plugin_path')}")
-                        print(f"   Name: {result.data.get('plugin_name')}")
-                        print(f"   Target: {result.data.get('target_path')}")
-                        print_first_validation_command(result.data)
-                        print("\n💡 To actually install, run:")
-                        print(f"   {result.metadata.get('next_steps', ['ask plugins install <url> --path <path>'])[0]}")
-                    else:
-                        print(f"✅ {result.data.get('message', 'Plugin installed.')}")
-                        if result.data.get("raw_output"):
-                            print(result.data["raw_output"])
-                        print_first_validation_command(result.data)
-                elif args.topic == "plugins" and args.action == "uninstall":
-                    if result.data.get("dry_run"):
-                        print("🔍 Dry run - would uninstall plugin:")
-                        print(f"   Name: {result.data.get('plugin_name', args.name)}")
-                        print(f"   Target: {result.data.get('target_path')}")
-                        print_first_validation_command(result.data)
-                        print("\n💡 To actually uninstall, run:")
-                        print(f"   {result.metadata.get('next_steps', ['ask plugins uninstall <name>'])[0]}")
-                    else:
-                        print(f"✅ {result.data.get('message', 'Plugin uninstalled.')}")
-                        print_first_validation_command(result.data)
-                elif args.topic == "plugins" and args.action == "harden":
-                    print(f"✅ {result.data.get('message', 'Plugin hardening checks passed.')}")
-                    command_runs = result.data.get("command_runs", [])
-                    if command_runs:
-                        print("Checks run:")
-                        for run in command_runs:
-                            print(f"  - {run.get('step')}: {run.get('command')}")
-                    print_first_validation_command(result.data)
+                elif args.topic == "plugins" and render_plugins_human(args, result):
+                    pass
                 elif args.topic == "evals":
                     if args.action == "run":
                         print(f"✅ Evaluation complete for {args.path}")

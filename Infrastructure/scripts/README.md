@@ -47,11 +47,11 @@ Index for repository automation, validation, and maintenance scripts.
 - `sync_plugin_factory_family.sh`
 - `sync_projection_trees.sh`
 - `command_surface.py`
-  - Builds `.skillsets/command-surface.json` from rooted manifests.
-  - Validates duplicate handles, missing canonical sources, missing `invoke_via`
-    on target handles, projection drift, and reviewer separation.
+  - Maintains retired command-surface compatibility metadata from rooted manifests.
+  - Validates duplicate skill target metadata, missing canonical sources, missing
+    `invoke_via` on target entries, projection drift, and reviewer separation.
   - Public wrappers:
-    - `python3 bin/ask skills handles --check --json`
+    - `python3 bin/ask skills list --json`
     - `python3 bin/ask reviewers resolve <handle> --json`
 - `sync_mcp.py`
 - `skill_catalog.py`

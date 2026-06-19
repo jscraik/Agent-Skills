@@ -1,7 +1,7 @@
 interface:
   display_name: "Bootstrap"
-  short_description: "$bootstrap - Bootstrap entrypoint"
-  default_prompt: "$bootstrap "
+  short_description: "Bootstrap entrypoint"
+  default_prompt: "Use Bootstrap. "
 
 policy:
   allow_implicit_invocation: false

@@ -1,7 +1,7 @@
 interface:
   display_name: "Codex Automation Architect"
-  short_description: "$codex-automation-architect - Codex Automation Architect entrypoint"
-  default_prompt: "$codex-automation-architect "
+  short_description: "Codex Automation Architect entrypoint"
+  default_prompt: "Use Codex Automation Architect. "
 
 policy:
   allow_implicit_invocation: false

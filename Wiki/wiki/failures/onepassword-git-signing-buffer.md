@@ -2,7 +2,7 @@
 title: 1Password Git Signing Buffer Error
 type: failure
 status: active
-last_reviewed: 2026-04-09
+last_reviewed: 2026-06-19
 sources:
   - /Users/jamiecraik/dev/Agent-Skills/FORJAMIE
   - /Users/jamiecraik/dev/Agent-Skills/Learnings.md

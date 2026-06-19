@@ -1,7 +1,7 @@
 interface:
   display_name: "Codex Hooks Builder"
-  short_description: "$codex-hooks-builder - Codex Hooks Builder entrypoint"
-  default_prompt: "$codex-hooks-builder "
+  short_description: "Codex Hooks Builder entrypoint"
+  default_prompt: "Use Codex Hooks Builder. "
 
 policy:
   allow_implicit_invocation: false

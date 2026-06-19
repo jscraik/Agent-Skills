@@ -1,7 +1,7 @@
 interface:
   display_name: "Autoresearch"
-  short_description: "$autoresearch - Autoresearch entrypoint"
-  default_prompt: "$autoresearch "
+  short_description: "Autoresearch entrypoint"
+  default_prompt: "Use Autoresearch. "
 
 policy:
   allow_implicit_invocation: false
