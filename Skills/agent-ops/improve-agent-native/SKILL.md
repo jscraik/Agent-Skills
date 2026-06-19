@@ -11,10 +11,7 @@ metadata:
   metadata_source: frontmatter
   risk: medium
   projection: flat
-  handles: "improve-agent-native, $improve-agent-native"
-  canonical_handle: improve-agent-native
   runtime_visibility: flat
-  command_visibility: target
   category: maintenance
   scope: global
   compatible_roles: "default, worker"

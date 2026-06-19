@@ -187,6 +187,10 @@ reply, or an untested local edit.
 - Prefer a narrow guardrail that prevents recurrence over broad process prose.
 - Prefer validators over reminders, runtime truth over summaries, enforcement
   over intention, and structured evidence over conversational memory.
+- Never fabricate command, tool, session, cell, or placeholder identifiers to
+  satisfy a workflow shape. A wait, resume, retry, or closeout action must point
+  at a real handle returned by the runtime in the current lane; otherwise run
+  the direct command, re-discover the live state, or classify the blocker.
 - Prefer systemic remediation when sibling patterns share the same mechanism.
 - If a local fix is intentionally narrow, state why broader alignment,
   enforcement, or validation is not warranted.

@@ -310,6 +310,14 @@ def _resolve_sdk_skill_source_path(requested: str, root: Path) -> list[SdkSkillR
     ])
 
 
+def _resolve_sdk_skill_name(requested: str, root: Path) -> list[SdkSkillRecord]:
+    return _distinct_records([
+        record
+        for record in build_sdk_skill_record_candidates(repo_root_path=root, visibility="advanced")
+        if record.handle == requested or record.name == requested
+    ])
+
+
 def _collision_policy_path(path: str) -> str:
     parts = Path(path).parts
     if parts and parts[-1] == "SKILL.md":
@@ -440,11 +448,7 @@ def resolve_sdk_skill_handle(handle: str, *, repo_root_path: Path | None = None)
         }
 
     root = repo_root_path or REPO_ROOT
-    matches = _resolve_sdk_skill_source_path(requested, root) or _distinct_records([
-        record
-        for record in build_sdk_skill_record_candidates(repo_root_path=root, visibility="advanced")
-        if record.handle == requested or record.name == requested
-    ])
+    matches = _resolve_sdk_skill_source_path(requested, root) or _resolve_sdk_skill_name(requested, root)
     if not matches:
         return {
             "status": "error",

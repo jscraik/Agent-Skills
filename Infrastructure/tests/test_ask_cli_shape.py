@@ -84,7 +84,6 @@ def sample(value):
             validator.LEGACY_SHAPE_DEBT_PATHS,
             frozenset({
                 "Infrastructure/scripts/lib/ask/commands/skills_impl.py",
-                "Infrastructure/scripts/lifecycle-and-sync/sdk_skill_registry.py",
                 "Infrastructure/tests/test_ask_cli_impl.py",
             }),
         )

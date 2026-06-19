@@ -60,6 +60,7 @@ RULES = [
 ]
 
 SKILL_DESCRIPTION_DOLLAR_PATTERN = re.compile(r"\$[A-Za-z][A-Za-z0-9_-]*")
+SKILL_FRONTMATTER_HANDLE_KEY_PATTERN = re.compile(r"^\s*(handles|canonical_handle):\s*")
 
 
 def _relative(path: Path) -> str:
@@ -103,6 +104,17 @@ def _frontmatter_description_line(path: Path) -> tuple[int, str] | None:
     return None
 
 
+def _frontmatter_lines(path: Path) -> Iterable[tuple[int, str]]:
+    text = path.read_text(encoding="utf-8")
+    if not text.startswith("---\n"):
+        return
+    end = text.find("\n---", 4)
+    if end == -1:
+        return
+    for line_number, line in enumerate(text[:end].splitlines(), start=1):
+        yield line_number, line
+
+
 def _iter_skill_description_findings() -> Iterable[dict[str, object]]:
     for root_name in SKILL_DESCRIPTION_ROOTS:
         root = ROOT / root_name
@@ -123,6 +135,25 @@ def _iter_skill_description_findings() -> Iterable[dict[str, object]]:
                     "match": match.group(0),
                     "message": "Skill description metadata must use natural trigger language, not $skill trigger notation.",
                 }
+
+
+def _iter_skill_frontmatter_handle_findings() -> Iterable[dict[str, object]]:
+    for root_name in SKILL_DESCRIPTION_ROOTS:
+        root = ROOT / root_name
+        if not root.exists():
+            continue
+        for path in sorted(root.rglob("SKILL.md")):
+            if _is_plugin_cache_path(path):
+                continue
+            for line_number, line in _frontmatter_lines(path):
+                match = SKILL_FRONTMATTER_HANDLE_KEY_PATTERN.search(line)
+                if match:
+                    yield {
+                        "path": _relative(path),
+                        "line": line_number,
+                        "match": match.group(1),
+                        "message": "Skill frontmatter must not carry legacy command-handle metadata.",
+                    }
 
 
 def _iter_agent_metadata_findings() -> Iterable[dict[str, object]]:
@@ -153,6 +184,7 @@ def main() -> int:
     findings = [
         *_iter_findings(RULES),
         *_iter_skill_description_findings(),
+        *_iter_skill_frontmatter_handle_findings(),
         *_iter_agent_metadata_findings(),
     ]
     payload = {
@@ -161,6 +193,7 @@ def main() -> int:
         "checked_paths": [
             *[rule.path for rule in RULES],
             *[f"{root}/**/SKILL.md frontmatter descriptions" for root in SKILL_DESCRIPTION_ROOTS],
+            *[f"{root}/**/SKILL.md legacy handle metadata" for root in SKILL_DESCRIPTION_ROOTS],
             *[f"{root}/**/agents/*.yaml metadata" for root in AGENT_METADATA_ROOTS],
         ],
         "findings": findings,
