@@ -38,6 +38,8 @@ def _blocked_receipt(repo_root: Path, dataset_path: Path, blocker: str) -> dict[
         "dataset_path": _repo_relative(repo_root, dataset_path),
         "dataset_digest": "sha256:" + ("0" * 64),
         "skill_ir_schema_version": None,
+        "package_id": None,
+        "package_digest": None,
         "target_path": None,
         "mode": None,
         "case_count": 0,
@@ -118,7 +120,14 @@ def _case_result(case: dict[str, Any]) -> dict[str, str]:
     }
 
 
-def _receipt(repo_root: Path, dataset_path: Path, cases: list[dict[str, str]], skill_ir_schema_version: str | None) -> dict[str, Any]:
+def _receipt(
+    repo_root: Path,
+    dataset_path: Path,
+    cases: list[dict[str, str]],
+    skill_ir_schema_version: str | None,
+    package_id: str | None,
+    package_digest: str | None,
+) -> dict[str, Any]:
     failed_count = sum(1 for item in cases if item["status"] == "fail")
     return {
         "schema_version": EVAL_RUN_RECEIPT_SCHEMA_VERSION,
@@ -128,6 +137,8 @@ def _receipt(repo_root: Path, dataset_path: Path, cases: list[dict[str, str]], s
         "dataset_path": _repo_relative(repo_root, dataset_path),
         "dataset_digest": _sha256_file(dataset_path),
         "skill_ir_schema_version": skill_ir_schema_version,
+        "package_id": package_id,
+        "package_digest": package_digest,
         "target_path": None,
         "mode": None,
         "case_count": len(cases),
@@ -145,6 +156,8 @@ def run_deterministic_eval(
     *,
     dataset: str,
     skill_ir_schema_version: str | None = None,
+    package_id: str | None = None,
+    package_digest: str | None = None,
 ) -> dict[str, Any]:
     """Run exact-match JSONL eval cases without invoking providers or mutating state."""
     dataset_path = Path(dataset)
@@ -158,4 +171,11 @@ def run_deterministic_eval(
     except ValueError as exc:
         return _blocked_receipt(repo_root, dataset_path, str(exc))
 
-    return _receipt(repo_root, dataset_path, [_case_result(case) for case in cases], skill_ir_schema_version)
+    return _receipt(
+        repo_root,
+        dataset_path,
+        [_case_result(case) for case in cases],
+        skill_ir_schema_version,
+        package_id,
+        package_digest,
+    )

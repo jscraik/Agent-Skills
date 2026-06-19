@@ -1405,6 +1405,42 @@ def _skill_audit_target(repo_root: Path, resolution: dict[str, Any]) -> str | No
         return None
 
 
+def _skills_sdk_digest_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return f"sha256:{digest.hexdigest()}"
+
+
+def _skills_sdk_repo_relative(repo_root: Path, path: Path) -> str:
+    try:
+        return path.resolve().relative_to(repo_root.resolve()).as_posix()
+    except (OSError, ValueError):
+        return path.as_posix()
+
+
+def _skills_sdk_eval_package_identity(repo_root: Path, target: str) -> dict[str, str] | None:
+    query = target.strip()
+    if not query:
+        return None
+    target_info, _audit_target = _resolve_doctor_target(repo_root, query)
+    source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
+    source_path = Path(str(source_path_value)) if source_path_value else Path(query)
+    if not source_path.is_absolute():
+        source_path = repo_root / source_path
+    if source_path.is_dir():
+        source_path = source_path / "SKILL.md"
+    if not source_path.is_file():
+        return None
+    receipt = _build_package_digest_receipt(repo_root, source_path=source_path, query=query)
+    return {
+        "skill_ir_schema_version": str(receipt["manifest"]["skill_ir_schema_version"]),
+        "package_id": str(receipt["package_id"]),
+        "package_digest": str(receipt["package_digest"]),
+    }
+
+
 def _skill_workout_candidates(repo_root: Path, handle: str) -> list[str]:
     workouts_root = repo_root / ".workouts"
     if not workouts_root.is_dir():
@@ -4165,6 +4201,94 @@ def skills_sdk_package_harden(
     return result
 
 
+def _skills_sdk_internal_case_results(scorecard: dict[str, Any]) -> tuple[list[dict[str, str]], list[str]]:
+    cases: list[dict[str, str]] = []
+    blockers: list[str] = []
+    raw_cases = scorecard.get("cases")
+    if not isinstance(raw_cases, list):
+        return cases, blockers
+
+    for index, raw_case in enumerate(raw_cases, start=1):
+        if not isinstance(raw_case, dict):
+            continue
+        case_id = str(raw_case.get("id") or raw_case.get("name") or f"case-{index}").strip()
+        if not case_id:
+            case_id = f"case-{index}"
+        passed = raw_case.get("passed") is True
+        blocked = raw_case.get("blocked") is True
+        status = "pass" if passed else "fail"
+        raw_blockers = raw_case.get("blocked_reasons")
+        if isinstance(raw_blockers, list):
+            blockers.extend(str(reason) for reason in raw_blockers if str(reason).strip())
+        raw_blocker_classes = raw_case.get("blocker_classes")
+        if isinstance(raw_blocker_classes, list):
+            blockers.extend(str(reason) for reason in raw_blocker_classes if str(reason).strip())
+        tier1_failures = raw_case.get("tier1_failures")
+        if not passed and isinstance(tier1_failures, list):
+            blockers.extend(str(reason) for reason in tier1_failures if str(reason).strip())
+        actual = "blocked" if blocked else status
+        cases.append(
+            {
+                "case_id": case_id,
+                "status": status,
+                "oracle": "exact_match",
+                "expected": "pass",
+                "actual": actual,
+            }
+        )
+    return cases, sorted(set(blockers))
+
+
+def _skills_sdk_internal_eval_receipt_counts(
+    repo_root: Path,
+    internal: CallResult,
+    *,
+    status: str,
+    fallback_blockers: list[str],
+    eval_commands: Any,
+) -> dict[str, Any]:
+    raw_output = str(internal.data.get("raw_output") or "")
+    scorecard_path = eval_commands._scorecard_path_from_output(repo_root, raw_output)  # noqa: SLF001
+    scorecard = eval_commands._read_scorecard(scorecard_path)  # noqa: SLF001
+    cases, case_blockers = _skills_sdk_internal_case_results(scorecard)
+    if cases:
+        failed_count = sum(1 for item in cases if item["status"] == "fail")
+        receipt_status = status if status != "pass" else "fail" if failed_count else "pass"
+        blockers = sorted(set(fallback_blockers + case_blockers)) if receipt_status != "pass" else []
+        dataset_path = (
+            _skills_sdk_repo_relative(repo_root, scorecard_path)
+            if scorecard_path is not None and scorecard_path.is_file()
+            else "internal:skill-builder"
+        )
+        dataset_digest = (
+            _skills_sdk_digest_file(scorecard_path)
+            if scorecard_path is not None and scorecard_path.is_file()
+            else "sha256:" + ("0" * 64)
+        )
+        return {
+            "status": receipt_status,
+            "dataset_path": dataset_path,
+            "dataset_digest": dataset_digest,
+            "case_count": len(cases),
+            "passed_count": len(cases) - failed_count,
+            "failed_count": failed_count,
+            "cases": cases,
+            "blockers": blockers,
+        }
+
+    internal_case_count = 0 if status == "blocked" else 1
+    return {
+        "status": status,
+        "dataset_path": "internal:skill-builder",
+        "dataset_digest": "sha256:" + ("0" * 64),
+        "case_count": internal_case_count,
+        "passed_count": 1 if status == "pass" else 0,
+        "failed_count": 1 if status == "fail" else 0,
+        "cases": [],
+        "blockers": fallback_blockers,
+    }
+
+
 def skills_sdk_eval_run(
     repo_root: Path,
     dataset: str | None = None,
@@ -4218,25 +4342,36 @@ def skills_sdk_eval_run(
         if internal.status != "success":
             blockers = [error.message for error in internal.errors] or [raw_status]
         status = "pass" if internal.status == "success" else "blocked" if raw_status.startswith("blocked") else "fail"
-        internal_case_count = 0 if status == "blocked" else 1
+        target_path = str(internal.data.get("resolved_skill_path") or target)
+        package_identity = _skills_sdk_eval_package_identity(repo_root, target_path)
+        receipt_counts = _skills_sdk_internal_eval_receipt_counts(
+            repo_root,
+            internal,
+            status=status,
+            fallback_blockers=blockers,
+            eval_commands=_eval_commands,
+        )
         receipt = {
             "schema_version": "skills-sdk.eval-run-receipt.v0",
             "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/eval-run-receipt.v0.schema.json",
-            "status": status,
+            "status": receipt_counts["status"],
             "runner": "internal_skill_builder_v0",
-            "dataset_path": "internal:skill-builder",
-            "dataset_digest": "sha256:" + ("0" * 64),
-            "skill_ir_schema_version": None,
-            "target_path": str(internal.data.get("resolved_skill_path") or target),
+            "dataset_path": receipt_counts["dataset_path"],
+            "dataset_digest": receipt_counts["dataset_digest"],
+            "skill_ir_schema_version": package_identity["skill_ir_schema_version"] if package_identity else None,
+            "package_id": package_identity["package_id"] if package_identity else None,
+            "package_digest": package_identity["package_digest"] if package_identity else None,
+            "target_path": target_path,
             "mode": mode,
-            "case_count": internal_case_count,
-            "passed_count": 1 if status == "pass" else 0,
-            "failed_count": 1 if status == "fail" else 0,
-            "cases": [],
-            "blockers": blockers,
+            "case_count": receipt_counts["case_count"],
+            "passed_count": receipt_counts["passed_count"],
+            "failed_count": receipt_counts["failed_count"],
+            "cases": receipt_counts["cases"],
+            "blockers": receipt_counts["blockers"],
             "mutation_performed": False,
             "acceptance_trace": ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022"],
         }
+        status = receipt["status"]
         payload = {
             "schema_version": "skills-sdk-eval-run.v0",
             "status": status,
@@ -4251,9 +4386,17 @@ def skills_sdk_eval_run(
             "agent_summary": f"skills-sdk internal eval run {status} for {target} in {mode} mode.",
         }
         result.data["skills_sdk_eval_run"] = payload
-        if internal.status != "success":
+        if status != "pass":
             result.status = "error"
             result.errors.extend(internal.errors)
+            if not result.errors:
+                result.errors.append(
+                    ErrorObject(
+                        code="ERR_VALIDATION",
+                        message=f"Skills SDK internal eval run did not pass for {target}.",
+                        fix_suggestion=_ask_validation_command("sdk", "eval", "run", target, "--runner", "internal", "--mode", mode),
+                    )
+                )
         return result
 
     if resolved_runner != "deterministic-jsonl":
@@ -4276,15 +4419,11 @@ def skills_sdk_eval_run(
             )
         )
         return result
-    skill_ir_schema_version: str | None = None
+    package_identity: dict[str, str] | None = None
     if target:
         query = target.strip()
-        target_info, _audit_target = _resolve_doctor_target(repo_root, query)
-        source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
-        source_path = Path(str(source_path_value)) if source_path_value else None
-        if source_path and not source_path.is_absolute():
-            source_path = repo_root / source_path
-        if not source_path or not source_path.is_file():
+        package_identity = _skills_sdk_eval_package_identity(repo_root, query)
+        if package_identity is None:
             result.status = "error"
             result.errors.append(
                 ErrorObject(
@@ -4304,10 +4443,14 @@ def skills_sdk_eval_run(
                 "agent_summary": f"skills-sdk eval run is blocked for {query}: canonical source is missing.",
             }
             return result
-        skill_ir = _build_skill_ir(repo_root, source_path=source_path, query=query)
-        skill_ir_schema_version = skill_ir["schema_version"]
 
-    receipt = _run_deterministic_eval(repo_root, dataset=dataset, skill_ir_schema_version=skill_ir_schema_version)
+    receipt = _run_deterministic_eval(
+        repo_root,
+        dataset=dataset,
+        skill_ir_schema_version=package_identity["skill_ir_schema_version"] if package_identity else None,
+        package_id=package_identity["package_id"] if package_identity else None,
+        package_digest=package_identity["package_digest"] if package_identity else None,
+    )
     payload = {
         "schema_version": "skills-sdk-eval-run.v0",
         "status": receipt["status"],

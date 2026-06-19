@@ -12,6 +12,8 @@
     "dataset_path": {"type": "string", "minLength": 1},
     "dataset_digest": {"type": "string", "minLength": 71},
     "skill_ir_schema_version": {"type": ["string", "null"]},
+    "package_id": {"type": ["string", "null"], "minLength": 1},
+    "package_digest": {"type": ["string", "null"], "minLength": 71},
     "target_path": {"type": ["string", "null"]},
     "mode": {"type": ["string", "null"]},
     "case_count": {"type": "integer", "minimum": 0},
@@ -36,5 +38,5 @@
     "mutation_performed": {"type": "boolean", "const": false},
     "acceptance_trace": {"type": "array", "minItems": 1, "items": {"type": "string", "enum": ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022"]}}
   },
-  "required": ["schema_version", "schema_uri", "status", "runner", "dataset_path", "dataset_digest", "skill_ir_schema_version", "target_path", "mode", "case_count", "passed_count", "failed_count", "cases", "blockers", "mutation_performed", "acceptance_trace"]
+  "required": ["schema_version", "schema_uri", "status", "runner", "dataset_path", "dataset_digest", "skill_ir_schema_version", "package_id", "package_digest", "target_path", "mode", "case_count", "passed_count", "failed_count", "cases", "blockers", "mutation_performed", "acceptance_trace"]
 }

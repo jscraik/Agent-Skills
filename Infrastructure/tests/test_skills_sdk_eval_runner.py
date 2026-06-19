@@ -16,11 +16,57 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 from ask.skills_sdk.eval_runner import run_deterministic_eval  # noqa: E402
 from ask.skills_sdk.typed_contracts import validate_eval_run_receipt, validate_robot_envelope  # noqa: E402
 from ask.commands.skills_impl import skills_sdk_eval_run  # noqa: E402
-from ask.envelope import CallResult  # noqa: E402
+from ask.envelope import CallResult, ErrorObject  # noqa: E402
 
 
 PASS_DATASET = "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json"
 FAIL_DATASET = "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-fail.json"
+
+
+def _internal_result_with_scorecard(scorecard_path: Path) -> CallResult:
+    scorecard_path.write_text(
+        json.dumps(
+            {
+                "cases": [
+                    {"id": "case-pass", "passed": True, "blocked": False},
+                    {
+                        "id": "case-fail",
+                        "passed": False,
+                        "blocked": False,
+                        "tier1_failures": ["expected signal missing"],
+                    },
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    internal_result = CallResult(status="success")
+    internal_result.data.update(
+        {
+            "eval_status": "pass",
+            "resolved_skill_path": "Skills/agent-ops/testing",
+            "raw_output": f"Scorecard: {scorecard_path}\n",
+            "tessl_eval": {"status": "skipped", "reason": "--skip-tessl"},
+        }
+    )
+    return internal_result
+
+
+def _blocked_internal_result_with_passing_scorecard(scorecard_path: Path) -> CallResult:
+    scorecard_path.write_text(
+        json.dumps({"cases": [{"id": "case-pass", "passed": True, "blocked": False}]}),
+        encoding="utf-8",
+    )
+    internal_result = CallResult(status="error")
+    internal_result.data.update(
+        {
+            "eval_status": "blocked_runtime",
+            "resolved_skill_path": "Skills/agent-ops/testing",
+            "raw_output": f"Scorecard: {scorecard_path}\n",
+        }
+    )
+    internal_result.errors.append(ErrorObject(code="ERR_RUNTIME", message="model unavailable"))
+    return internal_result
 
 
 def _command_env() -> dict[str, str]:
@@ -96,6 +142,8 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
         self.assertEqual(payload["status"], "pass")
         self.assertEqual(payload["passed_count"], 2)
         self.assertEqual(receipt.skill_ir_schema_version, "skills-sdk.skill-ir.v0")
+        self.assertEqual(receipt.package_id, "skills-sdk-valid-fixture")
+        self.assertIsNotNone(receipt.package_digest)
         self.assertFalse(payload["mutation_performed"])
 
     def test_public_cli_returns_validation_error_for_failing_dataset(self) -> None:
@@ -162,10 +210,63 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
         self.assertEqual(payload["status"], "pass")
         self.assertEqual(payload["receipt"]["runner"], "internal_skill_builder_v0")
         self.assertEqual(payload["receipt"]["target_path"], "Skills/agent-ops/testing")
+        self.assertEqual(payload["receipt"]["package_id"], "testing")
+        self.assertNotEqual(payload["receipt"]["package_digest"], "sha256:" + ("0" * 64))
         self.assertEqual(payload["receipt"]["case_count"], 1)
         self.assertEqual(payload["receipt"]["passed_count"], 1)
         self.assertEqual(payload["receipt"]["failed_count"], 0)
         self.assertEqual(payload["internal_eval"]["tessl_eval"]["status"], "skipped")
+
+    def test_sdk_internal_runner_binds_scorecard_case_counts_to_receipt(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            scorecard_path = Path(temp_dir) / "scorecard.json"
+            internal_result = _internal_result_with_scorecard(scorecard_path)
+            with mock.patch("ask.commands.evals.run_evals", return_value=internal_result):
+                result = skills_sdk_eval_run(
+                    REPO_ROOT,
+                    target="Skills/agent-ops/testing",
+                    mode="smoke",
+                    runner="internal",
+                )
+
+        payload = result.data["skills_sdk_eval_run"]
+        receipt = validate_eval_run_receipt(payload["receipt"])
+
+        self.assertEqual(result.status, "error")
+        self.assertEqual(payload["status"], "fail")
+        self.assertEqual(Path(receipt.dataset_path), scorecard_path.resolve())
+        self.assertNotEqual(receipt.dataset_digest, "sha256:" + ("0" * 64))
+        self.assertEqual(receipt.package_id, "testing")
+        self.assertIsNotNone(receipt.package_digest)
+        self.assertEqual(receipt.case_count, 2)
+        self.assertEqual(receipt.passed_count, 1)
+        self.assertEqual(receipt.failed_count, 1)
+        self.assertEqual([case.case_id for case in receipt.cases], ["case-pass", "case-fail"])
+        self.assertEqual([case.status for case in receipt.cases], ["pass", "fail"])
+        self.assertIn("expected signal missing", receipt.blockers)
+
+    def test_sdk_internal_runner_does_not_upgrade_backend_blocker_to_pass(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            scorecard_path = Path(temp_dir) / "scorecard.json"
+            internal_result = _blocked_internal_result_with_passing_scorecard(scorecard_path)
+            with mock.patch("ask.commands.evals.run_evals", return_value=internal_result):
+                result = skills_sdk_eval_run(
+                    REPO_ROOT,
+                    target="Skills/agent-ops/testing",
+                    mode="smoke",
+                    runner="internal",
+                )
+
+        payload = result.data["skills_sdk_eval_run"]
+        receipt = validate_eval_run_receipt(payload["receipt"])
+
+        self.assertEqual(result.status, "error")
+        self.assertEqual(payload["status"], "blocked")
+        self.assertEqual(receipt.status, "blocked")
+        self.assertEqual(receipt.case_count, 1)
+        self.assertEqual(receipt.passed_count, 1)
+        self.assertEqual(receipt.failed_count, 0)
+        self.assertIn("model unavailable", receipt.blockers)
 
 
 if __name__ == "__main__":

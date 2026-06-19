@@ -353,13 +353,14 @@
       "mutation_performed": false,
       "evidence_refs": [
         "Infrastructure/tests/test_skills_sdk_eval_runner.py::TestSkillsSdkEvalRunner::test_sdk_internal_runner_delegates_to_existing_eval_backend",
+        "Infrastructure/tests/test_skills_sdk_eval_runner.py::TestSkillsSdkEvalRunner::test_sdk_internal_runner_binds_scorecard_case_counts_to_receipt",
         "./bin/ask sdk eval run --runner deterministic-jsonl --dataset Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --skill Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
         "Infrastructure/config/schemas/skills-sdk/eval-case.v0.schema.json",
         "Infrastructure/config/schemas/skills-sdk/eval-run-receipt.v0.schema.json",
         "Infrastructure/tests/test_skills_sdk_eval_runner.py"
       ],
-      "next_slice": "Bind internal eval receipts to package identity and harden result counts before any hosted eval provider becomes required.",
-      "notes": "The SDK routes to the existing internal skill-builder eval backend and keeps deterministic JSONL as a fast fixture receipt lane; Tessl remains opt-in."
+      "next_slice": "Add calibrated internal eval assertions before any hosted eval provider becomes required.",
+      "notes": "The SDK routes to the existing internal skill-builder eval backend, preserves internal scorecard case counts in SDK receipts, binds targeted receipts to package identity, and keeps deterministic JSONL as a fast fixture lane; Tessl remains opt-in."
     },
     {
       "id": "package_verify",
