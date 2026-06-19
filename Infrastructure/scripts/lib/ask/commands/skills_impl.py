@@ -4116,7 +4116,7 @@ def skills_sdk_package_harden(
             ErrorObject(
                 code="ERR_VALIDATION",
                 message=f"Skills SDK package harden is missing a canonical SKILL.md source for '{query}'.",
-                fix_suggestion=_ask_validation_command("sdk", "package", "build", query),
+                fix_suggestion=_ask_validation_command("sdk", "package", "harden", query),
             )
         )
         result.data["skills_sdk_package_harden"] = {

@@ -70,6 +70,33 @@ class TestSkillsSdkPackageHardening(unittest.TestCase):
         self.assertEqual(model.blockers[0].id, "forbidden_package_paths")
         self.assertIn("Skills/sample/.ENV.production:forbidden_env_family", model.blockers[0].evidence)
 
+    def test_builder_blocks_root_escaping_package_paths(self) -> None:
+        package_receipt = deepcopy(self._package_receipt())
+        package_receipt["manifest"]["files"].extend(
+            [
+                {
+                    "path": "/tmp/secret.txt",
+                    "sha256": "0" * 64,
+                    "size_bytes": 0,
+                    "role": "reference",
+                },
+                {
+                    "path": "Skills/sample/../secret.txt",
+                    "sha256": "0" * 64,
+                    "size_bytes": 0,
+                    "role": "reference",
+                },
+            ]
+        )
+
+        payload = build_package_hardening_receipt(package_receipt)
+        model = validate_package_hardening_receipt(payload)
+
+        self.assertEqual(model.status, "blocked")
+        self.assertEqual(model.blockers[0].id, "forbidden_package_paths")
+        self.assertIn("/tmp/secret.txt:forbidden_absolute_path", model.blockers[0].evidence)
+        self.assertIn("Skills/sample/../secret.txt:forbidden_parent_relative_path", model.blockers[0].evidence)
+
     def test_public_cli_hardens_package_identity_receipt(self) -> None:
         completed = subprocess.run(
             [

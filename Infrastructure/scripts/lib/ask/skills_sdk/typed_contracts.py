@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -398,6 +398,9 @@ class PackageHardeningCheck(_SdkContractModel):
     evidence: list[str]
 
 
+NonEmptyPackagePath = Annotated[str, Field(min_length=1)]
+
+
 class PackageHardeningReceipt(_SdkContractModel):
     schema_version: Literal["skills-sdk.package-hardening-receipt.v0"]
     schema_uri: Literal[
@@ -409,7 +412,7 @@ class PackageHardeningReceipt(_SdkContractModel):
     source_digest: str = Field(min_length=71)
     manifest_digest: str = Field(min_length=71)
     package_digest: str = Field(min_length=71)
-    included_files: list[str]
+    included_files: list[NonEmptyPackagePath]
     file_count: int = Field(ge=0)
     total_size_bytes: int = Field(ge=0)
     hardening_checks: list[PackageHardeningCheck] = Field(min_length=1)

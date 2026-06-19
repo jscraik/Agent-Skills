@@ -84,8 +84,72 @@ def sample(value):
         self.assertGreaterEqual(len(validator.LEGACY_SHAPE_DEBT), 2)
         for metadata in validator.LEGACY_SHAPE_DEBT.values():
             self.assertTrue(metadata["owner"])
+            self.assertTrue(metadata["rule_id"])
+            self.assertTrue(metadata["ticket"])
             self.assertTrue(metadata["reason"])
             self.assertRegex(metadata["expires"], r"^20\d{2}-\d{2}-\d{2}$")
+
+    def test_legacy_shape_debt_metadata_validation_detects_missing_fields(self) -> None:
+        validator = _load_validator()
+        original_debt = validator.LEGACY_SHAPE_DEBT
+        try:
+            validator.LEGACY_SHAPE_DEBT = {
+                "test/missing_ticket.py": {
+                    "owner": "test",
+                    "rule_id": "ask-cli-shape-budget",
+                    "reason": "test reason",
+                    "expires": "2026-12-31",
+                }
+            }
+
+            issues = validator._check_legacy_shape_debt_metadata()
+
+            self.assertEqual(len(issues), 1)
+            self.assertIn("missing waiver field(s): ticket", issues[0])
+        finally:
+            validator.LEGACY_SHAPE_DEBT = original_debt
+
+    def test_legacy_shape_debt_metadata_validation_detects_expired_waivers(self) -> None:
+        validator = _load_validator()
+        original_debt = validator.LEGACY_SHAPE_DEBT
+        try:
+            validator.LEGACY_SHAPE_DEBT = {
+                "test/expired.py": {
+                    "owner": "test",
+                    "rule_id": "ask-cli-shape-budget",
+                    "ticket": "JSC-TEST",
+                    "reason": "test reason",
+                    "expires": "2020-01-01",
+                }
+            }
+
+            issues = validator._check_legacy_shape_debt_metadata()
+
+            self.assertEqual(len(issues), 1)
+            self.assertIn("expired on 2020-01-01", issues[0])
+        finally:
+            validator.LEGACY_SHAPE_DEBT = original_debt
+
+    def test_legacy_shape_debt_metadata_validation_detects_invalid_dates(self) -> None:
+        validator = _load_validator()
+        original_debt = validator.LEGACY_SHAPE_DEBT
+        try:
+            validator.LEGACY_SHAPE_DEBT = {
+                "test/invalid_date.py": {
+                    "owner": "test",
+                    "rule_id": "ask-cli-shape-budget",
+                    "ticket": "JSC-TEST",
+                    "reason": "test reason",
+                    "expires": "not-a-date",
+                }
+            }
+
+            issues = validator._check_legacy_shape_debt_metadata()
+
+            self.assertEqual(len(issues), 1)
+            self.assertIn("invalid expires date: not-a-date", issues[0])
+        finally:
+            validator.LEGACY_SHAPE_DEBT = original_debt
 
 
 if __name__ == "__main__":

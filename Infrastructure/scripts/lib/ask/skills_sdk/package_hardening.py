@@ -54,10 +54,16 @@ def _check(
 
 
 def _forbidden_reason(path: str) -> str | None:
-    parts = PurePosixPath(path).parts
-    if any(part in _FORBIDDEN_PATH_PARTS for part in parts):
+    parsed = PurePosixPath(path)
+    parts = parsed.parts
+    if parsed.is_absolute():
+        return "forbidden_absolute_path"
+    if any(part == ".." for part in parts):
+        return "forbidden_parent_relative_path"
+    lowered_parts = [part.lower() for part in parts]
+    if any(part in _FORBIDDEN_PATH_PARTS for part in lowered_parts):
         return "forbidden_path_part"
-    name = (parts[-1] if parts else path).lower()
+    name = (lowered_parts[-1] if lowered_parts else path.lower())
     if name in _FORBIDDEN_FILENAMES:
         return "forbidden_filename"
     if name.startswith(".env."):
