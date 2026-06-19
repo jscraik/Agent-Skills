@@ -32,6 +32,9 @@ const REQUIRED_SCRIPTS = {
 const POSTINSTALL_BOOTSTRAP =
 	"command -v simple-git-hooks >/dev/null 2>&1 && simple-git-hooks || true";
 
+/**
+ * Configures the project to use simple-git-hooks and activates them via pnpm install.
+ */
 function main() {
 	let packageJson;
 	try {
