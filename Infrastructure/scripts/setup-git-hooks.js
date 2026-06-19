@@ -18,9 +18,9 @@ import { execFileSync } from "node:child_process";
 
 const PACKAGE_JSON_PATH = resolve(process.cwd(), "package.json");
 const REQUIRED_HOOKS = {
-	"pre-commit": "make hooks-pre-commit",
-	"commit-msg": "node scripts/validate-commit-msg.js $1",
-	"pre-push": "make hooks-pre-push",
+	"pre-commit": "bash scripts/hooks/pre-commit.sh",
+	"commit-msg": "bash scripts/hooks/commit-msg.sh $1",
+	"pre-push": "bash scripts/hooks/pre-push.sh",
 };
 const REQUIRED_SCRIPTS = {
   "codestyle:validate": "bash scripts/validate-codestyle.sh",
@@ -109,9 +109,9 @@ function main() {
 		execFileSync("pnpm", ["install"], { stdio: "inherit" });
 		console.info("\n✓ Git hooks installed and active!");
 		console.info("\nHooks enabled:");
-		console.info("  • pre-commit: make hooks-pre-commit");
+		console.info("  • pre-commit: bash scripts/hooks/pre-commit.sh");
 		console.info("  • commit-msg: validates conventional commit format");
-		console.info("  • pre-push: make hooks-pre-push");
+		console.info("  • pre-push: bash scripts/hooks/pre-push.sh");
 	} catch {
 		console.error("\n⚠️  Failed to run pnpm install. Run it manually to activate hooks.");
 	}

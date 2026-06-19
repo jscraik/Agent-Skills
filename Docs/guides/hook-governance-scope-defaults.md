@@ -7,6 +7,7 @@
 - [Changes Implemented (2026-04-11)](#changes-implemented-2026-04-11)
 - [Scope Policy By Script](#scope-policy-by-script)
 - [Required Invocation Pattern](#required-invocation-pattern)
+- [Hook Command Shape](#hook-command-shape)
 - [Rollout Checklist For Other Projects](#rollout-checklist-for-other-projects)
 - [Why This Matters](#why-this-matters)
 
@@ -31,6 +32,7 @@ These defaults are mandatory when an agent is asked to implement changes in this
 ## Changes Implemented (2026-04-11)
 
 1. `Infrastructure/scripts/validation-and-linting/verify-work.sh`
+
 - Default governance scope is `project-local`.
 - `--project-governance` keeps project-local checks.
 - `--workspace-governance` enables explicit workspace scope.
@@ -38,27 +40,32 @@ These defaults are mandatory when an agent is asked to implement changes in this
 - Workspace mode forces persistent validation artifacts.
 
 2. `Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`
+
 - Supports explicit scope flags: `--workspace`, `--user`, and the legacy alias `--project-local`.
 - Default behavior remains repository-workspace scoped for direct invocation.
 - `--workspace` and `--project-local` keep sync mutations inside the repository and skip home runtime projections.
 - `--user` is required for home runtime projection updates.
 
 3. Standalone hook-governance scripts in this repository
+
 - No standalone `Infrastructure/scripts/hook-governance/rollout_check.py` or `Infrastructure/scripts/hook-governance/evaluate_docstring_ratchet.py` currently exist in this repo.
 - If introduced later, they must require explicit scope-bearing inputs (for example `--inventory`, `--classification`, `--metrics`) and must not silently fall back to shared workspace artifacts.
 
 ## Scope Policy By Script
 
 1. Workspace-by-design scripts:
+
 - `Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh --workspace` for repository-local runtime projection sync
 - `Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh --user` for explicit home runtime projection sync
 - Any future governance scripts that intentionally aggregate across repositories
 
 2. Scope-inherited scripts (recommended to stay input-driven):
+
 - `Infrastructure/scripts/validate_all.sh` (artifact mode selected by caller)
 - Future governance analyzers that read inventory/classification/metrics artifacts
 
 3. Entry-point behavior:
+
 - `Infrastructure/scripts/validation-and-linting/verify-work.sh` stays project-local by default.
 - Workspace mutation is explicit via `--workspace-governance`.
 
@@ -91,6 +98,18 @@ bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh --project-local  #
 bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh --user           # explicit home runtime projection
 ```
 
+## Hook Command Shape
+
+Git hook entries are leaf-adapter entrypoints. Installers and generated hook
+configuration must call `bash scripts/hooks/pre-commit.sh`,
+`bash scripts/hooks/commit-msg.sh`, and `bash scripts/hooks/pre-push.sh`
+directly.
+
+Do not install hook commands that call `make hooks-*`, generated `.git/hooks`
+files, `pre-commit run`, `prek run`, or another hook runner. `make hooks-*`
+targets may remain as human convenience wrappers, but they must delegate to the
+same leaf adapters instead of bouncing into another hook orchestration layer.
+
 ## Rollout Checklist For Other Projects
 
 1. Update the local `verify-work` equivalent to default to project-local governance.
@@ -100,6 +119,7 @@ bash Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh --user           #
 5. Ensure project-local mode writes temporary outputs, not shared tracked reports.
 6. Add a short scope-policy markdown in each repo so the default is discoverable.
 7. Validate both paths:
+
 - project-local run passes when unrelated repos are stale.
 - workspace run fails when governed workspace artifacts are stale.
 
