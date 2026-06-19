@@ -2535,12 +2535,12 @@ def _tessl_run_budget_preflight(
         }
     if process.returncode != 0:
         return {
-            "status": "warning",
+            "status": "blocked",
             "blocker_class": "blocked_runtime",
             "blocker": (
                 "Tessl workspace run-budget preflight could not fetch run history; "
-                "continuing with the operator-provided run limit because the live run "
-                "was explicitly requested."
+                "blocking live scoring because remaining workspace capacity could not "
+                "be checked."
             ),
             "command": command_text,
             "exit_code": process.returncode,
@@ -2554,12 +2554,12 @@ def _tessl_run_budget_preflight(
     used_runs = _tessl_eval_list_count(process.stdout)
     if used_runs is None:
         return {
-            "status": "warning",
+            "status": "blocked",
             "blocker_class": "blocked_validation",
             "blocker": (
                 "Tessl workspace run-budget preflight could not determine remaining "
-                "capacity; continuing with the operator-provided run limit because the "
-                "live run was explicitly requested."
+                "capacity; blocking live scoring because workspace reserve could not "
+                "be enforced."
             ),
             "command": command_text,
             "exit_code": process.returncode,

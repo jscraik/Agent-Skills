@@ -2041,7 +2041,7 @@ def test_timeout_partial_artifact_sanitizes_repo_paths(tmp_path: Path) -> None:
     assert "Skills/example/output.txt" in payload
 
 
-def test_tessl_run_budget_preflight_warns_when_capacity_unknown(tmp_path: Path) -> None:
+def test_tessl_run_budget_preflight_blocks_when_capacity_unknown(tmp_path: Path) -> None:
     def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
         assert cmd[1:3] == ["eval", "list"]
         return mock.Mock(returncode=0, stdout='{"unexpected":"shape"}', stderr="", args=cmd)
@@ -2054,13 +2054,13 @@ def test_tessl_run_budget_preflight_warns_when_capacity_unknown(tmp_path: Path) 
             {},
         )
 
-    assert preflight["status"] == "warning"
+    assert preflight["status"] == "blocked"
     assert preflight["blocker_class"] == "blocked_validation"
     assert "could not determine remaining capacity" in preflight["blocker"]
     assert preflight["capacity_source"] == "unparseable_eval_list"
 
 
-def test_tessl_run_budget_preflight_warns_when_eval_list_unavailable(tmp_path: Path) -> None:
+def test_tessl_run_budget_preflight_blocks_when_eval_list_unavailable(tmp_path: Path) -> None:
     def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
         assert cmd[1:3] == ["eval", "list"]
         return mock.Mock(
@@ -2078,7 +2078,7 @@ def test_tessl_run_budget_preflight_warns_when_eval_list_unavailable(tmp_path: P
             {},
         )
 
-    assert preflight["status"] == "warning"
+    assert preflight["status"] == "blocked"
     assert preflight["blocker_class"] == "blocked_runtime"
     assert "could not fetch run history" in preflight["blocker"]
     assert preflight["capacity_source"] == "unavailable_eval_list"
