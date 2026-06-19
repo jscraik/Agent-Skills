@@ -195,10 +195,11 @@ def test_hook_adapters_pass_bash_syntax() -> None:
         REPO_ROOT / "Infrastructure/scripts/hooks/commit-msg.sh",
         REPO_ROOT / "Infrastructure/scripts/hooks/pre-push.sh",
     ]
-    result = subprocess.run(
-        ["bash", "-n", *[str(script) for script in scripts]],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    assert result.returncode == 0, result.stderr
+    for script in scripts:
+        result = subprocess.run(
+            ["bash", "-n", str(script)],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert result.returncode == 0, f"{script}: {result.stderr}"
