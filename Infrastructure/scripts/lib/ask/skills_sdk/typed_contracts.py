@@ -469,6 +469,84 @@ class EvalRunReceipt(_SdkContractModel):
     )
 
 
+class SandboxCommandRule(_SdkContractModel):
+    program: str = Field(min_length=1)
+    args: list[str]
+
+
+class SandboxProfileFilesystem(_SdkContractModel):
+    read: list[str]
+    write: list[str]
+    temp_write: bool
+
+
+class SandboxProfileNetwork(_SdkContractModel):
+    egress: Literal["deny", "allow"]
+
+
+class SandboxProfileEnvironment(_SdkContractModel):
+    inherit: bool
+    allowed: list[str]
+
+
+class SandboxProfileCommands(_SdkContractModel):
+    shell_allowed: bool
+    allow: list[SandboxCommandRule]
+
+
+class SandboxProfileExecution(_SdkContractModel):
+    provider: Literal["none", "local", "remote"]
+    adapter: str | None
+
+
+class SandboxProfile(_SdkContractModel):
+    schema_version: Literal["skills-sdk.sandbox-profile.v0"]
+    schema_uri: Literal[
+        "https://jscraik.local/agent-skills/schemas/skills-sdk/sandbox-profile.v0.schema.json"
+    ]
+    profile_id: str = Field(min_length=1)
+    risk_tier: Literal["low", "medium", "high", "privileged", "published"]
+    default_policy: Literal["deny", "allow"]
+    filesystem: SandboxProfileFilesystem
+    network: SandboxProfileNetwork
+    environment: SandboxProfileEnvironment
+    commands: SandboxProfileCommands
+    execution: SandboxProfileExecution
+    acceptance_trace: list[Literal["FR-008", "FR-010", "SA-004", "SA-007", "SEC-001", "VP-021"]] = Field(
+        min_length=1
+    )
+
+
+class SandboxProfileCheck(_SdkContractModel):
+    id: str = Field(min_length=1)
+    status: Literal["pass", "warning", "blocker"]
+    severity: Literal["info", "warning", "blocker"]
+    message: str = Field(min_length=1)
+    evidence: list[str]
+
+
+class SandboxProfileReceipt(_SdkContractModel):
+    schema_version: Literal["skills-sdk.sandbox-profile-receipt.v0"]
+    schema_uri: Literal[
+        "https://jscraik.local/agent-skills/schemas/skills-sdk/sandbox-profile-receipt.v0.schema.json"
+    ]
+    status: Literal["pass", "blocked"]
+    profile_path: str = Field(min_length=1)
+    profile_digest: str | None
+    profile_id: str | None
+    risk_tier: Literal["low", "medium", "high", "privileged", "published"] | None
+    default_policy: Literal["deny", "allow"] | None
+    checks: list[SandboxProfileCheck] = Field(min_length=1)
+    blockers: list[SandboxProfileCheck]
+    warnings: list[SandboxProfileCheck]
+    execution_performed: Literal[False]
+    adapter_selected: Literal[False]
+    mutation_performed: Literal[False]
+    acceptance_trace: list[Literal["FR-008", "FR-010", "SA-004", "SA-007", "SEC-001", "VP-021"]] = Field(
+        min_length=1
+    )
+
+
 class SkillFrontmatter(_SdkContractModel):
     name: str
     description: str
@@ -681,6 +759,14 @@ def validate_eval_case(payload: object) -> EvalCase:
 
 def validate_eval_run_receipt(payload: object) -> EvalRunReceipt:
     return EvalRunReceipt.model_validate(payload)
+
+
+def validate_sandbox_profile(payload: object) -> SandboxProfile:
+    return SandboxProfile.model_validate(payload)
+
+
+def validate_sandbox_profile_receipt(payload: object) -> SandboxProfileReceipt:
+    return SandboxProfileReceipt.model_validate(payload)
 
 
 def validate_skill_frontmatter(payload: object) -> SkillFrontmatter:

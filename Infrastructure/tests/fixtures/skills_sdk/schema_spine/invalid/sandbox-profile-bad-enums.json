@@ -1,0 +1,33 @@
+{
+  "schema_version": "skills-sdk.sandbox-profile.v0",
+  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/sandbox-profile.v0.schema.json",
+  "profile_id": "bad-enum-profile",
+  "risk_tier": "root",
+  "default_policy": "maybe",
+  "filesystem": {
+    "read": ["Infrastructure/tests/fixtures/skills_sdk/valid_skill"],
+    "write": [],
+    "temp_write": true
+  },
+  "network": {
+    "egress": "deny"
+  },
+  "environment": {
+    "inherit": false,
+    "allowed": []
+  },
+  "commands": {
+    "shell_allowed": false,
+    "allow": [
+      {
+        "program": "python3",
+        "args": ["-m", "py_compile"]
+      }
+    ]
+  },
+  "execution": {
+    "provider": "none",
+    "adapter": null
+  },
+  "acceptance_trace": ["FR-008", "FR-010", "SA-004", "SA-007", "SEC-001", "VP-021"]
+}

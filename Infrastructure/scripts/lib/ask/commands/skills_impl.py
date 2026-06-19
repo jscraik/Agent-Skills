@@ -111,6 +111,10 @@ from ask.skills_sdk.docs_projection import verify_capability_docs_projection as 
 from ask.skills_sdk.package_build import build_package_digest_receipt as _build_package_digest_receipt  # noqa: E402
 from ask.skills_sdk.package_hardening import build_package_hardening_receipt as _build_package_hardening_receipt  # noqa: E402
 from ask.skills_sdk.eval_runner import run_deterministic_eval as _run_deterministic_eval  # noqa: E402
+from ask.skills_sdk.sandbox_profile import (  # noqa: E402
+    SandboxProfileError as _SandboxProfileError,
+    build_sandbox_profile_receipt as _build_sandbox_profile_receipt,
+)
 from ask.skills_sdk.project_install import (  # noqa: E402
     ProjectInstallError as _ProjectInstallError,
     install_project_skill as _install_project_skill,
@@ -4196,6 +4200,47 @@ def skills_sdk_package_harden(
                 code="ERR_VALIDATION",
                 message=message,
                 fix_suggestion="Remove forbidden package paths or restore canonical SkillIR/package provenance before hardening.",
+            )
+        )
+    return result
+
+
+def skills_sdk_sandbox_validate(
+    repo_root: Path,
+    profile: str,
+) -> CallResult:
+    """Validate a sandbox profile without invoking a sandbox provider."""
+    result = CallResult()
+    result.metadata["command"] = "sdk sandbox validate"
+    try:
+        receipt = _build_sandbox_profile_receipt(repo_root, profile_path=profile)
+    except _SandboxProfileError as exc:
+        receipt = exc.receipt
+    payload = {
+        "schema_version": "skills-sdk-sandbox-validate.v0",
+        "status": receipt["status"],
+        "profile": profile,
+        "facade_command": "skills-sdk sandbox validate",
+        "receipt": receipt,
+        "mutation_performed": False,
+        "execution_performed": False,
+        "validation_commands": [
+            _ask_validation_command("sdk", "sandbox", "validate", "--profile", profile),
+        ],
+        "agent_summary": (
+            f"skills-sdk sandbox validate passed for {receipt['profile_path']} without executing a sandbox."
+            if receipt["status"] == "pass"
+            else f"skills-sdk sandbox validate blocked {receipt['profile_path']} with {len(receipt['blockers'])} blocker(s)."
+        ),
+    }
+    result.data["skills_sdk_sandbox_validate"] = payload
+    if receipt["status"] != "pass":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=payload["agent_summary"],
+                fix_suggestion="Use a deny-by-default profile with no persistent writes, no network egress, no ambient environment, and no selected adapter.",
             )
         )
     return result

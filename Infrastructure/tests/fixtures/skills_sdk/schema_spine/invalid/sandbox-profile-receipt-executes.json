@@ -1,0 +1,25 @@
+{
+  "schema_version": "skills-sdk.sandbox-profile-receipt.v0",
+  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/sandbox-profile-receipt.v0.schema.json",
+  "status": "pass",
+  "profile_path": "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/sandbox-profile.json",
+  "profile_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "profile_id": "skills-sdk-deny-default-local",
+  "risk_tier": "high",
+  "default_policy": "deny",
+  "checks": [
+    {
+      "id": "deny_by_default",
+      "status": "pass",
+      "severity": "blocker",
+      "message": "Sandbox profiles must be deny-by-default.",
+      "evidence": ["default_policy:deny"]
+    }
+  ],
+  "blockers": [],
+  "warnings": [],
+  "execution_performed": true,
+  "adapter_selected": true,
+  "mutation_performed": false,
+  "acceptance_trace": ["FR-008", "FR-010", "SA-004", "SA-007", "SEC-001", "VP-021"]
+}

@@ -33,6 +33,8 @@ class TestSkillsSdkTypedContracts(unittest.TestCase):
             ("skill-ir.json", contracts.validate_skill_ir),
             ("package-digest-receipt.json", contracts.validate_package_digest_receipt),
             ("package-hardening-receipt.json", contracts.validate_package_hardening_receipt),
+            ("sandbox-profile.json", contracts.validate_sandbox_profile),
+            ("sandbox-profile-receipt.json", contracts.validate_sandbox_profile_receipt),
             ("eval-case.json", contracts.validate_eval_case),
             ("eval-run-receipt.json", contracts.validate_eval_run_receipt),
             ("check-receipt.json", contracts.validate_check_receipt),
@@ -111,6 +113,14 @@ class TestSkillsSdkTypedContracts(unittest.TestCase):
 
         with self.assertRaises(ValidationError):
             contracts.validate_package_hardening_receipt(payload)
+
+    def test_sandbox_profile_receipt_contract_rejects_execution_claims(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "sandbox-profile-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["execution_performed"] = True
+
+        with self.assertRaises(ValidationError):
+            contracts.validate_sandbox_profile_receipt(payload)
 
     def test_eval_run_contract_rejects_mutation_claims(self) -> None:
         payload = _json(FIXTURE_DIR / "valid" / "eval-run-receipt.json")

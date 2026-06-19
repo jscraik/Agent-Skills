@@ -21,6 +21,8 @@ SCHEMA_NAMES = {
     "package-manifest": "package-manifest.v0.schema.json",
     "package-digest-receipt": "package-digest-receipt.v0.schema.json",
     "package-hardening-receipt": "package-hardening-receipt.v0.schema.json",
+    "sandbox-profile": "sandbox-profile.v0.schema.json",
+    "sandbox-profile-receipt": "sandbox-profile-receipt.v0.schema.json",
     "eval-case": "eval-case.v0.schema.json",
     "eval-run-receipt": "eval-run-receipt.v0.schema.json",
     "project-conformance-receipt": "project-conformance-receipt.v1.schema.json",
@@ -146,6 +148,21 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertEqual(payload["hardening_checks"][0]["id"], "non_mutating_package_identity")
         self.assertFalse(payload["mutation_performed"])
 
+    def test_sandbox_profile_fixture_records_deny_by_default_contract(self) -> None:
+        payload = self.assert_valid("sandbox-profile", "sandbox-profile.json")
+
+        self.assertEqual(payload["default_policy"], "deny")
+        self.assertEqual(payload["network"]["egress"], "deny")
+        self.assertEqual(payload["execution"]["provider"], "none")
+
+    def test_sandbox_profile_receipt_fixture_records_no_execution(self) -> None:
+        payload = self.assert_valid("sandbox-profile-receipt", "sandbox-profile-receipt.json")
+
+        self.assertEqual(payload["status"], "pass")
+        self.assertFalse(payload["execution_performed"])
+        self.assertFalse(payload["adapter_selected"])
+        self.assertFalse(payload["mutation_performed"])
+
     def test_eval_case_fixture_records_deterministic_oracle(self) -> None:
         payload = self.assert_valid("eval-case", "eval-case.json")
 
@@ -211,6 +228,9 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
 
     def test_package_hardening_schema_rejects_mutation_claims(self) -> None:
         self.assert_invalid("package-hardening-receipt", "package-hardening-mutation-claim.json")
+
+    def test_sandbox_profile_receipt_schema_rejects_execution_claims(self) -> None:
+        self.assert_invalid("sandbox-profile-receipt", "sandbox-profile-receipt-executes.json")
 
     def test_eval_run_schema_rejects_mutation_claims(self) -> None:
         self.assert_invalid("eval-run-receipt", "eval-run-mutation-claim.json")
