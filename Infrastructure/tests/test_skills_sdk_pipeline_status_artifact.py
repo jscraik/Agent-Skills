@@ -11,6 +11,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 HTML_PATH = REPO_ROOT / "artifacts/recommended-skills-sdk-pipeline.html"
 MATRIX_PATH = REPO_ROOT / "Infrastructure/config/skills-sdk/capability-matrix.v1.json"
 LIFECYCLE_HTML_PATH = REPO_ROOT / "artifacts/skills-sdk-user-lifecycle-one-page.html"
+SIMPLE_ATLAS_PATH = REPO_ROOT / "Docs/reference/skills-sdk-platform-atlas.html"
 
 
 class CapabilityStatusParser(HTMLParser):
@@ -75,6 +76,7 @@ class TestSkillsSdkPipelineStatusArtifact(unittest.TestCase):
         )
         cls.runtime_status = json.loads(completed.stdout)["data"]["skills_sdk_status"]
         cls.lifecycle_html = LIFECYCLE_HTML_PATH.read_text(encoding="utf-8")
+        cls.simple_atlas_html = SIMPLE_ATLAS_PATH.read_text(encoding="utf-8")
         parser = CapabilityStatusParser()
         parser.feed(cls.html)
         cls.rows = parser.rows
@@ -249,6 +251,53 @@ class TestSkillsSdkPipelineStatusArtifact(unittest.TestCase):
                 text = self.rows[capability["id"]]["text"].lower()
                 for pattern in overclaim_patterns:
                     self.assertIsNone(re.search(pattern, text), pattern)
+
+    def test_simple_atlas_summary_matches_current_matrix_buckets(self) -> None:
+        bucket_by_status = {
+            "implemented": "implemented",
+            "preview_only": "preview",
+            "placeholder_optional": "placeholder",
+            "placeholder_blocked": "blocked",
+            "blocked_missing_adapter": "blocked",
+            "deferred": "deferred",
+            "out_of_scope": "out",
+        }
+        expected_counts = {
+            "implemented": 0,
+            "preview": 0,
+            "placeholder": 0,
+            "blocked": 0,
+            "deferred": 0,
+            "out": 0,
+        }
+        for capability in self.matrix["capabilities"]:
+            expected_counts[bucket_by_status[capability["status"]]] += 1
+
+        observed_counts = {
+            status: int(count)
+            for status, count in re.findall(
+                r'<div class="stat" data-status="([^"]+)"><b>(\d+)</b>',
+                self.simple_atlas_html,
+            )
+        }
+
+        self.assertEqual(observed_counts, expected_counts)
+
+    def test_simple_atlas_key_landed_sdk_spine_claims_match_matrix(self) -> None:
+        status_by_id = {
+            capability["id"]: capability["status"]
+            for capability in self.matrix["capabilities"]
+        }
+
+        self.assertEqual(status_by_id["skill_ir"], "implemented")
+        self.assertEqual(status_by_id["evals"], "implemented")
+        self.assertEqual(status_by_id["package_hardening"], "implemented")
+        self.assertIn("Tiny SkillIR.v0", self.simple_atlas_html)
+        self.assertIn("Deterministic Eval Runner", self.simple_atlas_html)
+        self.assertIn("target-bound receipts carry package identity", self.simple_atlas_html)
+        self.assertIn("Read-only package hardening blocks forbidden", self.simple_atlas_html)
+        self.assertNotIn("Next missing author step: deterministic local evals", self.simple_atlas_html)
+        self.assertNotIn('<strong>Eval run</strong><span>Next missing author step', self.simple_atlas_html)
 
 
 if __name__ == "__main__":
