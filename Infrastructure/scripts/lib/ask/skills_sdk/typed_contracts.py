@@ -4,6 +4,8 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from ask.skills_sdk import signing_contracts
+
 
 class _SdkContractModel(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
@@ -751,6 +753,11 @@ def validate_package_digest_receipt(payload: object) -> PackageDigestReceipt:
 
 def validate_package_hardening_receipt(payload: object) -> PackageHardeningReceipt:
     return PackageHardeningReceipt.model_validate(payload)
+
+
+def validate_signing_policy(payload: object) -> signing_contracts.SigningPolicy: return signing_contracts.validate_signing_policy(payload)
+
+def validate_signing_intent_receipt(payload: object) -> signing_contracts.SigningIntentReceipt: return signing_contracts.validate_signing_intent_receipt(payload)
 
 
 def validate_eval_case(payload: object) -> EvalCase:

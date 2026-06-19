@@ -100,9 +100,12 @@ def _add_sdk_package_parser(
     for action, help_text in {
         "build": "Build a digest-backed package identity receipt without emitting an archive",
         "harden": "Build a read-only package hardening receipt from package identity",
+        "signing-intent": "Build a non-mutating signing intent receipt from package identity and policy",
     }.items():
         parser = sdk_package_subparsers.add_parser(action, help=help_text, parents=[global_parser])
         parser.add_argument("target", help="Skill handle or repo-relative skill source path")
+        if action == "signing-intent":
+            parser.add_argument("--policy", required=True, help="Repo-relative or absolute signing policy JSON")
 
 
 def _add_sdk_sandbox_parser(
@@ -442,6 +445,12 @@ def _dispatch_sdk_package(repo_root: Path, args: argparse.Namespace) -> CallResu
         return skills_commands.skills_sdk_package_build(repo_root, target=args.target)
     if args.package_action == "harden":
         return skills_commands.skills_sdk_package_harden(repo_root, target=args.target)
+    if args.package_action == "signing-intent":
+        return skills_commands.skills_sdk_package_signing_intent(
+            repo_root,
+            target=args.target,
+            policy=args.policy,
+        )
     return build_unknown_action_result("sdk package", args.package_action)
 
 

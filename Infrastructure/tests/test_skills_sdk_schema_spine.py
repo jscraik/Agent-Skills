@@ -21,6 +21,8 @@ SCHEMA_NAMES = {
     "package-manifest": "package-manifest.v0.schema.json",
     "package-digest-receipt": "package-digest-receipt.v0.schema.json",
     "package-hardening-receipt": "package-hardening-receipt.v0.schema.json",
+    "signing-policy": "signing-policy.v0.schema.json",
+    "signing-intent-receipt": "signing-intent-receipt.v0.schema.json",
     "sandbox-profile": "sandbox-profile.v0.schema.json",
     "sandbox-profile-receipt": "sandbox-profile-receipt.v0.schema.json",
     "eval-case": "eval-case.v0.schema.json",
@@ -148,6 +150,23 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertEqual(payload["hardening_checks"][0]["id"], "non_mutating_package_identity")
         self.assertFalse(payload["mutation_performed"])
 
+    def test_signing_policy_fixture_records_external_key_boundary(self) -> None:
+        payload = self.assert_valid("signing-policy", "signing-policy.json")
+
+        self.assertEqual(payload["signer_id"], "skills-sdk-local-fixture-signer")
+        self.assertEqual(payload["key_material_policy"], "keyless_required")
+        self.assertFalse(payload["archive_required"])
+
+    def test_signing_intent_fixture_records_no_signature_or_artifact(self) -> None:
+        payload = self.assert_valid("signing-intent-receipt", "signing-intent-receipt.json")
+
+        self.assertEqual(payload["status"], "ready")
+        self.assertFalse(payload["signature_requested"])
+        self.assertFalse(payload["signing_performed"])
+        self.assertFalse(payload["key_material_accessed"])
+        self.assertFalse(payload["artifact_emitted"])
+        self.assertFalse(payload["mutation_performed"])
+
     def test_sandbox_profile_fixture_records_deny_by_default_contract(self) -> None:
         payload = self.assert_valid("sandbox-profile", "sandbox-profile.json")
 
@@ -228,6 +247,12 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
 
     def test_package_hardening_schema_rejects_mutation_claims(self) -> None:
         self.assert_invalid("package-hardening-receipt", "package-hardening-mutation-claim.json")
+
+    def test_signing_policy_schema_rejects_archive_requirement(self) -> None:
+        self.assert_invalid("signing-policy", "signing-policy-requires-archive.json")
+
+    def test_signing_intent_schema_rejects_signature_claims(self) -> None:
+        self.assert_invalid("signing-intent-receipt", "signing-intent-claims-signature.json")
 
     def test_sandbox_profile_receipt_schema_rejects_execution_claims(self) -> None:
         self.assert_invalid("sandbox-profile-receipt", "sandbox-profile-receipt-executes.json")

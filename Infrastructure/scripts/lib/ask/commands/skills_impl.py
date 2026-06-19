@@ -110,6 +110,10 @@ from ask.skills_sdk.ir import build_skill_ir as _build_skill_ir  # noqa: E402
 from ask.skills_sdk.docs_projection import verify_capability_docs_projection as _verify_capability_docs_projection  # noqa: E402
 from ask.skills_sdk.package_build import build_package_digest_receipt as _build_package_digest_receipt  # noqa: E402
 from ask.skills_sdk.package_hardening import build_package_hardening_receipt as _build_package_hardening_receipt  # noqa: E402
+from ask.skills_sdk.signing_intent import (  # noqa: E402
+    SigningIntentError as _SigningIntentError,
+    build_signing_intent_receipt as _build_signing_intent_receipt,
+)
 from ask.skills_sdk.eval_runner import run_deterministic_eval as _run_deterministic_eval  # noqa: E402
 from ask.skills_sdk.sandbox_profile import (  # noqa: E402
     SandboxProfileError as _SandboxProfileError,
@@ -212,6 +216,7 @@ __all__ = [
     "skills_sdk_ir_build",
     "skills_sdk_package_build",
     "skills_sdk_package_harden",
+    "skills_sdk_package_signing_intent",
     "skills_sdk_eval_run",
     "skills_sdk_placeholder_lifecycle",
     "skills_sdk_project_rollback",
@@ -4200,6 +4205,98 @@ def skills_sdk_package_harden(
                 code="ERR_VALIDATION",
                 message=message,
                 fix_suggestion="Remove forbidden package paths or restore canonical SkillIR/package provenance before hardening.",
+            )
+        )
+    return result
+
+
+def skills_sdk_package_signing_intent(
+    repo_root: Path,
+    target: str,
+    policy: str,
+) -> CallResult:
+    """Build a non-mutating signing intent receipt for one skill target."""
+    result = CallResult()
+    result.metadata["command"] = "sdk package signing-intent"
+    query = target.strip()
+    target_info, _audit_target = _resolve_doctor_target(repo_root, query)
+    source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
+    source_path = Path(str(source_path_value)) if source_path_value else None
+    if source_path and not source_path.is_absolute():
+        source_path = repo_root / source_path
+    policy_path = Path(policy)
+    if not policy_path.is_absolute():
+        policy_path = repo_root / policy_path
+
+    if not source_path or not source_path.is_file():
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Skills SDK package signing intent is missing a canonical SKILL.md source for '{query}'.",
+                fix_suggestion=_ask_validation_command("sdk", "package", "build", query),
+            )
+        )
+        result.data["skills_sdk_package_signing_intent"] = {
+            "schema_version": "skills-sdk-package-signing-intent.v0",
+            "query": query,
+            "status": "blocked",
+            "canonical_source_path": source_path_value,
+            "receipt": None,
+            "mutation_performed": False,
+            "signing_performed": False,
+            "key_material_accessed": False,
+            "artifact_emitted": False,
+            "validation_commands": [
+                _ask_validation_command("sdk", "package", "signing-intent", query, "--policy", policy)
+            ],
+            "agent_summary": f"skills-sdk package signing intent is blocked for {query}: canonical source is missing.",
+        }
+        return result
+
+    package_receipt = _build_package_digest_receipt(repo_root, source_path=source_path, query=query)
+    hardening_receipt = _build_package_hardening_receipt(package_receipt)
+    try:
+        signing_receipt = _build_signing_intent_receipt(
+            policy_path=policy_path,
+            package_receipt=package_receipt,
+            hardening_receipt=hardening_receipt,
+        )
+    except _SigningIntentError as exc:
+        signing_receipt = exc.receipt
+
+    payload = {
+        "schema_version": "skills-sdk-package-signing-intent.v0",
+        "query": query,
+        "status": signing_receipt["status"],
+        "canonical_source_path": source_path_value,
+        "policy_path": policy,
+        "facade_command": "skills-sdk package signing-intent",
+        "package_id": signing_receipt["package_id"],
+        "version": signing_receipt["version"],
+        "package_digest": signing_receipt["package_digest"],
+        "receipt": signing_receipt,
+        "mutation_performed": False,
+        "signing_performed": False,
+        "key_material_accessed": False,
+        "artifact_emitted": False,
+        "validation_commands": [
+            _ask_validation_command("sdk", "package", "signing-intent", query, "--policy", policy),
+        ],
+        "agent_summary": signing_receipt["agent_summary"],
+    }
+    result.data["skills_sdk_package_signing_intent"] = payload
+    if signing_receipt["status"] != "ready":
+        result.status = "error"
+        message = signing_receipt["blockers"][0]["message"] if signing_receipt["blockers"] else payload["agent_summary"]
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=message,
+                fix_suggestion=(
+                    "Use a v0 signing policy that pins the package id and digest, requires hardening, "
+                    "keeps key material external, and does not require archive emission."
+                ),
             )
         )
     return result

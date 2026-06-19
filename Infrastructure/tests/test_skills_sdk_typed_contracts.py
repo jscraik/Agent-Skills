@@ -33,6 +33,8 @@ class TestSkillsSdkTypedContracts(unittest.TestCase):
             ("skill-ir.json", contracts.validate_skill_ir),
             ("package-digest-receipt.json", contracts.validate_package_digest_receipt),
             ("package-hardening-receipt.json", contracts.validate_package_hardening_receipt),
+            ("signing-policy.json", contracts.validate_signing_policy),
+            ("signing-intent-receipt.json", contracts.validate_signing_intent_receipt),
             ("sandbox-profile.json", contracts.validate_sandbox_profile),
             ("sandbox-profile-receipt.json", contracts.validate_sandbox_profile_receipt),
             ("eval-case.json", contracts.validate_eval_case),
@@ -113,6 +115,38 @@ class TestSkillsSdkTypedContracts(unittest.TestCase):
 
         with self.assertRaises(ValidationError):
             contracts.validate_package_hardening_receipt(payload)
+
+    def test_signing_intent_contract_rejects_signature_claims(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "signing-intent-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["signing_performed"] = True
+
+        with self.assertRaises(ValidationError):
+            contracts.validate_signing_intent_receipt(payload)
+
+    def test_signing_intent_contract_rejects_key_material_access_claims(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "signing-intent-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["key_material_accessed"] = True
+
+        with self.assertRaises(ValidationError):
+            contracts.validate_signing_intent_receipt(payload)
+
+    def test_signing_policy_contract_rejects_archive_requirement(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "signing-policy.json")
+        self.assertIsInstance(payload, dict)
+        payload["archive_required"] = True
+
+        with self.assertRaises(ValidationError):
+            contracts.validate_signing_policy(payload)
+
+    def test_signing_policy_contract_rejects_short_package_digest(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "signing-policy.json")
+        self.assertIsInstance(payload, dict)
+        payload["allowed_package_digests"] = ["x"]
+
+        with self.assertRaises(ValidationError):
+            contracts.validate_signing_policy(payload)
 
     def test_sandbox_profile_receipt_contract_rejects_execution_claims(self) -> None:
         payload = _json(FIXTURE_DIR / "valid" / "sandbox-profile-receipt.json")

@@ -377,15 +377,20 @@
     },
     {
       "id": "signing",
-      "title": "Package signing",
-      "status": "placeholder_blocked",
-      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/placeholder_lifecycle.py",
+      "title": "Package signing intent",
+      "status": "implemented",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/signing_intent.py",
       "pipeline_sections": ["release_decision_matrix", "full_skill_lifecycle", "package_hardening"],
-      "feature_executed": false,
+      "feature_executed": true,
       "mutation_performed": false,
-      "evidence_refs": ["./bin/ask sdk lifecycle --surface signing --json --robot", "Infrastructure/tests/test_skills_sdk_placeholder_lifecycle.py"],
-      "next_slice": "Approve key ownership, signing adapter, and redaction policy.",
-      "notes": "The lifecycle facade reports signing as unavailable without accessing key material."
+      "evidence_refs": [
+        "./bin/ask sdk package signing-intent Infrastructure/tests/fixtures/skills_sdk/valid_skill --policy Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/signing-policy.json --json --robot",
+        "Infrastructure/config/schemas/skills-sdk/signing-policy.v0.schema.json",
+        "Infrastructure/config/schemas/skills-sdk/signing-intent-receipt.v0.schema.json",
+        "Infrastructure/tests/test_skills_sdk_signing_intent.py"
+      ],
+      "next_slice": "Approve real signing adapter, key ownership, archive emission, and redaction authority before producing signatures.",
+      "notes": "The SDK validates signing policy and package digest intent without requesting signatures, accessing key material, emitting artifacts, or mutating trust state."
     },
     {
       "id": "sandbox",
