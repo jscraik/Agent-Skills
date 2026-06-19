@@ -19,7 +19,7 @@ import { execFileSync } from "node:child_process";
 const PACKAGE_JSON_PATH = resolve(process.cwd(), "package.json");
 const REQUIRED_HOOKS = {
 	"pre-commit": "bash scripts/hooks/pre-commit.sh",
-	"commit-msg": "bash scripts/hooks/commit-msg.sh $1",
+	"commit-msg": "bash scripts/hooks/commit-msg.sh \"$1\"",
 	"pre-push": "bash scripts/hooks/pre-push.sh",
 };
 const REQUIRED_SCRIPTS = {

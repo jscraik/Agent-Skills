@@ -34,18 +34,18 @@ SIMPLE_GIT_HOOKS_EXPECTED = {
 }
 
 
-def _local_prek_entries(path: Path) -> dict[str, str]:
+def _local_prek_entries(path: Path) -> dict[str, list[str]]:
     """
     Extract stage-to-hook-entry mappings from local repositories in a pre-commit configuration file.
-    
+
     Parameters:
     	path (Path): Path to a pre-commit configuration TOML file.
-    
+
     Returns:
-    	dict[str, str]: Mapping of stage names to hook entry commands from local repositories.
+    	dict[str, list[str]]: Mapping of stage names to lists of hook entry commands from local repositories.
     """
     data = tomllib.loads(path.read_text(encoding="utf-8"))
-    entries: dict[str, str] = {}
+    entries: dict[str, list[str]] = {}
     for repo in data.get("repos", []):
         if repo.get("repo") != "local":
             continue
@@ -54,7 +54,9 @@ def _local_prek_entries(path: Path) -> dict[str, str]:
             if not isinstance(entry, str):
                 continue
             for stage in hook.get("stages", []):
-                entries[stage] = entry
+                if stage not in entries:
+                    entries[stage] = []
+                entries[stage].append(entry)
     return entries
 
 
@@ -89,9 +91,12 @@ def test_prek_entries_call_leaf_adapters() -> None:
     ]:
         path = REPO_ROOT / rel_path
         entries = _local_prek_entries(path)
-        assert entries == expected
-        for command in entries.values():
-            _assert_not_nested(command, path)
+        # Convert list of entries back to single values for comparison
+        entries_flat = {stage: cmds[0] if len(cmds) == 1 else cmds for stage, cmds in entries.items()}
+        assert entries_flat == expected
+        for commands in entries.values():
+            for command in commands:
+                _assert_not_nested(command, path)
 
 
 def test_simple_git_hooks_template_calls_leaf_adapters() -> None:
