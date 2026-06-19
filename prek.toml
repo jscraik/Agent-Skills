@@ -9,7 +9,7 @@ repo = "local"
 [[repos.hooks]]
 id = "hooks-pre-commit"
 name = "Run pre-commit validation"
-entry = "make hooks-pre-commit"
+entry = "bash scripts/hooks/pre-commit.sh"
 language = "system"
 stages = ["pre-commit"]
 pass_filenames = false
@@ -18,7 +18,7 @@ always_run = true
 [[repos.hooks]]
 id = "hooks-commit-msg"
 name = "Validate commit message policy"
-entry = "bash -lc 'make hooks-commit-msg HOOK_COMMIT_MSG_FILE=\"$1\"' --"
+entry = "bash scripts/hooks/commit-msg.sh"
 language = "system"
 stages = ["commit-msg"]
 pass_filenames = true
@@ -27,7 +27,7 @@ always_run = true
 [[repos.hooks]]
 id = "hooks-pre-push"
 name = "Run pre-push diagnostics"
-entry = "make hooks-pre-push"
+entry = "bash scripts/hooks/pre-push.sh"
 language = "system"
 stages = ["pre-push"]
 pass_filenames = false

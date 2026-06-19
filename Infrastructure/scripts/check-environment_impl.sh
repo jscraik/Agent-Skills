@@ -82,7 +82,7 @@ fi
 		exit 1
 	fi
 
-	required_support_files=("scripts/codex-preflight.sh" "scripts/codex-preflight-local-memory-legacy.sh" "scripts/codex-learn" "scripts/codex-enforced" "scripts/verify-work.sh" "scripts/validate-codestyle.sh" "scripts/validate-commit-msg.js" "scripts/install-prek-hooks.sh" "scripts/prepare-worktree.sh" "scripts/check-staged-secrets.sh" "scripts/check-doc-style.sh" "scripts/check-related-tests.sh" "scripts/check-semgrep-changed.sh" "scripts/semgrep-pre-push.yml")
+	required_support_files=("scripts/codex-preflight.sh" "scripts/codex-preflight-local-memory-legacy.sh" "scripts/codex-learn" "scripts/codex-enforced" "scripts/verify-work.sh" "scripts/validate-codestyle.sh" "scripts/validate-commit-msg.js" "scripts/hooks/pre-commit.sh" "scripts/hooks/commit-msg.sh" "scripts/hooks/pre-push.sh" "scripts/install-prek-hooks.sh" "scripts/prepare-worktree.sh" "scripts/check-staged-secrets.sh" "scripts/check-doc-style.sh" "scripts/check-related-tests.sh" "scripts/check-semgrep-changed.sh" "scripts/semgrep-pre-push.yml")
 	for support_file in "${required_support_files[@]}"; do
 		if [[ ! -f "$REPO_ROOT/${support_file}" ]]; then
 			echo "Error: missing required hook support file at $REPO_ROOT/${support_file}"
@@ -174,8 +174,9 @@ from pathlib import Path
 prek_config = Path(sys.argv[1])
 data = tomllib.loads(prek_config.read_text(encoding="utf-8"))
 required_hooks = {
-    "pre-commit": "make hooks-pre-commit",
-    "pre-push": "make hooks-pre-push",
+    "pre-commit": "bash scripts/hooks/pre-commit.sh",
+    "commit-msg": "bash scripts/hooks/commit-msg.sh",
+    "pre-push": "bash scripts/hooks/pre-push.sh",
 }
 found = {}
 for repo in data.get("repos", []):
@@ -224,7 +225,7 @@ PY
 			fi
 		done
 
-		required_simple_git_hooks=("pre-commit|make hooks-pre-commit" "commit-msg|node scripts/validate-commit-msg.js \$1" "pre-push|make hooks-pre-push")
+		required_simple_git_hooks=("pre-commit|bash scripts/hooks/pre-commit.sh" "commit-msg|bash scripts/hooks/commit-msg.sh \$1" "pre-push|bash scripts/hooks/pre-push.sh")
 		for hook_spec in "${required_simple_git_hooks[@]}"; do
 			hook_name="${hook_spec%%|*}"
 			hook_command="${hook_spec#*|}"
