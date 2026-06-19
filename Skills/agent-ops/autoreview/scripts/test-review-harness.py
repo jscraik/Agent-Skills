@@ -149,9 +149,36 @@ def validate_prompt_policy(repo: Path, autoreview: Path) -> None:
         raise RuntimeError(f"autoreview prompt missing scope policy: {missing}")
 
 
+def validate_merge_commit_diff_policy(autoreview: Path) -> None:
+    namespace = runpy.run_path(str(autoreview))
+    calls: list[tuple[str, ...]] = []
+
+    def fake_git(_repo: Path, *args: str, **_kwargs: object) -> str:
+        calls.append(args)
+        if args[:4] == ("rev-list", "--parents", "-n", "1"):
+            return "merge parent-one parent-two"
+        if args[:2] == ("show", "--name-only"):
+            return "app.js\n"
+        return "diff"
+
+    namespace["commit_bundle"].__globals__["git"] = fake_git
+    namespace["commit_bundle"](Path("."), "merge")
+    namespace["review_paths"](Path("."), "commit", None, "merge")
+
+    merge_show_calls = [args for args in calls if args and args[0] == "show"]
+    missing = [
+        args
+        for args in merge_show_calls
+        if "--diff-merges=first-parent" not in args
+    ]
+    if missing:
+        raise RuntimeError("autoreview merge commit mode did not request first-parent diffs")
+
+
 def run_reviews(repo: Path, script_dir: Path, fixture: str, engines: list[str]) -> None:
     autoreview = script_dir / "autoreview"
     validate_prompt_policy(repo, autoreview)
+    validate_merge_commit_diff_policy(autoreview)
     for engine in engines:
         print(f"== {engine} ==", flush=True)
         command = [

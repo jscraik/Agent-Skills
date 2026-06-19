@@ -2132,7 +2132,7 @@ def test_tessl_pending_run_preflight_blocks_existing_project_run(tmp_path: Path)
                 "attributes": {
                     "status": "pending",
                     "metadata": {
-                        "tileName": "autoreview",
+                        "tileName": "skills-sdk/autoreview",
                         "tileVersion": "0.1.0",
                     },
                 },
@@ -2382,7 +2382,7 @@ def test_evals_live_private_blocks_before_submit_when_pending_run_exists(tmp_pat
                 "type": "eval-run",
                 "attributes": {
                     "status": "pending",
-                    "metadata": {"tileName": "example-skill"},
+                    "metadata": {"tileName": "jscraik/example-skill"},
                 },
             }
         ]

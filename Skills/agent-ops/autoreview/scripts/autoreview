@@ -389,13 +389,31 @@ def branch_bundle(repo: Path, base_ref: str) -> str:
     )
 
 
+def commit_diff_args(repo: Path, commit_ref: str) -> list[str]:
+    parents = git(repo, "rev-list", "--parents", "-n", "1", commit_ref).split()
+    if len(parents) > 2:
+        return ["--diff-merges=first-parent"]
+    return []
+
+
 def commit_bundle(repo: Path, commit_ref: str) -> str:
+    diff_args = commit_diff_args(repo, commit_ref)
     return "\n\n".join(
         [
             "# Commit Diff",
             f"commit: {commit_ref}",
-            git(repo, "show", "--stat", "--format=fuller", commit_ref),
-            bounded(git(repo, "show", "--patch", "--find-renames", "--format=fuller", commit_ref)),
+            git(repo, "show", "--stat", "--format=fuller", *diff_args, commit_ref),
+            bounded(
+                git(
+                    repo,
+                    "show",
+                    "--patch",
+                    "--find-renames",
+                    "--format=fuller",
+                    *diff_args,
+                    commit_ref,
+                )
+            ),
         ]
     )
 
@@ -412,7 +430,16 @@ def review_paths(repo: Path, target: str, target_ref: str | None, commit_ref: st
         assert target_ref
         sources = [git(repo, "diff", "--name-only", f"{target_ref}...HEAD")]
     else:
-        sources = [git(repo, "show", "--name-only", "--format=", commit_ref)]
+        sources = [
+            git(
+                repo,
+                "show",
+                "--name-only",
+                "--format=",
+                *commit_diff_args(repo, commit_ref),
+                commit_ref,
+            )
+        ]
     for source in sources:
         for line in source.splitlines():
             path = line.strip()

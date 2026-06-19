@@ -2349,7 +2349,7 @@ def _tessl_pending_run_ids_for_project(stdout: str, *, project: str) -> list[str
             continue
         tile_name = _tessl_run_metadata_field(run, "tileName")
         subject = _tessl_run_field(run, "subject")
-        if tile_name != project and (not isinstance(subject, str) or subject.rsplit("/", 1)[-1] != project):
+        if not any(isinstance(value, str) and value.rsplit("/", 1)[-1] == project for value in (tile_name, subject)):
             continue
         run_id = _tessl_run_field(run, "id", "evalRunId", "runId")
         if isinstance(run_id, str) and run_id.strip():
