@@ -109,6 +109,24 @@ class CommandSurfaceTests(unittest.TestCase):
         self.assertNotIn("source_path", payload)
         self.assertNotIn("command_handle_path", payload)
 
+    def test_handles_report_preserves_legacy_aliases_for_pruning_consumers(self) -> None:
+        class FakeRecord:
+            def to_resolution(self) -> dict[str, object]:
+                return {
+                    "handle": "skill-builder",
+                    "owner": "skill-factory",
+                    "source_path": "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md",
+                }
+
+        with patch.object(COMMAND_SURFACE, "build_sdk_skill_record_candidates", return_value=[]), \
+             patch.object(COMMAND_SURFACE, "build_sdk_skill_records", return_value=[FakeRecord()]), \
+             patch.object(COMMAND_SURFACE, "sdk_duplicate_handle_violations", return_value=[]):
+            report = COMMAND_SURFACE.handles_report(repo_root_path=Path("."))
+
+        self.assertEqual(report["handles"], report["targets"])
+        self.assertEqual(report["hidden_handles"], report["hidden_targets"])
+        self.assertEqual(report["handles"][0]["handle"], "skill-builder")
+
 
 if __name__ == "__main__":
     unittest.main()

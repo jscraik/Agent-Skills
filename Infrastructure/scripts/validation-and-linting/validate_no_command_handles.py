@@ -31,6 +31,13 @@ AGENT_METADATA_ROOTS = (
     "Plugins",
 )
 
+RUNTIME_IDENTIFIER_PLACEHOLDER_PATHS = (
+    "AGENTS.md",
+    "Docs/agents/19-high-signal-steering-feedback.md",
+    "Docs/agents/README.md",
+    "Infrastructure/scripts/README.md",
+)
+
 RULES = [
     Rule(
         "Infrastructure/scripts/lib/ask/command_metadata.py",
@@ -61,6 +68,11 @@ RULES = [
 
 SKILL_DESCRIPTION_DOLLAR_PATTERN = re.compile(r"\$[A-Za-z][A-Za-z0-9_-]*")
 SKILL_FRONTMATTER_HANDLE_KEY_PATTERN = re.compile(r"^\s*(handles|canonical_handle):\s*")
+RUNTIME_IDENTIFIER_PLACEHOLDER_PATTERN = re.compile(
+    r"\b(?:cell_id|session_id|tool_call_id|command_id|handle)\b\s*[:=]\s*"
+    r"[\"'](?:noop|noop\d+|fake|dummy|placeholder|test)[\"']",
+    re.IGNORECASE,
+)
 
 
 def _relative(path: Path) -> str:
@@ -176,6 +188,25 @@ def _iter_agent_metadata_findings() -> Iterable[dict[str, object]]:
                         }
 
 
+def _iter_runtime_identifier_placeholder_findings() -> Iterable[dict[str, object]]:
+    for path_text in RUNTIME_IDENTIFIER_PLACEHOLDER_PATHS:
+        path = ROOT / path_text
+        if not path.exists():
+            continue
+        for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+            match = RUNTIME_IDENTIFIER_PLACEHOLDER_PATTERN.search(line)
+            if match:
+                yield {
+                    "path": _relative(path),
+                    "line": line_number,
+                    "match": match.group(0),
+                    "message": (
+                        "Agent-facing guidance must not include fabricated runtime identifier "
+                        "examples for wait, resume, retry, or closeout actions."
+                    ),
+                }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--json", action="store_true", help="Emit machine-readable output.")
@@ -186,6 +217,7 @@ def main() -> int:
         *_iter_skill_description_findings(),
         *_iter_skill_frontmatter_handle_findings(),
         *_iter_agent_metadata_findings(),
+        *_iter_runtime_identifier_placeholder_findings(),
     ]
     payload = {
         "schema_version": "no-command-handles.v1",
@@ -195,6 +227,7 @@ def main() -> int:
             *[f"{root}/**/SKILL.md frontmatter descriptions" for root in SKILL_DESCRIPTION_ROOTS],
             *[f"{root}/**/SKILL.md legacy handle metadata" for root in SKILL_DESCRIPTION_ROOTS],
             *[f"{root}/**/agents/*.yaml metadata" for root in AGENT_METADATA_ROOTS],
+            *[f"{path} runtime placeholder identifiers" for path in RUNTIME_IDENTIFIER_PLACEHOLDER_PATHS],
         ],
         "findings": findings,
     }

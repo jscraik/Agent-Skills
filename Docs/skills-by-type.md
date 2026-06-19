@@ -13,14 +13,14 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `library_api_reference`: 2
 - `product_verification`: 4
 - `data_fetch_analysis`: 3
-- `team_automation`: 49
+- `team_automation`: 46
 - `scaffolding_templates`: 16
 - `code_quality_review`: 24
 - `ci_cd_deployment`: 0
-- `runbook`: 13
+- `runbook`: 15
 - `infrastructure_ops`: 3
-- `invalid`: 0
-- `total_tagged`: 114
+- `invalid`: 45
+- `total_tagged`: 113
 
 ## Semantic Types
 
@@ -56,7 +56,6 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `goal-governor` — `Skills/agent-ops`
 - `he-brainstorm` — `Plugins/harness-engineering/skills`
 - `he-fix-bugs` — `Plugins/harness-engineering/skills`
-- `he-heartbeat` — `Plugins/harness-engineering/skills`
 - `he-improve` — `Plugins/harness-engineering/skills`
 - `he-linear-plan` — `Plugins/harness-engineering/skills`
 - `he-phase-work` — `Plugins/harness-engineering/skills`
@@ -64,7 +63,6 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `he-reconcile` — `Plugins/harness-engineering/skills`
 - `he-reframe` — `Plugins/harness-engineering/skills`
 - `he-reinforce` — `Plugins/harness-engineering/skills`
-- `he-router` — `Plugins/harness-engineering/skills`
 - `he-strategy` — `Plugins/harness-engineering/skills`
 - `he-work` — `Plugins/harness-engineering/skills`
 - `interview-me` — `Skills/product-strategy`
@@ -83,8 +81,7 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `sy-reframe` — `Plugins/synaipse-harness/skills`
 - `sy-reinforce` — `Plugins/synaipse-harness/skills`
 - `sy-review` — `Plugins/synaipse-harness/skills`
-- `sy-spec` — `Plugins/synaipse-harness/skills`
-- `sy-strategy` — `Plugins/synaipse-harness/skills`
+- `sy-slice-spec` — `Plugins/synaipse-harness/skills`
 - `sy-trace-plan` — `Plugins/synaipse-harness/skills`
 - `sy-tracker-plan` — `Plugins/synaipse-harness/skills`
 - `sy-work` — `Plugins/synaipse-harness/skills`
@@ -115,7 +112,6 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 
 ### Code Quality Review
 
-- `agents-md` — `Skills/agent-ops`
 - `autofix` — `Skills/agent-ops`
 - `baseline-ui` — `Skills/frontend-ui`
 - `best-practices` — `Skills/security-ops`
@@ -132,6 +128,7 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `javascript-pro` — `Skills/agent-ops`
 - `plugin-builder` — `Plugins/plugin-factory/skills/code_quality_review`
 - `rust-pro` — `Skills/agent-ops`
+- `sdk-scenario-generator` — `Skills/agent-ops`
 - `simplify` — `Skills/agent-ops`
 - `skill-builder` — `Plugins/skill-factory/skills/code_quality_review`
 - `testing` — `Skills/agent-ops`
@@ -146,10 +143,12 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 
 ### Runbook
 
+- `agents-md` — `Skills/agent-ops`
 - `bash-hygiene` — `Skills/agent-ops`
 - `biome-linting` — `Skills/agent-ops`
 - `codex-environment-creator` — `Skills/agent-ops`
 - `diagram-cli` — `Skills/agent-ops`
+- `improve-agent-native` — `Skills/agent-ops`
 - `keep-codex-fast` — `Skills/agent-ops`
 - `npm-release` — `Skills/agent-ops`
 - `pnpm-manager` — `Skills/agent-ops`
@@ -168,4 +167,51 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 
 ## Validation Notes
 
-- No invalid semantic type tags detected.
+- Unrecognized tags were found. Check script warnings and normalize to the canonical values.
+
+- `talk-azriel-executable-specs` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-baker-sadogursky-context-engineering-skills` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-batey-building-product-teams-age-of-ai` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-birgitta-closing-keynote` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-cormack-tests-lie-observability-ai` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-debois-agent-enablement` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-douglas-training-ai-on-your-own-code` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-dubnov-merge-rate-ai-adoption` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-farley-vibe-coding-best-we-can-do` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-firtman-web-mcp-agentic-web` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-foxwell-reinvention-dev-team` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-groetzinger-skills-everywhere` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-jones-odevo-ai-native-transformation` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-jourdan-pipelines-to-prompts` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-katsioloudes-code-security-ai` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-kerr-bipolar-disorder-dysregulation-ai` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-kushwaha-benchmarking-agent-era` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-lamis-context-engineering-dreaming` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-lawson-agent-experience` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-lopopolo-harness-engineering` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-luebken-embedding-pi-coding-agent` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-maleix-collective-intelligence` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-maple-aind-devcon-welcome` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-marsden-agent-desktops` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-martinelli-spec-driven-development` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-moss-skills-team-workflow` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-obstbaum-willoughby-vibes-to-metrics` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-overweg-one-brain-no-filtering` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-podjarny-skills-are-the-new-code` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-roberts-ai-native-brownfield` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-roberts-brownfield-ai-native` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-ruiz-agents-on-canvas-tldraw` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-scheire-artificial-intelligence` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-selajev-docker-sandboxes-agents` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-sloan-harness-engineering-beyond-code` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-smith-connecting-context-future-transports` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-stack-humans-architect-ai-writes-code` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-stoneham-product-brain` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-syme-agentic-repository-automation` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-tal-skills-security` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-thomas-ai-native-engineering` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-trieloff-browser-agents` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-walter-runtime-intelligence-agents` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-wilson-cq-stack-overflow-for-agents` — `Plugins/aidevcon/skills` (`reference`)
+- `talk-wotherspoon-humans-vs-slop` — `Plugins/aidevcon/skills` (`reference`)
+

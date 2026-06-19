@@ -118,8 +118,8 @@ Historical artifact debt is split into two lanes:
 - Existing tracked historical artifacts remain advisory diagnostic debt until a
   cleanup slice can classify and remove them safely.
 - Any changed file that classifies as `historical_artifact` is blocking unless
-  it is explicitly allowlisted as a fixture, reference, summary, index, or
-  intentional archive.
+  it has a reviewed allowlist entry or is converted into a fixture, reference,
+  summary, index, or intentional archive.
 
 Use this rule to keep the legacy backlog visible without letting new generated
 evidence, logs, event streams, or run output enter the repository as ordinary

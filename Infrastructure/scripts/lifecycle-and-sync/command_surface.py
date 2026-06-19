@@ -190,6 +190,8 @@ def handles_report(*, repo_root_path: Path | None = None, include_handles: bool 
         "projection_path": None,
         "target_count": len(records),
         "violations": violations,
+        "handles": public_rows,
+        "hidden_handles": [],
         "targets": public_rows,
         "hidden_targets": [],
         "notes": [
