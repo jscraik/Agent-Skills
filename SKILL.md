@@ -61,7 +61,7 @@ Do not hand-edit runtime projections.
 - `keep-codex-fast` — Diagnose Codex Desktop or CLI local-state bloat and safe recovery options. Use when sessions, archived history, logs, worktrees, or stale Codex config may be making Codex feel slow.
 - `npm-release` — Create, review, and validate npm release workflows. Use when preparing or publishing npm packages, release channels, dist-tags, provenance, or 2FA-protected publishes.
 - `pnpm-manager` — Run, plan, and validate pnpm workspace operations. Use when a user needs pnpm monorepo installs, tests, builds, filters, changed-package selection, or publish routing.
-- `pr-green-sweep` — Automate until-green PR review, CI, merge, and cleanup follow-through. Use when open project PRs need GitHub/gh, CodeRabbit, CircleCI, Context7, Snyk, autofix, heartbeat, and branch/worktree pruning.
+- `pr-green-sweep` — Automate until-green PR review, CI, merge, and cleanup follow-through. Use when open project PRs need GitHub, CodeRabbit, CircleCI, Context7, autofix, heartbeat, and branch/worktree pruning.
 - `prek-pro` — Review, configure, and troubleshoot prek hooks when users need prek.toml edits, shim installs, hook validation, or pre-commit migration help.
 - `production-deployment` — Plan, execute, and validate production deployments when rollout safety, health checks, observability, rollback, or production-parity verification is required.
 - `project-brain` — Create, validate, and repair Project Brain .harness memory files when setting up Project Brain, saving repo learnings, recording decisions, or preserving quality rules.

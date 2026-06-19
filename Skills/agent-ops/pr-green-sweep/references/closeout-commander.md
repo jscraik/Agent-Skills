@@ -13,6 +13,81 @@ Return one queue entry per PR:
 - `needs_user_decision`: product, release, roadmap, security risk, or ownership choice cannot be inferred from repo evidence.
 - `cleanup_only`: PR is merged or closed and only branch/worktree cleanup remains, with merge proof required before deletion.
 
+## Current Project Scope
+
+Default to the current GitHub repository. Do not broaden to all repositories,
+owners, orgs, or unrelated open PRs unless the user says `all`, `everything`,
+`broad`, names multiple repos/orgs, or explicitly asks for cross-repo rotation.
+
+For exact PR requests, inspect only the named PRs unless the user asks to keep a
+wider queue moving. For broad sweeps, preserve the discovered priority order and
+state what was not expanded.
+
+## URL-First PR Card
+
+Every surfaced PR entry should start with the canonical URL and include enough
+current-state proof to prevent stale action:
+
+~~~text
+https://github.com/OWNER/REPO/pull/123 - title
+Head: branch @ <sha>
+State: mergeable|blocked|dirty|unknown; review threads: open|none|unknown
+Checks: required pass/fail/pending with target URLs when available
+Local: branch/worktree ownership and dirty-path classification
+Next: exact action or blocker
+~~~
+
+Never use only `#123` for a PR that needs action, approval, merge, or cleanup.
+
+## Authorization Ladder
+
+Treat permissions as independent. A grant for one rung does not imply later
+rungs:
+
+1. discovery and read-only triage
+2. heartbeat or cron continuation
+3. local implementation and validation
+4. push or public PR update
+5. CI rerun or CI-fix iteration
+6. merge or close
+7. admin merge, force push, or policy override
+8. remote branch deletion
+9. worktree deletion or destructive cleanup
+10. release, tag, publish, or registry mutation
+
+Stop at the last granted rung and ask only for the exact next permission when
+the current evidence is otherwise ready.
+
+## Decision-Ready Blocker Brief
+
+When user action is needed, provide a prepared decision rather than a rough
+status:
+
+- full canonical URL and title
+- why the decision is needed now
+- latest head SHA, branch, or worktree identity
+- completed proof and exact commands/tool outcomes
+- exact blocker text, check name, thread id, policy, quota, or missing access
+- residual risk and what remains unproven
+- recommendation and exact available choices
+
+Do autonomous repair first. Do not ask the user to choose while a PR is stale,
+red for a fixable reason, missing local validation, or still has unresolved
+review state.
+
+## One-PR-At-A-Time Rotation
+
+Keep only one PR in the mutation lane at a time. Before starting another PR,
+the current PR must have one of:
+
+- pushed fix plus refreshed live state
+- explicit blocked status with decision-ready brief
+- no local edits and no pending validation
+- cleanup-only status after merge/close proof
+
+This prevents cross-PR staging mistakes, stale check claims, and ambiguous
+dirty-worktree ownership.
+
 ## Validation Surface Selector
 
 Before claiming a fix is validated, decide the correct surface:
@@ -47,14 +122,12 @@ Use service plugins first for live PR/service truth, then CLIs when local reprod
 
 | Lane | Use when | Report |
 | --- | --- | --- |
-| GitHub plugin | PR inventory, mergeability, branch protection, review state, and required checks need live GitHub truth. | PR number, head SHA, check names, review state, blocker. |
+| [@github] plugin | PR inventory, mergeability, branch protection, review state, and required checks need live GitHub truth. | PR number, head SHA, check names, review state, blocker. |
 | `gh` CLI | Plugin access is blocked, a repo wrapper expects `gh`, or local shell evidence is easier to reproduce. | Exact command, redacted output summary, exit status. |
-| CodeRabbit plugin | Review-thread inventory, severity, stale classification, or resolution support is needed. | Thread id, finding class, action taken, stale/blocked reason. |
-| CodeRabbit CLI | Local CodeRabbit evidence is available and useful as a fallback or reproduction path. | Exact command, whether evidence is current/live or cached. |
-| CircleCI plugin | Pipeline, workflow, job, rerun, or log truth is needed from CircleCI. | Workflow/job id, failed step, exact failure text, merge blocker status. |
-| CircleCI CLI | Local CircleCI inspection or rerun path is needed. Source credentials through `~/.codex/.env` without printing values. | Exact command, redacted auth state, failed job/log evidence. |
+| [@coderabbit] plugin | Review-thread inventory, severity, stale classification, or resolution support is needed. | Thread id, finding class, action taken, stale/blocked reason. |
+| [@circleci] plugin | Pipeline, workflow, job, rerun, or log truth is needed from CircleCI. | Workflow/job id, failed step, exact failure text, merge blocker status. |
+| CircleCI CLI | Local CircleCI inspection or rerun path is needed. Invoke through `op run --env-file ~/.codex/.env` without printing values. | Exact command, redacted auth state, failed job/log evidence. |
 | Context7 skill or CLI | A blocker depends on current external library, API, or CLI docs, especially version-sensitive flags or behavior. | Library id/source basis, retrieval path, inference vs docs-backed conclusion. |
-| Snyk CLI | Dependency security screening is policy-required, release-required for manifest-backed candidates, or explicitly requested. | Manifest path, severity summary, pass/fail/blocked; do not mix with prompt/security-policy findings. |
 
 Do not run every CLI by default. Each lane must name the evidence it adds, or it stays unused.
 
@@ -69,7 +142,10 @@ For each failing check, return:
 - likely fix file or owner
 - whether it blocks merge
 
-CircleCI evidence should come from the CircleCI plugin/CLI lane. Use `~/.codex/.env` as the expected local environment source for CircleCI credentials, but never print secrets or copy env values into reports.
+CircleCI evidence should come from the [@circleci] plugin or the CircleCI CLI
+lane. Invoke credentialed CircleCI commands through
+`op run --env-file ~/.codex/.env`, but never print secrets or copy env values
+into reports.
 
 ## Closeout Ledger
 

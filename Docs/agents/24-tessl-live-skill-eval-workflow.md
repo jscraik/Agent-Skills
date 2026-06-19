@@ -192,12 +192,13 @@ For behavioral skill readiness, the live-private staging gate also requires at
 least 20 gold-standard structured scenarios. A lower count can be used only as
 transition or diagnostic evidence, not as professional readiness evidence.
 
-Before running live Tessl, check the workspace run budget. Treat 300 live eval
-runs as the operator-provided limit unless Tessl reports a different
+Before running live Tessl, check the workspace run budget. Treat any
+operator-provided cap as binding unless Tessl reports a different
 operator-approved limit, and preserve at least 20 runs as a remediation reserve.
-The preferred preflight is:
+Use the installed Tessl CLI's supported list/filter surface; do not require a
+fixed list-window flag. A typical preflight is:
 
-    tessl eval list --json --workspace <workspace> --limit 300
+    tessl eval list --json --workspace <workspace>
 
 If the preflight fails or remaining capacity is unknown, block nonessential live
 scoring. Continue with SDK scenario generation, internal evals, dry-run staging,
@@ -242,9 +243,9 @@ Treat Tessl scores as evidence, not proof by themselves.
   `blocked_environment`. Do not submit another live eval until the quota reset
   or quota increase is available; use dry-run staging and local scenario
   quality gates only.
-- If the live run would exceed the 300-run workspace budget or consume the
-  20-run reserve, classify the lane as `blocked_environment` for live scoring
-  and continue with dry-run/local validation only.
+- If the live run would exceed the operator-approved workspace budget or consume
+  the 20-run reserve, classify the lane as `blocked_environment` for live
+  scoring and continue with dry-run/local validation only.
 - The live-private readiness gate is: usage-spec score is at least 90% and is
   not below the baseline score. A 95%+ score remains the improvement target.
   A lower score, lower baseline comparison, or
@@ -308,7 +309,7 @@ Before claiming completion:
   structured scenarios for behavioral skill readiness, or the run is explicitly
   recorded as transition/diagnostic evidence.
 - Tessl workspace run capacity was checked or explicitly estimated, with the
-  300-run limit and 20-run remediation reserve preserved.
+  operator-approved limit and 20-run remediation reserve preserved.
 - The staged `.tessl-plugin/plugin.json` version matches the canonical SKILL.md frontmatter
   version for the skill behavior being evaluated.
 - Focused Python tests for the wrapper passed.
