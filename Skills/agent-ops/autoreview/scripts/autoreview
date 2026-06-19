@@ -7,6 +7,7 @@ import copy
 import json
 import os
 import queue
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -979,7 +980,7 @@ def print_report(report: dict[str, Any], *, label: str = "autoreview") -> None:
 def start_parallel_tests(command: str, repo: Path, shell_kind: str) -> tuple[subprocess.Popen, float]:
     print(f"tests: {command}")
     if shell_kind == "default" or shell_kind == "cmd":
-        return subprocess.Popen(command, cwd=repo, shell=True), time.time()
+        return subprocess.Popen(shlex.split(command), cwd=repo), time.time()
     if shell_kind == "powershell":
         powershell = resolve_command("powershell", repo)
         return subprocess.Popen(

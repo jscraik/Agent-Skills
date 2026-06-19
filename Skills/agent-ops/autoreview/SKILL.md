@@ -288,6 +288,13 @@ Run Tessl only through the repo eval wrapper against staged input under `/tmp`; 
 - `references/task-profile.json`
 - `agents/openai.yaml`
 
+## See Also
+
+| Skill | When to use together |
+| --- | --- |
+| [[evals-router]] | Design eval coverage and judge-calibration checks for review workflows. |
+| [[pr-green-sweep]] | Carry review findings through CI, PR, and merge follow-through. |
+
 ## Helper
 
 OpenClaw repo-local helper:
