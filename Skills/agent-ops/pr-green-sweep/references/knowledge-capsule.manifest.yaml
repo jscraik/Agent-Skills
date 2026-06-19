@@ -1,0 +1,225 @@
+---
+schema_version: knowledge-os.knowledge-capsule-manifest.v1
+skill:
+  skill_id: pr-green-sweep
+  declared_name: pr-green-sweep
+  entrypoint_path: Skills/agent-ops/pr-green-sweep/SKILL.md
+  canonical_skill_path: Skills/agent-ops/pr-green-sweep/SKILL.md
+  writable_root: Skills/agent-ops/pr-green-sweep
+  apply_target_path: Skills/agent-ops/pr-green-sweep/SKILL.md
+upstream_pack:
+  pack_id: pack.pr-green-sweep
+  export_root: exports/packs/pack.pr-green-sweep
+  snapshot_digest: sha256:3e7336f20d5a280d5d3c4d5c97350f51b0fe5b0df4a872844af10ac2cb4808e6
+upstream_packs:
+- pack_id: pack.pr-green-sweep
+  role: until_green_pr_closeout
+  export_root: exports/packs/pack.pr-green-sweep
+  snapshot_digest: sha256:3e7336f20d5a280d5d3c4d5c97350f51b0fe5b0df4a872844af10ac2cb4808e6
+  default_facets:
+  - heartbeat_and_scope
+  - live_pr_evidence
+  - action_queue
+  - validation_surface
+  - authorization_and_blockers
+  - cleanup_proof
+  optional_facets: []
+selected_facets:
+- pack.pr-green-sweep:heartbeat_and_scope
+- pack.pr-green-sweep:live_pr_evidence
+- pack.pr-green-sweep:action_queue
+- pack.pr-green-sweep:validation_surface
+- pack.pr-green-sweep:authorization_and_blockers
+- pack.pr-green-sweep:cleanup_proof
+selected_asset_ids:
+- claim.codex.thread-automation-preserves-context
+- claim.pr-green-sweep.heartbeat-gates-rotation
+- principle.pr-green-sweep.live-proof-before-motion
+- checklist.pr-green-sweep.until-green-current-state
+- eval.pr-green-sweep.rotation-without-heartbeat
+- claim.pr-green-sweep.current-state-is-live-lane-proof
+- claim.pr-green-sweep.authorization-rungs-are-separate
+- claim.pr-green-sweep.action-queue-precedes-edits
+- claim.pr-green-sweep.single-mutation-lane
+- claim.harness.review-needs-proof
+- claim.harness.provenance-not-validation
+- claim.harness.human-authority-boundaries
+- claim.harness.full-job-verified-result
+- claim.harness.parallel-tokens-need-safety
+- lens.pr-green-sweep.live-pr-readiness-boundary
+- lens.harness.evidence-boundary
+- eval.pr-green-sweep.stale-green-checks
+- eval.harness.local-pass-ci-unknown
+- claim.pr-green-sweep.cleanup-needs-merge-proof
+- claim.harness.good-job-legible
+- claim.harness.human-attention-scarce
+- claim.harness.lifecycle-exit-proof
+- claim.harness.pr-lifecycle-skill
+- principle.harness.pr-lifecycle-is-skillable-loop
+- heuristic.pr-green-sweep.queue-before-patching
+- heuristic.harness.skillify-pr-lifecycle
+- eval.pr-green-sweep.status-summary-without-queue
+- eval.harness.pr-lifecycle-stops-before-main
+- claim.pr-green-sweep.validation-surface-matches-change
+- claim.harness.smallest-proof-surface
+- heuristic.pr-green-sweep.select-validation-surface
+- heuristic.harness.require-proof-boundary
+- checklist.harness.closeout-evidence
+- rubric.harness.full-job-proof
+- eval.pr-green-sweep.wrong-validator-for-reference-doc
+- claim.harness.strict-runtime-boundaries
+- claim.harness.feedback-becomes-guardrails
+- claim.harness.agent-observability
+- claim.harness.on-policy-guardrails
+- claim.harness.product-facing-proof
+- claim.harness.agent-legible-failures
+- rubric.pr-green-sweep.decision-ready-blocker
+- eval.pr-green-sweep.admin-merge-pressure
+- principle.harness.full-job-or-not-done
+- checklist.pr-green-sweep.cleanup-proof
+- eval.pr-green-sweep.cleanup-without-merge-proof
+source_export_paths:
+- pack.index.yaml
+- snapshot.yaml
+- assets.json
+- eval-scenarios.json
+- skills-sdk-ingest.yaml
+- pack.md
+- slices/*.md
+capsules:
+- pack_id: pack.pr-green-sweep
+  role: until_green_pr_closeout
+  facet_id: heartbeat_and_scope
+  optional: false
+  source_slice: slices/heartbeat-and-scope.md
+  target_path: references/knowledge-capsules/pr-green-sweep-heartbeat-and-scope.md
+  asset_ids:
+  - claim.codex.thread-automation-preserves-context
+  - claim.pr-green-sweep.heartbeat-gates-rotation
+  - principle.pr-green-sweep.live-proof-before-motion
+  - checklist.pr-green-sweep.until-green-current-state
+  - eval.pr-green-sweep.rotation-without-heartbeat
+  - claim.pr-green-sweep.current-state-is-live-lane-proof
+  - claim.pr-green-sweep.authorization-rungs-are-separate
+  - claim.pr-green-sweep.action-queue-precedes-edits
+  - claim.pr-green-sweep.single-mutation-lane
+  - claim.harness.review-needs-proof
+  - claim.harness.provenance-not-validation
+  - claim.harness.human-authority-boundaries
+  - claim.harness.full-job-verified-result
+  - claim.harness.parallel-tokens-need-safety
+- pack_id: pack.pr-green-sweep
+  role: until_green_pr_closeout
+  facet_id: live_pr_evidence
+  optional: false
+  source_slice: slices/live-pr-evidence.md
+  target_path: references/knowledge-capsules/pr-green-sweep-live-pr-evidence.md
+  asset_ids:
+  - claim.pr-green-sweep.current-state-is-live-lane-proof
+  - claim.harness.review-needs-proof
+  - claim.harness.provenance-not-validation
+  - lens.pr-green-sweep.live-pr-readiness-boundary
+  - lens.harness.evidence-boundary
+  - checklist.pr-green-sweep.until-green-current-state
+  - eval.pr-green-sweep.stale-green-checks
+  - eval.harness.local-pass-ci-unknown
+  - claim.pr-green-sweep.authorization-rungs-are-separate
+  - claim.pr-green-sweep.cleanup-needs-merge-proof
+  - claim.harness.good-job-legible
+  - claim.harness.human-attention-scarce
+  - claim.harness.human-authority-boundaries
+  - claim.codex.thread-automation-preserves-context
+  - claim.pr-green-sweep.heartbeat-gates-rotation
+  - claim.pr-green-sweep.action-queue-precedes-edits
+  - claim.pr-green-sweep.single-mutation-lane
+  - claim.harness.lifecycle-exit-proof
+  - claim.harness.full-job-verified-result
+  - claim.harness.parallel-tokens-need-safety
+- pack_id: pack.pr-green-sweep
+  role: until_green_pr_closeout
+  facet_id: action_queue
+  optional: false
+  source_slice: slices/action-queue.md
+  target_path: references/knowledge-capsules/pr-green-sweep-action-queue.md
+  asset_ids:
+  - claim.pr-green-sweep.action-queue-precedes-edits
+  - claim.pr-green-sweep.single-mutation-lane
+  - claim.harness.pr-lifecycle-skill
+  - principle.harness.pr-lifecycle-is-skillable-loop
+  - heuristic.pr-green-sweep.queue-before-patching
+  - heuristic.harness.skillify-pr-lifecycle
+  - eval.pr-green-sweep.status-summary-without-queue
+  - eval.harness.pr-lifecycle-stops-before-main
+  - claim.harness.full-job-verified-result
+  - claim.harness.parallel-tokens-need-safety
+  - claim.harness.lifecycle-exit-proof
+- pack_id: pack.pr-green-sweep
+  role: until_green_pr_closeout
+  facet_id: validation_surface
+  optional: false
+  source_slice: slices/validation-surface.md
+  target_path: references/knowledge-capsules/pr-green-sweep-validation-surface.md
+  asset_ids:
+  - claim.pr-green-sweep.validation-surface-matches-change
+  - claim.harness.smallest-proof-surface
+  - heuristic.pr-green-sweep.select-validation-surface
+  - heuristic.harness.require-proof-boundary
+  - checklist.harness.closeout-evidence
+  - rubric.harness.full-job-proof
+  - eval.pr-green-sweep.wrong-validator-for-reference-doc
+  - claim.harness.strict-runtime-boundaries
+  - claim.harness.feedback-becomes-guardrails
+  - claim.harness.review-needs-proof
+  - claim.harness.agent-observability
+  - claim.harness.on-policy-guardrails
+  - claim.harness.full-job-verified-result
+  - claim.harness.product-facing-proof
+  - claim.harness.agent-legible-failures
+- pack_id: pack.pr-green-sweep
+  role: until_green_pr_closeout
+  facet_id: authorization_and_blockers
+  optional: false
+  source_slice: slices/authorization-and-blockers.md
+  target_path: references/knowledge-capsules/pr-green-sweep-authorization-and-blockers.md
+  asset_ids:
+  - claim.pr-green-sweep.authorization-rungs-are-separate
+  - claim.harness.human-authority-boundaries
+  - principle.pr-green-sweep.live-proof-before-motion
+  - rubric.pr-green-sweep.decision-ready-blocker
+  - eval.pr-green-sweep.admin-merge-pressure
+  - claim.pr-green-sweep.heartbeat-gates-rotation
+  - claim.pr-green-sweep.current-state-is-live-lane-proof
+  - claim.harness.review-needs-proof
+  - claim.harness.provenance-not-validation
+- pack_id: pack.pr-green-sweep
+  role: until_green_pr_closeout
+  facet_id: cleanup_proof
+  optional: false
+  source_slice: slices/cleanup-proof.md
+  target_path: references/knowledge-capsules/pr-green-sweep-cleanup-proof.md
+  asset_ids:
+  - claim.pr-green-sweep.cleanup-needs-merge-proof
+  - claim.pr-green-sweep.authorization-rungs-are-separate
+  - principle.harness.full-job-or-not-done
+  - checklist.pr-green-sweep.cleanup-proof
+  - rubric.pr-green-sweep.decision-ready-blocker
+  - eval.pr-green-sweep.cleanup-without-merge-proof
+  - claim.harness.lifecycle-exit-proof
+  - claim.harness.human-authority-boundaries
+  - claim.harness.full-job-verified-result
+  - claim.harness.product-facing-proof
+  - claim.harness.review-needs-proof
+  - claim.pr-green-sweep.current-state-is-live-lane-proof
+  - claim.harness.provenance-not-validation
+runtime_dependency_policy:
+  requires_knowledge_os_at_runtime: false
+  raw_sources_included: false
+  local_absolute_paths_required: false
+provenance:
+  profile: pr-green-sweep
+  profile_digest: sha256:7ceb5edb741793dd961977c2359807d66d6c0fd723598578cc09c61df13c98da
+  packs:
+  - pack_id: pack.pr-green-sweep
+    export_root: exports/packs/pack.pr-green-sweep
+    snapshot_digest: sha256:3e7336f20d5a280d5d3c4d5c97350f51b0fe5b0df4a872844af10ac2cb4808e6
+    role: until_green_pr_closeout

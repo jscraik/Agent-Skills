@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/eval-case.v0.schema.json",
+  "title": "Skills SDK Eval Case v0",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "string", "const": "skills-sdk.eval-case.v0"},
+    "case_id": {"type": "string", "minLength": 1},
+    "input": {"type": "string", "minLength": 1},
+    "expected": {"type": "string", "minLength": 1},
+    "actual": {"type": "string"},
+    "oracle": {"type": "string", "enum": ["exact_match"]},
+    "acceptance_trace": {"type": "array", "minItems": 1, "items": {"type": "string", "enum": ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022"]}}
+  },
+  "required": ["schema_version", "case_id", "input", "expected", "actual", "oracle", "acceptance_trace"]
+}

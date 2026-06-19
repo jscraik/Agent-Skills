@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/skill-ir.v0.schema.json",
+  "title": "Skills SDK SkillIR v0",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "string", "const": "skills-sdk.skill-ir.v0"},
+    "schema_uri": {"type": "string", "const": "https://jscraik.local/agent-skills/schemas/skills-sdk/skill-ir.v0.schema.json"},
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "name": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1}
+      },
+      "required": ["id", "name", "version"]
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "root": {"type": "string", "minLength": 1},
+        "skill_md": {"type": "string", "minLength": 1},
+        "readme": {"type": ["string", "null"]},
+        "references": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "scripts": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "assets": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "evals": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      },
+      "required": ["root", "skill_md", "readme", "references", "scripts", "assets", "evals"]
+    },
+    "behavior": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "trigger": {"type": "string", "minLength": 1},
+        "inputs": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "outputs": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "procedure_summary": {"type": "string", "minLength": 1}
+      },
+      "required": ["trigger", "inputs", "outputs", "procedure_summary"]
+    },
+    "permissions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "filesystem": {"type": "string", "enum": ["none", "read", "write"]},
+        "network": {"type": "string", "enum": ["none", "restricted", "open"]},
+        "secrets": {"type": "string", "enum": ["none", "handles", "raw"]},
+        "tools": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      },
+      "required": ["filesystem", "network", "secrets", "tools"]
+    },
+    "risk": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "tier": {"type": "string", "enum": ["draft", "local", "scripted", "team", "privileged", "published"]},
+        "reasons": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "source_kind": {"type": "string", "enum": ["docs_only", "referenced", "scripted", "external", "placeholder"]}
+      },
+      "required": ["tier", "reasons", "source_kind"]
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "checks": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "receipts": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      },
+      "required": ["checks", "receipts"]
+    },
+    "mutation_performed": {"type": "boolean", "const": false},
+    "acceptance_trace": {"type": "array", "minItems": 1, "items": {"type": "string", "enum": ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022"]}}
+  },
+  "required": ["schema_version", "schema_uri", "identity", "source", "behavior", "permissions", "risk", "evidence", "mutation_performed", "acceptance_trace"]
+}

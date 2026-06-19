@@ -1,0 +1,26 @@
+{
+  "schema_version": "skills-sdk.eval-run-receipt.v0",
+  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/eval-run-receipt.v0.schema.json",
+  "status": "pass",
+  "runner": "deterministic_jsonl_v0",
+  "dataset_path": "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json",
+  "dataset_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "skill_ir_schema_version": "skills-sdk.skill-ir.v0",
+  "target_path": null,
+  "mode": null,
+  "case_count": 1,
+  "passed_count": 1,
+  "failed_count": 0,
+  "cases": [
+    {
+      "case_id": "exact-summary",
+      "status": "pass",
+      "oracle": "exact_match",
+      "expected": "local receipts prove local behavior",
+      "actual": "local receipts prove local behavior"
+    }
+  ],
+  "blockers": [],
+  "mutation_performed": true,
+  "acceptance_trace": ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022"]
+}

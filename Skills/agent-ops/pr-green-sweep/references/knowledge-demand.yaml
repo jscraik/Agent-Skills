@@ -1,0 +1,29 @@
+---
+schema_version: knowledge-os.knowledge-demand.v1
+skill:
+  skill_id: pr-green-sweep
+  declared_name: pr-green-sweep
+  entrypoint_path: Skills/agent-ops/pr-green-sweep/SKILL.md
+  canonical_skill_path: Skills/agent-ops/pr-green-sweep/SKILL.md
+  writable_root: Skills/agent-ops/pr-green-sweep
+  apply_target_path: Skills/agent-ops/pr-green-sweep/SKILL.md
+knowledge_signals:
+- codex_thread_automation
+- heartbeat_before_rotation
+- url_first_live_pr_evidence
+- action_queue_before_edits
+- authorization_ladder
+- validation_surface_selection
+- decision_ready_blockers
+- cleanup_merge_proof
+needed_facets:
+- pack.pr-green-sweep:heartbeat_and_scope
+- pack.pr-green-sweep:live_pr_evidence
+- pack.pr-green-sweep:action_queue
+- pack.pr-green-sweep:validation_surface
+- pack.pr-green-sweep:authorization_and_blockers
+- pack.pr-green-sweep:cleanup_proof
+runtime_dependency_policy:
+  requires_knowledge_os_at_runtime: false
+  raw_sources_included: false
+  local_absolute_paths_required: false

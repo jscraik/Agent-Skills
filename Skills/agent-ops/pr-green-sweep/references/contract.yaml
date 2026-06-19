@@ -1,12 +1,15 @@
 schema_version: 1
 skill: pr-green-sweep
-purpose: "Run an until-green PR remediation loop that composes GitHub, git-project-triage, CodeRabbit, autofix, CircleCI, HE heartbeat, and HE router prune-branches cleanup."
+purpose: "Run an until-green PR remediation loop that composes GitHub, CodeRabbit, autofix, CircleCI, heartbeat, and branch/worktree cleanup."
 triggers:
   - "monitor open PRs until green"
   - "set a heartbeat for PR checks and review fixes"
-  - "clear CodeRabbit and Codex comments before merge"
+  - "clear CodeRabbit review comments before merge"
   - "fix CircleCI failures on open PRs"
   - "merge all green PRs and prune branches/worktrees"
+scope_defaults:
+  current_repo_only_unless_broad_scope_requested: true
+  exact_pr_scope_does_not_imply_full_rotation: true
 non_goals:
   - "read-only PR summaries"
   - "single local test debugging without PR context"
@@ -29,9 +32,9 @@ outputs:
   - dirty_worktree_ledger
   - validation_surface_decisions
   - validation_evidence
-  - merge_ledger
+  - url_first_merge_ledger
   - cleanup_ledger
-  - blockers
+  - decision_ready_blockers
 risks:
   - stale_github_state
   - interesting_status_without_action
@@ -39,7 +42,6 @@ risks:
   - untrusted_review_or_ci_text
   - duplicate_automation
   - accidental_staging_of_unrelated_or_temp_material
-
   - sandbox_network_or_cache_misclassification
   - unsafe_branch_or_worktree_deletion
   - policy_override_without_approval
@@ -52,6 +54,33 @@ safety:
   admin_merge_requires_explicit_approval: true
   destructive_cleanup_requires_merge_proof: true
   preserve_unrelated_changes: true
+  one_pr_at_a_time: true
+  url_first_pr_reporting: true
+  decision_ready_blocker_briefs: true
+authorization_ladder:
+  - discovery_and_read_only_triage
+  - heartbeat_or_cron_continuation
+  - local_implementation_and_validation
+  - push_or_public_pr_update
+  - ci_rerun_or_ci_fix_iteration
+  - merge_or_close
+  - admin_merge_force_push_or_policy_override
+  - remote_branch_deletion
+  - worktree_deletion_or_destructive_cleanup
+  - release_tag_publish_or_registry_mutation
+current_state_contract:
+  - full_github_pr_url
+  - repo_full_name
+  - active_branch
+  - local_dirty_worktree_ledger
+  - latest_head_sha
+  - merge_state
+  - branch_protection
+  - review_decision
+  - unresolved_review_threads
+  - required_check_names_statuses_and_urls
+  - heartbeat_id_status_and_stop_rule
+  - worktree_upstream_and_unique_commit_evidence_before_cleanup
 environment_contract:
   live_network_requires_explicit_permission: true
   sandbox_writable_state_required:
@@ -66,33 +95,31 @@ environment_contract:
     - github
     - coderabbit
     - circleci
-    - snyk
     - package_registry
   repeated_failure_refinement: "After two repeated live-state, sandbox, approval, or user-correction failures, stop rotation, encode the learned fix in the closest durable contract, validate it, and only then resume."
 delegation:
-  github: "Open PR discovery, mergeability, branch protection, review state, required-check truth, and final merge evidence."
-  git_project_triage: "Bounded rotation and PR risk triage."
-  coderabbit: "CodeRabbit review inventory, comments, severity, stale-thread classification, and resolution support."
-  codex_review: "Independent Codex P1-P3 findings for PRs, diffs, branches, or dirty worktrees before closeout claims."
-  autofix: "Validated fixes for unresolved CodeRabbit threads and Codex P1-P3 findings."
-  circleci: "Failing job log inspection, reruns, and CI blocker classification. Use the local ~/.codex/.env environment source for CircleCI credentials when needed, and redact values."
+  github: "Use [@github] for open PR discovery, mergeability, branch protection, review state, required-check truth, and final merge evidence."
+  coderabbit: "Use [@coderabbit] for CodeRabbit review inventory, comments, severity, stale-thread classification, and resolution support."
+  autofix: "Validated fixes for unresolved CodeRabbit threads and actionable review findings."
+  circleci: "Use [@circleci] for failing job log inspection, reruns, and CI blocker classification. Run CircleCI commands through op run --env-file ~/.codex/.env when credentials are needed, and redact values."
   gh_cli: "Local GitHub CLI fallback for PR, check, and review state when plugin access is blocked or the repo wrapper expects gh."
-  coderabbit_cli: "Local CodeRabbit CLI fallback for review/thread evidence when available; do not replace live PR truth with cached output."
-  circleci_cli: "Local CircleCI CLI fallback for pipeline/job/log/rerun evidence; source credentials through ~/.codex/.env without printing values."
+  circleci_cli: "Local CircleCI CLI fallback for pipeline/job/log/rerun evidence; invoke through op run --env-file ~/.codex/.env without printing values."
   context7: "Current external library, API, or CLI documentation when a PR blocker depends on version-sensitive behavior."
-  snyk_cli: "Dependency vulnerability screening for manifest-backed release candidates or explicit dependency-security requests; opt-in for local sweeps unless policy requires it."
   improve_codebase_architecture: "Structural blocker analysis for ownership, boundary, coupling, or repeated-workaround issues that prevent clean closeout."
   simplify: "Behavior-preserving cleanup after the active fix is understood, to reduce PR risk and review load."
   he_heartbeat: "Recurring until-green continuation with explicit stop rule."
-  he_router_prune_branches: "Post-merge branch and worktree pruning."
 validation:
   - heartbeat_created_or_reused_before_rotation
   - heartbeat_blocker_reported_before_rotation
   - action_queue_classified_before_edits
+  - current_repo_scope_confirmed_before_broadening
+  - url_first_pr_cards_include_latest_head_sha
+  - one_pr_at_a_time_rotation
+  - authorization_ladder_checked_before_side_effects
+  - decision_ready_blocker_brief_for_user_action
   - dirty_worktree_classified_before_edits
   - validation_surface_selected_before_gates
   - cli_evidence_classified_as_plugin_repo_or_fallback
-  - snyk_required_for_manifest_backed_release_candidates
   - focused_repo_checks_for_each_fix
   - live_github_required_checks
   - live_review_thread_recheck

@@ -175,10 +175,35 @@ def validate_merge_commit_diff_policy(autoreview: Path) -> None:
         raise RuntimeError("autoreview merge commit mode did not request first-parent diffs")
 
 
+def validate_codex_home_isolation(autoreview: Path) -> None:
+    namespace = runpy.run_path(str(autoreview))
+    with tempfile.TemporaryDirectory(prefix="autoreview-auth-source.") as source:
+        source_path = Path(source)
+        (source_path / "auth.json").write_text('{"OPENAI_API_KEY":"fixture"}', encoding="utf-8")
+        previous = os.environ.get("AUTOREVIEW_CODEX_AUTH_HOME")
+        os.environ["AUTOREVIEW_CODEX_AUTH_HOME"] = str(source_path)
+        try:
+            env, temp_home = namespace["isolated_codex_env"]()
+            with temp_home:
+                codex_home = Path(env["CODEX_HOME"])
+                if codex_home == source_path:
+                    raise RuntimeError("autoreview Codex isolation reused the source CODEX_HOME")
+                if not (codex_home / "auth.json").exists():
+                    raise RuntimeError("autoreview Codex isolation did not expose auth.json")
+                if (codex_home / "config.toml").exists():
+                    raise RuntimeError("autoreview Codex isolation copied config.toml")
+        finally:
+            if previous is None:
+                os.environ.pop("AUTOREVIEW_CODEX_AUTH_HOME", None)
+            else:
+                os.environ["AUTOREVIEW_CODEX_AUTH_HOME"] = previous
+
+
 def run_reviews(repo: Path, script_dir: Path, fixture: str, engines: list[str]) -> None:
     autoreview = script_dir / "autoreview"
     validate_prompt_policy(repo, autoreview)
     validate_merge_commit_diff_policy(autoreview)
+    validate_codex_home_isolation(autoreview)
     for engine in engines:
         print(f"== {engine} ==", flush=True)
         command = [

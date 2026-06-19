@@ -17,6 +17,12 @@ SCHEMA_NAMES = {
     "install-receipt": "install-receipt.v1.schema.json",
     "lockfile-preview": "lockfile-preview.v1.schema.json",
     "lockfile": "lockfile.v1.schema.json",
+    "skill-ir": "skill-ir.v0.schema.json",
+    "package-manifest": "package-manifest.v0.schema.json",
+    "package-digest-receipt": "package-digest-receipt.v0.schema.json",
+    "package-hardening-receipt": "package-hardening-receipt.v0.schema.json",
+    "eval-case": "eval-case.v0.schema.json",
+    "eval-run-receipt": "eval-run-receipt.v0.schema.json",
     "project-conformance-receipt": "project-conformance-receipt.v1.schema.json",
     "placeholder-lifecycle": "placeholder-lifecycle.v1.schema.json",
     "review-plan-receipt": "sdk-review-plan-receipt.v1.schema.json",
@@ -63,7 +69,7 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         for schema_key, schema in self.schemas.items():
             with self.subTest(schema=schema_key):
                 self.assertIn("/skills-sdk/", schema["$id"])
-                self.assertTrue(schema["$id"].endswith(".v1.schema.json"))
+                self.assertRegex(schema["$id"], r"\.v[01]\.schema\.json$")
                 self.assertFalse(schema["additionalProperties"])
 
     def test_manifest_source_fixture_covers_source_shape_contract(self) -> None:
@@ -114,6 +120,46 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertIn("sample", payload["entries"])
         self.assertEqual(payload["entries"]["sample"]["target_path"], ".agents/skills/sample")
 
+    def test_skill_ir_fixture_records_read_only_package_spine(self) -> None:
+        payload = self.assert_valid("skill-ir", "skill-ir.json")
+
+        self.assertEqual(payload["identity"]["id"], "skills-sdk-valid-fixture")
+        self.assertEqual(payload["risk"]["tier"], "local")
+        self.assertEqual(payload["risk"]["source_kind"], "docs_only")
+        self.assertFalse(payload["mutation_performed"])
+
+    def test_package_digest_fixture_records_non_mutating_identity(self) -> None:
+        payload = self.assert_valid("package-digest-receipt", "package-digest-receipt.json")
+
+        self.assertEqual(payload["package_id"], "skills-sdk-valid-fixture")
+        self.assertTrue(payload["source_digest"].startswith("sha256:"))
+        self.assertEqual(payload["manifest"]["skill_ir_schema_version"], "skills-sdk.skill-ir.v0")
+        self.assertEqual(payload["included_files"], ["Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md"])
+        self.assertFalse(payload["mutation_performed"])
+
+    def test_package_hardening_fixture_records_non_mutating_checks(self) -> None:
+        payload = self.assert_valid("package-hardening-receipt", "package-hardening-receipt.json")
+
+        self.assertEqual(payload["status"], "pass")
+        self.assertEqual(payload["package_id"], "skills-sdk-valid-fixture")
+        self.assertEqual(payload["blockers"], [])
+        self.assertEqual(payload["hardening_checks"][0]["id"], "non_mutating_package_identity")
+        self.assertFalse(payload["mutation_performed"])
+
+    def test_eval_case_fixture_records_deterministic_oracle(self) -> None:
+        payload = self.assert_valid("eval-case", "eval-case.json")
+
+        self.assertEqual(payload["oracle"], "exact_match")
+        self.assertEqual(payload["expected"], payload["actual"])
+
+    def test_eval_run_fixture_records_non_mutating_deterministic_receipt(self) -> None:
+        payload = self.assert_valid("eval-run-receipt", "eval-run-receipt.json")
+
+        self.assertEqual(payload["status"], "pass")
+        self.assertEqual(payload["runner"], "deterministic_jsonl_v0")
+        self.assertEqual(payload["passed_count"], payload["case_count"])
+        self.assertFalse(payload["mutation_performed"])
+
     def test_project_conformance_fixture_reports_read_only_project_health(self) -> None:
         payload = self.assert_valid("project-conformance-receipt", "project-conformance-receipt.json")
 
@@ -153,6 +199,21 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
 
     def test_install_preview_schema_rejects_write_claims(self) -> None:
         self.assert_invalid("install-preview", "install-preview-writes.json")
+
+    def test_skill_ir_schema_rejects_mutation_claims(self) -> None:
+        self.assert_invalid("skill-ir", "skill-ir-mutation-claim.json")
+
+    def test_package_digest_schema_rejects_mutation_claims(self) -> None:
+        self.assert_invalid("package-digest-receipt", "package-digest-mutation-claim.json")
+
+    def test_package_digest_schema_rejects_empty_included_files(self) -> None:
+        self.assert_invalid("package-digest-receipt", "package-digest-empty-included-files.json")
+
+    def test_package_hardening_schema_rejects_mutation_claims(self) -> None:
+        self.assert_invalid("package-hardening-receipt", "package-hardening-mutation-claim.json")
+
+    def test_eval_run_schema_rejects_mutation_claims(self) -> None:
+        self.assert_invalid("eval-run-receipt", "eval-run-mutation-claim.json")
 
     def test_project_conformance_schema_rejects_mutation_claims(self) -> None:
         """

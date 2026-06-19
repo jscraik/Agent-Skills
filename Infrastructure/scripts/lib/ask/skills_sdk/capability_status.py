@@ -29,6 +29,8 @@ REQUIRED_CAPABILITY_IDS = (
     "manifest_schema",
     "receipt_schema",
     "risk_classification",
+    "skill_ir",
+    "package_identity",
     "install_preview",
     "lockfile_preview",
     "real_install",

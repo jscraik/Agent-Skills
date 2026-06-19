@@ -30,6 +30,11 @@ class TestSkillsSdkTypedContracts(unittest.TestCase):
     def test_valid_schema_spine_fixtures_load_through_pydantic_contracts(self) -> None:
         cases = (
             ("manifest-source.json", contracts.validate_manifest_source),
+            ("skill-ir.json", contracts.validate_skill_ir),
+            ("package-digest-receipt.json", contracts.validate_package_digest_receipt),
+            ("package-hardening-receipt.json", contracts.validate_package_hardening_receipt),
+            ("eval-case.json", contracts.validate_eval_case),
+            ("eval-run-receipt.json", contracts.validate_eval_run_receipt),
             ("check-receipt.json", contracts.validate_check_receipt),
             ("risk-classification.json", contracts.validate_risk_classification),
             ("install-preview.json", contracts.validate_install_preview),
@@ -66,6 +71,46 @@ class TestSkillsSdkTypedContracts(unittest.TestCase):
             contracts.validate_project_conformance_receipt(
                 _json(FIXTURE_DIR / "invalid" / "project-conformance-writes.json")
             )
+
+    def test_skill_ir_contract_rejects_mutation_claims(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "skill-ir.json")
+        self.assertIsInstance(payload, dict)
+        payload["mutation_performed"] = True
+
+        with self.assertRaises(ValidationError):
+            contracts.validate_skill_ir(payload)
+
+    def test_skill_ir_contract_rejects_empty_acceptance_trace(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "skill-ir.json")
+        self.assertIsInstance(payload, dict)
+        payload["acceptance_trace"] = []
+
+        with self.assertRaises(ValidationError):
+            contracts.validate_skill_ir(payload)
+
+    def test_package_digest_contract_rejects_mutation_claims(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "package-digest-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["mutation_performed"] = True
+
+        with self.assertRaises(ValidationError):
+            contracts.validate_package_digest_receipt(payload)
+
+    def test_package_hardening_contract_rejects_mutation_claims(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "package-hardening-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["mutation_performed"] = True
+
+        with self.assertRaises(ValidationError):
+            contracts.validate_package_hardening_receipt(payload)
+
+    def test_eval_run_contract_rejects_mutation_claims(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "eval-run-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["mutation_performed"] = True
+
+        with self.assertRaises(ValidationError):
+            contracts.validate_eval_run_receipt(payload)
 
     def test_contracts_reject_type_coercion(self) -> None:
         """

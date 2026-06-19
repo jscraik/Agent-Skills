@@ -35,6 +35,10 @@
     "./bin/ask sdk review execute --handoff .harness/artifacts/sdk-review-handoff/simplify.json --json --robot",
     "./bin/ask sdk review verify --handoff .harness/artifacts/sdk-review-handoff/simplify.json --json --robot",
     "./bin/ask sdk determinism audit --scope skills --limit 10 --json --robot",
+    "./bin/ask sdk ir build Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
+    "./bin/ask sdk eval run --runner deterministic-jsonl --dataset Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --skill Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
+    "./bin/ask sdk package build Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
+    "./bin/ask sdk package harden Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
     "/Users/jamiecraik/.venvs/pyyaml/bin/python Infrastructure/scripts/validation-and-linting/check_sdk_stage_skill_shape.py",
     "python3 -m unittest Infrastructure.scripts.testing.test_skill_creator_lifecycle_scaffold -v",
     "python3 -m unittest Infrastructure.scripts.testing.test_sdk_stage_skill_shape_validator -v",
@@ -44,6 +48,10 @@
     "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_project_cleanup.py -q",
     "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_project_install.py -q",
     "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_project_conformance.py -q",
+    "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_ir.py -q",
+    "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_eval_runner.py -q",
+    "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_package_build.py -q",
+    "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_package_hardening.py -q",
     "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_capability_status.py Infrastructure/tests/test_skills_sdk_pipeline_status_artifact.py -q"
   ],
   "capabilities": [
@@ -106,6 +114,40 @@
       "evidence_refs": ["Infrastructure/tests/test_skills_sdk_risk_classifier.py", "Infrastructure/config/schemas/skills-sdk/risk-classification.v1.schema.json"],
       "next_slice": "Connect risk tiers to real adapters only after those adapters are approved.",
       "notes": "Risk classification is local and read-only."
+    },
+    {
+      "id": "skill_ir",
+      "title": "SkillIR.v0 typed spine",
+      "status": "implemented",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/ir.py",
+      "pipeline_sections": ["compiler_emitter_discipline", "domain_model_integrity", "public_sdk_surface"],
+      "feature_executed": true,
+      "mutation_performed": false,
+      "evidence_refs": [
+        "./bin/ask sdk ir build Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
+        "Infrastructure/config/schemas/skills-sdk/skill-ir.v0.schema.json",
+        "Infrastructure/tests/test_skills_sdk_ir.py",
+        "Infrastructure/tests/test_skills_sdk_typed_contracts.py"
+      ],
+      "next_slice": "Use SkillIR.v0 as the shared model before package build, eval runner, signing, sandbox, emitters, or docs projection generation consume it.",
+      "notes": "The SDK can now build a read-only typed intermediate representation for a canonical skill source without claiming package emitters or registry readiness."
+    },
+    {
+      "id": "package_identity",
+      "title": "Package identity build",
+      "status": "implemented",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/package_build.py",
+      "pipeline_sections": ["compiler_emitter_discipline", "package_hardening", "public_sdk_surface"],
+      "feature_executed": true,
+      "mutation_performed": false,
+      "evidence_refs": [
+        "./bin/ask sdk package build Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
+        "Infrastructure/config/schemas/skills-sdk/package-manifest.v0.schema.json",
+        "Infrastructure/config/schemas/skills-sdk/package-digest-receipt.v0.schema.json",
+        "Infrastructure/tests/test_skills_sdk_package_build.py"
+      ],
+      "next_slice": "Connect package identity to signed archive emission only after signing, redaction, and archive ownership policy are approved.",
+      "notes": "Builds a digest-backed package identity receipt from SkillIR.v0 without emitting archives, signing, registry, or publish behavior."
     },
     {
       "id": "install_preview",
@@ -304,14 +346,20 @@
     {
       "id": "evals",
       "title": "Eval execution",
-      "status": "placeholder_optional",
-      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/placeholder_lifecycle.py",
+      "status": "implemented",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/eval_runner.py",
       "pipeline_sections": ["eval_ops", "full_skill_lifecycle", "knowledge_engineering"],
-      "feature_executed": false,
+      "feature_executed": true,
       "mutation_performed": false,
-      "evidence_refs": ["./bin/ask sdk lifecycle --surface evals --json --robot", "Infrastructure/tests/test_skills_sdk_placeholder_lifecycle.py"],
-      "next_slice": "Approve an eval-runner integration with local fixtures before external execution.",
-      "notes": "The SDK reports the eval lane without running eval providers."
+      "evidence_refs": [
+        "Infrastructure/tests/test_skills_sdk_eval_runner.py::TestSkillsSdkEvalRunner::test_sdk_internal_runner_delegates_to_existing_eval_backend",
+        "./bin/ask sdk eval run --runner deterministic-jsonl --dataset Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --skill Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
+        "Infrastructure/config/schemas/skills-sdk/eval-case.v0.schema.json",
+        "Infrastructure/config/schemas/skills-sdk/eval-run-receipt.v0.schema.json",
+        "Infrastructure/tests/test_skills_sdk_eval_runner.py"
+      ],
+      "next_slice": "Bind internal eval receipts to package identity and harden result counts before any hosted eval provider becomes required.",
+      "notes": "The SDK routes to the existing internal skill-builder eval backend and keeps deterministic JSONL as a fast fixture receipt lane; Tessl remains opt-in."
     },
     {
       "id": "package_verify",
@@ -494,8 +542,8 @@
       "feature_executed": false,
       "mutation_performed": false,
       "evidence_refs": ["artifacts/recommended-skills-sdk-pipeline.html"],
-      "next_slice": "Design typed IR and compiler ownership before emitting packages.",
-      "notes": "The pipeline artifact describes this destination; current SDK does not compile packages."
+      "next_slice": "Define archive emission, signing, and redaction ownership before any compiled package output is written.",
+      "notes": "The pipeline artifact describes this destination; current SDK only builds non-mutating package identity receipts."
     },
     {
       "id": "emitters",
@@ -524,14 +572,18 @@
     {
       "id": "package_hardening",
       "title": "Package hardening",
-      "status": "deferred",
-      "owner_surface": "future hardening lane",
+      "status": "implemented",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/package_hardening.py",
       "pipeline_sections": ["package_hardening", "release_decision_matrix"],
-      "feature_executed": false,
+      "feature_executed": true,
       "mutation_performed": false,
-      "evidence_refs": ["artifacts/recommended-skills-sdk-pipeline.html"],
-      "next_slice": "Add hardening checks after capability truth is visible and package pipeline scope is approved.",
-      "notes": "Some local package checks exist, but the broader hardening lane remains a roadmap capability."
+      "evidence_refs": [
+        "./bin/ask sdk package harden Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
+        "Infrastructure/config/schemas/skills-sdk/package-hardening-receipt.v0.schema.json",
+        "Infrastructure/tests/test_skills_sdk_package_hardening.py"
+      ],
+      "next_slice": "Connect hardening to archive emission only after signing, redaction, and publish authority are approved.",
+      "notes": "Read-only package hardening emits a receipt from package identity and blocks forbidden local runtime, generated artifact, dependency, or secret-bearing paths."
     }
   ]
 }

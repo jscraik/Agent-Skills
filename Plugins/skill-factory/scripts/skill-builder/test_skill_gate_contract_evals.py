@@ -17,6 +17,7 @@ from skill_gate import (
     SkillDoc,
     check_canonical_header_order,
     check_contract_and_evals,
+    check_research_eval_prompt_realism,
     check_required_sections,
     check_workflow_fail_fast,
 )
@@ -215,6 +216,50 @@ cases:
             findings = check_contract_and_evals(skill_dir, require_contract=False, require_evals=True)
 
         self.assertTrue(any(finding.code == "EVALS_EXPECTED_SIGNALS_LIST_SHAPE" for finding in findings))
+
+    def test_declared_realistic_eval_accepts_structured_scenario_context(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            skill_dir = Path(tmp)
+            refs = skill_dir / "references"
+            refs.mkdir()
+            (refs / "evals.yaml").write_text(
+                """
+cases:
+  - id: pr-sweep
+    name: PR sweep
+    category: edge
+    should_trigger: true
+    realistic: true
+    unit: PR closeout rotation
+    given: A maintainer asks the agent to sweep open PRs until they are green.
+    should: The agent reports heartbeat status, blocks unsafe merge paths, and proves latest-head checks.
+    prompt: Sweep this repo's PRs until green, merged, and cleaned up.
+  - id: weak
+    name: Weak placeholder
+    category: edge
+    should_trigger: true
+    realistic: true
+    prompt: TODO example prompt.
+""".strip(),
+                encoding="utf-8",
+            )
+            doc = SkillDoc(
+                path=skill_dir / "SKILL.md",
+                raw="",
+                frontmatter={"name": "sample"},
+                body="",
+                fm_start_line=1,
+                fm_end_line=1,
+            )
+
+            findings = check_research_eval_prompt_realism(doc)
+
+        weak_findings = [
+            finding for finding in findings if finding.code == "RESEARCH_EVALS_DECLARED_REALISTIC_WEAK"
+        ]
+        self.assertEqual(len(weak_findings), 1)
+        self.assertIn("weak", weak_findings[0].evidence)
+        self.assertNotIn("pr-sweep", weak_findings[0].evidence)
 
 
 if __name__ == "__main__":

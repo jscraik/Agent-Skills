@@ -130,7 +130,6 @@ def _validate_schema_subset(
 
     if isinstance(value, str) and "minLength" in schema and len(value) < schema["minLength"]:
         raise AssertionError(f"{path} shorter than minLength {schema['minLength']}")
-
     if isinstance(value, int) and "minimum" in schema and value < schema["minimum"]:
         raise AssertionError(f"{path} smaller than minimum {schema['minimum']}")
 

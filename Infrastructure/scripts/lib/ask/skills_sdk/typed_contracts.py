@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from typing import Literal
+from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class _SdkContractModel(BaseModel):
@@ -288,6 +288,185 @@ class ManifestSource(_SdkContractModel):
     acceptance_trace: list[Literal["FR-003", "SA-003", "VP-001", "VP-021"]]
 
 
+class SkillIrIdentity(_SdkContractModel):
+    id: str
+    name: str
+    version: str
+
+
+class SkillIrSource(_SdkContractModel):
+    root: str
+    skill_md: str
+    readme: str | None
+    references: list[str]
+    scripts: list[str]
+    assets: list[str]
+    evals: list[str]
+
+
+class SkillIrBehavior(_SdkContractModel):
+    trigger: str
+    inputs: list[str]
+    outputs: list[str]
+    procedure_summary: str
+
+
+class SkillIrPermissions(_SdkContractModel):
+    filesystem: Literal["none", "read", "write"]
+    network: Literal["none", "restricted", "open"]
+    secrets: Literal["none", "handles", "raw"]
+    tools: list[str]
+
+
+class SkillIrRisk(_SdkContractModel):
+    tier: Literal["draft", "local", "scripted", "team", "privileged", "published"]
+    reasons: list[str]
+    source_kind: Literal["docs_only", "referenced", "scripted", "external", "placeholder"]
+
+
+class SkillIrEvidence(_SdkContractModel):
+    checks: list[str]
+    receipts: list[str]
+
+
+class SkillIr(_SdkContractModel):
+    schema_version: Literal["skills-sdk.skill-ir.v0"]
+    schema_uri: Literal["https://jscraik.local/agent-skills/schemas/skills-sdk/skill-ir.v0.schema.json"]
+    identity: SkillIrIdentity
+    source: SkillIrSource
+    behavior: SkillIrBehavior
+    permissions: SkillIrPermissions
+    risk: SkillIrRisk
+    evidence: SkillIrEvidence
+    mutation_performed: Literal[False]
+    acceptance_trace: list[Literal["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022"]] = Field(
+        min_length=1
+    )
+
+
+class PackageManifestFile(_SdkContractModel):
+    path: str
+    sha256: str = Field(min_length=64, max_length=64)
+    size_bytes: int = Field(ge=0)
+    role: Literal["skill_md", "readme", "reference", "script", "asset", "eval"]
+
+
+class PackageManifestProvenance(_SdkContractModel):
+    source: list[str] = Field(min_length=1)
+    builder: str
+
+
+class PackageManifest(_SdkContractModel):
+    schema_version: Literal["skills-sdk.package-manifest.v0"]
+    schema_uri: Literal[
+        "https://jscraik.local/agent-skills/schemas/skills-sdk/package-manifest.v0.schema.json"
+    ]
+    package_id: str = Field(min_length=1)
+    version: str = Field(min_length=1)
+    skill_ir_schema_version: Literal["skills-sdk.skill-ir.v0"]
+    source: SkillIrSource
+    files: list[PackageManifestFile] = Field(min_length=1)
+    provenance: PackageManifestProvenance
+    mutation_performed: Literal[False]
+
+
+class PackageDigestReceipt(_SdkContractModel):
+    schema_version: Literal["skills-sdk.package-digest-receipt.v0"]
+    schema_uri: Literal[
+        "https://jscraik.local/agent-skills/schemas/skills-sdk/package-digest-receipt.v0.schema.json"
+    ]
+    status: Literal["built", "blocked"]
+    package_id: str = Field(min_length=1)
+    version: str = Field(min_length=1)
+    source_digest: str = Field(min_length=71)
+    manifest_digest: str = Field(min_length=71)
+    package_digest: str = Field(min_length=71)
+    manifest: PackageManifest
+    included_files: list[str] = Field(min_length=1)
+    excluded_files: list[str]
+    mutation_performed: Literal[False]
+    acceptance_trace: list[Literal["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022"]] = Field(
+        min_length=1
+    )
+
+
+class PackageHardeningCheck(_SdkContractModel):
+    id: str = Field(min_length=1)
+    status: Literal["pass", "warning", "blocker"]
+    severity: Literal["info", "warning", "blocker"]
+    message: str = Field(min_length=1)
+    evidence: list[str]
+
+
+NonEmptyPackagePath = Annotated[str, Field(min_length=1)]
+
+
+class PackageHardeningReceipt(_SdkContractModel):
+    schema_version: Literal["skills-sdk.package-hardening-receipt.v0"]
+    schema_uri: Literal[
+        "https://jscraik.local/agent-skills/schemas/skills-sdk/package-hardening-receipt.v0.schema.json"
+    ]
+    status: Literal["pass", "blocked"]
+    package_id: str = Field(min_length=1)
+    version: str = Field(min_length=1)
+    source_digest: str = Field(min_length=71)
+    manifest_digest: str = Field(min_length=71)
+    package_digest: str = Field(min_length=71)
+    included_files: list[NonEmptyPackagePath]
+    file_count: int = Field(ge=0)
+    total_size_bytes: int = Field(ge=0)
+    hardening_checks: list[PackageHardeningCheck] = Field(min_length=1)
+    blockers: list[PackageHardeningCheck]
+    warnings: list[PackageHardeningCheck]
+    mutation_performed: Literal[False]
+    acceptance_trace: list[Literal["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022"]] = Field(
+        min_length=1
+    )
+
+
+class EvalCase(_SdkContractModel):
+    schema_version: Literal["skills-sdk.eval-case.v0"]
+    case_id: str = Field(min_length=1)
+    input: str = Field(min_length=1)
+    expected: str = Field(min_length=1)
+    actual: str
+    oracle: Literal["exact_match"]
+    acceptance_trace: list[Literal["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022"]] = Field(
+        min_length=1
+    )
+
+
+class EvalCaseResult(_SdkContractModel):
+    case_id: str = Field(min_length=1)
+    status: Literal["pass", "fail"]
+    oracle: Literal["exact_match"]
+    expected: str = Field(min_length=1)
+    actual: str
+
+
+class EvalRunReceipt(_SdkContractModel):
+    schema_version: Literal["skills-sdk.eval-run-receipt.v0"]
+    schema_uri: Literal[
+        "https://jscraik.local/agent-skills/schemas/skills-sdk/eval-run-receipt.v0.schema.json"
+    ]
+    status: Literal["pass", "fail", "blocked"]
+    runner: Literal["deterministic_jsonl_v0", "internal_skill_builder_v0"]
+    dataset_path: str = Field(min_length=1)
+    dataset_digest: str = Field(min_length=71)
+    skill_ir_schema_version: str | None
+    target_path: str | None
+    mode: str | None
+    case_count: int = Field(ge=0)
+    passed_count: int = Field(ge=0)
+    failed_count: int = Field(ge=0)
+    cases: list[EvalCaseResult]
+    blockers: list[str]
+    mutation_performed: Literal[False]
+    acceptance_trace: list[Literal["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022"]] = Field(
+        min_length=1
+    )
+
+
 class SkillFrontmatter(_SdkContractModel):
     name: str
     description: str
@@ -476,6 +655,30 @@ def validate_capability_status(payload: object) -> CapabilityStatus:
 
 def validate_manifest_source(payload: object) -> ManifestSource:
     return ManifestSource.model_validate(payload)
+
+
+def validate_skill_ir(payload: object) -> SkillIr:
+    return SkillIr.model_validate(payload)
+
+
+def validate_package_manifest(payload: object) -> PackageManifest:
+    return PackageManifest.model_validate(payload)
+
+
+def validate_package_digest_receipt(payload: object) -> PackageDigestReceipt:
+    return PackageDigestReceipt.model_validate(payload)
+
+
+def validate_package_hardening_receipt(payload: object) -> PackageHardeningReceipt:
+    return PackageHardeningReceipt.model_validate(payload)
+
+
+def validate_eval_case(payload: object) -> EvalCase:
+    return EvalCase.model_validate(payload)
+
+
+def validate_eval_run_receipt(payload: object) -> EvalRunReceipt:
+    return EvalRunReceipt.model_validate(payload)
 
 
 def validate_skill_frontmatter(payload: object) -> SkillFrontmatter:

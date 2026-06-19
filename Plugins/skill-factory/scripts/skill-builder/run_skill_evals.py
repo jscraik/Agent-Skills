@@ -4477,6 +4477,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     )
     summary["passed"] = summary["passed"] and claim_gate_passed
     summary["decision"] = "pass" if summary["passed"] else "fail"
+    if any_blocked:
+        summary["decision"] = "blocked"
     if not snyk_gate_passed:
         snyk_status = str(summary["security_dependency_screening"].get("status", ""))
         summary["decision"] = "blocked" if snyk_status.startswith("blocked") else "fail"

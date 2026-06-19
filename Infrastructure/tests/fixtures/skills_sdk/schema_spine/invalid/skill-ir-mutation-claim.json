@@ -1,0 +1,52 @@
+{
+  "schema_version": "skills-sdk.skill-ir.v0",
+  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/skill-ir.v0.schema.json",
+  "identity": {
+    "id": "skills-sdk-valid-fixture",
+    "name": "skills-sdk-valid-fixture",
+    "version": "0.1.0"
+  },
+  "source": {
+    "root": "Infrastructure/tests/fixtures/skills_sdk/valid_skill",
+    "skill_md": "Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md",
+    "readme": null,
+    "references": [],
+    "scripts": [],
+    "assets": [],
+    "evals": []
+  },
+  "behavior": {
+    "trigger": "Minimal valid Codex skill source fixture for JSC-391 scaffold tests.",
+    "inputs": [],
+    "outputs": [],
+    "procedure_summary": "This fixture is a canonical skill source sample."
+  },
+  "permissions": {
+    "filesystem": "read",
+    "network": "none",
+    "secrets": "none",
+    "tools": []
+  },
+  "risk": {
+    "tier": "local",
+    "reasons": [
+      "source_kind:docs_only"
+    ],
+    "source_kind": "docs_only"
+  },
+  "evidence": {
+    "checks": [
+      "./bin/ask sdk ir build Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot"
+    ],
+    "receipts": []
+  },
+  "mutation_performed": true,
+  "acceptance_trace": [
+    "FR-003",
+    "FR-008",
+    "SA-003",
+    "SA-004",
+    "VP-021",
+    "VP-022"
+  ]
+}

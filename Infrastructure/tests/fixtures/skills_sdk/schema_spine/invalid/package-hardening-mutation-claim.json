@@ -1,0 +1,26 @@
+{
+  "schema_version": "skills-sdk.package-hardening-receipt.v0",
+  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/package-hardening-receipt.v0.schema.json",
+  "status": "pass",
+  "package_id": "skills-sdk-valid-fixture",
+  "version": "0.1.0",
+  "source_digest": "sha256:a22c823816dfd4d19fcf419e273effe1bddc35f56b797b841c692a661178fbb7",
+  "manifest_digest": "sha256:e5fc0580f2740e806f300e17294fd6b68393906cbea158e21fcc9cba55247025",
+  "package_digest": "sha256:60b4ed27a5919e8785c3a7ea01930ad1bcecef8a7aa8f75752abafd2338d73d6",
+  "included_files": ["Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md"],
+  "file_count": 1,
+  "total_size_bytes": 314,
+  "hardening_checks": [
+    {
+      "id": "non_mutating_package_identity",
+      "status": "pass",
+      "severity": "blocker",
+      "message": "Package hardening requires a read-only package digest receipt.",
+      "evidence": ["mutation_performed:False"]
+    }
+  ],
+  "blockers": [],
+  "warnings": [],
+  "mutation_performed": true,
+  "acceptance_trace": ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022"]
+}
