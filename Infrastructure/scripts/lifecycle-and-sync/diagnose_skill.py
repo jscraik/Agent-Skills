@@ -20,7 +20,7 @@ import argparse
 import json
 import re
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Optional
 
@@ -49,6 +49,11 @@ class DiagnosticResult:
     status: str  # "pass", "fail", "warn", "info", "skip"
     message: str
     details: Optional[str] = None
+
+
+@dataclass(frozen=True)
+class LifecycleReadinessContext:
+    canonical_by_name: dict[str, object]
 
 
 def find_skill_dir(skill_name: str) -> Optional[Path]:
@@ -322,10 +327,19 @@ def check_task_profile(skill_dir: Path) -> DiagnosticResult:
     return DiagnosticResult("task profile", "skip", "No task profile found (neither legacy binding nor implicit path)")
 
 
-def check_lifecycle_readiness(skill_dir: Path) -> DiagnosticResult:
-    """Check governed lifecycle readiness for a skill."""
+def build_lifecycle_readiness_context() -> LifecycleReadinessContext:
+    """Build the repository-wide skill catalog once for lifecycle diagnosis."""
     skill_files = discover_skill_files(REPO_ROOT)
-    canonical_by_name = canonical_skill_map(skill_files, REPO_ROOT)
+    return LifecycleReadinessContext(canonical_by_name=canonical_skill_map(skill_files, REPO_ROOT))
+
+
+def check_lifecycle_readiness(
+    skill_dir: Path,
+    *,
+    context: LifecycleReadinessContext | None = None,
+) -> DiagnosticResult:
+    """Check governed lifecycle readiness for a skill."""
+    context = context or build_lifecycle_readiness_context()
     skill_file = skill_dir / "SKILL.md"
     try:
         rel_parts = skill_dir.resolve().relative_to(SKILLS_DIR.resolve()).parts
@@ -338,7 +352,7 @@ def check_lifecycle_readiness(skill_dir: Path) -> DiagnosticResult:
             source_skill_file = REPO_ROOT / source_path
             if source_skill_file.is_file():
                 skill_file = source_skill_file
-    report = analyze_skill_file(skill_file, REPO_ROOT, canonical_by_name)
+    report = analyze_skill_file(skill_file, REPO_ROOT, context.canonical_by_name)
 
     if report.readiness == "blocked":
         return DiagnosticResult(
@@ -359,7 +373,46 @@ def check_lifecycle_readiness(skill_dir: Path) -> DiagnosticResult:
     return DiagnosticResult("lifecycle readiness", "pass", "healthy")
 
 
-def diagnose_skill(skill_name: str, *, require_workspace_projection: bool = True) -> List[DiagnosticResult]:
+def _append_runtime_surface_checks(
+    results: List[DiagnosticResult],
+    skill_name: str,
+    skill_dir: Path,
+    *,
+    require_workspace_projection: bool,
+) -> None:
+    resolved_skill_name = skill_dir.name
+    plugin_owned = is_plugin_owned_skill(skill_name, skill_dir)
+    if plugin_owned:
+        results.append(check_plugin_runtime_surface(resolved_skill_name, "codex"))
+        results.append(check_plugin_runtime_surface(resolved_skill_name, "agents"))
+        results.append(check_plugin_skill_index(resolved_skill_name))
+        return
+
+    resolution = resolve_skill_handle(resolved_skill_name, repo_root_path=REPO_ROOT)
+    sdk_flat = (
+        resolution.get("status") == "ok"
+        and resolution.get("handle_source") == "sdk_flat_registry"
+        and resolution.get("runtime_visibility") == "flat"
+    )
+    if sdk_flat:
+        results.append(check_workspace_flat_projection(resolved_skill_name, required=require_workspace_projection))
+        results.append(check_symlink(resolved_skill_name, CODEX_SKILLS, "codex"))
+        results.append(check_symlink(resolved_skill_name, AGENTS_SKILLS, "agents"))
+    elif rooted_skill_set := rooted_manifest_skill_set(skill_dir):
+        results.append(check_rooted_latent_runtime_surface(resolved_skill_name, rooted_skill_set, "codex"))
+        results.append(check_rooted_latent_runtime_surface(resolved_skill_name, rooted_skill_set, "agents"))
+    else:
+        results.append(check_symlink(resolved_skill_name, CODEX_SKILLS, "codex"))
+        results.append(check_symlink(resolved_skill_name, AGENTS_SKILLS, "agents"))
+    results.append(check_skill_index(resolved_skill_name))
+
+
+def diagnose_skill(
+    skill_name: str,
+    *,
+    require_workspace_projection: bool = True,
+    lifecycle_context: LifecycleReadinessContext | None = None,
+) -> List[DiagnosticResult]:
     """Run all diagnostic checks for a skill."""
     results: List[DiagnosticResult] = []
 
@@ -392,38 +445,14 @@ def diagnose_skill(skill_name: str, *, require_workspace_projection: bool = True
     # Run checks
     results.append(check_skill_md(skill_dir))
     results.append(check_nested_git(skill_dir))
-    # Skill audits may be invoked with a path argument (for example, utilities/my-skill).
-    # Symlink/index checks must always use the canonical skill directory name.
-    plugin_owned = is_plugin_owned_skill(skill_name, skill_dir)
-    if plugin_owned:
-        results.append(check_plugin_runtime_surface(resolved_skill_name, "codex"))
-        results.append(check_plugin_runtime_surface(resolved_skill_name, "agents"))
-        results.append(check_plugin_skill_index(resolved_skill_name))
-    else:
-        resolution = resolve_skill_handle(resolved_skill_name, repo_root_path=REPO_ROOT)
-        sdk_flat = (
-            resolution.get("status") == "ok"
-            and resolution.get("handle_source") == "sdk_flat_registry"
-            and resolution.get("runtime_visibility") == "flat"
-        )
-        if sdk_flat:
-            results.append(
-                check_workspace_flat_projection(
-                    resolved_skill_name,
-                    required=require_workspace_projection,
-                )
-            )
-            results.append(check_symlink(resolved_skill_name, CODEX_SKILLS, "codex"))
-            results.append(check_symlink(resolved_skill_name, AGENTS_SKILLS, "agents"))
-        elif rooted_skill_set := rooted_manifest_skill_set(skill_dir):
-            results.append(check_rooted_latent_runtime_surface(resolved_skill_name, rooted_skill_set, "codex"))
-            results.append(check_rooted_latent_runtime_surface(resolved_skill_name, rooted_skill_set, "agents"))
-        else:
-            results.append(check_symlink(resolved_skill_name, CODEX_SKILLS, "codex"))
-            results.append(check_symlink(resolved_skill_name, AGENTS_SKILLS, "agents"))
-        results.append(check_skill_index(resolved_skill_name))
+    _append_runtime_surface_checks(
+        results,
+        skill_name,
+        skill_dir,
+        require_workspace_projection=require_workspace_projection,
+    )
     results.append(check_task_profile(skill_dir))
-    results.append(check_lifecycle_readiness(skill_dir))
+    results.append(check_lifecycle_readiness(skill_dir, context=lifecycle_context))
 
     return results
 
@@ -470,98 +499,117 @@ def print_report(skill_name: str, results: List[DiagnosticResult]) -> int:
         return 0
 
 
-def diagnose_all_skills() -> int:
-    """Diagnose all skills and return exit code."""
-    # Find all skill directories
-    skill_names: List[str] = []
-
-    # From flat skills directory
+def collect_diagnosable_skill_names() -> list[str]:
+    """Collect skill names covered by all-skill diagnostics."""
+    skill_names: list[str] = []
     if SKILLS_DIR.is_dir():
         for item in SKILLS_DIR.iterdir():
             if item.is_symlink() and (item / "SKILL.md").exists():
                 skill_names.append(item.name)
+    _append_first_party_skill_names(skill_names)
+    _append_plugin_skill_names(skill_names)
+    _append_system_skill_names(skill_names)
+    return sorted(set(skill_names))
 
-    # From topic-cluster directories under Skills/
+
+def _append_first_party_skill_names(skill_names: list[str]) -> None:
     skills_root = REPO_ROOT / "Skills"
-    if skills_root.is_dir():
-        for category_dir in skills_root.iterdir():
-            if not category_dir.is_dir():
-                continue
-            for skill_dir in category_dir.iterdir():
-                if skill_dir.is_dir() and (skill_dir / "SKILL.md").exists():
-                    skill_names.append(skill_dir.name)
-
-    # From plugin skills under Plugins/
-    plugins_root = REPO_ROOT / "Plugins"
-    if plugins_root.is_dir():
-        for plugin_dir in plugins_root.iterdir():
-            if not plugin_dir.is_dir():
-                continue
-            plugin_skills = plugin_dir / "skills"
-            if not plugin_skills.is_dir():
-                continue
-            for type_dir in plugin_skills.iterdir():
-                if not type_dir.is_dir():
-                    continue
-                for skill_dir in type_dir.iterdir():
-                    if skill_dir.is_dir() and (skill_dir / "SKILL.md").exists():
-                        skill_names.append(skill_dir.name)
-
-    # From .system lane
-    system_lane = REPO_ROOT / ".agents" / "skills" / ".system"
-    if system_lane.is_dir():
-        for skill_dir in system_lane.iterdir():
+    if not skills_root.is_dir():
+        return
+    for category_dir in skills_root.iterdir():
+        if not category_dir.is_dir():
+            continue
+        for skill_dir in category_dir.iterdir():
             if skill_dir.is_dir() and (skill_dir / "SKILL.md").exists():
                 skill_names.append(skill_dir.name)
 
-    skill_names = sorted(set(skill_names))
 
-    print(f"🔍 Diagnosing {len(skill_names)} skills...\n")
+def _append_plugin_skill_names(skill_names: list[str]) -> None:
+    plugins_root = REPO_ROOT / "Plugins"
+    if not plugins_root.is_dir():
+        return
+    for plugin_dir in plugins_root.iterdir():
+        if not plugin_dir.is_dir():
+            continue
+        plugin_skills = plugin_dir / "skills"
+        if not plugin_skills.is_dir():
+            continue
+        for type_dir in plugin_skills.iterdir():
+            if not type_dir.is_dir():
+                continue
+            for skill_dir in type_dir.iterdir():
+                if skill_dir.is_dir() and (skill_dir / "SKILL.md").exists():
+                    skill_names.append(skill_dir.name)
 
-    total_fails = 0
-    total_warns = 0
-    total_infos = 0
-    failing_skills: List[str] = []
-    warning_skills: List[str] = []
-    advisory_skills: List[str] = []
 
-    for skill_name in skill_names:
-        results = diagnose_skill(skill_name, require_workspace_projection=False)
-        fails = sum(1 for r in results if r.status == "fail")
-        warns = sum(1 for r in results if r.status == "warn")
-        infos = sum(1 for r in results if r.status == "info")
+def _append_system_skill_names(skill_names: list[str]) -> None:
+    system_lane = REPO_ROOT / ".agents" / "skills" / ".system"
+    if not system_lane.is_dir():
+        return
+    for skill_dir in system_lane.iterdir():
+        if skill_dir.is_dir() and (skill_dir / "SKILL.md").exists():
+            skill_names.append(skill_dir.name)
 
-        total_fails += fails
-        total_warns += warns
-        total_infos += infos
-        if fails > 0:
-            failing_skills.append(skill_name)
-            print(f"✗ {skill_name}: {fails} fail(s), {warns} warn(s), {infos} advisory note(s)")
-        elif warns > 0:
-            warning_skills.append(skill_name)
-            print(f"⚠ {skill_name}: {fails} fail(s), {warns} warn(s), {infos} advisory note(s)")
-        elif infos > 0:
-            advisory_skills.append(skill_name)
-            print(f"ℹ {skill_name}: {infos} advisory note(s)")
 
+@dataclass
+class AllSkillsSummary:
+    total_fails: int = 0
+    total_warns: int = 0
+    total_infos: int = 0
+    failing_skills: List[str] = field(default_factory=list)
+    warning_skills: List[str] = field(default_factory=list)
+    advisory_skills: List[str] = field(default_factory=list)
+
+
+def _record_all_skills_result(summary: AllSkillsSummary, skill_name: str, results: List[DiagnosticResult]) -> None:
+    fails = sum(1 for r in results if r.status == "fail")
+    warns = sum(1 for r in results if r.status == "warn")
+    infos = sum(1 for r in results if r.status == "info")
+    summary.total_fails += fails
+    summary.total_warns += warns
+    summary.total_infos += infos
+    if fails > 0:
+        summary.failing_skills.append(skill_name)
+        print(f"✗ {skill_name}: {fails} fail(s), {warns} warn(s), {infos} advisory note(s)")
+    elif warns > 0:
+        summary.warning_skills.append(skill_name)
+        print(f"⚠ {skill_name}: {fails} fail(s), {warns} warn(s), {infos} advisory note(s)")
+    elif infos > 0:
+        summary.advisory_skills.append(skill_name)
+        print(f"ℹ {skill_name}: {infos} advisory note(s)")
+
+
+def _print_all_skills_summary(skill_count: int, summary: AllSkillsSummary) -> int:
     print()
     print(
-        f"Summary: {len(skill_names)} skills, {total_fails} failures, "
-        f"{total_warns} warnings, {total_infos} advisory notes"
+        f"Summary: {skill_count} skills, {summary.total_fails} failures, "
+        f"{summary.total_warns} warnings, {summary.total_infos} advisory notes"
     )
-
-    if failing_skills:
-        print(f"\nSkills with failures: {', '.join(failing_skills)}")
+    if summary.failing_skills:
+        print(f"\nSkills with failures: {', '.join(summary.failing_skills)}")
         return 1
-
-    if warning_skills:
-        print(f"\nSkills with warnings: {', '.join(warning_skills)}")
-
-    if advisory_skills:
-        print(f"\nSkills with advisory notes: {', '.join(advisory_skills)}")
-
+    if summary.warning_skills:
+        print(f"\nSkills with warnings: {', '.join(summary.warning_skills)}")
+    if summary.advisory_skills:
+        print(f"\nSkills with advisory notes: {', '.join(summary.advisory_skills)}")
     print("\n✅ All skills healthy")
     return 0
+
+
+def diagnose_all_skills() -> int:
+    """Diagnose all skills and return exit code."""
+    skill_names = collect_diagnosable_skill_names()
+    lifecycle_context = build_lifecycle_readiness_context()
+    summary = AllSkillsSummary()
+    print(f"🔍 Diagnosing {len(skill_names)} skills...\n")
+    for skill_name in skill_names:
+        results = diagnose_skill(
+            skill_name,
+            require_workspace_projection=False,
+            lifecycle_context=lifecycle_context,
+        )
+        _record_all_skills_result(summary, skill_name, results)
+    return _print_all_skills_summary(len(skill_names), summary)
 
 
 def main() -> int:
