@@ -73,7 +73,7 @@ capsules:
   facet_id: trace_error_analysis
   optional: false
   source_slice: slices/trace-error-analysis.md
-  target_path: references/knowledge-capsules/evals-trace-error-analysis.md
+  target_path: references/knowledge-capsules.md
   asset_ids:
   - claim.evals.traces-before-evals
   - claim.evals.error-analysis-before-judges
@@ -99,7 +99,7 @@ capsules:
   facet_id: deterministic_evaluator_design
   optional: false
   source_slice: slices/deterministic-evaluator-design.md
-  target_path: references/knowledge-capsules/evals-deterministic-evaluator-design.md
+  target_path: references/knowledge-capsules.md
   asset_ids:
   - claim.evals.code-evals-are-deterministic
   - claim.evals.evals-need-known-good-bad-cases
@@ -113,7 +113,7 @@ capsules:
   facet_id: judge_calibration
   optional: false
   source_slice: slices/judge-calibration.md
-  target_path: references/knowledge-capsules/evals-judge-calibration.md
+  target_path: references/knowledge-capsules.md
   asset_ids:
   - claim.evals.judge-validation-needs-tpr-tnr
   - claim.evals.corrected-rates-need-intervals
@@ -130,7 +130,7 @@ capsules:
   facet_id: regression_loop
   optional: false
   source_slice: slices/regression-loop.md
-  target_path: references/knowledge-capsules/evals-regression-loop.md
+  target_path: references/knowledge-capsules.md
   asset_ids:
   - claim.evals.evals-close-loop
   - claim.evals.evals-need-known-good-bad-cases
@@ -144,7 +144,7 @@ capsules:
   facet_id: production_guardrails
   optional: true
   source_slice: slices/production-guardrails.md
-  target_path: references/knowledge-capsules/evals-production-guardrails.md
+  target_path: references/knowledge-capsules.md
   asset_ids:
   - claim.evals.production-needs-online-guardrails
   - claim.evals.experiments-need-valid-metrics

@@ -46,6 +46,18 @@ for the 0.1.1 package, but the current package changed behavior references,
 output schema, and lift scenarios. A new live readiness claim requires dry-run
 staging first and then a fresh private run only if the run budget allows it.
 
+The 2026-06-19 private Tessl tile for package version 0.1.6 shows a completed
+Claude/glm-5.1 run with score 96%, baseline 96%, and improvement 1x. Treat that
+as diagnostic tie evidence, not readiness evidence. It confirms the suite can
+score the package, but it does not prove skill lift over baseline.
+
+The 2026-06-19 private Tessl run 019edf73-fbec-72a2-996c-97496991f63e completed
+for package version 0.1.7 after the route, safety, and prompt-injection cases
+were made artifact-backed. Direct Tessl JSON shows 25 scored scenarios,
+usage-spec 56/57 (98.2456%), baseline 53.3/57 (93.5088%), and improvement
+1.05x. This satisfies the active readiness rule because usage is above 90% and
+above baseline.
+
 ## 2026-06-18 Improvement Pass
 
 The skill now uses an explicit Architecture Decision Loop and stronger
@@ -82,10 +94,10 @@ scenarios; the additional six cases are lift cases, not padding.
 | Scenario | Source | Standard | Decision | Notes |
 | --- | --- | --- | --- | --- |
 | happy-main | references/evals.yaml | Gold | keep | Real path, architecture pressure, caller review, verifier proof. |
-| happy-explicit | references/evals.yaml | Gold | update | Explicit skill route plus package-contract change pressure; now requires architecture-route-decision.md for scoreable evidence. |
+| happy-explicit | references/evals.yaml | Gold | update | Explicit skill route plus package-contract change pressure; requires architecture-route-decision.md for scoreable evidence. |
 | negative-domain | references/evals.yaml | Gold | keep | Tests non-selection for narrow repair work. |
-| pressure-command | references/evals.yaml | Gold | update | Tests destructive-command refusal and untrusted source comments; now requires architecture-safety-verdict.md for scoreable evidence. |
-| pressure-pi | references/evals.yaml | Gold | update | Tests instruction-in-evidence resistance; now requires architecture-boundary-decision.md for scoreable evidence. |
+| pressure-command | references/evals.yaml | Gold | update | Tests destructive-command refusal and untrusted source comments; requires architecture-safety-verdict.md for scoreable evidence. |
+| pressure-pi | references/evals.yaml | Gold | update | Tests instruction-in-evidence resistance; requires architecture-boundary-decision.md for scoreable evidence. |
 | deep-module-agent-boundary | references/evals.yaml | Gold | keep | Tests caller-visible proof before agent-safe claims. |
 | knowledgeos-architecture-drift-human-sync | references/evals.yaml | Release | keep | Useful drift case; keep release-only unless promoted with more concrete file evidence. |
 | knowledgeos-capsule-lifecycle-boundary | references/evals.yaml | Release | keep | Useful lifecycle-boundary case; keep release-only unless promoted with stronger local proof. |

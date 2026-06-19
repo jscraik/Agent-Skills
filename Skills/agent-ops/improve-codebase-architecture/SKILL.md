@@ -2,7 +2,7 @@
 name: improve-codebase-architecture
 description: Review code architecture, code quality, dependency graphs, coupling, technical debt, modularization, ownership, and test seams. Use when refactors, restructuring, tightly coupled code, or architecture decisions need proof-backed options.
 metadata:
-  version: "0.1.6"
+  version: "0.1.7"
   skill-type: code_quality_review
   lifecycle_state: active
   maturity: validated

@@ -351,6 +351,30 @@ def _tessl_eval_view_has_complete_scores(payload: dict[str, object]) -> bool:
     return scored_scenarios > 0
 
 
+def _collect_tessl_metric_fields(value: object, *, tokens: tuple[str, ...]) -> dict[str, object]:
+    metrics: dict[str, object] = {}
+
+    def visit(current: object, path: tuple[str, ...]) -> None:
+        if isinstance(current, dict):
+            for key, child in current.items():
+                if isinstance(key, str):
+                    visit(child, (*path, key))
+            return
+        if isinstance(current, list):
+            for index, child in enumerate(current):
+                visit(child, (*path, str(index)))
+            return
+        if not isinstance(current, int | float) or isinstance(current, bool):
+            return
+        joined_path = ".".join(path)
+        lower_path = joined_path.lower()
+        if any(token in lower_path for token in tokens):
+            metrics[joined_path] = current
+
+    visit(value, ())
+    return metrics
+
+
 def _is_discovery_smoke_filter_blocker(raw_error: object) -> bool:
     return "discovery-smoke runner requires eval cases with `smoke_mode`" in _as_text(raw_error)
 
@@ -361,6 +385,7 @@ def _summarize_tessl_live_eval_view(payload: dict[str, object]) -> dict[str, obj
     scenarios = attributes.get("scenarios") if isinstance(attributes, dict) else None
     if not isinstance(scenarios, list):
         raise ValueError("Tessl eval view JSON did not include data.attributes.scenarios.")
+    attributes = attributes if isinstance(attributes, dict) else {}
 
     usage_score = 0.0
     baseline_score = 0.0
@@ -415,10 +440,37 @@ def _summarize_tessl_live_eval_view(payload: dict[str, object]) -> dict[str, obj
         s for s in scenario_summaries
         if s.get("usage_score") == s.get("baseline_score")
     ]
+    turn_metrics = _collect_tessl_metric_fields(attributes, tokens=("turn",))
+    token_metrics = _collect_tessl_metric_fields(attributes, tokens=("token",))
+    cost_metrics = _collect_tessl_metric_fields(attributes, tokens=("cost", "price", "spend"))
     return {
         "score": usage_rate,
         "baseline_score": baseline_rate,
         "improvement": improvement,
+        "comparative_quality": {
+            "with_skill_score": usage_rate,
+            "without_skill_score": baseline_rate,
+            "improvement": improvement,
+            "beats_baseline": usage_rate > baseline_rate,
+            "baseline_ties_count": len(baseline_ties),
+            "regressions_count": len(regressions),
+        },
+        "model_selection": {
+            "agent": attributes.get("agent"),
+            "model": attributes.get("model"),
+            "scorer_agent": attributes.get("scorerAgent") or attributes.get("scorer_agent"),
+            "scorer_model": attributes.get("scorerModel") or attributes.get("scorer_model"),
+            "quality_floor_before_cost": True,
+            "cost_is_secondary_to_score": True,
+        },
+        "cost_observability": {
+            "turn_metrics_available": bool(turn_metrics),
+            "token_metrics_available": bool(token_metrics),
+            "cost_metrics_available": bool(cost_metrics),
+            "turn_metrics": turn_metrics,
+            "token_metrics": token_metrics,
+            "cost_metrics": cost_metrics,
+        },
         "usage_points": usage_score,
         "baseline_points": baseline_score,
         "max_points": max_score,
@@ -512,6 +564,23 @@ def _tessl_live_private_policy(workspace: str | None = None) -> dict:
         "command_shape": "tessl eval run --json --workspace <workspace> <staged-plugin-dir>",
         "scenario_gate": "skill-owned references/evals.yaml plus reviewed generated scenarios are required before live scoring; behavioral skills need at least 20 gold-standard scenarios; structure-only checks must opt out explicitly",
         "min_scenarios_required": TESSL_LIVE_PRIVATE_MIN_SCENARIOS,
+        "duplicate_run_guard": "before live scoring, block when a pending eval run already exists for the same workspace/project",
+        "model_selection_gate": {
+            "quality_floor_before_cost": True,
+            "cost_is_secondary_to_score": True,
+            "required_summary_fields": [
+                "model_selection",
+                "comparative_quality",
+                "cost_observability",
+            ],
+            "acceptance": "with-skill score must meet the quality floor and beat baseline before model cost can be treated as a selection advantage",
+        },
+        "cost_observability": {
+            "track_turns_when_available": True,
+            "track_tokens_when_available": True,
+            "track_cost_when_available": True,
+            "missing_metrics_are_explicit": True,
+        },
         "run_limit_policy": {
             "workspace_run_limit": TESSL_WORKSPACE_RUN_LIMIT,
             "limit_source": TESSL_WORKSPACE_RUN_LIMIT_SOURCE,
@@ -885,7 +954,20 @@ def _parse_tessl_eval_cases_compat(text: str) -> list[dict[str, object]]:
             "reproduce",
             "raw_response_artifact",
             "judge_detail_artifact",
+            "judge_raw_output_artifact",
+            "judge_parse_error_artifact",
+            "judge_schema_error_artifact",
+            "positive_example_artifact",
+            "negative_example_artifact",
+            "source_policy_artifact",
+            "risk_dimension",
+            "label",
+            "synthetic",
+            "judge_temperature",
+            "judge_runs",
+            "sample_count",
             "pass_rate_calibration_artifact",
+            "pass_rate_threshold",
             "tessl_live_private",
         }:
             index += 1
@@ -939,6 +1021,18 @@ def _parse_tessl_eval_cases(evals_path: Path) -> list[dict[str, object]]:
             "reproduce",
             "raw_response_artifact",
             "judge_detail_artifact",
+            "judge_raw_output_artifact",
+            "judge_parse_error_artifact",
+            "judge_schema_error_artifact",
+            "positive_example_artifact",
+            "negative_example_artifact",
+            "source_policy_artifact",
+            "risk_dimension",
+            "label",
+            "synthetic",
+            "judge_temperature",
+            "judge_runs",
+            "sample_count",
             "pass_rate_threshold",
             "pass_rate_calibration_artifact",
             "tessl_live_private",
@@ -1150,6 +1244,36 @@ GENERIC_GENERATED_SHOULD = (
     "Produce an architecture decision note that states the evidence boundary, "
     "a safe first move, and the proof that would change the decision."
 )
+GUARDRAIL_CASE_RE = re.compile(r"(?i)\b(?:guardrail|hallucinat(?:e|ion|ions|ed|ing))\b")
+GUARDRAIL_LABEL_RE = re.compile(
+    r"(?i)\b(?:label(?:ed|led)?|human labels?|pass/fail|ordinary|adversarial|"
+    r"true-positive|true-negative|false-positive|false-negative|precision|recall|held-out|calibrat(?:e|ed|ion))\b"
+)
+GUARDRAIL_DIMENSION_RE = re.compile(
+    r"(?i)\b(?:sentence-level|per-sentence|factual accuracy|knowledge accuracy|"
+    r"source-of-truth|relevance|policy compliance|contextual coherence)\b"
+)
+GUARDRAIL_STRUCTURED_OUTPUT_RE = re.compile(r"(?i)\b(?:machine-readable|structured|json|schema)\b")
+GUARDRAIL_OUTCOME_RE = re.compile(
+    r"(?is)\bjudge_parse_error\b.*\bjudge_schema_error\b.*"
+    r"\bjudge_semantic_fail\b.*\bjudge_pass\b"
+)
+GUARDRAIL_RESPONSE_SCHEMA_TERMS = (
+    "sentence_results",
+    "overall_verdict",
+    "failure_reason",
+    "source_references",
+)
+GUARDRAIL_FAIL_CLOSED_RE = re.compile(
+    r"(?i)\b(?:fail-closed|fail closed|unsupported factual claim|unsupported claim)\b"
+)
+SOURCE_REFERENCE_PASS_RE = re.compile(
+    r"(?is)\b(?:exact|supporting)\b.*\b(?:source_references|source references|references?)\b.*\bpass\b|"
+    r"\bpass\b.*\b(?:exact|supporting)\b.*\b(?:source_references|source references|references?)\b"
+)
+FAIL_RATIONALE_RE = re.compile(r"(?is)\b(?:rationale|failure_reason|reason)\b.*\bfail\b|\bfail\b.*\b(?:rationale|failure_reason|reason)\b")
+JUDGE_CASE_RE = re.compile(r"(?i)\b(?:judge|grader|guardrail|hallucinat(?:e|ion|ions|ed|ing)|faithfulness)\b")
+ROLE_TERMS = ("assistant", "agent", "model", "skill")
 UNSTAGED_TESSL_REPO_PATH_RE = re.compile(
     r"(?<![A-Za-z0-9_./-])"
     r"(?:Infrastructure|Skills|Plugins|Docs|docs|skills-system|runtime|\.agents|\.codex|\.harness|\.skillsets)"
@@ -1273,6 +1397,170 @@ def _case_has_unstaged_repo_path_reference(case: dict[str, object]) -> bool:
     return bool(UNSTAGED_TESSL_REPO_PATH_RE.search("\n".join(text_parts)))
 
 
+def _case_text_for_quality(case: dict[str, object]) -> str:
+    text_parts = [
+        str(case.get(field) or "")
+        for field in (
+            "id",
+            "name",
+            "category",
+            "unit",
+            "given",
+            "should",
+            "prompt",
+            "expected_artifact",
+            "raw_response_artifact",
+            "judge_detail_artifact",
+            "judge_raw_output_artifact",
+            "judge_parse_error_artifact",
+            "judge_schema_error_artifact",
+            "positive_example_artifact",
+            "negative_example_artifact",
+            "source_policy_artifact",
+            "risk_dimension",
+            "label",
+        )
+    ]
+    acceptance = case.get("acceptance")
+    if isinstance(acceptance, list):
+        for item in acceptance:
+            if not isinstance(item, dict):
+                continue
+            normalized = _normalize_tessl_acceptance_item(item)
+            text_parts.extend([
+                str(normalized.get("type") or ""),
+                str(normalized.get("value") or ""),
+                str(normalized.get("expected_skill") or ""),
+            ])
+    expected_signals = case.get("expected_signals")
+    if isinstance(expected_signals, dict):
+        for value in expected_signals.values():
+            if isinstance(value, list):
+                text_parts.extend(str(item) for item in value)
+            else:
+                text_parts.append(str(value))
+    return "\n".join(text_parts)
+
+
+def _case_has_guardrail_calibration_shape(case: dict[str, object]) -> bool:
+    case_text = _case_text_for_quality(case)
+    if not GUARDRAIL_CASE_RE.search(case_text):
+        return True
+    has_structured_output = bool(GUARDRAIL_STRUCTURED_OUTPUT_RE.search(case_text))
+    acceptance = case.get("acceptance")
+    if isinstance(acceptance, list):
+        has_structured_output = has_structured_output or any(
+            _acceptance_type(item) == "output_schema" for item in acceptance
+        )
+    return (
+        bool(GUARDRAIL_LABEL_RE.search(case_text))
+        and bool(GUARDRAIL_DIMENSION_RE.search(case_text))
+        and has_structured_output
+    )
+
+
+def _case_has_paired_calibration_examples(case: dict[str, object]) -> bool:
+    case_text = _case_text_for_quality(case)
+    if not JUDGE_CASE_RE.search(case_text):
+        return True
+    positive = case.get("positive_example_artifact") or case.get("passing_example_artifact")
+    negative = case.get("negative_example_artifact") or case.get("failing_example_artifact")
+    if positive and negative:
+        return True
+    return not GUARDRAIL_CASE_RE.search(case_text)
+
+
+def _terms_present(text: str, terms: tuple[str, ...]) -> set[str]:
+    present: set[str] = set()
+    for term in terms:
+        pattern = r"(?i)(?<![A-Za-z0-9_-])" + re.escape(term) + r"(?![A-Za-z0-9_-])"
+        if re.search(pattern, text):
+            present.add(term)
+    return present
+
+
+def _case_has_mixed_guardrail_terms(case: dict[str, object]) -> bool:
+    case_text = _case_text_for_quality(case)
+    if not JUDGE_CASE_RE.search(case_text):
+        return False
+    role_terms = _terms_present(case_text, ROLE_TERMS)
+    # In guardrail/judge prompts, multiple role names often make the scorer's
+    # target ambiguous. Source-authority terms are intentionally not enforced
+    # here because "source-of-truth policy" is a useful composite phrase.
+    return len(role_terms) > 1
+
+
+def _case_has_guardrail_failure_outcomes(case: dict[str, object]) -> bool:
+    case_text = _case_text_for_quality(case)
+    if not GUARDRAIL_CASE_RE.search(case_text):
+        return True
+    raw_output = case.get("judge_raw_output_artifact") or case.get("raw_response_artifact")
+    return bool(raw_output) and bool(GUARDRAIL_OUTCOME_RE.search(case_text))
+
+
+def _case_has_guardrail_response_schema(case: dict[str, object]) -> bool:
+    case_text = _case_text_for_quality(case)
+    if not GUARDRAIL_CASE_RE.search(case_text):
+        return True
+    normalized = case_text.lower()
+    return (
+        all(term in normalized for term in GUARDRAIL_RESPONSE_SCHEMA_TERMS)
+        and bool(GUARDRAIL_FAIL_CLOSED_RE.search(case_text))
+    )
+
+
+def _case_has_source_reference_quality(case: dict[str, object]) -> bool:
+    case_text = _case_text_for_quality(case)
+    if not GUARDRAIL_CASE_RE.search(case_text):
+        return True
+    return bool(SOURCE_REFERENCE_PASS_RE.search(case_text)) and bool(FAIL_RATIONALE_RE.search(case_text))
+
+
+def _has_sampling_count(case: dict[str, object]) -> bool:
+    return bool(case.get("judge_runs") or case.get("sample_count"))
+
+
+def _case_has_judge_sampling_policy(case: dict[str, object]) -> bool:
+    case_text = _case_text_for_quality(case)
+    if not JUDGE_CASE_RE.search(case_text):
+        return True
+    if case.get("judge_temperature") and not _has_sampling_count(case):
+        return False
+    return True
+
+
+def _truthy_metadata(value: object) -> bool:
+    if isinstance(value, bool):
+        return value
+    return str(value).strip().lower() in {"1", "true", "yes", "y"}
+
+
+def _synthetic_guardrail_label_balance_findings(cases: list[dict[str, object]]) -> list[dict[str, str]]:
+    synthetic_cases = [
+        case
+        for case in cases
+        if _truthy_metadata(case.get("synthetic"))
+        and GUARDRAIL_CASE_RE.search(_case_text_for_quality(case))
+    ]
+    labeled_cases = [
+        case
+        for case in synthetic_cases
+        if str(case.get("label") or "").strip().lower() in {"pass", "fail"}
+    ]
+    labels = {str(case.get("label") or "").strip().lower() for case in labeled_cases}
+    if len(labeled_cases) < 2 or len(labels) >= 2:
+        return []
+    case_ids = ", ".join(str(case.get("id") or "unknown") for case in labeled_cases[:8])
+    return [{
+        "case_id": "synthetic_guardrail_suite",
+        "code": "guardrail_synthetic_label_imbalance",
+        "message": (
+            "Synthetic guardrail eval selections must include both pass and fail labels "
+            f"before acting as release evidence; selected one-class cases: {case_ids}."
+        ),
+    }]
+
+
 def _case_has_scenario_context(case: dict[str, object]) -> bool:
     fields = [str(case.get(field) or "").strip() for field in ("unit", "given", "should")]
     if all(fields):
@@ -1365,6 +1653,76 @@ def _tessl_eval_quality_findings(cases: list[dict[str, object]]) -> list[dict[st
                     "scoring repo-root paths."
                 ),
             })
+        if not _case_has_guardrail_calibration_shape(case):
+            findings.append({
+                "case_id": case_id,
+                "code": "guardrail_missing_calibration_shape",
+                "message": (
+                    "Hallucination or guardrail eval cases must name the source-of-truth "
+                    "and sentence-level failure dimensions, include labeled ordinary or "
+                    "adversarial examples for calibration, and require machine-readable "
+                    "output before the guardrail can become release evidence."
+                ),
+            })
+        if not _case_has_paired_calibration_examples(case):
+            findings.append({
+                "case_id": case_id,
+                "code": "guardrail_missing_paired_examples",
+                "message": (
+                    "Hallucination and subjective guardrail evals must include both "
+                    "positive_example_artifact and negative_example_artifact, or stay "
+                    "advisory until paired calibration examples exist."
+                ),
+            })
+        if _case_has_mixed_guardrail_terms(case):
+            findings.append({
+                "case_id": case_id,
+                "code": "guardrail_mixed_terminology",
+                "message": (
+                    "Guardrail and judge eval prompts must use consistent role and "
+                    "source-authority terms so the scorer knows what actor and evidence "
+                    "surface it is judging."
+                ),
+            })
+        if not _case_has_guardrail_failure_outcomes(case):
+            findings.append({
+                "case_id": case_id,
+                "code": "guardrail_missing_judge_outcomes",
+                "message": (
+                    "Guardrail evals must distinguish judge_parse_error, judge_schema_error, "
+                    "judge_semantic_fail, and judge_pass, and preserve raw judge output when "
+                    "parsing or schema validation fails."
+                ),
+            })
+        if not _case_has_guardrail_response_schema(case):
+            findings.append({
+                "case_id": case_id,
+                "code": "guardrail_missing_response_schema",
+                "message": (
+                    "Guardrail evals must require sentence_results[], overall_verdict, "
+                    "failure_reason, source_references[], and a fail-closed aggregation rule "
+                    "for unsupported factual claims."
+                ),
+            })
+        if not _case_has_source_reference_quality(case):
+            findings.append({
+                "case_id": case_id,
+                "code": "guardrail_missing_source_reference_quality",
+                "message": (
+                    "Guardrail evals must require exact supporting source references for pass "
+                    "decisions and keep fail rationales separate from pass references."
+                ),
+            })
+        if not _case_has_judge_sampling_policy(case):
+            findings.append({
+                "case_id": case_id,
+                "code": "judge_sampling_missing_repeat_count",
+                "message": (
+                    "Judge evals that set judge_temperature must also capture judge_runs or "
+                    "sample_count so stochastic pass-rate gates remain advisory until calibrated."
+                ),
+            })
+    findings.extend(_synthetic_guardrail_label_balance_findings(cases))
     return findings
 
 
@@ -1579,6 +1937,39 @@ def _tessl_criteria_from_case(case: dict[str, object]) -> dict:
             "agent_eval_artifacts": {
                 "raw_response": case.get("raw_response_artifact"),
                 "judge_details": case.get("judge_detail_artifact"),
+                "judge_raw_output": case.get("judge_raw_output_artifact")
+                or case.get("raw_response_artifact"),
+                "judge_parse_error": case.get("judge_parse_error_artifact"),
+                "judge_schema_error": case.get("judge_schema_error_artifact"),
+            },
+            "calibration_examples": {
+                "positive": case.get("positive_example_artifact"),
+                "negative": case.get("negative_example_artifact"),
+            },
+            "judge_failure_outcomes": {
+                "parse_error": "judge_parse_error",
+                "schema_error": "judge_schema_error",
+                "semantic_fail": "judge_semantic_fail",
+                "pass": "judge_pass",
+            },
+            "guardrail_output_contract": {
+                "sentence_results": "required",
+                "overall_verdict": "required",
+                "failure_reason": "required",
+                "source_references": "required_for_pass_decisions",
+                "unsupported_factual_claim": "fail_closed",
+                "fail_rationale": "separate_from_pass_reference",
+            },
+            "synthetic_case": {
+                "enabled": case.get("synthetic"),
+                "label": case.get("label"),
+                "risk_dimension": case.get("risk_dimension"),
+                "source_policy_artifact": case.get("source_policy_artifact"),
+            },
+            "judge_sampling": {
+                "temperature": case.get("judge_temperature"),
+                "runs": case.get("judge_runs"),
+                "sample_count": case.get("sample_count"),
             },
             "pass_rate_policy": {
                 "threshold": case.get("pass_rate_threshold"),
@@ -1905,6 +2296,181 @@ def _tessl_eval_list_count(stdout: str) -> int | None:
     return None
 
 
+def _tessl_eval_list_runs(stdout: str) -> list[dict[str, object]] | None:
+    parsed = _parse_json_value_from_text(stdout) if stdout.strip() else None
+    if isinstance(parsed, list):
+        return [item for item in parsed if isinstance(item, dict)]
+    if not isinstance(parsed, dict):
+        return None
+    if parsed.get("status") == "error" or parsed.get("ok") is False:
+        return None
+    for key in ("evals", "runs", "items", "nodes", "data", "results"):
+        value = parsed.get(key)
+        if isinstance(value, list):
+            return [item for item in value if isinstance(item, dict)]
+        if isinstance(value, dict):
+            nested = _tessl_eval_list_runs(json.dumps(value))
+            if nested is not None:
+                return nested
+    return None
+
+
+def _tessl_run_field(run: dict[str, object], *keys: str) -> object:
+    for key in keys:
+        value = run.get(key)
+        if value is not None:
+            return value
+    attributes = run.get("attributes")
+    if isinstance(attributes, dict):
+        for key in keys:
+            value = attributes.get(key)
+            if value is not None:
+                return value
+    return None
+
+
+def _tessl_run_metadata_field(run: dict[str, object], key: str) -> object:
+    metadata = run.get("metadata")
+    if isinstance(metadata, dict):
+        return metadata.get(key)
+    attributes = run.get("attributes")
+    if isinstance(attributes, dict):
+        metadata = attributes.get("metadata")
+        if isinstance(metadata, dict):
+            return metadata.get(key)
+    return None
+
+
+def _tessl_pending_run_ids_for_project(stdout: str, *, project: str) -> list[str] | None:
+    runs = _tessl_eval_list_runs(stdout)
+    if runs is None:
+        return None
+    pending_ids: list[str] = []
+    for run in runs:
+        run_status = _tessl_run_field(run, "status")
+        if not isinstance(run_status, str) or run_status.strip().lower() != "pending":
+            continue
+        tile_name = _tessl_run_metadata_field(run, "tileName")
+        subject = _tessl_run_field(run, "subject")
+        if tile_name != project and subject not in {project, f"skills-sdk/{project}"}:
+            continue
+        run_id = _tessl_run_field(run, "id", "evalRunId", "runId")
+        if isinstance(run_id, str) and run_id.strip():
+            pending_ids.append(run_id.strip())
+    return pending_ids
+
+
+def _tessl_pending_run_preflight(
+    tessl_path: str,
+    workspace: str,
+    project: str,
+    staged_root: Path,
+    env: dict[str, str],
+) -> dict[str, object]:
+    command = [
+        tessl_path,
+        "eval",
+        "list",
+        "--json",
+        "--workspace",
+        workspace,
+        "--limit",
+        "20",
+    ]
+    command_text = " ".join(shlex.quote(str(part)) for part in command)
+    try:
+        process = subprocess.run(
+            command,
+            cwd=str(staged_root),
+            capture_output=True,
+            text=True,
+            timeout=TESSL_PROJECT_LINK_TIMEOUT_SECONDS,
+            env=env,
+        )
+    except subprocess.TimeoutExpired as exc:
+        return {
+            "status": "blocked",
+            "blocker_class": "blocked_runtime",
+            "blocker": "Tessl pending-run preflight timed out before live scoring; refusing to submit another run.",
+            "command": command_text,
+            "raw_output": _as_text(exc.stdout),
+            "raw_error": _as_text(exc.stderr),
+        }
+    except OSError as exc:
+        return {
+            "status": "blocked",
+            "blocker_class": "blocked_runtime",
+            "blocker": f"Failed to run Tessl pending-run preflight; refusing to submit another run: {exc}",
+            "command": command_text,
+            "raw_output": "",
+            "raw_error": str(exc),
+        }
+
+    if blocker := _tessl_signal_blocker(process, lane="eval list pending-run preflight"):
+        return {
+            "status": "blocked",
+            "blocker_class": "blocked_runtime",
+            "blocker": blocker,
+            "command": command_text,
+            "exit_code": process.returncode,
+            "raw_output": process.stdout,
+            "raw_error": process.stderr,
+        }
+    if _tessl_auth_blocked(process.stdout, process.stderr):
+        return {
+            "status": "blocked",
+            "blocker_class": "blocked_auth",
+            "blocker": "Tessl authentication is required before pending-run preflight can protect live eval credits.",
+            "command": command_text,
+            "exit_code": process.returncode,
+            "raw_output": process.stdout,
+            "raw_error": process.stderr,
+        }
+    if process.returncode != 0:
+        return {
+            "status": "blocked",
+            "blocker_class": "blocked_runtime",
+            "blocker": "Tessl pending-run preflight could not fetch run history; refusing to submit another live eval run.",
+            "command": command_text,
+            "exit_code": process.returncode,
+            "raw_output": process.stdout,
+            "raw_error": process.stderr,
+        }
+
+    pending_ids = _tessl_pending_run_ids_for_project(process.stdout, project=project)
+    if pending_ids is None:
+        return {
+            "status": "blocked",
+            "blocker_class": "blocked_validation",
+            "blocker": "Tessl pending-run preflight could not parse run history; refusing to submit another live eval run.",
+            "command": command_text,
+            "exit_code": process.returncode,
+            "raw_output": process.stdout,
+            "raw_error": process.stderr,
+        }
+    if pending_ids:
+        return {
+            "status": "blocked",
+            "blocker_class": "blocked_environment",
+            "blocker": "A pending Tessl eval run already exists for this workspace/project; inspect that run instead of spending another.",
+            "command": command_text,
+            "exit_code": process.returncode,
+            "raw_output": process.stdout,
+            "raw_error": process.stderr,
+            "pending_eval_run_ids": pending_ids,
+        }
+    return {
+        "status": "pass",
+        "blocker": None,
+        "blocker_class": None,
+        "command": command_text,
+        "exit_code": process.returncode,
+        "raw_output": process.stdout,
+        "raw_error": process.stderr,
+        "pending_eval_run_ids": [],
+    }
+
+
 def _tessl_run_budget_preflight(
     tessl_path: str,
     workspace: str,
@@ -1972,23 +2538,12 @@ def _tessl_run_budget_preflight(
         }
     if process.returncode != 0:
         return {
-            "status": "blocked",
+            "status": "warning",
             "blocker_class": "blocked_runtime",
-            "blocker": "Tessl workspace run-budget preflight failed before live scoring.",
-            "command": command_text,
-            "exit_code": process.returncode,
-            "raw_output": process.stdout,
-            "raw_error": process.stderr,
-        }
-
-    used_runs = _tessl_eval_list_count(process.stdout)
-    if used_runs is None:
-        return {
-            "status": "blocked",
-            "blocker_class": "blocked_validation",
             "blocker": (
-                "Tessl workspace run-budget preflight could not determine remaining "
-                "capacity; blocking live scoring to preserve the configured reserve."
+                "Tessl workspace run-budget preflight could not fetch run history; "
+                "continuing with the operator-provided run limit because the live run "
+                "was explicitly requested."
             ),
             "command": command_text,
             "exit_code": process.returncode,
@@ -1996,6 +2551,26 @@ def _tessl_run_budget_preflight(
             "raw_error": process.stderr,
             "workspace_run_limit": TESSL_WORKSPACE_RUN_LIMIT,
             "reserve_runs": TESSL_WORKSPACE_RUN_RESERVE,
+            "capacity_source": "unavailable_eval_list",
+        }
+
+    used_runs = _tessl_eval_list_count(process.stdout)
+    if used_runs is None:
+        return {
+            "status": "warning",
+            "blocker_class": "blocked_validation",
+            "blocker": (
+                "Tessl workspace run-budget preflight could not determine remaining "
+                "capacity; continuing with the operator-provided run limit because the "
+                "live run was explicitly requested."
+            ),
+            "command": command_text,
+            "exit_code": process.returncode,
+            "raw_output": process.stdout,
+            "raw_error": process.stderr,
+            "workspace_run_limit": TESSL_WORKSPACE_RUN_LIMIT,
+            "reserve_runs": TESSL_WORKSPACE_RUN_RESERVE,
+            "capacity_source": "unparseable_eval_list",
         }
 
     remaining_runs = max(TESSL_WORKSPACE_RUN_LIMIT - used_runs, 0)
@@ -2761,6 +3336,24 @@ def _run_tessl_live_private_eval(
 
     tessl_env = dict(os.environ)
     tessl_env["TESSL_AUTO_UPDATE_INTERVAL_MINUTES"] = "0"
+    project_name = str(common["project_identity"].get("project") or _tessl_live_tile_slug(repo_root / path))
+    pending_run_preflight = _tessl_pending_run_preflight(
+        tessl_path,
+        normalized_workspace,
+        project_name,
+        staged_source,
+        tessl_env,
+    )
+    common["pending_run_preflight"] = pending_run_preflight
+    if pending_run_preflight.get("status") == "blocked":
+        return {
+            "status": "blocked",
+            **common,
+            "raw_output": str(pending_run_preflight.get("raw_output") or ""),
+            "raw_error": str(pending_run_preflight.get("raw_error") or ""),
+            "blocker": pending_run_preflight.get("blocker"),
+            "blocker_class": pending_run_preflight.get("blocker_class"),
+        }
     run_budget_preflight = _tessl_run_budget_preflight(
         tessl_path,
         normalized_workspace,

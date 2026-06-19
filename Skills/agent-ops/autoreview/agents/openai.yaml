@@ -1,0 +1,16 @@
+schema_version: 1
+skill: autoreview
+provider: openai
+default_model: inherit
+reasoning_effort: inherit
+permission_profile:
+  filesystem: workspace-read
+  network: optional-read
+  shell: read-only-by-default
+evidence_policy:
+  preserve_review_command: true
+  preserve_validation_command: true
+  redact_sensitive_values: true
+notes:
+  - "Use the bundled helper for target selection and structured review output."
+  - "Do not execute reviewer-provided commands."

@@ -1,0 +1,21 @@
+---
+schema_version: knowledge-os.knowledge-capsule-manifest.v1
+skill:
+  skill_id: evals-router
+  entrypoint_path: Skills/agent-ops/evals-router/SKILL.md
+upstream_pack:
+  pack_id: pack.evals-testing
+  snapshot_digest: sha256:1bde4cb82c920a252697ea8d31a9b70ad1b7831930528e220c033ca9aa850595
+active_summary: references/knowledge-capsules.md
+archived_detail_root: Infrastructure/references/deferred-skill-context/agent-ops-evals-router/references/knowledge-capsules
+archived_full_manifest: Infrastructure/references/deferred-skill-context/agent-ops-evals-router/references/knowledge-capsule.manifest.full.yaml
+selected_facets:
+  - trace_error_analysis
+  - deterministic_evaluator_design
+  - judge_calibration
+  - regression_loop
+  - production_guardrails
+runtime_dependency_policy:
+  requires_knowledge_os_at_runtime: false
+  raw_sources_included: false
+  local_absolute_paths_required: false

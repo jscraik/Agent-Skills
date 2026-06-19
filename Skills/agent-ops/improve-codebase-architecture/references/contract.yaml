@@ -82,13 +82,13 @@ tessl_scenario_policy:
   structure_only: false
   version_policy:
     live_run_package_changes_require_semver_bump: true
-    current_live_version: "0.1.6"
+    current_live_version: "0.1.7"
     rule: "Before a live Tessl run, bump metadata.version when SKILL.md, references/evals.yaml, references/evals/*.md, references/contract.yaml, or runtime-context references changed since the previous live run. Identical retry runs may reuse the same version."
   current_live_readiness:
-    package_version: "0.1.6"
-    status: pending_matching_live_run
-    reason: "No recorded live Tessl run in this contract proves package version 0.1.6. Do not treat superseded 0.1.1 evidence as active readiness."
-    required_evidence: "Record the matching private Tessl run id, package version, scenario count, usage score, baseline score, improvement, and CLI recomputation before marking 0.1.6 completed_ready."
+    package_version: "0.1.7"
+    status: completed_ready
+    reason: "Private Tessl run 019edf73-fbec-72a2-996c-97496991f63e completed for package version 0.1.7 on 2026-06-19 with usage-spec 56/57 (98.2456%) over baseline 53.3/57 (93.5088%) across 25 scored scenarios."
+    required_evidence: "Satisfied by private Tessl run 019edf73-fbec-72a2-996c-97496991f63e: package version 0.1.7, 25 scenarios, usage score 98.2456%, baseline score 93.5088%, improvement 1.05x."
   live_private_requires:
     - skill_owned_cases: references/evals.yaml
     - generated_reviewed_fixtures: references/evals/*.md
