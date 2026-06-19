@@ -14,8 +14,8 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "read": {"type": "array", "items": {"type": "string"}},
-        "write": {"type": "array", "items": {"type": "string"}},
+        "read": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "write": {"type": "array", "items": {"type": "string", "minLength": 1}},
         "temp_write": {"type": "boolean"}
       },
       "required": ["read", "write", "temp_write"]
