@@ -25,6 +25,7 @@ def _command_env() -> dict[str, str]:
     env.setdefault("XDG_CACHE_HOME", str(temp_base / "xdg-cache"))
     env.setdefault("XDG_STATE_HOME", str(temp_base / "xdg-state"))
     env.setdefault("MISE_CACHE_DIR", str(temp_base / "mise-cache"))
+    env.setdefault("MISE_STATE_DIR", str(temp_base / "mise-state"))
     env.setdefault("UV_CACHE_DIR", str(temp_base / "uv-cache"))
     env.setdefault("MISE_TRUSTED_CONFIG_PATHS", str(REPO_ROOT / ".mise.toml"))
     return env
@@ -69,6 +70,32 @@ class TestSkillsSdkIr(unittest.TestCase):
 
         self.assertEqual(model.permissions.network, "restricted")
         self.assertIn("network:restricted", model.permissions.tools)
+
+    def test_builder_can_emit_no_filesystem_permission(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            skill_root = Path(tmpdir) / "no-filesystem-skill"
+            skill_root.mkdir()
+            skill_md = skill_root / "SKILL.md"
+            skill_md.write_text(
+                "\n".join(
+                    [
+                        "---",
+                        "name: no-filesystem-skill",
+                        "description: Answers from in-memory prompt context.",
+                        "---",
+                        "",
+                        "# No Filesystem Skill",
+                        "",
+                        "Answer from the prompt context without reading or writing files.",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            payload = build_skill_ir(REPO_ROOT, source_path=skill_md, query=skill_root.as_posix())
+            model = validate_skill_ir(payload)
+
+        self.assertEqual(model.permissions.filesystem, "none")
 
     def test_public_cli_builds_skill_ir(self) -> None:
         completed = subprocess.run(

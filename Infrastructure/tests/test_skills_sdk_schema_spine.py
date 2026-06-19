@@ -20,6 +20,7 @@ SCHEMA_NAMES = {
     "skill-ir": "skill-ir.v0.schema.json",
     "package-manifest": "package-manifest.v0.schema.json",
     "package-digest-receipt": "package-digest-receipt.v0.schema.json",
+    "package-hardening-receipt": "package-hardening-receipt.v0.schema.json",
     "eval-case": "eval-case.v0.schema.json",
     "eval-run-receipt": "eval-run-receipt.v0.schema.json",
     "project-conformance-receipt": "project-conformance-receipt.v1.schema.json",
@@ -136,6 +137,15 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertEqual(payload["included_files"], ["Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md"])
         self.assertFalse(payload["mutation_performed"])
 
+    def test_package_hardening_fixture_records_non_mutating_checks(self) -> None:
+        payload = self.assert_valid("package-hardening-receipt", "package-hardening-receipt.json")
+
+        self.assertEqual(payload["status"], "pass")
+        self.assertEqual(payload["package_id"], "skills-sdk-valid-fixture")
+        self.assertEqual(payload["blockers"], [])
+        self.assertEqual(payload["hardening_checks"][0]["id"], "non_mutating_package_identity")
+        self.assertFalse(payload["mutation_performed"])
+
     def test_eval_case_fixture_records_deterministic_oracle(self) -> None:
         payload = self.assert_valid("eval-case", "eval-case.json")
 
@@ -195,6 +205,12 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
 
     def test_package_digest_schema_rejects_mutation_claims(self) -> None:
         self.assert_invalid("package-digest-receipt", "package-digest-mutation-claim.json")
+
+    def test_package_digest_schema_rejects_empty_included_files(self) -> None:
+        self.assert_invalid("package-digest-receipt", "package-digest-empty-included-files.json")
+
+    def test_package_hardening_schema_rejects_mutation_claims(self) -> None:
+        self.assert_invalid("package-hardening-receipt", "package-hardening-mutation-claim.json")
 
     def test_eval_run_schema_rejects_mutation_claims(self) -> None:
         self.assert_invalid("eval-run-receipt", "eval-run-mutation-claim.json")

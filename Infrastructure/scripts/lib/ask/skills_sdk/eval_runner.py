@@ -17,7 +17,7 @@ EVAL_RUN_ACCEPTANCE_TRACE = ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "
 def _repo_relative(repo_root: Path, path: Path) -> str:
     try:
         return path.resolve().relative_to(repo_root.resolve()).as_posix()
-    except ValueError:
+    except (OSError, ValueError):
         return path.as_posix()
 
 

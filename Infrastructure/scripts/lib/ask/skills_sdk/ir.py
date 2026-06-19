@@ -84,8 +84,12 @@ def _identity_from_frontmatter(frontmatter: dict[str, Any], skill_root: Path) ->
     }
 
 
-def _filesystem_permission(runtime_needs: list[str]) -> str:
-    return "write" if any("write" in item.lower() for item in runtime_needs) else "read"
+def _filesystem_permission(runtime_needs: list[str], scripts: list[str]) -> str:
+    if any("write" in item.lower() for item in runtime_needs):
+        return "write"
+    if runtime_needs or scripts:
+        return "read"
+    return "none"
 
 
 def _network_permission(normalized_runtime_needs: list[str], body: str) -> str:
@@ -116,7 +120,7 @@ def _permissions(frontmatter: dict[str, Any], body: str, scripts: list[str]) -> 
         *_normalized_list(frontmatter.get("commands")),
     })
     return {
-        "filesystem": _filesystem_permission(runtime_needs),
+        "filesystem": _filesystem_permission(runtime_needs, scripts),
         "network": _network_permission(normalized_runtime_needs, body),
         "secrets": _secrets_permission(runtime_needs, body),
         "tools": tools,

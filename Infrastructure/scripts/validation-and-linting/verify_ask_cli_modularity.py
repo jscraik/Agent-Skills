@@ -6,22 +6,72 @@ from __future__ import annotations
 import argparse
 import ast
 import subprocess
+from datetime import date
 from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 ASK_PATH = REPO_ROOT / "Infrastructure" / "bin" / "ask"
 PYTHON_SUFFIX = ".py"
-LEGACY_SHAPE_DEBT_PATHS = frozenset({
-    "Infrastructure/scripts/lib/ask/commands/evals.py",
-    "Infrastructure/tests/test_ask_evals_command.py",
-    "Plugins/skill-factory/scripts/skill-builder/run_skill_evals.py",
-    "Plugins/skill-factory/scripts/skill-builder/skill_gate.py",
-    "Plugins/skill-factory/scripts/skill-builder/test_run_skill_evals.py",
-    "Plugins/skill-factory/scripts/skill-builder/test_skill_gate_contract_evals.py",
-    "Infrastructure/scripts/lib/ask/commands/skills_impl.py",
-    "Infrastructure/tests/test_ask_cli_impl.py",
-})
+LEGACY_SHAPE_DEBT = {
+    "Infrastructure/scripts/lib/ask/commands/evals.py": {
+        "owner": "skills-sdk",
+        "rule_id": "ask-cli-shape-budget",
+        "ticket": "JSC-SDK-SPINE",
+        "reason": "pre-existing eval command extraction debt",
+        "expires": "2026-07-31",
+    },
+    "Infrastructure/tests/test_ask_evals_command.py": {
+        "owner": "skills-sdk",
+        "rule_id": "ask-cli-shape-budget",
+        "ticket": "JSC-SDK-SPINE",
+        "reason": "pre-existing eval command regression suite debt",
+        "expires": "2026-07-31",
+    },
+    "Plugins/skill-factory/scripts/skill-builder/run_skill_evals.py": {
+        "owner": "skill-factory",
+        "rule_id": "ask-cli-shape-budget",
+        "ticket": "JSC-SDK-SPINE",
+        "reason": "pre-existing plugin eval runner extraction debt",
+        "expires": "2026-07-31",
+    },
+    "Plugins/skill-factory/scripts/skill-builder/skill_gate.py": {
+        "owner": "skill-factory",
+        "rule_id": "ask-cli-shape-budget",
+        "ticket": "JSC-SDK-SPINE",
+        "reason": "pre-existing plugin gate extraction debt",
+        "expires": "2026-07-31",
+    },
+    "Plugins/skill-factory/scripts/skill-builder/test_run_skill_evals.py": {
+        "owner": "skill-factory",
+        "rule_id": "ask-cli-shape-budget",
+        "ticket": "JSC-SDK-SPINE",
+        "reason": "pre-existing plugin eval regression suite debt",
+        "expires": "2026-07-31",
+    },
+    "Plugins/skill-factory/scripts/skill-builder/test_skill_gate_contract_evals.py": {
+        "owner": "skill-factory",
+        "rule_id": "ask-cli-shape-budget",
+        "ticket": "JSC-SDK-SPINE",
+        "reason": "pre-existing plugin gate regression suite debt",
+        "expires": "2026-07-31",
+    },
+    "Infrastructure/scripts/lib/ask/commands/skills_impl.py": {
+        "owner": "ask-cli",
+        "rule_id": "ask-cli-shape-budget",
+        "ticket": "JSC-SDK-SPINE",
+        "reason": "pre-existing skills command extraction debt",
+        "expires": "2026-07-31",
+    },
+    "Infrastructure/tests/test_ask_cli_impl.py": {
+        "owner": "ask-cli",
+        "rule_id": "ask-cli-shape-budget",
+        "ticket": "JSC-SDK-SPINE",
+        "reason": "pre-existing ask CLI regression suite debt",
+        "expires": "2026-07-31",
+    },
+}
+LEGACY_SHAPE_DEBT_PATHS = frozenset(LEGACY_SHAPE_DEBT)
 
 
 def parse_args() -> argparse.Namespace:
@@ -182,6 +232,7 @@ def _check_function_shape(path: Path, current: str, baseline: str | None, args: 
 
 def _check_python_shape(args: argparse.Namespace) -> list[str]:
     issues: list[str] = []
+    issues.extend(_check_legacy_shape_debt_metadata())
     for path in _changed_python_paths(tuple(args.changed_files)):
         relpath = path.relative_to(REPO_ROOT).as_posix()
         if relpath in LEGACY_SHAPE_DEBT_PATHS:
@@ -190,6 +241,25 @@ def _check_python_shape(args: argparse.Namespace) -> list[str]:
         baseline = _git_head_text(path)
         _check_file_size(path, current, baseline, args, issues)
         _check_function_shape(path, current, baseline, args, issues)
+    return issues
+
+
+def _check_legacy_shape_debt_metadata() -> list[str]:
+    issues: list[str] = []
+    required_fields = ("owner", "rule_id", "ticket", "reason", "expires")
+    today = date.today()
+    for relpath, metadata in sorted(LEGACY_SHAPE_DEBT.items()):
+        missing = [field for field in required_fields if not metadata.get(field)]
+        if missing:
+            issues.append(f"{relpath} legacy shape debt missing waiver field(s): {', '.join(missing)}")
+            continue
+        try:
+            expires = date.fromisoformat(metadata["expires"])
+        except ValueError:
+            issues.append(f"{relpath} legacy shape debt has invalid expires date: {metadata['expires']}")
+            continue
+        if expires < today:
+            issues.append(f"{relpath} legacy shape debt expired on {metadata['expires']}")
     return issues
 
 

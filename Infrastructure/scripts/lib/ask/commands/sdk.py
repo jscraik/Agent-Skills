@@ -97,12 +97,12 @@ def _add_sdk_package_parser(
         parents=[global_parser],
     )
     sdk_package_subparsers = sdk_package_parser.add_subparsers(dest="package_action", required=True)
-    sdk_package_build_parser = sdk_package_subparsers.add_parser(
-        "build",
-        help="Build a digest-backed package identity receipt without emitting an archive",
-        parents=[global_parser],
-    )
-    sdk_package_build_parser.add_argument("target", help="Skill handle or repo-relative skill source path")
+    for action, help_text in {
+        "build": "Build a digest-backed package identity receipt without emitting an archive",
+        "harden": "Build a read-only package hardening receipt from package identity",
+    }.items():
+        parser = sdk_package_subparsers.add_parser(action, help=help_text, parents=[global_parser])
+        parser.add_argument("target", help="Skill handle or repo-relative skill source path")
 
 
 def add_sdk_parser(
@@ -518,6 +518,8 @@ def _dispatch_sdk_eval(repo_root: Path, args: argparse.Namespace) -> CallResult:
 def _dispatch_sdk_package(repo_root: Path, args: argparse.Namespace) -> CallResult:
     if args.package_action == "build":
         return skills_commands.skills_sdk_package_build(repo_root, target=args.target)
+    if args.package_action == "harden":
+        return skills_commands.skills_sdk_package_harden(repo_root, target=args.target)
     return build_unknown_action_result("sdk package", args.package_action)
 
 

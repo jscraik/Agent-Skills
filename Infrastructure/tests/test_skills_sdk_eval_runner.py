@@ -29,6 +29,7 @@ def _command_env() -> dict[str, str]:
     env.setdefault("XDG_CACHE_HOME", str(temp_base / "xdg-cache"))
     env.setdefault("XDG_STATE_HOME", str(temp_base / "xdg-state"))
     env.setdefault("MISE_CACHE_DIR", str(temp_base / "mise-cache"))
+    env.setdefault("MISE_STATE_DIR", str(temp_base / "mise-state"))
     env.setdefault("UV_CACHE_DIR", str(temp_base / "uv-cache"))
     env.setdefault("MISE_TRUSTED_CONFIG_PATHS", str(REPO_ROOT / ".mise.toml"))
     return env
@@ -161,6 +162,9 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
         self.assertEqual(payload["status"], "pass")
         self.assertEqual(payload["receipt"]["runner"], "internal_skill_builder_v0")
         self.assertEqual(payload["receipt"]["target_path"], "Skills/agent-ops/testing")
+        self.assertEqual(payload["receipt"]["case_count"], 1)
+        self.assertEqual(payload["receipt"]["passed_count"], 1)
+        self.assertEqual(payload["receipt"]["failed_count"], 0)
         self.assertEqual(payload["internal_eval"]["tessl_eval"]["status"], "skipped")
 
 

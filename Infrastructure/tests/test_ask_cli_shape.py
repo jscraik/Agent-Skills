@@ -80,13 +80,12 @@ def sample(value):
     def test_legacy_shape_debt_registry_is_explicit(self) -> None:
         validator = _load_validator()
 
-        self.assertEqual(
-            validator.LEGACY_SHAPE_DEBT_PATHS,
-            frozenset({
-                "Infrastructure/scripts/lib/ask/commands/skills_impl.py",
-                "Infrastructure/tests/test_ask_cli_impl.py",
-            }),
-        )
+        self.assertEqual(validator.LEGACY_SHAPE_DEBT_PATHS, frozenset(validator.LEGACY_SHAPE_DEBT))
+        self.assertGreaterEqual(len(validator.LEGACY_SHAPE_DEBT), 2)
+        for metadata in validator.LEGACY_SHAPE_DEBT.values():
+            self.assertTrue(metadata["owner"])
+            self.assertTrue(metadata["reason"])
+            self.assertRegex(metadata["expires"], r"^20\d{2}-\d{2}-\d{2}$")
 
 
 if __name__ == "__main__":

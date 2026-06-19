@@ -38,6 +38,7 @@
     "./bin/ask sdk ir build Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
     "./bin/ask sdk eval run --runner deterministic-jsonl --dataset Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --skill Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
     "./bin/ask sdk package build Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
+    "./bin/ask sdk package harden Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
     "/Users/jamiecraik/.venvs/pyyaml/bin/python Infrastructure/scripts/validation-and-linting/check_sdk_stage_skill_shape.py",
     "python3 -m unittest Infrastructure.scripts.testing.test_skill_creator_lifecycle_scaffold -v",
     "python3 -m unittest Infrastructure.scripts.testing.test_sdk_stage_skill_shape_validator -v",
@@ -50,6 +51,7 @@
     "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_ir.py -q",
     "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_eval_runner.py -q",
     "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_package_build.py -q",
+    "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_package_hardening.py -q",
     "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_capability_status.py Infrastructure/tests/test_skills_sdk_pipeline_status_artifact.py -q"
   ],
   "capabilities": [
@@ -570,14 +572,18 @@
     {
       "id": "package_hardening",
       "title": "Package hardening",
-      "status": "deferred",
-      "owner_surface": "future hardening lane",
+      "status": "implemented",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/package_hardening.py",
       "pipeline_sections": ["package_hardening", "release_decision_matrix"],
-      "feature_executed": false,
+      "feature_executed": true,
       "mutation_performed": false,
-      "evidence_refs": ["artifacts/recommended-skills-sdk-pipeline.html"],
-      "next_slice": "Add hardening checks after capability truth is visible and package pipeline scope is approved.",
-      "notes": "Some local package checks exist, but the broader hardening lane remains a roadmap capability."
+      "evidence_refs": [
+        "./bin/ask sdk package harden Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
+        "Infrastructure/config/schemas/skills-sdk/package-hardening-receipt.v0.schema.json",
+        "Infrastructure/tests/test_skills_sdk_package_hardening.py"
+      ],
+      "next_slice": "Connect hardening to archive emission only after signing, redaction, and publish authority are approved.",
+      "notes": "Read-only package hardening emits a receipt from package identity and blocks forbidden local runtime, generated artifact, dependency, or secret-bearing paths."
     }
   ]
 }

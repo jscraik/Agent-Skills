@@ -109,6 +109,7 @@ from ask.skills_sdk.install_preview import build_install_preview as _build_insta
 from ask.skills_sdk.ir import build_skill_ir as _build_skill_ir  # noqa: E402
 from ask.skills_sdk.docs_projection import verify_capability_docs_projection as _verify_capability_docs_projection  # noqa: E402
 from ask.skills_sdk.package_build import build_package_digest_receipt as _build_package_digest_receipt  # noqa: E402
+from ask.skills_sdk.package_hardening import build_package_hardening_receipt as _build_package_hardening_receipt  # noqa: E402
 from ask.skills_sdk.eval_runner import run_deterministic_eval as _run_deterministic_eval  # noqa: E402
 from ask.skills_sdk.project_install import (  # noqa: E402
     ProjectInstallError as _ProjectInstallError,
@@ -206,6 +207,7 @@ __all__ = [
     "skills_sdk_docs_verify",
     "skills_sdk_ir_build",
     "skills_sdk_package_build",
+    "skills_sdk_package_harden",
     "skills_sdk_eval_run",
     "skills_sdk_placeholder_lifecycle",
     "skills_sdk_project_rollback",
@@ -4094,6 +4096,75 @@ def skills_sdk_package_build(
     return result
 
 
+def skills_sdk_package_harden(
+    repo_root: Path,
+    target: str,
+) -> CallResult:
+    """Build a read-only package hardening receipt for one skill target."""
+    result = CallResult()
+    result.metadata["command"] = "sdk package harden"
+    query = target.strip()
+    target_info, _audit_target = _resolve_doctor_target(repo_root, query)
+    source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
+    source_path = Path(str(source_path_value)) if source_path_value else None
+    if source_path and not source_path.is_absolute():
+        source_path = repo_root / source_path
+
+    if not source_path or not source_path.is_file():
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Skills SDK package harden is missing a canonical SKILL.md source for '{query}'.",
+                fix_suggestion=_ask_validation_command("sdk", "package", "build", query),
+            )
+        )
+        result.data["skills_sdk_package_harden"] = {
+            "schema_version": "skills-sdk-package-harden.v0",
+            "query": query,
+            "status": "blocked",
+            "canonical_source_path": source_path_value,
+            "receipt": None,
+            "mutation_performed": False,
+            "validation_commands": [_ask_validation_command("sdk", "package", "harden", query)],
+            "agent_summary": f"skills-sdk package harden is blocked for {query}: canonical source is missing.",
+        }
+        return result
+
+    package_receipt = _build_package_digest_receipt(repo_root, source_path=source_path, query=query)
+    hardening_receipt = _build_package_hardening_receipt(package_receipt)
+    payload = {
+        "schema_version": "skills-sdk-package-harden.v0",
+        "query": query,
+        "status": hardening_receipt["status"],
+        "canonical_source_path": source_path_value,
+        "facade_command": "skills-sdk package harden",
+        "package_id": hardening_receipt["package_id"],
+        "version": hardening_receipt["version"],
+        "package_digest": hardening_receipt["package_digest"],
+        "receipt": hardening_receipt,
+        "mutation_performed": False,
+        "validation_commands": [
+            _ask_validation_command("sdk", "package", "harden", query),
+        ],
+        "agent_summary": f"skills-sdk package harden {hardening_receipt['status']} for {query} without writes.",
+    }
+    result.data["skills_sdk_package_harden"] = payload
+    if hardening_receipt["status"] != "pass":
+        result.status = "error"
+        message = "Skills SDK package hardening blocked package emission."
+        if hardening_receipt["blockers"]:
+            message = hardening_receipt["blockers"][0]["message"]
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=message,
+                fix_suggestion="Remove forbidden package paths or restore canonical SkillIR/package provenance before hardening.",
+            )
+        )
+    return result
+
+
 def skills_sdk_eval_run(
     repo_root: Path,
     dataset: str | None = None,
@@ -4147,6 +4218,7 @@ def skills_sdk_eval_run(
         if internal.status != "success":
             blockers = [error.message for error in internal.errors] or [raw_status]
         status = "pass" if internal.status == "success" else "blocked" if raw_status.startswith("blocked") else "fail"
+        internal_case_count = 0 if status == "blocked" else 1
         receipt = {
             "schema_version": "skills-sdk.eval-run-receipt.v0",
             "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/eval-run-receipt.v0.schema.json",
@@ -4157,9 +4229,9 @@ def skills_sdk_eval_run(
             "skill_ir_schema_version": None,
             "target_path": str(internal.data.get("resolved_skill_path") or target),
             "mode": mode,
-            "case_count": 0,
-            "passed_count": 0 if status != "pass" else 1,
-            "failed_count": 0 if status == "pass" else 1,
+            "case_count": internal_case_count,
+            "passed_count": 1 if status == "pass" else 0,
+            "failed_count": 1 if status == "fail" else 0,
             "cases": [],
             "blockers": blockers,
             "mutation_performed": False,

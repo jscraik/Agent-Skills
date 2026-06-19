@@ -346,7 +346,7 @@ class SkillIr(_SdkContractModel):
 
 class PackageManifestFile(_SdkContractModel):
     path: str
-    sha256: str = Field(min_length=64)
+    sha256: str = Field(min_length=64, max_length=64)
     size_bytes: int = Field(ge=0)
     role: Literal["skill_md", "readme", "reference", "script", "asset", "eval"]
 
@@ -384,6 +384,37 @@ class PackageDigestReceipt(_SdkContractModel):
     manifest: PackageManifest
     included_files: list[str] = Field(min_length=1)
     excluded_files: list[str]
+    mutation_performed: Literal[False]
+    acceptance_trace: list[Literal["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022"]] = Field(
+        min_length=1
+    )
+
+
+class PackageHardeningCheck(_SdkContractModel):
+    id: str = Field(min_length=1)
+    status: Literal["pass", "warning", "blocker"]
+    severity: Literal["info", "warning", "blocker"]
+    message: str = Field(min_length=1)
+    evidence: list[str]
+
+
+class PackageHardeningReceipt(_SdkContractModel):
+    schema_version: Literal["skills-sdk.package-hardening-receipt.v0"]
+    schema_uri: Literal[
+        "https://jscraik.local/agent-skills/schemas/skills-sdk/package-hardening-receipt.v0.schema.json"
+    ]
+    status: Literal["pass", "blocked"]
+    package_id: str = Field(min_length=1)
+    version: str = Field(min_length=1)
+    source_digest: str = Field(min_length=71)
+    manifest_digest: str = Field(min_length=71)
+    package_digest: str = Field(min_length=71)
+    included_files: list[str]
+    file_count: int = Field(ge=0)
+    total_size_bytes: int = Field(ge=0)
+    hardening_checks: list[PackageHardeningCheck] = Field(min_length=1)
+    blockers: list[PackageHardeningCheck]
+    warnings: list[PackageHardeningCheck]
     mutation_performed: Literal[False]
     acceptance_trace: list[Literal["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022"]] = Field(
         min_length=1
@@ -633,6 +664,10 @@ def validate_package_manifest(payload: object) -> PackageManifest:
 
 def validate_package_digest_receipt(payload: object) -> PackageDigestReceipt:
     return PackageDigestReceipt.model_validate(payload)
+
+
+def validate_package_hardening_receipt(payload: object) -> PackageHardeningReceipt:
+    return PackageHardeningReceipt.model_validate(payload)
 
 
 def validate_eval_case(payload: object) -> EvalCase:

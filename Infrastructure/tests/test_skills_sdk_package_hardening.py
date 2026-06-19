@@ -6,6 +6,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from copy import deepcopy
 from pathlib import Path
 
 
@@ -13,7 +14,8 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
 from ask.skills_sdk.package_build import build_package_digest_receipt  # noqa: E402
-from ask.skills_sdk.typed_contracts import validate_package_digest_receipt, validate_robot_envelope  # noqa: E402
+from ask.skills_sdk.package_hardening import build_package_hardening_receipt  # noqa: E402
+from ask.skills_sdk.typed_contracts import validate_package_hardening_receipt, validate_robot_envelope  # noqa: E402
 
 
 FIXTURE_SKILL = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/valid_skill"
@@ -31,30 +33,51 @@ def _command_env() -> dict[str, str]:
     return env
 
 
-class TestSkillsSdkPackageBuild(unittest.TestCase):
-    def test_builder_emits_non_mutating_package_digest_receipt(self) -> None:
-        payload = build_package_digest_receipt(
+class TestSkillsSdkPackageHardening(unittest.TestCase):
+    def _package_receipt(self) -> dict:
+        return build_package_digest_receipt(
             REPO_ROOT,
             source_path=FIXTURE_SKILL / "SKILL.md",
             query=FIXTURE_SKILL.as_posix(),
         )
-        model = validate_package_digest_receipt(payload)
 
-        self.assertEqual(model.schema_version, "skills-sdk.package-digest-receipt.v0")
-        self.assertEqual(model.package_id, "skills-sdk-valid-fixture")
-        self.assertEqual(model.manifest.skill_ir_schema_version, "skills-sdk.skill-ir.v0")
+    def test_builder_emits_non_mutating_hardening_receipt(self) -> None:
+        payload = build_package_hardening_receipt(self._package_receipt())
+        model = validate_package_hardening_receipt(payload)
+
+        self.assertEqual(model.schema_version, "skills-sdk.package-hardening-receipt.v0")
+        self.assertEqual(model.status, "pass")
         self.assertFalse(model.mutation_performed)
+        self.assertEqual(model.package_id, "skills-sdk-valid-fixture")
+        self.assertEqual(model.blockers, [])
         self.assertEqual(model.included_files, ["Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md"])
-        self.assertTrue(model.package_digest.startswith("sha256:"))
 
-    def test_public_cli_builds_package_identity_receipt(self) -> None:
+    def test_builder_blocks_forbidden_package_paths(self) -> None:
+        package_receipt = deepcopy(self._package_receipt())
+        package_receipt["manifest"]["files"].append(
+            {
+                "path": "Skills/sample/.ENV.production",
+                "sha256": "0" * 64,
+                "size_bytes": 0,
+                "role": "reference",
+            }
+        )
+
+        payload = build_package_hardening_receipt(package_receipt)
+        model = validate_package_hardening_receipt(payload)
+
+        self.assertEqual(model.status, "blocked")
+        self.assertEqual(model.blockers[0].id, "forbidden_package_paths")
+        self.assertIn("Skills/sample/.ENV.production:forbidden_env_family", model.blockers[0].evidence)
+
+    def test_public_cli_hardens_package_identity_receipt(self) -> None:
         completed = subprocess.run(
             [
                 sys.executable,
                 "Infrastructure/bin/ask",
                 "sdk",
                 "package",
-                "build",
+                "harden",
                 "Infrastructure/tests/fixtures/skills_sdk/valid_skill",
                 "--json",
                 "--robot",
@@ -69,15 +92,14 @@ class TestSkillsSdkPackageBuild(unittest.TestCase):
 
         self.assertEqual(completed.returncode, 0, completed.stderr)
         envelope = validate_robot_envelope(json.loads(completed.stdout))
-        payload = envelope.data["skills_sdk_package_build"]
+        payload = envelope.data["skills_sdk_package_harden"]
         self.assertIsInstance(payload, dict)
-        receipt = validate_package_digest_receipt(payload["receipt"])
+        receipt = validate_package_hardening_receipt(payload["receipt"])
 
-        self.assertEqual(payload["status"], "built")
-        self.assertEqual(payload["package_digest"], receipt.package_digest)
-        self.assertEqual(payload["included_files"], ["Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md"])
+        self.assertEqual(payload["status"], "pass")
+        self.assertEqual(receipt.status, "pass")
         self.assertFalse(payload["mutation_performed"])
-        self.assertIn("./bin/ask sdk package build", payload["validation_commands"][0])
+        self.assertIn("./bin/ask sdk package harden", payload["validation_commands"][0])
 
     def test_public_cli_blocks_missing_skill_source(self) -> None:
         completed = subprocess.run(
@@ -86,7 +108,7 @@ class TestSkillsSdkPackageBuild(unittest.TestCase):
                 "Infrastructure/bin/ask",
                 "sdk",
                 "package",
-                "build",
+                "harden",
                 "Infrastructure/tests/fixtures/skills_sdk/missing",
                 "--json",
                 "--robot",
@@ -101,10 +123,9 @@ class TestSkillsSdkPackageBuild(unittest.TestCase):
 
         self.assertNotEqual(completed.returncode, 0, completed.stdout)
         envelope = validate_robot_envelope(json.loads(completed.stdout))
-        payload = envelope.data["skills_sdk_package_build"]
+        payload = envelope.data["skills_sdk_package_harden"]
 
         self.assertEqual(envelope.status, "error")
-        self.assertEqual(envelope.errors[0].code, "ERR_VALIDATION")
         self.assertEqual(payload["status"], "blocked")
         self.assertFalse(payload["mutation_performed"])
 

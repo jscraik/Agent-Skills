@@ -22,6 +22,7 @@ def _command_env() -> dict[str, str]:
     env.setdefault("XDG_CACHE_HOME", str(temp_base / "xdg-cache"))
     env.setdefault("XDG_STATE_HOME", str(temp_base / "xdg-state"))
     env.setdefault("MISE_CACHE_DIR", str(temp_base / "mise-cache"))
+    env.setdefault("MISE_STATE_DIR", str(temp_base / "mise-state"))
     env.setdefault("UV_CACHE_DIR", str(temp_base / "uv-cache"))
     env.setdefault("MISE_TRUSTED_CONFIG_PATHS", str(REPO_ROOT / ".mise.toml"))
     return env
@@ -80,6 +81,33 @@ class TestSkillsSdkDocsProjection(unittest.TestCase):
         self.assertEqual(payload["status"], "blocked")
         self.assertEqual(payload["blockers"][0]["code"], "status_mismatch")
         self.assertEqual(payload["blockers"][0]["rows"][0]["id"], "skill_ir")
+
+    def test_verifier_blocks_duplicate_capability_rows(self) -> None:
+        source = REPO_ROOT / "artifacts/recommended-skills-sdk-pipeline.html"
+        duplicate = (
+            '<tr data-capability-id="skill_ir" data-status="implemented" '
+            'data-pipeline-sections="compiler_emitter_discipline,domain_model_integrity,public_sdk_surface"></tr>'
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            drifted = Path(tmpdir) / "duplicate.html"
+            drifted.write_text(source.read_text(encoding="utf-8") + duplicate, encoding="utf-8")
+
+            payload = verify_capability_docs_projection(REPO_ROOT, artifact_path=drifted)
+
+        self.assertEqual(payload["status"], "blocked")
+        blocker_codes = {blocker["code"] for blocker in payload["blockers"]}
+        self.assertIn("duplicate_capability_rows", blocker_codes)
+
+    def test_verifier_returns_blocked_receipt_for_parse_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            invalid = Path(tmpdir) / "invalid.html"
+            invalid.write_bytes(b"\xff")
+
+            payload = verify_capability_docs_projection(REPO_ROOT, artifact_path=invalid)
+
+        self.assertEqual(payload["status"], "blocked")
+        blocker_codes = {blocker["code"] for blocker in payload["blockers"]}
+        self.assertIn("projection_parse_failed", blocker_codes)
 
 
 if __name__ == "__main__":

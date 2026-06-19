@@ -35,10 +35,24 @@ class _CapabilityTableParser(HTMLParser):
         )
 
 
-def _load_projection_rows(path: Path) -> list[dict[str, Any]]:
+def _load_projection_rows(path: Path) -> tuple[list[dict[str, Any]], dict[str, Any] | None]:
     parser = _CapabilityTableParser()
-    parser.feed(path.read_text(encoding="utf-8"))
-    return parser.rows
+    try:
+        parser.feed(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError) as exc:
+        return [], {"code": "projection_parse_failed", "path": path.as_posix(), "message": str(exc)}
+    return parser.rows, None
+
+
+def _duplicate_ids(rows: list[dict[str, Any]]) -> list[str]:
+    seen: set[str] = set()
+    duplicates: set[str] = set()
+    for row in rows:
+        capability_id = row["id"]
+        if capability_id in seen:
+            duplicates.add(capability_id)
+        seen.add(capability_id)
+    return sorted(duplicates)
 
 
 def _row_mismatches(
@@ -60,12 +74,18 @@ def _blockers(
     html_path: Path,
     expected_by_id: dict[str, dict[str, Any]],
     actual_by_id: dict[str, dict[str, Any]],
+    duplicate_ids: list[str],
+    parse_blocker: dict[str, Any] | None,
 ) -> list[dict[str, Any]]:
     blockers: list[dict[str, Any]] = []
     missing = sorted(set(expected_by_id) - set(actual_by_id))
     extra = sorted(set(actual_by_id) - set(expected_by_id))
     if not html_path.is_file():
         blockers.append({"code": "missing_projection_artifact", "path": html_path.as_posix()})
+    if parse_blocker:
+        blockers.append(parse_blocker)
+    if duplicate_ids:
+        blockers.append({"code": "duplicate_capability_rows", "capability_ids": duplicate_ids})
     if missing:
         blockers.append({"code": "missing_capability_rows", "capability_ids": missing})
     if extra:
@@ -94,9 +114,9 @@ def verify_capability_docs_projection(
     matrix = load_capability_matrix(repo_root)
     capabilities = matrix["capabilities"]
     expected_by_id = {row["id"]: row for row in capabilities}
-    rows = _load_projection_rows(html_path) if html_path.is_file() else []
+    rows, parse_blocker = _load_projection_rows(html_path) if html_path.is_file() else ([], None)
     actual_by_id = {row["id"]: row for row in rows}
-    blockers = _blockers(html_path, expected_by_id, actual_by_id)
+    blockers = _blockers(html_path, expected_by_id, actual_by_id, _duplicate_ids(rows), parse_blocker)
     status = "pass" if not blockers else "blocked"
     return {
         "schema_version": "skills-sdk.docs-projection-verify.v0",
