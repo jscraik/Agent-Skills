@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/package-manifest.v0.schema.json",
+  "title": "Skills SDK Package Manifest v0",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "string", "const": "skills-sdk.package-manifest.v0"},
+    "schema_uri": {"type": "string", "const": "https://jscraik.local/agent-skills/schemas/skills-sdk/package-manifest.v0.schema.json"},
+    "package_id": {"type": "string", "minLength": 1},
+    "version": {"type": "string", "minLength": 1},
+    "skill_ir_schema_version": {"type": "string", "const": "skills-sdk.skill-ir.v0"},
+    "source": {"$ref": "skill-ir.v0.schema.json#/properties/source"},
+    "files": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/definitions/packageFile"}
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "builder": {"type": "string", "minLength": 1}
+      },
+      "required": ["source", "builder"]
+    },
+    "mutation_performed": {"type": "boolean", "const": false}
+  },
+  "required": ["schema_version", "schema_uri", "package_id", "version", "skill_ir_schema_version", "source", "files", "provenance", "mutation_performed"],
+  "definitions": {
+    "packageFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {"type": "string", "minLength": 64},
+        "size_bytes": {"type": "integer", "minimum": 0},
+        "role": {"type": "string", "enum": ["skill_md", "readme", "reference", "script", "asset", "eval"]}
+      },
+      "required": ["path", "sha256", "size_bytes", "role"]
+    }
+  }
+}

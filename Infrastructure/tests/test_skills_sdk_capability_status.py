@@ -196,8 +196,19 @@ class TestSkillsSdkCapabilityStatus(unittest.TestCase):
         """
         self.assertIn("rollback", VALID_ACTIONS["sdk"])
         self.assertIn("uninstall", VALID_ACTIONS["sdk"])
+        self.assertIn("ir", VALID_ACTIONS["sdk"])
+        self.assertIn("docs", VALID_ACTIONS["sdk"])
+        self.assertIn("eval", VALID_ACTIONS["sdk"])
+        self.assertIn("package", VALID_ACTIONS["sdk"])
         self.assertIn("status", VALID_ACTIONS["sdk"])
         self.assertIn("project", VALID_ACTIONS["sdk"])
+        self.assertIn("ask sdk ir build Skills/agent-ops/autofix --json --robot", COMMAND_EXAMPLES[("sdk", "ir")])
+        self.assertIn("ask sdk docs verify --json --robot", COMMAND_EXAMPLES[("sdk", "docs")])
+        self.assertIn(
+            "ask sdk eval run Skills/agent-ops/testing --runner internal --mode smoke --json --robot",
+            COMMAND_EXAMPLES[("sdk", "eval")],
+        )
+        self.assertIn("ask sdk package build Skills/agent-ops/autofix --json --robot", COMMAND_EXAMPLES[("sdk", "package")])
         self.assertTrue(any(command.startswith("ask sdk rollback ") for command in COMMAND_EXAMPLES[("sdk", "rollback")]))
         self.assertTrue(any(command.startswith("ask sdk uninstall ") for command in COMMAND_EXAMPLES[("sdk", "uninstall")]))
         self.assertIn("ask sdk status --json --robot", COMMAND_EXAMPLES[("sdk", "status")])

@@ -23,19 +23,92 @@ from ask.skills_sdk.review_plan import build_review_plan
 from ask.skills_sdk.review_verify import build_review_verification
 
 
+def _add_sdk_ir_parser(
+    sdk_subparsers: argparse._SubParsersAction,
+    global_parser: argparse.ArgumentParser,
+) -> None:
+    sdk_ir_parser = sdk_subparsers.add_parser(
+        "ir",
+        help="Build read-only Skills SDK intermediate representations",
+        parents=[global_parser],
+    )
+    sdk_ir_subparsers = sdk_ir_parser.add_subparsers(dest="ir_action", required=True)
+    sdk_ir_build_parser = sdk_ir_subparsers.add_parser(
+        "build",
+        help="Build SkillIR.v0 for one skill handle or source path",
+        parents=[global_parser],
+    )
+    sdk_ir_build_parser.add_argument("target", help="Skill handle or repo-relative skill source path")
+
+
+def _add_sdk_docs_parser(
+    sdk_subparsers: argparse._SubParsersAction,
+    global_parser: argparse.ArgumentParser,
+) -> None:
+    sdk_docs_parser = sdk_subparsers.add_parser(
+        "docs",
+        help="Verify Skills SDK documentation projections",
+        parents=[global_parser],
+    )
+    sdk_docs_subparsers = sdk_docs_parser.add_subparsers(dest="docs_action", required=True)
+    sdk_docs_verify_parser = sdk_docs_subparsers.add_parser(
+        "verify",
+        help="Verify the static capability table mirrors the SDK capability matrix",
+        parents=[global_parser],
+    )
+    sdk_docs_verify_parser.add_argument(
+        "--artifact",
+        help="Optional repo-relative or absolute HTML artifact path to verify",
+    )
+
+
+def _add_sdk_eval_parser(
+    sdk_subparsers: argparse._SubParsersAction,
+    global_parser: argparse.ArgumentParser,
+) -> None:
+    sdk_eval_parser = sdk_subparsers.add_parser("eval", help="Run Skills SDK eval receipts", parents=[global_parser])
+    sdk_eval_subparsers = sdk_eval_parser.add_subparsers(dest="eval_action", required=True)
+    sdk_eval_run_parser = sdk_eval_subparsers.add_parser(
+        "run",
+        help="Run internal skill evals or exact-match deterministic eval cases",
+        parents=[global_parser],
+    )
+    sdk_eval_run_parser.add_argument("target", nargs="?", help="Skill handle or source path for the internal eval runner")
+    sdk_eval_run_parser.add_argument("--dataset", help="Repo-relative or absolute deterministic eval dataset")
+    sdk_eval_run_parser.add_argument("--skill", help="Optional skill handle or source path for deterministic evals")
+    sdk_eval_run_parser.add_argument(
+        "--runner",
+        choices=["auto", "internal", "deterministic-jsonl"],
+        default="auto",
+        help="Eval backend. auto uses deterministic-jsonl with --dataset, otherwise internal.",
+    )
+    sdk_eval_run_parser.add_argument("--mode", choices=["smoke", "release"], default="smoke", help="Internal eval mode.")
+    sdk_eval_run_parser.add_argument("--case", action="append", dest="cases", help="Internal eval case id filter.")
+    sdk_eval_run_parser.add_argument("--with-tessl", action="store_true", help="Allow internal Tessl continuation.")
+
+
+def _add_sdk_package_parser(
+    sdk_subparsers: argparse._SubParsersAction,
+    global_parser: argparse.ArgumentParser,
+) -> None:
+    sdk_package_parser = sdk_subparsers.add_parser(
+        "package",
+        help="Build read-only Skills SDK package identity receipts",
+        parents=[global_parser],
+    )
+    sdk_package_subparsers = sdk_package_parser.add_subparsers(dest="package_action", required=True)
+    sdk_package_build_parser = sdk_package_subparsers.add_parser(
+        "build",
+        help="Build a digest-backed package identity receipt without emitting an archive",
+        parents=[global_parser],
+    )
+    sdk_package_build_parser.add_argument("target", help="Skill handle or repo-relative skill source path")
+
+
 def add_sdk_parser(
     subparsers: argparse._SubParsersAction,
     global_parser: argparse.ArgumentParser,
 ) -> None:
-    """
-    Register the 'sdk' CLI command and its subcommands on the provided subparsers.
-    
-    This adds the top-level "sdk" parser with subcommands: check, install, rollback, uninstall, lifecycle, status, and a nested read-only "project" group with "status" and "doctor". Each subcommand is configured with its expected arguments and shared parents.
-    
-    Parameters:
-        subparsers (argparse._SubParsersAction): The parent subparsers object to which the "sdk" parser will be attached.
-        global_parser (argparse.ArgumentParser): A parser containing global/common arguments to be included as a parent for all "sdk" subcommands.
-    """
     sdk_parser = subparsers.add_parser("sdk", help="Skills SDK product facade", parents=[global_parser])
     sdk_subparsers = sdk_parser.add_subparsers(dest="action")
     sdk_check_parser = sdk_subparsers.add_parser(
@@ -46,6 +119,10 @@ def add_sdk_parser(
     sdk_check_parser.add_argument("target", help="Skill handle or repo-relative skill source path")
     sdk_check_parser.add_argument("--strict", action="store_true", help="Run strict audit instead of the default compat audit")
     sdk_check_parser.add_argument("--codex-parity", action="store_true", help="Require Codex-targeted runtime proof")
+    _add_sdk_ir_parser(sdk_subparsers, global_parser)
+    _add_sdk_docs_parser(sdk_subparsers, global_parser)
+    _add_sdk_eval_parser(sdk_subparsers, global_parser)
+    _add_sdk_package_parser(sdk_subparsers, global_parser)
     sdk_install_parser = sdk_subparsers.add_parser(
         "install",
         help="Preview or apply a bounded Skills SDK project install",
@@ -299,24 +376,6 @@ def add_sdk_parser(
 
 
 def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
-    """
-    Dispatches an SDK CLI action to the corresponding skills command and validates required argument combinations.
-    
-    Parameters:
-        repo_root (Path): Repository root path passed to SDK handlers.
-        args (argparse.Namespace): Parsed CLI arguments. Expected attributes vary by action:
-            - action: one of "check", "install", "rollback", "uninstall", "lifecycle", "status", "project".
-            - For "check": target, strict, codex_parity.
-            - For "install": target, preview, apply, project_root, scope.
-            - For "rollback": receipt, preview, apply, project_root.
-            - For "uninstall": skill_id, preview, apply, project_root.
-            - For "lifecycle": surface, risk_tier.
-            - For "project": project_action (e.g., "status" or "doctor"), project_root.
-            Provide only the attributes required for the chosen action.
-    
-    Returns:
-        CallResult: Result produced by the invoked skills command. If argument validation fails, returns a `CallResult` with `status="error"` and an `ERR_VALIDATION` error; if the action is unrecognized, returns an unknown-action `CallResult`.
-    """
     if args.action == "check":
         return skills_commands.skills_sdk_check(
             repo_root,
@@ -359,6 +418,14 @@ def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
             target=args.target,
             scope=args.scope,
         )
+    core_dispatchers = {
+        "ir": _dispatch_sdk_ir,
+        "docs": _dispatch_sdk_docs,
+        "eval": _dispatch_sdk_eval,
+        "package": _dispatch_sdk_package,
+    }
+    if args.action in core_dispatchers:
+        return core_dispatchers[args.action](repo_root, args)
     if args.action == "rollback":
         if args.preview == args.apply:
             result = CallResult(status="error")
@@ -403,8 +470,14 @@ def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
         )
     if args.action == "status":
         return skills_commands.skills_sdk_status(repo_root)
-    if args.action == "knowledge":
-        return _dispatch_sdk_knowledge(repo_root, args)
+    tail_dispatchers = {
+        "knowledge": _dispatch_sdk_knowledge,
+        "lenses": _dispatch_sdk_lenses,
+        "determinism": _dispatch_sdk_determinism,
+        "review": _dispatch_sdk_review,
+    }
+    if args.action in tail_dispatchers:
+        return tail_dispatchers[args.action](repo_root, args)
     if args.action == "project":
         if args.project_action in {"status", "doctor"}:
             return skills_commands.skills_sdk_project_conformance(
@@ -413,13 +486,39 @@ def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
                 mode=args.project_action,
             )
         return build_unknown_action_result("sdk", args.project_action)
-    if args.action == "lenses":
-        return _dispatch_sdk_lenses(repo_root, args)
-    if args.action == "determinism":
-        return _dispatch_sdk_determinism(repo_root, args)
-    if args.action == "review":
-        return _dispatch_sdk_review(repo_root, args)
     return build_unknown_action_result("sdk", args.action)
+
+
+def _dispatch_sdk_ir(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    if args.ir_action == "build":
+        return skills_commands.skills_sdk_ir_build(repo_root, target=args.target)
+    return build_unknown_action_result("sdk ir", args.ir_action)
+
+
+def _dispatch_sdk_docs(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    if args.docs_action == "verify":
+        return skills_commands.skills_sdk_docs_verify(repo_root, artifact=args.artifact)
+    return build_unknown_action_result("sdk docs", args.docs_action)
+
+
+def _dispatch_sdk_eval(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    if args.eval_action == "run":
+        return skills_commands.skills_sdk_eval_run(
+            repo_root,
+            dataset=args.dataset,
+            target=args.skill or args.target,
+            mode=args.mode,
+            runner=args.runner,
+            skip_tessl=not args.with_tessl,
+            cases=args.cases,
+        )
+    return build_unknown_action_result("sdk eval", args.eval_action)
+
+
+def _dispatch_sdk_package(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    if args.package_action == "build":
+        return skills_commands.skills_sdk_package_build(repo_root, target=args.target)
+    return build_unknown_action_result("sdk package", args.package_action)
 
 
 def _dispatch_sdk_knowledge(repo_root: Path, args: argparse.Namespace) -> CallResult:

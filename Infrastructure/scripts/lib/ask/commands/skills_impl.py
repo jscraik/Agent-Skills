@@ -106,6 +106,10 @@ from ask.skills_sdk.package_verify import (  # noqa: E402
 )
 from ask.skills_sdk.risk import build_risk_classification as _build_risk_classification  # noqa: E402
 from ask.skills_sdk.install_preview import build_install_preview as _build_install_preview  # noqa: E402
+from ask.skills_sdk.ir import build_skill_ir as _build_skill_ir  # noqa: E402
+from ask.skills_sdk.docs_projection import verify_capability_docs_projection as _verify_capability_docs_projection  # noqa: E402
+from ask.skills_sdk.package_build import build_package_digest_receipt as _build_package_digest_receipt  # noqa: E402
+from ask.skills_sdk.eval_runner import run_deterministic_eval as _run_deterministic_eval  # noqa: E402
 from ask.skills_sdk.project_install import (  # noqa: E402
     ProjectInstallError as _ProjectInstallError,
     install_project_skill as _install_project_skill,
@@ -199,6 +203,10 @@ __all__ = [
     "skills_explain_boundary",
     "skills_handles",
     "skills_sdk_install_preview",
+    "skills_sdk_docs_verify",
+    "skills_sdk_ir_build",
+    "skills_sdk_package_build",
+    "skills_sdk_eval_run",
     "skills_sdk_placeholder_lifecycle",
     "skills_sdk_project_rollback",
     "skills_sdk_project_uninstall",
@@ -3937,6 +3945,329 @@ def skills_sdk_install_preview(
                 code="ERR_VALIDATION",
                 message=payload["agent_summary"],
                 fix_suggestion=_ask_validation_command("sdk", "check", query),
+            )
+        )
+    return result
+
+
+def skills_sdk_ir_build(
+    repo_root: Path,
+    target: str,
+) -> CallResult:
+    """Build a read-only SkillIR.v0 payload for one canonical skill target."""
+    result = CallResult()
+    result.metadata["command"] = "sdk ir build"
+    query = target.strip()
+    target_info, _audit_target = _resolve_doctor_target(repo_root, query)
+    source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
+    source_path = Path(str(source_path_value)) if source_path_value else None
+    if source_path and not source_path.is_absolute():
+        source_path = repo_root / source_path
+
+    if not source_path or not source_path.is_file():
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Skills SDK IR build is missing a canonical SKILL.md source for '{query}'.",
+                fix_suggestion=_ask_validation_command("sdk", "check", query),
+            )
+        )
+        result.data["skills_sdk_ir"] = {
+            "schema_version": "skills-sdk-ir-build.v0",
+            "query": query,
+            "status": "blocked",
+            "canonical_source_path": source_path_value,
+            "mutation_performed": False,
+            "validation_commands": [_ask_validation_command("sdk", "ir", "build", query)],
+            "agent_summary": f"skills-sdk ir build is blocked for {query}: canonical source is missing.",
+        }
+        return result
+
+    ir = _build_skill_ir(repo_root, source_path=source_path, query=query)
+    payload = {
+        "schema_version": "skills-sdk-ir-build.v0",
+        "query": query,
+        "status": "built",
+        "canonical_source_path": source_path_value,
+        "facade_command": "skills-sdk ir build",
+        "ir": ir,
+        "receipt": {
+            "command": "skills-sdk ir build",
+            "status": "built",
+            "mutation_performed": False,
+            "schema_version": ir["schema_version"],
+            "source_path": ir["source"]["skill_md"],
+        },
+        "validation_commands": [
+            _ask_validation_command("sdk", "ir", "build", query),
+        ],
+        "agent_summary": f"skills-sdk ir build produced SkillIR.v0 for {query} without writes.",
+    }
+    result.data["skills_sdk_ir"] = payload
+    return result
+
+
+def skills_sdk_docs_verify(
+    repo_root: Path,
+    artifact: str | None = None,
+) -> CallResult:
+    """Verify static SDK docs projections against executable capability truth."""
+    result = CallResult()
+    result.metadata["command"] = "sdk docs verify"
+    artifact_path = Path(artifact) if artifact else None
+    payload = _verify_capability_docs_projection(repo_root, artifact_path=artifact_path)
+    payload["validation_commands"] = [
+        _ask_validation_command("sdk", "docs", "verify")
+        if not artifact
+        else _ask_validation_command("sdk", "docs", "verify", "--artifact", artifact)
+    ]
+    result.data["skills_sdk_docs_verify"] = payload
+    if payload["status"] != "pass":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=payload["agent_summary"],
+                fix_suggestion="Regenerate or patch the capability projection from Infrastructure/config/skills-sdk/capability-matrix.v1.json.",
+            )
+        )
+    return result
+
+
+def skills_sdk_package_build(
+    repo_root: Path,
+    target: str,
+) -> CallResult:
+    """Build a non-mutating package identity receipt for one skill target."""
+    result = CallResult()
+    result.metadata["command"] = "sdk package build"
+    query = target.strip()
+    target_info, _audit_target = _resolve_doctor_target(repo_root, query)
+    source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
+    source_path = Path(str(source_path_value)) if source_path_value else None
+    if source_path and not source_path.is_absolute():
+        source_path = repo_root / source_path
+
+    if not source_path or not source_path.is_file():
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Skills SDK package build is missing a canonical SKILL.md source for '{query}'.",
+                fix_suggestion=_ask_validation_command("sdk", "ir", "build", query),
+            )
+        )
+        result.data["skills_sdk_package_build"] = {
+            "schema_version": "skills-sdk-package-build.v0",
+            "query": query,
+            "status": "blocked",
+            "canonical_source_path": source_path_value,
+            "mutation_performed": False,
+            "validation_commands": [_ask_validation_command("sdk", "package", "build", query)],
+            "agent_summary": f"skills-sdk package build is blocked for {query}: canonical source is missing.",
+        }
+        return result
+
+    receipt = _build_package_digest_receipt(repo_root, source_path=source_path, query=query)
+    payload = {
+        "schema_version": "skills-sdk-package-build.v0",
+        "query": query,
+        "status": receipt["status"],
+        "canonical_source_path": source_path_value,
+        "facade_command": "skills-sdk package build",
+        "package_id": receipt["package_id"],
+        "version": receipt["version"],
+        "source_digest": receipt["source_digest"],
+        "manifest_digest": receipt["manifest_digest"],
+        "package_digest": receipt["package_digest"],
+        "included_files": receipt["included_files"],
+        "excluded_files": receipt["excluded_files"],
+        "receipt": receipt,
+        "mutation_performed": False,
+        "validation_commands": [
+            _ask_validation_command("sdk", "package", "build", query),
+        ],
+        "agent_summary": f"skills-sdk package build produced digest identity for {query} without writes.",
+    }
+    result.data["skills_sdk_package_build"] = payload
+    return result
+
+
+def skills_sdk_eval_run(
+    repo_root: Path,
+    dataset: str | None = None,
+    target: str | None = None,
+    mode: str = "smoke",
+    runner: str = "auto",
+    skip_tessl: bool = True,
+    cases: list[str] | None = None,
+) -> CallResult:
+    """Run SDK evals through deterministic JSONL or the internal skill-builder backend."""
+    result = CallResult()
+    result.metadata["command"] = "sdk eval run"
+    resolved_runner = "deterministic-jsonl" if runner == "auto" and dataset else runner
+    if resolved_runner == "auto":
+        resolved_runner = "internal"
+    if resolved_runner == "internal":
+        if not target:
+            result.status = "error"
+            result.data["skills_sdk_eval_run"] = {
+                "schema_version": "skills-sdk-eval-run.v0",
+                "status": "blocked",
+                "dataset": dataset,
+                "target": target,
+                "runner": "internal_skill_builder_v0",
+                "receipt": None,
+                "mutation_performed": False,
+                "validation_commands": [_ask_validation_command("sdk", "eval", "run", "<skill>", "--runner", "internal")],
+                "agent_summary": "skills-sdk eval run is blocked: internal runner requires a skill target.",
+            }
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_VALIDATION",
+                    message="Skills SDK internal eval run requires a skill target.",
+                    fix_suggestion="Run ask sdk eval run <skill> --runner internal --mode smoke --json --robot.",
+                )
+            )
+            return result
+        from ask.commands import evals as _eval_commands  # noqa: PLC0415
+
+        internal = _eval_commands.run_evals(
+            repo_root,
+            target,
+            mode=mode,
+            runner="codex",
+            dashboard=True,
+            skip_tessl=skip_tessl,
+            cases=cases,
+        )
+        raw_status = str(internal.data.get("eval_status") or ("pass" if internal.status == "success" else "fail"))
+        blockers = []
+        if internal.status != "success":
+            blockers = [error.message for error in internal.errors] or [raw_status]
+        status = "pass" if internal.status == "success" else "blocked" if raw_status.startswith("blocked") else "fail"
+        receipt = {
+            "schema_version": "skills-sdk.eval-run-receipt.v0",
+            "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/eval-run-receipt.v0.schema.json",
+            "status": status,
+            "runner": "internal_skill_builder_v0",
+            "dataset_path": "internal:skill-builder",
+            "dataset_digest": "sha256:" + ("0" * 64),
+            "skill_ir_schema_version": None,
+            "target_path": str(internal.data.get("resolved_skill_path") or target),
+            "mode": mode,
+            "case_count": 0,
+            "passed_count": 0 if status != "pass" else 1,
+            "failed_count": 0 if status == "pass" else 1,
+            "cases": [],
+            "blockers": blockers,
+            "mutation_performed": False,
+            "acceptance_trace": ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022"],
+        }
+        payload = {
+            "schema_version": "skills-sdk-eval-run.v0",
+            "status": status,
+            "dataset": dataset,
+            "target": target,
+            "runner": "internal_skill_builder_v0",
+            "mode": mode,
+            "receipt": receipt,
+            "internal_eval": internal.data,
+            "mutation_performed": False,
+            "validation_commands": [_ask_validation_command("sdk", "eval", "run", target, "--runner", "internal", "--mode", mode)],
+            "agent_summary": f"skills-sdk internal eval run {status} for {target} in {mode} mode.",
+        }
+        result.data["skills_sdk_eval_run"] = payload
+        if internal.status != "success":
+            result.status = "error"
+            result.errors.extend(internal.errors)
+        return result
+
+    if resolved_runner != "deterministic-jsonl":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Unsupported Skills SDK eval runner: {runner}.",
+                fix_suggestion="Use --runner internal or --runner deterministic-jsonl.",
+            )
+        )
+        return result
+    if not dataset:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message="Skills SDK deterministic eval run requires --dataset.",
+                fix_suggestion="Run ask sdk eval run --runner deterministic-jsonl --dataset <cases.jsonl> --json --robot.",
+            )
+        )
+        return result
+    skill_ir_schema_version: str | None = None
+    if target:
+        query = target.strip()
+        target_info, _audit_target = _resolve_doctor_target(repo_root, query)
+        source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
+        source_path = Path(str(source_path_value)) if source_path_value else None
+        if source_path and not source_path.is_absolute():
+            source_path = repo_root / source_path
+        if not source_path or not source_path.is_file():
+            result.status = "error"
+            result.errors.append(
+                ErrorObject(
+                    code="ERR_VALIDATION",
+                    message=f"Skills SDK eval run is missing a canonical SKILL.md source for '{query}'.",
+                    fix_suggestion=_ask_validation_command("sdk", "ir", "build", query),
+                )
+            )
+            result.data["skills_sdk_eval_run"] = {
+                "schema_version": "skills-sdk-eval-run.v0",
+                "status": "blocked",
+                "dataset": dataset,
+                "target": query,
+                "receipt": None,
+                "mutation_performed": False,
+                "validation_commands": [_ask_validation_command("sdk", "eval", "run", "--dataset", dataset, "--skill", query)],
+                "agent_summary": f"skills-sdk eval run is blocked for {query}: canonical source is missing.",
+            }
+            return result
+        skill_ir = _build_skill_ir(repo_root, source_path=source_path, query=query)
+        skill_ir_schema_version = skill_ir["schema_version"]
+
+    receipt = _run_deterministic_eval(repo_root, dataset=dataset, skill_ir_schema_version=skill_ir_schema_version)
+    payload = {
+        "schema_version": "skills-sdk-eval-run.v0",
+        "status": receipt["status"],
+        "dataset": dataset,
+        "target": target,
+        "runner": receipt["runner"],
+        "case_count": receipt["case_count"],
+        "passed_count": receipt["passed_count"],
+        "failed_count": receipt["failed_count"],
+        "receipt": receipt,
+        "mutation_performed": False,
+        "validation_commands": [_ask_validation_command("sdk", "eval", "run", "--dataset", dataset)],
+        "agent_summary": (
+            f"skills-sdk eval run {receipt['status']} with "
+            f"{receipt['passed_count']}/{receipt['case_count']} deterministic JSONL case(s) passing."
+        ),
+    }
+    if target:
+        payload["validation_commands"] = [
+            _ask_validation_command("sdk", "eval", "run", "--dataset", dataset, "--skill", target)
+        ]
+    result.data["skills_sdk_eval_run"] = payload
+    if receipt["status"] != "pass":
+        result.status = "error"
+        message = "Skills SDK deterministic eval run did not pass."
+        if receipt["status"] == "blocked" and receipt["blockers"]:
+            message = f"Skills SDK deterministic eval run blocked: {receipt['blockers'][0]}"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=message,
+                fix_suggestion="Fix the JSONL eval dataset or expected/actual exact-match values and rerun ask sdk eval run.",
             )
         )
     return result

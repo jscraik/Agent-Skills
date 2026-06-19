@@ -1,0 +1,55 @@
+{
+  "schema_version": "skills-sdk.package-digest-receipt.v0",
+  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/package-digest-receipt.v0.schema.json",
+  "status": "built",
+  "package_id": "skills-sdk-valid-fixture",
+  "version": "0.1.0",
+  "source_digest": "sha256:a22c823816dfd4d19fcf419e273effe1bddc35f56b797b841c692a661178fbb7",
+  "manifest_digest": "sha256:e5fc0580f2740e806f300e17294fd6b68393906cbea158e21fcc9cba55247025",
+  "package_digest": "sha256:60b4ed27a5919e8785c3a7ea01930ad1bcecef8a7aa8f75752abafd2338d73d6",
+  "manifest": {
+    "schema_version": "skills-sdk.package-manifest.v0",
+    "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/package-manifest.v0.schema.json",
+    "package_id": "skills-sdk-valid-fixture",
+    "version": "0.1.0",
+    "skill_ir_schema_version": "skills-sdk.skill-ir.v0",
+    "source": {
+      "root": "Infrastructure/tests/fixtures/skills_sdk/valid_skill",
+      "skill_md": "Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md",
+      "readme": null,
+      "references": [],
+      "scripts": [],
+      "assets": [],
+      "evals": []
+    },
+    "files": [
+      {
+        "path": "Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md",
+        "sha256": "88b77f721bcfc6dbc6fed9c29a913a46164aa60153792d60cb18830508759c92",
+        "size_bytes": 314,
+        "role": "skill_md"
+      }
+    ],
+    "provenance": {
+      "source": [
+        "SkillIR.v0",
+        "canonical-source"
+      ],
+      "builder": "ask.skills_sdk.package_build"
+    },
+    "mutation_performed": false
+  },
+  "included_files": [
+    "Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md"
+  ],
+  "excluded_files": [],
+  "mutation_performed": false,
+  "acceptance_trace": [
+    "FR-003",
+    "FR-008",
+    "SA-003",
+    "SA-004",
+    "VP-021",
+    "VP-022"
+  ]
+}

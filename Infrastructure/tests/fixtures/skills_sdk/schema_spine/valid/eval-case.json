@@ -1,0 +1,9 @@
+{
+  "schema_version": "skills-sdk.eval-case.v0",
+  "case_id": "exact-summary",
+  "input": "Summarize: local receipts prove local behavior.",
+  "expected": "local receipts prove local behavior",
+  "actual": "local receipts prove local behavior",
+  "oracle": "exact_match",
+  "acceptance_trace": ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022"]
+}
