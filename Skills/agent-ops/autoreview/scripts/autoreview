@@ -579,7 +579,7 @@ def run_codex(args: argparse.Namespace, repo: Path, prompt: str) -> str:
         cmd.extend(["--model", args.model])
     if args.thinking:
         cmd.extend(["-c", f'model_reasoning_effort="{args.thinking}"'])
-    cmd.extend(["exec", "--" + "ig" + "nore-user-config"])
+    cmd.extend(["exec", "--ignore-user-config"])
     if args.stream_engine_output:
         cmd.append("--json")
     cmd.extend(
