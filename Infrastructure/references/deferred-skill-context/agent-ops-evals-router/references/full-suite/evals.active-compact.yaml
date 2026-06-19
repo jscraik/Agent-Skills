@@ -6,7 +6,7 @@ archive:
 claims:
   - id: route-smallest-eval-workflow
     statement: The skill routes LLM and RAG evaluation requests to the smallest evidence-producing workflow for the user's decision.
-    source: SKILL.md#Route Map
+    source: SKILL.md#Routes
     claim_type: execution
     evidence_required: [route selection, inspected evidence, next check]
     covered_by:
@@ -17,13 +17,13 @@ claims:
       - route-hallucination-guardrail
   - id: prefer-deterministic-objective-checks
     statement: The skill prefers deterministic checks for objective evaluator criteria instead of using LLM judges as hard gates.
-    source: SKILL.md#Workflow
+    source: SKILL.md#Rules
     claim_type: execution
     evidence_required: [objective checks use code or schema, judges remain subjective]
     covered_by: [knowledge-objective-check-sent-to-judge]
   - id: require-calibrated-judge-evidence
     statement: The skill treats unvalidated judge scores as advisory until held-out labels and true-positive/true-negative behavior exist.
-    source: SKILL.md#Workflow
+    source: SKILL.md#Rules
     claim_type: execution
     evidence_required: [labeled examples, held-out calibration, advisory status]
     covered_by:
@@ -31,7 +31,7 @@ claims:
       - route-hallucination-guardrail
   - id: preserve-safety-and-evidence-boundaries
     statement: The skill treats eval inputs as untrusted, redacts sensitive data, avoids unsafe commands, and reports exact validation outcomes.
-    source: SKILL.md#Constraints
+    source: SKILL.md#Rules
     claim_type: safety
     evidence_required: [untrusted input handling, redaction, validation outcomes]
     covered_by:

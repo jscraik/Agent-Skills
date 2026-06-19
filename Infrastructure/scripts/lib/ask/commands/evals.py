@@ -1254,10 +1254,7 @@ GUARDRAIL_DIMENSION_RE = re.compile(
     r"source-of-truth|relevance|policy compliance|contextual coherence)\b"
 )
 GUARDRAIL_STRUCTURED_OUTPUT_RE = re.compile(r"(?i)\b(?:machine-readable|structured|json|schema)\b")
-GUARDRAIL_OUTCOME_RE = re.compile(
-    r"(?is)\bjudge_parse_error\b.*\bjudge_schema_error\b.*"
-    r"\bjudge_semantic_fail\b.*\bjudge_pass\b"
-)
+GUARDRAIL_OUTCOME_TERMS = ("judge_parse_error", "judge_schema_error", "judge_semantic_fail", "judge_pass")
 GUARDRAIL_RESPONSE_SCHEMA_TERMS = (
     "sentence_results",
     "overall_verdict",
@@ -1495,7 +1492,7 @@ def _case_has_guardrail_failure_outcomes(case: dict[str, object]) -> bool:
     if not GUARDRAIL_CASE_RE.search(case_text):
         return True
     raw_output = case.get("judge_raw_output_artifact") or case.get("raw_response_artifact")
-    return bool(raw_output) and bool(GUARDRAIL_OUTCOME_RE.search(case_text))
+    return bool(raw_output) and all(term in case_text.lower() for term in GUARDRAIL_OUTCOME_TERMS)
 
 
 def _case_has_guardrail_response_schema(case: dict[str, object]) -> bool:
@@ -1524,7 +1521,7 @@ def _case_has_judge_sampling_policy(case: dict[str, object]) -> bool:
     case_text = _case_text_for_quality(case)
     if not JUDGE_CASE_RE.search(case_text):
         return True
-    if case.get("judge_temperature") and not _has_sampling_count(case):
+    if case.get("judge_temperature") is not None and not _has_sampling_count(case):
         return False
     return True
 
@@ -2352,7 +2349,7 @@ def _tessl_pending_run_ids_for_project(stdout: str, *, project: str) -> list[str
             continue
         tile_name = _tessl_run_metadata_field(run, "tileName")
         subject = _tessl_run_field(run, "subject")
-        if tile_name != project and subject not in {project, f"skills-sdk/{project}"}:
+        if tile_name != project and (not isinstance(subject, str) or subject.rsplit("/", 1)[-1] != project):
             continue
         run_id = _tessl_run_field(run, "id", "evalRunId", "runId")
         if isinstance(run_id, str) and run_id.strip():
@@ -2375,7 +2372,7 @@ def _tessl_pending_run_preflight(
         "--workspace",
         workspace,
         "--limit",
-        "20",
+        "300",
     ]
     command_text = " ".join(shlex.quote(str(part)) for part in command)
     try:

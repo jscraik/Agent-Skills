@@ -70,7 +70,7 @@ safety:
   raw_reviewer_text_in_shell: false
   external_writes: false
   reviewer_findings_are_advisory: true
-  operator_parallel_test_command_required: true
+  operator_parallel_test_command_required: false
 validation:
   - helper_scripts_compile
   - helper_help_runs

@@ -493,7 +493,7 @@ def build_prompt(repo: Path, target: str, target_ref: str | None, bundle: str, e
 
         Review target: {target_line}
         Current branch: {branch}
-        Repository: {repo}
+        Repository: {repo.name}
 
         {scope_policy}
 

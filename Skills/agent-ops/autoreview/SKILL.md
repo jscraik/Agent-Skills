@@ -9,7 +9,7 @@ metadata:
   owner: Agent Skills Team
   review_cadence: quarterly
   metadata_source: frontmatter
-  provenance: github:openclaw/openclaw:.agents/skills/autoreview:d4833e27c7758652b6c760517b2007a8e685f65a
+  provenance: frontmatter:agent-skills:canonical-source
 ---
 
 # Auto Review

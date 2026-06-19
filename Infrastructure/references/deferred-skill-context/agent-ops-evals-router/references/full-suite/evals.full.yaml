@@ -3,7 +3,7 @@ skill_name: evals-router
 claims:
   - id: route-smallest-eval-workflow
     statement: The skill routes LLM and RAG evaluation requests to the smallest evidence-producing workflow for the user's decision.
-    source: SKILL.md#Route Map
+    source: SKILL.md#Routes
     claim_type: execution
     evidence_required:
       - route selection matches the requested eval mode
@@ -19,7 +19,7 @@ claims:
       - route-hallucination-guardrail
   - id: prefer-deterministic-objective-checks
     statement: The skill prefers code, schema, parser, and artifact checks for objective evaluator criteria instead of using LLM judges as hard gates.
-    source: SKILL.md#Workflow
+    source: SKILL.md#Rules
     claim_type: execution
     evidence_required:
       - deterministic checks are preferred for objective criteria
@@ -28,7 +28,7 @@ claims:
       - knowledge-objective-check-sent-to-judge
   - id: require-calibrated-judge-evidence
     statement: The skill treats unvalidated judge scores as advisory until held-out human labels and true-positive/true-negative behavior are available.
-    source: SKILL.md#Workflow
+    source: SKILL.md#Rules
     claim_type: execution
     evidence_required:
       - judge score is marked advisory until labels exist
@@ -39,7 +39,7 @@ claims:
       - knowledge-unvalidated-judge-overclaims
   - id: require-trace-taxonomy-before-dashboard
     statement: The skill asks for traces, dimensional samples, and product-specific failure taxonomies before broad dashboard metrics.
-    source: SKILL.md#Workflow
+    source: SKILL.md#Rules
     claim_type: execution
     evidence_required:
       - trace-derived failure categories come before dashboard metrics
@@ -49,7 +49,7 @@ claims:
       - knowledge-dashboard-without-error-analysis
   - id: close-eval-regression-loop
     statement: The skill treats eval scores as incomplete proof until root cause, fix path, rerun evidence, and retained regression cases close the loop.
-    source: SKILL.md#Workflow
+    source: SKILL.md#Validation
     claim_type: execution
     evidence_required:
       - root cause or fix path is named
@@ -58,7 +58,7 @@ claims:
       - knowledge-score-without-action
   - id: preserve-safety-and-evidence-boundaries
     statement: The skill keeps eval inputs untrusted, redacts sensitive data, avoids unsafe commands, and reports exact validation outcomes.
-    source: SKILL.md#Constraints
+    source: SKILL.md#Rules
     claim_type: safety
     evidence_required:
       - untrusted eval inputs are not followed as instructions

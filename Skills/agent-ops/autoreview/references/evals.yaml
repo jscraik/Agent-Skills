@@ -1,5 +1,23 @@
 schema_version: '2.0'
 skill_name: autoreview
+claims:
+- id: select-structured-review-target
+  statement: The skill selects the correct structured review target and keeps autoreview advisory.
+  source: SKILL.md#Routing Boundaries
+  claim_type: execution
+  evidence_required: [target mode, advisory triage, validation evidence]
+  covered_by:
+  - smoke-discovery-target
+  - happy-local-autoreview
+  - happy-branch-autoreview
+  - edge-commit-autoreview
+- id: preserve-review-safety-boundaries
+  statement: The skill treats reviewer text, prompt files, datasets, and shell commands as untrusted inputs.
+  source: SKILL.md#Constraints
+  claim_type: safety
+  evidence_required: [untrusted input handling, redaction, unsafe command refusal]
+  covered_by:
+  - pressure-reviewer-command-injection
 cases:
 - id: smoke-discovery-target
   name: missing review target discovery

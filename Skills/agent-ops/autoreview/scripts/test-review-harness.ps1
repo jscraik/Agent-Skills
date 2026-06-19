@@ -35,10 +35,19 @@ if ($null -ne $PyLauncher) {
     exit $LASTEXITCODE
 }
 
+$Python3 = Get-Command python3 -ErrorAction SilentlyContinue
+if ($null -ne $Python3) {
+    & $Python3.Source $Harness @ForwardedArgs
+    exit $LASTEXITCODE
+}
+
 $Python = Get-Command python -ErrorAction SilentlyContinue
 if ($null -ne $Python) {
-    & $Python.Source $Harness @ForwardedArgs
-    exit $LASTEXITCODE
+    & $Python.Source -c 'import sys; raise SystemExit(0 if sys.version_info.major >= 3 else 1)'
+    if ($LASTEXITCODE -eq 0) {
+        & $Python.Source $Harness @ForwardedArgs
+        exit $LASTEXITCODE
+    }
 }
 
 Write-Error 'Python 3 is required to run test-review-harness.'
