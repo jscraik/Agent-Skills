@@ -164,6 +164,17 @@ class TestSkillsSdkTypedContracts(unittest.TestCase):
         with self.assertRaises(ValidationError):
             contracts.validate_eval_run_receipt(payload)
 
+    def test_eval_run_contract_accepts_legacy_receipt_without_package_identity(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "eval-run-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload.pop("package_id")
+        payload.pop("package_digest")
+
+        model = contracts.validate_eval_run_receipt(payload)
+
+        self.assertIsNone(model.package_id)
+        self.assertIsNone(model.package_digest)
+
     def test_contracts_reject_type_coercion(self) -> None:
         """
         Verify that the check-receipt contract enforces strict types for fields.

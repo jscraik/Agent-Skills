@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 from pathlib import Path, PurePosixPath
 from typing import Any
 
@@ -20,6 +21,7 @@ SANDBOX_PROFILE_ACCEPTANCE_TRACE = ["FR-008", "FR-010", "SA-004", "SA-007", "SEC
 SANDBOX_PROFILE_SCHEMA_PATH = Path("Infrastructure/config/schemas/skills-sdk/sandbox-profile.v0.schema.json")
 RISK_TIERS = {"low", "medium", "high", "privileged", "published"}
 DEFAULT_POLICIES = {"deny", "allow"}
+_HOME_DIR = os.path.expanduser("~")
 
 
 class SandboxProfileError(ValueError):
@@ -80,7 +82,7 @@ def _check(
 
 def _path_is_broad(path: str) -> bool:
     normalized_path = path.strip()
-    if normalized_path in {"", ".", "./", "*", "/", "/Users", "/Users/jamiecraik", "~"}:
+    if normalized_path in {"", ".", "./", "*", "/", "/Users", _HOME_DIR, "~"}:
         return True
     if any(marker in normalized_path for marker in ("*", "?", "[")):
         return True
@@ -129,9 +131,13 @@ def _filesystem_write_check(profile: dict[str, Any]) -> dict[str, Any]:
 
 
 def _deny_by_default_check(profile: dict[str, Any]) -> dict[str, Any]:
-    return [
-        _check("deny_by_default", "pass" if profile.get("default_policy") == "deny" else "blocker", "blocker", "Sandbox profiles must be deny-by-default.", [f"default_policy:{profile.get('default_policy')!s}"])
-    ][0]
+    return _check(
+        "deny_by_default",
+        "pass" if profile.get("default_policy") == "deny" else "blocker",
+        "blocker",
+        "Sandbox profiles must be deny-by-default.",
+        [f"default_policy:{profile.get('default_policy')!s}"],
+    )
 
 
 def _network_check(profile: dict[str, Any]) -> dict[str, Any]:

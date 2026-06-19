@@ -146,6 +146,46 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
         self.assertIsNotNone(receipt.package_digest)
         self.assertFalse(payload["mutation_performed"])
 
+    def test_public_cli_rejects_external_skill_path_for_package_identity(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            external_skill = Path(tmpdir) / "SKILL.md"
+            external_skill.write_text(
+                "---\nname: external\ndescription: External fixture.\n---\n\n# External\n",
+                encoding="utf-8",
+            )
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    "Infrastructure/bin/ask",
+                    "sdk",
+                    "eval",
+                    "run",
+                    "--dataset",
+                    PASS_DATASET,
+                    "--skill",
+                    str(external_skill),
+                    "--json",
+                    "--robot",
+                ],
+                cwd=REPO_ROOT,
+                env=_command_env(),
+                text=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                check=False,
+            )
+
+        self.assertEqual(completed.returncode, 2, completed.stderr)
+        envelope = validate_robot_envelope(json.loads(completed.stdout))
+        payload = envelope.data["skills_sdk_eval_run"]
+        self.assertIsInstance(payload, dict)
+
+        self.assertEqual(envelope.status, "error")
+        self.assertEqual(envelope.errors[0].code, "ERR_VALIDATION")
+        self.assertEqual(payload["status"], "blocked")
+        self.assertIsNone(payload["receipt"])
+        self.assertIn("canonical SKILL.md source", envelope.errors[0].message)
+
     def test_public_cli_returns_validation_error_for_failing_dataset(self) -> None:
         completed = subprocess.run(
             [

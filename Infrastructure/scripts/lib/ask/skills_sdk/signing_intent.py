@@ -5,10 +5,6 @@ import json
 from pathlib import Path
 from typing import Any
 
-from pydantic import ValidationError
-
-from ask.skills_sdk.signing_contracts import validate_signing_policy
-
 
 SIGNING_POLICY_SCHEMA_VERSION = "skills-sdk.signing-policy.v0"
 SIGNING_POLICY_SCHEMA_URI = (
@@ -23,6 +19,20 @@ SIGNING_ACCEPTANCE_TRACE = ["FR-003", "FR-008", "SA-003", "SA-004", "SEC-001", "
 _ALLOWED_ALGORITHMS = {"cosign-keyless", "minisign", "ssh-sig"}
 _ALLOWED_REDACTION_POLICIES = {"manifest_only", "manifest_and_receipts"}
 _ALLOWED_KEY_POLICIES = {"external_ref_required", "keyless_required"}
+_REQUIRED_POLICY_FIELDS = {
+    "schema_version",
+    "schema_uri",
+    "policy_id",
+    "signer_id",
+    "allowed_algorithms",
+    "allowed_package_ids",
+    "allowed_package_digests",
+    "requires_hardening_pass",
+    "key_material_policy",
+    "redaction_policy",
+    "archive_required",
+    "acceptance_trace",
+}
 
 
 class SigningIntentError(ValueError):
@@ -80,9 +90,18 @@ def _policy_schema_check(policy: dict[str, Any]) -> dict[str, Any]:
 
 def _policy_contract_check(policy: dict[str, Any]) -> dict[str, Any]:
     try:
-        validate_signing_policy(policy)
-    except ValidationError as exc:
-        errors = [f"{'.'.join(str(part) for part in item['loc'])}:{item['type']}" for item in exc.errors()]
+        from pydantic import ValidationError as PydanticValidationError
+
+        from ask.skills_sdk.signing_contracts import validate_signing_policy
+    except ModuleNotFoundError:
+        errors = _fallback_policy_contract_errors(policy)
+    else:
+        try:
+            validate_signing_policy(policy)
+            errors = []
+        except PydanticValidationError as exc:
+            errors = [f"{'.'.join(str(part) for part in item['loc'])}:{item['type']}" for item in exc.errors()]
+    if errors:
         return _check(
             "policy_contract_valid",
             "blocker",
@@ -96,6 +115,20 @@ def _policy_contract_check(policy: dict[str, Any]) -> dict[str, Any]:
         "blocker",
         "Signing policy satisfies the complete v0 schema contract.",
     )
+
+
+def _fallback_policy_contract_errors(policy: dict[str, Any]) -> list[str]:
+    errors = [f"{field}:missing" for field in sorted(_REQUIRED_POLICY_FIELDS - set(policy))]
+    for field in ("policy_id", "signer_id"):
+        if not isinstance(policy.get(field), str) or not str(policy.get(field)).strip():
+            errors.append(f"{field}:string_too_short")
+    if not _list_value(policy, "allowed_package_ids"):
+        errors.append("allowed_package_ids:too_short")
+    if any(len(item) < 71 for item in _list_value(policy, "allowed_package_digests")):
+        errors.append("allowed_package_digests:string_too_short")
+    if not _list_value(policy, "acceptance_trace"):
+        errors.append("acceptance_trace:too_short")
+    return errors
 
 
 def _signer_identity_check(policy: dict[str, Any]) -> dict[str, Any]:

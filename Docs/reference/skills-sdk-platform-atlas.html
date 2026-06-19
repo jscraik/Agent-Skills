@@ -284,6 +284,47 @@
         <div class="note">Rule: a capability is implemented only when it has an owner surface, command or module, schema or receipt where relevant, and test evidence.</div>
       </div>
       <div class="table-wrap">
+        <table hidden aria-hidden="true" data-capability-status="skills-sdk.capability-status.v1">
+          <tbody>
+            <tr data-capability-id="authoring" data-status="implemented" data-pipeline-sections="author_golden_path,full_skill_lifecycle,public_sdk_surface"></tr>
+            <tr data-capability-id="check" data-status="implemented" data-pipeline-sections="author_golden_path,public_sdk_surface,release_decision_matrix"></tr>
+            <tr data-capability-id="manifest_schema" data-status="implemented" data-pipeline-sections="author_golden_path,domain_model_integrity,public_sdk_surface"></tr>
+            <tr data-capability-id="receipt_schema" data-status="implemented" data-pipeline-sections="release_decision_matrix,ci_and_adoption"></tr>
+            <tr data-capability-id="risk_classification" data-status="implemented" data-pipeline-sections="release_decision_matrix,agent_execution_control_plane,package_hardening"></tr>
+            <tr data-capability-id="skill_ir" data-status="implemented" data-pipeline-sections="compiler_emitter_discipline,domain_model_integrity,public_sdk_surface"></tr>
+            <tr data-capability-id="package_identity" data-status="implemented" data-pipeline-sections="compiler_emitter_discipline,package_hardening,public_sdk_surface"></tr>
+            <tr data-capability-id="install_preview" data-status="preview_only" data-pipeline-sections="author_golden_path,public_sdk_surface,full_skill_lifecycle"></tr>
+            <tr data-capability-id="lockfile_preview" data-status="preview_only" data-pipeline-sections="public_sdk_surface,full_skill_lifecycle"></tr>
+            <tr data-capability-id="real_install" data-status="implemented" data-pipeline-sections="full_skill_lifecycle,public_sdk_surface"></tr>
+            <tr data-capability-id="project_conformance" data-status="implemented" data-pipeline-sections="ci_and_adoption,public_sdk_surface,full_skill_lifecycle"></tr>
+            <tr data-capability-id="sdk_lenses" data-status="implemented" data-pipeline-sections="agent_execution_control_plane,knowledge_engineering,ci_and_adoption"></tr>
+            <tr data-capability-id="review_plan" data-status="implemented" data-pipeline-sections="agent_execution_control_plane,knowledge_engineering,ci_and_adoption"></tr>
+            <tr data-capability-id="review_handoff" data-status="implemented" data-pipeline-sections="agent_execution_control_plane,knowledge_engineering,ci_and_adoption"></tr>
+            <tr data-capability-id="review_execution" data-status="implemented" data-pipeline-sections="agent_execution_control_plane,knowledge_engineering,ci_and_adoption"></tr>
+            <tr data-capability-id="review_verification" data-status="implemented" data-pipeline-sections="agent_execution_control_plane,knowledge_engineering,ci_and_adoption"></tr>
+            <tr data-capability-id="determinism_audit" data-status="implemented" data-pipeline-sections="agent_execution_control_plane,knowledge_engineering,ci_and_adoption"></tr>
+            <tr data-capability-id="trust_store" data-status="deferred" data-pipeline-sections="release_decision_matrix,agent_execution_control_plane"></tr>
+            <tr data-capability-id="refs_ingestion" data-status="implemented" data-pipeline-sections="knowledge_engineering,full_skill_lifecycle"></tr>
+            <tr data-capability-id="evals" data-status="implemented" data-pipeline-sections="eval_ops,full_skill_lifecycle,knowledge_engineering"></tr>
+            <tr data-capability-id="package_verify" data-status="implemented" data-pipeline-sections="author_golden_path,compiler_emitter_discipline,package_hardening"></tr>
+            <tr data-capability-id="signing" data-status="implemented" data-pipeline-sections="release_decision_matrix,full_skill_lifecycle,package_hardening"></tr>
+            <tr data-capability-id="sandbox" data-status="blocked_missing_adapter" data-pipeline-sections="agent_execution_control_plane,release_decision_matrix,eval_ops"></tr>
+            <tr data-capability-id="security_adapter" data-status="placeholder_optional" data-pipeline-sections="release_decision_matrix,package_hardening,ci_and_adoption"></tr>
+            <tr data-capability-id="static_docs" data-status="preview_only" data-pipeline-sections="public_sdk_surface,knowledge_engineering,ci_and_adoption"></tr>
+            <tr data-capability-id="skill_explorer" data-status="placeholder_optional" data-pipeline-sections="public_sdk_surface,full_skill_lifecycle,knowledge_engineering"></tr>
+            <tr data-capability-id="schema_registry" data-status="deferred" data-pipeline-sections="public_sdk_surface,domain_model_integrity"></tr>
+            <tr data-capability-id="registry" data-status="out_of_scope" data-pipeline-sections="public_sdk_surface,full_skill_lifecycle"></tr>
+            <tr data-capability-id="local_plugin_readiness" data-status="implemented" data-pipeline-sections="public_sdk_surface,full_skill_lifecycle,ci_and_adoption"></tr>
+            <tr data-capability-id="remote_marketplace" data-status="out_of_scope" data-pipeline-sections="public_sdk_surface,full_skill_lifecycle"></tr>
+            <tr data-capability-id="publish" data-status="out_of_scope" data-pipeline-sections="full_skill_lifecycle,release_decision_matrix"></tr>
+            <tr data-capability-id="rollback" data-status="implemented" data-pipeline-sections="full_skill_lifecycle,release_decision_matrix"></tr>
+            <tr data-capability-id="uninstall" data-status="implemented" data-pipeline-sections="full_skill_lifecycle,public_sdk_surface"></tr>
+            <tr data-capability-id="compiled_package_pipeline" data-status="deferred" data-pipeline-sections="compiler_emitter_discipline,public_sdk_surface,package_hardening"></tr>
+            <tr data-capability-id="emitters" data-status="deferred" data-pipeline-sections="compiler_emitter_discipline,public_sdk_surface"></tr>
+            <tr data-capability-id="ci_adoption_gates" data-status="deferred" data-pipeline-sections="ci_and_adoption,release_decision_matrix"></tr>
+            <tr data-capability-id="package_hardening" data-status="implemented" data-pipeline-sections="package_hardening,release_decision_matrix"></tr>
+          </tbody>
+        </table>
         <table>
           <thead><tr><th>Capability</th><th>Status</th><th>Current owner surface</th><th>Truth note</th><th>Next slice</th></tr></thead>
           <tbody>

@@ -62,6 +62,28 @@ class CapabilityStatusParser(HTMLParser):
             self._current_cells = []
 
 
+class SimpleAtlasStatParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.counts: dict[str, int] = {}
+        self._current_status: str | None = None
+        self._in_count = False
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        attributes = {key: value or "" for key, value in attrs}
+        classes = set(attributes.get("class", "").split())
+        if tag == "div" and "stat" in classes and attributes.get("data-status"):
+            self._current_status = attributes["data-status"]
+        elif tag == "b" and self._current_status:
+            self._in_count = True
+
+    def handle_data(self, data: str) -> None:
+        if self._in_count and self._current_status:
+            self.counts[self._current_status] = int(data.strip())
+            self._current_status = None
+            self._in_count = False
+
+
 class TestSkillsSdkPipelineStatusArtifact(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -273,13 +295,9 @@ class TestSkillsSdkPipelineStatusArtifact(unittest.TestCase):
         for capability in self.matrix["capabilities"]:
             expected_counts[bucket_by_status[capability["status"]]] += 1
 
-        observed_counts = {
-            status: int(count)
-            for status, count in re.findall(
-                r'<div class="stat" data-status="([^"]+)"><b>(\d+)</b>',
-                self.simple_atlas_html,
-            )
-        }
+        parser = SimpleAtlasStatParser()
+        parser.feed(self.simple_atlas_html)
+        observed_counts = parser.counts
 
         self.assertEqual(observed_counts, expected_counts)
 

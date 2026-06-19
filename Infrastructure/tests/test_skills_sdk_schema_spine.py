@@ -196,6 +196,17 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertEqual(payload["passed_count"], payload["case_count"])
         self.assertFalse(payload["mutation_performed"])
 
+    def test_eval_run_v0_schema_accepts_legacy_receipt_without_package_identity(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "eval-run-receipt.json")
+        payload.pop("package_id")
+        payload.pop("package_digest")
+
+        _validate_schema_subset(
+            self.schemas["eval-run-receipt"],
+            payload,
+            {**self.schemas, **self.schemas_by_file},
+        )
+
     def test_project_conformance_fixture_reports_read_only_project_health(self) -> None:
         payload = self.assert_valid("project-conformance-receipt", "project-conformance-receipt.json")
 
@@ -256,6 +267,17 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
 
     def test_sandbox_profile_receipt_schema_rejects_execution_claims(self) -> None:
         self.assert_invalid("sandbox-profile-receipt", "sandbox-profile-receipt-executes.json")
+
+    def test_sandbox_profile_receipt_schema_rejects_short_digest(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "sandbox-profile-receipt.json")
+        payload["profile_digest"] = "x"
+
+        with self.assertRaises(AssertionError):
+            _validate_schema_subset(
+                self.schemas["sandbox-profile-receipt"],
+                payload,
+                {**self.schemas, **self.schemas_by_file},
+            )
 
     def test_eval_run_schema_rejects_mutation_claims(self) -> None:
         self.assert_invalid("eval-run-receipt", "eval-run-mutation-claim.json")

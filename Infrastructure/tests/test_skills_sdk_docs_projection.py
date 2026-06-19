@@ -63,6 +63,35 @@ class TestSkillsSdkDocsProjection(unittest.TestCase):
         self.assertEqual(payload["status"], "pass")
         self.assertEqual(payload["artifact_path"], "artifacts/recommended-skills-sdk-pipeline.html")
 
+    def test_public_cli_verifies_reference_atlas_projection(self) -> None:
+        completed = subprocess.run(
+            [
+                sys.executable,
+                "Infrastructure/bin/ask",
+                "sdk",
+                "docs",
+                "verify",
+                "--artifact",
+                "Docs/reference/skills-sdk-platform-atlas.html",
+                "--json",
+                "--robot",
+            ],
+            cwd=REPO_ROOT,
+            env=_command_env(),
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+        )
+
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        envelope = validate_robot_envelope(json.loads(completed.stdout))
+        payload = envelope.data["skills_sdk_docs_verify"]
+
+        self.assertIsInstance(payload, dict)
+        self.assertEqual(payload["status"], "pass")
+        self.assertEqual(payload["artifact_path"], "Docs/reference/skills-sdk-platform-atlas.html")
+
     def test_verifier_blocks_status_drift(self) -> None:
         source = REPO_ROOT / "artifacts/recommended-skills-sdk-pipeline.html"
         with tempfile.TemporaryDirectory() as tmpdir:

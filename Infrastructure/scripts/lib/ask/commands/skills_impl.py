@@ -15,7 +15,7 @@ import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Protocol
 
 SCRIPTS_ROOT = Path(__file__).resolve().parents[3]
 REPO_ROOT = SCRIPTS_ROOT.parents[1]
@@ -183,6 +183,11 @@ from ask.skill_review_dashboard import (  # noqa: E402
 TESSL_REVIEW_MIN_SCORE = 90
 TESSL_REVIEW_TARGET_SCORE = 95
 PLUGIN_EVAL_MIN_ACCEPTABLE_GRADE = "B+"
+
+
+class _EvalCommandsProtocol(Protocol):
+    def _scorecard_path_from_output(self, repo_root: Path, raw_output: str) -> Path | None: ...
+    def _read_scorecard(self, path: Path | None) -> dict[str, Any]: ...
 
 
 __all__ = [
@@ -1434,8 +1439,12 @@ def _skills_sdk_eval_package_identity(repo_root: Path, target: str) -> dict[str,
     if not query:
         return None
     target_info, _audit_target = _resolve_doctor_target(repo_root, query)
+    if not isinstance(target_info, dict) or target_info.get("target_kind") == "invalid_path":
+        return None
     source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
-    source_path = Path(str(source_path_value)) if source_path_value else Path(query)
+    if not source_path_value:
+        return None
+    source_path = Path(str(source_path_value))
     if not source_path.is_absolute():
         source_path = repo_root / source_path
     if source_path.is_dir():
@@ -4387,7 +4396,7 @@ def _skills_sdk_internal_eval_receipt_counts(
     *,
     status: str,
     fallback_blockers: list[str],
-    eval_commands: Any,
+    eval_commands: _EvalCommandsProtocol,
 ) -> dict[str, Any]:
     raw_output = str(internal.data.get("raw_output") or "")
     scorecard_path = eval_commands._scorecard_path_from_output(repo_root, raw_output)  # noqa: SLF001

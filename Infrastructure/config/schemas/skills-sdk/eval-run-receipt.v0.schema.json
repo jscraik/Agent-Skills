@@ -38,5 +38,5 @@
     "mutation_performed": {"type": "boolean", "const": false},
     "acceptance_trace": {"type": "array", "minItems": 1, "items": {"type": "string", "enum": ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022"]}}
   },
-  "required": ["schema_version", "schema_uri", "status", "runner", "dataset_path", "dataset_digest", "skill_ir_schema_version", "package_id", "package_digest", "target_path", "mode", "case_count", "passed_count", "failed_count", "cases", "blockers", "mutation_performed", "acceptance_trace"]
+  "required": ["schema_version", "schema_uri", "status", "runner", "dataset_path", "dataset_digest", "skill_ir_schema_version", "target_path", "mode", "case_count", "passed_count", "failed_count", "cases", "blockers", "mutation_performed", "acceptance_trace"]
 }

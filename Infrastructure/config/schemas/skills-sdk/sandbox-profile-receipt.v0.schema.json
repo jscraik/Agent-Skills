@@ -9,7 +9,7 @@
     "schema_uri": {"type": "string", "const": "https://jscraik.local/agent-skills/schemas/skills-sdk/sandbox-profile-receipt.v0.schema.json"},
     "status": {"type": "string", "enum": ["pass", "blocked"]},
     "profile_path": {"type": "string", "minLength": 1},
-    "profile_digest": {"type": ["string", "null"]},
+    "profile_digest": {"type": ["string", "null"], "minLength": 71},
     "profile_id": {"type": ["string", "null"]},
     "risk_tier": {"type": ["string", "null"], "enum": ["low", "medium", "high", "privileged", "published", null]},
     "default_policy": {"type": ["string", "null"], "enum": ["deny", "allow", null]},
