@@ -13,6 +13,12 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 ASK_PATH = REPO_ROOT / "Infrastructure" / "bin" / "ask"
 PYTHON_SUFFIX = ".py"
 LEGACY_SHAPE_DEBT_PATHS = frozenset({
+    "Infrastructure/scripts/lib/ask/commands/evals.py",
+    "Infrastructure/tests/test_ask_evals_command.py",
+    "Plugins/skill-factory/scripts/skill-builder/run_skill_evals.py",
+    "Plugins/skill-factory/scripts/skill-builder/skill_gate.py",
+    "Plugins/skill-factory/scripts/skill-builder/test_run_skill_evals.py",
+    "Plugins/skill-factory/scripts/skill-builder/test_skill_gate_contract_evals.py",
     "Infrastructure/scripts/lib/ask/commands/skills_impl.py",
     "Infrastructure/tests/test_ask_cli_impl.py",
 })

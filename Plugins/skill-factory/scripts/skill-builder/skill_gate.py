@@ -1418,30 +1418,60 @@ def check_research_eval_prompt_realism(doc: SkillDoc) -> List[Finding]:
     placeholder_tokens = ("todo", "tbd", "lorem ipsum", "example prompt", "test prompt", "placeholder")
     action_tokens = (
         "audit",
+        "block",
         "build",
         "check",
+        "clean",
         "compare",
         "convert",
         "debug",
+        "delete",
         "diagnose",
         "fix",
+        "gate",
         "generate",
         "inspect",
+        "merge",
         "migrate",
+        "monitor",
         "plan",
+        "prove",
+        "prune",
+        "pull",
+        "push",
+        "report",
         "review",
         "route",
+        "rotate",
         "summarize",
+        "sweep",
         "validate",
     )
 
-    def prompt_has_concrete_context(prompt: str) -> bool:
-        words = re.findall(r"[a-z0-9][a-z0-9_-]*", prompt.lower())
+    def text_has_concrete_context(text: str) -> bool:
+        words = re.findall(r"[a-z0-9][a-z0-9_-]*", text.lower())
         if len(words) < 6:
             return False
-        if any(token in prompt.lower() for token in placeholder_tokens):
+        if any(token in text.lower() for token in placeholder_tokens):
             return False
         return any(token in words for token in action_tokens)
+
+    def case_has_concrete_context(case: dict[str, object]) -> bool:
+        prompt = str(case.get("prompt") or "")
+        if any(token in prompt.lower() for token in placeholder_tokens):
+            return False
+        context = "\n".join(
+            str(case.get(field) or "")
+            for field in (
+                "prompt",
+                "unit",
+                "given",
+                "should",
+                "expected_behavior",
+                "why_realistic",
+            )
+        )
+        return text_has_concrete_context(context)
 
     leaky = 0
     realistic = 0
@@ -1459,7 +1489,7 @@ def check_research_eval_prompt_realism(doc: SkillDoc) -> List[Finding]:
             if declared_realistic is False:
                 continue
             realism_denominator += 1
-            if prompt_has_concrete_context(prompt):
+            if case_has_concrete_context(case):
                 realistic += 1
             else:
                 weak_declared.append(case_id)
@@ -1469,7 +1499,7 @@ def check_research_eval_prompt_realism(doc: SkillDoc) -> List[Finding]:
         else:
             missing_realistic += 1
         realism_denominator += 1
-        if prompt_has_concrete_context(prompt) or any(token in prompt for token in natural_request_tokens):
+        if case_has_concrete_context(case) or any(token in prompt for token in natural_request_tokens):
             realistic += 1
 
     if leaky / len(trigger_cases) > 0.5:

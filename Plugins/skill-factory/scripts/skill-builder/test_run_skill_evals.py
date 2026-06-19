@@ -2113,6 +2113,66 @@ class RunSkillEvalsModeTests(unittest.TestCase):
             "blocked_auth",
         )
 
+    def test_runner_capacity_blocker_marks_summary_decision_blocked(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir, unittest.mock.patch(
+            "run_skill_evals._preflight_codex_live_runner",
+            return_value=([], []),
+        ), unittest.mock.patch(
+            "run_skill_evals.run_codex_exec",
+            return_value=(
+                1,
+                (
+                    '{"type":"error","message":"You\'ve hit your usage limit for '
+                    'GPT-5.3-Codex-Spark. Switch to another model now."}'
+                ),
+                "",
+                [],
+            ),
+        ):
+            skill_dir = Path(tmpdir) / "demo-skill"
+            refs_dir = skill_dir / "references"
+            refs_dir.mkdir(parents=True)
+            (skill_dir / "SKILL.md").write_text("---\nname: demo-skill\n---\n", encoding="utf-8")
+            (refs_dir / "evals.yaml").write_text(
+                textwrap.dedent(
+                    """
+                    schema_version: "2.0"
+                    cases:
+                      - id: capacity-case
+                        name: capacity case
+                        prompt: Use the skill.
+                        eval_modes: [smoke]
+                        should_trigger: true
+                        acceptance:
+                          - contains: "done"
+                    """
+                ).strip()
+                + "\n",
+                encoding="utf-8",
+            )
+
+            reports_dir = Path(tmpdir) / "reports"
+            exit_code = main(
+                [
+                    str(skill_dir),
+                    "--runner",
+                    "codex",
+                    "--eval-mode",
+                    "smoke",
+                    "--reports-dir",
+                    str(reports_dir),
+                    "--format",
+                    "json",
+                ]
+            )
+            report_dirs = sorted((reports_dir / "demo-skill").glob("*"))
+            summary = json.loads((report_dirs[-1] / "summary.json").read_text(encoding="utf-8"))
+
+        self.assertEqual(exit_code, 2)
+        self.assertEqual(summary["decision"], "blocked")
+        self.assertEqual(summary["blocked_cases"], 1)
+        self.assertEqual(summary["blocked_class_summary"]["blocked_runtime"], 1)
+
     def test_discovery_smoke_requires_explicit_smoke_mode_cases(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             skill_dir = Path(tmpdir) / "behavior-skill"

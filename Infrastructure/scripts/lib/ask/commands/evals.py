@@ -1839,6 +1839,14 @@ def _validate_tessl_workspace(workspace: str | None) -> str:
     return normalized
 
 
+def _default_tessl_workspace_from_env() -> tuple[str | None, str | None]:
+    for name in ("ASK_TESSL_WORKSPACE", "TESSL_WORKSPACE", "TESSL_WORKSPACE_NAME"):
+        value = os.environ.get(name)
+        if value is not None and value.strip():
+            return _validate_tessl_workspace(value), name
+    return None, None
+
+
 def _tessl_eval_case_id(case_id: str) -> str:
     return _safe_slug(case_id.replace("/", "-"))
 
@@ -4342,6 +4350,34 @@ def _read_scorecard(path: Path | None) -> dict:
     return data if isinstance(data, dict) else {}
 
 
+def _scorecard_blocker_class(scorecard: dict) -> str | None:
+    decision = str(scorecard.get("decision") or "").strip().lower()
+    if decision != "blocked":
+        return None
+
+    summary = scorecard.get("blocked_class_summary")
+    if isinstance(summary, dict):
+        for blocker_class, count in summary.items():
+            if blocker_class in EVAL_BLOCKER_TAXONOMY and isinstance(count, int) and count > 0:
+                return str(blocker_class)
+
+    for case in scorecard.get("cases") or []:
+        if not isinstance(case, dict):
+            continue
+        for blocker_class in case.get("blocker_classes") or []:
+            if blocker_class in EVAL_BLOCKER_TAXONOMY:
+                return str(blocker_class)
+        runners = case.get("runners")
+        if isinstance(runners, dict):
+            for runner in runners.values():
+                if not isinstance(runner, dict):
+                    continue
+                blocker_class = runner.get("blocker_class")
+                if blocker_class in EVAL_BLOCKER_TAXONOMY:
+                    return str(blocker_class)
+    return "blocked_validation"
+
+
 def _latest_review_report(repo_root: Path, skill_identifier: str) -> Path | None:
     review_root = repo_root / "Infrastructure" / "artifacts" / "skill-reviews"
     if not review_root.exists():
@@ -4499,6 +4535,31 @@ def run_evals(
     if path != requested_path:
         result.data["requested_path"] = requested_path
         result.data["resolved_skill_path"] = path
+    effective_tessl_workspace = tessl_workspace
+    tessl_workspace_source = "argument" if tessl_workspace else None
+    if not effective_tessl_workspace:
+        try:
+            effective_tessl_workspace, tessl_workspace_source = _default_tessl_workspace_from_env()
+        except ValueError as e:
+            if not skip_tessl or tessl_live_private:
+                result.status = "error"
+                result.data["raw_output"] = ""
+                result.data["raw_error"] = str(e)
+                result.data["eval_status"] = "blocked_validation"
+                result.data["blocker_class"] = "blocked_validation"
+                result.data["blocker_taxonomy"] = EVAL_BLOCKER_TAXONOMY
+                result.data["tessl_eval"] = {
+                    "status": "blocked",
+                    "blocker": str(e),
+                    "blocker_class": "blocked_validation",
+                    "workspace_source": "environment",
+                }
+                result.errors.append(ErrorObject(code="ERR_VALIDATION", message=str(e)))
+                return result
+            effective_tessl_workspace = None
+            tessl_workspace_source = None
+    result.data["tessl_workspace"] = effective_tessl_workspace
+    result.data["tessl_workspace_source"] = tessl_workspace_source
     result.data["validation_commands"] = [
         _evals_run_validation_command(
             path,
@@ -4506,7 +4567,7 @@ def run_evals(
             runner=runner,
             dashboard=dashboard,
             tessl_live_private=tessl_live_private,
-            tessl_workspace=tessl_workspace,
+            tessl_workspace=effective_tessl_workspace,
             tessl_live_dry_run=tessl_live_dry_run,
         )
     ]
@@ -4515,7 +4576,7 @@ def run_evals(
         "codex_profile_config": "[profiles.fast]" if mode == "smoke" and runner == "codex" else None,
         "codex_profile_required_for_smoke": mode == "smoke" and runner == "codex",
         "tessl_policy": _tessl_policy(),
-        "tessl_live_private_policy": _tessl_live_private_policy(tessl_workspace) if tessl_live_private else None,
+        "tessl_live_private_policy": _tessl_live_private_policy(effective_tessl_workspace) if tessl_live_private else None,
     }
 
     if tessl_live_dry_run and not tessl_live_private:
@@ -4552,7 +4613,7 @@ def run_evals(
         tessl_eval = _run_tessl_live_private_eval(
             repo_root,
             path,
-            workspace=tessl_workspace,
+            workspace=effective_tessl_workspace,
             dry_run=True,
         )
         result.data["tessl_eval"] = tessl_eval
@@ -4638,6 +4699,10 @@ def run_evals(
                     ))
         else:
             blocker_class = _classify_eval_blocker(raw_output=process.stdout, raw_error=process.stderr)
+            scorecard_path = _scorecard_path_from_output(repo_root, process.stdout)
+            scorecard_blocker_class = _scorecard_blocker_class(_read_scorecard(scorecard_path))
+            if blocker_class is None:
+                blocker_class = scorecard_blocker_class
             if blocker_class is not None:
                 result.data["eval_status"] = blocker_class
                 result.data["blocker_class"] = blocker_class
@@ -4650,8 +4715,11 @@ def run_evals(
                 eval_status=result.data["eval_status"],
                 blocker_class=blocker_class,
             )
-            result.errors.append(ErrorObject(code="ERR_VALIDATION", message="Evaluation run failed."))
-            if dashboard and _scorecard_path_from_output(repo_root, process.stdout) is not None:
+            result.errors.append(ErrorObject(
+                code="ERR_RUNTIME" if blocker_class == "blocked_runtime" else "ERR_VALIDATION",
+                message="Evaluation run blocked." if blocker_class is not None else "Evaluation run failed.",
+            ))
+            if dashboard and scorecard_path is not None:
                 try:
                     result.data.update(_render_eval_dashboard(repo_root, path, mode, process.stdout))
                 except Exception as e:  # noqa: BLE001
@@ -4719,7 +4787,7 @@ def run_evals(
             tessl_eval = _run_tessl_live_private_eval(
                 repo_root,
                 path,
-                workspace=tessl_workspace,
+                workspace=effective_tessl_workspace,
                 dry_run=tessl_live_dry_run,
             )
         else:
@@ -4727,7 +4795,7 @@ def run_evals(
                 repo_root,
                 path,
                 allow_project_save=allow_tessl_project_save,
-                workspace=tessl_workspace,
+                workspace=effective_tessl_workspace,
             )
         result.data["tessl_eval"] = tessl_eval
         if tessl_eval.get("status") != "pass":

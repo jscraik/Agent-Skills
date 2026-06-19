@@ -3217,6 +3217,76 @@ def test_run_evals_classifies_auth_blocker_without_scorecard(tmp_path: Path) -> 
     assert "blocked_auth" in result.data["blocker_taxonomy"]
 
 
+def test_run_evals_classifies_scorecard_runtime_blocker(tmp_path: Path) -> None:
+    scorecard_path = tmp_path / "reports" / "scorecard.json"
+    scorecard_path.parent.mkdir(parents=True)
+    scorecard_path.write_text(
+        json.dumps({
+            "decision": "blocked",
+            "blocked_class_summary": {"blocked_runtime": 21},
+            "cases": [],
+        }),
+        encoding="utf-8",
+    )
+    completed = mock.Mock(
+        returncode=2,
+        stdout=f"Skill evals: autoreview\nScorecard: {scorecard_path}\nRESULT: FAIL\n",
+        stderr="",
+    )
+
+    with mock.patch.object(evals.subprocess, "run", return_value=completed):
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/agent-ops/autoreview",
+            mode="smoke",
+            dashboard=False,
+            skip_tessl=True,
+        )
+
+    assert result.status == "error"
+    assert result.data["eval_status"] == "blocked_runtime"
+    assert result.data["blocker_class"] == "blocked_runtime"
+    assert result.errors[0].code == "ERR_RUNTIME"
+    assert result.errors[0].message == "Evaluation run blocked."
+
+
+def test_run_evals_uses_default_tessl_workspace_from_env(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("ASK_TESSL_WORKSPACE", "skills-sdk")
+    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
+
+    with (
+        mock.patch.object(evals.subprocess, "run", return_value=completed),
+        mock.patch.object(evals, "_run_tessl_eval", return_value={"status": "pass"}) as run_tessl,
+    ):
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/agent-ops/autoreview",
+            mode="smoke",
+            dashboard=False,
+        )
+
+    assert result.status == "success"
+    assert result.data["tessl_workspace"] == "skills-sdk"
+    assert result.data["tessl_workspace_source"] == "ASK_TESSL_WORKSPACE"
+    assert run_tessl.call_args.kwargs["workspace"] == "skills-sdk"
+
+
+def test_run_evals_blocks_invalid_default_tessl_workspace(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("ASK_TESSL_WORKSPACE", "skills-sdk/autoreview")
+
+    result = evals.run_evals(
+        tmp_path,
+        "Skills/agent-ops/autoreview",
+        mode="smoke",
+        dashboard=False,
+    )
+
+    assert result.status == "error"
+    assert result.data["eval_status"] == "blocked_validation"
+    assert result.data["tessl_eval"]["status"] == "blocked"
+    assert result.errors[0].code == "ERR_VALIDATION"
+
+
 def test_run_evals_classifies_user_input_blocker_without_scorecard(tmp_path: Path) -> None:
     completed = mock.Mock(
         returncode=1,
