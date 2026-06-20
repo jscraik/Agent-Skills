@@ -13,6 +13,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
 from ask.skills_sdk.static_explorer import build_static_explorer_receipt  # noqa: E402
+from ask.skills_sdk.static_explorer_contracts import validate_static_explorer_receipt  # noqa: E402
 
 
 def _command_env() -> dict[str, str]:
@@ -55,6 +56,7 @@ class TestSkillsSdkStaticExplorer(unittest.TestCase):
         self.assertFalse(receipt["html_rendered"])
         self.assertFalse(receipt["hosted_publish_requested"])
         self.assertFalse(receipt["mutation_performed"])
+        validate_static_explorer_receipt(receipt)
 
     def test_static_explorer_requires_preview_flag(self) -> None:
         process = _run_ask("sdk", "explorer", "static", "--json", "--robot")

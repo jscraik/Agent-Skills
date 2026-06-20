@@ -51,7 +51,15 @@
         "title": {"type": "string", "minLength": 1},
         "status": {
           "type": "string",
-          "enum": ["implemented", "preview_only", "placeholder_optional", "placeholder_blocked"]
+          "enum": [
+            "implemented",
+            "preview_only",
+            "placeholder_optional",
+            "placeholder_blocked",
+            "blocked_missing_adapter",
+            "deferred",
+            "out_of_scope"
+          ]
         },
         "owner_surface": {"type": "string", "minLength": 1}
       },

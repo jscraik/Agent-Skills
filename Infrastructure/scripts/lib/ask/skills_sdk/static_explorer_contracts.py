@@ -10,7 +10,15 @@ class _StaticExplorerModel(BaseModel):
 
 
 NonEmptyString = Annotated[str, Field(min_length=1)]
-CapabilityStatus = Literal["implemented", "preview_only", "placeholder_optional", "placeholder_blocked"]
+CapabilityStatus = Literal[
+    "implemented",
+    "preview_only",
+    "placeholder_optional",
+    "placeholder_blocked",
+    "blocked_missing_adapter",
+    "deferred",
+    "out_of_scope",
+]
 
 
 class StaticExplorerCheck(_StaticExplorerModel):
