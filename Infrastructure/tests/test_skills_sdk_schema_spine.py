@@ -25,6 +25,7 @@ SCHEMA_NAMES = {
     "observability-feedback-receipt": "observability-feedback-receipt.v0.schema.json",
     "emitter-preview-receipt": "emitter-preview-receipt.v0.schema.json",
     "ci-policy-preview-receipt": "ci-policy-preview-receipt.v0.schema.json",
+    "security-adapter-discovery-receipt": "security-adapter-discovery-receipt.v0.schema.json",
     "static-explorer-receipt": "static-explorer-receipt.v0.schema.json",
     "scenario-quality-receipt": "scenario-quality-receipt.v0.schema.json",
     "signing-policy": "signing-policy.v0.schema.json",
@@ -206,6 +207,25 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertFalse(payload["live_ci_evidence_attached"])
         self.assertFalse(payload["branch_protection_mutated"])
         self.assertFalse(payload["mutation_performed"])
+
+    def test_security_adapter_discovery_fixture_records_no_scanner_execution(self) -> None:
+        payload = self.assert_valid(
+            "security-adapter-discovery-receipt",
+            "security-adapter-discovery-receipt.json",
+        )
+
+        self.assertEqual(payload["status"], "preview")
+        self.assertEqual(payload["adapter_count"], 2)
+        self.assertFalse(payload["scanner_execution_performed"])
+        self.assertFalse(payload["network_accessed"])
+        self.assertFalse(payload["credentials_accessed"])
+        self.assertFalse(payload["mutation_performed"])
+
+    def test_security_adapter_discovery_schema_rejects_execution_claims(self) -> None:
+        self.assert_invalid(
+            "security-adapter-discovery-receipt",
+            "security-adapter-discovery-executes.json",
+        )
 
     def test_static_explorer_fixture_records_json_only_projection(self) -> None:
         payload = self.assert_valid("static-explorer-receipt", "static-explorer-receipt.json")

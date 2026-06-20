@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/security-adapter-discovery-receipt.v0.schema.json",
+  "title": "Skills SDK Security Adapter Discovery Receipt v0",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "string", "const": "skills-sdk.security-adapter-discovery-receipt.v0"},
+    "schema_uri": {"type": "string", "const": "https://jscraik.local/agent-skills/schemas/skills-sdk/security-adapter-discovery-receipt.v0.schema.json"},
+    "status": {"type": "string", "enum": ["preview", "blocked"]},
+    "operation": {"type": "string", "const": "security_adapter_discovery_preview"},
+    "adapter_count": {"type": "integer", "minimum": 0},
+    "adapter_candidates": {"type": "array", "items": {"$ref": "#/definitions/adapterCandidate"}},
+    "discovery_checks": {"type": "array", "minItems": 1, "items": {"$ref": "#/definitions/check"}},
+    "blockers": {"type": "array", "items": {"$ref": "#/definitions/check"}},
+    "scanner_execution_performed": {"type": "boolean", "const": false},
+    "network_accessed": {"type": "boolean", "const": false},
+    "credentials_accessed": {"type": "boolean", "const": false},
+    "mutation_performed": {"type": "boolean", "const": false},
+    "acceptance_trace": {"type": "array", "minItems": 1, "items": {"type": "string", "enum": ["PU-031", "FR-008", "SA-004", "SEC-001", "VP-031"]}},
+    "agent_summary": {"type": "string", "minLength": 1}
+  },
+  "required": [
+    "schema_version",
+    "schema_uri",
+    "status",
+    "operation",
+    "adapter_count",
+    "adapter_candidates",
+    "discovery_checks",
+    "blockers",
+    "scanner_execution_performed",
+    "network_accessed",
+    "credentials_accessed",
+    "mutation_performed",
+    "acceptance_trace",
+    "agent_summary"
+  ],
+  "definitions": {
+    "adapterCandidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "adapter_id": {"type": "string", "minLength": 1},
+        "display_name": {"type": "string", "minLength": 1},
+        "adapter_kind": {
+          "type": "string",
+          "enum": ["sast", "dependency_vulnerability", "secret_detection", "code_scanning", "dependency_review"]
+        },
+        "source": {"type": "string", "const": "repo_configuration"},
+        "configured": {"type": "boolean", "const": true},
+        "evidence_refs": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "requires_credentials": {"type": "boolean"},
+        "scanner_execution_performed": {"type": "boolean", "const": false},
+        "network_accessed": {"type": "boolean", "const": false},
+        "credentials_accessed": {"type": "boolean", "const": false}
+      },
+      "required": [
+        "adapter_id",
+        "display_name",
+        "adapter_kind",
+        "source",
+        "configured",
+        "evidence_refs",
+        "requires_credentials",
+        "scanner_execution_performed",
+        "network_accessed",
+        "credentials_accessed"
+      ]
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "status": {"type": "string", "enum": ["pass", "blocker"]},
+        "severity": {"type": "string", "const": "blocker"},
+        "message": {"type": "string", "minLength": 1},
+        "evidence": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      },
+      "required": ["id", "status", "severity", "message", "evidence"]
+    }
+  }
+}

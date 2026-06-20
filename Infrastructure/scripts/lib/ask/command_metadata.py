@@ -43,7 +43,7 @@ VALID_ACTIONS = {
         "fold",
         "init",
     ],
-    "sdk": ["check", "ir", "docs", "eval", "package", "sandbox", "trust", "observability", "emitter", "ci", "explorer", "install", "rollback", "uninstall", "lifecycle", "status", "knowledge", "project", "lenses", "determinism", "review"],
+    "sdk": ["check", "ir", "docs", "eval", "package", "sandbox", "trust", "observability", "emitter", "ci", "explorer", "security", "install", "rollback", "uninstall", "lifecycle", "status", "knowledge", "project", "lenses", "determinism", "review"],
     "reviewers": ["resolve"],
     "runtime": ["surface", "budget"],
     "plugins": ["list", "status", "doctor", "sync-local-runtime", "init", "create", "install", "import", "harden", "uninstall"],
@@ -108,6 +108,7 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
         "ask sdk emitter preview --skill Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
         "ask sdk ci policy --risk-tier high --preview --json --robot",
         "ask sdk explorer static --preview --json --robot",
+        "ask sdk security adapters --preview --json --robot",
         "ask sdk install Skills/agent-ops/autofix --preview --json --robot",
         "ask sdk install ./Skills/sample/SKILL.md --apply --project-root /tmp/sample-project --json --robot",
         "ask sdk rollback --receipt /tmp/sample-project/.harness/receipts/skills-sdk/install/autofix.json --preview --json --robot",
@@ -134,6 +135,7 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
         "skills-sdk package signing-intent Infrastructure/tests/fixtures/skills_sdk/valid_skill --policy Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/signing-policy.json --json --robot",
         "skills-sdk sandbox validate --profile Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/sandbox-profile.json --json --robot",
         "skills-sdk emitter preview --skill Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
+        "skills-sdk security adapters --preview --json --robot",
         "skills-sdk install Skills/agent-ops/autofix --preview --json --robot",
         "skills-sdk install ./Skills/sample/SKILL.md --apply --project-root /tmp/sample-project --json --robot",
         "skills-sdk rollback --receipt /tmp/sample-project/.harness/receipts/skills-sdk/install/autofix.json --preview --json --robot",
@@ -322,6 +324,10 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
     ("sdk", "explorer"): [
         "ask sdk explorer static --preview --json --robot",
         "skills-sdk explorer static --preview --json --robot",
+    ],
+    ("sdk", "security"): [
+        "ask sdk security adapters --preview --json --robot",
+        "skills-sdk security adapters --preview --json --robot",
     ],
     ("sdk", "trust"): [
         "ask sdk trust decide Infrastructure/tests/fixtures/skills_sdk/valid_skill --decision trust --reason 'fixture passed local checks' --owner skills-sdk-tests --preview --json --robot",

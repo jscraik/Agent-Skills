@@ -267,8 +267,8 @@
       </div>
       <div class="summary-grid">
         <div class="stat" data-status="implemented"><b>25</b><strong>Implemented</strong><span>Local SDK control-plane capabilities with owner surfaces and tests.</span></div>
-        <div class="stat" data-status="preview"><b>7</b><strong>Preview</strong><span>Read-only planning and static projection surfaces.</span></div>
-        <div class="stat" data-status="placeholder"><b>1</b><strong>Placeholder</strong><span>Visible but not executable optional lanes.</span></div>
+        <div class="stat" data-status="preview"><b>8</b><strong>Preview</strong><span>Read-only planning and static projection surfaces.</span></div>
+        <div class="stat" data-status="placeholder"><b>0</b><strong>Placeholder</strong><span>Visible but not executable optional lanes.</span></div>
         <div class="stat" data-status="blocked"><b>1</b><strong>Blocked</strong><span>Needs sandbox adapter decision before execution can be claimed.</span></div>
         <div class="stat" data-status="deferred"><b>2</b><strong>Deferred</strong><span>Schema registry and compiled package lanes.</span></div>
         <div class="stat" data-status="out"><b>3</b><strong>Out of scope</strong><span>Remote registry, marketplace service, and publish pipeline.</span></div>
@@ -311,7 +311,7 @@
             <tr data-capability-id="package_verify" data-status="implemented" data-pipeline-sections="author_golden_path,compiler_emitter_discipline,package_hardening"></tr>
             <tr data-capability-id="signing" data-status="implemented" data-pipeline-sections="release_decision_matrix,full_skill_lifecycle,package_hardening"></tr>
             <tr data-capability-id="sandbox" data-status="blocked_missing_adapter" data-pipeline-sections="agent_execution_control_plane,release_decision_matrix,eval_ops"></tr>
-            <tr data-capability-id="security_adapter" data-status="placeholder_optional" data-pipeline-sections="release_decision_matrix,package_hardening,ci_and_adoption"></tr>
+            <tr data-capability-id="security_adapter" data-status="preview_only" data-pipeline-sections="release_decision_matrix,package_hardening,ci_and_adoption"></tr>
             <tr data-capability-id="static_docs" data-status="preview_only" data-pipeline-sections="public_sdk_surface,knowledge_engineering,ci_and_adoption"></tr>
             <tr data-capability-id="skill_explorer" data-status="preview_only" data-pipeline-sections="public_sdk_surface,full_skill_lifecycle,knowledge_engineering"></tr>
             <tr data-capability-id="schema_registry" data-status="deferred" data-pipeline-sections="public_sdk_surface,domain_model_integrity"></tr>
@@ -390,7 +390,7 @@
         <div class="stage" data-status="implemented"><span class="num">01</span><strong>Canonical Skill Source</strong><span>Implemented: compact <code>SKILL.md</code>, references, manifests, governed source shape, package verification, and skill doctor/check facade.</span><div class="badge-row"><span class="pill implemented">real</span></div></div>
         <div class="stage parse" data-status="implemented"><span class="num">02</span><strong>Parse / Validate / Classify</strong><span>Implemented: schema spine, risk classifier, status matrix, install preview, conformance, deterministic lenses, and review receipts.</span><div class="badge-row"><span class="pill implemented">real</span></div></div>
         <div class="stage ir" data-status="implemented"><span class="num">03</span><strong>SkillIR.v0</strong><span>Implemented: a small read-only typed IR now feeds package identity and eval/package receipt lanes.</span><div class="badge-row"><span class="pill implemented">real</span></div></div>
-        <div class="stage pass" data-status="implemented"><span class="num">04</span><strong>Executable Passes</strong><span>Partial but real: deterministic evals, package identity, package hardening, local trust ledger, redacted observability feedback preview, install, cleanup, conformance, review, and docs verification run locally. Live runtime ingestion, security adapters, real signature emission, sandbox execution, remote trust-store, and CI remain separate lanes.</span><div class="badge-row"><span class="pill implemented">mixed real</span><span class="pill blocked">gaps</span></div></div>
+        <div class="stage pass" data-status="implemented"><span class="num">04</span><strong>Executable Passes</strong><span>Partial but real: deterministic evals, package identity, package hardening, local trust ledger, redacted observability feedback preview, install, cleanup, conformance, review, security adapter discovery preview, and docs verification run locally. Live runtime ingestion, scanner execution, real signature emission, sandbox execution, remote trust-store, and CI remain separate lanes.</span><div class="badge-row"><span class="pill implemented">mixed real</span><span class="pill blocked">gaps</span></div></div>
         <div class="stage emit" data-status="preview"><span class="num">05</span><strong>Emitters / Registry / Publish</strong><span>Preview plus deferred boundaries: local emitter write plans exist, but no emitter runtime, remote registry, remote marketplace, or publish pipeline is claimed.</span><div class="badge-row"><span class="pill preview">write plan</span><span class="pill out">not v1</span></div></div>
       </div>
     </section>
@@ -435,6 +435,7 @@
         <div class="step" data-status="preview"><span class="pill preview">08</span><strong>PU-028: CI Policy Preview</strong><span>Landed as preview-only: <code>ask sdk ci policy</code> emits required checks from risk tier without mutating branch protection or claiming live CI readiness.</span></div>
         <div class="step" data-status="preview"><span class="pill preview">09</span><strong>PU-029: Static Explorer Projection</strong><span>Landed as preview-only: <code>ask sdk explorer static</code> indexes capabilities and local skills from JSON/source manifests without rendering HTML or publishing a hosted explorer.</span></div>
         <div class="step" data-status="preview"><span class="pill preview">10</span><strong>PU-030: Scenario Quality Gate</strong><span>Landed as preview-only: <code>ask sdk eval scenario-quality</code> screens eval scenario metadata before generated or observed cases are promoted into release-mode runs.</span></div>
+        <div class="step" data-status="preview"><span class="pill preview">11</span><strong>PU-031: Security Adapter Discovery</strong><span>Landed as preview-only: <code>ask sdk security adapters --preview</code> discovers local configured scanner adapter surfaces without running scanners, reading credentials, using network, or mutating state.</span></div>
       </div>
     </section>
 
