@@ -1169,7 +1169,7 @@ Minimum sandbox profile fields:
 }
 ```
 
-macOS `sandbox-exec` is the V1 native candidate on macOS. Other platforms MAY use container or policy adapters, but no platform may report pass for a mandatory sandbox gate without a receipt proving equivalent filesystem, network, env, secret, process, and state controls.
+On supported Apple Silicon macOS hosts, `apple/container` is the stronger V1 provider candidate for Linux-container-style isolation. macOS `sandbox-exec` remains a lower-level process-confinement probe. Other platforms MAY use container or policy adapters, but no platform may report pass for a mandatory sandbox gate without a receipt proving equivalent filesystem, network, env, secret, process, and state controls.
 
 Sandbox receipts MUST include:
 
@@ -1387,7 +1387,7 @@ testing_lens:
 - SEC-005: Toxic flows such as email exfiltration, webhook exfiltration, API credential exposure, and unapproved network writes MUST be denied unless explicitly approved.
 - SEC-006: Skills MUST NOT inherit all ambient permissions silently.
 - SEC-007: Fetched URLs and external refs MUST carry trust, freshness, and source-boundary metadata.
-- SEC-008: macOS `sandbox-exec` is the V1 native sandbox adapter candidate; Linux/container adapters remain future-compatible.
+- SEC-008: `apple/container` is the preferred V1 sandbox provider candidate on supported Apple Silicon macOS hosts; macOS `sandbox-exec` remains a lower-level process-confinement probe, and Linux/container adapters remain future-compatible siblings.
 - SEC-009: OPA/Rego is the default policy-as-code candidate; Cedar remains deferred.
 - SEC-010: BetterLeaks is the preferred secret-detection candidate, with Gitleaks or TruffleHog as fallback or deep verification.
 - SEC-011: Sigstore Cosign and Gitsign are default candidates for package and source signing.
