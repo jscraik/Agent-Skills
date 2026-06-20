@@ -148,7 +148,17 @@ def _network_check(profile: dict[str, Any]) -> dict[str, Any]:
 
 def _environment_check(profile: dict[str, Any]) -> dict[str, Any]:
     environment = _object_field(profile, "environment")
-    return _check("environment_inheritance_denied", "pass" if environment.get("inherit") is False else "blocker", "blocker", "Sandbox profile must not inherit ambient environment variables.", [f"inherit:{environment.get('inherit')!s}"])
+    allowed = _list_field(environment, "allowed")
+    broad_allowed = [str(item) for item in allowed if str(item).strip() in {"*", ".*"}]
+    passes = environment.get("inherit") is False and not broad_allowed
+    evidence = broad_allowed or [f"inherit:{environment.get('inherit')!s}", f"allowed_count:{len(allowed)}"]
+    return _check(
+        "environment_inheritance_denied",
+        "pass" if passes else "blocker",
+        "blocker",
+        "Sandbox profile must not inherit ambient environment variables or allow broad environment passthrough.",
+        evidence,
+    )
 
 
 def _command_allowlist_check(profile: dict[str, Any]) -> dict[str, Any]:

@@ -74,6 +74,15 @@ def _event_redaction_errors(events: list[dict[str, Any]]) -> list[str]:
     return errors
 
 
+def _event_package_errors(events: list[dict[str, Any]], package_id: str) -> list[str]:
+    errors: list[str] = []
+    for index, event in enumerate(events):
+        skill_id = event.get("skill_id")
+        if skill_id != package_id:
+            errors.append(f"event:{index}:skill_id:{skill_id!s}:expected:{package_id}")
+    return errors
+
+
 def _scenario_candidate(event: dict[str, Any], index: int) -> dict[str, Any]:
     event_digest = _sha256_json(event)
     return {
@@ -154,6 +163,8 @@ def build_observability_feedback_receipt(
     checks.append(_check("events_jsonl_parse", "blocker" if load_errors else "pass", "Events input must be JSONL object records.", load_errors))
     redaction_errors = _event_redaction_errors(loaded_events)
     checks.append(_check("events_redacted", "blocker" if redaction_errors else "pass", "Events must be redacted and carry digest references instead of raw prompts or outputs.", redaction_errors))
+    package_errors = _event_package_errors(loaded_events, str(package_receipt["package_id"]))
+    checks.append(_check("events_package_bound", "blocker" if package_errors else "pass", "Events must match the selected package id before feedback candidates can be promoted.", package_errors))
     receipt = _receipt(repo_root, package_receipt, events, loaded_events, checks)
     if receipt["status"] == "blocked":
         raise ObservabilityFeedbackError(receipt)

@@ -135,6 +135,22 @@ class TestSkillsSdkSandboxProfile(unittest.TestCase):
         self.assertFalse(receipt["execution_performed"])
         self.assert_receipt_schema_valid(receipt)
 
+    def test_wildcard_environment_allowlist_blocks_when_inherit_disabled(self) -> None:
+        profile = json.loads((REPO_ROOT / VALID_PROFILE).read_text(encoding="utf-8"))
+        profile["environment"]["allowed"] = ["*"]
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            profile_path = Path(tmpdir) / "sandbox-profile.json"
+            profile_path.write_text(json.dumps(profile), encoding="utf-8")
+            receipt = build_sandbox_profile_receipt(REPO_ROOT, profile_path=profile_path.as_posix())
+
+        blocker = next(blocker for blocker in receipt["blockers"] if blocker["id"] == "environment_inheritance_denied")
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("*", blocker["evidence"])
+        self.assertFalse(receipt["execution_performed"])
+        self.assert_receipt_schema_valid(receipt)
+
     def test_directory_profile_path_returns_blocked_receipt(self) -> None:
         with self.assertRaisesRegex(Exception, "could not be read") as raised:
             build_sandbox_profile_receipt(REPO_ROOT, profile_path="Infrastructure/tests/fixtures/skills_sdk/schema_spine")

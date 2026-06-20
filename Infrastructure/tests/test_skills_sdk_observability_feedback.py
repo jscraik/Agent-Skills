@@ -92,6 +92,37 @@ class TestSkillsSdkObservabilityFeedback(unittest.TestCase):
         with self.assertRaises(ValidationError):
             validate_observability_feedback_receipt(payload)
 
+    def test_builder_blocks_events_for_wrong_skill_package(self) -> None:
+        with tempfile.NamedTemporaryFile("w", suffix=".events", encoding="utf-8") as events:
+            events.write(
+                json.dumps(
+                    {
+                        "event_type": "skill_run",
+                        "skill_id": "other-skill",
+                        "outcome": "failure",
+                        "redacted": True,
+                        "prompt_digest": "sha256:" + "5" * 64,
+                        "failure_summary": "Wrong package event must not become a candidate.",
+                    }
+                )
+                + "\n"
+            )
+            events.flush()
+
+            with self.assertRaises(ObservabilityFeedbackError) as raised:
+                build_observability_feedback_receipt(
+                    REPO_ROOT,
+                    package_receipt=self._package_receipt(),
+                    events_path=events.name,
+                )
+
+        receipt = validate_observability_feedback_receipt(raised.exception.receipt)
+        all_evidence = [item for blocker in receipt.blockers for item in blocker.evidence]
+
+        self.assertEqual(receipt.status, "blocked")
+        self.assertIn("event:0:skill_id:other-skill:expected:skills-sdk-valid-fixture", all_evidence)
+        self.assertEqual(receipt.scenario_candidates, [])
+
     def test_public_cli_previews_observability_feedback(self) -> None:
         completed = subprocess.run(
             [
