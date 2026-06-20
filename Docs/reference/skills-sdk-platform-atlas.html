@@ -448,7 +448,7 @@
         <div class="note">Each future slice should add one command, one schema or receipt, tests, and a capability-matrix update.</div>
       </div>
       <div class="card-grid">
-        <div class="note">No numbered product slice is currently promoted. The next controlled change should clear the post-merge hardening gate below before promoting a new roadmap item into command, schema or receipt, tests, and capability-matrix truth.</div>
+        <div class="note">No numbered product slice is currently promoted. The post-merge hardening gate below is now closed by focused regression proof; the next build slice should be promoted only after its command, schema or receipt, tests, and capability-matrix truth are concrete.</div>
       </div>
     </section>
 
@@ -456,18 +456,18 @@
       <div class="section-head">
         <div>
           <h2>Post-Merge Hardening Gate</h2>
-          <p>Review feedback after PU-031 is operational telemetry, not a separate roadmap product claim. Clear these parity and boundary gaps before promoting another numbered SDK slice.</p>
+          <p>Review feedback after PU-031 was treated as operational telemetry, not a separate roadmap product claim. The parity and boundary gaps are closed by the focused SDK receipt hardening regression suite.</p>
         </div>
-        <div class="note">Gate rule: schema, typed contracts, CLI fallback paths, path boundaries, and PR governance must agree before the atlas advertises the next build slice.</div>
+        <div class="note">Gate proof: <code>Infrastructure/tests/test_skills_sdk_receipt_hardening_gate.py</code> plus the focused SDK receipt suites prove schema, typed-contract, fallback, path-boundary, package-binding, PR-governance, emitter-root, and schema-helper parity.</div>
       </div>
       <div class="card-grid">
-        <div class="step" data-status="blocked"><span class="pill blocked">schema parity</span><strong>Fallback Contract Parity</strong><span>Signing fallback validation must reject malformed policy list entries, invalid acceptance traces, unknown policy fields, incompatible Pydantic imports, and nondeterministic absolute policy paths.</span></div>
-        <div class="step" data-status="blocked"><span class="pill blocked">receipt parity</span><strong>Typed Receipt Invariants</strong><span>Typed contracts must mirror JSON schema requirements for digest shape, required receipt uniqueness, trust mutation/status coupling, and non-mutating preview or blocked receipts.</span></div>
-        <div class="step" data-status="blocked"><span class="pill blocked">boundary</span><strong>Input Boundary Enforcement</strong><span>Preview commands must stop before reading or hashing disallowed external event and ledger paths, reject directory ledgers before append, and reject wildcard environment allowlists or shell allowlist bypasses.</span></div>
-        <div class="step" data-status="blocked"><span class="pill blocked">package binding</span><strong>Package-Bound Feedback</strong><span>Observability feedback must only promote redacted events for the requested skill package and must validate full digest references before candidate generation.</span></div>
-        <div class="step" data-status="blocked"><span class="pill blocked">governance</span><strong>PR Gate Integrity</strong><span>The PR-template gate must run trusted validation logic, reject empty required fields, and preserve documented N/A checklist handling without allowing a PR to weaken its own validator.</span></div>
-        <div class="step" data-status="blocked"><span class="pill blocked">emitter preview</span><strong>Emitter Root Normalization</strong><span>Emitter preview receipts and write plans must use one canonical target-root value so accepted previews remain schema-valid and absolute or normalized-away roots are blocked.</span></div>
-        <div class="step" data-status="blocked"><span class="pill blocked">test helper</span><strong>Schema Helper Fidelity</strong><span>The local schema-test helper must enforce numeric minimums for integers and floats and detect JSON-schema duplicate array items by semantic equality, not fragile string representations.</span></div>
+        <div class="step" data-status="implemented"><span class="pill implemented">schema parity</span><strong>Fallback Contract Parity</strong><span>Signing fallback validation rejects malformed policy list entries, invalid acceptance traces, unknown policy fields, incompatible Pydantic imports, and nondeterministic absolute policy paths.</span></div>
+        <div class="step" data-status="implemented"><span class="pill implemented">receipt parity</span><strong>Typed Receipt Invariants</strong><span>Typed contracts mirror JSON schema requirements for digest shape, required receipt uniqueness, trust mutation/status coupling, and non-mutating preview or blocked receipts.</span></div>
+        <div class="step" data-status="implemented"><span class="pill implemented">boundary</span><strong>Input Boundary Enforcement</strong><span>Preview commands stop before reading or hashing disallowed external event and ledger paths, reject directory ledgers before append, and reject wildcard environment allowlists or shell allowlist bypasses.</span></div>
+        <div class="step" data-status="implemented"><span class="pill implemented">package binding</span><strong>Package-Bound Feedback</strong><span>Observability feedback only promotes redacted events for the requested skill package and validates full digest references before candidate generation.</span></div>
+        <div class="step" data-status="implemented"><span class="pill implemented">governance</span><strong>PR Gate Integrity</strong><span>The PR-template gate runs trusted validation logic, rejects empty required fields, and preserves documented N/A checklist handling without allowing a PR to weaken its own validator.</span></div>
+        <div class="step" data-status="implemented"><span class="pill implemented">emitter preview</span><strong>Emitter Root Normalization</strong><span>Emitter preview receipts and write plans use one canonical target-root value so accepted previews remain schema-valid and absolute or normalized-away roots are blocked.</span></div>
+        <div class="step" data-status="implemented"><span class="pill implemented">test helper</span><strong>Schema Helper Fidelity</strong><span>The local schema-test helper enforces numeric minimums for integers and floats and detects JSON-schema duplicate array items by semantic equality, not fragile string representations.</span></div>
       </div>
     </section>
 
