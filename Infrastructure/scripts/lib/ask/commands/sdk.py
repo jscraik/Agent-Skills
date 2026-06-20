@@ -10,6 +10,7 @@ from ask.commands.sdk_ci import add_sdk_ci_parser, dispatch_sdk_ci
 from ask.commands.sdk_emitter import add_sdk_emitter_parser, dispatch_sdk_emitter
 from ask.commands.sdk_eval import add_sdk_eval_parser, dispatch_sdk_eval
 from ask.commands.sdk_explorer import add_sdk_explorer_parser, dispatch_sdk_explorer
+from ask.commands.sdk_security import add_sdk_security_parser, dispatch_sdk_security
 from ask.skills_sdk.determinism import audit_skill_determinism
 from ask.skills_sdk.lenses import (
     KNOWN_TASK_INTENTS,
@@ -297,6 +298,7 @@ def add_sdk_parser(
     add_sdk_emitter_parser(sdk_subparsers, global_parser)
     add_sdk_ci_parser(sdk_subparsers, global_parser)
     add_sdk_explorer_parser(sdk_subparsers, global_parser)
+    add_sdk_security_parser(sdk_subparsers, global_parser)
     _add_sdk_project_mutation_parsers(sdk_subparsers, global_parser)
     _add_sdk_lifecycle_status_parsers(sdk_subparsers, global_parser)
     _add_sdk_knowledge_parser(sdk_subparsers, global_parser)
@@ -408,6 +410,7 @@ def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
         "emitter": dispatch_sdk_emitter,
         "ci": dispatch_sdk_ci,
         "explorer": dispatch_sdk_explorer,
+        "security": dispatch_sdk_security,
         "install": _dispatch_sdk_install,
         "rollback": _dispatch_sdk_rollback,
         "uninstall": _dispatch_sdk_uninstall,

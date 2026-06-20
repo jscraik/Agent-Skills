@@ -223,6 +223,7 @@ __all__ = [
     "skills_sdk_observability_feedback",
     "skills_sdk_emitter_preview",
     "skills_sdk_ci_policy_preview",
+    "skills_sdk_security_adapters_preview",
     "skills_sdk_static_explorer_preview",
     "skills_sdk_eval_scenario_quality",
     "skills_sdk_eval_run",
@@ -4675,6 +4676,50 @@ def skills_sdk_ci_policy_preview(
                 code="ERR_VALIDATION",
                 message=payload["agent_summary"],
                 fix_suggestion="Use a supported SDK risk tier and attach live CI evidence in a separate hosted-check lane.",
+            )
+        )
+    return result
+
+
+def skills_sdk_security_adapters_preview(repo_root: Path) -> CallResult:
+    """Discover configured local security adapters without executing scanners."""
+    result = CallResult()
+    result.metadata["command"] = "sdk security adapters"
+    from ask.skills_sdk.security_adapter_discovery import (  # noqa: PLC0415
+        SecurityAdapterDiscoveryError,
+        build_security_adapter_discovery_receipt,
+    )
+
+    try:
+        receipt = build_security_adapter_discovery_receipt(repo_root)
+    except SecurityAdapterDiscoveryError as exc:
+        receipt = exc.receipt
+    payload = {
+        "schema_version": "skills-sdk-security-adapter-discovery-receipt.v0",
+        "status": receipt["status"],
+        "facade_command": "skills-sdk security adapters",
+        "adapter_count": receipt["adapter_count"],
+        "adapter_candidates": receipt["adapter_candidates"],
+        "receipt": receipt,
+        "scanner_execution_performed": False,
+        "network_accessed": False,
+        "credentials_accessed": False,
+        "mutation_performed": False,
+        "validation_commands": [
+            _ask_validation_command("sdk", "security", "adapters", "--preview")
+        ],
+        "agent_summary": receipt["agent_summary"],
+    }
+    result.data["skills_sdk_security_adapter_discovery"] = payload
+    if receipt["status"] == "blocked":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=payload["agent_summary"],
+                fix_suggestion=(
+                    "Add local scanner workflow or config evidence before approving any scanner execution adapter."
+                ),
             )
         )
     return result

@@ -454,14 +454,19 @@
     {
       "id": "security_adapter",
       "title": "Security adapter detection",
-      "status": "placeholder_optional",
-      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/placeholder_lifecycle.py",
+      "status": "preview_only",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/security_adapter_discovery.py",
       "pipeline_sections": ["release_decision_matrix", "package_hardening", "ci_and_adoption"],
-      "feature_executed": false,
+      "feature_executed": true,
       "mutation_performed": false,
-      "evidence_refs": ["./bin/ask sdk lifecycle --surface security_adapter --json --robot", "Infrastructure/tests/test_skills_sdk_placeholder_lifecycle.py"],
-      "next_slice": "Add local security adapter discovery before external scanner calls.",
-      "notes": "Medium-risk status reports optional placeholder without credentials or network calls."
+      "evidence_refs": [
+        "./bin/ask sdk security adapters --preview --json --robot",
+        "Infrastructure/scripts/lib/ask/skills_sdk/security_adapter_discovery.py",
+        "Infrastructure/config/schemas/skills-sdk/security-adapter-discovery-receipt.v0.schema.json",
+        "Infrastructure/tests/test_skills_sdk_security_adapter_discovery.py"
+      ],
+      "next_slice": "Connect discovered adapters to scanner execution receipts only after credential, network, and ownership boundaries are approved.",
+      "notes": "PU-031 discovers local configured scanner adapter surfaces from repo workflows and config without running scanners, reading credentials, using network, or mutating state."
     },
     {
       "id": "static_docs",

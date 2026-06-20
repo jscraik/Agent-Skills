@@ -2270,8 +2270,8 @@
           <span>The SDK stage validator, scaffold, and migrated SynAIpse stage packages now enforce the agreed product shape: thin operator instructions in <code>SKILL.md</code>, contracts and provenance in <code>references/*.yaml</code>/<code>agents/openai.yaml</code>, and focused Markdown references. KnowledgeOS ingestion remains a later portable-pack slice, not a runtime dependency.</span>
         </div>
         <div>
-          <strong>Current slice: PU-020</strong>
-          <span>Declutter route truth before expanding SDK surface area: keep <code>ask sdk status</code> as the operator entrypoint, keep this HTML projection-only, and prevent completed PUs from reappearing as next-slice claims.</span>
+          <strong>Current slice: PU-031</strong>
+          <span>Promote security adapter discovery to a preview-only SDK lane: detect local configured scanner adapter surfaces while keeping scanner execution, credentials, network, and mutation explicitly false.</span>
         </div>
       </div>
       <table class="status-grid">
@@ -2304,7 +2304,7 @@
         <tr data-capability-id="package_verify" data-status="implemented" data-pipeline-sections="author_golden_path,compiler_emitter_discipline,package_hardening"><td><strong>Package verification</strong><br><span>package_verify</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/package_verify.py</td><td>Connect package verification to signed publish only after signing is approved.</td></tr>
         <tr data-capability-id="signing" data-status="implemented" data-pipeline-sections="release_decision_matrix,full_skill_lifecycle,package_hardening"><td><strong>Package signing intent</strong><br><span>signing</span></td><td><span class="status-pill" data-status="implemented">implemented</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/signing_intent.py</td><td>Approve real signing adapter, key ownership, archive emission, and redaction authority before producing signatures.</td></tr>
         <tr data-capability-id="sandbox" data-status="blocked_missing_adapter" data-pipeline-sections="agent_execution_control_plane,release_decision_matrix,eval_ops"><td><strong>Sandbox execution</strong><br><span>sandbox</span></td><td><span class="status-pill" data-status="blocked_missing_adapter">blocked_missing_adapter</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/sandbox_profile.py plus placeholder_lifecycle.py</td><td>Approve sandbox provider selection and adapter contract.</td></tr>
-        <tr data-capability-id="security_adapter" data-status="placeholder_optional" data-pipeline-sections="release_decision_matrix,package_hardening,ci_and_adoption"><td><strong>Security adapter detection</strong><br><span>security_adapter</span></td><td><span class="status-pill" data-status="placeholder_optional">placeholder_optional</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/placeholder_lifecycle.py</td><td>Add local security adapter discovery before external scanner calls.</td></tr>
+        <tr data-capability-id="security_adapter" data-status="preview_only" data-pipeline-sections="release_decision_matrix,package_hardening,ci_and_adoption"><td><strong>Security adapter detection</strong><br><span>security_adapter</span></td><td><span class="status-pill" data-status="preview_only">preview_only</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/security_adapter_discovery.py</td><td>Connect discovered adapters to scanner execution receipts only after credential, network, and ownership boundaries are approved.</td></tr>
         <tr data-capability-id="static_docs" data-status="preview_only" data-pipeline-sections="public_sdk_surface,knowledge_engineering,ci_and_adoption"><td><strong>Static local documentation artifacts</strong><br><span>static_docs</span></td><td><span class="status-pill" data-status="preview_only">preview_only</span></td><td>artifacts/recommended-skills-sdk-pipeline.html</td><td>Keep the HTML artifacts projection-only from SDK capability status before any hosted explorer or docs expansion.</td></tr>
         <tr data-capability-id="skill_explorer" data-status="preview_only" data-pipeline-sections="public_sdk_surface,full_skill_lifecycle,knowledge_engineering"><td><strong>Static explorer index preview</strong><br><span>skill_explorer</span></td><td><span class="status-pill" data-status="preview_only">preview_only</span></td><td>Infrastructure/scripts/lib/ask/skills_sdk/static_explorer.py</td><td>Add hosted explorer rendering only after ownership, publishing, and freshness contracts are approved.</td></tr>
         <tr data-capability-id="schema_registry" data-status="deferred" data-pipeline-sections="public_sdk_surface,domain_model_integrity"><td><strong>Schema registry</strong><br><span>schema_registry</span></td><td><span class="status-pill" data-status="deferred">deferred</span></td><td>future Skills SDK schema registry</td><td>Define registry ownership, compatibility classes, and migration policy.</td></tr>
@@ -2476,8 +2476,8 @@
           <span>SDK lenses, lens-routed review plans, review handoff receipts, and determinism audit are implemented as read-only evidence surfaces.</span>
         </div>
         <div class="lifecycle-status-card" data-state="partial">
-          <strong>Current: PU-020 route-truth declutter</strong>
-          <span>PU-019 now has a first implemented Skills SDK consumer lane. PU-020 keeps status, matrix, and static docs aligned before further SDK expansion.</span>
+          <strong>Current: PU-031 security adapter discovery</strong>
+          <span>PU-031 keeps the security lane preview-only: local adapter discovery can report configured scanner surfaces, but scanner execution, credentials, network, and mutation remain blocked.</span>
         </div>
         <div class="lifecycle-status-card" data-state="partial">
           <strong>Partial: local docs and previews</strong>
@@ -2488,8 +2488,8 @@
           <span>Signing needs key ownership and redaction policy. Sandbox needs a selected provider and adapter contract before execution receipts can be real.</span>
         </div>
         <div class="lifecycle-status-card" data-state="deferred">
-          <strong>Deferred: refs and eval adapters</strong>
-          <span>Reference ingestion, local eval runner fixtures, and security adapter discovery are still placeholder or optional lanes.</span>
+          <strong>Deferred: hosted eval and scanner adapters</strong>
+          <span>Reference ingestion and local eval runner receipts exist; hosted eval providers and real scanner execution adapters still need separately approved slices.</span>
         </div>
         <div class="lifecycle-status-card" data-state="deferred">
           <strong>Deferred: package compiler and emitters</strong>

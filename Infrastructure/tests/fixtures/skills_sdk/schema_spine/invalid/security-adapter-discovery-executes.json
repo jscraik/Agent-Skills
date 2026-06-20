@@ -1,0 +1,37 @@
+{
+  "schema_version": "skills-sdk.security-adapter-discovery-receipt.v0",
+  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/security-adapter-discovery-receipt.v0.schema.json",
+  "status": "preview",
+  "operation": "security_adapter_discovery_preview",
+  "adapter_count": 1,
+  "adapter_candidates": [
+    {
+      "adapter_id": "semgrep",
+      "display_name": "Semgrep",
+      "adapter_kind": "sast",
+      "source": "repo_configuration",
+      "configured": true,
+      "evidence_refs": [".github/workflows/security-scan.yml"],
+      "requires_credentials": false,
+      "scanner_execution_performed": true,
+      "network_accessed": false,
+      "credentials_accessed": false
+    }
+  ],
+  "discovery_checks": [
+    {
+      "id": "repo_root_available",
+      "status": "pass",
+      "severity": "blocker",
+      "message": "Security adapter discovery requires a readable repository root.",
+      "evidence": ["."]
+    }
+  ],
+  "blockers": [],
+  "scanner_execution_performed": true,
+  "network_accessed": false,
+  "credentials_accessed": false,
+  "mutation_performed": false,
+  "acceptance_trace": ["PU-031", "FR-008", "SA-004", "SEC-001", "VP-031"],
+  "agent_summary": "security adapter discovery executed a scanner."
+}
