@@ -116,6 +116,7 @@ def _execute_variant(
     variant_label = command_plan["variant_label"]
     paths = _variant_paths(repo_root, command_plan)
     _prepare_variant_paths(paths, prompt)
+    _clear_stale_variant_output(paths)
     result, run_error, codex_exec_started = _run_variant(command_plan, prompt, repo_root, timeout_seconds, runner)
     _write_runner_outputs(paths, result)
     output_digest = _digest_file(paths.output)
@@ -156,6 +157,14 @@ def _prepare_variant_paths(paths: VariantPaths, prompt: str) -> None:
     paths.prompt.write_bytes(prompt.encode("utf-8"))
 
 
+def _clear_stale_variant_output(paths: VariantPaths) -> None:
+    if not paths.output.exists():
+        return
+    if not paths.output.is_file():
+        raise ValueError("A/B output path must be a file")
+    paths.output.unlink()
+
+
 def _run_variant(
     command_plan: dict[str, Any],
     prompt: str,
@@ -188,8 +197,10 @@ def _timeout_output_text(value: str | bytes | None) -> str:
 
 
 def _write_runner_outputs(paths: VariantPaths, result: CodexRunResult) -> None:
-    paths.stdout.write_bytes(result.stdout.encode("utf-8"))
-    paths.stderr.write_bytes(result.stderr.encode("utf-8"))
+    with paths.stdout.open("w", encoding="utf-8") as stdout_handle:
+        stdout_handle.write(result.stdout)
+    with paths.stderr.open("w", encoding="utf-8") as stderr_handle:
+        stderr_handle.write(result.stderr)
 
 
 def _variant_blockers(variant_label: str, run_error: str | None, exit_code: int, output_digest: str | None) -> list[str]:

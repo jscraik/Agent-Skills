@@ -5,6 +5,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import sys
+from typing import Callable
 import unittest
 
 
@@ -28,6 +29,20 @@ IDENTITY_B = {
     "package_id": "skills-sdk-scenario-quality-fixture",
     "package_digest": f"sha256:{'2' * 64}",
 }
+TestRunner = Callable[[list[str], str, Path, int], CodexRunResult]
+
+
+def _build_test_ab_run_receipt(evidence_root: str, runner: TestRunner) -> dict[str, object]:
+    return build_ab_run_receipt(
+        REPO_ROOT,
+        skill_a=SKILL_A,
+        skill_b=SKILL_B,
+        fixture=FIXTURE,
+        skill_a_identity=IDENTITY_A,
+        skill_b_identity=IDENTITY_B,
+        evidence_root=evidence_root,
+        runner=runner,
+    )
 
 
 class TestSkillsSdkAbRun(unittest.TestCase):
@@ -184,6 +199,30 @@ class TestSkillsSdkAbRun(unittest.TestCase):
             self.assertEqual((REPO_ROOT / result["runner_stdout_capture_path"]).read_text(encoding="utf-8"), "partial stdout")
             self.assertEqual((REPO_ROOT / result["runner_stderr_capture_path"]).read_text(encoding="utf-8"), "partial stderr")
         validate_ab_run_receipt(receipt)
+
+    def test_builder_clears_stale_output_before_variant_rerun(self) -> None:
+        def successful_runner(command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: int) -> CodexRunResult:
+            output_path = repo_root / command_argv[command_argv.index("--output-last-message") + 1]
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            output_path.write_text(json.dumps({"prompt": prompt[:12]}), encoding="utf-8")
+            return CodexRunResult(exit_code=0, stdout='{"event":"done"}\n', stderr="")
+
+        first_receipt = _build_test_ab_run_receipt(self.evidence_root, successful_runner)
+        self.assertEqual(first_receipt["status"], "completed")
+
+        def missing_output_runner(
+            command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: int
+        ) -> CodexRunResult:
+            return CodexRunResult(exit_code=0, stdout='{"event":"done"}\n', stderr="")
+
+        second_receipt = _build_test_ab_run_receipt(self.evidence_root, missing_output_runner)
+
+        self.assertEqual(second_receipt["status"], "blocked")
+        self.assertIn("A:output_last_message_missing", second_receipt["blockers"])
+        self.assertIn("B:output_last_message_missing", second_receipt["blockers"])
+        for result in second_receipt["variant_results"]:
+            self.assertIsNone(result["output_last_message_digest"])
+        validate_ab_run_receipt(second_receipt)
 
     def test_builder_does_not_claim_provider_invocation_when_codex_never_starts(self) -> None:
         def missing_runner(command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: int) -> CodexRunResult:
