@@ -45,6 +45,8 @@ _VALID_DOC = (
     "known taxonomy values\n"
     "## Required Evidence\n\n"
     "validate_steering_uptake.py\n"
+    "After any fabricated runtime handle is attempted\n"
+    "immediately preceding tool result\n"
 )
 _VALID_LEDGER = (
     "# Steering Uptake Ledger\n\n"

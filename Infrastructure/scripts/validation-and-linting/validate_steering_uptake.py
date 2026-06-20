@@ -117,6 +117,8 @@ REQUIRED_DOC_PHRASES = (
     "known taxonomy values",
     "Required Evidence",
     "validate_steering_uptake.py",
+    "After any fabricated runtime handle is attempted",
+    "immediately preceding tool result",
 )
 STEERING_DOC_LINK_RE = re.compile(
     r"\[[^\]]+\]\((?:/)?Docs/agents/19-high-signal-steering-feedback\.md\)"
