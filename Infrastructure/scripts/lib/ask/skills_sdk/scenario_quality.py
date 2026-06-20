@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import json
-import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -35,22 +33,106 @@ def _yaml_safe_load(text: str) -> Any:
     try:
         import yaml  # type: ignore
     except ModuleNotFoundError:
-        process = subprocess.run(
-            [
-                "ruby",
-                "-e",
-                "require 'yaml'; require 'json'; print JSON.generate(YAML.safe_load(STDIN.read, permitted_classes: [], aliases: true))",
-            ],
-            input=text,
-            text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            check=False,
-        )
-        if process.returncode != 0:
-            raise ValueError(process.stderr.strip() or "yaml_parse_failed")
-        return json.loads(process.stdout)
+        return _load_minimal_evals_yaml(text)
     return yaml.safe_load(text)
+
+
+def _load_minimal_evals_yaml(text: str) -> dict[str, Any]:
+    state: dict[str, Any] = {"cases": [], "current": None, "current_list": None, "current_mapping": None}
+    for raw_line in text.splitlines():
+        stripped, indent = _minimal_line(raw_line)
+        if not stripped or stripped == "cases:":
+            continue
+        if _consume_minimal_line(state, stripped, indent) or stripped.startswith(("schema_version:", "skill_name:")):
+            continue
+        else:
+            raise ValueError("minimal_yaml_parse_unsupported")
+    return {"cases": state["cases"]}
+
+
+def _minimal_line(raw_line: str) -> tuple[str, int]:
+    line = raw_line.split("#", 1)[0].rstrip()
+    return line.strip(), len(line) - len(line.lstrip(" "))
+
+
+def _consume_minimal_line(state: dict[str, Any], stripped: str, indent: int) -> bool:
+    if indent == 2 and stripped.startswith("- "):
+        return _start_minimal_case(state, stripped[2:])
+    if state["current"] is None:
+        return False
+    return _consume_case_field(state, stripped, indent) or _consume_nested_value(state, stripped, indent)
+
+
+def _start_minimal_case(state: dict[str, Any], item: str) -> bool:
+    current: dict[str, Any] = {}
+    state["cases"].append(current)
+    state["current"] = current
+    state["current_list"] = None
+    state["current_mapping"] = None
+    _assign_inline_pair(current, item)
+    return True
+
+
+def _consume_case_field(state: dict[str, Any], stripped: str, indent: int) -> bool:
+    if indent != 4 or ":" not in stripped:
+        return False
+    current = state["current"]
+    key, value = stripped.split(":", 1)
+    if value.strip():
+        current[key] = _parse_scalar(value.strip())
+        state["current_list"] = state["current_mapping"] = None
+    elif key in {"eval_modes", "acceptance"}:
+        state["current_list"] = current[key] = []
+        state["current_mapping"] = None
+    else:
+        state["current_mapping"] = current[key] = {}
+        state["current_list"] = None
+    return True
+
+
+def _consume_nested_value(state: dict[str, Any], stripped: str, indent: int) -> bool:
+    if indent < 6:
+        return False
+    if state["current_list"] is not None and stripped.startswith("- "):
+        state["current_list"].append(_parse_list_item(stripped[2:]))
+        return True
+    if state["current_list"] is not None and ":" in stripped:
+        latest = state["current_list"][-1] if state["current_list"] else None
+        if isinstance(latest, dict):
+            key, value = stripped.split(":", 1)
+            latest[key] = _parse_scalar(value.strip())
+            return True
+    if state["current_mapping"] is not None:
+        if ":" in stripped:
+            key, value = stripped.split(":", 1)
+            state["current_mapping"][key] = _parse_scalar(value.strip()) if value.strip() else True
+        return True
+    return False
+
+
+def _assign_inline_pair(target: dict[str, Any], item: str) -> None:
+    if ":" not in item:
+        raise ValueError("minimal_yaml_parse_unsupported")
+    key, value = item.split(":", 1)
+    target[key] = _parse_scalar(value.strip())
+
+
+def _parse_list_item(item: str) -> Any:
+    if ":" not in item:
+        return _parse_scalar(item)
+    result: dict[str, Any] = {}
+    for part in item.split(","):
+        key, value = part.split(":", 1)
+        result[key.strip().strip("{}")] = _parse_scalar(value.strip().strip("{}"))
+    return result
+
+
+def _parse_scalar(value: str) -> Any:
+    if value in {"true", "false"}:
+        return value == "true"
+    if value.startswith("[") and value.endswith("]"):
+        return [item.strip().strip("'\"") for item in value[1:-1].split(",") if item.strip()]
+    return value.strip("'\"")
 
 
 def _load_evals(path: Path) -> tuple[dict[str, Any] | None, str | None]:

@@ -6,6 +6,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 
@@ -15,6 +16,7 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 from ask.skills_sdk.scenario_quality import (  # noqa: E402
     ScenarioQualityError,
     build_scenario_quality_receipt,
+    _yaml_safe_load,
 )
 
 
@@ -80,6 +82,22 @@ class TestSkillsSdkScenarioQuality(unittest.TestCase):
         self.assertEqual(receipt["status"], "blocked")
         self.assertEqual(receipt["scenario_count"], 0)
         self.assertTrue(any(check["id"] == "evals_yaml_present" for check in receipt["blockers"]))
+
+    def test_yaml_fallback_parses_fixture_without_subprocess(self) -> None:
+        real_import = __import__
+
+        def import_without_yaml(name: str, *args: object, **kwargs: object) -> object:
+            if name == "yaml":
+                raise ModuleNotFoundError(name)
+            return real_import(name, *args, **kwargs)
+
+        evals_text = (REPO_ROOT / FIXTURE_SKILL / "references/evals.yaml").read_text(encoding="utf-8")
+        with mock.patch("builtins.__import__", side_effect=import_without_yaml):
+            payload = _yaml_safe_load(evals_text)
+
+        self.assertEqual(payload["cases"][0]["id"], "happy-scenario-quality")
+        self.assertEqual(payload["cases"][0]["eval_modes"], ["smoke"])
+        self.assertIsInstance(payload["cases"][0]["deterministic_checks"], dict)
 
 
 if __name__ == "__main__":
