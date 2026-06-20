@@ -534,7 +534,7 @@ class SandboxProfileReceipt(_SdkContractModel):
     ]
     status: Literal["pass", "blocked"]
     profile_path: str = Field(min_length=1)
-    profile_digest: str | None
+    profile_digest: str | None = Field(default=None, min_length=71)
     profile_id: str | None
     risk_tier: Literal["low", "medium", "high", "privileged", "published"] | None
     default_policy: Literal["deny", "allow"] | None

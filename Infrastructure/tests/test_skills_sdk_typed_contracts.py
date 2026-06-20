@@ -116,6 +116,14 @@ class TestSkillsSdkTypedContracts(unittest.TestCase):
         with self.assertRaises(ValidationError):
             contracts.validate_package_hardening_receipt(payload)
 
+    def test_sandbox_profile_receipt_rejects_short_profile_digest(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "sandbox-profile-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["profile_digest"] = "x"
+
+        with self.assertRaises(ValidationError):
+            contracts.validate_sandbox_profile_receipt(payload)
+
     def test_signing_intent_contract_rejects_signature_claims(self) -> None:
         payload = _json(FIXTURE_DIR / "valid" / "signing-intent-receipt.json")
         self.assertIsInstance(payload, dict)

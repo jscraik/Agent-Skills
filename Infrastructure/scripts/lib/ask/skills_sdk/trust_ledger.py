@@ -115,12 +115,16 @@ def _trust_decision_shape_check(
 
 
 def _ledger_path_check(repo_root: Path, ledger_path: Path) -> dict[str, Any]:
+    evidence = [_repo_relative(repo_root, ledger_path)]
+    if ledger_path.exists() and ledger_path.is_dir():
+        evidence.append("path_is_directory")
+    allowed = _ledger_path_allowed(repo_root, ledger_path) and "path_is_directory" not in evidence
     return _check(
         "ledger_path_allowed",
-        "pass" if _ledger_path_allowed(repo_root, ledger_path) else "blocker",
+        "pass" if allowed else "blocker",
         "blocker",
-        "Trust ledger writes must stay inside the repository or a temporary test path.",
-        [_repo_relative(repo_root, ledger_path)],
+        "Trust ledger writes must stay inside the repository or a temporary test file path.",
+        evidence,
     )
 
 
