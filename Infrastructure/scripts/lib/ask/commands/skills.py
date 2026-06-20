@@ -140,6 +140,10 @@ def skills_sdk_trust_decide(*args, **kwargs):
     return _call_impl("skills_sdk_trust_decide", *args, **kwargs)
 
 
+def skills_sdk_observability_feedback(*args, **kwargs):
+    return _call_impl("skills_sdk_observability_feedback", *args, **kwargs)
+
+
 def skills_sdk_eval_run(*args, **kwargs):
     return _call_impl("skills_sdk_eval_run", *args, **kwargs)
 
@@ -181,6 +185,7 @@ _FACADE_WRAPPERS.update(
         "skills_sdk_package_build": skills_sdk_package_build,
         "skills_sdk_package_harden": skills_sdk_package_harden,
         "skills_sdk_trust_decide": skills_sdk_trust_decide,
+        "skills_sdk_observability_feedback": skills_sdk_observability_feedback,
         "skills_sdk_eval_run": skills_sdk_eval_run,
         "skills_sdk_project_install": skills_sdk_project_install,
         "skills_sdk_project_conformance": skills_sdk_project_conformance,
@@ -224,6 +229,7 @@ skills_sdk_ir_build = _impl.skills_sdk_ir_build
 skills_sdk_package_build = _impl.skills_sdk_package_build
 skills_sdk_package_harden = _impl.skills_sdk_package_harden
 skills_sdk_trust_decide = _impl.skills_sdk_trust_decide
+skills_sdk_observability_feedback = _impl.skills_sdk_observability_feedback
 skills_sdk_eval_run = _impl.skills_sdk_eval_run
 skills_sdk_placeholder_lifecycle = _impl.skills_sdk_placeholder_lifecycle
 validate_openai_skill_format = _impl.validate_openai_skill_format
@@ -273,6 +279,7 @@ __all__ = [
     "skills_sdk_package_build",
     "skills_sdk_package_harden",
     "skills_sdk_trust_decide",
+    "skills_sdk_observability_feedback",
     "skills_sdk_eval_run",
     "skills_sdk_placeholder_lifecycle",
     "skills_sdk_project_conformance",

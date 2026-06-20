@@ -40,6 +40,7 @@
     "./bin/ask sdk package build Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
     "./bin/ask sdk package harden Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
     "./bin/ask sdk trust decide Infrastructure/tests/fixtures/skills_sdk/valid_skill --decision trust --reason 'fixture passed local checks' --owner skills-sdk-tests --preview --json --robot",
+    "./bin/ask sdk observability feedback --skill Infrastructure/tests/fixtures/skills_sdk/valid_skill --events Infrastructure/tests/fixtures/skills_sdk/observability/redacted-events.fixture --preview --json --robot",
     "./bin/ask sdk sandbox validate --profile Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/sandbox-profile.json --json --robot",
     "/Users/jamiecraik/.venvs/pyyaml/bin/python Infrastructure/scripts/validation-and-linting/check_sdk_stage_skill_shape.py",
     "python3 -m unittest Infrastructure.scripts.testing.test_skill_creator_lifecycle_scaffold -v",
@@ -334,6 +335,22 @@
       ],
       "next_slice": "Connect trust decisions to release-mode policy only after revocation, expiry, and owner workflows have stronger evidence.",
       "notes": "PU-025 appends local JSONL trust decisions only when --apply is explicit; it does not mutate a global trust store or claim runtime trust."
+    },
+    {
+      "id": "observability_feedback",
+      "title": "Redacted observability feedback preview",
+      "status": "implemented",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/observability_feedback.py",
+      "pipeline_sections": ["eval_ops", "knowledge_engineering", "agent_execution_control_plane"],
+      "feature_executed": true,
+      "mutation_performed": false,
+      "evidence_refs": [
+        "./bin/ask sdk observability feedback --skill Infrastructure/tests/fixtures/skills_sdk/valid_skill --events Infrastructure/tests/fixtures/skills_sdk/observability/redacted-events.fixture --preview --json --robot",
+        "Infrastructure/config/schemas/skills-sdk/observability-feedback-receipt.v0.schema.json",
+        "Infrastructure/tests/test_skills_sdk_observability_feedback.py"
+      ],
+      "next_slice": "Connect feedback candidates to generated eval-case drafts only after candidate promotion is guarded by package and eval receipts.",
+      "notes": "PU-026 mines local redacted JSONL events into preview-only eval scenario and skill-gap candidates; raw prompt/output fields block the receipt and no promotion or file generation is performed."
     },
     {
       "id": "refs_ingestion",

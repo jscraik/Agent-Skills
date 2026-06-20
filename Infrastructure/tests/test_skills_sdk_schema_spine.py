@@ -22,6 +22,7 @@ SCHEMA_NAMES = {
     "package-digest-receipt": "package-digest-receipt.v0.schema.json",
     "package-hardening-receipt": "package-hardening-receipt.v0.schema.json",
     "trust-decision-receipt": "trust-decision-receipt.v0.schema.json",
+    "observability-feedback-receipt": "observability-feedback-receipt.v0.schema.json",
     "signing-policy": "signing-policy.v0.schema.json",
     "signing-intent-receipt": "signing-intent-receipt.v0.schema.json",
     "sandbox-profile": "sandbox-profile.v0.schema.json",
@@ -159,6 +160,15 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertEqual(payload["package_id"], "skills-sdk-valid-fixture")
         self.assertFalse(payload["mutation_performed"])
         self.assertFalse(payload["trust_store_mutated"])
+
+    def test_observability_feedback_fixture_records_blocked_promotion_candidates(self) -> None:
+        payload = self.assert_valid("observability-feedback-receipt", "observability-feedback-receipt.json")
+
+        self.assertEqual(payload["status"], "preview")
+        self.assertEqual(payload["event_count"], 1)
+        self.assertEqual(payload["scenario_candidates"][0]["promotion_status"], "blocked_pending_package_eval")
+        self.assertEqual(payload["skill_gap_candidates"][0]["promotion_status"], "blocked_pending_package_eval")
+        self.assertFalse(payload["mutation_performed"])
 
     def test_signing_policy_fixture_records_external_key_boundary(self) -> None:
         payload = self.assert_valid("signing-policy", "signing-policy.json")
@@ -304,6 +314,9 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
 
     def test_trust_decision_schema_rejects_preview_write_claims(self) -> None:
         self.assert_invalid("trust-decision-receipt", "trust-decision-preview-writes.json")
+
+    def test_observability_feedback_schema_rejects_mutation_claims(self) -> None:
+        self.assert_invalid("observability-feedback-receipt", "observability-feedback-mutates.json")
 
     def test_signing_policy_schema_rejects_archive_requirement(self) -> None:
         self.assert_invalid("signing-policy", "signing-policy-requires-archive.json")

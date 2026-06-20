@@ -130,17 +130,9 @@ def _add_sdk_trust_parser(
     sdk_subparsers: argparse._SubParsersAction,
     global_parser: argparse.ArgumentParser,
 ) -> None:
-    sdk_trust_parser = sdk_subparsers.add_parser(
-        "trust",
-        help="Preview or append local Skills SDK trust decisions",
-        parents=[global_parser],
-    )
+    sdk_trust_parser = sdk_subparsers.add_parser("trust", help="Preview or append local Skills SDK trust decisions", parents=[global_parser])
     sdk_trust_subparsers = sdk_trust_parser.add_subparsers(dest="trust_action", required=True)
-    decide = sdk_trust_subparsers.add_parser(
-        "decide",
-        help="Build a local trust decision receipt for one package identity",
-        parents=[global_parser],
-    )
+    decide = sdk_trust_subparsers.add_parser("decide", help="Build a local trust decision receipt for one package identity", parents=[global_parser])
     decide.add_argument("target", help="Skill handle or repo-relative skill source path")
     decide.add_argument("--decision", choices=["trust", "distrust", "revoke"], required=True)
     decide.add_argument("--reason", required=True, help="Human-readable decision reason")
@@ -150,6 +142,18 @@ def _add_sdk_trust_parser(
     decide.add_argument("--ledger", help="Repo-relative or temporary JSONL ledger path")
     decide.add_argument("--preview", action="store_true", help="Emit the receipt without writing the ledger")
     decide.add_argument("--apply", action="store_true", help="Append the decision to the local ledger")
+
+
+def _add_sdk_observability_parser(
+    sdk_subparsers: argparse._SubParsersAction,
+    global_parser: argparse.ArgumentParser,
+) -> None:
+    parser = sdk_subparsers.add_parser("observability", help="Preview redacted runtime feedback candidates", parents=[global_parser])
+    subparsers = parser.add_subparsers(dest="observability_action", required=True)
+    feedback = subparsers.add_parser("feedback", help="Mine redacted event JSONL into blocked eval and skill-gap candidates", parents=[global_parser])
+    feedback.add_argument("--skill", required=True, help="Skill handle or repo-relative skill source path")
+    feedback.add_argument("--events", required=True, help="Repo-relative or temporary redacted events JSONL")
+    feedback.add_argument("--preview", action="store_true", help="Emit a non-mutating feedback receipt")
 
 
 def _add_sdk_check_parser(
@@ -319,6 +323,7 @@ def add_sdk_parser(
     _add_sdk_package_parser(sdk_subparsers, global_parser)
     _add_sdk_sandbox_parser(sdk_subparsers, global_parser)
     _add_sdk_trust_parser(sdk_subparsers, global_parser)
+    _add_sdk_observability_parser(sdk_subparsers, global_parser)
     _add_sdk_project_mutation_parsers(sdk_subparsers, global_parser)
     _add_sdk_lifecycle_status_parsers(sdk_subparsers, global_parser)
     _add_sdk_knowledge_parser(sdk_subparsers, global_parser)
@@ -426,6 +431,7 @@ def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
         "package": _dispatch_sdk_package,
         "sandbox": _dispatch_sdk_sandbox,
         "trust": _dispatch_sdk_trust,
+        "observability": _dispatch_sdk_observability,
         "install": _dispatch_sdk_install,
         "rollback": _dispatch_sdk_rollback,
         "uninstall": _dispatch_sdk_uninstall,
@@ -509,6 +515,14 @@ def _dispatch_sdk_trust(repo_root: Path, args: argparse.Namespace) -> CallResult
             revoked_package_digest=args.revoked_package_digest,
         )
     return build_unknown_action_result("sdk trust", args.trust_action)
+
+
+def _dispatch_sdk_observability(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    if args.observability_action == "feedback":
+        if not args.preview:
+            return _validation_error("sdk observability feedback", "Skills SDK observability feedback is preview-only in PU-026.", "ask sdk observability feedback --skill <target> --events <events.jsonl> --preview --json --robot")
+        return skills_commands.skills_sdk_observability_feedback(repo_root, target=args.skill, events=args.events)
+    return build_unknown_action_result("sdk observability", args.observability_action)
 
 
 def _dispatch_sdk_knowledge(repo_root: Path, args: argparse.Namespace) -> CallResult:

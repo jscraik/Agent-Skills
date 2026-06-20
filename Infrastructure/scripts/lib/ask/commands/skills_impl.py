@@ -220,6 +220,7 @@ __all__ = [
     "skills_sdk_package_harden",
     "skills_sdk_package_signing_intent",
     "skills_sdk_trust_decide",
+    "skills_sdk_observability_feedback",
     "skills_sdk_eval_run",
     "skills_sdk_placeholder_lifecycle",
     "skills_sdk_project_rollback",
@@ -4470,6 +4471,73 @@ def skills_sdk_trust_decide(
                 code="ERR_VALIDATION",
                 message=message,
                 fix_suggestion="Provide a valid decision, reason, owner, ledger path, and revocation digest when decision is revoke.",
+            )
+        )
+    return result
+
+
+def skills_sdk_observability_feedback(
+    repo_root: Path,
+    target: str,
+    events: str,
+) -> CallResult:
+    """Mine redacted runtime events into non-mutating feedback candidates."""
+    result = CallResult()
+    result.metadata["command"] = "sdk observability feedback"
+    query = target.strip()
+    target_info, _audit_target = _resolve_doctor_target(repo_root, query)
+    source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
+    source_path = Path(str(source_path_value)) if source_path_value else None
+    if source_path and not source_path.is_absolute():
+        source_path = repo_root / source_path
+    if not source_path or not source_path.is_file():
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Skills SDK observability feedback is missing a canonical SKILL.md source for '{query}'.",
+                fix_suggestion=_ask_validation_command("sdk", "package", "build", query),
+            )
+        )
+        return result
+
+    from ask.skills_sdk.observability_feedback import (  # noqa: PLC0415
+        ObservabilityFeedbackError,
+        build_observability_feedback_receipt,
+    )
+
+    package_receipt = _build_package_digest_receipt(repo_root, source_path=source_path, query=query)
+    try:
+        feedback_receipt = build_observability_feedback_receipt(
+            repo_root,
+            package_receipt=package_receipt,
+            events_path=events,
+        )
+    except ObservabilityFeedbackError as exc:
+        feedback_receipt = exc.receipt
+    payload = {
+        "schema_version": "skills-sdk-observability-feedback.v0",
+        "query": query,
+        "status": feedback_receipt["status"],
+        "canonical_source_path": source_path_value,
+        "facade_command": "skills-sdk observability feedback",
+        "package_id": feedback_receipt["package_id"],
+        "package_digest": feedback_receipt["package_digest"],
+        "receipt": feedback_receipt,
+        "mutation_performed": False,
+        "validation_commands": [
+            _ask_validation_command("sdk", "observability", "feedback", "--skill", query, "--events", events, "--preview")
+        ],
+        "agent_summary": feedback_receipt["agent_summary"],
+    }
+    result.data["skills_sdk_observability_feedback"] = payload
+    if feedback_receipt["status"] == "blocked":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=payload["agent_summary"],
+                fix_suggestion="Use redacted JSONL event records with digest references and no raw prompt/output fields.",
             )
         )
     return result

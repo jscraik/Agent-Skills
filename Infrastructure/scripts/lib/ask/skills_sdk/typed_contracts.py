@@ -4,7 +4,7 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from ask.skills_sdk import signing_contracts, trust_contracts
+from ask.skills_sdk import observability_contracts, signing_contracts, trust_contracts
 from ask.skills_sdk.eval_contracts import EvalQualityGates
 
 
@@ -739,6 +739,9 @@ def validate_trust_decision_receipt(payload: object) -> trust_contracts.TrustDec
     return trust_contracts.validate_trust_decision_receipt(payload)
 
 
+def validate_observability_feedback_receipt(payload: object) -> observability_contracts.ObservabilityFeedbackReceipt: return observability_contracts.validate_observability_feedback_receipt(payload)
+
+
 def validate_manifest_source(payload: object) -> ManifestSource:
     return ManifestSource.model_validate(payload)
 
@@ -764,16 +767,13 @@ def validate_signing_policy(payload: object) -> signing_contracts.SigningPolicy:
 def validate_signing_intent_receipt(payload: object) -> signing_contracts.SigningIntentReceipt: return signing_contracts.validate_signing_intent_receipt(payload)
 
 
-def validate_eval_case(payload: object) -> EvalCase:
-    return EvalCase.model_validate(payload)
+def validate_eval_case(payload: object) -> EvalCase: return EvalCase.model_validate(payload)
 
 
-def validate_eval_run_receipt(payload: object) -> EvalRunReceipt:
-    return EvalRunReceipt.model_validate(payload)
+def validate_eval_run_receipt(payload: object) -> EvalRunReceipt: return EvalRunReceipt.model_validate(payload)
 
 
-def validate_sandbox_profile(payload: object) -> SandboxProfile:
-    return SandboxProfile.model_validate(payload)
+def validate_sandbox_profile(payload: object) -> SandboxProfile: return SandboxProfile.model_validate(payload)
 
 
 def validate_sandbox_profile_receipt(payload: object) -> SandboxProfileReceipt:

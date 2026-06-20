@@ -1,0 +1,1 @@
+{"event_type":"skill_run","skill_id":"skills-sdk-valid-fixture","outcome":"failure","redacted":true,"prompt_digest":"sha256:5555555555555555555555555555555555555555555555555555555555555555","failure_summary":"Fixture event exposed a missing deterministic eval.","gap_summary":"Fixture event exposed a missing skill guardrail."}

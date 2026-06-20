@@ -42,6 +42,7 @@ REQUIRED_CAPABILITY_IDS = (
     "review_verification",
     "determinism_audit",
     "trust_store",
+    "observability_feedback",
     "refs_ingestion",
     "evals",
     "package_verify",
