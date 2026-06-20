@@ -49,13 +49,26 @@ def _load_run_receipt(path: Path) -> tuple[dict[str, Any] | None, str | None]:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except json.JSONDecodeError:
         return None, "run_receipt_invalid_json"
-    if isinstance(payload, dict) and "receipt" in payload and isinstance(payload["receipt"], dict):
-        payload = payload["receipt"]
+    payload = _unwrap_run_receipt(payload)
     if not isinstance(payload, dict):
         return None, "run_receipt_not_object"
     if not _run_receipt_shape_valid(payload):
         return None, "run_receipt_contract_invalid"
     return payload, None
+
+
+def _unwrap_run_receipt(payload: object) -> object:
+    if not isinstance(payload, dict):
+        return payload
+    if isinstance(payload.get("receipt"), dict):
+        return payload["receipt"]
+    data = payload.get("data")
+    if not isinstance(data, dict):
+        return payload
+    command_payload = data.get("skills_sdk_eval_ab_run")
+    if isinstance(command_payload, dict) and isinstance(command_payload.get("receipt"), dict):
+        return command_payload["receipt"]
+    return payload
 
 
 def _digest_like(value: object) -> bool:

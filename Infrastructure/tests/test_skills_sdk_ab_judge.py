@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import unittest
@@ -19,6 +20,14 @@ RUN_RECEIPT = "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-ru
 
 
 class TestSkillsSdkAbJudgePreview(unittest.TestCase):
+    def setUp(self) -> None:
+        self.evidence_root = REPO_ROOT / ".harness/test-sdk-ab-judge"
+        shutil.rmtree(self.evidence_root, ignore_errors=True)
+        self.evidence_root.mkdir(parents=True, exist_ok=True)
+
+    def tearDown(self) -> None:
+        shutil.rmtree(self.evidence_root, ignore_errors=True)
+
     def test_builder_creates_sanitized_judge_input_without_provider_invocation(self) -> None:
         receipt = build_ab_judge_preview_receipt(REPO_ROOT, run_receipt=RUN_RECEIPT)
 
@@ -52,6 +61,20 @@ class TestSkillsSdkAbJudgePreview(unittest.TestCase):
 
         self.assertEqual(receipt["status"], "blocked")
         self.assertIn("run_receipt_contract_invalid", receipt["blockers"])
+        validate_ab_judge_preview_receipt(receipt)
+
+    def test_builder_accepts_ab_run_robot_envelope(self) -> None:
+        run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
+        envelope_path = self.evidence_root / "ab-run-envelope.json"
+        envelope_path.write_text(
+            json.dumps({"status": "success", "data": {"skills_sdk_eval_ab_run": {"receipt": run_receipt}}}),
+            encoding="utf-8",
+        )
+
+        receipt = build_ab_judge_preview_receipt(REPO_ROOT, run_receipt=envelope_path.relative_to(REPO_ROOT).as_posix())
+
+        self.assertEqual(receipt["status"], "preview")
+        self.assertEqual(receipt["comparison_payload"]["experiment_id"], run_receipt["experiment_id"])
         validate_ab_judge_preview_receipt(receipt)
 
     def test_cli_requires_preview_gate(self) -> None:
