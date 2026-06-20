@@ -5,6 +5,7 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 from ask.skills_sdk import signing_contracts
+from ask.skills_sdk.eval_contracts import EvalQualityGates
 
 
 class _SdkContractModel(BaseModel):
@@ -341,9 +342,7 @@ class SkillIr(_SdkContractModel):
     risk: SkillIrRisk
     evidence: SkillIrEvidence
     mutation_performed: Literal[False]
-    acceptance_trace: list[Literal["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022"]] = Field(
-        min_length=1
-    )
+    acceptance_trace: list[Literal["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022"]] = Field(min_length=1)
 
 
 class PackageManifestFile(_SdkContractModel):
@@ -463,6 +462,7 @@ class EvalRunReceipt(_SdkContractModel):
     case_count: int = Field(ge=0)
     passed_count: int = Field(ge=0)
     failed_count: int = Field(ge=0)
+    quality_gates: EvalQualityGates | None = None
     cases: list[EvalCaseResult]
     blockers: list[str]
     mutation_performed: Literal[False]

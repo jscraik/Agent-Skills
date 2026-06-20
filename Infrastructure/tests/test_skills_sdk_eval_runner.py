@@ -27,6 +27,16 @@ def _internal_result_with_scorecard(scorecard_path: Path) -> CallResult:
     scorecard_path.write_text(
         json.dumps(
             {
+                "schema_version": "2.1",
+                "decision": "fail",
+                "passed": False,
+                "blocked_cases": 0,
+                "tier1_failures": 1,
+                "tier2_findings": 0,
+                "preflight_warnings": [],
+                "readiness_summary": {"unknown": 2},
+                "expected_signal_summary": {"runs": 1, "average": 1.0, "minimum": 1.0, "risky_cases": []},
+                "security_dependency_screening": {"status": "skipped"},
                 "cases": [
                     {"id": "case-pass", "passed": True, "blocked": False},
                     {
@@ -54,7 +64,21 @@ def _internal_result_with_scorecard(scorecard_path: Path) -> CallResult:
 
 def _blocked_internal_result_with_passing_scorecard(scorecard_path: Path) -> CallResult:
     scorecard_path.write_text(
-        json.dumps({"cases": [{"id": "case-pass", "passed": True, "blocked": False}]}),
+        json.dumps(
+            {
+                "schema_version": "2.1",
+                "decision": "pass",
+                "passed": True,
+                "blocked_cases": 0,
+                "tier1_failures": 0,
+                "tier2_findings": 0,
+                "preflight_warnings": [],
+                "readiness_summary": {"unknown": 1},
+                "expected_signal_summary": {"runs": 0, "average": None, "minimum": None, "risky_cases": []},
+                "security_dependency_screening": {"status": "skipped"},
+                "cases": [{"id": "case-pass", "passed": True, "blocked": False}],
+            }
+        ),
         encoding="utf-8",
     )
     internal_result = CallResult(status="error")
@@ -66,6 +90,19 @@ def _blocked_internal_result_with_passing_scorecard(scorecard_path: Path) -> Cal
         }
     )
     internal_result.errors.append(ErrorObject(code="ERR_RUNTIME", message="model unavailable"))
+    return internal_result
+
+
+def _successful_internal_result() -> CallResult:
+    internal_result = CallResult(status="success")
+    internal_result.data.update(
+        {
+            "eval_status": "pass",
+            "resolved_skill_path": "Skills/agent-ops/testing",
+            "raw_output": "Scorecard: Infrastructure/artifacts/evals/testing.json",
+            "tessl_eval": {"status": "skipped", "reason": "--skip-tessl"},
+        }
+    )
     return internal_result
 
 
@@ -217,17 +254,7 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
         self.assertEqual(payload["failed_count"], 1)
 
     def test_sdk_internal_runner_delegates_to_existing_eval_backend(self) -> None:
-        internal_result = CallResult(status="success")
-        internal_result.data.update(
-            {
-                "eval_status": "pass",
-                "resolved_skill_path": "Skills/agent-ops/testing",
-                "raw_output": "Scorecard: Infrastructure/artifacts/evals/testing.json",
-                "tessl_eval": {"status": "skipped", "reason": "--skip-tessl"},
-            }
-        )
-
-        with mock.patch("ask.commands.evals.run_evals", return_value=internal_result) as run:
+        with mock.patch("ask.commands.evals.run_evals", return_value=_successful_internal_result()) as run:
             result = skills_sdk_eval_run(
                 REPO_ROOT,
                 target="Skills/agent-ops/testing",
@@ -255,6 +282,7 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
         self.assertEqual(payload["receipt"]["case_count"], 1)
         self.assertEqual(payload["receipt"]["passed_count"], 1)
         self.assertEqual(payload["receipt"]["failed_count"], 0)
+        self.assertIsNone(payload["receipt"]["quality_gates"])
         self.assertEqual(payload["internal_eval"]["tessl_eval"]["status"], "skipped")
 
     def test_sdk_internal_runner_binds_scorecard_case_counts_to_receipt(self) -> None:
@@ -283,6 +311,13 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
         self.assertEqual(receipt.failed_count, 1)
         self.assertEqual([case.case_id for case in receipt.cases], ["case-pass", "case-fail"])
         self.assertEqual([case.status for case in receipt.cases], ["pass", "fail"])
+        self.assertIsNotNone(receipt.quality_gates)
+        self.assertEqual(receipt.quality_gates.source, "internal_scorecard")
+        self.assertEqual(receipt.quality_gates.decision, "fail")
+        self.assertEqual(receipt.quality_gates.tier1_failures, 1)
+        self.assertIn("scorecard_decision_passes", receipt.quality_gates.failed_assertions)
+        self.assertIn("tier1_failures_zero", receipt.quality_gates.failed_assertions)
+        self.assertIn("quality_gate_failed:scorecard_decision_passes", receipt.blockers)
         self.assertIn("expected signal missing", receipt.blockers)
 
     def test_sdk_internal_runner_does_not_upgrade_backend_blocker_to_pass(self) -> None:
@@ -306,6 +341,8 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
         self.assertEqual(receipt.case_count, 1)
         self.assertEqual(receipt.passed_count, 1)
         self.assertEqual(receipt.failed_count, 0)
+        self.assertIsNotNone(receipt.quality_gates)
+        self.assertEqual(receipt.quality_gates.failed_assertions, [])
         self.assertIn("model unavailable", receipt.blockers)
 
 

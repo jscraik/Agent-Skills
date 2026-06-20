@@ -120,6 +120,112 @@ def _case_result(case: dict[str, Any]) -> dict[str, str]:
     }
 
 
+def _summary_count(value: object) -> int:
+    if isinstance(value, bool):
+        return int(value)
+    if isinstance(value, int):
+        return max(value, 0)
+    if isinstance(value, list):
+        return len(value)
+    return 0
+
+
+def _integer_summary(value: object) -> dict[str, int]:
+    if not isinstance(value, dict):
+        return {}
+    return {
+        str(key): raw_value
+        for key, raw_value in value.items()
+        if isinstance(raw_value, int) and not isinstance(raw_value, bool) and raw_value >= 0
+    }
+
+
+def _expected_signal_summary(value: object) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        return {"runs": 0, "average": None, "minimum": None, "risky_cases": []}
+    risky_cases = value.get("risky_cases")
+    return {
+        "runs": _summary_count(value.get("runs")),
+        "average": value.get("average") if isinstance(value.get("average"), (int, float)) else None,
+        "minimum": value.get("minimum") if isinstance(value.get("minimum"), (int, float)) else None,
+        "risky_cases": [str(item) for item in risky_cases] if isinstance(risky_cases, list) else [],
+    }
+
+
+def _quality_assertion(assertion_id: str, expected: str, actual: object, passes: bool) -> dict[str, str]:
+    return {
+        "id": assertion_id,
+        "status": "pass" if passes else "fail",
+        "expected": expected,
+        "actual": str(actual),
+    }
+
+
+def _quality_gate_fields(scorecard: dict[str, Any]) -> dict[str, Any]:
+    decision = str(scorecard.get("decision") or "").strip().lower() or None
+    passed = scorecard.get("passed")
+    preflight_warnings = scorecard.get("preflight_warnings")
+    security_screening = scorecard.get("security_dependency_screening")
+    return {
+        "scorecard_schema_version": str(scorecard.get("schema_version") or "") or None,
+        "decision": decision,
+        "passed": passed if isinstance(passed, bool) else None,
+        "promotion_eligible": scorecard.get("promotion_eligible")
+        if isinstance(scorecard.get("promotion_eligible"), bool)
+        else None,
+        "blocked_cases": _summary_count(scorecard.get("blocked_cases")),
+        "tier1_failures": _summary_count(scorecard.get("tier1_failures")),
+        "tier2_findings": _summary_count(scorecard.get("tier2_findings")),
+        "preflight_warning_count": len(preflight_warnings) if isinstance(preflight_warnings, list) else 0,
+        "readiness_summary": _integer_summary(scorecard.get("readiness_summary")),
+        "expected_signal_summary": _expected_signal_summary(scorecard.get("expected_signal_summary")),
+        "security_dependency_screening_status": (
+            str(security_screening.get("status"))
+            if isinstance(security_screening, dict) and security_screening.get("status") is not None
+            else None
+        ),
+    }
+
+
+def _quality_assertions(fields: dict[str, Any]) -> list[dict[str, str]]:
+    expected_signals = fields["expected_signal_summary"]
+    assertions = [
+        _quality_assertion("scorecard_decision_passes", "decision == pass", fields["decision"], fields["decision"] == "pass"),
+        _quality_assertion("scorecard_passed_true", "passed == true", fields["passed"], fields["passed"] is True),
+        _quality_assertion("blocked_cases_zero", "blocked_cases == 0", fields["blocked_cases"], fields["blocked_cases"] == 0),
+        _quality_assertion("tier1_failures_zero", "tier1_failures == 0", fields["tier1_failures"], fields["tier1_failures"] == 0),
+        _quality_assertion("tier2_findings_zero", "tier2_findings == 0", fields["tier2_findings"], fields["tier2_findings"] == 0),
+        _quality_assertion(
+            "preflight_warnings_zero",
+            "preflight_warnings == 0",
+            fields["preflight_warning_count"],
+            fields["preflight_warning_count"] == 0,
+        ),
+        _quality_assertion(
+            "expected_signal_risky_cases_zero",
+            "expected_signal_summary.risky_cases == 0",
+            len(expected_signals["risky_cases"]),
+            len(expected_signals["risky_cases"]) == 0,
+        ),
+    ]
+    return assertions
+
+
+def internal_scorecard_quality_gates(scorecard: dict[str, Any]) -> dict[str, Any] | None:
+    """Extract calibrated SDK quality gates from the internal skill eval scorecard."""
+    if not scorecard:
+        return None
+    fields = _quality_gate_fields(scorecard)
+    assertions = _quality_assertions(fields)
+    failed_assertions = [item["id"] for item in assertions if item["status"] != "pass"]
+    return {
+        "source": "internal_scorecard",
+        **fields,
+        "assertions": assertions,
+        "failed_assertions": failed_assertions,
+    }
+
+
 def _receipt(
     repo_root: Path,
     dataset_path: Path,

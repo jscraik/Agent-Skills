@@ -207,6 +207,39 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
             {**self.schemas, **self.schemas_by_file},
         )
 
+    def test_eval_run_v0_schema_accepts_internal_quality_gates(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "eval-run-receipt.json")
+        payload["runner"] = "internal_skill_builder_v0"
+        payload["quality_gates"] = {
+            "source": "internal_scorecard",
+            "scorecard_schema_version": "2.1",
+            "decision": "pass",
+            "passed": True,
+            "promotion_eligible": None,
+            "blocked_cases": 0,
+            "tier1_failures": 0,
+            "tier2_findings": 0,
+            "preflight_warning_count": 0,
+            "readiness_summary": {"unknown": 1},
+            "expected_signal_summary": {"runs": 0, "average": None, "minimum": None, "risky_cases": []},
+            "security_dependency_screening_status": "skipped",
+            "assertions": [
+                {
+                    "id": "scorecard_decision_passes",
+                    "status": "pass",
+                    "expected": "decision == pass",
+                    "actual": "pass",
+                }
+            ],
+            "failed_assertions": [],
+        }
+
+        _validate_schema_subset(
+            self.schemas["eval-run-receipt"],
+            payload,
+            {**self.schemas, **self.schemas_by_file},
+        )
+
     def test_project_conformance_fixture_reports_read_only_project_health(self) -> None:
         payload = self.assert_valid("project-conformance-receipt", "project-conformance-receipt.json")
 

@@ -175,6 +175,40 @@ class TestSkillsSdkTypedContracts(unittest.TestCase):
         self.assertIsNone(model.package_id)
         self.assertIsNone(model.package_digest)
 
+    def test_eval_run_contract_accepts_internal_quality_gates(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "eval-run-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["runner"] = "internal_skill_builder_v0"
+        payload["quality_gates"] = {
+            "source": "internal_scorecard",
+            "scorecard_schema_version": "2.1",
+            "decision": "pass",
+            "passed": True,
+            "promotion_eligible": None,
+            "blocked_cases": 0,
+            "tier1_failures": 0,
+            "tier2_findings": 0,
+            "preflight_warning_count": 0,
+            "readiness_summary": {"unknown": 1},
+            "expected_signal_summary": {"runs": 0, "average": None, "minimum": None, "risky_cases": []},
+            "security_dependency_screening_status": "skipped",
+            "assertions": [
+                {
+                    "id": "scorecard_decision_passes",
+                    "status": "pass",
+                    "expected": "decision == pass",
+                    "actual": "pass",
+                }
+            ],
+            "failed_assertions": [],
+        }
+
+        model = contracts.validate_eval_run_receipt(payload)
+
+        self.assertIsNotNone(model.quality_gates)
+        self.assertEqual(model.quality_gates.source, "internal_scorecard")
+        self.assertEqual(model.quality_gates.assertions[0].id, "scorecard_decision_passes")
+
     def test_contracts_reject_type_coercion(self) -> None:
         """
         Verify that the check-receipt contract enforces strict types for fields.

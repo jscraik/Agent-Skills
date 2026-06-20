@@ -114,6 +114,7 @@ from ask.skills_sdk.signing_intent import (  # noqa: E402
     SigningIntentError as _SigningIntentError,
     build_signing_intent_receipt as _build_signing_intent_receipt,
 )
+from ask.skills_sdk.eval_runner import internal_scorecard_quality_gates as _internal_scorecard_quality_gates  # noqa: E402
 from ask.skills_sdk.eval_runner import run_deterministic_eval as _run_deterministic_eval  # noqa: E402
 from ask.skills_sdk.sandbox_profile import (  # noqa: E402
     SandboxProfileError as _SandboxProfileError,
@@ -4401,11 +4402,17 @@ def _skills_sdk_internal_eval_receipt_counts(
     raw_output = str(internal.data.get("raw_output") or "")
     scorecard_path = eval_commands._scorecard_path_from_output(repo_root, raw_output)  # noqa: SLF001
     scorecard = eval_commands._read_scorecard(scorecard_path)  # noqa: SLF001
+    quality_gates = _internal_scorecard_quality_gates(scorecard)
+    quality_blockers = (
+        [f"quality_gate_failed:{item}" for item in quality_gates["failed_assertions"]]
+        if quality_gates and quality_gates["failed_assertions"]
+        else []
+    )
     cases, case_blockers = _skills_sdk_internal_case_results(scorecard)
     if cases:
         failed_count = sum(1 for item in cases if item["status"] == "fail")
-        receipt_status = status if status != "pass" else "fail" if failed_count else "pass"
-        blockers = sorted(set(fallback_blockers + case_blockers)) if receipt_status != "pass" else []
+        receipt_status = status if status != "pass" else "fail" if failed_count or quality_blockers else "pass"
+        blockers = sorted(set(fallback_blockers + case_blockers + quality_blockers)) if receipt_status != "pass" else []
         dataset_path = (
             _skills_sdk_repo_relative(repo_root, scorecard_path)
             if scorecard_path is not None and scorecard_path.is_file()
@@ -4423,20 +4430,23 @@ def _skills_sdk_internal_eval_receipt_counts(
             "case_count": len(cases),
             "passed_count": len(cases) - failed_count,
             "failed_count": failed_count,
+            "quality_gates": quality_gates,
             "cases": cases,
             "blockers": blockers,
         }
 
     internal_case_count = 0 if status == "blocked" else 1
+    receipt_status = status if status != "pass" or not quality_blockers else "fail"
     return {
-        "status": status,
+        "status": receipt_status,
         "dataset_path": "internal:skill-builder",
         "dataset_digest": "sha256:" + ("0" * 64),
         "case_count": internal_case_count,
-        "passed_count": 1 if status == "pass" else 0,
-        "failed_count": 1 if status == "fail" else 0,
+        "passed_count": 1 if receipt_status == "pass" else 0,
+        "failed_count": 1 if receipt_status == "fail" else 0,
+        "quality_gates": quality_gates,
         "cases": [],
-        "blockers": fallback_blockers,
+        "blockers": sorted(set(fallback_blockers + quality_blockers)),
     }
 
 
@@ -4517,6 +4527,7 @@ def skills_sdk_eval_run(
             "case_count": receipt_counts["case_count"],
             "passed_count": receipt_counts["passed_count"],
             "failed_count": receipt_counts["failed_count"],
+            "quality_gates": receipt_counts["quality_gates"],
             "cases": receipt_counts["cases"],
             "blockers": receipt_counts["blockers"],
             "mutation_performed": False,
