@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class _EvalContractModel(BaseModel):
@@ -38,3 +38,20 @@ class EvalQualityGates(_EvalContractModel):
     security_dependency_screening_status: str | None
     assertions: list[EvalQualityAssertion] = Field(min_length=1)
     failed_assertions: list[str]
+
+    @field_validator("readiness_summary")
+    @classmethod
+    def _validate_readiness_summary_values(cls, v: dict[str, int]) -> dict[str, int]:
+        """Ensure all readiness_summary values are non-negative integers."""
+        for key, value in v.items():
+            if value < 0:
+                raise ValueError(f"readiness_summary values must be non-negative integers, got {value} for key {key}")
+        return v
+
+    @field_validator("failed_assertions")
+    @classmethod
+    def _validate_no_empty_strings(cls, v: list[str]) -> list[str]:
+        """Ensure no empty strings in failed_assertions."""
+        if any(assertion == "" for assertion in v):
+            raise ValueError("failed_assertions must not contain empty strings")
+        return v

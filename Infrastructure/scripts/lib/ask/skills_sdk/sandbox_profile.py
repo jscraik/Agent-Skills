@@ -155,11 +155,15 @@ def _command_allowlist_check(profile: dict[str, Any]) -> dict[str, Any]:
     commands = _object_field(profile, "commands")
     allowlist = _list_field(commands, "allow")
     shell_allowed = commands.get("shell_allowed") is True
-    shell_programs = [
-        str(command)
-        for command in allowlist
-        if isinstance(command, str) and PurePosixPath(command.strip()).name.lower() in _SHELL_PROGRAMS
-    ]
+    shell_programs = []
+    for command in allowlist:
+        program = None
+        if isinstance(command, str):
+            program = command
+        elif isinstance(command, dict) and "program" in command:
+            program = command["program"]
+        if program and isinstance(program, str) and PurePosixPath(program.strip()).name.lower() in _SHELL_PROGRAMS:
+            shell_programs.append(str(program))
     allowed = bool(allowlist) and (shell_allowed or not shell_programs)
     evidence = shell_programs if shell_programs else [f"allow_count:{len(allowlist)}"]
     return _check(
