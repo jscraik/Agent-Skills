@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class _TrustContractModel(BaseModel):
@@ -61,6 +61,15 @@ class TrustDecisionReceipt(_TrustContractModel):
         min_length=1
     )
     agent_summary: str = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def _recorded_receipts_include_ledger_evidence(self) -> TrustDecisionReceipt:
+        if self.status == "recorded":
+            if not self.mutation_performed:
+                raise ValueError("recorded trust decisions must set mutation_performed true")
+            if self.ledger_after_digest is None or self.ledger_entry is None or self.ledger_entry_digest is None:
+                raise ValueError("recorded trust decisions must include ledger mutation evidence")
+        return self
 
 
 def validate_trust_decision_receipt(payload: object) -> TrustDecisionReceipt:

@@ -21,6 +21,7 @@ from ask.skills_sdk.typed_contracts import (  # noqa: E402
     validate_observability_feedback_receipt,
     validate_robot_envelope,
 )
+from pydantic import ValidationError  # noqa: E402
 
 
 FIXTURE_SKILL = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/valid_skill"
@@ -74,7 +75,22 @@ class TestSkillsSdkObservabilityFeedback(unittest.TestCase):
 
         self.assertEqual(receipt.status, "blocked")
         self.assertFalse(receipt.mutation_performed)
-        self.assertIn("event:0:raw_keys:raw_prompt", receipt.blockers[0].evidence + receipt.blockers[-1].evidence)
+        all_evidence = [item for blocker in receipt.blockers for item in blocker.evidence]
+        self.assertIn("event:0:raw_keys:raw_prompt", all_evidence)
+
+    def test_contract_rejects_duplicate_required_receipts(self) -> None:
+        payload = build_observability_feedback_receipt(
+            REPO_ROOT,
+            package_receipt=self._package_receipt(),
+            events_path=REDACTED_EVENTS,
+        )
+        payload["scenario_candidates"][0]["required_receipts"] = [
+            "package_digest_receipt",
+            "package_digest_receipt",
+        ]
+
+        with self.assertRaises(ValidationError):
+            validate_observability_feedback_receipt(payload)
 
     def test_public_cli_previews_observability_feedback(self) -> None:
         completed = subprocess.run(

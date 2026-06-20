@@ -4372,6 +4372,7 @@ def skills_sdk_trust_decide(
     """Preview or append a local trust ledger decision for one skill package."""
     result = CallResult()
     result.metadata["command"] = "sdk trust decide"
+    preview_mode = preview and not apply
     query = target.strip()
     target_info, _audit_target = _resolve_doctor_target(repo_root, query)
     source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
@@ -4456,6 +4457,7 @@ def skills_sdk_trust_decide(
         "package_digest": trust_receipt["package_digest"],
         "ledger_path": trust_receipt["ledger_path"],
         "decision": trust_receipt["decision"],
+        "preview": preview_mode,
         "receipt": trust_receipt,
         "mutation_performed": trust_receipt["mutation_performed"],
         "trust_store_mutated": False,

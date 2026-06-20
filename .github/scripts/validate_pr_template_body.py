@@ -129,7 +129,8 @@ def _unchecked_checklist_errors(checklist_block: str) -> list[str]:
     ]
 
 
-def _placeholder_errors(body: str) -> list[str]:
+def _placeholder_errors(template: str, body: str) -> list[str]:
+    template_tokens = set(PLACEHOLDER_RE.findall(template))
     placeholders = [
         "pass/fail",
         "Add one-paragraph merge rationale here.",
@@ -142,7 +143,8 @@ def _placeholder_errors(body: str) -> list[str]:
         if placeholder in body:
             errors.append(f"Replace template placeholder: {placeholder}")
     for token in PLACEHOLDER_RE.findall(body):
-        errors.append(f"Replace unresolved placeholder token: {token}")
+        if token in template_tokens:
+            errors.append(f"Replace unresolved placeholder token: {token}")
     return errors
 
 
@@ -155,7 +157,7 @@ def validate_pr_body(template: str, body: str) -> list[str]:
     errors = _section_errors(contract, body)
     errors.extend(_field_errors(contract, body_blocks))
     errors.extend(_checklist_errors(contract, body_blocks))
-    errors.extend(_placeholder_errors(body))
+    errors.extend(_placeholder_errors(template, body))
     return errors
 
 

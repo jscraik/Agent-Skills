@@ -103,3 +103,16 @@ def test_rejects_unresolved_placeholder_tokens() -> None:
     errors = validator.validate_pr_body(_template(), body)
 
     assert "Replace unresolved placeholder token: <link / artifact path / comment ID>" in errors
+
+
+def test_accepts_angle_tokens_not_owned_by_template() -> None:
+    validator = _load_validator()
+    body = _filled_template_body().replace(
+        "repo-relative evidence",
+        "See <https://github.com/jscraik/Agent-Skills/pull/275> for hosted proof.",
+        1,
+    )
+
+    errors = validator.validate_pr_body(_template(), body)
+
+    assert not any("Replace unresolved placeholder token" in error for error in errors)

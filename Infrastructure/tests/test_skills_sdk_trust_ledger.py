@@ -154,6 +154,7 @@ class TestSkillsSdkTrustLedger(unittest.TestCase):
             receipt = validate_trust_decision_receipt(payload["receipt"])
 
             self.assertEqual(payload["status"], "preview")
+            self.assertTrue(payload["preview"])
             self.assertEqual(receipt.package_id, "skills-sdk-valid-fixture")
             self.assertFalse(payload["mutation_performed"])
             self.assertFalse(ledger_path.exists())

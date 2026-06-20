@@ -315,8 +315,14 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
     def test_trust_decision_schema_rejects_preview_write_claims(self) -> None:
         self.assert_invalid("trust-decision-receipt", "trust-decision-preview-writes.json")
 
+    def test_trust_decision_schema_rejects_recorded_without_ledger_evidence(self) -> None:
+        self.assert_invalid("trust-decision-receipt", "trust-decision-recorded-without-ledger-evidence.json")
+
     def test_observability_feedback_schema_rejects_mutation_claims(self) -> None:
         self.assert_invalid("observability-feedback-receipt", "observability-feedback-mutates.json")
+
+    def test_observability_feedback_schema_rejects_duplicate_required_receipts(self) -> None:
+        self.assert_invalid("observability-feedback-receipt", "observability-feedback-duplicate-required-receipts.json")
 
     def test_signing_policy_schema_rejects_archive_requirement(self) -> None:
         self.assert_invalid("signing-policy", "signing-policy-requires-archive.json")

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class _ObservabilityModel(BaseModel):
@@ -27,6 +27,16 @@ class FeedbackCandidate(_ObservabilityModel):
     prompt_digest: str | None = Field(default=None, min_length=71)
     failure_summary: str | None = Field(default=None, min_length=1)
     gap_summary: str | None = Field(default=None, min_length=1)
+
+    @field_validator("required_receipts")
+    @classmethod
+    def _require_both_receipts(
+        cls,
+        value: list[Literal["package_digest_receipt", "eval_run_receipt"]],
+    ) -> list[Literal["package_digest_receipt", "eval_run_receipt"]]:
+        if set(value) != {"package_digest_receipt", "eval_run_receipt"}:
+            raise ValueError("required_receipts must include package_digest_receipt and eval_run_receipt")
+        return value
 
 
 class ObservabilityFeedbackReceipt(_ObservabilityModel):

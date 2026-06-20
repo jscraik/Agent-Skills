@@ -74,7 +74,14 @@
   "allOf": [
     {
       "if": {"properties": {"status": {"const": "recorded"}}, "required": ["status"]},
-      "then": {"properties": {"mutation_performed": {"const": true}}}
+      "then": {
+        "properties": {
+          "mutation_performed": {"const": true},
+          "ledger_after_digest": {"type": "string", "minLength": 71},
+          "ledger_entry": {"type": "object"},
+          "ledger_entry_digest": {"type": "string", "minLength": 71}
+        }
+      }
     },
     {
       "if": {"properties": {"status": {"enum": ["preview", "blocked"]}}, "required": ["status"]},
