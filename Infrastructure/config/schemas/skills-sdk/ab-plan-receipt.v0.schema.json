@@ -34,25 +34,7 @@
     "command_plan": {
       "type": "array",
       "items": {"$ref": "#/definitions/codex_command_plan"},
-      "maxItems": 2,
-      "allOf": [
-        {
-          "contains": {
-            "type": "object",
-            "properties": {"variant_label": {"const": "A"}}
-          },
-          "minContains": 1,
-          "maxContains": 1
-        },
-        {
-          "contains": {
-            "type": "object",
-            "properties": {"variant_label": {"const": "B"}}
-          },
-          "minContains": 1,
-          "maxContains": 1
-        }
-      ]
+      "maxItems": 2
     },
     "secret_boundary": {
       "type": "object",
@@ -95,7 +77,29 @@
           "evidence_root": {"type": "string"},
           "experiment_id": {"type": "string"},
           "command_variant_labels": {"type": "array", "minItems": 2, "maxItems": 2},
-          "command_plan": {"type": "array", "minItems": 2, "maxItems": 2},
+          "command_plan": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "allOf": [
+              {
+                "contains": {
+                  "type": "object",
+                  "properties": {"variant_label": {"const": "A"}}
+                },
+                "minContains": 1,
+                "maxContains": 1
+              },
+              {
+                "contains": {
+                  "type": "object",
+                  "properties": {"variant_label": {"const": "B"}}
+                },
+                "minContains": 1,
+                "maxContains": 1
+              }
+            ]
+          },
           "blockers": {"type": "array", "maxItems": 0}
         }
       }

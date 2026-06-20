@@ -377,6 +377,19 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
                 {**self.schemas, **self.schemas_by_file},
             )
 
+    def test_ab_plan_schema_allows_preflight_blocked_empty_command_plan(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "ab-plan-receipt.json")
+        payload["status"] = "blocked"
+        payload["command_variant_labels"] = []
+        payload["command_plan"] = []
+        payload["blockers"] = ["fixture_missing"]
+
+        _validate_schema_subset(
+            self.schemas["ab-plan-receipt"],
+            payload,
+            {**self.schemas, **self.schemas_by_file},
+        )
+
     def test_ab_run_fixture_records_codex_execution_without_judge_invocation(self) -> None:
         payload = self.assert_valid("ab-run-receipt", "ab-run-receipt.json")
 
@@ -400,6 +413,24 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
                 payload,
                 {**self.schemas, **self.schemas_by_file},
             )
+
+    def test_ab_run_schema_allows_preflight_blocked_empty_command_plan(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "ab-run-receipt.json")
+        payload["status"] = "blocked"
+        payload["command_variant_labels"] = []
+        payload["command_plan"] = []
+        payload["variant_results"] = []
+        payload["mutation_performed"] = False
+        payload["network_accessed"] = False
+        payload["provider_invoked"] = False
+        payload["codex_exec_invoked"] = False
+        payload["blockers"] = ["fixture_missing"]
+
+        _validate_schema_subset(
+            self.schemas["ab-run-receipt"],
+            payload,
+            {**self.schemas, **self.schemas_by_file},
+        )
 
     def test_ab_judge_preview_fixture_records_sanitized_non_invoking_judge_input(self) -> None:
         payload = self.assert_valid("ab-judge-preview-receipt", "ab-judge-preview-receipt.json")

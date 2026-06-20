@@ -159,6 +159,32 @@ class TestSkillsSdkAbRun(unittest.TestCase):
         self.assertFalse(receipt["judge_provider_invoked"])
         validate_ab_run_receipt(receipt)
 
+    def test_builder_preserves_timeout_output_as_text_evidence(self) -> None:
+        def timeout_runner(command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: int) -> CodexRunResult:
+            raise subprocess.TimeoutExpired(command_argv, timeout_seconds, output=b"partial stdout", stderr=b"partial stderr")
+
+        receipt = build_ab_run_receipt(
+            REPO_ROOT,
+            skill_a=SKILL_A,
+            skill_b=SKILL_B,
+            fixture=FIXTURE,
+            skill_a_identity=IDENTITY_A,
+            skill_b_identity=IDENTITY_B,
+            evidence_root=self.evidence_root,
+            runner=timeout_runner,
+        )
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("A:codex_exec_timeout", receipt["blockers"])
+        self.assertIn("B:codex_exec_timeout", receipt["blockers"])
+        for result in receipt["variant_results"]:
+            self.assertEqual(result["exit_code"], 124)
+            self.assertTrue(str(result["runner_stdout_digest"]).startswith("sha256:"))
+            self.assertTrue(str(result["runner_stderr_digest"]).startswith("sha256:"))
+            self.assertEqual((REPO_ROOT / result["runner_stdout_capture_path"]).read_text(encoding="utf-8"), "partial stdout")
+            self.assertEqual((REPO_ROOT / result["runner_stderr_capture_path"]).read_text(encoding="utf-8"), "partial stderr")
+        validate_ab_run_receipt(receipt)
+
     def test_builder_does_not_claim_provider_invocation_when_codex_never_starts(self) -> None:
         def missing_runner(command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: int) -> CodexRunResult:
             raise OSError("codex not found")

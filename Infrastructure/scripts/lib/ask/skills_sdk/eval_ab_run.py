@@ -153,7 +153,7 @@ def _prepare_variant_paths(paths: VariantPaths, prompt: str) -> None:
     paths.prompt.parent.mkdir(parents=True, exist_ok=True)
     paths.stdout.parent.mkdir(parents=True, exist_ok=True)
     paths.output.parent.mkdir(parents=True, exist_ok=True)
-    paths.prompt.write_text(prompt, encoding="utf-8")
+    paths.prompt.write_bytes(prompt.encode("utf-8"))
 
 
 def _run_variant(
@@ -166,14 +166,30 @@ def _run_variant(
     try:
         return runner(command_plan["command_argv"], prompt, repo_root, timeout_seconds), None, True
     except subprocess.TimeoutExpired as exc:
-        return CodexRunResult(exit_code=124, stdout=exc.stdout or "", stderr=exc.stderr or ""), "codex_exec_timeout", True
+        return (
+            CodexRunResult(
+                exit_code=124,
+                stdout=_timeout_output_text(exc.stdout),
+                stderr=_timeout_output_text(exc.stderr),
+            ),
+            "codex_exec_timeout",
+            True,
+        )
     except OSError as exc:
         return CodexRunResult(exit_code=127, stdout="", stderr=str(exc)), "codex_exec_unavailable", False
 
 
+def _timeout_output_text(value: str | bytes | None) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, bytes):
+        return value.decode("utf-8", errors="replace")
+    return value
+
+
 def _write_runner_outputs(paths: VariantPaths, result: CodexRunResult) -> None:
-    paths.stdout.write_text(result.stdout, encoding="utf-8")
-    paths.stderr.write_text(result.stderr, encoding="utf-8")
+    paths.stdout.write_bytes(result.stdout.encode("utf-8"))
+    paths.stderr.write_bytes(result.stderr.encode("utf-8"))
 
 
 def _variant_blockers(variant_label: str, run_error: str | None, exit_code: int, output_digest: str | None) -> list[str]:
