@@ -232,7 +232,7 @@
     </header>
 
     <div class="truth-banner" role="note" aria-label="Truth boundary warning">
-      <span><strong>Truth boundary:</strong> the implemented product is currently a local SDK control plane with SkillIR.v0, package identity, package hardening, deterministic eval receipts, sandbox profile validation, project install lifecycle, review-routing helpers, knowledge ingest, and local plugin readiness. Emitters, signing, sandbox execution, trust-store, registry, hosted explorer, CI gates, and publish surfaces remain roadmap lanes unless separately proven.</span>
+      <span><strong>Truth boundary:</strong> the implemented product is currently a local SDK control plane with SkillIR.v0, package identity, package hardening, deterministic eval receipts, sandbox profile validation, project install lifecycle, review-routing helpers, knowledge ingest, and local plugin readiness. Runtime observability feedback loops, emitters, real signature emission, sandbox execution, trust-store, registry, hosted explorer, CI gates, and publish surfaces remain roadmap lanes unless separately proven.</span>
       <span class="pill blocked">do not overclaim</span>
     </div>
 
@@ -383,7 +383,7 @@
         <div class="stage" data-status="implemented"><span class="num">01</span><strong>Canonical Skill Source</strong><span>Implemented: compact <code>SKILL.md</code>, references, manifests, governed source shape, package verification, and skill doctor/check facade.</span><div class="badge-row"><span class="pill implemented">real</span></div></div>
         <div class="stage parse" data-status="implemented"><span class="num">02</span><strong>Parse / Validate / Classify</strong><span>Implemented: schema spine, risk classifier, status matrix, install preview, conformance, deterministic lenses, and review receipts.</span><div class="badge-row"><span class="pill implemented">real</span></div></div>
         <div class="stage ir" data-status="implemented"><span class="num">03</span><strong>SkillIR.v0</strong><span>Implemented: a small read-only typed IR now feeds package identity and eval/package receipt lanes.</span><div class="badge-row"><span class="pill implemented">real</span></div></div>
-        <div class="stage pass" data-status="implemented"><span class="num">04</span><strong>Executable Passes</strong><span>Partial but real: deterministic evals, package identity, package hardening, install, cleanup, conformance, review, and docs verification run locally. Security adapters, signing, sandbox, trust, and CI remain separate lanes.</span><div class="badge-row"><span class="pill implemented">mixed real</span><span class="pill blocked">gaps</span></div></div>
+        <div class="stage pass" data-status="implemented"><span class="num">04</span><strong>Executable Passes</strong><span>Partial but real: deterministic evals, package identity, package hardening, install, cleanup, conformance, review, and docs verification run locally. Runtime observability feedback, security adapters, real signature emission, sandbox execution, trust, and CI remain separate lanes.</span><div class="badge-row"><span class="pill implemented">mixed real</span><span class="pill blocked">gaps</span></div></div>
         <div class="stage emit" data-status="deferred"><span class="num">05</span><strong>Emitters / Registry / Publish</strong><span>Deferred or out of scope: no emitter runtime, remote registry, remote marketplace, or publish pipeline today.</span><div class="badge-row"><span class="pill deferred">future</span><span class="pill out">not v1</span></div></div>
       </div>
     </section>
@@ -403,6 +403,7 @@
         <div class="gap" data-status="implemented"><span class="pill implemented">intent landed</span><strong>Signing Intent Exists</strong><span>Package identity can be checked against a pinned signing policy without signature requests, key access, archive emission, or trust mutation.</span></div>
         <div class="gap" data-status="blocked"><span class="pill blocked">runtime gap</span><strong>Sandbox Execution Is Blocked</strong><span>Scripted or privileged skills still cannot be fully trusted until execution adapters exist; profile validation is only the first guardrail.</span></div>
         <div class="gap" data-status="deferred"><span class="pill deferred">state gap</span><strong>No Trust Ledger</strong><span>Trust decisions are discussed, but no persistent local trust-store mutation exists.</span></div>
+        <div class="gap" data-status="deferred"><span class="pill deferred">learning gap</span><strong>Runtime Feedback Loop Missing</strong><span>Eval receipts prove known cases, but the SDK does not yet ingest observed agent runs into scenario drafts, skill update candidates, removal candidates, and fresh package/eval receipts.</span></div>
         <div class="gap" data-status="deferred"><span class="pill deferred">adoption gap</span><strong>CI Gates Are Not Live</strong><span>Local validation does not prove branch protection, PR review, CircleCI, or GitHub security checks.</span></div>
         <div class="gap" data-status="out"><span class="pill out">scope risk</span><strong>Registry Too Early</strong><span>A registry before signing, package verification, trust decisions, and install receipts would create distribution theatre.</span></div>
       </div>
@@ -422,9 +423,48 @@
         <div class="step" data-status="implemented"><span class="pill implemented">03</span><strong>PU-023: Sandbox Profile Contract</strong><span>Added sandbox profile schema, validator, and high-risk blocker without executing sandboxed commands.</span></div>
         <div class="step" data-status="implemented"><span class="pill implemented">04</span><strong>PU-024: Signing Intent</strong><span>Add package digest binding and policy validation while keeping real signing, key ownership, archive emission, and trust mutation blocked.</span></div>
         <div class="step" data-status="deferred"><span class="pill deferred">05</span><strong>PU-025: Local Trust Ledger</strong><span>Add append-only trust decisions with skill id, digest, decision, reason, owner, expiry, and revocation marker.</span></div>
-        <div class="step" data-status="deferred"><span class="pill deferred">06</span><strong>PU-026: Emitter Contract Preview</strong><span>Add dry-run write-plan contract for one local projection only. No remote registry, no marketplace, no publish.</span></div>
-        <div class="step" data-status="deferred"><span class="pill deferred">07</span><strong>PU-027: CI Policy Preview</strong><span>Emit CI requirement receipts from risk tier; do not claim live CI until actual workflow results are attached.</span></div>
-        <div class="step" data-status="preview"><span class="pill preview">08</span><strong>PU-028: Static Explorer Projection</strong><span>Render capabilities and local skill index from JSON only. The HTML should own zero capability truth.</span></div>
+        <div class="step" data-status="deferred"><span class="pill deferred">06</span><strong>PU-026: Observability Feedback Loop</strong><span>Ingest redacted agent run receipts, mine real-world eval scenarios and skill gaps, then require update or removal candidates to pass package and eval receipts before promotion.</span></div>
+        <div class="step" data-status="deferred"><span class="pill deferred">07</span><strong>PU-027: Emitter Contract Preview</strong><span>Add dry-run write-plan contract for one local projection only. No remote registry, no marketplace, no publish.</span></div>
+        <div class="step" data-status="deferred"><span class="pill deferred">08</span><strong>PU-028: CI Policy Preview</strong><span>Emit CI requirement receipts from risk tier; do not claim live CI until actual workflow results are attached.</span></div>
+        <div class="step" data-status="preview"><span class="pill preview">09</span><strong>PU-029: Static Explorer Projection</strong><span>Render capabilities and local skill index from JSON only. The HTML should own zero capability truth.</span></div>
+      </div>
+    </section>
+
+    <section class="section" data-view-section="roadmap" aria-label="Skills-as-code discipline backlog">
+      <div class="section-head">
+        <div>
+          <h2>Skills-As-Code Backlog</h2>
+          <p>Podjarny-derived product directions that should shape future SDK slices without becoming capability claims before receipts, commands, schemas, and tests exist.</p>
+        </div>
+        <div class="note">Backlog rule: promote one item at a time into the numbered roadmap only when the owner surface and proof contract are concrete.</div>
+      </div>
+      <div class="card-grid">
+        <div class="step" data-status="deferred"><span class="pill deferred">foundation</span><strong>Context-Type Classification</strong><span>Classify skills as policy/practice, spec, workflow, tool adapter, or governance/eval context so risk, eval, freshness, and install gates match the job.</span></div>
+        <div class="step" data-status="deferred"><span class="pill deferred">foundation</span><strong>Skill Composition Graph</strong><span>Emit a receipt for skill-to-skill, skill-to-tool, reference, permission, and runtime dependency edges before claiming dependency-management maturity.</span></div>
+        <div class="step" data-status="deferred"><span class="pill deferred">foundation</span><strong>Risk Mode Taxonomy</strong><span>Separate malicious supply-chain risk, negligent instruction risk, and vulnerable operation risk so mitigations are specific instead of a generic severity label.</span></div>
+        <div class="step" data-status="deferred"><span class="pill deferred">quality</span><strong>Quality Profile Receipt</strong><span>Aggregate structure, hardening, evals, scenario quality, freshness, runtime evidence, and owner/review state as a lane-aware profile rather than a single vanity score.</span></div>
+        <div class="step" data-status="deferred"><span class="pill deferred">quality</span><strong>Scenario Quality Gate</strong><span>Screen eval scenarios for oracle clarity, reproducibility, regression value, redaction, and fixture quality before promoting generated or observed cases.</span></div>
+        <div class="step" data-status="deferred"><span class="pill deferred">quality</span><strong>Project And Comprehensive Evals</strong><span>Plan integration-style project evals and broader runtime/model comparison evals separately from isolated skill eval receipts.</span></div>
+        <div class="step" data-status="deferred"><span class="pill deferred">runtime</span><strong>Harness Enforcement Contract</strong><span>Preview deterministic harness or hook policies that block risky actions unless required skills, receipts, evals, sandbox, or trust evidence is present.</span></div>
+      </div>
+    </section>
+
+    <section class="section" data-view-section="roadmap" aria-label="Security intake backlog">
+      <div class="section-head">
+        <div>
+          <h2>Security Intake Backlog</h2>
+          <p>Tal-derived defensive review lanes for treating skills as dependency-like operational inputs with provenance, permissions, data exposure, sandboxing, semantic behavior, and approval friction checks.</p>
+        </div>
+        <div class="note">Security rule: do not claim third-party skill safety until intake, runtime, and approval receipts prove the exact lane being discussed.</div>
+      </div>
+      <div class="card-grid">
+        <div class="step" data-status="deferred"><span class="pill deferred">provenance</span><strong>Skill Intake Security Review</strong><span>Record source, owner, maintainer, version, purpose, repo history, release notes, and adoption decision before external or plugin skills become active runtime inputs.</span></div>
+        <div class="step" data-status="deferred"><span class="pill deferred">permissions</span><strong>Permission Delta Review</strong><span>Compare install or update plans for new filesystem, network, shell, browser, API, secret, and write access before approval.</span></div>
+        <div class="step" data-status="deferred"><span class="pill deferred">data</span><strong>Data Exposure Review</strong><span>Classify model-visible prompts, retrieved files, tool outputs, logs, transcripts, and secret-handling boundaries for each skill package.</span></div>
+        <div class="step" data-status="deferred"><span class="pill deferred">actions</span><strong>Action Surface Review</strong><span>List irreversible or high-impact actions a skill can cause, including writes, installs, publishes, messages, tickets, browser actions, and external API calls.</span></div>
+        <div class="step" data-status="deferred"><span class="pill deferred">isolation</span><strong>Third-Party Skill Quarantine</strong><span>Inspect, package, eval, and harden untrusted skills in a staged lane before installation, runtime projection, or user-level exposure.</span></div>
+        <div class="step" data-status="deferred"><span class="pill deferred">semantic</span><strong>Semantic Security Review</strong><span>Review what the skill can instruct the agent to do, not only filenames, frontmatter, regex hits, or package formatting.</span></div>
+        <div class="step" data-status="deferred"><span class="pill deferred">approval</span><strong>Approval Friction Policy</strong><span>Define when the SDK blocks, warns, asks, or auto-allows so human review remains meaningful without training operators to ignore prompts.</span></div>
       </div>
     </section>
 
