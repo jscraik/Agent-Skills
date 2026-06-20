@@ -49,7 +49,10 @@
       "properties": {
         "id": {"type": "string", "minLength": 1},
         "title": {"type": "string", "minLength": 1},
-        "status": {"type": "string", "minLength": 1},
+        "status": {
+          "type": "string",
+          "enum": ["implemented", "preview_only", "placeholder_optional", "placeholder_blocked"]
+        },
         "owner_surface": {"type": "string", "minLength": 1}
       },
       "required": ["id", "title", "status", "owner_surface"]
@@ -72,7 +75,7 @@
         "status": {"type": "string", "enum": ["pass", "blocker"]},
         "severity": {"type": "string", "const": "blocker"},
         "message": {"type": "string", "minLength": 1},
-        "evidence": {"type": "array", "items": {"type": "string"}}
+        "evidence": {"type": "array", "items": {"type": "string", "minLength": 1}}
       },
       "required": ["id", "status", "severity", "message", "evidence"]
     }

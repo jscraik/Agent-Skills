@@ -115,6 +115,11 @@ def _write_plan(repo_root: Path, package_receipt: dict[str, Any], target_root: s
     return actions
 
 
+def _receipt_target_root(checks: list[dict[str, Any]], normalized_target_root: str) -> str:
+    target_root_status = next(check["status"] for check in checks if check["id"] == "target_root_local_projection")
+    return normalized_target_root if target_root_status == "pass" else DEFAULT_TARGET_ROOT
+
+
 def build_emitter_preview_receipt(
     repo_root: Path,
     *,
@@ -130,6 +135,7 @@ def build_emitter_preview_receipt(
         _hardening_check(hardening_receipt),
     ]
     blockers = [check for check in checks if check["status"] == "blocker"]
+    receipt_target_root = _receipt_target_root(checks, normalized_target_root)
     receipt = {
         "schema_version": EMITTER_PREVIEW_SCHEMA_VERSION,
         "schema_uri": EMITTER_PREVIEW_SCHEMA_URI,
@@ -139,8 +145,8 @@ def build_emitter_preview_receipt(
         "package_id": package_receipt["package_id"],
         "version": package_receipt["version"],
         "package_digest": package_receipt["package_digest"],
-        "target_root": normalized_target_root,
-        "write_plan": [] if blockers else _write_plan(repo_root, package_receipt, normalized_target_root),
+        "target_root": receipt_target_root,
+        "write_plan": [] if blockers else _write_plan(repo_root, package_receipt, receipt_target_root),
         "required_receipts": ["package_digest_receipt", "package_hardening_receipt"],
         "emitter_checks": checks,
         "blockers": blockers,

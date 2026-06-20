@@ -12,6 +12,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
+from ask.skills_sdk.emitter_contracts import validate_emitter_preview_receipt  # noqa: E402
 from ask.skills_sdk.emitter_preview import build_emitter_preview_receipt  # noqa: E402
 from ask.skills_sdk.package_hardening import build_package_hardening_receipt  # noqa: E402
 
@@ -109,12 +110,14 @@ class TestSkillsSdkEmitterPreview(unittest.TestCase):
         receipt = payload["receipt"]
 
         self.assertEqual(receipt["status"], "blocked")
+        self.assertEqual(receipt["target_root"], ".agents/skills")
         self.assertEqual(receipt["write_plan"], [])
         self.assertTrue(
             any(check["id"] == "target_root_local_projection" for check in receipt["blockers"])
         )
         self.assertFalse(receipt["mutation_performed"])
         self.assertFalse(receipt["artifact_emitted"])
+        validate_emitter_preview_receipt(receipt)
 
     def test_emitter_preview_blocks_absolute_projection_roots(self) -> None:
         process = _run_ask(
@@ -135,8 +138,10 @@ class TestSkillsSdkEmitterPreview(unittest.TestCase):
         receipt = envelope["data"]["skills_sdk_emitter_preview"]["receipt"]
 
         self.assertEqual(receipt["status"], "blocked")
+        self.assertEqual(receipt["target_root"], ".agents/skills")
         self.assertEqual(receipt["write_plan"], [])
         self.assertEqual(receipt["blockers"][0]["id"], "target_root_local_projection")
+        validate_emitter_preview_receipt(receipt)
 
     def test_emitter_preview_normalizes_trailing_slash_projection_root(self) -> None:
         process = _run_ask(

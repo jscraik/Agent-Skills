@@ -31,5 +31,5 @@ schema_version: 1
 ## Validation
 
 - Run the exact script path touched with the narrowest safe arguments.
-- If a wrapper delegates to `Infrastructure/**), also run the delegated path or
+- If a wrapper delegates to `Infrastructure/**`, also run the delegated path or
   an owning test that proves the handoff.

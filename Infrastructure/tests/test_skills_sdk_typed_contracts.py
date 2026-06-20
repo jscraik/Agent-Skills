@@ -225,6 +225,30 @@ class TestSkillsSdkTypedContracts(unittest.TestCase):
         with self.assertRaises(ValidationError):
             validate_static_explorer_receipt(payload)
 
+    def test_static_explorer_contract_rejects_unknown_capability_status(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "static-explorer-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["capability_index"][0]["status"] = "unknown"
+
+        with self.assertRaises(ValidationError):
+            validate_static_explorer_receipt(payload)
+
+    def test_static_explorer_contract_rejects_empty_skill_set_items(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "static-explorer-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["skill_sets"] = [""]
+
+        with self.assertRaises(ValidationError):
+            validate_static_explorer_receipt(payload)
+
+    def test_static_explorer_contract_rejects_empty_evidence_items(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "static-explorer-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["explorer_checks"][0]["evidence"] = [""]
+
+        with self.assertRaises(ValidationError):
+            validate_static_explorer_receipt(payload)
+
     def test_static_explorer_fixture_loads_through_dedicated_contract(self) -> None:
         model = validate_static_explorer_receipt(_json(FIXTURE_DIR / "valid" / "static-explorer-receipt.json"))
 
