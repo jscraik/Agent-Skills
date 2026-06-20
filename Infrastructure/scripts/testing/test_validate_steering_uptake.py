@@ -615,6 +615,21 @@ def test_accepts_open_status_row_with_remaining_proof(tmp_path: Path) -> None:
     assert status_findings == []
 
 
+def test_accepts_open_status_row_with_documented_hyphenated_marker(tmp_path: Path) -> None:
+    _make_valid_root(tmp_path)
+    write(
+        tmp_path / ".harness/quality/steering-uptake.md",
+        "# Steering Uptake Ledger\n\n"
+        "| Date | Trigger | Failure pattern | Mechanism | Durable guardrail | Validation | Status |\n"
+        "| --- | --- | --- | --- | --- | --- | --- |\n"
+        "| 2026-05-19 | trigger | pattern | mechanism. Category: missing guardrails. | guardrail Improvement type: validator. | command to run; next-proof: rerun the production gate | open |\n",
+    )
+
+    findings = validate_steering_uptake.validate(tmp_path)
+
+    assert not any(finding.code == "STEERING_LEDGER_OPEN_UNCLEAR" for finding in findings)
+
+
 def test_rejects_open_status_row_without_remaining_proof(tmp_path: Path) -> None:
     _make_valid_root(tmp_path)
     write(
@@ -752,4 +767,3 @@ def test_main_plain_output_fail_includes_finding_code(monkeypatch, capsys) -> No
     captured = capsys.readouterr()
     assert "fail" in captured.out
     assert "STEERING_LEDGER_MISSING" in captured.out
-

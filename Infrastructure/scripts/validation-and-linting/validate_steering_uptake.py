@@ -69,9 +69,13 @@ OPEN_VALIDATION_MARKERS = {
     "pending",
     "blocked",
     "in progress",
+    "in-progress",
     "after push",
+    "after-push",
     "next proof",
+    "next-proof",
     "not claimed",
+    "not-claimed",
 }
 REQUIRED_HEADERS = [
     "Date",
