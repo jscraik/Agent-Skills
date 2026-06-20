@@ -5,7 +5,7 @@ from pathlib import Path
 
 import ask.commands.skills as skills_commands
 from ask.envelope import CallResult, ErrorObject
-from ask.cli_errors import build_unknown_action_result
+from ask.cli_errors import build_unknown_action_result, build_validation_error
 
 
 def add_sdk_ci_parser(
@@ -35,19 +35,10 @@ def add_sdk_ci_parser(
 def dispatch_sdk_ci(repo_root: Path, args: argparse.Namespace) -> CallResult:
     if args.ci_action == "policy":
         if not args.preview:
-            return _validation_error(
+            return build_validation_error(
                 "sdk ci policy",
                 "Skills SDK CI policy is preview-only in PU-028 and requires --preview.",
                 "ask sdk ci policy --risk-tier high --preview --json --robot",
             )
         return skills_commands.skills_sdk_ci_policy_preview(repo_root, risk_tier=args.risk_tier)
     return build_unknown_action_result("sdk ci", args.ci_action)
-
-
-def _validation_error(command: str, message: str, fix_suggestion: str) -> CallResult:
-    result = CallResult(status="error")
-    result.metadata["command"] = command
-    result.errors.append(
-        ErrorObject(code="ERR_VALIDATION", message=message, fix_suggestion=fix_suggestion)
-    )
-    return result

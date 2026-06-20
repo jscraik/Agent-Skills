@@ -5,7 +5,7 @@ from pathlib import Path
 
 import ask.commands.skills as skills_commands
 from ask.envelope import CallResult, ErrorObject
-from ask.cli_errors import build_unknown_action_result
+from ask.cli_errors import build_unknown_action_result, build_validation_error
 
 
 def add_sdk_explorer_parser(
@@ -29,19 +29,10 @@ def add_sdk_explorer_parser(
 def dispatch_sdk_explorer(repo_root: Path, args: argparse.Namespace) -> CallResult:
     if args.explorer_action == "static":
         if not args.preview:
-            return _validation_error(
+            return build_validation_error(
                 "sdk explorer static",
                 "Skills SDK static explorer is preview-only in PU-029 and requires --preview.",
                 "ask sdk explorer static --preview --json --robot",
             )
         return skills_commands.skills_sdk_static_explorer_preview(repo_root)
     return build_unknown_action_result("sdk explorer", args.explorer_action)
-
-
-def _validation_error(command: str, message: str, fix_suggestion: str) -> CallResult:
-    result = CallResult(status="error")
-    result.metadata["command"] = command
-    result.errors.append(
-        ErrorObject(code="ERR_VALIDATION", message=message, fix_suggestion=fix_suggestion)
-    )
-    return result

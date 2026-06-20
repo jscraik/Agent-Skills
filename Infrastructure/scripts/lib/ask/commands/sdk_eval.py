@@ -4,7 +4,7 @@ import argparse
 from pathlib import Path
 
 import ask.commands.skills as skills_commands
-from ask.cli_errors import build_unknown_action_result
+from ask.cli_errors import build_unknown_action_result, build_validation_error
 from ask.envelope import CallResult, ErrorObject
 
 
@@ -53,17 +53,10 @@ def dispatch_sdk_eval(repo_root: Path, args: argparse.Namespace) -> CallResult:
         )
     if args.eval_action == "scenario-quality":
         if not args.preview:
-            return _validation_error(
+            return build_validation_error(
                 "sdk eval scenario-quality",
                 "Skills SDK scenario quality is preview-only in PU-030 and requires --preview.",
                 "ask sdk eval scenario-quality <skill> --preview --json --robot",
             )
         return skills_commands.skills_sdk_eval_scenario_quality(repo_root, target=args.target)
     return build_unknown_action_result("sdk eval", args.eval_action)
-
-
-def _validation_error(command: str, message: str, fix_suggestion: str) -> CallResult:
-    result = CallResult(status="error")
-    result.metadata["command"] = command
-    result.errors.append(ErrorObject(code="ERR_VALIDATION", message=message, fix_suggestion=fix_suggestion))
-    return result
