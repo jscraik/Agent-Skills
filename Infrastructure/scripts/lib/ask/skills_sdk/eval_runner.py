@@ -29,7 +29,15 @@ def _sha256_file(path: Path) -> str:
     return f"sha256:{digest.hexdigest()}"
 
 
-def _blocked_receipt(repo_root: Path, dataset_path: Path, blocker: str) -> dict[str, Any]:
+def _blocked_receipt(
+    repo_root: Path,
+    dataset_path: Path,
+    blocker: str,
+    *,
+    skill_ir_schema_version: str | None = None,
+    package_id: str | None = None,
+    package_digest: str | None = None,
+) -> dict[str, Any]:
     return {
         "schema_version": EVAL_RUN_RECEIPT_SCHEMA_VERSION,
         "schema_uri": EVAL_RUN_RECEIPT_SCHEMA_URI,
@@ -37,9 +45,9 @@ def _blocked_receipt(repo_root: Path, dataset_path: Path, blocker: str) -> dict[
         "runner": "deterministic_jsonl_v0",
         "dataset_path": _repo_relative(repo_root, dataset_path),
         "dataset_digest": "sha256:" + ("0" * 64),
-        "skill_ir_schema_version": None,
-        "package_id": None,
-        "package_digest": None,
+        "skill_ir_schema_version": skill_ir_schema_version,
+        "package_id": package_id,
+        "package_digest": package_digest,
         "target_path": None,
         "mode": None,
         "case_count": 0,
@@ -257,6 +265,18 @@ def _receipt(
     }
 
 
+def _package_identity_fields(
+    skill_ir_schema_version: str | None,
+    package_id: str | None,
+    package_digest: str | None,
+) -> dict[str, str | None]:
+    return {
+        "skill_ir_schema_version": skill_ir_schema_version,
+        "package_id": package_id,
+        "package_digest": package_digest,
+    }
+
+
 def run_deterministic_eval(
     repo_root: Path,
     *,
@@ -269,19 +289,28 @@ def run_deterministic_eval(
     dataset_path = Path(dataset)
     if not dataset_path.is_absolute():
         dataset_path = repo_root / dataset_path
+    package_identity = _package_identity_fields(skill_ir_schema_version, package_id, package_digest)
     if not dataset_path.is_file():
-        return _blocked_receipt(repo_root, dataset_path, f"dataset not found: {_repo_relative(repo_root, dataset_path)}")
+        return _blocked_receipt(
+            repo_root,
+            dataset_path,
+            f"dataset not found: {_repo_relative(repo_root, dataset_path)}",
+            **package_identity,
+        )
 
     try:
         cases = _load_cases(dataset_path)
     except ValueError as exc:
-        return _blocked_receipt(repo_root, dataset_path, str(exc))
+        return _blocked_receipt(
+            repo_root,
+            dataset_path,
+            str(exc),
+            **package_identity,
+        )
 
     return _receipt(
         repo_root,
         dataset_path,
         [_case_result(case) for case in cases],
-        skill_ir_schema_version,
-        package_id,
-        package_digest,
+        **package_identity,
     )

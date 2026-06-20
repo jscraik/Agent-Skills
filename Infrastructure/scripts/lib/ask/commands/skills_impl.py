@@ -110,10 +110,6 @@ from ask.skills_sdk.ir import build_skill_ir as _build_skill_ir  # noqa: E402
 from ask.skills_sdk.docs_projection import verify_capability_docs_projection as _verify_capability_docs_projection  # noqa: E402
 from ask.skills_sdk.package_build import build_package_digest_receipt as _build_package_digest_receipt  # noqa: E402
 from ask.skills_sdk.package_hardening import build_package_hardening_receipt as _build_package_hardening_receipt  # noqa: E402
-from ask.skills_sdk.signing_intent import (  # noqa: E402
-    SigningIntentError as _SigningIntentError,
-    build_signing_intent_receipt as _build_signing_intent_receipt,
-)
 from ask.skills_sdk.eval_runner import internal_scorecard_quality_gates as _internal_scorecard_quality_gates  # noqa: E402
 from ask.skills_sdk.eval_runner import run_deterministic_eval as _run_deterministic_eval  # noqa: E402
 from ask.skills_sdk.sandbox_profile import (  # noqa: E402
@@ -4264,15 +4260,20 @@ def skills_sdk_package_signing_intent(
         }
         return result
 
+    from ask.skills_sdk.signing_intent import (  # noqa: PLC0415
+        SigningIntentError,
+        build_signing_intent_receipt,
+    )
+
     package_receipt = _build_package_digest_receipt(repo_root, source_path=source_path, query=query)
     hardening_receipt = _build_package_hardening_receipt(package_receipt)
     try:
-        signing_receipt = _build_signing_intent_receipt(
+        signing_receipt = build_signing_intent_receipt(
             policy_path=policy_path,
             package_receipt=package_receipt,
             hardening_receipt=hardening_receipt,
         )
-    except _SigningIntentError as exc:
+    except SigningIntentError as exc:
         signing_receipt = exc.receipt
 
     payload = {

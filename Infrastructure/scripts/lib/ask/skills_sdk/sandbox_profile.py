@@ -22,6 +22,7 @@ SANDBOX_PROFILE_SCHEMA_PATH = Path("Infrastructure/config/schemas/skills-sdk/san
 RISK_TIERS = {"low", "medium", "high", "privileged", "published"}
 DEFAULT_POLICIES = {"deny", "allow"}
 _HOME_DIR = os.path.expanduser("~")
+_SHELL_PROGRAMS = {"bash", "dash", "fish", "ksh", "pwsh", "powershell", "sh", "tcsh", "zsh"}
 
 
 class SandboxProfileError(ValueError):
@@ -151,8 +152,23 @@ def _environment_check(profile: dict[str, Any]) -> dict[str, Any]:
 
 
 def _command_allowlist_check(profile: dict[str, Any]) -> dict[str, Any]:
-    allowlist = _list_field(_object_field(profile, "commands"), "allow")
-    return _check("command_allowlist_present", "pass" if allowlist else "blocker", "blocker", "Sandbox profile must name bounded command programs even though execution is not performed.", [f"allow_count:{len(allowlist)}"])
+    commands = _object_field(profile, "commands")
+    allowlist = _list_field(commands, "allow")
+    shell_allowed = commands.get("shell_allowed") is True
+    shell_programs = [
+        str(command)
+        for command in allowlist
+        if isinstance(command, str) and PurePosixPath(command.strip()).name.lower() in _SHELL_PROGRAMS
+    ]
+    allowed = bool(allowlist) and (shell_allowed or not shell_programs)
+    evidence = shell_programs if shell_programs else [f"allow_count:{len(allowlist)}"]
+    return _check(
+        "command_allowlist_present",
+        "pass" if allowed else "blocker",
+        "blocker",
+        "Sandbox profile must name bounded non-shell command programs when shell execution is disabled.",
+        evidence,
+    )
 
 
 def _shell_disabled_check(profile: dict[str, Any]) -> dict[str, Any]:

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import builtins
 import json
 import os
 import subprocess
@@ -8,6 +9,7 @@ import tempfile
 import unittest
 from copy import deepcopy
 from pathlib import Path
+from unittest import mock
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -110,6 +112,33 @@ class TestSkillsSdkSigningIntent(unittest.TestCase):
         self.assertEqual(receipt.status, "blocked")
         self.assertIn("policy_contract_valid", {blocker.id for blocker in receipt.blockers})
         self.assertFalse(receipt.signing_performed)
+        self.assertFalse(receipt.key_material_accessed)
+
+    def test_fallback_contract_blocks_unknown_policy_fields(self) -> None:
+        package_receipt, hardening_receipt = self._package_receipts()
+        policy = deepcopy(json.loads(FIXTURE_POLICY.read_text(encoding="utf-8")))
+        policy["private_key"] = "must-not-enter-receipts"
+        real_import = builtins.__import__
+
+        def import_without_pydantic(name: str, *args: object, **kwargs: object) -> object:
+            if name == "pydantic":
+                raise ModuleNotFoundError(name)
+            return real_import(name, *args, **kwargs)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            policy_path = Path(tmpdir) / "policy.json"
+            policy_path.write_text(json.dumps(policy), encoding="utf-8")
+            with mock.patch("builtins.__import__", side_effect=import_without_pydantic):
+                with self.assertRaises(SigningIntentError) as raised:
+                    build_signing_intent_receipt(
+                        policy_path=policy_path,
+                        package_receipt=package_receipt,
+                        hardening_receipt=hardening_receipt,
+                    )
+
+        receipt = validate_signing_intent_receipt(raised.exception.receipt)
+        contract_blocker = next(blocker for blocker in receipt.blockers if blocker.id == "policy_contract_valid")
+        self.assertIn("private_key:extra_forbidden", contract_blocker.evidence)
         self.assertFalse(receipt.key_material_accessed)
 
     def test_builder_blocks_hardening_failure(self) -> None:

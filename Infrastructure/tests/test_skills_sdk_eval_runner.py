@@ -147,6 +147,21 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
         self.assertEqual(model.case_count, 0)
         self.assertIn("dataset not found", model.blockers[0])
 
+    def test_runner_preserves_package_identity_on_blocked_dataset(self) -> None:
+        payload = run_deterministic_eval(
+            REPO_ROOT,
+            dataset="Infrastructure/tests/fixtures/skills_sdk/evals/missing.jsonl",
+            skill_ir_schema_version="skills-sdk.skill-ir.v0",
+            package_id="skills-sdk-valid-fixture",
+            package_digest="sha256:" + ("1" * 64),
+        )
+        model = validate_eval_run_receipt(payload)
+
+        self.assertEqual(model.status, "blocked")
+        self.assertEqual(model.skill_ir_schema_version, "skills-sdk.skill-ir.v0")
+        self.assertEqual(model.package_id, "skills-sdk-valid-fixture")
+        self.assertEqual(model.package_digest, "sha256:" + ("1" * 64))
+
     def test_public_cli_runs_deterministic_eval_dataset(self) -> None:
         completed = subprocess.run(
             [

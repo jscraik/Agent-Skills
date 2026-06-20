@@ -119,6 +119,7 @@ def _policy_contract_check(policy: dict[str, Any]) -> dict[str, Any]:
 
 def _fallback_policy_contract_errors(policy: dict[str, Any]) -> list[str]:
     errors = [f"{field}:missing" for field in sorted(_REQUIRED_POLICY_FIELDS - set(policy))]
+    errors.extend(f"{field}:extra_forbidden" for field in sorted(set(policy) - _REQUIRED_POLICY_FIELDS))
     for field in ("policy_id", "signer_id"):
         if not isinstance(policy.get(field), str) or not str(policy.get(field)).strip():
             errors.append(f"{field}:string_too_short")
