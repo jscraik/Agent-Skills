@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/sandbox-profile-receipt.v0.schema.json",
+  "title": "Skills SDK Sandbox Profile Receipt v0",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "string", "const": "skills-sdk.sandbox-profile-receipt.v0"},
+    "schema_uri": {"type": "string", "const": "https://jscraik.local/agent-skills/schemas/skills-sdk/sandbox-profile-receipt.v0.schema.json"},
+    "status": {"type": "string", "enum": ["pass", "blocked"]},
+    "profile_path": {"type": "string", "minLength": 1},
+    "profile_digest": {"type": ["string", "null"], "minLength": 71},
+    "profile_id": {"type": ["string", "null"]},
+    "risk_tier": {"type": ["string", "null"], "enum": ["low", "medium", "high", "privileged", "published", null]},
+    "default_policy": {"type": ["string", "null"], "enum": ["deny", "allow", null]},
+    "checks": {"type": "array", "minItems": 1, "items": {"$ref": "#/definitions/sandboxCheck"}},
+    "blockers": {"type": "array", "items": {"$ref": "#/definitions/sandboxCheck"}},
+    "warnings": {"type": "array", "items": {"$ref": "#/definitions/sandboxCheck"}},
+    "execution_performed": {"type": "boolean", "const": false},
+    "adapter_selected": {"type": "boolean", "const": false},
+    "mutation_performed": {"type": "boolean", "const": false},
+    "acceptance_trace": {"type": "array", "minItems": 1, "items": {"type": "string", "enum": ["FR-008", "FR-010", "SA-004", "SA-007", "SEC-001", "VP-021"]}}
+  },
+  "required": ["schema_version", "schema_uri", "status", "profile_path", "profile_digest", "profile_id", "risk_tier", "default_policy", "checks", "blockers", "warnings", "execution_performed", "adapter_selected", "mutation_performed", "acceptance_trace"],
+  "definitions": {
+    "sandboxCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "status": {"type": "string", "enum": ["pass", "warning", "blocker"]},
+        "severity": {"type": "string", "enum": ["info", "warning", "blocker"]},
+        "message": {"type": "string", "minLength": 1},
+        "evidence": {"type": "array", "items": {"type": "string"}}
+      },
+      "required": ["id", "status", "severity", "message", "evidence"]
+    }
+  }
+}

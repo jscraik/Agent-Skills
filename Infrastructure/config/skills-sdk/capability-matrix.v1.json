@@ -37,8 +37,12 @@
     "./bin/ask sdk determinism audit --scope skills --limit 10 --json --robot",
     "./bin/ask sdk ir build Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
     "./bin/ask sdk eval run --runner deterministic-jsonl --dataset Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --skill Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
+    "./bin/ask sdk eval scenario-quality Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --preview --json --robot",
     "./bin/ask sdk package build Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
     "./bin/ask sdk package harden Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
+    "./bin/ask sdk trust decide Infrastructure/tests/fixtures/skills_sdk/valid_skill --decision trust --reason 'fixture passed local checks' --owner skills-sdk-tests --preview --json --robot",
+    "./bin/ask sdk observability feedback --skill Infrastructure/tests/fixtures/skills_sdk/valid_skill --events Infrastructure/tests/fixtures/skills_sdk/observability/redacted-events.fixture --preview --json --robot",
+    "./bin/ask sdk sandbox validate --profile Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/sandbox-profile.json --json --robot",
     "/Users/jamiecraik/.venvs/pyyaml/bin/python Infrastructure/scripts/validation-and-linting/check_sdk_stage_skill_shape.py",
     "python3 -m unittest Infrastructure.scripts.testing.test_skill_creator_lifecycle_scaffold -v",
     "python3 -m unittest Infrastructure.scripts.testing.test_sdk_stage_skill_shape_validator -v",
@@ -52,6 +56,7 @@
     "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_eval_runner.py -q",
     "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_package_build.py -q",
     "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_package_hardening.py -q",
+    "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_trust_ledger.py -q",
     "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_capability_status.py Infrastructure/tests/test_skills_sdk_pipeline_status_artifact.py -q"
   ],
   "capabilities": [
@@ -318,15 +323,35 @@
     },
     {
       "id": "trust_store",
-      "title": "Trust-store mutation",
-      "status": "deferred",
-      "owner_surface": "future Skills SDK trust lifecycle",
+      "title": "Local trust ledger",
+      "status": "implemented",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/trust_ledger.py",
       "pipeline_sections": ["release_decision_matrix", "agent_execution_control_plane"],
-      "feature_executed": false,
+      "feature_executed": true,
+      "mutation_performed": true,
+      "evidence_refs": [
+        "./bin/ask sdk trust decide Infrastructure/tests/fixtures/skills_sdk/valid_skill --decision trust --reason 'fixture passed local checks' --owner skills-sdk-tests --preview --json --robot",
+        "Infrastructure/config/schemas/skills-sdk/trust-decision-receipt.v0.schema.json",
+        "Infrastructure/tests/test_skills_sdk_trust_ledger.py"
+      ],
+      "next_slice": "Connect trust decisions to release-mode policy only after revocation, expiry, and owner workflows have stronger evidence.",
+      "notes": "PU-025 appends local JSONL trust decisions only when --apply is explicit; it does not mutate a global trust store or claim runtime trust."
+    },
+    {
+      "id": "observability_feedback",
+      "title": "Redacted observability feedback preview",
+      "status": "implemented",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/observability_feedback.py",
+      "pipeline_sections": ["eval_ops", "knowledge_engineering", "agent_execution_control_plane"],
+      "feature_executed": true,
       "mutation_performed": false,
-      "evidence_refs": [".harness/specs/2026-06-04-skills-sdk-pu-008-capability-truth-spec.md"],
-      "next_slice": "Define trust-store ownership and rollback before any mutation.",
-      "notes": "Current SDK commands do not mutate trust state."
+      "evidence_refs": [
+        "./bin/ask sdk observability feedback --skill Infrastructure/tests/fixtures/skills_sdk/valid_skill --events Infrastructure/tests/fixtures/skills_sdk/observability/redacted-events.fixture --preview --json --robot",
+        "Infrastructure/config/schemas/skills-sdk/observability-feedback-receipt.v0.schema.json",
+        "Infrastructure/tests/test_skills_sdk_observability_feedback.py"
+      ],
+      "next_slice": "Connect feedback candidates to generated eval-case drafts only after candidate promotion is guarded by package and eval receipts.",
+      "notes": "PU-026 mines local redacted JSONL events into preview-only eval scenario and skill-gap candidates; raw prompt/output fields block the receipt and no promotion or file generation is performed."
     },
     {
       "id": "refs_ingestion",
@@ -353,13 +378,32 @@
       "mutation_performed": false,
       "evidence_refs": [
         "Infrastructure/tests/test_skills_sdk_eval_runner.py::TestSkillsSdkEvalRunner::test_sdk_internal_runner_delegates_to_existing_eval_backend",
+        "Infrastructure/tests/test_skills_sdk_eval_runner.py::TestSkillsSdkEvalRunner::test_sdk_internal_runner_binds_scorecard_case_counts_to_receipt",
+        "Infrastructure/tests/test_skills_sdk_schema_spine.py::TestSkillsSdkSchemaSpine::test_eval_run_v0_schema_accepts_internal_quality_gates",
+        "Infrastructure/tests/test_skills_sdk_typed_contracts.py::TestSkillsSdkTypedContracts::test_eval_run_contract_accepts_internal_quality_gates",
         "./bin/ask sdk eval run --runner deterministic-jsonl --dataset Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --skill Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
         "Infrastructure/config/schemas/skills-sdk/eval-case.v0.schema.json",
         "Infrastructure/config/schemas/skills-sdk/eval-run-receipt.v0.schema.json",
         "Infrastructure/tests/test_skills_sdk_eval_runner.py"
       ],
-      "next_slice": "Bind internal eval receipts to package identity and harden result counts before any hosted eval provider becomes required.",
-      "notes": "The SDK routes to the existing internal skill-builder eval backend and keeps deterministic JSONL as a fast fixture receipt lane; Tessl remains opt-in."
+      "next_slice": "Add release-mode calibration thresholds and hosted-provider comparison only after local quality gates stabilize.",
+      "notes": "The SDK routes to the existing internal skill-builder eval backend, preserves internal scorecard case counts and calibrated quality-gate assertions in SDK receipts, binds targeted receipts to package identity, and keeps deterministic JSONL as a fast fixture lane; Tessl remains opt-in."
+    },
+    {
+      "id": "scenario_quality_gate",
+      "title": "Scenario quality gate",
+      "status": "preview_only",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/scenario_quality.py",
+      "pipeline_sections": ["eval_ops", "knowledge_engineering", "ci_and_adoption"],
+      "feature_executed": true,
+      "mutation_performed": false,
+      "evidence_refs": [
+        "./bin/ask sdk eval scenario-quality Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --preview --json --robot",
+        "Infrastructure/config/schemas/skills-sdk/scenario-quality-receipt.v0.schema.json",
+        "Infrastructure/tests/test_skills_sdk_scenario_quality.py"
+      ],
+      "next_slice": "Connect generated or observed eval candidates to this gate before promotion into release-mode eval runs.",
+      "notes": "PU-030 previews scenario promotion quality from references/evals.yaml without mutating scenario sources, running evals, or promoting generated candidates."
     },
     {
       "id": "package_verify",
@@ -375,27 +419,37 @@
     },
     {
       "id": "signing",
-      "title": "Package signing",
-      "status": "placeholder_blocked",
-      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/placeholder_lifecycle.py",
+      "title": "Package signing intent",
+      "status": "implemented",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/signing_intent.py",
       "pipeline_sections": ["release_decision_matrix", "full_skill_lifecycle", "package_hardening"],
-      "feature_executed": false,
+      "feature_executed": true,
       "mutation_performed": false,
-      "evidence_refs": ["./bin/ask sdk lifecycle --surface signing --json --robot", "Infrastructure/tests/test_skills_sdk_placeholder_lifecycle.py"],
-      "next_slice": "Approve key ownership, signing adapter, and redaction policy.",
-      "notes": "The lifecycle facade reports signing as unavailable without accessing key material."
+      "evidence_refs": [
+        "./bin/ask sdk package signing-intent Infrastructure/tests/fixtures/skills_sdk/valid_skill --policy Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/signing-policy.json --json --robot",
+        "Infrastructure/config/schemas/skills-sdk/signing-policy.v0.schema.json",
+        "Infrastructure/config/schemas/skills-sdk/signing-intent-receipt.v0.schema.json",
+        "Infrastructure/tests/test_skills_sdk_signing_intent.py"
+      ],
+      "next_slice": "Approve real signing adapter, key ownership, archive emission, and redaction authority before producing signatures.",
+      "notes": "The SDK validates signing policy and package digest intent without requesting signatures, accessing key material, emitting artifacts, or mutating trust state."
     },
     {
       "id": "sandbox",
       "title": "Sandbox execution",
       "status": "blocked_missing_adapter",
-      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/placeholder_lifecycle.py",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/sandbox_profile.py plus placeholder_lifecycle.py",
       "pipeline_sections": ["agent_execution_control_plane", "release_decision_matrix", "eval_ops"],
       "feature_executed": false,
       "mutation_performed": false,
-      "evidence_refs": ["./bin/ask sdk lifecycle --surface sandbox --risk-tier high --json --robot", "Infrastructure/tests/test_skills_sdk_placeholder_lifecycle.py"],
+      "evidence_refs": [
+        "./bin/ask sdk sandbox validate --profile Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/sandbox-profile.json --json --robot",
+        "./bin/ask sdk lifecycle --surface sandbox --risk-tier high --json --robot",
+        "Infrastructure/tests/test_skills_sdk_sandbox_profile.py",
+        "Infrastructure/tests/test_skills_sdk_placeholder_lifecycle.py"
+      ],
       "next_slice": "Approve sandbox provider selection and adapter contract.",
-      "notes": "High-risk lifecycle output blocks when sandbox is required and no adapter exists."
+      "notes": "Deny-by-default profile validation is implemented and non-mutating; high-risk lifecycle output still blocks because no sandbox execution adapter exists."
     },
     {
       "id": "security_adapter",
@@ -423,15 +477,20 @@
     },
     {
       "id": "skill_explorer",
-      "title": "Skill Explorer publishing",
-      "status": "placeholder_optional",
-      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/placeholder_lifecycle.py",
+      "title": "Static explorer index preview",
+      "status": "preview_only",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/static_explorer.py",
       "pipeline_sections": ["public_sdk_surface", "full_skill_lifecycle", "knowledge_engineering"],
-      "feature_executed": false,
+      "feature_executed": true,
       "mutation_performed": false,
-      "evidence_refs": ["./bin/ask sdk lifecycle --surface explorer --json --robot", "Infrastructure/tests/test_skills_sdk_placeholder_lifecycle.py"],
-      "next_slice": "Separate static local explorer from hosted publishing and add a real adapter.",
-      "notes": "The current lifecycle surface is an honest placeholder."
+      "evidence_refs": [
+        "./bin/ask sdk explorer static --preview --json --robot",
+        "Infrastructure/scripts/lib/ask/skills_sdk/static_explorer.py",
+        "Infrastructure/config/schemas/skills-sdk/static-explorer-receipt.v0.schema.json",
+        "Infrastructure/tests/test_skills_sdk_static_explorer.py"
+      ],
+      "next_slice": "Add hosted explorer rendering only after ownership, publishing, and freshness contracts are approved.",
+      "notes": "PU-029 previews capability and skill indexes from JSON/source manifests only; it does not render HTML or publish a hosted explorer."
     },
     {
       "id": "schema_registry",
@@ -548,26 +607,36 @@
     {
       "id": "emitters",
       "title": "Emitters",
-      "status": "deferred",
-      "owner_surface": "future emitter adapters",
+      "status": "preview_only",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/emitter_preview.py",
       "pipeline_sections": ["compiler_emitter_discipline", "public_sdk_surface"],
-      "feature_executed": false,
+      "feature_executed": true,
       "mutation_performed": false,
-      "evidence_refs": ["artifacts/recommended-skills-sdk-pipeline.html"],
-      "next_slice": "Approve emitter adapter contracts and generated-output ownership.",
-      "notes": "No emitter runtime is added by PU-008."
+      "evidence_refs": [
+        "./bin/ask sdk emitter preview --skill Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
+        "Infrastructure/scripts/lib/ask/skills_sdk/emitter_preview.py",
+        "Infrastructure/config/schemas/skills-sdk/emitter-preview-receipt.v0.schema.json",
+        "Infrastructure/tests/test_skills_sdk_emitter_preview.py"
+      ],
+      "next_slice": "Add a real emitter adapter only after archive emission, projection ownership, and rollback receipts are approved.",
+      "notes": "PU-027 previews a local .agents/skills write plan only; it does not emit files, mutate runtime projections, publish, or build archives."
     },
     {
       "id": "ci_adoption_gates",
       "title": "CI and adoption gates",
-      "status": "deferred",
-      "owner_surface": "future CI integration",
+      "status": "preview_only",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/ci_policy_preview.py",
       "pipeline_sections": ["ci_and_adoption", "release_decision_matrix"],
-      "feature_executed": false,
+      "feature_executed": true,
       "mutation_performed": false,
-      "evidence_refs": ["artifacts/recommended-skills-sdk-pipeline.html"],
-      "next_slice": "Define required checks and live CI proof in a PR-specific slice.",
-      "notes": "Local validation does not prove live CI or adoption readiness."
+      "evidence_refs": [
+        "./bin/ask sdk ci policy --risk-tier high --preview --json --robot",
+        "Infrastructure/scripts/lib/ask/skills_sdk/ci_policy_preview.py",
+        "Infrastructure/config/schemas/skills-sdk/ci-policy-preview-receipt.v0.schema.json",
+        "Infrastructure/tests/test_skills_sdk_ci_policy_preview.py"
+      ],
+      "next_slice": "Attach live CI run evidence only in a hosted-check receipt that preserves PR, CI, review, and mergeability boundaries.",
+      "notes": "PU-028 previews required checks from risk tier only; it does not mutate branch protection or claim live CI/adoption readiness."
     },
     {
       "id": "package_hardening",

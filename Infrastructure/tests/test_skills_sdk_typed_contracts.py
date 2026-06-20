@@ -13,6 +13,10 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
 from ask.skills_sdk import typed_contracts as contracts  # noqa: E402
+from ask.skills_sdk.ci_contracts import validate_ci_policy_preview_receipt  # noqa: E402
+from ask.skills_sdk.emitter_contracts import validate_emitter_preview_receipt  # noqa: E402
+from ask.skills_sdk.scenario_quality_contracts import validate_scenario_quality_receipt  # noqa: E402
+from ask.skills_sdk.static_explorer_contracts import validate_static_explorer_receipt  # noqa: E402
 
 
 FIXTURE_DIR = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine"
@@ -33,6 +37,10 @@ class TestSkillsSdkTypedContracts(unittest.TestCase):
             ("skill-ir.json", contracts.validate_skill_ir),
             ("package-digest-receipt.json", contracts.validate_package_digest_receipt),
             ("package-hardening-receipt.json", contracts.validate_package_hardening_receipt),
+            ("signing-policy.json", contracts.validate_signing_policy),
+            ("signing-intent-receipt.json", contracts.validate_signing_intent_receipt),
+            ("sandbox-profile.json", contracts.validate_sandbox_profile),
+            ("sandbox-profile-receipt.json", contracts.validate_sandbox_profile_receipt),
             ("eval-case.json", contracts.validate_eval_case),
             ("eval-run-receipt.json", contracts.validate_eval_run_receipt),
             ("check-receipt.json", contracts.validate_check_receipt),
@@ -104,6 +112,62 @@ class TestSkillsSdkTypedContracts(unittest.TestCase):
         with self.assertRaises(ValidationError):
             contracts.validate_package_hardening_receipt(payload)
 
+    def test_package_hardening_contract_rejects_empty_included_file_items(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "package-hardening-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["included_files"] = [""]
+
+        with self.assertRaises(ValidationError):
+            contracts.validate_package_hardening_receipt(payload)
+
+    def test_sandbox_profile_receipt_rejects_short_profile_digest(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "sandbox-profile-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["profile_digest"] = "x"
+
+        with self.assertRaises(ValidationError):
+            contracts.validate_sandbox_profile_receipt(payload)
+
+    def test_signing_intent_contract_rejects_signature_claims(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "signing-intent-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["signing_performed"] = True
+
+        with self.assertRaises(ValidationError):
+            contracts.validate_signing_intent_receipt(payload)
+
+    def test_signing_intent_contract_rejects_key_material_access_claims(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "signing-intent-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["key_material_accessed"] = True
+
+        with self.assertRaises(ValidationError):
+            contracts.validate_signing_intent_receipt(payload)
+
+    def test_signing_policy_contract_rejects_archive_requirement(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "signing-policy.json")
+        self.assertIsInstance(payload, dict)
+        payload["archive_required"] = True
+
+        with self.assertRaises(ValidationError):
+            contracts.validate_signing_policy(payload)
+
+    def test_signing_policy_contract_rejects_short_package_digest(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "signing-policy.json")
+        self.assertIsInstance(payload, dict)
+        payload["allowed_package_digests"] = ["x"]
+
+        with self.assertRaises(ValidationError):
+            contracts.validate_signing_policy(payload)
+
+    def test_sandbox_profile_receipt_contract_rejects_execution_claims(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "sandbox-profile-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["execution_performed"] = True
+
+        with self.assertRaises(ValidationError):
+            contracts.validate_sandbox_profile_receipt(payload)
+
     def test_eval_run_contract_rejects_mutation_claims(self) -> None:
         payload = _json(FIXTURE_DIR / "valid" / "eval-run-receipt.json")
         self.assertIsInstance(payload, dict)
@@ -111,6 +175,164 @@ class TestSkillsSdkTypedContracts(unittest.TestCase):
 
         with self.assertRaises(ValidationError):
             contracts.validate_eval_run_receipt(payload)
+
+    def test_emitter_preview_contract_rejects_emission_claims(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "emitter-preview-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["artifact_emitted"] = True
+
+        with self.assertRaises(ValidationError):
+            validate_emitter_preview_receipt(payload)
+
+    def test_emitter_preview_contract_rejects_duplicate_required_receipts(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "emitter-preview-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["required_receipts"] = [
+            "package_digest_receipt",
+            "package_digest_receipt",
+        ]
+
+        with self.assertRaises(ValidationError):
+            validate_emitter_preview_receipt(payload)
+
+    def test_emitter_preview_fixture_loads_through_dedicated_contract(self) -> None:
+        model = validate_emitter_preview_receipt(_json(FIXTURE_DIR / "valid" / "emitter-preview-receipt.json"))
+
+        self.assertEqual(model.model_config["extra"], "forbid")
+        self.assertTrue(model.model_config["strict"])
+        self.assertEqual(model.projection, "runtime-skill")
+
+    def test_ci_policy_preview_contract_rejects_hosted_ci_claims(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "ci-policy-preview-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["live_ci_evidence_attached"] = True
+
+        with self.assertRaises(ValidationError):
+            validate_ci_policy_preview_receipt(payload)
+
+    def test_ci_policy_preview_fixture_loads_through_dedicated_contract(self) -> None:
+        model = validate_ci_policy_preview_receipt(_json(FIXTURE_DIR / "valid" / "ci-policy-preview-receipt.json"))
+
+        self.assertEqual(model.model_config["extra"], "forbid")
+        self.assertTrue(model.model_config["strict"])
+        self.assertEqual(model.risk_tier, "high")
+
+    def test_static_explorer_contract_rejects_html_render_claims(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "static-explorer-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["html_rendered"] = True
+
+        with self.assertRaises(ValidationError):
+            validate_static_explorer_receipt(payload)
+
+    def test_static_explorer_contract_rejects_unknown_capability_status(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "static-explorer-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["capability_index"][0]["status"] = "unknown"
+
+        with self.assertRaises(ValidationError):
+            validate_static_explorer_receipt(payload)
+
+    def test_static_explorer_contract_rejects_empty_skill_set_items(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "static-explorer-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["skill_sets"] = [""]
+
+        with self.assertRaises(ValidationError):
+            validate_static_explorer_receipt(payload)
+
+    def test_static_explorer_contract_rejects_empty_evidence_items(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "static-explorer-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["explorer_checks"][0]["evidence"] = [""]
+
+        with self.assertRaises(ValidationError):
+            validate_static_explorer_receipt(payload)
+
+    def test_static_explorer_fixture_loads_through_dedicated_contract(self) -> None:
+        model = validate_static_explorer_receipt(_json(FIXTURE_DIR / "valid" / "static-explorer-receipt.json"))
+
+        self.assertEqual(model.model_config["extra"], "forbid")
+        self.assertTrue(model.model_config["strict"])
+        self.assertEqual(model.capability_count, 1)
+
+    def test_scenario_quality_contract_rejects_promotion_claims(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "scenario-quality-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["promotion_performed"] = True
+
+        with self.assertRaises(ValidationError):
+            validate_scenario_quality_receipt(payload)
+
+    def test_scenario_quality_fixture_loads_through_dedicated_contract(self) -> None:
+        model = validate_scenario_quality_receipt(_json(FIXTURE_DIR / "valid" / "scenario-quality-receipt.json"))
+
+        self.assertEqual(model.model_config["extra"], "forbid")
+        self.assertTrue(model.model_config["strict"])
+        self.assertEqual(model.scenario_count, 1)
+
+    def test_eval_run_contract_accepts_legacy_receipt_without_package_identity(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "eval-run-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload.pop("package_id")
+        payload.pop("package_digest")
+
+        model = contracts.validate_eval_run_receipt(payload)
+
+        self.assertIsNone(model.package_id)
+        self.assertIsNone(model.package_digest)
+
+    def test_eval_run_contract_accepts_internal_quality_gates(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "eval-run-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["runner"] = "internal_skill_builder_v0"
+        payload["quality_gates"] = {
+            "source": "internal_scorecard",
+            "scorecard_schema_version": "2.1",
+            "decision": "pass",
+            "passed": True,
+            "promotion_eligible": None,
+            "blocked_cases": 0,
+            "tier1_failures": 0,
+            "tier2_findings": 0,
+            "preflight_warning_count": 0,
+            "readiness_summary": {"unknown": 1},
+            "expected_signal_summary": {"runs": 0, "average": None, "minimum": None, "risky_cases": []},
+            "security_dependency_screening_status": "skipped",
+            "assertions": [
+                {
+                    "id": "scorecard_decision_passes",
+                    "status": "pass",
+                    "expected": "decision == pass",
+                    "actual": "pass",
+                }
+            ],
+            "failed_assertions": [],
+        }
+
+        model = contracts.validate_eval_run_receipt(payload)
+
+        self.assertIsNotNone(model.quality_gates)
+        self.assertEqual(model.quality_gates.source, "internal_scorecard")
+        self.assertEqual(model.quality_gates.assertions[0].id, "scorecard_decision_passes")
+
+    def test_trust_decision_contract_rejects_recorded_receipt_without_mutation(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "trust-decision-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["status"] = "recorded"
+        payload["mutation_performed"] = False
+
+        with self.assertRaises(ValidationError):
+            contracts.validate_trust_decision_receipt(payload)
+
+    def test_trust_decision_contract_rejects_mutating_preview_receipt(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "trust-decision-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["status"] = "preview"
+        payload["mutation_performed"] = True
+
+        with self.assertRaises(ValidationError):
+            contracts.validate_trust_decision_receipt(payload)
 
     def test_contracts_reject_type_coercion(self) -> None:
         """

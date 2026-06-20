@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/observability-feedback-receipt.v0.schema.json",
+  "title": "Skills SDK Observability Feedback Receipt v0",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "string", "const": "skills-sdk.observability-feedback-receipt.v0"},
+    "schema_uri": {"type": "string", "const": "https://jscraik.local/agent-skills/schemas/skills-sdk/observability-feedback-receipt.v0.schema.json"},
+    "status": {"type": "string", "enum": ["preview", "blocked"]},
+    "operation": {"type": "string", "const": "observability_feedback_preview"},
+    "package_id": {"type": "string", "minLength": 1},
+    "package_digest": {"type": "string", "minLength": 71},
+    "events_path": {"type": "string", "minLength": 1},
+    "event_count": {"type": "integer", "minimum": 0},
+    "accepted_event_count": {"type": "integer", "minimum": 0},
+    "scenario_candidates": {"type": "array", "items": {"$ref": "#/definitions/candidate"}},
+    "skill_gap_candidates": {"type": "array", "items": {"$ref": "#/definitions/candidate"}},
+    "promotion_blockers": {"type": "array", "items": {"type": "string", "enum": ["package_digest_receipt", "eval_run_receipt"]}},
+    "feedback_checks": {"type": "array", "minItems": 1, "items": {"$ref": "#/definitions/check"}},
+    "blockers": {"type": "array", "items": {"$ref": "#/definitions/check"}},
+    "mutation_performed": {"type": "boolean", "const": false},
+    "acceptance_trace": {"type": "array", "minItems": 1, "items": {"type": "string", "enum": ["PU-026", "FR-003", "FR-008", "SA-003", "VP-026"]}},
+    "agent_summary": {"type": "string", "minLength": 1}
+  },
+  "required": [
+    "schema_version",
+    "schema_uri",
+    "status",
+    "operation",
+    "package_id",
+    "package_digest",
+    "events_path",
+    "event_count",
+    "accepted_event_count",
+    "scenario_candidates",
+    "skill_gap_candidates",
+    "promotion_blockers",
+    "feedback_checks",
+    "blockers",
+    "mutation_performed",
+    "acceptance_trace",
+    "agent_summary"
+  ],
+  "definitions": {
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "candidate_type": {"type": "string", "enum": ["eval_scenario", "skill_gap"]},
+        "source_event_digest": {"type": "string", "minLength": 71},
+        "skill_id": {"type": "string", "minLength": 1},
+        "prompt_digest": {"type": ["string", "null"], "minLength": 71},
+        "failure_summary": {"type": ["string", "null"], "minLength": 1},
+        "gap_summary": {"type": ["string", "null"], "minLength": 1},
+        "promotion_status": {"type": "string", "const": "blocked_pending_package_eval"},
+        "required_receipts": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": {"type": "string", "enum": ["package_digest_receipt", "eval_run_receipt"]}
+        }
+      },
+      "required": [
+        "id",
+        "candidate_type",
+        "source_event_digest",
+        "skill_id",
+        "promotion_status",
+        "required_receipts"
+      ]
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "status": {"type": "string", "enum": ["pass", "blocker"]},
+        "severity": {"type": "string", "const": "blocker"},
+        "message": {"type": "string", "minLength": 1},
+        "evidence": {"type": "array", "items": {"type": "string"}}
+      },
+      "required": ["id", "status", "severity", "message", "evidence"]
+    }
+  }
+}

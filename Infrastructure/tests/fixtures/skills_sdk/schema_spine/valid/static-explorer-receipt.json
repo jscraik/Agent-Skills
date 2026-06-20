@@ -1,0 +1,43 @@
+{
+  "schema_version": "skills-sdk.static-explorer-receipt.v0",
+  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/static-explorer-receipt.v0.schema.json",
+  "status": "preview",
+  "operation": "static_explorer_preview",
+  "capability_count": 1,
+  "skill_count": 1,
+  "skill_sets": ["agent-ops"],
+  "capability_index": [
+    {
+      "id": "skill_explorer",
+      "title": "Static explorer index preview",
+      "status": "preview_only",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/static_explorer.py"
+    }
+  ],
+  "skill_index": [
+    {
+      "id": "testing",
+      "skill_set": "agent-ops",
+      "source_path": "Skills/agent-ops/testing/SKILL.md"
+    }
+  ],
+  "projection_inputs": [
+    "Infrastructure/config/skills-sdk/capability-matrix.v1.json",
+    ".skillsets/*/manifest.jsonl"
+  ],
+  "explorer_checks": [
+    {
+      "id": "capability_status_loaded",
+      "status": "pass",
+      "severity": "blocker",
+      "message": "Capability index must come from sdk status JSON.",
+      "evidence": ["skills-sdk.capability-status.v1"]
+    }
+  ],
+  "blockers": [],
+  "html_rendered": false,
+  "hosted_publish_requested": false,
+  "mutation_performed": false,
+  "acceptance_trace": ["PU-029", "FR-003", "FR-008", "VP-029"],
+  "agent_summary": "static explorer preview indexed 1 capability row(s) and 1 skill row(s)."
+}

@@ -167,6 +167,9 @@ FORJAMIE-*.md
 *.skill
 Docs/product/Archive.zip
 logs/
+!logs/
+logs/*
+!logs/AGENTS.md
 environment.toml
 
 # Secrets and environment files

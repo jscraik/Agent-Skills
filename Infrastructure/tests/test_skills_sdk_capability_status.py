@@ -185,30 +185,63 @@ class TestSkillsSdkCapabilityStatus(unittest.TestCase):
         self.assertEqual(wrapper_payload["metadata"]["command"], "sdk status --json --robot")
 
     def test_command_metadata_registers_sdk_lifecycle_routes(self) -> None:
-        """
-        Verify SDK command metadata registers lifecycle routes and example commands.
-        
-        Asserts that VALID_ACTIONS["sdk"] includes the lifecycle actions "rollback", "uninstall", "status", and "project", and that COMMAND_EXAMPLES contains representative example command strings for each route:
-        - an "ask sdk rollback" example,
-        - an "ask sdk uninstall" example,
-        - both "ask sdk status --json --robot" and "skills-sdk status --json --robot" examples for the status route,
-        - and an "ask sdk project status --project-root /tmp/sample-project --json --robot" example for the project route.
-        """
-        self.assertIn("rollback", VALID_ACTIONS["sdk"])
-        self.assertIn("uninstall", VALID_ACTIONS["sdk"])
-        self.assertIn("ir", VALID_ACTIONS["sdk"])
-        self.assertIn("docs", VALID_ACTIONS["sdk"])
-        self.assertIn("eval", VALID_ACTIONS["sdk"])
-        self.assertIn("package", VALID_ACTIONS["sdk"])
-        self.assertIn("status", VALID_ACTIONS["sdk"])
-        self.assertIn("project", VALID_ACTIONS["sdk"])
+        expected_actions = {
+            "rollback",
+            "uninstall",
+            "ir",
+            "docs",
+            "eval",
+            "package",
+            "sandbox",
+            "trust",
+            "observability",
+            "emitter",
+            "ci",
+            "explorer",
+            "status",
+            "project",
+        }
+
+        self.assertTrue(expected_actions.issubset(set(VALID_ACTIONS["sdk"])))
+
+    def test_command_metadata_registers_sdk_lifecycle_examples(self) -> None:
         self.assertIn("ask sdk ir build Skills/agent-ops/autofix --json --robot", COMMAND_EXAMPLES[("sdk", "ir")])
         self.assertIn("ask sdk docs verify --json --robot", COMMAND_EXAMPLES[("sdk", "docs")])
         self.assertIn(
             "ask sdk eval run Skills/agent-ops/testing --runner internal --mode smoke --json --robot",
             COMMAND_EXAMPLES[("sdk", "eval")],
         )
+        self.assertIn(
+            "ask sdk eval scenario-quality Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --preview --json --robot",
+            COMMAND_EXAMPLES[("sdk", "eval")],
+        )
         self.assertIn("ask sdk package build Skills/agent-ops/autofix --json --robot", COMMAND_EXAMPLES[("sdk", "package")])
+        self.assertIn(
+            "ask sdk sandbox validate --profile Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/sandbox-profile.json --json --robot",
+            COMMAND_EXAMPLES[("sdk", "sandbox")],
+        )
+        self.assertIn(
+            "ask sdk observability feedback --skill Infrastructure/tests/fixtures/skills_sdk/valid_skill --events Infrastructure/tests/fixtures/skills_sdk/observability/redacted-events.fixture --preview --json --robot",
+            COMMAND_EXAMPLES[("sdk", "observability")],
+        )
+        self.assertIn(
+            "ask sdk emitter preview --skill Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
+            COMMAND_EXAMPLES[("sdk", "emitter")],
+        )
+        self.assertIn(
+            "ask sdk ci policy --risk-tier high --preview --json --robot",
+            COMMAND_EXAMPLES[("sdk", "ci")],
+        )
+        self.assertIn(
+            "ask sdk explorer static --preview --json --robot",
+            COMMAND_EXAMPLES[("sdk", "explorer")],
+        )
+        self.assertIn(
+            "ask sdk trust decide Infrastructure/tests/fixtures/skills_sdk/valid_skill --decision trust --reason 'fixture passed local checks' --owner skills-sdk-tests --preview --json --robot",
+            COMMAND_EXAMPLES[("sdk", "trust")],
+        )
+
+    def test_command_metadata_registers_sdk_closeout_examples(self) -> None:
         self.assertTrue(any(command.startswith("ask sdk rollback ") for command in COMMAND_EXAMPLES[("sdk", "rollback")]))
         self.assertTrue(any(command.startswith("ask sdk uninstall ") for command in COMMAND_EXAMPLES[("sdk", "uninstall")]))
         self.assertIn("ask sdk status --json --robot", COMMAND_EXAMPLES[("sdk", "status")])

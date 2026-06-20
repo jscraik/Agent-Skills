@@ -15,7 +15,7 @@ import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Protocol
 
 SCRIPTS_ROOT = Path(__file__).resolve().parents[3]
 REPO_ROOT = SCRIPTS_ROOT.parents[1]
@@ -110,7 +110,12 @@ from ask.skills_sdk.ir import build_skill_ir as _build_skill_ir  # noqa: E402
 from ask.skills_sdk.docs_projection import verify_capability_docs_projection as _verify_capability_docs_projection  # noqa: E402
 from ask.skills_sdk.package_build import build_package_digest_receipt as _build_package_digest_receipt  # noqa: E402
 from ask.skills_sdk.package_hardening import build_package_hardening_receipt as _build_package_hardening_receipt  # noqa: E402
+from ask.skills_sdk.eval_runner import internal_scorecard_quality_gates as _internal_scorecard_quality_gates  # noqa: E402
 from ask.skills_sdk.eval_runner import run_deterministic_eval as _run_deterministic_eval  # noqa: E402
+from ask.skills_sdk.sandbox_profile import (  # noqa: E402
+    SandboxProfileError as _SandboxProfileError,
+    build_sandbox_profile_receipt as _build_sandbox_profile_receipt,
+)
 from ask.skills_sdk.project_install import (  # noqa: E402
     ProjectInstallError as _ProjectInstallError,
     install_project_skill as _install_project_skill,
@@ -177,6 +182,11 @@ TESSL_REVIEW_TARGET_SCORE = 95
 PLUGIN_EVAL_MIN_ACCEPTABLE_GRADE = "B+"
 
 
+class _EvalCommandsProtocol(Protocol):
+    def _scorecard_path_from_output(self, repo_root: Path, raw_output: str) -> Path | None: ...
+    def _read_scorecard(self, path: Path | None) -> dict[str, Any]: ...
+
+
 __all__ = [
     "audit_skill",
     "explain_skill",
@@ -208,6 +218,13 @@ __all__ = [
     "skills_sdk_ir_build",
     "skills_sdk_package_build",
     "skills_sdk_package_harden",
+    "skills_sdk_package_signing_intent",
+    "skills_sdk_trust_decide",
+    "skills_sdk_observability_feedback",
+    "skills_sdk_emitter_preview",
+    "skills_sdk_ci_policy_preview",
+    "skills_sdk_static_explorer_preview",
+    "skills_sdk_eval_scenario_quality",
     "skills_sdk_eval_run",
     "skills_sdk_placeholder_lifecycle",
     "skills_sdk_project_rollback",
@@ -1403,6 +1420,46 @@ def _skill_audit_target(repo_root: Path, resolution: dict[str, Any]) -> str | No
         return target.resolve().relative_to(repo_root.resolve()).as_posix()
     except (OSError, ValueError):
         return None
+
+
+def _skills_sdk_digest_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return f"sha256:{digest.hexdigest()}"
+
+
+def _skills_sdk_repo_relative(repo_root: Path, path: Path) -> str:
+    try:
+        return path.resolve().relative_to(repo_root.resolve()).as_posix()
+    except (OSError, ValueError):
+        return path.as_posix()
+
+
+def _skills_sdk_eval_package_identity(repo_root: Path, target: str) -> dict[str, str] | None:
+    query = target.strip()
+    if not query:
+        return None
+    target_info, _audit_target = _resolve_doctor_target(repo_root, query)
+    if not isinstance(target_info, dict) or target_info.get("target_kind") == "invalid_path":
+        return None
+    source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
+    if not source_path_value:
+        return None
+    source_path = Path(str(source_path_value))
+    if not source_path.is_absolute():
+        source_path = repo_root / source_path
+    if source_path.is_dir():
+        source_path = source_path / "SKILL.md"
+    if not source_path.is_file():
+        return None
+    receipt = _build_package_digest_receipt(repo_root, source_path=source_path, query=query)
+    return {
+        "skill_ir_schema_version": str(receipt["manifest"]["skill_ir_schema_version"]),
+        "package_id": str(receipt["package_id"]),
+        "package_digest": str(receipt["package_digest"]),
+    }
 
 
 def _skill_workout_candidates(repo_root: Path, handle: str) -> list[str]:
@@ -4165,6 +4222,670 @@ def skills_sdk_package_harden(
     return result
 
 
+def skills_sdk_package_signing_intent(
+    repo_root: Path,
+    target: str,
+    policy: str,
+) -> CallResult:
+    """Build a non-mutating signing intent receipt for one skill target."""
+    result = CallResult()
+    result.metadata["command"] = "sdk package signing-intent"
+    query = target.strip()
+    target_info, _audit_target = _resolve_doctor_target(repo_root, query)
+    source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
+    source_path = Path(str(source_path_value)) if source_path_value else None
+    if source_path and not source_path.is_absolute():
+        source_path = repo_root / source_path
+    policy_path = Path(policy)
+    if not policy_path.is_absolute():
+        policy_path = repo_root / policy_path
+
+    if not source_path or not source_path.is_file():
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Skills SDK package signing intent is missing a canonical SKILL.md source for '{query}'.",
+                fix_suggestion=_ask_validation_command("sdk", "package", "build", query),
+            )
+        )
+        result.data["skills_sdk_package_signing_intent"] = {
+            "schema_version": "skills-sdk-package-signing-intent.v0",
+            "query": query,
+            "status": "blocked",
+            "canonical_source_path": source_path_value,
+            "receipt": None,
+            "mutation_performed": False,
+            "signing_performed": False,
+            "key_material_accessed": False,
+            "artifact_emitted": False,
+            "validation_commands": [
+                _ask_validation_command("sdk", "package", "signing-intent", query, "--policy", policy)
+            ],
+            "agent_summary": f"skills-sdk package signing intent is blocked for {query}: canonical source is missing.",
+        }
+        return result
+
+    from ask.skills_sdk.signing_intent import (  # noqa: PLC0415
+        SigningIntentError,
+        build_signing_intent_receipt,
+    )
+
+    package_receipt = _build_package_digest_receipt(repo_root, source_path=source_path, query=query)
+    hardening_receipt = _build_package_hardening_receipt(package_receipt)
+    try:
+        signing_receipt = build_signing_intent_receipt(
+            repo_root=repo_root,
+            policy_path=policy_path,
+            package_receipt=package_receipt,
+            hardening_receipt=hardening_receipt,
+        )
+    except SigningIntentError as exc:
+        signing_receipt = exc.receipt
+
+    payload = {
+        "schema_version": "skills-sdk-package-signing-intent.v0",
+        "query": query,
+        "status": signing_receipt["status"],
+        "canonical_source_path": source_path_value,
+        "policy_path": policy,
+        "facade_command": "skills-sdk package signing-intent",
+        "package_id": signing_receipt["package_id"],
+        "version": signing_receipt["version"],
+        "package_digest": signing_receipt["package_digest"],
+        "receipt": signing_receipt,
+        "mutation_performed": False,
+        "signing_performed": False,
+        "key_material_accessed": False,
+        "artifact_emitted": False,
+        "validation_commands": [
+            _ask_validation_command("sdk", "package", "signing-intent", query, "--policy", policy),
+        ],
+        "agent_summary": signing_receipt["agent_summary"],
+    }
+    result.data["skills_sdk_package_signing_intent"] = payload
+    if signing_receipt["status"] != "ready":
+        result.status = "error"
+        message = signing_receipt["blockers"][0]["message"] if signing_receipt["blockers"] else payload["agent_summary"]
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=message,
+                fix_suggestion=(
+                    "Use a v0 signing policy that pins the package id and digest, requires hardening, "
+                    "keeps key material external, and does not require archive emission."
+                ),
+            )
+        )
+    return result
+
+
+def skills_sdk_sandbox_validate(
+    repo_root: Path,
+    profile: str,
+) -> CallResult:
+    """Validate a sandbox profile without invoking a sandbox provider."""
+    result = CallResult()
+    result.metadata["command"] = "sdk sandbox validate"
+    try:
+        receipt = _build_sandbox_profile_receipt(repo_root, profile_path=profile)
+    except _SandboxProfileError as exc:
+        receipt = exc.receipt
+    payload = {
+        "schema_version": "skills-sdk-sandbox-validate.v0",
+        "status": receipt["status"],
+        "profile": profile,
+        "facade_command": "skills-sdk sandbox validate",
+        "receipt": receipt,
+        "mutation_performed": False,
+        "execution_performed": False,
+        "validation_commands": [
+            _ask_validation_command("sdk", "sandbox", "validate", "--profile", profile),
+        ],
+        "agent_summary": (
+            f"skills-sdk sandbox validate passed for {receipt['profile_path']} without executing a sandbox."
+            if receipt["status"] == "pass"
+            else f"skills-sdk sandbox validate blocked {receipt['profile_path']} with {len(receipt['blockers'])} blocker(s)."
+        ),
+    }
+    result.data["skills_sdk_sandbox_validate"] = payload
+    if receipt["status"] != "pass":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=payload["agent_summary"],
+                fix_suggestion="Use a deny-by-default profile with no persistent writes, no network egress, no ambient environment, and no selected adapter.",
+            )
+        )
+    return result
+
+
+def skills_sdk_trust_decide(
+    repo_root: Path,
+    target: str,
+    decision: str,
+    reason: str,
+    owner: str,
+    *,
+    preview: bool,
+    apply: bool,
+    ledger: str | None = None,
+    expires_at: str | None = None,
+    revoked_package_digest: str | None = None,
+) -> CallResult:
+    """Preview or append a local trust ledger decision for one skill package."""
+    result = CallResult()
+    result.metadata["command"] = "sdk trust decide"
+    preview_mode = preview and not apply
+    query = target.strip()
+    target_info, _audit_target = _resolve_doctor_target(repo_root, query)
+    source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
+    source_path = Path(str(source_path_value)) if source_path_value else None
+    if source_path and not source_path.is_absolute():
+        source_path = repo_root / source_path
+
+    if not source_path or not source_path.is_file():
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Skills SDK trust decision is missing a canonical SKILL.md source for '{query}'.",
+                fix_suggestion=_ask_validation_command("sdk", "package", "build", query),
+            )
+        )
+        result.data["skills_sdk_trust_decide"] = {
+            "schema_version": "skills-sdk-trust-decide.v0",
+            "query": query,
+            "status": "blocked",
+            "canonical_source_path": source_path_value,
+            "receipt": None,
+            "mutation_performed": False,
+            "trust_store_mutated": False,
+            "validation_commands": [
+                _ask_validation_command(
+                    "sdk",
+                    "trust",
+                    "decide",
+                    query,
+                    "--decision",
+                    decision,
+                    "--reason",
+                    reason,
+                    "--owner",
+                    owner,
+                    "--preview",
+                )
+            ],
+            "agent_summary": f"skills-sdk trust decide is blocked for {query}: canonical source is missing.",
+        }
+        return result
+
+    from ask.skills_sdk.trust_ledger import (  # noqa: PLC0415
+        TrustLedgerError,
+        build_trust_decision_receipt,
+    )
+
+    package_receipt = _build_package_digest_receipt(repo_root, source_path=source_path, query=query)
+    try:
+        trust_receipt = build_trust_decision_receipt(
+            repo_root,
+            package_receipt=package_receipt,
+            decision=decision,
+            reason=reason,
+            owner=owner,
+            apply=apply,
+            ledger_path=ledger,
+            expires_at=expires_at,
+            revoked_package_digest=revoked_package_digest,
+        )
+    except TrustLedgerError as exc:
+        trust_receipt = exc.receipt
+
+    command_args = ["sdk", "trust", "decide", query, "--decision", decision, "--reason", reason, "--owner", owner]
+    if expires_at:
+        command_args.extend(["--expires-at", expires_at])
+    if revoked_package_digest:
+        command_args.extend(["--revoked-package-digest", revoked_package_digest])
+    if ledger:
+        command_args.extend(["--ledger", ledger])
+    command_args.append("--apply" if apply else "--preview")
+
+    payload = {
+        "schema_version": "skills-sdk-trust-decide.v0",
+        "query": query,
+        "status": trust_receipt["status"],
+        "canonical_source_path": source_path_value,
+        "facade_command": "skills-sdk trust decide",
+        "package_id": trust_receipt["package_id"],
+        "version": trust_receipt["version"],
+        "package_digest": trust_receipt["package_digest"],
+        "ledger_path": trust_receipt["ledger_path"],
+        "decision": trust_receipt["decision"],
+        "preview": preview_mode,
+        "receipt": trust_receipt,
+        "mutation_performed": trust_receipt["mutation_performed"],
+        "trust_store_mutated": False,
+        "validation_commands": [_ask_validation_command(*command_args)],
+        "agent_summary": trust_receipt["agent_summary"],
+    }
+    result.data["skills_sdk_trust_decide"] = payload
+    if trust_receipt["status"] == "blocked":
+        result.status = "error"
+        message = trust_receipt["blockers"][0]["message"] if trust_receipt["blockers"] else payload["agent_summary"]
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=message,
+                fix_suggestion="Provide a valid decision, reason, owner, ledger path, and revocation digest when decision is revoke.",
+            )
+        )
+    return result
+
+
+def skills_sdk_observability_feedback(
+    repo_root: Path,
+    target: str,
+    events: str,
+) -> CallResult:
+    """Mine redacted runtime events into non-mutating feedback candidates."""
+    result = CallResult()
+    result.metadata["command"] = "sdk observability feedback"
+    query = target.strip()
+    target_info, _audit_target = _resolve_doctor_target(repo_root, query)
+    source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
+    source_path = Path(str(source_path_value)) if source_path_value else None
+    if source_path and not source_path.is_absolute():
+        source_path = repo_root / source_path
+    if not source_path or not source_path.is_file():
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Skills SDK observability feedback is missing a canonical SKILL.md source for '{query}'.",
+                fix_suggestion=_ask_validation_command("sdk", "package", "build", query),
+            )
+        )
+        return result
+
+    from ask.skills_sdk.observability_feedback import (  # noqa: PLC0415
+        ObservabilityFeedbackError,
+        build_observability_feedback_receipt,
+    )
+
+    package_receipt = _build_package_digest_receipt(repo_root, source_path=source_path, query=query)
+    try:
+        feedback_receipt = build_observability_feedback_receipt(
+            repo_root,
+            package_receipt=package_receipt,
+            events_path=events,
+        )
+    except ObservabilityFeedbackError as exc:
+        feedback_receipt = exc.receipt
+    payload = {
+        "schema_version": "skills-sdk-observability-feedback.v0",
+        "query": query,
+        "status": feedback_receipt["status"],
+        "canonical_source_path": source_path_value,
+        "facade_command": "skills-sdk observability feedback",
+        "package_id": feedback_receipt["package_id"],
+        "package_digest": feedback_receipt["package_digest"],
+        "receipt": feedback_receipt,
+        "mutation_performed": False,
+        "validation_commands": [
+            _ask_validation_command("sdk", "observability", "feedback", "--skill", query, "--events", events, "--preview")
+        ],
+        "agent_summary": feedback_receipt["agent_summary"],
+    }
+    result.data["skills_sdk_observability_feedback"] = payload
+    if feedback_receipt["status"] == "blocked":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=payload["agent_summary"],
+                fix_suggestion="Use redacted JSONL event records with digest references and no raw prompt/output fields.",
+            )
+        )
+    return result
+
+
+def skills_sdk_emitter_preview(
+    repo_root: Path,
+    target: str,
+    projection: str,
+    target_root: str,
+) -> CallResult:
+    """Preview a generated-output write plan without emitting files."""
+    result = CallResult()
+    result.metadata["command"] = "sdk emitter preview"
+    query = target.strip()
+    target_info, _audit_target = _resolve_doctor_target(repo_root, query)
+    source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
+    source_path = Path(str(source_path_value)) if source_path_value else None
+    if source_path and not source_path.is_absolute():
+        source_path = repo_root / source_path
+    if not source_path or not source_path.is_file():
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Skills SDK emitter preview is missing a canonical SKILL.md source for '{query}'.",
+                fix_suggestion=_ask_validation_command("sdk", "package", "build", query),
+            )
+        )
+        return result
+
+    from ask.skills_sdk.emitter_preview import (  # noqa: PLC0415
+        EmitterPreviewError,
+        build_emitter_preview_receipt,
+    )
+
+    package_receipt = _build_package_digest_receipt(repo_root, source_path=source_path, query=query)
+    hardening_receipt = _build_package_hardening_receipt(package_receipt)
+    try:
+        emitter_receipt = build_emitter_preview_receipt(
+            repo_root,
+            package_receipt=package_receipt,
+            hardening_receipt=hardening_receipt,
+            projection=projection,
+            target_root=target_root,
+        )
+    except EmitterPreviewError as exc:
+        emitter_receipt = exc.receipt
+    payload = {
+        "schema_version": "skills-sdk-emitter-preview.v0",
+        "query": query,
+        "status": emitter_receipt["status"],
+        "canonical_source_path": source_path_value,
+        "facade_command": "skills-sdk emitter preview",
+        "package_id": emitter_receipt["package_id"],
+        "package_digest": emitter_receipt["package_digest"],
+        "projection": emitter_receipt["projection"],
+        "target_root": emitter_receipt["target_root"],
+        "receipt": emitter_receipt,
+        "mutation_performed": False,
+        "artifact_emitted": False,
+        "validation_commands": [
+            _ask_validation_command(
+                "sdk",
+                "emitter",
+                "preview",
+                "--skill",
+                query,
+                "--projection",
+                projection,
+                "--target-root",
+                target_root,
+                "--preview",
+            )
+        ],
+        "agent_summary": emitter_receipt["agent_summary"],
+    }
+    result.data["skills_sdk_emitter_preview"] = payload
+    if emitter_receipt["status"] == "blocked":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=payload["agent_summary"],
+                fix_suggestion="Use --projection runtime-skill with --target-root .agents/skills and a hardened local package.",
+            )
+        )
+    return result
+
+
+def skills_sdk_ci_policy_preview(
+    repo_root: Path,
+    risk_tier: str,
+) -> CallResult:
+    """Preview required CI checks without inspecting or mutating hosted CI."""
+    del repo_root
+    result = CallResult()
+    result.metadata["command"] = "sdk ci policy"
+    from ask.skills_sdk.ci_policy_preview import (  # noqa: PLC0415
+        CiPolicyPreviewError,
+        build_ci_policy_preview_receipt,
+    )
+
+    try:
+        receipt = build_ci_policy_preview_receipt(risk_tier=risk_tier)
+    except CiPolicyPreviewError as exc:
+        receipt = exc.receipt
+    payload = {
+        "schema_version": "skills-sdk-ci-policy-preview.v0",
+        "status": receipt["status"],
+        "facade_command": "skills-sdk ci policy",
+        "risk_tier": receipt["risk_tier"],
+        "required_checks": receipt["required_checks"],
+        "receipt": receipt,
+        "live_ci_evidence_attached": False,
+        "branch_protection_mutated": False,
+        "mutation_performed": False,
+        "validation_commands": [
+            _ask_validation_command("sdk", "ci", "policy", "--risk-tier", risk_tier, "--preview")
+        ],
+        "agent_summary": receipt["agent_summary"],
+    }
+    result.data["skills_sdk_ci_policy_preview"] = payload
+    if receipt["status"] == "blocked":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=payload["agent_summary"],
+                fix_suggestion="Use a supported SDK risk tier and attach live CI evidence in a separate hosted-check lane.",
+            )
+        )
+    return result
+
+
+def skills_sdk_static_explorer_preview(repo_root: Path) -> CallResult:
+    """Preview a JSON-only static explorer index without rendering or publishing HTML."""
+    result = CallResult()
+    result.metadata["command"] = "sdk explorer static"
+    from ask.skills_sdk.static_explorer import (  # noqa: PLC0415
+        StaticExplorerError,
+        build_static_explorer_receipt,
+    )
+
+    try:
+        receipt = build_static_explorer_receipt(repo_root)
+    except StaticExplorerError as exc:
+        receipt = exc.receipt
+    payload = {
+        "schema_version": "skills-sdk-static-explorer-preview.v0",
+        "status": receipt["status"],
+        "facade_command": "skills-sdk explorer static",
+        "capability_count": receipt["capability_count"],
+        "skill_count": receipt["skill_count"],
+        "projection_inputs": receipt["projection_inputs"],
+        "receipt": receipt,
+        "html_rendered": False,
+        "hosted_publish_requested": False,
+        "mutation_performed": False,
+        "validation_commands": [_ask_validation_command("sdk", "explorer", "static", "--preview")],
+        "agent_summary": receipt["agent_summary"],
+    }
+    result.data["skills_sdk_static_explorer_preview"] = payload
+    if receipt["status"] == "blocked":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=payload["agent_summary"],
+                fix_suggestion="Fix capability status JSON or rooted .skillsets manifest JSONL before previewing explorer indexes.",
+            )
+        )
+    return result
+
+
+def skills_sdk_eval_scenario_quality(repo_root: Path, target: str) -> CallResult:
+    """Preview eval scenario quality without promoting or mutating scenario sources."""
+    result = CallResult()
+    result.metadata["command"] = "sdk eval scenario-quality"
+    query = target.strip()
+    target_info, _audit_target = _resolve_doctor_target(repo_root, query)
+    source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
+    source_path = Path(str(source_path_value)) if source_path_value else None
+    if source_path and not source_path.is_absolute():
+        source_path = repo_root / source_path
+    if not source_path:
+        result.status = "error"
+        result.data["skills_sdk_eval_scenario_quality"] = {
+            "schema_version": "skills-sdk-eval-scenario-quality.v0",
+            "status": "blocked",
+            "query": query,
+            "canonical_source_path": source_path_value,
+            "receipt": None,
+            "mutation_performed": False,
+            "promotion_performed": False,
+            "validation_commands": [_ask_validation_command("sdk", "eval", "scenario-quality", query, "--preview")],
+            "agent_summary": f"skills-sdk eval scenario-quality is blocked for {query}: canonical source is missing.",
+        }
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Skills SDK scenario quality is missing a canonical SKILL.md source for '{query}'.",
+                fix_suggestion=_ask_validation_command("sdk", "eval", "scenario-quality", "<skill>", "--preview"),
+            )
+        )
+        return result
+
+    from ask.skills_sdk.scenario_quality import (  # noqa: PLC0415
+        ScenarioQualityError,
+        build_scenario_quality_receipt,
+    )
+
+    try:
+        receipt = build_scenario_quality_receipt(repo_root, source_path=source_path, query=query)
+    except ScenarioQualityError as exc:
+        receipt = exc.receipt
+    payload = {
+        "schema_version": "skills-sdk-eval-scenario-quality.v0",
+        "status": receipt["status"],
+        "query": query,
+        "canonical_source_path": source_path_value,
+        "facade_command": "skills-sdk eval scenario-quality",
+        "receipt": receipt,
+        "scenario_count": receipt["scenario_count"],
+        "promotion_ready_count": receipt["promotion_ready_count"],
+        "blocked_count": receipt["blocked_count"],
+        "mutation_performed": False,
+        "promotion_performed": False,
+        "validation_commands": [_ask_validation_command("sdk", "eval", "scenario-quality", query, "--preview")],
+        "agent_summary": receipt["agent_summary"],
+    }
+    result.data["skills_sdk_eval_scenario_quality"] = payload
+    if receipt["status"] == "blocked":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=payload["agent_summary"],
+                fix_suggestion="Add or repair references/evals.yaml with ids, prompts, acceptance checks, eval modes, and deterministic safety checks.",
+            )
+        )
+    return result
+
+
+def _skills_sdk_internal_case_results(scorecard: dict[str, Any]) -> tuple[list[dict[str, str]], list[str]]:
+    cases: list[dict[str, str]] = []
+    blockers: list[str] = []
+    raw_cases = scorecard.get("cases")
+    if not isinstance(raw_cases, list):
+        return cases, blockers
+
+    for index, raw_case in enumerate(raw_cases, start=1):
+        if not isinstance(raw_case, dict):
+            continue
+        case_id = str(raw_case.get("id") or raw_case.get("name") or f"case-{index}").strip()
+        if not case_id:
+            case_id = f"case-{index}"
+        passed = raw_case.get("passed") is True
+        blocked = raw_case.get("blocked") is True
+        status = "pass" if passed else "fail"
+        raw_blockers = raw_case.get("blocked_reasons")
+        if isinstance(raw_blockers, list):
+            blockers.extend(str(reason) for reason in raw_blockers if str(reason).strip())
+        raw_blocker_classes = raw_case.get("blocker_classes")
+        if isinstance(raw_blocker_classes, list):
+            blockers.extend(str(reason) for reason in raw_blocker_classes if str(reason).strip())
+        tier1_failures = raw_case.get("tier1_failures")
+        if not passed and isinstance(tier1_failures, list):
+            blockers.extend(str(reason) for reason in tier1_failures if str(reason).strip())
+        actual = "blocked" if blocked else status
+        cases.append(
+            {
+                "case_id": case_id,
+                "status": status,
+                "oracle": "exact_match",
+                "expected": "pass",
+                "actual": actual,
+            }
+        )
+    return cases, sorted(set(blockers))
+
+
+def _skills_sdk_internal_eval_receipt_counts(
+    repo_root: Path,
+    internal: CallResult,
+    *,
+    status: str,
+    fallback_blockers: list[str],
+    eval_commands: _EvalCommandsProtocol,
+) -> dict[str, Any]:
+    raw_output = str(internal.data.get("raw_output") or "")
+    scorecard_path = eval_commands._scorecard_path_from_output(repo_root, raw_output)  # noqa: SLF001
+    scorecard = eval_commands._read_scorecard(scorecard_path)  # noqa: SLF001
+    quality_gates = _internal_scorecard_quality_gates(scorecard)
+    quality_blockers = (
+        [f"quality_gate_failed:{item}" for item in quality_gates["failed_assertions"]]
+        if quality_gates and quality_gates["failed_assertions"]
+        else []
+    )
+    cases, case_blockers = _skills_sdk_internal_case_results(scorecard)
+    if cases:
+        failed_count = sum(1 for item in cases if item["status"] == "fail")
+        receipt_status = status if status != "pass" else "fail" if failed_count or quality_blockers else "pass"
+        blockers = sorted(set(fallback_blockers + case_blockers + quality_blockers)) if receipt_status != "pass" else []
+        dataset_path = (
+            _skills_sdk_repo_relative(repo_root, scorecard_path)
+            if scorecard_path is not None and scorecard_path.is_file()
+            else "internal:skill-builder"
+        )
+        dataset_digest = (
+            _skills_sdk_digest_file(scorecard_path)
+            if scorecard_path is not None and scorecard_path.is_file()
+            else "sha256:" + ("0" * 64)
+        )
+        return {
+            "status": receipt_status,
+            "dataset_path": dataset_path,
+            "dataset_digest": dataset_digest,
+            "case_count": len(cases),
+            "passed_count": len(cases) - failed_count,
+            "failed_count": failed_count,
+            "quality_gates": quality_gates,
+            "cases": cases,
+            "blockers": blockers,
+        }
+
+    internal_case_count = 0 if status == "blocked" else 1
+    receipt_status = status if status != "pass" or not quality_blockers else "fail"
+    return {
+        "status": receipt_status,
+        "dataset_path": "internal:skill-builder",
+        "dataset_digest": "sha256:" + ("0" * 64),
+        "case_count": internal_case_count,
+        "passed_count": 1 if receipt_status == "pass" else 0,
+        "failed_count": 1 if receipt_status == "fail" else 0,
+        "quality_gates": quality_gates,
+        "cases": [],
+        "blockers": sorted(set(fallback_blockers + quality_blockers)),
+    }
+
+
 def skills_sdk_eval_run(
     repo_root: Path,
     dataset: str | None = None,
@@ -4218,25 +4939,37 @@ def skills_sdk_eval_run(
         if internal.status != "success":
             blockers = [error.message for error in internal.errors] or [raw_status]
         status = "pass" if internal.status == "success" else "blocked" if raw_status.startswith("blocked") else "fail"
-        internal_case_count = 0 if status == "blocked" else 1
+        target_path = str(internal.data.get("resolved_skill_path") or target)
+        package_identity = _skills_sdk_eval_package_identity(repo_root, target_path)
+        receipt_counts = _skills_sdk_internal_eval_receipt_counts(
+            repo_root,
+            internal,
+            status=status,
+            fallback_blockers=blockers,
+            eval_commands=_eval_commands,
+        )
         receipt = {
             "schema_version": "skills-sdk.eval-run-receipt.v0",
             "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/eval-run-receipt.v0.schema.json",
-            "status": status,
+            "status": receipt_counts["status"],
             "runner": "internal_skill_builder_v0",
-            "dataset_path": "internal:skill-builder",
-            "dataset_digest": "sha256:" + ("0" * 64),
-            "skill_ir_schema_version": None,
-            "target_path": str(internal.data.get("resolved_skill_path") or target),
+            "dataset_path": receipt_counts["dataset_path"],
+            "dataset_digest": receipt_counts["dataset_digest"],
+            "skill_ir_schema_version": package_identity["skill_ir_schema_version"] if package_identity else None,
+            "package_id": package_identity["package_id"] if package_identity else None,
+            "package_digest": package_identity["package_digest"] if package_identity else None,
+            "target_path": target_path,
             "mode": mode,
-            "case_count": internal_case_count,
-            "passed_count": 1 if status == "pass" else 0,
-            "failed_count": 1 if status == "fail" else 0,
-            "cases": [],
-            "blockers": blockers,
+            "case_count": receipt_counts["case_count"],
+            "passed_count": receipt_counts["passed_count"],
+            "failed_count": receipt_counts["failed_count"],
+            "quality_gates": receipt_counts["quality_gates"],
+            "cases": receipt_counts["cases"],
+            "blockers": receipt_counts["blockers"],
             "mutation_performed": False,
             "acceptance_trace": ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022"],
         }
+        status = receipt["status"]
         payload = {
             "schema_version": "skills-sdk-eval-run.v0",
             "status": status,
@@ -4251,9 +4984,17 @@ def skills_sdk_eval_run(
             "agent_summary": f"skills-sdk internal eval run {status} for {target} in {mode} mode.",
         }
         result.data["skills_sdk_eval_run"] = payload
-        if internal.status != "success":
+        if status != "pass":
             result.status = "error"
             result.errors.extend(internal.errors)
+            if not result.errors:
+                result.errors.append(
+                    ErrorObject(
+                        code="ERR_VALIDATION",
+                        message=f"Skills SDK internal eval run did not pass for {target}.",
+                        fix_suggestion=_ask_validation_command("sdk", "eval", "run", target, "--runner", "internal", "--mode", mode),
+                    )
+                )
         return result
 
     if resolved_runner != "deterministic-jsonl":
@@ -4276,15 +5017,11 @@ def skills_sdk_eval_run(
             )
         )
         return result
-    skill_ir_schema_version: str | None = None
+    package_identity: dict[str, str] | None = None
     if target:
         query = target.strip()
-        target_info, _audit_target = _resolve_doctor_target(repo_root, query)
-        source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
-        source_path = Path(str(source_path_value)) if source_path_value else None
-        if source_path and not source_path.is_absolute():
-            source_path = repo_root / source_path
-        if not source_path or not source_path.is_file():
+        package_identity = _skills_sdk_eval_package_identity(repo_root, query)
+        if package_identity is None:
             result.status = "error"
             result.errors.append(
                 ErrorObject(
@@ -4304,10 +5041,14 @@ def skills_sdk_eval_run(
                 "agent_summary": f"skills-sdk eval run is blocked for {query}: canonical source is missing.",
             }
             return result
-        skill_ir = _build_skill_ir(repo_root, source_path=source_path, query=query)
-        skill_ir_schema_version = skill_ir["schema_version"]
 
-    receipt = _run_deterministic_eval(repo_root, dataset=dataset, skill_ir_schema_version=skill_ir_schema_version)
+    receipt = _run_deterministic_eval(
+        repo_root,
+        dataset=dataset,
+        skill_ir_schema_version=package_identity["skill_ir_schema_version"] if package_identity else None,
+        package_id=package_identity["package_id"] if package_identity else None,
+        package_digest=package_identity["package_digest"] if package_identity else None,
+    )
     payload = {
         "schema_version": "skills-sdk-eval-run.v0",
         "status": receipt["status"],

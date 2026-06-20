@@ -4,6 +4,9 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from ask.skills_sdk import observability_contracts, signing_contracts, trust_contracts
+from ask.skills_sdk.eval_contracts import EvalQualityGates
+
 
 class _SdkContractModel(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
@@ -339,9 +342,7 @@ class SkillIr(_SdkContractModel):
     risk: SkillIrRisk
     evidence: SkillIrEvidence
     mutation_performed: Literal[False]
-    acceptance_trace: list[Literal["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022"]] = Field(
-        min_length=1
-    )
+    acceptance_trace: list[Literal["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022"]] = Field(min_length=1)
 
 
 class PackageManifestFile(_SdkContractModel):
@@ -454,15 +455,96 @@ class EvalRunReceipt(_SdkContractModel):
     dataset_path: str = Field(min_length=1)
     dataset_digest: str = Field(min_length=71)
     skill_ir_schema_version: str | None
+    package_id: str | None = Field(default=None, min_length=1)
+    package_digest: str | None = Field(default=None, min_length=71)
     target_path: str | None
     mode: str | None
     case_count: int = Field(ge=0)
     passed_count: int = Field(ge=0)
     failed_count: int = Field(ge=0)
+    quality_gates: EvalQualityGates | None = None
     cases: list[EvalCaseResult]
     blockers: list[str]
     mutation_performed: Literal[False]
     acceptance_trace: list[Literal["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022"]] = Field(
+        min_length=1
+    )
+
+
+class SandboxCommandRule(_SdkContractModel):
+    program: str = Field(min_length=1)
+    args: list[str]
+
+
+class SandboxProfileFilesystem(_SdkContractModel):
+    read: list[str]
+    write: list[str]
+    temp_write: bool
+
+
+class SandboxProfileNetwork(_SdkContractModel):
+    egress: Literal["deny", "allow"]
+
+
+class SandboxProfileEnvironment(_SdkContractModel):
+    inherit: bool
+    allowed: list[str]
+
+
+class SandboxProfileCommands(_SdkContractModel):
+    shell_allowed: bool
+    allow: list[SandboxCommandRule]
+
+
+class SandboxProfileExecution(_SdkContractModel):
+    provider: Literal["none", "local", "remote"]
+    adapter: str | None
+
+
+class SandboxProfile(_SdkContractModel):
+    schema_version: Literal["skills-sdk.sandbox-profile.v0"]
+    schema_uri: Literal[
+        "https://jscraik.local/agent-skills/schemas/skills-sdk/sandbox-profile.v0.schema.json"
+    ]
+    profile_id: str = Field(min_length=1)
+    risk_tier: Literal["low", "medium", "high", "privileged", "published"]
+    default_policy: Literal["deny", "allow"]
+    filesystem: SandboxProfileFilesystem
+    network: SandboxProfileNetwork
+    environment: SandboxProfileEnvironment
+    commands: SandboxProfileCommands
+    execution: SandboxProfileExecution
+    acceptance_trace: list[Literal["FR-008", "FR-010", "SA-004", "SA-007", "SEC-001", "VP-021"]] = Field(
+        min_length=1
+    )
+
+
+class SandboxProfileCheck(_SdkContractModel):
+    id: str = Field(min_length=1)
+    status: Literal["pass", "warning", "blocker"]
+    severity: Literal["info", "warning", "blocker"]
+    message: str = Field(min_length=1)
+    evidence: list[str]
+
+
+class SandboxProfileReceipt(_SdkContractModel):
+    schema_version: Literal["skills-sdk.sandbox-profile-receipt.v0"]
+    schema_uri: Literal[
+        "https://jscraik.local/agent-skills/schemas/skills-sdk/sandbox-profile-receipt.v0.schema.json"
+    ]
+    status: Literal["pass", "blocked"]
+    profile_path: str = Field(min_length=1)
+    profile_digest: str | None = Field(default=None, min_length=71)
+    profile_id: str | None
+    risk_tier: Literal["low", "medium", "high", "privileged", "published"] | None
+    default_policy: Literal["deny", "allow"] | None
+    checks: list[SandboxProfileCheck] = Field(min_length=1)
+    blockers: list[SandboxProfileCheck]
+    warnings: list[SandboxProfileCheck]
+    execution_performed: Literal[False]
+    adapter_selected: Literal[False]
+    mutation_performed: Literal[False]
+    acceptance_trace: list[Literal["FR-008", "FR-010", "SA-004", "SA-007", "SEC-001", "VP-021"]] = Field(
         min_length=1
     )
 
@@ -653,6 +735,13 @@ def validate_capability_status(payload: object) -> CapabilityStatus:
     return CapabilityStatus.model_validate(payload)
 
 
+def validate_trust_decision_receipt(payload: object) -> trust_contracts.TrustDecisionReceipt:
+    return trust_contracts.validate_trust_decision_receipt(payload)
+
+
+def validate_observability_feedback_receipt(payload: object) -> observability_contracts.ObservabilityFeedbackReceipt: return observability_contracts.validate_observability_feedback_receipt(payload)
+
+
 def validate_manifest_source(payload: object) -> ManifestSource:
     return ManifestSource.model_validate(payload)
 
@@ -673,12 +762,22 @@ def validate_package_hardening_receipt(payload: object) -> PackageHardeningRecei
     return PackageHardeningReceipt.model_validate(payload)
 
 
-def validate_eval_case(payload: object) -> EvalCase:
-    return EvalCase.model_validate(payload)
+def validate_signing_policy(payload: object) -> signing_contracts.SigningPolicy: return signing_contracts.validate_signing_policy(payload)
+
+def validate_signing_intent_receipt(payload: object) -> signing_contracts.SigningIntentReceipt: return signing_contracts.validate_signing_intent_receipt(payload)
 
 
-def validate_eval_run_receipt(payload: object) -> EvalRunReceipt:
-    return EvalRunReceipt.model_validate(payload)
+def validate_eval_case(payload: object) -> EvalCase: return EvalCase.model_validate(payload)
+
+
+def validate_eval_run_receipt(payload: object) -> EvalRunReceipt: return EvalRunReceipt.model_validate(payload)
+
+
+def validate_sandbox_profile(payload: object) -> SandboxProfile: return SandboxProfile.model_validate(payload)
+
+
+def validate_sandbox_profile_receipt(payload: object) -> SandboxProfileReceipt:
+    return SandboxProfileReceipt.model_validate(payload)
 
 
 def validate_skill_frontmatter(payload: object) -> SkillFrontmatter:
@@ -689,17 +788,13 @@ def validate_install_preview(payload: object) -> InstallPreview:
     return InstallPreview.model_validate(payload)
 
 
-def validate_check_receipt(payload: object) -> CheckReceipt:
-    return CheckReceipt.model_validate(payload)
+def validate_check_receipt(payload: object) -> CheckReceipt: return CheckReceipt.model_validate(payload)
 
 
-def validate_risk_classification(payload: object) -> RiskClassification:
-    return RiskClassification.model_validate(payload)
+def validate_risk_classification(payload: object) -> RiskClassification: return RiskClassification.model_validate(payload)
 
 
-def validate_artifact_status_row(payload: object) -> ArtifactStatusRow:
-    return ArtifactStatusRow.model_validate(payload)
+def validate_artifact_status_row(payload: object) -> ArtifactStatusRow: return ArtifactStatusRow.model_validate(payload)
 
 
-def validate_source_artifact_contract(payload: object) -> SourceArtifactContract:
-    return SourceArtifactContract.model_validate(payload)
+def validate_source_artifact_contract(payload: object) -> SourceArtifactContract: return SourceArtifactContract.model_validate(payload)

@@ -22,7 +22,7 @@ ALLOWED_STATUSES = frozenset(
         "out_of_scope",
     }
 )
-MUTATING_CAPABILITY_IDS = frozenset({"real_install", "refs_ingestion", "review_execution", "rollback", "uninstall"})
+MUTATING_CAPABILITY_IDS = frozenset({"real_install", "refs_ingestion", "review_execution", "rollback", "trust_store", "uninstall"})
 REQUIRED_CAPABILITY_IDS = (
     "authoring",
     "check",
@@ -42,8 +42,10 @@ REQUIRED_CAPABILITY_IDS = (
     "review_verification",
     "determinism_audit",
     "trust_store",
+    "observability_feedback",
     "refs_ingestion",
     "evals",
+    "scenario_quality_gate",
     "package_verify",
     "signing",
     "sandbox",

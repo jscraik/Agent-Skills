@@ -12,11 +12,58 @@
     "dataset_path": {"type": "string", "minLength": 1},
     "dataset_digest": {"type": "string", "minLength": 71},
     "skill_ir_schema_version": {"type": ["string", "null"]},
+    "package_id": {"type": ["string", "null"], "minLength": 1},
+    "package_digest": {"type": ["string", "null"], "minLength": 71},
     "target_path": {"type": ["string", "null"]},
     "mode": {"type": ["string", "null"]},
     "case_count": {"type": "integer", "minimum": 0},
     "passed_count": {"type": "integer", "minimum": 0},
     "failed_count": {"type": "integer", "minimum": 0},
+    "quality_gates": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "source": {"type": "string", "enum": ["internal_scorecard"]},
+        "scorecard_schema_version": {"type": ["string", "null"]},
+        "decision": {"type": ["string", "null"]},
+        "passed": {"type": ["boolean", "null"]},
+        "promotion_eligible": {"type": ["boolean", "null"]},
+        "blocked_cases": {"type": "integer", "minimum": 0},
+        "tier1_failures": {"type": "integer", "minimum": 0},
+        "tier2_findings": {"type": "integer", "minimum": 0},
+        "preflight_warning_count": {"type": "integer", "minimum": 0},
+        "readiness_summary": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 0}},
+        "expected_signal_summary": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "runs": {"type": "integer", "minimum": 0},
+            "average": {"type": ["number", "null"]},
+            "minimum": {"type": ["number", "null"]},
+            "risky_cases": {"type": "array", "items": {"type": "string"}}
+          },
+          "required": ["runs", "average", "minimum", "risky_cases"]
+        },
+        "security_dependency_screening_status": {"type": ["string", "null"]},
+        "assertions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {"type": "string", "minLength": 1},
+              "status": {"type": "string", "enum": ["pass", "fail"]},
+              "expected": {"type": "string", "minLength": 1},
+              "actual": {"type": "string"}
+            },
+            "required": ["id", "status", "expected", "actual"]
+          }
+        },
+        "failed_assertions": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      },
+      "required": ["source", "scorecard_schema_version", "decision", "passed", "promotion_eligible", "blocked_cases", "tier1_failures", "tier2_findings", "preflight_warning_count", "readiness_summary", "expected_signal_summary", "security_dependency_screening_status", "assertions", "failed_assertions"]
+    },
     "cases": {
       "type": "array",
       "items": {

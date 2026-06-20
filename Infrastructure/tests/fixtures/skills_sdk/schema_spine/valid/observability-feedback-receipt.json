@@ -1,0 +1,48 @@
+{
+  "schema_version": "skills-sdk.observability-feedback-receipt.v0",
+  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/observability-feedback-receipt.v0.schema.json",
+  "status": "preview",
+  "operation": "observability_feedback_preview",
+  "package_id": "skills-sdk-valid-fixture",
+  "package_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+  "events_path": "Infrastructure/tests/fixtures/skills_sdk/observability/redacted-events.fixture",
+  "event_count": 1,
+  "accepted_event_count": 1,
+  "scenario_candidates": [
+    {
+      "id": "eval-scenario-fixture",
+      "candidate_type": "eval_scenario",
+      "source_event_digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+      "skill_id": "skills-sdk-valid-fixture",
+      "prompt_digest": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+      "failure_summary": "Fixture event exposed a missing deterministic eval.",
+      "promotion_status": "blocked_pending_package_eval",
+      "required_receipts": ["package_digest_receipt", "eval_run_receipt"]
+    }
+  ],
+  "skill_gap_candidates": [
+    {
+      "id": "skill-gap-fixture",
+      "candidate_type": "skill_gap",
+      "source_event_digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+      "skill_id": "skills-sdk-valid-fixture",
+      "gap_summary": "Fixture event exposed a missing skill guardrail.",
+      "promotion_status": "blocked_pending_package_eval",
+      "required_receipts": ["package_digest_receipt", "eval_run_receipt"]
+    }
+  ],
+  "promotion_blockers": ["package_digest_receipt", "eval_run_receipt"],
+  "feedback_checks": [
+    {
+      "id": "events_redacted",
+      "status": "pass",
+      "severity": "blocker",
+      "message": "Events must be redacted and carry digest references instead of raw prompts or outputs.",
+      "evidence": []
+    }
+  ],
+  "blockers": [],
+  "mutation_performed": false,
+  "acceptance_trace": ["PU-026", "FR-003", "FR-008", "SA-003", "VP-026"],
+  "agent_summary": "observability feedback preview produced 1 scenario candidate(s) and 1 skill gap candidate(s)."
+}

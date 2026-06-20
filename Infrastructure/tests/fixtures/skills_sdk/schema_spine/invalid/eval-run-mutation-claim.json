@@ -6,6 +6,8 @@
   "dataset_path": "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json",
   "dataset_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
   "skill_ir_schema_version": "skills-sdk.skill-ir.v0",
+  "package_id": null,
+  "package_digest": null,
   "target_path": null,
   "mode": null,
   "case_count": 1,

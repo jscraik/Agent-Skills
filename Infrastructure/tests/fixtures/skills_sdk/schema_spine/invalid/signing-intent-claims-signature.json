@@ -1,0 +1,30 @@
+{
+  "schema_version": "skills-sdk.signing-intent-receipt.v0",
+  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/signing-intent-receipt.v0.schema.json",
+  "status": "ready",
+  "policy_path": "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/signing-policy.json",
+  "policy_digest": "sha256:4d16ef847f821055f87c1f64e9e3f1251a928a877cd50e8c35d5bfbf54d21df0",
+  "package_id": "skills-sdk-valid-fixture",
+  "version": "0.1.0",
+  "source_digest": "sha256:a22c823816dfd4d19fcf419e273effe1bddc35f56b797b841c692a661178fbb7",
+  "manifest_digest": "sha256:e5fc0580f2740e806f300e17294fd6b68393906cbea158e21fcc9cba55247025",
+  "package_digest": "sha256:60b4ed27a5919e8785c3a7ea01930ad1bcecef8a7aa8f75752abafd2338d73d6",
+  "signing_checks": [
+    {
+      "id": "package_digest_pinned",
+      "status": "pass",
+      "severity": "blocker",
+      "message": "Signing policy must pin the exact package digest before requesting a signature.",
+      "evidence": ["package_digest:sha256:60b4ed27a5919e8785c3a7ea01930ad1bcecef8a7aa8f75752abafd2338d73d6"]
+    }
+  ],
+  "blockers": [],
+  "warnings": [],
+  "signature_requested": true,
+  "signing_performed": true,
+  "key_material_accessed": true,
+  "artifact_emitted": true,
+  "mutation_performed": false,
+  "acceptance_trace": ["FR-003", "FR-008", "SA-003", "SA-004", "SEC-001", "VP-021"],
+  "agent_summary": "invalid fixture claims signing happened."
+}

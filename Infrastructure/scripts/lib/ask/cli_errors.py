@@ -392,6 +392,16 @@ def parse_args_with_capture(parser: argparse.ArgumentParser, argv: List[str]) ->
         return None, int(exc.code), stderr_buffer.getvalue()
 
 
+def build_validation_error(command: str, message: str, fix_suggestion: str) -> CallResult:
+    """Build a standard validation error result with command context."""
+    result = CallResult(status="error")
+    result.metadata["command"] = command
+    result.errors.append(
+        ErrorObject(code="ERR_VALIDATION", message=message, fix_suggestion=fix_suggestion)
+    )
+    return result
+
+
 def try_fuzzy_parse(raw_args: List[str], robot_mode: bool = False) -> Tuple[Optional[str], Optional[str], List[str], Optional[str]]:
     """
     Try to parse args with fuzzy matching.

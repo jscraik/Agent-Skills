@@ -21,6 +21,16 @@ SCHEMA_NAMES = {
     "package-manifest": "package-manifest.v0.schema.json",
     "package-digest-receipt": "package-digest-receipt.v0.schema.json",
     "package-hardening-receipt": "package-hardening-receipt.v0.schema.json",
+    "trust-decision-receipt": "trust-decision-receipt.v0.schema.json",
+    "observability-feedback-receipt": "observability-feedback-receipt.v0.schema.json",
+    "emitter-preview-receipt": "emitter-preview-receipt.v0.schema.json",
+    "ci-policy-preview-receipt": "ci-policy-preview-receipt.v0.schema.json",
+    "static-explorer-receipt": "static-explorer-receipt.v0.schema.json",
+    "scenario-quality-receipt": "scenario-quality-receipt.v0.schema.json",
+    "signing-policy": "signing-policy.v0.schema.json",
+    "signing-intent-receipt": "signing-intent-receipt.v0.schema.json",
+    "sandbox-profile": "sandbox-profile.v0.schema.json",
+    "sandbox-profile-receipt": "sandbox-profile-receipt.v0.schema.json",
     "eval-case": "eval-case.v0.schema.json",
     "eval-run-receipt": "eval-run-receipt.v0.schema.json",
     "project-conformance-receipt": "project-conformance-receipt.v1.schema.json",
@@ -71,6 +81,18 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
                 self.assertIn("/skills-sdk/", schema["$id"])
                 self.assertRegex(schema["$id"], r"\.v[01]\.schema\.json$")
                 self.assertFalse(schema["additionalProperties"])
+
+    def test_schema_subset_validator_applies_minimum_to_float_numbers(self) -> None:
+        schema = {"type": "number", "minimum": 1}
+
+        with self.assertRaisesRegex(AssertionError, "smaller than minimum"):
+            _validate_schema_subset(schema, 0.5, {})
+
+    def test_schema_subset_validator_uses_json_equality_for_unique_items(self) -> None:
+        schema = {"type": "array", "uniqueItems": True}
+
+        with self.assertRaisesRegex(AssertionError, "duplicate items"):
+            _validate_schema_subset(schema, [{"a": 1, "b": 2}, {"b": 2, "a": 1}], {})
 
     def test_manifest_source_fixture_covers_source_shape_contract(self) -> None:
         payload = self.assert_valid("manifest-source", "manifest-source.json")
@@ -146,6 +168,107 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertEqual(payload["hardening_checks"][0]["id"], "non_mutating_package_identity")
         self.assertFalse(payload["mutation_performed"])
 
+    def test_trust_decision_fixture_records_local_ledger_preview(self) -> None:
+        payload = self.assert_valid("trust-decision-receipt", "trust-decision-receipt.json")
+
+        self.assertEqual(payload["status"], "preview")
+        self.assertEqual(payload["decision"], "trust")
+        self.assertEqual(payload["package_id"], "skills-sdk-valid-fixture")
+        self.assertFalse(payload["mutation_performed"])
+        self.assertFalse(payload["trust_store_mutated"])
+
+    def test_observability_feedback_fixture_records_blocked_promotion_candidates(self) -> None:
+        payload = self.assert_valid("observability-feedback-receipt", "observability-feedback-receipt.json")
+
+        self.assertEqual(payload["status"], "preview")
+        self.assertEqual(payload["event_count"], 1)
+        self.assertEqual(payload["scenario_candidates"][0]["promotion_status"], "blocked_pending_package_eval")
+        self.assertEqual(payload["skill_gap_candidates"][0]["promotion_status"], "blocked_pending_package_eval")
+        self.assertFalse(payload["mutation_performed"])
+
+    def test_emitter_preview_fixture_records_non_mutating_write_plan(self) -> None:
+        payload = self.assert_valid("emitter-preview-receipt", "emitter-preview-receipt.json")
+
+        self.assertEqual(payload["status"], "preview")
+        self.assertEqual(payload["projection"], "runtime-skill")
+        self.assertEqual(payload["target_root"], ".agents/skills")
+        self.assertEqual(payload["write_plan"][0]["action"], "write")
+        self.assertFalse(payload["mutation_performed"])
+        self.assertFalse(payload["artifact_emitted"])
+        self.assertFalse(payload["remote_publish_requested"])
+
+    def test_ci_policy_preview_fixture_records_no_hosted_ci_claims(self) -> None:
+        payload = self.assert_valid("ci-policy-preview-receipt", "ci-policy-preview-receipt.json")
+
+        self.assertEqual(payload["status"], "preview")
+        self.assertEqual(payload["risk_tier"], "high")
+        self.assertTrue(any(check["name"] == "risk-policy-gate" for check in payload["required_checks"]))
+        self.assertFalse(payload["live_ci_evidence_attached"])
+        self.assertFalse(payload["branch_protection_mutated"])
+        self.assertFalse(payload["mutation_performed"])
+
+    def test_static_explorer_fixture_records_json_only_projection(self) -> None:
+        payload = self.assert_valid("static-explorer-receipt", "static-explorer-receipt.json")
+
+        self.assertEqual(payload["status"], "preview")
+        self.assertEqual(payload["capability_count"], 1)
+        self.assertEqual(payload["skill_count"], 1)
+        self.assertFalse(payload["html_rendered"])
+        self.assertFalse(payload["hosted_publish_requested"])
+        self.assertFalse(payload["mutation_performed"])
+
+    def test_scenario_quality_fixture_records_non_mutating_gate(self) -> None:
+        payload = self.assert_valid("scenario-quality-receipt", "scenario-quality-receipt.json")
+
+        self.assertEqual(payload["status"], "preview")
+        self.assertEqual(payload["scenario_count"], 1)
+        self.assertEqual(payload["promotion_ready_count"], 1)
+        self.assertFalse(payload["mutation_performed"])
+        self.assertFalse(payload["promotion_performed"])
+
+    def test_scenario_quality_schema_rejects_empty_check_evidence(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "scenario-quality-receipt.json")
+        payload["scenario_rows"][0]["checks"][0]["evidence"] = [""]
+
+        with self.assertRaises(AssertionError):
+            _validate_schema_subset(
+                self.schemas["scenario-quality-receipt"],
+                payload,
+                {**self.schemas, **self.schemas_by_file},
+            )
+
+    def test_signing_policy_fixture_records_external_key_boundary(self) -> None:
+        payload = self.assert_valid("signing-policy", "signing-policy.json")
+
+        self.assertEqual(payload["signer_id"], "skills-sdk-local-fixture-signer")
+        self.assertEqual(payload["key_material_policy"], "keyless_required")
+        self.assertFalse(payload["archive_required"])
+
+    def test_signing_intent_fixture_records_no_signature_or_artifact(self) -> None:
+        payload = self.assert_valid("signing-intent-receipt", "signing-intent-receipt.json")
+
+        self.assertEqual(payload["status"], "ready")
+        self.assertFalse(payload["signature_requested"])
+        self.assertFalse(payload["signing_performed"])
+        self.assertFalse(payload["key_material_accessed"])
+        self.assertFalse(payload["artifact_emitted"])
+        self.assertFalse(payload["mutation_performed"])
+
+    def test_sandbox_profile_fixture_records_deny_by_default_contract(self) -> None:
+        payload = self.assert_valid("sandbox-profile", "sandbox-profile.json")
+
+        self.assertEqual(payload["default_policy"], "deny")
+        self.assertEqual(payload["network"]["egress"], "deny")
+        self.assertEqual(payload["execution"]["provider"], "none")
+
+    def test_sandbox_profile_receipt_fixture_records_no_execution(self) -> None:
+        payload = self.assert_valid("sandbox-profile-receipt", "sandbox-profile-receipt.json")
+
+        self.assertEqual(payload["status"], "pass")
+        self.assertFalse(payload["execution_performed"])
+        self.assertFalse(payload["adapter_selected"])
+        self.assertFalse(payload["mutation_performed"])
+
     def test_eval_case_fixture_records_deterministic_oracle(self) -> None:
         payload = self.assert_valid("eval-case", "eval-case.json")
 
@@ -159,6 +282,50 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertEqual(payload["runner"], "deterministic_jsonl_v0")
         self.assertEqual(payload["passed_count"], payload["case_count"])
         self.assertFalse(payload["mutation_performed"])
+
+    def test_eval_run_v0_schema_accepts_legacy_receipt_without_package_identity(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "eval-run-receipt.json")
+        payload.pop("package_id")
+        payload.pop("package_digest")
+
+        _validate_schema_subset(
+            self.schemas["eval-run-receipt"],
+            payload,
+            {**self.schemas, **self.schemas_by_file},
+        )
+
+    def test_eval_run_v0_schema_accepts_internal_quality_gates(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "eval-run-receipt.json")
+        payload["runner"] = "internal_skill_builder_v0"
+        payload["quality_gates"] = {
+            "source": "internal_scorecard",
+            "scorecard_schema_version": "2.1",
+            "decision": "pass",
+            "passed": True,
+            "promotion_eligible": None,
+            "blocked_cases": 0,
+            "tier1_failures": 0,
+            "tier2_findings": 0,
+            "preflight_warning_count": 0,
+            "readiness_summary": {"unknown": 1},
+            "expected_signal_summary": {"runs": 0, "average": None, "minimum": None, "risky_cases": []},
+            "security_dependency_screening_status": "skipped",
+            "assertions": [
+                {
+                    "id": "scorecard_decision_passes",
+                    "status": "pass",
+                    "expected": "decision == pass",
+                    "actual": "pass",
+                }
+            ],
+            "failed_assertions": [],
+        }
+
+        _validate_schema_subset(
+            self.schemas["eval-run-receipt"],
+            payload,
+            {**self.schemas, **self.schemas_by_file},
+        )
 
     def test_project_conformance_fixture_reports_read_only_project_health(self) -> None:
         payload = self.assert_valid("project-conformance-receipt", "project-conformance-receipt.json")
@@ -211,6 +378,38 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
 
     def test_package_hardening_schema_rejects_mutation_claims(self) -> None:
         self.assert_invalid("package-hardening-receipt", "package-hardening-mutation-claim.json")
+
+    def test_trust_decision_schema_rejects_preview_write_claims(self) -> None:
+        self.assert_invalid("trust-decision-receipt", "trust-decision-preview-writes.json")
+
+    def test_trust_decision_schema_rejects_recorded_without_ledger_evidence(self) -> None:
+        self.assert_invalid("trust-decision-receipt", "trust-decision-recorded-without-ledger-evidence.json")
+
+    def test_observability_feedback_schema_rejects_mutation_claims(self) -> None:
+        self.assert_invalid("observability-feedback-receipt", "observability-feedback-mutates.json")
+
+    def test_observability_feedback_schema_rejects_duplicate_required_receipts(self) -> None:
+        self.assert_invalid("observability-feedback-receipt", "observability-feedback-duplicate-required-receipts.json")
+
+    def test_signing_policy_schema_rejects_archive_requirement(self) -> None:
+        self.assert_invalid("signing-policy", "signing-policy-requires-archive.json")
+
+    def test_signing_intent_schema_rejects_signature_claims(self) -> None:
+        self.assert_invalid("signing-intent-receipt", "signing-intent-claims-signature.json")
+
+    def test_sandbox_profile_receipt_schema_rejects_execution_claims(self) -> None:
+        self.assert_invalid("sandbox-profile-receipt", "sandbox-profile-receipt-executes.json")
+
+    def test_sandbox_profile_receipt_schema_rejects_short_digest(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "sandbox-profile-receipt.json")
+        payload["profile_digest"] = "x"
+
+        with self.assertRaises(AssertionError):
+            _validate_schema_subset(
+                self.schemas["sandbox-profile-receipt"],
+                payload,
+                {**self.schemas, **self.schemas_by_file},
+            )
 
     def test_eval_run_schema_rejects_mutation_claims(self) -> None:
         self.assert_invalid("eval-run-receipt", "eval-run-mutation-claim.json")

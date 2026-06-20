@@ -1,0 +1,27 @@
+{
+  "schema_version": "skills-sdk.observability-feedback-receipt.v0",
+  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/observability-feedback-receipt.v0.schema.json",
+  "status": "preview",
+  "operation": "observability_feedback_preview",
+  "package_id": "skills-sdk-valid-fixture",
+  "package_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+  "events_path": "Infrastructure/tests/fixtures/skills_sdk/observability/redacted-events.fixture",
+  "event_count": 0,
+  "accepted_event_count": 0,
+  "scenario_candidates": [],
+  "skill_gap_candidates": [],
+  "promotion_blockers": [],
+  "feedback_checks": [
+    {
+      "id": "events_redacted",
+      "status": "pass",
+      "severity": "blocker",
+      "message": "Events must be redacted and carry digest references instead of raw prompts or outputs.",
+      "evidence": []
+    }
+  ],
+  "blockers": [],
+  "mutation_performed": true,
+  "acceptance_trace": ["PU-026", "FR-003", "FR-008", "SA-003", "VP-026"],
+  "agent_summary": "invalid fixture claims mutation."
+}

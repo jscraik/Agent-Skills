@@ -1,0 +1,28 @@
+{
+  "schema_version": "skills-sdk.sandbox-profile.v0",
+  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/sandbox-profile.v0.schema.json",
+  "profile_id": "unsafe-profile",
+  "risk_tier": "high",
+  "default_policy": "allow",
+  "filesystem": {
+    "read": ["/"],
+    "write": ["*"],
+    "temp_write": false
+  },
+  "network": {
+    "egress": "allow"
+  },
+  "environment": {
+    "inherit": true,
+    "allowed": ["*"]
+  },
+  "commands": {
+    "shell_allowed": true,
+    "allow": []
+  },
+  "execution": {
+    "provider": "local",
+    "adapter": "unapproved-local"
+  },
+  "acceptance_trace": ["FR-008", "FR-010", "SA-004", "SA-007", "SEC-001", "VP-021"]
+}

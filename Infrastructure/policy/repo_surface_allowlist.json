@@ -18,6 +18,42 @@
       "reason": "Validated Skills SDK pipeline status artifact with active parser tests and capability-matrix references; retained until promoted to a governed docs or report surface.",
       "owner": "skills-sdk",
       "review_after": "2026-09-19"
+    },
+    {
+      "id": "subtree-agents-infrastructure-guide",
+      "match_type": "exact",
+      "pattern": "Infrastructure/AGENTS.md",
+      "classification": "classification_required",
+      "reason": "Intentional nested Codex instruction boundary for the Infrastructure factory plane; retained as a scoped AGENTS.md until repo-surface policy classifies nested instruction files directly.",
+      "owner": "agent-skills instructions",
+      "review_after": "2026-09-20"
+    },
+    {
+      "id": "subtree-agents-artifacts-guide",
+      "match_type": "exact",
+      "pattern": "artifacts/AGENTS.md",
+      "classification": "historical_artifact",
+      "reason": "Intentional nested Codex instruction boundary that explains artifact retention and evidence authority inside an otherwise historical-artifact subtree.",
+      "owner": "agent-skills instructions",
+      "review_after": "2026-09-20"
+    },
+    {
+      "id": "subtree-agents-logs-guide",
+      "match_type": "exact",
+      "pattern": "logs/AGENTS.md",
+      "classification": "classification_required",
+      "reason": "Intentional nested Codex instruction boundary that keeps logs ignored while preserving scoped guidance for log handling and redaction.",
+      "owner": "agent-skills instructions",
+      "review_after": "2026-09-20"
+    },
+    {
+      "id": "subtree-agents-skills-system-guide",
+      "match_type": "exact",
+      "pattern": "skills-system/AGENTS.md",
+      "classification": "classification_required",
+      "reason": "Intentional nested Codex instruction boundary for governed system-skill bridge content outside the upstream lock payload.",
+      "owner": "agent-skills instructions",
+      "review_after": "2026-09-20"
     }
   ]
 }

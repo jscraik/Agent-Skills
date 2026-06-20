@@ -1,0 +1,20 @@
+schema_version: '2.0'
+skill_name: skills-sdk-scenario-quality-fixture
+cases:
+  - id: happy-scenario-quality
+    name: Happy scenario quality
+    category: happy
+    eval_modes:
+      - smoke
+    realistic: true
+    should_trigger: true
+    prepend_skill: true
+    prompt: Use this fixture skill and return evidence-backed validation output.
+    deterministic_checks:
+      forbidden_commands:
+        - curl
+        - wget
+        - rm -rf
+    acceptance:
+      - type: regex
+        value: '(?is)(evidence|validation)'

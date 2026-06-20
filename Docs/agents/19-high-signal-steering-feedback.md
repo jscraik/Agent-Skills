@@ -81,10 +81,10 @@ For each high-signal steering item:
    context-routing improvement, governance rule, reusable abstraction,
    reusable primitive, architectural policy, or implementation note.
 10. Add the smallest durable guardrail in docs, skills, scripts, validation, or
-   memory surfaces.
+    memory surfaces.
 11. Record the item in [steering-uptake.md](/.harness/quality/steering-uptake.md)
-   with the guardrail path, failure category, improvement type, and validation
-   command.
+    with the guardrail path, failure category, improvement type, and validation
+    command.
 12. Run `python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json`.
 13. Report the exact pass/fail/blocked outcome before resuming the original lane.
 
@@ -191,6 +191,11 @@ reply, or an untested local edit.
   satisfy a workflow shape. A wait, resume, retry, or closeout action must point
   at a real handle returned by the runtime in the current lane; otherwise run
   the direct command, re-discover the live state, or classify the blocker.
+- After any fabricated runtime handle is attempted, stop using wait or resume
+  actions until a real runtime-returned handle is visible in the immediately preceding tool result.
+  Recover by re-discovering live state with a direct
+  command, recording the failure in this ledger, and validating the steering
+  surfaces before ordinary implementation resumes.
 - Prefer systemic remediation when sibling patterns share the same mechanism.
 - If a local fix is intentionally narrow, state why broader alignment,
   enforcement, or validation is not warranted.

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/signing-policy.v0.schema.json",
+  "title": "Skills SDK Signing Policy v0",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "string", "const": "skills-sdk.signing-policy.v0"},
+    "schema_uri": {"type": "string", "const": "https://jscraik.local/agent-skills/schemas/skills-sdk/signing-policy.v0.schema.json"},
+    "policy_id": {"type": "string", "minLength": 1},
+    "signer_id": {"type": "string", "minLength": 1},
+    "allowed_algorithms": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "enum": ["cosign-keyless", "minisign", "ssh-sig"]}
+    },
+    "allowed_package_ids": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "allowed_package_digests": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 71}},
+    "requires_hardening_pass": {"type": "boolean", "const": true},
+    "key_material_policy": {"type": "string", "enum": ["external_ref_required", "keyless_required"]},
+    "redaction_policy": {"type": "string", "enum": ["manifest_only", "manifest_and_receipts"]},
+    "archive_required": {"type": "boolean", "const": false},
+    "acceptance_trace": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "enum": ["FR-003", "FR-008", "SA-003", "SA-004", "SEC-001", "VP-021"]}
+    }
+  },
+  "required": [
+    "schema_version",
+    "schema_uri",
+    "policy_id",
+    "signer_id",
+    "allowed_algorithms",
+    "allowed_package_ids",
+    "allowed_package_digests",
+    "requires_hardening_pass",
+    "key_material_policy",
+    "redaction_policy",
+    "archive_required",
+    "acceptance_trace"
+  ]
+}

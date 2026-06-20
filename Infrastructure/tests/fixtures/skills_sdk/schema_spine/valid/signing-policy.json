@@ -1,0 +1,14 @@
+{
+  "schema_version": "skills-sdk.signing-policy.v0",
+  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/signing-policy.v0.schema.json",
+  "policy_id": "fixture-local-signing-policy",
+  "signer_id": "skills-sdk-local-fixture-signer",
+  "allowed_algorithms": ["cosign-keyless"],
+  "allowed_package_ids": ["skills-sdk-valid-fixture"],
+  "allowed_package_digests": ["sha256:60b4ed27a5919e8785c3a7ea01930ad1bcecef8a7aa8f75752abafd2338d73d6"],
+  "requires_hardening_pass": true,
+  "key_material_policy": "keyless_required",
+  "redaction_policy": "manifest_only",
+  "archive_required": false,
+  "acceptance_trace": ["FR-003", "FR-008", "SA-003", "SA-004", "SEC-001", "VP-021"]
+}
