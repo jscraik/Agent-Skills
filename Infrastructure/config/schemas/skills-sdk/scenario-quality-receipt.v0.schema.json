@@ -64,7 +64,7 @@
         "status": {"type": "string", "enum": ["pass", "blocker"]},
         "severity": {"type": "string", "const": "blocker"},
         "message": {"type": "string", "minLength": 1},
-        "evidence": {"type": "array", "items": {"type": "string"}}
+        "evidence": {"type": "array", "items": {"type": "string", "minLength": 1}}
       },
       "required": ["id", "status", "severity", "message", "evidence"]
     }

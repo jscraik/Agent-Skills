@@ -120,6 +120,19 @@ def test_rejects_empty_required_fields() -> None:
     assert "Required field in ## Summary is empty: Problem:" in errors
 
 
+def test_rejects_duplicate_required_fields() -> None:
+    validator = _load_validator()
+    body = _filled_template_body().replace(
+        "- Problem: repo-relative evidence",
+        "- Problem: repo-relative evidence\n- Problem: duplicate evidence",
+        1,
+    )
+
+    errors = validator.validate_pr_body(_template(), body)
+
+    assert "Duplicate field in ## Summary: Problem:" in errors
+
+
 def test_accepts_required_field_with_nested_continuation_content() -> None:
     validator = _load_validator()
     body = _filled_template_body()

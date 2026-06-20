@@ -226,6 +226,17 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertFalse(payload["mutation_performed"])
         self.assertFalse(payload["promotion_performed"])
 
+    def test_scenario_quality_schema_rejects_empty_check_evidence(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "scenario-quality-receipt.json")
+        payload["scenario_rows"][0]["checks"][0]["evidence"] = [""]
+
+        with self.assertRaises(AssertionError):
+            _validate_schema_subset(
+                self.schemas["scenario-quality-receipt"],
+                payload,
+                {**self.schemas, **self.schemas_by_file},
+            )
+
     def test_signing_policy_fixture_records_external_key_boundary(self) -> None:
         payload = self.assert_valid("signing-policy", "signing-policy.json")
 

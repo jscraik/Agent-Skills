@@ -2,20 +2,20 @@
 schema_version: 1
 ---
 
-# plugins Agent Guide
+# Plugins Agent Guide
 
 ## Scope
 
-- Applies to lowercase `plugins/**`.
+- Applies to uppercase `Plugins/**`.
 - Inherits the repository root [AGENTS.md](../AGENTS.md).
 
 ## Edit Policy
 
-- Treat lowercase `plugins/**` as runtime, cache, or compatibility material
-  unless a manifest explicitly classifies a path as canonical source.
-- Canonical plugin-owned source normally belongs under uppercase `Plugins/**`
-  and related `Infrastructure/**` contracts. Do not hand-edit lower-case
-  mirrors to change product behavior.
+- Treat uppercase `Plugins/**` as canonical plugin-owned source unless a
+  nested guide or manifest explicitly marks a path as generated output.
+- Keep plugin behavior in canonical plugin source, bundled hooks, and related
+  `Infrastructure/**` contracts. Do not move product behavior into lowercase
+  runtime/cache mirrors.
 - On case-insensitive filesystems, be careful with `plugins` and `Plugins`
   path collisions. Verify the real path before moving, deleting, or syncing.
 - Use plugin install, status, and sync commands from the root `./bin/ask`

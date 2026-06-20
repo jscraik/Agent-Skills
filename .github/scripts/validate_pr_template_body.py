@@ -7,6 +7,7 @@ import argparse
 import os
 import re
 import sys
+from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -86,10 +87,14 @@ def _field_errors(contract: TemplateContract, body_blocks: dict[str, str]) -> li
     errors: list[str] = []
     for section, expected_fields in contract.fields_by_section.items():
         block = body_blocks.get(section, "")
-        field_values = _field_values(block)
+        field_values, field_counts = _field_values(block)
+        expected_counts = Counter(expected_fields)
         actual_fields = list(field_values)
-        missing_fields = [field for field in expected_fields if field not in actual_fields]
+        missing_fields = [field for field, count in expected_counts.items() if field_counts.get(field, 0) < count]
         extra_fields = [field for field in actual_fields if field not in expected_fields]
+        for field, count in field_counts.items():
+            if field in expected_counts and count > expected_counts[field]:
+                errors.append(f"Duplicate field in ## {section}: {field}:")
         for field in missing_fields:
             errors.append(f"Missing required field in ## {section}: {field}:")
         for field in extra_fields:
@@ -100,14 +105,17 @@ def _field_errors(contract: TemplateContract, body_blocks: dict[str, str]) -> li
     return errors
 
 
-def _field_values(block: str) -> dict[str, str]:
+def _field_values(block: str) -> tuple[dict[str, str], Counter[str]]:
     matches = list(FIELD_LINE_RE.finditer(block))
     values: dict[str, str] = {}
+    counts: Counter[str] = Counter()
     for index, match in enumerate(matches):
         next_start = matches[index + 1].start() if index + 1 < len(matches) else len(block)
         continuation = block[match.end():next_start].strip()
-        values[match.group("label").strip()] = f"{match.group('value').strip()}\n{continuation}".strip()
-    return values
+        label = match.group("label").strip()
+        counts[label] += 1
+        values[label] = f"{match.group('value').strip()}\n{continuation}".strip()
+    return values, counts
 
 
 def _normalize_checklist_label(label: str) -> str:
