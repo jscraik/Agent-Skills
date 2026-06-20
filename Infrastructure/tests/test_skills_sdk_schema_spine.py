@@ -23,6 +23,7 @@ SCHEMA_NAMES = {
     "package-hardening-receipt": "package-hardening-receipt.v0.schema.json",
     "trust-decision-receipt": "trust-decision-receipt.v0.schema.json",
     "observability-feedback-receipt": "observability-feedback-receipt.v0.schema.json",
+    "emitter-preview-receipt": "emitter-preview-receipt.v0.schema.json",
     "signing-policy": "signing-policy.v0.schema.json",
     "signing-intent-receipt": "signing-intent-receipt.v0.schema.json",
     "sandbox-profile": "sandbox-profile.v0.schema.json",
@@ -169,6 +170,17 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertEqual(payload["scenario_candidates"][0]["promotion_status"], "blocked_pending_package_eval")
         self.assertEqual(payload["skill_gap_candidates"][0]["promotion_status"], "blocked_pending_package_eval")
         self.assertFalse(payload["mutation_performed"])
+
+    def test_emitter_preview_fixture_records_non_mutating_write_plan(self) -> None:
+        payload = self.assert_valid("emitter-preview-receipt", "emitter-preview-receipt.json")
+
+        self.assertEqual(payload["status"], "preview")
+        self.assertEqual(payload["projection"], "runtime-skill")
+        self.assertEqual(payload["target_root"], ".agents/skills")
+        self.assertEqual(payload["write_plan"][0]["action"], "write")
+        self.assertFalse(payload["mutation_performed"])
+        self.assertFalse(payload["artifact_emitted"])
+        self.assertFalse(payload["remote_publish_requested"])
 
     def test_signing_policy_fixture_records_external_key_boundary(self) -> None:
         payload = self.assert_valid("signing-policy", "signing-policy.json")

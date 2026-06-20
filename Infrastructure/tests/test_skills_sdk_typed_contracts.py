@@ -13,6 +13,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
 from ask.skills_sdk import typed_contracts as contracts  # noqa: E402
+from ask.skills_sdk.emitter_contracts import validate_emitter_preview_receipt  # noqa: E402
 
 
 FIXTURE_DIR = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine"
@@ -171,6 +172,21 @@ class TestSkillsSdkTypedContracts(unittest.TestCase):
 
         with self.assertRaises(ValidationError):
             contracts.validate_eval_run_receipt(payload)
+
+    def test_emitter_preview_contract_rejects_emission_claims(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "emitter-preview-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["artifact_emitted"] = True
+
+        with self.assertRaises(ValidationError):
+            validate_emitter_preview_receipt(payload)
+
+    def test_emitter_preview_fixture_loads_through_dedicated_contract(self) -> None:
+        model = validate_emitter_preview_receipt(_json(FIXTURE_DIR / "valid" / "emitter-preview-receipt.json"))
+
+        self.assertEqual(model.model_config["extra"], "forbid")
+        self.assertTrue(model.model_config["strict"])
+        self.assertEqual(model.projection, "runtime-skill")
 
     def test_eval_run_contract_accepts_legacy_receipt_without_package_identity(self) -> None:
         payload = _json(FIXTURE_DIR / "valid" / "eval-run-receipt.json")

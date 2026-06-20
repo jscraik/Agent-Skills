@@ -6,6 +6,7 @@ from pathlib import Path
 import ask.commands.skills as skills_commands
 from ask.envelope import CallResult, ErrorObject
 from ask.cli_errors import build_unknown_action_result
+from ask.commands.sdk_emitter import add_sdk_emitter_parser, dispatch_sdk_emitter
 from ask.skills_sdk.determinism import audit_skill_determinism
 from ask.skills_sdk.lenses import (
     KNOWN_TASK_INTENTS,
@@ -23,10 +24,7 @@ from ask.skills_sdk.review_plan import build_review_plan
 from ask.skills_sdk.review_verify import build_review_verification
 
 
-def _add_sdk_ir_parser(
-    sdk_subparsers: argparse._SubParsersAction,
-    global_parser: argparse.ArgumentParser,
-) -> None:
+def _add_sdk_ir_parser(sdk_subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
     sdk_ir_parser = sdk_subparsers.add_parser(
         "ir",
         help="Build read-only Skills SDK intermediate representations",
@@ -324,6 +322,7 @@ def add_sdk_parser(
     _add_sdk_sandbox_parser(sdk_subparsers, global_parser)
     _add_sdk_trust_parser(sdk_subparsers, global_parser)
     _add_sdk_observability_parser(sdk_subparsers, global_parser)
+    add_sdk_emitter_parser(sdk_subparsers, global_parser)
     _add_sdk_project_mutation_parsers(sdk_subparsers, global_parser)
     _add_sdk_lifecycle_status_parsers(sdk_subparsers, global_parser)
     _add_sdk_knowledge_parser(sdk_subparsers, global_parser)
@@ -432,6 +431,7 @@ def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
         "sandbox": _dispatch_sdk_sandbox,
         "trust": _dispatch_sdk_trust,
         "observability": _dispatch_sdk_observability,
+        "emitter": dispatch_sdk_emitter,
         "install": _dispatch_sdk_install,
         "rollback": _dispatch_sdk_rollback,
         "uninstall": _dispatch_sdk_uninstall,

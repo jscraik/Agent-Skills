@@ -585,14 +585,19 @@
     {
       "id": "emitters",
       "title": "Emitters",
-      "status": "deferred",
-      "owner_surface": "future emitter adapters",
+      "status": "preview_only",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/emitter_preview.py",
       "pipeline_sections": ["compiler_emitter_discipline", "public_sdk_surface"],
-      "feature_executed": false,
+      "feature_executed": true,
       "mutation_performed": false,
-      "evidence_refs": ["artifacts/recommended-skills-sdk-pipeline.html"],
-      "next_slice": "Approve emitter adapter contracts and generated-output ownership.",
-      "notes": "No emitter runtime is added by PU-008."
+      "evidence_refs": [
+        "./bin/ask sdk emitter preview --skill Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
+        "Infrastructure/scripts/lib/ask/skills_sdk/emitter_preview.py",
+        "Infrastructure/config/schemas/skills-sdk/emitter-preview-receipt.v0.schema.json",
+        "Infrastructure/tests/test_skills_sdk_emitter_preview.py"
+      ],
+      "next_slice": "Add a real emitter adapter only after archive emission, projection ownership, and rollback receipts are approved.",
+      "notes": "PU-027 previews a local .agents/skills write plan only; it does not emit files, mutate runtime projections, publish, or build archives."
     },
     {
       "id": "ci_adoption_gates",

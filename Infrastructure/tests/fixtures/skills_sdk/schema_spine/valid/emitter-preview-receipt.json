@@ -1,0 +1,36 @@
+{
+  "schema_version": "skills-sdk.emitter-preview-receipt.v0",
+  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/emitter-preview-receipt.v0.schema.json",
+  "status": "preview",
+  "operation": "emitter_write_plan_preview",
+  "projection": "runtime-skill",
+  "package_id": "skills-sdk-valid-fixture",
+  "version": "0.1.0",
+  "package_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+  "target_root": ".agents/skills",
+  "write_plan": [
+    {
+      "action": "write",
+      "source_path": "Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md",
+      "target_path": ".agents/skills/skills-sdk-valid-fixture/SKILL.md",
+      "source_digest": "88b77f721bcfc6dbc6fed9c29a913a46164aa60153792d60cb18830508759c92",
+      "reason": "project runtime projection would mirror packaged skill source"
+    }
+  ],
+  "required_receipts": ["package_digest_receipt", "package_hardening_receipt"],
+  "emitter_checks": [
+    {
+      "id": "projection_supported",
+      "status": "pass",
+      "severity": "blocker",
+      "message": "Emitter preview currently supports only the runtime-skill projection contract.",
+      "evidence": ["runtime-skill"]
+    }
+  ],
+  "blockers": [],
+  "mutation_performed": false,
+  "artifact_emitted": false,
+  "remote_publish_requested": false,
+  "acceptance_trace": ["PU-027", "FR-003", "FR-008", "SA-003", "VP-027"],
+  "agent_summary": "emitter preview produced a local projection write plan without writing files."
+}

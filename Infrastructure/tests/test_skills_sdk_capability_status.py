@@ -195,6 +195,7 @@ class TestSkillsSdkCapabilityStatus(unittest.TestCase):
             "sandbox",
             "trust",
             "observability",
+            "emitter",
             "status",
             "project",
         }
@@ -216,6 +217,10 @@ class TestSkillsSdkCapabilityStatus(unittest.TestCase):
         self.assertIn(
             "ask sdk observability feedback --skill Infrastructure/tests/fixtures/skills_sdk/valid_skill --events Infrastructure/tests/fixtures/skills_sdk/observability/redacted-events.fixture --preview --json --robot",
             COMMAND_EXAMPLES[("sdk", "observability")],
+        )
+        self.assertIn(
+            "ask sdk emitter preview --skill Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
+            COMMAND_EXAMPLES[("sdk", "emitter")],
         )
         self.assertIn(
             "ask sdk trust decide Infrastructure/tests/fixtures/skills_sdk/valid_skill --decision trust --reason 'fixture passed local checks' --owner skills-sdk-tests --preview --json --robot",

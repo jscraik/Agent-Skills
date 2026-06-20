@@ -221,6 +221,7 @@ __all__ = [
     "skills_sdk_package_signing_intent",
     "skills_sdk_trust_decide",
     "skills_sdk_observability_feedback",
+    "skills_sdk_emitter_preview",
     "skills_sdk_eval_run",
     "skills_sdk_placeholder_lifecycle",
     "skills_sdk_project_rollback",
@@ -4540,6 +4541,91 @@ def skills_sdk_observability_feedback(
                 code="ERR_VALIDATION",
                 message=payload["agent_summary"],
                 fix_suggestion="Use redacted JSONL event records with digest references and no raw prompt/output fields.",
+            )
+        )
+    return result
+
+
+def skills_sdk_emitter_preview(
+    repo_root: Path,
+    target: str,
+    projection: str,
+    target_root: str,
+) -> CallResult:
+    """Preview a generated-output write plan without emitting files."""
+    result = CallResult()
+    result.metadata["command"] = "sdk emitter preview"
+    query = target.strip()
+    target_info, _audit_target = _resolve_doctor_target(repo_root, query)
+    source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
+    source_path = Path(str(source_path_value)) if source_path_value else None
+    if source_path and not source_path.is_absolute():
+        source_path = repo_root / source_path
+    if not source_path or not source_path.is_file():
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Skills SDK emitter preview is missing a canonical SKILL.md source for '{query}'.",
+                fix_suggestion=_ask_validation_command("sdk", "package", "build", query),
+            )
+        )
+        return result
+
+    from ask.skills_sdk.emitter_preview import (  # noqa: PLC0415
+        EmitterPreviewError,
+        build_emitter_preview_receipt,
+    )
+
+    package_receipt = _build_package_digest_receipt(repo_root, source_path=source_path, query=query)
+    hardening_receipt = _build_package_hardening_receipt(package_receipt)
+    try:
+        emitter_receipt = build_emitter_preview_receipt(
+            repo_root,
+            package_receipt=package_receipt,
+            hardening_receipt=hardening_receipt,
+            projection=projection,
+            target_root=target_root,
+        )
+    except EmitterPreviewError as exc:
+        emitter_receipt = exc.receipt
+    payload = {
+        "schema_version": "skills-sdk-emitter-preview.v0",
+        "query": query,
+        "status": emitter_receipt["status"],
+        "canonical_source_path": source_path_value,
+        "facade_command": "skills-sdk emitter preview",
+        "package_id": emitter_receipt["package_id"],
+        "package_digest": emitter_receipt["package_digest"],
+        "projection": emitter_receipt["projection"],
+        "target_root": emitter_receipt["target_root"],
+        "receipt": emitter_receipt,
+        "mutation_performed": False,
+        "artifact_emitted": False,
+        "validation_commands": [
+            _ask_validation_command(
+                "sdk",
+                "emitter",
+                "preview",
+                "--skill",
+                query,
+                "--projection",
+                projection,
+                "--target-root",
+                target_root,
+                "--preview",
+            )
+        ],
+        "agent_summary": emitter_receipt["agent_summary"],
+    }
+    result.data["skills_sdk_emitter_preview"] = payload
+    if emitter_receipt["status"] == "blocked":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=payload["agent_summary"],
+                fix_suggestion="Use --projection runtime-skill with --target-root .agents/skills and a hardened local package.",
             )
         )
     return result
