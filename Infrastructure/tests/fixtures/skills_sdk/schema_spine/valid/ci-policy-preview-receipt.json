@@ -1,0 +1,33 @@
+{
+  "schema_version": "skills-sdk.ci-policy-preview-receipt.v0",
+  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/ci-policy-preview-receipt.v0.schema.json",
+  "status": "preview",
+  "operation": "ci_policy_preview",
+  "risk_tier": "high",
+  "required_checks": [
+    {"name": "lint", "required": true, "source": "base"},
+    {"name": "test", "required": true, "source": "base"},
+    {"name": "typecheck", "required": true, "source": "base"},
+    {"name": "docs-test", "required": true, "source": "base"},
+    {"name": "security-scan", "required": true, "source": "base"},
+    {"name": "pr-template", "required": true, "source": "base"},
+    {"name": "risk-policy-gate", "required": true, "source": "risk_tier"},
+    {"name": "Semgrep (SAST)", "required": true, "source": "risk_tier"},
+    {"name": "Trivy (dependency CVE scan)", "required": true, "source": "risk_tier"}
+  ],
+  "policy_checks": [
+    {
+      "id": "risk_tier_supported",
+      "status": "pass",
+      "severity": "blocker",
+      "message": "CI policy preview requires a known SDK risk tier.",
+      "evidence": ["high"]
+    }
+  ],
+  "blockers": [],
+  "live_ci_evidence_attached": false,
+  "branch_protection_mutated": false,
+  "mutation_performed": false,
+  "acceptance_trace": ["PU-028", "FR-008", "SA-004", "VP-028"],
+  "agent_summary": "CI policy preview selected 9 required check(s) for high risk."
+}

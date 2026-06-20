@@ -267,10 +267,10 @@
       </div>
       <div class="summary-grid">
         <div class="stat" data-status="implemented"><b>25</b><strong>Implemented</strong><span>Local SDK control-plane capabilities with owner surfaces and tests.</span></div>
-        <div class="stat" data-status="preview"><b>4</b><strong>Preview</strong><span>Read-only planning and static projection surfaces.</span></div>
+        <div class="stat" data-status="preview"><b>5</b><strong>Preview</strong><span>Read-only planning and static projection surfaces.</span></div>
         <div class="stat" data-status="placeholder"><b>2</b><strong>Placeholder</strong><span>Visible but not executable optional lanes.</span></div>
         <div class="stat" data-status="blocked"><b>1</b><strong>Blocked</strong><span>Needs sandbox adapter decision before execution can be claimed.</span></div>
-        <div class="stat" data-status="deferred"><b>3</b><strong>Deferred</strong><span>CI adoption, schema registry, and compiled package lanes.</span></div>
+        <div class="stat" data-status="deferred"><b>2</b><strong>Deferred</strong><span>Schema registry and compiled package lanes.</span></div>
         <div class="stat" data-status="out"><b>3</b><strong>Out of scope</strong><span>Remote registry, marketplace service, and publish pipeline.</span></div>
       </div>
     </section>
@@ -322,7 +322,7 @@
             <tr data-capability-id="uninstall" data-status="implemented" data-pipeline-sections="full_skill_lifecycle,public_sdk_surface"></tr>
             <tr data-capability-id="compiled_package_pipeline" data-status="deferred" data-pipeline-sections="compiler_emitter_discipline,public_sdk_surface,package_hardening"></tr>
             <tr data-capability-id="emitters" data-status="preview_only" data-pipeline-sections="compiler_emitter_discipline,public_sdk_surface"></tr>
-            <tr data-capability-id="ci_adoption_gates" data-status="deferred" data-pipeline-sections="ci_and_adoption,release_decision_matrix"></tr>
+            <tr data-capability-id="ci_adoption_gates" data-status="preview_only" data-pipeline-sections="ci_and_adoption,release_decision_matrix"></tr>
             <tr data-capability-id="package_hardening" data-status="implemented" data-pipeline-sections="package_hardening,release_decision_matrix"></tr>
           </tbody>
         </table>
@@ -350,6 +350,7 @@
             <tr data-status="implemented"><td><strong>SkillIR.v0 and package identity</strong></td><td><span class="pill implemented">implemented</span></td><td><code>skills_sdk/ir.py</code> and <code>skills_sdk/package_build.py</code></td><td>The SDK builds a read-only typed IR and digest-backed package identity receipt without emitting archives.</td><td>Connect to signed archive emission only after signing, redaction, and archive ownership policy are approved.</td></tr>
             <tr data-status="implemented"><td><strong>Package hardening</strong></td><td><span class="pill implemented">implemented</span></td><td><code>skills_sdk/package_hardening.py</code></td><td>Read-only package hardening blocks forbidden runtime, generated, dependency, and secret-bearing paths.</td><td>Keep CI adoption separate; local hardening does not prove branch protection.</td></tr>
             <tr data-status="preview"><td><strong>Emitter write-plan preview</strong></td><td><span class="pill preview">preview only</span></td><td><code>skills_sdk/emitter_preview.py</code></td><td>Local <code>.agents/skills</code> projection write plans can be previewed without emitting files.</td><td>Add real emitters only after projection ownership, archive emission, and rollback receipts are approved.</td></tr>
+            <tr data-status="preview"><td><strong>CI policy preview</strong></td><td><span class="pill preview">preview only</span></td><td><code>skills_sdk/ci_policy_preview.py</code></td><td>Required checks can be previewed from SDK risk tier without claiming hosted CI evidence.</td><td>Attach live CI run evidence only in a separate hosted-check receipt.</td></tr>
             <tr data-status="out"><td><strong>Remote registry / marketplace / publish</strong></td><td><span class="pill out">out of scope</span></td><td>Future external services</td><td>Not part of current local SDK.</td><td>Requires signing, package attestations, service authority, and owner approval.</td></tr>
           </tbody>
         </table>
@@ -428,6 +429,7 @@
         <div class="step" data-status="implemented"><span class="pill implemented">05</span><strong>PU-025: Local Trust Ledger</strong><span>Landed: append-only local trust decisions bind owner, reason, decision, optional expiry or revocation marker, and package digest without mutating a remote trust store.</span></div>
         <div class="step" data-status="implemented"><span class="pill implemented">06</span><strong>PU-026: Observability Feedback Loop</strong><span>Landed: redacted local event receipts can be mined into blocked eval scenario and skill-gap candidates without live ingestion, file generation, or automatic promotion.</span></div>
         <div class="step" data-status="preview"><span class="pill preview">07</span><strong>PU-027: Emitter Contract Preview</strong><span>Landed as preview-only: <code>ask sdk emitter preview</code> emits a local projection write-plan receipt without runtime projection writes, archive emission, registry, marketplace, or publish authority.</span></div>
+        <div class="step" data-status="preview"><span class="pill preview">08</span><strong>PU-028: CI Policy Preview</strong><span>Landed as preview-only: <code>ask sdk ci policy</code> emits required checks from risk tier without mutating branch protection or claiming live CI readiness.</span></div>
       </div>
     </section>
 
@@ -440,7 +442,6 @@
         <div class="note">Each future slice should add one command, one schema or receipt, tests, and a capability-matrix update.</div>
       </div>
       <div class="card-grid">
-        <div class="step" data-status="deferred"><span class="pill deferred">08</span><strong>PU-028: CI Policy Preview</strong><span>Emit CI requirement receipts from risk tier; do not claim live CI until actual workflow results are attached.</span></div>
         <div class="step" data-status="preview"><span class="pill preview">09</span><strong>PU-029: Static Explorer Projection</strong><span>Render capabilities and local skill index from JSON only. The HTML should own zero capability truth.</span></div>
       </div>
     </section>

@@ -6,6 +6,7 @@ from pathlib import Path
 import ask.commands.skills as skills_commands
 from ask.envelope import CallResult, ErrorObject
 from ask.cli_errors import build_unknown_action_result
+from ask.commands.sdk_ci import add_sdk_ci_parser, dispatch_sdk_ci
 from ask.commands.sdk_emitter import add_sdk_emitter_parser, dispatch_sdk_emitter
 from ask.skills_sdk.determinism import audit_skill_determinism
 from ask.skills_sdk.lenses import (
@@ -142,10 +143,7 @@ def _add_sdk_trust_parser(
     decide.add_argument("--apply", action="store_true", help="Append the decision to the local ledger")
 
 
-def _add_sdk_observability_parser(
-    sdk_subparsers: argparse._SubParsersAction,
-    global_parser: argparse.ArgumentParser,
-) -> None:
+def _add_sdk_observability_parser(sdk_subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
     parser = sdk_subparsers.add_parser("observability", help="Preview redacted runtime feedback candidates", parents=[global_parser])
     subparsers = parser.add_subparsers(dest="observability_action", required=True)
     feedback = subparsers.add_parser("feedback", help="Mine redacted event JSONL into blocked eval and skill-gap candidates", parents=[global_parser])
@@ -323,6 +321,7 @@ def add_sdk_parser(
     _add_sdk_trust_parser(sdk_subparsers, global_parser)
     _add_sdk_observability_parser(sdk_subparsers, global_parser)
     add_sdk_emitter_parser(sdk_subparsers, global_parser)
+    add_sdk_ci_parser(sdk_subparsers, global_parser)
     _add_sdk_project_mutation_parsers(sdk_subparsers, global_parser)
     _add_sdk_lifecycle_status_parsers(sdk_subparsers, global_parser)
     _add_sdk_knowledge_parser(sdk_subparsers, global_parser)
@@ -432,6 +431,7 @@ def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
         "trust": _dispatch_sdk_trust,
         "observability": _dispatch_sdk_observability,
         "emitter": dispatch_sdk_emitter,
+        "ci": dispatch_sdk_ci,
         "install": _dispatch_sdk_install,
         "rollback": _dispatch_sdk_rollback,
         "uninstall": _dispatch_sdk_uninstall,

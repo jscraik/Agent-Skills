@@ -222,6 +222,7 @@ __all__ = [
     "skills_sdk_trust_decide",
     "skills_sdk_observability_feedback",
     "skills_sdk_emitter_preview",
+    "skills_sdk_ci_policy_preview",
     "skills_sdk_eval_run",
     "skills_sdk_placeholder_lifecycle",
     "skills_sdk_project_rollback",
@@ -4626,6 +4627,51 @@ def skills_sdk_emitter_preview(
                 code="ERR_VALIDATION",
                 message=payload["agent_summary"],
                 fix_suggestion="Use --projection runtime-skill with --target-root .agents/skills and a hardened local package.",
+            )
+        )
+    return result
+
+
+def skills_sdk_ci_policy_preview(
+    repo_root: Path,
+    risk_tier: str,
+) -> CallResult:
+    """Preview required CI checks without inspecting or mutating hosted CI."""
+    del repo_root
+    result = CallResult()
+    result.metadata["command"] = "sdk ci policy"
+    from ask.skills_sdk.ci_policy_preview import (  # noqa: PLC0415
+        CiPolicyPreviewError,
+        build_ci_policy_preview_receipt,
+    )
+
+    try:
+        receipt = build_ci_policy_preview_receipt(risk_tier=risk_tier)
+    except CiPolicyPreviewError as exc:
+        receipt = exc.receipt
+    payload = {
+        "schema_version": "skills-sdk-ci-policy-preview.v0",
+        "status": receipt["status"],
+        "facade_command": "skills-sdk ci policy",
+        "risk_tier": receipt["risk_tier"],
+        "required_checks": receipt["required_checks"],
+        "receipt": receipt,
+        "live_ci_evidence_attached": False,
+        "branch_protection_mutated": False,
+        "mutation_performed": False,
+        "validation_commands": [
+            _ask_validation_command("sdk", "ci", "policy", "--risk-tier", risk_tier, "--preview")
+        ],
+        "agent_summary": receipt["agent_summary"],
+    }
+    result.data["skills_sdk_ci_policy_preview"] = payload
+    if receipt["status"] == "blocked":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=payload["agent_summary"],
+                fix_suggestion="Use a supported SDK risk tier and attach live CI evidence in a separate hosted-check lane.",
             )
         )
     return result

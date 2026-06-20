@@ -602,14 +602,19 @@
     {
       "id": "ci_adoption_gates",
       "title": "CI and adoption gates",
-      "status": "deferred",
-      "owner_surface": "future CI integration",
+      "status": "preview_only",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/ci_policy_preview.py",
       "pipeline_sections": ["ci_and_adoption", "release_decision_matrix"],
-      "feature_executed": false,
+      "feature_executed": true,
       "mutation_performed": false,
-      "evidence_refs": ["artifacts/recommended-skills-sdk-pipeline.html"],
-      "next_slice": "Define required checks and live CI proof in a PR-specific slice.",
-      "notes": "Local validation does not prove live CI or adoption readiness."
+      "evidence_refs": [
+        "./bin/ask sdk ci policy --risk-tier high --preview --json --robot",
+        "Infrastructure/scripts/lib/ask/skills_sdk/ci_policy_preview.py",
+        "Infrastructure/config/schemas/skills-sdk/ci-policy-preview-receipt.v0.schema.json",
+        "Infrastructure/tests/test_skills_sdk_ci_policy_preview.py"
+      ],
+      "next_slice": "Attach live CI run evidence only in a hosted-check receipt that preserves PR, CI, review, and mergeability boundaries.",
+      "notes": "PU-028 previews required checks from risk tier only; it does not mutate branch protection or claim live CI/adoption readiness."
     },
     {
       "id": "package_hardening",

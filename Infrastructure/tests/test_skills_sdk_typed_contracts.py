@@ -13,6 +13,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
 from ask.skills_sdk import typed_contracts as contracts  # noqa: E402
+from ask.skills_sdk.ci_contracts import validate_ci_policy_preview_receipt  # noqa: E402
 from ask.skills_sdk.emitter_contracts import validate_emitter_preview_receipt  # noqa: E402
 
 
@@ -187,6 +188,21 @@ class TestSkillsSdkTypedContracts(unittest.TestCase):
         self.assertEqual(model.model_config["extra"], "forbid")
         self.assertTrue(model.model_config["strict"])
         self.assertEqual(model.projection, "runtime-skill")
+
+    def test_ci_policy_preview_contract_rejects_hosted_ci_claims(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "ci-policy-preview-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["live_ci_evidence_attached"] = True
+
+        with self.assertRaises(ValidationError):
+            validate_ci_policy_preview_receipt(payload)
+
+    def test_ci_policy_preview_fixture_loads_through_dedicated_contract(self) -> None:
+        model = validate_ci_policy_preview_receipt(_json(FIXTURE_DIR / "valid" / "ci-policy-preview-receipt.json"))
+
+        self.assertEqual(model.model_config["extra"], "forbid")
+        self.assertTrue(model.model_config["strict"])
+        self.assertEqual(model.risk_tier, "high")
 
     def test_eval_run_contract_accepts_legacy_receipt_without_package_identity(self) -> None:
         payload = _json(FIXTURE_DIR / "valid" / "eval-run-receipt.json")

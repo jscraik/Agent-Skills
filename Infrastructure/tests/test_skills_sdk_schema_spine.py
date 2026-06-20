@@ -24,6 +24,7 @@ SCHEMA_NAMES = {
     "trust-decision-receipt": "trust-decision-receipt.v0.schema.json",
     "observability-feedback-receipt": "observability-feedback-receipt.v0.schema.json",
     "emitter-preview-receipt": "emitter-preview-receipt.v0.schema.json",
+    "ci-policy-preview-receipt": "ci-policy-preview-receipt.v0.schema.json",
     "signing-policy": "signing-policy.v0.schema.json",
     "signing-intent-receipt": "signing-intent-receipt.v0.schema.json",
     "sandbox-profile": "sandbox-profile.v0.schema.json",
@@ -181,6 +182,16 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertFalse(payload["mutation_performed"])
         self.assertFalse(payload["artifact_emitted"])
         self.assertFalse(payload["remote_publish_requested"])
+
+    def test_ci_policy_preview_fixture_records_no_hosted_ci_claims(self) -> None:
+        payload = self.assert_valid("ci-policy-preview-receipt", "ci-policy-preview-receipt.json")
+
+        self.assertEqual(payload["status"], "preview")
+        self.assertEqual(payload["risk_tier"], "high")
+        self.assertTrue(any(check["name"] == "risk-policy-gate" for check in payload["required_checks"]))
+        self.assertFalse(payload["live_ci_evidence_attached"])
+        self.assertFalse(payload["branch_protection_mutated"])
+        self.assertFalse(payload["mutation_performed"])
 
     def test_signing_policy_fixture_records_external_key_boundary(self) -> None:
         payload = self.assert_valid("signing-policy", "signing-policy.json")
