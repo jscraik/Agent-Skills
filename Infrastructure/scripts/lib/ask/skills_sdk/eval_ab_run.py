@@ -72,7 +72,12 @@ def _codex_runner_env(source: dict[str, str] | None = None) -> dict[str, str]:
 
 
 def _repo_path(repo_root: Path, repo_relative_path: str) -> Path:
-    return repo_root / repo_relative_path
+    raw_path = Path(repo_relative_path)
+    if raw_path.is_absolute():
+        raise ValueError("A/B evidence paths must be repo-relative")
+    resolved = (repo_root / raw_path).resolve()
+    resolved.relative_to(repo_root.resolve())
+    return resolved
 
 
 def _default_codex_runner(command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: int) -> CodexRunResult:

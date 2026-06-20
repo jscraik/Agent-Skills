@@ -9,6 +9,19 @@ class _SdkContractModel(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
 
 
+_DECISION_LABELS = {"skill_a", "skill_b", "inconclusive"}
+
+
+def _exact_decision_labels(rows: list[str]) -> bool:
+    return set(rows) == _DECISION_LABELS
+
+
+def _validate_exact_decision_labels(value: list[str], *, message: str) -> list[str]:
+    if not _exact_decision_labels(value):
+        raise ValueError(message)
+    return value
+
+
 class EvalExecutionProfile(_SdkContractModel):
     id: str = Field(min_length=1)
     runner: Literal["codex_exec"]
@@ -90,9 +103,7 @@ class AbRubricWinnerPolicy(_SdkContractModel):
     def _allowed_winners_exact(
         cls, value: list[Literal["skill_a", "skill_b", "inconclusive"]]
     ) -> list[Literal["skill_a", "skill_b", "inconclusive"]]:
-        if set(value) != {"skill_a", "skill_b", "inconclusive"}:
-            raise ValueError("rubric winner policy must contain exact winner labels")
-        return value
+        return _validate_exact_decision_labels(value, message="rubric winner policy must contain exact winner labels")
 
 
 class AbRubricStagePolicy(_SdkContractModel):
@@ -182,17 +193,11 @@ class AbEvidencePlan(_SdkContractModel):
     def _winner_values_exact(
         cls, value: list[Literal["skill_a", "skill_b", "inconclusive"]]
     ) -> list[Literal["skill_a", "skill_b", "inconclusive"]]:
-        if set(value) != {"skill_a", "skill_b", "inconclusive"}:
-            raise ValueError("winner_values must contain the exact A/B decision labels")
-        return value
+        return _validate_exact_decision_labels(value, message="winner_values must contain the exact A/B decision labels")
 
 
 def _exact_variant_labels(rows: list[object], *, attr: str = "variant_label") -> bool:
     return len(rows) == 2 and {getattr(row, attr) for row in rows} == {"A", "B"}
-
-
-def _exact_decision_labels(rows: list[str]) -> bool:
-    return set(rows) == {"skill_a", "skill_b", "inconclusive"}
 
 
 def _exact_command_labels(rows: list[str]) -> bool:

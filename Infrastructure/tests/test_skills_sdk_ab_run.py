@@ -11,7 +11,7 @@ import unittest
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
-from ask.skills_sdk.eval_ab_run import CodexRunResult, _codex_runner_env, build_ab_run_receipt  # noqa: E402
+from ask.skills_sdk.eval_ab_run import CodexRunResult, _codex_runner_env, _execute_variant, build_ab_run_receipt  # noqa: E402
 from ask.skills_sdk.typed_contracts import validate_ab_run_receipt  # noqa: E402
 
 
@@ -56,6 +56,42 @@ class TestSkillsSdkAbRun(unittest.TestCase):
         self.assertNotIn("OLLAMA_API_KEY", env)
         self.assertNotIn("OPENAI_API_KEY", env)
         self.assertNotIn("SESSION_TOKEN", env)
+
+    def test_execute_variant_rejects_external_evidence_paths_before_runner_starts(self) -> None:
+        calls: list[list[str]] = []
+
+        def fake_runner(command_argv: list[str], prompt: str, repo_root: Path, timeout_seconds: int) -> CodexRunResult:
+            calls.append(command_argv)
+            return CodexRunResult(exit_code=0, stdout="", stderr="")
+
+        base_plan = {
+            "variant_label": "A",
+            "command_argv": ["codex", "exec", "--output-last-message", "unused"],
+            "sandbox_mode": "read-only",
+            "runner_prompt_input_path": f"{self.evidence_root}/A/prompt.txt",
+            "runner_stdout_capture_path": f"{self.evidence_root}/A/codex-stdout.jsonl",
+            "output_last_message_path": f"{self.evidence_root}/A/last-message.json",
+        }
+
+        for key, unsafe_path in (
+            ("runner_prompt_input_path", "/tmp/ab-run-prompt.txt"),
+            ("runner_stdout_capture_path", "../ab-run-stdout.jsonl"),
+            ("output_last_message_path", "/tmp/ab-run-last-message.json"),
+        ):
+            with self.subTest(key=key):
+                command_plan = dict(base_plan)
+                command_plan[key] = unsafe_path
+
+                with self.assertRaises(ValueError):
+                    _execute_variant(
+                        REPO_ROOT,
+                        command_plan=command_plan,
+                        prompt="prompt",
+                        timeout_seconds=1,
+                        runner=fake_runner,
+                    )
+
+        self.assertEqual(calls, [])
 
     def test_builder_executes_with_injected_runner_and_records_evidence(self) -> None:
         calls: list[list[str]] = []

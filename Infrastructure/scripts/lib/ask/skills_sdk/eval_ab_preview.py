@@ -16,11 +16,7 @@ AB_PREVIEW_SCHEMA_URI = "https://jscraik.local/agent-skills/schemas/skills-sdk/a
 
 
 def _digest_file(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return f"sha256:{digest.hexdigest()}"
+    return f"sha256:{hashlib.sha256(path.read_bytes()).hexdigest()}"
 
 
 def _repo_relative(repo_root: Path, path: Path) -> str:

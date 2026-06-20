@@ -148,28 +148,20 @@ def skills_sdk_eval_run(*args, **kwargs):
     return _call_impl("skills_sdk_eval_run", *args, **kwargs)
 
 
-def skills_sdk_eval_profiles_preview(*args, **kwargs):
-    return _call_impl("skills_sdk_eval_profiles_preview", *args, **kwargs)
+def _impl_facade(command_name):
+    def facade(*args, **kwargs):
+        return _call_impl(command_name, *args, **kwargs)
+
+    facade.__name__ = command_name
+    return facade
 
 
-def skills_sdk_eval_ab_rubric_preview(*args, **kwargs):
-    return _call_impl("skills_sdk_eval_ab_rubric_preview", *args, **kwargs)
-
-
-def skills_sdk_eval_ab_preview(*args, **kwargs):
-    return _call_impl("skills_sdk_eval_ab_preview", *args, **kwargs)
-
-
-def skills_sdk_eval_ab_plan(*args, **kwargs):
-    return _call_impl("skills_sdk_eval_ab_plan", *args, **kwargs)
-
-
-def skills_sdk_eval_ab_run(*args, **kwargs):
-    return _call_impl("skills_sdk_eval_ab_run", *args, **kwargs)
-
-
-def skills_sdk_eval_ab_judge_preview(*args, **kwargs):
-    return _call_impl("skills_sdk_eval_ab_judge_preview", *args, **kwargs)
+skills_sdk_eval_profiles_preview = _impl_facade("skills_sdk_eval_profiles_preview")
+skills_sdk_eval_ab_rubric_preview = _impl_facade("skills_sdk_eval_ab_rubric_preview")
+skills_sdk_eval_ab_preview = _impl_facade("skills_sdk_eval_ab_preview")
+skills_sdk_eval_ab_plan = _impl_facade("skills_sdk_eval_ab_plan")
+skills_sdk_eval_ab_run = _impl_facade("skills_sdk_eval_ab_run")
+skills_sdk_eval_ab_judge_preview = _impl_facade("skills_sdk_eval_ab_judge_preview")
 
 
 def skills_sdk_project_install(*args, **kwargs):
