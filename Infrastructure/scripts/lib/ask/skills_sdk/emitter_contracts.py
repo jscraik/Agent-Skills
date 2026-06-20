@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class _EmitterModel(BaseModel):
@@ -50,6 +50,17 @@ class EmitterPreviewReceipt(_EmitterModel):
         min_length=1
     )
     agent_summary: str = Field(min_length=1)
+
+    @field_validator("required_receipts")
+    @classmethod
+    def _require_both_receipts(
+        cls,
+        value: list[Literal["package_digest_receipt", "package_hardening_receipt"]],
+    ) -> list[Literal["package_digest_receipt", "package_hardening_receipt"]]:
+        expected = {"package_digest_receipt", "package_hardening_receipt"}
+        if len(set(value)) != len(value) or set(value) != expected:
+            raise ValueError("required_receipts must include package_digest_receipt and package_hardening_receipt")
+        return value
 
 
 def validate_emitter_preview_receipt(payload: object) -> EmitterPreviewReceipt:

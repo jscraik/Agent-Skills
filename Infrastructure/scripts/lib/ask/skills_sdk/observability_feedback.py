@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import tempfile
 from pathlib import Path
 from typing import Any
@@ -13,6 +14,7 @@ OBSERVABILITY_FEEDBACK_SCHEMA_URI = (
 )
 OBSERVABILITY_ACCEPTANCE_TRACE = ["PU-026", "FR-003", "FR-008", "SA-003", "VP-026"]
 RAW_EVENT_KEYS = frozenset({"prompt", "raw_prompt", "output", "raw_output", "transcript", "messages"})
+SHA256_DIGEST_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 
 
 class ObservabilityFeedbackError(ValueError):
@@ -69,8 +71,11 @@ def _event_redaction_errors(events: list[dict[str, Any]]) -> list[str]:
             errors.append(f"event:{index}:raw_keys:{','.join(raw_keys)}")
         if event.get("redacted") is not True:
             errors.append(f"event:{index}:redacted_not_true")
-        if not isinstance(event.get("prompt_digest"), str):
+        prompt_digest = event.get("prompt_digest")
+        if not isinstance(prompt_digest, str):
             errors.append(f"event:{index}:prompt_digest_missing")
+        elif SHA256_DIGEST_RE.fullmatch(prompt_digest) is None:
+            errors.append(f"event:{index}:prompt_digest_malformed")
     return errors
 
 
@@ -155,7 +160,11 @@ def build_observability_feedback_receipt(
     events = Path(events_path)
     if not events.is_absolute():
         events = repo_root / events
-    checks = [_check("events_path_allowed", "pass" if _path_allowed(repo_root, events) else "blocker", "Events input must stay inside the repository or a temporary test path.", [_repo_relative(repo_root, events)])]
+    path_allowed = _path_allowed(repo_root, events)
+    checks = [_check("events_path_allowed", "pass" if path_allowed else "blocker", "Events input must stay inside the repository or a temporary test path.", [_repo_relative(repo_root, events)])]
+    if not path_allowed:
+        receipt = _receipt(repo_root, package_receipt, events, [], checks)
+        raise ObservabilityFeedbackError(receipt)
     if events.is_file():
         loaded_events, load_errors = _load_events(events)
     else:

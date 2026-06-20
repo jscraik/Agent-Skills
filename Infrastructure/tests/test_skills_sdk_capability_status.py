@@ -211,6 +211,10 @@ class TestSkillsSdkCapabilityStatus(unittest.TestCase):
             "ask sdk eval run Skills/agent-ops/testing --runner internal --mode smoke --json --robot",
             COMMAND_EXAMPLES[("sdk", "eval")],
         )
+        self.assertIn(
+            "ask sdk eval scenario-quality Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --preview --json --robot",
+            COMMAND_EXAMPLES[("sdk", "eval")],
+        )
         self.assertIn("ask sdk package build Skills/agent-ops/autofix --json --robot", COMMAND_EXAMPLES[("sdk", "package")])
         self.assertIn(
             "ask sdk sandbox validate --profile Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/sandbox-profile.json --json --robot",
@@ -236,6 +240,8 @@ class TestSkillsSdkCapabilityStatus(unittest.TestCase):
             "ask sdk trust decide Infrastructure/tests/fixtures/skills_sdk/valid_skill --decision trust --reason 'fixture passed local checks' --owner skills-sdk-tests --preview --json --robot",
             COMMAND_EXAMPLES[("sdk", "trust")],
         )
+
+    def test_command_metadata_registers_sdk_closeout_examples(self) -> None:
         self.assertTrue(any(command.startswith("ask sdk rollback ") for command in COMMAND_EXAMPLES[("sdk", "rollback")]))
         self.assertTrue(any(command.startswith("ask sdk uninstall ") for command in COMMAND_EXAMPLES[("sdk", "uninstall")]))
         self.assertIn("ask sdk status --json --robot", COMMAND_EXAMPLES[("sdk", "status")])

@@ -224,6 +224,7 @@ __all__ = [
     "skills_sdk_emitter_preview",
     "skills_sdk_ci_policy_preview",
     "skills_sdk_static_explorer_preview",
+    "skills_sdk_eval_scenario_quality",
     "skills_sdk_eval_run",
     "skills_sdk_placeholder_lifecycle",
     "skills_sdk_project_rollback",
@@ -4274,6 +4275,7 @@ def skills_sdk_package_signing_intent(
     hardening_receipt = _build_package_hardening_receipt(package_receipt)
     try:
         signing_receipt = build_signing_intent_receipt(
+            repo_root=repo_root,
             policy_path=policy_path,
             package_receipt=package_receipt,
             hardening_receipt=hardening_receipt,
@@ -4713,6 +4715,75 @@ def skills_sdk_static_explorer_preview(repo_root: Path) -> CallResult:
                 code="ERR_VALIDATION",
                 message=payload["agent_summary"],
                 fix_suggestion="Fix capability status JSON or rooted .skillsets manifest JSONL before previewing explorer indexes.",
+            )
+        )
+    return result
+
+
+def skills_sdk_eval_scenario_quality(repo_root: Path, target: str) -> CallResult:
+    """Preview eval scenario quality without promoting or mutating scenario sources."""
+    result = CallResult()
+    result.metadata["command"] = "sdk eval scenario-quality"
+    query = target.strip()
+    target_info, _audit_target = _resolve_doctor_target(repo_root, query)
+    source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
+    source_path = Path(str(source_path_value)) if source_path_value else None
+    if source_path and not source_path.is_absolute():
+        source_path = repo_root / source_path
+    if not source_path:
+        result.status = "error"
+        result.data["skills_sdk_eval_scenario_quality"] = {
+            "schema_version": "skills-sdk-eval-scenario-quality.v0",
+            "status": "blocked",
+            "query": query,
+            "canonical_source_path": source_path_value,
+            "receipt": None,
+            "mutation_performed": False,
+            "promotion_performed": False,
+            "validation_commands": [_ask_validation_command("sdk", "eval", "scenario-quality", query, "--preview")],
+            "agent_summary": f"skills-sdk eval scenario-quality is blocked for {query}: canonical source is missing.",
+        }
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Skills SDK scenario quality is missing a canonical SKILL.md source for '{query}'.",
+                fix_suggestion=_ask_validation_command("sdk", "eval", "scenario-quality", "<skill>", "--preview"),
+            )
+        )
+        return result
+
+    from ask.skills_sdk.scenario_quality import (  # noqa: PLC0415
+        ScenarioQualityError,
+        build_scenario_quality_receipt,
+    )
+
+    try:
+        receipt = build_scenario_quality_receipt(repo_root, source_path=source_path, query=query)
+    except ScenarioQualityError as exc:
+        receipt = exc.receipt
+    payload = {
+        "schema_version": "skills-sdk-eval-scenario-quality.v0",
+        "status": receipt["status"],
+        "query": query,
+        "canonical_source_path": source_path_value,
+        "facade_command": "skills-sdk eval scenario-quality",
+        "receipt": receipt,
+        "scenario_count": receipt["scenario_count"],
+        "promotion_ready_count": receipt["promotion_ready_count"],
+        "blocked_count": receipt["blocked_count"],
+        "mutation_performed": False,
+        "promotion_performed": False,
+        "validation_commands": [_ask_validation_command("sdk", "eval", "scenario-quality", query, "--preview")],
+        "agent_summary": receipt["agent_summary"],
+    }
+    result.data["skills_sdk_eval_scenario_quality"] = payload
+    if receipt["status"] == "blocked":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=payload["agent_summary"],
+                fix_suggestion="Add or repair references/evals.yaml with ids, prompts, acceptance checks, eval modes, and deterministic safety checks.",
             )
         )
     return result

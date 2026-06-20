@@ -116,6 +116,50 @@ class TestSkillsSdkEmitterPreview(unittest.TestCase):
         self.assertFalse(receipt["mutation_performed"])
         self.assertFalse(receipt["artifact_emitted"])
 
+    def test_emitter_preview_blocks_absolute_projection_roots(self) -> None:
+        process = _run_ask(
+            "sdk",
+            "emitter",
+            "preview",
+            "--skill",
+            FIXTURE_SKILL,
+            "--target-root",
+            "/.agents/skills",
+            "--preview",
+            "--json",
+            "--robot",
+        )
+
+        self.assertNotEqual(process.returncode, 0)
+        envelope = json.loads(process.stdout)
+        receipt = envelope["data"]["skills_sdk_emitter_preview"]["receipt"]
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertEqual(receipt["write_plan"], [])
+        self.assertEqual(receipt["blockers"][0]["id"], "target_root_local_projection")
+
+    def test_emitter_preview_normalizes_trailing_slash_projection_root(self) -> None:
+        process = _run_ask(
+            "sdk",
+            "emitter",
+            "preview",
+            "--skill",
+            FIXTURE_SKILL,
+            "--target-root",
+            ".agents/skills/",
+            "--preview",
+            "--json",
+            "--robot",
+        )
+
+        self.assertEqual(process.returncode, 0, process.stderr)
+        envelope = json.loads(process.stdout)
+        receipt = envelope["data"]["skills_sdk_emitter_preview"]["receipt"]
+
+        self.assertEqual(receipt["status"], "preview")
+        self.assertEqual(receipt["target_root"], ".agents/skills")
+        self.assertTrue(receipt["write_plan"][0]["target_path"].startswith(".agents/skills/"))
+
     def test_emitter_preview_builder_blocks_failed_hardening_receipt(self) -> None:
         package_receipt = json.loads(
             (REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/package-digest-receipt.json").read_text(

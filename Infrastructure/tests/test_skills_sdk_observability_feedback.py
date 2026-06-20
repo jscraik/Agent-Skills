@@ -123,6 +123,52 @@ class TestSkillsSdkObservabilityFeedback(unittest.TestCase):
         self.assertIn("event:0:skill_id:other-skill:expected:skills-sdk-valid-fixture", all_evidence)
         self.assertEqual(receipt.scenario_candidates, [])
 
+    def test_builder_blocks_malformed_prompt_digest(self) -> None:
+        with tempfile.NamedTemporaryFile("w", suffix=".events", encoding="utf-8") as events:
+            events.write(
+                json.dumps(
+                    {
+                        "event_type": "skill_run",
+                        "skill_id": "skills-sdk-valid-fixture",
+                        "outcome": "failure",
+                        "redacted": True,
+                        "prompt_digest": "x",
+                        "failure_summary": "Malformed digest must not become a candidate.",
+                    }
+                )
+                + "\n"
+            )
+            events.flush()
+
+            with self.assertRaises(ObservabilityFeedbackError) as raised:
+                build_observability_feedback_receipt(
+                    REPO_ROOT,
+                    package_receipt=self._package_receipt(),
+                    events_path=events.name,
+                )
+
+        receipt = validate_observability_feedback_receipt(raised.exception.receipt)
+        all_evidence = [item for blocker in receipt.blockers for item in blocker.evidence]
+
+        self.assertEqual(receipt.status, "blocked")
+        self.assertIn("event:0:prompt_digest_malformed", all_evidence)
+        self.assertEqual(receipt.scenario_candidates, [])
+
+    def test_builder_blocks_external_event_path_without_reading_it(self) -> None:
+        with self.assertRaises(ObservabilityFeedbackError) as raised:
+            build_observability_feedback_receipt(
+                REPO_ROOT,
+                package_receipt=self._package_receipt(),
+                events_path="/etc/passwd",
+            )
+
+        receipt = validate_observability_feedback_receipt(raised.exception.receipt)
+
+        self.assertEqual(receipt.status, "blocked")
+        self.assertEqual(receipt.event_count, 0)
+        self.assertEqual(receipt.scenario_candidates, [])
+        self.assertEqual(receipt.blockers[0].id, "events_path_allowed")
+
     def test_public_cli_previews_observability_feedback(self) -> None:
         completed = subprocess.run(
             [

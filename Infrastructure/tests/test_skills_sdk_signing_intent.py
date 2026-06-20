@@ -225,6 +225,32 @@ class TestSkillsSdkSigningIntent(unittest.TestCase):
         self.assertFalse(receipt.signing_performed)
         self.assertFalse(receipt.key_material_accessed)
 
+    def test_fallback_contract_handles_incompatible_pydantic_imports(self) -> None:
+        package_receipt, hardening_receipt = self._package_receipts()
+        policy = deepcopy(json.loads(FIXTURE_POLICY.read_text(encoding="utf-8")))
+        policy["acceptance_trace"] = ["BAD"]
+        real_import = builtins.__import__
+
+        def import_with_incompatible_contracts(name: str, *args: object, **kwargs: object) -> object:
+            if name == "ask.skills_sdk.signing_contracts":
+                raise ImportError("pydantic v2 symbols unavailable")
+            return real_import(name, *args, **kwargs)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            policy_path = Path(tmpdir) / "policy.json"
+            policy_path.write_text(json.dumps(policy), encoding="utf-8")
+            with mock.patch("builtins.__import__", side_effect=import_with_incompatible_contracts):
+                with self.assertRaises(SigningIntentError) as raised:
+                    build_signing_intent_receipt(
+                        policy_path=policy_path,
+                        package_receipt=package_receipt,
+                        hardening_receipt=hardening_receipt,
+                    )
+
+        receipt = validate_signing_intent_receipt(raised.exception.receipt)
+        contract_blocker = next(blocker for blocker in receipt.blockers if blocker.id == "policy_contract_valid")
+        self.assertIn("acceptance_trace.0:literal_error", contract_blocker.evidence)
+
     def test_builder_blocks_hardening_failure(self) -> None:
         package_receipt, hardening_receipt = self._package_receipts()
         hardening_receipt["status"] = "blocked"
@@ -271,6 +297,7 @@ class TestSkillsSdkSigningIntent(unittest.TestCase):
 
         self.assertEqual(payload["status"], "ready")
         self.assertEqual(receipt.status, "ready")
+        self.assertEqual(receipt.policy_path, "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/signing-policy.json")
         self.assertFalse(payload["signing_performed"])
         self.assertFalse(payload["key_material_accessed"])
         self.assertFalse(payload["artifact_emitted"])

@@ -37,6 +37,7 @@
     "./bin/ask sdk determinism audit --scope skills --limit 10 --json --robot",
     "./bin/ask sdk ir build Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
     "./bin/ask sdk eval run --runner deterministic-jsonl --dataset Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --skill Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
+    "./bin/ask sdk eval scenario-quality Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --preview --json --robot",
     "./bin/ask sdk package build Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
     "./bin/ask sdk package harden Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
     "./bin/ask sdk trust decide Infrastructure/tests/fixtures/skills_sdk/valid_skill --decision trust --reason 'fixture passed local checks' --owner skills-sdk-tests --preview --json --robot",
@@ -387,6 +388,22 @@
       ],
       "next_slice": "Add release-mode calibration thresholds and hosted-provider comparison only after local quality gates stabilize.",
       "notes": "The SDK routes to the existing internal skill-builder eval backend, preserves internal scorecard case counts and calibrated quality-gate assertions in SDK receipts, binds targeted receipts to package identity, and keeps deterministic JSONL as a fast fixture lane; Tessl remains opt-in."
+    },
+    {
+      "id": "scenario_quality_gate",
+      "title": "Scenario quality gate",
+      "status": "preview_only",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/scenario_quality.py",
+      "pipeline_sections": ["eval_ops", "knowledge_engineering", "ci_and_adoption"],
+      "feature_executed": true,
+      "mutation_performed": false,
+      "evidence_refs": [
+        "./bin/ask sdk eval scenario-quality Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --preview --json --robot",
+        "Infrastructure/config/schemas/skills-sdk/scenario-quality-receipt.v0.schema.json",
+        "Infrastructure/tests/test_skills_sdk_scenario_quality.py"
+      ],
+      "next_slice": "Connect generated or observed eval candidates to this gate before promotion into release-mode eval runs.",
+      "notes": "PU-030 previews scenario promotion quality from references/evals.yaml without mutating scenario sources, running evals, or promoting generated candidates."
     },
     {
       "id": "package_verify",

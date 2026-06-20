@@ -42,6 +42,12 @@ def _filled_template_body() -> str:
     }
     for before, after in replacements.items():
         body = body.replace(before, after)
+    body = validator.FIELD_LINE_RE.sub(
+        lambda match: f"- {match.group('label')}: repo-relative evidence"
+        if match.group("value").strip() == ""
+        else match.group(0),
+        body,
+    )
     return body
 
 
@@ -103,6 +109,43 @@ def test_rejects_unresolved_placeholder_tokens() -> None:
     errors = validator.validate_pr_body(_template(), body)
 
     assert "Replace unresolved placeholder token: <link / artifact path / comment ID>" in errors
+
+
+def test_rejects_empty_required_fields() -> None:
+    validator = _load_validator()
+    body = _filled_template_body().replace("- Problem: repo-relative evidence", "- Problem:", 1)
+
+    errors = validator.validate_pr_body(_template(), body)
+
+    assert "Required field in ## Summary is empty: Problem:" in errors
+
+
+def test_accepts_required_field_with_nested_continuation_content() -> None:
+    validator = _load_validator()
+    body = _filled_template_body()
+    body = body.replace(
+        "- Any other command(s): repo-relative evidence",
+        "- Any other command(s):\n  - Command: `pytest` -> pass",
+        1,
+    )
+
+    errors = validator.validate_pr_body(_template(), body)
+
+    assert errors == []
+
+
+def test_accepts_unchecked_checklist_item_with_status_marker() -> None:
+    body = _filled_template_body()
+    body = body.replace(
+        "- [x] Any CodeRabbit Semgrep findings were either fixed or explicitly justified when warning-level-only.",
+        "- [ ] **(N/A)** Any CodeRabbit Semgrep findings were either fixed or explicitly justified when warning-level-only.",
+        1,
+    )
+    validator = _load_validator()
+
+    errors = validator.validate_pr_body(_template(), body)
+
+    assert errors == []
 
 
 def test_accepts_angle_tokens_not_owned_by_template() -> None:

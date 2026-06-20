@@ -109,7 +109,7 @@ def _policy_contract_check(policy: dict[str, Any]) -> dict[str, Any]:
         from pydantic import ValidationError as PydanticValidationError
 
         from ask.skills_sdk.signing_contracts import validate_signing_policy
-    except ModuleNotFoundError:
+    except ImportError:
         errors = _fallback_policy_contract_errors(policy)
     else:
         try:
@@ -301,6 +301,7 @@ def _package_policy_checks(
 
 def _blocked_receipt(
     *,
+    repo_root: Path | None = None,
     policy_path: Path,
     policy_digest: str | None,
     package_receipt: dict[str, Any],
@@ -309,6 +310,7 @@ def _blocked_receipt(
     blockers = [check for check in checks if check["status"] == "blocker"]
     warnings = [check for check in checks if check["status"] == "warning"]
     receipt = _receipt(
+        repo_root=repo_root,
         status="blocked",
         policy_path=policy_path,
         policy_digest=policy_digest,
@@ -321,8 +323,18 @@ def _blocked_receipt(
     return receipt
 
 
+def _display_policy_path(policy_path: Path, repo_root: Path | None) -> str:
+    if repo_root is None:
+        return policy_path.as_posix()
+    try:
+        return policy_path.resolve(strict=False).relative_to(repo_root.resolve()).as_posix()
+    except ValueError:
+        return policy_path.as_posix()
+
+
 def _receipt(
     *,
+    repo_root: Path | None = None,
     status: str,
     policy_path: Path,
     policy_digest: str | None,
@@ -335,7 +347,7 @@ def _receipt(
         "schema_version": SIGNING_INTENT_RECEIPT_SCHEMA_VERSION,
         "schema_uri": SIGNING_INTENT_RECEIPT_SCHEMA_URI,
         "status": status,
-        "policy_path": policy_path.as_posix(),
+        "policy_path": _display_policy_path(policy_path, repo_root),
         "policy_digest": policy_digest,
         "package_id": str(package_receipt.get("package_id") or ""),
         "version": str(package_receipt.get("version") or ""),
@@ -362,11 +374,13 @@ def build_signing_intent_receipt(
     policy_path: Path,
     package_receipt: dict[str, Any],
     hardening_receipt: dict[str, Any],
+    repo_root: Path | None = None,
 ) -> dict[str, Any]:
     policy, policy_digest, checks = _read_policy(policy_path)
     if policy is None:
         receipt = _blocked_receipt(
             policy_path=policy_path,
+            repo_root=repo_root,
             policy_digest=policy_digest,
             package_receipt=package_receipt,
             checks=checks,
@@ -379,6 +393,7 @@ def build_signing_intent_receipt(
     warnings = [check for check in checks if check["status"] == "warning"]
     status = "blocked" if blockers else "ready"
     receipt = _receipt(
+        repo_root=repo_root,
         status=status,
         policy_path=policy_path,
         policy_digest=policy_digest,

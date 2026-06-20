@@ -1,0 +1,44 @@
+{
+  "schema_version": "skills-sdk.scenario-quality-receipt.v0",
+  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/scenario-quality-receipt.v0.schema.json",
+  "status": "preview",
+  "operation": "scenario_quality_preview",
+  "query": "Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill",
+  "skill_path": "Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill/SKILL.md",
+  "evals_path": "Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill/references/evals.yaml",
+  "scenario_count": 1,
+  "promotion_ready_count": 1,
+  "blocked_count": 0,
+  "scenario_rows": [
+    {
+      "id": "happy-scenario-quality",
+      "category": "happy",
+      "realistic": true,
+      "promotion_status": "promotion_ready",
+      "checks": [
+        {
+          "id": "scenario_id",
+          "status": "pass",
+          "severity": "blocker",
+          "message": "Scenario must declare a stable id.",
+          "evidence": ["happy-scenario-quality"]
+        }
+      ],
+      "blockers": []
+    }
+  ],
+  "quality_checks": [
+    {
+      "id": "evals_yaml_present",
+      "status": "pass",
+      "severity": "blocker",
+      "message": "Skill must carry references/evals.yaml.",
+      "evidence": ["Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill/references/evals.yaml"]
+    }
+  ],
+  "blockers": [],
+  "mutation_performed": false,
+  "promotion_performed": false,
+  "acceptance_trace": ["PU-030", "FR-003", "FR-008", "SA-003", "VP-030"],
+  "agent_summary": "scenario quality preview checked 1 scenario(s) for Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill."
+}

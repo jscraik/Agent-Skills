@@ -98,6 +98,7 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
         "ask sdk docs verify --json --robot",
         "ask sdk eval run Skills/agent-ops/testing --runner internal --mode smoke --json --robot",
         "ask sdk eval run --runner deterministic-jsonl --dataset Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --json --robot",
+        "ask sdk eval scenario-quality Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --preview --json --robot",
         "ask sdk package build Skills/agent-ops/autofix --json --robot",
         "ask sdk package harden Skills/agent-ops/autofix --json --robot",
         "ask sdk package signing-intent Infrastructure/tests/fixtures/skills_sdk/valid_skill --policy Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/signing-policy.json --json --robot",
@@ -269,7 +270,9 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
         "ask sdk eval run Skills/agent-ops/testing --runner internal --mode smoke --json --robot",
         "ask sdk eval run --runner deterministic-jsonl --dataset Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --json --robot",
         "ask sdk eval run --runner deterministic-jsonl --dataset Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --skill Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
+        "ask sdk eval scenario-quality Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --preview --json --robot",
         "skills-sdk eval run Skills/agent-ops/testing --runner internal --mode smoke --json --robot",
+        "skills-sdk eval scenario-quality Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --preview --json --robot",
     ],
     ("sdk", "package"): [
         "ask sdk package build Skills/agent-ops/autofix --json --robot",

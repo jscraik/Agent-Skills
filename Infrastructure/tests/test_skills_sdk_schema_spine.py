@@ -26,6 +26,7 @@ SCHEMA_NAMES = {
     "emitter-preview-receipt": "emitter-preview-receipt.v0.schema.json",
     "ci-policy-preview-receipt": "ci-policy-preview-receipt.v0.schema.json",
     "static-explorer-receipt": "static-explorer-receipt.v0.schema.json",
+    "scenario-quality-receipt": "scenario-quality-receipt.v0.schema.json",
     "signing-policy": "signing-policy.v0.schema.json",
     "signing-intent-receipt": "signing-intent-receipt.v0.schema.json",
     "sandbox-profile": "sandbox-profile.v0.schema.json",
@@ -80,6 +81,18 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
                 self.assertIn("/skills-sdk/", schema["$id"])
                 self.assertRegex(schema["$id"], r"\.v[01]\.schema\.json$")
                 self.assertFalse(schema["additionalProperties"])
+
+    def test_schema_subset_validator_applies_minimum_to_float_numbers(self) -> None:
+        schema = {"type": "number", "minimum": 1}
+
+        with self.assertRaisesRegex(AssertionError, "smaller than minimum"):
+            _validate_schema_subset(schema, 0.5, {})
+
+    def test_schema_subset_validator_uses_json_equality_for_unique_items(self) -> None:
+        schema = {"type": "array", "uniqueItems": True}
+
+        with self.assertRaisesRegex(AssertionError, "duplicate items"):
+            _validate_schema_subset(schema, [{"a": 1, "b": 2}, {"b": 2, "a": 1}], {})
 
     def test_manifest_source_fixture_covers_source_shape_contract(self) -> None:
         payload = self.assert_valid("manifest-source", "manifest-source.json")
@@ -203,6 +216,15 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertFalse(payload["html_rendered"])
         self.assertFalse(payload["hosted_publish_requested"])
         self.assertFalse(payload["mutation_performed"])
+
+    def test_scenario_quality_fixture_records_non_mutating_gate(self) -> None:
+        payload = self.assert_valid("scenario-quality-receipt", "scenario-quality-receipt.json")
+
+        self.assertEqual(payload["status"], "preview")
+        self.assertEqual(payload["scenario_count"], 1)
+        self.assertEqual(payload["promotion_ready_count"], 1)
+        self.assertFalse(payload["mutation_performed"])
+        self.assertFalse(payload["promotion_performed"])
 
     def test_signing_policy_fixture_records_external_key_boundary(self) -> None:
         payload = self.assert_valid("signing-policy", "signing-policy.json")

@@ -136,6 +136,14 @@ def _validate_type_constraint(schema: dict[str, Any], value: object, path: str) 
         raise AssertionError(f"{path} expected {expected_types}, got {type(value).__name__}")
 
 
+def _validate_minimum_constraint(schema: dict[str, Any], value: object, path: str) -> None:
+    if "minimum" not in schema or not isinstance(value, (int, float)) or isinstance(value, bool):
+        return
+    minimum = schema["minimum"]
+    if isinstance(minimum, (int, float)) and value < minimum:
+        raise AssertionError(f"{path} smaller than minimum {minimum}")
+
+
 def _validate_scalar_constraints(schema: dict[str, Any], value: object, path: str) -> None:
     _validate_type_constraint(schema, value, path)
     if "const" in schema and value != schema["const"]:
@@ -144,8 +152,7 @@ def _validate_scalar_constraints(schema: dict[str, Any], value: object, path: st
         raise AssertionError(f"{path} expected one of {schema['enum']!r}, got {value!r}")
     if isinstance(value, str) and "minLength" in schema and len(value) < schema["minLength"]:
         raise AssertionError(f"{path} shorter than minLength {schema['minLength']}")
-    if isinstance(value, int) and "minimum" in schema and value < schema["minimum"]:
-        raise AssertionError(f"{path} smaller than minimum {schema['minimum']}")
+    _validate_minimum_constraint(schema, value, path)
 
 
 def _validate_array_constraints(
@@ -159,8 +166,10 @@ def _validate_array_constraints(
         raise AssertionError(f"{path} shorter than minItems {schema['minItems']}")
     if "maxItems" in schema and len(value) > schema["maxItems"]:
         raise AssertionError(f"{path} longer than maxItems {schema['maxItems']}")
-    if schema.get("uniqueItems") is True and len({repr(item) for item in value}) != len(value):
-        raise AssertionError(f"{path} contains duplicate items")
+    if schema.get("uniqueItems") is True:
+        for index, item in enumerate(value):
+            if any(item == previous for previous in value[:index]):
+                raise AssertionError(f"{path} contains duplicate items")
     if "items" in schema:
         for index, item in enumerate(value):
             _validate_schema_subset(schema["items"], item, schemas, f"{path}[{index}]", root_schema)

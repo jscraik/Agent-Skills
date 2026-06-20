@@ -142,6 +142,27 @@ class TestSkillsSdkTrustLedger(unittest.TestCase):
             self.assertFalse(ledger_path.exists())
             self.assertIn("revoked_package_digest:missing", receipt.blockers[0].evidence)
 
+    def test_builder_blocks_short_revoke_digest(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            ledger_path = Path(tmpdir) / "trust-ledger.jsonl"
+            with self.assertRaises(TrustLedgerError) as raised:
+                build_trust_decision_receipt(
+                    REPO_ROOT,
+                    package_receipt=self._package_receipt(),
+                    decision="revoke",
+                    reason="short digest fixture",
+                    owner="skills-sdk-tests",
+                    apply=False,
+                    ledger_path=ledger_path.as_posix(),
+                    revoked_package_digest="sha256:x",
+                )
+
+            receipt = validate_trust_decision_receipt(raised.exception.receipt)
+
+            self.assertEqual(receipt.status, "blocked")
+            self.assertFalse(receipt.mutation_performed)
+            self.assertIn("revoked_package_digest:sha256:x", receipt.blockers[0].evidence)
+
     def test_builder_blocks_directory_ledger_path_without_traceback(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             with self.assertRaises(TrustLedgerError) as raised:
@@ -161,6 +182,25 @@ class TestSkillsSdkTrustLedger(unittest.TestCase):
             self.assertFalse(receipt.mutation_performed)
             self.assertEqual(receipt.blockers[0].id, "ledger_path_allowed")
             self.assertIn("path_is_directory", receipt.blockers[0].evidence)
+
+    def test_builder_blocks_external_ledger_without_hashing_it(self) -> None:
+        with self.assertRaises(TrustLedgerError) as raised:
+            build_trust_decision_receipt(
+                REPO_ROOT,
+                package_receipt=self._package_receipt(),
+                decision="trust",
+                reason="external ledger fixture",
+                owner="skills-sdk-tests",
+                apply=False,
+                ledger_path="/etc/passwd",
+            )
+
+        receipt = validate_trust_decision_receipt(raised.exception.receipt)
+
+        self.assertEqual(receipt.status, "blocked")
+        self.assertIsNone(receipt.ledger_before_digest)
+        self.assertIsNone(receipt.ledger_after_digest)
+        self.assertEqual(receipt.blockers[0].id, "ledger_path_allowed")
 
     def test_public_cli_previews_trust_decision_receipt(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
@@ -15,6 +16,7 @@ TRUST_DECISION_RECEIPT_SCHEMA_URI = (
 TRUST_LEDGER_DEFAULT_PATH = Path(".harness/skills-sdk/trust-ledger.jsonl")
 TRUST_DECISION_ACCEPTANCE_TRACE = ["FR-003", "FR-008", "SA-003", "SA-004", "SEC-001", "VP-025"]
 TRUST_DECISIONS = frozenset({"trust", "distrust", "revoke"})
+SHA256_DIGEST_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 
 
 class TrustLedgerError(ValueError):
@@ -103,7 +105,7 @@ def _trust_decision_shape_check(
             evidence.append(f"expires_at:{expires_at}")
     if decision == "revoke" and not revoked_package_digest:
         evidence.append("revoked_package_digest:missing")
-    if revoked_package_digest is not None and not revoked_package_digest.startswith("sha256:"):
+    if revoked_package_digest is not None and SHA256_DIGEST_RE.fullmatch(revoked_package_digest) is None:
         evidence.append(f"revoked_package_digest:{revoked_package_digest}")
     return _check(
         "trust_decision_shape",
@@ -210,10 +212,15 @@ def _receipt(
     blockers: list[dict[str, Any]],
     mutation_performed: bool,
 ) -> dict[str, Any]:
+    receipt_revoked_package_digest = (
+        revoked_package_digest
+        if revoked_package_digest is not None and SHA256_DIGEST_RE.fullmatch(revoked_package_digest) is not None
+        else None
+    )
     return {
         **_receipt_base(status, decision, reason, owner),
         "expires_at": expires_at,
-        "revoked_package_digest": revoked_package_digest,
+        "revoked_package_digest": receipt_revoked_package_digest,
         **_receipt_package(package_receipt),
         **_receipt_ledger(repo_root, ledger_path, ledger_before_digest, ledger_after_digest, ledger_entry),
         "trust_checks": trust_checks,
@@ -335,7 +342,8 @@ def build_trust_decision_receipt(
     ledger = _resolve_ledger_path(repo_root, ledger_path)
     checks = _trust_checks(repo_root, ledger, decision, reason, owner, expires_at, revoked_package_digest)
     blockers = [check for check in checks if check["status"] == "blocker"]
-    before_digest = _sha256_file(ledger)
+    ledger_allowed = all(check["id"] != "ledger_path_allowed" for check in blockers)
+    before_digest = _sha256_file(ledger) if ledger_allowed else None
     if blockers:
         receipt = _blocked_receipt(
             repo_root,

@@ -8,6 +8,7 @@ from ask.envelope import CallResult, ErrorObject
 from ask.cli_errors import build_unknown_action_result
 from ask.commands.sdk_ci import add_sdk_ci_parser, dispatch_sdk_ci
 from ask.commands.sdk_emitter import add_sdk_emitter_parser, dispatch_sdk_emitter
+from ask.commands.sdk_eval import add_sdk_eval_parser, dispatch_sdk_eval
 from ask.commands.sdk_explorer import add_sdk_explorer_parser, dispatch_sdk_explorer
 from ask.skills_sdk.determinism import audit_skill_determinism
 from ask.skills_sdk.lenses import (
@@ -57,31 +58,6 @@ def _add_sdk_docs_parser(sdk_subparsers: argparse._SubParsersAction, global_pars
         "--artifact",
         help="Optional repo-relative or absolute HTML artifact path to verify",
     )
-
-
-def _add_sdk_eval_parser(
-    sdk_subparsers: argparse._SubParsersAction,
-    global_parser: argparse.ArgumentParser,
-) -> None:
-    sdk_eval_parser = sdk_subparsers.add_parser("eval", help="Run Skills SDK eval receipts", parents=[global_parser])
-    sdk_eval_subparsers = sdk_eval_parser.add_subparsers(dest="eval_action", required=True)
-    sdk_eval_run_parser = sdk_eval_subparsers.add_parser(
-        "run",
-        help="Run internal skill evals or exact-match deterministic eval cases",
-        parents=[global_parser],
-    )
-    sdk_eval_run_parser.add_argument("target", nargs="?", help="Skill handle or source path for the internal eval runner")
-    sdk_eval_run_parser.add_argument("--dataset", help="Repo-relative or absolute deterministic eval dataset")
-    sdk_eval_run_parser.add_argument("--skill", help="Optional skill handle or source path for deterministic evals")
-    sdk_eval_run_parser.add_argument(
-        "--runner",
-        choices=["auto", "internal", "deterministic-jsonl"],
-        default="auto",
-        help="Eval backend. auto uses deterministic-jsonl with --dataset, otherwise internal.",
-    )
-    sdk_eval_run_parser.add_argument("--mode", choices=["smoke", "release"], default="smoke", help="Internal eval mode.")
-    sdk_eval_run_parser.add_argument("--case", action="append", dest="cases", help="Internal eval case id filter.")
-    sdk_eval_run_parser.add_argument("--with-tessl", action="store_true", help="Allow internal Tessl continuation.")
 
 
 def _add_sdk_package_parser(
@@ -313,7 +289,7 @@ def add_sdk_parser(
     _add_sdk_check_parser(sdk_subparsers, global_parser)
     _add_sdk_ir_parser(sdk_subparsers, global_parser)
     _add_sdk_docs_parser(sdk_subparsers, global_parser)
-    _add_sdk_eval_parser(sdk_subparsers, global_parser)
+    add_sdk_eval_parser(sdk_subparsers, global_parser)
     _add_sdk_package_parser(sdk_subparsers, global_parser)
     _add_sdk_sandbox_parser(sdk_subparsers, global_parser)
     _add_sdk_trust_parser(sdk_subparsers, global_parser)
@@ -424,7 +400,7 @@ def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
         "check": _dispatch_sdk_check,
         "ir": _dispatch_sdk_ir,
         "docs": _dispatch_sdk_docs,
-        "eval": _dispatch_sdk_eval,
+        "eval": dispatch_sdk_eval,
         "package": _dispatch_sdk_package,
         "sandbox": _dispatch_sdk_sandbox,
         "trust": _dispatch_sdk_trust,
@@ -458,20 +434,6 @@ def _dispatch_sdk_docs(repo_root: Path, args: argparse.Namespace) -> CallResult:
     if args.docs_action == "verify":
         return skills_commands.skills_sdk_docs_verify(repo_root, artifact=args.artifact)
     return build_unknown_action_result("sdk docs", args.docs_action)
-
-
-def _dispatch_sdk_eval(repo_root: Path, args: argparse.Namespace) -> CallResult:
-    if args.eval_action == "run":
-        return skills_commands.skills_sdk_eval_run(
-            repo_root,
-            dataset=args.dataset,
-            target=args.skill or args.target,
-            mode=args.mode,
-            runner=args.runner,
-            skip_tessl=not args.with_tessl,
-            cases=args.cases,
-        )
-    return build_unknown_action_result("sdk eval", args.eval_action)
 
 
 def _dispatch_sdk_package(repo_root: Path, args: argparse.Namespace) -> CallResult:

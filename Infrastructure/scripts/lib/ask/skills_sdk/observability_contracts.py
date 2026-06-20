@@ -23,7 +23,10 @@ class FeedbackCandidate(_ObservabilityModel):
     source_event_digest: str = Field(min_length=71)
     skill_id: str = Field(min_length=1)
     promotion_status: Literal["blocked_pending_package_eval"]
-    required_receipts: list[Literal["package_digest_receipt", "eval_run_receipt"]] = Field(min_length=2)
+    required_receipts: list[Literal["package_digest_receipt", "eval_run_receipt"]] = Field(
+        min_length=2,
+        max_length=2,
+    )
     prompt_digest: str | None = Field(default=None, min_length=71)
     failure_summary: str | None = Field(default=None, min_length=1)
     gap_summary: str | None = Field(default=None, min_length=1)
@@ -34,7 +37,7 @@ class FeedbackCandidate(_ObservabilityModel):
         cls,
         value: list[Literal["package_digest_receipt", "eval_run_receipt"]],
     ) -> list[Literal["package_digest_receipt", "eval_run_receipt"]]:
-        if set(value) != {"package_digest_receipt", "eval_run_receipt"}:
+        if len(set(value)) != len(value) or set(value) != {"package_digest_receipt", "eval_run_receipt"}:
             raise ValueError("required_receipts must include package_digest_receipt and eval_run_receipt")
         return value
 

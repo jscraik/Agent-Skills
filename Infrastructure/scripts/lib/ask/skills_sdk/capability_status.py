@@ -45,6 +45,7 @@ REQUIRED_CAPABILITY_IDS = (
     "observability_feedback",
     "refs_ingestion",
     "evals",
+    "scenario_quality_gate",
     "package_verify",
     "signing",
     "sandbox",

@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/scenario-quality-receipt.v0.schema.json",
+  "title": "Skills SDK Scenario Quality Receipt v0",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "string", "const": "skills-sdk.scenario-quality-receipt.v0"},
+    "schema_uri": {"type": "string", "const": "https://jscraik.local/agent-skills/schemas/skills-sdk/scenario-quality-receipt.v0.schema.json"},
+    "status": {"type": "string", "enum": ["preview", "blocked"]},
+    "operation": {"type": "string", "const": "scenario_quality_preview"},
+    "query": {"type": "string", "minLength": 1},
+    "skill_path": {"type": "string", "minLength": 1},
+    "evals_path": {"type": "string", "minLength": 1},
+    "scenario_count": {"type": "integer", "minimum": 0},
+    "promotion_ready_count": {"type": "integer", "minimum": 0},
+    "blocked_count": {"type": "integer", "minimum": 0},
+    "scenario_rows": {"type": "array", "items": {"$ref": "#/definitions/scenarioRow"}},
+    "quality_checks": {"type": "array", "minItems": 1, "items": {"$ref": "#/definitions/check"}},
+    "blockers": {"type": "array", "items": {"$ref": "#/definitions/check"}},
+    "mutation_performed": {"type": "boolean", "const": false},
+    "promotion_performed": {"type": "boolean", "const": false},
+    "acceptance_trace": {"type": "array", "minItems": 1, "items": {"type": "string", "enum": ["PU-030", "FR-003", "FR-008", "SA-003", "VP-030"]}},
+    "agent_summary": {"type": "string", "minLength": 1}
+  },
+  "required": [
+    "schema_version",
+    "schema_uri",
+    "status",
+    "operation",
+    "query",
+    "skill_path",
+    "evals_path",
+    "scenario_count",
+    "promotion_ready_count",
+    "blocked_count",
+    "scenario_rows",
+    "quality_checks",
+    "blockers",
+    "mutation_performed",
+    "promotion_performed",
+    "acceptance_trace",
+    "agent_summary"
+  ],
+  "definitions": {
+    "scenarioRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "category": {"type": "string", "minLength": 1},
+        "realistic": {"type": "boolean"},
+        "promotion_status": {"type": "string", "enum": ["promotion_ready", "blocked_quality_gate"]},
+        "checks": {"type": "array", "minItems": 1, "items": {"$ref": "#/definitions/check"}},
+        "blockers": {"type": "array", "items": {"$ref": "#/definitions/check"}}
+      },
+      "required": ["id", "category", "realistic", "promotion_status", "checks", "blockers"]
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "status": {"type": "string", "enum": ["pass", "blocker"]},
+        "severity": {"type": "string", "const": "blocker"},
+        "message": {"type": "string", "minLength": 1},
+        "evidence": {"type": "array", "items": {"type": "string"}}
+      },
+      "required": ["id", "status", "severity", "message", "evidence"]
+    }
+  }
+}

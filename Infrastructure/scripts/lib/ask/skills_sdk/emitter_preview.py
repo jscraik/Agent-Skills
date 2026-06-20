@@ -39,15 +39,23 @@ def _check(check_id: str, status: str, message: str, evidence: list[str] | None 
 
 
 def _target_root_check(target_root: str) -> dict[str, Any]:
-    normalized = target_root.strip().strip("/")
+    normalized = _normalize_target_root(target_root)
     blocked_markers = ("://", "\\")
-    allowed = normalized == DEFAULT_TARGET_ROOT and not any(marker in target_root for marker in blocked_markers)
+    allowed = (
+        normalized == DEFAULT_TARGET_ROOT
+        and not target_root.strip().startswith("/")
+        and not any(marker in target_root for marker in blocked_markers)
+    )
     return _check(
         "target_root_local_projection",
         "pass" if allowed else "blocker",
         "Emitter preview is limited to the local .agents/skills projection root.",
         [target_root],
     )
+
+
+def _normalize_target_root(target_root: str) -> str:
+    return target_root.strip().rstrip("/")
 
 
 def _projection_check(projection: str) -> dict[str, Any]:
@@ -115,6 +123,7 @@ def build_emitter_preview_receipt(
     projection: str = "runtime-skill",
     target_root: str = DEFAULT_TARGET_ROOT,
 ) -> dict[str, Any]:
+    normalized_target_root = _normalize_target_root(target_root)
     checks = [
         _projection_check(projection),
         _target_root_check(target_root),
@@ -130,8 +139,8 @@ def build_emitter_preview_receipt(
         "package_id": package_receipt["package_id"],
         "version": package_receipt["version"],
         "package_digest": package_receipt["package_digest"],
-        "target_root": target_root,
-        "write_plan": [] if blockers else _write_plan(repo_root, package_receipt, target_root),
+        "target_root": normalized_target_root,
+        "write_plan": [] if blockers else _write_plan(repo_root, package_receipt, normalized_target_root),
         "required_receipts": ["package_digest_receipt", "package_hardening_receipt"],
         "emitter_checks": checks,
         "blockers": blockers,

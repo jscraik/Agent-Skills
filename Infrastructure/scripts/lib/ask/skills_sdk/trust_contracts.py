@@ -69,6 +69,8 @@ class TrustDecisionReceipt(_TrustContractModel):
                 raise ValueError("recorded trust decisions must set mutation_performed true")
             if self.ledger_after_digest is None or self.ledger_entry is None or self.ledger_entry_digest is None:
                 raise ValueError("recorded trust decisions must include ledger mutation evidence")
+        elif self.mutation_performed:
+            raise ValueError("preview and blocked trust decisions must set mutation_performed false")
         return self
 
 

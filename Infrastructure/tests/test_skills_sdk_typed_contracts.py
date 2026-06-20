@@ -15,6 +15,7 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 from ask.skills_sdk import typed_contracts as contracts  # noqa: E402
 from ask.skills_sdk.ci_contracts import validate_ci_policy_preview_receipt  # noqa: E402
 from ask.skills_sdk.emitter_contracts import validate_emitter_preview_receipt  # noqa: E402
+from ask.skills_sdk.scenario_quality_contracts import validate_scenario_quality_receipt  # noqa: E402
 from ask.skills_sdk.static_explorer_contracts import validate_static_explorer_receipt  # noqa: E402
 
 
@@ -183,6 +184,17 @@ class TestSkillsSdkTypedContracts(unittest.TestCase):
         with self.assertRaises(ValidationError):
             validate_emitter_preview_receipt(payload)
 
+    def test_emitter_preview_contract_rejects_duplicate_required_receipts(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "emitter-preview-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["required_receipts"] = [
+            "package_digest_receipt",
+            "package_digest_receipt",
+        ]
+
+        with self.assertRaises(ValidationError):
+            validate_emitter_preview_receipt(payload)
+
     def test_emitter_preview_fixture_loads_through_dedicated_contract(self) -> None:
         model = validate_emitter_preview_receipt(_json(FIXTURE_DIR / "valid" / "emitter-preview-receipt.json"))
 
@@ -219,6 +231,21 @@ class TestSkillsSdkTypedContracts(unittest.TestCase):
         self.assertEqual(model.model_config["extra"], "forbid")
         self.assertTrue(model.model_config["strict"])
         self.assertEqual(model.capability_count, 1)
+
+    def test_scenario_quality_contract_rejects_promotion_claims(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "scenario-quality-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["promotion_performed"] = True
+
+        with self.assertRaises(ValidationError):
+            validate_scenario_quality_receipt(payload)
+
+    def test_scenario_quality_fixture_loads_through_dedicated_contract(self) -> None:
+        model = validate_scenario_quality_receipt(_json(FIXTURE_DIR / "valid" / "scenario-quality-receipt.json"))
+
+        self.assertEqual(model.model_config["extra"], "forbid")
+        self.assertTrue(model.model_config["strict"])
+        self.assertEqual(model.scenario_count, 1)
 
     def test_eval_run_contract_accepts_legacy_receipt_without_package_identity(self) -> None:
         payload = _json(FIXTURE_DIR / "valid" / "eval-run-receipt.json")
@@ -264,6 +291,24 @@ class TestSkillsSdkTypedContracts(unittest.TestCase):
         self.assertIsNotNone(model.quality_gates)
         self.assertEqual(model.quality_gates.source, "internal_scorecard")
         self.assertEqual(model.quality_gates.assertions[0].id, "scorecard_decision_passes")
+
+    def test_trust_decision_contract_rejects_recorded_receipt_without_mutation(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "trust-decision-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["status"] = "recorded"
+        payload["mutation_performed"] = False
+
+        with self.assertRaises(ValidationError):
+            contracts.validate_trust_decision_receipt(payload)
+
+    def test_trust_decision_contract_rejects_mutating_preview_receipt(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "trust-decision-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["status"] = "preview"
+        payload["mutation_performed"] = True
+
+        with self.assertRaises(ValidationError):
+            contracts.validate_trust_decision_receipt(payload)
 
     def test_contracts_reject_type_coercion(self) -> None:
         """

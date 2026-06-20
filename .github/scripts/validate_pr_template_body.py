@@ -14,7 +14,9 @@ from pathlib import Path
 SECTION_RE = re.compile(r"^## (?P<title>.+?)\s*$", re.MULTILINE)
 CHECKBOX_RE = re.compile(r"^- \[[ xX]\] (?P<label>.+?)\s*$", re.MULTILINE)
 FIELD_RE = re.compile(r"^- (?P<label>[^:\n]+):", re.MULTILINE)
+FIELD_LINE_RE = re.compile(r"^- (?P<label>[^:\n]+):(?P<value>.*)$", re.MULTILINE)
 PLACEHOLDER_RE = re.compile(r"<[^>\n]+>")
+CHECKLIST_STATUS_RE = re.compile(r"^\*\*\((?:pending|n/a|not applicable)\)\*\*\s*", re.IGNORECASE)
 
 
 @dataclass(frozen=True)
@@ -39,7 +41,7 @@ def _template_contract(template: str) -> TemplateContract:
     sections = [match.group("title").strip() for match in SECTION_RE.finditer(template)]
     blocks = _section_blocks(template)
     checklist_items = [
-        match.group("label").strip()
+        _normalize_checklist_label(match.group("label"))
         for match in CHECKBOX_RE.finditer(blocks.get("Checklist", ""))
     ]
     fields_by_section: dict[str, list[str]] = {}
@@ -84,18 +86,36 @@ def _field_errors(contract: TemplateContract, body_blocks: dict[str, str]) -> li
     errors: list[str] = []
     for section, expected_fields in contract.fields_by_section.items():
         block = body_blocks.get(section, "")
-        actual_fields = [match.group("label").strip() for match in FIELD_RE.finditer(block)]
+        field_values = _field_values(block)
+        actual_fields = list(field_values)
         missing_fields = [field for field in expected_fields if field not in actual_fields]
         extra_fields = [field for field in actual_fields if field not in expected_fields]
         for field in missing_fields:
             errors.append(f"Missing required field in ## {section}: {field}:")
         for field in extra_fields:
             errors.append(f"Unexpected field in ## {section}: {field}:")
+        for field in expected_fields:
+            if field in field_values and field_values[field] == "":
+                errors.append(f"Required field in ## {section} is empty: {field}:")
     return errors
 
 
+def _field_values(block: str) -> dict[str, str]:
+    matches = list(FIELD_LINE_RE.finditer(block))
+    values: dict[str, str] = {}
+    for index, match in enumerate(matches):
+        next_start = matches[index + 1].start() if index + 1 < len(matches) else len(block)
+        continuation = block[match.end():next_start].strip()
+        values[match.group("label").strip()] = f"{match.group('value').strip()}\n{continuation}".strip()
+    return values
+
+
+def _normalize_checklist_label(label: str) -> str:
+    return CHECKLIST_STATUS_RE.sub("", label.strip()).strip()
+
+
 def _checklist_labels(checklist_block: str) -> list[str]:
-    return [match.group("label").strip() for match in CHECKBOX_RE.finditer(checklist_block)]
+    return [_normalize_checklist_label(match.group("label")) for match in CHECKBOX_RE.finditer(checklist_block)]
 
 
 def _checklist_errors(contract: TemplateContract, body_blocks: dict[str, str]) -> list[str]:
