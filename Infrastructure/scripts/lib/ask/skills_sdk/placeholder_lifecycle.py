@@ -55,7 +55,7 @@ PLACEHOLDER_LIFECYCLE_ACCEPTANCE_TRACE = (
     "VP-018",
 )
 
-SURFACES = ("refs", "evals", "signing", "sandbox", "security_adapter", "explorer")
+SURFACES = ("refs", "evals", "signing", "security_adapter", "explorer")
 RISK_TIERS = ("low", "medium", "high", "privileged", "published")
 BLOCKING_RISK_TIERS = {"high", "privileged", "published"}
 PUBLISHED_RISK_TIERS = {"published"}
@@ -91,13 +91,6 @@ SURFACE_CONTRACTS = {
         optional_reason="Package signing is reserved for a later Skills SDK milestone and no key material was accessed.",
         blocked_reason="Package signing is required by the selected risk tier but no signing adapter is implemented in V1.0.",
         required_risk_tiers=frozenset(PUBLISHED_RISK_TIERS),
-    ),
-    "sandbox": PlaceholderSurfaceContract(
-        surface="sandbox",
-        lifecycle_stage="sandbox_execution",
-        optional_reason="Sandbox execution is reserved for a later Skills SDK milestone and no sandbox provider was invoked.",
-        blocked_reason="Sandbox execution is required by the selected risk tier but no sandbox adapter is implemented in V1.0.",
-        required_risk_tiers=frozenset(BLOCKING_RISK_TIERS),
     ),
     "security_adapter": PlaceholderSurfaceContract(
         surface="security_adapter",

@@ -1,0 +1,74 @@
+{
+  "schema_version": "skills-sdk.eval-profile-preview-receipt.v0",
+  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/eval-profile-preview-receipt.v0.schema.json",
+  "status": "preview",
+  "operation": "eval_profile_preview",
+  "execution_profiles": [
+    {
+      "id": "codex-read-only",
+      "runner": "codex_exec",
+      "sandbox_mode": "read-only",
+      "approval_policy": "on-request",
+      "codex_json_events_required": true,
+      "output_schema_supported": true,
+      "mutation_allowed": false
+    },
+    {
+      "id": "codex-workspace-write",
+      "runner": "codex_exec",
+      "sandbox_mode": "workspace-write",
+      "approval_policy": "on-request",
+      "codex_json_events_required": true,
+      "output_schema_supported": true,
+      "mutation_allowed": true
+    }
+  ],
+  "judge_profiles": [
+    {
+      "id": "oss-local",
+      "provider": "ollama",
+      "mode": "local",
+      "host": "http://localhost:11434",
+      "model": "qwen3.5:latest",
+      "network_required": true,
+      "secret_env_names": [],
+      "auth_boundary": "none",
+      "receives_sanitized_outputs_only": true
+    },
+    {
+      "id": "oss-cloud",
+      "provider": "ollama",
+      "mode": "cloud",
+      "host": "https://ollama.com",
+      "model": "deepseek-v4-flash:cloud",
+      "network_required": true,
+      "secret_env_names": ["OLLAMA_API_KEY"],
+      "auth_boundary": "env_secret",
+      "receives_sanitized_outputs_only": true
+    },
+    {
+      "id": "codex-fast",
+      "provider": "codex",
+      "mode": "codex-fast",
+      "host": "codex-cli-authenticated-session",
+      "model": "gpt-5.3-codex-spark",
+      "network_required": true,
+      "secret_env_names": [],
+      "auth_boundary": "codex_cli_auth",
+      "receives_sanitized_outputs_only": true
+    }
+  ],
+  "secret_boundary": {
+    "skill_execution_env_secret_names": [],
+    "judge_env_secret_names": ["OLLAMA_API_KEY"],
+    "skill_execution_receives_judge_secrets": false
+  },
+  "execution_boundary": "codex_exec_sandbox",
+  "external_intake_boundary": "sdk_quarantine_only",
+  "mutation_performed": false,
+  "network_accessed": false,
+  "provider_invoked": false,
+  "blockers": [],
+  "acceptance_trace": ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022", "VP-030"],
+  "agent_summary": "eval profile preview declares Codex sandbox execution profiles and isolated Ollama/Codex judge profiles without invoking providers."
+}

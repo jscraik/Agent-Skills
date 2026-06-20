@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/ab-preview-receipt.v0.schema.json",
+  "title": "Skills SDK A/B Preview Receipt v0",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "string", "const": "skills-sdk.ab-preview-receipt.v0"},
+    "schema_uri": {"type": "string", "const": "https://jscraik.local/agent-skills/schemas/skills-sdk/ab-preview-receipt.v0.schema.json"},
+    "status": {"type": "string", "enum": ["preview", "blocked"]},
+    "operation": {"type": "string", "const": "ab_preview"},
+    "skill_a": {"oneOf": [{"type": "null"}, {"$ref": "#/definitions/skill_variant"}]},
+    "skill_b": {"oneOf": [{"type": "null"}, {"$ref": "#/definitions/skill_variant"}]},
+    "fixture": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "digest": {"type": "string", "minLength": 71},
+        "size_bytes": {"type": "integer", "minimum": 0}
+      },
+      "required": ["path", "digest", "size_bytes"]
+    },
+    "execution_profile": {"oneOf": [{"type": "null"}, {"$ref": "eval-profile-preview-receipt.v0.schema.json#/definitions/execution_profile"}]},
+    "judge_profile": {"oneOf": [{"type": "null"}, {"$ref": "eval-profile-preview-receipt.v0.schema.json#/definitions/judge_profile"}]},
+    "evidence_plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "codex_json_events": {"type": "boolean", "const": true},
+        "output_diff": {"type": "boolean", "const": true},
+        "validation_results": {"type": "boolean", "const": true},
+        "judge_decision": {"type": "boolean", "const": true},
+        "winner_values": {
+          "type": "array",
+          "minItems": 3,
+          "items": {"type": "string", "enum": ["skill_a", "skill_b", "inconclusive"]},
+          "uniqueItems": true
+        }
+      },
+      "required": ["codex_json_events", "output_diff", "validation_results", "judge_decision", "winner_values"]
+    },
+    "secret_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "skill_execution_env_secret_names": {"type": "array", "items": {"type": "string"}},
+        "judge_env_secret_names": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "skill_execution_receives_judge_secrets": {"type": "boolean", "const": false}
+      },
+      "required": [
+        "skill_execution_env_secret_names",
+        "judge_env_secret_names",
+        "skill_execution_receives_judge_secrets"
+      ]
+    },
+    "execution_boundary": {"type": "string", "const": "codex_exec_sandbox"},
+    "judge_boundary": {"type": "string", "const": "post_run_sanitized_evidence_only"},
+    "mutation_performed": {"type": "boolean", "const": false},
+    "network_accessed": {"type": "boolean", "const": false},
+    "provider_invoked": {"type": "boolean", "const": false},
+    "codex_exec_invoked": {"type": "boolean", "const": false},
+    "blockers": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "acceptance_trace": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "enum": ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022", "VP-030"]}
+    },
+    "agent_summary": {"type": "string", "minLength": 1}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "preview"}}},
+      "then": {
+        "properties": {
+          "skill_a": {"$ref": "#/definitions/skill_variant"},
+          "skill_b": {"$ref": "#/definitions/skill_variant"},
+          "fixture": {"type": "object"},
+          "execution_profile": {"$ref": "eval-profile-preview-receipt.v0.schema.json#/definitions/execution_profile"},
+          "judge_profile": {"$ref": "eval-profile-preview-receipt.v0.schema.json#/definitions/judge_profile"},
+          "blockers": {"type": "array", "maxItems": 0}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"status": {"const": "blocked"}}},
+      "then": {"properties": {"blockers": {"type": "array", "minItems": 1}}}
+    }
+  ],
+  "required": [
+    "schema_version",
+    "schema_uri",
+    "status",
+    "operation",
+    "skill_a",
+    "skill_b",
+    "fixture",
+    "execution_profile",
+    "judge_profile",
+    "evidence_plan",
+    "secret_boundary",
+    "execution_boundary",
+    "judge_boundary",
+    "mutation_performed",
+    "network_accessed",
+    "provider_invoked",
+    "codex_exec_invoked",
+    "blockers",
+    "acceptance_trace",
+    "agent_summary"
+  ],
+  "definitions": {
+    "skill_variant": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "label": {"type": "string", "enum": ["A", "B"]},
+        "query": {"type": "string", "minLength": 1},
+        "skill_ir_schema_version": {"type": "string", "minLength": 1},
+        "package_id": {"type": "string", "minLength": 1},
+        "package_digest": {"type": "string", "minLength": 71}
+      },
+      "required": ["label", "query", "skill_ir_schema_version", "package_id", "package_digest"]
+    }
+  }
+}

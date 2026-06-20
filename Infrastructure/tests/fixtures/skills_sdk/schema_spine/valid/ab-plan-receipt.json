@@ -1,0 +1,96 @@
+{
+  "schema_version": "skills-sdk.ab-plan-receipt.v0",
+  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/ab-plan-receipt.v0.schema.json",
+  "status": "planned",
+  "operation": "ab_plan",
+  "skill_a": {
+    "label": "A",
+    "query": "Infrastructure/tests/fixtures/skills_sdk/valid_skill",
+    "skill_ir_schema_version": "skills-sdk.skill-ir.v0",
+    "package_id": "skills-sdk-valid-fixture",
+    "package_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+  },
+  "skill_b": {
+    "label": "B",
+    "query": "Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill",
+    "skill_ir_schema_version": "skills-sdk.skill-ir.v0",
+    "package_id": "skills-sdk-scenario-quality-fixture",
+    "package_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+  },
+  "fixture": {
+    "path": "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json",
+    "digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+    "size_bytes": 128
+  },
+  "execution_profile": {
+    "id": "codex-read-only",
+    "runner": "codex_exec",
+    "sandbox_mode": "read-only",
+    "approval_policy": "on-request",
+    "codex_json_events_required": true,
+    "output_schema_supported": true,
+    "mutation_allowed": false
+  },
+  "judge_profile": {
+    "id": "oss-local",
+    "provider": "ollama",
+    "mode": "local",
+    "host": "http://localhost:11434",
+    "model": "qwen3.5:latest",
+    "network_required": true,
+    "secret_env_names": [],
+    "auth_boundary": "none",
+    "receives_sanitized_outputs_only": true
+  },
+  "evidence_root": ".harness/artifacts/sdk-ab-evals",
+  "experiment_id": "1111222233334444",
+  "command_variant_labels": ["A", "B"],
+  "command_plan": [
+    {
+      "variant_label": "A",
+      "command_argv": ["codex", "exec", "--sandbox", "read-only", "--ask-for-approval", "on-request", "--cd", ".", "--json", "--output-last-message", ".harness/artifacts/sdk-ab-evals/1111222233334444/A/last-message.json", "-"],
+      "sandbox_mode": "read-only",
+      "approval_policy": "on-request",
+      "event_log_path": ".harness/artifacts/sdk-ab-evals/1111222233334444/A/codex-events.jsonl",
+      "output_last_message_path": ".harness/artifacts/sdk-ab-evals/1111222233334444/A/last-message.json",
+      "prompt_stdin_path": ".harness/artifacts/sdk-ab-evals/1111222233334444/A/prompt.md",
+      "runner_stdout_capture_path": ".harness/artifacts/sdk-ab-evals/1111222233334444/A/codex-events.jsonl",
+      "runner_prompt_input_path": ".harness/artifacts/sdk-ab-evals/1111222233334444/A/prompt.md",
+      "prompt_stdin_digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+      "planned_write_paths": [
+        ".harness/artifacts/sdk-ab-evals/1111222233334444/A/last-message.json"
+      ],
+      "allowed_secret_env_names": []
+    },
+    {
+      "variant_label": "B",
+      "command_argv": ["codex", "exec", "--sandbox", "read-only", "--ask-for-approval", "on-request", "--cd", ".", "--json", "--output-last-message", ".harness/artifacts/sdk-ab-evals/1111222233334444/B/last-message.json", "-"],
+      "sandbox_mode": "read-only",
+      "approval_policy": "on-request",
+      "event_log_path": ".harness/artifacts/sdk-ab-evals/1111222233334444/B/codex-events.jsonl",
+      "output_last_message_path": ".harness/artifacts/sdk-ab-evals/1111222233334444/B/last-message.json",
+      "prompt_stdin_path": ".harness/artifacts/sdk-ab-evals/1111222233334444/B/prompt.md",
+      "runner_stdout_capture_path": ".harness/artifacts/sdk-ab-evals/1111222233334444/B/codex-events.jsonl",
+      "runner_prompt_input_path": ".harness/artifacts/sdk-ab-evals/1111222233334444/B/prompt.md",
+      "prompt_stdin_digest": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+      "planned_write_paths": [
+        ".harness/artifacts/sdk-ab-evals/1111222233334444/B/last-message.json"
+      ],
+      "allowed_secret_env_names": []
+    }
+  ],
+  "secret_boundary": {
+    "skill_execution_env_secret_names": [],
+    "judge_env_secret_names": [],
+    "skill_execution_receives_judge_secrets": false
+  },
+  "execution_boundary": "codex_exec_sandbox",
+  "judge_boundary": "post_run_sanitized_evidence_only",
+  "mutation_performed": false,
+  "network_accessed": false,
+  "provider_invoked": false,
+  "codex_exec_invoked": false,
+  "blockers": [],
+  "acceptance_trace": ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022", "VP-030"],
+  "agent_summary": "A/B eval execution plan is ready; Codex has not been invoked."
+}

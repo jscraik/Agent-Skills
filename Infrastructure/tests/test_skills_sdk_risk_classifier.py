@@ -62,7 +62,7 @@ class TestSkillsSdkRiskClassifier(unittest.TestCase):
         self.assertEqual(payload["risk_tier"], "medium")
         self.assertIn("reference_boundary", payload["sensor_ids"])
 
-    def test_scripted_skill_selects_static_and_sandbox_placeholder_sensors(self) -> None:
+    def test_scripted_skill_selects_static_and_codex_sandbox_boundary_sensors(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             skill_md = _write_skill(Path(tmp), "# Sample\n\nRun scripts/check.py before handoff.")
             (skill_md.parent / "scripts").mkdir()
@@ -74,7 +74,7 @@ class TestSkillsSdkRiskClassifier(unittest.TestCase):
         self.assertEqual(payload["risk_tier"], "high")
         self.assertEqual(payload["blocking_behavior"], "block")
         self.assertIn("static_script_scan", payload["sensor_ids"])
-        self.assertIn("sandbox_placeholder", payload["sensor_ids"])
+        self.assertIn("codex_sandbox_boundary", payload["sensor_ids"])
 
     def test_external_source_fails_into_privileged_risk_without_running_adapters(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -86,7 +86,7 @@ class TestSkillsSdkRiskClassifier(unittest.TestCase):
         self.assertEqual(payload["source_kind"], "external")
         self.assertEqual(payload["risk_tier"], "privileged")
         self.assertIn("external_adapter_detection", payload["sensor_ids"])
-        self.assertIn("sandbox_placeholder", payload["sensor_ids"])
+        self.assertIn("intake_quarantine_boundary", payload["sensor_ids"])
 
     def test_missing_source_uses_placeholder_lifecycle_receipt(self) -> None:
         payload = build_risk_classification(Path("/missing/SKILL.md"), {}, "")

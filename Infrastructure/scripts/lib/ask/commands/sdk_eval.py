@@ -1,11 +1,16 @@
 from __future__ import annotations
 
 import argparse
+from collections.abc import Callable
 from pathlib import Path
 
 import ask.commands.skills as skills_commands
 from ask.cli_errors import build_unknown_action_result, build_validation_error
-from ask.envelope import CallResult, ErrorObject
+from ask.envelope import CallResult
+
+
+_AB_PROFILE_CHOICES = ("oss-local", "oss-cloud", "codex-fast")
+_EXECUTION_PROFILE_CHOICES = ("codex-read-only", "codex-workspace-write")
 
 
 def add_sdk_eval_parser(
@@ -14,49 +19,183 @@ def add_sdk_eval_parser(
 ) -> None:
     parser = sdk_subparsers.add_parser("eval", help="Run Skills SDK eval receipts", parents=[global_parser])
     subparsers = parser.add_subparsers(dest="eval_action", required=True)
-    run = subparsers.add_parser(
-        "run",
-        help="Run internal skill evals or exact-match deterministic eval cases",
-        parents=[global_parser],
-    )
+    _add_run_parser(subparsers, global_parser)
+    _add_scenario_quality_parser(subparsers, global_parser)
+    _add_profiles_parser(subparsers, global_parser)
+    _add_ab_rubric_parser(subparsers, global_parser)
+    _add_ab_preview_parser(subparsers, global_parser)
+    _add_ab_plan_parser(subparsers, global_parser)
+    _add_ab_run_parser(subparsers, global_parser)
+    _add_ab_judge_preview_parser(subparsers, global_parser)
+
+
+def _add_run_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
+    run = subparsers.add_parser("run", help="Run internal skill evals or exact-match deterministic eval cases", parents=[global_parser])
     run.add_argument("target", nargs="?", help="Skill handle or source path for the internal eval runner")
     run.add_argument("--dataset", help="Repo-relative or absolute deterministic eval dataset")
     run.add_argument("--skill", help="Optional skill handle or source path for deterministic evals")
-    run.add_argument(
-        "--runner",
-        choices=["auto", "internal", "deterministic-jsonl"],
-        default="auto",
-        help="Eval backend. auto uses deterministic-jsonl with --dataset, otherwise internal.",
-    )
+    run.add_argument("--runner", choices=["auto", "internal", "deterministic-jsonl"], default="auto")
     run.add_argument("--mode", choices=["smoke", "release"], default="smoke", help="Internal eval mode.")
     run.add_argument("--case", action="append", dest="cases", help="Internal eval case id filter.")
     run.add_argument("--with-tessl", action="store_true", help="Allow internal Tessl continuation.")
-    quality = subparsers.add_parser(
-        "scenario-quality",
-        help="Preview eval scenario promotion quality for a skill",
-        parents=[global_parser],
-    )
+
+
+def _add_scenario_quality_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
+    quality = subparsers.add_parser("scenario-quality", help="Preview eval scenario promotion quality", parents=[global_parser])
     quality.add_argument("target", help="Skill handle or repo-relative skill source path")
     quality.add_argument("--preview", action="store_true", help="Emit a non-mutating scenario quality receipt")
 
 
+def _add_profiles_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
+    profiles = subparsers.add_parser("profiles", help="Preview Codex execution and judge profiles", parents=[global_parser])
+    profiles.add_argument("--preview", action="store_true", help="Emit a non-mutating eval profile receipt")
+
+
+def _add_ab_rubric_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
+    rubric = subparsers.add_parser("ab-rubric", help="Preview the canonical A/B scoring rubric", parents=[global_parser])
+    rubric.add_argument("--preview", action="store_true", help="Emit a non-mutating A/B rubric receipt")
+
+
+def _add_ab_common_arguments(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--skill-a", required=True, help="Skill handle or repo-relative source path for variant A")
+    parser.add_argument("--skill-b", required=True, help="Skill handle or repo-relative source path for variant B")
+    parser.add_argument("--fixture", required=True, help="Repo-relative A/B task fixture")
+    parser.add_argument("--execution-profile", choices=_EXECUTION_PROFILE_CHOICES, default="codex-read-only")
+    parser.add_argument("--judge-profile", choices=_AB_PROFILE_CHOICES, default="oss-local")
+
+
+def _add_ab_preview_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
+    preview = subparsers.add_parser("ab-preview", help="Preview a Codex-backed skill A/B contract", parents=[global_parser])
+    _add_ab_common_arguments(preview)
+    preview.add_argument("--preview", action="store_true", help="Emit a non-mutating A/B preview receipt")
+
+
+def _add_ab_plan_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
+    plan = subparsers.add_parser("ab-plan", help="Plan Codex exec commands for a skill A/B eval", parents=[global_parser])
+    _add_ab_common_arguments(plan)
+    plan.add_argument("--evidence-root", default=".harness/artifacts/sdk-ab-evals")
+    plan.add_argument("--preview", action="store_true", help="Emit a non-mutating A/B execution plan receipt")
+
+
+def _add_ab_run_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
+    run = subparsers.add_parser("ab-run", help="Execute a Codex-backed skill A/B eval", parents=[global_parser])
+    _add_ab_common_arguments(run)
+    run.add_argument("--evidence-root", default=".harness/artifacts/sdk-ab-evals")
+    run.add_argument("--timeout-seconds", type=int, default=1800, help="Timeout for each Codex variant run.")
+    run.add_argument("--execute", action="store_true", help="Required explicit gate before invoking Codex exec.")
+
+
+def _add_ab_judge_preview_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
+    judge = subparsers.add_parser("ab-judge-preview", help="Preview sanitized A/B judge input", parents=[global_parser])
+    judge.add_argument("--run-receipt", required=True, help="Repo-relative completed ab-run receipt JSON")
+    judge.add_argument("--preview", action="store_true", help="Emit a non-mutating judge input receipt")
+
+
 def dispatch_sdk_eval(repo_root: Path, args: argparse.Namespace) -> CallResult:
-    if args.eval_action == "run":
-        return skills_commands.skills_sdk_eval_run(
-            repo_root,
-            dataset=args.dataset,
-            target=args.skill or args.target,
-            mode=args.mode,
-            runner=args.runner,
-            skip_tessl=not args.with_tessl,
-            cases=args.cases,
-        )
-    if args.eval_action == "scenario-quality":
-        if not args.preview:
-            return build_validation_error(
-                "sdk eval scenario-quality",
-                "Skills SDK scenario quality is preview-only in PU-030 and requires --preview.",
-                "ask sdk eval scenario-quality <skill> --preview --json --robot",
-            )
-        return skills_commands.skills_sdk_eval_scenario_quality(repo_root, target=args.target)
-    return build_unknown_action_result("sdk eval", args.eval_action)
+    dispatchers: dict[str, Callable[[Path, argparse.Namespace], CallResult]] = {
+        "run": _dispatch_run,
+        "scenario-quality": _dispatch_scenario_quality,
+        "profiles": _dispatch_profiles,
+        "ab-rubric": _dispatch_ab_rubric,
+        "ab-preview": _dispatch_ab_preview,
+        "ab-plan": _dispatch_ab_plan,
+        "ab-run": _dispatch_ab_run,
+        "ab-judge-preview": _dispatch_ab_judge_preview,
+    }
+    dispatcher = dispatchers.get(args.eval_action)
+    if dispatcher is None:
+        return build_unknown_action_result("sdk eval", args.eval_action)
+    return dispatcher(repo_root, args)
+
+
+def _dispatch_run(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    return skills_commands.skills_sdk_eval_run(
+        repo_root,
+        dataset=args.dataset,
+        target=args.skill or args.target,
+        mode=args.mode,
+        runner=args.runner,
+        skip_tessl=not args.with_tessl,
+        cases=args.cases,
+    )
+
+
+def _preview_required(command: str, message: str, next_command: str, args: argparse.Namespace) -> CallResult | None:
+    if args.preview:
+        return None
+    return build_validation_error(command, message, next_command)
+
+
+def _dispatch_scenario_quality(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    error = _preview_required("sdk eval scenario-quality", "Scenario quality requires --preview.", _scenario_quality_next(), args)
+    return error or skills_commands.skills_sdk_eval_scenario_quality(repo_root, target=args.target)
+
+
+def _dispatch_profiles(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    error = _preview_required("sdk eval profiles", "Eval profiles require --preview.", "ask sdk eval profiles --preview --json --robot", args)
+    return error or skills_commands.skills_sdk_eval_profiles_preview(repo_root)
+
+
+def _dispatch_ab_rubric(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    error = _preview_required("sdk eval ab-rubric", "A/B rubric requires --preview.", "ask sdk eval ab-rubric --preview --json --robot", args)
+    return error or skills_commands.skills_sdk_eval_ab_rubric_preview(repo_root)
+
+
+def _dispatch_ab_preview(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    error = _preview_required("sdk eval ab-preview", "A/B preview requires --preview.", _ab_preview_next(), args)
+    if error:
+        return error
+    return skills_commands.skills_sdk_eval_ab_preview(repo_root, **_ab_common_kwargs(args))
+
+
+def _dispatch_ab_plan(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    error = _preview_required("sdk eval ab-plan", "A/B execution plan requires --preview.", _ab_plan_next(), args)
+    if error:
+        return error
+    return skills_commands.skills_sdk_eval_ab_plan(repo_root, evidence_root=args.evidence_root, **_ab_common_kwargs(args))
+
+
+def _dispatch_ab_run(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    if not args.execute:
+        return build_validation_error("sdk eval ab-run", "A/B eval execution invokes Codex and requires --execute.", _ab_run_next())
+    return skills_commands.skills_sdk_eval_ab_run(
+        repo_root,
+        evidence_root=args.evidence_root,
+        timeout_seconds=args.timeout_seconds,
+        **_ab_common_kwargs(args),
+    )
+
+
+def _dispatch_ab_judge_preview(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    error = _preview_required("sdk eval ab-judge-preview", "A/B judge input preview requires --preview.", _ab_judge_next(), args)
+    return error or skills_commands.skills_sdk_eval_ab_judge_preview(repo_root, run_receipt=args.run_receipt)
+
+
+def _ab_common_kwargs(args: argparse.Namespace) -> dict[str, str]:
+    return {
+        "skill_a": args.skill_a,
+        "skill_b": args.skill_b,
+        "fixture": args.fixture,
+        "execution_profile": args.execution_profile,
+        "judge_profile": args.judge_profile,
+    }
+
+
+def _scenario_quality_next() -> str:
+    return "ask sdk eval scenario-quality <skill> --preview --json --robot"
+
+
+def _ab_preview_next() -> str:
+    return "ask sdk eval ab-preview --skill-a <skill-a> --skill-b <skill-b> --fixture <fixture> --preview --json --robot"
+
+
+def _ab_plan_next() -> str:
+    return "ask sdk eval ab-plan --skill-a <skill-a> --skill-b <skill-b> --fixture <fixture> --preview --json --robot"
+
+
+def _ab_run_next() -> str:
+    return "ask sdk eval ab-run --skill-a <skill-a> --skill-b <skill-b> --fixture <fixture> --execute --json --robot"
+
+
+def _ab_judge_next() -> str:
+    return "ask sdk eval ab-judge-preview --run-receipt <receipt.json> --preview --json --robot"

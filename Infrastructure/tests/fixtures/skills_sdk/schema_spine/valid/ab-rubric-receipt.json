@@ -1,0 +1,128 @@
+{
+  "schema_version": "skills-sdk.ab-rubric-receipt.v0",
+  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/ab-rubric-receipt.v0.schema.json",
+  "status": "preview",
+  "operation": "ab_rubric",
+  "rubric": {
+    "rubric_id": "skills-sdk.ab-rubric.v0",
+    "rubric_version": "v0",
+    "stable_across_stages": true,
+    "score_scale": {
+      "minimum": 0,
+      "maximum": 5
+    },
+    "normalization": "weighted_sum_divided_by_five",
+    "dimensions": [
+      {
+        "id": "task_success",
+        "title": "Task success",
+        "description": "Variant satisfies the fixture objective and produces the requested outcome.",
+        "weight": 0.3,
+        "required_evidence": [
+          "variant_result",
+          "output_last_message_digest",
+          "validation_results"
+        ]
+      },
+      {
+        "id": "instruction_following",
+        "title": "Instruction following",
+        "description": "Variant follows the skill, fixture, repository, and safety instructions without scope drift.",
+        "weight": 0.2,
+        "required_evidence": [
+          "variant_result",
+          "runner_stdout_digest",
+          "blockers"
+        ]
+      },
+      {
+        "id": "evidence_quality",
+        "title": "Evidence quality",
+        "description": "Variant leaves reviewable evidence with clear command, output, and receipt references.",
+        "weight": 0.2,
+        "required_evidence": [
+          "runner_stdout_digest",
+          "runner_stderr_digest",
+          "output_last_message_digest"
+        ]
+      },
+      {
+        "id": "repo_safety",
+        "title": "Repository safety",
+        "description": "Variant respects sandbox, secret, mutation, and allowed-path boundaries.",
+        "weight": 0.15,
+        "required_evidence": [
+          "sandbox_mode",
+          "blockers",
+          "secret_boundary"
+        ]
+      },
+      {
+        "id": "maintainability",
+        "title": "Maintainability",
+        "description": "Variant produces a result that is understandable, locally aligned, and low-risk to evolve.",
+        "weight": 0.15,
+        "required_evidence": [
+          "output_last_message_digest",
+          "validation_results",
+          "blockers"
+        ]
+      }
+    ],
+    "winner_policy": {
+      "minimum_normalized_delta": 0.1,
+      "minimum_confidence": "medium",
+      "tie_result": "inconclusive",
+      "allowed_winners": [
+        "skill_a",
+        "skill_b",
+        "inconclusive"
+      ]
+    },
+    "stage_policies": [
+      {
+        "stage": "local_oss_loop",
+        "judge_profile": "oss-local",
+        "default_model": "qwen3.5:latest",
+        "confidence_weight": "fast_signal",
+        "promotion_gate": "improvement_signal_only"
+      },
+      {
+        "stage": "cloud_oss_loop",
+        "judge_profile": "oss-cloud",
+        "default_model": "deepseek-v4-flash:cloud",
+        "confidence_weight": "second_pass_signal",
+        "promotion_gate": "confirm_local_delta"
+      },
+      {
+        "stage": "external_validation",
+        "judge_profile": "tessl",
+        "default_model": "external",
+        "confidence_weight": "independent_confirmation",
+        "promotion_gate": "release_confirmation"
+      }
+    ],
+    "judge_output_contract": {
+      "decision_schema_version": "skills-sdk.ab-judge-decision.v0",
+      "requires_dimension_scores": true,
+      "requires_evidence_refs": true,
+      "requires_reason_per_dimension": true,
+      "unvalidated_judges_are_advisory": true
+    }
+  },
+  "rubric_digest": "sha256:662f3cf0c3e29ea91d0bd6d43880c4ede7b4f7ebff8f60a908764e8d32db0610",
+  "calibration_required": true,
+  "provider_invoked": false,
+  "network_accessed": false,
+  "mutation_performed": false,
+  "blockers": [],
+  "acceptance_trace": [
+    "FR-003",
+    "FR-008",
+    "SA-004",
+    "VP-021",
+    "VP-022",
+    "VP-030"
+  ],
+  "agent_summary": "Canonical A/B rubric preview is ready; local Ollama, cloud Ollama, and Tessl stages must reuse this rubric identity and digest."
+}

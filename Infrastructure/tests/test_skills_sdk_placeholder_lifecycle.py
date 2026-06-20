@@ -16,7 +16,7 @@ from ask.skills_sdk.placeholder_lifecycle import build_placeholder_lifecycle_rec
 
 
 SCHEMA_PATH = REPO_ROOT / "Infrastructure/config/schemas/skills-sdk/placeholder-lifecycle.v1.schema.json"
-SURFACES = {"refs", "evals", "signing", "sandbox", "security_adapter", "explorer"}
+SURFACES = {"refs", "evals", "signing", "security_adapter", "explorer"}
 FORBIDDEN_STATUSES = {"pass", "success"}
 
 
@@ -87,7 +87,7 @@ class TestSkillsSdkPlaceholderLifecycle(unittest.TestCase):
             "sdk",
             "lifecycle",
             "--surface",
-            "sandbox",
+            "security_adapter",
             "--json",
             "--robot",
         )
@@ -96,7 +96,7 @@ class TestSkillsSdkPlaceholderLifecycle(unittest.TestCase):
             "bin/skills-sdk",
             "lifecycle",
             "--surface",
-            "sandbox",
+            "security_adapter",
             "--json",
             "--robot",
         )
@@ -107,7 +107,7 @@ class TestSkillsSdkPlaceholderLifecycle(unittest.TestCase):
         )
         self.assertEqual(
             wrapper_payload["metadata"]["command"],
-            "sdk lifecycle --surface sandbox --json --robot",
+            "sdk lifecycle --surface security_adapter --json --robot",
         )
 
     def test_missing_required_adapters_block_for_high_risk_without_credentials(self) -> None:
@@ -126,10 +126,7 @@ class TestSkillsSdkPlaceholderLifecycle(unittest.TestCase):
         receipts = {receipt["surface"]: receipt for receipt in lifecycle["receipts"]}
 
         self.assertEqual(lifecycle["status"], "blocked")
-        self.assertEqual(lifecycle["blocked_surfaces"], ["sandbox", "security_adapter"])
-        self.assertEqual(receipts["sandbox"]["status"], "blocked")
-        self.assertEqual(receipts["sandbox"]["adapter_state"], "missing")
-        self.assertTrue(receipts["sandbox"]["required_for_risk_tier"])
+        self.assertEqual(lifecycle["blocked_surfaces"], ["security_adapter"])
         self.assertEqual(receipts["security_adapter"]["status"], "blocked")
         self.assertEqual(receipts["security_adapter"]["adapter_state"], "missing")
         self.assertTrue(receipts["security_adapter"]["required_for_risk_tier"])
@@ -141,7 +138,7 @@ class TestSkillsSdkPlaceholderLifecycle(unittest.TestCase):
             repo_root = Path(tmp)
             watched_paths = [
                 repo_root / ".harness" / "receipts" / "skills-sdk" / "placeholders" / "refs.json",
-                repo_root / ".harness" / "receipts" / "skills-sdk" / "placeholders" / "sandbox.json",
+                repo_root / ".harness" / "receipts" / "skills-sdk" / "placeholders" / "security_adapter.json",
                 repo_root / ".agents" / "skills",
                 repo_root / ".codex" / "skills",
                 repo_root / "skills.lock.json",

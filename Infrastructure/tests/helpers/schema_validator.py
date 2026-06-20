@@ -12,11 +12,15 @@ SUPPORTED_SCHEMA_KEYS = {
     "additionalProperties",
     "allOf",
     "const",
+    "contains",
     "definitions",
     "enum",
     "if",
     "items",
+    "maxContains",
     "maxItems",
+    "maxLength",
+    "minContains",
     "minItems",
     "minLength",
     "minimum",
@@ -152,6 +156,8 @@ def _validate_scalar_constraints(schema: dict[str, Any], value: object, path: st
         raise AssertionError(f"{path} expected one of {schema['enum']!r}, got {value!r}")
     if isinstance(value, str) and "minLength" in schema and len(value) < schema["minLength"]:
         raise AssertionError(f"{path} shorter than minLength {schema['minLength']}")
+    if isinstance(value, str) and "maxLength" in schema and len(value) > schema["maxLength"]:
+        raise AssertionError(f"{path} longer than maxLength {schema['maxLength']}")
     _validate_minimum_constraint(schema, value, path)
 
 
@@ -170,9 +176,31 @@ def _validate_array_constraints(
         for index, item in enumerate(value):
             if any(item == previous for previous in value[:index]):
                 raise AssertionError(f"{path} contains duplicate items")
+    if "contains" in schema:
+        _validate_contains_constraints(schema, value, schemas, path, root_schema)
     if "items" in schema:
         for index, item in enumerate(value):
             _validate_schema_subset(schema["items"], item, schemas, f"{path}[{index}]", root_schema)
+
+
+def _validate_contains_constraints(
+    schema: dict[str, Any],
+    value: list[object],
+    schemas: dict[str, dict[str, Any]],
+    path: str,
+    root_schema: dict[str, Any],
+) -> None:
+    match_count = sum(
+        1
+        for index, item in enumerate(value)
+        if _schema_option_matches(schema["contains"], item, schemas, f"{path}[{index}]", root_schema)
+    )
+    min_contains = schema.get("minContains", 1)
+    max_contains = schema.get("maxContains")
+    if isinstance(min_contains, int) and match_count < min_contains:
+        raise AssertionError(f"{path} contains fewer than {min_contains} matching items")
+    if isinstance(max_contains, int) and match_count > max_contains:
+        raise AssertionError(f"{path} contains more than {max_contains} matching items")
 
 
 def _validate_object_constraints(

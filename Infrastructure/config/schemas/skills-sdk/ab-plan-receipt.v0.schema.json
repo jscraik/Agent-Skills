@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/ab-plan-receipt.v0.schema.json",
+  "title": "Skills SDK A/B Execution Plan Receipt v0",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "string", "const": "skills-sdk.ab-plan-receipt.v0"},
+    "schema_uri": {"type": "string", "const": "https://jscraik.local/agent-skills/schemas/skills-sdk/ab-plan-receipt.v0.schema.json"},
+    "status": {"type": "string", "enum": ["planned", "blocked"]},
+    "operation": {"type": "string", "const": "ab_plan"},
+    "skill_a": {"oneOf": [{"type": "null"}, {"$ref": "ab-preview-receipt.v0.schema.json#/definitions/skill_variant"}]},
+    "skill_b": {"oneOf": [{"type": "null"}, {"$ref": "ab-preview-receipt.v0.schema.json#/definitions/skill_variant"}]},
+    "fixture": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "digest": {"type": "string", "minLength": 71},
+        "size_bytes": {"type": "integer", "minimum": 0}
+      },
+      "required": ["path", "digest", "size_bytes"]
+    },
+    "execution_profile": {"oneOf": [{"type": "null"}, {"$ref": "eval-profile-preview-receipt.v0.schema.json#/definitions/execution_profile"}]},
+    "judge_profile": {"oneOf": [{"type": "null"}, {"$ref": "eval-profile-preview-receipt.v0.schema.json#/definitions/judge_profile"}]},
+    "evidence_root": {"type": ["string", "null"], "minLength": 1},
+    "experiment_id": {"type": ["string", "null"], "minLength": 16, "maxLength": 16},
+    "command_variant_labels": {
+      "type": "array",
+      "maxItems": 2,
+      "items": {"type": "string", "enum": ["A", "B"]},
+      "uniqueItems": true
+    },
+    "command_plan": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/codex_command_plan"},
+      "maxItems": 2,
+      "allOf": [
+        {
+          "contains": {
+            "type": "object",
+            "properties": {"variant_label": {"const": "A"}}
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {"variant_label": {"const": "B"}}
+          },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      ]
+    },
+    "secret_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "skill_execution_env_secret_names": {"type": "array", "items": {"type": "string"}},
+        "judge_env_secret_names": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "skill_execution_receives_judge_secrets": {"type": "boolean", "const": false}
+      },
+      "required": [
+        "skill_execution_env_secret_names",
+        "judge_env_secret_names",
+        "skill_execution_receives_judge_secrets"
+      ]
+    },
+    "execution_boundary": {"type": "string", "const": "codex_exec_sandbox"},
+    "judge_boundary": {"type": "string", "const": "post_run_sanitized_evidence_only"},
+    "mutation_performed": {"type": "boolean", "const": false},
+    "network_accessed": {"type": "boolean", "const": false},
+    "provider_invoked": {"type": "boolean", "const": false},
+    "codex_exec_invoked": {"type": "boolean", "const": false},
+    "blockers": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "acceptance_trace": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "enum": ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022", "VP-030"]}
+    },
+    "agent_summary": {"type": "string", "minLength": 1}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "planned"}}},
+      "then": {
+        "properties": {
+          "skill_a": {"$ref": "ab-preview-receipt.v0.schema.json#/definitions/skill_variant"},
+          "skill_b": {"$ref": "ab-preview-receipt.v0.schema.json#/definitions/skill_variant"},
+          "fixture": {"type": "object"},
+          "execution_profile": {"$ref": "eval-profile-preview-receipt.v0.schema.json#/definitions/execution_profile"},
+          "judge_profile": {"$ref": "eval-profile-preview-receipt.v0.schema.json#/definitions/judge_profile"},
+          "evidence_root": {"type": "string"},
+          "experiment_id": {"type": "string"},
+          "command_variant_labels": {"type": "array", "minItems": 2, "maxItems": 2},
+          "command_plan": {"type": "array", "minItems": 2, "maxItems": 2},
+          "blockers": {"type": "array", "maxItems": 0}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"status": {"const": "blocked"}}},
+      "then": {"properties": {"blockers": {"type": "array", "minItems": 1}}}
+    }
+  ],
+  "required": [
+    "schema_version",
+    "schema_uri",
+    "status",
+    "operation",
+    "skill_a",
+    "skill_b",
+    "fixture",
+    "execution_profile",
+    "judge_profile",
+    "evidence_root",
+    "experiment_id",
+    "command_variant_labels",
+    "command_plan",
+    "secret_boundary",
+    "execution_boundary",
+    "judge_boundary",
+    "mutation_performed",
+    "network_accessed",
+    "provider_invoked",
+    "codex_exec_invoked",
+    "blockers",
+    "acceptance_trace",
+    "agent_summary"
+  ],
+  "definitions": {
+    "codex_command_plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "variant_label": {"type": "string", "enum": ["A", "B"]},
+        "command_argv": {"type": "array", "minItems": 10, "items": {"type": "string", "minLength": 1}},
+        "sandbox_mode": {"type": "string", "enum": ["read-only", "workspace-write"]},
+        "approval_policy": {"type": "string", "const": "on-request"},
+        "event_log_path": {"type": "string", "minLength": 1},
+        "output_last_message_path": {"type": "string", "minLength": 1},
+        "prompt_stdin_path": {"type": "string", "minLength": 1},
+        "runner_stdout_capture_path": {"type": "string", "minLength": 1},
+        "runner_prompt_input_path": {"type": "string", "minLength": 1},
+        "prompt_stdin_digest": {"type": "string", "minLength": 71},
+        "planned_write_paths": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "allowed_secret_env_names": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      },
+      "required": [
+        "variant_label",
+        "command_argv",
+        "sandbox_mode",
+        "approval_policy",
+        "event_log_path",
+        "output_last_message_path",
+        "prompt_stdin_path",
+        "runner_stdout_capture_path",
+        "runner_prompt_input_path",
+        "prompt_stdin_digest",
+        "planned_write_paths",
+        "allowed_secret_env_names"
+      ]
+    }
+  }
+}

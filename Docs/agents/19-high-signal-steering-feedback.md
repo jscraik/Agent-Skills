@@ -10,6 +10,32 @@ high-signal, about your operating behavior, or evidence that the environment is
 not absorbing feedback. Do not continue feature implementation until the uptake
 loop below has a durable guardrail and validation evidence.
 
+Runtime recovery is part of this stop rule. Do not call a wait, resume, poll, or
+closeout action with a guessed or stale runtime identifier. A runtime handle is
+usable only when the immediately preceding tool result returned it as active.
+Otherwise, rediscover state with a direct repo command and record repeated
+handle misuse as steering uptake before resuming implementation.
+
+Do not parallelize runtime-recovery calls. Wait/poll/resume actions are
+stateful and must be single-threaded against one real active handle. Never call
+them to test whether a guessed identifier is valid; invalid-handle probing is a
+failure of claim-vs-evidence discipline, not a discovery mechanism.
+
+For repository implementation, review, status, or file-inspection work, prefer
+direct repo commands over runtime wait or poll actions. A wait action is not a
+general status check. It is allowed only to resume a live asynchronous operation
+whose handle was returned by the immediately preceding tool result. If this rule
+is violated in the same turn, stop the feature lane again, record a fresh
+steering-uptake row, validate the steering surfaces, and continue using direct
+repo commands only.
+
+After a fabricated or stale wait-handle call occurs in a turn, do not call any
+wait/poll/resume action again for the rest of that turn unless a new asynchronous
+tool call in that same turn first returns a real live handle. Repeated invalid
+wait calls in the same turn are not additional discovery; they are evidence that
+the recovery lane must be constrained to direct repo commands until the next
+operator turn.
+
 ## Proof Before Proceeding
 
 Before resuming ordinary implementation, produce repo-local proof that future

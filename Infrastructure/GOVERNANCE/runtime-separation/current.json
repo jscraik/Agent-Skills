@@ -9,7 +9,7 @@
         "blocker_id": null,
         "command": "bin/ask plugins doctor --json",
         "drift_class": null,
-        "evidence_ref": "sha256:315dbc2d97d3e3522d92bd0e3a851d3af107192abbddfd062ff545272d6cd7b4",
+        "evidence_ref": "sha256:917848d53212adefa52919e2fab149bb3e17fae7098cdbda4be3d820ffb7ee60",
         "normalized_fields": {
           "activation_plugins": [
             {
@@ -78,7 +78,7 @@
           "blocker_id": null,
           "command": "bin/ask plugins status aidevcon --json",
           "drift_class": null,
-          "evidence_ref": "sha256:e12fc28b4a0ac6e2ea059e26815f8a21cdf9f1f05ea9b1bf2f9b4169eb058184",
+          "evidence_ref": "sha256:a7e834bb7620218a94438858879fb607f462993a01154bb0fb37c556e6b500a3",
           "normalized_fields": {
             "activation_plugin": {
               "cache_present": true,
@@ -101,7 +101,7 @@
           "blocker_id": null,
           "command": "bin/ask plugins status harness-engineering --json",
           "drift_class": null,
-          "evidence_ref": "sha256:3fc7d591c39fc497da4e0e9a3ae61cadaa548ca0a55423a6e5d778a3ccbf19fc",
+          "evidence_ref": "sha256:12ba3d2b3255df5a7915b29ab2fe0b50b2949452d5dc9f1fc2673a60d2720857",
           "normalized_fields": {
             "activation_plugin": {
               "cache_present": true,
@@ -124,7 +124,7 @@
           "blocker_id": null,
           "command": "bin/ask plugins status plugin-factory --json",
           "drift_class": null,
-          "evidence_ref": "sha256:4c056333855ce67b0e0af859cc79cc465d0449e705824f94cba314570dda1895",
+          "evidence_ref": "sha256:90273e9e09c13583a4671f64ccbf4d5d7a1fb93c800f6f02b65fcc2564280454",
           "normalized_fields": {
             "activation_plugin": {
               "cache_present": true,
@@ -147,7 +147,7 @@
           "blocker_id": null,
           "command": "bin/ask plugins status skill-factory --json",
           "drift_class": null,
-          "evidence_ref": "sha256:e1972cf43d1f9c21c55d434dad1ed962964a4ba3a9b61ef78270ccc78f3b2a64",
+          "evidence_ref": "sha256:ce791d0e3dacd27752876e12009c353623ca9f3f1e475565ce34f03af9299e6e",
           "normalized_fields": {
             "activation_plugin": {
               "cache_present": true,
@@ -170,7 +170,7 @@
           "blocker_id": null,
           "command": "bin/ask plugins status synaipse-harness --json",
           "drift_class": null,
-          "evidence_ref": "sha256:111ec83af0bf2a60f7f2a164302b02289cddeed5d9eedfb4059e73237d0aa552",
+          "evidence_ref": "sha256:083ae27f9553bb1fed9dabb07b13ffa7124d24ec229d36caec7a487aa9337f7a",
           "normalized_fields": {
             "activation_plugin": {
               "cache_present": true,
@@ -194,7 +194,7 @@
         "blocker_id": null,
         "command": "bin/ask repo doctor-catalog --strict --json",
         "drift_class": null,
-        "evidence_ref": "sha256:338c7e047cfc9fde402c753f602c58a2a2fa6ad90f528891003d30718c9603bf",
+        "evidence_ref": "sha256:28ffe93ed88db997c18de247273b8787f3fa1c16701c4aa56cc6eb92fbf9df7f",
         "normalized_fields": {
           "command": "repo doctor-catalog --strict --json",
           "decision_status": "resolved",
@@ -209,7 +209,7 @@
         "blocker_id": null,
         "command": "bin/ask repo status --json",
         "drift_class": null,
-        "evidence_ref": "sha256:096fb6d24a98a065eb545a0a6fe81108453b7a82e84a0a6cf105caab5cbc72c7",
+        "evidence_ref": "sha256:f78f66b34880342e056e34f344b3e4627af37ced3e817eb0f99f54e7174c62d8",
         "normalized_fields": {
           "command": "repo status --json",
           "is_git": true,
@@ -237,20 +237,20 @@
         "blocker_id": null,
         "command": "bin/ask skills list --json",
         "drift_class": null,
-        "evidence_ref": "sha256:e8214cdd4a0ecb57035f4d91ac6235f3bb2f4fbfabb7525bf6ebba0f2c16d79c",
+        "evidence_ref": "sha256:a256fed7ab32fdcb8ab9ec0737f30a4c74d9d4dc7aeb1663a1ae04b0f6f7fbd9",
         "normalized_fields": {
           "command": "skills list --json",
           "sample_names": [
             "chronicle",
+            "imagegen",
+            "openai-docs",
+            "skill-creator",
+            "skill-installer",
             "agents-md",
             "alignment-checkpoint",
             "autofix",
             "autoresearch",
-            "autoreview",
-            "bash-hygiene",
-            "biome-linting",
-            "bootstrap",
-            "code-fixes-triage"
+            "autoreview"
           ],
           "skill_count": 288,
           "status": "success"
@@ -259,7 +259,7 @@
         "subject_id": "skills"
       }
     },
-    "command_checks_digest": "9d234de1813bf94f0bf9e2d416b23bd89554b438f6b12f8e08da19e7d066a0ee",
+    "command_checks_digest": "120e6d83c901da1204fa7d2cd24b2fb054da5b042c9248f0b4e14e396d0a0bd3",
     "discovery_identity": "59be941a5d34db94d004e8cb145928ef52512d84fa383700da8556dcc1e3b73d",
     "duplicate_shadow_drift_classes": {
       "plugins_doctor": null,
@@ -288,7 +288,7 @@
         "asset_relpath": ".codex-plugin/plugin.json",
         "catalog_resolution": "Infrastructure/catalog/Plugins/aidevcon",
         "consumer_id": "plugins_status.aidevcon",
-        "evidence_ref": "sha256:e12fc28b4a0ac6e2ea059e26815f8a21cdf9f1f05ea9b1bf2f9b4169eb058184",
+        "evidence_ref": "sha256:a7e834bb7620218a94438858879fb607f462993a01154bb0fb37c556e6b500a3",
         "legacy_resolution": "./Plugins/aidevcon",
         "parity_result": "pass",
         "plugin_id": "aidevcon",
@@ -298,7 +298,7 @@
         "asset_relpath": ".codex-plugin/plugin.json",
         "catalog_resolution": "Infrastructure/catalog/Plugins/harness-engineering",
         "consumer_id": "plugins_status.harness-engineering",
-        "evidence_ref": "sha256:3fc7d591c39fc497da4e0e9a3ae61cadaa548ca0a55423a6e5d778a3ccbf19fc",
+        "evidence_ref": "sha256:12ba3d2b3255df5a7915b29ab2fe0b50b2949452d5dc9f1fc2673a60d2720857",
         "legacy_resolution": "./Plugins/harness-engineering",
         "parity_result": "pass",
         "plugin_id": "harness-engineering",
@@ -308,7 +308,7 @@
         "asset_relpath": ".codex-plugin/plugin.json",
         "catalog_resolution": "Infrastructure/catalog/Plugins/plugin-factory",
         "consumer_id": "plugins_status.plugin-factory",
-        "evidence_ref": "sha256:4c056333855ce67b0e0af859cc79cc465d0449e705824f94cba314570dda1895",
+        "evidence_ref": "sha256:90273e9e09c13583a4671f64ccbf4d5d7a1fb93c800f6f02b65fcc2564280454",
         "legacy_resolution": "./Plugins/plugin-factory",
         "parity_result": "pass",
         "plugin_id": "plugin-factory",
@@ -318,7 +318,7 @@
         "asset_relpath": ".codex-plugin/plugin.json",
         "catalog_resolution": "Infrastructure/catalog/Plugins/skill-factory",
         "consumer_id": "plugins_status.skill-factory",
-        "evidence_ref": "sha256:e1972cf43d1f9c21c55d434dad1ed962964a4ba3a9b61ef78270ccc78f3b2a64",
+        "evidence_ref": "sha256:ce791d0e3dacd27752876e12009c353623ca9f3f1e475565ce34f03af9299e6e",
         "legacy_resolution": "./Plugins/skill-factory",
         "parity_result": "pass",
         "plugin_id": "skill-factory",
@@ -328,7 +328,7 @@
         "asset_relpath": ".codex-plugin/plugin.json",
         "catalog_resolution": "Infrastructure/catalog/Plugins/synaipse-harness",
         "consumer_id": "plugins_status.synaipse-harness",
-        "evidence_ref": "sha256:111ec83af0bf2a60f7f2a164302b02289cddeed5d9eedfb4059e73237d0aa552",
+        "evidence_ref": "sha256:083ae27f9553bb1fed9dabb07b13ffa7124d24ec229d36caec7a487aa9337f7a",
         "legacy_resolution": "./Plugins/synaipse-harness",
         "parity_result": "pass",
         "plugin_id": "synaipse-harness",
