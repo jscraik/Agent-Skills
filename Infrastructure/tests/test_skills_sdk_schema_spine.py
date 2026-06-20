@@ -25,6 +25,7 @@ SCHEMA_NAMES = {
     "observability-feedback-receipt": "observability-feedback-receipt.v0.schema.json",
     "emitter-preview-receipt": "emitter-preview-receipt.v0.schema.json",
     "ci-policy-preview-receipt": "ci-policy-preview-receipt.v0.schema.json",
+    "static-explorer-receipt": "static-explorer-receipt.v0.schema.json",
     "signing-policy": "signing-policy.v0.schema.json",
     "signing-intent-receipt": "signing-intent-receipt.v0.schema.json",
     "sandbox-profile": "sandbox-profile.v0.schema.json",
@@ -191,6 +192,16 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertTrue(any(check["name"] == "risk-policy-gate" for check in payload["required_checks"]))
         self.assertFalse(payload["live_ci_evidence_attached"])
         self.assertFalse(payload["branch_protection_mutated"])
+        self.assertFalse(payload["mutation_performed"])
+
+    def test_static_explorer_fixture_records_json_only_projection(self) -> None:
+        payload = self.assert_valid("static-explorer-receipt", "static-explorer-receipt.json")
+
+        self.assertEqual(payload["status"], "preview")
+        self.assertEqual(payload["capability_count"], 1)
+        self.assertEqual(payload["skill_count"], 1)
+        self.assertFalse(payload["html_rendered"])
+        self.assertFalse(payload["hosted_publish_requested"])
         self.assertFalse(payload["mutation_performed"])
 
     def test_signing_policy_fixture_records_external_key_boundary(self) -> None:

@@ -223,6 +223,7 @@ __all__ = [
     "skills_sdk_observability_feedback",
     "skills_sdk_emitter_preview",
     "skills_sdk_ci_policy_preview",
+    "skills_sdk_static_explorer_preview",
     "skills_sdk_eval_run",
     "skills_sdk_placeholder_lifecycle",
     "skills_sdk_project_rollback",
@@ -4672,6 +4673,46 @@ def skills_sdk_ci_policy_preview(
                 code="ERR_VALIDATION",
                 message=payload["agent_summary"],
                 fix_suggestion="Use a supported SDK risk tier and attach live CI evidence in a separate hosted-check lane.",
+            )
+        )
+    return result
+
+
+def skills_sdk_static_explorer_preview(repo_root: Path) -> CallResult:
+    """Preview a JSON-only static explorer index without rendering or publishing HTML."""
+    result = CallResult()
+    result.metadata["command"] = "sdk explorer static"
+    from ask.skills_sdk.static_explorer import (  # noqa: PLC0415
+        StaticExplorerError,
+        build_static_explorer_receipt,
+    )
+
+    try:
+        receipt = build_static_explorer_receipt(repo_root)
+    except StaticExplorerError as exc:
+        receipt = exc.receipt
+    payload = {
+        "schema_version": "skills-sdk-static-explorer-preview.v0",
+        "status": receipt["status"],
+        "facade_command": "skills-sdk explorer static",
+        "capability_count": receipt["capability_count"],
+        "skill_count": receipt["skill_count"],
+        "projection_inputs": receipt["projection_inputs"],
+        "receipt": receipt,
+        "html_rendered": False,
+        "hosted_publish_requested": False,
+        "mutation_performed": False,
+        "validation_commands": [_ask_validation_command("sdk", "explorer", "static", "--preview")],
+        "agent_summary": receipt["agent_summary"],
+    }
+    result.data["skills_sdk_static_explorer_preview"] = payload
+    if receipt["status"] == "blocked":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=payload["agent_summary"],
+                fix_suggestion="Fix capability status JSON or rooted .skillsets manifest JSONL before previewing explorer indexes.",
             )
         )
     return result

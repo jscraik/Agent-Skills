@@ -8,6 +8,7 @@ from ask.envelope import CallResult, ErrorObject
 from ask.cli_errors import build_unknown_action_result
 from ask.commands.sdk_ci import add_sdk_ci_parser, dispatch_sdk_ci
 from ask.commands.sdk_emitter import add_sdk_emitter_parser, dispatch_sdk_emitter
+from ask.commands.sdk_explorer import add_sdk_explorer_parser, dispatch_sdk_explorer
 from ask.skills_sdk.determinism import audit_skill_determinism
 from ask.skills_sdk.lenses import (
     KNOWN_TASK_INTENTS,
@@ -40,10 +41,7 @@ def _add_sdk_ir_parser(sdk_subparsers: argparse._SubParsersAction, global_parser
     sdk_ir_build_parser.add_argument("target", help="Skill handle or repo-relative skill source path")
 
 
-def _add_sdk_docs_parser(
-    sdk_subparsers: argparse._SubParsersAction,
-    global_parser: argparse.ArgumentParser,
-) -> None:
+def _add_sdk_docs_parser(sdk_subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
     sdk_docs_parser = sdk_subparsers.add_parser(
         "docs",
         help="Verify Skills SDK documentation projections",
@@ -322,6 +320,7 @@ def add_sdk_parser(
     _add_sdk_observability_parser(sdk_subparsers, global_parser)
     add_sdk_emitter_parser(sdk_subparsers, global_parser)
     add_sdk_ci_parser(sdk_subparsers, global_parser)
+    add_sdk_explorer_parser(sdk_subparsers, global_parser)
     _add_sdk_project_mutation_parsers(sdk_subparsers, global_parser)
     _add_sdk_lifecycle_status_parsers(sdk_subparsers, global_parser)
     _add_sdk_knowledge_parser(sdk_subparsers, global_parser)
@@ -432,6 +431,7 @@ def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
         "observability": _dispatch_sdk_observability,
         "emitter": dispatch_sdk_emitter,
         "ci": dispatch_sdk_ci,
+        "explorer": dispatch_sdk_explorer,
         "install": _dispatch_sdk_install,
         "rollback": _dispatch_sdk_rollback,
         "uninstall": _dispatch_sdk_uninstall,

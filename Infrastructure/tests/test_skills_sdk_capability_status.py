@@ -197,6 +197,7 @@ class TestSkillsSdkCapabilityStatus(unittest.TestCase):
             "observability",
             "emitter",
             "ci",
+            "explorer",
             "status",
             "project",
         }
@@ -226,6 +227,10 @@ class TestSkillsSdkCapabilityStatus(unittest.TestCase):
         self.assertIn(
             "ask sdk ci policy --risk-tier high --preview --json --robot",
             COMMAND_EXAMPLES[("sdk", "ci")],
+        )
+        self.assertIn(
+            "ask sdk explorer static --preview --json --robot",
+            COMMAND_EXAMPLES[("sdk", "explorer")],
         )
         self.assertIn(
             "ask sdk trust decide Infrastructure/tests/fixtures/skills_sdk/valid_skill --decision trust --reason 'fixture passed local checks' --owner skills-sdk-tests --preview --json --robot",

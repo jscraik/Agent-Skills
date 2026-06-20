@@ -460,15 +460,20 @@
     },
     {
       "id": "skill_explorer",
-      "title": "Skill Explorer publishing",
-      "status": "placeholder_optional",
-      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/placeholder_lifecycle.py",
+      "title": "Static explorer index preview",
+      "status": "preview_only",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/static_explorer.py",
       "pipeline_sections": ["public_sdk_surface", "full_skill_lifecycle", "knowledge_engineering"],
-      "feature_executed": false,
+      "feature_executed": true,
       "mutation_performed": false,
-      "evidence_refs": ["./bin/ask sdk lifecycle --surface explorer --json --robot", "Infrastructure/tests/test_skills_sdk_placeholder_lifecycle.py"],
-      "next_slice": "Separate static local explorer from hosted publishing and add a real adapter.",
-      "notes": "The current lifecycle surface is an honest placeholder."
+      "evidence_refs": [
+        "./bin/ask sdk explorer static --preview --json --robot",
+        "Infrastructure/scripts/lib/ask/skills_sdk/static_explorer.py",
+        "Infrastructure/config/schemas/skills-sdk/static-explorer-receipt.v0.schema.json",
+        "Infrastructure/tests/test_skills_sdk_static_explorer.py"
+      ],
+      "next_slice": "Add hosted explorer rendering only after ownership, publishing, and freshness contracts are approved.",
+      "notes": "PU-029 previews capability and skill indexes from JSON/source manifests only; it does not render HTML or publish a hosted explorer."
     },
     {
       "id": "schema_registry",
