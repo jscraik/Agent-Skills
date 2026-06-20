@@ -13,82 +13,12 @@ jobs:
     name: pr-template
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       - name: Validate PR template completion
         if: github.event_name == 'pull_request'
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
-        with:
-          script: |
-            const body = context.payload.pull_request?.body ?? '';
-            const errors = [];
-
-            if (body.trim().length === 0) {
-              errors.push('PR body is empty. Fill out the full PR template.');
-            }
-
-            const requiredSections = [
-              '## Summary',
-              '## Checklist',
-              '## Testing',
-              '## Review artifacts',
-              '## Notes',
-            ];
-            for (const section of requiredSections) {
-              if (!body.includes(section)) {
-                errors.push('Missing required section: ' + section);
-              }
-            }
-
-            const checklistMatch = body.match(/## Checklist([\s\S]*?)(?:\n## |\n# |$)/i);
-            if (!checklistMatch) {
-              errors.push('Missing checklist block.');
-            } else {
-              const checklistBody = checklistMatch[1] ?? '';
-              const checklistItems = checklistBody
-                .split('\n')
-                .map((line) => line.trim())
-                .filter((line) => /^- \[[ xX]\]/.test(line));
-
-              if (checklistItems.length === 0) {
-                errors.push('Checklist has no checkbox items.');
-              }
-
-              const unchecked = checklistItems.filter((line) => /^- \[ \]/.test(line));
-              const unresolvedUnchecked = unchecked.filter(
-                (line) => !/\*\*\((pending|n\/a|not applicable)\)\*\*/i.test(line),
-              );
-              if (unresolvedUnchecked.length > 0) {
-                errors.push(
-                  'Checklist has unchecked item(s) without explicit status marker ((Pending) or (N/A)):\n' +
-                    unresolvedUnchecked.join('\n'),
-                );
-              }
-            }
-
-            const placeholders = [
-              'pass/fail',
-              '<link / artifact path / comment ID>',
-              '<0-5>',
-              '<reviewer + link>',
-              'Add one-paragraph merge rationale here.',
-            ];
-            for (const placeholder of placeholders) {
-              if (body.includes(placeholder)) {
-                errors.push('Replace template placeholder: ' + placeholder);
-              }
-            }
-
-            const reviewArtifactsMatch = body.match(/## Review artifacts([\s\S]*?)(?:\n## |\n# |$)/i);
-            if (reviewArtifactsMatch) {
-              const reviewArtifactsBody = reviewArtifactsMatch[1] ?? '';
-              const unresolvedTokens = reviewArtifactsBody.match(/<[^>\n]+>/g) ?? [];
-              for (const token of unresolvedTokens) {
-                errors.push('Replace unresolved placeholder token: ' + token);
-              }
-            }
-
-            if (errors.length > 0) {
-              core.setFailed(errors.join('\n'));
-            }
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: python3 .github/scripts/validate_pr_template_body.py --body-env PR_BODY
       - name: Skip PR template enforcement for merge queue
         if: github.event_name == 'merge_group'
         run: echo "merge_group event detected; PR template enforcement is pull_request-only."

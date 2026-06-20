@@ -29,7 +29,8 @@ discovering, and syncing Codex skills, operator docs, and agent workflows.
   Record the failure category and durable improvement type; an acknowledgement
   without a repo artifact plus validation evidence is not uptake.
   Use [High-Signal Steering Feedback](./Docs/agents/19-high-signal-steering-feedback.md)
-  and record uptake in `.harness/quality/steering-uptake.md`; validate with
+  by opening and reading it in the current turn before continuing ordinary
+  implementation or PR work. Record uptake in `.harness/quality/steering-uptake.md`; validate with
   `python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json`.
 - For networked repo operations in Codex sandboxed sessions, do not diagnose
   `gh`, CircleCI, Snyk, package registry, or other API failures as service

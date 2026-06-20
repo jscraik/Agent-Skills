@@ -16,6 +16,7 @@ SIGNING_INTENT_RECEIPT_SCHEMA_URI = (
 )
 SIGNING_ACCEPTANCE_TRACE = ["FR-003", "FR-008", "SA-003", "SA-004", "SEC-001", "VP-021"]
 
+_ALLOWED_ACCEPTANCE_TRACES = set(SIGNING_ACCEPTANCE_TRACE)
 _ALLOWED_ALGORITHMS = {"cosign-keyless", "minisign", "ssh-sig"}
 _ALLOWED_REDACTION_POLICIES = {"manifest_only", "manifest_and_receipts"}
 _ALLOWED_KEY_POLICIES = {"external_ref_required", "keyless_required"}
@@ -76,6 +77,21 @@ def _list_value(policy: dict[str, Any], key: str) -> list[str]:
     return [item for item in value if isinstance(item, str) and item.strip()]
 
 
+def _fallback_string_list_contract_errors(policy: dict[str, Any], key: str, *, min_length: int = 1) -> list[str]:
+    value = policy.get(key)
+    if not isinstance(value, list):
+        return [f"{key}:list_type"]
+    errors: list[str] = []
+    if not value:
+        errors.append(f"{key}:too_short")
+    for index, item in enumerate(value):
+        if not isinstance(item, str):
+            errors.append(f"{key}.{index}:string_type")
+        elif len(item) < min_length:
+            errors.append(f"{key}.{index}:string_too_short")
+    return errors
+
+
 def _policy_schema_check(policy: dict[str, Any]) -> dict[str, Any]:
     schema_version = policy.get("schema_version")
     schema_uri = policy.get("schema_uri")
@@ -123,12 +139,22 @@ def _fallback_policy_contract_errors(policy: dict[str, Any]) -> list[str]:
     for field in ("policy_id", "signer_id"):
         if not isinstance(policy.get(field), str) or not str(policy.get(field)).strip():
             errors.append(f"{field}:string_too_short")
-    if not _list_value(policy, "allowed_package_ids"):
-        errors.append("allowed_package_ids:too_short")
-    if any(len(item) < 71 for item in _list_value(policy, "allowed_package_digests")):
-        errors.append("allowed_package_digests:string_too_short")
-    if not _list_value(policy, "acceptance_trace"):
-        errors.append("acceptance_trace:too_short")
+    errors.extend(_fallback_string_list_contract_errors(policy, "allowed_algorithms"))
+    errors.extend(_fallback_string_list_contract_errors(policy, "allowed_package_ids"))
+    errors.extend(_fallback_string_list_contract_errors(policy, "allowed_package_digests", min_length=71))
+    allowed_algorithms = _list_value(policy, "allowed_algorithms")
+    errors.extend(
+        f"allowed_algorithms.{index}:literal_error"
+        for index, item in enumerate(allowed_algorithms)
+        if item not in _ALLOWED_ALGORITHMS
+    )
+    acceptance_trace = _list_value(policy, "acceptance_trace")
+    errors.extend(_fallback_string_list_contract_errors(policy, "acceptance_trace"))
+    errors.extend(
+        f"acceptance_trace.{index}:literal_error"
+        for index, item in enumerate(acceptance_trace)
+        if item not in _ALLOWED_ACCEPTANCE_TRACES
+    )
     return errors
 
 

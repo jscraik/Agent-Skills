@@ -141,6 +141,90 @@ class TestSkillsSdkSigningIntent(unittest.TestCase):
         self.assertIn("private_key:extra_forbidden", contract_blocker.evidence)
         self.assertFalse(receipt.key_material_accessed)
 
+    def test_fallback_contract_blocks_invalid_acceptance_trace(self) -> None:
+        package_receipt, hardening_receipt = self._package_receipts()
+        policy = deepcopy(json.loads(FIXTURE_POLICY.read_text(encoding="utf-8")))
+        policy["acceptance_trace"] = ["BAD"]
+        real_import = builtins.__import__
+
+        def import_without_pydantic(name: str, *args: object, **kwargs: object) -> object:
+            if name == "pydantic":
+                raise ModuleNotFoundError(name)
+            return real_import(name, *args, **kwargs)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            policy_path = Path(tmpdir) / "policy.json"
+            policy_path.write_text(json.dumps(policy), encoding="utf-8")
+            with mock.patch("builtins.__import__", side_effect=import_without_pydantic):
+                with self.assertRaises(SigningIntentError) as raised:
+                    build_signing_intent_receipt(
+                        policy_path=policy_path,
+                        package_receipt=package_receipt,
+                        hardening_receipt=hardening_receipt,
+                    )
+
+        receipt = validate_signing_intent_receipt(raised.exception.receipt)
+        contract_blocker = next(blocker for blocker in receipt.blockers if blocker.id == "policy_contract_valid")
+        self.assertIn("acceptance_trace.0:literal_error", contract_blocker.evidence)
+        self.assertFalse(receipt.signing_performed)
+        self.assertFalse(receipt.key_material_accessed)
+
+    def test_fallback_contract_blocks_malformed_list_entries(self) -> None:
+        package_receipt, hardening_receipt = self._package_receipts()
+        policy = deepcopy(json.loads(FIXTURE_POLICY.read_text(encoding="utf-8")))
+        policy["allowed_algorithms"] = ["cosign-keyless", 123]
+        real_import = builtins.__import__
+
+        def import_without_pydantic(name: str, *args: object, **kwargs: object) -> object:
+            if name == "pydantic":
+                raise ModuleNotFoundError(name)
+            return real_import(name, *args, **kwargs)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            policy_path = Path(tmpdir) / "policy.json"
+            policy_path.write_text(json.dumps(policy), encoding="utf-8")
+            with mock.patch("builtins.__import__", side_effect=import_without_pydantic):
+                with self.assertRaises(SigningIntentError) as raised:
+                    build_signing_intent_receipt(
+                        policy_path=policy_path,
+                        package_receipt=package_receipt,
+                        hardening_receipt=hardening_receipt,
+                    )
+
+        receipt = validate_signing_intent_receipt(raised.exception.receipt)
+        contract_blocker = next(blocker for blocker in receipt.blockers if blocker.id == "policy_contract_valid")
+        self.assertIn("allowed_algorithms.1:string_type", contract_blocker.evidence)
+        self.assertFalse(receipt.signing_performed)
+        self.assertFalse(receipt.key_material_accessed)
+
+    def test_fallback_contract_blocks_blank_list_entries(self) -> None:
+        package_receipt, hardening_receipt = self._package_receipts()
+        policy = deepcopy(json.loads(FIXTURE_POLICY.read_text(encoding="utf-8")))
+        policy["allowed_package_ids"] = ["skills-sdk-valid-fixture", ""]
+        real_import = builtins.__import__
+
+        def import_without_pydantic(name: str, *args: object, **kwargs: object) -> object:
+            if name == "pydantic":
+                raise ModuleNotFoundError(name)
+            return real_import(name, *args, **kwargs)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            policy_path = Path(tmpdir) / "policy.json"
+            policy_path.write_text(json.dumps(policy), encoding="utf-8")
+            with mock.patch("builtins.__import__", side_effect=import_without_pydantic):
+                with self.assertRaises(SigningIntentError) as raised:
+                    build_signing_intent_receipt(
+                        policy_path=policy_path,
+                        package_receipt=package_receipt,
+                        hardening_receipt=hardening_receipt,
+                    )
+
+        receipt = validate_signing_intent_receipt(raised.exception.receipt)
+        contract_blocker = next(blocker for blocker in receipt.blockers if blocker.id == "policy_contract_valid")
+        self.assertIn("allowed_package_ids.1:string_too_short", contract_blocker.evidence)
+        self.assertFalse(receipt.signing_performed)
+        self.assertFalse(receipt.key_material_accessed)
+
     def test_builder_blocks_hardening_failure(self) -> None:
         package_receipt, hardening_receipt = self._package_receipts()
         hardening_receipt["status"] = "blocked"
