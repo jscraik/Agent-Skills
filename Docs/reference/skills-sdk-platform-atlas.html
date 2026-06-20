@@ -409,19 +409,31 @@
       </div>
     </section>
 
-    <section class="section" data-view-section="roadmap" aria-label="Recommended next slices">
+    <section class="section" data-view-section="roadmap" aria-label="Landed foundation slices">
       <div class="section-head">
         <div>
-          <h2>Recommended Next Slices</h2>
-          <p>Small, buildable order that keeps the SDK honest and useful.</p>
+          <h2>Landed Foundation Slices</h2>
+          <p>Completed controlled slices that now form the local SDK foundation. Keep them here as proof-backed history, not as future recommendations.</p>
         </div>
-        <div class="note">Each slice should add one command, one schema or receipt, tests, and a capability-matrix update.</div>
+        <div class="note">Landed means command surface, schema or receipt, tests, and capability-matrix truth exist. It does not imply hosted services, registry, marketplace, or production runtime trust.</div>
       </div>
       <div class="card-grid">
         <div class="step" data-status="implemented"><span class="pill implemented">01</span><strong>PU-021: SkillIR.v0 Spine</strong><span>Landed: minimal typed IR now anchors package identity and receipt-producing SDK lanes.</span></div>
         <div class="step" data-status="implemented"><span class="pill implemented">02</span><strong>PU-022: Deterministic Eval Runner</strong><span>Landed: <code>ask sdk eval run</code> emits deterministic and internal scorecard-backed eval receipts with target-bound package identity and quality gates.</span></div>
         <div class="step" data-status="implemented"><span class="pill implemented">03</span><strong>PU-023: Sandbox Profile Contract</strong><span>Added sandbox profile schema, validator, and high-risk blocker without executing sandboxed commands.</span></div>
         <div class="step" data-status="implemented"><span class="pill implemented">04</span><strong>PU-024: Signing Intent</strong><span>Add package digest binding and policy validation while keeping real signing, key ownership, archive emission, and trust mutation blocked.</span></div>
+      </div>
+    </section>
+
+    <section class="section" data-view-section="roadmap" aria-label="Recommended next slices">
+      <div class="section-head">
+        <div>
+          <h2>Recommended Next Slices</h2>
+          <p>Remaining small, buildable order that keeps the SDK honest and useful.</p>
+        </div>
+        <div class="note">Each future slice should add one command, one schema or receipt, tests, and a capability-matrix update.</div>
+      </div>
+      <div class="card-grid">
         <div class="step" data-status="deferred"><span class="pill deferred">05</span><strong>PU-025: Local Trust Ledger</strong><span>Add append-only trust decisions with skill id, digest, decision, reason, owner, expiry, and revocation marker.</span></div>
         <div class="step" data-status="deferred"><span class="pill deferred">06</span><strong>PU-026: Observability Feedback Loop</strong><span>Ingest redacted agent run receipts, mine real-world eval scenarios and skill gaps, then require update or removal candidates to pass package and eval receipts before promotion.</span></div>
         <div class="step" data-status="deferred"><span class="pill deferred">07</span><strong>PU-027: Emitter Contract Preview</strong><span>Add dry-run write-plan contract for one local projection only. No remote registry, no marketplace, no publish.</span></div>
