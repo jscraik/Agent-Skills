@@ -1,0 +1,36 @@
+{
+  "schema_version": "skills-sdk.trust-decision-receipt.v0",
+  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/trust-decision-receipt.v0.schema.json",
+  "status": "preview",
+  "operation": "trust_decision",
+  "decision": "trust",
+  "reason": "Fixture package passed local SDK checks.",
+  "owner": "skills-sdk-local-fixture-owner",
+  "expires_at": null,
+  "revoked_package_digest": null,
+  "package_id": "skills-sdk-valid-fixture",
+  "version": "0.1.0",
+  "source_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "manifest_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+  "package_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+  "ledger_path": ".harness/skills-sdk/trust-ledger.jsonl",
+  "ledger_before_digest": null,
+  "ledger_after_digest": null,
+  "ledger_entry": null,
+  "ledger_entry_digest": null,
+  "trust_checks": [
+    {
+      "id": "trust_decision_shape",
+      "status": "pass",
+      "severity": "blocker",
+      "message": "Trust decisions require a known decision, reason, owner, valid expiry, and revocation digest when revoking.",
+      "evidence": []
+    }
+  ],
+  "blockers": [],
+  "warnings": [],
+  "mutation_performed": true,
+  "trust_store_mutated": false,
+  "acceptance_trace": ["FR-003", "FR-008", "SA-003", "SA-004", "SEC-001", "VP-025"],
+  "agent_summary": "skills-sdk trust decision preview for skills-sdk-valid-fixture using a local append-only ledger; no global trust store was mutated."
+}

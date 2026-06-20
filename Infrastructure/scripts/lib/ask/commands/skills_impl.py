@@ -219,6 +219,7 @@ __all__ = [
     "skills_sdk_package_build",
     "skills_sdk_package_harden",
     "skills_sdk_package_signing_intent",
+    "skills_sdk_trust_decide",
     "skills_sdk_eval_run",
     "skills_sdk_placeholder_lifecycle",
     "skills_sdk_project_rollback",
@@ -4349,6 +4350,126 @@ def skills_sdk_sandbox_validate(
                 code="ERR_VALIDATION",
                 message=payload["agent_summary"],
                 fix_suggestion="Use a deny-by-default profile with no persistent writes, no network egress, no ambient environment, and no selected adapter.",
+            )
+        )
+    return result
+
+
+def skills_sdk_trust_decide(
+    repo_root: Path,
+    target: str,
+    decision: str,
+    reason: str,
+    owner: str,
+    *,
+    preview: bool,
+    apply: bool,
+    ledger: str | None = None,
+    expires_at: str | None = None,
+    revoked_package_digest: str | None = None,
+) -> CallResult:
+    """Preview or append a local trust ledger decision for one skill package."""
+    result = CallResult()
+    result.metadata["command"] = "sdk trust decide"
+    query = target.strip()
+    target_info, _audit_target = _resolve_doctor_target(repo_root, query)
+    source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
+    source_path = Path(str(source_path_value)) if source_path_value else None
+    if source_path and not source_path.is_absolute():
+        source_path = repo_root / source_path
+
+    if not source_path or not source_path.is_file():
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Skills SDK trust decision is missing a canonical SKILL.md source for '{query}'.",
+                fix_suggestion=_ask_validation_command("sdk", "package", "build", query),
+            )
+        )
+        result.data["skills_sdk_trust_decide"] = {
+            "schema_version": "skills-sdk-trust-decide.v0",
+            "query": query,
+            "status": "blocked",
+            "canonical_source_path": source_path_value,
+            "receipt": None,
+            "mutation_performed": False,
+            "trust_store_mutated": False,
+            "validation_commands": [
+                _ask_validation_command(
+                    "sdk",
+                    "trust",
+                    "decide",
+                    query,
+                    "--decision",
+                    decision,
+                    "--reason",
+                    reason,
+                    "--owner",
+                    owner,
+                    "--preview",
+                )
+            ],
+            "agent_summary": f"skills-sdk trust decide is blocked for {query}: canonical source is missing.",
+        }
+        return result
+
+    from ask.skills_sdk.trust_ledger import (  # noqa: PLC0415
+        TrustLedgerError,
+        build_trust_decision_receipt,
+    )
+
+    package_receipt = _build_package_digest_receipt(repo_root, source_path=source_path, query=query)
+    try:
+        trust_receipt = build_trust_decision_receipt(
+            repo_root,
+            package_receipt=package_receipt,
+            decision=decision,
+            reason=reason,
+            owner=owner,
+            apply=apply,
+            ledger_path=ledger,
+            expires_at=expires_at,
+            revoked_package_digest=revoked_package_digest,
+        )
+    except TrustLedgerError as exc:
+        trust_receipt = exc.receipt
+
+    command_args = ["sdk", "trust", "decide", query, "--decision", decision, "--reason", reason, "--owner", owner]
+    if expires_at:
+        command_args.extend(["--expires-at", expires_at])
+    if revoked_package_digest:
+        command_args.extend(["--revoked-package-digest", revoked_package_digest])
+    if ledger:
+        command_args.extend(["--ledger", ledger])
+    command_args.append("--apply" if apply else "--preview")
+
+    payload = {
+        "schema_version": "skills-sdk-trust-decide.v0",
+        "query": query,
+        "status": trust_receipt["status"],
+        "canonical_source_path": source_path_value,
+        "facade_command": "skills-sdk trust decide",
+        "package_id": trust_receipt["package_id"],
+        "version": trust_receipt["version"],
+        "package_digest": trust_receipt["package_digest"],
+        "ledger_path": trust_receipt["ledger_path"],
+        "decision": trust_receipt["decision"],
+        "receipt": trust_receipt,
+        "mutation_performed": trust_receipt["mutation_performed"],
+        "trust_store_mutated": False,
+        "validation_commands": [_ask_validation_command(*command_args)],
+        "agent_summary": trust_receipt["agent_summary"],
+    }
+    result.data["skills_sdk_trust_decide"] = payload
+    if trust_receipt["status"] == "blocked":
+        result.status = "error"
+        message = trust_receipt["blockers"][0]["message"] if trust_receipt["blockers"] else payload["agent_summary"]
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=message,
+                fix_suggestion="Provide a valid decision, reason, owner, ledger path, and revocation digest when decision is revoke.",
             )
         )
     return result

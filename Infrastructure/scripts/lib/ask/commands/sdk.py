@@ -126,6 +126,32 @@ def _add_sdk_sandbox_parser(
     sdk_sandbox_validate_parser.add_argument("--profile", required=True, help="Repo-relative or absolute sandbox profile JSON")
 
 
+def _add_sdk_trust_parser(
+    sdk_subparsers: argparse._SubParsersAction,
+    global_parser: argparse.ArgumentParser,
+) -> None:
+    sdk_trust_parser = sdk_subparsers.add_parser(
+        "trust",
+        help="Preview or append local Skills SDK trust decisions",
+        parents=[global_parser],
+    )
+    sdk_trust_subparsers = sdk_trust_parser.add_subparsers(dest="trust_action", required=True)
+    decide = sdk_trust_subparsers.add_parser(
+        "decide",
+        help="Build a local trust decision receipt for one package identity",
+        parents=[global_parser],
+    )
+    decide.add_argument("target", help="Skill handle or repo-relative skill source path")
+    decide.add_argument("--decision", choices=["trust", "distrust", "revoke"], required=True)
+    decide.add_argument("--reason", required=True, help="Human-readable decision reason")
+    decide.add_argument("--owner", required=True, help="Decision owner")
+    decide.add_argument("--expires-at", help="Optional ISO-8601 expiry for the decision")
+    decide.add_argument("--revoked-package-digest", help="Required when --decision revoke")
+    decide.add_argument("--ledger", help="Repo-relative or temporary JSONL ledger path")
+    decide.add_argument("--preview", action="store_true", help="Emit the receipt without writing the ledger")
+    decide.add_argument("--apply", action="store_true", help="Append the decision to the local ledger")
+
+
 def _add_sdk_check_parser(
     sdk_subparsers: argparse._SubParsersAction,
     global_parser: argparse.ArgumentParser,
@@ -292,6 +318,7 @@ def add_sdk_parser(
     _add_sdk_eval_parser(sdk_subparsers, global_parser)
     _add_sdk_package_parser(sdk_subparsers, global_parser)
     _add_sdk_sandbox_parser(sdk_subparsers, global_parser)
+    _add_sdk_trust_parser(sdk_subparsers, global_parser)
     _add_sdk_project_mutation_parsers(sdk_subparsers, global_parser)
     _add_sdk_lifecycle_status_parsers(sdk_subparsers, global_parser)
     _add_sdk_knowledge_parser(sdk_subparsers, global_parser)
@@ -398,6 +425,7 @@ def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
         "eval": _dispatch_sdk_eval,
         "package": _dispatch_sdk_package,
         "sandbox": _dispatch_sdk_sandbox,
+        "trust": _dispatch_sdk_trust,
         "install": _dispatch_sdk_install,
         "rollback": _dispatch_sdk_rollback,
         "uninstall": _dispatch_sdk_uninstall,
@@ -458,6 +486,29 @@ def _dispatch_sdk_sandbox(repo_root: Path, args: argparse.Namespace) -> CallResu
     if args.sandbox_action == "validate":
         return skills_commands.skills_sdk_sandbox_validate(repo_root, profile=args.profile)
     return build_unknown_action_result("sdk sandbox", args.sandbox_action)
+
+
+def _dispatch_sdk_trust(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    if args.trust_action == "decide":
+        if args.preview == args.apply:
+            return _validation_error(
+                "sdk trust decide",
+                "Skills SDK trust decide accepts exactly one of --preview or --apply.",
+                "ask sdk trust decide <target> --decision trust --reason <reason> --owner <owner> --preview --json --robot",
+            )
+        return skills_commands.skills_sdk_trust_decide(
+            repo_root,
+            target=args.target,
+            decision=args.decision,
+            reason=args.reason,
+            owner=args.owner,
+            preview=args.preview,
+            apply=args.apply,
+            ledger=args.ledger,
+            expires_at=args.expires_at,
+            revoked_package_digest=args.revoked_package_digest,
+        )
+    return build_unknown_action_result("sdk trust", args.trust_action)
 
 
 def _dispatch_sdk_knowledge(repo_root: Path, args: argparse.Namespace) -> CallResult:

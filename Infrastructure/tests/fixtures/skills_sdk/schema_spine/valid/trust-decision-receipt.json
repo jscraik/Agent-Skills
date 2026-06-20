@@ -1,0 +1,47 @@
+{
+  "schema_version": "skills-sdk.trust-decision-receipt.v0",
+  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/trust-decision-receipt.v0.schema.json",
+  "status": "preview",
+  "operation": "trust_decision",
+  "decision": "trust",
+  "reason": "Fixture package passed local SDK checks.",
+  "owner": "skills-sdk-local-fixture-owner",
+  "expires_at": null,
+  "revoked_package_digest": null,
+  "package_id": "skills-sdk-valid-fixture",
+  "version": "0.1.0",
+  "source_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "manifest_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+  "package_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+  "ledger_path": ".harness/skills-sdk/trust-ledger.jsonl",
+  "ledger_before_digest": null,
+  "ledger_after_digest": null,
+  "ledger_entry": {
+    "schema_version": "skills-sdk.trust-decision-receipt.v0",
+    "recorded_at": "2026-06-20T00:00:00Z",
+    "package_id_digest": "sha256:6e3b1d49f6d8813157b6ee1043a8c2b0c6f693fb4771e516c9b662b005cc0897",
+    "version_digest": "sha256:6ad9613a455798d6d92e5f5f390ab4baa70596bc869ed6b17f5cdd2b28635f06",
+    "package_digest_digest": "sha256:3f05c6b25bd17fd921bedaa19354adf978dcb7f6d165a5d1c96097bdcf6a25f3",
+    "decision": "trust",
+    "reason_digest": "sha256:aec957380cff012e4237783104265db37e213a39fefe662b156a890f8e36a184",
+    "owner_digest": "sha256:b8121ecb530aeeb96031eede0cf5a84b033607c16a6bbf96b3576fa1d3161fe5",
+    "expires_at_digest": null,
+    "revoked_package_digest_digest": null
+  },
+  "ledger_entry_digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+  "trust_checks": [
+    {
+      "id": "trust_decision_shape",
+      "status": "pass",
+      "severity": "blocker",
+      "message": "Trust decisions require a known decision, reason, owner, valid expiry, and revocation digest when revoking.",
+      "evidence": []
+    }
+  ],
+  "blockers": [],
+  "warnings": [],
+  "mutation_performed": false,
+  "trust_store_mutated": false,
+  "acceptance_trace": ["FR-003", "FR-008", "SA-003", "SA-004", "SEC-001", "VP-025"],
+  "agent_summary": "skills-sdk trust decision preview for skills-sdk-valid-fixture using a local append-only ledger; no global trust store was mutated."
+}

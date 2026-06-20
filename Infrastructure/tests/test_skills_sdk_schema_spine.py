@@ -21,6 +21,7 @@ SCHEMA_NAMES = {
     "package-manifest": "package-manifest.v0.schema.json",
     "package-digest-receipt": "package-digest-receipt.v0.schema.json",
     "package-hardening-receipt": "package-hardening-receipt.v0.schema.json",
+    "trust-decision-receipt": "trust-decision-receipt.v0.schema.json",
     "signing-policy": "signing-policy.v0.schema.json",
     "signing-intent-receipt": "signing-intent-receipt.v0.schema.json",
     "sandbox-profile": "sandbox-profile.v0.schema.json",
@@ -149,6 +150,15 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertEqual(payload["blockers"], [])
         self.assertEqual(payload["hardening_checks"][0]["id"], "non_mutating_package_identity")
         self.assertFalse(payload["mutation_performed"])
+
+    def test_trust_decision_fixture_records_local_ledger_preview(self) -> None:
+        payload = self.assert_valid("trust-decision-receipt", "trust-decision-receipt.json")
+
+        self.assertEqual(payload["status"], "preview")
+        self.assertEqual(payload["decision"], "trust")
+        self.assertEqual(payload["package_id"], "skills-sdk-valid-fixture")
+        self.assertFalse(payload["mutation_performed"])
+        self.assertFalse(payload["trust_store_mutated"])
 
     def test_signing_policy_fixture_records_external_key_boundary(self) -> None:
         payload = self.assert_valid("signing-policy", "signing-policy.json")
@@ -291,6 +301,9 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
 
     def test_package_hardening_schema_rejects_mutation_claims(self) -> None:
         self.assert_invalid("package-hardening-receipt", "package-hardening-mutation-claim.json")
+
+    def test_trust_decision_schema_rejects_preview_write_claims(self) -> None:
+        self.assert_invalid("trust-decision-receipt", "trust-decision-preview-writes.json")
 
     def test_signing_policy_schema_rejects_archive_requirement(self) -> None:
         self.assert_invalid("signing-policy", "signing-policy-requires-archive.json")

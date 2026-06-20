@@ -4,7 +4,7 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from ask.skills_sdk import signing_contracts
+from ask.skills_sdk import signing_contracts, trust_contracts
 from ask.skills_sdk.eval_contracts import EvalQualityGates
 
 
@@ -735,6 +735,10 @@ def validate_capability_status(payload: object) -> CapabilityStatus:
     return CapabilityStatus.model_validate(payload)
 
 
+def validate_trust_decision_receipt(payload: object) -> trust_contracts.TrustDecisionReceipt:
+    return trust_contracts.validate_trust_decision_receipt(payload)
+
+
 def validate_manifest_source(payload: object) -> ManifestSource:
     return ManifestSource.model_validate(payload)
 
@@ -784,17 +788,13 @@ def validate_install_preview(payload: object) -> InstallPreview:
     return InstallPreview.model_validate(payload)
 
 
-def validate_check_receipt(payload: object) -> CheckReceipt:
-    return CheckReceipt.model_validate(payload)
+def validate_check_receipt(payload: object) -> CheckReceipt: return CheckReceipt.model_validate(payload)
 
 
-def validate_risk_classification(payload: object) -> RiskClassification:
-    return RiskClassification.model_validate(payload)
+def validate_risk_classification(payload: object) -> RiskClassification: return RiskClassification.model_validate(payload)
 
 
-def validate_artifact_status_row(payload: object) -> ArtifactStatusRow:
-    return ArtifactStatusRow.model_validate(payload)
+def validate_artifact_status_row(payload: object) -> ArtifactStatusRow: return ArtifactStatusRow.model_validate(payload)
 
 
-def validate_source_artifact_contract(payload: object) -> SourceArtifactContract:
-    return SourceArtifactContract.model_validate(payload)
+def validate_source_artifact_contract(payload: object) -> SourceArtifactContract: return SourceArtifactContract.model_validate(payload)
