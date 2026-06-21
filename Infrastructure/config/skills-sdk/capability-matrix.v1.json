@@ -346,17 +346,18 @@
       "id": "observability_feedback",
       "title": "Redacted observability feedback preview",
       "status": "implemented",
-      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/observability_feedback.py",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/observability_feedback.py and Infrastructure/scripts/lib/ask/skills_sdk/observability_promotion.py",
       "pipeline_sections": ["eval_ops", "knowledge_engineering", "agent_execution_control_plane"],
       "feature_executed": true,
       "mutation_performed": false,
       "evidence_refs": [
         "./bin/ask sdk observability feedback --skill Infrastructure/tests/fixtures/skills_sdk/valid_skill --events Infrastructure/tests/fixtures/skills_sdk/observability/redacted-events.fixture --preview --json --robot",
         "Infrastructure/config/schemas/skills-sdk/observability-feedback-receipt.v0.schema.json",
+        "Infrastructure/config/schemas/skills-sdk/observability-promotion-receipt.v0.schema.json",
         "Infrastructure/tests/test_skills_sdk_observability_feedback.py"
       ],
-      "next_slice": "Connect feedback candidates to generated eval-case drafts only after candidate promotion is guarded by package and eval receipts.",
-      "notes": "PU-026 mines local redacted JSONL events into preview-only eval scenario and skill-gap candidates; raw prompt/output fields block the receipt and no promotion or file generation is performed."
+      "next_slice": "Connect promoted feedback candidates to scenario-quality screening and generated eval-case drafts without mutating source scenarios.",
+      "notes": "PU-026 mines local redacted JSONL events into preview-only eval scenario and skill-gap candidates. Promotion preview now consumes feedback, package, and eval-run receipts to mark candidates ready or blocked without live ingestion, file generation, or automatic promotion."
     },
     {
       "id": "refs_ingestion",
@@ -391,7 +392,7 @@
         "Infrastructure/config/schemas/skills-sdk/eval-run-receipt.v0.schema.json",
         "Infrastructure/tests/test_skills_sdk_eval_runner.py"
       ],
-      "next_slice": "Use eval profiles to add Codex-backed A/B execution only after the preview receipt stays schema- and docs-verified.",
+      "next_slice": "Keep deterministic eval receipts separate from Codex-backed A/B execution and judge scoring receipts.",
       "notes": "The SDK routes to the existing internal skill-builder eval backend, preserves internal scorecard case counts and calibrated quality-gate assertions in SDK receipts, binds targeted receipts to package identity, and keeps deterministic JSONL as a fast fixture lane; Tessl remains opt-in."
     },
     {
@@ -440,7 +441,7 @@
         "Infrastructure/config/schemas/skills-sdk/ab-preview-receipt.v0.schema.json",
         "Infrastructure/tests/test_skills_sdk_ab_preview.py"
       ],
-      "next_slice": "Invoke codex exec for each variant only after the preview receipt, evidence directory contract, and judge input redaction contract are schema-verified.",
+      "next_slice": "Use completed A/B run receipts to drive sanitized judge input preview only after evidence directory and redaction contracts stay schema-verified.",
       "notes": "The SDK now previews a Codex-backed skill A/B experiment contract with skill A/B package identity, fixture digest, Codex execution profile, judge profile, and judge-secret isolation. It does not invoke codex exec, Ollama, network, winner selection, or mutation."
     },
     {
