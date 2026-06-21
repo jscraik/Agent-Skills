@@ -97,7 +97,22 @@ class TestAskSkillsErrors(unittest.TestCase):
             (skill_dir / "SKILL.md").write_text("---\nname: example-skill\n---\n\n# Example\n", encoding="utf-8")
             (skill_dir / "references").symlink_to(target_refs, target_is_directory=True)
 
-            with self.assertRaisesRegex(ValueError, "symlinked support directory"):
+            with self.assertRaisesRegex(ValueError, "symlinked support path"):
+                _write_tessl_plugin_wrapper(repo_root, "Skills/example-skill", repo_root / "tmp-tessl")
+
+    @unittest.skipIf(not hasattr(Path, "symlink_to"), "symlink support unavailable")
+    def test_tessl_wrapper_rejects_nested_support_symlinks(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir)
+            skill_dir = repo_root / "Skills/example-skill"
+            references = skill_dir / "references"
+            outside = repo_root / "outside.md"
+            references.mkdir(parents=True)
+            outside.write_text("outside", encoding="utf-8")
+            (skill_dir / "SKILL.md").write_text("---\nname: example-skill\n---\n\n# Example\n", encoding="utf-8")
+            (references / "leak.md").symlink_to(outside)
+
+            with self.assertRaisesRegex(ValueError, "symlinked support path"):
                 _write_tessl_plugin_wrapper(repo_root, "Skills/example-skill", repo_root / "tmp-tessl")
 
     @patch("ask.commands.skills_impl._get_python_command", return_value=["python3"])

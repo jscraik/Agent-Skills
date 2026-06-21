@@ -672,6 +672,12 @@ def _write_tessl_staged_json(path: Path, payload: dict[str, Any], staging_root_r
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
+def _raise_if_tessl_support_tree_has_symlink(support_dir: Path, label: str) -> None:
+    for path in [support_dir, *support_dir.rglob("*")]:
+        if path.is_symlink():
+            raise ValueError(f"Tessl review staging refuses symlinked support path: {label}")
+
+
 def _write_tessl_plugin_wrapper(repo_root: Path, audit_target_path: str, stable_parent: Path) -> tuple[Path, dict[str, str]]:
     """Create a stable Tessl plugin-shaped evidence wrapper for a SKILL.md-first local skill."""
     source_skill_dir = repo_root / audit_target_path
@@ -697,9 +703,11 @@ def _write_tessl_plugin_wrapper(repo_root: Path, audit_target_path: str, stable_
     shutil.copy2(source_skill, staged_skill_dir / "SKILL.md")
     for support_dir_name in ("references", "scripts", "assets", "evals"):
         support_dir = source_skill_dir / support_dir_name
-        if support_dir.is_symlink():
-            raise ValueError(f"Tessl review staging refuses symlinked support directory: {audit_target_path}/{support_dir_name}")
         if support_dir.is_dir():
+            _raise_if_tessl_support_tree_has_symlink(
+                support_dir,
+                f"{audit_target_path}/{support_dir_name}",
+            )
             shutil.copytree(support_dir, staged_skill_dir / support_dir_name)
 
     plugin = {
