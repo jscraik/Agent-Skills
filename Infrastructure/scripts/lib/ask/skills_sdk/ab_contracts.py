@@ -18,6 +18,7 @@ _AB_JUDGE_DIMENSION_ID_VALUES = (
     "maintainability",
 )
 _AB_JUDGE_DIMENSION_IDS = set(_AB_JUDGE_DIMENSION_ID_VALUES)
+_EXPERIMENT_ID_PATTERN = r"^[0-9a-f]{16}$"
 
 
 def _exact_decision_labels(rows: list[str]) -> bool:
@@ -447,7 +448,7 @@ class AbJudgeSanitizedVariantResult(_SdkContractModel):
 
 class AbJudgeComparisonPayload(_SdkContractModel):
     schema_version: Literal["skills-sdk.ab-judge-decision.v0"]
-    experiment_id: str = Field(min_length=16, max_length=16)
+    experiment_id: str = Field(pattern=_EXPERIMENT_ID_PATTERN)
     rubric: AbRubricContract
     rubric_digest: str = Field(min_length=71)
     skill_a: AbJudgePackageIdentity
@@ -475,7 +476,7 @@ class AbJudgePreviewReceipt(_SdkContractModel):
     operation: Literal["ab_judge_preview"]
     run_receipt_path: str | None = Field(default=None, min_length=1)
     run_receipt_digest: str | None = Field(default=None, min_length=71)
-    experiment_id: str | None = Field(default=None, min_length=16, max_length=16)
+    experiment_id: str | None = Field(default=None, pattern=_EXPERIMENT_ID_PATTERN)
     judge_profile: EvalJudgeProfile | None
     rubric_id: Literal["skills-sdk.ab-rubric.v0"] | None
     rubric_digest: str | None = Field(default=None, min_length=71)
@@ -546,7 +547,7 @@ class AbJudgeDimensionScore(_SdkContractModel):
 
 class AbJudgeDecision(_SdkContractModel):
     schema_version: Literal["skills-sdk.ab-judge-decision.v0"]
-    experiment_id: str = Field(min_length=16, max_length=16)
+    experiment_id: str = Field(pattern=_EXPERIMENT_ID_PATTERN)
     dimension_scores: list[AbJudgeDimensionScore] = Field(min_length=5, max_length=5)
     normalized_score_a: Annotated[float, Field(ge=0, le=1)]
     normalized_score_b: Annotated[float, Field(ge=0, le=1)]
@@ -573,7 +574,7 @@ class AbJudgeScoreReceipt(_SdkContractModel):
     operation: Literal["ab_judge_score"]
     run_receipt_path: str | None = Field(default=None, min_length=1)
     run_receipt_digest: str | None = Field(default=None, min_length=71)
-    experiment_id: str | None = Field(default=None, min_length=16, max_length=16)
+    experiment_id: str | None = Field(default=None, pattern=_EXPERIMENT_ID_PATTERN)
     judge_profile: EvalJudgeProfile | None
     rubric_id: Literal["skills-sdk.ab-rubric.v0"] | None
     rubric_digest: str | None = Field(default=None, min_length=71)

@@ -3,6 +3,8 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import os
+import re
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
@@ -22,6 +24,7 @@ AB_JUDGE_SCORE_SCHEMA_URI = (
 )
 DECISION_SCHEMA_VERSION = "skills-sdk.ab-judge-decision.v0"
 ALLOWED_WINNERS = ["skill_a", "skill_b", "inconclusive"]
+_EXPERIMENT_ID_RE = re.compile(r"[0-9a-f]{16}")
 _DIMENSION_IDS = {dimension["id"] for dimension in AB_RUBRIC_DIMENSIONS}
 _DECISION_KEYS = frozenset(
     {
@@ -132,8 +135,13 @@ def _run_receipt_header_valid(payload: dict[str, Any]) -> bool:
 
 def _run_receipt_identity_valid(payload: dict[str, Any]) -> bool:
     object_keys = ("skill_a", "skill_b", "fixture", "execution_profile", "judge_profile")
-    experiment_id = payload.get("experiment_id")
-    return all(_object_field(payload, key) is not None for key in object_keys) and isinstance(experiment_id, str) and len(experiment_id) == 16
+    return all(_object_field(payload, key) is not None for key in object_keys) and _experiment_id_valid(
+        payload.get("experiment_id")
+    )
+
+
+def _experiment_id_valid(value: object) -> bool:
+    return isinstance(value, str) and _EXPERIMENT_ID_RE.fullmatch(value) is not None
 
 
 def _run_receipt_variants_valid(payload: dict[str, Any]) -> bool:
@@ -368,14 +376,22 @@ def _score_evidence_paths(repo_root: Path, evidence_root: str, experiment_id: ob
         return {"blocker": "evidence_root_outside_repo", "prompt_path": None, "output_path": None}
     if _path_has_file_ancestor(repo_root, resolved):
         return {"blocker": "evidence_root_not_directory", "prompt_path": None, "output_path": None}
-    safe_experiment_id = experiment_id if isinstance(experiment_id, str) and len(experiment_id) == 16 else "blocked"
-    base = resolved / safe_experiment_id / "judge"
+    if not _experiment_id_valid(experiment_id):
+        return {"blocker": "experiment_id_invalid", "prompt_path": None, "output_path": None}
+    base = resolved / experiment_id / "judge"
+    contained_base = _contained_repo_path(repo_root, base)
+    if contained_base is None:
+        return {"blocker": "evidence_root_outside_repo", "prompt_path": None, "output_path": None}
+    if _path_has_file_ancestor(repo_root, contained_base):
+        return {"blocker": "evidence_root_not_directory", "prompt_path": None, "output_path": None}
+    prompt_file = contained_base / "prompt.txt"
+    output_file = contained_base / "ollama-output.json"
     return {
         "blocker": None,
-        "prompt_file": base / "prompt.txt",
-        "output_file": base / "ollama-output.json",
-        "prompt_path": _repo_relative(repo_root, base / "prompt.txt"),
-        "output_path": _repo_relative(repo_root, base / "ollama-output.json"),
+        "prompt_file": prompt_file,
+        "output_file": output_file,
+        "prompt_path": _repo_relative(repo_root, prompt_file),
+        "output_path": _repo_relative(repo_root, output_file),
     }
 
 
@@ -419,7 +435,7 @@ def _write_text_evidence(path: Path | None, value: str) -> None:
     if path is None:
         return
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_bytes(value.encode("utf-8"))
+    path.write_text(value, encoding="utf-8")
 
 
 def _contained_repo_path(repo_root: Path, path: Path) -> Path | None:
@@ -445,6 +461,12 @@ def _path_has_file_ancestor(repo_root: Path, path: Path) -> bool:
 
 
 def _run_ollama_judge(prompt: str, judge_profile: dict[str, Any], timeout_seconds: int) -> OllamaJudgeResult:
+    env = {
+        key: value
+        for key, value in os.environ.items()
+        if not key.startswith("OLLAMA_")
+    }
+    env["OLLAMA_HOST"] = str(judge_profile["host"])
     completed = subprocess.run(
         ["ollama", "run", str(judge_profile["model"])],
         input=prompt,
@@ -453,6 +475,7 @@ def _run_ollama_judge(prompt: str, judge_profile: dict[str, Any], timeout_second
         stderr=subprocess.PIPE,
         check=False,
         timeout=timeout_seconds,
+        env=env,
     )
     return OllamaJudgeResult(exit_code=completed.returncode, stdout=completed.stdout, stderr=completed.stderr)
 

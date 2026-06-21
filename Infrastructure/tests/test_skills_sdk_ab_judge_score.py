@@ -2,17 +2,24 @@ from __future__ import annotations
 
 import json
 import math
+import os
 from pathlib import Path
 import shutil
 import subprocess
 import sys
 import unittest
+from unittest import mock
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
-from ask.skills_sdk.eval_ab_judge import OllamaJudgeResult, _score_evidence_paths, build_ab_judge_score_receipt  # noqa: E402
+from ask.skills_sdk.eval_ab_judge import (  # noqa: E402
+    OllamaJudgeResult,
+    _run_ollama_judge,
+    _score_evidence_paths,
+    build_ab_judge_score_receipt,
+)
 from ask.skills_sdk.typed_contracts import validate_ab_judge_score_receipt  # noqa: E402
 
 
@@ -306,6 +313,71 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
 
         self.assertEqual(evidence["blocker"], "evidence_root_outside_repo")
         self.assertFalse((REPO_ROOT.parent / "sdk-ab-judge-escape.txt").exists())
+
+    def test_evidence_preflight_rejects_malformed_experiment_id(self) -> None:
+        evidence = _score_evidence_paths(REPO_ROOT, self.evidence_root, "../../../scratch")
+
+        self.assertEqual(evidence["blocker"], "experiment_id_invalid")
+        self.assertIsNone(evidence["prompt_path"])
+        self.assertIsNone(evidence["output_path"])
+
+    @unittest.skipIf(not hasattr(Path, "symlink_to"), "symlink support unavailable")
+    def test_evidence_preflight_rejects_symlinked_experiment_root(self) -> None:
+        evidence_root = REPO_ROOT / self.evidence_root
+        outside = Path("/private/tmp/sdk-ab-judge-outside")
+        experiment_root = evidence_root / "1234567890abcdef"
+        try:
+            outside.mkdir(parents=True, exist_ok=True)
+            evidence_root.mkdir(parents=True, exist_ok=True)
+            experiment_root.symlink_to(outside, target_is_directory=True)
+
+            evidence = _score_evidence_paths(REPO_ROOT, self.evidence_root, "1234567890abcdef")
+
+            self.assertEqual(evidence["blocker"], "evidence_root_outside_repo")
+            self.assertIsNone(evidence["prompt_path"])
+            self.assertIsNone(evidence["output_path"])
+        finally:
+            if experiment_root.is_symlink():
+                experiment_root.unlink()
+            shutil.rmtree(outside, ignore_errors=True)
+
+    def test_evidence_preflight_rejects_existing_file_experiment_root(self) -> None:
+        evidence_root = REPO_ROOT / self.evidence_root
+        evidence_root.mkdir(parents=True, exist_ok=True)
+        (evidence_root / "1234567890abcdef").write_text("not a directory", encoding="utf-8")
+
+        evidence = _score_evidence_paths(REPO_ROOT, self.evidence_root, "1234567890abcdef")
+
+        self.assertEqual(evidence["blocker"], "evidence_root_not_directory")
+        self.assertIsNone(evidence["prompt_path"])
+        self.assertIsNone(evidence["output_path"])
+
+    def test_local_ollama_runner_strips_ambient_cloud_auth(self) -> None:
+        captured_env: dict[str, str] = {}
+
+        def fake_run(*args: object, **kwargs: object) -> subprocess.CompletedProcess[str]:
+            captured_env.update(kwargs["env"])
+            return subprocess.CompletedProcess(args=args, returncode=0, stdout="{}", stderr="")
+
+        with mock.patch.dict(
+            os.environ,
+            {
+                "OLLAMA_HOST": "https://ollama.com",
+                "OLLAMA_API_KEY": "secret",
+                "OLLAMA_KEEP_ALIVE": "1h",
+            },
+        ):
+            with mock.patch("subprocess.run", side_effect=fake_run):
+                result = _run_ollama_judge(
+                    "prompt",
+                    {"host": "http://localhost:11434", "model": "qwen3.5:latest"},
+                    5,
+                )
+
+        self.assertEqual(result.exit_code, 0)
+        self.assertEqual(captured_env["OLLAMA_HOST"], "http://localhost:11434")
+        self.assertNotIn("OLLAMA_API_KEY", captured_env)
+        self.assertNotIn("OLLAMA_KEEP_ALIVE", captured_env)
 
 
 if __name__ == "__main__":

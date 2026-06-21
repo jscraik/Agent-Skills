@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 
@@ -26,6 +27,7 @@ SUPPORTED_SCHEMA_KEYS = {
     "minLength",
     "minimum",
     "oneOf",
+    "pattern",
     "properties",
     "required",
     "then",
@@ -157,6 +159,13 @@ def _validate_maximum_constraint(schema: dict[str, Any], value: object, path: st
         raise AssertionError(f"{path} greater than maximum {maximum}")
 
 
+def _validate_pattern_constraint(schema: dict[str, Any], value: object, path: str) -> None:
+    if "pattern" not in schema or not isinstance(value, str):
+        return
+    if re.fullmatch(str(schema["pattern"]), value) is None:
+        raise AssertionError(f"{path} does not match pattern {schema['pattern']!r}")
+
+
 def _validate_scalar_constraints(schema: dict[str, Any], value: object, path: str) -> None:
     _validate_type_constraint(schema, value, path)
     if "const" in schema and value != schema["const"]:
@@ -167,6 +176,7 @@ def _validate_scalar_constraints(schema: dict[str, Any], value: object, path: st
         raise AssertionError(f"{path} shorter than minLength {schema['minLength']}")
     if isinstance(value, str) and "maxLength" in schema and len(value) > schema["maxLength"]:
         raise AssertionError(f"{path} longer than maxLength {schema['maxLength']}")
+    _validate_pattern_constraint(schema, value, path)
     _validate_minimum_constraint(schema, value, path)
     _validate_maximum_constraint(schema, value, path)
 
