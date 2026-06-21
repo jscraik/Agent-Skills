@@ -6787,7 +6787,7 @@ def external_review_skill(
                         message="plugin-eval analysis failed during external-review lane.",
                         fix_suggestion="Inspect data.plugin_eval for full output.",
                     ))
-                elif plugin_summary.get("fail_count", 0) or not plugin_summary.get("grade_acceptable", False):
+                elif plugin_summary.get("blocking_fail_count", plugin_summary.get("fail_count", 0)) or not plugin_summary.get("grade_acceptable", False):
                     result.status = "error"
                     result.errors.append(ErrorObject(
                         code="ERR_VALIDATION",

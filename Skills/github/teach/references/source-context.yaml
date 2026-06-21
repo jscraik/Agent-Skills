@@ -1,0 +1,18 @@
+schema_version: 1
+skill: teach
+references:
+  - path: references/knowledge-demand.yaml
+    kind: knowledge_profile
+    load_when: deciding which capsule facet is relevant
+  - path: references/knowledge-capsule.manifest.yaml
+    kind: capsule_manifest
+    load_when: selecting one bounded capsule
+  - path: references/knowledge-capsules/
+    kind: generated_knowledge_capsules
+    load_when: only after manifest selection
+allowed_claims:
+  - KnowledgeOS capsules are vendored references, not runtime dependencies.
+forbidden_claims:
+  - raw source availability
+  - target repo readiness
+  - loading all capsules by default

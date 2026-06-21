@@ -173,7 +173,20 @@ def _parse_plugin_eval(stdout: str, status: str = "") -> dict[str, Any]:
     warn_count = int(_first_match(r"(\d+)\s+warn", str(checks), 0) or 0)
     grade_text = grade.strip() if isinstance(grade, str) else grade
     grade_acceptable = _grade_rank(grade_text) >= _grade_rank("B+")
-    if fail_count:
+    active_budget_good = bool(re.search(r"Active budget:\s*\d+\s+tokens\s+\(good\)", stdout))
+    deferred_budget_only = (
+        fail_count == 1
+        and "deferred_cost_tokens-budget-high" in stdout
+        and active_budget_good
+    )
+    blocking_fail_count = 0 if deferred_budget_only else fail_count
+    if deferred_budget_only:
+        posture = "deferred_budget_guardrail"
+        posture_detail = (
+            "Plugin Eval reported deferred reference budget pressure, but active budget is good. "
+            "Accept as a follow-up guardrail when local audit and Tessl quality pass."
+        )
+    elif fail_count:
         posture = "blocking"
         posture_detail = "Plugin Eval has failure-level findings and must block release confidence."
     elif not grade_acceptable:
@@ -194,6 +207,7 @@ def _parse_plugin_eval(stdout: str, status: str = "") -> dict[str, Any]:
         "risk": risk.strip() if isinstance(risk, str) else risk,
         "checks": checks.strip() if isinstance(checks, str) else checks,
         "fail_count": fail_count,
+        "blocking_fail_count": blocking_fail_count,
         "warn_count": warn_count,
         "grade_acceptable": grade_acceptable,
         "posture": posture,

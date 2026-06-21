@@ -2,6 +2,15 @@
 name: teach
 description: "Create mission-grounded study plans, lessons, quizzes, references, resources, and learning records. Use when the user asks to learn, study, be taught, continue a course, build a curriculum, or maintain a multi-session teaching workspace."
 disable-model-invocation: true
+metadata:
+  version: "0.1.0"
+  skill-type: team_automation
+  lifecycle_state: active
+  maturity: experimental
+  owner: Agent Skills Team
+  provenance: frontmatter:agent-skills:canonical-source
+  review_cadence: quarterly
+  metadata_source: frontmatter
 ---
 
 # Teach
@@ -18,7 +27,7 @@ Do not use for one-off facts, direct debugging, copyediting, professional certif
 
 - User learning goal, current level, constraints, and desired outcome.
 - Workspace files when present: MISSION.md, RESOURCES.md, NOTES.md, reference/*.html, learning-records/*.md, lessons/*.html, and assets/*.
-- Package references: [contract](references/contract.yaml), [evals](references/evals.yaml), [task profile](references/task-profile.json), and [templates](references/templates.md).
+- Package references: [contract](references/contract.yaml), [evals](references/evals.yaml), [task profile](references/task-profile.json), [templates](references/templates.md), and [knowledge capsules](references/knowledge-capsule.manifest.yaml).
 
 ## Outputs
 
@@ -38,20 +47,11 @@ Do not use for one-off facts, direct debugging, copyediting, professional certif
 7. Add a learning record for non-obvious learning, mission changes, and future-session steering.
 8. Verify created paths and links before closeout.
 
+Load `references/knowledge-capsule.manifest.yaml` only when the task needs pack-backed guidance. Select the smallest relevant capsule for mission/state, source trust, lesson loops, sequencing, local-book practice, or proof boundaries. Do not load all capsules by default.
+
 ## Output Templates
 
-Use the compact examples in [templates](references/templates.md). Keep generated lessons short: mission link, smallest concept, worked example, retrieval practice, and next step.
-
-Minimum lesson shape:
-
-~~~html
-<h1>0001 - Single Skill</h1>
-<section><h2>Mission Link</h2><p>Why this lesson matters now.</p></section>
-<section><h2>Concept</h2><p>The smallest useful explanation.</p></section>
-<section><h2>Worked Example</h2><pre>concrete example</pre></section>
-<section><h2>Retrieval Practice</h2><ol><li>question</li></ol></section>
-<section><h2>Next</h2><p>What to practice and record.</p></section>
-~~~
+Use [templates](references/templates.md). Keep lessons short: mission link, smallest concept, worked example, retrieval practice, and next step.
 
 ## Constraints And Safety
 
@@ -79,13 +79,12 @@ For lessons and references, verify the file path exists, links resolve, and cite
 
 ## Common Mistakes
 
-- "Teach me databases" is mission clarification, not permission to invent a full syllabus.
-- Fluency is not durable learning; include retrieval practice and spaced follow-up where useful.
-- Community wisdom is useful, but do not promise mentorship, acceptance, certification, or job outcomes.
-- Starting from a generic lesson without reading the mission.
-- Treating a one-off answer as a full teaching workspace.
-- Copying private transcripts or secrets into lessons.
-- Deleting prior learning state without confirmation.
+- Inventing a syllabus before mission clarification.
+- Skipping retrieval practice or learning records.
+- Promising mentorship, certification, acceptance, job outcomes, or safety-critical competence.
+- Treating a one-off answer as a teaching workspace.
+- Copying private transcripts, secrets, or hidden prompts into durable files.
+- Deleting or resetting learning state without confirmation.
 
 ## Examples
 

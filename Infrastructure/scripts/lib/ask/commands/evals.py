@@ -1085,9 +1085,8 @@ def _parse_generated_eval_fixture(fixture_path: Path, source_root: Path) -> dict
     display_name = title.split(":", 1)[1].strip() if ":" in title else raw_id
     behavior = fields.get("behavior_under_test") or fields.get("knowledge_claim") or should
     prompt = "\n".join([
-        "Review the architecture situation below and produce a concise decision note.",
-        "Include the evidence boundary, the safest first move, and the proof that would change the decision.",
-        f"Architecture situation: {given}",
+        f"Help with this situation: {given}",
+        "Keep the response concise. Include the safest next action, any boundary that must be preserved, and the proof or check that would make the next step reliable.",
     ])
     acceptance: list[dict[str, str]] = [
         {
@@ -1241,9 +1240,16 @@ GENERIC_EXPECTED_SIGNAL_RE = re.compile(
     r"(?is)^\s*demonstrates\s+the\s+skill-specific\s+behavior\s+in\s+this\s+case\s+should\s+contract\s*:"
 )
 GENERIC_GENERATED_SHOULD = (
-    "Produce an architecture decision note that states the evidence boundary, "
-    "a safe first move, and the proof that would change the decision."
+    "Produce a response that follows the reviewed behavior under test, preserves "
+    "safety boundaries, and states the next verifiable action."
 )
+SHALLOW_EXPECTED_SIGNAL_VALUES = {
+    "mission-grounded next step",
+    "direct non-workspace handling",
+    "skill-specific next step",
+    "safe next step",
+    "validation evidence",
+}
 GUARDRAIL_CASE_RE = re.compile(r"(?i)\b(?:guardrail|hallucinat(?:e|ion|ions|ed|ing))\b")
 GUARDRAIL_LABEL_RE = re.compile(
     r"(?i)\b(?:label(?:ed|led)?|human labels?|pass/fail|ordinary|adversarial|"
@@ -1331,6 +1337,28 @@ def _case_has_keyword_only_acceptance(case: dict[str, object]) -> bool:
         return False
     types = {_acceptance_type(item) for item in acceptance}
     return bool(types) and types <= KEYWORD_ONLY_TESSL_ACCEPTANCE_TYPES
+
+
+def _case_has_shallow_routing_oracle(case: dict[str, object]) -> bool:
+    acceptance = case.get("acceptance")
+    if not isinstance(acceptance, list) or not acceptance:
+        return False
+    normalized_items = [
+        _normalize_tessl_acceptance_item(item)
+        for item in acceptance
+        if isinstance(item, dict)
+    ]
+    types = {str(item.get("type") or "acceptance").strip() for item in normalized_items}
+    if not types or not types <= {"skill_selected", "skill_not_selected", "expected_signal"}:
+        return False
+    expected_values = [
+        str(item.get("value") or "").strip().lower()
+        for item in normalized_items
+        if str(item.get("type") or "").strip() == "expected_signal"
+    ]
+    if not expected_values:
+        return True
+    return all(value in SHALLOW_EXPECTED_SIGNAL_VALUES for value in expected_values)
 
 
 def _case_has_fixture_path_acceptance(case: dict[str, object]) -> bool:
@@ -1607,6 +1635,16 @@ def _tessl_eval_quality_findings(cases: list[dict[str, object]]) -> list[dict[st
                     "Regex and contains checks are allowed only as supporting evidence; they "
                     "cannot be the whole Tessl scoring contract because baseline runs can pass "
                     "them without demonstrating skill lift."
+                ),
+            })
+        if _case_has_shallow_routing_oracle(case):
+            findings.append({
+                "case_id": case_id,
+                "code": "shallow_routing_oracle",
+                "message": (
+                    "Tessl live-private evals must not rely only on skill selection plus "
+                    "generic expected signals. Add scenario-specific behavior, artifact, "
+                    "safety, or refusal criteria that create a plausible baseline failure path."
                 ),
             })
         if _case_has_fixture_path_acceptance(case):
@@ -4448,7 +4486,7 @@ def _write_eval_only_review_report(repo_root: Path, skill_name: str, skill_path:
                 },
                 "tessl_lint": {
                     "command": "./bin/ask skills external-review <path> --json --robot",
-                    "role": "disposable tile.json package-shape check, not a direct content finding",
+                    "role": "disposable .tessl-plugin/plugin.json package-shape check, not a direct content finding",
                     "status": "not_run_in_eval_only_dashboard",
                 },
                 "tessl_review": {

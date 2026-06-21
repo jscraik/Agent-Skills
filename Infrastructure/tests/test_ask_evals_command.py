@@ -419,6 +419,24 @@ def test_tessl_eval_quality_rejects_keyword_only_cases() -> None:
     }
 
 
+def test_tessl_eval_quality_rejects_shallow_routing_oracle() -> None:
+    cases = [{
+        "id": "shallow-teach-routing",
+        "unit": "teach routing",
+        "given": "A learner asks for a multi-session study plan.",
+        "should": "Choose the teaching workflow and preserve the learning mission.",
+        "prompt": "Teach SQL joins over four weeks.",
+        "acceptance": [
+            {"type": "skill_selected", "expected_skill": "teach"},
+            {"type": "expected_signal", "value": "mission-grounded next step"},
+        ],
+    }]
+
+    findings = evals._tessl_eval_quality_findings(cases)
+
+    assert [finding["code"] for finding in findings] == ["shallow_routing_oracle"]
+
+
 def test_ordinary_tessl_staging_allows_legacy_keyword_cases(tmp_path: Path) -> None:
     skill_root = _write_example_skill(tmp_path)
     (skill_root / "references" / "evals.yaml").write_text(
@@ -1501,6 +1519,10 @@ def test_tessl_live_private_stages_generated_fixture_scenarios(tmp_path: Path) -
     assert "references/evals/eval.arch.boundary-proof.md" in copied
     generated_case = staged_source / "evals" / "generated-eval.arch.boundary-proof" / "task.md"
     assert generated_case.exists()
+    generated_task = generated_case.read_text(encoding="utf-8")
+    assert "Review the architecture situation" not in generated_task
+    assert "Architecture situation:" not in generated_task
+    assert "Help with this situation:" in generated_task
     criteria = json.loads(
         (staged_source / "evals" / "generated-eval.arch.boundary-proof" / "criteria.json").read_text(
             encoding="utf-8"
@@ -3046,7 +3068,7 @@ def test_run_evals_renders_local_review_dashboard(tmp_path: Path) -> None:
     assert "Static evidence snapshot" in html_text
     assert "Review Lanes" in html_text
     assert "dynamic run-trace behavior checks" in html_text
-    assert "disposable tile.json package-shape check" in html_text
+    assert "disposable .tessl-plugin/plugin.json package-shape check" in html_text
     assert "opt-in local dependency security screening" in html_text
 
 
@@ -3461,6 +3483,27 @@ def test_plugin_eval_b_plus_warning_is_budget_guardrail() -> None:
     assert parsed["warn_count"] == 1
 
 
+def test_plugin_eval_deferred_budget_fail_is_nonblocking_when_active_budget_good() -> None:
+    parsed = _parse_plugin_eval(
+        """# Plugin Eval Report
+
+## At a Glance
+- Score: 86/100
+- Grade: B
+- Risk: high
+- Checks: 1 fail, 0 warn, 2 info
+- Active budget: 1293 tokens (good)
+
+## Checks
+- [FAIL] deferred_cost_tokens-budget-high: deferred_cost_tokens is excessive relative to the current Codex baseline.
+"""
+    )
+
+    assert parsed["fail_count"] == 1
+    assert parsed["blocking_fail_count"] == 0
+    assert parsed["posture"] == "deferred_budget_guardrail"
+
+
 def test_review_dashboard_renders_plugin_eval_acceptance_policy(tmp_path: Path) -> None:
     report_path = tmp_path / "review.json"
     output_path = tmp_path / "review.html"
@@ -3543,8 +3586,8 @@ def test_review_dashboard_renders_review_mode_details(tmp_path: Path) -> None:
                         "role": "budget and ergonomics guardrail",
                     },
                     "tessl_lint": {
-                        "command": "tessl skill lint <temporary-tile.json>",
-                        "role": "disposable tile.json package-shape check",
+                        "command": "tessl plugin lint <temporary-plugin-wrapper>",
+                        "role": "disposable .tessl-plugin/plugin.json package-shape check",
                     },
                     "tessl_review": {
                         "command": "tessl skill review <temporary-skill-directory>",
@@ -3575,7 +3618,7 @@ def test_review_dashboard_renders_review_mode_details(tmp_path: Path) -> None:
     assert "Review Lanes" in html_text
     assert "dynamic run-trace behavior checks" in html_text
     assert "budget and ergonomics guardrail" in html_text
-    assert "disposable tile.json package-shape check" in html_text
+    assert "disposable .tessl-plugin/plugin.json package-shape check" in html_text
     assert "local best-practice/content review" in html_text
     assert "opt-in local dependency security screening" in html_text
     assert "release-required for manifest-backed candidates" in html_text
