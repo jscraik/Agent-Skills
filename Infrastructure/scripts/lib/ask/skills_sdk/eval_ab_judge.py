@@ -64,10 +64,8 @@ def _repo_relative(repo_root: Path, path: Path) -> str:
 def _resolve_receipt_path(repo_root: Path, run_receipt: str) -> tuple[Path | None, str | None]:
     candidate = Path(run_receipt)
     path = candidate if candidate.is_absolute() else repo_root / candidate
-    try:
-        resolved = path.resolve()
-        resolved.relative_to(repo_root.resolve())
-    except (OSError, ValueError):
+    resolved = _contained_repo_path(repo_root, path)
+    if resolved is None:
         return None, "run_receipt_outside_repo"
     if not resolved.is_file():
         return resolved, "run_receipt_missing"
@@ -365,12 +363,10 @@ def _selected_score_profile(profile_id: str, blockers: list[str]) -> dict[str, A
 def _score_evidence_paths(repo_root: Path, evidence_root: str, experiment_id: object) -> dict[str, Any]:
     candidate = Path(evidence_root)
     root = candidate if candidate.is_absolute() else repo_root / candidate
-    try:
-        resolved = root.resolve()
-        resolved.relative_to(repo_root.resolve())
-    except (OSError, ValueError):
+    resolved = _contained_repo_path(repo_root, root)
+    if resolved is None:
         return {"blocker": "evidence_root_outside_repo", "prompt_path": None, "output_path": None}
-    if resolved.exists() and not resolved.is_dir():
+    if _path_has_file_ancestor(repo_root, resolved):
         return {"blocker": "evidence_root_not_directory", "prompt_path": None, "output_path": None}
     safe_experiment_id = experiment_id if isinstance(experiment_id, str) and len(experiment_id) == 16 else "blocked"
     base = resolved / safe_experiment_id / "judge"
@@ -429,13 +425,32 @@ def _safe_evidence_path(repo_root: Path, relative_path: str) -> Path:
     lexical_path = PurePosixPath(relative_path)
     if lexical_path.is_absolute() or ".." in lexical_path.parts:
         raise ValueError("evidence path outside repo")
-    repo_base = repo_root.resolve()
-    path = repo_base.joinpath(*lexical_path.parts).resolve()
-    try:
-        path.relative_to(repo_base)
-    except ValueError as exc:
-        raise ValueError("evidence path outside repo") from exc
+    path = _contained_repo_path(repo_root, repo_root.joinpath(*lexical_path.parts))
+    if path is None or _path_has_file_ancestor(repo_root, path.parent):
+        raise ValueError("evidence path outside repo")
     return path
+
+
+def _contained_repo_path(repo_root: Path, path: Path) -> Path | None:
+    try:
+        repo_base = repo_root.resolve()
+        resolved = path.resolve()
+        resolved.relative_to(repo_base)
+    except (OSError, ValueError):
+        return None
+    return resolved
+
+
+def _path_has_file_ancestor(repo_root: Path, path: Path) -> bool:
+    repo_base = repo_root.resolve()
+    current = path
+    while current != repo_base:
+        if current.exists() and not current.is_dir():
+            return True
+        if current.parent == current:
+            return True
+        current = current.parent
+    return False
 
 
 def _run_ollama_judge(prompt: str, judge_profile: dict[str, Any], timeout_seconds: int) -> OllamaJudgeResult:
@@ -498,7 +513,7 @@ def _decision_score_consistency_blocker(decision: dict[str, Any], comparison_pay
     computed_scores = _computed_normalized_scores(decision["dimension_scores"], comparison_payload)
     if not _normalized_scores_match(decision, computed_scores):
         return "judge_decision_normalized_scores_mismatch"
-    if decision["winner"] != _expected_winner(computed_scores, comparison_payload):
+    if decision["winner"] != _expected_winner(computed_scores, decision, comparison_payload):
         return "judge_decision_winner_mismatch"
     return None
 
@@ -529,13 +544,20 @@ def _normalized_scores_match(decision: dict[str, Any], computed_scores: dict[str
     return all(math.isclose(decision[key], computed_scores[key], rel_tol=0, abs_tol=1e-9) for key in computed_scores)
 
 
-def _expected_winner(computed_scores: dict[str, float], comparison_payload: dict[str, Any]) -> str:
+def _expected_winner(computed_scores: dict[str, float], decision: dict[str, Any], comparison_payload: dict[str, Any]) -> str:
     winner_policy = comparison_payload["rubric"]["winner_policy"]
     delta = computed_scores["normalized_score_b"] - computed_scores["normalized_score_a"]
     minimum_delta = winner_policy["minimum_normalized_delta"]
     if abs(delta) < minimum_delta:
         return winner_policy["tie_result"]
+    if not _confidence_meets_minimum(decision["confidence"], winner_policy["minimum_confidence"]):
+        return winner_policy["tie_result"]
     return "skill_b" if delta > 0 else "skill_a"
+
+
+def _confidence_meets_minimum(value: str, minimum: str) -> bool:
+    confidence_rank = {"low": 0, "medium": 1, "high": 2}
+    return confidence_rank[value] >= confidence_rank[minimum]
 
 
 def _dimension_scores_blocker(rows: object) -> str | None:

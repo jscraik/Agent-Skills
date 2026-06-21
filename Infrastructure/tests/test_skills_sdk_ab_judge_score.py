@@ -172,6 +172,24 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         self.assertIn("judge_decision_winner_mismatch", receipt["blockers"])
         validate_ab_judge_score_receipt(receipt)
 
+    def test_builder_blocks_low_confidence_directional_winner(self) -> None:
+        def low_confidence_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int) -> OllamaJudgeResult:
+            run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
+            decision = _decision(run_receipt["experiment_id"])
+            decision["confidence"] = "low"
+            return OllamaJudgeResult(exit_code=0, stdout=json.dumps(decision), stderr="")
+
+        receipt = build_ab_judge_score_receipt(
+            REPO_ROOT,
+            run_receipt=RUN_RECEIPT,
+            evidence_root=self.evidence_root,
+            runner=low_confidence_runner,
+        )
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("judge_decision_winner_mismatch", receipt["blockers"])
+        validate_ab_judge_score_receipt(receipt)
+
     def test_builder_blocks_normalized_scores_mismatched_to_dimension_rows(self) -> None:
         def mismatched_score_runner(
             prompt: str,
@@ -241,6 +259,22 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         self.assertEqual(receipt["status"], "blocked")
         self.assertIn("evidence_root_not_directory", receipt["blockers"])
         self.assertFalse(receipt["provider_invoked"])
+        self.assertFalse(receipt["mutation_performed"])
+        validate_ab_judge_score_receipt(receipt)
+
+    def test_builder_blocks_file_ancestor_evidence_root_before_writing(self) -> None:
+        def fake_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int) -> OllamaJudgeResult:
+            self.fail("runner should not be invoked when an evidence root ancestor is a file")
+
+        receipt = build_ab_judge_score_receipt(
+            REPO_ROOT,
+            run_receipt=RUN_RECEIPT,
+            evidence_root="AGENTS.md/judges",
+            runner=fake_runner,
+        )
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("evidence_root_not_directory", receipt["blockers"])
         self.assertFalse(receipt["mutation_performed"])
         validate_ab_judge_score_receipt(receipt)
 
