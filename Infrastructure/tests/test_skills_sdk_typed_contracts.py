@@ -49,6 +49,7 @@ class TestSkillsSdkTypedContracts(unittest.TestCase):
             ("install-receipt.json", contracts.validate_install_receipt),
             ("lockfile.json", contracts.validate_lockfile),
             ("project-conformance-receipt.json", contracts.validate_project_conformance_receipt),
+            ("ab-judge-score-receipt.json", contracts.validate_ab_judge_score_receipt),
         )
 
         for filename, validator in cases:

@@ -20,6 +20,7 @@ SUPPORTED_SCHEMA_KEYS = {
     "maxContains",
     "maxItems",
     "maxLength",
+    "maximum",
     "minContains",
     "minItems",
     "minLength",
@@ -148,6 +149,14 @@ def _validate_minimum_constraint(schema: dict[str, Any], value: object, path: st
         raise AssertionError(f"{path} smaller than minimum {minimum}")
 
 
+def _validate_maximum_constraint(schema: dict[str, Any], value: object, path: str) -> None:
+    if "maximum" not in schema or not isinstance(value, (int, float)) or isinstance(value, bool):
+        return
+    maximum = schema["maximum"]
+    if isinstance(maximum, (int, float)) and value > maximum:
+        raise AssertionError(f"{path} greater than maximum {maximum}")
+
+
 def _validate_scalar_constraints(schema: dict[str, Any], value: object, path: str) -> None:
     _validate_type_constraint(schema, value, path)
     if "const" in schema and value != schema["const"]:
@@ -159,6 +168,7 @@ def _validate_scalar_constraints(schema: dict[str, Any], value: object, path: st
     if isinstance(value, str) and "maxLength" in schema and len(value) > schema["maxLength"]:
         raise AssertionError(f"{path} longer than maxLength {schema['maxLength']}")
     _validate_minimum_constraint(schema, value, path)
+    _validate_maximum_constraint(schema, value, path)
 
 
 def _validate_array_constraints(

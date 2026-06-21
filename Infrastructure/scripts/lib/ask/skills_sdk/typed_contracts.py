@@ -770,6 +770,9 @@ def validate_ab_judge_preview_receipt(payload: object) -> ab_contracts.AbJudgePr
     return ab_contracts.AbJudgePreviewReceipt.model_validate(payload)
 
 
+def validate_ab_judge_score_receipt(payload: object) -> ab_contracts.AbJudgeScoreReceipt: return ab_contracts.AbJudgeScoreReceipt.model_validate(payload)
+
+
 def validate_sandbox_profile(payload: object) -> SandboxProfile: return SandboxProfile.model_validate(payload)
 
 

@@ -27,6 +27,7 @@ def add_sdk_eval_parser(
     _add_ab_plan_parser(subparsers, global_parser)
     _add_ab_run_parser(subparsers, global_parser)
     _add_ab_judge_preview_parser(subparsers, global_parser)
+    _add_ab_judge_score_parser(subparsers, global_parser)
 
 
 def _add_run_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
@@ -91,6 +92,15 @@ def _add_ab_judge_preview_parser(subparsers: argparse._SubParsersAction, global_
     judge.add_argument("--preview", action="store_true", help="Emit a non-mutating judge input receipt")
 
 
+def _add_ab_judge_score_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
+    score = subparsers.add_parser("ab-judge-score", help="Run local Ollama scoring for a completed A/B eval", parents=[global_parser])
+    score.add_argument("--run-receipt", required=True, help="Repo-relative completed ab-run receipt JSON")
+    score.add_argument("--evidence-root", default=".harness/artifacts/sdk-ab-judges")
+    score.add_argument("--judge-profile", choices=("oss-local",), default="oss-local")
+    score.add_argument("--timeout-seconds", type=_positive_int, default=300, help="Timeout for the local judge provider.")
+    score.add_argument("--execute", action="store_true", help="Required explicit gate before invoking the judge provider.")
+
+
 def _positive_int(value: str) -> int:
     parsed = int(value)
     if parsed < 1:
@@ -108,6 +118,7 @@ def dispatch_sdk_eval(repo_root: Path, args: argparse.Namespace) -> CallResult:
         "ab-plan": _dispatch_ab_plan,
         "ab-run": _dispatch_ab_run,
         "ab-judge-preview": _dispatch_ab_judge_preview,
+        "ab-judge-score": _dispatch_ab_judge_score,
     }
     dispatcher = dispatchers.get(args.eval_action)
     if dispatcher is None:
@@ -178,6 +189,18 @@ def _dispatch_ab_judge_preview(repo_root: Path, args: argparse.Namespace) -> Cal
     return error or skills_commands.skills_sdk_eval_ab_judge_preview(repo_root, run_receipt=args.run_receipt)
 
 
+def _dispatch_ab_judge_score(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    if not args.execute:
+        return build_validation_error("sdk eval ab-judge-score", "A/B judge scoring invokes Ollama and requires --execute.", _ab_judge_score_next())
+    return skills_commands.skills_sdk_eval_ab_judge_score(
+        repo_root,
+        run_receipt=args.run_receipt,
+        evidence_root=args.evidence_root,
+        judge_profile=args.judge_profile,
+        timeout_seconds=args.timeout_seconds,
+    )
+
+
 def _ab_common_kwargs(args: argparse.Namespace) -> dict[str, str]:
     return {
         "skill_a": args.skill_a,
@@ -206,3 +229,7 @@ def _ab_run_next() -> str:
 
 def _ab_judge_next() -> str:
     return "ask sdk eval ab-judge-preview --run-receipt <receipt.json> --preview --json --robot"
+
+
+def _ab_judge_score_next() -> str:
+    return "ask sdk eval ab-judge-score --run-receipt <receipt.json> --execute --json --robot"

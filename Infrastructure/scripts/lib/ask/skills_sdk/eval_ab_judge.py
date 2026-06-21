@@ -2,18 +2,46 @@ from __future__ import annotations
 
 import hashlib
 import json
+import subprocess
 from pathlib import Path
 from typing import Any
 
 from ask.skills_sdk.eval_ab_rubric import canonical_ab_rubric, canonical_ab_rubric_digest
+from ask.skills_sdk.eval_profiles import select_judge_profile
 
 
 AB_JUDGE_PREVIEW_SCHEMA_VERSION = "skills-sdk.ab-judge-preview-receipt.v0"
 AB_JUDGE_PREVIEW_SCHEMA_URI = (
     "https://jscraik.local/agent-skills/schemas/skills-sdk/ab-judge-preview-receipt.v0.schema.json"
 )
+AB_JUDGE_SCORE_SCHEMA_VERSION = "skills-sdk.ab-judge-score-receipt.v0"
+AB_JUDGE_SCORE_SCHEMA_URI = (
+    "https://jscraik.local/agent-skills/schemas/skills-sdk/ab-judge-score-receipt.v0.schema.json"
+)
 DECISION_SCHEMA_VERSION = "skills-sdk.ab-judge-decision.v0"
 ALLOWED_WINNERS = ["skill_a", "skill_b", "inconclusive"]
+_DIMENSION_IDS = {"task_success", "instruction_following", "evidence_quality", "repo_safety", "maintainability"}
+_DECISION_KEYS = frozenset(
+    {
+        "schema_version",
+        "experiment_id",
+        "dimension_scores",
+        "normalized_score_a",
+        "normalized_score_b",
+        "winner",
+        "confidence",
+        "reason",
+        "evidence_refs",
+    }
+)
+_DIMENSION_SCORE_KEYS = frozenset({"dimension_id", "skill_a_score", "skill_b_score", "reason", "evidence_refs"})
+
+
+class OllamaJudgeResult:
+    def __init__(self, *, exit_code: int, stdout: str, stderr: str) -> None:
+        self.exit_code = exit_code
+        self.stdout = stdout
+        self.stderr = stderr
 
 
 def _digest_text(value: str) -> str:
@@ -166,8 +194,10 @@ def _judge_prompt(comparison_payload: dict[str, Any]) -> str:
         "You are judging a Skills SDK A/B eval from sanitized receipt evidence only.\n"
         "Do not infer from package names, local paths, hidden logs, or unavailable content.\n"
         "Use the embedded rubric exactly; do not change weights or criteria.\n"
-        "Return JSON matching skills-sdk.ab-judge-decision.v0 with dimension_scores, "
-        "reason_per_dimension, winner, confidence, reason, and evidence_refs.\n"
+        "Return JSON only, matching skills-sdk.ab-judge-decision.v0 with dimension_scores, "
+        "normalized_score_a, normalized_score_b, winner, confidence, reason, and evidence_refs.\n"
+        "Each dimension_scores item must include dimension_id, skill_a_score, skill_b_score, "
+        "reason, and evidence_refs.\n"
         "Choose inconclusive when the sanitized evidence is insufficient.\n\n"
         f"Evidence:\n{json.dumps(comparison_payload, sort_keys=True, indent=2)}\n"
     )
@@ -261,3 +291,288 @@ def _judge_receipt_payload(
             else f"A/B judge preview is blocked: {', '.join(blockers)}."
         ),
     }
+
+
+def build_ab_judge_score_receipt(
+    repo_root: Path,
+    *,
+    run_receipt: str,
+    evidence_root: str = ".harness/artifacts/sdk-ab-judges",
+    judge_profile_id: str = "oss-local",
+    timeout_seconds: int = 300,
+    runner: Any | None = None,
+) -> dict[str, Any]:
+    preview = build_ab_judge_preview_receipt(repo_root, run_receipt=run_receipt)
+    blockers, judge_profile, evidence = _score_preflight(
+        repo_root, preview, evidence_root, judge_profile_id, timeout_seconds
+    )
+    decision, output_digest, provider_invoked, network_accessed = _score_decision(
+        blockers=blockers,
+        repo_root=repo_root,
+        preview=preview,
+        judge_profile=judge_profile,
+        evidence=evidence,
+        timeout_seconds=timeout_seconds,
+        runner=runner or _run_ollama_judge,
+    )
+    status = "scored" if decision is not None and not blockers else "blocked"
+    return _score_receipt_payload(
+        status=status,
+        preview=preview,
+        judge_profile=judge_profile,
+        evidence=evidence,
+        decision=decision,
+        output_digest=output_digest,
+        provider_invoked=provider_invoked,
+        network_accessed=network_accessed,
+        blockers=blockers,
+    )
+
+
+def _score_preflight(
+    repo_root: Path,
+    preview: dict[str, Any],
+    evidence_root: str,
+    judge_profile_id: str,
+    timeout_seconds: int,
+) -> tuple[list[str], dict[str, Any] | None, dict[str, Any]]:
+    blockers = list(preview["blockers"])
+    judge_profile = _selected_score_profile(judge_profile_id, blockers)
+    evidence = _score_evidence_paths(repo_root, evidence_root, preview.get("experiment_id"))
+    if evidence["blocker"]:
+        blockers.append(evidence["blocker"])
+    if preview["status"] != "preview":
+        blockers.append("judge_input_preview_blocked")
+    if timeout_seconds < 1:
+        blockers.append("timeout_seconds_invalid")
+    return blockers, judge_profile, evidence
+
+
+def _selected_score_profile(profile_id: str, blockers: list[str]) -> dict[str, Any] | None:
+    try:
+        profile = select_judge_profile(profile_id)
+    except ValueError:
+        blockers.append("judge_profile_unknown")
+        return None
+    if profile["id"] != "oss-local":
+        blockers.append("judge_profile_not_local_oss")
+    return profile
+
+
+def _score_evidence_paths(repo_root: Path, evidence_root: str, experiment_id: object) -> dict[str, Any]:
+    candidate = Path(evidence_root)
+    root = candidate if candidate.is_absolute() else repo_root / candidate
+    try:
+        resolved = root.resolve()
+        resolved.relative_to(repo_root.resolve())
+    except (OSError, ValueError):
+        return {"blocker": "evidence_root_outside_repo", "prompt_path": None, "output_path": None}
+    safe_experiment_id = experiment_id if isinstance(experiment_id, str) and len(experiment_id) == 16 else "blocked"
+    base = resolved / safe_experiment_id / "judge"
+    return {
+        "blocker": None,
+        "prompt_path": _repo_relative(repo_root, base / "prompt.txt"),
+        "output_path": _repo_relative(repo_root, base / "ollama-output.json"),
+    }
+
+
+def _score_decision(
+    *,
+    blockers: list[str],
+    repo_root: Path,
+    preview: dict[str, Any],
+    judge_profile: dict[str, Any] | None,
+    evidence: dict[str, Any],
+    timeout_seconds: int,
+    runner: Any,
+) -> tuple[dict[str, Any] | None, str | None, bool, bool]:
+    if blockers or judge_profile is None:
+        return None, None, False, False
+    judge_prompt = _judge_prompt(preview["comparison_payload"])
+    _write_text_evidence(repo_root, evidence["prompt_path"], judge_prompt)
+    try:
+        result = runner(judge_prompt, judge_profile, timeout_seconds)
+    except FileNotFoundError:
+        blockers.append("judge_provider_unavailable")
+        return None, None, False, False
+    except subprocess.TimeoutExpired as exc:
+        stdout = _timeout_output_text(exc.stdout)
+        _write_text_evidence(repo_root, evidence["output_path"], stdout)
+        blockers.append("judge_provider_timeout")
+        return None, _digest_text(stdout), True, True
+    _write_text_evidence(repo_root, evidence["output_path"], result.stdout)
+    output_digest = _digest_text(result.stdout)
+    if result.exit_code != 0:
+        blockers.append(f"judge_provider_exit_{result.exit_code}")
+        return None, output_digest, True, True
+    decision, blocker = _parse_judge_decision(result.stdout, preview["comparison_payload"])
+    if blocker:
+        blockers.append(blocker)
+    return decision, output_digest, True, True
+
+
+def _write_text_evidence(repo_root: Path, relative_path: str | None, value: str) -> None:
+    if relative_path is None:
+        return
+    repo_base = repo_root.resolve()
+    path = (repo_root / relative_path).resolve()
+    try:
+        path.relative_to(repo_base)
+    except ValueError as exc:
+        raise ValueError("evidence path outside repo") from exc
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(value, encoding="utf-8")
+
+
+def _run_ollama_judge(prompt: str, judge_profile: dict[str, Any], timeout_seconds: int) -> OllamaJudgeResult:
+    completed = subprocess.run(
+        ["ollama", "run", str(judge_profile["model"])],
+        input=prompt,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+        timeout=timeout_seconds,
+    )
+    return OllamaJudgeResult(exit_code=completed.returncode, stdout=completed.stdout, stderr=completed.stderr)
+
+
+def _parse_judge_decision(raw_output: str, comparison_payload: dict[str, Any]) -> tuple[dict[str, Any] | None, str | None]:
+    try:
+        decision = json.loads(raw_output)
+    except json.JSONDecodeError:
+        return None, "judge_output_invalid_json"
+    if not isinstance(decision, dict):
+        return None, "judge_output_not_object"
+    blocker = _decision_contract_blocker(decision, comparison_payload)
+    if blocker:
+        return None, blocker
+    return decision, None
+
+
+def _decision_contract_blocker(decision: dict[str, Any], comparison_payload: dict[str, Any]) -> str | None:
+    if set(decision) != _DECISION_KEYS:
+        return "judge_decision_keys_invalid"
+    if decision.get("schema_version") != DECISION_SCHEMA_VERSION:
+        return "judge_decision_schema_mismatch"
+    if decision.get("experiment_id") != comparison_payload["experiment_id"]:
+        return "judge_decision_experiment_mismatch"
+    if decision.get("winner") not in ALLOWED_WINNERS:
+        return "judge_decision_winner_invalid"
+    if decision.get("confidence") not in {"low", "medium", "high"}:
+        return "judge_decision_confidence_invalid"
+    if not isinstance(decision.get("reason"), str) or not decision["reason"].strip():
+        return "judge_decision_reason_missing"
+    if not _evidence_refs_valid(decision.get("evidence_refs")):
+        return "judge_decision_evidence_refs_invalid"
+    if not _normalized_scores_valid(decision):
+        return "judge_decision_normalized_scores_invalid"
+    if decision["winner"] != _expected_winner(decision, comparison_payload):
+        return "judge_decision_winner_mismatch"
+    return _dimension_scores_blocker(decision.get("dimension_scores"))
+
+
+def _normalized_scores_valid(decision: dict[str, Any]) -> bool:
+    for key in ("normalized_score_a", "normalized_score_b"):
+        value = decision.get(key)
+        if not isinstance(value, int | float) or isinstance(value, bool) or value < 0 or value > 1:
+            return False
+    return True
+
+
+def _expected_winner(decision: dict[str, Any], comparison_payload: dict[str, Any]) -> str:
+    winner_policy = comparison_payload["rubric"]["winner_policy"]
+    delta = decision["normalized_score_b"] - decision["normalized_score_a"]
+    minimum_delta = winner_policy["minimum_normalized_delta"]
+    if abs(delta) < minimum_delta:
+        return winner_policy["tie_result"]
+    return "skill_b" if delta > 0 else "skill_a"
+
+
+def _dimension_scores_blocker(rows: object) -> str | None:
+    if not isinstance(rows, list) or len(rows) != len(_DIMENSION_IDS):
+        return "judge_dimension_scores_invalid"
+    seen: set[str] = set()
+    for row in rows:
+        if not isinstance(row, dict):
+            return "judge_dimension_scores_invalid"
+        if set(row) != _DIMENSION_SCORE_KEYS:
+            return "judge_dimension_scores_invalid"
+        dimension_id = row.get("dimension_id")
+        if dimension_id not in _DIMENSION_IDS or dimension_id in seen:
+            return "judge_dimension_scores_invalid"
+        seen.add(dimension_id)
+        if not _dimension_score_row_valid(row):
+            return "judge_dimension_scores_invalid"
+    return None if seen == _DIMENSION_IDS else "judge_dimension_scores_invalid"
+
+
+def _dimension_score_row_valid(row: dict[str, Any]) -> bool:
+    if not isinstance(row.get("reason"), str) or not row["reason"].strip():
+        return False
+    if not _evidence_refs_valid(row.get("evidence_refs")):
+        return False
+    for key in ("skill_a_score", "skill_b_score"):
+        value = row.get(key)
+        if not isinstance(value, int | float) or isinstance(value, bool) or value < 0 or value > 5:
+            return False
+    return True
+
+
+def _evidence_refs_valid(value: object) -> bool:
+    return isinstance(value, list) and bool(value) and all(isinstance(item, str) and item for item in value)
+
+
+def _timeout_output_text(value: object) -> str:
+    if isinstance(value, bytes):
+        return value.decode("utf-8", errors="replace")
+    if isinstance(value, str):
+        return value
+    return ""
+
+
+def _score_receipt_payload(
+    *,
+    status: str,
+    preview: dict[str, Any],
+    judge_profile: dict[str, Any] | None,
+    evidence: dict[str, Any],
+    decision: dict[str, Any] | None,
+    output_digest: str | None,
+    provider_invoked: bool,
+    network_accessed: bool,
+    blockers: list[str],
+) -> dict[str, Any]:
+    agent_summary = _score_agent_summary(status, blockers)
+    return {
+        "schema_version": AB_JUDGE_SCORE_SCHEMA_VERSION,
+        "schema_uri": AB_JUDGE_SCORE_SCHEMA_URI,
+        "status": status,
+        "operation": "ab_judge_score",
+        "run_receipt_path": preview["run_receipt_path"],
+        "run_receipt_digest": preview["run_receipt_digest"],
+        "experiment_id": preview["experiment_id"],
+        "judge_profile": judge_profile,
+        "rubric_id": preview["rubric_id"],
+        "rubric_digest": preview["rubric_digest"],
+        "decision_schema_version": DECISION_SCHEMA_VERSION,
+        "allowed_winners": ALLOWED_WINNERS,
+        "judge_prompt_digest": preview["judge_prompt_digest"],
+        "judge_output_path": evidence["output_path"],
+        "judge_output_digest": output_digest,
+        "decision": decision,
+        "calibration_required": True,
+        "advisory_only": True,
+        "provider_invoked": provider_invoked,
+        "network_accessed": network_accessed,
+        "mutation_performed": provider_invoked,
+        "blockers": blockers,
+        "acceptance_trace": ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022", "VP-030"],
+        "agent_summary": agent_summary,
+    }
+
+
+def _score_agent_summary(status: str, blockers: list[str]) -> str:
+    if status == "scored":
+        return "A/B local judge scoring completed with advisory decision evidence."
+    return f"A/B local judge scoring blocked: {', '.join(blockers)}."

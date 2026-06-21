@@ -38,6 +38,7 @@ SCHEMA_NAMES = {
     "ab-plan-receipt": "ab-plan-receipt.v0.schema.json",
     "ab-run-receipt": "ab-run-receipt.v0.schema.json",
     "ab-judge-preview-receipt": "ab-judge-preview-receipt.v0.schema.json",
+    "ab-judge-score-receipt": "ab-judge-score-receipt.v0.schema.json",
     "eval-case": "eval-case.v0.schema.json",
     "eval-run-receipt": "eval-run-receipt.v0.schema.json",
     "project-conformance-receipt": "project-conformance-receipt.v1.schema.json",
@@ -452,6 +453,42 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         with self.assertRaises(AssertionError):
             _validate_schema_subset(
                 self.schemas["ab-judge-preview-receipt"],
+                payload,
+                {**self.schemas, **self.schemas_by_file},
+            )
+
+    def test_ab_judge_score_fixture_records_local_ollama_advisory_decision(self) -> None:
+        payload = self.assert_valid("ab-judge-score-receipt", "ab-judge-score-receipt.json")
+
+        self.assertEqual(payload["status"], "scored")
+        self.assertEqual(payload["operation"], "ab_judge_score")
+        self.assertEqual(payload["judge_profile"]["id"], "oss-local")
+        self.assertEqual(payload["judge_profile"]["model"], "qwen3.5:latest")
+        self.assertEqual(payload["decision"]["winner"], "skill_b")
+        self.assertTrue(payload["provider_invoked"])
+        self.assertTrue(payload["network_accessed"])
+        self.assertTrue(payload["mutation_performed"])
+        self.assertTrue(payload["advisory_only"])
+        self.assertTrue(payload["calibration_required"])
+
+    def test_ab_judge_score_schema_rejects_missing_dimension_score(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "ab-judge-score-receipt.json")
+        payload["decision"]["dimension_scores"].pop()
+
+        with self.assertRaises(AssertionError):
+            _validate_schema_subset(
+                self.schemas["ab-judge-score-receipt"],
+                payload,
+                {**self.schemas, **self.schemas_by_file},
+            )
+
+    def test_ab_judge_score_schema_rejects_duplicate_dimension_score(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "ab-judge-score-receipt.json")
+        payload["decision"]["dimension_scores"][1]["dimension_id"] = "task_success"
+
+        with self.assertRaises(AssertionError):
+            _validate_schema_subset(
+                self.schemas["ab-judge-score-receipt"],
                 payload,
                 {**self.schemas, **self.schemas_by_file},
             )

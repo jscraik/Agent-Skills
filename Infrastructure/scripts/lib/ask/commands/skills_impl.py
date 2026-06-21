@@ -117,6 +117,7 @@ from ask.skills_sdk.eval_ab_preview import build_ab_preview_receipt as _build_ab
 from ask.skills_sdk.eval_ab_plan import build_ab_plan_receipt as _build_ab_plan_receipt  # noqa: E402
 from ask.skills_sdk.eval_ab_run import build_ab_run_receipt as _build_ab_run_receipt  # noqa: E402
 from ask.skills_sdk.eval_ab_judge import build_ab_judge_preview_receipt as _build_ab_judge_preview_receipt  # noqa: E402
+from ask.skills_sdk.eval_ab_judge import build_ab_judge_score_receipt as _build_ab_judge_score_receipt  # noqa: E402
 from ask.skills_sdk.eval_profiles import build_eval_profile_preview_receipt as _build_eval_profile_preview_receipt  # noqa: E402
 from ask.skills_sdk.sandbox_profile import (  # noqa: E402
     SandboxProfileError as _SandboxProfileError,
@@ -238,6 +239,7 @@ __all__ = [
     "skills_sdk_eval_ab_plan",
     "skills_sdk_eval_ab_run",
     "skills_sdk_eval_ab_judge_preview",
+    "skills_sdk_eval_ab_judge_score",
     "skills_sdk_eval_run",
     "skills_sdk_placeholder_lifecycle",
     "skills_sdk_project_rollback",
@@ -5130,6 +5132,64 @@ def skills_sdk_eval_ab_judge_preview(
                 message=receipt["agent_summary"],
                 fix_suggestion=(
                     "Provide a repo-local completed ab-run receipt before previewing judge input."
+                ),
+            )
+        )
+    return result
+
+
+def skills_sdk_eval_ab_judge_score(
+    repo_root: Path,
+    *,
+    run_receipt: str,
+    evidence_root: str = ".harness/artifacts/sdk-ab-judges",
+    judge_profile: str = "oss-local",
+    timeout_seconds: int = 300,
+) -> CallResult:
+    """Invoke local Ollama A/B judge scoring and emit advisory decision evidence."""
+    result = CallResult()
+    result.metadata["command"] = "sdk eval ab-judge-score --execute"
+    receipt = _build_ab_judge_score_receipt(
+        repo_root,
+        run_receipt=run_receipt,
+        evidence_root=evidence_root,
+        judge_profile_id=judge_profile,
+        timeout_seconds=timeout_seconds,
+    )
+    payload = {
+        "schema_version": "skills-sdk-ab-judge-score.v0",
+        "status": receipt["status"],
+        "facade_command": "skills-sdk eval ab-judge-score",
+        "receipt": receipt,
+        "mutation_performed": receipt["mutation_performed"],
+        "validation_commands": [
+            _ask_validation_command(
+                "sdk",
+                "eval",
+                "ab-judge-score",
+                "--run-receipt",
+                run_receipt,
+                "--evidence-root",
+                evidence_root,
+                "--judge-profile",
+                judge_profile,
+                "--timeout-seconds",
+                str(timeout_seconds),
+                "--execute",
+            )
+        ],
+        "agent_summary": receipt["agent_summary"],
+    }
+    result.data["skills_sdk_eval_ab_judge_score"] = payload
+    if receipt["status"] == "blocked":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=receipt["agent_summary"],
+                fix_suggestion=(
+                    "Provide a completed ab-run receipt and a local Ollama qwen3.5:latest runtime before "
+                    "running ask sdk eval ab-judge-score."
                 ),
             )
         )

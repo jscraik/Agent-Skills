@@ -10,6 +10,20 @@ class _SdkContractModel(BaseModel):
 
 
 _DECISION_LABELS = {"skill_a", "skill_b", "inconclusive"}
+_AB_JUDGE_DIMENSION_IDS = {
+    "task_success",
+    "instruction_following",
+    "evidence_quality",
+    "repo_safety",
+    "maintainability",
+}
+AbJudgeDimensionId = Literal[
+    "task_success",
+    "instruction_following",
+    "evidence_quality",
+    "repo_safety",
+    "maintainability",
+]
 
 
 def _exact_decision_labels(rows: list[str]) -> bool:
@@ -504,5 +518,103 @@ class AbJudgePreviewReceipt(_SdkContractModel):
                 self.rubric_digest,
                 self.comparison_payload,
                 self.judge_prompt_digest,
+            )
+        )
+
+
+class AbJudgeDimensionScore(_SdkContractModel):
+    dimension_id: AbJudgeDimensionId
+    skill_a_score: Annotated[float, Field(ge=0, le=5)]
+    skill_b_score: Annotated[float, Field(ge=0, le=5)]
+    reason: str = Field(min_length=1)
+    evidence_refs: list[str] = Field(min_length=1)
+
+    @field_validator("evidence_refs")
+    @classmethod
+    def _evidence_refs_non_empty(cls, value: list[str]) -> list[str]:
+        if any(not item for item in value):
+            raise ValueError("judge dimension evidence refs must be non-empty")
+        return value
+
+
+class AbJudgeDecision(_SdkContractModel):
+    schema_version: Literal["skills-sdk.ab-judge-decision.v0"]
+    experiment_id: str = Field(min_length=16, max_length=16)
+    dimension_scores: list[AbJudgeDimensionScore] = Field(min_length=5, max_length=5)
+    normalized_score_a: Annotated[float, Field(ge=0, le=1)]
+    normalized_score_b: Annotated[float, Field(ge=0, le=1)]
+    winner: Literal["skill_a", "skill_b", "inconclusive"]
+    confidence: Literal["low", "medium", "high"]
+    reason: str = Field(min_length=1)
+    evidence_refs: list[str] = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def _decision_has_canonical_dimensions(self) -> AbJudgeDecision:
+        if {row.dimension_id for row in self.dimension_scores} != _AB_JUDGE_DIMENSION_IDS:
+            raise ValueError("A/B judge decisions must score every canonical dimension exactly once")
+        if any(not item for item in self.evidence_refs):
+            raise ValueError("judge decision evidence refs must be non-empty")
+        return self
+
+
+class AbJudgeScoreReceipt(_SdkContractModel):
+    schema_version: Literal["skills-sdk.ab-judge-score-receipt.v0"]
+    schema_uri: Literal[
+        "https://jscraik.local/agent-skills/schemas/skills-sdk/ab-judge-score-receipt.v0.schema.json"
+    ]
+    status: Literal["scored", "blocked"]
+    operation: Literal["ab_judge_score"]
+    run_receipt_path: str | None = Field(default=None, min_length=1)
+    run_receipt_digest: str | None = Field(default=None, min_length=71)
+    experiment_id: str | None = Field(default=None, min_length=16, max_length=16)
+    judge_profile: EvalJudgeProfile | None
+    rubric_id: Literal["skills-sdk.ab-rubric.v0"] | None
+    rubric_digest: str | None = Field(default=None, min_length=71)
+    decision_schema_version: Literal["skills-sdk.ab-judge-decision.v0"]
+    allowed_winners: list[Literal["skill_a", "skill_b", "inconclusive"]] = Field(min_length=3, max_length=3)
+    judge_prompt_digest: str | None = Field(default=None, min_length=71)
+    judge_output_path: str | None = Field(default=None, min_length=1)
+    judge_output_digest: str | None = Field(default=None, min_length=71)
+    decision: AbJudgeDecision | None
+    calibration_required: Literal[True]
+    advisory_only: Literal[True]
+    provider_invoked: bool
+    network_accessed: bool
+    mutation_performed: bool
+    blockers: list[str]
+    acceptance_trace: list[
+        Literal["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022", "VP-030"]
+    ] = Field(min_length=1)
+    agent_summary: str = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def _status_matches_score(self) -> AbJudgeScoreReceipt:
+        if not _exact_decision_labels(self.allowed_winners):
+            raise ValueError("A/B judge score receipts must contain exact winner labels")
+        if self.status == "scored":
+            if self.blockers:
+                raise ValueError("scored A/B judge receipts must not include blockers")
+            if not self._has_score_evidence():
+                raise ValueError("scored A/B judge receipts must include complete score evidence")
+            if not (self.provider_invoked and self.network_accessed and self.mutation_performed):
+                raise ValueError("scored A/B judge receipts must report provider side effects")
+        elif not self.blockers:
+            raise ValueError("blocked A/B judge score receipts must include blockers")
+        return self
+
+    def _has_score_evidence(self) -> bool:
+        return all(
+            item is not None
+            for item in (
+                self.run_receipt_path,
+                self.run_receipt_digest,
+                self.experiment_id,
+                self.judge_profile,
+                self.rubric_id,
+                self.rubric_digest,
+                self.judge_prompt_digest,
+                self.judge_output_path,
+                self.judge_output_digest,
+                self.decision,
             )
         )
