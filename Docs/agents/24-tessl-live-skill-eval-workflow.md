@@ -83,6 +83,15 @@ files by itself. On rerun, the wrapper archives prior target-tile, tool-project,
 and generated scenario evidence under evidence-archive/ before refreshing the
 current staging inputs.
 
+Treat every Registry tile used by this workflow as a dependency, not as a
+trusted fact source. Before installing or relying on a Registry tile, record the
+exact package id and version or commit-specific source, publisher or workspace,
+local install command, and any visible quality, impact, and security signals. A
+high review score, successful install, or Registry listing is candidate evidence
+only; it does not replace local lint/review, scenario-quality, target-repo
+validation, or live score comparison. High or critical security warnings block
+use until inspected and explicitly accepted by the operator.
+
 If the approved environment stream was sourced and `TESSL_WORKSPACE_API_TOKEN`
 is present, but `tessl project repair --json` still returns
 `Please authenticate with Tessl to continue`, classify the result as

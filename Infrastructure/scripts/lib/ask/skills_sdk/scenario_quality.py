@@ -10,6 +10,35 @@ SCENARIO_QUALITY_SCHEMA_URI = (
 )
 SCENARIO_QUALITY_ACCEPTANCE_TRACE = ["PU-030", "FR-003", "FR-008", "SA-003", "VP-030"]
 RAW_SECRET_PATTERNS = ("api_key=", "password=", "secret=", "token=")
+REGISTRY_DEPENDENCY_CLAIM = "sdk-scenario-generator.registry-dependency"
+RUBRIC_FAILURE_TERMS = (
+    "avoid",
+    "block",
+    "blocked",
+    "does not",
+    "do not",
+    "freeze",
+    "must not",
+    "not claim",
+    "refuse",
+    "reject",
+    "without",
+)
+RUBRIC_EVIDENCE_TERMS = (
+    "artifact",
+    "command",
+    "criteria",
+    "evidence",
+    "file",
+    "metadata",
+    "proof",
+    "result",
+    "scenario",
+    "score",
+    "signal",
+    "source",
+    "validation",
+)
 
 
 class ScenarioQualityError(ValueError):
@@ -38,12 +67,30 @@ def _yaml_safe_load(text: str) -> Any:
 
 
 def _load_minimal_evals_yaml(text: str) -> dict[str, Any]:
-    state: dict[str, Any] = {"cases": [], "current": None, "current_list": None, "current_mapping": None}
+    state: dict[str, Any] = {
+        "cases": [],
+        "current": None,
+        "current_list": None,
+        "current_mapping": None,
+        "last_scalar_key": None,
+        "in_cases": False,
+        "case_indent": None,
+    }
     for raw_line in text.splitlines():
         stripped, indent = _minimal_line(raw_line)
-        if not stripped or stripped == "cases:":
+        if not stripped:
             continue
-        if _consume_minimal_line(state, stripped, indent) or stripped.startswith(("schema_version:", "skill_name:")):
+        if stripped == "cases:":
+            state["in_cases"] = True
+            state["current"] = None
+            state["current_list"] = None
+            state["current_mapping"] = None
+            state["last_scalar_key"] = None
+            state["case_indent"] = None
+            continue
+        if not state["in_cases"]:
+            continue
+        if _consume_minimal_line(state, stripped, indent):
             continue
         else:
             raise ValueError("minimal_yaml_parse_unsupported")
@@ -56,58 +103,109 @@ def _minimal_line(raw_line: str) -> tuple[str, int]:
 
 
 def _consume_minimal_line(state: dict[str, Any], stripped: str, indent: int) -> bool:
-    if indent == 2 and stripped.startswith("- "):
-        return _start_minimal_case(state, stripped[2:])
+    case_indent = state.get("case_indent")
+    if stripped.startswith("- ") and (case_indent is None or indent == case_indent):
+        return _start_minimal_case(state, stripped[2:], indent)
     if state["current"] is None:
         return False
-    return _consume_case_field(state, stripped, indent) or _consume_nested_value(state, stripped, indent)
+    return _consume_nested_value(state, stripped, indent) or _consume_case_field(state, stripped, indent)
 
 
-def _start_minimal_case(state: dict[str, Any], item: str) -> bool:
+def _start_minimal_case(state: dict[str, Any], item: str, indent: int) -> bool:
     current: dict[str, Any] = {}
     state["cases"].append(current)
     state["current"] = current
     state["current_list"] = None
     state["current_mapping"] = None
+    state["last_scalar_key"] = None
+    if state.get("case_indent") is None:
+        state["case_indent"] = indent
     _assign_inline_pair(current, item)
     return True
 
 
 def _consume_case_field(state: dict[str, Any], stripped: str, indent: int) -> bool:
-    if indent != 4 or ":" not in stripped:
+    field_indent = int(state.get("case_indent") or 0) + 2
+    if indent != field_indent or ":" not in stripped:
         return False
     current = state["current"]
     key, value = stripped.split(":", 1)
     if value.strip():
         current[key] = _parse_scalar(value.strip())
         state["current_list"] = state["current_mapping"] = None
-    elif key in {"eval_modes", "acceptance"}:
+        state["last_scalar_key"] = key
+    elif key in {"eval_modes", "acceptance", "claim_ids"}:
         state["current_list"] = current[key] = []
         state["current_mapping"] = None
+        state["last_scalar_key"] = None
     else:
         state["current_mapping"] = current[key] = {}
         state["current_list"] = None
+        state["last_scalar_key"] = None
     return True
 
 
 def _consume_nested_value(state: dict[str, Any], stripped: str, indent: int) -> bool:
-    if indent < 6:
+    field_indent = int(state.get("case_indent") or 0) + 2
+    nested_indent = int(state.get("case_indent") or 0) + 4
+    return (
+        _consume_list_value(state, stripped, indent, field_indent, nested_indent)
+        or _consume_mapping_value(state, stripped, indent, nested_indent)
+        or _consume_scalar_continuation(state, stripped, indent, nested_indent)
+    )
+
+
+def _consume_list_value(state: dict[str, Any], stripped: str, indent: int, field_indent: int, nested_indent: int) -> bool:
+    current_list = state["current_list"]
+    if current_list is None:
         return False
-    if state["current_list"] is not None and stripped.startswith("- "):
-        state["current_list"].append(_parse_list_item(stripped[2:]))
+    if stripped.startswith("- "):
+        if indent < field_indent:
+            return False
+        current_list.append(_parse_list_item(stripped[2:]))
+        state["last_scalar_key"] = None
         return True
-    if state["current_list"] is not None and ":" in stripped:
-        latest = state["current_list"][-1] if state["current_list"] else None
-        if isinstance(latest, dict):
-            key, value = stripped.split(":", 1)
-            latest[key] = _parse_scalar(value.strip())
-            return True
-    if state["current_mapping"] is not None:
-        if ":" in stripped:
-            key, value = stripped.split(":", 1)
-            state["current_mapping"][key] = _parse_scalar(value.strip()) if value.strip() else True
+    latest = current_list[-1] if current_list else None
+    if isinstance(latest, dict) and ":" in stripped and indent >= nested_indent:
+        key, value = stripped.split(":", 1)
+        latest[key] = _parse_scalar(value.strip())
+        state["last_scalar_key"] = None
+        return True
+    return _consume_latest_dict_continuation(latest, stripped, indent, nested_indent)
+
+
+def _consume_latest_dict_continuation(latest: Any, stripped: str, indent: int, nested_indent: int) -> bool:
+    if not isinstance(latest, dict) or not latest or indent < nested_indent:
+        return False
+    key = next(reversed(latest))
+    prior = latest.get(key)
+    if isinstance(prior, str):
+        latest[key] = f"{prior} {stripped}"
         return True
     return False
+
+
+def _consume_mapping_value(state: dict[str, Any], stripped: str, indent: int, nested_indent: int) -> bool:
+    current_mapping = state["current_mapping"]
+    if current_mapping is None:
+        return False
+    if indent < nested_indent:
+        return False
+    if ":" in stripped:
+        key, value = stripped.split(":", 1)
+        current_mapping[key] = _parse_scalar(value.strip()) if value.strip() else True
+    state["last_scalar_key"] = None
+    return True
+
+
+def _consume_scalar_continuation(state: dict[str, Any], stripped: str, indent: int, nested_indent: int) -> bool:
+    if indent < nested_indent or not state.get("last_scalar_key") or not isinstance(state["current"], dict):
+        return False
+    key = str(state["last_scalar_key"])
+    prior = state["current"].get(key)
+    if isinstance(prior, str):
+        state["current"][key] = f"{prior} {stripped}"
+    return True
 
 
 def _assign_inline_pair(target: dict[str, Any], item: str) -> None:
@@ -155,6 +253,123 @@ def _list_field(case: dict[str, Any], key: str) -> list[Any]:
     return value if isinstance(value, list) else []
 
 
+def _text_field(case: dict[str, Any], key: str) -> str:
+    value = case.get(key)
+    return value if isinstance(value, str) else ""
+
+
+def _contains_any(text: str, terms: tuple[str, ...]) -> bool:
+    lowered = text.lower()
+    return any(term in lowered for term in terms)
+
+
+def _acceptance_text(case: dict[str, Any]) -> str:
+    parts: list[str] = []
+    for item in _list_field(case, "acceptance"):
+        if isinstance(item, dict):
+            value = item.get("value")
+            if value is not None:
+                parts.append(str(value))
+        else:
+            parts.append(str(item))
+    return " ".join(parts)
+
+
+def _case_has_release_mode(case: dict[str, Any]) -> bool:
+    return "release" in {str(mode) for mode in _list_field(case, "eval_modes")}
+
+
+def _case_claim_ids(case: dict[str, Any]) -> set[str]:
+    return {str(claim) for claim in _list_field(case, "claim_ids")}
+
+
+def _release_metadata_checks(case: dict[str, Any], scenario_id: str) -> list[dict[str, Any]]:
+    if not _case_has_release_mode(case):
+        return []
+    required_text_fields = ("why_realistic", "given", "should", "actual_artifact", "expected_artifact", "reproduce")
+    missing = [field for field in required_text_fields if not _text_field(case, field).strip()]
+    missing.extend(["claim_ids"] if not _case_claim_ids(case) else [])
+    return [
+        _check(
+            "release_case_metadata_present",
+            "blocker" if missing else "pass",
+            "Release scenarios must carry claim ids, realistic context, expected artifacts, and reproduce evidence.",
+            [f"{scenario_id}:{field}" for field in missing],
+        )
+    ]
+
+
+def _registry_dependency_checks(case: dict[str, Any], scenario_id: str) -> list[dict[str, Any]]:
+    if REGISTRY_DEPENDENCY_CLAIM not in _case_claim_ids(case):
+        return []
+    text = " ".join(
+        [
+            _text_field(case, "given"),
+            _text_field(case, "should"),
+            _text_field(case, "prompt"),
+            _acceptance_text(case),
+        ]
+    )
+    required_signals = {
+        "quality": ("quality", "review score"),
+        "impact": ("impact",),
+        "security": ("security", "warning"),
+        "version_or_pin": ("version", "pinned", "pinning", "commit-specific", "commit source"),
+        "local_validation": ("local validation", "target-repo", "target repo", "representative scenario"),
+    }
+    missing = [name for name, terms in required_signals.items() if not _contains_any(text, terms)]
+    blocks_warning = _contains_any(text, ("block", "blocked", "until inspected", "explicitly accepted"))
+    return [
+        _check(
+            "registry_dependency_intake_complete",
+            "blocker" if missing else "pass",
+            "Registry dependency scenarios must separate quality, impact, security, version or pinning, and local validation evidence.",
+            [f"{scenario_id}:{name}" for name in missing],
+        ),
+        _check(
+            "registry_security_warning_blocks_use",
+            "pass" if blocks_warning else "blocker",
+            "Registry dependency scenarios must block high or critical security warnings until inspected and accepted.",
+            [scenario_id] if not blocks_warning else [],
+        ),
+    ]
+
+
+def _release_rubric_checks(case: dict[str, Any], scenario_id: str) -> list[dict[str, Any]]:
+    if not _case_has_release_mode(case):
+        return []
+    acceptance = _list_field(case, "acceptance")
+    acceptance_text = _acceptance_text(case)
+    category = str(case.get("category") or "")
+    needs_failure_guard = category in {"pressure", "negative", "edge"}
+    has_failure_guard = _contains_any(acceptance_text, RUBRIC_FAILURE_TERMS)
+    has_evidence_anchor = _contains_any(acceptance_text, RUBRIC_EVIDENCE_TERMS)
+    checks = [
+        _check(
+            "release_rubric_binary_items",
+            "pass" if len(acceptance) >= 2 else "blocker",
+            "Release rubrics must split broad quality into at least two binary acceptance checks.",
+            [f"{scenario_id}:acceptance_count:{len(acceptance)}"] if len(acceptance) < 2 else [],
+        ),
+        _check(
+            "release_rubric_evidence_anchored",
+            "pass" if has_evidence_anchor else "blocker",
+            "Release rubrics must anchor scoring in observable evidence, artifacts, files, commands, scores, or proof lanes.",
+            [scenario_id] if not has_evidence_anchor else [],
+        ),
+    ]
+    if needs_failure_guard:
+        checks.append(
+            _check(
+                "release_rubric_failure_guard",
+                "pass" if has_failure_guard else "blocker",
+                "Pressure, negative, and edge release rubrics must include an explicit reject, block, avoid, or must-not condition.",
+                [scenario_id] if not has_failure_guard else [],
+            )
+        )
+    return checks
+
+
 def _scenario_checks(case: dict[str, Any], index: int) -> list[dict[str, Any]]:
     scenario_id = _scenario_id(case, index)
     prompt = case.get("prompt")
@@ -162,7 +377,7 @@ def _scenario_checks(case: dict[str, Any], index: int) -> list[dict[str, Any]]:
     eval_modes = _list_field(case, "eval_modes")
     deterministic_checks = case.get("deterministic_checks")
     prompt_text = prompt if isinstance(prompt, str) else ""
-    return [
+    checks = [
         _check("scenario_id", "pass" if scenario_id != f"case-{index}" else "blocker", "Scenario must declare a stable id.", [scenario_id]),
         _check("prompt_present", "pass" if prompt_text.strip() else "blocker", "Scenario must carry a prompt or stimulus.", [scenario_id]),
         _check("oracle_present", "pass" if acceptance else "blocker", "Scenario must declare acceptance checks as its oracle.", [scenario_id]),
@@ -180,6 +395,10 @@ def _scenario_checks(case: dict[str, Any], index: int) -> list[dict[str, Any]]:
             [scenario_id],
         ),
     ]
+    checks.extend(_release_metadata_checks(case, scenario_id))
+    checks.extend(_release_rubric_checks(case, scenario_id))
+    checks.extend(_registry_dependency_checks(case, scenario_id))
+    return checks
 
 
 def _scenario_row(case: dict[str, Any], index: int) -> dict[str, Any]:
@@ -213,12 +432,58 @@ def _rows(cases: list[Any]) -> tuple[list[dict[str, Any]], list[str]]:
 
 
 def _quality_checks(repo_root: Path, evals_path: Path, case_list: list[Any], load_error: str | None, row_errors: list[str]) -> list[dict[str, Any]]:
-    return [
+    checks = [
         _check("evals_yaml_present", "pass" if evals_path.is_file() else "blocker", "Skill must carry references/evals.yaml.", [_repo_relative(repo_root, evals_path)]),
         _check("evals_yaml_parse", "blocker" if load_error else "pass", "references/evals.yaml must parse as YAML object.", [load_error] if load_error else []),
         _check("cases_present", "pass" if case_list else "blocker", "references/evals.yaml must contain one or more cases.", [_repo_relative(repo_root, evals_path)]),
         _check("cases_are_objects", "blocker" if row_errors else "pass", "Every eval case must be an object.", row_errors),
     ]
+    checks.extend(_release_suite_checks(case_list))
+    return checks
+
+
+def _release_suite_checks(case_list: list[Any]) -> list[dict[str, Any]]:
+    release_count, pressure_count, negative_or_edge_count = _release_suite_counts(case_list)
+    has_release_cases = release_count > 0
+    return [
+        _release_requirement_check(
+            "release_minimum_scenario_count",
+            has_release_cases,
+            release_count,
+            20,
+            "Release-mode behavioral scenario suites must include at least 20 scenarios unless they are structure-only.",
+            "release_cases",
+        ),
+        _release_requirement_check(
+            "release_pressure_coverage",
+            has_release_cases,
+            pressure_count,
+            4,
+            "Release-mode scenario suites must include at least 4 pressure or regression cases.",
+            "pressure_or_regression",
+        ),
+        _release_requirement_check(
+            "release_negative_edge_coverage",
+            has_release_cases,
+            negative_or_edge_count,
+            2,
+            "Release-mode scenario suites must include at least 2 negative or edge boundary cases.",
+            "negative_or_edge",
+        ),
+    ]
+
+
+def _release_requirement_check(check_id: str, has_release_cases: bool, observed: int, minimum: int, message: str, evidence_label: str) -> dict[str, Any]:
+    blocked = has_release_cases and observed < minimum
+    return _check(check_id, "blocker" if blocked else "pass", message, [f"{evidence_label}:{observed}"] if blocked else [])
+
+
+def _release_suite_counts(case_list: list[Any]) -> tuple[int, int, int]:
+    release_cases = [case for case in case_list if isinstance(case, dict) and _case_has_release_mode(case)]
+    categories = [str(case.get("category") or "") for case in release_cases]
+    pressure_count = sum(1 for category in categories if category in {"pressure", "regression"})
+    negative_or_edge_count = sum(1 for category in categories if category in {"negative", "edge"})
+    return len(release_cases), pressure_count, negative_or_edge_count
 
 
 def _receipt(

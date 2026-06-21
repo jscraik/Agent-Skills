@@ -437,6 +437,24 @@ def test_tessl_eval_quality_rejects_shallow_routing_oracle() -> None:
     assert [finding["code"] for finding in findings] == ["shallow_routing_oracle"]
 
 
+def test_tessl_eval_quality_rejects_mixed_case_shallow_routing_oracle() -> None:
+    cases = [{
+        "id": "shallow-teach-routing",
+        "unit": "teach routing",
+        "given": "A learner asks for a multi-session study plan.",
+        "should": "Choose the teaching workflow and preserve the learning mission.",
+        "prompt": "Teach SQL joins over four weeks.",
+        "acceptance": [
+            {"type": "Skill_Selected", "expected_skill": "teach"},
+            {"type": "Expected_Signal", "value": "mission-grounded next step"},
+        ],
+    }]
+
+    findings = evals._tessl_eval_quality_findings(cases)
+
+    assert [finding["code"] for finding in findings] == ["shallow_routing_oracle"]
+
+
 def test_ordinary_tessl_staging_allows_legacy_keyword_cases(tmp_path: Path) -> None:
     skill_root = _write_example_skill(tmp_path)
     (skill_root / "references" / "evals.yaml").write_text(
@@ -3489,7 +3507,7 @@ def test_plugin_eval_deferred_budget_fail_is_nonblocking_when_active_budget_good
 
 ## At a Glance
 - Score: 86/100
-- Grade: B
+- Grade: B+
 - Risk: high
 - Checks: 1 fail, 0 warn, 2 info
 - Active budget: 1293 tokens (good)
@@ -3502,6 +3520,28 @@ def test_plugin_eval_deferred_budget_fail_is_nonblocking_when_active_budget_good
     assert parsed["fail_count"] == 1
     assert parsed["blocking_fail_count"] == 0
     assert parsed["posture"] == "deferred_budget_guardrail"
+
+
+def test_plugin_eval_deferred_budget_fail_still_blocks_low_grade() -> None:
+    parsed = _parse_plugin_eval(
+        """# Plugin Eval Report
+
+## At a Glance
+- Score: 72/100
+- Grade: C
+- Risk: high
+- Checks: 1 fail, 0 warn, 2 info
+- Active budget: 1293 tokens (good)
+
+## Checks
+- [FAIL] deferred_cost_tokens-budget-high: deferred_cost_tokens is excessive relative to the current Codex baseline.
+"""
+    )
+
+    assert parsed["grade_acceptable"] is False
+    assert parsed["fail_count"] == 1
+    assert parsed["blocking_fail_count"] == 1
+    assert parsed["posture"] == "blocking"
 
 
 def test_review_dashboard_renders_plugin_eval_acceptance_policy(tmp_path: Path) -> None:

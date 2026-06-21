@@ -174,33 +174,14 @@ def _parse_plugin_eval(stdout: str, status: str = "") -> dict[str, Any]:
     grade_text = grade.strip() if isinstance(grade, str) else grade
     grade_acceptable = _grade_rank(grade_text) >= _grade_rank("B+")
     active_budget_good = bool(re.search(r"Active budget:\s*\d+\s+tokens\s+\(good\)", stdout))
-    deferred_budget_only = (
-        fail_count == 1
-        and "deferred_cost_tokens-budget-high" in stdout
-        and active_budget_good
+    deferred_budget_only = fail_count == 1 and "deferred_cost_tokens-budget-high" in stdout and active_budget_good
+    blocking_fail_count = 0 if deferred_budget_only and grade_acceptable else fail_count
+    posture, posture_detail = _plugin_eval_posture(
+        fail_count=fail_count,
+        warn_count=warn_count,
+        grade_acceptable=grade_acceptable,
+        deferred_budget_only=deferred_budget_only,
     )
-    blocking_fail_count = 0 if deferred_budget_only else fail_count
-    if deferred_budget_only:
-        posture = "deferred_budget_guardrail"
-        posture_detail = (
-            "Plugin Eval reported deferred reference budget pressure, but active budget is good. "
-            "Accept as a follow-up guardrail when local audit and Tessl quality pass."
-        )
-    elif fail_count:
-        posture = "blocking"
-        posture_detail = "Plugin Eval has failure-level findings and must block release confidence."
-    elif not grade_acceptable:
-        posture = "blocking"
-        posture_detail = "Plugin Eval is below the B+ local acceptance floor."
-    elif warn_count:
-        posture = "budget_guardrail"
-        posture_detail = (
-            "Acceptable as a budget guardrail when local audit and Tessl quality pass; "
-            "track warnings as follow-up or prove observed usage."
-        )
-    else:
-        posture = "pass"
-        posture_detail = "Plugin Eval meets the local budget and ergonomics guardrail."
     return {
         "score": int(score_raw) if score_raw is not None else 0,
         "grade": grade_text,
@@ -215,6 +196,26 @@ def _parse_plugin_eval(stdout: str, status: str = "") -> dict[str, Any]:
         "findings": findings,
         "status": status or "reported",
     }
+
+
+def _plugin_eval_posture(*, fail_count: int, warn_count: int, grade_acceptable: bool, deferred_budget_only: bool) -> tuple[str, str]:
+    if deferred_budget_only and grade_acceptable:
+        return (
+            "deferred_budget_guardrail",
+            "Plugin Eval reported deferred reference budget pressure, but active budget is good. "
+            "Accept as a follow-up guardrail when local audit and Tessl quality pass.",
+        )
+    if fail_count:
+        return "blocking", "Plugin Eval has failure-level findings and must block release confidence."
+    if not grade_acceptable:
+        return "blocking", "Plugin Eval is below the B+ local acceptance floor."
+    if warn_count:
+        return (
+            "budget_guardrail",
+            "Acceptable as a budget guardrail when local audit and Tessl quality pass; "
+            "track warnings as follow-up or prove observed usage.",
+        )
+    return "pass", "Plugin Eval meets the local budget and ergonomics guardrail."
 
 
 def _audit_security_summary(audit_data: dict[str, Any]) -> dict[str, Any]:
@@ -566,7 +567,7 @@ def _render_dimension_rows(dimensions: list[dict[str, Any]]) -> str:
 def _plugin_posture_class(plugin: dict[str, Any]) -> str:
     if plugin.get("posture") == "blocking":
         return "bad"
-    if plugin.get("posture") == "budget_guardrail":
+    if plugin.get("posture") in {"budget_guardrail", "deferred_budget_guardrail"}:
         return "warn"
     return "good"
 

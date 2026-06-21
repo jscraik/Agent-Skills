@@ -1287,7 +1287,7 @@ UNSTAGED_TESSL_REPO_PATH_RE = re.compile(
 def _acceptance_type(item: object) -> str:
     if not isinstance(item, dict):
         return ""
-    return str(_normalize_tessl_acceptance_item(item).get("type") or "acceptance").strip()
+    return str(_normalize_tessl_acceptance_item(item).get("type") or "acceptance").strip().lower()
 
 
 def _is_provenance_only_signal(value: str) -> bool:
@@ -1315,7 +1315,7 @@ def _case_has_skill_lift_acceptance(case: dict[str, object]) -> bool:
         if not isinstance(item, dict):
             continue
         normalized = _normalize_tessl_acceptance_item(item)
-        item_type = str(normalized.get("type") or "acceptance").strip()
+        item_type = str(normalized.get("type") or "acceptance").strip().lower()
         value = str(normalized.get("value") or normalized.get("expected_skill") or "").strip()
         if item_type in {"skill_selected", "artifact_exists", "artifact_contains", "command_success", "output_schema"}:
             return True
@@ -1348,13 +1348,13 @@ def _case_has_shallow_routing_oracle(case: dict[str, object]) -> bool:
         for item in acceptance
         if isinstance(item, dict)
     ]
-    types = {str(item.get("type") or "acceptance").strip() for item in normalized_items}
+    types = {str(item.get("type") or "acceptance").strip().lower() for item in normalized_items}
     if not types or not types <= {"skill_selected", "skill_not_selected", "expected_signal"}:
         return False
     expected_values = [
         str(item.get("value") or "").strip().lower()
         for item in normalized_items
-        if str(item.get("type") or "").strip() == "expected_signal"
+        if str(item.get("type") or "").strip().lower() == "expected_signal"
     ]
     if not expected_values:
         return True
@@ -1396,7 +1396,7 @@ def _case_has_answer_leakage(case: dict[str, object]) -> bool:
         if not isinstance(item, dict):
             continue
         normalized = _normalize_tessl_acceptance_item(item)
-        item_type = str(normalized.get("type") or "acceptance").strip()
+        item_type = str(normalized.get("type") or "acceptance").strip().lower()
         if item_type.startswith(("must_not", "forbidden")):
             continue
         value = str(normalized.get("value") or normalized.get("expected_skill") or "").strip()
@@ -1935,7 +1935,7 @@ def _tessl_criteria_from_case(case: dict[str, object]) -> dict:
             if not isinstance(item, dict):
                 continue
             normalized_item = _normalize_tessl_acceptance_item(item)
-            criterion_type = str(normalized_item.get("type") or "acceptance").strip()
+            criterion_type = str(normalized_item.get("type") or "acceptance").strip().lower()
             value = str(
                 normalized_item.get("value")
                 or normalized_item.get("expected_skill")

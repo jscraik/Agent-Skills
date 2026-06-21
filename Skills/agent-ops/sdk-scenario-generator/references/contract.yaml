@@ -40,6 +40,8 @@ risks:
   - stale scenarios after skill behavior changes
   - live Tessl run budget exhaustion
   - opinion, compliment, hypothetical, or future-promise source material treated as scenario proof
+  - unrelated measurement dimensions collapsed into a fake aggregate score
+  - happy-path-only scenario set that never stresses invalid inputs, boundaries, sequencing, or shared state
 permission_profile:
   network: false
   filesystem:
@@ -105,15 +107,61 @@ concrete_evidence_policy:
     - would_use_answers
   rewrite_rule: "Replace future-tense or opinion prompts with concrete artifacts, prior failures, current behavior, or observable outputs."
   scorer_metadata_rule: "Move expected moves, bad patterns, good patterns, and answer keys out of visible task text."
+measurement_quality_policy:
+  source_principle: "Treat each eval scenario as a measurement instrument with a named construct."
+  separate_constructs:
+    - behavior_correctness
+    - efficiency_or_effort
+    - clarity_or_perspicuity
+    - dependability_or_confidence
+    - safety
+    - preference_or_satisfaction
+  forbidden:
+    - fake_overall_score_from_unrelated_dimensions
+    - criteria_without_construct_mapping
+    - subjective_rating_without_scale_or_threshold
+    - readiness_claim_from_preference_score
+  required_for_metrics:
+    - named_construct
+    - interpretation_threshold
+    - sample_or_scope_caveat
+    - what_the_metric_does_not_prove
+  reliability_rule: "Repeated scenarios that claim the same construct should reward the same skill behavior consistently."
+  validity_rule: "Each criterion must map to the skill behavior or proof lane it claims to measure."
+break_test_policy:
+  source_principle: "A scenario set should include realistic attempts to break the skill, not only happy paths."
+  stressors:
+    - invalid_inputs
+    - boundary_values
+    - null_or_default_transitions
+    - repeated_operations
+    - input_sequence_state_changes
+    - oversized_or_undersized_data
+    - shared_state_interactions
+    - corrupt_or_malformed_files
+    - invalid_file_names
+    - missing_permissions
+    - quota_or_capacity_failures
+    - stale_or_incompatible_generated_assets
+  scoreability_rule: "Break-test cases must still be gradeable from final artifacts or explicit output files."
+  relevance_rule: "Use only stressors that plausibly exercise the target skill's instructions or proof boundaries."
 tessl_registry_policy:
   manifest_name: plugin.json
   tile_identity: "plugin.json:name workspace/tile-name"
   readme_role: "registry_presentation_not_agent_context"
+  dependency_intake_required: true
+  trust_signals:
+    - quality
+    - impact
+    - security
+  high_or_critical_security_warning_blocks_install: true
+  prefer_pinned_version_or_commit_specific_source: true
   public_publication_requires_explicit_approval: true
   local_lint_does_not_prove_registry_publication: true
   registry_review_does_not_prove_target_repo_behavior: true
   repo_local_tile_does_not_prove_registry_installability: true
   evidence_lanes:
+    - registry_candidate_selection
     - local_package_shape
     - local_skill_review
     - scenario_effectiveness

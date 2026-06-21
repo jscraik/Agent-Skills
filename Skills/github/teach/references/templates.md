@@ -5,7 +5,7 @@ Use these compact shapes when creating workspace artifacts.
 ## MISSION.md
 
 # Mission
-I want to learn <topic> so I can <real outcome>.
+I aim to learn <topic> so I can <real outcome>.
 Current level: <what the learner can already do>.
 Constraints: <time, tools, accessibility, preferences>.
 Next milestone: <observable skill or artifact>.

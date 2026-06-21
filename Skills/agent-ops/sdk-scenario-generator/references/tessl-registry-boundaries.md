@@ -20,6 +20,8 @@ publication, workspace sharing, installation, or repo-local tile rollout.
 
 Keep these lanes separate in scenarios, rubrics, and readiness summaries:
 
+- Registry candidate selection: publisher/workspace, package id, version or
+  commit-specific source, and visible quality, impact, and security signals.
 - Local package shape: `tessl skill lint` or `tessl tile lint`.
 - Local skill review: `tessl skill review`.
 - Scenario effectiveness: `tessl scenario ...` and `tessl eval ...` outputs.
@@ -32,6 +34,24 @@ Do not claim that one lane proves another. For example, local lint does not
 prove a Registry version is current; Registry review metadata does not prove the
 context works in the target repo; and repo-local tile presence does not prove
 workspace publication or installability.
+
+## Registry Dependency Intake
+
+Before installing, updating, or trusting a Registry tile, record:
+
+- the exact tile identity from `plugin.json` `name`;
+- the pinned version, commit-specific source, or explicit reason a floating
+  install is acceptable;
+- the publisher or workspace and whether the tile is public or private;
+- visible quality, impact, and security signals from the Registry or CLI;
+- any warning surfaced during search, install, lint, review, or update;
+- the local validation that will prove the tile helps in the target repo.
+
+Use quality, impact, and security together. A high-quality tile with no impact
+may not be useful; an impactful tile with a high or critical security warning is
+blocked until inspected; and a secure tile with weak activation may not load
+when needed. Registry metadata chooses candidates, while local validation proves
+target-repo behavior.
 
 ## Distribution Choices
 

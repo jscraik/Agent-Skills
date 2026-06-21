@@ -1,7 +1,6 @@
 ---
 name: teach
 description: "Create mission-grounded study plans, lessons, quizzes, references, resources, and learning records. Use when the user asks to learn, study, be taught, continue a course, build a curriculum, or maintain a multi-session teaching workspace."
-disable-model-invocation: true
 metadata:
   version: "0.1.0"
   skill-type: team_automation
@@ -86,8 +85,18 @@ For lessons and references, verify the file path exists, links resolve, and cite
 - Copying private transcripts, secrets, or hidden prompts into durable files.
 - Deleting or resetting learning state without confirmation.
 
+## Gotchas
+
+- Validation commands may invoke model-backed evals; run them only as explicit operator checks, not as automatic teaching behavior.
+- Mission changes and workspace resets are high-impact learning-state edits; confirm before changing them.
+
 ## Examples
 
 - "Teach me TypeScript generics over the next few sessions" means clarify mission, then propose lesson 0001.
 - "Continue from my learning records" means read records and choose the next lesson.
 - "What does HTTP 404 mean?" means answer directly without this skill.
+
+## See Also
+
+- [sdk-scenario-generator](../agent-ops/sdk-scenario-generator/SKILL.md)
+- [evals-router](../agent-ops/evals-router/SKILL.md)

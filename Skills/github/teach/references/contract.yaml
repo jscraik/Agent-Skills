@@ -42,6 +42,17 @@
     "destructive_commands": false,
     "require_confirmation_before_mission_change": true
   },
+  "runtime_contract": {
+    "model_invocation_allowed": true,
+    "network_required": false,
+    "writes_learning_artifacts": true,
+    "requires_human_confirmation_for_destructive_changes": true
+  },
+  "validation": [
+    "./bin/ask skills audit Skills/github/teach --level strict --json --robot",
+    "./bin/ask evals run Skills/github/teach --mode smoke --json --robot",
+    "./bin/ask skills external-review Skills/github/teach --json --robot"
+  ],
   "evals": {
     "smoke": [
       "happy-new-topic",

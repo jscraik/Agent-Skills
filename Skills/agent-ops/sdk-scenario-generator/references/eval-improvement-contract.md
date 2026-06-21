@@ -9,8 +9,9 @@ Capture the scenario name, criterion name, max score, baseline score,
 with-context score, aggregate scenario delta, relevant `criteria.json`, and the
 context files that could teach or confuse the behavior.
 
-For tile evals, inspect `skills/**/SKILL.md`, `rules/**/*.md`, and
-`docs/**/*.md`. For codebase evals, inspect the target repo's context files
+For tile evals, inspect `skills/**/SKILL.md`, `rules/**/*.md`,
+`Docs/**/*.md`, and `docs/**/*.md` when the target repo uses lowercase docs.
+For codebase evals, inspect the target repo's context files
 such as `AGENTS.md`, `CLAUDE.md`, Copilot instructions, or rule files.
 
 ## Bucket Classifier

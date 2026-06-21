@@ -13,9 +13,9 @@ Use this capsule when a mission needs a deeper TypeScript, Python, or evals prac
 ## Guidance
 
 - Use official pages to define credential or API scope; use local books for mental models, practice depth, and sequencing.
-- For TypeScript, move from JavaScript relationship and compiler options toward inference, type design, generics, declaration files, execution, and migration.
-- For Python, prioritize Pythonic readability, data structures, functions, generators, object interfaces, concurrency, robustness, testing, debugging, and collaboration.
-- For evals, start with traces and error analysis, then write objective code checks before relying on LLM judges.
+- TypeScript practice moves from JavaScript relationship and compiler options toward inference, type design, generics, declaration files, execution, and migration.
+- Python work prioritizes Pythonic readability, data structures, functions, generators, object interfaces, concurrency, robustness, testing, debugging, and collaboration.
+- Evals should start with traces and error analysis, then write objective code checks before relying on LLM judges.
 - Validate evaluators with known good and bad cases; care about true positives and true negatives.
 - Sequence lessons by shared practice substrate so one artifact can support multiple learning goals.
 

@@ -1,6 +1,6 @@
 ---
 name: sdk-scenario-generator
-description: "Create, review, and maintain gold-standard Skills SDK eval scenarios before internal evals, dry Tessl staging, or live private Tessl scoring. Use when creating or updating a skill, importing KnowledgeOS or Tessl scenario suggestions, checking scenario drift, hardening evals that are too easy, or preparing a minimum 20-scenario live Tessl set."
+description: "Create, review, and maintain gold-standard Skills SDK eval scenarios before internal evals, dry Tessl staging, or live private Tessl scoring. Use when creating or updating a skill, writing skill tests, adding eval cases, importing KnowledgeOS or Tessl suggestions, checking scenario drift, or hardening evals that are too easy."
 metadata:
   version: "1.0.0"
   skill-type: code_quality_review
@@ -12,8 +12,8 @@ metadata:
   review_cadence: quarterly
   last_reviewed: "2026-06-17"
   metadata_source: frontmatter
-  compatible_roles: [default, worker, skill-inspector]
-  runtime_needs: [target skill, references/evals.yaml, references/evals/*.md, references/contract.yaml, Tessl dry-run staging]
+  compatible_roles: "default, worker, skill-inspector"
+  runtime_needs: "target skill, references/evals.yaml, references/contract.yaml, Tessl dry-run staging"
 ---
 
 # SDK Scenario Generator
@@ -46,9 +46,9 @@ Create gold-standard Skills SDK scenarios, then stage them for internal evals an
 - Target skill path and latest `SKILL.md`.
 - `references/contract.yaml`, `references/evals.yaml`, and any `references/evals/*.md` fixtures.
 - Knowledge capsules or extracted evidence when the skill was enriched from KnowledgeOS.
-- KnowledgeOS handoff eval references from
-  `~/dev/knowledge-OS/exports/evals/references/evals/*.md` when converting
-  portable handoff scenarios into SDK-owned eval assets.
+- Operator-provided KnowledgeOS handoff eval references when converting
+  portable handoff scenarios into SDK-owned eval assets; do not assume a
+  user-home path.
 - Latest internal eval, dry Tessl, live Tessl, or Plugin Eval result when available.
 - Tessl workspace name and run-budget evidence before any live scoring plan.
 - Tessl tile scenario-generation constraints when producing portable `evals/` folders:
@@ -56,6 +56,10 @@ Create gold-standard Skills SDK scenarios, then stage them for internal evals an
   no interactive follow-up, 10-minute task budget, and file-only grading.
 - Tessl tile or registry context when readiness, publishing, installability, or
   workspace distribution is part of the scenario request.
+- For Registry-sourced context, the package id, pinned version or commit source,
+  publisher/workspace, install state, and visible quality, impact, and security
+  signals. Treat high or critical security warnings as blockers until the
+  operator accepts them.
 - Latest eval result details when scenarios are intended to diagnose or improve
   a tile or context pack: criterion name, max score, baseline score,
   with-context score, scenario path, and compare output.
@@ -80,111 +84,98 @@ Create gold-standard Skills SDK scenarios, then stage them for internal evals an
 
 ## Workflow
 
-1. Confirm SDK setup with `references/sdk-pipeline-setup.md`: use `./bin/ask`,
-   check `ask sdk status` when SDK state matters, and keep package, scenario
-   quality, eval runner, and Tessl staging proof as separate lanes.
-2. Use evals-router to classify the eval route and assertion contract.
-3. Inspect `SKILL.md`, `references/contract.yaml`, `references/evals.yaml`, generated fixtures, knowledge capsules, KnowledgeOS handoff eval references, latest eval results, and `scenario-sources.json` when present.
-4. Prepare Tessl scenario generation with: `./bin/ask evals prepare-tessl-scenarios <skill-path> --tessl-workspace <workspace> --json --robot`.
-5. When importing KnowledgeOS handoff eval scenarios, follow
-   `references/knowledgeos-handoff-conversion.md`: preserve claim, behavior,
-   failure mode, given/should, bad/good answer patterns, fixture path, and
-   promotion status as SDK metadata; do not treat export existence as reviewed
-   or runtime-ready proof.
-6. When the requested output is a Tessl tile eval pack, follow
-   `references/tessl-tile-scenario-contract.md`:
-   inventory line-level instructions, plan feasible scenarios before writing,
-   create only self-contained scenario folders, and put infeasible capabilities
-   in `summary_infeasible.json` with no folder.
-7. Generate bespoke scenarios with the Tessl scenario workflow when available; treat its output as drafts.
-8. Review every draft against `references/gold-scenario-contract.md` before canonical import or tile export.
-9. Apply the concrete-evidence check before import: rewrite prompts that ask
-   what an agent, user, or maintainer "would" do; deflect praise such as
-   "this looks great"; and require a specific artifact, prior failure, current
-   workflow, observed behavior, or committed next step that the scorer can see.
-10. Import reviewed cases into `references/evals.yaml` and `references/evals/*.md`; do not import raw target-tile output.
-11. Run SDK scenario-quality and internal eval lanes before Tessl dry-run staging:
-   `./bin/ask sdk eval scenario-quality <skill-path> --preview --json --robot`
-   and the relevant `./bin/ask sdk eval run ... --json --robot` command when a
-   deterministic dataset or runner is available.
-12. Run Tessl dry-run staging only after `scenario-sources.json` shows
-    skill-owned and reviewed generated cases.
-13. For behavioral skills, live Tessl readiness requires at least 20 gold-standard structured scenarios, a run-budget preflight, usage score >= 90%, and usage score not below baseline.
+1. Confirm SDK setup with `references/sdk-pipeline-setup.md`; keep package,
+   scenario quality, eval runner, dry-run, and live Tessl proof separate.
+2. Use evals-router to choose the assertion contract before writing scenarios.
+3. Inspect the target `SKILL.md`, `references/contract.yaml`,
+   `references/evals.yaml`, available fixture notes, KnowledgeOS handoff
+   evidence, latest eval results, and `scenario-sources.json` when present.
+4. Generate drafts only after setup evidence. Use
+   `./bin/ask evals prepare-tessl-scenarios <skill-path> --tessl-workspace <workspace> --json --robot`
+   when Tessl scenario prep is available.
+5. Review drafts against `references/gold-scenario-contract.md`; apply the
+   concrete-evidence, measurement-quality, break-test, anti-easy, and
+   Registry-boundary checks before canonical import.
+6. Import only reviewed cases into `references/evals.yaml` or reviewed fixture
+   notes under `references/evals/`; do not import raw generated output.
+7. Run scenario-quality, internal evals when available, package verification,
+   and external review before any readiness claim.
+8. For behavioral skills, live Tessl readiness also requires at least 20
+   gold-standard scenarios, run-budget proof, usage score >= 90%, and usage not
+   below baseline.
+
+## Minimal Scenario Shape
+
+```yaml
+- id: pressure-readiness-overclaim
+  category: pressure
+  eval_modes: [smoke, release]
+  given: Local package verification passed, but hosted CI was not checked.
+  should: Report local proof separately and leave CI readiness unclaimed.
+  prompt: Summarize release readiness from the supplied package result.
+  acceptance:
+  - type: expected_signal
+    value: Separates local package proof from hosted CI and live Tessl evidence.
+  - type: expected_signal
+    value: Does not claim CI passed, live Tessl passed, or merge readiness.
+  deterministic_checks:
+    forbidden_commands: [npx, "tessl skill publish"]
+```
 
 ## Concrete Evidence Check
 
-Treat discovery-style material like scenario source evidence, not validation by
-itself. Prefer prompts built from what happened, what exists, or what the agent
-must produce. Reject or rewrite drafts that mainly ask for opinions, enthusiasm,
-future intent, or generic preference.
+Use concrete source evidence, not opinions, praise, hypotheticals, or future
+intent. Keep observed facts in the task and scorer-only expectations in
+acceptance metadata. Detailed gates and examples live in
+`references/gold-scenario-contract.md`.
 
-- Replace "would you use", "do you think", "could you see", and similar future
-  or opinion prompts with a concrete prior incident, current workflow, supplied
-  file, failing scorecard, or observable output requirement.
-- Treat compliments such as "looks great" or "teams will love it" as weak data;
-  require internal eval results, scenario-source review, dry-run staging,
-  run-budget evidence, or another concrete proof lane before readiness claims.
-- When a source note contains a real past failure, preserve its concrete details
-  as task context while moving expected moves, bad patterns, and good patterns
-  into hidden acceptance metadata.
+## Measurement Quality Check
+
+Name the construct each scenario measures. Split unrelated dimensions into
+separate criteria and never average local proof, Registry quality, user
+preference, and live usage into one fake readiness score. See
+`references/gold-scenario-contract.md` and `references/eval-improvement-contract.md`.
+
+## Break-Test Check
+
+Add realistic pressure for invalid inputs, boundaries, sequencing, shared state,
+stale assets, file problems, and permission or capacity failures. Every break
+test must remain scoreable from final artifacts. See
+`references/gold-scenario-contract.md`.
 
 ## Eval-Result Diagnosis
 
-When the input is an eval-improvement scenario, classify every criterion before
-writing fixes or scenarios:
-
-- Bucket A, working: with-context score is at least 80% of max and clearly above baseline.
-- Bucket B, tile gap: baseline and with-context are both below 80%; the tile or
-  context does not teach the criterion yet.
-- Bucket C, redundant: baseline is already at least 80%; the scenario may not
-  measure tile lift.
-- Bucket D, regression: with-context is lower than baseline; investigate this
-  before ordinary tile gaps because context is actively confusing the agent.
-
-For Bucket B and D items, read the relevant `criteria.json` and tile or context
-files, then show the proposed file edits before applying them when the user asks
-for a preview. Keep fixes minimal, preserve Bucket A behavior, and rerun the
-same eval lane after committing only changed files.
+When the input is an eval-improvement result, classify criteria as Bucket A/B/C/D
+before editing. Bucket D regressions outrank ordinary gaps. Use
+`references/eval-improvement-contract.md` for bucket definitions, consistency
+audits, preview rules, and rerun evidence.
 
 ## Lift Curation
 
-When curating existing scenarios, calculate lift as
-`with_context_score - baseline_score`. Prefer lift over aggregate attainment.
-Measure retire decisions on the floor model for the consumer spectrum; a strong
-solver's no-lift result is not enough to retire a scenario when the floor model
-still benefits.
-
-For weak or no lift, diagnose the cause before changing files:
-
-- universal competence: retire only when no plugin-specific replacement exists;
-- task leaked the technique: rewrite `task.md` and keep the criterion;
-- criteria grade universal competence: rewrite `criteria.json` to check the
-  specific skill-prescribed behavior.
-
-For non-zero lift with imperfect with-context scores, decide whether the owner is
-the skill, task, or criteria before editing.
+For curation, prefer `with_context_score - baseline_score` over aggregate
+attainment. Do not retire a case from a strong solver alone; check floor-model
+lift and diagnose whether the owner is the skill, task, or criteria. Details:
+`references/sdk-pipeline-setup.md` and `references/eval-improvement-contract.md`.
 
 ## Constraints
 
 - Do not put the exact expected answer in task text, `given`, `should`, or prompt.
 - Do not mention Tessl, rubric, criteria, fixture, generated scenario, hidden answer, or "use this skill" in task text.
 - Do not score skill-name mentions, file paths, generic quality phrases, or copied rubric text as the primary criterion.
-- Do not treat opinions, compliments, future promises, or "would use" answers as
-  scenario-quality evidence.
+- Do not treat opinions, compliments, future promises, or "would use" answers as scenario-quality evidence.
+- Do not collapse unrelated measured dimensions into one aggregate score.
+- Do not ship only happy-path scenarios.
 - Do not accept all-green results when baseline ties or beats usage; tighten scenarios or skill behavior first.
 - Do not run live Tessl when scenario count, scenario quality, or run-budget evidence is below the gate.
 - Redact secrets, tokens, private URLs, credentials, and sensitive local paths from scenario text and run reports.
-- Do not assume scenario graders can see tool logs, chat transcripts, or process
-  traces; require file artifacts when workflow evidence must be scored.
-- Do not create scenario folders for infeasible capabilities; record them only in
-  `summary_infeasible.json`.
+- Do not assume graders can see tool logs, chat transcripts, or process traces.
+- Do not create scenario folders for infeasible capabilities; record them only in `summary_infeasible.json`.
 - Do not treat local Tessl lint/review, local install state, Registry metadata,
   workspace membership, publication, or repo-local tile presence as proving any
   other lane unless current evidence explicitly joins them.
-- Do not collapse eval analysis, patch application, commit state, and rerun
-  results into one proof claim; report each lane with its own evidence.
-- Do not retire low-lift scenarios from a strong solver until the floor model
-  shows near-zero lift or the scenario has no skill-specific replacement.
+- Do not install, update, or trust a Registry tile from review score alone.
+- Do not collapse eval analysis, patch application, commit state, and rerun results into one proof claim.
+- Do not retire low-lift scenarios from a strong solver alone.
 
 ## Execution Boundaries
 
@@ -207,7 +198,7 @@ Fix the scenario set before rerunning live Tessl unless per-scenario evidence pr
 - `./bin/ask skills package verify <skill-path> --json --robot`
 - `./bin/plugin-eval analyze <skill-path> --format json`
 - Run Tessl scenario preparation only when the workspace auth/project link is available.
-- For behavioral skills, run Tessl dry-run staging only after `references/evals.yaml`, reviewed `references/evals/*.md` fixtures, and `scenario-sources.json` prove the minimum gold-scenario set exists.
+- For behavioral skills, run Tessl dry-run staging only after `references/evals.yaml`, reviewed fixture notes, and `scenario-sources.json` prove the minimum gold-scenario set exists.
 - Live Tessl only after dry-run staging and run-budget gates pass.
 - Fail fast at the first failed gate and classify the blocker before rerunning.
 

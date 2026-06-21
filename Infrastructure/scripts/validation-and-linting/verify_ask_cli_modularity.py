@@ -63,6 +63,13 @@ LEGACY_SHAPE_DEBT = {
         "reason": "pre-existing skills command extraction debt",
         "expires": "2026-07-31",
     },
+    "Infrastructure/scripts/lib/ask/skill_review_dashboard.py": {
+        "owner": "skills-sdk",
+        "rule_id": "ask-cli-shape-budget",
+        "ticket": "JSC-SDK-SPINE",
+        "reason": "pre-existing skill review dashboard extraction debt",
+        "expires": "2026-07-31",
+    },
     "Infrastructure/tests/test_ask_cli_impl.py": {
         "owner": "ask-cli",
         "rule_id": "ask-cli-shape-budget",

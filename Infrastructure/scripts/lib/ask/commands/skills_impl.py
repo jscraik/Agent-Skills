@@ -668,6 +668,8 @@ def _write_tessl_plugin_wrapper(repo_root: Path, audit_target_path: str, stable_
     """Create a stable Tessl plugin-shaped evidence wrapper for a SKILL.md-first local skill."""
     source_skill_dir = repo_root / audit_target_path
     source_skill = source_skill_dir / "SKILL.md"
+    if source_skill.is_symlink():
+        raise ValueError(f"Tessl review staging refuses symlinked skill source: {audit_target_path}/SKILL.md")
     fields = _read_skill_frontmatter_fields(source_skill)
     skill_key = _safe_tessl_skill_key(fields.get("name") or Path(audit_target_path).name)
     temp_root = stable_parent / "current"
@@ -687,6 +689,8 @@ def _write_tessl_plugin_wrapper(repo_root: Path, audit_target_path: str, stable_
     shutil.copy2(source_skill, staged_skill_dir / "SKILL.md")
     for support_dir_name in ("references", "scripts", "assets", "evals"):
         support_dir = source_skill_dir / support_dir_name
+        if support_dir.is_symlink():
+            raise ValueError(f"Tessl review staging refuses symlinked support directory: {audit_target_path}/{support_dir_name}")
         if support_dir.is_dir():
             shutil.copytree(support_dir, staged_skill_dir / support_dir_name)
 
@@ -700,8 +704,15 @@ def _write_tessl_plugin_wrapper(repo_root: Path, audit_target_path: str, stable_
     }
     plugin_path = temp_root / ".tessl-plugin" / "plugin.json"
     plugin_path.parent.mkdir(parents=True, exist_ok=True)
+    stable_parent_real = os.path.realpath(stable_parent)
+    plugin_path_real = os.path.realpath(plugin_path)
+    if os.path.commonpath([stable_parent_real, plugin_path_real]) != stable_parent_real:
+        raise ValueError("Tessl review staging manifest path escaped the staging root.")
     plugin_path.write_text(json.dumps(plugin, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     tessl_marker_path = temp_root / "tessl.json"
+    tessl_marker_real = os.path.realpath(tessl_marker_path)
+    if os.path.commonpath([stable_parent_real, tessl_marker_real]) != stable_parent_real:
+        raise ValueError("Tessl review staging marker path escaped the staging root.")
     tessl_marker_path.write_text(
         json.dumps({"name": f"agent-skills-{skill_key}", "version": "0.0.0-local"}, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
@@ -6820,7 +6831,17 @@ def external_review_skill(
             ))
         else:
             tessl_tmp_path = _stable_tessl_review_root(audit_target_path)
-            staging_root, plugin_info = _write_tessl_plugin_wrapper(repo_root, audit_target_path, tessl_tmp_path)
+            try:
+                staging_root, plugin_info = _write_tessl_plugin_wrapper(repo_root, audit_target_path, tessl_tmp_path)
+            except ValueError as exc:
+                result.status = "error"
+                result.data["tessl_plugin"] = {"status": "blocked_validation", "message": str(exc)}
+                result.errors.append(ErrorObject(
+                    code="ERR_VALIDATION",
+                    message=str(exc),
+                    fix_suggestion="Replace symlinked skill review inputs with regular files or directories before Tessl staging.",
+                ))
+                return result
             tessl_env: dict[str, str] = {}
             result.data["tessl_plugin"] = {
                 **plugin_info,

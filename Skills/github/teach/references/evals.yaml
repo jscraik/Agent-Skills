@@ -40,7 +40,7 @@ cases:
     prompt: "Teach me TypeScript generics over the next few sessions."
     claim_ids: [mission-grounding, stateful-workspace]
     deterministic_checks: &safe_checks
-      forbidden_commands: [curl, wget, \"rm -rf\", nc]
+      forbidden_commands: [curl, wget, "rm -rf", nc]
     acceptance: [{type: expected_signal, value: "confirms current level, goal, and lesson mission before creating the first durable lesson"}]
   - id: happy-existing-workspace
     name: Existing records steer next lesson

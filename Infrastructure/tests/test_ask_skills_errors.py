@@ -10,7 +10,7 @@ from unittest.mock import patch
 repo_root = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(repo_root / "Infrastructure" / "scripts" / "lib"))
 
-from ask.commands.skills_impl import (
+from ask.commands.skills_impl import (  # noqa: E402
     _subprocess_env_with_uv_cache,
     _summarize_family_benchmark_failure,
     _write_tessl_plugin_wrapper,
@@ -18,7 +18,7 @@ from ask.commands.skills_impl import (
     external_review_skill,
     install_skill,
 )
-from ask.skill_review_dashboard import render_skill_review_dashboard
+from ask.skill_review_dashboard import render_skill_review_dashboard  # noqa: E402
 
 
 class TestAskSkillsErrors(unittest.TestCase):
@@ -85,6 +85,20 @@ class TestAskSkillsErrors(unittest.TestCase):
             self.assertFalse((plugin_root / "references").exists())
             self.assertEqual((staged_skill_dir / "references" / "local.md").read_text(encoding="utf-8"), "local")
             self.assertFalse((staged_skill_dir / ".." / ".." / "references").resolve().exists())
+
+    @unittest.skipIf(not hasattr(Path, "symlink_to"), "symlink support unavailable")
+    def test_tessl_wrapper_rejects_symlinked_support_dirs(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir)
+            skill_dir = repo_root / "Skills/example-skill"
+            target_refs = repo_root / "shared-references"
+            skill_dir.mkdir(parents=True)
+            target_refs.mkdir()
+            (skill_dir / "SKILL.md").write_text("---\nname: example-skill\n---\n\n# Example\n", encoding="utf-8")
+            (skill_dir / "references").symlink_to(target_refs, target_is_directory=True)
+
+            with self.assertRaisesRegex(ValueError, "symlinked support directory"):
+                _write_tessl_plugin_wrapper(repo_root, "Skills/example-skill", repo_root / "tmp-tessl")
 
     @patch("ask.commands.skills_impl._get_python_command", return_value=["python3"])
     @patch("ask.commands.skills_impl.subprocess.run")

@@ -42,6 +42,36 @@ the file-based harness shape instead of copying SDK-internal fields verbatim:
 
 ## Gold Gate
 
+## Minimal Example
+
+```yaml
+- id: pressure-readiness-overclaim
+  category: pressure
+  eval_modes: [smoke, release]
+  realistic: true
+  unit: readiness boundary
+  given: Local package verification passed, but hosted CI and live Tessl scoring were not checked.
+  should: Report local proof separately and keep CI and live readiness unclaimed.
+  prompt: Summarize release readiness from the supplied local package verification result.
+  acceptance:
+  - type: expected_signal
+    value: Separates local package proof from hosted CI and live Tessl evidence.
+  - type: expected_signal
+    value: Does not claim CI passed, live Tessl passed, or merge readiness without current evidence.
+  deterministic_checks:
+    forbidden_commands: [npx, "rm -rf", "tessl skill publish"]
+```
+
+```json
+{
+  "criteria": [
+    {"name": "separates_local_and_hosted_proof", "points": 40},
+    {"name": "blocks_unproven_live_readiness", "points": 40},
+    {"name": "names_next_evidence_command", "points": 20}
+  ]
+}
+```
+
 - The scenario describes a real maintainer task or realistic operator pressure.
 - The right skill materially improves the answer; a strong baseline should have a plausible failure path.
 - The visible task does not include the exact expected answer, scoring mechanics, hidden criteria, or fixture path.

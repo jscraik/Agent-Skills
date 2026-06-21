@@ -423,7 +423,7 @@ def _score_decision(
     mutation_performed = True
     try:
         result = runner(judge_prompt, judge_profile, timeout_seconds)
-    except FileNotFoundError:
+    except OSError:
         blockers.append("judge_provider_unavailable")
         return None, None, False, False, mutation_performed
     except subprocess.TimeoutExpired as exc:
@@ -455,6 +455,8 @@ def _write_text_evidence(repo_root: Path, path: Path | None, value: str) -> None
     if hasattr(os, "O_NOFOLLOW"):
         flags |= os.O_NOFOLLOW
     file_descriptor = os.open(resolved, flags, 0o600)
+    if hasattr(os, "fchmod"):
+        os.fchmod(file_descriptor, 0o600)
     with os.fdopen(file_descriptor, "w", encoding="utf-8") as handle:
         handle.write(value)
 

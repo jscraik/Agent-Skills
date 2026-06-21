@@ -148,6 +148,27 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         self.assertTrue((REPO_ROOT / receipt["judge_output_path"]).parent.is_dir())
         validate_ab_judge_score_receipt(receipt)
 
+    def test_builder_blocks_local_judge_startup_oserror(self) -> None:
+        def permission_denied_runner(
+            prompt: str,
+            judge_profile: dict[str, object],
+            timeout_seconds: int,
+        ) -> OllamaJudgeResult:
+            raise PermissionError("ollama")
+
+        receipt = build_ab_judge_score_receipt(
+            REPO_ROOT,
+            run_receipt=RUN_RECEIPT,
+            evidence_root=self.evidence_root,
+            runner=permission_denied_runner,
+        )
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("judge_provider_unavailable", receipt["blockers"])
+        self.assertFalse(receipt["provider_invoked"])
+        self.assertTrue(receipt["mutation_performed"])
+        validate_ab_judge_score_receipt(receipt)
+
     def test_builder_clears_stale_output_when_local_judge_unavailable(self) -> None:
         run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
         stale_output = (
@@ -487,6 +508,19 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
 
             self.assertTrue(symlink.is_symlink())
             self.assertEqual(target.read_text(encoding="utf-8"), "original")
+
+    def test_write_text_evidence_resets_existing_file_permissions(self) -> None:
+        evidence_root = REPO_ROOT / self.evidence_root
+        score_dir = evidence_root / "1234567890abcdef" / "judge"
+        prompt_file = score_dir / "prompt.txt"
+        score_dir.mkdir(parents=True, exist_ok=True)
+        prompt_file.write_text("old prompt", encoding="utf-8")
+        prompt_file.chmod(0o644)
+
+        _write_text_evidence(REPO_ROOT, prompt_file, "new prompt")
+
+        self.assertEqual(prompt_file.read_text(encoding="utf-8"), "new prompt")
+        self.assertEqual(prompt_file.stat().st_mode & 0o777, 0o600)
 
     def test_evidence_preflight_rejects_existing_file_experiment_root(self) -> None:
         evidence_root = REPO_ROOT / self.evidence_root
