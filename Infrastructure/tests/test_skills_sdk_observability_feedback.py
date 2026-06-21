@@ -58,9 +58,11 @@ class TestSkillsSdkObservabilityFeedback(unittest.TestCase):
         payload["target_path"] = "Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md"
         return payload
 
-    def _write_receipt(self, directory: Path, name: str, payload: dict) -> str:
+    def _write_receipt(self, directory: Path, name: str, receipt_fixture: dict) -> str:
         path = directory / name
-        path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        with path.open("w", encoding="utf-8") as handle:
+            json.dump(receipt_fixture, handle, indent=2, sort_keys=True)
+            handle.write("\n")
         return path.as_posix()
 
     def _promotion_cli(
