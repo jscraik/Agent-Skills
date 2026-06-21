@@ -714,6 +714,8 @@ def validate_trust_decision_receipt(payload: object) -> trust_contracts.TrustDec
 
 def validate_observability_feedback_receipt(payload: object) -> observability_contracts.ObservabilityFeedbackReceipt: return observability_contracts.validate_observability_feedback_receipt(payload)
 
+def validate_observability_promotion_receipt(payload: object) -> observability_contracts.ObservabilityPromotionReceipt: return observability_contracts.validate_observability_promotion_receipt(payload)
+
 
 def validate_manifest_source(payload: object) -> ManifestSource:
     return ManifestSource.model_validate(payload)
@@ -772,9 +774,7 @@ def validate_ab_judge_preview_receipt(payload: object) -> ab_contracts.AbJudgePr
 
 def validate_ab_judge_score_receipt(payload: object) -> ab_contracts.AbJudgeScoreReceipt: return ab_contracts.AbJudgeScoreReceipt.model_validate(payload)
 
-
 def validate_sandbox_profile(payload: object) -> SandboxProfile: return SandboxProfile.model_validate(payload)
-
 
 def validate_sandbox_profile_receipt(payload: object) -> SandboxProfileReceipt:
     return SandboxProfileReceipt.model_validate(payload)

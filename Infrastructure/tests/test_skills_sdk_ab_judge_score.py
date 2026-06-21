@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 import shutil
 import subprocess
@@ -51,10 +52,17 @@ def _decision(experiment_id: str) -> dict[str, object]:
 class TestSkillsSdkAbJudgeScore(unittest.TestCase):
     def setUp(self) -> None:
         self.evidence_root = ".harness/test-sdk-ab-judge-score"
-        shutil.rmtree(REPO_ROOT / self.evidence_root, ignore_errors=True)
+        self._remove_evidence_root()
 
     def tearDown(self) -> None:
-        shutil.rmtree(REPO_ROOT / self.evidence_root, ignore_errors=True)
+        self._remove_evidence_root()
+
+    def _remove_evidence_root(self) -> None:
+        path = REPO_ROOT / self.evidence_root
+        if path.is_dir():
+            shutil.rmtree(path, ignore_errors=True)
+        elif path.exists():
+            path.unlink()
 
     def test_builder_scores_with_injected_local_judge(self) -> None:
         calls: list[tuple[str, str, int]] = []
@@ -124,6 +132,8 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         self.assertEqual(receipt["status"], "blocked")
         self.assertIn("judge_provider_unavailable", receipt["blockers"])
         self.assertFalse(receipt["provider_invoked"])
+        self.assertTrue(receipt["mutation_performed"])
+        self.assertTrue((REPO_ROOT / receipt["judge_output_path"]).parent.is_dir())
         validate_ab_judge_score_receipt(receipt)
 
     def test_builder_blocks_schema_extra_judge_keys(self) -> None:
@@ -160,6 +170,78 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
 
         self.assertEqual(receipt["status"], "blocked")
         self.assertIn("judge_decision_winner_mismatch", receipt["blockers"])
+        validate_ab_judge_score_receipt(receipt)
+
+    def test_builder_blocks_normalized_scores_mismatched_to_dimension_rows(self) -> None:
+        def mismatched_score_runner(
+            prompt: str,
+            judge_profile: dict[str, object],
+            timeout_seconds: int,
+        ) -> OllamaJudgeResult:
+            run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
+            decision = _decision(run_receipt["experiment_id"])
+            decision["dimension_scores"] = [
+                {
+                    **row,
+                    "skill_a_score": 5.0,
+                    "skill_b_score": 1.0,
+                    "reason": "skill_a has stronger evidence",
+                }
+                for row in decision["dimension_scores"]
+            ]
+            decision["normalized_score_a"] = 0.20
+            decision["normalized_score_b"] = 0.90
+            decision["winner"] = "skill_b"
+            return OllamaJudgeResult(exit_code=0, stdout=json.dumps(decision), stderr="")
+
+        receipt = build_ab_judge_score_receipt(
+            REPO_ROOT,
+            run_receipt=RUN_RECEIPT,
+            evidence_root=self.evidence_root,
+            runner=mismatched_score_runner,
+        )
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("judge_decision_normalized_scores_mismatch", receipt["blockers"])
+        validate_ab_judge_score_receipt(receipt)
+
+    def test_builder_blocks_non_finite_judge_scores(self) -> None:
+        def non_finite_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int) -> OllamaJudgeResult:
+            run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
+            decision = _decision(run_receipt["experiment_id"])
+            decision["normalized_score_a"] = math.nan
+            return OllamaJudgeResult(exit_code=0, stdout=json.dumps(decision), stderr="")
+
+        receipt = build_ab_judge_score_receipt(
+            REPO_ROOT,
+            run_receipt=RUN_RECEIPT,
+            evidence_root=self.evidence_root,
+            runner=non_finite_runner,
+        )
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("judge_output_invalid_json", receipt["blockers"])
+        validate_ab_judge_score_receipt(receipt)
+
+    def test_builder_blocks_file_evidence_root_before_writing(self) -> None:
+        evidence_root = REPO_ROOT / self.evidence_root
+        evidence_root.parent.mkdir(parents=True, exist_ok=True)
+        evidence_root.write_text("not a directory", encoding="utf-8")
+
+        def fake_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int) -> OllamaJudgeResult:
+            self.fail("runner should not be invoked when evidence root is a file")
+
+        receipt = build_ab_judge_score_receipt(
+            REPO_ROOT,
+            run_receipt=RUN_RECEIPT,
+            evidence_root=self.evidence_root,
+            runner=fake_runner,
+        )
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("evidence_root_not_directory", receipt["blockers"])
+        self.assertFalse(receipt["provider_invoked"])
+        self.assertFalse(receipt["mutation_performed"])
         validate_ab_judge_score_receipt(receipt)
 
     def test_cli_requires_execute_gate(self) -> None:

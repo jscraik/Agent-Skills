@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import subprocess
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -37,11 +39,11 @@ _DECISION_KEYS = frozenset(
 _DIMENSION_SCORE_KEYS = frozenset({"dimension_id", "skill_a_score", "skill_b_score", "reason", "evidence_refs"})
 
 
+@dataclass(frozen=True)
 class OllamaJudgeResult:
-    def __init__(self, *, exit_code: int, stdout: str, stderr: str) -> None:
-        self.exit_code = exit_code
-        self.stdout = stdout
-        self.stderr = stderr
+    exit_code: int
+    stdout: str
+    stderr: str
 
 
 def _digest_text(value: str) -> str:
@@ -306,7 +308,7 @@ def build_ab_judge_score_receipt(
     blockers, judge_profile, evidence = _score_preflight(
         repo_root, preview, evidence_root, judge_profile_id, timeout_seconds
     )
-    decision, output_digest, provider_invoked, network_accessed = _score_decision(
+    decision, output_digest, provider_invoked, network_accessed, mutation_performed = _score_decision(
         blockers=blockers,
         repo_root=repo_root,
         preview=preview,
@@ -325,6 +327,7 @@ def build_ab_judge_score_receipt(
         output_digest=output_digest,
         provider_invoked=provider_invoked,
         network_accessed=network_accessed,
+        mutation_performed=mutation_performed,
         blockers=blockers,
     )
 
@@ -367,6 +370,8 @@ def _score_evidence_paths(repo_root: Path, evidence_root: str, experiment_id: ob
         resolved.relative_to(repo_root.resolve())
     except (OSError, ValueError):
         return {"blocker": "evidence_root_outside_repo", "prompt_path": None, "output_path": None}
+    if resolved.exists() and not resolved.is_dir():
+        return {"blocker": "evidence_root_not_directory", "prompt_path": None, "output_path": None}
     safe_experiment_id = experiment_id if isinstance(experiment_id, str) and len(experiment_id) == 16 else "blocked"
     base = resolved / safe_experiment_id / "judge"
     return {
@@ -385,30 +390,31 @@ def _score_decision(
     evidence: dict[str, Any],
     timeout_seconds: int,
     runner: Any,
-) -> tuple[dict[str, Any] | None, str | None, bool, bool]:
+) -> tuple[dict[str, Any] | None, str | None, bool, bool, bool]:
     if blockers or judge_profile is None:
-        return None, None, False, False
+        return None, None, False, False, False
     judge_prompt = _judge_prompt(preview["comparison_payload"])
     _write_text_evidence(repo_root, evidence["prompt_path"], judge_prompt)
+    mutation_performed = True
     try:
         result = runner(judge_prompt, judge_profile, timeout_seconds)
     except FileNotFoundError:
         blockers.append("judge_provider_unavailable")
-        return None, None, False, False
+        return None, None, False, False, mutation_performed
     except subprocess.TimeoutExpired as exc:
         stdout = _timeout_output_text(exc.stdout)
         _write_text_evidence(repo_root, evidence["output_path"], stdout)
         blockers.append("judge_provider_timeout")
-        return None, _digest_text(stdout), True, True
+        return None, _digest_text(stdout), True, True, mutation_performed
     _write_text_evidence(repo_root, evidence["output_path"], result.stdout)
     output_digest = _digest_text(result.stdout)
     if result.exit_code != 0:
         blockers.append(f"judge_provider_exit_{result.exit_code}")
-        return None, output_digest, True, True
+        return None, output_digest, True, True, mutation_performed
     decision, blocker = _parse_judge_decision(result.stdout, preview["comparison_payload"])
     if blocker:
         blockers.append(blocker)
-    return decision, output_digest, True, True
+    return decision, output_digest, True, True, mutation_performed
 
 
 def _write_text_evidence(repo_root: Path, relative_path: str | None, value: str) -> None:
@@ -439,8 +445,8 @@ def _run_ollama_judge(prompt: str, judge_profile: dict[str, Any], timeout_second
 
 def _parse_judge_decision(raw_output: str, comparison_payload: dict[str, Any]) -> tuple[dict[str, Any] | None, str | None]:
     try:
-        decision = json.loads(raw_output)
-    except json.JSONDecodeError:
+        decision = json.loads(raw_output, parse_constant=_reject_json_constant)
+    except (ValueError, json.JSONDecodeError):
         return None, "judge_output_invalid_json"
     if not isinstance(decision, dict):
         return None, "judge_output_not_object"
@@ -457,6 +463,16 @@ def _decision_contract_blocker(decision: dict[str, Any], comparison_payload: dic
         return "judge_decision_schema_mismatch"
     if decision.get("experiment_id") != comparison_payload["experiment_id"]:
         return "judge_decision_experiment_mismatch"
+    scalar_blocker = _decision_scalar_blocker(decision)
+    if scalar_blocker:
+        return scalar_blocker
+    dimension_blocker = _dimension_scores_blocker(decision.get("dimension_scores"))
+    if dimension_blocker:
+        return dimension_blocker
+    return _decision_score_consistency_blocker(decision, comparison_payload)
+
+
+def _decision_scalar_blocker(decision: dict[str, Any]) -> str | None:
     if decision.get("winner") not in ALLOWED_WINNERS:
         return "judge_decision_winner_invalid"
     if decision.get("confidence") not in {"low", "medium", "high"}:
@@ -465,24 +481,49 @@ def _decision_contract_blocker(decision: dict[str, Any], comparison_payload: dic
         return "judge_decision_reason_missing"
     if not _evidence_refs_valid(decision.get("evidence_refs")):
         return "judge_decision_evidence_refs_invalid"
+    return None
+
+
+def _decision_score_consistency_blocker(decision: dict[str, Any], comparison_payload: dict[str, Any]) -> str | None:
     if not _normalized_scores_valid(decision):
         return "judge_decision_normalized_scores_invalid"
-    if decision["winner"] != _expected_winner(decision, comparison_payload):
+    computed_scores = _computed_normalized_scores(decision["dimension_scores"], comparison_payload)
+    if not _normalized_scores_match(decision, computed_scores):
+        return "judge_decision_normalized_scores_mismatch"
+    if decision["winner"] != _expected_winner(computed_scores, comparison_payload):
         return "judge_decision_winner_mismatch"
-    return _dimension_scores_blocker(decision.get("dimension_scores"))
+    return None
+
+
+def _reject_json_constant(value: str) -> None:
+    raise ValueError(f"non-finite JSON constant is not allowed: {value}")
 
 
 def _normalized_scores_valid(decision: dict[str, Any]) -> bool:
     for key in ("normalized_score_a", "normalized_score_b"):
         value = decision.get(key)
-        if not isinstance(value, int | float) or isinstance(value, bool) or value < 0 or value > 1:
+        if not _number_in_range(value, minimum=0, maximum=1):
             return False
     return True
 
 
-def _expected_winner(decision: dict[str, Any], comparison_payload: dict[str, Any]) -> str:
+def _computed_normalized_scores(
+    rows: list[dict[str, Any]],
+    comparison_payload: dict[str, Any],
+) -> dict[str, float]:
+    weights = {dimension["id"]: dimension["weight"] for dimension in comparison_payload["rubric"]["dimensions"]}
+    score_a = sum(row["skill_a_score"] * weights[row["dimension_id"]] for row in rows) / 5
+    score_b = sum(row["skill_b_score"] * weights[row["dimension_id"]] for row in rows) / 5
+    return {"normalized_score_a": score_a, "normalized_score_b": score_b}
+
+
+def _normalized_scores_match(decision: dict[str, Any], computed_scores: dict[str, float]) -> bool:
+    return all(math.isclose(decision[key], computed_scores[key], rel_tol=0, abs_tol=1e-9) for key in computed_scores)
+
+
+def _expected_winner(computed_scores: dict[str, float], comparison_payload: dict[str, Any]) -> str:
     winner_policy = comparison_payload["rubric"]["winner_policy"]
-    delta = decision["normalized_score_b"] - decision["normalized_score_a"]
+    delta = computed_scores["normalized_score_b"] - computed_scores["normalized_score_a"]
     minimum_delta = winner_policy["minimum_normalized_delta"]
     if abs(delta) < minimum_delta:
         return winner_policy["tie_result"]
@@ -513,10 +554,13 @@ def _dimension_score_row_valid(row: dict[str, Any]) -> bool:
     if not _evidence_refs_valid(row.get("evidence_refs")):
         return False
     for key in ("skill_a_score", "skill_b_score"):
-        value = row.get(key)
-        if not isinstance(value, int | float) or isinstance(value, bool) or value < 0 or value > 5:
+        if not _number_in_range(row.get(key), minimum=0, maximum=5):
             return False
     return True
+
+
+def _number_in_range(value: object, *, minimum: float, maximum: float) -> bool:
+    return isinstance(value, int | float) and not isinstance(value, bool) and math.isfinite(value) and minimum <= value <= maximum
 
 
 def _evidence_refs_valid(value: object) -> bool:
@@ -541,6 +585,7 @@ def _score_receipt_payload(
     output_digest: str | None,
     provider_invoked: bool,
     network_accessed: bool,
+    mutation_performed: bool,
     blockers: list[str],
 ) -> dict[str, Any]:
     agent_summary = _score_agent_summary(status, blockers)
@@ -565,7 +610,7 @@ def _score_receipt_payload(
         "advisory_only": True,
         "provider_invoked": provider_invoked,
         "network_accessed": network_accessed,
-        "mutation_performed": provider_invoked,
+        "mutation_performed": mutation_performed,
         "blockers": blockers,
         "acceptance_trace": ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022", "VP-030"],
         "agent_summary": agent_summary,

@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/observability-promotion-receipt.v0.schema.json",
+  "title": "Skills SDK Observability Promotion Receipt v0",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "string", "const": "skills-sdk.observability-promotion-receipt.v0"},
+    "schema_uri": {"type": "string", "const": "https://jscraik.local/agent-skills/schemas/skills-sdk/observability-promotion-receipt.v0.schema.json"},
+    "status": {"type": "string", "enum": ["preview", "blocked"]},
+    "operation": {"type": "string", "const": "observability_promotion_preview"},
+    "package_id": {"type": ["string", "null"], "minLength": 1},
+    "package_digest": {"type": ["string", "null"], "minLength": 71},
+    "feedback_receipt_path": {"type": ["string", "null"], "minLength": 1},
+    "feedback_receipt_digest": {"type": ["string", "null"], "minLength": 71},
+    "package_receipt_path": {"type": ["string", "null"], "minLength": 1},
+    "package_receipt_digest": {"type": ["string", "null"], "minLength": 71},
+    "eval_run_receipt_path": {"type": ["string", "null"], "minLength": 1},
+    "eval_run_receipt_digest": {"type": ["string", "null"], "minLength": 71},
+    "candidate_count": {"type": "integer", "minimum": 0},
+    "promotion_ready_count": {"type": "integer", "minimum": 0},
+    "blocked_count": {"type": "integer", "minimum": 0},
+    "candidate_decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "candidate_type": {"type": "string", "enum": ["eval_scenario", "skill_gap"]},
+          "source_event_digest": {"type": "string", "minLength": 71},
+          "skill_id": {"type": "string", "minLength": 1},
+          "decision": {"type": "string", "enum": ["promotion_ready", "blocked"]},
+          "promotion_status": {"type": "string", "enum": ["promotion_ready", "blocked_pending_package_eval"]},
+          "required_receipts": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "uniqueItems": true,
+            "items": {"type": "string", "enum": ["package_digest_receipt", "eval_run_receipt"]},
+            "contains": {"const": "package_digest_receipt"},
+            "minContains": 1,
+            "maxContains": 1
+          },
+          "evidence_refs": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 3,
+            "uniqueItems": true,
+            "items": {"type": "string", "enum": ["feedback_receipt", "package_digest_receipt", "eval_run_receipt"]},
+            "contains": {"const": "feedback_receipt"},
+            "minContains": 1,
+            "maxContains": 1
+          },
+          "blockers": {"type": "array", "items": {"type": "string", "minLength": 1}}
+        },
+        "required": ["id", "candidate_type", "source_event_digest", "skill_id", "decision", "promotion_status", "required_receipts", "evidence_refs", "blockers"]
+      }
+    },
+    "promotion_checks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/definitions/check"}
+    },
+    "blockers": {"type": "array", "items": {"$ref": "#/definitions/check"}},
+    "mutation_performed": {"type": "boolean", "const": false},
+    "acceptance_trace": {"type": "array", "minItems": 1, "items": {"type": "string", "enum": ["PU-026", "FR-003", "FR-008", "SA-003", "VP-026"]}},
+    "agent_summary": {"type": "string", "minLength": 1}
+  },
+  "required": ["schema_version", "schema_uri", "status", "operation", "package_id", "package_digest", "feedback_receipt_path", "feedback_receipt_digest", "package_receipt_path", "package_receipt_digest", "eval_run_receipt_path", "eval_run_receipt_digest", "candidate_count", "promotion_ready_count", "blocked_count", "candidate_decisions", "promotion_checks", "blockers", "mutation_performed", "acceptance_trace", "agent_summary"],
+  "definitions": {
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "status": {"type": "string", "enum": ["pass", "blocker"]},
+        "severity": {"type": "string", "const": "blocker"},
+        "message": {"type": "string", "minLength": 1},
+        "evidence": {"type": "array", "items": {"type": "string"}}
+      },
+      "required": ["id", "status", "severity", "message", "evidence"]
+    }
+  }
+}

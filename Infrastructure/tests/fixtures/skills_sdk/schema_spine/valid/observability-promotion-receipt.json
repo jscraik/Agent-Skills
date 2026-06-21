@@ -1,0 +1,47 @@
+{
+  "schema_version": "skills-sdk.observability-promotion-receipt.v0",
+  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/observability-promotion-receipt.v0.schema.json",
+  "status": "preview",
+  "operation": "observability_promotion_preview",
+  "package_id": "skills-sdk-valid-fixture",
+  "package_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+  "feedback_receipt_path": "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/observability-feedback-receipt.json",
+  "feedback_receipt_digest": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+  "package_receipt_path": "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/package-digest-receipt.json",
+  "package_receipt_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+  "eval_run_receipt_path": "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/eval-run-receipt.json",
+  "eval_run_receipt_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888",
+  "candidate_count": 1,
+  "promotion_ready_count": 1,
+  "blocked_count": 0,
+  "candidate_decisions": [
+    {
+      "id": "eval-scenario-fixture",
+      "candidate_type": "eval_scenario",
+      "source_event_digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+      "skill_id": "skills-sdk-valid-fixture",
+      "decision": "promotion_ready",
+      "promotion_status": "promotion_ready",
+      "required_receipts": ["package_digest_receipt", "eval_run_receipt"],
+      "evidence_refs": ["feedback_receipt", "package_digest_receipt", "eval_run_receipt"],
+      "blockers": []
+    }
+  ],
+  "promotion_checks": [
+    {
+      "id": "receipts_present",
+      "status": "pass",
+      "severity": "blocker",
+      "message": "Feedback, package, and eval receipts must be present under repo or temporary paths.",
+      "evidence": [
+        "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/observability-feedback-receipt.json",
+        "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/package-digest-receipt.json",
+        "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/eval-run-receipt.json"
+      ]
+    }
+  ],
+  "blockers": [],
+  "mutation_performed": false,
+  "acceptance_trace": ["PU-026", "FR-003", "FR-008", "SA-003", "VP-026"],
+  "agent_summary": "observability promotion preview marked 1 of 1 candidate(s) ready."
+}
