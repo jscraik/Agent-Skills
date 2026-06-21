@@ -5,7 +5,7 @@ import json
 import math
 import subprocess
 from dataclasses import dataclass
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 from ask.skills_sdk.eval_ab_rubric import canonical_ab_rubric, canonical_ab_rubric_digest
@@ -420,14 +420,22 @@ def _score_decision(
 def _write_text_evidence(repo_root: Path, relative_path: str | None, value: str) -> None:
     if relative_path is None:
         return
+    path = _safe_evidence_path(repo_root, relative_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(value, encoding="utf-8")
+
+
+def _safe_evidence_path(repo_root: Path, relative_path: str) -> Path:
+    lexical_path = PurePosixPath(relative_path)
+    if lexical_path.is_absolute() or ".." in lexical_path.parts:
+        raise ValueError("evidence path outside repo")
     repo_base = repo_root.resolve()
-    path = (repo_root / relative_path).resolve()
+    path = repo_base.joinpath(*lexical_path.parts).resolve()
     try:
         path.relative_to(repo_base)
     except ValueError as exc:
         raise ValueError("evidence path outside repo") from exc
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(value, encoding="utf-8")
+    return path
 
 
 def _run_ollama_judge(prompt: str, judge_profile: dict[str, Any], timeout_seconds: int) -> OllamaJudgeResult:
