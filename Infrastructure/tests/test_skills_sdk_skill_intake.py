@@ -5,6 +5,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from helpers.schema_validator import _validate_schema_subset
 
@@ -109,6 +110,26 @@ class TestSkillsSdkSkillIntake(unittest.TestCase):
         self.assertNotIn("unexpected/secret.txt", {item["path"] for item in receipt["inspected_files"]})
         self.assertFalse(receipt["execution_performed"])
         self.assertFalse(receipt["mutation_performed"])
+
+    def test_builder_does_not_walk_rejected_top_level_subtrees(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "external"
+            source.mkdir()
+            (source / "SKILL.md").write_text(
+                "---\nname: external\ndescription: external\n---\n\n# External\n",
+                encoding="utf-8",
+            )
+            rejected = source / "node_modules"
+            rejected.mkdir()
+            (rejected / "large-tree.txt").write_text("do not inspect", encoding="utf-8")
+
+            with mock.patch.object(Path, "rglob", side_effect=AssertionError("unexpected recursive walk")):
+                receipt = build_skill_intake_receipt(REPO_ROOT, source=source.as_posix())
+
+        self.assert_schema_valid(receipt)
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertTrue(any(check["id"] == "approved_top_level_paths" for check in receipt["blockers"]))
+        self.assertEqual({item["path"] for item in receipt["inspected_files"]}, {"SKILL.md"})
 
     def test_builder_blocks_symlink_source_root_before_resolving(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

@@ -151,12 +151,6 @@ def _relative_package_path(source_root: Path, path: Path) -> Path | None:
         return None
 
 
-def _is_allowed_package_path(relative_path: Path) -> bool:
-    if relative_path.parts and relative_path.parts[0] not in ALLOWED_TOP_LEVELS:
-        return False
-    return True
-
-
 def _inspect_allowed_path(
     path: Path,
     relative_path: Path,
@@ -174,6 +168,17 @@ def _inspect_allowed_path(
         special_files.append(relative)
         return
     inspected_files.append({"path": relative, "digest": _digest_file(path), "size_bytes": path.stat().st_size})
+
+
+def _iter_approved_package_paths(source_root: Path, top_level_children: list[Path]) -> list[Path]:
+    approved_paths: list[Path] = []
+    for child in top_level_children:
+        if child.name not in ALLOWED_TOP_LEVELS:
+            continue
+        approved_paths.append(child)
+        if child.is_dir() and not child.is_symlink():
+            approved_paths.extend(sorted(child.rglob("*")))
+    return approved_paths
 
 
 def _symlink_check(symlinks: list[str]) -> dict[str, Any]:
@@ -201,12 +206,10 @@ def _inspect_directory(repo_root: Path, source_root: Path) -> tuple[list[dict[st
     special_files: list[str] = []
     checks.append(_top_level_check(unexpected))
 
-    for path in sorted(source_root.rglob("*")):
+    for path in _iter_approved_package_paths(source_root, top_level_children):
         relative_path = _relative_package_path(source_root, path)
         if relative_path is None:
             checks.append(_check("path_containment", "blocker", "Resolved path escaped the intake root.", [_repo_label(repo_root, path)]))
-            continue
-        if not _is_allowed_package_path(relative_path):
             continue
         _inspect_allowed_path(path, relative_path, inspected_files, symlinks, special_files)
 
