@@ -18,7 +18,7 @@ class SkillIntakeFile(_SkillIntakeModel):
 class SkillIntakeCheck(_SkillIntakeModel):
     id: str = Field(min_length=1)
     status: Literal["pass", "blocker"]
-    severity: Literal["blocker"]
+    severity: Literal["pass", "blocker"]
     message: str = Field(min_length=1)
     evidence: list[str]
 

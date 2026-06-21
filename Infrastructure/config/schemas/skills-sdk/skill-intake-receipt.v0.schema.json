@@ -100,7 +100,7 @@
       "properties": {
         "id": {"type": "string", "minLength": 1},
         "status": {"type": "string", "enum": ["pass", "blocker"]},
-        "severity": {"type": "string", "const": "blocker"},
+        "severity": {"type": "string", "enum": ["pass", "blocker"]},
         "message": {"type": "string", "minLength": 1},
         "evidence": {"type": "array", "items": {"type": "string", "minLength": 1}}
       },

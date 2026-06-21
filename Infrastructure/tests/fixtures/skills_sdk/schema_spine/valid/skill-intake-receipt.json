@@ -20,14 +20,14 @@
     {
       "id": "skill_md_present",
       "status": "pass",
-      "severity": "blocker",
+      "severity": "pass",
       "message": "Source includes a regular SKILL.md file.",
       "evidence": ["SKILL.md"]
     },
     {
       "id": "execution_blocked",
       "status": "pass",
-      "severity": "blocker",
+      "severity": "pass",
       "message": "Intake inspects files only and does not execute skill code.",
       "evidence": []
     }

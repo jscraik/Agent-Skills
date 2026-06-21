@@ -37,7 +37,7 @@ def _check(
     return {
         "id": check_id,
         "status": status,
-        "severity": "blocker",
+        "severity": status,
         "message": message,
         "evidence": evidence or [],
     }
