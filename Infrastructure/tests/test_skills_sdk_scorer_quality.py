@@ -143,8 +143,9 @@ class TestSkillsSdkScorerQuality(unittest.TestCase):
     def test_missing_scorer_metadata_is_advisory_blocked_receipt(self) -> None:
         process = _run_ask("sdk", "eval", "scorer-quality", NO_SCORER_FIXTURE, "--preview", "--json", "--robot")
 
-        self.assertEqual(process.returncode, 0, process.stderr)
+        self.assertNotEqual(process.returncode, 0)
         envelope = json.loads(process.stdout)
+        self.assertEqual(envelope["status"], "error")
         payload = envelope["data"]["skills_sdk_eval_scorer_quality"]
         blocker_ids = {check["id"] for check in payload["receipt"]["blockers"]}
 
@@ -225,6 +226,30 @@ cases: []
 
         self.assertTrue(model.ready)
         self.assertEqual(model.operation, "scorer_quality_preview")
+
+    def test_typed_contract_rejects_non_blocker_entries_in_blockers(self) -> None:
+        receipt = build_scorer_quality_receipt(REPO_ROOT, source_path=REPO_ROOT / FIXTURE_SKILL, query=FIXTURE_SKILL)
+        receipt["status"] = "blocked"
+        receipt["ready"] = False
+        receipt["blockers"] = [
+            {
+                "id": "not_a_blocker",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "This entry should not be accepted as a blocker.",
+                "evidence": ["status:pass"],
+            }
+        ]
+
+        with self.assertRaises(Exception):
+            validate_scorer_quality_receipt(receipt)
+
+    def test_typed_contract_rejects_empty_check_evidence(self) -> None:
+        receipt = build_scorer_quality_receipt(REPO_ROOT, source_path=REPO_ROOT / FIXTURE_SKILL, query=FIXTURE_SKILL)
+        receipt["quality_checks"][0]["evidence"] = [""]
+
+        with self.assertRaises(Exception):
+            validate_scorer_quality_receipt(receipt)
 
     def test_command_uses_fallback_parser_without_pyyaml(self) -> None:
         script = f"""

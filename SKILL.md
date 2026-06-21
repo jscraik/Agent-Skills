@@ -15,7 +15,7 @@ Do not hand-edit runtime projections.
 - [Skills — Backend Platform](#skills-backend-platform)
 - [Skills — Content Publishing](#skills-content-publishing)
 - [Skills — Frontend Ui](#skills-frontend-ui)
-- [Skills — Github](#skills-github)
+- [Skills — GitHub](#skills-github)
 - [Skills — Mobile Native](#skills-mobile-native)
 - [Skills — Product Strategy](#skills-product-strategy)
 - [Skills — Security Ops](#skills-security-ops)

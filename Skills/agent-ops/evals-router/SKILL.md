@@ -18,24 +18,39 @@ Route LLM/RAG eval work to the smallest proof-producing path.
 
 ## When To Use
 
-Use for eval coverage, failed traces, judge prompts, labels, RAG evidence, synthetic cases, or review tooling. Ask one question only when target, traces, labels, scorecard, or desired artifact is missing.
+Use for eval coverage, failed traces, judge prompts, labels, RAG evidence, synthetic cases, or review tooling. Do not use for general software tests.
 
 ## Inputs
 
 Need the user goal plus any traces, labels, scorecard, prompt, retrieval evidence, or target artifact.
 
-Routes: use `eval-audit`, `error-analysis`, `write-judge-prompt`, `validate-evaluator`, `generate-synthetic-data`, `evaluate-rag`, or `build-review-interface`.
-
-Faithfulness guardrails require owned sources, sentence-level verdicts, structured judge outcomes, labeled examples, exact pass references, and calibration.
-For Skills SDK evals, run `./bin/ask sdk eval scorer-quality <skill-path> --preview --json --robot` before trusting score trends. When a scorer can influence release or live Tessl claims, also run `./bin/ask sdk eval scorer-calibration <skill-path> --preview --json --robot` so held-out TP/TN/FP/FN behavior, threshold, prompt/scorer version, model parameters, and raw artifacts are measured before the score is trusted. When quoting Tessl score history, require a `tessl eval view --json` artifact and `./bin/ask sdk eval tessl-score --view-json <view-json> --skill <skill-path> --preview --json --robot`; memory summaries are provenance only.
+Ask one question only when the target, evidence, scorecard, or desired artifact is missing.
 
 ## Outputs
 
 Expected artifacts: patched eval, judge prompt, trace analysis, synthetic case, RAG check, review-interface spec, or blocked report.
 
 ```json
-{"schema_version":"evals-router.v1","route":"error-analysis","evidence":["trace ids","scorecard.json"],"next_check":"rerun failing case after patch"}
+{"schema_version":"evals-router.v1","route":"evaluate-rag","evidence":["answer.md","retrieved_chunks.json"],"artifact":{"sentence_support":[{"sentence_id":"s1","verdict":"supported","chunk_refs":["chunk-07"]},{"sentence_id":"s2","verdict":"unsupported","chunk_refs":[]}]},"next_check":"rewrite or fail the unsupported sentence before any LLM judge"}
 ```
+
+## Procedure
+
+1. Choose one route and one proof method.
+2. Check the required evidence for that route before editing prompts, judges, or eval data.
+3. Produce the smallest useful artifact and name the next check that would prove or falsify it.
+4. If the next check fails, patch only the failed prompt, case, judge, retrieval evidence, or report section; rerun that same check before widening scope.
+5. For Skills SDK score trends, Tessl score history, or judge release claims, use references/route-checklists.md before trusting the score.
+
+Route checkpoints and pass criteria:
+
+- eval-audit: pass iff every claim maps to a case or named gap; next check is the missing realistic case.
+- error-analysis: pass iff failing traces have a failure mode and owner; next check is one rerun for the patched failure.
+- write-judge-prompt: pass iff the criterion is binary and labels include pass and fail examples.
+- validate-evaluator: pass iff obvious pass/fail, bias, and copied-rubric probes produce expected verdicts.
+- generate-synthetic-data: pass iff each case has a gap id and is separated from production traces.
+- evaluate-rag: pass iff every factual answer sentence has chunk support or a named unsupported verdict.
+- build-review-interface: pass iff reviewer fields, verdict schema, and export format are specified.
 
 ## Failure Mode
 
@@ -43,9 +58,9 @@ Missing evidence means report the route, missing input, and smallest next check.
 
 ## Validation
 
-Validation or acceptance criteria: run the narrowest relevant check, then `./bin/ask skills external-review <skill-path> --json --robot` before release claims. Fail fast at the first failed gate, stop instead of continuing to broader evals, patch only the failed artifact, and rerun the same check; if still blocked, report exact blocker evidence.
+Run the narrowest relevant check, then ./bin/ask skills external-review <skill-path> --json --robot before release claims. Fail fast: stop at the first failed gate; do not proceed. If blocked, report exact blocker evidence and the nearest meaningful fallback.
 
-Full judge template and route checkpoints: `references/route-checklists.md`. Deferred context: `Infrastructure/references/deferred-skill-context/agent-ops-evals-router/`.
+Detailed route checkpoints, judge templates, scorer checks, and capsule routing live in references/route-checklists.md and references/knowledge-capsule-routing.md.
 
 ## Gotchas
 
@@ -55,9 +70,16 @@ Full judge template and route checkpoints: `references/route-checklists.md`. Def
 
 ## Examples
 
-- Validate the judge behind a perfect score by adding obvious pass/fail and verbosity-bias calibration probes.
-- Audit a RAG answer eval by mapping each factual sentence to retrieved chunk references before running an LLM judge.
-- Generate synthetic cases only for named coverage gaps, then keep them separate from representative production traces.
+- Request: "This RAG answer looks plausible but may hallucinate." Route: evaluate-rag. Evidence: retrieved chunks plus answer sentences. Next check: sentence support map before any judge.
+  Artifact: sentence s1 -> chunk-07 -> supported; sentence s2 -> no chunk -> unsupported, so fail or rewrite s2.
+- Request: "The judge gives everything 100%." Route: validate-evaluator. Evidence: labeled pass/fail cases. Next check: obvious wrong, verbosity-bias, and copied-rubric probes.
+- Request: "We need more edge cases for tool failures." Route: generate-synthetic-data. Evidence: named gap id. Next check: keep generated cases separate from production traces.
+- Judge prompt artifact:
+  Criterion: pass iff every factual sentence has an exact source_references entry.
+  Input: answer text plus source_references with chunk ids and quoted support.
+  Return JSON: sentence_results[{sentence_id, verdict, source_refs, reason}], overall_verdict, failure_reason.
+  Use judge_pass only when every factual sentence is supported; otherwise use judge_semantic_fail, judge_parse_error, or judge_schema_error.
+- SDK scorer command: ./bin/ask sdk eval scorer-quality <skill-path> --preview --json --robot. For release-impacting scorers, follow with ./bin/ask sdk eval scorer-calibration <skill-path> --preview --json --robot.
 
 ## Rules
 
@@ -65,6 +87,10 @@ Full judge template and route checkpoints: `references/route-checklists.md`. Def
 - Prefer deterministic file, schema, regex, command, or artifact checks over LLM judges.
 - Use repo wrappers; do not import external code, schemas, paths, viewer requirements, or agent names.
 - Patch only required eval artifacts, skill sources, traces, prompts, or reports.
-- For stochastic judges, record run count, threshold, raw artifacts, timeout, calibration, scorer id, scorer version or digest, judge parameters, rationale-audit sampling, and segmentation fields.
-- Treat scorer metadata shape as necessary but insufficient; require a held-out calibration artifact bundle when the judge/scorer result is used as behavioral proof.
+- For stochastic judges, record the audit fields named in references/route-checklists.md.
+- Require held-out calibration before using a judge or scorer as behavioral proof.
 - Never invent a score.
+
+## Knowledge Capsules
+
+When deeper eval-method guidance is needed, open references/knowledge-capsule-routing.md, choose one matching capsule, and treat vendored KnowledgeOS files as package evidence rather than a runtime dependency.

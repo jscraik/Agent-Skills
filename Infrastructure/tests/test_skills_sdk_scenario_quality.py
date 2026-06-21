@@ -148,6 +148,24 @@ cases:
         self.assertEqual(payload["cases"][0]["claim_ids"], ["sample.claim"])
         self.assertIsInstance(payload["cases"][0]["deterministic_checks"], dict)
 
+    def test_yaml_fallback_rejects_invalid_scalar_continuation(self) -> None:
+        real_import = __import__
+
+        def import_without_yaml(name: str, *args: object, **kwargs: object) -> object:
+            if name == "yaml":
+                raise ModuleNotFoundError(name)
+            return real_import(name, *args, **kwargs)
+
+        evals_text = """schema_version: '2.0'
+cases:
+- id: invalid-continuation
+  realistic: true
+    continuation
+"""
+        with mock.patch("builtins.__import__", side_effect=import_without_yaml):
+            with self.assertRaises(ValueError):
+                _yaml_safe_load(evals_text)
+
     def test_release_mode_suite_requires_twenty_scenarios(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             skill_dir = _write_skill_with_evals(

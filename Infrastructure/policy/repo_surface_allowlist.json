@@ -63,6 +63,15 @@
       "reason": "Canonical held-out scorer calibration fixture bundle consumed by the Skills SDK scorer-calibration preview gate.",
       "owner": "skills-sdk",
       "review_after": "2026-09-21"
+    },
+    {
+      "id": "teach-scorer-calibration-bundle",
+      "match_type": "prefix",
+      "pattern": "Skills/github/teach/references/scorer-calibration/",
+      "classification": "historical_artifact",
+      "reason": "Canonical held-out scorer calibration fixture bundle consumed by the Skills SDK scorer-calibration preview gate.",
+      "owner": "skills-sdk",
+      "review_after": "2026-09-21"
     }
   ]
 }

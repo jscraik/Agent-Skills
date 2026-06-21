@@ -26,6 +26,7 @@ DECISION_SCHEMA_VERSION = "skills-sdk.ab-judge-decision.v0"
 ALLOWED_WINNERS = ["skill_a", "skill_b", "inconclusive"]
 _EXPERIMENT_ID_RE = re.compile(r"[0-9a-f]{16}")
 _DIMENSION_IDS = {dimension["id"] for dimension in AB_RUBRIC_DIMENSIONS}
+_OLLAMA_CLOUD_ENV_FILE = "/Users/jamiecraik/.codex/.env"
 _DECISION_KEYS = frozenset(
     {
         "schema_version",
@@ -134,14 +135,34 @@ def _run_receipt_header_valid(payload: dict[str, Any]) -> bool:
 
 
 def _run_receipt_identity_valid(payload: dict[str, Any]) -> bool:
-    object_keys = ("skill_a", "skill_b", "fixture", "execution_profile", "judge_profile")
-    return all(_object_field(payload, key) is not None for key in object_keys) and _experiment_id_valid(
-        payload.get("experiment_id")
+    return (
+        _experiment_id_valid(payload.get("experiment_id"))
+        and _skill_identity_valid(_object_field(payload, "skill_a"))
+        and _skill_identity_valid(_object_field(payload, "skill_b"))
+        and _fixture_identity_valid(_object_field(payload, "fixture"))
+        and _profile_identity_valid(_object_field(payload, "execution_profile"))
+        and _profile_identity_valid(_object_field(payload, "judge_profile"))
     )
 
 
 def _experiment_id_valid(value: object) -> bool:
     return isinstance(value, str) and _EXPERIMENT_ID_RE.fullmatch(value) is not None
+
+
+def _skill_identity_valid(value: dict[str, Any] | None) -> bool:
+    return value is not None and _non_empty_string(value.get("package_id")) and _digest_like(value.get("package_digest"))
+
+
+def _fixture_identity_valid(value: dict[str, Any] | None) -> bool:
+    return value is not None and _non_empty_string(value.get("path")) and _digest_like(value.get("digest"))
+
+
+def _profile_identity_valid(value: dict[str, Any] | None) -> bool:
+    return value is not None and _non_empty_string(value.get("id"))
+
+
+def _non_empty_string(value: object) -> bool:
+    return isinstance(value, str) and bool(value.strip())
 
 
 def _run_receipt_variants_valid(payload: dict[str, Any]) -> bool:
@@ -363,8 +384,8 @@ def _selected_score_profile(profile_id: str, blockers: list[str]) -> dict[str, A
     except ValueError:
         blockers.append("judge_profile_unknown")
         return None
-    if profile["id"] != "oss-local":
-        blockers.append("judge_profile_not_local_oss")
+    if profile["provider"] != "ollama" or profile["id"] not in {"oss-local", "oss-cloud"}:
+        blockers.append("judge_profile_not_supported_for_ollama_score")
     return profile
 
 
@@ -516,8 +537,17 @@ def _run_ollama_judge(prompt: str, judge_profile: dict[str, Any], timeout_second
         if not key.startswith("OLLAMA_")
     }
     env["OLLAMA_HOST"] = str(judge_profile["host"])
+    secret_names = [
+        str(name)
+        for name in judge_profile.get("secret_env_names", [])
+        if isinstance(name, str) and name.startswith("OLLAMA_")
+    ]
+    for secret_name in secret_names:
+        if secret_name in os.environ:
+            env[secret_name] = os.environ[secret_name]
+    command = _ollama_judge_command(judge_profile, secret_names)
     completed = subprocess.run(
-        ["ollama", "run", str(judge_profile["model"])],
+        command,
         input=prompt,
         text=True,
         stdout=subprocess.PIPE,
@@ -527,6 +557,14 @@ def _run_ollama_judge(prompt: str, judge_profile: dict[str, Any], timeout_second
         env=env,
     )
     return OllamaJudgeResult(exit_code=completed.returncode, stdout=completed.stdout, stderr=completed.stderr)
+
+
+def _ollama_judge_command(judge_profile: dict[str, Any], secret_names: list[str]) -> list[str]:
+    command = ["ollama", "run", str(judge_profile["model"])]
+    if not secret_names or all(os.environ.get(name) for name in secret_names):
+        return command
+    env_file = os.environ.get("ASK_OLLAMA_CLOUD_ENV_FILE", _OLLAMA_CLOUD_ENV_FILE)
+    return ["op", "run", "--env-file", env_file, "--", *command]
 
 
 def _parse_judge_decision(raw_output: str, comparison_payload: dict[str, Any]) -> tuple[dict[str, Any] | None, str | None]:

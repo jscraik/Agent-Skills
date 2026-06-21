@@ -1,0 +1,21 @@
+{
+  "schema_version": "skills-sdk.scorer-calibration-bundle.v1",
+  "scorer_id": "teach.release-scorer",
+  "scorer_version_or_digest": "teach-evals-yaml-2026-06-22",
+  "prompt_version": "teach-release-scorer.v1",
+  "threshold": 0.9,
+  "split": "held_out",
+  "parameters": {
+    "model": "tessl-live-private",
+    "temperature": 0,
+    "trial_count": 1
+  },
+  "examples_path": "examples.jsonl",
+  "raw_artifacts_dir": "raw",
+  "minimum_examples": 6,
+  "minimum_true_positives": 3,
+  "minimum_true_negatives": 3,
+  "max_false_positives": 0,
+  "max_false_negatives": 0,
+  "notes": "Held-out calibration examples check that the teach scorer rewards mission-grounded learning behavior and catches common false positives before score trends are trusted."
+}

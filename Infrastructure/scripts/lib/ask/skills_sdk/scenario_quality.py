@@ -205,7 +205,8 @@ def _consume_scalar_continuation(state: dict[str, Any], stripped: str, indent: i
     prior = state["current"].get(key)
     if isinstance(prior, str):
         state["current"][key] = f"{prior} {stripped}"
-    return True
+        return True
+    return False
 
 
 def _assign_inline_pair(target: dict[str, Any], item: str) -> None:

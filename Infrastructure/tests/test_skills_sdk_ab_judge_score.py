@@ -20,6 +20,7 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 from ask.skills_sdk.eval_ab_judge import (  # noqa: E402
     OllamaJudgeResult,
     _clear_text_evidence,
+    _ollama_judge_command,
     _run_ollama_judge,
     _score_evidence_paths,
     _write_text_evidence,
@@ -112,6 +113,63 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         self.assertIn("qwen3.5:latest", calls[0])
         self.assertTrue((REPO_ROOT / receipt["judge_output_path"]).is_file())
         validate_ab_judge_score_receipt(receipt)
+
+    def test_builder_scores_with_injected_cloud_judge(self) -> None:
+        calls: list[tuple[str, str, int]] = []
+
+        def fake_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int) -> OllamaJudgeResult:
+            calls.append((prompt, str(judge_profile["model"]), timeout_seconds))
+            run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
+            return OllamaJudgeResult(
+                exit_code=0,
+                stdout=json.dumps(_decision(run_receipt["experiment_id"])),
+                stderr="",
+            )
+
+        receipt = build_ab_judge_score_receipt(
+            REPO_ROOT,
+            run_receipt=RUN_RECEIPT,
+            evidence_root=self.evidence_root,
+            judge_profile_id="oss-cloud",
+            timeout_seconds=12,
+            runner=fake_runner,
+        )
+
+        self.assertEqual(receipt["status"], "scored")
+        self.assertEqual(receipt["judge_profile"]["id"], "oss-cloud")
+        self.assertEqual(receipt["judge_profile"]["model"], "deepseek-v4-flash:cloud")
+        self.assertEqual(receipt["judge_profile"]["secret_env_names"], ["OLLAMA_API_KEY"])
+        self.assertEqual(receipt["decision"]["winner"], "skill_b")
+        self.assertEqual(receipt["blockers"], [])
+        self.assertEqual(len(calls), 1)
+        self.assertIn("deepseek-v4-flash:cloud", calls[0])
+        validate_ab_judge_score_receipt(receipt)
+
+    def test_cli_accepts_cloud_judge_profile_before_execute_gate(self) -> None:
+        proc = subprocess.run(
+            [
+                str(REPO_ROOT / "bin/ask"),
+                "sdk",
+                "eval",
+                "ab-judge-score",
+                "--run-receipt",
+                RUN_RECEIPT,
+                "--judge-profile",
+                "oss-cloud",
+                "--json",
+                "--robot",
+            ],
+            cwd=REPO_ROOT,
+            check=False,
+            text=True,
+            capture_output=True,
+        )
+
+        payload = json.loads(proc.stdout)
+        self.assertEqual(proc.stderr, "")
+        self.assertEqual(payload["status"], "error")
+        self.assertEqual(payload["errors"][0]["code"], "ERR_VALIDATION")
+        self.assertIn("requires --execute", payload["errors"][0]["message"])
 
     def test_builder_blocks_invalid_judge_output(self) -> None:
         def invalid_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int) -> OllamaJudgeResult:
@@ -578,6 +636,61 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         self.assertEqual(captured_env["OLLAMA_HOST"], "http://localhost:11434")
         self.assertNotIn("OLLAMA_API_KEY", captured_env)
         self.assertNotIn("OLLAMA_KEEP_ALIVE", captured_env)
+
+    def test_cloud_ollama_runner_preserves_declared_cloud_auth_only(self) -> None:
+        captured_env: dict[str, str] = {}
+        captured_command: list[str] = []
+
+        def fake_run(args: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
+            captured_command.extend(args)
+            captured_env.update(kwargs["env"])
+            return subprocess.CompletedProcess(args=args, returncode=0, stdout="{}", stderr="")
+
+        with mock.patch.dict(
+            os.environ,
+            {
+                "OLLAMA_HOST": "http://localhost:11434",
+                "OLLAMA_API_KEY": "secret",
+                "OLLAMA_KEEP_ALIVE": "1h",
+            },
+        ):
+            with mock.patch("subprocess.run", side_effect=fake_run):
+                result = _run_ollama_judge(
+                    "prompt",
+                    {
+                        "host": "https://ollama.com",
+                        "model": "deepseek-v4-flash:cloud",
+                        "secret_env_names": ["OLLAMA_API_KEY"],
+                    },
+                    5,
+                )
+
+        self.assertEqual(result.exit_code, 0)
+        self.assertEqual(captured_command, ["ollama", "run", "deepseek-v4-flash:cloud"])
+        self.assertEqual(captured_env["OLLAMA_HOST"], "https://ollama.com")
+        self.assertEqual(captured_env["OLLAMA_API_KEY"], "secret")
+        self.assertNotIn("OLLAMA_KEEP_ALIVE", captured_env)
+
+    def test_cloud_ollama_runner_uses_op_run_env_file_when_secret_missing(self) -> None:
+        with mock.patch.dict(os.environ, {"ASK_OLLAMA_CLOUD_ENV_FILE": "/tmp/codex-test.env"}, clear=True):
+            command = _ollama_judge_command(
+                {"model": "deepseek-v4-flash:cloud"},
+                ["OLLAMA_API_KEY"],
+            )
+
+        self.assertEqual(
+            command,
+            [
+                "op",
+                "run",
+                "--env-file",
+                "/tmp/codex-test.env",
+                "--",
+                "ollama",
+                "run",
+                "deepseek-v4-flash:cloud",
+            ],
+        )
 
 
 if __name__ == "__main__":

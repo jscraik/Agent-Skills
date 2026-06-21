@@ -436,14 +436,43 @@ def progressive_disclosure_reference_paths(body: str) -> list[str]:
     return [raw for raw in body.split("`")[1::2] if raw.startswith("references/")]
 
 
+def package_local_regular_file(skill_md: Path | None, raw_path: str) -> bool:
+    """Return whether a declared package path is a regular file under the skill package."""
+    if not skill_md:
+        return False
+    path = Path(raw_path)
+    if path.is_absolute() or "\\" in raw_path or ".." in path.parts:
+        return False
+    package_root = skill_md.parent
+    candidate = package_root / path
+    if _path_has_symlink_component(package_root, candidate):
+        return False
+    try:
+        candidate.resolve(strict=True).relative_to(package_root.resolve())
+    except (OSError, ValueError):
+        return False
+    return candidate.is_file()
+
+
+def _path_has_symlink_component(root: Path, path: Path) -> bool:
+    try:
+        relative_parts = path.relative_to(root).parts
+    except ValueError:
+        return True
+    current = root
+    for part in relative_parts:
+        current = current / part
+        if current.is_symlink():
+            return True
+    return False
+
+
 def missing_progressive_disclosure_references(
     skill_md: Path | None,
     reference_paths: list[str],
 ) -> list[str]:
     """Return progressive-disclosure references that are absent from the skill package."""
-    if not skill_md:
-        return reference_paths
-    return [raw for raw in reference_paths if not (skill_md.parent / raw).exists()]
+    return [raw for raw in reference_paths if not package_local_regular_file(skill_md, raw)]
 
 
 def progressive_disclosure_contract(
@@ -516,7 +545,8 @@ def structured_reference_has_description(path: Path, text: str) -> bool:
 
 def script_has_description(text: str) -> bool:
     """Return whether script header comments or docstrings describe purpose/usage."""
-    for line in text.splitlines()[:25]:
+    lines = text.splitlines()[:25]
+    for index, line in enumerate(lines):
         stripped = line.strip().lower()
         if not stripped or stripped.startswith("#!"):
             continue
@@ -525,12 +555,24 @@ def script_has_description(text: str) -> bool:
         ):
             return True
         if stripped.startswith(("\"\"\"", "'''")) and any(
-            marker in stripped for marker in ("description", "purpose", "usage")
+            marker in _leading_docstring_text(lines[index:]) for marker in ("description", "purpose", "usage")
         ):
             return True
         if stripped.startswith(("import ", "from ", "print(", "def ", "class ")):
             return False
     return False
+
+
+def _leading_docstring_text(lines: list[str]) -> str:
+    quote = lines[0].strip()[:3]
+    body: list[str] = []
+    for line in lines:
+        body.append(line.strip().lower())
+        if len(body) > 1 and quote in line:
+            break
+        if len(body) == 1 and line.strip().lower().count(quote) >= 2:
+            break
+    return "\n".join(body)
 
 
 def support_file_has_description(path: Path) -> bool:
@@ -556,9 +598,40 @@ def iter_support_files(skill_md: Path | None, folder: str) -> list[Path]:
     if not skill_md:
         return []
     root = skill_md.parent / folder
+    if not root.is_dir() or root.is_symlink():
+        return []
+    return sorted(
+        path
+        for path in root.rglob("*")
+        if package_local_regular_file(skill_md, path.relative_to(skill_md.parent).as_posix())
+    )
+
+
+def unsafe_support_files(skill_md: Path | None, folder: str) -> list[Path]:
+    """Return support paths that must not be read as package evidence."""
+    if not skill_md:
+        return []
+    root = skill_md.parent / folder
+    if root.is_symlink():
+        return [root]
     if not root.is_dir():
         return []
-    return sorted(path for path in root.rglob("*") if path.is_file())
+    return sorted(
+        path
+        for path in root.rglob("*")
+        if path.is_symlink()
+        or (path.is_file() and not package_local_regular_file(skill_md, path.relative_to(skill_md.parent).as_posix()))
+    )
+
+
+def package_path_label(repo_root: Path | None, path: Path) -> str:
+    """Return a repo-relative label without resolving symlink leaves."""
+    if repo_root:
+        try:
+            return path.relative_to(repo_root).as_posix()
+        except ValueError:
+            pass
+    return path.as_posix()
 
 
 def support_file_inventory(
@@ -568,6 +641,7 @@ def support_file_inventory(
 ) -> dict[str, Any]:
     """Return deterministic naming and browseability checks for support files."""
     files = iter_support_files(skill_md, folder)
+    unsafe_paths = unsafe_support_files(skill_md, folder)
     bad_names = [path for path in files if not package_file_stem_ok(path)]
     generic_names = [path for path in files if path.stem.lower() in GENERIC_PACKAGE_FILE_STEMS]
     missing_descriptions = [path for path in files if not support_file_has_description(path)]
@@ -579,8 +653,9 @@ def support_file_inventory(
             repo_relative_path(repo_root, path) or path.as_posix() for path in missing_descriptions
         ],
         "description_coverage_count": len(files) - len(missing_descriptions),
-        "ready": not bad_names and not generic_names and not missing_descriptions,
+        "ready": not unsafe_paths and not bad_names and not generic_names and not missing_descriptions,
         "bad_names": [repo_relative_path(repo_root, path) or path.as_posix() for path in bad_names],
+        "unsafe_paths": [package_path_label(repo_root, path) for path in unsafe_paths],
     }
 
 

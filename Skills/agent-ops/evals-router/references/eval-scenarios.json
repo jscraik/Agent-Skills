@@ -1,0 +1,677 @@
+[
+  {
+    "id": "eval.evals.dashboard-without-error-analysis",
+    "type": "eval-scenario",
+    "title": "Dashboard Without Error Analysis",
+    "status": "draft",
+    "claim_strength": "synthesized",
+    "source_refs": [
+      {
+        "source_id": "sources.books.Evals & Testing.ai_evals_comprehensive_study_guide",
+        "locator": "chapter-15-mistake-1",
+        "boundary": "local_source_reference"
+      }
+    ],
+    "derived_from_claims": [
+      "claim.evals.error-analysis-before-judges",
+      "claim.evals.dimensions-sample-user-space"
+    ],
+    "applies_to": [
+      "evals-testing"
+    ],
+    "used_by": [
+      "pack.evals-testing"
+    ],
+    "source_boundaries": [
+      "local_source_reference"
+    ],
+    "payload": {
+      "given": "A team asks for a generic helpfulness dashboard before reviewing traces or naming product-specific failure modes.",
+      "should": "The testing skill redirects to a bounded trace review, dimensional sample, and failure taxonomy before recommending dashboard metrics.",
+      "expected_failure": "The testing skill designs broad generic metrics and skips failure discovery.",
+      "reproduce_with": "references/evals/eval.evals.dashboard-without-error-analysis.md",
+      "eval_intent": {
+        "capsule_refs": [
+          "evals-testing"
+        ],
+        "knowledge_claim": "The testing skill redirects to a bounded trace review, dimensional sample, and failure taxonomy before recommending dashboard metrics.",
+        "behavior_under_test": "The testing skill redirects to a bounded trace review, dimensional sample, and failure taxonomy before recommending dashboard metrics.",
+        "failure_mode": "The testing skill designs broad generic metrics and skips failure discovery.",
+        "expected_agent_move": "The testing skill redirects to a bounded trace review, dimensional sample, and failure taxonomy before recommending dashboard metrics.",
+        "proof_route": "references/evals.yaml",
+        "fixture_path": "references/evals/eval.evals.dashboard-without-error-analysis.md",
+        "promotion_status": "candidate",
+        "source_trace": {
+          "capsule_id": "evals-testing",
+          "section": "Eval Scenarios",
+          "source_digest": "sha256:0e0b572ed5aca1bb8b981ef3c76256b36de0e627de7bf0a9f3d29b8823b46ad1",
+          "extracted_principle": "The testing skill redirects to a bounded trace review, dimensional sample, and failure taxonomy before recommending dashboard metrics."
+        },
+        "bad_answer_pattern": [
+          "The testing skill designs broad generic metrics and skips failure discovery."
+        ],
+        "good_answer_pattern": [
+          "The testing skill redirects to a bounded trace review, dimensional sample, and failure taxonomy before recommending dashboard metrics."
+        ],
+        "weak_eval_flags": [
+
+        ],
+        "proposed_evals_yaml_case": {
+          "id": "eval.evals.dashboard-without-error-analysis",
+          "unit": "evals-testing",
+          "given": "A team asks for a generic helpfulness dashboard before reviewing traces or naming product-specific failure modes.",
+          "should": "The testing skill redirects to a bounded trace review, dimensional sample, and failure taxonomy before recommending dashboard metrics.",
+          "prompt": "Use the relevant skill guidance to respond to the scenario while preserving KnowledgeOS proof boundaries.",
+          "knowledge_pack": {
+            "scenario_id": "eval.evals.dashboard-without-error-analysis",
+            "fixture": "references/evals/eval.evals.dashboard-without-error-analysis.md",
+            "capsule_refs": [
+              "evals-testing"
+            ]
+          },
+          "acceptance": [
+            {
+              "type": "expected_signal",
+              "value": "The testing skill redirects to a bounded trace review, dimensional sample, and failure taxonomy before recommending dashboard metrics."
+            },
+            {
+              "type": "must_not_claim",
+              "value": "The testing skill designs broad generic metrics and skips failure discovery."
+            }
+          ]
+        },
+        "quality_findings": [
+
+        ],
+        "promotion": {
+          "scenario_status": "candidate",
+          "evals_yaml_status": "proposed",
+          "fixture_status": "present",
+          "tessl_status": "not_run",
+          "proof_status": "not_claimed",
+          "blocked_by": [
+
+          ]
+        },
+        "skill_lift_target": {
+          "before_failure": "The testing skill designs broad generic metrics and skips failure discovery.",
+          "after_behavior": "The testing skill redirects to a bounded trace review, dimensional sample, and failure taxonomy before recommending dashboard metrics.",
+          "observable_delta": "The testing skill redirects to a bounded trace review, dimensional sample, and failure taxonomy before recommending dashboard metrics."
+        }
+      },
+      "capsule_refs": [
+        "evals-testing"
+      ],
+      "knowledge_claim": "The testing skill redirects to a bounded trace review, dimensional sample, and failure taxonomy before recommending dashboard metrics.",
+      "behavior_under_test": "The testing skill redirects to a bounded trace review, dimensional sample, and failure taxonomy before recommending dashboard metrics.",
+      "failure_mode": "The testing skill designs broad generic metrics and skips failure discovery.",
+      "expected_agent_move": "The testing skill redirects to a bounded trace review, dimensional sample, and failure taxonomy before recommending dashboard metrics.",
+      "proof_route": "references/evals.yaml",
+      "fixture_path": "references/evals/eval.evals.dashboard-without-error-analysis.md",
+      "promotion_status": "candidate",
+      "source_trace": {
+        "capsule_id": "evals-testing",
+        "section": "Eval Scenarios",
+        "source_digest": "sha256:0e0b572ed5aca1bb8b981ef3c76256b36de0e627de7bf0a9f3d29b8823b46ad1",
+        "extracted_principle": "The testing skill redirects to a bounded trace review, dimensional sample, and failure taxonomy before recommending dashboard metrics."
+      },
+      "bad_answer_pattern": [
+        "The testing skill designs broad generic metrics and skips failure discovery."
+      ],
+      "good_answer_pattern": [
+        "The testing skill redirects to a bounded trace review, dimensional sample, and failure taxonomy before recommending dashboard metrics."
+      ],
+      "weak_eval_flags": [
+
+      ],
+      "proposed_evals_yaml_case": {
+        "id": "eval.evals.dashboard-without-error-analysis",
+        "unit": "evals-testing",
+        "given": "A team asks for a generic helpfulness dashboard before reviewing traces or naming product-specific failure modes.",
+        "should": "The testing skill redirects to a bounded trace review, dimensional sample, and failure taxonomy before recommending dashboard metrics.",
+        "prompt": "Use the relevant skill guidance to respond to the scenario while preserving KnowledgeOS proof boundaries.",
+        "knowledge_pack": {
+          "scenario_id": "eval.evals.dashboard-without-error-analysis",
+          "fixture": "references/evals/eval.evals.dashboard-without-error-analysis.md",
+          "capsule_refs": [
+            "evals-testing"
+          ]
+        },
+        "acceptance": [
+          {
+            "type": "expected_signal",
+            "value": "The testing skill redirects to a bounded trace review, dimensional sample, and failure taxonomy before recommending dashboard metrics."
+          },
+          {
+            "type": "must_not_claim",
+            "value": "The testing skill designs broad generic metrics and skips failure discovery."
+          }
+        ]
+      },
+      "quality_findings": [
+
+      ],
+      "promotion": {
+        "scenario_status": "candidate",
+        "evals_yaml_status": "proposed",
+        "fixture_status": "present",
+        "tessl_status": "not_run",
+        "proof_status": "not_claimed",
+        "blocked_by": [
+
+        ]
+      },
+      "skill_lift_target": {
+        "before_failure": "The testing skill designs broad generic metrics and skips failure discovery.",
+        "after_behavior": "The testing skill redirects to a bounded trace review, dimensional sample, and failure taxonomy before recommending dashboard metrics.",
+        "observable_delta": "The testing skill redirects to a bounded trace review, dimensional sample, and failure taxonomy before recommending dashboard metrics."
+      }
+    }
+  },
+  {
+    "id": "eval.evals.objective-check-sent-to-judge",
+    "type": "eval-scenario",
+    "title": "Objective Check Sent To Judge",
+    "status": "draft",
+    "claim_strength": "synthesized",
+    "source_refs": [
+      {
+        "source_id": "sources.books.Evals & Testing.ai_evals_comprehensive_study_guide",
+        "locator": "chapter-5-code-based-evaluators",
+        "boundary": "local_source_reference"
+      }
+    ],
+    "derived_from_claims": [
+      "claim.evals.code-evals-are-deterministic",
+      "claim.evals.evals-need-known-good-bad-cases"
+    ],
+    "applies_to": [
+      "evals-testing"
+    ],
+    "used_by": [
+      "pack.evals-testing"
+    ],
+    "source_boundaries": [
+      "local_source_reference"
+    ],
+    "payload": {
+      "given": "A test plan sends JSON schema validity, markdown-in-SMS detection, or required-field presence to an LLM judge.",
+      "should": "The testing skill recommends deterministic code or schema checks and asks for known good and bad evaluator fixtures.",
+      "expected_failure": "The testing skill accepts a judge where a stable parser or assertion would be cheaper and more reliable.",
+      "reproduce_with": "references/evals/eval.evals.objective-check-sent-to-judge.md",
+      "eval_intent": {
+        "capsule_refs": [
+          "evals-testing"
+        ],
+        "knowledge_claim": "The testing skill recommends deterministic code or schema checks and asks for known good and bad evaluator fixtures.",
+        "behavior_under_test": "The testing skill recommends deterministic code or schema checks and asks for known good and bad evaluator fixtures.",
+        "failure_mode": "The testing skill accepts a judge where a stable parser or assertion would be cheaper and more reliable.",
+        "expected_agent_move": "The testing skill recommends deterministic code or schema checks and asks for known good and bad evaluator fixtures.",
+        "proof_route": "references/evals.yaml",
+        "fixture_path": "references/evals/eval.evals.objective-check-sent-to-judge.md",
+        "promotion_status": "candidate",
+        "source_trace": {
+          "capsule_id": "evals-testing",
+          "section": "Eval Scenarios",
+          "source_digest": "sha256:787ca0763aeb5b740ee14195540037f36406b3723c51c7268881bc05736747da",
+          "extracted_principle": "The testing skill recommends deterministic code or schema checks and asks for known good and bad evaluator fixtures."
+        },
+        "bad_answer_pattern": [
+          "The testing skill accepts a judge where a stable parser or assertion would be cheaper and more reliable."
+        ],
+        "good_answer_pattern": [
+          "The testing skill recommends deterministic code or schema checks and asks for known good and bad evaluator fixtures."
+        ],
+        "weak_eval_flags": [
+
+        ],
+        "proposed_evals_yaml_case": {
+          "id": "eval.evals.objective-check-sent-to-judge",
+          "unit": "evals-testing",
+          "given": "A test plan sends JSON schema validity, markdown-in-SMS detection, or required-field presence to an LLM judge.",
+          "should": "The testing skill recommends deterministic code or schema checks and asks for known good and bad evaluator fixtures.",
+          "prompt": "Use the relevant skill guidance to respond to the scenario while preserving KnowledgeOS proof boundaries.",
+          "knowledge_pack": {
+            "scenario_id": "eval.evals.objective-check-sent-to-judge",
+            "fixture": "references/evals/eval.evals.objective-check-sent-to-judge.md",
+            "capsule_refs": [
+              "evals-testing"
+            ]
+          },
+          "acceptance": [
+            {
+              "type": "expected_signal",
+              "value": "The testing skill recommends deterministic code or schema checks and asks for known good and bad evaluator fixtures."
+            },
+            {
+              "type": "must_not_claim",
+              "value": "The testing skill accepts a judge where a stable parser or assertion would be cheaper and more reliable."
+            }
+          ]
+        },
+        "quality_findings": [
+
+        ],
+        "promotion": {
+          "scenario_status": "candidate",
+          "evals_yaml_status": "proposed",
+          "fixture_status": "present",
+          "tessl_status": "not_run",
+          "proof_status": "not_claimed",
+          "blocked_by": [
+
+          ]
+        },
+        "skill_lift_target": {
+          "before_failure": "The testing skill accepts a judge where a stable parser or assertion would be cheaper and more reliable.",
+          "after_behavior": "The testing skill recommends deterministic code or schema checks and asks for known good and bad evaluator fixtures.",
+          "observable_delta": "The testing skill recommends deterministic code or schema checks and asks for known good and bad evaluator fixtures."
+        }
+      },
+      "capsule_refs": [
+        "evals-testing"
+      ],
+      "knowledge_claim": "The testing skill recommends deterministic code or schema checks and asks for known good and bad evaluator fixtures.",
+      "behavior_under_test": "The testing skill recommends deterministic code or schema checks and asks for known good and bad evaluator fixtures.",
+      "failure_mode": "The testing skill accepts a judge where a stable parser or assertion would be cheaper and more reliable.",
+      "expected_agent_move": "The testing skill recommends deterministic code or schema checks and asks for known good and bad evaluator fixtures.",
+      "proof_route": "references/evals.yaml",
+      "fixture_path": "references/evals/eval.evals.objective-check-sent-to-judge.md",
+      "promotion_status": "candidate",
+      "source_trace": {
+        "capsule_id": "evals-testing",
+        "section": "Eval Scenarios",
+        "source_digest": "sha256:787ca0763aeb5b740ee14195540037f36406b3723c51c7268881bc05736747da",
+        "extracted_principle": "The testing skill recommends deterministic code or schema checks and asks for known good and bad evaluator fixtures."
+      },
+      "bad_answer_pattern": [
+        "The testing skill accepts a judge where a stable parser or assertion would be cheaper and more reliable."
+      ],
+      "good_answer_pattern": [
+        "The testing skill recommends deterministic code or schema checks and asks for known good and bad evaluator fixtures."
+      ],
+      "weak_eval_flags": [
+
+      ],
+      "proposed_evals_yaml_case": {
+        "id": "eval.evals.objective-check-sent-to-judge",
+        "unit": "evals-testing",
+        "given": "A test plan sends JSON schema validity, markdown-in-SMS detection, or required-field presence to an LLM judge.",
+        "should": "The testing skill recommends deterministic code or schema checks and asks for known good and bad evaluator fixtures.",
+        "prompt": "Use the relevant skill guidance to respond to the scenario while preserving KnowledgeOS proof boundaries.",
+        "knowledge_pack": {
+          "scenario_id": "eval.evals.objective-check-sent-to-judge",
+          "fixture": "references/evals/eval.evals.objective-check-sent-to-judge.md",
+          "capsule_refs": [
+            "evals-testing"
+          ]
+        },
+        "acceptance": [
+          {
+            "type": "expected_signal",
+            "value": "The testing skill recommends deterministic code or schema checks and asks for known good and bad evaluator fixtures."
+          },
+          {
+            "type": "must_not_claim",
+            "value": "The testing skill accepts a judge where a stable parser or assertion would be cheaper and more reliable."
+          }
+        ]
+      },
+      "quality_findings": [
+
+      ],
+      "promotion": {
+        "scenario_status": "candidate",
+        "evals_yaml_status": "proposed",
+        "fixture_status": "present",
+        "tessl_status": "not_run",
+        "proof_status": "not_claimed",
+        "blocked_by": [
+
+        ]
+      },
+      "skill_lift_target": {
+        "before_failure": "The testing skill accepts a judge where a stable parser or assertion would be cheaper and more reliable.",
+        "after_behavior": "The testing skill recommends deterministic code or schema checks and asks for known good and bad evaluator fixtures.",
+        "observable_delta": "The testing skill recommends deterministic code or schema checks and asks for known good and bad evaluator fixtures."
+      }
+    }
+  },
+  {
+    "id": "eval.evals.unvalidated-judge-overclaims",
+    "type": "eval-scenario",
+    "title": "Unvalidated Judge Overclaims",
+    "status": "draft",
+    "claim_strength": "synthesized",
+    "source_refs": [
+      {
+        "source_id": "sources.books.Evals & Testing.ai_evals_comprehensive_study_guide",
+        "locator": "chapter-15-mistakes-2-7-11",
+        "boundary": "local_source_reference"
+      }
+    ],
+    "derived_from_claims": [
+      "claim.evals.judge-validation-needs-tpr-tnr",
+      "claim.evals.corrected-rates-need-intervals"
+    ],
+    "applies_to": [
+      "evals-testing"
+    ],
+    "used_by": [
+      "pack.evals-testing"
+    ],
+    "source_boundaries": [
+      "local_source_reference"
+    ],
+    "payload": {
+      "given": "A plan proposes an LLM judge and reports a high agreement score without held-out test results, false-positive/false-negative counts, or prompt/version artifacts.",
+      "should": "The testing skill classifies the judge result as advisory or blocked for release proof and asks for calibration evidence before using it as a required gate.",
+      "expected_failure": "The testing skill accepts the agreement score as sufficient validation.",
+      "reproduce_with": "references/evals/eval.evals.unvalidated-judge-overclaims.md",
+      "eval_intent": {
+        "capsule_refs": [
+          "evals-testing"
+        ],
+        "knowledge_claim": "The testing skill classifies the judge result as advisory or blocked for release proof and asks for calibration evidence before using it as a required gate.",
+        "behavior_under_test": "The testing skill classifies the judge result as advisory or blocked for release proof and asks for calibration evidence before using it as a required gate.",
+        "failure_mode": "The testing skill accepts the agreement score as sufficient validation.",
+        "expected_agent_move": "The testing skill classifies the judge result as advisory or blocked for release proof and asks for calibration evidence before using it as a required gate.",
+        "proof_route": "references/evals.yaml",
+        "fixture_path": "references/evals/eval.evals.unvalidated-judge-overclaims.md",
+        "promotion_status": "candidate",
+        "source_trace": {
+          "capsule_id": "evals-testing",
+          "section": "Eval Scenarios",
+          "source_digest": "sha256:5f127fe38880f7927bd2a224c4714bd6930ccadd70a80332aa79a853fd1feafc",
+          "extracted_principle": "The testing skill classifies the judge result as advisory or blocked for release proof and asks for calibration evidence before using it as a required gate."
+        },
+        "bad_answer_pattern": [
+          "The testing skill accepts the agreement score as sufficient validation."
+        ],
+        "good_answer_pattern": [
+          "The testing skill classifies the judge result as advisory or blocked for release proof and asks for calibration evidence before using it as a required gate."
+        ],
+        "weak_eval_flags": [
+
+        ],
+        "proposed_evals_yaml_case": {
+          "id": "eval.evals.unvalidated-judge-overclaims",
+          "unit": "evals-testing",
+          "given": "A plan proposes an LLM judge and reports a high agreement score without held-out test results, false-positive/false-negative counts, or prompt/version artifacts.",
+          "should": "The testing skill classifies the judge result as advisory or blocked for release proof and asks for calibration evidence before using it as a required gate.",
+          "prompt": "Use the relevant skill guidance to respond to the scenario while preserving KnowledgeOS proof boundaries.",
+          "knowledge_pack": {
+            "scenario_id": "eval.evals.unvalidated-judge-overclaims",
+            "fixture": "references/evals/eval.evals.unvalidated-judge-overclaims.md",
+            "capsule_refs": [
+              "evals-testing"
+            ]
+          },
+          "acceptance": [
+            {
+              "type": "expected_signal",
+              "value": "The testing skill classifies the judge result as advisory or blocked for release proof and asks for calibration evidence before using it as a required gate."
+            },
+            {
+              "type": "must_not_claim",
+              "value": "The testing skill accepts the agreement score as sufficient validation."
+            }
+          ]
+        },
+        "quality_findings": [
+
+        ],
+        "promotion": {
+          "scenario_status": "candidate",
+          "evals_yaml_status": "proposed",
+          "fixture_status": "present",
+          "tessl_status": "not_run",
+          "proof_status": "not_claimed",
+          "blocked_by": [
+
+          ]
+        },
+        "skill_lift_target": {
+          "before_failure": "The testing skill accepts the agreement score as sufficient validation.",
+          "after_behavior": "The testing skill classifies the judge result as advisory or blocked for release proof and asks for calibration evidence before using it as a required gate.",
+          "observable_delta": "The testing skill classifies the judge result as advisory or blocked for release proof and asks for calibration evidence before using it as a required gate."
+        }
+      },
+      "capsule_refs": [
+        "evals-testing"
+      ],
+      "knowledge_claim": "The testing skill classifies the judge result as advisory or blocked for release proof and asks for calibration evidence before using it as a required gate.",
+      "behavior_under_test": "The testing skill classifies the judge result as advisory or blocked for release proof and asks for calibration evidence before using it as a required gate.",
+      "failure_mode": "The testing skill accepts the agreement score as sufficient validation.",
+      "expected_agent_move": "The testing skill classifies the judge result as advisory or blocked for release proof and asks for calibration evidence before using it as a required gate.",
+      "proof_route": "references/evals.yaml",
+      "fixture_path": "references/evals/eval.evals.unvalidated-judge-overclaims.md",
+      "promotion_status": "candidate",
+      "source_trace": {
+        "capsule_id": "evals-testing",
+        "section": "Eval Scenarios",
+        "source_digest": "sha256:5f127fe38880f7927bd2a224c4714bd6930ccadd70a80332aa79a853fd1feafc",
+        "extracted_principle": "The testing skill classifies the judge result as advisory or blocked for release proof and asks for calibration evidence before using it as a required gate."
+      },
+      "bad_answer_pattern": [
+        "The testing skill accepts the agreement score as sufficient validation."
+      ],
+      "good_answer_pattern": [
+        "The testing skill classifies the judge result as advisory or blocked for release proof and asks for calibration evidence before using it as a required gate."
+      ],
+      "weak_eval_flags": [
+
+      ],
+      "proposed_evals_yaml_case": {
+        "id": "eval.evals.unvalidated-judge-overclaims",
+        "unit": "evals-testing",
+        "given": "A plan proposes an LLM judge and reports a high agreement score without held-out test results, false-positive/false-negative counts, or prompt/version artifacts.",
+        "should": "The testing skill classifies the judge result as advisory or blocked for release proof and asks for calibration evidence before using it as a required gate.",
+        "prompt": "Use the relevant skill guidance to respond to the scenario while preserving KnowledgeOS proof boundaries.",
+        "knowledge_pack": {
+          "scenario_id": "eval.evals.unvalidated-judge-overclaims",
+          "fixture": "references/evals/eval.evals.unvalidated-judge-overclaims.md",
+          "capsule_refs": [
+            "evals-testing"
+          ]
+        },
+        "acceptance": [
+          {
+            "type": "expected_signal",
+            "value": "The testing skill classifies the judge result as advisory or blocked for release proof and asks for calibration evidence before using it as a required gate."
+          },
+          {
+            "type": "must_not_claim",
+            "value": "The testing skill accepts the agreement score as sufficient validation."
+          }
+        ]
+      },
+      "quality_findings": [
+
+      ],
+      "promotion": {
+        "scenario_status": "candidate",
+        "evals_yaml_status": "proposed",
+        "fixture_status": "present",
+        "tessl_status": "not_run",
+        "proof_status": "not_claimed",
+        "blocked_by": [
+
+        ]
+      },
+      "skill_lift_target": {
+        "before_failure": "The testing skill accepts the agreement score as sufficient validation.",
+        "after_behavior": "The testing skill classifies the judge result as advisory or blocked for release proof and asks for calibration evidence before using it as a required gate.",
+        "observable_delta": "The testing skill classifies the judge result as advisory or blocked for release proof and asks for calibration evidence before using it as a required gate."
+      }
+    }
+  },
+  {
+    "id": "eval.evals.score-without-action",
+    "type": "eval-scenario",
+    "title": "Score Without Action",
+    "status": "draft",
+    "claim_strength": "synthesized",
+    "source_refs": [
+      {
+        "source_id": "sources.books.Evals & Testing.ai_evals_comprehensive_study_guide",
+        "locator": "chapter-11-measuring-without-acting",
+        "boundary": "local_source_reference"
+      }
+    ],
+    "derived_from_claims": [
+      "claim.evals.evals-close-loop"
+    ],
+    "applies_to": [
+      "evals-testing"
+    ],
+    "used_by": [
+      "pack.evals-testing"
+    ],
+    "source_boundaries": [
+      "local_source_reference"
+    ],
+    "payload": {
+      "given": "An eval run produces a score and failure list, but the closeout does not identify root cause, fix path, rerun command, or retained regression case.",
+      "should": "The testing skill reports the score as incomplete proof and asks for the improvement loop evidence before claiming behavior improved.",
+      "expected_failure": "The testing skill treats the score alone as completion evidence.",
+      "reproduce_with": "references/evals/eval.evals.score-without-action.md",
+      "eval_intent": {
+        "capsule_refs": [
+          "evals-testing"
+        ],
+        "knowledge_claim": "The testing skill reports the score as incomplete proof and asks for the improvement loop evidence before claiming behavior improved.",
+        "behavior_under_test": "The testing skill reports the score as incomplete proof and asks for the improvement loop evidence before claiming behavior improved.",
+        "failure_mode": "The testing skill treats the score alone as completion evidence.",
+        "expected_agent_move": "The testing skill reports the score as incomplete proof and asks for the improvement loop evidence before claiming behavior improved.",
+        "proof_route": "references/evals.yaml",
+        "fixture_path": "references/evals/eval.evals.score-without-action.md",
+        "promotion_status": "candidate",
+        "source_trace": {
+          "capsule_id": "evals-testing",
+          "section": "Eval Scenarios",
+          "source_digest": "sha256:84c613c1adb9f98a9a285ccf3d306894f2dbace8994744476940ca12dd207283",
+          "extracted_principle": "The testing skill reports the score as incomplete proof and asks for the improvement loop evidence before claiming behavior improved."
+        },
+        "bad_answer_pattern": [
+          "The testing skill treats the score alone as completion evidence."
+        ],
+        "good_answer_pattern": [
+          "The testing skill reports the score as incomplete proof and asks for the improvement loop evidence before claiming behavior improved."
+        ],
+        "weak_eval_flags": [
+
+        ],
+        "proposed_evals_yaml_case": {
+          "id": "eval.evals.score-without-action",
+          "unit": "evals-testing",
+          "given": "An eval run produces a score and failure list, but the closeout does not identify root cause, fix path, rerun command, or retained regression case.",
+          "should": "The testing skill reports the score as incomplete proof and asks for the improvement loop evidence before claiming behavior improved.",
+          "prompt": "Use the relevant skill guidance to respond to the scenario while preserving KnowledgeOS proof boundaries.",
+          "knowledge_pack": {
+            "scenario_id": "eval.evals.score-without-action",
+            "fixture": "references/evals/eval.evals.score-without-action.md",
+            "capsule_refs": [
+              "evals-testing"
+            ]
+          },
+          "acceptance": [
+            {
+              "type": "expected_signal",
+              "value": "The testing skill reports the score as incomplete proof and asks for the improvement loop evidence before claiming behavior improved."
+            },
+            {
+              "type": "must_not_claim",
+              "value": "The testing skill treats the score alone as completion evidence."
+            }
+          ]
+        },
+        "quality_findings": [
+
+        ],
+        "promotion": {
+          "scenario_status": "candidate",
+          "evals_yaml_status": "proposed",
+          "fixture_status": "present",
+          "tessl_status": "not_run",
+          "proof_status": "not_claimed",
+          "blocked_by": [
+
+          ]
+        },
+        "skill_lift_target": {
+          "before_failure": "The testing skill treats the score alone as completion evidence.",
+          "after_behavior": "The testing skill reports the score as incomplete proof and asks for the improvement loop evidence before claiming behavior improved.",
+          "observable_delta": "The testing skill reports the score as incomplete proof and asks for the improvement loop evidence before claiming behavior improved."
+        }
+      },
+      "capsule_refs": [
+        "evals-testing"
+      ],
+      "knowledge_claim": "The testing skill reports the score as incomplete proof and asks for the improvement loop evidence before claiming behavior improved.",
+      "behavior_under_test": "The testing skill reports the score as incomplete proof and asks for the improvement loop evidence before claiming behavior improved.",
+      "failure_mode": "The testing skill treats the score alone as completion evidence.",
+      "expected_agent_move": "The testing skill reports the score as incomplete proof and asks for the improvement loop evidence before claiming behavior improved.",
+      "proof_route": "references/evals.yaml",
+      "fixture_path": "references/evals/eval.evals.score-without-action.md",
+      "promotion_status": "candidate",
+      "source_trace": {
+        "capsule_id": "evals-testing",
+        "section": "Eval Scenarios",
+        "source_digest": "sha256:84c613c1adb9f98a9a285ccf3d306894f2dbace8994744476940ca12dd207283",
+        "extracted_principle": "The testing skill reports the score as incomplete proof and asks for the improvement loop evidence before claiming behavior improved."
+      },
+      "bad_answer_pattern": [
+        "The testing skill treats the score alone as completion evidence."
+      ],
+      "good_answer_pattern": [
+        "The testing skill reports the score as incomplete proof and asks for the improvement loop evidence before claiming behavior improved."
+      ],
+      "weak_eval_flags": [
+
+      ],
+      "proposed_evals_yaml_case": {
+        "id": "eval.evals.score-without-action",
+        "unit": "evals-testing",
+        "given": "An eval run produces a score and failure list, but the closeout does not identify root cause, fix path, rerun command, or retained regression case.",
+        "should": "The testing skill reports the score as incomplete proof and asks for the improvement loop evidence before claiming behavior improved.",
+        "prompt": "Use the relevant skill guidance to respond to the scenario while preserving KnowledgeOS proof boundaries.",
+        "knowledge_pack": {
+          "scenario_id": "eval.evals.score-without-action",
+          "fixture": "references/evals/eval.evals.score-without-action.md",
+          "capsule_refs": [
+            "evals-testing"
+          ]
+        },
+        "acceptance": [
+          {
+            "type": "expected_signal",
+            "value": "The testing skill reports the score as incomplete proof and asks for the improvement loop evidence before claiming behavior improved."
+          },
+          {
+            "type": "must_not_claim",
+            "value": "The testing skill treats the score alone as completion evidence."
+          }
+        ]
+      },
+      "quality_findings": [
+
+      ],
+      "promotion": {
+        "scenario_status": "candidate",
+        "evals_yaml_status": "proposed",
+        "fixture_status": "present",
+        "tessl_status": "not_run",
+        "proof_status": "not_claimed",
+        "blocked_by": [
+
+        ]
+      },
+      "skill_lift_target": {
+        "before_failure": "The testing skill treats the score alone as completion evidence.",
+        "after_behavior": "The testing skill reports the score as incomplete proof and asks for the improvement loop evidence before claiming behavior improved.",
+        "observable_delta": "The testing skill reports the score as incomplete proof and asks for the improvement loop evidence before claiming behavior improved."
+      }
+    }
+  }
+]

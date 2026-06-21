@@ -1,4 +1,5 @@
 import json
+import os
 import sys
 import tempfile
 import unittest
@@ -906,6 +907,42 @@ description: Missing reference fixture.
         )
         self.assertFalse(progressive["progressive_disclosure_ready"])
 
+    def test_sdk_contract_rejects_progressive_paths_outside_package(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "escape-ref-skill"
+            references_dir = skill_dir / "references"
+            references_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: escape-ref-skill
+description: Escape reference fixture.
+---
+
+# Escape Reference Skill
+
+## Progressive Disclosure
+
+- Read `references/../outside.md` for task-specific detail.
+""",
+                encoding="utf-8",
+            )
+            (skill_dir / "outside.md").write_text("# Outside\n", encoding="utf-8")
+
+            contract = package_contracts.sdk_package_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+            )
+
+        progressive = contract["progressive_disclosure"]
+        self.assertEqual(
+            progressive["progressive_disclosure_missing_references"],
+            ["references/../outside.md"],
+        )
+        self.assertFalse(progressive["progressive_disclosure_ready"])
+
     def test_sdk_contract_reports_identity_and_asset_browseability(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir)
@@ -952,6 +989,74 @@ short_description: Check skill package identity
         self.assertTrue(identity["skill_identity"]["description_has_action_term"])
         self.assertTrue(identity["reference_inventory"]["ready"])
         self.assertTrue(identity["script_inventory"]["ready"])
+
+    def test_sdk_contract_accepts_multiline_script_docstring_description(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "script-docstring-skill"
+            scripts_dir = skill_dir / "scripts"
+            scripts_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: script-docstring-skill
+description: Create reliable script description checks for package validation.
+---
+
+# Script Docstring Skill
+""",
+                encoding="utf-8",
+            )
+            (scripts_dir / "run-checks.py").write_text(
+                "\"\"\"\nPurpose: run the package script fixture check.\n\"\"\"\nprint('ok')\n",
+                encoding="utf-8",
+            )
+
+            contract = package_contracts.sdk_package_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+            )
+
+        scripts = contract["identity_and_assets"]["script_inventory"]
+        self.assertTrue(scripts["ready"])
+        self.assertEqual(scripts["missing_descriptions"], [])
+
+    @unittest.skipUnless(hasattr(os, "symlink"), "symlink support required")
+    def test_sdk_contract_blocks_symlinked_support_files_without_reading(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "symlink-support-skill"
+            references_dir = skill_dir / "references"
+            references_dir.mkdir(parents=True)
+            outside = repo_root / "outside.md"
+            outside.write_text("# Outside\n", encoding="utf-8")
+            (references_dir / "outside-link.md").symlink_to(outside)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: symlink-support-skill
+description: Create reliable symlink blocking checks for package validation.
+---
+
+# Symlink Support Skill
+""",
+                encoding="utf-8",
+            )
+
+            contract = package_contracts.sdk_package_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+            )
+
+        references = contract["identity_and_assets"]["reference_inventory"]
+        self.assertFalse(references["ready"])
+        self.assertEqual(references["count"], 0)
+        self.assertIn(
+            "Skills/agent-ops/symlink-support-skill/references/outside-link.md",
+            references["unsafe_paths"],
+        )
 
     def test_sdk_contract_reports_identity_and_asset_drift(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

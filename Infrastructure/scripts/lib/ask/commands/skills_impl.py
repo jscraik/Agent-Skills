@@ -4940,6 +4940,8 @@ def skills_sdk_eval_scorer_quality(repo_root: Path, target: str) -> CallResult:
         "agent_summary": receipt["agent_summary"],
     }
     result.data["skills_sdk_eval_scorer_quality"] = payload
+    if receipt["status"] == "blocked":
+        result.status = "error"
     return result
 
 
@@ -5386,7 +5388,7 @@ def skills_sdk_eval_ab_judge_score(
     judge_profile: str = "oss-local",
     timeout_seconds: int = 300,
 ) -> CallResult:
-    """Invoke local Ollama A/B judge scoring and emit advisory decision evidence."""
+    """Invoke Ollama A/B judge scoring and emit advisory decision evidence."""
     result = CallResult()
     result.metadata["command"] = "sdk eval ab-judge-score --execute"
     receipt = _build_ab_judge_score_receipt(
@@ -5428,7 +5430,7 @@ def skills_sdk_eval_ab_judge_score(
                 code="ERR_VALIDATION",
                 message=receipt["agent_summary"],
                 fix_suggestion=(
-                    "Provide a completed ab-run receipt and a local Ollama qwen3.5:latest runtime before "
+                    "Provide a completed ab-run receipt and the selected Ollama judge runtime before "
                     "running ask sdk eval ab-judge-score."
                 ),
             )

@@ -1,0 +1,7 @@
+{
+  "id": "teach-cal-fail-rubric-copying",
+  "predicted_label": "fail",
+  "score": 0.08,
+  "rationale": "The response repeats words like mission, retrieval, and record without creating or verifying any learning artifact.",
+  "expected_behavior": "Rubric terms are insufficient without concrete artifact evidence."
+}

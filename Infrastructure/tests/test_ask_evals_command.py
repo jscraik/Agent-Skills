@@ -2124,6 +2124,29 @@ def test_tessl_run_budget_preflight_blocks_when_eval_list_unavailable(tmp_path: 
     assert preflight["capacity_source"] == "unavailable_eval_list"
 
 
+def test_tessl_run_budget_preflight_falls_back_when_limit_is_unsupported(tmp_path: Path) -> None:
+    calls: list[list[str]] = []
+
+    def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
+        calls.append(cmd)
+        if "--limit" in cmd:
+            return mock.Mock(returncode=1, stdout="", stderr="unknown option --limit", args=cmd)
+        return mock.Mock(returncode=0, stdout=json.dumps({"data": [{"id": "run-1"}]}), stderr="", args=cmd)
+
+    with mock.patch.object(evals.subprocess, "run", side_effect=fake_run):
+        preflight = evals._tessl_run_budget_preflight(
+            "/usr/local/bin/tessl",
+            "skills-sdk",
+            tmp_path,
+            {},
+        )
+
+    assert preflight["status"] == "pass"
+    assert "--limit" in calls[0]
+    assert "--limit" not in calls[1]
+    assert preflight["used_runs"] == 1
+
+
 def test_tessl_eval_list_count_rejects_error_payload_lists() -> None:
     payload = {
         "status": "error",
@@ -2218,6 +2241,30 @@ def test_tessl_pending_run_preflight_blocks_unparseable_history(tmp_path: Path) 
     assert preflight["status"] == "blocked"
     assert preflight["blocker_class"] == "blocked_validation"
     assert "could not parse run history" in preflight["blocker"]
+
+
+def test_tessl_pending_run_preflight_falls_back_when_limit_is_unsupported(tmp_path: Path) -> None:
+    calls: list[list[str]] = []
+
+    def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
+        calls.append(cmd)
+        if "--limit" in cmd:
+            return mock.Mock(returncode=1, stdout="", stderr="unknown option --limit", args=cmd)
+        return mock.Mock(returncode=0, stdout=json.dumps({"data": []}), stderr="", args=cmd)
+
+    with mock.patch.object(evals.subprocess, "run", side_effect=fake_run):
+        preflight = evals._tessl_pending_run_preflight(
+            "/usr/local/bin/tessl",
+            "skills-sdk",
+            "teach",
+            tmp_path,
+            {},
+        )
+
+    assert preflight["status"] == "pass"
+    assert "--limit" in calls[0]
+    assert "--limit" not in calls[1]
+    assert preflight["pending_eval_run_ids"] == []
 
 
 def test_tessl_run_budget_preflight_blocks_at_reserve(tmp_path: Path) -> None:

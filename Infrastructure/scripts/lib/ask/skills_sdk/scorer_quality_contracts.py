@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -14,7 +14,11 @@ class ScorerQualityCheck(_ScorerQualityModel):
     status: Literal["pass", "blocker"]
     severity: Literal["blocker"]
     message: str = Field(min_length=1)
-    evidence: list[str]
+    evidence: list[Annotated[str, Field(min_length=1)]]
+
+
+class ScorerQualityBlockerCheck(ScorerQualityCheck):
+    status: Literal["blocker"]
 
 
 class ScorerQualityParameters(_ScorerQualityModel):
@@ -85,7 +89,7 @@ class ScorerQualityReceipt(_ScorerQualityModel):
     evals_path: str = Field(min_length=1)
     ready: bool
     quality_checks: list[ScorerQualityCheck] = Field(min_length=1)
-    blockers: list[ScorerQualityCheck]
+    blockers: list[ScorerQualityBlockerCheck]
     mutation_performed: Literal[False]
     promotion_performed: Literal[False]
     acceptance_trace: list[Literal["Braintrust scorer validation", "PU-030", "VP-030"]] = Field(min_length=1)

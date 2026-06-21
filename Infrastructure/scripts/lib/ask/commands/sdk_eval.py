@@ -116,11 +116,11 @@ def _add_ab_judge_preview_parser(subparsers: argparse._SubParsersAction, global_
 
 
 def _add_ab_judge_score_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
-    score = subparsers.add_parser("ab-judge-score", help="Run local Ollama scoring for a completed A/B eval", parents=[global_parser])
+    score = subparsers.add_parser("ab-judge-score", help="Run Ollama scoring for a completed A/B eval", parents=[global_parser])
     score.add_argument("--run-receipt", required=True, help="Repo-relative completed ab-run receipt JSON")
     score.add_argument("--evidence-root", default=".harness/artifacts/sdk-ab-judges")
-    score.add_argument("--judge-profile", choices=("oss-local",), default="oss-local")
-    score.add_argument("--timeout-seconds", type=_positive_int, default=300, help="Timeout for the local judge provider.")
+    score.add_argument("--judge-profile", choices=("oss-local", "oss-cloud"), default="oss-local")
+    score.add_argument("--timeout-seconds", type=_positive_int, default=300, help="Timeout for the judge provider.")
     score.add_argument("--execute", action="store_true", help="Required explicit gate before invoking the judge provider.")
 
 

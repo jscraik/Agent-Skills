@@ -2410,26 +2410,8 @@ def _tessl_pending_run_preflight(
     staged_root: Path,
     env: dict[str, str],
 ) -> dict[str, object]:
-    command = [
-        tessl_path,
-        "eval",
-        "list",
-        "--json",
-        "--workspace",
-        workspace,
-        "--limit",
-        "300",
-    ]
-    command_text = " ".join(shlex.quote(str(part)) for part in command)
     try:
-        process = subprocess.run(
-            command,
-            cwd=str(staged_root),
-            capture_output=True,
-            text=True,
-            timeout=TESSL_PROJECT_LINK_TIMEOUT_SECONDS,
-            env=env,
-        )
+        process, command_text = _run_tessl_eval_list_for_workspace(tessl_path, workspace, staged_root, env)
     except subprocess.TimeoutExpired as exc:
         return {
             "status": "blocked",
@@ -2520,31 +2502,14 @@ def _tessl_run_budget_preflight(
     staged_root: Path,
     env: dict[str, str],
 ) -> dict[str, object]:
-    command = [
-        tessl_path,
-        "eval",
-        "list",
-        "--json",
-        "--workspace",
-        workspace,
-        "--limit",
-        str(TESSL_WORKSPACE_RUN_LIMIT),
-    ]
     try:
-        process = subprocess.run(
-            command,
-            cwd=str(staged_root),
-            capture_output=True,
-            text=True,
-            timeout=TESSL_PROJECT_LINK_TIMEOUT_SECONDS,
-            env=env,
-        )
+        process, command_text = _run_tessl_eval_list_for_workspace(tessl_path, workspace, staged_root, env)
     except subprocess.TimeoutExpired as exc:
         return {
             "status": "blocked",
             "blocker_class": "blocked_runtime",
             "blocker": "Tessl workspace run-budget preflight timed out before live scoring.",
-            "command": " ".join(shlex.quote(str(part)) for part in command),
+            "command": _tessl_eval_list_command_text(tessl_path, workspace, with_limit=True),
             "raw_output": _as_text(exc.stdout),
             "raw_error": _as_text(exc.stderr),
         }
@@ -2553,12 +2518,11 @@ def _tessl_run_budget_preflight(
             "status": "blocked",
             "blocker_class": "blocked_runtime",
             "blocker": f"Failed to run Tessl workspace run-budget preflight: {exc}",
-            "command": " ".join(shlex.quote(str(part)) for part in command),
+            "command": _tessl_eval_list_command_text(tessl_path, workspace, with_limit=True),
             "raw_output": "",
             "raw_error": str(exc),
         }
 
-    command_text = " ".join(shlex.quote(str(part)) for part in command)
     if blocker := _tessl_signal_blocker(process, lane="eval list run-budget preflight"):
         return {
             "status": "blocked",
@@ -2641,6 +2605,54 @@ def _tessl_run_budget_preflight(
         "used_runs": used_runs,
         "remaining_runs": remaining_runs,
     }
+
+
+def _tessl_eval_list_command(tessl_path: str, workspace: str, *, with_limit: bool) -> list[str]:
+    command = [tessl_path, "eval", "list", "--json", "--workspace", workspace]
+    if with_limit:
+        command.extend(["--limit", str(TESSL_WORKSPACE_RUN_LIMIT)])
+    return command
+
+
+def _tessl_eval_list_command_text(tessl_path: str, workspace: str, *, with_limit: bool) -> str:
+    return " ".join(shlex.quote(str(part)) for part in _tessl_eval_list_command(tessl_path, workspace, with_limit=with_limit))
+
+
+def _run_tessl_eval_list_for_workspace(
+    tessl_path: str,
+    workspace: str,
+    staged_root: Path,
+    env: dict[str, str],
+) -> tuple[subprocess.CompletedProcess[str], str]:
+    first_command = _tessl_eval_list_command(tessl_path, workspace, with_limit=True)
+    process = subprocess.run(
+        first_command,
+        cwd=str(staged_root),
+        capture_output=True,
+        text=True,
+        timeout=TESSL_PROJECT_LINK_TIMEOUT_SECONDS,
+        env=env,
+    )
+    if process.returncode == 0:
+        return process, " ".join(shlex.quote(str(part)) for part in first_command)
+
+    fallback_command = _tessl_eval_list_command(tessl_path, workspace, with_limit=False)
+    fallback_process = subprocess.run(
+        fallback_command,
+        cwd=str(staged_root),
+        capture_output=True,
+        text=True,
+        timeout=TESSL_PROJECT_LINK_TIMEOUT_SECONDS,
+        env=env,
+    )
+    fallback_text = " ".join(shlex.quote(str(part)) for part in fallback_command)
+    if fallback_process.returncode == 0:
+        fallback_process.stdout = (
+            fallback_process.stdout
+            + "\n"
+            + json.dumps({"fallback_from": " ".join(shlex.quote(str(part)) for part in first_command)})
+        )
+    return fallback_process, fallback_text
 
 
 def _tessl_live_private_eval_run_command(

@@ -45,7 +45,8 @@ def _repo_relative(repo_root: Path, path: Path) -> str:
 
 
 def _check(check_id: str, status: str, message: str, evidence: list[str] | None = None) -> dict[str, Any]:
-    return {"id": check_id, "status": status, "severity": "blocker", "message": message, "evidence": evidence or []}
+    clean_evidence = [item for item in (evidence or []) if item]
+    return {"id": check_id, "status": status, "severity": "blocker", "message": message, "evidence": clean_evidence}
 
 
 def _yaml_safe_load(text: str) -> Any:
