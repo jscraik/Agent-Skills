@@ -22,6 +22,8 @@ def add_sdk_eval_parser(
     _add_run_parser(subparsers, global_parser)
     _add_scenario_quality_parser(subparsers, global_parser)
     _add_scorer_quality_parser(subparsers, global_parser)
+    _add_scorer_calibration_parser(subparsers, global_parser)
+    _add_tessl_score_parser(subparsers, global_parser)
     _add_profiles_parser(subparsers, global_parser)
     _add_ab_rubric_parser(subparsers, global_parser)
     _add_ab_preview_parser(subparsers, global_parser)
@@ -52,6 +54,20 @@ def _add_scorer_quality_parser(subparsers: argparse._SubParsersAction, global_pa
     quality = subparsers.add_parser("scorer-quality", help="Preview eval scorer calibration quality", parents=[global_parser])
     quality.add_argument("target", help="Skill handle or repo-relative skill source path")
     quality.add_argument("--preview", action="store_true", help="Emit a non-mutating scorer quality receipt")
+
+
+def _add_scorer_calibration_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
+    calibration = subparsers.add_parser("scorer-calibration", help="Preview held-out scorer calibration evidence", parents=[global_parser])
+    calibration.add_argument("target", help="Skill handle or repo-relative skill source path")
+    calibration.add_argument("--preview", action="store_true", help="Emit a non-mutating scorer calibration receipt")
+
+
+def _add_tessl_score_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
+    score = subparsers.add_parser("tessl-score", help="Preview a Tessl score receipt from eval view JSON", parents=[global_parser])
+    score.add_argument("--view-json", required=True, help="Path to tessl eval view --json output")
+    score.add_argument("--skill", required=True, help="Skill handle or repo-relative source path represented by the run")
+    score.add_argument("--run-id", help="Expected Tessl eval run id")
+    score.add_argument("--preview", action="store_true", help="Emit a non-mutating Tessl score receipt")
 
 
 def _add_profiles_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
@@ -120,6 +136,8 @@ def dispatch_sdk_eval(repo_root: Path, args: argparse.Namespace) -> CallResult:
         "run": _dispatch_run,
         "scenario-quality": _dispatch_scenario_quality,
         "scorer-quality": _dispatch_scorer_quality,
+        "scorer-calibration": _dispatch_scorer_calibration,
+        "tessl-score": _dispatch_tessl_score,
         "profiles": _dispatch_profiles,
         "ab-rubric": _dispatch_ab_rubric,
         "ab-preview": _dispatch_ab_preview,
@@ -171,6 +189,27 @@ def _dispatch_scorer_quality(repo_root: Path, args: argparse.Namespace) -> CallR
         message="Scorer quality requires --preview.",
         next_command=_scorer_quality_next(),
         handler=skills_commands.skills_sdk_eval_scorer_quality,
+    )
+
+
+def _dispatch_scorer_calibration(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    return _dispatch_preview_target(
+        repo_root,
+        args,
+        command="sdk eval scorer-calibration",
+        message="Scorer calibration requires --preview.",
+        next_command=_scorer_calibration_next(),
+        handler=skills_commands.skills_sdk_eval_scorer_calibration,
+    )
+
+
+def _dispatch_tessl_score(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    error = _preview_required("sdk eval tessl-score", "Tessl score receipts require --preview.", _tessl_score_next(), args)
+    return error or skills_commands.skills_sdk_eval_tessl_score(
+        repo_root,
+        view_json=args.view_json,
+        skill=args.skill,
+        run_id=args.run_id,
     )
 
 
@@ -255,6 +294,14 @@ def _scenario_quality_next() -> str:
 
 def _scorer_quality_next() -> str:
     return "ask sdk eval scorer-quality <skill> --preview --json --robot"
+
+
+def _scorer_calibration_next() -> str:
+    return "ask sdk eval scorer-calibration <skill> --preview --json --robot"
+
+
+def _tessl_score_next() -> str:
+    return "ask sdk eval tessl-score --view-json <view-json> --skill <skill> --preview --json --robot"
 
 
 def _ab_preview_next() -> str:

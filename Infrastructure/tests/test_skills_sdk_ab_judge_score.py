@@ -436,6 +436,25 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
                 experiment_root.unlink()
 
     @unittest.skipIf(not hasattr(Path, "symlink_to"), "symlink support unavailable")
+    def test_evidence_preflight_rejects_symlinked_evidence_root(self) -> None:
+        evidence_root = REPO_ROOT / self.evidence_root
+        target_root = REPO_ROOT / ".harness/test-sdk-ab-judge-score-target"
+        shutil.rmtree(target_root, ignore_errors=True)
+        try:
+            target_root.mkdir(parents=True, exist_ok=True)
+            evidence_root.symlink_to(target_root, target_is_directory=True)
+
+            evidence = _score_evidence_paths(REPO_ROOT, self.evidence_root, "1234567890abcdef")
+
+            self.assertEqual(evidence["blocker"], "score_evidence_path_outside_repo")
+            self.assertIsNone(evidence["prompt_path"])
+            self.assertIsNone(evidence["output_path"])
+        finally:
+            if evidence_root.is_symlink():
+                evidence_root.unlink()
+            shutil.rmtree(target_root, ignore_errors=True)
+
+    @unittest.skipIf(not hasattr(Path, "symlink_to"), "symlink support unavailable")
     def test_evidence_preflight_rejects_symlinked_score_file(self) -> None:
         evidence_root = REPO_ROOT / self.evidence_root
         score_dir = evidence_root / "1234567890abcdef" / "judge"

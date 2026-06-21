@@ -241,6 +241,12 @@ Treat Tessl scores as evidence, not proof by themselves.
 - A live-private command is not green merely because `tessl eval run`
   completed. The wrapper must inspect `tessl eval view --json <run-id>` and
   compare usage-spec results against baseline before reporting readiness.
+- Before quoting prior or current Tessl scores, preserve the
+  `tessl eval view --json <run-id>` artifact and run
+  `./bin/ask sdk eval tessl-score --view-json <view-json> --skill <skill-path> --preview --json --robot`.
+  Memory summaries, screenshots, and chat history are provenance only. A
+  blocked receipt may expose partial score math, but it is not a completed
+  baseline.
 - If both usage-spec and baseline are 100%, classify the run as
   pass_but_non_discriminative for improvement evidence. The skill may be
   correct, but the scenario set did not prove uplift. Tighten scenarios before

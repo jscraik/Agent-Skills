@@ -16,3 +16,7 @@ Return JSON with `sentence_results[]`, `overall_verdict`, `failure_reason`, and 
 ## Skills SDK Scorer Check
 
 Run `./bin/ask sdk eval scorer-quality <skill-path> --preview --json --robot` for SDK-owned skill evals. A blocked receipt means score trends are advisory until `references/evals.yaml` declares calibrated `scorer_quality` metadata.
+
+Run `./bin/ask sdk eval scorer-calibration <skill-path> --preview --json --robot` when score trends, release claims, or live Tessl readiness depend on a judge/scorer. The bundle must include held-out labeled examples, TP/TN/FP/FN limits, threshold, scorer id, scorer version or digest, prompt version, model parameters, and raw scorer artifacts. A blocked receipt means the scorer metadata may be well shaped, but failure-catching behavior is not measured.
+
+Run `./bin/ask sdk eval tessl-score --view-json <view-json> --skill <skill-path> --preview --json --robot` before quoting prior or current Tessl scores. The view artifact must come from `tessl eval view --json <run-id>` or a preserved repo evidence copy. A blocked receipt may still expose partial score math, but it is historical evidence only and must not be reported as a completed baseline.

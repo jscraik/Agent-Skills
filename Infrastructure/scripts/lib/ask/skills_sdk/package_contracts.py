@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 import re
 from typing import Any
@@ -259,6 +260,9 @@ def read_reference_contract(skill_md: Path | None) -> dict[str, Any]:
     except OSError:
         return {}
     if yaml is None:
+        json_loaded = read_json_like_yaml_reference(text)
+        if isinstance(json_loaded, dict):
+            return json_loaded
         return read_reference_contract_fallback(text)
     try:
         loaded = yaml.safe_load(text) or {}
@@ -286,6 +290,9 @@ def read_structured_reference(path: Path) -> tuple[dict[str, Any] | list[Any] | 
         return None, "structured reference must parse to an object or list"
     if suffix in {".yaml", ".yml"}:
         if yaml is None:
+            json_loaded = read_json_like_yaml_reference(text)
+            if isinstance(json_loaded, (dict, list)):
+                return json_loaded, None
             loaded = read_structured_reference_fallback(text)
             return loaded, None
         try:
@@ -296,6 +303,17 @@ def read_structured_reference(path: Path) -> tuple[dict[str, Any] | list[Any] | 
             return loaded, None
         return None, "structured reference must parse to an object or list"
     return None, None
+
+
+def read_json_like_yaml_reference(text: str) -> dict[str, Any] | list[Any] | None:
+    stripped = text.lstrip()
+    if not stripped.startswith(("{", "[")):
+        return None
+    try:
+        loaded = json.loads(text)
+    except ValueError:
+        return None
+    return loaded if isinstance(loaded, (dict, list)) else None
 
 
 def read_structured_reference_fallback(text: str) -> dict[str, Any]:
@@ -483,6 +501,16 @@ def structured_reference_has_description(path: Path, text: str) -> bool:
     """Return whether a structured reference has a browseable purpose marker."""
     if path.suffix.lower() == ".json":
         return '"description"' in text or '"purpose"' in text or '"schema_version"' in text
+    if path.suffix.lower() == ".jsonl":
+        for line in text.splitlines():
+            if not line.strip():
+                continue
+            try:
+                record = json.loads(line)
+            except json.JSONDecodeError:
+                return False
+            return any(str(record.get(field) or "").strip() for field in ("description", "purpose", "schema_version"))
+        return False
     return bool(re.search(r"(?m)^(description|purpose|schema_version|name):\s*\S", text))
 
 
@@ -514,7 +542,7 @@ def support_file_has_description(path: Path) -> bool:
     suffix = path.suffix.lower()
     if suffix == ".md":
         return markdown_has_title(text)
-    if suffix in {".yaml", ".yml", ".json"}:
+    if suffix in {".yaml", ".yml", ".json", ".jsonl"}:
         return structured_reference_has_description(path, text)
     if suffix == ".txt":
         return bool(text.strip())
@@ -622,6 +650,79 @@ def identity_and_assets_contract(
         "script_inventory": scripts,
         "ready": skill_identity["ready"] and references["ready"] and scripts["ready"],
     }
+
+
+def knowledge_capsule_first_party_contract(repo_root: Path | None, skill_md: Path | None, text: str) -> dict[str, Any]:
+    """Return whether vendored knowledge capsules are surfaced through first-party skill references."""
+    references_dir = skill_md.parent / "references" if skill_md else None
+    manifest_path = references_dir / "knowledge-capsule.manifest.yaml" if references_dir else None
+    routing_path = references_dir / "knowledge-capsule-routing.md" if references_dir else None
+    manifest_declared = bool(manifest_path and manifest_path.is_file())
+    capsule_paths: list[str] = []
+    if manifest_path and manifest_path.is_file():
+        manifest, error = read_structured_reference(manifest_path)
+        if error is None and isinstance(manifest, dict):
+            capsules = manifest.get("capsules")
+            if isinstance(capsules, list):
+                capsule_paths = _knowledge_capsule_target_paths(capsules)
+        if not capsule_paths:
+            capsule_paths = _knowledge_capsule_target_paths_from_text(manifest_path)
+    routing_declared = bool(routing_path and routing_path.is_file())
+    routing_text = skill_markdown_text(routing_path) if routing_path else ""
+    missing_from_routing = [
+        path for path in capsule_paths
+        if routing_declared and path and path not in routing_text
+    ]
+    skill_mentions_routing = "knowledge-capsule-routing.md" in text
+    ready = (
+        not manifest_declared
+        or (
+            routing_declared
+            and skill_mentions_routing
+            and bool(capsule_paths)
+            and not missing_from_routing
+        )
+    )
+    return {
+        "schema_version": "skill-knowledge-capsule-first-party.v1",
+        "status": "pass" if ready else "advisory",
+        "manifest_declared": manifest_declared,
+        "manifest_path": repo_relative_path(repo_root, manifest_path) if repo_root and manifest_path else None,
+        "capsule_count": len(capsule_paths),
+        "capsule_paths": capsule_paths,
+        "first_party_routing_path": (
+            repo_relative_path(repo_root, routing_path) if repo_root and routing_path else None
+        ),
+        "first_party_routing_declared": routing_declared,
+        "skill_mentions_first_party_routing": skill_mentions_routing,
+        "missing_from_first_party_routing": missing_from_routing,
+        "ready": ready,
+        "policy": (
+            "Knowledge capsule manifests select bounded generated capsules, but capsule use rules should be "
+            "promoted into a first-party skill reference so agents see them without relying on buried capsule text."
+        ),
+    }
+
+
+def _knowledge_capsule_target_paths(capsules: list[Any]) -> list[str]:
+    paths: list[str] = []
+    for capsule in capsules:
+        if isinstance(capsule, dict) and isinstance(capsule.get("target_path"), str):
+            paths.append(capsule["target_path"].strip())
+        elif isinstance(capsule, str) and capsule.strip().startswith("target_path:"):
+            paths.append(capsule.split(":", 1)[1].strip())
+    return [path for path in paths if path]
+
+
+def _knowledge_capsule_target_paths_from_text(path: Path) -> list[str]:
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError:
+        return []
+    paths: list[str] = []
+    for match in re.finditer(r"(?m)^\s*target_path:\s*(.+?)\s*$", text):
+        paths.append(match.group(1).strip().strip("'\""))
+    return [capsule_path for capsule_path in paths if capsule_path]
 
 
 def skill_eval_paths(repo_root: Path | None, skill_md: Path | None) -> list[str]:
@@ -1560,6 +1661,7 @@ def sdk_package_contract(
     reference_quality = reference_quality_contract(repo_root, source_path)
     progressive_disclosure = progressive_disclosure_contract(repo_root, source_path, text)
     identity_and_assets = identity_and_assets_contract(repo_root, source_path, frontmatter)
+    knowledge_capsules = knowledge_capsule_first_party_contract(repo_root, source_path, text)
     workflow_contract = skillflow_contract(repo_root, source_path, reference_contract)
     optimization_readiness = optimization_contract(repo_root, source_path, reference_contract)
     eval_paths = skill_eval_paths(repo_root, source_path)
@@ -1627,6 +1729,7 @@ def sdk_package_contract(
         "budget_classification": reference_contract.get("budget_classification"),
         "workflow_contract": workflow_contract,
         "optimization_contract": optimization_readiness,
+        "knowledge_capsules": knowledge_capsules,
     }
     present = sorted(
         field for field, value in values.items() if sdk_contract_field_present(field, value)
@@ -1660,8 +1763,11 @@ def sdk_package_contract(
             "optimization_declared": bool(optimization_readiness["enabled"]),
             "optimization_status": optimization_readiness["status"],
             "optimization_mode": optimization_readiness["optimizer_mode"],
+            "knowledge_capsules_declared": bool(knowledge_capsules["manifest_declared"]),
+            "knowledge_capsules_first_party_ready": bool(knowledge_capsules["ready"]),
         },
         "identity_and_assets": identity_and_assets,
+        "knowledge_capsules": knowledge_capsules,
         "agent_contract": {
             "source_of_truth": source_rel,
             "editable_paths": editable_paths,

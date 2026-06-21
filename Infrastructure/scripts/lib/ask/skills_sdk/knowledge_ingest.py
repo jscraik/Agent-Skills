@@ -68,7 +68,7 @@ def build_knowledge_ingest(
         findings.append("references/knowledge-demand:differs_from_root_knowledge-demand")
     _validate_source_files(extraction_root, source_files, findings)
     preflight = (
-        _preflight_security_gate(repo_root, skill_dir, extraction_root, source_files)
+        _preflight_security_gate(repo_root, skill_dir, extraction_root, source_files, manifest=manifest)
         if preflight_security and not findings
         else None
     )
@@ -108,18 +108,7 @@ def build_knowledge_ingest(
             "path": _repo_relative(repo_root, skill_dir),
         },
         "copied_files": copied,
-        "routing_updates": [
-            {
-                "path": _repo_relative(repo_root, skill_dir / "SKILL.md"),
-                "description": "knowledge capsule progressive-disclosure routing",
-                "action": "write" if apply else "preview",
-            },
-            {
-                "path": _repo_relative(repo_root, skill_dir / "references" / "source-context.yaml"),
-                "description": "source-context entries for vendored KnowledgeOS capsule references",
-                "action": "write" if apply else "preview",
-            },
-        ],
+        "routing_updates": _routing_updates(repo_root, skill_dir, apply=apply),
         "validation_commands": [
             f"./bin/ask skills audit {_repo_relative(repo_root, skill_dir)} --level strict --json --robot",
             f"./bin/ask skills package verify {_repo_relative(repo_root, skill_dir)} --json --robot",
@@ -133,20 +122,59 @@ def build_knowledge_ingest(
     if not apply:
         return receipt
 
-    for source_file in source_files:
-        target = skill_dir / source_file.relative_to(extraction_root)
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(source_file, target)
-    _update_skill_routing(skill_dir / "SKILL.md", eval_routes=eval_routes)
-    _update_source_context(
-        skill_dir / "references" / "source-context.yaml",
-        eval_routes=eval_routes,
-    )
+    _apply_knowledge_ingest(skill_dir, extraction_root, source_files, eval_routes=eval_routes, manifest=manifest)
     if run_proof:
         receipt["proof_results"] = _run_proof(repo_root, receipt["validation_commands"])
         if any(item["status"] != "pass" for item in receipt["proof_results"]):
             receipt["status"] = "applied_with_failed_proof"
     return receipt
+
+
+def _routing_updates(repo_root: Path, skill_dir: Path, *, apply: bool) -> list[dict[str, str]]:
+    action = "write" if apply else "preview"
+    return [
+        {
+            "path": _repo_relative(repo_root, skill_dir / "SKILL.md"),
+            "description": "knowledge capsule progressive-disclosure routing",
+            "action": action,
+        },
+        {
+            "path": _repo_relative(repo_root, skill_dir / "references" / "source-context.yaml"),
+            "description": "source-context entries for vendored KnowledgeOS capsule references",
+            "action": action,
+        },
+        {
+            "path": _repo_relative(repo_root, skill_dir / "references" / "knowledge-capsule-routing.md"),
+            "description": "first-party routing index for vendored KnowledgeOS capsules",
+            "action": action,
+        },
+    ]
+
+
+def _apply_knowledge_ingest(
+    skill_dir: Path,
+    extraction_root: Path,
+    source_files: list[Path],
+    *,
+    eval_routes: list[dict[str, Any]],
+    manifest: dict[str, Any],
+) -> None:
+    for source_file in source_files:
+        target = skill_dir / source_file.relative_to(extraction_root)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source_file, target)
+    _update_knowledge_routing_files(skill_dir, eval_routes=eval_routes, manifest=manifest)
+
+
+def _update_knowledge_routing_files(
+    skill_dir: Path,
+    *,
+    eval_routes: list[dict[str, Any]],
+    manifest: dict[str, Any],
+) -> None:
+    _update_skill_routing(skill_dir / "SKILL.md", eval_routes=eval_routes)
+    _update_source_context(skill_dir / "references" / "source-context.yaml", eval_routes=eval_routes)
+    _update_capsule_routing_index(skill_dir / "references" / "knowledge-capsule-routing.md", manifest=manifest)
 
 
 def _resolve_skill_dir(repo_root: Path, skill: str) -> Path:
@@ -253,6 +281,7 @@ def _validate_source_files(extraction_root: Path, source_files: list[Path], find
     allowed_names = {
         "references/knowledge-demand.yaml",
         "references/knowledge-capsule.manifest.yaml",
+        "references/knowledge-capsule-routing.md",
         "references/eval-scenarios.json",
     }
     for source_file in source_files:
@@ -352,6 +381,67 @@ def _routing_text(*, eval_routes: dict[str, bool]) -> str:
     return ROUTING_TEXT
 
 
+def _update_capsule_routing_index(path: Path, *, manifest: dict[str, Any]) -> None:
+    capsules = manifest.get("capsules")
+    upstream_pack = manifest.get("upstream_pack")
+    if isinstance(upstream_pack, dict):
+        default_pack_id = str(upstream_pack.get("pack_id") or "").strip()
+    else:
+        default_pack_id = str(manifest.get("pack_id") or "").strip()
+    selected_asset_ids = manifest.get("selected_asset_ids")
+    default_asset_count = len(selected_asset_ids) if isinstance(selected_asset_ids, list) else 0
+    lines = [
+        "# Knowledge Capsule Routing",
+        "",
+        "This first-party index promotes vendored capsule routing into the skill package.",
+        "Use it before opening generated capsule bodies so capsule guidance is not hidden",
+        "inside second-order references.",
+        "",
+        "## Capsules",
+        "",
+    ]
+    if isinstance(capsules, list):
+        for capsule in capsules:
+            lines.extend(_capsule_routing_lines(capsule, default_pack_id, default_asset_count))
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
+
+
+def _capsule_routing_lines(capsule: object, default_pack_id: str, default_asset_count: int) -> list[str]:
+    normalized = _capsule_routing_entry(capsule)
+    if normalized is None or not normalized["target_path"]:
+        return []
+    tick = chr(96)
+    pack_id = normalized["pack_id"] or default_pack_id or "unknown"
+    asset_count = normalized["asset_count"] or default_asset_count
+    return [
+        "- " + tick + str(normalized["target_path"]) + tick,
+        "  - facet: " + str(normalized["facet"]),
+        "  - pack: " + str(pack_id),
+        "  - selected_asset_count: " + str(asset_count),
+        "  - load_when: task signals match this facet; load only this capsule before adding more.",
+    ]
+
+
+def _capsule_routing_entry(capsule: object) -> dict[str, Any] | None:
+    if isinstance(capsule, str) and capsule.strip().startswith("target_path:"):
+        return {
+            "target_path": capsule.split(":", 1)[1].strip(),
+            "facet": "capsule",
+            "pack_id": "",
+            "asset_count": 0,
+        }
+    if not isinstance(capsule, dict):
+        return None
+    asset_ids = capsule.get("asset_ids")
+    return {
+        "target_path": str(capsule.get("target_path") or "").strip(),
+        "facet": str(capsule.get("facet_id") or capsule.get("role") or "capsule").strip(),
+        "pack_id": str(capsule.get("pack_id") or "").strip(),
+        "asset_count": len(asset_ids) if isinstance(asset_ids, list) else 0,
+    }
+
+
 def _append_reference_links(text: str, *, eval_routes: dict[str, bool]) -> str:
     reference_marker = "## References\n"
     updated = text
@@ -360,6 +450,7 @@ def _append_reference_links(text: str, *, eval_routes: dict[str, bool]) -> str:
         reference_links = [
             "- `references/knowledge-demand.yaml`",
             "- `references/knowledge-capsule.manifest.yaml`",
+            "- `references/knowledge-capsule-routing.md`",
             "- `references/knowledge-capsules/`",
         ]
         if eval_routes["scenarios"]:
@@ -508,6 +599,8 @@ def _preflight_security_gate(
     skill_dir: Path,
     extraction_root: Path,
     source_files: list[Path],
+    *,
+    manifest: dict[str, Any],
 ) -> dict[str, Any]:
     with tempfile.TemporaryDirectory(prefix="ask-knowledge-ingest-") as tmp:
         staged_parent = Path(tmp)
@@ -518,11 +611,7 @@ def _preflight_security_gate(
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(source_file, target)
         eval_routes = _eval_reference_routes(extraction_root, source_files)
-        _update_skill_routing(staged_skill / "SKILL.md", eval_routes=eval_routes)
-        _update_source_context(
-            staged_skill / "references" / "source-context.yaml",
-            eval_routes=eval_routes,
-        )
+        _update_knowledge_routing_files(staged_skill, eval_routes=eval_routes, manifest=manifest)
         gate_script = _resolve_skill_gate_script(repo_root)
         process = subprocess.run(
             [
@@ -579,7 +668,7 @@ def _repo_relative(repo_root: Path, path: Path) -> str:
 def _yaml() -> Any | None:
     try:
         import yaml
-    except ModuleNotFoundError as exc:
+    except ModuleNotFoundError:
         return None
     return yaml
 

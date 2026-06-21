@@ -443,6 +443,33 @@ policy:
         )
         self.assertEqual(contract["metadata"]["policy"], {"openai_policy": "strict"})
 
+    def test_json_shaped_reference_contract_survives_without_pyyaml(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = Path(temp_dir) / "Skills" / "agent-ops" / "json-contract"
+            references = skill_dir / "references"
+            references.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text("# Json Contract\n", encoding="utf-8")
+            (references / "contract.yaml").write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "skill": "json-contract",
+                        "purpose": "Keep JSON-shaped YAML readable.",
+                        "inputs": ["input"],
+                        "outputs": ["output"],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            with patch.object(package_contracts, "yaml", None):
+                contract = package_contracts.read_reference_contract(skill_md)
+
+        self.assertEqual(contract["purpose"], "Keep JSON-shaped YAML readable.")
+        self.assertEqual(contract["inputs"], ["input"])
+        self.assertEqual(contract["outputs"], ["output"])
+
     def test_package_contract_malformed_yaml_falls_back_to_empty_openai_fields(self) -> None:
         class BrokenYaml:
             class YAMLError(Exception):
@@ -903,6 +930,10 @@ short_description: Check skill package identity
                 "# Gold Contract\n\nPurposeful reference detail.\n",
                 encoding="utf-8",
             )
+            (references_dir / "held-out-examples.jsonl").write_text(
+                '{"description":"Purpose: held-out scorer calibration example.","id":"case-1"}\n',
+                encoding="utf-8",
+            )
             (scripts_dir / "run-checks.py").write_text(
                 "\"\"\"Purpose: run the package identity fixture check.\"\"\"\n",
                 encoding="utf-8",
@@ -945,6 +976,10 @@ description: sample
                 "No title here.\n",
                 encoding="utf-8",
             )
+            (references_dir / "undocumented-examples.jsonl").write_text(
+                '{"id":"case-1"}\n',
+                encoding="utf-8",
+            )
             (scripts_dir / "RunChecks.py").write_text(
                 "print('missing purpose metadata')\n",
                 encoding="utf-8",
@@ -968,6 +1003,10 @@ description: sample
         )
         self.assertIn(
             "Skills/agent-ops/bad-skill/references/details.md",
+            identity["reference_inventory"]["missing_descriptions"],
+        )
+        self.assertIn(
+            "Skills/agent-ops/bad-skill/references/undocumented-examples.jsonl",
             identity["reference_inventory"]["missing_descriptions"],
         )
         self.assertIn(
@@ -1573,6 +1612,63 @@ metadata:
             [],
         )
         self.assertTrue(contract["progressive_disclosure"]["references_contract_declared"])
+
+    def test_knowledge_capsule_contract_requires_first_party_routing(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "capsule-skill"
+            references = skill_dir / "references"
+            references.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                "# Capsule Skill\n\nLoad references/knowledge-capsule-routing.md before capsule bodies.\n",
+                encoding="utf-8",
+            )
+            (references / "knowledge-capsule.manifest.yaml").write_text(
+                "capsules:\n"
+                "  - target_path: references/knowledge-capsules/one.md\n"
+                "    facet_id: one\n",
+                encoding="utf-8",
+            )
+            (references / "knowledge-capsule-routing.md").write_text(
+                "# Knowledge Capsule Routing\n\n- references/knowledge-capsules/one.md\n",
+                encoding="utf-8",
+            )
+
+            contract = package_contracts.sdk_package_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+            )
+
+        self.assertTrue(contract["knowledge_capsules"]["manifest_declared"])
+        self.assertTrue(contract["knowledge_capsules"]["ready"])
+        self.assertEqual(contract["knowledge_capsules"]["capsule_paths"], ["references/knowledge-capsules/one.md"])
+
+    def test_knowledge_capsule_contract_warns_when_routing_is_buried(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "capsule-skill"
+            references = skill_dir / "references"
+            references.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text("# Capsule Skill\n\nLoad the manifest when needed.\n", encoding="utf-8")
+            (references / "knowledge-capsule.manifest.yaml").write_text(
+                "capsules:\n"
+                "  - target_path: references/knowledge-capsules/one.md\n"
+                "    facet_id: one\n",
+                encoding="utf-8",
+            )
+
+            contract = package_contracts.sdk_package_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+            )
+
+        self.assertEqual(contract["knowledge_capsules"]["status"], "advisory")
+        self.assertTrue(contract["knowledge_capsules"]["manifest_declared"])
+        self.assertFalse(contract["knowledge_capsules"]["ready"])
 
     def test_package_readiness_schema_rejects_payload_without_snapshot_identity(self) -> None:
         with patch("ask.commands.skills_impl.resolve_skill_handle", return_value={

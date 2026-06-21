@@ -371,6 +371,8 @@ def _selected_score_profile(profile_id: str, blockers: list[str]) -> dict[str, A
 def _score_evidence_paths(repo_root: Path, evidence_root: str, experiment_id: object) -> dict[str, Any]:
     candidate = Path(evidence_root)
     root = candidate if candidate.is_absolute() else repo_root / candidate
+    if _path_has_symlink_ancestor(repo_root, root):
+        return {"blocker": "score_evidence_path_outside_repo", "prompt_path": None, "output_path": None}
     resolved = _contained_repo_path(repo_root, root)
     if resolved is None:
         return {"blocker": "evidence_root_outside_repo", "prompt_path": None, "output_path": None}

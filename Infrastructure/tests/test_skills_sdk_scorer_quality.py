@@ -226,6 +226,45 @@ cases: []
         self.assertTrue(model.ready)
         self.assertEqual(model.operation, "scorer_quality_preview")
 
+    def test_command_uses_fallback_parser_without_pyyaml(self) -> None:
+        script = f"""
+import importlib.abc
+import json
+import sys
+from pathlib import Path
+
+class BlockYaml(importlib.abc.MetaPathFinder):
+    def find_spec(self, fullname, path=None, target=None):
+        if fullname == "yaml" or fullname.startswith("yaml."):
+            raise ModuleNotFoundError("No module named 'yaml'")
+        return None
+
+repo_root = Path({str(REPO_ROOT)!r})
+sys.path.insert(0, str(repo_root / "Infrastructure" / "scripts" / "lib"))
+sys.meta_path.insert(0, BlockYaml())
+from ask.skills_sdk.scorer_quality import build_scorer_quality_receipt
+
+receipt = build_scorer_quality_receipt(
+    repo_root,
+    source_path=repo_root / {FIXTURE_SKILL!r},
+    query={FIXTURE_SKILL!r},
+)
+print(json.dumps({{"status": receipt["status"], "ready": receipt["ready"]}}))
+"""
+        process = subprocess.run(
+            [sys.executable, "-c", script],
+            cwd=REPO_ROOT,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+        )
+
+        self.assertEqual(process.returncode, 0, process.stderr)
+        payload = json.loads(process.stdout)
+        self.assertEqual(payload["status"], "preview")
+        self.assertTrue(payload["ready"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -27,7 +27,7 @@ Need the user goal plus any traces, labels, scorecard, prompt, retrieval evidenc
 Routes: use `eval-audit`, `error-analysis`, `write-judge-prompt`, `validate-evaluator`, `generate-synthetic-data`, `evaluate-rag`, or `build-review-interface`.
 
 Faithfulness guardrails require owned sources, sentence-level verdicts, structured judge outcomes, labeled examples, exact pass references, and calibration.
-For Skills SDK evals, run `./bin/ask sdk eval scorer-quality <skill-path> --preview --json --robot` before trusting score trends.
+For Skills SDK evals, run `./bin/ask sdk eval scorer-quality <skill-path> --preview --json --robot` before trusting score trends. When a scorer can influence release or live Tessl claims, also run `./bin/ask sdk eval scorer-calibration <skill-path> --preview --json --robot` so held-out TP/TN/FP/FN behavior, threshold, prompt/scorer version, model parameters, and raw artifacts are measured before the score is trusted. When quoting Tessl score history, require a `tessl eval view --json` artifact and `./bin/ask sdk eval tessl-score --view-json <view-json> --skill <skill-path> --preview --json --robot`; memory summaries are provenance only.
 
 ## Outputs
 
@@ -66,4 +66,5 @@ Full judge template and route checkpoints: `references/route-checklists.md`. Def
 - Use repo wrappers; do not import external code, schemas, paths, viewer requirements, or agent names.
 - Patch only required eval artifacts, skill sources, traces, prompts, or reports.
 - For stochastic judges, record run count, threshold, raw artifacts, timeout, calibration, scorer id, scorer version or digest, judge parameters, rationale-audit sampling, and segmentation fields.
+- Treat scorer metadata shape as necessary but insufficient; require a held-out calibration artifact bundle when the judge/scorer result is used as behavioral proof.
 - Never invent a score.

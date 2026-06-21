@@ -26,7 +26,7 @@ Do not use for one-off facts, direct debugging, copyediting, professional certif
 
 - User learning goal, current level, constraints, and desired outcome.
 - Workspace files when present: MISSION.md, RESOURCES.md, NOTES.md, reference/*.html, learning-records/*.md, lessons/*.html, and assets/*.
-- Package references: [contract](references/contract.yaml), [evals](references/evals.yaml), [task profile](references/task-profile.json), [templates](references/templates.md), and [knowledge capsules](references/knowledge-capsule.manifest.yaml).
+- Package references: [contract](references/contract.yaml), [evals](references/evals.yaml), [task profile](references/task-profile.json), [templates](references/templates.md), [knowledge capsule routing](references/knowledge-capsule-routing.md), and [knowledge capsules](references/knowledge-capsule.manifest.yaml).
 
 ## Outputs
 
@@ -46,7 +46,7 @@ Do not use for one-off facts, direct debugging, copyediting, professional certif
 7. Add a learning record for non-obvious learning, mission changes, and future-session steering.
 8. Verify created paths and links before closeout.
 
-Load `references/knowledge-capsule.manifest.yaml` only when the task needs pack-backed guidance. Select the smallest relevant capsule for mission/state, source trust, lesson loops, sequencing, local-book practice, or proof boundaries. Do not load all capsules by default.
+When the task needs pack-backed guidance, read `references/knowledge-capsule-routing.md` first, then load only the smallest relevant capsule from `references/knowledge-capsule.manifest.yaml` for mission/state, source trust, lesson loops, sequencing, local-book practice, or proof boundaries. Do not load all capsules by default.
 
 ## Output Templates
 

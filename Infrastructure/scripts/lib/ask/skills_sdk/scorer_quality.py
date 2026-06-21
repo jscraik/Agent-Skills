@@ -3,13 +3,6 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from pydantic import ValidationError
-
-from ask.skills_sdk.scorer_quality_contracts import (
-    validate_scorer_quality_metadata,
-    validate_scorer_quality_receipt,
-)
-
 
 SCORER_QUALITY_SCHEMA_VERSION = "skills-sdk.scorer-quality-receipt.v0"
 SCORER_QUALITY_SCHEMA_URI = (
@@ -28,6 +21,20 @@ REQUIRED_CALIBRATION_PROBES = {
 }
 REQUIRED_SEGMENTATION_FIELDS = {"category", "claim_ids", "eval_modes"}
 LLM_SCORER_TYPES = {"llm_judge", "hybrid", "external_tessl"}
+SCORER_METADATA_FIELDS = {
+    "schema_version",
+    "scorer_id",
+    "scorer_type",
+    "scope",
+    "scorer_version_or_digest",
+    "pass_threshold",
+    "deterministic_checks_first",
+    "parameters",
+    "rationale_audit",
+    "bias_probes",
+    "segmentation_fields",
+    "calibration_cases",
+}
 
 
 def _repo_relative(repo_root: Path, path: Path) -> str:
@@ -44,9 +51,92 @@ def _check(check_id: str, status: str, message: str, evidence: list[str] | None 
 def _yaml_safe_load(text: str) -> Any:
     try:
         import yaml  # type: ignore
-    except ModuleNotFoundError as exc:
-        raise ValueError("pyyaml_unavailable") from exc
+    except ModuleNotFoundError:
+        return _load_minimal_scorer_yaml(text)
     return yaml.safe_load(text)
+
+
+def _load_minimal_scorer_yaml(text: str) -> dict[str, Any]:
+    state: dict[str, Any] = {"payload": {}, "active": None, "section": None, "item": None}
+    for raw_line in text.splitlines():
+        prepared = _prepare_yaml_line(raw_line)
+        if prepared is None:
+            continue
+        indent, stripped = prepared
+        if indent == 0:
+            _handle_top_level_yaml(state, stripped)
+        elif state["active"] == "scorer_quality":
+            _handle_scorer_quality_yaml(state, indent, stripped)
+    return state["payload"]
+
+
+def _prepare_yaml_line(raw_line: str) -> tuple[int, str] | None:
+    line = raw_line.split("#", 1)[0].rstrip()
+    stripped = line.strip()
+    if not stripped:
+        return None
+    return len(line) - len(line.lstrip(" ")), stripped
+
+
+def _handle_top_level_yaml(state: dict[str, Any], stripped: str) -> None:
+    state["section"] = None
+    state["item"] = None
+    if ":" not in stripped:
+        return
+    key, value = stripped.split(":", 1)
+    state["active"] = key
+    state["payload"][key] = _parse_scalar(value.strip()) if value.strip() else {}
+
+
+def _handle_scorer_quality_yaml(state: dict[str, Any], indent: int, stripped: str) -> None:
+    scorer_quality = state["payload"].setdefault("scorer_quality", {})
+    if not isinstance(scorer_quality, dict):
+        return
+    if indent == 2 and stripped.endswith(":"):
+        _start_scorer_section(state, scorer_quality, stripped[:-1])
+    elif state["section"] in {"bias_probes", "segmentation_fields"} and stripped.startswith("- "):
+        scorer_quality[state["section"]].append(_parse_scalar(stripped[2:].strip()))
+    elif state["section"] == "calibration_cases":
+        _handle_calibration_yaml(state, scorer_quality, stripped)
+    elif state["section"] in {"parameters", "rationale_audit"} and ":" in stripped:
+        _assign_pair(scorer_quality[state["section"]], stripped)
+    elif indent == 2 and ":" in stripped:
+        _assign_pair(scorer_quality, stripped)
+
+
+def _start_scorer_section(state: dict[str, Any], scorer_quality: dict[str, Any], section: str) -> None:
+    state["section"] = section
+    state["item"] = None
+    scorer_quality[section] = [] if section in {"calibration_cases", "bias_probes", "segmentation_fields"} else {}
+
+
+def _handle_calibration_yaml(state: dict[str, Any], scorer_quality: dict[str, Any], stripped: str) -> None:
+    if stripped.startswith("- "):
+        state["item"] = {}
+        scorer_quality["calibration_cases"].append(state["item"])
+        _assign_pair(state["item"], stripped[2:])
+    elif isinstance(state["item"], dict) and ":" in stripped:
+        _assign_pair(state["item"], stripped)
+
+
+def _assign_pair(target: dict[str, Any], text: str) -> None:
+    if ":" not in text:
+        return
+    key, value = text.split(":", 1)
+    target[key.strip()] = _parse_scalar(value.strip())
+
+
+def _parse_scalar(value: str) -> Any:
+    raw = value.strip()
+    value = raw.strip("'\"")
+    if value in {"true", "false"}:
+        return value == "true"
+    if raw.startswith(("'", '"')) and raw.endswith(("'", '"')):
+        return value
+    try:
+        return float(value) if "." in value else int(value)
+    except ValueError:
+        return value
 
 
 def _load_evals(path: Path) -> tuple[dict[str, Any] | None, str | None]:
@@ -144,27 +234,108 @@ def _parameters_checks(scorer_quality: dict[str, Any], scorer_type: str) -> list
 def _contract_checks(scorer_quality: dict[str, Any]) -> list[dict[str, Any]]:
     if not scorer_quality:
         return []
+    errors = _scorer_metadata_contract_errors(scorer_quality)
+    status = "blocker" if errors else "pass"
+    evidence = errors
+    message = (
+        "scorer_quality metadata must satisfy the strict Pydantic contract."
+        if errors
+        else "scorer_quality metadata satisfies the strict Pydantic contract."
+    )
+    return [_check("scorer_quality_contract_valid", status, message, evidence)]
+
+
+def _scorer_metadata_contract_errors(scorer_quality: dict[str, Any]) -> list[str]:
+    try:
+        from pydantic import ValidationError as PydanticValidationError
+
+        from ask.skills_sdk.scorer_quality_contracts import validate_scorer_quality_metadata
+    except ImportError:
+        return _fallback_scorer_metadata_contract_errors(scorer_quality)
     try:
         validate_scorer_quality_metadata(scorer_quality)
-    except ValidationError as exc:
-        return [
-            _check(
-                "scorer_quality_contract_valid",
-                "blocker",
-                "scorer_quality metadata must satisfy the strict Pydantic contract.",
-                _validation_error_evidence(exc),
-            )
-        ]
-    return [
-        _check(
-            "scorer_quality_contract_valid",
-            "pass",
-            "scorer_quality metadata satisfies the strict Pydantic contract.",
-        )
-    ]
+    except PydanticValidationError as exc:
+        return _validation_error_evidence(exc)
+    return []
 
 
-def _validation_error_evidence(exc: ValidationError) -> list[str]:
+def _fallback_scorer_metadata_contract_errors(scorer_quality: dict[str, Any]) -> list[str]:
+    errors = [f"{field}:extra_forbidden" for field in sorted(set(scorer_quality) - SCORER_METADATA_FIELDS)]
+    errors.extend(_required_string_errors(scorer_quality, ["schema_version", "scorer_id", "scorer_version_or_digest"]))
+    errors.extend(_literal_error("schema_version", scorer_quality.get("schema_version"), {"skills-sdk.scorer-quality.v1"}))
+    errors.extend(_literal_error("scorer_type", scorer_quality.get("scorer_type"), ALLOWED_SCORER_TYPES))
+    errors.extend(_literal_error("scope", scorer_quality.get("scope"), ALLOWED_SCOPES))
+    errors.extend(_threshold_errors(scorer_quality.get("pass_threshold")))
+    errors.extend(_literal_error("deterministic_checks_first", scorer_quality.get("deterministic_checks_first"), {True}))
+    errors.extend(_string_list_errors(scorer_quality, "segmentation_fields", REQUIRED_SEGMENTATION_FIELDS))
+    errors.extend(_calibration_contract_errors(_list(scorer_quality.get("calibration_cases"))))
+    if scorer_quality.get("scorer_type") in LLM_SCORER_TYPES:
+        errors.extend(_judge_metadata_contract_errors(scorer_quality))
+    return errors
+
+
+def _required_string_errors(payload: dict[str, Any], fields: list[str]) -> list[str]:
+    return [f"{field}:string_too_short" for field in fields if not isinstance(payload.get(field), str) or not payload.get(field).strip()]
+
+
+def _literal_error(field: str, value: object, allowed: set[object]) -> list[str]:
+    return [] if value in allowed else [f"{field}:literal_error"]
+
+
+def _threshold_errors(value: object) -> list[str]:
+    if not isinstance(value, (int, float)) or isinstance(value, bool):
+        return ["pass_threshold:float_type"]
+    return [] if 0 < float(value) <= 1 else ["pass_threshold:less_than_equal"]
+
+
+def _string_list_errors(payload: dict[str, Any], field: str, allowed: set[str]) -> list[str]:
+    values = payload.get(field)
+    if not isinstance(values, list):
+        return [f"{field}:list_type"]
+    errors: list[str] = []
+    for index, value in enumerate(values):
+        if not isinstance(value, str) or not value.strip():
+            errors.append(f"{field}.{index}:string_too_short")
+        elif value not in allowed:
+            errors.append(f"{field}.{index}:literal_error")
+    return errors
+
+
+def _calibration_contract_errors(cases: list[Any]) -> list[str]:
+    if not cases:
+        return ["calibration_cases:too_short"]
+    errors: list[str] = []
+    for index, item in enumerate(cases):
+        errors.extend(_calibration_item_errors(index, item))
+    return errors
+
+
+def _calibration_item_errors(index: int, item: Any) -> list[str]:
+    if not isinstance(item, dict):
+        return [f"calibration_cases.{index}:dict_type"]
+    errors = _required_string_errors(item, ["id"])
+    errors.extend(_literal_error(f"calibration_cases.{index}.probe_type", item.get("probe_type"), REQUIRED_CALIBRATION_PROBES))
+    if not _has_expected_outcome(item):
+        errors.append(f"calibration_cases.{index}:expected_outcome_required")
+    return errors
+
+
+def _judge_metadata_contract_errors(scorer_quality: dict[str, Any]) -> list[str]:
+    errors = _object_contract_errors(scorer_quality, "parameters", ["model"], ["temperature", "trial_count"])
+    errors.extend(_object_contract_errors(scorer_quality, "rationale_audit", [], ["required", "sampled_count"]))
+    return errors
+
+
+def _object_contract_errors(payload: dict[str, Any], field: str, string_fields: list[str], required_fields: list[str]) -> list[str]:
+    value = payload.get(field)
+    if not isinstance(value, dict):
+        return [f"{field}:dict_type"]
+    errors = _required_string_errors(value, string_fields)
+    errors.extend(f"{field}.{required}:missing" for required in required_fields if required not in value)
+    return errors
+
+
+def _validation_error_evidence(exc: Any) -> list[str]:
     return [".".join(str(part) for part in error["loc"]) + f":{error['msg']}" for error in exc.errors()]
 
 
@@ -243,6 +414,14 @@ def _receipt(
         "acceptance_trace": SCORER_QUALITY_ACCEPTANCE_TRACE,
         "agent_summary": f"scorer quality preview checked scorer calibration for {query}.",
     }
+    return _validate_receipt(receipt)
+
+
+def _validate_receipt(receipt: dict[str, Any]) -> dict[str, Any]:
+    try:
+        from ask.skills_sdk.scorer_quality_contracts import validate_scorer_quality_receipt
+    except ImportError:
+        return receipt
     return validate_scorer_quality_receipt(receipt).model_dump()
 
 

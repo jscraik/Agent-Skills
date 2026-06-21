@@ -54,6 +54,15 @@
       "reason": "Intentional nested Codex instruction boundary for governed system-skill bridge content outside the upstream lock payload.",
       "owner": "agent-skills instructions",
       "review_after": "2026-09-20"
+    },
+    {
+      "id": "sdk-scenario-generator-scorer-calibration-bundle",
+      "match_type": "prefix",
+      "pattern": "Skills/agent-ops/sdk-scenario-generator/references/scorer-calibration/",
+      "classification": "historical_artifact",
+      "reason": "Canonical held-out scorer calibration fixture bundle consumed by the Skills SDK scorer-calibration preview gate.",
+      "owner": "skills-sdk",
+      "review_after": "2026-09-21"
     }
   ]
 }

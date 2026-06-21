@@ -91,42 +91,22 @@ def _write_extraction(
     refs = extraction / "references"
     capsules = refs / "knowledge-capsules"
     capsules.mkdir(parents=True)
-    skill_payload = {
-        "skill_id": "improve-agent-native",
-        "declared_name": "improve-agent-native",
-        "writable_root": "Skills/agent-ops/improve-agent-native",
-    }
-    plan = {
-        "schema_version": "knowledge-os.extraction-plan.v1",
-        "skill": skill_payload,
-        "upstream_packs": [
-            {
-                "pack_id": "pack.harness-engineering",
-                "snapshot_digest": "sha256:" + "a" * 64,
-            }
-        ],
-    }
-    demand = {
-        "schema_version": "knowledge-os.knowledge-demand.v1",
-        "skill": skill_payload,
-        "runtime_dependency_policy": {
-            "requires_knowledge_os_at_runtime": False,
-            "raw_sources_included": False,
-            "local_absolute_paths_required": False,
-        },
-    }
-    manifest = {
-        "schema_version": "knowledge-os.knowledge-capsule-manifest.v1",
-        "skill": skill_payload,
-        "selected_facets": ["pack.harness-engineering:evidence_boundary"],
-    }
+    skill_payload = _extraction_skill_payload()
+    plan = _extraction_plan(skill_payload)
+    demand = _extraction_demand(skill_payload)
+    manifest = _extraction_manifest(skill_payload)
     if include_evals:
         manifest["selected_asset_ids"] = ["eval.harness.local-pass-ci-unknown"]
-    (extraction / "extraction-plan.yaml").write_text(yaml.safe_dump(plan, sort_keys=False), encoding="utf-8")
-    (extraction / "knowledge-demand.yaml").write_text(yaml.safe_dump(demand, sort_keys=False), encoding="utf-8")
+    _write_yaml(extraction / "extraction-plan.yaml", plan)
+    _write_yaml(extraction / "knowledge-demand.yaml", demand)
     vendored_demand = vendored_demand_override or demand
-    (refs / "knowledge-demand.yaml").write_text(yaml.safe_dump(vendored_demand, sort_keys=False), encoding="utf-8")
-    (refs / "knowledge-capsule.manifest.yaml").write_text(yaml.safe_dump(manifest, sort_keys=False), encoding="utf-8")
+    _write_yaml(refs / "knowledge-demand.yaml", vendored_demand)
+    _write_yaml(refs / "knowledge-capsule.manifest.yaml", manifest)
+    (refs / "knowledge-capsule-routing.md").write_text(
+        "# Knowledge Capsule Routing\n\n"
+        "- `references/knowledge-capsules/harness-evidence-boundary.md` - Evidence boundary\n",
+        encoding="utf-8",
+    )
     capsule_text = "# Harness Evidence Boundary\n\nUse evidence before readiness claims.\n"
     if leak:
         capsule_text += "/Users/jamiecraik/dev/knowledge-OS/private-source.md\n"
@@ -162,6 +142,53 @@ def _write_extraction(
     return extraction
 
 
+def _extraction_skill_payload() -> dict[str, str]:
+    return {
+        "skill_id": "improve-agent-native",
+        "declared_name": "improve-agent-native",
+        "writable_root": "Skills/agent-ops/improve-agent-native",
+    }
+
+
+def _extraction_plan(skill_payload: dict[str, str]) -> dict[str, object]:
+    return {
+        "schema_version": "knowledge-os.extraction-plan.v1",
+        "skill": skill_payload,
+        "upstream_packs": [{"pack_id": "pack.harness-engineering", "snapshot_digest": "sha256:" + "a" * 64}],
+    }
+
+
+def _extraction_demand(skill_payload: dict[str, str]) -> dict[str, object]:
+    return {
+        "schema_version": "knowledge-os.knowledge-demand.v1",
+        "skill": skill_payload,
+        "runtime_dependency_policy": {
+            "requires_knowledge_os_at_runtime": False,
+            "raw_sources_included": False,
+            "local_absolute_paths_required": False,
+        },
+    }
+
+
+def _extraction_manifest(skill_payload: dict[str, str]) -> dict[str, object]:
+    return {
+        "schema_version": "knowledge-os.knowledge-capsule-manifest.v1",
+        "skill": skill_payload,
+        "selected_facets": ["pack.harness-engineering:evidence_boundary"],
+        "upstream_pack": {"pack_id": "pack.harness-engineering", "snapshot_digest": "sha256:" + "a" * 64},
+        "capsules": [
+            {
+                "facet_id": "evidence_boundary",
+                "target_path": "references/knowledge-capsules/harness-evidence-boundary.md",
+            }
+        ],
+    }
+
+
+def _write_yaml(path: Path, payload: dict[str, object]) -> None:
+    path.write_text(yaml.safe_dump(payload, sort_keys=False), encoding="utf-8")
+
+
 def _write_skill_gate(repo_root: Path) -> Path:
     gate = repo_root / "Plugins" / "skill-factory" / "scripts" / "skill-builder" / "skill_gate.py"
     gate.parent.mkdir(parents=True)
@@ -190,7 +217,9 @@ class TestSkillsSdkKnowledgeIngest(unittest.TestCase):
 
             self.assertEqual(payload["status"], "preview")
             self.assertEqual(payload["owner_boundary"]["runtime_dependency"], "vendored_skill_references_only")
-            self.assertEqual(len(payload["copied_files"]), 3)
+            copied_sources = {item["source"] for item in payload["copied_files"]}
+            self.assertIn("references/knowledge-capsule-routing.md", copied_sources)
+            self.assertEqual(len(payload["copied_files"]), 4)
             self.assertFalse((skill_dir / "references" / "knowledge-capsules").exists())
 
     def test_apply_vendors_references_and_updates_routing(self) -> None:
@@ -211,8 +240,13 @@ class TestSkillsSdkKnowledgeIngest(unittest.TestCase):
             self.assertEqual(payload["status"], "applied")
             self.assertTrue((skill_dir / "references" / "knowledge-demand.yaml").is_file())
             self.assertTrue((skill_dir / "references" / "knowledge-capsules" / "harness-evidence-boundary.md").is_file())
+            capsule_routing = skill_dir / "references" / "knowledge-capsule-routing.md"
+            self.assertTrue(capsule_routing.is_file())
+            capsule_routing_text = capsule_routing.read_text(encoding="utf-8")
+            self.assertIn("references/knowledge-capsules/harness-evidence-boundary.md", capsule_routing_text)
             skill_text = (skill_dir / "SKILL.md").read_text(encoding="utf-8")
             self.assertIn("Do not load all capsules by default", skill_text)
+            self.assertIn("references/knowledge-capsule-routing.md", skill_text)
             self.assertNotIn("references/eval-scenarios.json", skill_text)
             self.assertNotIn("references/evals/", skill_text)
             source_context = yaml.safe_load((skill_dir / "references" / "source-context.yaml").read_text(encoding="utf-8"))

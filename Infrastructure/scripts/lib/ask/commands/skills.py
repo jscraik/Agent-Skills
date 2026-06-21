@@ -167,6 +167,7 @@ skills_sdk_eval_ab_plan = _impl_facade("skills_sdk_eval_ab_plan")
 skills_sdk_eval_ab_run = _impl_facade("skills_sdk_eval_ab_run")
 skills_sdk_eval_ab_judge_preview = _impl_facade("skills_sdk_eval_ab_judge_preview")
 skills_sdk_eval_ab_judge_score = _impl_facade("skills_sdk_eval_ab_judge_score")
+skills_sdk_eval_tessl_score = _impl_facade("skills_sdk_eval_tessl_score")
 
 
 def skills_sdk_project_install(*args, **kwargs):
@@ -326,6 +327,7 @@ __all__ = [
     "skills_sdk_eval_ab_run",
     "skills_sdk_eval_ab_judge_preview",
     "skills_sdk_eval_ab_judge_score",
+    "skills_sdk_eval_tessl_score",
     "skills_sdk_placeholder_lifecycle",
     "skills_sdk_project_conformance",
     "skills_sdk_project_install",
