@@ -186,6 +186,23 @@ class TestSkillsSdkSkillIntake(unittest.TestCase):
         self.assertFalse(receipt["execution_performed"])
         self.assertFalse(receipt["mutation_performed"])
 
+    def test_builder_blocks_unresolvable_source_path(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            loop = Path(tmp) / "loop"
+            try:
+                loop.symlink_to(loop, target_is_directory=True)
+            except OSError as exc:
+                self.skipTest(f"symlink creation unavailable: {exc}")
+
+            receipt = build_skill_intake_receipt(REPO_ROOT, source=(loop / "skill").as_posix())
+
+        self.assert_schema_valid(receipt)
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertTrue(any(check["id"] == "source_resolvable" for check in receipt["blockers"]))
+        self.assertEqual(receipt["inspected_files"], [])
+        self.assertFalse(receipt["execution_performed"])
+        self.assertFalse(receipt["mutation_performed"])
+
     def test_builder_blocks_broad_filesystem_roots_before_scanning(self) -> None:
         receipt = build_skill_intake_receipt(REPO_ROOT, source=Path("/").as_posix())
 

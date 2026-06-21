@@ -193,6 +193,13 @@ def _regular_files_check(special_files: list[str]) -> dict[str, Any]:
     return _check("regular_files_only", "pass", "Source contains only regular files and directories.", [])
 
 
+def _non_mutating_intake_checks() -> list[dict[str, Any]]:
+    return [
+        _check("execution_blocked", "pass", "Intake inspects files only and does not execute skill code.", []),
+        _check("install_blocked", "pass", "Intake does not write canonical source, runtime projections, or install roots.", []),
+    ]
+
+
 def _inspect_directory(repo_root: Path, source_root: Path) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     skill_md_check = _skill_md_check(source_root)
     checks = [skill_md_check]
@@ -209,21 +216,17 @@ def _inspect_directory(repo_root: Path, source_root: Path) -> tuple[list[dict[st
     if skill_md_check["status"] == "blocker":
         checks.append(_check("no_symlinks", "pass", "Recursive inspection skipped until SKILL.md is a regular file.", []))
         checks.append(_check("regular_files_only", "pass", "Recursive inspection skipped until SKILL.md is a regular file.", []))
-        checks.append(_check("execution_blocked", "pass", "Intake inspects files only and does not execute skill code.", []))
-        checks.append(_check("install_blocked", "pass", "Intake does not write canonical source, runtime projections, or install roots.", []))
-        return checks, inspected_files
+    else:
+        for path in _iter_approved_package_paths(source_root, top_level_children):
+            relative_path = _relative_package_path(source_root, path)
+            if relative_path is None:
+                checks.append(_check("path_containment", "blocker", "Resolved path escaped the intake root.", [_repo_label(repo_root, path)]))
+                continue
+            _inspect_allowed_path(path, relative_path, inspected_files, symlinks, special_files)
 
-    for path in _iter_approved_package_paths(source_root, top_level_children):
-        relative_path = _relative_package_path(source_root, path)
-        if relative_path is None:
-            checks.append(_check("path_containment", "blocker", "Resolved path escaped the intake root.", [_repo_label(repo_root, path)]))
-            continue
-        _inspect_allowed_path(path, relative_path, inspected_files, symlinks, special_files)
-
-    checks.append(_symlink_check(symlinks))
-    checks.append(_regular_files_check(special_files))
-    checks.append(_check("execution_blocked", "pass", "Intake inspects files only and does not execute skill code.", []))
-    checks.append(_check("install_blocked", "pass", "Intake does not write canonical source, runtime projections, or install roots.", []))
+        checks.append(_symlink_check(symlinks))
+        checks.append(_regular_files_check(special_files))
+    checks.extend(_non_mutating_intake_checks())
     return checks, inspected_files
 
 
@@ -261,6 +264,13 @@ def _resolve_directory_source(repo_root: Path, source_path: Path, source_kind: s
             source_path=source_path,
             source_kind=source_kind,
             checks=[_check("source_exists", "blocker", "External skill intake source does not exist.", [_source_label(repo_root, source_path)])],
+        )
+    except (OSError, RuntimeError) as exc:
+        return _blocked_receipt(
+            repo_root,
+            source_path=source_path,
+            source_kind=source_kind,
+            checks=[_check("source_resolvable", "blocker", f"External skill intake source could not be resolved: {exc}", [_source_label(repo_root, source_path)])],
         )
     return _validated_directory_source(repo_root, resolved_source, source_kind)
 
