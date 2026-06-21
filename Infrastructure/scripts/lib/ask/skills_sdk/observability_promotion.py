@@ -349,6 +349,27 @@ def _promotion_checks(
     ]
 
 
+def _top_level_blockers(checks: list[dict[str, Any]], blockers: list[str]) -> list[dict[str, Any]]:
+    blocking_checks = [check for check in checks if check["status"] == "blocker"]
+    surfaced = {
+        evidence
+        for check in blocking_checks
+        for evidence in check.get("evidence", [])
+        if isinstance(evidence, str)
+    }
+    unsurfaced = [blocker for blocker in blockers if blocker not in surfaced]
+    if unsurfaced:
+        blocking_checks.append(
+            _check(
+                "promotion_blockers",
+                "blocker",
+                "Promotion preview blockers must be preserved as receipt evidence.",
+                unsurfaced,
+            )
+        )
+    return blocking_checks
+
+
 def _status(decisions: list[dict[str, Any]]) -> str:
     if decisions and all(decision["decision"] == "promotion_ready" for decision in decisions):
         return "preview"
@@ -394,7 +415,7 @@ def _receipt_payload(
         "blocked_count": blocked_count,
         "candidate_decisions": decisions,
         "promotion_checks": checks,
-        "blockers": [check for check in checks if check["status"] == "blocker"],
+        "blockers": _top_level_blockers(checks, blockers),
         "mutation_performed": False,
         "acceptance_trace": OBSERVABILITY_PROMOTION_ACCEPTANCE_TRACE,
         "agent_summary": _agent_summary(status, ready_count, len(decisions), blocked_count, len(blockers)),
