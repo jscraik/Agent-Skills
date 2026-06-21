@@ -194,7 +194,8 @@ def _regular_files_check(special_files: list[str]) -> dict[str, Any]:
 
 
 def _inspect_directory(repo_root: Path, source_root: Path) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-    checks = [_skill_md_check(source_root)]
+    skill_md_check = _skill_md_check(source_root)
+    checks = [skill_md_check]
     inspected_files: list[dict[str, Any]] = []
     try:
         top_level_children = sorted(source_root.iterdir(), key=lambda path: path.name)
@@ -205,6 +206,12 @@ def _inspect_directory(repo_root: Path, source_root: Path) -> tuple[list[dict[st
     unexpected, symlinks = _top_level_findings(source_root, top_level_children)
     special_files: list[str] = []
     checks.append(_top_level_check(unexpected))
+    if skill_md_check["status"] == "blocker":
+        checks.append(_check("no_symlinks", "pass", "Recursive inspection skipped until SKILL.md is a regular file.", []))
+        checks.append(_check("regular_files_only", "pass", "Recursive inspection skipped until SKILL.md is a regular file.", []))
+        checks.append(_check("execution_blocked", "pass", "Intake inspects files only and does not execute skill code.", []))
+        checks.append(_check("install_blocked", "pass", "Intake does not write canonical source, runtime projections, or install roots.", []))
+        return checks, inspected_files
 
     for path in _iter_approved_package_paths(source_root, top_level_children):
         relative_path = _relative_package_path(source_root, path)

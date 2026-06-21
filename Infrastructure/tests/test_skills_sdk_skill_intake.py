@@ -131,6 +131,39 @@ class TestSkillsSdkSkillIntake(unittest.TestCase):
         self.assertTrue(any(check["id"] == "approved_top_level_paths" for check in receipt["blockers"]))
         self.assertEqual({item["path"] for item in receipt["inspected_files"]}, {"SKILL.md"})
 
+    def test_builder_skips_recursive_scan_when_skill_md_missing(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "external"
+            source.mkdir()
+            assets = source / "assets"
+            assets.mkdir()
+            (assets / "large-tree.txt").write_text("do not inspect", encoding="utf-8")
+
+            with mock.patch.object(Path, "rglob", side_effect=AssertionError("unexpected recursive walk")):
+                receipt = build_skill_intake_receipt(REPO_ROOT, source=source.as_posix())
+
+        self.assert_schema_valid(receipt)
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertTrue(any(check["id"] == "skill_md_present" for check in receipt["blockers"]))
+        self.assertEqual(receipt["inspected_files"], [])
+
+    def test_builder_skips_recursive_scan_when_skill_md_is_directory(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "external"
+            source.mkdir()
+            (source / "SKILL.md").mkdir()
+            scripts = source / "scripts"
+            scripts.mkdir()
+            (scripts / "install.sh").write_text("do not inspect", encoding="utf-8")
+
+            with mock.patch.object(Path, "rglob", side_effect=AssertionError("unexpected recursive walk")):
+                receipt = build_skill_intake_receipt(REPO_ROOT, source=source.as_posix())
+
+        self.assert_schema_valid(receipt)
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertTrue(any(check["id"] == "skill_md_present" for check in receipt["blockers"]))
+        self.assertEqual(receipt["inspected_files"], [])
+
     def test_builder_blocks_symlink_source_root_before_resolving(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             real_source = Path(tmp) / "real"
