@@ -228,6 +228,7 @@ __all__ = [
     "skills_sdk_package_signing_intent",
     "skills_sdk_trust_decide",
     "skills_sdk_observability_feedback",
+    "skills_sdk_observability_promote",
     "skills_sdk_emitter_preview",
     "skills_sdk_ci_policy_preview",
     "skills_sdk_security_adapters_preview",
@@ -4885,6 +4886,64 @@ def skills_sdk_eval_scenario_quality(repo_root: Path, target: str) -> CallResult
                 code="ERR_VALIDATION",
                 message=payload["agent_summary"],
                 fix_suggestion="Add or repair references/evals.yaml with ids, prompts, acceptance checks, eval modes, and deterministic safety checks.",
+            )
+        )
+    return result
+
+
+def skills_sdk_observability_promote(
+    repo_root: Path,
+    *,
+    feedback_receipt: str,
+    package_receipt: str,
+    eval_run_receipt: str,
+) -> CallResult:
+    """Preview whether observability feedback candidates can advance after package and eval proof."""
+    result = CallResult()
+    result.metadata["command"] = "sdk observability promote"
+    from ask.skills_sdk.observability_promotion import build_observability_promotion_receipt  # noqa: PLC0415
+
+    promotion_receipt = build_observability_promotion_receipt(
+        repo_root,
+        feedback_receipt_path=feedback_receipt,
+        package_receipt_path=package_receipt,
+        eval_run_receipt_path=eval_run_receipt,
+    )
+    payload = {
+        "schema_version": "skills-sdk-observability-promotion.v0",
+        "status": promotion_receipt["status"],
+        "facade_command": "skills-sdk observability promote",
+        "package_id": promotion_receipt["package_id"],
+        "package_digest": promotion_receipt["package_digest"],
+        "receipt": promotion_receipt,
+        "mutation_performed": False,
+        "validation_commands": [
+            _ask_validation_command(
+                "sdk",
+                "observability",
+                "promote",
+                "--feedback-receipt",
+                feedback_receipt,
+                "--package-receipt",
+                package_receipt,
+                "--eval-run-receipt",
+                eval_run_receipt,
+                "--preview",
+            )
+        ],
+        "agent_summary": promotion_receipt["agent_summary"],
+    }
+    result.data["skills_sdk_observability_promote"] = payload
+    if promotion_receipt["status"] == "blocked":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=payload["agent_summary"],
+                fix_suggestion=(
+                    "Provide matching observability feedback, package digest, and passing eval-run receipts "
+                    "for the same package id and digest."
+                ),
             )
         )
     return result

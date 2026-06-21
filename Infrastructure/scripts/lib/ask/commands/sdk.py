@@ -127,6 +127,12 @@ def _add_sdk_observability_parser(sdk_subparsers: argparse._SubParsersAction, gl
     feedback.add_argument("--events", required=True, help="Repo-relative or temporary redacted events JSONL")
     feedback.add_argument("--preview", action="store_true", help="Emit a non-mutating feedback receipt")
 
+    promote = subparsers.add_parser("promote", help="Preview feedback candidate promotion against package and eval receipts", parents=[global_parser])
+    promote.add_argument("--feedback-receipt", required=True, help="Repo-relative or temporary observability feedback receipt JSON")
+    promote.add_argument("--package-receipt", required=True, help="Repo-relative or temporary package digest receipt JSON")
+    promote.add_argument("--eval-run-receipt", required=True, help="Repo-relative or temporary eval run receipt JSON")
+    promote.add_argument("--preview", action="store_true", help="Emit a non-mutating promotion receipt")
+
 
 def _add_sdk_check_parser(
     sdk_subparsers: argparse._SubParsersAction,
@@ -490,6 +496,15 @@ def _dispatch_sdk_observability(repo_root: Path, args: argparse.Namespace) -> Ca
         if not args.preview:
             return _validation_error("sdk observability feedback", "Skills SDK observability feedback is preview-only in PU-026.", "ask sdk observability feedback --skill <target> --events <events.jsonl> --preview --json --robot")
         return skills_commands.skills_sdk_observability_feedback(repo_root, target=args.skill, events=args.events)
+    if args.observability_action == "promote":
+        if not args.preview:
+            return _validation_error("sdk observability promote", "Skills SDK observability promotion is preview-only in PU-026.", "ask sdk observability promote --feedback-receipt <feedback.json> --package-receipt <package.json> --eval-run-receipt <eval.json> --preview --json --robot")
+        return skills_commands.skills_sdk_observability_promote(
+            repo_root,
+            feedback_receipt=args.feedback_receipt,
+            package_receipt=args.package_receipt,
+            eval_run_receipt=args.eval_run_receipt,
+        )
     return build_unknown_action_result("sdk observability", args.observability_action)
 
 

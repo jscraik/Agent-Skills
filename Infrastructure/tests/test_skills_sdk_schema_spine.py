@@ -23,6 +23,7 @@ SCHEMA_NAMES = {
     "package-hardening-receipt": "package-hardening-receipt.v0.schema.json",
     "trust-decision-receipt": "trust-decision-receipt.v0.schema.json",
     "observability-feedback-receipt": "observability-feedback-receipt.v0.schema.json",
+    "observability-promotion-receipt": "observability-promotion-receipt.v0.schema.json",
     "emitter-preview-receipt": "emitter-preview-receipt.v0.schema.json",
     "ci-policy-preview-receipt": "ci-policy-preview-receipt.v0.schema.json",
     "security-adapter-discovery-receipt": "security-adapter-discovery-receipt.v0.schema.json",
@@ -209,6 +210,16 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertEqual(payload["event_count"], 1)
         self.assertEqual(payload["scenario_candidates"][0]["promotion_status"], "blocked_pending_package_eval")
         self.assertEqual(payload["skill_gap_candidates"][0]["promotion_status"], "blocked_pending_package_eval")
+        self.assertFalse(payload["mutation_performed"])
+
+    def test_observability_promotion_fixture_records_receipt_backed_candidate_decisions(self) -> None:
+        payload = self.assert_valid("observability-promotion-receipt", "observability-promotion-receipt.json")
+
+        self.assertEqual(payload["status"], "preview")
+        self.assertEqual(payload["operation"], "observability_promotion_preview")
+        self.assertEqual(payload["candidate_count"], 1)
+        self.assertEqual(payload["promotion_ready_count"], 1)
+        self.assertEqual(payload["candidate_decisions"][0]["decision"], "promotion_ready")
         self.assertFalse(payload["mutation_performed"])
 
     def test_emitter_preview_fixture_records_non_mutating_write_plan(self) -> None:
