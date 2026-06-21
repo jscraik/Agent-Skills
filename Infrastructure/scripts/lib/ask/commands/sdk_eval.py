@@ -81,7 +81,7 @@ def _add_ab_run_parser(subparsers: argparse._SubParsersAction, global_parser: ar
     run = subparsers.add_parser("ab-run", help="Execute a Codex-backed skill A/B eval", parents=[global_parser])
     _add_ab_common_arguments(run)
     run.add_argument("--evidence-root", default=".harness/artifacts/sdk-ab-evals")
-    run.add_argument("--timeout-seconds", type=int, default=1800, help="Timeout for each Codex variant run.")
+    run.add_argument("--timeout-seconds", type=_positive_int, default=1800, help="Timeout for each Codex variant run.")
     run.add_argument("--execute", action="store_true", help="Required explicit gate before invoking Codex exec.")
 
 
@@ -89,6 +89,13 @@ def _add_ab_judge_preview_parser(subparsers: argparse._SubParsersAction, global_
     judge = subparsers.add_parser("ab-judge-preview", help="Preview sanitized A/B judge input", parents=[global_parser])
     judge.add_argument("--run-receipt", required=True, help="Repo-relative completed ab-run receipt JSON")
     judge.add_argument("--preview", action="store_true", help="Emit a non-mutating judge input receipt")
+
+
+def _positive_int(value: str) -> int:
+    parsed = int(value)
+    if parsed < 1:
+        raise argparse.ArgumentTypeError("must be >= 1")
+    return parsed
 
 
 def dispatch_sdk_eval(repo_root: Path, args: argparse.Namespace) -> CallResult:
