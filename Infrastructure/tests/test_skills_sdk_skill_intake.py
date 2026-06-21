@@ -164,6 +164,53 @@ class TestSkillsSdkSkillIntake(unittest.TestCase):
         self.assertTrue(any(check["id"] == "skill_md_present" for check in receipt["blockers"]))
         self.assertEqual(receipt["inspected_files"], [])
 
+    def test_builder_preserves_top_level_symlink_blocker_when_skill_md_invalid(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "external"
+            source.mkdir()
+            target = Path(tmp) / "target.md"
+            target.write_text("not a skill", encoding="utf-8")
+            skill_link = source / "SKILL.md"
+            try:
+                skill_link.symlink_to(target)
+            except OSError as exc:
+                self.skipTest(f"symlink creation unavailable: {exc}")
+
+            with mock.patch.object(Path, "rglob", side_effect=AssertionError("unexpected recursive walk")):
+                receipt = build_skill_intake_receipt(REPO_ROOT, source=source.as_posix())
+
+        self.assert_schema_valid(receipt)
+        self.assertEqual(receipt["status"], "blocked")
+        blocker_ids = {check["id"] for check in receipt["blockers"]}
+        self.assertIn("skill_md_present", blocker_ids)
+        self.assertIn("no_symlinks", blocker_ids)
+        symlink_check = next(check for check in receipt["intake_checks"] if check["id"] == "no_symlinks")
+        self.assertEqual(symlink_check["evidence"], ["SKILL.md"])
+        self.assertEqual(receipt["inspected_files"], [])
+
+    def test_builder_blocks_unreadable_approved_files(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "external"
+            source.mkdir()
+            (source / "SKILL.md").write_text(
+                "---\nname: external\ndescription: external\n---\n\n# External\n",
+                encoding="utf-8",
+            )
+            asset = source / "assets"
+            asset.mkdir()
+            unreadable = asset / "blocked.txt"
+            unreadable.write_text("cannot hash", encoding="utf-8")
+
+            with mock.patch("ask.skills_sdk.skill_intake._digest_file", side_effect=OSError("permission denied")):
+                receipt = build_skill_intake_receipt(REPO_ROOT, source=source.as_posix())
+
+        self.assert_schema_valid(receipt)
+        self.assertEqual(receipt["status"], "blocked")
+        readable_check = next(check for check in receipt["intake_checks"] if check["id"] == "source_files_readable")
+        self.assertEqual(readable_check["status"], "blocker")
+        self.assertIn("SKILL.md", readable_check["evidence"])
+        self.assertIn("assets/blocked.txt", readable_check["evidence"])
+
     def test_builder_blocks_symlink_source_root_before_resolving(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             real_source = Path(tmp) / "real"

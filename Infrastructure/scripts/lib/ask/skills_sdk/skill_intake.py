@@ -157,6 +157,7 @@ def _inspect_allowed_path(
     inspected_files: list[dict[str, Any]],
     symlinks: list[str],
     special_files: list[str],
+    unreadable_files: list[str],
 ) -> None:
     relative = relative_path.as_posix()
     if path.is_symlink():
@@ -167,7 +168,13 @@ def _inspect_allowed_path(
     if not path.is_file():
         special_files.append(relative)
         return
-    inspected_files.append({"path": relative, "digest": _digest_file(path), "size_bytes": path.stat().st_size})
+    try:
+        size_bytes = path.stat().st_size
+        digest = _digest_file(path)
+    except OSError:
+        unreadable_files.append(relative)
+        return
+    inspected_files.append({"path": relative, "digest": digest, "size_bytes": size_bytes})
 
 
 def _iter_approved_package_paths(source_root: Path, top_level_children: list[Path]) -> list[Path]:
@@ -193,6 +200,12 @@ def _regular_files_check(special_files: list[str]) -> dict[str, Any]:
     return _check("regular_files_only", "pass", "Source contains only regular files and directories.", [])
 
 
+def _readable_files_check(unreadable_files: list[str]) -> dict[str, Any]:
+    if unreadable_files:
+        return _check("source_files_readable", "blocker", "External skill intake requires approved files to be readable.", sorted(set(unreadable_files)))
+    return _check("source_files_readable", "pass", "Approved source files were readable.", [])
+
+
 def _non_mutating_intake_checks() -> list[dict[str, Any]]:
     return [
         _check("execution_blocked", "pass", "Intake inspects files only and does not execute skill code.", []),
@@ -212,20 +225,23 @@ def _inspect_directory(repo_root: Path, source_root: Path) -> tuple[list[dict[st
 
     unexpected, symlinks = _top_level_findings(source_root, top_level_children)
     special_files: list[str] = []
+    unreadable_files: list[str] = []
     checks.append(_top_level_check(unexpected))
     if skill_md_check["status"] == "blocker":
-        checks.append(_check("no_symlinks", "pass", "Recursive inspection skipped until SKILL.md is a regular file.", []))
+        checks.append(_symlink_check(symlinks))
         checks.append(_check("regular_files_only", "pass", "Recursive inspection skipped until SKILL.md is a regular file.", []))
+        checks.append(_check("source_files_readable", "pass", "Recursive inspection skipped until SKILL.md is a regular file.", []))
     else:
         for path in _iter_approved_package_paths(source_root, top_level_children):
             relative_path = _relative_package_path(source_root, path)
             if relative_path is None:
                 checks.append(_check("path_containment", "blocker", "Resolved path escaped the intake root.", [_repo_label(repo_root, path)]))
                 continue
-            _inspect_allowed_path(path, relative_path, inspected_files, symlinks, special_files)
+            _inspect_allowed_path(path, relative_path, inspected_files, symlinks, special_files, unreadable_files)
 
         checks.append(_symlink_check(symlinks))
         checks.append(_regular_files_check(special_files))
+        checks.append(_readable_files_check(unreadable_files))
     checks.extend(_non_mutating_intake_checks())
     return checks, inspected_files
 
