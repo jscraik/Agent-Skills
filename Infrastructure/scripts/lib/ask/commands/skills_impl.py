@@ -666,11 +666,19 @@ def _safe_tessl_skill_key(raw_name: str) -> str:
 
 
 def _write_tessl_staged_json(path: Path, payload: dict[str, Any], staging_root_real: str, label: str) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
+    safe_path = _safe_tessl_staging_path(path, staging_root_real, label)
+    safe_path.parent.mkdir(parents=True, exist_ok=True)
+    safe_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def _safe_tessl_staging_path(path: Path, staging_root_real: str, label: str) -> Path:
+    parent_real = os.path.realpath(path.parent)
+    if os.path.commonpath([staging_root_real, parent_real]) != staging_root_real:
+        raise ValueError(f"Tessl review staging {label} parent escaped the staging root.")
     target_real = os.path.realpath(path)
     if os.path.commonpath([staging_root_real, target_real]) != staging_root_real:
         raise ValueError(f"Tessl review staging {label} path escaped the staging root.")
-    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return Path(target_real)
 
 
 def _raise_if_tessl_support_tree_has_symlink(support_dir: Path, label: str) -> None:

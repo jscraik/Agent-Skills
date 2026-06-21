@@ -3,6 +3,13 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+from pydantic import ValidationError
+
+from ask.skills_sdk.scorer_quality_contracts import (
+    validate_scorer_quality_metadata,
+    validate_scorer_quality_receipt,
+)
+
 
 SCORER_QUALITY_SCHEMA_VERSION = "skills-sdk.scorer-quality-receipt.v0"
 SCORER_QUALITY_SCHEMA_URI = (
@@ -134,6 +141,33 @@ def _parameters_checks(scorer_quality: dict[str, Any], scorer_type: str) -> list
     ]
 
 
+def _contract_checks(scorer_quality: dict[str, Any]) -> list[dict[str, Any]]:
+    if not scorer_quality:
+        return []
+    try:
+        validate_scorer_quality_metadata(scorer_quality)
+    except ValidationError as exc:
+        return [
+            _check(
+                "scorer_quality_contract_valid",
+                "blocker",
+                "scorer_quality metadata must satisfy the strict Pydantic contract.",
+                _validation_error_evidence(exc),
+            )
+        ]
+    return [
+        _check(
+            "scorer_quality_contract_valid",
+            "pass",
+            "scorer_quality metadata satisfies the strict Pydantic contract.",
+        )
+    ]
+
+
+def _validation_error_evidence(exc: ValidationError) -> list[str]:
+    return [".".join(str(part) for part in error["loc"]) + f":{error['msg']}" for error in exc.errors()]
+
+
 def _presence_checks(repo_root: Path, evals_path: Path, scorer_quality: dict[str, Any], load_error: str | None) -> list[dict[str, Any]]:
     return [
         _check("evals_yaml_present", "pass" if evals_path.is_file() else "blocker", "Skill must carry references/evals.yaml.", [_repo_relative(repo_root, evals_path)]),
@@ -176,6 +210,7 @@ def _scorer_quality_checks(repo_root: Path, evals_path: Path, evals_payload: dic
     scorer_quality = _mapping(evals_payload.get("scorer_quality") if evals_payload else None)
     scorer_type = str(scorer_quality.get("scorer_type") or "")
     checks = _presence_checks(repo_root, evals_path, scorer_quality, load_error)
+    checks.extend(_contract_checks(scorer_quality))
     checks.extend(_identity_checks(scorer_quality))
     checks.extend(_calibration_checks(repo_root, evals_path, scorer_quality))
     checks.extend(_rationale_checks(scorer_quality, scorer_type))
@@ -192,7 +227,7 @@ def _receipt(
     checks: list[dict[str, Any]],
 ) -> dict[str, Any]:
     blockers = [check for check in checks if check["status"] == "blocker"]
-    return {
+    receipt = {
         "schema_version": SCORER_QUALITY_SCHEMA_VERSION,
         "schema_uri": SCORER_QUALITY_SCHEMA_URI,
         "status": "blocked" if blockers else "preview",
@@ -208,6 +243,7 @@ def _receipt(
         "acceptance_trace": SCORER_QUALITY_ACCEPTANCE_TRACE,
         "agent_summary": f"scorer quality preview checked scorer calibration for {query}.",
     }
+    return validate_scorer_quality_receipt(receipt).model_dump()
 
 
 def build_scorer_quality_receipt(repo_root: Path, *, source_path: Path, query: str) -> dict[str, Any]:

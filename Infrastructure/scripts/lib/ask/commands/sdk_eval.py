@@ -153,13 +153,38 @@ def _preview_required(command: str, message: str, next_command: str, args: argpa
 
 
 def _dispatch_scenario_quality(repo_root: Path, args: argparse.Namespace) -> CallResult:
-    error = _preview_required("sdk eval scenario-quality", "Scenario quality requires --preview.", _scenario_quality_next(), args)
-    return error or skills_commands.skills_sdk_eval_scenario_quality(repo_root, target=args.target)
+    return _dispatch_preview_target(
+        repo_root,
+        args,
+        command="sdk eval scenario-quality",
+        message="Scenario quality requires --preview.",
+        next_command=_scenario_quality_next(),
+        handler=skills_commands.skills_sdk_eval_scenario_quality,
+    )
 
 
 def _dispatch_scorer_quality(repo_root: Path, args: argparse.Namespace) -> CallResult:
-    error = _preview_required("sdk eval scorer-quality", "Scorer quality requires --preview.", _scorer_quality_next(), args)
-    return error or skills_commands.skills_sdk_eval_scorer_quality(repo_root, target=args.target)
+    return _dispatch_preview_target(
+        repo_root,
+        args,
+        command="sdk eval scorer-quality",
+        message="Scorer quality requires --preview.",
+        next_command=_scorer_quality_next(),
+        handler=skills_commands.skills_sdk_eval_scorer_quality,
+    )
+
+
+def _dispatch_preview_target(
+    repo_root: Path,
+    args: argparse.Namespace,
+    *,
+    command: str,
+    message: str,
+    next_command: str,
+    handler: Callable[[Path, str], CallResult],
+) -> CallResult:
+    error = _preview_required(command, message, next_command, args)
+    return error or handler(repo_root, target=args.target)
 
 
 def _dispatch_profiles(repo_root: Path, args: argparse.Namespace) -> CallResult:

@@ -3544,6 +3544,29 @@ def test_plugin_eval_deferred_budget_fail_still_blocks_low_grade() -> None:
     assert parsed["posture"] == "blocking"
 
 
+def test_plugin_eval_deferred_budget_mention_does_not_hide_other_failures() -> None:
+    parsed = _parse_plugin_eval(
+        """# Plugin Eval Report
+
+## At a Glance
+- Score: 90/100
+- Grade: A-
+- Risk: high
+- Checks: 1 fail, 0 warn, 2 info
+- Active budget: 1293 tokens (good)
+
+## Checks
+- [FAIL] missing_contract: required evidence is missing.
+- [INFO] deferred_cost_tokens-budget-high was reviewed as a future follow-up.
+"""
+    )
+
+    assert parsed["grade_acceptable"] is True
+    assert parsed["fail_count"] == 1
+    assert parsed["blocking_fail_count"] == 1
+    assert parsed["posture"] == "blocking"
+
+
 def test_review_dashboard_renders_plugin_eval_acceptance_policy(tmp_path: Path) -> None:
     report_path = tmp_path / "review.json"
     output_path = tmp_path / "review.html"

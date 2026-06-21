@@ -174,7 +174,7 @@ def _parse_plugin_eval(stdout: str, status: str = "") -> dict[str, Any]:
     grade_text = grade.strip() if isinstance(grade, str) else grade
     grade_acceptable = _grade_rank(grade_text) >= _grade_rank("B+")
     active_budget_good = bool(re.search(r"Active budget:\s*\d+\s+tokens\s+\(good\)", stdout))
-    deferred_budget_only = fail_count == 1 and "deferred_cost_tokens-budget-high" in stdout and active_budget_good
+    deferred_budget_only = fail_count == 1 and _has_deferred_budget_failure(stdout) and active_budget_good
     blocking_fail_count = 0 if deferred_budget_only and grade_acceptable else fail_count
     posture, posture_detail = _plugin_eval_posture(
         fail_count=fail_count,
@@ -216,6 +216,13 @@ def _plugin_eval_posture(*, fail_count: int, warn_count: int, grade_acceptable: 
             "track warnings as follow-up or prove observed usage.",
         )
     return "pass", "Plugin Eval meets the local budget and ergonomics guardrail."
+
+
+def _has_deferred_budget_failure(stdout: str) -> bool:
+    return any(
+        re.search(r"\[FAIL\]\s+deferred_cost_tokens-budget-high\b", line, flags=re.IGNORECASE)
+        for line in stdout.splitlines()
+    )
 
 
 def _audit_security_summary(audit_data: dict[str, Any]) -> dict[str, Any]:

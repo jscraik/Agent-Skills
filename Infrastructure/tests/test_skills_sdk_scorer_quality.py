@@ -13,6 +13,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
 from ask.skills_sdk.scorer_quality import build_scorer_quality_receipt  # noqa: E402
+from ask.skills_sdk.scorer_quality_contracts import validate_scorer_quality_receipt  # noqa: E402
 
 
 FIXTURE_SKILL = "Skills/agent-ops/sdk-scenario-generator"
@@ -56,6 +57,31 @@ scorer_quality:
     expected_score: 0
 cases: []
 """
+UNKNOWN_FIELD_SCORER_YAML = """schema_version: '2.0'
+skill_name: sample
+scorer_quality:
+  schema_version: skills-sdk.scorer-quality.v1
+  scorer_id: strict.release-scorer
+  scorer_type: deterministic
+  scope: suite
+  scorer_version_or_digest: strict-local
+  pass_threshold: 0.8
+  deterministic_checks_first: true
+  unexpected_field: should-block
+  segmentation_fields: [category, claim_ids, eval_modes]
+  calibration_cases:
+  - {id: obvious-correct, probe_type: obvious_correct, expected_score: 1}
+  - {id: obvious-wrong, probe_type: obvious_wrong, expected_score: 0}
+  - {id: short-correct-vs-verbose-wrong, probe_type: short_correct_vs_verbose_wrong, expected_direction: short_correct_wins}
+  - {id: copied-rubric-text-rejected, probe_type: rubric_copying_rejected, expected_score: 0}
+  - {id: skill-name-mention-not-enough, probe_type: skill_name_mention_not_enough, expected_score: 0}
+  - {id: evidence-lane-overclaim-rejected, probe_type: evidence_lane_overclaim_rejected, expected_score: 0}
+cases: []
+"""
+TYPE_COERCION_SCORER_YAML = UNKNOWN_FIELD_SCORER_YAML.replace(
+    "  unexpected_field: should-block\n  segmentation_fields:",
+    '  segmentation_fields:',
+).replace("  pass_threshold: 0.8", '  pass_threshold: "0.8"')
 
 
 def _command_env() -> dict[str, str]:
@@ -169,6 +195,36 @@ cases: []
         self.assertIn("judge_parameters_versioned", blocker_ids)
         self.assertIn("rationale_audit_required", blocker_ids)
         self.assertIn("rationale_audit_sampled", blocker_ids)
+
+    def test_metadata_contract_blocks_unknown_fields(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(Path(temp_dir), UNKNOWN_FIELD_SCORER_YAML)
+
+            receipt = build_scorer_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        blockers = {check["id"]: check for check in receipt["blockers"]}
+        self.assertIn("scorer_quality_contract_valid", blockers)
+        self.assertTrue(any("unexpected_field" in item for item in blockers["scorer_quality_contract_valid"]["evidence"]))
+
+    def test_metadata_contract_blocks_type_coercion(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(Path(temp_dir), TYPE_COERCION_SCORER_YAML)
+
+            receipt = build_scorer_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        blockers = {check["id"]: check for check in receipt["blockers"]}
+        self.assertIn("scorer_quality_contract_valid", blockers)
+        self.assertTrue(any("pass_threshold" in item for item in blockers["scorer_quality_contract_valid"]["evidence"]))
+
+    def test_builder_receipt_loads_through_pydantic_contract(self) -> None:
+        process = _run_ask("sdk", "eval", "scorer-quality", FIXTURE_SKILL, "--preview", "--json", "--robot")
+        self.assertEqual(process.returncode, 0, process.stderr)
+        envelope = json.loads(process.stdout)
+
+        model = validate_scorer_quality_receipt(envelope["data"]["skills_sdk_eval_scorer_quality"]["receipt"])
+
+        self.assertTrue(model.ready)
+        self.assertEqual(model.operation, "scorer_quality_preview")
 
 
 if __name__ == "__main__":

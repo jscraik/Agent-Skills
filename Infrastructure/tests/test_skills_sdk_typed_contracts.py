@@ -16,6 +16,7 @@ from ask.skills_sdk import typed_contracts as contracts  # noqa: E402
 from ask.skills_sdk.ci_contracts import validate_ci_policy_preview_receipt  # noqa: E402
 from ask.skills_sdk.emitter_contracts import validate_emitter_preview_receipt  # noqa: E402
 from ask.skills_sdk.scenario_quality_contracts import validate_scenario_quality_receipt  # noqa: E402
+from ask.skills_sdk.scorer_quality_contracts import validate_scorer_quality_receipt  # noqa: E402
 from ask.skills_sdk.static_explorer_contracts import validate_static_explorer_receipt  # noqa: E402
 
 
@@ -271,6 +272,21 @@ class TestSkillsSdkTypedContracts(unittest.TestCase):
         self.assertEqual(model.model_config["extra"], "forbid")
         self.assertTrue(model.model_config["strict"])
         self.assertEqual(model.scenario_count, 1)
+
+    def test_scorer_quality_contract_rejects_promotion_claims(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "scorer-quality-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["promotion_performed"] = True
+
+        with self.assertRaises(ValidationError):
+            validate_scorer_quality_receipt(payload)
+
+    def test_scorer_quality_fixture_loads_through_dedicated_contract(self) -> None:
+        model = validate_scorer_quality_receipt(_json(FIXTURE_DIR / "valid" / "scorer-quality-receipt.json"))
+
+        self.assertEqual(model.model_config["extra"], "forbid")
+        self.assertTrue(model.model_config["strict"])
+        self.assertTrue(model.ready)
 
     def test_eval_run_contract_accepts_legacy_receipt_without_package_identity(self) -> None:
         payload = _json(FIXTURE_DIR / "valid" / "eval-run-receipt.json")

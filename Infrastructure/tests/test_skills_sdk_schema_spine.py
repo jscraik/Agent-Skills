@@ -29,6 +29,7 @@ SCHEMA_NAMES = {
     "security-adapter-discovery-receipt": "security-adapter-discovery-receipt.v0.schema.json",
     "static-explorer-receipt": "static-explorer-receipt.v0.schema.json",
     "scenario-quality-receipt": "scenario-quality-receipt.v0.schema.json",
+    "scorer-quality-receipt": "scorer-quality-receipt.v0.schema.json",
     "signing-policy": "signing-policy.v0.schema.json",
     "signing-intent-receipt": "signing-intent-receipt.v0.schema.json",
     "sandbox-profile": "sandbox-profile.v0.schema.json",
@@ -288,6 +289,25 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         with self.assertRaises(AssertionError):
             _validate_schema_subset(
                 self.schemas["scenario-quality-receipt"],
+                payload,
+                {**self.schemas, **self.schemas_by_file},
+            )
+
+    def test_scorer_quality_fixture_records_non_mutating_gate(self) -> None:
+        payload = self.assert_valid("scorer-quality-receipt", "scorer-quality-receipt.json")
+
+        self.assertEqual(payload["status"], "preview")
+        self.assertTrue(payload["ready"])
+        self.assertFalse(payload["mutation_performed"])
+        self.assertFalse(payload["promotion_performed"])
+
+    def test_scorer_quality_schema_rejects_empty_check_evidence(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "scorer-quality-receipt.json")
+        payload["quality_checks"][0]["evidence"] = [""]
+
+        with self.assertRaises(AssertionError):
+            _validate_schema_subset(
+                self.schemas["scorer-quality-receipt"],
                 payload,
                 {**self.schemas, **self.schemas_by_file},
             )

@@ -11,6 +11,7 @@ repo_root = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(repo_root / "Infrastructure" / "scripts" / "lib"))
 
 from ask.commands.skills_impl import (  # noqa: E402
+    _safe_tessl_staging_path,
     _subprocess_env_with_uv_cache,
     _summarize_family_benchmark_failure,
     _write_tessl_plugin_wrapper,
@@ -114,6 +115,16 @@ class TestAskSkillsErrors(unittest.TestCase):
 
             with self.assertRaisesRegex(ValueError, "symlinked support path"):
                 _write_tessl_plugin_wrapper(repo_root, "Skills/example-skill", repo_root / "tmp-tessl")
+
+    def test_tessl_staged_json_path_rejects_escaping_parent_before_mkdir(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            staging_root = Path(tmpdir) / "staging"
+            escaped = Path(tmpdir) / "outside" / "plugin.json"
+
+            with self.assertRaisesRegex(ValueError, "parent escaped"):
+                _safe_tessl_staging_path(escaped, str(staging_root.resolve(strict=False)), "plugin manifest")
+
+            self.assertFalse(escaped.parent.exists())
 
     @patch("ask.commands.skills_impl._get_python_command", return_value=["python3"])
     @patch("ask.commands.skills_impl.subprocess.run")
