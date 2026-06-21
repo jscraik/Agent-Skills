@@ -233,6 +233,7 @@ __all__ = [
     "skills_sdk_security_adapters_preview",
     "skills_sdk_static_explorer_preview",
     "skills_sdk_eval_scenario_quality",
+    "skills_sdk_eval_scorer_quality",
     "skills_sdk_eval_profiles_preview",
     "skills_sdk_eval_ab_rubric_preview",
     "skills_sdk_eval_ab_preview",
@@ -4875,6 +4876,60 @@ def skills_sdk_eval_scenario_quality(repo_root: Path, target: str) -> CallResult
                 fix_suggestion="Add or repair references/evals.yaml with ids, prompts, acceptance checks, eval modes, and deterministic safety checks.",
             )
         )
+    return result
+
+
+def skills_sdk_eval_scorer_quality(repo_root: Path, target: str) -> CallResult:
+    """Preview scorer calibration quality without promoting or mutating eval sources."""
+    result = CallResult()
+    result.metadata["command"] = "sdk eval scorer-quality"
+    query = target.strip()
+    target_info, _audit_target = _resolve_doctor_target(repo_root, query)
+    source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
+    source_path = Path(str(source_path_value)) if source_path_value else None
+    if source_path and not source_path.is_absolute():
+        source_path = repo_root / source_path
+    if not source_path:
+        result.status = "error"
+        result.data["skills_sdk_eval_scorer_quality"] = {
+            "schema_version": "skills-sdk-eval-scorer-quality.v0",
+            "status": "blocked",
+            "query": query,
+            "canonical_source_path": source_path_value,
+            "receipt": None,
+            "ready": False,
+            "mutation_performed": False,
+            "promotion_performed": False,
+            "validation_commands": [_ask_validation_command("sdk", "eval", "scorer-quality", query, "--preview")],
+            "agent_summary": f"skills-sdk eval scorer-quality is blocked for {query}: canonical source is missing.",
+        }
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Skills SDK scorer quality is missing a canonical SKILL.md source for '{query}'.",
+                fix_suggestion=_ask_validation_command("sdk", "eval", "scorer-quality", "<skill>", "--preview"),
+            )
+        )
+        return result
+
+    from ask.skills_sdk.scorer_quality import build_scorer_quality_receipt  # noqa: PLC0415
+
+    receipt = build_scorer_quality_receipt(repo_root, source_path=source_path, query=query)
+    payload = {
+        "schema_version": "skills-sdk-eval-scorer-quality.v0",
+        "status": receipt["status"],
+        "query": query,
+        "canonical_source_path": source_path_value,
+        "facade_command": "skills-sdk eval scorer-quality",
+        "receipt": receipt,
+        "ready": receipt["ready"],
+        "blocked_count": len(receipt["blockers"]),
+        "mutation_performed": False,
+        "promotion_performed": False,
+        "validation_commands": [_ask_validation_command("sdk", "eval", "scorer-quality", query, "--preview")],
+        "agent_summary": receipt["agent_summary"],
+    }
+    result.data["skills_sdk_eval_scorer_quality"] = payload
     return result
 
 

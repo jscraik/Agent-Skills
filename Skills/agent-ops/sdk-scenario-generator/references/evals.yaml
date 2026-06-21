@@ -70,6 +70,49 @@ claims:
   - Sequence or repeated-operation scenario
   - Shared-state or integration-boundary scenario
   - File, permission, quota, or corrupted-input scenario when relevant
+scorer_quality:
+  schema_version: skills-sdk.scorer-quality.v1
+  scorer_id: sdk-scenario-generator.release-scorer
+  scorer_type: hybrid
+  scope: suite
+  scorer_version_or_digest: evals-yaml-local-2026-06-21
+  pass_threshold: 0.9
+  deterministic_checks_first: true
+  parameters:
+    model: tessl-local-review
+    temperature: 0
+    trial_count: 1
+  rationale_audit:
+    required: true
+    sampled_count: 3
+  bias_probes:
+  - short_correct_vs_verbose_wrong
+  - verbosity_bias
+  segmentation_fields:
+  - category
+  - claim_ids
+  - eval_modes
+  calibration_cases:
+  - id: obvious-correct-evidence-lanes
+    probe_type: obvious_correct
+    expected_score: 1
+    expected_label: pass
+  - id: obvious-wrong-overclaim
+    probe_type: obvious_wrong
+    expected_score: 0
+    expected_label: fail
+  - id: short-correct-vs-verbose-wrong
+    probe_type: short_correct_vs_verbose_wrong
+    expected_direction: short_correct_wins
+  - id: copied-rubric-text-rejected
+    probe_type: rubric_copying_rejected
+    expected_score: 0
+  - id: skill-name-mention-not-enough
+    probe_type: skill_name_mention_not_enough
+    expected_score: 0
+  - id: evidence-lane-overclaim-rejected
+    probe_type: evidence_lane_overclaim_rejected
+    expected_score: 0
 cases:
 - id: happy-skill-update-scenarios
   name: Skill update imports reviewed scenarios

@@ -21,6 +21,7 @@ def add_sdk_eval_parser(
     subparsers = parser.add_subparsers(dest="eval_action", required=True)
     _add_run_parser(subparsers, global_parser)
     _add_scenario_quality_parser(subparsers, global_parser)
+    _add_scorer_quality_parser(subparsers, global_parser)
     _add_profiles_parser(subparsers, global_parser)
     _add_ab_rubric_parser(subparsers, global_parser)
     _add_ab_preview_parser(subparsers, global_parser)
@@ -45,6 +46,12 @@ def _add_scenario_quality_parser(subparsers: argparse._SubParsersAction, global_
     quality = subparsers.add_parser("scenario-quality", help="Preview eval scenario promotion quality", parents=[global_parser])
     quality.add_argument("target", help="Skill handle or repo-relative skill source path")
     quality.add_argument("--preview", action="store_true", help="Emit a non-mutating scenario quality receipt")
+
+
+def _add_scorer_quality_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
+    quality = subparsers.add_parser("scorer-quality", help="Preview eval scorer calibration quality", parents=[global_parser])
+    quality.add_argument("target", help="Skill handle or repo-relative skill source path")
+    quality.add_argument("--preview", action="store_true", help="Emit a non-mutating scorer quality receipt")
 
 
 def _add_profiles_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
@@ -112,6 +119,7 @@ def dispatch_sdk_eval(repo_root: Path, args: argparse.Namespace) -> CallResult:
     dispatchers: dict[str, Callable[[Path, argparse.Namespace], CallResult]] = {
         "run": _dispatch_run,
         "scenario-quality": _dispatch_scenario_quality,
+        "scorer-quality": _dispatch_scorer_quality,
         "profiles": _dispatch_profiles,
         "ab-rubric": _dispatch_ab_rubric,
         "ab-preview": _dispatch_ab_preview,
@@ -147,6 +155,11 @@ def _preview_required(command: str, message: str, next_command: str, args: argpa
 def _dispatch_scenario_quality(repo_root: Path, args: argparse.Namespace) -> CallResult:
     error = _preview_required("sdk eval scenario-quality", "Scenario quality requires --preview.", _scenario_quality_next(), args)
     return error or skills_commands.skills_sdk_eval_scenario_quality(repo_root, target=args.target)
+
+
+def _dispatch_scorer_quality(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    error = _preview_required("sdk eval scorer-quality", "Scorer quality requires --preview.", _scorer_quality_next(), args)
+    return error or skills_commands.skills_sdk_eval_scorer_quality(repo_root, target=args.target)
 
 
 def _dispatch_profiles(repo_root: Path, args: argparse.Namespace) -> CallResult:
@@ -213,6 +226,10 @@ def _ab_common_kwargs(args: argparse.Namespace) -> dict[str, str]:
 
 def _scenario_quality_next() -> str:
     return "ask sdk eval scenario-quality <skill> --preview --json --robot"
+
+
+def _scorer_quality_next() -> str:
+    return "ask sdk eval scorer-quality <skill> --preview --json --robot"
 
 
 def _ab_preview_next() -> str:

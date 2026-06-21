@@ -93,7 +93,8 @@ Create gold-standard Skills SDK scenarios, then stage them for internal evals an
 
 1. Confirm SDK setup with `references/sdk-pipeline-setup.md`; keep package,
    scenario quality, eval runner, dry-run, and live Tessl proof separate.
-2. Use evals-router to choose the assertion contract before writing scenarios.
+2. Use evals-router to choose the assertion contract and scorer-quality gate
+   before writing scenarios.
 3. Inspect the target `SKILL.md`, `references/contract.yaml`,
    `references/evals.yaml`, available fixture notes, KnowledgeOS handoff
    evidence, latest eval results, and `scenario-sources.json` when present.
@@ -105,8 +106,8 @@ Create gold-standard Skills SDK scenarios, then stage them for internal evals an
    Registry-boundary checks before canonical import.
 6. Import only reviewed cases into `references/evals.yaml` or reviewed fixture
    notes under `references/evals/`; do not import raw generated output.
-7. Run scenario-quality, internal evals when available, package verification,
-   and external review before any readiness claim.
+7. Run scorer-quality, scenario-quality, internal evals when available,
+   package verification, and external review before any readiness claim.
 8. For behavioral skills, live Tessl readiness also requires at least 20
    gold-standard scenarios, run-budget proof, usage score >= 90%, and usage not
    below baseline.
@@ -199,6 +200,7 @@ Fix the scenario set before rerunning live Tessl unless per-scenario evidence pr
 ## Validation
 
 - `./bin/ask skills package verify <skill-path> --json --robot`
+- `./bin/ask sdk eval scorer-quality <skill-path> --preview --json --robot`
 - `./bin/plugin-eval analyze <skill-path> --format json`
 - Run Tessl scenario preparation only when the workspace auth/project link is available.
 - For behavioral skills, run Tessl dry-run staging only after `references/evals.yaml`, reviewed fixture notes, and `scenario-sources.json` prove the minimum gold-scenario set exists.

@@ -98,5 +98,7 @@ For lessons and references, verify the file path exists, links resolve, and cite
 
 ## See Also
 
-- [sdk-scenario-generator](../agent-ops/sdk-scenario-generator/SKILL.md)
-- [evals-router](../agent-ops/evals-router/SKILL.md)
+| Skill | Why |
+| --- | --- |
+| [[sdk-scenario-generator]] | Turns learning-workflow behavior into SDK eval scenarios. |
+| [[evals-router]] | Routes smoke and release eval checks for skill behavior. |
