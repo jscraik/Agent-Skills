@@ -41,8 +41,7 @@
     }
   ],
   "card_id": "runtime-card-unslopify-codex",
-  "command_handle": "$unslopify",
-  "created_at": "2026-06-13T11:18:16Z",
+  "created_at": "2026-06-20T20:41:31Z",
   "evidence_receipts": [
     {
       "artifact_path": ".harness/evidence/runtime-proof/unslopify/codex/runtime-card.json",
@@ -53,7 +52,7 @@
       "command": "./bin/ask skills proof unslopify --runtime-target codex --json --robot",
       "evidence_type": "command",
       "exit_code": 2,
-      "observed_at": "2026-06-13T11:18:16Z",
+      "observed_at": "2026-06-20T20:41:31Z",
       "probe_artifact_path": ".harness/evidence/runtime-proof/unslopify/codex/probe.json",
       "probe_command": "./bin/ask skills proof unslopify --runtime-target codex --json --robot",
       "probe_exit_code": 2,
@@ -71,7 +70,7 @@
   "limitations": [
     {
       "class": "skill_invocation_not_asserted",
-      "message": "Codex session metadata was observed for this workspace; this proof still verifies command-surface reachability rather than a dedicated skill tool invocation event. Agents observability counters are attached when available but are not treated as per-skill invocation proof."
+      "message": "Codex session metadata was observed for this workspace; this proof still verifies SDK-flat runtime reachability rather than a dedicated skill tool invocation event. Agents observability counters are attached when available but are not treated as per-skill invocation proof."
     }
   ],
   "mutation_scope": "evidence_write",
@@ -83,18 +82,18 @@
     "expected_outcome": "Operator can rerun the proof command and inspect schema-valid runtime evidence.",
     "next_commands": [
       {
-        "command": "./bin/ask skills sync --scope user --projection rooted --dry-run --json --robot",
+        "command": "./bin/ask skills sync --scope user --projection flat --dry-run --json --robot",
         "expected_outcome": "Reports whether ~/.codex/skills or ~/.agents/skills would be relinked before mutation.",
         "permission_profile": {
           "filesystem": "read workspace and user runtime links",
           "network": "not required"
         },
         "preconditions": [
-          "Workspace rooted projection validates cleanly."
+          "Workspace flat projection validates cleanly."
         ]
       },
       {
-        "command": "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
+        "command": "./bin/ask skills sync --scope workspace --projection flat --json --robot",
         "expected_outcome": "Refreshes .agents/skills from canonical frontmatter and skill sources.",
         "permission_profile": {
           "filesystem": "write workspace runtime projection",
@@ -105,7 +104,7 @@
         ]
       },
       {
-        "command": "./bin/ask skills sync --scope user --projection rooted --json --robot",
+        "command": "./bin/ask skills sync --scope user --projection flat --json --robot",
         "expected_outcome": "Makes user-level Codex and Agents skill runtimes point at the workspace projection.",
         "permission_profile": {
           "filesystem": "write home-directory runtime links",
@@ -132,17 +131,23 @@
       "network": "not required"
     },
     "preconditions": [
-      "Run workspace and user skill sync if the runtime link or command-surface handle is absent."
+      "Run workspace and user skill sync if the SDK skill handle or runtime link is absent."
     ],
     "reason": "Restore healthy Codex observability or collect a fresh skill invocation event, then rerun the explicit runtime proof.",
     "recovery_status": "partial"
   },
   "runtime_diagnostics": {
+    "direct_runtime_projection": {
+      "exists": true,
+      "path": "${WORKSPACE_ROOT}/.agents/skills/unslopify/SKILL.md",
+      "required": true,
+      "runtime_visibility": "flat"
+    },
     "expected_workspace_runtime": "${WORKSPACE_ROOT}/.agents/skills",
     "failed_gate": null,
     "recovery_commands": [
       {
-        "command": "./bin/ask skills sync --scope user --projection rooted --dry-run --json --robot",
+        "command": "./bin/ask skills sync --scope user --projection flat --dry-run --json --robot",
         "expected_outcome": "Reports whether ~/.codex/skills or ~/.agents/skills would be relinked before mutation.",
         "kind": "preview_user_runtime_sync",
         "permission_profile": {
@@ -150,11 +155,11 @@
           "network": "not required"
         },
         "preconditions": [
-          "Workspace rooted projection validates cleanly."
+          "Workspace flat projection validates cleanly."
         ]
       },
       {
-        "command": "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
+        "command": "./bin/ask skills sync --scope workspace --projection flat --json --robot",
         "expected_outcome": "Refreshes .agents/skills from canonical frontmatter and skill sources.",
         "kind": "refresh_workspace_projection",
         "permission_profile": {
@@ -166,7 +171,7 @@
         ]
       },
       {
-        "command": "./bin/ask skills sync --scope user --projection rooted --json --robot",
+        "command": "./bin/ask skills sync --scope user --projection flat --json --robot",
         "expected_outcome": "Makes user-level Codex and Agents skill runtimes point at the workspace projection.",
         "kind": "apply_user_runtime_sync",
         "permission_profile": {
@@ -207,18 +212,18 @@
       "agents_user_runtime": "root_symlink",
       "codex_user_runtime": "root_symlink"
     },
-    "schema_version": "command-handle-runtime-diagnostics.v1",
+    "schema_version": "sdk-skill-runtime-diagnostics.v1",
     "selected_runtime_target": "codex"
   },
   "runtime_session": {
     "actor_type": "agent",
-    "created_at": "2026-06-13T11:18:16Z",
-    "latest_turn_id": "019ec09f-7d40-7c12-9b01-2948d29b113c",
+    "created_at": "2026-06-20T20:41:31Z",
+    "latest_turn_id": "019ee6c2-49b8-7841-8bbc-dde91ee70468",
     "observability": {
       "codex_log_presence": true,
-      "last_ingest_at": "2026-06-13T11:18:14.235224Z",
-      "last_logs_ingest_at": "2026-06-13T11:18:14.235224Z",
-      "last_traces_ingest_at": "2026-06-13T10:30:03.992979Z",
+      "last_ingest_at": "2026-06-20T20:41:29.274428Z",
+      "last_logs_ingest_at": "2026-06-20T20:41:29.274428Z",
+      "last_traces_ingest_at": "2026-06-20T20:40:35.837157Z",
       "logs_freshness": "fresh",
       "overall_status": "trusted",
       "plugin_backed_skill_invocation_count": 0,
@@ -233,15 +238,15 @@
         }
       ],
       "stats_path": "${HOME}/.agents/otel-collector/data/processed/stats.json",
-      "traces_freshness": "recent"
+      "traces_freshness": "fresh"
     },
     "observability_sources": [
       "agents_otel_stats"
     ],
-    "rollout_path": "${HOME}/.codex/sessions/2026/06/10/rollout-2026-06-10T23-58-01-019eb3c1-c70c-7b32-ba71-1f640bfe3ddf.jsonl",
+    "rollout_path": "${HOME}/.codex/sessions/2026/06/20/rollout-2026-06-20T10-18-59-019ee453-85b7-7192-a4e5-a5d81eef4a9c.jsonl",
     "runtime_status": "partial",
     "runtime_target": "codex",
-    "session_id": "019eb3c1-c70c-7b32-ba71-1f640bfe3ddf",
+    "session_id": "019ee453-85b7-7192-a4e5-a5d81eef4a9c",
     "source": "codex_rollout_jsonl",
     "unavailable_reason": "Codex runtime observability is degraded; runtime evidence cannot claim live pass while telemetry reports overall_status='trusted' and skill_invocation_event_count=0.",
     "visibility_status": "user_observable",
@@ -250,28 +255,29 @@
   "runtime_status": "partial",
   "runtime_target": "codex",
   "schema_version": 1,
+  "sdk_skill_name": "unslopify",
   "skill_handle": "unslopify",
   "thread_runs": [
     {
       "claim_status": "partial",
       "cwd": "${WORKSPACE_ROOT}",
-      "latest_turn_id": "019ec09f-7d40-7c12-9b01-2948d29b113c",
-      "observed_at": "2026-06-13T11:18:16Z",
+      "latest_turn_id": "019ee6c2-49b8-7841-8bbc-dde91ee70468",
+      "observed_at": "2026-06-20T20:41:31Z",
       "originator": "Codex Desktop",
-      "rollout_path": "${HOME}/.codex/sessions/2026/06/10/rollout-2026-06-10T23-58-01-019eb3c1-c70c-7b32-ba71-1f640bfe3ddf.jsonl",
+      "rollout_path": "${HOME}/.codex/sessions/2026/06/20/rollout-2026-06-20T10-18-59-019ee453-85b7-7192-a4e5-a5d81eef4a9c.jsonl",
       "runtime_status": "implemented_enforced",
       "runtime_target": "codex",
-      "session_id": "019eb3c1-c70c-7b32-ba71-1f640bfe3ddf",
+      "session_id": "019ee453-85b7-7192-a4e5-a5d81eef4a9c",
       "source": "codex_rollout_jsonl",
-      "thread_id": "019eb3c1-c70c-7b32-ba71-1f640bfe3ddf",
+      "thread_id": "019ee453-85b7-7192-a4e5-a5d81eef4a9c",
       "thread_source": "user"
     },
     {
       "claim_status": "partial",
       "codex_log_presence": true,
-      "last_logs_ingest_at": "2026-06-13T11:18:14.235224Z",
-      "last_traces_ingest_at": "2026-06-13T10:30:03.992979Z",
-      "observed_at": "2026-06-13T11:18:16Z",
+      "last_logs_ingest_at": "2026-06-20T20:41:29.274428Z",
+      "last_traces_ingest_at": "2026-06-20T20:40:35.837157Z",
+      "observed_at": "2026-06-20T20:41:31Z",
       "overall_status": "trusted",
       "runtime_status": "implemented_enforced",
       "runtime_target": "codex",
@@ -284,69 +290,67 @@
     {
       "cwd": "${WORKSPACE_ROOT}",
       "event_type": "turn_context_observed",
-      "observed_at": "2026-06-10T22:58:05.661Z",
+      "observed_at": "2026-06-20T09:19:01.529Z",
       "runtime_target": "codex",
       "source_line": 5,
-      "turn_id": "019eb3c1-ca34-71e2-b2be-5c7be856e7e6"
+      "turn_id": "019ee453-88f9-7c63-b0e6-5e31f02063f1"
     },
     {
       "event_type": "task_complete",
-      "observed_at": "2026-06-10T23:03:52.940Z",
+      "observed_at": "2026-06-20T09:21:39.329Z",
       "runtime_target": "codex",
-      "source_line": 166,
-      "turn_id": "019eb3c1-ca34-71e2-b2be-5c7be856e7e6"
+      "source_line": 74,
+      "turn_id": "019ee453-88f9-7c63-b0e6-5e31f02063f1"
     },
     {
       "cwd": "${WORKSPACE_ROOT}",
       "event_type": "turn_context_observed",
-      "observed_at": "2026-06-10T23:13:44.002Z",
+      "observed_at": "2026-06-20T09:24:13.139Z",
       "runtime_target": "codex",
-      "source_line": 172,
-      "turn_id": "019eb3d0-26d9-70f3-8a54-d4a925bd48ca"
-    },
-    {
-      "cwd": "${WORKSPACE_ROOT}",
-      "event_type": "turn_context_observed",
-      "observed_at": "2026-06-10T23:31:38.047Z",
-      "runtime_target": "codex",
-      "source_line": 216,
-      "turn_id": "019eb3e0-8ba1-7b51-8e30-0e12610d13b5"
-    },
-    {
-      "cwd": "${WORKSPACE_ROOT}",
-      "event_type": "turn_context_observed",
-      "observed_at": "2026-06-10T23:35:09.464Z",
-      "runtime_target": "codex",
-      "source_line": 277,
-      "turn_id": "019eb3e0-8ba1-7b51-8e30-0e12610d13b5"
+      "source_line": 78,
+      "turn_id": "019ee458-4cef-7eb2-96ae-6a4db7eb86fe"
     },
     {
       "event_type": "task_complete",
-      "observed_at": "2026-06-10T23:36:44.709Z",
+      "observed_at": "2026-06-20T09:24:47.293Z",
       "runtime_target": "codex",
-      "source_line": 319,
-      "turn_id": "019eb3e0-8ba1-7b51-8e30-0e12610d13b5"
+      "source_line": 92,
+      "turn_id": "019ee458-4cef-7eb2-96ae-6a4db7eb86fe"
     },
     {
       "cwd": "${WORKSPACE_ROOT}",
       "event_type": "turn_context_observed",
-      "observed_at": "2026-06-10T23:37:26.495Z",
+      "observed_at": "2026-06-20T09:27:32.684Z",
       "runtime_target": "codex",
-      "source_line": 322,
-      "turn_id": "019eb3e5-da9e-7593-af15-78faf4c1c23e"
+      "source_line": 94,
+      "turn_id": "019ee45b-5a45-7d20-9a29-136cf5e15074"
+    },
+    {
+      "event_type": "patch_apply_end",
+      "observed_at": "2026-06-20T09:28:36.852Z",
+      "runtime_target": "codex",
+      "source_line": 120,
+      "turn_id": "019ee45b-5a45-7d20-9a29-136cf5e15074"
+    },
+    {
+      "event_type": "task_complete",
+      "observed_at": "2026-06-20T09:28:54.152Z",
+      "runtime_target": "codex",
+      "source_line": 133,
+      "turn_id": "019ee45b-5a45-7d20-9a29-136cf5e15074"
     },
     {
       "cwd": "${WORKSPACE_ROOT}",
       "event_type": "turn_context_observed",
-      "observed_at": "2026-06-11T00:22:25.383Z",
+      "observed_at": "2026-06-20T09:31:45.700Z",
       "runtime_target": "codex",
-      "source_line": 501,
-      "turn_id": "019eb40e-f691-76e2-bd6c-17752911fdc4"
+      "source_line": 135,
+      "turn_id": "019ee45f-369d-7141-8ae9-edeacd829bcd"
     },
     {
       "codex_log_presence": true,
       "event_type": "agents_observability_stats_observed",
-      "observed_at": "2026-06-13T11:18:16Z",
+      "observed_at": "2026-06-20T20:41:31Z",
       "overall_status": "trusted",
       "plugin_backed_skill_invocation_count": 0,
       "runtime_target": "codex",
@@ -364,6 +368,7 @@
         "canonical_source_exists": true,
         "codex_user_link": true,
         "codex_user_runtime_ready": true,
+        "direct_runtime_projection": true,
         "resolver": true,
         "user_runtime_alias_consistent": true,
         "user_runtime_ready": true
@@ -371,14 +376,21 @@
       "required_gates": [
         "resolver",
         "canonical_source_exists",
+        "direct_runtime_projection",
         "codex_user_runtime_ready"
       ],
       "runtime_diagnostics": {
+        "direct_runtime_projection": {
+          "exists": true,
+          "path": "${WORKSPACE_ROOT}/.agents/skills/unslopify/SKILL.md",
+          "required": true,
+          "runtime_visibility": "flat"
+        },
         "expected_workspace_runtime": "${WORKSPACE_ROOT}/.agents/skills",
         "failed_gate": null,
         "recovery_commands": [
           {
-            "command": "./bin/ask skills sync --scope user --projection rooted --dry-run --json --robot",
+            "command": "./bin/ask skills sync --scope user --projection flat --dry-run --json --robot",
             "expected_outcome": "Reports whether ~/.codex/skills or ~/.agents/skills would be relinked before mutation.",
             "kind": "preview_user_runtime_sync",
             "permission_profile": {
@@ -386,11 +398,11 @@
               "network": "not required"
             },
             "preconditions": [
-              "Workspace rooted projection validates cleanly."
+              "Workspace flat projection validates cleanly."
             ]
           },
           {
-            "command": "./bin/ask skills sync --scope workspace --projection rooted --json --robot",
+            "command": "./bin/ask skills sync --scope workspace --projection flat --json --robot",
             "expected_outcome": "Refreshes .agents/skills from canonical frontmatter and skill sources.",
             "kind": "refresh_workspace_projection",
             "permission_profile": {
@@ -402,7 +414,7 @@
             ]
           },
           {
-            "command": "./bin/ask skills sync --scope user --projection rooted --json --robot",
+            "command": "./bin/ask skills sync --scope user --projection flat --json --robot",
             "expected_outcome": "Makes user-level Codex and Agents skill runtimes point at the workspace projection.",
             "kind": "apply_user_runtime_sync",
             "permission_profile": {
@@ -443,7 +455,7 @@
           "agents_user_runtime": "root_symlink",
           "codex_user_runtime": "root_symlink"
         },
-        "schema_version": "command-handle-runtime-diagnostics.v1",
+        "schema_version": "sdk-skill-runtime-diagnostics.v1",
         "selected_runtime_target": "codex"
       },
       "runtime_target": "codex",

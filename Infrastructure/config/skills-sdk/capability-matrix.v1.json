@@ -37,6 +37,11 @@
     "./bin/ask sdk determinism audit --scope skills --limit 10 --json --robot",
     "./bin/ask sdk ir build Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
     "./bin/ask sdk eval run --runner deterministic-jsonl --dataset Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --skill Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
+    "./bin/ask sdk eval profiles --preview --json --robot",
+    "./bin/ask sdk eval ab-rubric --preview --json --robot",
+    "./bin/ask sdk eval ab-preview --skill-a Infrastructure/tests/fixtures/skills_sdk/valid_skill --skill-b Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --fixture Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --preview --json --robot",
+    "./bin/ask sdk eval ab-plan --skill-a Infrastructure/tests/fixtures/skills_sdk/valid_skill --skill-b Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --fixture Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --preview --json --robot",
+    "./bin/ask sdk eval ab-judge-preview --run-receipt Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.json --preview --json --robot",
     "./bin/ask sdk eval scenario-quality Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --preview --json --robot",
     "./bin/ask sdk package build Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
     "./bin/ask sdk package harden Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
@@ -386,8 +391,107 @@
         "Infrastructure/config/schemas/skills-sdk/eval-run-receipt.v0.schema.json",
         "Infrastructure/tests/test_skills_sdk_eval_runner.py"
       ],
-      "next_slice": "Add release-mode calibration thresholds and hosted-provider comparison only after local quality gates stabilize.",
+      "next_slice": "Use eval profiles to add Codex-backed A/B execution only after the preview receipt stays schema- and docs-verified.",
       "notes": "The SDK routes to the existing internal skill-builder eval backend, preserves internal scorecard case counts and calibrated quality-gate assertions in SDK receipts, binds targeted receipts to package identity, and keeps deterministic JSONL as a fast fixture lane; Tessl remains opt-in."
+    },
+    {
+      "id": "eval_profiles",
+      "title": "Eval runner and judge profiles",
+      "status": "preview_only",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/eval_profiles.py",
+      "pipeline_sections": ["eval_ops", "agent_execution_control_plane", "release_decision_matrix"],
+      "feature_executed": true,
+      "mutation_performed": false,
+      "evidence_refs": [
+        "./bin/ask sdk eval profiles --preview --json --robot",
+        "Infrastructure/config/schemas/skills-sdk/eval-profile-preview-receipt.v0.schema.json",
+        "Infrastructure/tests/test_skills_sdk_eval_profiles.py"
+      ],
+      "next_slice": "Use the previewed profiles to drive Codex-backed A/B execution receipts without exposing judge secrets or authenticated Codex judge state to skill execution.",
+      "notes": "The SDK now previews Codex exec sandbox profiles and post-run judge profiles: local Ollama uses qwen3.5:latest, Ollama Cloud uses deepseek-v4-flash:cloud with OLLAMA_API_KEY, Codex fast uses gpt-5.3-codex-spark through an authenticated Codex CLI boundary, and judge secrets are kept out of the candidate skill execution environment."
+    },
+    {
+      "id": "ab_rubric",
+      "title": "Canonical A/B scoring rubric",
+      "status": "preview_only",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/eval_ab_rubric.py",
+      "pipeline_sections": ["eval_ops", "agent_execution_control_plane", "release_decision_matrix"],
+      "feature_executed": true,
+      "mutation_performed": false,
+      "evidence_refs": [
+        "./bin/ask sdk eval ab-rubric --preview --json --robot",
+        "Infrastructure/config/schemas/skills-sdk/ab-rubric-receipt.v0.schema.json",
+        "Infrastructure/tests/test_skills_sdk_ab_rubric.py",
+        "Infrastructure/tests/test_skills_sdk_schema_spine.py::TestSkillsSdkSchemaSpine::test_ab_rubric_fixture_records_stable_cross_stage_scorecard"
+      ],
+      "next_slice": "Use this rubric digest for local Ollama judge execution before adding cloud DeepSeek and Tessl confirmation receipts.",
+      "notes": "The SDK now exposes one stable A/B scorecard for local qwen3.5:latest, cloud deepseek-v4-flash:cloud, and later Tessl validation. Judge outputs remain advisory until calibrated and must include dimension scores, evidence refs, and per-dimension reasons."
+    },
+    {
+      "id": "ab_preview",
+      "title": "Codex-backed A/B eval preview",
+      "status": "preview_only",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/eval_ab_preview.py",
+      "pipeline_sections": ["eval_ops", "agent_execution_control_plane", "release_decision_matrix"],
+      "feature_executed": true,
+      "mutation_performed": false,
+      "evidence_refs": [
+        "./bin/ask sdk eval ab-preview --skill-a Infrastructure/tests/fixtures/skills_sdk/valid_skill --skill-b Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --fixture Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --preview --json --robot",
+        "Infrastructure/config/schemas/skills-sdk/ab-preview-receipt.v0.schema.json",
+        "Infrastructure/tests/test_skills_sdk_ab_preview.py"
+      ],
+      "next_slice": "Invoke codex exec for each variant only after the preview receipt, evidence directory contract, and judge input redaction contract are schema-verified.",
+      "notes": "The SDK now previews a Codex-backed skill A/B experiment contract with skill A/B package identity, fixture digest, Codex execution profile, judge profile, and judge-secret isolation. It does not invoke codex exec, Ollama, network, winner selection, or mutation."
+    },
+    {
+      "id": "ab_plan",
+      "title": "Codex-backed A/B eval execution plan",
+      "status": "preview_only",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/eval_ab_plan.py",
+      "pipeline_sections": ["eval_ops", "agent_execution_control_plane", "release_decision_matrix"],
+      "feature_executed": true,
+      "mutation_performed": false,
+      "evidence_refs": [
+        "./bin/ask sdk eval ab-plan --skill-a Infrastructure/tests/fixtures/skills_sdk/valid_skill --skill-b Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --fixture Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --preview --json --robot",
+        "Infrastructure/config/schemas/skills-sdk/ab-plan-receipt.v0.schema.json",
+        "Infrastructure/tests/test_skills_sdk_ab_plan.py"
+      ],
+      "next_slice": "Invoke codex exec only after command-plan receipts, evidence root handling, and prompt redaction are verified against real runner output.",
+      "notes": "The SDK now emits the exact Codex exec command argv, prompt digests, and planned evidence paths for both variants without invoking Codex, Ollama, network, winner selection, or mutation."
+    },
+    {
+      "id": "ab_run",
+      "title": "Codex-backed A/B eval execution",
+      "status": "implemented",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/eval_ab_run.py",
+      "pipeline_sections": ["eval_ops", "agent_execution_control_plane", "release_decision_matrix"],
+      "feature_executed": true,
+      "mutation_performed": true,
+      "evidence_refs": [
+        "ask sdk eval ab-run --skill-a <skill-a> --skill-b <skill-b> --fixture <fixture> --execute --json --robot",
+        "Infrastructure/config/schemas/skills-sdk/ab-run-receipt.v0.schema.json",
+        "Infrastructure/tests/test_skills_sdk_ab_run.py",
+        "Infrastructure/tests/test_skills_sdk_schema_spine.py::TestSkillsSdkSchemaSpine::test_ab_run_fixture_records_codex_execution_without_judge_invocation"
+      ],
+      "next_slice": "Add sanitized evidence comparison and LLM-as-judge scoring after Codex execution receipts are stable and calibrated judge labels exist.",
+      "notes": "The SDK now has an explicit --execute-gated Codex A/B run command that writes bounded prompt/stdout/stderr/last-message evidence, records one result per variant, and keeps judge provider invocation false until a separate scoring receipt is added."
+    },
+    {
+      "id": "ab_judge_preview",
+      "title": "Codex-backed A/B judge input preview",
+      "status": "preview_only",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/eval_ab_judge.py",
+      "pipeline_sections": ["eval_ops", "agent_execution_control_plane", "release_decision_matrix"],
+      "feature_executed": true,
+      "mutation_performed": false,
+      "evidence_refs": [
+        "./bin/ask sdk eval ab-judge-preview --run-receipt Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.json --preview --json --robot",
+        "Infrastructure/config/schemas/skills-sdk/ab-judge-preview-receipt.v0.schema.json",
+        "Infrastructure/tests/test_skills_sdk_ab_judge.py",
+        "Infrastructure/tests/test_skills_sdk_schema_spine.py::TestSkillsSdkSchemaSpine::test_ab_judge_preview_fixture_records_sanitized_non_invoking_judge_input"
+      ],
+      "next_slice": "Invoke the selected judge profile only after calibration labels and decision-quality gates are added.",
+      "notes": "The SDK can now derive a sanitized A/B judge input payload and prompt digest from a completed ab-run receipt without invoking Ollama, Codex judge state, network, or mutation. The local default judge profile is Ollama qwen3.5:latest."
     },
     {
       "id": "scenario_quality_gate",
@@ -436,20 +540,20 @@
     },
     {
       "id": "sandbox",
-      "title": "Sandbox execution",
-      "status": "blocked_missing_adapter",
-      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/sandbox_profile.py plus placeholder_lifecycle.py",
+      "title": "Sandbox boundary validation",
+      "status": "preview_only",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/sandbox_profile.py plus boundary checks",
       "pipeline_sections": ["agent_execution_control_plane", "release_decision_matrix", "eval_ops"],
-      "feature_executed": false,
+      "feature_executed": true,
       "mutation_performed": false,
       "evidence_refs": [
         "./bin/ask sdk sandbox validate --profile Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/sandbox-profile.json --json --robot",
-        "./bin/ask sdk lifecycle --surface sandbox --risk-tier high --json --robot",
+        "Infrastructure/config/schemas/skills-sdk/sandbox-profile-receipt.v0.schema.json",
         "Infrastructure/tests/test_skills_sdk_sandbox_profile.py",
         "Infrastructure/tests/test_skills_sdk_placeholder_lifecycle.py"
       ],
-      "next_slice": "Approve sandbox provider selection and adapter contract.",
-      "notes": "Deny-by-default profile validation is implemented and non-mutating; high-risk lifecycle output still blocks because no sandbox execution adapter exists."
+      "next_slice": "Add external skill intake quarantine receipts and Codex exec A/B execution receipts before claiming live sandbox execution evidence.",
+      "notes": "The SDK only previews and validates sandbox boundary policy. It does not own a custom runtime sandbox: external skill intake should use quarantine-style validation, and eval A/B execution should use Codex sandbox modes through codex exec."
     },
     {
       "id": "security_adapter",

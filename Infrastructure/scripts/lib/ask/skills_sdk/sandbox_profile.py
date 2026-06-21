@@ -193,7 +193,13 @@ def _shell_disabled_check(profile: dict[str, Any]) -> dict[str, Any]:
 def _adapter_check(profile: dict[str, Any]) -> dict[str, Any]:
     execution = _object_field(profile, "execution")
     passed = execution.get("provider") == "none" and execution.get("adapter") is None
-    return _check("adapter_not_selected", "pass" if passed else "blocker", "blocker", "Sandbox profile validation must not select or invoke a sandbox adapter in this slice.", [f"provider:{execution.get('provider')!s}", f"adapter:{execution.get('adapter')!s}"])
+    return _check(
+        "execution_provider_not_selected",
+        "pass" if passed else "blocker",
+        "blocker",
+        "Sandbox boundary validation must not select or invoke an execution provider in this slice.",
+        [f"provider:{execution.get('provider')!s}", f"adapter:{execution.get('adapter')!s}"],
+    )
 
 
 def _semantic_checks(profile: dict[str, Any]) -> list[dict[str, Any]]:

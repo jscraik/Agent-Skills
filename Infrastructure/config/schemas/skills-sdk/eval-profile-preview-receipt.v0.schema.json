@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/eval-profile-preview-receipt.v0.schema.json",
+  "title": "Skills SDK Eval Profile Preview Receipt v0",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "string", "const": "skills-sdk.eval-profile-preview-receipt.v0"},
+    "schema_uri": {"type": "string", "const": "https://jscraik.local/agent-skills/schemas/skills-sdk/eval-profile-preview-receipt.v0.schema.json"},
+    "status": {"type": "string", "enum": ["preview", "blocked"]},
+    "operation": {"type": "string", "const": "eval_profile_preview"},
+    "execution_profiles": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/definitions/execution_profile"}
+    },
+    "judge_profiles": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/definitions/judge_profile"}
+    },
+    "secret_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "skill_execution_env_secret_names": {"type": "array", "items": {"type": "string"}},
+        "judge_env_secret_names": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "skill_execution_receives_judge_secrets": {"type": "boolean", "const": false}
+      },
+      "required": [
+        "skill_execution_env_secret_names",
+        "judge_env_secret_names",
+        "skill_execution_receives_judge_secrets"
+      ]
+    },
+    "execution_boundary": {"type": "string", "const": "codex_exec_sandbox"},
+    "external_intake_boundary": {"type": "string", "const": "sdk_quarantine_only"},
+    "mutation_performed": {"type": "boolean", "const": false},
+    "network_accessed": {"type": "boolean", "const": false},
+    "provider_invoked": {"type": "boolean", "const": false},
+    "blockers": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "acceptance_trace": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "enum": ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022", "VP-030"]}
+    },
+    "agent_summary": {"type": "string", "minLength": 1}
+  },
+  "required": [
+    "schema_version",
+    "schema_uri",
+    "status",
+    "operation",
+    "execution_profiles",
+    "judge_profiles",
+    "secret_boundary",
+    "execution_boundary",
+    "external_intake_boundary",
+    "mutation_performed",
+    "network_accessed",
+    "provider_invoked",
+    "blockers",
+    "acceptance_trace",
+    "agent_summary"
+  ],
+  "definitions": {
+    "execution_profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "runner": {"type": "string", "enum": ["codex_exec"]},
+        "sandbox_mode": {"type": "string", "enum": ["read-only", "workspace-write"]},
+        "approval_policy": {"type": "string", "enum": ["on-request"]},
+        "codex_json_events_required": {"type": "boolean", "const": true},
+        "output_schema_supported": {"type": "boolean", "const": true},
+        "mutation_allowed": {"type": "boolean"}
+      },
+      "required": [
+        "id",
+        "runner",
+        "sandbox_mode",
+        "approval_policy",
+        "codex_json_events_required",
+        "output_schema_supported",
+        "mutation_allowed"
+      ]
+    },
+    "judge_profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "provider": {"type": "string", "enum": ["ollama", "codex"]},
+        "mode": {"type": "string", "enum": ["local", "cloud", "codex-fast"]},
+        "host": {"type": ["string", "null"]},
+        "model": {"type": "string", "minLength": 1},
+        "network_required": {"type": "boolean"},
+        "secret_env_names": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "auth_boundary": {"type": "string", "enum": ["none", "env_secret", "codex_cli_auth"]},
+        "receives_sanitized_outputs_only": {"type": "boolean", "const": true}
+      },
+      "required": [
+        "id",
+        "provider",
+        "mode",
+        "host",
+        "model",
+        "network_required",
+        "secret_env_names",
+        "auth_boundary",
+        "receives_sanitized_outputs_only"
+      ]
+    }
+  }
+}

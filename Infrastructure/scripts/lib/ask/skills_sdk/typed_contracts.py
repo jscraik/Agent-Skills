@@ -4,7 +4,7 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from ask.skills_sdk import observability_contracts, signing_contracts, trust_contracts
+from ask.skills_sdk import ab_contracts, observability_contracts, signing_contracts, trust_contracts
 from ask.skills_sdk.eval_contracts import EvalQualityGates
 
 
@@ -693,41 +693,14 @@ def validate_lockfile(payload: object) -> Lockfile:
 
 
 def validate_cleanup_receipt(payload: object) -> CleanupReceipt:
-    """
-    Validate and parse an arbitrary payload into a CleanupReceipt.
-    
-    Parameters:
-    	payload (object): Unvalidated payload (typically a dict) representing a cleanup receipt.
-    
-    Returns:
-    	cleanup_receipt (CleanupReceipt): The parsed and validated `CleanupReceipt` model instance.
-    """
     return CleanupReceipt.model_validate(payload)
 
 
 def validate_project_conformance_receipt(payload: object) -> ProjectConformanceReceipt:
-    """
-    Validate and parse an arbitrary payload into a ProjectConformanceReceipt model.
-    
-    Parameters:
-    	payload (object): Unvalidated payload to be parsed and validated against the ProjectConformanceReceipt schema.
-    
-    Returns:
-    	project_conformance_receipt (ProjectConformanceReceipt): The validated ProjectConformanceReceipt instance.
-    """
     return ProjectConformanceReceipt.model_validate(payload)
 
 
 def validate_robot_envelope(payload: object) -> RobotEnvelope:
-    """
-    Validate and parse a raw payload into a RobotEnvelope model.
-    
-    Parameters:
-        payload (object): Unvalidated input (typically a dict) representing a robot envelope.
-    
-    Returns:
-        RobotEnvelope: The validated and parsed RobotEnvelope model instance.
-    """
     return RobotEnvelope.model_validate(payload)
 
 
@@ -771,6 +744,30 @@ def validate_eval_case(payload: object) -> EvalCase: return EvalCase.model_valid
 
 
 def validate_eval_run_receipt(payload: object) -> EvalRunReceipt: return EvalRunReceipt.model_validate(payload)
+
+
+def validate_eval_profile_preview_receipt(payload: object) -> ab_contracts.EvalProfilePreviewReceipt:
+    return ab_contracts.EvalProfilePreviewReceipt.model_validate(payload)
+
+
+def validate_ab_rubric_receipt(payload: object) -> ab_contracts.AbRubricReceipt:
+    return ab_contracts.AbRubricReceipt.model_validate(payload)
+
+
+def validate_ab_preview_receipt(payload: object) -> ab_contracts.AbPreviewReceipt:
+    return ab_contracts.AbPreviewReceipt.model_validate(payload)
+
+
+def validate_ab_plan_receipt(payload: object) -> ab_contracts.AbPlanReceipt:
+    return ab_contracts.AbPlanReceipt.model_validate(payload)
+
+
+def validate_ab_run_receipt(payload: object) -> ab_contracts.AbRunReceipt:
+    return ab_contracts.AbRunReceipt.model_validate(payload)
+
+
+def validate_ab_judge_preview_receipt(payload: object) -> ab_contracts.AbJudgePreviewReceipt:
+    return ab_contracts.AbJudgePreviewReceipt.model_validate(payload)
 
 
 def validate_sandbox_profile(payload: object) -> SandboxProfile: return SandboxProfile.model_validate(payload)

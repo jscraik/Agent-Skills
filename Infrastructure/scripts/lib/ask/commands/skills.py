@@ -148,6 +148,22 @@ def skills_sdk_eval_run(*args, **kwargs):
     return _call_impl("skills_sdk_eval_run", *args, **kwargs)
 
 
+def _impl_facade(command_name):
+    def facade(*args, **kwargs):
+        return _call_impl(command_name, *args, **kwargs)
+
+    facade.__name__ = command_name
+    return facade
+
+
+skills_sdk_eval_profiles_preview = _impl_facade("skills_sdk_eval_profiles_preview")
+skills_sdk_eval_ab_rubric_preview = _impl_facade("skills_sdk_eval_ab_rubric_preview")
+skills_sdk_eval_ab_preview = _impl_facade("skills_sdk_eval_ab_preview")
+skills_sdk_eval_ab_plan = _impl_facade("skills_sdk_eval_ab_plan")
+skills_sdk_eval_ab_run = _impl_facade("skills_sdk_eval_ab_run")
+skills_sdk_eval_ab_judge_preview = _impl_facade("skills_sdk_eval_ab_judge_preview")
+
+
 def skills_sdk_project_install(*args, **kwargs):
     """
     Install skills into a project via the Skills SDK.
@@ -187,6 +203,12 @@ _FACADE_WRAPPERS.update(
         "skills_sdk_trust_decide": skills_sdk_trust_decide,
         "skills_sdk_observability_feedback": skills_sdk_observability_feedback,
         "skills_sdk_eval_run": skills_sdk_eval_run,
+        "skills_sdk_eval_profiles_preview": skills_sdk_eval_profiles_preview,
+        "skills_sdk_eval_ab_rubric_preview": skills_sdk_eval_ab_rubric_preview,
+        "skills_sdk_eval_ab_preview": skills_sdk_eval_ab_preview,
+        "skills_sdk_eval_ab_plan": skills_sdk_eval_ab_plan,
+        "skills_sdk_eval_ab_run": skills_sdk_eval_ab_run,
+        "skills_sdk_eval_ab_judge_preview": skills_sdk_eval_ab_judge_preview,
         "skills_sdk_project_install": skills_sdk_project_install,
         "skills_sdk_project_conformance": skills_sdk_project_conformance,
     }
@@ -231,6 +253,12 @@ skills_sdk_package_harden = _impl.skills_sdk_package_harden
 skills_sdk_trust_decide = _impl.skills_sdk_trust_decide
 skills_sdk_observability_feedback = _impl.skills_sdk_observability_feedback
 skills_sdk_eval_run = _impl.skills_sdk_eval_run
+skills_sdk_eval_profiles_preview = _impl.skills_sdk_eval_profiles_preview
+skills_sdk_eval_ab_rubric_preview = _impl.skills_sdk_eval_ab_rubric_preview
+skills_sdk_eval_ab_preview = _impl.skills_sdk_eval_ab_preview
+skills_sdk_eval_ab_plan = _impl.skills_sdk_eval_ab_plan
+skills_sdk_eval_ab_run = _impl.skills_sdk_eval_ab_run
+skills_sdk_eval_ab_judge_preview = _impl.skills_sdk_eval_ab_judge_preview
 skills_sdk_placeholder_lifecycle = _impl.skills_sdk_placeholder_lifecycle
 validate_openai_skill_format = _impl.validate_openai_skill_format
 validate_skill_boundaries = _impl.validate_skill_boundaries
@@ -281,6 +309,12 @@ __all__ = [
     "skills_sdk_trust_decide",
     "skills_sdk_observability_feedback",
     "skills_sdk_eval_run",
+    "skills_sdk_eval_profiles_preview",
+    "skills_sdk_eval_ab_rubric_preview",
+    "skills_sdk_eval_ab_preview",
+    "skills_sdk_eval_ab_plan",
+    "skills_sdk_eval_ab_run",
+    "skills_sdk_eval_ab_judge_preview",
     "skills_sdk_placeholder_lifecycle",
     "skills_sdk_project_conformance",
     "skills_sdk_project_install",

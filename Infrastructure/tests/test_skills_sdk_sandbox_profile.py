@@ -73,7 +73,7 @@ class TestSkillsSdkSandboxProfile(unittest.TestCase):
         self.assert_receipt_schema_valid(receipt)
         validate_sandbox_profile_receipt(receipt)
 
-    def test_unsafe_profile_blocks_without_selecting_adapter(self) -> None:
+    def test_unsafe_profile_blocks_without_selecting_execution_provider(self) -> None:
         receipt = build_sandbox_profile_receipt(REPO_ROOT, profile_path=UNSAFE_PROFILE)
         blocker_ids = {blocker["id"] for blocker in receipt["blockers"]}
 
@@ -82,7 +82,7 @@ class TestSkillsSdkSandboxProfile(unittest.TestCase):
         self.assertIn("filesystem_read_scope", blocker_ids)
         self.assertIn("filesystem_write_scope", blocker_ids)
         self.assertIn("network_egress_denied", blocker_ids)
-        self.assertIn("adapter_not_selected", blocker_ids)
+        self.assertIn("execution_provider_not_selected", blocker_ids)
         self.assertFalse(receipt["execution_performed"])
         self.assertFalse(receipt["adapter_selected"])
         self.assertFalse(receipt["mutation_performed"])
