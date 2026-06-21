@@ -714,6 +714,8 @@ def validate_trust_decision_receipt(payload: object) -> trust_contracts.TrustDec
 
 def validate_observability_feedback_receipt(payload: object) -> observability_contracts.ObservabilityFeedbackReceipt: return observability_contracts.validate_observability_feedback_receipt(payload)
 
+def validate_observability_promotion_receipt(payload: object) -> observability_contracts.ObservabilityPromotionReceipt: return observability_contracts.validate_observability_promotion_receipt(payload)
+
 
 def validate_manifest_source(payload: object) -> ManifestSource:
     return ManifestSource.model_validate(payload)

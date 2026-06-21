@@ -346,17 +346,18 @@
       "id": "observability_feedback",
       "title": "Redacted observability feedback preview",
       "status": "implemented",
-      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/observability_feedback.py",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/observability_feedback.py and Infrastructure/scripts/lib/ask/skills_sdk/observability_promotion.py",
       "pipeline_sections": ["eval_ops", "knowledge_engineering", "agent_execution_control_plane"],
       "feature_executed": true,
       "mutation_performed": false,
       "evidence_refs": [
         "./bin/ask sdk observability feedback --skill Infrastructure/tests/fixtures/skills_sdk/valid_skill --events Infrastructure/tests/fixtures/skills_sdk/observability/redacted-events.fixture --preview --json --robot",
         "Infrastructure/config/schemas/skills-sdk/observability-feedback-receipt.v0.schema.json",
+        "Infrastructure/config/schemas/skills-sdk/observability-promotion-receipt.v0.schema.json",
         "Infrastructure/tests/test_skills_sdk_observability_feedback.py"
       ],
-      "next_slice": "Connect feedback candidates to generated eval-case drafts only after candidate promotion is guarded by package and eval receipts.",
-      "notes": "PU-026 mines local redacted JSONL events into preview-only eval scenario and skill-gap candidates; raw prompt/output fields block the receipt and no promotion or file generation is performed."
+      "next_slice": "Connect promoted feedback candidates to scenario-quality screening and generated eval-case drafts without mutating source scenarios.",
+      "notes": "PU-026 mines local redacted JSONL events into preview-only eval scenario and skill-gap candidates. Promotion preview now consumes feedback, package, and eval-run receipts to mark candidates ready or blocked without live ingestion, file generation, or automatic promotion."
     },
     {
       "id": "refs_ingestion",
