@@ -299,6 +299,85 @@ class TestSkillsSdkObservabilityFeedback(unittest.TestCase):
         all_blockers = [blocker for decision in receipt.candidate_decisions for blocker in decision.blockers]
         self.assertIn("eval_receipt_package_digest_mismatch", all_blockers)
 
+    def test_promotion_preview_rejects_schema_invalid_eval_receipt(self) -> None:
+        package_receipt = self._package_receipt()
+        feedback_receipt = build_observability_feedback_receipt(
+            REPO_ROOT,
+            package_receipt=package_receipt,
+            events_path=REDACTED_EVENTS,
+        )
+        invalid_eval_receipt = {
+            "schema_version": "skills-sdk.eval-run-receipt.v0",
+            "status": "pass",
+            "package_id": package_receipt["package_id"],
+            "package_digest": package_receipt["package_digest"],
+        }
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            payload = build_observability_promotion_receipt(
+                REPO_ROOT,
+                feedback_receipt_path=self._write_receipt(tmp_path, "feedback.json", feedback_receipt),
+                package_receipt_path=self._write_receipt(tmp_path, "package.json", package_receipt),
+                eval_run_receipt_path=self._write_receipt(tmp_path, "eval.json", invalid_eval_receipt),
+            )
+
+        receipt = validate_observability_promotion_receipt(payload)
+
+        self.assertEqual(receipt.status, "blocked")
+        self.assertEqual(receipt.promotion_ready_count, 0)
+        all_candidate_blockers = [blocker for decision in receipt.candidate_decisions for blocker in decision.blockers]
+        self.assertIn("eval_receipt_contract_invalid", all_candidate_blockers)
+        all_check_evidence = [item for blocker in receipt.blockers for item in blocker.evidence]
+        self.assertIn("eval_receipt_contract_invalid", all_check_evidence)
+
+    def test_promotion_preview_accepts_required_receipts_in_any_order(self) -> None:
+        package_receipt = self._package_receipt()
+        feedback_receipt = build_observability_feedback_receipt(
+            REPO_ROOT,
+            package_receipt=package_receipt,
+            events_path=REDACTED_EVENTS,
+        )
+        for candidate in feedback_receipt["scenario_candidates"] + feedback_receipt["skill_gap_candidates"]:
+            candidate["required_receipts"] = ["eval_run_receipt", "package_digest_receipt"]
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            payload = build_observability_promotion_receipt(
+                REPO_ROOT,
+                feedback_receipt_path=self._write_receipt(tmp_path, "feedback.json", feedback_receipt),
+                package_receipt_path=self._write_receipt(tmp_path, "package.json", package_receipt),
+                eval_run_receipt_path=self._write_receipt(tmp_path, "eval.json", self._passing_eval_receipt(package_receipt)),
+            )
+
+        receipt = validate_observability_promotion_receipt(payload)
+
+        self.assertEqual(receipt.status, "preview")
+        self.assertEqual(receipt.promotion_ready_count, 2)
+        self.assertTrue(all(decision.decision == "promotion_ready" for decision in receipt.candidate_decisions))
+
+    def test_promotion_preview_surfaces_contract_blockers(self) -> None:
+        package_receipt = self._package_receipt()
+        feedback_receipt = build_observability_feedback_receipt(
+            REPO_ROOT,
+            package_receipt=package_receipt,
+            events_path=REDACTED_EVENTS,
+        )
+        feedback_receipt["status"] = "blocked"
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            payload = build_observability_promotion_receipt(
+                REPO_ROOT,
+                feedback_receipt_path=self._write_receipt(tmp_path, "feedback.json", feedback_receipt),
+                package_receipt_path=self._write_receipt(tmp_path, "package.json", package_receipt),
+                eval_run_receipt_path=self._write_receipt(tmp_path, "eval.json", self._passing_eval_receipt(package_receipt)),
+            )
+
+        receipt = validate_observability_promotion_receipt(payload)
+
+        self.assertEqual(receipt.status, "blocked")
+        self.assertEqual(receipt.promotion_ready_count, 0)
+        all_check_evidence = [item for blocker in receipt.blockers for item in blocker.evidence]
+        self.assertIn("feedback_receipt_not_preview", all_check_evidence)
+
     def test_public_cli_previews_observability_promotion(self) -> None:
         package_receipt = self._package_receipt()
         feedback_receipt = build_observability_feedback_receipt(

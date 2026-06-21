@@ -6,6 +6,12 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
+from ask.skills_sdk.typed_contracts import (
+    validate_eval_run_receipt,
+    validate_observability_feedback_receipt,
+    validate_package_digest_receipt,
+)
+
 
 OBSERVABILITY_PROMOTION_SCHEMA_VERSION = "skills-sdk.observability-promotion-receipt.v0"
 OBSERVABILITY_PROMOTION_SCHEMA_URI = (
@@ -13,6 +19,7 @@ OBSERVABILITY_PROMOTION_SCHEMA_URI = (
 )
 OBSERVABILITY_PROMOTION_ACCEPTANCE_TRACE = ["PU-026", "FR-003", "FR-008", "SA-003", "VP-026"]
 REQUIRED_RECEIPTS = ["package_digest_receipt", "eval_run_receipt"]
+_REQUIRED_RECEIPTS_SET = set(REQUIRED_RECEIPTS)
 
 
 def _digest_file(path: Path) -> str:
@@ -164,6 +171,34 @@ def _contract_blockers(
         blockers.append("eval_receipt_schema_mismatch")
     elif eval_receipt.get("status") != "pass":
         blockers.append("eval_receipt_not_pass")
+    blockers.extend(
+        _contract_validation_blockers(
+            feedback_receipt=feedback_receipt,
+            package_receipt=package_receipt,
+            eval_receipt=eval_receipt,
+        )
+    )
+    return blockers
+
+
+def _contract_validation_blockers(
+    *,
+    feedback_receipt: dict[str, Any] | None,
+    package_receipt: dict[str, Any] | None,
+    eval_receipt: dict[str, Any] | None,
+) -> list[str]:
+    blockers: list[str] = []
+    for label, receipt, validator in (
+        ("feedback_receipt", feedback_receipt, validate_observability_feedback_receipt),
+        ("package_receipt", package_receipt, validate_package_digest_receipt),
+        ("eval_receipt", eval_receipt, validate_eval_run_receipt),
+    ):
+        if receipt is None:
+            continue
+        try:
+            validator(receipt)
+        except ValueError:
+            blockers.append(f"{label}_contract_invalid")
     return blockers
 
 
@@ -174,7 +209,12 @@ def _candidate_blockers(candidate: dict[str, Any], package_id: str | None) -> li
     if candidate.get("skill_id") != package_id:
         blockers.append("candidate_skill_id_mismatch")
     required = candidate.get("required_receipts")
-    if required != REQUIRED_RECEIPTS:
+    if (
+        not isinstance(required, list)
+        or len(required) != len(REQUIRED_RECEIPTS)
+        or len(set(required)) != len(required)
+        or set(required) != _REQUIRED_RECEIPTS_SET
+    ):
         blockers.append("candidate_required_receipts_mismatch")
     return blockers
 
@@ -261,6 +301,17 @@ def _receipt_paths_present(blockers: list[str]) -> bool:
     ]
 
 
+def _receipt_contract_state_blockers(blockers: list[str]) -> list[str]:
+    state_suffixes = (
+        "_contract_invalid",
+        "_schema_mismatch",
+        "_not_preview",
+        "_not_built",
+        "_not_pass",
+    )
+    return [blocker for blocker in blockers if blocker.endswith(state_suffixes)]
+
+
 def _promotion_checks(
     blockers: list[str],
     feedback_input: dict[str, Any],
@@ -269,6 +320,7 @@ def _promotion_checks(
 ) -> list[dict[str, Any]]:
     feedback_receipt = feedback_input["receipt"]
     eval_receipt = eval_input["receipt"]
+    contract_blockers = _receipt_contract_state_blockers(blockers)
     return [
         _check(
             "receipts_present",
@@ -281,6 +333,12 @@ def _promotion_checks(
             "pass" if "mismatch" not in " ".join(blockers) else "blocker",
             "Feedback, package, and eval receipts must bind to the same package id and digest.",
             [str(feedback_receipt.get("package_id"))] if isinstance(feedback_receipt, dict) else [],
+        ),
+        _check(
+            "receipt_contracts_valid",
+            "pass" if not contract_blockers else "blocker",
+            "Promotion preview requires schema-valid feedback, package, and eval receipts in the expected states.",
+            contract_blockers,
         ),
         _check(
             "eval_receipt_passes",
