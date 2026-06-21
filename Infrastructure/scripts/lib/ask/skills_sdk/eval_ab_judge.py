@@ -384,8 +384,10 @@ def _score_evidence_paths(repo_root: Path, evidence_root: str, experiment_id: ob
         return {"blocker": "evidence_root_outside_repo", "prompt_path": None, "output_path": None}
     if _path_has_file_ancestor(repo_root, contained_base):
         return {"blocker": "evidence_root_not_directory", "prompt_path": None, "output_path": None}
-    prompt_file = contained_base / "prompt.txt"
-    output_file = contained_base / "ollama-output.json"
+    prompt_file = _contained_score_evidence_file(repo_root, contained_base / "prompt.txt")
+    output_file = _contained_score_evidence_file(repo_root, contained_base / "ollama-output.json")
+    if prompt_file is None or output_file is None:
+        return {"blocker": "score_evidence_path_outside_repo", "prompt_path": None, "output_path": None}
     return {
         "blocker": None,
         "prompt_file": prompt_file,
@@ -393,6 +395,12 @@ def _score_evidence_paths(repo_root: Path, evidence_root: str, experiment_id: ob
         "prompt_path": _repo_relative(repo_root, prompt_file),
         "output_path": _repo_relative(repo_root, output_file),
     }
+
+
+def _contained_score_evidence_file(repo_root: Path, path: Path) -> Path | None:
+    if path.is_symlink():
+        return None
+    return _contained_repo_path(repo_root, path)
 
 
 def _score_decision(

@@ -7,6 +7,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import sys
+import tempfile
 import unittest
 from unittest import mock
 
@@ -395,10 +396,9 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
     @unittest.skipIf(not hasattr(Path, "symlink_to"), "symlink support unavailable")
     def test_evidence_preflight_rejects_symlinked_experiment_root(self) -> None:
         evidence_root = REPO_ROOT / self.evidence_root
-        outside = Path("/private/tmp/sdk-ab-judge-outside")
         experiment_root = evidence_root / "1234567890abcdef"
-        try:
-            outside.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(prefix="sdk-ab-judge-outside-") as outside_dir:
+            outside = Path(outside_dir)
             evidence_root.mkdir(parents=True, exist_ok=True)
             experiment_root.symlink_to(outside, target_is_directory=True)
 
@@ -407,10 +407,24 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             self.assertEqual(evidence["blocker"], "evidence_root_outside_repo")
             self.assertIsNone(evidence["prompt_path"])
             self.assertIsNone(evidence["output_path"])
-        finally:
             if experiment_root.is_symlink():
                 experiment_root.unlink()
-            shutil.rmtree(outside, ignore_errors=True)
+
+    @unittest.skipIf(not hasattr(Path, "symlink_to"), "symlink support unavailable")
+    def test_evidence_preflight_rejects_symlinked_score_file(self) -> None:
+        evidence_root = REPO_ROOT / self.evidence_root
+        score_dir = evidence_root / "1234567890abcdef" / "judge"
+        with tempfile.TemporaryDirectory(prefix="sdk-ab-judge-outside-") as outside_dir:
+            outside = Path(outside_dir) / "prompt.txt"
+            outside.write_text("outside", encoding="utf-8")
+            score_dir.mkdir(parents=True, exist_ok=True)
+            (score_dir / "prompt.txt").symlink_to(outside)
+
+            evidence = _score_evidence_paths(REPO_ROOT, self.evidence_root, "1234567890abcdef")
+
+            self.assertEqual(evidence["blocker"], "score_evidence_path_outside_repo")
+            self.assertIsNone(evidence["prompt_path"])
+            self.assertIsNone(evidence["output_path"])
 
     def test_evidence_preflight_rejects_existing_file_experiment_root(self) -> None:
         evidence_root = REPO_ROOT / self.evidence_root

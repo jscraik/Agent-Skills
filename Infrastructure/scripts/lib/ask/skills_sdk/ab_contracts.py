@@ -13,8 +13,7 @@ class _SdkContractModel(BaseModel):
 
 
 _DECISION_LABELS = {"skill_a", "skill_b", "inconclusive"}
-_AB_JUDGE_DIMENSION_ID_VALUES = tuple(str(dimension["id"]) for dimension in AB_RUBRIC_DIMENSIONS)
-_AB_JUDGE_DIMENSION_IDS = set(_AB_JUDGE_DIMENSION_ID_VALUES)
+_AB_JUDGE_DIMENSION_IDS = {str(dimension["id"]) for dimension in AB_RUBRIC_DIMENSIONS}
 _AB_JUDGE_DIMENSION_WEIGHTS = {
     str(dimension["id"]): float(dimension["weight"]) for dimension in AB_RUBRIC_DIMENSIONS
 }

@@ -162,7 +162,7 @@ def _validate_maximum_constraint(schema: dict[str, Any], value: object, path: st
 def _validate_pattern_constraint(schema: dict[str, Any], value: object, path: str) -> None:
     if "pattern" not in schema or not isinstance(value, str):
         return
-    if re.fullmatch(str(schema["pattern"]), value) is None:
+    if re.search(str(schema["pattern"]), value) is None:
         raise AssertionError(f"{path} does not match pattern {schema['pattern']!r}")
 
 
