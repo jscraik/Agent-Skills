@@ -366,6 +366,78 @@ def markdown_heading_declared(text: str, heading: str) -> bool:
     return False
 
 
+def markdown_section_body(text: str, heading: str) -> str:
+    """Return the body for a markdown heading without following sibling sections."""
+    target = heading.strip().lower()
+    collecting = False
+    heading_level = 0
+    body: list[str] = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("#"):
+            title = stripped.lstrip("#").strip().lower()
+            level = len(stripped) - len(stripped.lstrip("#"))
+            if collecting and level <= heading_level:
+                break
+            if title == target:
+                collecting = True
+                heading_level = level
+                continue
+        if collecting:
+            body.append(line)
+    return "\n".join(body).strip()
+
+
+def progressive_disclosure_reference_paths(body: str) -> list[str]:
+    """Return referenced package paths declared in the progressive-disclosure section."""
+    return [raw for raw in body.split("`")[1::2] if raw.startswith("references/")]
+
+
+def missing_progressive_disclosure_references(
+    skill_md: Path | None,
+    reference_paths: list[str],
+) -> list[str]:
+    """Return progressive-disclosure references that are absent from the skill package."""
+    if not skill_md:
+        return reference_paths
+    return [raw for raw in reference_paths if not (skill_md.parent / raw).exists()]
+
+
+def progressive_disclosure_contract(
+    repo_root: Path | None,
+    skill_md: Path | None,
+    text: str,
+) -> dict[str, Any]:
+    """Return deterministic compaction/progressive-disclosure signals."""
+    line_count = len(text.splitlines()) if text else 0
+    body = markdown_section_body(text, "Progressive Disclosure")
+    reference_paths = progressive_disclosure_reference_paths(body)
+    missing = missing_progressive_disclosure_references(skill_md, reference_paths)
+    existing_count = len(reference_paths) - len(missing)
+    compact_entrypoint = bool(text) and line_count <= 250
+    section_declared = bool(body)
+    references_declared = existing_count > 0
+    return {
+        "skill_md_line_count": line_count,
+        "skill_md_under_500_lines": line_count <= 500 if text else False,
+        "skill_md_under_250_lines": compact_entrypoint,
+        "progressive_disclosure_declared": section_declared,
+        "progressive_disclosure_reference_count": existing_count,
+        "progressive_disclosure_missing_references": missing,
+        "progressive_disclosure_ready": (
+            compact_entrypoint
+            and section_declared
+            and references_declared
+            and not missing
+        ),
+        "progressive_disclosure_policy": (
+            "Keep SKILL.md as the compact entrypoint and route task-specific "
+            "details to existing references."
+        ),
+        "source_path": repo_relative_path(repo_root, skill_md) if repo_root and skill_md else None,
+    }
+
+
 def skill_eval_paths(repo_root: Path | None, skill_md: Path | None) -> list[str]:
     """Return portable eval declarations adjacent to a skill package."""
     if not skill_md:
@@ -1300,6 +1372,7 @@ def sdk_package_contract(
     text = skill_markdown_text(source_path)
     reference_contract = read_reference_contract(source_path)
     reference_quality = reference_quality_contract(repo_root, source_path)
+    progressive_disclosure = progressive_disclosure_contract(repo_root, source_path, text)
     workflow_contract = skillflow_contract(repo_root, source_path, reference_contract)
     optimization_readiness = optimization_contract(repo_root, source_path, reference_contract)
     eval_paths = skill_eval_paths(repo_root, source_path)
@@ -1386,8 +1459,7 @@ def sdk_package_contract(
         "values": values,
         "progressive_disclosure": {
             "skill_md_declared": bool(source_path and source_path.is_file()),
-            "skill_md_line_count": len(text.splitlines()) if text else 0,
-            "skill_md_under_500_lines": len(text.splitlines()) <= 500 if text else False,
+            **progressive_disclosure,
             "agent_metadata_declared": bool(agents_openai_path),
             "references_contract_declared": bool(reference_contract),
             "references_quality_status": reference_quality["status"],

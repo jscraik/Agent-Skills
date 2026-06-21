@@ -159,22 +159,18 @@ lift and diagnose whether the owner is the skill, task, or criteria. Details:
 
 ## Constraints
 
-- Do not put the exact expected answer in task text, `given`, `should`, or prompt.
-- Do not mention Tessl, rubric, criteria, fixture, generated scenario, hidden answer, or "use this skill" in task text.
-- Do not score skill-name mentions, file paths, generic quality phrases, or copied rubric text as the primary criterion.
-- Do not treat opinions, compliments, future promises, or "would use" answers as scenario-quality evidence.
-- Do not collapse unrelated measured dimensions into one aggregate score.
-- Do not ship only happy-path scenarios.
-- Do not accept all-green results when baseline ties or beats usage; tighten scenarios or skill behavior first.
-- Do not run live Tessl when scenario count, scenario quality, or run-budget evidence is below the gate.
+- Do not leak exact expected answers or scoring mechanics in task text.
+- Do not score skill-name mentions, file paths, generic quality phrases, or copied rubric text as primary proof.
+- Do not treat opinions, compliments, future promises, or "would use" answers as quality evidence.
+- Do not collapse unrelated measured dimensions into one aggregate score or readiness claim.
+- Do not ship happy-path-only suites or accept all-green results when baseline ties or beats usage.
+- Do not run live Tessl when scenario count, quality, or run-budget evidence is below the gate.
 - Redact secrets, tokens, private URLs, credentials, and sensitive local paths from scenario text and run reports.
 - Do not assume graders can see tool logs, chat transcripts, or process traces.
 - Do not create scenario folders for infeasible capabilities; record them only in `summary_infeasible.json`.
-- Do not treat local Tessl lint/review, local install state, Registry metadata,
-  workspace membership, publication, or repo-local tile presence as proving any
-  other lane unless current evidence explicitly joins them.
+- Do not treat Tessl lint/review, install state, Registry metadata, workspace
+  membership, publication, or repo-local tile presence as proving any other lane.
 - Do not install, update, or trust a Registry tile from review score alone.
-- Do not collapse eval analysis, patch application, commit state, and rerun results into one proof claim.
 - Do not retire low-lift scenarios from a strong solver alone.
 
 ## Execution Boundaries
@@ -201,20 +197,6 @@ Fix the scenario set before rerunning live Tessl unless per-scenario evidence pr
 - For behavioral skills, run Tessl dry-run staging only after `references/evals.yaml`, reviewed fixture notes, and `scenario-sources.json` prove the minimum gold-scenario set exists.
 - Live Tessl only after dry-run staging and run-budget gates pass.
 - Fail fast at the first failed gate and classify the blocker before rerunning.
-
-## Gotchas
-
-- A high usage score is not enough when baseline ties or beats usage.
-- Scenario count can hide weak coverage; require a plausible baseline failure mode for each behavioral scenario.
-- User-facing task text must not contain hidden scoring language or exact expected answers.
-- Any skill behavior change can make previously good scenarios stale.
-
-## Anti-Patterns
-
-- Making scenarios easier to raise a score.
-- Treating a completed live run as readiness when usage ties or trails baseline.
-- Importing target-tile drafts without review.
-- Reusing generic structure scenarios as behavioral proof.
 
 ## Progressive Disclosure
 

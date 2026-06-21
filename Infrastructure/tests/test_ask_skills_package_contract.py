@@ -805,6 +805,80 @@ workflow:
         self.assertFalse(workflow_contract["blockers"])
         self.assertTrue(contract["progressive_disclosure"]["workflow_declared"])
 
+    def test_sdk_contract_reports_progressive_disclosure_compaction(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "compact-skill"
+            references_dir = skill_dir / "references"
+            references_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: compact-skill
+description: Compact skill fixture.
+---
+
+# Compact Skill
+
+## Workflow
+
+Keep the entrypoint small.
+
+## Progressive Disclosure
+
+- Read `references/details.md` for task-specific detail.
+""",
+                encoding="utf-8",
+            )
+            (references_dir / "details.md").write_text("# Details\n", encoding="utf-8")
+
+            contract = package_contracts.sdk_package_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+            )
+
+        progressive = contract["progressive_disclosure"]
+        self.assertTrue(progressive["skill_md_under_250_lines"])
+        self.assertTrue(progressive["progressive_disclosure_declared"])
+        self.assertEqual(progressive["progressive_disclosure_reference_count"], 1)
+        self.assertEqual(progressive["progressive_disclosure_missing_references"], [])
+        self.assertTrue(progressive["progressive_disclosure_ready"])
+
+    def test_sdk_contract_reports_missing_progressive_reference(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "missing-ref-skill"
+            skill_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: missing-ref-skill
+description: Missing reference fixture.
+---
+
+# Missing Reference Skill
+
+## Progressive Disclosure
+
+- Read `references/missing.md` for task-specific detail.
+""",
+                encoding="utf-8",
+            )
+
+            contract = package_contracts.sdk_package_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+            )
+
+        progressive = contract["progressive_disclosure"]
+        self.assertEqual(
+            progressive["progressive_disclosure_missing_references"],
+            ["references/missing.md"],
+        )
+        self.assertFalse(progressive["progressive_disclosure_ready"])
+
     def test_required_skillflow_missing_blocks_package_readiness(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir)
