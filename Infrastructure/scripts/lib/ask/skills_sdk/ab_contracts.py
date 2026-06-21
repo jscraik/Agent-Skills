@@ -86,11 +86,18 @@ class AbRubricScoreScale(_SdkContractModel):
 
 
 class AbRubricDimension(_SdkContractModel):
-    id: Literal["task_success", "instruction_following", "evidence_quality", "repo_safety", "maintainability"]
+    id: str = Field(min_length=1)
     title: str = Field(min_length=1)
     description: str = Field(min_length=1)
     weight: Annotated[float, Field(ge=0)]
     required_evidence: list[str] = Field(min_length=1)
+
+    @field_validator("id")
+    @classmethod
+    def _id_canonical(cls, value: str) -> str:
+        if value not in _AB_JUDGE_DIMENSION_IDS:
+            raise ValueError("rubric dimension id must be canonical")
+        return value
 
     @field_validator("required_evidence")
     @classmethod
@@ -143,8 +150,7 @@ class AbRubricContract(_SdkContractModel):
 
     @model_validator(mode="after")
     def _rubric_is_canonical(self) -> AbRubricContract:
-        expected_dimensions = {"task_success", "instruction_following", "evidence_quality", "repo_safety", "maintainability"}
-        if {dimension.id for dimension in self.dimensions} != expected_dimensions:
+        if {dimension.id for dimension in self.dimensions} != _AB_JUDGE_DIMENSION_IDS:
             raise ValueError("A/B rubric must contain the exact canonical dimensions")
         if abs(sum(dimension.weight for dimension in self.dimensions) - 1.0) > 0.000001:
             raise ValueError("A/B rubric dimension weights must sum to 1.0")

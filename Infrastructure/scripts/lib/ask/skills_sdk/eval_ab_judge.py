@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from ask.skills_sdk.eval_ab_rubric import canonical_ab_rubric, canonical_ab_rubric_digest
+from ask.skills_sdk.eval_ab_rubric import AB_RUBRIC_DIMENSIONS, canonical_ab_rubric, canonical_ab_rubric_digest
 from ask.skills_sdk.eval_profiles import select_judge_profile
 
 
@@ -22,7 +22,7 @@ AB_JUDGE_SCORE_SCHEMA_URI = (
 )
 DECISION_SCHEMA_VERSION = "skills-sdk.ab-judge-decision.v0"
 ALLOWED_WINNERS = ["skill_a", "skill_b", "inconclusive"]
-_DIMENSION_IDS = {"task_success", "instruction_following", "evidence_quality", "repo_safety", "maintainability"}
+_DIMENSION_IDS = {dimension["id"] for dimension in AB_RUBRIC_DIMENSIONS}
 _DECISION_KEYS = frozenset(
     {
         "schema_version",
