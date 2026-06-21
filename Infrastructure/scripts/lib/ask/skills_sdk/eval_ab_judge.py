@@ -449,7 +449,12 @@ def _write_text_evidence(repo_root: Path, path: Path | None, value: str) -> None
     if resolved is None:
         return
     resolved.parent.mkdir(parents=True, exist_ok=True)
-    resolved.write_text(value, encoding="utf-8")
+    flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    file_descriptor = os.open(resolved, flags, 0o644)
+    with os.fdopen(file_descriptor, "w", encoding="utf-8") as handle:
+        handle.write(value)
 
 
 def _clear_text_evidence(repo_root: Path, path: Path | None) -> None:
