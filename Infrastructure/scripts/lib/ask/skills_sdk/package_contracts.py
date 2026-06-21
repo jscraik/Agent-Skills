@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import re
 from typing import Any
 
 from ask.skills_sdk.contracts import (
@@ -82,6 +83,30 @@ OPTIMIZATION_SPLIT_ROLES: dict[str, str] = {
     "train": "proposal_generation",
     "selection": "candidate_acceptance",
     "test": "final_report_only",
+}
+PACKAGE_FILE_STEM_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+SKILL_DESCRIPTION_HANDLE_RE = re.compile(r"\$[A-Za-z][A-Za-z0-9_-]*")
+GENERIC_PACKAGE_FILE_STEMS = {"details", "misc", "notes", "scratch", "todo", "tmp"}
+DESCRIPTION_ACTION_TERMS = {
+    "audit",
+    "build",
+    "check",
+    "create",
+    "debug",
+    "diagnose",
+    "evaluate",
+    "fix",
+    "generate",
+    "harden",
+    "install",
+    "plan",
+    "prepare",
+    "review",
+    "run",
+    "sync",
+    "update",
+    "use",
+    "validate",
 }
 
 
@@ -435,6 +460,167 @@ def progressive_disclosure_contract(
             "details to existing references."
         ),
         "source_path": repo_relative_path(repo_root, skill_md) if repo_root and skill_md else None,
+    }
+
+
+def package_file_stem_ok(path: Path) -> bool:
+    """Return whether a package support filename uses purpose-readable kebab-case."""
+    return bool(PACKAGE_FILE_STEM_RE.fullmatch(path.stem))
+
+
+def text_contains_action_term(text: str) -> bool:
+    """Return whether text contains a deterministic natural-action trigger term."""
+    tokens = {token.strip(".,:;!?()[]{}\"'").lower() for token in text.split()}
+    return bool(tokens & DESCRIPTION_ACTION_TERMS)
+
+
+def markdown_has_title(text: str) -> bool:
+    """Return whether markdown text declares a top-level title."""
+    return any(line.startswith("# ") and line[2:].strip() for line in text.splitlines())
+
+
+def structured_reference_has_description(path: Path, text: str) -> bool:
+    """Return whether a structured reference has a browseable purpose marker."""
+    if path.suffix.lower() == ".json":
+        return '"description"' in text or '"purpose"' in text or '"schema_version"' in text
+    return bool(re.search(r"(?m)^(description|purpose|schema_version|name):\s*\S", text))
+
+
+def script_has_description(text: str) -> bool:
+    """Return whether script header comments or docstrings describe purpose/usage."""
+    for line in text.splitlines()[:25]:
+        stripped = line.strip().lower()
+        if not stripped or stripped.startswith("#!"):
+            continue
+        if stripped.startswith("#") and any(
+            marker in stripped for marker in ("description", "purpose", "usage")
+        ):
+            return True
+        if stripped.startswith(("\"\"\"", "'''")) and any(
+            marker in stripped for marker in ("description", "purpose", "usage")
+        ):
+            return True
+        if stripped.startswith(("import ", "from ", "print(", "def ", "class ")):
+            return False
+    return False
+
+
+def support_file_has_description(path: Path) -> bool:
+    """Return whether a reference or script carries deterministic browseability text."""
+    try:
+        text = path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return False
+    suffix = path.suffix.lower()
+    if suffix == ".md":
+        return markdown_has_title(text)
+    if suffix in {".yaml", ".yml", ".json"}:
+        return structured_reference_has_description(path, text)
+    if suffix == ".txt":
+        return bool(text.strip())
+    if path.parts and "scripts" in path.parts:
+        return script_has_description(text)
+    return False
+
+
+def iter_support_files(skill_md: Path | None, folder: str) -> list[Path]:
+    """Return package support files under references/ or scripts/."""
+    if not skill_md:
+        return []
+    root = skill_md.parent / folder
+    if not root.is_dir():
+        return []
+    return sorted(path for path in root.rglob("*") if path.is_file())
+
+
+def support_file_inventory(
+    repo_root: Path | None,
+    skill_md: Path | None,
+    folder: str,
+) -> dict[str, Any]:
+    """Return deterministic naming and browseability checks for support files."""
+    files = iter_support_files(skill_md, folder)
+    bad_names = [path for path in files if not package_file_stem_ok(path)]
+    generic_names = [path for path in files if path.stem.lower() in GENERIC_PACKAGE_FILE_STEMS]
+    missing_descriptions = [path for path in files if not support_file_has_description(path)]
+    return {
+        "count": len(files),
+        "filenames_kebab_case": not bad_names,
+        "generic_names": [repo_relative_path(repo_root, path) or path.as_posix() for path in generic_names],
+        "missing_descriptions": [
+            repo_relative_path(repo_root, path) or path.as_posix() for path in missing_descriptions
+        ],
+        "description_coverage_count": len(files) - len(missing_descriptions),
+        "ready": not bad_names and not generic_names and not missing_descriptions,
+        "bad_names": [repo_relative_path(repo_root, path) or path.as_posix() for path in bad_names],
+    }
+
+
+def skill_identity_contract(
+    repo_root: Path | None,
+    skill_md: Path | None,
+    frontmatter: dict[str, Any],
+) -> dict[str, Any]:
+    """Return deterministic naming and description signals for a skill package."""
+    name = str(frontmatter.get("name") or "").strip()
+    description = str(frontmatter.get("description") or "").strip()
+    short_description = str(metadata_value(frontmatter, "short_description") or "").strip()
+    directory_name = skill_md.parent.name if skill_md else ""
+    name_present = bool(name)
+    name_kebab_case = bool(PACKAGE_FILE_STEM_RE.fullmatch(name))
+    name_matches_directory = bool(name and directory_name and name == directory_name)
+    description_present = bool(description)
+    description_length_ok = 40 <= len(description) <= 420
+    description_no_command_handles = not SKILL_DESCRIPTION_HANDLE_RE.search(description)
+    description_has_action_term = text_contains_action_term(description)
+    short_description_length_ok = not short_description or len(short_description) <= 80
+    return {
+        "name": name,
+        "directory_name": directory_name,
+        "source_path": repo_relative_path(repo_root, skill_md) if repo_root and skill_md else None,
+        "name_present": name_present,
+        "name_kebab_case": name_kebab_case,
+        "name_matches_directory": name_matches_directory,
+        "description_present": description_present,
+        "description_length_chars": len(description),
+        "description_length_ok": description_length_ok,
+        "description_no_command_handles": description_no_command_handles,
+        "description_has_action_term": description_has_action_term,
+        "short_description_length_ok": short_description_length_ok,
+        "ready": all(
+            (
+                name_present,
+                name_kebab_case,
+                name_matches_directory,
+                description_present,
+                description_length_ok,
+                description_no_command_handles,
+                description_has_action_term,
+                short_description_length_ok,
+            )
+        ),
+    }
+
+
+def identity_and_assets_contract(
+    repo_root: Path | None,
+    skill_md: Path | None,
+    frontmatter: dict[str, Any],
+) -> dict[str, Any]:
+    """Return SDK advisory checks for skill identity and support asset browseability."""
+    skill_identity = skill_identity_contract(repo_root, skill_md, frontmatter)
+    references = support_file_inventory(repo_root, skill_md, "references")
+    scripts = support_file_inventory(repo_root, skill_md, "scripts")
+    return {
+        "schema_version": "skill-identity-assets.v1",
+        "policy": (
+            "Skill names should be stable kebab-case handles; descriptions should use natural "
+            "action-trigger language; references and scripts should be purpose-named and browseable."
+        ),
+        "skill_identity": skill_identity,
+        "reference_inventory": references,
+        "script_inventory": scripts,
+        "ready": skill_identity["ready"] and references["ready"] and scripts["ready"],
     }
 
 
@@ -1373,6 +1559,7 @@ def sdk_package_contract(
     reference_contract = read_reference_contract(source_path)
     reference_quality = reference_quality_contract(repo_root, source_path)
     progressive_disclosure = progressive_disclosure_contract(repo_root, source_path, text)
+    identity_and_assets = identity_and_assets_contract(repo_root, source_path, frontmatter)
     workflow_contract = skillflow_contract(repo_root, source_path, reference_contract)
     optimization_readiness = optimization_contract(repo_root, source_path, reference_contract)
     eval_paths = skill_eval_paths(repo_root, source_path)
@@ -1474,6 +1661,7 @@ def sdk_package_contract(
             "optimization_status": optimization_readiness["status"],
             "optimization_mode": optimization_readiness["optimizer_mode"],
         },
+        "identity_and_assets": identity_and_assets,
         "agent_contract": {
             "source_of_truth": source_rel,
             "editable_paths": editable_paths,

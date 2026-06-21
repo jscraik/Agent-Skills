@@ -44,7 +44,7 @@ Before Tessl dry-run or live scoring, require `scenario-sources.json` to show:
 
 Use lift, not aggregate score, for curation:
 
-```
+```text
 lift = with_context_score - baseline_score
 ```
 

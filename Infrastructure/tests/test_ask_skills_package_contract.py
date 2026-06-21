@@ -879,6 +879,106 @@ description: Missing reference fixture.
         )
         self.assertFalse(progressive["progressive_disclosure_ready"])
 
+    def test_sdk_contract_reports_identity_and_asset_browseability(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "identity-skill"
+            references_dir = skill_dir / "references"
+            scripts_dir = skill_dir / "scripts"
+            references_dir.mkdir(parents=True)
+            scripts_dir.mkdir()
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: identity-skill
+description: Create reliable package identity checks when validating skill assets.
+short_description: Check skill package identity
+---
+
+# Identity Skill
+""",
+                encoding="utf-8",
+            )
+            (references_dir / "gold-contract.md").write_text(
+                "# Gold Contract\n\nPurposeful reference detail.\n",
+                encoding="utf-8",
+            )
+            (scripts_dir / "run-checks.py").write_text(
+                "\"\"\"Purpose: run the package identity fixture check.\"\"\"\n",
+                encoding="utf-8",
+            )
+
+            contract = package_contracts.sdk_package_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+            )
+
+        identity = contract["identity_and_assets"]
+        self.assertTrue(identity["ready"])
+        self.assertTrue(identity["skill_identity"]["name_kebab_case"])
+        self.assertTrue(identity["skill_identity"]["name_matches_directory"])
+        self.assertTrue(identity["skill_identity"]["description_has_action_term"])
+        self.assertTrue(identity["reference_inventory"]["ready"])
+        self.assertTrue(identity["script_inventory"]["ready"])
+
+    def test_sdk_contract_reports_identity_and_asset_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "bad-skill"
+            references_dir = skill_dir / "references"
+            scripts_dir = skill_dir / "scripts"
+            references_dir.mkdir(parents=True)
+            scripts_dir.mkdir()
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: Bad Skill
+description: sample
+---
+
+# Bad Skill
+""",
+                encoding="utf-8",
+            )
+            (references_dir / "details.md").write_text(
+                "No title here.\n",
+                encoding="utf-8",
+            )
+            (scripts_dir / "RunChecks.py").write_text(
+                "print('missing purpose metadata')\n",
+                encoding="utf-8",
+            )
+
+            contract = package_contracts.sdk_package_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+            )
+
+        identity = contract["identity_and_assets"]
+        self.assertFalse(identity["ready"])
+        self.assertFalse(identity["skill_identity"]["name_kebab_case"])
+        self.assertFalse(identity["skill_identity"]["name_matches_directory"])
+        self.assertFalse(identity["skill_identity"]["description_length_ok"])
+        self.assertFalse(identity["skill_identity"]["description_has_action_term"])
+        self.assertIn(
+            "Skills/agent-ops/bad-skill/references/details.md",
+            identity["reference_inventory"]["generic_names"],
+        )
+        self.assertIn(
+            "Skills/agent-ops/bad-skill/references/details.md",
+            identity["reference_inventory"]["missing_descriptions"],
+        )
+        self.assertIn(
+            "Skills/agent-ops/bad-skill/scripts/RunChecks.py",
+            identity["script_inventory"]["bad_names"],
+        )
+        self.assertIn(
+            "Skills/agent-ops/bad-skill/scripts/RunChecks.py",
+            identity["script_inventory"]["missing_descriptions"],
+        )
+
     def test_required_skillflow_missing_blocks_package_readiness(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir)

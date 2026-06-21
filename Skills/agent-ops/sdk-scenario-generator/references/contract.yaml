@@ -223,7 +223,7 @@ skills_sdk_pipeline:
     - tessl_dry_run_staging
     - live_tessl_scoring
 knowledgeos_handoff_conversion_policy:
-  source_glob: "~/dev/knowledge-OS/exports/evals/references/evals/*.md"
+  source_glob: "operator-provided KnowledgeOS eval handoff export"
   source_status: "portable_handoff_not_sdk_readiness_proof"
   destination_primary: "references/evals.yaml"
   destination_detail: "references/evals/*.md"

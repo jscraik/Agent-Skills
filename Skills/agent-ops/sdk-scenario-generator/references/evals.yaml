@@ -116,7 +116,7 @@ cases:
   realistic: true
   why_realistic: Some SDK checks validate package layout and should not be forced into a behavioral 20-scenario gate.
   unit: structure exception
-  given: 'A structure-only skill package check sets tessl_scenario_policy.structure_only: true.'
+  given: 'A structure-only skill package check sets tessl_tile_scenario_policy.structure_only: true.'
   should: Allow package-shape validation while refusing to claim behavioral live Tessl readiness.
   actual_artifact: codex final response or created workspace files
   expected_artifact: scenario acceptance signals and required output files

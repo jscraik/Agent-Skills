@@ -19,7 +19,7 @@ behavior in a one-shot, file-based harness.
 
 ## Required Output Shape
 
-```
+```text
 <tile>/evals/
 ├── instructions.json
 ├── summary.json

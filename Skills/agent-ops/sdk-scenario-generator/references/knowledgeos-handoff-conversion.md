@@ -75,13 +75,13 @@ for `references/evals.yaml`.
 
 ## Batch Conversion Checklist
 
-- Every handoff file has a unique SDK id.
-- Every SDK category is runner-supported: `happy`, `negative`, `pressure`,
+- Handoff files must have unique SDK ids.
+- SDK categories must be runner-supported: `happy`, `negative`, `pressure`,
   or `edge`.
-- Every converted case includes the original fixture path in evidence metadata
+- Converted cases include the original fixture path in evidence metadata
   or a reviewed fixture file.
-- Every converted case preserves the failure mode and observable delta.
-- Every converted case has a plausible baseline failure path.
+- Each converted case preserves the failure mode and observable delta.
+- Baseline failure paths are plausible before skill context is added.
 - No converted prompt exposes hidden answer patterns or fixture paths.
 - Scenario-source proof later records the origin as KnowledgeOS handoff plus
   reviewed SDK import, not raw generated output.
