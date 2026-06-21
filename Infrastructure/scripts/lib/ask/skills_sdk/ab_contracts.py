@@ -10,20 +10,15 @@ class _SdkContractModel(BaseModel):
 
 
 _DECISION_LABELS = {"skill_a", "skill_b", "inconclusive"}
-_AB_JUDGE_DIMENSION_IDS = {
+_AB_JUDGE_DIMENSION_ID_VALUES = (
     "task_success",
     "instruction_following",
     "evidence_quality",
     "repo_safety",
     "maintainability",
-}
-AbJudgeDimensionId = Literal[
-    "task_success",
-    "instruction_following",
-    "evidence_quality",
-    "repo_safety",
-    "maintainability",
-]
+)
+_AB_JUDGE_DIMENSION_IDS = set(_AB_JUDGE_DIMENSION_ID_VALUES)
+AbJudgeDimensionId = Literal[*_AB_JUDGE_DIMENSION_ID_VALUES]
 
 
 def _exact_decision_labels(rows: list[str]) -> bool:

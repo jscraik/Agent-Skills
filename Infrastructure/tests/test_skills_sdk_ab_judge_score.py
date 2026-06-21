@@ -12,7 +12,7 @@ import unittest
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
-from ask.skills_sdk.eval_ab_judge import OllamaJudgeResult, _write_text_evidence, build_ab_judge_score_receipt  # noqa: E402
+from ask.skills_sdk.eval_ab_judge import OllamaJudgeResult, _score_evidence_paths, build_ab_judge_score_receipt  # noqa: E402
 from ask.skills_sdk.typed_contracts import validate_ab_judge_score_receipt  # noqa: E402
 
 
@@ -301,9 +301,10 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         self.assertEqual(payload["status"], "error")
         self.assertIn("requires --execute", payload["errors"][0]["message"])
 
-    def test_evidence_writer_rejects_paths_outside_repo(self) -> None:
-        with self.assertRaises(ValueError):
-            _write_text_evidence(REPO_ROOT, "../sdk-ab-judge-escape.txt", "blocked")
+    def test_evidence_preflight_rejects_paths_outside_repo(self) -> None:
+        evidence = _score_evidence_paths(REPO_ROOT, "../sdk-ab-judge-escape", "1234567890abcdef")
+
+        self.assertEqual(evidence["blocker"], "evidence_root_outside_repo")
         self.assertFalse((REPO_ROOT.parent / "sdk-ab-judge-escape.txt").exists())
 
 

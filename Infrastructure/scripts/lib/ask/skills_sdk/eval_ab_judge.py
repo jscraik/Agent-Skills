@@ -5,7 +5,7 @@ import json
 import math
 import subprocess
 from dataclasses import dataclass
-from pathlib import Path, PurePosixPath
+from pathlib import Path
 from typing import Any
 
 from ask.skills_sdk.eval_ab_rubric import canonical_ab_rubric, canonical_ab_rubric_digest
@@ -372,6 +372,8 @@ def _score_evidence_paths(repo_root: Path, evidence_root: str, experiment_id: ob
     base = resolved / safe_experiment_id / "judge"
     return {
         "blocker": None,
+        "prompt_file": base / "prompt.txt",
+        "output_file": base / "ollama-output.json",
         "prompt_path": _repo_relative(repo_root, base / "prompt.txt"),
         "output_path": _repo_relative(repo_root, base / "ollama-output.json"),
     }
@@ -390,7 +392,7 @@ def _score_decision(
     if blockers or judge_profile is None:
         return None, None, False, False, False
     judge_prompt = _judge_prompt(preview["comparison_payload"])
-    _write_text_evidence(repo_root, evidence["prompt_path"], judge_prompt)
+    _write_text_evidence(evidence["prompt_file"], judge_prompt)
     mutation_performed = True
     try:
         result = runner(judge_prompt, judge_profile, timeout_seconds)
@@ -399,10 +401,10 @@ def _score_decision(
         return None, None, False, False, mutation_performed
     except subprocess.TimeoutExpired as exc:
         stdout = _timeout_output_text(exc.stdout)
-        _write_text_evidence(repo_root, evidence["output_path"], stdout)
+        _write_text_evidence(evidence["output_file"], stdout)
         blockers.append("judge_provider_timeout")
         return None, _digest_text(stdout), True, True, mutation_performed
-    _write_text_evidence(repo_root, evidence["output_path"], result.stdout)
+    _write_text_evidence(evidence["output_file"], result.stdout)
     output_digest = _digest_text(result.stdout)
     if result.exit_code != 0:
         blockers.append(f"judge_provider_exit_{result.exit_code}")
@@ -413,22 +415,11 @@ def _score_decision(
     return decision, output_digest, True, True, mutation_performed
 
 
-def _write_text_evidence(repo_root: Path, relative_path: str | None, value: str) -> None:
-    if relative_path is None:
+def _write_text_evidence(path: Path | None, value: str) -> None:
+    if path is None:
         return
-    path = _safe_evidence_path(repo_root, relative_path)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(value, encoding="utf-8")
-
-
-def _safe_evidence_path(repo_root: Path, relative_path: str) -> Path:
-    lexical_path = PurePosixPath(relative_path)
-    if lexical_path.is_absolute() or ".." in lexical_path.parts:
-        raise ValueError("evidence path outside repo")
-    path = _contained_repo_path(repo_root, repo_root.joinpath(*lexical_path.parts))
-    if path is None or _path_has_file_ancestor(repo_root, path.parent):
-        raise ValueError("evidence path outside repo")
-    return path
 
 
 def _contained_repo_path(repo_root: Path, path: Path) -> Path | None:
