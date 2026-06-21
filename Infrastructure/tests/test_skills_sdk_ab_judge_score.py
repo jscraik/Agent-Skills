@@ -205,6 +205,33 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         with self.assertRaises(Exception):
             validate_ab_judge_score_receipt(receipt)
 
+    def test_typed_contract_rejects_persisted_score_arithmetic_mismatch(self) -> None:
+        def fake_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int) -> OllamaJudgeResult:
+            run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
+            return OllamaJudgeResult(exit_code=0, stdout=json.dumps(_decision(run_receipt["experiment_id"])), stderr="")
+
+        receipt = build_ab_judge_score_receipt(
+            REPO_ROOT,
+            run_receipt=RUN_RECEIPT,
+            evidence_root=self.evidence_root,
+            runner=fake_runner,
+        )
+        receipt["decision"]["dimension_scores"] = [
+            {
+                **row,
+                "skill_a_score": 5.0,
+                "skill_b_score": 1.0,
+                "reason": "skill_a has stronger evidence",
+            }
+            for row in receipt["decision"]["dimension_scores"]
+        ]
+        receipt["decision"]["normalized_score_a"] = 0.20
+        receipt["decision"]["normalized_score_b"] = 0.90
+        receipt["decision"]["winner"] = "skill_b"
+
+        with self.assertRaises(Exception):
+            validate_ab_judge_score_receipt(receipt)
+
     def test_builder_blocks_winner_mismatched_to_scores(self) -> None:
         def mismatched_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int) -> OllamaJudgeResult:
             run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))

@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import math
 from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+
+from ask.skills_sdk.eval_ab_rubric import AB_RUBRIC_DIMENSIONS, AB_RUBRIC_WINNER_POLICY
 
 
 class _SdkContractModel(BaseModel):
@@ -10,14 +13,11 @@ class _SdkContractModel(BaseModel):
 
 
 _DECISION_LABELS = {"skill_a", "skill_b", "inconclusive"}
-_AB_JUDGE_DIMENSION_ID_VALUES = (
-    "task_success",
-    "instruction_following",
-    "evidence_quality",
-    "repo_safety",
-    "maintainability",
-)
+_AB_JUDGE_DIMENSION_ID_VALUES = tuple(str(dimension["id"]) for dimension in AB_RUBRIC_DIMENSIONS)
 _AB_JUDGE_DIMENSION_IDS = set(_AB_JUDGE_DIMENSION_ID_VALUES)
+_AB_JUDGE_DIMENSION_WEIGHTS = {
+    str(dimension["id"]): float(dimension["weight"]) for dimension in AB_RUBRIC_DIMENSIONS
+}
 _EXPERIMENT_ID_PATTERN = r"^[0-9a-f]{16}$"
 
 
@@ -29,6 +29,36 @@ def _validate_exact_decision_labels(value: list[str], *, message: str) -> list[s
     if not _exact_decision_labels(value):
         raise ValueError(message)
     return value
+
+
+def _computed_judge_scores(rows: list[AbJudgeDimensionScore]) -> dict[str, float]:
+    score_a = sum(row.skill_a_score * _AB_JUDGE_DIMENSION_WEIGHTS[row.dimension_id] for row in rows) / 5
+    score_b = sum(row.skill_b_score * _AB_JUDGE_DIMENSION_WEIGHTS[row.dimension_id] for row in rows) / 5
+    return {"normalized_score_a": score_a, "normalized_score_b": score_b}
+
+
+def _judge_scores_match(decision: AbJudgeDecision, computed_scores: dict[str, float]) -> bool:
+    return all(
+        math.isclose(getattr(decision, key), computed_scores[key], rel_tol=0, abs_tol=1e-9)
+        for key in computed_scores
+    )
+
+
+def _judge_confidence_meets_minimum(value: str, minimum: str) -> bool:
+    confidence_rank = {"low": 0, "medium": 1, "high": 2}
+    return confidence_rank[value] >= confidence_rank[minimum]
+
+
+def _expected_judge_winner(decision: AbJudgeDecision, computed_scores: dict[str, float]) -> str:
+    delta = computed_scores["normalized_score_b"] - computed_scores["normalized_score_a"]
+    minimum_delta = float(AB_RUBRIC_WINNER_POLICY["minimum_normalized_delta"])
+    tie_result = str(AB_RUBRIC_WINNER_POLICY["tie_result"])
+    if abs(delta) < minimum_delta:
+        return tie_result
+    minimum_confidence = str(AB_RUBRIC_WINNER_POLICY["minimum_confidence"])
+    if not _judge_confidence_meets_minimum(decision.confidence, minimum_confidence):
+        return tie_result
+    return "skill_b" if delta > 0 else "skill_a"
 
 
 class EvalExecutionProfile(_SdkContractModel):
@@ -600,17 +630,30 @@ class AbJudgeScoreReceipt(_SdkContractModel):
         if not _exact_decision_labels(self.allowed_winners):
             raise ValueError("A/B judge score receipts must contain exact winner labels")
         if self.status == "scored":
-            if self.blockers:
-                raise ValueError("scored A/B judge receipts must not include blockers")
-            if not self._has_score_evidence():
-                raise ValueError("scored A/B judge receipts must include complete score evidence")
-            if self.decision is not None and self.decision.experiment_id != self.experiment_id:
-                raise ValueError("scored A/B judge receipts must bind decision to receipt experiment")
-            if not (self.provider_invoked and self.network_accessed and self.mutation_performed):
-                raise ValueError("scored A/B judge receipts must report provider side effects")
+            self._validate_scored_receipt()
         elif not self.blockers:
             raise ValueError("blocked A/B judge score receipts must include blockers")
         return self
+
+    def _validate_scored_receipt(self) -> None:
+        if self.blockers:
+            raise ValueError("scored A/B judge receipts must not include blockers")
+        if not self._has_score_evidence():
+            raise ValueError("scored A/B judge receipts must include complete score evidence")
+        if not (self.provider_invoked and self.network_accessed and self.mutation_performed):
+            raise ValueError("scored A/B judge receipts must report provider side effects")
+        self._validate_decision_consistency()
+
+    def _validate_decision_consistency(self) -> None:
+        if self.decision is None:
+            return
+        if self.decision.experiment_id != self.experiment_id:
+            raise ValueError("scored A/B judge receipts must bind decision to receipt experiment")
+        computed_scores = _computed_judge_scores(self.decision.dimension_scores)
+        if not _judge_scores_match(self.decision, computed_scores):
+            raise ValueError("scored A/B judge receipts must match normalized rubric scores")
+        if self.decision.winner != _expected_judge_winner(self.decision, computed_scores):
+            raise ValueError("scored A/B judge receipts must match rubric winner policy")
 
     def _has_score_evidence(self) -> bool:
         return all(
