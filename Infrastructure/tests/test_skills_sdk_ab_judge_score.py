@@ -11,6 +11,8 @@ import tempfile
 import unittest
 from unittest import mock
 
+from pydantic import ValidationError
+
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
@@ -205,7 +207,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         )
         receipt["decision"]["experiment_id"] = "0000000000000000"
 
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValidationError):
             validate_ab_judge_score_receipt(receipt)
 
     def test_typed_contract_rejects_persisted_score_arithmetic_mismatch(self) -> None:
@@ -232,7 +234,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         receipt["decision"]["normalized_score_b"] = 0.90
         receipt["decision"]["winner"] = "skill_b"
 
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValidationError):
             validate_ab_judge_score_receipt(receipt)
 
     def test_builder_blocks_winner_mismatched_to_scores(self) -> None:
@@ -406,7 +408,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
 
             evidence = _score_evidence_paths(REPO_ROOT, self.evidence_root, "1234567890abcdef")
 
-            self.assertEqual(evidence["blocker"], "evidence_root_outside_repo")
+            self.assertEqual(evidence["blocker"], "score_evidence_path_outside_repo")
             self.assertIsNone(evidence["prompt_path"])
             self.assertIsNone(evidence["output_path"])
             if experiment_root.is_symlink():
@@ -427,6 +429,32 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             self.assertEqual(evidence["blocker"], "score_evidence_path_outside_repo")
             self.assertIsNone(evidence["prompt_path"])
             self.assertIsNone(evidence["output_path"])
+
+    @unittest.skipIf(not hasattr(Path, "symlink_to"), "symlink support unavailable")
+    def test_evidence_preflight_rejects_repo_internal_symlinked_experiment_root(self) -> None:
+        evidence_root = REPO_ROOT / self.evidence_root
+        experiment_root = evidence_root / "1234567890abcdef"
+        target_root = evidence_root / "alternate-target"
+        evidence_root.mkdir(parents=True, exist_ok=True)
+        target_root.mkdir(parents=True, exist_ok=True)
+        experiment_root.symlink_to(target_root, target_is_directory=True)
+
+        evidence = _score_evidence_paths(REPO_ROOT, self.evidence_root, "1234567890abcdef")
+
+        self.assertEqual(evidence["blocker"], "score_evidence_path_outside_repo")
+        self.assertIsNone(evidence["prompt_path"])
+        self.assertIsNone(evidence["output_path"])
+
+    def test_evidence_preflight_rejects_directory_score_file_leaf(self) -> None:
+        evidence_root = REPO_ROOT / self.evidence_root
+        score_dir = evidence_root / "1234567890abcdef" / "judge"
+        (score_dir / "prompt.txt").mkdir(parents=True, exist_ok=True)
+
+        evidence = _score_evidence_paths(REPO_ROOT, self.evidence_root, "1234567890abcdef")
+
+        self.assertEqual(evidence["blocker"], "score_evidence_path_outside_repo")
+        self.assertIsNone(evidence["prompt_path"])
+        self.assertIsNone(evidence["output_path"])
 
     @unittest.skipIf(not hasattr(Path, "symlink_to"), "symlink support unavailable")
     def test_clear_text_evidence_unlinks_leaf_symlink_not_target(self) -> None:

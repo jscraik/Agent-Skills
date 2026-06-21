@@ -379,9 +379,11 @@ def _score_evidence_paths(repo_root: Path, evidence_root: str, experiment_id: ob
     if not _experiment_id_valid(experiment_id):
         return {"blocker": "experiment_id_invalid", "prompt_path": None, "output_path": None}
     base = resolved / experiment_id / "judge"
-    contained_base = _contained_repo_path(repo_root, base)
+    if _path_has_symlink_ancestor(resolved, base):
+        return {"blocker": "score_evidence_path_outside_repo", "prompt_path": None, "output_path": None}
+    contained_base = _contained_repo_path(resolved, base)
     if contained_base is None:
-        return {"blocker": "evidence_root_outside_repo", "prompt_path": None, "output_path": None}
+        return {"blocker": "score_evidence_path_outside_repo", "prompt_path": None, "output_path": None}
     if _path_has_file_ancestor(repo_root, contained_base):
         return {"blocker": "evidence_root_not_directory", "prompt_path": None, "output_path": None}
     prompt_file = _contained_score_evidence_file(repo_root, contained_base / "prompt.txt")
@@ -398,7 +400,7 @@ def _score_evidence_paths(repo_root: Path, evidence_root: str, experiment_id: ob
 
 
 def _contained_score_evidence_file(repo_root: Path, path: Path) -> Path | None:
-    if path.is_symlink():
+    if path.is_symlink() or path.is_dir():
         return None
     return _contained_repo_path(repo_root, path)
 
@@ -485,6 +487,17 @@ def _path_has_file_ancestor(repo_root: Path, path: Path) -> bool:
     current = path
     while current != repo_base:
         if current.exists() and not current.is_dir():
+            return True
+        if current.parent == current:
+            return True
+        current = current.parent
+    return False
+
+
+def _path_has_symlink_ancestor(root: Path, path: Path) -> bool:
+    current = path
+    while current != root:
+        if current.is_symlink():
             return True
         if current.parent == current:
             return True
