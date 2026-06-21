@@ -419,7 +419,7 @@ def _write_text_evidence(path: Path | None, value: str) -> None:
     if path is None:
         return
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(value, encoding="utf-8")
+    path.write_bytes(value.encode("utf-8"))
 
 
 def _contained_repo_path(repo_root: Path, path: Path) -> Path | None:

@@ -18,7 +18,6 @@ _AB_JUDGE_DIMENSION_ID_VALUES = (
     "maintainability",
 )
 _AB_JUDGE_DIMENSION_IDS = set(_AB_JUDGE_DIMENSION_ID_VALUES)
-AbJudgeDimensionId = Literal[*_AB_JUDGE_DIMENSION_ID_VALUES]
 
 
 def _exact_decision_labels(rows: list[str]) -> bool:
@@ -518,11 +517,18 @@ class AbJudgePreviewReceipt(_SdkContractModel):
 
 
 class AbJudgeDimensionScore(_SdkContractModel):
-    dimension_id: AbJudgeDimensionId
+    dimension_id: str = Field(min_length=1)
     skill_a_score: Annotated[float, Field(ge=0, le=5)]
     skill_b_score: Annotated[float, Field(ge=0, le=5)]
     reason: str = Field(min_length=1)
     evidence_refs: list[str] = Field(min_length=1)
+
+    @field_validator("dimension_id")
+    @classmethod
+    def _dimension_id_canonical(cls, value: str) -> str:
+        if value not in _AB_JUDGE_DIMENSION_IDS:
+            raise ValueError("judge dimension id must be canonical")
+        return value
 
     @field_validator("evidence_refs")
     @classmethod
