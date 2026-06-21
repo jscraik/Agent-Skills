@@ -267,7 +267,7 @@
       </div>
       <div class="summary-grid">
         <div class="stat" data-status="implemented"><b>26</b><strong>Implemented</strong><span>Local SDK control-plane capabilities with owner surfaces and tests.</span></div>
-        <div class="stat" data-status="preview"><b>14</b><strong>Preview</strong><span>Read-only planning and static projection surfaces.</span></div>
+        <div class="stat" data-status="preview"><b>15</b><strong>Preview</strong><span>Read-only planning and static projection surfaces.</span></div>
         <div class="stat" data-status="placeholder"><b>0</b><strong>Placeholder</strong><span>Visible but not executable optional lanes.</span></div>
         <div class="stat" data-status="blocked"><b>0</b><strong>Blocked</strong><span>Sandbox scope is intake quarantine plus Codex-backed eval execution.</span></div>
         <div class="stat" data-status="deferred"><b>2</b><strong>Deferred</strong><span>Schema registry and compiled package lanes.</span></div>
@@ -294,6 +294,7 @@
             <tr data-capability-id="skill_ir" data-status="implemented" data-pipeline-sections="compiler_emitter_discipline,domain_model_integrity,public_sdk_surface"></tr>
             <tr data-capability-id="package_identity" data-status="implemented" data-pipeline-sections="compiler_emitter_discipline,package_hardening,public_sdk_surface"></tr>
             <tr data-capability-id="install_preview" data-status="preview_only" data-pipeline-sections="author_golden_path,public_sdk_surface,full_skill_lifecycle"></tr>
+            <tr data-capability-id="skill_intake" data-status="preview_only" data-pipeline-sections="full_skill_lifecycle,package_hardening,agent_execution_control_plane"></tr>
             <tr data-capability-id="lockfile_preview" data-status="preview_only" data-pipeline-sections="public_sdk_surface,full_skill_lifecycle"></tr>
             <tr data-capability-id="real_install" data-status="implemented" data-pipeline-sections="full_skill_lifecycle,public_sdk_surface"></tr>
             <tr data-capability-id="project_conformance" data-status="implemented" data-pipeline-sections="ci_and_adoption,public_sdk_surface,full_skill_lifecycle"></tr>
@@ -341,6 +342,7 @@
             <tr data-status="implemented"><td><strong>Manifest and check receipt schemas</strong></td><td><span class="pill implemented">implemented</span></td><td><code>schemas/skills-sdk/*</code></td><td>Schema spine exists for current manifest and check receipt.</td><td>Add receipt families when install/publish lanes need them.</td></tr>
             <tr data-status="implemented"><td><strong>Risk classification</strong></td><td><span class="pill implemented">implemented</span></td><td><code>skills_sdk/risk.py</code></td><td>Local read-only tiering exists.</td><td>Connect risk tiers to real adapters after adapters are approved.</td></tr>
             <tr data-status="preview"><td><strong>Install and lockfile preview</strong></td><td><span class="pill preview">preview only</span></td><td><code>skills_sdk/install_preview.py</code></td><td>Models target paths and lockfile delta without writes.</td><td>Keep preview honest; writes belong to explicit install.</td></tr>
+            <tr data-status="preview"><td><strong>External skill intake quarantine</strong></td><td><span class="pill preview">preview only</span></td><td><code>skills_sdk/skill_intake.py</code></td><td><code>ask sdk intake inspect --preview</code> reads, hashes, and validates directory-form external skill candidates without execution, install, projection writes, network, or mutation.</td><td>Add archive unpack quarantine only after directory intake receipts and path-boundary checks stay schema-verified.</td></tr>
             <tr data-status="implemented"><td><strong>Real project install</strong></td><td><span class="pill implemented">implemented</span></td><td><code>skills_sdk/project_install.py</code></td><td>Bounded project install requires explicit apply and marked project root.</td><td>Add richer restore only when before-state is proven.</td></tr>
             <tr data-status="implemented"><td><strong>Rollback and uninstall</strong></td><td><span class="pill implemented">implemented</span></td><td><code>skills_sdk/project_cleanup.py</code></td><td>Receipt-proven cleanup bounded to explicit marked project roots.</td><td>Support duplicate install instances only if lockfile model changes.</td></tr>
             <tr data-status="implemented"><td><strong>Project conformance</strong></td><td><span class="pill implemented">implemented</span></td><td><code>skills_sdk/project_conformance.py</code></td><td>Read-only adoption gate for marked project roots.</td><td>Wire into repo adoption policy later.</td></tr>
@@ -522,7 +524,7 @@
         <div class="step" data-status="deferred"><span class="pill deferred">permissions</span><strong>Permission Delta Review</strong><span>Compare install or update plans for new filesystem, network, shell, browser, API, secret, and write access before approval.</span></div>
         <div class="step" data-status="deferred"><span class="pill deferred">data</span><strong>Data Exposure Review</strong><span>Classify model-visible prompts, retrieved files, tool outputs, logs, transcripts, and secret-handling boundaries for each skill package.</span></div>
         <div class="step" data-status="deferred"><span class="pill deferred">actions</span><strong>Action Surface Review</strong><span>List irreversible or high-impact actions a skill can cause, including writes, installs, publishes, messages, tickets, browser actions, and external API calls.</span></div>
-        <div class="step" data-status="deferred"><span class="pill deferred">isolation</span><strong>Third-Party Skill Quarantine</strong><span>Copy, unpack, read, validate, hash, and receipt untrusted skills in a staged lane; block execution, broad paths, and runtime projection until an intake decision is proven.</span></div>
+        <div class="step" data-status="preview"><span class="pill preview">isolation</span><strong>Third-Party Skill Quarantine</strong><span>Directory-form external skills can now be read, validated, hashed, and receipted in a staged lane; archive unpacking remains deferred and execution, install, broad paths, and runtime projection are blocked.</span></div>
         <div class="step" data-status="deferred"><span class="pill deferred">semantic</span><strong>Semantic Security Review</strong><span>Review what the skill can instruct the agent to do, not only filenames, frontmatter, regex hits, or package formatting.</span></div>
         <div class="step" data-status="deferred"><span class="pill deferred">approval</span><strong>Approval Friction Policy</strong><span>Define when the SDK blocks, warns, asks, or auto-allows so human review remains meaningful without training operators to ignore prompts.</span></div>
       </div>
@@ -543,7 +545,7 @@
         <div class="card" data-status="implemented"><span class="pill implemented">4</span><strong>Preview / install</strong><span>Preview target paths, then apply only to explicit marked project roots.</span></div>
         <div class="card" data-status="implemented"><span class="pill implemented">5</span><strong>Review route</strong><span>Select lenses, create review plan, create handoff, execute local artifacts, verify required artifacts.</span></div>
         <div class="card" data-status="implemented"><span class="pill implemented">6</span><strong>Eval run</strong><span>Run deterministic local evals or internal skill evals; target-bound receipts carry package identity and case counts. A/B execution should use Codex sandbox modes via <code>codex exec</code>.</span></div>
-        <div class="card" data-status="blocked"><span class="pill blocked">7</span><strong>Sign / quarantine</strong><span>Signing intent is local and ready; external skill intake needs quarantine receipts, and eval execution uses Codex sandbox modes.</span></div>
+        <div class="card" data-status="preview"><span class="pill preview">7</span><strong>Sign / quarantine</strong><span>Signing intent is local and ready; directory-form external skill intake now emits quarantine receipts, and eval execution uses Codex sandbox modes.</span></div>
         <div class="card" data-status="out"><span class="pill out">8</span><strong>Publish / registry</strong><span>Not V1. Do not expose until real signatures, release trust policy, evals, and package identity are ready together.</span></div>
       </div>
     </section>

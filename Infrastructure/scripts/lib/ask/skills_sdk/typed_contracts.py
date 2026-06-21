@@ -4,7 +4,7 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from ask.skills_sdk import ab_contracts, observability_contracts, signing_contracts, trust_contracts
+from ask.skills_sdk import ab_contracts, observability_contracts, signing_contracts, skill_intake_contracts, trust_contracts
 from ask.skills_sdk.eval_contracts import EvalQualityGates
 
 
@@ -775,6 +775,9 @@ def validate_sandbox_profile(payload: object) -> SandboxProfile: return SandboxP
 
 def validate_sandbox_profile_receipt(payload: object) -> SandboxProfileReceipt:
     return SandboxProfileReceipt.model_validate(payload)
+
+
+def validate_skill_intake_receipt(payload: object) -> skill_intake_contracts.SkillIntakeReceipt: return skill_intake_contracts.validate_skill_intake_receipt(payload)
 
 
 def validate_skill_frontmatter(payload: object) -> SkillFrontmatter:

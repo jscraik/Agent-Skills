@@ -32,6 +32,7 @@ SCHEMA_NAMES = {
     "signing-intent-receipt": "signing-intent-receipt.v0.schema.json",
     "sandbox-profile": "sandbox-profile.v0.schema.json",
     "sandbox-profile-receipt": "sandbox-profile-receipt.v0.schema.json",
+    "skill-intake-receipt": "skill-intake-receipt.v0.schema.json",
     "eval-profile-preview-receipt": "eval-profile-preview-receipt.v0.schema.json",
     "ab-rubric-receipt": "ab-rubric-receipt.v0.schema.json",
     "ab-preview-receipt": "ab-preview-receipt.v0.schema.json",
@@ -488,6 +489,17 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertFalse(payload["adapter_selected"])
         self.assertFalse(payload["mutation_performed"])
 
+    def test_skill_intake_receipt_fixture_records_quarantine_boundary(self) -> None:
+        payload = self.assert_valid("skill-intake-receipt", "skill-intake-receipt.json")
+
+        self.assertEqual(payload["status"], "preview")
+        self.assertEqual(payload["source_kind"], "directory")
+        self.assertEqual(payload["skill_id"], "skills-sdk-valid-fixture")
+        self.assertFalse(payload["execution_performed"])
+        self.assertFalse(payload["install_performed"])
+        self.assertFalse(payload["projection_mutation_performed"])
+        self.assertFalse(payload["mutation_performed"])
+
     def test_eval_case_fixture_records_deterministic_oracle(self) -> None:
         payload = self.assert_valid("eval-case", "eval-case.json")
 
@@ -618,6 +630,9 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
 
     def test_sandbox_profile_receipt_schema_rejects_execution_claims(self) -> None:
         self.assert_invalid("sandbox-profile-receipt", "sandbox-profile-receipt-executes.json")
+
+    def test_skill_intake_schema_rejects_execution_claims(self) -> None:
+        self.assert_invalid("skill-intake-receipt", "skill-intake-executes.json")
 
     def test_sandbox_profile_receipt_schema_rejects_short_digest(self) -> None:
         payload = _json(FIXTURE_DIR / "valid" / "sandbox-profile-receipt.json")

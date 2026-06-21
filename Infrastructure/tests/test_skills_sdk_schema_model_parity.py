@@ -25,6 +25,7 @@ SCHEMA_FILES = {
     "install-receipt": "install-receipt.v1.schema.json",
     "lockfile-preview": "lockfile-preview.v1.schema.json",
     "lockfile": "lockfile.v1.schema.json",
+    "skill-intake-receipt": "skill-intake-receipt.v0.schema.json",
 }
 
 
@@ -80,6 +81,7 @@ class TestSkillsSdkSchemaModelParity(unittest.TestCase):
             ("install-preview", "install-preview.json", contracts.validate_install_preview),
             ("install-receipt", "install-receipt.json", contracts.validate_install_receipt),
             ("lockfile", "lockfile.json", contracts.validate_lockfile),
+            ("skill-intake-receipt", "skill-intake-receipt.json", contracts.validate_skill_intake_receipt),
         )
 
         for schema_key, fixture_name, validator in cases:
@@ -100,6 +102,15 @@ class TestSkillsSdkSchemaModelParity(unittest.TestCase):
 
         with self.assertRaises(ValidationError):
             contracts.validate_check_receipt(_json(FIXTURE_DIR / "invalid" / "check-receipt-pass-placeholder.json"))
+
+    def test_invalid_skill_intake_execution_claim_fails_schema_and_model(self) -> None:
+        result = self.assert_schema_fails("skill-intake-receipt", "skill-intake-executes.json")
+        self.assertIn("$.execution_performed", result.diagnostics[0].json_path)
+
+        with self.assertRaises(ValidationError):
+            contracts.validate_skill_intake_receipt(
+                _json(FIXTURE_DIR / "invalid" / "skill-intake-executes.json")
+            )
 
 
 if __name__ == "__main__":

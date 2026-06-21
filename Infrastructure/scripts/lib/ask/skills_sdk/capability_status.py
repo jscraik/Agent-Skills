@@ -34,6 +34,7 @@ REQUIRED_CAPABILITY_IDS = (
     "skill_ir",
     "package_identity",
     "install_preview",
+    "skill_intake",
     "lockfile_preview",
     "real_install",
     "project_conformance",
