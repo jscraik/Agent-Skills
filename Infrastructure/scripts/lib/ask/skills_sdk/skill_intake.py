@@ -177,7 +177,7 @@ def _inspect_allowed_path(
     inspected_files.append({"path": relative, "digest": digest, "size_bytes": size_bytes})
 
 
-def _iter_approved_package_paths(source_root: Path, top_level_children: list[Path]) -> list[Path]:
+def _iter_approved_package_paths(top_level_children: list[Path]) -> list[Path]:
     approved_paths: list[Path] = []
     for child in top_level_children:
         if child.name not in ALLOWED_TOP_LEVELS:
