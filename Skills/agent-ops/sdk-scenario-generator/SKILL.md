@@ -12,8 +12,15 @@ metadata:
   review_cadence: quarterly
   last_reviewed: "2026-06-17"
   metadata_source: frontmatter
-  compatible_roles: "default, worker, skill-inspector"
-  runtime_needs: "target skill, references/evals.yaml, references/contract.yaml, Tessl dry-run staging"
+  compatible_roles:
+    - default
+    - worker
+    - skill-inspector
+  runtime_needs:
+    - target skill
+    - references/evals.yaml
+    - references/contract.yaml
+    - Tessl dry-run staging
 ---
 
 # SDK Scenario Generator

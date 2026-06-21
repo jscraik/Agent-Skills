@@ -664,6 +664,14 @@ def _safe_tessl_skill_key(raw_name: str) -> str:
     return key or "skill"
 
 
+def _write_tessl_staged_json(path: Path, payload: dict[str, Any], staging_root_real: str, label: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    target_real = os.path.realpath(path)
+    if os.path.commonpath([staging_root_real, target_real]) != staging_root_real:
+        raise ValueError(f"Tessl review staging {label} path escaped the staging root.")
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
 def _write_tessl_plugin_wrapper(repo_root: Path, audit_target_path: str, stable_parent: Path) -> tuple[Path, dict[str, str]]:
     """Create a stable Tessl plugin-shaped evidence wrapper for a SKILL.md-first local skill."""
     source_skill_dir = repo_root / audit_target_path
@@ -702,20 +710,15 @@ def _write_tessl_plugin_wrapper(repo_root: Path, audit_target_path: str, stable_
         "private": True,
         "skills": "./skills/",
     }
-    plugin_path = temp_root / ".tessl-plugin" / "plugin.json"
-    plugin_path.parent.mkdir(parents=True, exist_ok=True)
     stable_parent_real = os.path.realpath(stable_parent)
-    plugin_path_real = os.path.realpath(plugin_path)
-    if os.path.commonpath([stable_parent_real, plugin_path_real]) != stable_parent_real:
-        raise ValueError("Tessl review staging manifest path escaped the staging root.")
-    plugin_path.write_text(json.dumps(plugin, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    plugin_path = temp_root / ".tessl-plugin" / "plugin.json"
+    _write_tessl_staged_json(plugin_path, plugin, stable_parent_real, "manifest")
     tessl_marker_path = temp_root / "tessl.json"
-    tessl_marker_real = os.path.realpath(tessl_marker_path)
-    if os.path.commonpath([stable_parent_real, tessl_marker_real]) != stable_parent_real:
-        raise ValueError("Tessl review staging marker path escaped the staging root.")
-    tessl_marker_path.write_text(
-        json.dumps({"name": f"agent-skills-{skill_key}", "version": "0.0.0-local"}, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
+    _write_tessl_staged_json(
+        tessl_marker_path,
+        {"name": f"agent-skills-{skill_key}", "version": "0.0.0-local"},
+        stable_parent_real,
+        "marker",
     )
     return temp_root, {
         "plugin_manifest": str(plugin_path),
