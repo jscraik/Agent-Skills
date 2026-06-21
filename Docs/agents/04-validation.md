@@ -201,12 +201,14 @@ separately before rerunning the same wrapper lane.
 `ask skills external-review` is the durable second-check entrypoint for the
 external-review ladder. It runs strict audit, local Plugin Eval, and native
 Tessl review by default. Treat `tessl skill review` path shape as the skill
-directory containing `SKILL.md`; Tessl lint expects a tile package with
-`tile.json` and is not interchangeable. Plugin Eval is acceptable at `B+` or
+directory containing `SKILL.md`; Tessl plugin lint expects a staged package with
+`.tessl-plugin/plugin.json` and is not interchangeable. Plugin Eval is acceptable at `B+` or
 better when it has zero failures and the local/Tessl gates pass. Tessl review
 must meet the `95` threshold and must run through the wrapper, which preserves
-`/tmp/ask-tessl-reviews/<skill-path>-<sha12>` with `tile.json`, `tessl.json`,
-the copied skill, and included references for evidence.
+`/tmp/ask-tessl-reviews/<skill-path>-<sha12>/current` with
+`.tessl-plugin/plugin.json`, `tessl.json`, the copied skill, and included
+references for evidence. Reruns move the previous `current` directory under
+`evidence-archive/` before refreshing staged inputs.
 
 When any rung is blocked, record the exact command, status, blocker class, and
 the next minimal diagnostic. Do not replace a blocked rung with a different tool

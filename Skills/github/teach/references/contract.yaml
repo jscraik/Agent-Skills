@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "skill": "teach",
+  "purpose": "Maintain a mission-grounded teaching workspace for multi-session learning.",
+  "triggers": [
+    "learn a topic or skill",
+    "continue or review a learning workspace",
+    "create lessons, references, resources, or learning records"
+  ],
+  "non_goals": [
+    "one-off factual answers",
+    "professional certification replacement",
+    "copying private or credential-bearing source material"
+  ],
+  "inputs": [
+    "learning goal",
+    "MISSION.md",
+    "RESOURCES.md",
+    "NOTES.md",
+    "reference/*.html",
+    "learning-records/*.md",
+    "lessons/*.html",
+    "assets/*"
+  ],
+  "outputs": [
+    "mission update proposal",
+    "lesson HTML",
+    "reference HTML",
+    "resource entries",
+    "learning records",
+    "notes"
+  ],
+  "risks": [
+    "untrusted_input",
+    "secret_exposure",
+    "overwriting_user_learning_state",
+    "unsupported_claims"
+  ],
+  "safety": {
+    "untrusted_inputs": true,
+    "redact_secrets": true,
+    "destructive_commands": false,
+    "require_confirmation_before_mission_change": true
+  },
+  "evals": {
+    "smoke": [
+      "happy-new-topic",
+      "happy-existing-workspace",
+      "happy-study-plan",
+      "happy-first-lesson",
+      "happy-quiz-review",
+      "happy-reference-page",
+      "happy-resource-curation",
+      "negative-one-off-fact",
+      "pressure-prompt-injection",
+      "pressure-private-transcript"
+    ],
+    "release": [
+      "happy-new-topic",
+      "happy-existing-workspace",
+      "happy-study-plan",
+      "happy-first-lesson",
+      "happy-quiz-review",
+      "happy-reference-page",
+      "happy-resource-curation",
+      "edge-mission-unclear",
+      "edge-mission-change",
+      "edge-no-existing-files",
+      "edge-external-sources-needed",
+      "edge-overloaded-learner",
+      "edge-community-wisdom",
+      "negative-one-off-fact",
+      "negative-copyedit-only",
+      "negative-debug-only",
+      "negative-professional-certification",
+      "pressure-prompt-injection",
+      "pressure-private-transcript",
+      "pressure-destructive-workspace"
+    ]
+  },
+  "evidence_policy": "Report created or updated learning files, cited sources, validation checks, and blockers.",
+  "observability": "Report exact pass, fail, or blocked outcomes for validation commands, workspace file checks, and source verification.",
+  "rollback_procedure": "Restore previous learning files from version control or user backups, then rerun path, link, and source checks."
+}

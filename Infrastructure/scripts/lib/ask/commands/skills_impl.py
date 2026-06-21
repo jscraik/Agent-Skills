@@ -11,7 +11,6 @@ import sys
 import importlib.util
 import tempfile
 import difflib
-import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -665,49 +664,57 @@ def _safe_tessl_skill_key(raw_name: str) -> str:
     return key or "skill"
 
 
-def _write_tessl_tile_wrapper(repo_root: Path, audit_target_path: str, stable_parent: Path) -> tuple[Path, dict[str, str]]:
-    """Create a stable Tessl evidence wrapper for a SKILL.md-first local skill."""
+def _write_tessl_plugin_wrapper(repo_root: Path, audit_target_path: str, stable_parent: Path) -> tuple[Path, dict[str, str]]:
+    """Create a stable Tessl plugin-shaped evidence wrapper for a SKILL.md-first local skill."""
     source_skill_dir = repo_root / audit_target_path
     source_skill = source_skill_dir / "SKILL.md"
     fields = _read_skill_frontmatter_fields(source_skill)
     skill_key = _safe_tessl_skill_key(fields.get("name") or Path(audit_target_path).name)
-    stable_parent.mkdir(parents=True, exist_ok=True)
-    run_id = str(uuid.uuid4())[:8]
-    temp_root = stable_parent / run_id
+    temp_root = stable_parent / "current"
+    if temp_root.exists():
+        archive_root = stable_parent / "evidence-archive"
+        archive_root.mkdir(parents=True, exist_ok=True)
+        archive_name = f"plugin-review-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}"
+        archive_path = archive_root / archive_name
+        counter = 1
+        while archive_path.exists():
+            counter += 1
+            archive_path = archive_root / f"{archive_name}-{counter}"
+        shutil.move(str(temp_root), str(archive_path))
     temp_root.mkdir(parents=True, exist_ok=True)
-    tile_skill_dir = temp_root / "skills" / skill_key
-    tile_skill_dir.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(source_skill, tile_skill_dir / "SKILL.md")
+    staged_skill_dir = temp_root / "skills" / skill_key
+    staged_skill_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(source_skill, staged_skill_dir / "SKILL.md")
     for support_dir_name in ("references", "scripts", "assets", "evals"):
         support_dir = source_skill_dir / support_dir_name
         if support_dir.is_dir():
-            shutil.copytree(support_dir, tile_skill_dir / support_dir_name)
+            shutil.copytree(support_dir, staged_skill_dir / support_dir_name)
 
-    tile = {
+    plugin = {
+        "schema_version": 1,
         "name": f"local/{skill_key}",
-        "summary": fields.get("description") or f"Local validation wrapper for {skill_key}.",
+        "description": fields.get("description") or f"Local validation wrapper for {skill_key}.",
         "version": "0.0.0-local",
-        "skills": {
-            skill_key: {
-                "path": f"skills/{skill_key}/SKILL.md",
-            },
-        },
+        "private": True,
+        "skills": "./skills/",
     }
-    tile_path = temp_root / "tile.json"
-    tile_path.write_text(json.dumps(tile, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    plugin_path = temp_root / ".tessl-plugin" / "plugin.json"
+    plugin_path.parent.mkdir(parents=True, exist_ok=True)
+    plugin_path.write_text(json.dumps(plugin, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     tessl_marker_path = temp_root / "tessl.json"
     tessl_marker_path.write_text(
         json.dumps({"name": f"agent-skills-{skill_key}", "version": "0.0.0-local"}, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
-    return tile_path, {
-        "tile_path": str(tile_path),
+    return temp_root, {
+        "plugin_manifest": str(plugin_path),
         "tessl_project_marker": str(tessl_marker_path),
         "staging_root": str(temp_root),
-        "review_path": str(tile_skill_dir),
+        "review_path": str(staged_skill_dir),
         "skill_key": skill_key,
         "source_skill": audit_target_path,
         "evidence_retention": "stable_tmp_directory_left_for_post-run_inspection",
+        "archive_policy": "previous_current_staging_moved_to_evidence_archive_before_refresh",
     }
 
 
@@ -6652,10 +6659,10 @@ def external_review_skill(
         "tessl_staging_root": f"{os.path.join(tempfile.gettempdir(), 'ask-tessl-reviews')}/<skill-path>-<sha12>",
         "tessl_project_marker": "tessl.json",
         "tessl_evidence_retention": "stable tmp wrapper is intentionally left for inspection and copied-input evidence",
-        "tessl_lint_role": "stable_tile_packaging_shape_check",
+        "tessl_lint_role": "stable_plugin_packaging_shape_check",
         "tessl_lint_shape": (
-            "Tessl lint expects a Tessl tile.json package. Canonical repo skills are "
-            f"SKILL.md-first, so this command builds a stable local tile wrapper under {tempfile.gettempdir()} before linting."
+            "Tessl plugin lint expects a .tessl-plugin/plugin.json package. Canonical repo skills are "
+            f"SKILL.md-first, so this command builds a stable local plugin wrapper under {tempfile.gettempdir()} before linting."
         ),
         "tessl_review_role": "local_best_practice_content_review",
         "plugin_eval_role": "budget_and_ergonomics_guardrail",
@@ -6693,8 +6700,8 @@ def external_review_skill(
             "role": "static budget, ergonomics, and reviewability guardrail; not a substitute for local evals",
         },
         "tessl_lint": {
-            "command": "tessl skill lint <stable-tile.json>",
-            "role": "stable tile.json package-shape check, not a direct content finding",
+            "command": "tessl plugin lint <stable-plugin-directory>",
+            "role": "stable .tessl-plugin/plugin.json package-shape check, not a direct content finding",
             "canonical_source_shape": "SKILL.md-first",
         },
         "tessl_review": {
@@ -6805,7 +6812,7 @@ def external_review_skill(
         tessl_bin = shutil.which("tessl")
         if not tessl_bin:
             result.status = "error"
-            result.data["tessl_lint"] = {"status": "blocked_missing_binary", "command": "tessl skill lint"}
+            result.data["tessl_lint"] = {"status": "blocked_missing_binary", "command": "tessl plugin lint"}
             result.errors.append(ErrorObject(
                 code="ERR_DEPENDENCY",
                 message="Tessl CLI is not installed or not on PATH; Tessl local lint in the Second-Review Lane could not run.",
@@ -6813,20 +6820,20 @@ def external_review_skill(
             ))
         else:
             tessl_tmp_path = _stable_tessl_review_root(audit_target_path)
-            tile_path, tile_info = _write_tessl_tile_wrapper(repo_root, audit_target_path, tessl_tmp_path)
+            staging_root, plugin_info = _write_tessl_plugin_wrapper(repo_root, audit_target_path, tessl_tmp_path)
             tessl_env: dict[str, str] = {}
-            result.data["tessl_tile"] = {
-                **tile_info,
+            result.data["tessl_plugin"] = {
+                **plugin_info,
                 "mode": "stable_tmp_wrapper",
                 "reason": (
-                    "Tessl lint validates tile.json packages. Canonical repo skills remain "
-                    "SKILL.md-first, so this command stages a local packaging-shape wrapper under /tmp."
+                    "Tessl plugin lint validates .tessl-plugin/plugin.json packages. Canonical repo skills remain "
+                    "SKILL.md-first, so this command stages a local plugin-shaped wrapper under /tmp."
                 ),
                 "auth_home": "process_home",
                 "support_refs_included": True,
             }
 
-            lint_command = [tessl_bin, "skill", "lint", str(tile_path)]
+            lint_command = [tessl_bin, "plugin", "lint", str(staging_root)]
             try:
                 lint_proc = _run_captured_tool(
                     repo_root=repo_root,
@@ -6861,7 +6868,7 @@ def external_review_skill(
                     "--json",
                     "--threshold",
                     str(TESSL_REVIEW_MIN_SCORE),
-                    tile_info["review_path"],
+                    plugin_info["review_path"],
                 ]
                 try:
                     review_proc = _run_captured_tool(
