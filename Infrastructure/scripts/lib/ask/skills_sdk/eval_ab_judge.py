@@ -452,7 +452,7 @@ def _write_text_evidence(repo_root: Path, path: Path | None, value: str) -> None
     flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC
     if hasattr(os, "O_NOFOLLOW"):
         flags |= os.O_NOFOLLOW
-    file_descriptor = os.open(resolved, flags, 0o644)
+    file_descriptor = os.open(resolved, flags, 0o600)
     with os.fdopen(file_descriptor, "w", encoding="utf-8") as handle:
         handle.write(value)
 
