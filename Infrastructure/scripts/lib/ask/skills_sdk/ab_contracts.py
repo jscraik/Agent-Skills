@@ -604,6 +604,8 @@ class AbJudgeScoreReceipt(_SdkContractModel):
                 raise ValueError("scored A/B judge receipts must not include blockers")
             if not self._has_score_evidence():
                 raise ValueError("scored A/B judge receipts must include complete score evidence")
+            if self.decision is not None and self.decision.experiment_id != self.experiment_id:
+                raise ValueError("scored A/B judge receipts must bind decision to receipt experiment")
             if not (self.provider_invoked and self.network_accessed and self.mutation_performed):
                 raise ValueError("scored A/B judge receipts must report provider side effects")
         elif not self.blockers:

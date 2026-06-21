@@ -143,6 +143,34 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         self.assertTrue((REPO_ROOT / receipt["judge_output_path"]).parent.is_dir())
         validate_ab_judge_score_receipt(receipt)
 
+    def test_builder_clears_stale_output_when_local_judge_unavailable(self) -> None:
+        run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
+        stale_output = (
+            REPO_ROOT
+            / self.evidence_root
+            / run_receipt["experiment_id"]
+            / "judge"
+            / "ollama-output.json"
+        )
+        stale_output.parent.mkdir(parents=True, exist_ok=True)
+        stale_output.write_text('{"stale": true}', encoding="utf-8")
+
+        def missing_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int) -> OllamaJudgeResult:
+            raise FileNotFoundError("ollama")
+
+        receipt = build_ab_judge_score_receipt(
+            REPO_ROOT,
+            run_receipt=RUN_RECEIPT,
+            evidence_root=self.evidence_root,
+            runner=missing_runner,
+        )
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("judge_provider_unavailable", receipt["blockers"])
+        self.assertFalse(stale_output.exists())
+        self.assertIsNone(receipt["judge_output_digest"])
+        validate_ab_judge_score_receipt(receipt)
+
     def test_builder_blocks_schema_extra_judge_keys(self) -> None:
         def extra_key_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int) -> OllamaJudgeResult:
             run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
@@ -160,6 +188,22 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         self.assertEqual(receipt["status"], "blocked")
         self.assertIn("judge_decision_keys_invalid", receipt["blockers"])
         validate_ab_judge_score_receipt(receipt)
+
+    def test_typed_contract_rejects_decision_for_different_experiment(self) -> None:
+        def fake_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int) -> OllamaJudgeResult:
+            run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
+            return OllamaJudgeResult(exit_code=0, stdout=json.dumps(_decision(run_receipt["experiment_id"])), stderr="")
+
+        receipt = build_ab_judge_score_receipt(
+            REPO_ROOT,
+            run_receipt=RUN_RECEIPT,
+            evidence_root=self.evidence_root,
+            runner=fake_runner,
+        )
+        receipt["decision"]["experiment_id"] = "0000000000000000"
+
+        with self.assertRaises(Exception):
+            validate_ab_judge_score_receipt(receipt)
 
     def test_builder_blocks_winner_mismatched_to_scores(self) -> None:
         def mismatched_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int) -> OllamaJudgeResult:

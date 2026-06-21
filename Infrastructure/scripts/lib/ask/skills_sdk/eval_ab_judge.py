@@ -408,7 +408,8 @@ def _score_decision(
     if blockers or judge_profile is None:
         return None, None, False, False, False
     judge_prompt = _judge_prompt(preview["comparison_payload"])
-    _write_text_evidence(evidence["prompt_file"], judge_prompt)
+    _write_text_evidence(repo_root, evidence["prompt_file"], judge_prompt)
+    _clear_text_evidence(repo_root, evidence["output_file"])
     mutation_performed = True
     try:
         result = runner(judge_prompt, judge_profile, timeout_seconds)
@@ -417,10 +418,10 @@ def _score_decision(
         return None, None, False, False, mutation_performed
     except subprocess.TimeoutExpired as exc:
         stdout = _timeout_output_text(exc.stdout)
-        _write_text_evidence(evidence["output_file"], stdout)
+        _write_text_evidence(repo_root, evidence["output_file"], stdout)
         blockers.append("judge_provider_timeout")
         return None, _digest_text(stdout), True, True, mutation_performed
-    _write_text_evidence(evidence["output_file"], result.stdout)
+    _write_text_evidence(repo_root, evidence["output_file"], result.stdout)
     output_digest = _digest_text(result.stdout)
     if result.exit_code != 0:
         blockers.append(f"judge_provider_exit_{result.exit_code}")
@@ -431,11 +432,22 @@ def _score_decision(
     return decision, output_digest, True, True, mutation_performed
 
 
-def _write_text_evidence(path: Path | None, value: str) -> None:
+def _write_text_evidence(repo_root: Path, path: Path | None, value: str) -> None:
     if path is None:
         return
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(value, encoding="utf-8")
+    resolved = _contained_repo_path(repo_root, path)
+    if resolved is None:
+        return
+    resolved.parent.mkdir(parents=True, exist_ok=True)
+    resolved.write_text(value, encoding="utf-8")
+
+
+def _clear_text_evidence(repo_root: Path, path: Path | None) -> None:
+    if path is None:
+        return
+    resolved = _contained_repo_path(repo_root, path)
+    if resolved is not None and resolved.is_file():
+        resolved.unlink()
 
 
 def _contained_repo_path(repo_root: Path, path: Path) -> Path | None:
