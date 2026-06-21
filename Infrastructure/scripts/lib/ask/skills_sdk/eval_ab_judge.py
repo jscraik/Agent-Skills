@@ -443,6 +443,8 @@ def _score_decision(
 def _write_text_evidence(repo_root: Path, path: Path | None, value: str) -> None:
     if path is None:
         return
+    if path.is_symlink():
+        return
     resolved = _contained_repo_path(repo_root, path)
     if resolved is None:
         return
@@ -452,6 +454,11 @@ def _write_text_evidence(repo_root: Path, path: Path | None, value: str) -> None
 
 def _clear_text_evidence(repo_root: Path, path: Path | None) -> None:
     if path is None:
+        return
+    if path.is_symlink():
+        parent = _contained_repo_path(repo_root, path.parent)
+        if parent is not None:
+            path.unlink()
         return
     resolved = _contained_repo_path(repo_root, path)
     if resolved is not None and resolved.is_file():

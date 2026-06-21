@@ -17,8 +17,10 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
 from ask.skills_sdk.eval_ab_judge import (  # noqa: E402
     OllamaJudgeResult,
+    _clear_text_evidence,
     _run_ollama_judge,
     _score_evidence_paths,
+    _write_text_evidence,
     build_ab_judge_score_receipt,
 )
 from ask.skills_sdk.typed_contracts import validate_ab_judge_score_receipt  # noqa: E402
@@ -425,6 +427,38 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             self.assertEqual(evidence["blocker"], "score_evidence_path_outside_repo")
             self.assertIsNone(evidence["prompt_path"])
             self.assertIsNone(evidence["output_path"])
+
+    @unittest.skipIf(not hasattr(Path, "symlink_to"), "symlink support unavailable")
+    def test_clear_text_evidence_unlinks_leaf_symlink_not_target(self) -> None:
+        evidence_root = REPO_ROOT / self.evidence_root
+        score_dir = evidence_root / "1234567890abcdef" / "judge"
+        with tempfile.TemporaryDirectory(prefix="sdk-ab-judge-target-") as target_dir:
+            target = Path(target_dir) / "ollama-output.json"
+            target.write_text("old-output", encoding="utf-8")
+            score_dir.mkdir(parents=True, exist_ok=True)
+            symlink = score_dir / "ollama-output.json"
+            symlink.symlink_to(target)
+
+            _clear_text_evidence(REPO_ROOT, symlink)
+
+            self.assertFalse(symlink.exists())
+            self.assertEqual(target.read_text(encoding="utf-8"), "old-output")
+
+    @unittest.skipIf(not hasattr(Path, "symlink_to"), "symlink support unavailable")
+    def test_write_text_evidence_rejects_leaf_symlink(self) -> None:
+        evidence_root = REPO_ROOT / self.evidence_root
+        score_dir = evidence_root / "1234567890abcdef" / "judge"
+        with tempfile.TemporaryDirectory(prefix="sdk-ab-judge-target-") as target_dir:
+            target = Path(target_dir) / "prompt.txt"
+            target.write_text("original", encoding="utf-8")
+            score_dir.mkdir(parents=True, exist_ok=True)
+            symlink = score_dir / "prompt.txt"
+            symlink.symlink_to(target)
+
+            _write_text_evidence(REPO_ROOT, symlink, "new prompt")
+
+            self.assertTrue(symlink.is_symlink())
+            self.assertEqual(target.read_text(encoding="utf-8"), "original")
 
     def test_evidence_preflight_rejects_existing_file_experiment_root(self) -> None:
         evidence_root = REPO_ROOT / self.evidence_root

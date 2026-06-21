@@ -42,7 +42,7 @@
     "./bin/ask sdk eval ab-preview --skill-a Infrastructure/tests/fixtures/skills_sdk/valid_skill --skill-b Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --fixture Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --preview --json --robot",
     "./bin/ask sdk eval ab-plan --skill-a Infrastructure/tests/fixtures/skills_sdk/valid_skill --skill-b Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --fixture Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --preview --json --robot",
     "./bin/ask sdk eval ab-judge-preview --run-receipt Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.json --preview --json --robot",
-    "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_ab_judge_score.py -q",
+    "uv run --project Infrastructure --python 3.12 pytest -q Infrastructure/tests/test_skills_sdk_ab_judge_score.py",
     "./bin/ask sdk eval scenario-quality Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --preview --json --robot",
     "./bin/ask sdk package build Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
     "./bin/ask sdk package harden Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
