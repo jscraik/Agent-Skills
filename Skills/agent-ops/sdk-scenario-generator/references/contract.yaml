@@ -266,7 +266,7 @@ tessl_scenario_policy:
   workspace_run_limit_source: operator_provided_limit
   remediation_reserve_runs: 20
   capacity_preflight:
-    preferred_command: "tessl eval list --json --workspace <workspace> --limit 300"
+    preferred_command: "tessl eval list --json --workspace <workspace>"
     if_unknown: "block_nonessential_live_scoring"
   scenario_drift_review:
     required_after_skill_change: true

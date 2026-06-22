@@ -586,7 +586,7 @@ def _tessl_live_private_policy(workspace: str | None = None) -> dict:
             "limit_source": TESSL_WORKSPACE_RUN_LIMIT_SOURCE,
             "reserve_runs": TESSL_WORKSPACE_RUN_RESERVE,
             "verification_commands": [
-                "tessl eval list --json --workspace <workspace> --limit 300",
+                "tessl eval list --json --workspace <workspace>",
                 "tessl eval view --json <run-id>",
             ],
             "preflight": "before live scoring, check remaining Tessl workspace run capacity when the API/list surface is available; otherwise use the operator-provided 300-run cap and preserve reserve for rerun/remediation",
@@ -2509,7 +2509,7 @@ def _tessl_run_budget_preflight(
             "status": "blocked",
             "blocker_class": "blocked_runtime",
             "blocker": "Tessl workspace run-budget preflight timed out before live scoring.",
-            "command": _tessl_eval_list_command_text(tessl_path, workspace, with_limit=True),
+            "command": _tessl_eval_list_command_text(tessl_path, workspace),
             "raw_output": _as_text(exc.stdout),
             "raw_error": _as_text(exc.stderr),
         }
@@ -2518,7 +2518,7 @@ def _tessl_run_budget_preflight(
             "status": "blocked",
             "blocker_class": "blocked_runtime",
             "blocker": f"Failed to run Tessl workspace run-budget preflight: {exc}",
-            "command": _tessl_eval_list_command_text(tessl_path, workspace, with_limit=True),
+            "command": _tessl_eval_list_command_text(tessl_path, workspace),
             "raw_output": "",
             "raw_error": str(exc),
         }
@@ -2607,15 +2607,12 @@ def _tessl_run_budget_preflight(
     }
 
 
-def _tessl_eval_list_command(tessl_path: str, workspace: str, *, with_limit: bool) -> list[str]:
-    command = [tessl_path, "eval", "list", "--json", "--workspace", workspace]
-    if with_limit:
-        command.extend(["--limit", str(TESSL_WORKSPACE_RUN_LIMIT)])
-    return command
+def _tessl_eval_list_command(tessl_path: str, workspace: str) -> list[str]:
+    return [tessl_path, "eval", "list", "--json", "--workspace", workspace]
 
 
-def _tessl_eval_list_command_text(tessl_path: str, workspace: str, *, with_limit: bool) -> str:
-    return " ".join(shlex.quote(str(part)) for part in _tessl_eval_list_command(tessl_path, workspace, with_limit=with_limit))
+def _tessl_eval_list_command_text(tessl_path: str, workspace: str) -> str:
+    return " ".join(shlex.quote(str(part)) for part in _tessl_eval_list_command(tessl_path, workspace))
 
 
 def _run_tessl_eval_list_for_workspace(
@@ -2624,35 +2621,16 @@ def _run_tessl_eval_list_for_workspace(
     staged_root: Path,
     env: dict[str, str],
 ) -> tuple[subprocess.CompletedProcess[str], str]:
-    first_command = _tessl_eval_list_command(tessl_path, workspace, with_limit=True)
+    command = _tessl_eval_list_command(tessl_path, workspace)
     process = subprocess.run(
-        first_command,
+        command,
         cwd=str(staged_root),
         capture_output=True,
         text=True,
         timeout=TESSL_PROJECT_LINK_TIMEOUT_SECONDS,
         env=env,
     )
-    if process.returncode == 0:
-        return process, " ".join(shlex.quote(str(part)) for part in first_command)
-
-    fallback_command = _tessl_eval_list_command(tessl_path, workspace, with_limit=False)
-    fallback_process = subprocess.run(
-        fallback_command,
-        cwd=str(staged_root),
-        capture_output=True,
-        text=True,
-        timeout=TESSL_PROJECT_LINK_TIMEOUT_SECONDS,
-        env=env,
-    )
-    fallback_text = " ".join(shlex.quote(str(part)) for part in fallback_command)
-    if fallback_process.returncode == 0:
-        fallback_process.stdout = (
-            fallback_process.stdout
-            + "\n"
-            + json.dumps({"fallback_from": " ".join(shlex.quote(str(part)) for part in first_command)})
-        )
-    return fallback_process, fallback_text
+    return process, " ".join(shlex.quote(str(part)) for part in command)
 
 
 def _tessl_live_private_eval_run_command(

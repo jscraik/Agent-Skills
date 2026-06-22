@@ -92,7 +92,7 @@ Use the operator-provided workspace limit of 300 live Tessl runs unless Tessl re
 
 Preferred preflight:
 
-    tessl eval list --json --workspace <workspace> --limit 300
+    tessl eval list --json --workspace <workspace>
 
 If the limit or remaining capacity cannot be verified, block nonessential live scoring and continue with internal evals, dry-run staging, and scenario review. Record the blocker in the skill contract or run report.
 
