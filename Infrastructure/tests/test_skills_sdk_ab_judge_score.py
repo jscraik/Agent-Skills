@@ -116,7 +116,8 @@ def _run_codex_with_captured_subprocess(
             if op_env_file is not None:
                 env["ASK_CODEX_OP_ENV_FILE"] = str(op_env_file)
             subprocess.run = fake_run  # type: ignore[assignment]
-            with patch.dict(os.environ, env):
+            base_env = {"PATH": os.environ.get("PATH", ""), "HOME": os.environ.get("HOME", "")}
+            with patch.dict(os.environ, {**base_env, **env}, clear=True):
                 result = _run_codex_judge("prompt", judge_profile, 5, REPO_ROOT, output_file)
             return result, captured_command, captured_env, captured_profile_text, op_env_file
     finally:

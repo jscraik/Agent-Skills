@@ -559,6 +559,28 @@ class TestSkillsSdkKnowledgeIngest(unittest.TestCase):
             self.assertEqual(payload["status"], "applied")
             self.assertFalse((skill_dir / "references" / "knowledge-capsules" / "outside-secret.md").exists())
 
+    @unittest.skipIf(not hasattr(os, "symlink"), "symlink support required")
+    def test_required_reference_yaml_symlink_is_rejected_before_loading(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "agent-skills"
+            root.mkdir()
+            _write_skill(root)
+            extraction = _write_extraction(Path(tmp))
+            manifest_path = extraction / "references" / "knowledge-capsule.manifest.yaml"
+            outside = Path(tmp) / "outside-manifest.yaml"
+            outside.write_text(manifest_path.read_text(encoding="utf-8"), encoding="utf-8")
+            manifest_path.unlink()
+            os.symlink(outside, manifest_path)
+
+            with self.assertRaisesRegex(ValueError, "symlink_not_allowed"):
+                build_knowledge_ingest(
+                    root,
+                    extraction=str(extraction),
+                    skill="Skills/agent-ops/improve-agent-native",
+                    apply=False,
+                    preflight_security=False,
+                )
+
     def test_cli_requires_preview_or_apply(self) -> None:
         process = subprocess.run(
             [

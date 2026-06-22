@@ -16,7 +16,7 @@ from ask.skills_sdk.eval_ab_judge_codex import (
     _codex_op_env_file_available,
     _run_codex_judge,
 )
-from ask.skills_sdk.eval_ab_rubric import AB_RUBRIC_DIMENSIONS, canonical_ab_rubric, canonical_ab_rubric_digest
+from ask.skills_sdk.eval_ab_rubric import canonical_ab_rubric, canonical_ab_rubric_digest
 from ask.skills_sdk.eval_profiles import select_judge_profile
 
 AB_JUDGE_PREVIEW_SCHEMA_VERSION = "skills-sdk.ab-judge-preview-receipt.v0"
@@ -24,6 +24,7 @@ AB_JUDGE_PREVIEW_SCHEMA_URI = "https://jscraik.local/agent-skills/schemas/skills
 AB_JUDGE_SCORE_SCHEMA_VERSION = "skills-sdk.ab-judge-score-receipt.v0"
 AB_JUDGE_SCORE_SCHEMA_URI = "https://jscraik.local/agent-skills/schemas/skills-sdk/ab-judge-score-receipt.v0.schema.json"
 _EXPERIMENT_ID_RE = re.compile(r"[0-9a-f]{16}")
+__all__ = ["CodexJudgeResult"]
 
 
 def _digest_text(value: str) -> str:
@@ -442,16 +443,17 @@ def _score_decision(
     try:
         result = runner(judge_prompt, judge_profile, timeout_seconds, repo_root, evidence["output_file"])
     except CodexProfileConfigError:
-        blockers.append("codex_profile_config_missing"); return None, None, False, False, mutation_performed
+        blockers.append("codex_profile_config_missing")
+        return _blocked_score_decision(mutation_performed)
     except OSError:
-        blockers.append("judge_provider_unavailable"); return None, None, False, False, mutation_performed
+        blockers.append("judge_provider_unavailable")
+        return _blocked_score_decision(mutation_performed)
     except subprocess.TimeoutExpired as exc:
-        stdout = _timeout_output_text(exc.stdout); _write_text_evidence(repo_root, evidence["output_file"], stdout)
+        stdout = _timeout_output_text(exc.stdout)
+        _write_text_evidence(repo_root, evidence["output_file"], stdout)
         blockers.append("judge_provider_timeout")
         return None, _digest_text(stdout), True, True, mutation_performed
-    output_text = _codex_judge_output_text(repo_root, evidence["output_file"], result.output_text)
-    if not output_text:
-        output_text = result.stdout
+    output_text = _codex_judge_output_text(repo_root, evidence["output_file"], result.output_text) or result.stdout
     if not _contained_file_exists(repo_root, evidence["output_file"]):
         _write_text_evidence(repo_root, evidence["output_file"], output_text)
     output_digest = _digest_text(output_text)
@@ -462,6 +464,10 @@ def _score_decision(
     if blocker:
         blockers.append(blocker)
     return decision, output_digest, True, True, mutation_performed
+
+
+def _blocked_score_decision(mutation_performed: bool) -> tuple[None, None, bool, bool, bool]:
+    return None, None, False, False, mutation_performed
 
 
 def _write_text_evidence(repo_root: Path, path: Path | None, value: str) -> None:

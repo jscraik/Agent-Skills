@@ -3818,3 +3818,17 @@ def test_dashboard_report_uses_canonical_skill_builder_scripts(tmp_path: Path) -
     assert result.status == "success"
     cmd = run.call_args.args[0]
     assert cmd[1] == "Plugins/skill-factory/scripts/skill-builder/build_skill_eval_dashboard.py"
+
+
+def test_tessl_live_evidence_rejects_symlinked_repo_evidence_root(tmp_path: Path) -> None:
+    repo_root = tmp_path / "repo"
+    repo_root.mkdir()
+    external = tmp_path / "external-evidence"
+    external.mkdir()
+    evidence_parent = repo_root / ".harness" / "evidence"
+    evidence_parent.mkdir(parents=True)
+    os.symlink(external, evidence_parent / "tessl")
+
+    path = evals._tessl_live_evidence_file(repo_root, "Skills/example/SKILL.md", "run-123", "view.json")
+
+    assert path is None

@@ -62,7 +62,7 @@
             "contains": {"type": "string", "const": "--profile"},
             "minContains": 1
           },
-          "codex_profile": {"type": "string", "enum": ["oss-local", "oss-cloud"]},
+          "codex_profile": {"type": "string", "const": "oss-local"},
           "codex_exec_invoked": {"const": true},
           "decision": {"$ref": "#/definitions/judge_decision"},
           "provider_invoked": {"const": true},

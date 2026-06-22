@@ -12,8 +12,8 @@ import shutil
 import tempfile
 import hashlib
 import time
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Mapping
 from ask.envelope import CallResult, ErrorObject
 from ask.commands.skills_impl import _python_command_supports_packages, _subprocess_env_with_uv_cache
 from ask.skill_review_dashboard import render_skill_review_dashboard
@@ -404,15 +404,31 @@ def _tessl_live_evidence_file(repo_root: Path, skill_path: str, run_id: str, fil
     if run_segment is None:
         return None
     handle = re.sub(r"[^A-Za-z0-9_.-]+", "-", Path(skill_path).name).strip("-") or "skill"
-    root = (repo_root / ".harness" / "evidence" / "tessl").resolve(strict=False)
+    root = repo_root / ".harness" / "evidence" / "tessl"
+    if _path_has_symlink_component_under(root, repo_root):
+        return None
+    root_resolved = root.resolve(strict=False)
     evidence_dir = (root / handle / run_segment).resolve(strict=False)
     try:
-        evidence_dir.relative_to(root)
+        evidence_dir.relative_to(root_resolved)
     except ValueError:
         return None
     evidence_dir.mkdir(parents=True, exist_ok=True)
     path = evidence_dir / filename
     return None if path.is_symlink() else path
+
+
+def _path_has_symlink_component_under(path: Path, root: Path) -> bool:
+    try:
+        relative_parts = path.relative_to(root).parts
+    except ValueError:
+        return True
+    current = root
+    for part in relative_parts:
+        current = current / part
+        if current.is_symlink():
+            return True
+    return False
 
 
 def _tessl_evidence_segment(value: str) -> str | None:

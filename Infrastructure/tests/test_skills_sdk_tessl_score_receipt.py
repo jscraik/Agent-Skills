@@ -118,6 +118,13 @@ def _score_exceeds_max_view_payload() -> dict[str, object]:
     }
 
 
+def _non_finite_score_view_payload() -> dict[str, object]:
+    payload = _view_payload()
+    scenarios = payload["data"]["attributes"]["scenarios"]  # type: ignore[index]
+    scenarios[0]["solutions"][0]["assessmentResults"][0]["score"] = "nan"  # type: ignore[index]
+    return payload
+
+
 def _command_env() -> dict[str, str]:
     env = os.environ.copy()
     temp_base = Path(tempfile.gettempdir()) / "agent-skills-test"
@@ -278,6 +285,29 @@ class TestSkillsSdkTesslScoreReceipt(unittest.TestCase):
         self.assertEqual(receipt["score_summary"]["missing_scenario_count"], 1)
         self.assertIn("valid positive max points", receipt["blocker"])
         self.assertFalse(any("None%" in action for action in receipt["feedback_loop"]["required_next_actions"]))
+
+    def test_non_finite_score_is_blocked_as_incomplete(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "view.json"
+            path.write_text(json.dumps(_non_finite_score_view_payload()), encoding="utf-8")
+
+            receipt = build_tessl_score_receipt(REPO_ROOT, view_json=path, skill="Skills/github/teach", run_id=RUN_ID)
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertEqual(receipt["score_summary"]["missing_scenario_count"], 1)
+        self.assertIn("valid positive max points", receipt["blocker"])
+
+    def test_mismatched_expected_run_id_blocks_receipt(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "view.json"
+            path.write_text(json.dumps(_view_payload()), encoding="utf-8")
+
+            receipt = build_tessl_score_receipt(REPO_ROOT, view_json=path, skill="Skills/github/teach", run_id="expected-run")
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertEqual(receipt["blocker_class"], "blocked_validation")
+        self.assertEqual(receipt["expected_run_id"], "expected-run")
+        self.assertIn(RUN_ID, receipt["blocker"])
 
     def test_scenario_max_uses_larger_variant_denominator(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

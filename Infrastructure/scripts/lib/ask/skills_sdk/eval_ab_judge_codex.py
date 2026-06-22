@@ -112,8 +112,6 @@ def _codex_profile_source_path(profile_id: str) -> Path | None:
     if configured_source_dir:
         configured_root = Path(configured_source_dir).expanduser()
         candidates.append((configured_root / config_name, configured_root))
-    configs_root = Path.home() / "dev" / "configs" / "codex"
-    candidates.append((configs_root / config_name, configs_root))
     current_codex_home = os.environ.get("CODEX_HOME")
     if current_codex_home:
         codex_home = Path(current_codex_home).expanduser()

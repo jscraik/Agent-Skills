@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 from typing import Any
 
@@ -61,7 +62,7 @@ def _assessment_score(result: dict[str, Any]) -> tuple[float, float] | None:
         max_score = float(result[max_key])
     except (TypeError, ValueError):
         return None
-    if max_score <= 0 or score < 0 or score > max_score:
+    if not math.isfinite(score) or not math.isfinite(max_score) or max_score <= 0 or score < 0 or score > max_score:
         return None
     return score, max_score
 
@@ -218,6 +219,10 @@ def build_tessl_score_receipt(
     payload, load_error = _load_json(view_json)
     if payload is None:
         return _blocked_load_receipt(repo_root, view_json, skill, run_id, load_error)
+    artifact_run_id = _run_id(payload, None)
+    expected_run_id = (run_id or "").strip()
+    if expected_run_id and artifact_run_id and artifact_run_id != expected_run_id:
+        return _blocked_run_id_receipt(repo_root, view_json, skill, expected_run_id, artifact_run_id)
     attrs = _attributes(payload)
     score_summary = _score_summary(payload)
     status = str(attrs.get("status") or "unknown").strip().lower()
@@ -274,6 +279,39 @@ def _blocked_load_receipt(
         },
         "mutation_performed": False,
         "agent_summary": _blocked_agent_summary(f"Tessl view artifact could not be loaded: {load_error}"),
+    }
+
+
+def _blocked_run_id_receipt(
+    repo_root: Path,
+    view_json: Path,
+    skill: str,
+    expected_run_id: str,
+    artifact_run_id: str,
+) -> dict[str, Any]:
+    blocker = f"Tessl view artifact run id {artifact_run_id} does not match expected run id {expected_run_id}."
+    return {
+        "schema_version": TESSL_SCORE_RECEIPT_SCHEMA_VERSION,
+        "schema_uri": TESSL_SCORE_RECEIPT_SCHEMA_URI,
+        "status": "blocked",
+        "blocker_class": "blocked_validation",
+        "blocker": blocker,
+        "skill": skill,
+        "run_id": artifact_run_id,
+        "expected_run_id": expected_run_id,
+        "view_json": _repo_relative(repo_root, view_json),
+        "memory_derived": False,
+        "ready": False,
+        "score_summary": None,
+        "readiness_thresholds": _readiness_thresholds(),
+        "feedback_loop": {
+            "status": "blocked",
+            "required_next_actions": [
+                "Provide the tessl eval view --json artifact for the requested run id before scoring.",
+            ],
+        },
+        "mutation_performed": False,
+        "agent_summary": _blocked_agent_summary(blocker),
     }
 
 

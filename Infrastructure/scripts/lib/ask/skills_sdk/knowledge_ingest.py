@@ -254,6 +254,8 @@ def _eval_reference_routes(extraction_root: Path, source_files: list[Path]) -> d
 
 
 def _load_yaml(path: Path, *, label: str) -> dict[str, Any]:
+    if path.is_symlink():
+        raise ValueError(f"{label}:symlink_not_allowed")
     try:
         loaded = _yaml_safe_load_text(path.read_text(encoding="utf-8"), label=label) or {}
     except FileNotFoundError as exc:
