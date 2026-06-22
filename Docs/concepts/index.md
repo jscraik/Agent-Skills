@@ -42,10 +42,9 @@ Skills/<topic>/<skill-name>/
 ## Runtime Projection
 
 The `.agents/skills/` directory is a generated runtime projection consumed by
-Codex and other agent runtimes. In rooted mode it contains root router skills
-and runtime links, while command-visible handles are described by
-`.skillsets/command-surface.json` metadata that points back to canonical
-`SKILL.md` sources.
+Codex and other agent runtimes. In the current flat projection it contains
+runtime links for visible skills, while command-visible handles are resolved by
+the SDK registry back to canonical `SKILL.md` sources.
 
 This design:
 
@@ -63,9 +62,9 @@ python3 bin/ask skills resolve he-heartbeat --json
 python3 bin/ask reviewers resolve skillinspector --json
 ```
 
-`python3 bin/ask skills sync --scope workspace --projection rooted` refreshes
+`python3 bin/ask skills sync --scope workspace --projection flat` refreshes
 repo-local projection files. `python3 bin/ask skills sync --scope user
---projection rooted` refreshes user runtime links and profile-local plugin
+--projection flat` refreshes user runtime links and profile-local plugin
 mirrors.
 
 ## Deprecations and Aliases

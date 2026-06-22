@@ -12,6 +12,7 @@ FIXTURE_DIR = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine
 SCHEMA_NAMES = {
     "manifest-source": "manifest-source.v1.schema.json",
     "check-receipt": "check-receipt.v1.schema.json",
+    "capability-evidence-receipt": "capability-evidence-receipt.v0.schema.json",
     "risk-classification": "risk-classification.v1.schema.json",
     "install-preview": "install-preview.v1.schema.json",
     "install-receipt": "install-receipt.v1.schema.json",
@@ -129,6 +130,17 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertTrue(payload["canonical_source"])
         self.assertFalse(payload["runtime_projection"])
         self.assertIn("SA-003", payload["acceptance_trace"])
+
+    def test_capability_evidence_fixture_preserves_lane_boundaries(self) -> None:
+        payload = self.assert_valid("capability-evidence-receipt", "capability-evidence-receipt.json")
+
+        self.assertEqual(payload["status"], "pass")
+        self.assertFalse(payload["mutation_performed"])
+        self.assertFalse(payload["command_execution_performed"])
+        statuses_by_kind = {row["kind"]: row["status"] for row in payload["evidence_rows"]}
+        self.assertEqual(statuses_by_kind["schema"], "pass")
+        self.assertEqual(statuses_by_kind["command"], "not_run")
+        self.assertEqual(statuses_by_kind["external_lane"], "not_run")
 
     def test_check_receipt_fixture_encodes_status_failure_and_proof_metadata(self) -> None:
         payload = self.assert_valid("check-receipt", "check-receipt.json")

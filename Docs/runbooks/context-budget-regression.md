@@ -18,10 +18,11 @@ Run the flat budget gate:
 python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --json
 ```
 
-Run the rooted budget gate after generating rooted manifests:
+Run the legacy rooted budget gate only when explicitly maintaining
+`.skillsets/**` compatibility metadata:
 
 ```bash
-python3 bin/ask skills sync --projection rooted --dry-run --json
+python3 Infrastructure/scripts/lifecycle-and-sync/generate_skillset_manifests.py --write --json
 python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --projection rooted --json
 ```
 
@@ -45,14 +46,14 @@ If manifests are stale, regenerate them:
 python3 Infrastructure/scripts/lifecycle-and-sync/generate_skillset_manifests.py --write --json
 ```
 
-If first-level latent skills are exposed in rooted mode, regenerate the rooted
-projection:
+If first-level latent skills are exposed in the current runtime surface,
+refresh the flat projection:
 
 ```bash
-python3 bin/ask skills sync --scope workspace --projection rooted --json
+python3 bin/ask skills sync --scope workspace --projection flat --json
 ```
 
-Rollback to flat mode:
+Refresh flat mode explicitly:
 
 ```bash
 python3 bin/ask skills sync --scope workspace --projection flat --json

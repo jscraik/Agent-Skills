@@ -1,0 +1,51 @@
+{
+  "schema_version": "skills-sdk.capability-evidence-receipt.v0",
+  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/capability-evidence-receipt.v0.schema.json",
+  "status": "pass",
+  "operation": "capability_evidence_verify",
+  "scope": "capability-matrix",
+  "matrix_path": "Infrastructure/config/skills-sdk/capability-matrix.v1.json",
+  "capability_count": 1,
+  "evidence_ref_count": 3,
+  "pass_count": 1,
+  "blocked_count": 0,
+  "not_run_count": 2,
+  "unknown_count": 0,
+  "evidence_rows": [
+    {
+      "capability_id": "manifest_schema",
+      "ref": "Infrastructure/config/schemas/skills-sdk/manifest-source.v1.schema.json",
+      "kind": "schema",
+      "status": "pass",
+      "reason": "Schema evidence file exists and parses as JSON.",
+      "evidence": ["Infrastructure/config/schemas/skills-sdk/manifest-source.v1.schema.json"],
+      "lane": "local",
+      "executes_command": false
+    },
+    {
+      "capability_id": "check",
+      "ref": "./bin/ask sdk check Skills/agent-ops/simplify --json --robot",
+      "kind": "command",
+      "status": "not_run",
+      "reason": "Command evidence is classified but not executed by preview verification.",
+      "evidence": ["./bin/ask"],
+      "lane": "local_command",
+      "executes_command": true
+    },
+    {
+      "capability_id": "publish",
+      "ref": "https://github.com/example/repo/actions/runs/1",
+      "kind": "external_lane",
+      "status": "not_run",
+      "reason": "External evidence lanes require their own receipt.",
+      "evidence": ["https://github.com/example/repo/actions/runs/1"],
+      "lane": "external",
+      "executes_command": false
+    }
+  ],
+  "blockers": [],
+  "mutation_performed": false,
+  "command_execution_performed": false,
+  "acceptance_trace": ["PU-032", "FR-008", "SA-003", "VP-032"],
+  "agent_summary": "Capability evidence verification checked 3 evidence ref(s): 1 passed, 0 blocked, and 2 command or external lane ref(s) were classified but not run."
+}

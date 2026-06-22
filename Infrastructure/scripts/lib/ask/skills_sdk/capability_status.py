@@ -61,6 +61,7 @@ REQUIRED_CAPABILITY_IDS = (
     "sandbox",
     "security_adapter",
     "static_docs",
+    "capability_evidence",
     "skill_explorer",
     "schema_registry",
     "registry",

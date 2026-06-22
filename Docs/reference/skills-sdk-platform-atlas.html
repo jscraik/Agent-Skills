@@ -266,8 +266,8 @@
         <div class="note">The HTML is a projection. The executable truth should remain <code>./bin/ask sdk status --json --robot</code> plus the capability matrix.</div>
       </div>
       <div class="summary-grid">
-        <div class="stat" data-status="implemented"><b>27</b><strong>Implemented</strong><span>Local SDK control-plane capabilities with owner surfaces and tests.</span></div>
-        <div class="stat" data-status="preview"><b>14</b><strong>Preview</strong><span>Read-only planning and static projection surfaces.</span></div>
+        <div class="stat" data-status="implemented"><b>28</b><strong>Implemented</strong><span>Local SDK control-plane capabilities with owner surfaces and tests.</span></div>
+        <div class="stat" data-status="preview"><b>15</b><strong>Preview</strong><span>Read-only planning and static projection surfaces.</span></div>
         <div class="stat" data-status="placeholder"><b>0</b><strong>Placeholder</strong><span>Visible but not executable optional lanes.</span></div>
         <div class="stat" data-status="blocked"><b>0</b><strong>Blocked</strong><span>Sandbox scope is intake quarantine plus Codex-backed eval execution.</span></div>
         <div class="stat" data-status="deferred"><b>2</b><strong>Deferred</strong><span>Schema registry and compiled package lanes.</span></div>
@@ -321,6 +321,7 @@
             <tr data-capability-id="sandbox" data-status="preview_only" data-pipeline-sections="agent_execution_control_plane,release_decision_matrix,eval_ops"></tr>
             <tr data-capability-id="security_adapter" data-status="preview_only" data-pipeline-sections="release_decision_matrix,package_hardening,ci_and_adoption"></tr>
             <tr data-capability-id="static_docs" data-status="preview_only" data-pipeline-sections="public_sdk_surface,knowledge_engineering,ci_and_adoption"></tr>
+            <tr data-capability-id="capability_evidence" data-status="implemented" data-pipeline-sections="public_sdk_surface,domain_model_integrity,ci_and_adoption"></tr>
             <tr data-capability-id="skill_explorer" data-status="preview_only" data-pipeline-sections="public_sdk_surface,full_skill_lifecycle,knowledge_engineering"></tr>
             <tr data-capability-id="schema_registry" data-status="deferred" data-pipeline-sections="public_sdk_surface,domain_model_integrity"></tr>
             <tr data-capability-id="registry" data-status="out_of_scope" data-pipeline-sections="public_sdk_surface,full_skill_lifecycle"></tr>
@@ -367,6 +368,7 @@
             <tr data-status="implemented"><td><strong>Redacted observability feedback preview</strong></td><td><span class="pill implemented">implemented</span></td><td><code>observability_feedback.py</code> and <code>observability_promotion.py</code></td><td>Redacted local event JSONL can be mined into preview-only eval scenario and skill-gap candidates, then checked against matching package and eval-run receipts for promotion readiness.</td><td>Generate candidate eval-case drafts only after promoted candidates pass scenario-quality screening without mutating source scenarios.</td></tr>
             <tr data-status="implemented"><td><strong>SkillIR.v0 and package identity</strong></td><td><span class="pill implemented">implemented</span></td><td><code>skills_sdk/ir.py</code> and <code>skills_sdk/package_build.py</code></td><td>The SDK builds a read-only typed IR and digest-backed package identity receipt without emitting archives.</td><td>Connect to signed archive emission only after signing, redaction, and archive ownership policy are approved.</td></tr>
             <tr data-status="implemented"><td><strong>Package hardening</strong></td><td><span class="pill implemented">implemented</span></td><td><code>skills_sdk/package_hardening.py</code></td><td>Read-only package hardening blocks forbidden runtime, generated, dependency, and secret-bearing paths.</td><td>Keep CI adoption separate; local hardening does not prove branch protection.</td></tr>
+            <tr data-status="implemented"><td><strong>Capability evidence verifier</strong></td><td><span class="pill implemented">implemented</span></td><td><code>skills_sdk/capability_evidence.py</code></td><td>Capability matrix evidence refs are classified as files, schemas, receipts, non-executed commands, or external lanes.</td><td>Add command execution receipts only after command authority and external-lane ownership are approved.</td></tr>
             <tr data-status="preview"><td><strong>Emitter write-plan preview</strong></td><td><span class="pill preview">preview only</span></td><td><code>skills_sdk/emitter_preview.py</code></td><td>Local <code>.agents/skills</code> projection write plans can be previewed without emitting files.</td><td>Add real emitters only after projection ownership, archive emission, and rollback receipts are approved.</td></tr>
             <tr data-status="preview"><td><strong>CI policy preview</strong></td><td><span class="pill preview">preview only</span></td><td><code>skills_sdk/ci_policy_preview.py</code></td><td>Required checks can be previewed from SDK risk tier without claiming hosted CI evidence.</td><td>Attach live CI run evidence only in a separate hosted-check receipt.</td></tr>
             <tr data-status="preview"><td><strong>Static explorer index preview</strong></td><td><span class="pill preview">preview only</span></td><td><code>skills_sdk/static_explorer.py</code></td><td>Capability and skill indexes can be previewed from JSON/source manifests without rendering HTML.</td><td>Add hosted explorer rendering only after ownership, publishing, and freshness contracts are approved.</td></tr>
@@ -423,6 +425,7 @@
       </div>
       <div class="card-grid">
         <div class="gap" data-status="deferred"><span class="pill deferred">drift risk</span><strong>Atlas Is Bigger Than Product</strong><span>The HTML describes an end-state platform. The implemented SDK is a local control plane. Keep “platform atlas” and “capability truth” visually separate.</span></div>
+        <div class="gap" data-status="implemented"><span class="pill implemented">guarded</span><strong>Evidence Refs Need Verification</strong><span>The capability matrix evidence refs are now classified as file, command, schema, receipt, or external lane and recorded with pass, blocked, or not-run status so local readiness is not blended with hosted or external proof.</span></div>
         <div class="gap" data-status="implemented"><span class="pill implemented">spine landed</span><strong>Tiny IR Exists</strong><span><code>SkillIR.v0</code> is now the small read-only spine for package identity and receipt-producing SDK lanes.</span></div>
         <div class="gap" data-status="implemented"><span class="pill implemented">quality lane</span><strong>Deterministic And A/B Evals Run</strong><span>Local deterministic eval receipts and internal scorecard-backed receipts run with package identity, while A/B run receipts invoke Codex explicitly and leave judge provider invocation as a separate gated lane.</span></div>
         <div class="gap" data-status="implemented"><span class="pill implemented">intent landed</span><strong>Signing Intent Exists</strong><span>Package identity can be checked against a pinned signing policy without signature requests, key access, archive emission, or trust mutation.</span></div>
@@ -473,6 +476,7 @@
       </div>
       <div class="card-grid">
         <div class="note">No numbered product slice is currently promoted. The post-merge hardening gate below is now closed by focused regression proof; the next likely build slice is external skill intake quarantine receipts, promoted only after its command, schema or receipt, tests, and capability-matrix truth are concrete.</div>
+        <div class="step" data-status="implemented"><span class="pill implemented">landed</span><strong>Capability Evidence Verifier</strong><span>The SDK now emits a receipt that validates capability evidence refs against the current workspace: file refs must exist, command refs must either be known CLI examples or stay non-executed, schema and receipt refs must parse, and external lanes stay separate from local readiness.</span></div>
       </div>
     </section>
 

@@ -62,6 +62,21 @@ def _add_sdk_docs_parser(sdk_subparsers: argparse._SubParsersAction, global_pars
     )
 
 
+def _add_sdk_evidence_parser(sdk_subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
+    parser = sdk_subparsers.add_parser(
+        "evidence",
+        help="Verify Skills SDK evidence references without crossing external proof lanes",
+        parents=[global_parser],
+    )
+    subparsers = parser.add_subparsers(dest="evidence_action", required=True)
+    verify = subparsers.add_parser(
+        "verify",
+        help="Verify capability matrix evidence refs as files, schemas, receipts, commands, or external lanes",
+        parents=[global_parser],
+    )
+    verify.add_argument("--scope", choices=["capability-matrix"], default="capability-matrix")
+
+
 def _add_sdk_package_parser(
     sdk_subparsers: argparse._SubParsersAction,
     global_parser: argparse.ArgumentParser,
@@ -297,6 +312,7 @@ def add_sdk_parser(
     _add_sdk_check_parser(sdk_subparsers, global_parser)
     _add_sdk_ir_parser(sdk_subparsers, global_parser)
     _add_sdk_docs_parser(sdk_subparsers, global_parser)
+    _add_sdk_evidence_parser(sdk_subparsers, global_parser)
     add_sdk_eval_parser(sdk_subparsers, global_parser)
     _add_sdk_package_parser(sdk_subparsers, global_parser)
     _add_sdk_sandbox_parser(sdk_subparsers, global_parser)
@@ -410,6 +426,7 @@ def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
         "check": _dispatch_sdk_check,
         "ir": _dispatch_sdk_ir,
         "docs": _dispatch_sdk_docs,
+        "evidence": _dispatch_sdk_evidence,
         "eval": dispatch_sdk_eval,
         "package": _dispatch_sdk_package,
         "sandbox": _dispatch_sdk_sandbox,
@@ -446,6 +463,12 @@ def _dispatch_sdk_docs(repo_root: Path, args: argparse.Namespace) -> CallResult:
     if args.docs_action == "verify":
         return skills_commands.skills_sdk_docs_verify(repo_root, artifact=args.artifact)
     return build_unknown_action_result("sdk docs", args.docs_action)
+
+
+def _dispatch_sdk_evidence(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    if args.evidence_action == "verify":
+        return skills_commands.skills_sdk_capability_evidence(repo_root, scope=args.scope)
+    return build_unknown_action_result("sdk evidence", args.evidence_action)
 
 
 def _dispatch_sdk_package(repo_root: Path, args: argparse.Namespace) -> CallResult:

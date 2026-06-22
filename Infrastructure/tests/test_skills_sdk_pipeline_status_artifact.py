@@ -317,6 +317,11 @@ class TestSkillsSdkPipelineStatusArtifact(unittest.TestCase):
         self.assertNotIn("Next missing author step: deterministic local evals", self.simple_atlas_html)
         self.assertNotIn('<strong>Eval run</strong><span>Next missing author step', self.simple_atlas_html)
 
+    def test_simple_atlas_names_capability_evidence_verifier(self) -> None:
+        self.assertIn("Evidence Refs Need Verification", self.simple_atlas_html)
+        self.assertIn("Capability Evidence Verifier", self.simple_atlas_html)
+        self.assertIn("file, command, schema, receipt, or external lane", self.simple_atlas_html)
+
 
 if __name__ == "__main__":
     unittest.main()
