@@ -6412,6 +6412,18 @@ def skills_sdk_capability_evidence(repo_root: Path, scope: str) -> CallResult:
         "status": receipt["status"],
         "receipt": receipt,
     }
+    if receipt["status"] == "blocked":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=receipt["agent_summary"],
+                fix_suggestion=(
+                    "Inspect receipt.blockers and fix missing or unknown capability matrix evidence refs before "
+                    "using ask sdk evidence verify as a validation gate."
+                ),
+            )
+        )
     return result
 
 

@@ -17,6 +17,7 @@ from ask.skills_sdk.capability_evidence import (  # noqa: E402
     _classify_ref,
     build_capability_evidence_receipt,
 )
+from ask.commands import skills_impl  # noqa: E402
 
 
 def _command_env() -> dict[str, str]:
@@ -155,6 +156,20 @@ class TestSkillsSdkCapabilityEvidence(unittest.TestCase):
         self.assertEqual(receipt["not_run_count"], 1)
         self.assertEqual(receipt["blocked_count"], 1)
         self.assertEqual(receipt["blockers"][0]["capability_id"], "bad")
+
+    def test_command_wrapper_errors_when_receipt_blocks(self) -> None:
+        blocked_receipt = {
+            "status": "blocked",
+            "agent_summary": "Capability evidence verification checked 1 evidence ref(s): 0 passed, 1 blocked.",
+            "blockers": [{"capability_id": "bad", "ref": "missing.txt"}],
+        }
+
+        with mock.patch.object(skills_impl, "_build_capability_evidence_receipt", return_value=blocked_receipt):
+            result = skills_impl.skills_sdk_capability_evidence(REPO_ROOT, scope="capability-matrix")
+
+        self.assertEqual(result.status, "error")
+        self.assertEqual(result.data["skills_sdk_capability_evidence"]["status"], "blocked")
+        self.assertEqual(result.errors[0].code, "ERR_VALIDATION")
 
 
 if __name__ == "__main__":
