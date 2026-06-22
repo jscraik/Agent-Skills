@@ -4,6 +4,7 @@ Generated from `metadata.skill-type` tags in skill frontmatter. This index compl
 Entries are grouped by declared semantic type; each path names the owning skill package root, including plugin-owned surfaces.
 
 ## Table of Contents
+
 - [Summary](#summary)
 - [Semantic Types](#semantic-types)
 - [Validation Notes](#validation-notes)
@@ -13,14 +14,14 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `library_api_reference`: 2
 - `product_verification`: 4
 - `data_fetch_analysis`: 3
-- `team_automation`: 46
+- `team_automation`: 47
 - `scaffolding_templates`: 16
-- `code_quality_review`: 24
+- `code_quality_review`: 25
 - `ci_cd_deployment`: 0
 - `runbook`: 15
 - `infrastructure_ops`: 3
 - `invalid`: 45
-- `total_tagged`: 113
+- `total_tagged`: 115
 
 ## Semantic Types
 
@@ -85,6 +86,7 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `sy-trace-plan` — `Plugins/synaipse-harness/skills`
 - `sy-tracker-plan` — `Plugins/synaipse-harness/skills`
 - `sy-work` — `Plugins/synaipse-harness/skills`
+- `teach` — `Skills/github`
 - `triage` — `Skills/agent-ops`
 - `ubiquitous-language` — `Skills/agent-ops`
 - `video-transcript-downloader` — `Skills/content-publishing`
@@ -113,6 +115,7 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 ### Code Quality Review
 
 - `autofix` — `Skills/agent-ops`
+- `autoreview` — `Skills/agent-ops`
 - `baseline-ui` — `Skills/frontend-ui`
 - `best-practices` — `Skills/security-ops`
 - `codex-review` — `Skills/agent-ops`
@@ -214,4 +217,3 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `talk-walter-runtime-intelligence-agents` — `Plugins/aidevcon/skills` (`reference`)
 - `talk-wilson-cq-stack-overflow-for-agents` — `Plugins/aidevcon/skills` (`reference`)
 - `talk-wotherspoon-humans-vs-slop` — `Plugins/aidevcon/skills` (`reference`)
-
