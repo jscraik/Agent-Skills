@@ -355,11 +355,10 @@ def _tessl_eval_view_has_complete_scores(payload: dict[str, object]) -> bool:
 def _write_tessl_live_view_evidence(repo_root: Path, skill_path: str, run_id: str | None, view_raw_output: str) -> str | None:
     if not run_id or not view_raw_output.strip():
         return None
-    handle = re.sub(r"[^A-Za-z0-9_.-]+", "-", Path(skill_path).name).strip("-") or "skill"
-    evidence_dir = repo_root / ".harness" / "evidence" / "tessl" / handle / run_id
-    evidence_dir.mkdir(parents=True, exist_ok=True)
-    view_path = evidence_dir / "tessl-eval-view.json"
-    view_path.write_text(view_raw_output, encoding="utf-8")
+    view_path = _tessl_live_evidence_file(repo_root, skill_path, run_id, "tessl-eval-view.json")
+    if view_path is None:
+        return None
+    _write_tessl_live_evidence_text(view_path, view_raw_output)
     return str(view_path.relative_to(repo_root))
 
 
@@ -374,11 +373,11 @@ def _write_tessl_live_submission_evidence(
 ) -> str | None:
     if not run_id:
         return None
-    handle = re.sub(r"[^A-Za-z0-9_.-]+", "-", Path(skill_path).name).strip("-") or "skill"
-    evidence_dir = repo_root / ".harness" / "evidence" / "tessl" / handle / run_id
-    evidence_dir.mkdir(parents=True, exist_ok=True)
-    submission_path = evidence_dir / "tessl-eval-submission.json"
-    submission_path.write_text(
+    submission_path = _tessl_live_evidence_file(repo_root, skill_path, run_id, "tessl-eval-submission.json")
+    if submission_path is None:
+        return None
+    _write_tessl_live_evidence_text(
+        submission_path,
         json.dumps(
             {
                 "status": "submitted_pending_view",
@@ -393,9 +392,35 @@ def _write_tessl_live_submission_evidence(
             sort_keys=True,
         )
         + "\n",
-        encoding="utf-8",
     )
     return str(submission_path.relative_to(repo_root))
+
+
+def _tessl_live_evidence_file(repo_root: Path, skill_path: str, run_id: str, filename: str) -> Path | None:
+    run_segment = _tessl_evidence_segment(run_id)
+    if run_segment is None:
+        return None
+    handle = re.sub(r"[^A-Za-z0-9_.-]+", "-", Path(skill_path).name).strip("-") or "skill"
+    root = (repo_root / ".harness" / "evidence" / "tessl").resolve(strict=False)
+    evidence_dir = (root / handle / run_segment).resolve(strict=False)
+    try:
+        evidence_dir.relative_to(root)
+    except ValueError:
+        return None
+    evidence_dir.mkdir(parents=True, exist_ok=True)
+    path = evidence_dir / filename
+    return None if path.is_symlink() else path
+
+
+def _tessl_evidence_segment(value: str) -> str | None:
+    segment = value.strip()
+    if segment in {"", ".", ".."}:
+        return None
+    return segment if re.fullmatch(r"[A-Za-z0-9_.-]+", segment) else None
+
+
+def _write_tessl_live_evidence_text(path: Path, value: str) -> None:
+    path.write_text(value, encoding="utf-8")
 
 
 def _collect_tessl_metric_fields(value: object, *, tokens: tuple[str, ...]) -> dict[str, object]:

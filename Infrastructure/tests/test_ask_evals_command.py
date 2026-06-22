@@ -2492,6 +2492,27 @@ def test_evals_live_private_invokes_tessl_with_workspace_and_plugin_manifest(tmp
     assert summary["cost_observability"]["cost_metrics"]["usage.estimatedCostUsd"] == 0.0236
 
 
+def test_tessl_live_evidence_rejects_unsafe_run_ids(tmp_path: Path) -> None:
+    view_path = evals._write_tessl_live_view_evidence(
+        tmp_path,
+        "Skills/example-skill",
+        "../outside",
+        '{"status":"completed"}',
+    )
+    submission_path = evals._write_tessl_live_submission_evidence(
+        tmp_path,
+        "Skills/example-skill",
+        run_id="run/with/slash",
+        workspace="skills-sdk",
+        staged_source=tmp_path / "stage",
+        project_identity={"project": "skills-sdk/example-skill"},
+    )
+
+    assert view_path is None
+    assert submission_path is None
+    assert not (tmp_path / ".harness" / "evidence" / "outside").exists()
+
+
 def test_evals_live_private_blocks_before_submit_when_pending_run_exists(tmp_path: Path) -> None:
     completed = mock.Mock(returncode=0, stdout="{}", stderr="")
     pending_payload = {
