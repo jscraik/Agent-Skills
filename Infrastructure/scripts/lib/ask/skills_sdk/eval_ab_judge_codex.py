@@ -88,7 +88,7 @@ def _codex_op_env_file_path(judge_profile: dict[str, Any]) -> Path | None:
     configured = os.environ.get(_CODEX_OP_ENV_FILE_ENV)
     candidate = Path(configured).expanduser() if configured else Path.home() / ".codex" / ".env"
     try:
-        return _safe_regular_file(candidate, candidate.parent)
+        return _safe_existing_env_file(candidate, candidate.parent)
     except OSError:
         return None
 
@@ -136,6 +136,16 @@ def _safe_regular_file(path: Path, root: Path) -> Path | None:
     if os.path.commonpath([root_real, path_real]) != root_real:
         return None
     if path.is_symlink() or not path.is_file():
+        return None
+    return path
+
+
+def _safe_existing_env_file(path: Path, root: Path) -> Path | None:
+    root_real = os.path.realpath(root)
+    path_real = os.path.realpath(path)
+    if os.path.commonpath([root_real, path_real]) != root_real:
+        return None
+    if path.is_symlink() or path.is_dir() or not path.exists():
         return None
     return path
 
