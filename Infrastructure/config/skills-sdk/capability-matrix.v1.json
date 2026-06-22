@@ -28,6 +28,7 @@
   "validation_commands": [
     "./bin/ask sdk status --json --robot",
     "./bin/skills-sdk status --json --robot",
+    "./bin/ask sdk evidence verify --scope capability-matrix --json --robot",
     "./bin/ask sdk lenses validate --json --robot",
     "./bin/ask sdk lenses select --prompt 'review a skill for validation confidence' --intent validation_review --json --robot",
     "./bin/ask sdk review plan --target Skills/agent-ops/simplify --intent validation_review --receipt-out .harness/artifacts/sdk-review-plan/simplify.json --json --robot",
@@ -62,6 +63,7 @@
     "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_ir.py -q",
     "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_eval_runner.py -q",
     "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_package_build.py -q",
+    "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_capability_evidence.py -q",
     "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_package_hardening.py -q",
     "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_trust_ledger.py -q",
     "uv run --python 3.12 pytest Infrastructure/tests/test_skills_sdk_capability_status.py Infrastructure/tests/test_skills_sdk_pipeline_status_artifact.py -q"
@@ -619,6 +621,24 @@
       "evidence_refs": ["artifacts/recommended-skills-sdk-pipeline.html", ".harness/implementation-notes/2026-06-04-skills-sdk-v1-0-product-implementation-notes.html"],
       "next_slice": "Keep the HTML artifacts projection-only from SDK capability status before any hosted explorer or docs expansion.",
       "notes": "Local browser artifacts exist as visual projections of ./bin/ask sdk status; no hosted docs pipeline is claimed."
+    },
+    {
+      "id": "capability_evidence",
+      "title": "Capability evidence verifier",
+      "status": "implemented",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/capability_evidence.py",
+      "pipeline_sections": ["public_sdk_surface", "domain_model_integrity", "ci_and_adoption"],
+      "feature_executed": true,
+      "mutation_performed": false,
+      "evidence_refs": [
+        "./bin/ask sdk evidence verify --scope capability-matrix --json --robot",
+        "Infrastructure/scripts/lib/ask/skills_sdk/capability_evidence.py",
+        "Infrastructure/config/schemas/skills-sdk/capability-evidence-receipt.v0.schema.json",
+        "Infrastructure/tests/test_skills_sdk_capability_evidence.py",
+        "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/capability-evidence-receipt.json"
+      ],
+      "next_slice": "Add command execution receipts only after command authority, timeout, and external-lane ownership are approved.",
+      "notes": "PU-032 verifies capability evidence refs as repo files, schemas, receipts, non-executed commands, or external lanes without crossing runtime or hosted readiness boundaries."
     },
     {
       "id": "skill_explorer",

@@ -190,6 +190,7 @@ class TestSkillsSdkCapabilityStatus(unittest.TestCase):
             "uninstall",
             "ir",
             "docs",
+            "evidence",
             "eval",
             "package",
             "sandbox",
@@ -244,6 +245,16 @@ class TestSkillsSdkCapabilityStatus(unittest.TestCase):
         self.assertIn(
             "ask sdk trust decide Infrastructure/tests/fixtures/skills_sdk/valid_skill --decision trust --reason 'fixture passed local checks' --owner skills-sdk-tests --preview --json --robot",
             COMMAND_EXAMPLES[("sdk", "trust")],
+        )
+
+    def test_command_metadata_registers_sdk_evidence_examples(self) -> None:
+        self.assertIn(
+            "ask sdk evidence verify --scope capability-matrix --json --robot",
+            COMMAND_EXAMPLES[("sdk", "evidence")],
+        )
+        self.assertIn(
+            "skills-sdk evidence verify --scope capability-matrix --json --robot",
+            COMMAND_EXAMPLES[("sdk", "evidence")],
         )
 
     def test_command_metadata_registers_sdk_closeout_examples(self) -> None:

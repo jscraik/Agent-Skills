@@ -143,6 +143,9 @@ from ask.skills_sdk.capability_status import (  # noqa: E402
     CapabilityStatusError as _CapabilityStatusError,
     build_capability_status as _build_capability_status,
 )
+from ask.skills_sdk.capability_evidence import (  # noqa: E402
+    build_capability_evidence_receipt as _build_capability_evidence_receipt,
+)
 from skill_discovery import (  # noqa: E402
     USER_SKILL_SCOPE_PRECEDENCE,
     classify_skill_scope,
@@ -6386,6 +6389,29 @@ def skills_sdk_status(repo_root: Path) -> CallResult:
         )
         return result
     result.data["skills_sdk_status"] = status
+    return result
+
+
+def skills_sdk_capability_evidence(repo_root: Path, scope: str) -> CallResult:
+    """Verify capability matrix evidence refs without running command or external lanes."""
+    result = CallResult()
+    result.metadata["command"] = "sdk evidence verify"
+    try:
+        receipt = _build_capability_evidence_receipt(repo_root, scope=scope)
+    except (ValueError, _CapabilityStatusError) as e:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Skills SDK capability evidence verification failed: {e}",
+                fix_suggestion="Fix the capability matrix or run ask sdk evidence verify --scope capability-matrix --json --robot.",
+            )
+        )
+        return result
+    result.data["skills_sdk_capability_evidence"] = {
+        "status": receipt["status"],
+        "receipt": receipt,
+    }
     return result
 
 
