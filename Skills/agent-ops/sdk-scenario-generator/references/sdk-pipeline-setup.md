@@ -23,12 +23,31 @@ Keep these lanes separate:
 - Tessl scenario preparation: `./bin/ask evals prepare-tessl-scenarios <skill-path> --tessl-workspace <workspace> --json --robot`.
 - Tessl dry-run staging: `./bin/ask evals run <skill-path> --mode smoke --tessl-live-private --tessl-workspace <workspace> --tessl-live-dry-run --json --robot`.
 - Live Tessl scoring: only after scenario count, scenario quality, run-budget,
-  dry-run, and scenario-source gates pass.
+  dry-run, scenario-source gates, and any prior Tessl feedback-loop obligations
+  are closed.
 
 Do not treat one lane as proof for another. Package verification proves local
 shape and references; scenario-quality preview proves scenario contract quality;
 SDK eval run proves only the selected runner/dataset; Tessl staging proves staged
 payload shape; live scoring proves only the specific workspace run and model.
+
+## Live-To-Internal Feedback Loop
+
+Treat `./bin/ask sdk eval tessl-score --view-json <view-json> --skill <skill> --preview --json --robot`
+as the handoff feedback-loop gate for every behavioral skill. A completed Tessl
+run is not handoff-ready when the receipt reports:
+
+- `feedback_loop.status: open`;
+- any scenario-level baseline win;
+- usage below the live handoff threshold;
+- no aggregate lift over baseline;
+- missing baseline or usage-spec assessments.
+
+When the feedback loop is open, convert the live Tessl failure into repo-owned
+internal evidence before another live run: preserve the view artifact, classify
+each failing scenario owner as skill, task, criteria, or scorer, add or retain
+equivalent internal regression cases, rerun the internal release gate, and only
+then spend another live Tessl run.
 
 ## Scenario Source Gate
 

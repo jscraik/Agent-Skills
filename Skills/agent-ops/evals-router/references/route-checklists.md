@@ -20,3 +20,10 @@ Run `./bin/ask sdk eval scorer-quality <skill-path> --preview --json --robot` fo
 Run `./bin/ask sdk eval scorer-calibration <skill-path> --preview --json --robot` when score trends, release claims, or live Tessl readiness depend on a judge/scorer. The bundle must include held-out labeled examples, TP/TN/FP/FN limits, threshold, scorer id, scorer version or digest, prompt version, model parameters, and raw scorer artifacts. A blocked receipt means the scorer metadata may be well shaped, but failure-catching behavior is not measured.
 
 Run `./bin/ask sdk eval tessl-score --view-json <view-json> --skill <skill-path> --preview --json --robot` before quoting prior or current Tessl scores. The view artifact must come from `tessl eval view --json <run-id>` or a preserved repo evidence copy. A blocked receipt may still expose partial score math, but it is historical evidence only and must not be reported as a completed baseline.
+
+Treat the Tessl score receipt as a feedback-loop gate, not only a score
+formatter. A live handoff is blocked while `receipt.feedback_loop.status` is
+`open`, including scenario-level baseline wins, incomplete baseline/usage
+assessments, usage below the live handoff threshold, or no aggregate lift.
+Every live Tessl regression must become an internal regression obligation, with
+owner classification and rerun evidence, before the next live handoff claim.

@@ -7,6 +7,7 @@ from typing import Any
 
 TESSL_SCORE_RECEIPT_SCHEMA_VERSION = "skills-sdk.tessl-score-receipt.v0"
 TESSL_SCORE_RECEIPT_SCHEMA_URI = "https://jscraik.local/agent-skills/schemas/skills-sdk/tessl-score-receipt.v0.schema.json"
+TESSL_LIVE_HANDOFF_MIN_USAGE_PERCENT = 90.0
 
 
 def _repo_relative(repo_root: Path, path: Path) -> str:
@@ -176,9 +177,11 @@ def build_tessl_score_receipt(
         return _blocked_load_receipt(repo_root, view_json, skill, run_id, load_error)
     attrs = _attributes(payload)
     score_summary = _score_summary(payload)
+    feedback_loop = _feedback_loop(score_summary)
     status = str(attrs.get("status") or "unknown").strip().lower()
     failure_reason = attrs.get("failureReason") if isinstance(attrs.get("failureReason"), dict) else None
     receipt_status, blocker_class, blocker = _receipt_status(status, failure_reason, score_summary)
+    ready = receipt_status == "pass"
     return {
         "schema_version": TESSL_SCORE_RECEIPT_SCHEMA_VERSION,
         "schema_uri": TESSL_SCORE_RECEIPT_SCHEMA_URI,
@@ -191,14 +194,12 @@ def build_tessl_score_receipt(
         "tessl_status": status,
         "failure_reason": failure_reason,
         "memory_derived": False,
-        "ready": receipt_status == "pass",
+        "ready": ready,
         "score_summary": score_summary,
+        "readiness_thresholds": _readiness_thresholds(),
+        "feedback_loop": feedback_loop,
         "mutation_performed": False,
-        "agent_summary": (
-            "Tessl score receipt is blocked; use partial scores only as historical evidence."
-            if receipt_status == "blocked"
-            else "Tessl score receipt has complete scored baseline and usage-spec evidence."
-        ),
+        "agent_summary": _agent_summary(ready, blocker),
     }
 
 
@@ -221,8 +222,29 @@ def _blocked_load_receipt(
         "memory_derived": False,
         "ready": False,
         "score_summary": None,
+        "readiness_thresholds": _readiness_thresholds(),
+        "feedback_loop": {
+            "status": "blocked",
+            "required_next_actions": [
+                "Preserve a valid tessl eval view --json artifact before scoring.",
+            ],
+        },
         "mutation_performed": False,
     }
+
+
+def _readiness_thresholds() -> dict[str, Any]:
+    return {
+        "live_handoff_min_usage_percent": TESSL_LIVE_HANDOFF_MIN_USAGE_PERCENT,
+        "usage_must_beat_baseline": True,
+        "baseline_scenario_wins_allowed": 0,
+    }
+
+
+def _agent_summary(ready: bool, blocker: str | None) -> str:
+    if ready:
+        return "Tessl score receipt has closed the live-to-internal feedback loop for this run."
+    return _blocked_agent_summary(blocker)
 
 
 def _receipt_status(
@@ -230,14 +252,55 @@ def _receipt_status(
     failure_reason: dict[str, Any] | None,
     score_summary: dict[str, Any],
 ) -> tuple[str, str | None, str | None]:
+    blocker = _receipt_blocker(tessl_status, failure_reason, score_summary)
+    if blocker is not None:
+        return "blocked", "blocked_validation", blocker
+    return "pass", None, None
+
+
+def _receipt_blocker(
+    tessl_status: str,
+    failure_reason: dict[str, Any] | None,
+    score_summary: dict[str, Any],
+) -> str | None:
     if tessl_status in {"failed", "error", "cancelled", "canceled"}:
-        return "blocked", "blocked_validation", _failure_blocker(tessl_status, failure_reason)
+        return _failure_blocker(tessl_status, failure_reason)
     if score_summary["scenario_count"] > 0 and score_summary["max_points"] <= 0:
-        return "blocked", "blocked_validation", "Tessl eval view does not contain positive max points for scored scenarios."
+        return "Tessl eval view does not contain positive max points for scored scenarios."
     complete = score_summary["scenario_count"] > 0 and score_summary["missing_scenario_count"] == 0
-    if complete:
-        return "pass", None, None
-    return "blocked", "blocked_validation", "Tessl eval view does not contain complete scored baseline and usage-spec assessments."
+    if not complete:
+        return "Tessl eval view does not contain complete scored baseline and usage-spec assessments."
+    if score_summary["regressions"]:
+        return _regression_blocker(score_summary["regressions"])
+    return _handoff_blocker(score_summary)
+
+
+def _regression_blocker(regressions: list[dict[str, Any]]) -> str:
+    regression_paths = ", ".join(str(item["path"]) for item in regressions[:5])
+    suffix = "" if len(regressions) <= 5 else f" and {len(regressions) - 5} more"
+    return (
+        "Tessl feedback loop is open: baseline beat usage-spec on "
+        f"{len(regressions)} scenario(s): {regression_paths}{suffix}. "
+        "Import or retain equivalent internal regression cases, fix the owner, and rerun before live handoff."
+    )
+
+
+def _handoff_blocker(score_summary: dict[str, Any]) -> str | None:
+    usage_percent = score_summary["usage_percent"]
+    if usage_percent is None or usage_percent < TESSL_LIVE_HANDOFF_MIN_USAGE_PERCENT:
+        return _usage_threshold_blocker(usage_percent)
+    lift_points = score_summary["lift_points"]
+    if lift_points is None or lift_points <= 0:
+        return "Tessl usage-spec did not beat baseline in aggregate; the skill is not providing measurable lift."
+    return None
+
+
+def _usage_threshold_blocker(usage_percent: float | None) -> str:
+    return (
+        "Tessl usage score is below the live handoff threshold: "
+        f"{usage_percent}% < {TESSL_LIVE_HANDOFF_MIN_USAGE_PERCENT}%. "
+        "Strengthen the skill or scenario owner path internally before another handoff."
+    )
 
 
 def _failure_blocker(tessl_status: str, failure_reason: dict[str, Any] | None) -> str:
@@ -248,3 +311,39 @@ def _failure_blocker(tessl_status: str, failure_reason: dict[str, Any] | None) -
         else "Tessl run did not complete successfully."
     )
     return f"Tessl eval view status is {tessl_status}: {code}: {message}"
+
+
+def _feedback_loop(score_summary: dict[str, Any]) -> dict[str, Any]:
+    regressions = score_summary.get("regressions")
+    regression_paths = [
+        str(item.get("path"))
+        for item in regressions
+        if isinstance(item, dict) and item.get("path")
+    ] if isinstance(regressions, list) else []
+    usage_percent = score_summary.get("usage_percent")
+    lift_points = score_summary.get("lift_points")
+    missing_count = int(score_summary.get("missing_scenario_count") or 0)
+    required_next_actions: list[str] = []
+    if missing_count:
+        required_next_actions.append("Rerun or preserve a Tessl view with complete baseline and usage-spec assessments.")
+    if regression_paths:
+        required_next_actions.append("Import or retain equivalent internal regression cases for every baseline-win Tessl scenario.")
+        required_next_actions.append("Classify each regression owner as skill, task, criteria, or scorer before rerunning live Tessl.")
+    if usage_percent is None or usage_percent < TESSL_LIVE_HANDOFF_MIN_USAGE_PERCENT:
+        required_next_actions.append("Raise usage-spec performance above the live handoff threshold in internal release evidence.")
+    if lift_points is None or lift_points <= 0:
+        required_next_actions.append("Prove usage-spec beats baseline before claiming handoff readiness.")
+    return {
+        "status": "closed" if not required_next_actions else "open",
+        "source": "tessl_score_receipt",
+        "regression_count": len(regression_paths),
+        "regression_paths": regression_paths,
+        "missing_scenario_count": missing_count,
+        "required_next_actions": required_next_actions,
+    }
+
+
+def _blocked_agent_summary(blocker: str | None) -> str:
+    if blocker and "feedback loop is open" in blocker:
+        return "Tessl score receipt is blocked because the live-to-internal regression feedback loop is still open."
+    return "Tessl score receipt is blocked; use scores only as historical evidence until the blocker is closed."

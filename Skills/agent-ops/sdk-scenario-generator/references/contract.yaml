@@ -262,6 +262,20 @@ tessl_scenario_policy:
   min_gold_scenarios: 20
   live_private_min_usage_score: 0.90
   live_private_must_not_underperform_baseline: true
+  live_feedback_loop_required: true
+  baseline_scenario_wins_allowed: 0
+  feedback_loop_receipt_command: "ask sdk eval tessl-score --view-json <view-json> --skill <skill> --preview --json --robot"
+  feedback_loop_blocks_when:
+    - "receipt.feedback_loop.status is open"
+    - "a live Tessl scenario has baseline score greater than usage-spec score"
+    - "usage score is below the live handoff threshold"
+    - "usage-spec does not beat baseline in aggregate"
+    - "baseline or usage-spec assessments are missing"
+  feedback_loop_required_actions:
+    - "preserve tessl eval view --json evidence"
+    - "classify regression owner as skill, task, criteria, or scorer"
+    - "add or retain equivalent internal regression cases"
+    - "rerun internal release evidence before another live handoff"
   workspace_run_limit: 300
   workspace_run_limit_source: operator_provided_limit
   remediation_reserve_runs: 20
