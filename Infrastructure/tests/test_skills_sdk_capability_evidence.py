@@ -73,6 +73,20 @@ class TestSkillsSdkCapabilityEvidence(unittest.TestCase):
         self.assertIn("does not exist", reason)
         self.assertEqual(evidence, ["Infrastructure/tests/fixtures/missing-evidence.txt"])
 
+    def test_repo_local_ref_with_external_marker_resolves_as_file(self) -> None:
+        kind, status, reason, evidence, lane = _classify_ref(REPO_ROOT, "Skills/github/teach/SKILL.md")
+
+        self.assertEqual((kind, status, lane), ("file", "pass", "local"))
+        self.assertIn("exists", reason)
+        self.assertEqual(evidence, ["Skills/github/teach/SKILL.md"])
+
+    def test_missing_repo_local_ref_with_external_marker_blocks(self) -> None:
+        kind, status, reason, evidence, lane = _classify_ref(REPO_ROOT, "Skills/github/teach/missing-evidence.md")
+
+        self.assertEqual((kind, status, lane), ("file", "blocked", "local"))
+        self.assertIn("does not exist", reason)
+        self.assertEqual(evidence, ["Skills/github/teach/missing-evidence.md"])
+
     def test_schema_ref_must_parse_as_json(self) -> None:
         kind, status, reason, evidence, lane = _classify_ref(
             REPO_ROOT,

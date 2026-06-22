@@ -82,7 +82,7 @@ def _classify_ref(repo_root: Path, evidence_ref: str) -> tuple[EvidenceKind, Evi
     stripped = evidence_ref.strip()
     if not stripped:
         return "unknown", "unknown", "Evidence ref is empty.", [], "local"
-    if _is_external(stripped):
+    if _is_external_url(stripped):
         return "external_lane", "not_run", "External evidence lanes require their own receipt.", [stripped], "external"
     command_tokens = _command_tokens(stripped)
     if command_tokens:
@@ -99,7 +99,14 @@ def _classify_ref(repo_root: Path, evidence_ref: str) -> tuple[EvidenceKind, Evi
         return _file_status(repo_root, stripped, candidate, "receipt")
     if candidate is not None:
         return _file_status(repo_root, stripped, candidate, "file")
+    if _is_external(stripped):
+        return "external_lane", "not_run", "External evidence lanes require their own receipt.", [stripped], "external"
     return "unknown", "blocked", "Evidence ref is neither a known command nor a repo-local file.", [stripped], "local"
+
+
+def _is_external_url(evidence_ref: str) -> bool:
+    lowered = evidence_ref.lower()
+    return lowered.startswith(("http://", "https://"))
 
 
 def _is_external(evidence_ref: str) -> bool:
@@ -128,9 +135,7 @@ def _resolve_repo_path(repo_root: Path, evidence_ref: str) -> Path | None:
         resolved = path.resolve(strict=False)
     else:
         resolved = (repo_root / path).resolve(strict=False)
-    try:
-        resolved.relative_to(repo_root.resolve())
-    except ValueError:
+    if not resolved.is_relative_to(repo_root.resolve()):
         return None
     return resolved
 
