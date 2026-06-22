@@ -166,6 +166,33 @@ cases:
             with self.assertRaises(ValueError):
                 _yaml_safe_load(evals_text)
 
+    def test_builder_blocks_pyyaml_parse_errors(self) -> None:
+        class FakeYAMLError(Exception):
+            pass
+
+        class FakeYaml:
+            YAMLError = FakeYAMLError
+
+            @staticmethod
+            def safe_load(_text: str) -> object:
+                raise FakeYAMLError("bad yaml")
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(
+                Path(temp_dir),
+                "cases:\n- id: malformed\n  prompt: [unterminated\n",
+            )
+            with (
+                mock.patch.dict(sys.modules, {"yaml": FakeYaml}),
+                self.assertRaises(ScenarioQualityError) as raised,
+            ):
+                build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        receipt = raised.exception.receipt
+        self.assertEqual(receipt["status"], "blocked")
+        blocker_ids = {check["id"] for check in receipt["blockers"]}
+        self.assertIn("evals_yaml_parse", blocker_ids)
+
     def test_release_mode_suite_requires_twenty_scenarios(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             skill_dir = _write_skill_with_evals(

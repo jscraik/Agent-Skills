@@ -8,6 +8,8 @@ import tempfile
 from pathlib import Path
 from unittest import mock
 
+import pytest
+
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 ASK_LIB_DIR = REPO_ROOT / "Infrastructure" / "scripts" / "lib"
@@ -2582,6 +2584,57 @@ def test_tessl_live_evidence_rejects_unsafe_run_ids(tmp_path: Path) -> None:
     assert not (tmp_path / ".harness" / "evidence" / "outside").exists()
 
 
+def test_tessl_live_evidence_records_compact_forensic_index(tmp_path: Path) -> None:
+    view_path = evals._write_tessl_live_view_evidence(
+        tmp_path,
+        "Skills/example-skill",
+        "019e6ac8-08eb-75fb-8fbb-e2346517f82d",
+        json.dumps({"data": {"attributes": {"status": "completed", "scenarios": []}}}),
+    )
+
+    assert view_path is not None
+    index_path = tmp_path / ".harness" / "evidence" / "tessl" / "index.jsonl"
+    index_rows = [json.loads(line) for line in index_path.read_text(encoding="utf-8").splitlines()]
+
+    assert len(index_rows) == 1
+    assert index_rows[0]["schema_version"] == "skills-sdk.tessl-live-evidence-index.v1"
+    assert index_rows[0]["skill_handle"] == "example-skill"
+    assert index_rows[0]["run_id"] == "019e6ac8-08eb-75fb-8fbb-e2346517f82d"
+    assert index_rows[0]["artifact_type"] == "tessl-eval-view.json"
+    assert index_rows[0]["raw_evidence_path"] == view_path
+    assert index_rows[0]["status"] == "completed"
+    assert index_rows[0]["raw_evidence_bytes"] > 0
+    assert index_rows[0]["archived_previous_path"] is None
+    assert "local forensic evidence" in index_rows[0]["retention_policy"]
+
+
+def test_tessl_live_evidence_archives_prior_raw_file_before_overwrite(tmp_path: Path) -> None:
+    first_path = evals._write_tessl_live_view_evidence(
+        tmp_path,
+        "Skills/example-skill",
+        "019e6ac8-08eb-75fb-8fbb-e2346517f82d",
+        '{"data":{"attributes":{"status":"running","scenarios":[]}}}',
+    )
+    second_path = evals._write_tessl_live_view_evidence(
+        tmp_path,
+        "Skills/example-skill",
+        "019e6ac8-08eb-75fb-8fbb-e2346517f82d",
+        '{"data":{"attributes":{"status":"completed","scenarios":[]}}}',
+    )
+
+    assert first_path == second_path
+    raw_path = tmp_path / first_path
+    assert json.loads(raw_path.read_text(encoding="utf-8"))["data"]["attributes"]["status"] == "completed"
+
+    index_path = tmp_path / ".harness" / "evidence" / "tessl" / "index.jsonl"
+    index_rows = [json.loads(line) for line in index_path.read_text(encoding="utf-8").splitlines()]
+    archived_previous_path = index_rows[-1]["archived_previous_path"]
+
+    assert archived_previous_path is not None
+    archived_payload = json.loads((tmp_path / archived_previous_path).read_text(encoding="utf-8"))
+    assert archived_payload["data"]["attributes"]["status"] == "running"
+
+
 def test_evals_live_private_blocks_before_submit_when_pending_run_exists(tmp_path: Path) -> None:
     completed = mock.Mock(returncode=0, stdout="{}", stderr="")
     pending_payload = {
@@ -3092,6 +3145,41 @@ def test_evals_classify_malformed_yaml_as_blocked_validation(tmp_path: Path) -> 
     assert tessl_eval["status"] == "blocked"
     assert tessl_eval["blocker_class"] == "blocked_validation"
     assert "Failed to parse Tessl eval cases" in tessl_eval["blocker"]
+
+
+def test_evals_staging_rejects_symlinked_support_files(tmp_path: Path) -> None:
+    skill_root = _write_example_skill(tmp_path)
+    outside = tmp_path / "outside-secret.md"
+    outside.write_text("secret\n", encoding="utf-8")
+    link = skill_root / "references" / "evals" / "leak.md"
+    link.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        link.symlink_to(outside)
+    except OSError as exc:
+        pytest.skip(f"symlink creation unavailable: {exc}")
+
+    with pytest.raises(ValueError, match="symlinked support path"):
+        evals._stage_tessl_eval_source(tmp_path, "Skills/example-skill", tmp_path / "staged")
+
+
+def test_tessl_live_staging_rejects_symlinked_support_files(tmp_path: Path) -> None:
+    skill_root = _write_example_skill(tmp_path)
+    outside = tmp_path / "outside-secret.md"
+    outside.write_text("secret\n", encoding="utf-8")
+    link = skill_root / "assets" / "leak.md"
+    link.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        link.symlink_to(outside)
+    except OSError as exc:
+        pytest.skip(f"symlink creation unavailable: {exc}")
+
+    with pytest.raises(ValueError, match="symlinked support path"):
+        evals._stage_tessl_live_private_source(
+            tmp_path,
+            "Skills/example-skill",
+            "skills-sdk",
+            tmp_path / "staged",
+        )
 
 
 def test_evals_skip_tessl_escape_hatch(tmp_path: Path) -> None:

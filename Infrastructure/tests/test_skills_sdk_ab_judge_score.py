@@ -724,6 +724,8 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         self.assertIn("read-only", captured_command)
         self.assertIn("--ephemeral", captured_command)
         self.assertIn("--output-last-message", captured_command)
+        self.assertIn("--cd", captured_command)
+        self.assertNotEqual(captured_command[captured_command.index("--cd") + 1], str(REPO_ROOT))
         self.assertEqual(result.output_text, "{}")
         self.assertIn("CODEX_HOME", captured_env)
         self.assertIn("CODEX_SQLITE_HOME", captured_env)
@@ -759,12 +761,29 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             with patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(op_env_file)}):
                 command = _codex_judge_command(
                     {"id": "oss-cloud", "model": "deepseek-v4-flash:cloud", "secret_env_names": ["OLLAMA_API_KEY"]},
-                    REPO_ROOT,
+                    codex_judge._codex_judge_work_dir(output_file),
                     output_file,
                 )
 
-        self.assertEqual(command[:9], [command[0], "run", "--env-file", str(op_env_file), "--", "codex", "exec", "--profile", "oss-cloud"])
-        self.assertEqual(command[9:], ["--cd", str(REPO_ROOT), "--sandbox", "read-only", "--ephemeral", "--json", "--output-last-message", str(output_file), "-"])
+        self.assertEqual(
+            command[:9],
+            [command[0], "run", "--env-file", str(op_env_file), "--", "codex", "exec", "--profile", "oss-cloud"],
+        )
+        self.assertEqual(
+            command[9:],
+            [
+                "--cd",
+                str(codex_judge._codex_judge_work_dir(output_file)),
+                "--sandbox",
+                "read-only",
+                "--ephemeral",
+                "--json",
+                "--output-last-message",
+                str(output_file),
+                "-",
+            ],
+        )
+        self.assertNotEqual(command[11], str(REPO_ROOT))
 
     @unittest.skipIf(not hasattr(os, "mkfifo"), "fifo support unavailable")
     def test_cloud_codex_command_accepts_op_env_fifo(self) -> None:
@@ -776,6 +795,6 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             env_patch = patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(op_env_file)})
             bin_patch = patch.object(codex_judge, "_codex_op_bin", return_value="/opt/homebrew/bin/op")
             with env_patch, bin_patch:
-                command = _codex_judge_command(profile, REPO_ROOT, output_file)
+                command = _codex_judge_command(profile, codex_judge._codex_judge_work_dir(output_file), output_file)
         self.assertEqual(command[1:5], ["run", "--env-file", str(op_env_file), "--"])
         self.assertEqual(command[5:9], ["codex", "exec", "--profile", "oss-cloud"])

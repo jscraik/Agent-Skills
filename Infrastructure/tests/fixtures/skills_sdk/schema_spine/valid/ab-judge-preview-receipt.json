@@ -128,6 +128,7 @@
         "output_last_message_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888",
         "runner_stdout_digest": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
         "runner_stderr_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+        "semantic_output_excerpt": "Variant A completed the fixture with a concise but less specific answer.",
         "blockers": []
       },
       {
@@ -138,6 +139,7 @@
         "output_last_message_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
         "runner_stdout_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
         "runner_stderr_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "semantic_output_excerpt": "Variant B completed the fixture with stronger localization, concrete validation notes, and clearer evidence.",
         "blockers": []
       }
     ],

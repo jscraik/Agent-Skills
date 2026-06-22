@@ -95,9 +95,14 @@ def _retained_valid(repo_root: Path, retained: Any) -> bool:
     if not isinstance(retained_path, str) or not retained_path.strip():
         return False
     path = Path(retained_path)
-    if not path.is_absolute():
-        path = repo_root / path
-    return path.exists()
+    if path.is_absolute() or ".." in path.parts:
+        return False
+    try:
+        resolved = (repo_root / path).resolve(strict=False)
+        resolved.relative_to(repo_root.resolve())
+    except (OSError, ValueError):
+        return False
+    return resolved.exists()
 
 
 def _validation_valid(entries: Any) -> bool:

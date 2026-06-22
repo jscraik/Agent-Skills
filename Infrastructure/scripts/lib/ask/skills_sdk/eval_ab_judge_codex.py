@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import os
 import shutil
 import subprocess
@@ -32,7 +33,9 @@ def _run_codex_judge(
     repo_root: Path,
     output_file: Path,
 ) -> CodexJudgeResult:
-    command = _codex_judge_command(judge_profile, repo_root, output_file)
+    work_dir = _codex_judge_work_dir(output_file)
+    _prepare_codex_judge_work_dir(work_dir)
+    command = _codex_judge_command(judge_profile, work_dir, output_file)
     with tempfile.TemporaryDirectory(prefix="codex-oss-home.", dir=_codex_temp_parent()) as codex_home_raw:
         with tempfile.TemporaryDirectory(prefix="codex-oss-sqlite.", dir=_codex_temp_parent()) as sqlite_home_raw:
             codex_home = Path(codex_home_raw)
@@ -56,9 +59,9 @@ def _run_codex_judge(
     )
 
 
-def _codex_judge_command(judge_profile: dict[str, Any], repo_root: Path, output_file: Path) -> list[str]:
+def _codex_judge_command(judge_profile: dict[str, Any], work_dir: Path, output_file: Path) -> list[str]:
     codex_command = [
-        "codex", "exec", "--profile", str(judge_profile["id"]), "--cd", str(repo_root),
+        "codex", "exec", "--profile", str(judge_profile["id"]), "--cd", str(work_dir),
         "--sandbox", "read-only", "--ephemeral", "--json",
         "--output-last-message", str(output_file), "-",
     ]
@@ -67,6 +70,21 @@ def _codex_judge_command(judge_profile: dict[str, Any], repo_root: Path, output_
     if op_env_file is not None and op_bin is not None:
         return [op_bin, "run", "--env-file", str(op_env_file), "--", *codex_command]
     return codex_command
+
+
+def _codex_judge_work_dir(output_file: Path) -> Path:
+    digest = hashlib.sha256(str(output_file).encode("utf-8")).hexdigest()[:16]
+    return Path(_codex_temp_parent() or tempfile.gettempdir()) / "ask-sdk-ab-judge-workspaces" / digest
+
+
+def _prepare_codex_judge_work_dir(work_dir: Path) -> None:
+    if work_dir.is_symlink():
+        raise OSError("codex judge workspace must not be a symlink")
+    if work_dir.exists():
+        if not work_dir.is_dir():
+            raise OSError("codex judge workspace must be a directory")
+        shutil.rmtree(work_dir)
+    work_dir.mkdir(parents=True, exist_ok=True)
 
 
 def _codex_op_env_file_available(judge_profile: dict[str, Any]) -> bool:

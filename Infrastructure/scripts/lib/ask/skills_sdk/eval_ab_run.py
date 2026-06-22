@@ -12,6 +12,7 @@ from ask.skills_sdk.eval_ab_plan import build_ab_plan_receipt
 
 AB_RUN_SCHEMA_VERSION = "skills-sdk.ab-run-receipt.v0"
 AB_RUN_SCHEMA_URI = "https://jscraik.local/agent-skills/schemas/skills-sdk/ab-run-receipt.v0.schema.json"
+_SEMANTIC_OUTPUT_EXCERPT_BYTES = 4096
 
 
 @dataclass(frozen=True)
@@ -121,6 +122,7 @@ def _execute_variant(
     _write_runner_outputs(paths, result)
     output_digest = _digest_file(paths.output)
     blockers = _variant_blockers(variant_label, run_error, result.exit_code, output_digest)
+    semantic_excerpt = _semantic_output_excerpt(paths.output)
     return {
         "variant_label": variant_label,
         "status": "pass" if not blockers else "blocked",
@@ -135,6 +137,7 @@ def _execute_variant(
         "runner_stderr_digest": _digest_file(paths.stderr),
         "output_last_message_path": command_plan["output_last_message_path"],
         "output_last_message_digest": output_digest,
+        "semantic_output_excerpt": semantic_excerpt,
         "codex_exec_started": codex_exec_started,
         "blockers": blockers,
     }
@@ -201,6 +204,18 @@ def _write_runner_outputs(paths: VariantPaths, result: CodexRunResult) -> None:
         stdout_handle.write(result.stdout)
     with paths.stderr.open("w", encoding="utf-8") as stderr_handle:
         stderr_handle.write(result.stderr)
+
+
+def _semantic_output_excerpt(path: Path) -> str | None:
+    if not path.exists() or not path.is_file() or path.is_symlink():
+        return None
+    try:
+        data = path.read_bytes()[: _SEMANTIC_OUTPUT_EXCERPT_BYTES + 1]
+    except OSError:
+        return None
+    text = data[:_SEMANTIC_OUTPUT_EXCERPT_BYTES].decode("utf-8", errors="replace")
+    compact = text.replace("\x00", "").strip()
+    return compact or None
 
 
 def _variant_blockers(variant_label: str, run_error: str | None, exit_code: int, output_digest: str | None) -> list[str]:

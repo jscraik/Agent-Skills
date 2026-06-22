@@ -383,6 +383,7 @@ class AbVariantRunResult(_SdkContractModel):
     runner_stderr_digest: str = Field(min_length=71)
     output_last_message_path: str = Field(min_length=1)
     output_last_message_digest: str | None = Field(default=None, min_length=71)
+    semantic_output_excerpt: str | None = Field(default=None, min_length=1)
     blockers: list[str]
 
     @model_validator(mode="after")
@@ -479,6 +480,7 @@ class AbJudgeSanitizedVariantResult(_SdkContractModel):
     output_last_message_digest: str = Field(min_length=71)
     runner_stdout_digest: str = Field(min_length=71)
     runner_stderr_digest: str = Field(min_length=71)
+    semantic_output_excerpt: str = Field(min_length=1)
     blockers: list[str]
 
 

@@ -444,6 +444,7 @@ def _write_tessl_live_evidence_text(repo_root: Path, path: Path, value: str) -> 
         path.parent.resolve(strict=False).relative_to(root)
     except ValueError:
         return False
+    archived_previous_path = _archive_existing_tessl_live_evidence(repo_root, path)
     flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC
     if hasattr(os, "O_NOFOLLOW"):
         flags |= os.O_NOFOLLOW
@@ -453,7 +454,92 @@ def _write_tessl_live_evidence_text(repo_root: Path, path: Path, value: str) -> 
         return False
     with os.fdopen(file_descriptor, "w", encoding="utf-8") as handle:
         handle.write(value)
+    _record_tessl_live_evidence_index(repo_root, path, value, archived_previous_path)
     return True
+
+
+def _archive_existing_tessl_live_evidence(repo_root: Path, path: Path) -> str | None:
+    if not path.exists() or not path.is_file() or path.is_symlink():
+        return None
+    try:
+        if path.stat().st_size <= 0:
+            return None
+    except OSError:
+        return None
+
+    root = repo_root / ".harness" / "evidence" / "tessl"
+    try:
+        relative_path = path.resolve(strict=False).relative_to(root.resolve(strict=False))
+    except ValueError:
+        return None
+    archive_dir = root / "_archive" / relative_path.parent
+    archive_dir.mkdir(parents=True, exist_ok=True)
+    archive_path = archive_dir / f"{_tessl_archive_suffix()}-{path.name}"
+    try:
+        shutil.copy2(path, archive_path)
+    except OSError:
+        return None
+    return str(archive_path.relative_to(repo_root))
+
+
+def _record_tessl_live_evidence_index(
+    repo_root: Path,
+    path: Path,
+    value: str,
+    archived_previous_path: str | None,
+) -> None:
+    root = repo_root / ".harness" / "evidence" / "tessl"
+    try:
+        relative_path = path.resolve(strict=False).relative_to(root.resolve(strict=False))
+    except ValueError:
+        return
+    parts = relative_path.parts
+    if len(parts) < 3 or parts[0] == "_archive":
+        return
+
+    parsed = _parse_json_object_from_text(value)
+    status = _tessl_eval_view_status(parsed) if isinstance(parsed, dict) else None
+    summary: dict[str, object] | None = None
+    if isinstance(parsed, dict) and _tessl_eval_view_has_complete_scores(parsed):
+        try:
+            score_summary = _summarize_tessl_live_eval_view(parsed)
+        except ValueError:
+            score_summary = None
+        if score_summary is not None:
+            summary = {
+                "score": score_summary.get("score"),
+                "baseline_score": score_summary.get("baseline_score"),
+                "score_delta_vs_baseline": score_summary.get("score_delta_vs_baseline"),
+                "meets_min_score": score_summary.get("meets_min_score"),
+                "meets_target_score": score_summary.get("meets_target_score"),
+                "beats_baseline": score_summary.get("beats_baseline"),
+                "regression_count": len(score_summary.get("regressions") or []),
+            }
+
+    index_path = root / "index.jsonl"
+    entry = {
+        "schema_version": "skills-sdk.tessl-live-evidence-index.v1",
+        "recorded_at": _utc_now_iso(),
+        "skill_handle": parts[0],
+        "run_id": parts[1],
+        "artifact_type": parts[-1],
+        "raw_evidence_path": str(path.relative_to(repo_root)),
+        "raw_evidence_sha256": hashlib.sha256(value.encode("utf-8")).hexdigest(),
+        "raw_evidence_bytes": len(value.encode("utf-8")),
+        "status": status,
+        "summary": summary,
+        "archived_previous_path": archived_previous_path,
+        "retention_policy": (
+            "raw Tessl JSON is local forensic evidence; preserve it for failure analysis and "
+            "track compact index rows for handoff/review."
+        ),
+    }
+    index_path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        with index_path.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(entry, sort_keys=True) + "\n")
+    except OSError:
+        return
 
 
 def _collect_tessl_metric_fields(value: object, *, tokens: tuple[str, ...]) -> dict[str, object]:
@@ -800,6 +886,7 @@ def _copy_if_present(source_root: Path, relative_path: str, target_root: Path) -
     source = source_root / relative_path
     if not source.exists():
         return []
+    _reject_tessl_staging_symlink(source_root, source)
     target = target_root / relative_path
     target.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(source, target)
@@ -808,11 +895,15 @@ def _copy_if_present(source_root: Path, relative_path: str, target_root: Path) -
 
 def _copy_tree_files_if_present(source_root: Path, relative_path: str, target_root: Path) -> list[str]:
     source = source_root / relative_path
+    if source.is_symlink():
+        _reject_tessl_staging_symlink(source_root, source)
     if not source.is_dir():
         return []
 
     copied: list[str] = []
     for source_file in sorted(source.rglob("*")):
+        if source_file.is_symlink():
+            _reject_tessl_staging_symlink(source_root, source_file)
         if not source_file.is_file():
             continue
         child_relative = source_file.relative_to(source_root).as_posix()
@@ -830,11 +921,15 @@ def _copy_tree_files_to_relative_root(
     target_relative_root: str,
 ) -> list[str]:
     source = source_root / relative_path
+    if source.is_symlink():
+        _reject_tessl_staging_symlink(source_root, source)
     if not source.is_dir():
         return []
 
     copied: list[str] = []
     for source_file in sorted(source.rglob("*")):
+        if source_file.is_symlink():
+            _reject_tessl_staging_symlink(source_root, source_file)
         if not source_file.is_file():
             continue
         child_relative = source_file.relative_to(source_root).as_posix()
@@ -844,6 +939,16 @@ def _copy_tree_files_to_relative_root(
         shutil.copy2(source_file, target)
         copied.append(target_relative)
     return copied
+
+
+def _reject_tessl_staging_symlink(source_root: Path, source_path: Path) -> None:
+    if not source_path.is_symlink():
+        return
+    try:
+        label = source_path.relative_to(source_root).as_posix()
+    except ValueError:
+        label = source_path.as_posix()
+    raise ValueError(f"Tessl staging refuses symlinked support path: {label}")
 
 
 def _yaml_scalar(value: str) -> str:
@@ -2314,6 +2419,7 @@ def _copy_tessl_live_skill_package(source_root: Path, staged_root: Path) -> list
 
     skill_source = source_root / "SKILL.md"
     if skill_source.exists():
+        _reject_tessl_staging_symlink(source_root, skill_source)
         skill_target = staged_root / skill_package_root / "SKILL.md"
         skill_target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(skill_source, skill_target)
@@ -2570,6 +2676,7 @@ def _tessl_pending_run_preflight(
     staged_root: Path,
     env: dict[str, str],
 ) -> dict[str, object]:
+    command_text = _tessl_eval_list_command_text(tessl_path, workspace)
     try:
         process, command_text = _run_tessl_eval_list_for_workspace(tessl_path, workspace, staged_root, env)
     except subprocess.TimeoutExpired as exc:

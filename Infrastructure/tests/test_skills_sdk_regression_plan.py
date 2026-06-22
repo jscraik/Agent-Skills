@@ -138,6 +138,58 @@ class TestSkillsSdkRegressionPlan(unittest.TestCase):
         self.assertFalse(receipt["mutation_performed"])
         self.assertFalse(receipt["promotion_performed"])
 
+    def test_retained_regression_must_be_repo_local(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            view_path = Path(temp_dir) / "view.json"
+            plan_path = Path(temp_dir) / "plan.json"
+            outside_path = Path(temp_dir) / "external-regression.md"
+            view_path.write_text(json.dumps(_view_payload()), encoding="utf-8")
+            outside_path.write_text("external regression evidence\n", encoding="utf-8")
+            plan = _plan_payload()
+            plan["regressions"][0]["retained_regression"]["path"] = str(outside_path)
+            plan_path.write_text(json.dumps(plan), encoding="utf-8")
+
+            receipt = build_regression_plan_receipt(
+                REPO_ROOT,
+                view_json=view_path,
+                source_path=REPO_ROOT / FIXTURE_SKILL,
+                query=FIXTURE_SKILL,
+                run_id=RUN_ID,
+                plan_path=plan_path,
+            )
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertFalse(receipt["ready_for_live_rerun"])
+        blocker_ids = {check["id"] for check in receipt["blockers"]}
+        self.assertIn("retained_regression_present", blocker_ids)
+
+    def test_retained_regression_rejects_parent_traversal(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            view_path = Path(temp_dir) / "view.json"
+            plan_path = Path(temp_dir) / "plan.json"
+            view_path.write_text(json.dumps(_view_payload()), encoding="utf-8")
+            plan = _plan_payload()
+            traversal_path = (
+                "../agent-skills/Infrastructure/tests/fixtures/skills_sdk/"
+                "scenario_quality_skill/references/evals.yaml"
+            )
+            plan["regressions"][0]["retained_regression"]["path"] = traversal_path
+            plan_path.write_text(json.dumps(plan), encoding="utf-8")
+
+            receipt = build_regression_plan_receipt(
+                REPO_ROOT,
+                view_json=view_path,
+                source_path=REPO_ROOT / FIXTURE_SKILL,
+                query=FIXTURE_SKILL,
+                run_id=RUN_ID,
+                plan_path=plan_path,
+            )
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertFalse(receipt["ready_for_live_rerun"])
+        blocker_ids = {check["id"] for check in receipt["blockers"]}
+        self.assertIn("retained_regression_present", blocker_ids)
+
     def test_regression_plan_command_requires_preview(self) -> None:
         process = _run_ask(
             "sdk",
