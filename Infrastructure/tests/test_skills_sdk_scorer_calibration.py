@@ -285,6 +285,37 @@ class TestSkillsSdkScorerCalibration(unittest.TestCase):
         self.assertEqual(receipt["status"], "blocked")
         self.assertIn("score_threshold_consistent", blocker_ids)
 
+    def test_builder_blocks_out_of_range_example_scores(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill(Path(temp_dir))
+            _write_bundle(
+                skill_dir,
+                [
+                    {
+                        "id": "over-range-pass",
+                        "probe_type": "invalid_high_score",
+                        "expected_label": "pass",
+                        "predicted_label": "pass",
+                        "score": 2.0,
+                        "raw_artifact": "raw/over-range-pass.json",
+                    },
+                    {
+                        "id": "under-range-fail",
+                        "probe_type": "invalid_low_score",
+                        "expected_label": "fail",
+                        "predicted_label": "fail",
+                        "score": -1.0,
+                        "raw_artifact": "raw/under-range-fail.json",
+                    },
+                ],
+            )
+
+            receipt = build_scorer_calibration_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        blocker_ids = {check["id"] for check in receipt["blockers"]}
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("calibration_example_shape", blocker_ids)
+
     def test_builder_blocks_invalid_manifest_limits_without_crashing(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             skill_dir = _write_skill(Path(temp_dir))
@@ -349,6 +380,46 @@ class TestSkillsSdkScorerCalibration(unittest.TestCase):
         blocker_ids = {check["id"] for check in receipt["blockers"]}
         self.assertEqual(receipt["status"], "blocked")
         self.assertIn("calibration_examples_parse", blocker_ids)
+
+    @unittest.skipUnless(hasattr(os, "symlink"), "symlink support required")
+    def test_builder_blocks_symlinked_manifest_without_loading(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            skill_dir = _write_skill(root)
+            rows = [
+                {
+                    "id": "known-pass",
+                    "probe_type": "obvious_correct",
+                    "expected_label": "pass",
+                    "predicted_label": "pass",
+                    "score": 0.95,
+                    "raw_artifact": "raw/known-pass.json",
+                },
+                {
+                    "id": "known-fail",
+                    "probe_type": "obvious_reject",
+                    "expected_label": "fail",
+                    "predicted_label": "fail",
+                    "score": 0.10,
+                    "raw_artifact": "raw/known-fail.json",
+                },
+            ]
+            _write_bundle(skill_dir, rows)
+            bundle_dir = skill_dir / "references" / "scorer-calibration"
+            manifest_path = bundle_dir / "manifest.json"
+            external_manifest = root / "external-manifest.json"
+            external_manifest.write_text(manifest_path.read_text(encoding="utf-8"), encoding="utf-8")
+            manifest_path.unlink()
+            try:
+                manifest_path.symlink_to(external_manifest)
+            except OSError as exc:
+                self.skipTest(f"symlink creation unavailable: {exc}")
+
+            receipt = build_scorer_calibration_receipt(root, source_path=skill_dir, query="sample_skill")
+
+        blocker_ids = {check["id"] for check in receipt["blockers"]}
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("calibration_bundle_parse", blocker_ids)
 
     def test_builder_blocks_traversing_raw_artifact_path(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

@@ -81,6 +81,13 @@ def _number(value: object) -> float | None:
     return None
 
 
+def _calibration_score(value: object) -> float | None:
+    score = _number(value)
+    if score is None or score < 0 or score > 1:
+        return None
+    return score
+
+
 def _label(value: object) -> str:
     return str(value or "").strip()
 
@@ -187,7 +194,7 @@ def _example_shape_errors(index: int, row: dict[str, Any]) -> list[str]:
     for field in ("raw_artifact", "probe_type"):
         if not str(row.get(field) or "").strip():
             errors.append(f"{row_id}:{field}")
-    if _number(row.get("score")) is None:
+    if _calibration_score(row.get("score")) is None:
         errors.append(f"{row_id}:score")
     return errors
 
@@ -197,7 +204,7 @@ def _threshold_checks(rows: list[dict[str, Any]], threshold: float | None) -> li
         return []
     mismatches: list[str] = []
     for row in rows:
-        score = _number(row.get("score"))
+        score = _calibration_score(row.get("score"))
         if score is None:
             continue
         expected_prediction = SUCCESS_LABEL if score >= threshold else FAIL_LABEL
@@ -362,7 +369,12 @@ def _receipt(
 def build_scorer_calibration_receipt(repo_root: Path, *, source_path: Path, query: str) -> dict[str, Any]:
     skill_md = source_path if source_path.name == "SKILL.md" else source_path / "SKILL.md"
     bundle_path = skill_md.parent / DEFAULT_BUNDLE_RELATIVE_PATH
-    manifest, manifest_error = _load_json(bundle_path) if bundle_path.is_file() else ({}, "missing_calibration_bundle")
+    if bundle_path.is_symlink():
+        manifest, manifest_error = {}, "symlink_not_allowed"
+    elif bundle_path.is_file():
+        manifest, manifest_error = _load_json(bundle_path)
+    else:
+        manifest, manifest_error = {}, "missing_calibration_bundle"
     manifest = manifest or {}
     examples_path = _path_from_manifest(bundle_path.parent, manifest.get("examples_path"), "examples.jsonl")
     raw_dir = _path_from_manifest(bundle_path.parent, manifest.get("raw_artifacts_dir"), "raw")
