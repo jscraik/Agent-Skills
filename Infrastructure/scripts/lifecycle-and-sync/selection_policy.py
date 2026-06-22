@@ -152,11 +152,13 @@ PLUGIN_SKILL_COLLISION_POLICIES: tuple[dict[str, Any], ...] = (
         ),
         "paths": (
             "Plugins/cache/openai-curated/cloudflare/skills/agents-sdk",
+            "Plugins/cache/openai-curated-remote/cloudflare/skills/agents-sdk",
             "Plugins/cache/openai-curated/openai-developers/skills/agents-sdk",
             "Plugins/cache/openai-curated-remote/openai-developers/skills/agents-sdk",
         ),
         "qualified_names": {
             "Plugins/cache/openai-curated/cloudflare/skills/agents-sdk": "cloudflare:agents-sdk",
+            "Plugins/cache/openai-curated-remote/cloudflare/skills/agents-sdk": "cloudflare:agents-sdk",
             "Plugins/cache/openai-curated/openai-developers/skills/agents-sdk": "openai-developers:agents-sdk",
             "Plugins/cache/openai-curated-remote/openai-developers/skills/agents-sdk": "openai-developers:agents-sdk",
         },
@@ -309,6 +311,23 @@ PLUGIN_SKILL_COLLISION_POLICIES: tuple[dict[str, Any], ...] = (
             "config",
         )
     ),
+    *(
+        _same_capability_plugin_cache_policy(
+            name=name,
+            canonical_plugin="cloudflare",
+            duplicate_plugin="cloudflare",
+        )
+        for name in (
+            "building-ai-agent-on-cloudflare",
+            "building-mcp-server-on-cloudflare",
+            "cloudflare",
+            "durable-objects",
+            "sandbox-sdk",
+            "web-perf",
+            "workers-best-practices",
+            "wrangler",
+        )
+    ),
     _same_capability_plugin_cache_policy(
         name="coderabbit-review",
         canonical_plugin="coderabbit",
@@ -328,6 +347,8 @@ PLUGIN_SKILL_COLLISION_POLICIES: tuple[dict[str, Any], ...] = (
             "security-diff-scan",
             "security-scan",
             "threat-model",
+            "track-findings",
+            "triage-finding",
             "validation",
         )
     ),

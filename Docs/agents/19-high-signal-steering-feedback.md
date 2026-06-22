@@ -20,6 +20,9 @@ Do not parallelize runtime-recovery calls. Wait/poll/resume actions are
 stateful and must be single-threaded against one real active handle. Never call
 them to test whether a guessed identifier is valid; invalid-handle probing is a
 failure of claim-vs-evidence discipline, not a discovery mechanism.
+This applies equally through direct wait tools and multi-tool wrappers: a
+synthetic, placeholder, or known-invalid handle is never acceptable as a probe,
+even when the expected result is a harmless failure.
 
 For repository implementation, review, status, or file-inspection work, prefer
 direct repo commands over runtime wait or poll actions. A wait action is not a

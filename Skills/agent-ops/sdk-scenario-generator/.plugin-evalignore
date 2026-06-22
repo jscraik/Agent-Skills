@@ -1,0 +1,7 @@
+# Deep references stay available to ask/Tessl, but are not normal prompt
+# context for Plugin Eval's static token-budget score.
+agents/
+references/*.md
+references/evals.yaml
+references/evals/
+references/task-profile.json

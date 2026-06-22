@@ -1,0 +1,43 @@
+{
+  "schema_version": "skills-sdk.skill-intake-receipt.v0",
+  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/skill-intake-receipt.v0.schema.json",
+  "status": "preview",
+  "operation": "skill_intake_inspect",
+  "source_kind": "directory",
+  "source_path": "Infrastructure/tests/fixtures/skills_sdk/valid_skill",
+  "source_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "skill_id": "skills-sdk-valid-fixture",
+  "file_count": 1,
+  "total_size_bytes": 64,
+  "inspected_files": [
+    {
+      "path": "SKILL.md",
+      "digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "size_bytes": 64
+    }
+  ],
+  "intake_checks": [
+    {
+      "id": "skill_md_present",
+      "status": "pass",
+      "severity": "pass",
+      "message": "Source includes a regular SKILL.md file.",
+      "evidence": ["SKILL.md"]
+    },
+    {
+      "id": "execution_blocked",
+      "status": "pass",
+      "severity": "pass",
+      "message": "Intake inspects files only and does not execute skill code.",
+      "evidence": []
+    }
+  ],
+  "blockers": [],
+  "execution_performed": false,
+  "install_performed": false,
+  "projection_mutation_performed": false,
+  "network_accessed": false,
+  "mutation_performed": false,
+  "acceptance_trace": ["PU-032", "FR-008", "FR-010", "SA-004", "SEC-001", "VP-032"],
+  "agent_summary": "External skill intake inspected 1 file(s) for skills-sdk-valid-fixture without execution or install."
+}

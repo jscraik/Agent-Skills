@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/skill-intake-receipt.v0.schema.json",
+  "title": "Skills SDK External Skill Intake Receipt v0",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "string", "const": "skills-sdk.skill-intake-receipt.v0"},
+    "schema_uri": {"type": "string", "const": "https://jscraik.local/agent-skills/schemas/skills-sdk/skill-intake-receipt.v0.schema.json"},
+    "status": {"type": "string", "enum": ["preview", "blocked"]},
+    "operation": {"type": "string", "const": "skill_intake_inspect"},
+    "source_kind": {"type": "string", "enum": ["directory", "archive"]},
+    "source_path": {"type": "string", "minLength": 1},
+    "source_digest": {"type": ["string", "null"], "minLength": 71},
+    "skill_id": {"type": ["string", "null"], "minLength": 1},
+    "file_count": {"type": "integer", "minimum": 0},
+    "total_size_bytes": {"type": "integer", "minimum": 0},
+    "inspected_files": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/inspectedFile"}
+    },
+    "intake_checks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/definitions/check"}
+    },
+    "blockers": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/check"}
+    },
+    "execution_performed": {"type": "boolean", "const": false},
+    "install_performed": {"type": "boolean", "const": false},
+    "projection_mutation_performed": {"type": "boolean", "const": false},
+    "network_accessed": {"type": "boolean", "const": false},
+    "mutation_performed": {"type": "boolean", "const": false},
+    "acceptance_trace": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "enum": ["PU-032", "FR-008", "FR-010", "SA-004", "SEC-001", "VP-032"]}
+    },
+    "agent_summary": {"type": "string", "minLength": 1}
+  },
+  "required": [
+    "schema_version",
+    "schema_uri",
+    "status",
+    "operation",
+    "source_kind",
+    "source_path",
+    "source_digest",
+    "skill_id",
+    "file_count",
+    "total_size_bytes",
+    "inspected_files",
+    "intake_checks",
+    "blockers",
+    "execution_performed",
+    "install_performed",
+    "projection_mutation_performed",
+    "network_accessed",
+    "mutation_performed",
+    "acceptance_trace",
+    "agent_summary"
+  ],
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "preview"}}},
+      "then": {
+        "properties": {
+          "source_digest": {"type": "string", "minLength": 71},
+          "skill_id": {"type": "string", "minLength": 1},
+          "file_count": {"type": "integer", "minimum": 1},
+          "inspected_files": {"type": "array", "minItems": 1},
+          "intake_checks": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {"$ref": "#/definitions/check"},
+                {
+                  "properties": {
+                    "status": {"const": "pass"},
+                    "severity": {"const": "pass"}
+                  }
+                }
+              ]
+            }
+          },
+          "blockers": {"type": "array", "maxItems": 0}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"status": {"const": "blocked"}}},
+      "then": {
+        "properties": {
+          "blockers": {"type": "array", "minItems": 1}
+        }
+      }
+    }
+  ],
+  "definitions": {
+    "inspectedFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "digest": {"type": "string", "minLength": 71},
+        "size_bytes": {"type": "integer", "minimum": 0}
+      },
+      "required": ["path", "digest", "size_bytes"]
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "status": {"type": "string", "enum": ["pass", "blocker"]},
+        "severity": {"type": "string", "enum": ["pass", "blocker"]},
+        "message": {"type": "string", "minLength": 1},
+        "evidence": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      },
+      "required": ["id", "status", "severity", "message", "evidence"]
+    }
+  }
+}

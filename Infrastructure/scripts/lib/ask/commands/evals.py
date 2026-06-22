@@ -12,6 +12,7 @@ import shutil
 import tempfile
 import hashlib
 import time
+from collections.abc import Mapping
 from pathlib import Path
 from ask.envelope import CallResult, ErrorObject
 from ask.commands.skills_impl import _python_command_supports_packages, _subprocess_env_with_uv_cache
@@ -351,6 +352,196 @@ def _tessl_eval_view_has_complete_scores(payload: dict[str, object]) -> bool:
     return scored_scenarios > 0
 
 
+def _write_tessl_live_view_evidence(repo_root: Path, skill_path: str, run_id: str | None, view_raw_output: str) -> str | None:
+    if not run_id or not view_raw_output.strip():
+        return None
+    view_path = _tessl_live_evidence_file(repo_root, skill_path, run_id, "tessl-eval-view.json")
+    if view_path is None:
+        return None
+    if not _write_tessl_live_evidence_text(repo_root, view_path, view_raw_output):
+        return None
+    return str(view_path.relative_to(repo_root))
+
+
+def _write_tessl_live_submission_evidence(
+    repo_root: Path,
+    skill_path: str,
+    *,
+    run_id: str | None,
+    workspace: str,
+    staged_source: Path,
+    project_identity: Mapping[str, object],
+) -> str | None:
+    if not run_id:
+        return None
+    submission_path = _tessl_live_evidence_file(repo_root, skill_path, run_id, "tessl-eval-submission.json")
+    if submission_path is None:
+        return None
+    if not _write_tessl_live_evidence_text(
+        repo_root,
+        submission_path,
+        json.dumps(
+            {
+                "status": "submitted_pending_view",
+                "run_id": run_id,
+                "workspace": workspace,
+                "skill_path": skill_path,
+                "staged_source": str(staged_source),
+                "project_identity": project_identity,
+                "next_action": "poll tessl eval view through the Skills SDK wrapper until scored or blocked",
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+    ):
+        return None
+    return str(submission_path.relative_to(repo_root))
+
+
+def _tessl_live_evidence_file(repo_root: Path, skill_path: str, run_id: str, filename: str) -> Path | None:
+    run_segment = _tessl_evidence_segment(run_id)
+    if run_segment is None:
+        return None
+    handle = re.sub(r"[^A-Za-z0-9_.-]+", "-", Path(skill_path).name).strip("-") or "skill"
+    root = repo_root / ".harness" / "evidence" / "tessl"
+    if _path_has_symlink_component_under(root, repo_root):
+        return None
+    root_resolved = root.resolve(strict=False)
+    evidence_dir = (root / handle / run_segment).resolve(strict=False)
+    try:
+        evidence_dir.relative_to(root_resolved)
+    except ValueError:
+        return None
+    evidence_dir.mkdir(parents=True, exist_ok=True)
+    path = evidence_dir / filename
+    return None if path.is_symlink() else path
+
+
+def _path_has_symlink_component_under(path: Path, root: Path) -> bool:
+    try:
+        relative_parts = path.relative_to(root).parts
+    except ValueError:
+        return True
+    current = root
+    for part in relative_parts:
+        current = current / part
+        if current.is_symlink():
+            return True
+    return False
+
+
+def _tessl_evidence_segment(value: str) -> str | None:
+    segment = value.strip()
+    if segment in {"", ".", ".."}:
+        return None
+    return segment if re.fullmatch(r"[A-Za-z0-9_.-]+", segment) else None
+
+
+def _write_tessl_live_evidence_text(repo_root: Path, path: Path, value: str) -> bool:
+    root = (repo_root / ".harness" / "evidence" / "tessl").resolve(strict=False)
+    try:
+        path.parent.resolve(strict=False).relative_to(root)
+    except ValueError:
+        return False
+    archived_previous_path = _archive_existing_tessl_live_evidence(repo_root, path)
+    flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    try:
+        file_descriptor = os.open(path, flags, 0o600)
+    except OSError:
+        return False
+    with os.fdopen(file_descriptor, "w", encoding="utf-8") as handle:
+        handle.write(value)
+    _record_tessl_live_evidence_index(repo_root, path, value, archived_previous_path)
+    return True
+
+
+def _archive_existing_tessl_live_evidence(repo_root: Path, path: Path) -> str | None:
+    if not path.exists() or not path.is_file() or path.is_symlink():
+        return None
+    try:
+        if path.stat().st_size <= 0:
+            return None
+    except OSError:
+        return None
+
+    root = repo_root / ".harness" / "evidence" / "tessl"
+    try:
+        relative_path = path.resolve(strict=False).relative_to(root.resolve(strict=False))
+    except ValueError:
+        return None
+    archive_dir = root / "_archive" / relative_path.parent
+    archive_dir.mkdir(parents=True, exist_ok=True)
+    archive_path = archive_dir / f"{_tessl_archive_suffix()}-{path.name}"
+    try:
+        shutil.copy2(path, archive_path)
+    except OSError:
+        return None
+    return str(archive_path.relative_to(repo_root))
+
+
+def _record_tessl_live_evidence_index(
+    repo_root: Path,
+    path: Path,
+    value: str,
+    archived_previous_path: str | None,
+) -> None:
+    root = repo_root / ".harness" / "evidence" / "tessl"
+    try:
+        relative_path = path.resolve(strict=False).relative_to(root.resolve(strict=False))
+    except ValueError:
+        return
+    parts = relative_path.parts
+    if len(parts) < 3 or parts[0] == "_archive":
+        return
+
+    parsed = _parse_json_object_from_text(value)
+    status = _tessl_eval_view_status(parsed) if isinstance(parsed, dict) else None
+    summary: dict[str, object] | None = None
+    if isinstance(parsed, dict) and _tessl_eval_view_has_complete_scores(parsed):
+        try:
+            score_summary = _summarize_tessl_live_eval_view(parsed)
+        except ValueError:
+            score_summary = None
+        if score_summary is not None:
+            summary = {
+                "score": score_summary.get("score"),
+                "baseline_score": score_summary.get("baseline_score"),
+                "score_delta_vs_baseline": score_summary.get("score_delta_vs_baseline"),
+                "meets_min_score": score_summary.get("meets_min_score"),
+                "meets_target_score": score_summary.get("meets_target_score"),
+                "beats_baseline": score_summary.get("beats_baseline"),
+                "regression_count": len(score_summary.get("regressions") or []),
+            }
+
+    index_path = root / "index.jsonl"
+    entry = {
+        "schema_version": "skills-sdk.tessl-live-evidence-index.v1",
+        "recorded_at": _utc_now_iso(),
+        "skill_handle": parts[0],
+        "run_id": parts[1],
+        "artifact_type": parts[-1],
+        "raw_evidence_path": str(path.relative_to(repo_root)),
+        "raw_evidence_sha256": hashlib.sha256(value.encode("utf-8")).hexdigest(),
+        "raw_evidence_bytes": len(value.encode("utf-8")),
+        "status": status,
+        "summary": summary,
+        "archived_previous_path": archived_previous_path,
+        "retention_policy": (
+            "raw Tessl JSON is local forensic evidence; preserve it for failure analysis and "
+            "track compact index rows for handoff/review."
+        ),
+    }
+    index_path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        with index_path.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(entry, sort_keys=True) + "\n")
+    except OSError:
+        return
+
+
 def _collect_tessl_metric_fields(value: object, *, tokens: tuple[str, ...]) -> dict[str, object]:
     metrics: dict[str, object] = {}
 
@@ -565,6 +756,51 @@ def _tessl_live_private_policy(workspace: str | None = None) -> dict:
         "scenario_gate": "skill-owned references/evals.yaml plus reviewed generated scenarios are required before live scoring; behavioral skills need at least 20 gold-standard scenarios; structure-only checks must opt out explicitly",
         "min_scenarios_required": TESSL_LIVE_PRIVATE_MIN_SCENARIOS,
         "duplicate_run_guard": "before live scoring, block when a pending eval run already exists for the same workspace/project",
+        "pre_tessl_feedback_loop": {
+            "required_order": [
+                "deterministic_local_gates",
+                "oss_local_internal_judge",
+                "patch_oss_local_failures",
+                "oss_cloud_internal_judge",
+                "patch_oss_cloud_failures",
+                "tessl_live_dry_run",
+                "tessl_live_run",
+                "patch_tessl_failures",
+            ],
+            "deterministic_local_gates": [
+                "skills audit",
+                "sdk eval scenario-quality",
+                "sdk eval scorer-quality",
+                "sdk eval scorer-calibration",
+                "sdk eval regression-plan when prior Tessl or internal judge regressions exist",
+            ],
+            "internal_judge_sequence": [
+                {
+                    "profile": "oss-local",
+                    "role": "cheap internal remediation judge",
+                    "required_before": "oss-cloud",
+                    "failure_rule": "owner-classify failures, patch the smallest surface, retain regression evidence, and rerun from oss-local",
+                },
+                {
+                    "profile": "oss-cloud",
+                    "role": "higher-confidence internal remediation judge",
+                    "required_before": "tessl_live_dry_run",
+                    "failure_rule": "owner-classify failures, patch the smallest surface, retain regression evidence, and rerun from oss-local",
+                },
+            ],
+            "tessl_sequence": [
+                {
+                    "stage": "tessl_live_dry_run",
+                    "role": "package and scenario staging proof before external scoring",
+                },
+                {
+                    "stage": "tessl_live_run",
+                    "role": "external confirmation lane after internal judges pass",
+                },
+            ],
+            "failure_loop": "Any oss-local, oss-cloud, dry-run, or live Tessl failure returns to oss-local after owner classification, patch plan, retained regression evidence, and rerun commands are recorded.",
+            "live_blocked_until": "deterministic gates, oss-local, oss-cloud, and Tessl dry-run all pass for the current candidate or an explicit skip/blocker receipt is recorded.",
+        },
         "model_selection_gate": {
             "quality_floor_before_cost": True,
             "cost_is_secondary_to_score": True,
@@ -586,7 +822,7 @@ def _tessl_live_private_policy(workspace: str | None = None) -> dict:
             "limit_source": TESSL_WORKSPACE_RUN_LIMIT_SOURCE,
             "reserve_runs": TESSL_WORKSPACE_RUN_RESERVE,
             "verification_commands": [
-                "tessl eval list --json --workspace <workspace> --limit 300",
+                "tessl eval list --json --workspace <workspace>",
                 "tessl eval view --json <run-id>",
             ],
             "preflight": "before live scoring, check remaining Tessl workspace run capacity when the API/list surface is available; otherwise use the operator-provided 300-run cap and preserve reserve for rerun/remediation",
@@ -597,6 +833,16 @@ def _tessl_live_private_policy(workspace: str | None = None) -> dict:
         "target_score": TESSL_LIVE_PRIVATE_TARGET_SCORE,
         "usage_data_opt_out": "tessl config set shareUsageData false",
     }
+
+
+def _tessl_live_handoff_readiness(repo_root: Path, skill_path: str) -> dict:
+    from ask.skills_sdk.handoff_readiness import build_handoff_readiness_receipt  # noqa: PLC0415
+
+    return build_handoff_readiness_receipt(
+        repo_root,
+        source_path=repo_root / skill_path,
+        query=skill_path,
+    )
 
 
 def _tessl_scenario_generation_root_template() -> str:
@@ -640,6 +886,7 @@ def _copy_if_present(source_root: Path, relative_path: str, target_root: Path) -
     source = source_root / relative_path
     if not source.exists():
         return []
+    _reject_tessl_staging_symlink(source_root, source)
     target = target_root / relative_path
     target.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(source, target)
@@ -648,11 +895,15 @@ def _copy_if_present(source_root: Path, relative_path: str, target_root: Path) -
 
 def _copy_tree_files_if_present(source_root: Path, relative_path: str, target_root: Path) -> list[str]:
     source = source_root / relative_path
+    if source.is_symlink():
+        _reject_tessl_staging_symlink(source_root, source)
     if not source.is_dir():
         return []
 
     copied: list[str] = []
     for source_file in sorted(source.rglob("*")):
+        if source_file.is_symlink():
+            _reject_tessl_staging_symlink(source_root, source_file)
         if not source_file.is_file():
             continue
         child_relative = source_file.relative_to(source_root).as_posix()
@@ -670,11 +921,15 @@ def _copy_tree_files_to_relative_root(
     target_relative_root: str,
 ) -> list[str]:
     source = source_root / relative_path
+    if source.is_symlink():
+        _reject_tessl_staging_symlink(source_root, source)
     if not source.is_dir():
         return []
 
     copied: list[str] = []
     for source_file in sorted(source.rglob("*")):
+        if source_file.is_symlink():
+            _reject_tessl_staging_symlink(source_root, source_file)
         if not source_file.is_file():
             continue
         child_relative = source_file.relative_to(source_root).as_posix()
@@ -684,6 +939,16 @@ def _copy_tree_files_to_relative_root(
         shutil.copy2(source_file, target)
         copied.append(target_relative)
     return copied
+
+
+def _reject_tessl_staging_symlink(source_root: Path, source_path: Path) -> None:
+    if not source_path.is_symlink():
+        return
+    try:
+        label = source_path.relative_to(source_root).as_posix()
+    except ValueError:
+        label = source_path.as_posix()
+    raise ValueError(f"Tessl staging refuses symlinked support path: {label}")
 
 
 def _yaml_scalar(value: str) -> str:
@@ -1085,9 +1350,8 @@ def _parse_generated_eval_fixture(fixture_path: Path, source_root: Path) -> dict
     display_name = title.split(":", 1)[1].strip() if ":" in title else raw_id
     behavior = fields.get("behavior_under_test") or fields.get("knowledge_claim") or should
     prompt = "\n".join([
-        "Review the architecture situation below and produce a concise decision note.",
-        "Include the evidence boundary, the safest first move, and the proof that would change the decision.",
-        f"Architecture situation: {given}",
+        f"Help with this situation: {given}",
+        "Keep the response concise. Include the safest next action, any boundary that must be preserved, and the proof or check that would make the next step reliable.",
     ])
     acceptance: list[dict[str, str]] = [
         {
@@ -1241,9 +1505,16 @@ GENERIC_EXPECTED_SIGNAL_RE = re.compile(
     r"(?is)^\s*demonstrates\s+the\s+skill-specific\s+behavior\s+in\s+this\s+case\s+should\s+contract\s*:"
 )
 GENERIC_GENERATED_SHOULD = (
-    "Produce an architecture decision note that states the evidence boundary, "
-    "a safe first move, and the proof that would change the decision."
+    "Produce a response that follows the reviewed behavior under test, preserves "
+    "safety boundaries, and states the next verifiable action."
 )
+SHALLOW_EXPECTED_SIGNAL_VALUES = {
+    "mission-grounded next step",
+    "direct non-workspace handling",
+    "skill-specific next step",
+    "safe next step",
+    "validation evidence",
+}
 GUARDRAIL_CASE_RE = re.compile(r"(?i)\b(?:guardrail|hallucinat(?:e|ion|ions|ed|ing))\b")
 GUARDRAIL_LABEL_RE = re.compile(
     r"(?i)\b(?:label(?:ed|led)?|human labels?|pass/fail|ordinary|adversarial|"
@@ -1281,7 +1552,7 @@ UNSTAGED_TESSL_REPO_PATH_RE = re.compile(
 def _acceptance_type(item: object) -> str:
     if not isinstance(item, dict):
         return ""
-    return str(_normalize_tessl_acceptance_item(item).get("type") or "acceptance").strip()
+    return str(_normalize_tessl_acceptance_item(item).get("type") or "acceptance").strip().lower()
 
 
 def _is_provenance_only_signal(value: str) -> bool:
@@ -1309,7 +1580,7 @@ def _case_has_skill_lift_acceptance(case: dict[str, object]) -> bool:
         if not isinstance(item, dict):
             continue
         normalized = _normalize_tessl_acceptance_item(item)
-        item_type = str(normalized.get("type") or "acceptance").strip()
+        item_type = str(normalized.get("type") or "acceptance").strip().lower()
         value = str(normalized.get("value") or normalized.get("expected_skill") or "").strip()
         if item_type in {"skill_selected", "artifact_exists", "artifact_contains", "command_success", "output_schema"}:
             return True
@@ -1331,6 +1602,28 @@ def _case_has_keyword_only_acceptance(case: dict[str, object]) -> bool:
         return False
     types = {_acceptance_type(item) for item in acceptance}
     return bool(types) and types <= KEYWORD_ONLY_TESSL_ACCEPTANCE_TYPES
+
+
+def _case_has_shallow_routing_oracle(case: dict[str, object]) -> bool:
+    acceptance = case.get("acceptance")
+    if not isinstance(acceptance, list) or not acceptance:
+        return False
+    normalized_items = [
+        _normalize_tessl_acceptance_item(item)
+        for item in acceptance
+        if isinstance(item, dict)
+    ]
+    types = {str(item.get("type") or "acceptance").strip().lower() for item in normalized_items}
+    if not types or not types <= {"skill_selected", "skill_not_selected", "expected_signal"}:
+        return False
+    expected_values = [
+        str(item.get("value") or "").strip().lower()
+        for item in normalized_items
+        if str(item.get("type") or "").strip().lower() == "expected_signal"
+    ]
+    if not expected_values:
+        return True
+    return all(value in SHALLOW_EXPECTED_SIGNAL_VALUES for value in expected_values)
 
 
 def _case_has_fixture_path_acceptance(case: dict[str, object]) -> bool:
@@ -1368,7 +1661,7 @@ def _case_has_answer_leakage(case: dict[str, object]) -> bool:
         if not isinstance(item, dict):
             continue
         normalized = _normalize_tessl_acceptance_item(item)
-        item_type = str(normalized.get("type") or "acceptance").strip()
+        item_type = str(normalized.get("type") or "acceptance").strip().lower()
         if item_type.startswith(("must_not", "forbidden")):
             continue
         value = str(normalized.get("value") or normalized.get("expected_skill") or "").strip()
@@ -1607,6 +1900,16 @@ def _tessl_eval_quality_findings(cases: list[dict[str, object]]) -> list[dict[st
                     "Regex and contains checks are allowed only as supporting evidence; they "
                     "cannot be the whole Tessl scoring contract because baseline runs can pass "
                     "them without demonstrating skill lift."
+                ),
+            })
+        if _case_has_shallow_routing_oracle(case):
+            findings.append({
+                "case_id": case_id,
+                "code": "shallow_routing_oracle",
+                "message": (
+                    "Tessl live-private evals must not rely only on skill selection plus "
+                    "generic expected signals. Add scenario-specific behavior, artifact, "
+                    "safety, or refusal criteria that create a plausible baseline failure path."
                 ),
             })
         if _case_has_fixture_path_acceptance(case):
@@ -1897,7 +2200,7 @@ def _tessl_criteria_from_case(case: dict[str, object]) -> dict:
             if not isinstance(item, dict):
                 continue
             normalized_item = _normalize_tessl_acceptance_item(item)
-            criterion_type = str(normalized_item.get("type") or "acceptance").strip()
+            criterion_type = str(normalized_item.get("type") or "acceptance").strip().lower()
             value = str(
                 normalized_item.get("value")
                 or normalized_item.get("expected_skill")
@@ -2116,6 +2419,7 @@ def _copy_tessl_live_skill_package(source_root: Path, staged_root: Path) -> list
 
     skill_source = source_root / "SKILL.md"
     if skill_source.exists():
+        _reject_tessl_staging_symlink(source_root, skill_source)
         skill_target = staged_root / skill_package_root / "SKILL.md"
         skill_target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(skill_source, skill_target)
@@ -2372,26 +2676,9 @@ def _tessl_pending_run_preflight(
     staged_root: Path,
     env: dict[str, str],
 ) -> dict[str, object]:
-    command = [
-        tessl_path,
-        "eval",
-        "list",
-        "--json",
-        "--workspace",
-        workspace,
-        "--limit",
-        "300",
-    ]
-    command_text = " ".join(shlex.quote(str(part)) for part in command)
+    command_text = _tessl_eval_list_command_text(tessl_path, workspace)
     try:
-        process = subprocess.run(
-            command,
-            cwd=str(staged_root),
-            capture_output=True,
-            text=True,
-            timeout=TESSL_PROJECT_LINK_TIMEOUT_SECONDS,
-            env=env,
-        )
+        process, command_text = _run_tessl_eval_list_for_workspace(tessl_path, workspace, staged_root, env)
     except subprocess.TimeoutExpired as exc:
         return {
             "status": "blocked",
@@ -2482,31 +2769,14 @@ def _tessl_run_budget_preflight(
     staged_root: Path,
     env: dict[str, str],
 ) -> dict[str, object]:
-    command = [
-        tessl_path,
-        "eval",
-        "list",
-        "--json",
-        "--workspace",
-        workspace,
-        "--limit",
-        str(TESSL_WORKSPACE_RUN_LIMIT),
-    ]
     try:
-        process = subprocess.run(
-            command,
-            cwd=str(staged_root),
-            capture_output=True,
-            text=True,
-            timeout=TESSL_PROJECT_LINK_TIMEOUT_SECONDS,
-            env=env,
-        )
+        process, command_text = _run_tessl_eval_list_for_workspace(tessl_path, workspace, staged_root, env)
     except subprocess.TimeoutExpired as exc:
         return {
             "status": "blocked",
             "blocker_class": "blocked_runtime",
             "blocker": "Tessl workspace run-budget preflight timed out before live scoring.",
-            "command": " ".join(shlex.quote(str(part)) for part in command),
+            "command": _tessl_eval_list_command_text(tessl_path, workspace),
             "raw_output": _as_text(exc.stdout),
             "raw_error": _as_text(exc.stderr),
         }
@@ -2515,12 +2785,11 @@ def _tessl_run_budget_preflight(
             "status": "blocked",
             "blocker_class": "blocked_runtime",
             "blocker": f"Failed to run Tessl workspace run-budget preflight: {exc}",
-            "command": " ".join(shlex.quote(str(part)) for part in command),
+            "command": _tessl_eval_list_command_text(tessl_path, workspace),
             "raw_output": "",
             "raw_error": str(exc),
         }
 
-    command_text = " ".join(shlex.quote(str(part)) for part in command)
     if blocker := _tessl_signal_blocker(process, lane="eval list run-budget preflight"):
         return {
             "status": "blocked",
@@ -2603,6 +2872,32 @@ def _tessl_run_budget_preflight(
         "used_runs": used_runs,
         "remaining_runs": remaining_runs,
     }
+
+
+def _tessl_eval_list_command(tessl_path: str, workspace: str) -> list[str]:
+    return [tessl_path, "eval", "list", "--json", "--workspace", workspace]
+
+
+def _tessl_eval_list_command_text(tessl_path: str, workspace: str) -> str:
+    return " ".join(shlex.quote(str(part)) for part in _tessl_eval_list_command(tessl_path, workspace))
+
+
+def _run_tessl_eval_list_for_workspace(
+    tessl_path: str,
+    workspace: str,
+    staged_root: Path,
+    env: dict[str, str],
+) -> tuple[subprocess.CompletedProcess[str], str]:
+    command = _tessl_eval_list_command(tessl_path, workspace)
+    process = subprocess.run(
+        command,
+        cwd=str(staged_root),
+        capture_output=True,
+        text=True,
+        timeout=TESSL_PROJECT_LINK_TIMEOUT_SECONDS,
+        env=env,
+    )
+    return process, " ".join(shlex.quote(str(part)) for part in command)
 
 
 def _tessl_live_private_eval_run_command(
@@ -3444,9 +3739,18 @@ def _run_tessl_live_private_eval(
         blocker_class = None
 
     eval_run_id = _extract_tessl_eval_run_id(raw_output)
+    submission_evidence_path = _write_tessl_live_submission_evidence(
+        repo_root,
+        path,
+        run_id=eval_run_id,
+        workspace=normalized_workspace,
+        staged_source=staged_source,
+        project_identity=common["project_identity"],
+    )
     live_result_summary = None
     view_raw_output = ""
     view_raw_error = ""
+    view_evidence_path = None
     view_attempts = 0
     view_status = None
     if status == "pass":
@@ -3534,14 +3838,18 @@ def _run_tessl_live_private_eval(
                             )
                             blocker_class = None
 
+    view_evidence_path = _write_tessl_live_view_evidence(repo_root, path, eval_run_id, view_raw_output)
+
     return {
         "status": status,
         **common,
         "exit_code": process.returncode,
         "eval_run_id": eval_run_id,
+        "submission_evidence_path": submission_evidence_path,
         "live_result_summary": live_result_summary,
         "view_attempts": view_attempts,
         "view_status": view_status,
+        "view_evidence_path": view_evidence_path,
         "view_raw_output": view_raw_output,
         "view_raw_error": view_raw_error,
         "raw_output": raw_output,
@@ -4448,7 +4756,7 @@ def _write_eval_only_review_report(repo_root: Path, skill_name: str, skill_path:
                 },
                 "tessl_lint": {
                     "command": "./bin/ask skills external-review <path> --json --robot",
-                    "role": "disposable tile.json package-shape check, not a direct content finding",
+                    "role": "disposable .tessl-plugin/plugin.json package-shape check, not a direct content finding",
                     "status": "not_run_in_eval_only_dashboard",
                 },
                 "tessl_review": {
@@ -4597,24 +4905,64 @@ def run_evals(
         ))
         return result
 
-    if tessl_live_private and tessl_live_dry_run:
+    if tessl_live_private:
         _start_eval_lifecycle(result, path=path, mode=mode, runner=runner)
         result.status = "success"
         result.data["raw_output"] = ""
         result.data["raw_error"] = ""
         result.data["eval_status"] = "pass"
-        result.data["local_eval_status"] = "skipped_tessl_live_dry_run"
+        result.data["local_eval_status"] = (
+            "skipped_tessl_live_dry_run" if tessl_live_dry_run else "skipped_tessl_live_private"
+        )
         result.data["blocker_class"] = None
         result.data["blocker_taxonomy"] = EVAL_BLOCKER_TAXONOMY
-        result.data["tessl_dry_run_note"] = (
-            "Tessl live-private dry-run validates the staged private Tessl payload only. "
-            "Run without --tessl-live-dry-run after local audit/package gates pass to execute remote assessment."
-        )
+        if tessl_live_dry_run:
+            result.data["tessl_dry_run_note"] = (
+                "Tessl live-private dry-run validates the staged private Tessl payload only. "
+                "Run without --tessl-live-dry-run only after deterministic local gates, oss-local, "
+                "oss-cloud, and this dry-run pass for the current candidate."
+            )
+        else:
+            result.data["tessl_live_private_note"] = (
+                "Tessl live-private scoring uses the staged private Tessl payload directly. "
+                "Run deterministic local gates, oss-local, oss-cloud, and Tessl dry-run separately before live scoring; "
+                "any failure returns to oss-local after classification, patching, and retained regression evidence."
+            )
+            handoff_readiness = _tessl_live_handoff_readiness(repo_root, path)
+            result.data["handoff_readiness"] = handoff_readiness
+            if not handoff_readiness.get("ready_for_live_tessl"):
+                result.status = "error"
+                result.data["eval_status"] = "blocked_validation"
+                result.data["blocker_class"] = "blocked_validation"
+                result.data["tessl_eval_status"] = "blocked_validation"
+                result.data["tessl_blocker_class"] = "blocked_validation"
+                result.data["tessl_eval"] = {
+                    "status": "blocked",
+                    "blocker": handoff_readiness.get("agent_summary") or "handoff readiness is blocked",
+                    "blocker_class": "blocked_validation",
+                    "handoff_readiness_path": handoff_readiness.get("readiness_path"),
+                    "handoff_readiness_blockers": handoff_readiness.get("blockers", []),
+                    "required_next_actions": handoff_readiness.get("required_next_actions", []),
+                }
+                result.errors.append(ErrorObject(
+                    code="ERR_VALIDATION",
+                    message=f"Tessl live-private blocked: {result.data['tessl_eval']['blocker']}",
+                    fix_suggestion="./bin/ask sdk eval handoff-readiness --skill <skill> --preview --json --robot",
+                ))
+                _finish_eval_lifecycle(
+                    result,
+                    path=path,
+                    mode=mode,
+                    runner=runner,
+                    eval_status="blocked_validation",
+                    blocker_class="blocked_validation",
+                )
+                return result
         tessl_eval = _run_tessl_live_private_eval(
             repo_root,
             path,
             workspace=effective_tessl_workspace,
-            dry_run=True,
+            dry_run=tessl_live_dry_run,
         )
         result.data["tessl_eval"] = tessl_eval
         if tessl_eval.get("status") != "pass":

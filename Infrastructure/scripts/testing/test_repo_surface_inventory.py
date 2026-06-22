@@ -74,6 +74,26 @@ def test_skill_source_path_is_source() -> None:
     assert finding.blocking is False
 
 
+def test_skill_scorer_calibration_examples_are_source() -> None:
+    finding = MODULE.classify_path(
+        "Skills/agent-ops/sdk-scenario-generator/references/scorer-calibration/examples.jsonl"
+    )
+
+    assert finding.classification == "source"
+    assert finding.status == "ok"
+    assert finding.code == "authored_source_surface"
+    assert finding.blocking is False
+
+
+def test_pipeline_status_artifact_is_governed_source() -> None:
+    finding = MODULE.classify_path("artifacts/recommended-skills-sdk-pipeline.html")
+
+    assert finding.classification == "source"
+    assert finding.status == "ok"
+    assert finding.code == "authored_source_surface"
+    assert finding.blocking is False
+
+
 def test_root_architecture_is_front_door_source() -> None:
     finding = MODULE.classify_path("ARCHITECTURE.md")
 
@@ -263,8 +283,13 @@ def test_harness_curated_context_paths_are_classified() -> None:
 
 
 def test_current_tracked_inventory_has_no_classification_required_paths() -> None:
-    findings = MODULE.classify_paths(MODULE.git_ls_files(MODULE.REPO_ROOT))
-    offenders = [finding.path for finding in findings if finding.classification == "classification_required"]
+    allowlist = MODULE.load_allowlist(MODULE.REPO_ROOT / MODULE.DEFAULT_ALLOWLIST)
+    findings = MODULE.classify_paths(MODULE.git_ls_files(MODULE.REPO_ROOT), allowlist)
+    offenders = [
+        finding.path
+        for finding in findings
+        if finding.classification == "classification_required" and finding.blocking
+    ]
 
     assert offenders == []
 

@@ -11,12 +11,21 @@ inputs:
   - target_skill_contract
   - existing_evals
   - knowledgeos_extraction_optional
+  - knowledgeos_handoff_eval_references_optional
   - tessl_scenario_drafts_optional
+  - tessl_tile_or_registry_context_optional
+  - latest_eval_results_optional
+  - skills_sdk_status_optional
+  - scenario_sources_optional
   - previous_tessl_runs_optional
   - plugin_eval_report_optional
 outputs:
   - scenario_inventory
   - reviewed_scenario_patches
+  - tessl_tile_eval_pack_optional
+  - eval_result_diagnosis_optional
+  - lift_curation_decision_optional
+  - knowledgeos_handoff_conversion_optional
   - anti_easy_findings
   - tessl_run_budget_evidence
   - live_readiness_decision
@@ -24,17 +33,22 @@ non_goals:
   - generating easy scenarios to improve the score cosmetically
   - claiming behavioral readiness from structure-only package checks
   - publishing or uploading Tessl packages from scenario preparation
+  - treating Tessl Registry metadata as local validation or repo readiness proof
 risks:
   - answer leakage in user-visible task text
   - baseline tie or baseline win misreported as success
   - stale scenarios after skill behavior changes
   - live Tessl run budget exhaustion
+  - opinion, compliment, hypothetical, or future-promise source material treated as scenario proof
+  - unrelated measurement dimensions collapsed into a fake aggregate score
+  - happy-path-only scenario set that never stresses invalid inputs, boundaries, sequencing, or shared state
 permission_profile:
   network: false
   filesystem:
     read:
       - target skill package
       - KnowledgeOS extraction
+      - KnowledgeOS handoff eval references
       - Tessl scenario drafts
       - prior eval artifacts
     write:
@@ -44,19 +58,246 @@ permission_profile:
 budget_classification:
   evidence_assets:
     - references/gold-scenario-contract.md
+    - references/tessl-tile-scenario-contract.md
+    - references/tessl-registry-boundaries.md
+    - references/eval-improvement-contract.md
+    - references/sdk-pipeline-setup.md
+    - references/knowledgeos-handoff-conversion.md
     - references/evals.yaml
   runtime_context:
     - SKILL.md
+tessl_tile_scenario_policy:
+  output_root: "<tile>/evals"
+  required_files:
+    - instructions.json
+    - summary.json
+    - summary_infeasible.json
+    - "scenario-N/task.md"
+    - "scenario-N/criteria.json"
+    - "scenario-N/capability.txt"
+  scenario_count_default: 5
+  criteria_sum: 100
+  scenario_numbering: "zero_indexed_sequential"
+  no_folder_for_infeasible: true
+  self_contained_tasks: true
+  grading_observability: "final_files_only"
+  max_expected_runtime_minutes: 10
+  large_file_cleanup_threshold_mb: 50
+  forbidden_task_leakage:
+    - eval
+    - rubric
+    - criteria
+    - fixture
+    - generated scenario
+    - hidden answer
+    - use this skill
+concrete_evidence_policy:
+  source_principle: "Treat discovery-style material as source evidence, not validation by itself."
+  prefer:
+    - concrete_past_incident
+    - current_workflow
+    - supplied_file_or_fixture
+    - failing_scorecard_or_run_result
+    - observable_output_or_commitment
+  reject_as_readiness_proof:
+    - compliments
+    - opinions
+    - hypotheticals
+    - future_promises
+    - would_use_answers
+  rewrite_rule: "Replace future-tense or opinion prompts with concrete artifacts, prior failures, current behavior, or observable outputs."
+  scorer_metadata_rule: "Move expected moves, bad patterns, good patterns, and answer keys out of visible task text."
+measurement_quality_policy:
+  source_principle: "Treat each eval scenario as a measurement instrument with a named construct."
+  separate_constructs:
+    - behavior_correctness
+    - efficiency_or_effort
+    - clarity_or_perspicuity
+    - dependability_or_confidence
+    - safety
+    - preference_or_satisfaction
+  forbidden:
+    - fake_overall_score_from_unrelated_dimensions
+    - criteria_without_construct_mapping
+    - subjective_rating_without_scale_or_threshold
+    - readiness_claim_from_preference_score
+  required_for_metrics:
+    - named_construct
+    - interpretation_threshold
+    - sample_or_scope_caveat
+    - what_the_metric_does_not_prove
+  reliability_rule: "Repeated scenarios that claim the same construct should reward the same skill behavior consistently."
+  validity_rule: "Each criterion must map to the skill behavior or proof lane it claims to measure."
+break_test_policy:
+  source_principle: "A scenario set should include realistic attempts to break the skill, not only happy paths."
+  stressors:
+    - invalid_inputs
+    - boundary_values
+    - null_or_default_transitions
+    - repeated_operations
+    - input_sequence_state_changes
+    - oversized_or_undersized_data
+    - shared_state_interactions
+    - corrupt_or_malformed_files
+    - invalid_file_names
+    - missing_permissions
+    - quota_or_capacity_failures
+    - stale_or_incompatible_generated_assets
+  scoreability_rule: "Break-test cases must still be gradeable from final artifacts or explicit output files."
+  relevance_rule: "Use only stressors that plausibly exercise the target skill's instructions or proof boundaries."
+tessl_registry_policy:
+  manifest_name: plugin.json
+  tile_identity: "plugin.json:name workspace/tile-name"
+  readme_role: "registry_presentation_not_agent_context"
+  dependency_intake_required: true
+  trust_signals:
+    - quality
+    - impact
+    - security
+  high_or_critical_security_warning_blocks_install: true
+  prefer_pinned_version_or_commit_specific_source: true
+  public_publication_requires_explicit_approval: true
+  local_lint_does_not_prove_registry_publication: true
+  registry_review_does_not_prove_target_repo_behavior: true
+  repo_local_tile_does_not_prove_registry_installability: true
+  evidence_lanes:
+    - registry_candidate_selection
+    - local_package_shape
+    - local_skill_review
+    - scenario_effectiveness
+    - repo_local_install_state
+    - registry_publication_state
+    - workspace_access
+    - target_repo_code_and_test_truth
+eval_result_diagnosis_policy:
+  bucket_threshold: 0.80
+  buckets:
+    A_working: "with_context >= 80% of max and materially above baseline"
+    B_tile_gap: "baseline < 80% and with_context < 80%"
+    C_redundant: "baseline >= 80%"
+    D_regression: "with_context < baseline"
+  priority_order:
+    - D_regression
+    - B_tile_gap
+    - C_redundant
+    - A_working
+  required_evidence:
+    - scenario_name
+    - criterion_name
+    - max_score
+    - baseline_score
+    - with_context_score
+    - relevant_criteria_json
+    - candidate_context_files
+  fix_protocol:
+    show_patch_before_edit_when_requested: true
+    inspect_contradictions_before_regression_fix: true
+    commit_only_changed_files: true
+    rerun_same_eval_lane: true
+lift_curation_policy:
+  formula: "with_context_score - baseline_score"
+  primary_metric: lift
+  floor_model_required_for_retire: true
+  healthy_signal_min_lift: 40
+  weak_signal_min_lift: 10
+  no_signal_max_lift_exclusive: 10
+  weak_or_no_lift_causes:
+    universal_competence: "retire only when no skill-specific replacement exists"
+    task_leaked_technique: "rewrite task.md and keep criterion"
+    criteria_grade_universal_competence: "rewrite criteria.json for skill-prescribed behavior"
+  owner_triage_for_partial_with_context:
+    skill: "unclear SKILL.md instruction"
+    task: "task does not ask for what criteria grade"
+    criteria: "criteria test wrong or too-generic behavior"
+skills_sdk_pipeline:
+  setup_status_command: "./bin/ask sdk status --json --robot"
+  package_verify_command: "./bin/ask skills package verify Skills/agent-ops/sdk-scenario-generator --json --robot"
+  scenario_quality_command: "./bin/ask sdk eval scenario-quality Skills/agent-ops/sdk-scenario-generator --preview --json --robot"
+  internal_eval_command: "./bin/ask sdk eval run <runner-or-dataset> --json --robot"
+  scenario_source_required_before_tessl: true
+  proof_lanes:
+    - package_shape
+    - scenario_quality
+    - sdk_eval_runner
+    - tessl_scenario_preparation
+    - tessl_dry_run_staging
+    - live_tessl_scoring
+knowledgeos_handoff_conversion_policy:
+  source_glob: "operator-provided KnowledgeOS eval handoff export"
+  source_status: "portable_handoff_not_sdk_readiness_proof"
+  destination_primary: "references/evals.yaml"
+  destination_detail: "references/evals/*.md"
+  preserve_fields:
+    - promotion_status
+    - proof_route
+    - fixture_path
+    - knowledge_claim
+    - behavior_under_test
+    - failure_mode
+    - expected_agent_move
+    - observable_delta
+    - given
+    - should
+    - expected_failure
+    - bad_answer_patterns
+    - good_answer_patterns
+  supported_sdk_categories:
+    - happy
+    - negative
+    - pressure
+    - edge
+  hidden_metadata_fields:
+    - expected_agent_move
+    - expected_failure
+    - bad_answer_patterns
+    - good_answer_patterns
+  prompt_must_not_include:
+    - fixture_path
+    - expected_agent_move
+    - expected_failure
+    - bad_answer_patterns
+    - good_answer_patterns
 tessl_scenario_policy:
   structure_only: false
   min_gold_scenarios: 20
   live_private_min_usage_score: 0.90
   live_private_must_not_underperform_baseline: true
+  live_feedback_loop_required: true
+  baseline_scenario_wins_allowed: 0
+  observation_surface_required: true
+  observation_surfaces:
+    static_package:
+      can_grade:
+        - SKILL.md instructions
+        - references and templates shipped in the package
+        - plugin.json and staged scenario metadata
+      cannot_grade:
+        - runtime-created workspace files
+        - final chat responses not persisted into the judged solution
+        - tool side effects outside the staged Tessl payload
+      runtime_artifact_rule: "If criteria require a runtime artifact, either rewrite them to require the package instruction/template that would produce it or move the scenario to a runtime lane that captures the artifact."
+    runtime_workspace:
+      can_grade:
+        - files created by the evaluated run
+        - final responses captured by the runner
+        - explicit blocker artifacts produced by the skill
+  feedback_loop_receipt_command: "./bin/ask sdk eval tessl-score --view-json <view-json> --skill <skill> --preview --json --robot"
+  feedback_loop_blocks_when:
+    - "receipt.feedback_loop.status is open"
+    - "a live Tessl scenario has baseline score greater than usage-spec score"
+    - "usage score is below the live handoff threshold"
+    - "usage-spec does not beat baseline in aggregate"
+    - "baseline or usage-spec assessments are missing"
+  feedback_loop_required_actions:
+    - "preserve tessl eval view --json evidence"
+    - "classify regression owner as skill, task, criteria, or scorer"
+    - "add or retain equivalent internal regression cases"
+    - "rerun internal release evidence before another live handoff"
   workspace_run_limit: 300
   workspace_run_limit_source: operator_provided_limit
   remediation_reserve_runs: 20
   capacity_preflight:
-    preferred_command: "tessl eval list --json --workspace <workspace> --limit 300"
+    preferred_command: "tessl eval list --json --workspace <workspace>"
     if_unknown: "block_nonessential_live_scoring"
   scenario_drift_review:
     required_after_skill_change: true
@@ -73,6 +314,9 @@ tessl_scenario_policy:
       - add
       - remove
 commands:
+  sdk_status: "./bin/ask sdk status --json --robot"
+  sdk_scenario_quality: "./bin/ask sdk eval scenario-quality Skills/agent-ops/sdk-scenario-generator --preview --json --robot"
+  sdk_eval_run: "./bin/ask sdk eval run <runner-or-dataset> --json --robot"
   skills_audit: "./bin/ask skills audit Skills/agent-ops/sdk-scenario-generator --level strict --json --robot"
   external_review: "./bin/ask skills external-review Skills/agent-ops/sdk-scenario-generator --json --robot"
   package_verify: "./bin/ask skills package verify Skills/agent-ops/sdk-scenario-generator --json --robot"

@@ -1,0 +1,69 @@
+---
+schema_version: knowledge-os.knowledge-capsule-manifest.v1
+skill:
+  skill_id: teach
+  canonical_skill_path: Skills/github/teach/SKILL.md
+upstream_pack:
+  pack_id: pack.teach-learning-roadmap
+  role: mission_grounded_learning_workspace
+  export_root: exports/packs/pack.teach-learning-roadmap
+  snapshot_digest: sha256:c8f55dd8e1415cd00ed66be053d91bd6628c51d3e57afe79107ebf54b32ab65e
+selected_facets:
+  - pack.teach-learning-roadmap:mission_and_state
+  - pack.teach-learning-roadmap:source_trust
+  - pack.teach-learning-roadmap:lesson_loop
+  - pack.teach-learning-roadmap:roadmap_sequencing
+  - pack.teach-learning-roadmap:local_book_practice
+  - pack.teach-learning-roadmap:proof_and_boundaries
+capsules:
+  - facet_id: mission_and_state
+    target_path: references/knowledge-capsules/teach-learning-roadmap-mission-and-state.md
+  - facet_id: source_trust
+    target_path: references/knowledge-capsules/teach-learning-roadmap-source-trust.md
+  - facet_id: lesson_loop
+    target_path: references/knowledge-capsules/teach-learning-roadmap-lesson-loop.md
+  - facet_id: roadmap_sequencing
+    target_path: references/knowledge-capsules/teach-learning-roadmap-roadmap-sequencing.md
+  - facet_id: local_book_practice
+    target_path: references/knowledge-capsules/teach-learning-roadmap-local-book-practice.md
+  - facet_id: proof_and_boundaries
+    target_path: references/knowledge-capsules/teach-learning-roadmap-proof-and-boundaries.md
+selected_asset_ids:
+  - claim.teach.mission-precedes-lessons
+  - claim.teach.records-steer-future-sessions
+  - principle.teach.mission-led-roadmap
+  - checklist.teach.learning-pack-operating-loop
+  - lens.teach.learning-mission-boundary
+  - claim.teach.one-next-lesson
+  - claim.teach.learning-targets-share-practice-substrate
+  - claim.teach.high-trust-current-sources
+  - claim.teach.not-certification-replacement
+  - claim.teach.official-blueprints-anchor-cert-study
+  - heuristic.teach.official-sources-first
+  - rubric.teach.lesson-readiness
+  - claim.teach.lesson-includes-retrieval
+  - principle.teach.blueprint-to-practice-loop
+  - heuristic.teach.one-tangible-win
+  - claim.teach.local-books-enrich-roadmap
+  - heuristic.teach.sequence-by-shared-substrate
+  - principle.teach.local-books-bridge-official-blueprints
+  - claim.teach.typescript-mental-models
+  - claim.teach.pythonic-readability
+  - claim.teach.typescript-effective-path
+  - claim.teach.python-effective-path
+  - claim.teach.python-tests-matter
+  - claim.teach.evals-error-analysis-first
+  - claim.teach.evals-code-when-objective
+  - claim.teach.evals-validate-evaluators
+  - heuristic.teach.typescript-from-mental-model-to-migration
+  - heuristic.teach.python-from-idioms-to-automation
+  - heuristic.teach.evals-from-traces-to-checked-evaluators
+  - checklist.teach.local-book-practice-path
+  - principle.teach.proof-bearing-learning-records
+runtime_dependency_policy:
+  requires_knowledge_os_at_runtime: false
+  raw_sources_included: false
+  local_absolute_paths_required: false
+provenance:
+  profile: teach
+  profile_digest: sha256:c5a30b64aa6616774cb19ad4b6d001cb867ba861bb6a3c64b32149047bf8c7c2
