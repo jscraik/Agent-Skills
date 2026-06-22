@@ -18,6 +18,7 @@ from ask.skills_sdk.skill_intake import build_skill_intake_receipt  # noqa: E402
 
 VALID_SKILL = "Infrastructure/tests/fixtures/skills_sdk/valid_skill"
 SCHEMA_PATH = REPO_ROOT / "Infrastructure/config/schemas/skills-sdk/skill-intake-receipt.v0.schema.json"
+ORIGINAL_ITERDIR = Path.iterdir
 
 
 def _command_env() -> dict[str, str]:
@@ -123,7 +124,12 @@ class TestSkillsSdkSkillIntake(unittest.TestCase):
             rejected.mkdir()
             (rejected / "large-tree.txt").write_text("do not inspect", encoding="utf-8")
 
-            with mock.patch.object(Path, "rglob", side_effect=AssertionError("unexpected recursive walk")):
+            def guarded_iterdir(path: Path):
+                if path == rejected:
+                    raise AssertionError("unexpected recursive walk")
+                return ORIGINAL_ITERDIR(path)
+
+            with mock.patch.object(Path, "iterdir", guarded_iterdir):
                 receipt = build_skill_intake_receipt(REPO_ROOT, source=source.as_posix())
 
         self.assert_schema_valid(receipt)
@@ -139,7 +145,12 @@ class TestSkillsSdkSkillIntake(unittest.TestCase):
             assets.mkdir()
             (assets / "large-tree.txt").write_text("do not inspect", encoding="utf-8")
 
-            with mock.patch.object(Path, "rglob", side_effect=AssertionError("unexpected recursive walk")):
+            def guarded_iterdir(path: Path):
+                if path == assets:
+                    raise AssertionError("unexpected recursive walk")
+                return ORIGINAL_ITERDIR(path)
+
+            with mock.patch.object(Path, "iterdir", guarded_iterdir):
                 receipt = build_skill_intake_receipt(REPO_ROOT, source=source.as_posix())
 
         self.assert_schema_valid(receipt)
@@ -156,7 +167,12 @@ class TestSkillsSdkSkillIntake(unittest.TestCase):
             scripts.mkdir()
             (scripts / "install.sh").write_text("do not inspect", encoding="utf-8")
 
-            with mock.patch.object(Path, "rglob", side_effect=AssertionError("unexpected recursive walk")):
+            def guarded_iterdir(path: Path):
+                if path == scripts:
+                    raise AssertionError("unexpected recursive walk")
+                return ORIGINAL_ITERDIR(path)
+
+            with mock.patch.object(Path, "iterdir", guarded_iterdir):
                 receipt = build_skill_intake_receipt(REPO_ROOT, source=source.as_posix())
 
         self.assert_schema_valid(receipt)
@@ -210,6 +226,34 @@ class TestSkillsSdkSkillIntake(unittest.TestCase):
         self.assertEqual(readable_check["status"], "blocker")
         self.assertIn("SKILL.md", readable_check["evidence"])
         self.assertIn("assets/blocked.txt", readable_check["evidence"])
+
+    def test_builder_blocks_unreadable_approved_directories(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "external"
+            source.mkdir()
+            (source / "SKILL.md").write_text(
+                "---\nname: external\ndescription: external\n---\n\n# External\n",
+                encoding="utf-8",
+            )
+            asset = source / "assets"
+            asset.mkdir()
+            unreadable_dir = asset / "closed"
+            unreadable_dir.mkdir()
+            unreadable_resolved = unreadable_dir.resolve()
+
+            def guarded_iterdir(path: Path):
+                if path.resolve(strict=False) == unreadable_resolved:
+                    raise OSError("permission denied")
+                return ORIGINAL_ITERDIR(path)
+
+            with mock.patch.object(Path, "iterdir", guarded_iterdir):
+                receipt = build_skill_intake_receipt(REPO_ROOT, source=source.as_posix())
+
+        self.assert_schema_valid(receipt)
+        self.assertEqual(receipt["status"], "blocked")
+        readable_check = next(check for check in receipt["intake_checks"] if check["id"] == "source_files_readable")
+        self.assertEqual(readable_check["status"], "blocker")
+        self.assertIn("assets/closed", readable_check["evidence"])
 
     def test_builder_blocks_symlink_source_root_before_resolving(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
