@@ -188,13 +188,17 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
             return CodexJudgeResult(exit_code=0, stdout=json.dumps(_decision(run_receipt["experiment_id"])), stderr="")
 
-        receipt = build_ab_judge_score_receipt(
-            REPO_ROOT,
-            run_receipt=RUN_RECEIPT,
-            evidence_root=self.evidence_root,
-            judge_profile_id="oss-cloud",
-            runner=fake_runner,
-        )
+        with tempfile.TemporaryDirectory() as profile_dir:
+            op_env_file = Path(profile_dir) / "codex.env"
+            op_env_file.write_text("OLLAMA_API_KEY=op://vault/item/credential\n", encoding="utf-8")
+            with patch.dict(os.environ, {"ASK_CODEX_OP_ENV_FILE": str(op_env_file)}):
+                receipt = build_ab_judge_score_receipt(
+                    REPO_ROOT,
+                    run_receipt=RUN_RECEIPT,
+                    evidence_root=self.evidence_root,
+                    judge_profile_id="oss-cloud",
+                    runner=fake_runner,
+                )
 
         self.assertEqual(receipt["status"], "scored")
         self.assertEqual(receipt["blockers"], [])

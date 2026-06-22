@@ -48,12 +48,11 @@ def _run_codex_judge(
                 timeout=timeout_seconds,
                 env=_codex_judge_env(judge_profile, repo_root, codex_home, sqlite_home),
             )
-    output_text = output_file.read_text(encoding="utf-8") if output_file.is_file() else completed.stdout
     return CodexJudgeResult(
         exit_code=completed.returncode,
         stdout=completed.stdout,
         stderr=completed.stderr,
-        output_text=output_text,
+        output_text=completed.stdout,
     )
 
 
@@ -89,7 +88,7 @@ def _codex_op_env_file_path(judge_profile: dict[str, Any]) -> Path | None:
     configured = os.environ.get(_CODEX_OP_ENV_FILE_ENV)
     candidate = Path(configured).expanduser() if configured else Path.home() / ".codex" / ".env"
     try:
-        return candidate if candidate.exists() and not candidate.is_dir() else None
+        return _safe_regular_file(candidate, candidate.parent)
     except OSError:
         return None
 
@@ -108,22 +107,37 @@ def _copy_codex_profile_config(judge_profile: dict[str, Any], codex_home: Path) 
 
 def _codex_profile_source_path(profile_id: str) -> Path | None:
     config_name = f"{profile_id}.config.toml"
-    candidates: list[Path] = []
+    candidates: list[tuple[Path, Path]] = []
     configured_source_dir = os.environ.get(_CODEX_PROFILE_SOURCE_DIR_ENV)
     if configured_source_dir:
-        candidates.append(Path(configured_source_dir).expanduser() / config_name)
-    candidates.append(Path.home() / "dev" / "configs" / "codex" / config_name)
+        configured_root = Path(configured_source_dir).expanduser()
+        candidates.append((configured_root / config_name, configured_root))
+    configs_root = Path.home() / "dev" / "configs" / "codex"
+    candidates.append((configs_root / config_name, configs_root))
     current_codex_home = os.environ.get("CODEX_HOME")
     if current_codex_home:
-        candidates.append(Path(current_codex_home).expanduser() / config_name)
-    candidates.append(Path.home() / ".codex" / config_name)
-    for candidate in candidates:
+        codex_home = Path(current_codex_home).expanduser()
+        candidates.append((codex_home / config_name, codex_home))
+    dot_codex = Path.home() / ".codex"
+    candidates.append((dot_codex / config_name, dot_codex))
+    for candidate, root in candidates:
         try:
-            if candidate.is_file():
-                return candidate
+            safe_candidate = _safe_regular_file(candidate, root)
+            if safe_candidate is not None:
+                return safe_candidate
         except OSError:
             continue
     return None
+
+
+def _safe_regular_file(path: Path, root: Path) -> Path | None:
+    root_real = os.path.realpath(root)
+    path_real = os.path.realpath(path)
+    if os.path.commonpath([root_real, path_real]) != root_real:
+        return None
+    if path.is_symlink() or not path.is_file():
+        return None
+    return path
 
 
 def _codex_temp_parent() -> str | None:
