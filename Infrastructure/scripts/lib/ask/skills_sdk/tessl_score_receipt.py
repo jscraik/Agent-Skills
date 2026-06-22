@@ -232,6 +232,8 @@ def _receipt_status(
 ) -> tuple[str, str | None, str | None]:
     if tessl_status in {"failed", "error", "cancelled", "canceled"}:
         return "blocked", "blocked_validation", _failure_blocker(tessl_status, failure_reason)
+    if score_summary["scenario_count"] > 0 and score_summary["max_points"] <= 0:
+        return "blocked", "blocked_validation", "Tessl eval view does not contain positive max points for scored scenarios."
     complete = score_summary["scenario_count"] > 0 and score_summary["missing_scenario_count"] == 0
     if complete:
         return "pass", None, None

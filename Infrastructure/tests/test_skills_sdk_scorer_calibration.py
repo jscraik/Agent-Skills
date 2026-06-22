@@ -226,6 +226,30 @@ class TestSkillsSdkScorerCalibration(unittest.TestCase):
         self.assertEqual(receipt["status"], "blocked")
         self.assertIn("score_threshold_consistent", blocker_ids)
 
+    def test_builder_blocks_invalid_manifest_limits_without_crashing(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill(Path(temp_dir))
+            _write_bundle(
+                skill_dir,
+                [
+                    {
+                        "id": "known-pass",
+                        "probe_type": "obvious_correct",
+                        "expected_label": "pass",
+                        "predicted_label": "pass",
+                        "score": 0.95,
+                        "raw_artifact": "raw/known-pass.json",
+                    }
+                ],
+                manifest_overrides={"minimum_examples": "many"},
+            )
+
+            receipt = build_scorer_calibration_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        blocker_ids = {check["id"] for check in receipt["blockers"]}
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("held_out_example_count", blocker_ids)
+
 
 if __name__ == "__main__":
     unittest.main()

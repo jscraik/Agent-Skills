@@ -40,6 +40,27 @@ def _view_payload(*, status: str = "completed", missing_baseline: bool = False) 
     return {"data": {"id": RUN_ID, "attributes": attrs}}
 
 
+def _zero_max_view_payload() -> dict[str, object]:
+    return {
+        "data": {
+            "id": RUN_ID,
+            "attributes": {
+                "status": "completed",
+                "scenarios": [
+                    {
+                        "id": "scenario-zero",
+                        "path": "scenario-zero",
+                        "solutions": [
+                            {"variant": "usage-spec", "assessmentResults": [{"score": 0.0, "max_score": 0.0}]},
+                            {"variant": "baseline", "assessmentResults": [{"score": 0.0, "max_score": 0.0}]},
+                        ],
+                    }
+                ],
+            },
+        }
+    }
+
+
 def _command_env() -> dict[str, str]:
     env = os.environ.copy()
     temp_base = Path(tempfile.gettempdir()) / "agent-skills-test"
@@ -95,6 +116,18 @@ class TestSkillsSdkTesslScoreReceipt(unittest.TestCase):
         self.assertEqual(summary["missing_scenario_count"], 1)
         self.assertEqual(summary["usage_percent"], 100.0)
         self.assertEqual(summary["baseline_percent"], 50.0)
+
+    def test_zero_max_points_view_json_is_blocked(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "view.json"
+            path.write_text(json.dumps(_zero_max_view_payload()), encoding="utf-8")
+
+            receipt = build_tessl_score_receipt(REPO_ROOT, view_json=path, skill="Skills/github/teach", run_id=RUN_ID)
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertFalse(receipt["ready"])
+        self.assertEqual(receipt["blocker_class"], "blocked_validation")
+        self.assertIn("positive max points", receipt["blocker"])
 
     def test_tessl_score_command_requires_preview(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

@@ -246,31 +246,36 @@ def _confusion_checks(manifest: dict[str, Any], rows: list[dict[str, Any]], matr
     ]
 
 
-def _integer_limit(manifest: dict[str, Any], field: str, default: int) -> int:
-    value = manifest.get(field, default)
-    if isinstance(value, bool):
-        return default
-    try:
-        return int(value)
-    except (TypeError, ValueError):
-        return default
-
-
-def _confusion_limits(manifest: dict[str, Any]) -> dict[str, int]:
+def _confusion_limits(manifest: dict[str, Any]) -> dict[str, int | None]:
     return {
-        "minimum_examples": _integer_limit(manifest, "minimum_examples", 1),
-        "minimum_tp": _integer_limit(manifest, "minimum_true_positives", 1),
-        "minimum_tn": _integer_limit(manifest, "minimum_true_negatives", 1),
-        "max_fp": _integer_limit(manifest, "max_false_positives", 0),
-        "max_fn": _integer_limit(manifest, "max_false_negatives", 0),
+        "minimum_examples": _manifest_int_limit(manifest, "minimum_examples", default=1),
+        "minimum_tp": _manifest_int_limit(manifest, "minimum_true_positives", default=1),
+        "minimum_tn": _manifest_int_limit(manifest, "minimum_true_negatives", default=1),
+        "max_fp": _manifest_int_limit(manifest, "max_false_positives", default=0),
+        "max_fn": _manifest_int_limit(manifest, "max_false_negatives", default=0),
     }
 
 
-def _minimum_check(check_id: str, observed: int, minimum: int, message: str) -> dict[str, Any]:
+def _manifest_int_limit(manifest: dict[str, Any], key: str, *, default: int) -> int | None:
+    raw = manifest.get(key, default)
+    if isinstance(raw, bool):
+        return None
+    try:
+        value = int(raw)
+    except (TypeError, ValueError):
+        return None
+    return value if value >= 0 else None
+
+
+def _minimum_check(check_id: str, observed: int, minimum: int | None, message: str) -> dict[str, Any]:
+    if minimum is None:
+        return _check(check_id, "blocker", message, ["invalid_limit"])
     return _check(check_id, "pass" if observed >= minimum else "blocker", message, [f"{observed}<{minimum}"] if observed < minimum else [])
 
 
-def _maximum_check(check_id: str, observed: int, maximum: int, message: str) -> dict[str, Any]:
+def _maximum_check(check_id: str, observed: int, maximum: int | None, message: str) -> dict[str, Any]:
+    if maximum is None:
+        return _check(check_id, "blocker", message, ["invalid_limit"])
     return _check(check_id, "pass" if observed <= maximum else "blocker", message, [f"{observed}>{maximum}"] if observed > maximum else [])
 
 
