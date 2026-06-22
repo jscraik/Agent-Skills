@@ -228,6 +228,7 @@ def _raw_artifact_mismatches(raw_value: str, raw_path: Path, row: dict[str, Any]
         return [f"{raw_value}:parse"]
     checks = {
         "id": raw_payload.get("id") == row.get("id"),
+        "expected_label": raw_payload.get("expected_label") == row.get("expected_label"),
         "predicted_label": raw_payload.get("predicted_label") == row.get("predicted_label"),
         "score": _number(raw_payload.get("score")) == _number(row.get("score")),
     }
