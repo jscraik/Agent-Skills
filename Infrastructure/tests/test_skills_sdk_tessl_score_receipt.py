@@ -177,6 +177,18 @@ class TestSkillsSdkTesslScoreReceipt(unittest.TestCase):
         self.assertEqual(summary["usage_percent"], 100.0)
         self.assertEqual(summary["baseline_percent"], 50.0)
 
+    def test_pending_view_json_is_blocked_even_with_scores(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "view.json"
+            path.write_text(json.dumps(_view_payload(status="running")), encoding="utf-8")
+
+            receipt = build_tessl_score_receipt(REPO_ROOT, view_json=path, skill="Skills/github/teach", run_id=RUN_ID)
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertFalse(receipt["ready"])
+        self.assertIn("not complete yet", receipt["blocker"])
+        self.assertEqual(receipt["feedback_loop"]["status"], "open")
+
     def test_zero_max_points_view_json_is_blocked(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             path = Path(temp_dir) / "view.json"
@@ -278,6 +290,30 @@ class TestSkillsSdkTesslScoreReceipt(unittest.TestCase):
         payload = envelope["data"]["skills_sdk_eval_tessl_score"]
         self.assertEqual(envelope["status"], "error")
         self.assertEqual(payload["status"], "blocked")
+
+    def test_tessl_score_command_returns_error_for_missing_artifact(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            missing = Path(temp_dir) / "missing-view.json"
+
+            process = _run_ask(
+                "sdk",
+                "eval",
+                "tessl-score",
+                "--view-json",
+                str(missing),
+                "--skill",
+                "Skills/github/teach",
+                "--preview",
+                "--json",
+                "--robot",
+            )
+
+        self.assertNotEqual(process.returncode, 0)
+        envelope = json.loads(process.stdout)
+        payload = envelope["data"]["skills_sdk_eval_tessl_score"]
+        self.assertEqual(envelope["status"], "error")
+        self.assertEqual(payload["status"], "blocked")
+        self.assertIn("agent_summary", payload["receipt"])
 
 
 if __name__ == "__main__":

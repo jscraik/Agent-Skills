@@ -84,16 +84,30 @@
   },
   "decision_schema_version": "skills-sdk.ab-judge-decision.v0",
   "experiment_id": "1111222233334444",
+  "codex_exec_invoked": true,
+  "codex_profile": "oss-local",
+  "judge_command_argv": [
+    "codex",
+    "exec",
+    "--profile",
+    "oss-local",
+    "--cd",
+    ".",
+    "--json",
+    "--output-last-message",
+    ".harness/fixtures/sdk-ab-judge-score/1111222233334444/judge/codex-last-message.json",
+    "-"
+  ],
   "judge_output_digest": "sha256:38c3f1af5322e2b59cafe9ab40e23e9a1c91bb73559c2d8baf4be40e682d3a2a",
-  "judge_output_path": ".harness/fixtures/sdk-ab-judge-score/1111222233334444/judge/ollama-output.json",
+  "judge_output_path": ".harness/fixtures/sdk-ab-judge-score/1111222233334444/judge/codex-last-message.json",
   "judge_profile": {
     "auth_boundary": "none",
-    "host": "http://localhost:11434",
+    "host": "codex-cli-profile",
     "id": "oss-local",
     "mode": "local",
     "model": "qwen3.5:latest",
     "network_required": true,
-    "provider": "ollama",
+    "provider": "codex",
     "receives_sanitized_outputs_only": true,
     "secret_env_names": []
   },
@@ -110,4 +124,3 @@
   "schema_version": "skills-sdk.ab-judge-score-receipt.v0",
   "status": "scored"
 }
-

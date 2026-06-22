@@ -612,6 +612,9 @@ class AbJudgeScoreReceipt(_SdkContractModel):
     judge_prompt_digest: str | None = Field(default=None, min_length=71)
     judge_output_path: str | None = Field(default=None, min_length=1)
     judge_output_digest: str | None = Field(default=None, min_length=71)
+    judge_command_argv: list[str]
+    codex_profile: Literal["oss-local", "oss-cloud"] | None
+    codex_exec_invoked: bool
     decision: AbJudgeDecision | None
     calibration_required: Literal[True]
     advisory_only: Literal[True]
@@ -639,8 +642,12 @@ class AbJudgeScoreReceipt(_SdkContractModel):
             raise ValueError("scored A/B judge receipts must not include blockers")
         if not self._has_score_evidence():
             raise ValueError("scored A/B judge receipts must include complete score evidence")
-        if not (self.provider_invoked and self.network_accessed and self.mutation_performed):
+        if not (self.provider_invoked and self.network_accessed and self.mutation_performed and self.codex_exec_invoked):
             raise ValueError("scored A/B judge receipts must report provider side effects")
+        if self.codex_profile != self.judge_profile.id:
+            raise ValueError("scored A/B judge receipts must bind Codex profile to judge profile")
+        if self.judge_command_argv[:4] != ["codex", "exec", "--profile", self.codex_profile]:
+            raise ValueError("scored A/B judge receipts must invoke codex exec with the judge profile")
         self._validate_decision_consistency()
 
     def _validate_decision_consistency(self) -> None:
@@ -667,6 +674,8 @@ class AbJudgeScoreReceipt(_SdkContractModel):
                 self.judge_prompt_digest,
                 self.judge_output_path,
                 self.judge_output_digest,
+                self.judge_command_argv,
+                self.codex_profile,
                 self.decision,
             )
         )

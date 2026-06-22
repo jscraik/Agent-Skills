@@ -13,40 +13,27 @@ from typing import Any
 from ask.skills_sdk.eval_ab_rubric import AB_RUBRIC_DIMENSIONS, canonical_ab_rubric, canonical_ab_rubric_digest
 from ask.skills_sdk.eval_profiles import select_judge_profile
 
-
 AB_JUDGE_PREVIEW_SCHEMA_VERSION = "skills-sdk.ab-judge-preview-receipt.v0"
-AB_JUDGE_PREVIEW_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/ab-judge-preview-receipt.v0.schema.json"
-)
+AB_JUDGE_PREVIEW_SCHEMA_URI = "https://jscraik.local/agent-skills/schemas/skills-sdk/ab-judge-preview-receipt.v0.schema.json"
 AB_JUDGE_SCORE_SCHEMA_VERSION = "skills-sdk.ab-judge-score-receipt.v0"
-AB_JUDGE_SCORE_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/ab-judge-score-receipt.v0.schema.json"
-)
+AB_JUDGE_SCORE_SCHEMA_URI = "https://jscraik.local/agent-skills/schemas/skills-sdk/ab-judge-score-receipt.v0.schema.json"
 DECISION_SCHEMA_VERSION = "skills-sdk.ab-judge-decision.v0"
 ALLOWED_WINNERS = ["skill_a", "skill_b", "inconclusive"]
 _EXPERIMENT_ID_RE = re.compile(r"[0-9a-f]{16}")
 _DIMENSION_IDS = {dimension["id"] for dimension in AB_RUBRIC_DIMENSIONS}
-_DECISION_KEYS = frozenset(
-    {
-        "schema_version",
-        "experiment_id",
-        "dimension_scores",
-        "normalized_score_a",
-        "normalized_score_b",
-        "winner",
-        "confidence",
-        "reason",
-        "evidence_refs",
-    }
-)
+_DECISION_KEYS = frozenset((
+    "schema_version", "experiment_id", "dimension_scores", "normalized_score_a",
+    "normalized_score_b", "winner", "confidence", "reason", "evidence_refs",
+))
 _DIMENSION_SCORE_KEYS = frozenset({"dimension_id", "skill_a_score", "skill_b_score", "reason", "evidence_refs"})
 
 
 @dataclass(frozen=True)
-class OllamaJudgeResult:
+class CodexJudgeResult:
     exit_code: int
     stdout: str
     stderr: str
+    output_text: str = ""
 
 
 def _digest_text(value: str) -> str:
@@ -126,11 +113,7 @@ def _run_receipt_shape_valid(payload: dict[str, Any]) -> bool:
 
 
 def _run_receipt_header_valid(payload: dict[str, Any]) -> bool:
-    return (
-        payload.get("schema_version") == "skills-sdk.ab-run-receipt.v0"
-        and payload.get("operation") == "ab_run"
-        and payload.get("status") in {"completed", "blocked"}
-    )
+    return payload.get("schema_version") == "skills-sdk.ab-run-receipt.v0" and payload.get("operation") == "ab_run" and payload.get("status") in {"completed", "blocked"}
 
 
 def _run_receipt_identity_valid(payload: dict[str, Any]) -> bool:
@@ -165,18 +148,17 @@ def _non_empty_string(value: object) -> bool:
 
 
 def _run_receipt_variants_valid(payload: dict[str, Any]) -> bool:
-    if _variant_labels(payload.get("variant_results")) != {"A", "B"}:
-        return False
-    if _variant_labels(payload.get("command_plan")) != {"A", "B"}:
-        return False
-    return all(_variant_result_digests_valid(result) for result in payload["variant_results"])
+    return (
+        _variant_labels(payload.get("variant_results")) == {"A", "B"}
+        and _variant_labels(payload.get("command_plan")) == {"A", "B"}
+        and all(_variant_result_digests_valid(result) for result in payload["variant_results"])
+    )
 
 
 def _variant_result_digests_valid(result: object) -> bool:
     if not isinstance(result, dict):
         return False
-    keys = ("output_last_message_digest", "runner_stdout_digest", "runner_stderr_digest")
-    return all(_digest_like(result.get(key)) for key in keys)
+    return all(_digest_like(result.get(key)) for key in ("output_last_message_digest", "runner_stdout_digest", "runner_stderr_digest"))
 
 
 def _evidence_row(result: dict[str, Any]) -> dict[str, Any]:
@@ -341,7 +323,7 @@ def build_ab_judge_score_receipt(
         judge_profile=judge_profile,
         evidence=evidence,
         timeout_seconds=timeout_seconds,
-        runner=runner or _run_ollama_judge,
+        runner=runner or _run_codex_judge,
     )
     status = "scored" if decision is not None and not blockers else "blocked"
     return _score_receipt_payload(
@@ -367,9 +349,17 @@ def _score_preflight(
 ) -> tuple[list[str], dict[str, Any] | None, dict[str, Any]]:
     blockers = list(preview["blockers"])
     judge_profile = _selected_score_profile(judge_profile_id, blockers)
+    if judge_profile is not None:
+        blockers.extend(_missing_judge_profile_secrets(judge_profile))
     evidence = _score_evidence_paths(repo_root, evidence_root, preview.get("experiment_id"))
     if evidence["blocker"]:
         blockers.append(evidence["blocker"])
+    if judge_profile is not None and evidence.get("output_file") is not None:
+        evidence["command_argv"] = _codex_judge_command(judge_profile, repo_root, evidence["output_file"])
+        evidence["codex_profile"] = judge_profile["id"]
+    else:
+        evidence["command_argv"] = []
+        evidence["codex_profile"] = None
     if preview["status"] != "preview":
         blockers.append("judge_input_preview_blocked")
     if timeout_seconds < 1:
@@ -383,9 +373,18 @@ def _selected_score_profile(profile_id: str, blockers: list[str]) -> dict[str, A
     except ValueError:
         blockers.append("judge_profile_unknown")
         return None
-    if profile["provider"] != "ollama" or profile["id"] not in {"oss-local", "oss-cloud"}:
-        blockers.append("judge_profile_not_supported_for_ollama_score")
+    if profile["provider"] != "codex" or profile["id"] not in {"oss-local", "oss-cloud"}:
+        blockers.append("judge_profile_not_supported_for_codex_score")
     return profile
+
+
+def _missing_judge_profile_secrets(judge_profile: dict[str, Any]) -> list[str]:
+    missing = [
+        name
+        for name in judge_profile.get("secret_env_names", [])
+        if isinstance(name, str) and name and name not in os.environ
+    ]
+    return ["judge_profile_secret_missing"] if missing else []
 
 
 def _score_evidence_paths(repo_root: Path, evidence_root: str, experiment_id: object) -> dict[str, Any]:
@@ -409,7 +408,7 @@ def _score_evidence_paths(repo_root: Path, evidence_root: str, experiment_id: ob
     if _path_has_file_ancestor(repo_root, contained_base):
         return {"blocker": "evidence_root_not_directory", "prompt_path": None, "output_path": None}
     prompt_file = _contained_score_evidence_file(repo_root, contained_base / "prompt.txt")
-    output_file = _contained_score_evidence_file(repo_root, contained_base / "ollama-output.json")
+    output_file = _contained_score_evidence_file(repo_root, contained_base / "codex-last-message.json")
     if prompt_file is None or output_file is None:
         return {"blocker": "score_evidence_path_outside_repo", "prompt_path": None, "output_path": None}
     return {
@@ -444,7 +443,7 @@ def _score_decision(
     _clear_text_evidence(repo_root, evidence["output_file"])
     mutation_performed = True
     try:
-        result = runner(judge_prompt, judge_profile, timeout_seconds)
+        result = runner(judge_prompt, judge_profile, timeout_seconds, repo_root, evidence["output_file"])
     except OSError:
         blockers.append("judge_provider_unavailable")
         return None, None, False, False, mutation_performed
@@ -453,12 +452,16 @@ def _score_decision(
         _write_text_evidence(repo_root, evidence["output_file"], stdout)
         blockers.append("judge_provider_timeout")
         return None, _digest_text(stdout), True, True, mutation_performed
-    _write_text_evidence(repo_root, evidence["output_file"], result.stdout)
-    output_digest = _digest_text(result.stdout)
+    output_text = _codex_judge_output_text(repo_root, evidence["output_file"], result.output_text)
+    if not output_text:
+        output_text = result.stdout
+    if not _contained_file_exists(repo_root, evidence["output_file"]):
+        _write_text_evidence(repo_root, evidence["output_file"], output_text)
+    output_digest = _digest_text(output_text)
     if result.exit_code != 0:
         blockers.append(f"judge_provider_exit_{result.exit_code}")
         return None, output_digest, True, True, mutation_performed
-    decision, blocker = _parse_judge_decision(result.stdout, preview["comparison_payload"])
+    decision, blocker = _parse_judge_decision(output_text, preview["comparison_payload"])
     if blocker:
         blockers.append(blocker)
     return decision, output_digest, True, True, mutation_performed
@@ -496,6 +499,22 @@ def _clear_text_evidence(repo_root: Path, path: Path | None) -> None:
         resolved.unlink()
 
 
+def _contained_file_exists(repo_root: Path, path: Path | None) -> bool:
+    if path is None:
+        return False
+    resolved = _contained_repo_path(repo_root, path)
+    return resolved is not None and resolved.is_file()
+
+
+def _codex_judge_output_text(repo_root: Path, path: Path | None, fallback: str) -> str:
+    if path is None:
+        return fallback
+    resolved = _contained_repo_path(repo_root, path)
+    if resolved is None or not resolved.is_file():
+        return fallback
+    return resolved.read_text(encoding="utf-8")
+
+
 def _contained_repo_path(repo_root: Path, path: Path) -> Path | None:
     try:
         repo_base = repo_root.resolve()
@@ -529,22 +548,14 @@ def _path_has_symlink_ancestor(root: Path, path: Path) -> bool:
     return False
 
 
-def _run_ollama_judge(prompt: str, judge_profile: dict[str, Any], timeout_seconds: int) -> OllamaJudgeResult:
-    env = {
-        key: value
-        for key, value in os.environ.items()
-        if not key.startswith("OLLAMA_")
-    }
-    env["OLLAMA_HOST"] = str(judge_profile["host"])
-    secret_names = [
-        str(name)
-        for name in judge_profile.get("secret_env_names", [])
-        if isinstance(name, str) and name.startswith("OLLAMA_")
-    ]
-    for secret_name in secret_names:
-        if secret_name in os.environ:
-            env[secret_name] = os.environ[secret_name]
-    command = _ollama_judge_command(judge_profile, secret_names)
+def _run_codex_judge(
+    prompt: str,
+    judge_profile: dict[str, Any],
+    timeout_seconds: int,
+    repo_root: Path,
+    output_file: Path,
+) -> CodexJudgeResult:
+    command = _codex_judge_command(judge_profile, repo_root, output_file)
     completed = subprocess.run(
         command,
         input=prompt,
@@ -553,14 +564,36 @@ def _run_ollama_judge(prompt: str, judge_profile: dict[str, Any], timeout_second
         stderr=subprocess.PIPE,
         check=False,
         timeout=timeout_seconds,
-        env=env,
+        env=_codex_judge_env(judge_profile),
     )
-    return OllamaJudgeResult(exit_code=completed.returncode, stdout=completed.stdout, stderr=completed.stderr)
+    output_text = output_file.read_text(encoding="utf-8") if output_file.is_file() else completed.stdout
+    return CodexJudgeResult(
+        exit_code=completed.returncode,
+        stdout=completed.stdout,
+        stderr=completed.stderr,
+        output_text=output_text,
+    )
 
 
-def _ollama_judge_command(judge_profile: dict[str, Any], secret_names: list[str]) -> list[str]:
-    command = ["ollama", "run", str(judge_profile["model"])]
-    return command
+def _codex_judge_command(judge_profile: dict[str, Any], repo_root: Path, output_file: Path) -> list[str]:
+    return [
+        "codex", "exec", "--profile", str(judge_profile["id"]), "--cd", str(repo_root), "--json",
+        "--output-last-message", str(output_file), "-",
+    ]
+
+
+def _codex_judge_env(judge_profile: dict[str, Any]) -> dict[str, str]:
+    allowed_secret_names = {
+        name
+        for name in judge_profile.get("secret_env_names", [])
+        if isinstance(name, str) and name
+    }
+    return {
+        key: value
+        for key, value in os.environ.items()
+        if key in allowed_secret_names
+        or not any(marker in key.upper() for marker in ("KEY", "SECRET", "TOKEN", "PASSWORD", "CREDENTIAL", "COOKIE"))
+    }
 
 
 def _parse_judge_decision(raw_output: str, comparison_payload: dict[str, Any]) -> tuple[dict[str, Any] | None, str | None]:
@@ -715,23 +748,18 @@ def _score_receipt_payload(
     mutation_performed: bool,
     blockers: list[str],
 ) -> dict[str, Any]:
-    agent_summary = _score_agent_summary(status, blockers)
     return {
         "schema_version": AB_JUDGE_SCORE_SCHEMA_VERSION,
         "schema_uri": AB_JUDGE_SCORE_SCHEMA_URI,
         "status": status,
         "operation": "ab_judge_score",
-        "run_receipt_path": preview["run_receipt_path"],
-        "run_receipt_digest": preview["run_receipt_digest"],
-        "experiment_id": preview["experiment_id"],
+        **_score_receipt_run_fields(preview, evidence, output_digest),
         "judge_profile": judge_profile,
         "rubric_id": preview["rubric_id"],
         "rubric_digest": preview["rubric_digest"],
         "decision_schema_version": DECISION_SCHEMA_VERSION,
         "allowed_winners": ALLOWED_WINNERS,
-        "judge_prompt_digest": preview["judge_prompt_digest"],
-        "judge_output_path": evidence["output_path"],
-        "judge_output_digest": output_digest,
+        "codex_exec_invoked": provider_invoked,
         "decision": decision,
         "calibration_required": True,
         "advisory_only": True,
@@ -740,7 +768,24 @@ def _score_receipt_payload(
         "mutation_performed": mutation_performed,
         "blockers": blockers,
         "acceptance_trace": ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022", "VP-030"],
-        "agent_summary": agent_summary,
+        "agent_summary": _score_agent_summary(status, blockers),
+    }
+
+
+def _score_receipt_run_fields(
+    preview: dict[str, Any],
+    evidence: dict[str, Any],
+    output_digest: str | None,
+) -> dict[str, Any]:
+    return {
+        "run_receipt_path": preview["run_receipt_path"],
+        "run_receipt_digest": preview["run_receipt_digest"],
+        "experiment_id": preview["experiment_id"],
+        "judge_prompt_digest": preview["judge_prompt_digest"],
+        "judge_output_path": evidence["output_path"],
+        "judge_output_digest": output_digest,
+        "judge_command_argv": evidence["command_argv"],
+        "codex_profile": evidence["codex_profile"],
     }
 
 

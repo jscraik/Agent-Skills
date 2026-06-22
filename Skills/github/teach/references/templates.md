@@ -48,3 +48,21 @@ Notes: <credential, version, freshness, or source-boundary caveat>.
 Sensitive transcript material was used only in memory. Durable files contain
 redacted or synthetic examples, not names, client details, credentials, hidden
 prompts, private URLs, or copied private text.
+
+## Sanitized Transcript Lesson HTML
+
+<h1>Sanitized Transcript Lesson</h1>
+<section><h2>Redaction Boundary</h2><p>All names, client details, credentials, hidden prompts, private URLs, and sensitive transcript text were removed or replaced before persistence.</p></section>
+<section><h2>Synthetic Scenario</h2><p>Use Client A, Team B, and placeholder credentials only.</p></section>
+<section><h2>Learning Point</h2><p>The reusable lesson extracted from the transcript without copying private content.</p></section>
+<section><h2>Retrieval Practice</h2><ol><li>What must be redacted before turning a private transcript into a lesson?</li></ol></section>
+<section><h2>Artifact Evidence</h2><p>Record this file path and any companion learning record in closeout.</p></section>
+
+## Source Check Blocker
+
+# Source Check Blocker - <topic>
+Topic: <current or version-sensitive lesson request>.
+Missing evidence: <which current source, official docs, vendor docs, standard, or primary material is unavailable>.
+Acceptable sources: <specific high-trust source types>.
+Blocked action: Durable lesson creation is blocked until source trust is resolved.
+Next safe question: <one focused request for source material or permission to browse>.

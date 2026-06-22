@@ -2,7 +2,6 @@
   "id": "cal-pass-evidence-lanes",
   "description": "Raw scorer artifact for the known-pass evidence-lane calibration example.",
   "scorer_id": "sdk-scenario-generator.release-scorer",
-  "expected_label": "pass",
   "predicted_label": "pass",
   "score": 0.99,
   "rationale": "The answer separates local package proof, internal eval proof, live Tessl proof, hosted CI, and review-thread status without collapsing them into a single readiness claim."

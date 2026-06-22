@@ -9,7 +9,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
-from unittest import mock
+from unittest.mock import patch
 
 from pydantic import ValidationError
 
@@ -18,10 +18,10 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
 from ask.skills_sdk.eval_ab_judge import (  # noqa: E402
-    OllamaJudgeResult,
+    CodexJudgeResult,
     _clear_text_evidence,
-    _ollama_judge_command,
-    _run_ollama_judge,
+    _codex_judge_command,
+    _run_codex_judge,
     _score_evidence_paths,
     _write_text_evidence,
     build_ab_judge_score_receipt,
@@ -80,10 +80,10 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
     def test_builder_scores_with_injected_local_judge(self) -> None:
         calls: list[tuple[str, str, int]] = []
 
-        def fake_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int) -> OllamaJudgeResult:
+        def fake_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int, repo_root: Path, output_file: Path) -> CodexJudgeResult:
             calls.append((prompt, str(judge_profile["model"]), timeout_seconds))
             run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
-            return OllamaJudgeResult(
+            return CodexJudgeResult(
                 exit_code=0,
                 stdout=json.dumps(_decision(run_receipt["experiment_id"])),
                 stderr="",
@@ -116,24 +116,32 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
 
     def test_builder_scores_with_injected_cloud_judge(self) -> None:
         calls: list[tuple[str, str, int]] = []
+        original = os.environ.get("OLLAMA_API_KEY")
+        os.environ["OLLAMA_API_KEY"] = "cloud-token"
 
-        def fake_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int) -> OllamaJudgeResult:
+        def fake_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int, repo_root: Path, output_file: Path) -> CodexJudgeResult:
             calls.append((prompt, str(judge_profile["model"]), timeout_seconds))
             run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
-            return OllamaJudgeResult(
+            return CodexJudgeResult(
                 exit_code=0,
                 stdout=json.dumps(_decision(run_receipt["experiment_id"])),
                 stderr="",
             )
 
-        receipt = build_ab_judge_score_receipt(
-            REPO_ROOT,
-            run_receipt=RUN_RECEIPT,
-            evidence_root=self.evidence_root,
-            judge_profile_id="oss-cloud",
-            timeout_seconds=12,
-            runner=fake_runner,
-        )
+        try:
+            receipt = build_ab_judge_score_receipt(
+                REPO_ROOT,
+                run_receipt=RUN_RECEIPT,
+                evidence_root=self.evidence_root,
+                judge_profile_id="oss-cloud",
+                timeout_seconds=12,
+                runner=fake_runner,
+            )
+        finally:
+            if original is None:
+                os.environ.pop("OLLAMA_API_KEY", None)
+            else:
+                os.environ["OLLAMA_API_KEY"] = original
 
         self.assertEqual(receipt["status"], "scored")
         self.assertEqual(receipt["judge_profile"]["id"], "oss-cloud")
@@ -143,6 +151,27 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         self.assertEqual(receipt["blockers"], [])
         self.assertEqual(len(calls), 1)
         self.assertIn("deepseek-v4-flash:cloud", calls[0])
+        validate_ab_judge_score_receipt(receipt)
+
+    def test_builder_blocks_cloud_judge_when_profile_secret_missing(self) -> None:
+        original = os.environ.pop("OLLAMA_API_KEY", None)
+        try:
+            receipt = build_ab_judge_score_receipt(
+                REPO_ROOT,
+                run_receipt=RUN_RECEIPT,
+                evidence_root=self.evidence_root,
+                judge_profile_id="oss-cloud",
+                runner=lambda prompt, judge_profile, timeout_seconds, repo_root, output_file: self.fail(
+                    "runner should not start when the profile secret is missing"
+                ),
+            )
+        finally:
+            if original is not None:
+                os.environ["OLLAMA_API_KEY"] = original
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("judge_profile_secret_missing", receipt["blockers"])
+        self.assertFalse(receipt["provider_invoked"])
         validate_ab_judge_score_receipt(receipt)
 
     def test_cli_accepts_cloud_judge_profile_before_execute_gate(self) -> None:
@@ -172,8 +201,8 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         self.assertIn("requires --execute", payload["errors"][0]["message"])
 
     def test_builder_blocks_invalid_judge_output(self) -> None:
-        def invalid_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int) -> OllamaJudgeResult:
-            return OllamaJudgeResult(exit_code=0, stdout="not json", stderr="")
+        def invalid_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int, repo_root: Path, output_file: Path) -> CodexJudgeResult:
+            return CodexJudgeResult(exit_code=0, stdout="not json", stderr="")
 
         receipt = build_ab_judge_score_receipt(
             REPO_ROOT,
@@ -189,8 +218,8 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         validate_ab_judge_score_receipt(receipt)
 
     def test_builder_blocks_unavailable_local_judge(self) -> None:
-        def missing_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int) -> OllamaJudgeResult:
-            raise FileNotFoundError("ollama")
+        def missing_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int, repo_root: Path, output_file: Path) -> CodexJudgeResult:
+            raise FileNotFoundError("codex")
 
         receipt = build_ab_judge_score_receipt(
             REPO_ROOT,
@@ -211,8 +240,10 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             prompt: str,
             judge_profile: dict[str, object],
             timeout_seconds: int,
-        ) -> OllamaJudgeResult:
-            raise PermissionError("ollama")
+            repo_root: Path,
+            output_file: Path,
+        ) -> CodexJudgeResult:
+            raise PermissionError("codex")
 
         receipt = build_ab_judge_score_receipt(
             REPO_ROOT,
@@ -234,13 +265,13 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             / self.evidence_root
             / run_receipt["experiment_id"]
             / "judge"
-            / "ollama-output.json"
+            / "codex-last-message.json"
         )
         stale_output.parent.mkdir(parents=True, exist_ok=True)
         stale_output.write_text('{"stale": true}', encoding="utf-8")
 
-        def missing_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int) -> OllamaJudgeResult:
-            raise FileNotFoundError("ollama")
+        def missing_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int, repo_root: Path, output_file: Path) -> CodexJudgeResult:
+            raise FileNotFoundError("codex")
 
         receipt = build_ab_judge_score_receipt(
             REPO_ROOT,
@@ -256,11 +287,11 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         validate_ab_judge_score_receipt(receipt)
 
     def test_builder_blocks_schema_extra_judge_keys(self) -> None:
-        def extra_key_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int) -> OllamaJudgeResult:
+        def extra_key_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int, repo_root: Path, output_file: Path) -> CodexJudgeResult:
             run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
             decision = _decision(run_receipt["experiment_id"])
             decision["unexpected"] = "blocked"
-            return OllamaJudgeResult(exit_code=0, stdout=json.dumps(decision), stderr="")
+            return CodexJudgeResult(exit_code=0, stdout=json.dumps(decision), stderr="")
 
         receipt = build_ab_judge_score_receipt(
             REPO_ROOT,
@@ -274,9 +305,9 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         validate_ab_judge_score_receipt(receipt)
 
     def test_typed_contract_rejects_decision_for_different_experiment(self) -> None:
-        def fake_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int) -> OllamaJudgeResult:
+        def fake_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int, repo_root: Path, output_file: Path) -> CodexJudgeResult:
             run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
-            return OllamaJudgeResult(exit_code=0, stdout=json.dumps(_decision(run_receipt["experiment_id"])), stderr="")
+            return CodexJudgeResult(exit_code=0, stdout=json.dumps(_decision(run_receipt["experiment_id"])), stderr="")
 
         receipt = build_ab_judge_score_receipt(
             REPO_ROOT,
@@ -290,9 +321,9 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             validate_ab_judge_score_receipt(receipt)
 
     def test_typed_contract_rejects_persisted_score_arithmetic_mismatch(self) -> None:
-        def fake_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int) -> OllamaJudgeResult:
+        def fake_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int, repo_root: Path, output_file: Path) -> CodexJudgeResult:
             run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
-            return OllamaJudgeResult(exit_code=0, stdout=json.dumps(_decision(run_receipt["experiment_id"])), stderr="")
+            return CodexJudgeResult(exit_code=0, stdout=json.dumps(_decision(run_receipt["experiment_id"])), stderr="")
 
         receipt = build_ab_judge_score_receipt(
             REPO_ROOT,
@@ -317,11 +348,11 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             validate_ab_judge_score_receipt(receipt)
 
     def test_builder_blocks_winner_mismatched_to_scores(self) -> None:
-        def mismatched_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int) -> OllamaJudgeResult:
+        def mismatched_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int, repo_root: Path, output_file: Path) -> CodexJudgeResult:
             run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
             decision = _decision(run_receipt["experiment_id"])
             decision["winner"] = "skill_a"
-            return OllamaJudgeResult(exit_code=0, stdout=json.dumps(decision), stderr="")
+            return CodexJudgeResult(exit_code=0, stdout=json.dumps(decision), stderr="")
 
         receipt = build_ab_judge_score_receipt(
             REPO_ROOT,
@@ -335,11 +366,11 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         validate_ab_judge_score_receipt(receipt)
 
     def test_builder_blocks_low_confidence_directional_winner(self) -> None:
-        def low_confidence_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int) -> OllamaJudgeResult:
+        def low_confidence_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int, repo_root: Path, output_file: Path) -> CodexJudgeResult:
             run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
             decision = _decision(run_receipt["experiment_id"])
             decision["confidence"] = "low"
-            return OllamaJudgeResult(exit_code=0, stdout=json.dumps(decision), stderr="")
+            return CodexJudgeResult(exit_code=0, stdout=json.dumps(decision), stderr="")
 
         receipt = build_ab_judge_score_receipt(
             REPO_ROOT,
@@ -357,7 +388,9 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             prompt: str,
             judge_profile: dict[str, object],
             timeout_seconds: int,
-        ) -> OllamaJudgeResult:
+            repo_root: Path,
+            output_file: Path,
+        ) -> CodexJudgeResult:
             run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
             decision = _decision(run_receipt["experiment_id"])
             decision["dimension_scores"] = [
@@ -372,7 +405,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
             decision["normalized_score_a"] = 0.20
             decision["normalized_score_b"] = 0.90
             decision["winner"] = "skill_b"
-            return OllamaJudgeResult(exit_code=0, stdout=json.dumps(decision), stderr="")
+            return CodexJudgeResult(exit_code=0, stdout=json.dumps(decision), stderr="")
 
         receipt = build_ab_judge_score_receipt(
             REPO_ROOT,
@@ -386,11 +419,11 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         validate_ab_judge_score_receipt(receipt)
 
     def test_builder_blocks_non_finite_judge_scores(self) -> None:
-        def non_finite_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int) -> OllamaJudgeResult:
+        def non_finite_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int, repo_root: Path, output_file: Path) -> CodexJudgeResult:
             run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
             decision = _decision(run_receipt["experiment_id"])
             decision["normalized_score_a"] = math.nan
-            return OllamaJudgeResult(exit_code=0, stdout=json.dumps(decision), stderr="")
+            return CodexJudgeResult(exit_code=0, stdout=json.dumps(decision), stderr="")
 
         receipt = build_ab_judge_score_receipt(
             REPO_ROOT,
@@ -408,7 +441,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         evidence_root.parent.mkdir(parents=True, exist_ok=True)
         evidence_root.write_text("not a directory", encoding="utf-8")
 
-        def fake_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int) -> OllamaJudgeResult:
+        def fake_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int, repo_root: Path, output_file: Path) -> CodexJudgeResult:
             self.fail("runner should not be invoked when evidence root is a file")
 
         receipt = build_ab_judge_score_receipt(
@@ -425,7 +458,7 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         validate_ab_judge_score_receipt(receipt)
 
     def test_builder_blocks_file_ancestor_evidence_root_before_writing(self) -> None:
-        def fake_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int) -> OllamaJudgeResult:
+        def fake_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int, repo_root: Path, output_file: Path) -> CodexJudgeResult:
             self.fail("runner should not be invoked when an evidence root ancestor is a file")
 
         receipt = build_ab_judge_score_receipt(
@@ -559,10 +592,10 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         evidence_root = REPO_ROOT / self.evidence_root
         score_dir = evidence_root / "1234567890abcdef" / "judge"
         with tempfile.TemporaryDirectory(prefix="sdk-ab-judge-target-") as target_dir:
-            target = Path(target_dir) / "ollama-output.json"
+            target = Path(target_dir) / "codex-last-message.json"
             target.write_text("old-output", encoding="utf-8")
             score_dir.mkdir(parents=True, exist_ok=True)
-            symlink = score_dir / "ollama-output.json"
+            symlink = score_dir / "codex-last-message.json"
             symlink.symlink_to(target)
 
             _clear_text_evidence(REPO_ROOT, symlink)
@@ -610,85 +643,91 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         self.assertIsNone(evidence["prompt_path"])
         self.assertIsNone(evidence["output_path"])
 
-    def test_local_ollama_runner_strips_ambient_cloud_auth(self) -> None:
-        captured_env: dict[str, str] = {}
-
-        def fake_run(*args: object, **kwargs: object) -> subprocess.CompletedProcess[str]:
-            captured_env.update(kwargs["env"])
-            return subprocess.CompletedProcess(args=args, returncode=0, stdout="{}", stderr="")
-
-        with mock.patch.dict(
-            os.environ,
-            {
-                "OLLAMA_HOST": "https://ollama.com",
-                "OLLAMA_API_KEY": "secret",
-                "OLLAMA_KEEP_ALIVE": "1h",
-            },
-        ):
-            with mock.patch("subprocess.run", side_effect=fake_run):
-                result = _run_ollama_judge(
-                    "prompt",
-                    {"host": "http://localhost:11434", "model": "qwen3.5:latest"},
-                    5,
-                )
-
-        self.assertEqual(result.exit_code, 0)
-        self.assertEqual(captured_env["OLLAMA_HOST"], "http://localhost:11434")
-        self.assertNotIn("OLLAMA_API_KEY", captured_env)
-        self.assertNotIn("OLLAMA_KEEP_ALIVE", captured_env)
-
-    def test_cloud_ollama_runner_preserves_declared_cloud_auth_only(self) -> None:
+    def test_local_codex_runner_uses_oss_local_profile(self) -> None:
         captured_env: dict[str, str] = {}
         captured_command: list[str] = []
+        output_file = REPO_ROOT / self.evidence_root / "judge" / "codex-last-message.json"
 
         def fake_run(args: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
             captured_command.extend(args)
             captured_env.update(kwargs["env"])
+            output_file.parent.mkdir(parents=True, exist_ok=True)
+            output_file.write_text("{}", encoding="utf-8")
             return subprocess.CompletedProcess(args=args, returncode=0, stdout="{}", stderr="")
 
-        with mock.patch.dict(
-            os.environ,
-            {
-                "OLLAMA_HOST": "http://localhost:11434",
-                "OLLAMA_API_KEY": "secret",
-                "OLLAMA_KEEP_ALIVE": "1h",
-            },
-        ):
-            with mock.patch("subprocess.run", side_effect=fake_run):
-                result = _run_ollama_judge(
-                    "prompt",
-                    {
-                        "host": "https://ollama.com",
-                        "model": "deepseek-v4-flash:cloud",
-                        "secret_env_names": ["OLLAMA_API_KEY"],
-                    },
-                    5,
-                )
+        original_run = subprocess.run
+        try:
+            subprocess.run = fake_run  # type: ignore[assignment]
+            result = _run_codex_judge(
+                "prompt",
+                {"id": "oss-local", "model": "qwen3.5:latest"},
+                5,
+                REPO_ROOT,
+                output_file,
+            )
+        finally:
+            subprocess.run = original_run  # type: ignore[assignment]
 
         self.assertEqual(result.exit_code, 0)
-        self.assertEqual(captured_command, ["ollama", "run", "deepseek-v4-flash:cloud"])
-        self.assertEqual(captured_env["OLLAMA_HOST"], "https://ollama.com")
-        self.assertEqual(captured_env["OLLAMA_API_KEY"], "secret")
-        self.assertNotIn("OLLAMA_KEEP_ALIVE", captured_env)
+        self.assertEqual(captured_command[:4], ["codex", "exec", "--profile", "oss-local"])
+        self.assertIn("--output-last-message", captured_command)
+        self.assertEqual(result.output_text, "{}")
+        self.assertNotIn("OPENAI_API_KEY", captured_env)
+        self.assertNotIn("OLLAMA_API_KEY", captured_env)
 
-    def test_cloud_ollama_runner_uses_op_run_env_file_when_secret_missing(self) -> None:
-        with mock.patch.dict(os.environ, {"ASK_OLLAMA_CLOUD_ENV_FILE": "/tmp/codex-test.env"}, clear=True):
-            command = _ollama_judge_command(
-                {"model": "deepseek-v4-flash:cloud"},
-                ["OLLAMA_API_KEY"],
-            )
+    def test_cloud_codex_runner_allows_declared_profile_secret_only(self) -> None:
+        captured_env: dict[str, str] = {}
+        captured_command: list[str] = []
+        output_file = REPO_ROOT / self.evidence_root / "judge" / "codex-last-message.json"
+
+        def fake_run(args: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
+            captured_command.extend(args)
+            captured_env.update(kwargs["env"])
+            output_file.parent.mkdir(parents=True, exist_ok=True)
+            output_file.write_text("{}", encoding="utf-8")
+            return subprocess.CompletedProcess(args=args, returncode=0, stdout="{}", stderr="")
+
+        original_run = subprocess.run
+        try:
+            subprocess.run = fake_run  # type: ignore[assignment]
+            with patch.dict(os.environ, {"OLLAMA_API_KEY": "cloud-token", "OPENAI_API_KEY": "other-token"}):
+                result = _run_codex_judge(
+                    "prompt",
+                    {"id": "oss-cloud", "model": "deepseek-v4-flash:cloud", "secret_env_names": ["OLLAMA_API_KEY"]},
+                    5,
+                    REPO_ROOT,
+                    output_file,
+                )
+        finally:
+            subprocess.run = original_run  # type: ignore[assignment]
+
+        self.assertEqual(result.exit_code, 0)
+        self.assertEqual(captured_command[:4], ["codex", "exec", "--profile", "oss-cloud"])
+        self.assertEqual(captured_env["OLLAMA_API_KEY"], "cloud-token")
+        self.assertNotIn("OPENAI_API_KEY", captured_env)
+
+    def test_cloud_codex_command_uses_oss_cloud_profile(self) -> None:
+        output_file = REPO_ROOT / self.evidence_root / "judge" / "codex-last-message.json"
+
+        command = _codex_judge_command(
+            {"id": "oss-cloud", "model": "deepseek-v4-flash:cloud"},
+            REPO_ROOT,
+            output_file,
+        )
 
         self.assertEqual(
             command,
             [
-                "op",
-                "run",
-                "--env-file",
-                "/tmp/codex-test.env",
-                "--",
-                "ollama",
-                "run",
-                "deepseek-v4-flash:cloud",
+                "codex",
+                "exec",
+                "--profile",
+                "oss-cloud",
+                "--cd",
+                str(REPO_ROOT),
+                "--json",
+                "--output-last-message",
+                str(output_file),
+                "-",
             ],
         )
 

@@ -264,6 +264,23 @@ tessl_scenario_policy:
   live_private_must_not_underperform_baseline: true
   live_feedback_loop_required: true
   baseline_scenario_wins_allowed: 0
+  observation_surface_required: true
+  observation_surfaces:
+    static_package:
+      can_grade:
+        - SKILL.md instructions
+        - references and templates shipped in the package
+        - plugin.json and staged scenario metadata
+      cannot_grade:
+        - runtime-created workspace files
+        - final chat responses not persisted into the judged solution
+        - tool side effects outside the staged Tessl payload
+      runtime_artifact_rule: "If criteria require a runtime artifact, either rewrite them to require the package instruction/template that would produce it or move the scenario to a runtime lane that captures the artifact."
+    runtime_workspace:
+      can_grade:
+        - files created by the evaluated run
+        - final responses captured by the runner
+        - explicit blocker artifacts produced by the skill
   feedback_loop_receipt_command: "ask sdk eval tessl-score --view-json <view-json> --skill <skill> --preview --json --robot"
   feedback_loop_blocks_when:
     - "receipt.feedback_loop.status is open"

@@ -1,6 +1,5 @@
 {
   "id": "teach-cal-pass-source-trust",
-  "expected_label": "pass",
   "predicted_label": "pass",
   "score": 0.93,
   "rationale": "The response blocks current API claims until high-trust sources are available and avoids writing unsupported durable lesson content.",

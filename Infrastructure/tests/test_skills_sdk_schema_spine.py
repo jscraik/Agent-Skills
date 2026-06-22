@@ -312,7 +312,7 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
                 {**self.schemas, **self.schemas_by_file},
             )
 
-    def test_eval_profile_preview_fixture_records_codex_and_ollama_boundaries(self) -> None:
+    def test_eval_profile_preview_fixture_records_codex_profile_boundaries(self) -> None:
         payload = self.assert_valid("eval-profile-preview-receipt", "eval-profile-preview-receipt.json")
 
         self.assertEqual(payload["status"], "preview")
@@ -320,10 +320,14 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertEqual(payload["external_intake_boundary"], "sdk_quarantine_only")
         self.assertFalse(payload["secret_boundary"]["skill_execution_receives_judge_secrets"])
         judge_by_id = {profile["id"]: profile for profile in payload["judge_profiles"]}
+        self.assertEqual(judge_by_id["oss-local"]["provider"], "codex")
         self.assertEqual(judge_by_id["oss-local"]["model"], "qwen3.5:latest")
+        self.assertEqual(judge_by_id["oss-local"]["host"], "codex-cli-profile")
+        self.assertEqual(judge_by_id["oss-cloud"]["provider"], "codex")
         self.assertEqual(judge_by_id["oss-cloud"]["model"], "deepseek-v4-flash:cloud")
+        self.assertEqual(judge_by_id["oss-cloud"]["host"], "codex-cli-profile")
         self.assertEqual(judge_by_id["oss-cloud"]["secret_env_names"], ["OLLAMA_API_KEY"])
-        self.assertEqual(judge_by_id["oss-cloud"]["auth_boundary"], "env_secret")
+        self.assertEqual(judge_by_id["oss-cloud"]["auth_boundary"], "codex_cli_auth")
         self.assertTrue(judge_by_id["codex-fast"]["network_required"])
         self.assertEqual(judge_by_id["codex-fast"]["auth_boundary"], "codex_cli_auth")
         self.assertFalse(payload["provider_invoked"])
@@ -488,13 +492,17 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
                 {**self.schemas, **self.schemas_by_file},
             )
 
-    def test_ab_judge_score_fixture_records_local_ollama_advisory_decision(self) -> None:
+    def test_ab_judge_score_fixture_records_codex_profile_advisory_decision(self) -> None:
         payload = self.assert_valid("ab-judge-score-receipt", "ab-judge-score-receipt.json")
 
         self.assertEqual(payload["status"], "scored")
         self.assertEqual(payload["operation"], "ab_judge_score")
         self.assertEqual(payload["judge_profile"]["id"], "oss-local")
+        self.assertEqual(payload["judge_profile"]["provider"], "codex")
         self.assertEqual(payload["judge_profile"]["model"], "qwen3.5:latest")
+        self.assertEqual(payload["codex_profile"], "oss-local")
+        self.assertTrue(payload["codex_exec_invoked"])
+        self.assertEqual(payload["judge_command_argv"][:4], ["codex", "exec", "--profile", "oss-local"])
         self.assertEqual(payload["decision"]["winner"], "skill_b")
         self.assertTrue(payload["provider_invoked"])
         self.assertTrue(payload["network_accessed"])

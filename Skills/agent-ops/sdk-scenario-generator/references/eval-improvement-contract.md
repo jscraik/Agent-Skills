@@ -43,6 +43,15 @@ For each Bucket B or D item:
 7. Commit only changed files after approval.
 8. Rerun the same eval lane and compare before versus after.
 
+Before editing criteria, classify the eval observation surface. A Tessl static
+package lane can grade SKILL.md, references, templates, manifests, and staged
+scenario metadata; it cannot require runtime-created workspace files unless the
+runner actually executes the skill and persists those files into the judged
+solution. If the rubric names a runtime artifact that the lane cannot observe,
+rewrite the criterion to require the package instruction or template that would
+produce that artifact, or move the scenario to a runtime lane that can observe
+the file.
+
 For tile evals, `tessl tile lint <tile-path>` proves local package shape only.
 It does not prove scenario improvement. `tessl eval run ./evals/ --workspace
 <workspace>` plus `tessl eval compare ./evals/ --breakdown --workspace

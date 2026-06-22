@@ -180,8 +180,8 @@ def build_tessl_score_receipt(
         return _blocked_load_receipt(repo_root, view_json, skill, run_id, load_error)
     attrs = _attributes(payload)
     score_summary = _score_summary(payload)
-    feedback_loop = _feedback_loop(score_summary)
     status = str(attrs.get("status") or "unknown").strip().lower()
+    feedback_loop = _feedback_loop(score_summary, status)
     failure_reason = attrs.get("failureReason") if isinstance(attrs.get("failureReason"), dict) else None
     receipt_status, blocker_class, blocker = _receipt_status(status, failure_reason, score_summary)
     ready = receipt_status == "pass"
@@ -233,6 +233,7 @@ def _blocked_load_receipt(
             ],
         },
         "mutation_performed": False,
+        "agent_summary": _blocked_agent_summary(f"Tessl view artifact could not be loaded: {load_error}"),
     }
 
 
@@ -268,6 +269,8 @@ def _receipt_blocker(
 ) -> str | None:
     if tessl_status in {"failed", "error", "cancelled", "canceled"}:
         return _failure_blocker(tessl_status, failure_reason)
+    if tessl_status != "completed":
+        return f"Tessl eval view is not complete yet; current status is {tessl_status or 'unknown'}."
     if score_summary["scenario_count"] > 0 and score_summary["max_points"] <= 0:
         return "Tessl eval view does not contain positive max points for scored scenarios."
     complete = score_summary["scenario_count"] > 0 and score_summary["missing_scenario_count"] == 0
@@ -316,7 +319,7 @@ def _failure_blocker(tessl_status: str, failure_reason: dict[str, Any] | None) -
     return f"Tessl eval view status is {tessl_status}: {code}: {message}"
 
 
-def _feedback_loop(score_summary: dict[str, Any]) -> dict[str, Any]:
+def _feedback_loop(score_summary: dict[str, Any], tessl_status: str) -> dict[str, Any]:
     regressions = score_summary.get("regressions")
     regression_paths = [
         str(item.get("path"))
@@ -326,7 +329,7 @@ def _feedback_loop(score_summary: dict[str, Any]) -> dict[str, Any]:
     usage_percent = score_summary.get("usage_percent")
     lift_points = score_summary.get("lift_points")
     missing_count = int(score_summary.get("missing_scenario_count") or 0)
-    required_next_actions: list[str] = []
+    required_next_actions = _status_next_actions(tessl_status)
     if missing_count:
         required_next_actions.append("Rerun or preserve a Tessl view with complete baseline and usage-spec assessments.")
     if regression_paths:
@@ -345,6 +348,12 @@ def _feedback_loop(score_summary: dict[str, Any]) -> dict[str, Any]:
         "missing_scenario_count": missing_count,
         "required_next_actions": required_next_actions,
     }
+
+
+def _status_next_actions(tessl_status: str) -> list[str]:
+    if tessl_status == "completed":
+        return []
+    return ["Wait for Tessl completion and preserve the final tessl eval view --json artifact before scoring."]
 
 
 def _feedback_loop_lessons(
