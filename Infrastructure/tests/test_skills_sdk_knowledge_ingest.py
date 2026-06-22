@@ -512,6 +512,28 @@ class TestSkillsSdkKnowledgeIngest(unittest.TestCase):
             paths = {entry["path"] for entry in source_context["references"]}
             self.assertIn("references/knowledge-capsule.manifest.yaml", paths)
 
+    @unittest.skipIf(not hasattr(os, "symlink"), "symlink support required")
+    def test_apply_skips_symlinked_extraction_references(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "agent-skills"
+            root.mkdir()
+            skill_dir = _write_skill(root)
+            extraction = _write_extraction(Path(tmp))
+            outside = Path(tmp) / "outside-secret.md"
+            outside.write_text("private source", encoding="utf-8")
+            os.symlink(outside, extraction / "references" / "knowledge-capsules" / "outside-secret.md")
+
+            payload = build_knowledge_ingest(
+                root,
+                extraction=str(extraction),
+                skill="Skills/agent-ops/improve-agent-native",
+                apply=True,
+                preflight_security=False,
+            )
+
+            self.assertEqual(payload["status"], "applied")
+            self.assertFalse((skill_dir / "references" / "knowledge-capsules" / "outside-secret.md").exists())
+
     def test_cli_requires_preview_or_apply(self) -> None:
         process = subprocess.run(
             [

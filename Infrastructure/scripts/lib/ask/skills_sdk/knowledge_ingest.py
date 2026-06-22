@@ -160,7 +160,7 @@ def _apply_knowledge_ingest(
     manifest: dict[str, Any],
 ) -> None:
     for source_file in source_files:
-        target = skill_dir / source_file.relative_to(extraction_root)
+        target = _safe_skill_package_path(skill_dir, source_file.relative_to(extraction_root), label="knowledge reference")
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source_file, target)
     _update_knowledge_routing_files(skill_dir, eval_routes=eval_routes, manifest=manifest)
@@ -172,9 +172,31 @@ def _update_knowledge_routing_files(
     eval_routes: list[dict[str, Any]],
     manifest: dict[str, Any],
 ) -> None:
-    _update_skill_routing(skill_dir / "SKILL.md", eval_routes=eval_routes)
-    _update_source_context(skill_dir / "references" / "source-context.yaml", eval_routes=eval_routes)
-    _update_capsule_routing_index(skill_dir / "references" / "knowledge-capsule-routing.md", manifest=manifest)
+    _update_skill_routing(_safe_skill_package_path(skill_dir, Path("SKILL.md"), label="skill routing"), eval_routes=eval_routes)
+    _update_source_context(
+        _safe_skill_package_path(skill_dir, Path("references/source-context.yaml"), label="source context"),
+        eval_routes=eval_routes,
+    )
+    _update_capsule_routing_index(
+        _safe_skill_package_path(
+            skill_dir,
+            Path("references/knowledge-capsule-routing.md"),
+            label="capsule routing index",
+        ),
+        manifest=manifest,
+    )
+
+
+def _safe_skill_package_path(skill_dir: Path, relative_path: Path, *, label: str) -> Path:
+    if relative_path.is_absolute() or ".." in relative_path.parts:
+        raise ValueError(f"{label} path must stay inside the skill package.")
+    skill_root = skill_dir.resolve()
+    target = (skill_dir / relative_path).resolve(strict=False)
+    try:
+        target.relative_to(skill_root)
+    except ValueError as exc:
+        raise ValueError(f"{label} path must stay inside the skill package.") from exc
+    return target
 
 
 def _resolve_skill_dir(repo_root: Path, skill: str) -> Path:
@@ -203,10 +225,20 @@ def _collect_reference_files(extraction_root: Path) -> list[Path]:
     references_root = extraction_root / "references"
     if not references_root.is_dir():
         raise ValueError("KnowledgeOS extraction must contain a references directory.")
-    files = sorted(path for path in references_root.rglob("*") if path.is_file())
+    files = sorted(path for path in references_root.rglob("*") if _safe_extraction_reference_file(extraction_root, path))
     if not files:
         raise ValueError("KnowledgeOS extraction references directory is empty.")
     return files
+
+
+def _safe_extraction_reference_file(extraction_root: Path, path: Path) -> bool:
+    if path.is_symlink() or not path.is_file():
+        return False
+    try:
+        path.resolve(strict=True).relative_to(extraction_root.resolve())
+    except (OSError, ValueError):
+        return False
+    return True
 
 
 def _eval_reference_routes(extraction_root: Path, source_files: list[Path]) -> dict[str, bool]:
