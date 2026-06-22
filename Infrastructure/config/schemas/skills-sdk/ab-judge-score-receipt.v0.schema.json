@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/ab-judge-score-receipt.v0.schema.json",
+  "title": "Skills SDK A/B Judge Score Receipt v0",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "string", "const": "skills-sdk.ab-judge-score-receipt.v0"},
+    "schema_uri": {"type": "string", "const": "https://jscraik.local/agent-skills/schemas/skills-sdk/ab-judge-score-receipt.v0.schema.json"},
+    "status": {"type": "string", "enum": ["scored", "blocked"]},
+    "operation": {"type": "string", "const": "ab_judge_score"},
+    "run_receipt_path": {"type": ["string", "null"], "minLength": 1},
+    "run_receipt_digest": {"type": ["string", "null"], "minLength": 71},
+    "experiment_id": {"type": ["string", "null"], "pattern": "^[0-9a-f]{16}$"},
+    "judge_profile": {"oneOf": [{"type": "null"}, {"$ref": "eval-profile-preview-receipt.v0.schema.json#/definitions/judge_profile"}]},
+    "rubric_id": {"oneOf": [{"type": "null"}, {"type": "string", "const": "skills-sdk.ab-rubric.v0"}]},
+    "rubric_digest": {"type": ["string", "null"], "minLength": 71},
+    "decision_schema_version": {"type": "string", "const": "skills-sdk.ab-judge-decision.v0"},
+    "allowed_winners": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "uniqueItems": true,
+      "items": {"type": "string", "enum": ["skill_a", "skill_b", "inconclusive"]}
+    },
+    "judge_prompt_digest": {"type": ["string", "null"], "minLength": 71},
+    "judge_output_path": {"type": ["string", "null"], "minLength": 1},
+    "judge_output_digest": {"type": ["string", "null"], "minLength": 71},
+    "judge_command_argv": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "codex_profile": {"type": ["string", "null"], "enum": ["oss-local", "oss-cloud", null]},
+    "codex_exec_invoked": {"type": "boolean"},
+    "decision": {"oneOf": [{"type": "null"}, {"$ref": "#/definitions/judge_decision"}]},
+    "calibration_required": {"type": "boolean", "const": true},
+    "advisory_only": {"type": "boolean", "const": true},
+    "provider_invoked": {"type": "boolean"},
+    "network_accessed": {"type": "boolean"},
+    "mutation_performed": {"type": "boolean"},
+    "blockers": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "acceptance_trace": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "enum": ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022", "VP-030"]}
+    },
+    "agent_summary": {"type": "string", "minLength": 1}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "scored"}}},
+      "then": {
+        "properties": {
+          "run_receipt_path": {"type": "string"},
+          "run_receipt_digest": {"type": "string"},
+          "experiment_id": {"type": "string"},
+          "judge_profile": {"$ref": "eval-profile-preview-receipt.v0.schema.json#/definitions/judge_profile"},
+          "rubric_id": {"type": "string"},
+          "rubric_digest": {"type": "string"},
+          "judge_prompt_digest": {"type": "string"},
+          "judge_output_path": {"type": "string"},
+          "judge_output_digest": {"type": "string"},
+          "judge_command_argv": {
+            "type": "array",
+            "contains": {"type": "string", "const": "--profile"},
+            "minContains": 1
+          },
+          "codex_profile": {"type": "string", "enum": ["oss-local", "oss-cloud"]},
+          "codex_exec_invoked": {"const": true},
+          "decision": {"$ref": "#/definitions/judge_decision"},
+          "provider_invoked": {"const": true},
+          "network_accessed": {"const": true},
+          "mutation_performed": {"const": true},
+          "blockers": {"type": "array", "maxItems": 0}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"status": {"const": "blocked"}}},
+      "then": {"properties": {"blockers": {"type": "array", "minItems": 1}}}
+    }
+  ],
+  "required": [
+    "schema_version",
+    "schema_uri",
+    "status",
+    "operation",
+    "run_receipt_path",
+    "run_receipt_digest",
+    "experiment_id",
+    "judge_profile",
+    "rubric_id",
+    "rubric_digest",
+    "decision_schema_version",
+    "allowed_winners",
+    "judge_prompt_digest",
+    "judge_output_path",
+    "judge_output_digest",
+    "judge_command_argv",
+    "codex_profile",
+    "codex_exec_invoked",
+    "decision",
+    "calibration_required",
+    "advisory_only",
+    "provider_invoked",
+    "network_accessed",
+    "mutation_performed",
+    "blockers",
+    "acceptance_trace",
+    "agent_summary"
+  ],
+  "definitions": {
+    "judge_decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {"type": "string", "const": "skills-sdk.ab-judge-decision.v0"},
+        "experiment_id": {"type": "string", "pattern": "^[0-9a-f]{16}$"},
+        "dimension_scores": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {"$ref": "#/definitions/dimension_score"},
+          "allOf": [
+            {"contains": {"type": "object", "properties": {"dimension_id": {"const": "task_success"}}}, "minContains": 1, "maxContains": 1},
+            {"contains": {"type": "object", "properties": {"dimension_id": {"const": "instruction_following"}}}, "minContains": 1, "maxContains": 1},
+            {"contains": {"type": "object", "properties": {"dimension_id": {"const": "evidence_quality"}}}, "minContains": 1, "maxContains": 1},
+            {"contains": {"type": "object", "properties": {"dimension_id": {"const": "repo_safety"}}}, "minContains": 1, "maxContains": 1},
+            {"contains": {"type": "object", "properties": {"dimension_id": {"const": "maintainability"}}}, "minContains": 1, "maxContains": 1}
+          ]
+        },
+        "normalized_score_a": {"type": "number", "minimum": 0, "maximum": 1},
+        "normalized_score_b": {"type": "number", "minimum": 0, "maximum": 1},
+        "winner": {"type": "string", "enum": ["skill_a", "skill_b", "inconclusive"]},
+        "confidence": {"type": "string", "enum": ["low", "medium", "high"]},
+        "reason": {"type": "string", "minLength": 1},
+        "evidence_refs": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+      },
+      "required": [
+        "schema_version",
+        "experiment_id",
+        "dimension_scores",
+        "normalized_score_a",
+        "normalized_score_b",
+        "winner",
+        "confidence",
+        "reason",
+        "evidence_refs"
+      ]
+    },
+    "dimension_score": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "dimension_id": {
+          "type": "string",
+          "enum": ["task_success", "instruction_following", "evidence_quality", "repo_safety", "maintainability"]
+        },
+        "skill_a_score": {"type": "number", "minimum": 0, "maximum": 5},
+        "skill_b_score": {"type": "number", "minimum": 0, "maximum": 5},
+        "reason": {"type": "string", "minLength": 1},
+        "evidence_refs": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+      },
+      "required": ["dimension_id", "skill_a_score", "skill_b_score", "reason", "evidence_refs"]
+    }
+  }
+}

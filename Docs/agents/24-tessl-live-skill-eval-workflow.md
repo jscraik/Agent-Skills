@@ -83,6 +83,15 @@ files by itself. On rerun, the wrapper archives prior target-tile, tool-project,
 and generated scenario evidence under evidence-archive/ before refreshing the
 current staging inputs.
 
+Treat every Registry tile used by this workflow as a dependency, not as a
+trusted fact source. Before installing or relying on a Registry tile, record the
+exact package id and version or commit-specific source, publisher or workspace,
+local install command, and any visible quality, impact, and security signals. A
+high review score, successful install, or Registry listing is candidate evidence
+only; it does not replace local lint/review, scenario-quality, target-repo
+validation, or live score comparison. High or critical security warnings block
+use until inspected and explicitly accepted by the operator.
+
 If the approved environment stream was sourced and `TESSL_WORKSPACE_API_TOKEN`
 is present, but `tessl project repair --json` still returns
 `Please authenticate with Tessl to continue`, classify the result as
@@ -232,6 +241,12 @@ Treat Tessl scores as evidence, not proof by themselves.
 - A live-private command is not green merely because `tessl eval run`
   completed. The wrapper must inspect `tessl eval view --json <run-id>` and
   compare usage-spec results against baseline before reporting readiness.
+- Before quoting prior or current Tessl scores, preserve the
+  `tessl eval view --json <run-id>` artifact and run
+  `./bin/ask sdk eval tessl-score --view-json <view-json> --skill <skill-path> --preview --json --robot`.
+  Memory summaries, screenshots, and chat history are provenance only. A
+  blocked receipt may expose partial score math, but it is not a completed
+  baseline.
 - If both usage-spec and baseline are 100%, classify the run as
   pass_but_non_discriminative for improvement evidence. The skill may be
   correct, but the scenario set did not prove uplift. Tighten scenarios before

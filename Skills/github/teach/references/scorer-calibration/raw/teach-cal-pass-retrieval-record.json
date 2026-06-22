@@ -1,0 +1,7 @@
+{
+  "id": "teach-cal-pass-retrieval-record",
+  "predicted_label": "pass",
+  "score": 0.95,
+  "rationale": "The response includes retrieval practice, one repair step, and a learning-record update with path evidence.",
+  "expected_behavior": "Teaching output turns practice feedback into durable learning state."
+}

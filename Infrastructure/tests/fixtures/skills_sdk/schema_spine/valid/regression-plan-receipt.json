@@ -1,0 +1,133 @@
+{
+  "schema_version": "skills-sdk.eval-regression-plan.v0",
+  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/eval-regression-plan.v0.schema.json",
+  "status": "preview",
+  "operation": "eval_regression_plan_preview",
+  "query": "Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill",
+  "skill_path": "Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill/SKILL.md",
+  "view_json": "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/tessl-view-baseline-win.json",
+  "plan_path": "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/regression-plan-input.json",
+  "run_id": "019eef9f-1398-7022-8090-96cfc46150c8",
+  "source_score": {
+    "scenario_count": 1,
+    "scored_scenario_count": 1,
+    "missing_scenario_count": 0,
+    "usage_points": 0.25,
+    "baseline_points": 1,
+    "max_points": 1,
+    "usage_percent": 25,
+    "baseline_percent": 100,
+    "lift_points": -75,
+    "missing": [],
+    "regressions": [
+      {
+        "path": "happy-scenario-quality",
+        "usage_score": 0.25,
+        "baseline_score": 1,
+        "max_score": 1
+      }
+    ],
+    "ties": []
+  },
+  "regression_count": 1,
+  "regressions": [
+    {
+      "scenario_id": "happy-scenario-quality",
+      "usage_score": 0.25,
+      "baseline_score": 1,
+      "max_score": 1,
+      "owner": "criteria",
+      "failure_mode": "The rubric rewards generic success rather than the concrete scenario-quality artifact contract.",
+      "patch_plan": [
+        {
+          "file": "Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill/references/evals.yaml",
+          "change": "Retain the scenario and tighten acceptance around evidence-bearing rubric fields."
+        }
+      ],
+      "retained_regression": {
+        "status": "retained",
+        "path": "Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill/references/evals.yaml"
+      },
+      "validation_commands": [
+        "./bin/ask sdk eval scenario-quality Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --preview --json --robot"
+      ],
+      "checks": [
+        {
+          "id": "owner_classified",
+          "status": "pass",
+          "severity": "blocker",
+          "message": "Every Tessl baseline-win regression must be classified as skill, task, criteria, scorer, or environment.",
+          "evidence": [
+            "criteria"
+          ]
+        },
+        {
+          "id": "failure_mode_recorded",
+          "status": "pass",
+          "severity": "blocker",
+          "message": "Every regression must record the concrete failure mode before rerun.",
+          "evidence": []
+        },
+        {
+          "id": "patch_plan_present",
+          "status": "pass",
+          "severity": "blocker",
+          "message": "Every regression must include at least one patch-plan item with file and change.",
+          "evidence": []
+        },
+        {
+          "id": "retained_regression_present",
+          "status": "pass",
+          "severity": "blocker",
+          "message": "Every regression must retain or import an internal regression artifact before rerun.",
+          "evidence": [
+            "Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill/references/evals.yaml"
+          ]
+        },
+        {
+          "id": "validation_plan_present",
+          "status": "pass",
+          "severity": "blocker",
+          "message": "Every regression must name rerun validation commands before another live Tessl handoff.",
+          "evidence": [
+            "./bin/ask sdk eval scenario-quality Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --preview --json --robot"
+          ]
+        }
+      ],
+      "blockers": []
+    }
+  ],
+  "quality_checks": [
+    {
+      "id": "tessl_score_receipt_available",
+      "status": "pass",
+      "severity": "blocker",
+      "message": "Regression planning requires a parsed Tessl score receipt.",
+      "evidence": []
+    },
+    {
+      "id": "baseline_regressions_present",
+      "status": "pass",
+      "severity": "blocker",
+      "message": "Regression planning requires at least one baseline-win scenario.",
+      "evidence": []
+    },
+    {
+      "id": "regression_plan_artifact_present",
+      "status": "pass",
+      "severity": "blocker",
+      "message": "A regression plan artifact must classify every baseline-win scenario before live rerun.",
+      "evidence": [
+        "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/regression-plan-input.json"
+      ]
+    }
+  ],
+  "blockers": [],
+  "ready_for_live_rerun": true,
+  "required_next_actions": [
+    "Run scenario-quality, scorer-quality, scorer-calibration, dry Tessl staging, then live Tessl when budget allows."
+  ],
+  "mutation_performed": false,
+  "promotion_performed": false,
+  "agent_summary": "Regression plan for Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill is ready for internal rerun proof before live Tessl."
+}

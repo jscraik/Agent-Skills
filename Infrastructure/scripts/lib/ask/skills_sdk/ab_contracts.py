@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import math
 from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+
+from ask.skills_sdk.eval_ab_rubric import AB_RUBRIC_DIMENSIONS, AB_RUBRIC_WINNER_POLICY
 
 
 class _SdkContractModel(BaseModel):
@@ -10,16 +13,58 @@ class _SdkContractModel(BaseModel):
 
 
 _DECISION_LABELS = {"skill_a", "skill_b", "inconclusive"}
+_AB_JUDGE_DIMENSION_IDS = {str(dimension["id"]) for dimension in AB_RUBRIC_DIMENSIONS}
+_AB_JUDGE_DIMENSION_WEIGHTS = {
+    str(dimension["id"]): float(dimension["weight"]) for dimension in AB_RUBRIC_DIMENSIONS
+}
+_EXPERIMENT_ID_PATTERN = r"^[0-9a-f]{16}$"
 
 
 def _exact_decision_labels(rows: list[str]) -> bool:
     return set(rows) == _DECISION_LABELS
 
 
+def _contains_codex_profile_invocation(argv: list[str], codex_profile: str | None) -> bool:
+    if codex_profile is None:
+        return False
+    needle = ["codex", "exec", "--profile", codex_profile]
+    return any(argv[index:index + len(needle)] == needle for index in range(0, len(argv) - len(needle) + 1))
+
+
 def _validate_exact_decision_labels(value: list[str], *, message: str) -> list[str]:
     if not _exact_decision_labels(value):
         raise ValueError(message)
     return value
+
+
+def _computed_judge_scores(rows: list[AbJudgeDimensionScore]) -> dict[str, float]:
+    score_a = sum(row.skill_a_score * _AB_JUDGE_DIMENSION_WEIGHTS[row.dimension_id] for row in rows) / 5
+    score_b = sum(row.skill_b_score * _AB_JUDGE_DIMENSION_WEIGHTS[row.dimension_id] for row in rows) / 5
+    return {"normalized_score_a": score_a, "normalized_score_b": score_b}
+
+
+def _judge_scores_match(decision: AbJudgeDecision, computed_scores: dict[str, float]) -> bool:
+    return all(
+        math.isclose(getattr(decision, key), computed_scores[key], rel_tol=0, abs_tol=1e-9)
+        for key in computed_scores
+    )
+
+
+def _judge_confidence_meets_minimum(value: str, minimum: str) -> bool:
+    confidence_rank = {"low": 0, "medium": 1, "high": 2}
+    return confidence_rank[value] >= confidence_rank[minimum]
+
+
+def _expected_judge_winner(decision: AbJudgeDecision, computed_scores: dict[str, float]) -> str:
+    delta = computed_scores["normalized_score_b"] - computed_scores["normalized_score_a"]
+    minimum_delta = float(AB_RUBRIC_WINNER_POLICY["minimum_normalized_delta"])
+    tie_result = str(AB_RUBRIC_WINNER_POLICY["tie_result"])
+    if abs(delta) < minimum_delta:
+        return tie_result
+    minimum_confidence = str(AB_RUBRIC_WINNER_POLICY["minimum_confidence"])
+    if not _judge_confidence_meets_minimum(decision.confidence, minimum_confidence):
+        return tie_result
+    return "skill_b" if delta > 0 else "skill_a"
 
 
 class EvalExecutionProfile(_SdkContractModel):
@@ -78,11 +123,18 @@ class AbRubricScoreScale(_SdkContractModel):
 
 
 class AbRubricDimension(_SdkContractModel):
-    id: Literal["task_success", "instruction_following", "evidence_quality", "repo_safety", "maintainability"]
+    id: str = Field(min_length=1)
     title: str = Field(min_length=1)
     description: str = Field(min_length=1)
     weight: Annotated[float, Field(ge=0)]
     required_evidence: list[str] = Field(min_length=1)
+
+    @field_validator("id")
+    @classmethod
+    def _id_canonical(cls, value: str) -> str:
+        if value not in _AB_JUDGE_DIMENSION_IDS:
+            raise ValueError("rubric dimension id must be canonical")
+        return value
 
     @field_validator("required_evidence")
     @classmethod
@@ -135,8 +187,7 @@ class AbRubricContract(_SdkContractModel):
 
     @model_validator(mode="after")
     def _rubric_is_canonical(self) -> AbRubricContract:
-        expected_dimensions = {"task_success", "instruction_following", "evidence_quality", "repo_safety", "maintainability"}
-        if {dimension.id for dimension in self.dimensions} != expected_dimensions:
+        if {dimension.id for dimension in self.dimensions} != _AB_JUDGE_DIMENSION_IDS:
             raise ValueError("A/B rubric must contain the exact canonical dimensions")
         if abs(sum(dimension.weight for dimension in self.dimensions) - 1.0) > 0.000001:
             raise ValueError("A/B rubric dimension weights must sum to 1.0")
@@ -332,6 +383,7 @@ class AbVariantRunResult(_SdkContractModel):
     runner_stderr_digest: str = Field(min_length=71)
     output_last_message_path: str = Field(min_length=1)
     output_last_message_digest: str | None = Field(default=None, min_length=71)
+    semantic_output_excerpt: str | None = Field(default=None, min_length=1)
     blockers: list[str]
 
     @model_validator(mode="after")
@@ -428,12 +480,13 @@ class AbJudgeSanitizedVariantResult(_SdkContractModel):
     output_last_message_digest: str = Field(min_length=71)
     runner_stdout_digest: str = Field(min_length=71)
     runner_stderr_digest: str = Field(min_length=71)
+    semantic_output_excerpt: str = Field(min_length=1)
     blockers: list[str]
 
 
 class AbJudgeComparisonPayload(_SdkContractModel):
     schema_version: Literal["skills-sdk.ab-judge-decision.v0"]
-    experiment_id: str = Field(min_length=16, max_length=16)
+    experiment_id: str = Field(pattern=_EXPERIMENT_ID_PATTERN)
     rubric: AbRubricContract
     rubric_digest: str = Field(min_length=71)
     skill_a: AbJudgePackageIdentity
@@ -461,7 +514,7 @@ class AbJudgePreviewReceipt(_SdkContractModel):
     operation: Literal["ab_judge_preview"]
     run_receipt_path: str | None = Field(default=None, min_length=1)
     run_receipt_digest: str | None = Field(default=None, min_length=71)
-    experiment_id: str | None = Field(default=None, min_length=16, max_length=16)
+    experiment_id: str | None = Field(default=None, pattern=_EXPERIMENT_ID_PATTERN)
     judge_profile: EvalJudgeProfile | None
     rubric_id: Literal["skills-sdk.ab-rubric.v0"] | None
     rubric_digest: str | None = Field(default=None, min_length=71)
@@ -504,5 +557,134 @@ class AbJudgePreviewReceipt(_SdkContractModel):
                 self.rubric_digest,
                 self.comparison_payload,
                 self.judge_prompt_digest,
+            )
+        )
+
+
+class AbJudgeDimensionScore(_SdkContractModel):
+    dimension_id: str = Field(min_length=1)
+    skill_a_score: Annotated[float, Field(ge=0, le=5)]
+    skill_b_score: Annotated[float, Field(ge=0, le=5)]
+    reason: str = Field(min_length=1)
+    evidence_refs: list[str] = Field(min_length=1)
+
+    @field_validator("dimension_id")
+    @classmethod
+    def _dimension_id_canonical(cls, value: str) -> str:
+        if value not in _AB_JUDGE_DIMENSION_IDS:
+            raise ValueError("judge dimension id must be canonical")
+        return value
+
+    @field_validator("evidence_refs")
+    @classmethod
+    def _evidence_refs_non_empty(cls, value: list[str]) -> list[str]:
+        if any(not item for item in value):
+            raise ValueError("judge dimension evidence refs must be non-empty")
+        return value
+
+
+class AbJudgeDecision(_SdkContractModel):
+    schema_version: Literal["skills-sdk.ab-judge-decision.v0"]
+    experiment_id: str = Field(pattern=_EXPERIMENT_ID_PATTERN)
+    dimension_scores: list[AbJudgeDimensionScore] = Field(min_length=5, max_length=5)
+    normalized_score_a: Annotated[float, Field(ge=0, le=1)]
+    normalized_score_b: Annotated[float, Field(ge=0, le=1)]
+    winner: Literal["skill_a", "skill_b", "inconclusive"]
+    confidence: Literal["low", "medium", "high"]
+    reason: str = Field(min_length=1)
+    evidence_refs: list[str] = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def _decision_has_canonical_dimensions(self) -> AbJudgeDecision:
+        if {row.dimension_id for row in self.dimension_scores} != _AB_JUDGE_DIMENSION_IDS:
+            raise ValueError("A/B judge decisions must score every canonical dimension exactly once")
+        if any(not item for item in self.evidence_refs):
+            raise ValueError("judge decision evidence refs must be non-empty")
+        return self
+
+
+class AbJudgeScoreReceipt(_SdkContractModel):
+    schema_version: Literal["skills-sdk.ab-judge-score-receipt.v0"]
+    schema_uri: Literal[
+        "https://jscraik.local/agent-skills/schemas/skills-sdk/ab-judge-score-receipt.v0.schema.json"
+    ]
+    status: Literal["scored", "blocked"]
+    operation: Literal["ab_judge_score"]
+    run_receipt_path: str | None = Field(default=None, min_length=1)
+    run_receipt_digest: str | None = Field(default=None, min_length=71)
+    experiment_id: str | None = Field(default=None, pattern=_EXPERIMENT_ID_PATTERN)
+    judge_profile: EvalJudgeProfile | None
+    rubric_id: Literal["skills-sdk.ab-rubric.v0"] | None
+    rubric_digest: str | None = Field(default=None, min_length=71)
+    decision_schema_version: Literal["skills-sdk.ab-judge-decision.v0"]
+    allowed_winners: list[Literal["skill_a", "skill_b", "inconclusive"]] = Field(min_length=3, max_length=3)
+    judge_prompt_digest: str | None = Field(default=None, min_length=71)
+    judge_output_path: str | None = Field(default=None, min_length=1)
+    judge_output_digest: str | None = Field(default=None, min_length=71)
+    judge_command_argv: list[str]
+    codex_profile: Literal["oss-local", "oss-cloud"] | None
+    codex_exec_invoked: bool
+    decision: AbJudgeDecision | None
+    calibration_required: Literal[True]
+    advisory_only: Literal[True]
+    provider_invoked: bool
+    network_accessed: bool
+    mutation_performed: bool
+    blockers: list[str]
+    acceptance_trace: list[
+        Literal["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022", "VP-030"]
+    ] = Field(min_length=1)
+    agent_summary: str = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def _status_matches_score(self) -> AbJudgeScoreReceipt:
+        if not _exact_decision_labels(self.allowed_winners):
+            raise ValueError("A/B judge score receipts must contain exact winner labels")
+        if self.status == "scored":
+            self._validate_scored_receipt()
+        elif not self.blockers:
+            raise ValueError("blocked A/B judge score receipts must include blockers")
+        return self
+
+    def _validate_scored_receipt(self) -> None:
+        if self.blockers:
+            raise ValueError("scored A/B judge receipts must not include blockers")
+        if not self._has_score_evidence():
+            raise ValueError("scored A/B judge receipts must include complete score evidence")
+        if not (self.provider_invoked and self.network_accessed and self.mutation_performed and self.codex_exec_invoked):
+            raise ValueError("scored A/B judge receipts must report provider side effects")
+        if self.codex_profile != self.judge_profile.id:
+            raise ValueError("scored A/B judge receipts must bind Codex profile to judge profile")
+        if not _contains_codex_profile_invocation(self.judge_command_argv, self.codex_profile):
+            raise ValueError("scored A/B judge receipts must invoke codex exec with the judge profile")
+        self._validate_decision_consistency()
+
+    def _validate_decision_consistency(self) -> None:
+        if self.decision is None:
+            return
+        if self.decision.experiment_id != self.experiment_id:
+            raise ValueError("scored A/B judge receipts must bind decision to receipt experiment")
+        computed_scores = _computed_judge_scores(self.decision.dimension_scores)
+        if not _judge_scores_match(self.decision, computed_scores):
+            raise ValueError("scored A/B judge receipts must match normalized rubric scores")
+        if self.decision.winner != _expected_judge_winner(self.decision, computed_scores):
+            raise ValueError("scored A/B judge receipts must match rubric winner policy")
+
+    def _has_score_evidence(self) -> bool:
+        return all(
+            item is not None
+            for item in (
+                self.run_receipt_path,
+                self.run_receipt_digest,
+                self.experiment_id,
+                self.judge_profile,
+                self.rubric_id,
+                self.rubric_digest,
+                self.judge_prompt_digest,
+                self.judge_output_path,
+                self.judge_output_digest,
+                self.judge_command_argv,
+                self.codex_profile,
+                self.decision,
             )
         )

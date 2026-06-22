@@ -8,6 +8,8 @@ import tempfile
 from pathlib import Path
 from unittest import mock
 
+import pytest
+
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 ASK_LIB_DIR = REPO_ROOT / "Infrastructure" / "scripts" / "lib"
@@ -417,6 +419,42 @@ def test_tessl_eval_quality_rejects_keyword_only_cases() -> None:
         "missing_behavioral_acceptance",
         "keyword_only_acceptance",
     }
+
+
+def test_tessl_eval_quality_rejects_shallow_routing_oracle() -> None:
+    cases = [{
+        "id": "shallow-teach-routing",
+        "unit": "teach routing",
+        "given": "A learner asks for a multi-session study plan.",
+        "should": "Choose the teaching workflow and preserve the learning mission.",
+        "prompt": "Teach SQL joins over four weeks.",
+        "acceptance": [
+            {"type": "skill_selected", "expected_skill": "teach"},
+            {"type": "expected_signal", "value": "mission-grounded next step"},
+        ],
+    }]
+
+    findings = evals._tessl_eval_quality_findings(cases)
+
+    assert [finding["code"] for finding in findings] == ["shallow_routing_oracle"]
+
+
+def test_tessl_eval_quality_rejects_mixed_case_shallow_routing_oracle() -> None:
+    cases = [{
+        "id": "shallow-teach-routing",
+        "unit": "teach routing",
+        "given": "A learner asks for a multi-session study plan.",
+        "should": "Choose the teaching workflow and preserve the learning mission.",
+        "prompt": "Teach SQL joins over four weeks.",
+        "acceptance": [
+            {"type": "Skill_Selected", "expected_skill": "teach"},
+            {"type": "Expected_Signal", "value": "mission-grounded next step"},
+        ],
+    }]
+
+    findings = evals._tessl_eval_quality_findings(cases)
+
+    assert [finding["code"] for finding in findings] == ["shallow_routing_oracle"]
 
 
 def test_ordinary_tessl_staging_allows_legacy_keyword_cases(tmp_path: Path) -> None:
@@ -1164,7 +1202,33 @@ def _write_example_skill(tmp_path: Path) -> Path:
         encoding="utf-8",
     )
     (skill_root / "secret-not-staged.txt").write_text("do not copy\n", encoding="utf-8")
+    _write_handoff_readiness(tmp_path, "example-skill")
     return skill_root
+
+
+def _write_handoff_readiness(tmp_path: Path, skill_name: str) -> Path:
+    evidence_root = tmp_path / ".harness" / "evidence" / "handoff" / skill_name
+    evidence_root.mkdir(parents=True, exist_ok=True)
+    lanes = []
+    for lane_id in ("deterministic_local_gates", "oss-local", "oss-cloud", "tessl-live-dry-run"):
+        receipt_path = evidence_root / f"{lane_id}.json"
+        receipt_path.write_text(json.dumps({"lane": lane_id}) + "\n", encoding="utf-8")
+        lanes.append({
+            "id": lane_id,
+            "status": "pass",
+            "command": f"./bin/ask proof {lane_id}",
+            "receipt_path": receipt_path.relative_to(tmp_path).as_posix(),
+        })
+    readiness_path = evidence_root / "eval-handoff-readiness.json"
+    readiness_path.write_text(
+        json.dumps({
+            "schema_version": "skills-sdk.eval-handoff-readiness-input.v1",
+            "candidate_id": skill_name,
+            "lanes": lanes,
+        }) + "\n",
+        encoding="utf-8",
+    )
+    return readiness_path
 
 
 def test_evals_run_native_tessl_without_project_save_approval_flag(tmp_path: Path) -> None:
@@ -1337,6 +1401,23 @@ def test_evals_live_private_dry_run_stages_private_plugin_shape(tmp_path: Path) 
     assert tessl_eval["policy"]["no_install"] is True
     assert tessl_eval["policy"]["no_registry_upload"] is True
     assert tessl_eval["policy"]["plugin_private_required"] is True
+    feedback_loop = tessl_eval["policy"]["pre_tessl_feedback_loop"]
+    assert feedback_loop["required_order"] == [
+        "deterministic_local_gates",
+        "oss_local_internal_judge",
+        "patch_oss_local_failures",
+        "oss_cloud_internal_judge",
+        "patch_oss_cloud_failures",
+        "tessl_live_dry_run",
+        "tessl_live_run",
+        "patch_tessl_failures",
+    ]
+    assert [stage["profile"] for stage in feedback_loop["internal_judge_sequence"]] == [
+        "oss-local",
+        "oss-cloud",
+    ]
+    assert "returns to oss-local" in feedback_loop["failure_loop"]
+    assert "oss-cloud" in feedback_loop["live_blocked_until"]
     assert tessl_eval["tessl_project_marker"].endswith("/tessl.json")
     assert tessl_eval["plugin_version"] == "2.3.4"
 
@@ -1501,6 +1582,10 @@ def test_tessl_live_private_stages_generated_fixture_scenarios(tmp_path: Path) -
     assert "references/evals/eval.arch.boundary-proof.md" in copied
     generated_case = staged_source / "evals" / "generated-eval.arch.boundary-proof" / "task.md"
     assert generated_case.exists()
+    generated_task = generated_case.read_text(encoding="utf-8")
+    assert "Review the architecture situation" not in generated_task
+    assert "Architecture situation:" not in generated_task
+    assert "Help with this situation:" in generated_task
     criteria = json.loads(
         (staged_source / "evals" / "generated-eval.arch.boundary-proof" / "criteria.json").read_text(
             encoding="utf-8"
@@ -1627,6 +1712,32 @@ def test_evals_rejects_dry_run_without_live_private(tmp_path: Path) -> None:
     assert result.data["blocker_class"] == "blocked_validation"
     assert result.data["tessl_eval"]["blocker"] == "--tessl-live-dry-run requires --tessl-live-private."
     assert result.errors[0].code == "ERR_VALIDATION"
+    run.assert_not_called()
+
+
+def test_evals_live_private_blocks_without_handoff_readiness(tmp_path: Path) -> None:
+    readiness_path = _write_handoff_readiness(tmp_path, "example-skill")
+    _write_example_skill(tmp_path)
+    readiness_path.unlink()
+
+    with (
+        mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
+        mock.patch.object(evals.subprocess, "run") as run,
+    ):
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/example-skill",
+            mode="smoke",
+            tessl_live_private=True,
+            tessl_workspace="jscraik",
+        )
+
+    assert result.status == "error"
+    assert result.data["eval_status"] == "blocked_validation"
+    assert result.data["handoff_readiness"]["ready_for_live_tessl"] is False
+    assert result.data["tessl_eval"]["status"] == "blocked"
+    assert result.data["tessl_eval"]["blocker_class"] == "blocked_validation"
+    assert "Handoff readiness" in result.data["tessl_eval"]["blocker"]
     run.assert_not_called()
 
 
@@ -2084,6 +2195,28 @@ def test_tessl_run_budget_preflight_blocks_when_eval_list_unavailable(tmp_path: 
     assert preflight["capacity_source"] == "unavailable_eval_list"
 
 
+def test_tessl_run_budget_preflight_uses_unbounded_eval_list(tmp_path: Path) -> None:
+    calls: list[list[str]] = []
+
+    def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
+        calls.append(cmd)
+        assert "--limit" not in cmd
+        return mock.Mock(returncode=0, stdout=json.dumps({"data": [{"id": "run-1"}]}), stderr="", args=cmd)
+
+    with mock.patch.object(evals.subprocess, "run", side_effect=fake_run):
+        preflight = evals._tessl_run_budget_preflight(
+            "/usr/local/bin/tessl",
+            "skills-sdk",
+            tmp_path,
+            {},
+        )
+
+    assert preflight["status"] == "pass"
+    assert len(calls) == 1
+    assert calls[0] == ["/usr/local/bin/tessl", "eval", "list", "--json", "--workspace", "skills-sdk"]
+    assert preflight["used_runs"] == 1
+
+
 def test_tessl_eval_list_count_rejects_error_payload_lists() -> None:
     payload = {
         "status": "error",
@@ -2178,6 +2311,29 @@ def test_tessl_pending_run_preflight_blocks_unparseable_history(tmp_path: Path) 
     assert preflight["status"] == "blocked"
     assert preflight["blocker_class"] == "blocked_validation"
     assert "could not parse run history" in preflight["blocker"]
+
+
+def test_tessl_pending_run_preflight_uses_unbounded_eval_list(tmp_path: Path) -> None:
+    calls: list[list[str]] = []
+
+    def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
+        calls.append(cmd)
+        assert "--limit" not in cmd
+        return mock.Mock(returncode=0, stdout=json.dumps({"data": []}), stderr="", args=cmd)
+
+    with mock.patch.object(evals.subprocess, "run", side_effect=fake_run):
+        preflight = evals._tessl_pending_run_preflight(
+            "/usr/local/bin/tessl",
+            "skills-sdk",
+            "teach",
+            tmp_path,
+            {},
+        )
+
+    assert preflight["status"] == "pass"
+    assert len(calls) == 1
+    assert calls[0] == ["/usr/local/bin/tessl", "eval", "list", "--json", "--workspace", "skills-sdk"]
+    assert preflight["pending_eval_run_ids"] == []
 
 
 def test_tessl_run_budget_preflight_blocks_at_reserve(tmp_path: Path) -> None:
@@ -2310,14 +2466,21 @@ def test_evals_live_private_invokes_tessl_with_workspace_and_plugin_manifest(tmp
     )
 
     assert result.status == "success"
+    assert result.data["local_eval_status"] == "skipped_tessl_live_private"
+    assert "separately before live scoring" in result.data["tessl_live_private_note"]
     eval_run_calls = [
         call.args[0] for call in run.call_args_list
         if call.args[0][1:3] == ["eval", "run"]
+    ]
+    local_eval_calls = [
+        call.args[0] for call in run.call_args_list
+        if any("run_skill_evals.py" in str(part) for part in call.args[0])
     ]
     eval_view_calls = [
         call.args[0] for call in run.call_args_list
         if call.args[0][1:3] == ["eval", "view"]
     ]
+    assert local_eval_calls == []
     assert len(eval_run_calls) == 1
     assert len(eval_view_calls) == 1
     tessl_cmd = eval_run_calls[0]
@@ -2351,6 +2514,33 @@ def test_evals_live_private_invokes_tessl_with_workspace_and_plugin_manifest(tmp
         "tessl eval run --json --workspace <workspace> <staged-plugin-dir>"
     )
     assert result.data["tessl_eval"]["policy"]["duplicate_run_guard"].startswith("before live scoring")
+    submission_evidence_path = tmp_path / result.data["tessl_eval"]["submission_evidence_path"]
+    assert submission_evidence_path == (
+        tmp_path
+        / ".harness"
+        / "evidence"
+        / "tessl"
+        / "example-skill"
+        / "019e6ac8-08eb-75fb-8fbb-e2346517f82d"
+        / "tessl-eval-submission.json"
+    )
+    submission_evidence = json.loads(submission_evidence_path.read_text(encoding="utf-8"))
+    assert submission_evidence["status"] == "submitted_pending_view"
+    assert submission_evidence["run_id"] == "019e6ac8-08eb-75fb-8fbb-e2346517f82d"
+    assert submission_evidence["workspace"] == "jscraik"
+    assert submission_evidence["skill_path"] == "Skills/example-skill"
+    assert submission_evidence["next_action"].startswith("poll tessl eval view")
+    view_evidence_path = tmp_path / result.data["tessl_eval"]["view_evidence_path"]
+    assert view_evidence_path == (
+        tmp_path
+        / ".harness"
+        / "evidence"
+        / "tessl"
+        / "example-skill"
+        / "019e6ac8-08eb-75fb-8fbb-e2346517f82d"
+        / "tessl-eval-view.json"
+    )
+    assert json.loads(view_evidence_path.read_text(encoding="utf-8")) == json.loads(completed_view.stdout)
     summary = result.data["tessl_eval"]["live_result_summary"]
     assert summary["meets_min_score"] is True
     assert summary["beats_baseline"] is True
@@ -2371,6 +2561,78 @@ def test_evals_live_private_invokes_tessl_with_workspace_and_plugin_manifest(tmp
     assert summary["cost_observability"]["turn_metrics"]["usage.p95Turns"] == 37
     assert summary["cost_observability"]["token_metrics"]["usage.totalTokens"] == 12345
     assert summary["cost_observability"]["cost_metrics"]["usage.estimatedCostUsd"] == 0.0236
+
+
+def test_tessl_live_evidence_rejects_unsafe_run_ids(tmp_path: Path) -> None:
+    view_path = evals._write_tessl_live_view_evidence(
+        tmp_path,
+        "Skills/example-skill",
+        "../outside",
+        '{"status":"completed"}',
+    )
+    submission_path = evals._write_tessl_live_submission_evidence(
+        tmp_path,
+        "Skills/example-skill",
+        run_id="run/with/slash",
+        workspace="skills-sdk",
+        staged_source=tmp_path / "stage",
+        project_identity={"project": "skills-sdk/example-skill"},
+    )
+
+    assert view_path is None
+    assert submission_path is None
+    assert not (tmp_path / ".harness" / "evidence" / "outside").exists()
+
+
+def test_tessl_live_evidence_records_compact_forensic_index(tmp_path: Path) -> None:
+    view_path = evals._write_tessl_live_view_evidence(
+        tmp_path,
+        "Skills/example-skill",
+        "019e6ac8-08eb-75fb-8fbb-e2346517f82d",
+        json.dumps({"data": {"attributes": {"status": "completed", "scenarios": []}}}),
+    )
+
+    assert view_path is not None
+    index_path = tmp_path / ".harness" / "evidence" / "tessl" / "index.jsonl"
+    index_rows = [json.loads(line) for line in index_path.read_text(encoding="utf-8").splitlines()]
+
+    assert len(index_rows) == 1
+    assert index_rows[0]["schema_version"] == "skills-sdk.tessl-live-evidence-index.v1"
+    assert index_rows[0]["skill_handle"] == "example-skill"
+    assert index_rows[0]["run_id"] == "019e6ac8-08eb-75fb-8fbb-e2346517f82d"
+    assert index_rows[0]["artifact_type"] == "tessl-eval-view.json"
+    assert index_rows[0]["raw_evidence_path"] == view_path
+    assert index_rows[0]["status"] == "completed"
+    assert index_rows[0]["raw_evidence_bytes"] > 0
+    assert index_rows[0]["archived_previous_path"] is None
+    assert "local forensic evidence" in index_rows[0]["retention_policy"]
+
+
+def test_tessl_live_evidence_archives_prior_raw_file_before_overwrite(tmp_path: Path) -> None:
+    first_path = evals._write_tessl_live_view_evidence(
+        tmp_path,
+        "Skills/example-skill",
+        "019e6ac8-08eb-75fb-8fbb-e2346517f82d",
+        '{"data":{"attributes":{"status":"running","scenarios":[]}}}',
+    )
+    second_path = evals._write_tessl_live_view_evidence(
+        tmp_path,
+        "Skills/example-skill",
+        "019e6ac8-08eb-75fb-8fbb-e2346517f82d",
+        '{"data":{"attributes":{"status":"completed","scenarios":[]}}}',
+    )
+
+    assert first_path == second_path
+    raw_path = tmp_path / first_path
+    assert json.loads(raw_path.read_text(encoding="utf-8"))["data"]["attributes"]["status"] == "completed"
+
+    index_path = tmp_path / ".harness" / "evidence" / "tessl" / "index.jsonl"
+    index_rows = [json.loads(line) for line in index_path.read_text(encoding="utf-8").splitlines()]
+    archived_previous_path = index_rows[-1]["archived_previous_path"]
+
+    assert archived_previous_path is not None
+    archived_payload = json.loads((tmp_path / archived_previous_path).read_text(encoding="utf-8"))
+    assert archived_payload["data"]["attributes"]["status"] == "running"
 
 
 def test_evals_live_private_blocks_before_submit_when_pending_run_exists(tmp_path: Path) -> None:
@@ -2885,6 +3147,41 @@ def test_evals_classify_malformed_yaml_as_blocked_validation(tmp_path: Path) -> 
     assert "Failed to parse Tessl eval cases" in tessl_eval["blocker"]
 
 
+def test_evals_staging_rejects_symlinked_support_files(tmp_path: Path) -> None:
+    skill_root = _write_example_skill(tmp_path)
+    outside = tmp_path / "outside-secret.md"
+    outside.write_text("secret\n", encoding="utf-8")
+    link = skill_root / "references" / "evals" / "leak.md"
+    link.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        link.symlink_to(outside)
+    except OSError as exc:
+        pytest.skip(f"symlink creation unavailable: {exc}")
+
+    with pytest.raises(ValueError, match="symlinked support path"):
+        evals._stage_tessl_eval_source(tmp_path, "Skills/example-skill", tmp_path / "staged")
+
+
+def test_tessl_live_staging_rejects_symlinked_support_files(tmp_path: Path) -> None:
+    skill_root = _write_example_skill(tmp_path)
+    outside = tmp_path / "outside-secret.md"
+    outside.write_text("secret\n", encoding="utf-8")
+    link = skill_root / "assets" / "leak.md"
+    link.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        link.symlink_to(outside)
+    except OSError as exc:
+        pytest.skip(f"symlink creation unavailable: {exc}")
+
+    with pytest.raises(ValueError, match="symlinked support path"):
+        evals._stage_tessl_live_private_source(
+            tmp_path,
+            "Skills/example-skill",
+            "skills-sdk",
+            tmp_path / "staged",
+        )
+
+
 def test_evals_skip_tessl_escape_hatch(tmp_path: Path) -> None:
     completed = mock.Mock(returncode=0, stdout="{}", stderr="")
 
@@ -3046,7 +3343,7 @@ def test_run_evals_renders_local_review_dashboard(tmp_path: Path) -> None:
     assert "Static evidence snapshot" in html_text
     assert "Review Lanes" in html_text
     assert "dynamic run-trace behavior checks" in html_text
-    assert "disposable tile.json package-shape check" in html_text
+    assert "disposable .tessl-plugin/plugin.json package-shape check" in html_text
     assert "opt-in local dependency security screening" in html_text
 
 
@@ -3461,6 +3758,94 @@ def test_plugin_eval_b_plus_warning_is_budget_guardrail() -> None:
     assert parsed["warn_count"] == 1
 
 
+def test_plugin_eval_deferred_budget_fail_is_nonblocking_when_active_budget_good() -> None:
+    parsed = _parse_plugin_eval(
+        """# Plugin Eval Report
+
+## At a Glance
+- Score: 86/100
+- Grade: B+
+- Risk: high
+- Checks: 1 fail, 0 warn, 2 info
+- Active budget: 1293 tokens (good)
+
+## Checks
+- [FAIL] deferred_cost_tokens-budget-high: deferred_cost_tokens is excessive relative to the current Codex baseline.
+"""
+    )
+
+    assert parsed["fail_count"] == 1
+    assert parsed["blocking_fail_count"] == 0
+    assert parsed["posture"] == "deferred_budget_guardrail"
+
+
+def test_plugin_eval_deferred_budget_fail_is_nonblocking_when_active_budget_moderate_and_grade_b() -> None:
+    parsed = _parse_plugin_eval(
+        """# Plugin Eval Report
+
+## At a Glance
+- Score: 86/100
+- Grade: B
+- Risk: high
+- Checks: 1 fail, 0 warn, 2 info
+- Active budget: 2228 tokens (moderate)
+
+## Checks
+- [FAIL] deferred_cost_tokens-budget-high: deferred_cost_tokens is excessive relative to the current Codex baseline.
+"""
+    )
+
+    assert parsed["grade_acceptable"] is True
+    assert parsed["fail_count"] == 1
+    assert parsed["blocking_fail_count"] == 0
+    assert parsed["posture"] == "deferred_budget_guardrail"
+
+
+def test_plugin_eval_deferred_budget_fail_still_blocks_low_grade() -> None:
+    parsed = _parse_plugin_eval(
+        """# Plugin Eval Report
+
+## At a Glance
+- Score: 72/100
+- Grade: C
+- Risk: high
+- Checks: 1 fail, 0 warn, 2 info
+- Active budget: 1293 tokens (good)
+
+## Checks
+- [FAIL] deferred_cost_tokens-budget-high: deferred_cost_tokens is excessive relative to the current Codex baseline.
+"""
+    )
+
+    assert parsed["grade_acceptable"] is False
+    assert parsed["fail_count"] == 1
+    assert parsed["blocking_fail_count"] == 1
+    assert parsed["posture"] == "blocking"
+
+
+def test_plugin_eval_deferred_budget_mention_does_not_hide_other_failures() -> None:
+    parsed = _parse_plugin_eval(
+        """# Plugin Eval Report
+
+## At a Glance
+- Score: 90/100
+- Grade: A-
+- Risk: high
+- Checks: 1 fail, 0 warn, 2 info
+- Active budget: 1293 tokens (good)
+
+## Checks
+- [FAIL] missing_contract: required evidence is missing.
+- [INFO] deferred_cost_tokens-budget-high was reviewed as a future follow-up.
+"""
+    )
+
+    assert parsed["grade_acceptable"] is True
+    assert parsed["fail_count"] == 1
+    assert parsed["blocking_fail_count"] == 1
+    assert parsed["posture"] == "blocking"
+
+
 def test_review_dashboard_renders_plugin_eval_acceptance_policy(tmp_path: Path) -> None:
     report_path = tmp_path / "review.json"
     output_path = tmp_path / "review.html"
@@ -3543,8 +3928,8 @@ def test_review_dashboard_renders_review_mode_details(tmp_path: Path) -> None:
                         "role": "budget and ergonomics guardrail",
                     },
                     "tessl_lint": {
-                        "command": "tessl skill lint <temporary-tile.json>",
-                        "role": "disposable tile.json package-shape check",
+                        "command": "tessl plugin lint <temporary-plugin-wrapper>",
+                        "role": "disposable .tessl-plugin/plugin.json package-shape check",
                     },
                     "tessl_review": {
                         "command": "tessl skill review <temporary-skill-directory>",
@@ -3575,7 +3960,7 @@ def test_review_dashboard_renders_review_mode_details(tmp_path: Path) -> None:
     assert "Review Lanes" in html_text
     assert "dynamic run-trace behavior checks" in html_text
     assert "budget and ergonomics guardrail" in html_text
-    assert "disposable tile.json package-shape check" in html_text
+    assert "disposable .tessl-plugin/plugin.json package-shape check" in html_text
     assert "local best-practice/content review" in html_text
     assert "opt-in local dependency security screening" in html_text
     assert "release-required for manifest-backed candidates" in html_text
@@ -3590,3 +3975,17 @@ def test_dashboard_report_uses_canonical_skill_builder_scripts(tmp_path: Path) -
     assert result.status == "success"
     cmd = run.call_args.args[0]
     assert cmd[1] == "Plugins/skill-factory/scripts/skill-builder/build_skill_eval_dashboard.py"
+
+
+def test_tessl_live_evidence_rejects_symlinked_repo_evidence_root(tmp_path: Path) -> None:
+    repo_root = tmp_path / "repo"
+    repo_root.mkdir()
+    external = tmp_path / "external-evidence"
+    external.mkdir()
+    evidence_parent = repo_root / ".harness" / "evidence"
+    evidence_parent.mkdir(parents=True)
+    os.symlink(external, evidence_parent / "tessl")
+
+    path = evals._tessl_live_evidence_file(repo_root, "Skills/example/SKILL.md", "run-123", "view.json")
+
+    assert path is None

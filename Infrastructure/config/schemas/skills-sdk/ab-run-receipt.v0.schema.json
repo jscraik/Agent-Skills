@@ -189,6 +189,7 @@
         "runner_stderr_digest": {"type": "string", "minLength": 71},
         "output_last_message_path": {"type": "string", "minLength": 1},
         "output_last_message_digest": {"type": ["string", "null"], "minLength": 71},
+        "semantic_output_excerpt": {"type": ["string", "null"], "minLength": 1},
         "blockers": {"type": "array", "items": {"type": "string", "minLength": 1}}
       },
       "required": [
@@ -205,6 +206,7 @@
         "runner_stderr_digest",
         "output_last_message_path",
         "output_last_message_digest",
+        "semantic_output_excerpt",
         "blockers"
       ]
     }

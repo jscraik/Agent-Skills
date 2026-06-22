@@ -1,0 +1,31 @@
+{
+  "schema_version": "skills-sdk.scorer-quality-receipt.v0",
+  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/scorer-quality-receipt.v0.schema.json",
+  "status": "preview",
+  "operation": "scorer_quality_preview",
+  "query": "Skills/agent-ops/sdk-scenario-generator",
+  "skill_path": "Skills/agent-ops/sdk-scenario-generator/SKILL.md",
+  "evals_path": "Skills/agent-ops/sdk-scenario-generator/references/evals.yaml",
+  "ready": true,
+  "quality_checks": [
+    {
+      "id": "scorer_quality_contract_valid",
+      "status": "pass",
+      "severity": "blocker",
+      "message": "scorer_quality metadata satisfies the strict Pydantic contract.",
+      "evidence": []
+    },
+    {
+      "id": "calibration_probe_coverage",
+      "status": "pass",
+      "severity": "blocker",
+      "message": "Calibration must include obvious, bias, rubric-copying, skill-name, and evidence-lane probes.",
+      "evidence": []
+    }
+  ],
+  "blockers": [],
+  "mutation_performed": false,
+  "promotion_performed": false,
+  "acceptance_trace": ["Braintrust scorer validation", "PU-030", "VP-030"],
+  "agent_summary": "scorer quality preview checked scorer calibration for Skills/agent-ops/sdk-scenario-generator."
+}

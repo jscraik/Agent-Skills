@@ -10,6 +10,7 @@ from ask.commands.sdk_ci import add_sdk_ci_parser, dispatch_sdk_ci
 from ask.commands.sdk_emitter import add_sdk_emitter_parser, dispatch_sdk_emitter
 from ask.commands.sdk_eval import add_sdk_eval_parser, dispatch_sdk_eval
 from ask.commands.sdk_explorer import add_sdk_explorer_parser, dispatch_sdk_explorer
+from ask.commands.sdk_intake import add_sdk_intake_parser, dispatch_sdk_intake
 from ask.commands.sdk_security import add_sdk_security_parser, dispatch_sdk_security
 from ask.skills_sdk.determinism import audit_skill_determinism
 from ask.skills_sdk.lenses import (
@@ -299,6 +300,7 @@ def add_sdk_parser(
     add_sdk_eval_parser(sdk_subparsers, global_parser)
     _add_sdk_package_parser(sdk_subparsers, global_parser)
     _add_sdk_sandbox_parser(sdk_subparsers, global_parser)
+    add_sdk_intake_parser(sdk_subparsers, global_parser)
     _add_sdk_trust_parser(sdk_subparsers, global_parser)
     _add_sdk_observability_parser(sdk_subparsers, global_parser)
     add_sdk_emitter_parser(sdk_subparsers, global_parser)
@@ -411,6 +413,7 @@ def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
         "eval": dispatch_sdk_eval,
         "package": _dispatch_sdk_package,
         "sandbox": _dispatch_sdk_sandbox,
+        "intake": dispatch_sdk_intake,
         "trust": _dispatch_sdk_trust,
         "observability": _dispatch_sdk_observability,
         "emitter": dispatch_sdk_emitter,

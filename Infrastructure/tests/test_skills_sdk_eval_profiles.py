@@ -25,19 +25,21 @@ class TestSkillsSdkEvalProfiles(unittest.TestCase):
         self.assertFalse(receipt["secret_boundary"]["skill_execution_receives_judge_secrets"])
         validate_eval_profile_preview_receipt(receipt)
 
-    def test_preview_receipt_declares_selected_ollama_models(self) -> None:
+    def test_preview_receipt_declares_codex_backed_oss_profiles(self) -> None:
         receipt = build_eval_profile_preview_receipt()
         judge_by_id = {profile["id"]: profile for profile in receipt["judge_profiles"]}
 
+        self.assertEqual(judge_by_id["oss-local"]["provider"], "codex")
         self.assertEqual(judge_by_id["oss-local"]["model"], "qwen3.5:latest")
-        self.assertEqual(judge_by_id["oss-local"]["host"], "http://localhost:11434")
+        self.assertEqual(judge_by_id["oss-local"]["host"], "codex-cli-profile")
         self.assertTrue(judge_by_id["oss-local"]["network_required"])
         self.assertEqual(judge_by_id["oss-local"]["auth_boundary"], "none")
+        self.assertEqual(judge_by_id["oss-cloud"]["provider"], "codex")
         self.assertEqual(judge_by_id["oss-cloud"]["model"], "deepseek-v4-flash:cloud")
-        self.assertEqual(judge_by_id["oss-cloud"]["host"], "https://ollama.com")
+        self.assertEqual(judge_by_id["oss-cloud"]["host"], "codex-cli-profile")
         self.assertTrue(judge_by_id["oss-cloud"]["network_required"])
         self.assertEqual(judge_by_id["oss-cloud"]["secret_env_names"], ["OLLAMA_API_KEY"])
-        self.assertEqual(judge_by_id["oss-cloud"]["auth_boundary"], "env_secret")
+        self.assertEqual(judge_by_id["oss-cloud"]["auth_boundary"], "codex_cli_auth")
         self.assertEqual(judge_by_id["codex-fast"]["model"], "gpt-5.3-codex-spark")
         self.assertEqual(judge_by_id["codex-fast"]["host"], "codex-cli-authenticated-session")
         self.assertTrue(judge_by_id["codex-fast"]["network_required"])
