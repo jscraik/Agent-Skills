@@ -24,6 +24,13 @@ def _exact_decision_labels(rows: list[str]) -> bool:
     return set(rows) == _DECISION_LABELS
 
 
+def _contains_codex_profile_invocation(argv: list[str], codex_profile: str | None) -> bool:
+    if codex_profile is None:
+        return False
+    needle = ["codex", "exec", "--profile", codex_profile]
+    return any(argv[index:index + len(needle)] == needle for index in range(0, len(argv) - len(needle) + 1))
+
+
 def _validate_exact_decision_labels(value: list[str], *, message: str) -> list[str]:
     if not _exact_decision_labels(value):
         raise ValueError(message)
@@ -646,7 +653,7 @@ class AbJudgeScoreReceipt(_SdkContractModel):
             raise ValueError("scored A/B judge receipts must report provider side effects")
         if self.codex_profile != self.judge_profile.id:
             raise ValueError("scored A/B judge receipts must bind Codex profile to judge profile")
-        if self.judge_command_argv[:4] != ["codex", "exec", "--profile", self.codex_profile]:
+        if not _contains_codex_profile_invocation(self.judge_command_argv, self.codex_profile):
             raise ValueError("scored A/B judge receipts must invoke codex exec with the judge profile")
         self._validate_decision_consistency()
 

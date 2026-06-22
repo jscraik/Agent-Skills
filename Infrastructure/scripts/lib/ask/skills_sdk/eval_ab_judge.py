@@ -2,14 +2,20 @@ from __future__ import annotations
 
 import hashlib
 import json
-import math
 import os
 import re
 import subprocess
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from ask.skills_sdk.eval_ab_judge_decision import ALLOWED_WINNERS, DECISION_SCHEMA_VERSION, _parse_judge_decision
+from ask.skills_sdk.eval_ab_judge_codex import (
+    CodexJudgeResult,
+    CodexProfileConfigError,
+    _codex_judge_command,
+    _codex_op_env_file_available,
+    _run_codex_judge,
+)
 from ask.skills_sdk.eval_ab_rubric import AB_RUBRIC_DIMENSIONS, canonical_ab_rubric, canonical_ab_rubric_digest
 from ask.skills_sdk.eval_profiles import select_judge_profile
 
@@ -17,23 +23,7 @@ AB_JUDGE_PREVIEW_SCHEMA_VERSION = "skills-sdk.ab-judge-preview-receipt.v0"
 AB_JUDGE_PREVIEW_SCHEMA_URI = "https://jscraik.local/agent-skills/schemas/skills-sdk/ab-judge-preview-receipt.v0.schema.json"
 AB_JUDGE_SCORE_SCHEMA_VERSION = "skills-sdk.ab-judge-score-receipt.v0"
 AB_JUDGE_SCORE_SCHEMA_URI = "https://jscraik.local/agent-skills/schemas/skills-sdk/ab-judge-score-receipt.v0.schema.json"
-DECISION_SCHEMA_VERSION = "skills-sdk.ab-judge-decision.v0"
-ALLOWED_WINNERS = ["skill_a", "skill_b", "inconclusive"]
 _EXPERIMENT_ID_RE = re.compile(r"[0-9a-f]{16}")
-_DIMENSION_IDS = {dimension["id"] for dimension in AB_RUBRIC_DIMENSIONS}
-_DECISION_KEYS = frozenset((
-    "schema_version", "experiment_id", "dimension_scores", "normalized_score_a",
-    "normalized_score_b", "winner", "confidence", "reason", "evidence_refs",
-))
-_DIMENSION_SCORE_KEYS = frozenset({"dimension_id", "skill_a_score", "skill_b_score", "reason", "evidence_refs"})
-
-
-@dataclass(frozen=True)
-class CodexJudgeResult:
-    exit_code: int
-    stdout: str
-    stderr: str
-    output_text: str = ""
 
 
 def _digest_text(value: str) -> str:
@@ -202,12 +192,17 @@ def _comparison_payload(run_receipt: dict[str, Any]) -> dict[str, Any]:
 def _judge_prompt(comparison_payload: dict[str, Any]) -> str:
     return (
         "You are judging a Skills SDK A/B eval from sanitized receipt evidence only.\n"
+        "Do not inspect the repository, call tools, ask follow-up questions, or use hidden context.\n"
         "Do not infer from package names, local paths, hidden logs, or unavailable content.\n"
         "Use the embedded rubric exactly; do not change weights or criteria.\n"
-        "Return JSON only, matching skills-sdk.ab-judge-decision.v0 with dimension_scores, "
-        "normalized_score_a, normalized_score_b, winner, confidence, reason, and evidence_refs.\n"
+        "Return raw JSON only: no Markdown fences, no prose, no comments, no tool-call objects.\n"
+        "The top-level JSON object must have exactly these keys: schema_version, experiment_id, "
+        "dimension_scores, normalized_score_a, normalized_score_b, winner, confidence, reason, evidence_refs.\n"
+        "Set schema_version to skills-sdk.ab-judge-decision.v0 and experiment_id to the evidence experiment_id.\n"
         "Each dimension_scores item must include dimension_id, skill_a_score, skill_b_score, "
         "reason, and evidence_refs.\n"
+        "Use dimension_scores, never dimensions. Use one evidence_refs array per object.\n"
+        "Scores are 0 to 5. Normalized scores are 0 to 1: weighted_sum_of_dimension_scores / 5.\n"
         "Choose inconclusive when the sanitized evidence is insufficient.\n\n"
         f"Evidence:\n{json.dumps(comparison_payload, sort_keys=True, indent=2)}\n"
     )
@@ -384,6 +379,8 @@ def _missing_judge_profile_secrets(judge_profile: dict[str, Any]) -> list[str]:
         for name in judge_profile.get("secret_env_names", [])
         if isinstance(name, str) and name and name not in os.environ
     ]
+    if missing and _codex_op_env_file_available(judge_profile):
+        return []
     return ["judge_profile_secret_missing"] if missing else []
 
 
@@ -444,12 +441,12 @@ def _score_decision(
     mutation_performed = True
     try:
         result = runner(judge_prompt, judge_profile, timeout_seconds, repo_root, evidence["output_file"])
+    except CodexProfileConfigError:
+        blockers.append("codex_profile_config_missing"); return None, None, False, False, mutation_performed
     except OSError:
-        blockers.append("judge_provider_unavailable")
-        return None, None, False, False, mutation_performed
+        blockers.append("judge_provider_unavailable"); return None, None, False, False, mutation_performed
     except subprocess.TimeoutExpired as exc:
-        stdout = _timeout_output_text(exc.stdout)
-        _write_text_evidence(repo_root, evidence["output_file"], stdout)
+        stdout = _timeout_output_text(exc.stdout); _write_text_evidence(repo_root, evidence["output_file"], stdout)
         blockers.append("judge_provider_timeout")
         return None, _digest_text(stdout), True, True, mutation_performed
     output_text = _codex_judge_output_text(repo_root, evidence["output_file"], result.output_text)
@@ -546,185 +543,6 @@ def _path_has_symlink_ancestor(root: Path, path: Path) -> bool:
             return True
         current = current.parent
     return False
-
-
-def _run_codex_judge(
-    prompt: str,
-    judge_profile: dict[str, Any],
-    timeout_seconds: int,
-    repo_root: Path,
-    output_file: Path,
-) -> CodexJudgeResult:
-    command = _codex_judge_command(judge_profile, repo_root, output_file)
-    completed = subprocess.run(
-        command,
-        input=prompt,
-        text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        check=False,
-        timeout=timeout_seconds,
-        env=_codex_judge_env(judge_profile),
-    )
-    output_text = output_file.read_text(encoding="utf-8") if output_file.is_file() else completed.stdout
-    return CodexJudgeResult(
-        exit_code=completed.returncode,
-        stdout=completed.stdout,
-        stderr=completed.stderr,
-        output_text=output_text,
-    )
-
-
-def _codex_judge_command(judge_profile: dict[str, Any], repo_root: Path, output_file: Path) -> list[str]:
-    return [
-        "codex", "exec", "--profile", str(judge_profile["id"]), "--cd", str(repo_root), "--json",
-        "--output-last-message", str(output_file), "-",
-    ]
-
-
-def _codex_judge_env(judge_profile: dict[str, Any]) -> dict[str, str]:
-    allowed_secret_names = {
-        name
-        for name in judge_profile.get("secret_env_names", [])
-        if isinstance(name, str) and name
-    }
-    return {
-        key: value
-        for key, value in os.environ.items()
-        if key in allowed_secret_names
-        or not any(marker in key.upper() for marker in ("KEY", "SECRET", "TOKEN", "PASSWORD", "CREDENTIAL", "COOKIE"))
-    }
-
-
-def _parse_judge_decision(raw_output: str, comparison_payload: dict[str, Any]) -> tuple[dict[str, Any] | None, str | None]:
-    try:
-        decision = json.loads(raw_output, parse_constant=_reject_json_constant)
-    except (ValueError, json.JSONDecodeError):
-        return None, "judge_output_invalid_json"
-    if not isinstance(decision, dict):
-        return None, "judge_output_not_object"
-    blocker = _decision_contract_blocker(decision, comparison_payload)
-    if blocker:
-        return None, blocker
-    return decision, None
-
-
-def _decision_contract_blocker(decision: dict[str, Any], comparison_payload: dict[str, Any]) -> str | None:
-    if set(decision) != _DECISION_KEYS:
-        return "judge_decision_keys_invalid"
-    if decision.get("schema_version") != DECISION_SCHEMA_VERSION:
-        return "judge_decision_schema_mismatch"
-    if decision.get("experiment_id") != comparison_payload["experiment_id"]:
-        return "judge_decision_experiment_mismatch"
-    scalar_blocker = _decision_scalar_blocker(decision)
-    if scalar_blocker:
-        return scalar_blocker
-    dimension_blocker = _dimension_scores_blocker(decision.get("dimension_scores"))
-    if dimension_blocker:
-        return dimension_blocker
-    return _decision_score_consistency_blocker(decision, comparison_payload)
-
-
-def _decision_scalar_blocker(decision: dict[str, Any]) -> str | None:
-    if decision.get("winner") not in ALLOWED_WINNERS:
-        return "judge_decision_winner_invalid"
-    if decision.get("confidence") not in {"low", "medium", "high"}:
-        return "judge_decision_confidence_invalid"
-    if not isinstance(decision.get("reason"), str) or not decision["reason"].strip():
-        return "judge_decision_reason_missing"
-    if not _evidence_refs_valid(decision.get("evidence_refs")):
-        return "judge_decision_evidence_refs_invalid"
-    return None
-
-
-def _decision_score_consistency_blocker(decision: dict[str, Any], comparison_payload: dict[str, Any]) -> str | None:
-    if not _normalized_scores_valid(decision):
-        return "judge_decision_normalized_scores_invalid"
-    computed_scores = _computed_normalized_scores(decision["dimension_scores"], comparison_payload)
-    if not _normalized_scores_match(decision, computed_scores):
-        return "judge_decision_normalized_scores_mismatch"
-    if decision["winner"] != _expected_winner(computed_scores, decision, comparison_payload):
-        return "judge_decision_winner_mismatch"
-    return None
-
-
-def _reject_json_constant(value: str) -> None:
-    raise ValueError(f"non-finite JSON constant is not allowed: {value}")
-
-
-def _normalized_scores_valid(decision: dict[str, Any]) -> bool:
-    for key in ("normalized_score_a", "normalized_score_b"):
-        value = decision.get(key)
-        if not _number_in_range(value, minimum=0, maximum=1):
-            return False
-    return True
-
-
-def _computed_normalized_scores(
-    rows: list[dict[str, Any]],
-    comparison_payload: dict[str, Any],
-) -> dict[str, float]:
-    weights = {dimension["id"]: dimension["weight"] for dimension in comparison_payload["rubric"]["dimensions"]}
-    score_a = sum(row["skill_a_score"] * weights[row["dimension_id"]] for row in rows) / 5
-    score_b = sum(row["skill_b_score"] * weights[row["dimension_id"]] for row in rows) / 5
-    return {"normalized_score_a": score_a, "normalized_score_b": score_b}
-
-
-def _normalized_scores_match(decision: dict[str, Any], computed_scores: dict[str, float]) -> bool:
-    return all(math.isclose(decision[key], computed_scores[key], rel_tol=0, abs_tol=1e-9) for key in computed_scores)
-
-
-def _expected_winner(computed_scores: dict[str, float], decision: dict[str, Any], comparison_payload: dict[str, Any]) -> str:
-    winner_policy = comparison_payload["rubric"]["winner_policy"]
-    delta = computed_scores["normalized_score_b"] - computed_scores["normalized_score_a"]
-    minimum_delta = winner_policy["minimum_normalized_delta"]
-    if abs(delta) < minimum_delta:
-        return winner_policy["tie_result"]
-    if not _confidence_meets_minimum(decision["confidence"], winner_policy["minimum_confidence"]):
-        return winner_policy["tie_result"]
-    return "skill_b" if delta > 0 else "skill_a"
-
-
-def _confidence_meets_minimum(value: str, minimum: str) -> bool:
-    confidence_rank = {"low": 0, "medium": 1, "high": 2}
-    return confidence_rank[value] >= confidence_rank[minimum]
-
-
-def _dimension_scores_blocker(rows: object) -> str | None:
-    if not isinstance(rows, list) or len(rows) != len(_DIMENSION_IDS):
-        return "judge_dimension_scores_invalid"
-    seen: set[str] = set()
-    for row in rows:
-        if not isinstance(row, dict):
-            return "judge_dimension_scores_invalid"
-        if set(row) != _DIMENSION_SCORE_KEYS:
-            return "judge_dimension_scores_invalid"
-        dimension_id = row.get("dimension_id")
-        if dimension_id not in _DIMENSION_IDS or dimension_id in seen:
-            return "judge_dimension_scores_invalid"
-        seen.add(dimension_id)
-        if not _dimension_score_row_valid(row):
-            return "judge_dimension_scores_invalid"
-    return None if seen == _DIMENSION_IDS else "judge_dimension_scores_invalid"
-
-
-def _dimension_score_row_valid(row: dict[str, Any]) -> bool:
-    if not isinstance(row.get("reason"), str) or not row["reason"].strip():
-        return False
-    if not _evidence_refs_valid(row.get("evidence_refs")):
-        return False
-    for key in ("skill_a_score", "skill_b_score"):
-        if not _number_in_range(row.get(key), minimum=0, maximum=5):
-            return False
-    return True
-
-
-def _number_in_range(value: object, *, minimum: float, maximum: float) -> bool:
-    return isinstance(value, int | float) and not isinstance(value, bool) and math.isfinite(value) and minimum <= value <= maximum
-
-
-def _evidence_refs_valid(value: object) -> bool:
-    return isinstance(value, list) and bool(value) and all(isinstance(item, str) and item for item in value)
 
 
 def _timeout_output_text(value: object) -> str:
