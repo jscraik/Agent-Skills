@@ -16,6 +16,11 @@ discovering, and syncing Codex skills, operator docs, and agent workflows.
   `Infrastructure/bin/ask`.
 - The repository root has no package manager install step. Use repo wrappers at
   the root, and use package commands only inside verified package roots.
+- Run Infrastructure Python tests through the locked Infrastructure environment,
+  not the system Python from the repo root. Use
+  `bash scripts/run-infrastructure-python.sh -m unittest tests.<module>` or
+  `bash scripts/run-infrastructure-python.sh -m pytest <path>` so dependencies
+  from `Infrastructure/uv.lock` are available.
 - Before changing skills, sync policy, runtime projections, or agent-facing
   docs, read [UBIQUITOUS_LANGUAGE.md](./UBIQUITOUS_LANGUAGE.md).
 - Edit canonical sources, not runtime projections. See

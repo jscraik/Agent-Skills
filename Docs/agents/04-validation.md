@@ -33,7 +33,7 @@
   feedback uptake, or high-signal steering surfaces change. It also rejects
   unknown failure-category and improvement-type labels so uptake records use
   the documented taxonomy instead of vague local phrasing.
-- `python3 -m pytest Infrastructure/scripts/testing/test_validate_steering_uptake.py -q`
+- `bash scripts/run-infrastructure-python.sh -m pytest scripts/testing/test_validate_steering_uptake.py -q`
   proves steering uptake cannot pass as ceremony by rejecting records that lack
   operating failure, blocker, mechanism, or proof fields.
 - Interface-design changes should have tests that read as policy checks for
