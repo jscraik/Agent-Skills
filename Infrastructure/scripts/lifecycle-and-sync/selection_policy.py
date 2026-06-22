@@ -347,6 +347,8 @@ PLUGIN_SKILL_COLLISION_POLICIES: tuple[dict[str, Any], ...] = (
             "security-diff-scan",
             "security-scan",
             "threat-model",
+            "track-findings",
+            "triage-finding",
             "validation",
         )
     ),

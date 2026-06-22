@@ -46,6 +46,7 @@
     "./bin/ask sdk eval scenario-quality Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --preview --json --robot",
     "./bin/ask sdk package build Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
     "./bin/ask sdk package harden Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
+    "./bin/ask sdk intake inspect Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
     "./bin/ask sdk trust decide Infrastructure/tests/fixtures/skills_sdk/valid_skill --decision trust --reason 'fixture passed local checks' --owner skills-sdk-tests --preview --json --robot",
     "./bin/ask sdk observability feedback --skill Infrastructure/tests/fixtures/skills_sdk/valid_skill --events Infrastructure/tests/fixtures/skills_sdk/observability/redacted-events.fixture --preview --json --robot",
     "./bin/ask sdk sandbox validate --profile Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/sandbox-profile.json --json --robot",
@@ -171,6 +172,22 @@
       "evidence_refs": ["./bin/ask sdk install Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md --preview --json --robot", "Infrastructure/tests/test_skills_sdk_install_preview.py"],
       "next_slice": "Real install writes require a separately approved lifecycle slice.",
       "notes": "The SDK models target paths and lockfile delta without writing them."
+    },
+    {
+      "id": "skill_intake",
+      "title": "External skill intake quarantine",
+      "status": "preview_only",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/skill_intake.py",
+      "pipeline_sections": ["full_skill_lifecycle", "package_hardening", "agent_execution_control_plane"],
+      "feature_executed": true,
+      "mutation_performed": false,
+      "evidence_refs": [
+        "./bin/ask sdk intake inspect Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
+        "Infrastructure/config/schemas/skills-sdk/skill-intake-receipt.v0.schema.json",
+        "Infrastructure/tests/test_skills_sdk_skill_intake.py"
+      ],
+      "next_slice": "Add archive unpack quarantine only after directory intake receipts and path-boundary checks stay schema-verified.",
+      "notes": "PU-032 inspects directory-form external skill candidates by reading, hashing, and validating package paths without execution, install, runtime projection writes, network access, or mutation."
     },
     {
       "id": "lockfile_preview",

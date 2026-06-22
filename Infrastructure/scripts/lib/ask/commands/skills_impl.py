@@ -105,6 +105,7 @@ from ask.skills_sdk.package_verify import (  # noqa: E402
 )
 from ask.skills_sdk.risk import build_risk_classification as _build_risk_classification  # noqa: E402
 from ask.skills_sdk.install_preview import build_install_preview as _build_install_preview  # noqa: E402
+from ask.skills_sdk.skill_intake import build_skill_intake_receipt as _build_skill_intake_receipt  # noqa: E402
 from ask.skills_sdk.ir import build_skill_ir as _build_skill_ir  # noqa: E402
 from ask.skills_sdk.docs_projection import verify_capability_docs_projection as _verify_capability_docs_projection  # noqa: E402
 from ask.skills_sdk.package_build import build_package_digest_receipt as _build_package_digest_receipt  # noqa: E402
@@ -4075,6 +4076,49 @@ def skills_sdk_install_preview(
                 code="ERR_VALIDATION",
                 message=payload["agent_summary"],
                 fix_suggestion=_ask_validation_command("sdk", "check", query),
+            )
+        )
+    return result
+
+
+def skills_sdk_intake_inspect(
+    repo_root: Path,
+    *,
+    source: str,
+    source_kind: str = "directory",
+) -> CallResult:
+    """Build a non-mutating external skill intake receipt."""
+    result = CallResult()
+    result.metadata["command"] = "sdk intake inspect --preview"
+    query = source.strip()
+    receipt = _build_skill_intake_receipt(repo_root, source=query, source_kind=source_kind)
+    payload = {
+        "schema_version": "skills-sdk-intake-inspect.v0",
+        "query": query,
+        "status": receipt["status"],
+        "facade_command": "skills-sdk intake inspect --preview",
+        "receipt": receipt,
+        "validation_commands": [
+            _ask_validation_command(
+                "sdk",
+                "intake",
+                "inspect",
+                query,
+                "--preview",
+                "--source-kind",
+                source_kind,
+            ),
+        ],
+        "agent_summary": receipt["agent_summary"],
+    }
+    result.data["skills_sdk_intake_inspect"] = payload
+    if receipt["status"] == "blocked":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=receipt["agent_summary"],
+                fix_suggestion="Inspect data.skills_sdk_intake_inspect.receipt.blockers for specific details about path, symlink, or validation issues.",
             )
         )
     return result

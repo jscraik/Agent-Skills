@@ -77,6 +77,13 @@ LEGACY_SHAPE_DEBT = {
         "reason": "pre-existing package contract extraction debt",
         "expires": "2026-07-31",
     },
+    "Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py": {
+        "owner": "skill-factory",
+        "rule_id": "ask-cli-shape-budget",
+        "ticket": "JSC-SDK-SPINE",
+        "reason": "pre-existing skill authoring benchmark extraction debt",
+        "expires": "2026-07-31",
+    },
     "Infrastructure/tests/test_ask_cli_impl.py": {
         "owner": "ask-cli",
         "rule_id": "ask-cli-shape-budget",
@@ -89,6 +96,13 @@ LEGACY_SHAPE_DEBT = {
         "rule_id": "ask-cli-shape-budget",
         "ticket": "JSC-SDK-SPINE",
         "reason": "pre-existing package contract regression suite debt",
+        "expires": "2026-07-31",
+    },
+    "Infrastructure/tests/test_ask_skills_errors.py": {
+        "owner": "ask-cli",
+        "rule_id": "ask-cli-shape-budget",
+        "ticket": "JSC-SDK-SPINE",
+        "reason": "pre-existing skills error regression suite debt",
         "expires": "2026-07-31",
     },
 }
