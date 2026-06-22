@@ -42,12 +42,24 @@ def _score_solution(solution: dict[str, Any]) -> tuple[float, float] | None:
     for result in results:
         if not isinstance(result, dict):
             continue
-        try:
-            score += float(result.get("score") or 0)
-            max_score += float(result.get("max_score") or result.get("maxScore") or 0)
-        except (TypeError, ValueError):
+        parsed = _assessment_score(result)
+        if parsed is None:
             return None
+        score += parsed[0]
+        max_score += parsed[1]
     return score, max_score
+
+
+def _assessment_score(result: dict[str, Any]) -> tuple[float, float] | None:
+    if "score" not in result:
+        return None
+    max_key = "max_score" if "max_score" in result else "maxScore" if "maxScore" in result else None
+    if max_key is None:
+        return None
+    try:
+        return float(result["score"]), float(result[max_key])
+    except (TypeError, ValueError):
+        return None
 
 
 def _run_id(payload: dict[str, Any], fallback: str | None) -> str:
@@ -271,11 +283,11 @@ def _receipt_blocker(
         return _failure_blocker(tessl_status, failure_reason)
     if tessl_status != "completed":
         return f"Tessl eval view is not complete yet; current status is {tessl_status or 'unknown'}."
-    if score_summary["scenario_count"] > 0 and score_summary["max_points"] <= 0:
-        return "Tessl eval view does not contain positive max points for scored scenarios."
     complete = score_summary["scenario_count"] > 0 and score_summary["missing_scenario_count"] == 0
     if not complete:
         return "Tessl eval view does not contain complete scored baseline and usage-spec assessments."
+    if score_summary["scenario_count"] > 0 and score_summary["max_points"] <= 0:
+        return "Tessl eval view does not contain positive max points for scored scenarios."
     if score_summary["regressions"]:
         return _regression_blocker(score_summary["regressions"])
     return _handoff_blocker(score_summary)

@@ -220,6 +220,17 @@ cases: []
         self.assertIn("scorer_quality_contract_valid", blockers)
         self.assertTrue(any("pass_threshold" in item for item in blockers["scorer_quality_contract_valid"]["evidence"]))
 
+    def test_malformed_evals_yaml_returns_blocked_receipt(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(Path(temp_dir), "scorer_quality:\n  - [\n")
+
+            receipt = build_scorer_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        blockers = {check["id"]: check for check in receipt["blockers"]}
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("evals_yaml_parse", blockers)
+        self.assertTrue(blockers["evals_yaml_parse"]["evidence"])
+
     def test_builder_receipt_loads_through_pydantic_contract(self) -> None:
         process = _run_ask("sdk", "eval", "scorer-quality", FIXTURE_SKILL, "--preview", "--json", "--robot")
         self.assertEqual(process.returncode, 0, process.stderr)

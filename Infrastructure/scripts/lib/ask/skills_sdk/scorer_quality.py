@@ -54,7 +54,10 @@ def _yaml_safe_load(text: str) -> Any:
         import yaml  # type: ignore
     except ModuleNotFoundError:
         return _load_minimal_scorer_yaml(text)
-    return yaml.safe_load(text)
+    try:
+        return yaml.safe_load(text)
+    except yaml.YAMLError as exc:  # type: ignore[attr-defined]
+        raise ValueError(f"yaml_parse_error: {exc}") from exc
 
 
 def _load_minimal_scorer_yaml(text: str) -> dict[str, Any]:

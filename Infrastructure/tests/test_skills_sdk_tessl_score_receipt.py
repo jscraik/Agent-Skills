@@ -76,6 +76,27 @@ def _zero_max_view_payload() -> dict[str, object]:
     }
 
 
+def _missing_score_view_payload() -> dict[str, object]:
+    return {
+        "data": {
+            "id": RUN_ID,
+            "attributes": {
+                "status": "completed",
+                "scenarios": [
+                    {
+                        "id": "scenario-incomplete",
+                        "path": "scenario-incomplete",
+                        "solutions": [
+                            {"variant": "usage-spec", "assessmentResults": [{"score": 1.0, "max_score": 1.0}]},
+                            {"variant": "baseline", "assessmentResults": [{"max_score": 1.0}]},
+                        ],
+                    }
+                ],
+            },
+        }
+    }
+
+
 def _command_env() -> dict[str, str]:
     env = os.environ.copy()
     temp_base = Path(tempfile.gettempdir()) / "agent-skills-test"
@@ -211,6 +232,18 @@ class TestSkillsSdkTesslScoreReceipt(unittest.TestCase):
         self.assertEqual(receipt["status"], "blocked")
         self.assertFalse(receipt["ready"])
         self.assertEqual(receipt["score_summary"]["missing_scenario_count"], 1)
+
+    def test_missing_assessment_score_is_blocked_as_incomplete(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "view.json"
+            path.write_text(json.dumps(_missing_score_view_payload()), encoding="utf-8")
+
+            receipt = build_tessl_score_receipt(REPO_ROOT, view_json=path, skill="Skills/github/teach", run_id=RUN_ID)
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertFalse(receipt["ready"])
+        self.assertEqual(receipt["score_summary"]["missing_scenario_count"], 1)
+        self.assertIn("complete scored baseline", receipt["blocker"])
 
     def test_scenario_max_uses_larger_variant_denominator(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
