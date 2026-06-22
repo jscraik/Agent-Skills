@@ -285,6 +285,31 @@ class TestSkillsSdkKnowledgeIngest(unittest.TestCase):
             capsule_routing_text = capsule_routing.read_text(encoding="utf-8")
             self.assertIn("selected_asset_count: 0", capsule_routing_text)
 
+    @unittest.skipUnless(hasattr(os, "symlink"), "symlink support required")
+    def test_apply_blocks_symlinked_capsule_routing_target_before_write(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "agent-skills"
+            root.mkdir()
+            skill_dir = _write_skill(root)
+            extraction = _write_extraction(Path(tmp))
+            skill_md = skill_dir / "SKILL.md"
+            original_skill_text = skill_md.read_text(encoding="utf-8")
+            routing_path = skill_dir / "references" / "knowledge-capsule-routing.md"
+            try:
+                routing_path.symlink_to(Path("..") / "SKILL.md")
+            except OSError as exc:
+                self.skipTest(f"symlink creation unavailable: {exc}")
+
+            with self.assertRaises(ValueError):
+                build_knowledge_ingest(
+                    root,
+                    extraction=str(extraction),
+                    skill="Skills/agent-ops/improve-agent-native/SKILL.md",
+                    apply=True,
+                    preflight_security=False,
+                )
+            self.assertEqual(skill_md.read_text(encoding="utf-8"), original_skill_text)
+
     def test_apply_vendors_knowledge_eval_scenarios_and_fixtures(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "agent-skills"

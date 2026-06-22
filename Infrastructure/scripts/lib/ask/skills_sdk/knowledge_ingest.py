@@ -191,6 +191,11 @@ def _update_knowledge_routing_files(
 def _safe_skill_package_path(skill_dir: Path, relative_path: Path, *, label: str) -> Path:
     if relative_path.is_absolute() or ".." in relative_path.parts:
         raise ValueError(f"{label} path must stay inside the skill package.")
+    current = skill_dir
+    for part in relative_path.parts:
+        current = current / part
+        if current.is_symlink():
+            raise ValueError(f"{label} path must not contain symlinks.")
     skill_root = skill_dir.resolve()
     target = (skill_dir / relative_path).resolve(strict=False)
     try:
