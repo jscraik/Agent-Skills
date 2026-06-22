@@ -669,14 +669,21 @@ def _safe_tessl_skill_key(raw_name: str) -> str:
 
 def _write_tessl_staged_json(path: Path, payload: dict[str, Any], staging_root_real: str, label: str) -> None:
     safe_path = _safe_tessl_staging_path(path, staging_root_real, label)
-    safe_parent = os.path.realpath(safe_path.parent)
-    safe_target = os.path.realpath(safe_path)
-    if os.path.commonpath([staging_root_real, safe_parent]) != staging_root_real:
-        raise ValueError(f"Tessl review staging {label} parent escaped the staging root.")
-    if os.path.commonpath([staging_root_real, safe_target]) != staging_root_real:
-        raise ValueError(f"Tessl review staging {label} path escaped the staging root.")
     safe_path.parent.mkdir(parents=True, exist_ok=True)
-    safe_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    _write_tessl_staged_text(
+        safe_path,
+        json.dumps(payload, indent=2, sort_keys=True) + "\n",
+        staging_root_real,
+        label,
+    )
+
+
+def _write_tessl_staged_text(path: Path, value: str, staging_root_real: str, label: str) -> None:
+    safe_path = _safe_tessl_staging_path(path, staging_root_real, label)
+    if safe_path.is_symlink():
+        raise ValueError(f"Tessl review staging {label} path must not be a symlink.")
+    with safe_path.open("w", encoding="utf-8") as handle:
+        handle.write(value)
 
 
 def _safe_tessl_staging_path(path: Path, staging_root_real: str, label: str) -> Path:

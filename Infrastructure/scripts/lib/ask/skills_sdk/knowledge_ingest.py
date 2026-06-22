@@ -436,14 +436,19 @@ def _update_capsule_routing_index(path: Path, *, manifest: dict[str, Any]) -> No
     if isinstance(capsules, list):
         for capsule in capsules:
             lines.extend(_capsule_routing_lines(capsule, default_pack_id, default_asset_count))
-    path_parent_real = os.path.realpath(path.parent)
-    path_real = os.path.realpath(path)
-    if os.path.commonpath([path_parent_real, path_real]) != path_parent_real:
-        raise ValueError("Knowledge capsule routing path escaped its parent directory.")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    _write_capsule_routing_index(path, "\n".join(lines).rstrip() + "\n")
+
+
+def _write_capsule_routing_index(path: Path, value: str) -> None:
+    references_root_real = os.path.realpath(path.parent)
+    routing_path_real = os.path.realpath(path)
+    if os.path.commonpath([references_root_real, routing_path_real]) != references_root_real:
+        raise ValueError("Knowledge capsule routing path escaped the references directory.")
     if path.is_symlink():
         raise ValueError("Knowledge capsule routing path must not be a symlink.")
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
+    with Path(routing_path_real).open("w", encoding="utf-8") as handle:
+        handle.write(value)
 
 
 def _capsule_routing_lines(capsule: object, default_pack_id: str, default_asset_count: int) -> list[str]:
