@@ -423,6 +423,7 @@
       </div>
       <div class="card-grid">
         <div class="gap" data-status="deferred"><span class="pill deferred">drift risk</span><strong>Atlas Is Bigger Than Product</strong><span>The HTML describes an end-state platform. The implemented SDK is a local control plane. Keep “platform atlas” and “capability truth” visually separate.</span></div>
+        <div class="gap" data-status="deferred"><span class="pill deferred">proof gap</span><strong>Evidence Refs Need Verification</strong><span>The capability matrix requires evidence refs, but today they are validated as non-empty references, not as executed proof objects. The next SDK ratchet should classify each ref as file, command, schema, receipt, or external lane and record pass, blocked, or not-run status.</span></div>
         <div class="gap" data-status="implemented"><span class="pill implemented">spine landed</span><strong>Tiny IR Exists</strong><span><code>SkillIR.v0</code> is now the small read-only spine for package identity and receipt-producing SDK lanes.</span></div>
         <div class="gap" data-status="implemented"><span class="pill implemented">quality lane</span><strong>Deterministic And A/B Evals Run</strong><span>Local deterministic eval receipts and internal scorecard-backed receipts run with package identity, while A/B run receipts invoke Codex explicitly and leave judge provider invocation as a separate gated lane.</span></div>
         <div class="gap" data-status="implemented"><span class="pill implemented">intent landed</span><strong>Signing Intent Exists</strong><span>Package identity can be checked against a pinned signing policy without signature requests, key access, archive emission, or trust mutation.</span></div>
@@ -473,6 +474,7 @@
       </div>
       <div class="card-grid">
         <div class="note">No numbered product slice is currently promoted. The post-merge hardening gate below is now closed by focused regression proof; the next likely build slice is external skill intake quarantine receipts, promoted only after its command, schema or receipt, tests, and capability-matrix truth are concrete.</div>
+        <div class="step" data-status="deferred"><span class="pill deferred">next ratchet</span><strong>Capability Evidence Verifier</strong><span>Add an SDK receipt that validates capability evidence refs against the current workspace: file refs must exist, command refs must either run or be marked blocked with reason, schema refs must parse, and external lanes must stay separate from local readiness.</span></div>
       </div>
     </section>
 
