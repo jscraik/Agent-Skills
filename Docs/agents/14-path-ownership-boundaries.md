@@ -85,7 +85,7 @@ Workout and telemetry surfaces:
 - Edit product content only in canonical source paths.
 - Do not hand-edit runtime/projection surfaces.
 - Edit tracked `.agents/workflows/**` docs directly when the workflow itself changes.
-- Do not hand-edit `.skillsets/**`; regenerate it with `python3 bin/ask skills sync --projection rooted` or the manifest generator.
+- Do not hand-edit .skillsets/**; refresh current runtime projections with python3 bin/ask skills sync --scope workspace --projection flat and use the manifest generator only for legacy .skillsets/** compatibility metadata.
 - Treat `Plugins/cache/**` as mirrored output. Edits are blocked by default and allowed only in explicit projection-refresh lanes.
 - For explicit projection-refresh lanes, set `PATH_OWNERSHIP_ALLOW_CACHE_WRITES=1` and ensure matching canonical source or projection mechanics updates.
 - Regenerate projections with repository wrappers (`python3 bin/ask skills sync`, `Infrastructure/scripts/lifecycle-and-sync/sync_skills.sh`) rather than editing projections directly.

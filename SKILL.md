@@ -10,15 +10,15 @@ Do not hand-edit runtime projections.
 ## Table of Contents
 - [Summary](#summary)
 - [Catalog](#catalog)
-- [.Agents — Skills — .System](#agents-skills-system)
 - [Skills — Agent Ops](#skills-agent-ops)
 - [Skills — Backend Platform](#skills-backend-platform)
 - [Skills — Content Publishing](#skills-content-publishing)
 - [Skills — Frontend Ui](#skills-frontend-ui)
-- [Skills — GitHub](#skills-github)
+- [Skills — Github](#skills-github)
 - [Skills — Mobile Native](#skills-mobile-native)
 - [Skills — Product Strategy](#skills-product-strategy)
 - [Skills — Security Ops](#skills-security-ops)
+- [Skills System](#skills-system)
 
 ## Summary
 - `total_skills`: 83
@@ -27,11 +27,6 @@ Do not hand-edit runtime projections.
 - `policy_identity`: a4a5d9c1461c4d06
 
 ## Catalog
-
-## .Agents — Skills — .System
-
-- `imagegen` — Generate or edit raster images when the task benefits from AI-created bitmap visuals such as photos, illustrations, textures, sprites, mockups, or transparent-background cutouts. Use when Codex should create a brand-new image, transform an existing image, or derive visual variants from references, and the output should be a bitmap asset rather than repo-native code or vector. Do not use when the task is better handled by editing existing SVG/vector/code-native assets, extending an established icon or logo system, or building the visual directly in HTML/CSS/canvas.
-- `openai-docs` — Use when the user asks how to build with OpenAI products or APIs, asks about Codex itself or choosing Codex surfaces, needs up-to-date official documentation with citations, help choosing the latest model for a use case, or model upgrade and prompt-upgrade guidance; use OpenAI docs MCP tools for non-Codex docs questions, use the Codex manual helper first for broad Codex self-knowledge, and restrict fallback browsing to official OpenAI domains.
 
 ## Skills — Agent Ops
 
@@ -75,7 +70,7 @@ Do not hand-edit runtime projections.
 - `sdk-scenario-generator` — Create, review, and maintain gold-standard Skills SDK eval scenarios before internal evals, dry Tessl staging, or live private Tessl scoring. Use when creating or updating a skill, writing skill tests, adding eval cases, importing KnowledgeOS or Tessl suggestions, checking scenario drift, or hardening evals that are too easy.
 - `session-workflow-miner` — Analyze recent Codex session evidence for repeated manual workflows and route them to skills, subagents, validators, or no artifact when Jamie asks what he keeps doing manually.
 - `simplify` — Review changed code for behavior-preserving simplification by removing dead code, eliminating duplication, extracting shared helpers, improving names, and tightening tests. Use when a user asks for code review, refactor, clean up PR, simplify, tidy up code, review my changes, or maintainability cleanup before merge.
-- `skill-pr-delivery` — Ship skill changes to PRs when Codex skills need source edits, rooted sync, strict audit, reviewer evidence, commit, push, and PR status.
+- `skill-pr-delivery` — Ship skill changes to PRs when Codex skills need source edits, projection sync, strict audit, reviewer evidence, commit, push, and PR status.
 - `testing` — Select, run, parse, and report repo-native validation evidence, including test commands, failure ownership, coverage gaps, eval artifacts, deterministic scorers, judge calibration, and regression proof. Use when users ask what tests to run, ask to validate a change, fix failing tests, design test coverage, build eval proof, classify validation failures, or prove behavior before closeout.
 - `toml` — Create and review TOML configuration with strict typing and predictable structure. Use when editing tool configuration files that require schema-safe TOML.
 - `triage` — Review file-based todo findings into ready, skipped, customized, or blocked states. Use this skill when pending todo files need approval.
@@ -137,3 +132,8 @@ Do not hand-edit runtime projections.
 - `create-auth` — Create, migrate, or validate Better Auth implementation work. Use when the user wants Better Auth added or changed in code, including OAuth, passkeys, 2FA, magic links, or org flows.
 - `recon-workbench` — Run, audit, and design authorized Recon Workbench workflows when scoped target interrogation needs evidence artifacts, redaction, validation, and safe reporting.
 - `security-ownership-map` — Analyze git-history security ownership when sensitive files, CODEOWNERS coverage, bus factor, contributor concentration, and remediation evidence need mapping.
+
+## Skills System
+
+- `imagegen` — Generate or edit raster images when the task benefits from AI-created bitmap visuals such as photos, illustrations, textures, sprites, mockups, or transparent-background cutouts. Use when Codex should create a brand-new image, transform an existing image, or derive visual variants from references, and the output should be a bitmap asset rather than repo-native code or vector. Do not use when the task is better handled by editing existing SVG/vector/code-native assets, extending an established icon or logo system, or building the visual directly in HTML/CSS/canvas.
+- `openai-docs` — Use when the user asks how to build with OpenAI products or APIs, asks about Codex itself or choosing Codex surfaces, needs up-to-date official documentation with citations, help choosing the latest model for a use case, or model upgrade and prompt-upgrade guidance; use OpenAI docs MCP tools for non-Codex docs questions, use the Codex manual helper first for broad Codex self-knowledge, and restrict fallback browsing to official OpenAI domains.

@@ -1,6 +1,6 @@
 ---
 name: skill-pr-delivery
-description: Ship skill changes to PRs when Codex skills need source edits, rooted sync, strict audit, reviewer evidence, commit, push, and PR status.
+description: Ship skill changes to PRs when Codex skills need source edits, projection sync, strict audit, reviewer evidence, commit, push, and PR status.
 metadata:
   skill-type: team_automation
   lifecycle_state: active
@@ -48,7 +48,7 @@ metadata:
 - Classify the lane as create, harden, skillify, install, visibility, or PR delivery.
 - Check repo status, branch, upstream, and unrelated work before editing.
 - Edit canonical skill source, not generated runtime mirrors.
-- Run rooted sync and verify projected visibility when runtime availability matters.
+- Run projection sync and verify projected visibility when runtime availability matters.
 - Commit and push only the intended skill changes with validation evidence.
 
 ## Constraints
