@@ -246,13 +246,23 @@ def _confusion_checks(manifest: dict[str, Any], rows: list[dict[str, Any]], matr
     ]
 
 
+def _integer_limit(manifest: dict[str, Any], field: str, default: int) -> int:
+    value = manifest.get(field, default)
+    if isinstance(value, bool):
+        return default
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
 def _confusion_limits(manifest: dict[str, Any]) -> dict[str, int]:
     return {
-        "minimum_examples": int(manifest.get("minimum_examples") or 1),
-        "minimum_tp": int(manifest.get("minimum_true_positives") or 1),
-        "minimum_tn": int(manifest.get("minimum_true_negatives") or 1),
-        "max_fp": int(manifest.get("max_false_positives") or 0),
-        "max_fn": int(manifest.get("max_false_negatives") or 0),
+        "minimum_examples": _integer_limit(manifest, "minimum_examples", 1),
+        "minimum_tp": _integer_limit(manifest, "minimum_true_positives", 1),
+        "minimum_tn": _integer_limit(manifest, "minimum_true_negatives", 1),
+        "max_fp": _integer_limit(manifest, "max_false_positives", 0),
+        "max_fn": _integer_limit(manifest, "max_false_negatives", 0),
     }
 
 
