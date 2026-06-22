@@ -166,6 +166,8 @@ skills_sdk_eval_ab_preview = _impl_facade("skills_sdk_eval_ab_preview")
 skills_sdk_eval_ab_plan = _impl_facade("skills_sdk_eval_ab_plan")
 skills_sdk_eval_ab_run = _impl_facade("skills_sdk_eval_ab_run")
 skills_sdk_eval_ab_judge_preview = _impl_facade("skills_sdk_eval_ab_judge_preview")
+skills_sdk_eval_ab_judge_score = _impl_facade("skills_sdk_eval_ab_judge_score")
+skills_sdk_eval_tessl_score = _impl_facade("skills_sdk_eval_tessl_score")
 
 
 def skills_sdk_project_install(*args, **kwargs):
@@ -214,6 +216,7 @@ _FACADE_WRAPPERS.update(
         "skills_sdk_eval_ab_plan": skills_sdk_eval_ab_plan,
         "skills_sdk_eval_ab_run": skills_sdk_eval_ab_run,
         "skills_sdk_eval_ab_judge_preview": skills_sdk_eval_ab_judge_preview,
+        "skills_sdk_eval_ab_judge_score": skills_sdk_eval_ab_judge_score,
         "skills_sdk_project_install": skills_sdk_project_install,
         "skills_sdk_project_conformance": skills_sdk_project_conformance,
     }
@@ -265,6 +268,7 @@ skills_sdk_eval_ab_preview = _impl.skills_sdk_eval_ab_preview
 skills_sdk_eval_ab_plan = _impl.skills_sdk_eval_ab_plan
 skills_sdk_eval_ab_run = _impl.skills_sdk_eval_ab_run
 skills_sdk_eval_ab_judge_preview = _impl.skills_sdk_eval_ab_judge_preview
+skills_sdk_eval_ab_judge_score = _impl.skills_sdk_eval_ab_judge_score
 skills_sdk_placeholder_lifecycle = _impl.skills_sdk_placeholder_lifecycle
 validate_openai_skill_format = _impl.validate_openai_skill_format
 validate_skill_boundaries = _impl.validate_skill_boundaries
@@ -322,6 +326,8 @@ __all__ = [
     "skills_sdk_eval_ab_plan",
     "skills_sdk_eval_ab_run",
     "skills_sdk_eval_ab_judge_preview",
+    "skills_sdk_eval_ab_judge_score",
+    "skills_sdk_eval_tessl_score",
     "skills_sdk_placeholder_lifecycle",
     "skills_sdk_project_conformance",
     "skills_sdk_project_install",

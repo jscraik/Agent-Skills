@@ -2,18 +2,31 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+import re
+import subprocess
 from pathlib import Path
 from typing import Any
 
+from ask.skills_sdk.eval_ab_judge_decision import ALLOWED_WINNERS, DECISION_SCHEMA_VERSION, _parse_judge_decision
+from ask.skills_sdk.eval_ab_judge_codex import (
+    CodexJudgeResult,
+    CodexProfileConfigError,
+    _codex_judge_command,
+    _codex_judge_work_dir,
+    _codex_op_env_file_available,
+    _run_codex_judge,
+)
 from ask.skills_sdk.eval_ab_rubric import canonical_ab_rubric, canonical_ab_rubric_digest
-
+from ask.skills_sdk.eval_profiles import select_judge_profile
 
 AB_JUDGE_PREVIEW_SCHEMA_VERSION = "skills-sdk.ab-judge-preview-receipt.v0"
-AB_JUDGE_PREVIEW_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/ab-judge-preview-receipt.v0.schema.json"
-)
-DECISION_SCHEMA_VERSION = "skills-sdk.ab-judge-decision.v0"
-ALLOWED_WINNERS = ["skill_a", "skill_b", "inconclusive"]
+AB_JUDGE_PREVIEW_SCHEMA_URI = "https://jscraik.local/agent-skills/schemas/skills-sdk/ab-judge-preview-receipt.v0.schema.json"
+AB_JUDGE_SCORE_SCHEMA_VERSION = "skills-sdk.ab-judge-score-receipt.v0"
+AB_JUDGE_SCORE_SCHEMA_URI = "https://jscraik.local/agent-skills/schemas/skills-sdk/ab-judge-score-receipt.v0.schema.json"
+_EXPERIMENT_ID_RE = re.compile(r"[0-9a-f]{16}")
+_SEMANTIC_OUTPUT_EXCERPT_BYTES = 4096
+__all__ = ["CodexJudgeResult"]
 
 
 def _digest_text(value: str) -> str:
@@ -34,10 +47,8 @@ def _repo_relative(repo_root: Path, path: Path) -> str:
 def _resolve_receipt_path(repo_root: Path, run_receipt: str) -> tuple[Path | None, str | None]:
     candidate = Path(run_receipt)
     path = candidate if candidate.is_absolute() else repo_root / candidate
-    try:
-        resolved = path.resolve()
-        resolved.relative_to(repo_root.resolve())
-    except (OSError, ValueError):
+    resolved = _contained_repo_path(repo_root, path)
+    if resolved is None:
         return None, "run_receipt_outside_repo"
     if not resolved.is_file():
         return resolved, "run_receipt_missing"
@@ -95,35 +106,65 @@ def _run_receipt_shape_valid(payload: dict[str, Any]) -> bool:
 
 
 def _run_receipt_header_valid(payload: dict[str, Any]) -> bool:
-    return (
-        payload.get("schema_version") == "skills-sdk.ab-run-receipt.v0"
-        and payload.get("operation") == "ab_run"
-        and payload.get("status") in {"completed", "blocked"}
-    )
+    return payload.get("schema_version") == "skills-sdk.ab-run-receipt.v0" and payload.get("operation") == "ab_run" and payload.get("status") in {"completed", "blocked"}
 
 
 def _run_receipt_identity_valid(payload: dict[str, Any]) -> bool:
-    object_keys = ("skill_a", "skill_b", "fixture", "execution_profile", "judge_profile")
-    experiment_id = payload.get("experiment_id")
-    return all(_object_field(payload, key) is not None for key in object_keys) and isinstance(experiment_id, str) and len(experiment_id) == 16
+    return (
+        _experiment_id_valid(payload.get("experiment_id"))
+        and _skill_identity_valid(_object_field(payload, "skill_a"))
+        and _skill_identity_valid(_object_field(payload, "skill_b"))
+        and _fixture_identity_valid(_object_field(payload, "fixture"))
+        and _profile_identity_valid(_object_field(payload, "execution_profile"))
+        and _profile_identity_valid(_object_field(payload, "judge_profile"))
+    )
+
+
+def _experiment_id_valid(value: object) -> bool:
+    return isinstance(value, str) and _EXPERIMENT_ID_RE.fullmatch(value) is not None
+
+
+def _skill_identity_valid(value: dict[str, Any] | None) -> bool:
+    return value is not None and _non_empty_string(value.get("package_id")) and _digest_like(value.get("package_digest"))
+
+
+def _fixture_identity_valid(value: dict[str, Any] | None) -> bool:
+    return value is not None and _non_empty_string(value.get("path")) and _digest_like(value.get("digest"))
+
+
+def _profile_identity_valid(value: dict[str, Any] | None) -> bool:
+    return value is not None and _non_empty_string(value.get("id"))
+
+
+def _non_empty_string(value: object) -> bool:
+    return isinstance(value, str) and bool(value.strip())
 
 
 def _run_receipt_variants_valid(payload: dict[str, Any]) -> bool:
-    if _variant_labels(payload.get("variant_results")) != {"A", "B"}:
-        return False
-    if _variant_labels(payload.get("command_plan")) != {"A", "B"}:
-        return False
-    return all(_variant_result_digests_valid(result) for result in payload["variant_results"])
+    return (
+        _variant_labels(payload.get("variant_results")) == {"A", "B"}
+        and _variant_labels(payload.get("command_plan")) == {"A", "B"}
+        and all(_variant_result_digests_valid(result) for result in payload["variant_results"])
+    )
 
 
 def _variant_result_digests_valid(result: object) -> bool:
     if not isinstance(result, dict):
         return False
-    keys = ("output_last_message_digest", "runner_stdout_digest", "runner_stderr_digest")
-    return all(_digest_like(result.get(key)) for key in keys)
+    return (
+        all(
+            _digest_like(result.get(key))
+            for key in ("output_last_message_digest", "runner_stdout_digest", "runner_stderr_digest")
+        )
+        and _non_empty_string(result.get("output_last_message_path"))
+        and _non_empty_string(result.get("runner_stdout_capture_path"))
+    )
 
 
-def _evidence_row(result: dict[str, Any]) -> dict[str, Any]:
+def _evidence_row(repo_root: Path, result: dict[str, Any]) -> tuple[dict[str, Any], str | None]:
+    semantic_excerpt = _semantic_output_excerpt(repo_root, result)
+    if semantic_excerpt is None:
+        return {}, f"{result.get('variant_label', 'unknown')}:semantic_output_evidence_missing"
     return {
         "variant_label": result["variant_label"],
         "status": result["status"],
@@ -132,12 +173,23 @@ def _evidence_row(result: dict[str, Any]) -> dict[str, Any]:
         "output_last_message_digest": result["output_last_message_digest"],
         "runner_stdout_digest": result["runner_stdout_digest"],
         "runner_stderr_digest": result["runner_stderr_digest"],
+        "semantic_output_excerpt": semantic_excerpt,
         "blockers": result["blockers"],
-    }
+    }, None
 
 
-def _comparison_payload(run_receipt: dict[str, Any]) -> dict[str, Any]:
+def _comparison_payload(repo_root: Path, run_receipt: dict[str, Any]) -> tuple[dict[str, Any] | None, list[str]]:
     rubric = canonical_ab_rubric()
+    variant_rows: list[dict[str, Any]] = []
+    blockers: list[str] = []
+    for result in run_receipt["variant_results"]:
+        row, blocker = _evidence_row(repo_root, result)
+        if blocker:
+            blockers.append(blocker)
+            continue
+        variant_rows.append(row)
+    if blockers:
+        return None, blockers
     return {
         "schema_version": DECISION_SCHEMA_VERSION,
         "experiment_id": run_receipt["experiment_id"],
@@ -156,18 +208,61 @@ def _comparison_payload(run_receipt: dict[str, Any]) -> dict[str, Any]:
             "digest": run_receipt["fixture"]["digest"],
         },
         "execution_profile": run_receipt["execution_profile"]["id"],
-        "variant_results": [_evidence_row(result) for result in run_receipt["variant_results"]],
+        "variant_results": variant_rows,
         "allowed_winners": ALLOWED_WINNERS,
-    }
+    }, []
+
+
+def _semantic_output_excerpt(repo_root: Path, result: dict[str, Any]) -> str | None:
+    raw_excerpt = result.get("semantic_output_excerpt")
+    if _non_empty_string(raw_excerpt):
+        return _sanitize_semantic_excerpt(raw_excerpt)
+    for key in ("output_last_message_path", "runner_stdout_capture_path"):
+        excerpt = _read_semantic_excerpt(repo_root, result.get(key))
+        if excerpt:
+            return excerpt
+    return None
+
+
+def _read_semantic_excerpt(repo_root: Path, raw_path: object) -> str | None:
+    if not isinstance(raw_path, str) or not raw_path.strip():
+        return None
+    path = Path(raw_path)
+    if path.is_absolute() or path.is_symlink():
+        return None
+    candidate = repo_root / path
+    if candidate.is_symlink():
+        return None
+    resolved = _contained_repo_path(repo_root, candidate)
+    if resolved is None or resolved.is_symlink() or not resolved.is_file():
+        return None
+    try:
+        data = resolved.read_bytes()[: _SEMANTIC_OUTPUT_EXCERPT_BYTES + 1]
+    except OSError:
+        return None
+    text = data[:_SEMANTIC_OUTPUT_EXCERPT_BYTES].decode("utf-8", errors="replace")
+    return _sanitize_semantic_excerpt(text)
+
+
+def _sanitize_semantic_excerpt(text: str) -> str | None:
+    compact = text.replace("\x00", "").strip()
+    return compact or None
 
 
 def _judge_prompt(comparison_payload: dict[str, Any]) -> str:
     return (
         "You are judging a Skills SDK A/B eval from sanitized receipt evidence only.\n"
+        "Do not inspect the repository, call tools, ask follow-up questions, or use hidden context.\n"
         "Do not infer from package names, local paths, hidden logs, or unavailable content.\n"
         "Use the embedded rubric exactly; do not change weights or criteria.\n"
-        "Return JSON matching skills-sdk.ab-judge-decision.v0 with dimension_scores, "
-        "reason_per_dimension, winner, confidence, reason, and evidence_refs.\n"
+        "Return raw JSON only: no Markdown fences, no prose, no comments, no tool-call objects.\n"
+        "The top-level JSON object must have exactly these keys: schema_version, experiment_id, "
+        "dimension_scores, normalized_score_a, normalized_score_b, winner, confidence, reason, evidence_refs.\n"
+        "Set schema_version to skills-sdk.ab-judge-decision.v0 and experiment_id to the evidence experiment_id.\n"
+        "Each dimension_scores item must include dimension_id, skill_a_score, skill_b_score, "
+        "reason, and evidence_refs.\n"
+        "Use dimension_scores, never dimensions. Use one evidence_refs array per object.\n"
+        "Scores are 0 to 5. Normalized scores are 0 to 1: weighted_sum_of_dimension_scores / 5.\n"
         "Choose inconclusive when the sanitized evidence is insufficient.\n\n"
         f"Evidence:\n{json.dumps(comparison_payload, sort_keys=True, indent=2)}\n"
     )
@@ -180,7 +275,7 @@ def build_ab_judge_preview_receipt(repo_root: Path, *, run_receipt: str) -> dict
     if loaded_receipt is not None and loaded_receipt["status"] != "completed":
         blockers.append("run_receipt_not_completed")
 
-    comparison_payload, judge_prompt = _judge_input_payload(blockers, loaded_receipt)
+    comparison_payload, judge_prompt = _judge_input_payload(repo_root, blockers, loaded_receipt)
     status = "preview" if not blockers else "blocked"
     return _judge_receipt_payload(status, blockers, inputs, loaded_receipt, comparison_payload, judge_prompt)
 
@@ -217,12 +312,16 @@ def _load_receipt_inputs(
 
 
 def _judge_input_payload(
+    repo_root: Path,
     blockers: list[str],
     loaded_receipt: dict[str, Any] | None,
 ) -> tuple[dict[str, Any] | None, str | None]:
     if blockers or loaded_receipt is None:
         return None, None
-    comparison_payload = _comparison_payload(loaded_receipt)
+    comparison_payload, evidence_blockers = _comparison_payload(repo_root, loaded_receipt)
+    if evidence_blockers:
+        blockers.extend(evidence_blockers)
+        return None, None
     return comparison_payload, _judge_prompt(comparison_payload)
 
 
@@ -261,3 +360,327 @@ def _judge_receipt_payload(
             else f"A/B judge preview is blocked: {', '.join(blockers)}."
         ),
     }
+
+
+def build_ab_judge_score_receipt(
+    repo_root: Path,
+    *,
+    run_receipt: str,
+    evidence_root: str = ".harness/artifacts/sdk-ab-judges",
+    judge_profile_id: str = "oss-local",
+    timeout_seconds: int = 300,
+    runner: Any | None = None,
+) -> dict[str, Any]:
+    preview = build_ab_judge_preview_receipt(repo_root, run_receipt=run_receipt)
+    blockers, judge_profile, evidence = _score_preflight(
+        repo_root, preview, evidence_root, judge_profile_id, timeout_seconds
+    )
+    decision, output_digest, provider_invoked, network_accessed, mutation_performed = _score_decision(
+        blockers=blockers,
+        repo_root=repo_root,
+        preview=preview,
+        judge_profile=judge_profile,
+        evidence=evidence,
+        timeout_seconds=timeout_seconds,
+        runner=runner or _run_codex_judge,
+    )
+    status = "scored" if decision is not None and not blockers else "blocked"
+    return _score_receipt_payload(
+        status=status,
+        preview=preview,
+        judge_profile=judge_profile,
+        evidence=evidence,
+        decision=decision,
+        output_digest=output_digest,
+        provider_invoked=provider_invoked,
+        network_accessed=network_accessed,
+        mutation_performed=mutation_performed,
+        blockers=blockers,
+    )
+
+
+def _score_preflight(
+    repo_root: Path,
+    preview: dict[str, Any],
+    evidence_root: str,
+    judge_profile_id: str,
+    timeout_seconds: int,
+) -> tuple[list[str], dict[str, Any] | None, dict[str, Any]]:
+    blockers = list(preview["blockers"])
+    judge_profile = _selected_score_profile(judge_profile_id, blockers)
+    if judge_profile is not None:
+        blockers.extend(_missing_judge_profile_secrets(judge_profile))
+    evidence = _score_evidence_paths(repo_root, evidence_root, preview.get("experiment_id"))
+    if evidence["blocker"]:
+        blockers.append(evidence["blocker"])
+    if judge_profile is not None and evidence.get("output_file") is not None:
+        evidence["command_argv"] = _codex_judge_command(
+            judge_profile,
+            _codex_judge_work_dir(evidence["output_file"]),
+            evidence["output_file"],
+        )
+        evidence["codex_profile"] = judge_profile["id"]
+    else:
+        evidence["command_argv"] = []
+        evidence["codex_profile"] = None
+    if preview["status"] != "preview":
+        blockers.append("judge_input_preview_blocked")
+    if timeout_seconds < 1:
+        blockers.append("timeout_seconds_invalid")
+    return blockers, judge_profile, evidence
+
+
+def _selected_score_profile(profile_id: str, blockers: list[str]) -> dict[str, Any] | None:
+    try:
+        profile = select_judge_profile(profile_id)
+    except ValueError:
+        blockers.append("judge_profile_unknown")
+        return None
+    if profile["provider"] != "codex" or profile["id"] not in {"oss-local", "oss-cloud"}:
+        blockers.append("judge_profile_not_supported_for_codex_score")
+    return profile
+
+
+def _missing_judge_profile_secrets(judge_profile: dict[str, Any]) -> list[str]:
+    missing = [
+        name
+        for name in judge_profile.get("secret_env_names", [])
+        if isinstance(name, str) and name and name not in os.environ
+    ]
+    if missing and _codex_op_env_file_available(judge_profile):
+        return []
+    return ["judge_profile_secret_missing"] if missing else []
+
+
+def _score_evidence_paths(repo_root: Path, evidence_root: str, experiment_id: object) -> dict[str, Any]:
+    candidate = Path(evidence_root)
+    root = candidate if candidate.is_absolute() else repo_root / candidate
+    if _path_has_symlink_ancestor(repo_root, root):
+        return {"blocker": "score_evidence_path_outside_repo", "prompt_path": None, "output_path": None}
+    resolved = _contained_repo_path(repo_root, root)
+    if resolved is None:
+        return {"blocker": "evidence_root_outside_repo", "prompt_path": None, "output_path": None}
+    if _path_has_file_ancestor(repo_root, resolved):
+        return {"blocker": "evidence_root_not_directory", "prompt_path": None, "output_path": None}
+    if not _experiment_id_valid(experiment_id):
+        return {"blocker": "experiment_id_invalid", "prompt_path": None, "output_path": None}
+    base = resolved / experiment_id / "judge"
+    if _path_has_symlink_ancestor(resolved, base):
+        return {"blocker": "score_evidence_path_outside_repo", "prompt_path": None, "output_path": None}
+    contained_base = _contained_repo_path(resolved, base)
+    if contained_base is None:
+        return {"blocker": "score_evidence_path_outside_repo", "prompt_path": None, "output_path": None}
+    if _path_has_file_ancestor(repo_root, contained_base):
+        return {"blocker": "evidence_root_not_directory", "prompt_path": None, "output_path": None}
+    prompt_file = _contained_score_evidence_file(repo_root, contained_base / "prompt.txt")
+    output_file = _contained_score_evidence_file(repo_root, contained_base / "codex-last-message.json")
+    if prompt_file is None or output_file is None:
+        return {"blocker": "score_evidence_path_outside_repo", "prompt_path": None, "output_path": None}
+    return {
+        "blocker": None,
+        "prompt_file": prompt_file,
+        "output_file": output_file,
+        "prompt_path": _repo_relative(repo_root, prompt_file),
+        "output_path": _repo_relative(repo_root, output_file),
+    }
+
+
+def _contained_score_evidence_file(repo_root: Path, path: Path) -> Path | None:
+    if path.is_symlink() or path.is_dir():
+        return None
+    return _contained_repo_path(repo_root, path)
+
+
+def _score_decision(
+    *,
+    blockers: list[str],
+    repo_root: Path,
+    preview: dict[str, Any],
+    judge_profile: dict[str, Any] | None,
+    evidence: dict[str, Any],
+    timeout_seconds: int,
+    runner: Any,
+) -> tuple[dict[str, Any] | None, str | None, bool, bool, bool]:
+    if blockers or judge_profile is None:
+        return None, None, False, False, False
+    judge_prompt = _judge_prompt(preview["comparison_payload"])
+    _write_text_evidence(repo_root, evidence["prompt_file"], judge_prompt)
+    _clear_text_evidence(repo_root, evidence["output_file"])
+    mutation_performed = True
+    try:
+        result = runner(judge_prompt, judge_profile, timeout_seconds, repo_root, evidence["output_file"])
+    except CodexProfileConfigError:
+        blockers.append("codex_profile_config_missing")
+        return _blocked_score_decision(mutation_performed)
+    except OSError:
+        blockers.append("judge_provider_unavailable")
+        return _blocked_score_decision(mutation_performed)
+    except subprocess.TimeoutExpired as exc:
+        stdout = _timeout_output_text(exc.stdout)
+        _write_text_evidence(repo_root, evidence["output_file"], stdout)
+        blockers.append("judge_provider_timeout")
+        return None, _digest_text(stdout), True, True, mutation_performed
+    output_text = _codex_judge_output_text(repo_root, evidence["output_file"], result.output_text) or result.stdout
+    if not _contained_file_exists(repo_root, evidence["output_file"]):
+        _write_text_evidence(repo_root, evidence["output_file"], output_text)
+    output_digest = _digest_text(output_text)
+    if result.exit_code != 0:
+        blockers.append(f"judge_provider_exit_{result.exit_code}")
+        return None, output_digest, True, True, mutation_performed
+    decision, blocker = _parse_judge_decision(output_text, preview["comparison_payload"])
+    if blocker:
+        blockers.append(blocker)
+    return decision, output_digest, True, True, mutation_performed
+
+
+def _blocked_score_decision(mutation_performed: bool) -> tuple[None, None, bool, bool, bool]:
+    return None, None, False, False, mutation_performed
+
+
+def _write_text_evidence(repo_root: Path, path: Path | None, value: str) -> None:
+    if path is None:
+        return
+    if path.is_symlink():
+        return
+    resolved = _contained_repo_path(repo_root, path)
+    if resolved is None:
+        return
+    resolved.parent.mkdir(parents=True, exist_ok=True)
+    flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    file_descriptor = os.open(resolved, flags, 0o600)
+    if hasattr(os, "fchmod"):
+        os.fchmod(file_descriptor, 0o600)
+    with os.fdopen(file_descriptor, "w", encoding="utf-8") as handle:
+        handle.write(value)
+
+
+def _clear_text_evidence(repo_root: Path, path: Path | None) -> None:
+    if path is None:
+        return
+    if path.is_symlink():
+        parent = _contained_repo_path(repo_root, path.parent)
+        if parent is not None:
+            path.unlink()
+        return
+    resolved = _contained_repo_path(repo_root, path)
+    if resolved is not None and resolved.is_file():
+        resolved.unlink()
+
+
+def _contained_file_exists(repo_root: Path, path: Path | None) -> bool:
+    if path is None:
+        return False
+    resolved = _contained_repo_path(repo_root, path)
+    return resolved is not None and resolved.is_file()
+
+
+def _codex_judge_output_text(repo_root: Path, path: Path | None, fallback: str) -> str:
+    if path is None:
+        return fallback
+    resolved = _contained_repo_path(repo_root, path)
+    if resolved is None or not resolved.is_file():
+        return fallback
+    return resolved.read_text(encoding="utf-8")
+
+
+def _contained_repo_path(repo_root: Path, path: Path) -> Path | None:
+    try:
+        repo_base = repo_root.resolve()
+        resolved = path.resolve()
+        resolved.relative_to(repo_base)
+    except (OSError, ValueError):
+        return None
+    return resolved
+
+
+def _path_has_file_ancestor(repo_root: Path, path: Path) -> bool:
+    repo_base = repo_root.resolve()
+    current = path
+    while current != repo_base:
+        if current.exists() and not current.is_dir():
+            return True
+        if current.parent == current:
+            return True
+        current = current.parent
+    return False
+
+
+def _path_has_symlink_ancestor(root: Path, path: Path) -> bool:
+    current = path
+    while current != root:
+        if current.is_symlink():
+            return True
+        if current.parent == current:
+            return True
+        current = current.parent
+    return False
+
+
+def _timeout_output_text(value: object) -> str:
+    if isinstance(value, bytes):
+        return value.decode("utf-8", errors="replace")
+    if isinstance(value, str):
+        return value
+    return ""
+
+
+def _score_receipt_payload(
+    *,
+    status: str,
+    preview: dict[str, Any],
+    judge_profile: dict[str, Any] | None,
+    evidence: dict[str, Any],
+    decision: dict[str, Any] | None,
+    output_digest: str | None,
+    provider_invoked: bool,
+    network_accessed: bool,
+    mutation_performed: bool,
+    blockers: list[str],
+) -> dict[str, Any]:
+    return {
+        "schema_version": AB_JUDGE_SCORE_SCHEMA_VERSION,
+        "schema_uri": AB_JUDGE_SCORE_SCHEMA_URI,
+        "status": status,
+        "operation": "ab_judge_score",
+        **_score_receipt_run_fields(preview, evidence, output_digest),
+        "judge_profile": judge_profile,
+        "rubric_id": preview["rubric_id"],
+        "rubric_digest": preview["rubric_digest"],
+        "decision_schema_version": DECISION_SCHEMA_VERSION,
+        "allowed_winners": ALLOWED_WINNERS,
+        "codex_exec_invoked": provider_invoked,
+        "decision": decision,
+        "calibration_required": True,
+        "advisory_only": True,
+        "provider_invoked": provider_invoked,
+        "network_accessed": network_accessed,
+        "mutation_performed": mutation_performed,
+        "blockers": blockers,
+        "acceptance_trace": ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022", "VP-030"],
+        "agent_summary": _score_agent_summary(status, blockers),
+    }
+
+
+def _score_receipt_run_fields(
+    preview: dict[str, Any],
+    evidence: dict[str, Any],
+    output_digest: str | None,
+) -> dict[str, Any]:
+    return {
+        "run_receipt_path": preview["run_receipt_path"],
+        "run_receipt_digest": preview["run_receipt_digest"],
+        "experiment_id": preview["experiment_id"],
+        "judge_prompt_digest": preview["judge_prompt_digest"],
+        "judge_output_path": evidence["output_path"],
+        "judge_output_digest": output_digest,
+        "judge_command_argv": evidence["command_argv"],
+        "codex_profile": evidence["codex_profile"],
+    }
+
+
+def _score_agent_summary(status: str, blockers: list[str]) -> str:
+    if status == "scored":
+        return "A/B local judge scoring completed with advisory decision evidence."
+    return f"A/B local judge scoring blocked: {', '.join(blockers)}."

@@ -35,7 +35,7 @@ Plugin Eval is a budget and ergonomics guardrail. Grade `B+` or better with zero
 
 Tessl is the content quality gate. Tessl review must run through the repo wrapper with `--json --threshold 90`; scores below `90` block Tessl acceptance. Scores `95+` remain the improvement target, not the minimum acceptance floor.
 
-The Tessl review wrapper is preserved under `/tmp/ask-tessl-reviews/<skill-path>-<sha12>` with `tile.json`, `tessl.json`, copied skill files, and included references.
+The Tessl review wrapper is preserved under `/tmp/ask-tessl-reviews/<skill-path>-<sha12>/current` with `.tessl-plugin/plugin.json`, `tessl.json`, copied skill files, and included references. Reruns archive the previous `current` directory under `evidence-archive/` before refreshing staged inputs.
 
 ## Reporting
 

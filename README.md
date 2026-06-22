@@ -16,7 +16,7 @@ The short version:
 - `./bin/ask` is the public repo command surface.
 - Runtime counts drift by design. Ask the CLI for current truth instead of
   trusting a README number.
-- Catalog parity marker: **82 canonical skills**. Regenerate this marker with
+- Catalog parity marker: **83 canonical skills**. Regenerate this marker with
   the repo skill sync when catalog membership changes.
 
 For the product framing and proof contract, read
@@ -68,14 +68,14 @@ That path answers:
 
 ## Pick the right path
 
-| Reader job              | Start here                                                    | Why                                                                                                      |
-| ----------------------- | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Reader job              | Start here                                                    | Why                                                                                                     |
+| ----------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 | Check repo health       | `./bin/ask repo doctor --json --robot`                        | Combines repo status, catalog parity, runtime budget, SDK projection metadata, and surface diagnostics. |
-| Find a skill for a task | `./bin/ask skills improve "<goal>" --json --robot`            | Routes the goal to one capability and returns the next useful command.                                   |
-| Understand a skill      | `./bin/ask skills explain <handle> --json --robot`            | Resolves the handle to source, usage, limits, and proof.                                                 |
-| Prove a skill           | `./bin/ask skills prove <handle> --json --robot`              | Reports reachability, quality, analytics, and outcome-proof state without merging those lanes.           |
-| Audit a skill source    | `./bin/ask skills audit <path> --level strict --json --robot` | Runs the strict structural and policy check for one skill.                                               |
-| Close out current work  | `./bin/ask repo closeout --changed --json --robot`            | Reports changed-scope validation and readiness blockers.                                                 |
+| Find a skill for a task | `./bin/ask skills improve "<goal>" --json --robot`            | Routes the goal to one capability and returns the next useful command.                                  |
+| Understand a skill      | `./bin/ask skills explain <handle> --json --robot`            | Resolves the handle to source, usage, limits, and proof.                                                |
+| Prove a skill           | `./bin/ask skills prove <handle> --json --robot`              | Reports reachability, quality, analytics, and outcome-proof state without merging those lanes.          |
+| Audit a skill source    | `./bin/ask skills audit <path> --level strict --json --robot` | Runs the strict structural and policy check for one skill.                                              |
+| Close out current work  | `./bin/ask repo closeout --changed --json --robot`            | Reports changed-scope validation and readiness blockers.                                                |
 
 Use `--robot` when an agent is driving the CLI. The wrapper corrects clear
 syntax mistakes and returns structured errors when intent is ambiguous.
@@ -116,12 +116,12 @@ syntax mistakes and returns structured errors when intent is ambiguous.
 
 This repo separates source, generated projections, and live runtime visibility.
 
-| Surface                               | Purpose                                                   | Edit policy            |
-| ------------------------------------- | --------------------------------------------------------- | ---------------------- |
-| `Skills/<topic>/<skill>/SKILL.md`     | Canonical first-party skill source                        | Edit here              |
-| `Plugins/<plugin>/skills/**/SKILL.md` | Canonical plugin-owned skill source                       | Edit here              |
-| `.agents/skills/**`                   | Runtime projection consumed by Codex and agent runtimes   | Regenerate only        |
-| `~/.agents/skills`, `~/.codex/skills` | User runtime links to the active projection               | Refresh with user sync |
+| Surface                               | Purpose                                                 | Edit policy            |
+| ------------------------------------- | ------------------------------------------------------- | ---------------------- |
+| `Skills/<topic>/<skill>/SKILL.md`     | Canonical first-party skill source                      | Edit here              |
+| `Plugins/<plugin>/skills/**/SKILL.md` | Canonical plugin-owned skill source                     | Edit here              |
+| `.agents/skills/**`                   | Runtime projection consumed by Codex and agent runtimes | Regenerate only        |
+| `~/.agents/skills`, `~/.codex/skills` | User runtime links to the active projection             | Refresh with user sync |
 
 SDK-flat metadata is generated from canonical skill sources. Obsolete rooted
 manifests and command-surface files are not SDK inputs and should not be used as

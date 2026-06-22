@@ -23,7 +23,7 @@ ALLOWED_STATUSES = frozenset(
     }
 )
 MUTATING_CAPABILITY_IDS = frozenset(
-    {"ab_run", "real_install", "refs_ingestion", "review_execution", "rollback", "trust_store", "uninstall"}
+    {"ab_judge_score", "ab_run", "real_install", "refs_ingestion", "review_execution", "rollback", "trust_store", "uninstall"}
 )
 REQUIRED_CAPABILITY_IDS = (
     "authoring",
@@ -54,6 +54,7 @@ REQUIRED_CAPABILITY_IDS = (
     "ab_plan",
     "ab_run",
     "ab_judge_preview",
+    "ab_judge_score",
     "scenario_quality_gate",
     "package_verify",
     "signing",

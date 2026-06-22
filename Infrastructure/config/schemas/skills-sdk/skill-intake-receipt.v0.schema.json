@@ -70,7 +70,22 @@
           "source_digest": {"type": "string", "minLength": 71},
           "skill_id": {"type": "string", "minLength": 1},
           "file_count": {"type": "integer", "minimum": 1},
-          "inspected_files": {"type": "array", "minItems": 1}
+          "inspected_files": {"type": "array", "minItems": 1},
+          "intake_checks": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {"$ref": "#/definitions/check"},
+                {
+                  "properties": {
+                    "status": {"const": "pass"},
+                    "severity": {"const": "pass"}
+                  }
+                }
+              ]
+            }
+          },
+          "blockers": {"type": "array", "maxItems": 0}
         }
       }
     },

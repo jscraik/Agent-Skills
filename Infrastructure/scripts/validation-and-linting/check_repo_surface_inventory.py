@@ -351,6 +351,12 @@ def _classify_violation_surface(normalized: str, suffix: str) -> SurfaceFinding 
     return None
 
 
+def _is_governed_source_artifact(normalized: str, suffix: str) -> bool:
+    return normalized == "artifacts/recommended-skills-sdk-pipeline.html" or (
+        _starts_with(normalized, "Skills") and "/references/scorer-calibration/" in normalized and suffix == ".jsonl"
+    )
+
+
 def _classify_generated_surface(normalized: str, suffix: str) -> SurfaceFinding | None:
     if _starts_with_any(normalized, HARNESS_HISTORICAL_PREFIXES):
         return _finding(normalized, "tracked_harness_snapshot")
@@ -362,6 +368,8 @@ def _classify_generated_surface(normalized: str, suffix: str) -> SurfaceFinding 
         return _finding(normalized, "ownership_decision_required")
     if _starts_with_any(normalized, ("Infrastructure/tmp", "Infrastructure/todos")):
         return _finding(normalized, "tracked_generated_work_area")
+    if _is_governed_source_artifact(normalized, suffix):
+        return _finding(normalized, "authored_source_surface")
     if _starts_with_any(normalized, ("Infrastructure/artifacts", "artifacts")):
         return _finding(normalized, "tracked_historical_artifact")
     if suffix in {".jsonl", ".log"}:
@@ -778,7 +786,6 @@ def main() -> int:
         else:
             print(f"repo surface inventory failed: {exc}", file=sys.stderr)
         return 1
-
     if args.json:
         print(json.dumps(report, sort_keys=True))
     else:

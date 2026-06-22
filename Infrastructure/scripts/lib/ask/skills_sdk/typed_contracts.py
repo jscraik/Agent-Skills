@@ -738,13 +738,9 @@ def validate_package_hardening_receipt(payload: object) -> PackageHardeningRecei
 
 
 def validate_signing_policy(payload: object) -> signing_contracts.SigningPolicy: return signing_contracts.validate_signing_policy(payload)
-
 def validate_signing_intent_receipt(payload: object) -> signing_contracts.SigningIntentReceipt: return signing_contracts.validate_signing_intent_receipt(payload)
 
-
 def validate_eval_case(payload: object) -> EvalCase: return EvalCase.model_validate(payload)
-
-
 def validate_eval_run_receipt(payload: object) -> EvalRunReceipt: return EvalRunReceipt.model_validate(payload)
 
 
@@ -772,15 +768,14 @@ def validate_ab_judge_preview_receipt(payload: object) -> ab_contracts.AbJudgePr
     return ab_contracts.AbJudgePreviewReceipt.model_validate(payload)
 
 
+def validate_ab_judge_score_receipt(payload: object) -> ab_contracts.AbJudgeScoreReceipt: return ab_contracts.AbJudgeScoreReceipt.model_validate(payload)
 def validate_sandbox_profile(payload: object) -> SandboxProfile: return SandboxProfile.model_validate(payload)
-
 
 def validate_sandbox_profile_receipt(payload: object) -> SandboxProfileReceipt:
     return SandboxProfileReceipt.model_validate(payload)
 
 
 def validate_skill_intake_receipt(payload: object) -> skill_intake_contracts.SkillIntakeReceipt: return skill_intake_contracts.validate_skill_intake_receipt(payload)
-
 
 def validate_skill_frontmatter(payload: object) -> SkillFrontmatter:
     return SkillFrontmatter.model_validate(payload)
