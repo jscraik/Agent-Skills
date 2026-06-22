@@ -33,9 +33,9 @@
   },
   "judge_profile": {
     "id": "oss-local",
-    "provider": "ollama",
+    "provider": "codex",
     "mode": "local",
-    "host": "http://localhost:11434",
+    "host": "codex-cli-profile",
     "model": "qwen3.5:latest",
     "network_required": true,
     "secret_env_names": [],

@@ -16,6 +16,9 @@ from ask.skills_sdk import typed_contracts as contracts  # noqa: E402
 from ask.skills_sdk.ci_contracts import validate_ci_policy_preview_receipt  # noqa: E402
 from ask.skills_sdk.emitter_contracts import validate_emitter_preview_receipt  # noqa: E402
 from ask.skills_sdk.scenario_quality_contracts import validate_scenario_quality_receipt  # noqa: E402
+from ask.skills_sdk.scorer_quality_contracts import validate_scorer_quality_receipt  # noqa: E402
+from ask.skills_sdk.regression_plan_contracts import validate_regression_plan_receipt  # noqa: E402
+from ask.skills_sdk.handoff_readiness_contracts import validate_handoff_readiness_receipt  # noqa: E402
 from ask.skills_sdk.static_explorer_contracts import validate_static_explorer_receipt  # noqa: E402
 
 
@@ -49,6 +52,7 @@ class TestSkillsSdkTypedContracts(unittest.TestCase):
             ("install-receipt.json", contracts.validate_install_receipt),
             ("lockfile.json", contracts.validate_lockfile),
             ("project-conformance-receipt.json", contracts.validate_project_conformance_receipt),
+            ("ab-judge-score-receipt.json", contracts.validate_ab_judge_score_receipt),
         )
 
         for filename, validator in cases:
@@ -270,6 +274,53 @@ class TestSkillsSdkTypedContracts(unittest.TestCase):
         self.assertEqual(model.model_config["extra"], "forbid")
         self.assertTrue(model.model_config["strict"])
         self.assertEqual(model.scenario_count, 1)
+
+    def test_scorer_quality_contract_rejects_promotion_claims(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "scorer-quality-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["promotion_performed"] = True
+
+        with self.assertRaises(ValidationError):
+            validate_scorer_quality_receipt(payload)
+
+    def test_scorer_quality_fixture_loads_through_dedicated_contract(self) -> None:
+        model = validate_scorer_quality_receipt(_json(FIXTURE_DIR / "valid" / "scorer-quality-receipt.json"))
+
+        self.assertEqual(model.model_config["extra"], "forbid")
+        self.assertTrue(model.model_config["strict"])
+        self.assertTrue(model.ready)
+
+    def test_regression_plan_contract_rejects_readiness_claims_with_blockers(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "regression-plan-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["ready_for_live_rerun"] = False
+
+        with self.assertRaises(ValidationError):
+            validate_regression_plan_receipt(payload)
+
+    def test_regression_plan_fixture_loads_through_dedicated_contract(self) -> None:
+        model = validate_regression_plan_receipt(_json(FIXTURE_DIR / "valid" / "regression-plan-receipt.json"))
+
+        self.assertEqual(model.model_config["extra"], "forbid")
+        self.assertTrue(model.model_config["strict"])
+        self.assertTrue(model.ready_for_live_rerun)
+        self.assertEqual(model.regression_count, 1)
+
+    def test_handoff_readiness_contract_rejects_readiness_claims_with_blockers(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "handoff-readiness-receipt.json")
+        self.assertIsInstance(payload, dict)
+        payload["ready_for_live_tessl"] = False
+
+        with self.assertRaises(ValidationError):
+            validate_handoff_readiness_receipt(payload)
+
+    def test_handoff_readiness_fixture_loads_through_dedicated_contract(self) -> None:
+        model = validate_handoff_readiness_receipt(_json(FIXTURE_DIR / "valid" / "handoff-readiness-receipt.json"))
+
+        self.assertEqual(model.model_config["extra"], "forbid")
+        self.assertTrue(model.model_config["strict"])
+        self.assertTrue(model.ready_for_live_tessl)
+        self.assertEqual([lane.id for lane in model.lanes], model.required_lanes)
 
     def test_eval_run_contract_accepts_legacy_receipt_without_package_identity(self) -> None:
         payload = _json(FIXTURE_DIR / "valid" / "eval-run-receipt.json")

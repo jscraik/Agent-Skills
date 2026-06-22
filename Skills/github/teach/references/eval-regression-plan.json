@@ -1,0 +1,71 @@
+{
+  "schema_version": "skills-sdk.eval-regression-plan-input.v1",
+  "source_run_id": "019eef9f-1398-7022-8090-96cfc46150c8",
+  "regressions": [
+    {
+      "scenario_id": "edge-external-sources-needed",
+      "owner": "skill",
+      "failure_mode": "The skill allowed memory-only current React teaching to score partially instead of forcing a source-check receipt or blocker for durable current-source claims.",
+      "knowledge_capsule_facets": [
+        "source_trust",
+        "lesson_loop"
+      ],
+      "patch_plan": [
+        {
+          "file": "Skills/github/teach/SKILL.md",
+          "change": "Route current, newest, API, and version-sensitive requests through source-sensitive dispatch requiring high-trust source evidence or a source-check blocker."
+        },
+        {
+          "file": "Skills/github/teach/references/templates.md",
+          "change": "Name learning-records/source-check-blocker.md explicitly and require source-check receipt fields."
+        },
+        {
+          "file": "Skills/github/teach/references/evals.yaml",
+          "change": "Retain edge-external-sources-needed as self-contained regression criteria for source type, citation, verification date, claim boundary, and dependent artifact path."
+        }
+      ],
+      "retained_regression": {
+        "status": "retained",
+        "path": "Skills/github/teach/references/evals.yaml"
+      },
+      "validation_commands": [
+        "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache ./bin/ask sdk eval scenario-quality Skills/github/teach --preview --json --robot",
+        "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache ./bin/ask sdk eval scorer-quality Skills/github/teach --preview --json --robot",
+        "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache ./bin/ask sdk eval scorer-calibration Skills/github/teach --preview --json --robot",
+        "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache ./bin/ask evals run Skills/github/teach --tessl-live-private --tessl-workspace skills-sdk --tessl-live-dry-run --json --robot --no-dashboard"
+      ]
+    },
+    {
+      "scenario_id": "happy-quiz-review",
+      "owner": "skill",
+      "failure_mode": "The skill gave useful quiz feedback but did not make the durable quiz-review learning record and repair-step artifact unavoidable enough to beat baseline.",
+      "knowledge_capsule_facets": [
+        "lesson_loop"
+      ],
+      "patch_plan": [
+        {
+          "file": "Skills/github/teach/SKILL.md",
+          "change": "Route quiz review through the artifact/blocker dispatch table with required missed answer, misconception, correction, retrieval prompt, and next practice fields."
+        },
+        {
+          "file": "Skills/github/teach/references/templates.md",
+          "change": "Add quiz-review learning-record and quiz-review blocker templates."
+        },
+        {
+          "file": "Skills/github/teach/references/evals.yaml",
+          "change": "Retain happy-quiz-review as self-contained regression criteria for durable record or blocker proof."
+        }
+      ],
+      "retained_regression": {
+        "status": "retained",
+        "path": "Skills/github/teach/references/evals.yaml"
+      },
+      "validation_commands": [
+        "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache ./bin/ask sdk eval scenario-quality Skills/github/teach --preview --json --robot",
+        "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache ./bin/ask sdk eval scorer-quality Skills/github/teach --preview --json --robot",
+        "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache ./bin/ask sdk eval scorer-calibration Skills/github/teach --preview --json --robot",
+        "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache ./bin/ask evals run Skills/github/teach --tessl-live-private --tessl-workspace skills-sdk --tessl-live-dry-run --json --robot --no-dashboard"
+      ]
+    }
+  ]
+}

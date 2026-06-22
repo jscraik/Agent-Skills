@@ -42,6 +42,7 @@
     "./bin/ask sdk eval ab-preview --skill-a Infrastructure/tests/fixtures/skills_sdk/valid_skill --skill-b Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --fixture Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --preview --json --robot",
     "./bin/ask sdk eval ab-plan --skill-a Infrastructure/tests/fixtures/skills_sdk/valid_skill --skill-b Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --fixture Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json --preview --json --robot",
     "./bin/ask sdk eval ab-judge-preview --run-receipt Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.json --preview --json --robot",
+    "uv run --project Infrastructure --group test --python 3.12 pytest -q Infrastructure/tests/test_skills_sdk_ab_judge_score.py",
     "./bin/ask sdk eval scenario-quality Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --preview --json --robot",
     "./bin/ask sdk package build Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
     "./bin/ask sdk package harden Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
@@ -409,7 +410,7 @@
         "Infrastructure/tests/test_skills_sdk_eval_profiles.py"
       ],
       "next_slice": "Use the previewed profiles to drive Codex-backed A/B execution receipts without exposing judge secrets or authenticated Codex judge state to skill execution.",
-      "notes": "The SDK now previews Codex exec sandbox profiles and post-run judge profiles: local Ollama uses qwen3.5:latest, Ollama Cloud uses deepseek-v4-flash:cloud with OLLAMA_API_KEY, Codex fast uses gpt-5.3-codex-spark through an authenticated Codex CLI boundary, and judge secrets are kept out of the candidate skill execution environment."
+      "notes": "The SDK now previews Codex exec sandbox profiles and post-run judge profiles: oss-local layers the Codex oss-local profile for qwen3.5:latest, oss-cloud layers the Codex oss-cloud profile for deepseek-v4-flash:cloud, Codex fast uses gpt-5.3-codex-spark through an authenticated Codex CLI boundary, and judge secrets are kept out of the candidate skill execution environment."
     },
     {
       "id": "ab_rubric",
@@ -425,7 +426,7 @@
         "Infrastructure/tests/test_skills_sdk_ab_rubric.py",
         "Infrastructure/tests/test_skills_sdk_schema_spine.py::TestSkillsSdkSchemaSpine::test_ab_rubric_fixture_records_stable_cross_stage_scorecard"
       ],
-      "next_slice": "Use this rubric digest for local Ollama judge execution before adding cloud DeepSeek and Tessl confirmation receipts.",
+      "next_slice": "Use this rubric digest for Codex oss-local judge execution before adding Codex oss-cloud DeepSeek and Tessl confirmation receipts.",
       "notes": "The SDK now exposes one stable A/B scorecard for local qwen3.5:latest, cloud deepseek-v4-flash:cloud, and later Tessl validation. Judge outputs remain advisory until calibrated and must include dimension scores, evidence refs, and per-dimension reasons."
     },
     {
@@ -474,7 +475,7 @@
         "Infrastructure/tests/test_skills_sdk_ab_run.py",
         "Infrastructure/tests/test_skills_sdk_schema_spine.py::TestSkillsSdkSchemaSpine::test_ab_run_fixture_records_codex_execution_without_judge_invocation"
       ],
-      "next_slice": "Add sanitized evidence comparison and LLM-as-judge scoring after Codex execution receipts are stable and calibrated judge labels exist.",
+      "next_slice": "Use completed A/B run receipts to feed local advisory judge scoring before adding cloud DeepSeek and Tessl confirmation receipts.",
       "notes": "The SDK now has an explicit --execute-gated Codex A/B run command that writes bounded prompt/stdout/stderr/last-message evidence, records one result per variant, and keeps judge provider invocation false until a separate scoring receipt is added."
     },
     {
@@ -491,8 +492,25 @@
         "Infrastructure/tests/test_skills_sdk_ab_judge.py",
         "Infrastructure/tests/test_skills_sdk_schema_spine.py::TestSkillsSdkSchemaSpine::test_ab_judge_preview_fixture_records_sanitized_non_invoking_judge_input"
       ],
-      "next_slice": "Invoke the selected judge profile only after calibration labels and decision-quality gates are added.",
-      "notes": "The SDK can now derive a sanitized A/B judge input payload and prompt digest from a completed ab-run receipt without invoking Ollama, Codex judge state, network, or mutation. The local default judge profile is Ollama qwen3.5:latest."
+      "next_slice": "Use this sanitized input as the only payload sent to local advisory judge scoring.",
+      "notes": "The SDK can now derive a sanitized A/B judge input payload and prompt digest from a completed ab-run receipt without invoking Codex judge state, network, or mutation. The local default judge profile is Codex oss-local with qwen3.5:latest."
+    },
+    {
+      "id": "ab_judge_score",
+      "title": "Local A/B judge scoring",
+      "status": "implemented",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/eval_ab_judge.py",
+      "pipeline_sections": ["eval_ops", "agent_execution_control_plane", "release_decision_matrix"],
+      "feature_executed": true,
+      "mutation_performed": true,
+      "evidence_refs": [
+        "ask sdk eval ab-judge-score --run-receipt Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.json --execute --json --robot",
+        "Infrastructure/config/schemas/skills-sdk/ab-judge-score-receipt.v0.schema.json",
+        "Infrastructure/tests/test_skills_sdk_ab_judge_score.py",
+        "Infrastructure/tests/test_skills_sdk_schema_spine.py::TestSkillsSdkSchemaSpine::test_ab_judge_score_fixture_records_codex_profile_advisory_decision"
+      ],
+      "next_slice": "Add Codex oss-cloud DeepSeek confirmation only after local qwen3.5:latest scoring receipts are calibrated against expected labels.",
+      "notes": "The SDK can now invoke Codex exec with --profile oss-local against sanitized A/B evidence, validate the returned decision contract, and emit advisory score receipts. Codex oss-cloud, Codex-fast, and Tessl remain separate confirmation lanes."
     },
     {
       "id": "scenario_quality_gate",

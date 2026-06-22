@@ -1,0 +1,30 @@
+{
+  "candidate_id": "teach-2026-06-22",
+  "lanes": [
+    {
+      "blocker": "Current consolidated deterministic local gate receipt has not been materialized into the handoff evidence bundle.",
+      "command": "./bin/ask skills audit Skills/github/teach --level strict --json --robot && ./bin/ask sdk eval scenario-quality Skills/github/teach --preview --json --robot && ./bin/ask sdk eval scorer-quality Skills/github/teach --preview --json --robot && ./bin/ask sdk eval scorer-calibration Skills/github/teach --preview --json --robot",
+      "id": "deterministic_local_gates",
+      "status": "blocked"
+    },
+    {
+      "blocker": "Teach-specific oss-local internal judge receipt has not been generated for the current candidate.",
+      "command": "./bin/ask sdk eval ab-judge-score --run-receipt <teach-ab-run-receipt.json> --judge-profile oss-local --execute --json --robot",
+      "id": "oss-local",
+      "status": "blocked"
+    },
+    {
+      "blocker": "Teach-specific oss-cloud internal judge receipt has not been generated after oss-local remediation.",
+      "command": "./bin/ask sdk eval ab-judge-score --run-receipt <teach-ab-run-receipt.json> --judge-profile oss-cloud --execute --json --robot",
+      "id": "oss-cloud",
+      "status": "blocked"
+    },
+    {
+      "blocker": "Current Tessl live dry-run receipt has not been materialized into the handoff evidence bundle.",
+      "command": "./bin/ask evals run Skills/github/teach --tessl-live-private --tessl-workspace skills-sdk --tessl-live-dry-run --json --robot --no-dashboard",
+      "id": "tessl-live-dry-run",
+      "status": "blocked"
+    }
+  ],
+  "schema_version": "skills-sdk.eval-handoff-readiness-input.v1"
+}

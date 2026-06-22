@@ -1,28 +1,52 @@
 {
   "schema_version": "1.0",
-  "task": "sdk_scenario_generation",
-  "primary_inputs": [
-    "SKILL.md",
-    "references/contract.yaml",
-    "references/evals.yaml",
-    "references/evals/*.md",
-    "KnowledgeOS extraction output",
-    "Tessl scenario drafts",
-    "prior Tessl run summaries"
+  "profile_id": "Skills-agent-ops-sdk-scenario-generator",
+  "scope_skill": "Skills/agent-ops/sdk-scenario-generator",
+  "scope_profile": "Skills",
+  "rubric_version": "2026-06-21",
+  "evaluator_version": "v1",
+  "persona_set_id": "default-v1",
+  "thresholds": {
+    "stability_consecutive_passes": 1,
+    "critical_non_regression": true,
+    "max_iterations": 4,
+    "max_elapsed_ms": 180000,
+    "max_tokens": 14000,
+    "no_improvement_escalation_limit": 2
+  },
+  "criteria": [
+    {
+      "id": "scenario_lifecycle",
+      "label": "Inventories, reviews, imports, and validates scenarios through the canonical SDK lifecycle",
+      "threshold": 0.9,
+      "weight": 0.34,
+      "critical": true
+    },
+    {
+      "id": "anti_easy_quality",
+      "label": "Rejects answer leakage, shallow routing checks, provenance-only signals, and unscoreable tile tasks",
+      "threshold": 0.9,
+      "weight": 0.33,
+      "critical": true
+    },
+    {
+      "id": "tessl_readiness_boundaries",
+      "label": "Keeps dry-run, live Tessl, Registry, install, and repo validation evidence lanes separate",
+      "threshold": 0.9,
+      "weight": 0.33,
+      "critical": true
+    }
   ],
-  "primary_outputs": [
-    "gold-standard scenario set",
-    "scenario drift review",
-    "anti-easy findings",
-    "Tessl dry-run staging proof",
-    "live readiness decision"
-  ],
-  "minimum_behavioral_scenarios": 20,
-  "live_tessl_threshold": {
-    "usage_score_min": 0.9,
-    "usage_must_not_underperform_baseline": true,
-    "workspace_run_limit": 300,
-    "remediation_reserve_runs": 20,
-    "run_limit_source": "operator_provided_limit"
+  "delegation": {
+    "mode": "co-pilot",
+    "human_baseline_minutes": 60.0,
+    "ai_process_minutes": 20.0,
+    "probability_of_success": 0.78,
+    "rationale": "Scenario generation benefits from automated inventory and drafting, but promotion to canonical evals or live Tessl spend requires human-reviewable evidence and explicit readiness gates."
+  },
+  "learning_posture": {
+    "supported": ["guided", "execute"],
+    "default": "guided",
+    "rationale": "Default to guided mode when changing eval contracts or Tessl staging mechanics; execute only after repo evidence and run-budget boundaries are established."
   }
 }

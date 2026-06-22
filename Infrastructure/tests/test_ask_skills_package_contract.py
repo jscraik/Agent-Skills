@@ -1,4 +1,5 @@
 import json
+import os
 import sys
 import tempfile
 import unittest
@@ -443,6 +444,33 @@ policy:
         )
         self.assertEqual(contract["metadata"]["policy"], {"openai_policy": "strict"})
 
+    def test_json_shaped_reference_contract_survives_without_pyyaml(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = Path(temp_dir) / "Skills" / "agent-ops" / "json-contract"
+            references = skill_dir / "references"
+            references.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text("# Json Contract\n", encoding="utf-8")
+            (references / "contract.yaml").write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "skill": "json-contract",
+                        "purpose": "Keep JSON-shaped YAML readable.",
+                        "inputs": ["input"],
+                        "outputs": ["output"],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            with patch.object(package_contracts, "yaml", None):
+                contract = package_contracts.read_reference_contract(skill_md)
+
+        self.assertEqual(contract["purpose"], "Keep JSON-shaped YAML readable.")
+        self.assertEqual(contract["inputs"], ["input"])
+        self.assertEqual(contract["outputs"], ["output"])
+
     def test_package_contract_malformed_yaml_falls_back_to_empty_openai_fields(self) -> None:
         class BrokenYaml:
             class YAMLError(Exception):
@@ -804,6 +832,299 @@ workflow:
         self.assertEqual(workflow_contract["human_gate_count"], 0)
         self.assertFalse(workflow_contract["blockers"])
         self.assertTrue(contract["progressive_disclosure"]["workflow_declared"])
+
+    def test_sdk_contract_reports_progressive_disclosure_compaction(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "compact-skill"
+            references_dir = skill_dir / "references"
+            references_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: compact-skill
+description: Compact skill fixture.
+---
+
+# Compact Skill
+
+## Workflow
+
+Keep the entrypoint small.
+
+## Progressive Disclosure
+
+- Read `references/details.md` for task-specific detail.
+""",
+                encoding="utf-8",
+            )
+            (references_dir / "details.md").write_text("# Details\n", encoding="utf-8")
+
+            contract = package_contracts.sdk_package_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+            )
+
+        progressive = contract["progressive_disclosure"]
+        self.assertTrue(progressive["skill_md_under_250_lines"])
+        self.assertTrue(progressive["progressive_disclosure_declared"])
+        self.assertEqual(progressive["progressive_disclosure_reference_count"], 1)
+        self.assertEqual(progressive["progressive_disclosure_missing_references"], [])
+        self.assertTrue(progressive["progressive_disclosure_ready"])
+
+    def test_sdk_contract_reports_missing_progressive_reference(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "missing-ref-skill"
+            skill_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: missing-ref-skill
+description: Missing reference fixture.
+---
+
+# Missing Reference Skill
+
+## Progressive Disclosure
+
+- Read `references/missing.md` for task-specific detail.
+""",
+                encoding="utf-8",
+            )
+
+            contract = package_contracts.sdk_package_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+            )
+
+        progressive = contract["progressive_disclosure"]
+        self.assertEqual(
+            progressive["progressive_disclosure_missing_references"],
+            ["references/missing.md"],
+        )
+        self.assertFalse(progressive["progressive_disclosure_ready"])
+
+    def test_sdk_contract_rejects_progressive_paths_outside_package(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "escape-ref-skill"
+            references_dir = skill_dir / "references"
+            references_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: escape-ref-skill
+description: Escape reference fixture.
+---
+
+# Escape Reference Skill
+
+## Progressive Disclosure
+
+- Read `references/../outside.md` for task-specific detail.
+""",
+                encoding="utf-8",
+            )
+            (skill_dir / "outside.md").write_text("# Outside\n", encoding="utf-8")
+
+            contract = package_contracts.sdk_package_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+            )
+
+        progressive = contract["progressive_disclosure"]
+        self.assertEqual(
+            progressive["progressive_disclosure_missing_references"],
+            ["references/../outside.md"],
+        )
+        self.assertFalse(progressive["progressive_disclosure_ready"])
+
+    def test_sdk_contract_reports_identity_and_asset_browseability(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "identity-skill"
+            references_dir = skill_dir / "references"
+            scripts_dir = skill_dir / "scripts"
+            references_dir.mkdir(parents=True)
+            scripts_dir.mkdir()
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: identity-skill
+description: Create reliable package identity checks when validating skill assets.
+short_description: Check skill package identity
+---
+
+# Identity Skill
+""",
+                encoding="utf-8",
+            )
+            (references_dir / "gold-contract.md").write_text(
+                "# Gold Contract\n\nPurposeful reference detail.\n",
+                encoding="utf-8",
+            )
+            (references_dir / "held-out-examples.jsonl").write_text(
+                '{"description":"Purpose: held-out scorer calibration example.","id":"case-1"}\n',
+                encoding="utf-8",
+            )
+            (scripts_dir / "run-checks.py").write_text(
+                "\"\"\"Purpose: run the package identity fixture check.\"\"\"\n",
+                encoding="utf-8",
+            )
+
+            contract = package_contracts.sdk_package_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+            )
+
+        identity = contract["identity_and_assets"]
+        self.assertTrue(identity["ready"])
+        self.assertTrue(identity["skill_identity"]["name_kebab_case"])
+        self.assertTrue(identity["skill_identity"]["name_matches_directory"])
+        self.assertTrue(identity["skill_identity"]["description_has_action_term"])
+        self.assertTrue(identity["reference_inventory"]["ready"])
+        self.assertTrue(identity["script_inventory"]["ready"])
+
+    def test_sdk_contract_accepts_multiline_script_docstring_description(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "script-docstring-skill"
+            scripts_dir = skill_dir / "scripts"
+            scripts_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: script-docstring-skill
+description: Create reliable script description checks for package validation.
+---
+
+# Script Docstring Skill
+""",
+                encoding="utf-8",
+            )
+            (scripts_dir / "run-checks.py").write_text(
+                "\"\"\"\nPurpose: run the package script fixture check.\n\"\"\"\nprint('ok')\n",
+                encoding="utf-8",
+            )
+
+            contract = package_contracts.sdk_package_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+            )
+
+        scripts = contract["identity_and_assets"]["script_inventory"]
+        self.assertTrue(scripts["ready"])
+        self.assertEqual(scripts["missing_descriptions"], [])
+
+    @unittest.skipUnless(hasattr(os, "symlink"), "symlink support required")
+    def test_sdk_contract_blocks_symlinked_support_files_without_reading(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "symlink-support-skill"
+            references_dir = skill_dir / "references"
+            references_dir.mkdir(parents=True)
+            outside = repo_root / "outside.md"
+            outside.write_text("# Outside\n", encoding="utf-8")
+            try:
+                (references_dir / "outside-link.md").symlink_to(outside)
+            except OSError as exc:
+                self.skipTest(f"symlink creation unavailable: {exc}")
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: symlink-support-skill
+description: Create reliable symlink blocking checks for package validation.
+---
+
+# Symlink Support Skill
+""",
+                encoding="utf-8",
+            )
+
+            contract = package_contracts.sdk_package_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+            )
+
+        references = contract["identity_and_assets"]["reference_inventory"]
+        self.assertFalse(references["ready"])
+        self.assertEqual(references["count"], 0)
+        self.assertIn(
+            "Skills/agent-ops/symlink-support-skill/references/outside-link.md",
+            references["unsafe_paths"],
+        )
+
+    def test_sdk_contract_reports_identity_and_asset_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "bad-skill"
+            references_dir = skill_dir / "references"
+            scripts_dir = skill_dir / "scripts"
+            references_dir.mkdir(parents=True)
+            scripts_dir.mkdir()
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: Bad Skill
+description: sample
+---
+
+# Bad Skill
+""",
+                encoding="utf-8",
+            )
+            (references_dir / "details.md").write_text(
+                "No title here.\n",
+                encoding="utf-8",
+            )
+            (references_dir / "undocumented-examples.jsonl").write_text(
+                '{"id":"case-1"}\n',
+                encoding="utf-8",
+            )
+            (scripts_dir / "RunChecks.py").write_text(
+                "print('missing purpose metadata')\n",
+                encoding="utf-8",
+            )
+
+            contract = package_contracts.sdk_package_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+            )
+
+        identity = contract["identity_and_assets"]
+        self.assertFalse(identity["ready"])
+        self.assertFalse(identity["skill_identity"]["name_kebab_case"])
+        self.assertFalse(identity["skill_identity"]["name_matches_directory"])
+        self.assertFalse(identity["skill_identity"]["description_length_ok"])
+        self.assertFalse(identity["skill_identity"]["description_has_action_term"])
+        self.assertIn(
+            "Skills/agent-ops/bad-skill/references/details.md",
+            identity["reference_inventory"]["generic_names"],
+        )
+        self.assertIn(
+            "Skills/agent-ops/bad-skill/references/details.md",
+            identity["reference_inventory"]["missing_descriptions"],
+        )
+        self.assertIn(
+            "Skills/agent-ops/bad-skill/references/undocumented-examples.jsonl",
+            identity["reference_inventory"]["missing_descriptions"],
+        )
+        self.assertIn(
+            "Skills/agent-ops/bad-skill/scripts/RunChecks.py",
+            identity["script_inventory"]["bad_names"],
+        )
+        self.assertIn(
+            "Skills/agent-ops/bad-skill/scripts/RunChecks.py",
+            identity["script_inventory"]["missing_descriptions"],
+        )
 
     def test_required_skillflow_missing_blocks_package_readiness(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -1399,6 +1720,95 @@ metadata:
             [],
         )
         self.assertTrue(contract["progressive_disclosure"]["references_contract_declared"])
+
+    def test_knowledge_capsule_contract_requires_first_party_routing(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "capsule-skill"
+            references = skill_dir / "references"
+            references.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                "# Capsule Skill\n\nLoad references/knowledge-capsule-routing.md before capsule bodies.\n",
+                encoding="utf-8",
+            )
+            (references / "knowledge-capsule.manifest.yaml").write_text(
+                "capsules:\n"
+                "  - target_path: references/knowledge-capsules/one.md\n"
+                "    facet_id: one\n",
+                encoding="utf-8",
+            )
+            (references / "knowledge-capsule-routing.md").write_text(
+                "# Knowledge Capsule Routing\n\n- references/knowledge-capsules/one.md\n",
+                encoding="utf-8",
+            )
+
+            contract = package_contracts.sdk_package_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+            )
+
+        self.assertTrue(contract["knowledge_capsules"]["manifest_declared"])
+        self.assertTrue(contract["knowledge_capsules"]["ready"])
+        self.assertEqual(contract["knowledge_capsules"]["capsule_paths"], ["references/knowledge-capsules/one.md"])
+
+    def test_knowledge_capsule_contract_blocks_unsafe_target_paths(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "capsule-skill"
+            references = skill_dir / "references"
+            references.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                "# Capsule Skill\n\nLoad references/knowledge-capsule-routing.md before capsule bodies.\n",
+                encoding="utf-8",
+            )
+            (references / "knowledge-capsule.manifest.yaml").write_text(
+                "capsules:\n"
+                "  - target_path: /tmp/outside.md\n"
+                "    facet_id: outside\n",
+                encoding="utf-8",
+            )
+            (references / "knowledge-capsule-routing.md").write_text(
+                "# Knowledge Capsule Routing\n\n- /tmp/outside.md\n",
+                encoding="utf-8",
+            )
+
+            contract = package_contracts.sdk_package_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+            )
+
+        self.assertTrue(contract["knowledge_capsules"]["manifest_declared"])
+        self.assertFalse(contract["knowledge_capsules"]["ready"])
+        self.assertEqual(contract["knowledge_capsules"]["unsafe_capsule_paths"], ["/tmp/outside.md"])
+
+    def test_knowledge_capsule_contract_warns_when_routing_is_buried(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "capsule-skill"
+            references = skill_dir / "references"
+            references.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text("# Capsule Skill\n\nLoad the manifest when needed.\n", encoding="utf-8")
+            (references / "knowledge-capsule.manifest.yaml").write_text(
+                "capsules:\n"
+                "  - target_path: references/knowledge-capsules/one.md\n"
+                "    facet_id: one\n",
+                encoding="utf-8",
+            )
+
+            contract = package_contracts.sdk_package_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+            )
+
+        self.assertEqual(contract["knowledge_capsules"]["status"], "advisory")
+        self.assertTrue(contract["knowledge_capsules"]["manifest_declared"])
+        self.assertFalse(contract["knowledge_capsules"]["ready"])
 
     def test_package_readiness_schema_rejects_payload_without_snapshot_identity(self) -> None:
         with patch("ask.commands.skills_impl.resolve_skill_handle", return_value={

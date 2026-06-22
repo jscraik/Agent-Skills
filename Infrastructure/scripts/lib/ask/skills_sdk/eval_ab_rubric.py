@@ -126,7 +126,7 @@ def build_ab_rubric_preview_receipt() -> dict[str, Any]:
         "blockers": [],
         "acceptance_trace": ["FR-003", "FR-008", "SA-004", "VP-021", "VP-022", "VP-030"],
         "agent_summary": (
-            "Canonical A/B rubric preview is ready; local Ollama, cloud Ollama, and Tessl stages "
+            "Canonical A/B rubric preview is ready; Codex oss-local, Codex oss-cloud, and Tessl stages "
             "must reuse this rubric identity and digest."
         ),
     }

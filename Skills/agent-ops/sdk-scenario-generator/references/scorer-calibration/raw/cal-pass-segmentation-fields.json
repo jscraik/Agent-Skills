@@ -1,0 +1,8 @@
+{
+  "id": "cal-pass-segmentation-fields",
+  "description": "Raw scorer artifact for the known-pass segmentation calibration example.",
+  "scorer_id": "sdk-scenario-generator.release-scorer",
+  "predicted_label": "pass",
+  "score": 0.94,
+  "rationale": "The evaluation records category, claim ids, eval mode, and evidence lane so failures can be attributed instead of averaged into an opaque score."
+}

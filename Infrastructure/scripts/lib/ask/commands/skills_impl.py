@@ -11,7 +11,6 @@ import sys
 import importlib.util
 import tempfile
 import difflib
-import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -117,6 +116,7 @@ from ask.skills_sdk.eval_ab_preview import build_ab_preview_receipt as _build_ab
 from ask.skills_sdk.eval_ab_plan import build_ab_plan_receipt as _build_ab_plan_receipt  # noqa: E402
 from ask.skills_sdk.eval_ab_run import build_ab_run_receipt as _build_ab_run_receipt  # noqa: E402
 from ask.skills_sdk.eval_ab_judge import build_ab_judge_preview_receipt as _build_ab_judge_preview_receipt  # noqa: E402
+from ask.skills_sdk.eval_ab_judge import build_ab_judge_score_receipt as _build_ab_judge_score_receipt  # noqa: E402
 from ask.skills_sdk.eval_profiles import build_eval_profile_preview_receipt as _build_eval_profile_preview_receipt  # noqa: E402
 from ask.skills_sdk.sandbox_profile import (  # noqa: E402
     SandboxProfileError as _SandboxProfileError,
@@ -233,12 +233,18 @@ __all__ = [
     "skills_sdk_security_adapters_preview",
     "skills_sdk_static_explorer_preview",
     "skills_sdk_eval_scenario_quality",
+    "skills_sdk_eval_scorer_quality",
+    "skills_sdk_eval_scorer_calibration",
+    "skills_sdk_eval_tessl_score",
+    "skills_sdk_eval_regression_plan",
+    "skills_sdk_eval_handoff_readiness",
     "skills_sdk_eval_profiles_preview",
     "skills_sdk_eval_ab_rubric_preview",
     "skills_sdk_eval_ab_preview",
     "skills_sdk_eval_ab_plan",
     "skills_sdk_eval_ab_run",
     "skills_sdk_eval_ab_judge_preview",
+    "skills_sdk_eval_ab_judge_score",
     "skills_sdk_eval_run",
     "skills_sdk_placeholder_lifecycle",
     "skills_sdk_project_rollback",
@@ -663,49 +669,100 @@ def _safe_tessl_skill_key(raw_name: str) -> str:
     return key or "skill"
 
 
-def _write_tessl_tile_wrapper(repo_root: Path, audit_target_path: str, stable_parent: Path) -> tuple[Path, dict[str, str]]:
-    """Create a stable Tessl evidence wrapper for a SKILL.md-first local skill."""
+def _write_tessl_staged_json(path: Path, payload: dict[str, Any], staging_root_real: str, label: str) -> None:
+    safe_path = _safe_tessl_staging_path(path, staging_root_real, label)
+    safe_path.parent.mkdir(parents=True, exist_ok=True)
+    _write_tessl_staged_text(
+        safe_path,
+        json.dumps(payload, indent=2, sort_keys=True) + "\n",
+        staging_root_real,
+        label,
+    )
+
+
+def _write_tessl_staged_text(path: Path, value: str, staging_root_real: str, label: str) -> None:
+    safe_path = _safe_tessl_staging_path(path, staging_root_real, label)
+    if safe_path.is_symlink():
+        raise ValueError(f"Tessl review staging {label} path must not be a symlink.")
+    with safe_path.open("w", encoding="utf-8") as handle:
+        handle.write(value)
+
+
+def _safe_tessl_staging_path(path: Path, staging_root_real: str, label: str) -> Path:
+    parent_real = os.path.realpath(path.parent)
+    if os.path.commonpath([staging_root_real, parent_real]) != staging_root_real:
+        raise ValueError(f"Tessl review staging {label} parent escaped the staging root.")
+    target_real = os.path.realpath(path)
+    if os.path.commonpath([staging_root_real, target_real]) != staging_root_real:
+        raise ValueError(f"Tessl review staging {label} path escaped the staging root.")
+    return Path(target_real)
+
+
+def _raise_if_tessl_support_tree_has_symlink(support_dir: Path, label: str) -> None:
+    for path in [support_dir, *support_dir.rglob("*")]:
+        if path.is_symlink():
+            raise ValueError(f"Tessl review staging refuses symlinked support path: {label}")
+
+
+def _write_tessl_plugin_wrapper(repo_root: Path, audit_target_path: str, stable_parent: Path) -> tuple[Path, dict[str, str]]:
+    """Create a stable Tessl plugin-shaped evidence wrapper for a SKILL.md-first local skill."""
     source_skill_dir = repo_root / audit_target_path
     source_skill = source_skill_dir / "SKILL.md"
+    if source_skill.is_symlink():
+        raise ValueError(f"Tessl review staging refuses symlinked skill source: {audit_target_path}/SKILL.md")
     fields = _read_skill_frontmatter_fields(source_skill)
     skill_key = _safe_tessl_skill_key(fields.get("name") or Path(audit_target_path).name)
-    stable_parent.mkdir(parents=True, exist_ok=True)
-    run_id = str(uuid.uuid4())[:8]
-    temp_root = stable_parent / run_id
+    temp_root = stable_parent / "current"
+    if temp_root.exists():
+        archive_root = stable_parent / "evidence-archive"
+        archive_root.mkdir(parents=True, exist_ok=True)
+        archive_name = f"plugin-review-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}"
+        archive_path = archive_root / archive_name
+        counter = 1
+        while archive_path.exists():
+            counter += 1
+            archive_path = archive_root / f"{archive_name}-{counter}"
+        shutil.move(str(temp_root), str(archive_path))
     temp_root.mkdir(parents=True, exist_ok=True)
-    tile_skill_dir = temp_root / "skills" / skill_key
-    tile_skill_dir.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(source_skill, tile_skill_dir / "SKILL.md")
+    staged_skill_dir = temp_root / "skills" / skill_key
+    staged_skill_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(source_skill, staged_skill_dir / "SKILL.md")
     for support_dir_name in ("references", "scripts", "assets", "evals"):
         support_dir = source_skill_dir / support_dir_name
         if support_dir.is_dir():
-            shutil.copytree(support_dir, tile_skill_dir / support_dir_name)
+            _raise_if_tessl_support_tree_has_symlink(
+                support_dir,
+                f"{audit_target_path}/{support_dir_name}",
+            )
+            shutil.copytree(support_dir, staged_skill_dir / support_dir_name)
 
-    tile = {
+    plugin = {
+        "schema_version": 1,
         "name": f"local/{skill_key}",
-        "summary": fields.get("description") or f"Local validation wrapper for {skill_key}.",
+        "description": fields.get("description") or f"Local validation wrapper for {skill_key}.",
         "version": "0.0.0-local",
-        "skills": {
-            skill_key: {
-                "path": f"skills/{skill_key}/SKILL.md",
-            },
-        },
+        "private": True,
+        "skills": "./skills/",
     }
-    tile_path = temp_root / "tile.json"
-    tile_path.write_text(json.dumps(tile, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    stable_parent_real = os.path.realpath(stable_parent)
+    plugin_path = temp_root / ".tessl-plugin" / "plugin.json"
+    _write_tessl_staged_json(plugin_path, plugin, stable_parent_real, "manifest")
     tessl_marker_path = temp_root / "tessl.json"
-    tessl_marker_path.write_text(
-        json.dumps({"name": f"agent-skills-{skill_key}", "version": "0.0.0-local"}, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
+    _write_tessl_staged_json(
+        tessl_marker_path,
+        {"name": f"agent-skills-{skill_key}", "version": "0.0.0-local"},
+        stable_parent_real,
+        "marker",
     )
-    return tile_path, {
-        "tile_path": str(tile_path),
+    return temp_root, {
+        "plugin_manifest": str(plugin_path),
         "tessl_project_marker": str(tessl_marker_path),
         "staging_root": str(temp_root),
-        "review_path": str(tile_skill_dir),
+        "review_path": str(staged_skill_dir),
         "skill_key": skill_key,
         "source_skill": audit_target_path,
         "evidence_retention": "stable_tmp_directory_left_for_post-run_inspection",
+        "archive_policy": "previous_current_staging_moved_to_evidence_archive_before_refresh",
     }
 
 
@@ -4847,6 +4904,352 @@ def skills_sdk_eval_scenario_quality(repo_root: Path, target: str) -> CallResult
     return result
 
 
+def skills_sdk_eval_scorer_quality(repo_root: Path, target: str) -> CallResult:
+    """Preview scorer calibration quality without promoting or mutating eval sources."""
+    result = CallResult()
+    result.metadata["command"] = "sdk eval scorer-quality"
+    query = target.strip()
+    target_info, _audit_target = _resolve_doctor_target(repo_root, query)
+    source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
+    source_path = Path(str(source_path_value)) if source_path_value else None
+    if source_path and not source_path.is_absolute():
+        source_path = repo_root / source_path
+    if not source_path:
+        result.status = "error"
+        result.data["skills_sdk_eval_scorer_quality"] = {
+            "schema_version": "skills-sdk-eval-scorer-quality.v0",
+            "status": "blocked",
+            "query": query,
+            "canonical_source_path": source_path_value,
+            "receipt": None,
+            "ready": False,
+            "mutation_performed": False,
+            "promotion_performed": False,
+            "validation_commands": [_ask_validation_command("sdk", "eval", "scorer-quality", query, "--preview")],
+            "agent_summary": f"skills-sdk eval scorer-quality is blocked for {query}: canonical source is missing.",
+        }
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Skills SDK scorer quality is missing a canonical SKILL.md source for '{query}'.",
+                fix_suggestion=_ask_validation_command("sdk", "eval", "scorer-quality", "<skill>", "--preview"),
+            )
+        )
+        return result
+
+    from ask.skills_sdk.scorer_quality import build_scorer_quality_receipt  # noqa: PLC0415
+
+    receipt = build_scorer_quality_receipt(repo_root, source_path=source_path, query=query)
+    payload = {
+        "schema_version": "skills-sdk-eval-scorer-quality.v0",
+        "status": receipt["status"],
+        "query": query,
+        "canonical_source_path": source_path_value,
+        "facade_command": "skills-sdk eval scorer-quality",
+        "receipt": receipt,
+        "ready": receipt["ready"],
+        "blocked_count": len(receipt["blockers"]),
+        "mutation_performed": False,
+        "promotion_performed": False,
+        "validation_commands": [_ask_validation_command("sdk", "eval", "scorer-quality", query, "--preview")],
+        "agent_summary": receipt["agent_summary"],
+    }
+    result.data["skills_sdk_eval_scorer_quality"] = payload
+    if receipt["status"] == "blocked":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=payload["agent_summary"],
+                fix_suggestion=_ask_validation_command("sdk", "eval", "scorer-quality", query, "--preview"),
+            )
+        )
+    return result
+
+
+def skills_sdk_eval_scorer_calibration(repo_root: Path, target: str) -> CallResult:
+    """Preview held-out scorer calibration evidence without mutating eval sources."""
+    result = CallResult()
+    result.metadata["command"] = "sdk eval scorer-calibration"
+    query = target.strip()
+    target_info, _audit_target = _resolve_doctor_target(repo_root, query)
+    source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
+    source_path = Path(str(source_path_value)) if source_path_value else None
+    if source_path and not source_path.is_absolute():
+        source_path = repo_root / source_path
+    if not source_path:
+        result.status = "error"
+        result.data["skills_sdk_eval_scorer_calibration"] = {
+            "schema_version": "skills-sdk-eval-scorer-calibration.v0",
+            "status": "blocked",
+            "query": query,
+            "canonical_source_path": source_path_value,
+            "receipt": None,
+            "ready": False,
+            "mutation_performed": False,
+            "promotion_performed": False,
+            "validation_commands": [_ask_validation_command("sdk", "eval", "scorer-calibration", query, "--preview")],
+            "agent_summary": f"skills-sdk eval scorer-calibration is blocked for {query}: canonical source is missing.",
+        }
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Skills SDK scorer calibration is missing a canonical SKILL.md source for '{query}'.",
+                fix_suggestion=_ask_validation_command("sdk", "eval", "scorer-calibration", "<skill>", "--preview"),
+            )
+        )
+        return result
+
+    from ask.skills_sdk.scorer_calibration import build_scorer_calibration_receipt  # noqa: PLC0415
+
+    receipt = build_scorer_calibration_receipt(repo_root, source_path=source_path, query=query)
+    payload = {
+        "schema_version": "skills-sdk-eval-scorer-calibration.v0",
+        "status": receipt["status"],
+        "query": query,
+        "canonical_source_path": source_path_value,
+        "facade_command": "skills-sdk eval scorer-calibration",
+        "receipt": receipt,
+        "ready": receipt["ready"],
+        "blocked_count": len(receipt["blockers"]),
+        "mutation_performed": False,
+        "promotion_performed": False,
+        "validation_commands": [_ask_validation_command("sdk", "eval", "scorer-calibration", query, "--preview")],
+        "agent_summary": receipt["agent_summary"],
+    }
+    result.data["skills_sdk_eval_scorer_calibration"] = payload
+    if receipt["status"] == "blocked":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=payload["agent_summary"],
+                fix_suggestion=_ask_validation_command("sdk", "eval", "scorer-calibration", query, "--preview"),
+            )
+        )
+    return result
+
+
+def skills_sdk_eval_tessl_score(
+    repo_root: Path,
+    *,
+    view_json: str,
+    skill: str,
+    run_id: str | None = None,
+) -> CallResult:
+    """Preview a Tessl score receipt from an explicit eval view JSON artifact."""
+    result = CallResult()
+    result.metadata["command"] = "sdk eval tessl-score"
+    view_path = Path(view_json)
+    if not view_path.is_absolute():
+        view_path = repo_root / view_path
+
+    from ask.skills_sdk.tessl_score_receipt import build_tessl_score_receipt  # noqa: PLC0415
+
+    receipt = build_tessl_score_receipt(repo_root, view_json=view_path, skill=skill, run_id=run_id)
+    payload = {
+        "schema_version": "skills-sdk-eval-tessl-score.v0",
+        "status": receipt["status"],
+        "ready": receipt["ready"],
+        "skill": skill,
+        "run_id": receipt["run_id"],
+        "receipt": receipt,
+        "mutation_performed": False,
+        "validation_commands": [
+            _ask_validation_command("sdk", "eval", "tessl-score", "--view-json", view_json, "--skill", skill, "--preview")
+        ],
+        "agent_summary": receipt["agent_summary"],
+    }
+    result.data["skills_sdk_eval_tessl_score"] = payload
+    if receipt["status"] == "blocked":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=payload["agent_summary"],
+                fix_suggestion=_ask_validation_command(
+                    "sdk",
+                    "eval",
+                    "tessl-score",
+                    "--view-json",
+                    view_json,
+                    "--skill",
+                    skill,
+                    "--preview",
+                ),
+            )
+        )
+    return result
+
+
+def skills_sdk_eval_regression_plan(
+    repo_root: Path,
+    *,
+    view_json: str,
+    skill: str,
+    run_id: str | None = None,
+    plan_json: str | None = None,
+) -> CallResult:
+    """Preview an owner-classified regression plan from Tessl score evidence."""
+    result = CallResult()
+    result.metadata["command"] = "sdk eval regression-plan"
+    view_path = Path(view_json)
+    if not view_path.is_absolute():
+        view_path = repo_root / view_path
+    plan_path = Path(plan_json) if plan_json else None
+    if plan_path and not plan_path.is_absolute():
+        plan_path = repo_root / plan_path
+
+    query = skill.strip()
+    target_info, _audit_target = _resolve_doctor_target(repo_root, query)
+    source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
+    source_path = Path(str(source_path_value)) if source_path_value else None
+    if source_path and not source_path.is_absolute():
+        source_path = repo_root / source_path
+    if not source_path:
+        result.status = "error"
+        result.data["skills_sdk_eval_regression_plan"] = {
+            "schema_version": "skills-sdk-eval-regression-plan.v0",
+            "status": "blocked",
+            "ready_for_live_rerun": False,
+            "skill": skill,
+            "run_id": run_id or "",
+            "receipt": None,
+            "mutation_performed": False,
+            "validation_commands": [
+                _ask_validation_command("sdk", "eval", "regression-plan", "--view-json", view_json, "--skill", skill, "--preview")
+            ],
+            "agent_summary": f"skills-sdk eval regression-plan is blocked for {skill}: canonical source is missing.",
+        }
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Skills SDK regression plan is missing a canonical SKILL.md source for '{skill}'.",
+                fix_suggestion=_ask_validation_command("sdk", "eval", "regression-plan", "--view-json", "<view-json>", "--skill", "<skill>", "--preview"),
+            )
+        )
+        return result
+
+    from ask.skills_sdk.regression_plan import build_regression_plan_receipt  # noqa: PLC0415
+
+    receipt = build_regression_plan_receipt(
+        repo_root,
+        view_json=view_path,
+        source_path=source_path,
+        query=skill,
+        run_id=run_id,
+        plan_path=plan_path,
+    )
+    payload = {
+        "schema_version": "skills-sdk-eval-regression-plan.v0",
+        "status": receipt["status"],
+        "ready_for_live_rerun": receipt["ready_for_live_rerun"],
+        "skill": skill,
+        "run_id": receipt["run_id"],
+        "receipt": receipt,
+        "mutation_performed": False,
+        "validation_commands": [
+            _ask_validation_command("sdk", "eval", "regression-plan", "--view-json", view_json, "--skill", skill, "--preview")
+        ],
+        "agent_summary": receipt["agent_summary"],
+    }
+    result.data["skills_sdk_eval_regression_plan"] = payload
+    if receipt["status"] == "blocked":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=payload["agent_summary"],
+                fix_suggestion=_ask_validation_command(
+                    "sdk",
+                    "eval",
+                    "regression-plan",
+                    "--view-json",
+                    view_json,
+                    "--skill",
+                    skill,
+                    "--preview",
+                ),
+            )
+        )
+    return result
+
+
+def skills_sdk_eval_handoff_readiness(
+    repo_root: Path,
+    *,
+    skill: str,
+    receipt_json: str | None = None,
+) -> CallResult:
+    """Preview whether the required local/internal evidence lanes are ready for live Tessl."""
+    result = CallResult()
+    result.metadata["command"] = "sdk eval handoff-readiness"
+    readiness_path = Path(receipt_json) if receipt_json else None
+    if readiness_path and not readiness_path.is_absolute():
+        readiness_path = repo_root / readiness_path
+
+    query = skill.strip()
+    target_info, _audit_target = _resolve_doctor_target(repo_root, query)
+    source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
+    source_path = Path(str(source_path_value)) if source_path_value else None
+    if source_path and not source_path.is_absolute():
+        source_path = repo_root / source_path
+    if not source_path:
+        result.status = "error"
+        result.data["skills_sdk_eval_handoff_readiness"] = {
+            "schema_version": "skills-sdk-eval-handoff-readiness.v0",
+            "status": "blocked",
+            "ready_for_live_tessl": False,
+            "skill": skill,
+            "receipt": None,
+            "mutation_performed": False,
+            "validation_commands": [
+                _ask_validation_command("sdk", "eval", "handoff-readiness", "--skill", skill, "--preview")
+            ],
+            "agent_summary": f"skills-sdk eval handoff-readiness is blocked for {skill}: canonical source is missing.",
+        }
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Skills SDK handoff readiness is missing a canonical SKILL.md source for '{skill}'.",
+                fix_suggestion=_ask_validation_command("sdk", "eval", "handoff-readiness", "--skill", "<skill>", "--preview"),
+            )
+        )
+        return result
+
+    from ask.skills_sdk.handoff_readiness import build_handoff_readiness_receipt  # noqa: PLC0415
+
+    receipt = build_handoff_readiness_receipt(
+        repo_root,
+        source_path=source_path,
+        query=skill,
+        readiness_path=readiness_path,
+    )
+    payload = {
+        "schema_version": "skills-sdk-eval-handoff-readiness.v0",
+        "status": receipt["status"],
+        "ready_for_live_tessl": receipt["ready_for_live_tessl"],
+        "skill": skill,
+        "receipt": receipt,
+        "mutation_performed": False,
+        "validation_commands": [
+            _ask_validation_command("sdk", "eval", "handoff-readiness", "--skill", skill, "--preview")
+        ],
+        "agent_summary": receipt["agent_summary"],
+    }
+    result.data["skills_sdk_eval_handoff_readiness"] = payload
+    if receipt["status"] == "blocked":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=payload["agent_summary"],
+                fix_suggestion=_ask_validation_command("sdk", "eval", "handoff-readiness", "--skill", skill, "--preview"),
+            )
+        )
+    return result
+
+
 def skills_sdk_observability_promote(
     repo_root: Path,
     *,
@@ -5189,6 +5592,64 @@ def skills_sdk_eval_ab_judge_preview(
                 message=receipt["agent_summary"],
                 fix_suggestion=(
                     "Provide a repo-local completed ab-run receipt before previewing judge input."
+                ),
+            )
+        )
+    return result
+
+
+def skills_sdk_eval_ab_judge_score(
+    repo_root: Path,
+    *,
+    run_receipt: str,
+    evidence_root: str = ".harness/artifacts/sdk-ab-judges",
+    judge_profile: str = "oss-local",
+    timeout_seconds: int = 300,
+) -> CallResult:
+    """Invoke Ollama A/B judge scoring and emit advisory decision evidence."""
+    result = CallResult()
+    result.metadata["command"] = "sdk eval ab-judge-score --execute"
+    receipt = _build_ab_judge_score_receipt(
+        repo_root,
+        run_receipt=run_receipt,
+        evidence_root=evidence_root,
+        judge_profile_id=judge_profile,
+        timeout_seconds=timeout_seconds,
+    )
+    payload = {
+        "schema_version": "skills-sdk-ab-judge-score.v0",
+        "status": receipt["status"],
+        "facade_command": "skills-sdk eval ab-judge-score",
+        "receipt": receipt,
+        "mutation_performed": receipt["mutation_performed"],
+        "validation_commands": [
+            _ask_validation_command(
+                "sdk",
+                "eval",
+                "ab-judge-score",
+                "--run-receipt",
+                run_receipt,
+                "--evidence-root",
+                evidence_root,
+                "--judge-profile",
+                judge_profile,
+                "--timeout-seconds",
+                str(timeout_seconds),
+                "--execute",
+            )
+        ],
+        "agent_summary": receipt["agent_summary"],
+    }
+    result.data["skills_sdk_eval_ab_judge_score"] = payload
+    if receipt["status"] == "blocked":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=receipt["agent_summary"],
+                fix_suggestion=(
+                    "Provide a completed ab-run receipt and the selected Ollama judge runtime before "
+                    "running ask sdk eval ab-judge-score."
                 ),
             )
         )
@@ -6592,10 +7053,10 @@ def external_review_skill(
         "tessl_staging_root": f"{os.path.join(tempfile.gettempdir(), 'ask-tessl-reviews')}/<skill-path>-<sha12>",
         "tessl_project_marker": "tessl.json",
         "tessl_evidence_retention": "stable tmp wrapper is intentionally left for inspection and copied-input evidence",
-        "tessl_lint_role": "stable_tile_packaging_shape_check",
+        "tessl_lint_role": "stable_plugin_packaging_shape_check",
         "tessl_lint_shape": (
-            "Tessl lint expects a Tessl tile.json package. Canonical repo skills are "
-            f"SKILL.md-first, so this command builds a stable local tile wrapper under {tempfile.gettempdir()} before linting."
+            "Tessl plugin lint expects a .tessl-plugin/plugin.json package. Canonical repo skills are "
+            f"SKILL.md-first, so this command builds a stable local plugin wrapper under {tempfile.gettempdir()} before linting."
         ),
         "tessl_review_role": "local_best_practice_content_review",
         "plugin_eval_role": "budget_and_ergonomics_guardrail",
@@ -6633,8 +7094,8 @@ def external_review_skill(
             "role": "static budget, ergonomics, and reviewability guardrail; not a substitute for local evals",
         },
         "tessl_lint": {
-            "command": "tessl skill lint <stable-tile.json>",
-            "role": "stable tile.json package-shape check, not a direct content finding",
+            "command": "tessl plugin lint <stable-plugin-directory>",
+            "role": "stable .tessl-plugin/plugin.json package-shape check, not a direct content finding",
             "canonical_source_shape": "SKILL.md-first",
         },
         "tessl_review": {
@@ -6720,7 +7181,7 @@ def external_review_skill(
                         message="plugin-eval analysis failed during external-review lane.",
                         fix_suggestion="Inspect data.plugin_eval for full output.",
                     ))
-                elif plugin_summary.get("fail_count", 0) or not plugin_summary.get("grade_acceptable", False):
+                elif plugin_summary.get("blocking_fail_count", plugin_summary.get("fail_count", 0)) or not plugin_summary.get("grade_acceptable", False):
                     result.status = "error"
                     result.errors.append(ErrorObject(
                         code="ERR_VALIDATION",
@@ -6745,7 +7206,7 @@ def external_review_skill(
         tessl_bin = shutil.which("tessl")
         if not tessl_bin:
             result.status = "error"
-            result.data["tessl_lint"] = {"status": "blocked_missing_binary", "command": "tessl skill lint"}
+            result.data["tessl_lint"] = {"status": "blocked_missing_binary", "command": "tessl plugin lint"}
             result.errors.append(ErrorObject(
                 code="ERR_DEPENDENCY",
                 message="Tessl CLI is not installed or not on PATH; Tessl local lint in the Second-Review Lane could not run.",
@@ -6753,20 +7214,30 @@ def external_review_skill(
             ))
         else:
             tessl_tmp_path = _stable_tessl_review_root(audit_target_path)
-            tile_path, tile_info = _write_tessl_tile_wrapper(repo_root, audit_target_path, tessl_tmp_path)
+            try:
+                staging_root, plugin_info = _write_tessl_plugin_wrapper(repo_root, audit_target_path, tessl_tmp_path)
+            except ValueError as exc:
+                result.status = "error"
+                result.data["tessl_plugin"] = {"status": "blocked_validation", "message": str(exc)}
+                result.errors.append(ErrorObject(
+                    code="ERR_VALIDATION",
+                    message=str(exc),
+                    fix_suggestion="Replace symlinked skill review inputs with regular files or directories before Tessl staging.",
+                ))
+                return result
             tessl_env: dict[str, str] = {}
-            result.data["tessl_tile"] = {
-                **tile_info,
+            result.data["tessl_plugin"] = {
+                **plugin_info,
                 "mode": "stable_tmp_wrapper",
                 "reason": (
-                    "Tessl lint validates tile.json packages. Canonical repo skills remain "
-                    "SKILL.md-first, so this command stages a local packaging-shape wrapper under /tmp."
+                    "Tessl plugin lint validates .tessl-plugin/plugin.json packages. Canonical repo skills remain "
+                    "SKILL.md-first, so this command stages a local plugin-shaped wrapper under /tmp."
                 ),
                 "auth_home": "process_home",
                 "support_refs_included": True,
             }
 
-            lint_command = [tessl_bin, "skill", "lint", str(tile_path)]
+            lint_command = [tessl_bin, "plugin", "lint", str(staging_root)]
             try:
                 lint_proc = _run_captured_tool(
                     repo_root=repo_root,
@@ -6801,7 +7272,7 @@ def external_review_skill(
                     "--json",
                     "--threshold",
                     str(TESSL_REVIEW_MIN_SCORE),
-                    tile_info["review_path"],
+                    plugin_info["review_path"],
                 ]
                 try:
                     review_proc = _run_captured_tool(
