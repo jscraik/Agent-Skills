@@ -37,9 +37,9 @@ def _judge_profiles() -> list[dict[str, Any]]:
     return [
         {
             "id": "oss-local",
-            "provider": "ollama",
+            "provider": "codex",
             "mode": "local",
-            "host": "http://localhost:11434",
+            "host": "codex-cli-profile",
             "model": "qwen3.5:latest",
             "network_required": True,
             "secret_env_names": [],
@@ -48,13 +48,13 @@ def _judge_profiles() -> list[dict[str, Any]]:
         },
         {
             "id": "oss-cloud",
-            "provider": "ollama",
+            "provider": "codex",
             "mode": "cloud",
-            "host": "https://ollama.com",
+            "host": "codex-cli-profile",
             "model": "deepseek-v4-flash:cloud",
             "network_required": True,
             "secret_env_names": ["OLLAMA_API_KEY"],
-            "auth_boundary": "env_secret",
+            "auth_boundary": "codex_cli_auth",
             "receives_sanitized_outputs_only": True,
         },
         {
@@ -116,6 +116,6 @@ def build_eval_profile_preview_receipt() -> dict[str, Any]:
         "acceptance_trace": EVAL_PROFILE_ACCEPTANCE_TRACE,
         "agent_summary": (
             "eval profile preview declares Codex sandbox execution profiles and isolated "
-            "Ollama/Codex judge profiles without invoking providers."
+            "Codex-profile judge profiles without invoking providers."
         ),
     }

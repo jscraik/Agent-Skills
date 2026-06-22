@@ -1,0 +1,23 @@
+---
+schema_version: knowledge-os.knowledge-demand.v1
+skill: teach
+knowledge_signals:
+  - mission_before_lessons
+  - official_sources_first
+  - one_next_lesson
+  - retrieval_practice
+  - learning_records
+  - roadmap_sequencing
+  - local_book_practice
+  - credential_boundary
+needed_facets:
+  - mission_and_state
+  - source_trust
+  - lesson_loop
+  - roadmap_sequencing
+  - local_book_practice
+  - proof_and_boundaries
+runtime_dependency_policy:
+  requires_knowledge_os_at_runtime: false
+  raw_sources_included: false
+  local_absolute_paths_required: false

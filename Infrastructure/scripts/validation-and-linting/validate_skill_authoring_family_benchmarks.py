@@ -475,6 +475,15 @@ def _validate_evals(skill_rel: str, skill_dir: Path) -> List[Finding]:
         findings.append(Finding("FAIL", "EVALS_CASE_COUNT", skill_rel, f"evals must include at least 7 cases (found {len(cases)})"))
     elif len(cases) <= 8:
         findings.append(Finding("WARN", "EVALS_CASE_COUNT_MINIMAL", skill_rel, f"evals meet the minimum with only {len(cases)} cases; aim for ≥9 for meaningful coverage across all 4 required categories"))
+    elif len(cases) < 20:
+        findings.append(
+            Finding(
+                "WARN",
+                "EVALS_CASE_COUNT_BELOW_TESSL_READINESS",
+                skill_rel,
+                f"evals include {len(cases)} cases; live Tessl readiness for behavioral skills requires at least 20 gold-standard structured scenarios",
+            )
+        )
 
     seen_ids: Set[str] = set()
     categories: Set[str] = set()

@@ -33,9 +33,9 @@
   },
   "judge_profile": {
     "id": "oss-local",
-    "provider": "ollama",
+    "provider": "codex",
     "mode": "local",
-    "host": "http://localhost:11434",
+    "host": "codex-cli-profile",
     "model": "qwen3.5:latest",
     "network_required": true,
     "secret_env_names": [],
@@ -94,6 +94,7 @@
       "runner_stderr_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
       "output_last_message_path": ".harness/artifacts/sdk-ab-evals/1111222233334444/A/last-message.json",
       "output_last_message_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888",
+      "semantic_output_excerpt": "Variant A completed the fixture with a concise but less specific answer.",
       "blockers": []
     },
     {
@@ -110,6 +111,7 @@
       "runner_stderr_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       "output_last_message_path": ".harness/artifacts/sdk-ab-evals/1111222233334444/B/last-message.json",
       "output_last_message_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "semantic_output_excerpt": "Variant B completed the fixture with stronger localization, concrete validation notes, and clearer evidence.",
       "blockers": []
     }
   ],

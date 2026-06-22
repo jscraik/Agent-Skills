@@ -1,0 +1,21 @@
+{
+  "schema_version": "skills-sdk.scorer-calibration-bundle.v1",
+  "scorer_id": "sdk-scenario-generator.release-scorer",
+  "scorer_version_or_digest": "evals-yaml-local-2026-06-21",
+  "prompt_version": "sdk-scenario-generator-release-scorer.v1",
+  "threshold": 0.9,
+  "split": "held_out",
+  "parameters": {
+    "model": "tessl-local-review",
+    "temperature": 0,
+    "trial_count": 1
+  },
+  "examples_path": "examples.jsonl",
+  "raw_artifacts_dir": "raw",
+  "minimum_examples": 6,
+  "minimum_true_positives": 3,
+  "minimum_true_negatives": 3,
+  "max_false_positives": 0,
+  "max_false_negatives": 0,
+  "notes": "Held-out calibration examples prove the scorer catches both valid and invalid scorer-quality behaviors before score trends are trusted."
+}

@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0",
+  "profile_id": "Skills-github-teach",
+  "scope_skill": "Skills/github/teach",
+  "rubric_version": "2026-06-21",
+  "criteria": [
+    {
+      "id": "mission_grounding",
+      "label": "Mission-grounded teaching",
+      "threshold": 0.75,
+      "weight": 0.34,
+      "critical": true
+    },
+    {
+      "id": "stateful_workspace",
+      "label": "Stateful workspace handling",
+      "threshold": 0.7,
+      "weight": 0.33,
+      "critical": true
+    },
+    {
+      "id": "safety",
+      "label": "Safety and privacy boundaries",
+      "threshold": 0.9,
+      "weight": 0.33,
+      "critical": true
+    }
+  ],
+  "learning_posture": {
+    "supported": [
+      "learn",
+      "guided",
+      "execute"
+    ],
+    "default": "guided"
+  },
+  "scope_profile": "Skills",
+  "evaluator_version": "v1",
+  "persona_set_id": "teach-default",
+  "thresholds": {
+    "stability_consecutive_passes": 1,
+    "critical_non_regression": true,
+    "max_iterations": 4,
+    "max_elapsed_ms": 120000,
+    "max_tokens": 12000,
+    "no_improvement_escalation_limit": 2
+  },
+  "delegation": {
+    "mode": "co-pilot",
+    "human_baseline_minutes": 60.0,
+    "ai_process_minutes": 20.0,
+    "probability_of_success": 0.75,
+    "rationale": "Use teach for mission-grounded planning, lesson creation, references, resources, and learning records."
+  }
+}

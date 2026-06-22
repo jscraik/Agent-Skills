@@ -1,0 +1,46 @@
+schema_version: 1
+skill: teach
+references:
+  - path: references/knowledge-demand.yaml
+    kind: knowledge_profile
+    provenance: vendored KnowledgeOS extraction
+    load_when: deciding which capsule facet is relevant
+    allowed_claims:
+      - KnowledgeOS demand profile for this teaching skill
+    forbidden_claims:
+      - raw source availability
+      - target repo readiness
+      - loading all capsules by default
+    freshness: knowledge_os_snapshot
+    context_budget: small
+    claim_scope: knowledge_profile
+    bounded_unit: true
+  - path: references/knowledge-capsule.manifest.yaml
+    kind: capsule_manifest
+    provenance: vendored KnowledgeOS extraction
+    load_when: selecting one bounded capsule
+    allowed_claims:
+      - available capsule ids and summaries
+    forbidden_claims:
+      - raw source availability
+      - target repo readiness
+      - loading all capsules by default
+    freshness: knowledge_os_snapshot
+    context_budget: small
+    claim_scope: capsule_manifest
+    bounded_unit: true
+  - path: references/knowledge-capsules/
+    kind: generated_knowledge_capsules
+    provenance: vendored KnowledgeOS extraction
+    load_when: only after manifest selection
+    allowed_claims:
+      - selected capsule content for learner-facing lesson context
+      - KnowledgeOS capsules are vendored references, not runtime dependencies.
+    forbidden_claims:
+      - raw source availability
+      - target repo readiness
+      - loading all capsules by default
+    freshness: knowledge_os_snapshot
+    context_budget: bounded_selected_capsule
+    claim_scope: selected_capsule
+    bounded_unit: true

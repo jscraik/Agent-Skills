@@ -269,3 +269,5 @@ Repo-specific agent knowledge base. Append-only.
 **2026-06-16 [Codex]:** Bash command 'zsh' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:1675407108)
 
 **2026-06-16 [Codex]:** Bash command 'zsh' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:613334459)
+
+**2026-06-21 [Codex]:** Bash command 'zsh' failed with exit code 1 -> summarize the failure and change approach before rerunning the same command (auto-key:318241816)

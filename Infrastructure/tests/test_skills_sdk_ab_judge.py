@@ -77,6 +77,19 @@ class TestSkillsSdkAbJudgePreview(unittest.TestCase):
         self.assertEqual(receipt["comparison_payload"]["experiment_id"], run_receipt["experiment_id"])
         validate_ab_judge_preview_receipt(receipt)
 
+    def test_builder_blocks_incomplete_nested_run_receipt_identities(self) -> None:
+        run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
+        del run_receipt["skill_a"]["package_digest"]
+        receipt_path = self.evidence_root / "ab-run-missing-package-digest.json"
+        receipt_path.write_text(json.dumps(run_receipt), encoding="utf-8")
+
+        receipt = build_ab_judge_preview_receipt(REPO_ROOT, run_receipt=receipt_path.relative_to(REPO_ROOT).as_posix())
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("run_receipt_contract_invalid", receipt["blockers"])
+        self.assertIsNone(receipt["comparison_payload"])
+        validate_ab_judge_preview_receipt(receipt)
+
     def test_cli_requires_preview_gate(self) -> None:
         proc = subprocess.run(
             [

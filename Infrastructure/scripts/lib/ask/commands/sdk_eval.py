@@ -21,12 +21,18 @@ def add_sdk_eval_parser(
     subparsers = parser.add_subparsers(dest="eval_action", required=True)
     _add_run_parser(subparsers, global_parser)
     _add_scenario_quality_parser(subparsers, global_parser)
+    _add_scorer_quality_parser(subparsers, global_parser)
+    _add_scorer_calibration_parser(subparsers, global_parser)
+    _add_tessl_score_parser(subparsers, global_parser)
+    _add_regression_plan_parser(subparsers, global_parser)
+    _add_handoff_readiness_parser(subparsers, global_parser)
     _add_profiles_parser(subparsers, global_parser)
     _add_ab_rubric_parser(subparsers, global_parser)
     _add_ab_preview_parser(subparsers, global_parser)
     _add_ab_plan_parser(subparsers, global_parser)
     _add_ab_run_parser(subparsers, global_parser)
     _add_ab_judge_preview_parser(subparsers, global_parser)
+    _add_ab_judge_score_parser(subparsers, global_parser)
 
 
 def _add_run_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
@@ -44,6 +50,42 @@ def _add_scenario_quality_parser(subparsers: argparse._SubParsersAction, global_
     quality = subparsers.add_parser("scenario-quality", help="Preview eval scenario promotion quality", parents=[global_parser])
     quality.add_argument("target", help="Skill handle or repo-relative skill source path")
     quality.add_argument("--preview", action="store_true", help="Emit a non-mutating scenario quality receipt")
+
+
+def _add_scorer_quality_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
+    quality = subparsers.add_parser("scorer-quality", help="Preview eval scorer calibration quality", parents=[global_parser])
+    quality.add_argument("target", help="Skill handle or repo-relative skill source path")
+    quality.add_argument("--preview", action="store_true", help="Emit a non-mutating scorer quality receipt")
+
+
+def _add_scorer_calibration_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
+    calibration = subparsers.add_parser("scorer-calibration", help="Preview held-out scorer calibration evidence", parents=[global_parser])
+    calibration.add_argument("target", help="Skill handle or repo-relative skill source path")
+    calibration.add_argument("--preview", action="store_true", help="Emit a non-mutating scorer calibration receipt")
+
+
+def _add_tessl_score_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
+    score = subparsers.add_parser("tessl-score", help="Preview a Tessl score receipt from eval view JSON", parents=[global_parser])
+    score.add_argument("--view-json", required=True, help="Path to tessl eval view --json output")
+    score.add_argument("--skill", required=True, help="Skill handle or repo-relative source path represented by the run")
+    score.add_argument("--run-id", help="Expected Tessl eval run id")
+    score.add_argument("--preview", action="store_true", help="Emit a non-mutating Tessl score receipt")
+
+
+def _add_regression_plan_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
+    plan = subparsers.add_parser("regression-plan", help="Preview a regression owner classification plan from Tessl score evidence", parents=[global_parser])
+    plan.add_argument("--view-json", required=True, help="Path to tessl eval view --json output")
+    plan.add_argument("--skill", required=True, help="Skill handle or repo-relative source path represented by the run")
+    plan.add_argument("--run-id", help="Expected Tessl eval run id")
+    plan.add_argument("--plan-json", help="Optional explicit regression plan JSON artifact")
+    plan.add_argument("--preview", action="store_true", help="Emit a non-mutating regression plan receipt")
+
+
+def _add_handoff_readiness_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
+    readiness = subparsers.add_parser("handoff-readiness", help="Preview the required local and internal evidence gate before live Tessl", parents=[global_parser])
+    readiness.add_argument("--skill", required=True, help="Skill handle or repo-relative source path represented by the handoff")
+    readiness.add_argument("--receipt-json", help="Optional explicit handoff readiness JSON artifact")
+    readiness.add_argument("--preview", action="store_true", help="Emit a non-mutating handoff readiness receipt")
 
 
 def _add_profiles_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
@@ -91,6 +133,15 @@ def _add_ab_judge_preview_parser(subparsers: argparse._SubParsersAction, global_
     judge.add_argument("--preview", action="store_true", help="Emit a non-mutating judge input receipt")
 
 
+def _add_ab_judge_score_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
+    score = subparsers.add_parser("ab-judge-score", help="Run Ollama scoring for a completed A/B eval", parents=[global_parser])
+    score.add_argument("--run-receipt", required=True, help="Repo-relative completed ab-run receipt JSON")
+    score.add_argument("--evidence-root", default=".harness/artifacts/sdk-ab-judges")
+    score.add_argument("--judge-profile", choices=("oss-local", "oss-cloud"), default="oss-local")
+    score.add_argument("--timeout-seconds", type=_positive_int, default=300, help="Timeout for the judge provider.")
+    score.add_argument("--execute", action="store_true", help="Required explicit gate before invoking the judge provider.")
+
+
 def _positive_int(value: str) -> int:
     parsed = int(value)
     if parsed < 1:
@@ -102,12 +153,18 @@ def dispatch_sdk_eval(repo_root: Path, args: argparse.Namespace) -> CallResult:
     dispatchers: dict[str, Callable[[Path, argparse.Namespace], CallResult]] = {
         "run": _dispatch_run,
         "scenario-quality": _dispatch_scenario_quality,
+        "scorer-quality": _dispatch_scorer_quality,
+        "scorer-calibration": _dispatch_scorer_calibration,
+        "tessl-score": _dispatch_tessl_score,
+        "regression-plan": _dispatch_regression_plan,
+        "handoff-readiness": _dispatch_handoff_readiness,
         "profiles": _dispatch_profiles,
         "ab-rubric": _dispatch_ab_rubric,
         "ab-preview": _dispatch_ab_preview,
         "ab-plan": _dispatch_ab_plan,
         "ab-run": _dispatch_ab_run,
         "ab-judge-preview": _dispatch_ab_judge_preview,
+        "ab-judge-score": _dispatch_ab_judge_score,
     }
     dispatcher = dispatchers.get(args.eval_action)
     if dispatcher is None:
@@ -134,8 +191,79 @@ def _preview_required(command: str, message: str, next_command: str, args: argpa
 
 
 def _dispatch_scenario_quality(repo_root: Path, args: argparse.Namespace) -> CallResult:
-    error = _preview_required("sdk eval scenario-quality", "Scenario quality requires --preview.", _scenario_quality_next(), args)
-    return error or skills_commands.skills_sdk_eval_scenario_quality(repo_root, target=args.target)
+    return _dispatch_preview_target(
+        repo_root,
+        args,
+        command="sdk eval scenario-quality",
+        message="Scenario quality requires --preview.",
+        next_command=_scenario_quality_next(),
+        handler=skills_commands.skills_sdk_eval_scenario_quality,
+    )
+
+
+def _dispatch_scorer_quality(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    return _dispatch_preview_target(
+        repo_root,
+        args,
+        command="sdk eval scorer-quality",
+        message="Scorer quality requires --preview.",
+        next_command=_scorer_quality_next(),
+        handler=skills_commands.skills_sdk_eval_scorer_quality,
+    )
+
+
+def _dispatch_scorer_calibration(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    return _dispatch_preview_target(
+        repo_root,
+        args,
+        command="sdk eval scorer-calibration",
+        message="Scorer calibration requires --preview.",
+        next_command=_scorer_calibration_next(),
+        handler=skills_commands.skills_sdk_eval_scorer_calibration,
+    )
+
+
+def _dispatch_tessl_score(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    error = _preview_required("sdk eval tessl-score", "Tessl score receipts require --preview.", _tessl_score_next(), args)
+    return error or skills_commands.skills_sdk_eval_tessl_score(
+        repo_root,
+        view_json=args.view_json,
+        skill=args.skill,
+        run_id=args.run_id,
+    )
+
+
+def _dispatch_regression_plan(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    error = _preview_required("sdk eval regression-plan", "Regression plan receipts require --preview.", _regression_plan_next(), args)
+    return error or skills_commands.skills_sdk_eval_regression_plan(
+        repo_root,
+        view_json=args.view_json,
+        skill=args.skill,
+        run_id=args.run_id,
+        plan_json=args.plan_json,
+    )
+
+
+def _dispatch_handoff_readiness(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    error = _preview_required("sdk eval handoff-readiness", "Handoff readiness receipts require --preview.", _handoff_readiness_next(), args)
+    return error or skills_commands.skills_sdk_eval_handoff_readiness(
+        repo_root,
+        skill=args.skill,
+        receipt_json=args.receipt_json,
+    )
+
+
+def _dispatch_preview_target(
+    repo_root: Path,
+    args: argparse.Namespace,
+    *,
+    command: str,
+    message: str,
+    next_command: str,
+    handler: Callable[[Path, str], CallResult],
+) -> CallResult:
+    error = _preview_required(command, message, next_command, args)
+    return error or handler(repo_root, target=args.target)
 
 
 def _dispatch_profiles(repo_root: Path, args: argparse.Namespace) -> CallResult:
@@ -178,6 +306,18 @@ def _dispatch_ab_judge_preview(repo_root: Path, args: argparse.Namespace) -> Cal
     return error or skills_commands.skills_sdk_eval_ab_judge_preview(repo_root, run_receipt=args.run_receipt)
 
 
+def _dispatch_ab_judge_score(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    if not args.execute:
+        return build_validation_error("sdk eval ab-judge-score", "A/B judge scoring invokes Ollama and requires --execute.", _ab_judge_score_next())
+    return skills_commands.skills_sdk_eval_ab_judge_score(
+        repo_root,
+        run_receipt=args.run_receipt,
+        evidence_root=args.evidence_root,
+        judge_profile=args.judge_profile,
+        timeout_seconds=args.timeout_seconds,
+    )
+
+
 def _ab_common_kwargs(args: argparse.Namespace) -> dict[str, str]:
     return {
         "skill_a": args.skill_a,
@@ -190,6 +330,26 @@ def _ab_common_kwargs(args: argparse.Namespace) -> dict[str, str]:
 
 def _scenario_quality_next() -> str:
     return "ask sdk eval scenario-quality <skill> --preview --json --robot"
+
+
+def _scorer_quality_next() -> str:
+    return "ask sdk eval scorer-quality <skill> --preview --json --robot"
+
+
+def _scorer_calibration_next() -> str:
+    return "ask sdk eval scorer-calibration <skill> --preview --json --robot"
+
+
+def _tessl_score_next() -> str:
+    return "ask sdk eval tessl-score --view-json <view-json> --skill <skill> --preview --json --robot"
+
+
+def _regression_plan_next() -> str:
+    return "ask sdk eval regression-plan --view-json <view-json> --skill <skill> --preview --json --robot"
+
+
+def _handoff_readiness_next() -> str:
+    return "ask sdk eval handoff-readiness --skill <skill> --preview --json --robot"
 
 
 def _ab_preview_next() -> str:
@@ -206,3 +366,7 @@ def _ab_run_next() -> str:
 
 def _ab_judge_next() -> str:
     return "ask sdk eval ab-judge-preview --run-receipt <receipt.json> --preview --json --robot"
+
+
+def _ab_judge_score_next() -> str:
+    return "ask sdk eval ab-judge-score --run-receipt <receipt.json> --execute --json --robot"

@@ -10,15 +10,16 @@ from unittest.mock import patch
 repo_root = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(repo_root / "Infrastructure" / "scripts" / "lib"))
 
-from ask.commands.skills_impl import (
+from ask.commands.skills_impl import (  # noqa: E402
+    _safe_tessl_staging_path,
     _subprocess_env_with_uv_cache,
     _summarize_family_benchmark_failure,
-    _write_tessl_tile_wrapper,
+    _write_tessl_plugin_wrapper,
     audit_skill,
     external_review_skill,
     install_skill,
 )
-from ask.skill_review_dashboard import render_skill_review_dashboard
+from ask.skill_review_dashboard import render_skill_review_dashboard  # noqa: E402
 
 
 class TestAskSkillsErrors(unittest.TestCase):
@@ -72,19 +73,58 @@ class TestAskSkillsErrors(unittest.TestCase):
             (skill_dir / "references/local.md").write_text("local", encoding="utf-8")
             (shared_refs / "deferred-context-index.md").write_text("shared", encoding="utf-8")
 
-            tile_path, info = _write_tessl_tile_wrapper(
+            plugin_root, info = _write_tessl_plugin_wrapper(
                 repo_root,
                 "Plugins/harness-engineering/skills/he-phase-work",
                 repo_root / "tmp-tessl",
             )
 
-            tile_skill_dir = Path(info["review_path"])
-            tile_root = tile_path.parent
-            self.assertTrue(tile_path.is_file())
-            self.assertEqual((tile_skill_dir / "SKILL.md").read_text(encoding="utf-8"), (skill_dir / "SKILL.md").read_text(encoding="utf-8"))
-            self.assertFalse((tile_root / "references").exists())
-            self.assertEqual((tile_skill_dir / "references" / "local.md").read_text(encoding="utf-8"), "local")
-            self.assertFalse((tile_skill_dir / ".." / ".." / "references").resolve().exists())
+            staged_skill_dir = Path(info["review_path"])
+            self.assertTrue((plugin_root / ".tessl-plugin" / "plugin.json").is_file())
+            self.assertFalse((plugin_root / "tile.json").exists())
+            self.assertEqual((staged_skill_dir / "SKILL.md").read_text(encoding="utf-8"), (skill_dir / "SKILL.md").read_text(encoding="utf-8"))
+            self.assertFalse((plugin_root / "references").exists())
+            self.assertEqual((staged_skill_dir / "references" / "local.md").read_text(encoding="utf-8"), "local")
+            self.assertFalse((staged_skill_dir / ".." / ".." / "references").resolve().exists())
+
+    @unittest.skipIf(not hasattr(Path, "symlink_to"), "symlink support unavailable")
+    def test_tessl_wrapper_rejects_symlinked_support_dirs(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir)
+            skill_dir = repo_root / "Skills/example-skill"
+            target_refs = repo_root / "shared-references"
+            skill_dir.mkdir(parents=True)
+            target_refs.mkdir()
+            (skill_dir / "SKILL.md").write_text("---\nname: example-skill\n---\n\n# Example\n", encoding="utf-8")
+            (skill_dir / "references").symlink_to(target_refs, target_is_directory=True)
+
+            with self.assertRaisesRegex(ValueError, "symlinked support path"):
+                _write_tessl_plugin_wrapper(repo_root, "Skills/example-skill", repo_root / "tmp-tessl")
+
+    @unittest.skipIf(not hasattr(Path, "symlink_to"), "symlink support unavailable")
+    def test_tessl_wrapper_rejects_nested_support_symlinks(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root = Path(tmpdir)
+            skill_dir = repo_root / "Skills/example-skill"
+            references = skill_dir / "references"
+            outside = repo_root / "outside.md"
+            references.mkdir(parents=True)
+            outside.write_text("outside", encoding="utf-8")
+            (skill_dir / "SKILL.md").write_text("---\nname: example-skill\n---\n\n# Example\n", encoding="utf-8")
+            (references / "leak.md").symlink_to(outside)
+
+            with self.assertRaisesRegex(ValueError, "symlinked support path"):
+                _write_tessl_plugin_wrapper(repo_root, "Skills/example-skill", repo_root / "tmp-tessl")
+
+    def test_tessl_staged_json_path_rejects_escaping_parent_before_mkdir(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            staging_root = Path(tmpdir) / "staging"
+            escaped = Path(tmpdir) / "outside" / "plugin.json"
+
+            with self.assertRaisesRegex(ValueError, "parent escaped"):
+                _safe_tessl_staging_path(escaped, str(staging_root.resolve(strict=False)), "plugin manifest")
+
+            self.assertFalse(escaped.parent.exists())
 
     @patch("ask.commands.skills_impl._get_python_command", return_value=["python3"])
     @patch("ask.commands.skills_impl.subprocess.run")
@@ -248,7 +288,7 @@ class TestAskSkillsErrors(unittest.TestCase):
         - Exactly three subprocess invocations occur and none invoke "npx" or "publish".
         - The HOME environment used for tessl invocations does not contain the "agent-skills-tessl-" marker.
         - The tessl review invocation uses the arguments sequence ["skill", "review", "--json", "--threshold", "90", <skill_dir>].
-        - The returned tessl_tile marks support_refs_included as truthy.
+        - The returned tessl_plugin marks support_refs_included as truthy.
         
         Parameters:
             mock_run: patched subprocess.run used to simulate external tool invocations.
@@ -276,7 +316,7 @@ class TestAskSkillsErrors(unittest.TestCase):
                     stderr="",
                 ),
                 subprocess.CompletedProcess(
-                    args=["/usr/local/bin/tessl", "skill", "lint", skill_dir],
+                    args=["/usr/local/bin/tessl", "plugin", "lint", skill_dir],
                     returncode=0,
                     stdout="tessl lint ok",
                     stderr="",
@@ -304,13 +344,15 @@ class TestAskSkillsErrors(unittest.TestCase):
             self.assertNotIn("npx", call.args[0])
             self.assertNotIn("publish", call.args[0])
         tessl_call = mock_run.call_args_list[1]
+        self.assertEqual(tessl_call.args[0][1:3], ["plugin", "lint"])
         self.assertNotIn("agent-skills-tessl-", tessl_call.kwargs["env"].get("HOME", ""))
         review_call = mock_run.call_args_list[2]
         self.assertEqual(review_call.args[0][1:3], ["skill", "review"])
         self.assertEqual(review_call.args[0][3:5], ["--json", "--threshold"])
         self.assertEqual(review_call.args[0][5], "90")
         self.assertNotIn("agent-skills-tessl-", review_call.kwargs["env"].get("HOME", ""))
-        self.assertTrue(result.data["tessl_tile"]["support_refs_included"])
+        self.assertTrue(result.data["tessl_plugin"]["support_refs_included"])
+        self.assertTrue(result.data["tessl_plugin"]["plugin_manifest"].endswith("/.tessl-plugin/plugin.json"))
 
     @patch("ask.commands.skills_impl.audit_skill")
     @patch("ask.commands.skills_impl.shutil.which")

@@ -10,22 +10,28 @@ Do not hand-edit runtime projections.
 ## Table of Contents
 - [Summary](#summary)
 - [Catalog](#catalog)
+- [.Agents — Skills — .System](#agents-skills-system)
 - [Skills — Agent Ops](#skills-agent-ops)
 - [Skills — Backend Platform](#skills-backend-platform)
 - [Skills — Content Publishing](#skills-content-publishing)
 - [Skills — Frontend Ui](#skills-frontend-ui)
+- [Skills — GitHub](#skills-github)
 - [Skills — Mobile Native](#skills-mobile-native)
 - [Skills — Product Strategy](#skills-product-strategy)
 - [Skills — Security Ops](#skills-security-ops)
-- [Skills System](#skills-system)
 
 ## Summary
-- `total_skills`: 82
+- `total_skills`: 83
 - `catalog_source`: default user-visible catalog surface
 - `visibility`: default
-- `policy_identity`: f766f7003e860bce
+- `policy_identity`: e764e9f8afed933e
 
 ## Catalog
+
+## .Agents — Skills — .System
+
+- `imagegen` — Generate or edit raster images when the task benefits from AI-created bitmap visuals such as photos, illustrations, textures, sprites, mockups, or transparent-background cutouts. Use when Codex should create a brand-new image, transform an existing image, or derive visual variants from references, and the output should be a bitmap asset rather than repo-native code or vector. Do not use when the task is better handled by editing existing SVG/vector/code-native assets, extending an established icon or logo system, or building the visual directly in HTML/CSS/canvas.
+- `openai-docs` — Use when the user asks how to build with OpenAI products or APIs, asks about Codex itself or choosing Codex surfaces, needs up-to-date official documentation with citations, help choosing the latest model for a use case, or model upgrade and prompt-upgrade guidance; use OpenAI docs MCP tools for non-Codex docs questions, use the Codex manual helper first for broad Codex self-knowledge, and restrict fallback browsing to official OpenAI domains.
 
 ## Skills — Agent Ops
 
@@ -66,7 +72,7 @@ Do not hand-edit runtime projections.
 - `production-deployment` — Plan, execute, and validate production deployments when rollout safety, health checks, observability, rollback, or production-parity verification is required.
 - `project-brain` — Create, validate, and repair Project Brain .harness memory files when setting up Project Brain, saving repo learnings, recording decisions, or preserving quality rules.
 - `rust-pro` — Create and review Rust 1.75+ systems code with ownership-safe async patterns and production error handling. Use when building or debugging Rust services that need performance and reliability.
-- `sdk-scenario-generator` — Create, review, and maintain gold-standard Skills SDK eval scenarios before internal evals, dry Tessl staging, or live private Tessl scoring. Use when creating or updating a skill, importing KnowledgeOS or Tessl scenario suggestions, checking scenario drift, hardening evals that are too easy, or preparing a minimum 20-scenario live Tessl set.
+- `sdk-scenario-generator` — Create, review, and maintain gold-standard Skills SDK eval scenarios before internal evals, dry Tessl staging, or live private Tessl scoring. Use when creating or updating a skill, writing skill tests, adding eval cases, importing KnowledgeOS or Tessl suggestions, checking scenario drift, or hardening evals that are too easy.
 - `session-workflow-miner` — Analyze recent Codex session evidence for repeated manual workflows and route them to skills, subagents, validators, or no artifact when Jamie asks what he keeps doing manually.
 - `simplify` — Review changed code for behavior-preserving simplification by removing dead code, eliminating duplication, extracting shared helpers, improving names, and tightening tests. Use when a user asks for code review, refactor, clean up PR, simplify, tidy up code, review my changes, or maintainability cleanup before merge.
 - `skill-pr-delivery` — Ship skill changes to PRs when Codex skills need source edits, rooted sync, strict audit, reviewer evidence, commit, push, and PR status.
@@ -110,6 +116,10 @@ Do not hand-edit runtime projections.
 - `ui-ux-creative-coding` — Build and audit polished interaction refinements for existing React or Tauri UI when motion, accessibility, reduced-motion, and browser-verified behavior need focused improvement.
 - `ui-visual-regression` — Review, triage, and validate visual regression diffs. Use when the user wants snapshot-change analysis, layout regression evidence, Storybook diffs, Playwright screenshots, or Argos review.
 
+## Skills — Github
+
+- `teach` — Create mission-grounded study plans, lessons, quizzes, references, resources, and learning records. Use when the user asks to learn, study, be taught, continue a course, build a curriculum, or maintain a multi-session teaching workspace.
+
 ## Skills — Mobile Native
 
 - `atlas` — Automate Atlas on macOS when users explicitly ask to control Atlas tabs, bookmarks, history, or desktop browser state.
@@ -127,8 +137,3 @@ Do not hand-edit runtime projections.
 - `create-auth` — Create, migrate, or validate Better Auth implementation work. Use when the user wants Better Auth added or changed in code, including OAuth, passkeys, 2FA, magic links, or org flows.
 - `recon-workbench` — Run, audit, and design authorized Recon Workbench workflows when scoped target interrogation needs evidence artifacts, redaction, validation, and safe reporting.
 - `security-ownership-map` — Analyze git-history security ownership when sensitive files, CODEOWNERS coverage, bus factor, contributor concentration, and remediation evidence need mapping.
-
-## Skills System
-
-- `imagegen` — Generate or edit raster images when the task benefits from AI-created bitmap visuals such as photos, illustrations, textures, sprites, mockups, or transparent-background cutouts. Use when Codex should create a brand-new image, transform an existing image, or derive visual variants from references, and the output should be a bitmap asset rather than repo-native code or vector. Do not use when the task is better handled by editing existing SVG/vector/code-native assets, extending an established icon or logo system, or building the visual directly in HTML/CSS/canvas.
-- `openai-docs` — Use when the user asks how to build with OpenAI products or APIs, asks about Codex itself or choosing Codex surfaces, needs up-to-date official documentation with citations, help choosing the latest model for a use case, or model upgrade and prompt-upgrade guidance; use OpenAI docs MCP tools for non-Codex docs questions, use the Codex manual helper first for broad Codex self-knowledge, and restrict fallback browsing to official OpenAI domains.

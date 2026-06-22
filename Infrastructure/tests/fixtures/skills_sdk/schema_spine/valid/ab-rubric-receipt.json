@@ -124,5 +124,5 @@
     "VP-022",
     "VP-030"
   ],
-  "agent_summary": "Canonical A/B rubric preview is ready; local Ollama, cloud Ollama, and Tessl stages must reuse this rubric identity and digest."
+  "agent_summary": "Canonical A/B rubric preview is ready; Codex oss-local, Codex oss-cloud, and Tessl stages must reuse this rubric identity and digest."
 }
