@@ -25,3 +25,26 @@ Next milestone: <observable skill or artifact>.
 Context: <lesson or user answer that caused the insight>.
 Learning: <non-obvious thing now understood>.
 Next practice: <small follow-up task>.
+
+## Reference HTML
+
+<h1><topic> Reference</h1>
+<section><h2>Mission Link</h2><p>Why this reusable page matters.</p></section>
+<section><h2>Core Idea</h2><p>Stable explanation in the learner's words.</p></section>
+<section><h2>Quick Reference</h2><ul><li>term or rule</li></ul></section>
+<section><h2>Source Notes</h2><ul><li><source> - why trusted or supplemental</li></ul></section>
+<section><h2>Practice Link</h2><p>Lesson or retrieval prompt that uses this page.</p></section>
+
+## RESOURCES.md Entry
+
+## <topic>
+
+- [<title>](<url or local path>) - Trust: official|primary|standard|source|supplemental. Fit: <why it serves the mission>. Use for: <lesson, practice, or reference>.
+
+Notes: <credential, version, freshness, or source-boundary caveat>.
+
+## Redacted Transcript Lesson Note
+
+Sensitive transcript material was used only in memory. Durable files contain
+redacted or synthetic examples, not names, client details, credentials, hidden
+prompts, private URLs, or copied private text.

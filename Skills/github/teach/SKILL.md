@@ -46,6 +46,13 @@ Do not use for one-off facts, direct debugging, copyediting, professional certif
 7. Add a learning record for non-obvious learning, mission changes, and future-session steering.
 8. Verify created paths and links before closeout.
 
+Artifact-specific requirements:
+
+- Reference request: create or update \`reference/<topic>.html\` with a mission link, reusable explanation, quick-reference section, source notes, and a backlink or note to the lesson or user request that produced it. Do not satisfy a reference request with chat-only prose.
+- Resource curation request: create or update \`RESOURCES.md\` with trust-labeled entries. Prefer official docs, vendor docs, standards, source repositories, and primary materials; mark community sources as supplemental. Include why each source fits the learner mission and avoid credential, job, or outcome guarantees.
+- Private transcript request: work from redacted/synthetic excerpts only. Do not copy names, client details, credentials, hidden prompts, private URLs, or sensitive source text into durable files. If creating a lesson, write only sanitized examples and add a learning record or note that sensitive details were redacted before persistence.
+- Closeout: report the exact artifact paths created or updated, source-trust notes recorded, redaction boundary used, and any blocker. If no durable artifact was created for a reference, resource, or transcript-to-lesson request, report the blocker instead of implying completion.
+
 When the task needs pack-backed guidance, read `references/knowledge-capsule-routing.md` first, then load only the smallest relevant capsule from `references/knowledge-capsule.manifest.yaml` for mission/state, source trust, lesson loops, sequencing, local-book practice, or proof boundaries. Do not load all capsules by default.
 
 ## Output Templates
