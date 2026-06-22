@@ -97,6 +97,27 @@ def _missing_score_view_payload() -> dict[str, object]:
     }
 
 
+def _score_exceeds_max_view_payload() -> dict[str, object]:
+    return {
+        "data": {
+            "id": RUN_ID,
+            "attributes": {
+                "status": "completed",
+                "scenarios": [
+                    {
+                        "id": "scenario-corrupt-score",
+                        "path": "scenario-corrupt-score",
+                        "solutions": [
+                            {"variant": "usage-spec", "assessmentResults": [{"score": 10.0, "max_score": 1.0}]},
+                            {"variant": "baseline", "assessmentResults": [{"score": 0.5, "max_score": 1.0}]},
+                        ],
+                    }
+                ],
+            },
+        }
+    }
+
+
 def _command_env() -> dict[str, str]:
     env = os.environ.copy()
     temp_base = Path(tempfile.gettempdir()) / "agent-skills-test"
@@ -245,6 +266,19 @@ class TestSkillsSdkTesslScoreReceipt(unittest.TestCase):
         self.assertEqual(receipt["score_summary"]["missing_scenario_count"], 1)
         self.assertIn("complete scored baseline", receipt["blocker"])
 
+    def test_score_above_max_is_blocked_as_incomplete(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "view.json"
+            path.write_text(json.dumps(_score_exceeds_max_view_payload()), encoding="utf-8")
+
+            receipt = build_tessl_score_receipt(REPO_ROOT, view_json=path, skill="Skills/github/teach", run_id=RUN_ID)
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertFalse(receipt["ready"])
+        self.assertEqual(receipt["score_summary"]["missing_scenario_count"], 1)
+        self.assertIn("valid positive max points", receipt["blocker"])
+        self.assertFalse(any("None%" in action for action in receipt["feedback_loop"]["required_next_actions"]))
+
     def test_scenario_max_uses_larger_variant_denominator(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             path = Path(temp_dir) / "view.json"
@@ -259,6 +293,17 @@ class TestSkillsSdkTesslScoreReceipt(unittest.TestCase):
         self.assertEqual(summary["max_points"], 8.0)
         self.assertEqual(summary["usage_percent"], 50.0)
         self.assertEqual(summary["baseline_percent"], 25.0)
+
+    def test_failed_view_next_action_does_not_wait_for_completion(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "view.json"
+            path.write_text(json.dumps(_view_payload(status="failed")), encoding="utf-8")
+
+            receipt = build_tessl_score_receipt(REPO_ROOT, view_json=path, skill="Skills/github/teach", run_id=RUN_ID)
+
+        actions = receipt["feedback_loop"]["required_next_actions"]
+        self.assertTrue(any("Inspect failureReason" in action for action in actions))
+        self.assertFalse(any("Wait for Tessl completion" in action for action in actions))
 
     def test_tessl_score_command_requires_preview(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

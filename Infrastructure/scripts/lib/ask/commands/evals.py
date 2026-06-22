@@ -13,6 +13,7 @@ import tempfile
 import hashlib
 import time
 from pathlib import Path
+from typing import Mapping
 from ask.envelope import CallResult, ErrorObject
 from ask.commands.skills_impl import _python_command_supports_packages, _subprocess_env_with_uv_cache
 from ask.skill_review_dashboard import render_skill_review_dashboard
@@ -349,6 +350,52 @@ def _tessl_eval_view_has_complete_scores(payload: dict[str, object]) -> bool:
             return False
         scored_scenarios += 1
     return scored_scenarios > 0
+
+
+def _write_tessl_live_view_evidence(repo_root: Path, skill_path: str, run_id: str | None, view_raw_output: str) -> str | None:
+    if not run_id or not view_raw_output.strip():
+        return None
+    handle = re.sub(r"[^A-Za-z0-9_.-]+", "-", Path(skill_path).name).strip("-") or "skill"
+    evidence_dir = repo_root / ".harness" / "evidence" / "tessl" / handle / run_id
+    evidence_dir.mkdir(parents=True, exist_ok=True)
+    view_path = evidence_dir / "tessl-eval-view.json"
+    view_path.write_text(view_raw_output, encoding="utf-8")
+    return str(view_path.relative_to(repo_root))
+
+
+def _write_tessl_live_submission_evidence(
+    repo_root: Path,
+    skill_path: str,
+    *,
+    run_id: str | None,
+    workspace: str,
+    staged_source: Path,
+    project_identity: Mapping[str, object],
+) -> str | None:
+    if not run_id:
+        return None
+    handle = re.sub(r"[^A-Za-z0-9_.-]+", "-", Path(skill_path).name).strip("-") or "skill"
+    evidence_dir = repo_root / ".harness" / "evidence" / "tessl" / handle / run_id
+    evidence_dir.mkdir(parents=True, exist_ok=True)
+    submission_path = evidence_dir / "tessl-eval-submission.json"
+    submission_path.write_text(
+        json.dumps(
+            {
+                "status": "submitted_pending_view",
+                "run_id": run_id,
+                "workspace": workspace,
+                "skill_path": skill_path,
+                "staged_source": str(staged_source),
+                "project_identity": project_identity,
+                "next_action": "poll tessl eval view through the Skills SDK wrapper until scored or blocked",
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    return str(submission_path.relative_to(repo_root))
 
 
 def _collect_tessl_metric_fields(value: object, *, tokens: tuple[str, ...]) -> dict[str, object]:
@@ -3472,9 +3519,18 @@ def _run_tessl_live_private_eval(
         blocker_class = None
 
     eval_run_id = _extract_tessl_eval_run_id(raw_output)
+    submission_evidence_path = _write_tessl_live_submission_evidence(
+        repo_root,
+        path,
+        run_id=eval_run_id,
+        workspace=normalized_workspace,
+        staged_source=staged_source,
+        project_identity=common["project_identity"],
+    )
     live_result_summary = None
     view_raw_output = ""
     view_raw_error = ""
+    view_evidence_path = None
     view_attempts = 0
     view_status = None
     if status == "pass":
@@ -3562,14 +3618,18 @@ def _run_tessl_live_private_eval(
                             )
                             blocker_class = None
 
+    view_evidence_path = _write_tessl_live_view_evidence(repo_root, path, eval_run_id, view_raw_output)
+
     return {
         "status": status,
         **common,
         "exit_code": process.returncode,
         "eval_run_id": eval_run_id,
+        "submission_evidence_path": submission_evidence_path,
         "live_result_summary": live_result_summary,
         "view_attempts": view_attempts,
         "view_status": view_status,
+        "view_evidence_path": view_evidence_path,
         "view_raw_output": view_raw_output,
         "view_raw_error": view_raw_error,
         "raw_output": raw_output,
@@ -4625,24 +4685,32 @@ def run_evals(
         ))
         return result
 
-    if tessl_live_private and tessl_live_dry_run:
+    if tessl_live_private:
         _start_eval_lifecycle(result, path=path, mode=mode, runner=runner)
         result.status = "success"
         result.data["raw_output"] = ""
         result.data["raw_error"] = ""
         result.data["eval_status"] = "pass"
-        result.data["local_eval_status"] = "skipped_tessl_live_dry_run"
+        result.data["local_eval_status"] = (
+            "skipped_tessl_live_dry_run" if tessl_live_dry_run else "skipped_tessl_live_private"
+        )
         result.data["blocker_class"] = None
         result.data["blocker_taxonomy"] = EVAL_BLOCKER_TAXONOMY
-        result.data["tessl_dry_run_note"] = (
-            "Tessl live-private dry-run validates the staged private Tessl payload only. "
-            "Run without --tessl-live-dry-run after local audit/package gates pass to execute remote assessment."
-        )
+        if tessl_live_dry_run:
+            result.data["tessl_dry_run_note"] = (
+                "Tessl live-private dry-run validates the staged private Tessl payload only. "
+                "Run without --tessl-live-dry-run after local audit/package gates pass to execute remote assessment."
+            )
+        else:
+            result.data["tessl_live_private_note"] = (
+                "Tessl live-private scoring uses the staged private Tessl payload directly. "
+                "Run local smoke, audit, package, scenario-quality, scorer-quality, and dry-run gates separately before live scoring."
+            )
         tessl_eval = _run_tessl_live_private_eval(
             repo_root,
             path,
             workspace=effective_tessl_workspace,
-            dry_run=True,
+            dry_run=tessl_live_dry_run,
         )
         result.data["tessl_eval"] = tessl_eval
         if tessl_eval.get("status") != "pass":

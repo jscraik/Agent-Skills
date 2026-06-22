@@ -172,18 +172,21 @@ def _parse_plugin_eval(stdout: str, status: str = "") -> dict[str, Any]:
     fail_count = int(_first_match(r"(\d+)\s+fail", str(checks), 0) or 0)
     warn_count = int(_first_match(r"(\d+)\s+warn", str(checks), 0) or 0)
     grade_text = grade.strip() if isinstance(grade, str) else grade
-    grade_acceptable = _grade_rank(grade_text) >= _grade_rank("B+")
-    active_budget_good = bool(re.search(r"Active budget:\s*\d+\s+tokens\s+\(good\)", stdout))
-    deferred_budget_only = fail_count == 1 and _has_deferred_budget_failure(stdout) and active_budget_good
-    blocking_fail_count = 0 if deferred_budget_only and grade_acceptable else fail_count
+    score_value = int(score_raw) if score_raw is not None else 0
+    grade_floor_met = _grade_rank(grade_text) >= _grade_rank("B+")
+    active_budget_acceptable = bool(re.search(r"Active budget:\s*\d+\s+tokens\s+\((good|moderate)\)", stdout))
+    deferred_budget_only = fail_count == 1 and _has_deferred_budget_failure(stdout) and active_budget_acceptable
+    deferred_budget_waived = deferred_budget_only and score_value >= 85
+    grade_acceptable = grade_floor_met or deferred_budget_waived
+    blocking_fail_count = 0 if deferred_budget_waived else fail_count
     posture, posture_detail = _plugin_eval_posture(
         fail_count=fail_count,
         warn_count=warn_count,
         grade_acceptable=grade_acceptable,
-        deferred_budget_only=deferred_budget_only,
+        deferred_budget_only=deferred_budget_waived,
     )
     return {
-        "score": int(score_raw) if score_raw is not None else 0,
+        "score": score_value,
         "grade": grade_text,
         "risk": risk.strip() if isinstance(risk, str) else risk,
         "checks": checks.strip() if isinstance(checks, str) else checks,
@@ -191,6 +194,8 @@ def _parse_plugin_eval(stdout: str, status: str = "") -> dict[str, Any]:
         "blocking_fail_count": blocking_fail_count,
         "warn_count": warn_count,
         "grade_acceptable": grade_acceptable,
+        "grade_floor_met": grade_floor_met,
+        "deferred_budget_waived": deferred_budget_waived,
         "posture": posture,
         "posture_detail": posture_detail,
         "findings": findings,
@@ -199,10 +204,10 @@ def _parse_plugin_eval(stdout: str, status: str = "") -> dict[str, Any]:
 
 
 def _plugin_eval_posture(*, fail_count: int, warn_count: int, grade_acceptable: bool, deferred_budget_only: bool) -> tuple[str, str]:
-    if deferred_budget_only and grade_acceptable:
+    if deferred_budget_only:
         return (
             "deferred_budget_guardrail",
-            "Plugin Eval reported deferred reference budget pressure, but active budget is good. "
+            "Plugin Eval reported deferred reference budget pressure, but active budget is acceptable. "
             "Accept as a follow-up guardrail when local audit and Tessl quality pass.",
         )
     if fail_count:

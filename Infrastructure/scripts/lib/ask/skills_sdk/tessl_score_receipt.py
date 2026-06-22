@@ -57,9 +57,13 @@ def _assessment_score(result: dict[str, Any]) -> tuple[float, float] | None:
     if max_key is None:
         return None
     try:
-        return float(result["score"]), float(result[max_key])
+        score = float(result["score"])
+        max_score = float(result[max_key])
     except (TypeError, ValueError):
         return None
+    if max_score <= 0 or score < 0 or score > max_score:
+        return None
+    return score, max_score
 
 
 def _run_id(payload: dict[str, Any], fallback: str | None) -> str:
@@ -125,9 +129,14 @@ def _score_scenario(scenario: object) -> tuple[dict[str, Any] | None, dict[str, 
     usage_score = _score_solution(by_variant["usage-spec"])
     baseline_score = _score_solution(by_variant["baseline"])
     if usage_score is None or baseline_score is None:
+        reason = (
+            "invalid_assessment_score"
+            if _has_invalid_assessment_score(by_variant["usage-spec"]) or _has_invalid_assessment_score(by_variant["baseline"])
+            else "missing_assessment_results"
+        )
         return None, {
             "path": path,
-            "reason": "missing_assessment_results",
+            "reason": reason,
             "usage_has": usage_score is not None,
             "baseline_has": baseline_score is not None,
         }
@@ -145,6 +154,25 @@ def _scenario_variants(scenario: dict[str, Any], path: str) -> tuple[dict[str, d
     if not isinstance(usage, dict) or not isinstance(baseline, dict):
         return {}, {"path": path, "reason": "missing_variant", "variants": sorted(str(key) for key in by_variant)}
     return {"usage-spec": usage, "baseline": baseline}, None
+
+
+def _has_invalid_assessment_score(solution: dict[str, Any]) -> bool:
+    results = solution.get("assessmentResults")
+    if not isinstance(results, list) or not results:
+        return False
+    return any(
+        _assessment_score(result) is None
+        for result in results
+        if _has_assessment_score_fields(result)
+    )
+
+
+def _has_assessment_score_fields(result: Any) -> bool:
+    return (
+        isinstance(result, dict)
+        and "score" in result
+        and ("max_score" in result or "maxScore" in result)
+    )
 
 
 def _score_summary_from_parts(
@@ -284,6 +312,8 @@ def _receipt_blocker(
     if tessl_status != "completed":
         return f"Tessl eval view is not complete yet; current status is {tessl_status or 'unknown'}."
     complete = score_summary["scenario_count"] > 0 and score_summary["missing_scenario_count"] == 0
+    if any(item.get("reason") == "invalid_assessment_score" for item in score_summary["missing"]):
+        return "Tessl eval view does not contain valid positive max points for scored scenarios."
     if not complete:
         return "Tessl eval view does not contain complete scored baseline and usage-spec assessments."
     if score_summary["scenario_count"] > 0 and score_summary["max_points"] <= 0:
@@ -314,6 +344,11 @@ def _handoff_blocker(score_summary: dict[str, Any]) -> str | None:
 
 
 def _usage_threshold_blocker(usage_percent: float | None) -> str:
+    if usage_percent is None:
+        return (
+            "Tessl usage score is unavailable; preserve complete scored baseline "
+            "and usage-spec assessments before handoff."
+        )
     return (
         "Tessl usage score is below the live handoff threshold: "
         f"{usage_percent}% < {TESSL_LIVE_HANDOFF_MIN_USAGE_PERCENT}%. "
@@ -365,6 +400,8 @@ def _feedback_loop(score_summary: dict[str, Any], tessl_status: str) -> dict[str
 def _status_next_actions(tessl_status: str) -> list[str]:
     if tessl_status == "completed":
         return []
+    if tessl_status in {"failed", "error", "cancelled", "canceled"}:
+        return ["Inspect failureReason and resolve the failing lane before rerunning Tessl."]
     return ["Wait for Tessl completion and preserve the final tessl eval view --json artifact before scoring."]
 
 

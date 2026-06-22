@@ -2395,14 +2395,21 @@ def test_evals_live_private_invokes_tessl_with_workspace_and_plugin_manifest(tmp
     )
 
     assert result.status == "success"
+    assert result.data["local_eval_status"] == "skipped_tessl_live_private"
+    assert "separately before live scoring" in result.data["tessl_live_private_note"]
     eval_run_calls = [
         call.args[0] for call in run.call_args_list
         if call.args[0][1:3] == ["eval", "run"]
+    ]
+    local_eval_calls = [
+        call.args[0] for call in run.call_args_list
+        if any("run_skill_evals.py" in str(part) for part in call.args[0])
     ]
     eval_view_calls = [
         call.args[0] for call in run.call_args_list
         if call.args[0][1:3] == ["eval", "view"]
     ]
+    assert local_eval_calls == []
     assert len(eval_run_calls) == 1
     assert len(eval_view_calls) == 1
     tessl_cmd = eval_run_calls[0]
@@ -2436,6 +2443,33 @@ def test_evals_live_private_invokes_tessl_with_workspace_and_plugin_manifest(tmp
         "tessl eval run --json --workspace <workspace> <staged-plugin-dir>"
     )
     assert result.data["tessl_eval"]["policy"]["duplicate_run_guard"].startswith("before live scoring")
+    submission_evidence_path = tmp_path / result.data["tessl_eval"]["submission_evidence_path"]
+    assert submission_evidence_path == (
+        tmp_path
+        / ".harness"
+        / "evidence"
+        / "tessl"
+        / "example-skill"
+        / "019e6ac8-08eb-75fb-8fbb-e2346517f82d"
+        / "tessl-eval-submission.json"
+    )
+    submission_evidence = json.loads(submission_evidence_path.read_text(encoding="utf-8"))
+    assert submission_evidence["status"] == "submitted_pending_view"
+    assert submission_evidence["run_id"] == "019e6ac8-08eb-75fb-8fbb-e2346517f82d"
+    assert submission_evidence["workspace"] == "jscraik"
+    assert submission_evidence["skill_path"] == "Skills/example-skill"
+    assert submission_evidence["next_action"].startswith("poll tessl eval view")
+    view_evidence_path = tmp_path / result.data["tessl_eval"]["view_evidence_path"]
+    assert view_evidence_path == (
+        tmp_path
+        / ".harness"
+        / "evidence"
+        / "tessl"
+        / "example-skill"
+        / "019e6ac8-08eb-75fb-8fbb-e2346517f82d"
+        / "tessl-eval-view.json"
+    )
+    assert json.loads(view_evidence_path.read_text(encoding="utf-8")) == json.loads(completed_view.stdout)
     summary = result.data["tessl_eval"]["live_result_summary"]
     assert summary["meets_min_score"] is True
     assert summary["beats_baseline"] is True
@@ -3562,6 +3596,28 @@ def test_plugin_eval_deferred_budget_fail_is_nonblocking_when_active_budget_good
 """
     )
 
+    assert parsed["fail_count"] == 1
+    assert parsed["blocking_fail_count"] == 0
+    assert parsed["posture"] == "deferred_budget_guardrail"
+
+
+def test_plugin_eval_deferred_budget_fail_is_nonblocking_when_active_budget_moderate_and_grade_b() -> None:
+    parsed = _parse_plugin_eval(
+        """# Plugin Eval Report
+
+## At a Glance
+- Score: 86/100
+- Grade: B
+- Risk: high
+- Checks: 1 fail, 0 warn, 2 info
+- Active budget: 2228 tokens (moderate)
+
+## Checks
+- [FAIL] deferred_cost_tokens-budget-high: deferred_cost_tokens is excessive relative to the current Codex baseline.
+"""
+    )
+
+    assert parsed["grade_acceptable"] is True
     assert parsed["fail_count"] == 1
     assert parsed["blocking_fail_count"] == 0
     assert parsed["posture"] == "deferred_budget_guardrail"

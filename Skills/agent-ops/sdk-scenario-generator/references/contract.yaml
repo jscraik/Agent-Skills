@@ -281,7 +281,7 @@ tessl_scenario_policy:
         - files created by the evaluated run
         - final responses captured by the runner
         - explicit blocker artifacts produced by the skill
-  feedback_loop_receipt_command: "ask sdk eval tessl-score --view-json <view-json> --skill <skill> --preview --json --robot"
+  feedback_loop_receipt_command: "./bin/ask sdk eval tessl-score --view-json <view-json> --skill <skill> --preview --json --robot"
   feedback_loop_blocks_when:
     - "receipt.feedback_loop.status is open"
     - "a live Tessl scenario has baseline score greater than usage-spec score"

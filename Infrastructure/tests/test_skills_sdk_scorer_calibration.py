@@ -204,7 +204,7 @@ class TestSkillsSdkScorerCalibration(unittest.TestCase):
         self.assertEqual(receipt["status"], "blocked")
         self.assertIn("raw_artifacts_present", blocker_ids)
 
-    def test_builder_accepts_raw_artifacts_without_expected_label(self) -> None:
+    def test_builder_accepts_raw_artifacts_that_omit_expected_label(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             skill_dir = _write_skill(Path(temp_dir))
             _write_bundle(
@@ -222,10 +222,16 @@ class TestSkillsSdkScorerCalibration(unittest.TestCase):
             )
 
             receipt = build_scorer_calibration_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+            raw_artifact = json.loads(
+                (skill_dir / "references" / "scorer-calibration" / "raw" / "known-pass.json").read_text(
+                    encoding="utf-8"
+                )
+            )
 
         self.assertEqual(receipt["status"], "preview")
         self.assertTrue(receipt["ready"])
         self.assertEqual(receipt["blockers"], [])
+        self.assertNotIn("expected_label", raw_artifact)
 
     def test_builder_blocks_threshold_mismatch(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

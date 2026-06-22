@@ -26,6 +26,23 @@ Context: <lesson or user answer that caused the insight>.
 Learning: <non-obvious thing now understood>.
 Next practice: <small follow-up task>.
 
+## Teaching Blocker Note
+
+# <blocker topic>
+Blocked action: <lesson, roadmap, reference, resource curation, or workspace continuation>.
+Reason: <missing mission field, unclear source trust, unsafe reset, overload, or private-data boundary>.
+One focused question: <single question that unblocks the next safe action>.
+Deferred topics: <topics intentionally left for later, if any>.
+Next safe action: <smallest action after the blocker is resolved>.
+
+## learning-records/continuation-blocker.md
+
+# Continuation blocked
+Blocked action: continue from learning records.
+Missing paths: <MISSION.md and/or learning-records/>.
+One focused question: <single question that recovers the learner mission or last weak spot>.
+Next safe action: <create or restore the missing record, then choose one next lesson>.
+
 ## Reference HTML
 
 <h1><topic> Reference</h1>
@@ -66,3 +83,12 @@ Missing evidence: <which current source, official docs, vendor docs, standard, o
 Acceptable sources: <specific high-trust source types>.
 Blocked action: Durable lesson creation is blocked until source trust is resolved.
 Next safe question: <one focused request for source material or permission to browse>.
+
+## Source Check Receipt
+
+Source-sensitive topic: <current or version-sensitive lesson request>.
+Source type: <official docs | vendor docs | standard | source repository | primary material>.
+Source reference: <URL, citation, or local source path>.
+Verified on: <YYYY-MM-DD>.
+Claim boundary: <what the source supports and what remains uncertain>.
+Dependent artifact: <lesson, reference, or learning-record path that uses this source>.
