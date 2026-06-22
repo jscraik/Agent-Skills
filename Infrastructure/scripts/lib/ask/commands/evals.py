@@ -358,7 +358,8 @@ def _write_tessl_live_view_evidence(repo_root: Path, skill_path: str, run_id: st
     view_path = _tessl_live_evidence_file(repo_root, skill_path, run_id, "tessl-eval-view.json")
     if view_path is None:
         return None
-    _write_tessl_live_evidence_text(view_path, view_raw_output)
+    if not _write_tessl_live_evidence_text(repo_root, view_path, view_raw_output):
+        return None
     return str(view_path.relative_to(repo_root))
 
 
@@ -376,7 +377,8 @@ def _write_tessl_live_submission_evidence(
     submission_path = _tessl_live_evidence_file(repo_root, skill_path, run_id, "tessl-eval-submission.json")
     if submission_path is None:
         return None
-    _write_tessl_live_evidence_text(
+    if not _write_tessl_live_evidence_text(
+        repo_root,
         submission_path,
         json.dumps(
             {
@@ -392,7 +394,8 @@ def _write_tessl_live_submission_evidence(
             sort_keys=True,
         )
         + "\n",
-    )
+    ):
+        return None
     return str(submission_path.relative_to(repo_root))
 
 
@@ -419,8 +422,22 @@ def _tessl_evidence_segment(value: str) -> str | None:
     return segment if re.fullmatch(r"[A-Za-z0-9_.-]+", segment) else None
 
 
-def _write_tessl_live_evidence_text(path: Path, value: str) -> None:
-    path.write_text(value, encoding="utf-8")
+def _write_tessl_live_evidence_text(repo_root: Path, path: Path, value: str) -> bool:
+    root = (repo_root / ".harness" / "evidence" / "tessl").resolve(strict=False)
+    try:
+        path.parent.resolve(strict=False).relative_to(root)
+    except ValueError:
+        return False
+    flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    try:
+        file_descriptor = os.open(path, flags, 0o600)
+    except OSError:
+        return False
+    with os.fdopen(file_descriptor, "w", encoding="utf-8") as handle:
+        handle.write(value)
+    return True
 
 
 def _collect_tessl_metric_fields(value: object, *, tokens: tuple[str, ...]) -> dict[str, object]:
