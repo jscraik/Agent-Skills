@@ -123,6 +123,23 @@ class TestSkillsSdkCapabilityEvidence(unittest.TestCase):
         self.assertIn("not executed", reason)
         self.assertEqual(evidence, ["ask"])
 
+    def test_arbitrary_users_path_blocks_instead_of_becoming_command(self) -> None:
+        kind, status, reason, evidence, lane = _classify_ref(REPO_ROOT, "/Users/example/tmp/bad-receipt.json")
+
+        self.assertEqual((kind, status, lane), ("receipt", "blocked", "local"))
+        self.assertIn("does not resolve inside the repository", reason)
+        self.assertEqual(evidence, ["/Users/example/tmp/bad-receipt.json"])
+
+    def test_known_absolute_python_command_ref_is_not_run_by_verifier(self) -> None:
+        kind, status, reason, evidence, lane = _classify_ref(
+            REPO_ROOT,
+            "/Users/example/.venvs/pyyaml/bin/python Infrastructure/scripts/validation-and-linting/check_sdk_stage_skill_shape.py",
+        )
+
+        self.assertEqual((kind, status, lane), ("command", "not_run", "local_command"))
+        self.assertIn("not executed", reason)
+        self.assertEqual(evidence, ["/Users/example/.venvs/pyyaml/bin/python"])
+
     def test_pytest_node_ref_passes_when_named_test_exists(self) -> None:
         kind, status, reason, evidence, lane = _classify_ref(
             REPO_ROOT,

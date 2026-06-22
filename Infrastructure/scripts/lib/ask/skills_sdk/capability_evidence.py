@@ -123,9 +123,18 @@ def _command_tokens(evidence_ref: str) -> list[str]:
     if not tokens:
         return []
     first = tokens[0]
-    if first in COMMAND_STARTERS or first.startswith("/Users/"):
+    if first in COMMAND_STARTERS or _known_absolute_command_tokens(tokens):
         return tokens
     return []
+
+
+def _known_absolute_command_tokens(tokens: list[str]) -> bool:
+    if len(tokens) < 2:
+        return False
+    command = Path(tokens[0])
+    if not command.is_absolute():
+        return False
+    return command.name in {"python", "python3"} and command.parent.name == "bin"
 
 
 def _resolve_repo_path(repo_root: Path, evidence_ref: str) -> Path | None:
