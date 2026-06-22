@@ -554,7 +554,6 @@ def structured_reference_has_description(path: Path, text: str) -> bool:
                 return False
             return any(str(record.get(field) or "").strip() for field in ("description", "purpose", "schema_version"))
         return False
-        return False
     return bool(re.search(r"(?m)^(description|purpose|schema_version|name):\s*\S", text))
 
 
