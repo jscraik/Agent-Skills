@@ -4061,7 +4061,7 @@ def skills_sdk_intake_inspect(
             ErrorObject(
                 code="ERR_VALIDATION",
                 message=receipt["agent_summary"],
-                fix_suggestion="Inspect only a directory-form skill package with a regular SKILL.md and approved top-level paths.",
+                fix_suggestion="Inspect data.skills_sdk_intake_inspect.receipt.blockers for specific details about path, symlink, or validation issues.",
             )
         )
     return result

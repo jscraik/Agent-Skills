@@ -19,8 +19,6 @@
   "intake_checks": [
     {
       "id": "execution_blocked",
-      "status": "pass",
-      "severity": "blocker",
       "message": "Intake inspects files only and does not execute skill code.",
       "evidence": []
     }

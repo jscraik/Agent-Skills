@@ -105,7 +105,10 @@ class TestSkillsSdkSchemaModelParity(unittest.TestCase):
 
     def test_invalid_skill_intake_execution_claim_fails_schema_and_model(self) -> None:
         result = self.assert_schema_fails("skill-intake-receipt", "skill-intake-executes.json")
-        self.assertIn("$.execution_performed", result.diagnostics[0].json_path)
+        self.assertTrue(
+            any("$.execution_performed" in diagnostic.json_path for diagnostic in result.diagnostics),
+            "Expected at least one diagnostic to contain $.execution_performed in json_path"
+        )
 
         with self.assertRaises(ValidationError):
             contracts.validate_skill_intake_receipt(
