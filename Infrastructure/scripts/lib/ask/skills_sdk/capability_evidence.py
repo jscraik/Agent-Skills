@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import json
 import shlex
 from pathlib import Path
@@ -96,7 +97,7 @@ def _classify_ref(repo_root: Path, evidence_ref: str) -> tuple[EvidenceKind, Evi
     if stripped.endswith(".schema.json"):
         return _schema_status(repo_root, stripped, candidate)
     if _looks_like_receipt(stripped):
-        return _file_status(repo_root, stripped, candidate, "receipt")
+        return _receipt_status(repo_root, stripped, candidate)
     if candidate is not None:
         return _file_status(repo_root, stripped, candidate, "file")
     if _is_external(stripped):
@@ -177,6 +178,17 @@ def _schema_status(repo_root: Path, evidence_ref: str, candidate: Path | None) -
     return "schema", "pass", "Schema evidence file exists and parses as JSON.", evidence, "local"
 
 
+def _receipt_status(repo_root: Path, evidence_ref: str, candidate: Path | None) -> tuple[EvidenceKind, EvidenceStatus, str, list[str], str]:
+    kind, status, reason, evidence, lane = _file_status(repo_root, evidence_ref, candidate, "receipt")
+    if status != "pass" or candidate is None:
+        return kind, status, reason, evidence, lane
+    try:
+        json.loads(candidate.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return "receipt", "blocked", f"Receipt evidence file did not parse as JSON: {exc}", evidence, "local"
+    return "receipt", "pass", "Receipt evidence file exists and parses as JSON.", evidence, "local"
+
+
 def _pytest_node_status(
     repo_root: Path,
     evidence_ref: str,
@@ -187,14 +199,34 @@ def _pytest_node_status(
     kind, status, reason, evidence, lane = _file_status(repo_root, path_text, candidate, "file")
     if status != "pass" or candidate is None:
         return kind, status, reason, [evidence_ref], lane
-    test_name = node_id.rsplit("::", 1)[-1]
     try:
         text = candidate.read_text(encoding="utf-8")
     except OSError as exc:
         return "file", "blocked", f"Pytest node evidence file could not be read: {exc}", [evidence_ref], "local"
-    if f"def {test_name}" not in text:
+    if not _pytest_node_exists(text, node_id):
         return "file", "blocked", "Pytest node evidence file exists but named test was not found.", [evidence_ref], "local"
     return "file", "pass", "Pytest node evidence file exists and named test is present.", [evidence_ref], "local"
+
+
+def _pytest_node_exists(text: str, node_id: str) -> bool:
+    parts = [part for part in node_id.split("::") if part]
+    if not parts:
+        return False
+    parts[-1] = parts[-1].split("[", 1)[0]
+    try:
+        tree = ast.parse(text)
+    except SyntaxError:
+        return False
+    nodes: list[ast.stmt] = list(tree.body)
+    for index, part in enumerate(parts):
+        is_leaf = index == len(parts) - 1
+        if is_leaf:
+            return any(isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == part for node in nodes)
+        class_node = next((node for node in nodes if isinstance(node, ast.ClassDef) and node.name == part), None)
+        if class_node is None:
+            return False
+        nodes = list(class_node.body)
+    return False
 
 
 def _looks_like_receipt(evidence_ref: str) -> bool:
