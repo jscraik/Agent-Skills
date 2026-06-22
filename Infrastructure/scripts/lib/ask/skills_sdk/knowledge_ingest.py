@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -435,6 +436,12 @@ def _update_capsule_routing_index(path: Path, *, manifest: dict[str, Any]) -> No
     if isinstance(capsules, list):
         for capsule in capsules:
             lines.extend(_capsule_routing_lines(capsule, default_pack_id, default_asset_count))
+    path_parent_real = os.path.realpath(path.parent)
+    path_real = os.path.realpath(path)
+    if os.path.commonpath([path_parent_real, path_real]) != path_parent_real:
+        raise ValueError("Knowledge capsule routing path escaped its parent directory.")
+    if path.is_symlink():
+        raise ValueError("Knowledge capsule routing path must not be a symlink.")
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
 
