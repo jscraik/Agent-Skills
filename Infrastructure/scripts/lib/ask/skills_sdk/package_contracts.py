@@ -454,6 +454,18 @@ def package_local_regular_file(skill_md: Path | None, raw_path: str) -> bool:
     return candidate.is_file()
 
 
+def package_local_reference_path(raw_path: str) -> bool:
+    """Return whether a manifest target path is a package-local reference path."""
+    path = Path(raw_path)
+    return (
+        bool(raw_path.strip())
+        and not path.is_absolute()
+        and "\\" not in raw_path
+        and ".." not in path.parts
+        and path.parts[:1] == ("references",)
+    )
+
+
 def _path_has_symlink_component(root: Path, path: Path) -> bool:
     try:
         relative_parts = path.relative_to(root).parts
@@ -735,9 +747,10 @@ def knowledge_capsule_first_party_contract(repo_root: Path | None, skill_md: Pat
     references_dir = skill_md.parent / "references" if skill_md else None
     manifest_path = references_dir / "knowledge-capsule.manifest.yaml" if references_dir else None
     routing_path = references_dir / "knowledge-capsule-routing.md" if references_dir else None
-    manifest_declared = bool(manifest_path and manifest_path.is_file())
+    manifest_declared = bool(manifest_path and (manifest_path.is_file() or manifest_path.is_symlink()))
+    manifest_safe = bool(skill_md and package_local_regular_file(skill_md, "references/knowledge-capsule.manifest.yaml"))
     capsule_paths: list[str] = []
-    if manifest_path and manifest_path.is_file():
+    if manifest_safe and manifest_path:
         manifest, error = read_structured_reference(manifest_path)
         if error is None and isinstance(manifest, dict):
             capsules = manifest.get("capsules")
@@ -745,8 +758,10 @@ def knowledge_capsule_first_party_contract(repo_root: Path | None, skill_md: Pat
                 capsule_paths = _knowledge_capsule_target_paths(capsules)
         if not capsule_paths:
             capsule_paths = _knowledge_capsule_target_paths_from_text(manifest_path)
-    routing_declared = bool(routing_path and routing_path.is_file())
-    routing_text = skill_markdown_text(routing_path) if routing_path else ""
+    unsafe_capsule_paths = [path for path in capsule_paths if not package_local_reference_path(path)]
+    routing_declared = bool(routing_path and (routing_path.is_file() or routing_path.is_symlink()))
+    routing_safe = bool(skill_md and package_local_regular_file(skill_md, "references/knowledge-capsule-routing.md"))
+    routing_text = skill_markdown_text(routing_path) if routing_safe and routing_path else ""
     missing_from_routing = [
         path for path in capsule_paths
         if routing_declared and path and path not in routing_text
@@ -756,8 +771,11 @@ def knowledge_capsule_first_party_contract(repo_root: Path | None, skill_md: Pat
         not manifest_declared
         or (
             routing_declared
+            and manifest_safe
+            and routing_safe
             and skill_mentions_routing
             and bool(capsule_paths)
+            and not unsafe_capsule_paths
             and not missing_from_routing
         )
     )
@@ -768,10 +786,13 @@ def knowledge_capsule_first_party_contract(repo_root: Path | None, skill_md: Pat
         "manifest_path": repo_relative_path(repo_root, manifest_path) if repo_root and manifest_path else None,
         "capsule_count": len(capsule_paths),
         "capsule_paths": capsule_paths,
+        "unsafe_capsule_paths": unsafe_capsule_paths,
         "first_party_routing_path": (
             repo_relative_path(repo_root, routing_path) if repo_root and routing_path else None
         ),
         "first_party_routing_declared": routing_declared,
+        "first_party_routing_safe": routing_safe,
+        "manifest_safe": manifest_safe,
         "skill_mentions_first_party_routing": skill_mentions_routing,
         "missing_from_first_party_routing": missing_from_routing,
         "ready": ready,

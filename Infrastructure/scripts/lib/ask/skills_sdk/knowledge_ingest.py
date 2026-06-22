@@ -445,7 +445,9 @@ def _capsule_routing_lines(capsule: object, default_pack_id: str, default_asset_
         return []
     tick = chr(96)
     pack_id = normalized["pack_id"] or default_pack_id or "unknown"
-    asset_count = normalized["asset_count"] or default_asset_count
+    asset_count = normalized["asset_count"]
+    if asset_count is None:
+        asset_count = default_asset_count
     return [
         "- " + tick + str(normalized["target_path"]) + tick,
         "  - facet: " + str(normalized["facet"]),
@@ -461,7 +463,7 @@ def _capsule_routing_entry(capsule: object) -> dict[str, Any] | None:
             "target_path": capsule.split(":", 1)[1].strip(),
             "facet": "capsule",
             "pack_id": "",
-            "asset_count": 0,
+            "asset_count": None,
         }
     if not isinstance(capsule, dict):
         return None
@@ -470,7 +472,7 @@ def _capsule_routing_entry(capsule: object) -> dict[str, Any] | None:
         "target_path": str(capsule.get("target_path") or "").strip(),
         "facet": str(capsule.get("facet_id") or capsule.get("role") or "capsule").strip(),
         "pack_id": str(capsule.get("pack_id") or "").strip(),
-        "asset_count": len(asset_ids) if isinstance(asset_ids, list) else 0,
+        "asset_count": len(asset_ids) if isinstance(asset_ids, list) else None,
     }
 
 

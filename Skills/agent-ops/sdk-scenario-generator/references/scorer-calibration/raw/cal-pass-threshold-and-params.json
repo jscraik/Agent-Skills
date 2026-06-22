@@ -2,6 +2,7 @@
   "id": "cal-pass-threshold-and-params",
   "description": "Raw scorer artifact for the known-pass threshold and parameter calibration example.",
   "scorer_id": "sdk-scenario-generator.release-scorer",
+  "expected_label": "pass",
   "predicted_label": "pass",
   "score": 0.96,
   "rationale": "The scorer metadata records threshold, scorer version, prompt version, model, temperature, and trial count, so score trends can be interpreted against a fixed judge setup."

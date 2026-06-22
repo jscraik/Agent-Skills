@@ -143,6 +143,7 @@ cases:
     - npx
     - tessl tile publish
     - tessl skill publish
+    - tessl install
   acceptance:
   - type: expected_signal
     value: Separates draft generation, review, canonical import, internal evals, dry Tessl staging, and live readiness.

@@ -6,7 +6,7 @@
   "threshold": 0.9,
   "split": "held_out",
   "parameters": {
-    "model": "tessl-live-private",
+    "model": "qwen3.5:latest",
     "temperature": 0,
     "trial_count": 1
   },

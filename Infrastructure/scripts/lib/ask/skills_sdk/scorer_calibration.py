@@ -12,7 +12,7 @@ SCORER_CALIBRATION_SCHEMA_URI = (
 SCORER_CALIBRATION_ACCEPTANCE_TRACE = ["Braintrust scorer validation", "PU-030", "VP-030"]
 CALIBRATION_BUNDLE_SCHEMA_VERSION = "skills-sdk.scorer-calibration-bundle.v1"
 DEFAULT_BUNDLE_RELATIVE_PATH = Path("references/scorer-calibration/manifest.json")
-PASS_LABEL = "pass"
+SUCCESS_LABEL = "pass"
 FAIL_LABEL = "fail"
 
 
@@ -59,7 +59,20 @@ def _load_jsonl(path: Path) -> tuple[list[dict[str, Any]], str | None]:
 def _path_from_manifest(bundle_dir: Path, value: object, default: str) -> Path:
     raw = str(value or default)
     path = Path(raw)
-    return path if path.is_absolute() else bundle_dir / path
+    if path.is_absolute() or ".." in path.parts:
+        return bundle_dir / "__invalid_manifest_path__"
+    candidate = bundle_dir / path
+    return candidate if _path_stays_under_bundle(bundle_dir, candidate) else bundle_dir / "__invalid_manifest_path__"
+
+
+def _path_stays_under_bundle(bundle_dir: Path, path: Path) -> bool:
+    if path.is_symlink():
+        return False
+    try:
+        path.resolve(strict=False).relative_to(bundle_dir.resolve())
+    except (OSError, ValueError):
+        return False
+    return True
 
 
 def _number(value: object) -> float | None:
@@ -77,13 +90,13 @@ def _confusion_matrix(rows: list[dict[str, Any]]) -> dict[str, int]:
     for row in rows:
         expected = _label(row.get("expected_label"))
         predicted = _label(row.get("predicted_label"))
-        if expected == PASS_LABEL and predicted == PASS_LABEL:
+        if expected == SUCCESS_LABEL and predicted == SUCCESS_LABEL:
             matrix["tp"] += 1
         elif expected == FAIL_LABEL and predicted == FAIL_LABEL:
             matrix["tn"] += 1
-        elif expected == FAIL_LABEL and predicted == PASS_LABEL:
+        elif expected == FAIL_LABEL and predicted == SUCCESS_LABEL:
             matrix["fp"] += 1
-        elif expected == PASS_LABEL and predicted == FAIL_LABEL:
+        elif expected == SUCCESS_LABEL and predicted == FAIL_LABEL:
             matrix["fn"] += 1
     return matrix
 
@@ -169,7 +182,7 @@ def _example_shape_errors(index: int, row: dict[str, Any]) -> list[str]:
     if not str(row.get("id") or "").strip():
         errors.append(f"{row_id}:missing_id")
     for field in ("expected_label", "predicted_label"):
-        if _label(row.get(field)) not in {PASS_LABEL, FAIL_LABEL}:
+        if _label(row.get(field)) not in {SUCCESS_LABEL, FAIL_LABEL}:
             errors.append(f"{row_id}:{field}")
     for field in ("raw_artifact", "probe_type"):
         if not str(row.get(field) or "").strip():
@@ -187,7 +200,7 @@ def _threshold_checks(rows: list[dict[str, Any]], threshold: float | None) -> li
         score = _number(row.get("score"))
         if score is None:
             continue
-        expected_prediction = PASS_LABEL if score >= threshold else FAIL_LABEL
+        expected_prediction = SUCCESS_LABEL if score >= threshold else FAIL_LABEL
         if _label(row.get("predicted_label")) != expected_prediction:
             mismatches.append(str(row.get("id") or "unknown"))
     return [
@@ -219,7 +232,12 @@ def _raw_artifact_findings(bundle_dir: Path, rows: list[dict[str, Any]]) -> tupl
 def _raw_artifact_path(bundle_dir: Path, row: dict[str, Any]) -> tuple[str, Path]:
     raw_value = str(row.get("raw_artifact") or "")
     raw_path = Path(raw_value)
-    return raw_value, raw_path if raw_path.is_absolute() else bundle_dir / raw_path
+    if raw_path.is_absolute() or ".." in raw_path.parts:
+        return raw_value, bundle_dir / "__invalid_raw_artifact_path__"
+    candidate = bundle_dir / raw_path
+    if not _path_stays_under_bundle(bundle_dir, candidate):
+        return raw_value, bundle_dir / "__invalid_raw_artifact_path__"
+    return raw_value, candidate
 
 
 def _raw_artifact_mismatches(raw_value: str, raw_path: Path, row: dict[str, Any]) -> list[str]:

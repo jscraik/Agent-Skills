@@ -12,7 +12,10 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
-from ask.skills_sdk.scorer_quality import build_scorer_quality_receipt  # noqa: E402
+from ask.skills_sdk.scorer_quality import (  # noqa: E402
+    _fallback_scorer_metadata_contract_errors,
+    build_scorer_quality_receipt,
+)
 from ask.skills_sdk.scorer_quality_contracts import validate_scorer_quality_receipt  # noqa: E402
 
 
@@ -241,15 +244,53 @@ cases: []
             }
         ]
 
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValueError):
             validate_scorer_quality_receipt(receipt)
 
     def test_typed_contract_rejects_empty_check_evidence(self) -> None:
         receipt = build_scorer_quality_receipt(REPO_ROOT, source_path=REPO_ROOT / FIXTURE_SKILL, query=FIXTURE_SKILL)
         receipt["quality_checks"][0]["evidence"] = [""]
 
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValueError):
             validate_scorer_quality_receipt(receipt)
+
+    def test_fallback_metadata_contract_checks_judge_parameter_types(self) -> None:
+        errors = _fallback_scorer_metadata_contract_errors(
+            {
+                "schema_version": "skills-sdk.scorer-quality.v1",
+                "scorer_id": "strict.release-scorer",
+                "scorer_type": "llm_judge",
+                "scope": "suite",
+                "scorer_version_or_digest": "strict-local",
+                "pass_threshold": 0.8,
+                "deterministic_checks_first": True,
+                "parameters": {"model": "local-test", "temperature": "cold", "trial_count": 0},
+                "rationale_audit": {"required": "yes", "sampled_count": -1},
+                "bias_probes": ["short_correct_vs_verbose_wrong"],
+                "segmentation_fields": ["category", "claim_ids", "eval_modes"],
+                "calibration_cases": [
+                    {"id": "obvious-correct", "probe_type": "obvious_correct", "expected_score": 1},
+                    {"id": "obvious-wrong", "probe_type": "obvious_wrong", "expected_score": 0},
+                    {
+                        "id": "short-correct-vs-verbose-wrong",
+                        "probe_type": "short_correct_vs_verbose_wrong",
+                        "expected_direction": "short_correct_wins",
+                    },
+                    {"id": "copied-rubric-text-rejected", "probe_type": "rubric_copying_rejected", "expected_score": 0},
+                    {"id": "skill-name-mention-not-enough", "probe_type": "skill_name_mention_not_enough", "expected_score": 0},
+                    {
+                        "id": "evidence-lane-overclaim-rejected",
+                        "probe_type": "evidence_lane_overclaim_rejected",
+                        "expected_score": 0,
+                    },
+                ],
+            }
+        )
+
+        self.assertIn("parameters.temperature:float_type", errors)
+        self.assertIn("parameters.trial_count:greater_than_equal", errors)
+        self.assertIn("rationale_audit.required:bool_type", errors)
+        self.assertIn("rationale_audit.sampled_count:greater_than_equal", errors)
 
     def test_command_uses_fallback_parser_without_pyyaml(self) -> None:
         script = f"""

@@ -2,6 +2,7 @@
   "id": "cal-fail-skill-name-only",
   "description": "Raw scorer artifact for the known-fail skill-name-only calibration example.",
   "scorer_id": "sdk-scenario-generator.release-scorer",
+  "expected_label": "fail",
   "predicted_label": "fail",
   "score": 0.06,
   "rationale": "The candidate mentions the relevant skill by name but does not perform the required workflow, read the required evidence, or report bounded proof."

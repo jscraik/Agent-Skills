@@ -333,6 +333,32 @@ def _object_contract_errors(payload: dict[str, Any], field: str, string_fields: 
         return [f"{field}:dict_type"]
     errors = _required_string_errors(value, string_fields)
     errors.extend(f"{field}.{required}:missing" for required in required_fields if required not in value)
+    if field == "parameters":
+        errors.extend(_parameter_contract_errors(value))
+    elif field == "rationale_audit":
+        errors.extend(_rationale_audit_contract_errors(value))
+    return errors
+
+
+def _parameter_contract_errors(value: dict[str, Any]) -> list[str]:
+    errors: list[str] = []
+    temperature = value.get("temperature")
+    if not isinstance(temperature, (int, float)) or isinstance(temperature, bool):
+        errors.append("parameters.temperature:float_type")
+    trial_count = value.get("trial_count")
+    if not isinstance(trial_count, int) or isinstance(trial_count, bool) or trial_count < 1:
+        errors.append("parameters.trial_count:greater_than_equal")
+    return errors
+
+
+def _rationale_audit_contract_errors(value: dict[str, Any]) -> list[str]:
+    errors: list[str] = []
+    required = value.get("required")
+    if not isinstance(required, bool):
+        errors.append("rationale_audit.required:bool_type")
+    sampled_count = value.get("sampled_count")
+    if not isinstance(sampled_count, int) or isinstance(sampled_count, bool) or sampled_count < 0:
+        errors.append("rationale_audit.sampled_count:greater_than_equal")
     return errors
 
 

@@ -1,5 +1,6 @@
 {
   "id": "teach-cal-pass-mission-first",
+  "expected_label": "pass",
   "predicted_label": "pass",
   "score": 0.98,
   "rationale": "The response asks one focused mission question before creating durable lesson state and names the required workspace evidence.",

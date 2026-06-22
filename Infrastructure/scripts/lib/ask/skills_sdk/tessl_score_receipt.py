@@ -42,8 +42,11 @@ def _score_solution(solution: dict[str, Any]) -> tuple[float, float] | None:
     for result in results:
         if not isinstance(result, dict):
             continue
-        score += float(result.get("score") or 0)
-        max_score += float(result.get("max_score") or result.get("maxScore") or 0)
+        try:
+            score += float(result.get("score") or 0)
+            max_score += float(result.get("max_score") or result.get("maxScore") or 0)
+        except (TypeError, ValueError):
+            return None
     return score, max_score
 
 
@@ -116,7 +119,7 @@ def _score_scenario(scenario: object) -> tuple[dict[str, Any] | None, dict[str, 
             "usage_has": usage_score is not None,
             "baseline_has": baseline_score is not None,
         }
-    scenario_max = usage_score[1] or baseline_score[1]
+    scenario_max = max(usage_score[1], baseline_score[1])
     return {"path": path, "usage_score": usage_score[0], "baseline_score": baseline_score[0], "max_score": scenario_max}, None
 
 
@@ -338,9 +341,60 @@ def _feedback_loop(score_summary: dict[str, Any]) -> dict[str, Any]:
         "source": "tessl_score_receipt",
         "regression_count": len(regression_paths),
         "regression_paths": regression_paths,
+        "lessons_learned": _feedback_loop_lessons(regression_paths, usage_percent, lift_points, missing_count),
         "missing_scenario_count": missing_count,
         "required_next_actions": required_next_actions,
     }
+
+
+def _feedback_loop_lessons(
+    regression_paths: list[str],
+    usage_percent: object,
+    lift_points: object,
+    missing_count: int,
+) -> list[dict[str, Any]]:
+    lessons = _regression_lessons(regression_paths)
+    if missing_count:
+        lessons.append(
+            {
+                "source": "tessl_incomplete_assessment",
+                "lesson": "A Tessl score with missing baseline or usage-spec assessments is historical evidence only.",
+                "owner_classification_required": False,
+                "internal_regression_required": False,
+            }
+        )
+    if usage_percent is None or float(usage_percent) < TESSL_LIVE_HANDOFF_MIN_USAGE_PERCENT:
+        lessons.append(
+            {
+                "source": "tessl_low_usage_score",
+                "lesson": "Live usage below the handoff threshold means internal evals are not yet predictive enough for handoff.",
+                "owner_classification_required": True,
+                "internal_regression_required": bool(regression_paths),
+            }
+        )
+    if lift_points is None or float(lift_points) <= 0:
+        lessons.append(
+            {
+                "source": "tessl_no_aggregate_lift",
+                "lesson": "A skill that does not beat baseline in aggregate should not spend another live handoff run.",
+                "owner_classification_required": True,
+                "internal_regression_required": bool(regression_paths),
+            }
+        )
+    return lessons
+
+
+def _regression_lessons(regression_paths: list[str]) -> list[dict[str, Any]]:
+    return [
+        {
+            "source": "tessl_baseline_win",
+            "scenario_path": path,
+            "lesson": "Live Tessl found baseline outperforming the skill; preserve this as an internal regression obligation before another handoff.",
+            "owner_classification_required": True,
+            "internal_regression_required": True,
+        }
+        for path in regression_paths
+    ]
 
 
 def _blocked_agent_summary(blocker: str | None) -> str:

@@ -23,12 +23,12 @@ NO_CALIBRATION_FIXTURE = "Infrastructure/tests/fixtures/skills_sdk/scenario_qual
 def _command_env() -> dict[str, str]:
     env = os.environ.copy()
     temp_base = Path(tempfile.gettempdir()) / "agent-skills-test"
-    env.setdefault("XDG_CACHE_HOME", str(temp_base / "xdg-cache"))
-    env.setdefault("XDG_STATE_HOME", str(temp_base / "xdg-state"))
-    env.setdefault("MISE_CACHE_DIR", str(temp_base / "mise-cache"))
-    env.setdefault("MISE_STATE_DIR", str(temp_base / "mise-state"))
-    env.setdefault("UV_CACHE_DIR", str(temp_base / "uv-cache"))
-    env.setdefault("MISE_TRUSTED_CONFIG_PATHS", str(REPO_ROOT / ".mise.toml"))
+    env["XDG_CACHE_HOME"] = str(temp_base / "xdg-cache")
+    env["XDG_STATE_HOME"] = str(temp_base / "xdg-state")
+    env["MISE_CACHE_DIR"] = str(temp_base / "mise-cache")
+    env["MISE_STATE_DIR"] = str(temp_base / "mise-state")
+    env["UV_CACHE_DIR"] = str(temp_base / "uv-cache")
+    env["MISE_TRUSTED_CONFIG_PATHS"] = str(REPO_ROOT / ".mise.toml")
     return env
 
 
@@ -146,8 +146,9 @@ class TestSkillsSdkScorerCalibration(unittest.TestCase):
     def test_missing_calibration_bundle_is_advisory_blocked_receipt(self) -> None:
         process = _run_ask("sdk", "eval", "scorer-calibration", NO_CALIBRATION_FIXTURE, "--preview", "--json", "--robot")
 
-        self.assertEqual(process.returncode, 0, process.stderr)
+        self.assertNotEqual(process.returncode, 0)
         envelope = json.loads(process.stdout)
+        self.assertEqual(envelope["status"], "error")
         payload = envelope["data"]["skills_sdk_eval_scorer_calibration"]
         blocker_ids = {check["id"] for check in payload["receipt"]["blockers"]}
 
@@ -249,6 +250,72 @@ class TestSkillsSdkScorerCalibration(unittest.TestCase):
         blocker_ids = {check["id"] for check in receipt["blockers"]}
         self.assertEqual(receipt["status"], "blocked")
         self.assertIn("held_out_example_count", blocker_ids)
+
+    def test_builder_blocks_external_examples_path(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            skill_dir = _write_skill(root)
+            outside = root / "outside-examples.jsonl"
+            outside.write_text(
+                json.dumps(
+                    {
+                        "id": "known-pass",
+                        "probe_type": "obvious_correct",
+                        "expected_label": "pass",
+                        "predicted_label": "pass",
+                        "score": 0.95,
+                        "raw_artifact": "raw/known-pass.json",
+                    },
+                    sort_keys=True,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            _write_bundle(
+                skill_dir,
+                [
+                    {
+                        "id": "known-pass",
+                        "probe_type": "obvious_correct",
+                        "expected_label": "pass",
+                        "predicted_label": "pass",
+                        "score": 0.95,
+                        "raw_artifact": "raw/known-pass.json",
+                    }
+                ],
+                manifest_overrides={"examples_path": str(outside)},
+            )
+
+            receipt = build_scorer_calibration_receipt(root, source_path=skill_dir, query="sample_skill")
+
+        blocker_ids = {check["id"] for check in receipt["blockers"]}
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("calibration_examples_parse", blocker_ids)
+
+    def test_builder_blocks_traversing_raw_artifact_path(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            skill_dir = _write_skill(root)
+            _write_bundle(
+                skill_dir,
+                [
+                    {
+                        "id": "known-pass",
+                        "probe_type": "obvious_correct",
+                        "expected_label": "pass",
+                        "predicted_label": "pass",
+                        "score": 0.95,
+                        "raw_artifact": "../outside.json",
+                    }
+                ],
+                write_raw=False,
+            )
+
+            receipt = build_scorer_calibration_receipt(root, source_path=skill_dir, query="sample_skill")
+
+        blocker_ids = {check["id"] for check in receipt["blockers"]}
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("raw_artifacts_present", blocker_ids)
 
 
 if __name__ == "__main__":

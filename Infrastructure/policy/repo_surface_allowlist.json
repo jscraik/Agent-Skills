@@ -5,7 +5,7 @@
       "id": "selection-quality-history-canonical-index",
       "match_type": "exact",
       "pattern": "Infrastructure/artifacts/selection-quality/history.jsonl",
-      "classification": "historical_artifact",
+      "classification": "source",
       "reason": "Canonical append-only routing-quality history consumed by validation and catalog parity checks; retained until moved to a non-artifact state path.",
       "owner": "agent-skills validation",
       "review_after": "2026-09-19"
@@ -14,7 +14,7 @@
       "id": "skills-sdk-pipeline-status-artifact",
       "match_type": "exact",
       "pattern": "artifacts/recommended-skills-sdk-pipeline.html",
-      "classification": "historical_artifact",
+      "classification": "source",
       "reason": "Validated Skills SDK pipeline status artifact with active parser tests and capability-matrix references; retained until promoted to a governed docs or report surface.",
       "owner": "skills-sdk",
       "review_after": "2026-09-19"
@@ -32,7 +32,7 @@
       "id": "subtree-agents-artifacts-guide",
       "match_type": "exact",
       "pattern": "artifacts/AGENTS.md",
-      "classification": "historical_artifact",
+      "classification": "source",
       "reason": "Intentional nested Codex instruction boundary that explains artifact retention and evidence authority inside an otherwise historical-artifact subtree.",
       "owner": "agent-skills instructions",
       "review_after": "2026-09-20"
@@ -59,7 +59,7 @@
       "id": "sdk-scenario-generator-scorer-calibration-bundle",
       "match_type": "prefix",
       "pattern": "Skills/agent-ops/sdk-scenario-generator/references/scorer-calibration/",
-      "classification": "historical_artifact",
+      "classification": "source",
       "reason": "Canonical held-out scorer calibration fixture bundle consumed by the Skills SDK scorer-calibration preview gate.",
       "owner": "skills-sdk",
       "review_after": "2026-09-21"
@@ -68,7 +68,7 @@
       "id": "teach-scorer-calibration-bundle",
       "match_type": "prefix",
       "pattern": "Skills/github/teach/references/scorer-calibration/",
-      "classification": "historical_artifact",
+      "classification": "source",
       "reason": "Canonical held-out scorer calibration fixture bundle consumed by the Skills SDK scorer-calibration preview gate.",
       "owner": "skills-sdk",
       "review_after": "2026-09-21"

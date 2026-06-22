@@ -4942,6 +4942,13 @@ def skills_sdk_eval_scorer_quality(repo_root: Path, target: str) -> CallResult:
     result.data["skills_sdk_eval_scorer_quality"] = payload
     if receipt["status"] == "blocked":
         result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=payload["agent_summary"],
+                fix_suggestion=_ask_validation_command("sdk", "eval", "scorer-quality", query, "--preview"),
+            )
+        )
     return result
 
 
@@ -4996,6 +5003,15 @@ def skills_sdk_eval_scorer_calibration(repo_root: Path, target: str) -> CallResu
         "agent_summary": receipt["agent_summary"],
     }
     result.data["skills_sdk_eval_scorer_calibration"] = payload
+    if receipt["status"] == "blocked":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=payload["agent_summary"],
+                fix_suggestion=_ask_validation_command("sdk", "eval", "scorer-calibration", query, "--preview"),
+            )
+        )
     return result
 
 
@@ -5016,7 +5032,7 @@ def skills_sdk_eval_tessl_score(
     from ask.skills_sdk.tessl_score_receipt import build_tessl_score_receipt  # noqa: PLC0415
 
     receipt = build_tessl_score_receipt(repo_root, view_json=view_path, skill=skill, run_id=run_id)
-    result.data["skills_sdk_eval_tessl_score"] = {
+    payload = {
         "schema_version": "skills-sdk-eval-tessl-score.v0",
         "status": receipt["status"],
         "ready": receipt["ready"],
@@ -5029,6 +5045,25 @@ def skills_sdk_eval_tessl_score(
         ],
         "agent_summary": receipt["agent_summary"],
     }
+    result.data["skills_sdk_eval_tessl_score"] = payload
+    if receipt["status"] == "blocked":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=payload["agent_summary"],
+                fix_suggestion=_ask_validation_command(
+                    "sdk",
+                    "eval",
+                    "tessl-score",
+                    "--view-json",
+                    view_json,
+                    "--skill",
+                    skill,
+                    "--preview",
+                ),
+            )
+        )
     return result
 
 

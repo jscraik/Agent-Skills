@@ -260,6 +260,31 @@ class TestSkillsSdkKnowledgeIngest(unittest.TestCase):
                 source_context.get("allowed_claims", []),
             )
 
+    def test_apply_preserves_explicit_zero_capsule_asset_count(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "agent-skills"
+            root.mkdir()
+            skill_dir = _write_skill(root)
+            extraction = _write_extraction(Path(tmp))
+            manifest_path = extraction / "references" / "knowledge-capsule.manifest.yaml"
+            manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
+            manifest["selected_asset_ids"] = ["asset.one", "asset.two"]
+            manifest["capsules"][0]["asset_ids"] = []
+            _write_yaml(manifest_path, manifest)
+
+            payload = build_knowledge_ingest(
+                root,
+                extraction=str(extraction),
+                skill="Skills/agent-ops/improve-agent-native/SKILL.md",
+                apply=True,
+                preflight_security=False,
+            )
+
+            self.assertEqual(payload["status"], "applied")
+            capsule_routing = skill_dir / "references" / "knowledge-capsule-routing.md"
+            capsule_routing_text = capsule_routing.read_text(encoding="utf-8")
+            self.assertIn("selected_asset_count: 0", capsule_routing_text)
+
     def test_apply_vendors_knowledge_eval_scenarios_and_fixtures(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "agent-skills"

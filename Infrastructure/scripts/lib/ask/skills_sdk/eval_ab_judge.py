@@ -26,7 +26,6 @@ DECISION_SCHEMA_VERSION = "skills-sdk.ab-judge-decision.v0"
 ALLOWED_WINNERS = ["skill_a", "skill_b", "inconclusive"]
 _EXPERIMENT_ID_RE = re.compile(r"[0-9a-f]{16}")
 _DIMENSION_IDS = {dimension["id"] for dimension in AB_RUBRIC_DIMENSIONS}
-_OLLAMA_CLOUD_ENV_FILE = "/Users/jamiecraik/.codex/.env"
 _DECISION_KEYS = frozenset(
     {
         "schema_version",
@@ -561,10 +560,7 @@ def _run_ollama_judge(prompt: str, judge_profile: dict[str, Any], timeout_second
 
 def _ollama_judge_command(judge_profile: dict[str, Any], secret_names: list[str]) -> list[str]:
     command = ["ollama", "run", str(judge_profile["model"])]
-    if not secret_names or all(os.environ.get(name) for name in secret_names):
-        return command
-    env_file = os.environ.get("ASK_OLLAMA_CLOUD_ENV_FILE", _OLLAMA_CLOUD_ENV_FILE)
-    return ["op", "run", "--env-file", env_file, "--", *command]
+    return command
 
 
 def _parse_judge_decision(raw_output: str, comparison_payload: dict[str, Any]) -> tuple[dict[str, Any] | None, str | None]:

@@ -1031,7 +1031,10 @@ description: Create reliable script description checks for package validation.
             references_dir.mkdir(parents=True)
             outside = repo_root / "outside.md"
             outside.write_text("# Outside\n", encoding="utf-8")
-            (references_dir / "outside-link.md").symlink_to(outside)
+            try:
+                (references_dir / "outside-link.md").symlink_to(outside)
+            except OSError as exc:
+                self.skipTest(f"symlink creation unavailable: {exc}")
             skill_md = skill_dir / "SKILL.md"
             skill_md.write_text(
                 """---
@@ -1749,6 +1752,38 @@ metadata:
         self.assertTrue(contract["knowledge_capsules"]["manifest_declared"])
         self.assertTrue(contract["knowledge_capsules"]["ready"])
         self.assertEqual(contract["knowledge_capsules"]["capsule_paths"], ["references/knowledge-capsules/one.md"])
+
+    def test_knowledge_capsule_contract_blocks_unsafe_target_paths(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "capsule-skill"
+            references = skill_dir / "references"
+            references.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                "# Capsule Skill\n\nLoad references/knowledge-capsule-routing.md before capsule bodies.\n",
+                encoding="utf-8",
+            )
+            (references / "knowledge-capsule.manifest.yaml").write_text(
+                "capsules:\n"
+                "  - target_path: /tmp/outside.md\n"
+                "    facet_id: outside\n",
+                encoding="utf-8",
+            )
+            (references / "knowledge-capsule-routing.md").write_text(
+                "# Knowledge Capsule Routing\n\n- /tmp/outside.md\n",
+                encoding="utf-8",
+            )
+
+            contract = package_contracts.sdk_package_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+            )
+
+        self.assertTrue(contract["knowledge_capsules"]["manifest_declared"])
+        self.assertFalse(contract["knowledge_capsules"]["ready"])
+        self.assertEqual(contract["knowledge_capsules"]["unsafe_capsule_paths"], ["/tmp/outside.md"])
 
     def test_knowledge_capsule_contract_warns_when_routing_is_buried(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
