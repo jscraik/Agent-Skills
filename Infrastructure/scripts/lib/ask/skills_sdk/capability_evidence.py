@@ -167,26 +167,29 @@ def _file_status(
     return kind, "pass", "Evidence file exists inside the repository.", [_repo_relative(repo_root, candidate)], "local"
 
 
-def _schema_status(repo_root: Path, evidence_ref: str, candidate: Path | None) -> tuple[EvidenceKind, EvidenceStatus, str, list[str], str]:
-    kind, status, reason, evidence, lane = _file_status(repo_root, evidence_ref, candidate, "schema")
+def _json_artifact_status(
+    repo_root: Path,
+    evidence_ref: str,
+    candidate: Path | None,
+    kind: Literal["schema", "receipt"],
+) -> tuple[EvidenceKind, EvidenceStatus, str, list[str], str]:
+    kind_status, status, reason, evidence, lane = _file_status(repo_root, evidence_ref, candidate, kind)
     if status != "pass" or candidate is None:
-        return kind, status, reason, evidence, lane
+        return kind_status, status, reason, evidence, lane
+    kind_label = kind.capitalize()
     try:
         json.loads(candidate.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
-        return "schema", "blocked", f"Schema evidence file did not parse as JSON: {exc}", evidence, "local"
-    return "schema", "pass", "Schema evidence file exists and parses as JSON.", evidence, "local"
+        return kind, "blocked", f"{kind_label} evidence file did not parse as JSON: {exc}", evidence, "local"
+    return kind, "pass", f"{kind_label} evidence file exists and parses as JSON.", evidence, "local"
+
+
+def _schema_status(repo_root: Path, evidence_ref: str, candidate: Path | None) -> tuple[EvidenceKind, EvidenceStatus, str, list[str], str]:
+    return _json_artifact_status(repo_root, evidence_ref, candidate, "schema")
 
 
 def _receipt_status(repo_root: Path, evidence_ref: str, candidate: Path | None) -> tuple[EvidenceKind, EvidenceStatus, str, list[str], str]:
-    kind, status, reason, evidence, lane = _file_status(repo_root, evidence_ref, candidate, "receipt")
-    if status != "pass" or candidate is None:
-        return kind, status, reason, evidence, lane
-    try:
-        json.loads(candidate.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
-        return "receipt", "blocked", f"Receipt evidence file did not parse as JSON: {exc}", evidence, "local"
-    return "receipt", "pass", "Receipt evidence file exists and parses as JSON.", evidence, "local"
+    return _json_artifact_status(repo_root, evidence_ref, candidate, "receipt")
 
 
 def _pytest_node_status(
