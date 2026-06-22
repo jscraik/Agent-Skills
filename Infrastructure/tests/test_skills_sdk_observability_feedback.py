@@ -434,6 +434,32 @@ class TestSkillsSdkObservabilityFeedback(unittest.TestCase):
         all_check_evidence = [item for blocker in receipt.blockers for item in blocker.evidence]
         self.assertIn("feedback_receipt_has_no_candidates", all_check_evidence)
 
+    def test_promotion_preview_surfaces_candidate_only_blockers(self) -> None:
+        package_receipt = self._package_receipt()
+        feedback_receipt = build_observability_feedback_receipt(
+            REPO_ROOT,
+            package_receipt=package_receipt,
+            events_path=REDACTED_EVENTS,
+        )
+        feedback_receipt["scenario_candidates"][0]["skill_id"] = "other-package"
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            payload = build_observability_promotion_receipt(
+                REPO_ROOT,
+                feedback_receipt_path=self._write_receipt(tmp_path, "feedback.json", feedback_receipt),
+                package_receipt_path=self._write_receipt(tmp_path, "package.json", package_receipt),
+                eval_run_receipt_path=self._write_receipt(tmp_path, "eval.json", self._passing_eval_receipt(package_receipt)),
+            )
+
+        receipt = validate_observability_promotion_receipt(payload)
+
+        self.assertEqual(receipt.status, "blocked")
+        self.assertEqual(receipt.promotion_ready_count, 1)
+        all_candidate_blockers = [blocker for decision in receipt.candidate_decisions for blocker in decision.blockers]
+        self.assertIn("candidate_skill_id_mismatch", all_candidate_blockers)
+        all_check_evidence = [item for blocker in receipt.blockers for item in blocker.evidence]
+        self.assertIn("candidate_skill_id_mismatch", all_check_evidence)
+
     def test_public_cli_previews_observability_promotion(self) -> None:
         package_receipt = self._package_receipt()
         feedback_receipt = build_observability_feedback_receipt(

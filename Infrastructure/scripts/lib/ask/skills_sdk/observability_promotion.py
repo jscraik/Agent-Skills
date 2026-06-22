@@ -349,7 +349,20 @@ def _promotion_checks(
     ]
 
 
-def _top_level_blockers(checks: list[dict[str, Any]], blockers: list[str]) -> list[dict[str, Any]]:
+def _decision_blockers(decisions: list[dict[str, Any]]) -> list[str]:
+    return [
+        blocker
+        for decision in decisions
+        for blocker in decision.get("blockers", [])
+        if isinstance(blocker, str)
+    ]
+
+
+def _top_level_blockers(
+    checks: list[dict[str, Any]],
+    blockers: list[str],
+    decisions: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
     blocking_checks = [check for check in checks if check["status"] == "blocker"]
     surfaced = {
         evidence
@@ -357,7 +370,13 @@ def _top_level_blockers(checks: list[dict[str, Any]], blockers: list[str]) -> li
         for evidence in check.get("evidence", [])
         if isinstance(evidence, str)
     }
-    unsurfaced = [blocker for blocker in blockers if blocker not in surfaced]
+    unsurfaced = list(
+        dict.fromkeys(
+            blocker
+            for blocker in [*blockers, *_decision_blockers(decisions)]
+            if blocker not in surfaced
+        )
+    )
     if unsurfaced:
         blocking_checks.append(
             _check(
@@ -415,7 +434,7 @@ def _receipt_payload(
         "blocked_count": blocked_count,
         "candidate_decisions": decisions,
         "promotion_checks": checks,
-        "blockers": _top_level_blockers(checks, blockers),
+        "blockers": _top_level_blockers(checks, blockers, decisions),
         "mutation_performed": False,
         "acceptance_trace": OBSERVABILITY_PROMOTION_ACCEPTANCE_TRACE,
         "agent_summary": _agent_summary(status, ready_count, len(decisions), blocked_count, len(blockers)),
