@@ -26,6 +26,15 @@ Context: <lesson or user answer that caused the insight>.
 Learning: <non-obvious thing now understood>.
 Next practice: <small follow-up task>.
 
+## learning-records/quiz-review-<topic>.md
+
+# Quiz review - <topic>
+Missed answer: <short description of the missed answer>.
+Misconception: <what the answer revealed>.
+Correction: <smallest accurate repair>.
+Retrieval prompt: <one question that checks the corrected idea>.
+Next practice: <one repair step>.
+
 ## Teaching Blocker Note
 
 # <blocker topic>
@@ -35,6 +44,31 @@ One focused question: <single question that unblocks the next safe action>.
 Deferred topics: <topics intentionally left for later, if any>.
 Next safe action: <smallest action after the blocker is resolved>.
 
+## learning-records/mission-start-blocker.md
+
+# Mission start blocked
+Blocked action: lesson 0001.
+Missing mission fields: <current level, goal, constraints, or next milestone>.
+One focused question: <single question that resolves the most important missing field>.
+Next safe action: <create MISSION.md, then choose one first lesson>.
+
+## learning-records/mission-clarification-blocker.md
+
+# Mission clarification blocked
+Blocked action: lesson or syllabus creation.
+Missing mission field: <goal, current level, constraint, or desired outcome>.
+One focused question: <single question that resolves the mission>.
+Next safe action: <confirm mission, then choose one first lesson>.
+
+## learning-records/mission-change-blocker.md
+
+# Mission change blocked
+Current mission: <existing mission summary>.
+Requested mission: <new mission requested by the user>.
+Blocked action: overwrite MISSION.md or prior learning records.
+Confirmation question: <single question asking whether to switch, branch, or keep the current mission>.
+Next safe action: <record confirmation before changing state>.
+
 ## learning-records/continuation-blocker.md
 
 # Continuation blocked
@@ -42,6 +76,14 @@ Blocked action: continue from learning records.
 Missing paths: <MISSION.md and/or learning-records/>.
 One focused question: <single question that recovers the learner mission or last weak spot>.
 Next safe action: <create or restore the missing record, then choose one next lesson>.
+
+## learning-records/quiz-review-blocker.md
+
+# Quiz review blocked
+Blocked action: quiz feedback and learning-record update.
+Missing quiz evidence: <answers, expected answers, topic, or prior lesson>.
+One focused request: <single request for the missing quiz evidence>.
+Next safe action: <review answers, choose one repair step, and write a learning record>.
 
 ## Reference HTML
 
@@ -75,7 +117,7 @@ prompts, private URLs, or copied private text.
 <section><h2>Retrieval Practice</h2><ol><li>What must be redacted before turning a private transcript into a lesson?</li></ol></section>
 <section><h2>Artifact Evidence</h2><p>Record this file path and any companion learning record in closeout.</p></section>
 
-## Source Check Blocker
+## learning-records/source-check-blocker.md
 
 # Source Check Blocker - <topic>
 Topic: <current or version-sensitive lesson request>.

@@ -38,7 +38,7 @@ class TestSkillsSdkEvalProfiles(unittest.TestCase):
         self.assertEqual(judge_by_id["oss-cloud"]["model"], "deepseek-v4-flash:cloud")
         self.assertEqual(judge_by_id["oss-cloud"]["host"], "codex-cli-profile")
         self.assertTrue(judge_by_id["oss-cloud"]["network_required"])
-        self.assertEqual(judge_by_id["oss-cloud"]["secret_env_names"], [])
+        self.assertEqual(judge_by_id["oss-cloud"]["secret_env_names"], ["OLLAMA_API_KEY"])
         self.assertEqual(judge_by_id["oss-cloud"]["auth_boundary"], "codex_cli_auth")
         self.assertEqual(judge_by_id["codex-fast"]["model"], "gpt-5.3-codex-spark")
         self.assertEqual(judge_by_id["codex-fast"]["host"], "codex-cli-authenticated-session")

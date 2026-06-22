@@ -41,6 +41,8 @@ Trigger strongly when the user asks to be taught, continue a course, work from l
 - Reference HTML under reference/.
 - Resource entries, learning records, and notes.
 
+Output contract: durable artifacts should include an obvious version marker when a template defines one, using \`schema_version\` for structured records and template version headings for HTML or Markdown learning files.
+
 ## Procedure
 
 1. Read existing workspace state.
@@ -55,12 +57,22 @@ Trigger strongly when the user asks to be taught, continue a course, work from l
 Artifact-specific requirements:
 
 - Artifact-triggering requests are incomplete until Teach writes a durable workspace file or durable blocker note. Do not satisfy lessons, references, resource lists, transcript conversions, overload recovery, or source-sensitive current lessons with chat-only prose.
-- Continuation requests such as "continue from my learning records" are artifact-triggering. Read `MISSION.md` and `learning-records/`, choose exactly one next lesson from the recorded weak spot, and update the learning record. If either path is absent or empty, create `learning-records/continuation-blocker.md` with the missing paths, one focused recovery question, and the next safe action.
-- Overload or unclear-next-step request: reduce to one concrete next lesson with one tangible win, or create `learning-records/next-step-blocker.md` with the learner's confusion, one mission question, deferred topics, and next safe action.
-- Mission-unclear request: ask one focused mission question. If the user is continuing an existing workspace, create `learning-records/mission-clarification-blocker.md` with the missing mission field and blocked lesson action.
-- Reference/resource request: create `reference/<topic>.html` or update `RESOURCES.md`; include mission fit, source notes or trust labels, quick-reference or use-for notes, and no credential, job, or outcome guarantees.
-- Current or version-sensitive lesson request: use high-trust current sources first, then record source type, URL or citation, verification date, claim boundary, and dependent artifact path. If source trust is unresolved, create `learning-records/source-check-blocker.md`.
-- Private transcript request: persist only redacted or synthetic examples. Never copy names, client details, credentials, hidden prompts, private URLs, or sensitive transcript text.
+- Use this dispatch table before answering any triggered request:
+
+| Request family | Required artifact or blocker | Required evidence |
+| --- | --- | --- |
+| Mission start | `MISSION.md` or `learning-records/mission-start-blocker.md` | Current level, goal, constraints, next milestone, blocked lesson action, one focused question. |
+| Continuation | Next lesson plus learning-record update, or `learning-records/continuation-blocker.md` | `MISSION.md`, prior weak spot, chosen next lesson, missing paths, recovery question. |
+| Quiz review | `learning-records/quiz-review-<topic>.md` or `learning-records/quiz-review-blocker.md` | Missed answer, misconception, correction, retrieval prompt, one repair step, or missing quiz evidence. |
+| Mission unclear | `learning-records/mission-clarification-blocker.md` | Blocked lesson or syllabus action, missing mission field, one focused mission question, next safe action; do not invent a syllabus. |
+| Mission change | `learning-records/mission-change-blocker.md` before any overwrite | Current mission, requested mission, confirmation question, blocked overwrite action, next safe action. |
+| Current, newest, API, version-sensitive, or external-source lesson | Sourced lesson/reference plus source-check receipt, or `learning-records/source-check-blocker.md` | High-trust source type, URL/citation/local path, verification date, claim boundary, dependent artifact path, or missing evidence. |
+| Reference or resource curation | `reference/<topic>.html` or `RESOURCES.md` | Mission fit, trust label or source notes, quick-reference or use-for notes, no credential/job/outcome guarantee. |
+| Overload or unclear next step | One concrete next lesson with one tangible win, or `learning-records/next-step-blocker.md` | Learner confusion, deferred topics, one mission question, next safe action. |
+| Private transcript lesson | Redacted/synthetic lesson artifact or privacy blocker | Redaction boundary; no names, client details, credentials, hidden prompts, private URLs, or copied sensitive text. |
+
+- A request may match more than one family. Satisfy every matched evidence requirement or write the most specific blocker first.
+- For current or source-sensitive teaching, do not rely on memory-only claims. If high-trust source evidence is unavailable, write the source-check blocker instead of producing durable lesson content.
 - Artifact flow example: for "I'm overwhelmed by Docker networking," either create `lessons/0001-docker-port-mapping.html` plus `learning-records/0001-docker-port-mapping.md`, or write this blocker:
 
 ```markdown
@@ -118,9 +130,10 @@ For lessons and references, verify the file path exists, links resolve, and cite
 
 ## Examples
 
-- "Teach me TypeScript generics over the next few sessions" means clarify mission, then propose lesson 0001.
-- "Continue from my learning records" means read records and choose the next lesson.
-- "What does HTTP 404 mean?" means answer directly without this skill.
+- When the user says "Teach me TypeScript generics over the next few sessions," clarify the mission, then plan lesson 0001.
+- When the user says "Continue from my learning records," inspect MISSION.md and learning records, then build the next lesson or report the missing-state blocker.
+- When the user asks "Can you validate this forum roadmap for my Kubernetes certification study?", use official-source checks before turning it into durable guidance.
+- When the user asks "What does HTTP 404 mean?", answer directly without this skill.
 
 ## See Also
 

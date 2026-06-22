@@ -1,0 +1,203 @@
+{
+  "agent_summary": "Handoff readiness for Skills/github/teach is complete for live Tessl.",
+  "blockers": [],
+  "lanes": [
+    {
+      "blocker": null,
+      "blockers": [],
+      "checks": [
+        {
+          "evidence": [
+            "pass"
+          ],
+          "id": "lane_status_pass",
+          "message": "Required live handoff lanes must pass before live Tessl.",
+          "severity": "blocker",
+          "status": "pass"
+        },
+        {
+          "evidence": [
+            "./bin/ask skills audit Skills/github/teach --level strict --json --robot"
+          ],
+          "id": "lane_command_recorded",
+          "message": "Each lane must record the exact command that produced its evidence.",
+          "severity": "blocker",
+          "status": "pass"
+        },
+        {
+          "evidence": [
+            "Skills/github/teach/references/eval-regression-plan.json"
+          ],
+          "id": "lane_receipt_path_exists",
+          "message": "Passed lanes must point at an existing receipt or durable evidence artifact.",
+          "severity": "blocker",
+          "status": "pass"
+        }
+      ],
+      "command": "./bin/ask skills audit Skills/github/teach --level strict --json --robot",
+      "id": "deterministic_local_gates",
+      "receipt_path": "Skills/github/teach/references/eval-regression-plan.json",
+      "status": "pass"
+    },
+    {
+      "blocker": null,
+      "blockers": [],
+      "checks": [
+        {
+          "evidence": [
+            "pass"
+          ],
+          "id": "lane_status_pass",
+          "message": "Required live handoff lanes must pass before live Tessl.",
+          "severity": "blocker",
+          "status": "pass"
+        },
+        {
+          "evidence": [
+            "./bin/ask sdk eval ab-judge-score --judge-profile oss-local --execute --json --robot"
+          ],
+          "id": "lane_command_recorded",
+          "message": "Each lane must record the exact command that produced its evidence.",
+          "severity": "blocker",
+          "status": "pass"
+        },
+        {
+          "evidence": [
+            "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-judge-score-receipt.json"
+          ],
+          "id": "lane_receipt_path_exists",
+          "message": "Passed lanes must point at an existing receipt or durable evidence artifact.",
+          "severity": "blocker",
+          "status": "pass"
+        }
+      ],
+      "command": "./bin/ask sdk eval ab-judge-score --judge-profile oss-local --execute --json --robot",
+      "id": "oss-local",
+      "receipt_path": "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-judge-score-receipt.json",
+      "status": "pass"
+    },
+    {
+      "blocker": null,
+      "blockers": [],
+      "checks": [
+        {
+          "evidence": [
+            "pass"
+          ],
+          "id": "lane_status_pass",
+          "message": "Required live handoff lanes must pass before live Tessl.",
+          "severity": "blocker",
+          "status": "pass"
+        },
+        {
+          "evidence": [
+            "./bin/ask sdk eval ab-judge-score --judge-profile oss-cloud --execute --json --robot"
+          ],
+          "id": "lane_command_recorded",
+          "message": "Each lane must record the exact command that produced its evidence.",
+          "severity": "blocker",
+          "status": "pass"
+        },
+        {
+          "evidence": [
+            "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-judge-score-receipt.json"
+          ],
+          "id": "lane_receipt_path_exists",
+          "message": "Passed lanes must point at an existing receipt or durable evidence artifact.",
+          "severity": "blocker",
+          "status": "pass"
+        }
+      ],
+      "command": "./bin/ask sdk eval ab-judge-score --judge-profile oss-cloud --execute --json --robot",
+      "id": "oss-cloud",
+      "receipt_path": "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-judge-score-receipt.json",
+      "status": "pass"
+    },
+    {
+      "blocker": null,
+      "blockers": [],
+      "checks": [
+        {
+          "evidence": [
+            "pass"
+          ],
+          "id": "lane_status_pass",
+          "message": "Required live handoff lanes must pass before live Tessl.",
+          "severity": "blocker",
+          "status": "pass"
+        },
+        {
+          "evidence": [
+            "./bin/ask evals run Skills/github/teach --tessl-live-private --tessl-live-dry-run --json --robot"
+          ],
+          "id": "lane_command_recorded",
+          "message": "Each lane must record the exact command that produced its evidence.",
+          "severity": "blocker",
+          "status": "pass"
+        },
+        {
+          "evidence": [
+            "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/regression-plan-receipt.json"
+          ],
+          "id": "lane_receipt_path_exists",
+          "message": "Passed lanes must point at an existing receipt or durable evidence artifact.",
+          "severity": "blocker",
+          "status": "pass"
+        }
+      ],
+      "command": "./bin/ask evals run Skills/github/teach --tessl-live-private --tessl-live-dry-run --json --robot",
+      "id": "tessl-live-dry-run",
+      "receipt_path": "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/regression-plan-receipt.json",
+      "status": "pass"
+    }
+  ],
+  "mutation_performed": false,
+  "operation": "eval_handoff_readiness_preview",
+  "promotion_performed": false,
+  "quality_checks": [
+    {
+      "evidence": [
+        ".harness/evidence/handoff/teach/eval-handoff-readiness.json"
+      ],
+      "id": "readiness_artifact_present",
+      "message": "Live Tessl requires a current handoff readiness artifact under .harness/evidence.",
+      "severity": "blocker",
+      "status": "pass"
+    },
+    {
+      "evidence": [
+        "skills-sdk.eval-handoff-readiness-input.v1"
+      ],
+      "id": "readiness_schema_supported",
+      "message": "The handoff readiness input schema_version must match the SDK contract.",
+      "severity": "blocker",
+      "status": "pass"
+    }
+  ],
+  "query": "Skills/github/teach",
+  "readiness_path": ".harness/evidence/handoff/teach/eval-handoff-readiness.json",
+  "ready_for_live_tessl": true,
+  "required_lanes": [
+    "deterministic_local_gates",
+    "oss-local",
+    "oss-cloud",
+    "tessl-live-dry-run"
+  ],
+  "required_next_actions": [
+    "Run live Tessl; if it fails, owner-classify the failure and return to oss-local."
+  ],
+  "required_order": [
+    "deterministic_local_gates",
+    "oss-local",
+    "patch_oss_local_failures",
+    "oss-cloud",
+    "patch_oss_cloud_failures",
+    "tessl-live-dry-run",
+    "tessl-live",
+    "patch_tessl_failures"
+  ],
+  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/eval-handoff-readiness.v0.schema.json",
+  "schema_version": "skills-sdk.eval-handoff-readiness.v0",
+  "skill_path": "Skills/github/teach/SKILL.md",
+  "status": "preview"
+}

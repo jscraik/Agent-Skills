@@ -53,7 +53,7 @@ def _judge_profiles() -> list[dict[str, Any]]:
             "host": "codex-cli-profile",
             "model": "deepseek-v4-flash:cloud",
             "network_required": True,
-            "secret_env_names": [],
+            "secret_env_names": ["OLLAMA_API_KEY"],
             "auth_boundary": "codex_cli_auth",
             "receives_sanitized_outputs_only": True,
         },

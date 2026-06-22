@@ -265,15 +265,15 @@ def _confusion_checks(manifest: dict[str, Any], rows: list[dict[str, Any]], matr
 
 def _confusion_limits(manifest: dict[str, Any]) -> dict[str, int | None]:
     return {
-        "minimum_examples": _manifest_int_limit(manifest, "minimum_examples", default=1),
-        "minimum_tp": _manifest_int_limit(manifest, "minimum_true_positives", default=1),
-        "minimum_tn": _manifest_int_limit(manifest, "minimum_true_negatives", default=1),
+        "minimum_examples": _manifest_int_limit(manifest, "minimum_examples", default=1, minimum=1),
+        "minimum_tp": _manifest_int_limit(manifest, "minimum_true_positives", default=1, minimum=1),
+        "minimum_tn": _manifest_int_limit(manifest, "minimum_true_negatives", default=1, minimum=1),
         "max_fp": _manifest_int_limit(manifest, "max_false_positives", default=0),
         "max_fn": _manifest_int_limit(manifest, "max_false_negatives", default=0),
     }
 
 
-def _manifest_int_limit(manifest: dict[str, Any], key: str, *, default: int) -> int | None:
+def _manifest_int_limit(manifest: dict[str, Any], key: str, *, default: int, minimum: int = 0) -> int | None:
     raw = manifest.get(key, default)
     if isinstance(raw, bool):
         return None
@@ -281,7 +281,7 @@ def _manifest_int_limit(manifest: dict[str, Any], key: str, *, default: int) -> 
         value = int(raw)
     except (TypeError, ValueError):
         return None
-    return value if value >= 0 else None
+    return value if value >= minimum else None
 
 
 def _minimum_check(check_id: str, observed: int, minimum: int | None, message: str) -> dict[str, Any]:

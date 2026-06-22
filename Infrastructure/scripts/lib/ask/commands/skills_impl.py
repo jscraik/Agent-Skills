@@ -236,6 +236,8 @@ __all__ = [
     "skills_sdk_eval_scorer_quality",
     "skills_sdk_eval_scorer_calibration",
     "skills_sdk_eval_tessl_score",
+    "skills_sdk_eval_regression_plan",
+    "skills_sdk_eval_handoff_readiness",
     "skills_sdk_eval_profiles_preview",
     "skills_sdk_eval_ab_rubric_preview",
     "skills_sdk_eval_ab_preview",
@@ -5075,6 +5077,174 @@ def skills_sdk_eval_tessl_score(
                     skill,
                     "--preview",
                 ),
+            )
+        )
+    return result
+
+
+def skills_sdk_eval_regression_plan(
+    repo_root: Path,
+    *,
+    view_json: str,
+    skill: str,
+    run_id: str | None = None,
+    plan_json: str | None = None,
+) -> CallResult:
+    """Preview an owner-classified regression plan from Tessl score evidence."""
+    result = CallResult()
+    result.metadata["command"] = "sdk eval regression-plan"
+    view_path = Path(view_json)
+    if not view_path.is_absolute():
+        view_path = repo_root / view_path
+    plan_path = Path(plan_json) if plan_json else None
+    if plan_path and not plan_path.is_absolute():
+        plan_path = repo_root / plan_path
+
+    query = skill.strip()
+    target_info, _audit_target = _resolve_doctor_target(repo_root, query)
+    source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
+    source_path = Path(str(source_path_value)) if source_path_value else None
+    if source_path and not source_path.is_absolute():
+        source_path = repo_root / source_path
+    if not source_path:
+        result.status = "error"
+        result.data["skills_sdk_eval_regression_plan"] = {
+            "schema_version": "skills-sdk-eval-regression-plan.v0",
+            "status": "blocked",
+            "ready_for_live_rerun": False,
+            "skill": skill,
+            "run_id": run_id or "",
+            "receipt": None,
+            "mutation_performed": False,
+            "validation_commands": [
+                _ask_validation_command("sdk", "eval", "regression-plan", "--view-json", view_json, "--skill", skill, "--preview")
+            ],
+            "agent_summary": f"skills-sdk eval regression-plan is blocked for {skill}: canonical source is missing.",
+        }
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Skills SDK regression plan is missing a canonical SKILL.md source for '{skill}'.",
+                fix_suggestion=_ask_validation_command("sdk", "eval", "regression-plan", "--view-json", "<view-json>", "--skill", "<skill>", "--preview"),
+            )
+        )
+        return result
+
+    from ask.skills_sdk.regression_plan import build_regression_plan_receipt  # noqa: PLC0415
+
+    receipt = build_regression_plan_receipt(
+        repo_root,
+        view_json=view_path,
+        source_path=source_path,
+        query=skill,
+        run_id=run_id,
+        plan_path=plan_path,
+    )
+    payload = {
+        "schema_version": "skills-sdk-eval-regression-plan.v0",
+        "status": receipt["status"],
+        "ready_for_live_rerun": receipt["ready_for_live_rerun"],
+        "skill": skill,
+        "run_id": receipt["run_id"],
+        "receipt": receipt,
+        "mutation_performed": False,
+        "validation_commands": [
+            _ask_validation_command("sdk", "eval", "regression-plan", "--view-json", view_json, "--skill", skill, "--preview")
+        ],
+        "agent_summary": receipt["agent_summary"],
+    }
+    result.data["skills_sdk_eval_regression_plan"] = payload
+    if receipt["status"] == "blocked":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=payload["agent_summary"],
+                fix_suggestion=_ask_validation_command(
+                    "sdk",
+                    "eval",
+                    "regression-plan",
+                    "--view-json",
+                    view_json,
+                    "--skill",
+                    skill,
+                    "--preview",
+                ),
+            )
+        )
+    return result
+
+
+def skills_sdk_eval_handoff_readiness(
+    repo_root: Path,
+    *,
+    skill: str,
+    receipt_json: str | None = None,
+) -> CallResult:
+    """Preview whether the required local/internal evidence lanes are ready for live Tessl."""
+    result = CallResult()
+    result.metadata["command"] = "sdk eval handoff-readiness"
+    readiness_path = Path(receipt_json) if receipt_json else None
+    if readiness_path and not readiness_path.is_absolute():
+        readiness_path = repo_root / readiness_path
+
+    query = skill.strip()
+    target_info, _audit_target = _resolve_doctor_target(repo_root, query)
+    source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
+    source_path = Path(str(source_path_value)) if source_path_value else None
+    if source_path and not source_path.is_absolute():
+        source_path = repo_root / source_path
+    if not source_path:
+        result.status = "error"
+        result.data["skills_sdk_eval_handoff_readiness"] = {
+            "schema_version": "skills-sdk-eval-handoff-readiness.v0",
+            "status": "blocked",
+            "ready_for_live_tessl": False,
+            "skill": skill,
+            "receipt": None,
+            "mutation_performed": False,
+            "validation_commands": [
+                _ask_validation_command("sdk", "eval", "handoff-readiness", "--skill", skill, "--preview")
+            ],
+            "agent_summary": f"skills-sdk eval handoff-readiness is blocked for {skill}: canonical source is missing.",
+        }
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Skills SDK handoff readiness is missing a canonical SKILL.md source for '{skill}'.",
+                fix_suggestion=_ask_validation_command("sdk", "eval", "handoff-readiness", "--skill", "<skill>", "--preview"),
+            )
+        )
+        return result
+
+    from ask.skills_sdk.handoff_readiness import build_handoff_readiness_receipt  # noqa: PLC0415
+
+    receipt = build_handoff_readiness_receipt(
+        repo_root,
+        source_path=source_path,
+        query=skill,
+        readiness_path=readiness_path,
+    )
+    payload = {
+        "schema_version": "skills-sdk-eval-handoff-readiness.v0",
+        "status": receipt["status"],
+        "ready_for_live_tessl": receipt["ready_for_live_tessl"],
+        "skill": skill,
+        "receipt": receipt,
+        "mutation_performed": False,
+        "validation_commands": [
+            _ask_validation_command("sdk", "eval", "handoff-readiness", "--skill", skill, "--preview")
+        ],
+        "agent_summary": receipt["agent_summary"],
+    }
+    result.data["skills_sdk_eval_handoff_readiness"] = payload
+    if receipt["status"] == "blocked":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=payload["agent_summary"],
+                fix_suggestion=_ask_validation_command("sdk", "eval", "handoff-readiness", "--skill", skill, "--preview"),
             )
         )
     return result

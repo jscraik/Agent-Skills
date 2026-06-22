@@ -27,3 +27,29 @@ formatter. A live handoff is blocked while `receipt.feedback_loop.status` is
 assessments, usage below the live handoff threshold, or no aggregate lift.
 Every live Tessl regression must become an internal regression obligation, with
 owner classification and rerun evidence, before the next live handoff claim.
+
+## Skills SDK Live Handoff Loop
+
+Use this exact order for skill hardening before any live Tessl score is treated
+as release evidence:
+
+1. Run deterministic local gates first: `skills audit`, `sdk eval
+   scenario-quality`, `sdk eval scorer-quality`, `sdk eval scorer-calibration`,
+   and `sdk eval regression-plan` when previous Tessl or judge regressions
+   exist.
+2. Run the `oss-local` internal judge loop.
+3. Patch `oss-local` failures by recording owner classification, failure mode,
+   patch plan, retained regression artifact, and rerun commands.
+4. Run the `oss-cloud` internal judge loop.
+5. Patch `oss-cloud` failures with the same regression obligation shape.
+6. Run Tessl live-private dry-run staging.
+7. Run live Tessl only after the deterministic gates, `oss-local`, `oss-cloud`,
+   and Tessl dry-run pass for the current candidate, or an explicit blocker
+   receipt explains why a lane was skipped.
+8. Patch Tessl failures with the same regression obligation shape, then return
+   to step 2 until all rubrics pass correctly.
+
+`oss-local` is the cheap internal remediation judge, `oss-cloud` is the
+higher-confidence internal judge, and Tessl is the external confirmation lane.
+Do not spend live Tessl runs to discover failures that the internal judge loop
+can surface first.

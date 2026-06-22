@@ -670,6 +670,51 @@ def _tessl_live_private_policy(workspace: str | None = None) -> dict:
         "scenario_gate": "skill-owned references/evals.yaml plus reviewed generated scenarios are required before live scoring; behavioral skills need at least 20 gold-standard scenarios; structure-only checks must opt out explicitly",
         "min_scenarios_required": TESSL_LIVE_PRIVATE_MIN_SCENARIOS,
         "duplicate_run_guard": "before live scoring, block when a pending eval run already exists for the same workspace/project",
+        "pre_tessl_feedback_loop": {
+            "required_order": [
+                "deterministic_local_gates",
+                "oss_local_internal_judge",
+                "patch_oss_local_failures",
+                "oss_cloud_internal_judge",
+                "patch_oss_cloud_failures",
+                "tessl_live_dry_run",
+                "tessl_live_run",
+                "patch_tessl_failures",
+            ],
+            "deterministic_local_gates": [
+                "skills audit",
+                "sdk eval scenario-quality",
+                "sdk eval scorer-quality",
+                "sdk eval scorer-calibration",
+                "sdk eval regression-plan when prior Tessl or internal judge regressions exist",
+            ],
+            "internal_judge_sequence": [
+                {
+                    "profile": "oss-local",
+                    "role": "cheap internal remediation judge",
+                    "required_before": "oss-cloud",
+                    "failure_rule": "owner-classify failures, patch the smallest surface, retain regression evidence, and rerun from oss-local",
+                },
+                {
+                    "profile": "oss-cloud",
+                    "role": "higher-confidence internal remediation judge",
+                    "required_before": "tessl_live_dry_run",
+                    "failure_rule": "owner-classify failures, patch the smallest surface, retain regression evidence, and rerun from oss-local",
+                },
+            ],
+            "tessl_sequence": [
+                {
+                    "stage": "tessl_live_dry_run",
+                    "role": "package and scenario staging proof before external scoring",
+                },
+                {
+                    "stage": "tessl_live_run",
+                    "role": "external confirmation lane after internal judges pass",
+                },
+            ],
+            "failure_loop": "Any oss-local, oss-cloud, dry-run, or live Tessl failure returns to oss-local after owner classification, patch plan, retained regression evidence, and rerun commands are recorded.",
+            "live_blocked_until": "deterministic gates, oss-local, oss-cloud, and Tessl dry-run all pass for the current candidate or an explicit skip/blocker receipt is recorded.",
+        },
         "model_selection_gate": {
             "quality_floor_before_cost": True,
             "cost_is_secondary_to_score": True,
@@ -702,6 +747,16 @@ def _tessl_live_private_policy(workspace: str | None = None) -> dict:
         "target_score": TESSL_LIVE_PRIVATE_TARGET_SCORE,
         "usage_data_opt_out": "tessl config set shareUsageData false",
     }
+
+
+def _tessl_live_handoff_readiness(repo_root: Path, skill_path: str) -> dict:
+    from ask.skills_sdk.handoff_readiness import build_handoff_readiness_receipt  # noqa: PLC0415
+
+    return build_handoff_readiness_receipt(
+        repo_root,
+        source_path=repo_root / skill_path,
+        query=skill_path,
+    )
 
 
 def _tessl_scenario_generation_root_template() -> str:
@@ -4757,13 +4812,45 @@ def run_evals(
         if tessl_live_dry_run:
             result.data["tessl_dry_run_note"] = (
                 "Tessl live-private dry-run validates the staged private Tessl payload only. "
-                "Run without --tessl-live-dry-run after local audit/package gates pass to execute remote assessment."
+                "Run without --tessl-live-dry-run only after deterministic local gates, oss-local, "
+                "oss-cloud, and this dry-run pass for the current candidate."
             )
         else:
             result.data["tessl_live_private_note"] = (
                 "Tessl live-private scoring uses the staged private Tessl payload directly. "
-                "Run local smoke, audit, package, scenario-quality, scorer-quality, and dry-run gates separately before live scoring."
+                "Run deterministic local gates, oss-local, oss-cloud, and Tessl dry-run separately before live scoring; "
+                "any failure returns to oss-local after classification, patching, and retained regression evidence."
             )
+            handoff_readiness = _tessl_live_handoff_readiness(repo_root, path)
+            result.data["handoff_readiness"] = handoff_readiness
+            if not handoff_readiness.get("ready_for_live_tessl"):
+                result.status = "error"
+                result.data["eval_status"] = "blocked_validation"
+                result.data["blocker_class"] = "blocked_validation"
+                result.data["tessl_eval_status"] = "blocked_validation"
+                result.data["tessl_blocker_class"] = "blocked_validation"
+                result.data["tessl_eval"] = {
+                    "status": "blocked",
+                    "blocker": handoff_readiness.get("agent_summary") or "handoff readiness is blocked",
+                    "blocker_class": "blocked_validation",
+                    "handoff_readiness_path": handoff_readiness.get("readiness_path"),
+                    "handoff_readiness_blockers": handoff_readiness.get("blockers", []),
+                    "required_next_actions": handoff_readiness.get("required_next_actions", []),
+                }
+                result.errors.append(ErrorObject(
+                    code="ERR_VALIDATION",
+                    message=f"Tessl live-private blocked: {result.data['tessl_eval']['blocker']}",
+                    fix_suggestion="./bin/ask sdk eval handoff-readiness --skill <skill> --preview --json --robot",
+                ))
+                _finish_eval_lifecycle(
+                    result,
+                    path=path,
+                    mode=mode,
+                    runner=runner,
+                    eval_status="blocked_validation",
+                    blocker_class="blocked_validation",
+                )
+                return result
         tessl_eval = _run_tessl_live_private_eval(
             repo_root,
             path,

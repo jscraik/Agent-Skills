@@ -82,8 +82,8 @@ def _default_manifest() -> dict[str, Any]:
         "examples_path": "examples.jsonl",
         "raw_artifacts_dir": "raw",
         "minimum_examples": 1,
-        "minimum_true_positives": 0,
-        "minimum_true_negatives": 0,
+        "minimum_true_positives": 1,
+        "minimum_true_negatives": 1,
         "max_false_positives": 0,
         "max_false_negatives": 0,
     }
@@ -217,6 +217,14 @@ class TestSkillsSdkScorerCalibration(unittest.TestCase):
                         "predicted_label": "pass",
                         "score": 0.95,
                         "raw_artifact": "raw/known-pass.json",
+                    },
+                    {
+                        "id": "known-fail",
+                        "probe_type": "obvious_reject",
+                        "expected_label": "fail",
+                        "predicted_label": "fail",
+                        "score": 0.10,
+                        "raw_artifact": "raw/known-fail.json",
                     }
                 ],
             )
@@ -232,6 +240,27 @@ class TestSkillsSdkScorerCalibration(unittest.TestCase):
         self.assertTrue(receipt["ready"])
         self.assertEqual(receipt["blockers"], [])
         self.assertNotIn("expected_label", raw_artifact)
+
+    def test_builder_blocks_zero_calibration_coverage_minimums(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill(Path(temp_dir))
+            _write_bundle(
+                skill_dir,
+                [],
+                manifest_overrides={
+                    "minimum_examples": 0,
+                    "minimum_true_positives": 0,
+                    "minimum_true_negatives": 0,
+                },
+            )
+
+            receipt = build_scorer_calibration_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        blocker_ids = {check["id"] for check in receipt["blockers"]}
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("held_out_example_count", blocker_ids)
+        self.assertIn("true_positive_coverage", blocker_ids)
+        self.assertIn("true_negative_coverage", blocker_ids)
 
     def test_builder_blocks_threshold_mismatch(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

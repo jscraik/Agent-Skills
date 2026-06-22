@@ -24,6 +24,8 @@ def add_sdk_eval_parser(
     _add_scorer_quality_parser(subparsers, global_parser)
     _add_scorer_calibration_parser(subparsers, global_parser)
     _add_tessl_score_parser(subparsers, global_parser)
+    _add_regression_plan_parser(subparsers, global_parser)
+    _add_handoff_readiness_parser(subparsers, global_parser)
     _add_profiles_parser(subparsers, global_parser)
     _add_ab_rubric_parser(subparsers, global_parser)
     _add_ab_preview_parser(subparsers, global_parser)
@@ -68,6 +70,22 @@ def _add_tessl_score_parser(subparsers: argparse._SubParsersAction, global_parse
     score.add_argument("--skill", required=True, help="Skill handle or repo-relative source path represented by the run")
     score.add_argument("--run-id", help="Expected Tessl eval run id")
     score.add_argument("--preview", action="store_true", help="Emit a non-mutating Tessl score receipt")
+
+
+def _add_regression_plan_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
+    plan = subparsers.add_parser("regression-plan", help="Preview a regression owner classification plan from Tessl score evidence", parents=[global_parser])
+    plan.add_argument("--view-json", required=True, help="Path to tessl eval view --json output")
+    plan.add_argument("--skill", required=True, help="Skill handle or repo-relative source path represented by the run")
+    plan.add_argument("--run-id", help="Expected Tessl eval run id")
+    plan.add_argument("--plan-json", help="Optional explicit regression plan JSON artifact")
+    plan.add_argument("--preview", action="store_true", help="Emit a non-mutating regression plan receipt")
+
+
+def _add_handoff_readiness_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
+    readiness = subparsers.add_parser("handoff-readiness", help="Preview the required local and internal evidence gate before live Tessl", parents=[global_parser])
+    readiness.add_argument("--skill", required=True, help="Skill handle or repo-relative source path represented by the handoff")
+    readiness.add_argument("--receipt-json", help="Optional explicit handoff readiness JSON artifact")
+    readiness.add_argument("--preview", action="store_true", help="Emit a non-mutating handoff readiness receipt")
 
 
 def _add_profiles_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
@@ -138,6 +156,8 @@ def dispatch_sdk_eval(repo_root: Path, args: argparse.Namespace) -> CallResult:
         "scorer-quality": _dispatch_scorer_quality,
         "scorer-calibration": _dispatch_scorer_calibration,
         "tessl-score": _dispatch_tessl_score,
+        "regression-plan": _dispatch_regression_plan,
+        "handoff-readiness": _dispatch_handoff_readiness,
         "profiles": _dispatch_profiles,
         "ab-rubric": _dispatch_ab_rubric,
         "ab-preview": _dispatch_ab_preview,
@@ -210,6 +230,26 @@ def _dispatch_tessl_score(repo_root: Path, args: argparse.Namespace) -> CallResu
         view_json=args.view_json,
         skill=args.skill,
         run_id=args.run_id,
+    )
+
+
+def _dispatch_regression_plan(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    error = _preview_required("sdk eval regression-plan", "Regression plan receipts require --preview.", _regression_plan_next(), args)
+    return error or skills_commands.skills_sdk_eval_regression_plan(
+        repo_root,
+        view_json=args.view_json,
+        skill=args.skill,
+        run_id=args.run_id,
+        plan_json=args.plan_json,
+    )
+
+
+def _dispatch_handoff_readiness(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    error = _preview_required("sdk eval handoff-readiness", "Handoff readiness receipts require --preview.", _handoff_readiness_next(), args)
+    return error or skills_commands.skills_sdk_eval_handoff_readiness(
+        repo_root,
+        skill=args.skill,
+        receipt_json=args.receipt_json,
     )
 
 
@@ -302,6 +342,14 @@ def _scorer_calibration_next() -> str:
 
 def _tessl_score_next() -> str:
     return "ask sdk eval tessl-score --view-json <view-json> --skill <skill> --preview --json --robot"
+
+
+def _regression_plan_next() -> str:
+    return "ask sdk eval regression-plan --view-json <view-json> --skill <skill> --preview --json --robot"
+
+
+def _handoff_readiness_next() -> str:
+    return "ask sdk eval handoff-readiness --skill <skill> --preview --json --robot"
 
 
 def _ab_preview_next() -> str:

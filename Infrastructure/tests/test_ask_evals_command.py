@@ -1200,7 +1200,33 @@ def _write_example_skill(tmp_path: Path) -> Path:
         encoding="utf-8",
     )
     (skill_root / "secret-not-staged.txt").write_text("do not copy\n", encoding="utf-8")
+    _write_handoff_readiness(tmp_path, "example-skill")
     return skill_root
+
+
+def _write_handoff_readiness(tmp_path: Path, skill_name: str) -> Path:
+    evidence_root = tmp_path / ".harness" / "evidence" / "handoff" / skill_name
+    evidence_root.mkdir(parents=True, exist_ok=True)
+    lanes = []
+    for lane_id in ("deterministic_local_gates", "oss-local", "oss-cloud", "tessl-live-dry-run"):
+        receipt_path = evidence_root / f"{lane_id}.json"
+        receipt_path.write_text(json.dumps({"lane": lane_id}) + "\n", encoding="utf-8")
+        lanes.append({
+            "id": lane_id,
+            "status": "pass",
+            "command": f"./bin/ask proof {lane_id}",
+            "receipt_path": receipt_path.relative_to(tmp_path).as_posix(),
+        })
+    readiness_path = evidence_root / "eval-handoff-readiness.json"
+    readiness_path.write_text(
+        json.dumps({
+            "schema_version": "skills-sdk.eval-handoff-readiness-input.v1",
+            "candidate_id": skill_name,
+            "lanes": lanes,
+        }) + "\n",
+        encoding="utf-8",
+    )
+    return readiness_path
 
 
 def test_evals_run_native_tessl_without_project_save_approval_flag(tmp_path: Path) -> None:
@@ -1373,6 +1399,23 @@ def test_evals_live_private_dry_run_stages_private_plugin_shape(tmp_path: Path) 
     assert tessl_eval["policy"]["no_install"] is True
     assert tessl_eval["policy"]["no_registry_upload"] is True
     assert tessl_eval["policy"]["plugin_private_required"] is True
+    feedback_loop = tessl_eval["policy"]["pre_tessl_feedback_loop"]
+    assert feedback_loop["required_order"] == [
+        "deterministic_local_gates",
+        "oss_local_internal_judge",
+        "patch_oss_local_failures",
+        "oss_cloud_internal_judge",
+        "patch_oss_cloud_failures",
+        "tessl_live_dry_run",
+        "tessl_live_run",
+        "patch_tessl_failures",
+    ]
+    assert [stage["profile"] for stage in feedback_loop["internal_judge_sequence"]] == [
+        "oss-local",
+        "oss-cloud",
+    ]
+    assert "returns to oss-local" in feedback_loop["failure_loop"]
+    assert "oss-cloud" in feedback_loop["live_blocked_until"]
     assert tessl_eval["tessl_project_marker"].endswith("/tessl.json")
     assert tessl_eval["plugin_version"] == "2.3.4"
 
@@ -1667,6 +1710,32 @@ def test_evals_rejects_dry_run_without_live_private(tmp_path: Path) -> None:
     assert result.data["blocker_class"] == "blocked_validation"
     assert result.data["tessl_eval"]["blocker"] == "--tessl-live-dry-run requires --tessl-live-private."
     assert result.errors[0].code == "ERR_VALIDATION"
+    run.assert_not_called()
+
+
+def test_evals_live_private_blocks_without_handoff_readiness(tmp_path: Path) -> None:
+    readiness_path = _write_handoff_readiness(tmp_path, "example-skill")
+    _write_example_skill(tmp_path)
+    readiness_path.unlink()
+
+    with (
+        mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
+        mock.patch.object(evals.subprocess, "run") as run,
+    ):
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/example-skill",
+            mode="smoke",
+            tessl_live_private=True,
+            tessl_workspace="jscraik",
+        )
+
+    assert result.status == "error"
+    assert result.data["eval_status"] == "blocked_validation"
+    assert result.data["handoff_readiness"]["ready_for_live_tessl"] is False
+    assert result.data["tessl_eval"]["status"] == "blocked"
+    assert result.data["tessl_eval"]["blocker_class"] == "blocked_validation"
+    assert "Handoff readiness" in result.data["tessl_eval"]["blocker"]
     run.assert_not_called()
 
 
