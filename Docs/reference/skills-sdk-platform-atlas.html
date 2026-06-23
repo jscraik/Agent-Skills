@@ -262,7 +262,7 @@
     <header>
       <div>
         <h1>Skills SDK Platform Atlas</h1>
-        <p class="subtitle">Truth-aware edition. This artifact separates what the current SDK proves today from the north-star platform: a local CDLC control plane for skills-as-code, with receipt-backed safety, eval, install, trust, and lifecycle evidence.</p>
+        <p class="subtitle">Truth-aware edition. This artifact separates what the current SDK proves today from the north-star platform: a local CDLC control plane moving skills distribution from GitHub source folders into Tessl workspace, package, eval, review, inventory, and publish receipts.</p>
       </div>
       <aside class="mission">
         <strong>Mission</strong>
@@ -271,9 +271,44 @@
     </header>
 
     <div class="truth-banner" role="note" aria-label="Truth boundary warning">
-      <span><strong>Truth boundary:</strong> the implemented product is currently a local SDK control plane with SkillIR.v0, package identity, package hardening, deterministic eval receipts, Codex-backed A/B execution, local advisory A/B judge scoring, sandbox boundary validation for intake and eval planning, local trust ledger receipts, redacted observability feedback and receipt-backed promotion previews, project install lifecycle, review-routing helpers, knowledge ingest, and local plugin readiness. Live runtime observability ingestion, emitters, real signature emission, cloud judge confirmation, Tessl release confirmation, remote trust-store, registry, hosted explorer, CI gates, and publish surfaces remain roadmap lanes unless separately proven.</span>
+      <span><strong>Truth boundary:</strong> the implemented product is currently a local SDK control plane with SkillIR.v0, package identity, package hardening, deterministic eval receipts, Codex-backed A/B execution, local advisory A/B judge scoring, sandbox boundary validation for intake and eval planning, local trust ledger receipts, redacted observability feedback and receipt-backed promotion previews, project install lifecycle, review-routing helpers, knowledge ingest, and local plugin readiness. Tessl workspace catalog, project links, eval runs, review runs, inventories, members, settings, public publish, and GitHub exit flows remain roadmap lanes unless separately proven.</span>
       <span class="pill blocked">do not overclaim</span>
     </div>
+
+    <section class="section" data-view-section="truth" aria-label="Tessl workspace topology">
+      <div class="section-head">
+        <div>
+          <h2>Tessl Workspace Topology</h2>
+          <p>Use Tessl workspaces as lifecycle and authority lanes. Keep skill domains as category facets unless a domain needs different members, settings, source authority, or publication policy.</p>
+        </div>
+        <div class="note">GitHub should become source provenance during migration, not the install or distribution truth for skills.</div>
+      </div>
+      <div class="card-grid">
+        <div class="card" data-status="preview"><span class="pill preview">workspace lane</span><strong>Eval Workspace</strong><span>Private project-linked space for eval runs, review runs, scenario quality, release-decision receipts, and comparison evidence before promotion.</span></div>
+        <div class="card" data-status="preview"><span class="pill preview">workspace lane</span><strong>Private Skills Workspace</strong><span>Internal searchable and installable skills that can be reviewed, inventoried, and governed without becoming public distribution artifacts.</span></div>
+        <div class="card" data-status="deferred"><span class="pill deferred">publish lane</span><strong>Public Published Workspace</strong><span>Public distribution surface only after package identity, trust decision, eval/review evidence, workspace policy, and publish authority are recorded.</span></div>
+        <div class="card" data-status="implemented"><span class="pill implemented">facet model</span><strong>Skill Categories</strong><span>Frontend, backend, engineering, legal, security, marketing, database, and agent-ops should be tags or facets inside workspaces, not workspaces by default.</span></div>
+      </div>
+    </section>
+
+    <section class="section" data-view-section="gaps" aria-label="Tessl data surfaces to ingest">
+      <div class="section-head">
+        <div>
+          <h2>Tessl Data Surfaces To Ingest</h2>
+          <p>The next SDK slice should be read-only: snapshot Tessl workspace state before any install, publish, archive, update, visibility, or workspace mutation exists.</p>
+        </div>
+        <div class="note">Each surface should produce receipts that separate workspace truth, package truth, GitHub source provenance, and local SDK validation truth.</div>
+      </div>
+      <div class="card-grid">
+        <div class="card" data-status="preview"><span class="pill preview">catalog</span><strong>All Plugins</strong><span>Workspace-level searchable packages/plugins, ownership, visibility, quality, Tessl registry security, impact, and install metadata.</span></div>
+        <div class="card" data-status="preview"><span class="pill preview">linkage</span><strong>Projects</strong><span>Project identity, repository/source link, staged payload identity, workspace binding, and release/eval association.</span></div>
+        <div class="card" data-status="implemented"><span class="pill implemented">evidence</span><strong>Eval Runs</strong><span>Completed or blocked eval evidence, scores, baselines, improvements, model/agent metadata, scenario coverage, and package binding.</span></div>
+        <div class="card" data-status="preview"><span class="pill preview">criteria</span><strong>Review Runs</strong><span>Configurable Tessl Review criteria for what good looks like, plus reviewer authority, thresholds, findings, fix recommendations, and promotion blockers.</span></div>
+        <div class="card" data-status="implemented"><span class="pill implemented">coverage</span><strong>Inventories</strong><span>GitHub import coverage, discovered manifests, discovered skills, skipped repos, source provenance, and workspace import target.</span></div>
+        <div class="card" data-status="preview"><span class="pill preview">authority</span><strong>Members</strong><span>Role, ownership, publish authority, review authority, and who can connect external sources or mutate workspace state.</span></div>
+        <div class="card" data-status="preview"><span class="pill preview">policy</span><strong>Settings</strong><span>Workspace visibility, integrations, source connections, default policy, publish gates, and allowed mutation surfaces.</span></div>
+      </div>
+    </section>
 
     <section class="section" data-view-section="truth" aria-label="Talk-derived platform thesis">
       <div class="section-head">
@@ -330,8 +365,8 @@
         <div class="note">The HTML is a projection. The executable truth should remain <code>./bin/ask sdk status --json --robot</code> plus the capability matrix.</div>
       </div>
       <div class="summary-grid">
-        <div class="stat" data-status="implemented"><b>30</b><strong>Implemented</strong><span>Local SDK control-plane capabilities with owner surfaces and tests.</span></div>
-        <div class="stat" data-status="preview"><b>15</b><strong>Preview</strong><span>Read-only planning and static projection surfaces.</span></div>
+        <div class="stat" data-status="implemented"><b>28</b><strong>Implemented</strong><span>Local SDK control-plane capabilities with owner surfaces and tests.</span></div>
+        <div class="stat" data-status="preview"><b>17</b><strong>Preview</strong><span>Read-only planning and static projection surfaces.</span></div>
         <div class="stat" data-status="placeholder"><b>0</b><strong>Placeholder</strong><span>Visible but not executable optional lanes.</span></div>
         <div class="stat" data-status="blocked"><b>0</b><strong>Blocked</strong><span>Sandbox scope is intake quarantine plus Codex-backed eval execution.</span></div>
         <div class="stat" data-status="deferred"><b>2</b><strong>Deferred</strong><span>Schema registry and compiled package lanes.</span></div>
@@ -361,7 +396,7 @@
         <div class="discipline" data-status="preview">
           <span class="pill preview">partial</span>
           <strong>Security testing</strong>
-          <span>Package hardening, external intake review, and security adapter discovery exist, but dynamic skill red-team testing and scanner execution are not proven capability lanes yet.</span>
+          <span>Package hardening, external intake review, security adapter discovery, and Tessl registry security intake exist as planning lanes. Local scanner execution is reserved for pre-registry/private intake.</span>
         </div>
         <div class="discipline" data-status="preview">
           <span class="pill preview">partial</span>
@@ -409,12 +444,12 @@
             <tr data-capability-id="manifest_schema" data-status="implemented" data-pipeline-sections="author_golden_path,domain_model_integrity,public_sdk_surface"></tr>
             <tr data-capability-id="receipt_schema" data-status="implemented" data-pipeline-sections="release_decision_matrix,ci_and_adoption"></tr>
             <tr data-capability-id="risk_classification" data-status="implemented" data-pipeline-sections="release_decision_matrix,agent_execution_control_plane,package_hardening"></tr>
-            <tr data-capability-id="risk_mode_taxonomy" data-status="implemented" data-pipeline-sections="release_decision_matrix,agent_execution_control_plane,package_hardening"></tr>
+            <tr data-capability-id="risk_mode_taxonomy" data-status="preview_only" data-pipeline-sections="release_decision_matrix,agent_execution_control_plane,package_hardening"></tr>
             <tr data-capability-id="skill_ir" data-status="implemented" data-pipeline-sections="compiler_emitter_discipline,domain_model_integrity,public_sdk_surface"></tr>
             <tr data-capability-id="package_identity" data-status="implemented" data-pipeline-sections="compiler_emitter_discipline,package_hardening,public_sdk_surface"></tr>
             <tr data-capability-id="install_preview" data-status="preview_only" data-pipeline-sections="author_golden_path,public_sdk_surface,full_skill_lifecycle"></tr>
             <tr data-capability-id="skill_intake" data-status="preview_only" data-pipeline-sections="full_skill_lifecycle,package_hardening,agent_execution_control_plane"></tr>
-            <tr data-capability-id="skill_intake_review" data-status="implemented" data-pipeline-sections="full_skill_lifecycle,package_hardening,agent_execution_control_plane"></tr>
+            <tr data-capability-id="skill_intake_review" data-status="preview_only" data-pipeline-sections="full_skill_lifecycle,package_hardening,agent_execution_control_plane"></tr>
             <tr data-capability-id="lockfile_preview" data-status="preview_only" data-pipeline-sections="public_sdk_surface,full_skill_lifecycle"></tr>
             <tr data-capability-id="real_install" data-status="implemented" data-pipeline-sections="full_skill_lifecycle,public_sdk_surface"></tr>
             <tr data-capability-id="project_conformance" data-status="implemented" data-pipeline-sections="ci_and_adoption,public_sdk_surface,full_skill_lifecycle"></tr>
@@ -467,10 +502,10 @@
             <tr data-status="implemented"><td><strong>SDK check facade</strong></td><td><span class="pill implemented">implemented</span></td><td><code>ask sdk check</code></td><td>Routes through canonical skill doctor and emits receipt-shaped result.</td><td>Broaden only when new executable surfaces exist.</td></tr>
             <tr data-status="implemented"><td><strong>Manifest and check receipt schemas</strong></td><td><span class="pill implemented">implemented</span></td><td><code>schemas/skills-sdk/*</code></td><td>Schema spine exists for current manifest and check receipt.</td><td>Add receipt families when install/publish lanes need them.</td></tr>
             <tr data-status="implemented"><td><strong>Risk classification</strong></td><td><span class="pill implemented">implemented</span></td><td><code>skills_sdk/risk.py</code></td><td>Local read-only tiering exists.</td><td>Connect risk tiers to real adapters after adapters are approved.</td></tr>
-            <tr data-status="implemented"><td><strong>Risk mode taxonomy</strong></td><td><span class="pill implemented">implemented</span></td><td><code>skills_sdk/risk_modes.py</code></td><td><code>ask sdk security risk-modes --preview</code> separates malicious supply-chain, negligent instruction, vulnerable operation, and insufficient-evidence modes without executing source content, scanners, network, credentials, or mutation.</td><td>Use this receipt as input to external intake review and adoption decisions.</td></tr>
+            <tr data-status="preview"><td><strong>Risk mode taxonomy</strong></td><td><span class="pill preview">preview only</span></td><td><code>skills_sdk/risk_modes.py</code></td><td><code>ask sdk security risk-modes --preview</code> separates malicious supply-chain, negligent instruction, vulnerable operation, and insufficient-evidence modes without executing source content, scanners, network, credentials, or mutation.</td><td>Use this receipt as input to external intake review and adoption decisions.</td></tr>
             <tr data-status="preview"><td><strong>Install and lockfile preview</strong></td><td><span class="pill preview">preview only</span></td><td><code>skills_sdk/install_preview.py</code></td><td>Models target paths and lockfile delta without writes.</td><td>Keep preview honest; writes belong to explicit install.</td></tr>
             <tr data-status="preview"><td><strong>External skill intake quarantine</strong></td><td><span class="pill preview">preview only</span></td><td><code>skills_sdk/skill_intake.py</code></td><td><code>ask sdk intake inspect --preview</code> reads, hashes, and validates directory-form external skill candidates without execution, install, projection writes, network, or mutation.</td><td>Add archive unpack quarantine only after directory intake receipts and path-boundary checks stay schema-verified.</td></tr>
-            <tr data-status="implemented"><td><strong>External skill intake review</strong></td><td><span class="pill implemented">implemented</span></td><td><code>skills_sdk/skill_intake_review.py</code></td><td><code>ask sdk intake review --preview</code> consumes the quarantine intake receipt and risk-mode taxonomy receipt to produce provenance, permission, data-exposure, action-surface, isolation, semantic, approval-friction, and residual-risk review items without execution, scanners, network, credentials, install, or mutation.</td><td>Bind this review result into an adoption decision receipt.</td></tr>
+            <tr data-status="preview"><td><strong>External skill intake review</strong></td><td><span class="pill preview">preview only</span></td><td><code>skills_sdk/skill_intake_review.py</code></td><td><code>ask sdk intake review --preview</code> consumes the quarantine intake receipt and risk-mode taxonomy receipt to produce provenance, permission, data-exposure, action-surface, isolation, semantic, approval-friction, and residual-risk review items without execution, scanners, network, credentials, install, or mutation.</td><td>Bind this review result into an adoption decision receipt.</td></tr>
             <tr data-status="implemented"><td><strong>Real project install</strong></td><td><span class="pill implemented">implemented</span></td><td><code>skills_sdk/project_install.py</code></td><td>Bounded project install requires explicit apply and marked project root.</td><td>Add richer restore only when before-state is proven.</td></tr>
             <tr data-status="implemented"><td><strong>Rollback and uninstall</strong></td><td><span class="pill implemented">implemented</span></td><td><code>skills_sdk/project_cleanup.py</code></td><td>Receipt-proven cleanup bounded to explicit marked project roots.</td><td>Support duplicate install instances only if lockfile model changes.</td></tr>
             <tr data-status="implemented"><td><strong>Project conformance</strong></td><td><span class="pill implemented">implemented</span></td><td><code>skills_sdk/project_conformance.py</code></td><td>Read-only adoption gate for marked project roots.</td><td>Wire into repo adoption policy later.</td></tr>
@@ -494,7 +529,7 @@
             <tr data-status="implemented"><td><strong>Redacted observability feedback preview</strong></td><td><span class="pill implemented">implemented</span></td><td><code>observability_feedback.py</code> and <code>observability_promotion.py</code></td><td>Redacted local event JSONL can be mined into preview-only eval scenario and skill-gap candidates, then checked against matching package and eval-run receipts for promotion readiness.</td><td>Generate candidate eval-case drafts only after promoted candidates pass scenario-quality screening without mutating source scenarios.</td></tr>
             <tr data-status="implemented"><td><strong>SkillIR.v0 and package identity</strong></td><td><span class="pill implemented">implemented</span></td><td><code>skills_sdk/ir.py</code> and <code>skills_sdk/package_build.py</code></td><td>The SDK builds a read-only typed IR and digest-backed package identity receipt without emitting archives.</td><td>Connect to signed archive emission only after signing, redaction, and archive ownership policy are approved.</td></tr>
             <tr data-status="implemented"><td><strong>Package hardening</strong></td><td><span class="pill implemented">implemented</span></td><td><code>skills_sdk/package_hardening.py</code></td><td>Read-only package hardening blocks forbidden runtime, generated, dependency, and secret-bearing paths.</td><td>Keep CI adoption separate; local hardening does not prove branch protection.</td></tr>
-            <tr data-status="implemented"><td><strong>Capability evidence verifier</strong></td><td><span class="pill implemented">implemented</span></td><td><code>skills_sdk/capability_evidence.py</code></td><td>Capability matrix evidence refs are classified as files, schemas, receipts, non-executed commands, or external lanes.</td><td>Add command execution receipts only after command authority and external-lane ownership are approved.</td></tr>
+            <tr data-status="implemented"><td><strong>Capability Evidence Verifier</strong></td><td><span class="pill implemented">implemented</span></td><td><code>skills_sdk/capability_evidence.py</code></td><td>Capability matrix evidence refs are classified as files, schemas, receipts, non-executed commands, or external lanes.</td><td>Add command execution receipts only after command authority and external-lane ownership are approved.</td></tr>
             <tr data-status="preview"><td><strong>Emitter write-plan preview</strong></td><td><span class="pill preview">preview only</span></td><td><code>skills_sdk/emitter_preview.py</code></td><td>Local <code>.agents/skills</code> projection write plans can be previewed without emitting files.</td><td>Add real emitters only after projection ownership, archive emission, and rollback receipts are approved.</td></tr>
             <tr data-status="preview"><td><strong>CI policy preview</strong></td><td><span class="pill preview">preview only</span></td><td><code>skills_sdk/ci_policy_preview.py</code></td><td>Required checks can be previewed from SDK risk tier without claiming hosted CI evidence.</td><td>Attach live CI run evidence only in a separate hosted-check receipt.</td></tr>
             <tr data-status="preview"><td><strong>Static explorer index preview</strong></td><td><span class="pill preview">preview only</span></td><td><code>skills_sdk/static_explorer.py</code></td><td>Capability and skill indexes can be previewed from JSON/source manifests without rendering HTML.</td><td>Add hosted explorer rendering only after ownership, publishing, and freshness contracts are approved.</td></tr>
@@ -560,6 +595,7 @@
         <div class="gap" data-status="implemented"><span class="pill implemented">state landed</span><strong>Local Trust Ledger Exists</strong><span>Trust decisions can now be previewed or appended locally with package digest binding; remote trust-store and release enforcement are still separate future lanes.</span></div>
         <div class="gap" data-status="implemented"><span class="pill implemented">learning preview</span><strong>Redacted Feedback Preview Exists</strong><span>Redacted local event JSONL can now produce eval scenario and skill-gap candidates, and receipt-backed promotion preview can mark them ready or blocked; live ingestion, file generation, and automatic promotion remain future lanes.</span></div>
         <div class="gap" data-status="deferred"><span class="pill deferred">adoption gap</span><strong>CI Gates Are Not Live</strong><span>Local validation does not prove branch protection, PR review, CircleCI, or GitHub security checks.</span></div>
+        <div class="gap" data-status="preview"><span class="pill preview">registry-first</span><strong>Tessl Security Is The Primary Snyk Lane</strong><span>Use Tessl registry security when a package already has it. Run local <code>snyk-agent-scan</code> only for source imports, private candidates, or local skills without registry security.</span></div>
         <div class="gap" data-status="out"><span class="pill out">scope risk</span><strong>Registry Too Early</strong><span>A registry before signing, package verification, trust decisions, and install receipts would create distribution theatre.</span></div>
       </div>
     </section>
@@ -604,12 +640,17 @@
         <div class="note">Each future slice should add one command, one schema or receipt, tests, and a capability-matrix update.</div>
       </div>
       <div class="next-grid">
-        <div class="next-item priority" data-status="deferred"><b>01</b><strong>Adoption Decision Receipt</strong><span>Bind package digest, risk mode, review result, trust decision, expiry or revocation, install authority, and required evidence into one decision object.</span></div>
-        <div class="next-item" data-status="deferred"><b>02</b><strong>Composition Graph Receipt</strong><span>Map skill-to-skill, skill-to-tool, reference, permission, runtime, and package edges before claiming dependency-management maturity.</span></div>
-        <div class="next-item" data-status="deferred"><b>03</b><strong>Scenario Promotion Policy</strong><span>Connect observed or generated eval candidates to the existing scenario-quality preview without mutating source scenarios or leaking data.</span></div>
-        <div class="next-item" data-status="deferred"><b>04</b><strong>Dependency Version Policy</strong><span>Preview install/update/version constraints from package identity and lockfile state before registry or workspace publish exists.</span></div>
-        <div class="next-item" data-status="deferred"><b>05</b><strong>Dynamic Security Design</strong><span>Design red-team or dynamic scanner contracts as a roadmap lane; do not imply scanner execution until adapters and safe fixtures exist.</span></div>
-        <div class="next-item" data-status="deferred"><b>06</b><strong>CDLC Projection</strong><span>Only after the above receipts exist, add a dashboard projection for generate, evaluate, test, optimize, distribute, secure, consume, and observe.</span></div>
+        <div class="next-item priority" data-status="deferred"><b>01</b><strong>Review Criteria Receipt</strong><span>Record Tessl Review criteria, thresholds, reviewer authority, findings, fixes, and blockers so adoption decisions can explain what good meant for this skill.</span></div>
+        <div class="next-item priority" data-status="deferred"><b>02</b><strong>Adoption Decision Receipt</strong><span>Bind package digest, risk mode, review result, trust decision, expiry or revocation, install authority, and required evidence into one decision object.</span></div>
+        <div class="next-item" data-status="deferred"><b>03</b><strong>Composition Graph Receipt</strong><span>Map skill-to-skill, skill-to-tool, reference, permission, runtime, and package edges before claiming dependency-management maturity.</span></div>
+        <div class="next-item" data-status="deferred"><b>04</b><strong>Scenario Promotion Policy</strong><span>Connect observed or generated eval candidates to the existing scenario-quality preview without mutating source scenarios or leaking data.</span></div>
+        <div class="next-item priority" data-status="deferred"><b>05</b><strong>Tessl Workspace Snapshot</strong><span>Read all plugins, projects, eval runs, review runs, inventories, members, and settings into receipts before any Tessl mutation or publish path exists.</span></div>
+        <div class="next-item" data-status="deferred"><b>06</b><strong>GitHub Exit Policy</strong><span>Define when GitHub is source provenance only and when Tessl workspace/package receipts become search, install, eval, review, inventory, and publish truth.</span></div>
+        <div class="next-item" data-status="deferred"><b>07</b><strong>Dependency Version Policy</strong><span>Preview install/update/version constraints from package identity and lockfile state before registry or workspace publish exists.</span></div>
+        <div class="next-item priority" data-status="deferred"><b>08</b><strong>Tessl Registry Security Receipt</strong><span>Capture Tessl's Snyk-backed registry security status, provider label, known issues, package identity, registry source, and freshness before adding a separate scanner gate.</span></div>
+        <div class="next-item" data-status="deferred"><b>09</b><strong>Local Snyk Intake Fallback</strong><span>Use explicit skill paths, JSON output, token-presence proof without values, scanner version, data-egress notice, and issue-count classification only when Tessl registry security is unavailable.</span></div>
+        <div class="next-item" data-status="deferred"><b>10</b><strong>Dynamic Security Design</strong><span>Design red-team or dynamic scanner contracts as a roadmap lane; do not imply scanner execution until adapters and safe fixtures exist.</span></div>
+        <div class="next-item" data-status="deferred"><b>11</b><strong>CDLC Projection</strong><span>Only after the above receipts exist, add a dashboard projection for generate, evaluate, test, optimize, distribute, secure, consume, and observe.</span></div>
       </div>
     </section>
 

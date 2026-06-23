@@ -1,6 +1,6 @@
 {
   "schema_version": "skills-sdk.signing-policy.v0",
-  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/signing-policy.v0.schema.json",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/signing-policy.v0.schema.json",
   "policy_id": "fixture-local-signing-policy",
   "signer_id": "skills-sdk-local-fixture-signer",
   "allowed_algorithms": ["cosign-keyless"],

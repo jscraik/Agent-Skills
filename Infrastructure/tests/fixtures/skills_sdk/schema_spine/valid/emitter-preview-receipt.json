@@ -1,6 +1,6 @@
 {
   "schema_version": "skills-sdk.emitter-preview-receipt.v0",
-  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/emitter-preview-receipt.v0.schema.json",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/emitter-preview-receipt.v0.schema.json",
   "status": "preview",
   "operation": "emitter_write_plan_preview",
   "projection": "runtime-skill",

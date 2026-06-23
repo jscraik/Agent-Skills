@@ -1,0 +1,83 @@
+{
+  "schema_version": "skills-sdk.lifecycle-route-map.v1",
+  "status": "truth_surface",
+  "routes": [
+    {
+      "id": "foundry_status",
+      "pipeline_stage": "Foundry",
+      "loop": "Author loop",
+      "command": "./bin/ask sdk status --json --robot",
+      "owner_module": "ask.skills_sdk.capability_status",
+      "receipt_schema": "Infrastructure/config/schemas/skills-sdk/capability-status.v1.schema.json",
+      "test_ref": "Infrastructure/tests/test_skills_sdk_capability_status.py",
+      "capability_id": "capability_evidence",
+      "proof_boundary": "keeps the bootstrap foundry surface tied to the capability matrix before lifecycle claims"
+    },
+    {
+      "id": "adoption_decision",
+      "pipeline_stage": "Guardrails",
+      "loop": "Release loop",
+      "command": "./bin/ask sdk intake adopt <skill-dir> --trust-receipt <trust.json> --preview --json --robot",
+      "owner_module": "ask.skills_sdk.adoption_decision",
+      "receipt_schema": "Infrastructure/config/schemas/skills-sdk/adoption-decision-receipt.v0.schema.json",
+      "test_ref": "Infrastructure/tests/test_skills_sdk_adoption_decision.py",
+      "capability_id": "skill_intake_review",
+      "proof_boundary": "joins intake, review, package identity, and local trust without installing"
+    },
+    {
+      "id": "command_evidence_plan",
+      "pipeline_stage": "Evals/Proof",
+      "loop": "Proof loop",
+      "command": "./bin/ask sdk evidence command-plan --scope capability-matrix --preview --json --robot",
+      "owner_module": "ask.skills_sdk.command_evidence_plan",
+      "receipt_schema": "Infrastructure/config/schemas/skills-sdk/command-evidence-plan-receipt.v0.schema.json",
+      "test_ref": "Infrastructure/tests/test_skills_sdk_command_evidence_plan.py",
+      "capability_id": "capability_evidence",
+      "proof_boundary": "classifies command refs for replay receipts without executing them in the verifier"
+    },
+    {
+      "id": "lifecycle_route_map",
+      "pipeline_stage": "SDK Lifecycle",
+      "loop": "Author loop",
+      "command": "./bin/ask sdk route-map --preview --json --robot",
+      "owner_module": "ask.skills_sdk.lifecycle_route_map",
+      "receipt_schema": "Infrastructure/config/schemas/skills-sdk/lifecycle-route-map-receipt.v0.schema.json",
+      "test_ref": "Infrastructure/tests/test_skills_sdk_lifecycle_route_map.py",
+      "capability_id": "capability_evidence",
+      "proof_boundary": "maps command to owner module, receipt schema, test, capability, loop, and stage"
+    },
+    {
+      "id": "tessl_confirmation_boundary",
+      "pipeline_stage": "Tessl Distribution",
+      "loop": "Release loop",
+      "command": "./bin/ask sdk eval tessl-score --view-json <view-json> --skill <skill> --preview --json --robot",
+      "owner_module": "ask.skills_sdk.tessl_score_receipt",
+      "receipt_schema": "Infrastructure/config/schemas/skills-sdk/tessl-score-receipt.v0.schema.json",
+      "test_ref": "Infrastructure/tests/test_skills_sdk_tessl_score_receipt.py",
+      "capability_id": "evals",
+      "proof_boundary": "keeps local, cloud, and Tessl confirmation evidence in separate receipts"
+    },
+    {
+      "id": "knowledge_source_durability",
+      "pipeline_stage": "Durable Memory",
+      "loop": "Runtime loop",
+      "command": "./bin/ask sdk knowledge durability --skill <skill-path> --preview --json --robot",
+      "owner_module": "ask.skills_sdk.knowledge_durability",
+      "receipt_schema": "Infrastructure/config/schemas/skills-sdk/knowledge-durability-receipt.v0.schema.json",
+      "test_ref": "Infrastructure/tests/test_skills_sdk_knowledge_durability.py",
+      "capability_id": "refs_ingestion",
+      "proof_boundary": "blocks cache-only KnowledgeOS skill updates when durable plugin source should exist"
+    },
+    {
+      "id": "local_runtime_install_preview",
+      "pipeline_stage": "Local Runtime Truth",
+      "loop": "Runtime loop",
+      "command": "./bin/ask sdk install <skill> --preview --scope project --json --robot",
+      "owner_module": "ask.skills_sdk.install_preview",
+      "receipt_schema": "Infrastructure/config/schemas/skills-sdk/install-preview.v1.schema.json",
+      "test_ref": "Infrastructure/tests/test_skills_sdk_install_preview.py",
+      "capability_id": "install_preview",
+      "proof_boundary": "models local install target paths and lockfile deltas without mutating runtime state"
+    }
+  ]
+}

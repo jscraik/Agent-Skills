@@ -1,6 +1,6 @@
 {
   "schema_version": "skills-sdk.sandbox-profile.v0",
-  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/sandbox-profile.v0.schema.json",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/sandbox-profile.v0.schema.json",
   "profile_id": "skills-sdk-deny-default-local",
   "risk_tier": "high",
   "default_policy": "deny",

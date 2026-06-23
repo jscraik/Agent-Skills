@@ -6,7 +6,7 @@ from typing import Any
 
 EMITTER_PREVIEW_SCHEMA_VERSION = "skills-sdk.emitter-preview-receipt.v0"
 EMITTER_PREVIEW_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/emitter-preview-receipt.v0.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/emitter-preview-receipt.v0.schema.json"
 )
 EMITTER_ACCEPTANCE_TRACE = ["PU-027", "FR-003", "FR-008", "SA-003", "VP-027"]
 SUPPORTED_PROJECTIONS = frozenset({"runtime-skill"})

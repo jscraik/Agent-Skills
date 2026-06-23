@@ -196,7 +196,7 @@
     "tessl-live",
     "patch_tessl_failures"
   ],
-  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/eval-handoff-readiness.v0.schema.json",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/eval-handoff-readiness.v0.schema.json",
   "schema_version": "skills-sdk.eval-handoff-readiness.v0",
   "skill_path": "Skills/github/teach/SKILL.md",
   "status": "preview"

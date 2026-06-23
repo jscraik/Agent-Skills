@@ -1,12 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/install-receipt.v1.schema.json",
+  "$id": "https://agent-skills.local/schemas/skills-sdk/install-receipt.v1.schema.json",
   "title": "Skills SDK Install Receipt V1",
   "type": "object",
   "additionalProperties": false,
   "properties": {
     "schema_version": {"type": "string", "const": "skills-sdk.install-receipt.v1"},
-    "schema_uri": {"type": "string", "const": "https://jscraik.local/agent-skills/schemas/skills-sdk/install-receipt.v1.schema.json"},
+    "schema_uri": {"type": "string", "const": "https://agent-skills.local/schemas/skills-sdk/install-receipt.v1.schema.json"},
     "status": {"type": "string", "enum": ["success", "blocked", "partial"]},
     "operation": {"type": "string", "const": "install"},
     "scope": {"type": "string", "const": "project"},

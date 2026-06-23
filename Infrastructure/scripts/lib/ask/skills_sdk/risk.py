@@ -6,7 +6,7 @@ from typing import Any
 
 RISK_CLASSIFICATION_SCHEMA_VERSION = "skills-sdk.risk-classification.v1"
 RISK_CLASSIFICATION_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/risk-classification.v1.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/risk-classification.v1.schema.json"
 )
 
 RISK_ACCEPTANCE_TRACE = [

@@ -98,7 +98,7 @@ class EvalSecretBoundary(_SdkContractModel):
 class EvalProfilePreviewReceipt(_SdkContractModel):
     schema_version: Literal["skills-sdk.eval-profile-preview-receipt.v0"]
     schema_uri: Literal[
-        "https://jscraik.local/agent-skills/schemas/skills-sdk/eval-profile-preview-receipt.v0.schema.json"
+        "https://agent-skills.local/schemas/skills-sdk/eval-profile-preview-receipt.v0.schema.json"
     ]
     status: Literal["preview", "blocked"]
     operation: Literal["eval_profile_preview"]
@@ -202,7 +202,7 @@ class AbRubricContract(_SdkContractModel):
 
 class AbRubricReceipt(_SdkContractModel):
     schema_version: Literal["skills-sdk.ab-rubric-receipt.v0"]
-    schema_uri: Literal["https://jscraik.local/agent-skills/schemas/skills-sdk/ab-rubric-receipt.v0.schema.json"]
+    schema_uri: Literal["https://agent-skills.local/schemas/skills-sdk/ab-rubric-receipt.v0.schema.json"]
     status: Literal["preview"]
     operation: Literal["ab_rubric"]
     rubric: AbRubricContract
@@ -257,7 +257,7 @@ def _exact_command_labels(rows: list[str]) -> bool:
 
 class AbPreviewReceipt(_SdkContractModel):
     schema_version: Literal["skills-sdk.ab-preview-receipt.v0"]
-    schema_uri: Literal["https://jscraik.local/agent-skills/schemas/skills-sdk/ab-preview-receipt.v0.schema.json"]
+    schema_uri: Literal["https://agent-skills.local/schemas/skills-sdk/ab-preview-receipt.v0.schema.json"]
     status: Literal["preview", "blocked"]
     operation: Literal["ab_preview"]
     skill_a: AbSkillVariant | None
@@ -314,7 +314,7 @@ class AbCodexCommandPlan(_SdkContractModel):
 
 class AbPlanReceipt(_SdkContractModel):
     schema_version: Literal["skills-sdk.ab-plan-receipt.v0"]
-    schema_uri: Literal["https://jscraik.local/agent-skills/schemas/skills-sdk/ab-plan-receipt.v0.schema.json"]
+    schema_uri: Literal["https://agent-skills.local/schemas/skills-sdk/ab-plan-receipt.v0.schema.json"]
     status: Literal["planned", "blocked"]
     operation: Literal["ab_plan"]
     skill_a: AbSkillVariant | None
@@ -397,7 +397,7 @@ class AbVariantRunResult(_SdkContractModel):
 
 class AbRunReceipt(_SdkContractModel):
     schema_version: Literal["skills-sdk.ab-run-receipt.v0"]
-    schema_uri: Literal["https://jscraik.local/agent-skills/schemas/skills-sdk/ab-run-receipt.v0.schema.json"]
+    schema_uri: Literal["https://agent-skills.local/schemas/skills-sdk/ab-run-receipt.v0.schema.json"]
     status: Literal["completed", "blocked"]
     operation: Literal["ab_run"]
     skill_a: AbSkillVariant | None
@@ -508,7 +508,7 @@ class AbJudgeComparisonPayload(_SdkContractModel):
 class AbJudgePreviewReceipt(_SdkContractModel):
     schema_version: Literal["skills-sdk.ab-judge-preview-receipt.v0"]
     schema_uri: Literal[
-        "https://jscraik.local/agent-skills/schemas/skills-sdk/ab-judge-preview-receipt.v0.schema.json"
+        "https://agent-skills.local/schemas/skills-sdk/ab-judge-preview-receipt.v0.schema.json"
     ]
     status: Literal["preview", "blocked"]
     operation: Literal["ab_judge_preview"]
@@ -606,7 +606,7 @@ class AbJudgeDecision(_SdkContractModel):
 class AbJudgeScoreReceipt(_SdkContractModel):
     schema_version: Literal["skills-sdk.ab-judge-score-receipt.v0"]
     schema_uri: Literal[
-        "https://jscraik.local/agent-skills/schemas/skills-sdk/ab-judge-score-receipt.v0.schema.json"
+        "https://agent-skills.local/schemas/skills-sdk/ab-judge-score-receipt.v0.schema.json"
     ]
     status: Literal["scored", "blocked"]
     operation: Literal["ab_judge_score"]

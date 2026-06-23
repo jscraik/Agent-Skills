@@ -1,6 +1,6 @@
 {
   "schema_version": "skills-sdk.risk-mode-taxonomy-receipt.v0",
-  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/risk-mode-taxonomy-receipt.v0.schema.json",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/risk-mode-taxonomy-receipt.v0.schema.json",
   "status": "pass",
   "operation": "risk_mode_taxonomy_preview",
   "query": "Infrastructure/tests/fixtures/skills_sdk/valid_skill",

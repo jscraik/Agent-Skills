@@ -26,7 +26,7 @@ class SkillIntakeCheck(_SkillIntakeModel):
 class SkillIntakeReceipt(_SkillIntakeModel):
     schema_version: Literal["skills-sdk.skill-intake-receipt.v0"]
     schema_uri: Literal[
-        "https://jscraik.local/agent-skills/schemas/skills-sdk/skill-intake-receipt.v0.schema.json"
+        "https://agent-skills.local/schemas/skills-sdk/skill-intake-receipt.v0.schema.json"
     ]
     status: Literal["preview", "blocked"]
     operation: Literal["skill_intake_inspect"]

@@ -7,7 +7,7 @@ from typing import Any
 
 
 HANDOFF_READINESS_SCHEMA_VERSION = "skills-sdk.eval-handoff-readiness.v0"
-HANDOFF_READINESS_SCHEMA_URI = "https://jscraik.local/agent-skills/schemas/skills-sdk/eval-handoff-readiness.v0.schema.json"
+HANDOFF_READINESS_SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/eval-handoff-readiness.v0.schema.json"
 HANDOFF_READINESS_INPUT_SCHEMA_VERSION = "skills-sdk.eval-handoff-readiness-input.v1"
 
 REQUIRED_LANE_IDS = (

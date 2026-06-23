@@ -79,6 +79,18 @@ Thin surface. Strong guardrails. Durable memory. Professional output.
 
 The SDK MUST treat skills as secure, signed, permissioned, sandboxed, evaluatable software packages when risk requires it. The SDK MUST also preserve the low-friction usefulness of skills by keeping draft and local workflows light.
 
+## Tessl Workspace Topology Direction
+
+The desired Tessl setup is a lifecycle and authority model, not a domain-category model. The SDK should support three Tessl workspace lanes:
+
+- `eval`: private workspace lane for project-linked eval runs, review runs, scenario quality, and release-decision evidence.
+- `private_skills`: private workspace lane for internal skills that should be searchable, installable, and reviewable without being public distribution truth.
+- `public_published`: public workspace lane for skills that have passed promotion, policy, review, and publish authority.
+
+Skill domains such as frontend, backend, engineering, legal, security, marketing, database, and agent-ops are category facets inside those workspaces. They should not become workspaces unless a separate governance boundary requires different membership, settings, or source authority.
+
+The migration direction is to remove GitHub as the distribution surface for skills. GitHub can remain source, review, and provenance during the transition, but Tessl workspace/package receipts should become the install, search, eval, review, inventory, and publish truth. Future registry intake receipts MUST separate GitHub source provenance from Tessl distribution truth and record workspace lane, workspace name, package identity, category facets, project linkage, eval/review evidence, inventory coverage, member authority, and workspace policy.
+
 ## Problem Statement
 
 The project has converged on a strong architecture: skills are not just `SKILL.md` files. A useful skill package can include instructions, references, runbooks, scripts, assets, permissions, state, evals, evidence, provenance, signatures, and runtime boundaries.

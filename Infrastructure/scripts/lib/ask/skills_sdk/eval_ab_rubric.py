@@ -7,7 +7,7 @@ from typing import Any
 
 AB_RUBRIC_SCHEMA_VERSION = "skills-sdk.ab-rubric-receipt.v0"
 AB_RUBRIC_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/ab-rubric-receipt.v0.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/ab-rubric-receipt.v0.schema.json"
 )
 AB_RUBRIC_ID = "skills-sdk.ab-rubric.v0"
 AB_RUBRIC_VERSION = "v0"

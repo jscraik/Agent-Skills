@@ -6,7 +6,7 @@ from typing import Any
 
 SECURITY_ADAPTER_DISCOVERY_SCHEMA_VERSION = "skills-sdk.security-adapter-discovery-receipt.v0"
 SECURITY_ADAPTER_DISCOVERY_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/security-adapter-discovery-receipt.v0.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/security-adapter-discovery-receipt.v0.schema.json"
 )
 SECURITY_ADAPTER_ACCEPTANCE_TRACE = ["PU-031", "FR-008", "SA-004", "SEC-001", "VP-031"]
 

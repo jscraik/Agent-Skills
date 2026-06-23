@@ -9,7 +9,7 @@ from typing import Any
 EVAL_CASE_SCHEMA_VERSION = "skills-sdk.eval-case.v0"
 EVAL_RUN_RECEIPT_SCHEMA_VERSION = "skills-sdk.eval-run-receipt.v0"
 EVAL_RUN_RECEIPT_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/eval-run-receipt.v0.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/eval-run-receipt.v0.schema.json"
 )
 EVAL_RUN_ACCEPTANCE_TRACE = ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022"]
 

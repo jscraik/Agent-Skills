@@ -9,7 +9,7 @@ from ask.skills_sdk.risk import build_risk_classification
 
 
 SKILL_IR_SCHEMA_VERSION = "skills-sdk.skill-ir.v0"
-SKILL_IR_SCHEMA_URI = "https://jscraik.local/agent-skills/schemas/skills-sdk/skill-ir.v0.schema.json"
+SKILL_IR_SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/skill-ir.v0.schema.json"
 SKILL_IR_ACCEPTANCE_TRACE = ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022"]
 
 _HEADING_RE = re.compile(r"^#+\s+")

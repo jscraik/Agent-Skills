@@ -8,7 +8,7 @@ from ask.skills_sdk.eval_ab_preview import build_ab_preview_receipt
 
 
 AB_PLAN_SCHEMA_VERSION = "skills-sdk.ab-plan-receipt.v0"
-AB_PLAN_SCHEMA_URI = "https://jscraik.local/agent-skills/schemas/skills-sdk/ab-plan-receipt.v0.schema.json"
+AB_PLAN_SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/ab-plan-receipt.v0.schema.json"
 DEFAULT_EVIDENCE_ROOT = ".harness/artifacts/sdk-ab-evals"
 
 

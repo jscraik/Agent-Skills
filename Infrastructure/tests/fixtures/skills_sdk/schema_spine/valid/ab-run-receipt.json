@@ -1,6 +1,6 @@
 {
   "schema_version": "skills-sdk.ab-run-receipt.v0",
-  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/ab-run-receipt.v0.schema.json",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/ab-run-receipt.v0.schema.json",
   "status": "completed",
   "operation": "ab_run",
   "skill_a": {

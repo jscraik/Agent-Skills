@@ -1,6 +1,6 @@
 {
   "schema_version": "skills-sdk.ab-plan-receipt.v0",
-  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/ab-plan-receipt.v0.schema.json",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/ab-plan-receipt.v0.schema.json",
   "status": "planned",
   "operation": "ab_plan",
   "skill_a": {

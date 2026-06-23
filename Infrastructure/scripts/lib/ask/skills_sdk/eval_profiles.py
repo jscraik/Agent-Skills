@@ -5,7 +5,7 @@ from typing import Any
 
 EVAL_PROFILE_PREVIEW_SCHEMA_VERSION = "skills-sdk.eval-profile-preview-receipt.v0"
 EVAL_PROFILE_PREVIEW_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/eval-profile-preview-receipt.v0.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/eval-profile-preview-receipt.v0.schema.json"
 )
 EVAL_PROFILE_ACCEPTANCE_TRACE = ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022", "VP-030"]
 

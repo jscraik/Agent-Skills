@@ -1,12 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/static-explorer-receipt.v0.schema.json",
+  "$id": "https://agent-skills.local/schemas/skills-sdk/static-explorer-receipt.v0.schema.json",
   "title": "Skills SDK Static Explorer Receipt v0",
   "type": "object",
   "additionalProperties": false,
   "properties": {
     "schema_version": {"type": "string", "const": "skills-sdk.static-explorer-receipt.v0"},
-    "schema_uri": {"type": "string", "const": "https://jscraik.local/agent-skills/schemas/skills-sdk/static-explorer-receipt.v0.schema.json"},
+    "schema_uri": {"type": "string", "const": "https://agent-skills.local/schemas/skills-sdk/static-explorer-receipt.v0.schema.json"},
     "status": {"type": "string", "enum": ["preview", "blocked"]},
     "operation": {"type": "string", "const": "static_explorer_preview"},
     "capability_count": {"type": "integer", "minimum": 0},

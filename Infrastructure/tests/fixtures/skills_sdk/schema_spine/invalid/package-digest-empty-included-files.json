@@ -1,6 +1,6 @@
 {
   "schema_version": "skills-sdk.package-digest-receipt.v0",
-  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/package-digest-receipt.v0.schema.json",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/package-digest-receipt.v0.schema.json",
   "status": "built",
   "package_id": "skills-sdk-valid-fixture",
   "version": "0.1.0",
@@ -9,7 +9,7 @@
   "package_digest": "sha256:60b4ed27a5919e8785c3a7ea01930ad1bcecef8a7aa8f75752abafd2338d73d6",
   "manifest": {
     "schema_version": "skills-sdk.package-manifest.v0",
-    "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/package-manifest.v0.schema.json",
+    "schema_uri": "https://agent-skills.local/schemas/skills-sdk/package-manifest.v0.schema.json",
     "package_id": "skills-sdk-valid-fixture",
     "version": "0.1.0",
     "skill_ir_schema_version": "skills-sdk.skill-ir.v0",

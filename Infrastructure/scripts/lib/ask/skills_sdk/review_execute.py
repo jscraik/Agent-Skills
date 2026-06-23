@@ -11,7 +11,7 @@ from ask.skills_sdk.review_plan import canonical_receipt_digest
 
 REVIEW_EXECUTION_SCHEMA_VERSION = "skills-sdk.review-execution-receipt.v1"
 REVIEW_EXECUTION_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/sdk-review-execution-receipt.v1.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/sdk-review-execution-receipt.v1.schema.json"
 )
 REVIEW_HANDOFF_SCHEMA_VERSION = "skills-sdk.review-handoff-receipt.v1"
 

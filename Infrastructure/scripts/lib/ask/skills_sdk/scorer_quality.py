@@ -6,7 +6,7 @@ from typing import Any
 
 SCORER_QUALITY_SCHEMA_VERSION = "skills-sdk.scorer-quality-receipt.v0"
 SCORER_QUALITY_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/scorer-quality-receipt.v0.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/scorer-quality-receipt.v0.schema.json"
 )
 SCORER_QUALITY_ACCEPTANCE_TRACE = ["Braintrust scorer validation", "PU-030", "VP-030"]
 ALLOWED_SCORER_TYPES = {"deterministic", "llm_judge", "hybrid", "external_tessl"}

@@ -10,11 +10,11 @@ from ask.skills_sdk.ir import build_skill_ir
 
 PACKAGE_MANIFEST_SCHEMA_VERSION = "skills-sdk.package-manifest.v0"
 PACKAGE_MANIFEST_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/package-manifest.v0.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/package-manifest.v0.schema.json"
 )
 PACKAGE_DIGEST_RECEIPT_SCHEMA_VERSION = "skills-sdk.package-digest-receipt.v0"
 PACKAGE_DIGEST_RECEIPT_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/package-digest-receipt.v0.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/package-digest-receipt.v0.schema.json"
 )
 PACKAGE_DIGEST_ACCEPTANCE_TRACE = ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022"]
 

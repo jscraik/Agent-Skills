@@ -11,7 +11,7 @@ from typing import Any
 
 TRUST_DECISION_RECEIPT_SCHEMA_VERSION = "skills-sdk.trust-decision-receipt.v0"
 TRUST_DECISION_RECEIPT_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/trust-decision-receipt.v0.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/trust-decision-receipt.v0.schema.json"
 )
 TRUST_LEDGER_DEFAULT_PATH = Path(".harness/skills-sdk/trust-ledger.jsonl")
 TRUST_DECISION_ACCEPTANCE_TRACE = ["FR-003", "FR-008", "SA-003", "SA-004", "SEC-001", "VP-025"]

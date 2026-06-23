@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/sdk-review-verification-receipt.v1.schema.json",
+  "$id": "https://agent-skills.local/schemas/skills-sdk/sdk-review-verification-receipt.v1.schema.json",
   "title": "Skills SDK review verification receipt v1",
   "type": "object",
   "additionalProperties": false,
@@ -27,7 +27,7 @@
   "properties": {
     "schema_version": {"const": "skills-sdk.review-verification-receipt.v1"},
     "schema_uri": {
-      "const": "https://jscraik.local/agent-skills/schemas/skills-sdk/sdk-review-verification-receipt.v1.schema.json"
+      "const": "https://agent-skills.local/schemas/skills-sdk/sdk-review-verification-receipt.v1.schema.json"
     },
     "status": {"enum": ["pass", "fail"]},
     "source_review_handoff": {

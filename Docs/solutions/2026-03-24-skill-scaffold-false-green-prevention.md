@@ -3,13 +3,14 @@ title: Skill scaffold false-green prevention
 asset_family: canonical skills and plugin packages
 owner: Agent Skills Team
 source_artifact: Skills/skill-builder/Infrastructure/scripts/init_skill.py
-freshness_reviewed_on: 2026-03-24
+freshness_reviewed_on: 2026-06-23
 review_after_days: 90
 ---
 
 # Skill Scaffold False-Green Prevention
 
 ## Table of Contents
+
 - [Problem](#problem)
 - [Resolution](#resolution)
 - [Evidence](#evidence)

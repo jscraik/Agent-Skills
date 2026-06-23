@@ -11,7 +11,7 @@ from ask.skills_sdk.eval_ab_plan import build_ab_plan_receipt
 
 
 AB_RUN_SCHEMA_VERSION = "skills-sdk.ab-run-receipt.v0"
-AB_RUN_SCHEMA_URI = "https://jscraik.local/agent-skills/schemas/skills-sdk/ab-run-receipt.v0.schema.json"
+AB_RUN_SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/ab-run-receipt.v0.schema.json"
 _SEMANTIC_OUTPUT_EXCERPT_BYTES = 4096
 
 

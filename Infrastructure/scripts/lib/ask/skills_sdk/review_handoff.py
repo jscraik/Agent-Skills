@@ -15,7 +15,7 @@ from ask.skills_sdk.review_plan import (
 
 REVIEW_HANDOFF_SCHEMA_VERSION = "skills-sdk.review-handoff-receipt.v1"
 REVIEW_HANDOFF_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/sdk-review-handoff-receipt.v1.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/sdk-review-handoff-receipt.v1.schema.json"
 )
 
 

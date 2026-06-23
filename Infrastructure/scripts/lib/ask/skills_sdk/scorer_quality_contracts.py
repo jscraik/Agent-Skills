@@ -80,7 +80,7 @@ class ScorerQualityMetadata(_ScorerQualityModel):
 class ScorerQualityReceipt(_ScorerQualityModel):
     schema_version: Literal["skills-sdk.scorer-quality-receipt.v0"]
     schema_uri: Literal[
-        "https://jscraik.local/agent-skills/schemas/skills-sdk/scorer-quality-receipt.v0.schema.json"
+        "https://agent-skills.local/schemas/skills-sdk/scorer-quality-receipt.v0.schema.json"
     ]
     status: Literal["preview", "blocked"]
     operation: Literal["scorer_quality_preview"]

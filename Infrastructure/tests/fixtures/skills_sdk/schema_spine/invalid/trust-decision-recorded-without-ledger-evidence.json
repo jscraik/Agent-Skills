@@ -1,6 +1,6 @@
 {
   "schema_version": "skills-sdk.trust-decision-receipt.v0",
-  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/trust-decision-receipt.v0.schema.json",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/trust-decision-receipt.v0.schema.json",
   "status": "recorded",
   "operation": "trust_decision",
   "decision": "trust",

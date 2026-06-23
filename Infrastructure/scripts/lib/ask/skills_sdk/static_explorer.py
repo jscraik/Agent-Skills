@@ -9,7 +9,7 @@ from ask.skills_sdk.capability_status import build_capability_status
 
 STATIC_EXPLORER_SCHEMA_VERSION = "skills-sdk.static-explorer-receipt.v0"
 STATIC_EXPLORER_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/static-explorer-receipt.v0.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/static-explorer-receipt.v0.schema.json"
 )
 STATIC_EXPLORER_ACCEPTANCE_TRACE = ["PU-029", "FR-003", "FR-008", "VP-029"]
 MANIFEST_ROOT = Path(".skillsets")

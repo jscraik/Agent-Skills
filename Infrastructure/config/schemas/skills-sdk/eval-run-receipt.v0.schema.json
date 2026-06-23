@@ -1,12 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/eval-run-receipt.v0.schema.json",
+  "$id": "https://agent-skills.local/schemas/skills-sdk/eval-run-receipt.v0.schema.json",
   "title": "Skills SDK Eval Run Receipt v0",
   "type": "object",
   "additionalProperties": false,
   "properties": {
     "schema_version": {"type": "string", "const": "skills-sdk.eval-run-receipt.v0"},
-    "schema_uri": {"type": "string", "const": "https://jscraik.local/agent-skills/schemas/skills-sdk/eval-run-receipt.v0.schema.json"},
+    "schema_uri": {"type": "string", "const": "https://agent-skills.local/schemas/skills-sdk/eval-run-receipt.v0.schema.json"},
     "status": {"type": "string", "enum": ["pass", "fail", "blocked"]},
     "runner": {"type": "string", "enum": ["deterministic_jsonl_v0", "internal_skill_builder_v0"]},
     "dataset_path": {"type": "string", "minLength": 1},

@@ -10,7 +10,7 @@ from typing import Any
 
 OBSERVABILITY_FEEDBACK_SCHEMA_VERSION = "skills-sdk.observability-feedback-receipt.v0"
 OBSERVABILITY_FEEDBACK_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/observability-feedback-receipt.v0.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/observability-feedback-receipt.v0.schema.json"
 )
 OBSERVABILITY_ACCEPTANCE_TRACE = ["PU-026", "FR-003", "FR-008", "SA-003", "VP-026"]
 RAW_EVENT_KEYS = frozenset({"prompt", "raw_prompt", "output", "raw_output", "transcript", "messages"})

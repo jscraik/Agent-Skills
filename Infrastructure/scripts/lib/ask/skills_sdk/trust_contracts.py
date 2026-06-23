@@ -33,7 +33,7 @@ class TrustLedgerEntry(_TrustContractModel):
 class TrustDecisionReceipt(_TrustContractModel):
     schema_version: Literal["skills-sdk.trust-decision-receipt.v0"]
     schema_uri: Literal[
-        "https://jscraik.local/agent-skills/schemas/skills-sdk/trust-decision-receipt.v0.schema.json"
+        "https://agent-skills.local/schemas/skills-sdk/trust-decision-receipt.v0.schema.json"
     ]
     status: Literal["preview", "recorded", "blocked"]
     operation: Literal["trust_decision"]

@@ -6,7 +6,7 @@ from typing import Any
 
 PACKAGE_HARDENING_RECEIPT_SCHEMA_VERSION = "skills-sdk.package-hardening-receipt.v0"
 PACKAGE_HARDENING_RECEIPT_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/package-hardening-receipt.v0.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/package-hardening-receipt.v0.schema.json"
 )
 PACKAGE_HARDENING_ACCEPTANCE_TRACE = ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022"]
 MAX_PACKAGE_FILE_COUNT = 250

@@ -12,7 +12,7 @@ class _SigningContractModel(BaseModel):
 class SigningPolicy(_SigningContractModel):
     schema_version: Literal["skills-sdk.signing-policy.v0"]
     schema_uri: Literal[
-        "https://jscraik.local/agent-skills/schemas/skills-sdk/signing-policy.v0.schema.json"
+        "https://agent-skills.local/schemas/skills-sdk/signing-policy.v0.schema.json"
     ]
     policy_id: str = Field(min_length=1)
     signer_id: str = Field(min_length=1)
@@ -39,7 +39,7 @@ class SigningCheck(_SigningContractModel):
 class SigningIntentReceipt(_SigningContractModel):
     schema_version: Literal["skills-sdk.signing-intent-receipt.v0"]
     schema_uri: Literal[
-        "https://jscraik.local/agent-skills/schemas/skills-sdk/signing-intent-receipt.v0.schema.json"
+        "https://agent-skills.local/schemas/skills-sdk/signing-intent-receipt.v0.schema.json"
     ]
     status: Literal["ready", "blocked"]
     policy_path: str = Field(min_length=1)

@@ -1,6 +1,6 @@
 {
   "schema_version": "skills-sdk.ci-policy-preview-receipt.v0",
-  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/ci-policy-preview-receipt.v0.schema.json",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/ci-policy-preview-receipt.v0.schema.json",
   "status": "preview",
   "operation": "ci_policy_preview",
   "risk_tier": "high",

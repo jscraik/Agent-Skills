@@ -11,11 +11,11 @@ from ask.skills_sdk.schema_validation import validate_payload_against_schema
 
 SANDBOX_PROFILE_SCHEMA_VERSION = "skills-sdk.sandbox-profile.v0"
 SANDBOX_PROFILE_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/sandbox-profile.v0.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/sandbox-profile.v0.schema.json"
 )
 SANDBOX_PROFILE_RECEIPT_SCHEMA_VERSION = "skills-sdk.sandbox-profile-receipt.v0"
 SANDBOX_PROFILE_RECEIPT_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/sandbox-profile-receipt.v0.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/sandbox-profile-receipt.v0.schema.json"
 )
 SANDBOX_PROFILE_ACCEPTANCE_TRACE = ["FR-008", "FR-010", "SA-004", "SA-007", "SEC-001", "VP-021"]
 SANDBOX_PROFILE_SCHEMA_PATH = Path("Infrastructure/config/schemas/skills-sdk/sandbox-profile.v0.schema.json")

@@ -45,7 +45,7 @@ class FeedbackCandidate(_ObservabilityModel):
 class ObservabilityFeedbackReceipt(_ObservabilityModel):
     schema_version: Literal["skills-sdk.observability-feedback-receipt.v0"]
     schema_uri: Literal[
-        "https://jscraik.local/agent-skills/schemas/skills-sdk/observability-feedback-receipt.v0.schema.json"
+        "https://agent-skills.local/schemas/skills-sdk/observability-feedback-receipt.v0.schema.json"
     ]
     status: Literal["preview", "blocked"]
     operation: Literal["observability_feedback_preview"]
@@ -118,7 +118,7 @@ class PromotionCandidateDecision(_ObservabilityModel):
 class ObservabilityPromotionReceipt(_ObservabilityModel):
     schema_version: Literal["skills-sdk.observability-promotion-receipt.v0"]
     schema_uri: Literal[
-        "https://jscraik.local/agent-skills/schemas/skills-sdk/observability-promotion-receipt.v0.schema.json"
+        "https://agent-skills.local/schemas/skills-sdk/observability-promotion-receipt.v0.schema.json"
     ]
     status: Literal["preview", "blocked"]
     operation: Literal["observability_promotion_preview"]

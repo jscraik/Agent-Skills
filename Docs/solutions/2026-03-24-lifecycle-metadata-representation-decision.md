@@ -3,13 +3,14 @@ title: Lifecycle metadata representation decision
 asset_family: phase-one managed assets
 owner: Agent Skills Team
 source_artifact: docs/reference/managed-asset-lifecycle.md
-freshness_reviewed_on: 2026-03-24
+freshness_reviewed_on: 2026-06-23
 review_after_days: 90
 ---
 
 # Lifecycle Metadata Representation Decision
 
 ## Table of Contents
+
 - [Problem](#problem)
 - [Resolution](#resolution)
 - [Evidence](#evidence)

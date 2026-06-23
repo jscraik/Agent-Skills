@@ -1,6 +1,6 @@
 {
   "schema_version": "skills-sdk.package-hardening-receipt.v0",
-  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/package-hardening-receipt.v0.schema.json",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/package-hardening-receipt.v0.schema.json",
   "status": "pass",
   "package_id": "skills-sdk-valid-fixture",
   "version": "0.1.0",

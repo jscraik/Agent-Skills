@@ -6,7 +6,7 @@ from typing import Any
 
 PLACEHOLDER_LIFECYCLE_SCHEMA_VERSION = "skills-sdk.placeholder-lifecycle.v1"
 PLACEHOLDER_LIFECYCLE_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/placeholder-lifecycle.v1.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/placeholder-lifecycle.v1.schema.json"
 )
 PLACEHOLDER_LIFECYCLE_ACCEPTANCE_TRACE = (
     "FR-012",

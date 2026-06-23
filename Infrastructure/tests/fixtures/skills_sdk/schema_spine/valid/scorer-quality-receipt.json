@@ -1,6 +1,6 @@
 {
   "schema_version": "skills-sdk.scorer-quality-receipt.v0",
-  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/scorer-quality-receipt.v0.schema.json",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/scorer-quality-receipt.v0.schema.json",
   "status": "preview",
   "operation": "scorer_quality_preview",
   "query": "Skills/agent-ops/sdk-scenario-generator",

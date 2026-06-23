@@ -11,7 +11,7 @@ from ask.skills_sdk.capability_status import MATRIX_PATH, load_capability_matrix
 
 CAPABILITY_EVIDENCE_SCHEMA_VERSION = "skills-sdk.capability-evidence-receipt.v0"
 CAPABILITY_EVIDENCE_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/capability-evidence-receipt.v0.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/capability-evidence-receipt.v0.schema.json"
 )
 CAPABILITY_EVIDENCE_ACCEPTANCE_TRACE = ["PU-032", "FR-008", "SA-003", "VP-032"]
 COMMAND_STARTERS = frozenset({"./bin/ask", "./bin/skills-sdk", "ask", "python3", "uv", "bash"})

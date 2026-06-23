@@ -29,7 +29,7 @@ class ScenarioQualityRow(_ScenarioQualityModel):
 class ScenarioQualityReceipt(_ScenarioQualityModel):
     schema_version: Literal["skills-sdk.scenario-quality-receipt.v0"]
     schema_uri: Literal[
-        "https://jscraik.local/agent-skills/schemas/skills-sdk/scenario-quality-receipt.v0.schema.json"
+        "https://agent-skills.local/schemas/skills-sdk/scenario-quality-receipt.v0.schema.json"
     ]
     status: Literal["preview", "blocked"]
     operation: Literal["scenario_quality_preview"]

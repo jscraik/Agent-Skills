@@ -26,7 +26,7 @@ class RequiredCheck(_CiPolicyModel):
 class CiPolicyPreviewReceipt(_CiPolicyModel):
     schema_version: Literal["skills-sdk.ci-policy-preview-receipt.v0"]
     schema_uri: Literal[
-        "https://jscraik.local/agent-skills/schemas/skills-sdk/ci-policy-preview-receipt.v0.schema.json"
+        "https://agent-skills.local/schemas/skills-sdk/ci-policy-preview-receipt.v0.schema.json"
     ]
     status: Literal["preview", "blocked"]
     operation: Literal["ci_policy_preview"]

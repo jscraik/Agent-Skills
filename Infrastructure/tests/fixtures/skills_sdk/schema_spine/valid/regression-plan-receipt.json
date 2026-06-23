@@ -1,6 +1,6 @@
 {
   "schema_version": "skills-sdk.eval-regression-plan.v0",
-  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/eval-regression-plan.v0.schema.json",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/eval-regression-plan.v0.schema.json",
   "status": "preview",
   "operation": "eval_regression_plan_preview",
   "query": "Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill",

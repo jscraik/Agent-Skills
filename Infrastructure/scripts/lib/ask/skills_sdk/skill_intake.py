@@ -8,7 +8,7 @@ from typing import Any
 
 SKILL_INTAKE_SCHEMA_VERSION = "skills-sdk.skill-intake-receipt.v0"
 SKILL_INTAKE_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/skill-intake-receipt.v0.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/skill-intake-receipt.v0.schema.json"
 )
 SKILL_INTAKE_ACCEPTANCE_TRACE = ["PU-032", "FR-008", "FR-010", "SA-004", "SEC-001", "VP-032"]
 ALLOWED_TOP_LEVELS = frozenset({"SKILL.md", "agents", "references", "scripts", "assets", "evals"})

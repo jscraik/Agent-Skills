@@ -15,7 +15,7 @@ from ask.skills_sdk.typed_contracts import (
 
 OBSERVABILITY_PROMOTION_SCHEMA_VERSION = "skills-sdk.observability-promotion-receipt.v0"
 OBSERVABILITY_PROMOTION_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/observability-promotion-receipt.v0.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/observability-promotion-receipt.v0.schema.json"
 )
 OBSERVABILITY_PROMOTION_ACCEPTANCE_TRACE = ["PU-026", "FR-003", "FR-008", "SA-003", "VP-026"]
 REQUIRED_RECEIPTS = ["package_digest_receipt", "eval_run_receipt"]

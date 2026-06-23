@@ -1,6 +1,6 @@
 {
   "schema_version": "skills-sdk.install-receipt.v1",
-  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/install-receipt.v1.schema.json",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/install-receipt.v1.schema.json",
   "status": "success",
   "operation": "install",
   "scope": "project",
