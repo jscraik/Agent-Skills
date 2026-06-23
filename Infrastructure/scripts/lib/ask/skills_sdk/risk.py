@@ -202,6 +202,27 @@ def _skill_root_for(path: Path) -> Path:
     return path.parent if path.name == "SKILL.md" else path
 
 
+def _declared_source_kind(fields: dict[str, Any]) -> str | None:
+    declared = str(fields.get("source_kind") or fields.get("source-kind") or "").strip().lower()
+    return declared if declared in _SOURCE_PROFILES else None
+
+
+def _is_scripted_source(fields: dict[str, Any], skill_root: Path, lower_body: str) -> bool:
+    return (
+        any(_truthy_metadata(fields.get(key)) for key in ("commands", "tools", "runtime_needs"))
+        or any((skill_root / name).exists() for name in ("scripts", "bin"))
+        or any(marker in lower_body for marker in _SCRIPT_MARKERS)
+    )
+
+
+def _is_referenced_source(fields: dict[str, Any], skill_root: Path, lower_body: str) -> bool:
+    return (
+        any(_truthy_metadata(fields.get(key)) for key in ("references", "examples", "assets"))
+        or any((skill_root / name).exists() for name in ("references", "examples", "assets", "docs"))
+        or any(marker in lower_body for marker in _REFERENCE_MARKERS)
+    )
+
+
 def classify_source_kind(
     source_path: Path | None,
     frontmatter: dict[str, Any] | None = None,
@@ -219,21 +240,16 @@ def classify_source_kind(
     skill_root = _skill_root_for(source_path)
 
     provenance = str(fields.get("provenance") or "").lower()
+    declared_source_kind = _declared_source_kind(fields)
+    if declared_source_kind:
+        return declared_source_kind
     if "external" in provenance or _truthy_metadata(fields.get("external")):
         return "external"
 
-    if any(_truthy_metadata(fields.get(key)) for key in ("commands", "tools", "runtime_needs")):
-        return "scripted"
-    if any((skill_root / name).exists() for name in ("scripts", "bin")):
-        return "scripted"
-    if any(marker in lower_body for marker in _SCRIPT_MARKERS):
+    if _is_scripted_source(fields, skill_root, lower_body):
         return "scripted"
 
-    if any(_truthy_metadata(fields.get(key)) for key in ("references", "examples", "assets")):
-        return "referenced"
-    if any((skill_root / name).exists() for name in ("references", "examples", "assets", "docs")):
-        return "referenced"
-    if any(marker in lower_body for marker in _REFERENCE_MARKERS):
+    if _is_referenced_source(fields, skill_root, lower_body):
         return "referenced"
 
     if str(fields.get("status") or "").strip().lower() in {"placeholder", "not_run"}:

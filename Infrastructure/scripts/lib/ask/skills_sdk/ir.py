@@ -4,7 +4,7 @@ from pathlib import Path
 import re
 from typing import Any
 
-from ask.skills_sdk.contracts import read_skill_frontmatter_fields
+from ask.skills_sdk.contracts import body_without_frontmatter, read_skill_frontmatter_fields
 from ask.skills_sdk.risk import build_risk_classification
 
 
@@ -35,15 +35,6 @@ def _iter_files(root: Path, dirname: str, repo_root: Path) -> list[str]:
         for path in base.rglob("*")
         if path.is_file()
     )
-
-
-def _body_without_frontmatter(text: str) -> str:
-    lines = text.splitlines()
-    if lines and lines[0].strip() == "---":
-        for index, line in enumerate(lines[1:], start=1):
-            if line.strip() == "---":
-                return "\n".join(lines[index + 1 :]).strip()
-    return text.strip()
 
 
 def _first_paragraph(body: str) -> str:
@@ -178,7 +169,7 @@ def build_skill_ir(repo_root: Path, *, source_path: Path, query: str) -> dict[st
     source = source_path if source_path.name == "SKILL.md" else source_path / "SKILL.md"
     skill_root = _skill_root_for(source)
     text = source.read_text(encoding="utf-8")
-    body = _body_without_frontmatter(text)
+    body = body_without_frontmatter(text)
     frontmatter = read_skill_frontmatter_fields(source)
     source_block, files = _source_block(repo_root, skill_root, source)
 

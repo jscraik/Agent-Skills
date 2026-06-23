@@ -12,6 +12,9 @@ def add_sdk_security_parser(
     sdk_subparsers: argparse._SubParsersAction,
     global_parser: argparse.ArgumentParser,
 ) -> None:
+    """
+    Register CLI subcommands for SDK security adapter discovery and risk-mode classification.
+    """
     parser = sdk_subparsers.add_parser(
         "security",
         help="Preview local Skills SDK security adapter discovery",
@@ -24,9 +27,26 @@ def add_sdk_security_parser(
         parents=[global_parser],
     )
     adapters.add_argument("--preview", action="store_true", help="Emit a non-mutating adapter discovery receipt")
+    risk_modes = subparsers.add_parser(
+        "risk-modes",
+        help="Classify Tal/Podjarny skill risk modes without executing source content",
+        parents=[global_parser],
+    )
+    risk_modes.add_argument("target", help="Skill handle or repo-relative skill source path")
+    risk_modes.add_argument("--preview", action="store_true", help="Emit a non-mutating risk-mode taxonomy receipt")
 
 
 def dispatch_sdk_security(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    """
+    Route SDK security subcommands to their handlers with preview-mode enforcement.
+    
+    Parameters:
+        repo_root (Path): The root directory of the repository
+        args (argparse.Namespace): Parsed command-line arguments containing security_action and preview flag
+    
+    Returns:
+        CallResult: The result of the dispatched command or a validation/error response
+    """
     if args.security_action == "adapters":
         if not args.preview:
             return build_validation_error(
@@ -35,4 +55,12 @@ def dispatch_sdk_security(repo_root: Path, args: argparse.Namespace) -> CallResu
                 "ask sdk security adapters --preview --json --robot",
             )
         return skills_commands.skills_sdk_security_adapters_preview(repo_root)
+    if args.security_action == "risk-modes":
+        if not args.preview:
+            return build_validation_error(
+                "sdk security risk-modes",
+                "Skills SDK risk-mode taxonomy is preview-only in PU-033 and requires --preview.",
+                "ask sdk security risk-modes <target> --preview --json --robot",
+            )
+        return skills_commands.skills_sdk_security_risk_modes_preview(repo_root, args.target)
     return build_unknown_action_result("sdk security", args.security_action)

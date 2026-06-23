@@ -117,6 +117,7 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
         "ask sdk ci policy --risk-tier high --preview --json --robot",
         "ask sdk explorer static --preview --json --robot",
         "ask sdk security adapters --preview --json --robot",
+        "ask sdk security risk-modes Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
         "ask sdk install Skills/agent-ops/autofix --preview --json --robot",
         "ask sdk install ./Skills/sample/SKILL.md --apply --project-root /tmp/sample-project --json --robot",
         "ask sdk rollback --receipt /tmp/sample-project/.harness/receipts/skills-sdk/install/autofix.json --preview --json --robot",
@@ -303,6 +304,12 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
         "ask sdk sandbox validate --profile Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/sandbox-profile.json --json --robot",
         "skills-sdk sandbox validate --profile Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/sandbox-profile.json --json --robot",
     ],
+    ("sdk", "intake"): [
+        "ask sdk intake inspect Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
+        "ask sdk intake review Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
+        "skills-sdk intake inspect Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
+        "skills-sdk intake review Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
+    ],
     ("sdk", "install"): [
         "ask sdk install Skills/agent-ops/autofix --preview --json --robot",
         "ask sdk install ./Skills/sample/SKILL.md --apply --project-root /tmp/sample-project --json --robot",
@@ -345,7 +352,9 @@ COMMAND_EXAMPLES: Dict[Tuple[str, str], List[str]] = {
     ],
     ("sdk", "security"): [
         "ask sdk security adapters --preview --json --robot",
+        "ask sdk security risk-modes Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
         "skills-sdk security adapters --preview --json --robot",
+        "skills-sdk security risk-modes Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
     ],
     ("sdk", "trust"): [
         "ask sdk trust decide Infrastructure/tests/fixtures/skills_sdk/valid_skill --decision trust --reason 'fixture passed local checks' --owner skills-sdk-tests --preview --json --robot",

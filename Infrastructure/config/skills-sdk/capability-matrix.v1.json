@@ -47,7 +47,9 @@
     "./bin/ask sdk eval scenario-quality Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill --preview --json --robot",
     "./bin/ask sdk package build Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
     "./bin/ask sdk package harden Infrastructure/tests/fixtures/skills_sdk/valid_skill --json --robot",
+    "./bin/ask sdk security risk-modes Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
     "./bin/ask sdk intake inspect Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
+    "./bin/ask sdk intake review Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
     "./bin/ask sdk trust decide Infrastructure/tests/fixtures/skills_sdk/valid_skill --decision trust --reason 'fixture passed local checks' --owner skills-sdk-tests --preview --json --robot",
     "./bin/ask sdk observability feedback --skill Infrastructure/tests/fixtures/skills_sdk/valid_skill --events Infrastructure/tests/fixtures/skills_sdk/observability/redacted-events.fixture --preview --json --robot",
     "./bin/ask sdk sandbox validate --profile Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/sandbox-profile.json --json --robot",
@@ -130,6 +132,22 @@
       "notes": "Risk classification is local and read-only."
     },
     {
+      "id": "risk_mode_taxonomy",
+      "title": "Risk mode taxonomy receipt",
+      "status": "preview_only",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/risk_modes.py",
+      "pipeline_sections": ["release_decision_matrix", "agent_execution_control_plane", "package_hardening"],
+      "feature_executed": true,
+      "mutation_performed": false,
+      "evidence_refs": [
+        "./bin/ask sdk security risk-modes Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
+        "Infrastructure/config/schemas/skills-sdk/risk-mode-taxonomy-receipt.v0.schema.json",
+        "Infrastructure/tests/test_skills_sdk_risk_mode_taxonomy.py"
+      ],
+      "next_slice": "Use risk modes as input to external skill intake review and adoption decision receipts.",
+      "notes": "PU-033 separates malicious supply-chain, negligent instruction, vulnerable operation, and insufficient-evidence modes without executing source content, scanners, network, credentials, or mutation."
+    },
+    {
       "id": "skill_ir",
       "title": "SkillIR.v0 typed spine",
       "status": "implemented",
@@ -190,6 +208,22 @@
       ],
       "next_slice": "Add archive unpack quarantine only after directory intake receipts and path-boundary checks stay schema-verified.",
       "notes": "PU-032 inspects directory-form external skill candidates by reading, hashing, and validating package paths without execution, install, runtime projection writes, network access, or mutation."
+    },
+    {
+      "id": "skill_intake_review",
+      "title": "External skill intake review",
+      "status": "preview_only",
+      "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/skill_intake_review.py",
+      "pipeline_sections": ["full_skill_lifecycle", "package_hardening", "agent_execution_control_plane"],
+      "feature_executed": true,
+      "mutation_performed": false,
+      "evidence_refs": [
+        "./bin/ask sdk intake review Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
+        "Infrastructure/config/schemas/skills-sdk/skill-intake-review-receipt.v0.schema.json",
+        "Infrastructure/tests/test_skills_sdk_skill_intake_review.py"
+      ],
+      "next_slice": "Bind intake review, package digest, trust decision, expiry, and install authority into an adoption decision receipt.",
+      "notes": "PU-034 consumes the quarantine intake receipt and risk-mode taxonomy receipt to produce provenance, permission, data-exposure, action-surface, isolation, semantic, approval-friction, and residual-risk review items without execution, scanners, network, credentials, install, or mutation."
     },
     {
       "id": "lockfile_preview",
