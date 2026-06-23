@@ -102,6 +102,9 @@ class TestSkillsSdkAdoptionDecision(unittest.TestCase):
         self.assertIsNone(receipt["package_id"])
         self.assertIsNone(receipt["package_digest"])
         self.assertIn("package_identity_built", {item["id"] for item in receipt["blockers"]})
+        self.assertTrue(
+            all(isinstance(evidence, str) for check in receipt["checks"] for evidence in check["evidence"])
+        )
 
 
 if __name__ == "__main__":

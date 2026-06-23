@@ -59,7 +59,7 @@ def _adoption_checks(
             "package_identity_built",
             "pass" if package["status"] == "built" else "blocker",
             "Adoption decisions must bind to an immutable package digest.",
-            [package.get("package_digest", "package_digest:missing")],
+            [package.get("package_digest") or "package_digest:missing"],
         ),
         _trust_check(package, trust_receipt, trust_error),
     ]
