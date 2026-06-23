@@ -25,7 +25,7 @@ def build_adoption_decision_receipt(
 ) -> dict[str, Any]:
     source_path = _source_path(repo_root, source)
     intake = build_skill_intake_receipt(repo_root, source=source, source_kind=source_kind)
-    review = build_skill_intake_review_receipt(repo_root, source=source, source_kind="directory")
+    review = build_skill_intake_review_receipt(repo_root, source=source, source_kind=source_kind)
     package = build_package_digest_receipt(repo_root, source_path=source_path, query=source)
     trust_receipt, trust_error = _load_trust_receipt(repo_root, trust_receipt_path)
     checks = _adoption_checks(intake, review, package, trust_receipt, trust_error)

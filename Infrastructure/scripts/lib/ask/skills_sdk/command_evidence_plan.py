@@ -16,11 +16,12 @@ COMMAND_EVIDENCE_PLAN_ACCEPTANCE_TRACE = ["FR-008", "SA-003", "VP-032"]
 
 def build_command_evidence_plan_receipt(repo_root: Path, *, scope: str = "capability-matrix") -> dict[str, Any]:
     capability_receipt = build_capability_evidence_receipt(repo_root, scope=scope)
-    command_rows = [
-        _command_plan_row(row)
-        for row in capability_receipt["evidence_rows"]
-        if row["kind"] == "command"
-    ]
+    command_rows = []
+    for row in capability_receipt["evidence_rows"]:
+        if row["kind"] == "command":
+            plan_row = _command_plan_row(row)
+            if plan_row is not None:
+                command_rows.append(plan_row)
     blockers = [
         {
             "id": "no_command_evidence_refs",
@@ -50,12 +51,12 @@ def build_command_evidence_plan_receipt(repo_root: Path, *, scope: str = "capabi
     }
 
 
-def _command_plan_row(row: dict[str, Any]) -> dict[str, Any]:
+def _command_plan_row(row: dict[str, Any]) -> dict[str, Any] | None:
     command = row["ref"]
     try:
         argv = shlex.split(command)
     except ValueError:
-        argv = []
+        return None
     return {
         "capability_id": row["capability_id"],
         "command": command,

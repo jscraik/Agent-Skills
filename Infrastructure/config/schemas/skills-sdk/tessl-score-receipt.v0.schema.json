@@ -6,7 +6,7 @@
   "additionalProperties": false,
   "properties": {
     "schema_version": {"type": "string", "const": "skills-sdk.tessl-score-receipt.v0"},
-    "schema_uri": {"type": "string"},
+    "schema_uri": {"type": "string", "const": "https://jscraik.local/agent-skills/schemas/skills-sdk/tessl-score-receipt.v0.schema.json"},
     "status": {"type": "string", "enum": ["pass", "blocked"]},
     "blocker_class": {"type": ["string", "null"]},
     "blocker": {"type": ["string", "null"]},
@@ -22,6 +22,7 @@
     "readiness_thresholds": {"type": "object"},
     "feedback_loop": {"type": "object"},
     "mutation_performed": {"type": "boolean", "const": false},
+    "command_execution_performed": {"type": "boolean", "const": false},
     "agent_summary": {"type": "string", "minLength": 1}
   },
   "required": [
@@ -39,6 +40,7 @@
     "readiness_thresholds",
     "feedback_loop",
     "mutation_performed",
+    "command_execution_performed",
     "agent_summary"
   ]
 }

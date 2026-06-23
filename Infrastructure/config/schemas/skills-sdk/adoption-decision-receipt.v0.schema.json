@@ -12,7 +12,7 @@
     "source": {"type": "string", "minLength": 1},
     "source_kind": {"type": "string", "enum": ["directory", "archive"]},
     "package_id": {"type": "string", "minLength": 1},
-    "package_digest": {"type": "string", "minLength": 71},
+    "package_digest": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"},
     "intake_receipt_status": {"type": "string", "enum": ["preview", "blocked"]},
     "intake_review_receipt_status": {"type": "string", "enum": ["preview", "review", "pass", "blocked"]},
     "trust_receipt_status": {"type": ["string", "null"], "enum": ["preview", "recorded", "blocked", null]},

@@ -83,10 +83,12 @@ def _required_route_checks(routes: list[Any]) -> list[dict[str, Any]]:
     stages = {route.get("pipeline_stage") for route in routes if isinstance(route, dict)}
     missing = sorted(REQUIRED_ROUTE_IDS - route_ids)
     missing_loops = sorted(REQUIRED_LOOPS - loops)
+    missing_stages = sorted(REQUIRED_STAGES - stages)
     unknown_stages = sorted(str(stage) for stage in stages if stage not in REQUIRED_STAGES)
     return [
         _required_routes_check(missing),
         _check("required_loops_present", "blocker" if missing_loops else "pass", "Route map must name the four feedback loops.", missing_loops),
+        _check("required_stages_present", "blocker" if missing_stages else "pass", "Route map must include all required pipeline stages.", missing_stages),
         _check("pipeline_stages_known", "blocker" if unknown_stages else "pass", "Route map stages must use canonical pipeline names.", unknown_stages),
     ]
 
@@ -113,7 +115,7 @@ def _route_file_checks(repo_root: Path, route_id: str, route: dict[str, Any]) ->
             continue
         path = (repo_root / value).resolve(strict=False)
         inside = path.is_relative_to(repo_root.resolve())
-        exists = inside and path.exists()
+        exists = inside and path.is_file()
         checks.append(
             _check(
                 f"{route_id}.{key}_exists",

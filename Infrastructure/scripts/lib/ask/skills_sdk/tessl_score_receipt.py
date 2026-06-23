@@ -247,6 +247,7 @@ def build_tessl_score_receipt(
         "readiness_thresholds": _readiness_thresholds(),
         "feedback_loop": feedback_loop,
         "mutation_performed": False,
+        "command_execution_performed": False,
         "agent_summary": _agent_summary(ready, blocker),
     }
 
@@ -278,6 +279,7 @@ def _blocked_load_receipt(
             ],
         },
         "mutation_performed": False,
+        "command_execution_performed": False,
         "agent_summary": _blocked_agent_summary(f"Tessl view artifact could not be loaded: {load_error}"),
     }
 
@@ -311,6 +313,7 @@ def _blocked_run_id_receipt(
             ],
         },
         "mutation_performed": False,
+        "command_execution_performed": False,
         "agent_summary": _blocked_agent_summary(blocker),
     }
 
