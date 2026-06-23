@@ -55,7 +55,7 @@ def add_sdk_intake_parser(
 
 def _validation_error(command: str, message: str, fix_suggestion: str) -> CallResult:
     """
-    Create a CallResult with validation error status.
+    Build a standardized validation error result.
     
     Parameters:
     	command (str): The command associated with the error.
@@ -63,7 +63,7 @@ def _validation_error(command: str, message: str, fix_suggestion: str) -> CallRe
     	fix_suggestion (str): A suggested fix for the error.
     
     Returns:
-    	CallResult: An error result with validation error details.
+    	CallResult: An error CallResult with validation error code.
     """
     result = CallResult(status="error")
     result.metadata["command"] = command
@@ -73,17 +73,18 @@ def _validation_error(command: str, message: str, fix_suggestion: str) -> CallRe
 
 def dispatch_sdk_intake(repo_root: Path, args: argparse.Namespace) -> CallResult:
     """
-    Route the SDK intake command to its handler.
+    Route the `intake` subcommand to its handler, enforcing preview-only mode.
     
-    Dispatches the `inspect` or `review` subcommand based on parsed arguments.
-    Preview mode is required for both operations.
+    Dispatches `inspect` or `review` based on the parsed action. Returns a validation 
+    error if `--preview` is not set, as both operations are preview-only. Otherwise 
+    invokes the corresponding handler with the source and source kind arguments.
     
     Parameters:
         repo_root (Path): The repository root directory.
-        args (argparse.Namespace): Parsed arguments with intake_action, preview, and source.
+        args (argparse.Namespace): Parsed arguments containing intake_action, preview, source, and source_kind.
     
     Returns:
-        CallResult: The outcome of the intake operation.
+        CallResult: A validation error if preview is not set; otherwise, the outcome of the intake operation.
     """
     if args.intake_action == "inspect":
         if not args.preview:

@@ -25,6 +25,16 @@ FIXTURE_DIR = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine
 
 
 def _command_env() -> dict[str, str]:
+    """
+    Create an environment dictionary for test subprocess execution with isolated cache and state directories.
+    
+    Configures XDG, mise, and uv cache/state variables to use deterministic temporary directories,
+    preventing test execution from polluting the system's actual cache and state locations.
+    MISE_TRUSTED_CONFIG_PATHS is set to the repository's .mise.toml file.
+    
+    Returns:
+    	dict[str, str]: Environment variables configured with isolated cache/state paths.
+    """
     env = os.environ.copy()
     temp_base = Path(tempfile.gettempdir()) / "agent-skills-test"
     env.setdefault("XDG_CACHE_HOME", str(temp_base / "xdg-cache"))
@@ -37,6 +47,19 @@ def _command_env() -> dict[str, str]:
 
 
 def _run_json_command(*args: str, check: bool = True) -> dict:
+    """
+    Executes a command and returns its JSON output.
+    
+    Parameters:
+        *args (str): Command and arguments to execute.
+        check (bool): If True, raise AssertionError on non-zero exit code.
+    
+    Returns:
+        dict: Parsed JSON from the command's standard output.
+    
+    Raises:
+        AssertionError: If check is True and the command fails (non-zero exit code).
+    """
     process = subprocess.run(
         list(args),
         cwd=REPO_ROOT,
@@ -54,6 +77,18 @@ def _run_json_command(*args: str, check: bool = True) -> dict:
 
 
 def _write_skill(source: Path, *, body: str, frontmatter: str = "") -> None:
+    """
+    Create a minimal skill directory fixture.
+    
+    Creates the directory at source and writes a SKILL.md file containing YAML 
+    frontmatter (with name and description fields) followed by optional additional 
+    frontmatter and body content.
+    
+    Parameters:
+        source (Path): Directory path where the skill fixture will be created.
+        body (str): Markdown body content to append after the frontmatter.
+        frontmatter (str): Optional additional YAML frontmatter lines (default: "").
+    """
     source.mkdir()
     (source / "SKILL.md").write_text(
         f"---\nname: external-review\n"
@@ -80,6 +115,9 @@ class TestSkillsSdkSkillIntakeReview(unittest.TestCase):
         }
 
     def assert_schema_valid(self, payload: dict) -> None:
+        """
+        Assert that a receipt payload conforms to the skill intake review receipt schema.
+        """
         _validate_schema_subset(self.schema, payload, self.schema_store)
 
     def test_builder_consumes_intake_and_risk_mode_receipts(self) -> None:
@@ -345,6 +383,15 @@ class TestSkillsSdkSkillIntakeReview(unittest.TestCase):
 
 class TestDispatchSdkIntakeRouting(unittest.TestCase):
     def _make_args(self, **kwargs) -> argparse.Namespace:
+        """
+        Build an argument namespace for dispatcher testing.
+        
+        Parameters:
+            **kwargs: Configuration overrides. Defaults are json=True, robot=True, verbose=False.
+        
+        Returns:
+            argparse.Namespace: Argument namespace with defaults and overrides applied.
+        """
         defaults = {
             "json": True,
             "robot": True,

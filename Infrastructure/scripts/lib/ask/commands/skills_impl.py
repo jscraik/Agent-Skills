@@ -4098,11 +4098,10 @@ def skills_sdk_intake_inspect(
     Build a non-mutating intake inspection receipt for an external skill source.
     
     Parameters:
-        source (str): The skill source to inspect.
-        source_kind (str): The type of source; typically "directory" or "archive".
+        source_kind (str): The type of source; defaults to "directory" (also supports "archive").
     
     Returns:
-        CallResult: A result containing the intake inspection receipt. Status is set to "error" if the receipt indicates a blocked condition.
+        CallResult: Contains the intake inspection receipt payload under data["skills_sdk_intake_inspect"]. Status is set to "error" if the receipt status is "blocked".
     """
     result = CallResult()
     result.metadata["command"] = "sdk intake inspect --preview"
@@ -4150,11 +4149,11 @@ def skills_sdk_intake_review(
     Generate an intake review receipt for a skill source without mutating the workspace.
     
     Parameters:
-    	source (str): The skill source location to review (e.g., path or handle).
-    	source_kind (str): The type of source being reviewed. Defaults to "directory".
+    	source (str): The skill source location to review (path, URL, or handle).
+    	source_kind (str): Type of source. Defaults to "directory".
     
     Returns:
-    	CallResult: Result object with `data["skills_sdk_intake_review"]` containing the receipt payload. Status is set to "error" if the receipt status is "blocked".
+    	CallResult: Result with `data["skills_sdk_intake_review"]` containing the receipt payload. Status is set to "error" if the receipt status is "blocked".
     """
     result = CallResult()
     result.metadata["command"] = "sdk intake review --preview"
@@ -4196,7 +4195,21 @@ def skills_sdk_ir_build(
     repo_root: Path,
     target: str,
 ) -> CallResult:
-    """Build a read-only SkillIR.v0 payload for one canonical skill target."""
+    """
+    Build a read-only SkillIR.v0 payload for a canonical skill target.
+    
+    Resolves the target to its canonical source location and generates a SkillIR
+    representation if the source file exists. Returns a blocked IR payload if the
+    canonical source cannot be located.
+    
+    Parameters:
+        repo_root (Path): Repository root directory.
+        target (str): Skill target identifier or query.
+    
+    Returns:
+        CallResult: Result object with `data["skills_sdk_ir"]` containing a built or
+        blocked SkillIR payload. Status is "error" if canonical source validation fails.
+    """
     result = CallResult()
     result.metadata["command"] = "sdk ir build"
     query = target.strip()
@@ -4909,14 +4922,14 @@ def skills_sdk_security_adapters_preview(repo_root: Path) -> CallResult:
 
 def skills_sdk_security_risk_modes_preview(repo_root: Path, target: str) -> CallResult:
     """
-    Build a deterministic risk-mode taxonomy receipt without executing skill content.
+    Generate a security risk-mode taxonomy for a skill without executing it.
     
     Parameters:
-        target: A skill path or SDK handle to analyze.
+    	target: A skill path or SDK handle.
     
     Returns:
-        A CallResult containing the risk-mode taxonomy payload. Status is "error" if the
-        canonical source is missing.
+    	CallResult containing risk-mode taxonomy analysis under data["skills_sdk_risk_mode_taxonomy"].
+    	Status is "error" if the canonical source is missing.
     """
     result = CallResult()
     result.metadata["command"] = "sdk security risk-modes"
@@ -4983,7 +4996,12 @@ def skills_sdk_security_risk_modes_preview(repo_root: Path, target: str) -> Call
 
 
 def skills_sdk_static_explorer_preview(repo_root: Path) -> CallResult:
-    """Preview a JSON-only static explorer index without rendering or publishing HTML."""
+    """
+    Generate a JSON-only static explorer index preview without rendering or publishing HTML.
+    
+    Returns:
+    	`CallResult` with `data["skills_sdk_static_explorer_preview"]` containing a structured preview payload including capability and skill counts, projection inputs, and explorer metadata. Sets status to `error` if the receipt status is `blocked`.
+    """
     result = CallResult()
     result.metadata["command"] = "sdk explorer static"
     from ask.skills_sdk.static_explorer import (  # noqa: PLC0415

@@ -25,10 +25,22 @@ FIXTURE_DIR = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine
 
 
 def _schema() -> dict:
+    """
+    Load the risk-mode-taxonomy-receipt schema from disk.
+    
+    Returns:
+    	The risk-mode-taxonomy-receipt schema as a dictionary.
+    """
     return json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
 
 
 def _command_env() -> dict[str, str]:
+    """
+    Create an environment dictionary with cache and state variables set to deterministic temp locations for test execution.
+    
+    Returns:
+        A copy of the current environment with cache, state, and MISE configuration variables redirected to temp directories under `tempfile.gettempdir()/agent-skills-test`, and `MISE_TRUSTED_CONFIG_PATHS` set to the repository's `.mise.toml`.
+    """
     env = os.environ.copy()
     temp_base = Path(tempfile.gettempdir()) / "agent-skills-test"
     env.setdefault("XDG_CACHE_HOME", str(temp_base / "xdg-cache"))
@@ -41,6 +53,15 @@ def _command_env() -> dict[str, str]:
 
 
 def _run_ask(*args: str) -> subprocess.CompletedProcess[str]:
+    """
+    Executes the ask CLI tool with provided arguments.
+    
+    Parameters:
+        args (str): Arguments to pass to the ask command.
+    
+    Returns:
+        subprocess.CompletedProcess[str]: The completed process with stdout and stderr captured as text.
+    """
     return subprocess.run(
         [sys.executable, "Infrastructure/bin/ask", *args],
         cwd=REPO_ROOT,
@@ -53,6 +74,17 @@ def _run_ask(*args: str) -> subprocess.CompletedProcess[str]:
 
 
 def _write_skill(root: Path, body: str, frontmatter: str | None = None) -> Path:
+    """
+    Create a skill markdown file with YAML frontmatter in a "sample-risk-mode" subdirectory.
+    
+    Parameters:
+    	root (Path): Directory in which to create the skill subdirectory
+    	body (str): Content for the skill markdown file
+    	frontmatter (str | None): YAML frontmatter content. Defaults to basic name and description fields.
+    
+    Returns:
+    	Path: Path to the created SKILL.md file
+    """
     skill_dir = root / "sample-risk-mode"
     skill_dir.mkdir()
     frontmatter_text = frontmatter or "name: sample-risk-mode\ndescription: sample risk mode skill"
@@ -63,6 +95,15 @@ def _write_skill(root: Path, body: str, frontmatter: str | None = None) -> Path:
 
 class TestSkillsSdkRiskModeTaxonomy(unittest.TestCase):
     def assert_schema_valid(self, payload: dict) -> None:
+        """
+        Validate that the payload conforms to the risk-mode-taxonomy-receipt schema.
+        
+        Parameters:
+            payload (dict): The payload to validate.
+        
+        Raises:
+            AssertionError: If the payload does not conform to the schema.
+        """
         _validate_schema_subset(_schema(), payload, {"risk-mode-taxonomy-receipt": _schema()})
 
     def test_builder_detects_negligent_instruction_without_safety_language(self) -> None:
@@ -402,6 +443,15 @@ class TestSkillsSdkRiskModeTaxonomy(unittest.TestCase):
 
 class TestDispatchSdkSecurityRouting(unittest.TestCase):
     def _make_args(self, **kwargs) -> argparse.Namespace:
+        """
+        Create an argparse.Namespace with default SDK security argument values.
+        
+        Parameters:
+            **kwargs: Override values for namespace arguments.
+        
+        Returns:
+            argparse.Namespace: Namespace with json, robot, and verbose attributes defaulting to True, True, and False respectively, overridden by any kwargs.
+        """
         defaults = {
             "json": True,
             "robot": True,

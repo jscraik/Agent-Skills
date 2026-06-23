@@ -780,9 +780,7 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
 
     def test_placeholder_lifecycle_schema_rejects_pass_or_execution_claims(self) -> None:
         """
-        Ensure the placeholder-lifecycle schema rejects fixtures that claim execution or passing.
-
-        Asserts that the fixture "placeholder-claims-pass.json" does not conform to the placeholder-lifecycle schema and therefore validation fails.
+        Verify the placeholder-lifecycle schema rejects fixtures that claim execution or passing.
         """
         self.assert_invalid("placeholder-lifecycle", "placeholder-claims-pass.json")
 
@@ -802,6 +800,9 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertIn("PU-033", payload["acceptance_trace"])
 
     def test_risk_mode_taxonomy_receipt_schema_rejects_execution_claims(self) -> None:
+        """
+        Verify that the risk-mode-taxonomy-receipt schema rejects fixtures containing execution claims.
+        """
         self.assert_invalid("risk-mode-taxonomy-receipt", "risk-mode-taxonomy-executes.json")
 
     def test_risk_mode_taxonomy_receipt_schema_requires_exactly_four_mode_results(self) -> None:
@@ -849,6 +850,9 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertIn("PU-034", payload["acceptance_trace"])
 
     def test_skill_intake_review_receipt_schema_rejects_execution_claims(self) -> None:
+        """
+        Validates that the skill-intake-review-receipt schema rejects fixtures with execution performance claims.
+        """
         self.assert_invalid("skill-intake-review-receipt", "skill-intake-review-executes.json")
 
     def test_skill_intake_review_receipt_schema_rejects_review_status_without_review_items(self) -> None:

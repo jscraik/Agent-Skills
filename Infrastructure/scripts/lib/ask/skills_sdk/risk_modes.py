@@ -117,14 +117,10 @@ def _digest_json(value: object) -> str:
 
 def _repo_relative(repo_root: Path, path: Path) -> str:
     """
-    Returns a POSIX path string, relative to the repository root if possible.
-    
-    Parameters:
-    	repo_root (Path): The root directory of the repository
-    	path (Path): The path to convert
+    Converts a path to a POSIX string, relative to the repository root if possible.
     
     Returns:
-    	A POSIX string representing the path relative to the repository root if the path is within the repository; otherwise, a POSIX string of the original path.
+    	A POSIX path string, relative to repo_root if the path is within it, or the absolute path otherwise.
     """
     try:
         return path.resolve(strict=False).relative_to(repo_root.resolve()).as_posix()
@@ -144,20 +140,25 @@ def _text_signals(frontmatter: dict[str, Any], body: str) -> str:
 
 def _indicator(indicator_id: str, evidence_ref: str, reason: str) -> dict[str, str]:
     """
-    Create a standardized indicator dictionary.
+    Construct an indicator record from the provided fields.
     
     Returns:
-    	dict[str, str]: A dictionary containing the indicator id, evidence reference, and reason
+        dict[str, str]: A dictionary containing `id`, `evidence_ref`, and `reason` keys.
     """
     return {"id": indicator_id, "evidence_ref": evidence_ref, "reason": reason}
 
 
 def _regex_indicators(mode: str, text: str, evidence_ref: str) -> list[dict[str, str]]:
     """
-    Identify indicators detected in text for a given risk mode.
+    Detect risk indicators by matching configured regex patterns for a given mode against text.
+    
+    Parameters:
+        mode (str): The risk mode whose patterns to match against.
+        text (str): The text to search within.
+        evidence_ref (str): A reference identifier for the evidence source.
     
     Returns:
-        A list of indicator dictionaries for each matching pattern.
+        list[dict[str, str]]: A list of indicator dictionaries for each matched pattern.
     """
     indicators: list[dict[str, str]] = []
     for indicator_id, pattern in INDICATORS[mode]:
@@ -181,13 +182,13 @@ def _has_safety_language(text: str) -> bool:
 
 def _frontmatter_value(frontmatter: dict[str, Any], key: str) -> Any:
     """
-    Retrieve a value from frontmatter with fallback to the metadata sub-dictionary.
+    Retrieve a value from frontmatter, falling back to a nested metadata dictionary.
     
-    Treats None, empty string, empty list, and empty dict as missing. If the initial
-    lookup fails, attempts to retrieve the value from the metadata sub-dictionary.
+    Treats None, empty string, empty list, and empty dict as missing values. When a top-level
+    lookup yields a missing value, attempts to retrieve the value from the metadata sub-dictionary.
     
     Returns:
-        The value from frontmatter or its metadata dictionary, or None if not found
+        The value from frontmatter or its metadata sub-dictionary if found, or None otherwise.
     """
     value = frontmatter.get(key)
     if value not in (None, "", [], {}):
@@ -244,14 +245,12 @@ def _mode_specific_indicators(
     evidence_ref: str,
 ) -> list[dict[str, str]]:
     """
-    Apply mode-specific post-processing and refinement to indicators.
+    Refine indicators with mode-specific post-processing logic.
     
-    Parameters:
-    	mode (str): The risk mode classification.
-    	source_kind (str): The source type ("external" or "internal").
+    For malicious_supply_chain mode with external sources, appends an external-source indicator. Then dispatches to mode-specific refinement handlers which may add or modify indicators based on evidence patterns.
     
     Returns:
-    	list[dict[str, str]]: Indicators refined according to mode-specific logic.
+    	list[dict[str, str]]: The refined indicators after mode-specific processing.
     """
     if mode == "malicious_supply_chain" and source_kind == "external":
         indicators.append(_indicator("external_source", evidence_ref, "External source requires supply-chain review before adoption."))
@@ -292,10 +291,10 @@ def _negligent_indicators(indicators: list[dict[str, str]], text: str, evidence_
 
 def _vulnerable_indicators(indicators: list[dict[str, str]], text: str, evidence_ref: str) -> list[dict[str, str]]:
     """
-    Identifies when secret handling is present without explicit redaction guidance.
+    Appends a secret_without_redaction indicator when secret handling is detected without redaction guidance.
     
     Returns:
-        The indicators list with an appended secret_without_redaction indicator if secret handling is detected and no redaction guidance is found, otherwise unchanged.
+        The indicators list, with the indicator appended if applicable.
     """
     has_secret_handling = any(indicator["id"] == "secret_handling" for indicator in indicators)
     has_redaction = "redact" in text.lower() or "do not print" in text.lower()
@@ -308,15 +307,10 @@ def _unknown_evidence_indicators(
     indicators: list[dict[str, str]], frontmatter: dict[str, Any], evidence_ref: str
 ) -> list[dict[str, str]]:
     """
-    Append indicators for missing evidence fields in frontmatter.
-    
-    Parameters:
-        indicators: List of indicator dictionaries to be extended.
-        frontmatter: Frontmatter dictionary to check for 'provenance' and 'description' fields.
-        evidence_ref: Reference path for the evidence source.
+    Appends indicators for missing provenance and description fields in frontmatter.
     
     Returns:
-        The indicators list with indicators appended for missing 'provenance' and 'description' fields.
+        The updated indicators list.
     """
     if not _frontmatter_value(frontmatter, "provenance"):
         indicators.append(_indicator("missing_provenance", evidence_ref, "No provenance field was declared."))
@@ -344,11 +338,11 @@ def _mode_result(
     evidence_ref: str,
 ) -> dict[str, Any]:
     """
-    Builds a risk-mode assessment result with detected indicators and metadata.
+    Assesses whether a risk mode is present in the skill source.
     
     Returns:
-        A dictionary containing mode identification, detection status ("detected" or 
-        "not_detected"), severity, description, label, and list of matched indicators.
+        A dictionary containing the mode name, label, severity, description, detection status
+        ("detected" or "not_detected"), and matched indicators.
     """
     indicators = _mode_indicators(
         mode,
@@ -370,19 +364,14 @@ def _mode_result(
 
 def _primary_mode(mode_results: list[dict[str, Any]]) -> str:
     """
-    Determine the primary risk mode based on priority ordering.
-    
-    Scans mode results in the order defined by RISK_MODE_ORDER and returns the
-    first mode with a detected status. If no modes are detected, returns
-    "none_detected".
+    Identify the highest-priority detected risk mode.
     
     Parameters:
-    	mode_results (list[dict[str, Any]]): A list of per-mode result dictionaries,
-    		each containing at least a "mode" key (str) and "status" key (str).
+        mode_results (list[dict[str, Any]]): Per-mode result dictionaries, each
+            containing "mode" (str) and "status" (str) keys.
     
     Returns:
-    	str: The primary risk mode name, or "none_detected" if no modes have
-    	status "detected".
+        str: The name of the primary risk mode if detected, or `"none_detected"`.
     """
     for mode in RISK_MODE_ORDER:
         for result in mode_results:
@@ -393,10 +382,10 @@ def _primary_mode(mode_results: list[dict[str, Any]]) -> str:
 
 def build_risk_mode_taxonomy_receipt(repo_root: Path, *, source_path: Path, query: str) -> dict[str, Any]:
     """
-    Analyze a skill package for risk indicators and generate a taxonomy receipt.
+    Generate a risk taxonomy receipt by analyzing a skill package for risk indicators across defined modes.
     
     Returns:
-        A taxonomy receipt dictionary with risk classification, per-mode analysis results, detected modes, and operation metadata.
+        A taxonomy receipt dictionary containing schema metadata, source classification, mode-based analysis results, detected risk modes, and operation metadata.
     """
     source = source_path if source_path.name == "SKILL.md" else source_path / "SKILL.md"
     frontmatter = read_skill_frontmatter_fields(source)
