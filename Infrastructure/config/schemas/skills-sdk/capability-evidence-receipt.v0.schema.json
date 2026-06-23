@@ -21,7 +21,7 @@
     "replay_required_count": {"type": "integer", "minimum": 0},
     "replay_command": {
       "oneOf": [
-        {"type": "string", "const": "./bin/ask sdk evidence command-plan --scope capability-matrix --preview --json --robot"},
+        {"type": "string"},
         {"type": "null"}
       ]
     },
