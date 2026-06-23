@@ -85,6 +85,14 @@ SAFETY_TERMS = (
 
 
 def _body_without_frontmatter(text: str) -> str:
+    """
+    Extract the body text after YAML frontmatter delimiters.
+    
+    If text begins with `---`, returns everything after the closing `---`. Otherwise, returns the original text.
+    
+    Returns:
+        str: The body text, with leading and trailing whitespace removed.
+    """
     lines = text.splitlines()
     if lines and lines[0].strip() == "---":
         for index, line in enumerate(lines[1:], start=1):
@@ -94,11 +102,30 @@ def _body_without_frontmatter(text: str) -> str:
 
 
 def _digest_json(value: object) -> str:
+    """
+    Compute a SHA-256 digest of a JSON-serialized object.
+    
+    Parameters:
+    	value (object): The object to digest
+    
+    Returns:
+    	str: A digest string in the format `sha256:<hexdigest>`
+    """
     payload = json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8")
     return f"sha256:{hashlib.sha256(payload).hexdigest()}"
 
 
 def _repo_relative(repo_root: Path, path: Path) -> str:
+    """
+    Returns a POSIX path string, relative to the repository root if possible.
+    
+    Parameters:
+    	repo_root (Path): The root directory of the repository
+    	path (Path): The path to convert
+    
+    Returns:
+    	A POSIX string representing the path relative to the repository root if the path is within the repository; otherwise, a POSIX string of the original path.
+    """
     try:
         return path.resolve(strict=False).relative_to(repo_root.resolve()).as_posix()
     except ValueError:
@@ -106,14 +133,32 @@ def _repo_relative(repo_root: Path, path: Path) -> str:
 
 
 def _text_signals(frontmatter: dict[str, Any], body: str) -> str:
+    """
+    Combine frontmatter and body into a single text blob for evidence scanning.
+    
+    Returns:
+        A string containing the frontmatter as compact JSON (with sorted keys) on the first line, followed by the body text.
+    """
     return json.dumps(frontmatter, sort_keys=True, separators=(",", ":")) + "\n" + body
 
 
 def _indicator(indicator_id: str, evidence_ref: str, reason: str) -> dict[str, str]:
+    """
+    Create a standardized indicator dictionary.
+    
+    Returns:
+    	dict[str, str]: A dictionary containing the indicator id, evidence reference, and reason
+    """
     return {"id": indicator_id, "evidence_ref": evidence_ref, "reason": reason}
 
 
 def _regex_indicators(mode: str, text: str, evidence_ref: str) -> list[dict[str, str]]:
+    """
+    Identify indicators detected in text for a given risk mode.
+    
+    Returns:
+        A list of indicator dictionaries for each matching pattern.
+    """
     indicators: list[dict[str, str]] = []
     for indicator_id, pattern in INDICATORS[mode]:
         if not pattern:
@@ -124,11 +169,26 @@ def _regex_indicators(mode: str, text: str, evidence_ref: str) -> list[dict[str,
 
 
 def _has_safety_language(text: str) -> bool:
+    """
+    Determines whether text contains any safety-related terms.
+    
+    Returns:
+    	True if text contains any term from SAFETY_TERMS, False otherwise.
+    """
     lowered = text.lower()
     return any(term in lowered for term in SAFETY_TERMS)
 
 
 def _frontmatter_value(frontmatter: dict[str, Any], key: str) -> Any:
+    """
+    Retrieve a value from frontmatter with fallback to the metadata sub-dictionary.
+    
+    Treats None, empty string, empty list, and empty dict as missing. If the initial
+    lookup fails, attempts to retrieve the value from the metadata sub-dictionary.
+    
+    Returns:
+        The value from frontmatter or its metadata dictionary, or None if not found
+    """
     value = frontmatter.get(key)
     if value not in (None, "", [], {}):
         return value
@@ -146,6 +206,22 @@ def _mode_indicators(
     body: str,
     evidence_ref: str,
 ) -> list[dict[str, str]]:
+    """
+    Collect and refine risk indicators for a given risk mode.
+    
+    Extracts regex-based indicators from the skill content, then applies
+    mode-specific refinements based on the source kind and frontmatter context.
+    
+    Parameters:
+        mode: The risk mode to analyze
+        source_kind: The source kind (e.g., "external") affecting mode-specific detection
+        frontmatter: The parsed YAML frontmatter of the skill file
+        body: The text body of the skill file without frontmatter
+        evidence_ref: A path reference to the skill file for evidence tracking
+    
+    Returns:
+        A list of indicators, each containing id, evidence_ref, and reason fields
+    """
     text = _text_signals(frontmatter, body)
     indicators = _regex_indicators(mode, text, evidence_ref)
     return _mode_specific_indicators(
@@ -167,6 +243,16 @@ def _mode_specific_indicators(
     frontmatter: dict[str, Any],
     evidence_ref: str,
 ) -> list[dict[str, str]]:
+    """
+    Apply mode-specific post-processing and refinement to indicators.
+    
+    Parameters:
+    	mode (str): The risk mode classification.
+    	source_kind (str): The source type ("external" or "internal").
+    
+    Returns:
+    	list[dict[str, str]]: Indicators refined according to mode-specific logic.
+    """
     if mode == "malicious_supply_chain" and source_kind == "external":
         indicators.append(_indicator("external_source", evidence_ref, "External source requires supply-chain review before adoption."))
     if mode == "negligent_instruction":
@@ -179,6 +265,19 @@ def _mode_specific_indicators(
 
 
 def _negligent_indicators(indicators: list[dict[str, str]], text: str, evidence_ref: str) -> list[dict[str, str]]:
+    """
+    Refines negligent instruction indicators by validating boundary language presence.
+    
+    Adds a boundary language indicator if impactful actions lack safeguard language (approval, sandbox, preview, rollback, or redaction). Removes missing_safety_language indicators.
+    
+    Parameters:
+        indicators: Indicator list to refine.
+        text: Text to validate for safety language.
+        evidence_ref: Reference to the evidence location.
+    
+    Returns:
+        Refined indicator list.
+    """
     has_impactful_action = any(indicator["id"] == "impactful_write_without_review" for indicator in indicators)
     if has_impactful_action and not _has_safety_language(text):
         indicators.append(
@@ -192,6 +291,12 @@ def _negligent_indicators(indicators: list[dict[str, str]], text: str, evidence_
 
 
 def _vulnerable_indicators(indicators: list[dict[str, str]], text: str, evidence_ref: str) -> list[dict[str, str]]:
+    """
+    Identifies when secret handling is present without explicit redaction guidance.
+    
+    Returns:
+        The indicators list with an appended secret_without_redaction indicator if secret handling is detected and no redaction guidance is found, otherwise unchanged.
+    """
     has_secret_handling = any(indicator["id"] == "secret_handling" for indicator in indicators)
     has_redaction = "redact" in text.lower() or "do not print" in text.lower()
     if has_secret_handling and not has_redaction:
@@ -202,6 +307,17 @@ def _vulnerable_indicators(indicators: list[dict[str, str]], text: str, evidence
 def _unknown_evidence_indicators(
     indicators: list[dict[str, str]], frontmatter: dict[str, Any], evidence_ref: str
 ) -> list[dict[str, str]]:
+    """
+    Append indicators for missing evidence fields in frontmatter.
+    
+    Parameters:
+        indicators: List of indicator dictionaries to be extended.
+        frontmatter: Frontmatter dictionary to check for 'provenance' and 'description' fields.
+        evidence_ref: Reference path for the evidence source.
+    
+    Returns:
+        The indicators list with indicators appended for missing 'provenance' and 'description' fields.
+    """
     if not _frontmatter_value(frontmatter, "provenance"):
         indicators.append(_indicator("missing_provenance", evidence_ref, "No provenance field was declared."))
     if not _frontmatter_value(frontmatter, "description"):
@@ -210,6 +326,12 @@ def _unknown_evidence_indicators(
 
 
 def _mode_status(indicators: list[dict[str, str]]) -> str:
+    """
+    Determine the status of a risk mode based on indicator presence.
+    
+    Returns:
+    	status (str): `'detected'` if any indicators are present, `'not_detected'` otherwise.
+    """
     return "detected" if indicators else "not_detected"
 
 
@@ -221,6 +343,13 @@ def _mode_result(
     body: str,
     evidence_ref: str,
 ) -> dict[str, Any]:
+    """
+    Builds a risk-mode assessment result with detected indicators and metadata.
+    
+    Returns:
+        A dictionary containing mode identification, detection status ("detected" or 
+        "not_detected"), severity, description, label, and list of matched indicators.
+    """
     indicators = _mode_indicators(
         mode,
         source_kind=source_kind,
@@ -240,6 +369,21 @@ def _mode_result(
 
 
 def _primary_mode(mode_results: list[dict[str, Any]]) -> str:
+    """
+    Determine the primary risk mode based on priority ordering.
+    
+    Scans mode results in the order defined by RISK_MODE_ORDER and returns the
+    first mode with a detected status. If no modes are detected, returns
+    "none_detected".
+    
+    Parameters:
+    	mode_results (list[dict[str, Any]]): A list of per-mode result dictionaries,
+    		each containing at least a "mode" key (str) and "status" key (str).
+    
+    Returns:
+    	str: The primary risk mode name, or "none_detected" if no modes have
+    	status "detected".
+    """
     for mode in RISK_MODE_ORDER:
         for result in mode_results:
             if result["mode"] == mode and result["status"] == "detected":
@@ -248,7 +392,12 @@ def _primary_mode(mode_results: list[dict[str, Any]]) -> str:
 
 
 def build_risk_mode_taxonomy_receipt(repo_root: Path, *, source_path: Path, query: str) -> dict[str, Any]:
-    """Build a deterministic, non-mutating risk-mode taxonomy receipt for one skill package."""
+    """
+    Analyze a skill package for risk indicators and generate a taxonomy receipt.
+    
+    Returns:
+        A taxonomy receipt dictionary with risk classification, per-mode analysis results, detected modes, and operation metadata.
+    """
     source = source_path if source_path.name == "SKILL.md" else source_path / "SKILL.md"
     frontmatter = read_skill_frontmatter_fields(source)
     text = source.read_text(encoding="utf-8")
@@ -284,6 +433,19 @@ def _taxonomy_receipt(
     mode_results: list[dict[str, Any]],
     detected_modes: list[str],
 ) -> dict[str, Any]:
+    """
+    Assemble a risk-mode taxonomy receipt combining query context, package metadata, and mode analysis results.
+    
+    Parameters:
+    	query (str): The query string identifying the inspection task.
+    	package_receipt (dict[str, Any]): Package metadata containing package_id, package_digest, and source_digest.
+    	classification (dict[str, Any]): Risk classification containing source_kind and risk_tier.
+    	mode_results (list[dict[str, Any]]): Per-mode detection results with indicators and status.
+    	detected_modes (list[str]): List of detected risk mode names.
+    
+    Returns:
+    	dict[str, Any]: A structured receipt dictionary with schema metadata, classification, mode results, digests, and execution flags indicating preview-only behavior.
+    """
     return {
         "schema_version": RISK_MODE_TAXONOMY_SCHEMA_VERSION,
         "schema_uri": RISK_MODE_TAXONOMY_SCHEMA_URI,

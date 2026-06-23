@@ -12,6 +12,13 @@ def add_sdk_intake_parser(
     sdk_subparsers: argparse._SubParsersAction,
     global_parser: argparse.ArgumentParser,
 ) -> None:
+    """
+    Register the 'intake' subcommand with 'inspect' and 'review' sub-subcommands.
+    
+    Parameters:
+    	sdk_subparsers (argparse._SubParsersAction): The subparsers action for the SDK command.
+    	global_parser (argparse.ArgumentParser): The parent parser to use for all subcommands.
+    """
     sdk_intake_parser = sdk_subparsers.add_parser(
         "intake",
         help="Inspect external skill sources in a non-mutating quarantine lane",
@@ -47,6 +54,17 @@ def add_sdk_intake_parser(
 
 
 def _validation_error(command: str, message: str, fix_suggestion: str) -> CallResult:
+    """
+    Create a CallResult with validation error status.
+    
+    Parameters:
+    	command (str): The command associated with the error.
+    	message (str): The error message.
+    	fix_suggestion (str): A suggested fix for the error.
+    
+    Returns:
+    	CallResult: An error result with validation error details.
+    """
     result = CallResult(status="error")
     result.metadata["command"] = command
     result.errors.append(ErrorObject(code="ERR_VALIDATION", message=message, fix_suggestion=fix_suggestion))
@@ -54,6 +72,19 @@ def _validation_error(command: str, message: str, fix_suggestion: str) -> CallRe
 
 
 def dispatch_sdk_intake(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    """
+    Route the SDK intake command to its handler.
+    
+    Dispatches the `inspect` or `review` subcommand based on parsed arguments.
+    Preview mode is required for both operations.
+    
+    Parameters:
+        repo_root (Path): The repository root directory.
+        args (argparse.Namespace): Parsed arguments with intake_action, preview, and source.
+    
+    Returns:
+        CallResult: The outcome of the intake operation.
+    """
     if args.intake_action == "inspect":
         if not args.preview:
             return _validation_error(

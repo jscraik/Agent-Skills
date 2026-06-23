@@ -23,6 +23,16 @@ FIXTURE_DIR = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine
 
 
 def _command_env() -> dict[str, str]:
+    """
+    Create a process environment with isolated cache and state directories.
+    
+    Sets default values for cache, state, and configuration directories to a temporary location,
+    allowing controlled subprocess execution without interfering with system or user environments.
+    Existing environment variable values are preserved.
+    
+    Returns:
+        A dictionary of environment variables with paths redirected to a temporary test location.
+    """
     env = os.environ.copy()
     temp_base = Path(tempfile.gettempdir()) / "agent-skills-test"
     env.setdefault("XDG_CACHE_HOME", str(temp_base / "xdg-cache"))
@@ -35,6 +45,18 @@ def _command_env() -> dict[str, str]:
 
 
 def _run_json_command(*args: str, check: bool = True) -> dict:
+    """
+    Execute a command and return its JSON output.
+    
+    Parameters:
+        check (bool): If True, raises an error on non-zero exit code.
+    
+    Returns:
+        dict: Parsed JSON from standard output.
+    
+    Raises:
+        AssertionError: If check is True and the subprocess exits with a non-zero code.
+    """
     process = subprocess.run(
         list(args),
         cwd=REPO_ROOT,
@@ -52,6 +74,14 @@ def _run_json_command(*args: str, check: bool = True) -> dict:
 
 
 def _write_skill(source: Path, *, body: str, frontmatter: str = "") -> None:
+    """
+    Create a skill fixture file with YAML frontmatter in the specified directory.
+    
+    Parameters:
+        source (Path): Directory where the SKILL.md file will be created.
+        body (str): Body content of the skill file, appended after the frontmatter.
+        frontmatter (str): Optional additional YAML frontmatter fields to include before the body separator.
+    """
     source.mkdir()
     (source / "SKILL.md").write_text(
         f"---\nname: external-review\n"
@@ -78,6 +108,12 @@ class TestSkillsSdkSkillIntakeReview(unittest.TestCase):
         }
 
     def assert_schema_valid(self, payload: dict) -> None:
+        """
+        Validates a payload against the skill intake review receipt schema.
+        
+        Parameters:
+        	payload (dict): The receipt payload to validate
+        """
         _validate_schema_subset(self.schema, payload, self.schema_store)
 
     def test_builder_consumes_intake_and_risk_mode_receipts(self) -> None:

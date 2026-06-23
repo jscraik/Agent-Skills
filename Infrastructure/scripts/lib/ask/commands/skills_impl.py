@@ -4094,7 +4094,16 @@ def skills_sdk_intake_inspect(
     source: str,
     source_kind: str = "directory",
 ) -> CallResult:
-    """Build a non-mutating external skill intake receipt."""
+    """
+    Build a non-mutating intake inspection receipt for an external skill source.
+    
+    Parameters:
+        source (str): The skill source to inspect.
+        source_kind (str): The type of source; typically "directory" or "archive".
+    
+    Returns:
+        CallResult: A result containing the intake inspection receipt. Status is set to "error" if the receipt indicates a blocked condition.
+    """
     result = CallResult()
     result.metadata["command"] = "sdk intake inspect --preview"
     query = source.strip()
@@ -4137,7 +4146,16 @@ def skills_sdk_intake_review(
     source: str,
     source_kind: str = "directory",
 ) -> CallResult:
-    """Build a non-mutating external skill intake review receipt."""
+    """
+    Generate an intake review receipt for a skill source without mutating the workspace.
+    
+    Parameters:
+    	source (str): The skill source location to review (e.g., path or handle).
+    	source_kind (str): The type of source being reviewed. Defaults to "directory".
+    
+    Returns:
+    	CallResult: Result object with `data["skills_sdk_intake_review"]` containing the receipt payload. Status is set to "error" if the receipt status is "blocked".
+    """
     result = CallResult()
     result.metadata["command"] = "sdk intake review --preview"
     query = source.strip()
@@ -4890,7 +4908,16 @@ def skills_sdk_security_adapters_preview(repo_root: Path) -> CallResult:
 
 
 def skills_sdk_security_risk_modes_preview(repo_root: Path, target: str) -> CallResult:
-    """Build a deterministic risk-mode taxonomy receipt without executing skill content."""
+    """
+    Build a deterministic risk-mode taxonomy receipt without executing skill content.
+    
+    Parameters:
+        target: A skill path or SDK handle to analyze.
+    
+    Returns:
+        A CallResult containing the risk-mode taxonomy payload. Status is "error" if the
+        canonical source is missing.
+    """
     result = CallResult()
     result.metadata["command"] = "sdk security risk-modes"
     query = target.strip()

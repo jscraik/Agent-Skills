@@ -22,10 +22,22 @@ FIXTURE_DIR = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine
 
 
 def _schema() -> dict:
+    """
+    Load the risk-mode taxonomy receipt JSON schema.
+    
+    Returns:
+        dict: The parsed schema.
+    """
     return json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
 
 
 def _command_env() -> dict[str, str]:
+    """
+    Create an environment dictionary with isolated cache and state directories for subprocess execution.
+    
+    Returns:
+        A dictionary containing environment variables with isolated cache and state directories under a temporary base path, plus the trusted configuration path.
+    """
     env = os.environ.copy()
     temp_base = Path(tempfile.gettempdir()) / "agent-skills-test"
     env.setdefault("XDG_CACHE_HOME", str(temp_base / "xdg-cache"))
@@ -38,6 +50,12 @@ def _command_env() -> dict[str, str]:
 
 
 def _run_ask(*args: str) -> subprocess.CompletedProcess[str]:
+    """
+    Execute the ask CLI command with the given arguments.
+    
+    Returns:
+    	A CompletedProcess object with the command's return code, stdout, and stderr.
+    """
     return subprocess.run(
         [sys.executable, "Infrastructure/bin/ask", *args],
         cwd=REPO_ROOT,
@@ -50,6 +68,17 @@ def _run_ask(*args: str) -> subprocess.CompletedProcess[str]:
 
 
 def _write_skill(root: Path, body: str, frontmatter: str | None = None) -> Path:
+    """
+    Create a skill markdown file in a sample-risk-mode directory.
+    
+    Parameters:
+        root (Path): The base directory where the skill structure is created.
+        body (str): The skill content.
+        frontmatter (str | None): YAML frontmatter. Defaults to standard name and description fields.
+    
+    Returns:
+        Path: The path to the created SKILL.md file.
+    """
     skill_dir = root / "sample-risk-mode"
     skill_dir.mkdir()
     frontmatter_text = frontmatter or "name: sample-risk-mode\ndescription: sample risk mode skill"
@@ -60,9 +89,18 @@ def _write_skill(root: Path, body: str, frontmatter: str | None = None) -> Path:
 
 class TestSkillsSdkRiskModeTaxonomy(unittest.TestCase):
     def assert_schema_valid(self, payload: dict) -> None:
+        """
+        Assert that the payload conforms to the risk-mode-taxonomy-receipt schema.
+        
+        Parameters:
+        	payload (dict): The receipt payload to validate
+        """
         _validate_schema_subset(_schema(), payload, {"risk-mode-taxonomy-receipt": _schema()})
 
     def test_builder_detects_negligent_instruction_without_safety_language(self) -> None:
+        """
+        Verify that the risk mode builder identifies negligent instruction risk when a skill contains impactful write operations without safety language, and confirm execution, scanner execution, network access, and mutation flags remain false.
+        """
         with tempfile.TemporaryDirectory() as temp_dir:
             skill_md = _write_skill(
                 Path(temp_dir),
@@ -147,6 +185,11 @@ class TestSkillsSdkRiskModeTaxonomy(unittest.TestCase):
         self.assertFalse(receipt["mutation_performed"])
 
     def test_command_requires_preview_flag(self) -> None:
+        """
+        Verify that the risk-modes command requires the --preview flag.
+        
+        Asserts that invoking the command without --preview results in a non-zero return code and an error message containing "requires --preview".
+        """
         process = _run_ask(
             "sdk",
             "security",

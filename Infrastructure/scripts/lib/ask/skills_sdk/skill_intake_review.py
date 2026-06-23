@@ -35,6 +35,15 @@ APPROVAL_PATTERN = re.compile(r"\b(approval|ask|confirm|preview|dry-run|non-muta
 
 
 def _body_without_frontmatter(text: str) -> str:
+    """
+    Remove YAML frontmatter from text bounded by --- delimiters.
+    
+    Parameters:
+    	text (str): The text to process, potentially containing YAML frontmatter
+    
+    Returns:
+    	str: Text content following the frontmatter block if present, otherwise the original text, with leading and trailing whitespace removed
+    """
     lines = text.splitlines()
     if lines and lines[0].strip() == "---":
         for index, line in enumerate(lines[1:], start=1):
@@ -44,11 +53,27 @@ def _body_without_frontmatter(text: str) -> str:
 
 
 def _digest_json(value: object) -> str:
+    """
+    Computes a deterministic SHA-256 digest of an object.
+    
+    Returns:
+    	A string in the format `sha256:<hexdigest>`, where `<hexdigest>` is the SHA-256 hash of the object's JSON representation.
+    """
     payload = json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8")
     return f"sha256:{hashlib.sha256(payload).hexdigest()}"
 
 
 def _source_root(repo_root: Path, source: str) -> Path:
+    """
+    Resolve a source path relative to a repository root if the source is not absolute.
+    
+    Parameters:
+        repo_root (Path): Base directory used if source is relative
+        source (str): Source path string, which may include ~ for home directory
+    
+    Returns:
+        Path: Resolved path without filesystem validation
+    """
     source_path = Path(source).expanduser()
     if not source_path.is_absolute():
         source_path = repo_root / source_path
@@ -63,6 +88,20 @@ def _review_item(
     verdict: str,
     reason: str,
 ) -> dict[str, Any]:
+    """
+    Constructs a standardized review-item object.
+    
+    Parameters:
+        item_id (str): Identifier for the review item
+        status (str): Review status ('pass', 'review', or 'block')
+        question (str): The review question
+        evidence (list[str]): Evidence supporting the determination
+        verdict (str): The verdict or finding
+        reason (str): The reason or explanation for the verdict
+    
+    Returns:
+        dict[str, Any]: A dictionary with id, status, question, evidence, verdict, and reason keys
+    """
     return {
         "id": item_id,
         "status": status,
@@ -74,6 +113,12 @@ def _review_item(
 
 
 def _frontmatter_value(frontmatter: dict[str, Any], key: str) -> Any:
+    """
+    Extract a value from frontmatter, checking a metadata fallback if the primary value is empty.
+    
+    Returns:
+    	Any: The value from frontmatter[key] if it is not None, empty string, empty list, or empty dict. Falls back to frontmatter["metadata"][key] if metadata is a dict. Returns None if no usable value is found.
+    """
     value = frontmatter.get(key)
     if value not in (None, "", [], {}):
         return value
@@ -84,10 +129,25 @@ def _frontmatter_value(frontmatter: dict[str, Any], key: str) -> Any:
 
 
 def _has_provenance(frontmatter: dict[str, Any]) -> bool:
+    """
+    Determines if a skill has documented provenance information.
+    
+    Returns:
+    	`true` if the frontmatter contains meaningful provenance or owner information, `false` otherwise.
+    """
     return bool(_frontmatter_value(frontmatter, "provenance") or _frontmatter_value(frontmatter, "owner"))
 
 
 def _risk_mode_evidence(risk_mode_receipt: dict[str, Any]) -> list[str]:
+    """
+    Build evidence strings from detected risk modes and their indicators.
+    
+    Parameters:
+        risk_mode_receipt (dict[str, Any]): Receipt containing mode_results with risk modes and their indicators.
+    
+    Returns:
+        list[str]: Evidence strings formatted as `mode:indicator_ids` for modes with indicators, or the mode name alone.
+    """
     evidence: list[str] = []
     for mode_result in risk_mode_receipt["mode_results"]:
         if mode_result["status"] != "detected":
@@ -104,6 +164,12 @@ def _review_items(
     intake_receipt: dict[str, Any],
     risk_mode_receipt: dict[str, Any],
 ) -> list[dict[str, Any]]:
+    """
+    Generate review items analyzing a skill's content and risk exposure.
+    
+    Returns:
+        list[dict[str, Any]]: A list of eight review items, each containing id, status, question, evidence, verdict, and reason fields.
+    """
     text = json.dumps(frontmatter, sort_keys=True, separators=(",", ":")) + "\n" + body
     context = {
         "detected_modes": set(risk_mode_receipt["detected_modes"]),
@@ -126,6 +192,12 @@ def _review_items(
 
 
 def _provenance_item(context: dict[str, Any]) -> dict[str, Any]:
+    """
+    Build a review item assessing whether the skill declares provenance or ownership.
+    
+    Returns:
+        dict[str, Any]: A review item with status "pass" if provenance is present, "review" otherwise.
+    """
     has_provenance = bool(context["has_provenance"])
     return _review_item(
         "provenance",
@@ -138,6 +210,9 @@ def _provenance_item(context: dict[str, Any]) -> dict[str, Any]:
 
 
 def _permissions_item(context: dict[str, Any]) -> dict[str, Any]:
+    """
+    Creates a review item assessing whether declared or inferred permissions require human review based on detected risk modes.
+    """
     risky_modes = context["detected_modes"] & {"malicious_supply_chain", "negligent_instruction", "vulnerable_operation"}
     return _review_item(
         "permissions",
@@ -150,6 +225,15 @@ def _permissions_item(context: dict[str, Any]) -> dict[str, Any]:
 
 
 def _data_exposure_item(context: dict[str, Any]) -> dict[str, Any]:
+    """
+    Create a review item assessing whether the skill text contains data-exposure language.
+    
+    Parameters:
+    	context (dict[str, Any]): Context dictionary with "has_data_exposure" flag indicating whether data-exposure patterns were detected.
+    
+    Returns:
+    	dict[str, Any]: Review item evaluating potential secrets, logs, or transcripts exposure.
+    """
     has_data_exposure = bool(context["has_data_exposure"])
     return _review_item(
         "data_exposure",
@@ -162,6 +246,20 @@ def _data_exposure_item(context: dict[str, Any]) -> dict[str, Any]:
 
 
 def _action_surface_item(context: dict[str, Any]) -> dict[str, Any]:
+    """
+    Generates a review item assessing whether the skill contains action-surface language.
+    
+    Evaluates whether the skill's text includes deterministic terms indicating external actions
+    such as writes, deploys, publishes, or other mutating operations.
+    
+    Parameters:
+        context (dict): A dictionary containing has_action_surface (bool), indicating whether
+            action-surface language was detected in the skill.
+    
+    Returns:
+        dict: A review item with status "review" if action-surface language is detected,
+            "pass" otherwise.
+    """
     has_action_surface = bool(context["has_action_surface"])
     return _review_item(
         "action_surface",
@@ -174,6 +272,15 @@ def _action_surface_item(context: dict[str, Any]) -> dict[str, Any]:
 
 
 def _isolation_item(intake_receipt: dict[str, Any]) -> dict[str, Any]:
+    """
+    Creates an isolation review item confirming the intake stayed quarantined.
+    
+    Parameters:
+    	intake_receipt (dict[str, Any]): The intake receipt containing the schema version and execution flags
+    
+    Returns:
+    	dict[str, Any]: A review item with "pass" status indicating the intake maintained a non-mutating quarantine boundary
+    """
     return _review_item(
         "isolation",
         "pass",
@@ -185,6 +292,12 @@ def _isolation_item(intake_receipt: dict[str, Any]) -> dict[str, Any]:
 
 
 def _semantic_behavior_item(context: dict[str, Any]) -> dict[str, Any]:
+    """
+    Constructs a review item assessing semantic behavior risks.
+    
+    Returns:
+        A review item dictionary containing the semantic behavior assessment based on detected risk modes.
+    """
     semantic_modes = context["detected_modes"] & {"malicious_supply_chain", "negligent_instruction", "unknown_insufficient_evidence"}
     return _review_item(
         "semantic_behavior",
@@ -197,6 +310,12 @@ def _semantic_behavior_item(context: dict[str, Any]) -> dict[str, Any]:
 
 
 def _approval_friction_item(context: dict[str, Any]) -> dict[str, Any]:
+    """
+    Build a review item assessing approval friction for impactful actions.
+    
+    Returns:
+        dict[str, Any]: A review item with "review" status if impactful actions lack approval friction, otherwise "pass" status.
+    """
     needs_review = bool(context["has_action_surface"]) and not bool(context["has_approval_language"])
     return _review_item(
         "approval_friction",
@@ -209,6 +328,12 @@ def _approval_friction_item(context: dict[str, Any]) -> dict[str, Any]:
 
 
 def _risk_modes_item(context: dict[str, Any]) -> dict[str, Any]:
+    """
+    Builds a review item for detected risk modes.
+    
+    Returns:
+    	A review item dict with status "review" if any risk modes were detected, "pass" otherwise.
+    """
     detected_modes = context["detected_modes"]
     return _review_item(
         "risk_modes",
@@ -221,6 +346,12 @@ def _risk_modes_item(context: dict[str, Any]) -> dict[str, Any]:
 
 
 def _decision(review_items: list[dict[str, Any]]) -> str:
+    """
+    Determine the overall review decision based on aggregated review item statuses.
+    
+    Returns:
+        'blocked' if any item blocks review, 'needs_human_review' if any item requires review, 'ready_for_adoption_decision' otherwise.
+    """
     if any(item["status"] == "block" for item in review_items):
         return "blocked"
     if any(item["status"] == "review" for item in review_items):
@@ -229,6 +360,12 @@ def _decision(review_items: list[dict[str, Any]]) -> str:
 
 
 def _status(review_items: list[dict[str, Any]]) -> str:
+    """
+    Derive a status code from review items.
+    
+    Returns:
+        str: 'blocked' if the review is blocked, 'review' if human review is needed, 'pass' otherwise.
+    """
     decision = _decision(review_items)
     if decision == "blocked":
         return "blocked"
@@ -238,12 +375,30 @@ def _status(review_items: list[dict[str, Any]]) -> str:
 
 
 def _residual_risk(review_items: list[dict[str, Any]], risk_mode_receipt: dict[str, Any]) -> list[str]:
+    """
+    Identify residual risks from detected modes and review items requiring review.
+    
+    Parameters:
+        review_items: List of review item objects, each containing an 'id' and 'status'.
+        risk_mode_receipt: Receipt containing 'detected_modes' list of risk mode names.
+    
+    Returns:
+        List of risk identifiers as strings in the format 'risk_mode:<mode>' for each detected mode and 'review_item:<item_id>' for each review item with status 'review'.
+    """
     risks = [f"risk_mode:{mode}" for mode in risk_mode_receipt["detected_modes"]]
     risks.extend(f"review_item:{item['id']}" for item in review_items if item["status"] == "review")
     return risks
 
 
 def _blocked_receipt(repo_root: Path, source: str, intake_receipt: dict[str, Any]) -> dict[str, Any]:
+    """
+    Construct a blocked skill intake review receipt for skills with intake quarantine blockers.
+    
+    Returns:
+    	dict[str, Any]: A receipt with status 'blocked', containing an isolation review item
+    		that lists the intake's blockers as evidence, and indicating no code execution or
+    		mutation occurred. Requires intake blockers to be cleared before risk-mode review can proceed.
+    """
     source_path = _source_root(repo_root, source)
     review_items = [
         _review_item(
@@ -323,6 +478,15 @@ def _review_receipt(
     review_items: list[dict[str, Any]],
     decision: str,
 ) -> dict[str, Any]:
+    """
+    Construct a skill intake review receipt from intake, risk-mode, and review assessments.
+    
+    Parameters:
+        decision (str): The overall review decision ("blocked", "needs_human_review", or "ready_for_adoption_decision").
+    
+    Returns:
+        dict[str, Any]: A receipt dictionary with schema information, source/package identity, embedded receipts, and review items.
+    """
     return {
         "schema_version": SKILL_INTAKE_REVIEW_SCHEMA_VERSION,
         "schema_uri": SKILL_INTAKE_REVIEW_SCHEMA_URI,

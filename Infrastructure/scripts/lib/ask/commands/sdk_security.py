@@ -12,6 +12,9 @@ def add_sdk_security_parser(
     sdk_subparsers: argparse._SubParsersAction,
     global_parser: argparse.ArgumentParser,
 ) -> None:
+    """
+    Register CLI subcommands for SDK security adapter discovery and risk-mode classification.
+    """
     parser = sdk_subparsers.add_parser(
         "security",
         help="Preview local Skills SDK security adapter discovery",
@@ -34,6 +37,16 @@ def add_sdk_security_parser(
 
 
 def dispatch_sdk_security(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    """
+    Route SDK security subcommands to their handlers with preview-mode enforcement.
+    
+    Parameters:
+        repo_root (Path): The root directory of the repository
+        args (argparse.Namespace): Parsed command-line arguments containing security_action and preview flag
+    
+    Returns:
+        CallResult: The result of the dispatched command or a validation/error response
+    """
     if args.security_action == "adapters":
         if not args.preview:
             return build_validation_error(
