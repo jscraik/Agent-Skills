@@ -4149,7 +4149,7 @@ def skills_sdk_intake_review(
     Generate an intake review receipt for a skill source without mutating the workspace.
     
     Parameters:
-    	source (str): The skill source location to review (path, URL, or handle).
+    	source (str): The skill source directory path to review.
     	source_kind (str): Type of source. Defaults to "directory".
     
     Returns:

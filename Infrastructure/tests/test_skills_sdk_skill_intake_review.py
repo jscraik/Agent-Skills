@@ -366,6 +366,8 @@ class TestSkillsSdkSkillIntakeReview(unittest.TestCase):
             self.assertEqual(receipt["review_decision"], "needs_human_review")
         elif receipt["status"] == "blocked":
             self.assertEqual(receipt["review_decision"], "blocked")
+        else:
+            self.fail(f"Unexpected status value: {receipt['status']}")
 
     def test_required_receipts_always_lists_both_schema_versions(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

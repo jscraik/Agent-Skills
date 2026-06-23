@@ -283,6 +283,7 @@ class TestSkillsSdkRiskModeTaxonomy(unittest.TestCase):
         # For internal-authored skills this test verifies the builder completes without error
         self.assertIsNotNone(receipt)
         self.assert_schema_valid(receipt)
+        self.assertIn("external_source", indicator_ids)
 
     def test_builder_none_detected_when_no_risk_signals_present(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

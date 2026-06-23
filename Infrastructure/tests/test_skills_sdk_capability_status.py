@@ -348,7 +348,7 @@ class TestSkillsSdkCapabilityStatus(unittest.TestCase):
         self.assertEqual(row["status"], "implemented")
         self.assertTrue(row["feature_executed"])
         self.assertFalse(row["mutation_performed"])
-        self.assertTrue(any("risk_modes.py" in ref for ref in row["evidence_refs"]))
+        self.assertTrue(any("risk_modes.py" in ref for ref in row["owner_surface"]))
 
     def test_skill_intake_review_capability_is_implemented_in_matrix(self) -> None:
         matrix = load_capability_matrix(REPO_ROOT)
@@ -359,7 +359,7 @@ class TestSkillsSdkCapabilityStatus(unittest.TestCase):
         self.assertEqual(row["status"], "implemented")
         self.assertTrue(row["feature_executed"])
         self.assertFalse(row["mutation_performed"])
-        self.assertTrue(any("skill_intake_review.py" in ref for ref in row["evidence_refs"]))
+        self.assertTrue(any("skill_intake_review.py" in ref for ref in row["owner_surface"]))
 
     def test_matrix_rejects_missing_risk_mode_taxonomy_id(self) -> None:
         matrix = load_capability_matrix(REPO_ROOT)
@@ -380,7 +380,7 @@ class TestSkillsSdkCapabilityStatus(unittest.TestCase):
             "Expected a risk-modes example in sdk security command metadata",
         )
         self.assertTrue(
-            any("intake review" in example or "review" in example for example in intake_examples),
+            any("intake" in example and "review" in example for example in intake_examples),
             "Expected an intake review example in sdk intake command metadata",
         )
 
