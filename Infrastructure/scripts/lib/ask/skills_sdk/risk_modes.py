@@ -296,7 +296,7 @@ def _unknown_evidence_indicators(
     Returns:
         The updated indicators list.
     """
-    if not _frontmatter_value(frontmatter, "provenance"):
+    if not (_frontmatter_value(frontmatter, "provenance") or _frontmatter_value(frontmatter, "owner")):
         indicators.append(_indicator("missing_provenance", evidence_ref, "No provenance field was declared."))
     if not _frontmatter_value(frontmatter, "description"):
         indicators.append(_indicator("missing_purpose", evidence_ref, "No description field was declared."))

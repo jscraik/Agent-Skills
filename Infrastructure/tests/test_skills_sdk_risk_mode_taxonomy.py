@@ -299,8 +299,28 @@ class TestSkillsSdkRiskModeTaxonomy(unittest.TestCase):
                 )
 
         self.assertEqual(receipts[0]["taxonomy_digest"], receipts[1]["taxonomy_digest"])
+        self.assertEqual(receipts[0]["source_digest"], receipts[1]["source_digest"])
+        self.assertEqual(receipts[0]["package_digest"], receipts[1]["package_digest"])
         malicious = next(r for r in receipts[0]["mode_results"] if r["mode"] == "malicious_supply_chain")
         self.assertEqual({ind["evidence_ref"] for ind in malicious["indicators"]}, {"SKILL.md"})
+
+    def test_owner_field_satisfies_unknown_provenance_evidence(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_md = _write_skill(
+                Path(temp_dir),
+                "# Guidance\n\nProvide concise factual answers to questions.",
+                "name: sample\ndescription: safe skill\nowner: docs-platform",
+            )
+            receipt = build_risk_mode_taxonomy_receipt(
+                REPO_ROOT,
+                source_path=skill_md,
+                query=str(skill_md),
+            )
+
+        self.assert_schema_valid(receipt)
+        unknown = next(r for r in receipt["mode_results"] if r["mode"] == "unknown_insufficient_evidence")
+        indicator_ids = {ind["id"] for ind in unknown["indicators"]}
+        self.assertNotIn("missing_provenance", indicator_ids)
 
     def test_builder_none_detected_when_no_risk_signals_present(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
