@@ -72,7 +72,7 @@
       "id": "local_runtime_install_preview",
       "pipeline_stage": "Local Runtime Truth",
       "loop": "Runtime loop",
-      "command": "./bin/ask sdk install preview <skill> --scope project --json --robot",
+      "command": "./bin/ask sdk install preview <skill> --scope project --preview --json --robot",
       "owner_module": "ask.skills_sdk.install_preview",
       "receipt_schema": "Infrastructure/config/schemas/skills-sdk/install-preview.v1.schema.json",
       "test_ref": "Infrastructure/tests/test_skills_sdk_install_preview.py",
