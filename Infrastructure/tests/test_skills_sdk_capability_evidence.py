@@ -59,7 +59,12 @@ class TestSkillsSdkCapabilityEvidence(unittest.TestCase):
         self.assertEqual(receipt["proof_mode"], "inventory_only")
         self.assertGreater(receipt["evidence_ref_count"], 0)
         self.assertTrue(any(row["kind"] == "command" and row["status"] == "not_run" for row in receipt["evidence_rows"]))
-        self.assertEqual(receipt["replay_required_count"], receipt["not_run_count"])
+        replayable_count = sum(
+            1
+            for row in receipt["evidence_rows"]
+            if row["kind"] == "command" and row["status"] == "not_run"
+        )
+        self.assertEqual(receipt["replay_required_count"], replayable_count)
         self.assertIn("command-plan", receipt["replay_command"])
 
     def test_file_ref_passes_when_repo_local_file_exists(self) -> None:
@@ -221,6 +226,26 @@ class TestSkillsSdkCapabilityEvidence(unittest.TestCase):
         self.assertEqual(receipt["replay_required_count"], 1)
         self.assertEqual(receipt["blocked_count"], 1)
         self.assertEqual(receipt["blockers"][0]["capability_id"], "bad")
+
+    def test_replay_count_excludes_external_not_run_refs(self) -> None:
+        matrix = {
+            "capabilities": [
+                {
+                    "id": "capability_evidence",
+                    "evidence_refs": [
+                        "./bin/ask sdk status --json --robot",
+                        "https://github.com/example/repo/actions/runs/1",
+                    ],
+                }
+            ]
+        }
+
+        with mock.patch("ask.skills_sdk.capability_evidence.load_capability_matrix", return_value=matrix):
+            receipt = build_capability_evidence_receipt(REPO_ROOT)
+
+        self.assertEqual(receipt["not_run_count"], 2)
+        self.assertEqual(receipt["replay_required_count"], 1)
+        self.assertIn("command-plan", receipt["replay_command"])
 
     def test_command_wrapper_errors_when_receipt_blocks(self) -> None:
         blocked_receipt = {

@@ -35,6 +35,9 @@ def build_capability_evidence_receipt(repo_root: Path, *, scope: str = "capabili
     ]
     blockers = [row for row in rows if row["status"] in {"blocked", "unknown"}]
     not_run_count = sum(1 for row in rows if row["status"] == "not_run")
+    replay_required_count = sum(
+        1 for row in rows if row["kind"] == "command" and row["status"] == "not_run"
+    )
     pass_count = sum(1 for row in rows if row["status"] == "pass")
     unknown_count = sum(1 for row in rows if row["kind"] == "unknown")
     return {
@@ -51,8 +54,8 @@ def build_capability_evidence_receipt(repo_root: Path, *, scope: str = "capabili
         "not_run_count": not_run_count,
         "unknown_count": unknown_count,
         "proof_mode": CAPABILITY_EVIDENCE_PROOF_MODE,
-        "replay_required_count": not_run_count,
-        "replay_command": COMMAND_REPLAY_COMMAND if not_run_count else None,
+        "replay_required_count": replay_required_count,
+        "replay_command": COMMAND_REPLAY_COMMAND if replay_required_count else None,
         "evidence_rows": rows,
         "blockers": blockers,
         "mutation_performed": False,
@@ -64,7 +67,8 @@ def build_capability_evidence_receipt(repo_root: Path, *, scope: str = "capabili
 
 def _agent_summary(total: int, pass_count: int, blocked_count: int, not_run_count: int) -> str:
     replay_note = (
-        " Run the command evidence plan and replay receipts before treating command lanes as proven."
+        " Run the command evidence plan for replayable command lanes before treating command lanes as proven;"
+        " external lanes require separate receipts."
         if not_run_count
         else ""
     )
