@@ -300,10 +300,10 @@
         <div class="note">Each surface should produce receipts that separate workspace truth, package truth, GitHub source provenance, and local SDK validation truth.</div>
       </div>
       <div class="card-grid">
-        <div class="card" data-status="preview"><span class="pill preview">catalog</span><strong>All Plugins</strong><span>Workspace-level searchable packages/plugins, ownership, visibility, quality, security, impact, and install metadata.</span></div>
+        <div class="card" data-status="preview"><span class="pill preview">catalog</span><strong>All Plugins</strong><span>Workspace-level searchable packages/plugins, ownership, visibility, quality, Tessl registry security, impact, and install metadata.</span></div>
         <div class="card" data-status="preview"><span class="pill preview">linkage</span><strong>Projects</strong><span>Project identity, repository/source link, staged payload identity, workspace binding, and release/eval association.</span></div>
         <div class="card" data-status="implemented"><span class="pill implemented">evidence</span><strong>Eval Runs</strong><span>Completed or blocked eval evidence, scores, baselines, improvements, model/agent metadata, scenario coverage, and package binding.</span></div>
-        <div class="card" data-status="preview"><span class="pill preview">evidence</span><strong>Review Runs</strong><span>Automated or human review evidence, findings, policy checks, fix recommendations, and promotion blockers.</span></div>
+        <div class="card" data-status="preview"><span class="pill preview">criteria</span><strong>Review Runs</strong><span>Configurable Tessl Review criteria for what good looks like, plus reviewer authority, thresholds, findings, fix recommendations, and promotion blockers.</span></div>
         <div class="card" data-status="implemented"><span class="pill implemented">coverage</span><strong>Inventories</strong><span>GitHub import coverage, discovered manifests, discovered skills, skipped repos, source provenance, and workspace import target.</span></div>
         <div class="card" data-status="preview"><span class="pill preview">authority</span><strong>Members</strong><span>Role, ownership, publish authority, review authority, and who can connect external sources or mutate workspace state.</span></div>
         <div class="card" data-status="preview"><span class="pill preview">policy</span><strong>Settings</strong><span>Workspace visibility, integrations, source connections, default policy, publish gates, and allowed mutation surfaces.</span></div>
@@ -396,7 +396,7 @@
         <div class="discipline" data-status="preview">
           <span class="pill preview">partial</span>
           <strong>Security testing</strong>
-          <span>Package hardening, external intake review, and security adapter discovery exist, but dynamic skill red-team testing and scanner execution are not proven capability lanes yet.</span>
+          <span>Package hardening, external intake review, security adapter discovery, and Tessl registry security intake exist as planning lanes. Local scanner execution is reserved for pre-registry/private intake.</span>
         </div>
         <div class="discipline" data-status="preview">
           <span class="pill preview">partial</span>
@@ -595,6 +595,7 @@
         <div class="gap" data-status="implemented"><span class="pill implemented">state landed</span><strong>Local Trust Ledger Exists</strong><span>Trust decisions can now be previewed or appended locally with package digest binding; remote trust-store and release enforcement are still separate future lanes.</span></div>
         <div class="gap" data-status="implemented"><span class="pill implemented">learning preview</span><strong>Redacted Feedback Preview Exists</strong><span>Redacted local event JSONL can now produce eval scenario and skill-gap candidates, and receipt-backed promotion preview can mark them ready or blocked; live ingestion, file generation, and automatic promotion remain future lanes.</span></div>
         <div class="gap" data-status="deferred"><span class="pill deferred">adoption gap</span><strong>CI Gates Are Not Live</strong><span>Local validation does not prove branch protection, PR review, CircleCI, or GitHub security checks.</span></div>
+        <div class="gap" data-status="preview"><span class="pill preview">registry-first</span><strong>Tessl Security Is The Primary Snyk Lane</strong><span>Use Tessl registry security when a package already has it. Run local <code>snyk-agent-scan</code> only for source imports, private candidates, or local skills without registry security.</span></div>
         <div class="gap" data-status="out"><span class="pill out">scope risk</span><strong>Registry Too Early</strong><span>A registry before signing, package verification, trust decisions, and install receipts would create distribution theatre.</span></div>
       </div>
     </section>
@@ -639,14 +640,17 @@
         <div class="note">Each future slice should add one command, one schema or receipt, tests, and a capability-matrix update.</div>
       </div>
       <div class="next-grid">
-        <div class="next-item priority" data-status="deferred"><b>01</b><strong>Adoption Decision Receipt</strong><span>Bind package digest, risk mode, review result, trust decision, expiry or revocation, install authority, and required evidence into one decision object.</span></div>
-        <div class="next-item" data-status="deferred"><b>02</b><strong>Composition Graph Receipt</strong><span>Map skill-to-skill, skill-to-tool, reference, permission, runtime, and package edges before claiming dependency-management maturity.</span></div>
-        <div class="next-item" data-status="deferred"><b>03</b><strong>Scenario Promotion Policy</strong><span>Connect observed or generated eval candidates to the existing scenario-quality preview without mutating source scenarios or leaking data.</span></div>
-        <div class="next-item priority" data-status="deferred"><b>04</b><strong>Tessl Workspace Snapshot</strong><span>Read all plugins, projects, eval runs, review runs, inventories, members, and settings into receipts before any Tessl mutation or publish path exists.</span></div>
-        <div class="next-item" data-status="deferred"><b>05</b><strong>GitHub Exit Policy</strong><span>Define when GitHub is source provenance only and when Tessl workspace/package receipts become search, install, eval, review, inventory, and publish truth.</span></div>
-        <div class="next-item" data-status="deferred"><b>06</b><strong>Dependency Version Policy</strong><span>Preview install/update/version constraints from package identity and lockfile state before registry or workspace publish exists.</span></div>
-        <div class="next-item" data-status="deferred"><b>07</b><strong>Dynamic Security Design</strong><span>Design red-team or dynamic scanner contracts as a roadmap lane; do not imply scanner execution until adapters and safe fixtures exist.</span></div>
-        <div class="next-item" data-status="deferred"><b>08</b><strong>CDLC Projection</strong><span>Only after the above receipts exist, add a dashboard projection for generate, evaluate, test, optimize, distribute, secure, consume, and observe.</span></div>
+        <div class="next-item priority" data-status="deferred"><b>01</b><strong>Review Criteria Receipt</strong><span>Record Tessl Review criteria, thresholds, reviewer authority, findings, fixes, and blockers so adoption decisions can explain what good meant for this skill.</span></div>
+        <div class="next-item priority" data-status="deferred"><b>02</b><strong>Adoption Decision Receipt</strong><span>Bind package digest, risk mode, review result, trust decision, expiry or revocation, install authority, and required evidence into one decision object.</span></div>
+        <div class="next-item" data-status="deferred"><b>03</b><strong>Composition Graph Receipt</strong><span>Map skill-to-skill, skill-to-tool, reference, permission, runtime, and package edges before claiming dependency-management maturity.</span></div>
+        <div class="next-item" data-status="deferred"><b>04</b><strong>Scenario Promotion Policy</strong><span>Connect observed or generated eval candidates to the existing scenario-quality preview without mutating source scenarios or leaking data.</span></div>
+        <div class="next-item priority" data-status="deferred"><b>05</b><strong>Tessl Workspace Snapshot</strong><span>Read all plugins, projects, eval runs, review runs, inventories, members, and settings into receipts before any Tessl mutation or publish path exists.</span></div>
+        <div class="next-item" data-status="deferred"><b>06</b><strong>GitHub Exit Policy</strong><span>Define when GitHub is source provenance only and when Tessl workspace/package receipts become search, install, eval, review, inventory, and publish truth.</span></div>
+        <div class="next-item" data-status="deferred"><b>07</b><strong>Dependency Version Policy</strong><span>Preview install/update/version constraints from package identity and lockfile state before registry or workspace publish exists.</span></div>
+        <div class="next-item priority" data-status="deferred"><b>08</b><strong>Tessl Registry Security Receipt</strong><span>Capture Tessl's Snyk-backed registry security status, provider label, known issues, package identity, registry source, and freshness before adding a separate scanner gate.</span></div>
+        <div class="next-item" data-status="deferred"><b>09</b><strong>Local Snyk Intake Fallback</strong><span>Use explicit skill paths, JSON output, token-presence proof without values, scanner version, data-egress notice, and issue-count classification only when Tessl registry security is unavailable.</span></div>
+        <div class="next-item" data-status="deferred"><b>10</b><strong>Dynamic Security Design</strong><span>Design red-team or dynamic scanner contracts as a roadmap lane; do not imply scanner execution until adapters and safe fixtures exist.</span></div>
+        <div class="next-item" data-status="deferred"><b>11</b><strong>CDLC Projection</strong><span>Only after the above receipts exist, add a dashboard projection for generate, evaluate, test, optimize, distribute, secure, consume, and observe.</span></div>
       </div>
     </section>
 

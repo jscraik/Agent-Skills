@@ -41,6 +41,18 @@ Next Action: Use he-work or a governed implementation goal to execute PU-001 aft
 
 Implement the first V1.0 Skills SDK product slice from .harness/specs/2026-06-03-skills-sdk-v1-product-spec.md. The slice must produce executable schema and command proof for skills-sdk check, core receipts, risk classification, install preview stubs, and honest placeholder lifecycle states while preserving the JSC-391 scaffold boundaries that are now merged into main.
 
+## Tessl Migration Direction
+
+The V1.0 plan should steer toward Tessl as the skills distribution and lifecycle control plane while keeping this implementation slice read-only unless a later unit authorizes mutation. The target topology has three workspace lanes:
+
+- `eval`: project-linked eval, review, scenario-quality, and release-decision evidence.
+- `private_skills`: private searchable/installable skills that are not public distribution artifacts.
+- `public_published`: public published skills that passed promotion, policy, review, and publish authority.
+
+Domains such as frontend, backend, engineering, legal, security, marketing, database, and agent-ops remain skill category facets. They should only become workspaces when membership, settings, or source authority needs a separate governance boundary.
+
+GitHub remains source/provenance during migration, but should stop being treated as the skills distribution surface. Future implementation units that touch registry intake, explorer surfaces, install flows, or publish flows should record GitHub source provenance separately from Tessl workspace/package truth.
+
 ## Source Contract
 
 | Source | Role in this plan | Current state |
