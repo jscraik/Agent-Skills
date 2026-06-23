@@ -57,7 +57,7 @@ class TestSkillsSdkKnowledgeDurability(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir)
             cache_skill = repo_root / "plugins/cache/agent-skills-local/demo/1.0.0/skills/example"
-            source_skill = repo_root / "plugins/demo/skills/example"
+            source_skill = repo_root / "Plugins/demo/skills/example"
             for skill_dir in (cache_skill, source_skill):
                 references = skill_dir / "references"
                 references.mkdir(parents=True)

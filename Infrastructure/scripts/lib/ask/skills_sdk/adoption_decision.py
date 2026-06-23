@@ -199,6 +199,7 @@ def _trust_check(
 def _trust_expiry_status(trust_receipt: dict[str, Any]) -> tuple[bool, str | None]:
     expires_at = trust_receipt.get("expires_at")
     if expires_at is None:
+        # Trust receipts require the field, but null intentionally means no expiry.
         return True, None
     if not isinstance(expires_at, str) or not expires_at.strip():
         return False, "expires_at:invalid"
