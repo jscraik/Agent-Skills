@@ -23,7 +23,7 @@ def build_command_evidence_plan_receipt(repo_root: Path, *, scope: str = "capabi
             continue
         try:
             command_rows.append(_command_plan_row(row))
-        except ValueError as exc:
+        except (TypeError, ValueError) as exc:
             blockers.append(
                 _blocker(
                     "invalid_command_evidence_ref",
@@ -55,6 +55,8 @@ def build_command_evidence_plan_receipt(repo_root: Path, *, scope: str = "capabi
 
 def _command_plan_row(row: dict[str, Any]) -> dict[str, Any]:
     command = row["ref"]
+    if not isinstance(command, str) or not command.strip():
+        raise TypeError("Command evidence ref must be a non-empty string.")
     argv = shlex.split(command)
     return {
         "capability_id": row["capability_id"],

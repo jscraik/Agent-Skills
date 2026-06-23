@@ -28,6 +28,7 @@ class TestSkillsSdkAdoptionDecision(unittest.TestCase):
             "status": "preview",
             "decision": "trust",
             "package_digest": package["package_digest"],
+            "expires_at": "2999-01-01T00:00:00Z",
         }
         with patch(
             "ask.skills_sdk.adoption_decision._load_trust_receipt",
@@ -54,6 +55,7 @@ class TestSkillsSdkAdoptionDecision(unittest.TestCase):
             "status": "preview",
             "decision": "trust",
             "package_digest": package["package_digest"],
+            "expires_at": "2999-01-01T00:00:00Z",
         }
         with patch(
             "ask.skills_sdk.adoption_decision._load_trust_receipt",
@@ -67,6 +69,31 @@ class TestSkillsSdkAdoptionDecision(unittest.TestCase):
 
         self.assertEqual(receipt["status"], "blocked")
         self.assertIn("intake_review_preview", {item["id"] for item in receipt["blockers"]})
+
+    def test_expired_trust_receipt_blocks_adoption(self) -> None:
+        package = build_package_digest_receipt(REPO_ROOT, source_path=REPO_ROOT / VALID_SKILL, query=VALID_SKILL)
+        local_decision_receipt = {
+            "schema_version": "skills-sdk.trust-decision-receipt.v0",
+            "status": "preview",
+            "decision": "trust",
+            "package_digest": package["package_digest"],
+            "expires_at": "2000-01-01T00:00:00Z",
+        }
+        with patch(
+            "ask.skills_sdk.adoption_decision._load_trust_receipt",
+            return_value=(local_decision_receipt, None),
+        ), patch(
+            "ask.skills_sdk.adoption_decision._build_intake_review_receipt",
+            return_value={"status": "pass", "review_items": []},
+        ):
+            receipt = build_adoption_decision_receipt(
+                REPO_ROOT,
+                source=VALID_SKILL,
+                trust_receipt_path="local-decision-receipt.json",
+            )
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("local_trust_decision", {item["id"] for item in receipt["blockers"]})
 
     def test_bad_source_returns_blocked_receipt_without_digest_crash(self) -> None:
         receipt = build_adoption_decision_receipt(REPO_ROOT, source="Infrastructure/tests/fixtures/skills_sdk/no-such-skill")

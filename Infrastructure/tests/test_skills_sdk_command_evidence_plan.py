@@ -43,6 +43,28 @@ class TestSkillsSdkCommandEvidencePlan(unittest.TestCase):
         self.assertEqual(receipt["command_count"], 0)
         self.assertIn("invalid_command_evidence_ref", {item["id"] for item in receipt["blockers"]})
 
+    def test_blocks_non_string_command_evidence_refs(self) -> None:
+        capability_receipt = {
+            "evidence_rows": [
+                {
+                    "kind": "command",
+                    "capability_id": "bad_command",
+                    "ref": None,
+                    "reason": "fixture",
+                }
+            ]
+        }
+
+        with patch(
+            "ask.skills_sdk.command_evidence_plan.build_capability_evidence_receipt",
+            return_value=capability_receipt,
+        ):
+            receipt = build_command_evidence_plan_receipt(REPO_ROOT)
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertEqual(receipt["command_count"], 0)
+        self.assertIn("invalid_command_evidence_ref", {item["id"] for item in receipt["blockers"]})
+
 
 if __name__ == "__main__":
     unittest.main()

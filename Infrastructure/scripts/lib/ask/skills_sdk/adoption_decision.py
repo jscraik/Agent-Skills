@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -115,7 +116,7 @@ def _build_package_receipt(repo_root: Path, source_path: Path, source: str) -> d
 def _build_intake_review_receipt(repo_root: Path, source: str, source_kind: str) -> dict[str, Any]:
     try:
         return build_skill_intake_review_receipt(repo_root, source=source, source_kind=source_kind)
-    except ValueError as exc:
+    except (OSError, ValueError, KeyError) as exc:
         return {
             "status": "blocked",
             "review_items": [],
@@ -175,19 +176,41 @@ def _trust_check(
         f"status:{trust_receipt.get('status')}",
         f"decision:{trust_receipt.get('decision')}",
         f"package_digest:{trust_receipt.get('package_digest')}",
+        f"expires_at:{trust_receipt.get('expires_at')}",
     ]
+    expiry_valid, expiry_reason = _trust_expiry_status(trust_receipt)
+    if expiry_reason:
+        evidence.append(expiry_reason)
     trusted = (
         trust_receipt.get("schema_version") == "skills-sdk.trust-decision-receipt.v0"
         and trust_receipt.get("status") in {"preview", "recorded"}
         and trust_receipt.get("decision") == "trust"
         and trust_receipt.get("package_digest") == package_receipt["package_digest"]
+        and expiry_valid
     )
     return _check(
         "local_trust_decision",
         "pass" if trusted else "blocker",
-        "The trust receipt must trust the exact package digest under review.",
+        "The trust receipt must trust the exact package digest under review and must not be expired.",
         evidence,
     )
+
+
+def _trust_expiry_status(trust_receipt: dict[str, Any]) -> tuple[bool, str | None]:
+    expires_at = trust_receipt.get("expires_at")
+    if expires_at is None:
+        return True, None
+    if not isinstance(expires_at, str) or not expires_at.strip():
+        return False, "expires_at:invalid"
+    try:
+        expires_at_dt = datetime.fromisoformat(expires_at.replace("Z", "+00:00"))
+    except ValueError:
+        return False, "expires_at:invalid"
+    if expires_at_dt.tzinfo is None:
+        expires_at_dt = expires_at_dt.replace(tzinfo=UTC)
+    if expires_at_dt <= datetime.now(UTC):
+        return False, "expires_at:expired"
+    return True, None
 
 
 def _intake_review_completed(review_receipt: dict[str, Any]) -> bool:

@@ -6,6 +6,7 @@ from typing import Any
 
 
 LIFECYCLE_ROUTE_MAP_PATH = Path("Infrastructure/config/skills-sdk/lifecycle-route-map.v1.json")
+CAPABILITY_MATRIX_PATH = Path("Infrastructure/config/skills-sdk/capability-matrix.v1.json")
 LIFECYCLE_ROUTE_MAP_RECEIPT_SCHEMA_VERSION = "skills-sdk.lifecycle-route-map-receipt.v0"
 LIFECYCLE_ROUTE_MAP_RECEIPT_SCHEMA_URI = (
     "https://agent-skills.local/schemas/skills-sdk/lifecycle-route-map-receipt.v0.schema.json"
@@ -40,7 +41,9 @@ def build_lifecycle_route_map_receipt(repo_root: Path) -> dict[str, Any]:
     else:
         checks = [_check("route_map_load", "pass", "Lifecycle route map loaded as JSON.", [LIFECYCLE_ROUTE_MAP_PATH.as_posix()])]
     routes = payload.get("routes") if isinstance(payload, dict) else None
-    route_checks = _route_checks(repo_root, routes)
+    capability_ids, capability_checks = _capability_ids(repo_root)
+    checks.extend(capability_checks)
+    route_checks = _route_checks(repo_root, routes, capability_ids)
     checks.extend(route_checks)
     blockers = [check for check in checks if check["status"] == "blocker"]
     status = "pass" if not blockers else "blocked"
@@ -64,7 +67,7 @@ def build_lifecycle_route_map_receipt(repo_root: Path) -> dict[str, Any]:
     }
 
 
-def _route_checks(repo_root: Path, routes: Any) -> list[dict[str, Any]]:
+def _route_checks(repo_root: Path, routes: Any, capability_ids: set[str]) -> list[dict[str, Any]]:
     if not isinstance(routes, list) or not routes:
         return [_check("routes_present", "blocker", "Lifecycle route map must contain routes.", [])]
     checks = [_check("routes_present", "pass", "Lifecycle route map contains routes.", [str(len(routes))])]
@@ -73,7 +76,7 @@ def _route_checks(repo_root: Path, routes: Any) -> list[dict[str, Any]]:
         if not isinstance(route, dict):
             checks.append(_check("route_shape", "blocker", "Each lifecycle route must be an object.", [repr(route)]))
             continue
-        checks.extend(_route_file_checks(repo_root, str(route.get("id") or "missing"), route))
+        checks.extend(_route_file_checks(repo_root, str(route.get("id") or "missing"), route, capability_ids))
     return checks
 
 
@@ -104,7 +107,7 @@ def _required_routes_check(missing: list[str]) -> dict[str, Any]:
     )
 
 
-def _route_file_checks(repo_root: Path, route_id: str, route: dict[str, Any]) -> list[dict[str, Any]]:
+def _route_file_checks(repo_root: Path, route_id: str, route: dict[str, Any], capability_ids: set[str]) -> list[dict[str, Any]]:
     checks: list[dict[str, Any]] = []
     for key in ("command", "owner_module", "receipt_schema", "test_ref", "capability_id", "proof_boundary"):
         value = route.get(key)
@@ -124,7 +127,36 @@ def _route_file_checks(repo_root: Path, route_id: str, route: dict[str, Any]) ->
                 [value],
             )
         )
+    checks.extend(_route_capability_binding_checks(route_id, route, capability_ids))
     return checks
+
+
+def _route_capability_binding_checks(route_id: str, route: dict[str, Any], capability_ids: set[str]) -> list[dict[str, Any]]:
+    capability_id = route.get("capability_id")
+    if not isinstance(capability_id, str) or not capability_id:
+        return []
+    capability_exists = capability_id in capability_ids
+    return [
+        _check(
+            f"{route_id}.capability_id_exists",
+            "pass" if capability_exists else "blocker",
+            f"Route {route_id} capability_id must point to a capability matrix row.",
+            [capability_id],
+        )
+    ]
+
+
+def _capability_ids(repo_root: Path) -> tuple[set[str], list[dict[str, Any]]]:
+    matrix_path = repo_root / CAPABILITY_MATRIX_PATH
+    try:
+        payload = json.loads(matrix_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return set(), [_check("capability_matrix_load", "blocker", "Capability matrix must load as JSON.", [str(exc)])]
+    capabilities = payload.get("capabilities") if isinstance(payload, dict) else None
+    if not isinstance(capabilities, list):
+        return set(), [_check("capability_matrix_load", "blocker", "Capability matrix must contain capabilities.", [CAPABILITY_MATRIX_PATH.as_posix()])]
+    capability_ids = {row["id"] for row in capabilities if isinstance(row, dict) and isinstance(row.get("id"), str) and row["id"]}
+    return capability_ids, [_check("capability_matrix_load", "pass", "Capability matrix loaded for route capability binding.", [CAPABILITY_MATRIX_PATH.as_posix()])]
 
 
 def _check(check_id: str, status: str, message: str, evidence: list[str]) -> dict[str, Any]:

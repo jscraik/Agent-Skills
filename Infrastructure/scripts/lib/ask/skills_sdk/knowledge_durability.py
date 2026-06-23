@@ -70,15 +70,15 @@ def _durable_source_for_cache(repo_root: Path, skill_dir: Path) -> Path | None:
         skill_name = parts[3]
     else:
         return None
-    return (repo_root / "plugins" / plugin_id / "skills" / skill_name).resolve(strict=False)
+    return (repo_root / "Plugins" / plugin_id / "skills" / skill_name).resolve(strict=False)
 
 
 def _cache_relative(repo_root: Path, skill_dir: Path) -> Path | None:
+    skill_resolved = skill_dir.resolve(strict=False)
     for cache_root in (repo_root / "plugins/cache", repo_root / "Plugins/cache"):
-        try:
-            return skill_dir.resolve(strict=False).relative_to(cache_root.resolve(strict=False))
-        except ValueError:
-            continue
+        cache_resolved = cache_root.resolve(strict=False)
+        if skill_resolved.is_relative_to(cache_resolved):
+            return skill_resolved.relative_to(cache_resolved)
     return None
 
 

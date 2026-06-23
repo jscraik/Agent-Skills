@@ -10,7 +10,7 @@
       "owner_module": "ask.skills_sdk.capability_status",
       "receipt_schema": "Infrastructure/config/schemas/skills-sdk/capability-status.v1.schema.json",
       "test_ref": "Infrastructure/tests/test_skills_sdk_capability_status.py",
-      "capability_id": "capability_status",
+      "capability_id": "capability_evidence",
       "proof_boundary": "keeps the bootstrap foundry surface tied to the capability matrix before lifecycle claims"
     },
     {
@@ -72,7 +72,7 @@
       "id": "local_runtime_install_preview",
       "pipeline_stage": "Local Runtime Truth",
       "loop": "Runtime loop",
-      "command": "./bin/ask sdk install preview <skill> --scope project --preview --json --robot",
+      "command": "./bin/ask sdk install <skill> --preview --scope project --json --robot",
       "owner_module": "ask.skills_sdk.install_preview",
       "receipt_schema": "Infrastructure/config/schemas/skills-sdk/install-preview.v1.schema.json",
       "test_ref": "Infrastructure/tests/test_skills_sdk_install_preview.py",

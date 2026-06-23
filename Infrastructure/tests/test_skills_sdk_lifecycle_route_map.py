@@ -29,6 +29,7 @@ class TestSkillsSdkLifecycleRouteMap(unittest.TestCase):
         self.assertEqual(check_statuses["required_loops_present"], "pass")
         self.assertEqual(check_statuses["required_stages_present"], "pass")
         self.assertEqual(check_statuses["pipeline_stages_known"], "pass")
+        self.assertEqual(check_statuses["capability_matrix_load"], "pass")
 
         for route in receipt["routes"]:
             with self.subTest(route_id=route["id"]):
@@ -36,6 +37,7 @@ class TestSkillsSdkLifecycleRouteMap(unittest.TestCase):
                 self.assertIn("pipeline_stage", route, f"Route {route['id']} missing 'pipeline_stage' property")
                 self.assertIn(route["loop"], REQUIRED_LOOPS, f"Route {route['id']} has invalid loop: {route['loop']}")
                 self.assertIn(route["pipeline_stage"], REQUIRED_STAGES, f"Route {route['id']} has invalid stage: {route['pipeline_stage']}")
+                self.assertEqual(check_statuses[f"{route['id']}.capability_id_exists"], "pass")
 
 
 if __name__ == "__main__":

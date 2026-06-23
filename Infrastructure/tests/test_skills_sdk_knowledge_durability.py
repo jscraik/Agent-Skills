@@ -39,7 +39,7 @@ class TestSkillsSdkKnowledgeDurability(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir)
             cache_skill = repo_root / "plugins/cache/demo/1.0.0/skills/example"
-            source_skill = repo_root / "plugins/demo/skills/example"
+            source_skill = repo_root / "Plugins/demo/skills/example"
             for skill_dir in (cache_skill, source_skill):
                 references = skill_dir / "references"
                 references.mkdir(parents=True)
@@ -68,14 +68,14 @@ class TestSkillsSdkKnowledgeDurability(unittest.TestCase):
             receipt = build_knowledge_durability_receipt(repo_root, skill=str(cache_skill))
 
         self.assertEqual(receipt["status"], "pass")
-        self.assertEqual(receipt["durable_source_path"], "plugins/demo/skills/example")
+        self.assertEqual(receipt["durable_source_path"], "Plugins/demo/skills/example")
         self.assertTrue(receipt["cache_owned"])
 
     def test_detects_canonical_uppercase_plugin_cache_layout(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir)
             cache_skill = repo_root / "Plugins/cache/agent-skills-local/demo/1.0.0/skills/example"
-            source_skill = repo_root / "plugins/demo/skills/example"
+            source_skill = repo_root / "Plugins/demo/skills/example"
             for skill_dir in (cache_skill, source_skill):
                 references = skill_dir / "references"
                 references.mkdir(parents=True)
@@ -86,7 +86,7 @@ class TestSkillsSdkKnowledgeDurability(unittest.TestCase):
             receipt = build_knowledge_durability_receipt(repo_root, skill=str(cache_skill))
 
         self.assertEqual(receipt["status"], "pass")
-        self.assertEqual(receipt["durable_source_path"], "plugins/demo/skills/example")
+        self.assertEqual(receipt["durable_source_path"], "Plugins/demo/skills/example")
         self.assertTrue(receipt["cache_owned"])
 
 
