@@ -31,6 +31,19 @@ def add_sdk_intake_parser(
         default="directory",
         help="Input kind; archive unpacking is intentionally blocked in this slice",
     )
+    review = sdk_intake_subparsers.add_parser(
+        "review",
+        help="Build an external skill intake review receipt from quarantine and risk-mode receipts",
+        parents=[global_parser],
+    )
+    review.add_argument("source", help="External skill directory to review")
+    review.add_argument("--preview", action="store_true", help="Emit a non-mutating review receipt")
+    review.add_argument(
+        "--source-kind",
+        choices=["directory", "archive"],
+        default="directory",
+        help="Input kind; archive unpacking is intentionally blocked in this slice",
+    )
 
 
 def _validation_error(command: str, message: str, fix_suggestion: str) -> CallResult:
@@ -41,16 +54,28 @@ def _validation_error(command: str, message: str, fix_suggestion: str) -> CallRe
 
 
 def dispatch_sdk_intake(repo_root: Path, args: argparse.Namespace) -> CallResult:
-    if args.intake_action != "inspect":
-        return build_unknown_action_result("sdk intake", args.intake_action)
-    if not args.preview:
-        return _validation_error(
-            "sdk intake inspect",
-            "Skills SDK intake inspection is preview-only in this slice.",
-            "ask sdk intake inspect <skill-dir> --preview --json --robot",
+    if args.intake_action == "inspect":
+        if not args.preview:
+            return _validation_error(
+                "sdk intake inspect",
+                "Skills SDK intake inspection is preview-only in this slice.",
+                "ask sdk intake inspect <skill-dir> --preview --json --robot",
+            )
+        return skills_commands.skills_sdk_intake_inspect(
+            repo_root,
+            source=args.source,
+            source_kind=args.source_kind,
         )
-    return skills_commands.skills_sdk_intake_inspect(
-        repo_root,
-        source=args.source,
-        source_kind=args.source_kind,
-    )
+    if args.intake_action == "review":
+        if not args.preview:
+            return _validation_error(
+                "sdk intake review",
+                "Skills SDK intake review is preview-only in this slice.",
+                "ask sdk intake review <skill-dir> --preview --json --robot",
+            )
+        return skills_commands.skills_sdk_intake_review(
+            repo_root,
+            source=args.source,
+            source_kind=args.source_kind,
+        )
+    return build_unknown_action_result("sdk intake", args.intake_action)

@@ -106,6 +106,7 @@ from ask.skills_sdk.package_verify import (  # noqa: E402
 from ask.skills_sdk.risk import build_risk_classification as _build_risk_classification  # noqa: E402
 from ask.skills_sdk.install_preview import build_install_preview as _build_install_preview  # noqa: E402
 from ask.skills_sdk.skill_intake import build_skill_intake_receipt as _build_skill_intake_receipt  # noqa: E402
+from ask.skills_sdk.skill_intake_review import build_skill_intake_review_receipt as _build_skill_intake_review_receipt  # noqa: E402
 from ask.skills_sdk.ir import build_skill_ir as _build_skill_ir  # noqa: E402
 from ask.skills_sdk.docs_projection import verify_capability_docs_projection as _verify_capability_docs_projection  # noqa: E402
 from ask.skills_sdk.package_build import build_package_digest_receipt as _build_package_digest_receipt  # noqa: E402
@@ -224,6 +225,8 @@ __all__ = [
     "skills_explain_boundary",
     "skills_handles",
     "skills_sdk_install_preview",
+    "skills_sdk_intake_inspect",
+    "skills_sdk_intake_review",
     "skills_sdk_docs_verify",
     "skills_sdk_ir_build",
     "skills_sdk_package_build",
@@ -235,6 +238,7 @@ __all__ = [
     "skills_sdk_emitter_preview",
     "skills_sdk_ci_policy_preview",
     "skills_sdk_security_adapters_preview",
+    "skills_sdk_security_risk_modes_preview",
     "skills_sdk_static_explorer_preview",
     "skills_sdk_eval_scenario_quality",
     "skills_sdk_eval_scorer_quality",
@@ -4127,6 +4131,49 @@ def skills_sdk_intake_inspect(
     return result
 
 
+def skills_sdk_intake_review(
+    repo_root: Path,
+    *,
+    source: str,
+    source_kind: str = "directory",
+) -> CallResult:
+    """Build a non-mutating external skill intake review receipt."""
+    result = CallResult()
+    result.metadata["command"] = "sdk intake review --preview"
+    query = source.strip()
+    receipt = _build_skill_intake_review_receipt(repo_root, source=query, source_kind=source_kind)
+    payload = {
+        "schema_version": "skills-sdk-intake-review.v0",
+        "query": query,
+        "status": receipt["status"],
+        "facade_command": "skills-sdk intake review --preview",
+        "receipt": receipt,
+        "validation_commands": [
+            _ask_validation_command(
+                "sdk",
+                "intake",
+                "review",
+                query,
+                "--preview",
+                "--source-kind",
+                source_kind,
+            ),
+        ],
+        "agent_summary": receipt["agent_summary"],
+    }
+    result.data["skills_sdk_intake_review"] = payload
+    if receipt["status"] == "blocked":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=receipt["agent_summary"],
+                fix_suggestion="Inspect data.skills_sdk_intake_review.receipt.intake_receipt.blockers before rerunning review.",
+            )
+        )
+    return result
+
+
 def skills_sdk_ir_build(
     repo_root: Path,
     target: str,
@@ -4839,6 +4886,72 @@ def skills_sdk_security_adapters_preview(repo_root: Path) -> CallResult:
                 ),
             )
         )
+    return result
+
+
+def skills_sdk_security_risk_modes_preview(repo_root: Path, target: str) -> CallResult:
+    """Build a deterministic risk-mode taxonomy receipt without executing skill content."""
+    result = CallResult()
+    result.metadata["command"] = "sdk security risk-modes"
+    query = target.strip()
+    target_info, _audit_target = _resolve_doctor_target(repo_root, query)
+    source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
+    source_path = Path(str(source_path_value)) if source_path_value else None
+    if source_path and not source_path.is_absolute():
+        source_path = repo_root / source_path
+
+    if not source_path or not source_path.is_file():
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=f"Skills SDK risk-mode taxonomy is missing a canonical SKILL.md source for '{query}'.",
+                fix_suggestion=_ask_validation_command("sdk", "security", "risk-modes", query, "--preview"),
+            )
+        )
+        result.data["skills_sdk_risk_mode_taxonomy"] = {
+            "schema_version": "skills-sdk-risk-mode-taxonomy-preview.v0",
+            "query": query,
+            "status": "blocked",
+            "canonical_source_path": source_path_value,
+            "receipt": None,
+            "execution_performed": False,
+            "scanner_execution_performed": False,
+            "network_accessed": False,
+            "credentials_accessed": False,
+            "mutation_performed": False,
+            "validation_commands": [
+                _ask_validation_command("sdk", "security", "risk-modes", query, "--preview")
+            ],
+            "agent_summary": f"risk-mode taxonomy is blocked for {query}: canonical source is missing.",
+        }
+        return result
+
+    from ask.skills_sdk.risk_modes import build_risk_mode_taxonomy_receipt  # noqa: PLC0415
+
+    receipt = build_risk_mode_taxonomy_receipt(repo_root, source_path=source_path, query=query)
+    payload = {
+        "schema_version": "skills-sdk-risk-mode-taxonomy-preview.v0",
+        "query": query,
+        "status": receipt["status"],
+        "canonical_source_path": source_path_value,
+        "facade_command": "skills-sdk security risk-modes",
+        "package_id": receipt["package_id"],
+        "package_digest": receipt["package_digest"],
+        "primary_mode": receipt["primary_mode"],
+        "detected_modes": receipt["detected_modes"],
+        "receipt": receipt,
+        "execution_performed": False,
+        "scanner_execution_performed": False,
+        "network_accessed": False,
+        "credentials_accessed": False,
+        "mutation_performed": False,
+        "validation_commands": [
+            _ask_validation_command("sdk", "security", "risk-modes", query, "--preview")
+        ],
+        "agent_summary": receipt["agent_summary"],
+    }
+    result.data["skills_sdk_risk_mode_taxonomy"] = payload
     return result
 
 

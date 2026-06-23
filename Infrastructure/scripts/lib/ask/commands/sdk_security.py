@@ -24,6 +24,13 @@ def add_sdk_security_parser(
         parents=[global_parser],
     )
     adapters.add_argument("--preview", action="store_true", help="Emit a non-mutating adapter discovery receipt")
+    risk_modes = subparsers.add_parser(
+        "risk-modes",
+        help="Classify Tal/Podjarny skill risk modes without executing source content",
+        parents=[global_parser],
+    )
+    risk_modes.add_argument("target", help="Skill handle or repo-relative skill source path")
+    risk_modes.add_argument("--preview", action="store_true", help="Emit a non-mutating risk-mode taxonomy receipt")
 
 
 def dispatch_sdk_security(repo_root: Path, args: argparse.Namespace) -> CallResult:
@@ -35,4 +42,12 @@ def dispatch_sdk_security(repo_root: Path, args: argparse.Namespace) -> CallResu
                 "ask sdk security adapters --preview --json --robot",
             )
         return skills_commands.skills_sdk_security_adapters_preview(repo_root)
+    if args.security_action == "risk-modes":
+        if not args.preview:
+            return build_validation_error(
+                "sdk security risk-modes",
+                "Skills SDK risk-mode taxonomy is preview-only in PU-033 and requires --preview.",
+                "ask sdk security risk-modes <target> --preview --json --robot",
+            )
+        return skills_commands.skills_sdk_security_risk_modes_preview(repo_root, args.target)
     return build_unknown_action_result("sdk security", args.security_action)

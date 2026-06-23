@@ -14,6 +14,8 @@ SCHEMA_NAMES = {
     "check-receipt": "check-receipt.v1.schema.json",
     "capability-evidence-receipt": "capability-evidence-receipt.v0.schema.json",
     "risk-classification": "risk-classification.v1.schema.json",
+    "risk-mode-taxonomy-receipt": "risk-mode-taxonomy-receipt.v0.schema.json",
+    "skill-intake-review-receipt": "skill-intake-review-receipt.v0.schema.json",
     "install-preview": "install-preview.v1.schema.json",
     "install-receipt": "install-receipt.v1.schema.json",
     "lockfile-preview": "lockfile-preview.v1.schema.json",

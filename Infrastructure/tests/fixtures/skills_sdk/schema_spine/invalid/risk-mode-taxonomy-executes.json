@@ -1,0 +1,56 @@
+{
+  "schema_version": "skills-sdk.risk-mode-taxonomy-receipt.v0",
+  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/risk-mode-taxonomy-receipt.v0.schema.json",
+  "status": "pass",
+  "operation": "risk_mode_taxonomy_preview",
+  "query": "Infrastructure/tests/fixtures/skills_sdk/valid_skill",
+  "package_id": "skills-sdk-valid-fixture",
+  "package_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "source_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "source_kind": "scripted",
+  "risk_tier": "high",
+  "primary_mode": "none_detected",
+  "detected_modes": [],
+  "mode_results": [
+    {
+      "mode": "malicious_supply_chain",
+      "label": "Malicious supply-chain risk",
+      "status": "not_detected",
+      "severity": "critical",
+      "description": "The skill package includes indicators that it may intentionally cause harm, hide behavior, or bypass review.",
+      "indicators": []
+    },
+    {
+      "mode": "negligent_instruction",
+      "label": "Negligent instruction risk",
+      "status": "not_detected",
+      "severity": "high",
+      "description": "The skill urges impactful behavior without enough boundaries, review gates, or rollback language.",
+      "indicators": []
+    },
+    {
+      "mode": "vulnerable_operation",
+      "label": "Vulnerable operation risk",
+      "status": "not_detected",
+      "severity": "high",
+      "description": "The skill handles secrets, credentials, logs, external calls, or data exposure paths without clear safeguards.",
+      "indicators": []
+    },
+    {
+      "mode": "unknown_insufficient_evidence",
+      "label": "Unknown or insufficient-evidence risk",
+      "status": "not_detected",
+      "severity": "medium",
+      "description": "The package lacks enough structured provenance, purpose, or review evidence to classify confidently.",
+      "indicators": []
+    }
+  ],
+  "taxonomy_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "execution_performed": true,
+  "scanner_execution_performed": false,
+  "network_accessed": false,
+  "credentials_accessed": false,
+  "mutation_performed": false,
+  "acceptance_trace": ["PU-033", "FR-008", "SA-004", "SEC-001", "VP-033"],
+  "agent_summary": "invalid fixture claims execution."
+}

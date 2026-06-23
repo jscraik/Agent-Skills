@@ -1,0 +1,180 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/skill-intake-review-receipt.v0.schema.json",
+  "title": "Skills SDK External Skill Intake Review Receipt v0",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "string", "const": "skills-sdk.skill-intake-review-receipt.v0"},
+    "schema_uri": {"type": "string", "const": "https://jscraik.local/agent-skills/schemas/skills-sdk/skill-intake-review-receipt.v0.schema.json"},
+    "status": {"type": "string", "enum": ["pass", "review", "blocked"]},
+    "operation": {"type": "string", "const": "skill_intake_review_preview"},
+    "source_kind": {"type": "string", "enum": ["directory", "archive"]},
+    "source_path": {"type": "string", "minLength": 1},
+    "source_digest": {"type": ["string", "null"], "minLength": 71},
+    "skill_id": {"type": ["string", "null"], "minLength": 1},
+    "package_id": {"type": ["string", "null"], "minLength": 1},
+    "package_digest": {"type": ["string", "null"], "pattern": "^sha256:[0-9a-f]{64}$"},
+    "intake_receipt": {"$ref": "skill-intake-receipt.v0.schema.json"},
+    "risk_mode_receipt": {
+      "oneOf": [
+        {"$ref": "risk-mode-taxonomy-receipt.v0.schema.json"},
+        {"type": "null"}
+      ]
+    },
+    "risk_mode_receipt_digest": {"type": ["string", "null"], "pattern": "^sha256:[0-9a-f]{64}$"},
+    "required_receipts": {
+      "type": "array",
+      "minItems": 2,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": ["skills-sdk.skill-intake-receipt.v0", "skills-sdk.risk-mode-taxonomy-receipt.v0"]
+      }
+    },
+    "review_decision": {"type": "string", "enum": ["ready_for_adoption_decision", "needs_human_review", "blocked"]},
+    "review_items": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/definitions/reviewItem"}
+    },
+    "residual_risk": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "execution_performed": {"type": "boolean", "const": false},
+    "scanner_execution_performed": {"type": "boolean", "const": false},
+    "install_performed": {"type": "boolean", "const": false},
+    "projection_mutation_performed": {"type": "boolean", "const": false},
+    "network_accessed": {"type": "boolean", "const": false},
+    "credentials_accessed": {"type": "boolean", "const": false},
+    "mutation_performed": {"type": "boolean", "const": false},
+    "acceptance_trace": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "enum": ["PU-034", "FR-008", "FR-010", "SA-004", "SEC-001", "VP-034"]}
+    },
+    "agent_summary": {"type": "string", "minLength": 1}
+  },
+  "required": [
+    "schema_version",
+    "schema_uri",
+    "status",
+    "operation",
+    "source_kind",
+    "source_path",
+    "source_digest",
+    "skill_id",
+    "package_id",
+    "package_digest",
+    "intake_receipt",
+    "risk_mode_receipt",
+    "risk_mode_receipt_digest",
+    "required_receipts",
+    "review_decision",
+    "review_items",
+    "residual_risk",
+    "execution_performed",
+    "scanner_execution_performed",
+    "install_performed",
+    "projection_mutation_performed",
+    "network_accessed",
+    "credentials_accessed",
+    "mutation_performed",
+    "acceptance_trace",
+    "agent_summary"
+  ],
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "pass"}}},
+      "then": {
+        "properties": {
+          "review_decision": {"const": "ready_for_adoption_decision"},
+          "package_id": {"type": "string", "minLength": 1},
+          "package_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+          "risk_mode_receipt": {"$ref": "risk-mode-taxonomy-receipt.v0.schema.json"},
+          "risk_mode_receipt_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+          "review_items": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {"$ref": "#/definitions/reviewItem"},
+                {"properties": {"status": {"const": "pass"}}}
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"status": {"const": "review"}}},
+      "then": {
+        "properties": {
+          "review_decision": {"const": "needs_human_review"},
+          "package_id": {"type": "string", "minLength": 1},
+          "package_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+          "risk_mode_receipt": {"$ref": "risk-mode-taxonomy-receipt.v0.schema.json"},
+          "risk_mode_receipt_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+          "review_items": {
+            "type": "array",
+            "contains": {
+              "type": "object",
+              "properties": {"status": {"const": "review"}}
+            },
+            "minContains": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"status": {"const": "blocked"}}},
+      "then": {
+        "properties": {
+          "review_decision": {"const": "blocked"},
+          "risk_mode_receipt": {"type": "null"},
+          "risk_mode_receipt_digest": {"type": "null"},
+          "review_items": {
+            "type": "array",
+            "contains": {
+              "type": "object",
+              "properties": {"status": {"const": "block"}}
+            },
+            "minContains": 1
+          }
+        }
+      }
+    }
+  ],
+  "definitions": {
+    "reviewItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "enum": [
+            "provenance",
+            "permissions",
+            "data_exposure",
+            "action_surface",
+            "isolation",
+            "semantic_behavior",
+            "approval_friction",
+            "risk_modes"
+          ]
+        },
+        "status": {"type": "string", "enum": ["pass", "review", "block"]},
+        "question": {"type": "string", "minLength": 1},
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "verdict": {"type": "string", "minLength": 1},
+        "reason": {"type": "string", "minLength": 1}
+      },
+      "required": ["id", "status", "question", "evidence", "verdict", "reason"]
+    }
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "schema_version": "skills-sdk.skill-intake-review-receipt.v0",
+  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/skill-intake-review-receipt.v0.schema.json",
+  "status": "blocked",
+  "operation": "skill_intake_review_preview",
+  "source_kind": "directory",
+  "source_path": "external",
+  "source_digest": null,
+  "skill_id": null,
+  "package_id": null,
+  "package_digest": null,
+  "intake_receipt": {
+    "schema_version": "skills-sdk.skill-intake-receipt.v0",
+    "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/skill-intake-receipt.v0.schema.json",
+    "status": "blocked",
+    "operation": "skill_intake_inspect",
+    "source_kind": "directory",
+    "source_path": "external",
+    "source_digest": null,
+    "skill_id": null,
+    "file_count": 0,
+    "total_size_bytes": 0,
+    "inspected_files": [],
+    "intake_checks": [
+      {
+        "id": "skill_md_present",
+        "status": "blocker",
+        "severity": "blocker",
+        "message": "External skill intake requires a regular SKILL.md file.",
+        "evidence": ["SKILL.md"]
+      }
+    ],
+    "blockers": [
+      {
+        "id": "skill_md_present",
+        "status": "blocker",
+        "severity": "blocker",
+        "message": "External skill intake requires a regular SKILL.md file.",
+        "evidence": ["SKILL.md"]
+      }
+    ],
+    "execution_performed": false,
+    "install_performed": false,
+    "projection_mutation_performed": false,
+    "network_accessed": false,
+    "mutation_performed": false,
+    "acceptance_trace": ["PU-032", "FR-008", "FR-010", "SA-004", "SEC-001", "VP-032"],
+    "agent_summary": "External skill intake blocked directory source with 1 blocker(s)."
+  },
+  "risk_mode_receipt": null,
+  "risk_mode_receipt_digest": null,
+  "required_receipts": ["skills-sdk.skill-intake-receipt.v0", "skills-sdk.risk-mode-taxonomy-receipt.v0"],
+  "review_decision": "blocked",
+  "review_items": [
+    {
+      "id": "isolation",
+      "status": "block",
+      "question": "Did quarantine inspection complete before review?",
+      "evidence": ["skill_md_present"],
+      "verdict": "blocked",
+      "reason": "Risk-mode review is skipped until intake quarantine blockers are cleared."
+    }
+  ],
+  "residual_risk": ["intake_blocked"],
+  "execution_performed": true,
+  "scanner_execution_performed": false,
+  "install_performed": false,
+  "projection_mutation_performed": false,
+  "network_accessed": false,
+  "credentials_accessed": false,
+  "mutation_performed": false,
+  "acceptance_trace": ["PU-034", "FR-008", "FR-010", "SA-004", "SEC-001", "VP-034"],
+  "agent_summary": "External skill intake review blocked external; clear quarantine blockers before risk-mode review."
+}
