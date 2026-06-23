@@ -781,10 +781,100 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
     def test_placeholder_lifecycle_schema_rejects_pass_or_execution_claims(self) -> None:
         """
         Ensure the placeholder-lifecycle schema rejects fixtures that claim execution or passing.
-        
+
         Asserts that the fixture "placeholder-claims-pass.json" does not conform to the placeholder-lifecycle schema and therefore validation fails.
         """
         self.assert_invalid("placeholder-lifecycle", "placeholder-claims-pass.json")
+
+    def test_risk_mode_taxonomy_receipt_fixture_records_non_execution_boundary(self) -> None:
+        payload = self.assert_valid("risk-mode-taxonomy-receipt", "risk-mode-taxonomy-receipt.json")
+
+        self.assertEqual(payload["schema_version"], "skills-sdk.risk-mode-taxonomy-receipt.v0")
+        self.assertEqual(payload["operation"], "risk_mode_taxonomy_preview")
+        self.assertEqual(payload["primary_mode"], "vulnerable_operation")
+        self.assertIn("vulnerable_operation", payload["detected_modes"])
+        self.assertEqual(len(payload["mode_results"]), 4)
+        self.assertFalse(payload["execution_performed"])
+        self.assertFalse(payload["scanner_execution_performed"])
+        self.assertFalse(payload["network_accessed"])
+        self.assertFalse(payload["credentials_accessed"])
+        self.assertFalse(payload["mutation_performed"])
+        self.assertIn("PU-033", payload["acceptance_trace"])
+
+    def test_risk_mode_taxonomy_receipt_schema_rejects_execution_claims(self) -> None:
+        self.assert_invalid("risk-mode-taxonomy-receipt", "risk-mode-taxonomy-executes.json")
+
+    def test_risk_mode_taxonomy_receipt_schema_requires_exactly_four_mode_results(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "risk-mode-taxonomy-receipt.json")
+        payload["mode_results"] = payload["mode_results"][:3]
+
+        with self.assertRaises(AssertionError):
+            _validate_schema_subset(
+                self.schemas["risk-mode-taxonomy-receipt"],
+                payload,
+                {**self.schemas, **self.schemas_by_file},
+            )
+
+    def test_risk_mode_taxonomy_receipt_schema_requires_valid_sha256_digest(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "risk-mode-taxonomy-receipt.json")
+        payload["package_digest"] = "notadigest"
+
+        with self.assertRaises(AssertionError):
+            _validate_schema_subset(
+                self.schemas["risk-mode-taxonomy-receipt"],
+                payload,
+                {**self.schemas, **self.schemas_by_file},
+            )
+
+    def test_skill_intake_review_receipt_fixture_records_needs_human_review(self) -> None:
+        payload = self.assert_valid("skill-intake-review-receipt", "skill-intake-review-receipt.json")
+
+        self.assertEqual(payload["schema_version"], "skills-sdk.skill-intake-review-receipt.v0")
+        self.assertEqual(payload["operation"], "skill_intake_review_preview")
+        self.assertEqual(payload["status"], "review")
+        self.assertEqual(payload["review_decision"], "needs_human_review")
+        self.assertEqual(
+            set(payload["required_receipts"]),
+            {"skills-sdk.skill-intake-receipt.v0", "skills-sdk.risk-mode-taxonomy-receipt.v0"},
+        )
+        self.assertEqual(payload["intake_receipt"]["schema_version"], "skills-sdk.skill-intake-receipt.v0")
+        self.assertEqual(payload["risk_mode_receipt"]["schema_version"], "skills-sdk.risk-mode-taxonomy-receipt.v0")
+        self.assertFalse(payload["execution_performed"])
+        self.assertFalse(payload["scanner_execution_performed"])
+        self.assertFalse(payload["install_performed"])
+        self.assertFalse(payload["projection_mutation_performed"])
+        self.assertFalse(payload["network_accessed"])
+        self.assertFalse(payload["credentials_accessed"])
+        self.assertFalse(payload["mutation_performed"])
+        self.assertIn("PU-034", payload["acceptance_trace"])
+
+    def test_skill_intake_review_receipt_schema_rejects_execution_claims(self) -> None:
+        self.assert_invalid("skill-intake-review-receipt", "skill-intake-review-executes.json")
+
+    def test_skill_intake_review_receipt_schema_rejects_review_status_without_review_items(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "skill-intake-review-receipt.json")
+        # Remove all review items to break the minContains=1 for review status
+        payload["review_items"] = [
+            item for item in payload["review_items"] if item["status"] != "review"
+        ]
+
+        with self.assertRaises(AssertionError):
+            _validate_schema_subset(
+                self.schemas["skill-intake-review-receipt"],
+                payload,
+                {**self.schemas, **self.schemas_by_file},
+            )
+
+    def test_skill_intake_review_receipt_schema_rejects_unknown_review_item_ids(self) -> None:
+        payload = _json(FIXTURE_DIR / "valid" / "skill-intake-review-receipt.json")
+        payload["review_items"][0]["id"] = "unknown_custom_check"
+
+        with self.assertRaises(AssertionError):
+            _validate_schema_subset(
+                self.schemas["skill-intake-review-receipt"],
+                payload,
+                {**self.schemas, **self.schemas_by_file},
+            )
 
 
 if __name__ == "__main__":

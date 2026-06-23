@@ -1,3 +1,4 @@
+import argparse
 import json
 import os
 import subprocess
@@ -12,6 +13,7 @@ from helpers.schema_validator import _validate_schema_subset
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
+from ask.commands.sdk_intake import dispatch_sdk_intake  # noqa: E402
 from ask.skills_sdk.skill_intake_review import build_skill_intake_review_receipt  # noqa: E402
 
 
@@ -23,16 +25,6 @@ FIXTURE_DIR = REPO_ROOT / "Infrastructure/tests/fixtures/skills_sdk/schema_spine
 
 
 def _command_env() -> dict[str, str]:
-    """
-    Create a process environment with isolated cache and state directories.
-    
-    Sets default values for cache, state, and configuration directories to a temporary location,
-    allowing controlled subprocess execution without interfering with system or user environments.
-    Existing environment variable values are preserved.
-    
-    Returns:
-        A dictionary of environment variables with paths redirected to a temporary test location.
-    """
     env = os.environ.copy()
     temp_base = Path(tempfile.gettempdir()) / "agent-skills-test"
     env.setdefault("XDG_CACHE_HOME", str(temp_base / "xdg-cache"))
@@ -45,18 +37,6 @@ def _command_env() -> dict[str, str]:
 
 
 def _run_json_command(*args: str, check: bool = True) -> dict:
-    """
-    Execute a command and return its JSON output.
-    
-    Parameters:
-        check (bool): If True, raises an error on non-zero exit code.
-    
-    Returns:
-        dict: Parsed JSON from standard output.
-    
-    Raises:
-        AssertionError: If check is True and the subprocess exits with a non-zero code.
-    """
     process = subprocess.run(
         list(args),
         cwd=REPO_ROOT,
@@ -74,14 +54,6 @@ def _run_json_command(*args: str, check: bool = True) -> dict:
 
 
 def _write_skill(source: Path, *, body: str, frontmatter: str = "") -> None:
-    """
-    Create a skill fixture file with YAML frontmatter in the specified directory.
-    
-    Parameters:
-        source (Path): Directory where the SKILL.md file will be created.
-        body (str): Body content of the skill file, appended after the frontmatter.
-        frontmatter (str): Optional additional YAML frontmatter fields to include before the body separator.
-    """
     source.mkdir()
     (source / "SKILL.md").write_text(
         f"---\nname: external-review\n"
@@ -108,12 +80,6 @@ class TestSkillsSdkSkillIntakeReview(unittest.TestCase):
         }
 
     def assert_schema_valid(self, payload: dict) -> None:
-        """
-        Validates a payload against the skill intake review receipt schema.
-        
-        Parameters:
-        	payload (dict): The receipt payload to validate
-        """
         _validate_schema_subset(self.schema, payload, self.schema_store)
 
     def test_builder_consumes_intake_and_risk_mode_receipts(self) -> None:
@@ -220,6 +186,219 @@ class TestSkillsSdkSkillIntakeReview(unittest.TestCase):
 
         with self.assertRaises(AssertionError):
             self.assert_schema_valid(payload)
+
+    def test_review_items_cover_all_eight_review_dimensions(self) -> None:
+        receipt = build_skill_intake_review_receipt(REPO_ROOT, source=VALID_SKILL)
+
+        item_ids = {item["id"] for item in receipt["review_items"]}
+        expected_ids = {
+            "provenance",
+            "permissions",
+            "data_exposure",
+            "action_surface",
+            "isolation",
+            "semantic_behavior",
+            "approval_friction",
+            "risk_modes",
+        }
+        self.assertEqual(item_ids, expected_ids)
+
+    def test_provenance_via_owner_field_passes_provenance_check(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "external"
+            _write_skill(
+                source,
+                frontmatter="owner: my-team\n",
+                body="Summarize provided documents.",
+            )
+            receipt = build_skill_intake_review_receipt(REPO_ROOT, source=source.as_posix())
+
+        provenance_item = next(i for i in receipt["review_items"] if i["id"] == "provenance")
+        self.assertEqual(provenance_item["status"], "pass")
+        self.assertEqual(provenance_item["verdict"], "declared")
+
+    def test_skill_with_data_exposure_terms_flags_data_exposure_for_review(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "external"
+            _write_skill(
+                source,
+                frontmatter="provenance: test\n",
+                body="Read the API token and include in transcript output.",
+            )
+            receipt = build_skill_intake_review_receipt(REPO_ROOT, source=source.as_posix())
+
+        data_item = next(i for i in receipt["review_items"] if i["id"] == "data_exposure")
+        self.assertEqual(data_item["status"], "review")
+
+    def test_skill_with_action_surface_and_approval_language_passes_approval_friction(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "external"
+            _write_skill(
+                source,
+                frontmatter="provenance: test\n",
+                body="Commit changes only after explicit approval and preview.",
+            )
+            receipt = build_skill_intake_review_receipt(REPO_ROOT, source=source.as_posix())
+
+        approval_item = next(i for i in receipt["review_items"] if i["id"] == "approval_friction")
+        self.assertEqual(approval_item["status"], "pass")
+
+    def test_skill_with_action_surface_without_approval_language_flags_approval_friction(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "external"
+            _write_skill(
+                source,
+                frontmatter="provenance: test\n",
+                body="Commit the changes to the repository immediately.",
+            )
+            receipt = build_skill_intake_review_receipt(REPO_ROOT, source=source.as_posix())
+
+        approval_item = next(i for i in receipt["review_items"] if i["id"] == "approval_friction")
+        self.assertEqual(approval_item["status"], "review")
+
+    def test_blocked_receipt_has_null_risk_mode_fields(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "external"
+            source.mkdir()
+            (source / "README.md").write_text("not a skill", encoding="utf-8")
+
+            receipt = build_skill_intake_review_receipt(REPO_ROOT, source=source.as_posix())
+
+        self.assertIsNone(receipt["risk_mode_receipt"])
+        self.assertIsNone(receipt["risk_mode_receipt_digest"])
+        self.assertIsNone(receipt["package_id"])
+        self.assertIsNone(receipt["package_digest"])
+        self.assertEqual(receipt["review_decision"], "blocked")
+
+    def test_residual_risk_contains_risk_mode_and_review_item_entries(self) -> None:
+        receipt = build_skill_intake_review_receipt(REPO_ROOT, source=VALID_SKILL)
+
+        risk_mode_entries = [r for r in receipt["residual_risk"] if r.startswith("risk_mode:")]
+        review_item_entries = [r for r in receipt["residual_risk"] if r.startswith("review_item:")]
+        self.assertTrue(len(risk_mode_entries) > 0 or len(review_item_entries) > 0)
+        for entry in receipt["residual_risk"]:
+            self.assertTrue(
+                entry.startswith("risk_mode:") or entry.startswith("review_item:"),
+                f"Unexpected residual_risk entry format: {entry}",
+            )
+
+    def test_receipt_records_non_mutation_boundary(self) -> None:
+        receipt = build_skill_intake_review_receipt(REPO_ROOT, source=VALID_SKILL)
+
+        self.assertFalse(receipt["execution_performed"])
+        self.assertFalse(receipt["scanner_execution_performed"])
+        self.assertFalse(receipt["install_performed"])
+        self.assertFalse(receipt["projection_mutation_performed"])
+        self.assertFalse(receipt["network_accessed"])
+        self.assertFalse(receipt["credentials_accessed"])
+        self.assertFalse(receipt["mutation_performed"])
+
+    def test_agent_summary_contains_skill_id(self) -> None:
+        receipt = build_skill_intake_review_receipt(REPO_ROOT, source=VALID_SKILL)
+
+        self.assertIn("skills-sdk-valid-fixture", receipt["agent_summary"])
+
+    def test_receipt_includes_required_acceptance_trace_items(self) -> None:
+        receipt = build_skill_intake_review_receipt(REPO_ROOT, source=VALID_SKILL)
+
+        self.assertIn("PU-034", receipt["acceptance_trace"])
+        self.assertIn("FR-008", receipt["acceptance_trace"])
+        self.assertIn("SEC-001", receipt["acceptance_trace"])
+
+    def test_isolation_review_item_always_passes_when_intake_succeeds(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "external"
+            _write_skill(
+                source,
+                frontmatter="provenance: test\n",
+                body="Read documents.",
+            )
+            receipt = build_skill_intake_review_receipt(REPO_ROOT, source=source.as_posix())
+
+        isolation_item = next(i for i in receipt["review_items"] if i["id"] == "isolation")
+        self.assertEqual(isolation_item["status"], "pass")
+        self.assertEqual(isolation_item["verdict"], "quarantined")
+
+    def test_review_status_matches_review_decision(self) -> None:
+        receipt = build_skill_intake_review_receipt(REPO_ROOT, source=VALID_SKILL)
+
+        if receipt["status"] == "pass":
+            self.assertEqual(receipt["review_decision"], "ready_for_adoption_decision")
+        elif receipt["status"] == "review":
+            self.assertEqual(receipt["review_decision"], "needs_human_review")
+        elif receipt["status"] == "blocked":
+            self.assertEqual(receipt["review_decision"], "blocked")
+
+    def test_required_receipts_always_lists_both_schema_versions(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "external"
+            _write_skill(
+                source,
+                frontmatter="provenance: test\n",
+                body="Safe docs.",
+            )
+            receipt = build_skill_intake_review_receipt(REPO_ROOT, source=source.as_posix())
+
+        self.assertIn("skills-sdk.skill-intake-receipt.v0", receipt["required_receipts"])
+        self.assertIn("skills-sdk.risk-mode-taxonomy-receipt.v0", receipt["required_receipts"])
+
+
+class TestDispatchSdkIntakeRouting(unittest.TestCase):
+    def _make_args(self, **kwargs) -> argparse.Namespace:
+        defaults = {
+            "json": True,
+            "robot": True,
+            "verbose": False,
+        }
+        defaults.update(kwargs)
+        return argparse.Namespace(**defaults)
+
+    def test_dispatch_returns_error_for_unknown_intake_action(self) -> None:
+        args = self._make_args(intake_action="nonexistent_action")
+        result = dispatch_sdk_intake(REPO_ROOT, args)
+
+        self.assertEqual(result.status, "error")
+        self.assertTrue(len(result.errors) > 0)
+        self.assertIn("nonexistent_action", result.errors[0].message)
+
+    def test_dispatch_returns_error_for_review_without_preview(self) -> None:
+        args = self._make_args(
+            intake_action="review",
+            source=VALID_SKILL,
+            source_kind="directory",
+            preview=False,
+        )
+        result = dispatch_sdk_intake(REPO_ROOT, args)
+
+        self.assertEqual(result.status, "error")
+        self.assertTrue(len(result.errors) > 0)
+        self.assertIn("--preview", result.errors[0].fix_suggestion)
+        self.assertEqual(result.errors[0].code, "ERR_VALIDATION")
+
+    def test_dispatch_returns_error_for_inspect_without_preview(self) -> None:
+        args = self._make_args(
+            intake_action="inspect",
+            source=VALID_SKILL,
+            source_kind="directory",
+            preview=False,
+        )
+        result = dispatch_sdk_intake(REPO_ROOT, args)
+
+        self.assertEqual(result.status, "error")
+        self.assertEqual(result.errors[0].code, "ERR_VALIDATION")
+
+    def test_dispatch_routes_review_with_preview_to_implementation(self) -> None:
+        args = self._make_args(
+            intake_action="review",
+            source=VALID_SKILL,
+            source_kind="directory",
+            preview=True,
+        )
+        result = dispatch_sdk_intake(REPO_ROOT, args)
+
+        self.assertIn("skills_sdk_intake_review", result.data)
+        payload = result.data["skills_sdk_intake_review"]
+        self.assertIn(payload["status"], ("pass", "review", "blocked"))
 
 
 if __name__ == "__main__":

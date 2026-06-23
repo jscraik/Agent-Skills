@@ -333,6 +333,56 @@ class TestSkillsSdkCapabilityStatus(unittest.TestCase):
         self.assertIn("PU-001 through PU-007 are completed historical implementation slices", plan_text)
         self.assertIn("PR, CI, review-thread, tracker, merge readiness", plan_text)
 
+    def test_required_capability_ids_includes_risk_mode_taxonomy(self) -> None:
+        self.assertIn("risk_mode_taxonomy", REQUIRED_CAPABILITY_IDS)
+
+    def test_required_capability_ids_includes_skill_intake_review(self) -> None:
+        self.assertIn("skill_intake_review", REQUIRED_CAPABILITY_IDS)
+
+    def test_risk_mode_taxonomy_capability_is_implemented_in_matrix(self) -> None:
+        matrix = load_capability_matrix(REPO_ROOT)
+        by_id = {row["id"]: row for row in matrix["capabilities"]}
+
+        self.assertIn("risk_mode_taxonomy", by_id)
+        row = by_id["risk_mode_taxonomy"]
+        self.assertEqual(row["status"], "implemented")
+        self.assertTrue(row["feature_executed"])
+        self.assertFalse(row["mutation_performed"])
+        self.assertTrue(any("risk_modes.py" in ref for ref in row["evidence_refs"]))
+
+    def test_skill_intake_review_capability_is_implemented_in_matrix(self) -> None:
+        matrix = load_capability_matrix(REPO_ROOT)
+        by_id = {row["id"]: row for row in matrix["capabilities"]}
+
+        self.assertIn("skill_intake_review", by_id)
+        row = by_id["skill_intake_review"]
+        self.assertEqual(row["status"], "implemented")
+        self.assertTrue(row["feature_executed"])
+        self.assertFalse(row["mutation_performed"])
+        self.assertTrue(any("skill_intake_review.py" in ref for ref in row["evidence_refs"]))
+
+    def test_matrix_rejects_missing_risk_mode_taxonomy_id(self) -> None:
+        matrix = load_capability_matrix(REPO_ROOT)
+        bad_matrix = json.loads(json.dumps(matrix))
+        bad_matrix["capabilities"] = [
+            row for row in bad_matrix["capabilities"] if row["id"] != "risk_mode_taxonomy"
+        ]
+
+        with self.assertRaisesRegex(CapabilityStatusError, "missing required capability ids"):
+            validate_capability_matrix(bad_matrix)
+
+    def test_command_metadata_registers_risk_modes_and_intake_review_examples(self) -> None:
+        security_examples = COMMAND_EXAMPLES.get(("sdk", "security"), [])
+        intake_examples = COMMAND_EXAMPLES.get(("sdk", "intake"), [])
+
+        self.assertTrue(
+            any("risk-modes" in example for example in security_examples),
+            "Expected a risk-modes example in sdk security command metadata",
+        )
+        self.assertTrue(
+            any("intake review" in example or "review" in example for example in intake_examples),
+            "Expected an intake review example in sdk intake command metadata",
+        )
 
 
 if __name__ == "__main__":
