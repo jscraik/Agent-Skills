@@ -6,7 +6,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-from ask.skills_sdk.contracts import read_skill_frontmatter_fields
+from ask.skills_sdk.contracts import body_without_frontmatter, read_skill_frontmatter_fields
 from ask.skills_sdk.risk_modes import (
     RISK_MODE_TAXONOMY_SCHEMA_VERSION,
     build_risk_mode_taxonomy_receipt,
@@ -32,24 +32,6 @@ REVIEW_ITEM_IDS = (
 DATA_EXPOSURE_PATTERN = re.compile(r"\b(secret|credential|token|api key|password|log|stdout|stderr|transcript|trace)\b", re.IGNORECASE)
 ACTION_SURFACE_PATTERN = re.compile(r"\b(write|modify|delete|publish|install|commit|push|deploy|message|ticket|browser|api)\b", re.IGNORECASE)
 APPROVAL_PATTERN = re.compile(r"\b(approval|ask|confirm|preview|dry-run|non-mutating|block|rollback|sandbox)\b", re.IGNORECASE)
-
-
-def _body_without_frontmatter(text: str) -> str:
-    """
-    Remove YAML frontmatter from text bounded by --- delimiters.
-    
-    Parameters:
-    	text (str): The text to process, potentially containing YAML frontmatter
-    
-    Returns:
-    	str: Text content following the frontmatter block if present, otherwise the original text, with leading and trailing whitespace removed
-    """
-    lines = text.splitlines()
-    if lines and lines[0].strip() == "---":
-        for index, line in enumerate(lines[1:], start=1):
-            if line.strip() == "---":
-                return "\n".join(lines[index + 1 :]).strip()
-    return text.strip()
 
 
 def _digest_json(value: object) -> str:
@@ -451,7 +433,7 @@ def build_skill_intake_review_receipt(
     source_root = _source_root(repo_root, source).resolve(strict=True)
     skill_file = source_root / "SKILL.md"
     frontmatter = read_skill_frontmatter_fields(skill_file)
-    body = _body_without_frontmatter(skill_file.read_text(encoding="utf-8"))
+    body = body_without_frontmatter(skill_file.read_text(encoding="utf-8"))
     risk_mode_receipt = build_risk_mode_taxonomy_receipt(repo_root, source_path=skill_file, query=intake_receipt["skill_id"])
     review_items = _review_items(
         frontmatter=frontmatter,

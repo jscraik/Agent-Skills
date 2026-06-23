@@ -141,6 +141,7 @@
       "mutation_performed": false,
       "evidence_refs": [
         "./bin/ask sdk security risk-modes Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
+        "Infrastructure/scripts/lib/ask/skills_sdk/risk_modes.py",
         "Infrastructure/config/schemas/skills-sdk/risk-mode-taxonomy-receipt.v0.schema.json",
         "Infrastructure/tests/test_skills_sdk_risk_mode_taxonomy.py"
       ],

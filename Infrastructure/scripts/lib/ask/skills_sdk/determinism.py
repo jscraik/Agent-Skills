@@ -4,6 +4,8 @@ import re
 from pathlib import Path
 from typing import Any
 
+from ask.skills_sdk.contracts import body_without_frontmatter
+
 
 DETERMINISM_AUDIT_SCHEMA_VERSION = "skill-determinism-audit.v1"
 
@@ -62,7 +64,7 @@ def audit_skill_determinism(
     for skill_path in skill_files:
         text = skill_path.read_text(encoding="utf-8")
         frontmatter = _parse_frontmatter(text)
-        body = _body_without_frontmatter(text)
+        body = body_without_frontmatter(text)
         relative_path = _repo_relative(repo_root, skill_path)
         candidates.extend(_description_candidates(relative_path, frontmatter))
         candidates.extend(_lens_candidates(relative_path, text))
@@ -335,15 +337,6 @@ def _parse_simple_frontmatter(text: str) -> dict[str, str]:
     if current_key:
         values[current_key] = " ".join(folded).strip()
     return values
-
-
-def _body_without_frontmatter(text: str) -> str:
-    if not text.startswith("---\n"):
-        return text
-    parts = text.split("---", 2)
-    if len(parts) != 3:
-        return text
-    return parts[2].lstrip("\n")
 
 
 def _normalise_scalar(value: Any) -> str:

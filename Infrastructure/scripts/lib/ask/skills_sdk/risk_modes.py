@@ -6,7 +6,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-from ask.skills_sdk.contracts import read_skill_frontmatter_fields
+from ask.skills_sdk.contracts import body_without_frontmatter, read_skill_frontmatter_fields
 from ask.skills_sdk.package_build import build_package_digest_receipt
 from ask.skills_sdk.risk import build_risk_classification
 
@@ -82,23 +82,6 @@ SAFETY_TERMS = (
     "dry-run",
     "non-mutating",
 )
-
-
-def _body_without_frontmatter(text: str) -> str:
-    """
-    Extract the body text after YAML frontmatter delimiters.
-    
-    If text begins with `---`, returns everything after the closing `---`. Otherwise, returns the original text.
-    
-    Returns:
-        str: The body text, with leading and trailing whitespace removed.
-    """
-    lines = text.splitlines()
-    if lines and lines[0].strip() == "---":
-        for index, line in enumerate(lines[1:], start=1):
-            if line.strip() == "---":
-                return "\n".join(lines[index + 1 :]).strip()
-    return text.strip()
 
 
 def _digest_json(value: object) -> str:
@@ -390,7 +373,7 @@ def build_risk_mode_taxonomy_receipt(repo_root: Path, *, source_path: Path, quer
     source = source_path if source_path.name == "SKILL.md" else source_path / "SKILL.md"
     frontmatter = read_skill_frontmatter_fields(source)
     text = source.read_text(encoding="utf-8")
-    body = _body_without_frontmatter(text)
+    body = body_without_frontmatter(text)
     classification = build_risk_classification(source, frontmatter, text)
     package_receipt = build_package_digest_receipt(repo_root, source_path=source, query=query)
     evidence_ref = _repo_relative(repo_root, source)

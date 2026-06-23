@@ -199,9 +199,20 @@ def read_skill_frontmatter_fields(skill_md: Path) -> dict[str, Any]:
             *CODEX_SKILL_PACKAGE_FRONTMATTER_FIELDS,
             "metadata",
             *PACKAGE_CONTRACT_FIELDS,
+            "owner",
         } and parsed_value:
             fields[key] = parsed_value
     return fields
+
+
+def body_without_frontmatter(text: str) -> str:
+    """Return text after a leading YAML frontmatter block, trimmed."""
+    lines = text.splitlines()
+    if lines and lines[0].strip() == "---":
+        for index, line in enumerate(lines[1:], start=1):
+            if line.strip() == "---":
+                return "\n".join(lines[index + 1 :]).strip()
+    return text.strip()
 
 
 def status_from_bool(value: bool) -> str:
