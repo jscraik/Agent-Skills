@@ -18,7 +18,6 @@ CODEX_SKILL_PACKAGE_FIELDS: tuple[tuple[str, bool], ...] = (
 CODEX_SKILL_PACKAGE_FRONTMATTER_FIELDS: tuple[str, ...] = tuple(
     field for field, _required in CODEX_SKILL_PACKAGE_FIELDS
 )
-
 PACKAGE_CONTRACT_FIELDS: tuple[str, ...] = (
     "version",
     "compatible_roles",
@@ -26,6 +25,14 @@ PACKAGE_CONTRACT_FIELDS: tuple[str, ...] = (
     "maturity",
     "provenance",
     "share_readiness",
+)
+FRONTMATTER_FIELD_KEYS: tuple[str, ...] = (
+    *CODEX_SKILL_PACKAGE_FRONTMATTER_FIELDS,
+    "metadata",
+    *PACKAGE_CONTRACT_FIELDS,
+    "owner",
+    "source_kind",
+    "source-kind",
 )
 
 DOCTOR_BLOCKER_TAXONOMY: dict[str, str] = {
@@ -143,6 +150,50 @@ def parse_frontmatter_scalar(value: str) -> Any:
     return cleaned
 
 
+def _append_frontmatter_list_item(fields: dict[str, Any], current_map: str | None, current_list_key: str | None, item: Any) -> bool:
+    if current_map and current_list_key:
+        nested = fields.setdefault(current_map, {})
+        if isinstance(nested, dict):
+            values = nested.setdefault(current_list_key, [])
+            if isinstance(values, list):
+                values.append(item)
+                return True
+    if current_map and current_map != "metadata":
+        values = fields.setdefault(current_map, [])
+        if isinstance(values, list):
+            values.append(item)
+            return True
+    return False
+
+
+def _record_frontmatter_mapping(fields: dict[str, Any], line: str, current_map: str | None) -> tuple[str | None, str | None]:
+    if ":" not in line:
+        return current_map, None
+    key, value = line.split(":", 1)
+    key = key.strip()
+    value = value.strip()
+    if len(line) - len(line.lstrip(" ")) > 0 and current_map:
+        return current_map, _record_nested_frontmatter_value(fields, current_map, key, value)
+    if not value:
+        fields[key] = [] if key in PACKAGE_CONTRACT_FIELDS else {}
+        return key, None
+    parsed_value = parse_frontmatter_scalar(value)
+    if key in FRONTMATTER_FIELD_KEYS and parsed_value:
+        fields[key] = parsed_value
+    return None, None
+
+
+def _record_nested_frontmatter_value(fields: dict[str, Any], current_map: str, key: str, value: str) -> str | None:
+    nested = fields.setdefault(current_map, {})
+    if not isinstance(nested, dict):
+        return None
+    if value:
+        nested[key] = parse_frontmatter_scalar(value)
+        return None
+    nested[key] = []
+    return key
+
+
 def read_skill_frontmatter_fields(skill_md: Path) -> dict[str, Any]:
     """Extract conservative scalar and one-level metadata fields from SKILL.md frontmatter."""
     fields: dict[str, Any] = {}
@@ -158,50 +209,11 @@ def read_skill_frontmatter_fields(skill_md: Path) -> dict[str, Any]:
         stripped = line.strip()
         if not stripped:
             continue
-        indent = len(line) - len(line.lstrip(" "))
         if stripped.startswith("- "):
             item = parse_frontmatter_scalar(stripped[2:])
-            if current_map and current_list_key:
-                nested = fields.setdefault(current_map, {})
-                if isinstance(nested, dict):
-                    values = nested.setdefault(current_list_key, [])
-                    if isinstance(values, list):
-                        values.append(item)
+            if _append_frontmatter_list_item(fields, current_map, current_list_key, item):
                 continue
-            if current_map and current_map != "metadata":
-                values = fields.setdefault(current_map, [])
-                if isinstance(values, list):
-                    values.append(item)
-                continue
-        if ":" not in line:
-            continue
-        key, value = line.split(":", 1)
-        key = key.strip()
-        value = value.strip()
-        if indent > 0 and current_map:
-            nested = fields.setdefault(current_map, {})
-            if isinstance(nested, dict):
-                if value:
-                    nested[key] = parse_frontmatter_scalar(value)
-                    current_list_key = None
-                else:
-                    nested[key] = []
-                    current_list_key = key
-            continue
-        current_map = None
-        current_list_key = None
-        if not value:
-            fields[key] = [] if key in PACKAGE_CONTRACT_FIELDS else {}
-            current_map = key
-            continue
-        parsed_value = parse_frontmatter_scalar(value)
-        if key in {
-            *CODEX_SKILL_PACKAGE_FRONTMATTER_FIELDS,
-            "metadata",
-            *PACKAGE_CONTRACT_FIELDS,
-            "owner",
-        } and parsed_value:
-            fields[key] = parsed_value
+        current_map, current_list_key = _record_frontmatter_mapping(fields, line, current_map)
     return fields
 
 

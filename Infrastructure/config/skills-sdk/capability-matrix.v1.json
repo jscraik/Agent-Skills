@@ -134,14 +134,13 @@
     {
       "id": "risk_mode_taxonomy",
       "title": "Risk mode taxonomy receipt",
-      "status": "implemented",
+      "status": "preview_only",
       "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/risk_modes.py",
       "pipeline_sections": ["release_decision_matrix", "agent_execution_control_plane", "package_hardening"],
       "feature_executed": true,
       "mutation_performed": false,
       "evidence_refs": [
         "./bin/ask sdk security risk-modes Infrastructure/tests/fixtures/skills_sdk/valid_skill --preview --json --robot",
-        "Infrastructure/scripts/lib/ask/skills_sdk/risk_modes.py",
         "Infrastructure/config/schemas/skills-sdk/risk-mode-taxonomy-receipt.v0.schema.json",
         "Infrastructure/tests/test_skills_sdk_risk_mode_taxonomy.py"
       ],
@@ -213,7 +212,7 @@
     {
       "id": "skill_intake_review",
       "title": "External skill intake review",
-      "status": "implemented",
+      "status": "preview_only",
       "owner_surface": "Infrastructure/scripts/lib/ask/skills_sdk/skill_intake_review.py",
       "pipeline_sections": ["full_skill_lifecycle", "package_hardening", "agent_execution_control_plane"],
       "feature_executed": true,

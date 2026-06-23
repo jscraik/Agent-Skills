@@ -151,6 +151,7 @@ def _review_items(
     text = json.dumps(frontmatter, sort_keys=True, separators=(",", ":")) + "\n" + body
     context = {
         "detected_modes": set(risk_mode_receipt["detected_modes"]),
+        "source_kind": str(risk_mode_receipt.get("source_kind") or ""),
         "has_action_surface": bool(ACTION_SURFACE_PATTERN.search(text)),
         "has_data_exposure": bool(DATA_EXPOSURE_PATTERN.search(text)),
         "has_approval_language": bool(APPROVAL_PATTERN.search(text)),
@@ -195,13 +196,15 @@ def _permissions_item(context: dict[str, Any]) -> dict[str, Any]:
         dict: A review item indicating whether permission-bearing risk modes warrant human review.
     """
     risky_modes = context["detected_modes"] & {"malicious_supply_chain", "negligent_instruction", "vulnerable_operation"}
+    scripted_source = context["source_kind"] == "scripted"
+    requires_review = bool(risky_modes or scripted_source)
     return _review_item(
         "permissions",
-        "review" if risky_modes else "pass",
+        "review" if requires_review else "pass",
         "Do declared or inferred permissions need a reviewer before activation?",
-        context["risk_evidence"] or ["risk-mode receipt has no permission-affecting modes"],
-        "needs_human_review" if risky_modes else "bounded",
-        "Risk modes indicate permission-bearing behavior." if risky_modes else "No permission-bearing risk mode was detected.",
+        context["risk_evidence"] or (["source_kind:scripted"] if scripted_source else ["risk-mode receipt has no permission-affecting modes"]),
+        "needs_human_review" if requires_review else "bounded",
+        "Executable package content requires human permission review." if scripted_source else ("Risk modes indicate permission-bearing behavior." if risky_modes else "No permission-bearing risk mode was detected."),
     )
 
 
@@ -426,12 +429,16 @@ def build_skill_intake_review_receipt(
     source_kind: str = "directory",
 ) -> dict[str, Any]:
     """Build a non-mutating external skill review receipt from intake and risk-mode receipts."""
+    if source_kind != "directory":
+        raise ValueError("Skills SDK intake review accepts directory source_kind only in this slice.")
     intake_receipt = build_skill_intake_receipt(repo_root, source=source, source_kind=source_kind)
     if intake_receipt["status"] == "blocked":
         return _blocked_receipt(repo_root, source, intake_receipt)
 
-    source_root = _source_root(repo_root, source).resolve(strict=True)
-    skill_file = source_root / "SKILL.md"
+    source_root = _source_root(repo_root, str(intake_receipt["source_path"])).resolve(strict=True)
+    skill_file = source_root if source_root.name == "SKILL.md" else source_root / "SKILL.md"
+    if not skill_file.is_file():
+        raise ValueError(f"Resolved intake source does not contain SKILL.md: {source_root}")
     frontmatter = read_skill_frontmatter_fields(skill_file)
     body = body_without_frontmatter(skill_file.read_text(encoding="utf-8"))
     risk_mode_receipt = build_risk_mode_taxonomy_receipt(repo_root, source_path=skill_file, query=intake_receipt["skill_id"])

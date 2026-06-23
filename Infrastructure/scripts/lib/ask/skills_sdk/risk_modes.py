@@ -105,10 +105,11 @@ def _repo_relative(repo_root: Path, path: Path) -> str:
     Returns:
     	A POSIX path string, relative to repo_root if the path is within it, or the absolute path otherwise.
     """
+    resolved = path.resolve(strict=False)
     try:
-        return path.resolve(strict=False).relative_to(repo_root.resolve()).as_posix()
+        return resolved.relative_to(repo_root.resolve()).as_posix()
     except ValueError:
-        return path.as_posix()
+        return resolved.name
 
 
 def _text_signals(frontmatter: dict[str, Any], body: str) -> str:

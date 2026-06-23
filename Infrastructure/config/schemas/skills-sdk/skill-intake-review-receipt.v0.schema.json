@@ -9,9 +9,9 @@
     "schema_uri": {"type": "string", "const": "https://jscraik.local/agent-skills/schemas/skills-sdk/skill-intake-review-receipt.v0.schema.json"},
     "status": {"type": "string", "enum": ["pass", "review", "blocked"]},
     "operation": {"type": "string", "const": "skill_intake_review_preview"},
-    "source_kind": {"type": "string", "enum": ["directory", "archive"]},
+    "source_kind": {"type": "string", "const": "directory"},
     "source_path": {"type": "string", "minLength": 1},
-    "source_digest": {"type": ["string", "null"], "minLength": 71},
+    "source_digest": {"type": ["string", "null"], "pattern": "^sha256:[0-9a-f]{64}$"},
     "skill_id": {"type": ["string", "null"], "minLength": 1},
     "package_id": {"type": ["string", "null"], "minLength": 1},
     "package_digest": {"type": ["string", "null"], "pattern": "^sha256:[0-9a-f]{64}$"},
@@ -91,6 +91,8 @@
       "then": {
         "properties": {
           "review_decision": {"const": "ready_for_adoption_decision"},
+          "skill_id": {"type": "string", "minLength": 1},
+          "source_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
           "package_id": {"type": "string", "minLength": 1},
           "package_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
           "risk_mode_receipt": {"$ref": "risk-mode-taxonomy-receipt.v0.schema.json"},
@@ -112,6 +114,8 @@
       "then": {
         "properties": {
           "review_decision": {"const": "needs_human_review"},
+          "skill_id": {"type": "string", "minLength": 1},
+          "source_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
           "package_id": {"type": "string", "minLength": 1},
           "package_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
           "risk_mode_receipt": {"$ref": "risk-mode-taxonomy-receipt.v0.schema.json"},
@@ -132,6 +136,8 @@
       "then": {
         "properties": {
           "review_decision": {"const": "blocked"},
+          "package_id": {"type": "null"},
+          "package_digest": {"type": "null"},
           "risk_mode_receipt": {"type": "null"},
           "risk_mode_receipt_digest": {"type": "null"},
           "review_items": {

@@ -128,6 +128,29 @@ class TestSkillsSdkSkillIntakeReview(unittest.TestCase):
         self.assertEqual(receipt["review_decision"], "needs_human_review")
         self.assertEqual(receipt["intake_receipt"]["schema_version"], "skills-sdk.skill-intake-receipt.v0")
         self.assertEqual(receipt["risk_mode_receipt"]["schema_version"], "skills-sdk.risk-mode-taxonomy-receipt.v0")
+
+    def test_schema_rejects_inconsistent_status_conditionals(self) -> None:
+        receipt = build_skill_intake_review_receipt(REPO_ROOT, source=VALID_SKILL)
+
+        pass_receipt = json.loads(json.dumps(receipt))
+        for item in pass_receipt["review_items"]:
+            item["status"] = "pass"
+        pass_receipt["status"] = "pass"
+        pass_receipt["review_decision"] = "ready_for_adoption_decision"
+        pass_receipt["skill_id"] = None
+        with self.assertRaises(AssertionError):
+            self.assert_schema_valid(pass_receipt)
+
+        blocked_receipt = json.loads(json.dumps(receipt))
+        blocked_receipt["status"] = "blocked"
+        blocked_receipt["review_decision"] = "blocked"
+        blocked_receipt["risk_mode_receipt"] = None
+        blocked_receipt["risk_mode_receipt_digest"] = None
+        blocked_receipt["package_id"] = "unexpected-package"
+        blocked_receipt["package_digest"] = "sha256:" + "a" * 64
+        blocked_receipt["review_items"][0]["status"] = "block"
+        with self.assertRaises(AssertionError):
+            self.assert_schema_valid(blocked_receipt)
         self.assertIn("skills-sdk.risk-mode-taxonomy-receipt.v0", receipt["required_receipts"])
         self.assertFalse(receipt["execution_performed"])
         self.assertFalse(receipt["scanner_execution_performed"])
@@ -367,7 +390,32 @@ class TestSkillsSdkSkillIntakeReview(unittest.TestCase):
         elif receipt["status"] == "blocked":
             self.assertEqual(receipt["review_decision"], "blocked")
         else:
-            self.fail(f"Unexpected status value: {receipt['status']}")
+            self.fail(f"Unexpected review status: {receipt['status']}")
+
+    def test_scripted_package_requires_permission_review(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "external"
+            _write_skill(
+                source,
+                frontmatter="provenance: test\n",
+                body="Summarize provided documents.",
+            )
+            scripts = source / "scripts"
+            scripts.mkdir()
+            (scripts / "run.sh").write_text("#!/usr/bin/env bash\necho ok\n", encoding="utf-8")
+            receipt = build_skill_intake_review_receipt(REPO_ROOT, source=source.as_posix())
+
+        permissions_item = next(i for i in receipt["review_items"] if i["id"] == "permissions")
+        self.assertEqual(receipt["risk_mode_receipt"]["source_kind"], "scripted")
+        self.assertEqual(permissions_item["status"], "review")
+        self.assertIn("source_kind:scripted", permissions_item["evidence"])
+
+    def test_review_contract_rejects_archive_source_kind(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "external.zip"
+            source.write_bytes(b"not a real archive")
+            with self.assertRaisesRegex(ValueError, "directory source_kind only"):
+                build_skill_intake_review_receipt(REPO_ROOT, source=source.as_posix(), source_kind="archive")
 
     def test_required_receipts_always_lists_both_schema_versions(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

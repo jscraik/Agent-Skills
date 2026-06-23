@@ -4149,8 +4149,8 @@ def skills_sdk_intake_review(
     Generate an intake review receipt for a skill source without mutating the workspace.
     
     Parameters:
-    	source (str): The skill source directory path to review.
-    	source_kind (str): Type of source. Defaults to "directory".
+        source (str): The external skill directory path to review.
+        source_kind (str): Type of source. Defaults to "directory"; archive input remains blocked in this slice.
     
     Returns:
     	CallResult: Result with `data["skills_sdk_intake_review"]` containing the receipt payload. Status is set to "error" if the receipt status is "blocked".

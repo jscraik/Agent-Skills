@@ -278,12 +278,29 @@ class TestSkillsSdkRiskModeTaxonomy(unittest.TestCase):
 
         malicious = next(r for r in receipt["mode_results"] if r["mode"] == "malicious_supply_chain")
         indicator_ids = {ind["id"] for ind in malicious["indicators"]}
-        # External source_kind is set on the skill content; the taxonomy reads classification
-        # The external_source indicator depends on classification["source_kind"] == "external"
-        # For internal-authored skills this test verifies the builder completes without error
-        self.assertIsNotNone(receipt)
         self.assert_schema_valid(receipt)
         self.assertIn("external_source", indicator_ids)
+
+    def test_taxonomy_digest_is_stable_for_external_paths(self) -> None:
+        receipts = []
+        for _index in range(2):
+            with tempfile.TemporaryDirectory() as temp_dir:
+                skill_md = _write_skill(
+                    Path(temp_dir),
+                    "# Sample\n\nPlain documentation skill.",
+                    "name: sample-risk-mode\ndescription: sample\nprovenance: external",
+                )
+                receipts.append(
+                    build_risk_mode_taxonomy_receipt(
+                        REPO_ROOT,
+                        source_path=skill_md,
+                        query="same-external-content",
+                    )
+                )
+
+        self.assertEqual(receipts[0]["taxonomy_digest"], receipts[1]["taxonomy_digest"])
+        malicious = next(r for r in receipts[0]["mode_results"] if r["mode"] == "malicious_supply_chain")
+        self.assertEqual({ind["evidence_ref"] for ind in malicious["indicators"]}, {"SKILL.md"})
 
     def test_builder_none_detected_when_no_risk_signals_present(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

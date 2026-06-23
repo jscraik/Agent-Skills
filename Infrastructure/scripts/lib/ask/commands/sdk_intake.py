@@ -47,9 +47,9 @@ def add_sdk_intake_parser(
     review.add_argument("--preview", action="store_true", help="Emit a non-mutating review receipt")
     review.add_argument(
         "--source-kind",
-        choices=["directory", "archive"],
+        choices=["directory"],
         default="directory",
-        help="Input kind; archive unpacking is intentionally blocked in this slice",
+        help="Input kind; review currently accepts directory input only",
     )
 
 

@@ -345,10 +345,11 @@ class TestSkillsSdkCapabilityStatus(unittest.TestCase):
 
         self.assertIn("risk_mode_taxonomy", by_id)
         row = by_id["risk_mode_taxonomy"]
-        self.assertEqual(row["status"], "implemented")
+        self.assertEqual(row["status"], "preview_only")
         self.assertTrue(row["feature_executed"])
         self.assertFalse(row["mutation_performed"])
-        self.assertTrue(any("risk_modes.py" in ref for ref in row["owner_surface"]))
+        self.assertEqual(row["owner_surface"], "Infrastructure/scripts/lib/ask/skills_sdk/risk_modes.py")
+        self.assertTrue(any("risk-mode-taxonomy-receipt.v0.schema.json" in ref for ref in row["evidence_refs"]))
 
     def test_skill_intake_review_capability_is_implemented_in_matrix(self) -> None:
         matrix = load_capability_matrix(REPO_ROOT)
@@ -356,10 +357,11 @@ class TestSkillsSdkCapabilityStatus(unittest.TestCase):
 
         self.assertIn("skill_intake_review", by_id)
         row = by_id["skill_intake_review"]
-        self.assertEqual(row["status"], "implemented")
+        self.assertEqual(row["status"], "preview_only")
         self.assertTrue(row["feature_executed"])
         self.assertFalse(row["mutation_performed"])
-        self.assertTrue(any("skill_intake_review.py" in ref for ref in row["owner_surface"]))
+        self.assertEqual(row["owner_surface"], "Infrastructure/scripts/lib/ask/skills_sdk/skill_intake_review.py")
+        self.assertTrue(any("skill-intake-review-receipt.v0.schema.json" in ref for ref in row["evidence_refs"]))
 
     def test_matrix_rejects_missing_risk_mode_taxonomy_id(self) -> None:
         matrix = load_capability_matrix(REPO_ROOT)
@@ -380,7 +382,7 @@ class TestSkillsSdkCapabilityStatus(unittest.TestCase):
             "Expected a risk-modes example in sdk security command metadata",
         )
         self.assertTrue(
-            any("intake" in example and "review" in example for example in intake_examples),
+            any("sdk intake review" in example for example in intake_examples),
             "Expected an intake review example in sdk intake command metadata",
         )
 
