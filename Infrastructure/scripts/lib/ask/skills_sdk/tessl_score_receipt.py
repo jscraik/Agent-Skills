@@ -7,7 +7,7 @@ from typing import Any
 
 
 TESSL_SCORE_RECEIPT_SCHEMA_VERSION = "skills-sdk.tessl-score-receipt.v0"
-TESSL_SCORE_RECEIPT_SCHEMA_URI = "https://jscraik.local/agent-skills/schemas/skills-sdk/tessl-score-receipt.v0.schema.json"
+TESSL_SCORE_RECEIPT_SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/tessl-score-receipt.v0.schema.json"
 TESSL_LIVE_HANDOFF_MIN_USAGE_PERCENT = 90.0
 
 
@@ -230,6 +230,37 @@ def build_tessl_score_receipt(
     failure_reason = attrs.get("failureReason") if isinstance(attrs.get("failureReason"), dict) else None
     receipt_status, blocker_class, blocker = _receipt_status(status, failure_reason, score_summary)
     ready = receipt_status == "pass"
+    return _score_receipt(
+        repo_root=repo_root,
+        view_json=view_json,
+        skill=skill,
+        run_id=_run_id(payload, run_id),
+        tessl_status=status,
+        failure_reason=failure_reason,
+        score_summary=score_summary,
+        feedback_loop=feedback_loop,
+        receipt_status=receipt_status,
+        blocker_class=blocker_class,
+        blocker=blocker,
+        ready=ready,
+    )
+
+
+def _score_receipt(
+    *,
+    repo_root: Path,
+    view_json: Path,
+    skill: str,
+    run_id: str,
+    tessl_status: str,
+    failure_reason: dict[str, Any] | None,
+    score_summary: dict[str, Any],
+    feedback_loop: dict[str, Any],
+    receipt_status: str,
+    blocker_class: str | None,
+    blocker: str | None,
+    ready: bool,
+) -> dict[str, Any]:
     return {
         "schema_version": TESSL_SCORE_RECEIPT_SCHEMA_VERSION,
         "schema_uri": TESSL_SCORE_RECEIPT_SCHEMA_URI,
@@ -237,9 +268,9 @@ def build_tessl_score_receipt(
         "blocker_class": blocker_class,
         "blocker": blocker,
         "skill": skill,
-        "run_id": _run_id(payload, run_id),
+        "run_id": run_id,
         "view_json": _repo_relative(repo_root, view_json),
-        "tessl_status": status,
+        "tessl_status": tessl_status,
         "failure_reason": failure_reason,
         "memory_derived": False,
         "ready": ready,

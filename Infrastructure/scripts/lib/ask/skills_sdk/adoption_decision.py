@@ -11,7 +11,7 @@ from ask.skills_sdk.skill_intake_review import build_skill_intake_review_receipt
 
 ADOPTION_DECISION_SCHEMA_VERSION = "skills-sdk.adoption-decision-receipt.v0"
 ADOPTION_DECISION_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/adoption-decision-receipt.v0.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/adoption-decision-receipt.v0.schema.json"
 )
 ADOPTION_DECISION_ACCEPTANCE_TRACE = ["FR-003", "FR-008", "SA-003", "SA-004", "SEC-001"]
 
@@ -25,8 +25,8 @@ def build_adoption_decision_receipt(
 ) -> dict[str, Any]:
     source_path = _source_path(repo_root, source)
     intake = build_skill_intake_receipt(repo_root, source=source, source_kind=source_kind)
-    review = build_skill_intake_review_receipt(repo_root, source=source, source_kind=source_kind)
-    package = build_package_digest_receipt(repo_root, source_path=source_path, query=source)
+    review = _build_intake_review_receipt(repo_root, source, source_kind)
+    package = _build_package_receipt(repo_root, source_path, source)
     trust_receipt, trust_error = _load_trust_receipt(repo_root, trust_receipt_path)
     checks = _adoption_checks(intake, review, package, trust_receipt, trust_error)
     blockers = [check for check in checks if check["status"] == "blocker"]
@@ -100,6 +100,29 @@ def _adoption_receipt(
     }
 
 
+def _build_package_receipt(repo_root: Path, source_path: Path, source: str) -> dict[str, Any]:
+    try:
+        return build_package_digest_receipt(repo_root, source_path=source_path, query=source)
+    except (OSError, ValueError, KeyError) as exc:
+        return {
+            "status": "blocked",
+            "package_id": None,
+            "package_digest": None,
+            "blocker": f"package_identity_unavailable:{exc}",
+        }
+
+
+def _build_intake_review_receipt(repo_root: Path, source: str, source_kind: str) -> dict[str, Any]:
+    try:
+        return build_skill_intake_review_receipt(repo_root, source=source, source_kind=source_kind)
+    except ValueError as exc:
+        return {
+            "status": "blocked",
+            "review_items": [],
+            "blocker": f"intake_review_unavailable:{exc}",
+        }
+
+
 def _source_path(repo_root: Path, source: str) -> Path:
     path = Path(source).expanduser()
     if not path.is_absolute():
@@ -168,7 +191,7 @@ def _trust_check(
 
 
 def _intake_review_completed(review_receipt: dict[str, Any]) -> bool:
-    if review_receipt.get("status") not in {"preview", "review", "pass"}:
+    if review_receipt.get("status") != "pass":
         return False
     items = review_receipt.get("review_items")
     if not isinstance(items, list):

@@ -1,18 +1,18 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/adoption-decision-receipt.v0.schema.json",
+  "$id": "https://agent-skills.local/schemas/skills-sdk/adoption-decision-receipt.v0.schema.json",
   "title": "Skills SDK Adoption Decision Receipt v0",
   "type": "object",
   "additionalProperties": false,
   "properties": {
     "schema_version": {"type": "string", "const": "skills-sdk.adoption-decision-receipt.v0"},
-    "schema_uri": {"type": "string", "const": "https://jscraik.local/agent-skills/schemas/skills-sdk/adoption-decision-receipt.v0.schema.json"},
+    "schema_uri": {"type": "string", "const": "https://agent-skills.local/schemas/skills-sdk/adoption-decision-receipt.v0.schema.json"},
     "status": {"type": "string", "enum": ["ready", "blocked"]},
     "operation": {"type": "string", "const": "adoption_decision_preview"},
     "source": {"type": "string", "minLength": 1},
     "source_kind": {"type": "string", "enum": ["directory", "archive"]},
-    "package_id": {"type": "string", "minLength": 1},
-    "package_digest": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"},
+    "package_id": {"type": ["string", "null"], "minLength": 1},
+    "package_digest": {"type": ["string", "null"], "pattern": "^sha256:[A-Fa-f0-9]{64}$"},
     "intake_receipt_status": {"type": "string", "enum": ["preview", "blocked"]},
     "intake_review_receipt_status": {"type": "string", "enum": ["preview", "review", "pass", "blocked"]},
     "trust_receipt_status": {"type": ["string", "null"], "enum": ["preview", "recorded", "blocked", null]},
@@ -28,7 +28,13 @@
   "allOf": [
     {
       "if": {"properties": {"status": {"const": "ready"}}, "required": ["status"]},
-      "then": {"properties": {"blockers": {"maxItems": 0}}}
+      "then": {
+        "properties": {
+          "blockers": {"maxItems": 0},
+          "package_id": {"type": "string", "minLength": 1},
+          "package_digest": {"type": "string", "pattern": "^sha256:[A-Fa-f0-9]{64}$"}
+        }
+      }
     }
   ],
   "definitions": {

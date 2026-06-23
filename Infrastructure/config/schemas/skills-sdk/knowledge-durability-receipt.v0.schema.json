@@ -1,12 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/knowledge-durability-receipt.v0.schema.json",
+  "$id": "https://agent-skills.local/schemas/skills-sdk/knowledge-durability-receipt.v0.schema.json",
   "title": "Skills SDK Knowledge Durability Receipt v0",
   "type": "object",
   "additionalProperties": false,
   "properties": {
     "schema_version": {"type": "string", "const": "skills-sdk.knowledge-durability-receipt.v0"},
-    "schema_uri": {"type": "string", "const": "https://jscraik.local/agent-skills/schemas/skills-sdk/knowledge-durability-receipt.v0.schema.json"},
+    "schema_uri": {"type": "string", "const": "https://agent-skills.local/schemas/skills-sdk/knowledge-durability-receipt.v0.schema.json"},
     "status": {"type": "string", "enum": ["pass", "blocked"]},
     "operation": {"type": "string", "const": "knowledge_durability_preview"},
     "skill_path": {"type": "string", "minLength": 1},

@@ -6,7 +6,7 @@ from typing import Any
 
 KNOWLEDGE_DURABILITY_SCHEMA_VERSION = "skills-sdk.knowledge-durability-receipt.v0"
 KNOWLEDGE_DURABILITY_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/knowledge-durability-receipt.v0.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/knowledge-durability-receipt.v0.schema.json"
 )
 KNOWLEDGE_DURABILITY_ACCEPTANCE_TRACE = ["FR-008", "SA-003", "VP-032"]
 KNOWLEDGE_MANIFEST = "references/knowledge-capsule.manifest.yaml"
@@ -19,6 +19,7 @@ def build_knowledge_durability_receipt(repo_root: Path, *, skill: str) -> dict[s
     cache_owned = durable_dir is not None
     checks = [
         _repo_local_check(repo_root, skill_dir),
+        _skill_source_shape_check(skill_dir),
         _knowledge_files_check(skill_dir),
     ]
     if cache_owned:
@@ -57,10 +58,8 @@ def _skill_dir(repo_root: Path, skill: str) -> Path:
 
 
 def _durable_source_for_cache(repo_root: Path, skill_dir: Path) -> Path | None:
-    cache_root = (repo_root / "plugins/cache").resolve(strict=False)
-    try:
-        relative = skill_dir.resolve(strict=False).relative_to(cache_root)
-    except ValueError:
+    relative = _cache_relative(repo_root, skill_dir)
+    if relative is None:
         return None
     parts = relative.parts
     if len(parts) >= 5 and parts[3] == "skills":
@@ -72,6 +71,15 @@ def _durable_source_for_cache(repo_root: Path, skill_dir: Path) -> Path | None:
     else:
         return None
     return (repo_root / "plugins" / plugin_id / "skills" / skill_name).resolve(strict=False)
+
+
+def _cache_relative(repo_root: Path, skill_dir: Path) -> Path | None:
+    for cache_root in (repo_root / "plugins/cache", repo_root / "Plugins/cache"):
+        try:
+            return skill_dir.resolve(strict=False).relative_to(cache_root.resolve(strict=False))
+        except ValueError:
+            continue
+    return None
 
 
 def _repo_local_check(repo_root: Path, skill_dir: Path) -> dict[str, Any]:
@@ -90,6 +98,16 @@ def _durable_source_check(durable_dir: Path) -> dict[str, Any]:
         "pass" if (durable_dir / "SKILL.md").is_file() else "blocker",
         "Cache-owned plugin skill updates must also exist in durable plugin source.",
         [durable_dir.as_posix()],
+    )
+
+
+def _skill_source_shape_check(skill_dir: Path) -> dict[str, Any]:
+    skill_file = skill_dir / "SKILL.md"
+    return _check(
+        "skill_source_shape",
+        "pass" if skill_dir.is_dir() and skill_file.is_file() else "blocker",
+        "Knowledge durability checks require an existing skill directory with SKILL.md.",
+        [skill_file.as_posix()],
     )
 
 

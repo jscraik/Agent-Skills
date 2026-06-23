@@ -9,29 +9,31 @@ from ask.skills_sdk.capability_evidence import build_capability_evidence_receipt
 
 COMMAND_EVIDENCE_PLAN_SCHEMA_VERSION = "skills-sdk.command-evidence-plan-receipt.v0"
 COMMAND_EVIDENCE_PLAN_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/command-evidence-plan-receipt.v0.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/command-evidence-plan-receipt.v0.schema.json"
 )
 COMMAND_EVIDENCE_PLAN_ACCEPTANCE_TRACE = ["FR-008", "SA-003", "VP-032"]
 
 
 def build_command_evidence_plan_receipt(repo_root: Path, *, scope: str = "capability-matrix") -> dict[str, Any]:
     capability_receipt = build_capability_evidence_receipt(repo_root, scope=scope)
-    command_rows = []
+    command_rows: list[dict[str, Any]] = []
+    blockers: list[dict[str, Any]] = []
     for row in capability_receipt["evidence_rows"]:
-        if row["kind"] == "command":
-            plan_row = _command_plan_row(row)
-            if plan_row is not None:
-                command_rows.append(plan_row)
-    blockers = [
-        {
-            "id": "no_command_evidence_refs",
-            "status": "blocker",
-            "severity": "blocker",
-            "message": "No command evidence refs were found to plan.",
-            "evidence": [scope],
-        }
-    ] if not command_rows else []
-    status = "planned" if command_rows else "blocked"
+        if row["kind"] != "command":
+            continue
+        try:
+            command_rows.append(_command_plan_row(row))
+        except ValueError as exc:
+            blockers.append(
+                _blocker(
+                    "invalid_command_evidence_ref",
+                    "Command evidence ref is not shell-parseable.",
+                    [str(row.get("capability_id") or "capability:unknown"), str(row.get("ref") or ""), str(exc)],
+                )
+            )
+    if not command_rows:
+        blockers.append(_blocker("no_command_evidence_refs", "No command evidence refs were found to plan.", [scope]))
+    status = "blocked" if blockers else "planned"
     return {
         "schema_version": COMMAND_EVIDENCE_PLAN_SCHEMA_VERSION,
         "schema_uri": COMMAND_EVIDENCE_PLAN_SCHEMA_URI,
@@ -51,12 +53,9 @@ def build_command_evidence_plan_receipt(repo_root: Path, *, scope: str = "capabi
     }
 
 
-def _command_plan_row(row: dict[str, Any]) -> dict[str, Any] | None:
+def _command_plan_row(row: dict[str, Any]) -> dict[str, Any]:
     command = row["ref"]
-    try:
-        argv = shlex.split(command)
-    except ValueError:
-        return None
+    argv = shlex.split(command)
     return {
         "capability_id": row["capability_id"],
         "command": command,
@@ -66,4 +65,14 @@ def _command_plan_row(row: dict[str, Any]) -> dict[str, Any] | None:
         "receipt_required": True,
         "execution_policy": "manual_or_ci_replay",
         "source_evidence_reason": row["reason"],
+    }
+
+
+def _blocker(blocker_id: str, message: str, evidence: list[str]) -> dict[str, Any]:
+    return {
+        "id": blocker_id,
+        "status": "blocker",
+        "severity": "blocker",
+        "message": message,
+        "evidence": evidence,
     }

@@ -23,6 +23,12 @@ class TestSkillsSdkLifecycleRouteMap(unittest.TestCase):
         self.assertLessEqual(REQUIRED_ROUTE_IDS, route_ids)
         self.assertEqual(receipt["blockers"], [])
         self.assertTrue(all(route["command"].startswith("./bin/ask ") for route in receipt["routes"]))
+        self.assertLessEqual(REQUIRED_LOOPS, {route["loop"] for route in receipt["routes"]})
+        self.assertLessEqual(REQUIRED_STAGES, {route["pipeline_stage"] for route in receipt["routes"]})
+        check_statuses = {check["id"]: check["status"] for check in receipt["checks"]}
+        self.assertEqual(check_statuses["required_loops_present"], "pass")
+        self.assertEqual(check_statuses["required_stages_present"], "pass")
+        self.assertEqual(check_statuses["pipeline_stages_known"], "pass")
 
         for route in receipt["routes"]:
             with self.subTest(route_id=route["id"]):

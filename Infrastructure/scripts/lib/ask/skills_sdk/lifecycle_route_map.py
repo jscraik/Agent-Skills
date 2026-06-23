@@ -8,7 +8,7 @@ from typing import Any
 LIFECYCLE_ROUTE_MAP_PATH = Path("Infrastructure/config/skills-sdk/lifecycle-route-map.v1.json")
 LIFECYCLE_ROUTE_MAP_RECEIPT_SCHEMA_VERSION = "skills-sdk.lifecycle-route-map-receipt.v0"
 LIFECYCLE_ROUTE_MAP_RECEIPT_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/lifecycle-route-map-receipt.v0.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/lifecycle-route-map-receipt.v0.schema.json"
 )
 LIFECYCLE_ROUTE_MAP_ACCEPTANCE_TRACE = ["FR-008", "SA-003", "VP-032"]
 REQUIRED_ROUTE_IDS = {

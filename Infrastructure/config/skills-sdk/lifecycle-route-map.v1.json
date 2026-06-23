@@ -3,6 +3,17 @@
   "status": "truth_surface",
   "routes": [
     {
+      "id": "foundry_status",
+      "pipeline_stage": "Foundry",
+      "loop": "Author loop",
+      "command": "./bin/ask sdk status --json --robot",
+      "owner_module": "ask.skills_sdk.capability_status",
+      "receipt_schema": "Infrastructure/config/schemas/skills-sdk/capability-status.v1.schema.json",
+      "test_ref": "Infrastructure/tests/test_skills_sdk_capability_status.py",
+      "capability_id": "capability_status",
+      "proof_boundary": "keeps the bootstrap foundry surface tied to the capability matrix before lifecycle claims"
+    },
+    {
       "id": "adoption_decision",
       "pipeline_stage": "Guardrails",
       "loop": "Release loop",
@@ -56,6 +67,17 @@
       "test_ref": "Infrastructure/tests/test_skills_sdk_knowledge_durability.py",
       "capability_id": "refs_ingestion",
       "proof_boundary": "blocks cache-only KnowledgeOS skill updates when durable plugin source should exist"
+    },
+    {
+      "id": "local_runtime_install_preview",
+      "pipeline_stage": "Local Runtime Truth",
+      "loop": "Runtime loop",
+      "command": "./bin/ask sdk install preview <skill> --scope project --json --robot",
+      "owner_module": "ask.skills_sdk.install_preview",
+      "receipt_schema": "Infrastructure/config/schemas/skills-sdk/install-preview.v1.schema.json",
+      "test_ref": "Infrastructure/tests/test_skills_sdk_install_preview.py",
+      "capability_id": "install_preview",
+      "proof_boundary": "models local install target paths and lockfile deltas without mutating runtime state"
     }
   ]
 }
