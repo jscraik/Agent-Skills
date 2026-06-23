@@ -70,6 +70,7 @@
 | **Policy Identity** | The deterministic hash representing the active selection and discovery policy. | policy hash, sync hash | Medium |
 | **High-Signal Steering Candidate** | Any Jamie steering or review feedback item before classification; default to treating it as potentially durable until a specific non-durable reason is recorded. | feedback, comment, preference | High |
 | **High-Signal Steering Feedback** | Jamie guidance classified as a repeated agent behavior failure or transferable operating rule; it must be persisted before ordinary work continues. | feedback, comment, preference | High |
+| **Workflow Papercut Log** | A temporary scratch file under `/tmp/agent-skills-feedback/` used during complex Codex or Skills SDK workflow lanes to capture surprises, stale assumptions, blocked commands, and handoff friction before deciding what deserves durable repo uptake. | notes, memory, final proof | High |
 | **Feedback Intent Radius** | The scope at which feedback should be applied: `line`, `function`, `file`, `package`, `repository`, `architecture_rule`, or `durable_memory`. | scope guess, local fix | High |
 | **Pattern Sweep** | A bounded search for similar cases after feedback implies a transferable rule, with each match classified as fixed, left, deferred, or not applicable. | grep and fix all, one-off search | High |
 | **Generalized Feedback Rule** | The transferable principle implied by a local feedback example, stated without the incidental function, command, test, doc section, line, error, or file name. | local fix, review nit | High |

@@ -43,6 +43,13 @@ discovering, and syncing Codex skills, operator docs, and agent workflows.
   report the proof before resuming ordinary implementation or PR work.
   Record the failure category and durable improvement type; an acknowledgement
   without a repo artifact plus validation evidence is not uptake.
+  During complex workflow lanes, including Skills SDK intake, evidence replay,
+  adoption, Tessl handoff, docs verification, or package-readiness work, keep a
+  dedicated temporary papercut log such as
+  `/tmp/agent-skills-feedback/<slice>-papercuts.md`. Use it as scratch evidence
+  for surprises, stale assumptions, blocked commands, and workflow friction;
+  promote only recurring or durable lessons into repo docs, skills, tests,
+  validators, or the steering ledger.
   Use [High-Signal Steering Feedback](./Docs/agents/19-high-signal-steering-feedback.md)
   by opening and reading it in the current turn before continuing ordinary
   implementation or PR work. Record uptake in `.harness/quality/steering-uptake.md`; validate with

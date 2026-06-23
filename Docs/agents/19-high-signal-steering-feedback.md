@@ -61,6 +61,19 @@ reminders: validators, schema checks, runtime checks, trace instrumentation,
 workflow gates, skill-routing changes, retrieval improvements, recovery
 handlers, CI gates, or other artifacts that make recurrence harder.
 
+For complex Codex workflow lanes, keep a dedicated temporary workflow papercut
+log while the task is in flight. Use a predictable path such as
+`/tmp/agent-skills-feedback/<slice>-papercuts.md`, and append short entries
+when a command, review path, hosted check, browser handoff, cache, sandbox, or
+receipt contract behaves differently than expected. For Skills SDK work, this
+includes intake, capability evidence, command replay, adoption decision,
+KnowledgeOS/durable-memory checks, Tessl score/handoff, docs verify, and
+package-readiness lanes. The temp log is scratch evidence only: do not treat it
+as durable proof, do not commit it, and do not let it replace the steering
+ledger. At closeout, classify each useful papercut as ignored with reason,
+fixed locally, promoted to docs/tests/validators/receipts, or recorded as a
+steering-uptake row.
+
 If no durable change is possible in the current environment, record the item as
 `blocked` in the ledger with the concrete blocker and do not describe it as
 fixed.
