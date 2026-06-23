@@ -41,6 +41,19 @@ Next Action: Use he-work or a governed implementation goal to execute PU-001 aft
 
 Implement the first V1.0 Skills SDK product slice from .harness/specs/2026-06-03-skills-sdk-v1-product-spec.md. The slice must produce executable schema and command proof for skills-sdk check, core receipts, risk classification, install preview stubs, and honest placeholder lifecycle states while preserving the JSC-391 scaffold boundaries that are now merged into main.
 
+## Product Boundary Contract
+
+V1.0 implementation must preserve this split before adding more feature lanes:
+
+- `agent-skills` is the bootstrap foundry: source packages, fixtures, dogfood workflows, repo governance, and durable steering memory.
+- `Skills SDK` is the professional lifecycle contract: source shape, SkillIR, package identity, receipts, intake, trust, eval evidence, and runtime handoff rules.
+- `Tessl` is the distribution and external proof surface: private skill workspace, eval workspace, and public standard lane.
+- `Local Runtime Truth` is the installed behavior surface after package, trust, and runtime boundaries pass.
+
+Canonical pipeline: `Foundry -> SDK Lifecycle -> Guardrails -> Evals/Proof -> Tessl Distribution -> Local Runtime Truth`.
+
+Canonical loops: `Author loop`, `Proof loop`, `Release loop`, and `Runtime loop`.
+
 ## Tessl Migration Direction
 
 The V1.0 plan should steer toward Tessl as the skills distribution and lifecycle control plane while keeping this implementation slice read-only unless a later unit authorizes mutation. The target topology has three workspace lanes:

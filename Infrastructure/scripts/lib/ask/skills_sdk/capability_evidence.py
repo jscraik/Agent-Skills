@@ -14,6 +14,8 @@ CAPABILITY_EVIDENCE_SCHEMA_URI = (
     "https://agent-skills.local/schemas/skills-sdk/capability-evidence-receipt.v0.schema.json"
 )
 CAPABILITY_EVIDENCE_ACCEPTANCE_TRACE = ["PU-032", "FR-008", "SA-003", "VP-032"]
+CAPABILITY_EVIDENCE_PROOF_MODE = "inventory_only"
+COMMAND_REPLAY_COMMAND = "./bin/ask sdk evidence command-plan --scope capability-matrix --preview --json --robot"
 COMMAND_STARTERS = frozenset({"./bin/ask", "./bin/skills-sdk", "ask", "python3", "uv", "bash"})
 EXTERNAL_MARKERS = ("github", "circleci", "tessl", "snyk", "http://", "https://")
 
@@ -48,6 +50,9 @@ def build_capability_evidence_receipt(repo_root: Path, *, scope: str = "capabili
         "blocked_count": len(blockers),
         "not_run_count": not_run_count,
         "unknown_count": unknown_count,
+        "proof_mode": CAPABILITY_EVIDENCE_PROOF_MODE,
+        "replay_required_count": not_run_count,
+        "replay_command": COMMAND_REPLAY_COMMAND if not_run_count else None,
         "evidence_rows": rows,
         "blockers": blockers,
         "mutation_performed": False,
@@ -58,10 +63,16 @@ def build_capability_evidence_receipt(repo_root: Path, *, scope: str = "capabili
 
 
 def _agent_summary(total: int, pass_count: int, blocked_count: int, not_run_count: int) -> str:
+    replay_note = (
+        " Run the command evidence plan and replay receipts before treating command lanes as proven."
+        if not_run_count
+        else ""
+    )
     return (
         "Capability evidence verification checked "
         f"{total} evidence ref(s): {pass_count} passed, {blocked_count} blocked, "
         f"and {not_run_count} command or external lane ref(s) were classified but not run."
+        f"{replay_note}"
     )
 
 

@@ -1810,6 +1810,41 @@ metadata:
         self.assertTrue(contract["knowledge_capsules"]["manifest_declared"])
         self.assertFalse(contract["knowledge_capsules"]["ready"])
 
+    def test_knowledge_capsules_block_package_readiness_when_declared_but_not_routed(self) -> None:
+        frontmatter = {
+            "name": "capsule-blocked-skill",
+            "description": "Capsule blocked skill fixture.",
+            "metadata": {
+                "version": "1.0.0",
+                "compatible_roles": ["worker"],
+                "runtime_needs": ["filesystem"],
+                "maturity": "beta",
+                "provenance": "internal",
+                "share_readiness": "ready",
+            },
+        }
+        sdk_contract = {
+            "required_fields": {"missing": []},
+            "values": {
+                "workflow_contract": {"status": "pass"},
+                "optimization_contract": {"status": "pass"},
+                "reference_quality": {"status": "pass", "required_for_package_readiness": True},
+            },
+            "knowledge_capsules": {
+                "manifest_declared": True,
+                "ready": False,
+            },
+        }
+
+        with patch.object(package_contracts, "sdk_package_contract", return_value=sdk_contract):
+            package = package_contracts.skill_package_readiness(frontmatter)
+
+        self.assertEqual(package["readiness_level"], "knowledge_capsules_incomplete")
+        self.assertIn(
+            "knowledge_capsules:first_party_routing_incomplete",
+            package["install_gate"]["blocked_reasons"],
+        )
+
     def test_package_readiness_schema_rejects_payload_without_snapshot_identity(self) -> None:
         with patch("ask.commands.skills_impl.resolve_skill_handle", return_value={
             "status": "ok",

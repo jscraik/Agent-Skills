@@ -17,6 +17,14 @@
     "blocked_count": {"type": "integer", "minimum": 0},
     "not_run_count": {"type": "integer", "minimum": 0},
     "unknown_count": {"type": "integer", "minimum": 0},
+    "proof_mode": {"type": "string", "const": "inventory_only"},
+    "replay_required_count": {"type": "integer", "minimum": 0},
+    "replay_command": {
+      "oneOf": [
+        {"type": "string", "const": "./bin/ask sdk evidence command-plan --scope capability-matrix --preview --json --robot"},
+        {"type": "null"}
+      ]
+    },
     "evidence_rows": {"type": "array", "items": {"$ref": "#/definitions/evidenceRow"}},
     "blockers": {"type": "array", "items": {"$ref": "#/definitions/evidenceRow"}},
     "mutation_performed": {"type": "boolean", "const": false},
@@ -41,6 +49,9 @@
     "blocked_count",
     "not_run_count",
     "unknown_count",
+    "proof_mode",
+    "replay_required_count",
+    "replay_command",
     "evidence_rows",
     "blockers",
     "mutation_performed",

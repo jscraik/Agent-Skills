@@ -13,6 +13,20 @@ Implement the Skills SDK V1.0 plan one bounded slice at a time while preserving
 the JSC-391 scaffold boundary, keeping `./bin/ask` as the repo control plane,
 and introducing `skills-sdk` only as the approved product CLI facade.
 
+The product boundary is binding for every slice:
+
+- `agent-skills` is the bootstrap foundry, dogfood repo, source-package home,
+  fixture bed, and governance memory.
+- `Skills SDK` is the professional lifecycle contract for shaping, guarding,
+  proving, packaging, and handing off skills.
+- `Tessl` is distribution and external proof, not the local source of truth.
+- Local runtime proof is installed behavior truth after package and trust gates.
+
+Use the canonical pipeline
+`Foundry -> SDK Lifecycle -> Guardrails -> Evals/Proof -> Tessl Distribution -> Local Runtime Truth`
+and the canonical loops `Author loop`, `Proof loop`, `Release loop`, and
+`Runtime loop`.
+
 Each slice must run in its own isolated `codex/` feature branch and worktree
 from freshly pulled `main`. Do not continue to the next slice until the current
 slice is implemented, reviewed, validated, pushed, passed through the full
@@ -99,15 +113,15 @@ verified for a delivery claim.
 
 ## Slice Map
 
-| Slice | Purpose | Required first proof |
-| --- | --- | --- |
-| PU-001 | Baseline refresh and parent tracker gate | Clean pulled main, tracker action/waiver, and slice worktree identity |
-| PU-002 | Schema spine for manifest, receipt, risk, and preview | Versioned schema fixtures and validation route selected |
-| PU-003 | `skills-sdk check` command facade | `./bin/ask` and facade command contract cannot drift |
-| PU-004 | Risk tier classifier and sensor placement | Risk and sensor metadata fixtures pass |
-| PU-005 | Install preview and lockfile model stub | Preview emits delta without writing live state |
-| PU-006 | Honest placeholder lifecycle receipts | Refs/evals/signing/sandbox/explorer placeholders never report pass |
-| PU-007 | Evidence packaging, reviews, and closeout | Local, PR, CI, review, tracker, merge, and pulled-main lanes are separate |
+| Slice  | Purpose                                               | Required first proof                                                      |
+| ------ | ----------------------------------------------------- | ------------------------------------------------------------------------- |
+| PU-001 | Baseline refresh and parent tracker gate              | Clean pulled main, tracker action/waiver, and slice worktree identity     |
+| PU-002 | Schema spine for manifest, receipt, risk, and preview | Versioned schema fixtures and validation route selected                   |
+| PU-003 | `skills-sdk check` command facade                     | `./bin/ask` and facade command contract cannot drift                      |
+| PU-004 | Risk tier classifier and sensor placement             | Risk and sensor metadata fixtures pass                                    |
+| PU-005 | Install preview and lockfile model stub               | Preview emits delta without writing live state                            |
+| PU-006 | Honest placeholder lifecycle receipts                 | Refs/evals/signing/sandbox/explorer placeholders never report pass        |
+| PU-007 | Evidence packaging, reviews, and closeout             | Local, PR, CI, review, tracker, merge, and pulled-main lanes are separate |
 
 ## First Action
 

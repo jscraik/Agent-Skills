@@ -56,8 +56,11 @@ class TestSkillsSdkCapabilityEvidence(unittest.TestCase):
         self.assertIn(payload["status"], {"pass", "blocked"})
         self.assertFalse(receipt["mutation_performed"])
         self.assertFalse(receipt["command_execution_performed"])
+        self.assertEqual(receipt["proof_mode"], "inventory_only")
         self.assertGreater(receipt["evidence_ref_count"], 0)
         self.assertTrue(any(row["kind"] == "command" and row["status"] == "not_run" for row in receipt["evidence_rows"]))
+        self.assertEqual(receipt["replay_required_count"], receipt["not_run_count"])
+        self.assertIn("command-plan", receipt["replay_command"])
 
     def test_file_ref_passes_when_repo_local_file_exists(self) -> None:
         kind, status, reason, evidence, lane = _classify_ref(REPO_ROOT, "UBIQUITOUS_LANGUAGE.md")
@@ -214,6 +217,8 @@ class TestSkillsSdkCapabilityEvidence(unittest.TestCase):
         self.assertEqual(receipt["status"], "blocked")
         self.assertEqual(receipt["pass_count"], 1)
         self.assertEqual(receipt["not_run_count"], 1)
+        self.assertEqual(receipt["proof_mode"], "inventory_only")
+        self.assertEqual(receipt["replay_required_count"], 1)
         self.assertEqual(receipt["blocked_count"], 1)
         self.assertEqual(receipt["blockers"][0]["capability_id"], "bad")
 

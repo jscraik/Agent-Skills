@@ -77,6 +77,23 @@ V1 exists to prove the core product doctrine:
 Thin surface. Strong guardrails. Durable memory. Professional output.
 ```
 
+V1 also needs a strict product-boundary contract:
+
+```text
+agent-skills = bootstrap foundry, dogfood repo, source packages, fixtures, and governance memory.
+Skills SDK = professional lifecycle contract for shaping, guarding, proving, packaging, and handing off skills.
+Tessl = distribution and external proof surface, separated into private, eval, and public lanes.
+Local runtime = installed behavior truth, observed after package and trust boundaries pass.
+```
+
+The canonical product pipeline is:
+
+```text
+Foundry -> SDK Lifecycle -> Guardrails -> Evals/Proof -> Tessl Distribution -> Local Runtime Truth
+```
+
+The canonical feedback loops are `Author loop`, `Proof loop`, `Release loop`, and `Runtime loop`.
+
 The SDK MUST treat skills as secure, signed, permissioned, sandboxed, evaluatable software packages when risk requires it. The SDK MUST also preserve the low-friction usefulness of skills by keeping draft and local workflows light.
 
 ## Tessl Workspace Topology Direction
@@ -184,7 +201,8 @@ Expected result: docs explain capability contracts; the read-only Skill Explorer
 
 | Evidence | Current Signal | Spec Consequence |
 | --- | --- | --- |
-| `artifacts/recommended-skills-sdk-pipeline.html` | Full SDK architecture atlas with lifecycle, OSS, CI, security, knowledge, factories, docs, and explorer lanes | Use as broad vision, not as V1 scope by itself. |
+| `Docs/reference/skills-sdk-platform-atlas.html` | Truth-aware atlas for the product-boundary pipeline and current SDK capability truth | Use as operator-facing map, not as evidence that all command or external proof lanes replayed. |
+| `artifacts/recommended-skills-sdk-pipeline.html` | Historical full SDK architecture atlas with lifecycle, OSS, CI, security, knowledge, factories, docs, and explorer lanes | Use as broad vision, not as V1 scope by itself. |
 | `artifacts/skills-sdk-user-lifecycle-one-page.html` | User-facing lifecycle one-page with V1 scope, skill story/use case, CLI facade, install scopes, security adapters, knowledge ingestion, docs, and explorer | Use as product-surface evidence for V1. |
 | `artifacts/reports/skills-sdk-gap-analysis-current-code-tree-2026-06-03.md` | Gap-analysis report against current tree | Use as implementation readiness evidence, not as proof all contracts exist. |
 | JSC-375 through JSC-390 | Linear issue set for SDK platformization | Use for traceability and later planning. |

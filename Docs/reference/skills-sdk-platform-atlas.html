@@ -129,7 +129,7 @@
     .truth-banner strong { color: #70304f; }
     .truth-banner span { color: #33404b; font-size: 14px; line-height: 1.42; }
 
-    .summary-grid, .card-grid, .mvp-grid, .pipeline-grid, .split-grid, .thesis-grid, .discipline-grid, .evidence-grid, .next-grid {
+    .summary-grid, .card-grid, .mvp-grid, .pipeline-grid, .split-grid, .thesis-grid, .discipline-grid, .evidence-grid, .next-grid, .boundary-grid, .spine-grid, .loop-grid {
       display: grid;
       gap: 10px;
     }
@@ -142,8 +142,11 @@
     .discipline-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
     .evidence-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
     .next-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .boundary-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .spine-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); align-items: stretch; }
+    .loop-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 
-    .card, .stat, .stage, .decision, .gap, .step, .thesis-card, .discipline, .evidence-lane, .next-item {
+    .card, .stat, .stage, .decision, .gap, .step, .thesis-card, .discipline, .evidence-lane, .next-item, .boundary-card, .spine-card, .loop-card {
       border: 1px solid var(--line);
       background: #fff;
       padding: 12px;
@@ -166,6 +169,19 @@
     .next-item { border-left: 4px solid var(--preview); background: #fbfcfd; }
     .next-item.priority { border-left-color: var(--blocked); background: #fff8fb; }
     .next-item b { font-size: 12px; color: var(--muted); }
+    .boundary-card { border-top: 4px solid var(--ir); min-height: 118px; background: #fbfcfd; }
+    .boundary-card strong, .spine-card strong, .loop-card strong { font-size: 13px; line-height: 1.24; }
+    .boundary-card span, .spine-card span, .loop-card span { color: var(--muted); font-size: 12px; line-height: 1.36; }
+    .spine-card { position: relative; min-height: 148px; border-top: 4px solid var(--source); }
+    .spine-card::after { content: ""; position: absolute; top: 50%; right: -11px; width: 11px; border-top: 2px solid var(--line); }
+    .spine-card:last-child::after { display: none; }
+    .spine-card[data-stage="guardrails"] { border-top-color: var(--blocked); }
+    .spine-card[data-stage="proof"] { border-top-color: var(--pass); }
+    .spine-card[data-stage="tessl"] { border-top-color: var(--emit); }
+    .spine-card[data-stage="runtime"] { border-top-color: var(--runtime); }
+    .loop-card { min-height: 110px; background: #fbfcfd; border-left: 4px solid var(--preview); }
+    .loop-card.release { border-left-color: var(--blocked); }
+    .loop-card.runtime { border-left-color: var(--runtime); }
 
     .stat[data-status="implemented"], .card[data-status="implemented"] { border-color: rgba(47,111,82,.45); background: #f4fbf6; }
     .stat[data-status="preview"], .card[data-status="preview"] { border-color: rgba(47,111,143,.45); background: #edf6fa; }
@@ -250,7 +266,8 @@
     }
     @media (max-width: 720px) {
       main { width: min(100vw - 20px, 1240px); padding-top: 18px; }
-      .summary-grid, .card-grid, .mvp-grid, .pipeline-grid, .thesis-grid, .discipline-grid, .evidence-grid, .next-grid { grid-template-columns: 1fr; }
+      .summary-grid, .card-grid, .mvp-grid, .pipeline-grid, .thesis-grid, .discipline-grid, .evidence-grid, .next-grid, .boundary-grid, .spine-grid, .loop-grid { grid-template-columns: 1fr; }
+      .spine-card::after { display: none; }
       .truth-banner { grid-template-columns: 1fr; }
       .section { padding: 18px; }
       .toolbar { position: static; }
@@ -262,51 +279,56 @@
     <header>
       <div>
         <h1>Skills SDK Platform Atlas</h1>
-        <p class="subtitle">Truth-aware edition. This artifact separates what the current SDK proves today from the north-star platform: a local CDLC control plane moving skills distribution from GitHub source folders into Tessl workspace, package, eval, review, inventory, and publish receipts.</p>
+        <p class="subtitle">Truth-aware edition. This artifact separates the bootstrap foundry, the Skills SDK lifecycle contract, Tessl distribution, and local runtime truth so the platform story starts with the pipeline instead of the backlog.</p>
       </div>
       <aside class="mission">
         <strong>Mission</strong>
-        Thin surface. Strong guardrails. Treat skills as dependency-like knowledge packages when they can change behaviour, use tools, write state, access data, or influence decisions.
+        Thin surface. Strong guardrails. Durable memory. Professional output.
       </aside>
     </header>
 
     <div class="truth-banner" role="note" aria-label="Truth boundary warning">
-      <span><strong>Truth boundary:</strong> the implemented product is currently a local SDK control plane with SkillIR.v0, package identity, package hardening, deterministic eval receipts, Codex-backed A/B execution, local advisory A/B judge scoring, sandbox boundary validation for intake and eval planning, local trust ledger receipts, redacted observability feedback and receipt-backed promotion previews, project install lifecycle, review-routing helpers, knowledge ingest, and local plugin readiness. Tessl workspace catalog, project links, eval runs, review runs, inventories, members, settings, public publish, and GitHub exit flows remain roadmap lanes unless separately proven.</span>
+      <span><strong>Truth boundary:</strong> the implemented product is a local Skills SDK lifecycle contract inside the agent-skills foundry. It proves selected source-shape, SkillIR, package identity, package hardening, intake, trust, eval, review, knowledge, and install-preview receipts. Tessl workspaces, public distribution, external proof, and installed runtime behavior remain separate lanes unless their own receipts prove them.</span>
       <span class="pill blocked">do not overclaim</span>
     </div>
 
-    <section class="section" data-view-section="truth" aria-label="Tessl workspace topology">
+    <section class="section" data-view-section="truth" aria-label="Product boundary model">
       <div class="section-head">
         <div>
-          <h2>Tessl Workspace Topology</h2>
-          <p>Use Tessl workspaces as lifecycle and authority lanes. Keep skill domains as category facets unless a domain needs different members, settings, source authority, or publication policy.</p>
+          <h2>Product Boundary</h2>
+          <p>The atlas starts by separating the repo that incubates skills from the SDK contract that professionalizes them, the Tessl surfaces that distribute/prove them, and the local runtime that reveals whether installation actually works.</p>
         </div>
-        <div class="note">GitHub should become source provenance during migration, not the install or distribution truth for skills.</div>
+        <div class="note">Product rule: agent-skills is the foundry. Skills SDK is the lifecycle contract. Tessl is distribution/proof. Local runtime is behavior truth.</div>
       </div>
-      <div class="card-grid">
-        <div class="card" data-status="preview"><span class="pill preview">workspace lane</span><strong>Eval Workspace</strong><span>Private project-linked space for eval runs, review runs, scenario quality, release-decision receipts, and comparison evidence before promotion.</span></div>
-        <div class="card" data-status="preview"><span class="pill preview">workspace lane</span><strong>Private Skills Workspace</strong><span>Internal searchable and installable skills that can be reviewed, inventoried, and governed without becoming public distribution artifacts.</span></div>
-        <div class="card" data-status="deferred"><span class="pill deferred">publish lane</span><strong>Public Published Workspace</strong><span>Public distribution surface only after package identity, trust decision, eval/review evidence, workspace policy, and publish authority are recorded.</span></div>
-        <div class="card" data-status="implemented"><span class="pill implemented">facet model</span><strong>Skill Categories</strong><span>Frontend, backend, engineering, legal, security, marketing, database, and agent-ops should be tags or facets inside workspaces, not workspaces by default.</span></div>
+      <div class="boundary-grid">
+        <div class="boundary-card" data-status="implemented"><span class="pill implemented">foundry</span><strong>agent-skills</strong><span>Dogfood repo, source packages, fixtures, governance memory, and atlas/spec planning. It is not the product boundary by itself.</span></div>
+        <div class="boundary-card" data-status="implemented"><span class="pill implemented">contract</span><strong>Skills SDK</strong><span>Source shape, SkillIR, package identity, hardening, intake, trust, eval, review, knowledge, and install-preview receipts.</span></div>
+        <div class="boundary-card" data-status="preview"><span class="pill preview">distribution</span><strong>Tessl</strong><span>Private skill workspace, eval workspace, review evidence, and eventual public standard. Distribution truth is separate from GitHub source.</span></div>
+        <div class="boundary-card" data-status="preview"><span class="pill preview">runtime</span><strong>Local Runtime Truth</strong><span>Installed behavior, runtime links, observability, and rollback proof after package and trust boundaries pass.</span></div>
       </div>
     </section>
 
-    <section class="section" data-view-section="gaps" aria-label="Tessl data surfaces to ingest">
+    <section class="section" data-view-section="pipeline" aria-label="Canonical Skills SDK pipeline">
       <div class="section-head">
         <div>
-          <h2>Tessl Data Surfaces To Ingest</h2>
-          <p>The next SDK slice should be read-only: snapshot Tessl workspace state before any install, publish, archive, update, visibility, or workspace mutation exists.</p>
+          <h2>Canonical Pipeline</h2>
+          <p>Every SDK claim should land on this path. Each stage has one job, one proof boundary, and one loop that feeds the next improvement.</p>
         </div>
-        <div class="note">Each surface should produce receipts that separate workspace truth, package truth, GitHub source provenance, and local SDK validation truth.</div>
+        <div class="note">Backlog items belong on a stage. If a proposed slice cannot name its stage and loop, it is not ready for implementation.</div>
       </div>
-      <div class="card-grid">
-        <div class="card" data-status="preview"><span class="pill preview">catalog</span><strong>All Plugins</strong><span>Workspace-level searchable packages/plugins, ownership, visibility, quality, Tessl registry security, impact, and install metadata.</span></div>
-        <div class="card" data-status="preview"><span class="pill preview">linkage</span><strong>Projects</strong><span>Project identity, repository/source link, staged payload identity, workspace binding, and release/eval association.</span></div>
-        <div class="card" data-status="implemented"><span class="pill implemented">evidence</span><strong>Eval Runs</strong><span>Completed or blocked eval evidence, scores, baselines, improvements, model/agent metadata, scenario coverage, and package binding.</span></div>
-        <div class="card" data-status="preview"><span class="pill preview">criteria</span><strong>Review Runs</strong><span>Configurable Tessl Review criteria for what good looks like, plus reviewer authority, thresholds, findings, fix recommendations, and promotion blockers.</span></div>
-        <div class="card" data-status="implemented"><span class="pill implemented">coverage</span><strong>Inventories</strong><span>GitHub import coverage, discovered manifests, discovered skills, skipped repos, source provenance, and workspace import target.</span></div>
-        <div class="card" data-status="preview"><span class="pill preview">authority</span><strong>Members</strong><span>Role, ownership, publish authority, review authority, and who can connect external sources or mutate workspace state.</span></div>
-        <div class="card" data-status="preview"><span class="pill preview">policy</span><strong>Settings</strong><span>Workspace visibility, integrations, source connections, default policy, publish gates, and allowed mutation surfaces.</span></div>
+      <div class="spine-grid">
+        <div class="spine-card" data-status="implemented" data-stage="foundry"><span class="pill implemented">1</span><strong>Foundry</strong><span>agent-skills authors, dogfoods, records steering, and keeps fixtures/source packages. Output: source intent.</span></div>
+        <div class="spine-card" data-status="implemented" data-stage="sdk"><span class="pill implemented">2</span><strong>SDK Lifecycle</strong><span>Parse source, build SkillIR, package identity, schemas, and receipts. Output: professional package contract.</span></div>
+        <div class="spine-card" data-status="implemented" data-stage="guardrails"><span class="pill implemented">3</span><strong>Guardrails</strong><span>Intake, risk modes, hardening, trust, adoption, and human-review blockers. Output: bounded adoption decision.</span></div>
+        <div class="spine-card" data-status="preview" data-stage="proof"><span class="pill preview">4</span><strong>Evals / Proof</strong><span>Deterministic checks, scorer quality, calibration, A/B receipts, and command replay. Output: evidence, not vibes.</span></div>
+        <div class="spine-card" data-status="preview" data-stage="tessl"><span class="pill preview">5</span><strong>Tessl Distribution</strong><span>Private workspace, eval workspace, review runs, package inventory, and eventual public standard. Output: external proof/distribution.</span></div>
+        <div class="spine-card" data-status="preview" data-stage="runtime"><span class="pill preview">6</span><strong>Local Runtime Truth</strong><span>Project install preview, runtime links, installed behavior, observability, rollback, and feedback. Output: truth from use.</span></div>
+      </div>
+      <div class="loop-grid" style="margin-top:12px">
+        <div class="loop-card"><span class="pill preview">Author loop</span><strong>Foundry -> SDK Lifecycle</strong><span>Improve source and package shape until the SDK can explain the skill in receipts.</span></div>
+        <div class="loop-card"><span class="pill preview">Proof loop</span><strong>SDK Lifecycle -> Evals/Proof</strong><span>Turn claims into deterministic checks, calibrated scorers, and replayable evidence.</span></div>
+        <div class="loop-card release"><span class="pill blocked">Release loop</span><strong>Guardrails -> Tessl</strong><span>Only release when intake, trust, review, package identity, and external proof line up.</span></div>
+        <div class="loop-card runtime"><span class="pill preview">Runtime loop</span><strong>Runtime Truth -> Foundry</strong><span>Feed installed behavior, observability, and regressions back into durable source memory.</span></div>
       </div>
     </section>
 
@@ -543,10 +565,10 @@
     <section class="section" data-view-section="mvp" aria-label="MVP boundary">
       <div class="section-head">
         <div>
-          <h2>MVP Boundary: What This Should Be Next</h2>
-          <p>Keep the next product slice boring. The current SDK is already useful. The danger is expanding into registry, dashboards, Tessl, CI, and governance before the compiler spine exists.</p>
+          <h2>MVP Boundary: Professional Output First</h2>
+          <p>Keep the next product slice boring. The current SDK is useful when it turns source skills into receipt-backed package, guardrail, proof, distribution, and runtime handoff evidence.</p>
         </div>
-        <div class="note">MVP rule: every new feature must improve author speed, safety proof, eval quality, install confidence, runtime trust, or release decisions.</div>
+        <div class="note">MVP rule: every feature must attach to the canonical pipeline and improve author speed, safety proof, eval quality, install confidence, runtime trust, or release decisions.</div>
       </div>
       <div class="mvp-grid">
         <div class="card" data-status="implemented"><span class="pill implemented">keep</span><strong>Local SDK Control Plane</strong><span>Preserve <code>ask sdk</code> as the operator entrypoint. Keep status, check, install, cleanup, conformance, lenses, review, determinism, knowledge ingest, and package verify coherent.</span></div>
@@ -563,8 +585,8 @@
     <section class="section" data-view-section="pipeline" aria-label="Pipeline truth view">
       <div class="section-head">
         <div>
-          <h2>Pipeline View: Current Reality vs North Star</h2>
-          <p>The design still points toward a compiler pipeline, but the current SDK is a control-plane and receipt system. This view makes that distinction explicit.</p>
+          <h2>SDK Lifecycle Detail</h2>
+          <p>The current SDK is a local lifecycle contract, not a hosted platform. This detail view shows where the compiler-style spine exists and where emitters, registry, and publish remain future work.</p>
         </div>
         <div class="note">Use this as a planning map, not a capability claim.</div>
       </div>
@@ -577,26 +599,26 @@
       </div>
     </section>
 
-    <section class="section" data-view-section="gaps" aria-label="Architectural weaknesses and gaps">
+    <section class="section" data-view-section="gaps" aria-label="Pipeline stage gaps">
       <div class="section-head">
         <div>
-          <h2>Weaknesses to Fix</h2>
-          <p>These are the main risks in the idea and the artifact. They are not reasons to stop; they are the guardrails for the next build slice.</p>
+          <h2>Stage Gaps To Fix</h2>
+          <p>These gaps are attached to pipeline stages. They are not reasons to stop; they are the guardrails for the next build slice.</p>
         </div>
-        <div class="note">The highest-risk weakness is not technical. It is semantic drift: the map looks like a finished platform unless every section carries maturity state.</div>
+        <div class="note">Highest-risk gap: semantic drift. The map must never make foundry, SDK contract, Tessl distribution, and runtime truth look like one already-finished thing.</div>
       </div>
       <div class="card-grid">
-        <div class="gap" data-status="deferred"><span class="pill deferred">drift risk</span><strong>Atlas Is Bigger Than Product</strong><span>The HTML describes an end-state platform. The implemented SDK is a local control plane. Keep “platform atlas” and “capability truth” visually separate.</span></div>
-        <div class="gap" data-status="implemented"><span class="pill implemented">guarded</span><strong>Evidence Refs Need Verification</strong><span>The capability matrix evidence refs are now classified as file, command, schema, receipt, or external lane and recorded with pass, blocked, or not-run status so local readiness is not blended with hosted or external proof.</span></div>
+        <div class="gap" data-status="deferred"><span class="pill deferred">Foundry</span><strong>Atlas Can Outgrow Product Truth</strong><span>The HTML can describe an end-state platform faster than receipts prove it. Keep planning visuals visibly separate from SDK capability truth.</span></div>
+        <div class="gap" data-status="implemented"><span class="pill implemented">Evals/Proof</span><strong>Evidence Inventory Is Not Replay</strong><span>The capability matrix evidence refs are classified as file, command, schema, receipt, or external lane. Command/external refs now carry inventory-only proof mode and replay-required counts.</span></div>
         <div class="gap" data-status="implemented"><span class="pill implemented">spine landed</span><strong>Tiny IR Exists</strong><span><code>SkillIR.v0</code> is now the small read-only spine for package identity and receipt-producing SDK lanes.</span></div>
         <div class="gap" data-status="implemented"><span class="pill implemented">quality lane</span><strong>Deterministic And A/B Evals Run</strong><span>Local deterministic eval receipts and internal scorecard-backed receipts run with package identity, while A/B run receipts invoke Codex explicitly and leave judge provider invocation as a separate gated lane.</span></div>
         <div class="gap" data-status="implemented"><span class="pill implemented">intent landed</span><strong>Signing Intent Exists</strong><span>Package identity can be checked against a pinned signing policy without signature requests, key access, archive emission, or trust mutation.</span></div>
         <div class="gap" data-status="implemented"><span class="pill implemented">boundary aligned</span><strong>Sandbox Scope Is Narrow</strong><span>Keep sandbox work where it proves external skill intake quarantine or records Codex-backed eval execution through <code>codex exec</code> sandbox modes.</span></div>
         <div class="gap" data-status="implemented"><span class="pill implemented">state landed</span><strong>Local Trust Ledger Exists</strong><span>Trust decisions can now be previewed or appended locally with package digest binding; remote trust-store and release enforcement are still separate future lanes.</span></div>
         <div class="gap" data-status="implemented"><span class="pill implemented">learning preview</span><strong>Redacted Feedback Preview Exists</strong><span>Redacted local event JSONL can now produce eval scenario and skill-gap candidates, and receipt-backed promotion preview can mark them ready or blocked; live ingestion, file generation, and automatic promotion remain future lanes.</span></div>
-        <div class="gap" data-status="deferred"><span class="pill deferred">adoption gap</span><strong>CI Gates Are Not Live</strong><span>Local validation does not prove branch protection, PR review, CircleCI, or GitHub security checks.</span></div>
-        <div class="gap" data-status="preview"><span class="pill preview">registry-first</span><strong>Tessl Security Is The Primary Snyk Lane</strong><span>Use Tessl registry security when a package already has it. Run local <code>snyk-agent-scan</code> only for source imports, private candidates, or local skills without registry security.</span></div>
-        <div class="gap" data-status="out"><span class="pill out">scope risk</span><strong>Registry Too Early</strong><span>A registry before signing, package verification, trust decisions, and install receipts would create distribution theatre.</span></div>
+        <div class="gap" data-status="deferred"><span class="pill deferred">Release loop</span><strong>CI Gates Are Not Live</strong><span>Local validation does not prove branch protection, PR review, CircleCI, or GitHub security checks.</span></div>
+        <div class="gap" data-status="preview"><span class="pill preview">Tessl</span><strong>Tessl Security Is A Separate Lane</strong><span>Use Tessl registry security when a package has it. Run local scanner fallbacks only for source imports, private candidates, or local skills without registry security.</span></div>
+        <div class="gap" data-status="out"><span class="pill out">Tessl</span><strong>Registry Too Early</strong><span>A registry before signing, package verification, trust decisions, and install receipts would create distribution theatre.</span></div>
       </div>
     </section>
 
@@ -635,22 +657,16 @@
       <div class="section-head">
         <div>
           <h2>Recommended Next Slices</h2>
-          <p>Remaining small, buildable order that keeps the SDK honest and useful.</p>
+          <p>Small implementation order from this review. These slices reduce confusion before adding new product lanes.</p>
         </div>
-        <div class="note">Each future slice should add one command, one schema or receipt, tests, and a capability-matrix update.</div>
+        <div class="note">Each slice should name its stage and loop, then add the smallest doc, command, schema/receipt, test, or visual proof that closes the gap.</div>
       </div>
       <div class="next-grid">
-        <div class="next-item priority" data-status="deferred"><b>01</b><strong>Review Criteria Receipt</strong><span>Record Tessl Review criteria, thresholds, reviewer authority, findings, fixes, and blockers so adoption decisions can explain what good meant for this skill.</span></div>
-        <div class="next-item priority" data-status="deferred"><b>02</b><strong>Adoption Decision Receipt</strong><span>Bind package digest, risk mode, review result, trust decision, expiry or revocation, install authority, and required evidence into one decision object.</span></div>
-        <div class="next-item" data-status="deferred"><b>03</b><strong>Composition Graph Receipt</strong><span>Map skill-to-skill, skill-to-tool, reference, permission, runtime, and package edges before claiming dependency-management maturity.</span></div>
-        <div class="next-item" data-status="deferred"><b>04</b><strong>Scenario Promotion Policy</strong><span>Connect observed or generated eval candidates to the existing scenario-quality preview without mutating source scenarios or leaking data.</span></div>
-        <div class="next-item priority" data-status="deferred"><b>05</b><strong>Tessl Workspace Snapshot</strong><span>Read all plugins, projects, eval runs, review runs, inventories, members, and settings into receipts before any Tessl mutation or publish path exists.</span></div>
-        <div class="next-item" data-status="deferred"><b>06</b><strong>GitHub Exit Policy</strong><span>Define when GitHub is source provenance only and when Tessl workspace/package receipts become search, install, eval, review, inventory, and publish truth.</span></div>
-        <div class="next-item" data-status="deferred"><b>07</b><strong>Dependency Version Policy</strong><span>Preview install/update/version constraints from package identity and lockfile state before registry or workspace publish exists.</span></div>
-        <div class="next-item priority" data-status="deferred"><b>08</b><strong>Tessl Registry Security Receipt</strong><span>Capture Tessl's Snyk-backed registry security status, provider label, known issues, package identity, registry source, and freshness before adding a separate scanner gate.</span></div>
-        <div class="next-item" data-status="deferred"><b>09</b><strong>Local Snyk Intake Fallback</strong><span>Use explicit skill paths, JSON output, token-presence proof without values, scanner version, data-egress notice, and issue-count classification only when Tessl registry security is unavailable.</span></div>
-        <div class="next-item" data-status="deferred"><b>10</b><strong>Dynamic Security Design</strong><span>Design red-team or dynamic scanner contracts as a roadmap lane; do not imply scanner execution until adapters and safe fixtures exist.</span></div>
-        <div class="next-item" data-status="deferred"><b>11</b><strong>CDLC Projection</strong><span>Only after the above receipts exist, add a dashboard projection for generate, evaluate, test, optimize, distribute, secure, consume, and observe.</span></div>
+        <div class="next-item priority" data-status="implemented"><b>01</b><strong>Product Boundary Sweep</strong><span>Keep agent-skills as foundry/dogfood/source repo and Skills SDK as professional lifecycle contract across spec, plan, goal, and atlas language.</span></div>
+        <div class="next-item priority" data-status="implemented"><b>02</b><strong>Evidence Replay Split</strong><span>Keep <code>sdk evidence verify</code> as inventory/classification and expose replay-required counts plus the command-plan route for not-run lanes.</span></div>
+        <div class="next-item priority" data-status="implemented"><b>03</b><strong>Adoption Human Review Hardening</strong><span>Block adoption while any intake review item remains unresolved, even when package identity and trust digest match.</span></div>
+        <div class="next-item priority" data-status="implemented"><b>04</b><strong>Durable Memory Package Requirement</strong><span>Knowledge-backed skills must route declared capsules through first-party references before package readiness can claim professional output.</span></div>
+        <div class="next-item priority" data-status="implemented"><b>05</b><strong>Atlas Pipeline Redesign</strong><span>Start the visual with product boundary, stage spine, and four feedback loops; attach gaps to stages instead of showing an undifferentiated backlog.</span></div>
       </div>
     </section>
 
@@ -676,28 +692,28 @@
     <section class="section" data-view-section="roadmap" aria-label="Skills-as-code discipline backlog">
       <div class="section-head">
         <div>
-          <h2>Skills-As-Code Backlog</h2>
-          <p>Podjarny-derived product directions that should shape future SDK slices without becoming capability claims before receipts, commands, schemas, and tests exist.</p>
+          <h2>Backlog By Pipeline Stage</h2>
+          <p>Podjarny-derived product directions stay useful when they name their pipeline stage and proof route before becoming capability claims.</p>
         </div>
-        <div class="note">Backlog rule: promote one item at a time into the numbered roadmap only when the owner surface and proof contract are concrete.</div>
+        <div class="note">Backlog rule: promote one item only when the owner surface, loop, and proof contract are concrete.</div>
       </div>
         <div class="card-grid">
         <div class="step" data-status="implemented"><span class="pill implemented">foundation</span><strong>Risk Mode Taxonomy</strong><span>Landed as a non-mutating receipt so malicious supply-chain, negligent instruction, vulnerable operation, and insufficient-evidence modes can feed later intake and adoption decisions.</span></div>
         <div class="step" data-status="implemented"><span class="pill implemented">foundation</span><strong>External Skill Intake Review</strong><span>Landed as a non-mutating receipt that consumes quarantine and risk-mode receipts before adoption decisions claim runtime readiness.</span></div>
-        <div class="step" data-status="deferred"><span class="pill deferred">foundation</span><strong>Context-Type Classification</strong><span>Classify skills as policy/practice, spec, workflow, tool adapter, or governance/eval context so risk, eval, freshness, and install gates match the job.</span></div>
-        <div class="step" data-status="deferred"><span class="pill deferred">foundation</span><strong>Skill Composition Graph</strong><span>Emit a receipt for skill-to-skill, skill-to-tool, reference, permission, and runtime dependency edges before claiming dependency-management maturity.</span></div>
-        <div class="step" data-status="deferred"><span class="pill deferred">quality</span><strong>Quality Profile Receipt</strong><span>Aggregate structure, hardening, evals, scenario quality, freshness, runtime evidence, and owner/review state as a lane-aware profile rather than a single vanity score.</span></div>
-        <div class="step" data-status="deferred"><span class="pill deferred">quality</span><strong>Scenario Promotion Policy</strong><span>Use the existing scenario-quality preview as a gate before generated or observed cases are promoted into release-mode evals.</span></div>
-        <div class="step" data-status="deferred"><span class="pill deferred">quality</span><strong>Project And Comprehensive Evals</strong><span>Plan integration-style project evals and broader runtime/model comparison evals separately from isolated skill eval receipts.</span></div>
-        <div class="step" data-status="deferred"><span class="pill deferred">runtime</span><strong>Harness Enforcement Contract</strong><span>Preview deterministic harness or hook policies that block risky actions unless required skills, receipts, evals, Codex sandbox mode, or trust evidence is present.</span></div>
+        <div class="step" data-status="deferred"><span class="pill deferred">SDK Lifecycle</span><strong>Context-Type Classification</strong><span>Classify skills as policy/practice, spec, workflow, tool adapter, or governance/eval context so risk, eval, freshness, and install gates match the job.</span></div>
+        <div class="step" data-status="deferred"><span class="pill deferred">SDK Lifecycle</span><strong>Skill Composition Graph</strong><span>Emit a receipt for skill-to-skill, skill-to-tool, reference, permission, and runtime dependency edges before claiming dependency-management maturity.</span></div>
+        <div class="step" data-status="deferred"><span class="pill deferred">Evals/Proof</span><strong>Quality Profile Receipt</strong><span>Aggregate structure, hardening, evals, scenario quality, freshness, runtime evidence, and owner/review state as a lane-aware profile rather than a single vanity score.</span></div>
+        <div class="step" data-status="deferred"><span class="pill deferred">Evals/Proof</span><strong>Scenario Promotion Policy</strong><span>Use the existing scenario-quality preview as a gate before generated or observed cases are promoted into release-mode evals.</span></div>
+        <div class="step" data-status="deferred"><span class="pill deferred">Evals/Proof</span><strong>Project And Comprehensive Evals</strong><span>Plan integration-style project evals and broader runtime/model comparison evals separately from isolated skill eval receipts.</span></div>
+        <div class="step" data-status="deferred"><span class="pill deferred">Runtime loop</span><strong>Harness Enforcement Contract</strong><span>Preview deterministic harness or hook policies that block risky actions unless required skills, receipts, evals, Codex sandbox mode, or trust evidence is present.</span></div>
       </div>
     </section>
 
     <section class="section" data-view-section="roadmap" aria-label="Security intake backlog">
       <div class="section-head">
         <div>
-          <h2>Security Intake Backlog</h2>
-          <p>Tal-derived defensive review lanes for treating skills as dependency-like operational inputs with provenance, permissions, data exposure, quarantine boundaries, semantic behavior, and approval friction checks.</p>
+          <h2>Guardrails Backlog</h2>
+          <p>Tal-derived defensive review lanes live in the Guardrails stage and Release loop. They treat skills as dependency-like operational inputs before runtime use.</p>
         </div>
         <div class="note">Security rule: do not claim third-party skill safety until intake, runtime, and approval receipts prove the exact lane being discussed.</div>
       </div>

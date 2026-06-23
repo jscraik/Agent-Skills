@@ -2119,6 +2119,26 @@ def skill_package_readiness(
     ):
         readiness_level = "reference_quality_incomplete"
         share_ready = False
+    knowledge_capsules = sdk_contract.get("knowledge_capsules")
+    knowledge_blockers: list[str] = []
+    if (
+        isinstance(knowledge_capsules, dict)
+        and knowledge_capsules.get("manifest_declared") is True
+        and knowledge_capsules.get("ready") is not True
+    ):
+        knowledge_blockers = ["knowledge_capsules:first_party_routing_incomplete"]
+        blocked_reasons.extend(knowledge_blockers)
+    if (
+        knowledge_blockers
+        and not missing_identity_fields
+        and not missing
+        and not sdk_missing
+        and not workflow_blockers
+        and not optimization_blockers
+        and not reference_blockers
+    ):
+        readiness_level = "knowledge_capsules_incomplete"
+        share_ready = False
     if missing_identity_fields:
         blocked_reasons.append("identity_incomplete")
     if not missing and not share_readiness_ready:
