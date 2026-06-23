@@ -16,7 +16,7 @@ from ask.skills_sdk.skill_intake import build_skill_intake_receipt
 
 SKILL_INTAKE_REVIEW_SCHEMA_VERSION = "skills-sdk.skill-intake-review-receipt.v0"
 SKILL_INTAKE_REVIEW_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/skill-intake-review-receipt.v0.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/skill-intake-review-receipt.v0.schema.json"
 )
 SKILL_INTAKE_REVIEW_ACCEPTANCE_TRACE = ["PU-034", "FR-008", "FR-010", "SA-004", "SEC-001", "VP-034"]
 REVIEW_ITEM_IDS = (

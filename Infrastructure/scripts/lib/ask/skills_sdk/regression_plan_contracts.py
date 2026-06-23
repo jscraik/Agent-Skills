@@ -54,7 +54,7 @@ class RegressionPlanRow(_RegressionPlanModel):
 class RegressionPlanReceipt(_RegressionPlanModel):
     schema_version: Literal["skills-sdk.eval-regression-plan.v0"]
     schema_uri: Literal[
-        "https://jscraik.local/agent-skills/schemas/skills-sdk/eval-regression-plan.v0.schema.json"
+        "https://agent-skills.local/schemas/skills-sdk/eval-regression-plan.v0.schema.json"
     ]
     status: Literal["preview", "blocked"]
     operation: Literal["eval_regression_plan_preview"]

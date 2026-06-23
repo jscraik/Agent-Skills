@@ -8,7 +8,7 @@ from ask.skills_sdk.tessl_score_receipt import build_tessl_score_receipt
 
 
 REGRESSION_PLAN_SCHEMA_VERSION = "skills-sdk.eval-regression-plan.v0"
-REGRESSION_PLAN_SCHEMA_URI = "https://jscraik.local/agent-skills/schemas/skills-sdk/eval-regression-plan.v0.schema.json"
+REGRESSION_PLAN_SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/eval-regression-plan.v0.schema.json"
 OWNER_CHOICES = ("skill", "task", "criteria", "scorer", "environment")
 DEFAULT_PLAN_RELATIVE_PATH = Path("references/eval-regression-plan.json")
 

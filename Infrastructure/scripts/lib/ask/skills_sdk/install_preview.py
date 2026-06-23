@@ -8,11 +8,11 @@ from typing import Any
 
 INSTALL_PREVIEW_SCHEMA_VERSION = "skills-sdk.install-preview.v1"
 INSTALL_PREVIEW_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/install-preview.v1.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/install-preview.v1.schema.json"
 )
 LOCKFILE_PREVIEW_SCHEMA_VERSION = "skills-sdk.lockfile-preview.v1"
 LOCKFILE_PREVIEW_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/lockfile-preview.v1.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/lockfile-preview.v1.schema.json"
 )
 DEFAULT_LOCKFILE_PATH = "skills.lock.json"
 INSTALL_PREVIEW_ACCEPTANCE_TRACE = ["FR-006", "FR-010", "SA-020", "SA-021", "VP-021"]

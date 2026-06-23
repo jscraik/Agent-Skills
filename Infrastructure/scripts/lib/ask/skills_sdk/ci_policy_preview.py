@@ -5,7 +5,7 @@ from typing import Any
 
 CI_POLICY_PREVIEW_SCHEMA_VERSION = "skills-sdk.ci-policy-preview-receipt.v0"
 CI_POLICY_PREVIEW_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/ci-policy-preview-receipt.v0.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/ci-policy-preview-receipt.v0.schema.json"
 )
 CI_POLICY_ACCEPTANCE_TRACE = ["PU-028", "FR-008", "SA-004", "VP-028"]
 RISK_TIERS = ("low", "medium", "high", "privileged", "published")

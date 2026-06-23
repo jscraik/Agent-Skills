@@ -45,7 +45,7 @@ class SkillIndexRow(_StaticExplorerModel):
 class StaticExplorerReceipt(_StaticExplorerModel):
     schema_version: Literal["skills-sdk.static-explorer-receipt.v0"]
     schema_uri: Literal[
-        "https://jscraik.local/agent-skills/schemas/skills-sdk/static-explorer-receipt.v0.schema.json"
+        "https://agent-skills.local/schemas/skills-sdk/static-explorer-receipt.v0.schema.json"
     ]
     status: Literal["preview", "blocked"]
     operation: Literal["static_explorer_preview"]

@@ -12,11 +12,11 @@ from ask.skills_sdk.lenses import select_lenses
 
 REVIEW_PLAN_SCHEMA_VERSION = "skills-sdk.review-plan-receipt.v1"
 REVIEW_PLAN_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/sdk-review-plan-receipt.v1.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/sdk-review-plan-receipt.v1.schema.json"
 )
 REVIEW_PLAN_TRACE_SCHEMA_VERSION = "skills-sdk.review-plan-trace.v1"
 REVIEW_PLAN_TRACE_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/sdk-review-plan-trace.v1.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/sdk-review-plan-trace.v1.schema.json"
 )
 TRACE_DIR = Path(".harness/artifacts/sdk-review-plan/traces")
 

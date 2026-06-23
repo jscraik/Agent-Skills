@@ -1,6 +1,6 @@
 {
   "schema_version": "skills-sdk.review-plan-trace.v1",
-  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/sdk-review-plan-trace.v1.schema.json",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/sdk-review-plan-trace.v1.schema.json",
   "receipt_path": ".harness/artifacts/sdk-review-plan/fixture.json",
   "receipt_instance_id": "fixture-review-plan",
   "receipt_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",

@@ -1,6 +1,6 @@
 {
   "schema_version": "skills-sdk.ab-judge-preview-receipt.v0",
-  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/ab-judge-preview-receipt.v0.schema.json",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/ab-judge-preview-receipt.v0.schema.json",
   "status": "preview",
   "operation": "ab_judge_preview",
   "run_receipt_path": "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.json",

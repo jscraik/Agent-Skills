@@ -1,6 +1,6 @@
 {
   "schema_version": "skills-sdk.capability-evidence-receipt.v0",
-  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/capability-evidence-receipt.v0.schema.json",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/capability-evidence-receipt.v0.schema.json",
   "status": "pass",
   "operation": "capability_evidence_verify",
   "scope": "capability-matrix",

@@ -21,9 +21,9 @@ from ask.skills_sdk.eval_ab_rubric import canonical_ab_rubric, canonical_ab_rubr
 from ask.skills_sdk.eval_profiles import select_judge_profile
 
 AB_JUDGE_PREVIEW_SCHEMA_VERSION = "skills-sdk.ab-judge-preview-receipt.v0"
-AB_JUDGE_PREVIEW_SCHEMA_URI = "https://jscraik.local/agent-skills/schemas/skills-sdk/ab-judge-preview-receipt.v0.schema.json"
+AB_JUDGE_PREVIEW_SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/ab-judge-preview-receipt.v0.schema.json"
 AB_JUDGE_SCORE_SCHEMA_VERSION = "skills-sdk.ab-judge-score-receipt.v0"
-AB_JUDGE_SCORE_SCHEMA_URI = "https://jscraik.local/agent-skills/schemas/skills-sdk/ab-judge-score-receipt.v0.schema.json"
+AB_JUDGE_SCORE_SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/ab-judge-score-receipt.v0.schema.json"
 _EXPERIMENT_ID_RE = re.compile(r"[0-9a-f]{16}")
 _SEMANTIC_OUTPUT_EXCERPT_BYTES = 4096
 __all__ = ["CodexJudgeResult"]

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/eval-case.v0.schema.json",
+  "$id": "https://agent-skills.local/schemas/skills-sdk/eval-case.v0.schema.json",
   "title": "Skills SDK Eval Case v0",
   "type": "object",
   "additionalProperties": false,

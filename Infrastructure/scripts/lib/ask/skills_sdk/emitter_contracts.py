@@ -28,7 +28,7 @@ class EmitterWriteAction(_EmitterModel):
 class EmitterPreviewReceipt(_EmitterModel):
     schema_version: Literal["skills-sdk.emitter-preview-receipt.v0"]
     schema_uri: Literal[
-        "https://jscraik.local/agent-skills/schemas/skills-sdk/emitter-preview-receipt.v0.schema.json"
+        "https://agent-skills.local/schemas/skills-sdk/emitter-preview-receipt.v0.schema.json"
     ]
     status: Literal["preview", "blocked"]
     operation: Literal["emitter_write_plan_preview"]

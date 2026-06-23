@@ -1,6 +1,6 @@
 {
   "schema_version": "skills-sdk.observability-promotion-receipt.v0",
-  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/observability-promotion-receipt.v0.schema.json",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/observability-promotion-receipt.v0.schema.json",
   "status": "preview",
   "operation": "observability_promotion_preview",
   "package_id": "skills-sdk-valid-fixture",

@@ -1,6 +1,6 @@
 {
   "schema_version": "skills-sdk.lockfile.v1",
-  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/lockfile.v1.schema.json",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/lockfile.v1.schema.json",
   "generated_by": "ask skills-sdk",
   "entries": {
     "sample": {

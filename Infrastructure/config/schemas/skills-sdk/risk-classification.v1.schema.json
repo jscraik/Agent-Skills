@@ -1,12 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/risk-classification.v1.schema.json",
+  "$id": "https://agent-skills.local/schemas/skills-sdk/risk-classification.v1.schema.json",
   "title": "Skills SDK Risk Classification v1",
   "type": "object",
   "additionalProperties": false,
   "properties": {
     "schema_version": {"type": "string", "const": "skills-sdk.risk-classification.v1"},
-    "schema_uri": {"type": "string", "const": "https://jscraik.local/agent-skills/schemas/skills-sdk/risk-classification.v1.schema.json"},
+    "schema_uri": {"type": "string", "const": "https://agent-skills.local/schemas/skills-sdk/risk-classification.v1.schema.json"},
     "source_kind": {"type": "string", "enum": ["docs_only", "referenced", "scripted", "external", "placeholder"]},
     "risk_tier": {"type": "string", "enum": ["low", "medium", "high", "privileged", "published"]},
     "probability": {"$ref": "#/definitions/risk_dimension"},

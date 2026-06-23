@@ -8,7 +8,7 @@ from typing import Any
 
 CAPABILITY_STATUS_SCHEMA_VERSION = "skills-sdk.capability-status.v1"
 CAPABILITY_STATUS_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/capability-status.v1.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/capability-status.v1.schema.json"
 )
 MATRIX_PATH = Path("Infrastructure/config/skills-sdk/capability-matrix.v1.json")
 ALLOWED_STATUSES = frozenset(

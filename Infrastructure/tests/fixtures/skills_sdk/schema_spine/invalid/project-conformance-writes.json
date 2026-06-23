@@ -1,6 +1,6 @@
 {
   "schema_version": "skills-sdk.project-conformance-receipt.v1",
-  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/project-conformance-receipt.v1.schema.json",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/project-conformance-receipt.v1.schema.json",
   "command": "skills-sdk project status",
   "mode": "status",
   "status": "pass",

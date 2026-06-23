@@ -1,6 +1,6 @@
 {
   "schema_version": "skills-sdk.eval-run-receipt.v0",
-  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/eval-run-receipt.v0.schema.json",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/eval-run-receipt.v0.schema.json",
   "status": "pass",
   "runner": "deterministic_jsonl_v0",
   "dataset_path": "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json",

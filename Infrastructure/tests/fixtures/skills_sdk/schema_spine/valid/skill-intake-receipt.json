@@ -1,6 +1,6 @@
 {
   "schema_version": "skills-sdk.skill-intake-receipt.v0",
-  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/skill-intake-receipt.v0.schema.json",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/skill-intake-receipt.v0.schema.json",
   "status": "preview",
   "operation": "skill_intake_inspect",
   "source_kind": "directory",

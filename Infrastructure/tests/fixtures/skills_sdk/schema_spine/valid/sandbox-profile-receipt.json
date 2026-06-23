@@ -1,6 +1,6 @@
 {
   "schema_version": "skills-sdk.sandbox-profile-receipt.v0",
-  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/sandbox-profile-receipt.v0.schema.json",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/sandbox-profile-receipt.v0.schema.json",
   "status": "pass",
   "profile_path": "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/sandbox-profile.json",
   "profile_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",

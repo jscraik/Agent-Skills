@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/receipt-placeholder.v1.schema.json",
+  "$id": "https://agent-skills.local/schemas/skills-sdk/receipt-placeholder.v1.schema.json",
   "title": "JSC-391 Receipt Placeholder Contract",
   "type": "object",
   "additionalProperties": false,

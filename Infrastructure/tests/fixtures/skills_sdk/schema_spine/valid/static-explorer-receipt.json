@@ -1,6 +1,6 @@
 {
   "schema_version": "skills-sdk.static-explorer-receipt.v0",
-  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/static-explorer-receipt.v0.schema.json",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/static-explorer-receipt.v0.schema.json",
   "status": "preview",
   "operation": "static_explorer_preview",
   "capability_count": 1,

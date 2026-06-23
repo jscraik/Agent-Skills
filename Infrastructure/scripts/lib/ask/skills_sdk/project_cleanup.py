@@ -25,7 +25,7 @@ from ask.skills_sdk.project_install import (
 
 CLEANUP_RECEIPT_SCHEMA_VERSION = "skills-sdk.project-cleanup-receipt.v1"
 CLEANUP_RECEIPT_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/project-cleanup-receipt.v1.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/project-cleanup-receipt.v1.schema.json"
 )
 CLEANUP_RECEIPT_DIR = Path(".harness/receipts/skills-sdk/cleanup")
 CLEANUP_JOURNAL_DIR = Path(".harness/state/skills-sdk/cleanup")

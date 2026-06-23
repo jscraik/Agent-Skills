@@ -7,7 +7,7 @@ from typing import Any
 
 SCORER_CALIBRATION_SCHEMA_VERSION = "skills-sdk.scorer-calibration-receipt.v0"
 SCORER_CALIBRATION_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/scorer-calibration-receipt.v0.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/scorer-calibration-receipt.v0.schema.json"
 )
 SCORER_CALIBRATION_ACCEPTANCE_TRACE = ["Braintrust scorer validation", "PU-030", "VP-030"]
 CALIBRATION_BUNDLE_SCHEMA_VERSION = "skills-sdk.scorer-calibration-bundle.v1"

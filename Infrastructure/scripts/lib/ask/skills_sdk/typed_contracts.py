@@ -27,7 +27,7 @@ class RollbackMetadata(_SdkContractModel):
 class InstallReceipt(_SdkContractModel):
     schema_version: Literal["skills-sdk.install-receipt.v1"]
     schema_uri: Literal[
-        "https://jscraik.local/agent-skills/schemas/skills-sdk/install-receipt.v1.schema.json"
+        "https://agent-skills.local/schemas/skills-sdk/install-receipt.v1.schema.json"
     ]
     status: Literal["success", "blocked", "partial"]
     operation: Literal["install"]
@@ -60,7 +60,7 @@ class LockfileEntry(_SdkContractModel):
 
 class Lockfile(_SdkContractModel):
     schema_version: Literal["skills-sdk.lockfile.v1"]
-    schema_uri: Literal["https://jscraik.local/agent-skills/schemas/skills-sdk/lockfile.v1.schema.json"]
+    schema_uri: Literal["https://agent-skills.local/schemas/skills-sdk/lockfile.v1.schema.json"]
     generated_by: str
     entries: dict[str, LockfileEntry]
 
@@ -98,7 +98,7 @@ class ManualAction(_SdkContractModel):
 class CleanupReceipt(_SdkContractModel):
     schema_version: Literal["skills-sdk.project-cleanup-receipt.v1"]
     schema_uri: Literal[
-        "https://jscraik.local/agent-skills/schemas/skills-sdk/project-cleanup-receipt.v1.schema.json"
+        "https://agent-skills.local/schemas/skills-sdk/project-cleanup-receipt.v1.schema.json"
     ]
     operation: Literal["rollback", "uninstall"]
     status: Literal["preview", "success", "partial", "blocked"]
@@ -159,7 +159,7 @@ class ProjectConformanceManualAction(_SdkContractModel):
 class ProjectConformanceReceipt(_SdkContractModel):
     schema_version: Literal["skills-sdk.project-conformance-receipt.v1"]
     schema_uri: Literal[
-        "https://jscraik.local/agent-skills/schemas/skills-sdk/project-conformance-receipt.v1.schema.json"
+        "https://agent-skills.local/schemas/skills-sdk/project-conformance-receipt.v1.schema.json"
     ]
     command: str
     mode: Literal["status", "doctor"]
@@ -247,7 +247,7 @@ class CapabilitySummary(_SdkContractModel):
 class CapabilityStatus(_SdkContractModel):
     schema_version: Literal["skills-sdk.capability-status.v1"]
     schema_uri: Literal[
-        "https://jscraik.local/agent-skills/schemas/skills-sdk/capability-status.v1.schema.json"
+        "https://agent-skills.local/schemas/skills-sdk/capability-status.v1.schema.json"
     ]
     status: Literal["truth_surface"]
     generated_from: str
@@ -261,7 +261,7 @@ class CapabilityStatus(_SdkContractModel):
 class ManifestSource(_SdkContractModel):
     schema_version: Literal["skills-sdk.manifest-source.v1"]
     schema_uri: Literal[
-        "https://jscraik.local/agent-skills/schemas/skills-sdk/manifest-source.v1.schema.json"
+        "https://agent-skills.local/schemas/skills-sdk/manifest-source.v1.schema.json"
     ]
     source_kind: Literal[
         "minimal_skill",
@@ -334,7 +334,7 @@ class SkillIrEvidence(_SdkContractModel):
 
 class SkillIr(_SdkContractModel):
     schema_version: Literal["skills-sdk.skill-ir.v0"]
-    schema_uri: Literal["https://jscraik.local/agent-skills/schemas/skills-sdk/skill-ir.v0.schema.json"]
+    schema_uri: Literal["https://agent-skills.local/schemas/skills-sdk/skill-ir.v0.schema.json"]
     identity: SkillIrIdentity
     source: SkillIrSource
     behavior: SkillIrBehavior
@@ -360,7 +360,7 @@ class PackageManifestProvenance(_SdkContractModel):
 class PackageManifest(_SdkContractModel):
     schema_version: Literal["skills-sdk.package-manifest.v0"]
     schema_uri: Literal[
-        "https://jscraik.local/agent-skills/schemas/skills-sdk/package-manifest.v0.schema.json"
+        "https://agent-skills.local/schemas/skills-sdk/package-manifest.v0.schema.json"
     ]
     package_id: str = Field(min_length=1)
     version: str = Field(min_length=1)
@@ -374,7 +374,7 @@ class PackageManifest(_SdkContractModel):
 class PackageDigestReceipt(_SdkContractModel):
     schema_version: Literal["skills-sdk.package-digest-receipt.v0"]
     schema_uri: Literal[
-        "https://jscraik.local/agent-skills/schemas/skills-sdk/package-digest-receipt.v0.schema.json"
+        "https://agent-skills.local/schemas/skills-sdk/package-digest-receipt.v0.schema.json"
     ]
     status: Literal["built", "blocked"]
     package_id: str = Field(min_length=1)
@@ -405,7 +405,7 @@ NonEmptyPackagePath = Annotated[str, Field(min_length=1)]
 class PackageHardeningReceipt(_SdkContractModel):
     schema_version: Literal["skills-sdk.package-hardening-receipt.v0"]
     schema_uri: Literal[
-        "https://jscraik.local/agent-skills/schemas/skills-sdk/package-hardening-receipt.v0.schema.json"
+        "https://agent-skills.local/schemas/skills-sdk/package-hardening-receipt.v0.schema.json"
     ]
     status: Literal["pass", "blocked"]
     package_id: str = Field(min_length=1)
@@ -448,7 +448,7 @@ class EvalCaseResult(_SdkContractModel):
 class EvalRunReceipt(_SdkContractModel):
     schema_version: Literal["skills-sdk.eval-run-receipt.v0"]
     schema_uri: Literal[
-        "https://jscraik.local/agent-skills/schemas/skills-sdk/eval-run-receipt.v0.schema.json"
+        "https://agent-skills.local/schemas/skills-sdk/eval-run-receipt.v0.schema.json"
     ]
     status: Literal["pass", "fail", "blocked"]
     runner: Literal["deterministic_jsonl_v0", "internal_skill_builder_v0"]
@@ -504,7 +504,7 @@ class SandboxProfileExecution(_SdkContractModel):
 class SandboxProfile(_SdkContractModel):
     schema_version: Literal["skills-sdk.sandbox-profile.v0"]
     schema_uri: Literal[
-        "https://jscraik.local/agent-skills/schemas/skills-sdk/sandbox-profile.v0.schema.json"
+        "https://agent-skills.local/schemas/skills-sdk/sandbox-profile.v0.schema.json"
     ]
     profile_id: str = Field(min_length=1)
     risk_tier: Literal["low", "medium", "high", "privileged", "published"]
@@ -530,7 +530,7 @@ class SandboxProfileCheck(_SdkContractModel):
 class SandboxProfileReceipt(_SdkContractModel):
     schema_version: Literal["skills-sdk.sandbox-profile-receipt.v0"]
     schema_uri: Literal[
-        "https://jscraik.local/agent-skills/schemas/skills-sdk/sandbox-profile-receipt.v0.schema.json"
+        "https://agent-skills.local/schemas/skills-sdk/sandbox-profile-receipt.v0.schema.json"
     ]
     status: Literal["pass", "blocked"]
     profile_path: str = Field(min_length=1)
@@ -559,7 +559,7 @@ class SkillFrontmatter(_SdkContractModel):
 class LockfilePreview(_SdkContractModel):
     schema_version: Literal["skills-sdk.lockfile-preview.v1"]
     schema_uri: Literal[
-        "https://jscraik.local/agent-skills/schemas/skills-sdk/lockfile-preview.v1.schema.json"
+        "https://agent-skills.local/schemas/skills-sdk/lockfile-preview.v1.schema.json"
     ]
     lockfile_path: Literal["skills.lock.json"]
     operation: Literal["add", "update", "remove", "quarantine", "none"]
@@ -572,7 +572,7 @@ class LockfilePreview(_SdkContractModel):
 class InstallPreview(_SdkContractModel):
     schema_version: Literal["skills-sdk.install-preview.v1"]
     schema_uri: Literal[
-        "https://jscraik.local/agent-skills/schemas/skills-sdk/install-preview.v1.schema.json"
+        "https://agent-skills.local/schemas/skills-sdk/install-preview.v1.schema.json"
     ]
     scope: Literal["project", "workspace", "global"]
     target_paths: list[str]
@@ -614,7 +614,7 @@ class CheckActor(_SdkContractModel):
 class CheckReceipt(_SdkContractModel):
     schema_version: Literal["skills-sdk.check-receipt.v1"]
     schema_uri: Literal[
-        "https://jscraik.local/agent-skills/schemas/skills-sdk/check-receipt.v1.schema.json"
+        "https://agent-skills.local/schemas/skills-sdk/check-receipt.v1.schema.json"
     ]
     command: str
     command_version: str
@@ -654,7 +654,7 @@ class RiskSensor(_SdkContractModel):
 class RiskClassification(_SdkContractModel):
     schema_version: Literal["skills-sdk.risk-classification.v1"]
     schema_uri: Literal[
-        "https://jscraik.local/agent-skills/schemas/skills-sdk/risk-classification.v1.schema.json"
+        "https://agent-skills.local/schemas/skills-sdk/risk-classification.v1.schema.json"
     ]
     source_kind: Literal["docs_only", "referenced", "scripted", "external", "placeholder"]
     risk_tier: Literal["low", "medium", "high", "privileged", "published"]

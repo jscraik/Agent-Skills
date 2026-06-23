@@ -1,6 +1,6 @@
 {
   "schema_version": "skills-sdk.capability-status.v1",
-  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/capability-status.v1.schema.json",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/capability-status.v1.schema.json",
   "status": "truth_surface",
   "generated_from": ".harness/specs/2026-06-04-skills-sdk-pu-008-capability-truth-spec.md",
   "source_artifacts": [

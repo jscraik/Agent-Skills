@@ -12,10 +12,10 @@ from typing import Any
 
 INSTALL_RECEIPT_SCHEMA_VERSION = "skills-sdk.install-receipt.v1"
 INSTALL_RECEIPT_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/install-receipt.v1.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/install-receipt.v1.schema.json"
 )
 LOCKFILE_SCHEMA_VERSION = "skills-sdk.lockfile.v1"
-LOCKFILE_SCHEMA_URI = "https://jscraik.local/agent-skills/schemas/skills-sdk/lockfile.v1.schema.json"
+LOCKFILE_SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/lockfile.v1.schema.json"
 DEFAULT_LOCKFILE_PATH = "skills.lock.json"
 PROJECT_INSTALL_ACCEPTANCE_TRACE = [
     "PU-009-FR-001",

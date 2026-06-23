@@ -1,6 +1,6 @@
 {
   "schema_version": "skills-sdk.skill-ir.v0",
-  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/skill-ir.v0.schema.json",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/skill-ir.v0.schema.json",
   "identity": {
     "id": "skills-sdk-valid-fixture",
     "name": "skills-sdk-valid-fixture",

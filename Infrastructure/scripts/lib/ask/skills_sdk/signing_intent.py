@@ -8,11 +8,11 @@ from typing import Any
 
 SIGNING_POLICY_SCHEMA_VERSION = "skills-sdk.signing-policy.v0"
 SIGNING_POLICY_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/signing-policy.v0.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/signing-policy.v0.schema.json"
 )
 SIGNING_INTENT_RECEIPT_SCHEMA_VERSION = "skills-sdk.signing-intent-receipt.v0"
 SIGNING_INTENT_RECEIPT_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/signing-intent-receipt.v0.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/signing-intent-receipt.v0.schema.json"
 )
 SIGNING_ACCEPTANCE_TRACE = ["FR-003", "FR-008", "SA-003", "SA-004", "SEC-001", "VP-021"]
 

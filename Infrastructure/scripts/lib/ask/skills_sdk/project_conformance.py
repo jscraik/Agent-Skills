@@ -20,7 +20,7 @@ from ask.skills_sdk.project_install import (
 
 
 PROJECT_CONFORMANCE_SCHEMA_VERSION = "skills-sdk.project-conformance-receipt.v1"
-PROJECT_CONFORMANCE_SCHEMA_URI = "https://jscraik.local/agent-skills/schemas/skills-sdk/project-conformance-receipt.v1.schema.json"
+PROJECT_CONFORMANCE_SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/project-conformance-receipt.v1.schema.json"
 PROJECT_CONFORMANCE_ACCEPTANCE_TRACE = [
     "PU-012-FR-001",
     "PU-012-FR-002",

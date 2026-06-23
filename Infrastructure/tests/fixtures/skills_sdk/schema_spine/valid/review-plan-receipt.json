@@ -1,6 +1,6 @@
 {
   "schema_version": "skills-sdk.review-plan-receipt.v1",
-  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/sdk-review-plan-receipt.v1.schema.json",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/sdk-review-plan-receipt.v1.schema.json",
   "status": "pass",
   "target": "Skills/agent-ops/simplify",
   "target_kind": "skill_source",

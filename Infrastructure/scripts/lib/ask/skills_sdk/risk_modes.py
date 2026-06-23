@@ -13,7 +13,7 @@ from ask.skills_sdk.risk import build_risk_classification
 
 RISK_MODE_TAXONOMY_SCHEMA_VERSION = "skills-sdk.risk-mode-taxonomy-receipt.v0"
 RISK_MODE_TAXONOMY_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/risk-mode-taxonomy-receipt.v0.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/risk-mode-taxonomy-receipt.v0.schema.json"
 )
 RISK_MODE_TAXONOMY_ACCEPTANCE_TRACE = ["PU-033", "FR-008", "SA-004", "SEC-001", "VP-033"]
 

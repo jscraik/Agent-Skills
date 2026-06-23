@@ -1,6 +1,6 @@
 {
   "schema_version": "skills-sdk.skill-intake-review-receipt.v0",
-  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/skill-intake-review-receipt.v0.schema.json",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/skill-intake-review-receipt.v0.schema.json",
   "status": "review",
   "operation": "skill_intake_review_preview",
   "source_kind": "directory",
@@ -11,7 +11,7 @@
   "package_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   "intake_receipt": {
     "schema_version": "skills-sdk.skill-intake-receipt.v0",
-    "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/skill-intake-receipt.v0.schema.json",
+    "schema_uri": "https://agent-skills.local/schemas/skills-sdk/skill-intake-receipt.v0.schema.json",
     "status": "preview",
     "operation": "skill_intake_inspect",
     "source_kind": "directory",
@@ -54,7 +54,7 @@
   },
   "risk_mode_receipt": {
     "schema_version": "skills-sdk.risk-mode-taxonomy-receipt.v0",
-    "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/risk-mode-taxonomy-receipt.v0.schema.json",
+    "schema_uri": "https://agent-skills.local/schemas/skills-sdk/risk-mode-taxonomy-receipt.v0.schema.json",
     "status": "pass",
     "operation": "risk_mode_taxonomy_preview",
     "query": "Infrastructure/tests/fixtures/skills_sdk/valid_skill",

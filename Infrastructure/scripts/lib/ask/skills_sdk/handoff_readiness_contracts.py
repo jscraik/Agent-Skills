@@ -38,7 +38,7 @@ class HandoffReadinessLane(_HandoffReadinessModel):
 class HandoffReadinessReceipt(_HandoffReadinessModel):
     schema_version: Literal["skills-sdk.eval-handoff-readiness.v0"]
     schema_uri: Literal[
-        "https://jscraik.local/agent-skills/schemas/skills-sdk/eval-handoff-readiness.v0.schema.json"
+        "https://agent-skills.local/schemas/skills-sdk/eval-handoff-readiness.v0.schema.json"
     ]
     status: Literal["preview", "blocked"]
     operation: Literal["eval_handoff_readiness_preview"]

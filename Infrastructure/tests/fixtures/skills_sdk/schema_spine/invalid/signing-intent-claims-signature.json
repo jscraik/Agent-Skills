@@ -1,6 +1,6 @@
 {
   "schema_version": "skills-sdk.signing-intent-receipt.v0",
-  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/signing-intent-receipt.v0.schema.json",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/signing-intent-receipt.v0.schema.json",
   "status": "ready",
   "policy_path": "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/signing-policy.json",
   "policy_digest": "sha256:4d16ef847f821055f87c1f64e9e3f1251a928a877cd50e8c35d5bfbf54d21df0",

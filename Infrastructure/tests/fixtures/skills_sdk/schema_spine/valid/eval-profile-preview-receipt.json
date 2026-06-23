@@ -1,6 +1,6 @@
 {
   "schema_version": "skills-sdk.eval-profile-preview-receipt.v0",
-  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/eval-profile-preview-receipt.v0.schema.json",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/eval-profile-preview-receipt.v0.schema.json",
   "status": "preview",
   "operation": "eval_profile_preview",
   "execution_profiles": [

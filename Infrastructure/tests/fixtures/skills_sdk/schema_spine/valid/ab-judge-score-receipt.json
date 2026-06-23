@@ -120,7 +120,7 @@
   "rubric_id": "skills-sdk.ab-rubric.v0",
   "run_receipt_digest": "sha256:e7430a607077153ef31bbc582c8ceb4227b6dd244837b8e5c37c433e009b18be",
   "run_receipt_path": "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.json",
-  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/ab-judge-score-receipt.v0.schema.json",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/ab-judge-score-receipt.v0.schema.json",
   "schema_version": "skills-sdk.ab-judge-score-receipt.v0",
   "status": "scored"
 }

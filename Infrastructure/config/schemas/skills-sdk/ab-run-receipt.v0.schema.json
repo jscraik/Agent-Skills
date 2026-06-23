@@ -1,12 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/ab-run-receipt.v0.schema.json",
+  "$id": "https://agent-skills.local/schemas/skills-sdk/ab-run-receipt.v0.schema.json",
   "title": "Skills SDK A/B Execution Receipt v0",
   "type": "object",
   "additionalProperties": false,
   "properties": {
     "schema_version": {"type": "string", "const": "skills-sdk.ab-run-receipt.v0"},
-    "schema_uri": {"type": "string", "const": "https://jscraik.local/agent-skills/schemas/skills-sdk/ab-run-receipt.v0.schema.json"},
+    "schema_uri": {"type": "string", "const": "https://agent-skills.local/schemas/skills-sdk/ab-run-receipt.v0.schema.json"},
     "status": {"type": "string", "enum": ["completed", "blocked"]},
     "operation": {"type": "string", "const": "ab_run"},
     "skill_a": {"oneOf": [{"type": "null"}, {"$ref": "ab-preview-receipt.v0.schema.json#/definitions/skill_variant"}]},

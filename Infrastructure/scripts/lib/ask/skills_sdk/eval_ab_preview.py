@@ -12,7 +12,7 @@ from ask.skills_sdk.eval_profiles import (
 
 
 AB_PREVIEW_SCHEMA_VERSION = "skills-sdk.ab-preview-receipt.v0"
-AB_PREVIEW_SCHEMA_URI = "https://jscraik.local/agent-skills/schemas/skills-sdk/ab-preview-receipt.v0.schema.json"
+AB_PREVIEW_SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/ab-preview-receipt.v0.schema.json"
 
 
 def _digest_file(path: Path) -> str:

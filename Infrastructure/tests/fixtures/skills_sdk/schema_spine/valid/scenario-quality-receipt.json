@@ -1,6 +1,6 @@
 {
   "schema_version": "skills-sdk.scenario-quality-receipt.v0",
-  "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/scenario-quality-receipt.v0.schema.json",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/scenario-quality-receipt.v0.schema.json",
   "status": "preview",
   "operation": "scenario_quality_preview",
   "query": "Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill",

@@ -23,7 +23,7 @@ class CapabilityEvidenceRow(_CapabilityEvidenceModel):
 class CapabilityEvidenceReceipt(_CapabilityEvidenceModel):
     schema_version: Literal["skills-sdk.capability-evidence-receipt.v0"]
     schema_uri: Literal[
-        "https://jscraik.local/agent-skills/schemas/skills-sdk/capability-evidence-receipt.v0.schema.json"
+        "https://agent-skills.local/schemas/skills-sdk/capability-evidence-receipt.v0.schema.json"
     ]
     status: Literal["pass", "blocked"]
     operation: Literal["capability_evidence_verify"]

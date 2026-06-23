@@ -6,7 +6,7 @@ from typing import Any
 
 SCENARIO_QUALITY_SCHEMA_VERSION = "skills-sdk.scenario-quality-receipt.v0"
 SCENARIO_QUALITY_SCHEMA_URI = (
-    "https://jscraik.local/agent-skills/schemas/skills-sdk/scenario-quality-receipt.v0.schema.json"
+    "https://agent-skills.local/schemas/skills-sdk/scenario-quality-receipt.v0.schema.json"
 )
 SCENARIO_QUALITY_ACCEPTANCE_TRACE = ["PU-030", "FR-003", "FR-008", "SA-003", "VP-030"]
 RAW_SECRET_PATTERNS = ("api_key=", "password=", "secret=", "token=")
