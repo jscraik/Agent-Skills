@@ -23,6 +23,12 @@ discovering, and syncing Codex skills, operator docs, and agent workflows.
   from `Infrastructure/uv.lock` are available.
 - Before changing skills, sync policy, runtime projections, or agent-facing
   docs, read [UBIQUITOUS_LANGUAGE.md](./UBIQUITOUS_LANGUAGE.md).
+- Before changing Skills SDK plans, specs, atlas visuals, capability claims, or
+  product-direction docs, use the product-boundary terms in
+  [UBIQUITOUS_LANGUAGE.md](./UBIQUITOUS_LANGUAGE.md): `agent-skills` is the
+  foundry/dogfood/source repo, Skills SDK is the professional lifecycle
+  contract, Tessl is distribution and external proof, and local runtime truth is
+  a separate installed-behavior lane.
 - Edit canonical sources, not runtime projections. See
   [Path Ownership Boundaries](./Docs/agents/14-path-ownership-boundaries.md).
 - Treat every Jamie steering or review feedback item as high-signal operating

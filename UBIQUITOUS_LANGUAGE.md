@@ -2,15 +2,35 @@
 
 ## Scope and Sources
 
-- Scope: `agent-skills` repository operations, skill authoring, skill sync, and runtime visibility.
-- Sources: current conversation, `AGENTS.md`, `README.md`, `Docs/agents/14-path-ownership-boundaries.md`, `Docs/agents/13-workflow-and-safety-guidance.md`, `Infrastructure/scripts/lifecycle-and-sync/selection_policy.py`, `Infrastructure/references/skill-validation-reporting-contract.md`, `skills-system/skill-installer/SKILL.md`, `skills-system/skill-installer/references/skill-factory/install-flows.md`, and `Skills/agent-ops/ubiquitous-language/SKILL.md`.
-- Last updated: 2026-06-08
+- Scope: `agent-skills` repository operations, Skills SDK product direction, skill authoring, skill sync, and runtime visibility.
+- Sources: current conversation, `AGENTS.md`, `README.md`, `Docs/reference/skills-sdk-platform-atlas.html`, `.harness/specs/2026-06-03-skills-sdk-v1-product-spec.md`, `.harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md`, `Docs/goals/skills-sdk-v1-0-product-implementation/goal.md`, `Docs/agents/14-path-ownership-boundaries.md`, `Docs/agents/13-workflow-and-safety-guidance.md`, `Infrastructure/scripts/lifecycle-and-sync/selection_policy.py`, `Infrastructure/references/skill-validation-reporting-contract.md`, `skills-system/skill-installer/SKILL.md`, `skills-system/skill-installer/references/skill-factory/install-flows.md`, and `Skills/agent-ops/ubiquitous-language/SKILL.md`.
+- Last updated: 2026-06-23
 
 ## Canonical Terms
 
 | Term | Definition | Aliases to avoid | Confidence |
 | --- | --- | --- | --- |
 | **Agent Skills Kit** | The governed repository and CLI system for authoring, validating, discovering, and syncing Codex skills. | skills repo, agent-skills stuff | High |
+| **agent-skills Foundry** | The `agent-skills` repository role as dogfood workspace, canonical source package store, fixtures bed, governance memory, and product-planning surface. It incubates and proves Skills SDK work but is not itself the professional lifecycle contract. | product, registry, runtime truth, obsolete repo | High |
+| **Skills SDK** | The professional lifecycle contract for shaping, guarding, proving, packaging, and handing off skills as software-like knowledge packages. | agent-skills repo, marketplace, Tessl, skill folder | High |
+| **Professional Lifecycle Contract** | The Skills SDK promise that a skill can move through source shape, package identity, guardrails, eval/proof, distribution handoff, and runtime verification with receipts. | platform vision, dashboard, lifecycle vibes | High |
+| **Professional Output** | A skill package or receipt-backed handoff whose shape, guardrails, durable memory, proof, and runtime boundaries are clear enough for another agent or operator to trust and replay. | polished prose, nice docs, pretty atlas | High |
+| **Thin Surface** | The product posture that keeps the default SDK interface small and author-facing while moving heavy detail into receipts, references, schemas, and progressive-disclosure docs. | minimal product, less functionality | High |
+| **Strong Guardrails** | The SDK boundary work that blocks or labels unsafe adoption, weak evidence, permission drift, unresolved review, package ambiguity, and runtime overclaiming before a skill is treated as ready. | security section, generic safety, warnings | High |
+| **Durable Memory** | First-party routed knowledge, glossary, provenance, references, and learned steering that move with the package or repo instead of living only in chat or local cache. | notes, memories, arbitrary docs | High |
+| **Canonical Skills SDK Pipeline** | The six-stage product path: Foundry -> SDK Lifecycle -> Guardrails -> Evals/Proof -> Tessl Distribution -> Local Runtime Truth. Use this pipeline when placing backlog items, atlas cards, route-map entries, and product claims. | roadmap, lifecycle, platform flow | High |
+| **Foundry Stage** | The pipeline stage where `agent-skills` authors, dogfoods, captures steering, and keeps canonical source intent before the SDK professionalizes it. | source repo, project, bootstrap only | High |
+| **SDK Lifecycle Stage** | The pipeline stage where the SDK parses source, builds SkillIR/package identity, validates schemas, and emits local lifecycle receipts. | compiler pass, package build only | High |
+| **Guardrails Stage** | The pipeline stage for risk modes, intake, package hardening, trust, adoption decisions, and human-review blockers. | security backlog, compliance, warnings | High |
+| **Evals/Proof Stage** | The pipeline stage where deterministic checks, scorer quality, calibration, A/B receipts, command replay, and schema evidence prove or block claims. | tests only, evals only, evidence verify | High |
+| **Tessl Distribution Stage** | The pipeline stage for private workspaces, eval workspace evidence, review runs, package inventory, release confirmation, and eventual public standard. | registry, public publish, Tessl proof | High |
+| **Local Runtime Truth Stage** | The pipeline stage where installed behavior, runtime links, observability, rollback, and project-local use prove what the package actually does after handoff. | local install, user sync, runtime projection | High |
+| **Author Loop** | The feedback loop from Foundry to SDK Lifecycle that improves source and package shape until the SDK can explain the skill in receipts. | writing loop, source loop | High |
+| **Proof Loop** | The feedback loop from SDK Lifecycle to Evals/Proof that turns package claims into deterministic checks, calibrated scorers, and replayable evidence. | eval loop, test loop | High |
+| **Release Loop** | The feedback loop from Guardrails to Tessl Distribution that requires intake, trust, review, package identity, and external proof to line up before release claims. | publish loop, registry loop | High |
+| **Runtime Loop** | The feedback loop from Local Runtime Truth back to Foundry that turns installed behavior, observability, and regressions into durable source improvements. | install loop, production loop | High |
+| **Evidence Inventory** | The non-executing classification of capability evidence references as file, schema, receipt, command, external, pass, blocked, or not-run. It can pass while still requiring command replay for behavior proof. | evidence proof, replay, CI pass | High |
+| **Evidence Replay** | A separate receipt lane that runs or plans command evidence and binds current command outputs to capability claims. | evidence verify, inventory, not-run refs | High |
 | **`ask` CLI** | The public command interface at `./bin/ask` that agents must use for repository operations. | helper script, ask wrapper | High |
 | **Canonical Skill Source** | The editable source of a skill under `Skills/<topic-cluster>/<skill-name>/` or a plugin-owned skill path. | runtime skill, synced copy | High |
 | **Canonical Source Inspection** | Directly reading a skill's `SKILL.md` or package files for repair, audit, source review, or authoring when runtime skill use is not being claimed. | using the skill, running the skill | High |
@@ -83,10 +103,18 @@
 | "keep systems thinking sharp" | Apply **Systems Thinking Product Rule**. | "Name the blocker, encode the repeatable unblocking mechanism in code or contract, validate it, and explain the before and after." |
 | "prove you can operate this way" | Make an **Environment Refinement** before ordinary task work continues. | "Change the repo contract or validator so the repeated failure is harder to reproduce, then run evidence that proves the new mechanism." |
 | "capturing the flag is the win condition" | Apply **CTF Workflow Eval**. | "Use a planted flag as the success criterion, then iterate the skill from evidence until reliability and wall-clock targets are met." |
+| "agent-skills becomes obsolete" | Preserve `agent-skills` as **agent-skills Foundry** while moving professional lifecycle truth into **Skills SDK** and distribution/proof truth into Tessl/runtime lanes. | "Update docs to say `agent-skills` is the foundry/dogfood/source repo, Skills SDK is the professional lifecycle contract, Tessl is distribution/proof, and local runtime truth is separate." |
+| "professional output" | Apply the mantra as **Thin Surface**, **Strong Guardrails**, **Durable Memory**, and **Professional Output**. | "Place the change on the canonical pipeline and prove the package has shape, guardrails, durable memory, and replayable evidence before calling it professional output." |
+| "pass with not_run refs" | Distinguish **Evidence Inventory** from **Evidence Replay**. | "Treat `sdk evidence verify` as inventory/classification; run or plan replay receipts before claiming command behavior is proven." |
+| "make the atlas clearer" | Use the **Canonical Skills SDK Pipeline** and four named loops. | "Redesign or review atlas visuals around Foundry -> SDK Lifecycle -> Guardrails -> Evals/Proof -> Tessl Distribution -> Local Runtime Truth, with Author, Proof, Release, and Runtime loops." |
 
 ## Relationships
 
 - A **Canonical Skill Source** may produce one **Runtime Projection** entry after **Workspace Sync**.
+- The **agent-skills Foundry** supplies source packages, fixtures, and governance memory to the **Skills SDK**; it should not be described as the finished product, registry, or runtime truth.
+- **Skills SDK** professionalizes foundry source through the **Professional Lifecycle Contract** before any **Tessl Distribution Stage** or **Local Runtime Truth Stage** claim is made.
+- The **Canonical Skills SDK Pipeline** is the shared route for roadmap, atlas, route-map, and capability language. Backlog cards should name a pipeline stage and one of the **Author Loop**, **Proof Loop**, **Release Loop**, or **Runtime Loop** before they become implementation slices.
+- **Evidence Inventory** can prove that evidence references are present and classified; **Evidence Replay** is required before command refs or external lanes prove current behavior.
 - A **Runtime Projection** entry becomes available to user-level Codex sessions through **User Runtime Links** after **User Sync**.
 - In this repository, `.agents/skills/**` is a **Runtime Projection** for generated root skill sets and system bridges. In another owner repo, `.agents/skills/**` or `.codex/skills/**` is editable source only when a project-local `skills-sdk.json` declares that root as **Manifest-Declared Project Skill Source**.
 - Project-local skill source is saved in the owner repo at `<declared-root>/<skill-handle>/`. Its portable eval suite lives with the skill at `<declared-root>/<skill-handle>/evals/evals.json`; SDK evidence and lifecycle events live under the owner repo's `.harness/` paths.
@@ -125,6 +153,10 @@
 ## Flagged Ambiguities
 
 - "Skill" can mean **Canonical Skill Source**, **Runtime Projection**, or a skill advertised in the session prompt. Recommendation: use **Canonical Skill Source** for editable files, **Runtime Projection** for `.agents/skills/**`, and **available skill** for what the active Codex session can invoke.
+- "agent-skills" can mean the repository, the broader Agent Skills Kit, or the foundry role in the Skills SDK product direction. Recommendation: say **agent-skills Foundry** when discussing product boundary, and **Agent Skills Kit** when discussing the governed repo/CLI system.
+- "Skills SDK" can mean the local `ask sdk` command surface or the professional lifecycle contract. Recommendation: say **Skills SDK** for the contract and name the specific command when discussing implementation.
+- "Proof" can mean inventory, replay, eval score, hosted CI, Tessl run, or installed runtime behavior. Recommendation: use **Evidence Inventory**, **Evidence Replay**, **Evals/Proof Stage**, **Tessl Distribution Stage**, or **Local Runtime Truth Stage** to avoid overclaiming.
+- "Professional output" can mean polished docs or the actual package-readiness target. Recommendation: reserve it for the combination of **Thin Surface**, **Strong Guardrails**, **Durable Memory**, and receipt-backed package/runtime boundaries.
 - ".agents/skills" can mean an interoperable source root in another project or the generated runtime projection in this repository. Recommendation: check the owner repo's `skills-sdk.json` before editing.
 - "Sync" can mean **Workspace Sync**, **User Sync**, or a lower-level projection refresh script. Recommendation: default to both `./bin/ask skills sync --scope workspace` and `./bin/ask skills sync --scope user` when the user says "sync my skills."
 - "Use it" can mean **Canonical Source Inspection** or **Runtime Skill Activation**. Recommendation: keep them separate; source inspection is allowed for repair/review, but a blocked runtime proof means the skill was not used.
@@ -135,7 +167,7 @@
 ## Agent Integration
 
 - Instruction surface updated: `AGENTS.md`
-- Integration summary: future agents are told to read this glossary before changing skills, sync policy, runtime projections, or agent-facing docs, and to use Prompt Translations for terse or ambiguous user phrases.
+- Integration summary: future agents are told to read this glossary before changing skills, sync policy, runtime projections, agent-facing docs, Skills SDK plans/specs/atlas visuals, capability claims, or product-direction docs, and to use Prompt Translations for terse or ambiguous user phrases.
 - Validation/enforcement: manual glossary validation in this run; no new validator added yet.
 
 ## Decisions

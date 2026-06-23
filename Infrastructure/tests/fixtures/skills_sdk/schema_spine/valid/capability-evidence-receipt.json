@@ -11,6 +11,9 @@
   "blocked_count": 0,
   "not_run_count": 2,
   "unknown_count": 0,
+  "proof_mode": "inventory_only",
+  "replay_required_count": 1,
+  "replay_command": "./bin/ask sdk evidence command-plan --scope capability-matrix --preview --json --robot",
   "evidence_rows": [
     {
       "capability_id": "manifest_schema",
@@ -47,5 +50,5 @@
   "mutation_performed": false,
   "command_execution_performed": false,
   "acceptance_trace": ["PU-032", "FR-008", "SA-003", "VP-032"],
-  "agent_summary": "Capability evidence verification checked 3 evidence ref(s): 1 passed, 0 blocked, and 2 command or external lane ref(s) were classified but not run."
+  "agent_summary": "Capability evidence verification checked 3 evidence ref(s): 1 passed, 0 blocked, and 2 command or external lane ref(s) were classified but not run. Run the command evidence plan for replayable command lanes before treating command lanes as proven; external lanes require separate receipts."
 }

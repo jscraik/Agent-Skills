@@ -70,6 +70,35 @@ class TestSkillsSdkAdoptionDecision(unittest.TestCase):
         self.assertEqual(receipt["status"], "blocked")
         self.assertIn("intake_review_preview", {item["id"] for item in receipt["blockers"]})
 
+    def test_review_status_items_block_even_without_block_items(self) -> None:
+        package = build_package_digest_receipt(REPO_ROOT, source_path=REPO_ROOT / VALID_SKILL, query=VALID_SKILL)
+        local_decision_receipt = {
+            "schema_version": "skills-sdk.trust-decision-receipt.v0",
+            "status": "preview",
+            "decision": "trust",
+            "package_digest": package["package_digest"],
+            "expires_at": "2999-01-01T00:00:00Z",
+        }
+        review_receipt = {
+            "status": "pass",
+            "review_items": [{"id": "permissions", "status": "review"}],
+        }
+        with patch(
+            "ask.skills_sdk.adoption_decision._load_trust_receipt",
+            return_value=(local_decision_receipt, None),
+        ), patch(
+            "ask.skills_sdk.adoption_decision._build_intake_review_receipt",
+            return_value=review_receipt,
+        ):
+            receipt = build_adoption_decision_receipt(
+                REPO_ROOT,
+                source=VALID_SKILL,
+                trust_receipt_path="local-decision-receipt.json",
+            )
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("intake_review_preview", {item["id"] for item in receipt["blockers"]})
+
     def test_expired_trust_receipt_blocks_adoption(self) -> None:
         package = build_package_digest_receipt(REPO_ROOT, source_path=REPO_ROOT / VALID_SKILL, query=VALID_SKILL)
         local_decision_receipt = {

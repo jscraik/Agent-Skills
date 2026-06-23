@@ -220,4 +220,4 @@ def _intake_review_completed(review_receipt: dict[str, Any]) -> bool:
     items = review_receipt.get("review_items")
     if not isinstance(items, list):
         return False
-    return not any(isinstance(item, dict) and item.get("status") == "block" for item in items)
+    return all(isinstance(item, dict) and item.get("status") == "pass" for item in items)
