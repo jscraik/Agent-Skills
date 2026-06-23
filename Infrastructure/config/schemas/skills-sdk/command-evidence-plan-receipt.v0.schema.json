@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/command-evidence-plan-receipt.v0.schema.json",
+  "title": "Skills SDK Command Evidence Plan Receipt v0",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "string", "const": "skills-sdk.command-evidence-plan-receipt.v0"},
+    "schema_uri": {"type": "string", "const": "https://jscraik.local/agent-skills/schemas/skills-sdk/command-evidence-plan-receipt.v0.schema.json"},
+    "status": {"type": "string", "enum": ["planned", "blocked"]},
+    "operation": {"type": "string", "const": "command_evidence_plan"},
+    "scope": {"type": "string", "const": "capability-matrix"},
+    "command_count": {"type": "integer", "minimum": 0},
+    "commands": {"type": "array", "items": {"$ref": "#/definitions/command"}},
+    "blockers": {"type": "array", "items": {"$ref": "#/definitions/check"}},
+    "mutation_performed": {"type": "boolean", "const": false},
+    "command_execution_performed": {"type": "boolean", "const": false},
+    "acceptance_trace": {"type": "array", "minItems": 1, "items": {"type": "string", "enum": ["FR-008", "SA-003", "VP-032"]}},
+    "agent_summary": {"type": "string", "minLength": 1}
+  },
+  "required": ["schema_version", "schema_uri", "status", "operation", "scope", "command_count", "commands", "blockers", "mutation_performed", "command_execution_performed", "acceptance_trace", "agent_summary"],
+  "definitions": {
+    "command": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "capability_id": {"type": "string", "minLength": 1},
+        "command": {"type": "string", "minLength": 1},
+        "argv": {"type": "array", "items": {"type": "string"}},
+        "status": {"type": "string", "const": "planned"},
+        "execution_lane": {"type": "string", "const": "local_command"},
+        "receipt_required": {"type": "boolean", "const": true},
+        "execution_policy": {"type": "string", "const": "manual_or_ci_replay"},
+        "source_evidence_reason": {"type": "string", "minLength": 1}
+      },
+      "required": ["capability_id", "command", "argv", "status", "execution_lane", "receipt_required", "execution_policy", "source_evidence_reason"]
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "status": {"type": "string", "enum": ["pass", "blocker"]},
+        "severity": {"type": "string", "enum": ["info", "blocker"]},
+        "message": {"type": "string", "minLength": 1},
+        "evidence": {"type": "array", "items": {"type": "string"}}
+      },
+      "required": ["id", "status", "severity", "message", "evidence"]
+    }
+  }
+}

@@ -9,8 +9,15 @@ from ask.cli_errors import build_unknown_action_result
 from ask.commands.sdk_ci import add_sdk_ci_parser, dispatch_sdk_ci
 from ask.commands.sdk_emitter import add_sdk_emitter_parser, dispatch_sdk_emitter
 from ask.commands.sdk_eval import add_sdk_eval_parser, dispatch_sdk_eval
+from ask.commands.sdk_evidence import (
+    add_sdk_evidence_parser,
+    add_sdk_route_map_parser,
+    dispatch_sdk_evidence,
+    dispatch_sdk_route_map,
+)
 from ask.commands.sdk_explorer import add_sdk_explorer_parser, dispatch_sdk_explorer
 from ask.commands.sdk_intake import add_sdk_intake_parser, dispatch_sdk_intake
+from ask.commands.sdk_knowledge import add_sdk_knowledge_parser, dispatch_sdk_knowledge
 from ask.commands.sdk_security import add_sdk_security_parser, dispatch_sdk_security
 from ask.skills_sdk.determinism import audit_skill_determinism
 from ask.skills_sdk.lenses import (
@@ -21,7 +28,6 @@ from ask.skills_sdk.lenses import (
     select_lenses,
     validate_lens_catalog,
 )
-from ask.skills_sdk.knowledge_ingest import build_knowledge_ingest
 from ask.skills_sdk.placeholder_lifecycle import SURFACES
 from ask.skills_sdk.review_handoff import build_review_handoff
 from ask.skills_sdk.review_execute import build_review_execution
@@ -60,21 +66,6 @@ def _add_sdk_docs_parser(sdk_subparsers: argparse._SubParsersAction, global_pars
         "--artifact",
         help="Optional repo-relative or absolute HTML artifact path to verify",
     )
-
-
-def _add_sdk_evidence_parser(sdk_subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
-    parser = sdk_subparsers.add_parser(
-        "evidence",
-        help="Verify Skills SDK evidence references without crossing external proof lanes",
-        parents=[global_parser],
-    )
-    subparsers = parser.add_subparsers(dest="evidence_action", required=True)
-    verify = subparsers.add_parser(
-        "verify",
-        help="Verify capability matrix evidence refs as files, schemas, receipts, commands, or external lanes",
-        parents=[global_parser],
-    )
-    verify.add_argument("--scope", choices=["capability-matrix"], default="capability-matrix")
 
 
 def _add_sdk_package_parser(
@@ -206,20 +197,6 @@ def _add_sdk_lifecycle_status_parsers(
     sdk_subparsers.add_parser("status", help="Report the Skills SDK capability truth matrix", parents=[global_parser])
 
 
-def _add_sdk_knowledge_parser(
-    sdk_subparsers: argparse._SubParsersAction,
-    global_parser: argparse.ArgumentParser,
-) -> None:
-    parser = sdk_subparsers.add_parser("knowledge", help="Vendor portable knowledge bundles into skill packages", parents=[global_parser])
-    subparsers = parser.add_subparsers(dest="knowledge_action", required=True)
-    ingest = subparsers.add_parser("ingest", help="Validate and vendor a KnowledgeOS extraction into a skill package", parents=[global_parser])
-    ingest.add_argument("--extraction", required=True, help="KnowledgeOS extraction directory")
-    ingest.add_argument("--skill", required=True, help="Repo-local skill directory or SKILL.md")
-    ingest.add_argument("--preview", action="store_true", help="Validate and report writes without mutating")
-    ingest.add_argument("--apply", action="store_true", help="Vendor references and update skill routing")
-    ingest.add_argument("--run-proof", action="store_true", help="Run package audit and verify after apply")
-
-
 def _add_sdk_project_parser(
     sdk_subparsers: argparse._SubParsersAction,
     global_parser: argparse.ArgumentParser,
@@ -312,7 +289,8 @@ def add_sdk_parser(
     _add_sdk_check_parser(sdk_subparsers, global_parser)
     _add_sdk_ir_parser(sdk_subparsers, global_parser)
     _add_sdk_docs_parser(sdk_subparsers, global_parser)
-    _add_sdk_evidence_parser(sdk_subparsers, global_parser)
+    add_sdk_evidence_parser(sdk_subparsers, global_parser)
+    add_sdk_route_map_parser(sdk_subparsers, global_parser)
     add_sdk_eval_parser(sdk_subparsers, global_parser)
     _add_sdk_package_parser(sdk_subparsers, global_parser)
     _add_sdk_sandbox_parser(sdk_subparsers, global_parser)
@@ -325,7 +303,7 @@ def add_sdk_parser(
     add_sdk_security_parser(sdk_subparsers, global_parser)
     _add_sdk_project_mutation_parsers(sdk_subparsers, global_parser)
     _add_sdk_lifecycle_status_parsers(sdk_subparsers, global_parser)
-    _add_sdk_knowledge_parser(sdk_subparsers, global_parser)
+    add_sdk_knowledge_parser(sdk_subparsers, global_parser)
     _add_sdk_project_parser(sdk_subparsers, global_parser)
     _add_sdk_lenses_parser(sdk_subparsers, global_parser)
     _add_sdk_determinism_parser(sdk_subparsers, global_parser)
@@ -426,7 +404,8 @@ def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
         "check": _dispatch_sdk_check,
         "ir": _dispatch_sdk_ir,
         "docs": _dispatch_sdk_docs,
-        "evidence": _dispatch_sdk_evidence,
+        "evidence": dispatch_sdk_evidence,
+        "route-map": dispatch_sdk_route_map,
         "eval": dispatch_sdk_eval,
         "package": _dispatch_sdk_package,
         "sandbox": _dispatch_sdk_sandbox,
@@ -442,7 +421,7 @@ def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
         "uninstall": _dispatch_sdk_uninstall,
         "lifecycle": _dispatch_sdk_lifecycle,
         "status": lambda root, _args: skills_commands.skills_sdk_status(root),
-        "knowledge": _dispatch_sdk_knowledge,
+        "knowledge": dispatch_sdk_knowledge,
         "lenses": _dispatch_sdk_lenses,
         "determinism": _dispatch_sdk_determinism,
         "review": _dispatch_sdk_review,
@@ -463,12 +442,6 @@ def _dispatch_sdk_docs(repo_root: Path, args: argparse.Namespace) -> CallResult:
     if args.docs_action == "verify":
         return skills_commands.skills_sdk_docs_verify(repo_root, artifact=args.artifact)
     return build_unknown_action_result("sdk docs", args.docs_action)
-
-
-def _dispatch_sdk_evidence(repo_root: Path, args: argparse.Namespace) -> CallResult:
-    if args.evidence_action == "verify":
-        return skills_commands.skills_sdk_capability_evidence(repo_root, scope=args.scope)
-    return build_unknown_action_result("sdk evidence", args.evidence_action)
 
 
 def _dispatch_sdk_package(repo_root: Path, args: argparse.Namespace) -> CallResult:
@@ -529,69 +502,6 @@ def _dispatch_sdk_observability(repo_root: Path, args: argparse.Namespace) -> Ca
             eval_run_receipt=args.eval_run_receipt,
         )
     return build_unknown_action_result("sdk observability", args.observability_action)
-
-
-def _dispatch_sdk_knowledge(repo_root: Path, args: argparse.Namespace) -> CallResult:
-    result = CallResult(status="success")
-    command_action = args.knowledge_action
-    result.metadata["command"] = f"sdk knowledge {command_action}"
-    if command_action == "ingest":
-        if args.preview == args.apply:
-            result.status = "error"
-            result.errors.append(
-                ErrorObject(
-                    code="ERR_VALIDATION",
-                    message="Skills SDK knowledge ingest requires exactly one of --preview or --apply.",
-                    fix_suggestion=(
-                        "Run ask sdk knowledge ingest --extraction <KnowledgeOS extraction> "
-                        "--skill <skill path> --preview --json --robot."
-                    ),
-                )
-            )
-            return result
-        if args.run_proof and not args.apply:
-            result.status = "error"
-            result.errors.append(
-                ErrorObject(
-                    code="ERR_VALIDATION",
-                    message="--run-proof is only valid with --apply.",
-                    fix_suggestion="Run knowledge ingest with --apply --run-proof or drop --run-proof for preview.",
-                )
-            )
-            return result
-        try:
-            payload = build_knowledge_ingest(
-                repo_root,
-                extraction=args.extraction,
-                skill=args.skill,
-                apply=args.apply,
-                run_proof=args.run_proof,
-            )
-        except ValueError as exc:
-            result.status = "error"
-            result.errors.append(
-                ErrorObject(
-                    code="ERR_VALIDATION",
-                    message=str(exc),
-                    fix_suggestion=(
-                        "Check that --extraction is a KnowledgeOS extraction with references/ and "
-                        "--skill is a repo-local Skills SDK package."
-                    ),
-                )
-            )
-            return result
-        result.data["knowledge_ingest"] = payload
-        if payload["status"] not in {"preview", "applied"}:
-            result.status = "error"
-            result.errors.append(
-                ErrorObject(
-                    code="ERR_VALIDATION",
-                    message="Skills SDK knowledge ingest was blocked by extraction validation findings.",
-                    fix_suggestion="Fix the reported knowledge_ingest.findings before applying.",
-                )
-            )
-        return result
-    return build_unknown_action_result("sdk knowledge", command_action)
 
 
 def _dispatch_sdk_lenses(repo_root: Path, args: argparse.Namespace) -> CallResult:

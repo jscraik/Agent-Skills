@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jscraik.local/agent-skills/schemas/skills-sdk/adoption-decision-receipt.v0.schema.json",
+  "title": "Skills SDK Adoption Decision Receipt v0",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "string", "const": "skills-sdk.adoption-decision-receipt.v0"},
+    "schema_uri": {"type": "string", "const": "https://jscraik.local/agent-skills/schemas/skills-sdk/adoption-decision-receipt.v0.schema.json"},
+    "status": {"type": "string", "enum": ["ready", "blocked"]},
+    "operation": {"type": "string", "const": "adoption_decision_preview"},
+    "source": {"type": "string", "minLength": 1},
+    "source_kind": {"type": "string", "enum": ["directory", "archive"]},
+    "package_id": {"type": "string", "minLength": 1},
+    "package_digest": {"type": "string", "minLength": 71},
+    "intake_receipt_status": {"type": "string", "enum": ["preview", "blocked"]},
+    "intake_review_receipt_status": {"type": "string", "enum": ["preview", "review", "pass", "blocked"]},
+    "trust_receipt_status": {"type": ["string", "null"], "enum": ["preview", "recorded", "blocked", null]},
+    "trust_decision": {"type": ["string", "null"], "enum": ["trust", "distrust", "revoke", null]},
+    "checks": {"type": "array", "minItems": 1, "items": {"$ref": "#/definitions/check"}},
+    "blockers": {"type": "array", "items": {"$ref": "#/definitions/check"}},
+    "mutation_performed": {"type": "boolean", "const": false},
+    "command_execution_performed": {"type": "boolean", "const": false},
+    "acceptance_trace": {"type": "array", "minItems": 1, "items": {"type": "string", "enum": ["FR-003", "FR-008", "SA-003", "SA-004", "SEC-001"]}},
+    "agent_summary": {"type": "string", "minLength": 1}
+  },
+  "required": ["schema_version", "schema_uri", "status", "operation", "source", "source_kind", "package_id", "package_digest", "intake_receipt_status", "intake_review_receipt_status", "trust_receipt_status", "trust_decision", "checks", "blockers", "mutation_performed", "command_execution_performed", "acceptance_trace", "agent_summary"],
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "ready"}}, "required": ["status"]},
+      "then": {"properties": {"blockers": {"maxItems": 0}}}
+    }
+  ],
+  "definitions": {
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "status": {"type": "string", "enum": ["pass", "blocker"]},
+        "severity": {"type": "string", "enum": ["info", "blocker"]},
+        "message": {"type": "string", "minLength": 1},
+        "evidence": {"type": "array", "items": {"type": "string"}}
+      },
+      "required": ["id", "status", "severity", "message", "evidence"]
+    }
+  }
+}
