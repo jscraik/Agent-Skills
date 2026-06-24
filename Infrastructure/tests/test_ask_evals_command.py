@@ -1423,6 +1423,9 @@ def test_evals_live_private_dry_run_stages_private_plugin_shape(tmp_path: Path) 
 
     staged_source = Path(tessl_eval["staged_source"])
     assert not (staged_source / "tile.json").exists()
+    readme_text = (staged_source / "README.md").read_text(encoding="utf-8")
+    assert "Registry presentation" in readme_text
+    assert "should not be treated as agent context" in readme_text
     plugin_manifest = json.loads((staged_source / ".tessl-plugin" / "plugin.json").read_text(encoding="utf-8"))
     assert plugin_manifest["name"] == "jscraik/example-skill"
     assert plugin_manifest["version"] == "2.3.4"
@@ -2958,6 +2961,7 @@ def test_prepare_tessl_scenario_generation_dry_run_stages_target_tile(tmp_path: 
     assert target_tile.name == "target-tile"
     assert tool_project.name == "tool-project"
     assert (target_tile / "SKILL.md").is_file()
+    assert (target_tile / "README.md").is_file()
     assert not (target_tile / "evals").exists()
     assert (tool_project / "tessl.json").is_file()
     assert Path(result.data["scenario_generation_brief"]).is_file()

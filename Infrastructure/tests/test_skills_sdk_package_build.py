@@ -44,7 +44,13 @@ class TestSkillsSdkPackageBuild(unittest.TestCase):
         self.assertEqual(model.package_id, "skills-sdk-valid-fixture")
         self.assertEqual(model.manifest.skill_ir_schema_version, "skills-sdk.skill-ir.v0")
         self.assertFalse(model.mutation_performed)
-        self.assertEqual(model.included_files, ["Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md"])
+        self.assertEqual(
+            model.included_files,
+            [
+                "Infrastructure/tests/fixtures/skills_sdk/valid_skill/README.md",
+                "Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md",
+            ],
+        )
         self.assertTrue(model.package_digest.startswith("sha256:"))
 
     def test_public_cli_builds_package_identity_receipt(self) -> None:
@@ -75,7 +81,13 @@ class TestSkillsSdkPackageBuild(unittest.TestCase):
 
         self.assertEqual(payload["status"], "built")
         self.assertEqual(payload["package_digest"], receipt.package_digest)
-        self.assertEqual(payload["included_files"], ["Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md"])
+        self.assertEqual(
+            payload["included_files"],
+            [
+                "Infrastructure/tests/fixtures/skills_sdk/valid_skill/README.md",
+                "Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md",
+            ],
+        )
         self.assertFalse(payload["mutation_performed"])
         self.assertIn("./bin/ask sdk package build", payload["validation_commands"][0])
 
