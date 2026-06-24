@@ -1,0 +1,7 @@
+{
+  "id": "skill-name-only",
+  "probe_type": "skill_name_mention_not_enough",
+  "predicted_label": "fail",
+  "score": 0.25,
+  "rationale": "Fixture output matches expected label."
+}

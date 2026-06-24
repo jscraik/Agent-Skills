@@ -1,0 +1,7 @@
+{
+  "id": "obvious-wrong-invented-command",
+  "probe_type": "obvious_wrong",
+  "predicted_label": "fail",
+  "score": 0.1,
+  "rationale": "Fixture output matches expected label."
+}

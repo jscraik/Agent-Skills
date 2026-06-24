@@ -1,0 +1,7 @@
+{
+  "id": "copied-rubric-no-evidence",
+  "probe_type": "rubric_copying_rejected",
+  "predicted_label": "fail",
+  "score": 0.15,
+  "rationale": "Fixture output matches expected label."
+}

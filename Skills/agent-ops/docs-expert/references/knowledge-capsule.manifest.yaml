@@ -1,0 +1,222 @@
+---
+schema_version: knowledge-os.knowledge-capsule-manifest.v1
+skill:
+  skill_id: docs-expert
+  declared_name: docs-expert
+  entrypoint_path: "../agent-skills/Skills/agent-ops/docs-expert/SKILL.md"
+  canonical_skill_path: "../agent-skills/Skills/agent-ops/docs-expert/SKILL.md"
+  writable_root: "../agent-skills/Skills/agent-ops/docs-expert"
+  apply_target_path: "../agent-skills/Skills/agent-ops/docs-expert/SKILL.md"
+upstream_pack:
+  pack_id: pack.creator-writing
+  export_root: exports/packs/pack.creator-writing
+  snapshot_digest: sha256:6d162d4ee6dfdd8210f426e3c0531577016b81c9d4c3a63d36e979580a34bc63
+upstream_packs:
+- pack_id: pack.creator-writing
+  role: docs_expert_writing_quality
+  export_root: exports/packs/pack.creator-writing
+  snapshot_digest: sha256:6d162d4ee6dfdd8210f426e3c0531577016b81c9d4c3a63d36e979580a34bc63
+  default_facets:
+  - clarity_mechanics
+  - documentation_quality
+  - revision_and_structure
+  - technical_explanation
+  - accessible_writing
+  - actionable_error_messages
+  - downstream_skill_routing
+  optional_facets: []
+selected_facets:
+- clarity_mechanics
+- documentation_quality
+- revision_and_structure
+- technical_explanation
+- accessible_writing
+- actionable_error_messages
+- downstream_skill_routing
+selected_asset_ids:
+- claim.creator-writing.terms-must-be-defined-consistently
+- claim.creator-writing.active-voice-clarifies-actors
+- claim.creator-writing.one-idea-per-unit
+- claim.creator-writing.audience-gap-defines-document
+- claim.creator-writing.docs-should-minimize-parsing-tax
+- principle.creator-writing.reader-clarity-before-style
+- heuristic.creator-writing.one-idea-one-unit
+- checklist.creator-writing.clarity-editing-pass
+- lens.creator-writing.reader-access-and-recovery
+- claim.creator-writing.accessible-docs-benefit-everyone
+- claim.creator-writing.error-messages-enable-recovery
+- claim.creator-writing.docs-must-be-skimmable
+- claim.creator-writing.docs-should-be-broadly-helpful
+- principle.creator-writing.documentation-is-reader-empathy
+- heuristic.creator-writing.front-load-takeaways
+- checklist.creator-writing.documentation-quality-pass
+- rubric.creator-writing.technical-explanation-readiness
+- claim.creator-writing.examples-and-visuals-teach-use
+- claim.creator-writing.large-docs-need-navigable-structure
+- claim.creator-writing.revision-needs-separate-passes
+- claim.creator-writing.llms-assist-not-own-judgment
+- principle.creator-writing.revision-is-a-separate-mode
+- heuristic.creator-writing.edit-in-passes
+- checklist.creator-writing.revision-structure-pass
+- heuristic.creator-writing.choose-doc-type-by-reader-goal
+- claim.creator-writing.visual-meaning-needs-nonvisual-support
+- claim.creator-writing.inclusive-language-centers-readers
+- principle.creator-writing.accessibility-is-writing-quality
+- heuristic.creator-writing.describe-purpose-not-appearance
+- checklist.creator-writing.accessibility-editing-pass
+- rubric.creator-writing.accessible-document-readiness
+- claim.creator-writing.error-messages-need-diagnostic-identifiers
+- claim.creator-writing.error-message-craft-preserves-signal
+- principle.creator-writing.error-messages-are-recovery-paths
+- heuristic.creator-writing.show-actual-expected-fix
+- heuristic.creator-writing.concise-not-cryptic
+- checklist.creator-writing.error-message-editing-pass
+- rubric.creator-writing.error-message-readiness
+- claim.creator-writing.docs-expert-fits-proof-backed-docs
+- claim.creator-writing.x-content-writer-fits-public-x-content
+- claim.creator-writing.x-writer-separates-creative-and-trust-loops
+- principle.creator-writing.route-by-reader-job-and-proof
+- heuristic.creator-writing.docs-to-x-routing
+- checklist.creator-writing.skill-routing-pass
+- claim.creator-writing.communication-corpus-supports-specialized-passes
+source_export_paths:
+- pack.index.yaml
+- snapshot.yaml
+- assets.json
+- eval-scenarios.json
+- skills-sdk-ingest.yaml
+- pack.md
+- slices/*.md
+capsules:
+- pack_id: pack.creator-writing
+  role: docs_expert_writing_quality
+  facet_id: clarity_mechanics
+  optional: false
+  source_slice: slices/clarity-mechanics.md
+  target_path: references/knowledge-capsules/clarity-mechanics.md
+  asset_ids:
+  - claim.creator-writing.terms-must-be-defined-consistently
+  - claim.creator-writing.active-voice-clarifies-actors
+  - claim.creator-writing.one-idea-per-unit
+  - claim.creator-writing.audience-gap-defines-document
+  - claim.creator-writing.docs-should-minimize-parsing-tax
+  - principle.creator-writing.reader-clarity-before-style
+  - heuristic.creator-writing.one-idea-one-unit
+  - checklist.creator-writing.clarity-editing-pass
+  - lens.creator-writing.reader-access-and-recovery
+  - claim.creator-writing.accessible-docs-benefit-everyone
+  - claim.creator-writing.error-messages-enable-recovery
+- pack_id: pack.creator-writing
+  role: docs_expert_writing_quality
+  facet_id: documentation_quality
+  optional: false
+  source_slice: slices/documentation-quality.md
+  target_path: references/knowledge-capsules/documentation-quality.md
+  asset_ids:
+  - claim.creator-writing.docs-must-be-skimmable
+  - claim.creator-writing.docs-should-minimize-parsing-tax
+  - claim.creator-writing.docs-should-be-broadly-helpful
+  - principle.creator-writing.documentation-is-reader-empathy
+  - heuristic.creator-writing.front-load-takeaways
+  - checklist.creator-writing.documentation-quality-pass
+  - rubric.creator-writing.technical-explanation-readiness
+  - lens.creator-writing.reader-access-and-recovery
+  - claim.creator-writing.audience-gap-defines-document
+  - claim.creator-writing.examples-and-visuals-teach-use
+  - claim.creator-writing.large-docs-need-navigable-structure
+  - claim.creator-writing.accessible-docs-benefit-everyone
+  - claim.creator-writing.error-messages-enable-recovery
+- pack_id: pack.creator-writing
+  role: docs_expert_writing_quality
+  facet_id: revision_and_structure
+  optional: false
+  source_slice: slices/revision-and-structure.md
+  target_path: references/knowledge-capsules/revision-and-structure.md
+  asset_ids:
+  - claim.creator-writing.revision-needs-separate-passes
+  - claim.creator-writing.large-docs-need-navigable-structure
+  - claim.creator-writing.llms-assist-not-own-judgment
+  - principle.creator-writing.revision-is-a-separate-mode
+  - heuristic.creator-writing.edit-in-passes
+  - checklist.creator-writing.revision-structure-pass
+  - lens.creator-writing.reader-access-and-recovery
+  - claim.creator-writing.examples-and-visuals-teach-use
+  - claim.creator-writing.audience-gap-defines-document
+  - claim.creator-writing.accessible-docs-benefit-everyone
+  - claim.creator-writing.error-messages-enable-recovery
+- pack_id: pack.creator-writing
+  role: docs_expert_writing_quality
+  facet_id: technical_explanation
+  optional: false
+  source_slice: slices/technical-explanation.md
+  target_path: references/knowledge-capsules/technical-explanation.md
+  asset_ids:
+  - claim.creator-writing.audience-gap-defines-document
+  - claim.creator-writing.examples-and-visuals-teach-use
+  - claim.creator-writing.large-docs-need-navigable-structure
+  - heuristic.creator-writing.choose-doc-type-by-reader-goal
+  - rubric.creator-writing.technical-explanation-readiness
+  - checklist.creator-writing.revision-structure-pass
+  - claim.creator-writing.revision-needs-separate-passes
+  - claim.creator-writing.llms-assist-not-own-judgment
+- pack_id: pack.creator-writing
+  role: docs_expert_writing_quality
+  facet_id: accessible_writing
+  optional: false
+  source_slice: slices/accessible-writing.md
+  target_path: references/knowledge-capsules/accessible-writing.md
+  asset_ids:
+  - claim.creator-writing.accessible-docs-benefit-everyone
+  - claim.creator-writing.visual-meaning-needs-nonvisual-support
+  - claim.creator-writing.inclusive-language-centers-readers
+  - principle.creator-writing.accessibility-is-writing-quality
+  - heuristic.creator-writing.describe-purpose-not-appearance
+  - checklist.creator-writing.accessibility-editing-pass
+  - rubric.creator-writing.accessible-document-readiness
+  - lens.creator-writing.reader-access-and-recovery
+  - claim.creator-writing.audience-gap-defines-document
+  - claim.creator-writing.error-messages-enable-recovery
+- pack_id: pack.creator-writing
+  role: docs_expert_writing_quality
+  facet_id: actionable_error_messages
+  optional: false
+  source_slice: slices/actionable-error-messages.md
+  target_path: references/knowledge-capsules/actionable-error-messages.md
+  asset_ids:
+  - claim.creator-writing.error-messages-enable-recovery
+  - claim.creator-writing.error-messages-need-diagnostic-identifiers
+  - claim.creator-writing.error-message-craft-preserves-signal
+  - principle.creator-writing.error-messages-are-recovery-paths
+  - heuristic.creator-writing.show-actual-expected-fix
+  - heuristic.creator-writing.concise-not-cryptic
+  - checklist.creator-writing.error-message-editing-pass
+  - rubric.creator-writing.error-message-readiness
+  - lens.creator-writing.reader-access-and-recovery
+  - claim.creator-writing.audience-gap-defines-document
+  - claim.creator-writing.accessible-docs-benefit-everyone
+- pack_id: pack.creator-writing
+  role: docs_expert_writing_quality
+  facet_id: downstream_skill_routing
+  optional: false
+  source_slice: slices/downstream-skill-routing.md
+  target_path: references/knowledge-capsules/downstream-skill-routing.md
+  asset_ids:
+  - claim.creator-writing.docs-expert-fits-proof-backed-docs
+  - claim.creator-writing.x-content-writer-fits-public-x-content
+  - claim.creator-writing.x-writer-separates-creative-and-trust-loops
+  - principle.creator-writing.route-by-reader-job-and-proof
+  - heuristic.creator-writing.docs-to-x-routing
+  - checklist.creator-writing.skill-routing-pass
+  - claim.creator-writing.communication-corpus-supports-specialized-passes
+runtime_dependency_policy:
+  requires_knowledge_os_at_runtime: false
+  raw_sources_included: false
+  local_absolute_paths_required: false
+provenance:
+  profile: docs-expert
+  profile_digest: sha256:14b307b739f42ad4981316afe59000afa961218fada2ea58d0786d1173464b34
+  packs:
+  - pack_id: pack.creator-writing
+    export_root: exports/packs/pack.creator-writing
+    snapshot_digest: sha256:6d162d4ee6dfdd8210f426e3c0531577016b81c9d4c3a63d36e979580a34bc63
+    role: docs_expert_writing_quality

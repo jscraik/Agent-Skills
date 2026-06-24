@@ -1,0 +1,6 @@
+{"id":"obvious-correct-doc-evidence","probe_type":"obvious_correct","expected_label":"pass","predicted_label":"pass","score":0.95,"raw_artifact":"raw/obvious-correct-doc-evidence.json"}
+{"id":"obvious-wrong-invented-command","probe_type":"obvious_wrong","expected_label":"fail","predicted_label":"fail","score":0.1,"raw_artifact":"raw/obvious-wrong-invented-command.json"}
+{"id":"concise-correct-vs-verbose-wrong","probe_type":"short_correct_vs_verbose_wrong","expected_label":"fail","predicted_label":"fail","score":0.2,"raw_artifact":"raw/concise-correct-vs-verbose-wrong.json"}
+{"id":"copied-rubric-no-evidence","probe_type":"rubric_copying_rejected","expected_label":"fail","predicted_label":"fail","score":0.15,"raw_artifact":"raw/copied-rubric-no-evidence.json"}
+{"id":"skill-name-only","probe_type":"skill_name_mention_not_enough","expected_label":"fail","predicted_label":"fail","score":0.25,"raw_artifact":"raw/skill-name-only.json"}
+{"id":"local-proof-overclaim","probe_type":"evidence_lane_overclaim_rejected","expected_label":"fail","predicted_label":"fail","score":0.05,"raw_artifact":"raw/local-proof-overclaim.json"}

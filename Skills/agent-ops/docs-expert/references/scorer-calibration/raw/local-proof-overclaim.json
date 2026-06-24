@@ -1,0 +1,7 @@
+{
+  "id": "local-proof-overclaim",
+  "probe_type": "evidence_lane_overclaim_rejected",
+  "predicted_label": "fail",
+  "score": 0.05,
+  "rationale": "Fixture output matches expected label."
+}

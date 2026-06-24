@@ -158,6 +158,18 @@ def _add_sdk_project_mutation_parsers(
     sdk_subparsers: argparse._SubParsersAction,
     global_parser: argparse.ArgumentParser,
 ) -> None:
+    improve = sdk_subparsers.add_parser(
+        "improve",
+        help="Run a project-local skill improvement lifecycle gate",
+        parents=[global_parser],
+    )
+    improve.add_argument("target", help="Project-local SKILL.md source path")
+    improve.add_argument("--project-root", required=True, help="Absolute marked project root containing skills-sdk.json")
+    improve.add_argument("--evals", action="store_true", help="Run the SDK internal eval lane before recording the decision")
+    improve.add_argument("--mode", choices=["smoke", "release"], default="smoke", help="Eval mode when --evals is set")
+    improve.add_argument("--preview", action="store_true", help="Plan the improvement lifecycle evidence without writes")
+    improve.add_argument("--apply", action="store_true", help="Write owner-repo registry, event, and receipt evidence")
+
     install = sdk_subparsers.add_parser("install", help="Preview or apply a bounded Skills SDK project install", parents=[global_parser])
     install.add_argument("target", help="Skill handle or repo-relative skill source path")
     install.add_argument("--preview", action="store_true", help="Plan the install without performing writes")
@@ -351,6 +363,23 @@ def _dispatch_sdk_install(repo_root: Path, args: argparse.Namespace) -> CallResu
     )
 
 
+def _dispatch_sdk_improve(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    if args.preview == args.apply:
+        return _validation_error(
+            "sdk improve",
+            "Skills SDK improve requires exactly one of --preview or --apply.",
+            "ask sdk improve <project-skill> --project-root /path/to/project --preview --json --robot",
+        )
+    return skills_commands.skills_sdk_project_improve(
+        repo_root,
+        target=args.target,
+        project_root=args.project_root,
+        run_evals=args.evals,
+        mode=args.mode,
+        apply=args.apply,
+    )
+
+
 def _dispatch_sdk_rollback(repo_root: Path, args: argparse.Namespace) -> CallResult:
     if args.preview == args.apply:
         return _validation_error(
@@ -416,6 +445,7 @@ def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
         "ci": dispatch_sdk_ci,
         "explorer": dispatch_sdk_explorer,
         "security": dispatch_sdk_security,
+        "improve": _dispatch_sdk_improve,
         "install": _dispatch_sdk_install,
         "rollback": _dispatch_sdk_rollback,
         "uninstall": _dispatch_sdk_uninstall,

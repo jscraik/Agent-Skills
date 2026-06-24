@@ -1,0 +1,7 @@
+{
+  "id": "concise-correct-vs-verbose-wrong",
+  "probe_type": "short_correct_vs_verbose_wrong",
+  "predicted_label": "fail",
+  "score": 0.2,
+  "rationale": "Fixture output matches expected label."
+}
