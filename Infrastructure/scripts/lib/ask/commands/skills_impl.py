@@ -450,6 +450,29 @@ def _is_path_relative_to(path: Path, root: Path) -> bool:
         return False
 
 
+def _resolve_project_relative_config_path(
+    project_root: Path,
+    value: str,
+    *,
+    allow_project_root: bool = False,
+) -> Path | None:
+    raw_value = value.strip()
+    if not raw_value:
+        return None
+    raw_path = Path(raw_value)
+    if raw_path.is_absolute() or ".." in raw_path.parts:
+        return None
+    if raw_path.parts in {(), (".",)}:
+        if not allow_project_root:
+            return None
+        return project_root.resolve()
+    try:
+        resolved = (project_root / raw_path).resolve(strict=False)
+    except OSError:
+        return None
+    return resolved if _is_path_relative_to(resolved, project_root) else None
+
+
 def _find_project_manifest_root(path: Path) -> tuple[Path, Path] | None:
     """Return the nearest ancestor containing skills-sdk.json for a source path."""
     current = path if path.is_dir() else path.parent
@@ -477,12 +500,11 @@ def _declared_project_skill_source(project_root: Path, manifest_path: Path, sour
         root_value = item.get("root")
         if not isinstance(root_value, str) or not root_value.strip():
             continue
-        root_path = Path(root_value)
-        if root_path.is_absolute() or root_path.parts in {(), (".",)}:
+        declared_root = _resolve_project_relative_config_path(project_root, root_value)
+        if declared_root is None:
             continue
-        declared_root = (project_root / root_path).resolve()
         if _is_path_relative_to(source, declared_root):
-            return root_path.as_posix()
+            return Path(root_value).as_posix()
     return None
 
 
@@ -6345,9 +6367,20 @@ def _sdk_improve_project_id(manifest: dict[str, Any] | None, project_root: Path)
 def _sdk_improve_evidence_paths(project_root: Path, manifest: dict[str, Any] | None, slug: str) -> dict[str, Path]:
     evidence = manifest.get("evidence") if isinstance(manifest, dict) else None
     evidence = evidence if isinstance(evidence, dict) else {}
-    registry = project_root / str(evidence.get("registry") or ".harness/skills/registry.json")
-    events = project_root / str(evidence.get("events") or ".harness/skills/events.jsonl")
-    receipts_root = project_root / str(evidence.get("receipts") or ".harness/skills/receipts")
+    registry = _resolve_project_relative_config_path(
+        project_root,
+        str(evidence.get("registry") or ".harness/skills/registry.json"),
+    )
+    events = _resolve_project_relative_config_path(
+        project_root,
+        str(evidence.get("events") or ".harness/skills/events.jsonl"),
+    )
+    receipts_root = _resolve_project_relative_config_path(
+        project_root,
+        str(evidence.get("receipts") or ".harness/skills/receipts"),
+    )
+    if registry is None or events is None or receipts_root is None:
+        raise ValueError("Project evidence paths must be relative paths inside project_root.")
     return {
         "registry": registry,
         "events": events,
@@ -6363,12 +6396,17 @@ def _sdk_improve_project_relative(project_root: Path, path: Path) -> str:
 
 
 def _sdk_improve_load_registry(path: Path, project_id: str, manifest_path: str) -> dict[str, Any]:
-    try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
+    if not path.exists():
         payload = {}
+    else:
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"Invalid skills registry JSON at {path}: {exc}") from exc
+        except OSError as exc:
+            raise ValueError(f"Unable to read skills registry at {path}: {exc}") from exc
     if not isinstance(payload, dict):
-        payload = {}
+        raise ValueError(f"Skills registry JSON must be an object at {path}.")
     payload.setdefault("schema_version", "skills-sdk.project-skill-registry.v1")
     payload.setdefault("project", {"id": project_id, "manifest": manifest_path})
     payload.setdefault("summary", {})
@@ -6634,7 +6672,31 @@ def skills_sdk_project_improve(
     project_id = _sdk_improve_project_id(manifest, resolved_project_root)
     package_id = str(package_receipt.get("package_id") or source_path.parent.name)
     slug = _sdk_improve_receipt_slug(package_id, timestamp)
-    paths = _sdk_improve_evidence_paths(resolved_project_root, manifest, slug)
+    try:
+        paths = _sdk_improve_evidence_paths(resolved_project_root, manifest, slug)
+    except ValueError as exc:
+        receipt = {
+            "schema_version": "skills-sdk.project-improvement-receipt.v0",
+            "status": "blocked",
+            "operation": "project_skill_improve",
+            "target": query,
+            "project_root": str(resolved_project_root),
+            "canonical_source_path": str(source_path),
+            "blockers": ["invalid_project_evidence_paths"],
+            "mutation_performed": False,
+            "source_mutation_performed": False,
+            "validation_commands": [
+                _ask_validation_command("sdk", "project", "doctor", "--project-root", str(resolved_project_root)),
+            ],
+        }
+        return _sdk_improve_error(
+            result=result,
+            query=query,
+            status="blocked",
+            message=str(exc),
+            fix_suggestion="Use project-relative evidence paths that stay inside project_root.",
+            receipt=receipt,
+        )
     receipt_relative = _sdk_improve_project_relative(resolved_project_root, paths["receipt"])
     registry_relative = _sdk_improve_project_relative(resolved_project_root, paths["registry"])
     events_relative = _sdk_improve_project_relative(resolved_project_root, paths["events"])
@@ -6702,11 +6764,24 @@ def skills_sdk_project_improve(
 
     if apply:
         registry_before_digest = _skills_sdk_digest_file(paths["registry"]) if paths["registry"].is_file() else None
-        registry = _sdk_improve_load_registry(
-            paths["registry"],
-            project_id,
-            _sdk_improve_project_relative(resolved_project_root, manifest_path),
-        )
+        try:
+            registry = _sdk_improve_load_registry(
+                paths["registry"],
+                project_id,
+                _sdk_improve_project_relative(resolved_project_root, manifest_path),
+            )
+        except ValueError as exc:
+            receipt["status"] = "blocked"
+            receipt["blockers"] = [*blockers, "invalid_project_registry"]
+            receipt["mutation_performed"] = False
+            return _sdk_improve_error(
+                result=result,
+                query=query,
+                status="blocked",
+                message=str(exc),
+                fix_suggestion="Repair or move the existing project skill registry before applying SDK improve evidence.",
+                receipt=receipt,
+            )
         _sdk_improve_update_registry(
             registry,
             project_id=project_id,

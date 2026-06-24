@@ -3618,6 +3618,33 @@ def test_run_evals_classifies_user_input_blocker_without_scorecard(tmp_path: Pat
     assert result.data["lifecycle_event"]["outcome"]["blocker_classes"] == ["blocked_user_input"]
 
 
+def test_run_evals_classifies_codex_usage_limit_as_runtime(tmp_path: Path) -> None:
+    completed = mock.Mock(
+        returncode=1,
+        stdout="",
+        stderr=(
+            "ERROR: You've hit your usage limit for GPT-5.3-Codex-Spark. "
+            "Switch to another model now, or try again at 11:00 PM.\n"
+        ),
+    )
+
+    with mock.patch.object(evals.subprocess, "run", return_value=completed):
+        result = evals.run_evals(
+            tmp_path,
+            "Plugins/example-skill",
+            mode="smoke",
+            dashboard=False,
+            skip_tessl=True,
+        )
+
+    assert result.status == "error"
+    assert result.data["eval_status"] == "blocked_runtime"
+    assert result.data["blocker_class"] == "blocked_runtime"
+    assert result.errors[0].code == "ERR_RUNTIME"
+    assert result.data["lifecycle_event"]["outcome"]["status"] == "blocked_runtime"
+    assert result.data["lifecycle_event"]["outcome"]["blocker_classes"] == ["blocked_runtime"]
+
+
 def test_run_evals_classifies_discovery_smoke_filter_blocker(tmp_path: Path) -> None:
     completed = mock.Mock(
         returncode=1,

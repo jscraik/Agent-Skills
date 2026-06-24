@@ -3,10 +3,10 @@ schema_version: knowledge-os.knowledge-capsule-manifest.v1
 skill:
   skill_id: docs-expert
   declared_name: docs-expert
-  entrypoint_path: "../agent-skills/Skills/agent-ops/docs-expert/SKILL.md"
-  canonical_skill_path: "../agent-skills/Skills/agent-ops/docs-expert/SKILL.md"
-  writable_root: "../agent-skills/Skills/agent-ops/docs-expert"
-  apply_target_path: "../agent-skills/Skills/agent-ops/docs-expert/SKILL.md"
+  entrypoint_path: "Skills/agent-ops/docs-expert/SKILL.md"
+  canonical_skill_path: "Skills/agent-ops/docs-expert/SKILL.md"
+  writable_root: "Skills/agent-ops/docs-expert"
+  apply_target_path: "Skills/agent-ops/docs-expert/SKILL.md"
 upstream_pack:
   pack_id: pack.creator-writing
   export_root: exports/packs/pack.creator-writing

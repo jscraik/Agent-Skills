@@ -15,17 +15,26 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 def _command_env() -> dict[str, str]:
     env = os.environ.copy()
     temp_base = Path(tempfile.gettempdir()) / "agent-skills-test"
-    env.setdefault("XDG_CACHE_HOME", str(temp_base / "xdg-cache"))
-    env.setdefault("XDG_STATE_HOME", str(temp_base / "xdg-state"))
-    env.setdefault("MISE_CACHE_DIR", str(temp_base / "mise-cache"))
-    env.setdefault("MISE_STATE_DIR", str(temp_base / "mise-state"))
-    env.setdefault("UV_CACHE_DIR", str(temp_base / "uv-cache"))
-    env.setdefault("MISE_TRUSTED_CONFIG_PATHS", str(REPO_ROOT / ".mise.toml"))
-    env.setdefault("ASK_SKILLS_SDK_IMPROVE_TIMESTAMP", "2026-06-24T00:00:00Z")
+    env["XDG_CACHE_HOME"] = str(temp_base / "xdg-cache")
+    env["XDG_STATE_HOME"] = str(temp_base / "xdg-state")
+    env["MISE_CACHE_DIR"] = str(temp_base / "mise-cache")
+    env["MISE_STATE_DIR"] = str(temp_base / "mise-state")
+    env["UV_CACHE_DIR"] = str(temp_base / "uv-cache")
+    env["MISE_TRUSTED_CONFIG_PATHS"] = str(REPO_ROOT / ".mise.toml")
+    env["ASK_SKILLS_SDK_IMPROVE_TIMESTAMP"] = "2026-06-24T00:00:00Z"
     return env
 
 
 def _run_json_command(*args: str) -> dict:
+    process = _run_command(*args)
+    if process.returncode != 0:
+        raise AssertionError(
+            f"{' '.join(args)} failed with {process.returncode}\nSTDOUT:\n{process.stdout}\nSTDERR:\n{process.stderr}"
+        )
+    return json.loads(process.stdout)
+
+
+def _run_command(*args: str) -> subprocess.CompletedProcess[str]:
     process = subprocess.run(
         list(args),
         cwd=REPO_ROOT,
@@ -34,12 +43,9 @@ def _run_json_command(*args: str) -> dict:
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         check=False,
+        timeout=60,
     )
-    if process.returncode != 0:
-        raise AssertionError(
-            f"{' '.join(args)} failed with {process.returncode}\nSTDOUT:\n{process.stdout}\nSTDERR:\n{process.stderr}"
-        )
-    return json.loads(process.stdout)
+    return process
 
 
 def _project_manifest() -> dict:
@@ -160,6 +166,62 @@ class TestSkillsSdkProjectImprove(unittest.TestCase):
             self.assertEqual(events[-1]["event"], "project_skill_improvement_validated")
             self.assertEqual(events[-1]["source_edit_status"], "not_requested")
             self.assertFalse(improve_payload["source_mutation_performed"])
+
+    def test_preview_blocks_project_evidence_paths_outside_project_root(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            project_root, skill_md = _project_with_codex_skill(Path(tmp))
+            manifest = _project_manifest()
+            manifest["evidence"]["registry"] = "../outside-registry.json"
+            (project_root / "skills-sdk.json").write_text(json.dumps(manifest), encoding="utf-8")
+
+            process = _run_command(
+                sys.executable,
+                "Infrastructure/bin/ask",
+                "sdk",
+                "improve",
+                str(skill_md),
+                "--project-root",
+                str(project_root),
+                "--preview",
+                "--json",
+                "--robot",
+            )
+            payload = json.loads(process.stdout)
+            receipt = payload["data"]["skills_sdk_project_improve"]["receipt"]
+
+            self.assertNotEqual(process.returncode, 0)
+            self.assertEqual(payload["status"], "error")
+            self.assertEqual(receipt["status"], "blocked")
+            self.assertEqual(receipt["blockers"], ["invalid_project_evidence_paths"])
+            self.assertFalse((project_root.parent / "outside-registry.json").exists())
+
+    def test_apply_blocks_malformed_existing_registry_without_overwrite(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            project_root, skill_md = _project_with_codex_skill(Path(tmp))
+            registry_path = project_root / ".harness" / "skills" / "registry.json"
+            registry_path.parent.mkdir(parents=True)
+            registry_path.write_text("{not-json", encoding="utf-8")
+
+            process = _run_command(
+                sys.executable,
+                "Infrastructure/bin/ask",
+                "sdk",
+                "improve",
+                str(skill_md),
+                "--project-root",
+                str(project_root),
+                "--apply",
+                "--json",
+                "--robot",
+            )
+            payload = json.loads(process.stdout)
+            receipt = payload["data"]["skills_sdk_project_improve"]["receipt"]
+
+            self.assertNotEqual(process.returncode, 0)
+            self.assertEqual(payload["status"], "error")
+            self.assertEqual(receipt["status"], "blocked")
+            self.assertIn("invalid_project_registry", receipt["blockers"])
+            self.assertEqual(registry_path.read_text(encoding="utf-8"), "{not-json")
 
 
 if __name__ == "__main__":

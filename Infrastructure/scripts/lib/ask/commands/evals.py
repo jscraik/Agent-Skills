@@ -4549,6 +4549,25 @@ def _classify_eval_blocker(*, raw_output: str, raw_error: str, timed_out: bool =
     if timed_out:
         return "timeout_partial_output" if text.strip() else "timeout_no_output"
 
+    runtime_markers = [
+        "sandbox_apply: operation not permitted",
+        "host_execution_untrusted",
+        "sandbox-exec",
+        "operation not permitted",
+        "selected model is at capacity",
+        "model is at capacity",
+        "you've hit your usage limit",
+        "you have hit your usage limit",
+        "usage limit for",
+        "switch to another model",
+        "try again at",
+        "context window",
+        "start a new thread",
+        "blocked_runtime",
+    ]
+    if any(marker in low for marker in runtime_markers):
+        return "blocked_runtime"
+
     user_input_markers = [
         "user_input_requested_during_turn",
         "request_user_input",
@@ -4600,20 +4619,6 @@ def _classify_eval_blocker(*, raw_output: str, raw_error: str, timed_out: bool =
     ]
     if any(marker in low for marker in environment_markers):
         return "blocked_environment"
-
-    runtime_markers = [
-        "sandbox_apply: operation not permitted",
-        "host_execution_untrusted",
-        "sandbox-exec",
-        "operation not permitted",
-        "selected model is at capacity",
-        "model is at capacity",
-        "context window",
-        "start a new thread",
-        "blocked_runtime",
-    ]
-    if any(marker in low for marker in runtime_markers):
-        return "blocked_runtime"
 
     validation_markers = [
         "blocked_validation",

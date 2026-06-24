@@ -239,7 +239,7 @@ class TestAskCLI(unittest.TestCase):
         """
         Verify that the human-readable skills list output includes discovery confirmation and a validation replay command.
         """
-        cmd = ["python3", "Infrastructure/bin/ask", "skills", "list", "--robot"]
+        cmd = [sys.executable, str(Path(__file__).resolve().parents[1] / "bin" / "ask"), "skills", "list", "--robot"]
         result = _run_cli(cmd)
 
         self.assertEqual(result.returncode, 0)
@@ -379,9 +379,9 @@ class TestAskCLI(unittest.TestCase):
             ["./bin/ask skills list --json --robot"],
         )
 
-    def test_skills_list_human_output_exposes_validation(self):
-        """Verify ask skills list renders its inventory validation command."""
-        cmd = [sys.executable, "Infrastructure/bin/ask", "skills", "list", "--robot"]
+    def test_skills_list_human_output_includes_inventory_entries(self):
+        """Verify ask skills list renders inventory entries."""
+        cmd = [sys.executable, str(Path(__file__).resolve().parents[1] / "bin" / "ask"), "skills", "list", "--robot"]
         result = _run_cli(cmd)
 
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -4952,7 +4952,7 @@ class TestAskCLI(unittest.TestCase):
                 "--json",
                 "--robot",
             ]
-            result = _run_cli(cmd)
+            result = _run_cli(cmd, cwd=Path(__file__).resolve().parents[2])
 
         self.assertEqual(result.returncode, 0, result.stderr)
         output = json.loads(result.stdout)
@@ -4987,7 +4987,7 @@ class TestAskCLI(unittest.TestCase):
                 "--json",
                 "--robot",
             ]
-            result = _run_cli(cmd)
+            result = _run_cli(cmd, cwd=Path(__file__).resolve().parents[2])
 
         self.assertEqual(result.returncode, 0, result.stderr)
         output = json.loads(result.stdout)
