@@ -6534,15 +6534,17 @@ def _sdk_improve_atomic_write_json(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp_path = path.with_name(f".{path.name}.{os.getpid()}.tmp")
     safe_payload = _sdk_improve_redact_sensitive_values(payload)
-    tmp_path.write_bytes((json.dumps(safe_payload, indent=2, sort_keys=True) + "\n").encode("utf-8"))
+    with tmp_path.open("w", encoding="utf-8") as handle:
+        json.dump(safe_payload, handle, indent=2, sort_keys=True)
+        handle.write("\n")
     os.replace(tmp_path, path)
 
 
 def _sdk_improve_append_event(path: Path, event: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     safe_event = _sdk_improve_redact_sensitive_values(event)
-    with path.open("ab") as handle:
-        handle.write((json.dumps(safe_event, sort_keys=True, separators=(",", ":")) + "\n").encode("utf-8"))
+    with path.open("a", encoding="utf-8") as handle:
+        print(json.dumps(safe_event, sort_keys=True, separators=(",", ":")), file=handle)
 
 
 def _sdk_improve_error(
