@@ -373,6 +373,60 @@ def check_lifecycle_readiness(
     return DiagnosticResult("lifecycle readiness", "pass", "healthy")
 
 
+def _repo_relative_or_absolute(path: Path) -> str:
+    """Return a stable display path for repo-local or external skill roots."""
+    try:
+        return path.resolve().relative_to(REPO_ROOT.resolve()).as_posix()
+    except ValueError:
+        return path.resolve().as_posix()
+
+
+def _is_external_skill_dir(skill_dir: Path) -> bool:
+    try:
+        skill_dir.resolve().relative_to(REPO_ROOT.resolve())
+        return False
+    except ValueError:
+        return True
+
+
+def _append_external_skill_checks(results: List[DiagnosticResult], skill_dir: Path) -> None:
+    results.append(
+        DiagnosticResult(
+            "external project skill",
+            "info",
+            "Explicit filesystem skill outside the agent-skills foundry",
+            "Repo-coupled runtime projection and lifecycle readiness checks are skipped; use the owner repo's receipts for release claims.",
+        )
+    )
+    results.append(check_task_profile(skill_dir))
+    results.append(
+        DiagnosticResult(
+            "lifecycle readiness",
+            "skip",
+            "External project skill lifecycle readiness is owned by the target repository",
+        )
+    )
+
+
+def _requires_sdk_resolver(skill_name: str) -> bool:
+    candidate_arg = Path(skill_name).expanduser()
+    return not candidate_arg.exists() and "/" not in skill_name and "\\" not in skill_name
+
+
+def _sdk_resolver_failure(skill_name: str, resolution: dict[str, object]) -> List[DiagnosticResult]:
+    return [
+        DiagnosticResult(
+            "SDK resolver",
+            "fail",
+            f"SDK resolver could not resolve {skill_name}: {resolution.get('error_code', 'unknown_error')}",
+            str(
+                resolution.get("operator_action")
+                or "Run ./bin/ask skills list --json --robot to inspect SDK-visible skills."
+            ),
+        )
+    ]
+
+
 def _append_runtime_surface_checks(
     results: List[DiagnosticResult],
     skill_name: str,
@@ -416,22 +470,10 @@ def diagnose_skill(
     """Run all diagnostic checks for a skill."""
     results: List[DiagnosticResult] = []
 
-    candidate_arg = Path(skill_name).expanduser()
-    resolver_required = not candidate_arg.exists() and "/" not in skill_name and "\\" not in skill_name
+    resolver_required = _requires_sdk_resolver(skill_name)
     resolution = resolve_skill_handle(skill_name, repo_root_path=REPO_ROOT) if resolver_required else {}
     if resolver_required and resolution.get("status") != "ok":
-        results.append(
-            DiagnosticResult(
-                "SDK resolver",
-                "fail",
-                f"SDK resolver could not resolve {skill_name}: {resolution.get('error_code', 'unknown_error')}",
-                str(
-                    resolution.get("operator_action")
-                    or "Run ./bin/ask skills list --json --robot to inspect SDK-visible skills."
-                ),
-            )
-        )
-        return results
+        return _sdk_resolver_failure(skill_name, resolution)
 
     # Find skill directory
     skill_dir = find_skill_dir(skill_name)
@@ -439,12 +481,15 @@ def diagnose_skill(
         results.append(DiagnosticResult("skill directory", "fail", f"Skill '{skill_name}' not found in repository"))
         return results
 
-    results.append(DiagnosticResult("skill directory", "pass", f"Found at {skill_dir.relative_to(REPO_ROOT)}"))
+    results.append(DiagnosticResult("skill directory", "pass", f"Found at {_repo_relative_or_absolute(skill_dir)}"))
     resolved_skill_name = skill_dir.name
 
     # Run checks
     results.append(check_skill_md(skill_dir))
     results.append(check_nested_git(skill_dir))
+    if _is_external_skill_dir(skill_dir):
+        _append_external_skill_checks(results, skill_dir)
+        return results
     _append_runtime_surface_checks(
         results,
         skill_name,

@@ -441,6 +441,142 @@ def _validate_repo_relative_skill_path(repo_root: Path, skill_path: str) -> tupl
     return resolved_path, None
 
 
+def _is_path_relative_to(path: Path, root: Path) -> bool:
+    try:
+        path.resolve().relative_to(root.resolve())
+        return True
+    except (OSError, ValueError):
+        return False
+
+
+def _find_project_manifest_root(path: Path) -> tuple[Path, Path] | None:
+    """Return the nearest ancestor containing skills-sdk.json for a source path."""
+    current = path if path.is_dir() else path.parent
+    for candidate in (current, *current.parents):
+        manifest = candidate / "skills-sdk.json"
+        if manifest.is_file():
+            return candidate, manifest
+    return None
+
+
+def _declared_project_skill_source(project_root: Path, manifest_path: Path, source: Path) -> str | None:
+    """Return the declared source root for a project-local skill source."""
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    skill_sources = manifest.get("skill_sources")
+    if not isinstance(skill_sources, list):
+        return None
+    for item in skill_sources:
+        if not isinstance(item, dict):
+            continue
+        if item.get("kind") != "canonical_project_source":
+            continue
+        root_value = item.get("root")
+        if not isinstance(root_value, str) or not root_value.strip():
+            continue
+        root_path = Path(root_value)
+        if root_path.is_absolute() or root_path.parts in {(), (".",)}:
+            continue
+        declared_root = (project_root / root_path).resolve()
+        if _is_path_relative_to(source, declared_root):
+            return root_path.as_posix()
+    return None
+
+
+def _project_local_skill_target(repo_root: Path, query: str) -> tuple[dict[str, Any] | None, str | None]:
+    """Resolve a manifest-declared project-local SKILL.md outside the foundry."""
+    raw_path = Path(query).expanduser()
+    if not raw_path.is_absolute():
+        return None, None
+    try:
+        resolved_path = raw_path.resolve(strict=False)
+    except OSError:
+        return None, None
+    if _is_path_relative_to(resolved_path, repo_root):
+        return None, None
+    source = resolved_path if resolved_path.name == "SKILL.md" else resolved_path / "SKILL.md"
+    if not source.is_file():
+        return None, None
+    manifest_info = _find_project_manifest_root(source)
+    if not manifest_info:
+        return None, None
+    project_root, manifest_path = manifest_info
+    declared_root = _declared_project_skill_source(project_root, manifest_path, source)
+    if not declared_root:
+        return None, None
+    try:
+        target_path = resolved_path.relative_to(project_root).as_posix()
+    except ValueError:
+        target_path = resolved_path.as_posix()
+    try:
+        source_relative = source.relative_to(project_root).as_posix()
+    except ValueError:
+        source_relative = source.as_posix()
+    source_path = source.as_posix()
+    return {
+        "target_kind": "project_local_source_path",
+        "handle": None,
+        "source_path": source_path,
+        "target_path": target_path,
+        "requested_path": raw_path.as_posix(),
+        "source_exists": True,
+        "resolution": None,
+        "project_root": project_root.as_posix(),
+        "project_manifest": manifest_path.as_posix(),
+        "project_source_root": declared_root,
+        "project_relative_source_path": source_relative,
+    }, source.parent.as_posix()
+
+
+def _resolve_existing_skill_path(path: Path) -> Path | None:
+    """Return a skill directory for an existing explicit filesystem target."""
+    if path.is_file() and path.name == "SKILL.md":
+        path = path.parent
+    if path.is_dir() and (path / "SKILL.md").is_file():
+        return path.resolve()
+    return None
+
+
+def _resolve_audit_skill_path(repo_root: Path, skill_path: str) -> tuple[Path | None, bool, CallResult | None]:
+    """Resolve repo-local or explicit external skill audit targets.
+
+    Repo-relative inputs keep the existing traversal guard. Existing filesystem
+    skill directories outside the foundry are allowed as read-only project-local
+    audit targets so installed Skill Factory lanes can operate from owner repos.
+    """
+    raw_target = Path(skill_path).expanduser()
+    candidate = raw_target if raw_target.is_absolute() else repo_root / raw_target
+    explicit_skill_dir = _resolve_existing_skill_path(candidate)
+    if explicit_skill_dir is not None:
+        try:
+            explicit_skill_dir.relative_to(repo_root.resolve())
+            return explicit_skill_dir, False, None
+        except ValueError:
+            return explicit_skill_dir, True, None
+
+    resolved_path, path_error = _validate_repo_relative_skill_path(repo_root, skill_path)
+    return resolved_path, False, path_error
+
+
+def _external_skill_root_children(repo_root: Path, skill_path: str) -> list[Path]:
+    """Return immediate child skill dirs for an explicit external skill root."""
+    raw_target = Path(skill_path).expanduser()
+    candidate = raw_target if raw_target.is_absolute() else repo_root / raw_target
+    try:
+        root = candidate.resolve()
+        root.relative_to(repo_root.resolve())
+        return []
+    except ValueError:
+        pass
+    except OSError:
+        return []
+    if not root.is_dir() or (root / "SKILL.md").is_file():
+        return []
+    return sorted(path.resolve() for path in root.iterdir() if (path / "SKILL.md").is_file())
+
+
 def _normalize_skill_target_path(skill_path: str) -> tuple[Path, str]:
     """Return the directory target and normalized repo-relative path for a skill input."""
     audit_target = Path(skill_path)
@@ -3230,6 +3366,9 @@ def _resolve_doctor_target(repo_root: Path, target: str) -> tuple[dict[str, Any]
     query = target.strip()
     looks_like_path = "/" in query or query.endswith(".md") or query.startswith(".")
     if looks_like_path:
+        project_target, project_audit_target = _project_local_skill_target(repo_root, query)
+        if project_target is not None:
+            return project_target, project_audit_target
         target_path, target_path_value = _normalize_skill_target_path(query)
         requested_path_value = Path(query).as_posix()
         resolved_path, path_error = _validate_repo_relative_skill_path(repo_root, query)
@@ -7069,21 +7208,64 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
         validation_args.extend(["--level", level])
     result.data["validation_commands"] = [_skills_validation_command("audit", *validation_args)]
 
-    _, path_error = _validate_repo_relative_skill_path(repo_root, skill_path)
+    external_skill_children = _external_skill_root_children(repo_root, skill_path)
+    if external_skill_children:
+        result.data["target"] = Path(skill_path).expanduser().as_posix()
+        result.data["audit_scope"] = {
+            "classification": "external_project_skill_root",
+            "repo_coupled_gates": False,
+            "child_count": len(external_skill_children),
+        }
+        child_results: list[dict[str, Any]] = []
+        failed_children: list[str] = []
+        for child in external_skill_children:
+            child_result = audit_skill(repo_root, child.as_posix(), level=level)
+            child_errors = [getattr(error, "__dict__", error) for error in child_result.errors]
+            child_results.append({
+                "target": child.as_posix(),
+                "status": child_result.status,
+                "audit_scope": child_result.data.get("audit_scope"),
+                "errors": child_errors,
+            })
+            if child_result.status != "success":
+                failed_children.append(child.as_posix())
+        result.data["children"] = child_results
+        if failed_children:
+            result.status = "error"
+            result.errors.append(ErrorObject(
+                code="ERR_VALIDATION",
+                message=(
+                    f"External skill root audit failed for {len(failed_children)} "
+                    f"of {len(external_skill_children)} child skills."
+                ),
+                fix_suggestion="Inspect data.children for failing child skill audits.",
+            ))
+        else:
+            result.status = "success"
+        return result
+
+    resolved_skill_path, external_project_skill, path_error = _resolve_audit_skill_path(repo_root, skill_path)
     if path_error:
         return path_error
 
-    audit_target, audit_target_path = _normalize_skill_target_path(skill_path)
+    audit_target, audit_target_path = _normalize_skill_target_path(
+        resolved_skill_path.as_posix() if external_project_skill and resolved_skill_path else skill_path
+    )
+    result.data["target"] = audit_target_path
+    result.data["audit_scope"] = {
+        "classification": "external_project_skill" if external_project_skill else "foundry_repo_skill",
+        "repo_coupled_gates": not external_project_skill,
+    }
 
     python = _get_python_command(["pyyaml", "jsonschema"])
 
-    diag_cmd = python + ["Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py", skill_path]
+    diag_cmd = python + ["Infrastructure/scripts/lifecycle-and-sync/diagnose_skill.py", audit_target_path]
     audit_env = _subprocess_env_with_uv_cache()
 
     diag_proc = subprocess.run(diag_cmd, cwd=str(repo_root), capture_output=True, text=True, env=audit_env)
     result.data["diagnostics"] = {"exit_code": diag_proc.returncode, "stdout": diag_proc.stdout, "stderr": diag_proc.stderr}
 
-    is_skill_factory_system_overlay = audit_target_path in {
+    is_skill_factory_system_overlay = not external_project_skill and audit_target_path in {
         "skills-system/skill-creator",
         "skills-system/skill-installer",
     }
@@ -7130,27 +7312,33 @@ def audit_skill(repo_root: Path, skill_path: str, level: str = "compat") -> Call
             result.errors.append(ErrorObject(code="ERR_VALIDATION", message="Security gate failed."))
             return result
 
-        # Family benchmarks validation
-        family_cmd = python + ["Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py", "--skill", audit_target_path]
-        family_proc = subprocess.run(family_cmd, cwd=str(repo_root), capture_output=True, text=True, env=audit_env)
-        result.data["family_benchmarks"] = {"exit_code": family_proc.returncode, "stdout": family_proc.stdout, "stderr": family_proc.stderr}
-        if family_proc.returncode != 0:
-            summary = _summarize_family_benchmark_failure(family_proc.stdout, family_proc.stderr)
-            message = "Family benchmarks validation failed."
-            if summary:
-                message = f"{message} First failures: {summary}"
-            quoted_skill_path = shlex.quote(audit_target_path)
+        if external_project_skill:
+            result.data["family_benchmarks"] = {
+                "status": "skipped_external_project_skill",
+                "reason": "Family benchmark validation is foundry-repo-relative; owner repo receipts must prove external release readiness.",
+            }
+        else:
+            # Family benchmarks validation
+            family_cmd = python + ["Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py", "--skill", audit_target_path]
+            family_proc = subprocess.run(family_cmd, cwd=str(repo_root), capture_output=True, text=True, env=audit_env)
+            result.data["family_benchmarks"] = {"exit_code": family_proc.returncode, "stdout": family_proc.stdout, "stderr": family_proc.stderr}
+            if family_proc.returncode != 0:
+                summary = _summarize_family_benchmark_failure(family_proc.stdout, family_proc.stderr)
+                message = "Family benchmarks validation failed."
+                if summary:
+                    message = f"{message} First failures: {summary}"
+                quoted_skill_path = shlex.quote(audit_target_path)
 
-            result.status = "error"
-            result.errors.append(ErrorObject(
-                code="ERR_VALIDATION",
-                message=message,
-                fix_suggestion=(
-                    "Inspect data.family_benchmarks for full output, or run: "
-                    f"mise exec -- uv run --python 3.12 --with pyyaml --with jsonschema python Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py --skill {quoted_skill_path} --format text"
-                ),
-            ))
-            return result
+                result.status = "error"
+                result.errors.append(ErrorObject(
+                    code="ERR_VALIDATION",
+                    message=message,
+                    fix_suggestion=(
+                        "Inspect data.family_benchmarks for full output, or run: "
+                        f"mise exec -- uv run --python 3.12 --with pyyaml --with jsonschema python Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py --skill {quoted_skill_path} --format text"
+                    ),
+                ))
+                return result
 
         # OpenClaw skill guard
         openclaw_script = _resolve_skill_builder_script(repo_root, "openclaw_skill_guard")

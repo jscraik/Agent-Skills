@@ -139,7 +139,7 @@ class TestAskCLI(unittest.TestCase):
                 "--robot",
             ]
 
-            result = _run_cli(cmd)
+            result = _run_cli(cmd, cwd=Path(__file__).resolve().parents[2])
 
         self.assertEqual(result.returncode, 0, f"yaml-inspect output: {result.stdout}\nstderr: {result.stderr}")
         output = json.loads(result.stdout)
@@ -4223,7 +4223,7 @@ class TestAskCLI(unittest.TestCase):
         try:
             os.environ["SYNC_SKILLS_PROJECTION_MODE"] = "flat"
             cmd = ["python3", "Infrastructure/bin/ask", "runtime", "surface", "--json"]
-            result = _run_cli(cmd)
+            result = _run_cli(cmd, cwd=Path(__file__).resolve().parents[2])
 
             self.assertEqual(result.returncode, 0, result.stderr)
             output = json.loads(result.stdout)
@@ -4929,6 +4929,72 @@ class TestAskCLI(unittest.TestCase):
                 "Plugins/skill-factory/skills/code_quality_review/skill-builder --json --robot"
             ],
         )
+
+    def test_skills_audit_accepts_explicit_external_project_skill(self):
+        """Verify Skill Factory audit can inspect project-local skills outside the foundry."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = Path(temp_dir) / "x-writer" / ".codex" / "skills" / "draft-helper"
+            skill_dir.mkdir(parents=True)
+            (skill_dir / "SKILL.md").write_text(
+                "---\n"
+                "name: draft-helper\n"
+                "description: Use when improving a project-local writing workflow.\n"
+                "---\n\n"
+                "# Draft Helper\n",
+                encoding="utf-8",
+            )
+            cmd = [
+                sys.executable,
+                str(Path(__file__).resolve().parents[1] / "bin" / "ask"),
+                "skills",
+                "audit",
+                str(skill_dir),
+                "--json",
+                "--robot",
+            ]
+            result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        self.assertEqual(output["data"]["audit_scope"]["classification"], "external_project_skill")
+        self.assertFalse(output["data"]["audit_scope"]["repo_coupled_gates"])
+        diagnostics = output["data"]["diagnostics"]
+        self.assertEqual(diagnostics["exit_code"], 0)
+        self.assertIn("external project skill", diagnostics["stdout"])
+
+    def test_skills_audit_accepts_explicit_external_project_skill_root(self):
+        """Verify Skill Factory audit can inspect a project-local .codex/skills root."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skills_root = Path(temp_dir) / "x-writer" / ".codex" / "skills"
+            for name in ("draft-helper", "style-check"):
+                skill_dir = skills_root / name
+                skill_dir.mkdir(parents=True)
+                (skill_dir / "SKILL.md").write_text(
+                    "---\n"
+                    f"name: {name}\n"
+                    "description: Use when improving a project-local writing workflow.\n"
+                    "---\n\n"
+                    f"# {name}\n",
+                    encoding="utf-8",
+                )
+            cmd = [
+                sys.executable,
+                str(Path(__file__).resolve().parents[1] / "bin" / "ask"),
+                "skills",
+                "audit",
+                str(skills_root),
+                "--json",
+                "--robot",
+            ]
+            result = _run_cli(cmd)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = json.loads(result.stdout)
+        self.assertEqual(output["status"], "success")
+        self.assertEqual(output["data"]["audit_scope"]["classification"], "external_project_skill_root")
+        self.assertEqual(output["data"]["audit_scope"]["child_count"], 2)
+        self.assertEqual([child["status"] for child in output["data"]["children"]], ["success", "success"])
 
     def test_skills_audit_human_output_exposes_validation(self):
         """Verify ask skills audit renders its validation command."""
