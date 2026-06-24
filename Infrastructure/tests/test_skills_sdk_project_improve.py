@@ -102,6 +102,56 @@ def _project_with_codex_skill(tmp_path: Path) -> tuple[Path, Path]:
     return project_root, skill_root / "SKILL.md"
 
 
+def _seed_registry_with_sensitive_summary(registry_path: Path) -> None:
+    registry_path.parent.mkdir(parents=True)
+    registry_path.write_text(
+        json.dumps(
+            {
+                "schema_version": "skills-sdk.project-skill-registry.v1",
+                "project": {"id": "x-writer-canary", "manifest": "skills-sdk.json"},
+                "summary": {
+                    "api_token": "do-not-store",
+                    "nested": {"credential": "do-not-store-either"},
+                },
+                "skills": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+
+def _assert_apply_receipt_evidence(
+    test_case: unittest.TestCase,
+    *,
+    payload: dict,
+    project_root: Path,
+    skill_md: Path,
+    before_source: str,
+    registry_path: Path,
+) -> None:
+    improve_payload = payload["data"]["skills_sdk_project_improve"]
+    receipt = improve_payload["receipt"]
+    events_path = project_root / ".harness/skills/events.jsonl"
+    receipt_path = project_root / receipt["receipt_path"]
+    registry = json.loads(registry_path.read_text(encoding="utf-8"))
+    events = [json.loads(line) for line in events_path.read_text(encoding="utf-8").splitlines()]
+
+    test_case.assertEqual(payload["status"], "success")
+    test_case.assertEqual(receipt["status"], "pass")
+    test_case.assertTrue(receipt["mutation_performed"])
+    test_case.assertFalse(receipt["source_mutation_performed"])
+    test_case.assertEqual(skill_md.read_text(encoding="utf-8"), before_source)
+    test_case.assertTrue(receipt_path.is_file())
+    test_case.assertEqual(registry["summary"]["last_improvement_receipt"], receipt["receipt_path"])
+    test_case.assertEqual(registry["summary"]["api_token"], "[redacted]")
+    test_case.assertEqual(registry["summary"]["nested"]["credential"], "[redacted]")
+    test_case.assertEqual(registry["skills"][0]["handle"], "x-content-writer")
+    test_case.assertEqual(registry["skills"][0]["evidence"]["last_improvement_receipt"], receipt["receipt_path"])
+    test_case.assertEqual(events[-1]["event"], "project_skill_improvement_validated")
+    test_case.assertEqual(events[-1]["source_edit_status"], "not_requested")
+    test_case.assertFalse(improve_payload["source_mutation_performed"])
+
+
 class TestSkillsSdkProjectImprove(unittest.TestCase):
     def test_preview_does_not_write_owner_repo_evidence(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -133,6 +183,8 @@ class TestSkillsSdkProjectImprove(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             project_root, skill_md = _project_with_codex_skill(Path(tmp))
             before_source = skill_md.read_text(encoding="utf-8")
+            registry_path = project_root / ".harness/skills/registry.json"
+            _seed_registry_with_sensitive_summary(registry_path)
 
             payload = _run_json_command(
                 sys.executable,
@@ -146,26 +198,14 @@ class TestSkillsSdkProjectImprove(unittest.TestCase):
                 "--json",
                 "--robot",
             )
-            improve_payload = payload["data"]["skills_sdk_project_improve"]
-            receipt = improve_payload["receipt"]
-            registry_path = project_root / ".harness/skills/registry.json"
-            events_path = project_root / ".harness/skills/events.jsonl"
-            receipt_path = project_root / receipt["receipt_path"]
-            registry = json.loads(registry_path.read_text(encoding="utf-8"))
-            events = [json.loads(line) for line in events_path.read_text(encoding="utf-8").splitlines()]
-
-            self.assertEqual(payload["status"], "success")
-            self.assertEqual(receipt["status"], "pass")
-            self.assertTrue(receipt["mutation_performed"])
-            self.assertFalse(receipt["source_mutation_performed"])
-            self.assertEqual(skill_md.read_text(encoding="utf-8"), before_source)
-            self.assertTrue(receipt_path.is_file())
-            self.assertEqual(registry["summary"]["last_improvement_receipt"], receipt["receipt_path"])
-            self.assertEqual(registry["skills"][0]["handle"], "x-content-writer")
-            self.assertEqual(registry["skills"][0]["evidence"]["last_improvement_receipt"], receipt["receipt_path"])
-            self.assertEqual(events[-1]["event"], "project_skill_improvement_validated")
-            self.assertEqual(events[-1]["source_edit_status"], "not_requested")
-            self.assertFalse(improve_payload["source_mutation_performed"])
+            _assert_apply_receipt_evidence(
+                self,
+                payload=payload,
+                project_root=project_root,
+                skill_md=skill_md,
+                before_source=before_source,
+                registry_path=registry_path,
+            )
 
     def test_preview_blocks_project_evidence_paths_outside_project_root(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

@@ -6502,17 +6502,47 @@ def _sdk_improve_update_registry(
         summary["last_improvement_at"] = timestamp
 
 
+_SDK_IMPROVE_SENSITIVE_KEY_MARKERS = (
+    "api_key",
+    "apikey",
+    "auth",
+    "cookie",
+    "credential",
+    "password",
+    "secret",
+    "token",
+)
+
+
+def _sdk_improve_redact_sensitive_values(value: Any) -> Any:
+    if isinstance(value, dict):
+        redacted: dict[str, Any] = {}
+        for key, item in value.items():
+            key_text = str(key)
+            lowered = key_text.lower()
+            if any(marker in lowered for marker in _SDK_IMPROVE_SENSITIVE_KEY_MARKERS):
+                redacted[key_text] = "[redacted]"
+            else:
+                redacted[key_text] = _sdk_improve_redact_sensitive_values(item)
+        return redacted
+    if isinstance(value, list):
+        return [_sdk_improve_redact_sensitive_values(item) for item in value]
+    return value
+
+
 def _sdk_improve_atomic_write_json(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp_path = path.with_name(f".{path.name}.{os.getpid()}.tmp")
-    tmp_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    safe_payload = _sdk_improve_redact_sensitive_values(payload)
+    tmp_path.write_text(json.dumps(safe_payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     os.replace(tmp_path, path)
 
 
 def _sdk_improve_append_event(path: Path, event: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
+    safe_event = _sdk_improve_redact_sensitive_values(event)
     with path.open("a", encoding="utf-8") as handle:
-        handle.write(json.dumps(event, sort_keys=True, separators=(",", ":")) + "\n")
+        handle.write(json.dumps(safe_event, sort_keys=True, separators=(",", ":")) + "\n")
 
 
 def _sdk_improve_error(
