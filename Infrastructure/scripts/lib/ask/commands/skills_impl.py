@@ -6534,8 +6534,10 @@ def _sdk_improve_atomic_write_json(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp_path = path.with_name(f".{path.name}.{os.getpid()}.tmp")
     safe_payload = _sdk_improve_redact_sensitive_values(payload)
-    # lgtm[py/clear-text-storage-sensitive-data] CodeQL cannot see the recursive key-based redaction above.
-    tmp_path.write_text(json.dumps(safe_payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    tmp_path.write_text(  # codeql[py/clear-text-storage-sensitive-data]
+        json.dumps(safe_payload, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
     os.replace(tmp_path, path)
 
 
@@ -6543,8 +6545,9 @@ def _sdk_improve_append_event(path: Path, event: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     safe_event = _sdk_improve_redact_sensitive_values(event)
     with path.open("a", encoding="utf-8") as handle:
-        # lgtm[py/clear-text-storage-sensitive-data] CodeQL cannot see the recursive key-based redaction above.
-        handle.write(json.dumps(safe_event, sort_keys=True, separators=(",", ":")) + "\n")
+        handle.write(  # codeql[py/clear-text-storage-sensitive-data]
+            json.dumps(safe_event, sort_keys=True, separators=(",", ":")) + "\n"
+        )
 
 
 def _sdk_improve_error(
