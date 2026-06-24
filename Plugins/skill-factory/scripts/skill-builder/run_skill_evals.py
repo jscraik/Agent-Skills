@@ -2844,7 +2844,7 @@ def _classify_runner_blocker(
         runner_text = "\n".join([output_text or "", stdout_text or ""])
         return "timeout_partial_output" if runner_text.strip() else "timeout_no_output"
 
-    runtime_markers = [
+    strong_runtime_markers = [
         "sandbox_apply: operation not permitted",
         "host_execution_untrusted",
         "sandbox-exec",
@@ -2856,11 +2856,20 @@ def _classify_runner_blocker(
         "you have hit your usage limit",
         "usage limit for",
         "switch to another model",
-        "try again at",
-        "start a new thread",
         "blocked_runtime",
     ]
-    if any(marker in low for marker in runtime_markers):
+    weak_runtime_markers = ["try again at", "start a new thread"]
+    usage_context_markers = [
+        "usage limit",
+        "model is at capacity",
+        "selected model is at capacity",
+        "context window",
+    ]
+    if any(marker in low for marker in strong_runtime_markers):
+        return "blocked_runtime"
+    if any(marker in low for marker in weak_runtime_markers) and any(
+        marker in low for marker in usage_context_markers
+    ):
         return "blocked_runtime"
 
     user_input_markers = [
