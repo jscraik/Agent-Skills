@@ -6425,6 +6425,7 @@ def _sdk_improve_update_registry(
     source_root: str,
     hardening_receipt: dict[str, Any],
     eval_receipt: dict[str, Any] | None,
+    improvement_status: str,
     receipt_path: str,
     timestamp: str,
     source_edit_status: str,
@@ -6467,10 +6468,10 @@ def _sdk_improve_update_registry(
         "kind": "canonical_project_source",
     }
     entry["lifecycle"] = {
-        "state": "validated" if hardening_receipt.get("status") == "pass" else "blocked",
+        "state": "validated" if improvement_status == "pass" else "blocked",
         "decision": (
             "improve_validated_no_source_patch"
-            if hardening_receipt.get("status") == "pass" and source_edit_status == "not_requested"
+            if improvement_status == "pass" and source_edit_status == "not_requested"
             else "improve_blocked"
         ),
         "updated_at": timestamp,
@@ -6823,6 +6824,7 @@ def skills_sdk_project_improve(
             source_root=declared_root,
             hardening_receipt=hardening_receipt,
             eval_receipt=eval_receipt,
+            improvement_status=status,
             receipt_path=receipt_relative,
             timestamp=timestamp,
             source_edit_status=source_edit["status"],

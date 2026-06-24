@@ -10,6 +10,9 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
+
+from ask.commands.skills_impl import _sdk_improve_update_registry  # noqa: E402
 
 
 def _command_env() -> dict[str, str]:
@@ -262,6 +265,29 @@ class TestSkillsSdkProjectImprove(unittest.TestCase):
             self.assertEqual(receipt["status"], "blocked")
             self.assertIn("invalid_project_registry", receipt["blockers"])
             self.assertEqual(registry_path.read_text(encoding="utf-8"), "{not-json")
+
+    def test_registry_marks_eval_blocked_improvement_as_blocked(self) -> None:
+        registry: dict = {"skills": []}
+
+        _sdk_improve_update_registry(
+            registry,
+            project_id="x-writer-canary",
+            handle="x-content-writer",
+            source_path=".codex/skills/x-content-writer/SKILL.md",
+            source_root=".codex/skills",
+            hardening_receipt={"status": "pass", "package_digest": "sha256:" + "a" * 64, "file_count": 2},
+            eval_receipt={"status": "blocked", "runner": "internal", "case_count": 1, "passed_count": 0, "failed_count": 1},
+            improvement_status="blocked",
+            receipt_path=".harness/skills/receipts/improvements/x-content-writer.json",
+            timestamp="2026-06-24T00:00:00Z",
+            source_edit_status="not_requested",
+        )
+
+        entry = registry["skills"][0]
+        self.assertEqual(entry["lifecycle"]["state"], "blocked")
+        self.assertEqual(entry["lifecycle"]["decision"], "improve_blocked")
+        self.assertEqual(entry["package"]["hardening_status"], "pass")
+        self.assertEqual(entry["evals"]["status"], "blocked")
 
 
 if __name__ == "__main__":
