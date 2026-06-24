@@ -234,6 +234,15 @@ cases:
     given: A maintainer asks the agent to sweep open PRs until they are green.
     should: The agent reports heartbeat status, blocks unsafe merge paths, and proves latest-head checks.
     prompt: Sweep this repo's PRs until green, merged, and cleaned up.
+  - id: create-lesson
+    name: Create lesson
+    category: edge
+    should_trigger: true
+    realistic: true
+    unit: lesson creation
+    given: A learner asks the agent to create a first lesson from a clear mission and level.
+    should: The agent creates a compact lesson artifact with source notes and retrieval practice.
+    prompt: Create lesson 0001 for pytest assertions from my current mission.
   - id: weak
     name: Weak placeholder
     category: edge
@@ -260,6 +269,7 @@ cases:
         self.assertEqual(len(weak_findings), 1)
         self.assertIn("weak", weak_findings[0].evidence)
         self.assertNotIn("pr-sweep", weak_findings[0].evidence)
+        self.assertNotIn("create-lesson", weak_findings[0].evidence)
 
 
 if __name__ == "__main__":

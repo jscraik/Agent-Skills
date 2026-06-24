@@ -227,6 +227,7 @@ __all__ = [
     "skills_sdk_install_preview",
     "skills_sdk_intake_inspect",
     "skills_sdk_intake_review",
+    "skills_sdk_start",
     "skills_sdk_docs_verify",
     "skills_sdk_ir_build",
     "skills_sdk_package_build",
@@ -244,6 +245,7 @@ __all__ = [
     "skills_sdk_eval_scorer_quality",
     "skills_sdk_eval_scorer_calibration",
     "skills_sdk_eval_tessl_score",
+    "skills_sdk_eval_tessl_local_proof",
     "skills_sdk_eval_regression_plan",
     "skills_sdk_eval_handoff_readiness",
     "skills_sdk_eval_profiles_preview",
@@ -4200,6 +4202,138 @@ def skills_sdk_check(
     return result
 
 
+SDK_PIPELINE_START_SCHEMA_VERSION = "skills-sdk.pipeline-start.v1"
+SDK_PIPELINE_START_SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/pipeline-start.v1.schema.json"
+
+
+def _sdk_start_target_class(target_info: dict[str, Any], ownership: dict[str, Any]) -> str:
+    if target_info.get("target_kind") == "project_local_source_path":
+        return "project_local_skill"
+    if ownership.get("owner_kind") == "plugin_skills":
+        return "plugin_owned_skill"
+    if ownership.get("owner_kind") == "repo_skills":
+        return "global_skill"
+    if ownership.get("classification") in {"generated_runtime_projection", "client_runtime_config"}:
+        return "runtime_projection"
+    if target_info.get("target_kind") == "command_handle":
+        return "global_skill"
+    return "unknown"
+
+
+def _sdk_start_command_args(target: str, project_root: str | None) -> list[str]:
+    args = ["sdk", "start", target]
+    if project_root:
+        args.extend(["--project-root", project_root])
+    return args
+
+
+def _sdk_start_mechanical_commands(target: str) -> list[str]:
+    return [
+        _skills_validation_command("audit", target, "--level", "strict"),
+        _skills_validation_command("package", "verify", target),
+    ]
+
+
+def _sdk_start_project_context(target_info: dict[str, Any], project_root: str | None) -> dict[str, Any]:
+    inferred_root = target_info.get("project_root")
+    return {
+        "provided_project_root": project_root,
+        "inferred_project_root": inferred_root,
+        "project_root": project_root or inferred_root,
+        "project_manifest": target_info.get("project_manifest"),
+        "project_source_root": target_info.get("project_source_root"),
+    }
+
+
+def _sdk_start_repo_relative_source(repo_root: Path, source_path_value: Any) -> str | None:
+    if not isinstance(source_path_value, str) or not source_path_value.strip():
+        return None
+    source_path = Path(source_path_value)
+    if not source_path.is_absolute():
+        return source_path.as_posix()
+    return _repo_relative_path(repo_root, source_path)
+
+
+def _sdk_start_lanes(mechanical_target: str) -> list[dict[str, Any]]:
+    mechanical_commands = _sdk_start_mechanical_commands(mechanical_target)
+    return [
+        {"id": "sdk_start", "status": "pass", "proves": "target classified and next command selected"},
+        {"id": "target_classification", "status": "pass", "proves": "skill lifecycle target class and scope"},
+        {
+            "id": "mechanical_validation",
+            "status": "required_not_run",
+            "commands": mechanical_commands,
+            "proves": "SKILL.md, frontmatter, layout, references, README, fixtures, and package shape",
+        },
+        {
+            "id": "scenario_quality",
+            "status": "blocked_until_mechanical_validation",
+            "command": _ask_validation_command("sdk", "eval", "scenario-quality", mechanical_target, "--preview"),
+        },
+        {"id": "oss_local_eval", "status": "blocked_until_scenario_quality"},
+        {"id": "closeout_doctor", "status": "blocked_until_oss_local_eval"},
+        {"id": "oss_cloud_eval", "status": "blocked_until_local_closeout_pass"},
+        {"id": "registry_events_update", "status": "blocked_until_closeout_allows_promotion"},
+        {"id": "runtime_doctor", "status": "blocked_until_registry_or_projection_receipt"},
+    ]
+
+
+def skills_sdk_start(repo_root: Path, target: str, project_root: str | None = None) -> CallResult:
+    """Emit the first SDK lifecycle receipt and next required command."""
+    result = CallResult()
+    result.metadata["command"] = "sdk start"
+    query = target.strip()
+    target_info, audit_target = _resolve_doctor_target(repo_root, query)
+    source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
+    source_rel = _sdk_start_repo_relative_source(repo_root, source_path_value)
+    ownership = _skill_root_ownership_for_path(source_rel, repo_root=repo_root)
+    target_class = _sdk_start_target_class(target_info, ownership)
+    mechanical_target = audit_target or query
+    source_exists = bool(target_info.get("source_exists")) if isinstance(target_info, dict) else False
+    status = "pass" if source_exists and target_class != "unknown" else "blocked"
+    blockers = [] if status == "pass" else ["missing_or_unclassified_skill_source"]
+    receipt = {
+        "schema_version": SDK_PIPELINE_START_SCHEMA_VERSION,
+        "schema_uri": SDK_PIPELINE_START_SCHEMA_URI,
+        "status": status,
+        "target": query,
+        "target_class": target_class,
+        "target_info": target_info,
+        "source_ownership": ownership,
+        "project_context": _sdk_start_project_context(target_info, project_root),
+        "current_lane": "mechanical_validation" if status == "pass" else "target_classification",
+        "lanes": _sdk_start_lanes(mechanical_target),
+        "blocked_downstream_lanes": [
+            "scenario_quality",
+            "oss_local_eval",
+            "closeout_doctor",
+            "oss_cloud_eval",
+            "registry_events_update",
+            "runtime_doctor",
+        ],
+        "blockers": blockers,
+        "what_this_proves": "The SDK classified the skill target and selected the first legal lifecycle command.",
+        "what_this_does_not_prove": "Format, layout, references, eval behavior, registry promotion, and runtime reachability have not run yet.",
+        "validation_commands": [_ask_validation_command(*_sdk_start_command_args(query, project_root))],
+    }
+    receipt["next_action"] = {
+        "lane": receipt["current_lane"],
+        "command": _sdk_start_mechanical_commands(mechanical_target)[0],
+        "why": "Mechanical validation must pass before scenario-quality, eval, registry, or runtime lanes.",
+    }
+    result.data["skills_sdk_start"] = {"status": status, "receipt": receipt, "agent_summary": receipt["next_action"]["why"]}
+    if status != "pass":
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message="Skills SDK start could not classify the target skill source.",
+                fix_suggestion=receipt["next_action"]["command"],
+            )
+        )
+    return result
+
+
 def skills_sdk_install_preview(
     repo_root: Path,
     target: str,
@@ -5458,6 +5592,709 @@ def skills_sdk_eval_tessl_score(
     return result
 
 
+def skills_sdk_eval_tessl_local_proof(
+    repo_root: Path,
+    *,
+    skill: str,
+    workspace: str,
+    execute: bool = False,
+    include_review: bool = False,
+    review_threshold: int = TESSL_REVIEW_MIN_SCORE,
+    timeout_seconds: int = 180,
+) -> CallResult:
+    """Preview or execute a temp-staged local Tessl package/install proof receipt."""
+    result = CallResult()
+    result.metadata["command"] = "sdk eval tessl-local-proof"
+    from ask.commands import evals as eval_commands  # noqa: PLC0415
+
+    receipt = eval_commands.run_tessl_local_proof(
+        repo_root,
+        skill,
+        workspace=workspace,
+        execute=execute,
+        include_review=include_review,
+        review_threshold=review_threshold,
+        timeout_seconds=timeout_seconds,
+    )
+    command_parts = [
+        "sdk",
+        "eval",
+        "tessl-local-proof",
+        "--skill",
+        skill,
+        "--workspace",
+        workspace,
+    ]
+    if execute:
+        command_parts.append("--execute")
+    else:
+        command_parts.append("--preview")
+    if include_review:
+        command_parts.append("--include-review")
+    if review_threshold != TESSL_REVIEW_MIN_SCORE:
+        command_parts.extend(["--review-threshold", str(review_threshold)])
+    if timeout_seconds != 180:
+        command_parts.extend(["--timeout-seconds", str(timeout_seconds)])
+
+    payload = {
+        "schema_version": "skills-sdk-eval-tessl-local-proof.v0",
+        "status": receipt.get("status"),
+        "ready": receipt.get("status") == "pass",
+        "skill": skill,
+        "workspace": workspace,
+        "receipt": receipt,
+        "mutation_performed": execute,
+        "validation_commands": [_ask_validation_command(*command_parts)],
+        "agent_summary": (
+            "Tessl local proof passed."
+            if receipt.get("status") == "pass"
+            else f"Tessl local proof is {receipt.get('status')} for {skill}."
+        ),
+    }
+    result.data["skills_sdk_eval_tessl_local_proof"] = payload
+    if receipt.get("status") in {"blocked", "fail"}:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION" if receipt.get("status") == "fail" else "ERR_RUNTIME",
+                message=payload["agent_summary"],
+                fix_suggestion=_ask_validation_command(
+                    "sdk",
+                    "eval",
+                    "tessl-local-proof",
+                    "--skill",
+                    skill,
+                    "--workspace",
+                    workspace,
+                    "--preview",
+                ),
+            )
+        )
+    return result
+
+
+def _sdk_plugin_first_principles_gate(kind: str, action: str) -> dict[str, Any]:
+    return {
+        "schema_version": "skills-sdk.first-principles-factory-gate.v1",
+        "desired_outcome": "Create, review, install, or register a single skill or plugin through one SDK lifecycle front door.",
+        "user_specific_constraints": [
+            "Single skills and plugins must share an SDK orchestration lane.",
+            "Factory behavior must reuse existing skill/plugin commands instead of duplicating scaffold logic.",
+            "Registry save is local registry or marketplace persistence, not remote publication.",
+        ],
+        "copied_assumption_rejected": "Do not create a second plugin factory or treat marketplace save as public registry publish.",
+        "fundamental_constraints": [
+            f"artifact_kind={kind}",
+            f"lifecycle_action={action}",
+            "external registry publication requires a separate future authority lane",
+            "apply mode may only delegate to existing bounded commands or write local registry files",
+        ],
+        "smallest_effective_mechanism": "Add an SDK facade receipt that delegates to existing skill and plugin lifecycle commands.",
+        "artifact_decision": "IMPROVE_EXISTING",
+        "rejected_alternatives": [
+            {
+                "alternative": "BUILD_PLUGIN",
+                "reason": "The capability already belongs to the SDK and factory command surfaces.",
+            },
+            {
+                "alternative": "ADD_HOOK",
+                "reason": "The missing behavior is orchestration and receipts, not runtime hook execution.",
+            },
+            {
+                "alternative": "REMOTE_PUBLISH",
+                "reason": "Remote registry publish is explicitly outside the current local SDK authority boundary.",
+            },
+        ],
+        "evidence_required": [
+            "SDK command route exists for create, review, install, and save-registry.",
+            "Preview receipts expose lower-level commands before mutation.",
+            "Apply receipts show the delegated command result or local registry write.",
+        ],
+        "validation_proof": [
+            "Focused SDK plugin lifecycle tests",
+            "CLI help smoke for ask sdk plugin",
+            "py_compile for edited command modules",
+        ],
+        "stop_or_pivot_condition": "Stop before remote registry publication, external writes, or ambiguous plugin ownership.",
+    }
+
+
+def _sdk_plugin_mode_status(apply: bool) -> str:
+    return "applied" if apply else "preview"
+
+
+def _sdk_plugin_result(
+    *,
+    command: str,
+    payload_key: str,
+    payload: dict[str, Any],
+    error_message: str | None = None,
+    fix_suggestion: str | None = None,
+) -> CallResult:
+    result = CallResult()
+    result.metadata["command"] = command
+    result.data[payload_key] = payload
+    if error_message:
+        result.status = "error"
+        result.errors.append(
+            ErrorObject(
+                code="ERR_VALIDATION",
+                message=error_message,
+                fix_suggestion=fix_suggestion,
+            )
+        )
+    return result
+
+
+def _sdk_plugin_relpath(repo_root: Path, path: Path) -> str:
+    try:
+        return path.resolve().relative_to(repo_root.resolve()).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
+def _sdk_plugin_registry_path(repo_root: Path, kind: str, registry: str | None) -> Path:
+    if registry:
+        path = Path(registry)
+        return path if path.is_absolute() else repo_root / path
+    if kind == "plugin":
+        return repo_root / "Plugins" / "marketplace.json"
+    return repo_root / ".harness" / "skills" / "registry.json"
+
+
+def _sdk_plugin_read_json_object(path: Path, default_payload: dict[str, Any]) -> dict[str, Any]:
+    if not path.exists():
+        return default_payload
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Invalid JSON at {path}: {exc}") from exc
+    if not isinstance(payload, dict):
+        raise ValueError(f"Registry JSON must be an object at {path}.")
+    return payload
+
+
+def _sdk_plugin_atomic_write_json(path: Path, payload: dict[str, Any]) -> None:
+    _sdk_improve_atomic_write_json(path, payload)
+
+
+def _sdk_plugin_save_skill_registry_receipt(
+    repo_root: Path,
+    *,
+    target: str,
+    registry: str | None,
+    name: str | None,
+    apply: bool,
+) -> dict[str, Any]:
+    registry_path = _sdk_plugin_registry_path(repo_root, "skill", registry)
+    target_info, _audit_target = _resolve_doctor_target(repo_root, target)
+    source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
+    source_path = Path(str(source_path_value)) if source_path_value else Path(target)
+    if not source_path.is_absolute():
+        source_path = repo_root / source_path
+    handle = (name or source_path.parent.name).strip()
+    source_rel = _sdk_plugin_relpath(repo_root, source_path)
+    timestamp = datetime.now(timezone.utc).isoformat()
+    entry = {
+        "skill_id": f"local:{handle}",
+        "handle": handle,
+        "scope": "local",
+        "source": {
+            "path": source_rel,
+            "root": _sdk_plugin_relpath(repo_root, source_path.parent),
+            "kind": "canonical_skill_source",
+        },
+        "lifecycle": {
+            "state": "registered",
+            "decision": "sdk_plugin_save_registry",
+            "updated_at": timestamp,
+        },
+        "evidence": {
+            "last_registry_save_command": _ask_validation_command(
+                "sdk",
+                "plugin",
+                "save-registry",
+                "--kind",
+                "skill",
+                "--target",
+                target,
+                "--apply" if apply else "--preview",
+            ),
+        },
+    }
+    receipt = {
+        "schema_version": "skills-sdk.plugin-registry-save.v1",
+        "kind": "skill",
+        "target": target,
+        "name": handle,
+        "status": _sdk_plugin_mode_status(apply),
+        "registry_path": _sdk_plugin_relpath(repo_root, registry_path),
+        "entry": entry,
+        "mutation_performed": apply,
+    }
+    if not apply:
+        return receipt
+    registry_payload = _sdk_plugin_read_json_object(
+        registry_path,
+        {
+            "schema_version": "skills-sdk.project-skill-registry.v1",
+            "project": {"id": "agent-skills-local", "manifest": "local"},
+            "summary": {},
+            "skills": [],
+        },
+    )
+    skills = registry_payload.setdefault("skills", [])
+    if not isinstance(skills, list):
+        raise ValueError(f"Registry field 'skills' must be a list at {registry_path}.")
+    replaced = False
+    for index, item in enumerate(skills):
+        if isinstance(item, dict) and (item.get("skill_id") == entry["skill_id"] or item.get("handle") == handle):
+            skills[index] = entry
+            replaced = True
+            break
+    if not replaced:
+        skills.append(entry)
+    summary = registry_payload.setdefault("summary", {})
+    if isinstance(summary, dict):
+        summary["skill_count"] = len([item for item in skills if isinstance(item, dict)])
+        summary["last_registry_save_at"] = timestamp
+        summary["last_registry_save_handle"] = handle
+    _sdk_plugin_atomic_write_json(registry_path, registry_payload)
+    receipt["registry_written"] = True
+    return receipt
+
+
+def _sdk_plugin_save_plugin_registry_receipt(
+    repo_root: Path,
+    *,
+    target: str,
+    registry: str | None,
+    name: str | None,
+    apply: bool,
+) -> dict[str, Any]:
+    registry_path = _sdk_plugin_registry_path(repo_root, "plugin", registry)
+    target_path = Path(target)
+    if not target_path.is_absolute():
+        target_path = repo_root / target_path
+    plugin_name = (name or target_path.name).strip()
+    source_rel = "./" + _sdk_plugin_relpath(repo_root, target_path)
+    entry = {
+        "name": plugin_name,
+        "category": "Productivity",
+        "policy": {
+            "authentication": "ON_INSTALL",
+            "installation": "AVAILABLE",
+            "products": ["CODEX"],
+        },
+        "source": {
+            "source": "local",
+            "path": source_rel,
+        },
+    }
+    receipt = {
+        "schema_version": "skills-sdk.plugin-registry-save.v1",
+        "kind": "plugin",
+        "target": target,
+        "name": plugin_name,
+        "status": _sdk_plugin_mode_status(apply),
+        "registry_path": _sdk_plugin_relpath(repo_root, registry_path),
+        "entry": entry,
+        "mutation_performed": apply,
+    }
+    if not apply:
+        return receipt
+    registry_payload = _sdk_plugin_read_json_object(
+        registry_path,
+        {
+            "name": "agent-skills-local",
+            "interface": {"displayName": "Local Plugins"},
+            "plugins": [],
+        },
+    )
+    plugins = registry_payload.setdefault("plugins", [])
+    if not isinstance(plugins, list):
+        raise ValueError(f"Registry field 'plugins' must be a list at {registry_path}.")
+    replaced = False
+    for index, item in enumerate(plugins):
+        if isinstance(item, dict) and item.get("name") == plugin_name:
+            plugins[index] = entry
+            replaced = True
+            break
+    if not replaced:
+        plugins.append(entry)
+    plugins.sort(key=lambda item: str(item.get("name", "")) if isinstance(item, dict) else "")
+    _sdk_plugin_atomic_write_json(registry_path, registry_payload)
+    receipt["registry_written"] = True
+    return receipt
+
+
+def skills_sdk_plugin_create(
+    repo_root: Path,
+    *,
+    kind: str,
+    name: str,
+    category: str,
+    description: str | None = None,
+    with_registry: bool = False,
+    companion_folders: list[str] | None = None,
+    apply: bool = False,
+) -> CallResult:
+    """Create or preview creation of a single skill or plugin through the SDK facade."""
+    command = _ask_validation_command(
+        "sdk",
+        "plugin",
+        "create",
+        name,
+        "--kind",
+        kind,
+        "--category",
+        category,
+        "--apply" if apply else "--preview",
+    )
+    if kind == "skill" and not description:
+        payload = {
+            "schema_version": "skills-sdk-plugin-create.v0",
+            "status": "blocked",
+            "kind": kind,
+            "name": name,
+            "mutation_performed": False,
+            "first_principles_gate": _sdk_plugin_first_principles_gate(kind, "create"),
+            "validation_commands": [command],
+            "agent_summary": "Skill creation requires --description so the routing contract is not blank.",
+        }
+        return _sdk_plugin_result(
+            command="sdk plugin create",
+            payload_key="skills_sdk_plugin_create",
+            payload=payload,
+            error_message=payload["agent_summary"],
+            fix_suggestion="Add --description before applying or previewing a skill scaffold.",
+        )
+
+    if not apply:
+        lower_command = (
+            _skills_validation_command("init", name, "--category", category, "--description", description or "")
+            if kind == "skill"
+            else _ask_validation_command("plugins", "create", name, "--category", category)
+        )
+        if kind == "plugin" and with_registry:
+            lower_command = f"{lower_command} --with-marketplace"
+        payload = {
+            "schema_version": "skills-sdk-plugin-create.v0",
+            "status": "preview",
+            "kind": kind,
+            "name": name,
+            "category": category,
+            "with_registry": with_registry,
+            "planned_commands": [lower_command, command],
+            "first_principles_gate": _sdk_plugin_first_principles_gate(kind, "create"),
+            "mutation_performed": False,
+            "agent_summary": f"SDK plugin create preview planned {kind} creation without writes.",
+        }
+        return _sdk_plugin_result(command="sdk plugin create", payload_key="skills_sdk_plugin_create", payload=payload)
+
+    if kind == "skill":
+        delegated = init_skill(repo_root, name=name, category=category, description=description or "")
+        artifact_target = f"Skills/{category}/{name}" if not category.startswith("Skills/") else f"{category}/{name}"
+    else:
+        from ask.commands.plugins import init_plugin  # noqa: PLC0415
+
+        delegated = init_plugin(
+            repo_root,
+            name=name,
+            category=category,
+            with_marketplace=with_registry,
+            companion_folders=companion_folders or [],
+            action="create",
+        )
+        artifact_target = str(delegated.data.get("plugin_root") or f"Plugins/{category}/{name}")
+    registry_receipt = None
+    if with_registry and delegated.status == "success":
+        try:
+            registry_receipt = (
+                _sdk_plugin_save_skill_registry_receipt(
+                    repo_root,
+                    target=f"{artifact_target}/SKILL.md",
+                    registry=None,
+                    name=name,
+                    apply=True,
+                )
+                if kind == "skill"
+                else _sdk_plugin_save_plugin_registry_receipt(
+                    repo_root,
+                    target=artifact_target,
+                    registry=None,
+                    name=name,
+                    apply=True,
+                )
+            )
+        except ValueError as exc:
+            delegated.status = "error"
+            delegated.errors.append(
+                ErrorObject(
+                    code="ERR_VALIDATION",
+                    message=str(exc),
+                    fix_suggestion="Fix the local registry JSON before retrying registry save.",
+                )
+            )
+    payload = {
+        "schema_version": "skills-sdk-plugin-create.v0",
+        "status": "applied" if delegated.status == "success" else "blocked",
+        "kind": kind,
+        "name": name,
+        "category": category,
+        "with_registry": with_registry,
+        "delegated_command_status": delegated.status,
+        "delegated_data": delegated.data,
+        "registry_receipt": registry_receipt,
+        "first_principles_gate": _sdk_plugin_first_principles_gate(kind, "create"),
+        "mutation_performed": True,
+        "validation_commands": [command],
+        "agent_summary": f"SDK plugin create delegated {kind} creation through the bounded factory command.",
+    }
+    result = _sdk_plugin_result(command="sdk plugin create", payload_key="skills_sdk_plugin_create", payload=payload)
+    result.status = delegated.status
+    result.errors.extend(delegated.errors)
+    return result
+
+
+def skills_sdk_plugin_review(
+    repo_root: Path,
+    *,
+    kind: str,
+    target: str,
+    strict: bool = False,
+    execute: bool = False,
+) -> CallResult:
+    """Review or preview review of a single skill or plugin through SDK guardrails."""
+    command = _ask_validation_command(
+        "sdk",
+        "plugin",
+        "review",
+        target,
+        "--kind",
+        kind,
+        "--execute" if execute else "--preview",
+    )
+    planned = (
+        [_ask_validation_command("sdk", "check", target, "--strict" if strict else "")]
+        if kind == "skill"
+        else [_ask_validation_command("plugins", "harden", target)]
+    )
+    planned = [item.strip() for item in planned]
+    if not execute:
+        payload = {
+            "schema_version": "skills-sdk-plugin-review.v0",
+            "status": "preview",
+            "kind": kind,
+            "target": target,
+            "planned_commands": planned,
+            "first_principles_gate": _sdk_plugin_first_principles_gate(kind, "review"),
+            "mutation_performed": False,
+            "agent_summary": f"SDK plugin review preview planned {kind} guardrails without running checks.",
+        }
+        return _sdk_plugin_result(command="sdk plugin review", payload_key="skills_sdk_plugin_review", payload=payload)
+    if kind == "skill":
+        delegated = skills_sdk_check(repo_root, target=target, strict=strict, codex_parity=False)
+    else:
+        from ask.commands.plugins import harden_plugin  # noqa: PLC0415
+
+        delegated = harden_plugin(repo_root, plugin_path=target, require_marketplace=strict)
+    payload = {
+        "schema_version": "skills-sdk-plugin-review.v0",
+        "status": "passed" if delegated.status == "success" else "blocked",
+        "kind": kind,
+        "target": target,
+        "delegated_command_status": delegated.status,
+        "delegated_data": delegated.data,
+        "first_principles_gate": _sdk_plugin_first_principles_gate(kind, "review"),
+        "mutation_performed": False,
+        "validation_commands": [command],
+        "agent_summary": f"SDK plugin review executed bounded {kind} checks.",
+    }
+    result = _sdk_plugin_result(command="sdk plugin review", payload_key="skills_sdk_plugin_review", payload=payload)
+    result.status = delegated.status
+    result.errors.extend(delegated.errors)
+    return result
+
+
+def skills_sdk_plugin_install(
+    repo_root: Path,
+    *,
+    kind: str,
+    target: str | None = None,
+    project_root: str | None = None,
+    scope: str = "project",
+    url: str | None = None,
+    plugin_path: str | None = None,
+    name: str | None = None,
+    ref: str | None = None,
+    dest: str = "Plugins/third-party",
+    validation_level: str = "compat",
+    allow_untrusted_source: bool = False,
+    allow_unpinned_ref: bool = False,
+    sync_profile: bool = False,
+    require_desktop_loadable: bool = False,
+    apply: bool = False,
+) -> CallResult:
+    """Install or preview install of a single skill or plugin through SDK guardrails."""
+    command = _ask_validation_command(
+        "sdk",
+        "plugin",
+        "install",
+        "--kind",
+        kind,
+        "--apply" if apply else "--preview",
+    )
+    if kind == "skill":
+        if not target:
+            payload = {
+                "schema_version": "skills-sdk-plugin-install.v0",
+                "status": "blocked",
+                "kind": kind,
+                "mutation_performed": False,
+                "validation_commands": [command],
+                "first_principles_gate": _sdk_plugin_first_principles_gate(kind, "install"),
+                "agent_summary": "Skill install requires --target.",
+            }
+            return _sdk_plugin_result(
+                command="sdk plugin install",
+                payload_key="skills_sdk_plugin_install",
+                payload=payload,
+                error_message=payload["agent_summary"],
+                fix_suggestion="Pass --target <skill-handle-or-path>.",
+            )
+        delegated = (
+            skills_sdk_project_install(repo_root, target=target, project_root=project_root, scope=scope)
+            if apply
+            else skills_sdk_install_preview(repo_root, target=target, scope=scope)
+        )
+    else:
+        if not url or not plugin_path:
+            payload = {
+                "schema_version": "skills-sdk-plugin-install.v0",
+                "status": "blocked",
+                "kind": kind,
+                "mutation_performed": False,
+                "validation_commands": [command],
+                "first_principles_gate": _sdk_plugin_first_principles_gate(kind, "install"),
+                "agent_summary": "Plugin install requires --url and --path.",
+            }
+            return _sdk_plugin_result(
+                command="sdk plugin install",
+                payload_key="skills_sdk_plugin_install",
+                payload=payload,
+                error_message=payload["agent_summary"],
+                fix_suggestion="Pass --url <repo-url> --path <plugin-path>.",
+            )
+        from ask.commands.plugins import install_plugin  # noqa: PLC0415
+
+        delegated = install_plugin(
+            repo_root,
+            url=url,
+            plugin_path=plugin_path,
+            name=name,
+            ref=ref,
+            dest=dest,
+            validation_level=validation_level,
+            allow_untrusted_source=allow_untrusted_source,
+            allow_unpinned_ref=allow_unpinned_ref,
+            sync_profile=sync_profile,
+            require_desktop_loadable=require_desktop_loadable,
+            dry_run=not apply,
+            action="install",
+        )
+    payload = {
+        "schema_version": "skills-sdk-plugin-install.v0",
+        "status": "applied" if apply and delegated.status == "success" else ("preview" if not apply else "blocked"),
+        "kind": kind,
+        "target": target,
+        "delegated_command_status": delegated.status,
+        "delegated_data": delegated.data,
+        "first_principles_gate": _sdk_plugin_first_principles_gate(kind, "install"),
+        "mutation_performed": apply,
+        "validation_commands": [command],
+        "agent_summary": f"SDK plugin install {'applied' if apply else 'previewed'} {kind} install through bounded lifecycle commands.",
+    }
+    result = _sdk_plugin_result(command="sdk plugin install", payload_key="skills_sdk_plugin_install", payload=payload)
+    result.status = delegated.status
+    result.errors.extend(delegated.errors)
+    return result
+
+
+def skills_sdk_plugin_save_registry(
+    repo_root: Path,
+    *,
+    kind: str,
+    target: str,
+    registry: str | None = None,
+    name: str | None = None,
+    apply: bool = False,
+) -> CallResult:
+    """Save or preview saving a single skill or plugin in the local SDK registry/marketplace."""
+    command = _ask_validation_command(
+        "sdk",
+        "plugin",
+        "save-registry",
+        "--kind",
+        kind,
+        "--target",
+        target,
+        "--apply" if apply else "--preview",
+    )
+    try:
+        receipt = (
+            _sdk_plugin_save_skill_registry_receipt(
+                repo_root,
+                target=target,
+                registry=registry,
+                name=name,
+                apply=apply,
+            )
+            if kind == "skill"
+            else _sdk_plugin_save_plugin_registry_receipt(
+                repo_root,
+                target=target,
+                registry=registry,
+                name=name,
+                apply=apply,
+            )
+        )
+    except (OSError, ValueError) as exc:
+        payload = {
+            "schema_version": "skills-sdk-plugin-save-registry.v0",
+            "status": "blocked",
+            "kind": kind,
+            "target": target,
+            "receipt": None,
+            "mutation_performed": False,
+            "validation_commands": [command],
+            "first_principles_gate": _sdk_plugin_first_principles_gate(kind, "save-registry"),
+            "agent_summary": f"SDK plugin registry save is blocked: {exc}",
+        }
+        return _sdk_plugin_result(
+            command="sdk plugin save-registry",
+            payload_key="skills_sdk_plugin_save_registry",
+            payload=payload,
+            error_message=payload["agent_summary"],
+            fix_suggestion="Fix the local registry path or JSON shape before retrying.",
+        )
+    payload = {
+        "schema_version": "skills-sdk-plugin-save-registry.v0",
+        "status": receipt["status"],
+        "kind": kind,
+        "target": target,
+        "receipt": receipt,
+        "remote_publish_performed": False,
+        "mutation_performed": apply,
+        "validation_commands": [command],
+        "first_principles_gate": _sdk_plugin_first_principles_gate(kind, "save-registry"),
+        "agent_summary": (
+            f"SDK plugin registry save {'wrote' if apply else 'previewed'} local {kind} registry state; remote publish was not performed."
+        ),
+    }
+    return _sdk_plugin_result(command="sdk plugin save-registry", payload_key="skills_sdk_plugin_save_registry", payload=payload)
+
+
 def skills_sdk_eval_regression_plan(
     repo_root: Path,
     *,
@@ -6082,6 +6919,12 @@ def _skills_sdk_internal_eval_receipt_counts(
     scorecard_path = eval_commands._scorecard_path_from_output(repo_root, raw_output)  # noqa: SLF001
     scorecard = eval_commands._read_scorecard(scorecard_path)  # noqa: SLF001
     quality_gates = _internal_scorecard_quality_gates(scorecard)
+    closeout = internal.data.get("eval_closeout")
+    closeout_validation = (
+        eval_commands.validate_eval_closeout_payload(closeout)
+        if isinstance(closeout, dict) and hasattr(eval_commands, "validate_eval_closeout_payload")
+        else None
+    )
     quality_blockers = (
         [f"quality_gate_failed:{item}" for item in quality_gates["failed_assertions"]]
         if quality_gates and quality_gates["failed_assertions"]
@@ -6110,22 +6953,97 @@ def _skills_sdk_internal_eval_receipt_counts(
             "passed_count": len(cases) - failed_count,
             "failed_count": failed_count,
             "quality_gates": quality_gates,
+            "closeout_validation": closeout_validation,
             "cases": cases,
             "blockers": blockers,
         }
 
+    if isinstance(closeout, dict):
+        closeout_status = str(closeout.get("status") or status)
+        closeout_cases = closeout.get("cases")
+        cases = []
+        if isinstance(closeout_cases, list):
+            for index, raw_case in enumerate(closeout_cases, start=1):
+                if not isinstance(raw_case, dict):
+                    continue
+                case_id = str(raw_case.get("id") or f"case-{index}")
+                case_status = str(raw_case.get("status") or "blocked")
+                actual = case_status
+                cases.append(
+                    {
+                        "case_id": case_id,
+                        "status": "pass" if case_status == "pass" else "fail",
+                        "oracle": "eval_closeout",
+                        "expected": "pass",
+                        "actual": actual,
+                    }
+                )
+        closeout_blockers = list(fallback_blockers + quality_blockers)
+        if isinstance(closeout_validation, dict) and closeout_validation.get("status") != "pass":
+            for blocker in closeout_validation.get("blockers") or []:
+                if isinstance(blocker, dict):
+                    closeout_blockers.append(f"closeout_validation:{blocker.get('id')}")
+        blocker_class = closeout.get("blocker_class")
+        if blocker_class:
+            closeout_blockers.append(str(blocker_class))
+        for raw_case in closeout_cases if isinstance(closeout_cases, list) else []:
+            if not isinstance(raw_case, dict):
+                continue
+            if raw_case.get("blocker_class"):
+                closeout_blockers.append(str(raw_case["blocker_class"]))
+            for reason in raw_case.get("blocked_reasons") or []:
+                closeout_blockers.append(str(reason))
+            for failure in raw_case.get("failures") or []:
+                closeout_blockers.append(str(failure))
+        closeout_path = closeout.get("path")
+        dataset_path = str(closeout_path or "internal:skill-builder-closeout")
+        digest_path = repo_root / dataset_path if closeout_path and not Path(str(closeout_path)).is_absolute() else Path(str(closeout_path or ""))
+        dataset_digest = (
+            _skills_sdk_digest_file(digest_path)
+            if closeout_path and digest_path.is_file()
+            else "sha256:" + ("0" * 64)
+        )
+        failed_count = sum(1 for item in cases if item["status"] == "fail")
+        return {
+            "status": closeout_status,
+            "dataset_path": dataset_path,
+            "dataset_digest": dataset_digest,
+            "case_count": len(cases),
+            "passed_count": len(cases) - failed_count,
+            "failed_count": failed_count,
+            "quality_gates": quality_gates,
+            "closeout_validation": closeout_validation,
+            "cases": cases,
+            "blockers": sorted(set(closeout_blockers)) if closeout_status != "pass" else [],
+        }
+
+    synthetic_blockers = list(fallback_blockers + quality_blockers)
+    if status == "pass":
+        synthetic_blockers.append("blocked_missing_artifact:no_scorecard_or_closeout")
     internal_case_count = 0 if status == "blocked" else 1
-    receipt_status = status if status != "pass" or not quality_blockers else "fail"
+    receipt_status = "blocked" if status == "pass" else status if status != "pass" or not quality_blockers else "fail"
+    missing_artifact_check = {
+        "id": "blocked_missing_artifact:no_scorecard_or_closeout",
+        "status": "blocker",
+        "message": "Internal eval runner did not emit a scorecard or workflow closeout receipt.",
+        "evidence": ["raw_output"],
+    }
     return {
         "status": receipt_status,
         "dataset_path": "internal:skill-builder",
         "dataset_digest": "sha256:" + ("0" * 64),
         "case_count": internal_case_count,
-        "passed_count": 1 if receipt_status == "pass" else 0,
-        "failed_count": 1 if receipt_status == "fail" else 0,
+        "passed_count": 0,
+        "failed_count": 1 if receipt_status in {"fail", "blocked"} else 0,
         "quality_gates": quality_gates,
+        "closeout_validation": {
+            "schema_version": "skills-sdk.eval-closeout-validation.v1",
+            "status": "blocked",
+            "checks": [missing_artifact_check],
+            "blockers": [missing_artifact_check],
+        } if status == "pass" else {},
         "cases": [],
-        "blockers": sorted(set(fallback_blockers + quality_blockers)),
+        "blockers": sorted(set(synthetic_blockers)),
     }
 
 
@@ -6136,7 +7054,9 @@ def skills_sdk_eval_run(
     mode: str = "smoke",
     runner: str = "auto",
     skip_tessl: bool = True,
+    codex_profile: str | None = None,
     cases: list[str] | None = None,
+    timeout_seconds: int | None = None,
 ) -> CallResult:
     """Run SDK evals through deterministic JSONL or the internal skill-builder backend."""
     result = CallResult()
@@ -6175,7 +7095,9 @@ def skills_sdk_eval_run(
             runner="codex",
             dashboard=True,
             skip_tessl=skip_tessl,
+            codex_profile=codex_profile,
             cases=cases,
+            timeout_seconds=timeout_seconds,
         )
         raw_status = str(internal.data.get("eval_status") or ("pass" if internal.status == "success" else "fail"))
         blockers = []
@@ -6193,7 +7115,7 @@ def skills_sdk_eval_run(
         )
         receipt = {
             "schema_version": "skills-sdk.eval-run-receipt.v0",
-            "schema_uri": "https://jscraik.local/agent-skills/schemas/skills-sdk/eval-run-receipt.v0.schema.json",
+            "schema_uri": "https://agent-skills.local/schemas/skills-sdk/eval-run-receipt.v0.schema.json",
             "status": receipt_counts["status"],
             "runner": "internal_skill_builder_v0",
             "dataset_path": receipt_counts["dataset_path"],
@@ -6203,10 +7125,13 @@ def skills_sdk_eval_run(
             "package_digest": package_identity["package_digest"] if package_identity else None,
             "target_path": target_path,
             "mode": mode,
+            "lane": codex_profile or ("oss-local" if mode == "smoke" else mode),
+            "profile": codex_profile,
             "case_count": receipt_counts["case_count"],
             "passed_count": receipt_counts["passed_count"],
             "failed_count": receipt_counts["failed_count"],
             "quality_gates": receipt_counts["quality_gates"],
+            "closeout_validation": receipt_counts.get("closeout_validation"),
             "cases": receipt_counts["cases"],
             "blockers": receipt_counts["blockers"],
             "mutation_performed": False,
@@ -6223,7 +7148,20 @@ def skills_sdk_eval_run(
             "receipt": receipt,
             "internal_eval": internal.data,
             "mutation_performed": False,
-            "validation_commands": [_ask_validation_command("sdk", "eval", "run", target, "--runner", "internal", "--mode", mode)],
+            "validation_commands": [
+                _ask_validation_command(
+                    "sdk",
+                    "eval",
+                    "run",
+                    target,
+                    "--runner",
+                    "internal",
+                    "--mode",
+                    mode,
+                    *(("--codex-profile", codex_profile) if codex_profile else ()),
+                    *(("--timeout-seconds", str(timeout_seconds)) if timeout_seconds else ()),
+                )
+            ],
             "agent_summary": f"skills-sdk internal eval run {status} for {target} in {mode} mode.",
         }
         result.data["skills_sdk_eval_run"] = payload
@@ -6495,9 +7433,27 @@ def _sdk_improve_update_registry(
     entry["evals"] = {
         "status": eval_receipt.get("status") if eval_receipt else "not_run",
         "runner": eval_receipt.get("runner") if eval_receipt else None,
+        "lane": eval_receipt.get("lane") if eval_receipt else None,
+        "profile": eval_receipt.get("profile") if eval_receipt else None,
         "case_count": eval_receipt.get("case_count") if eval_receipt else 0,
         "passed_count": eval_receipt.get("passed_count") if eval_receipt else 0,
         "failed_count": eval_receipt.get("failed_count") if eval_receipt else 0,
+    }
+    missing_promotion_evidence: list[str] = []
+    if hardening_receipt.get("status") != "pass":
+        missing_promotion_evidence.append("package hardening pass")
+    if not eval_receipt:
+        missing_promotion_evidence.append("eval run receipt")
+    elif eval_receipt.get("status") != "pass":
+        missing_promotion_evidence.append(f"eval pass receipt ({eval_receipt.get('status')})")
+    closeout_validation = eval_receipt.get("closeout_validation") if eval_receipt else None
+    if isinstance(closeout_validation, dict) and closeout_validation.get("status") != "pass":
+        missing_promotion_evidence.append("workflow-closeout/v1 validation pass")
+    entry["promotion"] = {
+        "allowed": improvement_status == "pass" and not missing_promotion_evidence,
+        "state": "promoted" if improvement_status == "pass" and not missing_promotion_evidence else "blocked",
+        "missing": missing_promotion_evidence,
+        "updated_at": timestamp,
     }
     evidence = entry.get("evidence")
     if not isinstance(evidence, dict):
@@ -6587,6 +7543,7 @@ def skills_sdk_project_improve(
     project_root: str | None = None,
     run_evals: bool = False,
     mode: str = "smoke",
+    codex_profile: str | None = None,
     apply: bool = False,
 ) -> CallResult:
     """Run a project-local skill improvement lifecycle gate and record owner-repo evidence."""
@@ -6700,17 +7657,36 @@ def skills_sdk_project_improve(
     hardening_receipt = _build_package_hardening_receipt(package_receipt)
     eval_payload: dict[str, Any] | None = None
     eval_receipt: dict[str, Any] | None = None
+    eval_closeout: dict[str, Any] | None = None
     if run_evals:
-        eval_result = skills_sdk_eval_run(repo_root, target=str(source_path), mode=mode, runner="internal", skip_tessl=True)
+        eval_result = skills_sdk_eval_run(
+            repo_root,
+            target=str(source_path),
+            mode=mode,
+            runner="internal",
+            skip_tessl=True,
+            codex_profile=codex_profile,
+        )
         eval_payload = eval_result.data.get("skills_sdk_eval_run") if isinstance(eval_result.data, dict) else None
         if isinstance(eval_payload, dict) and isinstance(eval_payload.get("receipt"), dict):
             eval_receipt = eval_payload["receipt"]
+            internal_eval = eval_payload.get("internal_eval")
+            if isinstance(internal_eval, dict) and isinstance(internal_eval.get("eval_closeout"), dict):
+                eval_closeout = internal_eval["eval_closeout"]
 
     blockers: list[str] = []
     if hardening_receipt.get("status") != "pass":
         blockers.append(f"package_hardening:{hardening_receipt.get('status')}")
     if run_evals and (not eval_receipt or eval_receipt.get("status") != "pass"):
         blockers.append(f"evals:{eval_receipt.get('status') if eval_receipt else 'missing_receipt'}")
+    if run_evals and eval_closeout:
+        if eval_closeout.get("mutation_allowed") is not True:
+            blockers.append("eval_closeout:mutation_not_allowed")
+        if eval_closeout.get("registry_update_allowed") is not True:
+            blockers.append("eval_closeout:registry_promotion_not_allowed")
+        closeout_validation = eval_closeout.get("closeout_validation")
+        if isinstance(closeout_validation, dict) and closeout_validation.get("status") != "pass":
+            blockers.append("eval_closeout:validation_blocked")
     status = "blocked" if blockers else "pass"
     project_id = _sdk_improve_project_id(manifest, resolved_project_root)
     package_id = str(package_receipt.get("package_id") or source_path.parent.name)
@@ -6755,7 +7731,17 @@ def skills_sdk_project_improve(
     ]
     if run_evals:
         validation_commands.append(
-            _ask_validation_command("sdk", "eval", "run", str(source_path), "--runner", "internal", "--mode", mode)
+            _ask_validation_command(
+                "sdk",
+                "eval",
+                "run",
+                str(source_path),
+                "--runner",
+                "internal",
+                "--mode",
+                mode,
+                *(("--codex-profile", codex_profile) if codex_profile else ()),
+            )
         )
     validation_commands.append(
         _ask_validation_command(
@@ -6765,6 +7751,7 @@ def skills_sdk_project_improve(
             "--project-root",
             str(resolved_project_root),
             "--evals" if run_evals else "",
+            *(("--codex-profile", codex_profile) if codex_profile else ()),
             "--apply" if apply else "--preview",
         ).replace("  ", " ")
     )
@@ -6794,6 +7781,15 @@ def skills_sdk_project_improve(
             "status": eval_receipt.get("status") if eval_receipt else "not_run",
             "mode": mode if run_evals else None,
             "receipt": eval_receipt,
+            "closeout": eval_closeout,
+        },
+        "promotion": {
+            "allowed": status == "pass",
+            "missing": [
+                blocker
+                for blocker in blockers
+                if blocker.startswith(("package_hardening:", "evals:", "eval_closeout:"))
+            ],
         },
         "blockers": blockers,
         "registry_path": registry_relative,
@@ -8640,7 +9636,7 @@ def _skill_install_intake_decision(repo_root: Path, skill_name: str, target_path
         ],
         "compatibility_checks": [
             "OpenAI skill format and SKILL.md frontmatter",
-            "progressive disclosure shape and required local safety sections",
+            "progressive disclosure shape, preserved operating-model references, and required local safety sections",
             "repo path, network, secret, package-manager, and external-tool assumptions",
             "dependency manifest presence for Snyk applicability",
         ],
@@ -8717,6 +9713,7 @@ def install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str 
         result.data["readiness_policy"] = {
             "full_evals_required_before_promotion": True,
             "external_skill_install_is_intake_not_copy": True,
+            "preserve_operating_model_docs_as_references": True,
             "promotion_rule": intake_decision["promotion_rule"],
         }
         validation_args = [url, "--dest", dest_rel]
@@ -8822,6 +9819,7 @@ def install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str 
         result.data["readiness_policy"] = {
             "full_evals_required_before_promotion": True,
             "external_skill_install_is_intake_not_copy": True,
+            "preserve_operating_model_docs_as_references": True,
             "promotion_rule": intake_decision["promotion_rule"],
             "post_install_gates": [
                 f"ask skills audit {installed_path} --level strict --json --robot",

@@ -734,6 +734,24 @@
       "notes": "Local Codex plugin readiness is a generic Desktop readiness contract, not a remote marketplace service."
     },
     {
+      "id": "sdk_plugin_lifecycle",
+      "title": "SDK skill and plugin lifecycle facade",
+      "status": "implemented",
+      "owner_surface": "Infrastructure/scripts/lib/ask/commands/sdk.py and skills_impl.py",
+      "pipeline_sections": ["public_sdk_surface", "full_skill_lifecycle", "release_decision_matrix"],
+      "feature_executed": true,
+      "mutation_performed": true,
+      "evidence_refs": [
+        "./bin/ask sdk plugin --help",
+        "./bin/ask sdk plugin create demo-skill --kind skill --category agent-ops --description 'Demo skill' --with-registry --preview --json --robot",
+        "./bin/ask sdk plugin create demo-plugin --kind plugin --category third-party --with-registry --with-references --preview --json --robot",
+        "./bin/ask sdk plugin save-registry --kind plugin --target Plugins/plugin-factory --preview --json --robot",
+        "Infrastructure/tests/test_skills_sdk_plugin_lifecycle.py"
+      ],
+      "next_slice": "Add remote registry save only after registry service authority, signing, package attestations, and owner approval are defined.",
+      "notes": "The SDK now exposes one create/review/install/save-registry facade for single skills and plugins. Registry save is local registry or marketplace persistence; remote publish remains out of scope."
+    },
+    {
       "id": "remote_marketplace",
       "title": "Remote marketplace service",
       "status": "out_of_scope",

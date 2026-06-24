@@ -46,6 +46,8 @@ SDK_PACKAGE_CONTRACT_FIELDS: tuple[str, ...] = (
     "agent_metadata",
     "reference_contract",
     "reference_quality",
+    "writing_quality",
+    "openai_platform_compat",
     "purpose",
     "inputs",
     "outputs",
@@ -60,6 +62,23 @@ SDK_PACKAGE_CONTRACT_FIELDS: tuple[str, ...] = (
 SDK_PACKAGE_ADVISORY_CONTRACT_FIELDS: tuple[str, ...] = (
     "budget_classification",
 )
+OPERATING_MODEL_FORMAT_DOCS: tuple[tuple[str, tuple[str, ...], str], ...] = (
+    ("MISSION.md", ("MISSION.md",), "references/mission-format.md"),
+    ("RESOURCES.md", ("RESOURCES.md",), "references/resources-format.md"),
+    ("GLOSSARY.md", ("GLOSSARY.md",), "references/glossary-format.md"),
+    (
+        "learning-records/",
+        ("learning-records/", "learning-records/*.md"),
+        "references/learning-record-format.md",
+    ),
+)
+SOURCE_OPERATING_MODEL_KINDS: set[str] = {
+    "source_operating_model",
+    "operating_model_source",
+    "operating_model_reference",
+}
+PACKAGE_IGNORED_FILE_NAMES: set[str] = {".DS_Store", "Thumbs.db", "desktop.ini"}
+OPENAI_PLATFORM_COMPAT_SCHEMA_VERSION = "skills-sdk.openai-platform-compat.v1"
 SKILLFLOW_NODE_TYPES: set[str] = {
     "command",
     "llm",
@@ -487,6 +506,144 @@ def missing_progressive_disclosure_references(
     return [raw for raw in reference_paths if not package_local_regular_file(skill_md, raw)]
 
 
+def operating_model_format_contract(skill_md: Path | None, text: str) -> dict[str, Any]:
+    """Return whether named workspace artifacts keep first-class format docs."""
+    if not skill_md or not text:
+        return {
+            "artifacts_declared": [],
+            "required_format_references": [],
+            "present_format_references": [],
+            "missing_format_references": [],
+            "format_references_ready": False,
+            "policy": (
+                "Skills that name durable workspace artifacts must preserve their "
+                "operating-model docs as package-local references instead of "
+                "compressing them into SKILL.md."
+            ),
+        }
+
+    artifacts: list[str] = []
+    required: list[str] = []
+    present: list[str] = []
+    missing: list[str] = []
+    for artifact, needles, reference_path in OPERATING_MODEL_FORMAT_DOCS:
+        if not any(needle in text for needle in needles):
+            continue
+        artifacts.append(artifact)
+        required.append(reference_path)
+        if package_local_regular_file(skill_md, reference_path):
+            present.append(reference_path)
+        else:
+            missing.append(reference_path)
+
+    return {
+        "artifacts_declared": artifacts,
+        "required_format_references": required,
+        "present_format_references": present,
+        "missing_format_references": missing,
+        "format_references_ready": bool(artifacts) and not missing,
+        "policy": (
+            "Skills that name durable workspace artifacts must preserve their "
+            "operating-model docs as package-local references instead of "
+            "compressing them into SKILL.md."
+        ),
+    }
+
+
+def source_operating_model_contract(skill_md: Path | None, progressive_body: str) -> dict[str, Any]:
+    """Return whether source operating-model context is preserved as routed references."""
+    source_context_path = skill_md.parent / "references" / "source-context.yaml" if skill_md else None
+    if not source_context_path or not source_context_path.is_file():
+        return {
+            "schema_version": "source-operating-model-preservation.v1",
+            "status": "not_declared",
+            "source_context_declared": False,
+            "declared_references": [],
+            "present_references": [],
+            "missing_references": [],
+            "missing_progressive_routes": [],
+            "policy": (
+                "When source-context declares operating-model source material, "
+                "the package must preserve it as package-local references and route "
+                "agents to it through Progressive Disclosure."
+            ),
+        }
+
+    loaded, error = read_structured_reference(source_context_path)
+    declared: list[str] = []
+    missing: list[str] = []
+    missing_routes: list[str] = []
+    if error is None and isinstance(loaded, dict):
+        references = loaded.get("references")
+        if isinstance(references, list):
+            for item in references:
+                if not isinstance(item, dict):
+                    continue
+                kind = str(item.get("kind") or "").strip()
+                path = str(item.get("path") or "").strip()
+                if kind not in SOURCE_OPERATING_MODEL_KINDS or not path:
+                    continue
+                declared.append(path)
+                if not package_local_regular_file(skill_md, path):
+                    missing.append(path)
+                quoted_path = f"`{path}`"
+                if quoted_path not in progressive_body and path not in progressive_body:
+                    missing_routes.append(path)
+        for path in _source_operating_model_paths_from_text(source_context_path):
+            if path in declared:
+                continue
+            declared.append(path)
+            if not package_local_regular_file(skill_md, path):
+                missing.append(path)
+            quoted_path = f"`{path}`"
+            if quoted_path not in progressive_body and path not in progressive_body:
+                missing_routes.append(path)
+    elif error is not None:
+        missing.append("references/source-context.yaml")
+
+    present = [path for path in declared if path not in missing]
+    blocked = bool(missing or missing_routes)
+    return {
+        "schema_version": "source-operating-model-preservation.v1",
+        "status": "blocked_validation" if blocked else ("pass" if declared else "not_declared"),
+        "source_context_declared": True,
+        "source_context_error": error,
+        "declared_references": declared,
+        "present_references": present,
+        "missing_references": missing,
+        "missing_progressive_routes": missing_routes,
+        "policy": (
+            "When source-context declares operating-model source material, "
+            "the package must preserve it as package-local references and route "
+            "agents to it through Progressive Disclosure."
+        ),
+    }
+
+
+def _source_operating_model_paths_from_text(path: Path) -> list[str]:
+    """Extract source operating-model paths from source-context.yaml without PyYAML."""
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError:
+        return []
+    paths: list[str] = []
+    current_path: str | None = None
+    current_kind: str | None = None
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("- path:"):
+            if current_path and current_kind in SOURCE_OPERATING_MODEL_KINDS:
+                paths.append(current_path)
+            current_path = stripped.split(":", 1)[1].strip().strip("'\"")
+            current_kind = None
+            continue
+        if stripped.startswith("kind:"):
+            current_kind = stripped.split(":", 1)[1].strip().strip("'\"")
+    if current_path and current_kind in SOURCE_OPERATING_MODEL_KINDS:
+        paths.append(current_path)
+    return [source_path for source_path in paths if source_path]
+
+
 def progressive_disclosure_contract(
     repo_root: Path | None,
     skill_md: Path | None,
@@ -501,6 +658,13 @@ def progressive_disclosure_contract(
     compact_entrypoint = bool(text) and line_count <= 250
     section_declared = bool(body)
     references_declared = existing_count > 0
+    operating_model_formats = operating_model_format_contract(skill_md, text)
+    format_refs_ready = (
+        not operating_model_formats["artifacts_declared"]
+        or operating_model_formats["format_references_ready"]
+    )
+    source_operating_model = source_operating_model_contract(skill_md, body)
+    source_operating_model_ready = source_operating_model["status"] in {"pass", "not_declared"}
     return {
         "skill_md_line_count": line_count,
         "skill_md_under_500_lines": line_count <= 500 if text else False,
@@ -513,10 +677,14 @@ def progressive_disclosure_contract(
             and section_declared
             and references_declared
             and not missing
+            and format_refs_ready
+            and source_operating_model_ready
         ),
+        "operating_model_formats": operating_model_formats,
+        "source_operating_model": source_operating_model,
         "progressive_disclosure_policy": (
             "Keep SKILL.md as the compact entrypoint and route task-specific "
-            "details to existing references."
+            "details and source operating-model docs to existing references."
         ),
         "source_path": repo_relative_path(repo_root, skill_md) if repo_root and skill_md else None,
     }
@@ -617,6 +785,7 @@ def iter_support_files(skill_md: Path | None, folder: str) -> list[Path]:
     return sorted(
         path
         for path in root.rglob("*")
+        if path.name not in PACKAGE_IGNORED_FILE_NAMES
         if package_local_regular_file(skill_md, path.relative_to(skill_md.parent).as_posix())
     )
 
@@ -633,6 +802,7 @@ def unsafe_support_files(skill_md: Path | None, folder: str) -> list[Path]:
     return sorted(
         path
         for path in root.rglob("*")
+        if path.name not in PACKAGE_IGNORED_FILE_NAMES
         if path.is_symlink()
         or (path.is_file() and not package_local_regular_file(skill_md, path.relative_to(skill_md.parent).as_posix()))
     )
@@ -1447,9 +1617,11 @@ def skill_reference_files(repo_root: Path | None, skill_md: Path | None) -> list
         return []
     files: list[dict[str, Any]] = []
     for candidate in sorted(path for path in references_dir.rglob("*") if path.is_file()):
+        if candidate.name.startswith(".") or candidate.name in PACKAGE_IGNORED_FILE_NAMES:
+            continue
         try:
             text = candidate.read_text(encoding="utf-8")
-        except OSError as exc:
+        except (OSError, UnicodeDecodeError) as exc:
             files.append(
                 {
                     "path": repo_relative_path(repo_root, candidate) if repo_root else candidate.as_posix(),
@@ -1645,6 +1817,1174 @@ def reference_quality_contract(repo_root: Path | None, skill_md: Path | None) ->
     }
 
 
+def _quality_check(
+    name: str,
+    status: str,
+    *,
+    dimension: str,
+    evidence: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Return a stable writing-quality check record."""
+    return {
+        "name": name,
+        "dimension": dimension,
+        "status": status,
+        "evidence": evidence or {},
+    }
+
+
+def _quality_blocker(
+    rule_id: str,
+    message: str,
+    *,
+    dimension: str,
+    path: str | None,
+    severity: str = "blocked",
+) -> dict[str, Any]:
+    """Return a stable writing-quality blocker record."""
+    return {
+        "rule_id": rule_id,
+        "dimension": dimension,
+        "severity": severity,
+        "path": path,
+        "message": message,
+    }
+
+
+def _quality_advisory(
+    rule_id: str,
+    message: str,
+    *,
+    dimension: str,
+    path: str | None,
+    evidence: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Return a stable non-blocking writing-quality advisory record."""
+    return {
+        "rule_id": rule_id,
+        "dimension": dimension,
+        "severity": "advisory",
+        "path": path,
+        "message": message,
+        "evidence": evidence or {},
+    }
+
+
+def _frontmatter_bool(frontmatter: dict[str, Any], field: str) -> bool:
+    """Return a frontmatter boolean from bools or common string spellings."""
+    value = frontmatter.get(field)
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.strip().lower() in {"1", "true", "yes", "on"}
+    return False
+
+
+def markdown_heading_titles(text: str) -> list[str]:
+    """Return normalized markdown heading titles in document order."""
+    titles: list[str] = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped.startswith("#"):
+            continue
+        title = stripped.lstrip("#").strip()
+        if title:
+            titles.append(title)
+    return titles
+
+
+def _has_any_heading(text: str, headings: tuple[str, ...]) -> bool:
+    return any(markdown_heading_declared(text, heading) for heading in headings)
+
+
+def _body_contains_any(body: str, needles: tuple[str, ...]) -> bool:
+    lowered = body.lower()
+    return any(needle.lower() in lowered for needle in needles)
+
+
+def _token_set(text: str) -> set[str]:
+    """Return normalized natural-language tokens without broad regex parsing."""
+    punctuation = ".,:;!?()[]{}\"'<>"
+    return {
+        token.strip(punctuation).lower()
+        for token in text.replace("/", " ").replace("-", " ").split()
+        if token.strip(punctuation)
+    }
+
+
+def _package_support_files(skill_md: Path | None) -> list[Path]:
+    """Return package-local support files that should have a routing pointer."""
+    if not skill_md:
+        return []
+    package_root = skill_md.parent
+    support_roots = [
+        package_root / "references",
+        package_root / "scripts",
+        package_root / "assets",
+        package_root / "agents",
+        package_root / "workflows",
+    ]
+    files: list[Path] = []
+    for root in support_roots:
+        if not root.is_dir():
+            continue
+        for candidate in sorted(path for path in root.rglob("*") if path.is_file()):
+            if candidate.name.startswith(".") or candidate.name in PACKAGE_IGNORED_FILE_NAMES:
+                continue
+            files.append(candidate)
+    return files
+
+
+def _package_text_surfaces(skill_md: Path | None, text: str) -> str:
+    """Return the bounded package text used to detect routed support files."""
+    if not skill_md:
+        return text
+    surfaces = [text]
+    for relative_path in (
+        "agents/openai.yaml",
+        "references/contract.yaml",
+        "references/evals.yaml",
+        "references/source-context.yaml",
+        "workflows/skillflow.json",
+    ):
+        candidate = skill_md.parent / relative_path
+        if not candidate.is_file():
+            continue
+        try:
+            surfaces.append(candidate.read_text(encoding="utf-8"))
+        except OSError:
+            continue
+    return "\n".join(surfaces)
+
+
+def _orphaned_support_files(
+    repo_root: Path | None,
+    skill_md: Path | None,
+    text: str,
+) -> list[str]:
+    """Return support files not mentioned by package entrypoints or contracts."""
+    if not skill_md:
+        return []
+    package_text = _package_text_surfaces(skill_md, text)
+    package_root = skill_md.parent
+    orphaned: list[str] = []
+    implicitly_routed = {
+        "agents/openai.yaml",
+        "references/contract.yaml",
+        "references/evals.yaml",
+        "references/task-profile.json",
+    }
+    for candidate in _package_support_files(skill_md):
+        relative = candidate.relative_to(package_root).as_posix()
+        if relative in implicitly_routed:
+            continue
+        if relative in package_text or candidate.name in package_text:
+            continue
+        orphaned.append(repo_relative_path(repo_root, candidate) if repo_root else relative)
+    return [path for path in orphaned if path]
+
+
+def _review_lens_skill(frontmatter: dict[str, Any], text: str) -> bool:
+    """Return whether the skill appears to be a review/audit lens."""
+    name = str(frontmatter.get("name") or "")
+    description = str(frontmatter.get("description") or "")
+    haystack = f"{name} {description} {text}".lower()
+    return (
+        name.startswith("review-")
+        or "review-lens" in name
+        or "review lens" in haystack
+        or "reviewer lens" in haystack
+    )
+
+
+def _external_input_skill(frontmatter: dict[str, Any], text: str) -> bool:
+    """Return whether the skill inspects external or untrusted artifacts."""
+    haystack = (
+        f"{frontmatter.get('name') or ''} "
+        f"{frontmatter.get('description') or ''} {text}"
+    ).lower()
+    return any(
+        needle in haystack
+        for needle in (
+            "third-party",
+            "external skill",
+            "untrusted",
+            "review a diff",
+            "reviewer plugin",
+            "intake",
+            "fetched",
+            "user-provided",
+        )
+    )
+
+
+def _improvement_skill(frontmatter: dict[str, Any], text: str) -> bool:
+    """Return whether the skill claims to improve or optimize an artifact."""
+    tokens = _token_set(
+        f"{frontmatter.get('name') or ''} {frontmatter.get('description') or ''} {text}"
+    )
+    return bool(tokens & {"improve", "improving", "optimize", "optimization", "repair"})
+
+
+def _writing_quality_advisories(
+    repo_root: Path | None,
+    skill_md: Path | None,
+    frontmatter: dict[str, Any],
+    text: str,
+    *,
+    user_invoked: bool,
+    description: str,
+    procedural: bool,
+    source_path: str | None,
+) -> list[dict[str, Any]]:
+    """Return Tessl-derived advisory rubric findings for skill writing quality."""
+    advisories: list[dict[str, Any]] = []
+    description_tokens = _token_set(description)
+    action_terms = sorted(description_tokens & DESCRIPTION_ACTION_TERMS)
+    if not user_invoked and description:
+        if len(description_tokens) < 8 or not action_terms:
+            advisories.append(
+                _quality_advisory(
+                    "description_specificity_weak",
+                    "Description should name concrete capabilities rather than vague skill identity.",
+                    dimension="invocation",
+                    path=source_path,
+                    evidence={
+                        "token_count": len(description_tokens),
+                        "action_terms": action_terms,
+                    },
+                )
+            )
+        trigger_markers = {"when", "asks", "mentions", "needs", "wants", "use"}
+        if len(description_tokens & trigger_markers) < 2:
+            advisories.append(
+                _quality_advisory(
+                    "description_trigger_terms_missing",
+                    "Description should include natural trigger terms a user would actually say.",
+                    dimension="invocation",
+                    path=source_path,
+                    evidence={"trigger_markers": sorted(description_tokens & trigger_markers)},
+                )
+            )
+        conflict_terms = {"help", "helps", "stuff", "things", "tasks", "anything", "everything"}
+        if description_tokens & conflict_terms:
+            advisories.append(
+                _quality_advisory(
+                    "description_conflict_risk",
+                    "Description includes generic terms that can overlap with other skills.",
+                    dimension="invocation",
+                    path=source_path,
+                    evidence={"generic_terms": sorted(description_tokens & conflict_terms)},
+                )
+            )
+
+    commands = skill_command_candidates(text)
+    workflow_text = "\n".join(
+        markdown_section_body(text, heading)
+        for heading in ("Workflow", "Procedure", "Steps")
+        if markdown_heading_declared(text, heading)
+    )
+    action_output_terms = {"return", "report", "write", "create", "run", "validate", "emit", "record"}
+    if procedural and not commands and not (_token_set(workflow_text) & action_output_terms):
+        advisories.append(
+            _quality_advisory(
+                "content_actionability_weak",
+                "Procedural skills should provide concrete commands, artifacts, outputs, or action verbs.",
+                dimension="actionability",
+                path=source_path,
+                evidence={"command_count": len(commands)},
+            )
+        )
+
+    search_terms = {"search", "inspect", "review", "audit", "compare", "scan"}
+    bounded_terms = {"bounded", "budget", "limit", "stop", "first", "few", "narrowest"}
+    text_tokens = _token_set(text)
+    if text_tokens & search_terms and not (text_tokens & bounded_terms):
+        advisories.append(
+            _quality_advisory(
+                "unbounded_search_instruction",
+                "Search, review, or audit skills should declare a stop condition or bounded search budget.",
+                dimension="actionability",
+                path=source_path,
+                evidence={"search_terms": sorted(text_tokens & search_terms)},
+            )
+        )
+
+    if _review_lens_skill(frontmatter, text):
+        missing_review_sections = [
+            heading
+            for heading in ("Stance", "What to look for", "How to report")
+            if not markdown_heading_declared(text, heading)
+        ]
+        if missing_review_sections:
+            advisories.append(
+                _quality_advisory(
+                    "review_lens_output_contract_missing",
+                    "Review-lens skills should declare Stance, What to look for, and How to report sections.",
+                    dimension="review_lens",
+                    path=source_path,
+                    evidence={"missing_sections": missing_review_sections},
+                )
+            )
+
+    if _external_input_skill(frontmatter, text) and not _body_contains_any(
+        text,
+        ("treat", "untrusted", "as data", "not instructions", "trust boundary"),
+    ):
+        advisories.append(
+            _quality_advisory(
+                "missing_untrusted_input_boundary",
+                "Skills that inspect external artifacts should state the untrusted-input boundary.",
+                dimension="safety_boundary",
+                path=source_path,
+            )
+        )
+
+    if _improvement_skill(frontmatter, text) and not _body_contains_any(
+        text,
+        ("baseline", "before", "after", "rerun", "regression"),
+    ):
+        advisories.append(
+            _quality_advisory(
+                "improvement_claim_without_before_after_evidence",
+                "Improvement skills should require baseline, change, rerun, and regression evidence.",
+                dimension="self_improving",
+                path=source_path,
+            )
+        )
+
+    orphaned = _orphaned_support_files(repo_root, skill_md, text)
+    if orphaned:
+        advisories.append(
+            _quality_advisory(
+                "orphaned_bundle_reference",
+                "Package support files should be routed by SKILL.md or package contracts.",
+                dimension="progressive_disclosure",
+                path=source_path,
+                evidence={"orphaned_paths": orphaned},
+            )
+        )
+
+    return advisories
+
+
+def _skill_evals_yaml_path(skill_md: Path | None) -> Path | None:
+    if not skill_md:
+        return None
+    candidate = skill_md.parent / "references" / "evals.yaml"
+    return candidate if candidate.is_file() else None
+
+
+def _case_id(case: Any, index: int) -> str:
+    if isinstance(case, dict) and case.get("id"):
+        return str(case["id"])
+    return f"case[{index}]"
+
+
+def _scenario_cases_from_reference(
+    evals_path: Path,
+    loaded: dict[str, Any],
+) -> list[Any]:
+    """Return eval cases, using a small fallback for nested cases YAML."""
+    cases = loaded.get("cases")
+    if isinstance(cases, list) and all(isinstance(case, dict) for case in cases):
+        return cases
+    try:
+        text = evals_path.read_text(encoding="utf-8")
+    except OSError:
+        return cases if isinstance(cases, list) else []
+    parsed_cases: list[dict[str, Any]] = []
+    current: dict[str, Any] | None = None
+    current_list_key: str | None = None
+    in_cases = False
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped or stripped == "---" or stripped.startswith("#"):
+            continue
+        indent = len(line) - len(line.lstrip(" "))
+        if not in_cases:
+            if indent == 0 and stripped == "cases:":
+                in_cases = True
+            continue
+        if indent == 0:
+            break
+        if indent == 2 and stripped.startswith("- "):
+            if current is not None:
+                parsed_cases.append(current)
+            current = {}
+            current_list_key = None
+            remainder = stripped[2:].strip()
+            if ":" in remainder:
+                key, value = remainder.split(":", 1)
+                current[key.strip()] = parse_frontmatter_scalar(value.strip())
+            continue
+        if current is None:
+            continue
+        if current_list_key and indent >= 4 and stripped.startswith("- "):
+            values = current.setdefault(current_list_key, [])
+            if isinstance(values, list):
+                values.append(parse_frontmatter_scalar(stripped[2:].strip()))
+            continue
+        if indent >= 4 and ":" in stripped:
+            key, value = stripped.split(":", 1)
+            key = key.strip()
+            value = value.strip()
+            if value:
+                current[key] = parse_frontmatter_scalar(value)
+                current_list_key = None
+            else:
+                current[key] = []
+                current_list_key = key
+    if current is not None:
+        parsed_cases.append(current)
+    return parsed_cases or (cases if isinstance(cases, list) else [])
+
+
+def _scenario_alignment_checks(
+    repo_root: Path | None,
+    skill_md: Path | None,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Return deterministic gold-scenario shape checks for references/evals.yaml."""
+    checks: list[dict[str, Any]] = []
+    blockers: list[dict[str, Any]] = []
+    evals_path = _skill_evals_yaml_path(skill_md)
+    rel_path = repo_relative_path(repo_root, evals_path) if repo_root and evals_path else None
+    if evals_path is None:
+        checks.append(
+            _quality_check(
+                "scenario_alignment_declared",
+                "not_applicable",
+                dimension="scenario_alignment",
+                evidence={"path": None, "reason": "references/evals.yaml not declared"},
+            )
+        )
+        return checks, blockers
+
+    loaded, error = read_structured_reference(evals_path)
+    if error is not None or not isinstance(loaded, dict):
+        checks.append(
+            _quality_check(
+                "scenario_alignment_parse",
+                "blocked_validation",
+                dimension="scenario_alignment",
+                evidence={"path": rel_path, "error": error or "evals.yaml must be a mapping"},
+            )
+        )
+        blockers.append(
+            _quality_blocker(
+                "scenario_alignment_unparseable",
+                "references/evals.yaml must be parseable before scenario quality can be trusted.",
+                dimension="scenario_alignment",
+                path=rel_path,
+            )
+        )
+        return checks, blockers
+
+    cases = _scenario_cases_from_reference(evals_path, loaded)
+    if not isinstance(cases, list) or not cases:
+        checks.append(
+            _quality_check(
+                "scenario_alignment_cases_declared",
+                "blocked_validation",
+                dimension="scenario_alignment",
+                evidence={"path": rel_path, "case_count": 0},
+            )
+        )
+        blockers.append(
+            _quality_blocker(
+                "scenario_alignment_cases_missing",
+                "references/evals.yaml must declare at least one case before scenario-quality can run.",
+                dimension="scenario_alignment",
+                path=rel_path,
+            )
+        )
+        return checks, blockers
+
+    missing_by_case: list[dict[str, Any]] = []
+    for index, case in enumerate(cases):
+        if not isinstance(case, dict):
+            missing_by_case.append({"case": _case_id(case, index), "missing": ["mapping"]})
+            continue
+        missing: list[str] = []
+        for field in ("id", "category"):
+            if not str(case.get(field) or "").strip():
+                missing.append(field)
+        if not str(case.get("prompt") or case.get("user_task") or "").strip():
+            missing.append("prompt_or_user_task")
+        if not str(case.get("given") or case.get("why_realistic") or "").strip():
+            missing.append("given_or_why_realistic")
+        if not str(
+            case.get("should")
+            or case.get("expected_behavior")
+            or case.get("expected_evidence")
+            or ""
+        ).strip():
+            missing.append("should_or_expected_behavior")
+        acceptance = case.get("acceptance")
+        expected_evidence = case.get("expected_evidence")
+        if not (
+            isinstance(acceptance, list)
+            and acceptance
+            or isinstance(expected_evidence, list)
+            and expected_evidence
+        ):
+            missing.append("acceptance_or_expected_evidence")
+        if missing:
+            missing_by_case.append({"case": _case_id(case, index), "missing": missing})
+
+    status = "blocked_validation" if missing_by_case else "pass"
+    checks.append(
+        _quality_check(
+            "scenario_alignment_gold_shape",
+            status,
+            dimension="scenario_alignment",
+            evidence={
+                "path": rel_path,
+                "case_count": len(cases),
+                "missing_by_case": missing_by_case,
+            },
+        )
+    )
+    if missing_by_case:
+        blockers.append(
+            _quality_blocker(
+                "scenario_alignment_gold_shape_incomplete",
+                "references/evals.yaml cases must include gold-standard fields: id, category, task, given, should, and acceptance evidence.",
+                dimension="scenario_alignment",
+                path=rel_path,
+            )
+        )
+    return checks, blockers
+
+
+def writing_quality_contract(
+    repo_root: Path | None,
+    skill_md: Path | None,
+    frontmatter: dict[str, Any],
+    text: str,
+    progressive_disclosure: dict[str, Any],
+) -> dict[str, Any]:
+    """Return deterministic skill-writing rubric checks for package readiness."""
+    source_path = repo_relative_path(repo_root, skill_md) if repo_root and skill_md else None
+    checks: list[dict[str, Any]] = []
+    blockers: list[dict[str, Any]] = []
+
+    user_invoked = _frontmatter_bool(frontmatter, "disable-model-invocation")
+    description = str(frontmatter.get("description") or "").strip()
+    description_status = "not_applicable"
+    if not user_invoked:
+        description_status = (
+            "pass"
+            if description
+            and text_contains_action_term(description)
+            and "when" in {token.strip(".,:;!?()[]{}\"'").lower() for token in description.split()}
+            else "blocked_validation"
+        )
+        if description_status != "pass":
+            blockers.append(
+                _quality_blocker(
+                    "weak_description_triggers",
+                    "Model-invoked skills need a trigger-shaped description with an action verb and a real 'when' branch.",
+                    dimension="invocation",
+                    path=source_path,
+                )
+            )
+    checks.append(
+        _quality_check(
+            "description_trigger_shape",
+            description_status,
+            dimension="invocation",
+            evidence={
+                "user_invoked": user_invoked,
+                "has_description": bool(description),
+                "has_action_term": text_contains_action_term(description),
+            },
+        )
+    )
+
+    has_title = markdown_has_title(text)
+    checks.append(
+        _quality_check(
+            "skill_md_title",
+            "pass" if has_title else "blocked_validation",
+            dimension="information_hierarchy",
+            evidence={"headings": markdown_heading_titles(text)[:12]},
+        )
+    )
+    if not has_title:
+        blockers.append(
+            _quality_blocker(
+                "missing_skill_title",
+                "SKILL.md must declare a top-level title so agents can identify the entrypoint.",
+                dimension="information_hierarchy",
+                path=source_path,
+            )
+        )
+
+    procedural = _has_any_heading(text, ("Workflow", "Procedure", "Steps"))
+    validation_declared = markdown_heading_declared(text, "Validation")
+    output_contract_declared = markdown_heading_declared(text, "Output Contract")
+    validation_body = markdown_section_body(text, "Validation")
+    validation_evidence_declared = (
+        validation_declared
+        and _body_contains_any(validation_body, ("pass", "fail", "blocked", "command:"))
+    )
+    completion_status = (
+        "not_applicable"
+        if not procedural
+        else "pass"
+        if output_contract_declared or validation_evidence_declared
+        else "blocked_validation"
+    )
+    checks.append(
+        _quality_check(
+            "procedural_completion_criteria",
+            completion_status,
+            dimension="completion_criteria",
+            evidence={
+                "procedural": procedural,
+                "validation_declared": validation_declared,
+                "output_contract_declared": output_contract_declared,
+            },
+        )
+    )
+    if completion_status == "blocked_validation":
+        blockers.append(
+            _quality_blocker(
+                "missing_completion_criterion",
+                "Procedural skills must declare observable completion evidence through Validation or an Output Contract.",
+                dimension="completion_criteria",
+                path=source_path,
+            )
+        )
+
+    line_count = progressive_disclosure.get("skill_md_line_count", 0)
+    entrypoint_compact = bool(progressive_disclosure.get("skill_md_under_250_lines"))
+    references_count = int(progressive_disclosure.get("progressive_disclosure_reference_count") or 0)
+    missing_references = progressive_disclosure.get("progressive_disclosure_missing_references") or []
+    disclosure_status = (
+        "blocked_validation"
+        if missing_references or (not entrypoint_compact and references_count == 0)
+        else "pass"
+    )
+    checks.append(
+        _quality_check(
+            "progressive_disclosure_rubric",
+            disclosure_status,
+            dimension="progressive_disclosure",
+            evidence={
+                "line_count": line_count,
+                "under_250_lines": entrypoint_compact,
+                "reference_count": references_count,
+                "missing_references": missing_references,
+            },
+        )
+    )
+    if missing_references:
+        blockers.append(
+            _quality_blocker(
+                "weak_context_pointer_missing_reference",
+                "Progressive Disclosure points at references that are not present in the package.",
+                dimension="progressive_disclosure",
+                path=source_path,
+            )
+        )
+    elif not entrypoint_compact and references_count == 0:
+        blockers.append(
+            _quality_blocker(
+                "sprawl_without_disclosure",
+                "Long SKILL.md entrypoints must route branch-specific or reference material through package-local references.",
+                dimension="progressive_disclosure",
+                path=source_path,
+            )
+        )
+
+    scenario_checks, scenario_blockers = _scenario_alignment_checks(repo_root, skill_md)
+    checks.extend(scenario_checks)
+    blockers.extend(scenario_blockers)
+    advisories = _writing_quality_advisories(
+        repo_root,
+        skill_md,
+        frontmatter,
+        text,
+        user_invoked=user_invoked,
+        description=description,
+        procedural=procedural,
+        source_path=source_path,
+    )
+
+    status = "blocked_validation" if blockers else "pass"
+    return {
+        "schema_version": "skills-sdk.skill-writing-quality.v1",
+        "policy": "predictability_through_invocation_hierarchy_completion_and_scenarios",
+        "required_for_package_readiness": True,
+        "status": status,
+        "rubric": {
+            "source": "writing-great-skills",
+            "root_quality": "predictability",
+            "dimensions": [
+                "invocation",
+                "information_hierarchy",
+                "progressive_disclosure",
+                "completion_criteria",
+                "scenario_alignment",
+                "actionability",
+                "review_lens",
+                "safety_boundary",
+                "self_improving",
+            ],
+        },
+        "checks": checks,
+        "blockers": blockers,
+        "advisories": advisories,
+        "what_this_proves": [
+            "trigger_shape_checked",
+            "entrypoint_hierarchy_checked",
+            "completion_evidence_checked",
+            "reference_disclosure_checked",
+            "scenario_shape_checked",
+            "advisory_quality_patterns_scored",
+        ] if status == "pass" else [],
+        "what_this_does_not_prove": [
+            "behavioral_eval_pass",
+            "runtime_skill_activation",
+            "live_tessl_score",
+            "cloud_eval_confirmation",
+        ],
+    }
+
+
+def _platform_check(
+    name: str,
+    status: str,
+    *,
+    dimension: str,
+    evidence: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Return a stable OpenAI platform compatibility check record."""
+    return {
+        "name": name,
+        "dimension": dimension,
+        "status": status,
+        "evidence": evidence or {},
+    }
+
+
+def _platform_blocker(
+    rule_id: str,
+    message: str,
+    *,
+    dimension: str,
+    path: str | None,
+    evidence: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Return a stable OpenAI platform compatibility blocker record."""
+    return {
+        "rule_id": rule_id,
+        "dimension": dimension,
+        "severity": "blocked",
+        "path": path,
+        "message": message,
+        "evidence": evidence or {},
+    }
+
+
+def _platform_advisory(
+    rule_id: str,
+    message: str,
+    *,
+    dimension: str,
+    path: str | None,
+    evidence: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Return a stable OpenAI platform compatibility advisory record."""
+    return {
+        "rule_id": rule_id,
+        "dimension": dimension,
+        "severity": "advisory",
+        "path": path,
+        "message": message,
+        "evidence": evidence or {},
+    }
+
+
+def _plugin_root_for_source(repo_root: Path | None, source_path: Path | None) -> Path | None:
+    """Return the owning plugin root for a plugin-owned skill source."""
+    if not repo_root or not source_path:
+        return None
+    relative = repo_relative_path(repo_root, source_path)
+    if not relative:
+        return None
+    parts = relative.split("/")
+    if len(parts) >= 4 and parts[0] == "Plugins" and parts[2] == "skills":
+        return repo_root / parts[0] / parts[1]
+    return None
+
+
+def _plugin_manifest_path(plugin_root: Path | None) -> Path | None:
+    """Return the supported plugin manifest path for a plugin root."""
+    if not plugin_root:
+        return None
+    for relative in (".codex-plugin/plugin.json", "plugin.json"):
+        candidate = plugin_root / relative
+        if candidate.is_file():
+            return candidate
+    return None
+
+
+def _read_json_object(path: Path | None) -> tuple[dict[str, Any] | None, str | None]:
+    """Read a JSON object without treating malformed data as instructions."""
+    if path is None:
+        return None, "missing"
+    try:
+        loaded = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return None, exc.__class__.__name__
+    if not isinstance(loaded, dict):
+        return None, "json root must be an object"
+    return loaded, None
+
+
+def _rel_path_or_none(repo_root: Path | None, path: Path | None) -> str | None:
+    if repo_root and path:
+        return repo_relative_path(repo_root, path) or path.as_posix()
+    return path.as_posix() if path else None
+
+
+def _plugin_hook_commands_are_portable(command: str) -> bool:
+    """Return whether a command avoids local absolute plugin-owned paths."""
+    if "${PLUGIN_ROOT}" in command or "${PLUGIN_DATA}" in command:
+        return True
+    tokens = command.split()
+    return not any(token.startswith("/") or token.startswith("~/") for token in tokens)
+
+
+def _hook_timeout_shape(hook: dict[str, Any]) -> str:
+    if "timeoutSec" in hook:
+        return "timeoutSec"
+    if "timeout" not in hook:
+        return "missing"
+    return "seconds" if isinstance(hook.get("timeout"), int) else "invalid"
+
+
+def _plugin_hooks_contract(
+    repo_root: Path | None,
+    plugin_root: Path | None,
+    manifest: dict[str, Any] | None,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
+    """Return deterministic checks for Codex-supported plugin bundled hooks."""
+    checks: list[dict[str, Any]] = []
+    blockers: list[dict[str, Any]] = []
+    advisories: list[dict[str, Any]] = []
+    if not plugin_root:
+        checks.append(
+            _platform_check(
+                "plugin_hook_contract",
+                "not_applicable",
+                dimension="plugin_hooks",
+                evidence={"reason": "skill is not plugin-owned"},
+            )
+        )
+        return checks, blockers, advisories
+
+    hook_decl = manifest.get("hooks") if isinstance(manifest, dict) else None
+    hooks_path = plugin_root / "hooks" / "hooks.json"
+    hooks_rel = _rel_path_or_none(repo_root, hooks_path)
+    if hooks_path.is_file() and hook_decl != "./hooks/hooks.json":
+        blockers.append(
+            _platform_blocker(
+                "plugin_hooks_manifest_path_invalid",
+                "Plugin manifests must declare bundled hooks as ./hooks/hooks.json.",
+                dimension="plugin_hooks",
+                path=_rel_path_or_none(repo_root, _plugin_manifest_path(plugin_root)),
+                evidence={"declared_hooks": hook_decl},
+            )
+        )
+    checks.append(
+        _platform_check(
+            "plugin_hooks_manifest_declared",
+            "pass" if hook_decl == "./hooks/hooks.json" else "blocked_validation",
+            dimension="plugin_hooks",
+            evidence={"declared_hooks": hook_decl, "expected": "./hooks/hooks.json"},
+        )
+    )
+    loaded, error = _read_json_object(hooks_path)
+    if error is not None:
+        blockers.append(
+            _platform_blocker(
+                "plugin_hooks_file_unreadable",
+                "Bundled plugin hooks must be readable JSON.",
+                dimension="plugin_hooks",
+                path=hooks_rel,
+                evidence={"error": error},
+            )
+        )
+        checks.append(
+            _platform_check(
+                "plugin_hooks_json_parse",
+                "blocked_validation",
+                dimension="plugin_hooks",
+                evidence={"path": hooks_rel, "error": error},
+            )
+        )
+        return checks, blockers, advisories
+
+    hooks_root = loaded.get("hooks") if isinstance(loaded, dict) else None
+    hooks_root_ok = isinstance(hooks_root, dict)
+    checks.append(
+        _platform_check(
+            "plugin_hooks_top_level_object",
+            "pass" if hooks_root_ok else "blocked_validation",
+            dimension="plugin_hooks",
+            evidence={"path": hooks_rel},
+        )
+    )
+    if not hooks_root_ok:
+        blockers.append(
+            _platform_blocker(
+                "plugin_hooks_top_level_missing",
+                "Codex plugin hook config must use a top-level hooks object.",
+                dimension="plugin_hooks",
+                path=hooks_rel,
+            )
+        )
+        return checks, blockers, advisories
+
+    hook_count = 0
+    unsupported_types: list[str] = []
+    timeoutsec_hooks: list[str] = []
+    missing_timeout_hooks: list[str] = []
+    nonportable_commands: list[str] = []
+    invalid_groups: list[str] = []
+    for matcher_name, matcher_groups in hooks_root.items():
+        if not isinstance(matcher_groups, list):
+            invalid_groups.append(str(matcher_name))
+            continue
+        for group_index, group in enumerate(matcher_groups):
+            group_label = f"{matcher_name}[{group_index}]"
+            if not isinstance(group, dict) or not isinstance(group.get("hooks"), list):
+                invalid_groups.append(group_label)
+                continue
+            for hook_index, hook in enumerate(group["hooks"]):
+                hook_label = f"{group_label}.hooks[{hook_index}]"
+                if not isinstance(hook, dict):
+                    invalid_groups.append(hook_label)
+                    continue
+                hook_count += 1
+                hook_type = str(hook.get("type") or "")
+                if hook_type != "command":
+                    unsupported_types.append(f"{hook_label}:{hook_type or '<missing>'}")
+                timeout_shape = _hook_timeout_shape(hook)
+                if timeout_shape == "timeoutSec":
+                    timeoutsec_hooks.append(hook_label)
+                elif timeout_shape != "seconds":
+                    missing_timeout_hooks.append(hook_label)
+                command = str(hook.get("command") or "")
+                if hook_type == "command" and command and not _plugin_hook_commands_are_portable(command):
+                    nonportable_commands.append(hook_label)
+
+    if invalid_groups:
+        blockers.append(
+            _platform_blocker(
+                "plugin_hooks_group_shape_invalid",
+                "Each hook matcher group must contain a hooks array.",
+                dimension="plugin_hooks",
+                path=hooks_rel,
+                evidence={"invalid_groups": invalid_groups},
+            )
+        )
+    if unsupported_types:
+        blockers.append(
+            _platform_blocker(
+                "plugin_hooks_unsupported_type",
+                "Plugin hooks currently support command hooks only.",
+                dimension="runtime_support",
+                path=hooks_rel,
+                evidence={"unsupported_types": unsupported_types},
+            )
+        )
+    if timeoutsec_hooks:
+        blockers.append(
+            _platform_blocker(
+                "plugin_hooks_timeoutsec_unsupported",
+                "Command hooks must use timeout in seconds; timeoutSec is unsupported.",
+                dimension="plugin_hooks",
+                path=hooks_rel,
+                evidence={"hooks": timeoutsec_hooks},
+            )
+        )
+    if missing_timeout_hooks:
+        blockers.append(
+            _platform_blocker(
+                "plugin_hooks_timeout_missing",
+                "Command hooks must declare timeout as an integer number of seconds.",
+                dimension="plugin_hooks",
+                path=hooks_rel,
+                evidence={"hooks": missing_timeout_hooks},
+            )
+        )
+    if nonportable_commands:
+        blockers.append(
+            _platform_blocker(
+                "plugin_hooks_command_not_portable",
+                "Plugin-owned hook commands must reference ${PLUGIN_ROOT} or ${PLUGIN_DATA}.",
+                dimension="path_portability",
+                path=hooks_rel,
+                evidence={"hooks": nonportable_commands},
+            )
+        )
+    checks.append(
+        _platform_check(
+            "plugin_hooks_runtime_supported_shape",
+            "blocked_validation"
+            if invalid_groups or unsupported_types or timeoutsec_hooks or missing_timeout_hooks
+            else "pass",
+            dimension="plugin_hooks",
+            evidence={
+                "hook_count": hook_count,
+                "invalid_groups": invalid_groups,
+                "unsupported_types": unsupported_types,
+                "timeoutSec_hooks": timeoutsec_hooks,
+                "missing_timeout_hooks": missing_timeout_hooks,
+            },
+        )
+    )
+    checks.append(
+        _platform_check(
+            "plugin_hooks_command_portability",
+            "pass" if not nonportable_commands else "blocked_validation",
+            dimension="path_portability",
+            evidence={"nonportable_commands": nonportable_commands},
+        )
+    )
+    if hook_count == 0:
+        advisories.append(
+            _platform_advisory(
+                "plugin_hooks_empty",
+                "Bundled hook files should contain at least one supported command hook when declared.",
+                dimension="plugin_hooks",
+                path=hooks_rel,
+            )
+        )
+    return checks, blockers, advisories
+
+
+def openai_platform_compat_contract(
+    repo_root: Path | None,
+    source_path: Path | None,
+    frontmatter: dict[str, Any],
+) -> dict[str, Any]:
+    """Return deterministic OpenAI-facing skill and plugin compatibility checks."""
+    checks: list[dict[str, Any]] = []
+    blockers: list[dict[str, Any]] = []
+    advisories: list[dict[str, Any]] = []
+    source_rel = repo_relative_path(repo_root, source_path) if repo_root and source_path else None
+    openai_fields = read_agents_openai_yaml_fields(source_path)
+    interface = openai_fields.get("interface")
+    short_description = ""
+    if isinstance(interface, dict):
+        short_description = str(interface.get("short_description") or "").strip()
+    skill_description = str(frontmatter.get("description") or "").strip()
+    checks.append(
+        _platform_check(
+            "skill_metadata_projection",
+            "pass" if frontmatter.get("name") and skill_description else "blocked_validation",
+            dimension="metadata_projection",
+            evidence={
+                "name_present": bool(frontmatter.get("name")),
+                "description_present": bool(skill_description),
+                "short_description_present": bool(short_description),
+            },
+        )
+    )
+    if not frontmatter.get("name") or not skill_description:
+        blockers.append(
+            _platform_blocker(
+                "openai_skill_metadata_incomplete",
+                "OpenAI-facing skill projection requires name and description metadata.",
+                dimension="metadata_projection",
+                path=source_rel,
+            )
+        )
+    if not short_description:
+        advisories.append(
+            _platform_advisory(
+                "openai_short_description_missing",
+                "agents/openai.yaml should expose interface.short_description for browseable surfaces.",
+                dimension="metadata_projection",
+                path=source_rel,
+            )
+        )
+
+    plugin_root = _plugin_root_for_source(repo_root, source_path)
+    plugin_manifest_path = _plugin_manifest_path(plugin_root)
+    plugin_manifest, manifest_error = _read_json_object(plugin_manifest_path)
+    if plugin_root:
+        checks.append(
+            _platform_check(
+                "plugin_manifest_parse",
+                "pass" if manifest_error is None else "blocked_validation",
+                dimension="plugin_manifest",
+                evidence={
+                    "path": _rel_path_or_none(repo_root, plugin_manifest_path),
+                    "error": manifest_error,
+                },
+            )
+        )
+        if manifest_error is not None:
+            blockers.append(
+                _platform_blocker(
+                    "plugin_manifest_unreadable",
+                    "Plugin-owned skills must have a readable plugin.json manifest.",
+                    dimension="plugin_manifest",
+                    path=_rel_path_or_none(repo_root, plugin_manifest_path),
+                    evidence={"error": manifest_error},
+                )
+            )
+    hook_checks, hook_blockers, hook_advisories = _plugin_hooks_contract(
+        repo_root,
+        plugin_root,
+        plugin_manifest,
+    )
+    checks.extend(hook_checks)
+    blockers.extend(hook_blockers)
+    advisories.extend(hook_advisories)
+
+    status = "blocked_validation" if blockers else "pass"
+    return {
+        "schema_version": OPENAI_PLATFORM_COMPAT_SCHEMA_VERSION,
+        "policy": "deterministic_openai_skill_and_plugin_projection",
+        "required_for_package_readiness": True,
+        "status": status,
+        "target_kind": "plugin_skill" if plugin_root else "skill",
+        "rubric": {
+            "source": "openai-platform-and-codex-plugin-hook-contract",
+            "dimensions": [
+                "metadata_projection",
+                "plugin_manifest",
+                "plugin_hooks",
+                "path_portability",
+                "runtime_support",
+            ],
+        },
+        "checks": checks,
+        "blockers": blockers,
+        "advisories": advisories,
+        "what_this_proves": [
+            "openai_facing_metadata_shape_checked",
+            "plugin_manifest_hook_pointer_checked",
+            "bundled_command_hook_shape_checked",
+            "plugin_command_path_portability_checked",
+        ] if status == "pass" else [],
+        "what_this_does_not_prove": [
+            "hosted_openai_acceptance",
+            "runtime_plugin_hook_execution",
+            "behavioral_eval_pass",
+            "marketplace_publication",
+        ],
+    }
+
+
 def skill_agent_toml_paths(repo_root: Path | None, skill_md: Path | None) -> list[str]:
     """Return optional per-skill agent TOML runtime profiles."""
     if not skill_md:
@@ -1758,6 +3098,14 @@ def sdk_package_contract(
     reference_contract = read_reference_contract(source_path)
     reference_quality = reference_quality_contract(repo_root, source_path)
     progressive_disclosure = progressive_disclosure_contract(repo_root, source_path, text)
+    writing_quality = writing_quality_contract(
+        repo_root,
+        source_path,
+        frontmatter,
+        text,
+        progressive_disclosure,
+    )
+    openai_platform_compat = openai_platform_compat_contract(repo_root, source_path, frontmatter)
     identity_and_assets = identity_and_assets_contract(repo_root, source_path, frontmatter)
     knowledge_capsules = knowledge_capsule_first_party_contract(repo_root, source_path, text)
     workflow_contract = skillflow_contract(repo_root, source_path, reference_contract)
@@ -1802,6 +3150,8 @@ def sdk_package_contract(
             "authority": "sdk_package_contract",
         },
         "reference_quality": reference_quality,
+        "writing_quality": writing_quality,
+        "openai_platform_compat": openai_platform_compat,
         "purpose": reference_contract.get("purpose") or frontmatter.get("description"),
         "inputs": reference_contract.get("inputs")
         or ("declared_in_skill_md" if markdown_heading_declared(text, "Inputs") else None),
@@ -1851,6 +3201,8 @@ def sdk_package_contract(
             "agent_metadata_declared": bool(agents_openai_path),
             "references_contract_declared": bool(reference_contract),
             "references_quality_status": reference_quality["status"],
+            "writing_quality_status": writing_quality["status"],
+            "openai_platform_compat_status": openai_platform_compat["status"],
             "evals_declared": bool(eval_paths),
             "task_profile_declared": bool(task_profile_path),
             "agent_tomls_declared": bool(agent_toml_paths),
@@ -2138,6 +3490,30 @@ def skill_package_readiness(
         and not reference_blockers
     ):
         readiness_level = "knowledge_capsules_incomplete"
+        share_ready = False
+    progressive = sdk_contract.get("progressive_disclosure")
+    progressive_blockers: list[str] = []
+    if isinstance(progressive, dict):
+        source_operating_model = progressive.get("source_operating_model")
+        if (
+            isinstance(source_operating_model, dict)
+            and source_operating_model.get("status") == "blocked_validation"
+        ):
+            progressive_blockers = [
+                "progressive_disclosure:source_operating_model_preservation"
+            ]
+            blocked_reasons.extend(progressive_blockers)
+    if (
+        progressive_blockers
+        and not missing_identity_fields
+        and not missing
+        and not sdk_missing
+        and not workflow_blockers
+        and not optimization_blockers
+        and not reference_blockers
+        and not knowledge_blockers
+    ):
+        readiness_level = "progressive_disclosure_incomplete"
         share_ready = False
     if missing_identity_fields:
         blocked_reasons.append("identity_incomplete")

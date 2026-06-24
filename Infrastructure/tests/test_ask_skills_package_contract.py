@@ -614,6 +614,8 @@ policy:
         self.assertIn("agent_metadata", sdk_contract["required_fields"]["present"])
         self.assertIn("reference_contract", sdk_contract["required_fields"]["present"])
         self.assertIn("reference_quality", sdk_contract["required_fields"]["present"])
+        self.assertIn("writing_quality", sdk_contract["required_fields"]["present"])
+        self.assertIn("openai_platform_compat", sdk_contract["required_fields"]["present"])
         self.assertIn("purpose", sdk_contract["required_fields"]["present"])
         self.assertIn("inputs", sdk_contract["required_fields"]["present"])
         self.assertIn("outputs", sdk_contract["required_fields"]["present"])
@@ -640,7 +642,36 @@ policy:
         )
         self.assertFalse(sdk_contract["values"]["reference_quality"]["blockers"])
         self.assertEqual(
+            sdk_contract["values"]["writing_quality"]["schema_version"],
+            "skills-sdk.skill-writing-quality.v1",
+        )
+        self.assertEqual(sdk_contract["values"]["writing_quality"]["status"], "pass")
+        self.assertTrue(
+            sdk_contract["values"]["writing_quality"]["required_for_package_readiness"]
+        )
+        self.assertFalse(sdk_contract["values"]["writing_quality"]["blockers"])
+        self.assertEqual(
+            sdk_contract["values"]["openai_platform_compat"]["schema_version"],
+            "skills-sdk.openai-platform-compat.v1",
+        )
+        self.assertEqual(
+            sdk_contract["values"]["openai_platform_compat"]["status"],
+            "pass",
+        )
+        self.assertTrue(
+            sdk_contract["values"]["openai_platform_compat"]["required_for_package_readiness"]
+        )
+        self.assertFalse(sdk_contract["values"]["openai_platform_compat"]["blockers"])
+        self.assertEqual(
             sdk_contract["progressive_disclosure"]["references_quality_status"],
+            "pass",
+        )
+        self.assertEqual(
+            sdk_contract["progressive_disclosure"]["writing_quality_status"],
+            "pass",
+        )
+        self.assertEqual(
+            sdk_contract["progressive_disclosure"]["openai_platform_compat_status"],
             "pass",
         )
         self.assertEqual(
@@ -907,6 +938,72 @@ description: Missing reference fixture.
         )
         self.assertFalse(progressive["progressive_disclosure_ready"])
 
+    def test_sdk_contract_requires_format_docs_for_operating_model_artifacts(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "github" / "teach-like"
+            references_dir = skill_dir / "references"
+            references_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: teach-like
+description: Teaching fixture.
+---
+
+# Teach Like
+
+## Inputs
+
+- Workspace files: MISSION.md, RESOURCES.md, GLOSSARY.md, and learning-records/*.md.
+
+## Progressive Disclosure
+
+- Read `references/templates.md` for compact artifact shapes.
+""",
+                encoding="utf-8",
+            )
+            (references_dir / "templates.md").write_text("# Templates\n", encoding="utf-8")
+
+            contract = package_contracts.sdk_package_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+            )
+
+            progressive = contract["progressive_disclosure"]
+            formats = progressive["operating_model_formats"]
+            self.assertEqual(
+                formats["missing_format_references"],
+                [
+                    "references/mission-format.md",
+                    "references/resources-format.md",
+                    "references/glossary-format.md",
+                    "references/learning-record-format.md",
+                ],
+            )
+            self.assertFalse(formats["format_references_ready"])
+            self.assertFalse(progressive["progressive_disclosure_ready"])
+
+            for filename in (
+                "mission-format.md",
+                "resources-format.md",
+                "glossary-format.md",
+                "learning-record-format.md",
+            ):
+                (references_dir / filename).write_text(f"# {filename}\n", encoding="utf-8")
+
+            fixed = package_contracts.sdk_package_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+            )
+
+        fixed_formats = fixed["progressive_disclosure"]["operating_model_formats"]
+        self.assertEqual(fixed_formats["missing_format_references"], [])
+        self.assertTrue(fixed_formats["format_references_ready"])
+        self.assertTrue(fixed["progressive_disclosure"]["progressive_disclosure_ready"])
+
     def test_sdk_contract_rejects_progressive_paths_outside_package(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir)
@@ -942,6 +1039,93 @@ description: Escape reference fixture.
             ["references/../outside.md"],
         )
         self.assertFalse(progressive["progressive_disclosure_ready"])
+
+    def test_sdk_contract_requires_source_operating_model_progressive_route(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "github" / "sourceful-skill"
+            references_dir = skill_dir / "references"
+            references_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: sourceful-skill
+description: Preserve source operating model fixture.
+metadata:
+  version: "1.0.0"
+  compatible_roles:
+    - default
+  runtime_needs:
+    - local files
+  maturity: stable
+  provenance: test fixture
+  share_readiness: ready
+---
+
+# Sourceful Skill
+
+## Progressive Disclosure
+
+- Read `references/templates.md` for compact artifact shapes.
+""",
+                encoding="utf-8",
+            )
+            (references_dir / "templates.md").write_text("# Templates\n", encoding="utf-8")
+            (references_dir / "teaching-operating-model.md").write_text(
+                "# Teaching Operating Model\n",
+                encoding="utf-8",
+            )
+            (references_dir / "source-context.yaml").write_text(
+                """schema_version: 1
+references:
+  - path: references/teaching-operating-model.md
+    kind: source_operating_model
+    provenance: upstream source
+    load_when: creating lessons
+""",
+                encoding="utf-8",
+            )
+
+            contract = package_contracts.skill_package_readiness(
+                read_skill_frontmatter_fields(skill_md),
+                repo_root,
+                skill_md,
+            )
+
+            source_model = contract["sdk_contract"]["progressive_disclosure"][
+                "source_operating_model"
+            ]
+            self.assertEqual(source_model["status"], "blocked_validation")
+            self.assertEqual(
+                source_model["missing_progressive_routes"],
+                ["references/teaching-operating-model.md"],
+            )
+            self.assertIn(
+                "progressive_disclosure:source_operating_model_preservation",
+                contract["install_gate"]["blocked_reasons"],
+            )
+
+            skill_md.write_text(
+                skill_md.read_text(encoding="utf-8")
+                + "- Read `references/teaching-operating-model.md` before creating lessons.\n",
+                encoding="utf-8",
+            )
+
+            fixed = package_contracts.skill_package_readiness(
+                read_skill_frontmatter_fields(skill_md),
+                repo_root,
+                skill_md,
+            )
+
+        fixed_source_model = fixed["sdk_contract"]["progressive_disclosure"][
+            "source_operating_model"
+        ]
+        self.assertEqual(fixed_source_model["status"], "pass")
+        self.assertEqual(fixed_source_model["missing_progressive_routes"], [])
+        self.assertNotIn(
+            "progressive_disclosure:source_operating_model_preservation",
+            fixed["install_gate"]["blocked_reasons"],
+        )
 
     def test_sdk_contract_reports_identity_and_asset_browseability(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -1634,6 +1818,59 @@ tessl_scenario_policy:
             "tessl_scenario_drift_review_missing",
             {blocker["rule_id"] for blocker in contract["blockers"]},
         )
+
+    def test_reference_quality_skips_hidden_platform_files(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "hidden-file-skill"
+            references_dir = skill_dir / "references"
+            references_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: hidden-file-skill
+description: Hidden reference fixture.
+---
+
+# Hidden File Skill
+""",
+                encoding="utf-8",
+            )
+            (references_dir / ".DS_Store").write_bytes(b"\xff\x00binary")
+            (references_dir / "details.md").write_text("# Details\n", encoding="utf-8")
+
+            contract = package_contracts.reference_quality_contract(repo_root, skill_md)
+
+        paths = {check.get("path") for check in contract["checks"]}
+        self.assertNotIn("Skills/agent-ops/hidden-file-skill/references/.DS_Store", paths)
+        self.assertIn("Skills/agent-ops/hidden-file-skill/references/details.md", paths)
+        self.assertEqual(contract["status"], "pass")
+
+    def test_reference_quality_blocks_non_utf8_reference_without_crashing(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "binary-reference-skill"
+            references_dir = skill_dir / "references"
+            references_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: binary-reference-skill
+description: Binary reference fixture.
+---
+
+# Binary Reference Skill
+""",
+                encoding="utf-8",
+            )
+            (references_dir / "details.md").write_text("# Details\n", encoding="utf-8")
+            (references_dir / "bad.md").write_bytes(b"\xff\x00binary")
+
+            contract = package_contracts.reference_quality_contract(repo_root, skill_md)
+
+        blockers = {blocker["path"]: blocker for blocker in contract["blockers"]}
+        self.assertIn("Skills/agent-ops/binary-reference-skill/references/bad.md", blockers)
+        self.assertEqual(contract["status"], "blocked_validation")
 
     def test_sdk_contract_missing_files_block_install_readiness(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

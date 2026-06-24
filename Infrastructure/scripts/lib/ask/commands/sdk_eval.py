@@ -24,6 +24,7 @@ def add_sdk_eval_parser(
     _add_scorer_quality_parser(subparsers, global_parser)
     _add_scorer_calibration_parser(subparsers, global_parser)
     _add_tessl_score_parser(subparsers, global_parser)
+    _add_tessl_local_proof_parser(subparsers, global_parser)
     _add_regression_plan_parser(subparsers, global_parser)
     _add_handoff_readiness_parser(subparsers, global_parser)
     _add_profiles_parser(subparsers, global_parser)
@@ -43,6 +44,8 @@ def _add_run_parser(subparsers: argparse._SubParsersAction, global_parser: argpa
     run.add_argument("--runner", choices=["auto", "internal", "deterministic-jsonl"], default="auto")
     run.add_argument("--mode", choices=["smoke", "release"], default="smoke", help="Internal eval mode.")
     run.add_argument("--case", action="append", dest="cases", help="Internal eval case id filter.")
+    run.add_argument("--codex-profile", help="Override the Codex config profile for the internal eval runner.")
+    run.add_argument("--timeout-seconds", type=_positive_int, help="Override the internal eval runner timeout.")
     run.add_argument("--with-tessl", action="store_true", help="Allow internal Tessl continuation.")
 
 
@@ -70,6 +73,22 @@ def _add_tessl_score_parser(subparsers: argparse._SubParsersAction, global_parse
     score.add_argument("--skill", required=True, help="Skill handle or repo-relative source path represented by the run")
     score.add_argument("--run-id", help="Expected Tessl eval run id")
     score.add_argument("--preview", action="store_true", help="Emit a non-mutating Tessl score receipt")
+
+
+def _add_tessl_local_proof_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
+    proof = subparsers.add_parser(
+        "tessl-local-proof",
+        help="Preview or run local Tessl lint, pack, file install, and optional review proof",
+        parents=[global_parser],
+    )
+    proof.add_argument("--skill", required=True, help="Skill handle or repo-relative source path represented by the proof")
+    proof.add_argument("--workspace", required=True, help="Tessl workspace used for staged private package identity")
+    mode = proof.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--preview", action="store_true", help="Emit a non-mutating local Tessl proof plan")
+    mode.add_argument("--execute", action="store_true", help="Run temp-staged local Tessl lint, pack, and file install checks")
+    proof.add_argument("--include-review", action="store_true", help="Also run Tessl async review threshold check")
+    proof.add_argument("--review-threshold", type=_positive_int, default=90)
+    proof.add_argument("--timeout-seconds", type=_positive_int, default=180)
 
 
 def _add_regression_plan_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
@@ -156,6 +175,7 @@ def dispatch_sdk_eval(repo_root: Path, args: argparse.Namespace) -> CallResult:
         "scorer-quality": _dispatch_scorer_quality,
         "scorer-calibration": _dispatch_scorer_calibration,
         "tessl-score": _dispatch_tessl_score,
+        "tessl-local-proof": _dispatch_tessl_local_proof,
         "regression-plan": _dispatch_regression_plan,
         "handoff-readiness": _dispatch_handoff_readiness,
         "profiles": _dispatch_profiles,
@@ -180,7 +200,9 @@ def _dispatch_run(repo_root: Path, args: argparse.Namespace) -> CallResult:
         mode=args.mode,
         runner=args.runner,
         skip_tessl=not args.with_tessl,
+        codex_profile=args.codex_profile,
         cases=args.cases,
+        timeout_seconds=args.timeout_seconds,
     )
 
 
@@ -230,6 +252,18 @@ def _dispatch_tessl_score(repo_root: Path, args: argparse.Namespace) -> CallResu
         view_json=args.view_json,
         skill=args.skill,
         run_id=args.run_id,
+    )
+
+
+def _dispatch_tessl_local_proof(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    return skills_commands.skills_sdk_eval_tessl_local_proof(
+        repo_root,
+        skill=args.skill,
+        workspace=args.workspace,
+        execute=args.execute,
+        include_review=args.include_review,
+        review_threshold=args.review_threshold,
+        timeout_seconds=args.timeout_seconds,
     )
 
 
@@ -342,6 +376,10 @@ def _scorer_calibration_next() -> str:
 
 def _tessl_score_next() -> str:
     return "ask sdk eval tessl-score --view-json <view-json> --skill <skill> --preview --json --robot"
+
+
+def _tessl_local_proof_next() -> str:
+    return "ask sdk eval tessl-local-proof --skill <skill> --workspace <workspace> --preview --json --robot"
 
 
 def _regression_plan_next() -> str:

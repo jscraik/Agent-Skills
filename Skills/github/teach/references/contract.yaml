@@ -19,6 +19,7 @@
     "NOTES.md",
     "reference/*.html",
     "learning-records/*.md",
+    "GLOSSARY.md",
     "lessons/*.html",
     "assets/*"
   ],
@@ -27,6 +28,7 @@
     "lesson HTML",
     "reference HTML",
     "resource entries",
+    "glossary terms",
     "learning records",
     "notes"
   ],
@@ -48,10 +50,42 @@
     "writes_learning_artifacts": true,
     "requires_human_confirmation_for_destructive_changes": true
   },
+  "permission_profile": {
+    "filesystem": {
+      "read": [
+        "current teaching workspace files",
+        "package-local Teach references",
+        "user-provided source material after redaction review"
+      ],
+      "write": [
+        "MISSION.md",
+        "RESOURCES.md",
+        "GLOSSARY.md",
+        "NOTES.md",
+        "lessons/*.html",
+        "reference/*.html",
+        "learning-records/*.md",
+        "assets/* when a reusable component is required"
+      ]
+    },
+    "network": {
+      "required": false,
+      "allowed_when": "current, external-source, API, version-sensitive, or credential-scope lessons need high-trust source verification"
+    }
+  },
   "validation": [
     "./bin/ask skills audit Skills/github/teach --level strict --json --robot",
     "./bin/ask evals run Skills/github/teach --mode smoke --json --robot",
     "./bin/ask skills external-review Skills/github/teach --json --robot"
+  ],
+  "format_references": [
+    "references/mission-format.md",
+    "references/resources-format.md",
+    "references/learning-record-format.md",
+    "references/glossary-format.md"
+  ],
+  "source_operating_model_references": [
+    "references/teaching-operating-model.md"
   ],
   "evals": {
     "smoke": [
@@ -64,7 +98,9 @@
       "happy-resource-curation",
       "negative-one-off-fact",
       "pressure-prompt-injection",
-      "pressure-private-transcript"
+      "pressure-private-transcript",
+      "regression-format-doc-preservation",
+      "regression-teaching-operating-model-preservation"
     ],
     "release": [
       "happy-new-topic",
@@ -86,7 +122,9 @@
       "negative-professional-certification",
       "pressure-prompt-injection",
       "pressure-private-transcript",
-      "pressure-destructive-workspace"
+      "pressure-destructive-workspace",
+      "regression-format-doc-preservation",
+      "regression-teaching-operating-model-preservation"
     ]
   },
   "evidence_policy": "Report created or updated learning files, cited sources, validation checks, and blockers.",

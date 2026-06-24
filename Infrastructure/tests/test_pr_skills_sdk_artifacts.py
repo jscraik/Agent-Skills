@@ -777,9 +777,9 @@ class TestHtmlDoctrineCards(unittest.TestCase):
                     title, self._raw, f"Doctrine card title '{title}' not found"
                 )
 
-    def test_doctrine_card_count_is_eight(self):
+    def test_doctrine_card_count_is_nine(self):
         count = self._raw.count('class="doctrine-card"')
-        self.assertEqual(count, 8, f"Expected 8 doctrine-card elements, found {count}")
+        self.assertEqual(count, 9, f"Expected 9 doctrine-card elements, found {count}")
 
     def test_mantra_text_present(self):
         """The mantra should match the AX doctrine tagline."""

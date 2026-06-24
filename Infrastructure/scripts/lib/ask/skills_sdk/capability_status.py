@@ -23,7 +23,17 @@ ALLOWED_STATUSES = frozenset(
     }
 )
 MUTATING_CAPABILITY_IDS = frozenset(
-    {"ab_judge_score", "ab_run", "real_install", "refs_ingestion", "review_execution", "rollback", "trust_store", "uninstall"}
+    {
+        "ab_judge_score",
+        "ab_run",
+        "real_install",
+        "refs_ingestion",
+        "review_execution",
+        "rollback",
+        "sdk_plugin_lifecycle",
+        "trust_store",
+        "uninstall",
+    }
 )
 REQUIRED_CAPABILITY_IDS = (
     "authoring",
@@ -68,6 +78,7 @@ REQUIRED_CAPABILITY_IDS = (
     "schema_registry",
     "registry",
     "local_plugin_readiness",
+    "sdk_plugin_lifecycle",
     "remote_marketplace",
     "publish",
     "rollback",

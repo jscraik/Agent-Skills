@@ -1,0 +1,467 @@
+{
+  "actor_type": "agent",
+  "artifacts": [
+    {
+      "actor_type": "agent",
+      "artifact_id": "runtime-card-openai-docs-codex",
+      "artifact_type": "runtime_card",
+      "consumer_contract": "RuntimeCard v1 consumed by validate_runtime_cards.py and governed closeout.",
+      "generated_by": "./bin/ask skills proof openai-docs --runtime-target codex --json --robot",
+      "mutation_scope": "evidence_write",
+      "path": ".harness/evidence/runtime-proof/openai-docs/codex/runtime-card.json",
+      "source_identity": {
+        "source_paths": [
+          "skills-system/openai-docs/SKILL.md",
+          "Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py",
+          "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+        ]
+      },
+      "validation_status": "partial",
+      "visibility_status": "user_observable",
+      "workspace_root": "${WORKSPACE_ROOT}"
+    },
+    {
+      "actor_type": "agent",
+      "artifact_id": "runtime-probe-openai-docs-codex",
+      "artifact_type": "verifier_output",
+      "consumer_contract": "Probe JSON records the raw skill runtime proof used by the RuntimeCard.",
+      "generated_by": "./bin/ask skills proof openai-docs --runtime-target codex --json --robot",
+      "mutation_scope": "evidence_write",
+      "path": ".harness/evidence/runtime-proof/openai-docs/codex/probe.json",
+      "source_identity": {
+        "source_paths": [
+          "skills-system/openai-docs/SKILL.md",
+          "Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py",
+          "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+        ]
+      },
+      "validation_status": "partial",
+      "visibility_status": "user_observable",
+      "workspace_root": "${WORKSPACE_ROOT}"
+    }
+  ],
+  "card_id": "runtime-card-openai-docs-codex",
+  "created_at": "2026-06-24T20:43:05Z",
+  "evidence_receipts": [
+    {
+      "artifact_path": ".harness/evidence/runtime-proof/openai-docs/codex/runtime-card.json",
+      "blocker": "Codex runtime observability is degraded; runtime evidence cannot claim live pass while telemetry reports overall_status='trusted' and skill_invocation_event_count=0.",
+      "blocker_class": "partial",
+      "claim": "$openai-docs is reachable in the Codex runtime.",
+      "claim_status": "partial",
+      "command": "./bin/ask skills proof openai-docs --runtime-target codex --json --robot",
+      "evidence_type": "command",
+      "exit_code": 2,
+      "observed_at": "2026-06-24T20:43:05Z",
+      "probe_artifact_path": ".harness/evidence/runtime-proof/openai-docs/codex/probe.json",
+      "probe_command": "./bin/ask skills proof openai-docs --runtime-target codex --json --robot",
+      "probe_exit_code": 2,
+      "receipt_id": "runtime-proof-openai-docs-codex",
+      "runtime_status": "partial",
+      "runtime_target": "codex",
+      "source_paths": [
+        "skills-system/openai-docs/SKILL.md",
+        "Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py",
+        "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+      ],
+      "verifier": "ask.skills.proof"
+    }
+  ],
+  "limitations": [
+    {
+      "class": "skill_invocation_not_asserted",
+      "message": "Codex session metadata was observed for this workspace; this proof still verifies SDK-flat runtime reachability rather than a dedicated skill tool invocation event. Agents observability counters are attached when available but are not treated as per-skill invocation proof."
+    }
+  ],
+  "mutation_scope": "evidence_write",
+  "permission_profile": {
+    "filesystem": "workspace evidence write",
+    "network": "not required"
+  },
+  "recovery_plan": {
+    "expected_outcome": "Operator can rerun the proof command and inspect schema-valid runtime evidence.",
+    "next_commands": [
+      {
+        "command": "./bin/ask skills sync --scope user --projection flat --dry-run --json --robot",
+        "expected_outcome": "Reports whether ~/.codex/skills or ~/.agents/skills would be relinked before mutation.",
+        "permission_profile": {
+          "filesystem": "read workspace and user runtime links",
+          "network": "not required"
+        },
+        "preconditions": [
+          "Workspace flat projection validates cleanly."
+        ]
+      },
+      {
+        "command": "./bin/ask skills sync --scope workspace --projection flat --json --robot",
+        "expected_outcome": "Refreshes .agents/skills from canonical frontmatter and skill sources.",
+        "permission_profile": {
+          "filesystem": "write workspace runtime projection",
+          "network": "not required"
+        },
+        "preconditions": [
+          "Canonical skill sources are ready to project."
+        ]
+      },
+      {
+        "command": "./bin/ask skills sync --scope user --projection flat --json --robot",
+        "expected_outcome": "Makes user-level Codex and Agents skill runtimes point at the workspace projection.",
+        "permission_profile": {
+          "filesystem": "write home-directory runtime links",
+          "network": "not required"
+        },
+        "preconditions": [
+          "Dry-run output is acceptable to the operator."
+        ]
+      },
+      {
+        "command": "./bin/ask skills proof openai-docs --runtime-target codex --json --robot",
+        "expected_outcome": "Updates runtime evidence with pass or a narrower blocked_runtime reason.",
+        "permission_profile": {
+          "filesystem": "read workspace and user runtime links; write runtime-proof evidence",
+          "network": "not required"
+        },
+        "preconditions": [
+          "User runtime link now points at the workspace projection."
+        ]
+      }
+    ],
+    "permission_profile": {
+      "filesystem": "workspace evidence write and user runtime link read",
+      "network": "not required"
+    },
+    "preconditions": [
+      "Run workspace and user skill sync if the SDK skill handle or runtime link is absent."
+    ],
+    "reason": "Restore healthy Codex observability or collect a fresh skill invocation event, then rerun the explicit runtime proof.",
+    "recovery_status": "partial"
+  },
+  "runtime_diagnostics": {
+    "direct_runtime_projection": {
+      "exists": false,
+      "path": "${WORKSPACE_ROOT}/.agents/skills/openai-docs/SKILL.md",
+      "required": false,
+      "runtime_visibility": "source"
+    },
+    "expected_workspace_runtime": "${WORKSPACE_ROOT}/.agents/skills",
+    "failed_gate": null,
+    "recovery_commands": [
+      {
+        "command": "./bin/ask skills sync --scope user --projection flat --dry-run --json --robot",
+        "expected_outcome": "Reports whether ~/.codex/skills or ~/.agents/skills would be relinked before mutation.",
+        "kind": "preview_user_runtime_sync",
+        "permission_profile": {
+          "filesystem": "read workspace and user runtime links",
+          "network": "not required"
+        },
+        "preconditions": [
+          "Workspace flat projection validates cleanly."
+        ]
+      },
+      {
+        "command": "./bin/ask skills sync --scope workspace --projection flat --json --robot",
+        "expected_outcome": "Refreshes .agents/skills from canonical frontmatter and skill sources.",
+        "kind": "refresh_workspace_projection",
+        "permission_profile": {
+          "filesystem": "write workspace runtime projection",
+          "network": "not required"
+        },
+        "preconditions": [
+          "Canonical skill sources are ready to project."
+        ]
+      },
+      {
+        "command": "./bin/ask skills sync --scope user --projection flat --json --robot",
+        "expected_outcome": "Makes user-level Codex and Agents skill runtimes point at the workspace projection.",
+        "kind": "apply_user_runtime_sync",
+        "permission_profile": {
+          "filesystem": "write home-directory runtime links",
+          "network": "not required"
+        },
+        "preconditions": [
+          "Dry-run output is acceptable to the operator."
+        ]
+      },
+      {
+        "command": "./bin/ask skills proof openai-docs --runtime-target codex --json --robot",
+        "expected_outcome": "Updates runtime evidence with pass or a narrower blocked_runtime reason.",
+        "kind": "rerun_runtime_proof",
+        "permission_profile": {
+          "filesystem": "read workspace and user runtime links; write runtime-proof evidence",
+          "network": "not required"
+        },
+        "preconditions": [
+          "User runtime link now points at the workspace projection."
+        ]
+      }
+    ],
+    "recovery_risk": "User-scope sync mutates home-directory runtime links; preview with --dry-run before applying.",
+    "runtime_aliases": {
+      "dedupe_identity": "${WORKSPACE_ROOT}/.agents/skills",
+      "dedupe_rule": "Codex and Agents user skill roots are aliases when their resolved paths match.",
+      "distinct_runtime_identity_count": 1,
+      "expected_workspace_runtime": "${WORKSPACE_ROOT}/.agents/skills",
+      "root_identities": {
+        "agents_user_runtime": "${WORKSPACE_ROOT}/.agents/skills",
+        "codex_user_runtime": "${WORKSPACE_ROOT}/.agents/skills"
+      },
+      "schema_version": "skill-runtime-aliases.v1",
+      "status": "deduped_aliases"
+    },
+    "runtime_modes": {
+      "agents_user_runtime": "root_symlink",
+      "codex_user_runtime": "root_symlink"
+    },
+    "schema_version": "sdk-skill-runtime-diagnostics.v1",
+    "selected_runtime_target": "codex"
+  },
+  "runtime_session": {
+    "actor_type": "agent",
+    "created_at": "2026-06-24T20:43:05Z",
+    "latest_turn_id": "019efb5d-9934-7272-a4c9-366a32acdb88",
+    "observability": {
+      "codex_log_presence": true,
+      "last_ingest_at": "2026-06-24T20:43:00.362506Z",
+      "last_logs_ingest_at": "2026-06-24T20:43:00.362506Z",
+      "last_traces_ingest_at": "2026-06-24T20:31:13.423948Z",
+      "logs_freshness": "fresh",
+      "overall_status": "trusted",
+      "plugin_backed_skill_invocation_count": 0,
+      "reasons": [],
+      "skill_invocation_event_count": 0,
+      "source": "agents_otel_stats",
+      "stale_signals": [
+        {
+          "freshness": "stale",
+          "last_ingest_at": "2026-05-26T22:55:27.222740Z",
+          "signal": "metrics"
+        }
+      ],
+      "stats_path": "${HOME}/.agents/otel-collector/data/processed/stats.json",
+      "traces_freshness": "recent"
+    },
+    "observability_sources": [
+      "agents_otel_stats"
+    ],
+    "rollout_path": "${HOME}/.codex/sessions/2026/06/24/rollout-2026-06-24T00-35-56-019ef6d7-2a64-7463-8a9a-ba75e14b0dfd.jsonl",
+    "runtime_status": "partial",
+    "runtime_target": "codex",
+    "session_id": "019ef6d7-2a64-7463-8a9a-ba75e14b0dfd",
+    "source": "codex_rollout_jsonl",
+    "unavailable_reason": "Codex runtime observability is degraded; runtime evidence cannot claim live pass while telemetry reports overall_status='trusted' and skill_invocation_event_count=0.",
+    "visibility_status": "user_observable",
+    "workspace_root": "${WORKSPACE_ROOT}"
+  },
+  "runtime_status": "partial",
+  "runtime_target": "codex",
+  "schema_version": 1,
+  "sdk_skill_name": "openai-docs",
+  "skill_handle": "openai-docs",
+  "thread_runs": [
+    {
+      "claim_status": "partial",
+      "cwd": "${WORKSPACE_ROOT}",
+      "latest_turn_id": "019efb5d-9934-7272-a4c9-366a32acdb88",
+      "observed_at": "2026-06-24T20:43:05Z",
+      "originator": "Codex Desktop",
+      "rollout_path": "${HOME}/.codex/sessions/2026/06/24/rollout-2026-06-24T00-35-56-019ef6d7-2a64-7463-8a9a-ba75e14b0dfd.jsonl",
+      "runtime_status": "implemented_enforced",
+      "runtime_target": "codex",
+      "session_id": "019ef6d7-2a64-7463-8a9a-ba75e14b0dfd",
+      "source": "codex_rollout_jsonl",
+      "thread_id": "019ef6d7-2a64-7463-8a9a-ba75e14b0dfd",
+      "thread_source": "user"
+    },
+    {
+      "claim_status": "partial",
+      "codex_log_presence": true,
+      "last_logs_ingest_at": "2026-06-24T20:43:00.362506Z",
+      "last_traces_ingest_at": "2026-06-24T20:31:13.423948Z",
+      "observed_at": "2026-06-24T20:43:05Z",
+      "overall_status": "trusted",
+      "runtime_status": "implemented_enforced",
+      "runtime_target": "codex",
+      "source": "agents_otel_stats",
+      "stats_path": "${HOME}/.agents/otel-collector/data/processed/stats.json",
+      "thread_id": "agents-otel-observability"
+    }
+  ],
+  "turn_events": [
+    {
+      "cwd": "${WORKSPACE_ROOT}",
+      "event_type": "turn_context_observed",
+      "observed_at": "2026-06-23T23:37:06.383Z",
+      "runtime_target": "codex",
+      "source_line": 5,
+      "turn_id": "019ef6d8-39f9-7c30-a468-27ef825bf5d6"
+    },
+    {
+      "event_type": "task_complete",
+      "observed_at": "2026-06-23T23:39:03.991Z",
+      "runtime_target": "codex",
+      "source_line": 52,
+      "turn_id": "019ef6d8-39f9-7c30-a468-27ef825bf5d6"
+    },
+    {
+      "cwd": "${WORKSPACE_ROOT}",
+      "event_type": "turn_context_observed",
+      "observed_at": "2026-06-23T23:43:48.510Z",
+      "runtime_target": "codex",
+      "source_line": 54,
+      "turn_id": "019ef6de-5cd4-7e03-bbf8-2a22ed637404"
+    },
+    {
+      "event_type": "task_complete",
+      "observed_at": "2026-06-23T23:45:06.262Z",
+      "runtime_target": "codex",
+      "source_line": 76,
+      "turn_id": "019ef6de-5cd4-7e03-bbf8-2a22ed637404"
+    },
+    {
+      "cwd": "${WORKSPACE_ROOT}",
+      "event_type": "turn_context_observed",
+      "observed_at": "2026-06-23T23:45:51.049Z",
+      "runtime_target": "codex",
+      "source_line": 78,
+      "turn_id": "019ef6e0-3b7a-7561-8e60-112d7a7c85cd"
+    },
+    {
+      "event_type": "patch_apply_end",
+      "observed_at": "2026-06-23T23:49:13.156Z",
+      "runtime_target": "codex",
+      "source_line": 190,
+      "turn_id": "019ef6e0-3b7a-7561-8e60-112d7a7c85cd"
+    },
+    {
+      "event_type": "patch_apply_end",
+      "observed_at": "2026-06-23T23:49:29.197Z",
+      "runtime_target": "codex",
+      "source_line": 197,
+      "turn_id": "019ef6e0-3b7a-7561-8e60-112d7a7c85cd"
+    },
+    {
+      "event_type": "patch_apply_end",
+      "observed_at": "2026-06-23T23:49:45.332Z",
+      "runtime_target": "codex",
+      "source_line": 204,
+      "turn_id": "019ef6e0-3b7a-7561-8e60-112d7a7c85cd"
+    },
+    {
+      "codex_log_presence": true,
+      "event_type": "agents_observability_stats_observed",
+      "observed_at": "2026-06-24T20:43:05Z",
+      "overall_status": "trusted",
+      "plugin_backed_skill_invocation_count": 0,
+      "runtime_target": "codex",
+      "skill_invocation_event_count": 0,
+      "source": "agents_otel_stats",
+      "stats_path": "${HOME}/.agents/otel-collector/data/processed/stats.json"
+    }
+  ],
+  "verifier_results": [
+    {
+      "failed_check_id": "runtime_observability_degraded",
+      "gates": {
+        "agents_user_link": true,
+        "agents_user_runtime_ready": true,
+        "canonical_source_exists": true,
+        "codex_user_link": true,
+        "codex_user_runtime_ready": true,
+        "direct_runtime_projection": true,
+        "resolver": true,
+        "user_runtime_alias_consistent": true,
+        "user_runtime_ready": true
+      },
+      "required_gates": [
+        "resolver",
+        "canonical_source_exists",
+        "direct_runtime_projection",
+        "codex_user_runtime_ready"
+      ],
+      "runtime_diagnostics": {
+        "direct_runtime_projection": {
+          "exists": false,
+          "path": "${WORKSPACE_ROOT}/.agents/skills/openai-docs/SKILL.md",
+          "required": false,
+          "runtime_visibility": "source"
+        },
+        "expected_workspace_runtime": "${WORKSPACE_ROOT}/.agents/skills",
+        "failed_gate": null,
+        "recovery_commands": [
+          {
+            "command": "./bin/ask skills sync --scope user --projection flat --dry-run --json --robot",
+            "expected_outcome": "Reports whether ~/.codex/skills or ~/.agents/skills would be relinked before mutation.",
+            "kind": "preview_user_runtime_sync",
+            "permission_profile": {
+              "filesystem": "read workspace and user runtime links",
+              "network": "not required"
+            },
+            "preconditions": [
+              "Workspace flat projection validates cleanly."
+            ]
+          },
+          {
+            "command": "./bin/ask skills sync --scope workspace --projection flat --json --robot",
+            "expected_outcome": "Refreshes .agents/skills from canonical frontmatter and skill sources.",
+            "kind": "refresh_workspace_projection",
+            "permission_profile": {
+              "filesystem": "write workspace runtime projection",
+              "network": "not required"
+            },
+            "preconditions": [
+              "Canonical skill sources are ready to project."
+            ]
+          },
+          {
+            "command": "./bin/ask skills sync --scope user --projection flat --json --robot",
+            "expected_outcome": "Makes user-level Codex and Agents skill runtimes point at the workspace projection.",
+            "kind": "apply_user_runtime_sync",
+            "permission_profile": {
+              "filesystem": "write home-directory runtime links",
+              "network": "not required"
+            },
+            "preconditions": [
+              "Dry-run output is acceptable to the operator."
+            ]
+          },
+          {
+            "command": "./bin/ask skills proof openai-docs --runtime-target codex --json --robot",
+            "expected_outcome": "Updates runtime evidence with pass or a narrower blocked_runtime reason.",
+            "kind": "rerun_runtime_proof",
+            "permission_profile": {
+              "filesystem": "read workspace and user runtime links; write runtime-proof evidence",
+              "network": "not required"
+            },
+            "preconditions": [
+              "User runtime link now points at the workspace projection."
+            ]
+          }
+        ],
+        "recovery_risk": "User-scope sync mutates home-directory runtime links; preview with --dry-run before applying.",
+        "runtime_aliases": {
+          "dedupe_identity": "${WORKSPACE_ROOT}/.agents/skills",
+          "dedupe_rule": "Codex and Agents user skill roots are aliases when their resolved paths match.",
+          "distinct_runtime_identity_count": 1,
+          "expected_workspace_runtime": "${WORKSPACE_ROOT}/.agents/skills",
+          "root_identities": {
+            "agents_user_runtime": "${WORKSPACE_ROOT}/.agents/skills",
+            "codex_user_runtime": "${WORKSPACE_ROOT}/.agents/skills"
+          },
+          "schema_version": "skill-runtime-aliases.v1",
+          "status": "deduped_aliases"
+        },
+        "runtime_modes": {
+          "agents_user_runtime": "root_symlink",
+          "codex_user_runtime": "root_symlink"
+        },
+        "schema_version": "sdk-skill-runtime-diagnostics.v1",
+        "selected_runtime_target": "codex"
+      },
+      "runtime_target": "codex",
+      "status": "partial",
+      "verifier": "ask.skills.proof"
+    }
+  ],
+  "visibility_status": "user_observable",
+  "workspace_root": "${WORKSPACE_ROOT}"
+}

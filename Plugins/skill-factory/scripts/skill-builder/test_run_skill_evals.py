@@ -198,6 +198,20 @@ class RunSkillEvalsModeTests(unittest.TestCase):
                 stderr_text="",
             )
         )
+
+    def test_runtime_blocker_detection_overrides_successful_blocker_message(self) -> None:
+        self.assertEqual(
+            _classify_runner_blocker(
+                output_text=(
+                    "Blocked: the eval runner's filesystem sandbox is failing "
+                    "with sandbox-exec: sandbox_apply: Operation not permitted."
+                ),
+                stdout_text="",
+                stderr_text="",
+                exit_code=0,
+            ),
+            "blocked_runtime",
+        )
         self.assertFalse(
             _is_runner_runtime_blocked(
                 output_text="Validation: pass",

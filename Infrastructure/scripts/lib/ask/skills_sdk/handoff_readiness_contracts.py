@@ -17,8 +17,17 @@ class HandoffReadinessCheck(_HandoffReadinessModel):
     evidence: list[str]
 
 
+HandoffReadinessLaneId = Literal[
+    "deterministic_local_gates",
+    "oss-local",
+    "oss-cloud",
+    "tessl-local-proof",
+    "tessl-live-dry-run",
+]
+
+
 class HandoffReadinessLane(_HandoffReadinessModel):
-    id: Literal["deterministic_local_gates", "oss-local", "oss-cloud", "tessl-live-dry-run"]
+    id: HandoffReadinessLaneId
     status: Literal["pass", "blocked", "skip"] | None = None
     command: str | None = None
     receipt_path: str | None = None
@@ -45,9 +54,9 @@ class HandoffReadinessReceipt(_HandoffReadinessModel):
     query: str = Field(min_length=1)
     skill_path: str = Field(min_length=1)
     readiness_path: str = Field(min_length=1)
-    required_lanes: list[Literal["deterministic_local_gates", "oss-local", "oss-cloud", "tessl-live-dry-run"]]
-    required_order: list[str] = Field(min_length=8)
-    lanes: list[HandoffReadinessLane] = Field(min_length=4)
+    required_lanes: list[HandoffReadinessLaneId]
+    required_order: list[str] = Field(min_length=9)
+    lanes: list[HandoffReadinessLane] = Field(min_length=5)
     quality_checks: list[HandoffReadinessCheck] = Field(min_length=1)
     blockers: list[HandoffReadinessCheck]
     ready_for_live_tessl: bool

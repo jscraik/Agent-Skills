@@ -1,0 +1,44 @@
+{
+  "status": "success",
+  "trace_id": "d5f23bc6-4970-48be-9554-1d1400c4daf1",
+  "metadata": {
+    "version": "0.1.0",
+    "command": "skills audit Skills/github/teach --level strict --json --robot",
+    "next_steps": [],
+    "correction_note": null
+  },
+  "data": {
+    "validation_commands": [
+      "./bin/ask skills audit Skills/github/teach --level strict --json --robot"
+    ],
+    "target": "Skills/github/teach",
+    "audit_scope": {
+      "classification": "foundry_repo_skill",
+      "repo_coupled_gates": true
+    },
+    "diagnostics": {
+      "exit_code": 0,
+      "stdout": "\n📋 Diagnostic report: Skills/github/teach\n--------------------------------------------------\n  \u001b[32m✓\u001b[0m skill directory: Found at Skills/github/teach\n  \u001b[32m✓\u001b[0m SKILL.md: Valid YAML frontmatter with name and description\n  \u001b[32m✓\u001b[0m nested .git: No nested .git directory\n  \u001b[32m✓\u001b[0m workspace projection: SDK-flat projection OK: .agents/skills/teach/SKILL.md\n  \u001b[33m⚠\u001b[0m symlink (codex): Symlink points to unexpected location: /Users/jamiecraik/dev/Agent-Skills/Skills/github/teach\n  \u001b[32m✓\u001b[0m symlink (agents): Symlink OK in /Users/jamiecraik/.agents/skills\n  \u001b[32m✓\u001b[0m skill index: Listed in SKILL.md index\n  \u001b[90m○\u001b[0m task profile: No task profile found (neither legacy binding nor implicit path)\n  \u001b[32m✓\u001b[0m lifecycle readiness: healthy\n--------------------------------------------------\n⚠️  1 warning(s), 0 advisory note(s)\n",
+      "stderr": ""
+    },
+    "security_gate": {
+      "exit_code": 0,
+      "stdout": "Skill: teach\nPath:  /Users/jamiecraik/dev/agent-skills/Skills/github/teach/SKILL.md\n\n\nRESULT: PASS\n",
+      "stderr": ""
+    },
+    "family_benchmarks": {
+      "exit_code": 0,
+      "stdout": "[family-benchmark] checked skills:\n  - Skills/github/teach\n[family-benchmark] pass: all family benchmark checks satisfied\n",
+      "stderr": ""
+    },
+    "openclaw_guard": {
+      "exit_code": 0,
+      "stdout": "OpenClaw skill guard: teach\nSummary: 0 critical · 0 warn · 2 info\nINFO readiness.checked: Operational readiness checks completed\nINFO security.no_scripts: No executable scripts found; static security scan skipped\n",
+      "stderr": ""
+    }
+  },
+  "telemetry": {
+    "latency_ms": 2579
+  },
+  "errors": []
+}

@@ -18,6 +18,7 @@ from ask.commands.sdk_evidence import (
 from ask.commands.sdk_explorer import add_sdk_explorer_parser, dispatch_sdk_explorer
 from ask.commands.sdk_intake import add_sdk_intake_parser, dispatch_sdk_intake
 from ask.commands.sdk_knowledge import add_sdk_knowledge_parser, dispatch_sdk_knowledge
+from ask.commands.sdk_plugin import add_sdk_plugin_parser, dispatch_sdk_plugin
 from ask.commands.sdk_security import add_sdk_security_parser, dispatch_sdk_security
 from ask.skills_sdk.determinism import audit_skill_determinism
 from ask.skills_sdk.lenses import (
@@ -154,6 +155,19 @@ def _add_sdk_check_parser(
     parser.add_argument("--codex-parity", action="store_true", help="Require Codex-targeted runtime proof")
 
 
+def _add_sdk_start_parser(
+    sdk_subparsers: argparse._SubParsersAction,
+    global_parser: argparse.ArgumentParser,
+) -> None:
+    parser = sdk_subparsers.add_parser(
+        "start",
+        help="Classify a skill target and emit the next Skills SDK lifecycle command",
+        parents=[global_parser],
+    )
+    parser.add_argument("target", help="Skill handle, source path, or project-local SKILL.md path")
+    parser.add_argument("--project-root", help="Absolute owner project root for project-local skills")
+
+
 def _add_sdk_project_mutation_parsers(
     sdk_subparsers: argparse._SubParsersAction,
     global_parser: argparse.ArgumentParser,
@@ -167,6 +181,7 @@ def _add_sdk_project_mutation_parsers(
     improve.add_argument("--project-root", required=True, help="Absolute marked project root containing skills-sdk.json")
     improve.add_argument("--evals", action="store_true", help="Run the SDK internal eval lane before recording the decision")
     improve.add_argument("--mode", choices=["smoke", "release"], default="smoke", help="Eval mode when --evals is set")
+    improve.add_argument("--codex-profile", help="Override the Codex config profile for the internal eval lane")
     improve.add_argument("--preview", action="store_true", help="Plan the improvement lifecycle evidence without writes")
     improve.add_argument("--apply", action="store_true", help="Write owner-repo registry, event, and receipt evidence")
 
@@ -298,6 +313,7 @@ def add_sdk_parser(
 ) -> None:
     sdk_parser = subparsers.add_parser("sdk", help="Skills SDK product facade", parents=[global_parser])
     sdk_subparsers = sdk_parser.add_subparsers(dest="action")
+    _add_sdk_start_parser(sdk_subparsers, global_parser)
     _add_sdk_check_parser(sdk_subparsers, global_parser)
     _add_sdk_ir_parser(sdk_subparsers, global_parser)
     _add_sdk_docs_parser(sdk_subparsers, global_parser)
@@ -313,6 +329,7 @@ def add_sdk_parser(
     add_sdk_ci_parser(sdk_subparsers, global_parser)
     add_sdk_explorer_parser(sdk_subparsers, global_parser)
     add_sdk_security_parser(sdk_subparsers, global_parser)
+    add_sdk_plugin_parser(sdk_subparsers, global_parser)
     _add_sdk_project_mutation_parsers(sdk_subparsers, global_parser)
     _add_sdk_lifecycle_status_parsers(sdk_subparsers, global_parser)
     add_sdk_knowledge_parser(sdk_subparsers, global_parser)
@@ -337,6 +354,14 @@ def _dispatch_sdk_check(repo_root: Path, args: argparse.Namespace) -> CallResult
         target=args.target,
         strict=args.strict,
         codex_parity=args.codex_parity,
+    )
+
+
+def _dispatch_sdk_start(repo_root: Path, args: argparse.Namespace) -> CallResult:
+    return skills_commands.skills_sdk_start(
+        repo_root,
+        target=args.target,
+        project_root=args.project_root,
     )
 
 
@@ -376,6 +401,7 @@ def _dispatch_sdk_improve(repo_root: Path, args: argparse.Namespace) -> CallResu
         project_root=args.project_root,
         run_evals=args.evals,
         mode=args.mode,
+        codex_profile=args.codex_profile,
         apply=args.apply,
     )
 
@@ -430,6 +456,7 @@ def _dispatch_sdk_project(repo_root: Path, args: argparse.Namespace) -> CallResu
 
 def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
     dispatchers = {
+        "start": _dispatch_sdk_start,
         "check": _dispatch_sdk_check,
         "ir": _dispatch_sdk_ir,
         "docs": _dispatch_sdk_docs,
@@ -445,6 +472,7 @@ def dispatch_sdk(repo_root: Path, args: argparse.Namespace) -> CallResult:
         "ci": dispatch_sdk_ci,
         "explorer": dispatch_sdk_explorer,
         "security": dispatch_sdk_security,
+        "plugin": dispatch_sdk_plugin,
         "improve": _dispatch_sdk_improve,
         "install": _dispatch_sdk_install,
         "rollback": _dispatch_sdk_rollback,

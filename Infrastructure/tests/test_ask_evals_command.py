@@ -165,6 +165,8 @@ def test_smoke_evals_use_codex_spark_and_fast_profile_without_reasoning_level(tm
     assert cmd[cmd.index("--model") + 1] == "gpt-5.3-codex-spark"
     assert "--profile" in cmd
     assert cmd[cmd.index("--profile") + 1] == "fast"
+    assert "--sandbox" in cmd
+    assert cmd[cmd.index("--sandbox") + 1] == "workspace-write"
     assert result.data["profile_contract"]["codex_profile"] == "fast"
     assert result.data["profile_contract"]["codex_profile_config"] == "[profiles.fast]"
     assert result.data["profile_contract"]["tessl_policy"]["tessl_project_marker"] == "tessl.json"
@@ -210,6 +212,30 @@ def test_smoke_evals_accept_model_override_for_quota_recovery(tmp_path: Path) ->
     cmd = run.call_args.args[0]
     assert "--model" in cmd
     assert cmd[cmd.index("--model") + 1] == "gpt-5.4-mini"
+
+
+def test_smoke_evals_accept_profile_override_for_oss_cloud(tmp_path: Path) -> None:
+    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
+
+    with mock.patch.object(evals.subprocess, "run", return_value=completed) as run:
+        result = evals.run_evals(
+            tmp_path,
+            "Plugins/example-skill",
+            mode="smoke",
+            skip_tessl=True,
+            codex_profile="oss-cloud",
+        )
+
+    assert result.status == "success"
+    assert result.data["profile_contract"]["codex_profile"] == "oss-cloud"
+    assert result.data["profile_contract"]["codex_profile_config"] == "[profiles.oss-cloud]"
+    assert result.data["profile_contract"]["codex_profile_source"] == "argument"
+    cmd = run.call_args.args[0]
+    assert "--profile" in cmd
+    assert cmd[cmd.index("--profile") + 1] == "oss-cloud"
+    assert "--sandbox" in cmd
+    assert cmd[cmd.index("--sandbox") + 1] == "workspace-write"
+    assert "--model" not in cmd
 
 
 def test_smoke_evals_pass_case_filters_to_skill_runner(tmp_path: Path) -> None:
@@ -1210,13 +1236,32 @@ def _write_handoff_readiness(tmp_path: Path, skill_name: str) -> Path:
     evidence_root = tmp_path / ".harness" / "evidence" / "handoff" / skill_name
     evidence_root.mkdir(parents=True, exist_ok=True)
     lanes = []
-    for lane_id in ("deterministic_local_gates", "oss-local", "oss-cloud", "tessl-live-dry-run"):
+    lane_commands = {
+        "deterministic_local_gates": "./bin/ask sdk eval local-gates Skills/example-skill --json --robot",
+        "oss-local": "./bin/ask sdk eval run Skills/example-skill --codex-profile oss-local --json --robot",
+        "oss-cloud": "./bin/ask sdk eval run Skills/example-skill --codex-profile oss-cloud --json --robot",
+        "tessl-local-proof": "./bin/ask sdk eval tessl-local-proof Skills/example-skill --execute --json --robot",
+        "tessl-live-dry-run": (
+            "./bin/ask evals run Skills/example-skill --tessl-live-private "
+            "--tessl-live-dry-run --json --robot"
+        ),
+    }
+    for lane_id, command in lane_commands.items():
         receipt_path = evidence_root / f"{lane_id}.json"
-        receipt_path.write_text(json.dumps({"lane": lane_id}) + "\n", encoding="utf-8")
+        receipt_payload: dict[str, object] = {"status": "pass", "lane": lane_id}
+        if lane_id in {"oss-local", "oss-cloud"}:
+            receipt_payload["profile"] = lane_id
+        if lane_id == "tessl-local-proof":
+            receipt_payload["receipt"] = {
+                "schema_version": "skills-sdk.tessl-local-proof.v1",
+                "status": "pass",
+                "execute": True,
+            }
+        receipt_path.write_text(json.dumps(receipt_payload) + "\n", encoding="utf-8")
         lanes.append({
             "id": lane_id,
             "status": "pass",
-            "command": f"./bin/ask proof {lane_id}",
+            "command": command,
             "receipt_path": receipt_path.relative_to(tmp_path).as_posix(),
         })
     readiness_path = evidence_root / "eval-handoff-readiness.json"
@@ -1597,6 +1642,116 @@ def test_tessl_live_private_stages_generated_fixture_scenarios(tmp_path: Path) -
     assert criteria["metadata"]["source"] == "references/evals/eval.arch.boundary-proof.md"
     descriptions = [item["description"] for item in criteria["checklist"]]
     assert any("Classifies the boundary as risky" in item for item in descriptions)
+
+
+def test_tessl_live_private_staging_excludes_platform_junk_files(tmp_path: Path) -> None:
+    skill_root = _write_example_skill(tmp_path)
+    (skill_root / "references" / ".DS_Store").write_text("finder metadata\n", encoding="utf-8")
+    apple_double = skill_root / "references" / ".AppleDouble"
+    apple_double.mkdir()
+    (apple_double / "metadata").write_text("finder metadata\n", encoding="utf-8")
+
+    staged_source, copied = evals._stage_tessl_live_private_source(
+        tmp_path,
+        "Skills/example-skill",
+        "skills-sdk",
+        temp_root=tmp_path / "stage",
+    )
+
+    assert not any(".DS_Store" in path for path in copied)
+    assert not any(".AppleDouble" in path for path in copied)
+    assert not list(staged_source.rglob(".DS_Store"))
+    assert not list(staged_source.rglob(".AppleDouble"))
+
+
+def test_tessl_local_proof_preview_records_lint_pack_install_and_review_commands(tmp_path: Path) -> None:
+    _write_example_skill(tmp_path)
+
+    with mock.patch.object(evals.subprocess, "run") as run:
+        receipt = evals.run_tessl_local_proof(
+            tmp_path,
+            "Skills/example-skill",
+            workspace="skills-sdk",
+            execute=False,
+            include_review=True,
+        )
+
+    assert receipt["status"] == "preview"
+    assert receipt["execute"] is False
+    assert receipt["policy"]["no_publish"] is True
+    assert receipt["policy"]["install_scope"] == "temporary project workspace under /tmp/ask-tessl-local-install"
+    assert receipt["staged_file_count"] > 0
+    commands = receipt["planned_commands"]
+    assert "tessl plugin lint" in commands["plugin_lint"]
+    assert "tessl plugin pack --output" in commands["plugin_pack"]
+    assert "tessl install file:" in commands["install_file"]
+    assert "--agent codex" in commands["install_file"]
+    assert "tessl review run" in commands["review_run"]
+    assert "--workspace skills-sdk" in commands["review_run"]
+    assert not any("publish" in command for command in commands.values())
+    assert not any("npx" in command for command in commands.values())
+    run.assert_not_called()
+
+
+def test_tessl_local_proof_accepts_skill_md_path(tmp_path: Path) -> None:
+    _write_example_skill(tmp_path)
+
+    receipt = evals.run_tessl_local_proof(
+        tmp_path,
+        "Skills/example-skill/SKILL.md",
+        workspace="skills-sdk",
+        execute=False,
+    )
+
+    assert receipt["status"] == "preview"
+    assert receipt["source_path"] == "Skills/example-skill/SKILL.md"
+    assert receipt["proof_path"] == "Skills/example-skill"
+    assert receipt["dist_path"].endswith("/example-skill.tgz")
+    assert "/skills/example-skill" in receipt["planned_commands"]["review_run"]
+
+
+def test_tessl_local_proof_execute_uses_temp_install_workspace_and_no_publish(tmp_path: Path) -> None:
+    _write_example_skill(tmp_path)
+    completed = subprocess.CompletedProcess(args=[], returncode=0, stdout="{}", stderr="")
+    install_completed = subprocess.CompletedProcess(
+        args=[],
+        returncode=0,
+        stdout="Authenticated as operator@example.com\nInstalled skills-sdk/example-skill@0.1.0\n",
+        stderr="",
+    )
+
+    with (
+        mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
+        mock.patch.object(evals.subprocess, "run", side_effect=[completed, completed, install_completed, completed]) as run,
+    ):
+        receipt = evals.run_tessl_local_proof(
+            tmp_path,
+            "Skills/example-skill",
+            workspace="skills-sdk",
+            execute=True,
+            include_review=True,
+            timeout_seconds=17,
+        )
+
+    assert receipt["status"] == "pass"
+    assert receipt["execute"] is True
+    assert set(receipt["commands"]) == {"plugin_lint", "plugin_pack", "install_file", "review_run"}
+    assert "operator@example.com" not in receipt["commands"]["install_file"]["stdout"]
+    assert "<redacted-email>" in receipt["commands"]["install_file"]["stdout"]
+    assert run.call_count == 4
+    install_call = run.call_args_list[2]
+    install_command = install_call.args[0]
+    assert install_command[:2] == ["/usr/local/bin/tessl", "install"]
+    assert install_command[2].startswith("file:")
+    assert install_command[3:] == ["--agent", "codex", "--yes", "--strict"]
+    assert "/ask-tessl-local-install/" in install_call.kwargs["cwd"]
+    assert str(tmp_path) not in install_call.kwargs["cwd"]
+    for call in run.call_args_list:
+        command = call.args[0]
+        assert "publish" not in command
+        assert "npx" not in command
+        assert call.kwargs["timeout"] == 17
+        assert call.kwargs["env"]["TESSL_AUTO_UPDATE_INTERVAL_MINUTES"] == "0"
 
 
 def test_tessl_live_private_requires_twenty_behavioral_scenarios(tmp_path: Path) -> None:
@@ -3351,6 +3506,91 @@ def test_run_evals_renders_local_review_dashboard(tmp_path: Path) -> None:
     assert "opt-in local dependency security screening" in html_text
 
 
+def test_run_evals_writes_blocked_closeout_for_partial_report_dir(tmp_path: Path) -> None:
+    report_dir = tmp_path / "Infrastructure/artifacts/skills/example-skill/run-partial"
+    case_dir = report_dir / "01-edge-case"
+    case_dir.mkdir(parents=True)
+    (case_dir / "prompt.txt").write_text("Task: sparse brief\n", encoding="utf-8")
+    completed = mock.Mock(
+        returncode=0,
+        stdout=f"Skill evals: example-skill\nReports: {report_dir}\nRESULT: PASS\n",
+        stderr="",
+    )
+
+    with mock.patch.object(evals.subprocess, "run", return_value=completed):
+        result = evals.run_evals(tmp_path, "Plugins/example-skill", mode="smoke", skip_tessl=True)
+
+    assert result.status == "error"
+    assert result.data["eval_status"] == "blocked_missing_artifact"
+    closeout = result.data["eval_closeout"]
+    assert closeout["schema_version"] == "skills-sdk.eval-closeout.v1"
+    assert closeout["status"] == "blocked"
+    assert closeout["blocker_class"] == "blocked_missing_artifact"
+    assert closeout["cases"] == [
+        {
+            "id": "edge-case",
+            "status": "blocked",
+            "blocker_class": "blocked_missing_artifact",
+            "expected_artifacts": ["result.json"],
+            "actual_artifacts": ["prompt.txt"],
+            "result_path": "Infrastructure/artifacts/skills/example-skill/run-partial/01-edge-case",
+        }
+    ]
+    closeout_path = tmp_path / result.data["eval_closeout_path"]
+    assert closeout_path.is_file()
+    assert closeout["closeout_validation"]["status"] == "pass"
+
+
+def test_eval_closeout_validation_blocks_non_pass_mutation() -> None:
+    closeout = {
+        "schema_version": "skills-sdk.eval-closeout.v1",
+        "status": "blocked",
+        "skill_path": "Skills/example/SKILL.md",
+        "mode": "smoke",
+        "runner": "codex",
+        "cases": [{"id": "edge", "status": "blocked", "blocker_class": "blocked_missing_artifact"}],
+        "blocker_class": "blocked_missing_artifact",
+        "mutation_allowed": True,
+        "registry_update_allowed": True,
+        "next_reproduce_command": "./bin/ask evals run Skills/example --mode smoke --runner codex",
+    }
+
+    validation = evals.validate_eval_closeout_payload(closeout)
+
+    assert validation["status"] == "blocked"
+    blocker_ids = {blocker["id"] for blocker in validation["blockers"]}
+    assert "non_pass_blocks_source_mutation" in blocker_ids
+    assert "non_pass_blocks_registry_promotion" in blocker_ids
+
+
+def test_eval_closeout_doctor_reports_missing_case_result(tmp_path: Path) -> None:
+    report_dir = tmp_path / "Infrastructure/artifacts/skills/example-skill/run-partial"
+    case_dir = report_dir / "01-edge-case"
+    case_dir.mkdir(parents=True)
+    (case_dir / "prompt.txt").write_text("Task: sparse brief\n", encoding="utf-8")
+    closeout = {
+        "schema_version": "skills-sdk.eval-closeout.v1",
+        "status": "blocked",
+        "skill_path": "Skills/example/SKILL.md",
+        "mode": "smoke",
+        "runner": "codex",
+        "cases": [{"id": "edge-case", "status": "blocked", "blocker_class": "blocked_missing_artifact"}],
+        "blocker_class": "blocked_missing_artifact",
+        "mutation_allowed": False,
+        "registry_update_allowed": False,
+        "missing_suite_artifacts": True,
+        "next_reproduce_command": "./bin/ask evals run Skills/example --mode smoke --runner codex",
+    }
+    (report_dir / "workflow-closeout.json").write_text(json.dumps(closeout), encoding="utf-8")
+
+    result = evals.eval_closeout_doctor(tmp_path, str(report_dir))
+
+    assert result.status == "error"
+    doctor = result.data["eval_closeout_doctor"]
+    assert doctor["status"] == "blocked"
+    assert doctor["missing_result_cases"] == ["edge-case"]
+
+
 def test_run_evals_renders_dashboard_for_failed_scorecard(tmp_path: Path) -> None:
     scorecard_path = tmp_path / "Infrastructure/artifacts/skills/example-skill/run-2/scorecard.json"
     scorecard_path.parent.mkdir(parents=True)
@@ -3680,6 +3920,15 @@ def test_run_evals_stores_repo_relative_raw_output(tmp_path: Path) -> None:
     skill = tmp_path / "Skills" / "agent-ops" / "autoresearch"
     skill.mkdir(parents=True)
     absolute_report = tmp_path / "Infrastructure" / "artifacts" / "skills" / "scorecard.json"
+    absolute_report.parent.mkdir(parents=True)
+    absolute_report.write_text(
+        json.dumps({
+            "status": "pass",
+            "cases": [],
+            "no_case_reason": "path sanitization fixture",
+        }),
+        encoding="utf-8",
+    )
     completed = mock.Mock(
         returncode=0,
         stdout=f"Scorecard: {absolute_report}\n",

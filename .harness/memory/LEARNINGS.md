@@ -16,6 +16,8 @@ Repo-specific agent knowledge base. Append-only.
 > **Scope:** This repo only. Universal gotchas → `~/.codex/instructions/Learnings.md`.
 > **Format:** `**YYYY-MM-DD [Agent]:** <problem> → <fix>`
 
+- **2026-06-24 [Codex]:** Skills SDK handoff bundles that use placeholder commands like `<teach-ab-run-receipt.json>` turn missing receipts into pipeline stoppers. → Treat unresolved placeholders as validation blockers, point OSS lanes at executable `sdk eval run ... --codex-profile <lane>` commands, use `--timeout-seconds` to force typed `timeout_no_output` receipts, and keep live Tessl blocked while preserving `blocked_runtime` evidence for diagnostic continuation.
+
 - **2026-03-09 [Codex]:** `Infrastructure/scripts/docs_lint.py` does not accept a `--files` selector; passing it exits with argparse error. Use supported global flags (`--mode`, `--config`, optional report flags) and lint the configured scope.
 
 - **2026-03-12 [Codex]:** `run_skill_evals.py --smoke` uses a contract-derived discovery response rather than domain-specific skill output; avoid false regex failures by defining dedicated `smoke_mode` cases and filtering smoke runs to those cases.
@@ -198,6 +200,8 @@ Repo-specific agent knowledge base. Append-only.
 
 **2026-05-12 [Codex]:** Bash command 'cat' failed with exit code 2 -> argv/cwd not captured; no artifact at .harness/memory/command-failure-2293629618.log. Verify target path exists, check cwd, and use Read tool instead of shell cat for file access. [low-signal-suppressed: provenance cannot be recovered retroactively] (auto-key:2293629618)
 
+**2026-06-24 [Codex]:** Skills SDK OSS judge pipeline must stop at oss-local when the internal Codex runner emits a typed blocked_runtime; do not advance to oss-cloud, Tessl dry run, or live Tessl from a local runtime blocker. A Codex final answer can exit 0 while saying it is blocked (sandbox-exec: sandbox_apply: Operation not permitted or failed workspace writes), so Skill Factory eval classification must scan blocker markers before scoring expected-signal assertions. Validation: PYTHONDONTWRITEBYTECODE=1 python3 Plugins/skill-factory/scripts/skill-builder/test_run_skill_evals.py -> pass; ./bin/ask sdk eval run Skills/github/teach --mode smoke --case happy-first-lesson --codex-profile oss-local --json --robot -> blocked with blocker_class=blocked_runtime and no fake Teach behavior failure.
+
 **2026-05-12 [Codex]:** Bash command 'cat' failed with exit code 2 -> argv/cwd not captured; no artifact at .harness/memory/command-failure-3406616513.log. Verify target path exists, check cwd, and use Read tool instead of shell cat for file access. [low-signal-suppressed: provenance cannot be recovered retroactively] (auto-key:3406616513)
 
 **2026-05-13 [Codex]:** Bash command 'cat' failed with exit code 2 -> argv/cwd not captured; no artifact at .harness/memory/command-failure-1318967753.log. Verify target path exists, check cwd, and use Read tool instead of shell cat for file access. [low-signal-suppressed: provenance cannot be recovered retroactively] (auto-key:1318967753)
@@ -275,3 +279,11 @@ Repo-specific agent knowledge base. Append-only.
 **2026-06-24 [Codex]:** Bash command 'jq' failed with exit code 1 -> summarize the failure and change approach before rerunning the same command (auto-key:3696954620)
 
 **2026-06-24 [Codex]:** Bash command 'jq' failed with exit code 1 -> summarize the failure and change approach before rerunning the same command (auto-key:2893193666)
+
+**2026-06-24 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:4179815513)
+
+**2026-06-24 [Codex]:** Tessl dry-run staging can pass while copying ignored platform metadata into the evidence payload -> filter `.DS_Store`, `.AppleDouble`, and `__MACOSX` at the shared Tessl staging copy boundary, prove the staged file list and staged directory are clean, and write handoff readiness preview output to a separate receipt instead of overwriting the lane manifest.
+
+**2026-06-24 [Codex]:** Tessl local development proof is a distinct bridge from Tessl Distribution to Local Runtime Truth, not a substitute for oss-local, oss-cloud, live Tessl scoring, or persistent user runtime activation -> add `ask sdk eval tessl-local-proof` so the SDK stages a controlled package, runs native `tessl plugin lint`, `tessl plugin pack --output <file>.tgz`, temp `tessl install file:` in `/tmp/ask-tessl-local-install`, and optional explicit `tessl review run`; make handoff readiness require the executed local-proof receipt before live Tessl dry-run/scoring claims.
+
+**2026-06-24 [Codex]:** Plugin creation is part of the Skills SDK professional lifecycle, not a separate memory burden for the operator -> expose `ask sdk plugin create|review|install|save-registry` for both `--kind skill` and `--kind plugin`, delegate to existing bounded skills/plugins commands, save only to local skill registry or local plugin marketplace unless a future remote-publish authority lane exists, and keep `remote_publish_performed=false` in registry-save receipts.

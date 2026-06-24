@@ -94,6 +94,15 @@ def test_pipeline_status_artifact_is_governed_source() -> None:
     assert finding.blocking is False
 
 
+def test_lifecycle_status_artifact_is_governed_source() -> None:
+    finding = MODULE.classify_path("artifacts/skills-sdk-user-lifecycle-one-page.html")
+
+    assert finding.classification == "source"
+    assert finding.status == "ok"
+    assert finding.code == "authored_source_surface"
+    assert finding.blocking is False
+
+
 def test_root_architecture_is_front_door_source() -> None:
     finding = MODULE.classify_path("ARCHITECTURE.md")
 

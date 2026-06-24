@@ -6,13 +6,15 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
-from ask.commands.skills_impl import _sdk_improve_update_registry  # noqa: E402
+from ask.commands.skills_impl import _sdk_improve_update_registry, skills_sdk_project_improve  # noqa: E402
+from ask.envelope import CallResult, ErrorObject  # noqa: E402
 
 
 def _command_env() -> dict[str, str]:
@@ -373,6 +375,95 @@ class TestSkillsSdkProjectImprove(unittest.TestCase):
         self.assertEqual(entry["lifecycle"]["decision"], "improve_blocked")
         self.assertEqual(entry["package"]["hardening_status"], "pass")
         self.assertEqual(entry["evals"]["status"], "blocked")
+
+    def test_apply_records_blocked_receipt_when_eval_closeout_blocks(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            project_root, skill_md = _project_with_codex_skill(Path(tmp))
+            before_source = skill_md.read_text(encoding="utf-8")
+            closeout_path = project_root / ".harness" / "skills" / "eval-closeout.json"
+            closeout_path.parent.mkdir(parents=True)
+            closeout_path.write_text(
+                json.dumps(
+                    {
+                        "schema_version": "skills-sdk.eval-closeout.v1",
+                        "status": "blocked",
+                        "blocker_class": "blocked_missing_artifact",
+                        "cases": [
+                            {
+                                "id": "edge-case",
+                                "status": "blocked",
+                                "blocker_class": "blocked_missing_artifact",
+                            }
+                        ],
+                        "mutation_allowed": False,
+                        "registry_update_allowed": False,
+                    }
+                ),
+                encoding="utf-8",
+            )
+            eval_result = CallResult(status="error")
+            eval_result.data["skills_sdk_eval_run"] = {
+                "schema_version": "skills-sdk-eval-run.v0",
+                "status": "blocked",
+                "receipt": {
+                    "schema_version": "skills-sdk.eval-run-receipt.v0",
+                    "status": "blocked",
+                    "runner": "internal_skill_builder_v0",
+                    "dataset_path": str(closeout_path),
+                    "dataset_digest": "sha256:" + "1" * 64,
+                    "case_count": 1,
+                    "passed_count": 0,
+                    "failed_count": 1,
+                    "quality_gates": {},
+                    "cases": [
+                        {
+                            "case_id": "edge-case",
+                            "status": "fail",
+                            "oracle": "eval_closeout",
+                            "expected": "pass",
+                            "actual": "blocked",
+                        }
+                    ],
+                    "blockers": ["blocked_missing_artifact"],
+                },
+                "internal_eval": {
+                    "eval_closeout": {
+                        "status": "blocked",
+                        "blocker_class": "blocked_missing_artifact",
+                    }
+                },
+            }
+            eval_result.errors.append(
+                ErrorObject(
+                    code="ERR_VALIDATION",
+                    message="Evaluation run blocked by closeout contract: blocked_missing_artifact.",
+                )
+            )
+
+            with mock.patch("ask.commands.skills_impl.skills_sdk_eval_run", return_value=eval_result):
+                result = skills_sdk_project_improve(
+                    REPO_ROOT,
+                    str(skill_md),
+                    project_root=str(project_root),
+                    run_evals=True,
+                    apply=True,
+                    codex_profile="oss-cloud",
+                )
+
+            self.assertEqual(result.status, "error")
+            payload = result.data["skills_sdk_project_improve"]
+            receipt = payload["receipt"]
+            self.assertEqual(receipt["status"], "blocked")
+            self.assertIn("evals:blocked", receipt["blockers"])
+            self.assertTrue(
+                any("--codex-profile oss-cloud" in command for command in receipt["validation_commands"])
+            )
+            self.assertTrue(receipt["mutation_performed"])
+            self.assertFalse(receipt["source_mutation_performed"])
+            self.assertEqual(skill_md.read_text(encoding="utf-8"), before_source)
+            registry = json.loads((project_root / ".harness/skills/registry.json").read_text(encoding="utf-8"))
+            self.assertEqual(registry["skills"][0]["lifecycle"]["state"], "blocked")
+            self.assertEqual(registry["skills"][0]["evals"]["status"], "blocked")
 
 
 if __name__ == "__main__":

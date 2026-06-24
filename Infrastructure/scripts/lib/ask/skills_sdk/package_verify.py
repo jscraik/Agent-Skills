@@ -471,15 +471,59 @@ def verify_skill_directory(
     *,
     trusted_sources: set[str] | None = None,
 ) -> dict[str, Any]:
-    blockers: list[dict[str, Any]] = []
     trusted_sources = _normalized_trusted_sources(trusted_sources)
     frontmatter = read_skill_frontmatter_fields(skill_md)
     contract = skill_package_contract(repo_root, skill_md, frontmatter)
     sdk_contract = sdk_package_contract(repo_root, skill_md, frontmatter)
     values = package_field_values(frontmatter)
     missing = contract.get("required_fields", {}).get("missing", [])
-    reference_quality = sdk_contract.get("values", {}).get("reference_quality", {})
-    reference_blockers = reference_quality.get("blockers", [])
+    quality = _sdk_quality_values(sdk_contract)
+    blockers = _skill_directory_blockers(
+        repo_root,
+        skill_md,
+        missing,
+        quality,
+        values,
+        trusted_sources,
+    )
+    provenance_values = normalized_list(values.get("provenance"))
+    provenance_trusted = any(
+        _provenance_value_trusted(value, trusted_sources) for value in provenance_values
+    )
+    return _skill_directory_receipt(
+        repo_root=repo_root,
+        skill_md=skill_md,
+        query=query,
+        frontmatter=frontmatter,
+        contract=contract,
+        sdk_contract=sdk_contract,
+        missing=missing,
+        quality=quality,
+        provenance_values=provenance_values,
+        provenance_trusted=provenance_trusted,
+        trusted_sources=trusted_sources,
+        blockers=blockers,
+    )
+
+
+def _sdk_quality_values(sdk_contract: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    values = sdk_contract.get("values", {})
+    return {
+        "reference_quality": values.get("reference_quality", {}),
+        "writing_quality": values.get("writing_quality", {}),
+        "openai_platform_compat": values.get("openai_platform_compat", {}),
+    }
+
+
+def _skill_directory_blockers(
+    repo_root: Path,
+    skill_md: Path,
+    missing: list[str],
+    quality: dict[str, dict[str, Any]],
+    values: dict[str, Any],
+    trusted_sources: set[str],
+) -> list[dict[str, Any]]:
+    blockers: list[dict[str, Any]] = []
     if missing:
         blockers.append(
             _blocker(
@@ -488,20 +532,7 @@ def verify_skill_directory(
                 path=repo_relative_path(repo_root, skill_md),
             )
         )
-    if reference_blockers:
-        first_reference_blocker = reference_blockers[0]
-        blockers.append(
-            _blocker(
-                "reference_quality_blocked",
-                "Skill references failed package-readiness quality checks.",
-                path=first_reference_blocker.get("path"),
-                evidence={
-                    "policy": reference_quality.get("policy"),
-                    "status": reference_quality.get("status"),
-                    "blockers": reference_blockers,
-                },
-            )
-        )
+    blockers.extend(_quality_blockers(quality))
     provenance_values = normalized_list(values.get("provenance"))
     provenance_trusted = any(
         _provenance_value_trusted(value, trusted_sources) for value in provenance_values
@@ -514,41 +545,95 @@ def verify_skill_directory(
                 path=repo_relative_path(repo_root, skill_md),
             )
         )
-    return {
+    return blockers
+
+
+def _quality_blockers(quality: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
+    specs = (
+        ("reference_quality", "reference_quality_blocked", "Skill references failed package-readiness quality checks."),
+        ("writing_quality", "skill_writing_quality_blocked", "Skill writing quality failed SDK rubric checks."),
+        ("openai_platform_compat", "openai_platform_compat_blocked", "OpenAI platform compatibility failed SDK projection checks."),
+    )
+    blockers: list[dict[str, Any]] = []
+    for name, rule_id, message in specs:
+        blockers_for_quality = quality[name].get("blockers", [])
+        if blockers_for_quality:
+            blockers.append(_quality_blocker(rule_id, message, quality[name], blockers_for_quality))
+    return blockers
+
+
+def _quality_blocker(
+    rule_id: str,
+    message: str,
+    quality: dict[str, Any],
+    blockers: list[dict[str, Any]],
+) -> dict[str, Any]:
+    first_blocker = blockers[0]
+    return _blocker(
+        rule_id,
+        message,
+        path=first_blocker.get("path"),
+        evidence={
+            "policy": quality.get("policy"),
+            "status": quality.get("status"),
+            "blockers": blockers,
+        },
+    )
+
+
+def _skill_directory_receipt(
+    *,
+    repo_root: Path,
+    skill_md: Path,
+    query: str,
+    frontmatter: dict[str, Any],
+    contract: dict[str, Any],
+    sdk_contract: dict[str, Any],
+    missing: list[str],
+    quality: dict[str, dict[str, Any]],
+    provenance_values: list[str],
+    provenance_trusted: bool,
+    trusted_sources: set[str],
+    blockers: list[dict[str, Any]],
+) -> dict[str, Any]:
+    receipt = {
         "schema_version": PACKAGE_VERIFY_SCHEMA_VERSION,
         "target_kind": "skill_directory",
         "query": query,
         "target_path": repo_relative_path(repo_root, skill_md) or skill_md.as_posix(),
         "archive_identity": None,
-        "provenance_identity": {
-            "trusted": provenance_trusted,
-            "policy": sorted(trusted_sources),
-            "values": provenance_values,
-        },
+        "provenance_identity": _provenance_identity(provenance_trusted, provenance_values, trusted_sources),
         "contract": contract,
         "sdk_contract": sdk_contract,
-        "checks": [
-            _check("skill_md_present", "pass", {"path": repo_relative_path(repo_root, skill_md)}),
-            _check("frontmatter_read", "pass", {"fields": sorted(frontmatter)}),
-            _check("package_metadata_complete", "fail" if missing else "pass", {"missing": missing}),
-            _check("package_contract", "fail" if missing else "pass", {"missing": missing}),
-            _check(
-                "reference_quality",
-                "fail" if reference_blockers else "pass",
-                {
-                    "status": reference_quality.get("status"),
-                    "blockers": reference_blockers,
-                },
-            ),
-            _check(
-                "trusted_provenance",
-                "pass" if provenance_trusted else "fail",
-                {"values": provenance_values, "trusted_sources": sorted(trusted_sources)},
-            ),
-            _check("no_runtime_mutation", "pass", {"install_attempted": False, "archive_extracted": False}),
-        ],
+        "checks": _skill_directory_checks(
+            repo_root, skill_md, frontmatter, missing, quality, provenance_values, provenance_trusted, trusted_sources
+        ),
         "blockers": blockers,
         "rule_results": blockers,
+        "status": "blocked" if blockers else "pass",
+        "agent_summary": _skill_directory_summary(query, blockers),
+        "validation_commands": ["./bin/ask skills package verify <archive-or-skill> --json --robot"],
+    }
+    receipt.update(_directory_read_only_mutation_receipt())
+    return receipt
+
+
+def _skill_directory_summary(query: str, blockers: list[dict[str, Any]]) -> str:
+    if blockers:
+        return f"Package verification blocked: {blockers[0]['message']}"
+    return f"{query} package verification passed without runtime mutation."
+
+
+def _provenance_identity(
+    trusted: bool,
+    values: list[str],
+    trusted_sources: set[str],
+) -> dict[str, Any]:
+    return {"trusted": trusted, "policy": sorted(trusted_sources), "values": values}
+
+
+def _directory_read_only_mutation_receipt() -> dict[str, Any]:
+    return {
         "mutation_status": {
             "status": "pass",
             "mutated": False,
@@ -562,11 +647,40 @@ def verify_skill_directory(
             "reason": "Directory verification is read-only and performs no extraction or install.",
         },
         "rollback_hint": "Directory verification is read-only. Package archive verification must pass before install mutation.",
-        "status": "blocked" if blockers else "pass",
-        "agent_summary": (
-            f"Package verification blocked: {blockers[0]['message']}"
-            if blockers
-            else f"{query} package verification passed without runtime mutation."
-        ),
-        "validation_commands": ["./bin/ask skills package verify <archive-or-skill> --json --robot"],
     }
+
+
+def _skill_directory_checks(
+    repo_root: Path,
+    skill_md: Path,
+    frontmatter: dict[str, Any],
+    missing: list[str],
+    quality: dict[str, dict[str, Any]],
+    provenance_values: list[str],
+    provenance_trusted: bool,
+    trusted_sources: set[str],
+) -> list[dict[str, Any]]:
+    checks = [
+        _check("skill_md_present", "pass", {"path": repo_relative_path(repo_root, skill_md)}),
+        _check("frontmatter_read", "pass", {"fields": sorted(frontmatter)}),
+        _check("package_metadata_complete", "fail" if missing else "pass", {"missing": missing}),
+        _check("package_contract", "fail" if missing else "pass", {"missing": missing}),
+    ]
+    checks.extend(_quality_checks(quality))
+    checks.append(_check("trusted_provenance", "pass" if provenance_trusted else "fail", {"values": provenance_values, "trusted_sources": sorted(trusted_sources)}))
+    checks.append(_check("no_runtime_mutation", "pass", {"install_attempted": False, "archive_extracted": False}))
+    return checks
+
+
+def _quality_checks(quality: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
+    checks: list[dict[str, Any]] = []
+    for name, value in quality.items():
+        blockers = value.get("blockers", [])
+        checks.append(
+            _check(
+                name,
+                "fail" if blockers else "pass",
+                {"status": value.get("status"), "blockers": blockers},
+            )
+        )
+    return checks

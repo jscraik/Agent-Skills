@@ -91,6 +91,20 @@ EVAL_LIFECYCLE_EVENT_TYPES = {
 }
 
 
+EVAL_CLOSEOUT_SCHEMA_VERSION = "skills-sdk.eval-closeout.v1"
+EVAL_CLOSEOUT_REQUIRED_FIELDS = {
+    "schema_version",
+    "status",
+    "skill_path",
+    "mode",
+    "runner",
+    "cases",
+    "mutation_allowed",
+    "registry_update_allowed",
+    "next_reproduce_command",
+}
+
+
 def _safe_slug(value: str) -> str:
     slug = re.sub(r"[^A-Za-z0-9._-]+", "-", value.strip()).strip("-")
     return slug or "skill"
@@ -882,11 +896,25 @@ def _tessl_scenario_generation_policy(workspace: str | None = None) -> dict:
     }
 
 
+TESSL_STAGING_IGNORED_NAMES = {".DS_Store"}
+TESSL_STAGING_IGNORED_DIRS = {"__MACOSX", ".AppleDouble"}
+
+
+def _should_skip_tessl_staging_path(source_root: Path, source_path: Path) -> bool:
+    try:
+        relative_parts = source_path.relative_to(source_root).parts
+    except ValueError:
+        relative_parts = source_path.parts
+    return any(part in TESSL_STAGING_IGNORED_NAMES or part in TESSL_STAGING_IGNORED_DIRS for part in relative_parts)
+
+
 def _copy_if_present(source_root: Path, relative_path: str, target_root: Path) -> list[str]:
     source = source_root / relative_path
     if not source.exists():
         return []
     _reject_tessl_staging_symlink(source_root, source)
+    if _should_skip_tessl_staging_path(source_root, source):
+        return []
     target = target_root / relative_path
     target.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(source, target)
@@ -905,6 +933,8 @@ def _copy_tree_files_if_present(source_root: Path, relative_path: str, target_ro
         if source_file.is_symlink():
             _reject_tessl_staging_symlink(source_root, source_file)
         if not source_file.is_file():
+            continue
+        if _should_skip_tessl_staging_path(source_root, source_file):
             continue
         child_relative = source_file.relative_to(source_root).as_posix()
         target = target_root / child_relative
@@ -931,6 +961,8 @@ def _copy_tree_files_to_relative_root(
         if source_file.is_symlink():
             _reject_tessl_staging_symlink(source_root, source_file)
         if not source_file.is_file():
+            continue
+        if _should_skip_tessl_staging_path(source_root, source_file):
             continue
         child_relative = source_file.relative_to(source_root).as_posix()
         target_relative = f"{target_relative_root.rstrip('/')}/{child_relative}"
@@ -2459,6 +2491,12 @@ def _stable_tessl_live_stage_parent(path: str) -> Path:
     return Path(tempfile.gettempdir()) / "ask-tessl-live" / f"{safe_name}-{digest}"
 
 
+def _stable_tessl_local_install_workspace(path: str) -> Path:
+    safe_name = path.replace("/", "__").replace(" ", "_")
+    digest = hashlib.sha256(path.encode("utf-8")).hexdigest()[:12]
+    return Path(tempfile.gettempdir()) / "ask-tessl-local-install" / f"{safe_name}-{digest}"
+
+
 def _tessl_archive_suffix() -> str:
     return dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
 
@@ -3224,6 +3262,220 @@ def _stable_tessl_scenario_generation_parent(path: str) -> Path:
     safe_name = path.replace("/", "__").replace(" ", "_")
     digest = hashlib.sha256(path.encode("utf-8")).hexdigest()[:12]
     return Path(tempfile.gettempdir()) / "ask-tessl-scenario-generation" / f"{safe_name}-{digest}"
+
+
+def _tessl_local_proof_policy(workspace: str | None = None) -> dict[str, object]:
+    return {
+        "schema_version": "skills-sdk.tessl-local-proof-policy.v1",
+        "workspace": workspace,
+        "stage": "Tessl Distribution -> Local Runtime Truth bridge",
+        "proves": [
+            "controlled Tessl plugin package shape",
+            "local Tessl plugin lint compatibility",
+            "temporary plugin archive packability",
+            "file: install command compatibility inside a temporary project workspace",
+            "optional Tessl review threshold command result when explicitly requested",
+        ],
+        "does_not_prove": [
+            "live Tessl eval score",
+            "public registry publication",
+            "persistent user runtime activation",
+            "oss-local or oss-cloud behavioral proof",
+        ],
+        "no_publish": True,
+        "no_registry_upload": True,
+        "no_live_repo_source": True,
+        "install_scope": "temporary project workspace under /tmp/ask-tessl-local-install",
+    }
+
+
+def _tessl_local_command_payload(
+    command: list[str],
+    process: subprocess.CompletedProcess[str],
+    *,
+    cwd: Path,
+) -> dict[str, object]:
+    def redact(value: str) -> str:
+        return re.sub(r"[-A-Za-z0-9._%+]+@[-A-Za-z0-9.]+\.[A-Za-z]{2,}", "<redacted-email>", value)
+
+    return {
+        "status": "success" if process.returncode == 0 else "error",
+        "command": " ".join(shlex.quote(part) for part in command),
+        "cwd": str(cwd),
+        "exit_code": process.returncode,
+        "stdout": redact(process.stdout),
+        "stderr": redact(process.stderr),
+    }
+
+
+def _run_tessl_local_command(
+    command: list[str],
+    *,
+    cwd: Path,
+    env: dict[str, str],
+    timeout_seconds: int,
+) -> dict[str, object]:
+    try:
+        process = subprocess.run(
+            command,
+            cwd=str(cwd),
+            capture_output=True,
+            text=True,
+            timeout=timeout_seconds,
+            env=env,
+        )
+    except subprocess.TimeoutExpired as e:
+        return {
+            "status": "blocked",
+            "command": " ".join(shlex.quote(part) for part in command),
+            "cwd": str(cwd),
+            "timeout_seconds": timeout_seconds,
+            "stdout": _as_text(e.stdout),
+            "stderr": _as_text(e.stderr),
+            "blocker": f"Tessl local proof command timed out after {timeout_seconds} seconds.",
+            "blocker_class": "blocked_runtime",
+        }
+    except OSError as e:
+        return {
+            "status": "blocked",
+            "command": " ".join(shlex.quote(part) for part in command),
+            "cwd": str(cwd),
+            "stdout": "",
+            "stderr": str(e),
+            "blocker": f"Failed to run Tessl local proof command: {e}",
+            "blocker_class": "blocked_runtime",
+        }
+
+    payload = _tessl_local_command_payload(command, process, cwd=cwd)
+    if signal_blocker := _tessl_signal_blocker(process, lane="local proof"):
+        payload["status"] = "blocked"
+        payload["blocker"] = signal_blocker
+        payload["blocker_class"] = "blocked_runtime"
+    elif process.returncode != 0 and _tessl_auth_blocked(process.stdout, process.stderr):
+        payload["status"] = "blocked"
+        payload["blocker"] = "Tessl CLI is installed locally, but authentication is required before this local proof can run."
+        payload["blocker_class"] = "blocked_auth"
+    return payload
+
+
+def run_tessl_local_proof(
+    repo_root: Path,
+    path: str,
+    *,
+    workspace: str,
+    execute: bool = False,
+    include_review: bool = False,
+    review_threshold: int = 90,
+    timeout_seconds: int = 180,
+) -> dict[str, object]:
+    """Stage a Tessl package and optionally run local lint, pack, file install, and review checks."""
+    source_path = Path(path)
+    proof_path = str(source_path.parent) if source_path.name == "SKILL.md" else path
+    try:
+        normalized_workspace = _validate_tessl_workspace(workspace)
+        staged_source, copied_files = _stage_tessl_live_private_source(repo_root, proof_path, normalized_workspace)
+    except (OSError, ValueError) as e:
+        return {
+            "schema_version": "skills-sdk.tessl-local-proof.v1",
+            "status": "blocked",
+            "source_path": path,
+            "proof_path": proof_path,
+            "workspace": workspace,
+            "execute": execute,
+            "blocker": f"Failed to stage Tessl local proof source: {e}",
+            "blocker_class": "blocked_validation" if isinstance(e, ValueError) else "blocked_runtime",
+            "policy": _tessl_local_proof_policy(workspace),
+        }
+
+    tessl_path = shutil.which("tessl") or "tessl"
+    safe_name = proof_path.replace("/", "__").replace(" ", "_")
+    digest = hashlib.sha256(proof_path.encode("utf-8")).hexdigest()[:12]
+    install_workspace = Path(tempfile.gettempdir()) / "ask-tessl-local-install" / f"{safe_name}-{digest}"
+    source_root_name = (repo_root.resolve() / proof_path).resolve().name
+    dist_dir = staged_source / "dist"
+    dist_path = dist_dir / f"{source_root_name}.tgz"
+    review_path = staged_source / "skills" / source_root_name
+    lint_command = [tessl_path, "plugin", "lint", str(staged_source)]
+    pack_command = [tessl_path, "plugin", "pack", "--output", str(dist_path), str(staged_source)]
+    install_command = [tessl_path, "install", f"file:{staged_source}", "--agent", "codex", "--yes", "--strict"]
+    review_command = [
+        tessl_path,
+        "review",
+        "run",
+        str(review_path),
+        "--workspace",
+        normalized_workspace,
+        "--json",
+        "--threshold",
+        str(review_threshold),
+    ]
+    planned_commands = {
+        "plugin_lint": " ".join(shlex.quote(part) for part in lint_command),
+        "plugin_pack": " ".join(shlex.quote(part) for part in pack_command),
+        "install_file": " ".join(shlex.quote(part) for part in install_command),
+        "review_run": " ".join(shlex.quote(part) for part in review_command),
+    }
+    receipt: dict[str, object] = {
+        "schema_version": "skills-sdk.tessl-local-proof.v1",
+        "status": "preview" if not execute else "pass",
+        "source_path": path,
+        "proof_path": proof_path,
+        "workspace": normalized_workspace,
+        "execute": execute,
+        "include_review": include_review,
+        "review_threshold": review_threshold,
+        "staged_source": str(staged_source),
+        "staged_files": copied_files,
+        "staged_file_count": len(copied_files),
+        "install_workspace": str(install_workspace),
+        "dist_dir": str(dist_dir),
+        "dist_path": str(dist_path),
+        "planned_commands": planned_commands,
+        "commands": {},
+        "policy": _tessl_local_proof_policy(normalized_workspace),
+        "evidence_retention": f"staged directory is left under {tempfile.gettempdir()}/ask-tessl-live for inspection",
+    }
+    if not execute:
+        return receipt
+
+    if not shutil.which("tessl"):
+        receipt["status"] = "blocked"
+        receipt["blocker"] = "Installed native tessl CLI was not found on PATH."
+        receipt["blocker_class"] = "blocked_runtime"
+        return receipt
+
+    _clear_directory(install_workspace)
+    dist_dir.mkdir(parents=True, exist_ok=True)
+    env = dict(os.environ)
+    env["TESSL_AUTO_UPDATE_INTERVAL_MINUTES"] = "0"
+    commands: dict[str, object] = {}
+    for key, command, cwd in (
+        ("plugin_lint", lint_command, staged_source),
+        ("plugin_pack", pack_command, staged_source),
+        ("install_file", install_command, install_workspace),
+    ):
+        payload = _run_tessl_local_command(command, cwd=cwd, env=env, timeout_seconds=timeout_seconds)
+        commands[key] = payload
+        if payload.get("status") != "success":
+            receipt["status"] = "blocked" if payload.get("status") == "blocked" else "fail"
+            receipt["blocker"] = payload.get("blocker") or f"Tessl local proof step failed: {key}"
+            receipt["blocker_class"] = payload.get("blocker_class") or "failed_validation"
+            receipt["commands"] = commands
+            return receipt
+
+    if include_review:
+        payload = _run_tessl_local_command(review_command, cwd=staged_source, env=env, timeout_seconds=timeout_seconds)
+        commands["review_run"] = payload
+        if payload.get("status") != "success":
+            receipt["status"] = "blocked" if payload.get("status") == "blocked" else "fail"
+            receipt["blocker"] = payload.get("blocker") or "Tessl review run did not meet the requested threshold."
+            receipt["blocker_class"] = payload.get("blocker_class") or "failed_validation"
+            receipt["commands"] = commands
+            return receipt
+
+    receipt["commands"] = commands
+    receipt["installed_project_manifest"] = str(install_workspace / "tessl.json")
+    return receipt
 
 
 def _clear_directory(target: Path) -> None:
@@ -4647,6 +4899,392 @@ def _scorecard_path_from_output(repo_root: Path, raw_output: str) -> Path | None
     return None
 
 
+def _reports_path_from_output(repo_root: Path, raw_output: str) -> Path | None:
+    for line in raw_output.splitlines():
+        match = re.match(r"^Reports:\s+(.+?)\s*$", line)
+        if not match:
+            continue
+        candidate = Path(match.group(1)).expanduser()
+        if not candidate.is_absolute():
+            candidate = repo_root / candidate
+        return candidate.resolve()
+    return None
+
+
+def _eval_skill_source_root(path: str) -> Path:
+    source = Path(path).expanduser()
+    if source.name == "SKILL.md":
+        return source.parent
+    return source
+
+
+def _eval_skill_name_for_reports(path: str) -> str:
+    source_root = _eval_skill_source_root(path)
+    try:
+        frontmatter = _read_skill_frontmatter(source_root)
+    except OSError:
+        frontmatter = {}
+    name = str(frontmatter.get("name") or "").strip()
+    return name or source_root.name
+
+
+def _newest_report_dir_for_skill(repo_root: Path, *, skill_name: str, started_at: float) -> Path | None:
+    reports_root = repo_root / "Infrastructure" / "artifacts" / "skills" / skill_name
+    if not reports_root.is_dir():
+        return None
+    candidates = [
+        path
+        for path in reports_root.iterdir()
+        if path.is_dir() and path.stat().st_mtime >= started_at - 1
+    ]
+    if not candidates:
+        return None
+    return max(candidates, key=lambda path: path.stat().st_mtime)
+
+
+def _eval_report_dir(
+    repo_root: Path,
+    *,
+    skill_path: str,
+    raw_output: str,
+    started_at: float,
+) -> Path | None:
+    reports_path = _reports_path_from_output(repo_root, raw_output)
+    if reports_path is not None and reports_path.is_dir():
+        return reports_path
+    scorecard_path = _scorecard_path_from_output(repo_root, raw_output)
+    if scorecard_path is not None:
+        return scorecard_path.parent
+    return _newest_report_dir_for_skill(
+        repo_root,
+        skill_name=_eval_skill_name_for_reports(skill_path),
+        started_at=started_at,
+    )
+
+
+def _eval_closeout_status(eval_status: str, blocker_class: str | None) -> str:
+    if blocker_class:
+        return "blocked"
+    normalized = str(eval_status or "").strip().lower()
+    if normalized == "pass":
+        return "pass"
+    if normalized.startswith("blocked") or normalized.startswith("timeout"):
+        return "blocked"
+    return "fail"
+
+
+def _case_status_from_record(case: dict) -> str:
+    if case.get("blocked") is True:
+        return "blocked"
+    if case.get("passed") is True:
+        return "pass"
+    return "fail"
+
+
+def _case_closeout_from_record(case: dict) -> dict[str, object]:
+    case_id = str(case.get("id") or case.get("name") or "unknown")
+    status = _case_status_from_record(case)
+    result = {
+        "id": case_id,
+        "status": status,
+    }
+    if case.get("dir"):
+        result["result_path"] = str(case.get("dir"))
+    blocker_classes = case.get("blocker_classes")
+    if status == "blocked" and isinstance(blocker_classes, list) and blocker_classes:
+        result["blocker_class"] = str(blocker_classes[0])
+    if status != "pass":
+        failures = case.get("tier1_failures")
+        if isinstance(failures, list) and failures:
+            result["failures"] = [str(item) for item in failures]
+        blocked_reasons = case.get("blocked_reasons")
+        if isinstance(blocked_reasons, list) and blocked_reasons:
+            result["blocked_reasons"] = [str(item) for item in blocked_reasons]
+    return result
+
+
+def _case_closeout_from_partial_dir(case_dir: Path, repo_root: Path) -> dict[str, object]:
+    case_id = re.sub(r"^\d+-", "", case_dir.name)
+    result_path = case_dir / "result.json"
+    if result_path.is_file():
+        try:
+            case = json.loads(result_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            case = {}
+        if isinstance(case, dict):
+            return _case_closeout_from_record(case)
+    actual_artifacts = [
+        path.relative_to(case_dir).as_posix()
+        for path in sorted(case_dir.rglob("*"))
+        if path.is_file()
+    ]
+    return {
+        "id": case_id,
+        "status": "blocked",
+        "blocker_class": "blocked_missing_artifact",
+        "expected_artifacts": ["result.json"],
+        "actual_artifacts": actual_artifacts,
+        "result_path": _repo_relative_path(repo_root, case_dir),
+    }
+
+
+def _load_eval_summary(report_dir: Path) -> dict:
+    for name in ("summary.json", "scorecard.json"):
+        path = report_dir / name
+        if not path.is_file():
+            continue
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if isinstance(data, dict):
+            return data
+    return {}
+
+
+def _eval_closeout_validation_checks(closeout: dict[str, object]) -> list[dict[str, object]]:
+    checks: list[dict[str, object]] = []
+    missing = sorted(field for field in EVAL_CLOSEOUT_REQUIRED_FIELDS if field not in closeout)
+    checks.append({
+        "id": "required_fields_present",
+        "status": "blocker" if missing else "pass",
+        "message": "workflow-closeout/v1 receipts must include required contract fields.",
+        "evidence": missing,
+    })
+    schema_version = closeout.get("schema_version")
+    checks.append({
+        "id": "schema_version_valid",
+        "status": "pass" if schema_version == EVAL_CLOSEOUT_SCHEMA_VERSION else "blocker",
+        "message": "workflow-closeout receipt must use skills-sdk.eval-closeout.v1.",
+        "evidence": [] if schema_version == EVAL_CLOSEOUT_SCHEMA_VERSION else [str(schema_version)],
+    })
+    status = str(closeout.get("status") or "")
+    cases = closeout.get("cases")
+    case_list = cases if isinstance(cases, list) else []
+    checks.append({
+        "id": "cases_array_valid",
+        "status": "pass" if isinstance(cases, list) else "blocker",
+        "message": "workflow-closeout receipt must carry cases as an array.",
+        "evidence": [] if isinstance(cases, list) else [type(cases).__name__],
+    })
+    blocked_cases = [
+        str(case.get("id") or index)
+        for index, case in enumerate(case_list, start=1)
+        if isinstance(case, dict) and str(case.get("status") or "") == "blocked"
+    ]
+    checks.append({
+        "id": "blocked_cases_block_suite",
+        "status": "blocker" if blocked_cases and status != "blocked" else "pass",
+        "message": "Any blocked case must make the suite closeout status blocked.",
+        "evidence": blocked_cases if blocked_cases and status != "blocked" else [],
+    })
+    non_pass_status = status != "pass"
+    mutation_allowed = closeout.get("mutation_allowed")
+    registry_update_allowed = closeout.get("registry_update_allowed")
+    checks.append({
+        "id": "non_pass_blocks_source_mutation",
+        "status": "blocker" if non_pass_status and mutation_allowed is not False else "pass",
+        "message": "Non-pass closeouts must set mutation_allowed=false.",
+        "evidence": [f"mutation_allowed={mutation_allowed!r}"] if non_pass_status and mutation_allowed is not False else [],
+    })
+    checks.append({
+        "id": "non_pass_blocks_registry_promotion",
+        "status": "blocker" if non_pass_status and registry_update_allowed is not False else "pass",
+        "message": "Non-pass closeouts must set registry_update_allowed=false.",
+        "evidence": [f"registry_update_allowed={registry_update_allowed!r}"] if non_pass_status and registry_update_allowed is not False else [],
+    })
+    missing_suite_artifacts = closeout.get("missing_suite_artifacts") is True
+    blocker_class = closeout.get("blocker_class")
+    checks.append({
+        "id": "missing_artifacts_have_blocker_class",
+        "status": "blocker" if missing_suite_artifacts and not blocker_class else "pass",
+        "message": "Closeouts with missing suite artifacts must include blocker_class.",
+        "evidence": ["missing_suite_artifacts=true"] if missing_suite_artifacts and not blocker_class else [],
+    })
+    no_case_reason = closeout.get("no_case_reason")
+    checks.append({
+        "id": "pass_has_case_evidence",
+        "status": "blocker" if status == "pass" and not case_list and not no_case_reason else "pass",
+        "message": "Pass closeouts must include complete case evidence or an explicit no_case_reason.",
+        "evidence": ["cases=[]"] if status == "pass" and not case_list and not no_case_reason else [],
+    })
+    return checks
+
+
+def validate_eval_closeout_payload(closeout: dict[str, object]) -> dict[str, object]:
+    checks = _eval_closeout_validation_checks(closeout)
+    blockers = [check for check in checks if check["status"] == "blocker"]
+    return {
+        "schema_version": "skills-sdk.eval-closeout-validation.v1",
+        "status": "blocked" if blockers else "pass",
+        "checks": checks,
+        "blockers": blockers,
+    }
+
+
+def _load_eval_closeout(path: Path) -> tuple[dict[str, object] | None, str | None]:
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except OSError as exc:
+        return None, str(exc)
+    except json.JSONDecodeError as exc:
+        return None, f"invalid_json:{exc}"
+    if not isinstance(payload, dict):
+        return None, "closeout_json_not_object"
+    return payload, None
+
+
+def _closeout_path_for_doctor(path: Path) -> Path:
+    return path / "workflow-closeout.json" if path.is_dir() else path
+
+
+def eval_closeout_doctor(repo_root: Path, path: str) -> CallResult:
+    result = CallResult()
+    requested = Path(path).expanduser()
+    if not requested.is_absolute():
+        requested = repo_root / requested
+    closeout_path = _closeout_path_for_doctor(requested)
+    result.data["validation_commands"] = [
+        " ".join(shlex.quote(part) for part in ["./bin/ask", "evals", "closeout", "doctor", path, "--json", "--robot"])
+    ]
+    closeout, load_error = _load_eval_closeout(closeout_path)
+    report_dir = closeout_path.parent
+    case_dirs = [
+        item
+        for item in sorted(report_dir.iterdir())
+        if report_dir.is_dir() and item.is_dir() and re.match(r"^\d+-", item.name)
+    ] if report_dir.is_dir() else []
+    missing_result_cases = [
+        re.sub(r"^\d+-", "", item.name)
+        for item in case_dirs
+        if not (item / "result.json").is_file()
+    ]
+    summary_present = (report_dir / "summary.json").is_file()
+    scorecard_present = (report_dir / "scorecard.json").is_file()
+    validation = (
+        validate_eval_closeout_payload(closeout)
+        if closeout is not None
+        else {
+            "schema_version": "skills-sdk.eval-closeout-validation.v1",
+            "status": "blocked",
+            "checks": [],
+            "blockers": [{"id": "closeout_load", "status": "blocker", "message": load_error or "missing closeout", "evidence": [str(closeout_path)]}],
+        }
+    )
+    doctor = {
+        "schema_version": "skills-sdk.eval-closeout-doctor.v1",
+        "status": "blocked" if validation["status"] != "pass" or missing_result_cases else "pass",
+        "requested_path": path,
+        "closeout_path": _repo_relative_path(repo_root, closeout_path),
+        "report_dir": _repo_relative_path(repo_root, report_dir),
+        "summary_present": summary_present,
+        "scorecard_present": scorecard_present,
+        "case_count": len(case_dirs),
+        "missing_result_cases": missing_result_cases,
+        "closeout_validation": validation,
+        "next_reproduce_command": closeout.get("next_reproduce_command") if isinstance(closeout, dict) else None,
+    }
+    result.data["eval_closeout_doctor"] = doctor
+    if doctor["status"] != "pass":
+        result.status = "error"
+        result.errors.append(ErrorObject(
+            code="ERR_VALIDATION",
+            message="Eval closeout doctor detected blocked or incomplete closeout evidence.",
+            fix_suggestion=str(doctor.get("next_reproduce_command") or result.data["validation_commands"][0]),
+        ))
+    return result
+
+
+def _write_eval_closeout(
+    repo_root: Path,
+    *,
+    skill_path: str,
+    mode: str,
+    runner: str,
+    raw_output: str,
+    raw_error: str,
+    eval_status: str,
+    blocker_class: str | None,
+    started_at: float,
+) -> dict[str, object]:
+    report_dir = _eval_report_dir(
+        repo_root,
+        skill_path=skill_path,
+        raw_output=raw_output,
+        started_at=started_at,
+    )
+    summary = _load_eval_summary(report_dir) if report_dir is not None else {}
+    cases: list[dict[str, object]] = []
+    if isinstance(summary.get("cases"), list):
+        cases = [
+            _case_closeout_from_record(case)
+            for case in summary["cases"]
+            if isinstance(case, dict)
+        ]
+    elif report_dir is not None and report_dir.is_dir():
+        case_dirs = [
+            path
+            for path in sorted(report_dir.iterdir())
+            if path.is_dir() and re.match(r"^\d+-", path.name)
+        ]
+        cases = [_case_closeout_from_partial_dir(path, repo_root) for path in case_dirs]
+
+    closeout_blocker = blocker_class
+    status = _eval_closeout_status(eval_status, blocker_class)
+    missing_suite_artifacts = report_dir is not None and not summary
+    if missing_suite_artifacts:
+        status = "blocked"
+        closeout_blocker = closeout_blocker or "blocked_missing_artifact"
+    if cases and any(case.get("status") == "blocked" for case in cases):
+        status = "blocked"
+        closeout_blocker = closeout_blocker or "blocked_missing_artifact"
+    elif cases and status == "pass" and any(case.get("status") == "fail" for case in cases):
+        status = "fail"
+
+    closeout_path = None
+    if report_dir is not None:
+        closeout_path = report_dir / "workflow-closeout.json"
+    elif raw_output.strip() or raw_error.strip():
+        closeout_root = repo_root / "Infrastructure" / "artifacts" / "evals" / "closeouts"
+        closeout_root.mkdir(parents=True, exist_ok=True)
+        stamp = _utc_now_iso().replace(":", "").replace("-", "")
+        closeout_path = closeout_root / f"{stamp}-{_safe_slug(skill_path)}-{_safe_slug(mode)}-{_safe_slug(runner)}.json"
+
+    closeout: dict[str, object] = {
+        "schema_version": EVAL_CLOSEOUT_SCHEMA_VERSION,
+        "status": status,
+        "skill_path": skill_path,
+        "mode": mode,
+        "runner": runner,
+        "report_dir": _repo_relative_path(repo_root, report_dir) if report_dir is not None else None,
+        "cases_expected": [str(case.get("id")) for case in cases],
+        "cases": cases,
+        "blocker_class": closeout_blocker,
+        "mutation_allowed": status == "pass",
+        "registry_update_allowed": status == "pass",
+        "raw_output_present": bool(raw_output.strip()),
+        "raw_error_present": bool(raw_error.strip()),
+        "missing_suite_artifacts": missing_suite_artifacts,
+        "next_reproduce_command": _evals_run_validation_command(
+            skill_path,
+            mode=mode,
+            runner=runner,
+            dashboard=True,
+            tessl_live_private=False,
+            tessl_workspace=None,
+            tessl_live_dry_run=False,
+        ),
+    }
+    if closeout_path is not None:
+        closeout["closeout_validation"] = validate_eval_closeout_payload(closeout)
+        closeout_path.parent.mkdir(parents=True, exist_ok=True)
+        closeout["path"] = _repo_relative_path(repo_root, closeout_path)
+        closeout_path.write_text(json.dumps(closeout, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    else:
+        closeout["closeout_validation"] = validate_eval_closeout_payload(closeout)
+    return closeout
+
+
 def _write_timeout_partial_artifact(
     repo_root: Path,
     *,
@@ -4861,7 +5499,9 @@ def run_evals(
     tessl_workspace: str | None = None,
     tessl_live_dry_run: bool = False,
     model: str | None = None,
+    codex_profile: str | None = None,
     cases: list[str] | None = None,
+    timeout_seconds: int | None = None,
 ) -> CallResult:
     """Runs evaluation cases for a skill."""
     result = CallResult()
@@ -4906,9 +5546,11 @@ def run_evals(
             tessl_live_dry_run=tessl_live_dry_run,
         )
     ]
+    effective_codex_profile = codex_profile or SMOKE_EVAL_PROFILE
     result.data["profile_contract"] = {
-        "codex_profile": SMOKE_EVAL_PROFILE if mode == "smoke" and runner == "codex" else None,
-        "codex_profile_config": "[profiles.fast]" if mode == "smoke" and runner == "codex" else None,
+        "codex_profile": effective_codex_profile if mode == "smoke" and runner == "codex" else None,
+        "codex_profile_config": f"[profiles.{effective_codex_profile}]" if mode == "smoke" and runner == "codex" else None,
+        "codex_profile_source": "argument" if codex_profile else "default",
         "codex_profile_required_for_smoke": mode == "smoke" and runner == "codex",
         "tessl_policy": _tessl_policy(),
         "tessl_live_private_policy": _tessl_live_private_policy(effective_tessl_workspace) if tessl_live_private else None,
@@ -5024,18 +5666,21 @@ def run_evals(
     ]
     timeout = RELEASE_EVAL_TIMEOUT_SECONDS if mode == "release" else 300
     if mode == "smoke" and runner == "codex":
-        smoke_model = model or SMOKE_EVAL_MODEL
         cmd.extend([
             "--profile",
-            SMOKE_EVAL_PROFILE,
-            "--model",
-            smoke_model,
+            effective_codex_profile,
+            "--sandbox",
+            "workspace-write",
             "--timeout-sec",
             str(SMOKE_CASE_TIMEOUT_SECONDS),
         ])
+        if model or not codex_profile:
+            cmd.extend(["--model", model or SMOKE_EVAL_MODEL])
         timeout = SMOKE_EVAL_TIMEOUT_SECONDS
     elif mode == "smoke":
         timeout = SMOKE_EVAL_TIMEOUT_SECONDS
+    if timeout_seconds is not None:
+        timeout = timeout_seconds
 
     for raw_case in cases or []:
         for case in raw_case.split(","):
@@ -5044,6 +5689,7 @@ def run_evals(
                 cmd.extend(["--case", case])
 
     _start_eval_lifecycle(result, path=path, mode=mode, runner=runner)
+    eval_started_at = time.time()
 
     try:
         process = subprocess.run(
@@ -5226,6 +5872,42 @@ def run_evals(
             if lifecycle_events and lifecycle_events[-1].get("event_type") in {"eval_completed", "eval_blocked"}:
                 lifecycle_events.pop()
             _finish_eval_lifecycle(result, path=path, mode=mode, runner=runner, eval_status="pass")
+
+    closeout = _write_eval_closeout(
+        repo_root,
+        skill_path=path,
+        mode=mode,
+        runner=runner,
+        raw_output=str(result.data.get("raw_output") or ""),
+        raw_error=str(result.data.get("raw_error") or ""),
+        eval_status=str(result.data.get("eval_status") or ("pass" if result.status == "success" else "fail")),
+        blocker_class=result.data.get("blocker_class") if isinstance(result.data.get("blocker_class"), str) else None,
+        started_at=eval_started_at,
+    )
+    result.data["eval_closeout"] = closeout
+    if closeout.get("path"):
+        result.data["eval_closeout_path"] = closeout["path"]
+    if closeout.get("status") == "blocked" and result.status != "error":
+        blocker_class = str(closeout.get("blocker_class") or "blocked_missing_artifact")
+        result.status = "error"
+        result.data["eval_status"] = blocker_class
+        result.data["blocker_class"] = blocker_class
+        lifecycle_events = result.data.setdefault("lifecycle_events", [])
+        if lifecycle_events and lifecycle_events[-1].get("event_type") in {"eval_completed", "eval_blocked"}:
+            lifecycle_events.pop()
+        _finish_eval_lifecycle(
+            result,
+            path=path,
+            mode=mode,
+            runner=runner,
+            eval_status=blocker_class,
+            blocker_class=blocker_class,
+        )
+        result.errors.append(ErrorObject(
+            code="ERR_VALIDATION",
+            message=f"Evaluation run blocked by closeout contract: {blocker_class}.",
+            fix_suggestion=str(closeout.get("next_reproduce_command") or result.data["validation_commands"][0]),
+        ))
 
     return result
 

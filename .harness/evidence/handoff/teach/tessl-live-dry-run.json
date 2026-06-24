@@ -1,0 +1,510 @@
+{
+  "status": "success",
+  "trace_id": "7d9383bc-c688-4709-aa42-93688e2047b9",
+  "metadata": {
+    "version": "0.1.0",
+    "command": "evals run Skills/github/teach --mode smoke --tessl-live-private --tessl-workspace skills-sdk --tessl-live-dry-run --json --robot --no-dashboard",
+    "next_steps": [],
+    "correction_note": null
+  },
+  "data": {
+    "tessl_workspace": "skills-sdk",
+    "tessl_workspace_source": "argument",
+    "validation_commands": [
+      "./bin/ask evals run Skills/github/teach --mode smoke --runner codex --tessl-live-private --tessl-workspace skills-sdk --tessl-live-dry-run --no-dashboard --json --robot"
+    ],
+    "profile_contract": {
+      "codex_profile": "fast",
+      "codex_profile_config": "[profiles.fast]",
+      "codex_profile_source": "default",
+      "codex_profile_required_for_smoke": true,
+      "tessl_policy": {
+        "native_tessl_only": true,
+        "no_npx": true,
+        "no_publish": true,
+        "no_registry_upload": true,
+        "temp_staged_project_input_only": true,
+        "stable_staging_root": "/tmp/ask-tessl-evals/<skill-path>-<sha12>",
+        "evidence_retention": "stable tmp staging is intentionally left for post-run inspection; reruns archive previous staged evidence under evidence-archive/",
+        "tessl_project_marker": "tessl.json",
+        "staged_inputs": [
+          "SKILL.md",
+          "references/evals.yaml",
+          "references/contract.yaml",
+          "references/task-profile.json",
+          "assets/**/*",
+          "scenarios/<case-id>/{task.md,criteria.json}"
+        ],
+        "network_permission_required_by_repo": false,
+        "project_save_may_use_tessl_service": "only_for_project_link_when_workspace_provided",
+        "project_save_default": "compatibility_flag_not_required",
+        "project_identity_rule": "plugin skills use the plugin project name; standalone skills use the skill name",
+        "project_link_check": "when --tessl-workspace is provided, repair/link existing project first and create only when needed"
+      },
+      "tessl_live_private_policy": {
+        "enabled_by": "--tessl-live-private",
+        "visibility": "private",
+        "plugin_private_required": true,
+        "workspace_required": true,
+        "workspace": "skills-sdk",
+        "tile_name_format": "workspace/tile-name",
+        "project_identity_rule": "plugin skills use the plugin project name; standalone skills use the skill name",
+        "project_link_check": "repair/link existing project first and create only when needed",
+        "native_tessl_only": true,
+        "no_npx": true,
+        "no_install": true,
+        "no_publish": true,
+        "no_registry_upload": true,
+        "temp_staged_plugin_input_only": true,
+        "stable_staging_root": "/tmp/ask-tessl-live/<skill-path>-<sha12>",
+        "evidence_retention": "stable tmp staging is intentionally left for post-run inspection; reruns archive previous staged evidence under evidence-archive/",
+        "tessl_project_marker": "tessl.json",
+        "plugin_manifest": ".tessl-plugin/plugin.json",
+        "eval_layout": "evals/<case-id>/{task.md,criteria.json}",
+        "staged_inputs": [
+          ".tessl-plugin/plugin.json",
+          "tessl.json",
+          "skills/<skill-name>/SKILL.md",
+          "skills/<skill-name>/references/evals.yaml",
+          "skills/<skill-name>/references/evals/*.md",
+          "skills/<skill-name>/references/eval-scenarios.json",
+          "skills/<skill-name>/references/contract.yaml",
+          "skills/<skill-name>/references/task-profile.json",
+          "skills/<skill-name>/references/**/*",
+          "skills/<skill-name>/assets/**/*",
+          "evals/<case-id>/task.md",
+          "evals/<case-id>/criteria.json"
+        ],
+        "command_shape": "tessl eval run --json --workspace <workspace> <staged-plugin-dir>",
+        "scenario_gate": "skill-owned references/evals.yaml plus reviewed generated scenarios are required before live scoring; behavioral skills need at least 20 gold-standard scenarios; structure-only checks must opt out explicitly",
+        "min_scenarios_required": 20,
+        "duplicate_run_guard": "before live scoring, block when a pending eval run already exists for the same workspace/project",
+        "pre_tessl_feedback_loop": {
+          "required_order": [
+            "deterministic_local_gates",
+            "oss_local_internal_judge",
+            "patch_oss_local_failures",
+            "oss_cloud_internal_judge",
+            "patch_oss_cloud_failures",
+            "tessl_live_dry_run",
+            "tessl_live_run",
+            "patch_tessl_failures"
+          ],
+          "deterministic_local_gates": [
+            "skills audit",
+            "sdk eval scenario-quality",
+            "sdk eval scorer-quality",
+            "sdk eval scorer-calibration",
+            "sdk eval regression-plan when prior Tessl or internal judge regressions exist"
+          ],
+          "internal_judge_sequence": [
+            {
+              "profile": "oss-local",
+              "role": "cheap internal remediation judge",
+              "required_before": "oss-cloud",
+              "failure_rule": "owner-classify failures, patch the smallest surface, retain regression evidence, and rerun from oss-local"
+            },
+            {
+              "profile": "oss-cloud",
+              "role": "higher-confidence internal remediation judge",
+              "required_before": "tessl_live_dry_run",
+              "failure_rule": "owner-classify failures, patch the smallest surface, retain regression evidence, and rerun from oss-local"
+            }
+          ],
+          "tessl_sequence": [
+            {
+              "stage": "tessl_live_dry_run",
+              "role": "package and scenario staging proof before external scoring"
+            },
+            {
+              "stage": "tessl_live_run",
+              "role": "external confirmation lane after internal judges pass"
+            }
+          ],
+          "failure_loop": "Any oss-local, oss-cloud, dry-run, or live Tessl failure returns to oss-local after owner classification, patch plan, retained regression evidence, and rerun commands are recorded.",
+          "live_blocked_until": "deterministic gates, oss-local, oss-cloud, and Tessl dry-run all pass for the current candidate or an explicit skip/blocker receipt is recorded."
+        },
+        "model_selection_gate": {
+          "quality_floor_before_cost": true,
+          "cost_is_secondary_to_score": true,
+          "required_summary_fields": [
+            "model_selection",
+            "comparative_quality",
+            "cost_observability"
+          ],
+          "acceptance": "with-skill score must meet the quality floor and beat baseline before model cost can be treated as a selection advantage"
+        },
+        "cost_observability": {
+          "track_turns_when_available": true,
+          "track_tokens_when_available": true,
+          "track_cost_when_available": true,
+          "missing_metrics_are_explicit": true
+        },
+        "run_limit_policy": {
+          "workspace_run_limit": 300,
+          "limit_source": "operator_provided_limit",
+          "reserve_runs": 20,
+          "verification_commands": [
+            "tessl eval list --json --workspace <workspace>",
+            "tessl eval view --json <run-id>"
+          ],
+          "preflight": "before live scoring, check remaining Tessl workspace run capacity when the API/list surface is available; otherwise use the operator-provided 300-run cap and preserve reserve for rerun/remediation",
+          "block_when": "remaining run capacity cannot be checked and the run is nonessential, or known remaining capacity is at/below reserve; use dry-run staging and local scenario gates instead"
+        },
+        "readiness_gate": "after run completion, fetch tessl eval view --json and require usage score >= 90% and usage score > baseline; 95% remains the target",
+        "min_score_required": 0.9,
+        "target_score": 0.95,
+        "usage_data_opt_out": "tessl config set shareUsageData false"
+      }
+    },
+    "lifecycle_events": [
+      {
+        "schema_version": "capability-lifecycle-event.v1",
+        "event_type": "eval_started",
+        "event_definition": "A workout, smoke eval, or proof run started for a capability.",
+        "occurred_at": "2026-06-24T19:26:57Z",
+        "subject": {
+          "query": "Skills/github/teach",
+          "target_kind": "skill_path",
+          "handle": "teach",
+          "canonical_source_path": "Skills/github/teach",
+          "eval_mode": "smoke",
+          "runner": "codex"
+        },
+        "outcome": {
+          "status": "running",
+          "blocker_classes": [],
+          "warning_classes": []
+        }
+      },
+      {
+        "schema_version": "capability-lifecycle-event.v1",
+        "event_type": "eval_completed",
+        "event_definition": "A workout, smoke eval, or proof run completed with pass or fail status.",
+        "occurred_at": "2026-06-24T19:26:57Z",
+        "subject": {
+          "query": "Skills/github/teach",
+          "target_kind": "skill_path",
+          "handle": "teach",
+          "canonical_source_path": "Skills/github/teach",
+          "eval_mode": "smoke",
+          "runner": "codex"
+        },
+        "outcome": {
+          "status": "pass",
+          "blocker_classes": [],
+          "warning_classes": []
+        }
+      }
+    ],
+    "lifecycle_event": {
+      "schema_version": "capability-lifecycle-event.v1",
+      "event_type": "eval_completed",
+      "event_definition": "A workout, smoke eval, or proof run completed with pass or fail status.",
+      "occurred_at": "2026-06-24T19:26:57Z",
+      "subject": {
+        "query": "Skills/github/teach",
+        "target_kind": "skill_path",
+        "handle": "teach",
+        "canonical_source_path": "Skills/github/teach",
+        "eval_mode": "smoke",
+        "runner": "codex"
+      },
+      "outcome": {
+        "status": "pass",
+        "blocker_classes": [],
+        "warning_classes": []
+      }
+    },
+    "lifecycle_event_types": {
+      "eval_started": "A workout, smoke eval, or proof run started for a capability.",
+      "eval_blocked": "A workout, smoke eval, or proof run stopped on a classified blocker.",
+      "eval_completed": "A workout, smoke eval, or proof run completed with pass or fail status."
+    },
+    "raw_output": "",
+    "raw_error": "",
+    "eval_status": "pass",
+    "local_eval_status": "skipped_tessl_live_dry_run",
+    "blocker_class": null,
+    "blocker_taxonomy": {
+      "blocked_user_input": "The runner requested user input and should not be treated as hung.",
+      "blocked_auth": "The runner stopped on authentication or credential setup.",
+      "blocked_runtime": "The runner was blocked by local runtime, sandbox, or model-capacity limits.",
+      "timeout_no_output": "The eval timed out without producing final output.",
+      "timeout_partial_output": "The eval timed out after producing partial output.",
+      "blocked_missing_tool": "A required local command, runtime, package, or validator is unavailable.",
+      "blocked_missing_artifact": "An expected report, transcript, output, or generated artifact is absent.",
+      "blocked_environment": "The selected workspace, sandbox, cwd, or permission profile cannot run the check.",
+      "blocked_validation": "A structural or policy validation gate failed for the capability."
+    },
+    "tessl_dry_run_note": "Tessl live-private dry-run validates the staged private Tessl payload only. Run without --tessl-live-dry-run only after deterministic local gates, oss-local, oss-cloud, and this dry-run pass for the current candidate.",
+    "tessl_eval": {
+      "status": "pass",
+      "command": "tessl eval run --json --workspace skills-sdk /tmp/ask-tessl-live/Skills__github__teach-8f40b66016fb",
+      "source_path": "Skills/github/teach",
+      "staged_source": "/tmp/ask-tessl-live/Skills__github__teach-8f40b66016fb",
+      "plugin_manifest": "/tmp/ask-tessl-live/Skills__github__teach-8f40b66016fb/.tessl-plugin/plugin.json",
+      "plugin_version": "0.1.0",
+      "tessl_project_marker": "/tmp/ask-tessl-live/Skills__github__teach-8f40b66016fb/tessl.json",
+      "staged_files": [
+        ".tessl-plugin/plugin.json",
+        "tessl.json",
+        "README.md",
+        "skills/teach/agents/openai.yaml",
+        "skills/teach/references/contract.yaml",
+        "skills/teach/references/eval-regression-plan.json",
+        "skills/teach/references/evals/mission-change.md",
+        "skills/teach/references/evals/mission-first-python.md",
+        "skills/teach/references/evals/overloaded-docker.md",
+        "skills/teach/references/evals/private-transcript.md",
+        "skills/teach/references/evals/reference-from-lesson.md",
+        "skills/teach/references/evals.yaml",
+        "skills/teach/references/glossary-format.md",
+        "skills/teach/references/knowledge-capsule-routing.md",
+        "skills/teach/references/knowledge-capsule.manifest.yaml",
+        "skills/teach/references/knowledge-capsules/teach-learning-roadmap-lesson-loop.md",
+        "skills/teach/references/knowledge-capsules/teach-learning-roadmap-local-book-practice.md",
+        "skills/teach/references/knowledge-capsules/teach-learning-roadmap-mission-and-state.md",
+        "skills/teach/references/knowledge-capsules/teach-learning-roadmap-proof-and-boundaries.md",
+        "skills/teach/references/knowledge-capsules/teach-learning-roadmap-roadmap-sequencing.md",
+        "skills/teach/references/knowledge-capsules/teach-learning-roadmap-source-trust.md",
+        "skills/teach/references/knowledge-demand.yaml",
+        "skills/teach/references/learning-record-format.md",
+        "skills/teach/references/mission-format.md",
+        "skills/teach/references/resources-format.md",
+        "skills/teach/references/scorer-calibration/examples.jsonl",
+        "skills/teach/references/scorer-calibration/manifest.json",
+        "skills/teach/references/scorer-calibration/raw/teach-cal-fail-evidence-overclaim.json",
+        "skills/teach/references/scorer-calibration/raw/teach-cal-fail-rubric-copying.json",
+        "skills/teach/references/scorer-calibration/raw/teach-cal-fail-syllabus-before-mission.json",
+        "skills/teach/references/scorer-calibration/raw/teach-cal-pass-mission-first.json",
+        "skills/teach/references/scorer-calibration/raw/teach-cal-pass-retrieval-record.json",
+        "skills/teach/references/scorer-calibration/raw/teach-cal-pass-source-trust.json",
+        "skills/teach/references/source-context.yaml",
+        "skills/teach/references/task-profile.json",
+        "skills/teach/references/teaching-operating-model.md",
+        "skills/teach/references/templates.md",
+        "skills/teach/SKILL.md",
+        "SKILL.md",
+        "references/evals.yaml",
+        "references/contract.yaml",
+        "references/task-profile.json",
+        "references/eval-regression-plan.json",
+        "references/evals/mission-change.md",
+        "references/evals/mission-first-python.md",
+        "references/evals/overloaded-docker.md",
+        "references/evals/private-transcript.md",
+        "references/evals/reference-from-lesson.md",
+        "references/glossary-format.md",
+        "references/knowledge-capsule-routing.md",
+        "references/knowledge-capsule.manifest.yaml",
+        "references/knowledge-capsules/teach-learning-roadmap-lesson-loop.md",
+        "references/knowledge-capsules/teach-learning-roadmap-local-book-practice.md",
+        "references/knowledge-capsules/teach-learning-roadmap-mission-and-state.md",
+        "references/knowledge-capsules/teach-learning-roadmap-proof-and-boundaries.md",
+        "references/knowledge-capsules/teach-learning-roadmap-roadmap-sequencing.md",
+        "references/knowledge-capsules/teach-learning-roadmap-source-trust.md",
+        "references/knowledge-demand.yaml",
+        "references/learning-record-format.md",
+        "references/mission-format.md",
+        "references/resources-format.md",
+        "references/scorer-calibration/examples.jsonl",
+        "references/scorer-calibration/manifest.json",
+        "references/scorer-calibration/raw/teach-cal-fail-evidence-overclaim.json",
+        "references/scorer-calibration/raw/teach-cal-fail-rubric-copying.json",
+        "references/scorer-calibration/raw/teach-cal-fail-syllabus-before-mission.json",
+        "references/scorer-calibration/raw/teach-cal-pass-mission-first.json",
+        "references/scorer-calibration/raw/teach-cal-pass-retrieval-record.json",
+        "references/scorer-calibration/raw/teach-cal-pass-source-trust.json",
+        "references/source-context.yaml",
+        "references/teaching-operating-model.md",
+        "references/templates.md",
+        "scenario-sources.json",
+        "evals/happy-new-topic/task.md",
+        "evals/happy-new-topic/criteria.json",
+        "evals/happy-existing-workspace/task.md",
+        "evals/happy-existing-workspace/criteria.json",
+        "evals/happy-study-plan/task.md",
+        "evals/happy-study-plan/criteria.json",
+        "evals/happy-first-lesson/task.md",
+        "evals/happy-first-lesson/criteria.json",
+        "evals/happy-quiz-review/task.md",
+        "evals/happy-quiz-review/criteria.json",
+        "evals/happy-reference-page/task.md",
+        "evals/happy-reference-page/criteria.json",
+        "evals/happy-resource-curation/task.md",
+        "evals/happy-resource-curation/criteria.json",
+        "evals/edge-mission-unclear/task.md",
+        "evals/edge-mission-unclear/criteria.json",
+        "evals/edge-mission-change/task.md",
+        "evals/edge-mission-change/criteria.json",
+        "evals/edge-no-existing-files/task.md",
+        "evals/edge-no-existing-files/criteria.json",
+        "evals/edge-external-sources-needed/task.md",
+        "evals/edge-external-sources-needed/criteria.json",
+        "evals/edge-overloaded-learner/task.md",
+        "evals/edge-overloaded-learner/criteria.json",
+        "evals/edge-community-wisdom/task.md",
+        "evals/edge-community-wisdom/criteria.json",
+        "evals/negative-one-off-fact/task.md",
+        "evals/negative-one-off-fact/criteria.json",
+        "evals/negative-copyedit-only/task.md",
+        "evals/negative-copyedit-only/criteria.json",
+        "evals/negative-debug-only/task.md",
+        "evals/negative-debug-only/criteria.json",
+        "evals/negative-certification/task.md",
+        "evals/negative-certification/criteria.json",
+        "evals/pressure-injection/task.md",
+        "evals/pressure-injection/criteria.json",
+        "evals/pressure-private-transcript/task.md",
+        "evals/pressure-private-transcript/criteria.json",
+        "evals/pressure-destructive-reset/task.md",
+        "evals/pressure-destructive-reset/criteria.json",
+        "evals/regression-format-doc-preservation/task.md",
+        "evals/regression-format-doc-preservation/criteria.json",
+        "evals/regression-teaching-operating-model-preservation/task.md",
+        "evals/regression-teaching-operating-model-preservation/criteria.json",
+        "evals/regression-tessl-feedback-loop/task.md",
+        "evals/regression-tessl-feedback-loop/criteria.json",
+        "evals/generated-Reviewed-Generated-Scenario/task.md",
+        "evals/generated-Reviewed-Generated-Scenario/criteria.json"
+      ],
+      "staging_policy": "stable_tmp_private_plugin_evidence",
+      "workspace": "skills-sdk",
+      "project_identity": {
+        "owner_type": "standalone_skill",
+        "project": "teach",
+        "workspace": "skills-sdk",
+        "name": "skills-sdk/teach"
+      },
+      "visibility": "private",
+      "dry_run": true,
+      "live_private": true,
+      "evidence_retention": "staged directory is left under /tmp/ask-tessl-live for inspection",
+      "policy": {
+        "enabled_by": "--tessl-live-private",
+        "visibility": "private",
+        "plugin_private_required": true,
+        "workspace_required": true,
+        "workspace": "skills-sdk",
+        "tile_name_format": "workspace/tile-name",
+        "project_identity_rule": "plugin skills use the plugin project name; standalone skills use the skill name",
+        "project_link_check": "repair/link existing project first and create only when needed",
+        "native_tessl_only": true,
+        "no_npx": true,
+        "no_install": true,
+        "no_publish": true,
+        "no_registry_upload": true,
+        "temp_staged_plugin_input_only": true,
+        "stable_staging_root": "/tmp/ask-tessl-live/<skill-path>-<sha12>",
+        "evidence_retention": "stable tmp staging is intentionally left for post-run inspection; reruns archive previous staged evidence under evidence-archive/",
+        "tessl_project_marker": "tessl.json",
+        "plugin_manifest": ".tessl-plugin/plugin.json",
+        "eval_layout": "evals/<case-id>/{task.md,criteria.json}",
+        "staged_inputs": [
+          ".tessl-plugin/plugin.json",
+          "tessl.json",
+          "skills/<skill-name>/SKILL.md",
+          "skills/<skill-name>/references/evals.yaml",
+          "skills/<skill-name>/references/evals/*.md",
+          "skills/<skill-name>/references/eval-scenarios.json",
+          "skills/<skill-name>/references/contract.yaml",
+          "skills/<skill-name>/references/task-profile.json",
+          "skills/<skill-name>/references/**/*",
+          "skills/<skill-name>/assets/**/*",
+          "evals/<case-id>/task.md",
+          "evals/<case-id>/criteria.json"
+        ],
+        "command_shape": "tessl eval run --json --workspace <workspace> <staged-plugin-dir>",
+        "scenario_gate": "skill-owned references/evals.yaml plus reviewed generated scenarios are required before live scoring; behavioral skills need at least 20 gold-standard scenarios; structure-only checks must opt out explicitly",
+        "min_scenarios_required": 20,
+        "duplicate_run_guard": "before live scoring, block when a pending eval run already exists for the same workspace/project",
+        "pre_tessl_feedback_loop": {
+          "required_order": [
+            "deterministic_local_gates",
+            "oss_local_internal_judge",
+            "patch_oss_local_failures",
+            "oss_cloud_internal_judge",
+            "patch_oss_cloud_failures",
+            "tessl_live_dry_run",
+            "tessl_live_run",
+            "patch_tessl_failures"
+          ],
+          "deterministic_local_gates": [
+            "skills audit",
+            "sdk eval scenario-quality",
+            "sdk eval scorer-quality",
+            "sdk eval scorer-calibration",
+            "sdk eval regression-plan when prior Tessl or internal judge regressions exist"
+          ],
+          "internal_judge_sequence": [
+            {
+              "profile": "oss-local",
+              "role": "cheap internal remediation judge",
+              "required_before": "oss-cloud",
+              "failure_rule": "owner-classify failures, patch the smallest surface, retain regression evidence, and rerun from oss-local"
+            },
+            {
+              "profile": "oss-cloud",
+              "role": "higher-confidence internal remediation judge",
+              "required_before": "tessl_live_dry_run",
+              "failure_rule": "owner-classify failures, patch the smallest surface, retain regression evidence, and rerun from oss-local"
+            }
+          ],
+          "tessl_sequence": [
+            {
+              "stage": "tessl_live_dry_run",
+              "role": "package and scenario staging proof before external scoring"
+            },
+            {
+              "stage": "tessl_live_run",
+              "role": "external confirmation lane after internal judges pass"
+            }
+          ],
+          "failure_loop": "Any oss-local, oss-cloud, dry-run, or live Tessl failure returns to oss-local after owner classification, patch plan, retained regression evidence, and rerun commands are recorded.",
+          "live_blocked_until": "deterministic gates, oss-local, oss-cloud, and Tessl dry-run all pass for the current candidate or an explicit skip/blocker receipt is recorded."
+        },
+        "model_selection_gate": {
+          "quality_floor_before_cost": true,
+          "cost_is_secondary_to_score": true,
+          "required_summary_fields": [
+            "model_selection",
+            "comparative_quality",
+            "cost_observability"
+          ],
+          "acceptance": "with-skill score must meet the quality floor and beat baseline before model cost can be treated as a selection advantage"
+        },
+        "cost_observability": {
+          "track_turns_when_available": true,
+          "track_tokens_when_available": true,
+          "track_cost_when_available": true,
+          "missing_metrics_are_explicit": true
+        },
+        "run_limit_policy": {
+          "workspace_run_limit": 300,
+          "limit_source": "operator_provided_limit",
+          "reserve_runs": 20,
+          "verification_commands": [
+            "tessl eval list --json --workspace <workspace>",
+            "tessl eval view --json <run-id>"
+          ],
+          "preflight": "before live scoring, check remaining Tessl workspace run capacity when the API/list surface is available; otherwise use the operator-provided 300-run cap and preserve reserve for rerun/remediation",
+          "block_when": "remaining run capacity cannot be checked and the run is nonessential, or known remaining capacity is at/below reserve; use dry-run staging and local scenario gates instead"
+        },
+        "readiness_gate": "after run completion, fetch tessl eval view --json and require usage score >= 90% and usage score > baseline; 95% remains the target",
+        "min_score_required": 0.9,
+        "target_score": 0.95,
+        "usage_data_opt_out": "tessl config set shareUsageData false"
+      },
+      "raw_output": "",
+      "raw_error": "",
+      "exit_code": 0,
+      "blocker": null,
+      "blocker_class": null
+    }
+  },
+  "telemetry": {
+    "latency_ms": 45
+  },
+  "errors": []
+}

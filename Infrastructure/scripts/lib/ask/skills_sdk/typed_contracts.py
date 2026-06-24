@@ -5,6 +5,7 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 from ask.skills_sdk import ab_contracts, observability_contracts, signing_contracts, skill_intake_contracts, trust_contracts
+from ask.skills_sdk.eval_closeout_contracts import EvalCloseoutValidation
 from ask.skills_sdk.eval_contracts import EvalQualityGates
 
 
@@ -440,16 +441,14 @@ class EvalCase(_SdkContractModel):
 class EvalCaseResult(_SdkContractModel):
     case_id: str = Field(min_length=1)
     status: Literal["pass", "fail"]
-    oracle: Literal["exact_match"]
+    oracle: Literal["exact_match", "eval_closeout"]
     expected: str = Field(min_length=1)
     actual: str
 
 
 class EvalRunReceipt(_SdkContractModel):
     schema_version: Literal["skills-sdk.eval-run-receipt.v0"]
-    schema_uri: Literal[
-        "https://agent-skills.local/schemas/skills-sdk/eval-run-receipt.v0.schema.json"
-    ]
+    schema_uri: Literal["https://agent-skills.local/schemas/skills-sdk/eval-run-receipt.v0.schema.json"]
     status: Literal["pass", "fail", "blocked"]
     runner: Literal["deterministic_jsonl_v0", "internal_skill_builder_v0"]
     dataset_path: str = Field(min_length=1)
@@ -459,10 +458,13 @@ class EvalRunReceipt(_SdkContractModel):
     package_digest: str | None = Field(default=None, min_length=71)
     target_path: str | None
     mode: str | None
+    lane: str | None = None
+    profile: str | None = None
     case_count: int = Field(ge=0)
     passed_count: int = Field(ge=0)
     failed_count: int = Field(ge=0)
     quality_gates: EvalQualityGates | None = None
+    closeout_validation: EvalCloseoutValidation | None = None
     cases: list[EvalCaseResult]
     blockers: list[str]
     mutation_performed: Literal[False]

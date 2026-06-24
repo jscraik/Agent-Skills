@@ -148,6 +148,53 @@ cases:
         self.assertEqual(payload["cases"][0]["claim_ids"], ["sample.claim"])
         self.assertIsInstance(payload["cases"][0]["deterministic_checks"], dict)
 
+    def test_yaml_fallback_parses_legacy_expect_lists(self) -> None:
+        real_import = __import__
+
+        def import_without_yaml(name: str, *args: object, **kwargs: object) -> object:
+            if name == "yaml":
+                raise ModuleNotFoundError(name)
+            return real_import(name, *args, **kwargs)
+
+        evals_text = """schema_version: 1
+skill: sample
+claims:
+- id: sample.claim
+  statement: ignored by fallback
+cases:
+- id: x-writer-style-case
+  claim_ids:
+  - sample.claim
+  input: |-
+    Turn this brief into an X launch thread.
+  expect:
+  - Includes two hook variants.
+  - Keeps publication status draft-only when request_user_input
+    is unavailable.
+  - Keeps implementation ownership clear: Codex writes code; Jamie validates.
+  prompt: |-
+    Can you turn this brief into an X launch thread?
+  acceptance:
+  - type: regex
+    value: "(?is)(claim_authority.*limited to supplied brief|no external factual claims)"
+  eval_modes:
+  - smoke
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+"""
+        with mock.patch("builtins.__import__", side_effect=import_without_yaml):
+            payload = _yaml_safe_load(evals_text)
+
+        case = payload["cases"][0]
+        self.assertEqual(case["id"], "x-writer-style-case")
+        self.assertEqual(case["expect"][0], "Includes two hook variants.")
+        self.assertEqual(case["expect"][1], "Keeps publication status draft-only when request_user_input is unavailable.")
+        self.assertEqual(case["expect"][2], "Keeps implementation ownership clear: Codex writes code; Jamie validates.")
+        self.assertEqual(case["eval_modes"], ["smoke"])
+        self.assertEqual(case["claim_ids"], ["sample.claim"])
+        self.assertIsInstance(case["deterministic_checks"], dict)
+
     def test_yaml_fallback_rejects_invalid_scalar_continuation(self) -> None:
         real_import = __import__
 
@@ -192,6 +239,56 @@ cases:
         self.assertEqual(receipt["status"], "blocked")
         blocker_ids = {check["id"] for check in receipt["blockers"]}
         self.assertIn("evals_yaml_parse", blocker_ids)
+
+    def test_builder_blocks_malformed_text_field_assertions(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(
+                Path(temp_dir),
+                """schema_version: 1
+cases:
+- id: malformed-text-field
+  eval_modes:
+  - smoke
+  prompt: Check structured output.
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: text_field_in
+    value: draft_only
+""",
+            )
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
+        self.assertIn("typed_text_field_assertions_valid", blocker_ids)
+
+    def test_builder_blocks_regex_against_known_structured_fields(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(
+                Path(temp_dir),
+                """schema_version: 1
+cases:
+- id: regex-structured-field
+  eval_modes:
+  - smoke
+  prompt: Check structured output.
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: regex
+    value: 'publication_gate_status:\\s*draft_only'
+""",
+            )
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
+        self.assertIn("structured_fields_use_typed_assertions", blocker_ids)
 
     def test_release_mode_suite_requires_twenty_scenarios(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
