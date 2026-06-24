@@ -35,6 +35,28 @@ EXAMPLE_TESSL_EVAL_YAML = """cases:
 """
 
 
+def _completed_eval_with_report(tmp_path: Path, skill_name: str = "example-skill") -> mock.Mock:
+    report_dir = tmp_path / "Infrastructure" / "artifacts" / "skills" / skill_name / "run-1"
+    report_dir.mkdir(parents=True, exist_ok=True)
+    (report_dir / "summary.json").write_text(
+        json.dumps({
+            "cases": [
+                {
+                    "id": "happy-path",
+                    "status": "pass",
+                    "dir": f"Infrastructure/artifacts/skills/{skill_name}/run-1/01-happy-path",
+                }
+            ]
+        }),
+        encoding="utf-8",
+    )
+    return mock.Mock(
+        returncode=0,
+        stdout=f"Skill evals: {skill_name}\nReports: {report_dir}\nRESULT: PASS\n",
+        stderr="",
+    )
+
+
 def test_tessl_run_id_parser_handles_prefixed_json() -> None:
     payload = 'tessl output\n{"id": "019e7ab3-fda5-7071-8e47-9ea75386d53b"}'
 
@@ -150,7 +172,7 @@ def test_tessl_live_summary_flags_missing_observable_output_regressions() -> Non
 
 
 def test_smoke_evals_use_codex_spark_and_fast_profile_without_reasoning_level(tmp_path: Path) -> None:
-    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
+    completed = _completed_eval_with_report(tmp_path)
 
     with (
         mock.patch.object(evals, "_pyyaml_eval_python_command", return_value=["managed-python"]),
@@ -197,7 +219,7 @@ def test_evals_pyyaml_runner_bypasses_mise_project_resolution(monkeypatch) -> No
 
 
 def test_smoke_evals_accept_model_override_for_quota_recovery(tmp_path: Path) -> None:
-    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
+    completed = _completed_eval_with_report(tmp_path)
 
     with mock.patch.object(evals.subprocess, "run", return_value=completed) as run:
         result = evals.run_evals(
@@ -215,7 +237,7 @@ def test_smoke_evals_accept_model_override_for_quota_recovery(tmp_path: Path) ->
 
 
 def test_smoke_evals_accept_profile_override_for_oss_cloud(tmp_path: Path) -> None:
-    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
+    completed = _completed_eval_with_report(tmp_path)
 
     with mock.patch.object(evals.subprocess, "run", return_value=completed) as run:
         result = evals.run_evals(
@@ -239,7 +261,7 @@ def test_smoke_evals_accept_profile_override_for_oss_cloud(tmp_path: Path) -> No
 
 
 def test_smoke_evals_pass_case_filters_to_skill_runner(tmp_path: Path) -> None:
-    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
+    completed = _completed_eval_with_report(tmp_path)
 
     with mock.patch.object(evals.subprocess, "run", return_value=completed) as run:
         result = evals.run_evals(
@@ -260,7 +282,7 @@ def test_smoke_evals_pass_case_filters_to_skill_runner(tmp_path: Path) -> None:
 
 
 def test_smoke_evals_splits_comma_separated_case_filters(tmp_path: Path) -> None:
-    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
+    completed = _completed_eval_with_report(tmp_path)
 
     with mock.patch.object(evals.subprocess, "run", return_value=completed) as run:
         result = evals.run_evals(
@@ -281,7 +303,7 @@ def test_smoke_evals_splits_comma_separated_case_filters(tmp_path: Path) -> None
 
 
 def test_release_evals_do_not_force_smoke_model(tmp_path: Path) -> None:
-    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
+    completed = _completed_eval_with_report(tmp_path)
 
     with mock.patch.object(evals.subprocess, "run", return_value=completed) as run:
         result = evals.run_evals(tmp_path, "Plugins/example-skill", mode="release", skip_tessl=True)
@@ -1159,7 +1181,7 @@ def test_macro_eval_report_uses_claim_gap_when_case_has_no_finding(tmp_path: Pat
 
 
 def test_smoke_evals_can_use_discovery_smoke_without_codex_args(tmp_path: Path) -> None:
-    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
+    completed = _completed_eval_with_report(tmp_path)
 
     with (
         mock.patch.object(evals, "_pyyaml_eval_python_command", return_value=["managed-python"]),
@@ -1189,7 +1211,7 @@ def test_evals_resolve_runtime_projection_to_canonical_source(tmp_path: Path) ->
     canonical = tmp_path / "Skills" / "agent-ops" / "evals-router" / "references"
     canonical.mkdir(parents=True)
     (canonical / "evals.yaml").write_text("cases: []\n", encoding="utf-8")
-    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
+    completed = _completed_eval_with_report(tmp_path, "evals-router")
 
     with (
         mock.patch.object(evals, "_pyyaml_eval_python_command", return_value=["managed-python"]),
@@ -1277,7 +1299,7 @@ def _write_handoff_readiness(tmp_path: Path, skill_name: str) -> Path:
 
 
 def test_evals_run_native_tessl_without_project_save_approval_flag(tmp_path: Path) -> None:
-    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
+    completed = _completed_eval_with_report(tmp_path)
     _write_example_skill(tmp_path)
 
     with (
@@ -1322,7 +1344,7 @@ def test_eval_only_review_report_uses_stable_tessl_staging_template(tmp_path: Pa
 
 
 def test_evals_run_native_tessl_by_default_with_temp_staged_source(tmp_path: Path) -> None:
-    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
+    completed = _completed_eval_with_report(tmp_path)
     skill_root = _write_example_skill(tmp_path)
     (skill_root / "assets").mkdir()
     (skill_root / "assets" / "example.png").write_bytes(b"png")
@@ -1393,7 +1415,7 @@ def test_evals_run_native_tessl_by_default_with_temp_staged_source(tmp_path: Pat
 
 
 def test_evals_live_private_dry_run_stages_private_plugin_shape(tmp_path: Path) -> None:
-    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
+    completed = _completed_eval_with_report(tmp_path, "skill-factory-router")
     skill_root = _write_example_skill(tmp_path)
     (skill_root / "SKILL.md").write_text(
         '---\nname: example-skill\nmetadata:\n  version: "2.3.4"\n---\n'
@@ -1900,7 +1922,7 @@ def test_evals_live_private_blocks_without_handoff_readiness(tmp_path: Path) -> 
 
 
 def test_evals_live_private_skips_local_only_cases(tmp_path: Path) -> None:
-    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
+    completed = _completed_eval_with_report(tmp_path, "skill-factory-router")
     skill_root = _write_example_skill(tmp_path)
     (skill_root / "references" / "evals.yaml").write_text(
         (
@@ -2026,7 +2048,7 @@ def test_evals_run_uses_plugin_project_identity_when_workspace_is_set(tmp_path: 
         encoding="utf-8",
     )
 
-    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
+    completed = _completed_eval_with_report(tmp_path, "skill-factory-router")
 
     def fake_run(cmd: list[str], **kwargs: object) -> mock.Mock:
         if cmd[1:3] == ["project", "repair"]:
@@ -3342,7 +3364,7 @@ def test_tessl_live_staging_rejects_symlinked_support_files(tmp_path: Path) -> N
 
 
 def test_evals_skip_tessl_escape_hatch(tmp_path: Path) -> None:
-    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
+    completed = _completed_eval_with_report(tmp_path)
 
     with mock.patch.object(evals.subprocess, "run", return_value=completed) as run:
         result = evals.run_evals(tmp_path, "Skills/example-skill", mode="smoke", skip_tessl=True)
@@ -3539,6 +3561,31 @@ def test_run_evals_writes_blocked_closeout_for_partial_report_dir(tmp_path: Path
     closeout_path = tmp_path / result.data["eval_closeout_path"]
     assert closeout_path.is_file()
     assert closeout["closeout_validation"]["status"] == "pass"
+
+
+def test_run_evals_blocks_success_without_report_directory(tmp_path: Path) -> None:
+    completed = mock.Mock(
+        returncode=0,
+        stdout="Skill evals: example-skill\nRESULT: PASS\n",
+        stderr="",
+    )
+
+    with mock.patch.object(evals.subprocess, "run", return_value=completed):
+        result = evals.run_evals(tmp_path, "Plugins/example-skill", mode="smoke", skip_tessl=True)
+
+    assert result.status == "error"
+    assert result.data["eval_status"] == "blocked_missing_artifact"
+    closeout = result.data["eval_closeout"]
+    assert closeout["status"] == "blocked"
+    assert closeout["blocker_class"] == "blocked_missing_artifact"
+    assert closeout["report_dir"] is None
+    assert closeout["missing_suite_artifacts"] is True
+    assert closeout["mutation_allowed"] is False
+    assert closeout["registry_update_allowed"] is False
+    assert closeout["closeout_validation"]["status"] == "pass"
+    assert result.data["eval_closeout_path"].startswith(
+        "Infrastructure/artifacts/evals/closeouts/"
+    )
 
 
 def test_eval_closeout_validation_blocks_non_pass_mutation() -> None:
@@ -3793,7 +3840,7 @@ def test_run_evals_classifies_scorecard_runtime_blocker(tmp_path: Path) -> None:
 
 def test_run_evals_uses_default_tessl_workspace_from_env(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.setenv("ASK_TESSL_WORKSPACE", "skills-sdk")
-    completed = mock.Mock(returncode=0, stdout="{}", stderr="")
+    completed = _completed_eval_with_report(tmp_path, "autoreview")
 
     with (
         mock.patch.object(evals.subprocess, "run", return_value=completed),
@@ -4002,7 +4049,7 @@ def test_run_evals_classifies_timeout_output_shape(tmp_path: Path) -> None:
 
 
 def test_run_evals_can_skip_dashboard(tmp_path: Path) -> None:
-    completed = mock.Mock(returncode=0, stdout="Skill evals: example-skill\n", stderr="")
+    completed = _completed_eval_with_report(tmp_path)
 
     with mock.patch.object(evals.subprocess, "run", return_value=completed):
         result = evals.run_evals(

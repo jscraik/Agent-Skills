@@ -5231,7 +5231,7 @@ def _write_eval_closeout(
 
     closeout_blocker = blocker_class
     status = _eval_closeout_status(eval_status, blocker_class)
-    missing_suite_artifacts = report_dir is not None and not summary
+    missing_suite_artifacts = report_dir is None or not summary
     if missing_suite_artifacts:
         status = "blocked"
         closeout_blocker = closeout_blocker or "blocked_missing_artifact"

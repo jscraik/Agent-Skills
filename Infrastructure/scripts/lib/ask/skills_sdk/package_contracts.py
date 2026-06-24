@@ -2690,6 +2690,20 @@ def _plugin_hooks_contract(
     hook_decl = manifest.get("hooks") if isinstance(manifest, dict) else None
     hooks_path = plugin_root / "hooks" / "hooks.json"
     hooks_rel = _rel_path_or_none(repo_root, hooks_path)
+    if hook_decl is None and not hooks_path.is_file():
+        checks.append(
+            _platform_check(
+                "plugin_hooks_manifest_declared",
+                "not_applicable",
+                dimension="plugin_hooks",
+                evidence={
+                    "declared_hooks": hook_decl,
+                    "expected": "./hooks/hooks.json",
+                    "reason": "plugin does not declare bundled hooks",
+                },
+            )
+        )
+        return checks, blockers, advisories
     if hooks_path.is_file() and hook_decl != "./hooks/hooks.json":
         blockers.append(
             _platform_blocker(

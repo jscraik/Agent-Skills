@@ -342,6 +342,31 @@ Return schema_version: 1 and a short result summary.
             [check["name"] for check in verification["checks"]],
         )
 
+    def test_package_verify_treats_absent_plugin_hooks_as_not_applicable(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            plugin_root = repo_root / "Plugins" / "plugin-fixture"
+            skill_dir = plugin_root / "skills" / "packaged-skill"
+            _write_gold_quality_skill(skill_dir)
+            _write_plugin_manifest(plugin_root, hooks_value=None)
+
+            result = skills_package_verify(
+                repo_root,
+                "Plugins/plugin-fixture/skills/packaged-skill",
+            )
+
+        self.assertEqual(result.status, "success", result.data)
+        verification = result.data["skill_package_verification"]
+        compat = verification["sdk_contract"]["values"]["openai_platform_compat"]
+        self.assertEqual(compat["status"], "pass")
+        self.assertEqual(compat["target_kind"], "plugin_skill")
+        self.assertEqual(compat["blockers"], [])
+        checks = {check["name"]: check for check in compat["checks"]}
+        self.assertEqual(
+            checks["plugin_hooks_manifest_declared"]["status"],
+            "not_applicable",
+        )
+
     def test_package_verify_blocks_unsupported_openai_platform_plugin_hooks(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir)
