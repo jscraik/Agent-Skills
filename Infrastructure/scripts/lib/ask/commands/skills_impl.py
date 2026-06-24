@@ -6544,7 +6544,8 @@ def _sdk_improve_append_event(path: Path, event: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     safe_event = _sdk_improve_redact_sensitive_values(event)
     with path.open("a", encoding="utf-8") as handle:
-        print(json.dumps(safe_event, sort_keys=True, separators=(",", ":")), file=handle)
+        json.dump(safe_event, handle, sort_keys=True, separators=(",", ":"))
+        handle.write("\n")
 
 
 def _sdk_improve_error(
