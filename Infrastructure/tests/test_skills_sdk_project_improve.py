@@ -72,6 +72,31 @@ def _project_manifest() -> dict:
     }
 
 
+def _project_manifest_with_skill_roots() -> dict:
+    return {
+        "schema_version": "skills-sdk.project.v1",
+        "project_id": "x-writer-canary",
+        "skill_roots": [
+            {
+                "path": ".codex/skills",
+                "classification": "canonical_project_source",
+                "default_for_create": True,
+                "default_for_install": True,
+                "default_for_update": True,
+            }
+        ],
+        "eval_suite": {"path": "references/evals.yaml"},
+        "evidence": {
+            "output_path": ".harness/skills",
+            "registry": ".harness/skills/registry.json",
+            "events": ".harness/skills/events.jsonl",
+            "receipts": ".harness/skills/receipts",
+        },
+        "trust_policy": "local_owner",
+        "precedence_policy": "project_over_user_after_trust",
+    }
+
+
 def _write_codex_skill(skill_root: Path) -> None:
     (skill_root / "README.md").write_text("# X Content Writer\n", encoding="utf-8")
     (skill_root / "SKILL.md").write_text(
@@ -182,6 +207,32 @@ class TestSkillsSdkProjectImprove(unittest.TestCase):
             self.assertFalse((project_root / ".harness/skills/registry.json").exists())
             self.assertFalse((project_root / ".harness/skills/events.jsonl").exists())
 
+    def test_preview_accepts_schema_v1_skill_roots_manifest(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            project_root, skill_md = _project_with_codex_skill(Path(tmp))
+            (project_root / "skills-sdk.json").write_text(
+                json.dumps(_project_manifest_with_skill_roots()),
+                encoding="utf-8",
+            )
+
+            payload = _run_json_command(
+                sys.executable,
+                "Infrastructure/bin/ask",
+                "sdk",
+                "improve",
+                str(skill_md),
+                "--project-root",
+                str(project_root),
+                "--preview",
+                "--json",
+                "--robot",
+            )
+            receipt = payload["data"]["skills_sdk_project_improve"]["receipt"]
+
+            self.assertEqual(payload["status"], "success")
+            self.assertEqual(receipt["status"], "pass")
+            self.assertEqual(receipt["source"]["root"], ".codex/skills")
+
     def test_apply_writes_registry_event_and_receipt_without_source_overwrite(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             project_root, skill_md = _project_with_codex_skill(Path(tmp))
@@ -265,6 +316,40 @@ class TestSkillsSdkProjectImprove(unittest.TestCase):
             self.assertEqual(receipt["status"], "blocked")
             self.assertIn("invalid_project_registry", receipt["blockers"])
             self.assertEqual(registry_path.read_text(encoding="utf-8"), "{not-json")
+
+    def test_apply_blocks_non_list_registry_skills_without_overwrite(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            project_root, skill_md = _project_with_codex_skill(Path(tmp))
+            registry_path = project_root / ".harness" / "skills" / "registry.json"
+            registry_path.parent.mkdir(parents=True)
+            malformed_registry = {
+                "schema_version": "skills-sdk.project-skill-registry.v1",
+                "project": {"id": "x-writer-canary", "manifest": "skills-sdk.json"},
+                "summary": {},
+                "skills": {"x-content-writer": {"handle": "x-content-writer"}},
+            }
+            registry_path.write_text(json.dumps(malformed_registry), encoding="utf-8")
+
+            process = _run_command(
+                sys.executable,
+                "Infrastructure/bin/ask",
+                "sdk",
+                "improve",
+                str(skill_md),
+                "--project-root",
+                str(project_root),
+                "--apply",
+                "--json",
+                "--robot",
+            )
+            payload = json.loads(process.stdout)
+            receipt = payload["data"]["skills_sdk_project_improve"]["receipt"]
+
+            self.assertNotEqual(process.returncode, 0)
+            self.assertEqual(payload["status"], "error")
+            self.assertEqual(receipt["status"], "blocked")
+            self.assertIn("invalid_project_registry", receipt["blockers"])
+            self.assertEqual(json.loads(registry_path.read_text(encoding="utf-8")), malformed_registry)
 
     def test_registry_marks_eval_blocked_improvement_as_blocked(self) -> None:
         registry: dict = {"skills": []}

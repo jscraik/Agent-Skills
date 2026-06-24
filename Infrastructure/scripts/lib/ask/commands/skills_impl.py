@@ -489,15 +489,24 @@ def _declared_project_skill_source(project_root: Path, manifest_path: Path, sour
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         return None
+    declared_sources: list[tuple[Any, Any]] = []
     skill_sources = manifest.get("skill_sources")
-    if not isinstance(skill_sources, list):
-        return None
-    for item in skill_sources:
-        if not isinstance(item, dict):
+    if isinstance(skill_sources, list):
+        declared_sources.extend(
+            (item.get("root"), item.get("kind"))
+            for item in skill_sources
+            if isinstance(item, dict)
+        )
+    skill_roots = manifest.get("skill_roots")
+    if isinstance(skill_roots, list):
+        declared_sources.extend(
+            (item.get("path"), item.get("classification"))
+            for item in skill_roots
+            if isinstance(item, dict)
+        )
+    for root_value, classification in declared_sources:
+        if classification != "canonical_project_source":
             continue
-        if item.get("kind") != "canonical_project_source":
-            continue
-        root_value = item.get("root")
         if not isinstance(root_value, str) or not root_value.strip():
             continue
         declared_root = _resolve_project_relative_config_path(project_root, root_value)
@@ -6412,7 +6421,7 @@ def _sdk_improve_load_registry(path: Path, project_id: str, manifest_path: str) 
     payload.setdefault("summary", {})
     payload.setdefault("skills", [])
     if not isinstance(payload["skills"], list):
-        payload["skills"] = []
+        raise ValueError(f"Skills registry JSON field 'skills' must be a list at {path}.")
     return payload
 
 
@@ -6630,7 +6639,7 @@ def skills_sdk_project_improve(
             query=query,
             status="blocked",
             message="Skills SDK improve requires a valid owner repo skills-sdk.json manifest.",
-            fix_suggestion="Create skills-sdk.json with a canonical_project_source skill_sources entry.",
+            fix_suggestion="Create skills-sdk.json with a canonical_project_source skill_roots entry.",
             receipt=receipt,
         )
 
