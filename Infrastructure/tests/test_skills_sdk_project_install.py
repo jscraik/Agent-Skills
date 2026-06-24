@@ -488,7 +488,7 @@ class TestSkillsSdkProjectInstall(unittest.TestCase):
                 "---\nname: source-skill\ndescription: source skill\n---\n\n# Source\n",
                 encoding="utf-8",
             )
-            (source_root / "README.md").write_text("unapproved\n", encoding="utf-8")
+            (source_root / "NOTES.md").write_text("unapproved\n", encoding="utf-8")
 
             process = _run_process(
                 sys.executable,

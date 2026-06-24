@@ -171,6 +171,32 @@ def _skill_role_check(manifest_files: list[dict[str, Any]]) -> dict[str, Any]:
     )
 
 
+def _readme_role_check(manifest_files: list[dict[str, Any]]) -> dict[str, Any]:
+    roles = sorted(
+        {
+            str(item.get("role"))
+            for item in manifest_files
+            if isinstance(item.get("role"), str)
+        }
+    )
+    readme_paths = sorted(
+        str(item.get("path"))
+        for item in manifest_files
+        if item.get("role") == "readme" and isinstance(item.get("path"), str)
+    )
+    has_readme_md = any(
+        path == "README.md" or path.replace("\\", "/").endswith("/README.md")
+        for path in readme_paths
+    )
+    return _check(
+        "required_registry_readme_role",
+        "pass" if "readme" in roles and has_readme_md else "blocker",
+        "blocker",
+        "Skills SDK packages must include README.md as registry presentation; agent runtime instructions remain in SKILL.md.",
+        roles + readme_paths,
+    )
+
+
 def _hardening_checks(
     package_receipt: dict[str, Any],
     manifest: dict[str, Any],
@@ -184,6 +210,7 @@ def _hardening_checks(
         _size_budget_check(manifest_files, total_size),
         _provenance_check(manifest),
         _skill_role_check(manifest_files),
+        _readme_role_check(manifest_files),
     ]
 
 

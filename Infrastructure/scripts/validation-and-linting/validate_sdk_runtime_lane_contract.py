@@ -1,0 +1,250 @@
+#!/usr/bin/env python3
+"""Validate the Skills SDK runtime lane contract stays explicit."""
+
+from __future__ import annotations
+
+import argparse
+import json
+from dataclasses import dataclass
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[3]
+CONTRACT_PATH = ROOT / "Docs/agents/25-sdk-runtime-lane-contract.md"
+README_PATH = ROOT / "Docs/agents/README.md"
+VALIDATION_PATH = ROOT / "Docs/agents/04-validation.md"
+
+REQUIRED_LANES = {
+    "SDK mechanical validation": [
+        "./bin/ask skills package verify <skill-path> --json --robot",
+        "./bin/ask sdk eval scenario-quality <skill-path> --preview --json --robot",
+        "./bin/ask sdk eval scorer-quality <skill-path> --preview --json --robot",
+        "./bin/ask sdk eval scorer-calibration <skill-path> --preview --json --robot",
+        "./bin/ask skills audit <skill-path>/SKILL.md --level strict --json --robot",
+    ],
+    "oss-local flow": [
+        "codex exec --profile oss-local",
+        "codex_profile=oss-local",
+        "oss-local.config.toml",
+    ],
+    "oss-cloud flow": [
+        "codex exec --profile oss-cloud",
+        "codex_profile=oss-cloud",
+        "oss-cloud.config.toml",
+    ],
+    "Tessl local flow": [
+        "./bin/ask evals run <skill-path> --mode smoke or release --json --robot",
+        "./bin/ask evals prepare-tessl-scenarios <skill-path> --tessl-workspace <workspace> --dry-run --json --robot",
+        "/tmp/ask-tessl-*",
+    ],
+    "Tessl external flow": [
+        "./bin/ask evals run <skill-path> --tessl-live-private --tessl-workspace <workspace> --json --robot",
+        "./bin/ask sdk eval tessl-score --view-json <view-json> --skill <skill-path> --preview --json --robot",
+        "tessl eval view --json",
+        "Foundry package id",
+        "private Tessl package id",
+        "project repair/link/create",
+    ],
+}
+
+REQUIRED_NON_SUBSTITUTION_PHRASES = [
+    "Do not skip SDK mechanical validation before runtime proof",
+    "Do not use generic `./bin/ask evals run --runner codex --model <model>` as",
+    "Do not treat a ChatGPT-account model error as an oss-local blocker",
+    "Do not treat an oss-local pass as oss-cloud proof",
+    "Do not treat local Tessl package staging as external Tessl scoring proof",
+    "Do not treat external Tessl command completion as readiness",
+    "Do not treat a one-off Tessl upload as external proof",
+]
+
+REQUIRED_PIPELINE_PHRASES = [
+    "## Promotion Pipeline",
+    "1. SDK mechanical validation",
+    "2. oss-local flow",
+    "3. oss-cloud flow",
+    "4. Tessl local flow",
+    "5. Tessl external flow",
+    "durable private Tessl registry/workspace package",
+    "iterate until the sandboxed local OSS lane is valid",
+    "iterate until the sandboxed cloud OSS lane is valid",
+    "iterate until the rubric and scenario package are good enough",
+    "## Tessl External Identity Contract",
+    "`skills-sdk-lab` is the intended initial Tessl workspace",
+    "`jscraik-private` is the intended private Tessl registry workspace",
+    "`jscraik` is the intended public-facing Tessl registry workspace",
+    "foundry_package_id",
+    "tessl_private_package_id",
+    "staged package digest",
+    "## First-Time Tessl Workspace Setup",
+    "tessl install tessl-labs/tile-creator sharaf/migrate-to-tessl --agent codex --agent agents",
+    "Do not use `pnpx tessl i ...` for SDK runtime lanes",
+    "tessl project repair --json",
+    "tessl project repair --relink --workspace <workspace> --project <name> --yes",
+    "tessl project create <name> --workspace <workspace>",
+    "Do not run `tessl plugin publish`",
+    "registry upload commands in runtime-lane proof",
+    "staged-package lint",
+    "scored `tessl eval view --json` artifacts",
+    "workspace selection: `skills-sdk-lab`",
+    "`jscraik-private` for private registry promotion",
+    "`jscraik` for public registry",
+    "publish readiness: not claimed from runtime-lane proof",
+    "## Format Projection Rules",
+    "The Skills SDK must not publish an OpenAI/Codex plugin directory directly as a Tessl package",
+    "`agents/**`: preserve as OpenAI metadata",
+    "`.codex-plugin/plugin.json`: translate selected identity",
+    "There is no separate required OpenAI plugin marketplace JSON inside each plugin package",
+    "`plugin.json`: required Tessl registry manifest",
+    "`README.md`: include for private and public registry promotion",
+    "Tessl docs treat it as Registry UI presentation and not as agent context",
+    "`hooks/**`: omit or block unless the Tessl projection explicitly models",
+    "`mcp/**` and `apps/**`: omit or block unless the Tessl projection explicitly models",
+    "`tessl.json`: use as the workspace/project dependency manifest",
+]
+
+
+@dataclass
+class Finding:
+    code: str
+    message: str
+    path: str
+
+
+def _read(path: Path) -> str:
+    try:
+        return path.read_text(encoding="utf-8")
+    except OSError:
+        return ""
+
+
+def _relative(path: Path) -> str:
+    return str(path.relative_to(ROOT))
+
+
+def _phrase_present(text: str, compact_text: str, phrase: str) -> bool:
+    return phrase in text or phrase in compact_text
+
+
+def _contract_finding(code: str, message: str) -> Finding:
+    return Finding(code, message, _relative(CONTRACT_PATH))
+
+
+def _missing_phrase_findings(
+    text: str,
+    compact_text: str,
+    *,
+    phrases: list[str],
+    code: str,
+    message_prefix: str,
+) -> list[Finding]:
+    return [
+        _contract_finding(code, f"{message_prefix}: {phrase}")
+        for phrase in phrases
+        if not _phrase_present(text, compact_text, phrase)
+    ]
+
+
+def _validate_lane(text: str, compact_text: str, lane: str, phrases: list[str]) -> list[Finding]:
+    findings: list[Finding] = []
+    if lane not in text:
+        findings.append(_contract_finding("missing_lane", f"Runtime lane contract must describe {lane}."))
+    findings.extend(
+        _missing_phrase_findings(
+            text,
+            compact_text,
+            phrases=phrases,
+            code="missing_lane_command",
+            message_prefix="Runtime lane contract is missing required phrase",
+        )
+    )
+    return findings
+
+
+def _validate_contract() -> list[Finding]:
+    text = _read(CONTRACT_PATH)
+    if not text:
+        return [_contract_finding("missing_contract", "Skills SDK runtime lane contract document is missing or unreadable.")]
+    compact_text = " ".join(text.split())
+    findings = [
+        finding
+        for lane, phrases in REQUIRED_LANES.items()
+        for finding in _validate_lane(text, compact_text, lane, phrases)
+    ]
+    findings.extend(
+        _missing_phrase_findings(
+            text,
+            compact_text,
+            phrases=REQUIRED_NON_SUBSTITUTION_PHRASES,
+            code="missing_non_substitution_rule",
+            message_prefix="Runtime lane contract is missing non-substitution rule",
+        )
+    )
+    findings.extend(
+        _missing_phrase_findings(
+            text,
+            compact_text,
+            phrases=REQUIRED_PIPELINE_PHRASES,
+            code="missing_promotion_pipeline",
+            message_prefix="Runtime lane contract is missing promotion-pipeline phrase",
+        )
+    )
+    return findings
+
+
+def _validate_index_links() -> list[Finding]:
+    findings: list[Finding] = []
+    readme = _read(README_PATH)
+    validation = _read(VALIDATION_PATH)
+    if "25-sdk-runtime-lane-contract" not in readme:
+        findings.append(
+            Finding(
+                "missing_readme_link",
+                "Agent instruction map must link the Skills SDK runtime lane contract.",
+                _relative(README_PATH),
+            )
+        )
+    required_validation_phrases = [
+        "Skills SDK runtime lane contract",
+        "validate_sdk_runtime_lane_contract.py --json",
+        "SDK mechanical validation",
+        "codex exec --profile oss-local",
+        "codex exec --profile oss-cloud",
+        "--tessl-live-private",
+    ]
+    for phrase in required_validation_phrases:
+        if phrase not in validation:
+            findings.append(
+                Finding(
+                    "missing_validation_reference",
+                    f"Validation guidance is missing runtime-lane phrase: {phrase}",
+                    _relative(VALIDATION_PATH),
+                )
+            )
+    return findings
+
+
+def validate() -> list[Finding]:
+    return [*_validate_contract(), *_validate_index_links()]
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--json", action="store_true")
+    args = parser.parse_args()
+    findings = validate()
+    payload = {
+        "status": "pass" if not findings else "fail",
+        "finding_count": len(findings),
+        "findings": [finding.__dict__ for finding in findings],
+    }
+    if args.json:
+        print(json.dumps(payload, indent=2, sort_keys=True))
+    else:
+        print(payload["status"])
+        for finding in findings:
+            print(f"{finding.code}: {finding.path}: {finding.message}")
+    return 0 if not findings else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

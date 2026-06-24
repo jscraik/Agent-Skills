@@ -50,7 +50,27 @@ class TestSkillsSdkPackageHardening(unittest.TestCase):
         self.assertFalse(model.mutation_performed)
         self.assertEqual(model.package_id, "skills-sdk-valid-fixture")
         self.assertEqual(model.blockers, [])
-        self.assertEqual(model.included_files, ["Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md"])
+        self.assertEqual(
+            model.included_files,
+            [
+                "Infrastructure/tests/fixtures/skills_sdk/valid_skill/README.md",
+                "Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md",
+            ],
+        )
+
+    def test_builder_blocks_missing_registry_readme(self) -> None:
+        package_receipt = deepcopy(self._package_receipt())
+        package_receipt["manifest"]["files"] = [
+            item
+            for item in package_receipt["manifest"]["files"]
+            if item.get("role") != "readme"
+        ]
+
+        payload = build_package_hardening_receipt(package_receipt)
+        model = validate_package_hardening_receipt(payload)
+
+        self.assertEqual(model.status, "blocked")
+        self.assertEqual(model.blockers[0].id, "required_registry_readme_role")
 
     def test_builder_blocks_forbidden_package_paths(self) -> None:
         package_receipt = deepcopy(self._package_receipt())

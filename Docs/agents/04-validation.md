@@ -43,6 +43,12 @@
 - `python3 ~/.codex/Infrastructure/scripts/plan-graph-lint.py .agents/PLANS.md`
 - Use the repo-local wrapper above instead of the global `~/.codex` `verify-work` helper for this repository.
 - `python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json` when Jamie gives repeated or high-signal steering about agent behavior.
+- `python3 Infrastructure/scripts/validation-and-linting/validate_sdk_runtime_lane_contract.py --json`
+  validates the [Skills SDK runtime lane contract](/Docs/agents/25-sdk-runtime-lane-contract.md).
+  Use it when work touches or reports SDK mechanical validation,
+  `codex exec --profile oss-local`,
+  `codex exec --profile oss-cloud`, local Tessl staging, or
+  `--tessl-live-private` external Tessl proof.
 - Scope policy reference: [hook-governance-scope-defaults.md](/Docs/guides/hook-governance-scope-defaults.md).
 - Path ownership policy: [14-path-ownership-boundaries.md](/Docs/agents/14-path-ownership-boundaries.md).
 
@@ -66,6 +72,13 @@
 
 - Ensure `README.md`, `AGENTS.md`, and linked docs agree on commands and scope.
 - Prefer repository-root commands over guessed defaults.
+- Keep Skills SDK runtime proof lanes separate:
+  SDK mechanical validation proves package/scenario/scorer/static readiness,
+  `codex exec --profile oss-local` proves the oss-local flow,
+  `codex exec --profile oss-cloud` proves the oss-cloud flow,
+  local Tessl staging proves only the Tessl local flow, and
+  `--tessl-live-private` plus a scored `tessl eval view --json` artifact
+  proves the Tessl external flow.
 
 ## Skill quality ladder
 

@@ -26,7 +26,7 @@ PROJECT_INSTALL_ACCEPTANCE_TRACE = [
     "PU-009-VP-001",
 ]
 PROJECT_MARKERS = ("AGENTS.md", ".git", ".agents")
-APPROVED_TOP_LEVELS = frozenset({"SKILL.md", "agents", "references", "scripts", "assets"})
+APPROVED_TOP_LEVELS = frozenset({"SKILL.md", "README.md", "agents", "references", "scripts", "assets"})
 PROJECT_SKILL_ROOT = Path(".agents/skills")
 RECEIPT_DIR = Path(".harness/receipts/skills-sdk/install")
 

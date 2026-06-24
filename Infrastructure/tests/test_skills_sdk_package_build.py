@@ -31,7 +31,86 @@ def _command_env() -> dict[str, str]:
     return env
 
 
+def _write_project_local_skill(project_root: Path) -> Path:
+    skill_root = project_root / ".codex" / "skills" / "x-content-writer"
+    skill_root.mkdir(parents=True)
+    (project_root / "AGENTS.md").write_text("# X-writer Canary\n", encoding="utf-8")
+    (project_root / "skills-sdk.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "skills-sdk.project.v1",
+                "project": {"id": "x-writer-canary", "name": "X-writer Canary"},
+                "skill_sources": [
+                    {
+                        "root": ".codex/skills",
+                        "kind": "canonical_project_source",
+                        "standard": "agent-skills",
+                        "write_policy": "sdk_managed",
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    (skill_root / "SKILL.md").write_text(
+        "\n".join(
+            [
+                "---",
+                "name: x-content-writer",
+                "description: Project-local canary writer skill.",
+                "---",
+                "",
+                "# X Content Writer",
+                "",
+                "Draft only from project-local evidence.",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    return skill_root
+
+
+def _run_package_build_cli(skill_root: Path) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [
+            sys.executable,
+            "Infrastructure/bin/ask",
+            "sdk",
+            "package",
+            "build",
+            str(skill_root / "SKILL.md"),
+            "--json",
+            "--robot",
+        ],
+        cwd=REPO_ROOT,
+        env=_command_env(),
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+
+
 class TestSkillsSdkPackageBuild(unittest.TestCase):
+    def test_public_cli_builds_project_local_package_identity_from_declared_source_root(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            project_root = Path(tmpdir) / "x-writer-canary"
+            skill_root = _write_project_local_skill(project_root)
+            completed = _run_package_build_cli(skill_root)
+
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        envelope = validate_robot_envelope(json.loads(completed.stdout))
+        payload = envelope.data["skills_sdk_package_build"]
+        receipt = validate_package_digest_receipt(payload["receipt"])
+
+        self.assertEqual(payload["status"], "built")
+        self.assertEqual(receipt.package_id, "x-content-writer")
+        self.assertEqual(payload["included_files"], ["SKILL.md"])
+        self.assertEqual(
+            Path(str(payload["canonical_source_path"])).resolve(),
+            (skill_root / "SKILL.md").resolve(),
+        )
+
     def test_builder_emits_non_mutating_package_digest_receipt(self) -> None:
         payload = build_package_digest_receipt(
             REPO_ROOT,
@@ -44,7 +123,13 @@ class TestSkillsSdkPackageBuild(unittest.TestCase):
         self.assertEqual(model.package_id, "skills-sdk-valid-fixture")
         self.assertEqual(model.manifest.skill_ir_schema_version, "skills-sdk.skill-ir.v0")
         self.assertFalse(model.mutation_performed)
-        self.assertEqual(model.included_files, ["Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md"])
+        self.assertEqual(
+            model.included_files,
+            [
+                "Infrastructure/tests/fixtures/skills_sdk/valid_skill/README.md",
+                "Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md",
+            ],
+        )
         self.assertTrue(model.package_digest.startswith("sha256:"))
 
     def test_public_cli_builds_package_identity_receipt(self) -> None:
@@ -75,7 +160,13 @@ class TestSkillsSdkPackageBuild(unittest.TestCase):
 
         self.assertEqual(payload["status"], "built")
         self.assertEqual(payload["package_digest"], receipt.package_digest)
-        self.assertEqual(payload["included_files"], ["Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md"])
+        self.assertEqual(
+            payload["included_files"],
+            [
+                "Infrastructure/tests/fixtures/skills_sdk/valid_skill/README.md",
+                "Infrastructure/tests/fixtures/skills_sdk/valid_skill/SKILL.md",
+            ],
+        )
         self.assertFalse(payload["mutation_performed"])
         self.assertIn("./bin/ask sdk package build", payload["validation_commands"][0])
 

@@ -2370,6 +2370,26 @@ def _write_tessl_live_plugin_manifest(source_root: Path, staged_root: Path, work
     ]
 
 
+def _write_tessl_registry_readme(source_root: Path, staged_root: Path, workspace: str) -> list[str]:
+    source_readme = source_root / "README.md"
+    readme_target = staged_root / "README.md"
+    if source_readme.exists():
+        _reject_tessl_staging_symlink(source_root, source_readme)
+        shutil.copy2(source_readme, readme_target)
+    else:
+        tile_slug = _tessl_live_tile_slug(source_root)
+        readme_target.write_text(
+            (
+                f"# {source_root.name}\n\n"
+                f"Registry presentation for the private Tessl package `{workspace}/{tile_slug}`.\n\n"
+                "Agent runtime instructions live in `skills/` and `SKILL.md`; this README is "
+                "for registry presentation and should not be treated as agent context.\n"
+            ),
+            encoding="utf-8",
+        )
+    return ["README.md"]
+
+
 def _validate_tessl_live_private_manifest(plugin_path: Path, workspace: str) -> None:
     try:
         manifest = json.loads(plugin_path.read_text(encoding="utf-8"))
@@ -3181,6 +3201,7 @@ def _stage_tessl_live_private_source(
 
     copied: list[str] = []
     copied.extend(_write_tessl_live_plugin_manifest(source_root, staged_root, workspace))
+    copied.extend(_write_tessl_registry_readme(source_root, staged_root, workspace))
     copied.extend(_copy_tessl_live_skill_package(source_root, staged_root))
     for relative_path in (
         "SKILL.md",
@@ -3232,6 +3253,7 @@ def _stage_tessl_scenario_target_tile(
 
     copied: list[str] = []
     copied.extend(_write_tessl_live_plugin_manifest(source_root, target_tile, workspace))
+    copied.extend(_write_tessl_registry_readme(source_root, target_tile, workspace))
     copied.extend(_copy_tessl_live_skill_package(source_root, target_tile))
     for relative_path in (
         "SKILL.md",
@@ -4527,6 +4549,25 @@ def _classify_eval_blocker(*, raw_output: str, raw_error: str, timed_out: bool =
     if timed_out:
         return "timeout_partial_output" if text.strip() else "timeout_no_output"
 
+    runtime_markers = [
+        "sandbox_apply: operation not permitted",
+        "host_execution_untrusted",
+        "sandbox-exec",
+        "operation not permitted",
+        "selected model is at capacity",
+        "model is at capacity",
+        "you've hit your usage limit",
+        "you have hit your usage limit",
+        "usage limit for",
+        "switch to another model",
+        "try again at",
+        "context window",
+        "start a new thread",
+        "blocked_runtime",
+    ]
+    if any(marker in low for marker in runtime_markers):
+        return "blocked_runtime"
+
     user_input_markers = [
         "user_input_requested_during_turn",
         "request_user_input",
@@ -4578,20 +4619,6 @@ def _classify_eval_blocker(*, raw_output: str, raw_error: str, timed_out: bool =
     ]
     if any(marker in low for marker in environment_markers):
         return "blocked_environment"
-
-    runtime_markers = [
-        "sandbox_apply: operation not permitted",
-        "host_execution_untrusted",
-        "sandbox-exec",
-        "operation not permitted",
-        "selected model is at capacity",
-        "model is at capacity",
-        "context window",
-        "start a new thread",
-        "blocked_runtime",
-    ]
-    if any(marker in low for marker in runtime_markers):
-        return "blocked_runtime"
 
     validation_markers = [
         "blocked_validation",

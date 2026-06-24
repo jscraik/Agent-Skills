@@ -2844,6 +2844,34 @@ def _classify_runner_blocker(
         runner_text = "\n".join([output_text or "", stdout_text or ""])
         return "timeout_partial_output" if runner_text.strip() else "timeout_no_output"
 
+    strong_runtime_markers = [
+        "sandbox_apply: operation not permitted",
+        "host_execution_untrusted",
+        "sandbox-exec",
+        "operation not permitted",
+        "ran out of room in the model's context window",
+        "selected model is at capacity",
+        "model is at capacity",
+        "you've hit your usage limit",
+        "you have hit your usage limit",
+        "usage limit for",
+        "switch to another model",
+        "blocked_runtime",
+    ]
+    weak_runtime_markers = ["try again at", "start a new thread"]
+    usage_context_markers = [
+        "usage limit",
+        "model is at capacity",
+        "selected model is at capacity",
+        "context window",
+    ]
+    if any(marker in low for marker in strong_runtime_markers):
+        return "blocked_runtime"
+    if any(marker in low for marker in weak_runtime_markers) and any(
+        marker in low for marker in usage_context_markers
+    ):
+        return "blocked_runtime"
+
     user_input_markers = [
         "user_input_requested_during_turn",
         "request_user_input",
@@ -2868,22 +2896,6 @@ def _classify_runner_blocker(
     ]
     if any(marker in low for marker in auth_markers):
         return "blocked_auth"
-
-    runtime_markers = [
-        "sandbox_apply: operation not permitted",
-        "host_execution_untrusted",
-        "sandbox-exec",
-        "operation not permitted",
-        "ran out of room in the model's context window",
-        "selected model is at capacity",
-        "model is at capacity",
-        "you've hit your usage limit",
-        "you have hit your usage limit",
-        "start a new thread",
-        "blocked_runtime",
-    ]
-    if any(marker in low for marker in runtime_markers):
-        return "blocked_runtime"
 
     return None
 

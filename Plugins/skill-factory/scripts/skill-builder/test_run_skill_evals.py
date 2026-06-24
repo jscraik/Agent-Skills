@@ -23,7 +23,7 @@ if repo_root_str not in sys.path:
     sys.path.insert(0, repo_root_str)
 SKILL_DIR = SCRIPT_DIR.parents[1] / "skills" / "code_quality_review" / "skill-builder"
 
-from defusedxml import ElementTree as ET
+from defusedxml import ElementTree as ET  # noqa: E402
 
 existing_runner = sys.modules.get("run_skill_evals")
 if existing_runner is not None:
@@ -37,7 +37,7 @@ if existing_trace_checks is not None:
     if existing_path.parent != SCRIPT_DIR:
         del sys.modules["deterministic_trace_checks"]
 
-from run_skill_evals import (
+from run_skill_evals import (  # noqa: E402
     EvalCase,
     _acceptance_skip_reason,
     _attach_claim_execution_results,
@@ -67,7 +67,7 @@ from run_skill_evals import (
     _release_dependency_scan_roots,
     _snyk_release_gate_passed,
 )
-from deterministic_trace_checks import evaluate_trace
+from deterministic_trace_checks import evaluate_trace  # noqa: E402
 
 
 class RunSkillEvalsModeTests(unittest.TestCase):
@@ -214,6 +214,18 @@ class RunSkillEvalsModeTests(unittest.TestCase):
                 stderr_text="",
             ),
             "blocked_user_input",
+        )
+        self.assertEqual(
+            _classify_runner_blocker(
+                output_text="",
+                stdout_text="",
+                stderr_text=(
+                    "Use request_user_input when the brief is sparse.\n"
+                    "ERROR: You've hit your usage limit for GPT-5.3-Codex-Spark. "
+                    "Switch to another model now, or try again at 11:00 PM.\n"
+                ),
+            ),
+            "blocked_runtime",
         )
         self.assertEqual(
             _classify_runner_blocker(

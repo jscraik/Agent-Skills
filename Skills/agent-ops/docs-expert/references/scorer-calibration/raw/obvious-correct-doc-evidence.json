@@ -1,0 +1,7 @@
+{
+  "id": "obvious-correct-doc-evidence",
+  "probe_type": "obvious_correct",
+  "predicted_label": "pass",
+  "score": 0.95,
+  "rationale": "Fixture output matches expected label."
+}
