@@ -2638,7 +2638,7 @@ def _read_json_object(path: Path | None) -> tuple[dict[str, Any] | None, str | N
         return None, "missing"
     try:
         loaded = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
         return None, exc.__class__.__name__
     if not isinstance(loaded, dict):
         return None, "json root must be an object"
