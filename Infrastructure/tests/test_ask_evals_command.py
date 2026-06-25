@@ -38,6 +38,12 @@ EXAMPLE_TESSL_EVAL_YAML = """cases:
 def _completed_eval_with_report(tmp_path: Path, skill_name: str = "example-skill") -> mock.Mock:
     report_dir = tmp_path / "Infrastructure" / "artifacts" / "skills" / skill_name / "run-1"
     report_dir.mkdir(parents=True, exist_ok=True)
+    case_dir = report_dir / "01-happy-path"
+    case_dir.mkdir(parents=True, exist_ok=True)
+    (case_dir / "result.json").write_text(
+        json.dumps({"id": "happy-path", "status": "pass"}),
+        encoding="utf-8",
+    )
     (report_dir / "summary.json").write_text(
         json.dumps({
             "cases": [
