@@ -430,6 +430,10 @@ class TestSkillsSdkProjectImprove(unittest.TestCase):
                     "eval_closeout": {
                         "status": "blocked",
                         "blocker_class": "blocked_missing_artifact",
+                        "closeout_validation": {
+                            "status": "blocked",
+                            "blockers": [{"id": "required_fields_present"}],
+                        },
                     }
                 },
             }
@@ -455,6 +459,7 @@ class TestSkillsSdkProjectImprove(unittest.TestCase):
             receipt = payload["receipt"]
             self.assertEqual(receipt["status"], "blocked")
             self.assertIn("evals:blocked", receipt["blockers"])
+            self.assertIn("eval_closeout:validation_blocked", receipt["blockers"])
             self.assertTrue(
                 any("--codex-profile oss-cloud" in command for command in receipt["validation_commands"])
             )
@@ -464,7 +469,6 @@ class TestSkillsSdkProjectImprove(unittest.TestCase):
             registry = json.loads((project_root / ".harness/skills/registry.json").read_text(encoding="utf-8"))
             self.assertEqual(registry["skills"][0]["lifecycle"]["state"], "blocked")
             self.assertEqual(registry["skills"][0]["evals"]["status"], "blocked")
-
 
 if __name__ == "__main__":
     unittest.main()
