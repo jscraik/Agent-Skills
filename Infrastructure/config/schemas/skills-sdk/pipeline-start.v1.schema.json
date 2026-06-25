@@ -49,6 +49,10 @@
       "items": {
         "type": "object",
         "required": ["id", "status"],
+        "oneOf": [
+          { "required": ["command"] },
+          { "required": ["commands"] }
+        ],
         "properties": {
           "id": {
             "type": "string",
@@ -59,12 +63,15 @@
             "minLength": 1
           },
           "command": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1
           },
           "commands": {
             "type": "array",
+            "minItems": 1,
             "items": {
-              "type": "string"
+              "type": "string",
+              "minLength": 1
             }
           },
           "proves": {
@@ -72,7 +79,6 @@
           }
         },
         "additionalProperties": true
-      }
     },
     "next_action": {
       "type": "object",
