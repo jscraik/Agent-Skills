@@ -10,7 +10,7 @@ They are the teaching equivalent of ADRs: they capture non-obvious lessons, key 
 
     {1-3 sentences: what was learned or what prior knowledge was established, and why it matters for future sessions.}
 
-That is the whole format. A learning record can be a single paragraph. The value is recording that this is now known and why it changes what to teach next, not in filling out sections.
+That is the core format. A learning record can be a single paragraph. The value is recording that this is now known and why it changes what to teach next, not in filling out sections.
 
 ## Optional Sections
 
