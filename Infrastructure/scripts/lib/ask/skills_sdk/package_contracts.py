@@ -3389,6 +3389,29 @@ def skill_package_compatibility_snapshot() -> dict[str, Any]:
     }
 
 
+def _required_sdk_contract_blockers(sdk_contract: dict[str, Any]) -> dict[str, list[str]]:
+    values = sdk_contract.get("values")
+    if not isinstance(values, dict):
+        return {}
+    blockers_by_field: dict[str, list[str]] = {}
+    for field, contract in values.items():
+        if not isinstance(contract, dict):
+            continue
+        if contract.get("required_for_package_readiness") is not True:
+            continue
+        if contract.get("status") != "blocked_validation":
+            continue
+        raw_blockers = contract.get("blockers")
+        blocker_items = raw_blockers if isinstance(raw_blockers, list) else []
+        blockers = [
+            f"{field}:{blocker.get('rule_id', 'blocked_validation')}"
+            for blocker in blocker_items
+            if isinstance(blocker, dict)
+        ] or [f"{field}:blocked_validation"]
+        blockers_by_field[str(field)] = blockers
+    return blockers_by_field
+
+
 def skill_package_readiness(
     frontmatter: dict[str, Any],
     repo_root: Path | None = None,
@@ -3447,19 +3470,19 @@ def skill_package_readiness(
             if isinstance(blocker, dict)
         ] or ["optimization_contract:blocked_validation"]
         blocked_reasons.extend(optimization_blockers)
-    reference_quality = sdk_contract["values"].get("reference_quality")
-    reference_blockers: list[str] = []
-    if (
-        isinstance(reference_quality, dict)
-        and reference_quality.get("required_for_package_readiness") is True
-        and reference_quality.get("status") == "blocked_validation"
-    ):
-        reference_blockers = [
-            f"reference_quality:{blocker.get('rule_id', 'blocked_validation')}"
-            for blocker in reference_quality.get("blockers", [])
-            if isinstance(blocker, dict)
-        ] or ["reference_quality:blocked_validation"]
-        blocked_reasons.extend(reference_blockers)
+    required_contract_blockers = _required_sdk_contract_blockers(sdk_contract)
+    reference_blockers = required_contract_blockers.pop("reference_quality", [])
+    writing_quality_blockers = required_contract_blockers.pop("writing_quality", [])
+    openai_platform_blockers = required_contract_blockers.pop("openai_platform_compat", [])
+    other_required_contract_blockers = [
+        blocker
+        for blockers in required_contract_blockers.values()
+        for blocker in blockers
+    ]
+    blocked_reasons.extend(reference_blockers)
+    blocked_reasons.extend(writing_quality_blockers)
+    blocked_reasons.extend(openai_platform_blockers)
+    blocked_reasons.extend(other_required_contract_blockers)
     if sdk_missing and not missing_identity_fields and not missing:
         readiness_level = "sdk_contract_incomplete"
         share_ready = False
@@ -3485,6 +3508,42 @@ def skill_package_readiness(
     ):
         readiness_level = "reference_quality_incomplete"
         share_ready = False
+    if (
+        writing_quality_blockers
+        and not missing_identity_fields
+        and not missing
+        and not sdk_missing
+        and not workflow_blockers
+        and not optimization_blockers
+        and not reference_blockers
+    ):
+        readiness_level = "writing_quality_incomplete"
+        share_ready = False
+    if (
+        openai_platform_blockers
+        and not missing_identity_fields
+        and not missing
+        and not sdk_missing
+        and not workflow_blockers
+        and not optimization_blockers
+        and not reference_blockers
+        and not writing_quality_blockers
+    ):
+        readiness_level = "openai_platform_compat_incomplete"
+        share_ready = False
+    if (
+        other_required_contract_blockers
+        and not missing_identity_fields
+        and not missing
+        and not sdk_missing
+        and not workflow_blockers
+        and not optimization_blockers
+        and not reference_blockers
+        and not writing_quality_blockers
+        and not openai_platform_blockers
+    ):
+        readiness_level = "sdk_required_contract_incomplete"
+        share_ready = False
     knowledge_capsules = sdk_contract.get("knowledge_capsules")
     knowledge_blockers: list[str] = []
     if (
@@ -3502,6 +3561,9 @@ def skill_package_readiness(
         and not workflow_blockers
         and not optimization_blockers
         and not reference_blockers
+        and not writing_quality_blockers
+        and not openai_platform_blockers
+        and not other_required_contract_blockers
     ):
         readiness_level = "knowledge_capsules_incomplete"
         share_ready = False
@@ -3525,6 +3587,9 @@ def skill_package_readiness(
         and not workflow_blockers
         and not optimization_blockers
         and not reference_blockers
+        and not writing_quality_blockers
+        and not openai_platform_blockers
+        and not other_required_contract_blockers
         and not knowledge_blockers
     ):
         readiness_level = "progressive_disclosure_incomplete"

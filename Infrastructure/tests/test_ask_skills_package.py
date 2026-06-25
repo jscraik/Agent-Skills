@@ -13,7 +13,11 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 from ask.commands.skills_impl import skills_package, skills_package_verify  # noqa: E402
 
 
-def _write_minimal_sdk_package_companions(skill_dir: Path) -> None:
+def _write_minimal_sdk_package_companions(
+    skill_dir: Path,
+    *,
+    complete_evals: bool = True,
+) -> None:
     agents_dir = skill_dir / "agents"
     references_dir = skill_dir / "references"
     agents_dir.mkdir(parents=True, exist_ok=True)
@@ -44,8 +48,30 @@ observability: "Report package validation status and blockers."
 """,
         encoding="utf-8",
     )
-    (references_dir / "evals.yaml").write_text(
-        """schema_version: "2.0"
+    evals_text = """schema_version: "2.0"
+skill_name: packaged-skill
+claims:
+  - id: package.fixture.ready
+    statement: "The fixture reports package readiness from declared metadata and SDK companions."
+    source: "SKILL.md"
+    claim_type: governance
+    risk: medium
+    hard_gate: true
+    evidence_required: ["package output"]
+cases:
+  - id: package-smoke
+    name: package smoke
+    category: happy
+    should_trigger: true
+    given: "A skill with complete package metadata and SDK companion files."
+    prompt: "Package this skill."
+    expected_behavior: "Reports package readiness."
+    acceptance:
+      - "The package report includes install readiness."
+      - "The package report includes share readiness."
+"""
+    if not complete_evals:
+        evals_text = """schema_version: "2.0"
 skill_name: packaged-skill
 claims:
   - id: package.fixture.ready
@@ -62,9 +88,8 @@ cases:
     should_trigger: true
     prompt: "Package this skill."
     expected_behavior: "Reports package readiness."
-""",
-        encoding="utf-8",
-    )
+"""
+    (references_dir / "evals.yaml").write_text(evals_text, encoding="utf-8")
     (references_dir / "task-profile.json").write_text(
         """{
   "schema_version": "1.0",
@@ -207,7 +232,7 @@ metadata:
 """,
                 encoding="utf-8",
             )
-            _write_minimal_sdk_package_companions(skill_dir)
+            _write_minimal_sdk_package_companions(skill_dir, complete_evals=False)
 
             result = skills_package_verify(repo_root, "Skills/agent-ops/packaged-skill")
 
@@ -502,7 +527,7 @@ Return schema_version: 1 and a short result summary.
             (skill_dir / "SKILL.md").write_text(
                 """---
 name: packaged-skill
-description: Test package readiness metadata parsing.
+description: Use when packaging skills to validate package readiness metadata.
 version: "2.0.0"
 metadata:
   compatible_roles:
@@ -551,7 +576,7 @@ metadata:
             (skill_dir / "SKILL.md").write_text(
                 """---
 name: packaged-skill
-description: Test package readiness metadata parsing.
+description: Use when packaging skills to validate package readiness metadata.
 version: "2.0.0"
 compatible_roles: [worker, reviewer]
 runtime_needs: [filesystem]
@@ -583,7 +608,7 @@ share_readiness: ready
             (skill_dir / "SKILL.md").write_text(
                 """---
 name: packaged-skill
-description: Test package readiness metadata parsing.
+description: Use when packaging skills to validate package readiness metadata.
 version: "2.0.0"
 metadata:
   compatible_roles:
@@ -623,7 +648,7 @@ metadata:
             (skill_dir / "SKILL.md").write_text(
                 """---
 name: packaged-skill
-description: Test package readiness metadata parsing.
+description: Use when packaging skills to validate package readiness metadata.
 version: "2.0.0"
 metadata:
   compatible_roles:
@@ -730,7 +755,7 @@ metadata:
             (skill_dir / "SKILL.md").write_text(
                 """---
 name: packaged-skill
-description: Test package readiness metadata parsing.
+description: Use when packaging skills to validate package readiness metadata.
 version: "2.0.0"
 metadata:
   compatible_roles:

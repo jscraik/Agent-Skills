@@ -129,6 +129,29 @@ class TestSkillsSdkPluginLifecycle(unittest.TestCase):
             self.assertEqual(registry["skills"][0]["handle"], "demo-skill")
             self.assertEqual(registry["skills"][0]["source"]["path"], "Skills/agent-ops/demo-skill/SKILL.md")
 
+    def test_save_registry_apply_blocks_unresolved_skill_target_without_writing(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+
+            result = skills_sdk_plugin_save_registry(
+                repo_root,
+                kind="skill",
+                target="typo",
+                registry=".harness/skills/registry.json",
+                apply=True,
+            )
+
+            payload = result.data["skills_sdk_plugin_save_registry"]
+            self.assertEqual(result.status, "error")
+            self.assertEqual(payload["status"], "blocked")
+            self.assertFalse(payload["mutation_performed"])
+            self.assertIsNone(payload["receipt"])
+            self.assertFalse((repo_root / ".harness/skills/registry.json").exists())
+            self.assertIn(
+                "did not resolve to a canonical source",
+                result.errors[0].message,
+            )
+
     def test_save_registry_apply_writes_plugin_marketplace(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir)

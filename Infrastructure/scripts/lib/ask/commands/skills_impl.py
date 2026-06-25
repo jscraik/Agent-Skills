@@ -5789,9 +5789,13 @@ def _sdk_plugin_save_skill_registry_receipt(
     registry_path = _sdk_plugin_registry_path(repo_root, "skill", registry)
     target_info, _audit_target = _resolve_doctor_target(repo_root, target)
     source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
-    source_path = Path(str(source_path_value)) if source_path_value else Path(target)
+    if not source_path_value:
+        raise ValueError(f"Skill registry target did not resolve to a canonical source: {target}.")
+    source_path = Path(str(source_path_value))
     if not source_path.is_absolute():
         source_path = repo_root / source_path
+    if not source_path.is_file():
+        raise ValueError(f"Skill registry target source does not exist: {target}.")
     handle = (name or source_path.parent.name).strip()
     source_rel = _sdk_plugin_relpath(repo_root, source_path)
     timestamp = datetime.now(timezone.utc).isoformat()

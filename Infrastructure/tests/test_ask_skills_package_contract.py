@@ -1684,6 +1684,81 @@ optimization:
             package["install_gate"]["blocked_reasons"],
         )
 
+    def test_incomplete_writing_quality_blocks_package_readiness(self) -> None:
+        frontmatter = {
+            "name": "writing-blocked-skill",
+            "description": "Writing blocked skill fixture.",
+            "metadata": {
+                "version": "1.0.0",
+                "compatible_roles": ["worker"],
+                "runtime_needs": ["filesystem"],
+                "maturity": "beta",
+                "provenance": "internal",
+                "share_readiness": "ready",
+            },
+        }
+        sdk_contract = {
+            "required_fields": {"missing": []},
+            "values": {
+                "workflow_contract": {"status": "pass"},
+                "optimization_contract": {"status": "pass"},
+                "reference_quality": {"status": "pass", "required_for_package_readiness": True},
+                "writing_quality": {
+                    "status": "blocked_validation",
+                    "required_for_package_readiness": True,
+                    "blockers": [{"rule_id": "scenario_alignment_gold_shape"}],
+                },
+            },
+        }
+
+        with patch.object(package_contracts, "sdk_package_contract", return_value=sdk_contract):
+            package = package_contracts.skill_package_readiness(frontmatter)
+
+        self.assertEqual(package["readiness_level"], "writing_quality_incomplete")
+        self.assertFalse(package["install_gate"]["install_ready"])
+        self.assertIn(
+            "writing_quality:scenario_alignment_gold_shape",
+            package["install_gate"]["blocked_reasons"],
+        )
+
+    def test_incomplete_openai_platform_compat_blocks_package_readiness(self) -> None:
+        frontmatter = {
+            "name": "openai-blocked-skill",
+            "description": "OpenAI blocked skill fixture.",
+            "metadata": {
+                "version": "1.0.0",
+                "compatible_roles": ["worker"],
+                "runtime_needs": ["filesystem"],
+                "maturity": "beta",
+                "provenance": "internal",
+                "share_readiness": "ready",
+            },
+        }
+        sdk_contract = {
+            "required_fields": {"missing": []},
+            "values": {
+                "workflow_contract": {"status": "pass"},
+                "optimization_contract": {"status": "pass"},
+                "reference_quality": {"status": "pass", "required_for_package_readiness": True},
+                "writing_quality": {"status": "pass", "required_for_package_readiness": True},
+                "openai_platform_compat": {
+                    "status": "blocked_validation",
+                    "required_for_package_readiness": True,
+                    "blockers": [{"rule_id": "plugin_hooks_unsupported_type"}],
+                },
+            },
+        }
+
+        with patch.object(package_contracts, "sdk_package_contract", return_value=sdk_contract):
+            package = package_contracts.skill_package_readiness(frontmatter)
+
+        self.assertEqual(package["readiness_level"], "openai_platform_compat_incomplete")
+        self.assertFalse(package["install_gate"]["install_ready"])
+        self.assertIn(
+            "openai_platform_compat:plugin_hooks_unsupported_type",
+            package["install_gate"]["blocked_reasons"],
+        )
+
     def test_reference_quality_validates_scenario_drift_review_shape(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir)
