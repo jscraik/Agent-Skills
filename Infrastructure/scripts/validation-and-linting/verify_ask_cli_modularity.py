@@ -263,11 +263,11 @@ def _changed_python_paths(paths: tuple[str, ...]) -> list[Path]:
 def _check_file_size(path: Path, current: str, baseline: str | None, args: argparse.Namespace, issues: list[str]) -> None:
     relpath = path.relative_to(REPO_ROOT).as_posix()
     line_count = len(current.splitlines())
-    if baseline is not None:
-        return
+    baseline_line_count = len(baseline.splitlines()) if baseline is not None else 0
     if line_count <= args.max_file_lines:
         return
-    issues.append(f"{relpath} exceeds file line budget ({line_count} > {args.max_file_lines})")
+    if line_count > baseline_line_count:
+        issues.append(f"{relpath} exceeds file line budget ({line_count} > {args.max_file_lines})")
 
 
 def _check_function_shape(path: Path, current: str, baseline: str | None, args: argparse.Namespace, issues: list[str]) -> None:

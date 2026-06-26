@@ -7202,7 +7202,7 @@ def _skills_sdk_eval_run_validation_command(
 def _skills_sdk_eval_receipt_lane(mode: str, codex_profile: str | None) -> str:
     if codex_profile in {"oss-local", "oss-cloud"}:
         return codex_profile
-    return "oss-local" if mode == "smoke" else mode
+    return mode
 
 
 def skills_sdk_eval_run(
