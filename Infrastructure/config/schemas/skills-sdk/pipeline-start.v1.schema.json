@@ -79,6 +79,7 @@
           }
         },
         "additionalProperties": true
+      }
     },
     "next_action": {
       "type": "object",
