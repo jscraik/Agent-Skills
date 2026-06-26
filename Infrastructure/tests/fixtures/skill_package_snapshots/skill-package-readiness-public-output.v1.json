@@ -162,6 +162,8 @@
         "sdk_contract:purpose",
         "sdk_contract:reference_contract",
         "sdk_contract:task_profile",
+        "writing_quality:weak_description_triggers",
+        "openai_platform_compat:openai_skill_metadata_incomplete",
         "identity_incomplete"
       ],
       "checkout_test_status": "not_run",
@@ -182,6 +184,8 @@
           "sdk_contract:purpose",
           "sdk_contract:reference_contract",
           "sdk_contract:task_profile",
+          "writing_quality:weak_description_triggers",
+          "openai_platform_compat:openai_skill_metadata_incomplete",
           "identity_incomplete"
         ],
         "checkout_test_status": "not_run",
@@ -199,6 +203,8 @@
           "sdk_contract:purpose",
           "sdk_contract:reference_contract",
           "sdk_contract:task_profile",
+          "writing_quality:weak_description_triggers",
+          "openai_platform_compat:openai_skill_metadata_incomplete",
           "identity_incomplete"
         ],
         "promotion_ready": false,

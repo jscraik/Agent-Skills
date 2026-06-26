@@ -39,6 +39,23 @@ RUBRIC_EVIDENCE_TERMS = (
     "source",
     "validation",
 )
+TEXT_FIELD_ASSERTION_TYPES = {
+    "text_field_equals",
+    "text_field_in",
+    "text_field_present",
+    "text_field_absent",
+}
+STRUCTURED_FIELD_ASSERTION_KEYS = (
+    "publication_gate_status",
+    "publication_status",
+    "evidence_level",
+    "external_factual_claims",
+    "unsupported_external_claims",
+    "claim_authority",
+    "clarification_state",
+    "codexrepo_validation_status",
+    "source_confidence",
+)
 
 
 class ScenarioQualityError(ValueError):
@@ -137,7 +154,7 @@ def _consume_case_field(state: dict[str, Any], stripped: str, indent: int) -> bo
         current[key] = _parse_scalar(value.strip())
         state["current_list"] = state["current_mapping"] = None
         state["last_scalar_key"] = key
-    elif key in {"eval_modes", "acceptance", "claim_ids"}:
+    elif key in {"eval_modes", "acceptance", "claim_ids", "expect"}:
         state["current_list"] = current[key] = []
         state["current_mapping"] = None
         state["last_scalar_key"] = None
@@ -172,6 +189,10 @@ def _consume_list_value(state: dict[str, Any], stripped: str, indent: int, field
     if isinstance(latest, dict) and ":" in stripped and indent >= nested_indent:
         key, value = stripped.split(":", 1)
         latest[key] = _parse_scalar(value.strip())
+        state["last_scalar_key"] = None
+        return True
+    if isinstance(latest, str) and indent >= nested_indent:
+        current_list[-1] = f"{latest} {stripped}"
         state["last_scalar_key"] = None
         return True
     return _consume_latest_dict_continuation(latest, stripped, indent, nested_indent)
@@ -222,8 +243,13 @@ def _assign_inline_pair(target: dict[str, Any], item: str) -> None:
 def _parse_list_item(item: str) -> Any:
     if ":" not in item:
         return _parse_scalar(item)
+    first_key = item.split(":", 1)[0].strip().strip("{}")
+    if first_key not in {"type", "value", "values", "field", "fields", "key", "path", "id", "name", "status"}:
+        return _parse_scalar(item)
     result: dict[str, Any] = {}
     for part in item.split(","):
+        if ":" not in part:
+            return _parse_scalar(item)
         key, value = part.split(":", 1)
         result[key.strip().strip("{}")] = _parse_scalar(value.strip().strip("{}"))
     return result
@@ -277,6 +303,59 @@ def _acceptance_text(case: dict[str, Any]) -> str:
         else:
             parts.append(str(item))
     return " ".join(parts)
+
+
+def _acceptance_assertion_checks(case: dict[str, Any], scenario_id: str) -> list[dict[str, Any]]:
+    malformed_text_fields: list[str] = []
+    regex_structured_fields: list[str] = []
+    for index, item in enumerate(_list_field(case, "acceptance"), start=1):
+        if not isinstance(item, dict):
+            continue
+        assertion_type = str(item.get("type") or "")
+        marker = f"{scenario_id}:acceptance[{index}]"
+        if _text_field_assertion_malformed(item, assertion_type):
+            malformed_text_fields.append(marker)
+        regex_structured_fields.extend(_regex_structured_field_refs(item, assertion_type, marker))
+    return [
+        _check(
+            "typed_text_field_assertions_valid",
+            "blocker" if malformed_text_fields else "pass",
+            "text_field_* assertions must declare field/fields and expected values when required.",
+            malformed_text_fields,
+        ),
+        _check(
+            "structured_fields_use_typed_assertions",
+            "blocker" if regex_structured_fields else "pass",
+            "Known structured output fields must use text_field_* assertions instead of regex.",
+            regex_structured_fields,
+        ),
+    ]
+
+
+def _text_field_assertion_malformed(item: dict[str, Any], assertion_type: str) -> bool:
+    if assertion_type not in TEXT_FIELD_ASSERTION_TYPES:
+        return False
+    field = item.get("field") or item.get("key") or item.get("path")
+    fields = item.get("fields")
+    has_field = isinstance(field, str) and bool(field.strip())
+    has_fields = isinstance(fields, list) and any(isinstance(value, str) and value.strip() for value in fields)
+    has_expected = assertion_type in {"text_field_present", "text_field_absent"} or _has_text_field_expected_value(item)
+    return not (has_field or has_fields) or not has_expected
+
+
+def _has_text_field_expected_value(item: dict[str, Any]) -> bool:
+    value = item.get("value")
+    if isinstance(value, str) and value.strip():
+        return True
+    values = item.get("values")
+    return isinstance(values, list) and any(isinstance(value, str) and value.strip() for value in values)
+
+
+def _regex_structured_field_refs(item: dict[str, Any], assertion_type: str, marker: str) -> list[str]:
+    if assertion_type != "regex":
+        return []
+    value = str(item.get("value") or "")
+    return [f"{marker}:{key}" for key in STRUCTURED_FIELD_ASSERTION_KEYS if key in value][:1]
 
 
 def _case_has_release_mode(case: dict[str, Any]) -> bool:
@@ -402,6 +481,7 @@ def _scenario_checks(case: dict[str, Any], index: int) -> list[dict[str, Any]]:
     checks.extend(_release_metadata_checks(case, scenario_id))
     checks.extend(_release_rubric_checks(case, scenario_id))
     checks.extend(_registry_dependency_checks(case, scenario_id))
+    checks.extend(_acceptance_assertion_checks(case, scenario_id))
     return checks
 
 

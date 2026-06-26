@@ -1,0 +1,508 @@
+{
+  "status": "error",
+  "trace_id": "082cd48a-5f48-4dc2-a836-70a70b177bc9",
+  "metadata": {
+    "version": "0.1.0",
+    "command": "sdk eval run Skills/github/teach --runner internal --mode smoke --codex-profile oss-local --timeout-seconds 30 --json --robot",
+    "next_steps": [],
+    "correction_note": null
+  },
+  "data": {
+    "skills_sdk_eval_run": {
+      "schema_version": "skills-sdk-eval-run.v0",
+      "status": "blocked",
+      "dataset": null,
+      "target": "Skills/github/teach",
+      "runner": "internal_skill_builder_v0",
+      "mode": "smoke",
+      "receipt": {
+        "schema_version": "skills-sdk.eval-run-receipt.v0",
+        "schema_uri": "https://agent-skills.local/schemas/skills-sdk/eval-run-receipt.v0.schema.json",
+        "status": "blocked",
+        "runner": "internal_skill_builder_v0",
+        "dataset_path": "Infrastructure/artifacts/skills/teach/20260624-200958-919672/workflow-closeout.json",
+        "dataset_digest": "sha256:03dcfd80666cdeba414e19f375f224f4ae7dd946b0aaba81bd78ff60aabca577",
+        "skill_ir_schema_version": "skills-sdk.skill-ir.v0",
+        "package_id": "teach",
+        "package_digest": "sha256:e3593d812f9b40640e3caf79fdbaf3a2b27d2acab540ff85c82c9776e9c9df05",
+        "target_path": "Skills/github/teach",
+        "mode": "smoke",
+        "lane": "oss-local",
+        "profile": "oss-local",
+        "case_count": 9,
+        "passed_count": 0,
+        "failed_count": 9,
+        "quality_gates": null,
+        "closeout_validation": {
+          "schema_version": "skills-sdk.eval-closeout-validation.v1",
+          "status": "pass",
+          "checks": [
+            {
+              "id": "required_fields_present",
+              "status": "pass",
+              "message": "workflow-closeout/v1 receipts must include required contract fields.",
+              "evidence": []
+            },
+            {
+              "id": "schema_version_valid",
+              "status": "pass",
+              "message": "workflow-closeout receipt must use skills-sdk.eval-closeout.v1.",
+              "evidence": []
+            },
+            {
+              "id": "cases_array_valid",
+              "status": "pass",
+              "message": "workflow-closeout receipt must carry cases as an array.",
+              "evidence": []
+            },
+            {
+              "id": "blocked_cases_block_suite",
+              "status": "pass",
+              "message": "Any blocked case must make the suite closeout status blocked.",
+              "evidence": []
+            },
+            {
+              "id": "non_pass_blocks_source_mutation",
+              "status": "pass",
+              "message": "Non-pass closeouts must set mutation_allowed=false.",
+              "evidence": []
+            },
+            {
+              "id": "non_pass_blocks_registry_promotion",
+              "status": "pass",
+              "message": "Non-pass closeouts must set registry_update_allowed=false.",
+              "evidence": []
+            },
+            {
+              "id": "missing_artifacts_have_blocker_class",
+              "status": "pass",
+              "message": "Closeouts with missing suite artifacts must include blocker_class.",
+              "evidence": []
+            },
+            {
+              "id": "pass_has_case_evidence",
+              "status": "pass",
+              "message": "Pass closeouts must include complete case evidence or an explicit no_case_reason.",
+              "evidence": []
+            }
+          ],
+          "blockers": []
+        },
+        "cases": [
+          {
+            "case_id": "happy-new-topic",
+            "status": "fail",
+            "oracle": "eval_closeout",
+            "expected": "pass",
+            "actual": "blocked"
+          },
+          {
+            "case_id": "happy-existing-workspace",
+            "status": "fail",
+            "oracle": "eval_closeout",
+            "expected": "pass",
+            "actual": "blocked"
+          },
+          {
+            "case_id": "happy-study-plan",
+            "status": "fail",
+            "oracle": "eval_closeout",
+            "expected": "pass",
+            "actual": "blocked"
+          },
+          {
+            "case_id": "happy-first-lesson",
+            "status": "fail",
+            "oracle": "eval_closeout",
+            "expected": "pass",
+            "actual": "blocked"
+          },
+          {
+            "case_id": "happy-quiz-review",
+            "status": "fail",
+            "oracle": "eval_closeout",
+            "expected": "pass",
+            "actual": "fail"
+          },
+          {
+            "case_id": "happy-reference-page",
+            "status": "fail",
+            "oracle": "eval_closeout",
+            "expected": "pass",
+            "actual": "fail"
+          },
+          {
+            "case_id": "happy-resource-curation",
+            "status": "fail",
+            "oracle": "eval_closeout",
+            "expected": "pass",
+            "actual": "blocked"
+          },
+          {
+            "case_id": "edge-mission-unclear",
+            "status": "fail",
+            "oracle": "eval_closeout",
+            "expected": "pass",
+            "actual": "blocked"
+          },
+          {
+            "case_id": "edge-mission-change",
+            "status": "fail",
+            "oracle": "eval_closeout",
+            "expected": "pass",
+            "actual": "blocked"
+          }
+        ],
+        "blockers": [
+          "Evaluation timed out after 30 seconds.",
+          "[codex] blocked_runtime: The runner was blocked by local runtime, sandbox, or model-capacity limits. This is an eval runner blocker, not a skill behavior failure.",
+          "[codex] codex returned non-zero exit code: -9",
+          "blocked_missing_artifact",
+          "blocked_runtime",
+          "timeout_no_output"
+        ],
+        "mutation_performed": false,
+        "acceptance_trace": [
+          "FR-003",
+          "FR-008",
+          "SA-003",
+          "SA-004",
+          "VP-021",
+          "VP-022"
+        ]
+      },
+      "internal_eval": {
+        "tessl_workspace": null,
+        "tessl_workspace_source": null,
+        "validation_commands": [
+          "./bin/ask evals run Skills/github/teach --mode smoke --runner codex --json --robot"
+        ],
+        "profile_contract": {
+          "codex_profile": "oss-local",
+          "codex_profile_config": "[profiles.oss-local]",
+          "codex_profile_source": "argument",
+          "codex_profile_required_for_smoke": true,
+          "tessl_policy": {
+            "native_tessl_only": true,
+            "no_npx": true,
+            "no_publish": true,
+            "no_registry_upload": true,
+            "temp_staged_project_input_only": true,
+            "stable_staging_root": "/tmp/ask-tessl-evals/<skill-path>-<sha12>",
+            "evidence_retention": "stable tmp staging is intentionally left for post-run inspection; reruns archive previous staged evidence under evidence-archive/",
+            "tessl_project_marker": "tessl.json",
+            "staged_inputs": [
+              "SKILL.md",
+              "references/evals.yaml",
+              "references/contract.yaml",
+              "references/task-profile.json",
+              "assets/**/*",
+              "scenarios/<case-id>/{task.md,criteria.json}"
+            ],
+            "network_permission_required_by_repo": false,
+            "project_save_may_use_tessl_service": "only_for_project_link_when_workspace_provided",
+            "project_save_default": "compatibility_flag_not_required",
+            "project_identity_rule": "plugin skills use the plugin project name; standalone skills use the skill name",
+            "project_link_check": "when --tessl-workspace is provided, repair/link existing project first and create only when needed"
+          },
+          "tessl_live_private_policy": null
+        },
+        "lifecycle_events": [
+          {
+            "schema_version": "capability-lifecycle-event.v1",
+            "event_type": "eval_started",
+            "event_definition": "A workout, smoke eval, or proof run started for a capability.",
+            "occurred_at": "2026-06-24T19:16:37Z",
+            "subject": {
+              "query": "Skills/github/teach",
+              "target_kind": "skill_path",
+              "handle": "teach",
+              "canonical_source_path": "Skills/github/teach",
+              "eval_mode": "smoke",
+              "runner": "codex"
+            },
+            "outcome": {
+              "status": "running",
+              "blocker_classes": [],
+              "warning_classes": []
+            }
+          },
+          {
+            "schema_version": "capability-lifecycle-event.v1",
+            "event_type": "eval_blocked",
+            "event_definition": "A workout, smoke eval, or proof run stopped on a classified blocker.",
+            "occurred_at": "2026-06-24T19:17:07Z",
+            "subject": {
+              "query": "Skills/github/teach",
+              "target_kind": "skill_path",
+              "handle": "teach",
+              "canonical_source_path": "Skills/github/teach",
+              "eval_mode": "smoke",
+              "runner": "codex"
+            },
+            "outcome": {
+              "status": "timeout_no_output",
+              "blocker_classes": [
+                "timeout_no_output"
+              ],
+              "warning_classes": []
+            }
+          }
+        ],
+        "lifecycle_event": {
+          "schema_version": "capability-lifecycle-event.v1",
+          "event_type": "eval_blocked",
+          "event_definition": "A workout, smoke eval, or proof run stopped on a classified blocker.",
+          "occurred_at": "2026-06-24T19:17:07Z",
+          "subject": {
+            "query": "Skills/github/teach",
+            "target_kind": "skill_path",
+            "handle": "teach",
+            "canonical_source_path": "Skills/github/teach",
+            "eval_mode": "smoke",
+            "runner": "codex"
+          },
+          "outcome": {
+            "status": "timeout_no_output",
+            "blocker_classes": [
+              "timeout_no_output"
+            ],
+            "warning_classes": []
+          }
+        },
+        "lifecycle_event_types": {
+          "eval_started": "A workout, smoke eval, or proof run started for a capability.",
+          "eval_blocked": "A workout, smoke eval, or proof run stopped on a classified blocker.",
+          "eval_completed": "A workout, smoke eval, or proof run completed with pass or fail status."
+        },
+        "raw_output": "",
+        "raw_error": "",
+        "eval_status": "timeout_no_output",
+        "blocker_class": "timeout_no_output",
+        "blocker_taxonomy": {
+          "blocked_user_input": "The runner requested user input and should not be treated as hung.",
+          "blocked_auth": "The runner stopped on authentication or credential setup.",
+          "blocked_runtime": "The runner was blocked by local runtime, sandbox, or model-capacity limits.",
+          "timeout_no_output": "The eval timed out without producing final output.",
+          "timeout_partial_output": "The eval timed out after producing partial output.",
+          "blocked_missing_tool": "A required local command, runtime, package, or validator is unavailable.",
+          "blocked_missing_artifact": "An expected report, transcript, output, or generated artifact is absent.",
+          "blocked_environment": "The selected workspace, sandbox, cwd, or permission profile cannot run the check.",
+          "blocked_validation": "A structural or policy validation gate failed for the capability."
+        },
+        "timeout_classification": {
+          "class": "timeout_no_output",
+          "partial_output_artifact": null
+        },
+        "tessl_eval": {
+          "status": "skipped",
+          "reason": "--skip-tessl",
+          "policy": {
+            "native_tessl_only": true,
+            "no_npx": true,
+            "no_publish": true,
+            "no_registry_upload": true,
+            "temp_staged_project_input_only": true,
+            "stable_staging_root": "/tmp/ask-tessl-evals/<skill-path>-<sha12>",
+            "evidence_retention": "stable tmp staging is intentionally left for post-run inspection; reruns archive previous staged evidence under evidence-archive/",
+            "tessl_project_marker": "tessl.json",
+            "staged_inputs": [
+              "SKILL.md",
+              "references/evals.yaml",
+              "references/contract.yaml",
+              "references/task-profile.json",
+              "assets/**/*",
+              "scenarios/<case-id>/{task.md,criteria.json}"
+            ],
+            "network_permission_required_by_repo": false,
+            "project_save_may_use_tessl_service": "only_for_project_link_when_workspace_provided",
+            "project_save_default": "compatibility_flag_not_required",
+            "project_identity_rule": "plugin skills use the plugin project name; standalone skills use the skill name",
+            "project_link_check": "when --tessl-workspace is provided, repair/link existing project first and create only when needed"
+          }
+        },
+        "eval_closeout": {
+          "schema_version": "skills-sdk.eval-closeout.v1",
+          "status": "blocked",
+          "skill_path": "Skills/github/teach",
+          "mode": "smoke",
+          "runner": "codex",
+          "report_dir": "Infrastructure/artifacts/skills/teach/20260624-200958-919672",
+          "cases_expected": [
+            "happy-new-topic",
+            "happy-existing-workspace",
+            "happy-study-plan",
+            "happy-first-lesson",
+            "happy-quiz-review",
+            "happy-reference-page",
+            "happy-resource-curation",
+            "edge-mission-unclear",
+            "edge-mission-change"
+          ],
+          "cases": [
+            {
+              "id": "happy-new-topic",
+              "status": "blocked",
+              "result_path": "Infrastructure/artifacts/skills/teach/20260624-200958-919672/01-happy-new-topic",
+              "blocker_class": "blocked_runtime",
+              "blocked_reasons": [
+                "[codex] blocked_runtime: The runner was blocked by local runtime, sandbox, or model-capacity limits. This is an eval runner blocker, not a skill behavior failure."
+              ]
+            },
+            {
+              "id": "happy-existing-workspace",
+              "status": "blocked",
+              "result_path": "Infrastructure/artifacts/skills/teach/20260624-200958-919672/02-happy-existing-workspace",
+              "blocker_class": "blocked_runtime",
+              "blocked_reasons": [
+                "[codex] blocked_runtime: The runner was blocked by local runtime, sandbox, or model-capacity limits. This is an eval runner blocker, not a skill behavior failure."
+              ]
+            },
+            {
+              "id": "happy-study-plan",
+              "status": "blocked",
+              "result_path": "Infrastructure/artifacts/skills/teach/20260624-200958-919672/03-happy-study-plan",
+              "blocker_class": "blocked_runtime",
+              "blocked_reasons": [
+                "[codex] blocked_runtime: The runner was blocked by local runtime, sandbox, or model-capacity limits. This is an eval runner blocker, not a skill behavior failure."
+              ]
+            },
+            {
+              "id": "happy-first-lesson",
+              "status": "blocked",
+              "result_path": "Infrastructure/artifacts/skills/teach/20260624-200958-919672/04-happy-first-lesson",
+              "blocker_class": "blocked_runtime",
+              "blocked_reasons": [
+                "[codex] blocked_runtime: The runner was blocked by local runtime, sandbox, or model-capacity limits. This is an eval runner blocker, not a skill behavior failure."
+              ]
+            },
+            {
+              "id": "happy-quiz-review",
+              "status": "fail",
+              "result_path": "Infrastructure/artifacts/skills/teach/20260624-200958-919672/05-happy-quiz-review",
+              "failures": [
+                "[codex] codex returned non-zero exit code: -9"
+              ]
+            },
+            {
+              "id": "happy-reference-page",
+              "status": "fail",
+              "result_path": "Infrastructure/artifacts/skills/teach/20260624-200958-919672/06-happy-reference-page",
+              "failures": [
+                "[codex] codex returned non-zero exit code: -9"
+              ]
+            },
+            {
+              "id": "happy-resource-curation",
+              "status": "blocked",
+              "result_path": "Infrastructure/artifacts/skills/teach/20260624-200958-919672/07-happy-resource-curation",
+              "blocker_class": "blocked_runtime",
+              "blocked_reasons": [
+                "[codex] blocked_runtime: The runner was blocked by local runtime, sandbox, or model-capacity limits. This is an eval runner blocker, not a skill behavior failure."
+              ]
+            },
+            {
+              "id": "edge-mission-unclear",
+              "status": "blocked",
+              "result_path": "Infrastructure/artifacts/skills/teach/20260624-200958-919672/08-edge-mission-unclear",
+              "blocker_class": "blocked_runtime",
+              "blocked_reasons": [
+                "[codex] blocked_runtime: The runner was blocked by local runtime, sandbox, or model-capacity limits. This is an eval runner blocker, not a skill behavior failure."
+              ]
+            },
+            {
+              "id": "edge-mission-change",
+              "status": "blocked",
+              "blocker_class": "blocked_missing_artifact",
+              "expected_artifacts": [
+                "result.json"
+              ],
+              "actual_artifacts": [
+                "prompt.txt"
+              ],
+              "result_path": "Infrastructure/artifacts/skills/teach/20260624-200958-919672/09-edge-mission-change"
+            }
+          ],
+          "blocker_class": "timeout_no_output",
+          "mutation_allowed": false,
+          "registry_update_allowed": false,
+          "raw_output_present": false,
+          "raw_error_present": false,
+          "missing_suite_artifacts": true,
+          "next_reproduce_command": "./bin/ask evals run Skills/github/teach --mode smoke --runner codex --json --robot",
+          "closeout_validation": {
+            "schema_version": "skills-sdk.eval-closeout-validation.v1",
+            "status": "pass",
+            "checks": [
+              {
+                "id": "required_fields_present",
+                "status": "pass",
+                "message": "workflow-closeout/v1 receipts must include required contract fields.",
+                "evidence": []
+              },
+              {
+                "id": "schema_version_valid",
+                "status": "pass",
+                "message": "workflow-closeout receipt must use skills-sdk.eval-closeout.v1.",
+                "evidence": []
+              },
+              {
+                "id": "cases_array_valid",
+                "status": "pass",
+                "message": "workflow-closeout receipt must carry cases as an array.",
+                "evidence": []
+              },
+              {
+                "id": "blocked_cases_block_suite",
+                "status": "pass",
+                "message": "Any blocked case must make the suite closeout status blocked.",
+                "evidence": []
+              },
+              {
+                "id": "non_pass_blocks_source_mutation",
+                "status": "pass",
+                "message": "Non-pass closeouts must set mutation_allowed=false.",
+                "evidence": []
+              },
+              {
+                "id": "non_pass_blocks_registry_promotion",
+                "status": "pass",
+                "message": "Non-pass closeouts must set registry_update_allowed=false.",
+                "evidence": []
+              },
+              {
+                "id": "missing_artifacts_have_blocker_class",
+                "status": "pass",
+                "message": "Closeouts with missing suite artifacts must include blocker_class.",
+                "evidence": []
+              },
+              {
+                "id": "pass_has_case_evidence",
+                "status": "pass",
+                "message": "Pass closeouts must include complete case evidence or an explicit no_case_reason.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          "path": "Infrastructure/artifacts/skills/teach/20260624-200958-919672/workflow-closeout.json"
+        },
+        "eval_closeout_path": "Infrastructure/artifacts/skills/teach/20260624-200958-919672/workflow-closeout.json"
+      },
+      "mutation_performed": false,
+      "validation_commands": [
+        "./bin/ask sdk eval run Skills/github/teach --runner internal --mode smoke --codex-profile oss-local --timeout-seconds 30 --json --robot"
+      ],
+      "agent_summary": "skills-sdk internal eval run blocked for Skills/github/teach in smoke mode."
+    }
+  },
+  "telemetry": {
+    "latency_ms": 30050
+  },
+  "errors": [
+    {
+      "code": "ERR_RUNTIME",
+      "message": "Evaluation timed out after 30 seconds."
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "schema_version": "skills-sdk.handoff-lane-receipt.v0",
+  "status": "pass",
+  "lane": "deterministic_local_gates",
+  "skill": "Skills/github/teach",
+  "command": "./bin/ask skills audit Skills/github/teach --level strict --json --robot && ./bin/ask sdk eval scenario-quality Skills/github/teach --preview --json --robot && ./bin/ask sdk eval scorer-quality Skills/github/teach --preview --json --robot && ./bin/ask sdk eval scorer-calibration Skills/github/teach --preview --json --robot",
+  "evidence": [
+    ".harness/evidence/handoff/teach/deterministic-audit.json",
+    ".harness/evidence/handoff/teach/scenario-quality.json",
+    ".harness/evidence/handoff/teach/scorer-quality.json",
+    ".harness/evidence/handoff/teach/scorer-calibration.json"
+  ],
+  "mutation_performed": false,
+  "promotion_performed": false
+}

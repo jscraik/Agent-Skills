@@ -1,0 +1,30 @@
+# RESOURCES.md Format
+
+RESOURCES.md is the curated set of trusted sources for this topic. Knowledge for explainers should be drawn from here, not from parametric guesses. Wisdom comes from the communities listed here.
+
+## Structure
+
+    # {Topic} Resources
+
+    ## Knowledge
+
+    - [Sample placeholder book: _The Science and Practice of Strength Training_ - Zatsiorsky & Kraemer](<vetted-link>)
+      Foundational text on programming and adaptation. Use for: anything to do with periodisation, recovery, intensity zones.
+    - [Sample placeholder article: "How Much Should I Train?" - Greg Nuckols (Stronger By Science)](<vetted-link>)
+      Evidence-based review of volume landmarks. Use for: weekly set targets per muscle group.
+
+    ## Wisdom (Communities)
+
+    - [Sample placeholder community: r/weightroom](<vetted-community-link>)
+      High-signal subreddit, moderated against weak claims. Use for: programme critique, plateau troubleshooting.
+    - Sample placeholder local coaching: Tuesday strength class at {gym name}
+      Use for: real-time coaching feedback on lifts.
+
+## Rules
+
+- High-trust only. Prefer primary sources, recognised experts, peer-reviewed work, and communities with strong moderation. If a resource is marketing dressed as education, leave it out.
+- Annotate every entry. A bare link is useless in three months. Add one line covering what it covers and when to reach for it.
+- Group by Knowledge and Wisdom. A resource may appear in only one group.
+- Surface gaps explicitly. If no good resource exists for an area the mission needs, write a "Gaps" section listing what is missing. This drives future search.
+- Prune ruthlessly. A resource that turned out to be wrong, shallow, or off-mission should be removed, not buried.
+- Record community preferences. If the user has opted out of joining communities, note it here so future sessions do not keep proposing them.

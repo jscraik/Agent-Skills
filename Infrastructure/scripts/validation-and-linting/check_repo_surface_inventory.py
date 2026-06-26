@@ -352,7 +352,7 @@ def _classify_violation_surface(normalized: str, suffix: str) -> SurfaceFinding 
 
 
 def _is_governed_source_artifact(normalized: str, suffix: str) -> bool:
-    return normalized == "artifacts/recommended-skills-sdk-pipeline.html" or (
+    return normalized in {"artifacts/recommended-skills-sdk-pipeline.html", "artifacts/skills-sdk-user-lifecycle-one-page.html"} or (
         _starts_with(normalized, "Skills") and "/references/scorer-calibration/" in normalized and suffix == ".jsonl"
     )
 

@@ -16,6 +16,8 @@
     "package_digest": {"type": ["string", "null"], "minLength": 71},
     "target_path": {"type": ["string", "null"]},
     "mode": {"type": ["string", "null"]},
+    "lane": {"type": ["string", "null"]},
+    "profile": {"type": ["string", "null"]},
     "case_count": {"type": "integer", "minimum": 0},
     "passed_count": {"type": "integer", "minimum": 0},
     "failed_count": {"type": "integer", "minimum": 0},
@@ -64,6 +66,23 @@
       },
       "required": ["source", "scorecard_schema_version", "decision", "passed", "promotion_eligible", "blocked_cases", "tier1_failures", "tier2_findings", "preflight_warning_count", "readiness_summary", "expected_signal_summary", "security_dependency_screening_status", "assertions", "failed_assertions"]
     },
+    "closeout_validation": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {"type": "string", "const": "skills-sdk.eval-closeout-validation.v1"},
+        "status": {"type": "string", "enum": ["pass", "blocked"]},
+        "checks": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/eval_closeout_validation_check"}
+        },
+        "blockers": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/eval_closeout_validation_check"}
+        }
+      },
+      "required": ["schema_version", "status", "checks", "blockers"]
+    },
     "cases": {
       "type": "array",
       "items": {
@@ -72,7 +91,7 @@
         "properties": {
           "case_id": {"type": "string", "minLength": 1},
           "status": {"type": "string", "enum": ["pass", "fail"]},
-          "oracle": {"type": "string", "enum": ["exact_match"]},
+          "oracle": {"type": "string", "enum": ["exact_match", "eval_closeout"]},
           "expected": {"type": "string", "minLength": 1},
           "actual": {"type": "string"}
         },
@@ -83,5 +102,18 @@
     "mutation_performed": {"type": "boolean", "const": false},
     "acceptance_trace": {"type": "array", "minItems": 1, "items": {"type": "string", "enum": ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022"]}}
   },
-  "required": ["schema_version", "schema_uri", "status", "runner", "dataset_path", "dataset_digest", "skill_ir_schema_version", "target_path", "mode", "case_count", "passed_count", "failed_count", "cases", "blockers", "mutation_performed", "acceptance_trace"]
+  "required": ["schema_version", "schema_uri", "status", "runner", "dataset_path", "dataset_digest", "skill_ir_schema_version", "target_path", "mode", "case_count", "passed_count", "failed_count", "cases", "blockers", "mutation_performed", "acceptance_trace"],
+  "$defs": {
+    "eval_closeout_validation_check": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "status": {"type": "string", "enum": ["pass", "blocker"]},
+        "message": {"type": "string", "minLength": 1},
+        "evidence": {"type": "array", "items": {"type": "string"}}
+      },
+      "required": ["id", "status", "message", "evidence"]
+    }
+  }
 }

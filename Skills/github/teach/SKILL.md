@@ -8,6 +8,14 @@ metadata:
   maturity: experimental
   owner: Agent Skills Team
   provenance: frontmatter:agent-skills:canonical-source
+  compatible_roles:
+    - default
+    - worker
+  runtime_needs:
+    - current teaching workspace files
+    - package-local references
+    - optional high-trust source access for current or external-source lessons
+  share_readiness: ready
   review_cadence: quarterly
   metadata_source: frontmatter
 ---
@@ -18,7 +26,7 @@ Create and maintain a stateful teaching workspace for a user learning a topic ov
 
 ## Philosophy
 
-Teach one useful next step at a time. Mission, source trust, retrieval practice, and learning records matter more than a large syllabus.
+Teach one useful next step at a time. Mission, source trust, retrieval practice, and learning records matter more than a large syllabus. Preserve the source teaching model: knowledge from trusted sources, skills through practice loops, and wisdom through real-world feedback.
 
 ## When To Use
 
@@ -31,15 +39,15 @@ Trigger strongly when the user asks to be taught, continue a course, work from l
 ## Inputs
 
 - User learning goal, current level, constraints, and desired outcome.
-- Workspace files when present: MISSION.md, RESOURCES.md, NOTES.md, reference/*.html, learning-records/*.md, lessons/*.html, and assets/*.
-- Package references: [contract](references/contract.yaml), [evals](references/evals.yaml), [task profile](references/task-profile.json), [templates](references/templates.md), [knowledge capsule routing](references/knowledge-capsule-routing.md), and [knowledge capsules](references/knowledge-capsule.manifest.yaml).
+- Workspace files when present: MISSION.md, RESOURCES.md, GLOSSARY.md, NOTES.md, reference/*.html, learning-records/*.md, lessons/*.html, and assets/*.
+- Package references: [contract](references/contract.yaml), [evals](references/evals.yaml), [task profile](references/task-profile.json), [templates](references/templates.md), [teaching operating model](references/teaching-operating-model.md), [mission format](references/mission-format.md), [resources format](references/resources-format.md), [learning record format](references/learning-record-format.md), [glossary format](references/glossary-format.md), [knowledge capsule routing](references/knowledge-capsule-routing.md), and [knowledge capsules](references/knowledge-capsule.manifest.yaml).
 
 ## Outputs
 
 - Mission clarification or confirmed MISSION.md update.
 - Lesson HTML under lessons/.
 - Reference HTML under reference/.
-- Resource entries, learning records, and notes.
+- Resource entries, glossary terms, learning records, and notes.
 
 Output contract: durable artifacts should include an obvious version marker when a template defines one, using \`schema_version\` for structured records and template version headings for HTML or Markdown learning files.
 
@@ -49,10 +57,11 @@ Output contract: durable artifacts should include an obvious version marker when
 2. Confirm the mission before lesson creation. If missing or unclear, ask one focused question and stop.
 3. Choose one next lesson in the learner's zone of proximal development.
 4. Use high-trust resources for factual or current claims and record useful sources.
-5. Create a short lesson with one tangible win, retrieval practice, and a feedback loop.
+5. Create a short lesson with one tangible win, retrieval practice, source links, and a feedback loop.
 6. Create a reference when the lesson produces reusable knowledge.
-7. Add a learning record for non-obvious learning, mission changes, and future-session steering.
-8. Verify created paths and links before closeout.
+7. Promote glossary terms only after the learner shows they can use the term correctly.
+8. Add a learning record for non-obvious learning, mission changes, corrected misconceptions, and future-session steering.
+9. Verify created paths and links before closeout.
 
 Artifact-specific requirements:
 
@@ -64,6 +73,7 @@ Artifact-specific requirements:
 | Mission start | `MISSION.md` or `learning-records/mission-start-blocker.md` | Current level, goal, constraints, next milestone, blocked lesson action, one focused question. |
 | Continuation | Next lesson plus learning-record update, or `learning-records/continuation-blocker.md` | `MISSION.md`, prior weak spot, chosen next lesson, missing paths, recovery question. |
 | Quiz review | `learning-records/quiz-review-<topic>.md` or `learning-records/quiz-review-blocker.md` | Missed answer, misconception, correction, retrieval prompt, one repair step, or missing quiz evidence. |
+| Glossary update | `GLOSSARY.md` or a learning record explaining why the term is not ready | Evidence the learner understands the term, tight definition, avoid aliases, ambiguity resolution when needed. |
 | Mission unclear | `learning-records/mission-clarification-blocker.md` | Blocked lesson or syllabus action, missing mission field, one focused mission question, next safe action; do not invent a syllabus. |
 | Mission change | `learning-records/mission-change-blocker.md` before any overwrite | Current mission, requested mission, confirmation question, blocked overwrite action, next safe action. |
 | Current, newest, API, version-sensitive, or external-source lesson | Sourced lesson/reference plus source-check receipt, or `learning-records/source-check-blocker.md` | High-trust source type, URL/citation/local path, verification date, claim boundary, dependent artifact path, or missing evidence. |
@@ -90,7 +100,7 @@ When the task needs pack-backed guidance, read `references/knowledge-capsule-rou
 
 ## Output Templates
 
-Use [templates](references/templates.md). Keep lessons short: mission link, smallest concept, worked example, retrieval practice, and next step.
+Use [templates](references/templates.md), the [teaching operating model](references/teaching-operating-model.md), and the governing artifact formats: [mission format](references/mission-format.md), [resources format](references/resources-format.md), [learning record format](references/learning-record-format.md), and [glossary format](references/glossary-format.md). Keep lessons short: mission link, primary source, smallest concept, worked example, retrieval practice, feedback loop, reference links, follow-up prompt, and next step.
 
 ## Constraints And Safety
 
@@ -134,6 +144,15 @@ For lessons and references, verify the file path exists, links resolve, and cite
 - When the user says "Continue from my learning records," inspect MISSION.md and learning records, then build the next lesson or report the missing-state blocker.
 - When the user asks "Can you validate this forum roadmap for my Kubernetes certification study?", use official-source checks before turning it into durable guidance.
 - When the user asks "What does HTTP 404 mean?", answer directly without this skill.
+
+## Progressive Disclosure
+
+- Read `references/mission-format.md` before creating, revising, or validating MISSION.md.
+- Read `references/resources-format.md` before creating or pruning RESOURCES.md.
+- Read `references/learning-record-format.md` before creating or superseding learning records.
+- Read `references/glossary-format.md` before creating or revising GLOSSARY.md.
+- Read `references/teaching-operating-model.md` before creating lessons, references, quizzes, resources, or multi-session plans.
+- Read `references/templates.md` for compact artifact shapes after selecting the governing format reference.
 
 ## See Also
 

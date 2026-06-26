@@ -52,6 +52,7 @@ For AI coding agents, use this sequence:
 
 ```bash
 ./bin/ask repo doctor --json --robot
+./bin/ask sdk start "<skill-or-goal>" --project-root /path/to/project --json --robot
 ./bin/ask skills improve "<goal>" --json --robot
 ./bin/ask skills explain <recommended_capability> --json --robot
 ./bin/ask skills prove <recommended_capability> --json --robot
@@ -61,6 +62,7 @@ For AI coding agents, use this sequence:
 That path answers:
 
 - can I work safely here;
+- which SDK lifecycle lane should run first;
 - which capability matches the job;
 - how should I use it;
 - what proof exists;
@@ -71,6 +73,7 @@ That path answers:
 | Reader job              | Start here                                                    | Why                                                                                                     |
 | ----------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 | Check repo health       | `./bin/ask repo doctor --json --robot`                        | Combines repo status, catalog parity, runtime budget, SDK projection metadata, and surface diagnostics. |
+| Start an SDK skill lane | `./bin/ask sdk start <skill-or-goal> --json --robot`          | Classifies the target and returns the required mechanical-validation next action.                       |
 | Find a skill for a task | `./bin/ask skills improve "<goal>" --json --robot`            | Routes the goal to one capability and returns the next useful command.                                  |
 | Understand a skill      | `./bin/ask skills explain <handle> --json --robot`            | Resolves the handle to source, usage, limits, and proof.                                                |
 | Prove a skill           | `./bin/ask skills prove <handle> --json --robot`              | Reports reachability, quality, analytics, and outcome-proof state without merging those lanes.          |

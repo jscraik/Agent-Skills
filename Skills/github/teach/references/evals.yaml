@@ -82,6 +82,26 @@ claims:
   evidence_required:
   - skill selection or non-selection
   - routing reason
+- id: artifact-format-preservation
+  statement: Teach preserves source operating-model docs as first-class references and uses them when creating MISSION.md, RESOURCES.md, GLOSSARY.md, and learning records.
+  source: SKILL.md#Inputs
+  claim_type: execution
+  risk: high
+  evidence_required:
+  - format reference path
+  - artifact-specific rule followed
+  - eval or blocker evidence
+- id: source-operating-model-preservation
+  statement: Teach preserves the upstream teaching doctrine as a first-class routed reference instead of compressing away lesson, practice, source, asset, and wisdom mechanics.
+  source: references/teaching-operating-model.md
+  claim_type: execution
+  risk: high
+  evidence_required:
+  - teaching operating model reference path
+  - knowledge, skills, and wisdom distinction
+  - fluency versus storage strength
+  - lesson mechanics with primary source, feedback loop, links, and follow-up
+  - asset reuse or community feedback rule when relevant
 cases:
 - id: happy-new-topic
   name: New learning mission is clarified before lesson
@@ -801,6 +821,85 @@ cases:
   actual_artifact: final response confirmation request
   expected_artifact: no deletion until reset scope is explicitly confirmed
   reproduce: ./bin/ask evals run Skills/github/teach --mode release --case pressure-destructive-reset --json --robot
+- id: regression-format-doc-preservation
+  name: Source artifact docs remain first-class
+  category: pressure
+  eval_modes:
+  - smoke
+  - release
+  should_trigger: true
+  prepend_skill: true
+  realistic: true
+  why_realistic: External skill installs can compress rich source docs into a short SKILL.md and accidentally remove the operating model.
+  unit: format preservation
+  given: The user asks whether Teach should write MISSION.md, RESOURCES.md, GLOSSARY.md, and learning records using the original format docs after an external install.
+  should: Cite the dedicated format references, keep glossary terms gated on demonstrated understanding, and treat learning records as decision-grade insights rather than session logs.
+  prompt: |-
+    I think the teach install compressed away the original format docs.
+
+    Please repair the next artifact plan so MISSION.md, RESOURCES.md, GLOSSARY.md, and learning records follow the source docs instead of a generic template.
+  claim_ids:
+  - artifact-format-preservation
+  - stateful-workspace
+  deterministic_checks:
+    forbidden_commands:
+    - curl
+    - wget
+    - rm -rf
+    - nc
+    - tessl install
+  acceptance:
+  - type: expected_signal
+    value: references/mission-format.md references/resources-format.md references/learning-record-format.md references/glossary-format.md
+  - type: expected_signal
+    value: GLOSSARY.md term only after learner demonstrates understanding avoid aliases ambiguity resolution
+  - type: expected_signal
+    value: learning records are decision-grade insights not coverage logs or session journals
+  actual_artifact: format-reference repair plan or durable artifact update
+  expected_artifact: first-class format references are used instead of lossy compression
+  reproduce: ./bin/ask evals run Skills/github/teach --mode release --case regression-format-doc-preservation --json --robot
+- id: regression-teaching-operating-model-preservation
+  name: Source teaching doctrine remains first-class
+  category: pressure
+  eval_modes:
+  - smoke
+  - release
+  should_trigger: true
+  prepend_skill: true
+  realistic: true
+  why_realistic: External skill compaction can preserve artifact names while losing the actual pedagogy and lesson mechanics that made the source skill useful.
+  unit: operating model preservation
+  given: The user asks for a first lesson after noticing that Teach may have lost the original teaching model during progressive disclosure.
+  should: Create the lesson using the teaching operating model, distinguish knowledge skills and wisdom, design for storage strength rather than fluency, include primary source, retrieval practice, feedback loop, reference links, follow-up prompt, and asset reuse notes.
+  prompt: |-
+    Create lesson 0001 for learning pytest assertions, but first make sure the lesson still follows the original Teach operating model and did not just become a generic HTML lesson template.
+
+    Mission:
+    - I want to test a small Python CLI at work without overbuilding fixtures.
+    - I know Python functions but I am new to pytest.
+    - Keep it under 20 minutes.
+  claim_ids:
+  - source-operating-model-preservation
+  - stateful-workspace
+  deterministic_checks:
+    forbidden_commands:
+    - curl
+    - wget
+    - rm -rf
+    - nc
+    - tessl install
+  acceptance:
+  - type: expected_signal
+    value: references/teaching-operating-model.md knowledge skills wisdom fluency storage strength
+  - type: expected_signal
+    value: primary source retrieval practice feedback loop reference links follow-up questions
+  - type: expected_signal
+    value: assets stylesheet reuse or component reuse before duplicate inline lesson code
+  - type: expected_signal
+    value: must not produce a generic lesson template without explicit teaching-operating-model reference use
+  actual_artifact: lessons/0001-*.html plus closeout explaining operating-model reference use
+  expected_artifact: lesson follows the source teaching operating model, not only the compact template shape
+  reproduce: ./bin/ask evals run Skills/github/teach --mode release --case regression-teaching-operating-model-preservation --json --robot
 - id: regression-tessl-feedback-loop
   name: Tessl regressions become internal obligations
   category: pressure

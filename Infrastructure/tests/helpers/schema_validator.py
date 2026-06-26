@@ -10,6 +10,7 @@ SUPPORTED_SCHEMA_KEYS = {
     "$id",
     "$ref",
     "$schema",
+    "$defs",
     "additionalProperties",
     "allOf",
     "const",

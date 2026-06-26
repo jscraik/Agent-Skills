@@ -775,6 +775,12 @@ def _probe_payload(context: dict[str, Any], proof: dict[str, Any]) -> dict[str, 
             `exit_code` (int): Exit code from the validation command.
             `proof` (dict[str, Any]): The embedded raw proof object.
     """
+    proof_payload = dict(proof)
+    if context["claim_status"] == "partial":
+        proof_payload["structural_status"] = proof.get("status")
+        proof_payload["status"] = "partial"
+        proof_payload["live_proof_status"] = "partial"
+        proof_payload["partial_reason"] = context.get("blocker")
     return {
         "schema_version": "sdk-skill-runtime-probe.v1",
         "handle": context["handle"],
@@ -783,7 +789,7 @@ def _probe_payload(context: dict[str, Any], proof: dict[str, Any]) -> dict[str, 
         "observed_at": context["created_at"],
         "command": context["command"],
         "exit_code": context["exit_code"],
-        "proof": _redact_runtime_paths(proof, context["repo_root"]),
+        "proof": _redact_runtime_paths(proof_payload, context["repo_root"]),
     }
 
 
@@ -836,49 +842,55 @@ def _receipt_payload(context: dict[str, Any], relative_card_path: str, relative_
     return receipt
 
 
+def _observation_recovery_plan_command(context: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "command": context["command"],
+        "preconditions": [
+            "Open or reload a Codex session in this workspace.",
+            "Invoke or observe the skill handle in that live session.",
+            "Confirm Codex session telemetry and skill invocation counters are fresh.",
+        ],
+        "permission_profile": {
+            "filesystem": "read workspace evidence, Codex session logs, and observability stats",
+            "network": "not required",
+        },
+        "expected_outcome": (
+            "RuntimeCard is updated from partial to implemented_enforced only after fresh "
+            "live-session telemetry is observed."
+        ),
+    }
+
+
+def _projection_recovery_preconditions() -> list[str]:
+    return [
+        "Run workspace and user skill sync if the SDK skill handle or runtime link is absent."
+    ]
+
+
+def _recovery_reason(context: dict[str, Any]) -> str:
+    if context["claim_status"] == "pass":
+        return "$" + context["handle"] + f" is reachable in the {_runtime_display_name(context['runtime_target'])} runtime."
+    guidance = context["runtime_failure"].get("recovery_guidance")
+    return str(guidance) if guidance else f"Recovery guidance unavailable for blocked {context['runtime_target']} runtime."
+
+
 def _recovery_plan(context: dict[str, Any]) -> dict[str, Any]:
-    """
-    Constructs a recovery plan describing actions and expectations to remediate or confirm a skill's runtime reachability.
-    
-    Parameters:
-        context (dict): Evidence context containing at least the keys:
-            - "runtime_failure": dict with optional "recovery_guidance"
-            - "claim_status": str, e.g. "blocked" or "pass"
-            - "handle": skill handle string
-            - "runtime_target": runtime target string (used for display)
-            - "runtime_status": overall runtime status string
-            - "command": validation command string to rerun
-    
-    Returns:
-        dict: A recovery plan with the following keys:
-            - "recovery_status": current runtime status
-            - "reason": human-readable reason or recovery guidance
-            - "next_commands": list of command steps (each with "command", "preconditions",
-              "permission_profile", and "expected_outcome")
-            - "preconditions": list of high-level preconditions for recovery
-            - "permission_profile": required permissions for recovery actions
-            - "expected_outcome": expected result after following the plan
-    """
-    if context["claim_status"] != "pass":
-        guidance = context["runtime_failure"].get("recovery_guidance")
-        recovery_reason = (
-            str(guidance)
-            if guidance
-            else f"Recovery guidance unavailable for blocked {context['runtime_target']} runtime."
-        )
-    else:
-        recovery_reason = (
-            "$"
-            + context["handle"]
-            + f" is reachable in the {_runtime_display_name(context['runtime_target'])} runtime."
-        )
+    """Build the runtime recovery plan for the current proof state."""
+    recovery_reason = _recovery_reason(context)
     runtime_diagnostics = (
         context.get("runtime_diagnostics")
         if isinstance(context.get("runtime_diagnostics"), dict)
         else {}
     )
     diagnostic_commands = runtime_diagnostics.get("recovery_commands")
-    if isinstance(diagnostic_commands, list) and diagnostic_commands:
+    observation_blockers = {"runtime_observability_degraded", "runtime_session_stale"}
+    if context.get("failed_check_id") in observation_blockers:
+        next_commands = [_observation_recovery_plan_command(context)]
+        preconditions = [
+            "Projection links are already present; recover or recheck the live observability lane.",
+            "Do not run projection sync as the primary recovery step for missing invocation telemetry.",
+        ]
+    elif isinstance(diagnostic_commands, list) and diagnostic_commands:
         next_commands = [
             {
                 "command": str(item.get("command") or context["command"]),
@@ -901,6 +913,7 @@ def _recovery_plan(context: dict[str, Any]) -> dict[str, Any]:
             for item in diagnostic_commands
             if isinstance(item, dict)
         ]
+        preconditions = _projection_recovery_preconditions()
     else:
         next_commands = [
             {
@@ -918,13 +931,12 @@ def _recovery_plan(context: dict[str, Any]) -> dict[str, Any]:
                 ),
             }
         ]
+        preconditions = _projection_recovery_preconditions()
     return {
         "recovery_status": context["runtime_status"],
         "reason": recovery_reason,
         "next_commands": next_commands,
-        "preconditions": [
-            "Run workspace and user skill sync if the SDK skill handle or runtime link is absent."
-        ],
+        "preconditions": preconditions,
         "permission_profile": {
             "filesystem": "workspace evidence write and user runtime link read",
             "network": "not required",

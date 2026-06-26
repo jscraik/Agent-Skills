@@ -44,3 +44,67 @@ references:
     context_budget: bounded_selected_capsule
     claim_scope: selected_capsule
     bounded_unit: true
+  - path: references/mission-format.md
+    kind: operating_model_format
+    provenance: upstream teach source documentation
+    load_when: creating, revising, or validating MISSION.md
+    allowed_claims:
+      - MISSION.md shape and mission-governance rules
+    forbidden_claims:
+      - raw upstream repository availability
+      - bypassing mission confirmation
+    freshness: vendored_source_doc
+    context_budget: small
+    claim_scope: mission_format
+    bounded_unit: true
+  - path: references/resources-format.md
+    kind: operating_model_format
+    provenance: upstream teach source documentation
+    load_when: creating or pruning RESOURCES.md
+    allowed_claims:
+      - RESOURCES.md source-trust structure and curation rules
+    forbidden_claims:
+      - treating uncited model memory as a trusted source
+    freshness: vendored_source_doc
+    context_budget: small
+    claim_scope: resources_format
+    bounded_unit: true
+  - path: references/learning-record-format.md
+    kind: operating_model_format
+    provenance: upstream teach source documentation
+    load_when: creating or superseding learning records
+    allowed_claims:
+      - learning-record numbering, semantics, and write criteria
+    forbidden_claims:
+      - turning coverage logs into learning records
+    freshness: vendored_source_doc
+    context_budget: small
+    claim_scope: learning_record_format
+    bounded_unit: true
+  - path: references/glossary-format.md
+    kind: operating_model_format
+    provenance: upstream teach source documentation
+    load_when: creating or revising GLOSSARY.md
+    allowed_claims:
+      - glossary structure and term-promotion rules
+    forbidden_claims:
+      - adding glossary terms before learner understanding is evidenced
+    freshness: vendored_source_doc
+    context_budget: small
+    claim_scope: glossary_format
+    bounded_unit: true
+  - path: references/teaching-operating-model.md
+    kind: source_operating_model
+    provenance: upstream teach source documentation
+    load_when: creating lessons, references, quizzes, resources, or multi-session plans
+    allowed_claims:
+      - Teach source pedagogy and lesson-construction operating model
+      - Knowledge, skills, wisdom, fluency, storage strength, assets, citations, and community feedback rules
+    forbidden_claims:
+      - raw upstream repository availability
+      - replacing artifact format docs
+      - bypassing mission confirmation or source-check blockers
+    freshness: vendored_source_doc
+    context_budget: medium
+    claim_scope: teaching_operating_model
+    bounded_unit: true

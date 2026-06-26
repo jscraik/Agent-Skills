@@ -126,6 +126,11 @@ def _read_yaml_mapping(path: Path) -> Dict[str, Any]:
 
 # Space and colon variants support case-insensitive `contains foo` and `contains: foo` shorthand matching.
 _ACCEPTANCE_STRING_PREFIXES = ("contains ", "not_contains ", "regex ", "not_regex ", "contains:", "not_contains:", "regex:", "not_regex:")
+_SCAN_IGNORED_NAMES = {
+    ".DS_Store",
+    "Thumbs.db",
+    "desktop.ini",
+}
 
 
 def _is_bare_acceptance_string(value: Any) -> bool:
@@ -492,6 +497,8 @@ def _iter_scan_targets(skill_dir: Path) -> List[Tuple[Path, bool]]:
     targets: List[Tuple[Path, bool]] = []
     for path in skill_dir.rglob("*"):
         if not path.is_file():
+            continue
+        if path.name in _SCAN_IGNORED_NAMES:
             continue
         if ".git" in path.parts:
             continue
@@ -1424,6 +1431,7 @@ def check_research_eval_prompt_realism(doc: SkillDoc) -> List[Finding]:
         "clean",
         "compare",
         "convert",
+        "create",
         "debug",
         "delete",
         "diagnose",

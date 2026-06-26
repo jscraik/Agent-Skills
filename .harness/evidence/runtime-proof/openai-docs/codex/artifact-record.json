@@ -1,0 +1,19 @@
+{
+  "actor_type": "agent",
+  "artifact_id": "runtime-card-openai-docs-codex",
+  "artifact_type": "runtime_card",
+  "consumer_contract": "RuntimeCard v1 consumed by validate_runtime_cards.py and governed closeout.",
+  "generated_by": "./bin/ask skills proof openai-docs --runtime-target codex --json --robot",
+  "mutation_scope": "evidence_write",
+  "path": ".harness/evidence/runtime-proof/openai-docs/codex/runtime-card.json",
+  "source_identity": {
+    "source_paths": [
+      "skills-system/openai-docs/SKILL.md",
+      "Infrastructure/scripts/lib/ask/skills_sdk/runtime_adapters.py",
+      "Infrastructure/scripts/lib/ask/commands/skills_impl.py"
+    ]
+  },
+  "validation_status": "partial",
+  "visibility_status": "user_observable",
+  "workspace_root": "${WORKSPACE_ROOT}"
+}

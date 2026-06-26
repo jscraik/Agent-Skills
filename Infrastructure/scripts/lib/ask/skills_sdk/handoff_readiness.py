@@ -14,6 +14,7 @@ REQUIRED_LANE_IDS = (
     "deterministic_local_gates",
     "oss-local",
     "oss-cloud",
+    "tessl-local-proof",
     "tessl-live-dry-run",
 )
 
@@ -23,6 +24,7 @@ REQUIRED_ORDER = (
     "patch_oss_local_failures",
     "oss-cloud",
     "patch_oss_cloud_failures",
+    "tessl-local-proof",
     "tessl-live-dry-run",
     "tessl-live",
     "patch_tessl_failures",
@@ -100,6 +102,7 @@ def _lane_checks(repo_root: Path, lane_id: str, lane: dict[str, Any] | None) -> 
     ]
     if status == "pass":
         checks.append(_lane_receipt_check(repo_root, lane_id, lane.get("receipt_path")))
+        checks.append(_lane_receipt_semantics_check(repo_root, lane_id, lane))
         return checks
     checks.append(_blocked_lane_check(lane_id, lane.get("blocker")))
     return checks
@@ -125,12 +128,17 @@ def _lane_status_check(status: Any) -> dict[str, Any]:
 
 def _lane_command_check(lane_id: str, command: Any) -> dict[str, Any]:
     command_ok = isinstance(command, str) and command.strip()
+    placeholder_free = command_ok and not _has_command_placeholder(command)
     return _check(
         "lane_command_recorded",
-        "pass" if command_ok else "blocker",
-        "Each lane must record the exact command that produced its evidence.",
+        "pass" if command_ok and placeholder_free else "blocker",
+        "Each lane must record the exact executable command that produced or repairs its evidence.",
         [command] if command_ok else [lane_id],
     )
+
+
+def _has_command_placeholder(command: str) -> bool:
+    return bool(re.search(r"<[^>]+>", command))
 
 
 def _lane_receipt_check(repo_root: Path, lane_id: str, receipt_value: Any) -> dict[str, Any]:
@@ -142,6 +150,143 @@ def _lane_receipt_check(repo_root: Path, lane_id: str, receipt_value: Any) -> di
         "Passed lanes must point at an existing receipt or durable evidence artifact.",
         [_repo_relative(repo_root, receipt_path)] if receipt_path is not None else [lane_id],
     )
+
+
+def _receipt_status(payload: dict[str, Any]) -> str | None:
+    for key in ("status", "receipt_status", "eval_status", "tessl_eval_status"):
+        value = payload.get(key)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    for nested_receipt in _nested_receipt_payloads(payload):
+        value = nested_receipt.get("status")
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    tessl_eval = payload.get("tessl_eval")
+    if isinstance(tessl_eval, dict):
+        value = tessl_eval.get("status")
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    return None
+
+
+def _receipt_profile(payload: dict[str, Any]) -> str | None:
+    for key in ("profile", "codex_profile", "judge_profile_id", "lane"):
+        value = payload.get(key)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    judge_profile = payload.get("judge_profile")
+    if isinstance(judge_profile, dict):
+        value = judge_profile.get("id")
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    for nested_receipt in _nested_receipt_payloads(payload):
+        for key in ("profile", "codex_profile", "judge_profile_id", "lane"):
+            value = nested_receipt.get(key)
+            if isinstance(value, str) and value.strip():
+                return value.strip()
+    return None
+
+
+def _nested_receipt_payloads(payload: dict[str, Any]) -> list[dict[str, Any]]:
+    receipts: list[dict[str, Any]] = []
+    direct = payload.get("receipt")
+    if isinstance(direct, dict):
+        receipts.append(direct)
+    data = payload.get("data")
+    if isinstance(data, dict):
+        for value in data.values():
+            if isinstance(value, dict) and isinstance(value.get("receipt"), dict):
+                receipts.append(value["receipt"])
+    return receipts
+
+
+def _lane_receipt_semantics_check(repo_root: Path, lane_id: str, lane: dict[str, Any]) -> dict[str, Any]:
+    loaded = _load_lane_receipt(repo_root, lane_id, lane.get("receipt_path"))
+    if loaded["check"] is not None:
+        return loaded["check"]
+
+    receipt_path = loaded["path"]
+    payload = loaded["payload"]
+    status = (_receipt_status(payload) or "missing_status").strip().lower()
+    profile_check = _lane_profile_semantics(lane_id, lane, payload)
+    evidence = _lane_semantics_evidence(repo_root, receipt_path, status, profile_check)
+    passing_statuses = {"pass", "success", "scored"}
+    return _check(
+        "lane_receipt_semantics_valid",
+        "pass" if status in passing_statuses and profile_check["ok"] else "blocker",
+        "Passed lane receipts must prove the lane status and profile they are standing in for.",
+        evidence,
+    )
+
+
+def _load_lane_receipt(repo_root: Path, lane_id: str, receipt_value: Any) -> dict[str, Any]:
+    receipt_path = _resolve_evidence_path(repo_root, receipt_value)
+    if receipt_path is None or not receipt_path.exists():
+        check = _check(
+            "lane_receipt_semantics_valid",
+            "blocker",
+            "Passed lanes must point at a readable receipt whose status and lane semantics can be checked.",
+            [lane_id],
+        )
+        return {"path": None, "payload": {}, "check": check}
+    payload, error = _load_json_object(receipt_path)
+    if payload is None:
+        check = _check(
+            "lane_receipt_semantics_valid",
+            "blocker",
+            "Passed lanes must point at a JSON receipt, not an opaque or unreadable artifact.",
+            [_repo_relative(repo_root, receipt_path), error or "invalid_json"],
+        )
+        return {"path": receipt_path, "payload": {}, "check": check}
+    return {"path": receipt_path, "payload": payload, "check": None}
+
+
+def _lane_profile_semantics(lane_id: str, lane: dict[str, Any], payload: dict[str, Any]) -> dict[str, Any]:
+    profile = _receipt_profile(payload)
+    expected_profile = None
+    if lane_id in {"oss-local", "oss-cloud"}:
+        expected_profile = lane_id
+        return {"ok": profile == expected_profile, "profile": profile, "expected": expected_profile}
+    if lane_id == "tessl-live-dry-run":
+        command = str(lane.get("command") or "")
+        expected_profile = "command includes --tessl-live-dry-run"
+        return {"ok": "--tessl-live-dry-run" in command, "profile": profile, "expected": expected_profile}
+    if lane_id == "tessl-local-proof":
+        return _tessl_local_proof_semantics(lane, payload, profile)
+    return {"ok": True, "profile": profile, "expected": expected_profile}
+
+
+def _tessl_local_proof_semantics(lane: dict[str, Any], payload: dict[str, Any], profile: str | None) -> dict[str, Any]:
+    command = str(lane.get("command") or "")
+    command_ok = "tessl-local-proof" in command and "--execute" in command
+    receipt_ok = any(
+        nested.get("schema_version") == "skills-sdk.tessl-local-proof.v1"
+        and nested.get("execute") is True
+        and nested.get("status") == "pass"
+        for nested in _nested_receipt_payloads(payload)
+    )
+    return {
+        "ok": command_ok and receipt_ok,
+        "profile": profile,
+        "expected": "command includes tessl-local-proof --execute",
+    }
+
+
+def _lane_semantics_evidence(
+    repo_root: Path,
+    receipt_path: Path,
+    status: str,
+    profile_check: dict[str, Any],
+) -> list[str]:
+    evidence = [
+        _repo_relative(repo_root, receipt_path),
+        f"status={status}",
+    ]
+    expected = profile_check.get("expected")
+    if expected is not None:
+        evidence.append(f"profile={profile_check.get('profile') or 'missing'}")
+        evidence.append(f"expected={expected}")
+    return evidence
 
 
 def _blocked_lane_check(lane_id: str, blocker: Any) -> dict[str, Any]:
@@ -185,18 +330,58 @@ def _readiness_checks(repo_root: Path, path: Path, payload: dict[str, Any] | Non
     ]
 
 
-def _next_actions(repo_root: Path, blockers: list[dict[str, Any]], readiness_path: Path) -> list[str]:
-    if any(blocker["id"] == "readiness_artifact_present" for blocker in blockers):
+def _next_actions(
+    repo_root: Path,
+    blockers: list[dict[str, Any]],
+    readiness_path: Path,
+    lanes: list[dict[str, Any]] | None = None,
+) -> list[str]:
+    blocker_ids = {str(blocker["id"]) for blocker in blockers}
+    if "readiness_artifact_present" in blocker_ids:
         return [
             f"Create {_repo_relative(repo_root, readiness_path)} with deterministic, oss-local, oss-cloud, and Tessl dry-run lane receipts."
         ]
-    if any(blocker["id"] == "lane_present" for blocker in blockers):
+    command_actions = _lane_command_next_actions(blocker_ids)
+    if command_actions:
+        return command_actions
+    if _lane_has_runtime_blocker(lanes or [], "oss-local"):
+        return [_OSS_LOCAL_RUNTIME_BLOCKER_ACTION]
+    return _lane_status_next_actions(blocker_ids)
+
+
+_OSS_LOCAL_RUNTIME_BLOCKER_ACTION = (
+    "Preserve the oss-local blocked_runtime receipt, run oss-cloud as a diagnostic continuation, "
+    "and keep live Tessl blocked until oss-local is repaired or an explicit skip receipt is approved."
+)
+
+
+def _lane_command_next_actions(blocker_ids: set[str]) -> list[str]:
+    if "lane_command_recorded" in blocker_ids:
+        return [
+            "Replace placeholder lane commands with exact replay commands and durable receipt_path values before rerunning handoff-readiness.",
+            "For oss-local, first run ./bin/ask sdk eval run <skill> --runner internal --mode smoke --codex-profile oss-local --json --robot, then record its durable receipt_path.",
+            "Use the A/B judge route only when a comparative baseline and fixture have already been materialized.",
+        ]
+    if "lane_present" in blocker_ids:
         return ["Add the missing required lane rows before running live Tessl."]
-    if any(blocker["id"] == "lane_status_pass" for blocker in blockers):
+    return []
+
+
+def _lane_status_next_actions(blocker_ids: set[str]) -> list[str]:
+    if "lane_status_pass" in blocker_ids:
         return ["Rerun from oss-local after patching until deterministic gates, oss-local, oss-cloud, and Tessl dry-run all pass."]
-    if any(blocker["id"] == "lane_receipt_path_exists" for blocker in blockers):
+    if "lane_receipt_path_exists" in blocker_ids:
         return ["Move lane evidence into durable .harness evidence paths and update receipt_path values."]
     return ["Run live Tessl; if it fails, owner-classify the failure and return to oss-local."]
+
+
+def _lane_has_runtime_blocker(lanes: list[dict[str, Any]], lane_id: str) -> bool:
+    for lane in lanes:
+        if lane.get("id") != lane_id:
+            continue
+        blocker = lane.get("blocker")
+        return isinstance(blocker, str) and "blocked_runtime" in blocker
+    return False
 
 
 def _agent_summary(blockers: list[dict[str, Any]], query: str) -> str:
@@ -235,7 +420,7 @@ def build_handoff_readiness_receipt(
         "quality_checks": checks,
         "blockers": blockers,
         "ready_for_live_tessl": not blockers,
-        "required_next_actions": _next_actions(repo_root, blockers, actual_readiness_path),
+        "required_next_actions": _next_actions(repo_root, blockers, actual_readiness_path, lanes),
         "mutation_performed": False,
         "promotion_performed": False,
         "agent_summary": _agent_summary(blockers, query),

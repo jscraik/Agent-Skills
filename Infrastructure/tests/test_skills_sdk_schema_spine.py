@@ -52,6 +52,7 @@ SCHEMA_NAMES = {
     "review-plan-receipt": "sdk-review-plan-receipt.v1.schema.json",
     "review-plan-trace": "sdk-review-plan-trace.v1.schema.json",
     "review-handoff-receipt": "sdk-review-handoff-receipt.v1.schema.json",
+    "pipeline-start": "pipeline-start.v1.schema.json",
 }
 
 
@@ -712,6 +713,39 @@ class TestSkillsSdkSchemaSpine(unittest.TestCase):
         self.assertEqual(payload["source_review_plan"]["schema_version"], "skills-sdk.review-plan-receipt.v1")
         self.assertIn("reviewers_completed", payload["not_proven"])
         self.assertFalse(payload["mutation_performed"])
+
+    def test_pipeline_start_schema_rejects_lanes_without_commands(self) -> None:
+        payload = {
+            "schema_version": "skills-sdk.pipeline-start.v1",
+            "schema_uri": "https://agent-skills.local/schemas/skills-sdk/pipeline-start.v1.schema.json",
+            "status": "pass",
+            "target": "Skills/agent-ops/testing",
+            "target_class": "global_skill",
+            "current_lane": "mechanical_validation",
+            "lanes": [{"id": "mechanical_validation", "status": "required_not_run"}],
+            "next_action": {
+                "lane": "mechanical_validation",
+                "command": "./bin/ask skills audit Skills/agent-ops/testing --level strict --json --robot",
+                "why": "Run mechanical validation first.",
+            },
+            "blocked_downstream_lanes": ["scenario_quality"],
+            "what_this_proves": "target classification",
+            "what_this_does_not_prove": "runtime readiness",
+        }
+
+        with self.assertRaises(AssertionError):
+            _validate_schema_subset(
+                self.schemas["pipeline-start"],
+                payload,
+                {**self.schemas, **self.schemas_by_file},
+            )
+
+        payload["lanes"][0]["command"] = "./bin/ask skills audit Skills/agent-ops/testing --level strict --json --robot"
+        _validate_schema_subset(
+            self.schemas["pipeline-start"],
+            payload,
+            {**self.schemas, **self.schemas_by_file},
+        )
 
     def test_receipt_schema_rejects_non_contract_status_names(self) -> None:
         self.assert_invalid("check-receipt", "check-receipt-pass-placeholder.json")

@@ -1,30 +1,56 @@
 # Teach Templates
 
-Use these compact shapes when creating workspace artifacts.
+Use these compact shapes when creating workspace artifacts. The dedicated format references are governing docs for artifact semantics: `mission-format.md`, `resources-format.md`, `learning-record-format.md`, and `glossary-format.md`. For lesson, quiz, reference, resource, and multi-session teaching behavior, apply `teaching-operating-model.md`.
 
 ## MISSION.md
 
-# Mission
-I aim to learn <topic> so I can <real outcome>.
-Current level: <what the learner can already do>.
-Constraints: <time, tools, accessibility, preferences>.
-Next milestone: <observable skill or artifact>.
+# Mission: <topic>
+
+## Why
+<1-3 sentences naming the concrete real-world outcome.>
+
+## Success looks like
+- <specific observable capability or artifact>
+
+## Constraints
+- <time, tools, accessibility, preferences, or bounds>
+
+## Out of scope
+- <adjacent topics intentionally deferred>
 
 ## Lesson HTML
 
 <h1>0001 - <single skill></h1>
 <section><h2>Mission Link</h2><p>Why this lesson matters now.</p></section>
+<section><h2>Primary Source</h2><p>One high-trust source to read or watch.</p></section>
 <section><h2>Concept</h2><p>The smallest useful explanation.</p></section>
 <section><h2>Worked Example</h2><pre>concrete example</pre></section>
 <section><h2>Retrieval Practice</h2><ol><li>question</li></ol></section>
+<section><h2>Feedback Loop</h2><p>How the learner can check the answer or performance immediately.</p></section>
+<section><h2>Reference Links</h2><p>Anchor links to related lessons or reference pages.</p></section>
+<section><h2>Follow Up</h2><p>Ask follow-up questions if any part is unclear.</p></section>
 <section><h2>Next</h2><p>What to practice and what to record.</p></section>
 
 ## Learning Record
 
 # 0001 - <insight>
-Context: <lesson or user answer that caused the insight>.
-Learning: <non-obvious thing now understood>.
-Next practice: <small follow-up task>.
+
+<1-3 sentences: what was learned or established, and why it changes what to teach next.>
+
+Optional evidence: <user answer, exercise, prior experience, or correction>.
+Optional implications: <what this unlocks or rules out>.
+
+## GLOSSARY.md
+
+# <topic> Glossary
+
+<One or two sentence description of the topic.>
+
+## Terms
+
+**<Term>**:
+<One or two sentence definition that states what the term is.>
+_Avoid_: <aliases or vague phrases to avoid>
 
 ## learning-records/quiz-review-<topic>.md
 
@@ -93,14 +119,23 @@ Next safe action: <review answers, choose one repair step, and write a learning 
 <section><h2>Quick Reference</h2><ul><li>term or rule</li></ul></section>
 <section><h2>Source Notes</h2><ul><li><source> - why trusted or supplemental</li></ul></section>
 <section><h2>Practice Link</h2><p>Lesson or retrieval prompt that uses this page.</p></section>
+<section><h2>Print Shape</h2><p>Keep layout compact, readable, and useful as a quick reference.</p></section>
 
 ## RESOURCES.md Entry
 
-## <topic>
+## Knowledge
 
-- [<title>](<url or local path>) - Trust: official|primary|standard|source|supplemental. Fit: <why it serves the mission>. Use for: <lesson, practice, or reference>.
+- [<title>](<url or local path>) - Trust: official|primary|standard|vendor-docs|source-repository|source|supplemental. Fit: <why it serves the mission>. Use for: <lesson, practice, or reference>.
 
 Notes: <credential, version, freshness, or source-boundary caveat>.
+
+## Wisdom (Communities)
+
+- [<community or local source>](<url or local path>) - Trust: moderated|expert|local-coaching|supplemental. Use for: <feedback, troubleshooting, or practice critique>.
+
+## Gaps
+
+- <missing source area needed by the mission, if any>.
 
 ## Redacted Transcript Lesson Note
 

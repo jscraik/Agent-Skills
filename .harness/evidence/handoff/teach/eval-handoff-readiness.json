@@ -1,30 +1,40 @@
 {
-  "candidate_id": "teach-2026-06-22",
+  "schema_version": "skills-sdk.eval-handoff-readiness-input.v1",
+  "candidate_id": "teach",
   "lanes": [
     {
-      "blocker": "Current consolidated deterministic local gate receipt has not been materialized into the handoff evidence bundle.",
-      "command": "./bin/ask skills audit Skills/github/teach --level strict --json --robot && ./bin/ask sdk eval scenario-quality Skills/github/teach --preview --json --robot && ./bin/ask sdk eval scorer-quality Skills/github/teach --preview --json --robot && ./bin/ask sdk eval scorer-calibration Skills/github/teach --preview --json --robot",
       "id": "deterministic_local_gates",
-      "status": "blocked"
+      "status": "pass",
+      "command": "./bin/ask skills audit Skills/github/teach --level strict --json --robot && ./bin/ask sdk eval scenario-quality Skills/github/teach --preview --json --robot && ./bin/ask sdk eval scorer-quality Skills/github/teach --preview --json --robot && ./bin/ask sdk eval scorer-calibration Skills/github/teach --preview --json --robot",
+      "receipt_path": ".harness/evidence/handoff/teach/deterministic-local-gates.json"
     },
     {
-      "blocker": "Teach-specific oss-local internal judge receipt has not been generated for the current candidate.",
-      "command": "./bin/ask sdk eval ab-judge-score --run-receipt <teach-ab-run-receipt.json> --judge-profile oss-local --execute --json --robot",
       "id": "oss-local",
-      "status": "blocked"
+      "status": "blocked",
+      "command": "./bin/ask sdk eval run Skills/github/teach --runner internal --mode smoke --codex-profile oss-local --timeout-seconds 30 --json --robot",
+      "receipt_path": ".harness/evidence/handoff/teach/oss-local.json",
+      "blocker": "blocked_runtime: oss-local command produced no JSON receipt before timeout in this Codex session.",
+      "blocker_class": "blocked_runtime"
     },
     {
-      "blocker": "Teach-specific oss-cloud internal judge receipt has not been generated after oss-local remediation.",
-      "command": "./bin/ask sdk eval ab-judge-score --run-receipt <teach-ab-run-receipt.json> --judge-profile oss-cloud --execute --json --robot",
       "id": "oss-cloud",
-      "status": "blocked"
+      "status": "blocked",
+      "command": "./bin/ask sdk eval run Skills/github/teach --runner internal --mode smoke --codex-profile oss-cloud --timeout-seconds 30 --json --robot",
+      "receipt_path": ".harness/evidence/handoff/teach/oss-cloud.json",
+      "blocker": "blocked_runtime: oss-cloud command timed out after 30 seconds without producing final output.",
+      "blocker_class": "blocked_runtime"
     },
     {
-      "blocker": "Current Tessl live dry-run receipt has not been materialized into the handoff evidence bundle.",
-      "command": "./bin/ask evals run Skills/github/teach --tessl-live-private --tessl-workspace skills-sdk --tessl-live-dry-run --json --robot --no-dashboard",
+      "id": "tessl-local-proof",
+      "status": "pass",
+      "command": "./bin/ask sdk eval tessl-local-proof --skill Skills/github/teach --workspace skills-sdk --execute --json --robot",
+      "receipt_path": ".harness/evidence/handoff/teach/tessl-local-proof.json"
+    },
+    {
       "id": "tessl-live-dry-run",
-      "status": "blocked"
+      "status": "pass",
+      "command": "./bin/ask evals run Skills/github/teach --mode smoke --tessl-live-private --tessl-workspace skills-sdk --tessl-live-dry-run --json --robot --no-dashboard",
+      "receipt_path": ".harness/evidence/handoff/teach/tessl-live-dry-run.json"
     }
-  ],
-  "schema_version": "skills-sdk.eval-handoff-readiness-input.v1"
+  ]
 }

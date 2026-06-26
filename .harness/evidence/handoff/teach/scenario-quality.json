@@ -1,0 +1,2478 @@
+{
+  "status": "success",
+  "trace_id": "b499f332-e497-4a51-8444-873a2a645a33",
+  "metadata": {
+    "version": "0.1.0",
+    "command": "sdk eval scenario-quality Skills/github/teach --preview --json --robot",
+    "next_steps": [],
+    "correction_note": null
+  },
+  "data": {
+    "skills_sdk_eval_scenario_quality": {
+      "schema_version": "skills-sdk-eval-scenario-quality.v0",
+      "status": "preview",
+      "query": "Skills/github/teach",
+      "canonical_source_path": "Skills/github/teach/SKILL.md",
+      "facade_command": "skills-sdk eval scenario-quality",
+      "receipt": {
+        "schema_version": "skills-sdk.scenario-quality-receipt.v0",
+        "schema_uri": "https://agent-skills.local/schemas/skills-sdk/scenario-quality-receipt.v0.schema.json",
+        "status": "preview",
+        "operation": "scenario_quality_preview",
+        "query": "Skills/github/teach",
+        "skill_path": "Skills/github/teach/SKILL.md",
+        "evals_path": "Skills/github/teach/references/evals.yaml",
+        "scenario_count": 23,
+        "promotion_ready_count": 23,
+        "blocked_count": 0,
+        "scenario_rows": [
+          {
+            "id": "happy-new-topic",
+            "category": "happy",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "happy-new-topic"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "happy-new-topic"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "happy-new-topic"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "happy-new-topic"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "happy-new-topic"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "happy-new-topic"
+                ]
+              },
+              {
+                "id": "release_case_metadata_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release scenarios must carry claim ids, realistic context, expected artifacts, and reproduce evidence.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_binary_items",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must split broad quality into at least two binary acceptance checks.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_evidence_anchored",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must anchor scoring in observable evidence, artifacts, files, commands, scores, or proof lanes.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "happy-existing-workspace",
+            "category": "happy",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "happy-existing-workspace"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "happy-existing-workspace"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "happy-existing-workspace"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "happy-existing-workspace"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "happy-existing-workspace"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "happy-existing-workspace"
+                ]
+              },
+              {
+                "id": "release_case_metadata_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release scenarios must carry claim ids, realistic context, expected artifacts, and reproduce evidence.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_binary_items",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must split broad quality into at least two binary acceptance checks.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_evidence_anchored",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must anchor scoring in observable evidence, artifacts, files, commands, scores, or proof lanes.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "happy-study-plan",
+            "category": "happy",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "happy-study-plan"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "happy-study-plan"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "happy-study-plan"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "happy-study-plan"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "happy-study-plan"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "happy-study-plan"
+                ]
+              },
+              {
+                "id": "release_case_metadata_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release scenarios must carry claim ids, realistic context, expected artifacts, and reproduce evidence.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_binary_items",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must split broad quality into at least two binary acceptance checks.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_evidence_anchored",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must anchor scoring in observable evidence, artifacts, files, commands, scores, or proof lanes.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "happy-first-lesson",
+            "category": "happy",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "happy-first-lesson"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "happy-first-lesson"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "happy-first-lesson"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "happy-first-lesson"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "happy-first-lesson"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "happy-first-lesson"
+                ]
+              },
+              {
+                "id": "release_case_metadata_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release scenarios must carry claim ids, realistic context, expected artifacts, and reproduce evidence.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_binary_items",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must split broad quality into at least two binary acceptance checks.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_evidence_anchored",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must anchor scoring in observable evidence, artifacts, files, commands, scores, or proof lanes.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "happy-quiz-review",
+            "category": "happy",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "happy-quiz-review"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "happy-quiz-review"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "happy-quiz-review"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "happy-quiz-review"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "happy-quiz-review"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "happy-quiz-review"
+                ]
+              },
+              {
+                "id": "release_case_metadata_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release scenarios must carry claim ids, realistic context, expected artifacts, and reproduce evidence.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_binary_items",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must split broad quality into at least two binary acceptance checks.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_evidence_anchored",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must anchor scoring in observable evidence, artifacts, files, commands, scores, or proof lanes.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "happy-reference-page",
+            "category": "happy",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "happy-reference-page"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "happy-reference-page"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "happy-reference-page"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "happy-reference-page"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "happy-reference-page"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "happy-reference-page"
+                ]
+              },
+              {
+                "id": "release_case_metadata_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release scenarios must carry claim ids, realistic context, expected artifacts, and reproduce evidence.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_binary_items",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must split broad quality into at least two binary acceptance checks.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_evidence_anchored",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must anchor scoring in observable evidence, artifacts, files, commands, scores, or proof lanes.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "happy-resource-curation",
+            "category": "happy",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "happy-resource-curation"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "happy-resource-curation"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "happy-resource-curation"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "happy-resource-curation"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "happy-resource-curation"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "happy-resource-curation"
+                ]
+              },
+              {
+                "id": "release_case_metadata_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release scenarios must carry claim ids, realistic context, expected artifacts, and reproduce evidence.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_binary_items",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must split broad quality into at least two binary acceptance checks.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_evidence_anchored",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must anchor scoring in observable evidence, artifacts, files, commands, scores, or proof lanes.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "edge-mission-unclear",
+            "category": "edge",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "edge-mission-unclear"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "edge-mission-unclear"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "edge-mission-unclear"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "edge-mission-unclear"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "edge-mission-unclear"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "edge-mission-unclear"
+                ]
+              },
+              {
+                "id": "release_case_metadata_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release scenarios must carry claim ids, realistic context, expected artifacts, and reproduce evidence.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_binary_items",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must split broad quality into at least two binary acceptance checks.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_evidence_anchored",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must anchor scoring in observable evidence, artifacts, files, commands, scores, or proof lanes.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_failure_guard",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Pressure, negative, and edge release rubrics must include an explicit reject, block, avoid, or must-not condition.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "edge-mission-change",
+            "category": "edge",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "edge-mission-change"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "edge-mission-change"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "edge-mission-change"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "edge-mission-change"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "edge-mission-change"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "edge-mission-change"
+                ]
+              },
+              {
+                "id": "release_case_metadata_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release scenarios must carry claim ids, realistic context, expected artifacts, and reproduce evidence.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_binary_items",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must split broad quality into at least two binary acceptance checks.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_evidence_anchored",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must anchor scoring in observable evidence, artifacts, files, commands, scores, or proof lanes.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_failure_guard",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Pressure, negative, and edge release rubrics must include an explicit reject, block, avoid, or must-not condition.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "edge-no-existing-files",
+            "category": "edge",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "edge-no-existing-files"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "edge-no-existing-files"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "edge-no-existing-files"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "edge-no-existing-files"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "edge-no-existing-files"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "edge-no-existing-files"
+                ]
+              },
+              {
+                "id": "release_case_metadata_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release scenarios must carry claim ids, realistic context, expected artifacts, and reproduce evidence.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_binary_items",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must split broad quality into at least two binary acceptance checks.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_evidence_anchored",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must anchor scoring in observable evidence, artifacts, files, commands, scores, or proof lanes.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_failure_guard",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Pressure, negative, and edge release rubrics must include an explicit reject, block, avoid, or must-not condition.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "edge-external-sources-needed",
+            "category": "edge",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "edge-external-sources-needed"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "edge-external-sources-needed"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "edge-external-sources-needed"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "edge-external-sources-needed"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "edge-external-sources-needed"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "edge-external-sources-needed"
+                ]
+              },
+              {
+                "id": "release_case_metadata_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release scenarios must carry claim ids, realistic context, expected artifacts, and reproduce evidence.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_binary_items",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must split broad quality into at least two binary acceptance checks.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_evidence_anchored",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must anchor scoring in observable evidence, artifacts, files, commands, scores, or proof lanes.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_failure_guard",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Pressure, negative, and edge release rubrics must include an explicit reject, block, avoid, or must-not condition.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "edge-overloaded-learner",
+            "category": "edge",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "edge-overloaded-learner"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "edge-overloaded-learner"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "edge-overloaded-learner"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "edge-overloaded-learner"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "edge-overloaded-learner"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "edge-overloaded-learner"
+                ]
+              },
+              {
+                "id": "release_case_metadata_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release scenarios must carry claim ids, realistic context, expected artifacts, and reproduce evidence.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_binary_items",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must split broad quality into at least two binary acceptance checks.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_evidence_anchored",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must anchor scoring in observable evidence, artifacts, files, commands, scores, or proof lanes.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_failure_guard",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Pressure, negative, and edge release rubrics must include an explicit reject, block, avoid, or must-not condition.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "edge-community-wisdom",
+            "category": "edge",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "edge-community-wisdom"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "edge-community-wisdom"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "edge-community-wisdom"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "edge-community-wisdom"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "edge-community-wisdom"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "edge-community-wisdom"
+                ]
+              },
+              {
+                "id": "release_case_metadata_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release scenarios must carry claim ids, realistic context, expected artifacts, and reproduce evidence.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_binary_items",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must split broad quality into at least two binary acceptance checks.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_evidence_anchored",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must anchor scoring in observable evidence, artifacts, files, commands, scores, or proof lanes.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_failure_guard",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Pressure, negative, and edge release rubrics must include an explicit reject, block, avoid, or must-not condition.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "negative-one-off-fact",
+            "category": "negative",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "negative-one-off-fact"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "negative-one-off-fact"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "negative-one-off-fact"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "negative-one-off-fact"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "negative-one-off-fact"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "negative-one-off-fact"
+                ]
+              },
+              {
+                "id": "release_case_metadata_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release scenarios must carry claim ids, realistic context, expected artifacts, and reproduce evidence.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_binary_items",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must split broad quality into at least two binary acceptance checks.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_evidence_anchored",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must anchor scoring in observable evidence, artifacts, files, commands, scores, or proof lanes.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_failure_guard",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Pressure, negative, and edge release rubrics must include an explicit reject, block, avoid, or must-not condition.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "negative-copyedit-only",
+            "category": "negative",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "negative-copyedit-only"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "negative-copyedit-only"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "negative-copyedit-only"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "negative-copyedit-only"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "negative-copyedit-only"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "negative-copyedit-only"
+                ]
+              },
+              {
+                "id": "release_case_metadata_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release scenarios must carry claim ids, realistic context, expected artifacts, and reproduce evidence.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_binary_items",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must split broad quality into at least two binary acceptance checks.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_evidence_anchored",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must anchor scoring in observable evidence, artifacts, files, commands, scores, or proof lanes.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_failure_guard",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Pressure, negative, and edge release rubrics must include an explicit reject, block, avoid, or must-not condition.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "negative-debug-only",
+            "category": "negative",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "negative-debug-only"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "negative-debug-only"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "negative-debug-only"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "negative-debug-only"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "negative-debug-only"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "negative-debug-only"
+                ]
+              },
+              {
+                "id": "release_case_metadata_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release scenarios must carry claim ids, realistic context, expected artifacts, and reproduce evidence.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_binary_items",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must split broad quality into at least two binary acceptance checks.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_evidence_anchored",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must anchor scoring in observable evidence, artifacts, files, commands, scores, or proof lanes.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_failure_guard",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Pressure, negative, and edge release rubrics must include an explicit reject, block, avoid, or must-not condition.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "negative-certification",
+            "category": "negative",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "negative-certification"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "negative-certification"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "negative-certification"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "negative-certification"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "negative-certification"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "negative-certification"
+                ]
+              },
+              {
+                "id": "release_case_metadata_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release scenarios must carry claim ids, realistic context, expected artifacts, and reproduce evidence.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_binary_items",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must split broad quality into at least two binary acceptance checks.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_evidence_anchored",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must anchor scoring in observable evidence, artifacts, files, commands, scores, or proof lanes.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_failure_guard",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Pressure, negative, and edge release rubrics must include an explicit reject, block, avoid, or must-not condition.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "pressure-injection",
+            "category": "pressure",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "pressure-injection"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "pressure-injection"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "pressure-injection"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "pressure-injection"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "pressure-injection"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "pressure-injection"
+                ]
+              },
+              {
+                "id": "release_case_metadata_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release scenarios must carry claim ids, realistic context, expected artifacts, and reproduce evidence.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_binary_items",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must split broad quality into at least two binary acceptance checks.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_evidence_anchored",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must anchor scoring in observable evidence, artifacts, files, commands, scores, or proof lanes.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_failure_guard",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Pressure, negative, and edge release rubrics must include an explicit reject, block, avoid, or must-not condition.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "pressure-private-transcript",
+            "category": "pressure",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "pressure-private-transcript"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "pressure-private-transcript"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "pressure-private-transcript"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "pressure-private-transcript"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "pressure-private-transcript"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "pressure-private-transcript"
+                ]
+              },
+              {
+                "id": "release_case_metadata_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release scenarios must carry claim ids, realistic context, expected artifacts, and reproduce evidence.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_binary_items",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must split broad quality into at least two binary acceptance checks.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_evidence_anchored",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must anchor scoring in observable evidence, artifacts, files, commands, scores, or proof lanes.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_failure_guard",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Pressure, negative, and edge release rubrics must include an explicit reject, block, avoid, or must-not condition.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "pressure-destructive-reset",
+            "category": "pressure",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "pressure-destructive-reset"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "pressure-destructive-reset"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "pressure-destructive-reset"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "pressure-destructive-reset"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "pressure-destructive-reset"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "pressure-destructive-reset"
+                ]
+              },
+              {
+                "id": "release_case_metadata_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release scenarios must carry claim ids, realistic context, expected artifacts, and reproduce evidence.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_binary_items",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must split broad quality into at least two binary acceptance checks.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_evidence_anchored",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must anchor scoring in observable evidence, artifacts, files, commands, scores, or proof lanes.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_failure_guard",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Pressure, negative, and edge release rubrics must include an explicit reject, block, avoid, or must-not condition.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "regression-format-doc-preservation",
+            "category": "pressure",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "regression-format-doc-preservation"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "regression-format-doc-preservation"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "regression-format-doc-preservation"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "regression-format-doc-preservation"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "regression-format-doc-preservation"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "regression-format-doc-preservation"
+                ]
+              },
+              {
+                "id": "release_case_metadata_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release scenarios must carry claim ids, realistic context, expected artifacts, and reproduce evidence.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_binary_items",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must split broad quality into at least two binary acceptance checks.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_evidence_anchored",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must anchor scoring in observable evidence, artifacts, files, commands, scores, or proof lanes.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_failure_guard",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Pressure, negative, and edge release rubrics must include an explicit reject, block, avoid, or must-not condition.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "regression-teaching-operating-model-preservation",
+            "category": "pressure",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "regression-teaching-operating-model-preservation"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "regression-teaching-operating-model-preservation"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "regression-teaching-operating-model-preservation"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "regression-teaching-operating-model-preservation"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "regression-teaching-operating-model-preservation"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "regression-teaching-operating-model-preservation"
+                ]
+              },
+              {
+                "id": "release_case_metadata_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release scenarios must carry claim ids, realistic context, expected artifacts, and reproduce evidence.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_binary_items",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must split broad quality into at least two binary acceptance checks.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_evidence_anchored",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must anchor scoring in observable evidence, artifacts, files, commands, scores, or proof lanes.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_failure_guard",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Pressure, negative, and edge release rubrics must include an explicit reject, block, avoid, or must-not condition.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "regression-tessl-feedback-loop",
+            "category": "pressure",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "regression-tessl-feedback-loop"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "regression-tessl-feedback-loop"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "regression-tessl-feedback-loop"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "regression-tessl-feedback-loop"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "regression-tessl-feedback-loop"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "regression-tessl-feedback-loop"
+                ]
+              },
+              {
+                "id": "release_case_metadata_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release scenarios must carry claim ids, realistic context, expected artifacts, and reproduce evidence.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_binary_items",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must split broad quality into at least two binary acceptance checks.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_evidence_anchored",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must anchor scoring in observable evidence, artifacts, files, commands, scores, or proof lanes.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_failure_guard",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Pressure, negative, and edge release rubrics must include an explicit reject, block, avoid, or must-not condition.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          }
+        ],
+        "quality_checks": [
+          {
+            "id": "evals_yaml_present",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Skill must carry references/evals.yaml.",
+            "evidence": [
+              "Skills/github/teach/references/evals.yaml"
+            ]
+          },
+          {
+            "id": "evals_yaml_parse",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "references/evals.yaml must parse as YAML object.",
+            "evidence": []
+          },
+          {
+            "id": "cases_present",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "references/evals.yaml must contain one or more cases.",
+            "evidence": [
+              "Skills/github/teach/references/evals.yaml"
+            ]
+          },
+          {
+            "id": "cases_are_objects",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Every eval case must be an object.",
+            "evidence": []
+          },
+          {
+            "id": "release_minimum_scenario_count",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Release-mode behavioral scenario suites must include at least 20 scenarios unless they are structure-only.",
+            "evidence": []
+          },
+          {
+            "id": "release_pressure_coverage",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Release-mode scenario suites must include at least 4 pressure or regression cases.",
+            "evidence": []
+          },
+          {
+            "id": "release_negative_edge_coverage",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Release-mode scenario suites must include at least 2 negative or edge boundary cases.",
+            "evidence": []
+          }
+        ],
+        "blockers": [],
+        "mutation_performed": false,
+        "promotion_performed": false,
+        "acceptance_trace": [
+          "PU-030",
+          "FR-003",
+          "FR-008",
+          "SA-003",
+          "VP-030"
+        ],
+        "agent_summary": "scenario quality preview checked 23 scenario(s) for Skills/github/teach."
+      },
+      "scenario_count": 23,
+      "promotion_ready_count": 23,
+      "blocked_count": 0,
+      "mutation_performed": false,
+      "promotion_performed": false,
+      "validation_commands": [
+        "./bin/ask sdk eval scenario-quality Skills/github/teach --preview --json --robot"
+      ],
+      "agent_summary": "scenario quality preview checked 23 scenario(s) for Skills/github/teach."
+    }
+  },
+  "telemetry": {
+    "latency_ms": 10
+  },
+  "errors": []
+}

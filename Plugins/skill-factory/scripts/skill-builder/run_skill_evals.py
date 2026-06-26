@@ -1581,6 +1581,130 @@ def _contains_text(haystack: str, needle: str) -> bool:
     return needle.casefold() in haystack.casefold()
 
 
+def _normalize_text_field_key(value: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "_", value.strip().casefold()).strip("_")
+
+
+def _text_field_map(text: str) -> Dict[str, str]:
+    fields: Dict[str, str] = {}
+    for raw_line in text.splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+        line = re.sub(r"^[-*]\\s+", "", line)
+        line = line.replace(chr(96), "")
+        if ":" not in line:
+            continue
+        key, value = line.split(":", 1)
+        normalized_key = _normalize_text_field_key(key)
+        if normalized_key:
+            fields[normalized_key] = value.strip().strip("'\\\"")
+    return fields
+
+
+def _text_field_candidate_keys(assertion: Dict[str, Any]) -> List[str]:
+    raw_fields = assertion.get("fields")
+    candidates: List[str] = []
+    if isinstance(raw_fields, list):
+        candidates.extend(str(item) for item in raw_fields if str(item).strip())
+    path = assertion.get("path") or assertion.get("field") or assertion.get("key")
+    if isinstance(path, str) and path.strip():
+        candidates.append(path)
+    return candidates
+
+
+def _evaluate_text_field_assertion(text: str, assertion: Dict[str, Any]) -> Optional[str]:
+    t = str(assertion.get("type") or "")
+    candidates = _text_field_candidate_keys(assertion)
+    if not candidates:
+        return f"{t} missing field/path"
+    fields = _text_field_map(text)
+    normalized_candidates = [_normalize_text_field_key(path) for path in candidates]
+    present_key = next((key for key in normalized_candidates if key in fields), "")
+    present = bool(present_key)
+    path_label = "|".join(candidates)
+    if t == "text_field_present":
+        return None if present else f"text_field_present missing field: {path_label}"
+    if t == "text_field_absent":
+        return f"text_field_absent found field: {path_label}" if present else None
+    if not present:
+        return f"{t} missing field: {path_label}"
+    got = fields[present_key]
+    if t == "text_field_equals":
+        expected = _to_text_blob(assertion.get("value", ""))
+        if got.casefold() != expected.casefold():
+            return f"text_field_equals failed at {path_label}: got={got!r} expected={expected!r}"
+        return None
+    if t == "text_field_in":
+        values = assertion.get("values", assertion.get("value", []))
+        if not isinstance(values, list):
+            values = [values]
+        expected_values = [_to_text_blob(value) for value in values]
+        if got.casefold() not in {value.casefold() for value in expected_values}:
+            return f"text_field_in failed at {path_label}: got={got!r} expected one of {expected_values!r}"
+        return None
+    return f"unsupported text field assertion type: {t!r}"
+
+
+def _json_text_field_map(obj: Any) -> Dict[str, str]:
+    fields: Dict[str, str] = {}
+
+    def visit(value: Any, prefix: str = "") -> None:
+        if isinstance(value, dict):
+            for raw_key, child in value.items():
+                key = str(raw_key)
+                normalized_key = _normalize_text_field_key(key)
+                dotted_key = f"{prefix}.{key}" if prefix else key
+                normalized_dotted_key = _normalize_text_field_key(dotted_key)
+                if not isinstance(child, (dict, list)):
+                    text_value = _to_text_blob(child)
+                    if normalized_key:
+                        fields.setdefault(normalized_key, text_value)
+                    if normalized_dotted_key:
+                        fields.setdefault(normalized_dotted_key, text_value)
+                visit(child, dotted_key)
+            return
+        if isinstance(value, list):
+            for index, child in enumerate(value):
+                visit(child, f"{prefix}[{index}]" if prefix else f"[{index}]")
+
+    visit(obj)
+    return fields
+
+
+def _evaluate_json_text_field_assertion(obj: Any, assertion: Dict[str, Any]) -> Optional[str]:
+    t = str(assertion.get("type") or "")
+    candidates = _text_field_candidate_keys(assertion)
+    if not candidates:
+        return f"{t} missing field/path"
+    fields = _json_text_field_map(obj)
+    normalized_candidates = [_normalize_text_field_key(path) for path in candidates]
+    present_key = next((key for key in normalized_candidates if key in fields), "")
+    present = bool(present_key)
+    path_label = "|".join(candidates)
+    if t == "text_field_present":
+        return None if present else f"text_field_present missing field: {path_label}"
+    if t == "text_field_absent":
+        return f"text_field_absent found field: {path_label}" if present else None
+    if not present:
+        return f"{t} missing field: {path_label}"
+    got = fields[present_key]
+    if t == "text_field_equals":
+        expected = _to_text_blob(assertion.get("value", ""))
+        if got.casefold() != expected.casefold():
+            return f"text_field_equals failed at {path_label}: got={got!r} expected={expected!r}"
+        return None
+    if t == "text_field_in":
+        values = assertion.get("values", assertion.get("value", []))
+        if not isinstance(values, list):
+            values = [values]
+        expected_values = [_to_text_blob(value) for value in values]
+        if got.casefold() not in {value.casefold() for value in expected_values}:
+            return f"text_field_in failed at {path_label}: got={got!r} expected one of {expected_values!r}"
+        return None
+    return f"unsupported text field assertion type: {t!r}"
+
+
 _EXPECTED_SIGNAL_STOPWORDS = {
     "about",
     "after",
@@ -1722,6 +1846,10 @@ def evaluate_assertions_text(
             )
             if msg:
                 failures.append(msg)
+        elif t in {"text_field_equals", "text_field_in", "text_field_present", "text_field_absent"}:
+            msg = _evaluate_text_field_assertion(text, a)
+            if msg:
+                failures.append(msg)
         elif t == "expected_signal":
             msg = _evaluate_expected_signal_assertion(text, v)
             if msg:
@@ -1761,6 +1889,11 @@ def evaluate_assertions_json(
                     selected_skill=selected_skill,
                 )
             )
+            continue
+        if t in {"text_field_equals", "text_field_in", "text_field_present", "text_field_absent"}:
+            msg = _evaluate_json_text_field_assertion(obj, a)
+            if msg:
+                failures.append(msg)
             continue
 
         if t == "jsonpath_equals":
@@ -2837,9 +2970,6 @@ def _classify_runner_blocker(
     text = "\n".join([output_text or "", stdout_text or "", stderr_text or ""])
     low = text.lower()
 
-    if exit_code == 0 and (output_text or "").strip():
-        return None
-
     if exit_code == 124:
         runner_text = "\n".join([output_text or "", stdout_text or ""])
         return "timeout_partial_output" if runner_text.strip() else "timeout_no_output"
@@ -2871,6 +3001,9 @@ def _classify_runner_blocker(
         marker in low for marker in usage_context_markers
     ):
         return "blocked_runtime"
+
+    if exit_code == 0 and (output_text or "").strip():
+        return None
 
     user_input_markers = [
         "user_input_requested_during_turn",

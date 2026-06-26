@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-import argparse, sys, time
+# ruff: noqa: E402
+import argparse
+import sys
+import time
 from pathlib import Path
 from typing import Optional
 repo_root_path = Path(__file__).resolve().parents[1]
@@ -55,6 +58,7 @@ from ask.commands.plugins import (
 from ask.commands.evals import (
     benchmark_portfolio,
     dashboard_report,
+    eval_closeout_doctor,
     macro_eval_report,
     prepare_tessl_scenario_generation,
     run_evals,
@@ -105,7 +109,8 @@ def main():
     )
     repo_validate_parser.add_argument("--changed-files", nargs="+", default=[], help="Scope validation to these changed files")
     repo_yaml_parser = repo_subparsers.add_parser("yaml-inspect", help="Parse a repo YAML file with the managed PyYAML interpreter", parents=[global_parser])
-    repo_yaml_parser.add_argument("path", help="Repo-relative YAML file path"); repo_yaml_parser.add_argument("--query", help="Optional dotted query path, including numeric list indexes")
+    repo_yaml_parser.add_argument("path", help="Repo-relative YAML file path")
+    repo_yaml_parser.add_argument("--query", help="Optional dotted query path, including numeric list indexes")
     repo_stability_parser = repo_subparsers.add_parser("check-stability", help="Check stable skills not deleted without deprecation", parents=[global_parser])
     repo_stability_parser.add_argument("--changed-files", nargs="+", default=[], help="Changed SKILL.md files to check")
     repo_subparsers.add_parser("doctor", help="Agent-facing repository health entrypoint", description="Agent-facing repository health entrypoint", parents=[global_parser])
@@ -130,10 +135,12 @@ def main():
     skills_list_parser.add_argument("--starter", action="store_true", help="Return starter-mode curated skills")
     skills_list_parser.add_argument("--archetype", default="general", help="Starter archetype (general|delivery|review|docs)")
     skills_list_parser.add_argument("--limit", type=int, default=12, help="Max starter skills to return")
-    skills_budget_parser = skills_subparsers.add_parser("budget", help="Verify default skill runtime budget", parents=[global_parser]); skills_budget_parser.add_argument("--default-max", type=int, default=30, help="Maximum default-visible skills")
-    skills_capabilities_parser = skills_subparsers.add_parser("capabilities", aliases=["capability"], help="Report runtime proof-plane capability discovery", parents=[global_parser]); skills_capabilities_parser.add_argument("--runtime-target", default="codex", help="Runtime target to describe: any, codex, or agents")
+    skills_budget_parser = skills_subparsers.add_parser("budget", help="Verify default skill runtime budget", parents=[global_parser])
+    skills_budget_parser.add_argument("--default-max", type=int, default=30, help="Maximum default-visible skills")
+    skills_capabilities_parser = skills_subparsers.add_parser("capabilities", aliases=["capability"], help="Report runtime proof-plane capability discovery", parents=[global_parser])
+    skills_capabilities_parser.add_argument("--runtime-target", default="codex", help="Runtime target to describe: any, codex, or agents")
     skills_subparsers.add_parser("codex-preview", help="Show Codex preview command family and source-model basis", parents=[global_parser])
-    skills_load_preview_parser = skills_subparsers.add_parser("load-preview", help="Preview Codex skill loader behavior", parents=[global_parser])
+    skills_subparsers.add_parser("load-preview", help="Preview Codex skill loader behavior", parents=[global_parser])
     skills_render_preview_parser = skills_subparsers.add_parser("render-preview", help="Preview Codex available-skills rendering", parents=[global_parser])
     skills_render_preview_parser.add_argument("--context-window", type=int, help="Optional context window for Codex 2 percent metadata budget modeling")
     skills_config_parser = skills_subparsers.add_parser("config", help="Explain Codex skill config rule behavior", parents=[global_parser])
@@ -214,11 +221,17 @@ def main():
     skills_audit_parser = skills_subparsers.add_parser("audit", help="Run audits on a skill", parents=[global_parser])
     skills_audit_parser.add_argument("path", help="Path to the skill directory")
     skills_audit_parser.add_argument("--level", choices=["compat", "strict"], default="compat", help="Audit depth")
-    skills_external_review_parser = skills_subparsers.add_parser("external-review", help="Run the local-only external-style skill review lane", parents=[global_parser]); skills_external_review_parser.add_argument("path", help="Path to the skill directory")
-    skills_external_review_parser.add_argument("--audit-level", choices=["compat", "strict"], default="strict", help="Internal ask audit depth"); skills_external_review_parser.add_argument("--skip-plugin-eval", action="store_true", help="Skip plugin-eval comparison")
-    skills_external_review_parser.add_argument("--skip-tessl", action="store_true", help="Skip Tessl local lint and review"); skills_external_review_parser.add_argument("--skip-tessl-review", action="store_true", help="Skip Tessl local best-practice review")
+    skills_external_review_parser = skills_subparsers.add_parser("external-review", help="Run the local-only external-style skill review lane", parents=[global_parser])
+    skills_external_review_parser.add_argument("path", help="Path to the skill directory")
+    skills_external_review_parser.add_argument("--audit-level", choices=["compat", "strict"], default="strict", help="Internal ask audit depth")
+    skills_external_review_parser.add_argument("--skip-plugin-eval", action="store_true", help="Skip plugin-eval comparison")
+    skills_external_review_parser.add_argument("--skip-tessl", action="store_true", help="Skip Tessl local lint and review")
+    skills_external_review_parser.add_argument("--skip-tessl-review", action="store_true", help="Skip Tessl local best-practice review")
     skills_external_review_parser.add_argument("--include-snyk", action="store_true", help="Run optional Snyk CLI external security advisory")
-    skills_external_review_parser.add_argument("--timeout-seconds", type=int, default=180, help="Timeout for each local reviewer command"); skills_external_review_parser.add_argument("--report-path", help="Optional repo-relative JSON report path"); skills_external_review_parser.add_argument("--dashboard", action="store_true", help="Render a local HTML dashboard beside the review report"); skills_external_review_parser.add_argument("--dashboard-path", help="Optional repo-relative HTML dashboard path")
+    skills_external_review_parser.add_argument("--timeout-seconds", type=int, default=180, help="Timeout for each local reviewer command")
+    skills_external_review_parser.add_argument("--report-path", help="Optional repo-relative JSON report path")
+    skills_external_review_parser.add_argument("--dashboard", action="store_true", help="Render a local HTML dashboard beside the review report")
+    skills_external_review_parser.add_argument("--dashboard-path", help="Optional repo-relative HTML dashboard path")
     skills_gate_parser = skills_subparsers.add_parser("validate-skill-gate", help="Run the canonical skill gate", parents=[global_parser])
     skills_gate_parser.add_argument("path", help="Path to the skill directory")
     skills_openai_parser = skills_subparsers.add_parser("validate-openai-format", help="Run the canonical OpenAI skill format validator", parents=[global_parser])
@@ -307,6 +320,7 @@ def main():
     evals_run_parser.add_argument("--mode", choices=["smoke", "release"], default="smoke", help="Evaluation mode")
     evals_run_parser.add_argument("--runner", choices=["codex", "discovery-smoke"], default="codex", help="Evaluation runner. Use discovery-smoke for local-only contract smoke scorecards that do not call a model.")
     evals_run_parser.add_argument("--model", help="Override the smoke eval Codex model")
+    evals_run_parser.add_argument("--profile", help="Override the smoke eval Codex config profile")
     evals_run_parser.add_argument("--case", action="append", default=[], help="Run matching eval case ids/names")
     evals_run_parser.add_argument("--skip-tessl", action="store_true", help="Skip Tessl when policy or credentials block it")
     evals_run_parser.add_argument("--allow-tessl-project-save", action="store_true", help="Compatibility no-op for Tessl evals")
@@ -316,6 +330,10 @@ def main():
     evals_run_parser.add_argument("--no-dashboard", action="store_true", help="Skip rendering the local review dashboard after evals")
     evals_subparsers.add_parser("benchmark", help="Run full repository benchmark suite", parents=[global_parser])
     evals_subparsers.add_parser("dashboard", help="Generate evaluation dashboard", parents=[global_parser])
+    evals_closeout_parser = evals_subparsers.add_parser("closeout", help="Inspect eval workflow closeout receipts", parents=[global_parser])
+    evals_closeout_subparsers = evals_closeout_parser.add_subparsers(dest="closeout_action", required=True)
+    evals_closeout_doctor_parser = evals_closeout_subparsers.add_parser("doctor", help="Diagnose a workflow-closeout.json receipt or report directory", parents=[global_parser])
+    evals_closeout_doctor_parser.add_argument("path", help="Path to workflow-closeout.json or its report directory")
     evals_macro_parser = evals_subparsers.add_parser("macro-report", help="Export deterministic macro-eval events from saved skill eval summaries", parents=[global_parser])
     evals_macro_parser.add_argument("--output-dir", default=None, help="Directory for macro-eval artifacts")
     evals_macro_parser.add_argument("--summaries-glob", default=None, help="Repo-relative glob for summary.json files")
@@ -570,8 +588,10 @@ def main():
             )
         elif args.action == "budget":
             result = skills_commands.skills_budget(repo_root, default_max=args.default_max)
-        elif args.action in ("capabilities", "capability"): result = skills_commands.skills_capabilities(repo_root, runtime_target=args.runtime_target)
-        elif args.action == "codex-preview": result = skills_commands.skills_codex_preview(repo_root)
+        elif args.action in ("capabilities", "capability"):
+            result = skills_commands.skills_capabilities(repo_root, runtime_target=args.runtime_target)
+        elif args.action == "codex-preview":
+            result = skills_commands.skills_codex_preview(repo_root)
         elif args.action == "load-preview":
             result = skills_commands.skills_load_preview(repo_root)
         elif args.action == "render-preview":
@@ -762,12 +782,15 @@ def main():
                 tessl_workspace=args.tessl_workspace,
                 tessl_live_dry_run=args.tessl_live_dry_run,
                 model=args.model,
+                codex_profile=args.profile,
                 cases=args.case,
             )
         elif args.action == "benchmark":
             result = benchmark_portfolio(repo_root)
         elif args.action == "dashboard":
             result = dashboard_report(repo_root)
+        elif args.action == "closeout" and args.closeout_action == "doctor":
+            result = eval_closeout_doctor(repo_root, args.path)
         elif args.action == "macro-report":
             macro_report_kwargs = {"output_dir": args.output_dir}
             if args.summaries_glob:
@@ -1535,7 +1558,8 @@ def main():
                     if args.action == "run":
                         print(f"✅ Evaluation complete for {args.path}")
                         print(result.data.get("raw_output", ""))
-                        if result.data.get("dashboard_url"): print(f"Dashboard: {result.data['dashboard_url']}#{result.data.get('dashboard_tab', 'evals')}")
+                        if result.data.get("dashboard_url"):
+                            print(f"Dashboard: {result.data['dashboard_url']}#{result.data.get('dashboard_tab', 'evals')}")
                         print_first_validation_command(result.data)
                     elif args.action == "benchmark":
                         print("✅ Benchmark suite complete.")
@@ -1543,6 +1567,19 @@ def main():
                         print_first_validation_command(result.data)
                     elif args.action == "dashboard":
                         print(f"✅ {result.data['message']}")
+                        print_first_validation_command(result.data)
+                    elif args.action == "closeout" and args.closeout_action == "doctor":
+                        doctor = result.data.get("eval_closeout_doctor", {})
+                        print(f"Eval closeout doctor: {doctor.get('status')}")
+                        print(f"Path: {doctor.get('path')}")
+                        validation = doctor.get("closeout_validation") or {}
+                        print(f"Validation: {validation.get('status')}")
+                        missing_cases = doctor.get("missing_result_cases") or []
+                        if missing_cases:
+                            print(f"Missing result cases: {', '.join(missing_cases)}")
+                        blockers = validation.get("blockers") or []
+                        if blockers:
+                            print(f"Blockers: {len(blockers)}")
                         print_first_validation_command(result.data)
                 elif args.topic == "mcp" and args.action == "sync":
                     if result.data.get("dry_run"):
@@ -1728,15 +1765,19 @@ def main():
                                     print("\n🔎 Family benchmark error:")
                                     print(f"   {line}")
                                     break
-                    if "diagnostics" in result.data: print(result.data["diagnostics"]["stdout"])
-                    if "security_gate" in result.data: print(result.data["security_gate"]["stdout"])
+                    if "diagnostics" in result.data:
+                        print(result.data["diagnostics"]["stdout"])
+                    if "security_gate" in result.data:
+                        print(result.data["security_gate"]["stdout"])
                     print("\n📚 Audit examples:")
                     print("   ask skills audit backend-platform/cli-spec --level compat")
                     print("   ask skills audit backend-platform/cli-spec --level strict")
                     print("   ask skills audit Plugins/skill-factory/skills/code_quality_review/skill-builder --level strict")
                 elif args.action in ("install", "fold", "init"):
-                    if "raw_output" in result.data: print(result.data["raw_output"])
-                    if "raw_error" in result.data: print(result.data["raw_error"])
+                    if "raw_output" in result.data:
+                        print(result.data["raw_output"])
+                    if "raw_error" in result.data:
+                        print(result.data["raw_error"])
                     if args.action in {"fold", "init"}:
                         print_first_validation_command(result.data)
                     if args.action == "init":
@@ -1755,8 +1796,10 @@ def main():
                 "prune-stale-config",
                 "uninstall",
             ):
-                if "raw_output" in result.data: print(result.data["raw_output"])
-                if "raw_error" in result.data: print(result.data["raw_error"])
+                if "raw_output" in result.data:
+                    print(result.data["raw_output"])
+                if "raw_error" in result.data:
+                    print(result.data["raw_error"])
                 print_first_validation_command(result.data)
                 if "command_runs" in result.data:
                     print("\n🔧 Command execution details:")
@@ -1780,8 +1823,10 @@ def main():
             elif args.topic == "reviewers":
                 print_first_validation_command(result.data)
             elif args.topic == "evals":
-                if "raw_output" in result.data: print(result.data["raw_output"])
-                if "raw_error" in result.data: print(result.data["raw_error"])
+                if "raw_output" in result.data:
+                    print(result.data["raw_output"])
+                if "raw_error" in result.data:
+                    print(result.data["raw_error"])
                 print_first_validation_command(result.data)
                 print("\n📚 Eval examples:\n   ask evals run backend/cli-spec --mode smoke\n   ask evals run backend/cli-spec --mode release")
             elif args.topic == "graph":
@@ -1789,9 +1834,11 @@ def main():
                 print("\n📚 Graph examples:\n   ask graph find security\n   ask graph related skill-builder --depth 2\n   ask graph chain skill-creator skill-installer\n   ask graph info cli-spec")
             elif args.topic == "repo":
                 print_first_validation_command(result.data)
-                if args.action == "validate": print(result.data.get("raw_output", ""))
+                if args.action == "validate":
+                    print(result.data.get("raw_output", ""))
                 if args.action == "check-stability" and "errors" in result.data:
-                    for e in result.data["errors"]: print(f"   ERROR: {e}")
+                    for e in result.data["errors"]:
+                        print(f"   ERROR: {e}")
                 if args.action == "doctor" and "doctor" in result.data:
                     for line in render_golden_path_summary(result.data["doctor"], indent="   "):
                         print(line)

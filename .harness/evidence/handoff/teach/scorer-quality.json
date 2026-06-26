@@ -1,0 +1,203 @@
+{
+  "status": "success",
+  "trace_id": "447c1c32-5bab-4686-9933-fa432772113c",
+  "metadata": {
+    "version": "0.1.0",
+    "command": "sdk eval scorer-quality Skills/github/teach --preview --json --robot",
+    "next_steps": [],
+    "correction_note": null
+  },
+  "data": {
+    "skills_sdk_eval_scorer_quality": {
+      "schema_version": "skills-sdk-eval-scorer-quality.v0",
+      "status": "preview",
+      "query": "Skills/github/teach",
+      "canonical_source_path": "Skills/github/teach/SKILL.md",
+      "facade_command": "skills-sdk eval scorer-quality",
+      "receipt": {
+        "schema_version": "skills-sdk.scorer-quality-receipt.v0",
+        "schema_uri": "https://agent-skills.local/schemas/skills-sdk/scorer-quality-receipt.v0.schema.json",
+        "status": "preview",
+        "operation": "scorer_quality_preview",
+        "query": "Skills/github/teach",
+        "skill_path": "Skills/github/teach/SKILL.md",
+        "evals_path": "Skills/github/teach/references/evals.yaml",
+        "ready": true,
+        "quality_checks": [
+          {
+            "id": "evals_yaml_present",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Skill must carry references/evals.yaml.",
+            "evidence": [
+              "Skills/github/teach/references/evals.yaml"
+            ]
+          },
+          {
+            "id": "evals_yaml_parse",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "references/evals.yaml must parse as YAML object.",
+            "evidence": []
+          },
+          {
+            "id": "scorer_quality_declared",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "references/evals.yaml must declare scorer_quality before score trends are trusted.",
+            "evidence": [
+              "Skills/github/teach/references/evals.yaml"
+            ]
+          },
+          {
+            "id": "scorer_quality_contract_valid",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "scorer_quality metadata satisfies the strict Pydantic contract.",
+            "evidence": []
+          },
+          {
+            "id": "scorer_id_present",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "scorer_quality must declare a stable scorer_id.",
+            "evidence": [
+              "scorer_id"
+            ]
+          },
+          {
+            "id": "scorer_type_allowed",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "scorer_type must be deterministic, llm_judge, hybrid, or external_tessl.",
+            "evidence": [
+              "external_tessl"
+            ]
+          },
+          {
+            "id": "scorer_scope_allowed",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "scope must be span, trace, or suite.",
+            "evidence": [
+              "suite"
+            ]
+          },
+          {
+            "id": "scorer_version_or_digest_present",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Scorer prompt or code must carry a version or digest.",
+            "evidence": [
+              "scorer_version_or_digest"
+            ]
+          },
+          {
+            "id": "pass_threshold_valid",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "pass_threshold must be a number between 0 and 1.",
+            "evidence": [
+              "0.9"
+            ]
+          },
+          {
+            "id": "deterministic_checks_first",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Scorer quality must prefer deterministic checks before LLM judges.",
+            "evidence": [
+              "deterministic_checks_first"
+            ]
+          },
+          {
+            "id": "calibration_cases_present",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Scorer quality must include calibration cases.",
+            "evidence": [
+              "Skills/github/teach/references/evals.yaml"
+            ]
+          },
+          {
+            "id": "calibration_probe_coverage",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Calibration must include obvious, bias, rubric-copying, skill-name, and evidence-lane probes.",
+            "evidence": []
+          },
+          {
+            "id": "calibration_expected_outcomes",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Every calibration case must declare expected_score, expected_label, or expected_direction.",
+            "evidence": []
+          },
+          {
+            "id": "verbosity_bias_probe_present",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Calibration must test verbosity bias explicitly.",
+            "evidence": [
+              "teach-cal-pass-mission-first",
+              "teach-cal-fail-syllabus-before-mission",
+              "teach-cal-short-correct-vs-verbose-wrong",
+              "teach-cal-fail-rubric-copying",
+              "teach-cal-fail-skill-name-only",
+              "teach-cal-fail-evidence-overclaim"
+            ]
+          },
+          {
+            "id": "segmentation_fields_present",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Scorer receipts must support segmented analysis by category, claim_ids, and eval_modes.",
+            "evidence": []
+          },
+          {
+            "id": "rationale_audit_required",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "LLM or external judge scorers must require rationale review before score trends are trusted.",
+            "evidence": []
+          },
+          {
+            "id": "rationale_audit_sampled",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Rationale audit must sample at least 3 judge decisions.",
+            "evidence": []
+          },
+          {
+            "id": "judge_parameters_versioned",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "LLM or external judge scorers must record model, temperature, and trial count parameters.",
+            "evidence": []
+          }
+        ],
+        "blockers": [],
+        "mutation_performed": false,
+        "promotion_performed": false,
+        "acceptance_trace": [
+          "Braintrust scorer validation",
+          "PU-030",
+          "VP-030"
+        ],
+        "agent_summary": "scorer quality preview checked scorer calibration for Skills/github/teach."
+      },
+      "ready": true,
+      "blocked_count": 0,
+      "mutation_performed": false,
+      "promotion_performed": false,
+      "validation_commands": [
+        "./bin/ask sdk eval scorer-quality Skills/github/teach --preview --json --robot"
+      ],
+      "agent_summary": "scorer quality preview checked scorer calibration for Skills/github/teach."
+    }
+  },
+  "telemetry": {
+    "latency_ms": 11
+  },
+  "errors": []
+}

@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agent-skills.local/schemas/skills-sdk/pipeline-start.v1.schema.json",
+  "title": "Skills SDK pipeline start receipt",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "schema_uri",
+    "status",
+    "target",
+    "target_class",
+    "current_lane",
+    "lanes",
+    "next_action",
+    "blocked_downstream_lanes",
+    "what_this_proves",
+    "what_this_does_not_prove"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "skills-sdk.pipeline-start.v1"
+    },
+    "schema_uri": {
+      "const": "https://agent-skills.local/schemas/skills-sdk/pipeline-start.v1.schema.json"
+    },
+    "status": {
+      "enum": ["pass", "blocked"]
+    },
+    "target": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_class": {
+      "enum": [
+        "global_skill",
+        "project_local_skill",
+        "plugin_owned_skill",
+        "runtime_projection",
+        "unknown"
+      ]
+    },
+    "current_lane": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lanes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "status"],
+        "oneOf": [
+          { "required": ["command"] },
+          { "required": ["commands"] }
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "type": "string",
+            "minLength": 1
+          },
+          "command": {
+            "type": "string",
+            "minLength": 1
+          },
+          "commands": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "proves": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "next_action": {
+      "type": "object",
+      "required": ["lane", "command", "why"],
+      "properties": {
+        "lane": {
+          "type": "string",
+          "minLength": 1
+        },
+        "command": {
+          "type": "string",
+          "minLength": 1
+        },
+        "why": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "blocked_downstream_lanes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "target_info": {
+      "type": "object"
+    },
+    "source_ownership": {
+      "type": "object"
+    },
+    "project_context": {
+      "type": "object"
+    },
+    "validation_commands": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "what_this_proves": {
+      "type": "string",
+      "minLength": 1
+    },
+    "what_this_does_not_prove": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false
+}
