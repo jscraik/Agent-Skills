@@ -385,6 +385,23 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
         payload = result.data["skills_sdk_eval_run"]
         self.assertEqual(result.status, "success")
         self.assertIn("--codex-profile oss-cloud", payload["validation_commands"][0])
+        self.assertEqual(payload["receipt"]["lane"], "oss-cloud")
+        self.assertEqual(payload["receipt"]["profile"], "oss-cloud")
+
+    def test_sdk_internal_runner_keeps_runtime_profile_out_of_lane_id(self) -> None:
+        with mock.patch("ask.commands.evals.run_evals", return_value=_successful_internal_result()):
+            result = skills_sdk_eval_run(
+                REPO_ROOT,
+                target="Skills/agent-ops/testing",
+                mode="smoke",
+                runner="internal",
+                codex_profile="fast",
+            )
+
+        payload = result.data["skills_sdk_eval_run"]
+        self.assertEqual(result.status, "success")
+        self.assertEqual(payload["receipt"]["lane"], "oss-local")
+        self.assertEqual(payload["receipt"]["profile"], "fast")
 
     def test_sdk_internal_runner_passes_timeout_override(self) -> None:
         with mock.patch("ask.commands.evals.run_evals", return_value=_successful_internal_result()) as run:
@@ -411,6 +428,24 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
         payload = result.data["skills_sdk_eval_run"]
         self.assertEqual(result.status, "success")
         self.assertIn("--timeout-seconds 45", payload["validation_commands"][0])
+
+    def test_sdk_internal_runner_replay_command_includes_case_filters(self) -> None:
+        with mock.patch("ask.commands.evals.run_evals", return_value=_successful_internal_result()) as run:
+            result = skills_sdk_eval_run(
+                REPO_ROOT,
+                target="Skills/agent-ops/testing",
+                mode="smoke",
+                runner="internal",
+                codex_profile="oss-local",
+                cases=["happy-path", "edge-case"],
+            )
+
+        run.assert_called_once()
+        self.assertEqual(run.call_args.kwargs["cases"], ["happy-path", "edge-case"])
+        payload = result.data["skills_sdk_eval_run"]
+        command = payload["validation_commands"][0]
+        self.assertIn("--case happy-path", command)
+        self.assertIn("--case edge-case", command)
 
     def test_sdk_internal_runner_binds_scorecard_case_counts_to_receipt(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

@@ -21,13 +21,6 @@ LEGACY_SHAPE_DEBT = {
         "reason": "pre-existing eval command extraction debt",
         "expires": "2026-07-31",
     },
-    "Infrastructure/tests/test_ask_evals_command.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing eval command regression suite debt",
-        "expires": "2026-07-31",
-    },
     "Plugins/skill-factory/scripts/skill-builder/run_skill_evals.py": {
         "owner": "skill-factory",
         "rule_id": "ask-cli-shape-budget",
@@ -112,20 +105,6 @@ LEGACY_SHAPE_DEBT = {
         "reason": "pre-existing SDK artifact regression suite debt",
         "expires": "2026-07-31",
     },
-    "Infrastructure/tests/test_skills_sdk_handoff_readiness.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing handoff readiness regression suite debt",
-        "expires": "2026-07-31",
-    },
-    "Infrastructure/tests/test_skills_sdk_project_improve.py": {
-        "owner": "skills-sdk",
-        "rule_id": "ask-cli-shape-budget",
-        "ticket": "JSC-SDK-SPINE",
-        "reason": "pre-existing project improve regression suite debt",
-        "expires": "2026-07-31",
-    },
     "Infrastructure/tests/test_skills_sdk_scenario_quality.py": {
         "owner": "skills-sdk",
         "rule_id": "ask-cli-shape-budget",
@@ -148,9 +127,6 @@ LEGACY_SHAPE_DEBT = {
         "expires": "2026-07-31",
     },
 }
-LEGACY_SHAPE_DEBT_PATHS = frozenset(LEGACY_SHAPE_DEBT)
-
-
 def parse_args() -> argparse.Namespace:
     """
     Create and parse command-line arguments for verifying the ask CLI modularity.
@@ -285,13 +261,12 @@ def _changed_python_paths(paths: tuple[str, ...]) -> list[Path]:
 
 
 def _check_file_size(path: Path, current: str, baseline: str | None, args: argparse.Namespace, issues: list[str]) -> None:
+    relpath = path.relative_to(REPO_ROOT).as_posix()
     line_count = len(current.splitlines())
-    baseline_count = len(baseline.splitlines()) if baseline is not None else 0
+    if baseline is not None:
+        return
     if line_count <= args.max_file_lines:
         return
-    if baseline is not None and line_count <= baseline_count:
-        return
-    relpath = path.relative_to(REPO_ROOT).as_posix()
     issues.append(f"{relpath} exceeds file line budget ({line_count} > {args.max_file_lines})")
 
 
@@ -311,9 +286,6 @@ def _check_python_shape(args: argparse.Namespace) -> list[str]:
     issues: list[str] = []
     issues.extend(_check_legacy_shape_debt_metadata())
     for path in _changed_python_paths(tuple(args.changed_files)):
-        relpath = path.relative_to(REPO_ROOT).as_posix()
-        if relpath in LEGACY_SHAPE_DEBT_PATHS:
-            continue
         current = path.read_text(encoding="utf-8")
         baseline = _git_head_text(path)
         _check_file_size(path, current, baseline, args, issues)

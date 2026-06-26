@@ -244,7 +244,7 @@ def _parse_list_item(item: str) -> Any:
     if ":" not in item:
         return _parse_scalar(item)
     first_key = item.split(":", 1)[0].strip().strip("{}")
-    if first_key not in {"type", "value", "id", "name", "status"}:
+    if first_key not in {"type", "value", "values", "field", "fields", "key", "path", "id", "name", "status"}:
         return _parse_scalar(item)
     result: dict[str, Any] = {}
     for part in item.split(","):
@@ -339,8 +339,16 @@ def _text_field_assertion_malformed(item: dict[str, Any], assertion_type: str) -
     fields = item.get("fields")
     has_field = isinstance(field, str) and bool(field.strip())
     has_fields = isinstance(fields, list) and any(isinstance(value, str) and value.strip() for value in fields)
-    has_expected = assertion_type in {"text_field_present", "text_field_absent"} or "value" in item or "values" in item
+    has_expected = assertion_type in {"text_field_present", "text_field_absent"} or _has_text_field_expected_value(item)
     return not (has_field or has_fields) or not has_expected
+
+
+def _has_text_field_expected_value(item: dict[str, Any]) -> bool:
+    value = item.get("value")
+    if isinstance(value, str) and value.strip():
+        return True
+    values = item.get("values")
+    return isinstance(values, list) and any(isinstance(value, str) and value.strip() for value in values)
 
 
 def _regex_structured_field_refs(item: dict[str, Any], assertion_type: str, marker: str) -> list[str]:

@@ -39,6 +39,17 @@ def _load_validator_module() -> object:
     return module
 
 
+def _assert_partial_probe_and_recovery(testcase: unittest.TestCase, repo_root: Path, summary: dict, card: dict) -> None:
+    probe = json.loads((repo_root / summary["probe_artifact_path"]).read_text(encoding="utf-8"))
+    testcase.assertEqual(probe["proof"]["status"], "partial")
+    testcase.assertEqual(probe["proof"]["structural_status"], "pass")
+    testcase.assertEqual(probe["proof"]["live_proof_status"], "partial")
+    recovery_plan = card["recovery_plan"]
+    testcase.assertEqual(recovery_plan["recovery_status"], "partial")
+    testcase.assertTrue(any("telemetry" in item for item in recovery_plan["preconditions"]))
+    testcase.assertIn("skill invocation counters", recovery_plan["next_commands"][0]["preconditions"][2])
+
+
 class TestRuntimeProofValidation(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -373,7 +384,6 @@ class TestRuntimeProofValidation(unittest.TestCase):
                 codex_sessions_root=sessions_root,
                 agents_otel_stats_path=stats_path,
             )
-
             self.assertEqual(summary["runtime_session_status"], "observed")
             self.assertEqual(summary["observability_status"], "observed")
             self.assertEqual(summary["status"], "partial")
@@ -402,6 +412,7 @@ class TestRuntimeProofValidation(unittest.TestCase):
                 )
             )
             self.assertEqual(card["limitations"][0]["class"], "skill_invocation_not_asserted")
+            _assert_partial_probe_and_recovery(self, repo_root, summary, card)
             process = self.run_validator(
                 str(repo_root / summary["runtime_card_path"]),
                 "--require-shared-workspace",

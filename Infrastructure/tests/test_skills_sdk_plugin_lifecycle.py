@@ -13,6 +13,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
 from ask.commands.skills_impl import (  # noqa: E402
+    skills_sdk_plugin_install,
     skills_sdk_plugin_create,
     skills_sdk_plugin_save_registry,
 )
@@ -177,6 +178,90 @@ class TestSkillsSdkPluginLifecycle(unittest.TestCase):
             self.assertFalse(payload["remote_publish_performed"])
             self.assertEqual(marketplace["plugins"][0]["name"], "demo-plugin")
             self.assertEqual(marketplace["plugins"][0]["source"]["path"], "./Plugins/third-party/demo-plugin")
+
+    def test_save_registry_apply_blocks_missing_plugin_target_without_writing(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+
+            result = skills_sdk_plugin_save_registry(
+                repo_root,
+                kind="plugin",
+                target="Plugins/third-party/typo",
+                registry="Plugins/marketplace.json",
+                apply=True,
+            )
+
+            payload = result.data["skills_sdk_plugin_save_registry"]
+            self.assertEqual(result.status, "error")
+            self.assertEqual(payload["status"], "blocked")
+            self.assertFalse(payload["mutation_performed"])
+            self.assertIsNone(payload["receipt"])
+            self.assertFalse((repo_root / "Plugins/marketplace.json").exists())
+            self.assertIn("does not exist", result.errors[0].message)
+
+    def test_save_registry_apply_blocks_plugin_target_outside_repo(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir) / "repo"
+            outside_root = Path(temp_dir) / "outside-plugin"
+            repo_root.mkdir()
+            outside_root.mkdir()
+
+            result = skills_sdk_plugin_save_registry(
+                repo_root,
+                kind="plugin",
+                target=str(outside_root),
+                registry="Plugins/marketplace.json",
+                apply=True,
+            )
+
+            payload = result.data["skills_sdk_plugin_save_registry"]
+            self.assertEqual(result.status, "error")
+            self.assertEqual(payload["status"], "blocked")
+            self.assertFalse(payload["mutation_performed"])
+            self.assertIn("must stay inside the repository", result.errors[0].message)
+
+    def test_plugin_install_validation_command_records_full_plugin_inputs(self) -> None:
+        result = skills_sdk_plugin_install(
+            REPO_ROOT,
+            kind="plugin",
+            url="https://example.com/plugin.git",
+            name="demo-plugin",
+            ref="v1.2.3",
+            dest="Plugins/vendor",
+            validation_level="strict",
+            allow_untrusted_source=True,
+            allow_unpinned_ref=True,
+            sync_profile=True,
+            require_desktop_loadable=True,
+            apply=False,
+        )
+
+        command = result.data["skills_sdk_plugin_install"]["validation_commands"][0]
+        self.assertIn("--url https://example.com/plugin.git", command)
+        self.assertIn("--name demo-plugin", command)
+        self.assertIn("--ref v1.2.3", command)
+        self.assertIn("--dest Plugins/vendor", command)
+        self.assertIn("--validation-level strict", command)
+        self.assertIn("--allow-untrusted-source", command)
+        self.assertIn("--allow-unpinned-ref", command)
+        self.assertIn("--sync-profile", command)
+        self.assertIn("--require-desktop-loadable", command)
+
+    def test_skill_install_validation_command_records_target_inputs(self) -> None:
+        result = skills_sdk_plugin_install(
+            REPO_ROOT,
+            kind="skill",
+            target="Skills/agent-ops/testing",
+            project_root="/tmp/example-project",
+            scope="user",
+            apply=False,
+        )
+
+        command = result.data["skills_sdk_plugin_install"]["validation_commands"][0]
+        self.assertIn("--target Skills/agent-ops/testing", command)
+        self.assertIn("--project-root /tmp/example-project", command)
+        self.assertIn("--scope user", command)
+        self.assertIn("--preview", command)
 
 
 if __name__ == "__main__":

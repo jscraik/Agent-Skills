@@ -765,6 +765,7 @@ class TestHtmlDoctrineCards(unittest.TestCase):
         "Token Efficiency",
         "Cognitive Complexity Budget",
         "Agent Experience",
+        "Self Improving",
     ]
 
     def setUp(self):
@@ -779,7 +780,8 @@ class TestHtmlDoctrineCards(unittest.TestCase):
 
     def test_doctrine_card_count_is_nine(self):
         count = self._raw.count('class="doctrine-card"')
-        self.assertEqual(count, 9, f"Expected 9 doctrine-card elements, found {count}")
+        expected_count = len(self.EXPECTED_CARD_TITLES)
+        self.assertEqual(count, expected_count, f"Expected {expected_count} doctrine-card elements, found {count}")
 
     def test_mantra_text_present(self):
         """The mantra should match the AX doctrine tagline."""

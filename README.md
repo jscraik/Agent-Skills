@@ -73,7 +73,7 @@ That path answers:
 | Reader job              | Start here                                                    | Why                                                                                                     |
 | ----------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 | Check repo health       | `./bin/ask repo doctor --json --robot`                        | Combines repo status, catalog parity, runtime budget, SDK projection metadata, and surface diagnostics. |
-| Start an SDK skill lane | `./bin/ask sdk start <skill-or-goal> --json --robot`          | Classifies the target and returns the required mechanical-validation next action.                        |
+| Start an SDK skill lane | `./bin/ask sdk start <skill-or-goal> --json --robot`          | Classifies the target and returns the required mechanical-validation next action.                       |
 | Find a skill for a task | `./bin/ask skills improve "<goal>" --json --robot`            | Routes the goal to one capability and returns the next useful command.                                  |
 | Understand a skill      | `./bin/ask skills explain <handle> --json --robot`            | Resolves the handle to source, usage, limits, and proof.                                                |
 | Prove a skill           | `./bin/ask skills prove <handle> --json --robot`              | Reports reachability, quality, analytics, and outcome-proof state without merging those lanes.          |
@@ -168,11 +168,8 @@ For one skill, use the quality ladder from
 [Validation and Checks](Docs/agents/04-validation.md):
 
 ```bash
-./bin/ask sdk start <skill-path> --project-root /path/to/project --json --robot
 ./bin/ask skills audit <skill-path> --level strict --json --robot
-./bin/ask skills package verify <skill-path> --json --robot
-./bin/ask sdk eval scenario-quality <skill-path> --preview --json --robot
-./bin/ask sdk eval run <skill-path> --mode smoke --json --robot
+./bin/ask evals run <skill-path> --mode smoke --json --robot
 ./bin/plugin-eval analyze <skill-path> --format json
 ./bin/ask skills external-review <skill-path> --json --robot
 ```

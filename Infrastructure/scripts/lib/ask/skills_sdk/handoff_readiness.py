@@ -210,9 +210,10 @@ def _lane_receipt_semantics_check(repo_root: Path, lane_id: str, lane: dict[str,
     status = (_receipt_status(payload) or "missing_status").strip().lower()
     profile_check = _lane_profile_semantics(lane_id, lane, payload)
     evidence = _lane_semantics_evidence(repo_root, receipt_path, status, profile_check)
+    passing_statuses = {"pass", "success", "scored"}
     return _check(
         "lane_receipt_semantics_valid",
-        "pass" if status in {"pass", "success", "scored", "preview"} and profile_check["ok"] else "blocker",
+        "pass" if status in passing_statuses and profile_check["ok"] else "blocker",
         "Passed lane receipts must prove the lane status and profile they are standing in for.",
         evidence,
     )

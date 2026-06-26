@@ -63,6 +63,14 @@ def _completed_eval_with_report(tmp_path: Path, skill_name: str = "example-skill
     )
 
 
+def _assert_plugin_shaped_stage(staged_source: Path, skill_name: str) -> Path:
+    staged_skill = staged_source / "skills" / skill_name
+    assert not (staged_source / "references").exists()
+    assert not (staged_source / "assets").exists()
+    assert not (staged_source / "SKILL.md").exists()
+    return staged_skill
+
+
 def test_tessl_run_id_parser_handles_prefixed_json() -> None:
     payload = 'tessl output\n{"id": "019e7ab3-fda5-7071-8e47-9ea75386d53b"}'
 
@@ -1513,10 +1521,9 @@ def test_evals_live_private_dry_run_stages_private_plugin_shape(tmp_path: Path) 
     descriptions = [item["description"] for item in criteria["checklist"]]
     assert "(?is)(example|task)" in descriptions
     assert "Preserves package shape and proves the skill-specific eval can be scored." in descriptions
-    assert (staged_source / "references" / "runtime-boundary.md").read_text(encoding="utf-8") == (
-        "Runtime boundary details.\n"
-    )
-    assert (staged_source / "assets" / "example.png").read_bytes() == b"png"
+    staged_skill = _assert_plugin_shaped_stage(staged_source, "example-skill")
+    assert (staged_skill / "references" / "runtime-boundary.md").read_text(encoding="utf-8") == "Runtime boundary details.\n"
+    assert (staged_skill / "assets" / "example.png").read_bytes() == b"png"
     assert (staged_source / "tessl.json").exists()
     assert not (staged_source / "secret-not-staged.txt").exists()
 
@@ -1655,7 +1662,7 @@ def test_tessl_live_private_stages_generated_fixture_scenarios(tmp_path: Path) -
     assert manifest["generated_fixture_cases"] == 1
     assert manifest["structure_only_exception"] is True
     assert "scenario-sources.json" in copied
-    assert "references/evals/eval.arch.boundary-proof.md" in copied
+    assert "skills/example-skill/references/evals/eval.arch.boundary-proof.md" in copied
     generated_case = staged_source / "evals" / "generated-eval.arch.boundary-proof" / "task.md"
     assert generated_case.exists()
     generated_task = generated_case.read_text(encoding="utf-8")

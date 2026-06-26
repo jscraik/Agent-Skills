@@ -31,7 +31,7 @@ Use difficulty carefully. For knowledge acquisition, difficulty is usually the e
 
 ## Lesson Contract
 
-A lesson is the primary unit of teaching. It should be a single self-contained HTML file under lessons/ named with the next sequence number, for example lessons/0001-topic-name.html.
+A lesson is the primary unit of teaching. It should be a single HTML file under lessons/ named with the next sequence number, for example lessons/0001-topic-name.html. It may link repo-local shared assets under assets/ when those assets make the lesson clearer or more reusable.
 
 Every lesson should:
 

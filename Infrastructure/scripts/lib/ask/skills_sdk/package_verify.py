@@ -556,10 +556,19 @@ def _quality_blockers(quality: dict[str, dict[str, Any]]) -> list[dict[str, Any]
     )
     blockers: list[dict[str, Any]] = []
     for name, rule_id, message in specs:
-        blockers_for_quality = quality[name].get("blockers", [])
+        quality_value = quality[name]
+        blockers_for_quality = _normalized_quality_blockers(quality_value)
         if blockers_for_quality:
-            blockers.append(_quality_blocker(rule_id, message, quality[name], blockers_for_quality))
+            blockers.append(_quality_blocker(rule_id, message, quality_value, blockers_for_quality))
     return blockers
+
+
+def _normalized_quality_blockers(quality: dict[str, Any]) -> list[dict[str, Any]]:
+    raw_blockers = quality.get("blockers", [])
+    blockers = raw_blockers if isinstance(raw_blockers, list) else []
+    if quality.get("status") == "blocked_validation" and not blockers:
+        return [{"rule_id": "blocked_validation"}]
+    return [blocker for blocker in blockers if isinstance(blocker, dict)]
 
 
 def _quality_blocker(
@@ -675,11 +684,11 @@ def _skill_directory_checks(
 def _quality_checks(quality: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
     checks: list[dict[str, Any]] = []
     for name, value in quality.items():
-        blockers = value.get("blockers", [])
+        blockers = _normalized_quality_blockers(value)
         checks.append(
             _check(
                 name,
-                "fail" if blockers else "pass",
+                "fail" if value.get("status") == "blocked_validation" or blockers else "pass",
                 {"status": value.get("status"), "blockers": blockers},
             )
         )

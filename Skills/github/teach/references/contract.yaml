@@ -85,7 +85,9 @@
     "references/glossary-format.md"
   ],
   "source_operating_model_references": [
-    "references/teaching-operating-model.md"
+    "references/teaching-operating-model.md",
+    "references/knowledge-capsule-routing.md",
+    "references/knowledge-capsule.manifest.yaml"
   ],
   "evals": {
     "smoke": [

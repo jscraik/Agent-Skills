@@ -12,8 +12,11 @@ sys.path.append(str(Path(__file__).resolve().parents[1] / "scripts" / "lib"))
 from ask.cli_errors import build_helpful_error, build_unknown_action_result
 from ask.command_metadata import VALID_ACTIONS
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
 
 def _run_cli(cmd: list[str], **kwargs):
+    kwargs.setdefault("cwd", REPO_ROOT)
     return subprocess.run(cmd, capture_output=True, text=True, timeout=30, **kwargs)
 
 
@@ -44,6 +47,32 @@ def _assert_contract_ready(testcase: unittest.TestCase, payload: dict) -> None:
     testcase.assertFalse(payload["has_contract_gaps"])
     testcase.assertEqual(payload["contract_status"], "ready")
     testcase.assertTrue(payload["contract_ready"])
+
+
+def _write_pass_closeout(tmp: str) -> Path:
+    case_dir = Path(tmp) / "01-edge-case"
+    case_dir.mkdir()
+    (case_dir / "result.json").write_text('{"id":"edge-case","status":"pass"}\n', encoding="utf-8")
+    closeout_path = Path(tmp) / "workflow-closeout.json"
+    closeout_path.write_text(
+        json.dumps(
+            {
+                "schema_version": "skills-sdk.eval-closeout.v1",
+                "status": "pass",
+                "skill_path": "Skills/example-skill",
+                "mode": "smoke",
+                "runner": "codex",
+                "blocker_class": None,
+                "report_dir": str(Path(tmp)),
+                "cases": [{"id": "edge-case", "status": "pass", "result_path": str(case_dir)}],
+                "mutation_allowed": False,
+                "registry_update_allowed": False,
+                "next_reproduce_command": "./bin/ask evals run Skills/example-skill --mode smoke --json --robot",
+            }
+        ),
+        encoding="utf-8",
+    )
+    return closeout_path
 
 
 class TestAskCLI(unittest.TestCase):
@@ -1163,7 +1192,7 @@ class TestAskCLI(unittest.TestCase):
 
     def test_skills_explain_rejects_unreadable_source_file(self):
         """Verify explain rejects source files that cannot be read."""
-        lib_path = str(Path.cwd() / "Infrastructure" / "scripts" / "lib")
+        lib_path = str(REPO_ROOT / "Infrastructure" / "scripts" / "lib")
         sys.path.insert(0, lib_path)
         try:
             from ask.commands import skills as skills_commands
@@ -1182,7 +1211,7 @@ class TestAskCLI(unittest.TestCase):
                 "_skill_sections",
                 side_effect=PermissionError("permission denied"),
             ):
-                result = skills_commands.explain_skill(Path.cwd(), "autofix")
+                result = skills_commands.explain_skill(REPO_ROOT, "autofix")
         finally:
             sys.path.remove(lib_path)
 
@@ -3394,6 +3423,26 @@ class TestAskCLI(unittest.TestCase):
         self.assertIn("missing action for topic 'evals'", result.stdout)
         self.assertIn("Validation: ./bin/ask evals dashboard --json --robot", result.stdout)
 
+    def test_evals_closeout_doctor_human_output_renders_result(self):
+        """Verify evals closeout doctor prints its non-JSON result."""
+        with tempfile.TemporaryDirectory() as tmp:
+            closeout_path = _write_pass_closeout(tmp)
+            cmd = [
+                "python3",
+                "Infrastructure/bin/ask",
+                "evals",
+                "closeout",
+                "doctor",
+                str(closeout_path),
+                "--robot",
+            ]
+            result = _run_cli(cmd, cwd=REPO_ROOT)
+
+        self.assertEqual(result.returncode, 0, f"closeout doctor output: {result.stdout}\nstderr: {result.stderr}")
+        self.assertIn("Eval closeout doctor: pass", result.stdout)
+        self.assertIn("Validation: pass", result.stdout)
+        self.assertIn("Validation: ./bin/ask evals closeout doctor", result.stdout)
+
     def test_mcp_sync_dry_run_json_contract_exposes_validation(self):
         """Verify MCP sync dry-run exposes its replay command without writing config."""
         cmd = ["python3", "Infrastructure/bin/ask", "mcp", "sync", "--dry-run", "--json", "--robot"]
@@ -4752,13 +4801,13 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(output["data"]["plugin_eval"]["status"], "skipped")
         self.assertEqual(output["data"]["tessl_lint"]["status"], "skipped")
         self.assertEqual(output["data"]["policy"]["plugin_eval_min_acceptable_grade"], "B+")
-        self.assertEqual(output["data"]["policy"]["tessl_review_min_score"], 90)
+        self.assertEqual(output["data"]["policy"]["tessl_review_min_score"], 95)
         self.assertEqual(output["data"]["policy"]["tessl_review_target_score"], 95)
         self.assertEqual(output["data"]["policy"]["tessl_project_marker"], "tessl.json")
         self.assertIn("/tmp/ask-tessl-reviews", output["data"]["policy"]["tessl_staging_root"])
-        self.assertEqual(output["data"]["review_mode_details"]["tessl_review"]["minimum_score"], 90)
+        self.assertEqual(output["data"]["review_mode_details"]["tessl_review"]["minimum_score"], 95)
         self.assertEqual(output["data"]["review_mode_details"]["tessl_review"]["target_score"], 95)
-        self.assertIn("--threshold 90", output["data"]["review_mode_details"]["tessl_review"]["command"])
+        self.assertIn("--threshold 95", output["data"]["review_mode_details"]["tessl_review"]["command"])
         self.assertEqual(
             output["data"]["validation_commands"],
             [

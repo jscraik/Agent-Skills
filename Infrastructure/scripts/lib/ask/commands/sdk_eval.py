@@ -6,6 +6,7 @@ from pathlib import Path
 
 import ask.commands.skills as skills_commands
 from ask.cli_errors import build_unknown_action_result, build_validation_error
+from ask.commands.skills_impl import TESSL_REVIEW_MIN_SCORE
 from ask.envelope import CallResult
 
 
@@ -87,7 +88,7 @@ def _add_tessl_local_proof_parser(subparsers: argparse._SubParsersAction, global
     mode.add_argument("--preview", action="store_true", help="Emit a non-mutating local Tessl proof plan")
     mode.add_argument("--execute", action="store_true", help="Run temp-staged local Tessl lint, pack, and file install checks")
     proof.add_argument("--include-review", action="store_true", help="Also run Tessl async review threshold check")
-    proof.add_argument("--review-threshold", type=_positive_int, default=90)
+    proof.add_argument("--review-threshold", type=_positive_int, default=TESSL_REVIEW_MIN_SCORE)
     proof.add_argument("--timeout-seconds", type=_positive_int, default=180)
 
 

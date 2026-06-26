@@ -8,16 +8,16 @@ RESOURCES.md is the curated set of trusted sources for this topic. Knowledge for
 
     ## Knowledge
 
-    - [Book: _The Science and Practice of Strength Training_ - Zatsiorsky & Kraemer](https://example.com)
+    - [Sample placeholder book: _The Science and Practice of Strength Training_ - Zatsiorsky & Kraemer](<vetted-link>)
       Foundational text on programming and adaptation. Use for: anything to do with periodisation, recovery, intensity zones.
-    - [Article: "How Much Should I Train?" - Greg Nuckols (Stronger By Science)](https://example.com)
+    - [Sample placeholder article: "How Much Should I Train?" - Greg Nuckols (Stronger By Science)](<vetted-link>)
       Evidence-based review of volume landmarks. Use for: weekly set targets per muscle group.
 
     ## Wisdom (Communities)
 
-    - [r/weightroom](https://reddit.com/r/weightroom)
+    - [Sample placeholder community: r/weightroom](<vetted-community-link>)
       High-signal subreddit, moderated against weak claims. Use for: programme critique, plateau troubleshooting.
-    - Local: Tuesday strength class at {gym name}
+    - Sample placeholder local coaching: Tuesday strength class at {gym name}
       Use for: real-time coaching feedback on lifts.
 
 ## Rules

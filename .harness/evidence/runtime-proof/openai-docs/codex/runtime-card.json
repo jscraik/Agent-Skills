@@ -82,47 +82,16 @@
     "expected_outcome": "Operator can rerun the proof command and inspect schema-valid runtime evidence.",
     "next_commands": [
       {
-        "command": "./bin/ask skills sync --scope user --projection flat --dry-run --json --robot",
-        "expected_outcome": "Reports whether ~/.codex/skills or ~/.agents/skills would be relinked before mutation.",
-        "permission_profile": {
-          "filesystem": "read workspace and user runtime links",
-          "network": "not required"
-        },
-        "preconditions": [
-          "Workspace flat projection validates cleanly."
-        ]
-      },
-      {
-        "command": "./bin/ask skills sync --scope workspace --projection flat --json --robot",
-        "expected_outcome": "Refreshes .agents/skills from canonical frontmatter and skill sources.",
-        "permission_profile": {
-          "filesystem": "write workspace runtime projection",
-          "network": "not required"
-        },
-        "preconditions": [
-          "Canonical skill sources are ready to project."
-        ]
-      },
-      {
-        "command": "./bin/ask skills sync --scope user --projection flat --json --robot",
-        "expected_outcome": "Makes user-level Codex and Agents skill runtimes point at the workspace projection.",
-        "permission_profile": {
-          "filesystem": "write home-directory runtime links",
-          "network": "not required"
-        },
-        "preconditions": [
-          "Dry-run output is acceptable to the operator."
-        ]
-      },
-      {
         "command": "./bin/ask skills proof openai-docs --runtime-target codex --json --robot",
-        "expected_outcome": "Updates runtime evidence with pass or a narrower blocked_runtime reason.",
+        "expected_outcome": "RuntimeCard is updated from partial to implemented_enforced only after fresh live-session telemetry is observed.",
         "permission_profile": {
-          "filesystem": "read workspace and user runtime links; write runtime-proof evidence",
+          "filesystem": "read workspace evidence, Codex session logs, and observability stats",
           "network": "not required"
         },
         "preconditions": [
-          "User runtime link now points at the workspace projection."
+          "Open or reload a Codex session in this workspace.",
+          "Invoke or observe the openai-docs skill handle in that live session.",
+          "Confirm Codex session telemetry and skill invocation counters are fresh."
         ]
       }
     ],
@@ -131,7 +100,8 @@
       "network": "not required"
     },
     "preconditions": [
-      "Run workspace and user skill sync if the SDK skill handle or runtime link is absent."
+      "Projection links are already present; recover or recheck the live observability lane.",
+      "Do not use projection maintenance as the primary recovery step for missing invocation telemetry."
     ],
     "reason": "Restore healthy Codex observability or collect a fresh skill invocation event, then rerun the explicit runtime proof.",
     "recovery_status": "partial"
@@ -147,55 +117,21 @@
     "failed_gate": null,
     "recovery_commands": [
       {
-        "command": "./bin/ask skills sync --scope user --projection flat --dry-run --json --robot",
-        "expected_outcome": "Reports whether ~/.codex/skills or ~/.agents/skills would be relinked before mutation.",
-        "kind": "preview_user_runtime_sync",
-        "permission_profile": {
-          "filesystem": "read workspace and user runtime links",
-          "network": "not required"
-        },
-        "preconditions": [
-          "Workspace flat projection validates cleanly."
-        ]
-      },
-      {
-        "command": "./bin/ask skills sync --scope workspace --projection flat --json --robot",
-        "expected_outcome": "Refreshes .agents/skills from canonical frontmatter and skill sources.",
-        "kind": "refresh_workspace_projection",
-        "permission_profile": {
-          "filesystem": "write workspace runtime projection",
-          "network": "not required"
-        },
-        "preconditions": [
-          "Canonical skill sources are ready to project."
-        ]
-      },
-      {
-        "command": "./bin/ask skills sync --scope user --projection flat --json --robot",
-        "expected_outcome": "Makes user-level Codex and Agents skill runtimes point at the workspace projection.",
-        "kind": "apply_user_runtime_sync",
-        "permission_profile": {
-          "filesystem": "write home-directory runtime links",
-          "network": "not required"
-        },
-        "preconditions": [
-          "Dry-run output is acceptable to the operator."
-        ]
-      },
-      {
         "command": "./bin/ask skills proof openai-docs --runtime-target codex --json --robot",
-        "expected_outcome": "Updates runtime evidence with pass or a narrower blocked_runtime reason.",
+        "expected_outcome": "Updates runtime evidence only after fresh live-session telemetry or a narrower blocked_runtime reason is observed.",
         "kind": "rerun_runtime_proof",
         "permission_profile": {
-          "filesystem": "read workspace and user runtime links; write runtime-proof evidence",
+          "filesystem": "read workspace evidence, Codex session logs, and observability stats",
           "network": "not required"
         },
         "preconditions": [
-          "User runtime link now points at the workspace projection."
+          "Open or reload a Codex session in this workspace.",
+          "Invoke or observe the openai-docs skill handle in that live session.",
+          "Confirm Codex session telemetry and skill invocation counters are fresh."
         ]
       }
     ],
-    "recovery_risk": "User-scope sync mutates home-directory runtime links; preview with --dry-run before applying.",
+    "recovery_risk": "Projection links already resolve; the remaining blocker is missing live invocation telemetry.",
     "runtime_aliases": {
       "dedupe_identity": "${WORKSPACE_ROOT}/.agents/skills",
       "dedupe_rule": "Codex and Agents user skill roots are aliases when their resolved paths match.",
@@ -389,55 +325,21 @@
         "failed_gate": null,
         "recovery_commands": [
           {
-            "command": "./bin/ask skills sync --scope user --projection flat --dry-run --json --robot",
-            "expected_outcome": "Reports whether ~/.codex/skills or ~/.agents/skills would be relinked before mutation.",
-            "kind": "preview_user_runtime_sync",
-            "permission_profile": {
-              "filesystem": "read workspace and user runtime links",
-              "network": "not required"
-            },
-            "preconditions": [
-              "Workspace flat projection validates cleanly."
-            ]
-          },
-          {
-            "command": "./bin/ask skills sync --scope workspace --projection flat --json --robot",
-            "expected_outcome": "Refreshes .agents/skills from canonical frontmatter and skill sources.",
-            "kind": "refresh_workspace_projection",
-            "permission_profile": {
-              "filesystem": "write workspace runtime projection",
-              "network": "not required"
-            },
-            "preconditions": [
-              "Canonical skill sources are ready to project."
-            ]
-          },
-          {
-            "command": "./bin/ask skills sync --scope user --projection flat --json --robot",
-            "expected_outcome": "Makes user-level Codex and Agents skill runtimes point at the workspace projection.",
-            "kind": "apply_user_runtime_sync",
-            "permission_profile": {
-              "filesystem": "write home-directory runtime links",
-              "network": "not required"
-            },
-            "preconditions": [
-              "Dry-run output is acceptable to the operator."
-            ]
-          },
-          {
             "command": "./bin/ask skills proof openai-docs --runtime-target codex --json --robot",
-            "expected_outcome": "Updates runtime evidence with pass or a narrower blocked_runtime reason.",
+            "expected_outcome": "Updates runtime evidence only after fresh live-session telemetry or a narrower blocked_runtime reason is observed.",
             "kind": "rerun_runtime_proof",
             "permission_profile": {
-              "filesystem": "read workspace and user runtime links; write runtime-proof evidence",
+              "filesystem": "read workspace evidence, Codex session logs, and observability stats",
               "network": "not required"
             },
             "preconditions": [
-              "User runtime link now points at the workspace projection."
+              "Open or reload a Codex session in this workspace.",
+              "Invoke or observe the openai-docs skill handle in that live session.",
+              "Confirm Codex session telemetry and skill invocation counters are fresh."
             ]
           }
         ],
-        "recovery_risk": "User-scope sync mutates home-directory runtime links; preview with --dry-run before applying.",
+        "recovery_risk": "Projection links already resolve; the remaining blocker is missing live invocation telemetry.",
         "runtime_aliases": {
           "dedupe_identity": "${WORKSPACE_ROOT}/.agents/skills",
           "dedupe_rule": "Codex and Agents user skill roots are aliases when their resolved paths match.",

@@ -38,6 +38,7 @@
       "user_runtime_ready": true
     },
     "handle": "openai-docs",
+    "live_proof_status": "partial",
     "live_runtime_invocation": {
       "operator_action": "Open or reload a Codex session and verify the handle appears in the picker or can be invoked as a $ handle.",
       "runtime_satisfied_by": "codex_user_runtime",
@@ -143,7 +144,8 @@
     "runtime_satisfied_by": "codex_user_runtime",
     "runtime_target": "codex",
     "schema_version": "sdk-skill-proof.v1",
-    "status": "pass",
+    "status": "partial",
+    "structural_status": "pass",
     "user_runtime_links": {
       "agents_skills": {
         "dedupe_identity": "${WORKSPACE_ROOT}/.agents/skills",

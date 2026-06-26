@@ -1568,6 +1568,19 @@ def main():
                     elif args.action == "dashboard":
                         print(f"✅ {result.data['message']}")
                         print_first_validation_command(result.data)
+                    elif args.action == "closeout" and args.closeout_action == "doctor":
+                        doctor = result.data.get("eval_closeout_doctor", {})
+                        print(f"Eval closeout doctor: {doctor.get('status')}")
+                        print(f"Path: {doctor.get('path')}")
+                        validation = doctor.get("closeout_validation") or {}
+                        print(f"Validation: {validation.get('status')}")
+                        missing_cases = doctor.get("missing_result_cases") or []
+                        if missing_cases:
+                            print(f"Missing result cases: {', '.join(missing_cases)}")
+                        blockers = validation.get("blockers") or []
+                        if blockers:
+                            print(f"Blockers: {len(blockers)}")
+                        print_first_validation_command(result.data)
                 elif args.topic == "mcp" and args.action == "sync":
                     if result.data.get("dry_run"):
                         print(f"🔍 Dry run - would sync {result.data['server_count']} MCP server(s):")

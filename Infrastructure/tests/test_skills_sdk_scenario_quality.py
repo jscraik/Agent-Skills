@@ -265,6 +265,32 @@ cases:
         blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
         self.assertIn("typed_text_field_assertions_valid", blocker_ids)
 
+    def test_builder_blocks_typed_field_assertions_with_empty_values(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(
+                Path(temp_dir),
+                """schema_version: 1
+cases:
+- id: malformed-empty-values
+  eval_modes:
+  - smoke
+  prompt: Check structured output.
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: text_field_in
+    field: status
+    values: []
+""",
+            )
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
+        self.assertIn("typed_text_field_assertions_valid", blocker_ids)
+
     def test_builder_blocks_regex_against_known_structured_fields(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             skill_dir = _write_skill_with_evals(

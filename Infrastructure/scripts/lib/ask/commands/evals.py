@@ -36,6 +36,7 @@ TESSL_WORKSPACE_RUN_LIMIT_SOURCE = "operator_provided_limit"
 TESSL_WORKSPACE_RUN_RESERVE = 20
 TESSL_LIVE_PRIVATE_MIN_SCORE = 0.90
 TESSL_LIVE_PRIVATE_TARGET_SCORE = 0.95
+TESSL_LOCAL_REVIEW_MIN_SCORE = 95
 TESSL_LIVE_PRIVATE_VIEW_POLL_SECONDS = 10
 TESSL_LIVE_PRIVATE_VIEW_TIMEOUT_SECONDS = 900
 TESSL_PROJECT_LINK_TIMEOUT_SECONDS = 60
@@ -3241,15 +3242,6 @@ def _stage_tessl_live_private_source(
     copied.extend(_write_tessl_live_plugin_manifest(source_root, staged_root, workspace))
     copied.extend(_write_tessl_registry_readme(source_root, staged_root, workspace))
     copied.extend(_copy_tessl_live_skill_package(source_root, staged_root))
-    for relative_path in (
-        "SKILL.md",
-        "references/evals.yaml",
-        "references/contract.yaml",
-        "references/task-profile.json",
-    ):
-        copied.extend(_copy_if_present(source_root, relative_path, staged_root))
-    copied.extend(_copy_tree_files_if_present(source_root, "assets", staged_root))
-    copied.extend(_copy_tessl_live_reference_support_files(source_root, staged_root, set(copied)))
     copied.extend(_write_tessl_live_evals_from_references(source_root, staged_root))
     _validate_tessl_live_private_manifest(staged_root / ".tessl-plugin" / "plugin.json", workspace)
 
@@ -3365,7 +3357,7 @@ def run_tessl_local_proof(
     workspace: str,
     execute: bool = False,
     include_review: bool = False,
-    review_threshold: int = 90,
+    review_threshold: int = TESSL_LOCAL_REVIEW_MIN_SCORE,
     timeout_seconds: int = 180,
 ) -> dict[str, object]:
     """Stage a Tessl package and optionally run local lint, pack, file install, and review checks."""
@@ -4955,11 +4947,7 @@ def _eval_report_dir(
     scorecard_path = _scorecard_path_from_output(repo_root, raw_output)
     if scorecard_path is not None:
         return scorecard_path.parent
-    return _newest_report_dir_for_skill(
-        repo_root,
-        skill_name=_eval_skill_name_for_reports(skill_path),
-        started_at=started_at,
-    )
+    return None
 
 
 def _eval_closeout_status(eval_status: str, blocker_class: str | None) -> str:

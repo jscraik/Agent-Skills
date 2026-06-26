@@ -188,7 +188,7 @@ from ask.skill_review_dashboard import (  # noqa: E402
 )
 
 
-TESSL_REVIEW_MIN_SCORE = 90
+TESSL_REVIEW_MIN_SCORE = 95
 TESSL_REVIEW_TARGET_SCORE = 95
 PLUGIN_EVAL_MIN_ACCEPTABLE_GRADE = "B+"
 
@@ -1850,7 +1850,7 @@ SKILL_OPERATION_PROFILES: dict[str, dict[str, Any]] = {
             "compat or strict audit",
             "external review report",
             "Plugin Eval grade B+ or better",
-            "Tessl review score >= 90 (95+ target)",
+            "Tessl review score >= 95",
             "metadata contract",
         ],
         "stop_conditions": ["blocked_validation", "blocked_missing_artifact", "blocked_missing_tool"],
@@ -4204,6 +4204,14 @@ def skills_sdk_check(
 
 SDK_PIPELINE_START_SCHEMA_VERSION = "skills-sdk.pipeline-start.v1"
 SDK_PIPELINE_START_SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/pipeline-start.v1.schema.json"
+SDK_START_BLOCKED_DOWNSTREAM_LANES = [
+    "scenario_quality",
+    "oss_local_eval",
+    "closeout_doctor",
+    "oss_cloud_eval",
+    "registry_events_update",
+    "runtime_doctor",
+]
 
 
 def _sdk_start_target_class(target_info: dict[str, Any], ownership: dict[str, Any]) -> str:
@@ -4234,6 +4242,21 @@ def _sdk_start_mechanical_commands(target: str) -> list[str]:
     ]
 
 
+def _sdk_eval_run_command(target: str, profile: str) -> str:
+    return _ask_validation_command(
+        "sdk",
+        "eval",
+        "run",
+        target,
+        "--runner",
+        "internal",
+        "--mode",
+        "smoke",
+        "--codex-profile",
+        profile,
+    )
+
+
 def _sdk_start_project_context(target_info: dict[str, Any], project_root: str | None) -> dict[str, Any]:
     inferred_root = target_info.get("project_root")
     return {
@@ -4255,27 +4278,76 @@ def _sdk_start_repo_relative_source(repo_root: Path, source_path_value: Any) -> 
 
 
 def _sdk_start_lanes(mechanical_target: str) -> list[dict[str, Any]]:
-    mechanical_commands = _sdk_start_mechanical_commands(mechanical_target)
-    return [
-        {"id": "sdk_start", "status": "pass", "proves": "target classified and next command selected"},
-        {"id": "target_classification", "status": "pass", "proves": "skill lifecycle target class and scope"},
+    start_command = _ask_validation_command("sdk", "start", mechanical_target)
+    lanes: list[dict[str, Any]] = [
+        {"id": "sdk_start", "status": "pass", "command": start_command, "proves": "target classified and next command selected"},
+        {"id": "target_classification", "status": "pass", "command": start_command, "proves": "skill lifecycle target class and scope"},
         {
             "id": "mechanical_validation",
             "status": "required_not_run",
-            "commands": mechanical_commands,
+            "commands": _sdk_start_mechanical_commands(mechanical_target),
             "proves": "SKILL.md, frontmatter, layout, references, README, fixtures, and package shape",
         },
-        {
-            "id": "scenario_quality",
-            "status": "blocked_until_mechanical_validation",
-            "command": _ask_validation_command("sdk", "eval", "scenario-quality", mechanical_target, "--preview"),
-        },
-        {"id": "oss_local_eval", "status": "blocked_until_scenario_quality"},
-        {"id": "closeout_doctor", "status": "blocked_until_oss_local_eval"},
-        {"id": "oss_cloud_eval", "status": "blocked_until_local_closeout_pass"},
-        {"id": "registry_events_update", "status": "blocked_until_closeout_allows_promotion"},
-        {"id": "runtime_doctor", "status": "blocked_until_registry_or_projection_receipt"},
     ]
+    lanes.extend(
+        [
+            {
+                "id": "scenario_quality",
+                "status": "blocked_until_mechanical_validation",
+                "command": _ask_validation_command("sdk", "eval", "scenario-quality", mechanical_target, "--preview"),
+            },
+            {"id": "oss_local_eval", "status": "blocked_until_scenario_quality", "command": _sdk_eval_run_command(mechanical_target, "oss-local")},
+            {"id": "closeout_doctor", "status": "blocked_until_oss_local_eval", "command": _ask_validation_command("evals", "closeout", "doctor", "<workflow-closeout.json>")},
+            {"id": "oss_cloud_eval", "status": "blocked_until_local_closeout_pass", "command": _sdk_eval_run_command(mechanical_target, "oss-cloud")},
+            {"id": "registry_events_update", "status": "blocked_until_closeout_allows_promotion", "command": _ask_validation_command("sdk", "improve", mechanical_target, "--project-root", "<project-root>", "--apply")},
+            {"id": "runtime_doctor", "status": "blocked_until_registry_or_projection_receipt", "command": _ask_validation_command("skills", "proof", mechanical_target, "--runtime-target", "codex")},
+        ]
+    )
+    return lanes
+
+
+def _sdk_start_status(source_exists: bool, target_class: str) -> tuple[str, list[str]]:
+    allowed = {"project_local_skill", "plugin_owned_skill", "global_skill"}
+    if source_exists and target_class in allowed:
+        return "pass", []
+    blocker = "runtime_projection_not_canonical_source" if target_class == "runtime_projection" else "missing_or_unclassified_skill_source"
+    return "blocked", [blocker]
+
+
+def _sdk_start_receipt(
+    query: str,
+    target_info: dict[str, Any],
+    ownership: dict[str, Any],
+    target_class: str,
+    project_root: str | None,
+    mechanical_target: str,
+    status: str,
+    blockers: list[str],
+) -> dict[str, Any]:
+    current_lane = "mechanical_validation" if status == "pass" else "target_classification"
+    receipt = {
+        "schema_version": SDK_PIPELINE_START_SCHEMA_VERSION,
+        "schema_uri": SDK_PIPELINE_START_SCHEMA_URI,
+        "status": status,
+        "target": query,
+        "target_class": target_class,
+        "target_info": target_info,
+        "source_ownership": ownership,
+        "project_context": _sdk_start_project_context(target_info, project_root),
+        "current_lane": current_lane,
+        "lanes": _sdk_start_lanes(mechanical_target),
+        "blocked_downstream_lanes": SDK_START_BLOCKED_DOWNSTREAM_LANES,
+        "blockers": blockers,
+        "what_this_proves": "The SDK classified the skill target and selected the first legal lifecycle command.",
+        "what_this_does_not_prove": "Format, layout, references, eval behavior, registry promotion, and runtime reachability have not run yet.",
+        "validation_commands": [_ask_validation_command(*_sdk_start_command_args(query, project_root))],
+    }
+    receipt["next_action"] = {
+        "lane": current_lane,
+        "command": _sdk_start_mechanical_commands(mechanical_target)[0],
+        "why": "Mechanical validation must pass before scenario-quality, eval, registry, or runtime lanes.",
+    }
+    return receipt
 
 
 def skills_sdk_start(repo_root: Path, target: str, project_root: str | None = None) -> CallResult:
@@ -4290,37 +4362,8 @@ def skills_sdk_start(repo_root: Path, target: str, project_root: str | None = No
     target_class = _sdk_start_target_class(target_info, ownership)
     mechanical_target = audit_target or query
     source_exists = bool(target_info.get("source_exists")) if isinstance(target_info, dict) else False
-    status = "pass" if source_exists and target_class != "unknown" else "blocked"
-    blockers = [] if status == "pass" else ["missing_or_unclassified_skill_source"]
-    receipt = {
-        "schema_version": SDK_PIPELINE_START_SCHEMA_VERSION,
-        "schema_uri": SDK_PIPELINE_START_SCHEMA_URI,
-        "status": status,
-        "target": query,
-        "target_class": target_class,
-        "target_info": target_info,
-        "source_ownership": ownership,
-        "project_context": _sdk_start_project_context(target_info, project_root),
-        "current_lane": "mechanical_validation" if status == "pass" else "target_classification",
-        "lanes": _sdk_start_lanes(mechanical_target),
-        "blocked_downstream_lanes": [
-            "scenario_quality",
-            "oss_local_eval",
-            "closeout_doctor",
-            "oss_cloud_eval",
-            "registry_events_update",
-            "runtime_doctor",
-        ],
-        "blockers": blockers,
-        "what_this_proves": "The SDK classified the skill target and selected the first legal lifecycle command.",
-        "what_this_does_not_prove": "Format, layout, references, eval behavior, registry promotion, and runtime reachability have not run yet.",
-        "validation_commands": [_ask_validation_command(*_sdk_start_command_args(query, project_root))],
-    }
-    receipt["next_action"] = {
-        "lane": receipt["current_lane"],
-        "command": _sdk_start_mechanical_commands(mechanical_target)[0],
-        "why": "Mechanical validation must pass before scenario-quality, eval, registry, or runtime lanes.",
-    }
+    status, blockers = _sdk_start_status(source_exists, target_class)
+    receipt = _sdk_start_receipt(query, target_info, ownership, target_class, project_root, mechanical_target, status, blockers)
     result.data["skills_sdk_start"] = {"status": status, "receipt": receipt, "agent_summary": receipt["next_action"]["why"]}
     if status != "pass":
         result.status = "error"
@@ -5877,24 +5920,9 @@ def _sdk_plugin_save_plugin_registry_receipt(
     apply: bool,
 ) -> dict[str, Any]:
     registry_path = _sdk_plugin_registry_path(repo_root, "plugin", registry)
-    target_path = Path(target)
-    if not target_path.is_absolute():
-        target_path = repo_root / target_path
+    target_path, target_rel = _sdk_plugin_validated_plugin_source(repo_root, target)
     plugin_name = (name or target_path.name).strip()
-    source_rel = "./" + _sdk_plugin_relpath(repo_root, target_path)
-    entry = {
-        "name": plugin_name,
-        "category": "Productivity",
-        "policy": {
-            "authentication": "ON_INSTALL",
-            "installation": "AVAILABLE",
-            "products": ["CODEX"],
-        },
-        "source": {
-            "source": "local",
-            "path": source_rel,
-        },
-    }
+    entry = _sdk_plugin_marketplace_entry(plugin_name, target_rel)
     receipt = {
         "schema_version": "skills-sdk.plugin-registry-save.v1",
         "kind": "plugin",
@@ -5907,6 +5935,40 @@ def _sdk_plugin_save_plugin_registry_receipt(
     }
     if not apply:
         return receipt
+    _sdk_plugin_write_marketplace_entry(registry_path, plugin_name, entry)
+    receipt["registry_written"] = True
+    return receipt
+
+
+def _sdk_plugin_validated_plugin_source(repo_root: Path, target: str) -> tuple[Path, str]:
+    target_path = Path(target)
+    if not target_path.is_absolute():
+        target_path = repo_root / target_path
+    try:
+        target_rel = target_path.resolve().relative_to(repo_root.resolve()).as_posix()
+    except ValueError as exc:
+        raise ValueError(f"Plugin registry target must stay inside the repository: {target}.") from exc
+    if not target_path.is_dir():
+        raise ValueError(f"Plugin registry target does not exist: {target}.")
+    if not (target_path / ".codex-plugin" / "plugin.json").is_file():
+        raise ValueError(f"Plugin registry target is missing .codex-plugin/plugin.json: {target}.")
+    return target_path, target_rel
+
+
+def _sdk_plugin_marketplace_entry(plugin_name: str, target_rel: str) -> dict[str, Any]:
+    return {
+        "name": plugin_name,
+        "category": "Productivity",
+        "policy": {
+            "authentication": "ON_INSTALL",
+            "installation": "AVAILABLE",
+            "products": ["CODEX"],
+        },
+        "source": {"source": "local", "path": f"./{target_rel}"},
+    }
+
+
+def _sdk_plugin_write_marketplace_entry(registry_path: Path, plugin_name: str, entry: dict[str, Any]) -> None:
     registry_payload = _sdk_plugin_read_json_object(
         registry_path,
         {
@@ -5928,8 +5990,53 @@ def _sdk_plugin_save_plugin_registry_receipt(
         plugins.append(entry)
     plugins.sort(key=lambda item: str(item.get("name", "")) if isinstance(item, dict) else "")
     _sdk_plugin_atomic_write_json(registry_path, registry_payload)
-    receipt["registry_written"] = True
-    return receipt
+
+
+def _sdk_command_extend(args: list[str], *pairs: tuple[str, str | None]) -> None:
+    for flag, value in pairs:
+        if value:
+            args.extend([flag, value])
+
+
+def _sdk_plugin_install_validation_command(
+    *,
+    kind: str,
+    apply: bool,
+    target: str | None = None,
+    project_root: str | None = None,
+    scope: str = "project",
+    url: str | None = None,
+    plugin_path: str | None = None,
+    name: str | None = None,
+    ref: str | None = None,
+    dest: str = "Plugins/third-party",
+    validation_level: str = "compat",
+    allow_untrusted_source: bool = False,
+    allow_unpinned_ref: bool = False,
+    sync_profile: bool = False,
+    require_desktop_loadable: bool = False,
+) -> str:
+    args = ["sdk", "plugin", "install", "--kind", kind]
+    if kind == "skill":
+        _sdk_command_extend(args, ("--target", target), ("--project-root", project_root))
+        if scope != "project":
+            args.extend(["--scope", scope])
+    else:
+        _sdk_command_extend(args, ("--url", url), ("--path", plugin_path), ("--name", name), ("--ref", ref))
+        if dest != "Plugins/third-party":
+            args.extend(["--dest", dest])
+        if validation_level != "compat":
+            args.extend(["--validation-level", validation_level])
+        for enabled, flag in (
+            (allow_untrusted_source, "--allow-untrusted-source"),
+            (allow_unpinned_ref, "--allow-unpinned-ref"),
+            (sync_profile, "--sync-profile"),
+            (require_desktop_loadable, "--require-desktop-loadable"),
+        ):
+            if enabled:
+                args.append(flag)
+    args.append("--apply" if apply else "--preview")
+    return _ask_validation_command(*args)
 
 
 def skills_sdk_plugin_create(
@@ -6141,32 +6248,27 @@ def skills_sdk_plugin_install(
     apply: bool = False,
 ) -> CallResult:
     """Install or preview install of a single skill or plugin through SDK guardrails."""
-    command = _ask_validation_command(
-        "sdk",
-        "plugin",
-        "install",
-        "--kind",
-        kind,
-        "--apply" if apply else "--preview",
-    )
+    command_args = {
+        "kind": kind,
+        "target": target,
+        "project_root": project_root,
+        "scope": scope,
+        "url": url,
+        "plugin_path": plugin_path,
+        "name": name,
+        "ref": ref,
+        "dest": dest,
+        "validation_level": validation_level,
+        "allow_untrusted_source": allow_untrusted_source,
+        "allow_unpinned_ref": allow_unpinned_ref,
+        "sync_profile": sync_profile,
+        "require_desktop_loadable": require_desktop_loadable,
+        "apply": apply,
+    }
+    command = _sdk_plugin_install_validation_command(**command_args)
     if kind == "skill":
         if not target:
-            payload = {
-                "schema_version": "skills-sdk-plugin-install.v0",
-                "status": "blocked",
-                "kind": kind,
-                "mutation_performed": False,
-                "validation_commands": [command],
-                "first_principles_gate": _sdk_plugin_first_principles_gate(kind, "install"),
-                "agent_summary": "Skill install requires --target.",
-            }
-            return _sdk_plugin_result(
-                command="sdk plugin install",
-                payload_key="skills_sdk_plugin_install",
-                payload=payload,
-                error_message=payload["agent_summary"],
-                fix_suggestion="Pass --target <skill-handle-or-path>.",
-            )
+            return _sdk_plugin_install_blocked(kind, command, "Skill install requires --target.", "Pass --target <skill-handle-or-path>.")
         delegated = (
             skills_sdk_project_install(repo_root, target=target, project_root=project_root, scope=scope)
             if apply
@@ -6174,42 +6276,65 @@ def skills_sdk_plugin_install(
         )
     else:
         if not url or not plugin_path:
-            payload = {
-                "schema_version": "skills-sdk-plugin-install.v0",
-                "status": "blocked",
-                "kind": kind,
-                "mutation_performed": False,
-                "validation_commands": [command],
-                "first_principles_gate": _sdk_plugin_first_principles_gate(kind, "install"),
-                "agent_summary": "Plugin install requires --url and --path.",
-            }
-            return _sdk_plugin_result(
-                command="sdk plugin install",
-                payload_key="skills_sdk_plugin_install",
-                payload=payload,
-                error_message=payload["agent_summary"],
-                fix_suggestion="Pass --url <repo-url> --path <plugin-path>.",
-            )
-        from ask.commands.plugins import install_plugin  # noqa: PLC0415
+            return _sdk_plugin_install_blocked(kind, command, "Plugin install requires --url and --path.", "Pass --url <repo-url> --path <plugin-path>.")
+        delegated = _sdk_plugin_install_delegated(repo_root, command_args)
+    payload = _sdk_plugin_install_payload(kind, target, apply, command, delegated)
+    result = _sdk_plugin_result(command="sdk plugin install", payload_key="skills_sdk_plugin_install", payload=payload)
+    result.status = delegated.status
+    result.errors.extend(delegated.errors)
+    return result
 
-        delegated = install_plugin(
-            repo_root,
-            url=url,
-            plugin_path=plugin_path,
-            name=name,
-            ref=ref,
-            dest=dest,
-            validation_level=validation_level,
-            allow_untrusted_source=allow_untrusted_source,
-            allow_unpinned_ref=allow_unpinned_ref,
-            sync_profile=sync_profile,
-            require_desktop_loadable=require_desktop_loadable,
-            dry_run=not apply,
-            action="install",
-        )
+
+def _sdk_plugin_install_blocked(kind: str, command: str, message: str, fix_suggestion: str) -> CallResult:
     payload = {
         "schema_version": "skills-sdk-plugin-install.v0",
-        "status": "applied" if apply and delegated.status == "success" else ("preview" if not apply else "blocked"),
+        "status": "blocked",
+        "kind": kind,
+        "mutation_performed": False,
+        "validation_commands": [command],
+        "first_principles_gate": _sdk_plugin_first_principles_gate(kind, "install"),
+        "agent_summary": message,
+    }
+    return _sdk_plugin_result(
+        command="sdk plugin install",
+        payload_key="skills_sdk_plugin_install",
+        payload=payload,
+        error_message=message,
+        fix_suggestion=fix_suggestion,
+    )
+
+
+def _sdk_plugin_install_delegated(repo_root: Path, args: dict[str, Any]) -> CallResult:
+    from ask.commands.plugins import install_plugin  # noqa: PLC0415
+
+    return install_plugin(
+        repo_root,
+        url=args["url"],
+        plugin_path=args["plugin_path"],
+        name=args["name"],
+        ref=args["ref"],
+        dest=args["dest"],
+        validation_level=args["validation_level"],
+        allow_untrusted_source=args["allow_untrusted_source"],
+        allow_unpinned_ref=args["allow_unpinned_ref"],
+        sync_profile=args["sync_profile"],
+        require_desktop_loadable=args["require_desktop_loadable"],
+        dry_run=not args["apply"],
+        action="install",
+    )
+
+
+def _sdk_plugin_install_payload(
+    kind: str,
+    target: str | None,
+    apply: bool,
+    command: str,
+    delegated: CallResult,
+) -> dict[str, Any]:
+    status = "applied" if apply and delegated.status == "success" else ("preview" if not apply else "blocked")
+    return {
+        "schema_version": "skills-sdk-plugin-install.v0",
+        "status": status,
         "kind": kind,
         "target": target,
         "delegated_command_status": delegated.status,
@@ -6219,10 +6344,6 @@ def skills_sdk_plugin_install(
         "validation_commands": [command],
         "agent_summary": f"SDK plugin install {'applied' if apply else 'previewed'} {kind} install through bounded lifecycle commands.",
     }
-    result = _sdk_plugin_result(command="sdk plugin install", payload_key="skills_sdk_plugin_install", payload=payload)
-    result.status = delegated.status
-    result.errors.extend(delegated.errors)
-    return result
 
 
 def skills_sdk_plugin_save_registry(
@@ -7051,6 +7172,39 @@ def _skills_sdk_internal_eval_receipt_counts(
     }
 
 
+def _skills_sdk_eval_run_validation_command(
+    target: str,
+    *,
+    mode: str,
+    codex_profile: str | None,
+    cases: list[str] | None,
+    timeout_seconds: int | None,
+) -> str:
+    args = [
+        "sdk",
+        "eval",
+        "run",
+        target,
+        "--runner",
+        "internal",
+        "--mode",
+        mode,
+    ]
+    if codex_profile:
+        args.extend(["--codex-profile", codex_profile])
+    for case in cases or []:
+        args.extend(["--case", case])
+    if timeout_seconds:
+        args.extend(["--timeout-seconds", str(timeout_seconds)])
+    return _ask_validation_command(*args)
+
+
+def _skills_sdk_eval_receipt_lane(mode: str, codex_profile: str | None) -> str:
+    if codex_profile in {"oss-local", "oss-cloud"}:
+        return codex_profile
+    return "oss-local" if mode == "smoke" else mode
+
+
 def skills_sdk_eval_run(
     repo_root: Path,
     dataset: str | None = None,
@@ -7129,7 +7283,7 @@ def skills_sdk_eval_run(
             "package_digest": package_identity["package_digest"] if package_identity else None,
             "target_path": target_path,
             "mode": mode,
-            "lane": codex_profile or ("oss-local" if mode == "smoke" else mode),
+            "lane": _skills_sdk_eval_receipt_lane(mode, codex_profile),
             "profile": codex_profile,
             "case_count": receipt_counts["case_count"],
             "passed_count": receipt_counts["passed_count"],
@@ -7153,17 +7307,12 @@ def skills_sdk_eval_run(
             "internal_eval": internal.data,
             "mutation_performed": False,
             "validation_commands": [
-                _ask_validation_command(
-                    "sdk",
-                    "eval",
-                    "run",
+                _skills_sdk_eval_run_validation_command(
                     target,
-                    "--runner",
-                    "internal",
-                    "--mode",
-                    mode,
-                    *(("--codex-profile", codex_profile) if codex_profile else ()),
-                    *(("--timeout-seconds", str(timeout_seconds)) if timeout_seconds else ()),
+                    mode=mode,
+                    codex_profile=codex_profile,
+                    cases=cases,
+                    timeout_seconds=timeout_seconds,
                 )
             ],
             "agent_summary": f"skills-sdk internal eval run {status} for {target} in {mode} mode.",

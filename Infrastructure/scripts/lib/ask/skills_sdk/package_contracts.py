@@ -76,6 +76,7 @@ SOURCE_OPERATING_MODEL_KINDS: set[str] = {
     "source_operating_model",
     "operating_model_source",
     "operating_model_reference",
+    "operating_model_format",
 }
 PACKAGE_IGNORED_FILE_NAMES: set[str] = {".DS_Store", "Thumbs.db", "desktop.ini"}
 OPENAI_PLATFORM_COMPAT_SCHEMA_VERSION = "skills-sdk.openai-platform-compat.v1"
@@ -2653,10 +2654,8 @@ def _rel_path_or_none(repo_root: Path | None, path: Path | None) -> str | None:
 
 def _plugin_hook_commands_are_portable(command: str) -> bool:
     """Return whether a command avoids local absolute plugin-owned paths."""
-    if "${PLUGIN_ROOT}" in command or "${PLUGIN_DATA}" in command:
-        return True
     tokens = command.split()
-    return not any(token.startswith("/") or token.startswith("~/") for token in tokens)
+    return not any(token.startswith(("/", "~/")) for token in tokens)
 
 
 def _hook_timeout_shape(hook: dict[str, Any]) -> str:
@@ -2664,7 +2663,7 @@ def _hook_timeout_shape(hook: dict[str, Any]) -> str:
         return "timeoutSec"
     if "timeout" not in hook:
         return "missing"
-    return "seconds" if isinstance(hook.get("timeout"), int) else "invalid"
+    return "seconds" if type(hook.get("timeout")) is int else "invalid"
 
 
 def _plugin_hooks_contract(

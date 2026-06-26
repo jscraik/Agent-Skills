@@ -125,7 +125,7 @@ Next safe action: <review answers, choose one repair step, and write a learning 
 
 ## Knowledge
 
-- [<title>](<url or local path>) - Trust: official|primary|standard|source|supplemental. Fit: <why it serves the mission>. Use for: <lesson, practice, or reference>.
+- [<title>](<url or local path>) - Trust: official|primary|standard|vendor-docs|source-repository|source|supplemental. Fit: <why it serves the mission>. Use for: <lesson, practice, or reference>.
 
 Notes: <credential, version, freshness, or source-boundary caveat>.
 

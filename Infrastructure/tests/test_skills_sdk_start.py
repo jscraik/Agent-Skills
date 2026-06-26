@@ -10,6 +10,9 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
+
+from ask.commands.skills_impl import skills_sdk_start  # noqa: E402
 
 
 def _command_env() -> dict[str, str]:
@@ -124,6 +127,22 @@ class TestSkillsSdkStart(unittest.TestCase):
             self.assertIn(str(skill_md.parent), receipt["next_action"]["command"])
             self.assertIn("oss_cloud_eval", receipt["blocked_downstream_lanes"])
             self.assertIn("Format, layout, references", receipt["what_this_does_not_prove"])
+
+    def test_start_blocks_runtime_projection_targets(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo_root = Path(tmp) / "repo"
+            projection_skill = repo_root / ".agents" / "skills" / "demo-skill" / "SKILL.md"
+            projection_skill.parent.mkdir(parents=True)
+            projection_skill.write_text("---\nname: demo-skill\n---\n# Demo\n", encoding="utf-8")
+
+            result = skills_sdk_start(repo_root, ".agents/skills/demo-skill/SKILL.md")
+
+        payload = result.data["skills_sdk_start"]
+        receipt = payload["receipt"]
+        self.assertEqual(result.status, "error")
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertEqual(receipt["target_class"], "runtime_projection")
+        self.assertIn("runtime_projection_not_canonical_source", receipt["blockers"])
 
 
 if __name__ == "__main__":

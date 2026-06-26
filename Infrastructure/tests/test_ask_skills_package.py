@@ -11,6 +11,7 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from ask.commands.skills_impl import skills_package, skills_package_verify  # noqa: E402
+from ask.skills_sdk.package_verify import _quality_blockers, _quality_checks  # noqa: E402
 
 
 def _write_minimal_sdk_package_companions(
@@ -424,6 +425,70 @@ Return schema_version: 1 and a short result summary.
         self.assertIn("plugin_hooks_manifest_path_invalid", rule_ids)
         self.assertIn("plugin_hooks_unsupported_type", rule_ids)
         self.assertIn("plugin_hooks_timeoutsec_unsupported", rule_ids)
+
+    def test_package_verify_reports_invalid_utf8_plugin_hooks_as_blocker(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            plugin_root = repo_root / "Plugins" / "plugin-fixture"
+            skill_dir = plugin_root / "skills" / "packaged-skill"
+            _write_gold_quality_skill(skill_dir)
+            _write_plugin_manifest(plugin_root, hooks_value="./hooks/hooks.json")
+            hooks_dir = plugin_root / "hooks"
+            hooks_dir.mkdir(parents=True, exist_ok=True)
+            (hooks_dir / "hooks.json").write_bytes(bytes([123, 255]))
+
+            result = skills_package_verify(
+                repo_root,
+                "Plugins/plugin-fixture/skills/packaged-skill",
+            )
+
+        self.assertEqual(result.status, "error")
+        compat = result.data["skill_package_verification"]["sdk_contract"]["values"]["openai_platform_compat"]
+        blocker = next(blocker for blocker in compat["blockers"] if blocker["rule_id"] == "plugin_hooks_file_unreadable")
+        self.assertEqual(blocker["evidence"]["error"], "UnicodeDecodeError")
+
+    def test_package_verify_rejects_placeholder_hooks_with_local_absolute_paths(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            plugin_root = repo_root / "Plugins" / "plugin-fixture"
+            skill_dir = plugin_root / "skills" / "packaged-skill"
+            _write_gold_quality_skill(skill_dir)
+            _write_plugin_manifest(plugin_root, hooks_value="./hooks/hooks.json")
+            _write_plugin_hooks(
+                plugin_root,
+                {
+                    "type": "command",
+                    "command": "python3 $" + "{PLUGIN_ROOT}/hooks/session_start.py /Users/jamie/local",
+                    "timeout": True,
+                },
+            )
+
+            result = skills_package_verify(
+                repo_root,
+                "Plugins/plugin-fixture/skills/packaged-skill",
+            )
+
+        self.assertEqual(result.status, "error")
+        compat = result.data["skill_package_verification"]["sdk_contract"]["values"]["openai_platform_compat"]
+        rule_ids = {blocker["rule_id"] for blocker in compat["blockers"]}
+        self.assertIn("plugin_hooks_command_not_portable", rule_ids)
+        self.assertIn("plugin_hooks_timeout_missing", rule_ids)
+
+    def test_package_verify_quality_helpers_block_empty_blocked_validation_details(self) -> None:
+        quality = {
+            "reference_quality": {"status": "pass", "blockers": []},
+            "writing_quality": {"status": "blocked_validation", "blockers": []},
+            "openai_platform_compat": {"status": "blocked_validation", "blockers": "malformed"},
+        }
+
+        blockers = _quality_blockers(quality)
+        blocker_ids = {blocker["rule_id"] for blocker in blockers}
+        checks = {check["name"]: check for check in _quality_checks(quality)}
+
+        self.assertIn("skill_writing_quality_blocked", blocker_ids)
+        self.assertIn("openai_platform_compat_blocked", blocker_ids)
+        self.assertEqual(checks["writing_quality"]["status"], "fail")
+        self.assertEqual(checks["openai_platform_compat"]["status"], "fail")
 
     def test_package_reports_versioned_role_ready_contract(self) -> None:
         with patch("ask.commands.skills_impl.resolve_skill_handle", return_value={
