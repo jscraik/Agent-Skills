@@ -38,7 +38,8 @@ Read applicable `AGENTS.md`; resolve generated/mirrored docs to canonical source
 Doc target, audience, reader job, writing mode, truth files, validation commands, glossary or ubiquitous-language surfaces, and brand/governance constraints.
 
 ## Outputs
-Findings, patch summary, evidence map, validation outcomes, unknowns, and handoff needs.
+Findings, patch summary, evidence map, quality rubric, validation outcomes,
+unknowns, and handoff needs.
 
 ## Discovery Interview
 
@@ -49,7 +50,10 @@ Findings, patch summary, evidence map, validation outcomes, unknowns, and handof
 - Read `references/discovery-interview.md` when the request is underspecified.
 
 ## Procedure
-1. Classify doc type, writing mode, reader job, source, side effect, and validator:
+1. Classify doc type, writing type, writing mode, reader job, source, side effect, and validator:
+   - writing type: technical documentation, developer education, service docs,
+     article or long-form, talk or visual doc, short-form or content creation,
+     DevRel/community interface, accessible writing, or error/recovery text.
    - `explore`: gather fragments, questions, claims, terms, citations, and gaps without committing to structure.
    - `shape`: choose the reader path, prerequisite concepts, section/block sequence, format choices, and citations.
    - `rewrite`: patch the smallest verified doc path.
@@ -66,12 +70,18 @@ Findings, patch summary, evidence map, validation outcomes, unknowns, and handof
 8. Rewrite one reader path at a time; prioritize setup, validation, safety, recovery, grounding, citations, and reader-state continuity.
 9. Validate the changed path with the smallest matching check.
 10. For README/onboarding docs, score first-run usefulness, clarity, recovery, freshness, visual need, and whether screenshots, diagrams, or other visuals lower reader search cost.
-11. Load `references/documentation-quality.md` only when detailed prose, README, co-authoring, reader-test, reader-state, citations, visuals, or format-choice rules matter.
-12. For specialized writing work, load `references/knowledge-capsule-routing.md`,
-   choose the smallest matching capsule, and name the capsule used in the
-   evidence map.
+11. For substantial docs, score the changed path against the quality rubric:
+   clear, relevant, accurate, brief, understood, logical, and accepted.
+12. Load `references/documentation-quality.md` only when detailed prose, README, co-authoring, reader-test, reader-state, citations, visuals, or format-choice rules matter.
+13. For specialized writing work, load `references/knowledge-capsule-routing.md`,
+   choose the smallest matching capsule for the writing type, and name the
+   selected writing type plus capsule path in the evidence map.
 
-Load `references/knowledge-capsule.manifest.yaml` when an audit needs pack-backed harness or principal-engineering judgment. Prefer harness capsules for evidence, proof, routing, review feedback, PR lifecycle, and brownfield-readiness gaps. Prefer Ryan capsules for environment design, repo knowledge, mechanical boundaries, safety policy, operating model, and long-term coherence. Do not load all capsules by default; select the smallest relevant capsule from the manifest.
+Knowledge capsule discovery lives at the top level of `references/`: start with
+`references/knowledge-capsule-routing.md` and
+`references/knowledge-capsule.manifest.yaml`. Capsule bodies live under
+`references/knowledge-capsules/` and are loaded only after routing selects the
+smallest relevant capsule. Do not browse or load all capsule files by default.
 
 ## Constraints
 Use headings, short paragraphs, bullets, tables, citations, and bold only when they improve skimming or trust. Add TOCs, diagrams, screenshots, images, or other visuals only when they lower search cost, explain a relationship, or help the reader recognize a real UI/state. Redact secrets and sensitive data by default.
@@ -103,6 +113,9 @@ Use implementation, security, release, CI, platform, verification, memory, or hu
 - `changes`: rewritten text, patch summary, or no-change rationale
 - `evidence_map`: claim -> file, line, command, citation, or blocker
 - `reader_state`: prerequisites, introduced concepts, glossary terms, citations, and writer questions when substantial docs need it
+- `writing_type`: selected type, selection reason, and capsule path when a
+  specialized writing facet is used
+- `quality_rubric`: clear, relevant, accurate, brief, understood, logical, and accepted
 - `validation`: pass, fail, blocked, or not applicable
 - `unknowns` and `handoff`: assumptions and owner
 
@@ -129,19 +142,11 @@ Replacing repo contracts with generic advice; hiding uncertainty; loading archiv
 - `Infrastructure/references/software-literature-skill-expertise-map.md`: skill-to-literature routing map.
 - `references/documentation-quality.md`: detailed prose, README, visual, and
   reader-testing criteria.
-- `references/knowledge-capsule-routing.md`: routes KnowledgeOS-backed writing
-  facets without adding a runtime KnowledgeOS dependency.
-- `references/knowledge-capsules/content-design-service-docs.md`: service-doc
-  reader jobs, vocabulary, acceptance criteria, maintenance cost, and evidence.
-- `references/knowledge-capsules/answer-first-argument-structure.md`: answer
-  first, then support the decision or recovery path.
-- `references/knowledge-capsules/visual-document-structure.md`: slidedocs,
-  screenshots, diagrams, and visual docs as standalone information architecture.
-- `references/knowledge-capsules/devrel-community-docs.md`: public DevRel and
-  trust docs as community interfaces with feedback and ownership boundaries.
-- `references/knowledge-capsules/accessible-writing.md` and
-  `references/knowledge-capsules/actionable-error-messages.md`: inclusive
-  language, nonvisual support, and recovery-oriented error text.
+- `references/knowledge-capsule-routing.md`: top-level routing index for
+  KnowledgeOS-backed writing facets without adding a runtime KnowledgeOS
+  dependency.
+- `references/knowledge-capsule.manifest.yaml`: top-level capsule manifest
+  used to select one smallest relevant capsule before opening its body.
 - `references/contract.yaml`: machine-readable contract.
 - `references/evals.yaml`: benchmark cases.
 - `references/task-profile.json`: evaluator thresholds.

@@ -45,6 +45,28 @@ reader-testing decisions.
 - Never teach unsafe habits such as hardcoding API keys, tokens, or secrets.
 - Prioritize common reader tasks before rare edge cases.
 
+## Quality Rubric Connects Style To Reader Outcomes
+
+For substantial documentation, evaluate the changed path against:
+
+- Clear: the reader can identify the purpose, next action, and key claim
+  without rereading.
+- Relevant: the content serves the named reader job and prioritizes common
+  reader tasks before rare edge cases.
+- Accurate: every operational claim has live evidence, a citation, a command
+  result, or a marked blocker.
+- Brief: the doc uses the fewest sections, paragraphs, examples, and visuals
+  that still preserve reader success.
+
+The target reader outcome is:
+
+- Understood: prerequisites are introduced or linked before use, and ambiguous
+  terms are resolved.
+- Logical: sections follow the reader's task sequence, not the writer's
+  discovery sequence.
+- Accepted: claims are supported by evidence, uncertainty is named, and
+  validation outcomes are reported without overclaiming.
+
 ## README Reviews Need First-Run Proof
 
 For README and onboarding docs, check whether a reader can succeed in the first

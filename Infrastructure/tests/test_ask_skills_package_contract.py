@@ -1759,6 +1759,184 @@ optimization:
             package["install_gate"]["blocked_reasons"],
         )
 
+    def test_reference_quality_requires_capability_selector_for_multi_facet_capsules(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "multi-facet-skill"
+            references_dir = skill_dir / "references"
+            references_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: multi-facet-skill
+description: Multi facet fixture.
+version: "1.0.0"
+---
+
+# Multi Facet Skill
+
+## Progressive Disclosure
+- references/knowledge-capsules/example-a.md
+""",
+                encoding="utf-8",
+            )
+            (references_dir / "contract.yaml").write_text(
+                """purpose: Test missing capability selector.
+inputs:
+  - user_request
+outputs:
+  - result
+""",
+                encoding="utf-8",
+            )
+            (references_dir / "knowledge-capsule.manifest.yaml").write_text(
+                """schema_version: knowledge-os.knowledge-capsule-manifest.v1
+selected_facets:
+  - pack.example:alpha
+  - pack.example:beta
+""",
+                encoding="utf-8",
+            )
+
+            contract = package_contracts.reference_quality_contract(repo_root, skill_md)
+
+        selector_check = next(
+            check for check in contract["checks"] if check["name"] == "capability_selector_contract"
+        )
+        self.assertEqual(selector_check["status"], "blocked_validation")
+        self.assertEqual(
+            selector_check["missing"],
+            [
+                "knowledge-capsule-routing.md",
+                "capability_selection",
+                "progressive_disclosure_named_capsules",
+            ],
+        )
+        self.assertIn(
+            "capability_selector_contract_missing",
+            {blocker["rule_id"] for blocker in contract["blockers"]},
+        )
+        self.assertIn(
+            "basic_requirement_rubric_missing",
+            {blocker["rule_id"] for blocker in contract["blockers"]},
+        )
+
+    def test_reference_quality_requires_basic_requirement_rubric(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "rubricless-skill"
+            references_dir = skill_dir / "references"
+            references_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: rubricless-skill
+description: Rubricless fixture.
+version: "1.0.0"
+---
+
+# Rubricless Skill
+""",
+                encoding="utf-8",
+            )
+            (references_dir / "contract.yaml").write_text(
+                """purpose: Test missing rubric contract.
+inputs:
+  - user request
+outputs:
+  - result
+""",
+                encoding="utf-8",
+            )
+
+            contract = package_contracts.reference_quality_contract(repo_root, skill_md)
+
+        rubric_check = next(
+            check for check in contract["checks"] if check["name"] == "basic_requirement_rubric"
+        )
+        self.assertEqual(rubric_check["status"], "blocked_validation")
+        self.assertEqual(
+            rubric_check["missing"],
+            ["quality_criteria", "evidence_requirements"],
+        )
+        self.assertIn(
+            "basic_requirement_rubric_missing",
+            {blocker["rule_id"] for blocker in contract["blockers"]},
+        )
+
+    def test_reference_quality_accepts_declared_capability_selector_for_multi_facet_capsules(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "selector-skill"
+            references_dir = skill_dir / "references"
+            references_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: selector-skill
+description: Selector fixture.
+version: "1.0.0"
+---
+
+# Selector Skill
+
+Select the task type before opening capsule bodies.
+
+## Progressive Disclosure
+- references/knowledge-capsule-routing.md
+- references/knowledge-capsule.manifest.yaml
+- references/knowledge-capsules/<capsule>.md
+""",
+                encoding="utf-8",
+            )
+            (references_dir / "contract.yaml").write_text(
+                """purpose: Test complete capability selector.
+inputs:
+  - user_request
+  - task_type
+outputs:
+  - result
+  - task_type
+quality_criteria:
+  task_type_selection:
+    alpha: alpha task
+    beta: beta task
+  result_quality:
+    observable: result names selected task type and evidence
+evidence_requirements:
+  - Selection decisions must cite the selected task type and evidence.
+""",
+                encoding="utf-8",
+            )
+            (references_dir / "knowledge-capsule-routing.md").write_text(
+                "# Capsule Routing\n\nRoute through the smallest selected capsule.\n",
+                encoding="utf-8",
+            )
+            (references_dir / "knowledge-capsule.manifest.yaml").write_text(
+                """schema_version: knowledge-os.knowledge-capsule-manifest.v1
+selected_facets:
+  - pack.example:alpha
+  - pack.example:beta
+""",
+                encoding="utf-8",
+            )
+
+            contract = package_contracts.reference_quality_contract(repo_root, skill_md)
+
+        selector_check = next(
+            check for check in contract["checks"] if check["name"] == "capability_selector_contract"
+        )
+        self.assertEqual(selector_check["status"], "pass")
+        self.assertEqual(selector_check["selectors"], ["task_type_selection"])
+        rubric_check = next(
+            check for check in contract["checks"] if check["name"] == "basic_requirement_rubric"
+        )
+        self.assertEqual(rubric_check["status"], "pass")
+        self.assertNotIn(
+            "capability_selector_contract_missing",
+            {blocker["rule_id"] for blocker in contract["blockers"]},
+        )
+
     def test_reference_quality_validates_scenario_drift_review_shape(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir)

@@ -5,6 +5,20 @@ triggers: [skill_creation, skill_hardening, skill_installation, skill_refactor, 
 non_goals: [ordinary_product_work, plugin_packaging, broad_repo_maintenance]
 inputs: [user_request, optional_repo_path, optional_skill_path, optional_evidence]
 outputs: [selected_lane, rationale, next_invocation, blocked_missing_input]
+quality_criteria:
+  routing_lane_choice:
+    creation: new skill request routes to skill-creator or skill-builder path
+    hardening: existing skill improvement routes to skill-builder and SDK pipeline
+    installation: external skill intake routes to skill-installer path
+    refactor: source extraction, restructuring, or reuse analysis routes to skill-refactor
+    skillify: raw content conversion routes to skillify before package hardening
+  routing_accuracy: selected lane matches the user's primary lifecycle intent and declared target path
+  evidence_boundary: rationale cites request facts, missing inputs, and side-effect boundaries without executing downstream mutation
+  next_step_clarity: output names the next invocation or the exact missing input that blocks routing
+evidence_requirements:
+  - Selected lane must be justified by user request facts or declared target paths.
+  - Missing inputs must be reported as blocked_missing_input instead of guessed.
+  - Router output must not claim downstream validation, mutation, or Tessl proof.
 commands:
   - "bash Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family.sh"
   - "./bin/ask skills external-review Plugins/skill-factory/skills/skill-factory-router --audit-level compat --json"

@@ -406,6 +406,108 @@ def read_reference_contract_fallback(text: str) -> dict[str, Any]:
     return fields
 
 
+def _contract_sequence_contains(contract: dict[str, Any], field: str, value: str) -> bool:
+    """Return whether a simple contract sequence contains a string value."""
+    values = contract.get(field)
+    return isinstance(values, list) and value in {item for item in values if isinstance(item, str)}
+
+
+def _capability_selector_fields(contract: dict[str, Any]) -> dict[str, str]:
+    """Return selector keys and expected input/output field names."""
+    quality_criteria = contract.get("quality_criteria")
+    selectors: dict[str, str] = {}
+    if isinstance(quality_criteria, dict):
+        for key, value in quality_criteria.items():
+            if key.endswith("_selection") and isinstance(value, dict) and value:
+                selectors[key] = key.removesuffix("_selection")
+    capability_selection = contract.get("capability_selection")
+    if isinstance(capability_selection, dict) and capability_selection:
+        selectors.setdefault("capability_selection", "capability")
+    return selectors
+
+
+def _basic_requirement_rubric_check(
+    contract: dict[str, Any],
+    selectors: dict[str, str],
+) -> tuple[dict[str, Any], list[dict[str, str]]]:
+    """Return whether the reference contract defines observable skill success."""
+    quality_criteria = contract.get("quality_criteria")
+    evidence_requirements = contract.get("evidence_requirements")
+    missing: list[str] = []
+    quality_keys: list[str] = []
+    selector_keys: list[str] = []
+
+    if not isinstance(quality_criteria, dict) or not quality_criteria:
+        missing.append("quality_criteria")
+    else:
+        quality_keys = sorted(str(key) for key in quality_criteria)
+        selector_keys = sorted(key for key in quality_keys if key.endswith("_selection"))
+        observable_quality_keys = [key for key in quality_keys if not key.endswith("_selection")]
+        if not observable_quality_keys:
+            missing.append("quality_criteria.observable_success")
+        for selector_key in selectors:
+            if selector_key not in quality_criteria:
+                missing.append(f"quality_criteria.{selector_key}")
+
+    if not isinstance(evidence_requirements, list) or not [
+        item for item in evidence_requirements if isinstance(item, str) and item.strip()
+    ]:
+        missing.append("evidence_requirements")
+
+    check = {
+        "name": "basic_requirement_rubric",
+        "status": "pass" if not missing else "blocked_validation",
+        "path": "references/contract.yaml",
+        "missing": missing,
+        "quality_criteria": quality_keys,
+        "selector_criteria": selector_keys,
+        "policy": (
+            "Every Skills SDK contract must define observable quality criteria "
+            "and evidence requirements for the skill's basic job before handoff."
+        ),
+    }
+    blockers = []
+    if missing:
+        blockers.append(
+            {
+                "rule_id": "basic_requirement_rubric_missing",
+                "path": "references/contract.yaml",
+                "message": (
+                    "references/contract.yaml must declare quality_criteria and "
+                    "evidence_requirements so package verification can score the "
+                    "skill's basic requirement before Tessl handoff."
+                ),
+            }
+        )
+    return check, blockers
+
+
+def _manifest_declares_multiple_capabilities(manifest: dict[str, Any]) -> tuple[bool, list[str]]:
+    """Return whether a capsule manifest exposes multiple selectable facets."""
+    facet_values: set[str] = set()
+    selected_facets = manifest.get("selected_facets")
+    if isinstance(selected_facets, list):
+        for item in selected_facets:
+            if isinstance(item, str) and item.strip():
+                facet_values.add(item.split(":", 1)[-1])
+    upstream_packs = manifest.get("upstream_packs")
+    if isinstance(upstream_packs, list):
+        for item in upstream_packs:
+            if not isinstance(item, dict):
+                continue
+            default_facets = item.get("default_facets")
+            if isinstance(default_facets, list):
+                facet_values.update(
+                    str(facet) for facet in default_facets if isinstance(facet, str) and facet
+                )
+    capsules = manifest.get("capsules")
+    if isinstance(capsules, list):
+        for item in capsules:
+            if isinstance(item, dict) and isinstance(item.get("facet"), str):
+                facet_values.add(item["facet"])
+    return len(facet_values) > 1, sorted(facet_values)
+
+
 def skill_markdown_text(skill_md: Path | None) -> str:
     """Return SKILL.md body text for contract discovery without raising."""
     if not skill_md or not skill_md.is_file():
@@ -1759,6 +1861,84 @@ def reference_quality_contract(repo_root: Path | None, skill_md: Path | None) ->
                     )
 
     reference_contract = read_reference_contract(skill_md)
+    reference_contract_selectors = _capability_selector_fields(reference_contract)
+    if references_dir and (references_dir / "contract.yaml").is_file():
+        rubric_check, rubric_blockers = _basic_requirement_rubric_check(
+            reference_contract,
+            reference_contract_selectors,
+        )
+        checks.append(rubric_check)
+        blockers.extend(rubric_blockers)
+    if references_dir and references_dir.is_dir():
+        manifest_path = references_dir / "knowledge-capsule.manifest.yaml"
+        routing_path = references_dir / "knowledge-capsule-routing.md"
+        if manifest_path.is_file():
+            manifest, manifest_error = read_structured_reference(manifest_path)
+            manifest_payload = manifest if isinstance(manifest, dict) else {}
+            has_multi_capability_manifest, manifest_facets = _manifest_declares_multiple_capabilities(
+                manifest_payload
+            )
+            if has_multi_capability_manifest:
+                selectors = reference_contract_selectors
+                missing_selector: list[str] = []
+                if manifest_error is not None:
+                    missing_selector.append("knowledge-capsule.manifest.yaml")
+                if not routing_path.is_file():
+                    missing_selector.append("knowledge-capsule-routing.md")
+                if not selectors:
+                    missing_selector.append("capability_selection")
+                for selector_key, selector_field in selectors.items():
+                    if not _contract_sequence_contains(reference_contract, "inputs", selector_field):
+                        missing_selector.append(f"inputs.{selector_field}")
+                    if not _contract_sequence_contains(reference_contract, "outputs", selector_field):
+                        missing_selector.append(f"outputs.{selector_field}")
+                    quality_criteria = reference_contract.get("quality_criteria")
+                    if (
+                        selector_key != "capability_selection"
+                        and (
+                            not isinstance(quality_criteria, dict)
+                            or not isinstance(quality_criteria.get(selector_key), dict)
+                            or not quality_criteria.get(selector_key)
+                        )
+                    ):
+                        missing_selector.append(f"quality_criteria.{selector_key}")
+                skill_text = skill_markdown_text(skill_md)
+                named_capsule_refs = sorted(
+                    {
+                        match
+                        for match in re.findall(
+                            r"references/knowledge-capsules/[^\s`<>]+\.md",
+                            skill_text,
+                        )
+                        if "<capsule>" not in match
+                    }
+                )
+                if named_capsule_refs:
+                    missing_selector.append("progressive_disclosure_named_capsules")
+                checks.append(
+                    {
+                        "name": "capability_selector_contract",
+                        "status": "pass" if not missing_selector else "blocked_validation",
+                        "path": "references/contract.yaml",
+                        "missing": missing_selector,
+                        "selectors": sorted(selectors),
+                        "manifest_facets": manifest_facets,
+                        "named_capsule_refs": named_capsule_refs,
+                    }
+                )
+                if missing_selector:
+                    blockers.append(
+                        {
+                            "rule_id": "capability_selector_contract_missing",
+                            "path": "references/contract.yaml",
+                            "message": (
+                                "Skills with multi-facet capsule manifests must declare a "
+                                "capability selector in references/contract.yaml and route "
+                                "through top-level capsule references before Tessl handoff."
+                            ),
+                        }
+                    )
+
     tessl_policy = reference_contract.get("tessl_scenario_policy")
     if isinstance(tessl_policy, dict) and not (
         tessl_policy.get("structure_only") is True

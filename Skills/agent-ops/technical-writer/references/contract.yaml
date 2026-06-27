@@ -6,9 +6,30 @@ triggers:
   - Documentation claims must be checked against scripts, commands, workflows, repo structure, support paths, or governance docs.
 non_goals:
   - Do not change runtime behavior, dependencies, CI policy, release state, external trackers, generated projections, or user config from this skill alone.
-inputs: [user_request, doc_target, audience, reader_job, writing_mode, truth_files, validation_commands, glossary_surfaces]
-outputs: [findings, rewritten_docs_or_patch_summary, evidence_map, reader_state, validation_status, unknowns, handoff]
+inputs: [user_request, doc_target, audience, reader_job, writing_type, writing_mode, truth_files, validation_commands, glossary_surfaces]
+outputs: [findings, rewritten_docs_or_patch_summary, evidence_map, reader_state, writing_type, quality_rubric, validation_status, unknowns, handoff]
 quality_criteria:
+  writing_type_selection:
+    technical_documentation: API, README, runbook, config, command, code-doc, or proof-backed repo guidance
+    developer_education: tutorial, lesson, learning path, concept introduction, or example-led teaching
+    content_design_and_service_docs: task-oriented service content, acceptance criteria, vocabulary, maintenance, or support docs
+    articles_and_long_form: argument, essay, narrative explanation, long-form technical article, or public post
+    presentations_and_visual_docs: talk outline, slide deck, visual explanation, diagram-led doc, screenshot-led doc, or standalone slidedoc
+    short_form_and_content_creation: social post, short update, concise announcement, content hook, or compact public artifact
+    devrel_role_and_audience: community-facing docs, trust surface, feedback loop, support boundary, or audience-positioning work
+    voice_signal_and_taste: tone, positioning, credibility, signal density, or brand consistency work
+    storytelling_and_explanation: narrative structure, analogy, conceptual explanation, or sticky framing
+    clarity_style_and_revision: style pass, clarity pass, structural revision, or concise rewrite
+    accessible_and_inclusive_writing: inclusive language, nonvisual support, accessible formatting, or broad-reader support
+    error_messages_and_recovery: error message, blocker explanation, recovery path, warning, or troubleshooting guidance
+  quality_rubric:
+    clear: purpose, next action, and key claim are identifiable without rereading
+    relevant: content serves the named reader job and prioritizes common reader tasks
+    accurate: operational claims have live evidence, citations, command results, or blockers
+    brief: the doc uses the fewest sections, paragraphs, examples, and visuals that preserve reader success
+    understood: prerequisites are introduced or linked before use and ambiguous terms are resolved
+    logical: sections follow the reader's task sequence instead of the writer's discovery sequence
+    accepted: claims are supported by evidence, uncertainty is named, and validation does not overclaim
   skimmability: informative headings, short paragraphs, topic-first sentences, bullets, tables, and useful bolding
   prose: simple unambiguous sentences, consistent terms, no unsupported reader-state assumptions
   reader_state: map prerequisites, introduced concepts, cited evidence, glossary terms, and missing foundations
