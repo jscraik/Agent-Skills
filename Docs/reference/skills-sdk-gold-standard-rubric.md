@@ -485,7 +485,7 @@ commands:
 - ./bin/ask sdk eval scenario-quality <skill-path> --preview --json --robot
 - ./bin/ask sdk eval scorer-quality <skill-path> --preview --json --robot
 - ./bin/ask sdk eval scorer-calibration <skill-path> --preview --json --robot
-- ./bin/ask sdk eval plugin-eval <skill-path> --preview --json --robot
+- ./bin/plugin-eval analyze <skill-path> --format json
 - ./bin/ask skills external-review <skill-path> --json --robot
 - ./bin/ask sdk eval tessl-local-proof --skill <skill-path> --workspace <workspace> --execute --json --robot
 - ./bin/ask sdk eval handoff-readiness --skill <skill-path> --preview --json --robot

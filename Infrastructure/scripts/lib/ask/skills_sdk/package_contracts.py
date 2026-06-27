@@ -437,13 +437,18 @@ def _basic_requirement_rubric_check(
     quality_keys: list[str] = []
     selector_keys: list[str] = []
 
+    # Check field presence (exists in contract) vs emptiness (present but no content)
+    quality_present = "quality_criteria" in contract
+    evidence_present = "evidence_requirements" in contract
+
     has_quality = isinstance(quality_criteria, dict) and quality_criteria
     has_evidence = isinstance(evidence_requirements, list) and [
         item for item in evidence_requirements if isinstance(item, str) and item.strip()
     ]
 
     # Only validate if at least one rubric field is present (showing intent to migrate)
-    if not has_quality and not has_evidence:
+    # Empty dict/list placeholders are treated as present-but-invalid, not absent
+    if not quality_present and not evidence_present:
         # Legacy contract without rubric fields; skip validation
         return {
             "name": "basic_requirement_rubric",
