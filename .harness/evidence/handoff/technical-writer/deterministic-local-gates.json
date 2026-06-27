@@ -1,6 +1,6 @@
 {
   "status": "success",
-  "trace_id": "ddf1fa70-f62e-40cc-a76c-e7143776e7c2",
+  "trace_id": "723cf476-a221-45c9-b606-1f52b90b3977",
   "metadata": {
     "version": "0.1.0",
     "command": "sdk eval scenario-quality Skills/agent-ops/technical-writer --preview --json --robot",
@@ -22,8 +22,8 @@
         "query": "Skills/agent-ops/technical-writer",
         "skill_path": "Skills/agent-ops/technical-writer/SKILL.md",
         "evals_path": "Skills/agent-ops/technical-writer/references/evals.yaml",
-        "scenario_count": 25,
-        "promotion_ready_count": 25,
+        "scenario_count": 27,
+        "promotion_ready_count": 27,
         "blocked_count": 0,
         "scenario_rows": [
           {
@@ -105,6 +105,216 @@
                 "status": "pass",
                 "severity": "blocker",
                 "message": "Release rubrics must anchor scoring in observable evidence, artifacts, files, commands, scores, or proof lanes.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "reader-state-glossary-citations",
+            "category": "edge",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "reader-state-glossary-citations"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "reader-state-glossary-citations"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "reader-state-glossary-citations"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "reader-state-glossary-citations"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "reader-state-glossary-citations"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "reader-state-glossary-citations"
+                ]
+              },
+              {
+                "id": "release_case_metadata_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release scenarios must carry claim ids, realistic context, expected artifacts, and reproduce evidence.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_binary_items",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must split broad quality into at least two binary acceptance checks.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_evidence_anchored",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must anchor scoring in observable evidence, artifacts, files, commands, scores, or proof lanes.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_failure_guard",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Pressure, negative, and edge release rubrics must include an explicit reject, block, avoid, or must-not condition.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "writer-gap-gathering",
+            "category": "pressure",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "writer-gap-gathering"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "writer-gap-gathering"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "writer-gap-gathering"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "writer-gap-gathering"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "writer-gap-gathering"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "writer-gap-gathering"
+                ]
+              },
+              {
+                "id": "release_case_metadata_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release scenarios must carry claim ids, realistic context, expected artifacts, and reproduce evidence.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_binary_items",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must split broad quality into at least two binary acceptance checks.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_evidence_anchored",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Release rubrics must anchor scoring in observable evidence, artifacts, files, commands, scores, or proof lanes.",
+                "evidence": []
+              },
+              {
+                "id": "release_rubric_failure_guard",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Pressure, negative, and edge release rubrics must include an explicit reject, block, avoid, or must-not condition.",
                 "evidence": []
               },
               {
@@ -2710,21 +2920,21 @@
           "SA-003",
           "VP-030"
         ],
-        "agent_summary": "scenario quality preview checked 25 scenario(s) for Skills/agent-ops/technical-writer."
+        "agent_summary": "scenario quality preview checked 27 scenario(s) for Skills/agent-ops/technical-writer."
       },
-      "scenario_count": 25,
-      "promotion_ready_count": 25,
+      "scenario_count": 27,
+      "promotion_ready_count": 27,
       "blocked_count": 0,
       "mutation_performed": false,
       "promotion_performed": false,
       "validation_commands": [
         "./bin/ask sdk eval scenario-quality Skills/agent-ops/technical-writer --preview --json --robot"
       ],
-      "agent_summary": "scenario quality preview checked 25 scenario(s) for Skills/agent-ops/technical-writer."
+      "agent_summary": "scenario quality preview checked 27 scenario(s) for Skills/agent-ops/technical-writer."
     }
   },
   "telemetry": {
-    "latency_ms": 32
+    "latency_ms": 10
   },
   "errors": []
 }

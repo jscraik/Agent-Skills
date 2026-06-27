@@ -22,19 +22,15 @@
     },
     {
       "id": "tessl-local-proof",
-      "status": "blocked",
-      "command": "./bin/ask sdk eval tessl-local-proof --skill Skills/agent-ops/technical-writer --workspace skills-sdk --execute --json --robot",
-      "receipt_path": ".harness/evidence/handoff/technical-writer/tessl-local-proof.json",
-      "blocker": "blocked_validation: Tessl local proof requires reviewed generated scenarios first; prepare-tessl-scenarios then blocked because Tessl workspace skills-sdk was not found or not accessible for project technical-writer.",
-      "blocker_class": "blocked_validation"
+      "status": "pass",
+      "command": "./bin/ask sdk eval tessl-local-proof --skill Skills/agent-ops/technical-writer --workspace skills-sdk-lab --execute --json --robot",
+      "receipt_path": ".harness/evidence/handoff/technical-writer/tessl-local-proof.json"
     },
     {
       "id": "tessl-live-dry-run",
-      "status": "blocked",
-      "command": "./bin/ask evals run Skills/agent-ops/technical-writer --mode smoke --tessl-live-private --tessl-workspace skills-sdk --tessl-live-dry-run --json --robot --no-dashboard",
-      "receipt_path": ".harness/evidence/handoff/technical-writer/tessl-live-dry-run.json",
-      "blocker": "blocked_validation: live Tessl dry-run must wait until reviewed generated scenarios exist and the skills-sdk Tessl workspace/project is accessible.",
-      "blocker_class": "blocked_validation"
+      "status": "pass",
+      "command": "./bin/ask evals run Skills/agent-ops/technical-writer --mode smoke --tessl-live-private --tessl-workspace skills-sdk-lab --tessl-live-dry-run --json --robot",
+      "receipt_path": ".harness/evidence/handoff/technical-writer/tessl-live-dry-run.json"
     }
   ]
 }
