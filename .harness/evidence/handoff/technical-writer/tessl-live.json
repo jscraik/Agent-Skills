@@ -1,9 +1,9 @@
 {
-  "status": "success",
-  "trace_id": "82e74fa6-1b56-41a2-9c3f-df165a22cc3e",
+  "status": "error",
+  "trace_id": "cbe851bc-c82b-40a1-a6db-a27681609717",
   "metadata": {
     "version": "0.1.0",
-    "command": "evals run Skills/agent-ops/technical-writer --mode smoke --tessl-live-private --tessl-workspace skills-sdk-lab --tessl-live-dry-run --json --robot",
+    "command": "evals run Skills/agent-ops/technical-writer --mode smoke --tessl-live-private --tessl-workspace skills-sdk-lab --json --robot",
     "next_steps": [],
     "correction_note": null
   },
@@ -11,7 +11,7 @@
     "tessl_workspace": "skills-sdk-lab",
     "tessl_workspace_source": "argument",
     "validation_commands": [
-      "./bin/ask evals run Skills/agent-ops/technical-writer --mode smoke --runner codex --tessl-live-private --tessl-workspace skills-sdk-lab --tessl-live-dry-run --json --robot"
+      "./bin/ask evals run Skills/agent-ops/technical-writer --mode smoke --runner codex --tessl-live-private --tessl-workspace skills-sdk-lab --json --robot"
     ],
     "profile_contract": {
       "codex_profile": "fast",
@@ -176,7 +176,7 @@
         "schema_version": "capability-lifecycle-event.v1",
         "event_type": "eval_started",
         "event_definition": "A workout, smoke eval, or proof run started for a capability.",
-        "occurred_at": "2026-06-27T06:56:58Z",
+        "occurred_at": "2026-06-27T11:05:32Z",
         "subject": {
           "query": "Skills/agent-ops/technical-writer",
           "target_kind": "skill_path",
@@ -193,9 +193,9 @@
       },
       {
         "schema_version": "capability-lifecycle-event.v1",
-        "event_type": "eval_completed",
-        "event_definition": "A workout, smoke eval, or proof run completed with pass or fail status.",
-        "occurred_at": "2026-06-27T06:56:58Z",
+        "event_type": "eval_blocked",
+        "event_definition": "A workout, smoke eval, or proof run stopped on a classified blocker.",
+        "occurred_at": "2026-06-27T11:05:34Z",
         "subject": {
           "query": "Skills/agent-ops/technical-writer",
           "target_kind": "skill_path",
@@ -205,17 +205,19 @@
           "runner": "codex"
         },
         "outcome": {
-          "status": "pass",
-          "blocker_classes": [],
+          "status": "blocked_auth",
+          "blocker_classes": [
+            "blocked_auth"
+          ],
           "warning_classes": []
         }
       }
     ],
     "lifecycle_event": {
       "schema_version": "capability-lifecycle-event.v1",
-      "event_type": "eval_completed",
-      "event_definition": "A workout, smoke eval, or proof run completed with pass or fail status.",
-      "occurred_at": "2026-06-27T06:56:58Z",
+      "event_type": "eval_blocked",
+      "event_definition": "A workout, smoke eval, or proof run stopped on a classified blocker.",
+      "occurred_at": "2026-06-27T11:05:34Z",
       "subject": {
         "query": "Skills/agent-ops/technical-writer",
         "target_kind": "skill_path",
@@ -225,8 +227,10 @@
         "runner": "codex"
       },
       "outcome": {
-        "status": "pass",
-        "blocker_classes": [],
+        "status": "blocked_auth",
+        "blocker_classes": [
+          "blocked_auth"
+        ],
         "warning_classes": []
       }
     },
@@ -237,9 +241,9 @@
     },
     "raw_output": "",
     "raw_error": "",
-    "eval_status": "pass",
-    "local_eval_status": "skipped_tessl_live_dry_run",
-    "blocker_class": null,
+    "eval_status": "blocked_auth",
+    "local_eval_status": "skipped_tessl_live_private",
+    "blocker_class": "blocked_auth",
     "blocker_taxonomy": {
       "blocked_user_input": "The runner requested user input and should not be treated as hung.",
       "blocked_auth": "The runner stopped on authentication or credential setup.",
@@ -251,9 +255,312 @@
       "blocked_environment": "The selected workspace, sandbox, cwd, or permission profile cannot run the check.",
       "blocked_validation": "A structural or policy validation gate failed for the capability."
     },
-    "tessl_dry_run_note": "Tessl live-private dry-run validates the staged private Tessl payload only. Run without --tessl-live-dry-run only after deterministic local gates, oss-local, oss-cloud, and this dry-run pass for the current candidate.",
+    "tessl_live_private_note": "Tessl live-private scoring uses the staged private Tessl payload directly. Run deterministic local gates, oss-local, oss-cloud, and Tessl dry-run separately before live scoring; any failure returns to oss-local after classification, patching, and retained regression evidence.",
+    "handoff_readiness": {
+      "schema_version": "skills-sdk.eval-handoff-readiness.v0",
+      "schema_uri": "https://agent-skills.local/schemas/skills-sdk/eval-handoff-readiness.v0.schema.json",
+      "status": "preview",
+      "operation": "eval_handoff_readiness_preview",
+      "query": "Skills/agent-ops/technical-writer",
+      "skill_path": "Skills/agent-ops/technical-writer/SKILL.md",
+      "readiness_path": ".harness/evidence/handoff/technical-writer/eval-handoff-readiness.json",
+      "required_lanes": [
+        "deterministic_local_gates",
+        "oss-local",
+        "oss-cloud",
+        "tessl-local-proof",
+        "tessl-live-dry-run"
+      ],
+      "required_order": [
+        "deterministic_local_gates",
+        "oss-local",
+        "patch_oss_local_failures",
+        "oss-cloud",
+        "patch_oss_cloud_failures",
+        "tessl-local-proof",
+        "tessl-live-dry-run",
+        "tessl-live",
+        "patch_tessl_failures"
+      ],
+      "lanes": [
+        {
+          "id": "deterministic_local_gates",
+          "status": "pass",
+          "command": "./bin/ask sdk eval scenario-quality Skills/agent-ops/technical-writer --preview --json --robot",
+          "receipt_path": ".harness/evidence/handoff/technical-writer/deterministic-local-gates.json",
+          "blocker": null,
+          "checks": [
+            {
+              "id": "lane_status_pass",
+              "status": "pass",
+              "severity": "blocker",
+              "message": "Required live handoff lanes must pass before live Tessl.",
+              "evidence": [
+                "pass"
+              ]
+            },
+            {
+              "id": "lane_command_recorded",
+              "status": "pass",
+              "severity": "blocker",
+              "message": "Each lane must record the exact executable command that produced or repairs its evidence.",
+              "evidence": [
+                "./bin/ask sdk eval scenario-quality Skills/agent-ops/technical-writer --preview --json --robot"
+              ]
+            },
+            {
+              "id": "lane_receipt_path_exists",
+              "status": "pass",
+              "severity": "blocker",
+              "message": "Passed lanes must point at an existing receipt or durable evidence artifact.",
+              "evidence": [
+                ".harness/evidence/handoff/technical-writer/deterministic-local-gates.json"
+              ]
+            },
+            {
+              "id": "lane_receipt_semantics_valid",
+              "status": "pass",
+              "severity": "blocker",
+              "message": "Passed lane receipts must prove the lane status and profile they are standing in for.",
+              "evidence": [
+                ".harness/evidence/handoff/technical-writer/deterministic-local-gates.json",
+                "status=success"
+              ]
+            }
+          ],
+          "blockers": []
+        },
+        {
+          "id": "oss-local",
+          "status": "pass",
+          "command": "./bin/ask sdk eval run Skills/agent-ops/technical-writer --runner internal --mode smoke --codex-profile oss-local --timeout-seconds 180 --json --robot",
+          "receipt_path": ".harness/evidence/handoff/technical-writer/oss-local.json",
+          "blocker": null,
+          "checks": [
+            {
+              "id": "lane_status_pass",
+              "status": "pass",
+              "severity": "blocker",
+              "message": "Required live handoff lanes must pass before live Tessl.",
+              "evidence": [
+                "pass"
+              ]
+            },
+            {
+              "id": "lane_command_recorded",
+              "status": "pass",
+              "severity": "blocker",
+              "message": "Each lane must record the exact executable command that produced or repairs its evidence.",
+              "evidence": [
+                "./bin/ask sdk eval run Skills/agent-ops/technical-writer --runner internal --mode smoke --codex-profile oss-local --timeout-seconds 180 --json --robot"
+              ]
+            },
+            {
+              "id": "lane_receipt_path_exists",
+              "status": "pass",
+              "severity": "blocker",
+              "message": "Passed lanes must point at an existing receipt or durable evidence artifact.",
+              "evidence": [
+                ".harness/evidence/handoff/technical-writer/oss-local.json"
+              ]
+            },
+            {
+              "id": "lane_receipt_semantics_valid",
+              "status": "pass",
+              "severity": "blocker",
+              "message": "Passed lane receipts must prove the lane status and profile they are standing in for.",
+              "evidence": [
+                ".harness/evidence/handoff/technical-writer/oss-local.json",
+                "status=success",
+                "profile=oss-local",
+                "expected=oss-local with codex_exec_invoked=true",
+                "codex_exec_invoked=True"
+              ]
+            }
+          ],
+          "blockers": []
+        },
+        {
+          "id": "oss-cloud",
+          "status": "pass",
+          "command": "./bin/ask sdk eval run Skills/agent-ops/technical-writer --runner internal --mode smoke --codex-profile oss-cloud --timeout-seconds 180 --json --robot",
+          "receipt_path": ".harness/evidence/handoff/technical-writer/oss-cloud.json",
+          "blocker": null,
+          "checks": [
+            {
+              "id": "lane_status_pass",
+              "status": "pass",
+              "severity": "blocker",
+              "message": "Required live handoff lanes must pass before live Tessl.",
+              "evidence": [
+                "pass"
+              ]
+            },
+            {
+              "id": "lane_command_recorded",
+              "status": "pass",
+              "severity": "blocker",
+              "message": "Each lane must record the exact executable command that produced or repairs its evidence.",
+              "evidence": [
+                "./bin/ask sdk eval run Skills/agent-ops/technical-writer --runner internal --mode smoke --codex-profile oss-cloud --timeout-seconds 180 --json --robot"
+              ]
+            },
+            {
+              "id": "lane_receipt_path_exists",
+              "status": "pass",
+              "severity": "blocker",
+              "message": "Passed lanes must point at an existing receipt or durable evidence artifact.",
+              "evidence": [
+                ".harness/evidence/handoff/technical-writer/oss-cloud.json"
+              ]
+            },
+            {
+              "id": "lane_receipt_semantics_valid",
+              "status": "pass",
+              "severity": "blocker",
+              "message": "Passed lane receipts must prove the lane status and profile they are standing in for.",
+              "evidence": [
+                ".harness/evidence/handoff/technical-writer/oss-cloud.json",
+                "status=success",
+                "profile=oss-cloud",
+                "expected=oss-cloud with codex_exec_invoked=true",
+                "codex_exec_invoked=True"
+              ]
+            }
+          ],
+          "blockers": []
+        },
+        {
+          "id": "tessl-local-proof",
+          "status": "pass",
+          "command": "./bin/ask sdk eval tessl-local-proof --skill Skills/agent-ops/technical-writer --workspace skills-sdk-lab --execute --json --robot",
+          "receipt_path": ".harness/evidence/handoff/technical-writer/tessl-local-proof.json",
+          "blocker": null,
+          "checks": [
+            {
+              "id": "lane_status_pass",
+              "status": "pass",
+              "severity": "blocker",
+              "message": "Required live handoff lanes must pass before live Tessl.",
+              "evidence": [
+                "pass"
+              ]
+            },
+            {
+              "id": "lane_command_recorded",
+              "status": "pass",
+              "severity": "blocker",
+              "message": "Each lane must record the exact executable command that produced or repairs its evidence.",
+              "evidence": [
+                "./bin/ask sdk eval tessl-local-proof --skill Skills/agent-ops/technical-writer --workspace skills-sdk-lab --execute --json --robot"
+              ]
+            },
+            {
+              "id": "lane_receipt_path_exists",
+              "status": "pass",
+              "severity": "blocker",
+              "message": "Passed lanes must point at an existing receipt or durable evidence artifact.",
+              "evidence": [
+                ".harness/evidence/handoff/technical-writer/tessl-local-proof.json"
+              ]
+            },
+            {
+              "id": "lane_receipt_semantics_valid",
+              "status": "pass",
+              "severity": "blocker",
+              "message": "Passed lane receipts must prove the lane status and profile they are standing in for.",
+              "evidence": [
+                ".harness/evidence/handoff/technical-writer/tessl-local-proof.json",
+                "status=success",
+                "profile=missing",
+                "expected=command includes tessl-local-proof --execute"
+              ]
+            }
+          ],
+          "blockers": []
+        },
+        {
+          "id": "tessl-live-dry-run",
+          "status": "pass",
+          "command": "./bin/ask evals run Skills/agent-ops/technical-writer --mode smoke --tessl-live-private --tessl-workspace skills-sdk-lab --tessl-live-dry-run --json --robot",
+          "receipt_path": ".harness/evidence/handoff/technical-writer/tessl-live-dry-run.json",
+          "blocker": null,
+          "checks": [
+            {
+              "id": "lane_status_pass",
+              "status": "pass",
+              "severity": "blocker",
+              "message": "Required live handoff lanes must pass before live Tessl.",
+              "evidence": [
+                "pass"
+              ]
+            },
+            {
+              "id": "lane_command_recorded",
+              "status": "pass",
+              "severity": "blocker",
+              "message": "Each lane must record the exact executable command that produced or repairs its evidence.",
+              "evidence": [
+                "./bin/ask evals run Skills/agent-ops/technical-writer --mode smoke --tessl-live-private --tessl-workspace skills-sdk-lab --tessl-live-dry-run --json --robot"
+              ]
+            },
+            {
+              "id": "lane_receipt_path_exists",
+              "status": "pass",
+              "severity": "blocker",
+              "message": "Passed lanes must point at an existing receipt or durable evidence artifact.",
+              "evidence": [
+                ".harness/evidence/handoff/technical-writer/tessl-live-dry-run.json"
+              ]
+            },
+            {
+              "id": "lane_receipt_semantics_valid",
+              "status": "pass",
+              "severity": "blocker",
+              "message": "Passed lane receipts must prove the lane status and profile they are standing in for.",
+              "evidence": [
+                ".harness/evidence/handoff/technical-writer/tessl-live-dry-run.json",
+                "status=success",
+                "profile=missing",
+                "expected=command includes --tessl-live-dry-run and receipt records tessl_eval.dry_run=true",
+                "tessl_live_dry_run=True"
+              ]
+            }
+          ],
+          "blockers": []
+        }
+      ],
+      "quality_checks": [
+        {
+          "id": "readiness_artifact_present",
+          "status": "pass",
+          "severity": "blocker",
+          "message": "Live Tessl requires a current handoff readiness artifact under .harness/evidence.",
+          "evidence": [
+            ".harness/evidence/handoff/technical-writer/eval-handoff-readiness.json"
+          ]
+        },
+        {
+          "id": "readiness_schema_supported",
+          "status": "pass",
+          "severity": "blocker",
+          "message": "The handoff readiness input schema_version must match the SDK contract.",
+          "evidence": [
+            "skills-sdk.eval-handoff-readiness-input.v1"
+          ]
+        }
+      ],
+      "blockers": [],
+      "ready_for_live_tessl": true,
+      "required_next_actions": [
+        "Run live Tessl; if it fails, owner-classify the failure and return to oss-local."
+      ],
+      "mutation_performed": false,
+      "promotion_performed": false,
+      "agent_summary": "Handoff readiness for Skills/agent-ops/technical-writer is complete for live Tessl."
+    },
     "tessl_eval": {
-      "status": "pass",
+      "status": "blocked",
       "command": "tessl eval run --json --workspace skills-sdk-lab /tmp/ask-tessl-evals/Skills__agent-ops__technical-writer-0fd318d6658a",
       "source_path": "Skills/agent-ops/technical-writer",
       "staged_source": "/tmp/ask-tessl-evals/Skills__agent-ops__technical-writer-0fd318d6658a",
@@ -386,7 +693,7 @@
         "name": "skills-sdk-lab/technical-writer"
       },
       "visibility": "private",
-      "dry_run": true,
+      "dry_run": false,
       "live_private": true,
       "evidence_retention": "staged directory is left under /tmp/ask-tessl-evals for inspection",
       "policy": {
@@ -509,15 +816,49 @@
         "target_score": 0.95,
         "usage_data_opt_out": "tessl config set shareUsageData false"
       },
+      "project_link": {
+        "identity": {
+          "owner_type": "standalone_skill",
+          "project": "technical-writer",
+          "workspace": "skills-sdk-lab",
+          "name": "skills-sdk-lab/technical-writer"
+        },
+        "staged_source": "/tmp/ask-tessl-evals/Skills__agent-ops__technical-writer-0fd318d6658a",
+        "checked": true,
+        "status": "blocked",
+        "action": "check",
+        "blocker": "Tessl CLI is installed locally, but authentication is required before project link checks can run.",
+        "blocker_class": "blocked_auth",
+        "commands": [
+          {
+            "action": "check",
+            "command": "/Users/jamiecraik/.local/bin/tessl project repair --json --yes",
+            "exit_code": 1,
+            "signal": null,
+            "raw_output": "{\n  \"status\": \"error\",\n  \"message\": \"Please authenticate with Tessl to continue. Run `tessl login` to sign up or log in.\"\n}\n",
+            "raw_error": "",
+            "parsed_output": {
+              "status": "error",
+              "message": "Please authenticate with Tessl to continue. Run `tessl login` to sign up or log in."
+            }
+          }
+        ]
+      },
       "raw_output": "",
       "raw_error": "",
-      "exit_code": 0,
-      "blocker": null,
-      "blocker_class": null
-    }
+      "blocker": "Tessl CLI is installed locally, but authentication is required before project link checks can run.",
+      "blocker_class": "blocked_auth"
+    },
+    "tessl_eval_status": "blocked_auth",
+    "tessl_blocker_class": "blocked_auth"
   },
   "telemetry": {
-    "latency_ms": 59
+    "latency_ms": 1526
   },
-  "errors": []
+  "errors": [
+    {
+      "code": "ERR_RUNTIME",
+      "message": "Tessl eval blocked: Tessl CLI is installed locally, but authentication is required before project link checks can run."
+    }
+  ]
 }

@@ -1,6 +1,6 @@
 {
   "status": "success",
-  "trace_id": "2d285e38-06b6-4056-b66d-9930e2bf5008",
+  "trace_id": "5e8defe7-4593-40b3-b86d-7c4405143b6f",
   "metadata": {
     "version": "0.1.0",
     "command": "sdk eval tessl-local-proof --skill Skills/agent-ops/technical-writer --workspace skills-sdk-lab --execute --json --robot",
@@ -23,7 +23,7 @@
         "execute": true,
         "include_review": false,
         "review_threshold": 95,
-        "staged_source": "/tmp/ask-tessl-live/Skills__agent-ops__technical-writer-0fd318d6658a",
+        "staged_source": "/tmp/ask-tessl-evals/Skills__agent-ops__technical-writer-0fd318d6658a",
         "staged_files": [
           ".tessl-plugin/plugin.json",
           "tessl.json",
@@ -143,34 +143,34 @@
         ],
         "staged_file_count": 115,
         "install_workspace": "/tmp/ask-tessl-local-install/Skills__agent-ops__technical-writer-0fd318d6658a",
-        "dist_dir": "/tmp/ask-tessl-live/Skills__agent-ops__technical-writer-0fd318d6658a/dist",
-        "dist_path": "/tmp/ask-tessl-live/Skills__agent-ops__technical-writer-0fd318d6658a/dist/technical-writer.tgz",
+        "dist_dir": "/tmp/ask-tessl-evals/Skills__agent-ops__technical-writer-0fd318d6658a/dist",
+        "dist_path": "/tmp/ask-tessl-evals/Skills__agent-ops__technical-writer-0fd318d6658a/dist/technical-writer.tgz",
         "planned_commands": {
-          "plugin_lint": "/Users/jamiecraik/.local/bin/tessl plugin lint /tmp/ask-tessl-live/Skills__agent-ops__technical-writer-0fd318d6658a",
-          "plugin_pack": "/Users/jamiecraik/.local/bin/tessl plugin pack --output /tmp/ask-tessl-live/Skills__agent-ops__technical-writer-0fd318d6658a/dist/technical-writer.tgz /tmp/ask-tessl-live/Skills__agent-ops__technical-writer-0fd318d6658a",
-          "install_file": "/Users/jamiecraik/.local/bin/tessl install file:/tmp/ask-tessl-live/Skills__agent-ops__technical-writer-0fd318d6658a --agent codex --yes --strict",
-          "review_run": "/Users/jamiecraik/.local/bin/tessl review run /tmp/ask-tessl-live/Skills__agent-ops__technical-writer-0fd318d6658a/skills/technical-writer --workspace skills-sdk-lab --json --threshold 95"
+          "plugin_lint": "/Users/jamiecraik/.local/bin/tessl plugin lint /tmp/ask-tessl-evals/Skills__agent-ops__technical-writer-0fd318d6658a",
+          "plugin_pack": "/Users/jamiecraik/.local/bin/tessl plugin pack --output /tmp/ask-tessl-evals/Skills__agent-ops__technical-writer-0fd318d6658a/dist/technical-writer.tgz /tmp/ask-tessl-evals/Skills__agent-ops__technical-writer-0fd318d6658a",
+          "install_file": "/Users/jamiecraik/.local/bin/tessl install file:/tmp/ask-tessl-evals/Skills__agent-ops__technical-writer-0fd318d6658a --agent codex --yes --strict",
+          "review_run": "/Users/jamiecraik/.local/bin/tessl review run /tmp/ask-tessl-evals/Skills__agent-ops__technical-writer-0fd318d6658a/skills/technical-writer --workspace skills-sdk-lab --json --threshold 95"
         },
         "commands": {
           "plugin_lint": {
             "status": "success",
-            "command": "/Users/jamiecraik/.local/bin/tessl plugin lint /tmp/ask-tessl-live/Skills__agent-ops__technical-writer-0fd318d6658a",
-            "cwd": "/tmp/ask-tessl-live/Skills__agent-ops__technical-writer-0fd318d6658a",
+            "command": "/Users/jamiecraik/.local/bin/tessl plugin lint /tmp/ask-tessl-evals/Skills__agent-ops__technical-writer-0fd318d6658a",
+            "cwd": "/tmp/ask-tessl-evals/Skills__agent-ops__technical-writer-0fd318d6658a",
             "exit_code": 0,
             "stdout": "\n✔ Plugin skills-sdk-lab/technical-writer@0.2.1 is valid\n",
             "stderr": ""
           },
           "plugin_pack": {
             "status": "success",
-            "command": "/Users/jamiecraik/.local/bin/tessl plugin pack --output /tmp/ask-tessl-live/Skills__agent-ops__technical-writer-0fd318d6658a/dist/technical-writer.tgz /tmp/ask-tessl-live/Skills__agent-ops__technical-writer-0fd318d6658a",
-            "cwd": "/tmp/ask-tessl-live/Skills__agent-ops__technical-writer-0fd318d6658a",
+            "command": "/Users/jamiecraik/.local/bin/tessl plugin pack --output /tmp/ask-tessl-evals/Skills__agent-ops__technical-writer-0fd318d6658a/dist/technical-writer.tgz /tmp/ask-tessl-evals/Skills__agent-ops__technical-writer-0fd318d6658a",
+            "cwd": "/tmp/ask-tessl-evals/Skills__agent-ops__technical-writer-0fd318d6658a",
             "exit_code": 0,
-            "stdout": "✔ Plugin packaged to /tmp/ask-tessl-live/Skills__agent-ops__technical-writer-0fd318d6658a/dist/technical-writer.tgz\n",
+            "stdout": "✔ Plugin packaged to /tmp/ask-tessl-evals/Skills__agent-ops__technical-writer-0fd318d6658a/dist/technical-writer.tgz\n",
             "stderr": ""
           },
           "install_file": {
             "status": "success",
-            "command": "/Users/jamiecraik/.local/bin/tessl install file:/tmp/ask-tessl-live/Skills__agent-ops__technical-writer-0fd318d6658a --agent codex --yes --strict",
+            "command": "/Users/jamiecraik/.local/bin/tessl install file:/tmp/ask-tessl-evals/Skills__agent-ops__technical-writer-0fd318d6658a --agent codex --yes --strict",
             "cwd": "/tmp/ask-tessl-local-install/Skills__agent-ops__technical-writer-0fd318d6658a",
             "exit_code": 0,
             "stdout": "✓ Authenticated as <redacted-email>\n\n\n\nDetected 4 agent(s) needing setup: Claude Code, Gemini cli, Codex, GitHub Copilot CLI\n\n✔ Created MCP client configuration for 4 agent(s):\n- Claude Code: .mcp.json\n- Gemini cli: .gemini/settings.json\n- Codex: .codex/config.toml\n- GitHub Copilot CLI: .vscode/mcp.json\n\n\n✓ Init complete!\n✔ Installed skills-sdk-lab/technical-writer@0.2.1\n",
@@ -199,7 +199,7 @@
           "no_live_repo_source": true,
           "install_scope": "temporary project workspace under /tmp/ask-tessl-local-install"
         },
-        "evidence_retention": "staged directory is left under /tmp/ask-tessl-live for inspection",
+        "evidence_retention": "staged directory is left under /tmp/ask-tessl-evals for inspection",
         "installed_project_manifest": "/tmp/ask-tessl-local-install/Skills__agent-ops__technical-writer-0fd318d6658a/tessl.json"
       },
       "mutation_performed": true,
@@ -210,7 +210,7 @@
     }
   },
   "telemetry": {
-    "latency_ms": 3205
+    "latency_ms": 22717
   },
   "errors": []
 }

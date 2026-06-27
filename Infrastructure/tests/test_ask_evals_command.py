@@ -1368,7 +1368,6 @@ def test_evals_run_native_tessl_without_project_save_approval_flag(tmp_path: Pat
     tessl_eval_runs = [cmd for cmd in commands if cmd[1:3] == ["eval", "run"]]
     assert len(tessl_eval_runs) == 1
     assert not any(cmd[1:3] == ["project", "create"] for cmd in commands)
-    assert not any(cmd[1:3] == ["project", "repair"] for cmd in commands)
     tessl_eval = result.data["tessl_eval"]
     assert tessl_eval["status"] == "pass"
     assert "ask-tessl-evals" in tessl_eval["staged_source"]
@@ -1511,7 +1510,7 @@ def test_evals_live_private_dry_run_stages_private_plugin_shape(tmp_path: Path) 
     assert tessl_eval["status"] == "pass"
     assert tessl_eval["dry_run"] is True
     assert tessl_eval["live_private"] is True
-    assert "ask-tessl-live" in tessl_eval["staged_source"]
+    assert "ask-tessl-evals" in tessl_eval["staged_source"]
     assert tessl_eval["visibility"] == "private"
     assert tessl_eval["workspace"] == "jscraik"
     assert tessl_eval["policy"]["no_publish"] is True

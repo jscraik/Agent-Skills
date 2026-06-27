@@ -2458,7 +2458,7 @@ def _profiles_with_effective_roots(profiles: dict[str, dict[str, Any]]) -> dict[
                 "codex_profile": "fast",
                 "codex_profile_config": "[profiles.fast]",
                 "codex_runner_args": ["--profile", "fast"],
-                "tessl_eval_staging_root": f"{os.path.join(tempfile.gettempdir(), 'ask-tessl-live')}/<skill-path>-<sha12>",
+                "tessl_eval_staging_root": f"{os.path.join(tempfile.gettempdir(), 'ask-tessl-evals')}/<skill-path>-<sha12>",
                 "tessl_project_marker": "tessl.json",
                 "staged_inputs": [
                     "SKILL.md",

@@ -700,12 +700,12 @@ def _summarize_tessl_live_eval_view(payload: dict[str, object]) -> dict[str, obj
 
 def _tessl_staging_root_template() -> str:
     """Return the human-readable template for stable Tessl eval staging."""
-    return str(Path(tempfile.gettempdir()) / "ask-tessl-live" / "<skill-path>-<sha12>")
+    return str(Path(tempfile.gettempdir()) / "ask-tessl-evals" / "<skill-path>-<sha12>")
 
 
 def _tessl_live_staging_root_template() -> str:
     """Return the human-readable template for private Tessl live tile staging."""
-    return str(Path(tempfile.gettempdir()) / "ask-tessl-live" / "<skill-path>-<sha12>")
+    return str(Path(tempfile.gettempdir()) / "ask-tessl-evals" / "<skill-path>-<sha12>")
 
 
 def _tessl_policy() -> dict:
@@ -2501,7 +2501,7 @@ def _stable_tessl_stage_parent(path: str) -> Path:
 def _stable_tessl_live_stage_parent(path: str) -> Path:
     safe_name = path.replace("/", "__").replace(" ", "_")
     digest = hashlib.sha256(path.encode("utf-8")).hexdigest()[:12]
-    return Path(tempfile.gettempdir()) / "ask-tessl-live" / f"{safe_name}-{digest}"
+    return Path(tempfile.gettempdir()) / "ask-tessl-evals" / f"{safe_name}-{digest}"
 
 
 def _stable_tessl_local_install_workspace(path: str) -> Path:
@@ -3437,7 +3437,7 @@ def run_tessl_local_proof(
         "planned_commands": planned_commands,
         "commands": {},
         "policy": _tessl_local_proof_policy(normalized_workspace),
-        "evidence_retention": f"staged directory is left under {tempfile.gettempdir()}/ask-tessl-live for inspection",
+        "evidence_retention": f"staged directory is left under {tempfile.gettempdir()}/ask-tessl-evals for inspection",
     }
     if not execute:
         return receipt
@@ -3840,7 +3840,7 @@ def _tessl_eval_result_common(
         "visibility": "private",
         "dry_run": dry_run,
         "live_private": True,
-        "evidence_retention": f"staged directory is left under {tempfile.gettempdir()}/ask-tessl-live for inspection",
+        "evidence_retention": f"staged directory is left under {tempfile.gettempdir()}/ask-tessl-evals for inspection",
         "policy": _tessl_live_private_policy(workspace),
     }
 

@@ -1,0 +1,22 @@
+{
+  "schema_version": "tessl-live-blocked/v1",
+  "generated_at": "2026-06-27T11:07:46Z",
+  "skill": "Skills/agent-ops/technical-writer",
+  "workspace": "skills-sdk-lab",
+  "requested_command": "./bin/ask evals run Skills/agent-ops/technical-writer --mode smoke --tessl-live-private --tessl-workspace skills-sdk-lab --json --robot > .harness/evidence/handoff/technical-writer/tessl-live.json",
+  "status": "blocked",
+  "blocker_class": "blocked_auth",
+  "blocker": "Tessl CLI is installed locally, but authentication is not active for the installed CLI; both sandboxed and unsandboxed `tessl doctor --json` reported authentication.authenticated=false.",
+  "tessl_invoked": true,
+  "tessl_eval_run_started": false,
+  "tessl_run_id": null,
+  "score": null,
+  "evidence_before_block": {
+    "live_receipt": ".harness/evidence/handoff/technical-writer/tessl-live.json",
+    "handoff_readiness_preview": ".harness/evidence/handoff/technical-writer/eval-handoff-readiness-preview.json",
+    "tessl_live_dry_run": ".harness/evidence/handoff/technical-writer/tessl-live-dry-run.json",
+    "tessl_local_proof": ".harness/evidence/handoff/technical-writer/tessl-local-proof.json",
+    "approved_staging_root": "/tmp/ask-tessl-evals/Skills__agent-ops__technical-writer-0fd318d6658a"
+  },
+  "retry_requirement": "Run `tessl login` for /Users/jamiecraik/.local/bin/tessl, confirm `/Users/jamiecraik/.local/bin/tessl doctor --json` reports authentication.authenticated=true, then rerun the requested live eval command."
+}

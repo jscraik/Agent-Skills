@@ -2588,7 +2588,10 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(eval_contract["codex_profile"], "fast")
         self.assertEqual(eval_contract["codex_profile_config"], "[profiles.fast]")
         self.assertEqual(eval_contract["tessl_project_marker"], "tessl.json")
-        self.assertIn("/tmp/ask-tessl-live", eval_contract["tessl_eval_staging_root"])
+        self.assertIn(
+            os.path.join(tempfile.gettempdir(), "ask-tessl-evals"),
+            eval_contract["tessl_eval_staging_root"],
+        )
         self.assertEqual(profiles["operation_context"]["profile_model"], "profile-v2-inspired")
         self.assertEqual(profiles["operation_context"]["contract_schemas"]["doctor"], "skill-doctor.v1")
         self.assertEqual(profiles["operation_context"]["contract_schemas"]["memory"], "skill-memory-provider.v1")

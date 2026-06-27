@@ -1,6 +1,6 @@
 {
   "status": "success",
-  "trace_id": "7738ad54-8bac-49be-8533-013dd999f00a",
+  "trace_id": "5db88d64-f696-4234-8bde-8c93f518cc2e",
   "metadata": {
     "version": "0.1.0",
     "command": "sdk eval handoff-readiness --skill Skills/agent-ops/technical-writer --preview --json --robot",
@@ -324,7 +324,7 @@
     }
   },
   "telemetry": {
-    "latency_ms": 9
+    "latency_ms": 10
   },
   "errors": []
 }

@@ -68,7 +68,7 @@ operator_contract:
     deep: "release, projection, security, benchmark, or cross-plugin checks only for broad/package-impacting changes"
   eval_evidence_contract:
     codex_profile: "oss-local and oss-cloud for proof; fast ([profiles.fast]) only for quick smoke checks"
-    tessl_eval_staging_root: "/tmp/ask-tessl-live/<skill-path>-<sha12>"
+    tessl_eval_staging_root: "/tmp/ask-tessl-evals/<skill-path>-<sha12>"
     tessl_review_staging_root: "/tmp/ask-tessl-reviews/<skill-path>-<sha12>"
     tessl_project_marker: "tessl.json"
     eval_case_source: "references/evals.yaml -> scenarios/<case-id>/task.md"

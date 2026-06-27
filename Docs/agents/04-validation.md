@@ -99,7 +99,7 @@ Codex profile when validating skill-factory output.
 
 `ask evals run` must include the installed local Tessl CLI lane every time after
 the repo eval runner. Stage only the controlled Tessl input files into the
-stable evidence directory `/tmp/ask-tessl-live/<skill-path>-<sha12>`, then run
+stable evidence directory `/tmp/ask-tessl-evals/<skill-path>-<sha12>`, then run
 `tessl eval run --json <staged-temp-source>`; do not point Tessl at the live
 skill or plugin source tree. The hard boundary is registry upload: use native
 `tessl`, no `npx tessl`, no publish, no registry upload, and no package upload
@@ -122,7 +122,7 @@ reported under `skills-sdk`, not under a personal workspace with the same
 project name. Leave the staged directory in place so the copied
 inputs, synthesized Tessl tasks, and Tessl project marker remain inspectable
 evidence. Reruns must archive prior staged contents to a sibling archive such
-as `/tmp/ask-tessl-live/<skill-path>-<sha12>-evidence-archive/` before
+as `/tmp/ask-tessl-evals/<skill-path>-<sha12>-evidence-archive/` before
 refreshing current inputs; do not delete temp evidence to get a clean
 workspace. Do not keep historical `scenarios/`, `evals/`, or
 `criteria.json` evidence under the staged upload root, because Tessl may ingest
@@ -133,7 +133,7 @@ The live Tessl workflow is a separate explicit lane. Use
 `./bin/ask evals run <skill-path> --tessl-live-private --tessl-workspace <workspace>`
 only when the operator asks for live private Tessl evidence. This lane must
 stage a plugin-shaped package under
-`/tmp/ask-tessl-live/<skill-path>-<sha12>`, write
+`/tmp/ask-tessl-evals/<skill-path>-<sha12>`, write
 `.tessl-plugin/plugin.json` with `"name": "<workspace>/<plugin-name>"`,
 `"private": true`, and `"skills": "./skills/"`, copy the skill package to
 `skills/<skill-name>/SKILL.md`, omit `tile.json`, and convert eval cases into

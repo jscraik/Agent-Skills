@@ -25,7 +25,7 @@ The `oss-local` and `oss-cloud` lanes must use `codex exec --profile oss-local` 
 
 ## Tessl Eval Evidence
 
-Tessl live-private dry-run must use the installed local `tessl` CLI after the SDK deterministic and OSS proof lanes. The wrapper copies controlled input to `/tmp/ask-tessl-live/<skill-path>-<sha12>` and leaves that directory in place for inspection.
+Tessl live-private dry-run must use the installed local `tessl` CLI after the SDK deterministic and OSS proof lanes. The wrapper copies controlled input to `/tmp/ask-tessl-evals/<skill-path>-<sha12>` and leaves that directory in place for inspection.
 
 The improve-skill Tessl lane uses the product workspace `skills-sdk-lab`.
 If an operator or older example supplies `skills-sdk`, the wrapper normalizes
