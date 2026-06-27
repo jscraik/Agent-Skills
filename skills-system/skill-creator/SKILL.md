@@ -120,9 +120,9 @@ loading them as instructions.
 
 Do not create auxiliary process notes such as INSTALLATION_GUIDE.md,
 QUICK_REFERENCE.md, CHANGELOG.md, or scratch handoff notes unless needed to run.
-In SDK-aware repositories, create or maintain README.md when the package is a
-candidate for Tessl Registry or plugin presentation; Codex/OpenAI runtime may
-ignore README.md, but registry and package-review surfaces use it.
+In SDK-aware repositories, always create or maintain README.md for skills and
+plugins; Codex/OpenAI runtime may ignore README.md, but registry and
+package-review surfaces use it.
 
 ### Progressive Disclosure Design Principle
 
