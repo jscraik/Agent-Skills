@@ -39,6 +39,19 @@ wait calls in the same turn are not additional discovery; they are evidence that
 the recovery lane must be constrained to direct repo commands until the next
 operator turn.
 
+Post-compaction recovery checklist:
+
+- If the continuation summary does not include a concrete active runtime handle
+  from the immediately preceding visible tool result, treat all prior handles as
+  unusable.
+- Start with direct repository commands such as `git status`, `stat`, `tail`,
+  `jq`, or the repo wrapper that re-discovers state from disk.
+- Do not use multi-tool wrappers for wait, poll, resume, or closeout recovery.
+  Wrapper calls do not weaken the handle-evidence requirement.
+- If an invalid wait/poll/resume call happens anyway, stop the delivery lane,
+  record the recurrence in this ledger, validate steering uptake, and continue
+  with single direct repo commands only for the rest of that turn.
+
 ## Proof Before Proceeding
 
 Before resuming ordinary implementation, produce repo-local proof that future
