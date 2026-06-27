@@ -594,6 +594,15 @@ def _analytic_rubric_quality_check(contract: dict[str, Any]) -> tuple[dict[str, 
     return check, blockers
 
 
+def _requires_tessl_handoff_quality(contract: dict[str, Any]) -> bool:
+    """Return whether this reference contract declares a live Tessl handoff lane."""
+    tessl_policy = contract.get("tessl_scenario_policy")
+    return isinstance(tessl_policy, dict) and not (
+        tessl_policy.get("structure_only") is True
+        or tessl_policy.get("structure_check_only") is True
+    )
+
+
 def _manifest_declares_multiple_capabilities(manifest: dict[str, Any]) -> tuple[bool, list[str]]:
     """Return whether a capsule manifest exposes multiple selectable facets."""
     facet_values: set[str] = set()
@@ -1974,6 +1983,7 @@ def reference_quality_contract(repo_root: Path | None, skill_md: Path | None) ->
 
     reference_contract = read_reference_contract(skill_md)
     reference_contract_selectors = _capability_selector_fields(reference_contract)
+    requires_tessl_handoff_quality = _requires_tessl_handoff_quality(reference_contract)
     if references_dir and (references_dir / "contract.yaml").is_file():
         rubric_check, rubric_blockers = _basic_requirement_rubric_check(
             reference_contract,
@@ -1985,7 +1995,8 @@ def reference_quality_contract(repo_root: Path | None, skill_md: Path | None) ->
             reference_contract
         )
         checks.append(analytic_rubric_check)
-        blockers.extend(analytic_rubric_blockers)
+        if requires_tessl_handoff_quality:
+            blockers.extend(analytic_rubric_blockers)
     if references_dir and references_dir.is_dir():
         manifest_path = references_dir / "knowledge-capsule.manifest.yaml"
         routing_path = references_dir / "knowledge-capsule-routing.md"
@@ -2057,10 +2068,7 @@ def reference_quality_contract(repo_root: Path | None, skill_md: Path | None) ->
                     )
 
     tessl_policy = reference_contract.get("tessl_scenario_policy")
-    if isinstance(tessl_policy, dict) and not (
-        tessl_policy.get("structure_only") is True
-        or tessl_policy.get("structure_check_only") is True
-    ):
+    if requires_tessl_handoff_quality and isinstance(tessl_policy, dict):
         scenario_drift_review = tessl_policy.get("scenario_drift_review")
         missing_review = []
         if not isinstance(scenario_drift_review, dict):

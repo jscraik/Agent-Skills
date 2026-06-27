@@ -1908,6 +1908,61 @@ evidence_requirements:
         self.assertIn("quality_criteria.result_quality.observable_evidence", analytic_check["missing"])
         self.assertIn("quality_criteria.result_quality.scoring", analytic_check["missing"])
         self.assertIn("automatic_failure_conditions", analytic_check["missing"])
+        self.assertNotIn(
+            "analytic_rubric_quality_missing",
+            {blocker["rule_id"] for blocker in contract["blockers"]},
+        )
+
+    def test_reference_quality_blocks_analytic_rubric_shape_for_tessl_handoff(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "weak-tessl-rubric-skill"
+            references_dir = skill_dir / "references"
+            references_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: weak-tessl-rubric-skill
+description: Weak Tessl rubric fixture.
+version: "1.0.0"
+---
+
+# Weak Tessl Rubric Skill
+""",
+                encoding="utf-8",
+            )
+            (references_dir / "contract.yaml").write_text(
+                """purpose: Test weak Tessl rubric contract.
+inputs:
+  - user request
+outputs:
+  - result
+quality_criteria:
+  result_quality:
+    observable: result contains useful evidence
+evidence_requirements:
+  - Result cites evidence.
+tessl_scenario_policy:
+  scenario_drift_review:
+    required_after_skill_change: true
+    review_decisions:
+      - keep
+      - update
+      - add
+      - remove
+    review_surfaces:
+      - references/evals.yaml
+      - references/evals/*.md
+""",
+                encoding="utf-8",
+            )
+
+            contract = package_contracts.reference_quality_contract(repo_root, skill_md)
+
+        analytic_check = next(
+            check for check in contract["checks"] if check["name"] == "analytic_rubric_quality"
+        )
+        self.assertEqual(analytic_check["status"], "blocked_validation")
         self.assertIn(
             "analytic_rubric_quality_missing",
             {blocker["rule_id"] for blocker in contract["blockers"]},
