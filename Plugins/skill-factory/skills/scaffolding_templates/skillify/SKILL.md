@@ -61,7 +61,12 @@ Ask one direct question if destination, owner, or repeatability is unclear.
 6. Create the minimal package shape below only for high-confidence missing skill candidates.
 7. Add one happy-path eval and one boundary or negative eval.
 8. Run strict audit. If it fails, fix that failure before broader validation.
-9. Run external review and record the report path when hardening evidence matters.
+9. For SDK-pipeline candidates, run the handoff proof ladder before any release,
+   install, sync, publish, or live Tessl claim: scenario-quality preview,
+   scorer-quality preview, scorer-calibration preview, oss-local smoke,
+   oss-cloud smoke, Tessl local proof with `--execute` in `skills-sdk-lab`,
+   Tessl live-private dry-run in `skills-sdk-lab`, then handoff-readiness.
+10. Run external review and record the report path when hardening evidence matters.
 
 In read-only, audit-only, or eval-runner contexts, do not attempt file writes.
 Return the same package shape as an implementation plan, set validation steps to
@@ -85,7 +90,7 @@ Create this minimal package: `<skill-name>/SKILL.md`, `references/contract.yaml`
 
 Add `scripts/`, `assets/`, or extra references only when needed.
 
-Minimal SDK stage SKILL.md body: frontmatter with name, trigger-rich description, metadata.version, and metadata.sdk_stage; then the fixed headings from Infrastructure/references/sdk-stage-skill-template.md. Use [skill template](./references/skill-template.md) for the copy-paste scaffold.
+Minimal SDK stage SKILL.md body: frontmatter with name, trigger-rich description, metadata.version, and metadata.sdk_stage; then the fixed headings from Infrastructure/references/sdk-stage-skill-template.md. Use [skill template](./references/skill-template.md) for the copy-paste scaffold and preserve its SDK handoff proof ladder.
 
 ## Output Template
 
@@ -175,6 +180,21 @@ the smallest command, permission, or source artifact needed to unblock them.
 
 ## Validation
 
-Run `./bin/ask skills audit <skill-path> --level strict --json --robot`, then `python3 Infrastructure/bin/ask skills external-review <skill-path> --audit-level compat --json`.
+Run this SDK handoff proof ladder for created skill packages before any release,
+install, sync, publish, live Tessl, or readiness claim:
+
+1. `./bin/ask skills audit <skill-path> --level strict --json --robot`
+2. `./bin/ask sdk eval scenario-quality <skill-path> --preview --json --robot`
+3. `./bin/ask sdk eval scorer-quality <skill-path> --preview --json --robot`
+4. `./bin/ask sdk eval scorer-calibration <skill-path> --preview --json --robot`
+5. `./bin/ask sdk eval run <skill-path> --runner internal --mode smoke --codex-profile oss-local --json --robot`
+6. `./bin/ask sdk eval run <skill-path> --runner internal --mode smoke --codex-profile oss-cloud --json --robot`
+7. `./bin/ask sdk eval tessl-local-proof --skill <skill-path> --workspace skills-sdk-lab --execute --json --robot`
+8. `./bin/ask evals run <skill-path> --mode smoke --runner discovery-smoke --tessl-live-private --tessl-workspace skills-sdk-lab --tessl-live-dry-run --json --robot`
+9. `./bin/ask sdk eval handoff-readiness --skill <skill-path> --preview --json --robot`
+10. `python3 Infrastructure/bin/ask skills external-review <skill-path> --audit-level compat --json`
+
+Do not substitute `./bin/ask evals run --runner codex`, preview-only Tessl
+local proof, or a Tessl dry-run command string for SDK handoff evidence.
 
 Fail fast: stop at the first failed gate, classify it, and do not proceed to sync, commit, publish, or install until fixed or explicitly blocked.

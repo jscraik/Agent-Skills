@@ -278,7 +278,7 @@ class TestAskSkillsRoute(unittest.TestCase):
         """
         Verifies that advanced-only (hidden-lane) skills are added to the total considered set while the router still receives the original default window of skills.
         
-        Asserts that discover_catalog_entries is called for default and advanced surfaces, the selection is `docs-expert`, `considered_total` reflects inclusion of one advanced-only entry (21), and the router received both a default skill and a hidden-lane skill (`code-review`) in its routing input.
+        Asserts that discover_catalog_entries is called for default and advanced surfaces, the selection is `technical-writer`, `considered_total` reflects inclusion of one advanced-only entry (21), and the router received both a default skill and a hidden-lane skill (`code-review`) in its routing input.
         """
         default_entries = [
             SimpleNamespace(
@@ -290,8 +290,8 @@ class TestAskSkillsRoute(unittest.TestCase):
             for index in range(19)
         ]
         docs_expert = SimpleNamespace(
-            name="docs-expert",
-            source_dir=REPO_ROOT / "Skills" / "agent-ops" / "docs-expert",
+            name="technical-writer",
+            source_dir=REPO_ROOT / "Skills" / "agent-ops" / "technical-writer",
             category="Skills/agent-ops",
             description="Audit and update repository documentation.",
         )
@@ -335,8 +335,8 @@ class TestAskSkillsRoute(unittest.TestCase):
         router_stub = _CapturingRouterStub(
             [
                 SimpleNamespace(
-                    skill_name="docs-expert",
-                    skill_path="Skills/agent-ops/docs-expert",
+                    skill_name="technical-writer",
+                    skill_path="Skills/agent-ops/technical-writer",
                     confidence=0.95,
                     rationale=["keyword overlap=2"],
                     risk_tier="low",
@@ -370,10 +370,10 @@ class TestAskSkillsRoute(unittest.TestCase):
             [call(), call(advanced=True)],
         )
         self.assertEqual(result.status, "success")
-        self.assertEqual(result.data["decision"]["selected_candidates"][0]["name"], "docs-expert")
+        self.assertEqual(result.data["decision"]["selected_candidates"][0]["name"], "technical-writer")
         self.assertEqual(result.data["decision"]["considered_total"], 21)
         self.assertNotIn("route_considered_total", mocked_parity.call_args.kwargs)
-        self.assertIn("docs-expert", router_stub.calls[0])
+        self.assertIn("technical-writer", router_stub.calls[0])
         self.assertIn("code-review", router_stub.calls[0])
 
 

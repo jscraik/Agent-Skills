@@ -320,7 +320,7 @@ def main():
     evals_run_parser.add_argument("--mode", choices=["smoke", "release"], default="smoke", help="Evaluation mode")
     evals_run_parser.add_argument("--runner", choices=["codex", "discovery-smoke"], default="codex", help="Evaluation runner. Use discovery-smoke for local-only contract smoke scorecards that do not call a model.")
     evals_run_parser.add_argument("--model", help="Override the smoke eval Codex model")
-    evals_run_parser.add_argument("--profile", help="Override the smoke eval Codex config profile")
+    evals_run_parser.add_argument("--profile", help="Override the Codex config profile for codex-runner scenario proof")
     evals_run_parser.add_argument("--case", action="append", default=[], help="Run matching eval case ids/names")
     evals_run_parser.add_argument("--skip-tessl", action="store_true", help="Skip Tessl when policy or credentials block it")
     evals_run_parser.add_argument("--allow-tessl-project-save", action="store_true", help="Compatibility no-op for Tessl evals")

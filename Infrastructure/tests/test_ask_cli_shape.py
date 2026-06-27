@@ -77,6 +77,19 @@ def sample(value):
         validator._check_file_size(VALIDATOR_PATH, "1\n2\n3\n4\n5\n6\n", "1\n2\n3\n4\n5\n", args, issues)
         self.assertEqual(len(issues), 1)
 
+    def test_legacy_shape_debt_exempts_registered_paths_from_shape_ratchets(self) -> None:
+        validator = _load_validator()
+        args = SimpleNamespace(max_file_lines=1, max_function_lines=1, max_complexity=1)
+        path = REPO_ROOT / "Infrastructure/scripts/lib/ask/commands/evals.py"
+        current = "def sample(value):\n    if value:\n        return 1\n    return 0\n"
+        baseline = "def sample(value):\n    return 0\n"
+        issues: list[str] = []
+
+        validator._check_file_size(path, current, baseline, args, issues)
+        validator._check_function_shape(path, current, baseline, args, issues)
+
+        self.assertEqual(issues, [])
+
     def test_legacy_shape_debt_registry_is_explicit(self) -> None:
         validator = _load_validator()
 

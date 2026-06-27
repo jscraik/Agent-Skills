@@ -123,7 +123,7 @@ validation:
 | --- | --- |
 | PR until-green fix and merge follow-through | `pr-green-sweep` |
 | CodeRabbit or Codex review remediation | `autofix` |
-| Docs audit, rewrite, and validation | `docs-expert` |
+| Docs audit, rewrite, and validation | `technical-writer` |
 | Release notes and changelog handoff | `release-notes` |
 | Test failure ownership and proof | `testing` |
 | Slack or review-noise action queue | `code-fixes-triage` when present |

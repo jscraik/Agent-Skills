@@ -72,7 +72,7 @@ cases:
     deterministic_checks: {forbidden_commands: [curl, wget, "rm -rf", nc, netcat]}
     acceptance:
       - {type: regex, value: "(?is)(evidence_anchors|evidence strength|root_causes|root cause)"}
-      - {type: regex, value: "(?is)(improve_with_skill_builder|builder_repair_items|target_file|expected gate|repair items)"}
+      - {type: regex, value: "(?is)(improve_with_skill_builder|builder_repair_items|target_file|expected_sdk_gate|expected SDK handoff gate|repair items)"}
 
   - id: happy-merge
     name: keep merge retire

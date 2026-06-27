@@ -990,12 +990,12 @@ STARTER_ARCHETYPES = {
         "testing",
         "simplify",
         "improve-codebase-architecture",
-        "docs-expert",
+        "technical-writer",
         "context7",
     ),
-    "delivery": ("pr-green-sweep", "testing", "autofix", "coding-harness", "docs-expert"),
+    "delivery": ("pr-green-sweep", "testing", "autofix", "coding-harness", "technical-writer"),
     "review": ("improve-codebase-architecture", "he-code-review", "autofix", "testing"),
-    "docs": ("agents-md", "docs-expert", "context7", "openai-docs"),
+    "docs": ("agents-md", "technical-writer", "context7", "openai-docs"),
 }
 
 
@@ -2458,14 +2458,15 @@ def _profiles_with_effective_roots(profiles: dict[str, dict[str, Any]]) -> dict[
                 "codex_profile": "fast",
                 "codex_profile_config": "[profiles.fast]",
                 "codex_runner_args": ["--profile", "fast"],
-                "tessl_eval_staging_root": f"{os.path.join(tempfile.gettempdir(), 'ask-tessl-evals')}/<skill-path>-<sha12>",
+                "tessl_eval_staging_root": f"{os.path.join(tempfile.gettempdir(), 'ask-tessl-live')}/<skill-path>-<sha12>",
                 "tessl_project_marker": "tessl.json",
                 "staged_inputs": [
                     "SKILL.md",
                     "references/evals.yaml",
                     "references/contract.yaml",
                     "references/task-profile.json",
-                    "scenarios/<case-id>/task.md",
+                    "evals/<case-id>/task.md",
+                    "evals/<case-id>/criteria.json",
                 ],
                 "evidence_retention": "stable tmp staging is intentionally left for post-run inspection",
             }
@@ -7202,7 +7203,28 @@ def _skills_sdk_eval_run_validation_command(
 def _skills_sdk_eval_receipt_lane(mode: str, codex_profile: str | None) -> str:
     if codex_profile in {"oss-local", "oss-cloud"}:
         return codex_profile
+    if codex_profile in {"fast", "codex-fast"}:
+        return "codex-fast-smoke"
     return mode
+
+
+def _skills_sdk_eval_codex_profile_proof(
+    internal: CallResult,
+    *,
+    codex_profile: str | None,
+) -> dict[str, object]:
+    profile_contract = internal.data.get("profile_contract")
+    if not isinstance(profile_contract, dict):
+        profile_contract = {}
+    invoked = profile_contract.get("codex_exec_invoked") is True
+    observed_profile = profile_contract.get("codex_profile")
+    command_shape = profile_contract.get("codex_exec_command_shape")
+    return {
+        "codex_profile": observed_profile if isinstance(observed_profile, str) else None,
+        "codex_exec_invoked": invoked,
+        "codex_exec_command_shape": command_shape if isinstance(command_shape, list) else None,
+        "matches_requested_profile": bool(codex_profile) and invoked and observed_profile == codex_profile,
+    }
 
 
 def skills_sdk_eval_run(
@@ -7271,10 +7293,14 @@ def skills_sdk_eval_run(
             fallback_blockers=blockers,
             eval_commands=_eval_commands,
         )
+        profile_proof = _skills_sdk_eval_codex_profile_proof(internal, codex_profile=codex_profile)
+        profile_blockers: list[str] = []
+        if codex_profile in {"oss-local", "oss-cloud"} and not profile_proof["matches_requested_profile"]:
+            profile_blockers.append(f"blocked_missing_artifact:codex_profile_exec_receipt_missing:{codex_profile}")
         receipt = {
             "schema_version": "skills-sdk.eval-run-receipt.v0",
             "schema_uri": "https://agent-skills.local/schemas/skills-sdk/eval-run-receipt.v0.schema.json",
-            "status": receipt_counts["status"],
+            "status": "blocked" if profile_blockers and receipt_counts["status"] == "pass" else receipt_counts["status"],
             "runner": "internal_skill_builder_v0",
             "dataset_path": receipt_counts["dataset_path"],
             "dataset_digest": receipt_counts["dataset_digest"],
@@ -7285,13 +7311,16 @@ def skills_sdk_eval_run(
             "mode": mode,
             "lane": _skills_sdk_eval_receipt_lane(mode, codex_profile),
             "profile": codex_profile,
+            "codex_profile": profile_proof["codex_profile"],
+            "codex_exec_invoked": profile_proof["codex_exec_invoked"],
+            "codex_exec_command_shape": profile_proof["codex_exec_command_shape"],
             "case_count": receipt_counts["case_count"],
             "passed_count": receipt_counts["passed_count"],
-            "failed_count": receipt_counts["failed_count"],
+            "failed_count": max(1, receipt_counts["failed_count"]) if profile_blockers else receipt_counts["failed_count"],
             "quality_gates": receipt_counts["quality_gates"],
             "closeout_validation": receipt_counts.get("closeout_validation"),
             "cases": receipt_counts["cases"],
-            "blockers": receipt_counts["blockers"],
+            "blockers": sorted(set([*receipt_counts["blockers"], *profile_blockers])),
             "mutation_performed": False,
             "acceptance_trace": ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022"],
         }
@@ -9795,9 +9824,16 @@ def _skill_install_intake_decision(repo_root: Path, skill_name: str, target_path
         ],
         "post_install_gates": [
             "./bin/ask skills audit <skill-path> --level strict --json --robot",
+            "./bin/ask sdk eval scenario-quality <skill-path> --preview --json --robot",
+            "./bin/ask sdk eval scorer-quality <skill-path> --preview --json --robot",
+            "./bin/ask sdk eval scorer-calibration <skill-path> --preview --json --robot",
+            "./bin/ask sdk eval run <skill-path> --runner internal --mode smoke --codex-profile oss-local --json --robot",
+            "./bin/ask sdk eval run <skill-path> --runner internal --mode smoke --codex-profile oss-cloud --json --robot",
+            "./bin/ask sdk eval tessl-local-proof --skill <skill-path> --workspace skills-sdk-lab --execute --json --robot",
+            "./bin/ask evals run <skill-path> --mode smoke --runner discovery-smoke --tessl-live-private --tessl-workspace skills-sdk-lab --tessl-live-dry-run --json --robot once scenario-quality passes",
+            "./bin/ask sdk eval handoff-readiness --skill <skill-path> --preview --json --robot",
             "./bin/ask skills external-review <skill-path> --json --robot",
-            "./bin/ask evals run <skill-path> --mode smoke --json --robot once eval cases exist",
-            "./bin/ask evals run <skill-path> --mode release --json --robot before promotion or release-readiness claims",
+            "./bin/ask evals run <skill-path> --mode release --json --robot only after SDK handoff gates are current",
         ],
         "snyk_policy": {
             "required_when": "manifest-backed candidate is promoted or release readiness is claimed",
@@ -9976,9 +10012,16 @@ def install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str 
             "promotion_rule": intake_decision["promotion_rule"],
             "post_install_gates": [
                 f"ask skills audit {installed_path} --level strict --json --robot",
+                f"ask sdk eval scenario-quality {installed_path} --preview --json --robot",
+                f"ask sdk eval scorer-quality {installed_path} --preview --json --robot",
+                f"ask sdk eval scorer-calibration {installed_path} --preview --json --robot",
+                f"ask sdk eval run {installed_path} --runner internal --mode smoke --codex-profile oss-local --json --robot",
+                f"ask sdk eval run {installed_path} --runner internal --mode smoke --codex-profile oss-cloud --json --robot",
+                f"ask sdk eval tessl-local-proof --skill {installed_path} --workspace skills-sdk-lab --execute --json --robot",
+                f"ask evals run {installed_path} --mode smoke --runner discovery-smoke --tessl-live-private --tessl-workspace skills-sdk-lab --tessl-live-dry-run --json --robot once scenario-quality passes",
+                f"ask sdk eval handoff-readiness --skill {installed_path} --preview --json --robot",
                 f"ask skills external-review {installed_path} --json --robot",
-                f"ask evals run {installed_path} --mode smoke --json --robot once eval cases exist",
-                f"ask evals run {installed_path} --mode release --json --robot before promotion or release-readiness claims",
+                f"ask evals run {installed_path} --mode release --json --robot only after SDK handoff gates are current",
             ],
         }
         result.metadata["next_steps"] = result.data["readiness_policy"]["post_install_gates"]

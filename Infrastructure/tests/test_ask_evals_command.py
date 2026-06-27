@@ -205,6 +205,8 @@ def test_smoke_evals_use_codex_spark_and_fast_profile_without_reasoning_level(tm
     assert cmd[cmd.index("--sandbox") + 1] == "workspace-write"
     assert result.data["profile_contract"]["codex_profile"] == "fast"
     assert result.data["profile_contract"]["codex_profile_config"] == "[profiles.fast]"
+    assert result.data["profile_contract"]["codex_exec_invoked"] is True
+    assert result.data["profile_contract"]["codex_exec_command_shape"][:4] == ["codex", "exec", "--profile", "fast"]
     assert result.data["profile_contract"]["tessl_policy"]["tessl_project_marker"] == "tessl.json"
     assert "--reasoning" not in cmd
     assert "--reasoning-effort" not in cmd
@@ -270,7 +272,33 @@ def test_smoke_evals_accept_profile_override_for_oss_cloud(tmp_path: Path) -> No
     assert "--profile" in cmd
     assert cmd[cmd.index("--profile") + 1] == "oss-cloud"
     assert "--sandbox" in cmd
-    assert cmd[cmd.index("--sandbox") + 1] == "workspace-write"
+    assert cmd[cmd.index("--sandbox") + 1] == "read-only"
+    assert "--model" not in cmd
+    assert result.data["profile_contract"]["codex_exec_invoked"] is True
+    assert result.data["profile_contract"]["codex_profile_proof_lane"] == "oss-cloud"
+
+
+def test_release_evals_accept_profile_override_for_oss_local_proof(tmp_path: Path) -> None:
+    completed = _completed_eval_with_report(tmp_path)
+
+    with mock.patch.object(evals.subprocess, "run", return_value=completed) as run:
+        result = evals.run_evals(
+            tmp_path,
+            "Plugins/example-skill",
+            mode="release",
+            skip_tessl=True,
+            codex_profile="oss-local",
+        )
+
+    assert result.status == "success"
+    assert result.data["profile_contract"]["codex_profile"] == "oss-local"
+    assert result.data["profile_contract"]["codex_exec_invoked"] is True
+    assert result.data["profile_contract"]["codex_exec_command_shape"][:4] == ["codex", "exec", "--profile", "oss-local"]
+    cmd = run.call_args.args[0]
+    assert "--profile" in cmd
+    assert cmd[cmd.index("--profile") + 1] == "oss-local"
+    assert "--sandbox" in cmd
+    assert cmd[cmd.index("--sandbox") + 1] == "read-only"
     assert "--model" not in cmd
 
 
@@ -1287,11 +1315,19 @@ def _write_handoff_readiness(tmp_path: Path, skill_name: str) -> Path:
         receipt_payload: dict[str, object] = {"status": "pass", "lane": lane_id}
         if lane_id in {"oss-local", "oss-cloud"}:
             receipt_payload["profile"] = lane_id
+            receipt_payload["codex_profile"] = lane_id
+            receipt_payload["codex_exec_invoked"] = True
         if lane_id == "tessl-local-proof":
             receipt_payload["receipt"] = {
                 "schema_version": "skills-sdk.tessl-local-proof.v1",
                 "status": "pass",
                 "execute": True,
+            }
+        if lane_id == "tessl-live-dry-run":
+            receipt_payload["tessl_eval"] = {
+                "status": "pass",
+                "live_private": True,
+                "dry_run": True,
             }
         receipt_path.write_text(json.dumps(receipt_payload) + "\n", encoding="utf-8")
         lanes.append({
@@ -1932,6 +1968,16 @@ def test_evals_live_private_blocks_without_handoff_readiness(tmp_path: Path) -> 
     assert result.data["tessl_eval"]["blocker_class"] == "blocked_validation"
     assert "Handoff readiness" in result.data["tessl_eval"]["blocker"]
     run.assert_not_called()
+
+
+def test_tessl_live_private_policy_names_tessl_local_proof_gate() -> None:
+    policy = evals._tessl_live_private_policy("skills-sdk-lab")
+    feedback_loop = policy["pre_tessl_feedback_loop"]
+
+    assert "tessl_local_proof" in feedback_loop["required_order"]
+    assert any(step["stage"] == "tessl_local_proof" for step in feedback_loop["tessl_sequence"])
+    assert "Tessl local-proof" in feedback_loop["failure_loop"]
+    assert "Tessl local-proof" in feedback_loop["live_blocked_until"]
 
 
 def test_evals_live_private_skips_local_only_cases(tmp_path: Path) -> None:
@@ -3157,7 +3203,7 @@ def test_prepare_tessl_scenario_generation_dry_run_stages_target_tile(tmp_path: 
     assert Path(result.data["scenario_generation_brief"]).is_file()
     assert not (target_tile / "tile.json").exists()
     manifest = json.loads((target_tile / ".tessl-plugin" / "plugin.json").read_text(encoding="utf-8"))
-    assert manifest["name"] == "skills-sdk/example-skill"
+    assert manifest["name"] == "skills-sdk-lab/example-skill"
     assert manifest["version"] == "1.2.3"
     assert manifest["private"] is True
     assert manifest["skills"] == "./skills/"
@@ -3211,9 +3257,30 @@ def test_prepare_tessl_scenario_generation_installs_tool_in_temp_project(tmp_pat
     completed = mock.Mock(returncode=0, stdout="installed\\n", stderr="")
     _write_example_skill(tmp_path)
 
+    def fake_install(cmd: list[str], **kwargs: object) -> mock.Mock:
+        if cmd[1:3] == ["project", "repair"] and "--relink" not in cmd:
+            return mock.Mock(returncode=1, stdout='{"status":"error"}', stderr="", args=cmd)
+        if cmd[1:3] == ["project", "repair"] and "--relink" in cmd:
+            return mock.Mock(returncode=1, stdout='{"status":"error","message":"not found"}', stderr="", args=cmd)
+        if cmd[1:3] == ["project", "create"]:
+            return mock.Mock(returncode=0, stdout="Created project\n", stderr="", args=cmd)
+        tool_project = Path(str(kwargs["cwd"]))
+        scenario_root = (
+            tool_project
+            / ".tessl/plugins/tessl-labs/tessl-skill-eval-scenarios/creating-eval-scenarios"
+        )
+        (scenario_root / "references").mkdir(parents=True)
+        (scenario_root / "SKILL.md").write_text("# Creating Eval Scenarios\n", encoding="utf-8")
+        (scenario_root / "references/scenario-generation.md").write_text(
+            "# Scenario Generation\n",
+            encoding="utf-8",
+        )
+        completed.args = cmd
+        return completed
+
     with (
         mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
-        mock.patch.object(evals.subprocess, "run", return_value=completed) as run,
+        mock.patch.object(evals.subprocess, "run", side_effect=fake_install) as run,
     ):
         result = evals.prepare_tessl_scenario_generation(
             tmp_path,
@@ -3222,6 +3289,7 @@ def test_prepare_tessl_scenario_generation_installs_tool_in_temp_project(tmp_pat
         )
 
     assert result.status == "success"
+    assert result.data["workspace"] == "skills-sdk-lab"
     cmd = run.call_args.args[0]
     assert cmd == [
         "/usr/local/bin/tessl",
@@ -3233,6 +3301,8 @@ def test_prepare_tessl_scenario_generation_installs_tool_in_temp_project(tmp_pat
     ]
     assert run.call_args.kwargs["cwd"] == result.data["tool_project"]
     assert "/ask-tessl-scenario-generation/" in result.data["tool_project"]
+    assert "/.tessl/plugins/" in result.data["scenario_skill"]
+    assert "/.tessl/plugins/" in result.data["scenario_reference"]
     assert result.data["generated_output"].endswith("/target-tile/evals")
 
 
@@ -3867,9 +3937,54 @@ def test_run_evals_uses_default_tessl_workspace_from_env(tmp_path: Path, monkeyp
         )
 
     assert result.status == "success"
-    assert result.data["tessl_workspace"] == "skills-sdk"
+    assert result.data["tessl_workspace"] == "skills-sdk-lab"
     assert result.data["tessl_workspace_source"] == "ASK_TESSL_WORKSPACE"
-    assert run_tessl.call_args.kwargs["workspace"] == "skills-sdk"
+    assert run_tessl.call_args.kwargs["workspace"] == "skills-sdk-lab"
+
+
+def test_run_evals_uses_repo_default_tessl_workspace(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.delenv("ASK_TESSL_WORKSPACE", raising=False)
+    monkeypatch.delenv("TESSL_WORKSPACE", raising=False)
+    monkeypatch.delenv("TESSL_WORKSPACE_NAME", raising=False)
+    completed = _completed_eval_with_report(tmp_path, "autoreview")
+
+    with (
+        mock.patch.object(evals.subprocess, "run", return_value=completed),
+        mock.patch.object(evals, "_run_tessl_eval", return_value={"status": "pass"}) as run_tessl,
+    ):
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/agent-ops/autoreview",
+            mode="smoke",
+            dashboard=False,
+        )
+
+    assert result.status == "success"
+    assert result.data["tessl_workspace"] == "skills-sdk-lab"
+    assert result.data["tessl_workspace_source"] == "repo_default"
+    assert run_tessl.call_args.kwargs["workspace"] == "skills-sdk-lab"
+
+
+def test_run_evals_normalizes_tessl_workspace_argument(tmp_path: Path) -> None:
+    completed = _completed_eval_with_report(tmp_path, "autoreview")
+
+    with (
+        mock.patch.object(evals.subprocess, "run", return_value=completed),
+        mock.patch.object(evals, "_run_tessl_eval", return_value={"status": "pass"}) as run_tessl,
+    ):
+        result = evals.run_evals(
+            tmp_path,
+            "Skills/agent-ops/autoreview",
+            mode="smoke",
+            dashboard=False,
+            tessl_workspace="skills-sdk",
+        )
+
+    assert result.status == "success"
+    assert result.data["tessl_workspace"] == "skills-sdk-lab"
+    assert result.data["tessl_workspace_source"] == "argument"
+    assert "--tessl-workspace skills-sdk-lab" in result.data["validation_commands"][0]
+    assert run_tessl.call_args.kwargs["workspace"] == "skills-sdk-lab"
 
 
 def test_run_evals_blocks_invalid_default_tessl_workspace(tmp_path: Path, monkeypatch) -> None:

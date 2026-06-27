@@ -246,14 +246,58 @@ def _lane_profile_semantics(lane_id: str, lane: dict[str, Any], payload: dict[st
     expected_profile = None
     if lane_id in {"oss-local", "oss-cloud"}:
         expected_profile = lane_id
-        return {"ok": profile == expected_profile, "profile": profile, "expected": expected_profile}
+        codex_exec_invoked = _receipt_codex_exec_invoked(payload)
+        return {
+            "ok": profile == expected_profile and codex_exec_invoked,
+            "profile": profile,
+            "expected": f"{expected_profile} with codex_exec_invoked=true",
+            "codex_exec_invoked": codex_exec_invoked,
+        }
     if lane_id == "tessl-live-dry-run":
-        command = str(lane.get("command") or "")
-        expected_profile = "command includes --tessl-live-dry-run"
-        return {"ok": "--tessl-live-dry-run" in command, "profile": profile, "expected": expected_profile}
+        return _tessl_live_dry_run_semantics(lane, payload, profile)
     if lane_id == "tessl-local-proof":
         return _tessl_local_proof_semantics(lane, payload, profile)
     return {"ok": True, "profile": profile, "expected": expected_profile}
+
+
+def _tessl_live_dry_run_semantics(lane: dict[str, Any], payload: dict[str, Any], profile: str | None) -> dict[str, Any]:
+    command = str(lane.get("command") or "")
+    command_ok = "--tessl-live-dry-run" in command
+    receipt_ok = _receipt_has_tessl_live_dry_run(payload)
+    return {
+        "ok": command_ok and receipt_ok,
+        "profile": profile,
+        "expected": "command includes --tessl-live-dry-run and receipt records tessl_eval.dry_run=true",
+        "tessl_live_dry_run": receipt_ok,
+    }
+
+
+def _receipt_has_tessl_live_dry_run(payload: dict[str, Any]) -> bool:
+    for candidate in _tessl_eval_payloads(payload):
+        if candidate.get("dry_run") is not True:
+            continue
+        status = str(candidate.get("status") or payload.get("status") or "").strip().lower()
+        if status in {"pass", "success"}:
+            return True
+    return False
+
+
+def _tessl_eval_payloads(payload: dict[str, Any]) -> list[dict[str, Any]]:
+    candidates: list[dict[str, Any]] = []
+    tessl_eval = payload.get("tessl_eval")
+    if isinstance(tessl_eval, dict):
+        candidates.append(tessl_eval)
+    data = payload.get("data")
+    if isinstance(data, dict):
+        nested_tessl_eval = data.get("tessl_eval")
+        if isinstance(nested_tessl_eval, dict):
+            candidates.append(nested_tessl_eval)
+        for value in data.values():
+            if isinstance(value, dict):
+                nested = value.get("tessl_eval")
+                if isinstance(nested, dict):
+                    candidates.append(nested)
+    return candidates
 
 
 def _tessl_local_proof_semantics(lane: dict[str, Any], payload: dict[str, Any], profile: str | None) -> dict[str, Any]:
@@ -272,6 +316,15 @@ def _tessl_local_proof_semantics(lane: dict[str, Any], payload: dict[str, Any], 
     }
 
 
+def _receipt_codex_exec_invoked(payload: dict[str, Any]) -> bool:
+    if payload.get("codex_exec_invoked") is True:
+        return True
+    for nested_receipt in _nested_receipt_payloads(payload):
+        if nested_receipt.get("codex_exec_invoked") is True:
+            return True
+    return False
+
+
 def _lane_semantics_evidence(
     repo_root: Path,
     receipt_path: Path,
@@ -286,6 +339,10 @@ def _lane_semantics_evidence(
     if expected is not None:
         evidence.append(f"profile={profile_check.get('profile') or 'missing'}")
         evidence.append(f"expected={expected}")
+    if "codex_exec_invoked" in profile_check:
+        evidence.append(f"codex_exec_invoked={profile_check.get('codex_exec_invoked')}")
+    if "tessl_live_dry_run" in profile_check:
+        evidence.append(f"tessl_live_dry_run={profile_check.get('tessl_live_dry_run')}")
     return evidence
 
 

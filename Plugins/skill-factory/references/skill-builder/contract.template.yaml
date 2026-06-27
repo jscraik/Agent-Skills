@@ -63,12 +63,12 @@ operator_contract:
     retry: "Retry transient tool/UI/action failures once when the retry is cheap and safe."
     stop: "Stop after bounded retry and report exact blocker, attempted fallback, and next step."
   validation_tiers:
-    fast: "strict skill audit plus smoke eval using Codex [profiles.fast] and staged Tessl eval under /tmp/ask-tessl-evals with tessl.json"
-    standard: "external-review with Plugin Eval B+ or better accepted and Tessl review score >= 95 using stable /tmp/ask-tessl-reviews evidence"
+    fast: "strict skill audit plus SDK scenario-quality, scorer-quality, and scorer-calibration previews"
+    standard: "oss-local, oss-cloud, Tessl local-proof --execute, Tessl live-private dry-run, handoff-readiness, then external-review when earlier gates pass"
     deep: "release, projection, security, benchmark, or cross-plugin checks only for broad/package-impacting changes"
   eval_evidence_contract:
-    codex_profile: "fast ([profiles.fast])"
-    tessl_eval_staging_root: "/tmp/ask-tessl-evals/<skill-path>-<sha12>"
+    codex_profile: "oss-local and oss-cloud for proof; fast ([profiles.fast]) only for quick smoke checks"
+    tessl_eval_staging_root: "/tmp/ask-tessl-live/<skill-path>-<sha12>"
     tessl_review_staging_root: "/tmp/ask-tessl-reviews/<skill-path>-<sha12>"
     tessl_project_marker: "tessl.json"
     eval_case_source: "references/evals.yaml -> scenarios/<case-id>/task.md"

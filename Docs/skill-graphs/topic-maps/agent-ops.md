@@ -66,7 +66,7 @@ covers:
 
 ## Documentation & Context
 
-- [[docs-expert]] — Audit or rewrite repository docs (README, runbooks, community-health files) and in-code documentation.
+- [[technical-writer]] — Audit or rewrite repository docs (README, runbooks, community-health files) and in-code documentation.
 - [[context7]] — Extract current library documentation via Context7 for up-to-date API details and version checks.
 - [[openai-docs]] — Up-to-date official OpenAI documentation with citations via the OpenAI docs MCP.
 - [[diagram-cli]] — Generate, validate, and refresh architecture artifacts (.mmd/.svg/.diagram manifest + context packs).

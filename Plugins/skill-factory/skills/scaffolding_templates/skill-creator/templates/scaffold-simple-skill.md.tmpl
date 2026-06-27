@@ -45,6 +45,11 @@ This scaffold starts in `{lifecycle_state}` state with `{maturity}` maturity. Re
 
 ## Validation
 - Replace with the commands, tests, or checks that prove this skill is safe to use.
+- For SDK handoff work, keep the proof ladder in order: strict audit,
+  scenario-quality, scorer-quality, scorer-calibration, oss-local,
+  oss-cloud, Tessl local proof with \`--execute\`, Tessl live-private dry-run,
+  then handoff-readiness. Do not use a generic smoke eval, preview-only Tessl
+  local proof, or Tessl dry-run command text as release evidence.
 - Fail fast: if a gate fails, stop and report the failure before continuing.
 
 ## Gotchas

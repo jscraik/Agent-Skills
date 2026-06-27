@@ -125,7 +125,7 @@
   "blockers": [],
   "ready_for_live_rerun": true,
   "required_next_actions": [
-    "Run scenario-quality, scorer-quality, scorer-calibration, dry Tessl staging, then live Tessl when budget allows."
+    "Run scenario-quality, scorer-quality, scorer-calibration, oss-local, oss-cloud, Tessl local-proof --execute, Tessl dry-run staging, then handoff-readiness before live Tessl when budget allows."
   ],
   "mutation_performed": false,
   "promotion_performed": false,

@@ -1,0 +1,40 @@
+{
+  "schema_version": "skills-sdk.eval-handoff-readiness-input.v1",
+  "candidate_id": "technical-writer",
+  "lanes": [
+    {
+      "id": "deterministic_local_gates",
+      "status": "pass",
+      "command": "./bin/ask sdk eval scenario-quality Skills/agent-ops/technical-writer --preview --json --robot",
+      "receipt_path": ".harness/evidence/handoff/technical-writer/deterministic-local-gates.json"
+    },
+    {
+      "id": "oss-local",
+      "status": "pass",
+      "command": "./bin/ask sdk eval run Skills/agent-ops/technical-writer --runner internal --mode smoke --codex-profile oss-local --timeout-seconds 180 --json --robot",
+      "receipt_path": ".harness/evidence/handoff/technical-writer/oss-local.json"
+    },
+    {
+      "id": "oss-cloud",
+      "status": "pass",
+      "command": "./bin/ask sdk eval run Skills/agent-ops/technical-writer --runner internal --mode smoke --codex-profile oss-cloud --timeout-seconds 180 --json --robot",
+      "receipt_path": ".harness/evidence/handoff/technical-writer/oss-cloud.json"
+    },
+    {
+      "id": "tessl-local-proof",
+      "status": "blocked",
+      "command": "./bin/ask sdk eval tessl-local-proof --skill Skills/agent-ops/technical-writer --workspace skills-sdk --execute --json --robot",
+      "receipt_path": ".harness/evidence/handoff/technical-writer/tessl-local-proof.json",
+      "blocker": "blocked_validation: Tessl local proof requires reviewed generated scenarios first; prepare-tessl-scenarios then blocked because Tessl workspace skills-sdk was not found or not accessible for project technical-writer.",
+      "blocker_class": "blocked_validation"
+    },
+    {
+      "id": "tessl-live-dry-run",
+      "status": "blocked",
+      "command": "./bin/ask evals run Skills/agent-ops/technical-writer --mode smoke --tessl-live-private --tessl-workspace skills-sdk --tessl-live-dry-run --json --robot --no-dashboard",
+      "receipt_path": ".harness/evidence/handoff/technical-writer/tessl-live-dry-run.json",
+      "blocker": "blocked_validation: live Tessl dry-run must wait until reviewed generated scenarios exist and the skills-sdk Tessl workspace/project is accessible.",
+      "blocker_class": "blocked_validation"
+    }
+  ]
+}

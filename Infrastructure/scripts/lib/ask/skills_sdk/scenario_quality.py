@@ -56,6 +56,7 @@ STRUCTURED_FIELD_ASSERTION_KEYS = (
     "codexrepo_validation_status",
     "source_confidence",
 )
+PLATFORM_PARITY_GATE_ID_PREFIX = "platform_tessl_quality"
 
 
 class ScenarioQualityError(ValueError):
@@ -332,6 +333,31 @@ def _acceptance_assertion_checks(case: dict[str, Any], scenario_id: str) -> list
     ]
 
 
+def _platform_parity_checks(case: dict[str, Any], scenario_id: str) -> list[dict[str, Any]]:
+    """Apply the Tessl live-private scenario quality gate to SDK scenario rows."""
+    try:
+        from ask.commands import evals as eval_commands  # noqa: PLC0415
+    except Exception as exc:  # pragma: no cover - import failure is a blocker surface.
+        return [
+            _check(
+                "platform_tessl_quality_available",
+                "blocker",
+                "Scenario-quality must be able to load the shared Tessl quality gate.",
+                [f"{scenario_id}:{type(exc).__name__}:{exc}"],
+            )
+        ]
+    findings = eval_commands._tessl_eval_quality_findings([case])  # noqa: SLF001
+    return [
+        _check(
+            f"{PLATFORM_PARITY_GATE_ID_PREFIX}:{finding['code']}",
+            "blocker",
+            "SDK scenario-quality and Tessl live-private staging must share the same behavioral quality gate.",
+            [f"{scenario_id}:{finding['code']}:{finding['message']}"],
+        )
+        for finding in findings
+    ]
+
+
 def _text_field_assertion_malformed(item: dict[str, Any], assertion_type: str) -> bool:
     if assertion_type not in TEXT_FIELD_ASSERTION_TYPES:
         return False
@@ -482,6 +508,7 @@ def _scenario_checks(case: dict[str, Any], index: int) -> list[dict[str, Any]]:
     checks.extend(_release_rubric_checks(case, scenario_id))
     checks.extend(_registry_dependency_checks(case, scenario_id))
     checks.extend(_acceptance_assertion_checks(case, scenario_id))
+    checks.extend(_platform_parity_checks(case, scenario_id))
     return checks
 
 

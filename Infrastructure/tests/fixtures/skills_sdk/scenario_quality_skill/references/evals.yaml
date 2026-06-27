@@ -4,17 +4,22 @@ cases:
   - id: happy-scenario-quality
     name: Happy scenario quality
     category: happy
+    unit: package evidence boundary
     eval_modes:
       - smoke
     realistic: true
     should_trigger: true
     prepend_skill: true
-    prompt: Use this fixture skill and return evidence-backed validation output.
+    given: A skill maintainer has a package-shape receipt but no current validation output.
+    should: Produce evidence-backed validation output without claiming release readiness.
+    prompt: A skill maintainer needs a concise validation summary for a package-shape receipt that does not include current runtime or hosted evidence. Explain what can be claimed and what remains unproven.
     deterministic_checks:
       forbidden_commands:
         - curl
         - wget
         - rm -rf
     acceptance:
+      - type: expected_signal
+        value: Separates package-shape evidence from runtime or hosted readiness claims.
       - type: regex
         value: '(?is)(evidence|validation)'

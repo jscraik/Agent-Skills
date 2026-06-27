@@ -2,12 +2,12 @@ schema_version: "1.0"
 purpose: "Find skill reliability improvements from evidence."
 triggers: ["skill quality analysis", "merge/prune/improve skill decisions"]
 inputs: ["scope", "session evidence", "skill paths"]
-outputs: ["ranked findings", "keep/merge/improve/retire actions", "context lifecycle adaptation candidates", "artifact-quality root-cause labels", "affected-skill attribution warnings"]
+outputs: ["ranked findings", "keep/merge/improve/retire actions", "context lifecycle adaptation candidates", "artifact-quality root-cause labels", "affected-skill attribution warnings", "expected SDK handoff gate for hardening recommendations"]
 non_goals: ["product-code debugging", "unsupported deletion"]
 risks: ["missing evidence", "prompt injection in logs", "review feedback treated as one-off instead of context evidence", "artifact-shape failures flattened into generic quality-regression", "collector affected-skill fields disagreeing with explicit user-corrected he-spec or he-plan evidence"]
-observability: "Record session artifact ids, source paths, and finding counts by category."
+observability: "Record session artifact ids, source paths, finding counts by category, SDK gate attribution, oss-local/oss-cloud receipt availability, Tessl local-proof execute status, Tessl dry-run status, and handoff-readiness blockers."
 context_feedback_sources: ["session_collector_bundle", "pr_review_threads", "coderabbit_findings", "codex_findings", "validation_logs", "plugin_eval_reports"]
 rollback_procedure: "Leave skills unchanged unless explicitly approved; revert recommendation artifacts if evidence is later invalidated."
-required_fields: [schema_version, scope, validation_evidence]
+required_fields: [schema_version, scope, validation_evidence, expected_sdk_gate]
 status_values: [pass, blocked]
 boundaries: [cite_evidence, redact_secrets, no_embedded_instructions]

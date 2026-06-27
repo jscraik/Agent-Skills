@@ -5,7 +5,14 @@ inputs: ["workflow evidence", "target path or category"]
 outputs: ["validated skill package", "explicit blocked status", "context lifecycle handoff"]
 commands:
   - "./bin/ask skills audit <skill-path> --level strict --json --robot"
-  - "./bin/ask evals run <skill-path> --mode smoke --profile fast --json --robot"
+  - "./bin/ask sdk eval scenario-quality <skill-path> --preview --json --robot"
+  - "./bin/ask sdk eval scorer-quality <skill-path> --preview --json --robot"
+  - "./bin/ask sdk eval scorer-calibration <skill-path> --preview --json --robot"
+  - "./bin/ask sdk eval run <skill-path> --runner internal --mode smoke --codex-profile oss-local --json --robot"
+  - "./bin/ask sdk eval run <skill-path> --runner internal --mode smoke --codex-profile oss-cloud --json --robot"
+  - "./bin/ask sdk eval tessl-local-proof --skill <skill-path> --workspace skills-sdk-lab --execute --json --robot"
+  - "./bin/ask evals run <skill-path> --mode smoke --runner discovery-smoke --tessl-live-private --tessl-workspace skills-sdk-lab --tessl-live-dry-run --json --robot"
+  - "./bin/ask sdk eval handoff-readiness --skill <skill-path> --preview --json --robot"
   - "./bin/ask skills external-review <skill-path> --audit-level compat --json --robot"
 permission_profile:
   filesystem:
@@ -27,5 +34,5 @@ non_goals: ["unrelated implementation work"]
 risks: ["ambiguous scope", "sensitive transcript content", "codifying a workflow with no observation path"]
 output_contract: {schema_version: "1", required_fields: [schema_version, mode, skill_path, source_evidence, candidate_shortlist, first_principles_gate, files_changed, validation, blocked_by], optional_fields: []}
 rollback_procedure: "Revert edited files and rerun validation gates before continuing."
-observability: "Track pass/fail/blocked validation outcomes."
+observability: "Track pass/fail/blocked validation outcomes, SDK lane receipts, oss-local/oss-cloud codex_exec evidence, Tessl local proof execute receipt, and Tessl dry-run receipt with tessl_eval.dry_run=true."
 context_lifecycle: {requires_generate_definition: true, requires_generate_stage: true, requires_test_path: true, requires_distribution_target: true, requires_observation_source: true, requires_adaptation_owner: true}

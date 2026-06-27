@@ -36,6 +36,7 @@ _PATCHABLE_IMPL_NAMES = (
     "discover_catalog_entries",
     "discover_skill_entries",
     "handles_report",
+    "_sdk_handle_owner_index",
     "route_skills",
     "improve_skills",
     "install_skill",

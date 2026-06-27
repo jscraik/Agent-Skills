@@ -1,0 +1,44 @@
+schema_version: 1
+skill: technical-writer
+references:
+- path: references/knowledge-demand.yaml
+  kind: knowledge_profile
+  provenance: vendored KnowledgeOS extraction
+  load_when: deciding which pack-backed capsule is relevant
+  allowed_claims:
+  - knowledge demand profile for this skill
+  forbidden_claims:
+  - target repo readiness
+  - raw source availability
+  freshness: knowledge_os_snapshot
+  context_budget: small
+  claim_scope: knowledge_profile
+  bounded_unit: true
+- path: references/knowledge-capsule.manifest.yaml
+  kind: capsule_manifest
+  provenance: vendored KnowledgeOS extraction
+  load_when: selecting a bounded KnowledgeOS capsule
+  allowed_claims:
+  - selected capsules and upstream pack snapshot digests
+  forbidden_claims:
+  - raw source completeness
+  - runtime dependency on KnowledgeOS
+  freshness: knowledge_os_snapshot
+  context_budget: small
+  claim_scope: capsule_manifest
+  bounded_unit: true
+- path: references/knowledge-capsules/
+  kind: generated_knowledge_capsules
+  provenance: vendored KnowledgeOS extraction
+  load_when: only after the manifest selects the relevant capsule
+  allowed_claims:
+  - bounded expert viewpoint or evidence lane captured in the selected capsule
+  forbidden_claims:
+  - load all capsules by default
+  - claims outside selected capsule text
+  freshness: knowledge_os_snapshot
+  context_budget: selective
+  claim_scope: bounded_capsules
+  bounded_unit: true
+allowed_claims:
+- KnowledgeOS capsules are vendored references, not runtime dependencies

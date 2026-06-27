@@ -55,7 +55,7 @@ Companion reusable lens pack: [software-literature-expert-lens-pack.md](./softwa
 | Skills/security-ops/* | Pragmatic Programmer, DDIA, EIP | Add dependency, integration, and operational-security questions where the skill touches manifests, data flows, secrets, or external APIs. |
 | Skills/frontend-ui/design-system | Philosophy of Software Design, DDD, Use Cases | Use for design-system vocabulary, component boundary clarity, and user-flow acceptance checks. |
 | Skills/content-publishing/llm-wiki | Pragmatic Programmer, DDD | Improve knowledge capture, glossary discipline, and source-of-truth boundaries. |
-| Skills/agent-ops/docs-expert | Pragmatic Programmer, DDD, Use Cases | Strengthen docs as operational interfaces: clear owners, vocabulary, main flows, and exception paths. |
+| Skills/agent-ops/technical-writer | Pragmatic Programmer, DDD, Use Cases | Strengthen docs as operational interfaces: clear owners, vocabulary, main flows, and exception paths. |
 
 ## How To Use The Material
 

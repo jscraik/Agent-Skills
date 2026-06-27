@@ -5,18 +5,34 @@ Use this when hardening skill-factory output or explaining why a skill run is bl
 ## Required Ladder
 
 1. Run `./bin/ask skills audit <target> --level strict --json --robot`.
-2. Then run `./bin/ask evals run <target> --mode smoke --json --robot`.
-3. Next, execute `python3 Infrastructure/bin/ask skills external-review <target> --audit-level compat --json`.
+2. Run `./bin/ask sdk eval scenario-quality <target> --preview --json --robot`.
+3. Run `./bin/ask sdk eval scorer-quality <target> --preview --json --robot`.
+4. Run `./bin/ask sdk eval scorer-calibration <target> --preview --json --robot`.
+5. Run `./bin/ask sdk eval run <target> --runner internal --mode smoke --codex-profile oss-local --json --robot`.
+6. Run `./bin/ask sdk eval run <target> --runner internal --mode smoke --codex-profile oss-cloud --json --robot`.
+7. Run `./bin/ask sdk eval tessl-local-proof --skill <target> --workspace skills-sdk-lab --execute --json --robot`.
+8. Run `./bin/ask evals run <target> --mode smoke --runner discovery-smoke --tessl-live-private --tessl-workspace skills-sdk-lab --tessl-live-dry-run --json --robot`.
+9. Run `./bin/ask sdk eval handoff-readiness --skill <target> --preview --json --robot`.
+10. Next, execute `python3 Infrastructure/bin/ask skills external-review <target> --audit-level compat --json`.
 
 Stop at the first failed required gate unless the user explicitly asks for a full matrix.
 
 ## Codex Profile
 
-Smoke evals must use Codex `[profiles.fast]` through `--profile fast`. Do not validate skill-factory output on the ambient Codex profile.
+Quick smoke checks may use Codex `[profiles.fast]` through `--profile fast`, but they do not satisfy the `oss-local` or `oss-cloud` proof lanes. Do not validate skill-factory output on the ambient Codex profile.
+
+The `oss-local` and `oss-cloud` lanes must use `codex exec --profile oss-local` and `codex exec --profile oss-cloud`, or an SDK receipt proving `codex_exec_invoked=true` and the matching `codex_profile`.
 
 ## Tessl Eval Evidence
 
-`ask evals run` must use the installed local `tessl` CLI after the repo eval runner. The wrapper copies controlled input to `/tmp/ask-tessl-evals/<skill-path>-<sha12>` and leaves that directory in place for inspection.
+Tessl live-private dry-run must use the installed local `tessl` CLI after the SDK deterministic and OSS proof lanes. The wrapper copies controlled input to `/tmp/ask-tessl-live/<skill-path>-<sha12>` and leaves that directory in place for inspection.
+
+The improve-skill Tessl lane uses the product workspace `skills-sdk-lab`.
+If an operator or older example supplies `skills-sdk`, the wrapper normalizes
+that stale alias to `skills-sdk-lab` before creating project identity,
+scenario-generation staging, local proof, or live-private dry-run receipts.
+
+Tessl local proof must be an execute receipt, not a preview receipt. Tessl dry-run handoff evidence must prove both the `--tessl-live-dry-run` command and `tessl_eval.dry_run=true` in the receipt payload.
 
 The staged input must include:
 
@@ -24,7 +40,7 @@ The staged input must include:
 - `references/evals.yaml`
 - `references/contract.yaml` when present
 - `references/task-profile.json` when present
-- `scenarios/<case-id>/task.md` synthesized from canonical `references/evals.yaml`
+- `evals/<case-id>/task.md` plus `evals/<case-id>/criteria.json` synthesized from canonical `references/evals.yaml`
 - `tessl.json`
 
 Never run Tessl against the live repo source tree, and never use `npx tessl`, publish, registry upload, or package upload commands in this lane.

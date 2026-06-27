@@ -149,7 +149,7 @@ class SkillCreatorLifecycleScaffoldTests(unittest.TestCase):
             self.assertIn("success_criteria:", evals_yaml)
             self.assertIn("prompt-injection-pressure", evals_yaml)
             self.assertIn("tessl-staging-awareness", evals_yaml)
-            self.assertIn("/tmp/ask-tessl-evals", evals_yaml)
+            self.assertIn("/tmp/ask-tessl-live", evals_yaml)
             self.assertIn("tessl.json", evals_yaml)
             self.assertIn("should_trigger: false", evals_yaml)
 

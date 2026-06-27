@@ -1,0 +1,380 @@
+---
+schema_version: knowledge-os.knowledge-capsule-manifest.v1
+skill:
+  skill_id: technical-writer
+  declared_name: technical-writer
+  entrypoint_path: Skills/agent-ops/technical-writer/SKILL.md
+  canonical_skill_path: Skills/agent-ops/technical-writer/SKILL.md
+  writable_root: Skills/agent-ops/technical-writer
+  apply_target_path: Skills/agent-ops/technical-writer/SKILL.md
+upstream_pack:
+  pack_id: pack.developer-advocate-writing
+  export_root: exports/packs/pack.developer-advocate-writing
+  snapshot_digest: sha256:b678921ff0cec3e8f01162404729b8749f625e0ee5b460980c431d55894824ae
+upstream_packs:
+- pack_id: pack.developer-advocate-writing
+  role: technical_writer_devrel_communication
+  export_root: exports/packs/pack.developer-advocate-writing
+  snapshot_digest: sha256:b678921ff0cec3e8f01162404729b8749f625e0ee5b460980c431d55894824ae
+  default_facets:
+  - devrel_role_and_audience
+  - technical_documentation
+  - developer_education
+  - content_design_and_service_docs
+  - articles_and_long_form
+  - voice_signal_and_taste
+  - storytelling_and_explanation
+  - presentations_and_visual_docs
+  - short_form_and_content_creation
+  - clarity_style_and_revision
+  - accessible_and_inclusive_writing
+  - error_messages_and_recovery
+  optional_facets: []
+selected_facets:
+- pack.developer-advocate-writing:devrel_role_and_audience
+- pack.developer-advocate-writing:technical_documentation
+- pack.developer-advocate-writing:developer_education
+- pack.developer-advocate-writing:content_design_and_service_docs
+- pack.developer-advocate-writing:articles_and_long_form
+- pack.developer-advocate-writing:voice_signal_and_taste
+- pack.developer-advocate-writing:storytelling_and_explanation
+- pack.developer-advocate-writing:presentations_and_visual_docs
+- pack.developer-advocate-writing:short_form_and_content_creation
+- pack.developer-advocate-writing:clarity_style_and_revision
+- pack.developer-advocate-writing:accessible_and_inclusive_writing
+- pack.developer-advocate-writing:error_messages_and_recovery
+selected_asset_ids:
+- claim.creator-writing.devrel-docs-bridge-community-and-company
+- claim.creator-writing.devrel-role-boundaries-shape-doc-ownership
+- claim.creator-writing.positioning-sets-document-context
+- principle.creator-writing.devrel-docs-are-community-interface
+- heuristic.creator-writing.route-devrel-feedback
+- heuristic.creator-writing.frame-by-category-alternatives-value
+- rubric.creator-writing.docs-expert-capsule-readiness
+- lens.creator-writing.docs-as-community-interface
+- claim.creator-writing.user-need-defines-content
+- claim.creator-writing.answer-first-structure-supports-review
+- claim.creator-writing.content-lifecycle-needs-evidence
+- claim.creator-writing.docs-must-be-skimmable
+- claim.creator-writing.docs-should-minimize-parsing-tax
+- claim.creator-writing.docs-should-be-broadly-helpful
+- principle.creator-writing.documentation-is-reader-empathy
+- heuristic.creator-writing.front-load-takeaways
+- checklist.creator-writing.documentation-quality-pass
+- rubric.creator-writing.technical-explanation-readiness
+- lens.creator-writing.reader-access-and-recovery
+- claim.creator-writing.audience-gap-defines-document
+- claim.creator-writing.examples-and-visuals-teach-use
+- claim.creator-writing.large-docs-need-navigable-structure
+- claim.creator-writing.accessible-docs-benefit-everyone
+- claim.creator-writing.error-messages-enable-recovery
+- claim.creator-writing.explanations-lower-understanding-cost
+- claim.creator-writing.sticky-docs-beat-curse-of-knowledge
+- principle.creator-writing.context-before-detail
+- heuristic.creator-writing.choose-doc-type-by-reader-goal
+- checklist.creator-writing.revision-structure-pass
+- claim.creator-writing.revision-needs-separate-passes
+- claim.creator-writing.llms-assist-not-own-judgment
+- claim.creator-writing.clear-writing-requires-revision
+- principle.creator-writing.docs-are-service-interface
+- heuristic.creator-writing.start-from-reader-job
+- checklist.creator-writing.content-design-service-docs-pass
+- claim.creator-writing.long-form-builds-trust
+- claim.creator-writing.questions-start-thinking
+- claim.creator-writing.generic-value-is-dead
+- claim.creator-writing.writing-tests-ideas-fast
+- principle.creator-writing.perspective-over-volume
+- heuristic.creator-writing.question-led-draft
+- checklist.creator-writing.long-form-draft-loop
+- rubric.creator-writing.signal-readiness
+- lens.creator-writing.signal-and-taste
+- claim.creator-writing.taste-directs-ai
+- claim.creator-writing.mission-filters-content
+- claim.creator-writing.creativity-needs-low-input-space
+- claim.creator-writing.idea-museum-builds-voice
+- principle.creator-writing.mission-based-coherence
+- principle.creator-writing.space-before-signal
+- heuristic.creator-writing.idea-museum
+- heuristic.creator-writing.input-fast-before-creation
+- principle.creator-writing.documents-need-argument-architecture
+- heuristic.creator-writing.answer-then-support
+- checklist.creator-writing.argument-visual-doc-pass
+- claim.creator-writing.visual-documents-need-standalone-architecture
+- claim.creator-writing.visual-meaning-needs-nonvisual-support
+- heuristic.creator-writing.choose-visual-document-intentionally
+- heuristic.creator-writing.describe-purpose-not-appearance
+- checklist.creator-writing.accessibility-editing-pass
+- rubric.creator-writing.accessible-document-readiness
+- claim.creator-writing.inclusive-language-centers-readers
+- claim.creator-writing.x-content-writer-fits-public-x-content
+- claim.creator-writing.x-writer-separates-creative-and-trust-loops
+- claim.creator-writing.communication-corpus-supports-specialized-passes
+- claim.creator-writing.show-work-turns-process-into-public-signal
+- principle.creator-writing.route-by-reader-job-and-proof
+- principle.creator-writing.source-corpus-is-a-lane-not-a-shortcut
+- heuristic.creator-writing.docs-to-x-routing
+- checklist.creator-writing.skill-routing-pass
+- claim.creator-writing.docs-expert-fits-proof-backed-docs
+- claim.creator-writing.terms-must-be-defined-consistently
+- claim.creator-writing.active-voice-clarifies-actors
+- claim.creator-writing.one-idea-per-unit
+- principle.creator-writing.reader-clarity-before-style
+- principle.creator-writing.revision-is-a-separate-mode
+- heuristic.creator-writing.one-idea-one-unit
+- heuristic.creator-writing.edit-in-passes
+- checklist.creator-writing.clarity-editing-pass
+- principle.creator-writing.accessibility-is-writing-quality
+- claim.creator-writing.error-messages-need-diagnostic-identifiers
+- claim.creator-writing.error-message-craft-preserves-signal
+- principle.creator-writing.error-messages-are-recovery-paths
+- heuristic.creator-writing.show-actual-expected-fix
+- heuristic.creator-writing.concise-not-cryptic
+- checklist.creator-writing.error-message-editing-pass
+- rubric.creator-writing.error-message-readiness
+source_export_paths:
+- pack.index.yaml
+- snapshot.yaml
+- assets.json
+- eval-scenarios.json
+- skills-sdk-ingest.yaml
+- pack.md
+- slices/*.md
+capsules:
+- pack_id: pack.developer-advocate-writing
+  role: technical_writer_devrel_communication
+  facet_id: devrel_role_and_audience
+  optional: false
+  source_slice: slices/devrel-role-and-audience.md
+  target_path: references/knowledge-capsules/technical-writer-devrel-communication-devrel-role-and-audience.md
+  asset_ids:
+  - claim.creator-writing.devrel-docs-bridge-community-and-company
+  - claim.creator-writing.devrel-role-boundaries-shape-doc-ownership
+  - claim.creator-writing.positioning-sets-document-context
+  - principle.creator-writing.devrel-docs-are-community-interface
+  - heuristic.creator-writing.route-devrel-feedback
+  - heuristic.creator-writing.frame-by-category-alternatives-value
+  - rubric.creator-writing.docs-expert-capsule-readiness
+  - lens.creator-writing.docs-as-community-interface
+  - claim.creator-writing.user-need-defines-content
+  - claim.creator-writing.answer-first-structure-supports-review
+  - claim.creator-writing.content-lifecycle-needs-evidence
+- pack_id: pack.developer-advocate-writing
+  role: technical_writer_devrel_communication
+  facet_id: technical_documentation
+  optional: false
+  source_slice: slices/technical-documentation.md
+  target_path: references/knowledge-capsules/technical-writer-devrel-communication-technical-documentation.md
+  asset_ids:
+  - claim.creator-writing.docs-must-be-skimmable
+  - claim.creator-writing.docs-should-minimize-parsing-tax
+  - claim.creator-writing.docs-should-be-broadly-helpful
+  - principle.creator-writing.documentation-is-reader-empathy
+  - heuristic.creator-writing.front-load-takeaways
+  - checklist.creator-writing.documentation-quality-pass
+  - rubric.creator-writing.technical-explanation-readiness
+  - lens.creator-writing.reader-access-and-recovery
+  - claim.creator-writing.audience-gap-defines-document
+  - claim.creator-writing.examples-and-visuals-teach-use
+  - claim.creator-writing.large-docs-need-navigable-structure
+  - claim.creator-writing.accessible-docs-benefit-everyone
+  - claim.creator-writing.error-messages-enable-recovery
+- pack_id: pack.developer-advocate-writing
+  role: technical_writer_devrel_communication
+  facet_id: developer_education
+  optional: false
+  source_slice: slices/developer-education.md
+  target_path: references/knowledge-capsules/technical-writer-devrel-communication-developer-education.md
+  asset_ids:
+  - claim.creator-writing.audience-gap-defines-document
+  - claim.creator-writing.examples-and-visuals-teach-use
+  - claim.creator-writing.large-docs-need-navigable-structure
+  - claim.creator-writing.explanations-lower-understanding-cost
+  - claim.creator-writing.sticky-docs-beat-curse-of-knowledge
+  - principle.creator-writing.context-before-detail
+  - heuristic.creator-writing.choose-doc-type-by-reader-goal
+  - checklist.creator-writing.revision-structure-pass
+  - rubric.creator-writing.technical-explanation-readiness
+  - claim.creator-writing.revision-needs-separate-passes
+  - claim.creator-writing.llms-assist-not-own-judgment
+- pack_id: pack.developer-advocate-writing
+  role: technical_writer_devrel_communication
+  facet_id: content_design_and_service_docs
+  optional: false
+  source_slice: slices/content-design-and-service-docs.md
+  target_path: references/knowledge-capsules/technical-writer-devrel-communication-content-design-and-service-docs.md
+  asset_ids:
+  - claim.creator-writing.user-need-defines-content
+  - claim.creator-writing.content-lifecycle-needs-evidence
+  - claim.creator-writing.clear-writing-requires-revision
+  - principle.creator-writing.docs-are-service-interface
+  - heuristic.creator-writing.start-from-reader-job
+  - checklist.creator-writing.content-design-service-docs-pass
+  - rubric.creator-writing.docs-expert-capsule-readiness
+  - lens.creator-writing.reader-access-and-recovery
+  - claim.creator-writing.answer-first-structure-supports-review
+  - claim.creator-writing.devrel-docs-bridge-community-and-company
+  - claim.creator-writing.audience-gap-defines-document
+  - claim.creator-writing.accessible-docs-benefit-everyone
+  - claim.creator-writing.error-messages-enable-recovery
+- pack_id: pack.developer-advocate-writing
+  role: technical_writer_devrel_communication
+  facet_id: articles_and_long_form
+  optional: false
+  source_slice: slices/articles-and-long-form.md
+  target_path: references/knowledge-capsules/technical-writer-devrel-communication-articles-and-long-form.md
+  asset_ids:
+  - claim.creator-writing.long-form-builds-trust
+  - claim.creator-writing.questions-start-thinking
+  - claim.creator-writing.generic-value-is-dead
+  - claim.creator-writing.writing-tests-ideas-fast
+  - principle.creator-writing.perspective-over-volume
+  - heuristic.creator-writing.question-led-draft
+  - checklist.creator-writing.long-form-draft-loop
+  - rubric.creator-writing.signal-readiness
+  - lens.creator-writing.signal-and-taste
+  - claim.creator-writing.taste-directs-ai
+  - claim.creator-writing.mission-filters-content
+  - claim.creator-writing.creativity-needs-low-input-space
+- pack_id: pack.developer-advocate-writing
+  role: technical_writer_devrel_communication
+  facet_id: voice_signal_and_taste
+  optional: false
+  source_slice: slices/voice-signal-and-taste.md
+  target_path: references/knowledge-capsules/technical-writer-devrel-communication-voice-signal-and-taste.md
+  asset_ids:
+  - claim.creator-writing.taste-directs-ai
+  - claim.creator-writing.idea-museum-builds-voice
+  - claim.creator-writing.mission-filters-content
+  - claim.creator-writing.creativity-needs-low-input-space
+  - principle.creator-writing.mission-based-coherence
+  - principle.creator-writing.space-before-signal
+  - heuristic.creator-writing.idea-museum
+  - heuristic.creator-writing.input-fast-before-creation
+  - lens.creator-writing.signal-and-taste
+  - claim.creator-writing.questions-start-thinking
+  - claim.creator-writing.generic-value-is-dead
+- pack_id: pack.developer-advocate-writing
+  role: technical_writer_devrel_communication
+  facet_id: storytelling_and_explanation
+  optional: false
+  source_slice: slices/storytelling-and-explanation.md
+  target_path: references/knowledge-capsules/technical-writer-devrel-communication-storytelling-and-explanation.md
+  asset_ids:
+  - claim.creator-writing.explanations-lower-understanding-cost
+  - claim.creator-writing.sticky-docs-beat-curse-of-knowledge
+  - claim.creator-writing.positioning-sets-document-context
+  - principle.creator-writing.context-before-detail
+  - principle.creator-writing.documents-need-argument-architecture
+  - heuristic.creator-writing.answer-then-support
+  - heuristic.creator-writing.frame-by-category-alternatives-value
+  - checklist.creator-writing.argument-visual-doc-pass
+  - rubric.creator-writing.docs-expert-capsule-readiness
+  - claim.creator-writing.audience-gap-defines-document
+  - claim.creator-writing.answer-first-structure-supports-review
+  - claim.creator-writing.visual-documents-need-standalone-architecture
+  - claim.creator-writing.user-need-defines-content
+  - claim.creator-writing.devrel-docs-bridge-community-and-company
+- pack_id: pack.developer-advocate-writing
+  role: technical_writer_devrel_communication
+  facet_id: presentations_and_visual_docs
+  optional: false
+  source_slice: slices/presentations-and-visual-docs.md
+  target_path: references/knowledge-capsules/technical-writer-devrel-communication-presentations-and-visual-docs.md
+  asset_ids:
+  - claim.creator-writing.visual-documents-need-standalone-architecture
+  - claim.creator-writing.examples-and-visuals-teach-use
+  - claim.creator-writing.visual-meaning-needs-nonvisual-support
+  - principle.creator-writing.documents-need-argument-architecture
+  - heuristic.creator-writing.choose-visual-document-intentionally
+  - heuristic.creator-writing.describe-purpose-not-appearance
+  - checklist.creator-writing.argument-visual-doc-pass
+  - checklist.creator-writing.accessibility-editing-pass
+  - rubric.creator-writing.accessible-document-readiness
+  - claim.creator-writing.answer-first-structure-supports-review
+  - claim.creator-writing.positioning-sets-document-context
+  - claim.creator-writing.accessible-docs-benefit-everyone
+  - claim.creator-writing.inclusive-language-centers-readers
+- pack_id: pack.developer-advocate-writing
+  role: technical_writer_devrel_communication
+  facet_id: short_form_and_content_creation
+  optional: false
+  source_slice: slices/short-form-and-content-creation.md
+  target_path: references/knowledge-capsules/technical-writer-devrel-communication-short-form-and-content-creation.md
+  asset_ids:
+  - claim.creator-writing.x-content-writer-fits-public-x-content
+  - claim.creator-writing.x-writer-separates-creative-and-trust-loops
+  - claim.creator-writing.communication-corpus-supports-specialized-passes
+  - claim.creator-writing.show-work-turns-process-into-public-signal
+  - principle.creator-writing.route-by-reader-job-and-proof
+  - principle.creator-writing.source-corpus-is-a-lane-not-a-shortcut
+  - heuristic.creator-writing.docs-to-x-routing
+  - checklist.creator-writing.skill-routing-pass
+  - claim.creator-writing.docs-expert-fits-proof-backed-docs
+- pack_id: pack.developer-advocate-writing
+  role: technical_writer_devrel_communication
+  facet_id: clarity_style_and_revision
+  optional: false
+  source_slice: slices/clarity-style-and-revision.md
+  target_path: references/knowledge-capsules/technical-writer-devrel-communication-clarity-style-and-revision.md
+  asset_ids:
+  - claim.creator-writing.terms-must-be-defined-consistently
+  - claim.creator-writing.active-voice-clarifies-actors
+  - claim.creator-writing.one-idea-per-unit
+  - claim.creator-writing.revision-needs-separate-passes
+  - claim.creator-writing.llms-assist-not-own-judgment
+  - principle.creator-writing.reader-clarity-before-style
+  - principle.creator-writing.revision-is-a-separate-mode
+  - heuristic.creator-writing.one-idea-one-unit
+  - heuristic.creator-writing.edit-in-passes
+  - checklist.creator-writing.clarity-editing-pass
+  - checklist.creator-writing.revision-structure-pass
+  - claim.creator-writing.audience-gap-defines-document
+  - claim.creator-writing.large-docs-need-navigable-structure
+  - claim.creator-writing.examples-and-visuals-teach-use
+- pack_id: pack.developer-advocate-writing
+  role: technical_writer_devrel_communication
+  facet_id: accessible_and_inclusive_writing
+  optional: false
+  source_slice: slices/accessible-and-inclusive-writing.md
+  target_path: references/knowledge-capsules/technical-writer-devrel-communication-accessible-and-inclusive-writing.md
+  asset_ids:
+  - claim.creator-writing.accessible-docs-benefit-everyone
+  - claim.creator-writing.visual-meaning-needs-nonvisual-support
+  - claim.creator-writing.inclusive-language-centers-readers
+  - principle.creator-writing.accessibility-is-writing-quality
+  - heuristic.creator-writing.describe-purpose-not-appearance
+  - checklist.creator-writing.accessibility-editing-pass
+  - rubric.creator-writing.accessible-document-readiness
+  - lens.creator-writing.reader-access-and-recovery
+  - claim.creator-writing.audience-gap-defines-document
+  - claim.creator-writing.error-messages-enable-recovery
+- pack_id: pack.developer-advocate-writing
+  role: technical_writer_devrel_communication
+  facet_id: error_messages_and_recovery
+  optional: false
+  source_slice: slices/error-messages-and-recovery.md
+  target_path: references/knowledge-capsules/technical-writer-devrel-communication-error-messages-and-recovery.md
+  asset_ids:
+  - claim.creator-writing.error-messages-enable-recovery
+  - claim.creator-writing.error-messages-need-diagnostic-identifiers
+  - claim.creator-writing.error-message-craft-preserves-signal
+  - principle.creator-writing.error-messages-are-recovery-paths
+  - heuristic.creator-writing.show-actual-expected-fix
+  - heuristic.creator-writing.concise-not-cryptic
+  - checklist.creator-writing.error-message-editing-pass
+  - rubric.creator-writing.error-message-readiness
+  - lens.creator-writing.reader-access-and-recovery
+  - claim.creator-writing.audience-gap-defines-document
+  - claim.creator-writing.accessible-docs-benefit-everyone
+runtime_dependency_policy:
+  requires_knowledge_os_at_runtime: false
+  raw_sources_included: false
+  local_absolute_paths_required: false
+provenance:
+  profile: technical-writer
+  profile_digest: sha256:fee9b5cadedea78a980961aad23dc9f61d274f60b57baf3b36522474ca949b82
+  packs:
+  - pack_id: pack.developer-advocate-writing
+    export_root: exports/packs/pack.developer-advocate-writing
+    snapshot_digest: sha256:b678921ff0cec3e8f01162404729b8749f625e0ee5b460980c431d55894824ae
+    role: technical_writer_devrel_communication

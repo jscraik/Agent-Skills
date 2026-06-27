@@ -1,0 +1,39 @@
+---
+schema_version: knowledge-os.knowledge-demand.v1
+skill:
+  skill_id: technical-writer
+  declared_name: technical-writer
+  entrypoint_path: Skills/agent-ops/technical-writer/SKILL.md
+  canonical_skill_path: Skills/agent-ops/technical-writer/SKILL.md
+  writable_root: Skills/agent-ops/technical-writer
+  apply_target_path: Skills/agent-ops/technical-writer/SKILL.md
+knowledge_signals:
+- devrel_role_and_audience
+- technical_documentation
+- developer_education
+- content_design_and_service_docs
+- articles_and_long_form
+- voice_signal_and_taste
+- storytelling_and_explanation
+- presentations_and_visual_docs
+- short_form_and_content_creation
+- clarity_style_and_revision
+- accessible_and_inclusive_writing
+- error_messages_and_recovery
+needed_facets:
+- pack.developer-advocate-writing:devrel_role_and_audience
+- pack.developer-advocate-writing:technical_documentation
+- pack.developer-advocate-writing:developer_education
+- pack.developer-advocate-writing:content_design_and_service_docs
+- pack.developer-advocate-writing:articles_and_long_form
+- pack.developer-advocate-writing:voice_signal_and_taste
+- pack.developer-advocate-writing:storytelling_and_explanation
+- pack.developer-advocate-writing:presentations_and_visual_docs
+- pack.developer-advocate-writing:short_form_and_content_creation
+- pack.developer-advocate-writing:clarity_style_and_revision
+- pack.developer-advocate-writing:accessible_and_inclusive_writing
+- pack.developer-advocate-writing:error_messages_and_recovery
+runtime_dependency_policy:
+  requires_knowledge_os_at_runtime: false
+  raw_sources_included: false
+  local_absolute_paths_required: false

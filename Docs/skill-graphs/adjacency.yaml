@@ -43,7 +43,7 @@ diagram-cli:
     memory surface
   verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
     evidence before closeout
-docs-expert:
+technical-writer:
   project-brain: Capture durable repo learnings and route updates into the canonical
     memory surface
   verification-before-completion: Confirm gate outcomes and report deterministic pass/fail
@@ -161,7 +161,7 @@ typescript:
 ubiquitous-language:
   agents-md: Use when the glossary needs to influence repo-level agent instructions
     after terminology is stable.
-  docs-expert: Use for broader documentation rewrites after the canonical vocabulary
+  technical-writer: Use for broader documentation rewrites after the canonical vocabulary
     is agreed.
   verification-before-completion: Pair with prompt translations that turn vague completion
     language into exact validation evidence.

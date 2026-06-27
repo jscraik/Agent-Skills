@@ -1,0 +1,66 @@
+{
+  "status": "error",
+  "trace_id": "0484eb44-0620-4d6f-9fd5-d4a7d52e6cf2",
+  "metadata": {
+    "version": "0.1.0",
+    "command": "sdk eval tessl-local-proof --skill Skills/agent-ops/technical-writer --workspace skills-sdk --execute --json --robot",
+    "next_steps": [],
+    "correction_note": null
+  },
+  "data": {
+    "skills_sdk_eval_tessl_local_proof": {
+      "schema_version": "skills-sdk-eval-tessl-local-proof.v0",
+      "status": "blocked",
+      "ready": false,
+      "skill": "Skills/agent-ops/technical-writer",
+      "workspace": "skills-sdk",
+      "receipt": {
+        "schema_version": "skills-sdk.tessl-local-proof.v1",
+        "status": "blocked",
+        "source_path": "Skills/agent-ops/technical-writer",
+        "proof_path": "Skills/agent-ops/technical-writer",
+        "workspace": "skills-sdk",
+        "execute": true,
+        "blocker": "Failed to stage Tessl local proof source: Tessl live-private evals require reviewed generated scenarios before scoring. Run ./bin/ask evals prepare-tessl-scenarios <skill> --tessl-workspace <workspace> --json --robot, generate bespoke scenarios with the Tessl scenario skill, review/import them into references/evals/*.md or references/evals.yaml, then rerun the live Tessl lane. Structure-only packages may set tessl_scenario_policy.structure_only: true in references/contract.yaml.",
+        "blocker_class": "blocked_validation",
+        "policy": {
+          "schema_version": "skills-sdk.tessl-local-proof-policy.v1",
+          "workspace": "skills-sdk",
+          "stage": "Tessl Distribution -> Local Runtime Truth bridge",
+          "proves": [
+            "controlled Tessl plugin package shape",
+            "local Tessl plugin lint compatibility",
+            "temporary plugin archive packability",
+            "file: install command compatibility inside a temporary project workspace",
+            "optional Tessl review threshold command result when explicitly requested"
+          ],
+          "does_not_prove": [
+            "live Tessl eval score",
+            "public registry publication",
+            "persistent user runtime activation",
+            "oss-local or oss-cloud behavioral proof"
+          ],
+          "no_publish": true,
+          "no_registry_upload": true,
+          "no_live_repo_source": true,
+          "install_scope": "temporary project workspace under /tmp/ask-tessl-local-install"
+        }
+      },
+      "mutation_performed": true,
+      "validation_commands": [
+        "./bin/ask sdk eval tessl-local-proof --skill Skills/agent-ops/technical-writer --workspace skills-sdk --execute --json --robot"
+      ],
+      "agent_summary": "Tessl local proof is blocked for Skills/agent-ops/technical-writer."
+    }
+  },
+  "telemetry": {
+    "latency_ms": 42
+  },
+  "errors": [
+    {
+      "code": "ERR_RUNTIME",
+      "message": "Tessl local proof is blocked for Skills/agent-ops/technical-writer.",
+      "fix_suggestion": "./bin/ask sdk eval tessl-local-proof --skill Skills/agent-ops/technical-writer --workspace skills-sdk --preview --json --robot"
+    }
+  ]
+}

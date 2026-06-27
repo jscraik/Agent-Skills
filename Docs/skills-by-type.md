@@ -119,7 +119,7 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `baseline-ui` — `Skills/frontend-ui`
 - `best-practices` — `Skills/security-ops`
 - `codex-review` — `Skills/agent-ops`
-- `docs-expert` — `Skills/agent-ops`
+- `technical-writer` — `Skills/agent-ops`
 - `elixir-pro` — `Skills/agent-ops`
 - `evals-router` — `Skills/agent-ops`
 - `fixing-accessibility` — `Skills/frontend-ui`

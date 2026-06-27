@@ -29,6 +29,10 @@ SMOKE_EVAL_PROFILE = "fast"
 DEFAULT_MACRO_EVAL_REPORTS_GLOB = "Infrastructure/artifacts/skills/*/*/summary.json"
 TESSL_SCENARIO_TOOL_TILE = "tessl-labs/tessl-skill-eval-scenarios"
 TESSL_SCENARIO_TOOL_VERSION = "0.1.0"
+TESSL_DEFAULT_WORKSPACE = "skills-sdk-lab"
+TESSL_WORKSPACE_ALIASES = {
+    "skills-sdk": TESSL_DEFAULT_WORKSPACE,
+}
 TESSL_TILE_VERSION_RE = re.compile(r"^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$")
 TESSL_LIVE_PRIVATE_MIN_SCENARIOS = 20
 TESSL_WORKSPACE_RUN_LIMIT = 300
@@ -696,7 +700,7 @@ def _summarize_tessl_live_eval_view(payload: dict[str, object]) -> dict[str, obj
 
 def _tessl_staging_root_template() -> str:
     """Return the human-readable template for stable Tessl eval staging."""
-    return str(Path(tempfile.gettempdir()) / "ask-tessl-evals" / "<skill-path>-<sha12>")
+    return str(Path(tempfile.gettempdir()) / "ask-tessl-live" / "<skill-path>-<sha12>")
 
 
 def _tessl_live_staging_root_template() -> str:
@@ -721,7 +725,8 @@ def _tessl_policy() -> dict:
             "references/contract.yaml",
             "references/task-profile.json",
             "assets/**/*",
-            "scenarios/<case-id>/{task.md,criteria.json}",
+            "evals/<case-id>/task.md",
+            "evals/<case-id>/criteria.json",
         ],
         "network_permission_required_by_repo": False,
         "project_save_may_use_tessl_service": "only_for_project_link_when_workspace_provided",
@@ -778,6 +783,7 @@ def _tessl_live_private_policy(workspace: str | None = None) -> dict:
                 "patch_oss_local_failures",
                 "oss_cloud_internal_judge",
                 "patch_oss_cloud_failures",
+                "tessl_local_proof",
                 "tessl_live_dry_run",
                 "tessl_live_run",
                 "patch_tessl_failures",
@@ -805,6 +811,10 @@ def _tessl_live_private_policy(workspace: str | None = None) -> dict:
             ],
             "tessl_sequence": [
                 {
+                    "stage": "tessl_local_proof",
+                    "role": "local Tessl lint, pack, temp install, and optional review proof before staged external scoring",
+                },
+                {
                     "stage": "tessl_live_dry_run",
                     "role": "package and scenario staging proof before external scoring",
                 },
@@ -813,8 +823,8 @@ def _tessl_live_private_policy(workspace: str | None = None) -> dict:
                     "role": "external confirmation lane after internal judges pass",
                 },
             ],
-            "failure_loop": "Any oss-local, oss-cloud, dry-run, or live Tessl failure returns to oss-local after owner classification, patch plan, retained regression evidence, and rerun commands are recorded.",
-            "live_blocked_until": "deterministic gates, oss-local, oss-cloud, and Tessl dry-run all pass for the current candidate or an explicit skip/blocker receipt is recorded.",
+            "failure_loop": "Any oss-local, oss-cloud, Tessl local-proof, dry-run, or live Tessl failure returns to oss-local after owner classification, patch plan, retained regression evidence, and rerun commands are recorded.",
+            "live_blocked_until": "deterministic gates, oss-local, oss-cloud, Tessl local-proof, and Tessl dry-run all pass for the current candidate or an explicit skip/blocker receipt is recorded.",
         },
         "model_selection_gate": {
             "quality_floor_before_cost": True,
@@ -889,8 +899,10 @@ def _tessl_scenario_generation_policy(workspace: str | None = None) -> dict:
         "evidence_retention": "stable tmp staging is intentionally left for post-run inspection; reruns archive previous staged evidence under evidence-archive/",
         "target_tile": "target-tile",
         "tool_project": "tool-project",
-        "scenario_skill_path": ".tessl/tiles/tessl-labs/tessl-skill-eval-scenarios/creating-eval-scenarios/SKILL.md",
-        "scenario_reference_path": ".tessl/tiles/tessl-labs/tessl-skill-eval-scenarios/creating-eval-scenarios/references/scenario-generation.md",
+        "scenario_skill_path": ".tessl/plugins/tessl-labs/tessl-skill-eval-scenarios/creating-eval-scenarios/SKILL.md",
+        "legacy_scenario_skill_path": ".tessl/tiles/tessl-labs/tessl-skill-eval-scenarios/creating-eval-scenarios/SKILL.md",
+        "scenario_reference_path": ".tessl/plugins/tessl-labs/tessl-skill-eval-scenarios/creating-eval-scenarios/references/scenario-generation.md",
+        "legacy_scenario_reference_path": ".tessl/tiles/tessl-labs/tessl-skill-eval-scenarios/creating-eval-scenarios/references/scenario-generation.md",
         "generated_output": "target-tile/evals/",
         "canonical_import_target": "references/evals.yaml plus references/evals/*.md after review",
         "live_eval_gate": "the later --tessl-live-private lane stages only reviewed canonical skill assets; generate and import bespoke scenarios before running it",
@@ -2172,7 +2184,7 @@ def _validate_tessl_workspace(workspace: str | None) -> str:
         )
     if "/" in normalized:
         raise ValueError("Tessl workspace must be the workspace name only, not workspace/tile.")
-    return normalized
+    return TESSL_WORKSPACE_ALIASES.get(normalized, normalized)
 
 
 def _default_tessl_workspace_from_env() -> tuple[str | None, str | None]:
@@ -2180,7 +2192,7 @@ def _default_tessl_workspace_from_env() -> tuple[str | None, str | None]:
         value = os.environ.get(name)
         if value is not None and value.strip():
             return _validate_tessl_workspace(value), name
-    return None, None
+    return TESSL_DEFAULT_WORKSPACE, "repo_default"
 
 
 def _tessl_eval_case_id(case_id: str) -> str:
@@ -3537,11 +3549,7 @@ def _write_tessl_scenario_generation_brief(
     tool_project: Path,
 ) -> Path:
     brief_path = staged_root / "scenario-generation-brief.md"
-    scenario_skill = tool_project / ".tessl/tiles/tessl-labs/tessl-skill-eval-scenarios/creating-eval-scenarios/SKILL.md"
-    scenario_reference = (
-        tool_project
-        / ".tessl/tiles/tessl-labs/tessl-skill-eval-scenarios/creating-eval-scenarios/references/scenario-generation.md"
-    )
+    scenario_skill, scenario_reference = _tessl_scenario_tool_paths(tool_project)
     brief_path.write_text(
         "\n".join([
             "# Tessl Scenario Generation Brief",
@@ -3576,6 +3584,21 @@ def _write_tessl_scenario_generation_brief(
         encoding="utf-8",
     )
     return brief_path
+
+
+def _tessl_scenario_tool_paths(tool_project: Path) -> tuple[Path, Path]:
+    """Return scenario-tool paths for both current and legacy Tessl install layouts."""
+    relative_suffix = Path("tessl-labs/tessl-skill-eval-scenarios/creating-eval-scenarios")
+    roots = [
+        tool_project / ".tessl/plugins",
+        tool_project / ".tessl/tiles",
+    ]
+    candidates = [root / relative_suffix for root in roots]
+    scenario_root = next((candidate for candidate in candidates if candidate.exists()), candidates[0])
+    return (
+        scenario_root / "SKILL.md",
+        scenario_root / "references/scenario-generation.md",
+    )
 
 
 def prepare_tessl_scenario_generation(
@@ -3753,11 +3776,7 @@ def prepare_tessl_scenario_generation(
         blocker = None
         blocker_class = None
 
-    scenario_skill = tool_project / ".tessl/tiles/tessl-labs/tessl-skill-eval-scenarios/creating-eval-scenarios/SKILL.md"
-    scenario_reference = (
-        tool_project
-        / ".tessl/tiles/tessl-labs/tessl-skill-eval-scenarios/creating-eval-scenarios/references/scenario-generation.md"
-    )
+    scenario_skill, scenario_reference = _tessl_scenario_tool_paths(tool_project)
     brief_path = _write_tessl_scenario_generation_brief(
         staged_root,
         source_path=path,
@@ -4303,11 +4322,14 @@ def _evals_run_validation_command(
     mode: str,
     runner: str,
     dashboard: bool,
+    codex_profile: str | None = None,
     tessl_live_private: bool = False,
     tessl_workspace: str | None = None,
     tessl_live_dry_run: bool = False,
 ) -> str:
     parts = ["./bin/ask", "evals", "run", path, "--mode", mode, "--runner", runner]
+    if codex_profile:
+        parts.extend(["--profile", codex_profile])
     if tessl_live_private:
         parts.append("--tessl-live-private")
     if tessl_workspace:
@@ -5498,8 +5520,28 @@ def run_evals(
     if path != requested_path:
         result.data["requested_path"] = requested_path
         result.data["resolved_skill_path"] = path
-    effective_tessl_workspace = tessl_workspace
-    tessl_workspace_source = "argument" if tessl_workspace else None
+    effective_tessl_workspace = None
+    tessl_workspace_source = None
+    if tessl_workspace:
+        try:
+            effective_tessl_workspace = _validate_tessl_workspace(tessl_workspace)
+            tessl_workspace_source = "argument"
+        except ValueError as e:
+            if not skip_tessl or tessl_live_private:
+                result.status = "error"
+                result.data["raw_output"] = ""
+                result.data["raw_error"] = str(e)
+                result.data["eval_status"] = "blocked_validation"
+                result.data["blocker_class"] = "blocked_validation"
+                result.data["blocker_taxonomy"] = EVAL_BLOCKER_TAXONOMY
+                result.data["tessl_eval"] = {
+                    "status": "blocked",
+                    "blocker": str(e),
+                    "blocker_class": "blocked_validation",
+                    "workspace_source": "argument",
+                }
+                result.errors.append(ErrorObject(code="ERR_VALIDATION", message=str(e)))
+                return result
     if not effective_tessl_workspace:
         try:
             effective_tessl_workspace, tessl_workspace_source = _default_tessl_workspace_from_env()
@@ -5529,17 +5571,23 @@ def run_evals(
             mode=mode,
             runner=runner,
             dashboard=dashboard,
+            codex_profile=codex_profile,
             tessl_live_private=tessl_live_private,
             tessl_workspace=effective_tessl_workspace,
             tessl_live_dry_run=tessl_live_dry_run,
         )
     ]
     effective_codex_profile = codex_profile or SMOKE_EVAL_PROFILE
+    codex_profile_invoked = runner == "codex" and (mode == "smoke" or codex_profile is not None)
+    codex_profile_config = f"[profiles.{effective_codex_profile}]" if codex_profile_invoked else None
     result.data["profile_contract"] = {
-        "codex_profile": effective_codex_profile if mode == "smoke" and runner == "codex" else None,
-        "codex_profile_config": f"[profiles.{effective_codex_profile}]" if mode == "smoke" and runner == "codex" else None,
+        "codex_profile": effective_codex_profile if codex_profile_invoked else None,
+        "codex_profile_config": codex_profile_config,
         "codex_profile_source": "argument" if codex_profile else "default",
         "codex_profile_required_for_smoke": mode == "smoke" and runner == "codex",
+        "codex_exec_invoked": codex_profile_invoked,
+        "codex_exec_command_shape": ["codex", "exec", "--profile", effective_codex_profile] if codex_profile_invoked else None,
+        "codex_profile_proof_lane": effective_codex_profile if effective_codex_profile in {"oss-local", "oss-cloud"} else None,
         "tessl_policy": _tessl_policy(),
         "tessl_live_private_policy": _tessl_live_private_policy(effective_tessl_workspace) if tessl_live_private else None,
     }
@@ -5653,16 +5701,17 @@ def run_evals(
         "--runner", runner,
     ]
     timeout = RELEASE_EVAL_TIMEOUT_SECONDS if mode == "release" else 300
-    if mode == "smoke" and runner == "codex":
+    if runner == "codex" and (mode == "smoke" or codex_profile is not None):
+        sandbox = "read-only" if codex_profile in {"oss-local", "oss-cloud", "codex-fast"} else "workspace-write"
         cmd.extend([
             "--profile",
             effective_codex_profile,
             "--sandbox",
-            "workspace-write",
+            sandbox,
             "--timeout-sec",
             str(SMOKE_CASE_TIMEOUT_SECONDS),
         ])
-        if model or not codex_profile:
+        if mode == "smoke" and (model or not codex_profile):
             cmd.extend(["--model", model or SMOKE_EVAL_MODEL])
         timeout = SMOKE_EVAL_TIMEOUT_SECONDS
     elif mode == "smoke":

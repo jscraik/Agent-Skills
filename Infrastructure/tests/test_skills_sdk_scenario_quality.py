@@ -316,6 +316,35 @@ cases:
         blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
         self.assertIn("structured_fields_use_typed_assertions", blocker_ids)
 
+    def test_builder_blocks_tessl_keyword_only_quality_mismatch(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(
+                Path(temp_dir),
+                """schema_version: '2.0'
+skill_name: sample
+cases:
+- id: keyword-only-mismatch
+  category: happy
+  eval_modes:
+  - smoke
+  realistic: true
+  prompt: Ask for an evidence-backed validation summary.
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: regex
+    value: '(?is)(evidence|validation)'
+""",
+            )
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
+        self.assertIn("platform_tessl_quality:keyword_only_acceptance", blocker_ids)
+        self.assertIn("platform_tessl_quality:missing_scenario_context", blocker_ids)
+
     def test_release_mode_suite_requires_twenty_scenarios(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             skill_dir = _write_skill_with_evals(

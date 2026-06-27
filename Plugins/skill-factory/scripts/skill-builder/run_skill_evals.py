@@ -2967,12 +2967,18 @@ def _classify_runner_blocker(
     Returns:
         Optional[str]: One of the blocker keys listed above, or `None` if no blocker markers are found.
     """
-    text = "\n".join([output_text or "", stdout_text or "", stderr_text or ""])
-    low = text.lower()
-
     if exit_code == 124:
         runner_text = "\n".join([output_text or "", stdout_text or ""])
         return "timeout_partial_output" if runner_text.strip() else "timeout_no_output"
+
+    # A successful Codex process can produce a useful skill-level blocked report
+    # that quotes sandbox/runtime evidence. Score that final answer with the
+    # scenario assertions instead of upgrading it to an eval-runner blocker.
+    if exit_code == 0 and (output_text or "").strip() and not (stderr_text or "").strip():
+        return None
+
+    text = "\n".join([output_text or "", stdout_text or "", stderr_text or ""])
+    low = text.lower()
 
     strong_runtime_markers = [
         "sandbox_apply: operation not permitted",

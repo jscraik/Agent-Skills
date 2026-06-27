@@ -21,10 +21,12 @@ proof complete.
 
 1. SDK mechanical validation: prove the package shape, scenario metadata,
    scorer metadata, scorer calibration, docs projection, and strict audit.
-2. oss-local flow: run the skill or A/B judge through `codex exec --profile
-oss-local`; iterate until the sandboxed local OSS lane is valid, then move
-   to the next model lane.
-3. oss-cloud flow: run the same proof through `codex exec --profile oss-cloud`;
+2. oss-local flow: run the skill scenario proof or A/B judge through
+   `codex exec --profile oss-local` in the read-only Codex profile sandbox;
+   iterate until the sandboxed local OSS lane is valid, then move to the next
+   model lane.
+3. oss-cloud flow: run the same proof through `codex exec --profile oss-cloud`
+   in the read-only Codex profile sandbox;
    iterate until the sandboxed cloud OSS lane is valid, then move to Tessl.
 4. Tessl local flow: run internal/local Tessl staging and rubric checks;
    iterate until the rubric and scenario package are good enough for external
@@ -48,7 +50,14 @@ oss-local`; iterate until the sandboxed local OSS lane is valid, then move
 
 - Do not skip SDK mechanical validation before runtime proof.
 - Do not use generic `./bin/ask evals run --runner codex --model <model>` as
-  oss-local proof unless the resulting receipt proves `codex_profile=oss-local`.
+  oss-local proof unless the resulting receipt proves `codex_exec_invoked=true`
+  and `codex_profile=oss-local`.
+- Do not use `./bin/ask evals run --runner codex` as oss-cloud proof unless the
+  resulting receipt proves `codex_exec_invoked=true` and
+  `codex_profile=oss-cloud`.
+- `codex exec --profile fast` or SDK receipts in the `codex-fast-smoke` lane
+  are allowed for quick smoke tasks and checks only; they do not satisfy
+  oss-local or oss-cloud promotion evidence.
 - Do not treat a ChatGPT-account model error as an oss-local blocker. The
   oss-local lane is the Codex `oss-local` profile lane.
 - Do not treat an oss-local pass as oss-cloud proof. Cloud confirmation has its

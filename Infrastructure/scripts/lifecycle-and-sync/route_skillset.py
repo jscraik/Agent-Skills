@@ -503,6 +503,12 @@ def factory_override(skill_set: str, task: str, rows: list[dict[str, Any]]) -> d
                 {"skill", "skills"},
             ),
             (
+                "skill-builder",
+                "improve-skill-sdk-pipeline",
+                {"improve", "harden", "fix", "repair", "review", "score", "eval", "evals", "tessl", "sdk"},
+                {"skill", "skills"},
+            ),
+            (
                 "skill-refactor",
                 "refactor-skill",
                 {"refactor", "simplify", "merge", "fold", "prune", "coverage", "session"},
