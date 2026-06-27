@@ -8,6 +8,32 @@ non_goals:
   - Do not change runtime behavior, dependencies, CI policy, release state, external trackers, generated projections, or user config from this skill alone.
 inputs: [user_request, doc_target, audience, reader_job, writing_type, writing_mode, truth_files, validation_commands, glossary_surfaces]
 outputs: [findings, rewritten_docs_or_patch_summary, evidence_map, reader_state, writing_type, quality_rubric, validation_status, unknowns, handoff]
+commands:
+  - "./bin/ask skills audit Skills/agent-ops/technical-writer --level strict --json --robot"
+  - "./bin/ask skills package verify Skills/agent-ops/technical-writer --json --robot"
+  - "./bin/ask sdk eval scenario-quality Skills/agent-ops/technical-writer --preview --json --robot"
+  - "./bin/ask sdk eval scorer-quality Skills/agent-ops/technical-writer --preview --json --robot"
+  - "./bin/ask sdk eval scorer-calibration Skills/agent-ops/technical-writer --preview --json --robot"
+  - "./bin/ask sdk eval run Skills/agent-ops/technical-writer --runner internal --mode smoke --codex-profile oss-local --json --robot"
+  - "./bin/ask sdk eval run Skills/agent-ops/technical-writer --runner internal --mode smoke --codex-profile oss-cloud --json --robot"
+  - "./bin/ask sdk eval tessl-local-proof --skill Skills/agent-ops/technical-writer --workspace skills-sdk-lab --execute --json --robot"
+  - "./bin/ask sdk eval tessl-score --view-json <view-json> --skill Skills/agent-ops/technical-writer --preview --json --robot"
+permission_profile:
+  filesystem:
+    read:
+      - doc_target
+      - truth_files
+      - validation_commands
+      - repo_guidance
+      - glossary_surfaces
+      - screenshots_or_visual_evidence_when_supplied
+    write:
+      - doc_target
+      - canonical_skill_eval_assets_when_explicitly_hardening_this_skill
+      - repo_local_evidence_artifacts_when_recording_validation
+  network:
+    required: false
+    allowed_when: "Only when the user requests external citation verification, hosted PR/CI status, Tessl workspace evidence, or other explicit external proof."
 quality_criteria:
   writing_type_selection:
     technical_documentation: API, README, runbook, config, command, code-doc, or proof-backed repo guidance

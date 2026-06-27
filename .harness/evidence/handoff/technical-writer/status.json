@@ -1,15 +1,21 @@
 {
-  "generated_at": "2026-06-27T17:41:55.797685+00:00",
+  "freshness": {
+    "artifact_head": "618dd1aa6",
+    "current_head": "618dd1aa6",
+    "status": "current",
+    "warning": null
+  },
+  "generated_at": "2026-06-27T18:51:20.810320+00:00",
   "pipeline_lanes": {
     "pull_request": {
       "hosted_check": {
         "conclusion": "SUCCESS",
-        "details_url": "https://github.com/jscraik/Agent-Skills/actions/runs/28296743203/job/83837890985",
+        "details_url": "https://github.com/jscraik/Agent-Skills/actions/runs/28297144131/job/83838941819",
         "name": "pr-template",
         "status": "COMPLETED"
       },
       "local_template_validation": {
-        "command": "gh pr view 293 --repo jscraik/Agent-Skills --json body --jq '.body' | python3 .github/scripts/validate_pr_template_body.py",
+        "command": "gh pr view 293 --repo jscraik/Agent-Skills --json body --jq .body | python3 .github/scripts/validate_pr_template_body.py",
         "note": "Validated against the current local pull request template via stdin.",
         "status": "pass"
       },
@@ -33,15 +39,34 @@
       "improvement": null,
       "scenario_count": 32,
       "score": null,
+      "score_receipt": {
+        "baseline_percent": 65.2273,
+        "blocker": "Tessl feedback loop is open: baseline beat usage-spec on 5 scenario(s): wrong-domain, reader-testing, generated-boundary, smoke-boundary-discovery, regression-stale-command-example. Import or retain equivalent internal regression cases, fix the owner, and rerun before live handoff.",
+        "blocker_class": "blocked_validation",
+        "feedback_loop_status": "open",
+        "ready": false,
+        "regression_count": 5,
+        "regression_paths": [
+          "wrong-domain",
+          "reader-testing",
+          "generated-boundary",
+          "smoke-boundary-discovery",
+          "regression-stale-command-example"
+        ],
+        "scenario_count": 32,
+        "source": ".harness/evidence/handoff/technical-writer/tessl-score-preview.json",
+        "status": "blocked",
+        "usage_percent": 76.8182
+      },
       "source": ".harness/evidence/tessl/technical-writer/019f0933-e8cc-724c-951a-7f1341590e50/tessl-eval-view.json",
-      "status": "pending",
+      "status": "completed",
       "type": "eval-run",
       "updated_at": null
     }
   },
   "repo": {
     "branch": "codex/technical-writer-sdk-pipeline",
-    "head": "95fabd61c",
+    "head": "618dd1aa6",
     "root": "."
   },
   "schema_version": "skills-sdk-handoff-status/v1",
@@ -51,7 +76,7 @@
     "skill_md": "Skills/agent-ops/technical-writer/SKILL.md"
   },
   "status": {
-    "current_position": "tessl_external_pending_existing_run",
+    "current_position": "tessl_feedback_loop_open",
     "does_not_prove": [
       "PR mergeability",
       "final Tessl score",
@@ -59,9 +84,9 @@
       "installed runtime behavior"
     ],
     "next_actions": [
-      "refresh PR #293 by pushing the current branch so hosted checks see this status artifact",
-      "inspect the existing pending Tessl eval before submitting any new live scoring run",
-      "treat the older local plan as superseded by this handoff status for technical-writer PR work"
+      "classify the five Tessl baseline-win regressions by owner: skill, task, criteria, or scorer",
+      "retain or import equivalent internal regression scenarios before another live Tessl run",
+      "rerun the SDK pipeline from internal eval receipts through oss-local, oss-cloud, and Tessl dry-run before live handoff"
     ]
   }
 }

@@ -39,6 +39,27 @@ def _git_commit() -> str | None:
     return result.stdout.strip()
 
 
+def _existing_artifact_freshness(output: Path, current_head: str | None) -> dict[str, Any]:
+    if not output.exists():
+        return {
+            "status": "new_artifact",
+            "artifact_head": None,
+            "current_head": current_head,
+            "warning": None,
+        }
+    artifact_head = (_load_json(output).get("repo") or {}).get("head")
+    status = "current" if artifact_head == current_head else "stale"
+    warning = None
+    if status == "stale":
+        warning = "Existing handoff status was generated for a different HEAD."
+    return {
+        "status": status,
+        "artifact_head": artifact_head,
+        "current_head": current_head,
+        "warning": warning,
+    }
+
+
 def _tessl_summary(tessl_view: Path) -> dict[str, Any]:
     data = _load_json(tessl_view).get("data", {})
     attrs = data.get("attributes") or {}
@@ -53,6 +74,29 @@ def _tessl_summary(tessl_view: Path) -> dict[str, Any]:
         "improvement": attrs.get("improvement"),
         "created_at": attrs.get("created_at"),
         "updated_at": attrs.get("updated_at"),
+    }
+
+
+def _tessl_score_summary(tessl_score: Path | None) -> dict[str, Any] | None:
+    if tessl_score is None:
+        return None
+    data = _load_json(tessl_score)
+    score = (data.get("data") or {}).get("skills_sdk_eval_tessl_score") or {}
+    receipt = score.get("receipt") or {}
+    score_summary = receipt.get("score_summary") or {}
+    feedback_loop = receipt.get("feedback_loop") or {}
+    return {
+        "source": _relative(tessl_score),
+        "status": score.get("status"),
+        "ready": score.get("ready"),
+        "blocker_class": receipt.get("blocker_class"),
+        "blocker": receipt.get("blocker"),
+        "usage_percent": score_summary.get("usage_percent"),
+        "baseline_percent": score_summary.get("baseline_percent"),
+        "scenario_count": score_summary.get("scenario_count"),
+        "regression_count": feedback_loop.get("regression_count"),
+        "regression_paths": feedback_loop.get("regression_paths") or [],
+        "feedback_loop_status": feedback_loop.get("status"),
     }
 
 
@@ -88,6 +132,9 @@ def _skill_paths(skill: Path) -> dict[str, str]:
 
 
 def _current_position(tessl: dict[str, Any], pr: dict[str, Any]) -> str:
+    tessl_score = tessl.get("score_receipt")
+    if isinstance(tessl_score, dict) and tessl_score.get("status") == "blocked":
+        return "tessl_feedback_loop_open"
     if tessl.get("status") == "pending":
         return "tessl_external_pending_existing_run"
     if pr["hosted_check"].get("conclusion") not in {None, "SUCCESS"}:
@@ -95,22 +142,41 @@ def _current_position(tessl: dict[str, Any], pr: dict[str, Any]) -> str:
     return "needs_current_pipeline_decision"
 
 
-def build_status(args: argparse.Namespace) -> dict[str, Any]:
+def _next_actions(current_position: str) -> list[str]:
+    if current_position == "tessl_feedback_loop_open":
+        return [
+            "classify the five Tessl baseline-win regressions by owner: skill, task, criteria, or scorer",
+            "retain or import equivalent internal regression scenarios before another live Tessl run",
+            "rerun the SDK pipeline from internal eval receipts through oss-local, oss-cloud, and Tessl dry-run before live handoff",
+        ]
+    if current_position == "tessl_external_pending_existing_run":
+        return [
+            "inspect the existing pending Tessl eval before submitting any new live scoring run",
+            "run the SDK tessl-score receipt path after Tessl returns a completed run",
+            "treat the older local plan as superseded by this handoff status for technical-writer PR work",
+        ]
+    return [
+        "refresh PR #293 by pushing the current branch so hosted checks see this status artifact",
+        "run the SDK tessl-score receipt path before any new live Tessl run",
+        "treat the older local plan as superseded by this handoff status for technical-writer PR work",
+    ]
+
+
+def _status_body(args: argparse.Namespace, head: str | None) -> dict[str, Any]:
     skill = (ROOT / args.skill).resolve()
     tessl = _tessl_summary((ROOT / args.tessl_view).resolve())
+    if args.tessl_score:
+        tessl["score_receipt"] = _tessl_score_summary((ROOT / args.tessl_score).resolve())
     pr = _template_check((ROOT / args.pr_json).resolve())
+    current_position = _current_position(tessl, pr)
     return {
         "schema_version": "skills-sdk-handoff-status/v1",
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "repo": {"root": _relative(ROOT), "head": _git_commit(), "branch": args.branch},
+        "repo": {"root": _relative(ROOT), "head": head, "branch": args.branch},
         "skill": _skill_paths(skill),
         "status": {
-            "current_position": _current_position(tessl, pr),
-            "next_actions": [
-                "refresh PR #293 by pushing the current branch so hosted checks see this status artifact",
-                "inspect the existing pending Tessl eval before submitting any new live scoring run",
-                "treat the older local plan as superseded by this handoff status for technical-writer PR work",
-            ],
+            "current_position": current_position,
+            "next_actions": _next_actions(current_position),
             "does_not_prove": [
                 "PR mergeability",
                 "final Tessl score",
@@ -129,10 +195,19 @@ def build_status(args: argparse.Namespace) -> dict[str, Any]:
     }
 
 
+def build_status(args: argparse.Namespace, output: Path | None = None) -> dict[str, Any]:
+    head = _git_commit()
+    status = _status_body(args, head)
+    if output is not None:
+        status["freshness"] = _existing_artifact_freshness(output, head)
+    return status
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--skill", required=True)
     parser.add_argument("--tessl-view", required=True)
+    parser.add_argument("--tessl-score")
     parser.add_argument("--pr-json", required=True)
     parser.add_argument("--stale-plan", required=True)
     parser.add_argument("--branch", default="codex/technical-writer-sdk-pipeline")
@@ -144,9 +219,11 @@ def main() -> int:
     args = parse_args()
     output = (ROOT / args.output).resolve()
     output.parent.mkdir(parents=True, exist_ok=True)
-    status = build_status(args)
+    status = build_status(args, output=output)
     output.write_text(json.dumps(status, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    print(json.dumps({"status": "pass", "output": _relative(output)}, sort_keys=True))
+    freshness = status["freshness"]["status"]
+    outcome = "warning" if freshness == "stale" else "pass"
+    print(json.dumps({"freshness": freshness, "output": _relative(output), "status": outcome}, sort_keys=True))
     return 0
 
 

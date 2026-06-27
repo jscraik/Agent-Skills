@@ -3,7 +3,7 @@ schema_version: 1
 artifact_type: implementation_notes
 canonical_slug: skills-sdk-v1-0-product-implementation
 title: Skills SDK V1.0 Product Implementation Notes
-status: scaffolded
+status: active_reconciled
 date: 2026-06-04
 goal_path: docs/goals/skills-sdk-v1-0-product-implementation/goal.md
 plan_path: .harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md
@@ -12,9 +12,10 @@ plan_path: .harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.
 # Skills SDK V1.0 Product Implementation Notes
 
 These notes are the Worker-visible implementation notebook for the governed
-Skills SDK V1.0 goal. They start as a scaffold and must be updated by each
-implementation slice with exact files changed, validation evidence, review
-artifacts, PR state, merge state, and pulled-main evidence.
+Skills SDK V1.0 goal. They now serve as historical implementation notes plus a
+current reconciliation marker; current command-surface truth comes from
+\`./bin/ask sdk status --json --robot\`, and current release-lane truth comes
+from lane-specific receipts under \`.harness/evidence/**\`.
 
 <GoalStatus goal="skills-sdk-v1-0-product-implementation" status="active" />
 
@@ -26,27 +27,32 @@ contracts behind tested module boundaries.
 
 <DeepModuleMap
   scope="skills-sdk-v1-0-product-implementation"
-  status="scaffolded"
+  status="current-via-sdk-status"
 />
 
 ## Current Slice Insertion Map
 
-Current active task: PU-001 baseline refresh and parent tracker gate.
+Current active task: reconcile live SDK capability truth, tracker scope, Atlas
+projection freshness, and Tessl feedback-loop evidence after the V1.0 slices
+moved beyond the original PU-001 baseline gate.
 
 <InsertionPoint
-  slice="PU-001"
+  slice="current-reconciliation"
   status="active"
 />
 
 ## Runtime Truth Surface
 
-No runtime SDK command has been implemented by this goal yet. Runtime truth
-begins only after a slice records command output, receipt output, validation
-commands, and PR delivery state.
+The SDK command surface is implemented beyond the original baseline gate.
+Current executable truth is \`./bin/ask sdk status --json --robot\`; on
+2026-06-27 it reported 51 capability rows: 29 implemented, 17 preview-only,
+2 deferred, and 3 out-of-scope. These notes do not by themselves prove hosted
+PR state, live Tessl readiness, registry readiness, or local installed runtime
+behavior.
 
 <RuntimeCardState
   route="skills-sdk"
-  status="not_implemented"
+  status="implemented-with-separated-proof-lanes"
 />
 
 ## Blast Radius View
@@ -69,10 +75,41 @@ its own focused validation command outcomes and reviewer artifacts before
 handoff.
 
 <ValidatorCoverage
-  status="scaffolded"
+  status="current-via-repo-wrappers"
   requiredReviews="simplify; improve-codebase-architecture; codex-review; testing; ubiquitous-language"
   requiredValidators="adversarial-reviewer; agent-native-reviewer"
 />
+
+## 2026-06-27 Current Reconciliation
+
+Current command-surface evidence:
+
+- \`./bin/ask sdk status --json --robot\` reports
+  \`skills-sdk.capability-status.v1\` with 51 capability rows.
+- Capability counts at this checkpoint: 29 implemented, 17 preview-only,
+  2 deferred, and 3 out-of-scope.
+- \`Docs/reference/skills-sdk-platform-atlas.html\` is a projection and must be
+  regenerated or annotated whenever those counts drift from \`ask sdk status\`.
+
+Current \`technical-writer\` release-lane evidence:
+
+- Package shape, scenario quality, scorer quality, scorer calibration,
+  oss-local, oss-cloud, Tessl local proof, and Tessl dry-run lanes have
+  repo-local receipts under \`.harness/evidence/handoff/technical-writer/\`.
+- Live Tessl run \`019f0933-e8cc-724c-951a-7f1341590e50\` completed but does
+  not satisfy handoff readiness: the SDK Tessl score receipt reports usage
+  76.8182%, baseline 65.2273%, and an open feedback loop with five baseline-win
+  scenarios.
+- Do not submit another live Tessl run until those regressions are classified
+  as skill, task, criteria, or scorer owners and equivalent internal regression
+  evidence is retained or imported.
+
+Tracker state:
+
+- Local V1 spec and plan still name JSC-390 as docs/static Skill Explorer scope.
+- Live Linear state was not verified in this checkpoint; use
+  \`.harness/reports/skills-sdk-tracker-state-current.json\` as the current
+  local tracker-reconciliation artifact until live tracker proof is refreshed.
 
 ## 2026-06-04 PU-001 Validator Artifact Recovery
 
