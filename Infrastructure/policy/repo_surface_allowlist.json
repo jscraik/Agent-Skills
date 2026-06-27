@@ -5,10 +5,28 @@
       "id": "selection-quality-history-canonical-index",
       "match_type": "exact",
       "pattern": "Infrastructure/artifacts/selection-quality/history.jsonl",
-      "classification": "source",
+      "classification": "historical_artifact",
       "reason": "Canonical append-only routing-quality history consumed by validation and catalog parity checks; retained until moved to a non-artifact state path.",
       "owner": "agent-skills validation",
       "review_after": "2026-09-19"
+    },
+    {
+      "id": "technical-writer-tessl-evidence-index",
+      "match_type": "exact",
+      "pattern": ".harness/evidence/tessl/index.jsonl",
+      "classification": "historical_artifact",
+      "reason": "Append-only Tessl evidence index for technical-writer live-eval handoff receipts; retained as reviewed evidence until a governed Tessl receipt store replaces it.",
+      "owner": "skills-sdk",
+      "review_after": "2026-09-27"
+    },
+    {
+      "id": "projection-integrity-latest-evidence",
+      "match_type": "exact",
+      "pattern": "Infrastructure/artifacts/validation/projection-integrity/latest.json",
+      "classification": "historical_artifact",
+      "reason": "Latest projection-integrity evidence artifact consumed by projection validation closeout; retained as a reviewed historical artifact until the generator writes to a governed state path.",
+      "owner": "agent-skills validation",
+      "review_after": "2026-09-27"
     },
     {
       "id": "skills-sdk-pipeline-status-artifact",

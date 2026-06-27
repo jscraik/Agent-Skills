@@ -1864,6 +1864,55 @@ outputs:
             {blocker["rule_id"] for blocker in contract["blockers"]},
         )
 
+    def test_reference_quality_requires_analytic_rubric_shape(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "weak-rubric-skill"
+            references_dir = skill_dir / "references"
+            references_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: weak-rubric-skill
+description: Weak rubric fixture.
+version: "1.0.0"
+---
+
+# Weak Rubric Skill
+""",
+                encoding="utf-8",
+            )
+            (references_dir / "contract.yaml").write_text(
+                """purpose: Test weak rubric contract.
+inputs:
+  - user request
+outputs:
+  - result
+quality_criteria:
+  result_quality:
+    observable: result contains useful evidence
+evidence_requirements:
+  - Result cites evidence.
+""",
+                encoding="utf-8",
+            )
+
+            contract = package_contracts.reference_quality_contract(repo_root, skill_md)
+
+        analytic_check = next(
+            check for check in contract["checks"] if check["name"] == "analytic_rubric_quality"
+        )
+        self.assertEqual(analytic_check["status"], "blocked_validation")
+        self.assertIn("quality_criteria.result_quality.purpose", analytic_check["missing"])
+        self.assertIn("quality_criteria.result_quality.why_it_matters", analytic_check["missing"])
+        self.assertIn("quality_criteria.result_quality.observable_evidence", analytic_check["missing"])
+        self.assertIn("quality_criteria.result_quality.scoring", analytic_check["missing"])
+        self.assertIn("automatic_failure_conditions", analytic_check["missing"])
+        self.assertIn(
+            "analytic_rubric_quality_missing",
+            {blocker["rule_id"] for blocker in contract["blockers"]},
+        )
+
     def test_reference_quality_accepts_declared_capability_selector_for_multi_facet_capsules(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir)
@@ -1902,7 +1951,19 @@ quality_criteria:
     alpha: alpha task
     beta: beta task
   result_quality:
-    observable: result names selected task type and evidence
+    purpose: Measures whether the skill returns the selected task result.
+    why_it_matters: Selector skills must prove that the selected capability changes the output.
+    observable_evidence:
+      - The result names the selected task type.
+      - The result cites selector evidence.
+    scoring:
+      5: Selects the task type, returns the matching result, and cites evidence.
+      4: Selects the task type and returns the matching result with minor evidence gaps.
+      3: Returns a plausible result but leaves selector evidence partly implicit.
+      2: Mentions a task type but does not use it to shape the result.
+      1: Does not select or apply a task type.
+automatic_failure_conditions:
+  - Missing or contradictory task type selection.
 evidence_requirements:
   - Selection decisions must cite the selected task type and evidence.
 """,
@@ -1932,6 +1993,10 @@ selected_facets:
             check for check in contract["checks"] if check["name"] == "basic_requirement_rubric"
         )
         self.assertEqual(rubric_check["status"], "pass")
+        analytic_check = next(
+            check for check in contract["checks"] if check["name"] == "analytic_rubric_quality"
+        )
+        self.assertEqual(analytic_check["status"], "pass")
         self.assertNotIn(
             "capability_selector_contract_missing",
             {blocker["rule_id"] for blocker in contract["blockers"]},

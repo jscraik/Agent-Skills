@@ -79,10 +79,14 @@
   local Tessl staging proves only the Tessl local flow, and
   `--tessl-live-private` plus a scored `tessl eval view --json` artifact
   proves the Tessl external flow.
-- Skills SDK package movement must include a basic-requirement rubric before
-  Tessl handoff. `references/contract.yaml` must state observable
-  `quality_criteria` plus `evidence_requirements`; multi-capability skills must
-  also score selector criteria, such as `writing_type_selection` or
+- Skills SDK package movement must include a basic-requirement analytic rubric
+  before Tessl handoff. `references/contract.yaml` must state observable
+  `quality_criteria`, `evidence_requirements`, and
+  `automatic_failure_conditions`; every non-selector quality criterion must
+  include `purpose`, `why_it_matters`, `observable_evidence` as a non-empty
+  string or list, and scoring anchors for `5`, `4`, `3`, `2`, and `1`.
+  Multi-capability skills must also
+  score selector criteria, such as `writing_type_selection` or
   `task_type_selection`, and expose the selected capability in inputs and
   outputs. `./bin/ask skills package verify <skill-path> --json --robot`
   blocks the package when this rubric contract is missing.

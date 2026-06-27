@@ -3,6 +3,58 @@ purpose: "Skillify routing and execution boundaries."
 triggers: ["user asks to skillify a repeatable workflow"]
 inputs: ["workflow evidence", "target path or category"]
 outputs: ["validated skill package", "explicit blocked status", "context lifecycle handoff"]
+quality_criteria:
+  repeatable_workflow_fit:
+    purpose: "Measures whether the captured workflow is repeatable enough to become a skill."
+    why_it_matters: "A skill should encode a recurring operator behavior, not a one-off transcript or vague preference."
+    observable_evidence: "SKILL.md and references/contract.yaml expose these fields without relying on chat history."
+    scoring:
+      5: "Captures triggers, inputs, outputs, non-goals, risks, and completion evidence from reusable workflow evidence."
+      4: "Captures the repeatable workflow with minor edge-case gaps."
+      3: "Captures common workflow steps but leaves some evidence or boundaries implicit."
+      2: "Turns a broad or one-off request into a skill without enough repeatability evidence."
+      1: "Creates a skill from unsupported, non-repeatable, or unclear workflow material."
+  sdk_pipeline_entry:
+    purpose: "Measures whether new packages enter the shared SDK lifecycle before promotion claims."
+    why_it_matters: "Generated skills must inherit the same pipeline as updated, installed, or refactored skills."
+    observable_evidence: "Output includes the sdk start receipt or a concrete blocker before any downstream lane."
+    scoring:
+      5: "Runs or records sdk start before every downstream release, Tessl, registry, sync, install, or runtime claim."
+      4: "Uses sdk start before promotion claims with minor reporting gaps."
+      3: "Mentions the SDK ladder but does not make the current lane explicit."
+      2: "Runs only audit or package checks before downstream claims."
+      1: "Claims readiness without SDK lifecycle entry."
+  gold_scenarios:
+    purpose: "Measures whether the generated package has behavior-focused eval coverage."
+    why_it_matters: "Scenario coverage prevents a new skill from reaching Tessl with only package-shape or keyword checks."
+    observable_evidence: "references/evals.yaml or package-local eval files name task, expected behavior, scorer, and failure condition."
+    scoring:
+      5: "Includes happy, boundary or negative, and pressure coverage with observable criteria and failure modes."
+      4: "Includes behavior-focused happy and boundary or negative coverage with minor gaps."
+      3: "Includes common behavior coverage but under-specifies edge or failure cases."
+      2: "Uses generic, keyword, or structure-only scenarios for behavioral readiness."
+      1: "Has no meaningful eval coverage for the skill behavior."
+  handoff_lane_integrity:
+    purpose: "Measures whether handoff evidence remains ordered and non-substitutable."
+    why_it_matters: "A generated package should not spend live Tessl runs until internal evidence predicts external success."
+    observable_evidence: "Validation notes list exact command outcomes or blockers for claimed lanes."
+    scoring:
+      5: "Lists every claimed lane in order with exact command outcome or blocker and no substitution."
+      4: "Keeps all major handoff lanes separate with minor reporting gaps."
+      3: "Separates internal and external proof but leaves some lane order implicit."
+      2: "Blends package, OSS, Tessl, registry, or runtime evidence."
+      1: "Uses one lane as proof for another or skips required handoff gates."
+automatic_failure_conditions:
+  - "Creates a skill from unsupported one-off or unclear workflow evidence."
+  - "Claims release, Tessl, registry, sync, install, or runtime readiness before sdk start and required gates."
+  - "Ships behavioral readiness with only structure, keyword, or happy-path scenarios."
+  - "Substitutes Tessl dry-run, Plugin Eval, package verification, or runtime proof for another required lane."
+evidence_requirements:
+  - "Exact package path and ownership classification."
+  - "Strict audit and package verify outcomes or blockers."
+  - "Scenario-quality, scorer-quality, and scorer-calibration outcomes before OSS eval claims."
+  - "oss-local and oss-cloud receipts with codex profile boundaries before Tessl spend."
+  - "Tessl local proof execute and dry-run receipts before live Tessl confirmation."
 commands:
   - "./bin/ask skills audit <skill-path> --level strict --json --robot"
   - "./bin/ask sdk eval scenario-quality <skill-path> --preview --json --robot"

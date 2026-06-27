@@ -39,7 +39,9 @@ A gold-standard skill package:
    skill is selected and nearby skills are not over-triggered.
 2. Keeps SKILL.md compact and routes deeper knowledge through package-local
    references, scripts, assets, and evals.
-3. Defines observable success criteria in references/contract.yaml.
+3. Defines observable analytic success criteria in references/contract.yaml:
+   each non-selector criterion has purpose, why-it-matters,
+   observable-evidence as a non-empty string or list, and 1-5 scoring anchors.
 4. Provides scenarios and rubrics that test real behavior without leaking the
    scoring answer into the task.
 5. Separates SDK validation, OSS profile proof, Tessl local proof, Tessl
@@ -136,14 +138,16 @@ evidence_requirements, capability selectors, and package verify receipt.
 
 #### Scoring
 
-5: The contract defines observable quality criteria, evidence requirements,
-automatic blockers, and selector criteria for every major mode.
+5: The contract defines observable analytic quality criteria, evidence
+requirements, automatic blockers, and selector criteria for every major mode;
+each non-selector criterion has purpose, why-it-matters, observable evidence as
+a non-empty string or list, and 1-5 scoring anchors.
 
-4: Criteria and evidence requirements are present, with minor gaps in edge
-cases or automatic blockers.
+4: Analytic criteria and evidence requirements are present, with minor gaps in
+edge cases or automatic blockers.
 
-3: Basic criteria exist but are too broad to produce consistent reviewer
-scores without interpretation.
+3: Basic criteria exist but some criteria are too broad or underspecified to
+produce consistent reviewer scores without interpretation.
 
 2: Criteria are present only as prose or examples and are not tied to evidence.
 
@@ -393,6 +397,10 @@ resolved or explicitly accepted as a blocker by the operator:
 - Missing or unparseable references/contract.yaml when the package declares a
   contract.
 - Missing quality_criteria or evidence_requirements in references/contract.yaml.
+- Non-selector quality_criteria entries that do not use the analytic rubric
+  shape: purpose, why_it_matters, observable_evidence as a non-empty string or
+  list, and scoring anchors for 5, 4, 3, 2, and 1.
+- Missing automatic_failure_conditions in references/contract.yaml.
 - Multi-capability package without a selector contract, selector output, or
   top-level routing path.
 - Direct SKILL.md references to private capsule bodies that bypass the

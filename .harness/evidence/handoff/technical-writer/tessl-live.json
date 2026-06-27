@@ -1,6 +1,6 @@
 {
   "status": "error",
-  "trace_id": "cbe851bc-c82b-40a1-a6db-a27681609717",
+  "trace_id": "25e06169-cdf0-4c64-b803-98cf3e65d68d",
   "metadata": {
     "version": "0.1.0",
     "command": "evals run Skills/agent-ops/technical-writer --mode smoke --tessl-live-private --tessl-workspace skills-sdk-lab --json --robot",
@@ -176,7 +176,7 @@
         "schema_version": "capability-lifecycle-event.v1",
         "event_type": "eval_started",
         "event_definition": "A workout, smoke eval, or proof run started for a capability.",
-        "occurred_at": "2026-06-27T11:05:32Z",
+        "occurred_at": "2026-06-27T13:11:24Z",
         "subject": {
           "query": "Skills/agent-ops/technical-writer",
           "target_kind": "skill_path",
@@ -195,7 +195,7 @@
         "schema_version": "capability-lifecycle-event.v1",
         "event_type": "eval_blocked",
         "event_definition": "A workout, smoke eval, or proof run stopped on a classified blocker.",
-        "occurred_at": "2026-06-27T11:05:34Z",
+        "occurred_at": "2026-06-27T13:11:27Z",
         "subject": {
           "query": "Skills/agent-ops/technical-writer",
           "target_kind": "skill_path",
@@ -205,9 +205,9 @@
           "runner": "codex"
         },
         "outcome": {
-          "status": "blocked_auth",
+          "status": "blocked_environment",
           "blocker_classes": [
-            "blocked_auth"
+            "blocked_environment"
           ],
           "warning_classes": []
         }
@@ -217,7 +217,7 @@
       "schema_version": "capability-lifecycle-event.v1",
       "event_type": "eval_blocked",
       "event_definition": "A workout, smoke eval, or proof run stopped on a classified blocker.",
-      "occurred_at": "2026-06-27T11:05:34Z",
+      "occurred_at": "2026-06-27T13:11:27Z",
       "subject": {
         "query": "Skills/agent-ops/technical-writer",
         "target_kind": "skill_path",
@@ -227,9 +227,9 @@
         "runner": "codex"
       },
       "outcome": {
-        "status": "blocked_auth",
+        "status": "blocked_environment",
         "blocker_classes": [
-          "blocked_auth"
+          "blocked_environment"
         ],
         "warning_classes": []
       }
@@ -241,9 +241,9 @@
     },
     "raw_output": "",
     "raw_error": "",
-    "eval_status": "blocked_auth",
+    "eval_status": "blocked_environment",
     "local_eval_status": "skipped_tessl_live_private",
-    "blocker_class": "blocked_auth",
+    "blocker_class": "blocked_environment",
     "blocker_taxonomy": {
       "blocked_user_input": "The runner requested user input and should not be treated as hung.",
       "blocked_auth": "The runner stopped on authentication or credential setup.",
@@ -825,40 +825,76 @@
         },
         "staged_source": "/tmp/ask-tessl-evals/Skills__agent-ops__technical-writer-0fd318d6658a",
         "checked": true,
-        "status": "blocked",
-        "action": "check",
-        "blocker": "Tessl CLI is installed locally, but authentication is required before project link checks can run.",
-        "blocker_class": "blocked_auth",
+        "status": "pass",
+        "action": "relinked_existing_project_updated_source",
+        "blocker": null,
+        "blocker_class": null,
         "commands": [
           {
             "action": "check",
             "command": "/Users/jamiecraik/.local/bin/tessl project repair --json --yes",
             "exit_code": 1,
             "signal": null,
-            "raw_output": "{\n  \"status\": \"error\",\n  \"message\": \"Please authenticate with Tessl to continue. Run `tessl login` to sign up or log in.\"\n}\n",
+            "raw_output": "{\n  \"status\": \"error\",\n  \"message\": \"--workspace, --project, and --yes are only valid with a repair action.\"\n}\n",
             "raw_error": "",
             "parsed_output": {
               "status": "error",
-              "message": "Please authenticate with Tessl to continue. Run `tessl login` to sign up or log in."
+              "message": "--workspace, --project, and --yes are only valid with a repair action."
+            }
+          },
+          {
+            "action": "relink",
+            "command": "/Users/jamiecraik/.local/bin/tessl project repair --relink --workspace skills-sdk-lab --project technical-writer --yes --json",
+            "exit_code": 0,
+            "signal": null,
+            "raw_output": "{\n  \"status\": \"relinked\",\n  \"message\": \"Relinked this directory to skills-sdk-lab/technical-writer.\"\n}\n",
+            "raw_error": "",
+            "parsed_output": {
+              "status": "relinked",
+              "message": "Relinked this directory to skills-sdk-lab/technical-writer."
+            }
+          },
+          {
+            "action": "update_source",
+            "command": "/Users/jamiecraik/.local/bin/tessl project repair --update-source --yes --json",
+            "exit_code": 0,
+            "signal": null,
+            "raw_output": "{\n  \"status\": \"match\",\n  \"message\": \"Linked project already matches this directory.\"\n}\n",
+            "raw_error": "",
+            "parsed_output": {
+              "status": "match",
+              "message": "Linked project already matches this directory."
             }
           }
         ]
       },
-      "raw_output": "",
-      "raw_error": "",
-      "blocker": "Tessl CLI is installed locally, but authentication is required before project link checks can run.",
-      "blocker_class": "blocked_auth"
+      "pending_run_preflight": {
+        "status": "blocked",
+        "blocker_class": "blocked_environment",
+        "blocker": "A pending Tessl eval run already exists for this workspace/project; inspect that run instead of spending another.",
+        "command": "/Users/jamiecraik/.local/bin/tessl eval list --json --workspace skills-sdk-lab",
+        "exit_code": 0,
+        "raw_output": "{\n  \"links\": {\n    \"self\": \"http://api.tessl.io/experimental/eval-runs?sort=-createdAt&page[size]=20&mineOnly=false&workspaceNameFilter=skills-sdk-lab\",\n    \"next\": null,\n    \"prev\": null\n  },\n  \"meta\": {\n    \"count\": 1\n  },\n  \"data\": [\n    {\n      \"id\": \"019f0933-e8cc-724c-951a-7f1341590e50\",\n      \"type\": \"eval-run\",\n      \"attributes\": {\n        \"status\": \"pending\",\n        \"metadata\": {\n          \"cwd\": \"/private/tmp/ask-tessl-evals/Skills__agent-ops__technical-writer-0fd318d6658a\",\n          \"cliInvocation\": \"eval run --json --workspace skills-sdk-lab /tmp/ask-tessl-evals/Skills__agent-ops__technical-writer-0fd318d6658a\",\n          \"tileName\": \"technical-writer\",\n          \"tileVersion\": \"0.2.1\",\n          \"tileSummary\": \"Private live eval plugin for technical-writer.\",\n          \"tileIsPrivate\": true\n        },\n        \"createdBy\": {\n          \"type\": \"user\",\n          \"id\": \"019e2c02-a956-70e6-8a87-701eaa9e919a\",\n          \"firstName\": \"Jamie\",\n          \"lastName\": \"Craik\"\n        },\n        \"label\": null,\n        \"createdAt\": \"2026-06-27T13:10:24.714Z\",\n        \"updatedAt\": \"2026-06-27T13:10:26.938Z\",\n        \"visibility\": \"private\",\n        \"agent\": \"claude\",\n        \"model\": \"deepseek-v4-flash\",\n        \"skipForcedContextActivation\": false,\n        \"skipScoring\": false,\n        \"runQualityCheck\": false,\n        \"evalRunFixtures\": {\n          \"context\": {\n            \"type\": \"plugin-directory\",\n            \"path\": \".\"\n          }\n        }\n      }\n    }\n  ]\n}\n",
+        "raw_error": "- Fetching eval runs...\n",
+        "pending_eval_run_ids": [
+          "019f0933-e8cc-724c-951a-7f1341590e50"
+        ]
+      },
+      "raw_output": "{\n  \"links\": {\n    \"self\": \"http://api.tessl.io/experimental/eval-runs?sort=-createdAt&page[size]=20&mineOnly=false&workspaceNameFilter=skills-sdk-lab\",\n    \"next\": null,\n    \"prev\": null\n  },\n  \"meta\": {\n    \"count\": 1\n  },\n  \"data\": [\n    {\n      \"id\": \"019f0933-e8cc-724c-951a-7f1341590e50\",\n      \"type\": \"eval-run\",\n      \"attributes\": {\n        \"status\": \"pending\",\n        \"metadata\": {\n          \"cwd\": \"/private/tmp/ask-tessl-evals/Skills__agent-ops__technical-writer-0fd318d6658a\",\n          \"cliInvocation\": \"eval run --json --workspace skills-sdk-lab /tmp/ask-tessl-evals/Skills__agent-ops__technical-writer-0fd318d6658a\",\n          \"tileName\": \"technical-writer\",\n          \"tileVersion\": \"0.2.1\",\n          \"tileSummary\": \"Private live eval plugin for technical-writer.\",\n          \"tileIsPrivate\": true\n        },\n        \"createdBy\": {\n          \"type\": \"user\",\n          \"id\": \"019e2c02-a956-70e6-8a87-701eaa9e919a\",\n          \"firstName\": \"Jamie\",\n          \"lastName\": \"Craik\"\n        },\n        \"label\": null,\n        \"createdAt\": \"2026-06-27T13:10:24.714Z\",\n        \"updatedAt\": \"2026-06-27T13:10:26.938Z\",\n        \"visibility\": \"private\",\n        \"agent\": \"claude\",\n        \"model\": \"deepseek-v4-flash\",\n        \"skipForcedContextActivation\": false,\n        \"skipScoring\": false,\n        \"runQualityCheck\": false,\n        \"evalRunFixtures\": {\n          \"context\": {\n            \"type\": \"plugin-directory\",\n            \"path\": \".\"\n          }\n        }\n      }\n    }\n  ]\n}\n",
+      "raw_error": "- Fetching eval runs...\n",
+      "blocker": "A pending Tessl eval run already exists for this workspace/project; inspect that run instead of spending another.",
+      "blocker_class": "blocked_environment"
     },
-    "tessl_eval_status": "blocked_auth",
-    "tessl_blocker_class": "blocked_auth"
+    "tessl_eval_status": "blocked_environment",
+    "tessl_blocker_class": "blocked_environment"
   },
   "telemetry": {
-    "latency_ms": 1526
+    "latency_ms": 3533
   },
   "errors": [
     {
       "code": "ERR_RUNTIME",
-      "message": "Tessl eval blocked: Tessl CLI is installed locally, but authentication is required before project link checks can run."
+      "message": "Tessl eval blocked: A pending Tessl eval run already exists for this workspace/project; inspect that run instead of spending another."
     }
   ]
 }

@@ -86,7 +86,9 @@ Template:
 
     Run the SDK handoff proof ladder before release, install, sync, publish, or live Tessl claims:
 
+    0. ./bin/ask sdk start <skill-path> --json --robot
     1. ./bin/ask skills audit <skill-path> --level strict --json --robot
+    1a. ./bin/ask sdk security risk-modes <skill-path> --preview --json --robot
     2. ./bin/ask sdk eval scenario-quality <skill-path> --preview --json --robot
     3. ./bin/ask sdk eval scorer-quality <skill-path> --preview --json --robot
     4. ./bin/ask sdk eval scorer-calibration <skill-path> --preview --json --robot
@@ -96,7 +98,7 @@ Template:
     8. ./bin/ask evals run <skill-path> --mode smoke --runner discovery-smoke --tessl-live-private --tessl-workspace skills-sdk-lab --tessl-live-dry-run --json --robot
     9. ./bin/ask sdk eval handoff-readiness --skill <skill-path> --preview --json --robot
 
-    Fail fast at the first failed gate. Do not treat ./bin/ask evals run --runner codex, preview-only Tessl local proof, or a dry-run command string as handoff evidence.
+    Fail fast at the first failed gate. Treat oss-local as the 70-75 internal discovery band, oss-cloud as the path to >=90 internal success, and Tessl live as external confirmation at >=90 and >= baseline. Do not treat ./bin/ask evals run --runner codex, preview-only Tessl local proof, or a dry-run command string as handoff evidence.
 
     ## Gotchas
 

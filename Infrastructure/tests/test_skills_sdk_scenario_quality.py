@@ -345,6 +345,120 @@ cases:
         self.assertIn("platform_tessl_quality:keyword_only_acceptance", blocker_ids)
         self.assertIn("platform_tessl_quality:missing_scenario_context", blocker_ids)
 
+    def test_builder_blocks_skill_name_as_primary_tessl_proof(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(
+                Path(temp_dir),
+                """schema_version: '2.0'
+skill_name: sample
+cases:
+- id: skill-name-primary-proof
+  category: happy
+  eval_modes:
+  - release
+  realistic: true
+  why_realistic: A real skill routing case.
+  given: A docs task should trigger the skill.
+  should: Score the output, not only whether the skill was selected.
+  actual_artifact: final response
+  expected_artifact: review.md
+  reproduce: ./bin/ask sdk eval run sample
+  prompt: Write review.md for a staged docs task.
+  claim_ids:
+  - sample.claim
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: skill_selected
+    expected_skill: sample
+  - type: regex
+    value: '(?i)(documentation|evidence)'
+""",
+            )
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
+        self.assertIn("platform_tessl_quality:skill_name_primary_proof", blocker_ids)
+
+    def test_builder_blocks_release_case_without_concrete_output_artifact(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(
+                Path(temp_dir),
+                """schema_version: '2.0'
+skill_name: sample
+cases:
+- id: artifactless-release-case
+  category: edge
+  eval_modes:
+  - release
+  realistic: true
+  why_realistic: A real docs review case.
+  given: A docs task needs a visible result.
+  should: Produce a scoreable final artifact.
+  actual_artifact: final response
+  expected_artifact: proof-backed response
+  reproduce: ./bin/ask sdk eval run sample
+  prompt: Review the staged docs task.
+  claim_ids:
+  - sample.claim
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: Names evidence and blocks unsupported claims.
+  - type: must_not
+    value: Invents command evidence.
+""",
+            )
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
+        self.assertIn("platform_tessl_quality:missing_concrete_output_artifact", blocker_ids)
+
+    def test_builder_blocks_hidden_reference_dependency_in_discovery_case(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(
+                Path(temp_dir),
+                """schema_version: '2.0'
+skill_name: sample
+cases:
+- id: hidden-reference-discovery
+  category: pressure
+  eval_modes:
+  - release
+  realistic: true
+  why_realistic: Discovery must work in isolated runners.
+  given: A discovery case points at references/discovery-interview.md.
+  should: Ask the smallest useful discovery question.
+  actual_artifact: discovery response
+  expected_artifact: blocked report
+  reproduce: ./bin/ask sdk eval run sample
+  prompt: Read references/discovery-interview.md, then ask one discovery question.
+  claim_ids:
+  - sample.claim
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: Asks the smallest useful discovery question.
+  - type: must_not
+    value: Blocks only because the reference file was unavailable.
+""",
+            )
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
+        self.assertIn("platform_tessl_quality:hidden_reference_dependency", blocker_ids)
+
     def test_release_mode_suite_requires_twenty_scenarios(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             skill_dir = _write_skill_with_evals(

@@ -217,7 +217,7 @@
             "no_publish": true,
             "no_registry_upload": true,
             "temp_staged_project_input_only": true,
-            "stable_staging_root": "/tmp/ask-tessl-live/<skill-path>-<sha12>",
+            "stable_staging_root": "/tmp/ask-tessl-evals/<skill-path>-<sha12>",
             "evidence_retention": "stable tmp staging is intentionally left for post-run inspection; reruns archive previous staged evidence under evidence-archive/",
             "tessl_project_marker": "tessl.json",
             "staged_inputs": [
@@ -317,7 +317,7 @@
           "blocked_validation": "A structural or policy validation gate failed for the capability."
         },
         "dashboard_path": "Infrastructure/artifacts/skill-reviews/technical-writer-dashboard-smoke.html",
-        "dashboard_url": "file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skill-reviews/technical-writer-dashboard-smoke.html",
+        "dashboard_url": "Infrastructure/artifacts/skill-reviews/technical-writer-dashboard-smoke.html",
         "dashboard_tab": "evals",
         "dashboard_source_report": "Infrastructure/artifacts/skill-reviews/technical-writer-eval-latest.json",
         "scorecard_path": "Infrastructure/artifacts/skills/technical-writer/20260627-072011-484439/scorecard.json",
@@ -331,7 +331,7 @@
             "no_publish": true,
             "no_registry_upload": true,
             "temp_staged_project_input_only": true,
-            "stable_staging_root": "/tmp/ask-tessl-live/<skill-path>-<sha12>",
+            "stable_staging_root": "/tmp/ask-tessl-evals/<skill-path>-<sha12>",
             "evidence_retention": "stable tmp staging is intentionally left for post-run inspection; reruns archive previous staged evidence under evidence-archive/",
             "tessl_project_marker": "tessl.json",
             "staged_inputs": [

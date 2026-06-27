@@ -7,14 +7,50 @@ inputs: [user_request, optional_repo_path, optional_skill_path, optional_evidenc
 outputs: [selected_lane, rationale, next_invocation, blocked_missing_input]
 quality_criteria:
   routing_lane_choice:
-    creation: new skill request routes to skill-creator or skill-builder path
-    hardening: existing skill improvement routes to skill-builder and SDK pipeline
-    installation: external skill intake routes to skill-installer path
-    refactor: source extraction, restructuring, or reuse analysis routes to skill-refactor
-    skillify: raw content conversion routes to skillify before package hardening
-  routing_accuracy: selected lane matches the user's primary lifecycle intent and declared target path
-  evidence_boundary: rationale cites request facts, missing inputs, and side-effect boundaries without executing downstream mutation
-  next_step_clarity: output names the next invocation or the exact missing input that blocks routing
+    purpose: "Measures whether the router maps lifecycle requests to the intended Skill Factory lane."
+    why_it_matters: "Lane choice determines which skill owns mutation, validation, evidence folding, or reusable workflow capture."
+    observable_evidence: "Routing table maps creation to skill-creator or skill-builder, hardening to skill-builder, installation to skill-installer, refactor to skill-refactor, and raw workflow capture to skillify."
+    scoring:
+      5: "Maps every supported lifecycle intent to the correct lane and rejects out-of-scope product work."
+      4: "Maps supported lifecycle intents correctly with minor ambiguity in edge wording."
+      3: "Maps common lifecycle intents but leaves one adjacent route ambiguous."
+      2: "Relies on broad keywords and misroutes at least one lifecycle intent."
+      1: "Does not provide a reliable lifecycle lane mapping."
+  routing_accuracy:
+    purpose: "Measures whether the selected lane matches the user's primary lifecycle intent and declared target path."
+    why_it_matters: "Incorrect routing sends creation, installation, refactor, or hardening work into the wrong proof ladder."
+    observable_evidence: "Router output names one selected lane, rationale, matched request facts, and target path or missing target blocker."
+    scoring:
+      5: "Selects exactly one correct lane with matched request facts and target-path evidence."
+      4: "Selects the correct lane with minor rationale or target-path gaps."
+      3: "Selects a plausible lane but leaves adjacent lifecycle ambiguity."
+      2: "Selects from broad keywords without enough lifecycle evidence."
+      1: "Selects the wrong lane or multiple conflicting lanes."
+  evidence_boundary:
+    purpose: "Measures whether routing remains read-only and avoids downstream proof claims."
+    why_it_matters: "The router chooses the lane; downstream skills own mutation, validation, Tessl, registry, and runtime evidence."
+    observable_evidence: "Rationale cites request facts, missing inputs, side-effect boundaries, and does not claim downstream mutation or validation."
+    scoring:
+      5: "Reports routing evidence and side-effect boundary without executing or claiming downstream gates."
+      4: "Keeps the boundary with minor wording gaps."
+      3: "Avoids mutation but leaves some downstream proof status ambiguous."
+      2: "Blends routing with downstream validation or readiness language."
+      1: "Executes or claims downstream mutation, validation, Tessl, registry, or runtime proof from the router lane."
+  next_step_clarity:
+    purpose: "Measures whether the router gives the next executable invocation or a precise blocker."
+    why_it_matters: "A router that only names a category still leaves agents to guess the next skill or command."
+    observable_evidence: "Output names the next invocation, selected skill path, or exact missing input that blocks routing."
+    scoring:
+      5: "Names the next invocation or exact blocked input with no ambiguity."
+      4: "Names the next step with minor missing context."
+      3: "Names a lane but leaves the concrete invocation to infer."
+      2: "Reports broad routing advice without an executable next step or blocker."
+      1: "Provides no usable next step."
+automatic_failure_conditions:
+  - "Selects multiple conflicting lanes for one request without asking for missing target authority."
+  - "Routes hardening, Tessl, or SDK pipeline work away from skill-builder."
+  - "Claims downstream validation, mutation, Tessl, registry, or runtime proof from the router lane."
+  - "Guesses a missing target path instead of reporting blocked_missing_input."
 evidence_requirements:
   - Selected lane must be justified by user request facts or declared target paths.
   - Missing inputs must be reported as blocked_missing_input instead of guessed.

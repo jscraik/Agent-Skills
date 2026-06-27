@@ -4206,11 +4206,19 @@ def skills_sdk_check(
 SDK_PIPELINE_START_SCHEMA_VERSION = "skills-sdk.pipeline-start.v1"
 SDK_PIPELINE_START_SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/pipeline-start.v1.schema.json"
 SDK_START_BLOCKED_DOWNSTREAM_LANES = [
+    "security_risk_modes",
     "scenario_quality",
+    "scorer_quality",
+    "scorer_calibration",
     "oss_local_eval",
-    "closeout_doctor",
+    "oss_local_repair_loop",
     "oss_cloud_eval",
-    "registry_events_update",
+    "oss_cloud_repair_loop",
+    "tessl_local_proof_execute",
+    "tessl_live_dry_run",
+    "handoff_readiness",
+    "tessl_live_confirmation",
+    "registry_or_private_workspace_decision",
     "runtime_doctor",
 ]
 
@@ -4258,6 +4266,22 @@ def _sdk_eval_run_command(target: str, profile: str) -> str:
     )
 
 
+def _sdk_tessl_dry_run_command(target: str) -> str:
+    return _ask_validation_command(
+        "evals",
+        "run",
+        target,
+        "--mode",
+        "smoke",
+        "--runner",
+        "discovery-smoke",
+        "--tessl-live-private",
+        "--tessl-workspace",
+        "skills-sdk-lab",
+        "--tessl-live-dry-run",
+    )
+
+
 def _sdk_start_project_context(target_info: dict[str, Any], project_root: str | None) -> dict[str, Any]:
     inferred_root = target_info.get("project_root")
     return {
@@ -4293,18 +4317,89 @@ def _sdk_start_lanes(mechanical_target: str) -> list[dict[str, Any]]:
     lanes.extend(
         [
             {
-                "id": "scenario_quality",
+                "id": "security_risk_modes",
                 "status": "blocked_until_mechanical_validation",
+                "command": _ask_validation_command("sdk", "security", "risk-modes", mechanical_target, "--preview"),
+                "proves": "security-sensitive behavior, permissions, secrets, network, filesystem, and publication risk modes are explicit before eval or registry lanes",
+            },
+            {
+                "id": "scenario_quality",
+                "status": "blocked_until_security_risk_modes",
                 "command": _ask_validation_command("sdk", "eval", "scenario-quality", mechanical_target, "--preview"),
+                "proves": "gold-standard scenarios, concrete artifacts, behavioral rubrics, Tessl parity checks, and scoreable failure conditions",
+            },
+            {
+                "id": "scorer_quality",
+                "status": "blocked_until_scenario_quality",
+                "command": _ask_validation_command("sdk", "eval", "scorer-quality", mechanical_target, "--preview"),
+                "proves": "LLM judge or hybrid scorer measures the skill requirement rather than keyword or skill-name artifacts",
+            },
+            {
+                "id": "scorer_calibration",
+                "status": "blocked_until_scorer_quality",
+                "command": _ask_validation_command("sdk", "eval", "scorer-calibration", mechanical_target, "--preview"),
+                "proves": "rubric calibration distinguishes correct, wrong, concise, verbose, and unsupported answers",
             },
             {"id": "oss_local_eval", "status": "blocked_until_scenario_quality", "command": _sdk_eval_run_command(mechanical_target, "oss-local")},
-            {"id": "closeout_doctor", "status": "blocked_until_oss_local_eval", "command": _ask_validation_command("evals", "closeout", "doctor", "<workflow-closeout.json>")},
-            {"id": "oss_cloud_eval", "status": "blocked_until_local_closeout_pass", "command": _sdk_eval_run_command(mechanical_target, "oss-cloud")},
-            {"id": "registry_events_update", "status": "blocked_until_closeout_allows_promotion", "command": _ask_validation_command("sdk", "improve", mechanical_target, "--project-root", "<project-root>", "--apply")},
-            {"id": "runtime_doctor", "status": "blocked_until_registry_or_projection_receipt", "command": _ask_validation_command("skills", "proof", mechanical_target, "--runtime-target", "codex")},
+            {
+                "id": "oss_local_repair_loop",
+                "status": "blocked_until_oss_local_eval",
+                "command": "owner-classify oss-local failures, patch skill/scenarios/rubrics/validators, then rerun oss-local",
+                "target_success_rate": "70-75 internal success after mechanical and scenario gates",
+            },
+            {"id": "oss_cloud_eval", "status": "blocked_until_oss_local_repair_loop", "command": _sdk_eval_run_command(mechanical_target, "oss-cloud")},
+            {
+                "id": "oss_cloud_repair_loop",
+                "status": "blocked_until_oss_cloud_eval",
+                "command": "owner-classify oss-cloud failures, improve skill/scenarios/rubrics/validators, then rerun from oss-local",
+                "target_success_rate": ">=90 internal success before Tessl spend",
+            },
+            {
+                "id": "tessl_local_proof_execute",
+                "status": "blocked_until_oss_cloud_repair_loop",
+                "command": _ask_validation_command("sdk", "eval", "tessl-local-proof", "--skill", mechanical_target, "--workspace", "skills-sdk-lab", "--execute"),
+                "proves": "controlled /tmp Tessl staging, package lint, pack/install mechanics, and workspace identity without live scoring spend",
+            },
+            {
+                "id": "tessl_live_dry_run",
+                "status": "blocked_until_tessl_local_proof_execute",
+                "command": _sdk_tessl_dry_run_command(mechanical_target),
+                "proves": "external Tessl staging shape without consuming the live confirmation lane",
+            },
+            {
+                "id": "handoff_readiness",
+                "status": "blocked_until_tessl_live_dry_run",
+                "command": _ask_validation_command("sdk", "eval", "handoff-readiness", "--skill", mechanical_target, "--preview"),
+                "proves": "deterministic, oss-local, oss-cloud, Tessl local proof, and Tessl dry-run receipts are current and ordered",
+            },
+            {
+                "id": "tessl_live_confirmation",
+                "status": "blocked_until_handoff_readiness",
+                "command": _ask_validation_command("evals", "run", mechanical_target, "--mode", "smoke", "--runner", "discovery-smoke", "--tessl-live-private", "--tessl-workspace", "skills-sdk-lab"),
+                "target_success_rate": ">=90 and >= baseline; Tessl is confirmational, not the discovery loop",
+            },
+            {
+                "id": "registry_or_private_workspace_decision",
+                "status": "blocked_until_tessl_live_confirmation",
+                "command": "choose private workspace retention or public registry publication from current Tessl and SDK receipts",
+                "proves": "single paid workspace publication/private-state decision is explicit before registry claims",
+            },
+            {"id": "runtime_doctor", "status": "blocked_until_registry_or_private_workspace_decision", "command": _ask_validation_command("skills", "proof", mechanical_target, "--runtime-target", "codex")},
         ]
     )
     return lanes
+
+
+def _sdk_start_score_policy() -> dict[str, Any]:
+    return {
+        "schema_version": "skills-sdk.pipeline-score-policy.v1",
+        "oss_local_target": "70-75 success rate after mechanical checks, gold scenarios, and initial rubric hardening",
+        "oss_cloud_target": ">=90 internal success rate after iterative skill, scenario, rubric, validator, and judge repair",
+        "tessl_live_target": ">=90 and >= baseline as external confirmation only",
+        "failure_loop": "Any oss-local, oss-cloud, Tessl dry-run, or Tessl live failure returns to oss-local after owner classification and durable validator/rubric/scenario updates.",
+        "tessl_spend_policy": "Use Tessl paid live runs only after internal SDK receipts and dry-run evidence predict >=90 external confirmation.",
+        "workspace_policy": "Use the operator-approved Tessl workspace skills-sdk-lab and decide private versus published state explicitly before registry claims.",
+    }
 
 
 def _sdk_start_status(source_exists: bool, target_class: str) -> tuple[str, list[str]]:
@@ -4338,9 +4433,10 @@ def _sdk_start_receipt(
         "current_lane": current_lane,
         "lanes": _sdk_start_lanes(mechanical_target),
         "blocked_downstream_lanes": SDK_START_BLOCKED_DOWNSTREAM_LANES,
+        "score_policy": _sdk_start_score_policy(),
         "blockers": blockers,
-        "what_this_proves": "The SDK classified the skill target and selected the first legal lifecycle command.",
-        "what_this_does_not_prove": "Format, layout, references, eval behavior, registry promotion, and runtime reachability have not run yet.",
+        "what_this_proves": "The SDK classified the skill target and selected the first legal lifecycle command in the shared create, update, install, refactor, skillify, and skill-builder pipeline.",
+        "what_this_does_not_prove": "Format, layout, references, security posture, eval behavior, internal score bands, registry promotion, Tessl confirmation, and runtime reachability have not run yet.",
         "validation_commands": [_ask_validation_command(*_sdk_start_command_args(query, project_root))],
     }
     receipt["next_action"] = {

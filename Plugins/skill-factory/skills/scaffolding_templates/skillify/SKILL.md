@@ -61,11 +61,14 @@ Ask one direct question if destination, owner, or repeatability is unclear.
 6. Create the minimal package shape below only for high-confidence missing skill candidates.
 7. Add one happy-path eval and one boundary or negative eval.
 8. Run strict audit. If it fails, fix that failure before broader validation.
-9. For SDK-pipeline candidates, run the handoff proof ladder before any release,
+9. For SDK-pipeline candidates, run `./bin/ask sdk start <skill-path> --json --robot`, then run the handoff proof ladder before any release,
    install, sync, publish, or live Tessl claim: scenario-quality preview,
-   scorer-quality preview, scorer-calibration preview, oss-local smoke,
+   security risk-modes preview, scorer-quality preview, scorer-calibration preview, oss-local smoke,
    oss-cloud smoke, Tessl local proof with `--execute` in `skills-sdk-lab`,
    Tessl live-private dry-run in `skills-sdk-lab`, then handoff-readiness.
+   Treat oss-local as the 70-75 internal discovery band, oss-cloud as the
+   iterative path to >=90 internal success, and Tessl live as external
+   confirmation at >=90 and >= baseline.
 10. Run external review and record the report path when hardening evidence matters.
 
 In read-only, audit-only, or eval-runner contexts, do not attempt file writes.
@@ -183,7 +186,9 @@ the smallest command, permission, or source artifact needed to unblock them.
 Run this SDK handoff proof ladder for created skill packages before any release,
 install, sync, publish, live Tessl, or readiness claim:
 
+0. `./bin/ask sdk start <skill-path> --json --robot`
 1. `./bin/ask skills audit <skill-path> --level strict --json --robot`
+1a. `./bin/ask sdk security risk-modes <skill-path> --preview --json --robot`
 2. `./bin/ask sdk eval scenario-quality <skill-path> --preview --json --robot`
 3. `./bin/ask sdk eval scorer-quality <skill-path> --preview --json --robot`
 4. `./bin/ask sdk eval scorer-calibration <skill-path> --preview --json --robot`
@@ -194,6 +199,11 @@ install, sync, publish, live Tessl, or readiness claim:
 9. `./bin/ask evals run <skill-path> --mode smoke --runner discovery-smoke --tessl-live-private --tessl-workspace skills-sdk-lab --tessl-live-dry-run --json --robot`
 10. `./bin/ask sdk eval handoff-readiness --skill <skill-path> --preview --json --robot`
 11. `./bin/ask skills external-review <skill-path> --audit-level compat --json --robot`
+
+Do not spend a Tessl live run until internal SDK evidence predicts >=90; if
+Tessl finds basic skill-behavior, format, scenario, rubric, judge, or reference
+failures, classify that as an upstream SDK pipeline defect and patch the
+deterministic guardrail before rerunning from oss-local.
 
 Do not substitute `./bin/ask evals run --runner codex`, preview-only Tessl
 local proof, or a Tessl dry-run command string for SDK handoff evidence.

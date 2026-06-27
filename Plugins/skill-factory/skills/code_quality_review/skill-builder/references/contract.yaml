@@ -14,6 +14,57 @@ outputs:
   - "context lifecycle stage changed or blocked"
   - "validator evidence using pass/fail/blocked/not applicable"
   - "media artifact evidence or blocked status when image generation is requested"
+quality_criteria:
+  sdk_pipeline_entry:
+    purpose: "Measures whether hardening work enters the shared SDK lifecycle before downstream claims."
+    why_it_matters: "A single front door prevents create, update, install, refactor, and skillify lanes from drifting apart."
+    observable_evidence: "Output names the sdk start receipt or reports the blocker that prevented running it."
+    scoring:
+      5: "Routes through sdk start, names the current lane, and blocks every unproven downstream claim."
+      4: "Routes through sdk start and blocks downstream claims with minor reporting gaps."
+      3: "Mentions SDK gates but leaves the current lane or blocked lanes partly implicit."
+      2: "Uses ad hoc validation language instead of the shared SDK start receipt."
+      1: "Claims Tessl, registry, release, or runtime readiness without SDK lifecycle entry."
+  first_failed_gate_repair:
+    purpose: "Measures whether the repair targets the first failing gate instead of widening scope."
+    why_it_matters: "Fail-fast repair keeps validator, scenario, rubric, and skill changes traceable to a concrete blocker."
+    observable_evidence: "Output includes the failing gate, blocker class, edited path or explicit no-edit blocker, and rerun command."
+    scoring:
+      5: "Identifies the first failed gate, patches the smallest durable surface, and reruns the same gate."
+      4: "Identifies and repairs the failed gate with a minor evidence or rerun-reporting gap."
+      3: "Identifies the failure but mixes repair scope with adjacent nonblocking work."
+      2: "Reports several possible failures without owner classification or focused repair."
+      1: "Continues past a failed required gate or treats the failure as nonblocking without evidence."
+  score_lane_separation:
+    purpose: "Measures whether score and readiness evidence stay in their proper proof lanes."
+    why_it_matters: "Local, cloud, Tessl, registry, and runtime evidence prove different things and cannot substitute for one another."
+    observable_evidence: "Validation evidence reports each claimed lane with exact command outcome or blocker."
+    scoring:
+      5: "Reports each claimed lane with exact pass, fail, blocked, or not-run evidence and no lane substitution."
+      4: "Separates all major lanes with minor wording gaps."
+      3: "Separates local and external evidence but requires manual interpretation for some lanes."
+      2: "Blends score, dry-run, package, registry, or runtime evidence in readiness language."
+      1: "Uses one passing lane as proof for another lane."
+  progressive_disclosure_preserved:
+    purpose: "Measures whether hardening keeps the entrypoint usable while preserving deeper evidence."
+    why_it_matters: "Always-loaded skill text should route details rather than absorb every rubric, scenario, and source note."
+    observable_evidence: "Changed files keep task-specific long-form material in references, scripts, assets, or eval fixtures rather than inflating SKILL.md."
+    scoring:
+      5: "Keeps SKILL.md compact and routes every heavy or conditional detail to package-local references."
+      4: "Preserves progressive disclosure with minor organization gaps."
+      3: "Keeps the package usable but leaves some long-form detail in the entrypoint."
+      2: "Duplicates or buries important details across SKILL.md and references."
+      1: "Makes required context hard to find or loads large unrelated material by default."
+automatic_failure_conditions:
+  - "Claims Tessl, registry, release, or runtime readiness before the SDK start receipt permits that lane."
+  - "Continues past a failed required gate without blocker classification and rerun evidence."
+  - "Uses Plugin Eval, Tessl score, package verification, or runtime proof as a substitute for another lane."
+  - "Moves large rubric, scenario, or generated knowledge content into SKILL.md instead of package references."
+evidence_requirements:
+  - "Exact command evidence for every readiness or eval claim."
+  - "A package verifier, strict audit, or explicit blocker before Tessl or registry claims."
+  - "Scenario, scorer, OSS, Tessl, and handoff receipts kept as separate proof lanes."
+  - "Steering uptake ledger row and validator evidence when a repeated failure pattern is repaired."
 permission_profile:
   filesystem:
     read:

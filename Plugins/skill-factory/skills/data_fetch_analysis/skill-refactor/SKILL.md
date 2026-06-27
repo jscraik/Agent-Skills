@@ -75,11 +75,14 @@ Evidence routing lives in [evidence routing](./references/evidence-routing.md). 
 4. Assign evidence strength.
 5. Recommend one lane: keep, observe, improve, capture, merge/fold with approval, or retire with approval.
 6. If recommending Skill Factory hardening, include concrete repair items: target file, finding class, expected SDK handoff gate, minimum patch surface, and blocker.
-7. When eval or Tessl disagreement is involved, map the evidence to the SDK
+7. When eval or Tessl disagreement is involved, map the evidence to `./bin/ask sdk start <skill-path> --json --robot` and the SDK
    handoff proof ladder instead of generic eval language: strict audit,
-   scenario-quality, scorer-quality, scorer-calibration, oss-local, oss-cloud,
+   security risk-modes, scenario-quality, scorer-quality, scorer-calibration, oss-local, oss-cloud,
    Tessl local proof with `--execute`, Tessl live-private dry-run, then
    handoff-readiness.
+   Treat oss-local misses as 70-75 discovery-band repair inputs, oss-cloud
+   misses as the path to >=90 internal confidence, and Tessl live misses as
+   upstream SDK pipeline defects unless proven external-only.
 
 ## Validation Checkpoints
 
@@ -202,7 +205,7 @@ For this skill itself, run `./bin/ask skills audit Plugins/skill-factory/skills/
 
 For any recommended Skill Factory hardening lane, require the target skill's SDK
 handoff proof ladder before release, install, sync, publish, or live Tessl
-claims: strict audit, scenario-quality preview, scorer-quality preview,
+claims: sdk start, strict audit, security risk-modes preview, scenario-quality preview, scorer-quality preview,
 scorer-calibration preview, oss-local smoke, oss-cloud smoke, Tessl local proof
 with `--execute` in `skills-sdk-lab`, Tessl live-private dry-run in
 `skills-sdk-lab`, then handoff-readiness. Do not recommend `./bin/ask evals

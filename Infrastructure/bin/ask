@@ -6,9 +6,9 @@ import time
 from pathlib import Path
 from typing import Optional
 repo_root_path = Path(__file__).resolve().parents[1]
-sys.path.append(str(repo_root_path / "scripts" / "lib"))
-sys.path.append(str(repo_root_path / "scripts"))
-sys.path.append(str(repo_root_path / "utilities" / "skill-builder" / "scripts"))
+sys.path.insert(0, str(repo_root_path / "utilities" / "skill-builder" / "scripts"))
+sys.path.insert(0, str(repo_root_path / "scripts"))
+sys.path.insert(0, str(repo_root_path / "scripts" / "lib"))
 from ask.envelope import CallResult, ErrorObject, ErrorCode
 from ask.context import find_repo_root
 from ask.command_metadata import VALID_ACTIONS, VALID_TOPICS

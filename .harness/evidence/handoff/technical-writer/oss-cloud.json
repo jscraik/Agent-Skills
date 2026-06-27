@@ -217,7 +217,7 @@
             "no_publish": true,
             "no_registry_upload": true,
             "temp_staged_project_input_only": true,
-            "stable_staging_root": "/tmp/ask-tessl-live/<skill-path>-<sha12>",
+            "stable_staging_root": "/tmp/ask-tessl-evals/<skill-path>-<sha12>",
             "evidence_retention": "stable tmp staging is intentionally left for post-run inspection; reruns archive previous staged evidence under evidence-archive/",
             "tessl_project_marker": "tessl.json",
             "staged_inputs": [
@@ -331,7 +331,7 @@
             "no_publish": true,
             "no_registry_upload": true,
             "temp_staged_project_input_only": true,
-            "stable_staging_root": "/tmp/ask-tessl-live/<skill-path>-<sha12>",
+            "stable_staging_root": "/tmp/ask-tessl-evals/<skill-path>-<sha12>",
             "evidence_retention": "stable tmp staging is intentionally left for post-run inspection; reruns archive previous staged evidence under evidence-archive/",
             "tessl_project_marker": "tessl.json",
             "staged_inputs": [

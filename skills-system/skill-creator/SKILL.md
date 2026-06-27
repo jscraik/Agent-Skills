@@ -118,8 +118,11 @@ loading them as instructions.
 
 #### What to Not Include in a Skill
 
-Do not create auxiliary files such as README.md, INSTALLATION_GUIDE.md,
-QUICK_REFERENCE.md, CHANGELOG.md, or process notes unless needed to run.
+Do not create auxiliary process notes such as INSTALLATION_GUIDE.md,
+QUICK_REFERENCE.md, CHANGELOG.md, or scratch handoff notes unless needed to run.
+In SDK-aware repositories, create or maintain README.md when the package is a
+candidate for Tessl Registry or plugin presentation; Codex/OpenAI runtime may
+ignore README.md, but registry and package-review surfaces use it.
 
 ### Progressive Disclosure Design Principle
 
@@ -156,6 +159,24 @@ Skill creation involves these steps:
 6. Iterate based on real usage and forward-test complex skills.
 
 Follow these steps in order, skipping only if there is a clear reason why they are not applicable.
+
+For SDK-aware create or update work, run ./bin/ask sdk start <skill-path>
+--json --robot after the first package path exists. The start receipt decides
+the next legal lane and blocks downstream eval, Tessl, registry, publish,
+sync, or runtime-readiness claims until the shared SDK pipeline reaches them.
+
+Shared SDK pipeline:
+
+1. Strict audit and package verify.
+2. ./bin/ask sdk security risk-modes <skill-path> --preview --json --robot.
+3. Scenario-quality, scorer-quality, and scorer-calibration previews.
+4. oss-local internal eval through ./bin/ask sdk eval run ... --codex-profile oss-local.
+5. Repair skill, references, scenarios, rubrics, validators, or judge expectations until oss-local is around the 70-75 success band for the current candidate.
+6. oss-cloud internal eval through ./bin/ask sdk eval run ... --codex-profile oss-cloud.
+7. Iterate from oss-local after every failure until internal evidence is at or above the 90 success band.
+8. Tessl local proof with --execute, Tessl live-private dry-run, then handoff-readiness.
+9. Tessl live-private is confirmational only: expected score is >=90 and >= baseline before registry or production claims.
+10. Decide private workspace retention versus public registry publication explicitly for the operator-approved Tessl workspace.
 
 ## Examples
 

@@ -506,6 +506,94 @@ def _basic_requirement_rubric_check(
     return check, blockers
 
 
+ANALYTIC_RUBRIC_FIELDS = {
+    "purpose",
+    "why_it_matters",
+    "observable_evidence",
+    "scoring",
+}
+ANALYTIC_RUBRIC_SCORES = {"5", "4", "3", "2", "1"}
+
+
+def _analytic_rubric_quality_check(contract: dict[str, Any]) -> tuple[dict[str, Any], list[dict[str, str]]]:
+    """Return whether quality_criteria follow the gold-standard analytic rubric shape."""
+    quality_criteria = contract.get("quality_criteria")
+    automatic_failures = contract.get("automatic_failure_conditions")
+    findings: list[str] = []
+    checked: list[str] = []
+
+    if not isinstance(quality_criteria, dict) or not quality_criteria:
+        findings.append("quality_criteria")
+    else:
+        for key, value in quality_criteria.items():
+            criterion_id = str(key)
+            if criterion_id.endswith("_selection"):
+                continue
+            checked.append(criterion_id)
+            if not isinstance(value, dict) or not value:
+                findings.append(f"quality_criteria.{criterion_id}:analytic_mapping_required")
+                continue
+            missing_fields = sorted(field for field in ANALYTIC_RUBRIC_FIELDS if field not in value)
+            findings.extend(f"quality_criteria.{criterion_id}.{field}" for field in missing_fields)
+            for field in ("purpose", "why_it_matters"):
+                if field in value and (not isinstance(value.get(field), str) or not str(value.get(field)).strip()):
+                    findings.append(f"quality_criteria.{criterion_id}.{field}:nonempty_string_required")
+            observable_evidence = value.get("observable_evidence")
+            if "observable_evidence" in value and not (
+                (isinstance(observable_evidence, str) and observable_evidence.strip())
+                or (
+                    isinstance(observable_evidence, list)
+                    and any(isinstance(item, str) and item.strip() for item in observable_evidence)
+                )
+            ):
+                findings.append(
+                    f"quality_criteria.{criterion_id}.observable_evidence:nonempty_string_or_list_required"
+                )
+            scoring = value.get("scoring")
+            if not isinstance(scoring, dict) or not scoring:
+                continue
+            score_keys = {str(score_key) for score_key in scoring}
+            missing_scores = sorted(ANALYTIC_RUBRIC_SCORES - score_keys, reverse=True)
+            findings.extend(f"quality_criteria.{criterion_id}.scoring.{score}" for score in missing_scores)
+            for score_key, score_value in scoring.items():
+                if not isinstance(score_value, str) or not score_value.strip():
+                    findings.append(f"quality_criteria.{criterion_id}.scoring.{score_key}:nonempty_string_required")
+
+    if not checked:
+        findings.append("quality_criteria.observable_analytic_criterion")
+    if not isinstance(automatic_failures, list) or not [
+        item for item in automatic_failures if isinstance(item, str) and item.strip()
+    ]:
+        findings.append("automatic_failure_conditions")
+
+    check = {
+        "name": "analytic_rubric_quality",
+        "status": "pass" if not findings else "blocked_validation",
+        "path": "references/contract.yaml",
+        "criteria_checked": sorted(checked),
+        "missing": sorted(findings),
+        "policy": (
+            "references/contract.yaml quality_criteria must use an analytic rubric "
+            "shape: one observable dimension per criterion, purpose, why_it_matters, "
+            "observable_evidence, 1-5 scoring anchors, and package-level automatic failures."
+        ),
+    }
+    blockers: list[dict[str, str]] = []
+    if findings:
+        blockers.append(
+            {
+                "rule_id": "analytic_rubric_quality_missing",
+                "path": "references/contract.yaml",
+                "message": (
+                    "references/contract.yaml must define analytic rubric criteria "
+                    "with purpose, why_it_matters, observable_evidence, scoring anchors 5-1, "
+                    "and automatic_failure_conditions before Tessl handoff."
+                ),
+            }
+        )
+    return check, blockers
+
+
 def _manifest_declares_multiple_capabilities(manifest: dict[str, Any]) -> tuple[bool, list[str]]:
     """Return whether a capsule manifest exposes multiple selectable facets."""
     facet_values: set[str] = set()
@@ -1893,6 +1981,11 @@ def reference_quality_contract(repo_root: Path | None, skill_md: Path | None) ->
         )
         checks.append(rubric_check)
         blockers.extend(rubric_blockers)
+        analytic_rubric_check, analytic_rubric_blockers = _analytic_rubric_quality_check(
+            reference_contract
+        )
+        checks.append(analytic_rubric_check)
+        blockers.extend(analytic_rubric_blockers)
     if references_dir and references_dir.is_dir():
         manifest_path = references_dir / "knowledge-capsule.manifest.yaml"
         routing_path = references_dir / "knowledge-capsule-routing.md"

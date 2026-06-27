@@ -145,6 +145,7 @@ Run the narrowest applicable checks before claiming the skill is ready:
 
 ### Repo Checks
 - ./bin/ask skills audit <skill-path> --level strict --json --robot
+- ./bin/ask skills package verify <skill-path> --json --robot
 - ./bin/ask sdk eval scenario-quality <skill-path> --preview --json --robot
 - ./bin/ask sdk eval scorer-quality <skill-path> --preview --json --robot
 - ./bin/ask sdk eval scorer-calibration <skill-path> --preview --json --robot
@@ -155,7 +156,7 @@ Run the narrowest applicable checks before claiming the skill is ready:
 - ./bin/ask sdk eval handoff-readiness --skill <skill-path> --preview --json --robot
 
 ### External Review
-- python3 Infrastructure/bin/ask skills external-review <skill-path> --audit-level compat --json --robot
+- ./bin/ask skills external-review <skill-path> --audit-level compat --json --robot
 
 ## Handoff
 - Return the produced artifact, validation evidence, blocker class, and next safe stage or owner.

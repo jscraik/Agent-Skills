@@ -4,18 +4,28 @@ Use this when hardening skill-factory output or explaining why a skill run is bl
 
 ## Required Ladder
 
+0. Run `./bin/ask sdk start <target> --json --robot`.
 1. Run `./bin/ask skills audit <target> --level strict --json --robot`.
-2. Run `./bin/ask sdk eval scenario-quality <target> --preview --json --robot`.
-3. Run `./bin/ask sdk eval scorer-quality <target> --preview --json --robot`.
-4. Run `./bin/ask sdk eval scorer-calibration <target> --preview --json --robot`.
-5. Run `./bin/ask sdk eval run <target> --runner internal --mode smoke --codex-profile oss-local --json --robot`.
-6. Run `./bin/ask sdk eval run <target> --runner internal --mode smoke --codex-profile oss-cloud --json --robot`.
-7. Run `./bin/ask sdk eval tessl-local-proof --skill <target> --workspace skills-sdk-lab --execute --json --robot`.
-8. Run `./bin/ask evals run <target> --mode smoke --runner discovery-smoke --tessl-live-private --tessl-workspace skills-sdk-lab --tessl-live-dry-run --json --robot`.
-9. Run `./bin/ask sdk eval handoff-readiness --skill <target> --preview --json --robot`.
-10. Next, execute `python3 Infrastructure/bin/ask skills external-review <target> --audit-level compat --json`.
+2. Run `./bin/ask skills package verify <target> --json --robot`.
+3. Run `./bin/ask sdk security risk-modes <target> --preview --json --robot`.
+4. Run `./bin/ask sdk eval scenario-quality <target> --preview --json --robot`.
+5. Run `./bin/ask sdk eval scorer-quality <target> --preview --json --robot`.
+6. Run `./bin/ask sdk eval scorer-calibration <target> --preview --json --robot`.
+7. Run `./bin/ask sdk eval run <target> --runner internal --mode smoke --codex-profile oss-local --json --robot`.
+8. Run `./bin/ask sdk eval run <target> --runner internal --mode smoke --codex-profile oss-cloud --json --robot`.
+9. Run `./bin/ask sdk eval tessl-local-proof --skill <target> --workspace skills-sdk-lab --execute --json --robot`.
+10. Run `./bin/ask evals run <target> --mode smoke --runner discovery-smoke --tessl-live-private --tessl-workspace skills-sdk-lab --tessl-live-dry-run --json --robot`.
+11. Run `./bin/ask sdk eval handoff-readiness --skill <target> --preview --json --robot`.
+12. Next, execute `./bin/ask skills external-review <target> --audit-level compat --json --robot`.
 
 Stop at the first failed required gate unless the user explicitly asks for a full matrix.
+
+Score policy: oss-local is the 70-75 internal discovery band, oss-cloud is the
+iterative path to >=90 internal success, and Tessl live-private is external
+confirmation at >=90 and >= baseline. If Tessl finds basic skill-behavior,
+format, scenario, rubric, judge, reference, security, or package-shape failures,
+classify that as an upstream SDK pipeline defect and patch the deterministic
+guardrail before rerunning from oss-local.
 
 ## Codex Profile
 

@@ -23,19 +23,52 @@ quality_criteria:
     accessible_and_inclusive_writing: inclusive language, nonvisual support, accessible formatting, or broad-reader support
     error_messages_and_recovery: error message, blocker explanation, recovery path, warning, or troubleshooting guidance
   quality_rubric:
-    clear: purpose, next action, and key claim are identifiable without rereading
-    relevant: content serves the named reader job and prioritizes common reader tasks
-    accurate: operational claims have live evidence, citations, command results, or blockers
-    brief: the doc uses the fewest sections, paragraphs, examples, and visuals that preserve reader success
-    understood: prerequisites are introduced or linked before use and ambiguous terms are resolved
-    logical: sections follow the reader's task sequence instead of the writer's discovery sequence
-    accepted: claims are supported by evidence, uncertainty is named, and validation does not overclaim
-  skimmability: informative headings, short paragraphs, topic-first sentences, bullets, tables, and useful bolding
-  prose: simple unambiguous sentences, consistent terms, no unsupported reader-state assumptions
-  reader_state: map prerequisites, introduced concepts, cited evidence, glossary terms, and missing foundations
-  helpfulness: recovery steps for common failures, safe examples, expanded abbreviations where useful
-  readme_onboarding: verify headline counts, command examples, validation status, source/projection/runtime clarity, and first-run path
-  visuals: use diagrams, screenshots, images, or tables only for relationships, flows, state transitions, validation pipelines, rendered artifacts, or UI states; include adjacent prose
+    purpose: Score whether the output is clear, relevant, accurate, brief, understood, logical, and accepted for the selected writing type.
+    why_it_matters: These dimensions translate the skill's core promise into observable reviewer behavior instead of generic writing praise.
+    observable_evidence: The changed doc or draft has a visible reader job, evidence-backed claims, concise structure, introduced terms, logical task sequence, and uncertainty or blockers where proof is missing.
+    scoring:
+      5: The doc satisfies all seven dimensions with current evidence and no meaningful rewrite needed.
+      4: The doc satisfies the dimensions with minor wording, citation, or structure gaps.
+      3: The doc is usable but one or two dimensions require noticeable reviewer interpretation or rework.
+      2: The doc misses several dimensions or contains unsupported operational claims.
+      1: The doc cannot be understood, trusted, or acted on for the named reader job.
+  reader_state_and_structure:
+    purpose: Score whether the doc introduces concepts, prerequisites, and terms in the order a reader needs them.
+    why_it_matters: Documentation fails when it assumes context the reader does not yet have, even if the facts are individually correct.
+    observable_evidence: The output includes or updates a reader-state map, names prerequisites, resolves glossary terms, and orders sections by reader task sequence.
+    scoring:
+      5: Reader state, prerequisites, glossary terms, citations, and missing foundations are explicitly handled.
+      4: Reader state is mostly handled with minor term or prerequisite gaps.
+      3: Common reader assumptions are covered but some concepts appear before support.
+      2: The doc relies on unstated prerequisites or unresolved terms.
+      1: The doc is organized around writer discovery rather than reader understanding.
+  evidence_grounding:
+    purpose: Score whether factual and operational claims are supported by citations, commands, receipts, screenshots, or explicit blockers.
+    why_it_matters: Technical writing must be accurate and accepted; unsupported claims create false readiness or user harm.
+    observable_evidence: Each important claim links to file, line, command output, receipt, screenshot, source citation, or blocker; validation outcomes use pass, fail, blocked, or not applicable.
+    scoring:
+      5: All important claims have current evidence or explicit blockers and proof lanes remain separate.
+      4: Claims are grounded with minor citation gaps that do not change behavior.
+      3: Main claims are grounded but some supporting claims need verification.
+      2: Several operational or factual claims are unsupported, stale, or blended across proof lanes.
+      1: The doc fabricates, guesses, or overclaims evidence.
+  visual_and_accessibility_support:
+    purpose: Score whether visuals, screenshots, tables, diagrams, and accessible structure are used when they improve comprehension.
+    why_it_matters: Modern technical content often needs visual support, but visuals must clarify relationships, flows, state, or UI rather than decorate.
+    observable_evidence: The output uses appropriate diagrams, screenshots, images, tables, headings, alt-adjacent prose, or states that no visual is needed for the reader task.
+    scoring:
+      5: Visual or structural aids clarify the reader task and remain accessible through adjacent prose.
+      4: Visual or structural support is appropriate with minor accessibility or placement gaps.
+      3: The doc is readable but misses a useful visual, table, or accessibility support.
+      2: Visuals are absent where needed or decorative where evidence is required.
+      1: Visual or formatting choices make the content harder to understand or inaccessible.
+automatic_failure_conditions:
+  - The output chooses the wrong writing type or skips type selection when the task spans multiple writing modes.
+  - Operational, factual, or citation claims are fabricated, stale, or unsupported.
+  - Missing source information is silently cut instead of raised with the writer.
+  - Runtime, validation, Tessl, registry, or release readiness lanes are blended into one status.
+  - New durable terminology is introduced without checking the repo glossary or ubiquitous language surface.
+  - Required visuals, screenshots, examples, recovery paths, or accessibility support are omitted without a stated blocker.
 evidence_requirements:
   - Operational claims link to file, line, command output, or blocker.
   - Citation-backed docs link important claims to source files, commands, receipts, screenshots, or explicit blockers.
