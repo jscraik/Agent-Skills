@@ -31,4 +31,4 @@ CLAUDE_APPROVAL_POSTURE = "require"
 
 [tasks.yaml-inspect]
 description = "Inspect repo YAML through the managed ask/PyYAML lane"
-run = "bash -lc './bin/ask repo yaml-inspect \"$@\"' --"
+run = "bash -lc './bin/ask repo yaml-inspect --json --robot \"$@\"' --"
