@@ -209,6 +209,59 @@ lift_curation_policy:
     skill: "unclear SKILL.md instruction"
     task: "task does not ask for what criteria grade"
     criteria: "criteria test wrong or too-generic behavior"
+quality_criteria:
+  scenario_validity:
+    purpose: "Create scenarios that measure the target skill behavior rather than generic model competence."
+    why_it_matters: "Internal evals must catch skill defects before Tessl; scenarios that any baseline model can solve do not prove the skill works."
+    observable_evidence: "Each scenario names the skill behavior, failure mode, realistic context, and expected artifact; the prompt is self-contained for the evaluated runner without leaking hidden answers; and the criteria reward behavior prescribed by the target skill package."
+    scoring:
+      5: "Every scenario targets a specific skill behavior with realistic setup, scoreable output, and no reliance on hidden context."
+      4: "Scenarios mostly target specific skill behavior with minor realism or artifact-detail improvements remaining."
+      3: "Scenarios are usable but include some generic tasks, weak context, or underspecified artifacts."
+      2: "Many scenarios measure generic competence or lack the artifacts needed for reliable scoring."
+      1: "Scenarios do not test the target skill's intended behavior."
+  measurement_quality:
+    purpose: "Define rubrics and metrics that are observable, non-overlapping, and tied to a named construct."
+    why_it_matters: "Scenario scores drive repair loops; subjective or overlapping criteria obscure whether the skill, task, criteria, or scorer failed."
+    observable_evidence: "Criteria separate behavior correctness, evidence use, safety, efficiency, and clarity when those constructs matter; score anchors or binary checks cite observable artifacts, text fields, commands, files, or proof lanes; and metrics state interpretation thresholds and what they do not prove."
+    scoring:
+      5: "Criteria and metrics are construct-mapped, observable, non-overlapping, and include thresholds plus proof limitations."
+      4: "Criteria and metrics are mostly observable with minor overlap or threshold clarification remaining."
+      3: "Criteria and metrics can support scoring but leave some construct mapping or proof limits ambiguous."
+      2: "Criteria are broad, subjective, overlapping, or lack thresholds needed for consistent scoring."
+      1: "Criteria cannot be scored reliably."
+  leakage_resistance:
+    purpose: "Keep hidden expected moves, answer keys, bad patterns, and good patterns out of visible task text."
+    why_it_matters: "Answer leakage inflates scores and hides whether the skill instructions actually caused the desired behavior."
+    observable_evidence: "Visible prompts omit hidden criteria, answer keys, expected moves, and fixture-path shortcuts; hidden metadata remains in evaluator-only fields or reference files; and scenario review flags leakage and rewrites prompts before promotion."
+    scoring:
+      5: "No visible task text leaks hidden scoring logic, expected moves, answer keys, or shortcut fixture paths."
+      4: "Only minor wording could hint at the desired method, without giving away the answer."
+      3: "Some prompts reveal the desired approach but still require meaningful skill behavior."
+      2: "Prompts leak enough scoring logic that results are likely inflated."
+      1: "Prompts expose the hidden answer or criteria directly."
+  tessl_readiness:
+    purpose: "Prepare scenarios for staged Tessl dry run and live confirmation only after internal SDK proof is strong."
+    why_it_matters: "Tessl is a paid external confirmation lane; internal SDK checks should do the diagnostic work before live scoring."
+    observable_evidence: "Scenario set includes at least 20 gold-standard structured scenarios plus release metadata requirements, dry-run staging uses controlled /tmp payloads and repo wrappers rather than the live skill source, and live handoff evidence records lift, baseline comparison, blocked cases, and feedback-loop status."
+    scoring:
+      5: "Scenarios are internally promotion-ready, staged through the repo Tessl wrapper, and accompanied by lift and feedback-loop evidence."
+      4: "Scenarios are ready for Tessl staging with only minor metadata or evidence cleanup remaining."
+      3: "Scenarios are internally plausible but still need staging, lift, or feedback-loop evidence before live handoff."
+      2: "Scenarios require substantial internal repair before Tessl dry run."
+      1: "Scenarios are sent toward Tessl without internal SDK readiness evidence."
+evidence_requirements:
+  - "Scenario inventory with category, behavior under test, failure mode, and expected artifact."
+  - "Observable acceptance criteria or score anchors for each release scenario."
+  - "Leakage review decision for visible task text."
+  - "SDK scenario-quality receipt before Tessl handoff."
+  - "At least 20 gold-standard structured scenarios before live handoff."
+automatic_failure_conditions:
+  - "Visible scenario text leaks hidden answer keys, expected moves, bad patterns, good patterns, or scorer-only criteria."
+  - "Scenario set measures generic model competence instead of the target skill's instructions."
+  - "Release scenarios lack scoreable artifacts, acceptance checks, or reproducibility evidence."
+  - "Live handoff readiness is claimed with fewer than 20 gold-standard structured scenarios."
+  - "Tessl live scoring is treated as the first diagnostic gate instead of external confirmation after internal SDK proof."
 skills_sdk_pipeline:
   setup_status_command: "./bin/ask sdk status --json --robot"
   package_verify_command: "./bin/ask skills package verify Skills/agent-ops/sdk-scenario-generator --json --robot"

@@ -34,7 +34,7 @@ See 'references/contract.yaml' for the compact machine-readable contract and 're
 2. Treat Slack and bot messages as signal surfaces, not delivery truth.
 3. For each item, refresh the live state that matters: GitHub PR, latest head SHA, required checks, review threads, tracker state, local branch or worktree, and relevant validation output.
 4. Classify each item as 'fix_now', 'monitor', 'informational', or 'blocked'.
-5. Name the owner lane: 'pr-green-sweep', 'autofix', 'testing', 'release-notes', 'docs-expert', repo-specific implementation, or no action.
+5. Name the owner lane: 'pr-green-sweep', 'autofix', 'testing', 'release-notes', 'technical-writer', repo-specific implementation, or no action.
 6. Promote repeated noise into the durable destination it implies: guardrail, test, docs contract, skill behavior, eval fixture, or tracker issue.
 7. Stop before implementing fixes unless the user asked for follow-through or the routing skill owns execution.
 

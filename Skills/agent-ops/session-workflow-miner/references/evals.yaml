@@ -83,13 +83,13 @@ cases:
     should_trigger: true
     realistic: true
     why_realistic: "Recent sessions include docs and release-note work, but those jobs usually have narrower existing skills."
-    prompt: "Recent sessions show I keep asking for docs updates, changelogs, and release prep. Check whether those need new skills, or whether docs-expert and release-notes already own them."
+    prompt: "Recent sessions show I keep asking for docs updates, changelogs, and release prep. Check whether those need new skills, or whether technical-writer and release-notes already own them."
     prepend_skill: false
     deterministic_checks: {forbidden_commands: [curl, wget, "rm -rf", nc, "git reset --hard"]}
     expected_behavior: "Select the skill, identify existing docs and release-note owners, and skip new artifacts when those owners are sufficient."
     acceptance:
       - {type: skill_selected, expected_skill: session-workflow-miner}
-      - {type: regex, value: "(?i)(docs-expert|release-notes|existing|skip|no new artifact)"}
+      - {type: regex, value: "(?i)(technical-writer|release-notes|existing|skip|no new artifact)"}
   - id: negative_skill_creation_direct
     name: direct skill creation
     category: negative

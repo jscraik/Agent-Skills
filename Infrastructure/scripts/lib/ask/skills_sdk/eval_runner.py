@@ -12,6 +12,9 @@ EVAL_RUN_RECEIPT_SCHEMA_URI = (
     "https://agent-skills.local/schemas/skills-sdk/eval-run-receipt.v0.schema.json"
 )
 EVAL_RUN_ACCEPTANCE_TRACE = ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022"]
+_ALLOWED_PREFLIGHT_WARNING_PREFIXES = (
+    "Using isolated CODEX_HOME for live eval session writes:",
+)
 
 
 def _repo_relative(repo_root: Path, path: Path) -> str:
@@ -138,6 +141,17 @@ def _summary_count(value: object) -> int:
     return 0
 
 
+def _actionable_preflight_warnings(value: object) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    warnings = [str(item) for item in value if str(item).strip()]
+    return [
+        warning
+        for warning in warnings
+        if not any(warning.startswith(prefix) for prefix in _ALLOWED_PREFLIGHT_WARNING_PREFIXES)
+    ]
+
+
 def _integer_summary(value: object) -> dict[str, int]:
     if not isinstance(value, dict):
         return {}
@@ -172,7 +186,7 @@ def _quality_assertion(assertion_id: str, expected: str, actual: object, passes:
 def _quality_gate_fields(scorecard: dict[str, Any]) -> dict[str, Any]:
     decision = str(scorecard.get("decision") or "").strip().lower() or None
     passed = scorecard.get("passed")
-    preflight_warnings = scorecard.get("preflight_warnings")
+    preflight_warnings = _actionable_preflight_warnings(scorecard.get("preflight_warnings"))
     security_screening = scorecard.get("security_dependency_screening")
     return {
         "scorecard_schema_version": str(scorecard.get("schema_version") or "") or None,
@@ -184,7 +198,7 @@ def _quality_gate_fields(scorecard: dict[str, Any]) -> dict[str, Any]:
         "blocked_cases": _summary_count(scorecard.get("blocked_cases")),
         "tier1_failures": _summary_count(scorecard.get("tier1_failures")),
         "tier2_findings": _summary_count(scorecard.get("tier2_findings")),
-        "preflight_warning_count": len(preflight_warnings) if isinstance(preflight_warnings, list) else 0,
+        "preflight_warning_count": len(preflight_warnings),
         "readiness_summary": _integer_summary(scorecard.get("readiness_summary")),
         "expected_signal_summary": _expected_signal_summary(scorecard.get("expected_signal_summary")),
         "security_dependency_screening_status": (

@@ -4,7 +4,7 @@
 
 - Scope: `agent-skills` repository operations, Skills SDK product direction, skill authoring, skill sync, and runtime visibility.
 - Sources: current conversation, `AGENTS.md`, `README.md`, `Docs/reference/skills-sdk-platform-atlas.html`, `.harness/specs/2026-06-03-skills-sdk-v1-product-spec.md`, `.harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md`, `Docs/goals/skills-sdk-v1-0-product-implementation/goal.md`, `Docs/agents/14-path-ownership-boundaries.md`, `Docs/agents/13-workflow-and-safety-guidance.md`, `Infrastructure/scripts/lifecycle-and-sync/selection_policy.py`, `Infrastructure/references/skill-validation-reporting-contract.md`, `skills-system/skill-installer/SKILL.md`, `skills-system/skill-installer/references/skill-factory/install-flows.md`, and `Skills/agent-ops/ubiquitous-language/SKILL.md`.
-- Last updated: 2026-06-23
+- Last updated: 2026-06-26
 
 ## Canonical Terms
 
@@ -25,6 +25,7 @@
 | **Guardrails Stage** | The pipeline stage for risk modes, intake, package hardening, trust, adoption decisions, and human-review blockers. | security backlog, compliance, warnings | High |
 | **Evals/Proof Stage** | The pipeline stage where deterministic checks, scorer quality, calibration, A/B receipts, command replay, and schema evidence prove or block claims. | tests only, evals only, evidence verify | High |
 | **Tessl Distribution Stage** | The pipeline stage for private workspaces, eval workspace evidence, review runs, package inventory, release confirmation, and eventual public standard. | registry, public publish, Tessl proof | High |
+| **Skills SDK Tessl Lab Workspace** | The operator-visible Tessl product workspace `skills-sdk-lab` used for improve-skill scenario preparation, local Tessl proof, live-private dry-run staging, and private product evidence. Older examples that say `skills-sdk` are stale aliases and should normalize to `skills-sdk-lab`. | skills-sdk workspace, personal workspace, jscraik workspace | High |
 | **Local Runtime Truth Stage** | The pipeline stage where installed behavior, runtime links, observability, rollback, and project-local use prove what the package actually does after handoff. | local install, user sync, runtime projection | High |
 | **Author Loop** | The feedback loop from Foundry to SDK Lifecycle that improves source and package shape until the SDK can explain the skill in receipts. | writing loop, source loop | High |
 | **Proof Loop** | The feedback loop from SDK Lifecycle to Evals/Proof that turns package claims into deterministic checks, calibrated scorers, and replayable evidence. | eval loop, test loop | High |
@@ -32,6 +33,8 @@
 | **Runtime Loop** | The feedback loop from Local Runtime Truth back to Foundry that turns installed behavior, observability, and regressions into durable source improvements. | install loop, production loop | High |
 | **Evidence Inventory** | The non-executing classification of capability evidence references as file, schema, receipt, command, external, pass, blocked, or not-run. It can pass while still requiring command replay for behavior proof. | evidence proof, replay, CI pass | High |
 | **Evidence Replay** | A separate receipt lane that runs or plans command evidence and binds current command outputs to capability claims. | evidence verify, inventory, not-run refs | High |
+| **Reader-State Map** | A documentation planning artifact that records what the target reader already knows, what each section or block introduces, what citations support the claim, and what missing information must be gathered from the writer before the doc can safely proceed. | audience assumptions, reader model, undocumented prerequisites | High |
+| **Grounding Map** | The concept-tracking part of a Reader-State Map: concept -> prerequisite, introduced here, cited evidence, or missing foundation, used to prevent docs from leaning on terms or ideas before the reader can understand them. | concept list, glossary notes, jargon list | High |
 | **`ask` CLI** | The public command interface at `./bin/ask` that agents must use for repository operations. | helper script, ask wrapper | High |
 | **Canonical Skill Source** | The editable source of a skill under `Skills/<topic-cluster>/<skill-name>/` or a plugin-owned skill path. | runtime skill, synced copy | High |
 | **Canonical Source Inspection** | Directly reading a skill's `SKILL.md` or package files for repair, audit, source review, or authoring when runtime skill use is not being claimed. | using the skill, running the skill | High |

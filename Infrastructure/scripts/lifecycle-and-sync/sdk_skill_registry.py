@@ -22,6 +22,10 @@ from selection_policy import (
 )
 from skill_discovery import REPO_ROOT, classify_skill_scope, normalize_skill_description, parse_skill_frontmatter
 
+LEGACY_SKILL_HANDLE_ALIASES = {
+    "docs-expert": "technical-writer",
+}
+
 
 @dataclass(frozen=True)
 class SdkSkillRecord:
@@ -448,7 +452,8 @@ def resolve_sdk_skill_handle(handle: str, *, repo_root_path: Path | None = None)
         }
 
     root = repo_root_path or REPO_ROOT
-    matches = _resolve_sdk_skill_source_path(requested, root) or _resolve_sdk_skill_name(requested, root)
+    lookup_handle = LEGACY_SKILL_HANDLE_ALIASES.get(requested, requested)
+    matches = _resolve_sdk_skill_source_path(lookup_handle, root) or _resolve_sdk_skill_name(lookup_handle, root)
     if not matches:
         return {
             "status": "error",
@@ -456,7 +461,7 @@ def resolve_sdk_skill_handle(handle: str, *, repo_root_path: Path | None = None)
             "handle": requested,
             "operator_action": "Run ./bin/ask skills list --json --robot to list SDK-visible skills.",
         }
-    if len(matches) > 1 and _policy_manages_collision(requested, {match.source_path for match in matches}):
+    if len(matches) > 1 and _policy_manages_collision(lookup_handle, {match.source_path for match in matches}):
         matches = sorted(matches, key=_record_publish_priority)[:1]
     if len(matches) > 1:
         return {

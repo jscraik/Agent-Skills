@@ -7,14 +7,68 @@ non_goals:
   - "Route unrelated work away from this skill."
 inputs:
   - "eval goal"
+  - "capability"
   - "available evidence"
   - "environment constraints"
   - "desired artifact"
 outputs:
+  - "capability"
   - "route recommendation"
   - "workflow choice"
   - "evidence gaps"
   - "next validation step"
+quality_criteria:
+  capability_selection:
+    required: true
+    purpose: "Select the eval-work route that matches the user's actual objective before designing or scoring anything."
+    why_it_matters: "The router is a dispatch skill; wrong route selection sends judge design, trace analysis, RAG retrieval review, synthetic case generation, and review tooling into incompatible workflows."
+    observable_evidence: "Names the selected route or routes explicitly, maps the user's requested artifact, evidence, and constraints to the selected route, and rejects unrelated software-test work instead of forcing it through LLM eval guidance."
+    scoring:
+      5: "Selects the minimal matching route, cites the deciding evidence, and names any secondary route only when the task genuinely spans multiple eval work types."
+      4: "Selects a matching route with minor missing rationale or minor over-inclusion that does not change the next action."
+      3: "Selects a plausible route but leaves route rationale, evidence needs, or boundary exclusions underspecified."
+      2: "Selects a broad or mismatched route that would require substantial rerouting before useful work can begin."
+      1: "Does not select a route or routes unrelated work into LLM/RAG eval workflows."
+  evidence_boundary:
+    purpose: "Separate what current artifacts prove from what still needs evaluation evidence."
+    why_it_matters: "Eval work fails when dashboards, confidence, summaries, or model preferences are treated as proof of task success."
+    observable_evidence: "Lists the artifacts, labels, traces, prompts, retrieval outputs, or judge outputs being used, states evidence gaps before recommending scoring, judge calibration, or scenario generation, and avoids readiness claims when required artifacts are absent."
+    scoring:
+      5: "Identifies proof artifacts and gaps precisely, and limits recommendations to what those artifacts can support."
+      4: "Identifies the main proof artifacts and gaps with only minor omissions."
+      3: "Mentions evidence needs but leaves important proof boundaries ambiguous."
+      2: "Relies on incomplete evidence or blends telemetry, summaries, and proof lanes in a way that could mislead follow-on work."
+      1: "Makes unsupported evaluation or readiness claims."
+  judge_and_metric_quality:
+    purpose: "Keep judge prompts, metrics, and rubrics binary, observable, calibrated, and aligned to the construct being measured."
+    why_it_matters: "LLM evals need reliable measurement instruments; overlapping criteria or subjective ratings hide actual failure modes."
+    observable_evidence: "Uses one observable behavior per criterion, defines pass/fail or anchored score levels with evidence requirements, and calls out overlap, missing labels, or calibration gaps when present."
+    scoring:
+      5: "Produces or recommends criteria that are observable, non-overlapping, calibrated against labels or examples, and tied to a named construct."
+      4: "Produces mostly observable criteria with small calibration or wording improvements remaining."
+      3: "Produces usable criteria but leaves overlap, calibration, or construct mapping partly unresolved."
+      2: "Criteria are too subjective, broad, or overlapping to score consistently without substantial revision."
+      1: "Does not define scoreable criteria or metrics."
+  workflow_next_step:
+    purpose: "End with the smallest validation or implementation step that advances the selected eval route."
+    why_it_matters: "The router should reduce ambiguity and route work into the next executable lane rather than producing generic evaluation advice."
+    observable_evidence: "Names the next action, command, artifact, or review step, states blockers when credentials, labels, traces, or scenario inputs are missing, and keeps unrelated SDK, Tessl, or software-test lanes separate."
+    scoring:
+      5: "Provides a specific next step with required input, expected output, and blocker handling for the selected route."
+      4: "Provides a specific next step with minor missing detail."
+      3: "Provides a plausible next step but leaves execution details or blockers unclear."
+      2: "Provides generic advice that does not reliably move the eval workflow forward."
+      1: "Provides no actionable next step."
+evidence_requirements:
+  - "Selected route or route set."
+  - "Artifact and evidence inventory."
+  - "Named gaps or blockers."
+  - "Next validation, scoring, or generation step."
+automatic_failure_conditions:
+  - "Routes general software testing or unrelated implementation work into this eval router."
+  - "Treats model confidence, dashboards, summaries, or compliments as evaluation proof without artifact evidence."
+  - "Creates judge criteria that cannot be scored from observable behavior or artifacts."
+  - "Ignores explicit user constraints, available labels, known failed traces, or requested evaluation lane."
 risks:
   - over_triggering
   - untrusted_input

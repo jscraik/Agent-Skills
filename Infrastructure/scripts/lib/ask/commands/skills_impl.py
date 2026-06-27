@@ -990,12 +990,12 @@ STARTER_ARCHETYPES = {
         "testing",
         "simplify",
         "improve-codebase-architecture",
-        "docs-expert",
+        "technical-writer",
         "context7",
     ),
-    "delivery": ("pr-green-sweep", "testing", "autofix", "coding-harness", "docs-expert"),
+    "delivery": ("pr-green-sweep", "testing", "autofix", "coding-harness", "technical-writer"),
     "review": ("improve-codebase-architecture", "he-code-review", "autofix", "testing"),
-    "docs": ("agents-md", "docs-expert", "context7", "openai-docs"),
+    "docs": ("agents-md", "technical-writer", "context7", "openai-docs"),
 }
 
 
@@ -2465,7 +2465,8 @@ def _profiles_with_effective_roots(profiles: dict[str, dict[str, Any]]) -> dict[
                     "references/evals.yaml",
                     "references/contract.yaml",
                     "references/task-profile.json",
-                    "scenarios/<case-id>/task.md",
+                    "evals/<case-id>/task.md",
+                    "evals/<case-id>/criteria.json",
                 ],
                 "evidence_retention": "stable tmp staging is intentionally left for post-run inspection",
             }
@@ -4205,11 +4206,19 @@ def skills_sdk_check(
 SDK_PIPELINE_START_SCHEMA_VERSION = "skills-sdk.pipeline-start.v1"
 SDK_PIPELINE_START_SCHEMA_URI = "https://agent-skills.local/schemas/skills-sdk/pipeline-start.v1.schema.json"
 SDK_START_BLOCKED_DOWNSTREAM_LANES = [
+    "security_risk_modes",
     "scenario_quality",
+    "scorer_quality",
+    "scorer_calibration",
     "oss_local_eval",
-    "closeout_doctor",
+    "oss_local_repair_loop",
     "oss_cloud_eval",
-    "registry_events_update",
+    "oss_cloud_repair_loop",
+    "tessl_local_proof_execute",
+    "tessl_live_dry_run",
+    "handoff_readiness",
+    "tessl_live_confirmation",
+    "registry_or_private_workspace_decision",
     "runtime_doctor",
 ]
 
@@ -4257,6 +4266,22 @@ def _sdk_eval_run_command(target: str, profile: str) -> str:
     )
 
 
+def _sdk_tessl_dry_run_command(target: str) -> str:
+    return _ask_validation_command(
+        "evals",
+        "run",
+        target,
+        "--mode",
+        "smoke",
+        "--runner",
+        "discovery-smoke",
+        "--tessl-live-private",
+        "--tessl-workspace",
+        "skills-sdk-lab",
+        "--tessl-live-dry-run",
+    )
+
+
 def _sdk_start_project_context(target_info: dict[str, Any], project_root: str | None) -> dict[str, Any]:
     inferred_root = target_info.get("project_root")
     return {
@@ -4292,18 +4317,89 @@ def _sdk_start_lanes(mechanical_target: str) -> list[dict[str, Any]]:
     lanes.extend(
         [
             {
-                "id": "scenario_quality",
+                "id": "security_risk_modes",
                 "status": "blocked_until_mechanical_validation",
+                "command": _ask_validation_command("sdk", "security", "risk-modes", mechanical_target, "--preview"),
+                "proves": "security-sensitive behavior, permissions, secrets, network, filesystem, and publication risk modes are explicit before eval or registry lanes",
+            },
+            {
+                "id": "scenario_quality",
+                "status": "blocked_until_security_risk_modes",
                 "command": _ask_validation_command("sdk", "eval", "scenario-quality", mechanical_target, "--preview"),
+                "proves": "gold-standard scenarios, concrete artifacts, behavioral rubrics, Tessl parity checks, and scoreable failure conditions",
+            },
+            {
+                "id": "scorer_quality",
+                "status": "blocked_until_scenario_quality",
+                "command": _ask_validation_command("sdk", "eval", "scorer-quality", mechanical_target, "--preview"),
+                "proves": "LLM judge or hybrid scorer measures the skill requirement rather than keyword or skill-name artifacts",
+            },
+            {
+                "id": "scorer_calibration",
+                "status": "blocked_until_scorer_quality",
+                "command": _ask_validation_command("sdk", "eval", "scorer-calibration", mechanical_target, "--preview"),
+                "proves": "rubric calibration distinguishes correct, wrong, concise, verbose, and unsupported answers",
             },
             {"id": "oss_local_eval", "status": "blocked_until_scenario_quality", "command": _sdk_eval_run_command(mechanical_target, "oss-local")},
-            {"id": "closeout_doctor", "status": "blocked_until_oss_local_eval", "command": _ask_validation_command("evals", "closeout", "doctor", "<workflow-closeout.json>")},
-            {"id": "oss_cloud_eval", "status": "blocked_until_local_closeout_pass", "command": _sdk_eval_run_command(mechanical_target, "oss-cloud")},
-            {"id": "registry_events_update", "status": "blocked_until_closeout_allows_promotion", "command": _ask_validation_command("sdk", "improve", mechanical_target, "--project-root", "<project-root>", "--apply")},
-            {"id": "runtime_doctor", "status": "blocked_until_registry_or_projection_receipt", "command": _ask_validation_command("skills", "proof", mechanical_target, "--runtime-target", "codex")},
+            {
+                "id": "oss_local_repair_loop",
+                "status": "blocked_until_oss_local_eval",
+                "command": "owner-classify oss-local failures, patch skill/scenarios/rubrics/validators, then rerun oss-local",
+                "target_success_rate": "70-75 internal success after mechanical and scenario gates",
+            },
+            {"id": "oss_cloud_eval", "status": "blocked_until_oss_local_repair_loop", "command": _sdk_eval_run_command(mechanical_target, "oss-cloud")},
+            {
+                "id": "oss_cloud_repair_loop",
+                "status": "blocked_until_oss_cloud_eval",
+                "command": "owner-classify oss-cloud failures, improve skill/scenarios/rubrics/validators, then rerun oss-local only if classification shows a local skill regression",
+                "target_success_rate": ">=90 internal success before Tessl spend",
+            },
+            {
+                "id": "tessl_local_proof_execute",
+                "status": "blocked_until_oss_cloud_repair_loop",
+                "command": _ask_validation_command("sdk", "eval", "tessl-local-proof", "--skill", mechanical_target, "--workspace", "skills-sdk-lab", "--execute"),
+                "proves": "controlled /tmp Tessl staging, package lint, pack/install mechanics, and workspace identity without live scoring spend",
+            },
+            {
+                "id": "tessl_live_dry_run",
+                "status": "blocked_until_tessl_local_proof_execute",
+                "command": _sdk_tessl_dry_run_command(mechanical_target),
+                "proves": "external Tessl staging shape without consuming the live confirmation lane",
+            },
+            {
+                "id": "handoff_readiness",
+                "status": "blocked_until_tessl_live_dry_run",
+                "command": _ask_validation_command("sdk", "eval", "handoff-readiness", "--skill", mechanical_target, "--preview"),
+                "proves": "deterministic, oss-local, oss-cloud, Tessl local proof, and Tessl dry-run receipts are current and ordered",
+            },
+            {
+                "id": "tessl_live_confirmation",
+                "status": "blocked_until_handoff_readiness",
+                "command": _ask_validation_command("evals", "run", mechanical_target, "--mode", "smoke", "--runner", "discovery-smoke", "--tessl-live-private", "--tessl-workspace", "skills-sdk-lab"),
+                "target_success_rate": ">=90 and >= baseline; Tessl is confirmational, not the discovery loop",
+            },
+            {
+                "id": "registry_or_private_workspace_decision",
+                "status": "blocked_until_tessl_live_confirmation",
+                "command": "choose private workspace retention or public registry publication from current Tessl and SDK receipts",
+                "proves": "single paid workspace publication/private-state decision is explicit before registry claims",
+            },
+            {"id": "runtime_doctor", "status": "blocked_until_registry_or_private_workspace_decision", "command": _ask_validation_command("skills", "proof", mechanical_target, "--runtime-target", "codex")},
         ]
     )
     return lanes
+
+
+def _sdk_start_score_policy() -> dict[str, Any]:
+    return {
+        "schema_version": "skills-sdk.pipeline-score-policy.v1",
+        "oss_local_target": "70-75 success rate after mechanical checks, gold scenarios, and initial rubric hardening",
+        "oss_cloud_target": ">=90 internal success rate after iterative skill, scenario, rubric, validator, and judge repair",
+        "tessl_live_target": ">=90 and >= baseline as external confirmation only",
+        "failure_loop": "Any oss-local, oss-cloud, Tessl dry-run, or Tessl live failure stays in its source lane until owner classification identifies the repair surface; rerun oss-local only for classified local skill regressions.",
+        "tessl_spend_policy": "Use Tessl paid live runs only after internal SDK receipts and dry-run evidence predict >=90 external confirmation.",
+        "workspace_policy": "Use the operator-approved Tessl workspace skills-sdk-lab and decide private versus published state explicitly before registry claims.",
+    }
 
 
 def _sdk_start_status(source_exists: bool, target_class: str) -> tuple[str, list[str]]:
@@ -4337,9 +4433,10 @@ def _sdk_start_receipt(
         "current_lane": current_lane,
         "lanes": _sdk_start_lanes(mechanical_target),
         "blocked_downstream_lanes": SDK_START_BLOCKED_DOWNSTREAM_LANES,
+        "score_policy": _sdk_start_score_policy(),
         "blockers": blockers,
-        "what_this_proves": "The SDK classified the skill target and selected the first legal lifecycle command.",
-        "what_this_does_not_prove": "Format, layout, references, eval behavior, registry promotion, and runtime reachability have not run yet.",
+        "what_this_proves": "The SDK classified the skill target and selected the first legal lifecycle command in the shared create, update, install, refactor, skillify, and skill-builder pipeline.",
+        "what_this_does_not_prove": "Format, layout, references, security posture, eval behavior, internal score bands, registry promotion, Tessl confirmation, and runtime reachability have not run yet.",
         "validation_commands": [_ask_validation_command(*_sdk_start_command_args(query, project_root))],
     }
     receipt["next_action"] = {
@@ -7202,7 +7299,28 @@ def _skills_sdk_eval_run_validation_command(
 def _skills_sdk_eval_receipt_lane(mode: str, codex_profile: str | None) -> str:
     if codex_profile in {"oss-local", "oss-cloud"}:
         return codex_profile
+    if codex_profile in {"fast", "codex-fast"}:
+        return "codex-fast-smoke"
     return mode
+
+
+def _skills_sdk_eval_codex_profile_proof(
+    internal: CallResult,
+    *,
+    codex_profile: str | None,
+) -> dict[str, object]:
+    profile_contract = internal.data.get("profile_contract")
+    if not isinstance(profile_contract, dict):
+        profile_contract = {}
+    invoked = profile_contract.get("codex_exec_invoked") is True
+    observed_profile = profile_contract.get("codex_profile")
+    command_shape = profile_contract.get("codex_exec_command_shape")
+    return {
+        "codex_profile": observed_profile if isinstance(observed_profile, str) else None,
+        "codex_exec_invoked": invoked,
+        "codex_exec_command_shape": command_shape if isinstance(command_shape, list) else None,
+        "matches_requested_profile": bool(codex_profile) and invoked and observed_profile == codex_profile,
+    }
 
 
 def skills_sdk_eval_run(
@@ -7271,10 +7389,14 @@ def skills_sdk_eval_run(
             fallback_blockers=blockers,
             eval_commands=_eval_commands,
         )
+        profile_proof = _skills_sdk_eval_codex_profile_proof(internal, codex_profile=codex_profile)
+        profile_blockers: list[str] = []
+        if codex_profile in {"oss-local", "oss-cloud"} and not profile_proof["matches_requested_profile"]:
+            profile_blockers.append(f"blocked_missing_artifact:codex_profile_exec_receipt_missing:{codex_profile}")
         receipt = {
             "schema_version": "skills-sdk.eval-run-receipt.v0",
             "schema_uri": "https://agent-skills.local/schemas/skills-sdk/eval-run-receipt.v0.schema.json",
-            "status": receipt_counts["status"],
+            "status": "blocked" if profile_blockers and receipt_counts["status"] == "pass" else receipt_counts["status"],
             "runner": "internal_skill_builder_v0",
             "dataset_path": receipt_counts["dataset_path"],
             "dataset_digest": receipt_counts["dataset_digest"],
@@ -7285,13 +7407,16 @@ def skills_sdk_eval_run(
             "mode": mode,
             "lane": _skills_sdk_eval_receipt_lane(mode, codex_profile),
             "profile": codex_profile,
+            "codex_profile": profile_proof["codex_profile"],
+            "codex_exec_invoked": profile_proof["codex_exec_invoked"],
+            "codex_exec_command_shape": profile_proof["codex_exec_command_shape"],
             "case_count": receipt_counts["case_count"],
             "passed_count": receipt_counts["passed_count"],
-            "failed_count": receipt_counts["failed_count"],
+            "failed_count": max(1, receipt_counts["failed_count"]) if profile_blockers else receipt_counts["failed_count"],
             "quality_gates": receipt_counts["quality_gates"],
             "closeout_validation": receipt_counts.get("closeout_validation"),
             "cases": receipt_counts["cases"],
-            "blockers": receipt_counts["blockers"],
+            "blockers": sorted(set([*receipt_counts["blockers"], *profile_blockers])),
             "mutation_performed": False,
             "acceptance_trace": ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022"],
         }
@@ -9795,9 +9920,16 @@ def _skill_install_intake_decision(repo_root: Path, skill_name: str, target_path
         ],
         "post_install_gates": [
             "./bin/ask skills audit <skill-path> --level strict --json --robot",
+            "./bin/ask sdk eval scenario-quality <skill-path> --preview --json --robot",
+            "./bin/ask sdk eval scorer-quality <skill-path> --preview --json --robot",
+            "./bin/ask sdk eval scorer-calibration <skill-path> --preview --json --robot",
+            "./bin/ask sdk eval run <skill-path> --runner internal --mode smoke --codex-profile oss-local --json --robot",
+            "./bin/ask sdk eval run <skill-path> --runner internal --mode smoke --codex-profile oss-cloud --json --robot",
+            "./bin/ask sdk eval tessl-local-proof --skill <skill-path> --workspace skills-sdk-lab --execute --json --robot",
+            "./bin/ask evals run <skill-path> --mode smoke --runner discovery-smoke --tessl-live-private --tessl-workspace skills-sdk-lab --tessl-live-dry-run --json --robot once scenario-quality passes",
+            "./bin/ask sdk eval handoff-readiness --skill <skill-path> --preview --json --robot",
             "./bin/ask skills external-review <skill-path> --json --robot",
-            "./bin/ask evals run <skill-path> --mode smoke --json --robot once eval cases exist",
-            "./bin/ask evals run <skill-path> --mode release --json --robot before promotion or release-readiness claims",
+            "./bin/ask evals run <skill-path> --mode release --json --robot only after SDK handoff gates are current",
         ],
         "snyk_policy": {
             "required_when": "manifest-backed candidate is promoted or release readiness is claimed",
@@ -9976,9 +10108,16 @@ def install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str 
             "promotion_rule": intake_decision["promotion_rule"],
             "post_install_gates": [
                 f"ask skills audit {installed_path} --level strict --json --robot",
+                f"ask sdk eval scenario-quality {installed_path} --preview --json --robot",
+                f"ask sdk eval scorer-quality {installed_path} --preview --json --robot",
+                f"ask sdk eval scorer-calibration {installed_path} --preview --json --robot",
+                f"ask sdk eval run {installed_path} --runner internal --mode smoke --codex-profile oss-local --json --robot",
+                f"ask sdk eval run {installed_path} --runner internal --mode smoke --codex-profile oss-cloud --json --robot",
+                f"ask sdk eval tessl-local-proof --skill {installed_path} --workspace skills-sdk-lab --execute --json --robot",
+                f"ask evals run {installed_path} --mode smoke --runner discovery-smoke --tessl-live-private --tessl-workspace skills-sdk-lab --tessl-live-dry-run --json --robot once scenario-quality passes",
+                f"ask sdk eval handoff-readiness --skill {installed_path} --preview --json --robot",
                 f"ask skills external-review {installed_path} --json --robot",
-                f"ask evals run {installed_path} --mode smoke --json --robot once eval cases exist",
-                f"ask evals run {installed_path} --mode release --json --robot before promotion or release-readiness claims",
+                f"ask evals run {installed_path} --mode release --json --robot only after SDK handoff gates are current",
             ],
         }
         result.metadata["next_steps"] = result.data["readiness_policy"]["post_install_gates"]

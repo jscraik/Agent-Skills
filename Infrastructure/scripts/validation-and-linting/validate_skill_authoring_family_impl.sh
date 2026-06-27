@@ -896,7 +896,7 @@ if [[ "$release_ready" == "1" ]] && [[ -n "$evidence_run_dir" ]]; then
       mode: "release-ready",
       codex_profile: $profile,
       codex_profile_config: $profile_config,
-      tessl_eval_staging_policy: "stable /tmp/ask-tessl-evals staging with copied canonical eval inputs and tessl.json project marker",
+      tessl_eval_staging_policy: "stable /tmp/ask-tessl-evals staging with copied canonical eval inputs, evals/<case-id> Tessl tasks, and tessl.json project marker",
       tessl_review_policy: "Tessl review score must be >= 95; Plugin Eval B+ or better is acceptable with zero failures",
       evidence_dir: $dir,
       skill_coverage: $skills,

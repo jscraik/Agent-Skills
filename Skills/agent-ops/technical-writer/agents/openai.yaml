@@ -1,0 +1,7 @@
+interface:
+  display_name: "Technical Writer"
+  short_description: "Technical Writer entrypoint"
+  default_prompt: "Use Technical Writer. "
+
+policy:
+  allow_implicit_invocation: false

@@ -382,12 +382,12 @@
       <div class="section-head">
         <div>
           <h2>Capability Truth Summary</h2>
-          <p>This is the current product shape expressed as an operator-readable status layer. Green means implemented evidence exists. Blue means preview only. Amber means placeholder. Red means blocked. Grey means deferred or out of scope.</p>
+          <p>This is the checkpointed product shape expressed as an operator-readable status layer. Green means implemented evidence exists. Blue means preview only. Amber means placeholder. Red means blocked. Grey means deferred or out of scope.</p>
         </div>
-        <div class="note">The HTML is a projection. The executable truth should remain <code>./bin/ask sdk status --json --robot</code> plus the capability matrix.</div>
+        <div class="note">Projection checkpoint: generated from <code>./bin/ask sdk status --json --robot</code> on 2026-06-27T18:48:09Z at HEAD <code>618dd1aa6</code>; status digest <code>sha256:bdd01b88a07a4625a3f0daac3a6b1026e096e0c4449277d19afb0138492a1715</code>. Regenerate when HEAD or capability digest changes.</div>
       </div>
       <div class="summary-grid">
-        <div class="stat" data-status="implemented"><b>30</b><strong>Implemented</strong><span>Local SDK control-plane capabilities with owner surfaces and tests.</span></div>
+        <div class="stat" data-status="implemented"><b>29</b><strong>Implemented</strong><span>Local SDK control-plane capabilities with owner surfaces and tests.</span></div>
         <div class="stat" data-status="preview"><b>17</b><strong>Preview</strong><span>Read-only planning and static projection surfaces.</span></div>
         <div class="stat" data-status="placeholder"><b>0</b><strong>Placeholder</strong><span>Visible but not executable optional lanes.</span></div>
         <div class="stat" data-status="blocked"><b>0</b><strong>Blocked</strong><span>Sandbox scope is intake quarantine plus Codex-backed eval execution.</span></div>
@@ -400,7 +400,7 @@
       <div class="section-head">
         <div>
           <h2>Five-Discipline Coverage</h2>
-          <p>Podjarny's skills-as-code model is the clearest way to see current maturity without drowning in all 50 capability rows.</p>
+          <p>Podjarny's skills-as-code model is the clearest way to see current maturity without drowning in all 51 capability rows.</p>
         </div>
         <div class="note">Coverage describes local SDK evidence only. Hosted CI, remote registry, publish, cloud judge, and Tessl release confirmation remain separate proof lanes.</div>
       </div>
@@ -459,7 +459,7 @@
         <div class="note">Rule: a capability is implemented only when it has an owner surface, command or module, schema or receipt where relevant, and test evidence.</div>
       </div>
       <div>
-        <table hidden aria-hidden="true" data-capability-status="skills-sdk.capability-status.v1">
+        <table hidden aria-hidden="true" data-capability-status="skills-sdk.capability-status.v1" data-generated-at="2026-06-27T18:48:09Z" data-generated-head="618dd1aa6" data-status-digest="sha256:bdd01b88a07a4625a3f0daac3a6b1026e096e0c4449277d19afb0138492a1715">
           <tbody>
             <tr data-capability-id="authoring" data-status="implemented" data-pipeline-sections="author_golden_path,full_skill_lifecycle,public_sdk_surface"></tr>
             <tr data-capability-id="check" data-status="implemented" data-pipeline-sections="author_golden_path,public_sdk_surface,release_decision_matrix"></tr>

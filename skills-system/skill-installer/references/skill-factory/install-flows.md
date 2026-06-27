@@ -49,13 +49,33 @@ After installing a skill, tell the user: `Restart Codex to pick up new skills.`
 
 Canonical installs must not stop at copied source. Before promoting a command handle or claiming readiness:
 
+- Run `./bin/ask sdk start <path> --json --robot`; the start receipt is the
+  shared authority for install, update, skillify, refactor, and builder lanes.
 - Add or refresh `references/contract.yaml` and `references/evals.yaml`.
 - Ensure the frontmatter description says what the skill does and when to use it.
 - Add required local safety sections or references when strict audit requires them.
 - Add prompt-injection expected-context config only for deliberate security/eval fixtures, not to suppress real helper risks.
-- Run `./bin/ask skills audit <path> --level strict --json` and either fix failures or report the skill as installed but not release-ready.
+- Run `./bin/ask skills audit <path> --level strict --json --robot` and either fix failures or report the skill as installed but not release-ready.
+- Run SDK deterministic proof before Tessl or promotion claims:
+  `./bin/ask sdk security risk-modes <path> --preview --json --robot`,
+  `./bin/ask sdk eval scenario-quality <path> --preview --json --robot`,
+  `./bin/ask sdk eval scorer-quality <path> --preview --json --robot`, and
+  `./bin/ask sdk eval scorer-calibration <path> --preview --json --robot`.
+- Run scenario behavior proof through the read-only Codex profile lanes in order:
+  `./bin/ask sdk eval run <path> --runner internal --mode smoke --codex-profile oss-local --json --robot`
+  then `./bin/ask sdk eval run <path> --runner internal --mode smoke --codex-profile oss-cloud --json --robot`.
+- Run Tessl local proof with execute evidence before dry-run or live scoring:
+  `./bin/ask sdk eval tessl-local-proof --skill <path> --workspace skills-sdk-lab --execute --json --robot`.
+- Run Tessl live-private dry-run only after the prior gates pass, using controlled staged input:
+  `./bin/ask evals run <path> --mode smoke --runner discovery-smoke --tessl-live-private --tessl-workspace skills-sdk-lab --tessl-live-dry-run --json --robot`.
+- Run `./bin/ask sdk eval handoff-readiness --skill <path> --preview --json --robot` before live Tessl scoring or any release-readiness claim.
+- Treat oss-local as the 70-75 internal discovery band, oss-cloud as the path
+  to >=90 internal confidence, and Tessl live-private as confirmation at >=90
+  and >= baseline. If Tessl finds basic skill-behavior or fixture failures,
+  patch the SDK validator, scenario, rubric, reference, or judge contract and
+  rerun from oss-local before spending another live confirmation run.
 - Run `./bin/ask skills external-review <path> --json --robot` as the **Second-Review Lane** for Plugin Eval and Tessl local review before claiming quality.
-- Run smoke evals once representative eval cases exist, and run release evals before command-handle promotion, canonical routing, blending into an existing skill, or release-readiness claims.
+- Run release evals only after the SDK handoff gates are current; blocked SDK gates stop command-handle promotion, canonical routing, blending into an existing skill, or release-readiness claims.
 - Include Snyk in the release/security lane for manifest-backed candidates. Pure `SKILL.md`-first instruction-only candidates without supported dependency manifests should be reported as `not_applicable` for Snyk.
 - Run workspace sync/proof only after the canonical source decision and hardening state are clear.
 

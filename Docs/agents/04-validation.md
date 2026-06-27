@@ -79,6 +79,23 @@
   local Tessl staging proves only the Tessl local flow, and
   `--tessl-live-private` plus a scored `tessl eval view --json` artifact
   proves the Tessl external flow.
+- Skills SDK package movement must include a basic-requirement analytic rubric
+  before Tessl handoff. `references/contract.yaml` must state observable
+  `quality_criteria`, `evidence_requirements`, and
+  `automatic_failure_conditions`; every non-selector quality criterion must
+  include `purpose`, `why_it_matters`, `observable_evidence` as a non-empty
+  string or list, and scoring anchors for `5`, `4`, `3`, `2`, and `1`.
+  Multi-capability skills must also
+  score selector criteria, such as `writing_type_selection` or
+  `task_type_selection`, and expose the selected capability in inputs and
+  outputs. `./bin/ask skills package verify <skill-path> --json --robot`
+  blocks the package when this rubric contract is missing.
+- Use the
+  [Skills SDK Gold Standard Rubric](/Docs/reference/skills-sdk-gold-standard-rubric.md)
+  as the top-level release-readiness standard. A package is not ready for Tessl
+  live evals or registry release merely because internal checks, Plugin Eval,
+  or Tessl scores pass; it must also satisfy the rubric's automatic failures,
+  weighted readiness floors, and lane-specific evidence requirements.
 
 ## Skill quality ladder
 
@@ -109,7 +126,7 @@ public publish, registry upload, or leak.
 
 The staging layer must adapt repo-native eval metadata into Tessl's expected
 project shape: copy the skill entrypoint and eval reference files, synthesize
-`scenarios/<case-id>/task.md` plus `scenarios/<case-id>/criteria.json` from
+`evals/<case-id>/task.md` plus `evals/<case-id>/criteria.json` from
 `references/evals.yaml`, and include a minimal `tessl.json` project marker.
 Project identity is deterministic:
 plugin-owned skills under `Plugins/<plugin-id>/skills/**` use the plugin
@@ -133,7 +150,7 @@ The live Tessl workflow is a separate explicit lane. Use
 `./bin/ask evals run <skill-path> --tessl-live-private --tessl-workspace <workspace>`
 only when the operator asks for live private Tessl evidence. This lane must
 stage a plugin-shaped package under
-`/tmp/ask-tessl-live/<skill-path>-<sha12>`, write
+`/tmp/ask-tessl-evals/<skill-path>-<sha12>`, write
 `.tessl-plugin/plugin.json` with `"name": "<workspace>/<plugin-name>"`,
 `"private": true`, and `"skills": "./skills/"`, copy the skill package to
 `skills/<skill-name>/SKILL.md`, omit `tile.json`, and convert eval cases into

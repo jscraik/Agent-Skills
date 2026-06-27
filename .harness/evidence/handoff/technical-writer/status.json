@@ -1,0 +1,92 @@
+{
+  "freshness": {
+    "artifact_head": "618dd1aa6",
+    "current_head": "618dd1aa6",
+    "status": "current",
+    "warning": null
+  },
+  "generated_at": "2026-06-27T18:51:20.810320+00:00",
+  "pipeline_lanes": {
+    "pull_request": {
+      "hosted_check": {
+        "conclusion": "SUCCESS",
+        "details_url": "https://github.com/jscraik/Agent-Skills/actions/runs/28297144131/job/83838941819",
+        "name": "pr-template",
+        "status": "COMPLETED"
+      },
+      "local_template_validation": {
+        "command": "gh pr view 293 --repo jscraik/Agent-Skills --json body --jq .body | python3 .github/scripts/validate_pr_template_body.py",
+        "note": "Validated against the current local pull request template via stdin.",
+        "status": "pass"
+      },
+      "pr": {
+        "head_ref": "codex/technical-writer-sdk-pipeline",
+        "number": 293,
+        "state": "OPEN",
+        "title": "Align technical writer SDK pipeline",
+        "url": "https://github.com/jscraik/Agent-Skills/pull/293"
+      },
+      "source": ".harness/evidence/handoff/technical-writer/pr-293.json"
+    },
+    "stale_plan_reconciliation": {
+      "source": ".harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md",
+      "status": "older_local_plan_state_superseded_for_technical_writer_pr"
+    },
+    "tessl_external": {
+      "baseline": null,
+      "created_at": null,
+      "id": "019f0933-e8cc-724c-951a-7f1341590e50",
+      "improvement": null,
+      "scenario_count": 32,
+      "score": null,
+      "score_receipt": {
+        "baseline_percent": 65.2273,
+        "blocker": "Tessl feedback loop is open: baseline beat usage-spec on 5 scenario(s): wrong-domain, reader-testing, generated-boundary, smoke-boundary-discovery, regression-stale-command-example. Import or retain equivalent internal regression cases, fix the owner, and rerun before live handoff.",
+        "blocker_class": "blocked_validation",
+        "feedback_loop_status": "open",
+        "ready": false,
+        "regression_count": 5,
+        "regression_paths": [
+          "wrong-domain",
+          "reader-testing",
+          "generated-boundary",
+          "smoke-boundary-discovery",
+          "regression-stale-command-example"
+        ],
+        "scenario_count": 32,
+        "source": ".harness/evidence/handoff/technical-writer/tessl-score-preview.json",
+        "status": "blocked",
+        "usage_percent": 76.8182
+      },
+      "source": ".harness/evidence/tessl/technical-writer/019f0933-e8cc-724c-951a-7f1341590e50/tessl-eval-view.json",
+      "status": "completed",
+      "type": "eval-run",
+      "updated_at": null
+    }
+  },
+  "repo": {
+    "branch": "codex/technical-writer-sdk-pipeline",
+    "head": "618dd1aa6",
+    "root": "."
+  },
+  "schema_version": "skills-sdk-handoff-status/v1",
+  "skill": {
+    "evals_yaml": "Skills/agent-ops/technical-writer/references/evals.yaml",
+    "skill": "Skills/agent-ops/technical-writer",
+    "skill_md": "Skills/agent-ops/technical-writer/SKILL.md"
+  },
+  "status": {
+    "current_position": "tessl_feedback_loop_open",
+    "does_not_prove": [
+      "PR mergeability",
+      "final Tessl score",
+      "registry release readiness",
+      "installed runtime behavior"
+    ],
+    "next_actions": [
+      "classify the five Tessl baseline-win regressions by owner: skill, task, criteria, or scorer",
+      "retain or import equivalent internal regression scenarios before another live Tessl run",
+      "rerun the SDK pipeline from internal eval receipts through oss-local, oss-cloud, and Tessl dry-run before live handoff"
+    ]
+  }
+}

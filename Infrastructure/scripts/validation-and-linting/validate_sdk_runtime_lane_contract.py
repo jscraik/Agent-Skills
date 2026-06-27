@@ -60,6 +60,8 @@ REQUIRED_NON_SUBSTITUTION_PHRASES = [
 REQUIRED_PIPELINE_PHRASES = [
     "## Promotion Pipeline",
     "1. SDK mechanical validation",
+    "Skills SDK Gold Standard Rubric",
+    "/Docs/reference/skills-sdk-gold-standard-rubric.md",
     "2. oss-local flow",
     "3. oss-cloud flow",
     "4. Tessl local flow",
@@ -205,6 +207,8 @@ def _validate_index_links() -> list[Finding]:
         )
     required_validation_phrases = [
         "Skills SDK runtime lane contract",
+        "Skills SDK Gold Standard Rubric",
+        "/Docs/reference/skills-sdk-gold-standard-rubric.md",
         "validate_sdk_runtime_lane_contract.py --json",
         "SDK mechanical validation",
         "codex exec --profile oss-local",

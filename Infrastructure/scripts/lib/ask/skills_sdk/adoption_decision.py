@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -208,8 +208,8 @@ def _trust_expiry_status(trust_receipt: dict[str, Any]) -> tuple[bool, str | Non
     except ValueError:
         return False, "expires_at:invalid"
     if expires_at_dt.tzinfo is None:
-        expires_at_dt = expires_at_dt.replace(tzinfo=UTC)
-    if expires_at_dt <= datetime.now(UTC):
+        expires_at_dt = expires_at_dt.replace(tzinfo=timezone.utc)
+    if expires_at_dt <= datetime.now(timezone.utc):
         return False, "expires_at:expired"
     return True, None
 

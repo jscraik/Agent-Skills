@@ -55,6 +55,11 @@ Replace this line with the one concise routing question the user should answer.
 
 ## Validation
 - Validate route selection before execution.
+- For SDK handoff routes, preserve the proof ladder: strict audit,
+  scenario-quality, scorer-quality, scorer-calibration, oss-local,
+  oss-cloud, Tessl local proof with \`--execute\`, Tessl live-private dry-run,
+  then handoff-readiness. Do not route directly from creation or install to
+  live Tessl scoring.
 - Fail fast if route criteria are ambiguous or checks fail.
 - Verify outputs match the chosen workflow contract.
 

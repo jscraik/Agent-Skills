@@ -27,14 +27,14 @@ docs, or any observable operator experience. Use `n.a.` with a concrete reason
 for docs-only, metadata-only, or evidence-only changes where no behavior path
 exists.
 
-- Behavior or issue addressed: describe the observable behavior, issue, or n.a. reason
-- Real environment tested: list the real environment, production path, or n.a. reason
-- Exact steps or command run after this patch: list exact steps, command, or n.a. reason
-- Evidence after fix: link artifact, copied output, screenshot, redacted log, runtime-card ref, or n.a. reason
-- Observed result after fix: state the observed result, or n.a. reason
-- What was not tested: list untested paths, or `none` with reason
-- Proof limitations or environment constraints: state limitations, blockers, or `none`
-- Before evidence, if available: link before evidence, summarize baseline, or `n.a.` with reason
+- Behavior or issue addressed:
+- Real environment tested:
+- Exact steps or command run after this patch:
+- Evidence after fix:
+- Observed result after fix:
+- What was not tested:
+- Proof limitations or environment constraints:
+- Before evidence, if available:
 
 Behavior proof guidance: Behavior proof is separate from unit tests, lint,
 typecheck, and CI. Use it to show the actual production path or nearest
@@ -44,31 +44,33 @@ transcripts, bulky telemetry, or local absolute paths.
 
 ## Work performed
 
-- Plan IDs: list Linear keys, spec paths, plan paths, or `n.a.` with reason
-- Linear reference: list `Refs JSC-N`, `Fixes JSC-N`, `Closes JSC-N`, or `n.a.` with reason
-- Linked issue relationship: classify the linked issue relationship as implementation closure, preparatory/enabling work, standalone/untracked work, or `n.a.` with reason; for parent-goal references, state completed acceptance IDs or `none`
-- Phase / slice: list completed phase, implementation slice, or `n.a.` with reason
-- Session IDs: list Codex thread/session IDs, session-collector artifact IDs or paths, harness run IDs, or `n.a.` with reason. For AI-assisted work, include at least one session reference or explain why no session artifact was captured.
-- Trace IDs: list CI workflow/job URLs, harness/eval/runtime trace IDs, runtime-card/evidence bundle artifact paths, review trace IDs, or `n.a.` with reason. For traced or evaluated work, include the trace or artifact reference used to verify the claim.
-- AI session / traceability: map the AI session or trace reference to the work it supports; do not paste raw transcripts, prompts, secrets, or bulky telemetry into the PR body.
-- Completed work: list implementation units, docs/config changes, or evidence-only work completed in this PR
-- Affected surfaces: list code, tests, docs, PR template, CLI reference, workflow config, generated artifacts, examples, or `n.a.` with reason
-- Documentation impact: classify required docs as updated or `n.a.` with reason, including README.md, SECURITY.md, CONTRIBUTING.md, AGENTS.md, ARCHITECTURE.md, governance docs, and existing deep-module README files; list docs-expert or reviewer evidence for high-impact documentation changes
-- Documentation lifecycle impact: classify created, updated, deprecated, superseded, archived, removed, or `n.a.` with reason; include canon class and distribution impact when docs changed
-- SemVer impact: classify none, patch, minor, major, or `n.a.` with reason; explain downstream-template or packaged-skill impact when present
-- Expected outcome alignment: state how this change preserves Coding Harness as a portable agent operating system for greenfield and brownfield repos, or mark `n.a.` with reason
-- Pattern scope inventory: for any steering feedback, review comment, or line-level correction that implies a broader design/API principle, name the principle, list sibling implementations or similar misbehavior classes searched, and state which siblings were changed, intentionally left unchanged, or deferred with tracker/evidence
-- Meta-behavior proof: for repeated steering or high-signal corrections, name the durable repo/system change plus concrete repo path, command, or issue ID that prevents recurrence, or `n.a.` with tracked exception reason
-- Repeated-error research: when the same error occurs twice, use `Source: ...; Candidate 1: ...; Candidate 2: ...; Candidate 3: ...; Chosen: ...; Implemented: ...`; otherwise `n.a.` with reason
-- Acceptance trace: map completed acceptance items to evidence refs, or `n.a.` with reason
-- Validation evidence: list command outcomes, CI jobs, repo-relative artifact paths, or `n.a.` with reason; do not paste local absolute paths
-- Review artifacts: list CodeRabbit, Codex, reviewer, or harness review artifacts, or `n.a.` with reason
-- Durable evidence map: classify every local-only artifact reference as tracked receipt, PR comment, CI artifact URL, runtime-card/evidence-bundle ref, or `n.a.` with reason; use repo-relative paths only
-- Runtime impact: state direct, transitive, dev-only, CI-only, runtime-facing, or `n.a.` with reason
-- CodeRabbit mode coverage: list analysis, validation, gate, closeout, promotion, or `n.a.` with reason
-- Closeout state: classify PR state, merge or auto-merge state, branch/worktree state, Linear state, next-lane routing, and any remaining blocker or waiting owner
-- Learning / reinforcement: list promoted learnings, memory updates, or `none` with reason
-- Deferred work: list follow-up work intentionally left out, or `none`
+- Plan IDs:
+- Linear reference:
+- Linked issue relationship:
+- Phase / slice:
+- Session IDs:
+- Trace IDs:
+- AI session / traceability:
+<!-- Cite durable session/run/runtime-card references when available. Do not paste raw transcripts, prompts, secrets, or bulky telemetry. -->
+- Completed work:
+- Affected surfaces:
+- Documentation impact:
+- Documentation lifecycle impact:
+- SemVer impact:
+- Expected outcome alignment:
+- Pattern scope inventory:
+- Meta-behavior proof:
+- Repeated-error research:
+- Acceptance trace:
+- Validation evidence: See Testing.
+- Review artifacts: See Review artifacts.
+- Durable evidence map:
+- Runtime impact:
+- CodeRabbit mode coverage:
+- Closeout state:
+<!-- Closeout state must classify PR state, merge or auto-merge state, branch/worktree state, Linear state, next-lane routing, and any remaining blocker or waiting owner. -->
+- Learning / reinforcement:
+- Deferred work:
 
 ## Checklist
 
@@ -76,24 +78,24 @@ transcripts, bulky telemetry, or local absolute paths.
 - [ ] Branch name follows policy (`codex/*` for agent-created branches).
 - [ ] Required local gates run: `bash scripts/validate-codestyle.sh` plus the repo, package, or surface-scoped validation commands listed in Testing.
 - [ ] `scripts/validate-codestyle.sh` was treated as the enforcement point for hook env sanitization (`GIT_DIR`, `GIT_WORK_TREE`, and related `GIT_*` values are untrusted and sanitized before delegated package scripts).
-- [ ] **(Pending)** Any CodeRabbit Semgrep findings were either fixed or explicitly justified when warning-level-only.
+- [ ] Any CodeRabbit Semgrep findings were either fixed or explicitly justified when warning-level-only.
 - [ ] North-star learning loop considered for changed files; relevant learning gate, review-context, promotion, or feedback evidence is listed below, or marked `n.a.` with a reason.
 - [ ] Merge is blocked until all required checks pass.
 - [ ] I will delete branch/worktree after merge.
 
 ## Testing
 
-- verification_commands: list exact commands run here
-- verification_outcomes: record pass/fail/blocked for each command here
-- blocked_steps_reason: none if all planned steps ran
-- Command: `bash scripts/validate-codestyle.sh` -> pass/fail/n.a. with reason
-- Command: `./bin/ask repo validate --json --robot` -> pass/fail/n.a. with reason
-- Command: `./bin/ask repo closeout --changed --json --robot` -> pass/fail/n.a. with reason
-- Command: `<package-root package-manager command>` -> pass/fail/n.a. with reason; run package-manager gates only inside verified package roots
+- verification_commands:
+- verification_outcomes:
+- blocked_steps_reason:
+- Command: `bash scripts/validate-codestyle.sh` -> <replace with actual status and observed outcome or blocker>
+- Command: `./bin/ask repo validate --json --robot` -> <replace with actual status and observed outcome, or n.a. with reason>
+- Command: `./bin/ask repo closeout --changed --json --robot` -> <replace with actual status and observed outcome or blocker>
+- Command: `<package-root package-manager command>` -> <replace with actual status and observed outcome, or n.a. with reason>; run package-manager gates only inside verified package roots
 - Setup: `CHANGED_FILES="<comma-separated-changed-files>"` (set before running any file-scoped gates)
-- Command: `<file-scoped learning/review-context gate from the owning surface>` -> pass/fail/n.a. with reason
-- Command: `<north-star feedback or steering-uptake gate from the owning surface>` -> pass/fail/n.a. with reason
-- Command: `harness pr-closeout --pr <number> --gates artifacts/pr-closeout/closeout-gates.json --json` -> pass/fail/n.a.
+- Command: `<file-scoped learning/review-context gate from the owning surface>` -> <replace with actual status and observed outcome, or n.a. with reason>
+- Command: `<north-star feedback or steering-uptake gate from the owning surface>` -> <replace with actual status and observed outcome, or n.a. with reason>
+- Command: `harness pr-closeout --pr <number> --gates artifacts/pr-closeout/closeout-gates.json --json` -> <replace with actual status and observed outcome, or n.a. with reason>
 - Any other command(s):
 
 ## Review artifacts
@@ -102,12 +104,12 @@ transcripts, bulky telemetry, or local absolute paths.
   - CodeRabbit review: pending completion and finding resolution or waiver.
   - Independent reviewer: pending confirmation that review was performed outside the coding agent.
   - Codex review: pending completion and finding resolution or waiver.
-- CodeRabbit: <link / artifact path / comment ID>
-- Independent reviewer evidence: <reviewer + link>
-- Codex: <link / artifact path / comment ID>
-- CodeRabbit Semgrep: fixed / waived with rationale / n.a.
+- CodeRabbit:
+- Independent reviewer evidence:
+- Codex:
+- CodeRabbit Semgrep:
 - Additional evidence (if any):
 
 ## Notes
 
-Add one-paragraph merge rationale here.
+<!-- Add one-paragraph merge rationale before requesting review. -->

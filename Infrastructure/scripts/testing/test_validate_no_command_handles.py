@@ -22,6 +22,8 @@ def test_runtime_identifier_placeholder_pattern_rejects_fake_wait_ids() -> None:
 
     assert pattern.search('cell_id: "noop"')
     assert pattern.search("session_id = 'placeholder'")
+    assert pattern.search('cell_id: "nonexistent2"')
+    assert pattern.search('tool_call_id: "fake"')
 
 
 def test_runtime_identifier_placeholder_pattern_allows_realistic_runtime_ids() -> None:
@@ -29,3 +31,9 @@ def test_runtime_identifier_placeholder_pattern_allows_realistic_runtime_ids() -
 
     assert not pattern.search('cell_id: "cell_019e6a4b159776a9"')
     assert not pattern.search("placeholder identifiers must be rejected")
+
+
+def test_runtime_placeholder_guard_scans_steering_ledger() -> None:
+    assert ".harness/quality/steering-uptake.md" in (
+        validate_no_command_handles.RUNTIME_IDENTIFIER_PLACEHOLDER_PATHS
+    )

@@ -230,7 +230,9 @@ def _next_actions(blockers: list[dict[str, Any]], rows: list[dict[str, Any]]) ->
         return ["Run tessl-score first and inspect whether the feedback loop is open."]
     blocker_ids = {check["id"] for check in blockers}
     actions = [_ACTION_BY_BLOCKER[blocker_id] for blocker_id in _ACTION_BY_BLOCKER if blocker_id in blocker_ids]
-    return actions or ["Run scenario-quality, scorer-quality, scorer-calibration, dry Tessl staging, then live Tessl when budget allows."]
+    return actions or [
+        "Run scenario-quality, scorer-quality, scorer-calibration, ./bin/ask skills package verify <skill-path> --json --robot, ./bin/ask skills audit <skill-path> --level strict --json --robot, oss-local, oss-cloud, Tessl local-proof --execute, Tessl dry-run staging, then handoff-readiness before live Tessl when budget allows."
+    ]
 
 
 _ACTION_BY_BLOCKER = {

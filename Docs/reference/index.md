@@ -10,5 +10,7 @@ Good reference topics for this repo:
 - Recursive loop contracts in `/Docs/skill-graphs/schemas/*`.
 - Any contracts or schemas that tools should not guess.
 - Managed asset lifecycle defaults in [managed-asset-lifecycle.md](/Docs/reference/managed-asset-lifecycle.md).
+- Skills SDK release-readiness scoring in
+  [skills-sdk-gold-standard-rubric.md](/Docs/reference/skills-sdk-gold-standard-rubric.md).
 
 - Back to [Docs index](/Docs)

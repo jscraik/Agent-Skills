@@ -380,7 +380,7 @@ def _tessl_score_next() -> str:
 
 
 def _tessl_local_proof_next() -> str:
-    return "ask sdk eval tessl-local-proof --skill <skill> --workspace <workspace> --preview --json --robot"
+    return "ask sdk eval tessl-local-proof --skill <skill> --workspace <workspace> --execute --json --robot"
 
 
 def _regression_plan_next() -> str:

@@ -163,7 +163,7 @@ Start with a dry run when proving shape:
 
 The wrapper stages a private plugin package under:
 
-    /tmp/ask-tessl-live/<skill-path>-<sha12>/
+    /tmp/ask-tessl-evals/<skill-path>-<sha12>/
       .tessl-plugin/plugin.json
       tessl.json
       skills/<skill-name>/SKILL.md

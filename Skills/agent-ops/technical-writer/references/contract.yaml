@@ -1,0 +1,117 @@
+schema_version: 1
+skill: technical-writer
+purpose: Make repository docs accurate, reader-first, and evidence-backed.
+triggers:
+  - README, runbook, code-doc, config-doc, template, or trust-surface docs need audit, rewrite, or validation.
+  - Documentation claims must be checked against scripts, commands, workflows, repo structure, support paths, or governance docs.
+non_goals:
+  - Do not change runtime behavior, dependencies, CI policy, release state, external trackers, generated projections, or user config from this skill alone.
+inputs: [user_request, doc_target, audience, reader_job, writing_type, writing_mode, truth_files, validation_commands, glossary_surfaces]
+outputs: [findings, rewritten_docs_or_patch_summary, evidence_map, reader_state, writing_type, quality_rubric, validation_status, unknowns, handoff]
+commands:
+  - "./bin/ask skills audit Skills/agent-ops/technical-writer --level strict --json --robot"
+  - "./bin/ask skills package verify Skills/agent-ops/technical-writer --json --robot"
+  - "./bin/ask sdk eval scenario-quality Skills/agent-ops/technical-writer --preview --json --robot"
+  - "./bin/ask sdk eval scorer-quality Skills/agent-ops/technical-writer --preview --json --robot"
+  - "./bin/ask sdk eval scorer-calibration Skills/agent-ops/technical-writer --preview --json --robot"
+  - "./bin/ask sdk eval run Skills/agent-ops/technical-writer --runner internal --mode smoke --codex-profile oss-local --json --robot"
+  - "./bin/ask sdk eval run Skills/agent-ops/technical-writer --runner internal --mode smoke --codex-profile oss-cloud --json --robot"
+  - "./bin/ask sdk eval tessl-local-proof --skill Skills/agent-ops/technical-writer --workspace skills-sdk-lab --execute --json --robot"
+  - "./bin/ask sdk eval tessl-score --view-json <view-json> --skill Skills/agent-ops/technical-writer --preview --json --robot"
+permission_profile:
+  filesystem:
+    read:
+      - doc_target
+      - truth_files
+      - validation_commands
+      - repo_guidance
+      - glossary_surfaces
+      - screenshots_or_visual_evidence_when_supplied
+    write:
+      - doc_target
+      - canonical_skill_eval_assets_when_explicitly_hardening_this_skill
+      - repo_local_evidence_artifacts_when_recording_validation
+  network:
+    required: false
+    allowed_when: "Only when the user requests external citation verification, hosted PR/CI status, Tessl workspace evidence, or other explicit external proof."
+quality_criteria:
+  writing_type_selection:
+    technical_documentation: API, README, runbook, config, command, code-doc, or proof-backed repo guidance
+    developer_education: tutorial, lesson, learning path, concept introduction, or example-led teaching
+    content_design_and_service_docs: task-oriented service content, acceptance criteria, vocabulary, maintenance, or support docs
+    articles_and_long_form: argument, essay, narrative explanation, long-form technical article, or public post
+    presentations_and_visual_docs: talk outline, slide deck, visual explanation, diagram-led doc, screenshot-led doc, or standalone slidedoc
+    short_form_and_content_creation: social post, short update, concise announcement, content hook, or compact public artifact
+    devrel_role_and_audience: community-facing docs, trust surface, feedback loop, support boundary, or audience-positioning work
+    voice_signal_and_taste: tone, positioning, credibility, signal density, or brand consistency work
+    storytelling_and_explanation: narrative structure, analogy, conceptual explanation, or sticky framing
+    clarity_style_and_revision: style pass, clarity pass, structural revision, or concise rewrite
+    accessible_and_inclusive_writing: inclusive language, nonvisual support, accessible formatting, or broad-reader support
+    error_messages_and_recovery: error message, blocker explanation, recovery path, warning, or troubleshooting guidance
+  quality_rubric:
+    purpose: Score whether the output is clear, relevant, accurate, brief, understood, logical, and accepted for the selected writing type.
+    why_it_matters: These dimensions translate the skill's core promise into observable reviewer behavior instead of generic writing praise.
+    observable_evidence: The changed doc or draft has a visible reader job, evidence-backed claims, concise structure, introduced terms, logical task sequence, and uncertainty or blockers where proof is missing.
+    scoring:
+      5: The doc satisfies all seven dimensions with current evidence and no meaningful rewrite needed.
+      4: The doc satisfies the dimensions with minor wording, citation, or structure gaps.
+      3: The doc is usable but one or two dimensions require noticeable reviewer interpretation or rework.
+      2: The doc misses several dimensions or contains unsupported operational claims.
+      1: The doc cannot be understood, trusted, or acted on for the named reader job.
+  reader_state_and_structure:
+    purpose: Score whether the doc introduces concepts, prerequisites, and terms in the order a reader needs them.
+    why_it_matters: Documentation fails when it assumes context the reader does not yet have, even if the facts are individually correct.
+    observable_evidence: The output includes or updates a reader-state map, names prerequisites, resolves glossary terms, and orders sections by reader task sequence.
+    scoring:
+      5: Reader state, prerequisites, glossary terms, citations, and missing foundations are explicitly handled.
+      4: Reader state is mostly handled with minor term or prerequisite gaps.
+      3: Common reader assumptions are covered but some concepts appear before support.
+      2: The doc relies on unstated prerequisites or unresolved terms.
+      1: The doc is organized around writer discovery rather than reader understanding.
+  evidence_grounding:
+    purpose: Score whether factual and operational claims are supported by citations, commands, receipts, screenshots, or explicit blockers.
+    why_it_matters: Technical writing must be accurate and accepted; unsupported claims create false readiness or user harm.
+    observable_evidence: Each important claim links to file, line, command output, receipt, screenshot, source citation, or blocker; validation outcomes use pass, fail, blocked, or not applicable.
+    scoring:
+      5: All important claims have current evidence or explicit blockers and proof lanes remain separate.
+      4: Claims are grounded with minor citation gaps that do not change behavior.
+      3: Main claims are grounded but some supporting claims need verification.
+      2: Several operational or factual claims are unsupported, stale, or blended across proof lanes.
+      1: The doc fabricates, guesses, or overclaims evidence.
+  visual_and_accessibility_support:
+    purpose: Score whether visuals, screenshots, tables, diagrams, and accessible structure are used when they improve comprehension.
+    why_it_matters: Modern technical content often needs visual support, but visuals must clarify relationships, flows, state, or UI rather than decorate.
+    observable_evidence: The output uses appropriate diagrams, screenshots, images, tables, headings, alt-adjacent prose, or states that no visual is needed for the reader task.
+    scoring:
+      5: Visual or structural aids clarify the reader task and remain accessible through adjacent prose.
+      4: Visual or structural support is appropriate with minor accessibility or placement gaps.
+      3: The doc is readable but misses a useful visual, table, or accessibility support.
+      2: Visuals are absent where needed or decorative where evidence is required.
+      1: Visual or formatting choices make the content harder to understand or inaccessible.
+automatic_failure_conditions:
+  - The output chooses the wrong writing type or skips type selection when the task spans multiple writing modes.
+  - Operational, factual, or citation claims are fabricated, stale, or unsupported.
+  - Missing source information is silently cut instead of raised with the writer.
+  - Runtime, validation, Tessl, registry, or release readiness lanes are blended into one status.
+  - New durable terminology is introduced without checking the repo glossary or ubiquitous language surface.
+  - Required visuals, screenshots, examples, recovery paths, or accessibility support are omitted without a stated blocker.
+evidence_requirements:
+  - Operational claims link to file, line, command output, or blocker.
+  - Citation-backed docs link important claims to source files, commands, receipts, screenshots, or explicit blockers.
+  - Missing examples, ownership decisions, terms, visuals, or recovery paths are raised with the writer before being cut or deferred.
+  - New durable terms are checked against UBIQUITOUS_LANGUAGE.md, UBIQUITOUS.md, UBIQUITOUS-MAP.md, or glossary files before introduction.
+  - Validation results use pass, fail, blocked, or not applicable.
+  - Runtime availability is separate from source existence or strict audit.
+risks: [over_triggering, untrusted_input, validation_drift, projection_edits, unsupported_claims]
+approval_gates: [broad_rewrite, destructive_command, install_sync_publish_release, secret_access, user_global_config, external_write, ownership_conflict]
+validation: [strict_skill_audit, skill_gate, openai_skill_format, package_boundary_checks, plugin_eval_grade_a, docs_lint_or_blocked]
+safety:
+  untrusted_inputs: true
+  redact_secrets: true
+  destructive_commands: false
+handoffs:
+  implementation: Use implementation skills for behavior changes.
+  verification: Use verification-before-completion for deterministic closeout.
+  memory: Use project-brain only when the user asks to preserve a learning.
+observability: Report commands, exact outcomes, blockers, and confidence limits.
+rollback_procedure: Revert only the documentation files changed by the docs pass; restore previous validation wording when command evidence is blocked or contradicted; leave behavior changes to the owning implementation workflow.

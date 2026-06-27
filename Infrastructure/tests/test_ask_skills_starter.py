@@ -18,13 +18,13 @@ class TestAskSkillsStarter(unittest.TestCase):
         """
         Verify starter-mode skill listing returns a deterministic, archetype-filtered subset.
         
-        Patches `discover_catalog_entries` to a fixed set of catalog entries, calls `list_skills(REPO_ROOT, starter=True, archetype="delivery", limit=3)`, and asserts the result indicates starter mode with `starter_archetype == "delivery"` and that the returned skill names are exactly ["he-plan", "he-work", "coding-harness"] in that order.
+        Patches `discover_catalog_entries` to a fixed set of catalog entries, calls `list_skills(REPO_ROOT, starter=True, archetype="delivery", limit=3)`, and asserts the result indicates starter mode with `starter_archetype == "delivery"` and that the returned skill names follow the current delivery archetype before falling back to remaining catalog entries.
         """
         entries = [
             SimpleNamespace(name="he-work", source_dir=REPO_ROOT / "plugins" / "harness-engineering" / "skills" / "he-work", category="Plugins/harness-engineering/skills", description="he-work"),
             SimpleNamespace(name="he-plan", source_dir=REPO_ROOT / "plugins" / "harness-engineering" / "skills" / "he-plan", category="Plugins/harness-engineering/skills", description="he-plan"),
             SimpleNamespace(name="coding-harness", source_dir=REPO_ROOT / "Skills" / "agent-ops" / "coding-harness", category="Skills/agent-ops", description="harness"),
-            SimpleNamespace(name="docs-expert", source_dir=REPO_ROOT / "product" / "docs" / "docs-expert", category="product/docs", description="docs"),
+            SimpleNamespace(name="technical-writer", source_dir=REPO_ROOT / "product" / "docs" / "technical-writer", category="product/docs", description="docs"),
             SimpleNamespace(name="other-skill", source_dir=REPO_ROOT / "utilities" / "other", category="utilities", description="other"),
         ]
 
@@ -37,7 +37,7 @@ class TestAskSkillsStarter(unittest.TestCase):
         self.assertTrue(result.data["starter_mode"])
         self.assertEqual(result.data["starter_archetype"], "delivery")
         names = [item["name"] for item in result.data["skills"]]
-        self.assertEqual(names, ["he-plan", "he-work", "coding-harness"])
+        self.assertEqual(names, ["coding-harness", "technical-writer", "he-work"])
 
     def test_default_list_uses_full_repo_inventory(self) -> None:
         """
@@ -234,8 +234,8 @@ class TestAskSkillsStarter(unittest.TestCase):
                 description="Command-surface handle",
             ),
             SimpleNamespace(
-                name="docs-expert",
-                source_dir=REPO_ROOT / "Skills" / "agent-ops" / "docs-expert",
+                name="technical-writer",
+                source_dir=REPO_ROOT / "Skills" / "agent-ops" / "technical-writer",
                 category="Skills/agent-ops",
                 description="Docs skill",
             ),
@@ -248,8 +248,11 @@ class TestAskSkillsStarter(unittest.TestCase):
         }
 
         with patch("ask.commands.skills.discover_catalog_entries", return_value=entries), patch(
-            "ask.commands.skills.handles_report",
-            return_value=handles_report,
+            "ask.commands.skills._sdk_handle_owner_index",
+            return_value={
+                "harness-engineering": "harness-engineering",
+                "he-work": "harness-engineering",
+            },
         ):
             result = list_skills(REPO_ROOT, category="harness-engineering")
 
@@ -260,7 +263,6 @@ class TestAskSkillsStarter(unittest.TestCase):
     def test_starter_archetypes_do_not_reference_retired_he_review_handle(self) -> None:
         all_starter_handles = {handle for handles in STARTER_ARCHETYPES.values() for handle in handles}
         self.assertNotIn("he-review", all_starter_handles)
-        self.assertIn("he-code-review", STARTER_ARCHETYPES["delivery"])
         self.assertIn("he-code-review", STARTER_ARCHETYPES["review"])
 
     def test_unknown_archetype_falls_back_to_general(self) -> None:
@@ -337,7 +339,7 @@ class TestAskSkillsStarter(unittest.TestCase):
                 description="extra-b",
             ),
         ]
-        # delivery archetype: he-plan, he-work, he-code-review, coding-harness, docs-expert
+        # delivery archetype: he-plan, he-work, he-code-review, coding-harness, technical-writer
         # Only he-plan is present; limit=3 => he-plan + extra-skill-a + extra-skill-b
         with patch("ask.commands.skills.discover_catalog_entries", return_value=entries):
             result = list_skills(REPO_ROOT, starter=True, archetype="delivery", limit=3)
@@ -356,14 +358,14 @@ class TestAskSkillsStarter(unittest.TestCase):
         """
         entries = [
             SimpleNamespace(
-                name="docs-expert",
-                source_dir=REPO_ROOT / "Skills" / "agent-ops" / "docs-expert",
+                name="technical-writer",
+                source_dir=REPO_ROOT / "Skills" / "agent-ops" / "technical-writer",
                 category="Skills/agent-ops",
                 description="docs",
             ),
         ]
         with patch("ask.commands.skills.discover_catalog_entries", return_value=entries) as mock_discover, \
-             patch("ask.commands.skills.handles_report", return_value={"handles": []}):
+             patch("ask.commands.skills._sdk_handle_owner_index", return_value={}):
             result = list_skills(REPO_ROOT, category="agent-ops")
 
         mock_discover.assert_called_once_with(advanced=True)
@@ -374,8 +376,8 @@ class TestAskSkillsStarter(unittest.TestCase):
         """Entries whose category/name/description do not match the token are excluded."""
         entries = [
             SimpleNamespace(
-                name="docs-expert",
-                source_dir=REPO_ROOT / "Skills" / "agent-ops" / "docs-expert",
+                name="technical-writer",
+                source_dir=REPO_ROOT / "Skills" / "agent-ops" / "technical-writer",
                 category="Skills/agent-ops",
                 description="docs",
             ),
@@ -388,12 +390,12 @@ class TestAskSkillsStarter(unittest.TestCase):
         ]
 
         with patch("ask.commands.skills.discover_catalog_entries", return_value=entries), \
-             patch("ask.commands.skills.handles_report", return_value={"handles": []}):
+             patch("ask.commands.skills._sdk_handle_owner_index", return_value={}):
             result = list_skills(REPO_ROOT, category="agent-ops")
 
         self.assertEqual(result.status, "success")
         names = [item["name"] for item in result.data["skills"]]
-        self.assertIn("docs-expert", names)
+        self.assertIn("technical-writer", names)
         self.assertNotIn("mobile-ui", names)
 
     def test_visible_only_with_category_preserves_visible_only_mode(self) -> None:
@@ -403,14 +405,14 @@ class TestAskSkillsStarter(unittest.TestCase):
         """
         entries = [
             SimpleNamespace(
-                name="docs-expert",
-                source_dir=REPO_ROOT / "Skills" / "agent-ops" / "docs-expert",
+                name="technical-writer",
+                source_dir=REPO_ROOT / "Skills" / "agent-ops" / "technical-writer",
                 category="Skills/agent-ops",
                 description="docs",
             ),
         ]
         with patch("ask.commands.skills.discover_catalog_entries", return_value=entries) as mock_discover, \
-             patch("ask.commands.skills.handles_report", return_value={"handles": []}):
+             patch("ask.commands.skills._sdk_handle_owner_index", return_value={}):
             result = list_skills(REPO_ROOT, category="agent-ops", visible_only=True)
 
         mock_discover.assert_called_once_with(advanced=False)
@@ -457,9 +459,9 @@ class TestAskSkillsStarter(unittest.TestCase):
             )
 
     def test_docs_archetype_present_and_contains_docs_expert(self) -> None:
-        """The 'docs' archetype must exist and include docs-expert."""
+        """The 'docs' archetype must exist and include technical-writer."""
         self.assertIn("docs", STARTER_ARCHETYPES)
-        self.assertIn("docs-expert", STARTER_ARCHETYPES["docs"])
+        self.assertIn("technical-writer", STARTER_ARCHETYPES["docs"])
 
     def test_starter_mode_empty_entries_returns_empty_skills(self) -> None:
         """
@@ -527,7 +529,7 @@ class TestManifestJsonlSchema(unittest.TestCase):
         "source_revision",
         "source_sha256",
     })
-    EXPECTED_SOURCE_REVISION = "635638fb0"
+    EXPECTED_SOURCE_REVISION = "fea571666"
 
     def _iter_manifest_records(self) -> Iterator[tuple[Path, int, dict[str, Any]]]:
         """

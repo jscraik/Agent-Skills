@@ -19,9 +19,25 @@ Keep these lanes separate:
 
 - Package shape: `./bin/ask skills package verify <skill-path> --json --robot`.
 - Scenario quality: `./bin/ask sdk eval scenario-quality <skill-path> --preview --json --robot`.
+  This is the platform-parity scenario gate and must include the same
+  behavioral quality blockers used by Tessl dry-run/live-private staging.
 - Deterministic or internal SDK eval: `./bin/ask sdk eval run ... --json --robot`.
+- oss-local scenario proof: `codex exec --profile oss-local` in the read-only
+  Codex profile sandbox, or an SDK receipt with `codex_exec_invoked=true` and
+  `codex_profile=oss-local`.
+- oss-cloud scenario proof: `codex exec --profile oss-cloud` in the read-only
+  Codex profile sandbox, or an SDK receipt with `codex_exec_invoked=true` and
+  `codex_profile=oss-cloud`.
+- Fast smoke/check lane: `codex exec --profile fast` or a receipt in the
+  `codex-fast-smoke` lane. This lane is useful for quick checks only and does
+  not satisfy oss-local or oss-cloud promotion proof.
+- Tessl local proof: `./bin/ask sdk eval tessl-local-proof --skill <skill-path>
+  --workspace <workspace> --execute --json --robot`. Preview receipts do not
+  satisfy the live handoff lane.
 - Tessl scenario preparation: `./bin/ask evals prepare-tessl-scenarios <skill-path> --tessl-workspace <workspace> --json --robot`.
 - Tessl dry-run staging: `./bin/ask evals run <skill-path> --mode smoke --tessl-live-private --tessl-workspace <workspace> --tessl-live-dry-run --json --robot`.
+  Handoff readiness must verify both the command flag and a receipt payload with
+  `tessl_eval.dry_run=true`.
 - Live Tessl scoring: only after scenario count, scenario quality, run-budget,
   dry-run, scenario-source gates, and any prior Tessl feedback-loop obligations
   are closed.
@@ -30,6 +46,10 @@ Do not treat one lane as proof for another. Package verification proves local
 shape and references; scenario-quality preview proves scenario contract quality;
 SDK eval run proves only the selected runner/dataset; Tessl staging proves staged
 payload shape; live scoring proves only the specific workspace run and model.
+`./bin/ask evals run --runner codex` is not oss-local or oss-cloud proof unless
+the durable receipt proves the matching Codex profile invocation.
+Tessl local proof is required before dry-run/live handoff, but it does not
+replace dry-run staging or live scoring.
 
 ## Live-To-Internal Feedback Loop
 

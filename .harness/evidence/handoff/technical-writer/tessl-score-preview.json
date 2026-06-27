@@ -1,0 +1,180 @@
+{
+  "status": "error",
+  "trace_id": "06d79555-6c62-4215-9381-08cba76be7f7",
+  "metadata": {
+    "version": "0.1.0",
+    "command": "sdk eval tessl-score --view-json .harness/evidence/tessl/technical-writer/019f0933-e8cc-724c-951a-7f1341590e50/tessl-eval-view.json --skill Skills/agent-ops/technical-writer --run-id 019f0933-e8cc-724c-951a-7f1341590e50 --preview --json --robot",
+    "next_steps": [],
+    "correction_note": null
+  },
+  "data": {
+    "skills_sdk_eval_tessl_score": {
+      "schema_version": "skills-sdk-eval-tessl-score.v0",
+      "status": "blocked",
+      "ready": false,
+      "skill": "Skills/agent-ops/technical-writer",
+      "run_id": "019f0933-e8cc-724c-951a-7f1341590e50",
+      "receipt": {
+        "schema_version": "skills-sdk.tessl-score-receipt.v0",
+        "schema_uri": "https://agent-skills.local/schemas/skills-sdk/tessl-score-receipt.v0.schema.json",
+        "status": "blocked",
+        "blocker_class": "blocked_validation",
+        "blocker": "Tessl feedback loop is open: baseline beat usage-spec on 5 scenario(s): wrong-domain, reader-testing, generated-boundary, smoke-boundary-discovery, regression-stale-command-example. Import or retain equivalent internal regression cases, fix the owner, and rerun before live handoff.",
+        "skill": "Skills/agent-ops/technical-writer",
+        "run_id": "019f0933-e8cc-724c-951a-7f1341590e50",
+        "view_json": ".harness/evidence/tessl/technical-writer/019f0933-e8cc-724c-951a-7f1341590e50/tessl-eval-view.json",
+        "tessl_status": "completed",
+        "failure_reason": null,
+        "memory_derived": false,
+        "ready": false,
+        "score_summary": {
+          "scenario_count": 32,
+          "scored_scenario_count": 32,
+          "missing_scenario_count": 0,
+          "usage_points": 67.6,
+          "baseline_points": 57.4,
+          "max_points": 88.0,
+          "usage_percent": 76.8182,
+          "baseline_percent": 65.2273,
+          "lift_points": 11.5909,
+          "missing": [],
+          "regressions": [
+            {
+              "path": "wrong-domain",
+              "usage_score": 1.0,
+              "baseline_score": 2.0,
+              "max_score": 2.0
+            },
+            {
+              "path": "reader-testing",
+              "usage_score": 0.0,
+              "baseline_score": 2.0,
+              "max_score": 2.0
+            },
+            {
+              "path": "generated-boundary",
+              "usage_score": 0.0,
+              "baseline_score": 3.0,
+              "max_score": 3.0
+            },
+            {
+              "path": "smoke-boundary-discovery",
+              "usage_score": 2.0,
+              "baseline_score": 3.0,
+              "max_score": 3.0
+            },
+            {
+              "path": "regression-stale-command-example",
+              "usage_score": 2.6,
+              "baseline_score": 3.0,
+              "max_score": 3.0
+            }
+          ],
+          "ties": [
+            "readme-first-run",
+            "writer-gap-gathering",
+            "accessible-error-copy",
+            "visual-doc-standalone",
+            "docs-validation-ledger",
+            "service-doc-reader-job",
+            "edge-missing-doc-target",
+            "regression-rename-handle",
+            "devrel-community-feedback",
+            "negative-generic-copyedit",
+            "pressure-unverified-badge",
+            "docs-to-x-routing-boundary",
+            "answer-first-architecture-note",
+            "reader-state-glossary-citations",
+            "pressure-generated-projection-edit",
+            "regression-capsule-runtime-boundary",
+            "generated-eval.visual-evidence-decision"
+          ]
+        },
+        "readiness_thresholds": {
+          "live_handoff_min_usage_percent": 90.0,
+          "usage_must_beat_baseline": true,
+          "baseline_scenario_wins_allowed": 0
+        },
+        "feedback_loop": {
+          "status": "open",
+          "source": "tessl_score_receipt",
+          "regression_count": 5,
+          "regression_paths": [
+            "wrong-domain",
+            "reader-testing",
+            "generated-boundary",
+            "smoke-boundary-discovery",
+            "regression-stale-command-example"
+          ],
+          "lessons_learned": [
+            {
+              "source": "tessl_baseline_win",
+              "scenario_path": "wrong-domain",
+              "lesson": "Live Tessl found baseline outperforming the skill; preserve this as an internal regression obligation before another handoff.",
+              "owner_classification_required": true,
+              "internal_regression_required": true
+            },
+            {
+              "source": "tessl_baseline_win",
+              "scenario_path": "reader-testing",
+              "lesson": "Live Tessl found baseline outperforming the skill; preserve this as an internal regression obligation before another handoff.",
+              "owner_classification_required": true,
+              "internal_regression_required": true
+            },
+            {
+              "source": "tessl_baseline_win",
+              "scenario_path": "generated-boundary",
+              "lesson": "Live Tessl found baseline outperforming the skill; preserve this as an internal regression obligation before another handoff.",
+              "owner_classification_required": true,
+              "internal_regression_required": true
+            },
+            {
+              "source": "tessl_baseline_win",
+              "scenario_path": "smoke-boundary-discovery",
+              "lesson": "Live Tessl found baseline outperforming the skill; preserve this as an internal regression obligation before another handoff.",
+              "owner_classification_required": true,
+              "internal_regression_required": true
+            },
+            {
+              "source": "tessl_baseline_win",
+              "scenario_path": "regression-stale-command-example",
+              "lesson": "Live Tessl found baseline outperforming the skill; preserve this as an internal regression obligation before another handoff.",
+              "owner_classification_required": true,
+              "internal_regression_required": true
+            },
+            {
+              "source": "tessl_low_usage_score",
+              "lesson": "Live usage below the handoff threshold means internal evals are not yet predictive enough for handoff.",
+              "owner_classification_required": true,
+              "internal_regression_required": true
+            }
+          ],
+          "missing_scenario_count": 0,
+          "required_next_actions": [
+            "Import or retain equivalent internal regression cases for every baseline-win Tessl scenario.",
+            "Classify each regression owner as skill, task, criteria, or scorer before rerunning live Tessl.",
+            "Raise usage-spec performance above the live handoff threshold in internal release evidence."
+          ]
+        },
+        "mutation_performed": false,
+        "command_execution_performed": false,
+        "agent_summary": "Tessl score receipt is blocked because the live-to-internal regression feedback loop is still open."
+      },
+      "mutation_performed": false,
+      "validation_commands": [
+        "./bin/ask sdk eval tessl-score --view-json .harness/evidence/tessl/technical-writer/019f0933-e8cc-724c-951a-7f1341590e50/tessl-eval-view.json --skill Skills/agent-ops/technical-writer --preview --json --robot"
+      ],
+      "agent_summary": "Tessl score receipt is blocked because the live-to-internal regression feedback loop is still open."
+    }
+  },
+  "telemetry": {
+    "latency_ms": 11
+  },
+  "errors": [
+    {
+      "code": "ERR_VALIDATION",
+      "message": "Tessl score receipt is blocked because the live-to-internal regression feedback loop is still open.",
+      "fix_suggestion": "./bin/ask sdk eval tessl-score --view-json .harness/evidence/tessl/technical-writer/019f0933-e8cc-724c-951a-7f1341590e50/tessl-eval-view.json --skill Skills/agent-ops/technical-writer --preview --json --robot"
+    }
+  ]
+}

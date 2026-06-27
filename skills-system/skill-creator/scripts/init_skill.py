@@ -145,10 +145,18 @@ Run the narrowest applicable checks before claiming the skill is ready:
 
 ### Repo Checks
 - ./bin/ask skills audit <skill-path> --level strict --json --robot
-- ./bin/ask evals run <skill-path> --mode smoke --json --robot
+- ./bin/ask skills package verify <skill-path> --json --robot
+- ./bin/ask sdk eval scenario-quality <skill-path> --preview --json --robot
+- ./bin/ask sdk eval scorer-quality <skill-path> --preview --json --robot
+- ./bin/ask sdk eval scorer-calibration <skill-path> --preview --json --robot
+- ./bin/ask sdk eval run <skill-path> --runner internal --mode smoke --codex-profile oss-local --json --robot
+- ./bin/ask sdk eval run <skill-path> --runner internal --mode smoke --codex-profile oss-cloud --json --robot
+- ./bin/ask sdk eval tessl-local-proof --skill <skill-path> --workspace skills-sdk-lab --execute --json --robot
+- ./bin/ask evals run <skill-path> --mode smoke --runner discovery-smoke --tessl-live-private --tessl-workspace skills-sdk-lab --tessl-live-dry-run --json --robot
+- ./bin/ask sdk eval handoff-readiness --skill <skill-path> --preview --json --robot
 
 ### External Review
-- python3 Infrastructure/bin/ask skills external-review <skill-path> --audit-level compat --json --robot
+- ./bin/ask skills external-review <skill-path> --audit-level compat --json --robot
 
 ## Handoff
 - Return the produced artifact, validation evidence, blocker class, and next safe stage or owner.
@@ -286,7 +294,7 @@ forbidden_writes:
   - "Downstream-stage artifacts that this skill does not own."
 execution_boundaries:
   - "Redact secrets and sensitive data by default in prompts, outputs, temporary evidence, and copied artifacts."
-  - "Stage Tessl input through the repo wrapper under /tmp/ask-tessl-evals or /tmp/ask-tessl-reviews."
+  - "Stage Tessl live-private input through the repo wrapper under /tmp/ask-tessl-evals and Tessl review input under /tmp/ask-tessl-reviews."
   - "Do not run Tessl directly against the live repository source tree."
 exit_criteria:
   - "Required artifacts exist and are non-empty, or the response includes the promised structured fields."
@@ -324,6 +332,17 @@ evidence_policy:
     - "Repository-wide readiness."
   tessl:
     min_review_score: 95
+    workspace: "skills-sdk-lab"
+    handoff_ladder:
+      - "skills audit strict"
+      - "sdk eval scenario-quality"
+      - "sdk eval scorer-quality"
+      - "sdk eval scorer-calibration"
+      - "sdk eval run --codex-profile oss-local"
+      - "sdk eval run --codex-profile oss-cloud"
+      - "sdk eval tessl-local-proof --execute"
+      - "evals run --tessl-live-private --tessl-live-dry-run"
+      - "sdk eval handoff-readiness"
     staging_required: true
     staging_roots:
       - "/tmp/ask-tessl-evals"
@@ -332,7 +351,8 @@ evidence_policy:
       - "SKILL.md"
       - "references/evals.yaml"
       - "tessl.json"
-      - "scenarios/<case-id>/task.md"
+      - "evals/<case-id>/task.md"
+      - "evals/<case-id>/criteria.json"
     setup_blockers:
       - "missing_workspace_or_project_link"
 workflow:
@@ -474,7 +494,8 @@ cases:
       must_include:
         - "/tmp/ask-tessl-evals"
         - "tessl.json"
-        - "scenarios"
+        - "evals/<case-id>"
+        - "handoff-readiness"
       must_not_include:
         - "run against the live repo source"
     deterministic_checks:

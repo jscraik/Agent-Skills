@@ -87,20 +87,28 @@ source, destination, validation, and restart guidance.
 When installing into an SDK-aware repository, preserve and validate the skill
 package contract after download:
 
-1. Confirm the package has `SKILL.md` with `name` and `description`.
-2. Preserve `agents/openai.yaml` when present; do not move SDK contract fields
+1. Run `./bin/ask sdk start <installed-path-or-handle> --json --robot` once
+   the package path exists; the start receipt is the shared lifecycle authority
+   for install, update, skillify, refactor, and builder lanes.
+2. Confirm the package has `SKILL.md` with `name` and `description`.
+3. Preserve `agents/openai.yaml` when present; do not move SDK contract fields
    into it.
-3. Preserve `references/contract.yaml` when present. If the repo enforces
+4. Preserve `references/contract.yaml` when present. If the repo enforces
    strict SDK readiness and this file is missing, classify the install as
    `blocked_validation` rather than silently accepting the package.
-4. Run `./bin/ask skills package <installed-path-or-handle> --json --robot`
+5. Run `./bin/ask skills package verify <installed-path-or-handle> --json --robot`
    when available.
-5. Treat `package_contract.sdk_contract.required_fields.missing` as blocking
+6. Treat `package_contract.sdk_contract.required_fields.missing` as blocking
    for strict SDK installation. Required SDK fields are purpose, inputs,
    outputs, permission profile, evals, and evidence policy.
-6. Report local `~/.agents/` OTEL, session, or observability providers only as
+7. Report local `~/.agents/` OTEL, session, or observability providers only as
    evidence enrichment. They do not replace install artifacts, evals, or
    package validators.
+8. Do not claim release readiness, Tessl readiness, registry readiness, or
+   runtime availability until the SDK start receipt's ordered lanes have passed:
+   strict audit/package verify, security risk-modes, scenario-quality,
+   scorer-quality, scorer-calibration, oss-local, oss-cloud, Tessl local proof
+   with `--execute`, Tessl live-private dry-run, and handoff-readiness.
 
 ## Notes
 

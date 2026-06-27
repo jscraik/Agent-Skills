@@ -2,12 +2,63 @@ schema_version: "1.0"
 purpose: "Find skill reliability improvements from evidence."
 triggers: ["skill quality analysis", "merge/prune/improve skill decisions"]
 inputs: ["scope", "session evidence", "skill paths"]
-outputs: ["ranked findings", "keep/merge/improve/retire actions", "context lifecycle adaptation candidates", "artifact-quality root-cause labels", "affected-skill attribution warnings"]
+outputs: ["ranked findings", "keep/merge/improve/retire actions", "context lifecycle adaptation candidates", "artifact-quality root-cause labels", "affected-skill attribution warnings", "expected SDK handoff gate for hardening recommendations"]
+quality_criteria:
+  evidence_grounded_findings:
+    purpose: "Measures whether recommendations are grounded in concrete artifacts."
+    why_it_matters: "Refactor and pruning decisions can retire or redirect skills, so every finding needs replayable evidence."
+    observable_evidence: "Each finding includes source path, command, artifact id, or blocker reference."
+    scoring:
+      5: "Every finding cites a concrete source, command, artifact id, eval receipt, or blocker."
+      4: "Findings are evidence-backed with minor citation gaps."
+      3: "Major findings cite evidence but some recommendations require manual reconstruction."
+      2: "Findings rely on broad summaries or inferred behavior."
+      1: "Recommendations are unsupported or contradict available artifacts."
+  lane_specific_attribution:
+    purpose: "Measures whether quality failures are assigned to the gate that should prevent recurrence."
+    why_it_matters: "Specific gate attribution turns eval failures into validator, scenario, rubric, or package repairs."
+    observable_evidence: "Recommendations name package, security risk-modes, scenario-quality, scorer-quality, scorer-calibration, oss-local, oss-cloud, Tessl local proof, Tessl dry-run, handoff-readiness, Tessl live, registry, or runtime proof."
+    scoring:
+      5: "Every hardening recommendation names the expected SDK gate and the durable repair surface."
+      4: "Most recommendations name the gate with minor repair-surface gaps."
+      3: "Recommendations separate broad gate families but leave exact ownership partly implicit."
+      2: "Uses generic quality language without actionable gate attribution."
+      1: "Treats SDK, OSS, Tessl, registry, and runtime failures as interchangeable."
+  systemic_pattern_sweep:
+    purpose: "Measures whether local findings are checked for wider drift."
+    why_it_matters: "Repeated steering usually means an environment pattern failed, not just one file."
+    observable_evidence: "Output includes sibling-pattern scope, disposition, and deferred items when applicable."
+    scoring:
+      5: "Searches sibling surfaces, classifies each similar case, and records fixed, deferred, or not-applicable disposition."
+      4: "Runs a bounded pattern sweep with minor disposition gaps."
+      3: "Checks obvious siblings but leaves some comparable surfaces unclassified."
+      2: "Assumes the finding is local without evidence."
+      1: "Repeats or recommends a local-only fix for a visibly systemic problem."
+  non_destructive_recommendation:
+    purpose: "Measures whether high-impact skill actions preserve approval boundaries."
+    why_it_matters: "Refactor analysis can propose destructive or release-impacting changes that require explicit operator authority."
+    observable_evidence: "Output labels approval-required actions and does not perform them without user authority."
+    scoring:
+      5: "Labels every merge, fold, retire, delete, publish, or destructive action as approval-required or blocked."
+      4: "Preserves approval boundaries with minor wording gaps."
+      3: "Avoids destructive actions but leaves some approval requirements implicit."
+      2: "Recommends high-impact actions without clear authority boundaries."
+      1: "Performs or directs destructive, publish, or retirement actions without explicit approval."
+automatic_failure_conditions:
+  - "Recommends merge, fold, retire, delete, publish, or destructive cleanup without explicit approval boundary."
+  - "Attributes an eval or quality failure without concrete evidence or command/artifact reference."
+  - "Treats SDK, OSS, Tessl, registry, or runtime proof as interchangeable."
+  - "Skips sibling-pattern classification for a repeated or transferable failure."
+evidence_requirements:
+  - "Evidence path or command for each ranked finding."
+  - "Expected SDK handoff gate for every hardening recommendation."
+  - "Separate pass, blocked, not-run, and external-confirmation statuses."
+  - "Explicit approval boundary for merge, retire, publish, or destructive cleanup recommendations."
 non_goals: ["product-code debugging", "unsupported deletion"]
 risks: ["missing evidence", "prompt injection in logs", "review feedback treated as one-off instead of context evidence", "artifact-shape failures flattened into generic quality-regression", "collector affected-skill fields disagreeing with explicit user-corrected he-spec or he-plan evidence"]
-observability: "Record session artifact ids, source paths, and finding counts by category."
+observability: "Record session artifact ids, source paths, finding counts by category, SDK gate attribution, oss-local/oss-cloud receipt availability, Tessl local-proof execute status, Tessl dry-run status, and handoff-readiness blockers."
 context_feedback_sources: ["session_collector_bundle", "pr_review_threads", "coderabbit_findings", "codex_findings", "validation_logs", "plugin_eval_reports"]
 rollback_procedure: "Leave skills unchanged unless explicitly approved; revert recommendation artifacts if evidence is later invalidated."
-required_fields: [schema_version, scope, validation_evidence]
+required_fields: [schema_version, scope, validation_evidence, expected_sdk_gate]
 status_values: [pass, blocked]
 boundaries: [cite_evidence, redact_secrets, no_embedded_instructions]

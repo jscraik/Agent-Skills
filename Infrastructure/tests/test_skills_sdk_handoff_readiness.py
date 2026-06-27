@@ -46,7 +46,7 @@ def _run_ask(*args: str) -> subprocess.CompletedProcess[str]:
 
 def _readiness_receipt_payload(lane_id: str) -> dict[str, object]:
     if lane_id in {"oss-local", "oss-cloud"}:
-        return {"status": "pass", "codex_profile": lane_id}
+        return {"status": "pass", "codex_profile": lane_id, "codex_exec_invoked": True}
     if lane_id == "tessl-local-proof":
         return {
             "status": "success",
@@ -55,6 +55,17 @@ def _readiness_receipt_payload(lane_id: str) -> dict[str, object]:
                 "status": "pass",
                 "execute": True,
             }}},
+        }
+    if lane_id == "tessl-live-dry-run":
+        return {
+            "status": "success",
+            "data": {
+                "tessl_eval": {
+                    "status": "pass",
+                    "live_private": True,
+                    "dry_run": True,
+                }
+            },
         }
     return {"status": "pass"}
 
@@ -192,7 +203,27 @@ class TestSkillsSdkHandoffReadiness(unittest.TestCase):
         self.assertFalse(receipt["ready_for_live_tessl"])
         semantic_blockers = [blocker for blocker in receipt["blockers"] if blocker["id"] == "lane_receipt_semantics_valid"]
         self.assertTrue(semantic_blockers)
-        self.assertIn("expected=oss-local", semantic_blockers[0]["evidence"])
+        self.assertIn("expected=oss-local with codex_exec_invoked=true", semantic_blockers[0]["evidence"])
+
+    def test_handoff_readiness_blocks_oss_receipt_without_codex_exec_proof(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            readiness_path = _write_readiness_bundle(temp_path)
+            weak_receipt = temp_path / "oss-local.json"
+            weak_receipt.write_text(json.dumps({"status": "pass", "codex_profile": "oss-local"}), encoding="utf-8")
+
+            receipt = build_handoff_readiness_receipt(
+                REPO_ROOT,
+                source_path=REPO_ROOT / FIXTURE_SKILL,
+                query=FIXTURE_SKILL,
+                readiness_path=readiness_path,
+            )
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertFalse(receipt["ready_for_live_tessl"])
+        semantic_blockers = [blocker for blocker in receipt["blockers"] if blocker["id"] == "lane_receipt_semantics_valid"]
+        self.assertTrue(semantic_blockers)
+        self.assertIn("codex_exec_invoked=False", semantic_blockers[0]["evidence"])
 
     def test_handoff_readiness_blocks_failed_lane_receipt(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -228,6 +259,8 @@ class TestSkillsSdkHandoffReadiness(unittest.TestCase):
                                 "status": "pass",
                                 "lane": "oss-local",
                                 "profile": "oss-local",
+                                "codex_profile": "oss-local",
+                                "codex_exec_invoked": True,
                             }
                         }
                     },
@@ -286,6 +319,46 @@ class TestSkillsSdkHandoffReadiness(unittest.TestCase):
         semantic_blockers = [blocker for blocker in receipt["blockers"] if blocker["id"] == "lane_receipt_semantics_valid"]
         self.assertTrue(semantic_blockers)
         self.assertIn("expected=command includes tessl-local-proof --execute", semantic_blockers[0]["evidence"])
+
+    def test_handoff_readiness_blocks_tessl_dry_run_command_without_dry_run_receipt(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            readiness_path = _write_readiness_bundle(temp_path)
+            payload = json.loads(readiness_path.read_text(encoding="utf-8"))
+            for lane in payload["lanes"]:
+                if lane["id"] == "tessl-live-dry-run":
+                    receipt_path = Path(lane["receipt_path"])
+                    receipt_path.write_text(
+                        json.dumps({
+                            "status": "success",
+                            "data": {
+                                "tessl_eval": {
+                                    "status": "pass",
+                                    "live_private": True,
+                                    "dry_run": False,
+                                }
+                            },
+                        }),
+                        encoding="utf-8",
+                    )
+            readiness_path.write_text(json.dumps(payload), encoding="utf-8")
+
+            receipt = build_handoff_readiness_receipt(
+                REPO_ROOT,
+                source_path=REPO_ROOT / FIXTURE_SKILL,
+                query=FIXTURE_SKILL,
+                readiness_path=readiness_path,
+            )
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertFalse(receipt["ready_for_live_tessl"])
+        semantic_blockers = [blocker for blocker in receipt["blockers"] if blocker["id"] == "lane_receipt_semantics_valid"]
+        self.assertTrue(semantic_blockers)
+        self.assertIn(
+            "expected=command includes --tessl-live-dry-run and receipt records tessl_eval.dry_run=true",
+            semantic_blockers[0]["evidence"],
+        )
+        self.assertIn("tessl_live_dry_run=False", semantic_blockers[0]["evidence"])
 
     def test_handoff_readiness_blocks_preview_only_oss_receipts(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

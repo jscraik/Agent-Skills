@@ -460,6 +460,9 @@ class EvalRunReceipt(_SdkContractModel):
     mode: str | None
     lane: str | None = None
     profile: str | None = None
+    codex_profile: str | None = None
+    codex_exec_invoked: bool | None = None
+    codex_exec_command_shape: list[str] | None = None
     case_count: int = Field(ge=0)
     passed_count: int = Field(ge=0)
     failed_count: int = Field(ge=0)

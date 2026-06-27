@@ -149,6 +149,15 @@ class TestAskCLI(unittest.TestCase):
         self.assertNotIn("mise exec", output["data"]["python_command"])
         self.assertNotIn("mise", output["data"]["python_command"])
 
+    def test_mise_yaml_inspect_task_routes_to_repo_wrapper(self):
+        """Verify the mise YAML task cannot drift from the managed ask lane."""
+        repo_root = Path(__file__).resolve().parents[2]
+        mise_toml = (repo_root / ".mise.toml").read_text(encoding="utf-8")
+
+        self.assertIn("[tasks.yaml-inspect]", mise_toml)
+        self.assertIn("./bin/ask repo yaml-inspect --json --robot", mise_toml)
+        self.assertNotIn("python3 -c 'import yaml", mise_toml)
+
     def test_repo_yaml_inspect_serializes_yaml_dates(self):
         """Verify YAML inspection emits JSON-safe values for YAML scalar types."""
         repo_root = Path(__file__).resolve().parents[2]
@@ -2588,7 +2597,10 @@ class TestAskCLI(unittest.TestCase):
         self.assertEqual(eval_contract["codex_profile"], "fast")
         self.assertEqual(eval_contract["codex_profile_config"], "[profiles.fast]")
         self.assertEqual(eval_contract["tessl_project_marker"], "tessl.json")
-        self.assertIn("/tmp/ask-tessl-evals", eval_contract["tessl_eval_staging_root"])
+        self.assertIn(
+            os.path.join(tempfile.gettempdir(), "ask-tessl-evals"),
+            eval_contract["tessl_eval_staging_root"],
+        )
         self.assertEqual(profiles["operation_context"]["profile_model"], "profile-v2-inspired")
         self.assertEqual(profiles["operation_context"]["contract_schemas"]["doctor"], "skill-doctor.v1")
         self.assertEqual(profiles["operation_context"]["contract_schemas"]["memory"], "skill-memory-provider.v1")

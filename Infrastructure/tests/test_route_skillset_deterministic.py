@@ -24,6 +24,7 @@ SOURCE_PATHS = {
     "plugin-factory-router": "Plugins/plugin-factory/skills/plugin-factory-router/SKILL.md",
     "plugin-installer": "Plugins/plugin-factory/skills/infrastructure_ops/plugin-installer/SKILL.md",
     "plugin-router": "Plugins/plugin-factory/skills/team_automation/plugin-router/SKILL.md",
+    "skill-builder": "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md",
     "skill-factory-router": "Plugins/skill-factory/skills/skill-factory-router/SKILL.md",
     "skill-creator": "Plugins/skill-factory/skills/scaffolding_templates/skill-creator/SKILL.md",
     "skill-factory-router": "Plugins/skill-factory/skills/skill-factory-router/SKILL.md",
@@ -175,6 +176,20 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
 
         self.assertEqual(payload["selected"]["id"], "skillify")
         self.assertIn("skillify-workflow", payload["candidates"][0]["reason"])
+
+    def test_skill_factory_sdk_improve_routes_to_builder(self) -> None:
+        payload = self._route(
+            "skill-factory",
+            "improve an existing skill through the SDK pipeline with oss-local, oss-cloud, Tessl local proof, and handoff-readiness",
+            [
+                _row("skill-factory-router", "Harden and validate skills."),
+                _row("skill-builder", "Reviews and improves SKILL.md packages."),
+                _row("skill-refactor", "Analyze skill reliability from evidence."),
+            ],
+        )
+
+        self.assertEqual(payload["selected"]["id"], "skill-builder")
+        self.assertIn("improve-skill-sdk-pipeline", payload["candidates"][0]["reason"])
 
     def test_skill_factory_context_feedback_routes_to_refactor(self) -> None:
         payload = self._route(

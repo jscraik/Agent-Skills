@@ -41,7 +41,7 @@ covers:
 
 ## Knowledge Systems
 
-- [[docs-expert]] — Keep strategy docs, runbooks, and README surfaces aligned with live behavior.
+- [[technical-writer]] — Keep strategy docs, runbooks, and README surfaces aligned with live behavior.
 - [[llm-wiki]] — Persist strategy knowledge in a queryable markdown wiki with incremental updates.
 
 ---
@@ -50,7 +50,7 @@ covers:
 
 - New feature idea → [[he-brainstorm]] → [[interview-me]] → [[architecture-interview]] → [[he-plan]].
 - Improve existing project → [[deep-interview]] → [[architecture-interview]] → [[he-plan]].
-- Research and document → [[context7]] / [[llm-wiki]] → [[docs-expert]].
+- Research and document → [[context7]] / [[llm-wiki]] → [[technical-writer]].
 
 ## Cross-links
 

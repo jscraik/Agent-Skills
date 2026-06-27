@@ -199,16 +199,37 @@ class RunSkillEvalsModeTests(unittest.TestCase):
             )
         )
 
-    def test_runtime_blocker_detection_overrides_successful_blocker_message(self) -> None:
-        self.assertEqual(
+    def test_successful_final_answer_blocker_message_scores_with_assertions(self) -> None:
+        self.assertIsNone(
             _classify_runner_blocker(
                 output_text=(
-                    "Blocked: the eval runner's filesystem sandbox is failing "
+                    "Blocked: a validation command could not run "
                     "with sandbox-exec: sandbox_apply: Operation not permitted."
                 ),
                 stdout_text="",
                 stderr_text="",
                 exit_code=0,
+            ),
+        )
+
+    def test_successful_exit_still_scans_stdout_for_runner_blockers(self) -> None:
+        self.assertEqual(
+            _classify_runner_blocker(
+                output_text="Final answer says the task is complete.",
+                stdout_text="ERROR: You've hit your usage limit for GPT-5.3-Codex-Spark.",
+                stderr_text="",
+                exit_code=0,
+            ),
+            "blocked_runtime",
+        )
+
+    def test_runtime_blocker_detection_keeps_stderr_sandbox_failures(self) -> None:
+        self.assertEqual(
+            _classify_runner_blocker(
+                output_text="",
+                stdout_text="",
+                stderr_text="sandbox-exec: sandbox_apply: Operation not permitted",
+                exit_code=1,
             ),
             "blocked_runtime",
         )

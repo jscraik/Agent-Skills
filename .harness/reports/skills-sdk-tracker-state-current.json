@@ -1,0 +1,48 @@
+{
+  "schema": "skills-sdk.tracker-state-current.v1",
+  "generated_at": "2026-06-27T18:48:09Z",
+  "repo": {
+    "head": "618dd1aa6",
+    "branch": "codex/technical-writer-sdk-pipeline"
+  },
+  "purpose": "Separate current local Skills SDK repo evidence from live tracker truth until Linear can be queried directly.",
+  "local_sources": [
+    ".harness/specs/2026-06-03-skills-sdk-v1-product-spec.md",
+    ".harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md",
+    ".harness/implementation-notes/2026-06-04-skills-sdk-v1-0-product-implementation-notes.mdx",
+    ".harness/evidence/handoff/technical-writer/status.json",
+    ".harness/evidence/handoff/technical-writer/tessl-score-preview.json"
+  ],
+  "local_tracker_summary": [
+    {
+      "key": "JSC-390",
+      "local_role": "Docs and static Skill Explorer scope in the older local plan.",
+      "current_interpretation": "Not sufficient evidence for the current V1 implementation parent scope."
+    },
+    {
+      "key": "JSC-391",
+      "local_role": "Completed scaffold gate and structural prerequisite in the older local plan.",
+      "current_interpretation": "Historical local evidence only; live tracker state still requires confirmation."
+    },
+    {
+      "key": "skills-sdk-v1-parent",
+      "local_role": "Parent tracker candidate named by local V1 planning notes.",
+      "current_interpretation": "Awaiting live tracker reconciliation before treating it as the current parent scope."
+    }
+  ],
+  "live_linear": {
+    "checked": false,
+    "status": "blocked_tool_unavailable",
+    "blocker": "No Linear CLI executable was available in this shell session.",
+    "attempted_commands": [
+      "command -v linear",
+      "command -v lin"
+    ],
+    "next_external_query": "Query live Linear for JSC-390, JSC-391, and the current Skills SDK V1 parent candidate; record issue status, parent/child relationship, implementation scope owner, and whether PR #293 is still the active hardening lane."
+  },
+  "proof_boundaries": [
+    "Local spec and plan files do not prove live Linear status.",
+    "Hosted pull request checks do not prove current tracker parent scope.",
+    "This artifact does not mutate Linear and must be superseded after live tracker evidence is captured."
+  ]
+}

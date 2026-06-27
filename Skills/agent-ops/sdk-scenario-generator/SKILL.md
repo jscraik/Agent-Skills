@@ -30,6 +30,9 @@ Create gold-standard Skills SDK scenarios, then stage them for internal evals an
 ## Philosophy
 
 - Scenario count is a floor, not quality proof.
+- SDK scenario-quality and Tessl live-private staging must use the same
+  behavioral quality gate; a scenario blocked by Tessl must also block SDK
+  scenario-quality promotion.
 - A good scenario makes the right skill useful and a strong baseline plausibly wrong.
 - Task text is for the agent; criteria are for the scorer. Do not leak the answer into the task.
 - Strong scenarios are grounded in concrete past or current evidence, not
@@ -73,7 +76,8 @@ Create gold-standard Skills SDK scenarios, then stage them for internal evals an
 - Skills SDK setup state: `./bin/ask` availability, `ask sdk status`,
   package verification, scenario-quality preview, scorer-quality preview,
   scorer-calibration preview, Tessl score receipt preview when quoting live
-  score history, SDK eval runner, and scenario source evidence.
+  score history, SDK eval runner, oss-local/oss-cloud Codex profile
+  availability, and scenario source evidence.
 
 ## Outputs
 
@@ -107,13 +111,25 @@ Create gold-standard Skills SDK scenarios, then stage them for internal evals an
    Registry-boundary checks before canonical import.
 6. Import only reviewed cases into `references/evals.yaml` or reviewed fixture
    notes under `references/evals/`; do not import raw generated output.
-7. Run scorer-quality, scorer-calibration, scenario-quality, internal evals when
-   available, package verification, and external review before any readiness
-   claim.
-9. When comparing against a previous Tessl run, refresh or preserve
+7. Run scorer-quality, scorer-calibration, scenario-quality, package
+   verification, and strict audit before runtime model proof.
+8. For eval scenario behavioral proof, use read-only Codex profile lanes in
+   order: first `codex exec --profile oss-local`, then `codex exec --profile
+   oss-cloud`. An SDK wrapper is acceptable only when its receipt proves
+   `codex_exec_invoked=true` and the matching `codex_profile`; do not treat
+   `./bin/ask evals run --runner codex` as oss-local or oss-cloud proof.
+   Use `codex exec --profile fast` only for quick smoke tasks and checks; it
+   does not substitute for either OSS promotion lane.
+9. Run Tessl local proof with an execute receipt before Tessl dry-run or live
+   lanes; preview-only Tessl local proof does not satisfy handoff readiness.
+10. Run Tessl dry-run or live lanes only after deterministic gates, oss-local,
+   oss-cloud, and Tessl local proof are passed or explicitly blocked with
+   receipts. Tessl dry-run handoff evidence must prove both the
+   `--tessl-live-dry-run` command and `tessl_eval.dry_run=true`.
+11. When comparing against a previous Tessl run, refresh or preserve
    `tessl eval view --json <run-id>` and run the `sdk eval tessl-score`
    receipt. Do not use memory summaries as the baseline.
-8. For behavioral skills, live Tessl readiness also requires at least 20
+12. For behavioral skills, live Tessl readiness also requires at least 20
    gold-standard scenarios, run-budget proof, usage score >= 90%, and usage not
    below baseline.
 
@@ -207,11 +223,20 @@ Fix the scenario set before rerunning live Tessl unless per-scenario evidence pr
 - `./bin/ask skills package verify <skill-path> --json --robot`
 - `./bin/ask sdk eval scorer-quality <skill-path> --preview --json --robot`
 - `./bin/ask sdk eval scorer-calibration <skill-path> --preview --json --robot`
+- `codex exec --profile oss-local` in the read-only Codex profile sandbox, or
+  an SDK receipt proving `codex_exec_invoked=true` and
+  `codex_profile=oss-local`
+- `codex exec --profile oss-cloud` in the read-only Codex profile sandbox, or
+  an SDK receipt proving `codex_exec_invoked=true` and
+  `codex_profile=oss-cloud`
+- `codex exec --profile fast` only as a quick smoke/check lane, not as
+  oss-local or oss-cloud proof
+- `./bin/ask sdk eval tessl-local-proof --skill <skill-path> --workspace <workspace> --execute --json --robot`
 - `./bin/ask sdk eval tessl-score --view-json <view-json> --skill <skill-path> --preview --json --robot`
 - `./bin/plugin-eval analyze <skill-path> --format json`
 - Run Tessl scenario preparation only when the workspace auth/project link is available.
 - For behavioral skills, run Tessl dry-run staging only after `references/evals.yaml`, reviewed fixture notes, and `scenario-sources.json` prove the minimum gold-scenario set exists.
-- Live Tessl only after dry-run staging and run-budget gates pass.
+- Live Tessl only after Tessl local proof, dry-run staging, and run-budget gates pass.
 - Fail fast at the first failed gate and classify the blocker before rerunning.
 
 ## Progressive Disclosure

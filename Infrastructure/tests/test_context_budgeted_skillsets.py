@@ -243,7 +243,7 @@ class TestSkillsetRouting(ContextBudgetTempDirTestCase):
                             "id": "specific-stage",
                             "description": "Use for branch review readiness",
                             "level": "atom",
-                            "source_path": "Skills/agent-ops/docs-expert/SKILL.md",
+                            "source_path": "Skills/agent-ops/technical-writer/SKILL.md",
                             "triggers": ["branch review readiness"],
                         }
                     ),

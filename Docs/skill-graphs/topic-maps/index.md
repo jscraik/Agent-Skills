@@ -37,7 +37,7 @@ covers:
 ## Cross-topic Skills
 
 - [[context7]] — Live library documentation across product, backend, and agent-ops work.
-- [[docs-expert]] — Documentation quality and repo-truth alignment across all domains.
+- [[technical-writer]] — Documentation quality and repo-truth alignment across all domains.
 - [[create-auth]] — Auth implementation bridging backend-platform and security-ops.
 - [[best-practices]] — Security hardening and Better Auth review.
 - [[1password]] — Secret and env-injection workflows across delivery lanes.

@@ -74,11 +74,19 @@ Evidence routing lives in [evidence routing](./references/evidence-routing.md). 
 3. Group findings by root cause.
 4. Assign evidence strength.
 5. Recommend one lane: keep, observe, improve, capture, merge/fold with approval, or retire with approval.
-6. If recommending Skill Factory hardening, include concrete repair items: target file, finding class, expected gate, minimum patch surface, and blocker.
+6. If recommending Skill Factory hardening, include concrete repair items: target file, finding class, expected SDK handoff gate, minimum patch surface, and blocker.
+7. When eval or Tessl disagreement is involved, map the evidence to `./bin/ask sdk start <skill-path> --json --robot` and the SDK
+   handoff proof ladder instead of generic eval language: strict audit,
+   security risk-modes, scenario-quality, scorer-quality, scorer-calibration, oss-local, oss-cloud,
+   Tessl local proof with `--execute`, Tessl live-private dry-run, then
+   handoff-readiness.
+   Treat oss-local misses as 70-75 discovery-band repair inputs, oss-cloud
+   misses as the path to >=90 internal confidence, and Tessl live misses as
+   upstream SDK pipeline defects unless proven external-only.
 
 ## Validation Checkpoints
 
-Each finding cites one current source, uses one primary root-cause label, and stops at the first failed gate. Merge, fold, retire, install, publish, and projection refresh decisions become explicit approval handoffs. `skill-factory-router` handoffs name target file, finding class, expected gate, minimum patch surface, and residual risk.
+Each finding cites one current source, uses one primary root-cause label, and stops at the first failed gate. Merge, fold, retire, install, publish, and projection refresh decisions become explicit approval handoffs. `skill-factory-router` handoffs name target file, finding class, expected SDK handoff gate, minimum patch surface, and residual risk.
 
 ## Root Cause Labels
 
@@ -103,6 +111,7 @@ recommendation: keep|observe|improve_with_skill_builder|capture|merge_with_appro
 builder_repair_items:
   - target_file: <canonical source path>
     finding_class: trigger|content|eval|budget|reference|safety|validation
+    expected_sdk_gate: strict_audit|scenario_quality|scorer_quality|scorer_calibration|oss_local|oss_cloud|tessl_local_proof_execute|tessl_live_private_dry_run|handoff_readiness|external_review
 validation_status: pass|fail|blocked|not_run
 blocked_by: null
 ```
@@ -138,6 +147,7 @@ recommendation: improve_with_skill_builder
 builder_repair_items:
   - target_file: Plugins/skill-factory/skills/code_quality_review/skill-factory-router/SKILL.md
     finding_class: trigger
+    expected_sdk_gate: scenario_quality
 validation_status: fail
 blocked_by: null
 ```
@@ -191,6 +201,15 @@ If evidence is stale, missing, contradictory, or too broad, return `blocked_by` 
 
 ## Validation
 
-Run `./bin/ask skills audit Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor --level strict --json --robot`, then `python3 Infrastructure/bin/ask skills external-review Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor --audit-level compat --json`.
+For this skill itself, run `./bin/ask skills audit Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor --level strict --json --robot`, then `./bin/ask skills external-review Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor --audit-level compat --json --robot`.
+
+For any recommended Skill Factory hardening lane, require the target skill's SDK
+handoff proof ladder before release, install, sync, publish, or live Tessl
+claims: sdk start, strict audit, security risk-modes preview, scenario-quality preview, scorer-quality preview,
+scorer-calibration preview, oss-local smoke, oss-cloud smoke, Tessl local proof
+with `--execute` in `skills-sdk-lab`, Tessl live-private dry-run in
+`skills-sdk-lab`, then handoff-readiness. Do not recommend `./bin/ask evals
+run --runner codex`, preview-only Tessl local proof, or Tessl dry-run command
+text as sufficient handoff evidence.
 
 Fail fast: stop at the first failed gate, classify it, and do not proceed to sync, commit, publish, or install until it is fixed or explicitly blocked.
