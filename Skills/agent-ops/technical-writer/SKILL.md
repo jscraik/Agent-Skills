@@ -160,3 +160,10 @@ Replacing repo contracts with generic advice; hiding uncertainty; loading archiv
 - `references/contract.yaml`: machine-readable contract.
 - `references/evals.yaml`: benchmark cases.
 - `references/task-profile.json`: evaluator thresholds.
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[sdk-scenario-generator]] | Turn documentation quality requirements into SDK eval scenarios and fixtures |
+| [[evals-router]] | Select the proof lane, scorer contract, and Tessl handoff route for documentation evals |
