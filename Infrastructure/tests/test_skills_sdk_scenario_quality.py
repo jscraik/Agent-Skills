@@ -316,7 +316,7 @@ cases:
         blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
         self.assertIn("structured_fields_use_typed_assertions", blocker_ids)
 
-    def test_builder_blocks_tessl_keyword_only_quality_mismatch(self) -> None:
+    def test_builder_records_tessl_quality_mismatch_as_advisory_before_live_handoff(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             skill_dir = _write_skill_with_evals(
                 Path(temp_dir),
@@ -338,14 +338,14 @@ cases:
 """,
             )
 
-            with self.assertRaises(ScenarioQualityError) as raised:
-                build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+            receipt = build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
 
-        blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
-        self.assertIn("platform_tessl_quality:keyword_only_acceptance", blocker_ids)
-        self.assertIn("platform_tessl_quality:missing_scenario_context", blocker_ids)
+        checks = {check["id"]: check for row in receipt["scenario_rows"] for check in row["checks"]}
+        self.assertEqual(checks["platform_tessl_quality:keyword_only_acceptance"]["status"], "advisory")
+        self.assertEqual(checks["platform_tessl_quality:missing_scenario_context"]["status"], "advisory")
+        self.assertFalse(receipt["blockers"])
 
-    def test_builder_blocks_skill_name_as_primary_tessl_proof(self) -> None:
+    def test_builder_records_skill_name_as_primary_tessl_proof_as_advisory_before_live_handoff(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             skill_dir = _write_skill_with_evals(
                 Path(temp_dir),
@@ -355,7 +355,7 @@ cases:
 - id: skill-name-primary-proof
   category: happy
   eval_modes:
-  - release
+  - smoke
   realistic: true
   why_realistic: A real skill routing case.
   given: A docs task should trigger the skill.
@@ -377,13 +377,13 @@ cases:
 """,
             )
 
-            with self.assertRaises(ScenarioQualityError) as raised:
-                build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+            receipt = build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
 
-        blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
-        self.assertIn("platform_tessl_quality:skill_name_primary_proof", blocker_ids)
+        checks = {check["id"]: check for row in receipt["scenario_rows"] for check in row["checks"]}
+        self.assertEqual(checks["platform_tessl_quality:skill_name_primary_proof"]["status"], "advisory")
+        self.assertFalse(receipt["blockers"])
 
-    def test_builder_blocks_release_case_without_concrete_output_artifact(self) -> None:
+    def test_builder_blocks_live_handoff_case_without_concrete_output_artifact(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             skill_dir = _write_skill_with_evals(
                 Path(temp_dir),
@@ -394,6 +394,7 @@ cases:
   category: edge
   eval_modes:
   - release
+  - live-private
   realistic: true
   why_realistic: A real docs review case.
   given: A docs task needs a visible result.
@@ -421,7 +422,7 @@ cases:
         blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
         self.assertIn("platform_tessl_quality:missing_concrete_output_artifact", blocker_ids)
 
-    def test_builder_blocks_hidden_reference_dependency_in_discovery_case(self) -> None:
+    def test_builder_records_hidden_reference_dependency_as_advisory_before_live_handoff(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             skill_dir = _write_skill_with_evals(
                 Path(temp_dir),
@@ -431,7 +432,7 @@ cases:
 - id: hidden-reference-discovery
   category: pressure
   eval_modes:
-  - release
+  - smoke
   realistic: true
   why_realistic: Discovery must work in isolated runners.
   given: A discovery case points at references/discovery-interview.md.
@@ -453,11 +454,11 @@ cases:
 """,
             )
 
-            with self.assertRaises(ScenarioQualityError) as raised:
-                build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+            receipt = build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
 
-        blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
-        self.assertIn("platform_tessl_quality:hidden_reference_dependency", blocker_ids)
+        checks = {check["id"]: check for row in receipt["scenario_rows"] for check in row["checks"]}
+        self.assertEqual(checks["platform_tessl_quality:hidden_reference_dependency"]["status"], "advisory")
+        self.assertFalse(receipt["blockers"])
 
     def test_release_mode_suite_requires_twenty_scenarios(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

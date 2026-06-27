@@ -89,6 +89,19 @@ class TestSdkSkillResolution(SdkSkillRegistryTempDirTestCase):
         self.assertNotIn("invoke_via", payload)
         self.assertNotIn("command_handle", json.dumps(payload))
 
+    def test_sdk_resolution_preserves_docs_expert_legacy_handle(self) -> None:
+        repo_root = self.temp_dir / "repo"
+        source = _write_skill_source(repo_root, "technical-writer")
+        _link_flat_projection(repo_root, "technical-writer", source)
+
+        payload = command_surface.resolve_skill_handle("docs-expert", repo_root_path=repo_root)
+
+        self.assertEqual(payload["status"], "ok")
+        self.assertEqual(payload["handle"], "technical-writer")
+        self.assertEqual(payload["requested_handle"], "docs-expert")
+        self.assertEqual(payload["alias_resolution"], "technical-writer")
+        self.assertEqual(payload["source_path"], "Skills/agent-ops/technical-writer/SKILL.md")
+
     def test_sdk_resolution_keeps_hidden_runtime_skills_private(self) -> None:
         repo_root = self.temp_dir / "repo"
         skill_dir = _write_skill_source(repo_root, "he-phase-heartbeat", root="Plugins/harness-engineering/skills")

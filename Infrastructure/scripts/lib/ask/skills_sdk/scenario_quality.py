@@ -76,6 +76,15 @@ def _check(check_id: str, status: str, message: str, evidence: list[str] | None 
     return {"id": check_id, "status": status, "severity": "blocker", "message": message, "evidence": evidence or []}
 
 
+def _advisory_check(
+    check_id: str,
+    _status: str,
+    message: str,
+    evidence: list[str] | None = None,
+) -> dict[str, Any]:
+    return {"id": check_id, "status": "advisory", "severity": "advisory", "message": message, "evidence": evidence or []}
+
+
 def _yaml_safe_load(text: str) -> Any:
     try:
         import yaml  # type: ignore
@@ -347,15 +356,35 @@ def _platform_parity_checks(case: dict[str, Any], scenario_id: str) -> list[dict
             )
         ]
     findings = tessl_eval_quality_findings([case])
+    blocks_handoff = _case_requires_live_tessl_parity(case)
+    check_builder = _check if blocks_handoff else _advisory_check
+    status = "blocker" if blocks_handoff else "advisory"
+    message = (
+        "SDK scenario-quality and Tessl live-private staging must share the same behavioral quality gate."
+        if blocks_handoff
+        else "Tessl live-private quality finding recorded as advisory until the case declares live-private or handoff intent."
+    )
     return [
-        _check(
+        check_builder(
             f"{PLATFORM_PARITY_GATE_ID_PREFIX}:{finding['code']}",
-            "blocker",
-            "SDK scenario-quality and Tessl live-private staging must share the same behavioral quality gate.",
+            status,
+            message,
             [f"{scenario_id}:{finding['code']}:{finding['message']}"],
         )
         for finding in findings
     ]
+
+
+def _case_requires_live_tessl_parity(case: dict[str, Any]) -> bool:
+    """Return whether Tessl parity findings should block this scenario-quality row."""
+    eval_modes = _list_field(case, "eval_modes")
+    explicit_modes = {"tessl-live-private", "live-private", "live_private", "tessl-handoff", "handoff"}
+    if any(str(mode).strip().lower() in explicit_modes for mode in eval_modes):
+        return True
+    for key in ("tessl_live_private", "live_private", "tessl_handoff", "handoff"):
+        if case.get(key) is True:
+            return True
+    return False
 
 
 def _text_field_assertion_malformed(item: dict[str, Any], assertion_type: str) -> bool:
