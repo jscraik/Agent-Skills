@@ -4351,7 +4351,7 @@ def _sdk_start_lanes(mechanical_target: str) -> list[dict[str, Any]]:
             {
                 "id": "oss_cloud_repair_loop",
                 "status": "blocked_until_oss_cloud_eval",
-                "command": "owner-classify oss-cloud failures, improve skill/scenarios/rubrics/validators, then rerun from oss-local",
+                "command": "owner-classify oss-cloud failures, improve skill/scenarios/rubrics/validators, then rerun oss-local only if classification shows a local skill regression",
                 "target_success_rate": ">=90 internal success before Tessl spend",
             },
             {
@@ -4396,7 +4396,7 @@ def _sdk_start_score_policy() -> dict[str, Any]:
         "oss_local_target": "70-75 success rate after mechanical checks, gold scenarios, and initial rubric hardening",
         "oss_cloud_target": ">=90 internal success rate after iterative skill, scenario, rubric, validator, and judge repair",
         "tessl_live_target": ">=90 and >= baseline as external confirmation only",
-        "failure_loop": "Any oss-local, oss-cloud, Tessl dry-run, or Tessl live failure returns to oss-local after owner classification and durable validator/rubric/scenario updates.",
+        "failure_loop": "Any oss-local, oss-cloud, Tessl dry-run, or Tessl live failure stays in its source lane until owner classification identifies the repair surface; rerun oss-local only for classified local skill regressions.",
         "tessl_spend_policy": "Use Tessl paid live runs only after internal SDK receipts and dry-run evidence predict >=90 external confirmation.",
         "workspace_policy": "Use the operator-approved Tessl workspace skills-sdk-lab and decide private versus published state explicitly before registry claims.",
     }

@@ -429,7 +429,10 @@ def _lane_status_next_actions(blocker_ids: set[str]) -> list[str]:
         return ["Rerun from oss-local after patching until deterministic gates, oss-local, oss-cloud, and Tessl dry-run all pass."]
     if "lane_receipt_path_exists" in blocker_ids:
         return ["Move lane evidence into durable .harness evidence paths and update receipt_path values."]
-    return ["Run live Tessl; if it fails, owner-classify the failure and return to oss-local."]
+    return [
+        "Run live Tessl and classify the live-lane result; return to oss-local only when "
+        "the Tessl failure is evidence of a local skill regression."
+    ]
 
 
 def _lane_has_runtime_blocker(lanes: list[dict[str, Any]], lane_id: str) -> bool:

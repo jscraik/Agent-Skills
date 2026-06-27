@@ -18,6 +18,7 @@ FIELD_RE = re.compile(r"^- (?P<label>[^:\n]+):", re.MULTILINE)
 FIELD_LINE_RE = re.compile(r"^- (?P<label>[^:\n]+):(?P<value>.*)$", re.MULTILINE)
 PLACEHOLDER_RE = re.compile(r"<[^>\n]+>")
 CHECKLIST_STATUS_RE = re.compile(r"^\*\*\((?:pending|n/a|not applicable)\)\*\*\s*", re.IGNORECASE)
+ANGLE_BRACKET_URL_RE = re.compile(r"^<https?://[^>\s]+>$")
 
 
 @dataclass(frozen=True)
@@ -171,7 +172,9 @@ def _placeholder_errors(template: str, body: str) -> list[str]:
         if placeholder in body:
             errors.append(f"Replace template placeholder: {placeholder}")
     for token in PLACEHOLDER_RE.findall(body):
-        if token in template_tokens:
+        if token.startswith("<!--") or ANGLE_BRACKET_URL_RE.match(token):
+            continue
+        if token in template_tokens or " " in token or "/" in token:
             errors.append(f"Replace unresolved placeholder token: {token}")
     return errors
 

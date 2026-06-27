@@ -112,13 +112,13 @@
               "profile": "oss-local",
               "role": "cheap internal remediation judge",
               "required_before": "oss-cloud",
-              "failure_rule": "owner-classify failures, patch the smallest surface, retain regression evidence, and rerun from oss-local"
+              "failure_rule": "owner-classify failures in their source lane; rerun oss-local only when classification shows a local skill regression"
             },
             {
               "profile": "oss-cloud",
               "role": "higher-confidence internal remediation judge",
               "required_before": "tessl_live_dry_run",
-              "failure_rule": "owner-classify failures, patch the smallest surface, retain regression evidence, and rerun from oss-local"
+              "failure_rule": "owner-classify failures in their source lane; rerun oss-local only when classification shows a local skill regression"
             }
           ],
           "tessl_sequence": [
@@ -135,7 +135,7 @@
               "role": "external confirmation lane after internal judges pass"
             }
           ],
-          "failure_loop": "Any oss-local, oss-cloud, Tessl local-proof, dry-run, or live Tessl failure returns to oss-local after owner classification, patch plan, retained regression evidence, and rerun commands are recorded.",
+          "failure_loop": "Any oss-local, oss-cloud, Tessl local-proof, dry-run, or live Tessl failure stays in its source lane until owner classification identifies the repair surface; rerun oss-local only for classified local skill regressions.",
           "live_blocked_until": "deterministic gates, oss-local, oss-cloud, Tessl local-proof, and Tessl dry-run all pass for the current candidate or an explicit skip/blocker receipt is recorded."
         },
         "model_selection_gate": {
@@ -255,7 +255,7 @@
       "blocked_environment": "The selected workspace, sandbox, cwd, or permission profile cannot run the check.",
       "blocked_validation": "A structural or policy validation gate failed for the capability."
     },
-    "tessl_live_private_note": "Tessl live-private scoring uses the staged private Tessl payload directly. Run deterministic local gates, oss-local, oss-cloud, and Tessl dry-run separately before live scoring; any failure returns to oss-local after classification, patching, and retained regression evidence.",
+    "tessl_live_private_note": "Tessl live-private scoring uses the staged private Tessl payload directly. Run deterministic local gates, oss-local, oss-cloud, and Tessl dry-run separately before live scoring; live Tessl quota, auth, project-link, or external scoring blockers remain Tessl-lane blockers, and oss-local is rerun only for classified local skill regressions.",
     "handoff_readiness": {
       "schema_version": "skills-sdk.eval-handoff-readiness.v0",
       "schema_uri": "https://agent-skills.local/schemas/skills-sdk/eval-handoff-readiness.v0.schema.json",
@@ -553,7 +553,7 @@
       "blockers": [],
       "ready_for_live_tessl": true,
       "required_next_actions": [
-        "Run live Tessl; if it fails, owner-classify the failure and return to oss-local."
+          "Run live Tessl and classify the live-lane result; return to oss-local only when the Tessl failure is evidence of a local skill regression."
       ],
       "mutation_performed": false,
       "promotion_performed": false,
@@ -758,13 +758,13 @@
               "profile": "oss-local",
               "role": "cheap internal remediation judge",
               "required_before": "oss-cloud",
-              "failure_rule": "owner-classify failures, patch the smallest surface, retain regression evidence, and rerun from oss-local"
+              "failure_rule": "owner-classify failures in their source lane; rerun oss-local only when classification shows a local skill regression"
             },
             {
               "profile": "oss-cloud",
               "role": "higher-confidence internal remediation judge",
               "required_before": "tessl_live_dry_run",
-              "failure_rule": "owner-classify failures, patch the smallest surface, retain regression evidence, and rerun from oss-local"
+              "failure_rule": "owner-classify failures in their source lane; rerun oss-local only when classification shows a local skill regression"
             }
           ],
           "tessl_sequence": [
@@ -781,7 +781,7 @@
               "role": "external confirmation lane after internal judges pass"
             }
           ],
-          "failure_loop": "Any oss-local, oss-cloud, Tessl local-proof, dry-run, or live Tessl failure returns to oss-local after owner classification, patch plan, retained regression evidence, and rerun commands are recorded.",
+          "failure_loop": "Any oss-local, oss-cloud, Tessl local-proof, dry-run, or live Tessl failure stays in its source lane until owner classification identifies the repair surface; rerun oss-local only for classified local skill regressions.",
           "live_blocked_until": "deterministic gates, oss-local, oss-cloud, Tessl local-proof, and Tessl dry-run all pass for the current candidate or an explicit skip/blocker receipt is recorded."
         },
         "model_selection_gate": {

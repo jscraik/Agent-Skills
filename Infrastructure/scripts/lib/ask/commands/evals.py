@@ -804,13 +804,13 @@ def _tessl_live_private_policy(workspace: str | None = None) -> dict:
                     "profile": "oss-local",
                     "role": "cheap internal remediation judge",
                     "required_before": "oss-cloud",
-                    "failure_rule": "owner-classify failures, patch the smallest surface, retain regression evidence, and rerun from oss-local",
+                    "failure_rule": "owner-classify failures in their source lane; rerun oss-local only when classification shows a local skill regression",
                 },
                 {
                     "profile": "oss-cloud",
                     "role": "higher-confidence internal remediation judge",
                     "required_before": "tessl_live_dry_run",
-                    "failure_rule": "owner-classify failures, patch the smallest surface, retain regression evidence, and rerun from oss-local",
+                    "failure_rule": "owner-classify failures in their source lane; rerun oss-local only when classification shows a local skill regression",
                 },
             ],
             "tessl_sequence": [
@@ -827,7 +827,7 @@ def _tessl_live_private_policy(workspace: str | None = None) -> dict:
                     "role": "external confirmation lane after internal judges pass",
                 },
             ],
-            "failure_loop": "Any oss-local, oss-cloud, Tessl local-proof, dry-run, or live Tessl failure returns to oss-local after owner classification, patch plan, retained regression evidence, and rerun commands are recorded.",
+            "failure_loop": "Any oss-local, oss-cloud, Tessl local-proof, dry-run, or live Tessl failure stays in its source lane until owner classification identifies the repair surface; rerun oss-local only for classified local skill regressions.",
             "live_blocked_until": "deterministic gates, oss-local, oss-cloud, Tessl local-proof, and Tessl dry-run all pass for the current candidate or an explicit skip/blocker receipt is recorded.",
         },
         "model_selection_gate": {
@@ -5455,7 +5455,8 @@ def run_evals(
             result.data["tessl_live_private_note"] = (
                 "Tessl live-private scoring uses the staged private Tessl payload directly. "
                 "Run deterministic local gates, oss-local, oss-cloud, and Tessl dry-run separately before live scoring; "
-                "any failure returns to oss-local after classification, patching, and retained regression evidence."
+                "live Tessl quota, auth, project-link, or external scoring blockers remain Tessl-lane blockers, "
+                "and oss-local is rerun only for classified local skill regressions."
             )
             handoff_readiness = _tessl_live_handoff_readiness(repo_root, path)
             result.data["handoff_readiness"] = handoff_readiness

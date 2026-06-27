@@ -86,7 +86,8 @@ Intentionally isolated.
     errors = validator.validate_pr_body(_template(), body)
 
     assert any("PR body sections must match" in error for error in errors)
-    assert "Missing required section: ## Motivation" in errors
+    assert "Missing required section: ## What Problem This Solves" in errors
+    assert "Missing required section: ## Why This Change Was Made" in errors
     assert "Missing required section: ## Behavior Proof" in errors
     assert "Missing required section: ## Work performed" in errors
     assert any("Checklist item text/order must match" in error for error in errors)
@@ -94,12 +95,12 @@ Intentionally isolated.
 
 def test_rejects_body_with_template_section_reordered() -> None:
     validator = _load_validator()
-    body = _filled_template_body().replace("## Motivation", "## Motivation Renamed", 1)
+    body = _filled_template_body().replace("## What Problem This Solves", "## What Problem This Solves Renamed", 1)
 
     errors = validator.validate_pr_body(_template(), body)
 
     assert any("PR body sections must match" in error for error in errors)
-    assert "Missing required section: ## Motivation" in errors
+    assert "Missing required section: ## What Problem This Solves" in errors
 
 
 def test_rejects_unresolved_placeholder_tokens() -> None:
@@ -117,7 +118,7 @@ def test_rejects_empty_required_fields() -> None:
 
     errors = validator.validate_pr_body(_template(), body)
 
-    assert "Required field in ## Summary is empty: Problem:" in errors
+    assert "Required field in ## Why This Change Was Made is empty: Problem:" in errors
 
 
 def test_rejects_duplicate_required_fields() -> None:
@@ -130,7 +131,7 @@ def test_rejects_duplicate_required_fields() -> None:
 
     errors = validator.validate_pr_body(_template(), body)
 
-    assert "Duplicate field in ## Summary: Problem:" in errors
+    assert "Duplicate field in ## Why This Change Was Made: Problem:" in errors
 
 
 def test_accepts_required_field_with_nested_continuation_content() -> None:
