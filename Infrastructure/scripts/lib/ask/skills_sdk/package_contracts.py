@@ -437,7 +437,28 @@ def _basic_requirement_rubric_check(
     quality_keys: list[str] = []
     selector_keys: list[str] = []
 
-    if not isinstance(quality_criteria, dict) or not quality_criteria:
+    has_quality = isinstance(quality_criteria, dict) and quality_criteria
+    has_evidence = isinstance(evidence_requirements, list) and [
+        item for item in evidence_requirements if isinstance(item, str) and item.strip()
+    ]
+
+    # Only validate if at least one rubric field is present (showing intent to migrate)
+    if not has_quality and not has_evidence:
+        # Legacy contract without rubric fields; skip validation
+        return {
+            "name": "basic_requirement_rubric",
+            "status": "skipped",
+            "path": "references/contract.yaml",
+            "missing": [],
+            "quality_criteria": [],
+            "selector_criteria": [],
+            "policy": (
+                "Skills SDK contracts should define observable quality criteria "
+                "and evidence requirements for the skill's basic job before handoff."
+            ),
+        }, []
+
+    if not has_quality:
         missing.append("quality_criteria")
     else:
         quality_keys = sorted(str(key) for key in quality_criteria)
@@ -449,9 +470,7 @@ def _basic_requirement_rubric_check(
             if selector_key not in quality_criteria:
                 missing.append(f"quality_criteria.{selector_key}")
 
-    if not isinstance(evidence_requirements, list) or not [
-        item for item in evidence_requirements if isinstance(item, str) and item.strip()
-    ]:
+    if not has_evidence:
         missing.append("evidence_requirements")
 
     check = {
@@ -503,8 +522,8 @@ def _manifest_declares_multiple_capabilities(manifest: dict[str, Any]) -> tuple[
     capsules = manifest.get("capsules")
     if isinstance(capsules, list):
         for item in capsules:
-            if isinstance(item, dict) and isinstance(item.get("facet"), str):
-                facet_values.add(item["facet"])
+            if isinstance(item, dict) and isinstance(item.get("facet_id"), str):
+                facet_values.add(item["facet_id"])
     return len(facet_values) > 1, sorted(facet_values)
 
 
