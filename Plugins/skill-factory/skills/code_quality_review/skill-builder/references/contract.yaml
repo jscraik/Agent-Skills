@@ -62,7 +62,7 @@ automatic_failure_conditions:
   - "Moves large rubric, scenario, or generated knowledge content into SKILL.md instead of package references."
 evidence_requirements:
   - "Exact command evidence for every readiness or eval claim."
-  - "A package verifier, strict audit, or explicit blocker before Tessl or registry claims."
+  - "Strict audit and package verify, or an explicit blocker for the gate that could not run, before Tessl or registry claims."
   - "Scenario, scorer, OSS, Tessl, and handoff receipts kept as separate proof lanes."
   - "Steering uptake ledger row and validator evidence when a repeated failure pattern is repaired."
 permission_profile:
