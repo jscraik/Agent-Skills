@@ -88,14 +88,14 @@ transcripts, bulky telemetry, or local absolute paths.
 - verification_commands:
 - verification_outcomes:
 - blocked_steps_reason:
-- Command: `bash scripts/validate-codestyle.sh` -> pass
-- Command: `./bin/ask repo validate --json --robot` -> pass/fail/n.a. with reason
-- Command: `./bin/ask repo closeout --changed --json --robot` -> blocked (reason)
-- Command: `<package-root package-manager command>` -> pass/fail/n.a. with reason; run package-manager gates only inside verified package roots
+- Command: `bash scripts/validate-codestyle.sh` -> <replace with actual status and observed outcome or blocker>
+- Command: `./bin/ask repo validate --json --robot` -> <replace with actual status and observed outcome, or n.a. with reason>
+- Command: `./bin/ask repo closeout --changed --json --robot` -> <replace with actual status and observed outcome or blocker>
+- Command: `<package-root package-manager command>` -> <replace with actual status and observed outcome, or n.a. with reason>; run package-manager gates only inside verified package roots
 - Setup: `CHANGED_FILES="<comma-separated-changed-files>"` (set before running any file-scoped gates)
-- Command: `<file-scoped learning/review-context gate from the owning surface>` -> pass/fail/n.a. with reason
-- Command: `<north-star feedback or steering-uptake gate from the owning surface>` -> pass/fail/n.a. with reason
-- Command: `harness pr-closeout --pr <number> --gates artifacts/pr-closeout/closeout-gates.json --json` -> pass/fail/n.a.
+- Command: `<file-scoped learning/review-context gate from the owning surface>` -> <replace with actual status and observed outcome, or n.a. with reason>
+- Command: `<north-star feedback or steering-uptake gate from the owning surface>` -> <replace with actual status and observed outcome, or n.a. with reason>
+- Command: `harness pr-closeout --pr <number> --gates artifacts/pr-closeout/closeout-gates.json --json` -> <replace with actual status and observed outcome, or n.a. with reason>
 - Any other command(s):
 
 ## Review artifacts

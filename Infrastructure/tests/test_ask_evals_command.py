@@ -1455,6 +1455,22 @@ def test_eval_only_review_report_uses_stable_tessl_staging_template(tmp_path: Pa
     )
 
 
+def test_tessl_live_private_sanitizer_preserves_staged_evidence_root() -> None:
+    payload = {
+        "staged_source": "/tmp/ask-tessl-evals/example-skill-abc123",
+        "path": "/private/tmp/ask-tessl-evals/example-skill-abc123/scenarios/smoke/task.md",
+        "user": "Jamie",
+        "stdout": "contact user@example.com and inspect /Users/jamiecraik/private.txt",
+    }
+
+    sanitized = evals._sanitize_tessl_live_private_payload(payload)
+
+    assert sanitized["staged_source"] == "/tmp/ask-tessl-evals/example-skill-abc123"
+    assert sanitized["path"] == "/private/tmp/ask-tessl-evals/example-skill-abc123/scenarios/smoke/task.md"
+    assert sanitized["user"] == "<redacted-actor>"
+    assert sanitized["stdout"] == "contact <redacted-email> and inspect <user-path>"
+
+
 def test_evals_run_native_tessl_by_default_with_temp_staged_source(tmp_path: Path) -> None:
     completed = _completed_eval_with_report(tmp_path)
     skill_root = _write_example_skill(tmp_path)

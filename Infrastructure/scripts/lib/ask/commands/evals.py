@@ -3167,8 +3167,6 @@ def _sanitize_tessl_live_private_payload(value: object) -> object:
             if isinstance(parsed, (dict, list)):
                 return json.dumps(_sanitize_tessl_live_private_payload(parsed), indent=2, sort_keys=True)
         redacted = re.sub(r"/Users/[^\s\"']+", "<user-path>", value)
-        redacted = redacted.replace("/private/tmp/ask-tessl-evals/", "/tmp/ask-tessl-live/")
-        redacted = redacted.replace("/tmp/ask-tessl-evals/", "/tmp/ask-tessl-live/")
         redacted = re.sub(r"[-A-Za-z0-9._%+]+@[-A-Za-z0-9.]+\.[A-Za-z]{2,}", "<redacted-email>", redacted)
         return redacted
     return value
