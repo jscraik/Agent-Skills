@@ -57,7 +57,7 @@ Public content can turn process into signal by sharing work-in-progress, useful 
 Interpretation notes:
 - For X-writer, this should stay evidence-led and public-safe rather than becoming oversharing.
 
-### claim.creator-writing.docs-expert-fits-proof-backed-docs: Docs Expert Fits Proof Backed Docs
+### claim.creator-writing.technical-writer-fits-proof-backed-docs: Technical Writer Fits Proof Backed Docs
 
 - Type: claim-card
 - Status: draft
@@ -67,7 +67,7 @@ Interpretation notes:
 Docs-expert is the best downstream skill when the writing task is a proof-backed documentation audit, rewrite, or validation against live repository evidence.
 
 Interpretation notes:
-- Use docs-expert when accuracy against repo truth is the job, not when the output is mainly public social copy.
+- Use technical-writer when accuracy against repo truth is the job, not when the output is mainly public social copy.
 
 ## Principles
 
@@ -77,14 +77,14 @@ Interpretation notes:
 - Status: draft
 - Claim strength: synthesized
 - Source boundaries: local_source_reference
-- Derived from claims: claim.creator-writing.docs-expert-fits-proof-backed-docs, claim.creator-writing.x-content-writer-fits-public-x-content, claim.creator-writing.x-writer-separates-creative-and-trust-loops
+- Derived from claims: claim.creator-writing.technical-writer-fits-proof-backed-docs, claim.creator-writing.x-content-writer-fits-public-x-content, claim.creator-writing.x-writer-separates-creative-and-trust-loops
 
-Choose the downstream writing skill by the reader job and proof requirement: docs-expert for repo-truth documentation, x-content-writer for public X content, and both when evidence-backed work becomes public copy.
+Choose the downstream writing skill by the reader job and proof requirement: technical-writer for repo-truth documentation, x-content-writer for public X content, and both when evidence-backed work becomes public copy.
 
 Rationale: The inspected skill and repo guidance separate proof-backed documentation correction from X.com content drafting and publication-boundary packaging.
 
 Application notes:
-- Start with docs-expert when commands, paths, configs, or validation claims can be stale.
+- Start with technical-writer when commands, paths, configs, or validation claims can be stale.
 - Move to x-content-writer when the artifact becomes an X post, thread, Article, visual, or handoff.
 - Preserve the proof boundary when translating docs evidence into public content.
 
@@ -113,9 +113,9 @@ Application notes:
 - Status: draft
 - Claim strength: synthesized
 - Source boundaries: local_source_reference
-- Derived from claims: claim.creator-writing.docs-expert-fits-proof-backed-docs, claim.creator-writing.x-content-writer-fits-public-x-content, claim.creator-writing.x-writer-separates-creative-and-trust-loops
+- Derived from claims: claim.creator-writing.technical-writer-fits-proof-backed-docs, claim.creator-writing.x-content-writer-fits-public-x-content, claim.creator-writing.x-writer-separates-creative-and-trust-loops
 
-If the artifact must be accurate against repo truth, start with docs-expert; if it must become Jamie-style X content, hand the proof-shaped material to x-content-writer.
+If the artifact must be accurate against repo truth, start with technical-writer; if it must become Jamie-style X content, hand the proof-shaped material to x-content-writer.
 
 Use when:
 - A README, runbook, skill doc, or trust-surface doc might feed public content.
@@ -133,10 +133,10 @@ Avoid when:
 - Status: draft
 - Claim strength: synthesized
 - Source boundaries: local_source_reference
-- Derived from claims: claim.creator-writing.docs-expert-fits-proof-backed-docs, claim.creator-writing.x-content-writer-fits-public-x-content, claim.creator-writing.x-writer-separates-creative-and-trust-loops, claim.creator-writing.communication-corpus-supports-specialized-passes
+- Derived from claims: claim.creator-writing.technical-writer-fits-proof-backed-docs, claim.creator-writing.x-content-writer-fits-public-x-content, claim.creator-writing.x-writer-separates-creative-and-trust-loops, claim.creator-writing.communication-corpus-supports-specialized-passes
 
 - [ ] Identify whether the reader job is documentation correction, public content drafting, or both.
-- [ ] Use docs-expert when the task needs live repo evidence, command/path checks, or documentation validation.
+- [ ] Use technical-writer when the task needs live repo evidence, command/path checks, or documentation validation.
 - [ ] Use x-content-writer when the task needs Jamie-style X posts, threads, Articles, proof clips, visuals, or content packaging.
 - [ ] Keep X-writer draft and package work inside the operator publish boundary.
 - [ ] Keep Writing Lab rough material separate from Publication Lab claim authority.

@@ -17,6 +17,10 @@ from pathlib import Path
 from ask.envelope import CallResult, ErrorObject
 from ask.commands.skills_impl import _python_command_supports_packages, _subprocess_env_with_uv_cache
 from ask.skill_review_dashboard import render_skill_review_dashboard
+from ask.skills_sdk.tessl_eval_quality import (
+    normalize_tessl_acceptance_item,
+    tessl_eval_quality_findings,
+)
 
 
 SKILL_BUILDER_SCRIPTS = "Plugins/skill-factory/scripts/skill-builder"
@@ -1905,170 +1909,7 @@ def _case_has_scenario_context(case: dict[str, object]) -> bool:
 
 
 def _tessl_eval_quality_findings(cases: list[dict[str, object]]) -> list[dict[str, str]]:
-    findings: list[dict[str, str]] = []
-    for case in cases:
-        case_id = str(case.get("id") or "unknown")
-        if not _case_has_scenario_context(case):
-            findings.append({
-                "case_id": case_id,
-                "code": "missing_scenario_context",
-                "message": (
-                    "Tessl eval cases must include unit/given/should context or an equivalent "
-                    "structured prompt so the scorer can judge behaviour, not only keywords."
-                ),
-            })
-        if not _case_has_behavioral_acceptance(case):
-            findings.append({
-                "case_id": case_id,
-                "code": "missing_behavioral_acceptance",
-                "message": (
-                    "Tessl eval cases must include at least one behavioural acceptance item "
-                    "such as expected_signal, skill_selected, artifact_exists, command_success, "
-                    "or a must_not/forbidden signal."
-                ),
-            })
-        elif not _case_has_skill_lift_acceptance(case):
-            findings.append({
-                "case_id": case_id,
-                "code": "missing_skill_lift_acceptance",
-                "message": (
-                    "Tessl eval cases must include at least one acceptance item that tests "
-                    "the skill's behaviour. Provenance-only fixture-path signals are useful "
-                    "supporting evidence, but they do not prove the skill improves the answer."
-                ),
-            })
-        if _case_has_keyword_only_acceptance(case):
-            findings.append({
-                "case_id": case_id,
-                "code": "keyword_only_acceptance",
-                "message": (
-                    "Regex and contains checks are allowed only as supporting evidence; they "
-                    "cannot be the whole Tessl scoring contract because baseline runs can pass "
-                    "them without demonstrating skill lift."
-                ),
-            })
-        if _case_has_shallow_routing_oracle(case):
-            findings.append({
-                "case_id": case_id,
-                "code": "shallow_routing_oracle",
-                "message": (
-                    "Tessl live-private evals must not rely only on skill selection plus "
-                    "generic expected signals. Add scenario-specific behavior, artifact, "
-                    "safety, or refusal criteria that create a plausible baseline failure path."
-                ),
-            })
-        if _case_has_fixture_path_acceptance(case):
-            findings.append({
-                "case_id": case_id,
-                "code": "fixture_path_acceptance",
-                "message": (
-                    "Tessl eval cases must not score provenance-only fixture path mentions. "
-                    "Fixture paths belong in scenario metadata, while acceptance must test "
-                    "observable behaviour that distinguishes skill lift from baseline output."
-                ),
-            })
-        if _case_has_prompt_scoring_mechanics(case):
-            findings.append({
-                "case_id": case_id,
-                "code": "prompt_exposes_scoring_mechanics",
-                "message": (
-                    "Tessl eval prompts must read like realistic user tasks and must not "
-                    "expose scenario fixture mechanics or tell the agent it is handling a "
-                    "generated scoring fixture."
-                ),
-            })
-        if _case_has_answer_leakage(case):
-            findings.append({
-                "case_id": case_id,
-                "code": "answer_leakage",
-                "message": (
-                    "Tessl eval task text must not contain the long-form expected answer "
-                    "that is later used as the scoring signal. Keep expected behaviour in "
-                    "hidden metadata or acceptance criteria, not in the agent-visible task."
-                ),
-            })
-        if _case_has_unstaged_repo_path_reference(case):
-            findings.append({
-                "case_id": case_id,
-                "code": "unstaged_repo_path_reference",
-                "message": (
-                    "Tessl live-private evals stage a controlled skill package copy, not the "
-                    "live repository. Use package-relative paths such as SKILL.md or "
-                    "references/contract.yaml, or provide an explicit fixture artifact before "
-                    "scoring repo-root paths."
-                ),
-            })
-        if not _case_has_guardrail_calibration_shape(case):
-            findings.append({
-                "case_id": case_id,
-                "code": "guardrail_missing_calibration_shape",
-                "message": (
-                    "Hallucination or guardrail eval cases must name the source-of-truth "
-                    "and sentence-level failure dimensions, include labeled ordinary or "
-                    "adversarial examples for calibration, and require machine-readable "
-                    "output before the guardrail can become release evidence."
-                ),
-            })
-        if not _case_has_paired_calibration_examples(case):
-            findings.append({
-                "case_id": case_id,
-                "code": "guardrail_missing_paired_examples",
-                "message": (
-                    "Hallucination and subjective guardrail evals must include both "
-                    "positive_example_artifact and negative_example_artifact, or stay "
-                    "advisory until paired calibration examples exist."
-                ),
-            })
-        if _case_has_mixed_guardrail_terms(case):
-            findings.append({
-                "case_id": case_id,
-                "code": "guardrail_mixed_terminology",
-                "message": (
-                    "Guardrail and judge eval prompts must use consistent role and "
-                    "source-authority terms so the scorer knows what actor and evidence "
-                    "surface it is judging."
-                ),
-            })
-        if not _case_has_guardrail_failure_outcomes(case):
-            findings.append({
-                "case_id": case_id,
-                "code": "guardrail_missing_judge_outcomes",
-                "message": (
-                    "Guardrail evals must distinguish judge_parse_error, judge_schema_error, "
-                    "judge_semantic_fail, and judge_pass, and preserve raw judge output when "
-                    "parsing or schema validation fails."
-                ),
-            })
-        if not _case_has_guardrail_response_schema(case):
-            findings.append({
-                "case_id": case_id,
-                "code": "guardrail_missing_response_schema",
-                "message": (
-                    "Guardrail evals must require sentence_results[], overall_verdict, "
-                    "failure_reason, source_references[], and a fail-closed aggregation rule "
-                    "for unsupported factual claims."
-                ),
-            })
-        if not _case_has_source_reference_quality(case):
-            findings.append({
-                "case_id": case_id,
-                "code": "guardrail_missing_source_reference_quality",
-                "message": (
-                    "Guardrail evals must require exact supporting source references for pass "
-                    "decisions and keep fail rationales separate from pass references."
-                ),
-            })
-        if not _case_has_judge_sampling_policy(case):
-            findings.append({
-                "case_id": case_id,
-                "code": "judge_sampling_missing_repeat_count",
-                "message": (
-                    "Judge evals that set judge_temperature must also capture judge_runs or "
-                    "sample_count so stochastic pass-rate gates remain advisory until calibrated."
-                ),
-            })
-    findings.extend(_synthetic_guardrail_label_balance_findings(cases))
-    return findings
+    return tessl_eval_quality_findings(cases)
 
 
 def _assert_tessl_eval_quality(cases: list[dict[str, object]], *, source: Path) -> None:
@@ -2212,24 +2053,7 @@ def _tessl_task_markdown(case: dict[str, object]) -> str:
 
 
 def _normalize_tessl_acceptance_item(item: dict[object, object]) -> dict[str, str]:
-    normalized = {str(key).strip(): str(value).strip() for key, value in item.items()}
-    if "type" in normalized or "value" in normalized or "expected_skill" in normalized:
-        return normalized
-
-    # Compact flow maps without a space after "{" parse as a key named
-    # "{type" in PyYAML. Recover those fields so Tessl rubrics keep their
-    # scoring detail instead of degrading into generic checklist rows.
-    recovered: dict[str, str] = {}
-    for key, value in normalized.items():
-        text = f"{key}: {value}".strip().strip("{} ")
-        for match in re.finditer(
-            r"(type|value|expected_skill)\s*:\s*(.*?)(?=,\s*(?:type|value|expected_skill)\s*:|$)",
-            text,
-        ):
-            field = match.group(1)
-            raw = match.group(2).strip().rstrip("}").strip()
-            recovered[field] = raw.strip("\"'")
-    return recovered or normalized
+    return normalize_tessl_acceptance_item(item)
 
 
 def _tessl_case_source(case: dict[str, object]) -> str:

@@ -293,7 +293,7 @@ forbidden_writes:
   - "Downstream-stage artifacts that this skill does not own."
 execution_boundaries:
   - "Redact secrets and sensitive data by default in prompts, outputs, temporary evidence, and copied artifacts."
-  - "Stage Tessl live-private input through the repo wrapper under /tmp/ask-tessl-live and Tessl review input under /tmp/ask-tessl-reviews."
+  - "Stage Tessl live-private input through the repo wrapper under /tmp/ask-tessl-evals and Tessl review input under /tmp/ask-tessl-reviews."
   - "Do not run Tessl directly against the live repository source tree."
 exit_criteria:
   - "Required artifacts exist and are non-empty, or the response includes the promised structured fields."
@@ -319,7 +319,7 @@ observability:
     - "references/evals.yaml"
     - "references/task-profile.json"
     - "references/source-context.yaml"
-    - "/tmp/ask-tessl-live"
+    - "/tmp/ask-tessl-evals"
     - "/tmp/ask-tessl-reviews"
 evidence_policy:
   proves:
@@ -344,7 +344,7 @@ evidence_policy:
       - "sdk eval handoff-readiness"
     staging_required: true
     staging_roots:
-      - "/tmp/ask-tessl-live"
+      - "/tmp/ask-tessl-evals"
       - "/tmp/ask-tessl-reviews"
     required_staged_files:
       - "SKILL.md"
@@ -491,7 +491,7 @@ cases:
     prompt: "Prepare this skill for Tessl review and describe the required staged package contents."
     acceptance:
       must_include:
-        - "/tmp/ask-tessl-live"
+        - "/tmp/ask-tessl-evals"
         - "tessl.json"
         - "evals/<case-id>"
         - "handoff-readiness"

@@ -336,7 +336,7 @@ def _acceptance_assertion_checks(case: dict[str, Any], scenario_id: str) -> list
 def _platform_parity_checks(case: dict[str, Any], scenario_id: str) -> list[dict[str, Any]]:
     """Apply the Tessl live-private scenario quality gate to SDK scenario rows."""
     try:
-        from ask.commands import evals as eval_commands  # noqa: PLC0415
+        from ask.skills_sdk.tessl_eval_quality import tessl_eval_quality_findings  # noqa: PLC0415
     except Exception as exc:  # pragma: no cover - import failure is a blocker surface.
         return [
             _check(
@@ -346,7 +346,7 @@ def _platform_parity_checks(case: dict[str, Any], scenario_id: str) -> list[dict
                 [f"{scenario_id}:{type(exc).__name__}:{exc}"],
             )
         ]
-    findings = eval_commands._tessl_eval_quality_findings([case])  # noqa: SLF001
+    findings = tessl_eval_quality_findings([case])
     return [
         _check(
             f"{PLATFORM_PARITY_GATE_ID_PREFIX}:{finding['code']}",

@@ -198,7 +198,7 @@ If evidence is stale, missing, contradictory, or too broad, return `blocked_by` 
 
 ## Validation
 
-For this skill itself, run `./bin/ask skills audit Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor --level strict --json --robot`, then `python3 Infrastructure/bin/ask skills external-review Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor --audit-level compat --json`.
+For this skill itself, run `./bin/ask skills audit Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor --level strict --json --robot`, then `./bin/ask skills external-review Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor --audit-level compat --json --robot`.
 
 For any recommended Skill Factory hardening lane, require the target skill's SDK
 handoff proof ladder before release, install, sync, publish, or live Tessl

@@ -19,7 +19,7 @@ Lifecycle status: draft
 A useful explanation packages facts with context, cause, consequence, and why-it-matters so readers can understand and apply the information.
 
 Interpretation notes:
-- For docs-expert, missing context is a reader-blocking defect, not only a style issue.
+- For technical-writer, missing context is a reader-blocking defect, not only a style issue.
 
 ### claim.creator-writing.sticky-docs-beat-curse-of-knowledge: Sticky Docs Beat Curse Of Knowledge
 
@@ -200,7 +200,7 @@ Avoid when:
 
 ## Rubrics
 
-### rubric.creator-writing.docs-expert-capsule-readiness: Docs Expert Capsule Readiness
+### rubric.creator-writing.technical-writer-capsule-readiness: Technical Writer Capsule Readiness
 
 - Type: rubric
 - Status: draft

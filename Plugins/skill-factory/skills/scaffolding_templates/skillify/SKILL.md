@@ -187,12 +187,13 @@ install, sync, publish, live Tessl, or readiness claim:
 2. `./bin/ask sdk eval scenario-quality <skill-path> --preview --json --robot`
 3. `./bin/ask sdk eval scorer-quality <skill-path> --preview --json --robot`
 4. `./bin/ask sdk eval scorer-calibration <skill-path> --preview --json --robot`
-5. `./bin/ask sdk eval run <skill-path> --runner internal --mode smoke --codex-profile oss-local --json --robot`
-6. `./bin/ask sdk eval run <skill-path> --runner internal --mode smoke --codex-profile oss-cloud --json --robot`
-7. `./bin/ask sdk eval tessl-local-proof --skill <skill-path> --workspace skills-sdk-lab --execute --json --robot`
-8. `./bin/ask evals run <skill-path> --mode smoke --runner discovery-smoke --tessl-live-private --tessl-workspace skills-sdk-lab --tessl-live-dry-run --json --robot`
-9. `./bin/ask sdk eval handoff-readiness --skill <skill-path> --preview --json --robot`
-10. `python3 Infrastructure/bin/ask skills external-review <skill-path> --audit-level compat --json`
+5. `./bin/ask skills package verify <skill-path> --json --robot`
+6. `./bin/ask sdk eval run <skill-path> --runner internal --mode smoke --codex-profile oss-local --json --robot`
+7. `./bin/ask sdk eval run <skill-path> --runner internal --mode smoke --codex-profile oss-cloud --json --robot`
+8. `./bin/ask sdk eval tessl-local-proof --skill <skill-path> --workspace skills-sdk-lab --execute --json --robot`
+9. `./bin/ask evals run <skill-path> --mode smoke --runner discovery-smoke --tessl-live-private --tessl-workspace skills-sdk-lab --tessl-live-dry-run --json --robot`
+10. `./bin/ask sdk eval handoff-readiness --skill <skill-path> --preview --json --robot`
+11. `./bin/ask skills external-review <skill-path> --audit-level compat --json --robot`
 
 Do not substitute `./bin/ask evals run --runner codex`, preview-only Tessl
 local proof, or a Tessl dry-run command string for SDK handoff evidence.

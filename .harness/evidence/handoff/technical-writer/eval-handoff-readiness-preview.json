@@ -310,7 +310,7 @@
         "blockers": [],
         "ready_for_live_tessl": true,
         "required_next_actions": [
-          "Run live Tessl; if it fails, owner-classify the failure and return to oss-local."
+          "Run live Tessl and classify the live-lane result; return to oss-local only when the Tessl failure is evidence of a local skill regression."
         ],
         "mutation_performed": false,
         "promotion_performed": false,

@@ -1038,6 +1038,69 @@ def test_tessl_eval_quality_accepts_behavioral_scenario() -> None:
     assert evals._tessl_eval_quality_findings(cases) == []
 
 
+def test_tessl_eval_quality_rejects_skill_name_as_primary_proof() -> None:
+    cases = [{
+        "id": "skill-selection-oracle",
+        "unit": "technical writing boundary",
+        "given": "A user asks for a docs audit.",
+        "should": "Demonstrate a useful docs-audit behavior, not just select the expected skill.",
+        "prompt": "Review the staged docs package.",
+        "acceptance": [
+            {"type": "skill_selected", "value": "technical-writer"},
+            {"type": "regex", "value": "(?i)technical-writer"},
+        ],
+    }]
+
+    findings = evals._tessl_eval_quality_findings(cases)
+
+    assert "skill_name_primary_proof" in {finding["code"] for finding in findings}
+
+
+def test_tessl_eval_quality_rejects_missing_concrete_output_artifact() -> None:
+    cases = [{
+        "id": "release-case-without-output",
+        "mode": "release",
+        "unit": "technical writing reader review",
+        "given": "A migration guide omits rollback evidence.",
+        "should": "Identify missing reader and recovery evidence.",
+        "prompt": "Review the staged migration guide and report the issue.",
+        "acceptance": [
+            {
+                "type": "expected_signal",
+                "value": "Names missing rollback evidence and asks the writer for the source of truth before editing.",
+            },
+        ],
+    }]
+
+    findings = evals._tessl_eval_quality_findings(cases)
+
+    assert "missing_concrete_output_artifact" in {finding["code"] for finding in findings}
+
+
+def test_tessl_eval_quality_rejects_hidden_reference_dependency() -> None:
+    cases = [{
+        "id": "hidden-discovery-reference",
+        "mode": "smoke",
+        "unit": "underspecified documentation request",
+        "given": "A user asks for docs help without naming the editable surface.",
+        "should": "Ask one discovery question before editing.",
+        "prompt": (
+            "Use references/discovery-interview.md to decide the smallest useful "
+            "question for this underspecified request."
+        ),
+        "acceptance": [
+            {
+                "type": "expected_signal",
+                "value": "Asks which documentation path or surface to inspect first before making changes.",
+            },
+        ],
+    }]
+
+    findings = evals._tessl_eval_quality_findings(cases)
+
+    assert "hidden_reference_dependency" in {finding["code"] for finding in findings}
+
+
 def test_extract_tessl_eval_run_id_accepts_array_json_response() -> None:
     output = (
         "- Running 32 scenarios...\n"
@@ -1524,6 +1587,7 @@ def test_evals_live_private_dry_run_stages_private_plugin_shape(tmp_path: Path) 
         "patch_oss_local_failures",
         "oss_cloud_internal_judge",
         "patch_oss_cloud_failures",
+        "tessl_local_proof",
         "tessl_live_dry_run",
         "tessl_live_run",
         "patch_tessl_failures",
@@ -2076,10 +2140,10 @@ def test_evals_live_private_uses_plugin_project_identity(tmp_path: Path) -> None
     plugin_manifest = json.loads((staged_source / ".tessl-plugin" / "plugin.json").read_text(encoding="utf-8"))
     project_marker = json.loads((staged_source / "tessl.json").read_text(encoding="utf-8"))
     assert not (staged_source / "tile.json").exists()
-    assert plugin_manifest["name"] == "skills-sdk/skill-factory"
+    assert plugin_manifest["name"] == "skills-sdk-lab/skill-factory"
     assert plugin_manifest["skills"] == "./skills/"
     assert (staged_source / "skills" / "skill-factory-router" / "SKILL.md").is_file()
-    assert project_marker["name"] == "skills-sdk/skill-factory"
+    assert project_marker["name"] == "skills-sdk-lab/skill-factory"
 
 
 def test_evals_run_uses_plugin_project_identity_when_workspace_is_set(tmp_path: Path) -> None:
@@ -2112,17 +2176,17 @@ def test_evals_run_uses_plugin_project_identity_when_workspace_is_set(tmp_path: 
         if cmd[1:3] == ["project", "repair"]:
             staged_source = Path(str(kwargs["cwd"]))
             marker = json.loads((staged_source / "tessl.json").read_text(encoding="utf-8"))
-            assert marker["name"] == "skills-sdk/skill-factory"
+            assert marker["name"] == "skills-sdk-lab/skill-factory"
             return mock.Mock(
                 returncode=0,
-                stdout='{"workspace":"skills-sdk","project":"skill-factory","name":"skills-sdk/skill-factory"}',
+                stdout='{"workspace":"skills-sdk-lab","project":"skill-factory","name":"skills-sdk-lab/skill-factory"}',
                 stderr="",
                 args=cmd,
             )
         if cmd[1:4] == ["eval", "run", "--json"]:
             staged_source = Path(cmd[4])
             marker = json.loads((staged_source / "tessl.json").read_text(encoding="utf-8"))
-            assert marker["name"] == "skills-sdk/skill-factory"
+            assert marker["name"] == "skills-sdk-lab/skill-factory"
             return mock.Mock(returncode=0, stdout="{}", stderr="", args=cmd)
         return completed
 
@@ -2607,12 +2671,12 @@ def test_evals_live_private_requires_workspace(tmp_path: Path) -> None:
             tessl_live_dry_run=True,
     )
 
-    assert result.status == "error"
+    assert result.status == "success"
     assert run.call_count == 0
     tessl_eval = result.data["tessl_eval"]
-    assert tessl_eval["status"] == "blocked"
-    assert tessl_eval["blocker_class"] == "blocked_validation"
-    assert "--tessl-workspace" in tessl_eval["blocker"]
+    assert tessl_eval["status"] == "pass"
+    assert tessl_eval["workspace"] == "skills-sdk-lab"
+    assert tessl_eval["dry_run"] is True
 
 
 def test_evals_live_private_rejects_invalid_workspace(tmp_path: Path) -> None:

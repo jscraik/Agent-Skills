@@ -9,7 +9,7 @@ Lifecycle status: draft
 
 ## Claim Cards
 
-### claim.creator-writing.docs-expert-fits-proof-backed-docs: Technical Writer Fits Proof Backed Docs
+### claim.creator-writing.technical-writer-fits-proof-backed-docs: Technical Writer Fits Proof Backed Docs
 
 - Type: claim-card
 - Status: draft
@@ -65,7 +65,7 @@ Interpretation notes:
 - Status: draft
 - Claim strength: synthesized
 - Source boundaries: local_source_reference
-- Derived from claims: claim.creator-writing.docs-expert-fits-proof-backed-docs, claim.creator-writing.x-content-writer-fits-public-x-content, claim.creator-writing.x-writer-separates-creative-and-trust-loops
+- Derived from claims: claim.creator-writing.technical-writer-fits-proof-backed-docs, claim.creator-writing.x-content-writer-fits-public-x-content, claim.creator-writing.x-writer-separates-creative-and-trust-loops
 
 Choose the downstream writing skill by the reader job and proof requirement: technical-writer for repo-truth documentation, x-content-writer for public X content, and both when evidence-backed work becomes public copy.
 
@@ -84,7 +84,7 @@ Application notes:
 - Status: draft
 - Claim strength: synthesized
 - Source boundaries: local_source_reference
-- Derived from claims: claim.creator-writing.docs-expert-fits-proof-backed-docs, claim.creator-writing.x-content-writer-fits-public-x-content, claim.creator-writing.x-writer-separates-creative-and-trust-loops
+- Derived from claims: claim.creator-writing.technical-writer-fits-proof-backed-docs, claim.creator-writing.x-content-writer-fits-public-x-content, claim.creator-writing.x-writer-separates-creative-and-trust-loops
 
 If the artifact must be accurate against repo truth, start with technical-writer; if it must become Jamie-style X content, hand the proof-shaped material to x-content-writer.
 
@@ -104,7 +104,7 @@ Avoid when:
 - Status: draft
 - Claim strength: synthesized
 - Source boundaries: local_source_reference
-- Derived from claims: claim.creator-writing.docs-expert-fits-proof-backed-docs, claim.creator-writing.x-content-writer-fits-public-x-content, claim.creator-writing.x-writer-separates-creative-and-trust-loops, claim.creator-writing.communication-corpus-supports-specialized-passes
+- Derived from claims: claim.creator-writing.technical-writer-fits-proof-backed-docs, claim.creator-writing.x-content-writer-fits-public-x-content, claim.creator-writing.x-writer-separates-creative-and-trust-loops, claim.creator-writing.communication-corpus-supports-specialized-passes
 
 - [ ] Identify whether the reader job is documentation correction, public content drafting, or both.
 - [ ] Use technical-writer when the task needs live repo evidence, command/path checks, or documentation validation.

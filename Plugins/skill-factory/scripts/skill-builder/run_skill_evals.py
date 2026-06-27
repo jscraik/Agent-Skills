@@ -2971,14 +2971,8 @@ def _classify_runner_blocker(
         runner_text = "\n".join([output_text or "", stdout_text or ""])
         return "timeout_partial_output" if runner_text.strip() else "timeout_no_output"
 
-    # A successful Codex process can produce a useful skill-level blocked report
-    # that quotes sandbox/runtime evidence. Score that final answer with the
-    # scenario assertions instead of upgrading it to an eval-runner blocker.
-    if exit_code == 0 and (output_text or "").strip() and not (stderr_text or "").strip():
-        return None
-
-    text = "\n".join([output_text or "", stdout_text or "", stderr_text or ""])
-    low = text.lower()
+    process_text = "\n".join([stdout_text or "", stderr_text or ""])
+    low = process_text.lower()
 
     strong_runtime_markers = [
         "sandbox_apply: operation not permitted",
@@ -3010,6 +3004,15 @@ def _classify_runner_blocker(
 
     if exit_code == 0 and (output_text or "").strip():
         return None
+
+    text = "\n".join([output_text or "", process_text])
+    low = text.lower()
+    if any(marker in low for marker in strong_runtime_markers):
+        return "blocked_runtime"
+    if any(marker in low for marker in weak_runtime_markers) and any(
+        marker in low for marker in usage_context_markers
+    ):
+        return "blocked_runtime"
 
     user_input_markers = [
         "user_input_requested_during_turn",

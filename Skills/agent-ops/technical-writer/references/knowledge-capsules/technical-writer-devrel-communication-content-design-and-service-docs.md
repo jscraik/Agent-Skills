@@ -117,7 +117,7 @@ Interpretation notes:
 
 Treat documentation as a service interface whose quality is proven by reader need, successful action, and maintainable lifecycle evidence.
 
-Rationale: Content design connects words to user journeys, evidence, acceptance criteria, and maintenance cost, so docs-expert should review operational usefulness before prose polish.
+Rationale: Content design connects words to user journeys, evidence, acceptance criteria, and maintenance cost, so technical-writer should review operational usefulness before prose polish.
 
 Application notes:
 - Start audits by identifying the reader job and the evidence that this job exists.
@@ -165,7 +165,7 @@ Avoid when:
 
 ## Rubrics
 
-### rubric.creator-writing.docs-expert-capsule-readiness: Docs Expert Capsule Readiness
+### rubric.creator-writing.technical-writer-capsule-readiness: Technical Writer Capsule Readiness
 
 - Type: rubric
 - Status: draft

@@ -212,6 +212,17 @@ class RunSkillEvalsModeTests(unittest.TestCase):
             ),
         )
 
+    def test_successful_exit_still_scans_stdout_for_runner_blockers(self) -> None:
+        self.assertEqual(
+            _classify_runner_blocker(
+                output_text="Final answer says the task is complete.",
+                stdout_text="ERROR: You've hit your usage limit for GPT-5.3-Codex-Spark.",
+                stderr_text="",
+                exit_code=0,
+            ),
+            "blocked_runtime",
+        )
+
     def test_runtime_blocker_detection_keeps_stderr_sandbox_failures(self) -> None:
         self.assertEqual(
             _classify_runner_blocker(

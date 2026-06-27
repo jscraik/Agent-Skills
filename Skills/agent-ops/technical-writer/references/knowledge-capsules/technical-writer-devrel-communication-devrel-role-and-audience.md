@@ -93,7 +93,7 @@ Interpretation notes:
 
 DevRel documentation should be reviewed as a community interface with explicit outbound help, inbound feedback, role ownership, and business-value boundaries.
 
-Rationale: DevRel sources define the work as cross-functional and two-way; docs-expert should preserve that operating shape instead of reducing DevRel docs to marketing copy or static reference.
+Rationale: DevRel sources define the work as cross-functional and two-way; technical-writer should preserve that operating shape instead of reducing DevRel docs to marketing copy or static reference.
 
 Application notes:
 - Identify which DevRel role owns the document and which roles provide evidence.
@@ -140,7 +140,7 @@ Avoid when:
 
 ## Rubrics
 
-### rubric.creator-writing.docs-expert-capsule-readiness: Docs Expert Capsule Readiness
+### rubric.creator-writing.technical-writer-capsule-readiness: Technical Writer Capsule Readiness
 
 - Type: rubric
 - Status: draft

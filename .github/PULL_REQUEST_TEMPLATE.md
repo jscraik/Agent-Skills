@@ -76,7 +76,7 @@ transcripts, bulky telemetry, or local absolute paths.
 
 - [ ] I did not push directly to `main`; this PR is from a dedicated branch.
 - [ ] Branch name follows policy (`codex/*` for agent-created branches).
-- [ ] Required local gates run: `bash scripts/validate-codestyle.sh`, `pnpm check`, `bash scripts/run-harness-gate.sh tooling-audit --path . --json`.
+- [ ] Required local gates run: `bash scripts/validate-codestyle.sh`, `./bin/ask repo closeout --changed --json --robot`, `bash scripts/run-harness-gate.sh tooling-audit --path . --json`.
 - [ ] `scripts/validate-codestyle.sh` was treated as the enforcement point for hook env sanitization (`GIT_DIR`, `GIT_WORK_TREE`, and related `GIT_*` values are untrusted and sanitized before `pnpm run`).
 - [ ] Any CodeRabbit Semgrep findings were either fixed or explicitly justified when warning-level-only.
 - [ ] North-star learning loop considered for changed files; relevant learning gate, review-context, promotion, or feedback evidence is listed below, or marked `n.a.` with a reason.
@@ -93,7 +93,7 @@ transcripts, bulky telemetry, or local absolute paths.
 - blocked_steps_reason:
 <!-- Add one or more evidence lines such as:
 - Command: `bash scripts/validate-codestyle.sh` -> pass
-- Command: `pnpm check` -> blocked (reason)
+- Command: `./bin/ask repo closeout --changed --json --robot` -> blocked (reason)
 - Command: `bash scripts/run-harness-gate.sh tooling-audit --path . --json` -> n.a. (reason)
 -->
 - Any other command(s):

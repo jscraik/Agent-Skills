@@ -317,7 +317,7 @@
           "blocked_validation": "A structural or policy validation gate failed for the capability."
         },
         "dashboard_path": "Infrastructure/artifacts/skill-reviews/technical-writer-dashboard-smoke.html",
-        "dashboard_url": "file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skill-reviews/technical-writer-dashboard-smoke.html",
+        "dashboard_url": "Infrastructure/artifacts/skill-reviews/technical-writer-dashboard-smoke.html",
         "dashboard_tab": "evals",
         "dashboard_source_report": "Infrastructure/artifacts/skill-reviews/technical-writer-eval-latest.json",
         "scorecard_path": "Infrastructure/artifacts/skills/technical-writer/20260627-072108-325712/scorecard.json",

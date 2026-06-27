@@ -50,7 +50,7 @@ selected_asset_ids:
 - principle.creator-writing.devrel-docs-are-community-interface
 - heuristic.creator-writing.route-devrel-feedback
 - heuristic.creator-writing.frame-by-category-alternatives-value
-- rubric.creator-writing.docs-expert-capsule-readiness
+- rubric.creator-writing.technical-writer-capsule-readiness
 - lens.creator-writing.docs-as-community-interface
 - claim.creator-writing.user-need-defines-content
 - claim.creator-writing.answer-first-structure-supports-review
@@ -114,7 +114,7 @@ selected_asset_ids:
 - principle.creator-writing.source-corpus-is-a-lane-not-a-shortcut
 - heuristic.creator-writing.docs-to-x-routing
 - checklist.creator-writing.skill-routing-pass
-- claim.creator-writing.docs-expert-fits-proof-backed-docs
+- claim.creator-writing.technical-writer-fits-proof-backed-docs
 - claim.creator-writing.terms-must-be-defined-consistently
 - claim.creator-writing.active-voice-clarifies-actors
 - claim.creator-writing.one-idea-per-unit
@@ -153,7 +153,7 @@ capsules:
   - principle.creator-writing.devrel-docs-are-community-interface
   - heuristic.creator-writing.route-devrel-feedback
   - heuristic.creator-writing.frame-by-category-alternatives-value
-  - rubric.creator-writing.docs-expert-capsule-readiness
+  - rubric.creator-writing.technical-writer-capsule-readiness
   - lens.creator-writing.docs-as-community-interface
   - claim.creator-writing.user-need-defines-content
   - claim.creator-writing.answer-first-structure-supports-review
@@ -209,7 +209,7 @@ capsules:
   - principle.creator-writing.docs-are-service-interface
   - heuristic.creator-writing.start-from-reader-job
   - checklist.creator-writing.content-design-service-docs-pass
-  - rubric.creator-writing.docs-expert-capsule-readiness
+  - rubric.creator-writing.technical-writer-capsule-readiness
   - lens.creator-writing.reader-access-and-recovery
   - claim.creator-writing.answer-first-structure-supports-review
   - claim.creator-writing.devrel-docs-bridge-community-and-company
@@ -268,7 +268,7 @@ capsules:
   - heuristic.creator-writing.answer-then-support
   - heuristic.creator-writing.frame-by-category-alternatives-value
   - checklist.creator-writing.argument-visual-doc-pass
-  - rubric.creator-writing.docs-expert-capsule-readiness
+  - rubric.creator-writing.technical-writer-capsule-readiness
   - claim.creator-writing.audience-gap-defines-document
   - claim.creator-writing.answer-first-structure-supports-review
   - claim.creator-writing.visual-documents-need-standalone-architecture
@@ -309,7 +309,7 @@ capsules:
   - principle.creator-writing.source-corpus-is-a-lane-not-a-shortcut
   - heuristic.creator-writing.docs-to-x-routing
   - checklist.creator-writing.skill-routing-pass
-  - claim.creator-writing.docs-expert-fits-proof-backed-docs
+  - claim.creator-writing.technical-writer-fits-proof-backed-docs
 - pack_id: pack.developer-advocate-writing
   role: technical_writer_devrel_communication
   facet_id: clarity_style_and_revision

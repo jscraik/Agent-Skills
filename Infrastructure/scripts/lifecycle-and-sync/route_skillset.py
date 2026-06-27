@@ -540,6 +540,16 @@ def factory_override(skill_set: str, task: str, rows: list[dict[str, Any]]) -> d
                 "reason": f"matched deterministic {skill_set} rule '{rule_name}'",
             }
     if len(matched) > 1:
+        preferred = _preferred_factory_match(skill_set, matched)
+        if preferred is not None:
+            route_id, rule_name = preferred
+            row = row_by_id(rows, route_id)
+            if row:
+                return {
+                    "row": row,
+                    "confidence": 0.95,
+                    "reason": f"matched deterministic {skill_set} rule '{rule_name}' with explicit precedence",
+                }
         router_id = "plugin-factory-router" if skill_set == "plugin-factory" else "skill-factory-router"
         row = row_by_id(rows, router_id)
         if row:
@@ -548,6 +558,12 @@ def factory_override(skill_set: str, task: str, rows: list[dict[str, Any]]) -> d
                 "confidence": 0.9,
                 "reason": f"matched deterministic {skill_set} rule 'multi-intent-factory-task'",
             }
+    return None
+
+
+def _preferred_factory_match(skill_set: str, matched: list[tuple[str, str]]) -> tuple[str, str] | None:
+    if skill_set == "skill-factory" and ("skill-builder", "improve-skill-sdk-pipeline") in matched:
+        return ("skill-builder", "improve-skill-sdk-pipeline")
     return None
 
 

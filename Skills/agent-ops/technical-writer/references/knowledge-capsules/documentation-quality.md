@@ -302,7 +302,7 @@ Avoid when:
   - pass: The writer explains prerequisite concepts or links to them before using them heavily.
   - fail: The writer uses expert shortcuts that a target beginner cannot decode.
 
-### rubric.creator-writing.docs-expert-capsule-readiness: Technical Writer Capsule Readiness
+### rubric.creator-writing.technical-writer-capsule-readiness: Technical Writer Capsule Readiness
 
 - Type: rubric
 - Status: draft

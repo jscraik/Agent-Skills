@@ -165,7 +165,7 @@ Avoid when:
 
 ## Rubrics
 
-### rubric.creator-writing.docs-expert-capsule-readiness: Technical Writer Capsule Readiness
+### rubric.creator-writing.technical-writer-capsule-readiness: Technical Writer Capsule Readiness
 
 - Type: rubric
 - Status: draft

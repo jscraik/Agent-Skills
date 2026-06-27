@@ -1,8 +1,13 @@
 ---
 name: technical-writer
-description: Audit, rewrite, and validate README, runbook, code-doc, config-doc, and public trust-surface documentation by checking stale instructions, command examples, dependency claims, file paths, configs, workflows, and code references against live repository evidence. Use when documentation needs proof-backed correction or reader-focused validation.
+description: Audit, rewrite, and validate README, runbook, code-doc, config-doc, and public trust-surface documentation by checking stale instructions, command examples, dependency claims, file paths, configs, workflows, and code references against live repository evidence. Use when documentation needs proof-backed correction, reader-focused validation, or legacy docs-expert routing.
+triggers:
+  - technical writer
+  - docs-expert
+  - docs expert
+  - proof-backed documentation
 metadata:
-  version: 0.2.1
+  version: 0.2.2
   skill-type: code_quality_review
   lifecycle_state: active
   maturity: validated
@@ -47,7 +52,12 @@ unknowns, and handoff needs.
 - Use a plain-language question.
 - Explain why this matters for the current skill decision.
 - avoid dumping the whole interview plan at once.
-- Read `references/discovery-interview.md` when the request is underspecified.
+- When the editable surface is unclear, ask which documentation path or
+  surface to inspect first: canonical docs/source, generated or runtime
+  projections, public publication surfaces, or audit-only with no edits.
+- Read `references/discovery-interview.md` when the request is underspecified
+  and file access is available; in isolated eval runners, use the inline rules
+  above without treating the missing reference read as a task blocker.
 
 ## Procedure
 1. Classify doc type, writing type, writing mode, reader job, source, side effect, and validator:

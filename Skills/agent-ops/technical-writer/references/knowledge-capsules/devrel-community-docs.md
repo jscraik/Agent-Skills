@@ -2,7 +2,7 @@
 
 Review DevRel and public trust-surface docs as two-way community interfaces with explicit developer benefit, feedback route, role ownership, and business-value boundary.
 
-Pack id: pack.creator-writing
+Pack id: pack.developer-advocate-writing
 Facet id: devrel_community_docs
 Runtime dependency: none; this slice is generated from a KnowledgeOS pack export.
 Lifecycle status: draft
@@ -140,7 +140,7 @@ Avoid when:
 
 ## Rubrics
 
-### rubric.creator-writing.docs-expert-capsule-readiness: Technical Writer Capsule Readiness
+### rubric.creator-writing.technical-writer-capsule-readiness: Technical Writer Capsule Readiness
 
 - Type: rubric
 - Status: draft
