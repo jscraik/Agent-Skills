@@ -17,10 +17,17 @@ explicitly accepts a blocker. If a command from one lane blocks, report that
 lane as blocked. Do not replace it with a different lane and call the original
 proof complete.
 
+Use the
+[Skills SDK Gold Standard Rubric](/Docs/reference/skills-sdk-gold-standard-rubric.md)
+as the top-level scoring standard before Tessl live eval or registry release
+claims. Numeric scores from Plugin Eval or Tessl do not replace the rubric's
+automatic failure conditions, lane separation, or command-evidence requirements.
+
 ## Promotion Pipeline
 
-1. SDK mechanical validation: prove the package shape, scenario metadata,
-   scorer metadata, scorer calibration, docs projection, and strict audit.
+1. SDK mechanical validation: prove the package shape, gold-standard rubric
+   floor, scenario metadata, scorer metadata, scorer calibration, docs
+   projection, and strict audit.
 2. oss-local flow: run the skill scenario proof or A/B judge through
    `codex exec --profile oss-local` in the read-only Codex profile sandbox;
    iterate until the sandboxed local OSS lane is valid, then move to the next

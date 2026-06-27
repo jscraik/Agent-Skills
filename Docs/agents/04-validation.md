@@ -86,6 +86,12 @@
   `task_type_selection`, and expose the selected capability in inputs and
   outputs. `./bin/ask skills package verify <skill-path> --json --robot`
   blocks the package when this rubric contract is missing.
+- Use the
+  [Skills SDK Gold Standard Rubric](/Docs/reference/skills-sdk-gold-standard-rubric.md)
+  as the top-level release-readiness standard. A package is not ready for Tessl
+  live evals or registry release merely because internal checks, Plugin Eval,
+  or Tessl scores pass; it must also satisfy the rubric's automatic failures,
+  weighted readiness floors, and lane-specific evidence requirements.
 
 ## Skill quality ladder
 

@@ -63,6 +63,23 @@ def test_contract_blocks_missing_pipeline_stage(monkeypatch) -> None:
     assert any(finding.code == "missing_promotion_pipeline" for finding in findings)
 
 
+def test_contract_blocks_missing_gold_standard_rubric(monkeypatch) -> None:
+    module = _load_module()
+    original_read = module._read
+
+    def fake_read(path: Path) -> str:
+        text = original_read(path)
+        if path == module.CONTRACT_PATH:
+            return text.replace("Skills SDK Gold Standard Rubric", "Skills SDK release scorecard")
+        return text
+
+    monkeypatch.setattr(module, "_read", fake_read)
+
+    findings = module.validate()
+
+    assert any(finding.code == "missing_promotion_pipeline" for finding in findings)
+
+
 def test_contract_blocks_missing_non_substitution_rule(monkeypatch) -> None:
     module = _load_module()
     original_read = module._read
