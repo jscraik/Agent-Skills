@@ -1,0 +1,22 @@
+{
+  "headRefName": "codex/technical-writer-sdk-pipeline",
+  "number": 293,
+  "state": "OPEN",
+  "template_check": {
+    "__typename": "CheckRun",
+    "completedAt": "2026-06-27T17:38:10Z",
+    "conclusion": "SUCCESS",
+    "detailsUrl": "https://github.com/jscraik/Agent-Skills/actions/runs/28296743203/job/83837890985",
+    "name": "pr-template",
+    "startedAt": "2026-06-27T17:38:02Z",
+    "status": "COMPLETED",
+    "workflowName": "Harness PR Pipeline"
+  },
+  "title": "Align technical writer SDK pipeline",
+  "url": "https://github.com/jscraik/Agent-Skills/pull/293",
+  "local_template_validation": {
+    "status": "pass",
+    "command": "gh pr view 293 --repo jscraik/Agent-Skills --json body --jq '.body' | python3 .github/scripts/validate_pr_template_body.py",
+    "note": "Validated against the current local pull request template via stdin."
+  }
+}

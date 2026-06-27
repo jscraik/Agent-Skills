@@ -1,0 +1,67 @@
+{
+  "generated_at": "2026-06-27T17:41:55.797685+00:00",
+  "pipeline_lanes": {
+    "pull_request": {
+      "hosted_check": {
+        "conclusion": "SUCCESS",
+        "details_url": "https://github.com/jscraik/Agent-Skills/actions/runs/28296743203/job/83837890985",
+        "name": "pr-template",
+        "status": "COMPLETED"
+      },
+      "local_template_validation": {
+        "command": "gh pr view 293 --repo jscraik/Agent-Skills --json body --jq '.body' | python3 .github/scripts/validate_pr_template_body.py",
+        "note": "Validated against the current local pull request template via stdin.",
+        "status": "pass"
+      },
+      "pr": {
+        "head_ref": "codex/technical-writer-sdk-pipeline",
+        "number": 293,
+        "state": "OPEN",
+        "title": "Align technical writer SDK pipeline",
+        "url": "https://github.com/jscraik/Agent-Skills/pull/293"
+      },
+      "source": ".harness/evidence/handoff/technical-writer/pr-293.json"
+    },
+    "stale_plan_reconciliation": {
+      "source": ".harness/plan/2026-06-04-skills-sdk-v1-0-product-implementation-plan.md",
+      "status": "older_local_plan_state_superseded_for_technical_writer_pr"
+    },
+    "tessl_external": {
+      "baseline": null,
+      "created_at": null,
+      "id": "019f0933-e8cc-724c-951a-7f1341590e50",
+      "improvement": null,
+      "scenario_count": 32,
+      "score": null,
+      "source": ".harness/evidence/tessl/technical-writer/019f0933-e8cc-724c-951a-7f1341590e50/tessl-eval-view.json",
+      "status": "pending",
+      "type": "eval-run",
+      "updated_at": null
+    }
+  },
+  "repo": {
+    "branch": "codex/technical-writer-sdk-pipeline",
+    "head": "95fabd61c",
+    "root": "."
+  },
+  "schema_version": "skills-sdk-handoff-status/v1",
+  "skill": {
+    "evals_yaml": "Skills/agent-ops/technical-writer/references/evals.yaml",
+    "skill": "Skills/agent-ops/technical-writer",
+    "skill_md": "Skills/agent-ops/technical-writer/SKILL.md"
+  },
+  "status": {
+    "current_position": "tessl_external_pending_existing_run",
+    "does_not_prove": [
+      "PR mergeability",
+      "final Tessl score",
+      "registry release readiness",
+      "installed runtime behavior"
+    ],
+    "next_actions": [
+      "refresh PR #293 by pushing the current branch so hosted checks see this status artifact",
+      "inspect the existing pending Tessl eval before submitting any new live scoring run",
+      "treat the older local plan as superseded by this handoff status for technical-writer PR work"
+    ]
+  }
+}

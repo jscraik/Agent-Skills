@@ -31,7 +31,10 @@
 - For ad hoc YAML inspection, do not run bare system Python imports because
   system Python may not have PyYAML. Use the repo wrapper instead:
   `./bin/ask repo yaml-inspect <repo-relative-yaml> --json --robot`, with
-  `--query <dotted.path>` when only one nested value is needed.
+  `--query <dotted.path>` when only one nested value is needed. The mise task
+  `mise run yaml-inspect -- <repo-relative-yaml>` must route to that same
+  wrapper. Treat a bare `python3 -c "import yaml"` failure as evidence to use
+  the wrapper, not as permission to install or bypass dependencies.
 
 ## Package command map
 

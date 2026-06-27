@@ -16,6 +16,10 @@ discovering, and syncing Codex skills, operator docs, and agent workflows.
   `Infrastructure/bin/ask`.
 - The repository root has no package manager install step. Use repo wrappers at
   the root, and use package commands only inside verified package roots.
+- Inspect YAML through the managed wrapper lane, not ad hoc system Python:
+  `./bin/ask repo yaml-inspect <repo-relative-yaml> --json --robot` or
+  `mise run yaml-inspect -- <repo-relative-yaml>`. Plain `python3` is not a
+  PyYAML contract for this repo.
 - Run Infrastructure Python tests through the locked Infrastructure environment,
   not the system Python from the repo root. Use
   `bash Infrastructure/scripts/run-infrastructure-python.sh -m unittest tests.<module>` or
