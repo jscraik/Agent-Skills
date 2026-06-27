@@ -61,7 +61,7 @@ Ask one direct question if destination, owner, or repeatability is unclear.
 6. Create the minimal package shape below only for high-confidence missing skill candidates.
 7. Add one happy-path eval and one boundary or negative eval.
 8. Run strict audit. If it fails, fix that failure before broader validation.
-9. For SDK-pipeline candidates, run `./bin/ask sdk start <skill-path> --json --robot`, then follow the exact SDK handoff proof ladder in [Validation](`#validation`) before any release, install, sync, publish, or live Tessl claim.
+9. For SDK-pipeline candidates, run `./bin/ask sdk start <skill-path> --json --robot`, then follow the exact SDK handoff proof ladder in [Validation](#validation) before any release, install, sync, publish, or live Tessl claim.
    Treat oss-local as the 70-75 internal discovery band, oss-cloud as the
    iterative path to >=90 internal success, and Tessl live as external
    confirmation at >=90 and >= baseline.

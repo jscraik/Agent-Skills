@@ -174,9 +174,10 @@ Shared SDK pipeline:
 5. Repair skill, references, scenarios, rubrics, validators, or judge expectations until oss-local is around the 70-75 success band for the current candidate.
 6. oss-cloud internal eval through ./bin/ask sdk eval run ... --codex-profile oss-cloud.
 7. Iterate from oss-local after every failure until internal evidence is at or above the 90 success band.
-8. Tessl local proof with --execute, Tessl live-private dry-run, then handoff-readiness.
-9. Tessl live-private is confirmational only: expected score is >=90 and >= baseline before registry or production claims.
-10. Decide private workspace retention versus public registry publication explicitly for the operator-approved Tessl workspace.
+8. Prepare Tessl scenarios through `./bin/ask evals prepare-tessl-scenarios <skill-path> --json --robot`, review generated scenarios, and classify scenario drift before any live-private Tessl progression.
+9. Tessl local proof with --execute, Tessl live-private dry-run, then handoff-readiness.
+10. Tessl live-private is confirmational only: expected score is >=90 and >= baseline before registry or production claims.
+11. Decide private workspace retention versus public registry publication explicitly for the operator-approved Tessl workspace.
 
 ## Examples
 

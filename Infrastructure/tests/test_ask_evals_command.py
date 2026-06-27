@@ -2140,10 +2140,10 @@ def test_evals_live_private_uses_plugin_project_identity(tmp_path: Path) -> None
     plugin_manifest = json.loads((staged_source / ".tessl-plugin" / "plugin.json").read_text(encoding="utf-8"))
     project_marker = json.loads((staged_source / "tessl.json").read_text(encoding="utf-8"))
     assert not (staged_source / "tile.json").exists()
-    assert plugin_manifest["name"] == "skills-sdk-lab/skill-factory"
+    assert plugin_manifest["name"] == "skills-sdk/skill-factory"
     assert plugin_manifest["skills"] == "./skills/"
     assert (staged_source / "skills" / "skill-factory-router" / "SKILL.md").is_file()
-    assert project_marker["name"] == "skills-sdk-lab/skill-factory"
+    assert project_marker["name"] == "skills-sdk/skill-factory"
 
 
 def test_evals_run_uses_plugin_project_identity_when_workspace_is_set(tmp_path: Path) -> None:
@@ -2176,17 +2176,17 @@ def test_evals_run_uses_plugin_project_identity_when_workspace_is_set(tmp_path: 
         if cmd[1:3] == ["project", "repair"]:
             staged_source = Path(str(kwargs["cwd"]))
             marker = json.loads((staged_source / "tessl.json").read_text(encoding="utf-8"))
-            assert marker["name"] == "skills-sdk-lab/skill-factory"
+            assert marker["name"] == "skills-sdk/skill-factory"
             return mock.Mock(
                 returncode=0,
-                stdout='{"workspace":"skills-sdk-lab","project":"skill-factory","name":"skills-sdk-lab/skill-factory"}',
+                stdout='{"workspace":"skills-sdk","project":"skill-factory","name":"skills-sdk/skill-factory"}',
                 stderr="",
                 args=cmd,
             )
         if cmd[1:4] == ["eval", "run", "--json"]:
             staged_source = Path(cmd[4])
             marker = json.loads((staged_source / "tessl.json").read_text(encoding="utf-8"))
-            assert marker["name"] == "skills-sdk-lab/skill-factory"
+            assert marker["name"] == "skills-sdk/skill-factory"
             return mock.Mock(returncode=0, stdout="{}", stderr="", args=cmd)
         return completed
 
@@ -2671,12 +2671,11 @@ def test_evals_live_private_requires_workspace(tmp_path: Path) -> None:
             tessl_live_dry_run=True,
     )
 
-    assert result.status == "success"
+    assert result.status == "error"
     assert run.call_count == 0
     tessl_eval = result.data["tessl_eval"]
-    assert tessl_eval["status"] == "pass"
-    assert tessl_eval["workspace"] == "skills-sdk-lab"
-    assert tessl_eval["dry_run"] is True
+    assert tessl_eval["status"] == "blocked"
+    assert tessl_eval["workspace_source"] == "missing"
 
 
 def test_evals_live_private_rejects_invalid_workspace(tmp_path: Path) -> None:
@@ -3266,7 +3265,7 @@ def test_prepare_tessl_scenario_generation_dry_run_stages_target_tile(tmp_path: 
     assert Path(result.data["scenario_generation_brief"]).is_file()
     assert not (target_tile / "tile.json").exists()
     manifest = json.loads((target_tile / ".tessl-plugin" / "plugin.json").read_text(encoding="utf-8"))
-    assert manifest["name"] == "skills-sdk-lab/example-skill"
+    assert manifest["name"] == "skills-sdk/example-skill"
     assert manifest["version"] == "1.2.3"
     assert manifest["private"] is True
     assert manifest["skills"] == "./skills/"
@@ -3352,7 +3351,7 @@ def test_prepare_tessl_scenario_generation_installs_tool_in_temp_project(tmp_pat
         )
 
     assert result.status == "success"
-    assert result.data["workspace"] == "skills-sdk-lab"
+    assert result.data["workspace"] == "skills-sdk"
     cmd = run.call_args.args[0]
     assert cmd == [
         "/usr/local/bin/tessl",
@@ -4000,12 +3999,12 @@ def test_run_evals_uses_default_tessl_workspace_from_env(tmp_path: Path, monkeyp
         )
 
     assert result.status == "success"
-    assert result.data["tessl_workspace"] == "skills-sdk-lab"
+    assert result.data["tessl_workspace"] == "skills-sdk"
     assert result.data["tessl_workspace_source"] == "ASK_TESSL_WORKSPACE"
-    assert run_tessl.call_args.kwargs["workspace"] == "skills-sdk-lab"
+    assert run_tessl.call_args.kwargs["workspace"] == "skills-sdk"
 
 
-def test_run_evals_uses_repo_default_tessl_workspace(tmp_path: Path, monkeypatch) -> None:
+def test_run_evals_without_workspace_uses_no_tessl_workspace(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.delenv("ASK_TESSL_WORKSPACE", raising=False)
     monkeypatch.delenv("TESSL_WORKSPACE", raising=False)
     monkeypatch.delenv("TESSL_WORKSPACE_NAME", raising=False)
@@ -4023,12 +4022,12 @@ def test_run_evals_uses_repo_default_tessl_workspace(tmp_path: Path, monkeypatch
         )
 
     assert result.status == "success"
-    assert result.data["tessl_workspace"] == "skills-sdk-lab"
-    assert result.data["tessl_workspace_source"] == "repo_default"
-    assert run_tessl.call_args.kwargs["workspace"] == "skills-sdk-lab"
+    assert result.data["tessl_workspace"] is None
+    assert result.data["tessl_workspace_source"] is None
+    assert run_tessl.call_args.kwargs["workspace"] is None
 
 
-def test_run_evals_normalizes_tessl_workspace_argument(tmp_path: Path) -> None:
+def test_run_evals_preserves_tessl_workspace_argument(tmp_path: Path) -> None:
     completed = _completed_eval_with_report(tmp_path, "autoreview")
 
     with (
@@ -4044,10 +4043,29 @@ def test_run_evals_normalizes_tessl_workspace_argument(tmp_path: Path) -> None:
         )
 
     assert result.status == "success"
-    assert result.data["tessl_workspace"] == "skills-sdk-lab"
+    assert result.data["tessl_workspace"] == "skills-sdk"
     assert result.data["tessl_workspace_source"] == "argument"
-    assert "--tessl-workspace skills-sdk-lab" in result.data["validation_commands"][0]
-    assert run_tessl.call_args.kwargs["workspace"] == "skills-sdk-lab"
+    assert "--tessl-workspace skills-sdk" in result.data["validation_commands"][0]
+    assert run_tessl.call_args.kwargs["workspace"] == "skills-sdk"
+
+
+def test_run_evals_live_private_blocks_without_workspace(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.delenv("ASK_TESSL_WORKSPACE", raising=False)
+    monkeypatch.delenv("TESSL_WORKSPACE", raising=False)
+    monkeypatch.delenv("TESSL_WORKSPACE_NAME", raising=False)
+
+    result = evals.run_evals(
+        tmp_path,
+        "Skills/agent-ops/autoreview",
+        mode="smoke",
+        dashboard=False,
+        tessl_live_private=True,
+    )
+
+    assert result.status == "error"
+    assert result.data["eval_status"] == "blocked_validation"
+    assert result.data["tessl_eval"]["workspace_source"] == "missing"
+    assert "require --tessl-workspace" in result.errors[0].message
 
 
 def test_run_evals_blocks_invalid_default_tessl_workspace(tmp_path: Path, monkeypatch) -> None:

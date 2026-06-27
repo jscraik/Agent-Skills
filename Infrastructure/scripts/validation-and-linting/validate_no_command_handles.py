@@ -36,6 +36,7 @@ RUNTIME_IDENTIFIER_PLACEHOLDER_PATHS = (
     "Docs/agents/19-high-signal-steering-feedback.md",
     "Docs/agents/README.md",
     "Infrastructure/scripts/README.md",
+    ".harness/quality/steering-uptake.md",
 )
 
 RULES = [
@@ -70,7 +71,7 @@ SKILL_DESCRIPTION_DOLLAR_PATTERN = re.compile(r"\$[A-Za-z][A-Za-z0-9_-]*")
 SKILL_FRONTMATTER_HANDLE_KEY_PATTERN = re.compile(r"^\s*(handles|canonical_handle):\s*")
 RUNTIME_IDENTIFIER_PLACEHOLDER_PATTERN = re.compile(
     r"\b(?:cell_id|session_id|tool_call_id|command_id|handle)\b\s*[:=]\s*"
-    r"[\"'](?:noop|noop\d+|fake|dummy|placeholder|test)[\"']",
+    r"[\"'](?:noop|noop\d+|fake|dummy|placeholder|test|nonexistent\d*)[\"']",
     re.IGNORECASE,
 )
 

@@ -34,9 +34,6 @@ DEFAULT_MACRO_EVAL_REPORTS_GLOB = "Infrastructure/artifacts/skills/*/*/summary.j
 TESSL_SCENARIO_TOOL_TILE = "tessl-labs/tessl-skill-eval-scenarios"
 TESSL_SCENARIO_TOOL_VERSION = "0.1.0"
 TESSL_DEFAULT_WORKSPACE = "skills-sdk-lab"
-TESSL_WORKSPACE_ALIASES = {
-    "skills-sdk": TESSL_DEFAULT_WORKSPACE,
-}
 TESSL_TILE_VERSION_RE = re.compile(r"^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$")
 TESSL_LIVE_PRIVATE_MIN_SCENARIOS = 20
 TESSL_WORKSPACE_RUN_LIMIT = 300
@@ -381,7 +378,8 @@ def _write_tessl_live_view_evidence(repo_root: Path, skill_path: str, run_id: st
     view_path = _tessl_live_evidence_file(repo_root, skill_path, run_id, "tessl-eval-view.json")
     if view_path is None:
         return None
-    if not _write_tessl_live_evidence_text(repo_root, view_path, view_raw_output):
+    sanitized_output = _sanitize_tessl_live_private_payload(view_raw_output)
+    if not _write_tessl_live_evidence_text(repo_root, view_path, str(sanitized_output)):
         return None
     return str(view_path.relative_to(repo_root))
 
@@ -409,8 +407,8 @@ def _write_tessl_live_submission_evidence(
                 "run_id": run_id,
                 "workspace": workspace,
                 "skill_path": skill_path,
-                "staged_source": str(staged_source),
-                "project_identity": project_identity,
+                "staged_source": str(_sanitize_tessl_live_private_payload(str(staged_source))),
+                "project_identity": _sanitize_tessl_live_private_payload(dict(project_identity)),
                 "next_action": "poll tessl eval view through the Skills SDK wrapper until scored or blocked",
             },
             indent=2,
@@ -2025,7 +2023,7 @@ def _validate_tessl_workspace(workspace: str | None) -> str:
         )
     if "/" in normalized:
         raise ValueError("Tessl workspace must be the workspace name only, not workspace/tile.")
-    return TESSL_WORKSPACE_ALIASES.get(normalized, normalized)
+    return normalized
 
 
 def _default_tessl_workspace_from_env() -> tuple[str | None, str | None]:
@@ -2033,7 +2031,7 @@ def _default_tessl_workspace_from_env() -> tuple[str | None, str | None]:
         value = os.environ.get(name)
         if value is not None and value.strip():
             return _validate_tessl_workspace(value), name
-    return TESSL_DEFAULT_WORKSPACE, "repo_default"
+    return None, None
 
 
 def _tessl_eval_case_id(case_id: str) -> str:
@@ -2600,8 +2598,8 @@ def _tessl_pending_run_preflight(
             "blocker": blocker,
             "command": command_text,
             "exit_code": process.returncode,
-            "raw_output": process.stdout,
-            "raw_error": process.stderr,
+            "raw_output": _sanitize_tessl_live_private_payload(process.stdout),
+            "raw_error": _sanitize_tessl_live_private_payload(process.stderr),
         }
     if _tessl_auth_blocked(process.stdout, process.stderr):
         return {
@@ -2610,8 +2608,8 @@ def _tessl_pending_run_preflight(
             "blocker": "Tessl authentication is required before pending-run preflight can protect live eval credits.",
             "command": command_text,
             "exit_code": process.returncode,
-            "raw_output": process.stdout,
-            "raw_error": process.stderr,
+            "raw_output": _sanitize_tessl_live_private_payload(process.stdout),
+            "raw_error": _sanitize_tessl_live_private_payload(process.stderr),
         }
     if process.returncode != 0:
         return {
@@ -2620,8 +2618,8 @@ def _tessl_pending_run_preflight(
             "blocker": "Tessl pending-run preflight could not fetch run history; refusing to submit another live eval run.",
             "command": command_text,
             "exit_code": process.returncode,
-            "raw_output": process.stdout,
-            "raw_error": process.stderr,
+            "raw_output": _sanitize_tessl_live_private_payload(process.stdout),
+            "raw_error": _sanitize_tessl_live_private_payload(process.stderr),
         }
 
     pending_ids = _tessl_pending_run_ids_for_project(process.stdout, project=project)
@@ -2632,8 +2630,8 @@ def _tessl_pending_run_preflight(
             "blocker": "Tessl pending-run preflight could not parse run history; refusing to submit another live eval run.",
             "command": command_text,
             "exit_code": process.returncode,
-            "raw_output": process.stdout,
-            "raw_error": process.stderr,
+            "raw_output": _sanitize_tessl_live_private_payload(process.stdout),
+            "raw_error": _sanitize_tessl_live_private_payload(process.stderr),
         }
     if pending_ids:
         return {
@@ -2642,8 +2640,8 @@ def _tessl_pending_run_preflight(
             "blocker": "A pending Tessl eval run already exists for this workspace/project; inspect that run instead of spending another.",
             "command": command_text,
             "exit_code": process.returncode,
-            "raw_output": process.stdout,
-            "raw_error": process.stderr,
+            "raw_output": _sanitize_tessl_live_private_payload(process.stdout),
+            "raw_error": _sanitize_tessl_live_private_payload(process.stderr),
             "pending_eval_run_ids": pending_ids,
         }
     return {
@@ -2652,8 +2650,8 @@ def _tessl_pending_run_preflight(
         "blocker_class": None,
         "command": command_text,
         "exit_code": process.returncode,
-        "raw_output": process.stdout,
-        "raw_error": process.stderr,
+        "raw_output": _sanitize_tessl_live_private_payload(process.stdout),
+        "raw_error": _sanitize_tessl_live_private_payload(process.stderr),
         "pending_eval_run_ids": [],
     }
 
@@ -2692,8 +2690,8 @@ def _tessl_run_budget_preflight(
             "blocker": blocker,
             "command": command_text,
             "exit_code": process.returncode,
-            "raw_output": process.stdout,
-            "raw_error": process.stderr,
+            "raw_output": _sanitize_tessl_live_private_payload(process.stdout),
+            "raw_error": _sanitize_tessl_live_private_payload(process.stderr),
         }
     if _tessl_auth_blocked(process.stdout, process.stderr):
         return {
@@ -2702,8 +2700,8 @@ def _tessl_run_budget_preflight(
             "blocker": "Tessl CLI is installed locally, but authentication is required before run-budget preflight can run.",
             "command": command_text,
             "exit_code": process.returncode,
-            "raw_output": process.stdout,
-            "raw_error": process.stderr,
+            "raw_output": _sanitize_tessl_live_private_payload(process.stdout),
+            "raw_error": _sanitize_tessl_live_private_payload(process.stderr),
         }
     if process.returncode != 0:
         return {
@@ -2716,8 +2714,8 @@ def _tessl_run_budget_preflight(
             ),
             "command": command_text,
             "exit_code": process.returncode,
-            "raw_output": process.stdout,
-            "raw_error": process.stderr,
+            "raw_output": _sanitize_tessl_live_private_payload(process.stdout),
+            "raw_error": _sanitize_tessl_live_private_payload(process.stderr),
             "workspace_run_limit": TESSL_WORKSPACE_RUN_LIMIT,
             "reserve_runs": TESSL_WORKSPACE_RUN_RESERVE,
             "capacity_source": "unavailable_eval_list",
@@ -2735,8 +2733,8 @@ def _tessl_run_budget_preflight(
             ),
             "command": command_text,
             "exit_code": process.returncode,
-            "raw_output": process.stdout,
-            "raw_error": process.stderr,
+            "raw_output": _sanitize_tessl_live_private_payload(process.stdout),
+            "raw_error": _sanitize_tessl_live_private_payload(process.stderr),
             "workspace_run_limit": TESSL_WORKSPACE_RUN_LIMIT,
             "reserve_runs": TESSL_WORKSPACE_RUN_RESERVE,
             "capacity_source": "unparseable_eval_list",
@@ -2760,8 +2758,8 @@ def _tessl_run_budget_preflight(
         "blocker_class": blocker_class,
         "command": command_text,
         "exit_code": process.returncode,
-        "raw_output": process.stdout,
-        "raw_error": process.stderr,
+        "raw_output": _sanitize_tessl_live_private_payload(process.stdout),
+        "raw_error": _sanitize_tessl_live_private_payload(process.stderr),
         "workspace_run_limit": TESSL_WORKSPACE_RUN_LIMIT,
         "reserve_runs": TESSL_WORKSPACE_RUN_RESERVE,
         "used_runs": used_runs,
@@ -2774,7 +2772,7 @@ def _tessl_eval_list_command(tessl_path: str, workspace: str) -> list[str]:
 
 
 def _tessl_eval_list_command_text(tessl_path: str, workspace: str) -> str:
-    return " ".join(shlex.quote(str(part)) for part in _tessl_eval_list_command(tessl_path, workspace))
+    return " ".join(shlex.quote(_portable_command_part(str(part))) for part in _tessl_eval_list_command(tessl_path, workspace))
 
 
 def _run_tessl_eval_list_for_workspace(
@@ -2844,12 +2842,16 @@ def _ensure_tessl_project_link(
         signal_name = _signal_name_for_returncode(process.returncode)
         commands.append({
             "action": action,
-            "command": " ".join(shlex.quote(str(part)) for part in process_args),
+            "command": " ".join(shlex.quote(_portable_command_part(str(part))) for part in process_args),
             "exit_code": process.returncode,
             "signal": signal_name,
-            "raw_output": process.stdout,
-            "raw_error": process.stderr,
-            "parsed_output": _json_or_text(process.stdout.strip()) if process.stdout.strip() else None,
+            "raw_output": _sanitize_tessl_live_private_payload(process.stdout),
+            "raw_error": _sanitize_tessl_live_private_payload(process.stderr),
+            "parsed_output": (
+                _sanitize_tessl_live_private_payload(_json_or_text(process.stdout.strip()))
+                if process.stdout.strip()
+                else None
+            ),
         })
 
     try:
@@ -3128,12 +3130,48 @@ def _tessl_local_command_payload(
 
     return {
         "status": "success" if process.returncode == 0 else "error",
-        "command": " ".join(shlex.quote(part) for part in command),
+        "command": " ".join(shlex.quote(_portable_command_part(part)) for part in command),
         "cwd": str(cwd),
         "exit_code": process.returncode,
         "stdout": redact(process.stdout),
         "stderr": redact(process.stderr),
     }
+
+
+def _portable_command_part(part: str) -> str:
+    if Path(part).is_absolute():
+        return Path(part).name
+    return part
+
+
+def _sanitize_tessl_live_private_payload(value: object) -> object:
+    if isinstance(value, dict):
+        sanitized: dict[str, object] = {}
+        for key, item in value.items():
+            if key in {"createdBy", "user", "userId", "firstName", "lastName"}:
+                sanitized[key] = "<redacted-actor>"
+            elif key in {"command", "cliInvocation", "cwd", "path", "staged_source"}:
+                sanitized[key] = _sanitize_tessl_live_private_payload(item)
+            else:
+                sanitized[key] = _sanitize_tessl_live_private_payload(item)
+        return sanitized
+    if isinstance(value, list):
+        return [_sanitize_tessl_live_private_payload(item) for item in value]
+    if isinstance(value, str):
+        stripped = value.strip()
+        if stripped.startswith(("{", "[")):
+            try:
+                parsed = json.loads(stripped)
+            except json.JSONDecodeError:
+                parsed = None
+            if isinstance(parsed, (dict, list)):
+                return json.dumps(_sanitize_tessl_live_private_payload(parsed), indent=2, sort_keys=True)
+        redacted = re.sub(r"/Users/[^\s\"']+", "<user-path>", value)
+        redacted = redacted.replace("/private/tmp/ask-tessl-evals/", "/tmp/ask-tessl-live/")
+        redacted = redacted.replace("/tmp/ask-tessl-evals/", "/tmp/ask-tessl-live/")
+        redacted = re.sub(r"[-A-Za-z0-9._%+]+@[-A-Za-z0-9.]+\.[A-Za-z]{2,}", "<redacted-email>", redacted)
+        return redacted
+    return value
 
 
 def _run_tessl_local_command(
@@ -3959,10 +3997,10 @@ def _run_tessl_live_private_eval(
         "view_attempts": view_attempts,
         "view_status": view_status,
         "view_evidence_path": view_evidence_path,
-        "view_raw_output": view_raw_output,
-        "view_raw_error": view_raw_error,
-        "raw_output": raw_output,
-        "raw_error": raw_error,
+        "view_raw_output": _sanitize_tessl_live_private_payload(view_raw_output),
+        "view_raw_error": _sanitize_tessl_live_private_payload(view_raw_error),
+        "raw_output": _sanitize_tessl_live_private_payload(raw_output),
+        "raw_error": _sanitize_tessl_live_private_payload(raw_error),
         "blocker": blocker,
         "blocker_class": blocker_class,
     }
@@ -5095,7 +5133,7 @@ def _write_eval_closeout(
         "cases": cases,
         "blocker_class": closeout_blocker,
         "mutation_allowed": status == "pass",
-        "registry_update_allowed": status == "pass",
+        "registry_update_allowed": status == "pass" and mode == "release",
         "raw_output_present": bool(raw_output.strip()),
         "raw_error_present": bool(raw_error.strip()),
         "missing_suite_artifacts": missing_suite_artifacts,
@@ -5387,6 +5425,22 @@ def run_evals(
                 return result
             effective_tessl_workspace = None
             tessl_workspace_source = None
+    if tessl_live_private and not effective_tessl_workspace:
+        message = "Tessl live-private evals require --tessl-workspace <workspace> or an explicit Tessl workspace environment variable."
+        result.status = "error"
+        result.data["raw_output"] = ""
+        result.data["raw_error"] = message
+        result.data["eval_status"] = "blocked_validation"
+        result.data["blocker_class"] = "blocked_validation"
+        result.data["blocker_taxonomy"] = EVAL_BLOCKER_TAXONOMY
+        result.data["tessl_eval"] = {
+            "status": "blocked",
+            "blocker": message,
+            "blocker_class": "blocked_validation",
+            "workspace_source": "missing",
+        }
+        result.errors.append(ErrorObject(code="ERR_VALIDATION", message=message))
+        return result
     result.data["tessl_workspace"] = effective_tessl_workspace
     result.data["tessl_workspace_source"] = tessl_workspace_source
     result.data["validation_commands"] = [

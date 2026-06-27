@@ -14,7 +14,7 @@
       "id": "technical-writer-tessl-evidence-index",
       "match_type": "exact",
       "pattern": ".harness/evidence/tessl/index.jsonl",
-      "classification": "historical_artifact",
+      "classification": "reference",
       "reason": "Append-only Tessl evidence index for technical-writer live-eval handoff receipts; retained as reviewed evidence until a governed Tessl receipt store replaces it.",
       "owner": "skills-sdk",
       "review_after": "2026-09-27"

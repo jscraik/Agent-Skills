@@ -243,7 +243,7 @@ quality_criteria:
   tessl_readiness:
     purpose: "Prepare scenarios for staged Tessl dry run and live confirmation only after internal SDK proof is strong."
     why_it_matters: "Tessl is a paid external confirmation lane; internal SDK checks should do the diagnostic work before live scoring."
-    observable_evidence: "Scenario set meets the minimum gold-scenario count and release metadata requirements, dry-run staging uses controlled /tmp payloads and repo wrappers rather than the live skill source, and live handoff evidence records lift, baseline comparison, blocked cases, and feedback-loop status."
+    observable_evidence: "Scenario set includes at least 20 gold-standard structured scenarios plus release metadata requirements, dry-run staging uses controlled /tmp payloads and repo wrappers rather than the live skill source, and live handoff evidence records lift, baseline comparison, blocked cases, and feedback-loop status."
     scoring:
       5: "Scenarios are internally promotion-ready, staged through the repo Tessl wrapper, and accompanied by lift and feedback-loop evidence."
       4: "Scenarios are ready for Tessl staging with only minor metadata or evidence cleanup remaining."
@@ -255,10 +255,12 @@ evidence_requirements:
   - "Observable acceptance criteria or score anchors for each release scenario."
   - "Leakage review decision for visible task text."
   - "SDK scenario-quality receipt before Tessl handoff."
+  - "At least 20 gold-standard structured scenarios before live handoff."
 automatic_failure_conditions:
   - "Visible scenario text leaks hidden answer keys, expected moves, bad patterns, good patterns, or scorer-only criteria."
   - "Scenario set measures generic model competence instead of the target skill's instructions."
   - "Release scenarios lack scoreable artifacts, acceptance checks, or reproducibility evidence."
+  - "Live handoff readiness is claimed with fewer than 20 gold-standard structured scenarios."
   - "Tessl live scoring is treated as the first diagnostic gate instead of external confirmation after internal SDK proof."
 skills_sdk_pipeline:
   setup_status_command: "./bin/ask sdk status --json --robot"

@@ -96,7 +96,7 @@ package contract after download:
 4. Preserve `references/contract.yaml` when present. If the repo enforces
    strict SDK readiness and this file is missing, classify the install as
    `blocked_validation` rather than silently accepting the package.
-5. Run `./bin/ask skills package <installed-path-or-handle> --json --robot`
+5. Run `./bin/ask skills package verify <installed-path-or-handle> --json --robot`
    when available.
 6. Treat `package_contract.sdk_contract.required_fields.missing` as blocking
    for strict SDK installation. Required SDK fields are purpose, inputs,

@@ -190,7 +190,15 @@
           "SA-004",
           "VP-021",
           "VP-022"
-        ]
+        ],
+        "profile_contract": {
+          "tessl_policy": {
+            "stable_staging_root": "/tmp/ask-tessl-live/<skill-path>-<sha12>"
+          }
+        },
+        "closeout": {
+          "registry_update_allowed": false
+        }
       },
       "internal_eval": {
         "tessl_workspace": "skills-sdk-lab",
@@ -217,7 +225,7 @@
             "no_publish": true,
             "no_registry_upload": true,
             "temp_staged_project_input_only": true,
-            "stable_staging_root": "/tmp/ask-tessl-evals/<skill-path>-<sha12>",
+            "stable_staging_root": "/tmp/ask-tessl-live/<skill-path>-<sha12>",
             "evidence_retention": "stable tmp staging is intentionally left for post-run inspection; reruns archive previous staged evidence under evidence-archive/",
             "tessl_project_marker": "tessl.json",
             "staged_inputs": [
@@ -331,7 +339,7 @@
             "no_publish": true,
             "no_registry_upload": true,
             "temp_staged_project_input_only": true,
-            "stable_staging_root": "/tmp/ask-tessl-evals/<skill-path>-<sha12>",
+            "stable_staging_root": "/tmp/ask-tessl-live/<skill-path>-<sha12>",
             "evidence_retention": "stable tmp staging is intentionally left for post-run inspection; reruns archive previous staged evidence under evidence-archive/",
             "tessl_project_marker": "tessl.json",
             "staged_inputs": [
@@ -375,7 +383,7 @@
           ],
           "blocker_class": null,
           "mutation_allowed": true,
-          "registry_update_allowed": true,
+          "registry_update_allowed": false,
           "raw_output_present": true,
           "raw_error_present": false,
           "missing_suite_artifacts": false,
