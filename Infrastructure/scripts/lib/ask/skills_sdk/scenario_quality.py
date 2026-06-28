@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from ask.skills_sdk.release_scenario_sets import build_release_scenario_set_checks
+from ask.skills_sdk.release_scenario_sets import build_release_scenario_set_checks, release_scenario_set_case_ids
 from ask.skills_sdk.scenario_set_parity import build_scenario_set_parity_checks
 
 
@@ -649,6 +649,7 @@ def build_scenario_quality_receipt(
     query: str,
     tessl_staged_json: Path | None = None,
     tessl_score_json: Path | None = None,
+    scenario_set: str | None = None,
 ) -> dict[str, Any]:
     skill_md = source_path if source_path.name == "SKILL.md" else source_path / "SKILL.md"
     evals_path = skill_md.parent / "references" / "evals.yaml"
@@ -657,7 +658,9 @@ def build_scenario_quality_receipt(
     case_list = cases if isinstance(cases, list) else []
     scenario_rows, row_errors = _rows(case_list)
     receipt_checks = _quality_checks(repo_root, evals_path, evals_payload, case_list, load_error, row_errors)
-    canonical_ids = {row["id"] for row in scenario_rows}
+    all_canonical_ids = {row["id"] for row in scenario_rows}
+    selected_release_ids = release_scenario_set_case_ids(evals_payload, scenario_set)
+    canonical_ids = selected_release_ids or all_canonical_ids
     scenario_set_parity, parity_checks = build_scenario_set_parity_checks(
         repo_root,
         skill_md.parent,

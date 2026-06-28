@@ -212,21 +212,23 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         self.assertIn("oss-local-code", receipt["judge_command_argv"])
         validate_ab_judge_score_receipt(receipt)
 
-    def test_codex_command_uses_large_transcript_profile_id(self) -> None:
+    def test_codex_command_uses_large_transcript_model_settings(self) -> None:
         judge_profile = {
             "id": "oss-local-large-transcript",
-            "codex_profile": "oss-local-large-transcript",
+            "codex_profile": "oss-local",
             "model": "gpt-oss:20b",
+            "model_settings": {"num_ctx": 16384, "temperature": 0.1, "top_p": 0.9},
         }
         result, command, _env, _profile_text, _op_env_file = _run_codex_with_captured_subprocess(
-            "oss-local-large-transcript",
+            "oss-local",
             'model = "gpt-oss:20b"\n',
             judge_profile,
         )
 
         self.assertEqual(result.exit_code, 0)
         self.assertIn("--profile", command)
-        self.assertEqual(command[command.index("--profile") + 1], "oss-local-large-transcript")
+        self.assertEqual(command[command.index("--profile") + 1], "oss-local")
+        self.assertIn("model_settings.num_ctx=16384", command)
 
     def test_builder_scores_with_injected_cloud_judge_profile(self) -> None:
         calls: list[tuple[str, str]] = []

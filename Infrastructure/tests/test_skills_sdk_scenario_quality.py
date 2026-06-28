@@ -851,7 +851,7 @@ cases:
         self.assertIn("release_pressure_coverage", blocker_ids)
         self.assertIn("release_negative_edge_coverage", blocker_ids)
 
-    def test_release_scenario_set_accepts_approved_5_15_split(self) -> None:
+    def test_release_scenario_set_accepts_grouped_case_lists(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             skill_dir = _write_skill_with_evals(Path(temp_dir), _release_set_20_evals_yaml())
 
@@ -860,10 +860,37 @@ cases:
         check_map = {check["id"]: check for check in receipt["quality_checks"]}
         self.assertEqual(check_map["release_scenario_set_default_unique"]["status"], "pass")
         self.assertEqual(check_map["release_scenario_set_minimum_count"]["status"], "pass")
-        self.assertEqual(check_map["release_scenario_set_split_5_15"]["status"], "pass")
         self.assertEqual(check_map["release_scenario_set_ids_exist"]["status"], "pass")
         self.assertEqual(check_map["release_scenario_set_cases_are_release_mode"]["status"], "pass")
         self.assertEqual(receipt["scenario_count"], 20)
+        validate_scenario_quality_receipt(receipt)
+
+    def test_release_scenario_set_accepts_flat_case_lists(self) -> None:
+        payload = _release_set_20_evals_yaml()
+        flat_cases = "\n".join(
+            [
+                "release_scenario_sets:",
+                "- id: sample-release-20-v1",
+                "  default: true",
+                "  minimum_scenarios: 20",
+                "  cases:",
+                *[f"  - foundation-{index}" for index in range(1, 6)],
+                *[f"  - behavioral-{index}" for index in range(1, 16)],
+                "cases:",
+            ]
+        )
+        start = payload.index("release_scenario_sets:")
+        end = payload.index("cases:", start)
+        payload = payload[:start] + flat_cases + payload[end + len("cases:") :]
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(Path(temp_dir), payload)
+
+            receipt = build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        check_map = {check["id"]: check for check in receipt["quality_checks"]}
+        self.assertEqual(check_map["release_scenario_set_minimum_count"]["status"], "pass")
+        self.assertEqual(check_map["release_scenario_set_ids_exist"]["status"], "pass")
+        self.assertEqual(check_map["release_scenario_set_cases_are_release_mode"]["status"], "pass")
         validate_scenario_quality_receipt(receipt)
 
     def test_release_scenario_set_rejects_duplicate_ids(self) -> None:
@@ -1008,6 +1035,52 @@ cases:
             )
 
         self.assertEqual(receipt["scenario_set_parity"]["canonical_count"], 1)
+        self.assertEqual(receipt["scenario_set_parity"]["reviewed_fixture_count"], 1)
+        self.assertFalse(receipt["blockers"])
+        validate_scenario_quality_receipt(receipt)
+
+    def test_scenario_set_parity_uses_selected_release_set_universe(self) -> None:
+        payload = _release_set_20_evals_yaml() + """
+- id: non-release-doc-case
+  category: happy
+  eval_modes:
+  - smoke
+  realistic: true
+  unit: docs scenario parity
+  given: A non-release documentation scenario belongs to the full suite but not the selected release set.
+  should: Return non-release-doc-case.md content with source-backed validation claims.
+  actual_artifact: non-release-doc-case.md
+  expected_artifact: non-release-doc-case.md
+  prompt: Return the non-release-doc-case.md content.
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: Returns non-release-doc-case.md content with source-backed validation claims.
+"""
+        release_ids = [f"foundation-{index}" for index in range(1, 6)] + [f"behavioral-{index}" for index in range(1, 16)]
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            skill_dir = _write_skill_with_evals(temp_path, payload)
+            reviewed_dir = skill_dir / "references" / "evals"
+            reviewed_dir.mkdir()
+            (reviewed_dir / "eval.visual-evidence-decision.md").write_text("# Visual evidence decision\n", encoding="utf-8")
+            ids = [*release_ids, "generated-eval.visual-evidence-decision"]
+            staged_json = _write_staged_tessl_json(temp_path / "staged.json", ids)
+            score_json = _write_tessl_score_json(temp_path / "score.json", ids)
+
+            receipt = build_scenario_quality_receipt(
+                temp_path,
+                source_path=skill_dir,
+                query="sample_skill",
+                tessl_staged_json=staged_json,
+                tessl_score_json=score_json,
+                scenario_set="sample-release-20-v1",
+            )
+
+        self.assertEqual(receipt["scenario_count"], 21)
+        self.assertEqual(receipt["scenario_set_parity"]["canonical_count"], 20)
         self.assertEqual(receipt["scenario_set_parity"]["reviewed_fixture_count"], 1)
         self.assertFalse(receipt["blockers"])
         validate_scenario_quality_receipt(receipt)

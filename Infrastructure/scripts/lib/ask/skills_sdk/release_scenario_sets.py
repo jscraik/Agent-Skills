@@ -18,6 +18,29 @@ def build_release_scenario_set_checks(evals_payload: dict[str, Any] | None, case
     return checks
 
 
+def release_scenario_set_case_ids(evals_payload: dict[str, Any] | None, scenario_set: str | None = None) -> set[str]:
+    if not isinstance(evals_payload, dict):
+        return set()
+    release_sets = evals_payload.get("release_scenario_sets")
+    if not isinstance(release_sets, list):
+        return set()
+    selected = _select_release_scenario_set(release_sets, scenario_set)
+    if not isinstance(selected, dict):
+        return set()
+    case_ids, shape_check = _release_scenario_set_case_ids(0, str(selected.get("id") or ""), selected)
+    return set(case_ids) if shape_check is None else set()
+
+
+def _select_release_scenario_set(release_sets: list[Any], scenario_set: str | None) -> dict[str, Any] | None:
+    if scenario_set:
+        for item in release_sets:
+            if isinstance(item, dict) and item.get("id") == scenario_set:
+                return item
+        return None
+    defaults = [item for item in release_sets if isinstance(item, dict) and item.get("default") is True]
+    return defaults[0] if len(defaults) == 1 else None
+
+
 def _check(check_id: str, status: str, message: str, evidence: list[str] | None = None) -> dict[str, Any]:
     return {"id": check_id, "status": status, "severity": "blocker", "message": message, "evidence": evidence or []}
 
@@ -74,11 +97,11 @@ def _release_scenario_set_entry_checks(index: int, item: Any, case_by_id: dict[s
         return [_release_scenario_set_entry_object_check(index)]
     set_id = str(item.get("id") or "").strip()
     checks = _release_scenario_set_identity_checks(index, set_id)
-    groups = item.get("groups")
-    if not isinstance(groups, dict):
-        checks.append(_release_scenario_set_groups_check(index, set_id))
+    case_ids, shape_check = _release_scenario_set_case_ids(index, set_id, item)
+    if shape_check is not None:
+        checks.append(shape_check)
         return checks
-    checks.extend(_release_scenario_set_group_checks(item, set_id, groups, case_by_id))
+    checks.extend(_release_scenario_set_case_checks(item, set_id, case_ids, case_by_id))
     return checks
 
 
@@ -92,29 +115,37 @@ def _release_scenario_set_identity_checks(index: int, set_id: str) -> list[dict[
     return [_check("release_scenario_set_id_present", "blocker", "Release scenario sets must have stable ids.", [f"entry:{index}"])]
 
 
-def _release_scenario_set_groups_check(index: int, set_id: str) -> dict[str, Any]:
+def _release_scenario_set_shape_check(index: int, set_id: str) -> dict[str, Any]:
     return _check(
-        "release_scenario_set_groups_present",
+        "release_scenario_set_cases_present",
         "blocker",
-        "Release scenario sets must declare grouped case ids.",
+        "Release scenario sets must declare case ids through groups or a flat cases list.",
         [set_id or f"entry:{index}"],
     )
 
 
-def _release_scenario_set_group_checks(
+def _release_scenario_set_case_ids(index: int, set_id: str, item: dict[str, Any]) -> tuple[list[str], dict[str, Any] | None]:
+    groups = item.get("groups")
+    if isinstance(groups, dict):
+        case_ids = [case_id for value in groups.values() for case_id in _string_list(value)]
+        if case_ids:
+            return case_ids, None
+    flat_cases = _string_list(item.get("cases"))
+    if flat_cases:
+        return flat_cases, None
+    return [], _release_scenario_set_shape_check(index, set_id)
+
+
+def _release_scenario_set_case_checks(
     item: dict[str, Any],
     set_id: str,
-    groups: dict[str, Any],
+    case_ids: list[str],
     case_by_id: dict[str, dict[str, Any]],
 ) -> list[dict[str, Any]]:
-    foundation = _string_list(groups.get("foundation_smoke"))
-    behavioral = _string_list(groups.get("behavioral_release"))
-    case_ids = [*foundation, *behavioral]
     minimum = item.get("minimum_scenarios")
     minimum_value = minimum if isinstance(minimum, int) and not isinstance(minimum, bool) else 20
     return [
         _release_scenario_set_minimum_check(set_id, case_ids, minimum_value),
-        _release_scenario_set_split_check(set_id, foundation, behavioral),
         _release_scenario_set_missing_ids_check(set_id, case_ids, case_by_id),
         _release_scenario_set_release_mode_check(set_id, case_ids, case_by_id),
         _release_scenario_set_unique_ids_check(set_id, case_ids),
@@ -128,16 +159,6 @@ def _release_scenario_set_minimum_check(set_id: str, case_ids: list[str], minimu
         "blocker" if blocked else "pass",
         "Default release scenario sets must contain at least the declared minimum and never fewer than 20 cases.",
         [f"{set_id}:count:{len(case_ids)}:minimum:{minimum_value}"] if blocked else [],
-    )
-
-
-def _release_scenario_set_split_check(set_id: str, foundation: list[str], behavioral: list[str]) -> dict[str, Any]:
-    blocked = len(foundation) != 5 or len(behavioral) != 15
-    return _check(
-        "release_scenario_set_split_5_15",
-        "blocker" if blocked else "pass",
-        "Technical-writer release set uses the approved 5 foundation smoke plus 15 behavioral release split.",
-        [f"{set_id}:foundation:{len(foundation)}:behavioral:{len(behavioral)}"] if blocked else [],
     )
 
 

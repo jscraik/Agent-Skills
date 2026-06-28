@@ -128,7 +128,7 @@
         },
         {
           "evidence": [
-            "./bin/ask sdk eval tessl-local-proof --skill Skills/github/teach --workspace skills-sdk --execute --json --robot"
+            "./bin/ask sdk eval tessl-local-proof --skill Skills/github/teach --workspace jscraik --execute --json --robot"
           ],
           "id": "lane_command_recorded",
           "message": "Each lane must record the exact command that produced its evidence.",
@@ -145,7 +145,7 @@
           "status": "pass"
         }
       ],
-      "command": "./bin/ask sdk eval tessl-local-proof --skill Skills/github/teach --workspace skills-sdk --execute --json --robot",
+      "command": "./bin/ask sdk eval tessl-local-proof --skill Skills/github/teach --workspace jscraik --execute --json --robot",
       "id": "tessl-local-proof",
       "receipt_path": "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/regression-plan-receipt.json",
       "status": "pass"

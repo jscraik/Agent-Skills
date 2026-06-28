@@ -56,6 +56,7 @@ def _add_scenario_quality_parser(subparsers: argparse._SubParsersAction, global_
     quality.add_argument("target", help="Skill handle or repo-relative skill source path")
     quality.add_argument("--tessl-staged-json", help="Optional Tessl dry-run/staging receipt JSON used for scenario-set parity")
     quality.add_argument("--tessl-score", help="Optional SDK Tessl score receipt JSON used for scenario-set parity")
+    quality.add_argument("--scenario-set", help="Named release scenario set from references/evals.yaml used for parity")
     quality.add_argument("--preview", action="store_true", help="Emit a non-mutating scenario quality receipt")
 
 
@@ -225,6 +226,7 @@ def _dispatch_scenario_quality(repo_root: Path, args: argparse.Namespace) -> Cal
         args.target,
         tessl_staged_json=args.tessl_staged_json,
         tessl_score=args.tessl_score,
+        scenario_set=args.scenario_set,
     )
 
 

@@ -5519,6 +5519,7 @@ def skills_sdk_eval_scenario_quality(
     *,
     tessl_staged_json: str | None = None,
     tessl_score: str | None = None,
+    scenario_set: str | None = None,
 ) -> CallResult:
     """Preview eval scenario quality without promoting or mutating scenario sources."""
     result = CallResult()
@@ -5531,6 +5532,8 @@ def skills_sdk_eval_scenario_quality(
     if tessl_score_path and not tessl_score_path.is_absolute():
         tessl_score_path = repo_root / tessl_score_path
     validation_command_parts = ["sdk", "eval", "scenario-quality", query, "--preview"]
+    if scenario_set:
+        validation_command_parts.extend(["--scenario-set", scenario_set])
     if tessl_staged_json:
         validation_command_parts.extend(["--tessl-staged-json", tessl_staged_json])
     if tessl_score:
@@ -5574,6 +5577,7 @@ def skills_sdk_eval_scenario_quality(
             query=query,
             tessl_staged_json=tessl_staged_path,
             tessl_score_json=tessl_score_path,
+            scenario_set=scenario_set,
         )
     except ScenarioQualityError as exc:
         receipt = exc.receipt

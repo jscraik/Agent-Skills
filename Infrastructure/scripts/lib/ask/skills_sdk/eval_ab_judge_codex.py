@@ -80,6 +80,8 @@ def _codex_judge_command(judge_profile: dict[str, Any], work_dir: Path, output_f
     model_override = _codex_model_override(judge_profile)
     if model_override is not None:
         codex_command[2:2] = ["-c", f"model={_json_toml_string(model_override)}"]
+    for override in reversed(_codex_model_setting_overrides(judge_profile)):
+        codex_command[2:2] = ["-c", override]
     op_env_file = _codex_op_env_file_path(judge_profile)
     op_bin = _codex_op_bin() if op_env_file is not None else None
     if op_env_file is not None and op_bin is not None:
@@ -96,6 +98,27 @@ def _codex_model_override(judge_profile: dict[str, Any]) -> str | None:
         return None
     model = judge_profile.get("model")
     return model if isinstance(model, str) and model else None
+
+
+def _codex_model_setting_overrides(judge_profile: dict[str, Any]) -> list[str]:
+    settings = judge_profile.get("model_settings")
+    if not isinstance(settings, dict):
+        return []
+    overrides: list[str] = []
+    for key in sorted(settings):
+        if not isinstance(key, str) or not key:
+            continue
+        value = settings[key]
+        if isinstance(value, bool):
+            encoded = "true" if value else "false"
+        elif isinstance(value, int | float) and not isinstance(value, bool):
+            encoded = str(value)
+        elif isinstance(value, str):
+            encoded = _json_toml_string(value)
+        else:
+            continue
+        overrides.append(f"model_settings.{key}={encoded}")
+    return overrides
 
 
 def _json_toml_string(value: str) -> str:
