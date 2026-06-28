@@ -458,7 +458,7 @@
         "next_gate_allowed": false,
         "blocked_next_gates": [
           "oss-cloud",
-          "tessl-dry-run",
+          "tessl-live-dry-run",
           "tessl-live"
         ],
         "ready_for_live_tessl": false,
