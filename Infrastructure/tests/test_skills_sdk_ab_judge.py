@@ -34,7 +34,7 @@ class TestSkillsSdkAbJudgePreview(unittest.TestCase):
         self.assertEqual(receipt["status"], "preview")
         self.assertEqual(receipt["operation"], "ab_judge_preview")
         self.assertEqual(receipt["judge_profile"]["id"], "oss-local")
-        self.assertEqual(receipt["judge_profile"]["model"], "qwen3.5:latest")
+        self.assertEqual(receipt["judge_profile"]["model"], "gpt-oss:20b")
         self.assertEqual(receipt["rubric_id"], AB_RUBRIC_ID)
         self.assertEqual(receipt["rubric_digest"], canonical_ab_rubric_digest())
         self.assertEqual(receipt["allowed_winners"], ["skill_a", "skill_b", "inconclusive"])

@@ -1,0 +1,100 @@
+{
+  "schema_version": "skills-sdk.dirty-file-triage.v1",
+  "generated_at": "2026-06-28T16:38:07Z",
+  "repo": {
+    "branch": "codex/sdk-eval-parity-guardrails",
+    "head": "33a1b61d4",
+    "root": "."
+  },
+  "git_status_command": "git status --short --branch",
+  "buckets": {
+    "commit_now": [
+      {
+        "reason": "SDK A/B judge, eval profile, scenario-quality, typed contract, and Tessl quality guardrail changes belong to the active pipeline hardening patch.",
+        "paths": [
+          "Infrastructure/config/schemas/skills-sdk/ab-judge-score-receipt.v0.schema.json",
+          "Infrastructure/config/schemas/skills-sdk/eval-profile-preview-receipt.v0.schema.json",
+          "Infrastructure/config/skills-sdk/capability-matrix.v1.json",
+          "Infrastructure/scripts/lib/ask/commands/skills_impl.py",
+          "Infrastructure/scripts/lib/ask/skills_sdk/ab_contracts.py",
+          "Infrastructure/scripts/lib/ask/skills_sdk/eval_ab_judge.py",
+          "Infrastructure/scripts/lib/ask/skills_sdk/eval_ab_judge_codex.py",
+          "Infrastructure/scripts/lib/ask/skills_sdk/eval_ab_rubric.py",
+          "Infrastructure/scripts/lib/ask/skills_sdk/eval_profiles.py",
+          "Infrastructure/scripts/lib/ask/skills_sdk/tessl_eval_quality.py",
+          "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-judge-preview-receipt.json",
+          "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-judge-score-receipt.json",
+          "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-plan-receipt.json",
+          "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-preview-receipt.json",
+          "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-rubric-receipt.json",
+          "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.json",
+          "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/eval-profile-preview-receipt.json",
+          "Infrastructure/tests/test_skills_sdk_ab_judge.py",
+          "Infrastructure/tests/test_skills_sdk_ab_judge_score.py",
+          "Infrastructure/tests/test_skills_sdk_ab_preview.py",
+          "Infrastructure/tests/test_skills_sdk_ab_rubric.py",
+          "Infrastructure/tests/test_skills_sdk_eval_profiles.py",
+          "Infrastructure/tests/test_skills_sdk_eval_runner.py",
+          "Infrastructure/tests/test_skills_sdk_scenario_quality.py",
+          "Infrastructure/tests/test_skills_sdk_schema_spine.py"
+        ]
+      },
+      {
+        "reason": "Skill-builder runner handling and tests belong to the active oss-local reliability and exact release-scenario filtering patch.",
+        "paths": [
+          "Plugins/skill-factory/scripts/skill-builder/run_skill_evals.py",
+          "Plugins/skill-factory/scripts/skill-builder/test_run_skill_evals.py"
+        ]
+      },
+      {
+        "reason": "Technical-writer skill and eval criteria changes belong to the active Tessl-regression repair lane.",
+        "paths": [
+          "Skills/agent-ops/technical-writer/SKILL.md",
+          "Skills/agent-ops/technical-writer/references/evals.yaml",
+          "Skills/agent-ops/technical-writer/references/evals/eval.tessl-workspace-project-agents-boundary.md"
+        ]
+      },
+      {
+        "reason": "Durable learned-failure and pipeline reference artifacts belong with the guardrail patch if their diff confirms no local-only/private content.",
+        "paths": [
+          ".harness/memory/LEARNINGS.md",
+          "artifacts/recommended-skills-sdk-pipeline.html"
+        ]
+      }
+    ],
+    "generated_evidence": [
+      {
+        "reason": "Current handoff, parity, classification, tracker, and atlas artifacts record the live HEAD and current blockers; commit if this PR tracks evidence artifacts.",
+        "paths": [
+          ".harness/evidence/handoff/technical-writer/status.json",
+          ".harness/evidence/handoff/technical-writer/scenario-set-parity-current.json",
+          ".harness/evidence/handoff/technical-writer/oss-local.json",
+          ".harness/evidence/handoff/technical-writer/tessl-baseline-win-regression-classification.json",
+          ".harness/evidence/handoff/technical-writer/deferred-tessl-workspace-project-agents-boundary.md",
+          ".harness/reports/skills-sdk-tracker-state-current.json",
+          ".harness/reports/thread-product-state-current.json",
+          ".harness/reports/technical-writer-dirty-file-triage-current.json",
+          "Docs/reference/skills-sdk-platform-atlas.html"
+        ]
+      }
+    ],
+    "defer_with_reason": [
+      {
+        "reason": "Do not run or stage fresh OSS-cloud, Tessl dry-run, or live Tessl evidence until oss-local release evidence passes. Current oss-local release receipt proves the requested profile lane but records 13/20 passed and 7 tier-1 failures.",
+        "paths": []
+      }
+    ],
+    "unrelated_user_owned": [
+      {
+        "reason": "No dirty path is classified as user-owned from current command evidence; re-check with git diff before staging.",
+        "paths": []
+      }
+    ]
+  },
+  "blocking_notes": [
+    "Scenario parity now passes for the current comparable universe: 27 canonical evals + 5 reviewed fixtures = 32 staged and scored Tessl scenarios.",
+    "The later-added tessl-workspace-project-agents-boundary scenario is deferred from the active comparable universe until a new Tessl staging/score cycle includes it.",
+    "OSS-local release evidence was regenerated at .harness/evidence/handoff/technical-writer/oss-local.json and proves codex_exec_invoked=true with codex_profile=oss-local for technical-writer-release-20-v1, but the lane failed behaviorally with 13/20 passed and 7 tier-1 failures.",
+    "OSS-cloud remains blocked because it would be a later confidence lane after valid oss-local release evidence, not a repair lane for oss-local failures."
+  ]
+}

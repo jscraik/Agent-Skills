@@ -7366,13 +7366,16 @@ def _skills_sdk_eval_receipt_lane(mode: str, codex_profile: str | None) -> str:
 def _load_release_scenario_sets(evals_path: Path) -> list[dict[str, Any]]:
     if not evals_path.is_file():
         return []
+    text = evals_path.read_text(encoding="utf-8")
     try:
-        import yaml  # type: ignore
+        from ask.skills_sdk.scenario_quality import _yaml_safe_load  # noqa: PLC0415
 
-        payload = yaml.safe_load(evals_path.read_text(encoding="utf-8")) or {}
+        payload = _yaml_safe_load(text) or {}
     except Exception:
-        return []
+        payload = {}
     raw_sets = payload.get("release_scenario_sets") if isinstance(payload, dict) else None
+    if not isinstance(raw_sets, list):
+        raw_sets = _load_minimal_release_scenario_sets(text)
     if not isinstance(raw_sets, list):
         return []
     sets: list[dict[str, Any]] = []
@@ -7408,6 +7411,75 @@ def _load_release_scenario_sets(evals_path: Path) -> list[dict[str, Any]]:
             }
         )
     return sets
+
+
+def _load_minimal_release_scenario_sets(text: str) -> list[dict[str, Any]]:
+    release_sets: list[dict[str, Any]] = []
+    current: dict[str, Any] | None = None
+    current_group: str | None = None
+    in_release_sets = False
+    in_groups = False
+    for raw_line in text.splitlines():
+        line = raw_line.split("#", 1)[0].rstrip()
+        if not line.strip():
+            continue
+        indent = len(line) - len(line.lstrip(" "))
+        stripped = line.strip()
+        if indent == 0 and stripped == "release_scenario_sets:":
+            in_release_sets = True
+            current = None
+            current_group = None
+            in_groups = False
+            continue
+        if in_release_sets and indent == 0 and not stripped.startswith("- "):
+            break
+        if not in_release_sets:
+            continue
+        if indent == 2 and stripped.startswith("- "):
+            current = {"groups": {}}
+            release_sets.append(current)
+            current_group = None
+            in_groups = False
+            _minimal_release_set_assign(current, stripped[2:])
+            continue
+        if current is None:
+            continue
+        if indent == 4 and stripped == "groups:":
+            in_groups = True
+            current_group = None
+            continue
+        if indent == 4 and ":" in stripped:
+            in_groups = False
+            current_group = None
+            _minimal_release_set_assign(current, stripped)
+            continue
+        if in_groups and indent == 6 and stripped.endswith(":"):
+            current_group = stripped[:-1].strip()
+            groups = current.setdefault("groups", {})
+            if isinstance(groups, dict):
+                groups[current_group] = []
+            continue
+        if in_groups and indent == 8 and stripped.startswith("- ") and current_group:
+            groups = current.setdefault("groups", {})
+            if isinstance(groups, dict):
+                group_values = groups.setdefault(current_group, [])
+                if isinstance(group_values, list):
+                    group_values.append(stripped[2:].strip().strip("'\""))
+    return release_sets
+
+
+def _minimal_release_set_assign(target: dict[str, Any], pair: str) -> None:
+    if ":" not in pair:
+        return
+    key, value = pair.split(":", 1)
+    value = value.strip().strip("'\"")
+    if value in {"true", "false"}:
+        target[key.strip()] = value == "true"
+        return
+    if value.isdigit():
+        target[key.strip()] = int(value)
+        return
+    target[key.strip()] = value
 
 
 def _select_release_scenario_set(release_sets: list[dict[str, Any]], scenario_set: str | None) -> dict[str, Any] | None:

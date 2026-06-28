@@ -505,6 +505,40 @@ class TestSkillsSdkHandoffReadiness(unittest.TestCase):
         self.assertTrue(semantic_blockers)
         self.assertIn("status=preview", semantic_blockers[0]["evidence"])
 
+    def test_handoff_readiness_routes_failed_oss_local_receipt_to_repair_first(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            readiness_path = _write_readiness_bundle(temp_path)
+            oss_receipt = temp_path / "oss-local.json"
+            oss_receipt.write_text(
+                json.dumps({
+                    "status": "error",
+                    "receipt": {
+                        "status": "fail",
+                        "codex_profile": "oss-local",
+                        "codex_exec_invoked": True,
+                        "case_count": 20,
+                    },
+                }),
+                encoding="utf-8",
+            )
+
+            receipt = build_handoff_readiness_receipt(
+                REPO_ROOT,
+                source_path=REPO_ROOT / FIXTURE_SKILL,
+                query=FIXTURE_SKILL,
+                readiness_path=readiness_path,
+            )
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertFalse(receipt["ready_for_live_tessl"])
+        semantic_blockers = [blocker for blocker in receipt["blockers"] if blocker["id"] == "lane_receipt_semantics_valid"]
+        self.assertTrue(semantic_blockers)
+        self.assertIn("status=error", semantic_blockers[0]["evidence"])
+        self.assertIn("Repair the oss-local release-lane failures", receipt["required_next_actions"][0])
+        self.assertIn("before oss-cloud", receipt["required_next_actions"][0])
+        self.assertIn("do not run live Tessl", receipt["required_next_actions"][0])
+
     def test_handoff_readiness_blocks_placeholder_lane_commands(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)

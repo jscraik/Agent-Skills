@@ -1,8 +1,8 @@
 {
   "schema": "skills-sdk.tracker-state-current.v1",
-  "generated_at": "2026-06-27T19:47:10Z",
+  "generated_at": "2026-06-28T15:55:47Z",
   "repo": {
-    "head": "f3204cbb8",
+    "head": "33a1b61d4",
     "branch": "codex/sdk-eval-parity-guardrails"
   },
   "purpose": "Separate current local Skills SDK repo evidence from live tracker truth until Linear can be queried directly.",

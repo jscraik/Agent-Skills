@@ -1,0 +1,46 @@
+{
+  "schema_version": "skills-sdk.scenario-set-parity-current.v1",
+  "generated_at": "2026-06-28T16:38:07Z",
+  "repo": {
+    "branch": "codex/sdk-eval-parity-guardrails",
+    "head": "33a1b61d4",
+    "root": "."
+  },
+  "command": "./bin/ask sdk eval scenario-quality Skills/agent-ops/technical-writer --tessl-staged-json .harness/evidence/handoff/technical-writer/tessl-live-dry-run.json --tessl-score .harness/evidence/handoff/technical-writer/tessl-score-preview.json --preview --json --robot",
+  "status": "pass",
+  "validator": "sdk eval scenario-quality with --tessl-staged-json and --tessl-score",
+  "surfaces_compared": {
+    "canonical_evals": "Skills/agent-ops/technical-writer/references/evals.yaml",
+    "reviewed_fixture_notes": "Skills/agent-ops/technical-writer/references/evals/*.md",
+    "staged_tessl_receipt": ".harness/evidence/handoff/technical-writer/tessl-live-dry-run.json",
+    "tessl_score_receipt": ".harness/evidence/handoff/technical-writer/tessl-score-preview.json"
+  },
+  "parity": {
+    "canonical_count": 27,
+    "reviewed_fixture_count": 5,
+    "staged_tessl_count": 32,
+    "score_receipt_path_count": 32,
+    "score_receipt_declared_count": 32,
+    "missing_from_staged": [],
+    "extra_in_staged": [],
+    "missing_from_score_receipt": [],
+    "extra_in_score_receipt": []
+  },
+  "blockers": [],
+  "deferred_from_current_universe": [
+    {
+      "id": "tessl-workspace-project-agents-boundary",
+      "generated_id": "generated-eval.tessl-workspace-project-agents-boundary",
+      "reason": "The current Tessl score receipt records 32 scenarios and does not include this later-added boundary case. Keeping it in active evals.yaml or references/evals/eval.*.md would make SDK, staged Tessl, and score receipt evidence incomparable.",
+      "deferred_note": ".harness/evidence/handoff/technical-writer/deferred-tessl-workspace-project-agents-boundary.md"
+    }
+  ],
+  "reviewed_fixture_notes": [
+    "Skills/agent-ops/technical-writer/references/evals/eval.glossary-workspace-authority.md",
+    "Skills/agent-ops/technical-writer/references/evals/eval.reader-state-citation-map.md",
+    "Skills/agent-ops/technical-writer/references/evals/eval.validation-lane-separation.md",
+    "Skills/agent-ops/technical-writer/references/evals/eval.visual-evidence-decision.md",
+    "Skills/agent-ops/technical-writer/references/evals/eval.writer-gap-gathering.md"
+  ],
+  "next_action": "Repair the seven oss-local release-lane tier-1 failures before oss-cloud. Current oss-local evidence records codex_exec_invoked=true, codex_profile=oss-local, scenario_set_id=technical-writer-release-20-v1, selected_count=20, and scenario_set_count=20, but status=fail with 13/20 passed."
+}

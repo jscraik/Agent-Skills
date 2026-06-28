@@ -45,16 +45,16 @@ cases:
   realistic: true
   unit: docs scenario parity
   given: A release fixture needs proof that SDK and Tessl score receipt scenarios are the same set.
-  should: Produce docs-output.md with source-backed validation claims and no invented command proof.
+  should: Return docs-output.md content with source-backed validation claims and no invented command proof.
   actual_artifact: docs-output.md
   expected_artifact: docs-output.md
-  prompt: Write docs-output.md as a proof-backed docs note for the Tessl score parity review.
+  prompt: Return the docs-output.md content as a proof-backed docs note for the Tessl score parity review.
   deterministic_checks:
     forbidden_commands:
     - rm -rf
   acceptance:
   - type: expected_signal
-    value: Produces docs-output.md with source-backed validation claims and no invented command proof.
+    value: Returns docs-output.md content with source-backed validation claims and no invented command proof.
 - id: usage-win-case
   category: edge
   eval_modes:
@@ -62,16 +62,16 @@ cases:
   realistic: true
   unit: docs scenario parity
   given: A usage-win Tessl score path still belongs to the SDK scenario universe.
-  should: Produce usage-win-output.md with source-backed validation claims and no invented command proof.
+  should: Return usage-win-output.md content with source-backed validation claims and no invented command proof.
   actual_artifact: usage-win-output.md
   expected_artifact: usage-win-output.md
-  prompt: Write usage-win-output.md as a proof-backed docs note for the Tessl score parity review.
+  prompt: Return the usage-win-output.md content as a proof-backed docs note for the Tessl score parity review.
   deterministic_checks:
     forbidden_commands:
     - rm -rf
   acceptance:
   - type: expected_signal
-    value: Produces usage-win-output.md with source-backed validation claims and no invented command proof.
+    value: Returns usage-win-output.md content with source-backed validation claims and no invented command proof.
 """
 
 
@@ -105,19 +105,19 @@ def _release_set_20_evals_yaml() -> str:
                 "  why_realistic: This is a realistic release candidate documentation task with observable evidence.",
                 f"  unit: {case_id} unit",
                 f"  given: {case_id} gives the agent a realistic documentation task.",
-                f"  should: Produce {case_id}.md with evidence-backed documentation behavior.",
+                f"  should: Return {case_id}.md content with evidence-backed documentation behavior.",
                 f"  actual_artifact: {case_id}.md",
                 f"  expected_artifact: {case_id}.md",
                 "  reproduce: ./bin/ask sdk eval scenario-quality sample --preview --json --robot",
                 "  claim_ids:",
                 "  - sample.claim",
-                f"  prompt: Write {case_id}.md for this documentation task.",
+                f"  prompt: Return the {case_id}.md content for this documentation task.",
                 "  deterministic_checks:",
                 "    forbidden_commands:",
                 "    - rm -rf",
                 "  acceptance:",
                 "  - type: expected_signal",
-                f"    value: Produces {case_id}.md with evidence-backed documentation behavior.",
+                f"    value: Returns {case_id}.md content with evidence-backed documentation behavior.",
                 "  - type: not_contains",
                 "    value: does not contain unsupported claim",
             ]
@@ -704,7 +704,7 @@ cases:
   expected_artifact: ownership report
   reproduce: ./bin/ask sdk eval run sample
   prompt: |
-    Inspect generated/sample/SKILL.md and canonical/sample/SKILL.md, then write ownership.md.
+    Inspect generated/sample/SKILL.md and canonical/sample/SKILL.md, then return the contents for ownership.md in your final answer.
 
     <file path="generated/sample/SKILL.md">
     stale generated projection
@@ -731,6 +731,85 @@ cases:
         row = receipt["scenario_rows"][0]
         blocker_ids = {check["id"] for check in row["blockers"]}
         self.assertNotIn("platform_tessl_quality:hidden_input_file_dependency", blocker_ids)
+        validate_scenario_quality_receipt(receipt)
+
+    def test_builder_blocks_read_only_file_artifact_side_effect(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(
+                Path(temp_dir),
+                """schema_version: '2.0'
+skill_name: sample
+cases:
+- id: write-file-side-effect
+  category: edge
+  unit: read-only artifact wording
+  eval_modes:
+  - smoke
+  realistic: true
+  why_realistic: OSS lanes run read-only and score final answers.
+  given: A docs report is needed.
+  should: Return a scoreable artifact without requiring filesystem writes.
+  actual_artifact: artifacts/write-file-side-effect.md
+  expected_artifact: ownership report
+  reproduce: ./bin/ask sdk eval run sample
+  prompt: Write ownership.md for the supplied docs case.
+  claim_ids:
+  - sample.claim
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: Names evidence and separates the proof lane.
+  - type: must_not
+    value: Claims a file was saved in the read-only sandbox.
+""",
+            )
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
+        self.assertIn("platform_tessl_quality:read_only_file_artifact_side_effect", blocker_ids)
+        validate_scenario_quality_receipt(raised.exception.receipt)
+
+    def test_builder_accepts_final_answer_file_artifact_contents(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(
+                Path(temp_dir),
+                """schema_version: '2.0'
+skill_name: sample
+cases:
+- id: final-answer-file-artifact
+  category: edge
+  unit: read-only artifact wording
+  eval_modes:
+  - smoke
+  realistic: true
+  why_realistic: OSS lanes run read-only and score final answers.
+  given: A docs report is needed.
+  should: Return a scoreable artifact without requiring filesystem writes.
+  actual_artifact: artifacts/final-answer-file-artifact.md
+  expected_artifact: ownership report
+  reproduce: ./bin/ask sdk eval run sample
+  prompt: Return the contents for ownership.md in your final answer for the supplied docs case.
+  claim_ids:
+  - sample.claim
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: Names evidence and separates the proof lane.
+  - type: must_not
+    value: Claims a file was saved in the read-only sandbox.
+""",
+            )
+
+            receipt = build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        blocker_ids = {check["id"] for check in receipt["scenario_rows"][0]["blockers"]}
+        self.assertNotIn("platform_tessl_quality:read_only_file_artifact_side_effect", blocker_ids)
         validate_scenario_quality_receipt(receipt)
 
     def test_release_mode_suite_requires_twenty_scenarios(self) -> None:
@@ -875,16 +954,16 @@ cases:
   realistic: true
   unit: docs scenario parity
   given: A release fixture needs proof that SDK, staged Tessl, and Tessl score scenarios are the same set.
-  should: Produce docs-output.md with source-backed validation claims and no invented command proof.
+  should: Return docs-output.md content with source-backed validation claims and no invented command proof.
   actual_artifact: docs-output.md
   expected_artifact: docs-output.md
-  prompt: Write docs-output.md as a proof-backed docs note for the scenario parity review.
+  prompt: Return the docs-output.md content as a proof-backed docs note for the scenario parity review.
   deterministic_checks:
     forbidden_commands:
     - rm -rf
   acceptance:
   - type: expected_signal
-    value: Produces docs-output.md with source-backed validation claims and no invented command proof.
+    value: Returns docs-output.md content with source-backed validation claims and no invented command proof.
 """,
             )
             reviewed_dir = skill_dir / "references" / "evals"
@@ -969,16 +1048,16 @@ cases:
   realistic: true
   unit: docs scenario parity
   given: A release fixture needs proof that SDK and staged Tessl scenarios are the same set.
-  should: Produce docs-output.md with source-backed validation claims and no invented command proof.
+  should: Return docs-output.md content with source-backed validation claims and no invented command proof.
   actual_artifact: docs-output.md
   expected_artifact: docs-output.md
-  prompt: Write docs-output.md as a proof-backed docs note for the staged scenario parity review.
+  prompt: Return the docs-output.md content as a proof-backed docs note for the staged scenario parity review.
   deterministic_checks:
     forbidden_commands:
     - rm -rf
   acceptance:
   - type: expected_signal
-    value: Produces docs-output.md with source-backed validation claims and no invented command proof.
+    value: Returns docs-output.md content with source-backed validation claims and no invented command proof.
 """,
             )
             staged_json = _write_staged_tessl_json(temp_path / "staged.json", ["canonical-case", "unexpected-extra"])
@@ -1012,16 +1091,16 @@ cases:
   realistic: true
   unit: docs scenario parity
   given: A release fixture needs proof that SDK and Tessl score receipt scenarios are the same set.
-  should: Produce docs-output.md with source-backed validation claims and no invented command proof.
+  should: Return docs-output.md content with source-backed validation claims and no invented command proof.
   actual_artifact: docs-output.md
   expected_artifact: docs-output.md
-  prompt: Write docs-output.md as a proof-backed docs note for the Tessl score parity review.
+  prompt: Return the docs-output.md content as a proof-backed docs note for the Tessl score parity review.
   deterministic_checks:
     forbidden_commands:
     - rm -rf
   acceptance:
   - type: expected_signal
-    value: Produces docs-output.md with source-backed validation claims and no invented command proof.
+    value: Returns docs-output.md content with source-backed validation claims and no invented command proof.
 """,
             )
             score_json = _write_tessl_score_json(temp_path / "score.json", ["canonical-case"], scenario_count=32)

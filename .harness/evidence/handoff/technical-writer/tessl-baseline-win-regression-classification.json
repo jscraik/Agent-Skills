@@ -1,0 +1,79 @@
+{
+  "schema_version": "skills-sdk.tessl-baseline-win-regression-classification.v1",
+  "generated_at": "2026-06-28T15:55:47Z",
+  "repo": {
+    "branch": "codex/sdk-eval-parity-guardrails",
+    "head": "33a1b61d4",
+    "root": "."
+  },
+  "source_receipts": {
+    "tessl_score": ".harness/evidence/handoff/technical-writer/tessl-score-preview.json",
+    "tessl_view": ".harness/evidence/tessl/technical-writer/019f0933-e8cc-724c-951a-7f1341590e50/tessl-eval-view.json",
+    "regression_plan": "Skills/agent-ops/technical-writer/references/eval-regression-plan.json",
+    "canonical_evals": "Skills/agent-ops/technical-writer/references/evals.yaml"
+  },
+  "score_summary": {
+    "scenario_count": 32,
+    "usage_percent": 76.8182,
+    "baseline_percent": 65.2273,
+    "feedback_loop_status": "open",
+    "regression_count": 5
+  },
+  "regressions": [
+    {
+      "scenario_id": "wrong-domain",
+      "owner_bucket": "criteria",
+      "what_tessl_wanted": "A technical-writer invocation should block or reroute a parser allocation refactor as implementation work unless the user asks for documentation, content, talk, article, or publication work.",
+      "current_skill_task_or_criteria_source": "Skills/agent-ops/technical-writer/references/evals.yaml:714 and Skills/agent-ops/technical-writer/references/eval-regression-plan.json:4",
+      "minimal_patch_target": "Criteria/scorer wording in Skills/agent-ops/technical-writer/references/evals.yaml so the case scores observable routing/blocker behavior instead of generic documentation output.",
+      "command_evidence_refs": [
+        "jq '.data.skills_sdk_eval_tessl_score.receipt.score_summary.regressions' .harness/evidence/handoff/technical-writer/tessl-score-preview.json",
+        "rg -n 'id: wrong-domain|wrong-domain' Skills/agent-ops/technical-writer/references/evals.yaml Skills/agent-ops/technical-writer/references/eval-regression-plan.json"
+      ]
+    },
+    {
+      "scenario_id": "reader-testing",
+      "owner_bucket": "skill",
+      "what_tessl_wanted": "An explicit fresh-reader question map covering rollout, rollback, failure recovery, evidence found, missing assumptions, and blocked rewrite needs.",
+      "current_skill_task_or_criteria_source": "Skills/agent-ops/technical-writer/references/evals.yaml:547 and Skills/agent-ops/technical-writer/references/eval-regression-plan.json:29",
+      "minimal_patch_target": "Skills/agent-ops/technical-writer/SKILL.md and references/documentation-quality.md to make the fresh-reader matrix unavoidable before runbook rewrite recommendations.",
+      "command_evidence_refs": [
+        "jq '.data.skills_sdk_eval_tessl_score.receipt.score_summary.regressions' .harness/evidence/handoff/technical-writer/tessl-score-preview.json",
+        "rg -n 'id: reader-testing|reader-testing' Skills/agent-ops/technical-writer/references/evals.yaml Skills/agent-ops/technical-writer/references/eval-regression-plan.json"
+      ]
+    },
+    {
+      "scenario_id": "generated-boundary",
+      "owner_bucket": "skill",
+      "what_tessl_wanted": "The response should name canonical source ownership, refuse direct generated/runtime projection edits, and separate projection refresh evidence or blocker follow-up.",
+      "current_skill_task_or_criteria_source": "Skills/agent-ops/technical-writer/references/evals.yaml:403 and Skills/agent-ops/technical-writer/references/eval-regression-plan.json:58",
+      "minimal_patch_target": "Skills/agent-ops/technical-writer/SKILL.md plus references/contract.yaml and eval criteria so source/projection/runtime boundary decisions happen before edits.",
+      "command_evidence_refs": [
+        "jq '.data.skills_sdk_eval_tessl_score.receipt.score_summary.regressions' .harness/evidence/handoff/technical-writer/tessl-score-preview.json",
+        "rg -n 'id: generated-boundary|generated-boundary' Skills/agent-ops/technical-writer/references/evals.yaml Skills/agent-ops/technical-writer/references/eval-regression-plan.json"
+      ]
+    },
+    {
+      "scenario_id": "smoke-boundary-discovery",
+      "owner_bucket": "task",
+      "what_tessl_wanted": "Exactly one smallest useful discovery question that clarifies editable documentation surface and side-effect boundary before changing files.",
+      "current_skill_task_or_criteria_source": "Skills/agent-ops/technical-writer/references/evals.yaml:639 and Skills/agent-ops/technical-writer/references/eval-regression-plan.json:87",
+      "minimal_patch_target": "Task wording and acceptance criteria in Skills/agent-ops/technical-writer/references/evals.yaml, with a short discovery-only branch in SKILL.md if behavior remains ambiguous.",
+      "command_evidence_refs": [
+        "jq '.data.skills_sdk_eval_tessl_score.receipt.score_summary.regressions' .harness/evidence/handoff/technical-writer/tessl-score-preview.json",
+        "rg -n 'id: smoke-boundary-discovery|smoke-boundary-discovery' Skills/agent-ops/technical-writer/references/evals.yaml Skills/agent-ops/technical-writer/references/eval-regression-plan.json"
+      ]
+    },
+    {
+      "scenario_id": "regression-stale-command-example",
+      "owner_bucket": "skill",
+      "what_tessl_wanted": "Live wrapper verification or an explicit blocked validation statement before changing a stale command example, with local command proof separated from external readiness.",
+      "current_skill_task_or_criteria_source": "Skills/agent-ops/technical-writer/references/evals.yaml:1270 and Skills/agent-ops/technical-writer/references/eval-regression-plan.json:112",
+      "minimal_patch_target": "Skills/agent-ops/technical-writer/SKILL.md, references/documentation-quality.md, and eval criteria to enforce exact command evidence or blocked validation before stale-command rewrites.",
+      "command_evidence_refs": [
+        "jq '.data.skills_sdk_eval_tessl_score.receipt.score_summary.regressions' .harness/evidence/handoff/technical-writer/tessl-score-preview.json",
+        "rg -n 'id: regression-stale-command-example|regression-stale-command-example' Skills/agent-ops/technical-writer/references/evals.yaml Skills/agent-ops/technical-writer/references/eval-regression-plan.json"
+      ]
+    }
+  ]
+}

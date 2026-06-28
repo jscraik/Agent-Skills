@@ -1,0 +1,281 @@
+{
+  "schema_version": "thread-product-state.v1",
+  "generated_at": "2026-06-28T15:41:59Z",
+  "generated_by": "codex-product-manager",
+  "scope": {
+    "primary_repo": "/Users/jamiecraik/dev/agent-skills",
+    "related_repos": [
+      "/Users/jamiecraik/dev/configs"
+    ],
+    "active_product_lane": "Skills SDK eval/profile hardening and technical-writer pipeline reliability",
+    "primary_skill": "Skills/agent-ops/technical-writer"
+  },
+  "repo_state": {
+    "agent_skills": {
+      "branch": "codex/sdk-eval-parity-guardrails",
+      "head": "33a1b61d4",
+      "remote_tracking": "origin/codex/sdk-eval-parity-guardrails",
+      "dirty": true
+    },
+    "configs": {
+      "branch": "main",
+      "head": "051b7012",
+      "remote_tracking": "origin/main",
+      "dirty": true
+    }
+  },
+  "status_freshness": {
+    "current_head": "33a1b61d4",
+    "stale_artifacts": [
+      {
+        "path": ".harness/reports/skills-sdk-tracker-state-current.json",
+        "recorded_head": "f3204cbb8",
+        "fresh": false,
+        "next_action": "Regenerate or supersede this tracker artifact before using it as current project state."
+      },
+      {
+        "path": ".harness/evidence/handoff/technical-writer/status.json",
+        "recorded_head": "f3204cbb8",
+        "fresh": false,
+        "next_action": "Regenerate this handoff status against current HEAD before treating it as the active technical-writer state."
+      }
+    ]
+  },
+  "implementation_lanes": [
+    {
+      "id": "local_eval_default_model",
+      "state": "changed_with_current_command_evidence",
+      "summary": "Local sandbox eval profile now declares gpt-oss:20b as the default with 8192 context, 0.1 temperature, and 0.9 top_p.",
+      "source_surfaces": [
+        "Infrastructure/scripts/lib/ask/skills_sdk/eval_profiles.py",
+        "Infrastructure/scripts/lib/ask/skills_sdk/eval_ab_rubric.py",
+        "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/eval-profile-preview-receipt.json"
+      ],
+      "evidence": [
+        {
+          "command": "./bin/ask sdk eval profiles --preview --json --robot",
+          "cwd": "/Users/jamiecraik/dev/agent-skills",
+          "outcome": "pass",
+          "observed": "Receipt includes oss-local model gpt-oss:20b with num_ctx 8192, temperature 0.1, top_p 0.9."
+        }
+      ]
+    },
+    {
+      "id": "local_eval_specialist_profiles",
+      "state": "changed_with_current_command_evidence",
+      "summary": "Dedicated Codex profile lanes exist for code-heavy local evals and fast fallback evals.",
+      "source_surfaces": [
+        "/Users/jamiecraik/dev/configs/codex/oss-local-code.config.toml",
+        "/Users/jamiecraik/dev/configs/codex/oss-local-fallback.config.toml",
+        "Infrastructure/scripts/lib/ask/skills_sdk/eval_profiles.py",
+        "Infrastructure/config/schemas/skills-sdk/ab-judge-score-receipt.v0.schema.json"
+      ],
+      "evidence": [
+        {
+          "command": "python3 - <<'PY' ... local eval profile TOML and symlink assertion ... PY",
+          "cwd": "/Users/jamiecraik/dev/configs",
+          "outcome": "pass",
+          "observed": "local eval profiles ok"
+        },
+        {
+          "command": "./bin/ask sdk eval profiles --preview --json --robot",
+          "cwd": "/Users/jamiecraik/dev/agent-skills",
+          "outcome": "pass",
+          "observed": "Receipt includes oss-local-code with qwen3-coder:30b and oss-local-fallback with qwen3.5:latest."
+        }
+      ]
+    },
+    {
+      "id": "technical_writer_tessl_handoff",
+      "state": "blocked_by_existing_evidence",
+      "summary": "Live Tessl handoff is blocked by open feedback-loop evidence and stale handoff status.",
+      "source_surfaces": [
+        ".harness/evidence/handoff/technical-writer/eval-handoff-readiness-preview.json",
+        ".harness/evidence/handoff/technical-writer/tessl-score-preview.json",
+        ".harness/evidence/tessl/technical-writer/019f0933-e8cc-724c-951a-7f1341590e50/tessl-eval-view.json"
+      ],
+      "evidence": [
+        {
+          "command": "jq '{status: .status, data: .data.skills_sdk_eval_handoff_readiness.receipt | {ready_for_live_tessl, blockers, lanes}}' .harness/evidence/handoff/technical-writer/eval-handoff-readiness-preview.json",
+          "cwd": "/Users/jamiecraik/dev/agent-skills",
+          "outcome": "pass",
+          "observed": "ready_for_live_tessl=false; blockers include feedback_loop.status=open, regression_count=5, usage_percent=76.8182, oss-cloud scenario count 2 vs expected 32, and oss-local receipt semantics invalid."
+        },
+        {
+          "command": "jq '{status: .data.attributes.status, id: .data.id, score: .data.attributes.score}' .harness/evidence/tessl/technical-writer/019f0933-e8cc-724c-951a-7f1341590e50/tessl-eval-view.json",
+          "cwd": "/Users/jamiecraik/dev/agent-skills",
+          "outcome": "pass",
+          "observed": "Tessl run status completed; score was null in the stored view artifact."
+        }
+      ]
+    },
+    {
+      "id": "configs_validator",
+      "state": "verified_with_current_command_evidence",
+      "summary": "The full Codex config validator passes after the config issue resolution.",
+      "source_surfaces": [
+        "/Users/jamiecraik/dev/configs/codex/config.toml",
+        "/Users/jamiecraik/dev/configs/codex/scripts/validate-codex-config.py"
+      ],
+      "evidence": [
+        {
+          "command": "python3 codex/scripts/validate-codex-config.py",
+          "cwd": "/Users/jamiecraik/dev/configs",
+          "outcome": "pass",
+          "observed": "[validate-codex-config] OK; profiles=11; mcp_servers=18; agents_registered_roles=62; plugin_hooks=disabled; trusted_project_overlap warning remains informational."
+        }
+      ]
+    }
+  ],
+  "validation_evidence_current_window": [
+    {
+      "command": "bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest tests/test_skills_sdk_eval_profiles.py tests/test_skills_sdk_ab_preview.py tests/test_skills_sdk_ab_rubric.py tests/test_skills_sdk_ab_judge.py tests/test_skills_sdk_ab_judge_score.py tests/test_skills_sdk_schema_spine.py -q",
+      "cwd": "/Users/jamiecraik/dev/agent-skills",
+      "outcome": "pass",
+      "observed": "139 passed, 43 subtests passed"
+    },
+    {
+      "command": "./bin/ask sdk eval profiles --preview --json --robot",
+      "cwd": "/Users/jamiecraik/dev/agent-skills",
+      "outcome": "pass",
+      "observed": "Profile preview receipt declares gpt-oss:20b default, gpt-oss:20b large-transcript trial, qwen3-coder:30b code profile, and qwen3.5:latest fallback profile."
+    },
+    {
+      "command": "bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest tests/test_skills_sdk_typed_contracts.py -q",
+      "cwd": "/Users/jamiecraik/dev/agent-skills",
+      "outcome": "pass",
+      "observed": "39 passed, 17 subtests passed"
+    },
+    {
+      "command": "python3 -m unittest codex.scripts.tests.test_validate_codex_config.StandaloneProfileConfigTests",
+      "cwd": "/Users/jamiecraik/dev/configs",
+      "outcome": "pass",
+      "observed": "Ran 4 tests; OK"
+    },
+    {
+      "command": "python3 - <<'PY' ... local eval profile TOML and symlink assertion ... PY",
+      "cwd": "/Users/jamiecraik/dev/configs",
+      "outcome": "pass",
+      "observed": "local eval profiles ok"
+    },
+    {
+      "command": "bash Infrastructure/scripts/run-infrastructure-python.sh -m ruff check scripts/lib/ask/skills_sdk/ab_contracts.py scripts/lib/ask/skills_sdk/eval_ab_judge.py scripts/lib/ask/skills_sdk/eval_ab_judge_codex.py scripts/lib/ask/skills_sdk/eval_ab_rubric.py scripts/lib/ask/skills_sdk/eval_profiles.py tests/test_skills_sdk_eval_profiles.py tests/test_skills_sdk_ab_preview.py tests/test_skills_sdk_ab_rubric.py tests/test_skills_sdk_ab_judge.py tests/test_skills_sdk_ab_judge_score.py tests/test_skills_sdk_schema_spine.py",
+      "cwd": "/Users/jamiecraik/dev/agent-skills",
+      "outcome": "pass",
+      "observed": "All checks passed"
+    },
+    {
+      "command": "python3 codex/scripts/validate-codex-config.py",
+      "cwd": "/Users/jamiecraik/dev/configs",
+      "outcome": "pass",
+      "observed": "[validate-codex-config] OK; profiles=11; mcp_servers=18; trusted_project_overlap warning count=16."
+    }
+  ],
+  "dirty_file_buckets": {
+    "agent_skills": {
+      "model_profile_change_bucket": [
+        "Docs/reference/skills-sdk-platform-atlas.html",
+        "Infrastructure/config/schemas/skills-sdk/ab-judge-score-receipt.v0.schema.json",
+        "Infrastructure/config/schemas/skills-sdk/eval-profile-preview-receipt.v0.schema.json",
+        "Infrastructure/config/skills-sdk/capability-matrix.v1.json",
+        "Infrastructure/scripts/lib/ask/skills_sdk/ab_contracts.py",
+        "Infrastructure/scripts/lib/ask/skills_sdk/eval_ab_judge.py",
+        "Infrastructure/scripts/lib/ask/skills_sdk/eval_ab_judge_codex.py",
+        "Infrastructure/scripts/lib/ask/skills_sdk/eval_ab_rubric.py",
+        "Infrastructure/scripts/lib/ask/skills_sdk/eval_profiles.py",
+        "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-judge-preview-receipt.json",
+        "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-judge-score-receipt.json",
+        "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-plan-receipt.json",
+        "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-preview-receipt.json",
+        "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-rubric-receipt.json",
+        "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.json",
+        "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/eval-profile-preview-receipt.json",
+        "Infrastructure/tests/test_skills_sdk_ab_judge.py",
+        "Infrastructure/tests/test_skills_sdk_ab_judge_score.py",
+        "Infrastructure/tests/test_skills_sdk_ab_preview.py",
+        "Infrastructure/tests/test_skills_sdk_ab_rubric.py",
+        "Infrastructure/tests/test_skills_sdk_eval_profiles.py",
+        "Infrastructure/tests/test_skills_sdk_schema_spine.py",
+        "artifacts/recommended-skills-sdk-pipeline.html"
+      ],
+      "pre_existing_or_separate_bucket": [
+        ".harness/memory/LEARNINGS.md",
+        "Infrastructure/scripts/lib/ask/commands/skills_impl.py",
+        "Infrastructure/scripts/lib/ask/skills_sdk/tessl_eval_quality.py",
+        "Infrastructure/tests/test_skills_sdk_eval_runner.py",
+        "Infrastructure/tests/test_skills_sdk_scenario_quality.py",
+        "Plugins/skill-factory/scripts/skill-builder/run_skill_evals.py",
+        "Plugins/skill-factory/scripts/skill-builder/test_run_skill_evals.py",
+        "Skills/agent-ops/technical-writer/SKILL.md",
+        "Skills/agent-ops/technical-writer/references/evals.yaml"
+      ],
+      "new_pm_artifact_bucket": [
+        ".harness/reports/thread-product-state-current.json"
+      ]
+    },
+    "configs": {
+      "model_profile_change_bucket": [
+        "codex/oss-local.config.toml",
+        "codex/oss-local-code.config.toml",
+        "codex/oss-local-fallback.config.toml",
+        "codex/scripts/tests/test_validate_codex_config.py",
+        "codex/scripts/validate-codex-config.py"
+      ],
+      "pre_existing_or_separate_bucket": [
+        ".github/PULL_REQUEST_TEMPLATE.md",
+        "Brewfile",
+        "artifacts/policy/environment-attestation.json",
+        "codex/config.toml",
+        "codex/instructions/tooling.md",
+        "codex/projection-map.json",
+        "codex/rules/default.rules",
+        "mise.lock",
+        "mise/config.toml",
+        "mise/mise.lock",
+        "scripts/check-environment.sh",
+        "requirements/python-document-reading.txt"
+      ]
+    }
+  },
+  "next_actions": [
+    {
+      "priority": 1,
+      "action": "Regenerate technical-writer handoff status at agent-skills HEAD 33a1b61d4 before using it for pipeline decisions.",
+      "proof_command": "./bin/ask sdk eval handoff-readiness --skill Skills/agent-ops/technical-writer --tessl-score .harness/evidence/handoff/technical-writer/tessl-score-preview.json --preview --json --robot",
+      "repo": "/Users/jamiecraik/dev/agent-skills"
+    },
+    {
+      "priority": 2,
+      "action": "Classify the five Tessl baseline-win regressions by owner before editing technical-writer further.",
+      "proof_command": "jq '.data.skills_sdk_eval_tessl_score.receipt.feedback_loop.regression_paths' .harness/evidence/handoff/technical-writer/tessl-score-preview.json",
+      "repo": "/Users/jamiecraik/dev/agent-skills"
+    },
+    {
+      "priority": 3,
+      "action": "Rerun the OSS release lane with scenario parity after regression classification and scenario repair.",
+      "proof_command": "./bin/ask sdk eval run Skills/agent-ops/technical-writer --runner internal --mode release --codex-profile oss-local --json --robot",
+      "repo": "/Users/jamiecraik/dev/agent-skills"
+    },
+    {
+      "priority": 4,
+      "action": "Triage dirty files into commit groups before any push or PR update.",
+      "proof_command": "git status --short --branch",
+      "repo": "/Users/jamiecraik/dev/agent-skills"
+    }
+  ],
+  "claim_boundaries": {
+    "does_prove": [
+      "The SDK eval profile preview currently emits the requested local eval model lanes.",
+      "Focused SDK tests and typed contract tests listed in validation_evidence_current_window passed in this closeout window.",
+      "The three local eval Codex profile TOML files and home symlinks match the requested models and read-only/on-request posture.",
+      "The /Users/jamiecraik/dev/configs Codex config validator passes in this closeout window."
+    ],
+    "does_not_prove": [
+      "technical-writer is ready for live Tessl.",
+      "PR mergeability or hosted CI state.",
+      "Linear tracker freshness.",
+      "Registry release readiness.",
+      "Runtime behavior of the newly selected local models after pulling them into Ollama."
+    ]
+  }
+}

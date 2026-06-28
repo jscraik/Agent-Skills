@@ -419,7 +419,7 @@ def _score_preflight(
             _codex_judge_work_dir(evidence["output_file"]),
             evidence["output_file"],
         )
-        evidence["codex_profile"] = judge_profile["id"]
+        evidence["codex_profile"] = judge_profile.get("codex_profile") or judge_profile["id"]
     else:
         evidence["command_argv"] = []
         evidence["codex_profile"] = None
@@ -436,7 +436,8 @@ def _selected_score_profile(profile_id: str, blockers: list[str]) -> dict[str, A
     except ValueError:
         blockers.append("judge_profile_unknown")
         return None
-    if profile["provider"] != "codex" or profile["id"] not in {"oss-local", "oss-cloud"}:
+    supported_codex_profiles = {"oss-local", "oss-local-code", "oss-local-fallback", "oss-cloud"}
+    if profile["provider"] != "codex" or profile.get("codex_profile", profile["id"]) not in supported_codex_profiles:
         blockers.append("judge_profile_not_supported_for_codex_score")
     return profile
 

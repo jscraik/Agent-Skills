@@ -45,6 +45,7 @@ from run_skill_evals import (  # noqa: E402
     _claim_to_evidence_summary,
     _case_has_executed_check_evidence,
     _codex_exec_prefix,
+    _filter_cases,
     _load_evals_document,
     _resolve_existing_optional_case_artifact_path,
     _preflight_codex_live_runner,
@@ -266,6 +267,47 @@ class RunSkillEvalsModeTests(unittest.TestCase):
                 output_text="Projection report: canonical source is editable.",
                 stdout_text='{"type":"turn.completed"}',
                 stderr_text="failed to parse function arguments: invalid type: string '500', expected usize",
+                exit_code=0,
+            )
+        )
+
+    def test_local_model_refresh_failure_is_runtime_blocker(self) -> None:
+        self.assertEqual(
+            _classify_runner_blocker(
+                output_text="",
+                stdout_text="",
+                stderr_text=(
+                    "ERROR codex_models_manager::manager: failed to refresh available models: "
+                    "stream disconnected before completion: error sending request for url "
+                    "(http://localhost:11434/v1/models?client_version=0.141.0)"
+                ),
+                exit_code=1,
+            ),
+            "blocked_runtime",
+        )
+
+    def test_local_model_refresh_warning_with_final_output_is_scored(self) -> None:
+        self.assertIsNone(
+            _classify_runner_blocker(
+                output_text="Which document in the repository would you like me to review first?",
+                stdout_text="",
+                stderr_text=(
+                    "ERROR codex_models_manager::manager: failed to refresh available models: "
+                    "stream disconnected before completion: failed to decode models response: "
+                    "missing field models at line 1 column 527"
+                ),
+                exit_code=0,
+            )
+        )
+
+    def test_sandbox_noise_with_final_output_is_scored(self) -> None:
+        self.assertIsNone(
+            _classify_runner_blocker(
+                output_text="Validation: blocked because the command needs approval.",
+                stdout_text="",
+                stderr_text=(
+                    "exec_command failed: sandbox-exec: sandbox_apply: Operation not permitted"
+                ),
                 exit_code=0,
             )
         )
@@ -1529,6 +1571,56 @@ class RunSkillEvalsModeTests(unittest.TestCase):
 
         selected = _filter_cases_for_eval_mode(cases, eval_mode="release")
         self.assertEqual([case.id for case in selected], ["happy", "explicit-release"])
+
+    def test_release_scenario_set_filters_exact_case_ids(self) -> None:
+        cases = [
+            EvalCase(
+                id="writer-gap-gathering",
+                name="Writer gap gathering",
+                prompt="ok",
+                acceptance=["ok"],
+            ),
+            EvalCase(
+                id="generated-eval.writer-gap-gathering",
+                name="Generated writer gap gathering",
+                prompt="generated",
+                acceptance=["generated"],
+            ),
+        ]
+
+        selected = _filter_cases(
+            cases,
+            case_filters=["writer-gap-gathering"],
+            categories=[],
+            exact_case_ids=True,
+        )
+        self.assertEqual([case.id for case in selected], ["writer-gap-gathering"])
+
+    def test_non_release_case_filter_keeps_substring_matching(self) -> None:
+        cases = [
+            EvalCase(
+                id="writer-gap-gathering",
+                name="Writer gap gathering",
+                prompt="ok",
+                acceptance=["ok"],
+            ),
+            EvalCase(
+                id="generated-eval.writer-gap-gathering",
+                name="Generated writer gap gathering",
+                prompt="generated",
+                acceptance=["generated"],
+            ),
+        ]
+
+        selected = _filter_cases(
+            cases,
+            case_filters=["writer-gap-gathering"],
+            categories=[],
+        )
+        self.assertEqual(
+            [case.id for case in selected],
+            ["writer-gap-gathering", "generated-eval.writer-gap-gathering"],
+        )
 
     def test_release_mode_keeps_dual_tagged_smoke_cases_for_live_runners(self) -> None:
         cases = [

@@ -8,6 +8,20 @@ EVAL_PROFILE_PREVIEW_SCHEMA_URI = (
     "https://agent-skills.local/schemas/skills-sdk/eval-profile-preview-receipt.v0.schema.json"
 )
 EVAL_PROFILE_ACCEPTANCE_TRACE = ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022", "VP-030"]
+LOCAL_SANDBOX_DEFAULT_SETTINGS = {"num_ctx": 8192, "temperature": 0.1, "top_p": 0.9}
+LOCAL_SANDBOX_LARGE_TRANSCRIPT_SETTINGS = {"num_ctx": 16384, "temperature": 0.1, "top_p": 0.9}
+_LOCAL_JUDGE_PROFILE_SPECS = (
+    ("oss-local", "oss-local", "gpt-oss:20b", "local_sandbox_eval_default", LOCAL_SANDBOX_DEFAULT_SETTINGS),
+    (
+        "oss-local-large-transcript",
+        "oss-local",
+        "gpt-oss:20b",
+        "larger_local_transcript_trial",
+        LOCAL_SANDBOX_LARGE_TRANSCRIPT_SETTINGS,
+    ),
+    ("oss-local-code", "oss-local-code", "qwen3-coder:30b", "code_heavy_specialist", LOCAL_SANDBOX_DEFAULT_SETTINGS),
+    ("oss-local-fallback", "oss-local-fallback", "qwen3.5:latest", "fast_fallback", LOCAL_SANDBOX_DEFAULT_SETTINGS),
+)
 
 
 def _codex_execution_profiles() -> list[dict[str, Any]]:
@@ -34,24 +48,20 @@ def _codex_execution_profiles() -> list[dict[str, Any]]:
 
 
 def _judge_profiles() -> list[dict[str, Any]]:
-    return [
-        {
-            "id": "oss-local",
-            "provider": "codex",
-            "mode": "local",
-            "host": "codex-cli-profile",
-            "model": "qwen3.5:latest",
-            "network_required": True,
-            "secret_env_names": [],
-            "auth_boundary": "none",
-            "receives_sanitized_outputs_only": True,
-        },
+    profiles = [
+        _local_judge_profile(profile_id, codex_profile, model, model_role, settings)
+        for profile_id, codex_profile, model, model_role, settings in _LOCAL_JUDGE_PROFILE_SPECS
+    ]
+    profiles.extend([
         {
             "id": "oss-cloud",
+            "codex_profile": "oss-cloud",
             "provider": "codex",
             "mode": "cloud",
             "host": "codex-cli-profile",
             "model": "deepseek-v4-flash:cloud",
+            "model_role": "cloud_confirmation",
+            "model_settings": None,
             "network_required": True,
             "secret_env_names": ["OLLAMA_API_KEY"],
             "auth_boundary": "codex_cli_auth",
@@ -59,16 +69,43 @@ def _judge_profiles() -> list[dict[str, Any]]:
         },
         {
             "id": "codex-fast",
+            "codex_profile": "fast",
             "provider": "codex",
             "mode": "codex-fast",
             "host": "codex-cli-authenticated-session",
             "model": "gpt-5.3-codex-spark",
+            "model_role": "codex_fast_smoke",
+            "model_settings": None,
             "network_required": True,
             "secret_env_names": [],
             "auth_boundary": "codex_cli_auth",
             "receives_sanitized_outputs_only": True,
         },
-    ]
+    ])
+    return profiles
+
+
+def _local_judge_profile(
+    profile_id: str,
+    codex_profile: str,
+    model: str,
+    model_role: str,
+    settings: dict[str, Any],
+) -> dict[str, Any]:
+    return {
+        "id": profile_id,
+        "codex_profile": codex_profile,
+        "provider": "codex",
+        "mode": "local",
+        "host": "codex-cli-profile",
+        "model": model,
+        "model_role": model_role,
+        "model_settings": dict(settings),
+        "network_required": True,
+        "secret_env_names": [],
+        "auth_boundary": "none",
+        "receives_sanitized_outputs_only": True,
+    }
 
 
 def _profile_by_id(profiles: list[dict[str, Any]], profile_id: str, profile_kind: str) -> dict[str, Any]:

@@ -15,7 +15,7 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
 from ask.skills_sdk.eval_runner import internal_scorecard_quality_gates, run_deterministic_eval  # noqa: E402
 from ask.skills_sdk.typed_contracts import validate_eval_run_receipt, validate_robot_envelope  # noqa: E402
-from ask.commands.skills_impl import skills_sdk_eval_run  # noqa: E402
+from ask.commands.skills_impl import _load_release_scenario_sets, skills_sdk_eval_run  # noqa: E402
 from ask.envelope import CallResult, ErrorObject  # noqa: E402
 
 
@@ -513,6 +513,14 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
         self.assertEqual(receipt.scenario_set_case_ids, TECHNICAL_WRITER_RELEASE_20)
         self.assertEqual(receipt.selected_case_ids, TECHNICAL_WRITER_RELEASE_20)
         self.assertEqual(receipt.release_set_minimum, 20)
+
+    def test_release_scenario_sets_load_without_pyyaml(self) -> None:
+        evals_path = REPO_ROOT / "Skills/agent-ops/technical-writer/references/evals.yaml"
+        with mock.patch.dict(sys.modules, {"yaml": None}):
+            release_sets = _load_release_scenario_sets(evals_path)
+
+        self.assertEqual(release_sets[0]["id"], "technical-writer-release-20-v1")
+        self.assertEqual(release_sets[0]["case_ids"], TECHNICAL_WRITER_RELEASE_20)
 
     def test_oss_release_lane_blocks_filtered_debug_subset_before_runtime(self) -> None:
         with mock.patch("ask.commands.evals.run_evals") as run:

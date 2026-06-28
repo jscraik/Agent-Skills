@@ -1,4 +1,128 @@
 {
+  "schema_version": "skills-sdk.ab-judge-score-receipt.v0",
+  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/ab-judge-score-receipt.v0.schema.json",
+  "status": "scored",
+  "operation": "ab_judge_score",
+  "run_receipt_path": "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.json",
+  "run_receipt_digest": "sha256:76eb89ec8abebd5af7ee9b2c43765910011470f05450f1f6bebf425c19d5b1f4",
+  "experiment_id": "2f17c65de51f3a24",
+  "judge_prompt_digest": "sha256:68c44f41813edf8431978ee0408496cb04c2294927e3dac5f4a493e87de0c65c",
+  "judge_output_path": ".harness/artifacts/sdk-ab-judges/2f17c65de51f3a24/judge/codex-last-message.json",
+  "judge_output_digest": "sha256:56f0348dce1dbeb49d0bada29c7325553de2a8d380a8f7d38406029415ca1b8b",
+  "judge_command_argv": [
+    "codex",
+    "exec",
+    "--profile",
+    "oss-local",
+    "--cd",
+    "/private/tmp/ask-sdk-ab-judge-workspaces/08155c397ce35c2d",
+    "--sandbox",
+    "read-only",
+    "--ephemeral",
+    "--json",
+    "--output-last-message",
+    "/Users/jamiecraik/dev/agent-skills/.harness/artifacts/sdk-ab-judges/2f17c65de51f3a24/judge/codex-last-message.json",
+    "-"
+  ],
+  "codex_profile": "oss-local",
+  "judge_profile": {
+    "id": "oss-local",
+    "codex_profile": "oss-local",
+    "provider": "codex",
+    "mode": "local",
+    "host": "codex-cli-profile",
+    "model": "gpt-oss:20b",
+    "model_role": "local_sandbox_eval_default",
+    "model_settings": {
+      "num_ctx": 8192,
+      "temperature": 0.1,
+      "top_p": 0.9
+    },
+    "network_required": true,
+    "secret_env_names": [],
+    "auth_boundary": "none",
+    "receives_sanitized_outputs_only": true
+  },
+  "rubric_id": "skills-sdk.ab-rubric.v0",
+  "rubric_digest": "sha256:0063e3f35e8bbd93c5de20d2672075267e7b74fb33278db7ab48c5858b99b574",
+  "decision_schema_version": "skills-sdk.ab-judge-decision.v0",
+  "allowed_winners": [
+    "skill_a",
+    "skill_b",
+    "inconclusive"
+  ],
+  "codex_exec_invoked": true,
+  "decision": {
+    "schema_version": "skills-sdk.ab-judge-decision.v0",
+    "experiment_id": "2f17c65de51f3a24",
+    "dimension_scores": [
+      {
+        "dimension_id": "task_success",
+        "skill_a_score": 3.0,
+        "skill_b_score": 4.0,
+        "reason": "skill_b has stronger task_success evidence",
+        "evidence_refs": [
+          "variant_results",
+          "output_last_message_digest"
+        ]
+      },
+      {
+        "dimension_id": "instruction_following",
+        "skill_a_score": 3.0,
+        "skill_b_score": 4.0,
+        "reason": "skill_b has stronger instruction_following evidence",
+        "evidence_refs": [
+          "variant_results",
+          "output_last_message_digest"
+        ]
+      },
+      {
+        "dimension_id": "evidence_quality",
+        "skill_a_score": 3.0,
+        "skill_b_score": 4.0,
+        "reason": "skill_b has stronger evidence_quality evidence",
+        "evidence_refs": [
+          "variant_results",
+          "output_last_message_digest"
+        ]
+      },
+      {
+        "dimension_id": "repo_safety",
+        "skill_a_score": 3.0,
+        "skill_b_score": 4.0,
+        "reason": "skill_b has stronger repo_safety evidence",
+        "evidence_refs": [
+          "variant_results",
+          "output_last_message_digest"
+        ]
+      },
+      {
+        "dimension_id": "maintainability",
+        "skill_a_score": 3.0,
+        "skill_b_score": 4.0,
+        "reason": "skill_b has stronger maintainability evidence",
+        "evidence_refs": [
+          "variant_results",
+          "output_last_message_digest"
+        ]
+      }
+    ],
+    "normalized_score_a": 0.6,
+    "normalized_score_b": 0.8,
+    "winner": "skill_b",
+    "confidence": "medium",
+    "reason": "skill_b has stronger sanitized receipt evidence across the rubric.",
+    "evidence_refs": [
+      "variant_results",
+      "rubric_digest"
+    ]
+  },
+  "calibration_required": true,
+  "advisory_only": true,
+  "provider_invoked": true,
+  "network_accessed": true,
+  "mutation_performed": true,
+  "blockers": [],
   "acceptance_trace": [
     "FR-003",
     "FR-008",
@@ -8,119 +132,5 @@
     "VP-022",
     "VP-030"
   ],
-  "advisory_only": true,
-  "agent_summary": "A/B local judge scoring completed with advisory decision evidence.",
-  "allowed_winners": [
-    "skill_a",
-    "skill_b",
-    "inconclusive"
-  ],
-  "blockers": [],
-  "calibration_required": true,
-  "decision": {
-    "confidence": "medium",
-    "dimension_scores": [
-      {
-        "dimension_id": "task_success",
-        "evidence_refs": [
-          "variant_results",
-          "output_last_message_digest"
-        ],
-        "reason": "skill_b has stronger task_success evidence",
-        "skill_a_score": 3.0,
-        "skill_b_score": 4.0
-      },
-      {
-        "dimension_id": "instruction_following",
-        "evidence_refs": [
-          "variant_results",
-          "output_last_message_digest"
-        ],
-        "reason": "skill_b has stronger instruction_following evidence",
-        "skill_a_score": 3.0,
-        "skill_b_score": 4.0
-      },
-      {
-        "dimension_id": "evidence_quality",
-        "evidence_refs": [
-          "variant_results",
-          "output_last_message_digest"
-        ],
-        "reason": "skill_b has stronger evidence_quality evidence",
-        "skill_a_score": 3.0,
-        "skill_b_score": 4.0
-      },
-      {
-        "dimension_id": "repo_safety",
-        "evidence_refs": [
-          "variant_results",
-          "output_last_message_digest"
-        ],
-        "reason": "skill_b has stronger repo_safety evidence",
-        "skill_a_score": 3.0,
-        "skill_b_score": 4.0
-      },
-      {
-        "dimension_id": "maintainability",
-        "evidence_refs": [
-          "variant_results",
-          "output_last_message_digest"
-        ],
-        "reason": "skill_b has stronger maintainability evidence",
-        "skill_a_score": 3.0,
-        "skill_b_score": 4.0
-      }
-    ],
-    "evidence_refs": [
-      "variant_results",
-      "rubric_digest"
-    ],
-    "experiment_id": "1111222233334444",
-    "normalized_score_a": 0.6,
-    "normalized_score_b": 0.8,
-    "reason": "skill_b has stronger sanitized receipt evidence across the rubric.",
-    "schema_version": "skills-sdk.ab-judge-decision.v0",
-    "winner": "skill_b"
-  },
-  "decision_schema_version": "skills-sdk.ab-judge-decision.v0",
-  "experiment_id": "1111222233334444",
-  "codex_exec_invoked": true,
-  "codex_profile": "oss-local",
-  "judge_command_argv": [
-    "codex",
-    "exec",
-    "--profile",
-    "oss-local",
-    "--cd",
-    ".",
-    "--json",
-    "--output-last-message",
-    ".harness/fixtures/sdk-ab-judge-score/1111222233334444/judge/codex-last-message.json",
-    "-"
-  ],
-  "judge_output_digest": "sha256:38c3f1af5322e2b59cafe9ab40e23e9a1c91bb73559c2d8baf4be40e682d3a2a",
-  "judge_output_path": ".harness/fixtures/sdk-ab-judge-score/1111222233334444/judge/codex-last-message.json",
-  "judge_profile": {
-    "auth_boundary": "none",
-    "host": "codex-cli-profile",
-    "id": "oss-local",
-    "mode": "local",
-    "model": "qwen3.5:latest",
-    "network_required": true,
-    "provider": "codex",
-    "receives_sanitized_outputs_only": true,
-    "secret_env_names": []
-  },
-  "judge_prompt_digest": "sha256:c2f82df29cc0c1f2acfcee21634fda00baf060220d6b77a336df40967b5a4985",
-  "mutation_performed": true,
-  "network_accessed": true,
-  "operation": "ab_judge_score",
-  "provider_invoked": true,
-  "rubric_digest": "sha256:662f3cf0c3e29ea91d0bd6d43880c4ede7b4f7ebff8f60a908764e8d32db0610",
-  "rubric_id": "skills-sdk.ab-rubric.v0",
-  "run_receipt_digest": "sha256:e7430a607077153ef31bbc582c8ceb4227b6dd244837b8e5c37c433e009b18be",
-  "run_receipt_path": "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.json",
-  "schema_uri": "https://agent-skills.local/schemas/skills-sdk/ab-judge-score-receipt.v0.schema.json",
-  "schema_version": "skills-sdk.ab-judge-score-receipt.v0",
-  "status": "scored"
+  "agent_summary": "A/B local judge scoring completed with advisory decision evidence."
 }

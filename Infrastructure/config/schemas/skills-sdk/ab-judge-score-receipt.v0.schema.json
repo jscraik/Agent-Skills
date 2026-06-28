@@ -27,7 +27,10 @@
     "judge_output_path": {"type": ["string", "null"], "minLength": 1},
     "judge_output_digest": {"type": ["string", "null"], "minLength": 71},
     "judge_command_argv": {"type": "array", "items": {"type": "string", "minLength": 1}},
-    "codex_profile": {"type": ["string", "null"], "enum": ["oss-local", "oss-cloud", null]},
+    "codex_profile": {
+      "type": ["string", "null"],
+      "enum": ["oss-local", "oss-local-code", "oss-local-fallback", "oss-cloud", null]
+    },
     "codex_exec_invoked": {"type": "boolean"},
     "decision": {"oneOf": [{"type": "null"}, {"$ref": "#/definitions/judge_decision"}]},
     "calibration_required": {"type": "boolean", "const": true},
@@ -62,7 +65,7 @@
             "contains": {"type": "string", "const": "--profile"},
             "minContains": 1
           },
-          "codex_profile": {"type": "string", "enum": ["oss-local", "oss-cloud"]},
+          "codex_profile": {"type": "string", "enum": ["oss-local", "oss-local-code", "oss-local-fallback", "oss-cloud"]},
           "codex_exec_invoked": {"const": true},
           "decision": {"$ref": "#/definitions/judge_decision"},
           "provider_invoked": {"const": true},

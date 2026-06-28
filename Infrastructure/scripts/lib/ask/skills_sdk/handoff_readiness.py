@@ -417,6 +417,8 @@ def _next_actions(
     command_actions = _lane_command_next_actions(blocker_ids)
     if command_actions:
         return command_actions
+    if "lane_receipt_semantics_valid" in blocker_ids and _lane_receipt_semantics_blocked(lanes or [], "oss-local"):
+        return [_OSS_LOCAL_RECEIPT_SEMANTICS_BLOCKER_ACTION]
     if _lane_has_runtime_blocker(lanes or [], "oss-local"):
         return [_OSS_LOCAL_RUNTIME_BLOCKER_ACTION]
     return _lane_status_next_actions(blocker_ids)
@@ -425,6 +427,11 @@ def _next_actions(
 _OSS_LOCAL_RUNTIME_BLOCKER_ACTION = (
     "Preserve the oss-local blocked_runtime receipt, run oss-cloud as a diagnostic continuation, "
     "and keep live Tessl blocked until oss-local is repaired or an explicit skip receipt is approved."
+)
+
+_OSS_LOCAL_RECEIPT_SEMANTICS_BLOCKER_ACTION = (
+    "Repair the oss-local release-lane failures and rerun oss-local before oss-cloud; "
+    "do not run live Tessl while the oss-local receipt status, profile proof, or release scenario evidence is blocked."
 )
 
 
@@ -606,6 +613,17 @@ def _lane_has_runtime_blocker(lanes: list[dict[str, Any]], lane_id: str) -> bool
             continue
         blocker = lane.get("blocker")
         return isinstance(blocker, str) and "blocked_runtime" in blocker
+    return False
+
+
+def _lane_receipt_semantics_blocked(lanes: list[dict[str, Any]], lane_id: str) -> bool:
+    for lane in lanes:
+        if lane.get("id") != lane_id:
+            continue
+        blockers = lane.get("blockers")
+        if not isinstance(blockers, list):
+            return False
+        return any(isinstance(blocker, dict) and blocker.get("id") == "lane_receipt_semantics_valid" for blocker in blockers)
     return False
 
 

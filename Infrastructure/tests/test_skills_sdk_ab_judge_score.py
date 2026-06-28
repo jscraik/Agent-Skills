@@ -162,7 +162,9 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         self.assertEqual(receipt["status"], "scored")
         self.assertEqual(receipt["operation"], "ab_judge_score")
         self.assertEqual(receipt["judge_profile"]["id"], "oss-local")
-        self.assertEqual(receipt["judge_profile"]["model"], "qwen3.5:latest")
+        self.assertEqual(receipt["judge_profile"]["model"], "gpt-oss:20b")
+        self.assertEqual(receipt["judge_profile"]["model_role"], "local_sandbox_eval_default")
+        self.assertEqual(receipt["judge_profile"]["model_settings"]["num_ctx"], 8192)
         self.assertEqual(receipt["decision"]["winner"], "skill_b")
         self.assertEqual(receipt["decision"]["confidence"], "medium")
         self.assertTrue(receipt["provider_invoked"])
@@ -172,8 +174,42 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         self.assertTrue(receipt["calibration_required"])
         self.assertEqual(receipt["blockers"], [])
         self.assertEqual(len(calls), 1)
-        self.assertIn("qwen3.5:latest", calls[0])
+        self.assertIn("gpt-oss:20b", calls[0])
         self.assertTrue((REPO_ROOT / receipt["judge_output_path"]).is_file())
+        validate_ab_judge_score_receipt(receipt)
+
+    def test_builder_scores_with_code_heavy_local_judge_profile(self) -> None:
+        calls: list[str] = []
+
+        def fake_runner(
+            prompt: str,
+            judge_profile: dict[str, object],
+            timeout_seconds: int,
+            repo_root: Path,
+            output_file: Path,
+        ) -> CodexJudgeResult:
+            calls.append(str(judge_profile["codex_profile"]))
+            run_receipt = json.loads((REPO_ROOT / RUN_RECEIPT).read_text(encoding="utf-8"))
+            return CodexJudgeResult(exit_code=0, stdout=json.dumps(_decision(run_receipt["experiment_id"])), stderr="")
+
+        receipt = build_ab_judge_score_receipt(
+            REPO_ROOT,
+            run_receipt=RUN_RECEIPT,
+            evidence_root=self.evidence_root,
+            judge_profile_id="oss-local-code",
+            runner=fake_runner,
+        )
+
+        self.assertEqual(receipt["status"], "scored")
+        self.assertEqual(receipt["blockers"], [])
+        self.assertEqual(receipt["judge_profile"]["id"], "oss-local-code")
+        self.assertEqual(receipt["judge_profile"]["codex_profile"], "oss-local-code")
+        self.assertEqual(receipt["judge_profile"]["model"], "qwen3-coder:30b")
+        self.assertEqual(receipt["judge_profile"]["model_role"], "code_heavy_specialist")
+        self.assertEqual(receipt["codex_profile"], "oss-local-code")
+        self.assertEqual(calls, ["oss-local-code"])
+        self.assertIn("--profile", receipt["judge_command_argv"])
+        self.assertIn("oss-local-code", receipt["judge_command_argv"])
         validate_ab_judge_score_receipt(receipt)
 
     def test_builder_scores_with_injected_cloud_judge_profile(self) -> None:
@@ -714,8 +750,8 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
     def test_local_codex_runner_uses_oss_local_profile(self) -> None:
         result, captured_command, captured_env, captured_profile_text, _op_env_file = _run_codex_with_captured_subprocess(
             "oss-local",
-            'model = "qwen3.5:latest"\nmodel_provider = "ollama"\nsandbox_mode = "read-only"\n',
-            {"id": "oss-local", "model": "qwen3.5:latest"},
+            'model = "gpt-oss:20b"\nmodel_provider = "ollama"\nsandbox_mode = "read-only"\n',
+            {"id": "oss-local", "codex_profile": "oss-local", "model": "gpt-oss:20b"},
         )
 
         self.assertEqual(result.exit_code, 0)
@@ -729,10 +765,32 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         self.assertEqual(result.output_text, "{}")
         self.assertIn("CODEX_HOME", captured_env)
         self.assertIn("CODEX_SQLITE_HOME", captured_env)
-        self.assertIn('model = "qwen3.5:latest"', captured_profile_text)
+        self.assertIn('model = "gpt-oss:20b"', captured_profile_text)
         self.assertNotIn("OPENAI_API_KEY", captured_env)
         self.assertNotIn("OLLAMA_API_KEY", captured_env)
         self.assertNotIn("GITHUB_TOKEN", captured_env)
+
+    def test_code_heavy_codex_runner_uses_dedicated_local_profile(self) -> None:
+        result, captured_command, _captured_env, captured_profile_text, _op_env_file = _run_codex_with_captured_subprocess(
+            "oss-local-code",
+            'model = "qwen3-coder:30b"\nmodel_provider = "ollama"\nsandbox_mode = "read-only"\n',
+            {"id": "oss-local-code", "codex_profile": "oss-local-code", "model": "qwen3-coder:30b"},
+        )
+
+        self.assertEqual(result.exit_code, 0)
+        self.assertEqual(captured_command[:4], ["codex", "exec", "--profile", "oss-local-code"])
+        self.assertIn('model = "qwen3-coder:30b"', captured_profile_text)
+
+    def test_fallback_codex_runner_uses_dedicated_local_profile(self) -> None:
+        result, captured_command, _captured_env, captured_profile_text, _op_env_file = _run_codex_with_captured_subprocess(
+            "oss-local-fallback",
+            'model = "qwen3.5:latest"\nmodel_provider = "ollama"\nsandbox_mode = "read-only"\n',
+            {"id": "oss-local-fallback", "codex_profile": "oss-local-fallback", "model": "qwen3.5:latest"},
+        )
+
+        self.assertEqual(result.exit_code, 0)
+        self.assertEqual(captured_command[:4], ["codex", "exec", "--profile", "oss-local-fallback"])
+        self.assertIn('model = "qwen3.5:latest"', captured_profile_text)
 
     def test_cloud_codex_runner_wraps_codex_with_op_env_file(self) -> None:
         result, captured_command, captured_env, captured_profile_text, op_env_file = _run_codex_with_captured_subprocess(

@@ -24,6 +24,10 @@ PROVENANCE_ONLY_VERBS_RE = re.compile(r"(?i)\b(names?|cites?|references?|points?
 CASE_INPUT_PATH_RE = re.compile(
     r"(?i)(?<![A-Za-z0-9_./-])(?:canonical|generated|fixtures?|inputs?|sources?)/[^\s,;:)\]}\"']+\.(?:md|json|txt|yaml|yml)\b"
 )
+SIDE_EFFECT_FILE_PROMPT_RE = re.compile(
+    r"(?is)\b(?:write|save|create|produce)\b[^\n]{0,100}\b[A-Za-z0-9_.-]+\.(?:md|json|txt|yaml|yml)\b"
+)
+FINAL_ANSWER_FILE_MARKER_RE = re.compile(r"(?i)\b(?:return|provide|include|show)\b[^\n]{0,80}\b(?:contents?|final answer|response)\b")
 INLINE_INPUT_MARKERS = (
     "<file",
     "```",
@@ -285,6 +289,13 @@ def _case_depends_on_hidden_input_file(case: dict[str, object]) -> bool:
     return bool(re.search(r"(?i)\b(inspect|read|review|compare|audit|use|open)\b", visible_text))
 
 
+def _case_requires_file_side_effect_without_final_answer_path(case: dict[str, object]) -> bool:
+    prompt = str(case.get("prompt") or "")
+    if not SIDE_EFFECT_FILE_PROMPT_RE.search(prompt):
+        return False
+    return not FINAL_ANSWER_FILE_MARKER_RE.search(prompt)
+
+
 def _case_acceptance_text_parts(case: dict[str, object]) -> list[str]:
     text_parts: list[str] = []
     for item in _normalized_acceptance_items(case):
@@ -517,6 +528,11 @@ TESSL_CASE_FINDING_RULES = (
         _case_depends_on_hidden_input_file,
         "hidden_input_file_dependency",
         "SDK and Tessl release scenarios must inline required input file contents or provide a staged fixture artifact; do not ask isolated runners to inspect package-relative files that are absent from the visible task.",
+    ),
+    (
+        _case_requires_file_side_effect_without_final_answer_path,
+        "read_only_file_artifact_side_effect",
+        "OSS read-only release scenarios must ask for file artifact contents in the final answer rather than requiring the agent to write, save, create, or produce files in the sandbox.",
     ),
 )
 

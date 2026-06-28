@@ -27,8 +27,14 @@ def _exact_decision_labels(rows: list[str]) -> bool:
 def _contains_codex_profile_invocation(argv: list[str], codex_profile: str | None) -> bool:
     if codex_profile is None:
         return False
-    needle = ["codex", "exec", "--profile", codex_profile]
-    return any(argv[index:index + len(needle)] == needle for index in range(0, len(argv) - len(needle) + 1))
+    try:
+        codex_index = argv.index("codex")
+        if argv[codex_index + 1] != "exec":
+            return False
+        profile_index = argv.index("--profile", codex_index + 2)
+    except (IndexError, ValueError):
+        return False
+    return profile_index + 1 < len(argv) and argv[profile_index + 1] == codex_profile
 
 
 def _validate_exact_decision_labels(value: list[str], *, message: str) -> list[str]:
@@ -77,12 +83,28 @@ class EvalExecutionProfile(_SdkContractModel):
     mutation_allowed: bool
 
 
+class EvalJudgeModelSettings(_SdkContractModel):
+    num_ctx: Annotated[int, Field(ge=1)]
+    temperature: Annotated[float, Field(ge=0)]
+    top_p: Annotated[float, Field(ge=0, le=1)]
+
+
 class EvalJudgeProfile(_SdkContractModel):
     id: str = Field(min_length=1)
+    codex_profile: str = Field(min_length=1)
     provider: Literal["ollama", "codex"]
     mode: Literal["local", "cloud", "codex-fast"]
     host: str | None
     model: str = Field(min_length=1)
+    model_role: Literal[
+        "local_sandbox_eval_default",
+        "larger_local_transcript_trial",
+        "code_heavy_specialist",
+        "fast_fallback",
+        "cloud_confirmation",
+        "codex_fast_smoke",
+    ]
+    model_settings: EvalJudgeModelSettings | None
     network_required: bool
     secret_env_names: list[str]
     auth_boundary: Literal["none", "env_secret", "codex_cli_auth"]
@@ -622,7 +644,7 @@ class AbJudgeScoreReceipt(_SdkContractModel):
     judge_output_path: str | None = Field(default=None, min_length=1)
     judge_output_digest: str | None = Field(default=None, min_length=71)
     judge_command_argv: list[str]
-    codex_profile: Literal["oss-local", "oss-cloud"] | None
+    codex_profile: Literal["oss-local", "oss-local-code", "oss-local-fallback", "oss-cloud"] | None
     codex_exec_invoked: bool
     decision: AbJudgeDecision | None
     calibration_required: Literal[True]
@@ -653,10 +675,10 @@ class AbJudgeScoreReceipt(_SdkContractModel):
             raise ValueError("scored A/B judge receipts must include complete score evidence")
         if not (self.provider_invoked and self.network_accessed and self.mutation_performed and self.codex_exec_invoked):
             raise ValueError("scored A/B judge receipts must report provider side effects")
-        if self.codex_profile != self.judge_profile.id:
+        if self.codex_profile != self.judge_profile.codex_profile:
             raise ValueError("scored A/B judge receipts must bind Codex profile to judge profile")
         if not _contains_codex_profile_invocation(self.judge_command_argv, self.codex_profile):
-            raise ValueError("scored A/B judge receipts must invoke codex exec with the judge profile")
+            raise ValueError("scored A/B judge receipts must invoke codex exec with the judge Codex profile")
         self._validate_decision_consistency()
 
     def _validate_decision_consistency(self) -> None:

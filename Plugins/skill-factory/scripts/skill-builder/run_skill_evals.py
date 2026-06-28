@@ -2705,13 +2705,16 @@ def _filter_cases(
     *,
     case_filters: Sequence[str],
     categories: Sequence[str],
+    exact_case_ids: bool = False,
 ) -> List[EvalCase]:
     """
     Filter eval cases by case id/name substring and by category.
 
     Parameters:
-        case_filters (Sequence[str]): Substring terms (case-insensitive) to match against each case's `id` or `name`. An empty sequence disables id/name filtering.
+        case_filters (Sequence[str]): Terms used to match case ids or names. An empty sequence disables id/name filtering.
         categories (Sequence[str]): Category names to include (case-insensitive). An empty sequence disables category filtering.
+        exact_case_ids (bool): When true, case filters must match the exact case id. Release scenario-set
+            expansion uses this to prevent substring leakage into generated fixture ids.
 
     Returns:
         List[EvalCase]: The subset of `cases` that match all provided filters.
@@ -2734,7 +2737,10 @@ def _filter_cases(
     filtered: List[EvalCase] = []
     for case in cases:
         haystack = f"{case.id} {case.name}".lower()
-        match_case = not case_terms or any(term in haystack for term in case_terms)
+        if exact_case_ids:
+            match_case = not case_terms or case.id.lower() in case_terms
+        else:
+            match_case = not case_terms or any(term in haystack for term in case_terms)
         match_category = not category_set or ((case.category or "").lower() in category_set)
         if match_case and match_category:
             filtered.append(case)
@@ -3131,11 +3137,7 @@ def _classify_runner_blocker(
     process_text = "\n".join([stdout_text or "", stderr_text or ""])
     low = process_text.lower()
 
-    strong_runtime_markers = [
-        "sandbox_apply: operation not permitted",
-        "host_execution_untrusted",
-        "sandbox-exec",
-        "operation not permitted",
+    hard_runtime_markers = [
         "ran out of room in the model's context window",
         "selected model is at capacity",
         "model is at capacity",
@@ -3143,7 +3145,18 @@ def _classify_runner_blocker(
         "you have hit your usage limit",
         "usage limit for",
         "switch to another model",
+    ]
+    conditional_runtime_markers = [
+        "sandbox_apply: operation not permitted",
+        "host_execution_untrusted",
+        "sandbox-exec",
+        "operation not permitted",
         "blocked_runtime",
+    ]
+    model_refresh_runtime_markers = [
+        "failed to refresh available models",
+        "error sending request for url (http://localhost:11434",
+        "stream disconnected before completion",
     ]
     weak_runtime_markers = ["try again at", "start a new thread"]
     usage_context_markers = [
@@ -3152,7 +3165,11 @@ def _classify_runner_blocker(
         "selected model is at capacity",
         "context window",
     ]
-    if any(marker in low for marker in strong_runtime_markers):
+    if any(marker in low for marker in hard_runtime_markers):
+        return "blocked_runtime"
+    if (exit_code != 0 or not (output_text or "").strip()) and any(
+        marker in low for marker in model_refresh_runtime_markers
+    ):
         return "blocked_runtime"
     if any(marker in low for marker in weak_runtime_markers) and any(
         marker in low for marker in usage_context_markers
@@ -3172,7 +3189,13 @@ def _classify_runner_blocker(
     ]
     if exit_code == 0 and not (output_text or "").strip() and any(marker in low for marker in tool_schema_markers):
         return "blocked_runtime"
-    if any(marker in low for marker in strong_runtime_markers):
+    if any(marker in low for marker in hard_runtime_markers):
+        return "blocked_runtime"
+    if any(marker in low for marker in conditional_runtime_markers):
+        return "blocked_runtime"
+    if (exit_code != 0 or not (output_text or "").strip()) and any(
+        marker in low for marker in model_refresh_runtime_markers
+    ):
         return "blocked_runtime"
     if any(marker in low for marker in weak_runtime_markers) and any(
         marker in low for marker in usage_context_markers
@@ -3931,7 +3954,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     case_filters = _parse_csv_args(args.case)
     category_filters = _parse_csv_args(args.category)
     try:
-        cases = _filter_cases(cases, case_filters=case_filters, categories=category_filters)
+        cases = _filter_cases(
+            cases,
+            case_filters=case_filters,
+            categories=category_filters,
+            exact_case_ids=args.eval_mode == "release" and bool(case_filters),
+        )
     except ValueError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1

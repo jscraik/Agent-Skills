@@ -91,10 +91,37 @@
       "additionalProperties": false,
       "properties": {
         "id": {"type": "string", "minLength": 1},
+        "codex_profile": {"type": "string", "minLength": 1},
         "provider": {"type": "string", "enum": ["ollama", "codex"]},
         "mode": {"type": "string", "enum": ["local", "cloud", "codex-fast"]},
         "host": {"type": ["string", "null"]},
         "model": {"type": "string", "minLength": 1},
+        "model_role": {
+          "type": "string",
+          "enum": [
+            "local_sandbox_eval_default",
+            "larger_local_transcript_trial",
+            "code_heavy_specialist",
+            "fast_fallback",
+            "cloud_confirmation",
+            "codex_fast_smoke"
+          ]
+        },
+        "model_settings": {
+          "oneOf": [
+            {"type": "null"},
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "num_ctx": {"type": "integer", "minimum": 1},
+                "temperature": {"type": "number", "minimum": 0},
+                "top_p": {"type": "number", "minimum": 0, "maximum": 1}
+              },
+              "required": ["num_ctx", "temperature", "top_p"]
+            }
+          ]
+        },
         "network_required": {"type": "boolean"},
         "secret_env_names": {"type": "array", "items": {"type": "string", "minLength": 1}},
         "auth_boundary": {"type": "string", "enum": ["none", "env_secret", "codex_cli_auth"]},
@@ -102,10 +129,13 @@
       },
       "required": [
         "id",
+        "codex_profile",
         "provider",
         "mode",
         "host",
         "model",
+        "model_role",
+        "model_settings",
         "network_required",
         "secret_env_names",
         "auth_boundary",
