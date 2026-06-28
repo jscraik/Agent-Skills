@@ -139,7 +139,8 @@ class TestSkillsSdkStart(unittest.TestCase):
             self.assertIn(str(skill_md.parent), receipt["next_action"]["command"])
             self.assertIn("oss_cloud_eval", receipt["blocked_downstream_lanes"])
             self.assertIn("security posture", receipt["what_this_does_not_prove"])
-            self.assertIn("skills-sdk-lab", receipt["score_policy"]["workspace_policy"])
+            self.assertIn("jscraik", receipt["score_policy"]["workspace_policy"])
+            self.assertIn("private", receipt["score_policy"]["workspace_policy"])
 
     def test_start_records_single_pipeline_for_all_lifecycle_entrypoints(self) -> None:
         payload = _run_json_command(
@@ -158,7 +159,7 @@ class TestSkillsSdkStart(unittest.TestCase):
         self.assertEqual(lanes["oss_local_repair_loop"]["target_success_rate"], "70-75 internal success after mechanical and scenario gates")
         self.assertEqual(lanes["oss_cloud_repair_loop"]["target_success_rate"], ">=90 internal success before Tessl spend")
         self.assertEqual(lanes["tessl_live_confirmation"]["target_success_rate"], ">=90 and >= baseline; Tessl is confirmational, not the discovery loop")
-        self.assertIn("--workspace skills-sdk-lab", lanes["tessl_local_proof_execute"]["command"])
+        self.assertIn("--workspace jscraik", lanes["tessl_local_proof_execute"]["command"])
         self.assertIn("--tessl-live-dry-run", lanes["tessl_live_dry_run"]["command"])
         self.assertIn("private workspace retention or public registry publication", lanes["registry_or_private_workspace_decision"]["command"])
 

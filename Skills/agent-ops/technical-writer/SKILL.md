@@ -30,14 +30,18 @@ Docs should move verified information into the reader's head with low search cos
 - README, runbook, code-doc, template, config-doc, or trust-surface docs need audit or rewrite.
 - Claims need checks against scripts, commands, workflows, tests, repo structure, support paths, or governance docs.
 - Substantial docs need reader testing for hidden assumptions or missing setup.
+- Talks, articles, DevRel content, service content, visual docs, and short-form
+  writing need evidence-backed technical shaping.
 
 ## Avoid
 - Inventing commands, paths, versions, tool access, or platform behavior.
 - Generic copyediting when operational accuracy is the job.
 - Changing runtime behavior, dependencies, CI, release state, trackers, user config, projections, or mirrors from this skill alone.
+- Implementation refactors or performance work unless the user explicitly asks
+  for documentation, docs review, content, talk, article, or publication work.
 
 ## Preconditions
-Read applicable `AGENTS.md`; resolve generated/mirrored docs to canonical sources; know audience, reader job, side effect, and approval gates before editing.
+Read applicable `AGENTS.md`; resolve generated/mirrored docs to canonical sources; know audience, reader job, side effect, and approval gates before editing. When generated, canonical, runtime, mirrored, or publication paths appear, make the source/projection/runtime/publication boundary decision before any edit.
 
 ## Inputs
 Doc target, audience, reader job, writing mode, truth files, validation commands, glossary or ubiquitous-language surfaces, and brand/governance constraints.
@@ -55,6 +59,8 @@ unknowns, and handoff needs.
 - When the editable surface is unclear, ask which documentation path or
   surface to inspect first: canonical docs/source, generated or runtime
   projections, public publication surfaces, or audit-only with no edits.
+- For an underspecified boundary request, ask exactly one smallest useful
+  editable-surface question before proposing implementation steps or edits.
 - Read `references/discovery-interview.md` when the request is underspecified
   and file access is available; in isolated eval runners, use the inline rules
   above without treating the missing reference read as a task blocker.
@@ -68,22 +74,45 @@ unknowns, and handoff needs.
    - `shape`: choose the reader path, prerequisite concepts, section/block sequence, format choices, and citations.
    - `rewrite`: patch the smallest verified doc path.
    - `validate`: test whether the changed path works without hidden context.
-2. Inspect 2-3 focused truth surfaces before widening scope:
+2. If generated, canonical, runtime, mirrored, or publication paths are present,
+   name the editable owner, the non-editable projection or publication surface,
+   and whether refresh, sync, or publish is a separate follow-up or blocker.
+3. Inspect 2-3 focused truth surfaces before widening scope:
    - Find documented commands or paths: `rg -n "bin/ask|scripts/|make |npm |pnpm |uv |pytest|SKILL.md|AGENTS.md" <doc>`
    - Verify referenced files exist: `test -e <path>` or `rg --files | rg '<basename>$'`
    - Inspect canonical wrappers before package commands: `./bin/ask repo status --json --robot`
-3. Search the active glossary before introducing domain language: prefer `UBIQUITOUS_LANGUAGE.md`, then repo-local `UBIQUITOUS.md`, `UBIQUITOUS-MAP.md`, or `glossary*` files when present.
-4. Build a claim map: `claim -> evidence, owner, status, citation`. Mark missing proof as blocked.
-5. For substantial docs, build a Reader-State Map: `concept -> prerequisite | introduced here | cited evidence | missing foundation`.
-6. When a concept or term is missing, raise the gap with the writer and gather the missing information; do not cut, invent, or bury it unless the user chooses that path.
-7. If no repo term exists and a durable term is needed, add the term plainly to the doc and the active ubiquitous-language or glossary surface with citation or assumption evidence.
-8. Rewrite one reader path at a time; prioritize setup, validation, safety, recovery, grounding, citations, and reader-state continuity.
-9. Validate the changed path with the smallest matching check.
-10. For README/onboarding docs, score first-run usefulness, clarity, recovery, freshness, visual need, and whether screenshots, diagrams, or other visuals lower reader search cost.
-11. For substantial docs, score the changed path against the quality rubric:
+4. When the user supplies a self-contained staged excerpt plus a requested
+   artifact, produce the completed artifact body inline as the answer. Do not
+   answer with an intention, progress note, or file-saving plan such as "I'll
+   create", "building now", or "let me analyze". Do not call tools or read
+   files when the task says the staged excerpt is self-contained. Do not ask
+   the user where to save it, and do not treat unavailable optional file reads
+   as a blocker to using the supplied excerpt. Put unavailable glossary or repo
+   reads in the evidence map as blockers inside the artifact.
+5. Search the active glossary before introducing domain language: prefer `UBIQUITOUS_LANGUAGE.md`, then repo-local `UBIQUITOUS.md`, `UBIQUITOUS-MAP.md`, or `glossary*` files when present.
+6. Build a claim map: `claim -> evidence, owner, status, citation`. Mark missing proof as blocked.
+7. Before changing command examples, capture exact command evidence or a blocked
+   validation statement. Keep local command proof separate from hosted, tracker,
+   release, registry, or external readiness.
+8. For substantial docs, build a Reader-State Map: `concept -> prerequisite | introduced here | cited evidence | missing foundation`.
+9. For runbooks and migrations, run a fresh-reader question matrix before rewrite
+   recommendations: rollout action, rollback path, failure recovery, evidence
+   found, missing assumptions, and blocked rewrite needs.
+10. When a concept or term is missing, raise the gap with the writer and gather the missing information; do not cut, invent, or bury it unless the user chooses that path.
+    If a requested rewrite depends on missing command output, owner evidence,
+    recovery steps, screenshots, or approval, stop before drafting replacement
+    content. Return the writer-facing gap, the exact missing input, and the
+    smallest question or owner handoff needed to proceed. Do not introduce
+    tool names, command names, repo paths, owners, or recovery mechanisms that
+    were not present in the supplied evidence.
+11. If no repo term exists and a durable term is needed, add the term plainly to the doc and the active ubiquitous-language or glossary surface with citation or assumption evidence.
+12. Rewrite one reader path at a time; prioritize setup, validation, safety, recovery, grounding, citations, and reader-state continuity.
+13. Validate the changed path with the smallest matching check.
+14. For README/onboarding docs, score first-run usefulness, clarity, recovery, freshness, visual need, and whether screenshots, diagrams, or other visuals lower reader search cost.
+15. For substantial docs, score the changed path against the quality rubric:
    clear, relevant, accurate, brief, understood, logical, and accepted.
-12. Load `references/documentation-quality.md` only when detailed prose, README, co-authoring, reader-test, reader-state, citations, visuals, or format-choice rules matter.
-13. For specialized writing work, load `references/knowledge-capsule-routing.md`,
+16. Load `references/documentation-quality.md` only when detailed prose, README, co-authoring, reader-test, reader-state, citations, visuals, or format-choice rules matter.
+17. For specialized writing work, load `references/knowledge-capsule-routing.md`,
    choose the smallest matching capsule for the writing type, and name the
    selected writing type plus capsule path in the evidence map.
 
@@ -97,7 +126,7 @@ smallest relevant capsule. Do not browse or load all capsule files by default.
 Use headings, short paragraphs, bullets, tables, citations, and bold only when they improve skimming or trust. Add TOCs, diagrams, screenshots, images, or other visuals only when they lower search cost, explain a relationship, or help the reader recognize a real UI/state. Redact secrets and sensitive data by default.
 
 ## Execution Boundaries
-Edit docs, examples, doc comments, or docs-adjacent config only when needed. Do not change non-doc behavior without another routed skill and approval.
+Edit docs, examples, doc comments, or docs-adjacent config only when needed. Do not change generated projections, runtime projections, publication surfaces, or non-doc behavior without canonical ownership evidence, another routed skill, and approval.
 
 ## Failure Mode
 If evidence conflicts with requested wording, follow repo truth. If proof is missing, mark affected claims blocked. If the fix is non-doc behavior, route to the right workflow.

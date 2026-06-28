@@ -165,6 +165,9 @@ class TestSkillsSdkTesslScoreReceipt(unittest.TestCase):
         self.assertEqual(summary["usage_percent"], 100.0)
         self.assertEqual(summary["baseline_percent"], 50.0)
         self.assertEqual(summary["missing_scenario_count"], 0)
+        self.assertEqual(summary["regressions"], [])
+        self.assertEqual(summary["ties"], [])
+        self.assertEqual(summary["wins"], ["scenario-0", "scenario-1"])
 
     def test_baseline_win_blocks_handoff_feedback_loop(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -180,6 +183,8 @@ class TestSkillsSdkTesslScoreReceipt(unittest.TestCase):
         self.assertIn("feedback loop is open", receipt["blocker"])
         self.assertEqual(summary["usage_percent"], 25.0)
         self.assertEqual(summary["baseline_percent"], 100.0)
+        self.assertEqual(summary["ties"], [])
+        self.assertEqual(summary["wins"], [])
         self.assertEqual(receipt["feedback_loop"]["status"], "open")
         self.assertEqual(receipt["feedback_loop"]["regression_count"], 2)
         self.assertIn("scenario-0", receipt["feedback_loop"]["regression_paths"])
@@ -225,6 +230,7 @@ class TestSkillsSdkTesslScoreReceipt(unittest.TestCase):
         self.assertEqual(summary["missing_scenario_count"], 1)
         self.assertEqual(summary["usage_percent"], 100.0)
         self.assertEqual(summary["baseline_percent"], 50.0)
+        self.assertEqual(summary["wins"], ["scenario-0"])
 
     def test_pending_view_json_is_blocked_even_with_scores(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -323,6 +329,7 @@ class TestSkillsSdkTesslScoreReceipt(unittest.TestCase):
         self.assertEqual(summary["max_points"], 8.0)
         self.assertEqual(summary["usage_percent"], 50.0)
         self.assertEqual(summary["baseline_percent"], 25.0)
+        self.assertEqual(summary["wins"], ["scenario-0", "scenario-1"])
 
     def test_failed_view_next_action_does_not_wait_for_completion(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

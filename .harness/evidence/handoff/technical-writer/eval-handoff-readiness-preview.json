@@ -1,26 +1,36 @@
 {
-  "status": "success",
-  "trace_id": "5db88d64-f696-4234-8bde-8c93f518cc2e",
+  "status": "error",
+  "trace_id": "6c0925f5-cec4-412c-83e6-8f93cda50803",
   "metadata": {
     "version": "0.1.0",
-    "command": "sdk eval handoff-readiness --skill Skills/agent-ops/technical-writer --preview --json --robot",
+    "command": "sdk eval handoff-readiness --skill Skills/agent-ops/technical-writer --tessl-score .harness/evidence/handoff/technical-writer/tessl-score-preview.json --preview --json --robot",
     "next_steps": [],
     "correction_note": null
   },
   "data": {
     "skills_sdk_eval_handoff_readiness": {
       "schema_version": "skills-sdk-eval-handoff-readiness.v0",
-      "status": "preview",
-      "ready_for_live_tessl": true,
+      "status": "blocked",
+      "ready_for_live_tessl": false,
       "skill": "Skills/agent-ops/technical-writer",
       "receipt": {
         "schema_version": "skills-sdk.eval-handoff-readiness.v0",
         "schema_uri": "https://agent-skills.local/schemas/skills-sdk/eval-handoff-readiness.v0.schema.json",
-        "status": "preview",
+        "status": "blocked",
         "operation": "eval_handoff_readiness_preview",
         "query": "Skills/agent-ops/technical-writer",
         "skill_path": "Skills/agent-ops/technical-writer/SKILL.md",
         "readiness_path": ".harness/evidence/handoff/technical-writer/eval-handoff-readiness.json",
+        "tessl_score_path": ".harness/evidence/handoff/technical-writer/tessl-score-preview.json",
+        "tessl_score_summary": {
+          "status": "blocked",
+          "blocker_class": "blocked_validation",
+          "feedback_loop_status": "open",
+          "regression_count": 5,
+          "usage_percent": 76.8182,
+          "baseline_percent": 65.2273,
+          "scenario_count": 32
+        },
         "required_lanes": [
           "deterministic_local_gates",
           "oss-local",
@@ -123,19 +133,33 @@
               },
               {
                 "id": "lane_receipt_semantics_valid",
-                "status": "pass",
+                "status": "blocker",
                 "severity": "blocker",
                 "message": "Passed lane receipts must prove the lane status and profile they are standing in for.",
                 "evidence": [
                   ".harness/evidence/handoff/technical-writer/oss-local.json",
-                  "status=success",
+                  "status=error",
                   "profile=oss-local",
                   "expected=oss-local with codex_exec_invoked=true",
                   "codex_exec_invoked=True"
                 ]
               }
             ],
-            "blockers": []
+            "blockers": [
+              {
+                "id": "lane_receipt_semantics_valid",
+                "status": "blocker",
+                "severity": "blocker",
+                "message": "Passed lane receipts must prove the lane status and profile they are standing in for.",
+                "evidence": [
+                  ".harness/evidence/handoff/technical-writer/oss-local.json",
+                  "status=error",
+                  "profile=oss-local",
+                  "expected=oss-local with codex_exec_invoked=true",
+                  "codex_exec_invoked=True"
+                ]
+              }
+            ]
           },
           {
             "id": "oss-cloud",
@@ -305,26 +329,139 @@
             "evidence": [
               "skills-sdk.eval-handoff-readiness-input.v1"
             ]
+          },
+          {
+            "id": "tessl_feedback_loop_closed",
+            "status": "blocker",
+            "severity": "blocker",
+            "message": "Live Tessl handoff is blocked while the Tessl-to-internal feedback loop is open.",
+            "evidence": [
+              ".harness/evidence/handoff/technical-writer/tessl-score-preview.json",
+              "feedback_loop.status=open"
+            ]
+          },
+          {
+            "id": "tessl_baseline_wins_absent",
+            "status": "blocker",
+            "severity": "blocker",
+            "message": "Live Tessl handoff is blocked when baseline beats usage on any scenario.",
+            "evidence": [
+              ".harness/evidence/handoff/technical-writer/tessl-score-preview.json",
+              "regression_count=5"
+            ]
+          },
+          {
+            "id": "tessl_usage_threshold_met",
+            "status": "blocker",
+            "severity": "blocker",
+            "message": "Live Tessl handoff requires usage score >= 90%.",
+            "evidence": [
+              ".harness/evidence/handoff/technical-writer/tessl-score-preview.json",
+              "usage_percent=76.8182"
+            ]
+          },
+          {
+            "id": "oss-local_release_scenario_count_matches_tessl",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "OSS release proof must run the same scenario count as the final Tessl assessment before live handoff.",
+            "evidence": [
+              "expected:32",
+              "observed:32",
+              ".harness/evidence/handoff/technical-writer/oss-local.json"
+            ]
+          },
+          {
+            "id": "oss-cloud_release_scenario_count_matches_tessl",
+            "status": "blocker",
+            "severity": "blocker",
+            "message": "OSS release proof must run the same scenario count as the final Tessl assessment before live handoff.",
+            "evidence": [
+              "expected:32",
+              "observed:2",
+              ".harness/evidence/handoff/technical-writer/oss-cloud.json"
+            ]
           }
         ],
-        "blockers": [],
-        "ready_for_live_tessl": true,
+        "blockers": [
+          {
+            "id": "tessl_feedback_loop_closed",
+            "status": "blocker",
+            "severity": "blocker",
+            "message": "Live Tessl handoff is blocked while the Tessl-to-internal feedback loop is open.",
+            "evidence": [
+              ".harness/evidence/handoff/technical-writer/tessl-score-preview.json",
+              "feedback_loop.status=open"
+            ]
+          },
+          {
+            "id": "tessl_baseline_wins_absent",
+            "status": "blocker",
+            "severity": "blocker",
+            "message": "Live Tessl handoff is blocked when baseline beats usage on any scenario.",
+            "evidence": [
+              ".harness/evidence/handoff/technical-writer/tessl-score-preview.json",
+              "regression_count=5"
+            ]
+          },
+          {
+            "id": "tessl_usage_threshold_met",
+            "status": "blocker",
+            "severity": "blocker",
+            "message": "Live Tessl handoff requires usage score >= 90%.",
+            "evidence": [
+              ".harness/evidence/handoff/technical-writer/tessl-score-preview.json",
+              "usage_percent=76.8182"
+            ]
+          },
+          {
+            "id": "oss-cloud_release_scenario_count_matches_tessl",
+            "status": "blocker",
+            "severity": "blocker",
+            "message": "OSS release proof must run the same scenario count as the final Tessl assessment before live handoff.",
+            "evidence": [
+              "expected:32",
+              "observed:2",
+              ".harness/evidence/handoff/technical-writer/oss-cloud.json"
+            ]
+          },
+          {
+            "id": "lane_receipt_semantics_valid",
+            "status": "blocker",
+            "severity": "blocker",
+            "message": "Passed lane receipts must prove the lane status and profile they are standing in for.",
+            "evidence": [
+              ".harness/evidence/handoff/technical-writer/oss-local.json",
+              "status=error",
+              "profile=oss-local",
+              "expected=oss-local with codex_exec_invoked=true",
+              "codex_exec_invoked=True"
+            ]
+          }
+        ],
+        "ready_for_live_tessl": false,
         "required_next_actions": [
           "Run live Tessl and classify the live-lane result; return to oss-local only when the Tessl failure is evidence of a local skill regression."
         ],
         "mutation_performed": false,
         "promotion_performed": false,
-        "agent_summary": "Handoff readiness for Skills/agent-ops/technical-writer is complete for live Tessl."
+        "agent_summary": "Handoff readiness for Skills/agent-ops/technical-writer is blocked: live Tessl requires current deterministic, oss-local, oss-cloud, and Tessl dry-run evidence."
       },
       "mutation_performed": false,
       "validation_commands": [
         "./bin/ask sdk eval handoff-readiness --skill Skills/agent-ops/technical-writer --preview --json --robot"
       ],
-      "agent_summary": "Handoff readiness for Skills/agent-ops/technical-writer is complete for live Tessl."
+      "agent_summary": "Handoff readiness for Skills/agent-ops/technical-writer is blocked: live Tessl requires current deterministic, oss-local, oss-cloud, and Tessl dry-run evidence."
     }
   },
   "telemetry": {
-    "latency_ms": 10
+    "latency_ms": 12
   },
-  "errors": []
+  "errors": [
+    {
+      "code": "ERR_VALIDATION",
+      "message": "Handoff readiness for Skills/agent-ops/technical-writer is blocked: live Tessl requires current deterministic, oss-local, oss-cloud, and Tessl dry-run evidence.",
+      "fix_suggestion": "./bin/ask sdk eval handoff-readiness --skill Skills/agent-ops/technical-writer --preview --json --robot"
+    }
+  ]
 }

@@ -177,6 +177,44 @@ without conversation context:
    and unsupported claims.
 4. Patch the document or mark the gap as blocked.
 
+For runbooks and migration docs, use this fresh-reader question matrix before
+rewriting:
+
+- Rollout: What exact action does the reader take, and what evidence says it ran?
+- Rollback: What exact recovery path exists if rollout fails?
+- Failure recovery: What symptoms matter, where does the reader look, and who owns
+  escalation?
+- Missing assumptions: Which prerequisites, permissions, environment, dashboard,
+  or glossary terms are assumed but not stated?
+- Blocked rewrite needs: Which missing command, owner, screenshot, validation
+  output, or decision must be gathered from the writer before the doc can be
+  corrected?
+
+## Generated And Runtime Projection Boundaries
+
+Generated, runtime, mirrored, and publication surfaces are not editable proof by
+themselves. When those paths appear, first name:
+
+- canonical editable owner;
+- generated, runtime, mirrored, or public surface that must not be patched
+  directly;
+- evidence used to identify ownership; and
+- separate refresh, sync, publish, or blocker needed after canonical edits.
+
+If canonical ownership is not proven, return a boundary report or discovery
+question instead of editing the projection.
+
+## Stale Command Example Repair
+
+When a command example is stale, keep the repair narrow:
+
+- Compare the current doc claim to the repo wrapper or command contract.
+- Run the smallest safe check, or state the exact blocked validation reason.
+- Replace only the stale command example and adjacent sentence needed to make the
+  reader path accurate.
+- Report local command proof separately from hosted CI, tracker, release,
+  registry, or external readiness.
+
 Use subagents only when the active environment supports them and the task
 benefits from a fresh-reader pass. Otherwise, provide a manual reader-test
 checklist.

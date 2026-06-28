@@ -13,8 +13,8 @@ Use this when hardening skill-factory output or explaining why a skill run is bl
 6. Run `./bin/ask sdk eval scorer-calibration <target> --preview --json --robot`.
 7. Run `./bin/ask sdk eval run <target> --runner internal --mode smoke --codex-profile oss-local --json --robot`.
 8. Run `./bin/ask sdk eval run <target> --runner internal --mode smoke --codex-profile oss-cloud --json --robot`.
-9. Run `./bin/ask sdk eval tessl-local-proof --skill <target> --workspace skills-sdk-lab --execute --json --robot`.
-10. Run `./bin/ask evals run <target> --mode smoke --runner discovery-smoke --tessl-live-private --tessl-workspace skills-sdk-lab --tessl-live-dry-run --json --robot`.
+9. Run `./bin/ask sdk eval tessl-local-proof --skill <target> --workspace jscraik --execute --json --robot`.
+10. Run `./bin/ask evals run <target> --mode smoke --runner discovery-smoke --tessl-live-private --tessl-workspace jscraik --tessl-live-dry-run --json --robot`.
 11. Run `./bin/ask sdk eval handoff-readiness --skill <target> --preview --json --robot`.
 12. Next, execute `./bin/ask skills external-review <target> --audit-level compat --json --robot`.
 
@@ -37,9 +37,10 @@ The `oss-local` and `oss-cloud` lanes must use `codex exec --profile oss-local` 
 
 Tessl live-private dry-run must use the installed local `tessl` CLI after the SDK deterministic and OSS proof lanes. The wrapper copies controlled input to `/tmp/ask-tessl-evals/<skill-path>-<sha12>` and leaves that directory in place for inspection.
 
-The improve-skill Tessl lane uses the product workspace `skills-sdk-lab`.
-If an operator or older example supplies `skills-sdk`, the wrapper normalizes
-that stale alias to `skills-sdk-lab` before creating project identity,
+The improve-skill Tessl lane uses the product workspace `jscraik`.
+If an operator or older example supplies `skills-sdk`, `skills-sdk-lab`, or
+`jscraik-private`, the wrapper blocks that stale alias and requires `jscraik`
+before creating project identity,
 scenario-generation staging, local proof, or live-private dry-run receipts.
 
 Tessl local proof must be an execute receipt, not a preview receipt. Tessl dry-run handoff evidence must prove both the `--tessl-live-dry-run` command and `tessl_eval.dry_run=true` in the receipt payload.

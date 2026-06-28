@@ -39,19 +39,12 @@ def _git_commit() -> str | None:
     return result.stdout.strip()
 
 
-def _existing_artifact_freshness(output: Path, current_head: str | None) -> dict[str, Any]:
-    if not output.exists():
-        return {
-            "status": "new_artifact",
-            "artifact_head": None,
-            "current_head": current_head,
-            "warning": None,
-        }
-    artifact_head = (_load_json(output).get("repo") or {}).get("head")
+def _generated_artifact_freshness(status: dict[str, Any], current_head: str | None) -> dict[str, Any]:
+    artifact_head = (status.get("repo") or {}).get("head")
     status = "current" if artifact_head == current_head else "stale"
     warning = None
     if status == "stale":
-        warning = "Existing handoff status was generated for a different HEAD."
+        warning = "Generated handoff status repo.head does not match current HEAD."
     return {
         "status": status,
         "artifact_head": artifact_head,
@@ -199,7 +192,7 @@ def build_status(args: argparse.Namespace, output: Path | None = None) -> dict[s
     head = _git_commit()
     status = _status_body(args, head)
     if output is not None:
-        status["freshness"] = _existing_artifact_freshness(output, head)
+        status["freshness"] = _generated_artifact_freshness(status, head)
     return status
 
 

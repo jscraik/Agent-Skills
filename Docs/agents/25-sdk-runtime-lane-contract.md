@@ -64,7 +64,8 @@ automatic failure conditions, lane separation, or command-evidence requirements.
   `codex_profile=oss-cloud`.
 - `codex exec --profile fast` or SDK receipts in the `codex-fast-smoke` lane
   are allowed for quick smoke tasks and checks only; they do not satisfy
-  oss-local or oss-cloud promotion evidence.
+  oss-local or oss-cloud promotion evidence and cannot substitute for oss-local
+  or oss-cloud promotion evidence.
 - Do not treat a ChatGPT-account model error as an oss-local blocker. The
   oss-local lane is the Codex `oss-local` profile lane.
 - Do not treat an oss-local pass as oss-cloud proof. Cloud confirmation has its
@@ -117,17 +118,24 @@ The Tessl external lane is a projection from the foundry into a durable private
 Tessl package:
 
 - `agent-skills` is the foundry source of truth.
-- `skills-sdk-lab` is the intended initial Tessl workspace for creation,
-  scenario generation, internal review, and eval iteration before registry
-  promotion.
-- `jscraik-private` is the intended private Tessl registry workspace for
-  promoted Skills SDK packages before public release.
-- `jscraik` is the intended public-facing Tessl registry workspace for Skills
-  SDK public skills after they pass private promotion.
+- `jscraik` is the single intended Tessl workspace for Skills SDK project
+  creation, scenario generation, internal review, eval iteration, private
+  registry retention, and later public registry publication decisions.
+- Tessl workspace and Tessl project are different identifiers. `jscraik` is the
+  workspace; each standalone skill or plugin-owned package is generated, linked,
+  repaired, and evaluated as its own Tessl project under that workspace.
+- Standalone skill projects use the skill slug, for example
+  `jscraik/technical-writer`. Plugin-owned skills use the plugin slug, for
+  example `jscraik/skill-factory`, so project eval history stays attached to
+  the repository/package identity Tessl shows in the Projects list.
+- Every staged Tessl plugin manifest must start with `private: true`. Public
+  visibility requires a separate explicit publish lane and must not be inferred
+  from project linking, eval success, or workspace selection.
 - `foundry_package_id` identifies the canonical skill or plugin package in the
   repo.
 - `tessl_private_package_id` identifies the private Tessl registry/workspace
-  package, normally `<workspace>/<package-name>`.
+  package and must match the project marker, normally
+  `<workspace>/<project-slug>`.
 - The CLI must repair, link, or create the Tessl project for that private
   package identity before running external evals.
 - The receipt must record the staged package digest and the private package id
@@ -154,7 +162,8 @@ treated as available.
 The helper split is:
 
 - `tessl-labs/tile-creator`: use for first-time private tile/package shape,
-  `plugin.json`, package docs, rules, skills, lint, and eval-scenario setup.
+  `.tessl-plugin/plugin.json`, package docs, rules, skills, lint, and
+  eval-scenario setup.
   Treat older `tile.json` examples as legacy naming unless the installed
   helper explicitly requires them.
 - `sharaf/migrate-to-tessl`: use for migration and publish-oriented review
@@ -172,11 +181,13 @@ OpenAI/Codex package surfaces:
 - `references/**`: include only when safe, repo-local, non-symlinked, and
   referenced by the skill or package contract.
 - `assets/**`: include only when referenced and safe.
-- `agents/**`: preserve as OpenAI metadata; do not treat it as Tessl runtime
-  input unless a Tessl mapping exists.
+- `agents/**`: preserve as OpenAI metadata. For skill package projection,
+  copy required OpenAI/Codex skill metadata such as `agents/openai.yaml` into
+  `skills/<skill-name>/agents/**`; do not treat it as a Tessl runtime rule
+  unless a Tessl mapping exists.
 - `.codex-plugin/plugin.json`: translate selected identity, summary, display,
-  and capability metadata into a Tessl `plugin.json`; do not publish this file
-  directly as the Tessl manifest.
+  and capability metadata into a Tessl `.tessl-plugin/plugin.json`; do not
+  publish this file directly as the Tessl manifest.
 - `plugins/marketplace.json`: preserve as OpenAI marketplace/index metadata.
   There is no separate required OpenAI plugin marketplace JSON inside each
   plugin package in the current repo format; marketplace-facing metadata lives
@@ -188,35 +199,63 @@ OpenAI/Codex package surfaces:
 
 Tessl package surfaces:
 
-- `plugin.json`: required Tessl registry manifest with
-  `workspace/package-name`, semantic version, summary, privacy, and the mapped
-  skills/docs/rules entries.
+- `.tessl-plugin/plugin.json`: required Tessl registry manifest with
+  `workspace/package-name`, semantic version, description, privacy, optional
+  `skills`, optional `rules`, and optional `mcpServers` entries. For Skills SDK
+  skill projections, `skills` must point at the staged skill tree and
+  `rules` must not be used as a replacement for skill references.
 - `README.md`: include for private and public registry promotion. Tessl docs
   treat it as Registry UI presentation and not as agent context; agent-facing
-  context must live in skills, docs, rules, references, or generated scenarios.
-- `skills/**`: include validated `SKILL.md` files and their declared safe
-  support files.
-- `references/**`: include safe knowledge capsules, docs, and evidence needed
-  by the skill; reject raw local sources, absolute paths, symlinks, secrets,
-  and unmodeled generated caches.
-- `assets/**`: include only referenced safe files.
-- `evals/**` or `scenarios/**`: generate from SDK eval metadata for local and
-  external Tessl eval lanes.
+  context must live in skills, references, scripts, assets, MCP declarations,
+  or generated scenarios. The README must carry a GitHub Badge section for the
+  Tessl registry badge when public, name `tessl skill review --optimize` as the
+  score-improvement path, and name `tessl review run` as the CI score gate.
+- `skills/<skill-name>/SKILL.md`: include validated skill entrypoints in the
+  Tessl skill convention. This is the staged projection of the OpenAI/Codex
+  skill source, not a replacement source of truth.
+- `skills/<skill-name>/references/**`: include safe knowledge capsules, docs,
+  and evidence needed by the skill; reject raw local sources, absolute paths,
+  symlinks, secrets, and unmodeled generated caches. Do not translate skill
+  references into Tessl `rules/`; Tessl's own skill packages use
+  `references/` for skill support context.
+- `skills/<skill-name>/scripts/**`: include only safe scripts that the skill
+  explicitly references and that pass package safety checks.
+- `skills/<skill-name>/assets/**`: include only referenced safe files.
+- `.mcp.json`: include only when the plugin bundles MCP servers. Its top-level
+  `mcpServers` map must declare `stdio` servers with `command` or `http`
+  servers with an `http`/`https` URL. This plugin-bundled file is distinct from
+  Tessl's consuming-project `.mcp.json`.
+- `evals/<case-id>/task.md` and `evals/<case-id>/criteria.json`: generate from
+  SDK eval metadata for Tessl package scoring. `scenario.json` is optional for
+  fixtures, includes, or setup scripts.
+- `.tesslignore`: include at the staged plugin root. It must exclude
+  project-local agent context and generated/local evidence such as
+  `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `.harness/`, `.agents/`, `.codex/`,
+  `.tessl/`, and `dist/`, but it must not ignore manifest entrypoints such as
+  `skills`, `rules`, or `docs`.
 - `tessl.json`: use as the workspace/project dependency manifest in the
-  dedicated Tessl checkout or staged eval payload. Do not mutate the foundry
-  repo root with Tessl workspace state unless a separate repo policy decision
-  requires it.
+  dedicated Tessl checkout or staged eval payload. Its `name` must be the exact
+  Tessl project identity `<workspace>/<project-slug>`, not merely any package
+  under the workspace. Do not mutate the foundry repo root with Tessl workspace
+  state unless a separate repo policy decision requires it.
+- `AGENTS.md`: treat as consuming-workspace or repository instruction context.
+  It helps an agent understand how to operate in the checkout, but it is not
+  skill reference material or a Tessl runtime rule. Exclude it from staged Tessl
+  plugin packages with `.tesslignore` unless a future explicit projection rule
+  models agent-instruction files as package content.
 
-The projection result must show this mapping in receipt evidence before any
-private or public registry claim is made.
+The projection result must show this mapping in receipt evidence and pass the
+Tessl projection-shape validator before any private or public registry claim is
+made.
 
 For a first private Tessl package projection:
 
 1. Derive `foundry_package_id`, source commit, and staged package digest from
    the canonical `agent-skills` package.
 2. Stage a clean private Tessl package under `/tmp/ask-tessl-*`; include
-   `plugin.json`, `README.md` for registry presentation, skill content,
-   references, and scenarios generated from SDK metadata.
+   `.tessl-plugin/plugin.json`, `README.md` for registry presentation, skill
+   content, references, and scenarios generated from SDK metadata. The staged
+   manifest must use workspace `jscraik` and `private: true`.
 3. Run local shape and install checks through
    `./bin/ask sdk eval tessl-local-proof --skill <skill-path> --workspace <workspace> --preview --json --robot`,
    then `--execute` when the operator wants the local native Tessl commands to
@@ -246,9 +285,10 @@ The setup result must distinguish:
 
 - workspace helper availability: installed helper plugins in
   `/Users/jamiecraik/Documents/tessl/tessl.json`;
-- workspace selection: `skills-sdk-lab` for Skills SDK skill creation and eval,
-  `jscraik-private` for private registry promotion, or `jscraik` for public
-  registry publication;
+- workspace selection: `jscraik` for every Skills SDK Tessl project and
+  package lane;
+- manifest visibility: staged plugin manifests start `private: true`; public
+  publication is a separate approved lane;
 - private package identity: `tessl_private_package_id`;
 - project link state: linked, relinked, created, or blocked;
 - publish readiness: not claimed from runtime-lane proof; registry publish or

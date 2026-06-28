@@ -287,3 +287,7 @@ Repo-specific agent knowledge base. Append-only.
 **2026-06-24 [Codex]:** Tessl local development proof is a distinct bridge from Tessl Distribution to Local Runtime Truth, not a substitute for oss-local, oss-cloud, live Tessl scoring, or persistent user runtime activation -> add `ask sdk eval tessl-local-proof` so the SDK stages a controlled package, runs native `tessl plugin lint`, `tessl plugin pack --output <file>.tgz`, temp `tessl install file:` in `/tmp/ask-tessl-local-install`, and optional explicit `tessl review run`; make handoff readiness require the executed local-proof receipt before live Tessl dry-run/scoring claims.
 
 **2026-06-24 [Codex]:** Plugin creation is part of the Skills SDK professional lifecycle, not a separate memory burden for the operator -> expose `ask sdk plugin create|review|install|save-registry` for both `--kind skill` and `--kind plugin`, delegate to existing bounded skills/plugins commands, save only to local skill registry or local plugin marketplace unless a future remote-publish authority lane exists, and keep `remote_publish_performed=false` in registry-save receipts.
+
+**2026-06-27 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2062735754)
+
+**2026-06-28 [Codex]:** Bash command 'zsh' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:431959183)

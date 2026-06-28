@@ -1,6 +1,6 @@
 {
   "status": "error",
-  "trace_id": "06d79555-6c62-4215-9381-08cba76be7f7",
+  "trace_id": "d288a0d0-0516-4c53-8c53-824474714a72",
   "metadata": {
     "version": "0.1.0",
     "command": "sdk eval tessl-score --view-json .harness/evidence/tessl/technical-writer/019f0933-e8cc-724c-951a-7f1341590e50/tessl-eval-view.json --skill Skills/agent-ops/technical-writer --run-id 019f0933-e8cc-724c-951a-7f1341590e50 --preview --json --robot",
@@ -88,6 +88,18 @@
             "pressure-generated-projection-edit",
             "regression-capsule-runtime-boundary",
             "generated-eval.visual-evidence-decision"
+          ],
+          "wins": [
+            "happy-readme",
+            "risky-command",
+            "smoke-discovery",
+            "prompt-injection",
+            "pressure-sync-publish-boundary",
+            "pressure-broad-rewrite-approval",
+            "generated-eval.writer-gap-gathering",
+            "generated-eval.reader-state-citation-map",
+            "generated-eval.validation-lane-separation",
+            "generated-eval.glossary-workspace-authority"
           ]
         },
         "readiness_thresholds": {
@@ -168,7 +180,7 @@
     }
   },
   "telemetry": {
-    "latency_ms": 11
+    "latency_ms": 12
   },
   "errors": [
     {

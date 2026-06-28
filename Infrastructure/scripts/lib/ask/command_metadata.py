@@ -171,7 +171,7 @@ TOPIC_EXAMPLES: Dict[str, List[str]] = {
         "ask evals run Skills/backend-platform/cli-spec --mode smoke",
         "ask evals dashboard",
         "ask evals macro-report --json --robot",
-        "ask evals prepare-tessl-scenarios Skills/agent-ops/goal-governor --tessl-workspace skills-sdk-lab --dry-run --json --robot",
+        "ask evals prepare-tessl-scenarios Skills/agent-ops/goal-governor --tessl-workspace jscraik --dry-run --json --robot",
     ],
     "graph": [
         "ask graph find security",

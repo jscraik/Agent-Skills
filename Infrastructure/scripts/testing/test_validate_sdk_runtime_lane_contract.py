@@ -98,3 +98,60 @@ def test_contract_blocks_missing_non_substitution_rule(monkeypatch) -> None:
     findings = module.validate()
 
     assert any(finding.code == "missing_non_substitution_rule" for finding in findings)
+
+
+def test_contract_blocks_missing_fast_profile_smoke_boundary(monkeypatch) -> None:
+    module = _load_module()
+    original_read = module._read
+
+    def fake_read(path: Path) -> str:
+        text = original_read(path)
+        if path == module.CONTRACT_PATH:
+            return text.replace("codex exec --profile fast", "codex exec smoke")
+        return text
+
+    monkeypatch.setattr(module, "_read", fake_read)
+
+    findings = module.validate()
+
+    assert any(finding.code == "missing_non_substitution_rule" for finding in findings)
+    assert any("codex exec --profile fast" in finding.message for finding in findings)
+
+
+def test_contract_blocks_missing_tessl_references_not_rules_projection(monkeypatch) -> None:
+    module = _load_module()
+    original_read = module._read
+
+    def fake_read(path: Path) -> str:
+        text = original_read(path)
+        if path == module.CONTRACT_PATH:
+            return text.replace(
+                "Do not translate skill\n  references into Tessl `rules/`",
+                "Use Tessl package folders for support context",
+            )
+        return text
+
+    monkeypatch.setattr(module, "_read", fake_read)
+
+    findings = module.validate()
+
+    assert any(finding.code == "missing_promotion_pipeline" for finding in findings)
+    assert any("Do not translate skill references" in finding.message for finding in findings)
+
+
+def test_contract_blocks_missing_tessl_registry_badge_guidance(monkeypatch) -> None:
+    module = _load_module()
+    original_read = module._read
+
+    def fake_read(path: Path) -> str:
+        text = original_read(path)
+        if path == module.CONTRACT_PATH:
+            return text.replace("GitHub Badge section", "registry presentation section")
+        return text
+
+    monkeypatch.setattr(module, "_read", fake_read)
+
+    findings = module.validate()
+
+    assert any(finding.code == "missing_promotion_pipeline" for finding in findings)
+    assert any("GitHub Badge section" in finding.message for finding in findings)

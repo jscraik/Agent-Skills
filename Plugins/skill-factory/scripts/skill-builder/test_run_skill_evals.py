@@ -44,6 +44,7 @@ from run_skill_evals import (  # noqa: E402
     _classify_runner_blocker,
     _claim_to_evidence_summary,
     _case_has_executed_check_evidence,
+    _codex_exec_prefix,
     _load_evals_document,
     _resolve_existing_optional_case_artifact_path,
     _preflight_codex_live_runner,
@@ -157,6 +158,29 @@ class RunSkillEvalsModeTests(unittest.TestCase):
 
         self.assertEqual(len(failures), 1)
         self.assertIn("expected_signal failed", failures[0])
+
+    def test_discovery_question_assertion_accepts_scope_question_before_edits(self) -> None:
+        failures = evaluate_assertions_text(
+            (
+                "Before making edits, which documentation path or surface should I inspect first: "
+                "canonical docs, generated projections, publication surfaces, or audit-only?"
+            ),
+            [{"type": "discovery_question", "value": "ask for scope before edits"}],
+            skill_name="technical-writer",
+            selected_skill=True,
+        )
+
+        self.assertEqual(failures, [])
+
+    def test_discovery_question_assertion_rejects_edit_claims(self) -> None:
+        failures = evaluate_assertions_text(
+            "I updated the README. Which docs should I inspect next?",
+            [{"type": "discovery_question", "value": "ask for scope before edits"}],
+            skill_name="technical-writer",
+            selected_skill=True,
+        )
+
+        self.assertEqual(failures, ["discovery_question failed: response claimed an edit before discovery"])
 
     def test_contains_assertions_are_case_insensitive_for_agent_prose(self) -> None:
         self.assertEqual(
@@ -449,6 +473,7 @@ class RunSkillEvalsModeTests(unittest.TestCase):
             self.assertEqual(cases[0].expected_signals["required_terms"], ["canonical source"])
             self.assertEqual(cases[0].expected_signals["forbidden_terms"], ["runtime projection"])
             self.assertEqual(cases[0].budgets["min_expected_signal_score"], 90)
+
 
     def test_load_evals_parses_riteway_contract_metadata(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -1702,6 +1727,28 @@ class RunSkillEvalsModeTests(unittest.TestCase):
         cmd = mocked_run.call_args.args[0]
         self.assertIn("--ignore-user-config", cmd)
         self.assertLess(cmd.index("--ignore-user-config"), cmd.index("--sandbox"))
+
+    def test_codex_exec_prefix_wraps_default_mise_codex_with_repo_node(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            home = root / "home"
+            workspace = root / "workspace"
+            codex_bin = home / ".local/share/mise/installs/npm-openai-codex/latest/bin/codex"
+            node_bin = home / ".local/share/mise/installs/node/24.13.1/bin/node"
+            codex_bin.parent.mkdir(parents=True)
+            node_bin.parent.mkdir(parents=True)
+            codex_bin.write_text("#!/usr/bin/env node\n", encoding="utf-8")
+            node_bin.write_text("#!/bin/sh\n", encoding="utf-8")
+            workspace.mkdir()
+            (workspace / ".mise.toml").write_text('[tools]\n"node" = "24.13.1"\n', encoding="utf-8")
+
+            with (
+                unittest.mock.patch("run_skill_evals.Path.home", return_value=home),
+                unittest.mock.patch("run_skill_evals.WORKSPACE_ROOT", workspace),
+            ):
+                prefix = _codex_exec_prefix(None)
+
+        self.assertEqual(prefix, [str(node_bin), str(codex_bin.resolve()), "exec"])
 
     def test_run_codex_exec_skips_ignore_user_config_when_unsupported(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

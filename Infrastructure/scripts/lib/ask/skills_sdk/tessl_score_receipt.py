@@ -99,6 +99,7 @@ def _empty_score_summary() -> dict[str, Any]:
         "missing": [{"reason": "missing_scenarios"}],
         "regressions": [],
         "ties": [],
+        "wins": [],
     }
 
 
@@ -196,6 +197,7 @@ def _score_summary_from_parts(
         "missing": missing,
         "regressions": [item for item in scored if item["usage_score"] < item["baseline_score"]],
         "ties": [item["path"] for item in scored if item["usage_score"] == item["baseline_score"]],
+        "wins": [item["path"] for item in scored if item["usage_score"] > item["baseline_score"]],
     }
 
 

@@ -1711,6 +1711,34 @@ def _skills_sdk_eval_package_identity(repo_root: Path, target: str) -> dict[str,
     }
 
 
+def _skills_sdk_eval_source_path(repo_root: Path, target: str) -> Path | None:
+    query = target.strip()
+    if not query:
+        return None
+    target_info, _audit_target = _resolve_doctor_target(repo_root, query)
+    if not isinstance(target_info, dict) or target_info.get("target_kind") == "invalid_path":
+        return None
+    source_path_value = target_info.get("source_path")
+    if not source_path_value:
+        return None
+    source_path = Path(str(source_path_value))
+    if not source_path.is_absolute():
+        source_path = repo_root / source_path
+    if source_path.is_dir():
+        source_path = source_path / "SKILL.md"
+    return source_path if source_path.is_file() else None
+
+
+def _flatten_case_filters(cases: list[str] | None) -> list[str]:
+    selected: list[str] = []
+    for raw_case in cases or []:
+        for case_id in raw_case.split(","):
+            normalized = case_id.strip()
+            if normalized and normalized not in selected:
+                selected.append(normalized)
+    return selected
+
+
 def _skill_workout_candidates(repo_root: Path, handle: str) -> list[str]:
     workouts_root = repo_root / ".workouts"
     if not workouts_root.is_dir():
@@ -4277,7 +4305,7 @@ def _sdk_tessl_dry_run_command(target: str) -> str:
         "discovery-smoke",
         "--tessl-live-private",
         "--tessl-workspace",
-        "skills-sdk-lab",
+        "jscraik",
         "--tessl-live-dry-run",
     )
 
@@ -4357,7 +4385,7 @@ def _sdk_start_lanes(mechanical_target: str) -> list[dict[str, Any]]:
             {
                 "id": "tessl_local_proof_execute",
                 "status": "blocked_until_oss_cloud_repair_loop",
-                "command": _ask_validation_command("sdk", "eval", "tessl-local-proof", "--skill", mechanical_target, "--workspace", "skills-sdk-lab", "--execute"),
+                "command": _ask_validation_command("sdk", "eval", "tessl-local-proof", "--skill", mechanical_target, "--workspace", "jscraik", "--execute"),
                 "proves": "controlled /tmp Tessl staging, package lint, pack/install mechanics, and workspace identity without live scoring spend",
             },
             {
@@ -4375,7 +4403,7 @@ def _sdk_start_lanes(mechanical_target: str) -> list[dict[str, Any]]:
             {
                 "id": "tessl_live_confirmation",
                 "status": "blocked_until_handoff_readiness",
-                "command": _ask_validation_command("evals", "run", mechanical_target, "--mode", "smoke", "--runner", "discovery-smoke", "--tessl-live-private", "--tessl-workspace", "skills-sdk-lab"),
+                "command": _ask_validation_command("evals", "run", mechanical_target, "--mode", "smoke", "--runner", "discovery-smoke", "--tessl-live-private", "--tessl-workspace", "jscraik"),
                 "target_success_rate": ">=90 and >= baseline; Tessl is confirmational, not the discovery loop",
             },
             {
@@ -4398,7 +4426,7 @@ def _sdk_start_score_policy() -> dict[str, Any]:
         "tessl_live_target": ">=90 and >= baseline as external confirmation only",
         "failure_loop": "Any oss-local, oss-cloud, Tessl dry-run, or Tessl live failure stays in its source lane until owner classification identifies the repair surface; rerun oss-local only for classified local skill regressions.",
         "tessl_spend_policy": "Use Tessl paid live runs only after internal SDK receipts and dry-run evidence predict >=90 external confirmation.",
-        "workspace_policy": "Use the operator-approved Tessl workspace skills-sdk-lab and decide private versus published state explicitly before registry claims.",
+        "workspace_policy": "Use the operator-approved Tessl workspace jscraik for all SDK Tessl projects; staged plugin manifests start private until a separate publish lane changes visibility.",
     }
 
 
@@ -5485,11 +5513,28 @@ def skills_sdk_static_explorer_preview(repo_root: Path) -> CallResult:
     return result
 
 
-def skills_sdk_eval_scenario_quality(repo_root: Path, target: str) -> CallResult:
+def skills_sdk_eval_scenario_quality(
+    repo_root: Path,
+    target: str,
+    *,
+    tessl_staged_json: str | None = None,
+    tessl_score: str | None = None,
+) -> CallResult:
     """Preview eval scenario quality without promoting or mutating scenario sources."""
     result = CallResult()
     result.metadata["command"] = "sdk eval scenario-quality"
     query = target.strip()
+    tessl_staged_path = Path(tessl_staged_json) if tessl_staged_json else None
+    if tessl_staged_path and not tessl_staged_path.is_absolute():
+        tessl_staged_path = repo_root / tessl_staged_path
+    tessl_score_path = Path(tessl_score) if tessl_score else None
+    if tessl_score_path and not tessl_score_path.is_absolute():
+        tessl_score_path = repo_root / tessl_score_path
+    validation_command_parts = ["sdk", "eval", "scenario-quality", query, "--preview"]
+    if tessl_staged_json:
+        validation_command_parts.extend(["--tessl-staged-json", tessl_staged_json])
+    if tessl_score:
+        validation_command_parts.extend(["--tessl-score", tessl_score])
     target_info, _audit_target = _resolve_doctor_target(repo_root, query)
     source_path_value = target_info.get("source_path") if isinstance(target_info, dict) else None
     source_path = Path(str(source_path_value)) if source_path_value else None
@@ -5505,7 +5550,7 @@ def skills_sdk_eval_scenario_quality(repo_root: Path, target: str) -> CallResult
             "receipt": None,
             "mutation_performed": False,
             "promotion_performed": False,
-            "validation_commands": [_ask_validation_command("sdk", "eval", "scenario-quality", query, "--preview")],
+            "validation_commands": [_ask_validation_command(*validation_command_parts)],
             "agent_summary": f"skills-sdk eval scenario-quality is blocked for {query}: canonical source is missing.",
         }
         result.errors.append(
@@ -5523,7 +5568,13 @@ def skills_sdk_eval_scenario_quality(repo_root: Path, target: str) -> CallResult
     )
 
     try:
-        receipt = build_scenario_quality_receipt(repo_root, source_path=source_path, query=query)
+        receipt = build_scenario_quality_receipt(
+            repo_root,
+            source_path=source_path,
+            query=query,
+            tessl_staged_json=tessl_staged_path,
+            tessl_score_json=tessl_score_path,
+        )
     except ScenarioQualityError as exc:
         receipt = exc.receipt
     payload = {
@@ -5538,7 +5589,7 @@ def skills_sdk_eval_scenario_quality(repo_root: Path, target: str) -> CallResult
         "blocked_count": receipt["blocked_count"],
         "mutation_performed": False,
         "promotion_performed": False,
-        "validation_commands": [_ask_validation_command("sdk", "eval", "scenario-quality", query, "--preview")],
+        "validation_commands": [_ask_validation_command(*validation_command_parts)],
         "agent_summary": receipt["agent_summary"],
     }
     result.data["skills_sdk_eval_scenario_quality"] = payload
@@ -6615,6 +6666,7 @@ def skills_sdk_eval_handoff_readiness(
     *,
     skill: str,
     receipt_json: str | None = None,
+    tessl_score: str | None = None,
 ) -> CallResult:
     """Preview whether the required local/internal evidence lanes are ready for live Tessl."""
     result = CallResult()
@@ -6622,6 +6674,9 @@ def skills_sdk_eval_handoff_readiness(
     readiness_path = Path(receipt_json) if receipt_json else None
     if readiness_path and not readiness_path.is_absolute():
         readiness_path = repo_root / readiness_path
+    tessl_score_path = Path(tessl_score) if tessl_score else None
+    if tessl_score_path and not tessl_score_path.is_absolute():
+        tessl_score_path = repo_root / tessl_score_path
 
     query = skill.strip()
     target_info, _audit_target = _resolve_doctor_target(repo_root, query)
@@ -6659,6 +6714,7 @@ def skills_sdk_eval_handoff_readiness(
         source_path=source_path,
         query=skill,
         readiness_path=readiness_path,
+        tessl_score_path=tessl_score_path,
     )
     payload = {
         "schema_version": "skills-sdk-eval-handoff-readiness.v0",
@@ -7275,6 +7331,7 @@ def _skills_sdk_eval_run_validation_command(
     mode: str,
     codex_profile: str | None,
     cases: list[str] | None,
+    scenario_set: str | None = None,
     timeout_seconds: int | None,
 ) -> str:
     args = [
@@ -7289,6 +7346,8 @@ def _skills_sdk_eval_run_validation_command(
     ]
     if codex_profile:
         args.extend(["--codex-profile", codex_profile])
+    if scenario_set:
+        args.extend(["--scenario-set", scenario_set])
     for case in cases or []:
         args.extend(["--case", case])
     if timeout_seconds:
@@ -7302,6 +7361,228 @@ def _skills_sdk_eval_receipt_lane(mode: str, codex_profile: str | None) -> str:
     if codex_profile in {"fast", "codex-fast"}:
         return "codex-fast-smoke"
     return mode
+
+
+def _load_release_scenario_sets(evals_path: Path) -> list[dict[str, Any]]:
+    if not evals_path.is_file():
+        return []
+    try:
+        import yaml  # type: ignore
+
+        payload = yaml.safe_load(evals_path.read_text(encoding="utf-8")) or {}
+    except Exception:
+        return []
+    raw_sets = payload.get("release_scenario_sets") if isinstance(payload, dict) else None
+    if not isinstance(raw_sets, list):
+        return []
+    sets: list[dict[str, Any]] = []
+    for raw_set in raw_sets:
+        if not isinstance(raw_set, dict):
+            continue
+        set_id = str(raw_set.get("id") or "").strip()
+        if not set_id:
+            continue
+        case_ids: list[str] = []
+        groups = raw_set.get("groups")
+        if isinstance(groups, dict):
+            for group_ids in groups.values():
+                if not isinstance(group_ids, list):
+                    continue
+                for raw_case_id in group_ids:
+                    case_id = str(raw_case_id or "").strip()
+                    if case_id and case_id not in case_ids:
+                        case_ids.append(case_id)
+        raw_cases = raw_set.get("cases")
+        if isinstance(raw_cases, list):
+            for raw_case_id in raw_cases:
+                case_id = str(raw_case_id or "").strip()
+                if case_id and case_id not in case_ids:
+                    case_ids.append(case_id)
+        minimum = raw_set.get("minimum_scenarios")
+        sets.append(
+            {
+                "id": set_id,
+                "default": raw_set.get("default") is True,
+                "minimum_scenarios": minimum if isinstance(minimum, int) and not isinstance(minimum, bool) else 20,
+                "case_ids": case_ids,
+            }
+        )
+    return sets
+
+
+def _select_release_scenario_set(release_sets: list[dict[str, Any]], scenario_set: str | None) -> dict[str, Any] | None:
+    if not release_sets:
+        return None
+    if scenario_set:
+        for release_set in release_sets:
+            if release_set["id"] == scenario_set:
+                return release_set
+        return None
+    for release_set in release_sets:
+        if release_set.get("default") is True:
+            return release_set
+    return release_sets[0]
+
+
+def _skills_sdk_release_set_blocked_result(
+    repo_root: Path,
+    *,
+    target: str,
+    target_path: str,
+    evals_path: Path,
+    package_identity: dict[str, str] | None,
+    mode: str,
+    codex_profile: str | None,
+    cases: list[str] | None,
+    scenario_set: str | None,
+    selected_case_ids: list[str],
+    release_set: dict[str, Any] | None,
+    blocker: str,
+    message: str,
+) -> CallResult:
+    result = CallResult(status="error")
+    release_case_ids = list(release_set.get("case_ids") or []) if release_set else []
+    receipt = {
+        "schema_version": "skills-sdk.eval-run-receipt.v0",
+        "schema_uri": "https://agent-skills.local/schemas/skills-sdk/eval-run-receipt.v0.schema.json",
+        "status": "blocked",
+        "runner": "internal_skill_builder_v0",
+        "dataset_path": _skills_sdk_repo_relative(repo_root, evals_path),
+        "dataset_digest": _skills_sdk_digest_file(evals_path) if evals_path.is_file() else "sha256:" + ("0" * 64),
+        "skill_ir_schema_version": package_identity["skill_ir_schema_version"] if package_identity else None,
+        "package_id": package_identity["package_id"] if package_identity else None,
+        "package_digest": package_identity["package_digest"] if package_identity else None,
+        "target_path": target_path,
+        "mode": mode,
+        "lane": _skills_sdk_eval_receipt_lane(mode, codex_profile),
+        "lane_type": "focused-debug",
+        "profile": codex_profile,
+        "codex_profile": codex_profile,
+        "codex_exec_invoked": False,
+        "codex_exec_command_shape": None,
+        "scenario_set_id": release_set.get("id") if release_set else scenario_set,
+        "scenario_set_case_ids": release_case_ids,
+        "selected_case_ids": selected_case_ids,
+        "release_set_minimum": release_set.get("minimum_scenarios") if release_set else 20,
+        "case_count": len(selected_case_ids),
+        "passed_count": 0,
+        "failed_count": 0,
+        "quality_gates": None,
+        "closeout_validation": None,
+        "cases": [],
+        "blockers": [blocker],
+        "mutation_performed": False,
+        "acceptance_trace": ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022"],
+    }
+    result.data["skills_sdk_eval_run"] = {
+        "schema_version": "skills-sdk-eval-run.v0",
+        "status": "blocked",
+        "dataset": None,
+        "target": target,
+        "runner": "internal_skill_builder_v0",
+        "mode": mode,
+        "receipt": receipt,
+        "mutation_performed": False,
+        "validation_commands": [
+            _skills_sdk_eval_run_validation_command(
+                target,
+                mode=mode,
+                codex_profile=codex_profile,
+                cases=cases,
+                scenario_set=scenario_set,
+                timeout_seconds=None,
+            )
+        ],
+        "agent_summary": message,
+    }
+    result.errors.append(
+        ErrorObject(
+            code="ERR_VALIDATION",
+            message=message,
+            fix_suggestion=(
+                f"Run the declared release set with --scenario-set {release_set['id']} "
+                if release_set
+                else "Define release_scenario_sets in references/evals.yaml before OSS release proof."
+            )
+            + "or use --mode smoke for focused debug subsets.",
+        )
+    )
+    return result
+
+
+def _skills_sdk_prepare_release_case_filters(
+    repo_root: Path,
+    *,
+    target: str,
+    target_path: str,
+    mode: str,
+    codex_profile: str | None,
+    cases: list[str] | None,
+    scenario_set: str | None,
+    package_identity: dict[str, str] | None,
+) -> tuple[list[str] | None, dict[str, Any] | None, CallResult | None]:
+    if mode != "release" or codex_profile not in {"oss-local", "oss-cloud"}:
+        return cases, None, None
+    source_path = _skills_sdk_eval_source_path(repo_root, target)
+    if source_path is None:
+        return cases, None, None
+    skill_dir = source_path.parent
+    evals_path = skill_dir / "references" / "evals.yaml"
+    release_sets = _load_release_scenario_sets(evals_path)
+    release_set = _select_release_scenario_set(release_sets, scenario_set)
+    selected_case_ids = _flatten_case_filters(cases)
+    if scenario_set and release_set is None:
+        blocked = _skills_sdk_release_set_blocked_result(
+            repo_root,
+            target=target,
+            target_path=target_path,
+            evals_path=evals_path,
+            package_identity=package_identity,
+            mode=mode,
+            codex_profile=codex_profile,
+            cases=cases,
+            scenario_set=scenario_set,
+            selected_case_ids=selected_case_ids,
+            release_set=None,
+            blocker=f"release_scenario_set_unknown:{scenario_set}",
+            message=f"Skills SDK release eval run is blocked: scenario set {scenario_set!r} is not declared.",
+        )
+        return cases, None, blocked
+    if release_set is None:
+        return cases, None, None
+    release_case_ids = list(release_set["case_ids"])
+    minimum = int(release_set.get("minimum_scenarios") or 20)
+    release_metadata = {
+        "scenario_set_id": release_set["id"],
+        "scenario_set_case_ids": release_case_ids,
+        "release_set_minimum": minimum,
+    }
+    if not selected_case_ids:
+        return release_case_ids, release_metadata, None
+    if selected_case_ids == release_case_ids:
+        return selected_case_ids, release_metadata, None
+    blocked = _skills_sdk_release_set_blocked_result(
+        repo_root,
+        target=target,
+        target_path=target_path,
+        evals_path=evals_path,
+        package_identity=package_identity,
+        mode=mode,
+        codex_profile=codex_profile,
+        cases=cases,
+        scenario_set=scenario_set,
+        selected_case_ids=selected_case_ids,
+        release_set=release_set,
+        blocker=(
+            f"focused_debug_subset_not_release_evidence:selected:{len(selected_case_ids)}:"
+            f"required:{len(release_case_ids)}:minimum:{minimum}"
+        ),
+        message=(
+            "Skills SDK release eval run is blocked: explicit --case filters are a focused-debug subset, "
+            f"not {codex_profile} release-lane evidence for scenario set {release_set['id']}."
+        ),
+    )
+    return cases, release_metadata, blocked
 
 
 def _skills_sdk_eval_codex_profile_proof(
@@ -7332,6 +7613,7 @@ def skills_sdk_eval_run(
     skip_tessl: bool = True,
     codex_profile: str | None = None,
     cases: list[str] | None = None,
+    scenario_set: str | None = None,
     timeout_seconds: int | None = None,
 ) -> CallResult:
     """Run SDK evals through deterministic JSONL or the internal skill-builder backend."""
@@ -7364,6 +7646,21 @@ def skills_sdk_eval_run(
             return result
         from ask.commands import evals as _eval_commands  # noqa: PLC0415
 
+        target_path = str(_skills_sdk_eval_source_path(repo_root, target) or target)
+        package_identity = _skills_sdk_eval_package_identity(repo_root, target_path)
+        cases, release_set_metadata, release_set_blocked = _skills_sdk_prepare_release_case_filters(
+            repo_root,
+            target=target,
+            target_path=target_path,
+            mode=mode,
+            codex_profile=codex_profile,
+            cases=cases,
+            scenario_set=scenario_set,
+            package_identity=package_identity,
+        )
+        if release_set_blocked is not None:
+            return release_set_blocked
+
         internal = _eval_commands.run_evals(
             repo_root,
             target,
@@ -7380,8 +7677,9 @@ def skills_sdk_eval_run(
         if internal.status != "success":
             blockers = [error.message for error in internal.errors] or [raw_status]
         status = "pass" if internal.status == "success" else "blocked" if raw_status.startswith("blocked") else "fail"
-        target_path = str(internal.data.get("resolved_skill_path") or target)
-        package_identity = _skills_sdk_eval_package_identity(repo_root, target_path)
+        target_path = str(internal.data.get("resolved_skill_path") or target_path)
+        if package_identity is None:
+            package_identity = _skills_sdk_eval_package_identity(repo_root, target_path)
         receipt_counts = _skills_sdk_internal_eval_receipt_counts(
             repo_root,
             internal,
@@ -7406,10 +7704,15 @@ def skills_sdk_eval_run(
             "target_path": target_path,
             "mode": mode,
             "lane": _skills_sdk_eval_receipt_lane(mode, codex_profile),
+            "lane_type": "release" if release_set_metadata else mode,
             "profile": codex_profile,
             "codex_profile": profile_proof["codex_profile"],
             "codex_exec_invoked": profile_proof["codex_exec_invoked"],
             "codex_exec_command_shape": profile_proof["codex_exec_command_shape"],
+            "scenario_set_id": release_set_metadata["scenario_set_id"] if release_set_metadata else scenario_set,
+            "scenario_set_case_ids": release_set_metadata["scenario_set_case_ids"] if release_set_metadata else None,
+            "selected_case_ids": _flatten_case_filters(cases),
+            "release_set_minimum": release_set_metadata["release_set_minimum"] if release_set_metadata else None,
             "case_count": receipt_counts["case_count"],
             "passed_count": receipt_counts["passed_count"],
             "failed_count": max(1, receipt_counts["failed_count"]) if profile_blockers else receipt_counts["failed_count"],
@@ -7437,6 +7740,7 @@ def skills_sdk_eval_run(
                     mode=mode,
                     codex_profile=codex_profile,
                     cases=cases,
+                    scenario_set=scenario_set,
                     timeout_seconds=timeout_seconds,
                 )
             ],
@@ -9925,8 +10229,8 @@ def _skill_install_intake_decision(repo_root: Path, skill_name: str, target_path
             "./bin/ask sdk eval scorer-calibration <skill-path> --preview --json --robot",
             "./bin/ask sdk eval run <skill-path> --runner internal --mode smoke --codex-profile oss-local --json --robot",
             "./bin/ask sdk eval run <skill-path> --runner internal --mode smoke --codex-profile oss-cloud --json --robot",
-            "./bin/ask sdk eval tessl-local-proof --skill <skill-path> --workspace skills-sdk-lab --execute --json --robot",
-            "./bin/ask evals run <skill-path> --mode smoke --runner discovery-smoke --tessl-live-private --tessl-workspace skills-sdk-lab --tessl-live-dry-run --json --robot once scenario-quality passes",
+            "./bin/ask sdk eval tessl-local-proof --skill <skill-path> --workspace jscraik --execute --json --robot",
+            "./bin/ask evals run <skill-path> --mode smoke --runner discovery-smoke --tessl-live-private --tessl-workspace jscraik --tessl-live-dry-run --json --robot once scenario-quality passes",
             "./bin/ask sdk eval handoff-readiness --skill <skill-path> --preview --json --robot",
             "./bin/ask skills external-review <skill-path> --json --robot",
             "./bin/ask evals run <skill-path> --mode release --json --robot only after SDK handoff gates are current",
@@ -10113,8 +10417,8 @@ def install_skill(repo_root: Path, url: str, remediate: bool = False, dest: str 
                 f"ask sdk eval scorer-calibration {installed_path} --preview --json --robot",
                 f"ask sdk eval run {installed_path} --runner internal --mode smoke --codex-profile oss-local --json --robot",
                 f"ask sdk eval run {installed_path} --runner internal --mode smoke --codex-profile oss-cloud --json --robot",
-                f"ask sdk eval tessl-local-proof --skill {installed_path} --workspace skills-sdk-lab --execute --json --robot",
-                f"ask evals run {installed_path} --mode smoke --runner discovery-smoke --tessl-live-private --tessl-workspace skills-sdk-lab --tessl-live-dry-run --json --robot once scenario-quality passes",
+                f"ask sdk eval tessl-local-proof --skill {installed_path} --workspace jscraik --execute --json --robot",
+                f"ask evals run {installed_path} --mode smoke --runner discovery-smoke --tessl-live-private --tessl-workspace jscraik --tessl-live-dry-run --json --robot once scenario-quality passes",
                 f"ask sdk eval handoff-readiness --skill {installed_path} --preview --json --robot",
                 f"ask skills external-review {installed_path} --json --robot",
                 f"ask evals run {installed_path} --mode release --json --robot only after SDK handoff gates are current",

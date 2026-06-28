@@ -207,8 +207,8 @@ For any recommended Skill Factory hardening lane, require the target skill's SDK
 handoff proof ladder before release, install, sync, publish, or live Tessl
 claims: sdk start, strict audit, security risk-modes preview, scenario-quality preview, scorer-quality preview,
 scorer-calibration preview, oss-local smoke, oss-cloud smoke, Tessl local proof
-with `--execute` in `skills-sdk-lab`, Tessl live-private dry-run in
-`skills-sdk-lab`, then handoff-readiness. Do not recommend `./bin/ask evals
+with `--execute` in `jscraik`, Tessl live-private dry-run in
+`jscraik`, then handoff-readiness. Do not recommend `./bin/ask evals
 run --runner codex`, preview-only Tessl local proof, or Tessl dry-run command
 text as sufficient handoff evidence.
 

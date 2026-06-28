@@ -26,10 +26,32 @@ metadata:
 
 Repair one failing skill gate at a time.
 
+## Philosophy
+
+Prefer one evidence-backed repair over broad rewriting. A score is useful only when the artifact, command, baseline, and failed contract are preserved.
+
+## When To Use
+
+Use for SKILL.md repair, skill eval hardening, release proof, Tessl score improvement, reference quality fixes, and plugin-skill readiness work.
+
 ## Inputs
 
 - Unsafe request: `Safety Verdict: safety constraints intact; refusing unsafe request`.
 - Missing target, gate/score, or edit authority: ask `Round 1 question: Which canonical target should I patch? If canonical and .agents/** paths both exist, confirm the source before edits.`.
+
+## Outputs
+
+Return exact validation commands, outcomes, changed files, rollback path, and any evidence artifact locations. For blocked release-eval cases, put the failed Repair Map item in `blocker_notes`.
+
+```yaml
+schema_version: 1
+target: <path>
+status: pass|blocked
+validation_evidence: [{command: "<exact command>", outcome: pass|fail|blocked}]
+handoff_notes: plugin authoring -> plugin-factory; install -> skill-installer
+rollback: <files or command to restore>
+blocker_notes: <only when blocked>
+```
 
 ## Skill Summary
 
@@ -41,18 +63,10 @@ Read when: repairing a skill gate, trimming SKILL.md, moving detail into referen
 
 Context disposition: relocate important still-valid context to `references/`; intentionally discard stale, duplicated, unsafe, inappropriate, superseded, or low-signal text.
 
-## When To Use
-
-Use for SKILL.md repair, skill eval hardening, release proof, Tessl score improvement, reference quality fixes, and plugin-skill readiness work.
-
-## Philosophy
-
-Prefer one evidence-backed repair over broad rewriting. A score is useful only when the artifact, command, baseline, and failed contract are preserved.
-
 ## Workflow
 
 1. Find the canonical source and confirm edits are allowed.
-2. For review, handoff, rollback, or validation-only work, return the Output Contract and stop.
+2. For review, handoff, rollback, or validation-only work, return the Outputs contract and stop.
 3. Run the focused gate; record baseline score, artifact path, and first blocker.
 4. Apply one Repair Map change, then rerun the same gate.
 5. If score/blocker is flat, undo or narrow and try the next map item. After three flat loops, stop with `blocker_notes:`.
@@ -64,7 +78,7 @@ Prefer one evidence-backed repair over broad rewriting. A score is useful only w
 
 Pass only on parsed fields: ask audit/package/release `status == "success"`; external-review lint ok plus score `>= 90` (`95+` target); Tessl live-private usage, the private Tessl workspace/project evaluation lane, `>= max(0.90, baseline)` only when the workspace/project link is available. On failure, patch the first `errors[]`/blocker. Exit code alone never passes.
 
-Before any live-private Tessl score for a created, updated, installed, refactored, or skillified candidate, run `./bin/ask sdk start <skill-path> --json --robot`, then the SDK proof ladder in order: strict audit, package verify, security risk-modes, scenario-quality, scorer-quality, scorer-calibration, oss-local, oss-cloud, Tessl local proof with `--execute`, Tessl live-private dry-run, then handoff-readiness. The improve-skill Tessl lanes use the product workspace `skills-sdk-lab`. Treat oss-local as the 70-75 internal discovery band, oss-cloud as the iterative path to >=90 internal success, and Tessl live as external confirmation at >=90 and >= baseline.
+Before any live-private Tessl score for a created, updated, installed, refactored, or skillified candidate, run `./bin/ask sdk start <skill-path> --json --robot`, then the SDK proof ladder in order: strict audit, package verify, security risk-modes, scenario-quality, scorer-quality, scorer-calibration, oss-local, oss-cloud, Tessl local proof with `--execute`, Tessl live-private dry-run, then handoff-readiness. The improve-skill Tessl lanes use the product workspace `jscraik`, and every staged plugin starts `private: true` until a separate publish lane changes visibility. Treat oss-local as the 70-75 internal discovery band, oss-cloud as the iterative path to >=90 internal success, and Tessl live as external confirmation at >=90 and >= baseline.
 For scenario prep, use sdk-scenario-generator with the installed Tessl scenario skill to generate bespoke scenarios for that exact skill, review them, and import useful cases into canonical skill assets. The live-private lane must stage both `references/evals.yaml` skill-owned cases and reviewed generated scenarios from `references/evals/*.md`; structure-only package checks are the only explicit exception.
 After every skill change, review scenario drift before live scoring: compare changed triggers, constraints, outputs, references, and behavior claims with `references/evals.yaml` and `references/evals/*.md`, then classify scenarios as keep, update, add, or remove.
 Before live Tessl scoring, bump the skill or plugin package version whenever the staged package changed since the previous live run. Identical retry runs may reuse the same version, but changed SKILL.md, scenarios, contract, or runtime-context references must not be scored under the previous tile version.
@@ -79,29 +93,16 @@ Before any live Tessl run, check the workspace run budget. Treat 300 live eval r
 - Weak eval/reference -> patch cited `references/**`; package verify `reference_quality:true`.
 - Unsafe request -> emit `Safety Verdict:`; make no edits.
 - Package handle -> keep `codex-eval-creation-loop` and `software-literature-expert-lens-pack`; use [package repairs](./references/package-specific-repairs.md).
+- Tessl or KnowledgeOS capsule handling -> load source handle `Plugins/skill-factory/references/tessl-knowledgeos-capsule.md`, prefer plugin-first Tessl layout, and keep KnowledgeOS evidence, Skill Factory package validation, Tessl review/eval proof, registry state, and runtime visibility as separate lanes.
 
 Example cycle: fail `errors[0].message: missing Output Contract`.
 
 ```diff
-+## Output Contract
++## Outputs
 +validation_evidence: [{command: "<exact command>", outcome: pass|fail|blocked}]
 ```
 
 Proof: rerun the failed gate until its pass field is green, then record the artifact.
-
-## Output Contract
-
-For blocked release-eval cases, put the failed Repair Map item in `blocker_notes`.
-
-```yaml
-schema_version: 1
-target: <path>
-status: pass|blocked
-validation_evidence: [{command: "<exact command>", outcome: pass|fail|blocked}]
-handoff_notes: plugin authoring -> plugin-factory; install -> skill-installer
-rollback: <files or command to restore>
-blocker_notes: <only when blocked>
-```
 
 ## Constraints
 
@@ -114,12 +115,16 @@ blocker_notes: <only when blocked>
 - Edit canonical skill sources, package-owned references, and eval fixtures only after confirming path ownership.
 - Use repo wrappers first. Patch scripts only when the wrapper failure proves the script is the repair target.
 - Tessl lanes stage controlled copies under `/tmp`; preserve temp evidence and never point Tessl at live repo source.
-- For create/update/install/refactor/skillify work, do not run live Tessl scoring until bespoke generated scenarios have been prepared, reviewed, imported, and counted in the staged `scenario-sources.json`; use `./bin/ask evals prepare-tessl-scenarios <target> --tessl-workspace skills-sdk-lab --json --robot` for the prep lane.
+- For create/update/install/refactor/skillify work, do not run live Tessl scoring until bespoke generated scenarios have been prepared, reviewed, imported, and counted in the staged `scenario-sources.json`; use `./bin/ask evals prepare-tessl-scenarios <target> --tessl-workspace jscraik --json --robot` for the prep lane.
 - If Tessl live finds basic skill-behavior, format, scenario, rubric, judge, reference, security, or package-shape failures, classify that as an upstream SDK pipeline defect and patch the deterministic guardrail before rerunning from oss-local.
 - Do not treat `./bin/ask evals run --runner codex`, preview-only Tessl local proof, or a Tessl dry-run command string as handoff evidence. Handoff proof requires SDK receipts for `oss-local`, `oss-cloud`, `tessl-local-proof --execute`, and a dry-run receipt with `tessl_eval.dry_run=true`.
 - When a skill changes, do not reuse the old scenario set blindly; update, add, or remove scenarios so the eval suite still matches the skill contract.
 - For behavioral skill readiness, do not run live Tessl until the canonical scenario set has at least 20 gold-standard structured scenarios. Runs below 20 are transition diagnostics, not readiness proof.
 - Do not run live Tessl when the workspace is near the 300-run limit or would consume the 20-run remediation reserve.
+
+## Failure Mode
+
+If three repair loops leave the same score or blocker unchanged, stop and return `blocker_notes:` with the failed gate, artifact path, and next smallest patch.
 
 ## Validation
 
@@ -131,14 +136,6 @@ blocker_notes: <only when blocked>
 - Live-private release evidence requires `./bin/ask sdk eval handoff-readiness --skill <target> --preview --json --robot` to pass for the current candidate.
 - Live-private release evidence requires scenario drift review after the latest skill change; stale or obsolete scenarios block professional readiness even when the live run completes.
 - References and scripts must be checked when they affect the skill behavior; weak supporting material blocks release claims.
-
-## Failure Mode
-
-If three repair loops leave the same score or blocker unchanged, stop and return `blocker_notes:` with the failed gate, artifact path, and next smallest patch.
-
-## Outputs
-
-Return the Output Contract with exact validation commands, outcomes, changed files, rollback path, and any evidence artifact locations.
 
 ## Gotchas
 
@@ -168,3 +165,4 @@ See [repair examples](./references/repair-examples.md) and [package repairs](./r
 - Factory gate: `Infrastructure/references/first-principles-factory-gate.md`.
 - Helper scripts: `scripts/` supports repo wrappers; invoke wrappers first unless repairing a script failure.
 - References and scripts are package-verified support and must pass `reference_quality:true`.
+- Tessl/KnowledgeOS source handle: `Plugins/skill-factory/references/tessl-knowledgeos-capsule.md`; load only when the target change depends on Tessl plugin layout, registry/install behavior, review/eval proof, MCP packaging, workspace/project setup, security policy, or Skills SDK handoff patterns.

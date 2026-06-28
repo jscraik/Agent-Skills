@@ -462,7 +462,87 @@ def _load_evals_document(evals_path: Path) -> Dict[str, Any]:
     obj = yaml.safe_load(evals_path.read_text(encoding="utf-8"))
     if not isinstance(obj, dict) or "cases" not in obj or not isinstance(obj["cases"], list):
         raise ValueError("evals.yaml must be a mapping with `cases: [...]`.")
+    generated_cases = _parse_reviewed_generated_eval_fixtures(evals_path)
+    if generated_cases:
+        existing_ids = {str(case.get("id") or "") for case in obj["cases"] if isinstance(case, dict)}
+        obj = dict(obj)
+        obj["cases"] = [
+            *obj["cases"],
+            *(case for case in generated_cases if str(case.get("id") or "") not in existing_ids),
+        ]
     return obj
+
+
+def _parse_reviewed_generated_eval_fixtures(evals_path: Path) -> List[Dict[str, Any]]:
+    fixture_root = evals_path.parent / "evals"
+    if not fixture_root.is_dir():
+        return []
+    cases: List[Dict[str, Any]] = []
+    for fixture_path in sorted(fixture_root.glob("eval.*.md")):
+        parsed = _parse_reviewed_generated_eval_fixture(fixture_path, evals_path.parent)
+        if parsed is not None:
+            cases.append(parsed)
+    return cases
+
+
+def _parse_reviewed_generated_eval_fixture(fixture_path: Path, references_root: Path) -> Optional[Dict[str, Any]]:
+    fields: Dict[str, str] = {}
+    title = fixture_path.stem.removeprefix("eval.").replace("-", " ").title()
+    for raw_line in fixture_path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if line.startswith("# "):
+            title = line[2:].strip().split(":", 1)[-1].strip() or title
+            continue
+        if ":" not in line:
+            continue
+        key, value = line.split(":", 1)
+        key = key.strip()
+        if key in {
+            "Knowledge claim",
+            "Behavior under test",
+            "Expected agent move",
+            "Failure mode",
+            "Given",
+            "Should",
+            "Expected failure",
+        }:
+            fields[key] = value.strip()
+    given = fields.get("Given")
+    should = fields.get("Should")
+    expected_move = fields.get("Expected agent move") or should
+    failure_mode = fields.get("Failure mode") or fields.get("Expected failure")
+    if not given or not should or not expected_move:
+        return None
+    raw_id = fixture_path.stem.removeprefix("eval.")
+    relative_path = fixture_path.relative_to(references_root.parent).as_posix()
+    artifact_name = f"{raw_id}.md"
+    prompt = "\n".join([
+        f"Generated reviewed scenario: {title}",
+        f"Knowledge claim: {fields.get('Knowledge claim', '')}",
+        f"Behavior under test: {fields.get('Behavior under test', '')}",
+        f"Given: {given}",
+        f"Should: {should}",
+        "Produce the named artifact with observable evidence and preserve the documented failure boundary.",
+    ])
+    acceptance: List[Dict[str, str]] = [{"type": "expected_signal", "value": expected_move}]
+    if failure_mode:
+        acceptance.append({"type": "not_contains", "value": failure_mode})
+    return {
+        "id": f"generated-eval.{raw_id}",
+        "name": title,
+        "category": "edge",
+        "eval_modes": ["release"],
+        "realistic": True,
+        "why_realistic": "Reviewed generated fixture imported from references/evals for OSS and Tessl scenario parity.",
+        "unit": title,
+        "given": given,
+        "should": should,
+        "actual_artifact": artifact_name,
+        "expected_artifact": artifact_name,
+        "reproduce": relative_path,
+        "prompt": prompt,
+        "acceptance": acceptance,
+    }
 
 
 def _normalize_string_list(raw: Any, *, field_name: str, case_number: Optional[int] = None) -> Tuple[str, ...]:
@@ -1809,6 +1889,29 @@ def _evaluate_skill_selection_assertion(
     return None
 
 
+_DISCOVERY_SCOPE_RE = re.compile(
+    r"(?i)\b(?:doc(?:umentation)?|docs?|readme|runbook|surface|scope|path|target|canonical|generated|projection|publication|audit-only|audit only|edit goal)\b"
+)
+_DISCOVERY_PRE_EDIT_RE = re.compile(
+    r"(?i)\b(?:before|prior to|first|start|initial|clarif(?:y|ication)|discovery|smallest|bounded|no edits|without edits)\b"
+)
+_DISCOVERY_EDIT_CLAIM_RE = re.compile(
+    r"(?i)\b(?:I changed|I've changed|I updated|I've updated|patched|rewrote|saved|committed)\b"
+)
+
+
+def _evaluate_discovery_question_assertion(text: str) -> Optional[str]:
+    if _DISCOVERY_EDIT_CLAIM_RE.search(text):
+        return "discovery_question failed: response claimed an edit before discovery"
+    if "?" not in text:
+        return "discovery_question failed: response did not ask a question"
+    if not _DISCOVERY_SCOPE_RE.search(text):
+        return "discovery_question failed: response did not name a documentation scope, path, target, or surface"
+    if not _DISCOVERY_PRE_EDIT_RE.search(text):
+        return "discovery_question failed: response did not preserve a before-edit discovery boundary"
+    return None
+
+
 def evaluate_assertions_text(
     text: str,
     assertions: List[Assertion],
@@ -1854,6 +1957,10 @@ def evaluate_assertions_text(
             msg = _evaluate_expected_signal_assertion(text, v)
             if msg:
                 failures.append(msg)
+        elif t == "discovery_question":
+            msg = _evaluate_discovery_question_assertion(text)
+            if msg:
+                failures.append(msg)
         else:
             failures.append(f"unsupported assertion type for text output: {t!r}")
     return failures
@@ -1879,6 +1986,7 @@ def evaluate_assertions_json(
             "skill_selected",
             "skill_not_selected",
             "expected_signal",
+            "discovery_question",
         }:
             text = json.dumps(obj, ensure_ascii=False, indent=2)
             failures.extend(
@@ -2277,10 +2385,19 @@ def run_codex_exec(
 
     def _invoke(effective_profile: Optional[str]) -> Tuple[int, str, str]:
         cmd = _codex_exec_prefix(codex_bin)
-        # Eval cases pass prompt/context explicitly; ignoring user config keeps
-        # local MCP auth and project startup hooks from contaminating results.
+        # Eval cases pass prompt/context explicitly. When a named runtime lane
+        # profile is requested, keep profile config available while still using
+        # the isolated CODEX_HOME copied below.
         ignore_user_config_support = _codex_supports_exec_flag(codex_bin, "--ignore-user-config")
-        if ignore_user_config_support is not False:
+        if effective_profile:
+            warnings.append("Preserved Codex user/profile config because an explicit --profile was requested.")
+            disable_support = _codex_supports_exec_flag(codex_bin, "--disable")
+            if disable_support is not False:
+                cmd.extend(["--disable", "apps"])
+                warnings.append("Disabled Codex apps for noninteractive profile eval subprocesses.")
+            else:
+                warnings.append("Codex CLI does not support --disable; eval runner could not disable apps.")
+        elif ignore_user_config_support is not False:
             cmd.append("--ignore-user-config")
         else:
             warnings.append("Codex CLI does not support --ignore-user-config; eval runner continued without it.")
@@ -2320,6 +2437,7 @@ def run_codex_exec(
                 env=env,
                 cwd=workspace_root,
                 timeout=timeout,
+                start_new_session=True,
             )
         except FileNotFoundError:
             return 127, "", "codex CLI not found on PATH. Install it (for example: npm i -g @openai/codex)."
@@ -2421,6 +2539,7 @@ def run_alt_codex_exec(
             capture_output=True,
             cwd=workspace_root,
             timeout=timeout,
+            start_new_session=True,
         )
     except FileNotFoundError:
         if use_shell_function:
@@ -2643,12 +2762,50 @@ def _codex_cli_prefix(codex_bin: Optional[Path]) -> List[str]:
             - `["<codex_bin>"]` if `codex_bin` is provided without a sibling `node`,
             - `["codex"]` if `codex_bin` is `None`.
     """
-    if codex_bin:
-        node_bin = codex_bin.parent / "node"
-        if node_bin.exists():
-            return [str(node_bin), str(codex_bin)]
-        return [str(codex_bin)]
+    effective_codex_bin = codex_bin or _mise_codex_bin()
+    if effective_codex_bin:
+        node_bin = effective_codex_bin.parent / "node"
+        if not node_bin.exists() and _is_node_launcher(effective_codex_bin):
+            node_bin = _mise_repo_node_bin()
+        if node_bin and node_bin.exists():
+            return [str(node_bin), str(effective_codex_bin)]
+        return [str(effective_codex_bin)]
     return ["codex"]
+
+
+def _is_node_launcher(path: Path) -> bool:
+    try:
+        first_line = path.read_text(encoding="utf-8", errors="replace").splitlines()[0]
+    except (OSError, IndexError):
+        return False
+    return "node" in first_line and first_line.startswith("#!")
+
+
+def _mise_codex_bin() -> Optional[Path]:
+    codex_bin = Path.home() / ".local" / "share" / "mise" / "installs" / "npm-openai-codex" / "latest" / "bin" / "codex"
+    return codex_bin.resolve() if codex_bin.exists() else None
+
+
+def _mise_repo_node_bin() -> Optional[Path]:
+    version = _repo_mise_node_version()
+    if not version:
+        return None
+    node_bin = Path.home() / ".local" / "share" / "mise" / "installs" / "node" / version / "bin" / "node"
+    return node_bin if node_bin.exists() else None
+
+
+def _repo_mise_node_version() -> Optional[str]:
+    config_path = WORKSPACE_ROOT / ".mise.toml"
+    try:
+        for line in config_path.read_text(encoding="utf-8").splitlines():
+            stripped = line.strip()
+            if stripped.startswith('"node"') or stripped.startswith("node"):
+                _, _, raw_value = stripped.partition("=")
+                value = raw_value.strip().strip('"').strip("'")
+                return value or None
+    except OSError:
+        return None
+    return None
 
 
 def _codex_exec_prefix(codex_bin: Optional[Path]) -> List[str]:
@@ -2734,7 +2891,7 @@ def _isolated_codex_home_for_eval() -> Tuple[Path, List[str]]:
         (target_home / child).mkdir(parents=True, exist_ok=True)
 
     if source_home.exists():
-        for name in ("auth.json", "config.toml"):
+        for name in ("auth.json", "config.toml", "oss-local.config.toml", "oss-cloud.config.toml"):
             warning = _copy_codex_home_file(source_home, target_home, name)
             if warning:
                 warnings.append(warning)
@@ -2912,7 +3069,7 @@ def _codex_help_text(codex_bin: Optional[Path]) -> Optional[str]:
         env["PATH"] = f"{codex_bin.parent}{os.pathsep}{env.get('PATH', '')}"
 
     try:
-        proc = sp.run(cmd, text=True, capture_output=True, env=env, timeout=10)
+        proc = sp.run(cmd, text=True, capture_output=True, env=env, timeout=10, start_new_session=True)
     except Exception:  # noqa: BLE001
         _CODEX_HELP_CACHE[key] = None
         return None

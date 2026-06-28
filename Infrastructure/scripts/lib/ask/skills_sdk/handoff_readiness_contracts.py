@@ -44,6 +44,16 @@ class HandoffReadinessLane(_HandoffReadinessModel):
         return self
 
 
+class HandoffReadinessTesslScoreSummary(_HandoffReadinessModel):
+    status: str | None = None
+    blocker_class: str | None = None
+    feedback_loop_status: str | None = None
+    regression_count: int | None = Field(default=None, ge=0)
+    usage_percent: int | float | None = None
+    baseline_percent: int | float | None = None
+    scenario_count: int | None = Field(default=None, ge=0)
+
+
 class HandoffReadinessReceipt(_HandoffReadinessModel):
     schema_version: Literal["skills-sdk.eval-handoff-readiness.v0"]
     schema_uri: Literal[
@@ -54,6 +64,8 @@ class HandoffReadinessReceipt(_HandoffReadinessModel):
     query: str = Field(min_length=1)
     skill_path: str = Field(min_length=1)
     readiness_path: str = Field(min_length=1)
+    tessl_score_path: str | None = None
+    tessl_score_summary: HandoffReadinessTesslScoreSummary | None = None
     required_lanes: list[HandoffReadinessLaneId]
     required_order: list[str] = Field(min_length=9)
     lanes: list[HandoffReadinessLane] = Field(min_length=5)

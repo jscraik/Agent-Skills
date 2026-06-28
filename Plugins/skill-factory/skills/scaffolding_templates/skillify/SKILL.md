@@ -191,8 +191,8 @@ install, sync, publish, live Tessl, or readiness claim:
 5. `./bin/ask skills package verify <skill-path> --json --robot`
 6. `./bin/ask sdk eval run <skill-path> --runner internal --mode smoke --codex-profile oss-local --json --robot`
 7. `./bin/ask sdk eval run <skill-path> --runner internal --mode smoke --codex-profile oss-cloud --json --robot`
-8. `./bin/ask sdk eval tessl-local-proof --skill <skill-path> --workspace skills-sdk-lab --execute --json --robot`
-9. `./bin/ask evals run <skill-path> --mode smoke --runner discovery-smoke --tessl-live-private --tessl-workspace skills-sdk-lab --tessl-live-dry-run --json --robot`
+8. `./bin/ask sdk eval tessl-local-proof --skill <skill-path> --workspace jscraik --execute --json --robot`
+9. `./bin/ask evals run <skill-path> --mode smoke --runner discovery-smoke --tessl-live-private --tessl-workspace jscraik --tessl-live-dry-run --json --robot`
 10. `./bin/ask sdk eval handoff-readiness --skill <skill-path> --preview --json --robot`
 11. `./bin/ask skills external-review <skill-path> --audit-level compat --json --robot`
 

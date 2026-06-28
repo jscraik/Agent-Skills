@@ -459,10 +459,15 @@ class EvalRunReceipt(_SdkContractModel):
     target_path: str | None
     mode: str | None
     lane: str | None = None
+    lane_type: str | None = None
     profile: str | None = None
     codex_profile: str | None = None
     codex_exec_invoked: bool | None = None
     codex_exec_command_shape: list[str] | None = None
+    scenario_set_id: str | None = None
+    scenario_set_case_ids: list[str] | None = None
+    selected_case_ids: list[str] | None = None
+    release_set_minimum: int | None = Field(default=None, ge=0)
     case_count: int = Field(ge=0)
     passed_count: int = Field(ge=0)
     failed_count: int = Field(ge=0)

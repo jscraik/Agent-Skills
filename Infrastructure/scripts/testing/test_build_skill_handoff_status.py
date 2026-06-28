@@ -120,12 +120,11 @@ def test_build_status_reports_tessl_feedback_loop_when_score_blocks(tmp_path: Pa
     ]
 
 
-def test_existing_artifact_freshness_flags_stale_head(tmp_path: Path) -> None:
-    output = tmp_path / "status.json"
-    output.write_text(json.dumps({"repo": {"head": "old"}}), encoding="utf-8")
+def test_generated_artifact_freshness_uses_emitted_repo_head() -> None:
+    status = {"repo": {"head": "new"}}
 
-    freshness = build_skill_handoff_status._existing_artifact_freshness(output, "new")
+    freshness = build_skill_handoff_status._generated_artifact_freshness(status, "new")
 
-    assert freshness["status"] == "stale"
-    assert freshness["artifact_head"] == "old"
+    assert freshness["status"] == "current"
+    assert freshness["artifact_head"] == "new"
     assert freshness["current_head"] == "new"

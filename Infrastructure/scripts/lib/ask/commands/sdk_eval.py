@@ -45,6 +45,7 @@ def _add_run_parser(subparsers: argparse._SubParsersAction, global_parser: argpa
     run.add_argument("--runner", choices=["auto", "internal", "deterministic-jsonl"], default="auto")
     run.add_argument("--mode", choices=["smoke", "release"], default="smoke", help="Internal eval mode.")
     run.add_argument("--case", action="append", dest="cases", help="Internal eval case id filter.")
+    run.add_argument("--scenario-set", help="Named release scenario set from references/evals.yaml.")
     run.add_argument("--codex-profile", help="Override the Codex config profile for the internal eval runner.")
     run.add_argument("--timeout-seconds", type=_positive_int, help="Override the internal eval runner timeout.")
     run.add_argument("--with-tessl", action="store_true", help="Allow internal Tessl continuation.")
@@ -53,6 +54,8 @@ def _add_run_parser(subparsers: argparse._SubParsersAction, global_parser: argpa
 def _add_scenario_quality_parser(subparsers: argparse._SubParsersAction, global_parser: argparse.ArgumentParser) -> None:
     quality = subparsers.add_parser("scenario-quality", help="Preview eval scenario promotion quality", parents=[global_parser])
     quality.add_argument("target", help="Skill handle or repo-relative skill source path")
+    quality.add_argument("--tessl-staged-json", help="Optional Tessl dry-run/staging receipt JSON used for scenario-set parity")
+    quality.add_argument("--tessl-score", help="Optional SDK Tessl score receipt JSON used for scenario-set parity")
     quality.add_argument("--preview", action="store_true", help="Emit a non-mutating scenario quality receipt")
 
 
@@ -105,6 +108,7 @@ def _add_handoff_readiness_parser(subparsers: argparse._SubParsersAction, global
     readiness = subparsers.add_parser("handoff-readiness", help="Preview the required local and internal evidence gate before live Tessl", parents=[global_parser])
     readiness.add_argument("--skill", required=True, help="Skill handle or repo-relative source path represented by the handoff")
     readiness.add_argument("--receipt-json", help="Optional explicit handoff readiness JSON artifact")
+    readiness.add_argument("--tessl-score", help="Optional SDK Tessl score receipt JSON used as a live feedback-loop blocker")
     readiness.add_argument("--preview", action="store_true", help="Emit a non-mutating handoff readiness receipt")
 
 
@@ -203,6 +207,7 @@ def _dispatch_run(repo_root: Path, args: argparse.Namespace) -> CallResult:
         skip_tessl=not args.with_tessl,
         codex_profile=args.codex_profile,
         cases=args.cases,
+        scenario_set=args.scenario_set,
         timeout_seconds=args.timeout_seconds,
     )
 
@@ -214,13 +219,12 @@ def _preview_required(command: str, message: str, next_command: str, args: argpa
 
 
 def _dispatch_scenario_quality(repo_root: Path, args: argparse.Namespace) -> CallResult:
-    return _dispatch_preview_target(
+    error = _preview_required("sdk eval scenario-quality", "Scenario quality requires --preview.", _scenario_quality_next(), args)
+    return error or skills_commands.skills_sdk_eval_scenario_quality(
         repo_root,
-        args,
-        command="sdk eval scenario-quality",
-        message="Scenario quality requires --preview.",
-        next_command=_scenario_quality_next(),
-        handler=skills_commands.skills_sdk_eval_scenario_quality,
+        args.target,
+        tessl_staged_json=args.tessl_staged_json,
+        tessl_score=args.tessl_score,
     )
 
 
@@ -285,6 +289,7 @@ def _dispatch_handoff_readiness(repo_root: Path, args: argparse.Namespace) -> Ca
         repo_root,
         skill=args.skill,
         receipt_json=args.receipt_json,
+        tessl_score=args.tessl_score,
     )
 
 

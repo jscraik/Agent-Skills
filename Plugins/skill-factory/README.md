@@ -10,6 +10,7 @@ The plugin manifest is [`.codex-plugin/plugin.json`](./.codex-plugin/plugin.json
 - [Factory Lifecycle](#factory-lifecycle): how ideas move from draft to runtime proof.
 - [Routing Boundaries](#routing-boundaries): where each lane stops.
 - [Context Lifecycle](#context-lifecycle): the shared generate/test/distribute/observe/adapt frame.
+- [Tessl And KnowledgeOS](#tessl-and-knowledgeos): current plugin-first Tessl layout and evidence boundaries.
 - [Source Boundaries](#source-boundaries): which paths are canonical and which paths are compatibility links.
 - [Validation](#validation): commands to prove docs and plugin metadata still match the live package.
 
@@ -60,6 +61,12 @@ Use the routed hardening workflow for builder-style output: `builder_result`, `d
 ## Context Lifecycle
 
 Skills are context packages. Durable changes should move through generate, test, distribute, observe, and adapt instead of ending at template completion. Use [`references/context-development-lifecycle.md`](./references/context-development-lifecycle.md) when repeated review feedback, session evidence, or validation drift should become a skill, eval, or routing improvement.
+
+## Tessl And KnowledgeOS
+
+Use [`references/tessl-knowledgeos-capsule.md`](./references/tessl-knowledgeos-capsule.md) when Skill Factory work depends on Tessl plugin layout, registry/install behavior, review/eval lanes, MCP packaging, workspace/project setup, security policy, or the KnowledgeOS-to-Skills-SDK handoff.
+
+The reference is plugin-first: `.tessl-plugin/plugin.json` is the plugin manifest, `tessl.json` is the project manifest, plugin-bundled `.mcp.json` differs from project `.mcp.json`, and `tile.json` is legacy/migration terminology. Keep KnowledgeOS source evidence, Skill Factory package validation, Tessl review/eval proof, registry publish state, security policy, hosted PR state, and runtime visibility as separate evidence lanes.
 
 ## Source Boundaries
 

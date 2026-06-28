@@ -134,9 +134,10 @@ project, while standalone skills use the skill project. When a Tessl workspace
 is provided, the wrapper must check the staged project link before evals run,
 relink an existing project first, and create a project only when relink proves
 one does not already exist. The requested workspace is part of the evidence
-contract: a run requested for `skills-sdk` must create, link, list, and be
-reported under `skills-sdk`, not under a personal workspace with the same
-project name. Leave the staged directory in place so the copied
+contract: every SDK Tessl run uses the `jscraik` workspace and must create,
+link, list, and report the exact per-skill or per-plugin project identity,
+such as `jscraik/technical-writer` or `jscraik/skill-factory`, not a personal
+workspace or stale alias with the same project name. Leave the staged directory in place so the copied
 inputs, synthesized Tessl tasks, and Tessl project marker remain inspectable
 evidence. Reruns must archive prior staged contents to a sibling archive such
 as `/tmp/ask-tessl-evals/<skill-path>-<sha12>-evidence-archive/` before

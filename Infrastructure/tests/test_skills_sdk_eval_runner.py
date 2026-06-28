@@ -21,6 +21,28 @@ from ask.envelope import CallResult, ErrorObject  # noqa: E402
 
 PASS_DATASET = "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json"
 FAIL_DATASET = "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-fail.json"
+TECHNICAL_WRITER_RELEASE_20 = [
+    "smoke-discovery",
+    "smoke-boundary-discovery",
+    "reader-state-glossary-citations",
+    "writer-gap-gathering",
+    "happy-readme",
+    "generated-boundary",
+    "readme-first-run",
+    "reader-testing",
+    "prompt-injection",
+    "risky-command",
+    "wrong-domain",
+    "docs-validation-ledger",
+    "service-doc-reader-job",
+    "answer-first-architecture-note",
+    "visual-doc-standalone",
+    "docs-to-x-routing-boundary",
+    "pressure-unverified-badge",
+    "pressure-generated-projection-edit",
+    "regression-capsule-runtime-boundary",
+    "regression-stale-command-example",
+]
 
 
 def _closeout_validation(status: str = "pass") -> dict[str, object]:
@@ -470,6 +492,50 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
         command = payload["validation_commands"][0]
         self.assertIn("--case happy-path", command)
         self.assertIn("--case edge-case", command)
+
+    def test_oss_release_lane_expands_default_release_scenario_set(self) -> None:
+        with mock.patch("ask.commands.evals.run_evals", return_value=_successful_internal_result("oss-local")) as run:
+            result = skills_sdk_eval_run(
+                REPO_ROOT,
+                target="Skills/agent-ops/technical-writer",
+                mode="release",
+                runner="internal",
+                codex_profile="oss-local",
+            )
+
+        run.assert_called_once()
+        self.assertEqual(run.call_args.kwargs["cases"], TECHNICAL_WRITER_RELEASE_20)
+        payload = result.data["skills_sdk_eval_run"]
+        receipt = validate_eval_run_receipt(payload["receipt"])
+        self.assertEqual(result.status, "success")
+        self.assertEqual(receipt.lane_type, "release")
+        self.assertEqual(receipt.scenario_set_id, "technical-writer-release-20-v1")
+        self.assertEqual(receipt.scenario_set_case_ids, TECHNICAL_WRITER_RELEASE_20)
+        self.assertEqual(receipt.selected_case_ids, TECHNICAL_WRITER_RELEASE_20)
+        self.assertEqual(receipt.release_set_minimum, 20)
+
+    def test_oss_release_lane_blocks_filtered_debug_subset_before_runtime(self) -> None:
+        with mock.patch("ask.commands.evals.run_evals") as run:
+            result = skills_sdk_eval_run(
+                REPO_ROOT,
+                target="Skills/agent-ops/technical-writer",
+                mode="release",
+                runner="internal",
+                codex_profile="oss-local",
+                cases=["smoke-discovery"],
+            )
+
+        run.assert_not_called()
+        payload = result.data["skills_sdk_eval_run"]
+        receipt = validate_eval_run_receipt(payload["receipt"])
+        self.assertEqual(result.status, "error")
+        self.assertEqual(payload["status"], "blocked")
+        self.assertEqual(receipt.status, "blocked")
+        self.assertEqual(receipt.lane_type, "focused-debug")
+        self.assertEqual(receipt.case_count, 1)
+        self.assertEqual(receipt.selected_case_ids, ["smoke-discovery"])
+        self.assertEqual(receipt.scenario_set_case_ids, TECHNICAL_WRITER_RELEASE_20)
+        self.assertIn("focused_debug_subset_not_release_evidence:selected:1:required:20:minimum:20", receipt.blockers)
 
     def test_sdk_internal_runner_binds_scorecard_case_counts_to_receipt(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

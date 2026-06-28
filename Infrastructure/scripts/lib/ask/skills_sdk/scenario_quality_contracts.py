@@ -26,6 +26,18 @@ class ScenarioQualityRow(_ScenarioQualityModel):
     blockers: list[ScenarioQualityCheck]
 
 
+class ScenarioSetParity(_ScenarioQualityModel):
+    canonical_count: int = Field(ge=0)
+    reviewed_fixture_count: int = Field(ge=0)
+    staged_tessl_count: int | None = Field(default=None, ge=0)
+    score_receipt_path_count: int | None = Field(default=None, ge=0)
+    score_receipt_declared_count: int | None = Field(default=None, ge=0)
+    missing_from_staged: list[str]
+    extra_in_staged: list[str]
+    missing_from_score_receipt: list[str]
+    extra_in_score_receipt: list[str]
+
+
 class ScenarioQualityReceipt(_ScenarioQualityModel):
     schema_version: Literal["skills-sdk.scenario-quality-receipt.v0"]
     schema_uri: Literal[
@@ -39,6 +51,7 @@ class ScenarioQualityReceipt(_ScenarioQualityModel):
     scenario_count: int = Field(ge=0)
     promotion_ready_count: int = Field(ge=0)
     blocked_count: int = Field(ge=0)
+    scenario_set_parity: ScenarioSetParity | None = None
     scenario_rows: list[ScenarioQualityRow]
     quality_checks: list[ScenarioQualityCheck] = Field(min_length=1)
     blockers: list[ScenarioQualityCheck]

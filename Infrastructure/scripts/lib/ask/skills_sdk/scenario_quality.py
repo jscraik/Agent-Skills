@@ -3,6 +3,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+from ask.skills_sdk.release_scenario_sets import build_release_scenario_set_checks
+from ask.skills_sdk.scenario_set_parity import build_scenario_set_parity_checks
+
 
 SCENARIO_QUALITY_SCHEMA_VERSION = "skills-sdk.scenario-quality-receipt.v0"
 SCENARIO_QUALITY_SCHEMA_URI = (
@@ -74,15 +77,6 @@ def _repo_relative(repo_root: Path, path: Path) -> str:
 
 def _check(check_id: str, status: str, message: str, evidence: list[str] | None = None) -> dict[str, Any]:
     return {"id": check_id, "status": status, "severity": "blocker", "message": message, "evidence": evidence or []}
-
-
-def _advisory_check(
-    check_id: str,
-    _status: str,
-    message: str,
-    evidence: list[str] | None = None,
-) -> dict[str, Any]:
-    return {"id": check_id, "status": "advisory", "severity": "advisory", "message": message, "evidence": evidence or []}
 
 
 def _yaml_safe_load(text: str) -> Any:
@@ -356,35 +350,15 @@ def _platform_parity_checks(case: dict[str, Any], scenario_id: str) -> list[dict
             )
         ]
     findings = tessl_eval_quality_findings([case])
-    blocks_handoff = _case_requires_live_tessl_parity(case)
-    check_builder = _check if blocks_handoff else _advisory_check
-    status = "blocker" if blocks_handoff else "advisory"
-    message = (
-        "SDK scenario-quality and Tessl live-private staging must share the same behavioral quality gate."
-        if blocks_handoff
-        else "Tessl live-private quality finding recorded as advisory until the case declares live-private or handoff intent."
-    )
     return [
-        check_builder(
+        _check(
             f"{PLATFORM_PARITY_GATE_ID_PREFIX}:{finding['code']}",
-            status,
-            message,
+            "blocker",
+            "SDK scenario-quality and Tessl live-private staging must repair scenario warnings before the next phase.",
             [f"{scenario_id}:{finding['code']}:{finding['message']}"],
         )
         for finding in findings
     ]
-
-
-def _case_requires_live_tessl_parity(case: dict[str, Any]) -> bool:
-    """Return whether Tessl parity findings should block this scenario-quality row."""
-    eval_modes = _list_field(case, "eval_modes")
-    explicit_modes = {"tessl-live-private", "live-private", "live_private", "tessl-handoff", "handoff"}
-    if any(str(mode).strip().lower() in explicit_modes for mode in eval_modes):
-        return True
-    for key in ("tessl_live_private", "live_private", "tessl_handoff", "handoff"):
-        if case.get(key) is True:
-            return True
-    return False
 
 
 def _text_field_assertion_malformed(item: dict[str, Any], assertion_type: str) -> bool:
@@ -571,7 +545,14 @@ def _rows(cases: list[Any]) -> tuple[list[dict[str, Any]], list[str]]:
     return rows, errors
 
 
-def _quality_checks(repo_root: Path, evals_path: Path, case_list: list[Any], load_error: str | None, row_errors: list[str]) -> list[dict[str, Any]]:
+def _quality_checks(
+    repo_root: Path,
+    evals_path: Path,
+    evals_payload: dict[str, Any] | None,
+    case_list: list[Any],
+    load_error: str | None,
+    row_errors: list[str],
+) -> list[dict[str, Any]]:
     checks = [
         _check("evals_yaml_present", "pass" if evals_path.is_file() else "blocker", "Skill must carry references/evals.yaml.", [_repo_relative(repo_root, evals_path)]),
         _check("evals_yaml_parse", "blocker" if load_error else "pass", "references/evals.yaml must parse as YAML object.", [load_error] if load_error else []),
@@ -579,6 +560,7 @@ def _quality_checks(repo_root: Path, evals_path: Path, case_list: list[Any], loa
         _check("cases_are_objects", "blocker" if row_errors else "pass", "Every eval case must be an object.", row_errors),
     ]
     checks.extend(_release_suite_checks(case_list))
+    checks.extend(build_release_scenario_set_checks(evals_payload, case_list))
     return checks
 
 
@@ -634,6 +616,7 @@ def _receipt(
     evals_path: Path,
     scenario_rows: list[dict[str, Any]],
     receipt_checks: list[dict[str, Any]],
+    scenario_set_parity: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     scenario_blockers = [blocker for row in scenario_rows for blocker in row["blockers"]]
     blockers = [check for check in receipt_checks if check["status"] == "blocker"] + scenario_blockers
@@ -648,6 +631,7 @@ def _receipt(
         "scenario_count": len(scenario_rows),
         "promotion_ready_count": sum(1 for row in scenario_rows if row["promotion_status"] == "promotion_ready"),
         "blocked_count": sum(1 for row in scenario_rows if row["promotion_status"] == "blocked_quality_gate"),
+        "scenario_set_parity": scenario_set_parity,
         "scenario_rows": scenario_rows,
         "quality_checks": receipt_checks,
         "blockers": blockers,
@@ -658,15 +642,39 @@ def _receipt(
     }
 
 
-def build_scenario_quality_receipt(repo_root: Path, *, source_path: Path, query: str) -> dict[str, Any]:
+def build_scenario_quality_receipt(
+    repo_root: Path,
+    *,
+    source_path: Path,
+    query: str,
+    tessl_staged_json: Path | None = None,
+    tessl_score_json: Path | None = None,
+) -> dict[str, Any]:
     skill_md = source_path if source_path.name == "SKILL.md" else source_path / "SKILL.md"
     evals_path = skill_md.parent / "references" / "evals.yaml"
     evals_payload, load_error = _load_evals(evals_path) if evals_path.is_file() else (None, "missing_evals_yaml")
     cases = evals_payload.get("cases") if isinstance(evals_payload, dict) else None
     case_list = cases if isinstance(cases, list) else []
     scenario_rows, row_errors = _rows(case_list)
-    receipt_checks = _quality_checks(repo_root, evals_path, case_list, load_error, row_errors)
-    receipt = _receipt(repo_root, query=query, skill_md=skill_md, evals_path=evals_path, scenario_rows=scenario_rows, receipt_checks=receipt_checks)
+    receipt_checks = _quality_checks(repo_root, evals_path, evals_payload, case_list, load_error, row_errors)
+    canonical_ids = {row["id"] for row in scenario_rows}
+    scenario_set_parity, parity_checks = build_scenario_set_parity_checks(
+        repo_root,
+        skill_md.parent,
+        canonical_ids,
+        tessl_staged_json,
+        tessl_score_json,
+    )
+    receipt_checks.extend(parity_checks)
+    receipt = _receipt(
+        repo_root,
+        query=query,
+        skill_md=skill_md,
+        evals_path=evals_path,
+        scenario_rows=scenario_rows,
+        receipt_checks=receipt_checks,
+        scenario_set_parity=scenario_set_parity,
+    )
     if receipt["blockers"]:
         raise ScenarioQualityError(receipt)
     return receipt

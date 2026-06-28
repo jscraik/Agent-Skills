@@ -55,6 +55,10 @@ def default_handoff_readiness_path(repo_root: Path, source_path: Path) -> Path:
     return repo_root / ".harness" / "evidence" / "handoff" / _safe_slug(_skill_dir(source_path).name) / "eval-handoff-readiness.json"
 
 
+def default_tessl_score_path(repo_root: Path, source_path: Path) -> Path:
+    return repo_root / ".harness" / "evidence" / "handoff" / _safe_slug(_skill_dir(source_path).name) / "tessl-score-preview.json"
+
+
 def _load_json_object(path: Path) -> tuple[dict[str, Any] | None, str | None]:
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
@@ -325,6 +329,18 @@ def _receipt_codex_exec_invoked(payload: dict[str, Any]) -> bool:
     return False
 
 
+def _receipt_case_count(payload: dict[str, Any]) -> int | None:
+    for key in ("case_count", "scenario_count", "scored_scenario_count"):
+        value = payload.get(key)
+        if isinstance(value, int):
+            return value
+    for nested_receipt in _nested_receipt_payloads(payload):
+        nested = _receipt_case_count(nested_receipt)
+        if nested is not None:
+            return nested
+    return None
+
+
 def _lane_semantics_evidence(
     repo_root: Path,
     receipt_path: Path,
@@ -435,6 +451,155 @@ def _lane_status_next_actions(blocker_ids: set[str]) -> list[str]:
     ]
 
 
+def _tessl_score_receipt(payload: dict[str, Any] | None) -> dict[str, Any] | None:
+    if not isinstance(payload, dict):
+        return None
+    data = payload.get("data")
+    if isinstance(data, dict):
+        score = data.get("skills_sdk_eval_tessl_score")
+        if isinstance(score, dict) and isinstance(score.get("receipt"), dict):
+            return score["receipt"]
+    if isinstance(payload.get("receipt"), dict):
+        return payload["receipt"]
+    return None
+
+
+def _tessl_score_summary(receipt: dict[str, Any] | None) -> dict[str, Any] | None:
+    if receipt is None:
+        return None
+    score_summary = _score_summary(receipt)
+    feedback_loop = _feedback_loop(receipt)
+    regressions = _regressions(score_summary)
+    return {
+        "status": receipt.get("status"),
+        "blocker_class": receipt.get("blocker_class"),
+        "feedback_loop_status": feedback_loop.get("status"),
+        "regression_count": feedback_loop.get("regression_count") if feedback_loop.get("regression_count") is not None else len(regressions),
+        "usage_percent": score_summary.get("usage_percent"),
+        "baseline_percent": score_summary.get("baseline_percent"),
+        "scenario_count": score_summary.get("scenario_count"),
+    }
+
+
+def _score_summary(receipt: dict[str, Any]) -> dict[str, Any]:
+    value = receipt.get("score_summary")
+    return value if isinstance(value, dict) else {}
+
+
+def _feedback_loop(receipt: dict[str, Any]) -> dict[str, Any]:
+    value = receipt.get("feedback_loop")
+    return value if isinstance(value, dict) else {}
+
+
+def _regressions(score_summary: dict[str, Any]) -> list[Any]:
+    value = score_summary.get("regressions")
+    return value if isinstance(value, list) else []
+
+
+def _tessl_score_checks(repo_root: Path, tessl_score_path: Path | None) -> list[dict[str, Any]]:
+    if tessl_score_path is None:
+        return []
+    payload, error = _load_json_object(tessl_score_path) if tessl_score_path.is_file() else (None, "missing_tessl_score")
+    if payload is None:
+        return [
+            _check(
+                "tessl_score_receipt_readable",
+                "blocker",
+                "Live handoff must consume the latest SDK Tessl score receipt when one is declared or present.",
+                [_repo_relative(repo_root, tessl_score_path), error or "invalid_json"],
+            )
+        ]
+    receipt = _tessl_score_receipt(payload)
+    if receipt is None:
+        return [
+            _check(
+                "tessl_score_receipt_readable",
+                "blocker",
+                "Tessl score evidence must include a skills-sdk Tessl score receipt.",
+                [_repo_relative(repo_root, tessl_score_path)],
+            )
+        ]
+    return _tessl_score_gate_checks(repo_root, tessl_score_path, receipt)
+
+
+def _tessl_score_gate_checks(repo_root: Path, tessl_score_path: Path, receipt: dict[str, Any]) -> list[dict[str, Any]]:
+    score_summary = _score_summary(receipt)
+    feedback_loop = _feedback_loop(receipt)
+    regressions = _regressions(score_summary)
+    usage_percent = score_summary.get("usage_percent")
+    usage_ok = isinstance(usage_percent, (int, float)) and float(usage_percent) >= 90.0
+    feedback_open = feedback_loop.get("status") == "open"
+    baseline_wins = bool(regressions) or int(feedback_loop.get("regression_count") or 0) > 0
+    evidence = [_repo_relative(repo_root, tessl_score_path)]
+    return [
+        _tessl_gate_check(
+            "tessl_feedback_loop_closed",
+            not feedback_open,
+            "Live Tessl handoff is blocked while the Tessl-to-internal feedback loop is open.",
+            evidence,
+            f"feedback_loop.status={feedback_loop.get('status')}",
+        ),
+        _tessl_gate_check(
+            "tessl_baseline_wins_absent",
+            not baseline_wins,
+            "Live Tessl handoff is blocked when baseline beats usage on any scenario.",
+            evidence,
+            f"regression_count={feedback_loop.get('regression_count') or len(regressions)}",
+        ),
+        _tessl_gate_check(
+            "tessl_usage_threshold_met",
+            usage_ok,
+            "Live Tessl handoff requires usage score >= 90%.",
+            evidence,
+            f"usage_percent={usage_percent}",
+        ),
+    ]
+
+
+def _tessl_gate_check(check_id: str, ok: bool, message: str, evidence: list[str], failure_evidence: str) -> dict[str, Any]:
+    return _check(check_id, "pass" if ok else "blocker", message, evidence if ok else evidence + [failure_evidence])
+
+
+def _oss_release_scenario_coverage_checks(
+    repo_root: Path,
+    lane_map: dict[str, dict[str, Any]],
+    tessl_score_receipt: dict[str, Any] | None,
+) -> list[dict[str, Any]]:
+    if tessl_score_receipt is None:
+        return []
+    score_summary = _score_summary(tessl_score_receipt)
+    expected_count = score_summary.get("scenario_count")
+    if not isinstance(expected_count, int) or expected_count <= 0:
+        return []
+    return [
+        _oss_lane_release_scenario_check(repo_root, lane_id, lane_map.get(lane_id) or {}, expected_count)
+        for lane_id in ("oss-local", "oss-cloud")
+    ]
+
+
+def _oss_lane_release_scenario_check(repo_root: Path, lane_id: str, lane: dict[str, Any], expected_count: int) -> dict[str, Any]:
+    receipt_path = _resolve_evidence_path(repo_root, lane.get("receipt_path"))
+    payload, error = _load_json_object(receipt_path) if receipt_path and receipt_path.is_file() else (None, "missing_oss_receipt")
+    observed_count = _receipt_case_count(payload) if payload is not None else None
+    return _check(
+        f"{lane_id}_release_scenario_count_matches_tessl",
+        "pass" if observed_count == expected_count else "blocker",
+        "OSS release proof must run the same scenario count as the final Tessl assessment before live handoff.",
+        _oss_release_scenario_evidence(repo_root, receipt_path, error, expected_count, observed_count),
+    )
+
+
+def _oss_release_scenario_evidence(
+    repo_root: Path,
+    receipt_path: Path | None,
+    error: str | None,
+    expected_count: int,
+    observed_count: int | None,
+) -> list[str]:
+    evidence_path = _repo_relative(repo_root, receipt_path) if receipt_path is not None else error or "missing_oss_receipt"
+    return [f"expected:{expected_count}", f"observed:{observed_count if observed_count is not None else 'missing'}", evidence_path]
+
+
 def _lane_has_runtime_blocker(lanes: list[dict[str, Any]], lane_id: str) -> bool:
     for lane in lanes:
         if lane.get("id") != lane_id:
@@ -450,22 +615,55 @@ def _agent_summary(blockers: list[dict[str, Any]], query: str) -> str:
     return f"Handoff readiness for {query} is complete for live Tessl."
 
 
-def build_handoff_readiness_receipt(
+def _actual_tessl_score_path(repo_root: Path, source_path: Path, tessl_score_path: Path | None) -> Path | None:
+    actual_path = tessl_score_path or default_tessl_score_path(repo_root, source_path)
+    if tessl_score_path is None and not actual_path.exists():
+        return None
+    return actual_path
+
+
+def _readiness_payload(path: Path) -> tuple[dict[str, Any] | None, str | None]:
+    return _load_json_object(path) if path.is_file() else (None, "missing_readiness_artifact")
+
+
+def _load_tessl_score_receipt(path: Path | None) -> dict[str, Any] | None:
+    payload, _error = _load_json_object(path) if path else (None, None)
+    return _tessl_score_receipt(payload)
+
+
+def _handoff_checks(
     repo_root: Path,
-    *,
-    source_path: Path,
-    query: str,
-    readiness_path: Path | None = None,
-) -> dict[str, Any]:
-    skill_path = _skill_md(source_path)
-    actual_readiness_path = readiness_path or default_handoff_readiness_path(repo_root, source_path)
-    payload, error = _load_json_object(actual_readiness_path) if actual_readiness_path.is_file() else (None, "missing_readiness_artifact")
-    lane_map = _lane_index(payload or {})
-    lanes = [_lane_row(repo_root, lane_id, lane_map.get(lane_id)) for lane_id in REQUIRED_LANE_IDS]
-    checks = _readiness_checks(repo_root, actual_readiness_path, payload, error)
-    blockers = [check for check in checks if check["status"] == "blocker"] + [
+    readiness_path: Path,
+    payload: dict[str, Any] | None,
+    error: str | None,
+    lane_map: dict[str, dict[str, Any]],
+    tessl_score_path: Path | None,
+    tessl_score_receipt: dict[str, Any] | None,
+) -> list[dict[str, Any]]:
+    checks = _readiness_checks(repo_root, readiness_path, payload, error)
+    checks.extend(_tessl_score_checks(repo_root, tessl_score_path))
+    checks.extend(_oss_release_scenario_coverage_checks(repo_root, lane_map, tessl_score_receipt))
+    return checks
+
+
+def _handoff_blockers(checks: list[dict[str, Any]], lanes: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [check for check in checks if check["status"] == "blocker"] + [
         blocker for lane in lanes for blocker in lane["blockers"]
     ]
+
+
+def _handoff_receipt(
+    repo_root: Path,
+    *,
+    query: str,
+    skill_path: Path,
+    readiness_path: Path,
+    tessl_score_path: Path | None,
+    tessl_score_receipt: dict[str, Any] | None,
+    lanes: list[dict[str, Any]],
+    checks: list[dict[str, Any]],
+    blockers: list[dict[str, Any]],
+) -> dict[str, Any]:
     return {
         "schema_version": HANDOFF_READINESS_SCHEMA_VERSION,
         "schema_uri": HANDOFF_READINESS_SCHEMA_URI,
@@ -473,15 +671,47 @@ def build_handoff_readiness_receipt(
         "operation": "eval_handoff_readiness_preview",
         "query": query,
         "skill_path": _repo_relative(repo_root, skill_path),
-        "readiness_path": _repo_relative(repo_root, actual_readiness_path),
+        "readiness_path": _repo_relative(repo_root, readiness_path),
+        "tessl_score_path": _repo_relative(repo_root, tessl_score_path) if tessl_score_path else None,
+        "tessl_score_summary": _tessl_score_summary(tessl_score_receipt),
         "required_lanes": list(REQUIRED_LANE_IDS),
         "required_order": list(REQUIRED_ORDER),
         "lanes": lanes,
         "quality_checks": checks,
         "blockers": blockers,
         "ready_for_live_tessl": not blockers,
-        "required_next_actions": _next_actions(repo_root, blockers, actual_readiness_path, lanes),
+        "required_next_actions": _next_actions(repo_root, blockers, readiness_path, lanes),
         "mutation_performed": False,
         "promotion_performed": False,
         "agent_summary": _agent_summary(blockers, query),
     }
+
+
+def build_handoff_readiness_receipt(
+    repo_root: Path,
+    *,
+    source_path: Path,
+    query: str,
+    readiness_path: Path | None = None,
+    tessl_score_path: Path | None = None,
+) -> dict[str, Any]:
+    skill_path = _skill_md(source_path)
+    actual_readiness_path = readiness_path or default_handoff_readiness_path(repo_root, source_path)
+    actual_tessl_score_path = _actual_tessl_score_path(repo_root, source_path, tessl_score_path)
+    payload, error = _readiness_payload(actual_readiness_path)
+    lane_map = _lane_index(payload or {})
+    lanes = [_lane_row(repo_root, lane_id, lane_map.get(lane_id)) for lane_id in REQUIRED_LANE_IDS]
+    tessl_score_receipt = _load_tessl_score_receipt(actual_tessl_score_path)
+    checks = _handoff_checks(repo_root, actual_readiness_path, payload, error, lane_map, actual_tessl_score_path, tessl_score_receipt)
+    blockers = _handoff_blockers(checks, lanes)
+    return _handoff_receipt(
+        repo_root,
+        query=query,
+        skill_path=skill_path,
+        readiness_path=actual_readiness_path,
+        tessl_score_path=actual_tessl_score_path,
+        tessl_score_receipt=tessl_score_receipt,
+        lanes=lanes,
+        checks=checks,
+        blockers=blockers,
+    )

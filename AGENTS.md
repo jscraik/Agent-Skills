@@ -74,13 +74,15 @@ discovering, and syncing Codex skills, operator docs, and agent workflows.
   that setup blocker directly instead of re-litigating auth, sandboxing, or temp
   staging. Tessl project identity is
   deterministic: plugin-owned skills under `Plugins/<plugin-id>/skills/**`
-  belong to the plugin project, for example `skills-sdk/skill-factory`, and
-  standalone skills belong to their own skill project. Wrappers must check or
+  belong to the plugin project, for example `jscraik/skill-factory`, and
+  standalone skills belong to their own skill project, for example
+  `jscraik/technical-writer`. The workspace is `jscraik`; the project is the
+  per-skill or per-plugin identity under that workspace. Wrappers must check or
   establish that project link before running the Tessl eval/install lane,
   relinking an existing project before creating a new one. The operator-provided
-  workspace name is binding evidence; do not substitute a personal workspace
-  when the requested or visible Tessl workspace is `skills-sdk` or another
-  product workspace. In Codex sessions,
+  workspace name is binding evidence; do not substitute a personal workspace or
+  stale alias when the requested or visible Tessl workspace is `jscraik`. In
+  Codex sessions,
   source the operator-approved
   `/Users/jamiecraik/.codex/.env` environment stream directly when the Tessl
   workspace token is needed; never print token values or shell-expanded
