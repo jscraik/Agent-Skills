@@ -15,9 +15,13 @@ def build_scenario_set_parity_checks(
 ) -> tuple[dict[str, Any] | None, list[dict[str, Any]]]:
     if tessl_staged_json is None and tessl_score_json is None:
         return None, []
-    expected_ids = _tessl_case_ids(canonical_ids | _reviewed_fixture_ids(skill_dir))
+    raw_expected_ids = canonical_ids | _reviewed_fixture_ids(skill_dir)
+    expected_ids = _tessl_case_ids(raw_expected_ids)
     parity = _empty_parity(canonical_ids, expected_ids)
     checks: list[dict[str, Any]] = []
+    collision_check = _tessl_case_id_collision_check(raw_expected_ids)
+    if collision_check is not None:
+        checks.append(collision_check)
     if tessl_staged_json is not None:
         checks.append(_staged_parity_check(repo_root, tessl_staged_json, expected_ids, parity))
     if tessl_score_json is not None:
@@ -134,6 +138,25 @@ def _reviewed_fixture_ids(skill_dir: Path) -> set[str]:
 
 def _tessl_case_ids(case_ids: set[str]) -> set[str]:
     return {_tessl_case_id(case_id) for case_id in case_ids}
+
+
+def _tessl_case_id_collision_check(case_ids: set[str]) -> dict[str, Any] | None:
+    raw_ids_by_tessl_id: dict[str, set[str]] = {}
+    for case_id in case_ids:
+        raw_ids_by_tessl_id.setdefault(_tessl_case_id(case_id), set()).add(case_id)
+    collisions = [
+        f"{tessl_id}:{','.join(sorted(raw_ids))}"
+        for tessl_id, raw_ids in sorted(raw_ids_by_tessl_id.items())
+        if len(raw_ids) > 1
+    ]
+    if not collisions:
+        return None
+    return _check(
+        "scenario_set_tessl_case_ids_unique",
+        "blocker",
+        "SDK scenario IDs must remain unique after Tessl-safe normalization.",
+        collisions,
+    )
 
 
 def _tessl_case_id(case_id: str) -> str:

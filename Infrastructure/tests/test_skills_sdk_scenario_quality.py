@@ -918,6 +918,7 @@ cases:
         check_map = {check["id"]: check for check in raised.exception.receipt["quality_checks"]}
         self.assertEqual(check_map["release_scenario_set_minimum_count"]["status"], "blocker")
         self.assertIn("sample-release-10-v1:count:10:minimum:20", check_map["release_scenario_set_minimum_count"]["evidence"])
+        validate_scenario_quality_receipt(raised.exception.receipt)
 
     def test_release_scenario_set_rejects_duplicate_ids(self) -> None:
         duplicate_set = "\n".join(
@@ -1178,6 +1179,64 @@ cases:
             ["scenario_set:missing-release-set:not_found_or_empty"],
         )
         self.assertEqual(raised.exception.receipt["scenario_set_parity"]["canonical_count"], 0)
+        validate_scenario_quality_receipt(raised.exception.receipt)
+
+    def test_scenario_set_parity_blocks_tessl_case_id_collisions(self) -> None:
+        evals_text = """schema_version: '2.0'
+skill_name: sample
+cases:
+- id: docs/foo
+  category: happy
+  eval_modes:
+  - smoke
+  realistic: true
+  unit: docs slash scenario
+  given: A docs scenario id contains a slash.
+  should: Return docs-slash.md content with evidence-backed documentation behavior.
+  actual_artifact: docs-slash.md
+  expected_artifact: docs-slash.md
+  prompt: Return docs-slash.md content.
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: Returns docs-slash.md content with evidence-backed documentation behavior.
+- id: docs-foo
+  category: edge
+  eval_modes:
+  - smoke
+  realistic: true
+  unit: docs dash scenario
+  given: A docs scenario id already contains the Tessl-safe dash form.
+  should: Return docs-dash.md content with evidence-backed documentation behavior.
+  actual_artifact: docs-dash.md
+  expected_artifact: docs-dash.md
+  prompt: Return docs-dash.md content.
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: Returns docs-dash.md content with evidence-backed documentation behavior.
+"""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            skill_dir = _write_skill_with_evals(temp_path, evals_text)
+            staged_json = _write_staged_tessl_json(temp_path / "staged.json", ["docs-foo"])
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(
+                    temp_path,
+                    source_path=skill_dir,
+                    query="sample_skill",
+                    tessl_staged_json=staged_json,
+                )
+
+        check_map = {check["id"]: check for check in raised.exception.receipt["quality_checks"]}
+        self.assertEqual(check_map["scenario_set_tessl_case_ids_unique"]["status"], "blocker")
+        self.assertEqual(check_map["scenario_set_tessl_case_ids_unique"]["evidence"], ["docs-foo:docs-foo,docs/foo"])
+        validate_scenario_quality_receipt(raised.exception.receipt)
 
     def test_scenario_set_parity_counts_tessl_score_wins_as_covered_paths(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
