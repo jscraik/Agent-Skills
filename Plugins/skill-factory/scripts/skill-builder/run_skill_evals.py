@@ -3164,6 +3164,14 @@ def _classify_runner_blocker(
 
     text = "\n".join([output_text or "", process_text])
     low = text.lower()
+    tool_schema_markers = [
+        "failed to parse function arguments",
+        "tool exec invoked with incompatible payload",
+        "no last agent message",
+        "wrote empty content to",
+    ]
+    if exit_code == 0 and not (output_text or "").strip() and any(marker in low for marker in tool_schema_markers):
+        return "blocked_runtime"
     if any(marker in low for marker in strong_runtime_markers):
         return "blocked_runtime"
     if any(marker in low for marker in weak_runtime_markers) and any(

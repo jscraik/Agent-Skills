@@ -247,6 +247,29 @@ class RunSkillEvalsModeTests(unittest.TestCase):
             "blocked_runtime",
         )
 
+    def test_empty_successful_exit_with_tool_schema_error_is_runtime_blocker(self) -> None:
+        self.assertEqual(
+            _classify_runner_blocker(
+                output_text="",
+                stdout_text='{"type":"turn.completed"}',
+                stderr_text=(
+                    "failed to parse function arguments: invalid type: string "
+                    "'500', expected usize\n"
+                    "Warning: no last agent message; wrote empty content to final.txt"
+                ),
+                exit_code=0,
+            ),
+            "blocked_runtime",
+        )
+        self.assertIsNone(
+            _classify_runner_blocker(
+                output_text="Projection report: canonical source is editable.",
+                stdout_text='{"type":"turn.completed"}',
+                stderr_text="failed to parse function arguments: invalid type: string '500', expected usize",
+                exit_code=0,
+            )
+        )
+
     def test_runtime_blocker_detection_keeps_stderr_sandbox_failures(self) -> None:
         self.assertEqual(
             _classify_runner_blocker(
