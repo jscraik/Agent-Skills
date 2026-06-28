@@ -143,7 +143,7 @@ def _release_scenario_set_case_checks(
     case_by_id: dict[str, dict[str, Any]],
 ) -> list[dict[str, Any]]:
     minimum = item.get("minimum_scenarios")
-    minimum_value = minimum if isinstance(minimum, int) and not isinstance(minimum, bool) else 20
+    minimum_value = max(20, minimum) if isinstance(minimum, int) and not isinstance(minimum, bool) else 20
     return [
         _release_scenario_set_minimum_check(set_id, case_ids, minimum_value),
         _release_scenario_set_missing_ids_check(set_id, case_ids, case_by_id),

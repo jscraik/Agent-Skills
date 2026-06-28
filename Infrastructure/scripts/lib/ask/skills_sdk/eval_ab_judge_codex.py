@@ -105,9 +105,8 @@ def _codex_model_setting_overrides(judge_profile: dict[str, Any]) -> list[str]:
     if not isinstance(settings, dict):
         return []
     overrides: list[str] = []
-    for key in sorted(settings):
-        if not isinstance(key, str) or not key:
-            continue
+    valid_keys = sorted(key for key in settings if isinstance(key, str) and key)
+    for key in valid_keys:
         value = settings[key]
         if isinstance(value, bool):
             encoded = "true" if value else "false"

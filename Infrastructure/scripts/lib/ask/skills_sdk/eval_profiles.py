@@ -124,6 +124,10 @@ def select_judge_profile(profile_id: str) -> dict[str, Any]:
     return _profile_by_id(_judge_profiles(), profile_id, "judge")
 
 
+def judge_profile_ids() -> tuple[str, ...]:
+    return tuple(str(profile["id"]) for profile in _judge_profiles())
+
+
 def build_eval_profile_preview_receipt() -> dict[str, Any]:
     judge_secret_names = sorted(
         {

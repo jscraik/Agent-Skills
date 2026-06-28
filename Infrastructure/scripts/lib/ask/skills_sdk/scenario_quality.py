@@ -642,6 +642,24 @@ def _receipt(
     }
 
 
+def _selected_canonical_ids(
+    evals_payload: dict[str, Any] | None,
+    scenario_set: str | None,
+    all_canonical_ids: set[str],
+) -> tuple[set[str], list[dict[str, Any]]]:
+    selected_release_ids = release_scenario_set_case_ids(evals_payload, scenario_set)
+    if scenario_set and not selected_release_ids:
+        return set(), [
+            _check(
+                "release_scenario_set_selector_valid",
+                "blocker",
+                "Scenario-set parity must use a declared release scenario set when --scenario-set is provided.",
+                [f"scenario_set:{scenario_set}:not_found_or_empty"],
+            )
+        ]
+    return selected_release_ids or all_canonical_ids, []
+
+
 def build_scenario_quality_receipt(
     repo_root: Path,
     *,
@@ -659,8 +677,8 @@ def build_scenario_quality_receipt(
     scenario_rows, row_errors = _rows(case_list)
     receipt_checks = _quality_checks(repo_root, evals_path, evals_payload, case_list, load_error, row_errors)
     all_canonical_ids = {row["id"] for row in scenario_rows}
-    selected_release_ids = release_scenario_set_case_ids(evals_payload, scenario_set)
-    canonical_ids = selected_release_ids or all_canonical_ids
+    canonical_ids, selector_checks = _selected_canonical_ids(evals_payload, scenario_set, all_canonical_ids)
+    receipt_checks.extend(selector_checks)
     scenario_set_parity, parity_checks = build_scenario_set_parity_checks(
         repo_root,
         skill_md.parent,

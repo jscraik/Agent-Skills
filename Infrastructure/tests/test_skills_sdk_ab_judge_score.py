@@ -230,6 +230,16 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         self.assertEqual(command[command.index("--profile") + 1], "oss-local")
         self.assertIn("model_settings.num_ctx=16384", command)
 
+    def test_codex_model_settings_skip_non_string_keys_before_sorting(self) -> None:
+        overrides = codex_judge._codex_model_setting_overrides(
+            {
+                "id": "mixed-settings",
+                "model_settings": {1: 16384, "num_ctx": 8192, "temperature": 0.1, "bad": object()},
+            }
+        )
+
+        self.assertEqual(overrides, ["model_settings.num_ctx=8192", "model_settings.temperature=0.1"])
+
     def test_builder_scores_with_injected_cloud_judge_profile(self) -> None:
         calls: list[tuple[str, str]] = []
 
@@ -288,6 +298,31 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         payload = json.loads(proc.stdout)
         self.assertEqual(proc.stderr, "")
         self.assertEqual(payload["status"], "error")
+
+    def test_cli_accepts_declared_local_code_judge_profile_before_execute_gate(self) -> None:
+        proc = subprocess.run(
+            [
+                str(REPO_ROOT / "bin/ask"),
+                "sdk",
+                "eval",
+                "ab-judge-score",
+                "--run-receipt",
+                RUN_RECEIPT,
+                "--judge-profile",
+                "oss-local-code",
+                "--json",
+                "--robot",
+            ],
+            cwd=REPO_ROOT,
+            check=False,
+            text=True,
+            capture_output=True,
+        )
+
+        payload = json.loads(proc.stdout)
+        self.assertEqual(proc.stderr, "")
+        self.assertEqual(payload["status"], "error")
+        self.assertIn("requires --execute", payload["errors"][0]["message"])
         self.assertEqual(payload["errors"][0]["code"], "ERR_VALIDATION")
         self.assertIn("requires --execute", payload["errors"][0]["message"])
 

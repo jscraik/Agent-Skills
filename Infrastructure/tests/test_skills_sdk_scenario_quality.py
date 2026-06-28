@@ -893,6 +893,32 @@ cases:
         self.assertEqual(check_map["release_scenario_set_cases_are_release_mode"]["status"], "pass")
         validate_scenario_quality_receipt(receipt)
 
+    def test_release_scenario_set_cannot_lower_minimum_below_twenty(self) -> None:
+        payload = _release_set_20_evals_yaml()
+        flat_cases = "\n".join(
+            [
+                "release_scenario_sets:",
+                "- id: sample-release-10-v1",
+                "  default: true",
+                "  minimum_scenarios: 5",
+                "  cases:",
+                *[f"  - foundation-{index}" for index in range(1, 6)],
+                *[f"  - behavioral-{index}" for index in range(1, 6)],
+                "cases:",
+            ]
+        )
+        start = payload.index("release_scenario_sets:")
+        end = payload.index("cases:", start)
+        payload = payload[:start] + flat_cases + payload[end + len("cases:") :]
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(Path(temp_dir), payload)
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        check_map = {check["id"]: check for check in raised.exception.receipt["quality_checks"]}
+        self.assertEqual(check_map["release_scenario_set_minimum_count"]["status"], "blocker")
+        self.assertIn("sample-release-10-v1:count:10:minimum:20", check_map["release_scenario_set_minimum_count"]["evidence"])
+
     def test_release_scenario_set_rejects_duplicate_ids(self) -> None:
         duplicate_set = "\n".join(
             [
@@ -1084,6 +1110,30 @@ cases:
         self.assertEqual(receipt["scenario_set_parity"]["reviewed_fixture_count"], 1)
         self.assertFalse(receipt["blockers"])
         validate_scenario_quality_receipt(receipt)
+
+    def test_scenario_set_parity_blocks_unknown_selected_release_set(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            skill_dir = _write_skill_with_evals(temp_path, _release_set_20_evals_yaml())
+            release_ids = [f"foundation-{index}" for index in range(1, 6)] + [f"behavioral-{index}" for index in range(1, 16)]
+            staged_json = _write_staged_tessl_json(temp_path / "staged.json", release_ids)
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(
+                    temp_path,
+                    source_path=skill_dir,
+                    query="sample_skill",
+                    tessl_staged_json=staged_json,
+                    scenario_set="missing-release-set",
+                )
+
+        blockers = {check["id"]: check for check in raised.exception.receipt["blockers"]}
+        self.assertIn("release_scenario_set_selector_valid", blockers)
+        self.assertEqual(
+            blockers["release_scenario_set_selector_valid"]["evidence"],
+            ["scenario_set:missing-release-set:not_found_or_empty"],
+        )
+        self.assertEqual(raised.exception.receipt["scenario_set_parity"]["canonical_count"], 0)
 
     def test_scenario_set_parity_counts_tessl_score_wins_as_covered_paths(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
