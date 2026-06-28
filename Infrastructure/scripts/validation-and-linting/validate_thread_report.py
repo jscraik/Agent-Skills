@@ -13,6 +13,7 @@ VALID_STATUSES = {"pass", "blocked", "failed"}
 VALID_OUTCOMES = {"pass", "fail", "blocked"}
 BLOCKED_OSS_LOCAL_GATES = {"oss-cloud", "tessl-dry-run", "tessl-live"}
 LEARNING_LEDGER_PATH = ".harness/memory/LEARNINGS.md"
+REPO_ROOT = Path(__file__).resolve().parents[3]
 
 
 def _finding(path: str, message: str) -> dict[str, str]:
@@ -53,6 +54,13 @@ def _validate_items(
                     findings.append(_finding(f"{item_path}.{required_key}", "must be pass, fail, or blocked"))
             elif not _non_empty_string(item.get(required_key)):
                 findings.append(_finding(f"{item_path}.{required_key}", "must be a non-empty final string"))
+            elif required_key == "artifact" and key == "artifact_assertions":
+                # Check if artifact path exists
+                artifact_value = item.get(required_key)
+                if isinstance(artifact_value, str) and artifact_value.strip():
+                    artifact_path = REPO_ROOT / artifact_value
+                    if not artifact_path.exists():
+                        findings.append(_finding(f"{item_path}.{required_key}", f"path does not exist: {artifact_value}"))
     return findings
 
 
@@ -108,10 +116,18 @@ def _validate_blocked_next_gates(payload: dict[str, Any]) -> list[dict[str, str]
 
 
 def _validate_files_changed(payload: dict[str, Any]) -> list[dict[str, str]]:
+    findings: list[dict[str, str]] = []
     files_changed = payload.get("files_changed")
     if not isinstance(files_changed, list) or not all(isinstance(item, str) and item.strip() for item in files_changed):
         return [_finding("files_changed", "must be a list of non-empty strings")]
-    return []
+
+    for index, file_path in enumerate(files_changed):
+        if isinstance(file_path, str) and file_path.strip():
+            full_path = REPO_ROOT / file_path
+            if not full_path.exists():
+                findings.append(_finding(f"files_changed.{index}", f"path does not exist: {file_path}"))
+
+    return findings
 
 
 def _validate_lessons(payload: dict[str, Any]) -> list[dict[str, str]]:
@@ -144,6 +160,11 @@ def _validate_lessons(payload: dict[str, Any]) -> list[dict[str, str]]:
                     "must point at durable memory, docs, source, eval, or validator surface; not only the thread report",
                 )
             )
+        # Check if recorded_in path exists
+        if isinstance(recorded_in, str) and recorded_in.strip():
+            recorded_path = REPO_ROOT / recorded_in
+            if not recorded_path.exists():
+                findings.append(_finding(f"lessons.{index}.recorded_in", f"path does not exist: {recorded_in}"))
     if not has_learning_ledger_record:
         findings.append(
             _finding(

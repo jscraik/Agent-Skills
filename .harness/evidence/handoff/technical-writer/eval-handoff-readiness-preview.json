@@ -458,12 +458,12 @@
         "next_gate_allowed": false,
         "blocked_next_gates": [
           "oss-cloud",
-          "tessl-dry-run",
+          "tessl-live-dry-run",
           "tessl-live"
         ],
         "ready_for_live_tessl": false,
         "required_next_actions": [
-          "Repair the oss-local release-lane failures and rerun oss-local before oss-cloud; do not run live Tessl while the oss-local receipt status, profile proof, or release scenario evidence is blocked."
+          "Repair the oss-local release-lane failures and rerun oss-local before oss-cloud; resolve the oss-cloud scenario count mismatch; do not run live Tessl while the oss-local receipt status, profile proof, or release scenario evidence is blocked."
         ],
         "mutation_performed": false,
         "promotion_performed": false,

@@ -20,7 +20,7 @@
         "schema_uri": "https://agent-skills.local/schemas/skills-sdk/eval-run-receipt.v0.schema.json",
         "status": "fail",
         "runner": "internal_skill_builder_v0",
-        "dataset_path": "Infrastructure/artifacts/skills/technical-writer/20260628-205656-614157/scorecard.json",
+        "dataset_path": "Infrastructure/artifacts/skills/technical-writer/20260628-201223-215442/scorecard.json",
         "dataset_digest": "sha256:fc72e5df22752bd298aec0d436a7700c294f02af53a143fc2e8d6297e4d4cb21",
         "skill_ir_schema_version": "skills-sdk.skill-ir.v0",
         "package_id": "technical-writer",
