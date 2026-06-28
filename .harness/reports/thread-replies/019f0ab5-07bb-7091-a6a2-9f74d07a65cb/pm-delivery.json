@@ -5,7 +5,7 @@
   "report_path": "latest.json",
   "delivery_method": "codex_app__send_message_to_thread",
   "delivery_status": "delivered",
-  "delivered_at": "2026-06-28T20:10:34Z",
-  "message_summary": "Reported technical-writer oss-local repair pass 3 failed at 14 of 20 with six current failures and later gates still blocked.",
+  "delivered_at": "2026-06-28T20:44:06Z",
+  "message_summary": "Sent PR #294 stabilization update with commit, push, local gates, and hosted PR blockers.",
   "delivery_evidence": "send_message_to_thread returned threadId 019f0314-ba59-7a00-ab78-9bd3174d1d03"
 }
