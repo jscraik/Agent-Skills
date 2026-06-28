@@ -15,7 +15,7 @@ def build_scenario_set_parity_checks(
 ) -> tuple[dict[str, Any] | None, list[dict[str, Any]]]:
     if tessl_staged_json is None and tessl_score_json is None:
         return None, []
-    expected_ids = canonical_ids | _reviewed_fixture_ids(skill_dir)
+    expected_ids = _tessl_case_ids(canonical_ids | _reviewed_fixture_ids(skill_dir))
     parity = _empty_parity(canonical_ids, expected_ids)
     checks: list[dict[str, Any]] = []
     if tessl_staged_json is not None:
@@ -62,6 +62,7 @@ def _score_parity_check(repo_root: Path, path: Path, expected_ids: set[str], par
     if receipt is None:
         return _readable_check(repo_root, path, "scenario_set_score_receipt_readable", error or "missing_receipt")
     score_ids, declared_count = _score_receipt_ids(receipt)
+    score_ids = _tessl_case_ids(score_ids)
     parity["score_receipt_path_count"] = len(score_ids)
     parity["score_receipt_declared_count"] = declared_count
     check = _diff_check(
@@ -129,6 +130,19 @@ def _reviewed_fixture_ids(skill_dir: Path) -> set[str]:
         for path in evals_dir.glob("eval.*.md")
         if path.is_file()
     }
+
+
+def _tessl_case_ids(case_ids: set[str]) -> set[str]:
+    return {_tessl_case_id(case_id) for case_id in case_ids}
+
+
+def _tessl_case_id(case_id: str) -> str:
+    return _safe_slug(case_id.replace("/", "-"))
+
+
+def _safe_slug(value: str) -> str:
+    slug = re.sub(r"[^A-Za-z0-9._-]+", "-", value.strip()).strip("-")
+    return slug or "skill"
 
 
 def _staged_tessl_ids(payload: dict[str, Any]) -> set[str]:

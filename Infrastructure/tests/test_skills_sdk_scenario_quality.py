@@ -1065,6 +1065,50 @@ cases:
         self.assertFalse(receipt["blockers"])
         validate_scenario_quality_receipt(receipt)
 
+    def test_scenario_set_parity_normalizes_tessl_staged_case_ids(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            skill_dir = _write_skill_with_evals(
+                temp_path,
+                """schema_version: '2.0'
+skill_name: sample
+cases:
+- id: docs/foo
+  category: happy
+  eval_modes:
+  - smoke
+  realistic: true
+  unit: docs scenario parity
+  given: A scenario id contains characters that Tessl staging normalizes.
+  should: Return docs-output.md content with source-backed validation claims and no invented command proof.
+  actual_artifact: docs-output.md
+  expected_artifact: docs-output.md
+  prompt: Return the docs-output.md content as a proof-backed docs note for the scenario parity review.
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: Returns docs-output.md content with source-backed validation claims and no invented command proof.
+""",
+            )
+            staged_json = _write_staged_tessl_json(temp_path / "staged.json", ["docs-foo"])
+            score_json = _write_tessl_score_json(temp_path / "score.json", ["docs/foo"])
+
+            receipt = build_scenario_quality_receipt(
+                temp_path,
+                source_path=skill_dir,
+                query="sample_skill",
+                tessl_staged_json=staged_json,
+                tessl_score_json=score_json,
+            )
+
+        self.assertEqual(receipt["scenario_set_parity"]["missing_from_staged"], [])
+        self.assertEqual(receipt["scenario_set_parity"]["extra_in_staged"], [])
+        self.assertEqual(receipt["scenario_set_parity"]["missing_from_score_receipt"], [])
+        self.assertFalse(receipt["blockers"])
+        validate_scenario_quality_receipt(receipt)
+
     def test_scenario_set_parity_uses_selected_release_set_universe(self) -> None:
         payload = _release_set_20_evals_yaml() + """
 - id: non-release-doc-case

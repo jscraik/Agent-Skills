@@ -7503,10 +7503,8 @@ def _select_release_scenario_set(release_sets: list[dict[str, Any]], scenario_se
             if release_set["id"] == scenario_set:
                 return release_set
         return None
-    for release_set in release_sets:
-        if release_set.get("default") is True:
-            return release_set
-    return release_sets[0]
+    defaults = [release_set for release_set in release_sets if release_set.get("default") is True]
+    return defaults[0] if len(defaults) == 1 else None
 
 
 def _skills_sdk_release_set_blocked_result(
@@ -7631,6 +7629,27 @@ def _skills_sdk_prepare_release_case_filters(
             release_set=None,
             blocker=f"release_scenario_set_unknown:{scenario_set}",
             message=f"Skills SDK release eval run is blocked: scenario set {scenario_set!r} is not declared.",
+        )
+        return cases, None, blocked
+    if release_sets and release_set is None:
+        default_count = sum(1 for item in release_sets if item.get("default") is True)
+        blocked = _skills_sdk_release_set_blocked_result(
+            repo_root,
+            target=target,
+            target_path=target_path,
+            evals_path=evals_path,
+            package_identity=package_identity,
+            mode=mode,
+            codex_profile=codex_profile,
+            cases=cases,
+            scenario_set=scenario_set,
+            selected_case_ids=selected_case_ids,
+            release_set=None,
+            blocker=f"release_scenario_set_default_ambiguous:default_count:{default_count}",
+            message=(
+                "Skills SDK release eval run is blocked: release_scenario_sets must declare "
+                "exactly one default or the run must specify --scenario-set."
+            ),
         )
         return cases, None, blocked
     if release_set is None:

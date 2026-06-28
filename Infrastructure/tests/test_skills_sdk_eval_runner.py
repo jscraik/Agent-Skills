@@ -594,6 +594,39 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
         self.assertEqual(receipt.case_count, 10)
         self.assertIn("release_scenario_set_under_minimum:sample-release-10-v1:count:10:minimum:20", receipt.blockers)
 
+    def test_release_lane_blocks_ambiguous_default_release_sets_before_runtime(self) -> None:
+        release_sets = [
+            {
+                "id": "release-a-v1",
+                "default": True,
+                "minimum_scenarios": 20,
+                "case_ids": TECHNICAL_WRITER_RELEASE_20,
+            },
+            {
+                "id": "release-b-v1",
+                "default": True,
+                "minimum_scenarios": 20,
+                "case_ids": TECHNICAL_WRITER_RELEASE_20,
+            },
+        ]
+        with mock.patch("ask.commands.skills_impl._load_release_scenario_sets", return_value=release_sets):
+            with mock.patch("ask.commands.evals.run_evals") as run:
+                result = skills_sdk_eval_run(
+                    REPO_ROOT,
+                    target="Skills/agent-ops/technical-writer",
+                    mode="release",
+                    runner="internal",
+                    codex_profile="oss-local",
+                )
+
+        run.assert_not_called()
+        payload = result.data["skills_sdk_eval_run"]
+        receipt = validate_eval_run_receipt(payload["receipt"])
+        self.assertEqual(result.status, "error")
+        self.assertEqual(payload["status"], "blocked")
+        self.assertEqual(receipt.status, "blocked")
+        self.assertIn("release_scenario_set_default_ambiguous:default_count:2", receipt.blockers)
+
     def test_release_lane_enforces_release_set_without_profile(self) -> None:
         with mock.patch("ask.commands.evals.run_evals") as run:
             result = skills_sdk_eval_run(
