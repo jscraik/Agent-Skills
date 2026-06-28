@@ -306,7 +306,7 @@ Repo-specific agent knowledge base. Append-only.
 
 **2026-06-28 [Codex]:** PM execution-thread repair reports must carry lessons beyond the transient thread artifact -> require `thread-report/v1.lessons` with a durable `recorded_in` target, reject lessons recorded only under `.harness/reports/thread-replies/`, and require at least one lesson to cite `.harness/memory/LEARNINGS.md` so recurring OSS-local, SDK pipeline, Tessl, and thread-delivery failures become available to future agents.
 
-**2026-06-28 [Codex]:** OSS-local profile invocation proof is not release behavior proof -> treat `codex_exec_invoked=true` and `codex_profile=oss-local` as lane invocation evidence only, keep `oss-cloud`, `tessl-dry-run`, and `tessl-live` blocked while the release receipt behavior fails, and require the next repair report to classify remaining failures before another edit loop.
+**2026-06-28 [Codex]:** OSS-local profile invocation proof is not release behavior proof -> treat `codex_exec_invoked=true` and `codex_profile=oss-local` as lane invocation evidence only, keep `oss-cloud`, `tessl-live-dry-run`, and `tessl-live` blocked while the release receipt behavior fails, and require the next repair report to classify remaining failures before another edit loop.
 
 **2026-06-28 [Codex]:** Technical-writer oss-local failures should be classified before every repair loop -> distinguish skill defects from criteria/scorer brittleness, patch only the owning surface, and keep missing command/artifact evidence as `blocked` instead of allowing generated docs to claim validation pass.
 
