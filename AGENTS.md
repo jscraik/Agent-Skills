@@ -61,6 +61,13 @@ discovering, and syncing Codex skills, operator docs, and agent workflows.
   gone. Identify the mechanism that allowed the symptom, encode the smallest
   durable guardrail in docs, skills, scripts, or validation, and prove the
   guardrail prevents the same class of failure from reaching Jamie again.
+- Skills SDK PM thread coordination: when Jamie designates one thread as the
+  Skills SDK PM decision surface, delegated execution threads must report back
+  through a validated `thread-report/v1` artifact and a PM delivery receipt
+  before their work can influence the next SDK gate decision. Use
+  [PM Thread Coordination](./Docs/agents/26-pm-thread-coordination.md) and
+  validate with
+  `python3 Infrastructure/scripts/validation-and-linting/validate_thread_pm_delivery.py <report> --require-delivery --json`.
 - Tessl eval contract: when running skill/plugin evals, run the installed local
   `tessl` CLI automatically through the repo wrapper, stage only controlled
   input under `/tmp`, synthesize Tessl

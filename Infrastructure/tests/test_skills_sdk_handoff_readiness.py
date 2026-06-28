@@ -518,6 +518,7 @@ class TestSkillsSdkHandoffReadiness(unittest.TestCase):
                         "codex_profile": "oss-local",
                         "codex_exec_invoked": True,
                         "case_count": 20,
+                        "failed_count": 7,
                     },
                 }),
                 encoding="utf-8",
@@ -532,12 +533,18 @@ class TestSkillsSdkHandoffReadiness(unittest.TestCase):
 
         self.assertEqual(receipt["status"], "blocked")
         self.assertFalse(receipt["ready_for_live_tessl"])
+        self.assertFalse(receipt["next_gate_allowed"])
+        self.assertEqual(receipt["blocked_next_gates"], ["oss-cloud", "tessl-dry-run", "tessl-live"])
+        oss_local_lane = next(lane for lane in receipt["lanes"] if lane["id"] == "oss-local")
+        self.assertEqual(oss_local_lane["declared_status"], "pass")
+        self.assertEqual(oss_local_lane["status"], "blocked")
         semantic_blockers = [blocker for blocker in receipt["blockers"] if blocker["id"] == "lane_receipt_semantics_valid"]
         self.assertTrue(semantic_blockers)
         self.assertIn("status=error", semantic_blockers[0]["evidence"])
         self.assertIn("Repair the oss-local release-lane failures", receipt["required_next_actions"][0])
         self.assertIn("before oss-cloud", receipt["required_next_actions"][0])
         self.assertIn("do not run live Tessl", receipt["required_next_actions"][0])
+        validate_handoff_readiness_receipt(receipt)
 
     def test_handoff_readiness_blocks_placeholder_lane_commands(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

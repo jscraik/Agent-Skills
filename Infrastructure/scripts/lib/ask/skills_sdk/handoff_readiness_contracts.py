@@ -29,6 +29,7 @@ HandoffReadinessLaneId = Literal[
 class HandoffReadinessLane(_HandoffReadinessModel):
     id: HandoffReadinessLaneId
     status: Literal["pass", "blocked", "skip"] | None = None
+    declared_status: str | None = None
     command: str | None = None
     receipt_path: str | None = None
     blocker: str | None = None
@@ -71,6 +72,8 @@ class HandoffReadinessReceipt(_HandoffReadinessModel):
     lanes: list[HandoffReadinessLane] = Field(min_length=5)
     quality_checks: list[HandoffReadinessCheck] = Field(min_length=1)
     blockers: list[HandoffReadinessCheck]
+    next_gate_allowed: bool
+    blocked_next_gates: list[str]
     ready_for_live_tessl: bool
     required_next_actions: list[str]
     mutation_performed: Literal[False]

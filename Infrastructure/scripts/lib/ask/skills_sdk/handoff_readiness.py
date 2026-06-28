@@ -375,15 +375,38 @@ def _blocked_lane_check(lane_id: str, blocker: Any) -> dict[str, Any]:
 def _lane_row(repo_root: Path, lane_id: str, lane: dict[str, Any] | None) -> dict[str, Any]:
     checks = _lane_checks(repo_root, lane_id, lane)
     receipt_path = lane.get("receipt_path") if isinstance(lane, dict) else None
+    declared_status = lane.get("status") if isinstance(lane, dict) else None
+    blockers = [check for check in checks if check["status"] == "blocker"]
+    effective_status = _effective_lane_status(declared_status, blockers)
+    blocker = _effective_lane_blocker(lane, blockers)
     return {
         "id": lane_id,
-        "status": lane.get("status") if isinstance(lane, dict) else None,
+        "status": effective_status,
+        "declared_status": declared_status if isinstance(declared_status, str) else None,
         "command": lane.get("command") if isinstance(lane, dict) else None,
         "receipt_path": receipt_path if isinstance(receipt_path, str) else None,
-        "blocker": lane.get("blocker") if isinstance(lane, dict) else None,
+        "blocker": blocker,
         "checks": checks,
-        "blockers": [check for check in checks if check["status"] == "blocker"],
+        "blockers": blockers,
     }
+
+
+def _effective_lane_status(declared_status: Any, blockers: list[dict[str, Any]]) -> str | None:
+    if blockers:
+        if declared_status in {"blocked", "skip"}:
+            return declared_status
+        return "blocked"
+    return declared_status if isinstance(declared_status, str) else None
+
+
+def _effective_lane_blocker(lane: dict[str, Any] | None, blockers: list[dict[str, Any]]) -> str | None:
+    declared_blocker = lane.get("blocker") if isinstance(lane, dict) else None
+    if isinstance(declared_blocker, str) and declared_blocker.strip():
+        return declared_blocker
+    if not blockers:
+        return None
+    blocker_ids = ",".join(str(blocker.get("id") or "unknown") for blocker in blockers)
+    return f"blocked_validation: {blocker_ids}"
 
 
 def _readiness_checks(repo_root: Path, path: Path, payload: dict[str, Any] | None, error: str | None) -> list[dict[str, Any]]:
@@ -627,6 +650,30 @@ def _lane_receipt_semantics_blocked(lanes: list[dict[str, Any]], lane_id: str) -
     return False
 
 
+def _lane_effective_status(lanes: list[dict[str, Any]], lane_id: str) -> str | None:
+    for lane in lanes:
+        if lane.get("id") == lane_id:
+            status = lane.get("status")
+            return status if isinstance(status, str) else None
+    return None
+
+
+def _blocked_next_gates(lanes: list[dict[str, Any]], blockers: list[dict[str, Any]]) -> list[str]:
+    oss_local_status = _lane_effective_status(lanes, "oss-local")
+    if oss_local_status != "pass" or _lane_receipt_semantics_blocked(lanes, "oss-local"):
+        return ["oss-cloud", "tessl-dry-run", "tessl-live"]
+
+    oss_cloud_status = _lane_effective_status(lanes, "oss-cloud")
+    if oss_cloud_status != "pass":
+        return ["tessl-dry-run", "tessl-live"]
+
+    tessl_dry_run_status = _lane_effective_status(lanes, "tessl-live-dry-run")
+    if tessl_dry_run_status != "pass" or blockers:
+        return ["tessl-live"]
+
+    return []
+
+
 def _agent_summary(blockers: list[dict[str, Any]], query: str) -> str:
     if blockers:
         return f"Handoff readiness for {query} is blocked: live Tessl requires current deterministic, oss-local, oss-cloud, and Tessl dry-run evidence."
@@ -682,6 +729,7 @@ def _handoff_receipt(
     checks: list[dict[str, Any]],
     blockers: list[dict[str, Any]],
 ) -> dict[str, Any]:
+    blocked_next_gates = _blocked_next_gates(lanes, blockers)
     return {
         "schema_version": HANDOFF_READINESS_SCHEMA_VERSION,
         "schema_uri": HANDOFF_READINESS_SCHEMA_URI,
@@ -697,6 +745,8 @@ def _handoff_receipt(
         "lanes": lanes,
         "quality_checks": checks,
         "blockers": blockers,
+        "next_gate_allowed": not blockers and not blocked_next_gates,
+        "blocked_next_gates": blocked_next_gates,
         "ready_for_live_tessl": not blockers,
         "required_next_actions": _next_actions(repo_root, blockers, readiness_path, lanes),
         "mutation_performed": False,

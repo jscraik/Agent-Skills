@@ -1,9 +1,9 @@
 {
   "schema_version": "skills-sdk.scenario-set-parity-current.v1",
-  "generated_at": "2026-06-28T16:38:07Z",
+  "generated_at": "2026-06-28T17:21:13Z",
   "repo": {
     "branch": "codex/sdk-eval-parity-guardrails",
-    "head": "33a1b61d4",
+    "head": "842bda239",
     "root": "."
   },
   "command": "./bin/ask sdk eval scenario-quality Skills/agent-ops/technical-writer --tessl-staged-json .harness/evidence/handoff/technical-writer/tessl-live-dry-run.json --tessl-score .harness/evidence/handoff/technical-writer/tessl-score-preview.json --preview --json --robot",

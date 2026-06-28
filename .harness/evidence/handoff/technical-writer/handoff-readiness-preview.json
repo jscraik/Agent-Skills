@@ -1,6 +1,6 @@
 {
   "status": "error",
-  "trace_id": "d4fb4782-8f65-4c46-9fc6-b873824fddbd",
+  "trace_id": "7ec978f3-3ce6-45a4-844d-5431bc2396a2",
   "metadata": {
     "version": "0.1.0",
     "command": "sdk eval handoff-readiness --skill Skills/agent-ops/technical-writer --tessl-score .harness/evidence/handoff/technical-writer/tessl-score-preview.json --preview --json --robot",
@@ -53,6 +53,7 @@
           {
             "id": "deterministic_local_gates",
             "status": "pass",
+            "declared_status": "pass",
             "command": "./bin/ask sdk eval scenario-quality Skills/agent-ops/technical-writer --preview --json --robot",
             "receipt_path": ".harness/evidence/handoff/technical-writer/deterministic-local-gates.json",
             "blocker": null,
@@ -99,10 +100,11 @@
           },
           {
             "id": "oss-local",
-            "status": "pass",
+            "status": "blocked",
+            "declared_status": "pass",
             "command": "./bin/ask sdk eval run Skills/agent-ops/technical-writer --runner internal --mode smoke --codex-profile oss-local --timeout-seconds 180 --json --robot",
             "receipt_path": ".harness/evidence/handoff/technical-writer/oss-local.json",
-            "blocker": null,
+            "blocker": "blocked_validation: lane_receipt_semantics_valid",
             "checks": [
               {
                 "id": "lane_status_pass",
@@ -164,6 +166,7 @@
           {
             "id": "oss-cloud",
             "status": "pass",
+            "declared_status": "pass",
             "command": "./bin/ask sdk eval run Skills/agent-ops/technical-writer --runner internal --mode smoke --codex-profile oss-cloud --timeout-seconds 180 --json --robot",
             "receipt_path": ".harness/evidence/handoff/technical-writer/oss-cloud.json",
             "blocker": null,
@@ -214,6 +217,7 @@
           {
             "id": "tessl-local-proof",
             "status": "pass",
+            "declared_status": "pass",
             "command": "./bin/ask sdk eval tessl-local-proof --skill Skills/agent-ops/technical-writer --workspace skills-sdk-lab --execute --json --robot",
             "receipt_path": ".harness/evidence/handoff/technical-writer/tessl-local-proof.json",
             "blocker": null,
@@ -263,6 +267,7 @@
           {
             "id": "tessl-live-dry-run",
             "status": "pass",
+            "declared_status": "pass",
             "command": "./bin/ask evals run Skills/agent-ops/technical-writer --mode smoke --tessl-live-private --tessl-workspace skills-sdk-lab --tessl-live-dry-run --json --robot",
             "receipt_path": ".harness/evidence/handoff/technical-writer/tessl-live-dry-run.json",
             "blocker": null,
@@ -450,6 +455,12 @@
             ]
           }
         ],
+        "next_gate_allowed": false,
+        "blocked_next_gates": [
+          "oss-cloud",
+          "tessl-dry-run",
+          "tessl-live"
+        ],
         "ready_for_live_tessl": false,
         "required_next_actions": [
           "Repair the oss-local release-lane failures and rerun oss-local before oss-cloud; do not run live Tessl while the oss-local receipt status, profile proof, or release scenario evidence is blocked."
@@ -466,7 +477,7 @@
     }
   },
   "telemetry": {
-    "latency_ms": 10
+    "latency_ms": 16
   },
   "errors": [
     {

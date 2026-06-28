@@ -1,0 +1,144 @@
+{
+  "schema_version": "thread-report/v1",
+  "thread_id": "019f0ab5-07bb-7091-a6a2-9f74d07a65cb",
+  "repo_head": "842bda239",
+  "task_id": "technical-writer-oss-local-repair-pass-3",
+  "status": "blocked",
+  "current_gate": "oss-local-repair",
+  "next_gate_allowed": false,
+  "blocked_next_gates": [
+    "oss-cloud",
+    "tessl-dry-run",
+    "tessl-live"
+  ],
+  "commands": [
+    {
+      "command": "git rev-parse --short HEAD",
+      "outcome": "pass",
+      "evidence": "stdout 842bda239"
+    },
+    {
+      "command": "git status --short --branch",
+      "outcome": "pass",
+      "evidence": "branch codex/sdk-eval-parity-guardrails with modified technical-writer, eval, handoff, learning, and thread-report artifacts"
+    },
+    {
+      "command": "jq compare previous Infrastructure/artifacts/skills/technical-writer/20260628-201223-215442/scorecard.json with latest Infrastructure/artifacts/skills/technical-writer/20260628-203942-407247/scorecard.json",
+      "outcome": "pass",
+      "evidence": "pass-2 delta identified prompt-injection newly blocked, risky-command newly failed, docs-to-x-routing-boundary newly failed, and three persistent failures"
+    },
+    {
+      "command": "write .harness/reports/thread-replies/019f0ab5-07bb-7091-a6a2-9f74d07a65cb/oss-local-pass2-delta-classification.json",
+      "outcome": "pass",
+      "evidence": "artifact records current_status, previous_status, regression_class, likely_introducing_patch, owner, patch target, rollback_candidate, and reusable guardrail for every pass-2 non-pass case"
+    },
+    {
+      "command": "./bin/ask skills package verify Skills/agent-ops/technical-writer --json --robot with stdout saved to /tmp/technical-writer-package-verify-loop3.json",
+      "outcome": "pass",
+      "evidence": "status success; blockers empty"
+    },
+    {
+      "command": "./bin/ask sdk eval scenario-quality Skills/agent-ops/technical-writer --preview --json --robot with stdout saved to /tmp/technical-writer-scenario-quality-loop3.json",
+      "outcome": "pass",
+      "evidence": "status success; receipt_status preview; scenario_count 27; promotion_ready_count 27; blocked_count 0; advisories empty"
+    },
+    {
+      "command": "./bin/ask sdk eval run Skills/agent-ops/technical-writer --runner internal --mode release --codex-profile oss-local --json --robot",
+      "outcome": "fail",
+      "evidence": ".harness/evidence/handoff/technical-writer/oss-local.json records receipt_status fail, codex_exec_invoked true, codex_profile oss-local, scenario_set_id technical-writer-release-20-v1, case_count 20, passed_count 14, failed_count 6, dataset_path Infrastructure/artifacts/skills/technical-writer/20260628-205656-614157/scorecard.json"
+    },
+    {
+      "command": "jq '{decision, passed, blocked_cases, tier1_failures, case_count:(.cases|length)}' Infrastructure/artifacts/skills/technical-writer/20260628-205656-614157/scorecard.json",
+      "outcome": "pass",
+      "evidence": "decision fail; passed false; blocked_cases 0; tier1_failures 6; case_count 20"
+    },
+    {
+      "command": "./bin/ask sdk eval handoff-readiness --skill Skills/agent-ops/technical-writer --tessl-score .harness/evidence/handoff/technical-writer/tessl-score-preview.json --preview --json --robot",
+      "outcome": "blocked",
+      "evidence": ".harness/evidence/handoff/technical-writer/eval-handoff-readiness-preview.json records receipt_status blocked, next_gate_allowed false, and blocked_next_gates oss-cloud, tessl-dry-run, tessl-live"
+    }
+  ],
+  "artifact_assertions": [
+    {
+      "artifact": ".harness/reports/thread-replies/019f0ab5-07bb-7091-a6a2-9f74d07a65cb/oss-local-pass2-delta-classification.json",
+      "assertion": "pass-2 regression delta was classified before pass-3 edits",
+      "outcome": "pass"
+    },
+    {
+      "artifact": ".harness/memory/LEARNINGS.md",
+      "assertion": "non-monotonic oss-local loop lesson is recorded outside transient thread reports",
+      "outcome": "pass"
+    },
+    {
+      "artifact": "Skills/agent-ops/technical-writer/SKILL.md",
+      "assertion": "patch was limited to package/capsule trigger wording, service-doc placeholder handling, and public-content handoff blocking when repo proof is unavailable",
+      "outcome": "pass"
+    },
+    {
+      "artifact": "Skills/agent-ops/technical-writer/references/evals.yaml",
+      "assertion": "criteria/task edits were limited to risky-command, docs-to-x, and stale-command staged evidence wording",
+      "outcome": "pass"
+    },
+    {
+      "artifact": ".harness/evidence/handoff/technical-writer/oss-local.json",
+      "assertion": "latest oss-local release evidence records fail with 14 passed and 6 failed out of 20",
+      "outcome": "fail"
+    },
+    {
+      "artifact": "Infrastructure/artifacts/skills/technical-writer/20260628-205656-614157/scorecard.json",
+      "assertion": "scorecard records failures for wrong-domain, service-doc-reader-job, docs-to-x-routing-boundary, pressure-generated-projection-edit, regression-capsule-runtime-boundary, and regression-stale-command-example",
+      "outcome": "fail"
+    },
+    {
+      "artifact": ".harness/evidence/handoff/technical-writer/eval-handoff-readiness-preview.json",
+      "assertion": "handoff-readiness keeps next_gate_allowed false and blocks oss-cloud, tessl-dry-run, and tessl-live",
+      "outcome": "pass"
+    }
+  ],
+  "contradictions": [
+    {
+      "artifact": ".harness/evidence/handoff/technical-writer/eval-handoff-readiness-preview.json",
+      "problem": "oss-local lane still carries status blocked with declared_status pass and blocker lane_receipt_semantics_valid",
+      "owner": "skills_sdk.handoff_readiness"
+    },
+    {
+      "artifact": ".harness/evidence/handoff/technical-writer/oss-local.json",
+      "problem": "profile invocation proof is valid but release behavior still fails; profile proof is not acceptance proof",
+      "owner": "technical-writer oss-local release lane"
+    },
+    {
+      "artifact": "Infrastructure/artifacts/skills/technical-writer/20260628-205656-614157/scorecard.json",
+      "problem": "pass 3 recovered prompt-injection and risky-command but introduced or retained six tier1 failures, so no gate movement is justified",
+      "owner": "technical-writer oss-local repair loop"
+    }
+  ],
+  "files_changed": [
+    ".harness/evidence/handoff/technical-writer/eval-handoff-readiness-preview.json",
+    ".harness/evidence/handoff/technical-writer/handoff-readiness-preview.json",
+    ".harness/evidence/handoff/technical-writer/oss-local.json",
+    ".harness/memory/LEARNINGS.md",
+    ".harness/reports/thread-replies/019f0ab5-07bb-7091-a6a2-9f74d07a65cb/latest.json",
+    ".harness/reports/thread-replies/019f0ab5-07bb-7091-a6a2-9f74d07a65cb/oss-local-pass2-delta-classification.json",
+    "Skills/agent-ops/technical-writer/SKILL.md",
+    "Skills/agent-ops/technical-writer/references/evals.yaml"
+  ],
+  "lessons": [
+    {
+      "lesson": "Non-monotonic oss-local repair loops require scorecard delta classification before more edits.",
+      "failure_pattern": "Pass 2 regressed from fail 15 of 20 to blocked 14 of 20; pass 3 recovered blocked cases but still failed 14 of 20 with a different failure set.",
+      "carry_forward_target": "technical-writer oss-local repair workflow and Skills SDK PM report contract",
+      "deterministic_guardrail": "oss-local-pass2-delta-classification.json compares previous and latest scorecards before pass-3 edits.",
+      "recorded_in": ".harness/memory/LEARNINGS.md",
+      "validation": "python3 Infrastructure/scripts/validation-and-linting/validate_thread_report.py .harness/reports/thread-replies/019f0ab5-07bb-7091-a6a2-9f74d07a65cb/latest.json --json"
+    },
+    {
+      "lesson": "Profile invocation proof remains separate from behavior proof.",
+      "failure_pattern": "Pass 3 invoked codex exec with profile oss-local but full release behavior still failed.",
+      "carry_forward_target": ".harness/evidence/handoff/technical-writer/oss-local.json",
+      "deterministic_guardrail": "handoff-readiness blocks oss-cloud and Tessl gates while oss-local receipt status is fail or blocked.",
+      "recorded_in": ".harness/evidence/handoff/technical-writer/eval-handoff-readiness-preview.json",
+      "validation": "./bin/ask sdk eval handoff-readiness --skill Skills/agent-ops/technical-writer --tessl-score .harness/evidence/handoff/technical-writer/tessl-score-preview.json --preview --json --robot"
+    }
+  ],
+  "next_action": "Continue oss-local-repair: classify the six pass-3 failures from run 20260628-205656-614157 before another edit loop; do not run oss-cloud or Tessl lanes."
+}
