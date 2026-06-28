@@ -747,7 +747,7 @@ def _handoff_receipt(
         "blockers": blockers,
         "next_gate_allowed": not blockers and not blocked_next_gates,
         "blocked_next_gates": blocked_next_gates,
-        "ready_for_live_tessl": not blockers,
+        "ready_for_live_tessl": not blockers and not blocked_next_gates,
         "required_next_actions": _next_actions(repo_root, blockers, readiness_path, lanes),
         "mutation_performed": False,
         "promotion_performed": False,
