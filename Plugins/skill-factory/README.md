@@ -66,8 +66,7 @@ Skills are context packages. Durable changes should move through generate, test,
 
 Use [`references/tessl-knowledgeos-capsule.md`](./references/tessl-knowledgeos-capsule.md) when Skill Factory work depends on Tessl plugin layout, registry/install behavior, review/eval lanes, MCP packaging, workspace/project setup, security policy, or the KnowledgeOS-to-Skills-SDK handoff.
 
-The reference is plugin-first: `.tessl-plugin/plugin.json` is the plugin manifest, `tessl.json` is the project manifest, plugin-bundled `.mcp.json` differs from project `.mcp.json`, and `tile.json` is legacy/migration terminology. Keep KnowledgeOS source evidence, Skill Factory package validation, Tessl review/eval proof, registry publish state, security policy, hosted PR state, and runtime visibility as separate evidence lanes.
-
+The reference is plugin-first: `.tessl-plugin/plugin.json` is the Tessl package manifest, `tessl.json` is the project manifest, plugin-bundled `.mcp.json` differs from project `.mcp.json`, and `tile.json` is legacy/migration terminology. Keep KnowledgeOS source evidence, Skill Factory package validation, Tessl review/eval proof, registry publish state, security policy, hosted PR state, and runtime visibility as separate evidence lanes.
 ## Source Boundaries
 
 Edit canonical plugin source under [`Plugins/skill-factory/`](../skill-factory/). Do not hand-edit generated runtime projections or copied plugin mirrors.
