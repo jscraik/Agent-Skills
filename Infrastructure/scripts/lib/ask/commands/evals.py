@@ -2307,7 +2307,7 @@ def _validate_tessl_live_private_manifest(plugin_path: Path, workspace: str) -> 
     if not isinstance(version, str) or not TESSL_TILE_VERSION_RE.fullmatch(version):
         raise ValueError("Staged Tessl plugin manifest must include a SemVer version.")
     skills = manifest.get("skills")
-    if not _valid_tessl_path_pointer(skills):
+    if not _valid_tessl_path_pointer(skills) or _normalized_tessl_path_pointers(skills) != ["skills"]:
         raise ValueError("Staged Tessl plugin manifest skills must point to the staged skills root.")
     if "rules" in manifest:
         raise ValueError(
@@ -2328,16 +2328,22 @@ def _load_json_object_file(path: Path, *, label: str) -> dict[str, object]:
 
 
 def _valid_tessl_path_pointer(value: object) -> bool:
+    return bool(_normalized_tessl_path_pointers(value))
+
+
+def _normalized_tessl_path_pointers(value: object) -> list[str]:
     values = value if isinstance(value, list) else [value]
     if not values:
-        return False
+        return []
+    normalized: list[str] = []
     for item in values:
         if not isinstance(item, str) or not item.strip():
-            return False
+            return []
         path = PurePosixPath(item.strip())
         if path.is_absolute() or any(part == ".." for part in path.parts):
-            return False
-    return True
+            return []
+        normalized.append(path.as_posix().removeprefix("./").rstrip("/"))
+    return normalized
 
 
 def _validate_tessl_bundled_mcp(staged_root: Path, manifest: dict[str, object]) -> None:

@@ -1709,6 +1709,51 @@ def test_tessl_projection_shape_rejects_root_rules_for_skill_references(tmp_path
         )
 
 
+def test_tessl_projection_shape_rejects_manifest_skills_outside_staged_root(tmp_path: Path) -> None:
+    _write_example_skill(tmp_path)
+    staged_source, _copied = evals._stage_tessl_live_private_source(
+        tmp_path,
+        "Skills/example-skill",
+        "jscraik",
+        temp_root=tmp_path / "stage",
+    )
+    manifest_path = staged_source / ".tessl-plugin" / "plugin.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["skills"] = "./not-skills/"
+    manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="skills must point to the staged skills root"):
+        evals._validate_tessl_projection_shape(
+            staged_source,
+            skill_name="example-skill",
+            workspace="jscraik",
+            project_slug="example-skill",
+            require_evals=True,
+        )
+
+
+def test_tessl_projection_shape_accepts_normalized_manifest_skills_root(tmp_path: Path) -> None:
+    _write_example_skill(tmp_path)
+    staged_source, _copied = evals._stage_tessl_live_private_source(
+        tmp_path,
+        "Skills/example-skill",
+        "jscraik",
+        temp_root=tmp_path / "stage",
+    )
+    manifest_path = staged_source / ".tessl-plugin" / "plugin.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["skills"] = "skills/"
+    manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+
+    evals._validate_tessl_projection_shape(
+        staged_source,
+        skill_name="example-skill",
+        workspace="jscraik",
+        project_slug="example-skill",
+        require_evals=True,
+    )
+
+
 def test_tessl_projection_shape_rejects_readme_without_badge_and_review_guidance(tmp_path: Path) -> None:
     skill_root = _write_example_skill(tmp_path)
     (skill_root / "README.md").write_text("# Example Skill\n\nRegistry presentation.\n", encoding="utf-8")
