@@ -110,6 +110,8 @@ def _validate_delivery_fields(
     findings.extend(_validate_delivery_report_path(delivery, delivery_path, report_path))
     if not _non_empty_string(delivery.get("pm_thread_id")):
         findings.append(_finding("delivery.pm_thread_id", "must name the PM/root thread id"))
+    elif delivery.get("pm_thread_id") == report.get("thread_id"):
+        findings.append(_finding("delivery.pm_thread_id", "must differ from the execution thread_id"))
     if delivery.get("delivery_method") not in VALID_DELIVERY_METHODS:
         findings.append(_finding("delivery.delivery_method", "must be a supported delivery method or explicit blocked method"))
     if delivery.get("delivery_status") not in VALID_DELIVERY_STATUSES:
