@@ -219,3 +219,35 @@ def test_thread_report_requires_learning_ledger_record(tmp_path: Path) -> None:
     )
 
     assert any(finding["path"] == "report.lessons" for finding in findings)
+
+
+def test_thread_report_rejects_missing_artifact_paths(tmp_path: Path) -> None:
+    module = _load_module()
+    report = tmp_path / "latest.json"
+    payload = json.loads(_valid_report())
+    payload["artifact_assertions"][0]["artifact"] = "missing/evidence.json"
+    report.write_text(json.dumps(payload), encoding="utf-8")
+
+    findings = module.validate_delivery(
+        report,
+        tmp_path / "pm-delivery.json",
+        require_delivery=False,
+    )
+
+    assert any(finding["path"] == "report.artifact_assertions.0.artifact" for finding in findings)
+
+
+def test_thread_report_accepts_external_artifact_urls(tmp_path: Path) -> None:
+    module = _load_module()
+    report = tmp_path / "latest.json"
+    payload = json.loads(_valid_report())
+    payload["artifact_assertions"][0]["artifact"] = "https://github.com/jscraik/Agent-Skills/pull/294"
+    report.write_text(json.dumps(payload), encoding="utf-8")
+
+    findings = module.validate_delivery(
+        report,
+        tmp_path / "pm-delivery.json",
+        require_delivery=False,
+    )
+
+    assert findings == []

@@ -37,6 +37,7 @@ import shlex
 import subprocess as sp
 import sys
 import tempfile
+import tomllib
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Sequence, Set, Tuple, Union
@@ -2803,14 +2804,16 @@ def _mise_repo_node_bin() -> Optional[Path]:
 def _repo_mise_node_version() -> Optional[str]:
     config_path = WORKSPACE_ROOT / ".mise.toml"
     try:
-        for line in config_path.read_text(encoding="utf-8").splitlines():
-            stripped = line.strip()
-            if stripped.startswith('"node"') or stripped.startswith("node"):
-                _, _, raw_value = stripped.partition("=")
-                value = raw_value.strip().strip('"').strip("'")
-                return value or None
+        config = tomllib.loads(config_path.read_text(encoding="utf-8"))
     except OSError:
         return None
+    except tomllib.TOMLDecodeError:
+        return None
+    tools = config.get("tools")
+    if not isinstance(tools, dict):
+        return None
+    value = tools.get("node")
+    return value if isinstance(value, str) and value.strip() else None
     return None
 
 

@@ -148,20 +148,20 @@ stale evidence as current scenarios. Do not duplicate eval cases by hand unless
 the canonical eval format changes.
 
 The live Tessl workflow is a separate explicit lane. Use
-`./bin/ask evals run <skill-path> --tessl-live-private --tessl-workspace <workspace>`
+`./bin/ask evals run <skill-path> --tessl-live-private --tessl-workspace jscraik`
 only when the operator asks for live private Tessl evidence. This lane must
 stage a plugin-shaped package under
 `/tmp/ask-tessl-evals/<skill-path>-<sha12>`, write
-`.tessl-plugin/plugin.json` with `"name": "<workspace>/<plugin-name>"`,
+`.tessl-plugin/plugin.json` with `"name": "jscraik/<plugin-name>"`,
 `"private": true`, and `"skills": "./skills/"`, copy the skill package to
 `skills/<skill-name>/SKILL.md`, omit `tile.json`, and convert eval cases into
 `evals/<case-id>/task.md` plus `evals/<case-id>/criteria.json` using Tessl's
 `weighted_checklist` criteria shape. Include local `references/**` support
 files beside the staged skill so Tessl plugin discovery and skill-relative links
 resolve from the plugin root. Run
-`tessl eval run --json --workspace <workspace> <staged-plugin-dir>`.
+`tessl eval run --json --workspace jscraik <staged-plugin-dir>`.
 Stage `tessl.json` for the same
-`<workspace>/<plugin-name>` identity because Tessl saves eval runs to a project.
+`jscraik/<plugin-name>` identity because Tessl saves eval runs to a project.
 Before invoking Tessl evals, the wrapper must check that project link, relink an
 existing project first, and create the project only when needed. Start with
 `--tessl-live-dry-run` when proving package shape or policy before any live
@@ -170,7 +170,7 @@ service call.
 For plugin-owned skills under `Plugins/<plugin-id>/skills/**`, `<tile-name>`
 is the plugin id, not the leaf skill directory. For example, live private
 validation of `Plugins/skill-factory/skills/skill-factory-router`
-must stage and save to `<workspace>/skill-factory` while keeping the
+must stage and save to `jscraik/skill-factory` while keeping the
 `skills` manifest entries aligned to the surviving Skill Factory skills.
 
 The live-private lane is still not a publish lane. Do not run `tessl install`,
@@ -186,7 +186,7 @@ Tessl scenario generation is a separate prep lane, not part of ordinary
 skill, run:
 
 ```bash
-./bin/ask evals prepare-tessl-scenarios <skill-path> --tessl-workspace <workspace> --json --robot
+./bin/ask evals prepare-tessl-scenarios <skill-path> --tessl-workspace jscraik --json --robot
 ```
 
 Start with `--dry-run` to prove package shape. The command stages the target

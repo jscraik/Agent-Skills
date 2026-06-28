@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
+ROOT = Path(__file__).resolve().parents[3]
 
 SCHEMA_VERSION = "thread-report/v1"
 VALID_STATUSES = {"pass", "blocked", "failed"}
@@ -54,14 +55,28 @@ def _validate_items(
                     findings.append(_finding(f"{item_path}.{required_key}", "must be pass, fail, or blocked"))
             elif not _non_empty_string(item.get(required_key)):
                 findings.append(_finding(f"{item_path}.{required_key}", "must be a non-empty final string"))
-            elif required_key == "artifact" and key == "artifact_assertions":
-                # Check if artifact path exists
-                artifact_value = item.get(required_key)
-                if isinstance(artifact_value, str) and artifact_value.strip():
-                    artifact_path = REPO_ROOT / artifact_value
-                    if not artifact_path.exists():
-                        findings.append(_finding(f"{item_path}.{required_key}", f"path does not exist: {artifact_value}"))
     return findings
+
+
+def _repo_path_exists(value: str) -> bool:
+    if value.startswith(("https://", "http://")):
+        return True
+    path = Path(value)
+    if path.is_absolute():
+        try:
+            path.relative_to(ROOT)
+        except ValueError:
+            return False
+        return path.exists()
+    if value.startswith("../"):
+        return False
+    return (ROOT / path).exists()
+
+
+def _validate_repo_path(value: Any, finding_path: str) -> list[dict[str, str]]:
+    if not _non_empty_string(value):
+        return []
+    return [] if _repo_path_exists(str(value)) else [_finding(finding_path, "must reference an existing repo path")]
 
 
 def _validate_required_top(payload: dict[str, Any]) -> list[dict[str, str]]:
@@ -116,17 +131,12 @@ def _validate_blocked_next_gates(payload: dict[str, Any]) -> list[dict[str, str]
 
 
 def _validate_files_changed(payload: dict[str, Any]) -> list[dict[str, str]]:
-    findings: list[dict[str, str]] = []
     files_changed = payload.get("files_changed")
     if not isinstance(files_changed, list) or not all(isinstance(item, str) and item.strip() for item in files_changed):
         return [_finding("files_changed", "must be a list of non-empty strings")]
-
-    for index, file_path in enumerate(files_changed):
-        if isinstance(file_path, str) and file_path.strip():
-            full_path = REPO_ROOT / file_path
-            if not full_path.exists():
-                findings.append(_finding(f"files_changed.{index}", f"path does not exist: {file_path}"))
-
+    findings: list[dict[str, str]] = []
+    for index, item in enumerate(files_changed):
+        findings.extend(_validate_repo_path(item, f"files_changed.{index}"))
     return findings
 
 
@@ -151,6 +161,7 @@ def _validate_lessons(payload: dict[str, Any]) -> list[dict[str, str]]:
         if not isinstance(item, dict):
             continue
         recorded_in = item.get("recorded_in")
+        findings.extend(_validate_repo_path(recorded_in, f"lessons.{index}.recorded_in"))
         if isinstance(recorded_in, str) and LEARNING_LEDGER_PATH in recorded_in:
             has_learning_ledger_record = True
         if isinstance(recorded_in, str) and recorded_in.startswith(".harness/reports/thread-replies/"):
@@ -160,11 +171,6 @@ def _validate_lessons(payload: dict[str, Any]) -> list[dict[str, str]]:
                     "must point at durable memory, docs, source, eval, or validator surface; not only the thread report",
                 )
             )
-        # Check if recorded_in path exists
-        if isinstance(recorded_in, str) and recorded_in.strip():
-            recorded_path = REPO_ROOT / recorded_in
-            if not recorded_path.exists():
-                findings.append(_finding(f"lessons.{index}.recorded_in", f"path does not exist: {recorded_in}"))
     if not has_learning_ledger_record:
         findings.append(
             _finding(
@@ -182,6 +188,9 @@ def validate_thread_report(payload: dict[str, Any]) -> list[dict[str, str]]:
     findings.extend(_validate_blocked_next_gates(payload))
     findings.extend(_validate_items(payload, "commands", {"command", "outcome", "evidence"}, "outcome"))
     findings.extend(_validate_items(payload, "artifact_assertions", {"artifact", "assertion", "outcome"}, "outcome"))
+    for index, item in enumerate(payload.get("artifact_assertions") or []):
+        if isinstance(item, dict):
+            findings.extend(_validate_repo_path(item.get("artifact"), f"artifact_assertions.{index}.artifact"))
     findings.extend(_validate_items(payload, "contradictions", {"artifact", "problem", "owner"}))
     findings.extend(_validate_files_changed(payload))
     findings.extend(_validate_lessons(payload))

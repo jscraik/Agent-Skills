@@ -6724,7 +6724,15 @@ def skills_sdk_eval_handoff_readiness(
         "receipt": receipt,
         "mutation_performed": False,
         "validation_commands": [
-            _ask_validation_command("sdk", "eval", "handoff-readiness", "--skill", skill, "--preview")
+            _ask_validation_command(
+                "sdk",
+                "eval",
+                "handoff-readiness",
+                "--skill",
+                skill,
+                *("--tessl-score", tessl_score) if tessl_score else (),
+                "--preview",
+            )
         ],
         "agent_summary": receipt["agent_summary"],
     }
@@ -7593,7 +7601,7 @@ def _skills_sdk_prepare_release_case_filters(
     scenario_set: str | None,
     package_identity: dict[str, str] | None,
 ) -> tuple[list[str] | None, dict[str, Any] | None, CallResult | None]:
-    if mode != "release" or codex_profile not in {"oss-local", "oss-cloud"}:
+    if mode != "release":
         return cases, None, None
     source_path = _skills_sdk_eval_source_path(repo_root, target)
     if source_path is None:
@@ -7631,7 +7639,7 @@ def _skills_sdk_prepare_release_case_filters(
     }
     if not selected_case_ids:
         return release_case_ids, release_metadata, None
-    if selected_case_ids == release_case_ids:
+    if len(selected_case_ids) == len(release_case_ids) and set(selected_case_ids) == set(release_case_ids):
         return selected_case_ids, release_metadata, None
     blocked = _skills_sdk_release_set_blocked_result(
         repo_root,

@@ -290,10 +290,10 @@ def _case_depends_on_hidden_input_file(case: dict[str, object]) -> bool:
 
 
 def _case_requires_file_side_effect_without_final_answer_path(case: dict[str, object]) -> bool:
-    prompt = str(case.get("prompt") or "")
-    if not SIDE_EFFECT_FILE_PROMPT_RE.search(prompt):
+    visible_text = "\n".join(str(case.get(field) or "") for field in ("prompt", "task"))
+    if not SIDE_EFFECT_FILE_PROMPT_RE.search(visible_text):
         return False
-    return not FINAL_ANSWER_FILE_MARKER_RE.search(prompt)
+    return not FINAL_ANSWER_FILE_MARKER_RE.search(visible_text)
 
 
 def _case_acceptance_text_parts(case: dict[str, object]) -> list[str]:

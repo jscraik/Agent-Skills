@@ -218,7 +218,7 @@
             "id": "tessl-local-proof",
             "status": "pass",
             "declared_status": "pass",
-            "command": "./bin/ask sdk eval tessl-local-proof --skill Skills/agent-ops/technical-writer --workspace skills-sdk-lab --execute --json --robot",
+            "command": "./bin/ask sdk eval tessl-local-proof --skill Skills/agent-ops/technical-writer --workspace jscraik --execute --json --robot",
             "receipt_path": ".harness/evidence/handoff/technical-writer/tessl-local-proof.json",
             "blocker": null,
             "checks": [
@@ -237,7 +237,7 @@
                 "severity": "blocker",
                 "message": "Each lane must record the exact executable command that produced or repairs its evidence.",
                 "evidence": [
-                  "./bin/ask sdk eval tessl-local-proof --skill Skills/agent-ops/technical-writer --workspace skills-sdk-lab --execute --json --robot"
+                  "./bin/ask sdk eval tessl-local-proof --skill Skills/agent-ops/technical-writer --workspace jscraik --execute --json --robot"
                 ]
               },
               {
@@ -268,7 +268,7 @@
             "id": "tessl-live-dry-run",
             "status": "pass",
             "declared_status": "pass",
-            "command": "./bin/ask evals run Skills/agent-ops/technical-writer --mode smoke --tessl-live-private --tessl-workspace skills-sdk-lab --tessl-live-dry-run --json --robot",
+            "command": "./bin/ask evals run Skills/agent-ops/technical-writer --mode smoke --tessl-live-private --tessl-workspace jscraik --tessl-live-dry-run --json --robot",
             "receipt_path": ".harness/evidence/handoff/technical-writer/tessl-live-dry-run.json",
             "blocker": null,
             "checks": [
@@ -287,7 +287,7 @@
                 "severity": "blocker",
                 "message": "Each lane must record the exact executable command that produced or repairs its evidence.",
                 "evidence": [
-                  "./bin/ask evals run Skills/agent-ops/technical-writer --mode smoke --tessl-live-private --tessl-workspace skills-sdk-lab --tessl-live-dry-run --json --robot"
+                  "./bin/ask evals run Skills/agent-ops/technical-writer --mode smoke --tessl-live-private --tessl-workspace jscraik --tessl-live-dry-run --json --robot"
                 ]
               },
               {

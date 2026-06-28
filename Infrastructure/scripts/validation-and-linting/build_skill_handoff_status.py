@@ -39,14 +39,14 @@ def _git_commit() -> str | None:
     return result.stdout.strip()
 
 
-def _generated_artifact_freshness(status: dict[str, Any], current_head: str | None) -> dict[str, Any]:
-    artifact_head = (status.get("repo") or {}).get("head")
-    status = "current" if artifact_head == current_head else "stale"
+def _generated_artifact_freshness(status_artifact: dict[str, Any], current_head: str | None) -> dict[str, Any]:
+    artifact_head = (status_artifact.get("repo") or {}).get("head")
+    freshness_status = "current" if artifact_head == current_head else "stale"
     warning = None
-    if status == "stale":
+    if freshness_status == "stale":
         warning = "Generated handoff status repo.head does not match current HEAD."
     return {
-        "status": status,
+        "status": freshness_status,
         "artifact_head": artifact_head,
         "current_head": current_head,
         "warning": warning,

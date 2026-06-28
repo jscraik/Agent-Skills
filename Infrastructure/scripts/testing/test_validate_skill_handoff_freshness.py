@@ -52,6 +52,25 @@ def test_freshness_accepts_matching_heads(tmp_path: Path) -> None:
     assert findings == []
 
 
+def test_freshness_accepts_equivalent_head_abbreviations(tmp_path: Path) -> None:
+    module = _load_module()
+    status_json, tracker_json, atlas_html = _write_artifacts(
+        tmp_path,
+        status_head="33a1b61d4",
+        tracker_head="33a1b61d4",
+        atlas_head="33a1b61d4",
+    )
+
+    findings = module.validate_freshness(
+        "33a1b61d",
+        status_json=status_json,
+        tracker_json=tracker_json,
+        atlas_html=atlas_html,
+    )
+
+    assert findings == []
+
+
 def test_freshness_blocks_stale_status_json(tmp_path: Path) -> None:
     module = _load_module()
     status_json, tracker_json, atlas_html = _write_artifacts(

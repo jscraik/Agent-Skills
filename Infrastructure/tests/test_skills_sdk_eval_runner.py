@@ -545,6 +545,43 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
         self.assertEqual(receipt.scenario_set_case_ids, TECHNICAL_WRITER_RELEASE_20)
         self.assertIn("focused_debug_subset_not_release_evidence:selected:1:required:20:minimum:20", receipt.blockers)
 
+    def test_release_lane_accepts_full_case_set_in_any_order(self) -> None:
+        reversed_cases = list(reversed(TECHNICAL_WRITER_RELEASE_20))
+        with mock.patch("ask.commands.evals.run_evals", return_value=_successful_internal_result("oss-local")) as run:
+            result = skills_sdk_eval_run(
+                REPO_ROOT,
+                target="Skills/agent-ops/technical-writer",
+                mode="release",
+                runner="internal",
+                codex_profile="oss-local",
+                cases=reversed_cases,
+            )
+
+        run.assert_called_once()
+        self.assertEqual(run.call_args.kwargs["cases"], reversed_cases)
+        payload = result.data["skills_sdk_eval_run"]
+        receipt = validate_eval_run_receipt(payload["receipt"])
+        self.assertEqual(result.status, "success")
+        self.assertEqual(receipt.selected_case_ids, reversed_cases)
+        self.assertEqual(receipt.scenario_set_case_ids, TECHNICAL_WRITER_RELEASE_20)
+
+    def test_release_lane_enforces_release_set_without_profile(self) -> None:
+        with mock.patch("ask.commands.evals.run_evals") as run:
+            result = skills_sdk_eval_run(
+                REPO_ROOT,
+                target="Skills/agent-ops/technical-writer",
+                mode="release",
+                runner="internal",
+                cases=["smoke-discovery"],
+            )
+
+        run.assert_not_called()
+        payload = result.data["skills_sdk_eval_run"]
+        receipt = validate_eval_run_receipt(payload["receipt"])
+        self.assertEqual(result.status, "error")
+        self.assertEqual(receipt.status, "blocked")
+        self.assertIn("focused_debug_subset_not_release_evidence:selected:1:required:20:minimum:20", receipt.blockers)
+
     def test_sdk_internal_runner_binds_scorecard_case_counts_to_receipt(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             scorecard_path = Path(temp_dir) / "scorecard.json"

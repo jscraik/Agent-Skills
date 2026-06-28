@@ -11,7 +11,7 @@ def build_release_scenario_set_checks(evals_payload: dict[str, Any] | None, case
         return []
     if not isinstance(release_sets, list) or not release_sets:
         return [_check("release_scenario_sets_valid", "blocker", "release_scenario_sets must be a non-empty list when provided.", ["release_scenario_sets"])]
-    checks = [_release_scenario_set_default_check(release_sets)]
+    checks = [_release_scenario_set_default_check(release_sets), _release_scenario_set_ids_unique_check(release_sets)]
     case_by_id = _case_by_id(case_list)
     for index, item in enumerate(release_sets, start=1):
         checks.extend(_release_scenario_set_entry_checks(index, item, case_by_id))
@@ -51,6 +51,21 @@ def _release_scenario_set_default_check(release_sets: list[Any]) -> dict[str, An
         "pass" if default_count == 1 else "blocker",
         "Exactly one release scenario set should be marked default.",
         [f"default_count:{default_count}"] if default_count != 1 else [],
+    )
+
+
+def _release_scenario_set_ids_unique_check(release_sets: list[Any]) -> dict[str, Any]:
+    ids = [
+        str(item.get("id")).strip()
+        for item in release_sets
+        if isinstance(item, dict) and isinstance(item.get("id"), str) and str(item.get("id")).strip()
+    ]
+    duplicates = sorted({set_id for set_id in ids if ids.count(set_id) > 1})
+    return _check(
+        "release_scenario_set_ids_unique",
+        "blocker" if duplicates else "pass",
+        "Release scenario set ids must be unique.",
+        duplicates,
     )
 
 

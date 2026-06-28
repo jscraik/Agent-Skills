@@ -484,6 +484,10 @@ def _lane_status_next_actions(blocker_ids: set[str]) -> list[str]:
 def _tessl_score_receipt(payload: dict[str, Any] | None) -> dict[str, Any] | None:
     if not isinstance(payload, dict):
         return None
+    if payload.get("schema_version") == "skills-sdk.tessl-score-receipt.v0":
+        return payload
+    if isinstance(payload.get("score_summary"), dict) and isinstance(payload.get("feedback_loop"), dict):
+        return payload
     data = payload.get("data")
     if isinstance(data, dict):
         score = data.get("skills_sdk_eval_tessl_score")
@@ -492,7 +496,6 @@ def _tessl_score_receipt(payload: dict[str, Any] | None) -> dict[str, Any] | Non
     if isinstance(payload.get("receipt"), dict):
         return payload["receipt"]
     return None
-
 
 def _tessl_score_summary(receipt: dict[str, Any] | None) -> dict[str, Any] | None:
     if receipt is None:
@@ -510,21 +513,17 @@ def _tessl_score_summary(receipt: dict[str, Any] | None) -> dict[str, Any] | Non
         "scenario_count": score_summary.get("scenario_count"),
     }
 
-
 def _score_summary(receipt: dict[str, Any]) -> dict[str, Any]:
     value = receipt.get("score_summary")
     return value if isinstance(value, dict) else {}
-
 
 def _feedback_loop(receipt: dict[str, Any]) -> dict[str, Any]:
     value = receipt.get("feedback_loop")
     return value if isinstance(value, dict) else {}
 
-
 def _regressions(score_summary: dict[str, Any]) -> list[Any]:
     value = score_summary.get("regressions")
     return value if isinstance(value, list) else []
-
 
 def _tessl_score_checks(repo_root: Path, tessl_score_path: Path | None) -> list[dict[str, Any]]:
     if tessl_score_path is None:
@@ -551,7 +550,6 @@ def _tessl_score_checks(repo_root: Path, tessl_score_path: Path | None) -> list[
         ]
     return _tessl_score_gate_checks(repo_root, tessl_score_path, receipt)
 
-
 def _tessl_score_gate_checks(repo_root: Path, tessl_score_path: Path, receipt: dict[str, Any]) -> list[dict[str, Any]]:
     score_summary = _score_summary(receipt)
     feedback_loop = _feedback_loop(receipt)
@@ -561,7 +559,14 @@ def _tessl_score_gate_checks(repo_root: Path, tessl_score_path: Path, receipt: d
     feedback_open = feedback_loop.get("status") == "open"
     baseline_wins = bool(regressions) or int(feedback_loop.get("regression_count") or 0) > 0
     evidence = [_repo_relative(repo_root, tessl_score_path)]
-    return [
+    checks = [
+        _tessl_gate_check(
+            "tessl_score_receipt_complete",
+            bool(feedback_loop) and isinstance(score_summary.get("scenario_count"), int) and score_summary["scenario_count"] > 0,
+            "Tessl score evidence must include feedback_loop and score_summary.scenario_count.",
+            evidence,
+            f"feedback_loop={bool(feedback_loop)}:scenario_count={score_summary.get('scenario_count')}",
+        ),
         _tessl_gate_check(
             "tessl_feedback_loop_closed",
             not feedback_open,
@@ -584,11 +589,10 @@ def _tessl_score_gate_checks(repo_root: Path, tessl_score_path: Path, receipt: d
             f"usage_percent={usage_percent}",
         ),
     ]
-
+    return checks
 
 def _tessl_gate_check(check_id: str, ok: bool, message: str, evidence: list[str], failure_evidence: str) -> dict[str, Any]:
     return _check(check_id, "pass" if ok else "blocker", message, evidence if ok else evidence + [failure_evidence])
-
 
 def _oss_release_scenario_coverage_checks(
     repo_root: Path,
@@ -598,32 +602,41 @@ def _oss_release_scenario_coverage_checks(
     if tessl_score_receipt is None:
         return []
     score_summary = _score_summary(tessl_score_receipt)
-    expected_count = score_summary.get("scenario_count")
-    if not isinstance(expected_count, int) or expected_count <= 0:
-        return []
     return [
-        _oss_lane_release_scenario_check(repo_root, lane_id, lane_map.get(lane_id) or {}, expected_count)
+        _oss_lane_release_scenario_check(repo_root, lane_id, lane_map.get(lane_id) or {}, score_summary)
         for lane_id in ("oss-local", "oss-cloud")
     ]
 
-
-def _oss_lane_release_scenario_check(repo_root: Path, lane_id: str, lane: dict[str, Any], expected_count: int) -> dict[str, Any]:
+def _oss_lane_release_scenario_check(repo_root: Path, lane_id: str, lane: dict[str, Any], score_summary: dict[str, Any]) -> dict[str, Any]:
     receipt_path = _resolve_evidence_path(repo_root, lane.get("receipt_path"))
     payload, error = _load_json_object(receipt_path) if receipt_path and receipt_path.is_file() else (None, "missing_oss_receipt")
     observed_count = _receipt_case_count(payload) if payload is not None else None
+    expected_count = _oss_release_expected_count(payload, score_summary)
     return _check(
         f"{lane_id}_release_scenario_count_matches_tessl",
-        "pass" if observed_count == expected_count else "blocker",
-        "OSS release proof must run the same scenario count as the final Tessl assessment before live handoff.",
+        "pass" if isinstance(expected_count, int) and observed_count == expected_count else "blocker",
+        "OSS release proof must run the declared release-set universe before live handoff.",
         _oss_release_scenario_evidence(repo_root, receipt_path, error, expected_count, observed_count),
     )
 
+def _oss_release_expected_count(payload: dict[str, Any] | None, score_summary: dict[str, Any]) -> int | None:
+    receipt = payload.get("receipt") if isinstance(payload, dict) and isinstance(payload.get("receipt"), dict) else payload
+    if not isinstance(receipt, dict):
+        receipt = {}
+    case_ids = receipt.get("scenario_set_case_ids")
+    if isinstance(case_ids, list) and case_ids:
+        return len(case_ids)
+    minimum = receipt.get("release_set_minimum")
+    if isinstance(minimum, int) and minimum > 0:
+        return minimum
+    scenario_count = score_summary.get("scenario_count")
+    return scenario_count if isinstance(scenario_count, int) and scenario_count > 0 else None
 
 def _oss_release_scenario_evidence(
     repo_root: Path,
     receipt_path: Path | None,
     error: str | None,
-    expected_count: int,
+    expected_count: int | None,
     observed_count: int | None,
 ) -> list[str]:
     evidence_path = _repo_relative(repo_root, receipt_path) if receipt_path is not None else error or "missing_oss_receipt"

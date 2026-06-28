@@ -866,6 +866,32 @@ cases:
         self.assertEqual(receipt["scenario_count"], 20)
         validate_scenario_quality_receipt(receipt)
 
+    def test_release_scenario_set_rejects_duplicate_ids(self) -> None:
+        duplicate_set = "\n".join(
+            [
+                "- id: sample-release-20-v1",
+                "  default: false",
+                "  minimum_scenarios: 20",
+                "  groups:",
+                "    foundation_smoke:",
+                "    - foundation-1",
+                "    - foundation-2",
+                "    - foundation-3",
+                "    - foundation-4",
+                "    - foundation-5",
+                "    behavioral_release:",
+                *[f"    - behavioral-{index}" for index in range(1, 16)],
+            ]
+        )
+        payload = _release_set_20_evals_yaml().replace("cases:", f"{duplicate_set}\ncases:", 1)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(Path(temp_dir), payload)
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
+        self.assertIn("release_scenario_set_ids_unique", blocker_ids)
+
     def test_release_rubric_requires_binary_evidence_and_failure_guard(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             skill_dir = _write_skill_with_evals(

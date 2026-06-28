@@ -13,7 +13,7 @@
   "repo_state": {
     "agent_skills": {
       "branch": "codex/sdk-eval-parity-guardrails",
-      "head": "33a1b61d4",
+      "head": "4542ee2c9",
       "remote_tracking": "origin/codex/sdk-eval-parity-guardrails",
       "dirty": true
     },
@@ -25,19 +25,19 @@
     }
   },
   "status_freshness": {
-    "current_head": "33a1b61d4",
+    "current_head": "4542ee2c9",
     "stale_artifacts": [
       {
         "path": ".harness/reports/skills-sdk-tracker-state-current.json",
-        "recorded_head": "f3204cbb8",
+        "recorded_head": "33a1b61d4",
         "fresh": false,
-        "next_action": "Regenerate or supersede this tracker artifact before using it as current project state."
+        "next_action": "Regenerate or supersede this tracker artifact at current PR head 4542ee2c9 before using it as current project state."
       },
       {
         "path": ".harness/evidence/handoff/technical-writer/status.json",
-        "recorded_head": "f3204cbb8",
+        "recorded_head": "33a1b61d4",
         "fresh": false,
-        "next_action": "Regenerate this handoff status against current HEAD before treating it as the active technical-writer state."
+        "next_action": "Regenerate this handoff status at current PR head 4542ee2c9 before treating it as the active technical-writer state."
       }
     ]
   },

@@ -38,6 +38,16 @@ def current_git_head(repo_root: Path = ROOT) -> str:
     return subprocess.check_output(["git", "rev-parse", "--short", "HEAD"], cwd=repo_root, text=True).strip()
 
 
+def _heads_match(expected: str, actual: str | None) -> bool:
+    if actual is None:
+        return False
+    if expected == actual:
+        return True
+    if not re.fullmatch(r"[0-9a-fA-F]{7,40}", expected) or not re.fullmatch(r"[0-9a-fA-F]{7,40}", actual):
+        return False
+    return expected.startswith(actual) or actual.startswith(expected)
+
+
 def _load_json(path: Path) -> dict[str, Any] | None:
     try:
         loaded = json.loads(path.read_text(encoding="utf-8"))
@@ -86,7 +96,7 @@ def validate_freshness(
         ("tracker_json_head_stale", tracker_json, _nested_repo_head(_load_json(tracker_json))),
         ("atlas_generated_head_stale", atlas_html, _atlas_generated_head(atlas_html)),
     ]
-    return [_finding(code, path, current_head, actual) for code, path, actual in checks if actual != current_head]
+    return [_finding(code, path, current_head, actual) for code, path, actual in checks if not _heads_match(current_head, actual)]
 
 
 def _parser() -> argparse.ArgumentParser:

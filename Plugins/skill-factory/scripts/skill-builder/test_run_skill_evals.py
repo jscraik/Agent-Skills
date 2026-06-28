@@ -53,6 +53,7 @@ from run_skill_evals import (  # noqa: E402
     _isolated_codex_home_for_eval,
     _is_runner_runtime_blocked,
     _is_smoke_only_case,
+    _repo_mise_node_version,
     _scrub_mcp_servers_from_toml,
     _weak_acceptance_reasons,
     _write_junit_report,
@@ -1864,6 +1865,16 @@ class RunSkillEvalsModeTests(unittest.TestCase):
                 prefix = _codex_exec_prefix(None)
 
         self.assertEqual(prefix, [str(node_bin), str(codex_bin.resolve()), "exec"])
+
+    def test_repo_mise_node_version_uses_toml_tools_table(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            workspace = Path(tmpdir)
+            (workspace / ".mise.toml").write_text('[env]\nnode = "not-a-tool"\n[tools]\n"node" = "24.13.1"\n', encoding="utf-8")
+
+            with unittest.mock.patch("run_skill_evals.WORKSPACE_ROOT", workspace):
+                version = _repo_mise_node_version()
+
+        self.assertEqual(version, "24.13.1")
 
     def test_run_codex_exec_skips_ignore_user_config_when_unsupported(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

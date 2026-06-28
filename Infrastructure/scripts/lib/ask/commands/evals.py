@@ -2306,8 +2306,9 @@ def _validate_tessl_live_private_manifest(plugin_path: Path, workspace: str) -> 
     version = manifest.get("version")
     if not isinstance(version, str) or not TESSL_TILE_VERSION_RE.fullmatch(version):
         raise ValueError("Staged Tessl plugin manifest must include a SemVer version.")
-    if "skills" in manifest and not _valid_tessl_path_pointer(manifest["skills"]):
-        raise ValueError("Staged Tessl plugin manifest skills must be a relative string or string array.")
+    skills = manifest.get("skills")
+    if not _valid_tessl_path_pointer(skills):
+        raise ValueError("Staged Tessl plugin manifest skills must point to the staged skills root.")
     if "rules" in manifest:
         raise ValueError(
             "Skills SDK Tessl skill projections must keep skill support context in references/, not map it to Tessl rules/."
