@@ -116,12 +116,12 @@ Proof: rerun the failed gate until its pass field is green, then record the arti
 - Use repo wrappers first. Patch scripts only when the wrapper failure proves the script is the repair target.
 - Tessl lanes stage controlled copies under `/tmp`; preserve temp evidence and never point Tessl at live repo source.
 - For create/update/install/refactor/skillify work, do not run live Tessl scoring until bespoke generated scenarios have been prepared, reviewed, imported, and counted in the staged `scenario-sources.json`; use `./bin/ask evals prepare-tessl-scenarios <target> --tessl-workspace jscraik --json --robot` for the prep lane.
-- If Tessl live finds basic skill-behavior, format, scenario, rubric, judge, reference, security, or package-shape failures, classify that as an upstream SDK pipeline defect and patch the deterministic guardrail before rerunning from oss-local.
+- If Tessl live finds scenario, rubric, judge, or package-shape failures, classify that as an upstream SDK pipeline defect and patch the deterministic guardrail before rerunning from oss-local.
+- Route basic skill-behavior, reference, and security failures to the owning skill/source repair path before rerunning.
 - Do not treat `./bin/ask evals run --runner codex`, preview-only Tessl local proof, or a Tessl dry-run command string as handoff evidence. Handoff proof requires SDK receipts for `oss-local`, `oss-cloud`, `tessl-local-proof --execute`, and a dry-run receipt with `tessl_eval.dry_run=true`.
 - When a skill changes, do not reuse the old scenario set blindly; update, add, or remove scenarios so the eval suite still matches the skill contract.
 - For behavioral skill readiness, do not run live Tessl until the canonical scenario set has at least 20 gold-standard structured scenarios. Runs below 20 are transition diagnostics, not readiness proof.
 - Do not run live Tessl when the workspace is near the 300-run limit or would consume the 20-run remediation reserve.
-
 ## Failure Mode
 
 If three repair loops leave the same score or blocker unchanged, stop and return `blocker_notes:` with the failed gate, artifact path, and next smallest patch.
