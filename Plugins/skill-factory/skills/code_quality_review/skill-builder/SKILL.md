@@ -43,15 +43,6 @@ Use for SKILL.md repair, skill eval hardening, release proof, Tessl score improv
 
 Return exact validation commands, outcomes, changed files, rollback path, and any evidence artifact locations. For blocked release-eval cases, put the failed Repair Map item in `blocker_notes`.
 
-```yaml
-schema_version: 1
-target: <path>
-status: pass|blocked
-validation_evidence: [{command: "<exact command>", outcome: pass|fail|blocked}]
-handoff_notes: plugin authoring -> plugin-factory; install -> skill-installer
-rollback: <files or command to restore>
-blocker_notes: <only when blocked>
-```
 
 ## Skill Summary
 
