@@ -27,6 +27,7 @@ from ask.skills_sdk.eval_ab_judge import (  # noqa: E402
     _write_text_evidence,
     build_ab_judge_score_receipt,
 )
+from ask.commands.sdk_eval import _AB_SCORE_PROFILE_CHOICES  # noqa: E402
 from ask.skills_sdk import eval_ab_judge_codex as codex_judge  # noqa: E402
 from ask.skills_sdk.typed_contracts import validate_ab_judge_score_receipt  # noqa: E402
 
@@ -325,6 +326,11 @@ class TestSkillsSdkAbJudgeScore(unittest.TestCase):
         self.assertIn("requires --execute", payload["errors"][0]["message"])
         self.assertEqual(payload["errors"][0]["code"], "ERR_VALIDATION")
         self.assertIn("requires --execute", payload["errors"][0]["message"])
+
+    def test_ab_judge_score_cli_choices_exclude_codex_fast(self) -> None:
+        self.assertIn("oss-local-code", _AB_SCORE_PROFILE_CHOICES)
+        self.assertIn("oss-local-fallback", _AB_SCORE_PROFILE_CHOICES)
+        self.assertNotIn("codex-fast", _AB_SCORE_PROFILE_CHOICES)
 
     def test_builder_blocks_invalid_judge_output(self) -> None:
         def invalid_runner(prompt: str, judge_profile: dict[str, object], timeout_seconds: int, repo_root: Path, output_file: Path) -> CodexJudgeResult:

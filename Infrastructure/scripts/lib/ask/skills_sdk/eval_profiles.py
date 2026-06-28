@@ -128,6 +128,15 @@ def judge_profile_ids() -> tuple[str, ...]:
     return tuple(str(profile["id"]) for profile in _judge_profiles())
 
 
+def codex_score_judge_profile_ids() -> tuple[str, ...]:
+    supported_codex_profiles = {"oss-local", "oss-local-code", "oss-local-fallback", "oss-cloud"}
+    return tuple(
+        str(profile["id"])
+        for profile in _judge_profiles()
+        if profile["provider"] == "codex" and profile.get("codex_profile", profile["id"]) in supported_codex_profiles
+    )
+
+
 def build_eval_profile_preview_receipt() -> dict[str, Any]:
     judge_secret_names = sorted(
         {

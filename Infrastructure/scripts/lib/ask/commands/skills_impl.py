@@ -7414,11 +7414,12 @@ def _load_release_scenario_sets(evals_path: Path) -> list[dict[str, Any]]:
                 if case_id and case_id not in case_ids:
                     case_ids.append(case_id)
         minimum = raw_set.get("minimum_scenarios")
+        minimum_value = max(20, minimum) if isinstance(minimum, int) and not isinstance(minimum, bool) else 20
         sets.append(
             {
                 "id": set_id,
                 "default": raw_set.get("default") is True,
-                "minimum_scenarios": minimum if isinstance(minimum, int) and not isinstance(minimum, bool) else 20,
+                "minimum_scenarios": minimum_value,
                 "case_ids": case_ids,
             }
         )
@@ -7641,6 +7642,26 @@ def _skills_sdk_prepare_release_case_filters(
         "scenario_set_case_ids": release_case_ids,
         "release_set_minimum": minimum,
     }
+    if len(release_case_ids) < minimum:
+        blocked = _skills_sdk_release_set_blocked_result(
+            repo_root,
+            target=target,
+            target_path=target_path,
+            evals_path=evals_path,
+            package_identity=package_identity,
+            mode=mode,
+            codex_profile=codex_profile,
+            cases=cases,
+            scenario_set=scenario_set,
+            selected_case_ids=release_case_ids,
+            release_set=release_set,
+            blocker=f"release_scenario_set_under_minimum:{release_set['id']}:count:{len(release_case_ids)}:minimum:{minimum}",
+            message=(
+                "Skills SDK release eval run is blocked: the selected release scenario set "
+                f"{release_set['id']!r} declares {len(release_case_ids)} cases, below the minimum {minimum}."
+            ),
+        )
+        return cases, release_metadata, blocked
     if not selected_case_ids:
         return release_case_ids, release_metadata, None
     if len(selected_case_ids) == len(release_case_ids) and set(selected_case_ids) == set(release_case_ids):

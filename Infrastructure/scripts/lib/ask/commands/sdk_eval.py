@@ -8,10 +8,11 @@ import ask.commands.skills as skills_commands
 from ask.cli_errors import build_unknown_action_result, build_validation_error
 from ask.commands.skills_impl import TESSL_REVIEW_MIN_SCORE
 from ask.envelope import CallResult
-from ask.skills_sdk.eval_profiles import judge_profile_ids
+from ask.skills_sdk.eval_profiles import codex_score_judge_profile_ids, judge_profile_ids
 
 
 _AB_PROFILE_CHOICES = judge_profile_ids()
+_AB_SCORE_PROFILE_CHOICES = codex_score_judge_profile_ids()
 _EXECUTION_PROFILE_CHOICES = ("codex-read-only", "codex-workspace-write")
 
 
@@ -163,7 +164,7 @@ def _add_ab_judge_score_parser(subparsers: argparse._SubParsersAction, global_pa
     score = subparsers.add_parser("ab-judge-score", help="Run Ollama scoring for a completed A/B eval", parents=[global_parser])
     score.add_argument("--run-receipt", required=True, help="Repo-relative completed ab-run receipt JSON")
     score.add_argument("--evidence-root", default=".harness/artifacts/sdk-ab-judges")
-    score.add_argument("--judge-profile", choices=_AB_PROFILE_CHOICES, default="oss-local")
+    score.add_argument("--judge-profile", choices=_AB_SCORE_PROFILE_CHOICES, default="oss-local")
     score.add_argument("--timeout-seconds", type=_positive_int, default=300, help="Timeout for the judge provider.")
     score.add_argument("--execute", action="store_true", help="Required explicit gate before invoking the judge provider.")
 
