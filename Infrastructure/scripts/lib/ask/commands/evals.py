@@ -13,7 +13,7 @@ import tempfile
 import hashlib
 import time
 from collections.abc import Mapping
-from pathlib import Path, PurePosixPath
+from pathlib import Path
 from ask.envelope import CallResult, ErrorObject
 from ask.commands.skills_impl import _python_command_supports_packages, _subprocess_env_with_uv_cache
 from ask.skill_review_dashboard import render_skill_review_dashboard
@@ -2307,8 +2307,8 @@ def _validate_tessl_live_private_manifest(plugin_path: Path, workspace: str) -> 
     if not isinstance(version, str) or not TESSL_TILE_VERSION_RE.fullmatch(version):
         raise ValueError("Staged Tessl plugin manifest must include a SemVer version.")
     skills = manifest.get("skills")
-    if not _valid_tessl_path_pointer(skills) or _normalized_tessl_path_pointers(skills) != ["skills"]:
-        raise ValueError("Staged Tessl plugin manifest skills must point to the staged skills root.")
+    if skills != "./skills/":
+        raise ValueError('Staged Tessl plugin manifest skills must be "./skills/".')
     if "rules" in manifest:
         raise ValueError(
             "Skills SDK Tessl skill projections must keep skill support context in references/, not map it to Tessl rules/."
@@ -2325,25 +2325,6 @@ def _load_json_object_file(path: Path, *, label: str) -> dict[str, object]:
     if not isinstance(loaded, dict):
         raise ValueError(f"{label} must be a JSON object.")
     return loaded
-
-
-def _valid_tessl_path_pointer(value: object) -> bool:
-    return bool(_normalized_tessl_path_pointers(value))
-
-
-def _normalized_tessl_path_pointers(value: object) -> list[str]:
-    values = value if isinstance(value, list) else [value]
-    if not values:
-        return []
-    normalized: list[str] = []
-    for item in values:
-        if not isinstance(item, str) or not item.strip():
-            return []
-        path = PurePosixPath(item.strip())
-        if path.is_absolute() or any(part == ".." for part in path.parts):
-            return []
-        normalized.append(path.as_posix().removeprefix("./").rstrip("/"))
-    return normalized
 
 
 def _validate_tessl_bundled_mcp(staged_root: Path, manifest: dict[str, object]) -> None:

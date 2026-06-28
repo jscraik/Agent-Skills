@@ -1722,7 +1722,7 @@ def test_tessl_projection_shape_rejects_manifest_skills_outside_staged_root(tmp_
     manifest["skills"] = "./not-skills/"
     manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
 
-    with pytest.raises(ValueError, match="skills must point to the staged skills root"):
+    with pytest.raises(ValueError, match='skills must be "\\./skills/"'):
         evals._validate_tessl_projection_shape(
             staged_source,
             skill_name="example-skill",
@@ -1732,7 +1732,7 @@ def test_tessl_projection_shape_rejects_manifest_skills_outside_staged_root(tmp_
         )
 
 
-def test_tessl_projection_shape_accepts_normalized_manifest_skills_root(tmp_path: Path) -> None:
+def test_tessl_projection_shape_rejects_manifest_skills_without_exact_staged_root(tmp_path: Path) -> None:
     _write_example_skill(tmp_path)
     staged_source, _copied = evals._stage_tessl_live_private_source(
         tmp_path,
@@ -1745,13 +1745,14 @@ def test_tessl_projection_shape_accepts_normalized_manifest_skills_root(tmp_path
     manifest["skills"] = "skills/"
     manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
 
-    evals._validate_tessl_projection_shape(
-        staged_source,
-        skill_name="example-skill",
-        workspace="jscraik",
-        project_slug="example-skill",
-        require_evals=True,
-    )
+    with pytest.raises(ValueError, match='skills must be "\\./skills/"'):
+        evals._validate_tessl_projection_shape(
+            staged_source,
+            skill_name="example-skill",
+            workspace="jscraik",
+            project_slug="example-skill",
+            require_evals=True,
+        )
 
 
 def test_tessl_projection_shape_rejects_readme_without_badge_and_review_guidance(tmp_path: Path) -> None:
