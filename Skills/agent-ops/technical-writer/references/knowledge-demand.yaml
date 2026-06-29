@@ -20,6 +20,11 @@ knowledge_signals:
 - clarity_style_and_revision
 - accessible_and_inclusive_writing
 - error_messages_and_recovery
+- capsule_source_model
+- capsule_relationship_map
+- capsule_downstream_integration
+- capsule_failure_modes
+- capsule_eval_scenarios
 needed_facets:
 - pack.developer-advocate-writing:devrel_role_and_audience
 - pack.developer-advocate-writing:technical_documentation
@@ -33,6 +38,8 @@ needed_facets:
 - pack.developer-advocate-writing:clarity_style_and_revision
 - pack.developer-advocate-writing:accessible_and_inclusive_writing
 - pack.developer-advocate-writing:error_messages_and_recovery
+- pack.knowledge-os-kernel-quality:capsule_design
+- pack.knowledge-os-kernel-quality:export_readiness
 runtime_dependency_policy:
   requires_knowledge_os_at_runtime: false
   raw_sources_included: false

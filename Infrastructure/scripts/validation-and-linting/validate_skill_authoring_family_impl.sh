@@ -192,7 +192,13 @@ fi
 run_skill_builder_script() {
   local script_name="$1"
   shift
-  "${python_cmd[@]}" "${skill_builder_scripts_dir}/${script_name}" "$@"
+  local script_python_cmd=("${python_cmd[@]}")
+  if ! "${script_python_cmd[@]}" -c "import yaml" >/dev/null 2>&1; then
+    if [[ -x "$pyyaml_venv_python" ]] && "$pyyaml_venv_python" -c "import yaml" >/dev/null 2>&1; then
+      script_python_cmd=("$pyyaml_venv_python")
+    fi
+  fi
+  "${script_python_cmd[@]}" "${skill_builder_scripts_dir}/${script_name}" "$@"
 }
 
 he_work_skill="Plugins/harness-engineering/skills/he-work/SKILL.md"
@@ -388,7 +394,13 @@ python3 Infrastructure/scripts/validation-and-linting/check_skill_factory_system
 echo "[family-gate] skill-factory system overlays passed"
 
 echo "[family-gate] validating he-improve example spec yaml fixtures"
-"${python_cmd[@]}" - <<'PY'
+yaml_python_cmd=("${python_cmd[@]}")
+if ! "${yaml_python_cmd[@]}" -c "import yaml" >/dev/null 2>&1; then
+  if [[ -x "$pyyaml_venv_python" ]] && "$pyyaml_venv_python" -c "import yaml" >/dev/null 2>&1; then
+    yaml_python_cmd=("$pyyaml_venv_python")
+  fi
+fi
+"${yaml_python_cmd[@]}" - <<'PY'
 from pathlib import Path
 import yaml
 

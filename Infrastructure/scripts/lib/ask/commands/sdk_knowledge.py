@@ -79,6 +79,7 @@ def _dispatch_ingest(repo_root: Path, args: argparse.Namespace) -> CallResult:
             str(exc),
             "Check that --extraction is a KnowledgeOS extraction with references/ and --skill is repo-local.",
         )
+    _block_warning_preflight(payload)
     return _ingest_result(payload)
 
 
@@ -128,6 +129,26 @@ def _ingest_result(payload: dict) -> CallResult:
             )
         )
     return result
+
+
+def _block_warning_preflight(payload: dict) -> None:
+    preflight = payload.get("staged_preflight")
+    if not isinstance(preflight, dict) or preflight.get("status") != "pass":
+        return
+    stdout = str(preflight.get("stdout_excerpt") or "")
+    warning_count = sum(
+        1
+        for line in stdout.splitlines()
+        if line.startswith("WARN ") or ": WARN" in line
+    )
+    preflight["warning_count"] = warning_count
+    if warning_count == 0:
+        return
+    preflight["status"] = "blocked"
+    payload["status"] = "blocked"
+    findings = payload.setdefault("findings", [])
+    if "staged_security_gate_warnings" not in findings:
+        findings.append("staged_security_gate_warnings")
 
 
 def _validation_error(command: str, message: str, fix_suggestion: str) -> CallResult:
