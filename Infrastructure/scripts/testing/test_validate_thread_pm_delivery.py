@@ -251,3 +251,22 @@ def test_thread_report_accepts_external_artifact_urls(tmp_path: Path) -> None:
     )
 
     assert findings == []
+
+
+def test_thread_report_allows_final_shell_redirection_commands(tmp_path: Path) -> None:
+    module = _load_module()
+    report = tmp_path / "latest.json"
+    payload = json.loads(_valid_report())
+    payload["commands"][0]["command"] = (
+        "./bin/ask sdk eval handoff-readiness --skill Skills/agent-ops/technical-writer "
+        "--preview --json --robot > .harness/evidence/handoff/technical-writer/eval-handoff-readiness-preview.json"
+    )
+    report.write_text(json.dumps(payload), encoding="utf-8")
+
+    findings = module.validate_delivery(
+        report,
+        tmp_path / "pm-delivery.json",
+        require_delivery=False,
+    )
+
+    assert findings == []

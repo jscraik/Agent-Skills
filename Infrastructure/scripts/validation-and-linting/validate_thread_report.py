@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -26,7 +27,7 @@ def _non_empty_string(value: Any) -> bool:
 
 
 def _has_placeholder(value: str) -> bool:
-    return "<" in value or ">" in value
+    return bool(re.search(r"<[^<>\s][^<>]*>", value))
 
 
 def _validate_items(

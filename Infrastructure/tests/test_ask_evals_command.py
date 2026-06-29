@@ -1755,16 +1755,41 @@ def test_tessl_projection_shape_rejects_manifest_skills_without_exact_staged_roo
         )
 
 
-def test_tessl_projection_shape_rejects_readme_without_badge_and_review_guidance(tmp_path: Path) -> None:
+def test_tessl_projection_shape_augments_existing_readme_with_registry_guidance(tmp_path: Path) -> None:
     skill_root = _write_example_skill(tmp_path)
-    (skill_root / "README.md").write_text("# Example Skill\n\nRegistry presentation.\n", encoding="utf-8")
+    (skill_root / "README.md").write_text("# Example Skill\n\nExisting project README.\n", encoding="utf-8")
+
+    staged_source, _copied = evals._stage_tessl_live_private_source(
+        tmp_path,
+        "Skills/example-skill",
+        "jscraik",
+        temp_root=tmp_path / "stage",
+    )
+
+    readme_text = (staged_source / "README.md").read_text(encoding="utf-8")
+    assert "Existing project README." in readme_text
+    assert "GitHub Badge" in readme_text
+    assert "tessl skill review --optimize" in readme_text
+    assert "tessl review run" in readme_text
+
+
+def test_tessl_projection_shape_rejects_readme_without_badge_and_review_guidance(tmp_path: Path) -> None:
+    _write_example_skill(tmp_path)
+    staged_source, _copied = evals._stage_tessl_live_private_source(
+        tmp_path,
+        "Skills/example-skill",
+        "jscraik",
+        temp_root=tmp_path / "stage",
+    )
+    (staged_source / "README.md").write_text("# Example Skill\n\nRegistry presentation.\n", encoding="utf-8")
 
     with pytest.raises(ValueError, match="GitHub Badge"):
-        evals._stage_tessl_live_private_source(
-            tmp_path,
-            "Skills/example-skill",
-            "jscraik",
-            temp_root=tmp_path / "stage",
+        evals._validate_tessl_projection_shape(
+            staged_source,
+            skill_name="example-skill",
+            workspace="jscraik",
+            project_slug="example-skill",
+            require_evals=True,
         )
 
 
@@ -2426,6 +2451,11 @@ def test_evals_run_uses_plugin_project_identity_when_workspace_is_set(tmp_path: 
 
     with (
         mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
+        mock.patch.object(
+            evals,
+            "_tessl_live_handoff_readiness",
+            return_value={"ready_for_live_tessl": True, "blockers": [], "required_next_actions": []},
+        ),
         mock.patch.object(evals.subprocess, "run", side_effect=fake_run),
     ):
         result = evals.run_evals(
@@ -3143,7 +3173,7 @@ def test_tessl_live_evidence_records_compact_forensic_index(tmp_path: Path) -> N
     index_rows = [json.loads(line) for line in index_path.read_text(encoding="utf-8").splitlines()]
 
     assert len(index_rows) == 1
-    assert index_rows[0]["schema_version"] == "jscraik.tessl-live-evidence-index.v1"
+    assert index_rows[0]["schema_version"] == "skills-sdk.tessl-live-evidence-index.v1"
     assert index_rows[0]["skill_handle"] == "example-skill"
     assert index_rows[0]["run_id"] == "019e6ac8-08eb-75fb-8fbb-e2346517f82d"
     assert index_rows[0]["artifact_type"] == "tessl-eval-view.json"
@@ -3213,6 +3243,11 @@ def test_evals_live_private_blocks_before_submit_when_pending_run_exists(tmp_pat
 
     with (
         mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
+        mock.patch.object(
+            evals,
+            "_tessl_live_handoff_readiness",
+            return_value={"ready_for_live_tessl": True, "blockers": [], "required_next_actions": []},
+        ),
         mock.patch.object(evals.subprocess, "run", side_effect=fake_run),
     ):
         result = evals.run_evals(
@@ -3263,6 +3298,13 @@ def test_evals_live_private_fails_when_score_is_below_baseline(tmp_path: Path) -
     _write_example_skill(tmp_path)
 
     def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
+        if cmd[1:3] == ["project", "repair"] and "--json" in cmd:
+            return mock.Mock(
+                returncode=0,
+                stdout='{"workspace":"jscraik","project":"example-skill","name":"jscraik/example-skill"}',
+                stderr="",
+                args=cmd,
+            )
         if cmd[1:3] == ["eval", "list"]:
             return mock.Mock(returncode=0, stdout="[]", stderr="", args=cmd)
         if cmd[1:3] == ["eval", "run"]:
@@ -3273,6 +3315,11 @@ def test_evals_live_private_fails_when_score_is_below_baseline(tmp_path: Path) -
 
     with (
         mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
+        mock.patch.object(
+            evals,
+            "_tessl_live_handoff_readiness",
+            return_value={"ready_for_live_tessl": True, "blockers": [], "required_next_actions": []},
+        ),
         mock.patch.object(evals.subprocess, "run", side_effect=fake_run),
     ):
         result = evals.run_evals(
@@ -3323,6 +3370,13 @@ def test_evals_live_private_fails_when_skill_only_ties_baseline(tmp_path: Path) 
     _write_example_skill(tmp_path)
 
     def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
+        if cmd[1:3] == ["project", "repair"] and "--json" in cmd:
+            return mock.Mock(
+                returncode=0,
+                stdout='{"workspace":"jscraik","project":"example-skill","name":"jscraik/example-skill"}',
+                stderr="",
+                args=cmd,
+            )
         if cmd[1:3] == ["eval", "list"]:
             return mock.Mock(returncode=0, stdout="[]", stderr="", args=cmd)
         if cmd[1:3] == ["eval", "run"]:
@@ -3333,6 +3387,11 @@ def test_evals_live_private_fails_when_skill_only_ties_baseline(tmp_path: Path) 
 
     with (
         mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
+        mock.patch.object(
+            evals,
+            "_tessl_live_handoff_readiness",
+            return_value={"ready_for_live_tessl": True, "blockers": [], "required_next_actions": []},
+        ),
         mock.patch.object(evals.subprocess, "run", side_effect=fake_run),
     ):
         result = evals.run_evals(
@@ -3396,6 +3455,13 @@ def test_evals_live_private_polls_until_view_scores_are_complete(tmp_path: Path)
 
     def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
         nonlocal view_calls
+        if cmd[1:3] == ["project", "repair"] and "--json" in cmd:
+            return mock.Mock(
+                returncode=0,
+                stdout='{"workspace":"jscraik","project":"example-skill","name":"jscraik/example-skill"}',
+                stderr="",
+                args=cmd,
+            )
         if cmd[1:3] == ["eval", "list"]:
             return mock.Mock(returncode=0, stdout="[]", stderr="", args=cmd)
         if cmd[1:3] == ["eval", "run"]:
@@ -3407,6 +3473,11 @@ def test_evals_live_private_polls_until_view_scores_are_complete(tmp_path: Path)
 
     with (
         mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
+        mock.patch.object(
+            evals,
+            "_tessl_live_handoff_readiness",
+            return_value={"ready_for_live_tessl": True, "blockers": [], "required_next_actions": []},
+        ),
         mock.patch.object(evals.subprocess, "run", side_effect=fake_run),
         mock.patch.object(evals.time, "sleep", return_value=None),
     ):
@@ -3451,6 +3522,13 @@ def test_evals_live_private_reports_tessl_quota_blocker(tmp_path: Path) -> None:
     _write_example_skill(tmp_path)
 
     def fake_run(cmd: list[str], **_kwargs: object) -> mock.Mock:
+        if cmd[1:3] == ["project", "repair"] and "--json" in cmd:
+            return mock.Mock(
+                returncode=0,
+                stdout='{"workspace":"jscraik","project":"example-skill","name":"jscraik/example-skill"}',
+                stderr="",
+                args=cmd,
+            )
         if cmd[1:3] == ["eval", "list"]:
             return mock.Mock(returncode=0, stdout="[]", stderr="", args=cmd)
         if cmd[1:3] == ["eval", "run"]:
@@ -3461,6 +3539,11 @@ def test_evals_live_private_reports_tessl_quota_blocker(tmp_path: Path) -> None:
 
     with (
         mock.patch.object(evals.shutil, "which", return_value="/usr/local/bin/tessl"),
+        mock.patch.object(
+            evals,
+            "_tessl_live_handoff_readiness",
+            return_value={"ready_for_live_tessl": True, "blockers": [], "required_next_actions": []},
+        ),
         mock.patch.object(evals.subprocess, "run", side_effect=fake_run),
     ):
         result = evals.run_evals(
@@ -3935,7 +4018,7 @@ def test_run_evals_writes_blocked_closeout_for_partial_report_dir(tmp_path: Path
     assert result.status == "error"
     assert result.data["eval_status"] == "blocked_missing_artifact"
     closeout = result.data["eval_closeout"]
-    assert closeout["schema_version"] == "jscraik.eval-closeout.v1"
+    assert closeout["schema_version"] == "skills-sdk.eval-closeout.v1"
     assert closeout["status"] == "blocked"
     assert closeout["blocker_class"] == "blocked_missing_artifact"
     assert closeout["cases"] == [

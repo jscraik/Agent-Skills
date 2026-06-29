@@ -2245,11 +2245,12 @@ def _write_tessl_live_plugin_manifest(source_root: Path, staged_root: Path, work
 def _write_tessl_registry_readme(source_root: Path, staged_root: Path, workspace: str) -> list[str]:
     source_readme = source_root / "README.md"
     readme_target = staged_root / "README.md"
+    tile_slug = _tessl_live_tile_slug(source_root)
     if source_readme.exists():
         _reject_tessl_staging_symlink(source_root, source_readme)
         shutil.copy2(source_readme, readme_target)
+        _append_tessl_registry_readme_section(readme_target, workspace, tile_slug)
     else:
-        tile_slug = _tessl_live_tile_slug(source_root)
         readme_target.write_text(
             (
                 f"# {source_root.name}\n\n"
@@ -2267,6 +2268,26 @@ def _write_tessl_registry_readme(source_root: Path, staged_root: Path, workspace
             encoding="utf-8",
         )
     return ["README.md"]
+
+
+def _append_tessl_registry_readme_section(readme_target: Path, workspace: str, tile_slug: str) -> None:
+    text = readme_target.read_text(encoding="utf-8")
+    required = ("GitHub Badge", "Tessl registry", "tessl skill review --optimize", "tessl review run")
+    if all(phrase in text for phrase in required):
+        return
+    suffix = (
+        "\n\n## Tessl Registry Presentation\n\n"
+        f"Registry presentation for the private Tessl package `{workspace}/{tile_slug}`. "
+        "Agent runtime instructions live in `skills/` and `SKILL.md`; this README is "
+        "for registry presentation and should not be treated as agent context.\n\n"
+        "### GitHub Badge\n\n"
+        "When this package is public in the Tessl registry, paste the registry-provided "
+        "GitHub badge Markdown here so repository readers can see the current Tessl score.\n\n"
+        "### Score Improvement And CI Gate\n\n"
+        "Use `tessl skill review --optimize` to improve a weak registry score before "
+        "promotion. Use `tessl review run` in CI when the package needs a score threshold gate.\n"
+    )
+    readme_target.write_text(text.rstrip() + suffix, encoding="utf-8")
 
 
 def _write_tesslignore(staged_root: Path) -> list[str]:
