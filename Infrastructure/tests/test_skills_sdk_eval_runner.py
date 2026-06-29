@@ -522,6 +522,29 @@ class TestSkillsSdkEvalRunner(unittest.TestCase):
         self.assertEqual(release_sets[0]["id"], "technical-writer-release-20-v1")
         self.assertEqual(release_sets[0]["case_ids"], TECHNICAL_WRITER_RELEASE_20)
 
+    def test_release_scenario_sets_fallback_loads_flat_case_lists_without_pyyaml(self) -> None:
+        flat_cases = "\n".join(f"      - case-{index}" for index in range(1, 21))
+        with tempfile.TemporaryDirectory() as temp_dir:
+            evals_path = Path(temp_dir) / "evals.yaml"
+            evals_path.write_text(
+                f"""schema_version: '2.0'
+release_scenario_sets:
+  - id: flat-release-20-v1
+    default: true
+    minimum_scenarios: 20
+    cases:
+{flat_cases}
+cases:
+- id: case-1
+""",
+                encoding="utf-8",
+            )
+            with mock.patch("ask.skills_sdk.scenario_quality._yaml_safe_load", side_effect=RuntimeError("yaml unavailable")):
+                release_sets = _load_release_scenario_sets(evals_path)
+
+        self.assertEqual(release_sets[0]["id"], "flat-release-20-v1")
+        self.assertEqual(release_sets[0]["case_ids"], [f"case-{index}" for index in range(1, 21)])
+
     def test_oss_release_lane_blocks_filtered_debug_subset_before_runtime(self) -> None:
         with mock.patch("ask.commands.evals.run_evals") as run:
             result = skills_sdk_eval_run(

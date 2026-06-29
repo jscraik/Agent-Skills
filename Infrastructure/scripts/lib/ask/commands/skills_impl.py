@@ -7430,8 +7430,10 @@ def _load_minimal_release_scenario_sets(text: str) -> list[dict[str, Any]]:
     release_sets: list[dict[str, Any]] = []
     current: dict[str, Any] | None = None
     current_group: str | None = None
+    current_set_indent: int | None = None
     in_release_sets = False
     in_groups = False
+    in_cases = False
     for raw_line in text.splitlines():
         line = raw_line.split("#", 1)[0].rstrip()
         if not line.strip():
@@ -7442,37 +7444,56 @@ def _load_minimal_release_scenario_sets(text: str) -> list[dict[str, Any]]:
             in_release_sets = True
             current = None
             current_group = None
+            current_set_indent = None
             in_groups = False
+            in_cases = False
             continue
         if in_release_sets and indent == 0 and not stripped.startswith("- "):
             break
         if not in_release_sets:
             continue
-        if indent == 2 and stripped.startswith("- "):
+        if stripped.startswith("- ") and (current is None or current_set_indent is None or indent <= current_set_indent):
             current = {"groups": {}}
             release_sets.append(current)
             current_group = None
+            current_set_indent = indent
             in_groups = False
+            in_cases = False
             _minimal_release_set_assign(current, stripped[2:])
             continue
         if current is None:
             continue
-        if indent == 4 and stripped == "groups:":
+        property_indent = (current_set_indent or 0) + 2
+        item_indent = property_indent + 2
+        if indent == property_indent and stripped == "groups:":
             in_groups = True
+            in_cases = False
             current_group = None
             continue
-        if indent == 4 and ":" in stripped:
+        if indent == property_indent and stripped == "cases:":
             in_groups = False
+            in_cases = True
+            current_group = None
+            current["cases"] = []
+            continue
+        if in_cases and indent == item_indent and stripped.startswith("- "):
+            cases = current.setdefault("cases", [])
+            if isinstance(cases, list):
+                cases.append(stripped[2:].strip().strip("'\""))
+            continue
+        if indent == property_indent and ":" in stripped:
+            in_groups = False
+            in_cases = False
             current_group = None
             _minimal_release_set_assign(current, stripped)
             continue
-        if in_groups and indent == 6 and stripped.endswith(":"):
+        if in_groups and indent == item_indent and stripped.endswith(":"):
             current_group = stripped[:-1].strip()
             groups = current.setdefault("groups", {})
             if isinstance(groups, dict):
                 groups[current_group] = []
             continue
-        if in_groups and indent == 8 and stripped.startswith("- ") and current_group:
+        if in_groups and indent == item_indent + 2 and stripped.startswith("- ") and current_group:
             groups = current.setdefault("groups", {})
             if isinstance(groups, dict):
                 group_values = groups.setdefault(current_group, [])

@@ -222,6 +222,8 @@ class TestSkillsSdkHandoffReadiness(unittest.TestCase):
         self.assertEqual(receipt["status"], "blocked")
         self.assertFalse(receipt["ready_for_live_tessl"])
         self.assertIn("tessl_feedback_loop_closed", {blocker["id"] for blocker in receipt["blockers"]})
+        self.assertTrue(any("Tessl score feedback loop" in action for action in receipt["required_next_actions"]))
+        self.assertFalse(any(action.startswith("Run live Tessl") for action in receipt["required_next_actions"]))
         validate_handoff_readiness_receipt(receipt)
 
     def test_handoff_readiness_blocks_tessl_baseline_wins(self) -> None:

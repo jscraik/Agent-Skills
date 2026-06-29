@@ -440,6 +440,8 @@ def _next_actions(
     command_actions = _lane_command_next_actions(blocker_ids)
     if command_actions:
         return command_actions
+    if not blocker_ids.isdisjoint({"tessl_score_receipt_complete", "tessl_feedback_loop_closed", "tessl_baseline_wins_absent", "tessl_usage_threshold_met"}):
+        return ["Repair the Tessl score feedback loop by classifying baseline wins, low usage, or incomplete score evidence in the internal SDK lanes; rerun the Tessl score receipt before any live Tessl run."]
     if "lane_receipt_semantics_valid" in blocker_ids and _lane_receipt_semantics_blocked(lanes or [], "oss-local"):
         return [_OSS_LOCAL_RECEIPT_SEMANTICS_BLOCKER_ACTION]
     if _lane_has_runtime_blocker(lanes or [], "oss-local"):
