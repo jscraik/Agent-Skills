@@ -1,0 +1,8 @@
+{
+  "id": "local-eval-pass-overclaims-runtime",
+  "description": "Raw scorer artifact for the proof-lane overclaim calibration example.",
+  "scorer_id": "evals-router-release-scorer",
+  "predicted_label": "fail",
+  "score": 0.05,
+  "rationale": "The answer treats local eval or package proof as runtime activation, live Tessl, or release readiness proof, collapsing evidence lanes that must remain separate."
+}

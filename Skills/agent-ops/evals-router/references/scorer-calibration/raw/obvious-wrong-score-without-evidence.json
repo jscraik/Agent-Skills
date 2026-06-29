@@ -1,0 +1,8 @@
+{
+  "id": "obvious-wrong-score-without-evidence",
+  "description": "Raw scorer artifact for the known-fail score-without-evidence calibration example.",
+  "scorer_id": "evals-router-release-scorer",
+  "predicted_label": "fail",
+  "score": 0.05,
+  "rationale": "The answer invents a quality score without traces, labels, retrieved chunks, judge outputs, or a deterministic check, so it cannot support eval readiness."
+}

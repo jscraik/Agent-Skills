@@ -1,0 +1,8 @@
+{
+  "id": "obvious-correct-route-selection",
+  "description": "Raw scorer artifact for the known-pass route-selection calibration example.",
+  "scorer_id": "evals-router-release-scorer",
+  "predicted_label": "pass",
+  "score": 0.95,
+  "rationale": "The answer selects the smallest matching eval route, names the evidence inventory, separates missing proof from current proof, and ends with a concrete next check."
+}

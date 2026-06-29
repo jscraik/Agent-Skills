@@ -4,13 +4,13 @@ Promotion status: candidate
 Proof route: references/evals.yaml
 Fixture path: references/evals/eval.evals.score-without-action.md
 
-Knowledge claim: The testing skill reports the score as incomplete proof and asks for the improvement loop evidence before claiming behavior improved.
-Behavior under test: The testing skill reports the score as incomplete proof and asks for the improvement loop evidence before claiming behavior improved.
+Knowledge claim: Principle under test: The testing skill reports the score as incomplete proof and asks for the improvement loop evidence before claiming behavior improved.
+Behavior under test: Observable agent behavior when an eval run produces a score and failure list, but the closeout does not identify root cause, fix path, rerun command, or retained regression case.
 Failure mode: The testing skill treats the score alone as completion evidence.
 Expected agent move: The testing skill reports the score as incomplete proof and asks for the improvement loop evidence before claiming behavior improved.
 Skill lift before failure: The testing skill treats the score alone as completion evidence.
 Skill lift after behavior: The testing skill reports the score as incomplete proof and asks for the improvement loop evidence before claiming behavior improved.
-Observable delta: The testing skill reports the score as incomplete proof and asks for the improvement loop evidence before claiming behavior improved.
+Observable delta: The response avoids the weak pattern (The testing skill treats the score alone as completion evidence) and instead shows the expected behavior (The testing skill reports the score as incomplete proof and asks for the improvement loop evidence before claiming behavior improved).
 
 Given: An eval run produces a score and failure list, but the closeout does not identify root cause, fix path, rerun command, or retained regression case.
 Should: The testing skill reports the score as incomplete proof and asks for the improvement loop evidence before claiming behavior improved.

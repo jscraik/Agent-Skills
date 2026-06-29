@@ -14,12 +14,28 @@ knowledge_signals:
 - judge_calibration
 - regression_closeout
 - production_guardrails
+- skill_eval_route_selection
+- scenario_promotion
+- scorer_quality_boundary
+- registry_semantic_risk
+- capsule_source_model
+- capsule_relationship_map
+- capsule_downstream_integration
+- capsule_failure_modes
+- capsule_eval_scenarios
 needed_facets:
 - pack.evals-testing:trace_error_analysis
 - pack.evals-testing:deterministic_evaluator_design
 - pack.evals-testing:judge_calibration
 - pack.evals-testing:regression_loop
 - pack.evals-testing:production_guardrails
+- pack.skills-sdk:evaluation_benchmarks
+- pack.skills-sdk:operations_registry
+- pack.skills-sdk:supply_chain_security
+- pack.skills-sdk:generation_revision
+- pack.skills-sdk:architecture_runtime
+- pack.knowledge-os-kernel-quality:capsule_design
+- pack.knowledge-os-kernel-quality:export_readiness
 runtime_dependency_policy:
   requires_knowledge_os_at_runtime: false
   raw_sources_included: false
