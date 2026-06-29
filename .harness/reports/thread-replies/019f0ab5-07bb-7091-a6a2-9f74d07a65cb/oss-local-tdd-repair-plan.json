@@ -1,17 +1,14 @@
 {
   "schema_version": "oss-local-tdd-repair-plan/v1",
-  "repo_head": "ed27703b4",
+  "repo_head": "22ce0b931",
   "current_gate": "oss-local-repair",
-  "selected_cluster": "criteria-task-brittleness-for-safe-outputs",
+  "selected_cluster": "criteria-acceptance-overfit-for-visual-and-stale-command",
   "owner_class": "criteria",
-  "why_this_cluster_first": "The pass-3 matrix classifies five of six current failures as criteria/task-owned, and the pass-3 scorecard shows safe outputs failing brittle regex or expected-signal token thresholds. This is the widest same-owner cluster and avoids mixing with the service-doc skill-owned failure.",
-  "failing_test_or_fixture_to_add": "Use pass-3 release artifacts as the pre-patch fixture: Infrastructure/artifacts/skills/technical-writer/20260628-205656-614157/{11-wrong-domain,16-docs-to-x-routing-boundary,18-pressure-generated-projection-edit,19-regression-capsule-runtime-boundary,20-regression-stale-command-example}/codex/final.txt with scorecard tier1 failures.",
+  "why_this_cluster_first": "The 20260629-052058-529282 oss-local release receipt reduced the failure set to three cases. visual-doc-standalone and regression-stale-command-example failed only expected-signal wording despite producing the requested review or command repair; service-doc-reader-job remains a separate skill-behavior failure because it invented concrete acceptance commands and owner details while marking evidence blocked.",
+  "failing_test_or_fixture_to_add": "Use the fresh oss-local release artifact as the pre-patch fixture: Infrastructure/artifacts/skills/technical-writer/20260629-052058-529282/workflow-closeout.json.",
   "expected_pre_patch_failure": {
-    "wrong_domain": "regex failed: /(?i)(routing_decision|not_applicable|blocker|refactoring? code|code refactor|not documentation)/",
-    "docs_to_x_routing_boundary": "expected_signal matched 5/13, required 7; missing unsupported/publication/badge/coverage/announcement/claim",
-    "pressure_generated_projection_edit": "expected_signal matched 5/12, required 6; missing name/refresh/blocker/evidence/used/for",
-    "regression_capsule_runtime_boundary": "expected_signal matched 4/11, required 6; missing name/the/command/blocker/used/for",
-    "regression_stale_command_example": "expected_signal matched 5/17, required 9; missing uses/supplied/local/for/staged/artifact"
+    "visual_doc_standalone": "[codex] expected_signal failed: matched 5/11 signal terms (required 6); missing: name, file, artifact, blocker, used, decision",
+    "regression_stale_command_example": "[codex] expected_signal failed: matched 4/9 signal terms (required 5); missing: uses, evidence, avoid, external, readines"
   },
   "files_allowed_to_change": [
     "Skills/agent-ops/technical-writer/references/evals.yaml"
@@ -23,12 +20,12 @@
     "Tessl staging artifacts",
     "oss-cloud/Tessl live evidence"
   ],
-  "anti_easy_check": "Do not weaken should_trigger, release membership, or forbidden command checks; preserve the requirement that outputs separate local proof from external readiness and block unsupported claims.",
-  "simplification_check": "Replace overfit expected-signal prose with smaller observable regex/signal checks that accept semantically equivalent safe outputs without requiring meta words such as supplied, staged, artifact, used, or name.",
+  "anti_easy_check": "Do not weaken release membership, should_trigger, or forbidden command checks. Keep behavior requirements for slide-level evidence, local wrapper validation, and no external readiness drift.",
+  "simplification_check": "Replace brittle expected-signal wording with behavior-shaped criteria: slide evidence plus async-reader blocked interpretation for the visual case, and wrapper evidence plus local validation plus must_not external readiness drift for the stale-command case.",
   "reusable_guardrail_decision": {
-    "decision": "record",
+    "decision": "recorded",
     "target": ".harness/memory/LEARNINGS.md",
-    "rationale": "Repeated eval failures from safe outputs failing brittle signal words should become a durable lesson for future Skills SDK criteria design."
+    "rationale": "Prior committed learning already records that release-lane criteria should check observable behavior and absence of forbidden drift rather than exact meta-word uptake."
   },
   "validation_commands": [
     "./bin/ask skills package verify Skills/agent-ops/technical-writer --json --robot",
@@ -41,4 +38,3 @@
     "tessl-live"
   ]
 }
-

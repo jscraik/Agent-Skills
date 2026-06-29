@@ -605,6 +605,46 @@ cases:
         blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
         self.assertIn("platform_tessl_quality:missing_concrete_output_artifact", blocker_ids)
 
+    def test_builder_blocks_acceptance_type_unsupported_by_text_runner(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(
+                Path(temp_dir),
+                """schema_version: '2.0'
+skill_name: sample
+cases:
+- id: unsupported-text-assertion
+  category: edge
+  unit: release assertion support
+  eval_modes:
+  - release
+  realistic: true
+  why_realistic: Release cases must use assertions executable by the skill eval runner.
+  given: A release case uses a must_not assertion that the text-output runner cannot execute.
+  should: Block unsupported acceptance types before oss-local release.
+  actual_artifact: final response
+  expected_artifact: proof-backed response
+  reproduce: ./bin/ask sdk eval run sample
+  prompt: Review the staged docs task.
+  claim_ids:
+  - sample.claim
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: Names evidence and blocks unsupported claims.
+  - type: must_not
+    value: Invents command evidence.
+""",
+            )
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
+        self.assertIn("text_output_runner_acceptance_supported", blocker_ids)
+        validate_scenario_quality_receipt(raised.exception.receipt)
+
     def test_builder_blocks_hidden_reference_dependency_before_next_phase(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             skill_dir = _write_skill_with_evals(
@@ -672,8 +712,8 @@ cases:
   acceptance:
   - type: expected_signal
     value: Names the editable owner and separates refresh evidence.
-  - type: must_not
-    value: Edits the generated projection directly.
+  - type: not_regex
+    value: (?is)edited the generated projection directly
 """,
             )
 
@@ -721,8 +761,8 @@ cases:
   acceptance:
   - type: expected_signal
     value: Names the editable owner and separates refresh evidence.
-  - type: must_not
-    value: Edits the generated projection directly.
+  - type: not_regex
+    value: (?is)edited the generated projection directly
 """,
             )
 
@@ -761,8 +801,8 @@ cases:
   acceptance:
   - type: expected_signal
     value: Names evidence and separates the proof lane.
-  - type: must_not
-    value: Claims a file was saved in the read-only sandbox.
+  - type: not_regex
+    value: (?is)(saved|wrote) .*file .*read-only sandbox
 """,
             )
 
@@ -801,8 +841,8 @@ cases:
   acceptance:
   - type: expected_signal
     value: Names evidence and separates the proof lane.
-  - type: must_not
-    value: Claims a file was saved in the read-only sandbox.
+  - type: not_regex
+    value: (?is)(saved|wrote) .*file .*read-only sandbox
 """,
             )
 

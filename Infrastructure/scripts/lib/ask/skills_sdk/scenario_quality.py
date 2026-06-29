@@ -48,6 +48,17 @@ TEXT_FIELD_ASSERTION_TYPES = {
     "text_field_present",
     "text_field_absent",
 }
+TEXT_OUTPUT_RUNNER_ACCEPTANCE_TYPES = {
+    "contains",
+    "not_contains",
+    "regex",
+    "not_regex",
+    "skill_selected",
+    "skill_not_selected",
+    "expected_signal",
+    "discovery_question",
+    *TEXT_FIELD_ASSERTION_TYPES,
+}
 STRUCTURED_FIELD_ASSERTION_KEYS = (
     "publication_gate_status",
     "publication_status",
@@ -312,15 +323,24 @@ def _acceptance_text(case: dict[str, Any]) -> str:
 def _acceptance_assertion_checks(case: dict[str, Any], scenario_id: str) -> list[dict[str, Any]]:
     malformed_text_fields: list[str] = []
     regex_structured_fields: list[str] = []
+    unsupported_text_assertions: list[str] = []
     for index, item in enumerate(_list_field(case, "acceptance"), start=1):
         if not isinstance(item, dict):
             continue
         assertion_type = str(item.get("type") or "")
         marker = f"{scenario_id}:acceptance[{index}]"
+        if assertion_type not in TEXT_OUTPUT_RUNNER_ACCEPTANCE_TYPES:
+            unsupported_text_assertions.append(f"{marker}:{assertion_type or 'missing_type'}")
         if _text_field_assertion_malformed(item, assertion_type):
             malformed_text_fields.append(marker)
         regex_structured_fields.extend(_regex_structured_field_refs(item, assertion_type, marker))
     return [
+        _check(
+            "text_output_runner_acceptance_supported",
+            "blocker" if unsupported_text_assertions else "pass",
+            "Scenario acceptance types must be executable by the text-output skill eval runner before release.",
+            unsupported_text_assertions,
+        ),
         _check(
             "typed_text_field_assertions_valid",
             "blocker" if malformed_text_fields else "pass",

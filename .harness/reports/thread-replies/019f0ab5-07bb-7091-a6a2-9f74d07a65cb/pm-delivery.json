@@ -3,9 +3,9 @@
   "thread_id": "019f0ab5-07bb-7091-a6a2-9f74d07a65cb",
   "pm_thread_id": "019f0314-ba59-7a00-ab78-9bd3174d1d03",
   "report_path": "latest.json",
-  "delivery_method": "blocked_no_thread_tool",
-  "delivery_status": "blocked",
-  "delivered_at": "",
-  "message_summary": "technical-writer oss-local TDD repair report blocked on oss-local runtime/tooling",
-  "delivery_evidence": "codex_app__send_message_to_thread was discoverable in ALL_TOOLS but returned: No handler registered for tool: send_message_to_thread; delivery not claimed"
+  "delivery_method": "codex_app__send_message_to_thread",
+  "delivery_status": "delivered",
+  "delivered_at": "2026-06-29T04:52:30Z",
+  "message_summary": "Reported technical-writer oss-local checkpoint, scenario-quality guardrail, validation evidence, and 15/20 oss-local blocker.",
+  "delivery_evidence": "send_message_to_thread returned threadId 019f0314-ba59-7a00-ab78-9bd3174d1d03"
 }

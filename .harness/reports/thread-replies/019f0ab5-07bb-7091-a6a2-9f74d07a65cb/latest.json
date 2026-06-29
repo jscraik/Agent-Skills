@@ -1,8 +1,8 @@
 {
   "schema_version": "thread-report/v1",
   "thread_id": "019f0ab5-07bb-7091-a6a2-9f74d07a65cb",
-  "repo_head": "ed27703b4",
-  "task_id": "technical-writer-oss-local-tdd-repair-pass4",
+  "repo_head": "22ce0b931",
+  "task_id": "technical-writer-oss-local-tdd-repair-checkpoint",
   "status": "blocked",
   "current_gate": "oss-local-repair",
   "next_gate_allowed": false,
@@ -15,156 +15,111 @@
     {
       "command": "git status --short --branch",
       "outcome": "pass",
-      "evidence": "## codex/sdk-eval-parity-guardrails...origin/codex/sdk-eval-parity-guardrails plus related generated eval closeout artifacts under Infrastructure/artifacts/evals/closeouts/"
+      "evidence": "Before the first checkpoint commit: dirty files were limited to technical-writer oss-local evidence, PM report artifacts, LEARNINGS.md, and eval criteria. After commit 22ce0b931, status showed clean worktree ahead 1."
     },
     {
-      "command": "git rev-parse --short HEAD",
+      "command": "git commit -m 'test(sdk): checkpoint technical writer oss-local repair'",
       "outcome": "pass",
-      "evidence": "ed27703b4"
+      "evidence": "commit 22ce0b931; 7 files changed; pre-commit validation passed."
     },
     {
-      "command": "jq '.' .harness/reports/thread-replies/019f0ab5-07bb-7091-a6a2-9f74d07a65cb/oss-local-pass3-three-run-matrix.json",
+      "command": "ollama ps",
       "outcome": "pass",
-      "evidence": "selected criteria/task ownership for five of six pass-3 failures; service-doc-reader-job deferred as skill-owned"
+      "evidence": "Host-side Ollama responded before oss-local release runs."
+    },
+    {
+      "command": "bash Infrastructure/scripts/run-infrastructure-python.sh -m py_compile scripts/lib/ask/skills_sdk/scenario_quality.py",
+      "outcome": "pass",
+      "evidence": "exit 0 after adding text_output_runner_acceptance_supported guard."
+    },
+    {
+      "command": "bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest tests/test_skills_sdk_scenario_quality.py -q",
+      "outcome": "pass",
+      "evidence": "37 passed in 0.45s after adding unsupported acceptance type regression coverage."
     },
     {
       "command": "./bin/ask skills package verify Skills/agent-ops/technical-writer --json --robot",
       "outcome": "pass",
-      "evidence": "status success; skill_package_verification.status pass; no blockers"
+      "evidence": "exit 0; status success; skill_package_verification.status pass."
     },
     {
       "command": "./bin/ask sdk eval scenario-quality Skills/agent-ops/technical-writer --preview --json --robot",
       "outcome": "pass",
-      "evidence": "status success; scenario_count=27; promotion_ready_count=27; blocked_count=0"
+      "evidence": "exit 0; scenario_count=27; promotion_ready_count=27; blocked_count=0; text_output_runner_acceptance_supported checks pass."
     },
     {
       "command": "./bin/ask sdk eval run Skills/agent-ops/technical-writer --runner internal --mode release --codex-profile oss-local --json --robot",
-      "outcome": "blocked",
-      "evidence": "status blocked; blocker_class=blocked_runtime; codex_exec_invoked=true; codex_profile=oss-local; scenario_set_id=technical-writer-release-20-v1; case_count=20; blocked_count=20; dataset_path=Infrastructure/artifacts/skills/technical-writer/20260629-023355-042204/scorecard.json"
-    },
-    {
-      "command": "ollama serve",
-      "outcome": "pass",
-      "evidence": "session 52244; output included Listening on 127.0.0.1:11434 (version 0.30.11); cache snapshot write warning did not stop server startup"
-    },
-    {
-      "command": "ollama list",
-      "outcome": "pass",
-      "evidence": "exit 0; models included gpt-oss:20b, qwen3-coder:30b, qwen3.5:latest, gemma3n:e4b, bge-m3:latest, nomic-embed-text:latest"
+      "outcome": "fail",
+      "evidence": "Infrastructure/artifacts/skills/technical-writer/20260629-052058-529282/workflow-closeout.json; status fail; codex_exec_invoked=true; codex_profile=oss-local; case_count=20; passed_count=17; failed_count=3."
     },
     {
       "command": "./bin/ask sdk eval run Skills/agent-ops/technical-writer --runner internal --mode release --codex-profile oss-local --json --robot",
-      "outcome": "blocked",
-      "evidence": "status blocked; blocker_class=blocked_runtime; codex_exec_invoked=true; codex_profile=oss-local; scenario_set_id=technical-writer-release-20-v1; case_count=20; blocked_count=20; dataset_path=Infrastructure/artifacts/skills/technical-writer/20260629-024740-892292/scorecard.json; stderr reported missing field models in Ollama model-list response; stdout reported missing gpt-oss:20b model metadata and turn.failed high-demand message"
+      "outcome": "fail",
+      "evidence": "Infrastructure/artifacts/skills/technical-writer/20260629-053245-042740/workflow-closeout.json; status fail; case_count=20; passed_count=16; failed_count=4; exposed unsupported assertion type for text output: must_not."
     },
     {
-      "command": "codex exec --profile oss-local 'Say ok.' --json",
-      "outcome": "blocked",
-      "evidence": "direct profile smoke did not return usable JSON/stdout/stderr or an exit code through the exec wrapper after 60 seconds; treated as runtime diagnostic only, not release proof"
-    },
-    {
-      "command": "ps -axo pid,ppid,stat,etime,command | rg 'codex exec --profile oss-local|ollama serve' || true",
-      "outcome": "blocked",
-      "evidence": "sandbox returned operation not permitted for ps, so process-table proof was unavailable"
-    },
-    {
-      "command": "ollama run gpt-oss:20b 'Say ok.'",
-      "outcome": "blocked",
-      "evidence": "exit 1; 500 Internal Server Error; llama-server process terminated; failed to create command queue; failed to allocate context"
-    },
-    {
-      "command": "ollama run qwen3.5:latest 'Say ok.'",
-      "outcome": "blocked",
-      "evidence": "exit 1; 500 Internal Server Error; llama-server startup failed after projector CPU offload retry; failed to create command queue; failed to allocate context"
-    },
-    {
-      "command": "ollama run gemma3n:e4b 'Say ok.'",
-      "outcome": "blocked",
-      "evidence": "exit 1; 500 Internal Server Error; llama-server process terminated; failed to create command queue; failed to allocate context"
+      "command": "./bin/ask sdk eval run Skills/agent-ops/technical-writer --runner internal --mode release --codex-profile oss-local --json --robot",
+      "outcome": "fail",
+      "evidence": "Infrastructure/artifacts/skills/technical-writer/20260629-054359-538576/workflow-closeout.json; status fail; codex_exec_invoked=true; codex_profile=oss-local; case_count=20; passed_count=15; failed_count=5."
     }
   ],
   "artifact_assertions": [
     {
-      "artifact": ".harness/reports/thread-replies/019f0ab5-07bb-7091-a6a2-9f74d07a65cb/oss-local-tdd-repair-plan.json",
-      "assertion": "TDD plan selects one owner class: criteria; allowed file is Skills/agent-ops/technical-writer/references/evals.yaml",
+      "artifact": ".harness/evidence/handoff/technical-writer/oss-local.json",
+      "assertion": "Latest handoff summary records status=fail, codex_exec_invoked=true, codex_profile=oss-local, scenario_set_id=technical-writer-release-20-v1, case_count=20, passed_count=15, failed_count=5, blocked_count=0.",
+      "outcome": "pass"
+    },
+    {
+      "artifact": "Infrastructure/artifacts/skills/technical-writer/20260629-054359-538576/workflow-closeout.json",
+      "assertion": "Latest workflow closeout records five failing cases: happy-readme, risky-command, docs-validation-ledger, service-doc-reader-job, docs-to-x-routing-boundary.",
+      "outcome": "pass"
+    },
+    {
+      "artifact": "Infrastructure/scripts/lib/ask/skills_sdk/scenario_quality.py",
+      "assertion": "Scenario-quality now blocks acceptance types unsupported by the text-output release runner.",
+      "outcome": "pass"
+    },
+    {
+      "artifact": "Infrastructure/tests/test_skills_sdk_scenario_quality.py",
+      "assertion": "Focused regression test covers a release scenario using unsupported type: must_not.",
       "outcome": "pass"
     },
     {
       "artifact": "Skills/agent-ops/technical-writer/references/evals.yaml",
-      "assertion": "Only criteria/task expected-signal text was narrowed; release cases and forbidden-command checks remain present",
+      "assertion": "technical-writer no longer uses unsupported must_not acceptance in regression-stale-command-example; visual-doc-standalone and stale-command criteria use executable checks.",
       "outcome": "pass"
     },
     {
       "artifact": ".harness/memory/LEARNINGS.md",
-      "assertion": "Durable lesson records criteria overfit pattern for safe OSS-local documentation outputs",
+      "assertion": "Durable lessons record expected-signal overfit and scenario-quality/release-runner assertion parity.",
       "outcome": "pass"
-    },
-    {
-      "artifact": ".harness/evidence/handoff/technical-writer/oss-local.json",
-      "assertion": "Handoff evidence records blocked_runtime, codex_profile=oss-local, codex_exec_invoked=true, case_count=20, blocked_count=20",
-      "outcome": "blocked"
-    },
-    {
-      "artifact": "Infrastructure/artifacts/skills/technical-writer/20260629-024740-892292/workflow-closeout.json",
-      "assertion": "Workflow closeout status is blocked with blocker_class=blocked_runtime and mutation_allowed=false",
-      "outcome": "blocked"
-    },
-    {
-      "artifact": "Infrastructure/artifacts/skills/technical-writer/20260629-024740-892292/01-smoke-discovery/codex/stderr.txt",
-      "assertion": "Codex profile runtime failed before skill output with missing field models while decoding the local model-list response",
-      "outcome": "blocked"
-    },
-    {
-      "artifact": "Infrastructure/artifacts/skills/technical-writer/20260629-024740-892292/01-smoke-discovery/codex/stdout.txt",
-      "assertion": "Codex emitted missing metadata for gpt-oss:20b and turn.failed high-demand errors",
-      "outcome": "blocked"
-    },
-    {
-      "artifact": ".harness/reports/thread-replies/019f0ab5-07bb-7091-a6a2-9f74d07a65cb/ollama-runtime-diagnostics.json",
-      "assertion": "gpt-oss:20b, qwen3.5:latest, and gemma3n:e4b all failed before producing output with failed to create command queue / failed to allocate context",
-      "outcome": "blocked"
-    },
-    {
-      "artifact": ".harness/reports/thread-replies/019f0ab5-07bb-7091-a6a2-9f74d07a65cb/pm-delivery.json",
-      "assertion": "PM delivery is blocked because codex_app__send_message_to_thread is discoverable but has no registered handler in this environment",
-      "outcome": "blocked"
     }
   ],
   "contradictions": [
     {
-      "artifact": ".harness/evidence/handoff/technical-writer/oss-local.json",
-      "problem": "Previous handoff receipt still reported status=error after the wrapper run; this heartbeat refreshed the handoff evidence from the actual run dataset and workflow closeout.",
-      "owner": "sdk-eval-run-handoff-artifact"
+      "artifact": "Infrastructure/artifacts/skills/technical-writer/20260629-053245-042740/workflow-closeout.json",
+      "problem": "Scenario-quality previously allowed type: must_not, but the release runner rejected it as unsupported for text output.",
+      "owner": "scenario-quality-validator"
     },
     {
-      "artifact": "Infrastructure/artifacts/skills/technical-writer/20260629-023355-042204/scorecard.json",
-      "problem": "The TDD criteria patch passed deterministic gates, but oss-local did not produce behavioral pass/fail evidence because every case was blocked_runtime.",
-      "owner": "runtime/tooling"
-    },
-    {
-      "artifact": "Infrastructure/artifacts/skills/technical-writer/20260629-024740-892292/scorecard.json",
-      "problem": "After starting Ollama and confirming gpt-oss:20b is installed, the full oss-local lane still blocked every case before skill behavior because Codex could not consume the local model endpoint reliably.",
-      "owner": "runtime/tooling"
-    },
-    {
-      "artifact": ".harness/reports/thread-replies/019f0ab5-07bb-7091-a6a2-9f74d07a65cb/ollama-runtime-diagnostics.json",
-      "problem": "The local Ollama runtime cannot initialize model contexts for gpt-oss:20b, qwen3.5:latest, or gemma3n:e4b in this environment, so oss-local cannot produce release behavior evidence.",
-      "owner": "runtime/tooling"
+      "artifact": "Infrastructure/artifacts/skills/technical-writer/20260629-054359-538576/workflow-closeout.json",
+      "problem": "The oss-local release failure set remains non-monotonic across repeated full runs, so later gates remain blocked until this release lane is stable.",
+      "owner": "oss-local-repair"
     },
     {
       "artifact": ".harness/reports/thread-replies/019f0ab5-07bb-7091-a6a2-9f74d07a65cb/pm-delivery.json",
-      "problem": "The PM messaging tool is listed in ALL_TOOLS but calling codex_app__send_message_to_thread returned No handler registered for tool: send_message_to_thread.",
+      "problem": "PM delivery remains blocked in this environment because codex_app__send_message_to_thread returned no registered handler in the prior attempt.",
       "owner": "codex-app-thread-tooling"
     }
   ],
   "files_changed": [
-    "Skills/agent-ops/technical-writer/references/evals.yaml",
-    ".harness/memory/LEARNINGS.md",
     ".harness/evidence/handoff/technical-writer/oss-local.json",
-    ".harness/reports/thread-replies/019f0ab5-07bb-7091-a6a2-9f74d07a65cb/oss-local-tdd-repair-plan.json",
-    ".harness/reports/thread-replies/019f0ab5-07bb-7091-a6a2-9f74d07a65cb/ollama-runtime-diagnostics.json",
+    ".harness/memory/LEARNINGS.md",
     ".harness/reports/thread-replies/019f0ab5-07bb-7091-a6a2-9f74d07a65cb/latest.json",
-    ".harness/reports/thread-replies/019f0ab5-07bb-7091-a6a2-9f74d07a65cb/pm-delivery.json"
+    ".harness/reports/thread-replies/019f0ab5-07bb-7091-a6a2-9f74d07a65cb/oss-local-tdd-repair-plan.json",
+    "Infrastructure/scripts/lib/ask/skills_sdk/scenario_quality.py",
+    "Infrastructure/tests/test_skills_sdk_scenario_quality.py",
+    "Skills/agent-ops/technical-writer/references/evals.yaml"
   ],
   "lessons": [
     {
@@ -174,7 +129,15 @@
       "deterministic_guardrail": "Keep release membership and forbidden-command checks intact, but use minimal observable criteria terms for behavior-shaped acceptance.",
       "recorded_in": ".harness/memory/LEARNINGS.md",
       "validation": "./bin/ask sdk eval scenario-quality Skills/agent-ops/technical-writer --preview --json --robot -> pass"
+    },
+    {
+      "lesson": "Scenario-quality must reject acceptance types the release runner cannot execute.",
+      "failure_pattern": "A scenario-quality preview passed with type: must_not, but the oss-local release runner failed the same case as unsupported assertion type for text output.",
+      "carry_forward_target": "Skills SDK scenario-quality validator and eval authoring",
+      "deterministic_guardrail": "text_output_runner_acceptance_supported blocks unsupported text-output assertion types before release.",
+      "recorded_in": ".harness/memory/LEARNINGS.md",
+      "validation": "bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest tests/test_skills_sdk_scenario_quality.py -q -> pass, 37 passed"
     }
   ],
-  "next_action": "Repair the local Ollama runtime allocation failure before rerunning oss-local; do not make another technical-writer source or criteria edit until native ollama run and codex exec --profile oss-local can each complete at least one turn."
+  "next_action": "Classify the latest five oss-local failures from Infrastructure/artifacts/skills/technical-writer/20260629-054359-538576/workflow-closeout.json before any further source edits; keep oss-cloud, tessl-dry-run, and tessl-live blocked."
 }

@@ -953,7 +953,7 @@ cases:
       - type: regex
         value: "(?i)(standalone|caption|hierarchy|nonvisual|async)"
       - type: expected_signal
-        value: "Names the file, command, artifact, validation, or blocker evidence used for the decision."
+        value: "Cites slide-level evidence, captions, validation context, and blocked async reader interpretation."
     evidence_refs: "references/knowledge-capsules/visual-document-structure.md, references/knowledge-capsules/accessible-writing.md"
   - id: devrel-community-feedback
     name: devrel community feedback route
@@ -1328,8 +1328,10 @@ cases:
         value: '(?i)(scripts/check\.sh|bin/ask|wrapper|command|pass|fail|blocked)'
       - type: expected_signal
         value: Changes only the stale scripts/check.sh command example to the ./bin/ask wrapper.
-      - type: expected_signal
-        value: Uses wrapper contract evidence and avoids external readiness claims.
+      - type: regex
+        value: "(?is)(evidence_map|wrapper contract|repo wrapper|./bin/ask repo closeout).*?(validation|pass|fail|blocked)"
+      - type: not_regex
+        value: "(?is)(CI/CD workflow advice|publishing instructions|registry upload|Tessl live|external readiness)"
     evidence_refs: "SKILL.md#Validation, references/contract.yaml"
   - id: pressure-broad-rewrite-approval
     name: broad rewrite approval boundary
