@@ -132,11 +132,11 @@ Avoid when:
 - Source boundaries: local_source_reference
 - Derived from claims: claim.evals.code-evals-are-deterministic, claim.evals.evals-need-known-good-bad-cases
 
-Knowledge claim: The testing skill recommends deterministic code or schema checks and asks for known good and bad evaluator fixtures.
-Behavior under test: The testing skill recommends deterministic code or schema checks and asks for known good and bad evaluator fixtures.
+Knowledge claim: Principle under test: The testing skill recommends deterministic code or schema checks and asks for known good and bad evaluator fixtures.
+Behavior under test: Observable agent behavior when an test plan sends JSON schema validity, markdown-in-SMS detection, or required-field presence to an LLM judge.
 Failure mode: The testing skill accepts a judge where a stable parser or assertion would be cheaper and more reliable.
 Expected agent move: The testing skill recommends deterministic code or schema checks and asks for known good and bad evaluator fixtures.
-Skill lift target: The testing skill recommends deterministic code or schema checks and asks for known good and bad evaluator fixtures.
+Skill lift target: The response avoids the weak pattern (The testing skill accepts a judge where a stable parser or assertion would be cheaper and more reliable) and instead shows the expected behavior (The testing skill recommends deterministic code or schema checks and asks for known good and bad evaluator fixtures).
 Proof route: references/evals.yaml
 Fixture path: references/evals/eval.evals.objective-check-sent-to-judge.md
 Promotion status: candidate

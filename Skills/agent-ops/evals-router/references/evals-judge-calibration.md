@@ -69,6 +69,18 @@ Skill review checks structure and quality, while task and repo evals test whethe
 Interpretation notes:
 - Evals-router should not treat a static review score as proof that a skill improves behavior.
 
+### claim.evals.scorers-need-obvious-case-calibration: Scorers Need Obvious Case Calibration
+
+- Type: claim-card
+- Status: draft
+- Claim strength: direct
+- Source boundaries: local_source_reference
+
+Eval score trends are not trustworthy until the scorer passes obvious correct and incorrect cases.
+
+Interpretation notes:
+- Treat score changes without scorer calibration as diagnostic input, not readiness evidence.
+
 ### claim.evals.code-evals-are-deterministic: Code Evals Are Deterministic
 
 - Type: claim-card
@@ -128,6 +140,42 @@ Task evals for skill or context impact should compare behavior with and without 
 
 Interpretation notes:
 - Claims that a knowledge capsule, skill, or registry tile helped should keep baseline behavior, with-context behavior, and publication metadata separate.
+
+### claim.evals.production-clusters-seed-targeted-datasets: Production Clusters Seed Targeted Datasets
+
+- Type: claim-card
+- Status: draft
+- Claim strength: direct
+- Source boundaries: local_source_reference
+
+Production or production-like trace clusters should seed targeted eval datasets before a fix is scored.
+
+Interpretation notes:
+- Use this to resist writing generic synthetic edge cases before inspecting observed failure clusters.
+
+### claim.evals.online-offline-loop-closes-coverage-gap: Online Offline Loop Closes Coverage Gap
+
+- Type: claim-card
+- Status: draft
+- Claim strength: direct
+- Source boundaries: local_source_reference
+
+Offline evals and production monitoring should feed each other so test coverage follows live user behavior.
+
+Interpretation notes:
+- Use this when dashboard findings need to become durable dataset rows or regression cases.
+
+### claim.evals.subjective-quality-needs-human-review: Subjective Quality Needs Human Review
+
+- Type: claim-card
+- Status: draft
+- Claim strength: direct
+- Source boundaries: local_source_reference
+
+Subjective quality dimensions should use human review until their labels are stable enough to automate.
+
+Interpretation notes:
+- Use this to prevent brittle automation from replacing necessary human judgment.
 
 ## Principles
 
@@ -210,6 +258,27 @@ Avoid when:
   - pass: Reported rates include calibration limits, confidence intervals, or an explicit advisory-only boundary.
   - fail: Raw judge pass rate is presented as true production quality.
 
+### rubric.evals.production-loop-readiness: Production Loop Readiness
+
+- Type: rubric
+- Status: draft
+- Claim strength: synthesized
+- Source boundaries: local_source_reference
+- Derived from claims: claim.evals.production-clusters-seed-targeted-datasets, claim.evals.scorers-need-obvious-case-calibration, claim.evals.online-offline-loop-closes-coverage-gap, claim.evals.subjective-quality-needs-human-review
+
+- source-of-failures: Does the eval set come from observed or realistically simulated behavior with preserved trace context?
+  - pass: The dataset is linked to trace clusters, logs, review labels, or a documented production-risk proxy.
+  - fail: The dataset is mostly imagined examples with no connection to observed failures or live risk.
+- scorer-calibration: Are scorer outputs validated before aggregate trends are trusted?
+  - pass: Scorers have obvious pass and fail cases, bias checks, and a documented choice between code, judge, and human review.
+  - fail: The report trusts score movement without proving that the scorer measures the intended behavior.
+- baseline-comparison: Can the change be compared against a recorded baseline?
+  - pass: The baseline run, dataset snapshot, model or prompt version, and changed variable are recorded.
+  - fail: The improvement claim relies on memory, approximate before/after comparison, or multiple simultaneous changes.
+- loop-closure: Do production findings feed future offline coverage?
+  - pass: New live failures are promoted into datasets, regression cases, or documented follow-up scope.
+  - fail: Production monitoring remains a dashboard-only signal that does not change the eval suite.
+
 ## Eval Scenarios
 
 ### eval.evals.unvalidated-judge-overclaims: Unvalidated Judge Overclaims
@@ -220,11 +289,11 @@ Avoid when:
 - Source boundaries: local_source_reference
 - Derived from claims: claim.evals.judge-validation-needs-tpr-tnr, claim.evals.corrected-rates-need-intervals
 
-Knowledge claim: The testing skill classifies the judge result as advisory or blocked for release proof and asks for calibration evidence before using it as a required gate.
-Behavior under test: The testing skill classifies the judge result as advisory or blocked for release proof and asks for calibration evidence before using it as a required gate.
+Knowledge claim: Principle under test: The testing skill classifies the judge result as advisory or blocked for release proof and asks for calibration evidence before using it as a required gate.
+Behavior under test: Observable agent behavior when an plan proposes an LLM judge and reports a high agreement score without held-out test results, false-positive/false-negative counts, or prompt/version artifacts.
 Failure mode: The testing skill accepts the agreement score as sufficient validation.
 Expected agent move: The testing skill classifies the judge result as advisory or blocked for release proof and asks for calibration evidence before using it as a required gate.
-Skill lift target: The testing skill classifies the judge result as advisory or blocked for release proof and asks for calibration evidence before using it as a required gate.
+Skill lift target: The response avoids the weak pattern (The testing skill accepts the agreement score as sufficient validation) and instead shows the expected behavior (The testing skill classifies the judge result as advisory or blocked for release proof and asks for calibration evidence before using it as a required gate).
 Proof route: references/evals.yaml
 Fixture path: references/evals/eval.evals.unvalidated-judge-overclaims.md
 Promotion status: candidate

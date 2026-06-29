@@ -1,0 +1,21 @@
+{
+  "schema_version": "skills-sdk.scorer-calibration-bundle.v1",
+  "scorer_id": "evals-router-release-scorer",
+  "scorer_version_or_digest": "evals-yaml-local-2026-06-29",
+  "prompt_version": "evals-router-release-scorer.v1",
+  "threshold": 0.85,
+  "split": "held_out",
+  "parameters": {
+    "model": "tessl-local-review",
+    "temperature": 0,
+    "trial_count": 1
+  },
+  "examples_path": "examples.jsonl",
+  "raw_artifacts_dir": "raw",
+  "minimum_examples": 6,
+  "minimum_true_positives": 1,
+  "minimum_true_negatives": 5,
+  "max_false_positives": 0,
+  "max_false_negatives": 0,
+  "notes": "Held-out calibration examples verify that the evals-router scorer accepts evidence-first route selection and rejects unsupported score, rubric, skill-name, verbosity, and proof-lane overclaims before score trends are trusted."
+}
