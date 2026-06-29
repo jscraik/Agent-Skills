@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import subprocess
 import sys
 import unittest
 from pathlib import Path
@@ -45,6 +46,23 @@ class TestAskCliShape(unittest.TestCase):
         self.assertIn("from ask.cli_prompts import", content)
         self.assertNotIn("def print_first_validation_command", content)
         self.assertNotIn("def prompt_nonempty", content)
+
+    def test_evals_run_exposes_timeout_seconds(self) -> None:
+        result = subprocess.run(
+            [sys.executable, str(ASK_ENTRYPOINT), "evals", "run", "--help"],
+            capture_output=True,
+            text=True,
+            check=True,
+            timeout=10,
+        )
+
+        self.assertIn("--timeout-seconds", result.stdout)
+
+    def test_evals_run_passes_timeout_seconds_to_runner(self) -> None:
+        content = ASK_ENTRYPOINT.read_text(encoding="utf-8")
+
+        self.assertIn("evals_run_parser.add_argument(\"--timeout-seconds\"", content)
+        self.assertIn("timeout_seconds=args.timeout_seconds", content)
 
     def test_sync_wrapper_delegates_without_command_surface_fossils(self) -> None:
         content = SYNC_WRAPPER.read_text(encoding="utf-8")

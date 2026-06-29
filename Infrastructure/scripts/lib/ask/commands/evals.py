@@ -4402,6 +4402,7 @@ def _evals_run_validation_command(
     tessl_live_private: bool = False,
     tessl_workspace: str | None = None,
     tessl_live_dry_run: bool = False,
+    timeout_seconds: int | None = None,
 ) -> str:
     parts = ["./bin/ask", "evals", "run", path, "--mode", mode, "--runner", runner]
     if codex_profile:
@@ -4412,6 +4413,8 @@ def _evals_run_validation_command(
         parts.extend(["--tessl-workspace", tessl_workspace])
     if tessl_live_dry_run:
         parts.append("--tessl-live-dry-run")
+    if timeout_seconds is not None:
+        parts.extend(["--timeout-seconds", str(timeout_seconds)])
     if not dashboard:
         parts.append("--no-dashboard")
     parts.extend(["--json", "--robot"])
@@ -5292,6 +5295,7 @@ def _write_eval_closeout(
     eval_status: str,
     blocker_class: str | None,
     started_at: float,
+    timeout_seconds: int | None = None,
 ) -> dict[str, object]:
     report_dir = _eval_report_dir(
         repo_root,
@@ -5359,6 +5363,7 @@ def _write_eval_closeout(
             tessl_live_private=False,
             tessl_workspace=None,
             tessl_live_dry_run=False,
+            timeout_seconds=timeout_seconds,
         ),
     }
     if closeout_path is not None:
@@ -6014,6 +6019,7 @@ def run_evals(
         eval_status=str(result.data.get("eval_status") or ("pass" if result.status == "success" else "fail")),
         blocker_class=result.data.get("blocker_class") if isinstance(result.data.get("blocker_class"), str) else None,
         started_at=eval_started_at,
+        timeout_seconds=timeout_seconds,
     )
     result.data["eval_closeout"] = closeout
     if closeout.get("path"):
