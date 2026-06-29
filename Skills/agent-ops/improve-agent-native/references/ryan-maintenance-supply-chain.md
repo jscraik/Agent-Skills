@@ -278,6 +278,17 @@ Avoid when:
 - Source boundaries: user_provided_excerpt_not_independently_verified
 - Derived from claims: claim.ryan.code-free-maintenance-economics, claim.ryan.pinned-supply-chain-cooldowns
 
+Knowledge claim: Principle under test: The agent evaluates maintenance burden, supply-chain risk, toolchain surface area, pinning, cooldown policy, and whether the dependency should be removed, internalized, or avoided.
+Behavior under test: Observable agent behavior when an agent proposes adding a dependency or tool because code generation makes implementation cheap.
+Failure mode: The agent treats low implementation cost as sufficient reason to expand the dependency or tool surface.
+Expected agent move: The agent evaluates maintenance burden, supply-chain risk, toolchain surface area, pinning, cooldown policy, and whether the dependency should be removed, internalized, or avoided.
+Skill lift target: The response avoids the weak pattern (The agent treats low implementation cost as sufficient reason to expand the dependency or tool surface) and instead shows the expected behavior (The agent evaluates maintenance burden, supply-chain risk, toolchain surface area, pinning, cooldown policy, and whether the dependency should be removed, internalized, or avoided).
+Proof route: references/evals.yaml
+Fixture path: references/evals/eval.ryan.maintenance-economics-boundary.md
+Promotion status: candidate
+Capsule refs: principal-engineering
+Weak eval flags: none
+
 Given: An agent proposes adding a dependency or tool because code generation makes implementation cheap.
 Should: The agent evaluates maintenance burden, supply-chain risk, toolchain surface area, pinning, cooldown policy, and whether the dependency should be removed, internalized, or avoided.
 Expected failure: The agent treats low implementation cost as sufficient reason to expand the dependency or tool surface.

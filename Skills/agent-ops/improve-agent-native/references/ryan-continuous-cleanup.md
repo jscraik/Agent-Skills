@@ -141,6 +141,17 @@ Avoid when:
 - Source boundaries: user_provided_excerpt_not_independently_verified
 - Derived from claims: claim.ryan.repeated-steering-environment-failure, claim.ryan.long-term-coherence-agent-artifacts
 
+Knowledge claim: Principle under test: The agent identifies the recurrence, names the failure class, proposes the smallest durable repo mechanism, and records either the patch or a bounded skip reason.
+Behavior under test: Observable agent behavior when an user repeats the same correction across two agent tasks in a repository.
+Failure mode: The agent applies another one-off fix and treats the repeated feedback as ordinary task steering.
+Expected agent move: The agent identifies the recurrence, names the failure class, proposes the smallest durable repo mechanism, and records either the patch or a bounded skip reason.
+Skill lift target: The response avoids the weak pattern (The agent applies another one-off fix and treats the repeated feedback as ordinary task steering) and instead shows the expected behavior (The agent identifies the recurrence, names the failure class, proposes the smallest durable repo mechanism, and records either the patch or a bounded skip reason).
+Proof route: references/evals.yaml
+Fixture path: references/evals/eval.ryan.repeated-steering-to-durable-mechanism.md
+Promotion status: candidate
+Capsule refs: principal-engineering
+Weak eval flags: none
+
 Given: A user repeats the same correction across two agent tasks in a repository.
 Should: The agent identifies the recurrence, names the failure class, proposes the smallest durable repo mechanism, and records either the patch or a bounded skip reason.
 Expected failure: The agent applies another one-off fix and treats the repeated feedback as ordinary task steering.

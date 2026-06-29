@@ -16,12 +16,12 @@ Lifecycle status: reviewed
 - Claim strength: direct
 - Source boundaries: user_provided_excerpt_not_independently_verified
 
-Codex should be understood as both a scaled product surface and a high-velocity research delivery vehicle.
+Codex can be understood as both a scaled product surface and a high-velocity research delivery vehicle.
 
 Interpretation notes:
 - This supports frequent reassessment of product behavior, workflows, and operator patterns.
 
-### claim.ryan.multi-trajectory-ooda: Agent OODA Must Scale Across Trajectories
+### claim.ryan.multi-trajectory-ooda: Agent OODA Needs to Scale Across Trajectories
 
 - Type: claim-card
 - Status: reviewed
@@ -40,7 +40,7 @@ Interpretation notes:
 - Claim strength: direct
 - Source boundaries: user_provided_excerpt_not_independently_verified
 
-Work should be treated as iterative rather than a single-pass production act.
+Work can be treated as iterative rather than a single-pass production act.
 
 Interpretation notes:
 - This short claim anchors OODA and evaluation-loop assets.
@@ -52,7 +52,7 @@ Interpretation notes:
 - Claim strength: direct
 - Source boundaries: user_provided_excerpt_not_independently_verified
 
-Effective agent harnesses should teach agents how to seek task-relevant context through tools and workflows rather than relying on large piles of static rules.
+Effective agent harnesses can teach agents how to seek task-relevant context through tools and workflows rather than relying on large piles of static rules.
 
 Interpretation notes:
 - This extends repo knowledge from storage into active context-retrieval behavior.
@@ -64,19 +64,19 @@ Interpretation notes:
 - Claim strength: direct
 - Source boundaries: user_provided_excerpt_not_independently_verified
 
-Long-horizon agent systems cannot assume relevant information will remain in context because compaction and trajectory length continuously change available context.
+Long-horizon agent systems does not assume relevant information will remain in context because compaction and trajectory length continuously change available context.
 
 Interpretation notes:
 - This supports resumption keys, context-recovery commands, and durable handoff artifacts.
 
-### claim.ryan.prompt-to-paved-workflow: Prompts Should Collapse To Paved Workflows
+### claim.ryan.prompt-to-paved-workflow: Prompts Can Collapse To Paved Workflows
 
 - Type: claim-card
 - Status: reviewed
 - Claim strength: direct
 - Source boundaries: user_provided_excerpt_not_independently_verified
 
-Agent prompts should route into known workflows that explain what matters, common task shapes, and where to learn more.
+Agent prompts can route into known workflows that explain what matters, common task shapes, and where to learn more.
 
 Interpretation notes:
 - This maps directly to skill routing and workflow front doors.
@@ -88,7 +88,7 @@ Interpretation notes:
 - Claim strength: direct
 - Source boundaries: article_source_note_paraphrase
 
-Agent autonomy should increase as the development loop is encoded into tools, including state validation, bug reproduction, evidence capture, fixes, validation, PR creation, feedback handling, build remediation, escalation, and merge.
+Agent autonomy can increase as the development loop is encoded into tools, including state validation, bug reproduction, evidence capture, fixes, validation, PR creation, feedback handling, build remediation, escalation, and merge.
 
 Interpretation notes:
 - This turns autonomy into an evidence-backed tooling threshold rather than a model-confidence claim.
@@ -115,7 +115,7 @@ Interpretation notes:
 Runtime hooks can be used as context delivery points during an agent run.
 
 Interpretation notes:
-- Hook usage remains environment-specific and should preserve runtime support boundaries.
+- Hook usage remains environment-specific and can preserve runtime support boundaries.
 
 ### claim.harness.progressive-disclosure-routing: Progressive Disclosure Needs Routing Proof
 
@@ -124,7 +124,7 @@ Interpretation notes:
 - Claim strength: inferred
 - Source boundaries: local_source_reference, local_repo_or_corpus_reference
 
-Short skill descriptions and front matter should be tested as routing surfaces, because detailed instructions only help when the agent loads them at the right time.
+Short skill descriptions and front matter can be tested as routing surfaces, because detailed instructions only help when the agent loads them at the right time.
 
 Interpretation notes:
 - The routing-proof phrasing is an inference from the progressive-disclosure practice.
@@ -153,14 +153,14 @@ Agent throughput changes merge-gate tradeoffs; short-lived pull requests, cheap 
 Interpretation notes:
 - The claim is conditional; it does not justify loosening gates without strong recovery loops.
 
-### claim.harness.small-skill-set: Shared Skills Should Stay Few And Dense
+### claim.harness.small-skill-set: Shared Skills Can Stay Few And Dense
 
 - Type: claim-card
 - Status: reviewed
 - Claim strength: direct
 - Source boundaries: local_source_reference
 
-Harness behavior should be concentrated into a small shared set of high-density skills before creating many fragmented workflow artifacts.
+Harness behavior can be concentrated into a small shared set of high-density skills before creating many fragmented workflow artifacts.
 
 Interpretation notes:
 - This claim supports skill-surface consolidation guidance.
@@ -172,7 +172,7 @@ Interpretation notes:
 - Claim strength: direct
 - Source boundaries: local_repo_or_corpus_reference
 
-Sampled or partial artifacts may support local work, but they should not become repo-wide authority without equivalent source-prompt coverage evidence.
+Sampled or partial artifacts may support local work, but they can not become repo-wide authority without equivalent source-prompt coverage evidence.
 
 Interpretation notes:
 - This claim is especially relevant when turning research into operational doctrine.
@@ -187,13 +187,13 @@ Interpretation notes:
 - Source boundaries: user_provided_excerpt_not_independently_verified
 - Derived from claims: claim.ryan.multi-trajectory-ooda, claim.ryan.work-is-iterative-game, claim.ryan.context-not-persistent
 
-Agent operating systems should support observing, orienting, deciding, and acting across multiple turns, trajectories, and organizational signals.
+Agent operating systems can support observing, orienting, deciding, and acting across multiple turns, trajectories, and organizational signals.
 
 Rationale: Real work is iterative and often spans stacked trajectories, so agents need durable awareness beyond a single prompt-response loop.
 
 Application notes:
 - Preserve decisions, observations, and proof across trajectories.
-- Give agents visibility into relevant parallel organizational activity where safe.
+- Document agent access to visibility into relevant parallel organizational activity where safe.
 - Distinguish local trajectory state from program-level state.
 
 ### principle.ryan.context-seeking-over-rule-piles: Context Seeking Beats Rule Piles
@@ -204,12 +204,12 @@ Application notes:
 - Source boundaries: user_provided_excerpt_not_independently_verified, local_source_reference, local_repo_or_corpus_reference
 - Derived from claims: claim.ryan.context-seeking-framework, claim.ryan.prompt-to-paved-workflow, claim.harness.progressive-disclosure-routing
 
-Agent instructions should define how to seek, select, and apply context instead of trying to preload every rule.
+Agent instructions can define how to seek, select, and apply context instead of trying to preload every rule.
 
 Rationale: Stochastic agents and long-running trajectories need repeatable context-recovery behavior more than static context volume.
 
 Application notes:
-- Tell agents what kind of context matters for common task shapes.
+- Document for agents what kind of context matters for common task shapes.
 - Route prompts to paved workflows and deeper references.
 - Prefer context maps, tools, hooks, and validation loops over instruction sprawl.
 
@@ -223,7 +223,7 @@ Application notes:
 
 Long-horizon agent work needs deliberate context delivery, recovery, and refresh mechanisms across the trajectory.
 
-Rationale: Agents can lose or reshape context over time, so the harness must provide just-in-time context and resumption surfaces.
+Rationale: Agents can lose or reshape context over time, so the harness needs to provide just-in-time context and resumption surfaces.
 
 Application notes:
 - Design for compaction, interruption, and resumed execution.
@@ -238,7 +238,7 @@ Application notes:
 - Source boundaries: user_provided_excerpt_not_independently_verified
 - Derived from claims: claim.ryan.ai-priors-monthly, claim.ryan.codex-product-research-vehicle
 
-Principal engineers should regularly refresh assumptions about AI capability and update working patterns accordingly.
+Principal engineers can regularly refresh assumptions about AI capability and update working patterns accordingly.
 
 Rationale: Agent products and research surfaces change rapidly enough that old workflows can become stale within weeks.
 
@@ -280,7 +280,7 @@ Assume the future agent may not remember the current context, and leave durable 
 
 Use when:
 - Work may span compaction, retries, handoffs, child agents, or long-running trajectories.
-- State, decisions, or validation proof must survive beyond one model context.
+- State, decisions, or validation proof needs to survive beyond one model context.
 - A downstream workflow will need to resume without chat history.
 
 Avoid when:
@@ -314,7 +314,7 @@ Avoid when:
 - Source boundaries: article_source_note_paraphrase
 - Derived from claims: claim.ryan.merge-gates-depend-on-recovery-loops, claim.ryan.autonomy-threshold-tooling
 
-Loosen merge gates or increase agent autonomy only to the level that validation, remediation, feedback handling, escalation, and rollback loops can reliably absorb.
+Assess merge gates or increase agent autonomy only to the level that validation, remediation, feedback handling, escalation, and rollback loops can reliably absorb.
 
 Use when:
 - A team wants higher agent throughput without turning every PR into synchronous human review.
@@ -322,7 +322,7 @@ Use when:
 - Gate ceremony is slowing safe, short-lived changes more than it is reducing risk.
 
 Avoid when:
-- The system cannot reproduce failures, capture evidence, remediate builds, or escalate ambiguous risk.
+- The system does not reproduce failures, capture evidence, remediate builds, or escalate ambiguous risk.
 - Human authority boundaries for release, security, compliance, identity, or irreversible decisions are unclear.
 - The argument for autonomy is based on model capability rather than encoded tooling and recovery evidence.
 
@@ -338,7 +338,7 @@ Avoid when:
 
 Problem: A harness tries to control stochastic agents by adding more static rules instead of teaching context-seeking and workflow selection.
 
-Failure mode: Agents lose, skip, or misapply static guidance during long-horizon work, especially after compaction or context shifts.
+Failure mode: Agents lose, miss or misapply static guidance during long-horizon work, especially after compaction or context shifts.
 
 Avoidance: Encode context maps, workflow routing, tool discovery, hooks, resumption artifacts, and validation loops that help agents recover the right context when needed.
 
@@ -352,7 +352,7 @@ Avoidance: Encode context maps, workflow routing, tool discovery, hooks, resumpt
 - Source boundaries: user_provided_excerpt_not_independently_verified
 - Derived from claims: claim.ryan.context-not-persistent, claim.ryan.jit-context-management, claim.ryan.hooks-context-delivery, claim.ryan.prompt-to-paved-workflow
 
-- [ ] Name the workflow a prompt should collapse into.
+- [ ] Name the workflow a prompt can collapse into.
 - [ ] Tell the agent what context type matters and where to seek it.
 - [ ] Provide durable resumption state outside transient model context.
 - [ ] Use runtime-supported hooks or workflow steps for just-in-time context delivery.
@@ -386,8 +386,19 @@ Avoidance: Encode context maps, workflow routing, tool discovery, hooks, resumpt
 - Source boundaries: user_provided_excerpt_not_independently_verified
 - Derived from claims: claim.ryan.context-not-persistent, claim.ryan.prompt-to-paved-workflow
 
+Knowledge claim: Principle under test: The agent reconstructs state from repo files, manifests, generated artifacts, recent validation output, and source notes before continuing.
+Behavior under test: Observable agent behavior when an agent resumes a long-horizon task after context compaction with only a partial summary.
+Failure mode: The agent assumes the compressed chat summary is sufficient and continues from stale or incomplete context.
+Expected agent move: The agent reconstructs state from repo files, manifests, generated artifacts, recent validation output, and source notes before continuing.
+Skill lift target: The response avoids the weak pattern (The agent assumes the compressed chat summary is sufficient and continues from stale or incomplete context) and instead shows the expected behavior (The agent reconstructs state from repo files, manifests, generated artifacts, recent validation output, and source notes before continuing).
+Proof route: references/evals.yaml
+Fixture path: references/evals/eval.ryan.compaction-context-recovery.md
+Promotion status: candidate
+Capsule refs: principal-engineering
+Weak eval flags: none
+
 Given: An agent resumes a long-horizon task after context compaction with only a partial summary.
-Should: The agent reconstructs state from repo files, manifests, generated artifacts, recent validation output, and source notes before continuing.
+Can: The agent reconstructs state from repo files, manifests, generated artifacts, recent validation output, and source notes before continuing.
 Expected failure: The agent assumes the compressed chat summary is sufficient and continues from stale or incomplete context.
 Reproduce with: references/evals/eval.ryan.compaction-context-recovery.md
 
@@ -399,7 +410,18 @@ Reproduce with: references/evals/eval.ryan.compaction-context-recovery.md
 - Source boundaries: article_source_note_paraphrase
 - Derived from claims: claim.ryan.merge-gates-depend-on-recovery-loops, claim.ryan.autonomy-threshold-tooling
 
+Knowledge claim: Principle under test: The agent evaluates current validation, remediation, feedback handling, escalation, rollback, and human-authority boundaries before recommending a gate posture.
+Behavior under test: Observable agent behavior when an team asks whether to let agents merge low-risk pull requests with fewer blocking human gates.
+Failure mode: The agent recommends either more ceremony or more autonomy based only on model capability, team preference, or generic throughput goals.
+Expected agent move: The agent evaluates current validation, remediation, feedback handling, escalation, rollback, and human-authority boundaries before recommending a gate posture.
+Skill lift target: The response avoids the weak pattern (The agent recommends either more ceremony or more autonomy based only on model capability, team preference, or generic throughput goals) and instead shows the expected behavior (The agent evaluates current validation, remediation, feedback handling, escalation, rollback, and human-authority boundaries before recommending a gate posture).
+Proof route: references/evals.yaml
+Fixture path: references/evals/eval.ryan.autonomy-gate-threshold.md
+Promotion status: candidate
+Capsule refs: principal-engineering
+Weak eval flags: none
+
 Given: A team asks whether to let agents merge low-risk pull requests with fewer blocking human gates.
-Should: The agent evaluates current validation, remediation, feedback handling, escalation, rollback, and human-authority boundaries before recommending a gate posture.
+Can: The agent evaluates current validation, remediation, feedback handling, escalation, rollback, and human-authority boundaries before recommending a gate posture.
 Expected failure: The agent recommends either more ceremony or more autonomy based only on model capability, team preference, or generic throughput goals.
 Reproduce with: references/evals/eval.ryan.autonomy-gate-threshold.md

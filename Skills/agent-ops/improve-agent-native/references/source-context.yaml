@@ -1,3 +1,4 @@
+---
 schema_version: 1
 skill: improve-agent-native
 stage: skill-install
@@ -32,8 +33,10 @@ original_references:
   purpose: local distilled solo agent-native repository defaults
   load_when: selecting practical next moves for a solo high-permission repo
 - path: references/agent-native-primitives.md
-  purpose: local distilled action parity, primitive tool, dynamic context, shared workspace, execution-signal, and outcome-test criteria
-  load_when: auditing an agent-facing app, product workflow, MCP/tool surface, autonomous loop, system prompt, or UI action that agents are expected to operate
+  purpose: local distilled action parity, primitive tool, dynamic context, shared
+    workspace, execution-signal, and outcome-test criteria
+  load_when: auditing an agent-facing app, product workflow, MCP/tool surface, autonomous
+    loop, system prompt, or UI action that agents are expected to operate
 load_when:
 - SKILL.md is insufficient to answer provenance, scoring, or companion governance
   questions.
@@ -157,9 +160,11 @@ references:
 - path: references/agent-native-primitives.md
   kind: expert_viewpoint
   provenance: local distillation from user-supplied agent-native architecture material
-  load_when: product or workflow readiness depends on action parity, primitive tools, dynamic context, shared workspace, completion signals, or outcome tests
+  load_when: product or workflow readiness depends on action parity, primitive tools,
+    dynamic context, shared workspace, completion signals, or outcome tests
   allowed_claims:
-  - action parity, primitive tool, dynamic context, shared workspace, completion-signal, and outcome-test audit criteria
+  - action parity, primitive tool, dynamic context, shared workspace, completion-signal,
+    and outcome-test audit criteria
   forbidden_claims:
   - target product readiness without target-repo evidence
   - wholesale upstream package coverage
@@ -193,8 +198,8 @@ references:
   context_budget: small
   claim_scope: capsule_manifest
   bounded_unit: true
-- path: references/knowledge-capsules/
-  kind: generated_knowledge_capsules
+- path: references/*.md
+  kind: generated_knowledge_capsules_flat
   provenance: vendored KnowledgeOS extraction
   load_when: only after the manifest selects the relevant capsule
   allowed_claims:
@@ -232,13 +237,262 @@ references:
   context_budget: selective
   claim_scope: eval_fixture_detail
   bounded_unit: true
+- path: references/harness-evidence-boundary.md
+  kind: generated_knowledge_capsule
+  provenance: vendored KnowledgeOS extraction
+  load_when: only after the manifest and routing index select this capsule
+  allowed_claims:
+  - bounded expert viewpoint or evidence lane captured in the selected capsule
+  forbidden_claims:
+  - load all capsules by default
+  - claims outside selected capsule text
+  freshness: knowledge_os_snapshot
+  context_budget: selective
+  claim_scope: bounded_capsule
+  bounded_unit: true
+- path: references/harness-review-feedback.md
+  kind: generated_knowledge_capsule
+  provenance: vendored KnowledgeOS extraction
+  load_when: only after the manifest and routing index select this capsule
+  allowed_claims:
+  - bounded expert viewpoint or evidence lane captured in the selected capsule
+  forbidden_claims:
+  - load all capsules by default
+  - claims outside selected capsule text
+  freshness: knowledge_os_snapshot
+  context_budget: selective
+  claim_scope: bounded_capsule
+  bounded_unit: true
+- path: references/harness-skill-routing.md
+  kind: generated_knowledge_capsule
+  provenance: vendored KnowledgeOS extraction
+  load_when: only after the manifest and routing index select this capsule
+  allowed_claims:
+  - bounded expert viewpoint or evidence lane captured in the selected capsule
+  forbidden_claims:
+  - load all capsules by default
+  - claims outside selected capsule text
+  freshness: knowledge_os_snapshot
+  context_budget: selective
+  claim_scope: bounded_capsule
+  bounded_unit: true
+- path: references/harness-brownfield-readiness.md
+  kind: generated_knowledge_capsule
+  provenance: vendored KnowledgeOS extraction
+  load_when: only after the manifest and routing index select this capsule
+  allowed_claims:
+  - bounded expert viewpoint or evidence lane captured in the selected capsule
+  forbidden_claims:
+  - load all capsules by default
+  - claims outside selected capsule text
+  freshness: knowledge_os_snapshot
+  context_budget: selective
+  claim_scope: bounded_capsule
+  bounded_unit: true
+- path: references/harness-pr-lifecycle.md
+  kind: generated_knowledge_capsule
+  provenance: vendored KnowledgeOS extraction
+  load_when: only after the manifest and routing index select this capsule
+  allowed_claims:
+  - bounded expert viewpoint or evidence lane captured in the selected capsule
+  forbidden_claims:
+  - load all capsules by default
+  - claims outside selected capsule text
+  freshness: knowledge_os_snapshot
+  context_budget: selective
+  claim_scope: bounded_capsule
+  bounded_unit: true
+- path: references/ryan-environment-design.md
+  kind: generated_knowledge_capsule
+  provenance: vendored KnowledgeOS extraction
+  load_when: only after the manifest and routing index select this capsule
+  allowed_claims:
+  - bounded expert viewpoint or evidence lane captured in the selected capsule
+  forbidden_claims:
+  - load all capsules by default
+  - claims outside selected capsule text
+  freshness: knowledge_os_snapshot
+  context_budget: selective
+  claim_scope: bounded_capsule
+  bounded_unit: true
+- path: references/ryan-repo-knowledge.md
+  kind: generated_knowledge_capsule
+  provenance: vendored KnowledgeOS extraction
+  load_when: only after the manifest and routing index select this capsule
+  allowed_claims:
+  - bounded expert viewpoint or evidence lane captured in the selected capsule
+  forbidden_claims:
+  - load all capsules by default
+  - claims outside selected capsule text
+  freshness: knowledge_os_snapshot
+  context_budget: selective
+  claim_scope: bounded_capsule
+  bounded_unit: true
+- path: references/ryan-mechanical-boundaries.md
+  kind: generated_knowledge_capsule
+  provenance: vendored KnowledgeOS extraction
+  load_when: only after the manifest and routing index select this capsule
+  allowed_claims:
+  - bounded expert viewpoint or evidence lane captured in the selected capsule
+  forbidden_claims:
+  - load all capsules by default
+  - claims outside selected capsule text
+  freshness: knowledge_os_snapshot
+  context_budget: selective
+  claim_scope: bounded_capsule
+  bounded_unit: true
+- path: references/ryan-continuous-cleanup.md
+  kind: generated_knowledge_capsule
+  provenance: vendored KnowledgeOS extraction
+  load_when: only after the manifest and routing index select this capsule
+  allowed_claims:
+  - bounded expert viewpoint or evidence lane captured in the selected capsule
+  forbidden_claims:
+  - load all capsules by default
+  - claims outside selected capsule text
+  freshness: knowledge_os_snapshot
+  context_budget: selective
+  claim_scope: bounded_capsule
+  bounded_unit: true
+- path: references/ryan-agent-operating-model.md
+  kind: generated_knowledge_capsule
+  provenance: vendored KnowledgeOS extraction
+  load_when: only after the manifest and routing index select this capsule
+  allowed_claims:
+  - bounded expert viewpoint or evidence lane captured in the selected capsule
+  forbidden_claims:
+  - load all capsules by default
+  - claims outside selected capsule text
+  freshness: knowledge_os_snapshot
+  context_budget: selective
+  claim_scope: bounded_capsule
+  bounded_unit: true
+- path: references/ryan-safety-policy.md
+  kind: generated_knowledge_capsule
+  provenance: vendored KnowledgeOS extraction
+  load_when: only after the manifest and routing index select this capsule
+  allowed_claims:
+  - bounded expert viewpoint or evidence lane captured in the selected capsule
+  forbidden_claims:
+  - load all capsules by default
+  - claims outside selected capsule text
+  freshness: knowledge_os_snapshot
+  context_budget: selective
+  claim_scope: bounded_capsule
+  bounded_unit: true
+- path: references/ryan-long-term-coherence.md
+  kind: generated_knowledge_capsule
+  provenance: vendored KnowledgeOS extraction
+  load_when: only after the manifest and routing index select this capsule
+  allowed_claims:
+  - bounded expert viewpoint or evidence lane captured in the selected capsule
+  forbidden_claims:
+  - load all capsules by default
+  - claims outside selected capsule text
+  freshness: knowledge_os_snapshot
+  context_budget: selective
+  claim_scope: bounded_capsule
+  bounded_unit: true
+- path: references/ryan-maintenance-supply-chain.md
+  kind: generated_knowledge_capsule
+  provenance: vendored KnowledgeOS extraction
+  load_when: only after the manifest and routing index select this capsule
+  allowed_claims:
+  - bounded expert viewpoint or evidence lane captured in the selected capsule
+  forbidden_claims:
+  - load all capsules by default
+  - claims outside selected capsule text
+  freshness: knowledge_os_snapshot
+  context_budget: selective
+  claim_scope: bounded_capsule
+  bounded_unit: true
+- path: references/ryan-stakeholder-alignment.md
+  kind: generated_knowledge_capsule
+  provenance: vendored KnowledgeOS extraction
+  load_when: only after the manifest and routing index select this capsule
+  allowed_claims:
+  - bounded expert viewpoint or evidence lane captured in the selected capsule
+  forbidden_claims:
+  - load all capsules by default
+  - claims outside selected capsule text
+  freshness: knowledge_os_snapshot
+  context_budget: selective
+  claim_scope: bounded_capsule
+  bounded_unit: true
+- path: references/ryan-adoption-economics.md
+  kind: generated_knowledge_capsule
+  provenance: vendored KnowledgeOS extraction
+  load_when: only after the manifest and routing index select this capsule
+  allowed_claims:
+  - bounded expert viewpoint or evidence lane captured in the selected capsule
+  forbidden_claims:
+  - load all capsules by default
+  - claims outside selected capsule text
+  freshness: knowledge_os_snapshot
+  context_budget: selective
+  claim_scope: bounded_capsule
+  bounded_unit: true
+- path: references/ryan-quality-standards.md
+  kind: generated_knowledge_capsule
+  provenance: vendored KnowledgeOS extraction
+  load_when: only after the manifest and routing index select this capsule
+  allowed_claims:
+  - bounded expert viewpoint or evidence lane captured in the selected capsule
+  forbidden_claims:
+  - load all capsules by default
+  - claims outside selected capsule text
+  freshness: knowledge_os_snapshot
+  context_budget: selective
+  claim_scope: bounded_capsule
+  bounded_unit: true
+- path: references/ryan-sociotechnical-adoption.md
+  kind: generated_knowledge_capsule
+  provenance: vendored KnowledgeOS extraction
+  load_when: only after the manifest and routing index select this capsule
+  allowed_claims:
+  - bounded expert viewpoint or evidence lane captured in the selected capsule
+  forbidden_claims:
+  - load all capsules by default
+  - claims outside selected capsule text
+  freshness: knowledge_os_snapshot
+  context_budget: selective
+  claim_scope: bounded_capsule
+  bounded_unit: true
+- path: references/knowledge-os-capsule-design.md
+  kind: generated_knowledge_capsule
+  provenance: vendored KnowledgeOS extraction
+  load_when: only after the manifest and routing index select this capsule
+  allowed_claims:
+  - bounded expert viewpoint or evidence lane captured in the selected capsule
+  forbidden_claims:
+  - load all capsules by default
+  - claims outside selected capsule text
+  freshness: knowledge_os_snapshot
+  context_budget: selective
+  claim_scope: bounded_capsule
+  bounded_unit: true
+- path: references/knowledge-os-export-readiness.md
+  kind: generated_knowledge_capsule
+  provenance: vendored KnowledgeOS extraction
+  load_when: only after the manifest and routing index select this capsule
+  allowed_claims:
+  - bounded expert viewpoint or evidence lane captured in the selected capsule
+  forbidden_claims:
+  - load all capsules by default
+  - claims outside selected capsule text
+  freshness: knowledge_os_snapshot
+  context_budget: selective
+  claim_scope: bounded_capsule
+  bounded_unit: true
 allowed_claims:
 - active skill package is a compact local distillation of the pinned upstream package
 - one bounded viewpoint or substantial evidence unit maps to one references/*.md file
 - raw upstream materials are provenance, not default runtime context
 - KnowledgeOS capsules are vendored references, not runtime dependencies
 - KnowledgeOS-selected eval scenarios must be wired through references/evals.yaml
-- Agent-native architecture material is merged into the existing readiness rubric, not exposed as a separate audit lens
+- Agent-native architecture material is merged into the existing readiness rubric,
+  not exposed as a separate audit lens before Tessl proof
+- KnowledgeOS-selected eval scenarios must be wired through references/evals.yaml
   before Tessl proof
 forbidden_claims:
 - package install proves any target repository is ready

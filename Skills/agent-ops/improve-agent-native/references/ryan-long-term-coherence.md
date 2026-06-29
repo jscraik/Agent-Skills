@@ -227,6 +227,17 @@ Avoid when:
 - Source boundaries: user_provided_excerpt_not_independently_verified
 - Derived from claims: claim.ryan.long-term-coherence-agent-artifacts, claim.ryan.agent-self-observability-ledgers
 
+Knowledge claim: Principle under test: The agent reviews precedent across generated surfaces, identifies the durable ownership boundary, decides whether to promote the learning into a ledger, validator, runbook, or skill, and defines pruning or review criteria so the artifact stays coherent over future changes.
+Behavior under test: Observable agent behavior when an repeated agent mistake has already been fixed locally, but similar generated artifacts and steering patterns are likely to recur across future work.
+Failure mode: The agent adds another local note or one-off fix without deciding how the learning scales to future agents and future generated artifacts.
+Expected agent move: The agent reviews precedent across generated surfaces, identifies the durable ownership boundary, decides whether to promote the learning into a ledger, validator, runbook, or skill, and defines pruning or review criteria so the artifact stays coherent over future changes.
+Skill lift target: The response avoids the weak pattern (The agent adds another local note or one-off fix without deciding how the learning scales to future agents and future generated artifacts) and instead shows the expected behavior (The agent reviews precedent across generated surfaces, identifies the durable ownership boundary, decides whether to promote the learning into a ledger, validator, runbook, or skill, and defines pruning or review criteria so the artifact stays coherent over future changes).
+Proof route: references/evals.yaml
+Fixture path: references/evals/eval.ryan.long-term-coherence-governance.md
+Promotion status: candidate
+Capsule refs: principal-engineering
+Weak eval flags: none
+
 Given: A repeated agent mistake has already been fixed locally, but similar generated artifacts and steering patterns are likely to recur across future work.
 Should: The agent reviews precedent across generated surfaces, identifies the durable ownership boundary, decides whether to promote the learning into a ledger, validator, runbook, or skill, and defines pruning or review criteria so the artifact stays coherent over future changes.
 Expected failure: The agent adds another local note or one-off fix without deciding how the learning scales to future agents and future generated artifacts.

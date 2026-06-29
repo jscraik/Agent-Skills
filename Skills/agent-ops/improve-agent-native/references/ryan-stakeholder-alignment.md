@@ -145,6 +145,17 @@ Avoidance: Convert activity into audience-specific takeaways, decisions, ownersh
 - Source boundaries: article_source_note_paraphrase
 - Derived from claims: claim.ryan.synthesis-step, claim.ryan.consensus-builds-leverage
 
+Knowledge claim: Principle under test: The agent compresses the activity into decision-relevant meaning, current state, risks, next action, and the evidence boundary.
+Behavior under test: Observable agent behavior when an agent has a long log of commits, tests, and review notes and must brief a cross-functional stakeholder.
+Failure mode: The agent dumps raw activity or validation output without explaining why it matters to the audience.
+Expected agent move: The agent compresses the activity into decision-relevant meaning, current state, risks, next action, and the evidence boundary.
+Skill lift target: The response avoids the weak pattern (The agent dumps raw activity or validation output without explaining why it matters to the audience) and instead shows the expected behavior (The agent compresses the activity into decision-relevant meaning, current state, risks, next action, and the evidence boundary).
+Proof route: references/evals.yaml
+Fixture path: references/evals/eval.ryan.stakeholder-synthesis.md
+Promotion status: candidate
+Capsule refs: principal-engineering
+Weak eval flags: none
+
 Given: An agent has a long log of commits, tests, and review notes and must brief a cross-functional stakeholder.
 Should: The agent compresses the activity into decision-relevant meaning, current state, risks, next action, and the evidence boundary.
 Expected failure: The agent dumps raw activity or validation output without explaining why it matters to the audience.

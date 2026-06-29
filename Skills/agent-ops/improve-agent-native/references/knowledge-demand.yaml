@@ -13,13 +13,11 @@ knowledge_signals:
 - evidence_boundary
 - review_feedback
 - brownfield_readiness
-- action_parity
-- primitive_tool_design
-- dynamic_context_injection
-- capability_map
-- outcome_testing
-- shared_workspace
-- completion_signals
+- capsule_source_model
+- capsule_relationship_map
+- capsule_downstream_integration
+- capsule_failure_modes
+- capsule_eval_scenarios
 needed_facets:
 - pack.harness-engineering:evidence_boundary
 - pack.harness-engineering:review_feedback
@@ -38,6 +36,8 @@ needed_facets:
 - pack.ryan-lopopolo-principal-engineering:adoption_economics
 - pack.ryan-lopopolo-principal-engineering:quality_standards
 - pack.ryan-lopopolo-principal-engineering:sociotechnical_adoption
+- pack.knowledge-os-kernel-quality:capsule_design
+- pack.knowledge-os-kernel-quality:export_readiness
 runtime_dependency_policy:
   requires_knowledge_os_at_runtime: false
   raw_sources_included: false

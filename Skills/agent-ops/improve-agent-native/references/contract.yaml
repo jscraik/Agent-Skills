@@ -9,10 +9,14 @@ non_goals:
   - "Implementation without explicit edit authority."
 inputs:
   - "target repository path or diff"
+  - facet
+  - "facet selected from the knowledge capsule manifest when pack-backed judgment is needed"
   - "audit mode: scorecard, recommendations, AGENTS audit, docs audit, validation-entrypoint audit, proof-loop audit, action-parity audit, tool-design audit, dynamic-context audit, or source trace"
   - "repo-native validation commands when present"
 outputs:
   - "readiness score or no-score rationale"
+  - facet
+  - "facet selected and the exact capsule reference path used when pack-backed judgment informs the answer"
   - "what is working"
   - "highest-leverage gaps"
   - "keep/move/delete guidance audit"
@@ -33,5 +37,46 @@ validation:
   - package_verify
   - family_benchmark
   - command_surface_projection_check
+quality_criteria:
+  facet_selection:
+    capsule_design: "Use for KnowledgeOS capsule source-model, relationship-map, downstream-integration, failure-mode, or eval-scenario quality gaps."
+    export_readiness: "Use for KnowledgeOS export handoff, consumer receipt, digest freshness, and producer-versus-consumer proof-boundary gaps."
+    evidence_boundary: "Use for local, runtime, CI, review, tracker, artifact, and readiness claim-boundary gaps."
+    review_feedback: "Use for repeated review feedback, steering uptake, and durable guardrail gaps."
+    skill_routing: "Use for missing skill routing, capsule routing, runtime activation, or source-versus-runtime visibility gaps."
+    brownfield_readiness: "Use for brownfield repo readiness, incremental adoption, and legacy-surface gaps."
+    pr_lifecycle: "Use for pull-request lifecycle, merge-readiness, review-thread, and post-merge truth gaps."
+    environment_design: "Use for workspace, runtime, sandbox, dependency, and command-environment gaps."
+    repo_knowledge: "Use for repository knowledge, context discovery, and documentation-routing gaps."
+    mechanical_boundaries: "Use for ownership, authority, destructive-action, and generated-surface boundary gaps."
+    continuous_cleanup: "Use for recurring drift, cleanup, and maintenance-loop gaps."
+    agent_operating_model: "Use for long-running agent trajectory, compaction, workflow, hook, and autonomy-loop gaps."
+    safety_policy: "Use for approval, secret, safety, and policy-boundary gaps."
+    long_term_coherence: "Use for durable memory, project continuity, and future-maintenance gaps."
+    maintenance_supply_chain: "Use for package, dependency, release, and supply-chain-maintenance gaps."
+    stakeholder_alignment: "Use for stakeholder expectation, product boundary, and delivery-claim gaps."
+    adoption_economics: "Use for token budget, learning budget, rollout, and adoption-leverage gaps."
+    quality_standards: "Use for evaluation, quality rubric, and benchmark-overclaim gaps."
+    sociotechnical_adoption: "Use for organizational adoption and human-agent workflow-design gaps."
+  result_quality:
+    purpose: "Measures whether the audit selects the smallest relevant capsule and turns it into file-evidence guidance."
+    why_it_matters: "Multi-facet capsule packs are useful only when agents route to bounded references instead of loading or citing the whole pack."
+    observable_evidence:
+      - "The result names the selected facet or explains why no capsule was needed."
+      - "The result cites an exact skill-local capsule path when capsule knowledge informs the answer."
+      - "The recommendation stays within the selected capsule's evidence boundary and target repo evidence."
+    scoring:
+      5: "Selects the smallest relevant facet, cites exact capsule and repo evidence, and names residual proof boundaries."
+      4: "Selects a relevant facet and cites evidence with minor boundary gaps."
+      3: "Uses capsule guidance plausibly but leaves the selection or evidence boundary partly implicit."
+      2: "Mentions capsule guidance without showing a clear selector decision or exact evidence path."
+      1: "Loads or claims the whole capsule pack by default, or makes readiness claims without evidence."
+automatic_failure_conditions:
+  - "Loads all capsules by default instead of selecting a facet."
+  - "Claims KnowledgeOS producer proof as Skills SDK consumer proof without running the consumer gate."
+  - "Makes an implementation-readiness claim from an audit-only pass."
+evidence_requirements:
+  - "Pack-backed judgments must cite references/knowledge-capsule.manifest.yaml, references/knowledge-capsule-routing.md, or the exact selected capsule file."
+  - "Readiness claims must cite repo-local files, commands, or blockers from the target repository."
 observability: "Report exact files inspected, commands run, outcomes, and blockers."
 rollback_procedure: "Remove the skill package and regenerate command-surface projection."

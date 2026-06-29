@@ -28,7 +28,7 @@ Interpretation notes:
 - Claim strength: direct
 - Source boundaries: user_provided_excerpt_not_independently_verified
 
-High-leverage systems thinkers should have room to explore agent use deeply so the organization can later operationalize effective patterns.
+High-leverage systems thinkers can have room to explore agent use deeply so the organization can later operationalize effective patterns.
 
 Interpretation notes:
 - This supports pattern discovery as an explicit adoption phase.
@@ -52,10 +52,10 @@ Interpretation notes:
 - Claim strength: direct
 - Source boundaries: user_provided_excerpt_not_independently_verified
 
-Banning direct human-written code can force teams to convert every agent failure into permanent repository capability.
+Banning direct human-written code can pressure teams to convert every agent failure into permanent repository capability.
 
 Interpretation notes:
-- This is an extreme adoption pattern and should be used as a lens, not a universal rule.
+- This is an extreme adoption pattern and can be used as a lens, not a universal rule.
 
 ### claim.ryan.non-engineers-can-ship-with-harness: Harnesses Can Expand Who Ships
 
@@ -100,7 +100,7 @@ Interpretation notes:
 - Claim strength: direct
 - Source boundaries: user_provided_excerpt_not_independently_verified
 
-Codex should be understood as both a scaled product surface and a high-velocity research delivery vehicle.
+Codex can be understood as both a scaled product surface and a high-velocity research delivery vehicle.
 
 Interpretation notes:
 - This supports frequent reassessment of product behavior, workflows, and operator patterns.
@@ -115,7 +115,7 @@ Interpretation notes:
 - Source boundaries: user_provided_excerpt_not_independently_verified
 - Derived from claims: claim.ryan.token-budgets-rd, claim.ryan.uncapped-systems-thinkers
 
-Organizations should give high-leverage systems thinkers enough AI budget to discover reusable operating patterns before optimizing spend.
+Organizations can give high-leverage systems thinkers enough AI budget to discover reusable operating patterns before optimizing spend.
 
 Rationale: Early agent adoption behaves like R&D; the highest-leverage operators can convert exploration into repeatable workflows for the wider organization.
 
@@ -132,7 +132,7 @@ Application notes:
 - Source boundaries: user_provided_excerpt_not_independently_verified
 - Derived from claims: claim.ryan.ai-priors-monthly, claim.ryan.codex-product-research-vehicle
 
-Principal engineers should regularly refresh assumptions about AI capability and update working patterns accordingly.
+Principal engineers can regularly refresh assumptions about AI capability and update working patterns accordingly.
 
 Rationale: Agent products and research surfaces change rapidly enough that old workflows can become stale within weeks.
 
@@ -149,9 +149,9 @@ Application notes:
 - Source boundaries: user_provided_excerpt_not_independently_verified
 - Derived from claims: claim.ryan.zero-human-code-forces-harness, claim.ryan.non-engineers-can-ship-with-harness
 
-Temporarily forbidding direct human implementation can expose missing agent capabilities and force durable system improvements.
+Temporarily using a bounded no-direct-human-implementation experiment can expose missing agent capabilities and surface durable system improvements.
 
-Rationale: If humans cannot work outside the agent lane inside a deliberately bounded experiment, every failure becomes pressure to improve repo legibility, primitives, lints, review personas, and workflows.
+Rationale: If humans does not route around the agent inside a deliberately bounded experiment, every failure becomes pressure to improve repo legibility, primitives, lints, review personas, and workflows.
 
 Application notes:
 - Use this deliberately as a harness-building constraint, not as performative purity.
@@ -175,7 +175,7 @@ Ask practitioners for the two or three hardest real cases they have solved, then
 
 Use when:
 - Building domain evals for agent work.
-- A team says quality is obvious but cannot yet measure it.
+- A team says quality is obvious but does not yet measure it.
 - Expert judgment is tacit and not represented in tests.
 
 Avoid when:
@@ -192,7 +192,18 @@ Avoid when:
 - Source boundaries: user_provided_excerpt_not_independently_verified
 - Derived from claims: claim.ryan.token-budgets-rd, claim.ryan.uncapped-systems-thinkers, claim.ryan.non-engineers-can-ship-with-harness
 
+Knowledge claim: Principle under test: The agent distinguishes exploration budget from permanent spend, recommends giving proven systems thinkers enough room to discover reusable patterns, names human authority and ROI-review boundaries, and avoids treating token volume itself as success.
+Behavior under test: Observable agent behavior when an leader asks whether to cap agent token spend tightly across the whole organization before teams know which workflows create leverage.
+Failure mode: The agent recommends a blanket cap or blanket unlimited spend without a learning loop, ownership model, or route for non-engineers to adopt proven workflows.
+Expected agent move: The agent distinguishes exploration budget from permanent spend, recommends giving proven systems thinkers enough room to discover reusable patterns, names human authority and ROI-review boundaries, and avoids treating token volume itself as success.
+Skill lift target: The response avoids the weak pattern (The agent recommends a blanket cap or blanket unlimited spend without a learning loop, ownership model, or route for non-engineers to adopt proven workflows) and instead shows the expected behavior (The agent distinguishes exploration budget from permanent spend, recommends giving proven systems thinkers enough room to discover reusable patterns, names human authority and ROI-review boundaries, and avoids treating token volume itself as success).
+Proof route: references/evals.yaml
+Fixture path: references/evals/eval.ryan.adoption-budget-pattern-discovery.md
+Promotion status: candidate
+Capsule refs: principal-engineering
+Weak eval flags: none
+
 Given: A leader asks whether to cap agent token spend tightly across the whole organization before teams know which workflows create leverage.
-Should: The agent distinguishes exploration budget from permanent spend, recommends giving proven systems thinkers enough room to discover reusable patterns, names human authority and ROI-review boundaries, and avoids treating token volume itself as success.
+Can: The agent distinguishes exploration budget from permanent spend, recommends giving proven systems thinkers enough room to discover reusable patterns, names human authority and ROI-review boundaries, and avoids treating token volume itself as success.
 Expected failure: The agent recommends a blanket cap or blanket unlimited spend without a learning loop, ownership model, or route for non-engineers to adopt proven workflows.
 Reproduce with: references/evals/eval.ryan.adoption-budget-pattern-discovery.md

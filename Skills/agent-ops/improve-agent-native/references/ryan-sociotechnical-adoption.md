@@ -124,6 +124,17 @@ Avoid when:
 - Source boundaries: user_provided_excerpt_not_independently_verified
 - Derived from claims: claim.ryan.public-perception-lag, claim.ryan.coding-agent-perception-lock
 
+Knowledge claim: Principle under test: The agent distinguishes stale capability priors from genuine product reliability gaps, checks current evidence before making adoption claims, proposes in-product examples or workflow education, defines adoption metrics, and avoids overclaiming unsupported capability.
+Behavior under test: Observable agent behavior when users still treat a current coding agent as an interactive pair-programming assistant and avoid longer-horizon delegated workflows.
+Failure mode: The agent assumes adoption resistance is only user education, or assumes the product is unreliable without checking current capability evidence.
+Expected agent move: The agent distinguishes stale capability priors from genuine product reliability gaps, checks current evidence before making adoption claims, proposes in-product examples or workflow education, defines adoption metrics, and avoids overclaiming unsupported capability.
+Skill lift target: The response avoids the weak pattern (The agent assumes adoption resistance is only user education, or assumes the product is unreliable without checking current capability evidence) and instead shows the expected behavior (The agent distinguishes stale capability priors from genuine product reliability gaps, checks current evidence before making adoption claims, proposes in-product examples or workflow education, defines adoption metrics, and avoids overclaiming unsupported capability).
+Proof route: references/evals.yaml
+Fixture path: references/evals/eval.ryan.perception-lock-adoption-decision.md
+Promotion status: candidate
+Capsule refs: principal-engineering
+Weak eval flags: none
+
 Given: Users still treat a current coding agent as an interactive pair-programming assistant and avoid longer-horizon delegated workflows.
 Should: The agent distinguishes stale capability priors from genuine product reliability gaps, checks current evidence before making adoption claims, proposes in-product examples or workflow education, defines adoption metrics, and avoids overclaiming unsupported capability.
 Expected failure: The agent assumes adoption resistance is only user education, or assumes the product is unreliable without checking current capability evidence.

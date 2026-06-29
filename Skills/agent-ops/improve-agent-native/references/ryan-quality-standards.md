@@ -245,6 +245,17 @@ Avoidance: Pair code-output benchmarks with evals that test the full software-en
 - Source boundaries: user_provided_excerpt_not_independently_verified
 - Derived from claims: claim.ryan.benchmarks-produce-code-not-engineers, claim.ryan.synthesis-failure-guardrail
 
+Knowledge claim: Principle under test: The agent identifies benchmark laundering risk, names the missing full-loop quality checks, and proposes a quality gate that evaluates artifact usefulness, synthesis clarity, accessibility or misuse resistance when relevant, and durable engineering behavior.
+Behavior under test: Observable agent behavior when an proposed agent eval rewards code output volume or benchmark pass rate while ignoring synthesis quality, accessibility, maintainability, and whether the work behaves like software engineering.
+Failure mode: The agent accepts the benchmark result as sufficient proof that the model or harness behaves like a software engineer.
+Expected agent move: The agent identifies benchmark laundering risk, names the missing full-loop quality checks, and proposes a quality gate that evaluates artifact usefulness, synthesis clarity, accessibility or misuse resistance when relevant, and durable engineering behavior.
+Skill lift target: The response avoids the weak pattern (The agent accepts the benchmark result as sufficient proof that the model or harness behaves like a software engineer) and instead shows the expected behavior (The agent identifies benchmark laundering risk, names the missing full-loop quality checks, and proposes a quality gate that evaluates artifact usefulness, synthesis clarity, accessibility or misuse resistance when relevant, and durable engineering behavior).
+Proof route: references/evals.yaml
+Fixture path: references/evals/eval.ryan.benchmark-laundering-quality-gate.md
+Promotion status: candidate
+Capsule refs: principal-engineering
+Weak eval flags: none
+
 Given: A proposed agent eval rewards code output volume or benchmark pass rate while ignoring synthesis quality, accessibility, maintainability, and whether the work behaves like software engineering.
 Should: The agent identifies benchmark laundering risk, names the missing full-loop quality checks, and proposes a quality gate that evaluates artifact usefulness, synthesis clarity, accessibility or misuse resistance when relevant, and durable engineering behavior.
 Expected failure: The agent accepts the benchmark result as sufficient proof that the model or harness behaves like a software engineer.

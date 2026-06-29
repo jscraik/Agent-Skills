@@ -1,25 +1,25 @@
-# Eval Fixture: Maintenance Economics Boundary
+# eval.ryan.maintenance-economics-boundary: Cheap Code Still Needs Maintenance Boundaries
 
-## Input
+Promotion status: candidate
+Proof route: references/evals.yaml
+Fixture path: references/evals/eval.ryan.maintenance-economics-boundary.md
 
-An agent proposes a new dependency because it can implement the requested
-feature quickly and code generation is cheap.
+Knowledge claim: Principle under test: The agent evaluates maintenance burden, supply-chain risk, toolchain surface area, pinning, cooldown policy, and whether the dependency should be removed, internalized, or avoided.
+Behavior under test: Observable agent behavior when an agent proposes adding a dependency or tool because code generation makes implementation cheap.
+Failure mode: The agent treats low implementation cost as sufficient reason to expand the dependency or tool surface.
+Expected agent move: The agent evaluates maintenance burden, supply-chain risk, toolchain surface area, pinning, cooldown policy, and whether the dependency should be removed, internalized, or avoided.
+Skill lift before failure: The agent treats low implementation cost as sufficient reason to expand the dependency or tool surface.
+Skill lift after behavior: The agent evaluates maintenance burden, supply-chain risk, toolchain surface area, pinning, cooldown policy, and whether the dependency should be removed, internalized, or avoided.
+Observable delta: The response avoids the weak pattern (The agent treats low implementation cost as sufficient reason to expand the dependency or tool surface) and instead shows the expected behavior (The agent evaluates maintenance burden, supply-chain risk, toolchain surface area, pinning, cooldown policy, and whether the dependency should be removed, internalized, or avoided).
 
-## Expected Response Requirements
+Given: An agent proposes adding a dependency or tool because code generation makes implementation cheap.
+Should: The agent evaluates maintenance burden, supply-chain risk, toolchain surface area, pinning, cooldown policy, and whether the dependency should be removed, internalized, or avoided.
+Expected failure: The agent treats low implementation cost as sufficient reason to expand the dependency or tool surface.
 
-- Evaluate maintenance burden, supply-chain risk, pinning, cooldown policy, and
-  toolchain surface area.
-- Consider removal, internalization, or avoiding the dependency.
-- Tie the recommendation to validation and ownership boundaries.
+Bad answer patterns:
+- The agent treats low implementation cost as sufficient reason to expand the dependency or tool surface.
 
-## Failure Assertions
+Good answer patterns:
+- The agent evaluates maintenance burden, supply-chain risk, toolchain surface area, pinning, cooldown policy, and whether the dependency should be removed, internalized, or avoided.
 
-- Fails if the response treats cheap implementation as sufficient.
-- Fails if it expands dependency surface without risk review.
-
-## Skill-Local Evidence Boundary
-
-Failure category: seed eval requires behavioural scenario conversion.
-Evidence boundary: this fixture is skill-local evidence at references/evals/eval.ryan.maintenance-economics-boundary.md; it does not by itself prove repository, pull request, remote-check, merge-readiness, or Tessl-readiness outcomes.
-Durable mechanism: use this fixture to generate scenario criteria that require the agent to balance maintenance burden, supply-chain risk, pinning, cooldown policy, and replacement options before adding or retaining a dependency.
-Validation status: not_run_with_reason until the scenario is executed by the local pipeline and private Tessl eval lane.
+This is the portable SDK reproduction contract for the eval scenario. The KnowledgeOS authoring fixture remains inside the validation workspace and is not vendored into SDK-ready exports.
