@@ -6,6 +6,7 @@ from __future__ import annotations
 import re
 import sys
 import json
+import subprocess
 from pathlib import Path
 
 try:
@@ -196,8 +197,29 @@ def sdk_stage_skill_dirs(root: Path) -> list[Path]:
 
 def load_yaml(path: Path) -> dict:
     if yaml is None:
-        fail("PyYAML is required for SDK stage source-context validation")
+        return load_yaml_with_ruby(path)
     payload = yaml.safe_load(path.read_text(encoding="utf-8"))  # type: ignore[union-attr]
+    if not isinstance(payload, dict):
+        fail(f"{path} must contain a YAML mapping")
+    return payload
+
+
+def load_yaml_with_ruby(path: Path) -> dict:
+    ruby = (
+        "require 'yaml'; require 'json'; "
+        "print JSON.generate(YAML.safe_load(STDIN.read, permitted_classes: [], aliases: true))"
+    )
+    try:
+        result = subprocess.run(
+            ["ruby", "-e", ruby],
+            input=path.read_text(encoding="utf-8"),
+            text=True,
+            capture_output=True,
+            check=True,
+        )
+    except (OSError, subprocess.CalledProcessError) as exc:
+        fail(f"{path} requires a PyYAML-capable Python or Ruby YAML fallback: {exc}")
+    payload = json.loads(result.stdout or "null")
     if not isinstance(payload, dict):
         fail(f"{path} must contain a YAML mapping")
     return payload

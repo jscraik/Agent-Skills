@@ -133,8 +133,36 @@ def _load_minimal_evals_yaml(text: str) -> dict[str, Any]:
 
 
 def _minimal_line(raw_line: str) -> tuple[str, int]:
-    line = raw_line.split("#", 1)[0].rstrip()
+    line = _strip_yaml_comment(raw_line).rstrip()
     return line.strip(), len(line) - len(line.lstrip(" "))
+
+
+def _strip_yaml_comment(raw_line: str) -> str:
+    in_single = False
+    in_double = False
+    for index, char in enumerate(raw_line):
+        if char == "'" and not in_double:
+            in_single = not in_single
+            continue
+        if char == '"' and not in_single and not _is_escaped(raw_line, index):
+            in_double = not in_double
+            continue
+        if _is_yaml_comment_start(raw_line, index, char, in_single, in_double):
+            return raw_line[:index]
+    return raw_line
+
+
+def _is_escaped(text: str, index: int) -> bool:
+    slash_count = 0
+    cursor = index - 1
+    while cursor >= 0 and text[cursor] == "\\":
+        slash_count += 1
+        cursor -= 1
+    return slash_count % 2 == 1
+
+
+def _is_yaml_comment_start(text: str, index: int, char: str, in_single: bool, in_double: bool) -> bool:
+    return char == "#" and not in_single and not in_double and (index == 0 or text[index - 1].isspace())
 
 
 def _consume_minimal_line(state: dict[str, Any], stripped: str, indent: int) -> bool:

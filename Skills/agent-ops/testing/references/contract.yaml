@@ -10,15 +10,63 @@ non_goals:
 inputs:
   - target repo and changed files
   - behavior or artifact claim being tested
+  - capability
   - repo instructions and command contracts
   - existing test output or failure text
   - credential, sandbox, network, or dirty-worktree constraints
 outputs:
   - selected validation route
   - active persona lens names when used for review-style test strategy
+  - capability
   - exact pass/fail/blocked command evidence
   - failure ownership classification
   - coverage gaps and next minimal diagnostic
+commands:
+  - "./bin/ask skills package verify Skills/agent-ops/testing --json --robot"
+  - "./bin/ask skills audit Skills/agent-ops/testing --level strict --json --robot"
+  - "./bin/ask skills external-review Skills/agent-ops/testing --json --robot"
+permission_profile:
+  network: false
+  filesystem:
+    read:
+      - target repo
+      - target skill package
+      - validation artifacts
+    write:
+      - target repo tests and fixtures when explicitly in scope
+      - target skill references when explicitly in scope
+quality_criteria:
+  capability_selection:
+    purpose: "Select the smallest testing or KnowledgeOS capsule capability needed for the validation question."
+    why_it_matters: "The testing skill spans repo validation, eval artifacts, deterministic scorers, judge calibration, regression loops, and production guardrails; loading all guidance hides the exact proof lane."
+    observable_evidence:
+      - "The response names the selected validation capability or capsule lane."
+      - "The response cites the routing index, contract, or source-context entry that justified the selection."
+      - "The response avoids loading unrelated capsule bodies by default."
+    scoring:
+      5: "Selects the narrowest relevant capability, cites routing evidence, and avoids unrelated capsules."
+      4: "Selects a relevant capability with minor routing or citation gaps."
+      3: "Uses a plausible testing lane but leaves the selection rationale partly implicit."
+      2: "Mentions testing capsules but loads or applies unrelated facets."
+      1: "Does not select a capability before using capsule material."
+  validation_evidence_quality:
+    purpose: "Ensure validation claims are backed by exact commands, artifacts, schemas, or calibrated eval evidence."
+    why_it_matters: "Closeout claims are only useful when the evidence proves the touched behavior instead of a broad or stale status."
+    observable_evidence:
+      - "Reports exact commands with pass, fail, or blocked outcomes."
+      - "Classifies blocker ownership and nearest meaningful fallback proof."
+      - "Keeps deterministic artifacts and calibrated evals above uncalibrated judge summaries."
+    scoring:
+      5: "Evidence is exact, scoped, classified, and tied to the claimed behavior."
+      4: "Evidence is mostly exact with minor missing ownership or fallback detail."
+      3: "Evidence is usable but relies partly on broad or indirect proof."
+      2: "Evidence is vague, stale, or does not exercise the touched path."
+      1: "Claims validation without runnable or artifact-backed proof."
+evidence_requirements:
+  - "Validation reports must include exact command outcomes as pass, fail, or blocked."
+  - "Blocked proof must name the blocker class and nearest meaningful fallback."
+  - "Capsule-backed guidance must be selected through references/knowledge-capsule-routing.md and references/source-context.yaml."
+  - "Eval or judge claims require deterministic artifacts or calibration evidence before release claims."
 risks:
   - over_triggering
   - validation_drift

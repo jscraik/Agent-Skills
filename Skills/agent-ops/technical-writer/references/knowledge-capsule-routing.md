@@ -26,6 +26,94 @@ only when the first one cannot answer the specific gap.
 
 ## Capsules
 
+## Package Context And Eval Assets
+
+- `references/source-context.yaml`
+  - facet: provenance_and_runtime_boundary
+  - load_when: checking KnowledgeOS snapshot provenance, allowed claims,
+    freshness, or the no-runtime-KnowledgeOS boundary.
+- `references/eval-regression-plan.json`
+  - facet: eval_regression_tracking
+  - load_when: repairing scenario regressions, release-lane failure clusters, or
+    oss-local/Tessl parity drift.
+- `references/evals/eval.glossary-workspace-authority.md`
+  - facet: eval_case_review
+  - load_when: reviewing glossary and ubiquitous-language authority behavior.
+- `references/evals/eval.reader-state-citation-map.md`
+  - facet: eval_case_review
+  - load_when: reviewing reader-state maps, citations, and evidence grounding.
+- `references/evals/eval.validation-lane-separation.md`
+  - facet: eval_case_review
+  - load_when: reviewing local, hosted, registry, or external validation lanes.
+- `references/evals/eval.visual-evidence-decision.md`
+  - facet: eval_case_review
+  - load_when: reviewing screenshot, diagram, image, or visual-evidence choices.
+- `references/evals/eval.writer-gap-gathering.md`
+  - facet: eval_case_review
+  - load_when: reviewing writer-facing gap handling and missing-information
+    questions.
+- `references/scorer-calibration/manifest.json`
+  - facet: scorer_calibration
+  - load_when: calibrating evaluator labels or checking scorer example coverage.
+- `references/scorer-calibration/examples.jsonl`
+  - facet: scorer_calibration
+  - load_when: comparing concise correct outputs with verbose alternatives.
+- `references/scorer-calibration/raw/concise-correct-vs-verbose-wrong.json`
+  - facet: scorer_calibration
+  - load_when: checking concise-correct versus verbose-wrong scorer behavior.
+- `references/scorer-calibration/raw/copied-rubric-no-evidence.json`
+  - facet: scorer_calibration
+  - load_when: checking copied rubric text without artifact evidence.
+- `references/scorer-calibration/raw/local-proof-overclaim.json`
+  - facet: scorer_calibration
+  - load_when: checking local-proof overclaims and validation-lane boundaries.
+- `references/scorer-calibration/raw/obvious-correct-doc-evidence.json`
+  - facet: scorer_calibration
+  - load_when: checking clearly grounded documentation evidence.
+- `references/scorer-calibration/raw/obvious-wrong-invented-command.json`
+  - facet: scorer_calibration
+  - load_when: checking invented command examples and hallucinated proof.
+- `references/scorer-calibration/raw/skill-name-only.json`
+  - facet: scorer_calibration
+  - load_when: checking that skill-name mentions alone do not satisfy behavior.
+- `references/knowledge-capsules/clarity-mechanics.md`
+  - facet: clarity_style_and_revision
+  - load_when: task needs sentence-level clarity, active voice, plain language,
+    terminology, brevity, or one-idea-per-unit revision.
+- `references/knowledge-capsules/revision-and-structure.md`
+  - facet: clarity_style_and_revision
+  - load_when: task needs section order, answer-first structure, skimmability,
+    multi-pass revision, or existing-doc restructuring.
+- `references/knowledge-capsules/technical-explanation.md`
+  - facet: storytelling_and_explanation
+  - load_when: task needs concept explanation, mental model, causal chain,
+    architecture explanation, or example-led technical explanation.
+
+## Pack-Specific Capsules
+
+## Package Context And General Writing Capsules
+
+- `references/source-context.yaml`
+  - facet: provenance_and_runtime_boundary
+  - load_when: checking KnowledgeOS snapshot provenance, allowed claims,
+    freshness, or the no-runtime-KnowledgeOS boundary.
+  - do_not_use_for: target repo readiness, raw source completeness, or loading
+    every capsule by default.
+- `references/knowledge-capsules/clarity-mechanics.md`
+  - facet: clarity_style_and_revision
+  - load_when: task needs sentence-level clarity, active voice, plain language,
+    terminology, brevity, or one-idea-per-unit revision.
+- `references/knowledge-capsules/revision-and-structure.md`
+  - facet: clarity_style_and_revision
+  - load_when: task needs section order, answer-first structure, skimmability,
+    multi-pass revision, or existing-doc restructuring.
+- `references/knowledge-capsules/technical-explanation.md`
+  - facet: storytelling_and_explanation
+  - load_when: task needs concept explanation, mental model, causal chain,
+    architecture explanation, or example-led technical explanation.
+
+## Pack-Specific Capsules
+
 - `references/knowledge-capsules/technical-writer-devrel-communication-devrel-role-and-audience.md`
   - facet: devrel_role_and_audience
   - pack: pack.developer-advocate-writing

@@ -47,6 +47,14 @@ SHALLOW_EXPECTED_SIGNAL_VALUES = {
     "validation evidence",
 }
 SUPPORTING_ONLY_ACCEPTANCE_TYPES = {"regex", "not_regex", "contains", "not_contains", "skill_selected", "skill_not_selected"}
+NEGATIVE_ACCEPTANCE_TYPES = {"not_regex", "not_contains", "must_not", "must_not_claim", "must_not_do", "forbidden_signal"}
+NO_INVENTION_CONSTRAINT_RE = re.compile(r"(?i)\b(?:do not invent|use only the supplied|missing evidence as blocked)\b")
+NO_INVENTION_SUPPORT_RE = re.compile(r"(?i)\b(?:support channels?|slack)\b")
+NO_INVENTION_COMMAND_RE = re.compile(r"(?i)\b(?:setup commands?|validation commands?|commands?)\b")
+BROAD_SUPPORT_CHANNEL_NEGATIVE_RE = re.compile(r"(?i)(?:#\[[^\]]+|#\[a-z|slack\s+(?:channel|support)|support\s+channel)")
+BROAD_COMMAND_NEGATIVE_RE = re.compile(
+    r"(?i)(?:pytest|uv|mise|npm|pnpm|yarn|\./bin/ask|setup\s+command|validation\s+command)"
+)
 GUARDRAIL_CASE_RE = re.compile(r"(?i)\b(?:guardrail|hallucinat(?:e|ion|ions|ed|ing))\b")
 GUARDRAIL_LABEL_RE = re.compile(
     r"(?i)\b(?:label(?:ed|led)?|human labels?|pass/fail|ordinary|adversarial|"
@@ -327,6 +335,11 @@ def _case_text_for_quality(case: dict[str, object]) -> str:
     return "\n".join(text_parts)
 
 
+def _case_instruction_text(case: dict[str, object]) -> str:
+    fields = ("id", "name", "category", "unit", "given", "should", "prompt", "task")
+    return "\n".join(str(case.get(field) or "") for field in fields)
+
+
 def _case_has_guardrail_calibration_shape(case: dict[str, object]) -> bool:
     case_text = _case_text_for_quality(case)
     if not GUARDRAIL_CASE_RE.search(case_text):
@@ -463,6 +476,24 @@ def _release_case_missing_output_artifact(case: dict[str, object]) -> bool:
     return "release" in modes and not _case_has_concrete_output_artifact(case)
 
 
+def _case_has_broad_no_invention_negative_acceptance(case: dict[str, object]) -> bool:
+    case_text = _case_instruction_text(case)
+    if not NO_INVENTION_CONSTRAINT_RE.search(case_text):
+        return True
+    negative_text = "\n".join(
+        _acceptance_value(item)
+        for item in _normalized_acceptance_items(case)
+        if str(item.get("type") or "").strip().lower() in NEGATIVE_ACCEPTANCE_TYPES
+    )
+    if not negative_text.strip():
+        return False
+    if NO_INVENTION_SUPPORT_RE.search(case_text) and not BROAD_SUPPORT_CHANNEL_NEGATIVE_RE.search(negative_text):
+        return False
+    if NO_INVENTION_COMMAND_RE.search(case_text) and not BROAD_COMMAND_NEGATIVE_RE.search(negative_text):
+        return False
+    return True
+
+
 TESSL_CASE_FINDING_RULES = (
     (
         _missing_scenario_context,
@@ -533,6 +564,11 @@ TESSL_CASE_FINDING_RULES = (
         _case_requires_file_side_effect_without_final_answer_path,
         "read_only_file_artifact_side_effect",
         "OSS read-only release scenarios must ask for file artifact contents in the final answer rather than requiring the agent to write, save, create, or produce files in the sandbox.",
+    ),
+    (
+        lambda case: not _case_has_broad_no_invention_negative_acceptance(case),
+        "narrow_no_invention_negative_acceptance",
+        "No-invention scenarios must include broad negative acceptance for the forbidden support paths or command families they name, so plausible invented Slack channels, setup commands, validation commands, owners, dates, recovery paths, or acceptance criteria cannot pass by synonym.",
     ),
 )
 
