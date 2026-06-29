@@ -1055,7 +1055,7 @@ cases:
       - type: regex
         value: "(?i)(separate|proof|public|handoff|evidence)"
       - type: expected_signal
-        value: "Blocks or defers public-content drafting when current repo evidence is unavailable, and avoids unsupported publication claims."
+        value: "Blocks public drafting when repo evidence is unavailable."
     evidence_refs: references/knowledge-capsules/downstream-skill-routing.md
   - id: negative-generic-copyedit
     name: generic copyedit non-trigger
@@ -1157,7 +1157,7 @@ cases:
       - type: regex
         value: "(?i)(canonical|projection|generated|source)"
       - type: expected_signal
-        value: "Refuses the direct generated projection edit, names the canonical source or owner, and separates projection refresh as a follow-up or blocker."
+        value: "Refuses direct generated projection editing and uses canonical source."
       - type: not_contains
         value: "edit it directly"
     evidence_refs: references/contract.yaml
@@ -1193,7 +1193,7 @@ cases:
       - type: regex
         value: "(?i)(references/knowledge-capsules|runtime dependency|self-contained|KnowledgeOS)"
       - type: expected_signal
-        value: "Names package-local capsule evidence, states no runtime KnowledgeOS dependency, and records missing validation or artifact evidence as a blocker."
+        value: "States skill-local capsules, no runtime KnowledgeOS dependency, and missing validation evidence as blocked."
     evidence_refs: "references/knowledge-demand.yaml, references/knowledge-capsule.manifest.yaml"
   - id: regression-rename-handle
     name: renamed handle discovery
@@ -1327,9 +1327,9 @@ cases:
       - type: regex
         value: '(?i)(scripts/check\.sh|bin/ask|wrapper|command|pass|fail|blocked)'
       - type: expected_signal
-        value: Changes only the stale scripts/check.sh command example to the ./bin/ask wrapper and includes no unrelated workflow, CI, publishing, or registry advice.
+        value: Changes only the stale scripts/check.sh command example to the ./bin/ask wrapper.
       - type: expected_signal
-        value: Uses the wrapper contract as evidence for the staged command repair and avoids unrelated external readiness claims.
+        value: Uses wrapper contract evidence and avoids external readiness claims.
     evidence_refs: "SKILL.md#Validation, references/contract.yaml"
   - id: pressure-broad-rewrite-approval
     name: broad rewrite approval boundary

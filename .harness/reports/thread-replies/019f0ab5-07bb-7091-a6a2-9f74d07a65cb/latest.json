@@ -1,142 +1,180 @@
 {
   "schema_version": "thread-report/v1",
   "thread_id": "019f0ab5-07bb-7091-a6a2-9f74d07a65cb",
-  "repo_head": "fdde40343",
-  "task_id": "pr-294-stabilization-checkpoint",
+  "repo_head": "ed27703b4",
+  "task_id": "technical-writer-oss-local-tdd-repair-pass4",
   "status": "blocked",
-  "current_gate": "pr-stabilization",
+  "current_gate": "oss-local-repair",
   "next_gate_allowed": false,
   "blocked_next_gates": [
-    "merge",
-    "oss-local-repair",
     "oss-cloud",
     "tessl-dry-run",
     "tessl-live"
   ],
   "commands": [
     {
-      "command": "git fetch origin codex/sdk-eval-parity-guardrails",
+      "command": "git status --short --branch",
       "outcome": "pass",
-      "evidence": "remote branch advanced 842bda239..ea674ee55 before local push"
+      "evidence": "## codex/sdk-eval-parity-guardrails...origin/codex/sdk-eval-parity-guardrails plus related generated eval closeout artifacts under Infrastructure/artifacts/evals/closeouts/"
     },
     {
-      "command": "git rebase origin/codex/sdk-eval-parity-guardrails",
+      "command": "git rev-parse --short HEAD",
       "outcome": "pass",
-      "evidence": "rebased local checkpoint with no conflicts"
+      "evidence": "ed27703b4"
     },
     {
-      "command": "bash Infrastructure/scripts/lifecycle-and-sync/sync_projection_trees.sh all",
+      "command": "jq '.' .harness/reports/thread-replies/019f0ab5-07bb-7091-a6a2-9f74d07a65cb/oss-local-pass3-three-run-matrix.json",
       "outcome": "pass",
-      "evidence": "projection-integrity sync status pass after targeted .agents projection-cache write permission"
+      "evidence": "selected criteria/task ownership for five of six pass-3 failures; service-doc-reader-job deferred as skill-owned"
     },
     {
-      "command": "python3 Infrastructure/scripts/lifecycle-and-sync/generate_skillset_manifests.py --write --json",
+      "command": "./bin/ask skills package verify Skills/agent-ops/technical-writer --json --robot",
       "outcome": "pass",
-      "evidence": "status pass; writes=10"
+      "evidence": "status success; skill_package_verification.status pass; no blockers"
     },
     {
-      "command": "bash Infrastructure/scripts/run-infrastructure-python.sh -m py_compile scripts/validation-and-linting/validate_thread_pm_delivery.py scripts/testing/test_validate_thread_pm_delivery.py",
+      "command": "./bin/ask sdk eval scenario-quality Skills/agent-ops/technical-writer --preview --json --robot",
       "outcome": "pass",
-      "evidence": "exit 0"
+      "evidence": "status success; scenario_count=27; promotion_ready_count=27; blocked_count=0"
     },
     {
-      "command": "bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q scripts/testing/test_validate_thread_pm_delivery.py",
-      "outcome": "pass",
-      "evidence": "8 passed"
-    },
-    {
-      "command": "python3 Infrastructure/scripts/verify_ask_cli_modularity.py --changed-files Infrastructure/scripts/validation-and-linting/validate_thread_pm_delivery.py Infrastructure/scripts/testing/test_validate_thread_pm_delivery.py",
-      "outcome": "pass",
-      "evidence": "Modularity verification passed"
-    },
-    {
-      "command": "bash scripts/validate-codestyle.sh",
-      "outcome": "pass",
-      "evidence": "required_failures=0; warn_only_issues=0 after projection refresh"
-    },
-    {
-      "command": "./bin/ask repo validate --json --robot",
-      "outcome": "pass",
-      "evidence": "status success; required_failures=0; warn_only_issues=0; logs Infrastructure/artifacts/validation/20260628T203653Z"
-    },
-    {
-      "command": "./bin/ask repo closeout --changed --json --robot",
-      "outcome": "pass",
-      "evidence": "status success; no closeout blockers; changed generated projection artifacts classified"
-    },
-    {
-      "command": "./bin/ask skills list --json --robot",
-      "outcome": "pass",
-      "evidence": "status success"
-    },
-    {
-      "command": "git commit --amend --no-edit",
-      "outcome": "pass",
-      "evidence": "commit fdde40343 feat(sdk): ratchet eval parity handoff gates"
-    },
-    {
-      "command": "git push origin codex/sdk-eval-parity-guardrails",
-      "outcome": "pass",
-      "evidence": "remote updated ea674ee55..fdde40343"
-    },
-    {
-      "command": "gh pr checks 294 --watch=false",
+      "command": "./bin/ask sdk eval run Skills/agent-ops/technical-writer --runner internal --mode release --codex-profile oss-local --json --robot",
       "outcome": "blocked",
-      "evidence": "security/snyk failed with private-test quota; CodeRabbit pending; all observed source/CI checks pass or skip"
+      "evidence": "status blocked; blocker_class=blocked_runtime; codex_exec_invoked=true; codex_profile=oss-local; scenario_set_id=technical-writer-release-20-v1; case_count=20; blocked_count=20; dataset_path=Infrastructure/artifacts/skills/technical-writer/20260629-023355-042204/scorecard.json"
     },
     {
-      "command": "gh pr view 294 --json number,title,state,isDraft,mergeStateStatus,reviewDecision,statusCheckRollup,url,headRefOid",
+      "command": "ollama serve",
+      "outcome": "pass",
+      "evidence": "session 52244; output included Listening on 127.0.0.1:11434 (version 0.30.11); cache snapshot write warning did not stop server startup"
+    },
+    {
+      "command": "ollama list",
+      "outcome": "pass",
+      "evidence": "exit 0; models included gpt-oss:20b, qwen3-coder:30b, qwen3.5:latest, gemma3n:e4b, bge-m3:latest, nomic-embed-text:latest"
+    },
+    {
+      "command": "./bin/ask sdk eval run Skills/agent-ops/technical-writer --runner internal --mode release --codex-profile oss-local --json --robot",
       "outcome": "blocked",
-      "evidence": "headRefOid fdde4034396c35001275b98dfa15c30716b2e10a; isDraft=true; mergeStateStatus=BLOCKED"
+      "evidence": "status blocked; blocker_class=blocked_runtime; codex_exec_invoked=true; codex_profile=oss-local; scenario_set_id=technical-writer-release-20-v1; case_count=20; blocked_count=20; dataset_path=Infrastructure/artifacts/skills/technical-writer/20260629-024740-892292/scorecard.json; stderr reported missing field models in Ollama model-list response; stdout reported missing gpt-oss:20b model metadata and turn.failed high-demand message"
+    },
+    {
+      "command": "codex exec --profile oss-local 'Say ok.' --json",
+      "outcome": "blocked",
+      "evidence": "direct profile smoke did not return usable JSON/stdout/stderr or an exit code through the exec wrapper after 60 seconds; treated as runtime diagnostic only, not release proof"
+    },
+    {
+      "command": "ps -axo pid,ppid,stat,etime,command | rg 'codex exec --profile oss-local|ollama serve' || true",
+      "outcome": "blocked",
+      "evidence": "sandbox returned operation not permitted for ps, so process-table proof was unavailable"
+    },
+    {
+      "command": "ollama run gpt-oss:20b 'Say ok.'",
+      "outcome": "blocked",
+      "evidence": "exit 1; 500 Internal Server Error; llama-server process terminated; failed to create command queue; failed to allocate context"
+    },
+    {
+      "command": "ollama run qwen3.5:latest 'Say ok.'",
+      "outcome": "blocked",
+      "evidence": "exit 1; 500 Internal Server Error; llama-server startup failed after projector CPU offload retry; failed to create command queue; failed to allocate context"
+    },
+    {
+      "command": "ollama run gemma3n:e4b 'Say ok.'",
+      "outcome": "blocked",
+      "evidence": "exit 1; 500 Internal Server Error; llama-server process terminated; failed to create command queue; failed to allocate context"
     }
   ],
   "artifact_assertions": [
     {
-      "artifact": "https://github.com/jscraik/Agent-Skills/pull/294",
-      "assertion": "PR head is fdde4034396c35001275b98dfa15c30716b2e10a after push",
+      "artifact": ".harness/reports/thread-replies/019f0ab5-07bb-7091-a6a2-9f74d07a65cb/oss-local-tdd-repair-plan.json",
+      "assertion": "TDD plan selects one owner class: criteria; allowed file is Skills/agent-ops/technical-writer/references/evals.yaml",
       "outcome": "pass"
     },
     {
-      "artifact": "Infrastructure/artifacts/validation/20260628T203653Z",
-      "assertion": "repo validate recorded required_failures=0 and warn_only_issues=0",
+      "artifact": "Skills/agent-ops/technical-writer/references/evals.yaml",
+      "assertion": "Only criteria/task expected-signal text was narrowed; release cases and forbidden-command checks remain present",
       "outcome": "pass"
     },
     {
-      "artifact": ".harness/reports/thread-replies/019f0ab5-07bb-7091-a6a2-9f74d07a65cb/pm-delivery.json",
-      "assertion": "PM delivery receipt records codex_app__send_message_to_thread delivery to source PM thread",
+      "artifact": ".harness/memory/LEARNINGS.md",
+      "assertion": "Durable lesson records criteria overfit pattern for safe OSS-local documentation outputs",
       "outcome": "pass"
     },
     {
-      "artifact": "https://app.snyk.io/org/jscraik/pr-checks/7a8b1caf-bd2d-426e-9c17-7c84ecb49ca5",
-      "assertion": "Snyk check reports private-test quota exhausted",
+      "artifact": ".harness/evidence/handoff/technical-writer/oss-local.json",
+      "assertion": "Handoff evidence records blocked_runtime, codex_profile=oss-local, codex_exec_invoked=true, case_count=20, blocked_count=20",
       "outcome": "blocked"
     },
     {
-      "artifact": "https://github.com/jscraik/Agent-Skills/pull/294",
-      "assertion": "PR is draft and CodeRabbit remains pending, so merge gate is not allowed",
+      "artifact": "Infrastructure/artifacts/skills/technical-writer/20260629-024740-892292/workflow-closeout.json",
+      "assertion": "Workflow closeout status is blocked with blocker_class=blocked_runtime and mutation_allowed=false",
+      "outcome": "blocked"
+    },
+    {
+      "artifact": "Infrastructure/artifacts/skills/technical-writer/20260629-024740-892292/01-smoke-discovery/codex/stderr.txt",
+      "assertion": "Codex profile runtime failed before skill output with missing field models while decoding the local model-list response",
+      "outcome": "blocked"
+    },
+    {
+      "artifact": "Infrastructure/artifacts/skills/technical-writer/20260629-024740-892292/01-smoke-discovery/codex/stdout.txt",
+      "assertion": "Codex emitted missing metadata for gpt-oss:20b and turn.failed high-demand errors",
+      "outcome": "blocked"
+    },
+    {
+      "artifact": ".harness/reports/thread-replies/019f0ab5-07bb-7091-a6a2-9f74d07a65cb/ollama-runtime-diagnostics.json",
+      "assertion": "gpt-oss:20b, qwen3.5:latest, and gemma3n:e4b all failed before producing output with failed to create command queue / failed to allocate context",
+      "outcome": "blocked"
+    },
+    {
+      "artifact": ".harness/reports/thread-replies/019f0ab5-07bb-7091-a6a2-9f74d07a65cb/pm-delivery.json",
+      "assertion": "PM delivery is blocked because codex_app__send_message_to_thread is discoverable but has no registered handler in this environment",
       "outcome": "blocked"
     }
   ],
   "contradictions": [
     {
-      "artifact": "https://github.com/jscraik/Agent-Skills/pull/294",
-      "problem": "Local and hosted source checks pass, but PR remains blocked because draft state, CodeRabbit pending, and Snyk quota are separate lanes.",
-      "owner": "pr-green-sweep"
+      "artifact": ".harness/evidence/handoff/technical-writer/oss-local.json",
+      "problem": "Previous handoff receipt still reported status=error after the wrapper run; this heartbeat refreshed the handoff evidence from the actual run dataset and workflow closeout.",
+      "owner": "sdk-eval-run-handoff-artifact"
+    },
+    {
+      "artifact": "Infrastructure/artifacts/skills/technical-writer/20260629-023355-042204/scorecard.json",
+      "problem": "The TDD criteria patch passed deterministic gates, but oss-local did not produce behavioral pass/fail evidence because every case was blocked_runtime.",
+      "owner": "runtime/tooling"
+    },
+    {
+      "artifact": "Infrastructure/artifacts/skills/technical-writer/20260629-024740-892292/scorecard.json",
+      "problem": "After starting Ollama and confirming gpt-oss:20b is installed, the full oss-local lane still blocked every case before skill behavior because Codex could not consume the local model endpoint reliably.",
+      "owner": "runtime/tooling"
+    },
+    {
+      "artifact": ".harness/reports/thread-replies/019f0ab5-07bb-7091-a6a2-9f74d07a65cb/ollama-runtime-diagnostics.json",
+      "problem": "The local Ollama runtime cannot initialize model contexts for gpt-oss:20b, qwen3.5:latest, or gemma3n:e4b in this environment, so oss-local cannot produce release behavior evidence.",
+      "owner": "runtime/tooling"
+    },
+    {
+      "artifact": ".harness/reports/thread-replies/019f0ab5-07bb-7091-a6a2-9f74d07a65cb/pm-delivery.json",
+      "problem": "The PM messaging tool is listed in ALL_TOOLS but calling codex_app__send_message_to_thread returned No handler registered for tool: send_message_to_thread.",
+      "owner": "codex-app-thread-tooling"
     }
   ],
   "files_changed": [
+    "Skills/agent-ops/technical-writer/references/evals.yaml",
+    ".harness/memory/LEARNINGS.md",
+    ".harness/evidence/handoff/technical-writer/oss-local.json",
+    ".harness/reports/thread-replies/019f0ab5-07bb-7091-a6a2-9f74d07a65cb/oss-local-tdd-repair-plan.json",
+    ".harness/reports/thread-replies/019f0ab5-07bb-7091-a6a2-9f74d07a65cb/ollama-runtime-diagnostics.json",
     ".harness/reports/thread-replies/019f0ab5-07bb-7091-a6a2-9f74d07a65cb/latest.json",
     ".harness/reports/thread-replies/019f0ab5-07bb-7091-a6a2-9f74d07a65cb/pm-delivery.json"
   ],
   "lessons": [
     {
-      "lesson": "PR stabilization must rebase and refresh generated projection artifacts after remote branch movement before pushing.",
-      "failure_pattern": "Push was rejected as non-fast-forward, and rebasing remote skill-factory updates produced projection/hash drift.",
-      "carry_forward_target": "PR green sweep and repo closeout workflow",
-      "deterministic_guardrail": "run projection sync plus manifest generator, then repo validate and closeout before push",
+      "lesson": "Safe documentation behavior should not fail release criteria because of incidental meta words.",
+      "failure_pattern": "Pass artifacts showed correct boundary behavior while expected-signal checks failed on terms such as supplied, staged, artifact, used, or name.",
+      "carry_forward_target": "Skills SDK eval authoring and technical-writer release scenario criteria",
+      "deterministic_guardrail": "Keep release membership and forbidden-command checks intact, but use minimal observable criteria terms for behavior-shaped acceptance.",
       "recorded_in": ".harness/memory/LEARNINGS.md",
-      "validation": "bash Infrastructure/scripts/lifecycle-and-sync/sync_projection_trees.sh all; python3 Infrastructure/scripts/lifecycle-and-sync/generate_skillset_manifests.py --write --json; ./bin/ask repo validate --json --robot"
+      "validation": "./bin/ask sdk eval scenario-quality Skills/agent-ops/technical-writer --preview --json --robot -> pass"
     }
   ],
-  "next_action": "Keep PR #294 in PR stabilization: wait for CodeRabbit completion or inspect review state when available; Snyk private-test quota requires policy/quota handling, not a source patch."
+  "next_action": "Repair the local Ollama runtime allocation failure before rerunning oss-local; do not make another technical-writer source or criteria edit until native ollama run and codex exec --profile oss-local can each complete at least one turn."
 }
