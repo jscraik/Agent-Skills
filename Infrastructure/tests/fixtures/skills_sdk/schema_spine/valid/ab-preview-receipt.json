@@ -19,8 +19,8 @@
   },
   "fixture": {
     "path": "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json",
-    "digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
-    "size_bytes": 128
+    "digest": "sha256:fda71f6bb394bb6a0628b7e566f5e86ff671bff0d1ec53417570182e5d944e2c",
+    "size_bytes": 682
   },
   "execution_profile": {
     "id": "codex-read-only",
@@ -33,10 +33,17 @@
   },
   "judge_profile": {
     "id": "oss-local",
+    "codex_profile": "oss-local",
     "provider": "codex",
     "mode": "local",
     "host": "codex-cli-profile",
-    "model": "qwen3.5:latest",
+    "model": "gpt-oss:20b",
+    "model_role": "local_sandbox_eval_default",
+    "model_settings": {
+      "num_ctx": 8192,
+      "temperature": 0.1,
+      "top_p": 0.9
+    },
     "network_required": true,
     "secret_env_names": [],
     "auth_boundary": "none",
@@ -47,7 +54,11 @@
     "output_diff": true,
     "validation_results": true,
     "judge_decision": true,
-    "winner_values": ["skill_a", "skill_b", "inconclusive"]
+    "winner_values": [
+      "skill_a",
+      "skill_b",
+      "inconclusive"
+    ]
   },
   "secret_boundary": {
     "skill_execution_env_secret_names": [],
@@ -61,6 +72,14 @@
   "provider_invoked": false,
   "codex_exec_invoked": false,
   "blockers": [],
-  "acceptance_trace": ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022", "VP-030"],
+  "acceptance_trace": [
+    "FR-003",
+    "FR-008",
+    "SA-003",
+    "SA-004",
+    "VP-021",
+    "VP-022",
+    "VP-030"
+  ],
   "agent_summary": "A/B eval preview is ready to run later through Codex sandbox execution."
 }

@@ -4,24 +4,31 @@
   "status": "preview",
   "operation": "ab_judge_preview",
   "run_receipt_path": "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/ab-run-receipt.json",
-  "run_receipt_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-  "experiment_id": "1111222233334444",
+  "run_receipt_digest": "sha256:76eb89ec8abebd5af7ee9b2c43765910011470f05450f1f6bebf425c19d5b1f4",
+  "experiment_id": "2f17c65de51f3a24",
   "judge_profile": {
     "id": "oss-local",
+    "codex_profile": "oss-local",
     "provider": "codex",
     "mode": "local",
     "host": "codex-cli-profile",
-    "model": "qwen3.5:latest",
+    "model": "gpt-oss:20b",
+    "model_role": "local_sandbox_eval_default",
+    "model_settings": {
+      "num_ctx": 8192,
+      "temperature": 0.1,
+      "top_p": 0.9
+    },
     "network_required": true,
     "secret_env_names": [],
     "auth_boundary": "none",
     "receives_sanitized_outputs_only": true
   },
   "rubric_id": "skills-sdk.ab-rubric.v0",
-  "rubric_digest": "sha256:662f3cf0c3e29ea91d0bd6d43880c4ede7b4f7ebff8f60a908764e8d32db0610",
+  "rubric_digest": "sha256:0063e3f35e8bbd93c5de20d2672075267e7b74fb33278db7ab48c5858b99b574",
   "comparison_payload": {
     "schema_version": "skills-sdk.ab-judge-decision.v0",
-    "experiment_id": "1111222233334444",
+    "experiment_id": "2f17c65de51f3a24",
     "rubric": {
       "rubric_id": "skills-sdk.ab-rubric.v0",
       "rubric_version": "v0",
@@ -37,48 +44,72 @@
           "title": "Task success",
           "description": "Variant satisfies the fixture objective and produces the requested outcome.",
           "weight": 0.3,
-          "required_evidence": ["variant_result", "output_last_message_digest", "validation_results"]
+          "required_evidence": [
+            "variant_result",
+            "output_last_message_digest",
+            "validation_results"
+          ]
         },
         {
           "id": "instruction_following",
           "title": "Instruction following",
           "description": "Variant follows the skill, fixture, repository, and safety instructions without scope drift.",
           "weight": 0.2,
-          "required_evidence": ["variant_result", "runner_stdout_digest", "blockers"]
+          "required_evidence": [
+            "variant_result",
+            "runner_stdout_digest",
+            "blockers"
+          ]
         },
         {
           "id": "evidence_quality",
           "title": "Evidence quality",
           "description": "Variant leaves reviewable evidence with clear command, output, and receipt references.",
           "weight": 0.2,
-          "required_evidence": ["runner_stdout_digest", "runner_stderr_digest", "output_last_message_digest"]
+          "required_evidence": [
+            "runner_stdout_digest",
+            "runner_stderr_digest",
+            "output_last_message_digest"
+          ]
         },
         {
           "id": "repo_safety",
           "title": "Repository safety",
           "description": "Variant respects sandbox, secret, mutation, and allowed-path boundaries.",
           "weight": 0.15,
-          "required_evidence": ["sandbox_mode", "blockers", "secret_boundary"]
+          "required_evidence": [
+            "sandbox_mode",
+            "blockers",
+            "secret_boundary"
+          ]
         },
         {
           "id": "maintainability",
           "title": "Maintainability",
           "description": "Variant produces a result that is understandable, locally aligned, and low-risk to evolve.",
           "weight": 0.15,
-          "required_evidence": ["output_last_message_digest", "validation_results", "blockers"]
+          "required_evidence": [
+            "output_last_message_digest",
+            "validation_results",
+            "blockers"
+          ]
         }
       ],
       "winner_policy": {
         "minimum_normalized_delta": 0.1,
         "minimum_confidence": "medium",
         "tie_result": "inconclusive",
-        "allowed_winners": ["skill_a", "skill_b", "inconclusive"]
+        "allowed_winners": [
+          "skill_a",
+          "skill_b",
+          "inconclusive"
+        ]
       },
       "stage_policies": [
         {
           "stage": "local_oss_loop",
           "judge_profile": "oss-local",
-          "default_model": "qwen3.5:latest",
+          "default_model": "gpt-oss:20b",
           "confidence_weight": "fast_signal",
           "promotion_gate": "improvement_signal_only"
         },
@@ -105,7 +136,7 @@
         "unvalidated_judges_are_advisory": true
       }
     },
-    "rubric_digest": "sha256:662f3cf0c3e29ea91d0bd6d43880c4ede7b4f7ebff8f60a908764e8d32db0610",
+    "rubric_digest": "sha256:0063e3f35e8bbd93c5de20d2672075267e7b74fb33278db7ab48c5858b99b574",
     "skill_a": {
       "package_id": "skills-sdk-valid-fixture",
       "package_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
@@ -116,7 +147,7 @@
     },
     "fixture": {
       "path": "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json",
-      "digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333"
+      "digest": "sha256:fda71f6bb394bb6a0628b7e566f5e86ff671bff0d1ec53417570182e5d944e2c"
     },
     "execution_profile": "codex-read-only",
     "variant_results": [
@@ -125,10 +156,10 @@
         "status": "pass",
         "exit_code": 0,
         "sandbox_mode": "read-only",
-        "output_last_message_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888",
-        "runner_stdout_digest": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
-        "runner_stderr_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
-        "semantic_output_excerpt": "Variant A completed the fixture with a concise but less specific answer.",
+        "output_last_message_digest": "sha256:e186cc5daa3c0c25bf0d48003cf51f69cd6ed2480af236696f4c11897b9940f9",
+        "runner_stdout_digest": "sha256:7869cad8873a1e7ba476458a6abaa34412f7cd79c6c62a884afeed9dfb956896",
+        "runner_stderr_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "semantic_output_excerpt": "sanitized output for A",
         "blockers": []
       },
       {
@@ -136,23 +167,39 @@
         "status": "pass",
         "exit_code": 0,
         "sandbox_mode": "read-only",
-        "output_last_message_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-        "runner_stdout_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
-        "runner_stderr_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "semantic_output_excerpt": "Variant B completed the fixture with stronger localization, concrete validation notes, and clearer evidence.",
+        "output_last_message_digest": "sha256:17799ab9cc0fddcdc2c920e2c269c43c17c78713d20ce6a48fb7a99373127404",
+        "runner_stdout_digest": "sha256:7869cad8873a1e7ba476458a6abaa34412f7cd79c6c62a884afeed9dfb956896",
+        "runner_stderr_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "semantic_output_excerpt": "sanitized output for B",
         "blockers": []
       }
     ],
-    "allowed_winners": ["skill_a", "skill_b", "inconclusive"]
+    "allowed_winners": [
+      "skill_a",
+      "skill_b",
+      "inconclusive"
+    ]
   },
-  "judge_prompt_digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+  "judge_prompt_digest": "sha256:68c44f41813edf8431978ee0408496cb04c2294927e3dac5f4a493e87de0c65c",
   "decision_schema_version": "skills-sdk.ab-judge-decision.v0",
-  "allowed_winners": ["skill_a", "skill_b", "inconclusive"],
+  "allowed_winners": [
+    "skill_a",
+    "skill_b",
+    "inconclusive"
+  ],
   "calibration_required": true,
   "provider_invoked": false,
   "network_accessed": false,
   "mutation_performed": false,
   "blockers": [],
-  "acceptance_trace": ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022", "VP-030"],
+  "acceptance_trace": [
+    "FR-003",
+    "FR-008",
+    "SA-003",
+    "SA-004",
+    "VP-021",
+    "VP-022",
+    "VP-030"
+  ],
   "agent_summary": "A/B judge preview is ready; no judge provider has been invoked."
 }

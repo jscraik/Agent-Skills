@@ -81,7 +81,7 @@ class TestSkillsSdkAbPreview(unittest.TestCase):
         self.assertEqual(receipt["skill_a"]["package_id"], "skills-sdk-valid-fixture")
         self.assertEqual(receipt["skill_b"]["package_id"], "skills-sdk-scenario-quality-fixture")
         self.assertEqual(receipt["execution_profile"]["id"], "codex-read-only")
-        self.assertEqual(receipt["judge_profile"]["model"], "qwen3.5:latest")
+        self.assertEqual(receipt["judge_profile"]["model"], "gpt-oss:20b")
         self.assertEqual(receipt["secret_boundary"]["skill_execution_env_secret_names"], [])
         self.assertFalse(receipt["codex_exec_invoked"])
         self.assertFalse(receipt["provider_invoked"])

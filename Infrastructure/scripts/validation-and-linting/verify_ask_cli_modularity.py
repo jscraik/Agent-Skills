@@ -133,6 +133,20 @@ LEGACY_SHAPE_DEBT = {
         "reason": "pre-existing scenario quality regression suite debt",
         "expires": "2026-07-31",
     },
+    "Infrastructure/tests/test_skills_sdk_ab_judge_score.py": {
+        "owner": "skills-sdk",
+        "rule_id": "ask-cli-shape-budget",
+        "ticket": "JSC-SDK-SPINE",
+        "reason": "pre-existing A/B judge score regression suite debt",
+        "expires": "2026-07-31",
+    },
+    "Infrastructure/tests/test_skills_sdk_schema_spine.py": {
+        "owner": "skills-sdk",
+        "rule_id": "ask-cli-shape-budget",
+        "ticket": "JSC-SDK-SPINE",
+        "reason": "pre-existing schema spine regression suite debt",
+        "expires": "2026-07-31",
+    },
     "skills-system/skill-creator/scripts/init_skill.py": {
         "owner": "skill-factory",
         "rule_id": "ask-cli-shape-budget",

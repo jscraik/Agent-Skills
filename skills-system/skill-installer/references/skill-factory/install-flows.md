@@ -65,9 +65,9 @@ Canonical installs must not stop at copied source. Before promoting a command ha
   `./bin/ask sdk eval run <path> --runner internal --mode smoke --codex-profile oss-local --json --robot`
   then `./bin/ask sdk eval run <path> --runner internal --mode smoke --codex-profile oss-cloud --json --robot`.
 - Run Tessl local proof with execute evidence before dry-run or live scoring:
-  `./bin/ask sdk eval tessl-local-proof --skill <path> --workspace skills-sdk-lab --execute --json --robot`.
+  `./bin/ask sdk eval tessl-local-proof --skill <path> --workspace jscraik --execute --json --robot`.
 - Run Tessl live-private dry-run only after the prior gates pass, using controlled staged input:
-  `./bin/ask evals run <path> --mode smoke --runner discovery-smoke --tessl-live-private --tessl-workspace skills-sdk-lab --tessl-live-dry-run --json --robot`.
+  `./bin/ask evals run <path> --mode smoke --runner discovery-smoke --tessl-live-private --tessl-workspace jscraik --tessl-live-dry-run --json --robot`.
 - Run `./bin/ask sdk eval handoff-readiness --skill <path> --preview --json --robot` before live Tessl scoring or any release-readiness claim.
 - Treat oss-local as the 70-75 internal discovery band, oss-cloud as the path
   to >=90 internal confidence, and Tessl live-private as confirmation at >=90

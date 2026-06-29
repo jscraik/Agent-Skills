@@ -9,6 +9,7 @@ BEHAVIORAL_TESSL_ACCEPTANCE_TYPES = {
     "artifact_exists",
     "artifact_contains",
     "command_success",
+    "discovery_question",
     "forbidden_signal",
     "must_not",
     "must_not_claim",
@@ -20,6 +21,21 @@ KEYWORD_ONLY_TESSL_ACCEPTANCE_TYPES = {"regex", "not_regex", "contains", "not_co
 CONCRETE_OUTPUT_ARTIFACT_RE = re.compile(r"(?i)(?<![A-Za-z0-9_.-])[A-Za-z0-9_.-]+\.(?:md|json|txt|yaml|yml)(?![A-Za-z0-9_.-])")
 PROVENANCE_FIXTURE_PATH_RE = re.compile(r"(?i)\breferences/evals/[^\s]+\.md\b")
 PROVENANCE_ONLY_VERBS_RE = re.compile(r"(?i)\b(names?|cites?|references?|points?\s+to|lists?)\b")
+CASE_INPUT_PATH_RE = re.compile(
+    r"(?i)(?<![A-Za-z0-9_./-])(?:canonical|generated|fixtures?|inputs?|sources?)/[^\s,;:)\]}\"']+\.(?:md|json|txt|yaml|yml)\b"
+)
+SIDE_EFFECT_FILE_PROMPT_RE = re.compile(
+    r"(?is)\b(?:write|save|create|produce)\b[^\n]{0,100}\b[A-Za-z0-9_.-]+\.(?:md|json|txt|yaml|yml)\b"
+)
+FINAL_ANSWER_FILE_MARKER_RE = re.compile(r"(?i)\b(?:return|provide|include|show)\b[^\n]{0,80}\b(?:contents?|final answer|response)\b")
+INLINE_INPUT_MARKERS = (
+    "<file",
+    "```",
+    "canonical excerpt",
+    "generated excerpt",
+    "file contents",
+    "inline input",
+)
 GENERIC_EXPECTED_SIGNAL_RE = re.compile(
     r"(?is)^\s*demonstrates\s+the\s+skill-specific\s+behavior\s+in\s+this\s+case\s+should\s+contract\s*:"
 )
@@ -141,7 +157,14 @@ def _case_has_behavioral_acceptance(case: dict[str, object]) -> bool:
 def _acceptance_item_tests_skill_lift(item: dict[str, str]) -> bool:
     item_type = str(item.get("type") or "acceptance").strip().lower()
     value = _acceptance_value(item)
-    if item_type in {"skill_selected", "artifact_exists", "artifact_contains", "command_success", "output_schema"}:
+    if item_type in {
+        "skill_selected",
+        "artifact_exists",
+        "artifact_contains",
+        "command_success",
+        "discovery_question",
+        "output_schema",
+    }:
         return True
     if item_type.startswith(("forbidden", "must_not")):
         return True
@@ -252,6 +275,25 @@ def _case_has_unstaged_repo_path_reference(case: dict[str, object]) -> bool:
     text_parts = [str(case.get(field) or "") for field in ("prompt", "unit", "given", "should")]
     text_parts.extend(_acceptance_value(item) for item in _normalized_acceptance_items(case))
     return bool(UNSTAGED_TESSL_REPO_PATH_RE.search("\n".join(text_parts)))
+
+
+def _case_depends_on_hidden_input_file(case: dict[str, object]) -> bool:
+    prompt = str(case.get("prompt") or "")
+    task = str(case.get("task") or "")
+    visible_text = "\n".join([prompt, task])
+    if not CASE_INPUT_PATH_RE.search(visible_text):
+        return False
+    lowered = visible_text.lower()
+    if any(marker in lowered for marker in INLINE_INPUT_MARKERS):
+        return False
+    return bool(re.search(r"(?i)\b(inspect|read|review|compare|audit|use|open)\b", visible_text))
+
+
+def _case_requires_file_side_effect_without_final_answer_path(case: dict[str, object]) -> bool:
+    visible_text = "\n".join(str(case.get(field) or "") for field in ("prompt", "task"))
+    if not SIDE_EFFECT_FILE_PROMPT_RE.search(visible_text):
+        return False
+    return not FINAL_ANSWER_FILE_MARKER_RE.search(visible_text)
 
 
 def _case_acceptance_text_parts(case: dict[str, object]) -> list[str]:
@@ -481,6 +523,16 @@ TESSL_CASE_FINDING_RULES = (
         _case_has_unstaged_repo_path_reference,
         "unstaged_repo_path_reference",
         "Tessl live-private evals stage a controlled skill package copy, not the live repository. Use package-relative paths such as SKILL.md or references/contract.yaml, or provide an explicit fixture artifact before scoring repo-root paths.",
+    ),
+    (
+        _case_depends_on_hidden_input_file,
+        "hidden_input_file_dependency",
+        "SDK and Tessl release scenarios must inline required input file contents or provide a staged fixture artifact; do not ask isolated runners to inspect package-relative files that are absent from the visible task.",
+    ),
+    (
+        _case_requires_file_side_effect_without_final_answer_path,
+        "read_only_file_artifact_side_effect",
+        "OSS read-only release scenarios must ask for file artifact contents in the final answer rather than requiring the agent to write, save, create, or produce files in the sandbox.",
     ),
 )
 

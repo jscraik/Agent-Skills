@@ -287,3 +287,29 @@ Repo-specific agent knowledge base. Append-only.
 **2026-06-24 [Codex]:** Tessl local development proof is a distinct bridge from Tessl Distribution to Local Runtime Truth, not a substitute for oss-local, oss-cloud, live Tessl scoring, or persistent user runtime activation -> add `ask sdk eval tessl-local-proof` so the SDK stages a controlled package, runs native `tessl plugin lint`, `tessl plugin pack --output <file>.tgz`, temp `tessl install file:` in `/tmp/ask-tessl-local-install`, and optional explicit `tessl review run`; make handoff readiness require the executed local-proof receipt before live Tessl dry-run/scoring claims.
 
 **2026-06-24 [Codex]:** Plugin creation is part of the Skills SDK professional lifecycle, not a separate memory burden for the operator -> expose `ask sdk plugin create|review|install|save-registry` for both `--kind skill` and `--kind plugin`, delegate to existing bounded skills/plugins commands, save only to local skill registry or local plugin marketplace unless a future remote-publish authority lane exists, and keep `remote_publish_performed=false` in registry-save receipts.
+
+**2026-06-27 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2062735754)
+
+**2026-06-28 [Codex]:** Bash command 'zsh' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:431959183)
+
+**2026-06-28 [Codex]:** Bash command 'zsh' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:1273122764)
+
+**2026-06-28 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:1791873440)
+
+**2026-06-28 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:490979608)
+
+**2026-06-28 [Codex]:** Bash command 'python' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:3862258705)
+
+**2026-06-28 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:2833495122)
+
+**2026-06-28 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:1784491479)
+
+**2026-06-28 [Codex]:** PM execution-thread repair reports must carry lessons beyond the transient thread artifact -> require `thread-report/v1.lessons` with a durable `recorded_in` target, reject lessons recorded only under `.harness/reports/thread-replies/`, and require at least one lesson to cite `.harness/memory/LEARNINGS.md` so recurring OSS-local, SDK pipeline, Tessl, and thread-delivery failures become available to future agents.
+
+**2026-06-28 [Codex]:** OSS-local profile invocation proof is not release behavior proof -> treat `codex_exec_invoked=true` and `codex_profile=oss-local` as lane invocation evidence only, keep `oss-cloud`, `tessl-live-dry-run`, and `tessl-live` blocked while the release receipt behavior fails, and require the next repair report to classify remaining failures before another edit loop.
+
+**2026-06-28 [Codex]:** Technical-writer oss-local failures should be classified before every repair loop -> distinguish skill defects from criteria/scorer brittleness, patch only the owning surface, and keep missing command/artifact evidence as `blocked` instead of allowing generated docs to claim validation pass.
+
+**2026-06-28 [Codex]:** Non-monotonic OSS-local repair loops are regression events, not normal iteration -> compare the previous and latest scorecards before editing, classify newly failed, newly blocked, persisted, improved, and scoring-drift cases, and prefer rollback or narrow criteria repair over broader skill instructions.
+
+**2026-06-28 [Codex]:** Rotating OSS-local failures often indicate criteria or task overfit rather than skill behavior drift -> build a three-run matrix, patch one ownership class at a time, and avoid adding global skill text when safe outputs only miss exact scorer wording.

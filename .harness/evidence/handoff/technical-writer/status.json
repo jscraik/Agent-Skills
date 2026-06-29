@@ -1,11 +1,11 @@
 {
   "freshness": {
-    "artifact_head": "618dd1aa6",
-    "current_head": "618dd1aa6",
+    "artifact_head": "33a1b61d4",
+    "current_head": "33a1b61d4",
     "status": "current",
     "warning": null
   },
-  "generated_at": "2026-06-27T18:51:20.810320+00:00",
+  "generated_at": "2026-06-28T16:39:24.414296+00:00",
   "pipeline_lanes": {
     "pull_request": {
       "hosted_check": {
@@ -65,8 +65,8 @@
     }
   },
   "repo": {
-    "branch": "codex/technical-writer-sdk-pipeline",
-    "head": "618dd1aa6",
+    "branch": "codex/sdk-eval-parity-guardrails",
+    "head": "33a1b61d4",
     "root": "."
   },
   "schema_version": "skills-sdk-handoff-status/v1",

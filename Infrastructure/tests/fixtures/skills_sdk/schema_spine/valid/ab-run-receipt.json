@@ -19,8 +19,8 @@
   },
   "fixture": {
     "path": "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/deterministic-eval-pass.json",
-    "digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
-    "size_bytes": 128
+    "digest": "sha256:fda71f6bb394bb6a0628b7e566f5e86ff671bff0d1ec53417570182e5d944e2c",
+    "size_bytes": 682
   },
   "execution_profile": {
     "id": "codex-read-only",
@@ -33,48 +33,84 @@
   },
   "judge_profile": {
     "id": "oss-local",
+    "codex_profile": "oss-local",
     "provider": "codex",
     "mode": "local",
     "host": "codex-cli-profile",
-    "model": "qwen3.5:latest",
+    "model": "gpt-oss:20b",
+    "model_role": "local_sandbox_eval_default",
+    "model_settings": {
+      "num_ctx": 8192,
+      "temperature": 0.1,
+      "top_p": 0.9
+    },
     "network_required": true,
     "secret_env_names": [],
     "auth_boundary": "none",
     "receives_sanitized_outputs_only": true
   },
   "evidence_root": ".harness/artifacts/sdk-ab-evals",
-  "experiment_id": "1111222233334444",
-  "command_variant_labels": ["A", "B"],
+  "experiment_id": "2f17c65de51f3a24",
+  "command_variant_labels": [
+    "A",
+    "B"
+  ],
   "command_plan": [
     {
       "variant_label": "A",
-      "command_argv": ["codex", "exec", "--sandbox", "read-only", "--ask-for-approval", "on-request", "--cd", ".", "--json", "--output-last-message", ".harness/artifacts/sdk-ab-evals/1111222233334444/A/last-message.json", "-"],
+      "command_argv": [
+        "codex",
+        "exec",
+        "--sandbox",
+        "read-only",
+        "--ask-for-approval",
+        "on-request",
+        "--cd",
+        ".",
+        "--json",
+        "--output-last-message",
+        ".harness/artifacts/sdk-ab-evals/2f17c65de51f3a24/A/last-message.json",
+        "-"
+      ],
       "sandbox_mode": "read-only",
       "approval_policy": "on-request",
-      "event_log_path": ".harness/artifacts/sdk-ab-evals/1111222233334444/A/codex-events.jsonl",
-      "output_last_message_path": ".harness/artifacts/sdk-ab-evals/1111222233334444/A/last-message.json",
-      "prompt_stdin_path": ".harness/artifacts/sdk-ab-evals/1111222233334444/A/prompt.md",
-      "runner_stdout_capture_path": ".harness/artifacts/sdk-ab-evals/1111222233334444/A/codex-events.jsonl",
-      "runner_prompt_input_path": ".harness/artifacts/sdk-ab-evals/1111222233334444/A/prompt.md",
-      "prompt_stdin_digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+      "event_log_path": ".harness/artifacts/sdk-ab-evals/2f17c65de51f3a24/A/codex-events.jsonl",
+      "output_last_message_path": ".harness/artifacts/sdk-ab-evals/2f17c65de51f3a24/A/last-message.json",
+      "prompt_stdin_path": ".harness/artifacts/sdk-ab-evals/2f17c65de51f3a24/A/prompt.md",
+      "runner_stdout_capture_path": ".harness/artifacts/sdk-ab-evals/2f17c65de51f3a24/A/codex-events.jsonl",
+      "runner_prompt_input_path": ".harness/artifacts/sdk-ab-evals/2f17c65de51f3a24/A/prompt.md",
+      "prompt_stdin_digest": "sha256:7313a309a5b4a393d25282ab0475a1b90ef506f0980c0244170d7ad2b56d0d25",
       "planned_write_paths": [
-        ".harness/artifacts/sdk-ab-evals/1111222233334444/A/last-message.json"
+        ".harness/artifacts/sdk-ab-evals/2f17c65de51f3a24/A/last-message.json"
       ],
       "allowed_secret_env_names": []
     },
     {
       "variant_label": "B",
-      "command_argv": ["codex", "exec", "--sandbox", "read-only", "--ask-for-approval", "on-request", "--cd", ".", "--json", "--output-last-message", ".harness/artifacts/sdk-ab-evals/1111222233334444/B/last-message.json", "-"],
+      "command_argv": [
+        "codex",
+        "exec",
+        "--sandbox",
+        "read-only",
+        "--ask-for-approval",
+        "on-request",
+        "--cd",
+        ".",
+        "--json",
+        "--output-last-message",
+        ".harness/artifacts/sdk-ab-evals/2f17c65de51f3a24/B/last-message.json",
+        "-"
+      ],
       "sandbox_mode": "read-only",
       "approval_policy": "on-request",
-      "event_log_path": ".harness/artifacts/sdk-ab-evals/1111222233334444/B/codex-events.jsonl",
-      "output_last_message_path": ".harness/artifacts/sdk-ab-evals/1111222233334444/B/last-message.json",
-      "prompt_stdin_path": ".harness/artifacts/sdk-ab-evals/1111222233334444/B/prompt.md",
-      "runner_stdout_capture_path": ".harness/artifacts/sdk-ab-evals/1111222233334444/B/codex-events.jsonl",
-      "runner_prompt_input_path": ".harness/artifacts/sdk-ab-evals/1111222233334444/B/prompt.md",
-      "prompt_stdin_digest": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+      "event_log_path": ".harness/artifacts/sdk-ab-evals/2f17c65de51f3a24/B/codex-events.jsonl",
+      "output_last_message_path": ".harness/artifacts/sdk-ab-evals/2f17c65de51f3a24/B/last-message.json",
+      "prompt_stdin_path": ".harness/artifacts/sdk-ab-evals/2f17c65de51f3a24/B/prompt.md",
+      "runner_stdout_capture_path": ".harness/artifacts/sdk-ab-evals/2f17c65de51f3a24/B/codex-events.jsonl",
+      "runner_prompt_input_path": ".harness/artifacts/sdk-ab-evals/2f17c65de51f3a24/B/prompt.md",
+      "prompt_stdin_digest": "sha256:092fb6edf7f63efcfa9ca57f8f269b3dbcc51efa5d44985bdf39fd63e6c4b4c5",
       "planned_write_paths": [
-        ".harness/artifacts/sdk-ab-evals/1111222233334444/B/last-message.json"
+        ".harness/artifacts/sdk-ab-evals/2f17c65de51f3a24/B/last-message.json"
       ],
       "allowed_secret_env_names": []
     }
@@ -84,34 +120,60 @@
       "variant_label": "A",
       "status": "pass",
       "exit_code": 0,
-      "command_argv": ["codex", "exec", "--sandbox", "read-only", "--ask-for-approval", "on-request", "--cd", ".", "--json", "--output-last-message", ".harness/artifacts/sdk-ab-evals/1111222233334444/A/last-message.json", "-"],
+      "command_argv": [
+        "codex",
+        "exec",
+        "--sandbox",
+        "read-only",
+        "--ask-for-approval",
+        "on-request",
+        "--cd",
+        ".",
+        "--json",
+        "--output-last-message",
+        ".harness/artifacts/sdk-ab-evals/2f17c65de51f3a24/A/last-message.json",
+        "-"
+      ],
       "sandbox_mode": "read-only",
-      "prompt_stdin_path": ".harness/artifacts/sdk-ab-evals/1111222233334444/A/prompt.md",
-      "prompt_stdin_digest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
-      "runner_stdout_capture_path": ".harness/artifacts/sdk-ab-evals/1111222233334444/A/codex-events.jsonl",
-      "runner_stdout_digest": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
-      "runner_stderr_capture_path": ".harness/artifacts/sdk-ab-evals/1111222233334444/A/codex-stderr.txt",
-      "runner_stderr_digest": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
-      "output_last_message_path": ".harness/artifacts/sdk-ab-evals/1111222233334444/A/last-message.json",
-      "output_last_message_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888",
-      "semantic_output_excerpt": "Variant A completed the fixture with a concise but less specific answer.",
+      "prompt_stdin_path": ".harness/artifacts/sdk-ab-evals/2f17c65de51f3a24/A/prompt.md",
+      "prompt_stdin_digest": "sha256:7313a309a5b4a393d25282ab0475a1b90ef506f0980c0244170d7ad2b56d0d25",
+      "runner_stdout_capture_path": ".harness/artifacts/sdk-ab-evals/2f17c65de51f3a24/A/codex-events.jsonl",
+      "runner_stdout_digest": "sha256:7869cad8873a1e7ba476458a6abaa34412f7cd79c6c62a884afeed9dfb956896",
+      "runner_stderr_capture_path": ".harness/artifacts/sdk-ab-evals/2f17c65de51f3a24/A/codex-stderr.txt",
+      "runner_stderr_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "output_last_message_path": ".harness/artifacts/sdk-ab-evals/2f17c65de51f3a24/A/last-message.json",
+      "output_last_message_digest": "sha256:e186cc5daa3c0c25bf0d48003cf51f69cd6ed2480af236696f4c11897b9940f9",
+      "semantic_output_excerpt": "sanitized output for A",
       "blockers": []
     },
     {
       "variant_label": "B",
       "status": "pass",
       "exit_code": 0,
-      "command_argv": ["codex", "exec", "--sandbox", "read-only", "--ask-for-approval", "on-request", "--cd", ".", "--json", "--output-last-message", ".harness/artifacts/sdk-ab-evals/1111222233334444/B/last-message.json", "-"],
+      "command_argv": [
+        "codex",
+        "exec",
+        "--sandbox",
+        "read-only",
+        "--ask-for-approval",
+        "on-request",
+        "--cd",
+        ".",
+        "--json",
+        "--output-last-message",
+        ".harness/artifacts/sdk-ab-evals/2f17c65de51f3a24/B/last-message.json",
+        "-"
+      ],
       "sandbox_mode": "read-only",
-      "prompt_stdin_path": ".harness/artifacts/sdk-ab-evals/1111222233334444/B/prompt.md",
-      "prompt_stdin_digest": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
-      "runner_stdout_capture_path": ".harness/artifacts/sdk-ab-evals/1111222233334444/B/codex-events.jsonl",
-      "runner_stdout_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
-      "runner_stderr_capture_path": ".harness/artifacts/sdk-ab-evals/1111222233334444/B/codex-stderr.txt",
-      "runner_stderr_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-      "output_last_message_path": ".harness/artifacts/sdk-ab-evals/1111222233334444/B/last-message.json",
-      "output_last_message_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-      "semantic_output_excerpt": "Variant B completed the fixture with stronger localization, concrete validation notes, and clearer evidence.",
+      "prompt_stdin_path": ".harness/artifacts/sdk-ab-evals/2f17c65de51f3a24/B/prompt.md",
+      "prompt_stdin_digest": "sha256:092fb6edf7f63efcfa9ca57f8f269b3dbcc51efa5d44985bdf39fd63e6c4b4c5",
+      "runner_stdout_capture_path": ".harness/artifacts/sdk-ab-evals/2f17c65de51f3a24/B/codex-events.jsonl",
+      "runner_stdout_digest": "sha256:7869cad8873a1e7ba476458a6abaa34412f7cd79c6c62a884afeed9dfb956896",
+      "runner_stderr_capture_path": ".harness/artifacts/sdk-ab-evals/2f17c65de51f3a24/B/codex-stderr.txt",
+      "runner_stderr_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "output_last_message_path": ".harness/artifacts/sdk-ab-evals/2f17c65de51f3a24/B/last-message.json",
+      "output_last_message_digest": "sha256:17799ab9cc0fddcdc2c920e2c269c43c17c78713d20ce6a48fb7a99373127404",
+      "semantic_output_excerpt": "sanitized output for B",
       "blockers": []
     }
   ],
@@ -129,6 +191,14 @@
   "codex_exec_invoked": true,
   "timeout_seconds": 1800,
   "blockers": [],
-  "acceptance_trace": ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022", "VP-030"],
+  "acceptance_trace": [
+    "FR-003",
+    "FR-008",
+    "SA-003",
+    "SA-004",
+    "VP-021",
+    "VP-022",
+    "VP-030"
+  ],
   "agent_summary": "A/B eval Codex execution completed; judge scoring has not been invoked."
 }

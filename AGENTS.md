@@ -61,6 +61,13 @@ discovering, and syncing Codex skills, operator docs, and agent workflows.
   gone. Identify the mechanism that allowed the symptom, encode the smallest
   durable guardrail in docs, skills, scripts, or validation, and prove the
   guardrail prevents the same class of failure from reaching Jamie again.
+- Skills SDK PM thread coordination: when Jamie designates one thread as the
+  Skills SDK PM decision surface, delegated execution threads must report back
+  through a validated `thread-report/v1` artifact and a PM delivery receipt
+  before their work can influence the next SDK gate decision. Use
+  [PM Thread Coordination](./Docs/agents/26-pm-thread-coordination.md) and
+  validate with
+  `python3 Infrastructure/scripts/validation-and-linting/validate_thread_pm_delivery.py <report> --require-delivery --json`.
 - Tessl eval contract: when running skill/plugin evals, run the installed local
   `tessl` CLI automatically through the repo wrapper, stage only controlled
   input under `/tmp`, synthesize Tessl
@@ -74,13 +81,15 @@ discovering, and syncing Codex skills, operator docs, and agent workflows.
   that setup blocker directly instead of re-litigating auth, sandboxing, or temp
   staging. Tessl project identity is
   deterministic: plugin-owned skills under `Plugins/<plugin-id>/skills/**`
-  belong to the plugin project, for example `skills-sdk/skill-factory`, and
-  standalone skills belong to their own skill project. Wrappers must check or
+  belong to the plugin project, for example `jscraik/skill-factory`, and
+  standalone skills belong to their own skill project, for example
+  `jscraik/technical-writer`. The workspace is `jscraik`; the project is the
+  per-skill or per-plugin identity under that workspace. Wrappers must check or
   establish that project link before running the Tessl eval/install lane,
   relinking an existing project before creating a new one. The operator-provided
-  workspace name is binding evidence; do not substitute a personal workspace
-  when the requested or visible Tessl workspace is `skills-sdk` or another
-  product workspace. In Codex sessions,
+  workspace name is binding evidence; do not substitute a personal workspace or
+  stale alias when the requested or visible Tessl workspace is `jscraik`. In
+  Codex sessions,
   source the operator-approved
   `/Users/jamiecraik/.codex/.env` environment stream directly when the Tessl
   workspace token is needed; never print token values or shell-expanded

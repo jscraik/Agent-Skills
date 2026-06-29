@@ -1,0 +1,142 @@
+{
+  "schema_version": "thread-report/v1",
+  "thread_id": "019f0ab5-07bb-7091-a6a2-9f74d07a65cb",
+  "repo_head": "fdde40343",
+  "task_id": "pr-294-stabilization-checkpoint",
+  "status": "blocked",
+  "current_gate": "pr-stabilization",
+  "next_gate_allowed": false,
+  "blocked_next_gates": [
+    "merge",
+    "oss-local-repair",
+    "oss-cloud",
+    "tessl-dry-run",
+    "tessl-live"
+  ],
+  "commands": [
+    {
+      "command": "git fetch origin codex/sdk-eval-parity-guardrails",
+      "outcome": "pass",
+      "evidence": "remote branch advanced 842bda239..ea674ee55 before local push"
+    },
+    {
+      "command": "git rebase origin/codex/sdk-eval-parity-guardrails",
+      "outcome": "pass",
+      "evidence": "rebased local checkpoint with no conflicts"
+    },
+    {
+      "command": "bash Infrastructure/scripts/lifecycle-and-sync/sync_projection_trees.sh all",
+      "outcome": "pass",
+      "evidence": "projection-integrity sync status pass after targeted .agents projection-cache write permission"
+    },
+    {
+      "command": "python3 Infrastructure/scripts/lifecycle-and-sync/generate_skillset_manifests.py --write --json",
+      "outcome": "pass",
+      "evidence": "status pass; writes=10"
+    },
+    {
+      "command": "bash Infrastructure/scripts/run-infrastructure-python.sh -m py_compile scripts/validation-and-linting/validate_thread_pm_delivery.py scripts/testing/test_validate_thread_pm_delivery.py",
+      "outcome": "pass",
+      "evidence": "exit 0"
+    },
+    {
+      "command": "bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q scripts/testing/test_validate_thread_pm_delivery.py",
+      "outcome": "pass",
+      "evidence": "8 passed"
+    },
+    {
+      "command": "python3 Infrastructure/scripts/verify_ask_cli_modularity.py --changed-files Infrastructure/scripts/validation-and-linting/validate_thread_pm_delivery.py Infrastructure/scripts/testing/test_validate_thread_pm_delivery.py",
+      "outcome": "pass",
+      "evidence": "Modularity verification passed"
+    },
+    {
+      "command": "bash scripts/validate-codestyle.sh",
+      "outcome": "pass",
+      "evidence": "required_failures=0; warn_only_issues=0 after projection refresh"
+    },
+    {
+      "command": "./bin/ask repo validate --json --robot",
+      "outcome": "pass",
+      "evidence": "status success; required_failures=0; warn_only_issues=0; logs Infrastructure/artifacts/validation/20260628T203653Z"
+    },
+    {
+      "command": "./bin/ask repo closeout --changed --json --robot",
+      "outcome": "pass",
+      "evidence": "status success; no closeout blockers; changed generated projection artifacts classified"
+    },
+    {
+      "command": "./bin/ask skills list --json --robot",
+      "outcome": "pass",
+      "evidence": "status success"
+    },
+    {
+      "command": "git commit --amend --no-edit",
+      "outcome": "pass",
+      "evidence": "commit fdde40343 feat(sdk): ratchet eval parity handoff gates"
+    },
+    {
+      "command": "git push origin codex/sdk-eval-parity-guardrails",
+      "outcome": "pass",
+      "evidence": "remote updated ea674ee55..fdde40343"
+    },
+    {
+      "command": "gh pr checks 294 --watch=false",
+      "outcome": "blocked",
+      "evidence": "security/snyk failed with private-test quota; CodeRabbit pending; all observed source/CI checks pass or skip"
+    },
+    {
+      "command": "gh pr view 294 --json number,title,state,isDraft,mergeStateStatus,reviewDecision,statusCheckRollup,url,headRefOid",
+      "outcome": "blocked",
+      "evidence": "headRefOid fdde4034396c35001275b98dfa15c30716b2e10a; isDraft=true; mergeStateStatus=BLOCKED"
+    }
+  ],
+  "artifact_assertions": [
+    {
+      "artifact": "https://github.com/jscraik/Agent-Skills/pull/294",
+      "assertion": "PR head is fdde4034396c35001275b98dfa15c30716b2e10a after push",
+      "outcome": "pass"
+    },
+    {
+      "artifact": "Infrastructure/artifacts/validation/20260628T203653Z",
+      "assertion": "repo validate recorded required_failures=0 and warn_only_issues=0",
+      "outcome": "pass"
+    },
+    {
+      "artifact": ".harness/reports/thread-replies/019f0ab5-07bb-7091-a6a2-9f74d07a65cb/pm-delivery.json",
+      "assertion": "PM delivery receipt records codex_app__send_message_to_thread delivery to source PM thread",
+      "outcome": "pass"
+    },
+    {
+      "artifact": "https://app.snyk.io/org/jscraik/pr-checks/7a8b1caf-bd2d-426e-9c17-7c84ecb49ca5",
+      "assertion": "Snyk check reports private-test quota exhausted",
+      "outcome": "blocked"
+    },
+    {
+      "artifact": "https://github.com/jscraik/Agent-Skills/pull/294",
+      "assertion": "PR is draft and CodeRabbit remains pending, so merge gate is not allowed",
+      "outcome": "blocked"
+    }
+  ],
+  "contradictions": [
+    {
+      "artifact": "https://github.com/jscraik/Agent-Skills/pull/294",
+      "problem": "Local and hosted source checks pass, but PR remains blocked because draft state, CodeRabbit pending, and Snyk quota are separate lanes.",
+      "owner": "pr-green-sweep"
+    }
+  ],
+  "files_changed": [
+    ".harness/reports/thread-replies/019f0ab5-07bb-7091-a6a2-9f74d07a65cb/latest.json",
+    ".harness/reports/thread-replies/019f0ab5-07bb-7091-a6a2-9f74d07a65cb/pm-delivery.json"
+  ],
+  "lessons": [
+    {
+      "lesson": "PR stabilization must rebase and refresh generated projection artifacts after remote branch movement before pushing.",
+      "failure_pattern": "Push was rejected as non-fast-forward, and rebasing remote skill-factory updates produced projection/hash drift.",
+      "carry_forward_target": "PR green sweep and repo closeout workflow",
+      "deterministic_guardrail": "run projection sync plus manifest generator, then repo validate and closeout before push",
+      "recorded_in": ".harness/memory/LEARNINGS.md",
+      "validation": "bash Infrastructure/scripts/lifecycle-and-sync/sync_projection_trees.sh all; python3 Infrastructure/scripts/lifecycle-and-sync/generate_skillset_manifests.py --write --json; ./bin/ask repo validate --json --robot"
+    }
+  ],
+  "next_action": "Keep PR #294 in PR stabilization: wait for CodeRabbit completion or inspect review state when available; Snyk private-test quota requires policy/quota handling, not a source patch."
+}

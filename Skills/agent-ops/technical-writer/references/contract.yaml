@@ -16,7 +16,7 @@ commands:
   - "./bin/ask sdk eval scorer-calibration Skills/agent-ops/technical-writer --preview --json --robot"
   - "./bin/ask sdk eval run Skills/agent-ops/technical-writer --runner internal --mode smoke --codex-profile oss-local --json --robot"
   - "./bin/ask sdk eval run Skills/agent-ops/technical-writer --runner internal --mode smoke --codex-profile oss-cloud --json --robot"
-  - "./bin/ask sdk eval tessl-local-proof --skill Skills/agent-ops/technical-writer --workspace skills-sdk-lab --execute --json --robot"
+  - "./bin/ask sdk eval tessl-local-proof --skill Skills/agent-ops/technical-writer --workspace jscraik --execute --json --robot"
   - "./bin/ask sdk eval tessl-score --view-json <view-json> --skill Skills/agent-ops/technical-writer --preview --json --robot"
 permission_profile:
   filesystem:
@@ -98,6 +98,8 @@ automatic_failure_conditions:
 evidence_requirements:
   - Operational claims link to file, line, command output, or blocker.
   - Citation-backed docs link important claims to source files, commands, receipts, screenshots, or explicit blockers.
+  - Command example repairs include exact command evidence or a blocked validation statement before changing the example.
+  - Generated, runtime, mirrored, and publication paths name the canonical editable owner before edits; otherwise the response is boundary-report or refresh-only.
   - Missing examples, ownership decisions, terms, visuals, or recovery paths are raised with the writer before being cut or deferred.
   - New durable terms are checked against UBIQUITOUS_LANGUAGE.md, UBIQUITOUS.md, UBIQUITOUS-MAP.md, or glossary files before introduction.
   - Validation results use pass, fail, blocked, or not applicable.

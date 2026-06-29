@@ -18,6 +18,7 @@ from ask.skills_sdk.scenario_quality import (  # noqa: E402
     build_scenario_quality_receipt,
     _yaml_safe_load,
 )
+from ask.skills_sdk.scenario_quality_contracts import validate_scenario_quality_receipt  # noqa: E402
 
 
 FIXTURE_SKILL = "Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill"
@@ -31,6 +32,142 @@ def _write_skill_with_evals(root: Path, evals_text: str) -> Path:
     (skill_dir / "SKILL.md").write_text("---\nname: sample\n---\n# Sample\n", encoding="utf-8")
     (references_dir / "evals.yaml").write_text(evals_text, encoding="utf-8")
     return skill_dir
+
+
+def _two_case_score_parity_evals_yaml() -> str:
+    return """schema_version: '2.0'
+skill_name: sample
+cases:
+- id: tied-case
+  category: happy
+  eval_modes:
+  - smoke
+  realistic: true
+  unit: docs scenario parity
+  given: A release fixture needs proof that SDK and Tessl score receipt scenarios are the same set.
+  should: Return docs-output.md content with source-backed validation claims and no invented command proof.
+  actual_artifact: docs-output.md
+  expected_artifact: docs-output.md
+  prompt: Return the docs-output.md content as a proof-backed docs note for the Tessl score parity review.
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: Returns docs-output.md content with source-backed validation claims and no invented command proof.
+- id: usage-win-case
+  category: edge
+  eval_modes:
+  - smoke
+  realistic: true
+  unit: docs scenario parity
+  given: A usage-win Tessl score path still belongs to the SDK scenario universe.
+  should: Return usage-win-output.md content with source-backed validation claims and no invented command proof.
+  actual_artifact: usage-win-output.md
+  expected_artifact: usage-win-output.md
+  prompt: Return the usage-win-output.md content as a proof-backed docs note for the Tessl score parity review.
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: Returns usage-win-output.md content with source-backed validation claims and no invented command proof.
+"""
+
+
+def _release_set_20_evals_yaml() -> str:
+    foundation = [f"foundation-{index}" for index in range(1, 6)]
+    behavioral = [f"behavioral-{index}" for index in range(1, 16)]
+    case_ids = foundation + behavioral
+    lines = [
+        "schema_version: '2.0'",
+        "skill_name: sample",
+        "release_scenario_sets:",
+        "- id: sample-release-20-v1",
+        "  default: true",
+        "  minimum_scenarios: 20",
+        "  groups:",
+        "    foundation_smoke:",
+        *[f"    - {case_id}" for case_id in foundation],
+        "    behavioral_release:",
+        *[f"    - {case_id}" for case_id in behavioral],
+        "cases:",
+    ]
+    for case_id in case_ids:
+        category = "pressure" if case_id.startswith("behavioral-") and case_id.endswith(("1", "2", "3", "4")) else "edge"
+        lines.extend(
+            [
+                f"- id: {case_id}",
+                f"  category: {category}",
+                "  eval_modes:",
+                "  - release",
+                "  realistic: true",
+                "  why_realistic: This is a realistic release candidate documentation task with observable evidence.",
+                f"  unit: {case_id} unit",
+                f"  given: {case_id} gives the agent a realistic documentation task.",
+                f"  should: Return {case_id}.md content with evidence-backed documentation behavior.",
+                f"  actual_artifact: {case_id}.md",
+                f"  expected_artifact: {case_id}.md",
+                "  reproduce: ./bin/ask sdk eval scenario-quality sample --preview --json --robot",
+                "  claim_ids:",
+                "  - sample.claim",
+                f"  prompt: Return the {case_id}.md content for this documentation task.",
+                "  deterministic_checks:",
+                "    forbidden_commands:",
+                "    - rm -rf",
+                "  acceptance:",
+                "  - type: expected_signal",
+                f"    value: Returns {case_id}.md content with evidence-backed documentation behavior.",
+                "  - type: not_contains",
+                "    value: does not contain unsupported claim",
+            ]
+        )
+    return "\n".join(lines) + "\n"
+
+
+def _write_staged_tessl_json(path: Path, ids: list[str]) -> Path:
+    path.write_text(
+        json.dumps({
+            "data": {
+                "skills_sdk_eval_tessl_live": {
+                    "receipt": {
+                        "staged_files": [f"evals/{scenario_id}/task.md" for scenario_id in ids],
+                    }
+                }
+            }
+        }),
+        encoding="utf-8",
+    )
+    return path
+
+
+def _write_tessl_score_json(
+    path: Path,
+    ids: list[str],
+    *,
+    scenario_count: int | None = None,
+    wins: list[str] | None = None,
+) -> Path:
+    win_ids = wins or []
+    path.write_text(
+        json.dumps({
+            "data": {
+                "skills_sdk_eval_tessl_score": {
+                    "receipt": {
+                        "score_summary": {
+                            "scenario_count": scenario_count if scenario_count is not None else len(ids) + len(win_ids),
+                            "regressions": [],
+                            "ties": ids,
+                            "wins": win_ids,
+                        },
+                        "feedback_loop": {"regression_paths": []},
+                    }
+                }
+            }
+        }),
+        encoding="utf-8",
+    )
+    return path
 
 
 def _command_env() -> dict[str, str]:
@@ -316,7 +453,7 @@ cases:
         blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
         self.assertIn("structured_fields_use_typed_assertions", blocker_ids)
 
-    def test_builder_records_tessl_quality_mismatch_as_advisory_before_live_handoff(self) -> None:
+    def test_builder_blocks_tessl_quality_mismatch_before_next_phase(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             skill_dir = _write_skill_with_evals(
                 Path(temp_dir),
@@ -338,14 +475,15 @@ cases:
 """,
             )
 
-            receipt = build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
 
-        checks = {check["id"]: check for row in receipt["scenario_rows"] for check in row["checks"]}
-        self.assertEqual(checks["platform_tessl_quality:keyword_only_acceptance"]["status"], "advisory")
-        self.assertEqual(checks["platform_tessl_quality:missing_scenario_context"]["status"], "advisory")
-        self.assertFalse(receipt["blockers"])
+        blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
+        self.assertIn("platform_tessl_quality:keyword_only_acceptance", blocker_ids)
+        self.assertIn("platform_tessl_quality:missing_scenario_context", blocker_ids)
+        validate_scenario_quality_receipt(raised.exception.receipt)
 
-    def test_builder_records_skill_name_as_primary_tessl_proof_as_advisory_before_live_handoff(self) -> None:
+    def test_builder_blocks_skill_name_as_primary_tessl_proof_before_next_phase(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             skill_dir = _write_skill_with_evals(
                 Path(temp_dir),
@@ -377,11 +515,55 @@ cases:
 """,
             )
 
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
+        self.assertIn("platform_tessl_quality:skill_name_primary_proof", blocker_ids)
+        validate_scenario_quality_receipt(raised.exception.receipt)
+
+    def test_builder_accepts_discovery_question_as_behavioral_lift(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(
+                Path(temp_dir),
+                """schema_version: '2.0'
+skill_name: sample
+cases:
+- id: discovery-question-behavior
+  category: happy
+  unit: first-turn discovery
+  eval_modes:
+  - smoke
+  realistic: true
+  why_realistic: A real first-turn discovery case.
+  given: A docs task is underspecified before edits.
+  should: Ask one discovery question before changing files.
+  actual_artifact: discovery response
+  expected_artifact: discovery question response
+  reproduce: ./bin/ask sdk eval run sample
+  prompt: Ask the smallest useful discovery question before editing staged docs.
+  claim_ids:
+  - sample.claim
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: discovery_question
+    value: Asks for documentation scope, path, target, or surface before edits.
+  - type: not_contains
+    value: I changed
+""",
+            )
+
             receipt = build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
 
-        checks = {check["id"]: check for row in receipt["scenario_rows"] for check in row["checks"]}
-        self.assertEqual(checks["platform_tessl_quality:skill_name_primary_proof"]["status"], "advisory")
-        self.assertFalse(receipt["blockers"])
+        self.assertEqual(receipt["status"], "preview")
+        row = receipt["scenario_rows"][0]
+        self.assertEqual(row["promotion_status"], "promotion_ready")
+        blocker_ids = {check["id"] for check in row["blockers"]}
+        self.assertNotIn("platform_tessl_quality:missing_skill_lift_acceptance", blocker_ids)
+        self.assertNotIn("platform_tessl_quality:keyword_only_acceptance", blocker_ids)
+        validate_scenario_quality_receipt(receipt)
 
     def test_builder_blocks_live_handoff_case_without_concrete_output_artifact(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -392,6 +574,7 @@ skill_name: sample
 cases:
 - id: artifactless-release-case
   category: edge
+  unit: live handoff output artifact
   eval_modes:
   - release
   - live-private
@@ -422,7 +605,7 @@ cases:
         blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
         self.assertIn("platform_tessl_quality:missing_concrete_output_artifact", blocker_ids)
 
-    def test_builder_records_hidden_reference_dependency_as_advisory_before_live_handoff(self) -> None:
+    def test_builder_blocks_hidden_reference_dependency_before_next_phase(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             skill_dir = _write_skill_with_evals(
                 Path(temp_dir),
@@ -454,11 +637,180 @@ cases:
 """,
             )
 
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
+        self.assertIn("platform_tessl_quality:hidden_reference_dependency", blocker_ids)
+        validate_scenario_quality_receipt(raised.exception.receipt)
+
+    def test_builder_blocks_hidden_input_file_dependency_before_next_phase(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(
+                Path(temp_dir),
+                """schema_version: '2.0'
+skill_name: sample
+cases:
+- id: hidden-input-file
+  category: edge
+  unit: docs ownership fixture
+  eval_modes:
+  - smoke
+  realistic: true
+  why_realistic: Release evals often stage docs ownership fixtures.
+  given: A generated projection appears stale.
+  should: Resolve ownership without editing the projection.
+  actual_artifact: artifacts/hidden-input-file.md
+  expected_artifact: ownership report
+  reproduce: ./bin/ask sdk eval run sample
+  prompt: Inspect generated/sample/SKILL.md and canonical/sample/SKILL.md, then write ownership.md.
+  claim_ids:
+  - sample.claim
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: Names the editable owner and separates refresh evidence.
+  - type: must_not
+    value: Edits the generated projection directly.
+""",
+            )
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
+        self.assertIn("platform_tessl_quality:hidden_input_file_dependency", blocker_ids)
+        validate_scenario_quality_receipt(raised.exception.receipt)
+
+    def test_builder_accepts_inline_input_file_content(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(
+                Path(temp_dir),
+                """schema_version: '2.0'
+skill_name: sample
+cases:
+- id: inline-input-file
+  category: edge
+  unit: docs ownership fixture
+  eval_modes:
+  - smoke
+  realistic: true
+  why_realistic: Release evals often stage docs ownership fixtures.
+  given: A generated projection appears stale.
+  should: Resolve ownership without editing the projection.
+  actual_artifact: artifacts/inline-input-file.md
+  expected_artifact: ownership report
+  reproduce: ./bin/ask sdk eval run sample
+  prompt: |
+    Inspect generated/sample/SKILL.md and canonical/sample/SKILL.md, then return the contents for ownership.md in your final answer.
+
+    <file path="generated/sample/SKILL.md">
+    stale generated projection
+    </file>
+
+    <file path="canonical/sample/SKILL.md">
+    canonical source
+    </file>
+  claim_ids:
+  - sample.claim
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: Names the editable owner and separates refresh evidence.
+  - type: must_not
+    value: Edits the generated projection directly.
+""",
+            )
+
             receipt = build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
 
-        checks = {check["id"]: check for row in receipt["scenario_rows"] for check in row["checks"]}
-        self.assertEqual(checks["platform_tessl_quality:hidden_reference_dependency"]["status"], "advisory")
-        self.assertFalse(receipt["blockers"])
+        row = receipt["scenario_rows"][0]
+        blocker_ids = {check["id"] for check in row["blockers"]}
+        self.assertNotIn("platform_tessl_quality:hidden_input_file_dependency", blocker_ids)
+        validate_scenario_quality_receipt(receipt)
+
+    def test_builder_blocks_read_only_file_artifact_side_effect(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(
+                Path(temp_dir),
+                """schema_version: '2.0'
+skill_name: sample
+cases:
+- id: write-file-side-effect
+  category: edge
+  unit: read-only artifact wording
+  eval_modes:
+  - smoke
+  realistic: true
+  why_realistic: OSS lanes run read-only and score final answers.
+  given: A docs report is needed.
+  should: Return a scoreable artifact without requiring filesystem writes.
+  actual_artifact: artifacts/write-file-side-effect.md
+  expected_artifact: ownership report
+  reproduce: ./bin/ask sdk eval run sample
+  prompt: Write ownership.md for the supplied docs case.
+  claim_ids:
+  - sample.claim
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: Names evidence and separates the proof lane.
+  - type: must_not
+    value: Claims a file was saved in the read-only sandbox.
+""",
+            )
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
+        self.assertIn("platform_tessl_quality:read_only_file_artifact_side_effect", blocker_ids)
+        validate_scenario_quality_receipt(raised.exception.receipt)
+
+    def test_builder_accepts_final_answer_file_artifact_contents(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(
+                Path(temp_dir),
+                """schema_version: '2.0'
+skill_name: sample
+cases:
+- id: final-answer-file-artifact
+  category: edge
+  unit: read-only artifact wording
+  eval_modes:
+  - smoke
+  realistic: true
+  why_realistic: OSS lanes run read-only and score final answers.
+  given: A docs report is needed.
+  should: Return a scoreable artifact without requiring filesystem writes.
+  actual_artifact: artifacts/final-answer-file-artifact.md
+  expected_artifact: ownership report
+  reproduce: ./bin/ask sdk eval run sample
+  prompt: Return the contents for ownership.md in your final answer for the supplied docs case.
+  claim_ids:
+  - sample.claim
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: Names evidence and separates the proof lane.
+  - type: must_not
+    value: Claims a file was saved in the read-only sandbox.
+""",
+            )
+
+            receipt = build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        blocker_ids = {check["id"] for check in receipt["scenario_rows"][0]["blockers"]}
+        self.assertNotIn("platform_tessl_quality:read_only_file_artifact_side_effect", blocker_ids)
+        validate_scenario_quality_receipt(receipt)
 
     def test_release_mode_suite_requires_twenty_scenarios(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -498,6 +850,101 @@ cases:
         self.assertIn("release_minimum_scenario_count", blocker_ids)
         self.assertIn("release_pressure_coverage", blocker_ids)
         self.assertIn("release_negative_edge_coverage", blocker_ids)
+
+    def test_release_scenario_set_accepts_grouped_case_lists(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(Path(temp_dir), _release_set_20_evals_yaml())
+
+            receipt = build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        check_map = {check["id"]: check for check in receipt["quality_checks"]}
+        self.assertEqual(check_map["release_scenario_set_default_unique"]["status"], "pass")
+        self.assertEqual(check_map["release_scenario_set_minimum_count"]["status"], "pass")
+        self.assertEqual(check_map["release_scenario_set_ids_exist"]["status"], "pass")
+        self.assertEqual(check_map["release_scenario_set_cases_are_release_mode"]["status"], "pass")
+        self.assertEqual(receipt["scenario_count"], 20)
+        validate_scenario_quality_receipt(receipt)
+
+    def test_release_scenario_set_accepts_flat_case_lists(self) -> None:
+        payload = _release_set_20_evals_yaml()
+        flat_cases = "\n".join(
+            [
+                "release_scenario_sets:",
+                "- id: sample-release-20-v1",
+                "  default: true",
+                "  minimum_scenarios: 20",
+                "  cases:",
+                *[f"  - foundation-{index}" for index in range(1, 6)],
+                *[f"  - behavioral-{index}" for index in range(1, 16)],
+                "cases:",
+            ]
+        )
+        start = payload.index("release_scenario_sets:")
+        end = payload.index("cases:", start)
+        payload = payload[:start] + flat_cases + payload[end + len("cases:") :]
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(Path(temp_dir), payload)
+
+            receipt = build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        check_map = {check["id"]: check for check in receipt["quality_checks"]}
+        self.assertEqual(check_map["release_scenario_set_minimum_count"]["status"], "pass")
+        self.assertEqual(check_map["release_scenario_set_ids_exist"]["status"], "pass")
+        self.assertEqual(check_map["release_scenario_set_cases_are_release_mode"]["status"], "pass")
+        validate_scenario_quality_receipt(receipt)
+
+    def test_release_scenario_set_cannot_lower_minimum_below_twenty(self) -> None:
+        payload = _release_set_20_evals_yaml()
+        flat_cases = "\n".join(
+            [
+                "release_scenario_sets:",
+                "- id: sample-release-10-v1",
+                "  default: true",
+                "  minimum_scenarios: 5",
+                "  cases:",
+                *[f"  - foundation-{index}" for index in range(1, 6)],
+                *[f"  - behavioral-{index}" for index in range(1, 6)],
+                "cases:",
+            ]
+        )
+        start = payload.index("release_scenario_sets:")
+        end = payload.index("cases:", start)
+        payload = payload[:start] + flat_cases + payload[end + len("cases:") :]
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(Path(temp_dir), payload)
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        check_map = {check["id"]: check for check in raised.exception.receipt["quality_checks"]}
+        self.assertEqual(check_map["release_scenario_set_minimum_count"]["status"], "blocker")
+        self.assertIn("sample-release-10-v1:count:10:minimum:20", check_map["release_scenario_set_minimum_count"]["evidence"])
+        validate_scenario_quality_receipt(raised.exception.receipt)
+
+    def test_release_scenario_set_rejects_duplicate_ids(self) -> None:
+        duplicate_set = "\n".join(
+            [
+                "- id: sample-release-20-v1",
+                "  default: false",
+                "  minimum_scenarios: 20",
+                "  groups:",
+                "    foundation_smoke:",
+                "    - foundation-1",
+                "    - foundation-2",
+                "    - foundation-3",
+                "    - foundation-4",
+                "    - foundation-5",
+                "    behavioral_release:",
+                *[f"    - behavioral-{index}" for index in range(1, 16)],
+            ]
+        )
+        payload = _release_set_20_evals_yaml().replace("cases:", f"{duplicate_set}\ncases:", 1)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(Path(temp_dir), payload)
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
+        self.assertIn("release_scenario_set_ids_unique", blocker_ids)
 
     def test_release_rubric_requires_binary_evidence_and_failure_guard(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -571,6 +1018,358 @@ cases:
         self.assertIn("weak-registry-case:security", blockers["registry_dependency_intake_complete"]["evidence"])
         self.assertIn("weak-registry-case:version_or_pin", blockers["registry_dependency_intake_complete"]["evidence"])
         self.assertIn("weak-registry-case:local_validation", blockers["registry_dependency_intake_complete"]["evidence"])
+
+    def test_scenario_set_parity_accepts_canonical_and_reviewed_fixture_ids(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            skill_dir = _write_skill_with_evals(
+                temp_path,
+                """schema_version: '2.0'
+skill_name: sample
+cases:
+- id: canonical-case
+  category: happy
+  eval_modes:
+  - smoke
+  realistic: true
+  unit: docs scenario parity
+  given: A release fixture needs proof that SDK, staged Tessl, and Tessl score scenarios are the same set.
+  should: Return docs-output.md content with source-backed validation claims and no invented command proof.
+  actual_artifact: docs-output.md
+  expected_artifact: docs-output.md
+  prompt: Return the docs-output.md content as a proof-backed docs note for the scenario parity review.
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: Returns docs-output.md content with source-backed validation claims and no invented command proof.
+""",
+            )
+            reviewed_dir = skill_dir / "references" / "evals"
+            reviewed_dir.mkdir()
+            (reviewed_dir / "eval.visual-evidence-decision.md").write_text("# Visual evidence decision\n", encoding="utf-8")
+            ids = ["canonical-case", "generated-eval.visual-evidence-decision"]
+            staged_json = _write_staged_tessl_json(temp_path / "staged.json", ids)
+            score_json = _write_tessl_score_json(temp_path / "score.json", ids)
+
+            receipt = build_scenario_quality_receipt(
+                temp_path,
+                source_path=skill_dir,
+                query="sample_skill",
+                tessl_staged_json=staged_json,
+                tessl_score_json=score_json,
+            )
+
+        self.assertEqual(receipt["scenario_set_parity"]["canonical_count"], 1)
+        self.assertEqual(receipt["scenario_set_parity"]["reviewed_fixture_count"], 1)
+        self.assertFalse(receipt["blockers"])
+        validate_scenario_quality_receipt(receipt)
+
+    def test_scenario_set_parity_normalizes_tessl_staged_case_ids(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            skill_dir = _write_skill_with_evals(
+                temp_path,
+                """schema_version: '2.0'
+skill_name: sample
+cases:
+- id: docs/foo
+  category: happy
+  eval_modes:
+  - smoke
+  realistic: true
+  unit: docs scenario parity
+  given: A scenario id contains characters that Tessl staging normalizes.
+  should: Return docs-output.md content with source-backed validation claims and no invented command proof.
+  actual_artifact: docs-output.md
+  expected_artifact: docs-output.md
+  prompt: Return the docs-output.md content as a proof-backed docs note for the scenario parity review.
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: Returns docs-output.md content with source-backed validation claims and no invented command proof.
+""",
+            )
+            staged_json = _write_staged_tessl_json(temp_path / "staged.json", ["docs-foo"])
+            score_json = _write_tessl_score_json(temp_path / "score.json", ["docs/foo"])
+
+            receipt = build_scenario_quality_receipt(
+                temp_path,
+                source_path=skill_dir,
+                query="sample_skill",
+                tessl_staged_json=staged_json,
+                tessl_score_json=score_json,
+            )
+
+        self.assertEqual(receipt["scenario_set_parity"]["missing_from_staged"], [])
+        self.assertEqual(receipt["scenario_set_parity"]["extra_in_staged"], [])
+        self.assertEqual(receipt["scenario_set_parity"]["missing_from_score_receipt"], [])
+        self.assertFalse(receipt["blockers"])
+        validate_scenario_quality_receipt(receipt)
+
+    def test_scenario_set_parity_uses_selected_release_set_universe(self) -> None:
+        payload = _release_set_20_evals_yaml() + """
+- id: non-release-doc-case
+  category: happy
+  eval_modes:
+  - smoke
+  realistic: true
+  unit: docs scenario parity
+  given: A non-release documentation scenario belongs to the full suite but not the selected release set.
+  should: Return non-release-doc-case.md content with source-backed validation claims.
+  actual_artifact: non-release-doc-case.md
+  expected_artifact: non-release-doc-case.md
+  prompt: Return the non-release-doc-case.md content.
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: Returns non-release-doc-case.md content with source-backed validation claims.
+"""
+        release_ids = [f"foundation-{index}" for index in range(1, 6)] + [f"behavioral-{index}" for index in range(1, 16)]
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            skill_dir = _write_skill_with_evals(temp_path, payload)
+            reviewed_dir = skill_dir / "references" / "evals"
+            reviewed_dir.mkdir()
+            (reviewed_dir / "eval.visual-evidence-decision.md").write_text("# Visual evidence decision\n", encoding="utf-8")
+            ids = [*release_ids, "generated-eval.visual-evidence-decision"]
+            staged_json = _write_staged_tessl_json(temp_path / "staged.json", ids)
+            score_json = _write_tessl_score_json(temp_path / "score.json", ids)
+
+            receipt = build_scenario_quality_receipt(
+                temp_path,
+                source_path=skill_dir,
+                query="sample_skill",
+                tessl_staged_json=staged_json,
+                tessl_score_json=score_json,
+                scenario_set="sample-release-20-v1",
+            )
+
+        self.assertEqual(receipt["scenario_count"], 21)
+        self.assertEqual(receipt["scenario_set_parity"]["canonical_count"], 20)
+        self.assertEqual(receipt["scenario_set_parity"]["reviewed_fixture_count"], 1)
+        self.assertFalse(receipt["blockers"])
+        validate_scenario_quality_receipt(receipt)
+
+    def test_scenario_set_parity_blocks_unknown_selected_release_set(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            skill_dir = _write_skill_with_evals(temp_path, _release_set_20_evals_yaml())
+            release_ids = [f"foundation-{index}" for index in range(1, 6)] + [f"behavioral-{index}" for index in range(1, 16)]
+            staged_json = _write_staged_tessl_json(temp_path / "staged.json", release_ids)
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(
+                    temp_path,
+                    source_path=skill_dir,
+                    query="sample_skill",
+                    tessl_staged_json=staged_json,
+                    scenario_set="missing-release-set",
+                )
+
+        blockers = {check["id"]: check for check in raised.exception.receipt["blockers"]}
+        self.assertIn("release_scenario_set_selector_valid", blockers)
+        self.assertEqual(
+            blockers["release_scenario_set_selector_valid"]["evidence"],
+            ["scenario_set:missing-release-set:not_found_or_empty"],
+        )
+        self.assertEqual(raised.exception.receipt["scenario_set_parity"]["canonical_count"], 0)
+        validate_scenario_quality_receipt(raised.exception.receipt)
+
+    def test_scenario_set_parity_blocks_tessl_case_id_collisions(self) -> None:
+        evals_text = """schema_version: '2.0'
+skill_name: sample
+cases:
+- id: docs/foo
+  category: happy
+  eval_modes:
+  - smoke
+  realistic: true
+  unit: docs slash scenario
+  given: A docs scenario id contains a slash.
+  should: Return docs-slash.md content with evidence-backed documentation behavior.
+  actual_artifact: docs-slash.md
+  expected_artifact: docs-slash.md
+  prompt: Return docs-slash.md content.
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: Returns docs-slash.md content with evidence-backed documentation behavior.
+- id: docs-foo
+  category: edge
+  eval_modes:
+  - smoke
+  realistic: true
+  unit: docs dash scenario
+  given: A docs scenario id already contains the Tessl-safe dash form.
+  should: Return docs-dash.md content with evidence-backed documentation behavior.
+  actual_artifact: docs-dash.md
+  expected_artifact: docs-dash.md
+  prompt: Return docs-dash.md content.
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: Returns docs-dash.md content with evidence-backed documentation behavior.
+"""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            skill_dir = _write_skill_with_evals(temp_path, evals_text)
+            staged_json = _write_staged_tessl_json(temp_path / "staged.json", ["docs-foo"])
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(
+                    temp_path,
+                    source_path=skill_dir,
+                    query="sample_skill",
+                    tessl_staged_json=staged_json,
+                )
+
+        check_map = {check["id"]: check for check in raised.exception.receipt["quality_checks"]}
+        self.assertEqual(check_map["scenario_set_tessl_case_ids_unique"]["status"], "blocker")
+        self.assertEqual(check_map["scenario_set_tessl_case_ids_unique"]["evidence"], ["docs-foo:docs-foo,docs/foo"])
+        validate_scenario_quality_receipt(raised.exception.receipt)
+
+    def test_scenario_set_parity_counts_tessl_score_wins_as_covered_paths(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            skill_dir = _write_skill_with_evals(
+                temp_path,
+                _two_case_score_parity_evals_yaml(),
+            )
+            score_json = _write_tessl_score_json(temp_path / "score.json", ["tied-case"], wins=["usage-win-case"])
+
+            receipt = build_scenario_quality_receipt(
+                temp_path,
+                source_path=skill_dir,
+                query="sample_skill",
+                tessl_score_json=score_json,
+            )
+
+        self.assertEqual(receipt["scenario_set_parity"]["score_receipt_path_count"], 2)
+        self.assertEqual(receipt["scenario_set_parity"]["score_receipt_declared_count"], 2)
+        self.assertEqual(receipt["scenario_set_parity"]["missing_from_score_receipt"], [])
+        self.assertFalse(receipt["blockers"])
+        validate_scenario_quality_receipt(receipt)
+
+    def test_scenario_set_parity_blocks_missing_tessl_score_win_paths(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            skill_dir = _write_skill_with_evals(
+                temp_path,
+                _two_case_score_parity_evals_yaml(),
+            )
+            score_json = _write_tessl_score_json(temp_path / "score.json", ["tied-case"], scenario_count=2)
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(
+                    temp_path,
+                    source_path=skill_dir,
+                    query="sample_skill",
+                    tessl_score_json=score_json,
+                )
+
+        receipt = raised.exception.receipt
+        blockers = {check["id"]: check for check in receipt["blockers"]}
+        self.assertIn("scenario_set_score_receipt_matches_sdk", blockers)
+        self.assertEqual(receipt["scenario_set_parity"]["score_receipt_path_count"], 1)
+        self.assertEqual(receipt["scenario_set_parity"]["missing_from_score_receipt"], ["usage-win-case"])
+        self.assertIn("missing:usage-win-case", blockers["scenario_set_score_receipt_matches_sdk"]["evidence"])
+        validate_scenario_quality_receipt(receipt)
+
+    def test_scenario_set_parity_blocks_staged_tessl_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            skill_dir = _write_skill_with_evals(
+                temp_path,
+                """schema_version: '2.0'
+skill_name: sample
+cases:
+- id: canonical-case
+  category: happy
+  eval_modes:
+  - smoke
+  realistic: true
+  unit: docs scenario parity
+  given: A release fixture needs proof that SDK and staged Tessl scenarios are the same set.
+  should: Return docs-output.md content with source-backed validation claims and no invented command proof.
+  actual_artifact: docs-output.md
+  expected_artifact: docs-output.md
+  prompt: Return the docs-output.md content as a proof-backed docs note for the staged scenario parity review.
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: Returns docs-output.md content with source-backed validation claims and no invented command proof.
+""",
+            )
+            staged_json = _write_staged_tessl_json(temp_path / "staged.json", ["canonical-case", "unexpected-extra"])
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(
+                    temp_path,
+                    source_path=skill_dir,
+                    query="sample_skill",
+                    tessl_staged_json=staged_json,
+                )
+
+        receipt = raised.exception.receipt
+        blocker_ids = {check["id"] for check in receipt["blockers"]}
+        self.assertIn("scenario_set_staged_tessl_matches_sdk", blocker_ids)
+        self.assertEqual(receipt["scenario_set_parity"]["extra_in_staged"], ["unexpected-extra"])
+        validate_scenario_quality_receipt(receipt)
+
+    def test_scenario_set_parity_blocks_tessl_score_count_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            skill_dir = _write_skill_with_evals(
+                temp_path,
+                """schema_version: '2.0'
+skill_name: sample
+cases:
+- id: canonical-case
+  category: happy
+  eval_modes:
+  - smoke
+  realistic: true
+  unit: docs scenario parity
+  given: A release fixture needs proof that SDK and Tessl score receipt scenarios are the same set.
+  should: Return docs-output.md content with source-backed validation claims and no invented command proof.
+  actual_artifact: docs-output.md
+  expected_artifact: docs-output.md
+  prompt: Return the docs-output.md content as a proof-backed docs note for the Tessl score parity review.
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: Returns docs-output.md content with source-backed validation claims and no invented command proof.
+""",
+            )
+            score_json = _write_tessl_score_json(temp_path / "score.json", ["canonical-case"], scenario_count=32)
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(
+                    temp_path,
+                    source_path=skill_dir,
+                    query="sample_skill",
+                    tessl_score_json=score_json,
+                )
+
+        receipt = raised.exception.receipt
+        blockers = {check["id"]: check for check in receipt["blockers"]}
+        self.assertIn("scenario_set_score_receipt_matches_sdk", blockers)
+        self.assertIn("declared_count:32:expected:1", blockers["scenario_set_score_receipt_matches_sdk"]["evidence"])
+        validate_scenario_quality_receipt(receipt)
 
 
 if __name__ == "__main__":

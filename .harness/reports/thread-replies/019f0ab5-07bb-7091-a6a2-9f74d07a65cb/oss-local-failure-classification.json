@@ -1,0 +1,57 @@
+{
+  "schema_version": "oss-local-failure-classification/v1",
+  "repo_head": "842bda239",
+  "scenario_set_id": "technical-writer-release-20-v1",
+  "source_receipt": ".harness/evidence/handoff/technical-writer/oss-local.json",
+  "failures": [
+    {
+      "case_id": "generated-boundary",
+      "owner": "scorer",
+      "evidence": "Infrastructure/artifacts/skills/technical-writer/20260628-172921-871097/05-generated-boundary/result.json tier1_failures[0]",
+      "minimal_patch_target": "Skills/agent-ops/technical-writer/references/evals.yaml",
+      "repair_strategy": "Keep the boundary behavior requirement but replace over-specific lexical signal wording with observable generated-projection ownership behavior."
+    },
+    {
+      "case_id": "readme-first-run",
+      "owner": "scenario",
+      "evidence": "Infrastructure/artifacts/skills/technical-writer/20260628-172921-871097/06-readme-first-run/result.json runners.codex.notes[0]",
+      "minimal_patch_target": "Skills/agent-ops/technical-writer/references/evals.yaml",
+      "repair_strategy": "Remove hard skill_selected acceptance from this isolated release case because the runner records selection_signal unavailable while the scenario already prepends the skill body."
+    },
+    {
+      "case_id": "smoke-boundary-discovery",
+      "owner": "skill",
+      "evidence": "Infrastructure/artifacts/skills/technical-writer/20260628-172921-871097/09-smoke-boundary-discovery/codex/final.txt",
+      "minimal_patch_target": "Skills/agent-ops/technical-writer/SKILL.md",
+      "repair_strategy": "Add one exact underspecified-boundary question shape so the model asks for canonical source, generated/runtime projection, runtime links, public publication, or audit-only before edits."
+    },
+    {
+      "case_id": "docs-validation-ledger",
+      "owner": "scorer",
+      "evidence": "Infrastructure/artifacts/skills/technical-writer/20260628-172921-871097/12-docs-validation-ledger/result.json tier1_failures[0]",
+      "minimal_patch_target": "Skills/agent-ops/technical-writer/references/evals.yaml",
+      "repair_strategy": "Keep the stale-command proof behavior but make the signal check observe stale command, wrapper command, and pass/fail/blocked outcome rather than requiring compare/propose/rewrite wording."
+    },
+    {
+      "case_id": "service-doc-reader-job",
+      "owner": "skill",
+      "evidence": "Infrastructure/artifacts/skills/technical-writer/20260628-172921-871097/13-service-doc-reader-job/codex/final.txt",
+      "minimal_patch_target": "Skills/agent-ops/technical-writer/SKILL.md",
+      "repair_strategy": "Instruct blocked service-doc rewrites to avoid preserving unsupported claims as finished prose and instead return a reader-job gap map or bracketed evidence gaps."
+    },
+    {
+      "case_id": "regression-capsule-runtime-boundary",
+      "owner": "skill",
+      "evidence": "Infrastructure/artifacts/skills/technical-writer/20260628-172921-871097/19-regression-capsule-runtime-boundary/result.json tier1_failures[0]",
+      "minimal_patch_target": "Skills/agent-ops/technical-writer/SKILL.md",
+      "repair_strategy": "Add a capsule-boundary response rule that names package-local capsule paths and the validation command, artifact, or blocker evidence used for the decision."
+    },
+    {
+      "case_id": "regression-stale-command-example",
+      "owner": "scenario",
+      "evidence": "Infrastructure/artifacts/skills/technical-writer/20260628-172921-871097/20-regression-stale-command-example/codex/final.txt",
+      "minimal_patch_target": "Skills/agent-ops/technical-writer/references/evals.yaml",
+      "repair_strategy": "Prepend the skill body for this release case and tighten the signal to require stale command, wrapper command, local validation status, and no external readiness claims."
+    }
+  ]
+}

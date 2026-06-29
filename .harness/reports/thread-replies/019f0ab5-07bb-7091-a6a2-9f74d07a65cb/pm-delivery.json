@@ -1,0 +1,11 @@
+{
+  "schema_version": "thread-report-delivery/v1",
+  "thread_id": "019f0ab5-07bb-7091-a6a2-9f74d07a65cb",
+  "pm_thread_id": "019f0314-ba59-7a00-ab78-9bd3174d1d03",
+  "report_path": "latest.json",
+  "delivery_method": "codex_app__send_message_to_thread",
+  "delivery_status": "delivered",
+  "delivered_at": "2026-06-28T20:44:06Z",
+  "message_summary": "Sent PR #294 stabilization update with commit, push, local gates, and hosted PR blockers.",
+  "delivery_evidence": "send_message_to_thread returned threadId 019f0314-ba59-7a00-ab78-9bd3174d1d03"
+}

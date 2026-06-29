@@ -44,6 +44,8 @@ from run_skill_evals import (  # noqa: E402
     _classify_runner_blocker,
     _claim_to_evidence_summary,
     _case_has_executed_check_evidence,
+    _codex_exec_prefix,
+    _filter_cases,
     _load_evals_document,
     _resolve_existing_optional_case_artifact_path,
     _preflight_codex_live_runner,
@@ -51,6 +53,7 @@ from run_skill_evals import (  # noqa: E402
     _isolated_codex_home_for_eval,
     _is_runner_runtime_blocked,
     _is_smoke_only_case,
+    _repo_mise_node_version,
     _scrub_mcp_servers_from_toml,
     _weak_acceptance_reasons,
     _write_junit_report,
@@ -158,6 +161,29 @@ class RunSkillEvalsModeTests(unittest.TestCase):
         self.assertEqual(len(failures), 1)
         self.assertIn("expected_signal failed", failures[0])
 
+    def test_discovery_question_assertion_accepts_scope_question_before_edits(self) -> None:
+        failures = evaluate_assertions_text(
+            (
+                "Before making edits, which documentation path or surface should I inspect first: "
+                "canonical docs, generated projections, publication surfaces, or audit-only?"
+            ),
+            [{"type": "discovery_question", "value": "ask for scope before edits"}],
+            skill_name="technical-writer",
+            selected_skill=True,
+        )
+
+        self.assertEqual(failures, [])
+
+    def test_discovery_question_assertion_rejects_edit_claims(self) -> None:
+        failures = evaluate_assertions_text(
+            "I updated the README. Which docs should I inspect next?",
+            [{"type": "discovery_question", "value": "ask for scope before edits"}],
+            skill_name="technical-writer",
+            selected_skill=True,
+        )
+
+        self.assertEqual(failures, ["discovery_question failed: response claimed an edit before discovery"])
+
     def test_contains_assertions_are_case_insensitive_for_agent_prose(self) -> None:
         self.assertEqual(
             evaluate_assertions_text(
@@ -221,6 +247,70 @@ class RunSkillEvalsModeTests(unittest.TestCase):
                 exit_code=0,
             ),
             "blocked_runtime",
+        )
+
+    def test_empty_successful_exit_with_tool_schema_error_is_runtime_blocker(self) -> None:
+        self.assertEqual(
+            _classify_runner_blocker(
+                output_text="",
+                stdout_text='{"type":"turn.completed"}',
+                stderr_text=(
+                    "failed to parse function arguments: invalid type: string "
+                    "'500', expected usize\n"
+                    "Warning: no last agent message; wrote empty content to final.txt"
+                ),
+                exit_code=0,
+            ),
+            "blocked_runtime",
+        )
+        self.assertIsNone(
+            _classify_runner_blocker(
+                output_text="Projection report: canonical source is editable.",
+                stdout_text='{"type":"turn.completed"}',
+                stderr_text="failed to parse function arguments: invalid type: string '500', expected usize",
+                exit_code=0,
+            )
+        )
+
+    def test_local_model_refresh_failure_is_runtime_blocker(self) -> None:
+        self.assertEqual(
+            _classify_runner_blocker(
+                output_text="",
+                stdout_text="",
+                stderr_text=(
+                    "ERROR codex_models_manager::manager: failed to refresh available models: "
+                    "stream disconnected before completion: error sending request for url "
+                    "(http://localhost:11434/v1/models?client_version=0.141.0)"
+                ),
+                exit_code=1,
+            ),
+            "blocked_runtime",
+        )
+
+    def test_local_model_refresh_warning_with_final_output_is_scored(self) -> None:
+        self.assertIsNone(
+            _classify_runner_blocker(
+                output_text="Which document in the repository would you like me to review first?",
+                stdout_text="",
+                stderr_text=(
+                    "ERROR codex_models_manager::manager: failed to refresh available models: "
+                    "stream disconnected before completion: failed to decode models response: "
+                    "missing field models at line 1 column 527"
+                ),
+                exit_code=0,
+            )
+        )
+
+    def test_sandbox_noise_with_final_output_is_scored(self) -> None:
+        self.assertIsNone(
+            _classify_runner_blocker(
+                output_text="Validation: blocked because the command needs approval.",
+                stdout_text="",
+                stderr_text=(
+                    "exec_command failed: sandbox-exec: sandbox_apply: Operation not permitted"
+                ),
+                exit_code=0,
+            )
         )
 
     def test_runtime_blocker_detection_keeps_stderr_sandbox_failures(self) -> None:
@@ -449,6 +539,7 @@ class RunSkillEvalsModeTests(unittest.TestCase):
             self.assertEqual(cases[0].expected_signals["required_terms"], ["canonical source"])
             self.assertEqual(cases[0].expected_signals["forbidden_terms"], ["runtime projection"])
             self.assertEqual(cases[0].budgets["min_expected_signal_score"], 90)
+
 
     def test_load_evals_parses_riteway_contract_metadata(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -1482,6 +1573,56 @@ class RunSkillEvalsModeTests(unittest.TestCase):
         selected = _filter_cases_for_eval_mode(cases, eval_mode="release")
         self.assertEqual([case.id for case in selected], ["happy", "explicit-release"])
 
+    def test_release_scenario_set_filters_exact_case_ids(self) -> None:
+        cases = [
+            EvalCase(
+                id="writer-gap-gathering",
+                name="Writer gap gathering",
+                prompt="ok",
+                acceptance=["ok"],
+            ),
+            EvalCase(
+                id="generated-eval.writer-gap-gathering",
+                name="Generated writer gap gathering",
+                prompt="generated",
+                acceptance=["generated"],
+            ),
+        ]
+
+        selected = _filter_cases(
+            cases,
+            case_filters=["writer-gap-gathering"],
+            categories=[],
+            exact_case_ids=True,
+        )
+        self.assertEqual([case.id for case in selected], ["writer-gap-gathering"])
+
+    def test_non_release_case_filter_keeps_substring_matching(self) -> None:
+        cases = [
+            EvalCase(
+                id="writer-gap-gathering",
+                name="Writer gap gathering",
+                prompt="ok",
+                acceptance=["ok"],
+            ),
+            EvalCase(
+                id="generated-eval.writer-gap-gathering",
+                name="Generated writer gap gathering",
+                prompt="generated",
+                acceptance=["generated"],
+            ),
+        ]
+
+        selected = _filter_cases(
+            cases,
+            case_filters=["writer-gap-gathering"],
+            categories=[],
+        )
+        self.assertEqual(
+            [case.id for case in selected],
+            ["writer-gap-gathering", "generated-eval.writer-gap-gathering"],
+        )
+
     def test_release_mode_keeps_dual_tagged_smoke_cases_for_live_runners(self) -> None:
         cases = [
             EvalCase(
@@ -1702,6 +1843,38 @@ class RunSkillEvalsModeTests(unittest.TestCase):
         cmd = mocked_run.call_args.args[0]
         self.assertIn("--ignore-user-config", cmd)
         self.assertLess(cmd.index("--ignore-user-config"), cmd.index("--sandbox"))
+
+    def test_codex_exec_prefix_wraps_default_mise_codex_with_repo_node(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            home = root / "home"
+            workspace = root / "workspace"
+            codex_bin = home / ".local/share/mise/installs/npm-openai-codex/latest/bin/codex"
+            node_bin = home / ".local/share/mise/installs/node/24.13.1/bin/node"
+            codex_bin.parent.mkdir(parents=True)
+            node_bin.parent.mkdir(parents=True)
+            codex_bin.write_text("#!/usr/bin/env node\n", encoding="utf-8")
+            node_bin.write_text("#!/bin/sh\n", encoding="utf-8")
+            workspace.mkdir()
+            (workspace / ".mise.toml").write_text('[tools]\n"node" = "24.13.1"\n', encoding="utf-8")
+
+            with (
+                unittest.mock.patch("run_skill_evals.Path.home", return_value=home),
+                unittest.mock.patch("run_skill_evals.WORKSPACE_ROOT", workspace),
+            ):
+                prefix = _codex_exec_prefix(None)
+
+        self.assertEqual(prefix, [str(node_bin), str(codex_bin.resolve()), "exec"])
+
+    def test_repo_mise_node_version_uses_toml_tools_table(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            workspace = Path(tmpdir)
+            (workspace / ".mise.toml").write_text('[env]\nnode = "not-a-tool"\n[tools]\n"node" = "24.13.1"\n', encoding="utf-8")
+
+            with unittest.mock.patch("run_skill_evals.WORKSPACE_ROOT", workspace):
+                version = _repo_mise_node_version()
+
+        self.assertEqual(version, "24.13.1")
 
     def test_run_codex_exec_skips_ignore_user_config_when_unsupported(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

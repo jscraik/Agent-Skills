@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import os
 import shutil
 import subprocess
@@ -60,16 +61,67 @@ def _run_codex_judge(
 
 
 def _codex_judge_command(judge_profile: dict[str, Any], work_dir: Path, output_file: Path) -> list[str]:
+    codex_profile = _codex_profile_id(judge_profile)
     codex_command = [
-        "codex", "exec", "--profile", str(judge_profile["id"]), "--cd", str(work_dir),
-        "--sandbox", "read-only", "--ephemeral", "--json",
-        "--output-last-message", str(output_file), "-",
+        "codex",
+        "exec",
+        "--profile",
+        codex_profile,
+        "--cd",
+        str(work_dir),
+        "--sandbox",
+        "read-only",
+        "--ephemeral",
+        "--json",
+        "--output-last-message",
+        str(output_file),
+        "-",
     ]
+    model_override = _codex_model_override(judge_profile)
+    if model_override is not None:
+        codex_command[2:2] = ["-c", f"model={_json_toml_string(model_override)}"]
+    for override in reversed(_codex_model_setting_overrides(judge_profile)):
+        codex_command[2:2] = ["-c", override]
     op_env_file = _codex_op_env_file_path(judge_profile)
     op_bin = _codex_op_bin() if op_env_file is not None else None
     if op_env_file is not None and op_bin is not None:
         return [op_bin, "run", "--env-file", str(op_env_file), "--", *codex_command]
     return codex_command
+
+
+def _codex_profile_id(judge_profile: dict[str, Any]) -> str:
+    return str(judge_profile.get("codex_profile") or judge_profile["id"])
+
+
+def _codex_model_override(judge_profile: dict[str, Any]) -> str | None:
+    if _codex_profile_id(judge_profile) == str(judge_profile["id"]):
+        return None
+    model = judge_profile.get("model")
+    return model if isinstance(model, str) and model else None
+
+
+def _codex_model_setting_overrides(judge_profile: dict[str, Any]) -> list[str]:
+    settings = judge_profile.get("model_settings")
+    if not isinstance(settings, dict):
+        return []
+    overrides: list[str] = []
+    valid_keys = sorted(key for key in settings if isinstance(key, str) and key)
+    for key in valid_keys:
+        value = settings[key]
+        if isinstance(value, bool):
+            encoded = "true" if value else "false"
+        elif isinstance(value, int | float) and not isinstance(value, bool):
+            encoded = str(value)
+        elif isinstance(value, str):
+            encoded = _json_toml_string(value)
+        else:
+            continue
+        overrides.append(f"model_settings.{key}={encoded}")
+    return overrides
+
+
+def _json_toml_string(value: str) -> str:
+    return json.dumps(value)
 
 
 def _codex_judge_work_dir(output_file: Path) -> Path:
@@ -99,7 +151,7 @@ def _codex_op_bin() -> str | None:
 
 
 def _codex_op_env_file_path(judge_profile: dict[str, Any]) -> Path | None:
-    if judge_profile.get("id") != "oss-cloud":
+    if _codex_profile_id(judge_profile) != "oss-cloud":
         return None
     if not judge_profile.get("secret_env_names"):
         return None
@@ -112,7 +164,7 @@ def _codex_op_env_file_path(judge_profile: dict[str, Any]) -> Path | None:
 
 
 def _copy_codex_profile_config(judge_profile: dict[str, Any], codex_home: Path) -> Path:
-    profile_id = str(judge_profile["id"])
+    profile_id = _codex_profile_id(judge_profile)
     source = _codex_profile_source_path(profile_id)
     if source is None:
         raise CodexProfileConfigError(f"missing Codex profile config for {profile_id}")

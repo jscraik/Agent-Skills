@@ -147,3 +147,4 @@ Read when:
 - You need package contract or eval expectations: [contract](./references/contract.yaml), [evals](./references/evals.yaml), [task profile](./references/task-profile.json).
 - You need ambiguous request questions: [discovery interview](./references/discovery-interview.md).
 - You need source-repo routing policy handles: [routing policy](./references/routing-policy.md).
+- You need Tessl plugin, registry, eval, review, MCP, workspace, install, security-policy, or KnowledgeOS handoff behavior: load the Tessl KnowledgeOS capsule handle from [routing policy](./references/routing-policy.md).

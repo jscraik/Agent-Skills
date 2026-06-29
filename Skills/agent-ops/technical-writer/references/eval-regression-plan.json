@@ -1,0 +1,143 @@
+{
+  "schema_version": "skills-sdk.eval-regression-plan-input.v1",
+  "source_run_id": "019f0933-e8cc-724c-951a-7f1341590e50",
+  "regressions": [
+    {
+      "scenario_id": "wrong-domain",
+      "owner": "criteria",
+      "failure_mode": "Tessl wanted the documentation skill to avoid taking a general parser-refactor implementation request, but the current scenario metadata still describes a proof-backed documentation response as the expected artifact, which blurs refusal versus docs output.",
+      "patch_plan": [
+        {
+          "file": "Skills/agent-ops/technical-writer/references/evals.yaml",
+          "change": "Make wrong-domain acceptance score non-selection, refusal, and reroute evidence explicitly, and remove wording that asks for a documentation response artifact."
+        },
+        {
+          "file": "Skills/agent-ops/technical-writer/SKILL.md",
+          "change": "Keep the trigger boundary concise: implementation refactors route away from technical-writer unless the user asks for documentation, docs review, content, talk, article, or publication work."
+        }
+      ],
+      "retained_regression": {
+        "status": "retained",
+        "path": "Skills/agent-ops/technical-writer/references/evals.yaml"
+      },
+      "validation_commands": [
+        "./bin/ask sdk eval scenario-quality Skills/agent-ops/technical-writer --tessl-staged-json .harness/evidence/handoff/technical-writer/tessl-live-dry-run.json --tessl-score .harness/evidence/handoff/technical-writer/tessl-score-preview.json --preview --json --robot",
+        "./bin/ask sdk eval scorer-quality Skills/agent-ops/technical-writer --preview --json --robot",
+        "./bin/ask sdk eval scorer-calibration Skills/agent-ops/technical-writer --preview --json --robot",
+        "./bin/ask sdk eval handoff-readiness --skill Skills/agent-ops/technical-writer --tessl-score .harness/evidence/handoff/technical-writer/tessl-score-preview.json --preview --json --robot"
+      ]
+    },
+    {
+      "scenario_id": "reader-testing",
+      "owner": "skill",
+      "failure_mode": "Tessl wanted an explicit fresh-reader question map covering rollout, rollback, recovery, evidence found, missing assumptions, and blocked rewrite needs; the skill guidance does not make that reader-test artifact unavoidable enough to beat baseline.",
+      "patch_plan": [
+        {
+          "file": "Skills/agent-ops/technical-writer/SKILL.md",
+          "change": "Promote fresh-reader testing into the core procedure for runbooks and migration docs before rewrite recommendations."
+        },
+        {
+          "file": "Skills/agent-ops/technical-writer/references/documentation-quality.md",
+          "change": "Add a reader-state map and fresh-reader question-set pattern for rollout, rollback, failure recovery, missing assumptions, and blocked rewrite needs."
+        },
+        {
+          "file": "Skills/agent-ops/technical-writer/references/evals.yaml",
+          "change": "Tighten reader-testing acceptance so the rubric scores the full reader question matrix and explicit blocked rewrite needs."
+        }
+      ],
+      "retained_regression": {
+        "status": "retained",
+        "path": "Skills/agent-ops/technical-writer/references/evals.yaml"
+      },
+      "validation_commands": [
+        "./bin/ask sdk eval scenario-quality Skills/agent-ops/technical-writer --tessl-staged-json .harness/evidence/handoff/technical-writer/tessl-live-dry-run.json --tessl-score .harness/evidence/handoff/technical-writer/tessl-score-preview.json --preview --json --robot",
+        "./bin/ask sdk eval scorer-quality Skills/agent-ops/technical-writer --preview --json --robot",
+        "./bin/ask sdk eval scorer-calibration Skills/agent-ops/technical-writer --preview --json --robot",
+        "./bin/ask sdk eval handoff-readiness --skill Skills/agent-ops/technical-writer --tessl-score .harness/evidence/handoff/technical-writer/tessl-score-preview.json --preview --json --robot"
+      ]
+    },
+    {
+      "scenario_id": "generated-boundary",
+      "owner": "skill",
+      "failure_mode": "Tessl wanted canonical-source ownership, generated projection non-editability, and projection-refresh separation; the skill does not force that boundary decision early enough when generated and canonical paths appear together.",
+      "patch_plan": [
+        {
+          "file": "Skills/agent-ops/technical-writer/SKILL.md",
+          "change": "Add a first-step source/projection/runtime/publication boundary decision before edits whenever generated, canonical, runtime, or projected paths are present."
+        },
+        {
+          "file": "Skills/agent-ops/technical-writer/references/contract.yaml",
+          "change": "Make generated projection edits a blocked or refresh-only path unless canonical source ownership is proven."
+        },
+        {
+          "file": "Skills/agent-ops/technical-writer/references/evals.yaml",
+          "change": "Tighten generated-boundary acceptance around canonical editable owner, generated projection non-editability, and separate refresh evidence."
+        }
+      ],
+      "retained_regression": {
+        "status": "retained",
+        "path": "Skills/agent-ops/technical-writer/references/evals.yaml"
+      },
+      "validation_commands": [
+        "./bin/ask sdk eval scenario-quality Skills/agent-ops/technical-writer --tessl-staged-json .harness/evidence/handoff/technical-writer/tessl-live-dry-run.json --tessl-score .harness/evidence/handoff/technical-writer/tessl-score-preview.json --preview --json --robot",
+        "./bin/ask sdk eval scorer-quality Skills/agent-ops/technical-writer --preview --json --robot",
+        "./bin/ask sdk eval scorer-calibration Skills/agent-ops/technical-writer --preview --json --robot",
+        "./bin/ask sdk eval handoff-readiness --skill Skills/agent-ops/technical-writer --tessl-score .harness/evidence/handoff/technical-writer/tessl-score-preview.json --preview --json --robot"
+      ]
+    },
+    {
+      "scenario_id": "smoke-boundary-discovery",
+      "owner": "task",
+      "failure_mode": "Tessl wanted one smallest useful discovery question before edits, but the task both prepends the skill and describes several boundary dimensions, making it easy for the agent to over-answer instead of asking the boundary question.",
+      "patch_plan": [
+        {
+          "file": "Skills/agent-ops/technical-writer/references/evals.yaml",
+          "change": "Make the smoke-boundary-discovery task score only the single discovery question and penalize multi-step implementation or edits."
+        },
+        {
+          "file": "Skills/agent-ops/technical-writer/SKILL.md",
+          "change": "Add a short discovery-only branch for underspecified boundary requests that asks exactly one smallest useful editable-surface question."
+        }
+      ],
+      "retained_regression": {
+        "status": "retained",
+        "path": "Skills/agent-ops/technical-writer/references/evals.yaml"
+      },
+      "validation_commands": [
+        "./bin/ask sdk eval scenario-quality Skills/agent-ops/technical-writer --tessl-staged-json .harness/evidence/handoff/technical-writer/tessl-live-dry-run.json --tessl-score .harness/evidence/handoff/technical-writer/tessl-score-preview.json --preview --json --robot",
+        "./bin/ask sdk eval scorer-quality Skills/agent-ops/technical-writer --preview --json --robot",
+        "./bin/ask sdk eval scorer-calibration Skills/agent-ops/technical-writer --preview --json --robot",
+        "./bin/ask sdk eval handoff-readiness --skill Skills/agent-ops/technical-writer --tessl-score .harness/evidence/handoff/technical-writer/tessl-score-preview.json --preview --json --robot"
+      ]
+    },
+    {
+      "scenario_id": "regression-stale-command-example",
+      "owner": "skill",
+      "failure_mode": "Tessl wanted live wrapper verification or an explicit blocker before rewriting the stale command; the skill does not yet make command-evidence separation and narrow command-only patching strong enough to beat baseline.",
+      "patch_plan": [
+        {
+          "file": "Skills/agent-ops/technical-writer/SKILL.md",
+          "change": "Require exact command evidence or a blocked validation statement before changing command examples, and separate local command proof from external readiness."
+        },
+        {
+          "file": "Skills/agent-ops/technical-writer/references/documentation-quality.md",
+          "change": "Add a stale-command example repair pattern that compares current doc claim, repo wrapper contract, validation outcome, and narrow replacement text."
+        },
+        {
+          "file": "Skills/agent-ops/technical-writer/references/evals.yaml",
+          "change": "Tighten regression-stale-command-example criteria around live wrapper evidence, narrow patch scope, and explicit pass/fail/blocked reporting."
+        }
+      ],
+      "retained_regression": {
+        "status": "retained",
+        "path": "Skills/agent-ops/technical-writer/references/evals.yaml"
+      },
+      "validation_commands": [
+        "./bin/ask sdk eval scenario-quality Skills/agent-ops/technical-writer --tessl-staged-json .harness/evidence/handoff/technical-writer/tessl-live-dry-run.json --tessl-score .harness/evidence/handoff/technical-writer/tessl-score-preview.json --preview --json --robot",
+        "./bin/ask sdk eval scorer-quality Skills/agent-ops/technical-writer --preview --json --robot",
+        "./bin/ask sdk eval scorer-calibration Skills/agent-ops/technical-writer --preview --json --robot",
+        "./bin/ask sdk eval handoff-readiness --skill Skills/agent-ops/technical-writer --tessl-score .harness/evidence/handoff/technical-writer/tessl-score-preview.json --preview --json --robot"
+      ]
+    }
+  ]
+}

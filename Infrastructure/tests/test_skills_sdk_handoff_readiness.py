@@ -46,7 +46,7 @@ def _run_ask(*args: str) -> subprocess.CompletedProcess[str]:
 
 def _readiness_receipt_payload(lane_id: str) -> dict[str, object]:
     if lane_id in {"oss-local", "oss-cloud"}:
-        return {"status": "pass", "codex_profile": lane_id, "codex_exec_invoked": True}
+        return {"status": "pass", "codex_profile": lane_id, "codex_exec_invoked": True, "case_count": 3}
     if lane_id == "tessl-local-proof":
         return {
             "status": "success",
@@ -83,11 +83,11 @@ def _readiness_lane_command(lane_id: str) -> str:
         ),
         "tessl-local-proof": (
             "./bin/ask sdk eval tessl-local-proof --skill Skills/example "
-            "--workspace skills-sdk --execute --json --robot"
+            "--workspace jscraik --execute --json --robot"
         ),
         "tessl-live-dry-run": (
             "./bin/ask evals run Skills/example --tessl-live-private "
-            "--tessl-workspace skills-sdk --tessl-live-dry-run --json --robot"
+            "--tessl-workspace jscraik --tessl-live-dry-run --json --robot"
         ),
     }
     return commands[lane_id]
@@ -116,6 +116,62 @@ def _write_readiness_bundle(temp_dir: Path, *, status: str = "pass") -> Path:
     return readiness_path
 
 
+def _write_tessl_score_receipt(
+    path: Path,
+    *,
+    feedback_status: str = "closed",
+    regressions: list[dict[str, object]] | None = None,
+    usage_percent: float = 95.0,
+    scenario_count: int = 3,
+) -> Path:
+    regressions = regressions or []
+    path.write_text(
+        json.dumps({
+            "data": {
+                "skills_sdk_eval_tessl_score": {
+                    "status": "preview",
+                    "ready": not regressions and feedback_status != "open" and usage_percent >= 90.0,
+                    "receipt": {
+                        "status": "preview",
+                        "blocker_class": None,
+                        "feedback_loop": {
+                            "status": feedback_status,
+                            "regression_count": len(regressions),
+                            "regression_paths": [str(item.get("path")) for item in regressions],
+                        },
+                        "score_summary": {
+                            "scenario_count": scenario_count,
+                            "usage_percent": usage_percent,
+                            "baseline_percent": 70.0,
+                            "regressions": regressions,
+                        },
+                    },
+                }
+            }
+        }),
+        encoding="utf-8",
+    )
+    return path
+
+
+def _write_raw_tessl_score_receipt(path: Path, *, scenario_count: int = 3) -> Path:
+    path.write_text(
+        json.dumps({
+            "schema_version": "skills-sdk.tessl-score-receipt.v0",
+            "status": "preview",
+            "feedback_loop": {"status": "closed", "regression_count": 0},
+            "score_summary": {
+                "scenario_count": scenario_count,
+                "usage_percent": 95.0,
+                "baseline_percent": 70.0,
+                "regressions": [],
+            },
+        }),
+        encoding="utf-8",
+    )
+    return path
+
+
 class TestSkillsSdkHandoffReadiness(unittest.TestCase):
     def test_missing_readiness_artifact_blocks_live_gate(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -135,16 +191,151 @@ class TestSkillsSdkHandoffReadiness(unittest.TestCase):
     def test_complete_readiness_artifact_allows_live_gate(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             readiness_path = _write_readiness_bundle(Path(temp_dir))
+            tessl_score = _write_tessl_score_receipt(Path(temp_dir) / "tessl-score.json")
             receipt = build_handoff_readiness_receipt(
                 REPO_ROOT,
                 source_path=REPO_ROOT / FIXTURE_SKILL,
                 query=FIXTURE_SKILL,
                 readiness_path=readiness_path,
+                tessl_score_path=tessl_score,
             )
 
         self.assertEqual(receipt["status"], "preview")
         self.assertTrue(receipt["ready_for_live_tessl"])
         self.assertEqual(receipt["blockers"], [])
+        self.assertEqual(receipt["tessl_score_summary"]["usage_percent"], 95.0)
+        validate_handoff_readiness_receipt(receipt)
+
+    def test_handoff_readiness_blocks_open_tessl_feedback_loop(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            readiness_path = _write_readiness_bundle(temp_path)
+            tessl_score = _write_tessl_score_receipt(temp_path / "tessl-score.json", feedback_status="open")
+            receipt = build_handoff_readiness_receipt(
+                REPO_ROOT,
+                source_path=REPO_ROOT / FIXTURE_SKILL,
+                query=FIXTURE_SKILL,
+                readiness_path=readiness_path,
+                tessl_score_path=tessl_score,
+            )
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertFalse(receipt["ready_for_live_tessl"])
+        self.assertIn("tessl_feedback_loop_closed", {blocker["id"] for blocker in receipt["blockers"]})
+        self.assertTrue(any("Tessl score feedback loop" in action for action in receipt["required_next_actions"]))
+        self.assertFalse(any(action.startswith("Run live Tessl") for action in receipt["required_next_actions"]))
+        validate_handoff_readiness_receipt(receipt)
+
+    def test_handoff_readiness_blocks_tessl_baseline_wins(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            readiness_path = _write_readiness_bundle(temp_path)
+            tessl_score = _write_tessl_score_receipt(
+                temp_path / "tessl-score.json",
+                regressions=[{"path": "reader-testing", "usage_score": 0, "baseline_score": 2}],
+            )
+            receipt = build_handoff_readiness_receipt(
+                REPO_ROOT,
+                source_path=REPO_ROOT / FIXTURE_SKILL,
+                query=FIXTURE_SKILL,
+                readiness_path=readiness_path,
+                tessl_score_path=tessl_score,
+            )
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertFalse(receipt["ready_for_live_tessl"])
+        self.assertIn("tessl_baseline_wins_absent", {blocker["id"] for blocker in receipt["blockers"]})
+        validate_handoff_readiness_receipt(receipt)
+
+    def test_handoff_readiness_blocks_sub_90_tessl_usage(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            readiness_path = _write_readiness_bundle(temp_path)
+            tessl_score = _write_tessl_score_receipt(temp_path / "tessl-score.json", usage_percent=89.9)
+            receipt = build_handoff_readiness_receipt(
+                REPO_ROOT,
+                source_path=REPO_ROOT / FIXTURE_SKILL,
+                query=FIXTURE_SKILL,
+                readiness_path=readiness_path,
+                tessl_score_path=tessl_score,
+            )
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertFalse(receipt["ready_for_live_tessl"])
+        self.assertIn("tessl_usage_threshold_met", {blocker["id"] for blocker in receipt["blockers"]})
+        validate_handoff_readiness_receipt(receipt)
+
+    def test_handoff_readiness_blocks_smoke_only_oss_release_proof(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            readiness_path = _write_readiness_bundle(temp_path)
+            for lane_id in ("oss-local", "oss-cloud"):
+                (temp_path / f"{lane_id}.json").write_text(
+                    json.dumps({"status": "pass", "codex_profile": lane_id, "codex_exec_invoked": True, "case_count": 2}),
+                    encoding="utf-8",
+                )
+            tessl_score = _write_tessl_score_receipt(temp_path / "tessl-score.json", scenario_count=5)
+            receipt = build_handoff_readiness_receipt(
+                REPO_ROOT,
+                source_path=REPO_ROOT / FIXTURE_SKILL,
+                query=FIXTURE_SKILL,
+                readiness_path=readiness_path,
+                tessl_score_path=tessl_score,
+            )
+
+        self.assertEqual(receipt["status"], "blocked")
+        blocker_ids = {blocker["id"] for blocker in receipt["blockers"]}
+        self.assertIn("oss-local_release_scenario_count_matches_tessl", blocker_ids)
+        self.assertIn("oss-cloud_release_scenario_count_matches_tessl", blocker_ids)
+        validate_handoff_readiness_receipt(receipt)
+
+    def test_handoff_readiness_accepts_raw_tessl_score_receipt(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            readiness_path = _write_readiness_bundle(temp_path)
+            tessl_score = _write_raw_tessl_score_receipt(temp_path / "tessl-score.json")
+            receipt = build_handoff_readiness_receipt(
+                REPO_ROOT,
+                source_path=REPO_ROOT / FIXTURE_SKILL,
+                query=FIXTURE_SKILL,
+                readiness_path=readiness_path,
+                tessl_score_path=tessl_score,
+            )
+
+        self.assertEqual(receipt["status"], "preview")
+        self.assertTrue(receipt["ready_for_live_tessl"])
+        self.assertEqual(receipt["tessl_score_summary"]["scenario_count"], 3)
+        validate_handoff_readiness_receipt(receipt)
+
+    def test_handoff_readiness_compares_oss_to_release_set_universe(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            readiness_path = _write_readiness_bundle(temp_path)
+            for lane_id in ("oss-local", "oss-cloud"):
+                (temp_path / f"{lane_id}.json").write_text(
+                    json.dumps({
+                        "status": "pass",
+                        "codex_profile": lane_id,
+                        "codex_exec_invoked": True,
+                        "case_count": 20,
+                        "scenario_set_case_ids": [f"case-{index}" for index in range(20)],
+                        "release_set_minimum": 20,
+                    }),
+                    encoding="utf-8",
+                )
+            tessl_score = _write_tessl_score_receipt(temp_path / "tessl-score.json", scenario_count=32)
+            receipt = build_handoff_readiness_receipt(
+                REPO_ROOT,
+                source_path=REPO_ROOT / FIXTURE_SKILL,
+                query=FIXTURE_SKILL,
+                readiness_path=readiness_path,
+                tessl_score_path=tessl_score,
+            )
+
+        self.assertEqual(receipt["status"], "preview")
+        blocker_ids = {blocker["id"] for blocker in receipt["blockers"]}
+        self.assertNotIn("oss-local_release_scenario_count_matches_tessl", blocker_ids)
+        self.assertNotIn("oss-cloud_release_scenario_count_matches_tessl", blocker_ids)
         validate_handoff_readiness_receipt(receipt)
 
     def test_handoff_readiness_command_requires_preview(self) -> None:
@@ -287,7 +478,7 @@ class TestSkillsSdkHandoffReadiness(unittest.TestCase):
                 if lane["id"] == "tessl-local-proof":
                     lane["command"] = (
                         "./bin/ask sdk eval tessl-local-proof "
-                        "--skill Skills/example --workspace skills-sdk --preview --json --robot"
+                        "--skill Skills/example --workspace jscraik --preview --json --robot"
                     )
                     receipt_path = Path(lane["receipt_path"])
                     receipt_path.write_text(
@@ -382,6 +573,47 @@ class TestSkillsSdkHandoffReadiness(unittest.TestCase):
         semantic_blockers = [blocker for blocker in receipt["blockers"] if blocker["id"] == "lane_receipt_semantics_valid"]
         self.assertTrue(semantic_blockers)
         self.assertIn("status=preview", semantic_blockers[0]["evidence"])
+
+    def test_handoff_readiness_routes_failed_oss_local_receipt_to_repair_first(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            readiness_path = _write_readiness_bundle(temp_path)
+            oss_receipt = temp_path / "oss-local.json"
+            oss_receipt.write_text(
+                json.dumps({
+                    "status": "error",
+                    "receipt": {
+                        "status": "fail",
+                        "codex_profile": "oss-local",
+                        "codex_exec_invoked": True,
+                        "case_count": 20,
+                        "failed_count": 7,
+                    },
+                }),
+                encoding="utf-8",
+            )
+
+            receipt = build_handoff_readiness_receipt(
+                REPO_ROOT,
+                source_path=REPO_ROOT / FIXTURE_SKILL,
+                query=FIXTURE_SKILL,
+                readiness_path=readiness_path,
+            )
+
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertFalse(receipt["ready_for_live_tessl"])
+        self.assertFalse(receipt["next_gate_allowed"])
+        self.assertEqual(receipt["blocked_next_gates"], ["oss-cloud", "tessl-dry-run", "tessl-live"])
+        oss_local_lane = next(lane for lane in receipt["lanes"] if lane["id"] == "oss-local")
+        self.assertEqual(oss_local_lane["declared_status"], "pass")
+        self.assertEqual(oss_local_lane["status"], "blocked")
+        semantic_blockers = [blocker for blocker in receipt["blockers"] if blocker["id"] == "lane_receipt_semantics_valid"]
+        self.assertTrue(semantic_blockers)
+        self.assertIn("status=error", semantic_blockers[0]["evidence"])
+        self.assertIn("Repair the oss-local release-lane failures", receipt["required_next_actions"][0])
+        self.assertIn("before oss-cloud", receipt["required_next_actions"][0])
+        self.assertIn("do not run live Tessl", receipt["required_next_actions"][0])
+        validate_handoff_readiness_receipt(receipt)
 
     def test_handoff_readiness_blocks_placeholder_lane_commands(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

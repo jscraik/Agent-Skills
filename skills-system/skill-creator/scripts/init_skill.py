@@ -151,8 +151,8 @@ Run the narrowest applicable checks before claiming the skill is ready:
 - ./bin/ask sdk eval scorer-calibration <skill-path> --preview --json --robot
 - ./bin/ask sdk eval run <skill-path> --runner internal --mode smoke --codex-profile oss-local --json --robot
 - ./bin/ask sdk eval run <skill-path> --runner internal --mode smoke --codex-profile oss-cloud --json --robot
-- ./bin/ask sdk eval tessl-local-proof --skill <skill-path> --workspace skills-sdk-lab --execute --json --robot
-- ./bin/ask evals run <skill-path> --mode smoke --runner discovery-smoke --tessl-live-private --tessl-workspace skills-sdk-lab --tessl-live-dry-run --json --robot
+- ./bin/ask sdk eval tessl-local-proof --skill <skill-path> --workspace jscraik --execute --json --robot
+- ./bin/ask evals run <skill-path> --mode smoke --runner discovery-smoke --tessl-live-private --tessl-workspace jscraik --tessl-live-dry-run --json --robot
 - ./bin/ask sdk eval handoff-readiness --skill <skill-path> --preview --json --robot
 
 ### External Review
@@ -332,7 +332,7 @@ evidence_policy:
     - "Repository-wide readiness."
   tessl:
     min_review_score: 95
-    workspace: "skills-sdk-lab"
+    workspace: "jscraik"
     handoff_ladder:
       - "skills audit strict"
       - "sdk eval scenario-quality"

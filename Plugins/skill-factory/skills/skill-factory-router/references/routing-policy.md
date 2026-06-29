@@ -20,6 +20,17 @@ Source handle: `Plugins/skill-factory/references/operator-pattern-map.md`.
 
 Use when a request spans multiple skill-factory lanes or when prior operator patterns clarify whether work belongs in `skillify`, `skill-builder`, `skill-refactor`, `.system/skill-creator`, `.system/skill-installer`, or `plugin-factory`.
 
+## Tessl KnowledgeOS Capsule
+
+Source handle: `Plugins/skill-factory/references/tessl-knowledgeos-capsule.md`.
+
+Use when routing or answering Skill Factory work that depends on Tessl plugin
+layout, registry/install behavior, review/eval lanes, MCP packaging,
+workspace/project setup, security policy, or the KnowledgeOS-to-Skills-SDK
+handoff. Keep KnowledgeOS evidence, Skill Factory package shape, Tessl
+review/eval proof, registry publish state, and runtime visibility as separate
+evidence lanes.
+
 ## Live Deferred-Context Policy
 
 Source handle: `Plugins/skill-factory/references/live-deferred-context.md`.

@@ -43,6 +43,7 @@
 - [23-ctf-workflow-evals](/Docs/agents/23-ctf-workflow-evals.md)
 - [24-tessl-live-skill-eval-workflow](/Docs/agents/24-tessl-live-skill-eval-workflow.md)
 - [25-sdk-runtime-lane-contract](/Docs/agents/25-sdk-runtime-lane-contract.md)
+- [26-pm-thread-coordination](/Docs/agents/26-pm-thread-coordination.md)
 - [ask product golden path command contracts](/Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md)
 
 ## Quick picks
@@ -65,4 +66,5 @@
 | CTF-style workflow evals and skill self-refinement | [/Docs/agents/23-ctf-workflow-evals.md](/Docs/agents/23-ctf-workflow-evals.md)                                                     |
 | Tessl private evals and scenario generation       | [/Docs/agents/24-tessl-live-skill-eval-workflow.md](/Docs/agents/24-tessl-live-skill-eval-workflow.md)                             |
 | Skills SDK runtime lane proof                     | [/Docs/agents/25-sdk-runtime-lane-contract.md](/Docs/agents/25-sdk-runtime-lane-contract.md)                                       |
+| PM thread delegation and reply delivery           | [/Docs/agents/26-pm-thread-coordination.md](/Docs/agents/26-pm-thread-coordination.md)                                             |
 | Product command contracts                         | [/Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md](/Docs/cli-specs/2026-05-01-ask-product-golden-path-contracts.md) |

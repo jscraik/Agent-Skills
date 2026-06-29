@@ -128,6 +128,43 @@
         },
         {
           "evidence": [
+            "./bin/ask sdk eval tessl-local-proof --skill Skills/github/teach --workspace jscraik --execute --json --robot"
+          ],
+          "id": "lane_command_recorded",
+          "message": "Each lane must record the exact command that produced its evidence.",
+          "severity": "blocker",
+          "status": "pass"
+        },
+        {
+          "evidence": [
+            "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/regression-plan-receipt.json"
+          ],
+          "id": "lane_receipt_path_exists",
+          "message": "Passed lanes must point at an existing receipt or durable evidence artifact.",
+          "severity": "blocker",
+          "status": "pass"
+        }
+      ],
+      "command": "./bin/ask sdk eval tessl-local-proof --skill Skills/github/teach --workspace jscraik --execute --json --robot",
+      "id": "tessl-local-proof",
+      "receipt_path": "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/regression-plan-receipt.json",
+      "status": "pass"
+    },
+    {
+      "blocker": null,
+      "blockers": [],
+      "checks": [
+        {
+          "evidence": [
+            "pass"
+          ],
+          "id": "lane_status_pass",
+          "message": "Required live handoff lanes must pass before live Tessl.",
+          "severity": "blocker",
+          "status": "pass"
+        },
+        {
+          "evidence": [
             "./bin/ask evals run Skills/github/teach --tessl-live-private --tessl-live-dry-run --json --robot"
           ],
           "id": "lane_command_recorded",
@@ -181,6 +218,7 @@
     "deterministic_local_gates",
     "oss-local",
     "oss-cloud",
+    "tessl-local-proof",
     "tessl-live-dry-run"
   ],
   "required_next_actions": [
@@ -192,6 +230,7 @@
     "patch_oss_local_failures",
     "oss-cloud",
     "patch_oss_cloud_failures",
+    "tessl-local-proof",
     "tessl-live-dry-run",
     "tessl-live",
     "patch_tessl_failures"
