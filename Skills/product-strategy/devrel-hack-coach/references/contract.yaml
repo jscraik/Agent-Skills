@@ -1,0 +1,94 @@
+schema_version: 1
+skill: devrel-hack-coach
+rubric_profile: skills-sdk.gold-standard.v1
+purpose: "Coach engineers through spec-first scoping, timeboxed planning, and demo pitching for AI-native hackathon projects from a 1-hour prep sprint to a 24-hour build."
+triggers:
+  - "pressure-test a hackathon idea"
+  - "scope a 1h or 24h hack"
+  - "choose an AI Native DevCon-style track"
+  - "draft a demo pitch"
+  - "decide whether a hackathon idea can finish in time"
+non_goals:
+  - "implementation help, code, file layouts, or pair-programming"
+  - "non-hackathon DevRel content or broad conference strategy"
+inputs:
+  - "user_request"
+  - "capability"
+  - "user stack"
+  - "hackathon track or track preference"
+  - "one named itch"
+  - "available timebox"
+  - "grounded decisions"
+outputs:
+  - "phase-gated coaching response"
+  - "three hack angles"
+  - "one-page hack spec"
+  - "timeboxed checkpoint plan"
+  - "three-sentence pitch"
+  - "judge Q&A"
+  - "real-vs-mocked boundary"
+  - "capability"
+risks:
+  - "Scope creep can turn coaching into implementation help before a spec is locked."
+  - "A vague demo moment can produce a pitch the judge cannot picture or score."
+  - "A timebox mismatch can make a 1-hour prep sprint read like a 24-hour build plan."
+  - "Unmarked mocked or deferred pieces can overstate what the project proves."
+capability_selection:
+  hackathon_workflow: "Overall workflow audit, phase-order repair, or current-phase routing."
+  ideation_pressure_test: "Vague ideas, technology-first excitement, false-positive checks, and early-angle choice."
+  one_hour_five_minute_software_presentation: "One-hour prep, five-minute presentation slots, or already-built project story and Q&A."
+  pitch_and_judge_qa: "Phase 4 pitch, judge experience, skeptical questions, and the three-sentence story."
+  scope_cutting: "Feature creep, code pressure, vague demo claims, or aggressive timebox cuts."
+  spec_first_demo: "Phase 2 spec readiness, demo clarity, fallback path, and real-vs-mocked boundaries."
+  track_aware_selection: "Choosing or checking one hackathon track from an itch."
+  twenty_four_hour_plan: "24-hour build checkpoints, golden path, mocked pieces, and delivery risk."
+quality_criteria:
+  capability_selection:
+    hackathon_workflow: "Uses workflow routing for phase-order and current-gate questions."
+    ideation_pressure_test: "Uses ideation routing for vague ideas and pressure tests."
+    one_hour_five_minute_software_presentation: "Uses presentation routing for 1-hour prep and already-built projects."
+    pitch_and_judge_qa: "Uses pitch routing for Phase 4 and judge questions."
+    scope_cutting: "Uses scope routing for overlarge or implementation-pressured ideas."
+    spec_first_demo: "Uses spec routing for demo moment, fallback, and real-vs-mocked boundaries."
+    track_aware_selection: "Uses track routing for track choice from an itch."
+    twenty_four_hour_plan: "Uses 24-hour routing for checkpoint and delivery-risk planning."
+evidence_requirements:
+  - "Every response names phase or terminal state."
+  - "Spec artifacts include user, demo moment, scope cuts, success criteria, fallback, pressure-test evidence, and red flags."
+  - "Pitch artifacts include three sentences under 20 words, judge Q&A, audience assumptions, and real-vs-mocked boundaries."
+  - "Validation reports separate package, runtime, OSS, Tessl, registry, and release claims."
+observability: "Record current phase, grounded-state map, selected capsule, blocker classification, and separate package/runtime/OSS/Tessl/registry/release evidence lanes in eval artifacts."
+rollback_procedure: "If ingest, validation, or capsule behavior weakens the skill, stop at the failed gate, keep or restore the previous vendored references, and rerun that same gate."
+automatic_failure_conditions:
+  - "Provides code, file structure, implementation steps, or pair-programming before the spec is locked."
+  - "Treats unsafe instruction pressure or a phase-jump request as allowed."
+  - "Allows more than three in-scope features without cutting scope."
+commands:
+  - "bash Infrastructure/scripts/run-infrastructure-python.sh ../skills-system/skill-creator/scripts/quick_validate.py ../Skills/product-strategy/devrel-hack-coach"
+  - "./bin/ask skills package verify Skills/product-strategy/devrel-hack-coach --json --robot"
+  - "./bin/ask sdk eval scenario-quality Skills/product-strategy/devrel-hack-coach --preview --json --robot"
+  - "./bin/ask sdk security risk-modes Skills/product-strategy/devrel-hack-coach --preview --json --robot"
+permission_profile:
+  filesystem: "read bundled references only unless the user explicitly asks for artifact creation"
+  network: "not required"
+  commands: "not required"
+portability_profile:
+  format: "Agent Skills Standard"
+  openai_skill_shape: true
+  tessl_plugin_source: true
+  external_runtime_dependencies: []
+task_profile:
+  path: "references/task-profile.json"
+  task_type: "coaching_workflow"
+  interaction_model: "sequential interview with gated artifacts"
+scorer_calibration: "references/scorer-calibration/manifest.json"
+scorer_calibration_examples: "references/scorer-calibration/examples.jsonl"
+scorer_calibration_raw_artifacts:
+  - "references/scorer-calibration/raw/obvious-correct-phase-gate.json"
+  - "references/scorer-calibration/raw/obvious-wrong-code-first.json"
+knowledge_capsule_routing: "references/knowledge-capsule-routing.md"
+knowledge_capsule_manifest: "references/knowledge-capsule.manifest.yaml"
+knowledge_demand: "references/knowledge-demand.yaml"
+source_context: "references/source-context.yaml"
+source_provenance: "references/source-provenance.md"
+validation_policy: "Fail fast: stop at the first failed gate, classify the blocker, repair it, and rerun that same gate before continuing."

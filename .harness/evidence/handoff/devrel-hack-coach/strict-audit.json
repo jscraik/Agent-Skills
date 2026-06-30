@@ -1,0 +1,14 @@
+{
+  "schema_version": "skills-sdk-gate-receipt/v1",
+  "gate": "strict_audit",
+  "status": "pass",
+  "target": "Skills/product-strategy/devrel-hack-coach",
+  "command": "jq '.' .harness/evidence/handoff/devrel-hack-coach/oss-local-smoke-classification-20260630-135516.json",
+  "evidence_refs": [
+    "Skills/product-strategy/devrel-hack-coach/SKILL.md",
+    "Skills/product-strategy/devrel-hack-coach/references/evals.yaml"
+  ],
+  "proves": "The latest oss-local failure was classified before patching.",
+  "does_not_prove": "Does not prove oss-local, oss-cloud, Tessl, PR, CI, or merge readiness.",
+  "generated_at": "2026-06-30T13:05:30.283Z"
+}

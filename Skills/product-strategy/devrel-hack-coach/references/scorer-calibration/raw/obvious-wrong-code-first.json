@@ -1,0 +1,6 @@
+{
+  "id": "obvious-wrong-code-first",
+  "predicted_label": "fail",
+  "rationale": "The artifact jumps into implementation before a locked spec and violates the skill boundary against code-before-spec coaching.",
+  "score": 0.1
+}

@@ -1,0 +1,57 @@
+{
+  "schema_version": "skills-sdk-gate-chain/v1",
+  "target": "Skills/product-strategy/devrel-hack-coach",
+  "target_gate": "scorer_calibration",
+  "gates": [
+    {
+      "id": "sdk_start",
+      "status": "pass",
+      "receipt_path": ".harness/evidence/handoff/devrel-hack-coach/sdk-start.json",
+      "what_this_proves": "sdk_start evidence exists for scorer_calibration movement.",
+      "what_this_does_not_prove": "Does not prove oss-local, oss-cloud, Tessl dry-run, Tessl live, PR, CI, or merge readiness."
+    },
+    {
+      "id": "strict_audit",
+      "status": "pass",
+      "receipt_path": ".harness/evidence/handoff/devrel-hack-coach/strict-audit.json",
+      "what_this_proves": "strict_audit evidence exists for scorer_calibration movement.",
+      "what_this_does_not_prove": "Does not prove oss-local, oss-cloud, Tessl dry-run, Tessl live, PR, CI, or merge readiness."
+    },
+    {
+      "id": "package_verify",
+      "status": "pass",
+      "receipt_path": ".harness/evidence/handoff/devrel-hack-coach/package-verify.json",
+      "what_this_proves": "package_verify evidence exists for scorer_calibration movement.",
+      "what_this_does_not_prove": "Does not prove oss-local, oss-cloud, Tessl dry-run, Tessl live, PR, CI, or merge readiness."
+    },
+    {
+      "id": "security_risk_modes",
+      "status": "pass",
+      "receipt_path": ".harness/evidence/handoff/devrel-hack-coach/security-risk-modes.json",
+      "what_this_proves": "security_risk_modes evidence exists for scorer_calibration movement.",
+      "what_this_does_not_prove": "Does not prove oss-local, oss-cloud, Tessl dry-run, Tessl live, PR, CI, or merge readiness."
+    },
+    {
+      "id": "scenario_quality",
+      "status": "pass",
+      "receipt_path": ".harness/evidence/handoff/devrel-hack-coach/scenario-quality.json",
+      "what_this_proves": "scenario_quality evidence exists for scorer_calibration movement.",
+      "what_this_does_not_prove": "Does not prove oss-local, oss-cloud, Tessl dry-run, Tessl live, PR, CI, or merge readiness."
+    },
+    {
+      "id": "scorer_quality",
+      "status": "pass",
+      "receipt_path": ".harness/evidence/handoff/devrel-hack-coach/scorer-quality.json",
+      "what_this_proves": "scorer_quality evidence exists for scorer_calibration movement.",
+      "what_this_does_not_prove": "Does not prove oss-local, oss-cloud, Tessl dry-run, Tessl live, PR, CI, or merge readiness."
+    },
+    {
+      "id": "scorer_calibration",
+      "status": "pass",
+      "receipt_path": ".harness/evidence/handoff/devrel-hack-coach/scorer-calibration.json",
+      "what_this_proves": "scorer_calibration evidence exists for scorer_calibration movement.",
+      "what_this_does_not_prove": "Does not prove oss-local, oss-cloud, Tessl dry-run, Tessl live, PR, CI, or merge readiness."
+    }
+  ],
+  "generated_at": "2026-06-30T13:05:30.283Z"
+}

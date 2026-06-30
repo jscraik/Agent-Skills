@@ -1,0 +1,19 @@
+{
+  "schema_version": "skills-sdk-plugin-shape/v1",
+  "target": "Skills/product-strategy/devrel-hack-coach",
+  "target_kind": "standalone_skill",
+  "workspace": "jscraik",
+  "private": true,
+  "openai_skill_shape": "pass",
+  "tessl_plugin_shape": "not_applicable",
+  "files": [
+    "SKILL.md",
+    "README.md",
+    "agents/openai.yaml",
+    "references",
+    "references/evals.yaml"
+  ],
+  "proves": "Standalone skill shape is explicit; Tessl plugin container is not required at this gate.",
+  "does_not_prove": "Not registry packaging or publication proof.",
+  "generated_at": "2026-06-30T13:05:30.283Z"
+}

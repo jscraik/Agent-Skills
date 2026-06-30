@@ -1,0 +1,14 @@
+{
+  "schema_version": "skills-sdk-gate-receipt/v1",
+  "gate": "scorer_calibration",
+  "status": "pass",
+  "target": "Skills/product-strategy/devrel-hack-coach",
+  "command": "python3 scripts/validation-and-linting/validate_skills_sdk_release_ratchets.py Skills/product-strategy/devrel-hack-coach --target-gate scorer_calibration --json",
+  "evidence_refs": [
+    "Skills/product-strategy/devrel-hack-coach/SKILL.md",
+    "Skills/product-strategy/devrel-hack-coach/references/evals.yaml"
+  ],
+  "proves": "The scorer calibration gate has required artifacts through the ratchet.",
+  "does_not_prove": "Does not prove oss-local, oss-cloud, Tessl, PR, CI, or merge readiness.",
+  "generated_at": "2026-06-30T13:05:30.283Z"
+}

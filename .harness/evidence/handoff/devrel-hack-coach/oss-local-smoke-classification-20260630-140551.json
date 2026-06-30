@@ -1,0 +1,30 @@
+{
+  "schema_version": "skills-sdk-smoke-failure-classification/v1",
+  "generated_at": "2026-06-30T13:10:00.189Z",
+  "target": "Skills/product-strategy/devrel-hack-coach",
+  "latest_oss_local_run": {
+    "artifact_dir": "Infrastructure/artifacts/skills/devrel-hack-coach/20260630-140551-634801",
+    "command": "./bin/ask sdk eval run Skills/product-strategy/devrel-hack-coach --runner internal --mode smoke --codex-profile oss-local --json --robot",
+    "status": "fail",
+    "case_count": 6,
+    "passed_count": 5,
+    "failed_count": 1,
+    "blocked_count": 0
+  },
+  "failures": [
+    {
+      "case_id": "happy-draft-pitch",
+      "owner": "scenario criteria",
+      "what_oss_wanted": "Ask for the missing spec content before writing the three-sentence pitch and judge Q&A.",
+      "actual_output": "I’m ready to write the pitch and Q&A once I see your lock-file spec. Could you paste the spec (or key sections like Goal, User, Demo Moment, etc.) so I can craft the three-sentence pitch and judge questions?",
+      "current_failure": "Expected-signal terms required locked/completed/one-page/all fields while the output used lock-file spec and named concrete spec fields.",
+      "minimal_patch_target": "references/evals.yaml happy-draft-pitch expected_signal changed to spec pitch Q&A Goal User Demo Moment questions."
+    }
+  ],
+  "blocked_next_gates": [
+    "oss-cloud",
+    "tessl-dry-run",
+    "tessl-live"
+  ],
+  "next_action": "Rerun package verify, scenario-quality, scorer_calibration ratchet, and full oss-local smoke after the signal patch."
+}

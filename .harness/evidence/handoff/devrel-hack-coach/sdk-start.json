@@ -1,0 +1,14 @@
+{
+  "schema_version": "skills-sdk-gate-receipt/v1",
+  "gate": "sdk_start",
+  "status": "pass",
+  "target": "Skills/product-strategy/devrel-hack-coach",
+  "command": "git archive 'stash@{0}^3' Skills/product-strategy/devrel-hack-coach | tar -x",
+  "evidence_refs": [
+    "Skills/product-strategy/devrel-hack-coach/SKILL.md",
+    "Skills/product-strategy/devrel-hack-coach/references/evals.yaml"
+  ],
+  "proves": "The SDK package source path exists for validation.",
+  "does_not_prove": "Does not prove oss-local, oss-cloud, Tessl, PR, CI, or merge readiness.",
+  "generated_at": "2026-06-30T13:05:30.283Z"
+}

@@ -1,0 +1,6 @@
+{
+  "id": "obvious-correct-phase-gate",
+  "predicted_label": "pass",
+  "rationale": "The artifact names the current hackathon phase, asks for missing stack/track/itch input, and avoids code-first implementation.",
+  "score": 0.95
+}

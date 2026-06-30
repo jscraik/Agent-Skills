@@ -1,0 +1,31 @@
+{
+  "schema_version": "skills-sdk-smoke-failure-classification/v1",
+  "generated_at": "2026-06-30T13:02:36.614Z",
+  "target": "Skills/product-strategy/devrel-hack-coach",
+  "latest_oss_local_run": {
+    "artifact_dir": "Infrastructure/artifacts/skills/devrel-hack-coach/20260630-135516-969355",
+    "command": "./bin/ask sdk eval run Skills/product-strategy/devrel-hack-coach --runner internal --mode smoke --codex-profile oss-local --json --robot",
+    "status": "fail",
+    "case_count": 6,
+    "passed_count": 5,
+    "failed_count": 1,
+    "blocked_count": 0
+  },
+  "failures": [
+    {
+      "case_id": "happy-plan-checkpoints",
+      "owner": "scenario criteria",
+      "what_oss_wanted": "Name checkpoint artifacts at T+2h, T+8h, T+16h, and T+22h, including smoke test/golden path language.",
+      "actual_output_summary": "Output named T+2/T+8/T+16/T+22, used smoke-test and golden-path with non-ASCII hyphen variants, named artifacts, and documented mock-vs-real checks.",
+      "current_failure": "Regex only accepted ASCII space/hyphen forms for smoke test/golden path.",
+      "minimal_patch_target": "references/evals.yaml happy-plan-checkpoints regex changed from smoke test|smoke-test|golden path to smoke.?test|golden.?path."
+    }
+  ],
+  "source_state_note": "The restored SDK package is untracked and was absent after the previous oss-local run, while .agents/skills/devrel-hack-coach is a broken symlink whenever the canonical package is absent. Keep source recovery separate from behavioral gate movement.",
+  "blocked_next_gates": [
+    "oss-cloud",
+    "tessl-dry-run",
+    "tessl-live"
+  ],
+  "next_action": "Rerun package verify, scenario-quality, scorer_calibration ratchet, and full oss-local smoke after the criteria patch."
+}
