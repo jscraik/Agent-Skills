@@ -16,12 +16,6 @@ Given: A skill library grows after several successful task-time fixes, but there
 Should: The agent classifies this as skill technical debt risk and asks for library-time maintenance evidence before treating the library as SDK-ready.
 Expected failure: The agent treats successful individual task repairs as proof that the library is healthy.
 
-Bad answer patterns:
-- The agent says the library is healthy because recent tasks passed.
-- The agent ignores routing quality as the library size grows.
-
-Good answer patterns:
-- The agent asks for library-level maintenance and routing evidence.
-- The agent separates task-time repair proof from ecosystem health proof.
-
-This is the portable SDK reproduction contract for the eval scenario. The KnowledgeOS authoring fixture remains inside the validation workspace and is not vendored into SDK-ready exports.
+Bad answer patterns: The agent says the library is healthy because recent tasks passed; the agent ignores routing quality as the library size grows.
+Good answer patterns: The agent asks for library-level maintenance and routing evidence; the agent separates task-time repair proof from ecosystem health proof.
+Note: This is the portable SDK reproduction contract for the eval scenario. The KnowledgeOS authoring fixture remains inside the validation workspace and is not vendored into SDK-ready exports.
