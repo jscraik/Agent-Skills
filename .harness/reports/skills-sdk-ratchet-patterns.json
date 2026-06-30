@@ -1,0 +1,83 @@
+{
+  "schema_version": "skills-sdk-ratchet-patterns/v1",
+  "generated_at": "2026-06-29",
+  "scope": "Skills SDK pipeline and Skill Factory hardening",
+  "evidence_sources": [
+    {
+      "kind": "codex_memory",
+      "path": "/Users/jamiecraik/.codex/memories/MEMORY.md",
+      "query": "Skills SDK, Skill Factory, Tessl, scenario, security, stale handle"
+    },
+    {
+      "kind": "session_collector",
+      "path": "/Users/jamiecraik/.agents/session-collector",
+      "query": "collector availability and canonical evidence-root pattern"
+    },
+    {
+      "kind": "repo_ledger",
+      "path": ".harness/quality/steering-uptake.md",
+      "query": "validated recurring steering and stale runtime-handle rows"
+    },
+    {
+      "kind": "repo_memory",
+      "path": ".harness/memory/LEARNINGS.md",
+      "query": "Skill Factory and OpenClaw/security-script history"
+    }
+  ],
+  "patterns": [
+    {
+      "id": "central-rubric-drift",
+      "pattern": "Skill-local contracts can duplicate or redefine the SDK gold rubric.",
+      "ratchet": "Require rubric_profile skills-sdk.gold-standard.v1 and keep local criteria to selector or domain additions."
+    },
+    {
+      "id": "knowledgeos-reference-shape-drift",
+      "pattern": "KnowledgeOS capsule exports can drift between top-level references and nested knowledge-capsules directories.",
+      "ratchet": "Require flat references/*.md capsule paths for new or touched packages; allow references/knowledge-capsules/ only when the manifest includes an explicit migration justification."
+    },
+    {
+      "id": "reference-heading-invocation-drift",
+      "pattern": "Reference and capsule files can be present and routed while carrying generic or filename-misaligned headings that agents cannot invoke reliably.",
+      "ratchet": "Require every Markdown reference and vendored KnowledgeOS capsule body to pass reference_heading_invocable before OSS, Tessl, or registry movement."
+    },
+    {
+      "id": "yaml-parser-parity-drift",
+      "pattern": "Managed YAML and fallback parsers can disagree on scenario count, nested lists, or deterministic checks.",
+      "ratchet": "Validate parser parity and avoid alias-dependent deterministic_checks in release scenarios."
+    },
+    {
+      "id": "reference-boundary-drift",
+      "pattern": "Package-management references leak into always-loaded SKILL.md progressive disclosure.",
+      "ratchet": "Route package-only references through references/contract.yaml and keep SKILL.md coaching/runtime facing."
+    },
+    {
+      "id": "tessl-lane-overclaim",
+      "pattern": "Tessl review, dry-run, live eval, and score receipts are easy to collapse into one score claim.",
+      "ratchet": "Require Tessl artifacts to name their lane before they are used as evidence."
+    },
+    {
+      "id": "skill-factory-pipeline-drift",
+      "pattern": "Skill Factory create, install, build, refactor, or skillify lanes can produce a skill without the same SDK gate ladder.",
+      "ratchet": "Require package verify, scenario-quality, and security risk-mode commands in SDK candidate contracts."
+    },
+    {
+      "id": "security-lane-gap",
+      "pattern": "Security risk review is still easier to treat as optional or external to skill package validation.",
+      "ratchet": "Add non-mutating SDK security risk-mode preview before Tessl movement and promote reusable security scripts into SDK validation surfaces."
+    },
+    {
+      "id": "advisory-carry-forward",
+      "pattern": "Scenario warnings and weak release cases can be carried into later paid or external lanes.",
+      "ratchet": "Release cases need executable acceptance and deterministic checks before promotion."
+    },
+    {
+      "id": "stale-runtime-handle",
+      "pattern": "Assistant turns repeatedly probe stale or fabricated wait handles after compaction or heartbeat recovery.",
+      "ratchet": "Continue direct-command-only recovery after a stale handle and validate steering uptake plus no-command-handle artifacts."
+    }
+  ],
+  "security_note": {
+    "codex_security_plugin": "Use Codex Security for threat modeling or scoped scans when skill/plugin changes affect command execution, package ingestion, dependency scanning, credentials, external inputs, or registry distribution.",
+    "sdk_position": "Security scripts such as OpenClaw-style skill guards should be promoted into Skills SDK validation when they are reusable, deterministic, and package-shape aware."
+  }
+}

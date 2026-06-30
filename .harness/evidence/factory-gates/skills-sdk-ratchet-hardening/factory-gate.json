@@ -1,0 +1,45 @@
+{
+  "schema_version": "factory-gate/v1",
+  "desired_outcome": "Prevent Skill Factory and Skills SDK candidates from advancing without deterministic evidence for routing, release gates, scenario parity, security risk modes, plugin shape, advisory closure, and repair-loop monotonicity.",
+  "user_specific_constraints": [
+    "Use the testing, improve-agent-native, sdk-scenario-generator, evals-router, and improve-codebase-architecture skills as the governing lenses.",
+    "Promote repeated steering into validators, tests, rubrics, or durable evidence surfaces rather than adding prose-only reminders.",
+    "Keep package-shape validation separate from release-readiness validation.",
+    "Do not allow advisory or warning findings to carry into later eval phases.",
+    "Do not move from oss-local to oss-cloud or Tessl without release-lane evidence."
+  ],
+  "copied_assumption_rejected": "A skill package that passes package verify is not automatically ready for release-lane movement or Tessl evaluation.",
+  "fundamental_constraints": [
+    "Release movement must be evidence-led and ordered.",
+    "Scenarios used by SDK, OSS, and Tessl lanes must be traceable to the same canonical case set.",
+    "Security, prompt-injection, data-boundary, and destructive-command risks must be explicit package gates.",
+    "Skill Factory routes must choose the correct create, install, build, refactor, or improve surface without prompt wording drift.",
+    "Repair loops must classify regressions before another edit pass."
+  ],
+  "smallest_effective_mechanism": "Add focused validator checks and regression tests to existing Skills SDK release-ratchet, Skill Factory overlay, and route-selection surfaces.",
+  "artifact_decision": "IMPROVE_EXISTING",
+  "rejected_alternatives": [
+    "Rely on operator memory or thread instructions to remember the lane order.",
+    "Add a new checklist without executable enforcement.",
+    "Treat Tessl live scoring as the first place to detect package, scenario, security, or route drift.",
+    "Patch only the current skill scenarios without adding anti-regression tests."
+  ],
+  "evidence_required": [
+    "Standalone Skill Factory overlay semantic validator covers SDK ladder, construction contract, and gold rubric wiring.",
+    "Release-ratchet validator blocks missing factory-gate, gate-chain, scenario-parity, security, plugin-shape, advisory, and repair-loop evidence.",
+    "Route-selection tests prove external installs, refactors, plugin work, and improve-existing requests do not drift to the wrong factory surface.",
+    "Focused tests prove each new ratchet fails on the intended missing or malformed evidence.",
+    "A real package check demonstrates package verification remains separate from release-ratchet evidence."
+  ],
+  "validation_proof": [
+    "Command: bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q scripts/testing/test_validate_skills_sdk_release_ratchets.py scripts/testing/test_skill_factory_system_overlays.py -> pass, 16 passed",
+    "Command: bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_route_skillset_deterministic.py scripts/testing/test_validate_skills_sdk_release_ratchets.py scripts/testing/test_skill_factory_system_overlays.py -> pass, 37 passed",
+    "Command: bash Infrastructure/scripts/run-infrastructure-python.sh -m py_compile tests/test_route_skillset_deterministic.py scripts/lifecycle-and-sync/route_skillset.py -> pass",
+    "Command: python3 scripts/validation-and-linting/check_skill_factory_system_overlays.py -> pass",
+    "Command: ./bin/ask skills package verify Skills/product-strategy/devrel-hack-coach --json --robot -> pass",
+    "Command: bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q scripts/testing/test_validate_skills_sdk_release_ratchets.py scripts/testing/test_skill_factory_system_overlays.py tests/test_route_skillset_deterministic.py tests/test_ask_skills_package_contract.py -> pass, 102 passed",
+    "Command: bash Infrastructure/scripts/run-infrastructure-python.sh -m py_compile scripts/validation-and-linting/validate_skills_sdk_release_ratchets.py scripts/testing/test_validate_skills_sdk_release_ratchets.py scripts/validation-and-linting/check_skill_factory_system_overlays.py scripts/testing/test_skill_factory_system_overlays.py tests/test_route_skillset_deterministic.py scripts/lifecycle-and-sync/route_skillset.py tests/test_ask_skills_package_contract.py -> pass",
+    "Command: python3 scripts/validation-and-linting/validate_skills_sdk_release_ratchets.py Skills/product-strategy/devrel-hack-coach --json -> fail as expected because release evidence receipts are missing"
+  ],
+  "stop_or_pivot_condition": "If a candidate skill lacks any required release evidence receipt, keep the next lane blocked and generate the missing receipt or repair the upstream gate instead of running oss-cloud, Tessl dry-run, or Tessl live."
+}
