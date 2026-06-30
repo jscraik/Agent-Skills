@@ -16,12 +16,6 @@ Given: A skill package passes frontmatter validation and description-length chec
 Should: The agent classifies conformance as passed but routing quality as unproven, then asks for trigger/non-trigger examples or selection evidence before readiness.
 Expected failure: The agent treats valid frontmatter and a long description as proof that the skill routes correctly.
 
-Bad answer patterns:
-- The agent says the skill routes well because frontmatter is valid.
-- The agent rewards description length as primary proof.
-
-Good answer patterns:
-- The agent requests positive and negative routing examples.
-- The agent keeps format conformance separate from semantic trigger quality.
-
-This is the portable SDK reproduction contract for the eval scenario. The KnowledgeOS authoring fixture remains inside the validation workspace and is not vendored into SDK-ready exports.
+Bad answer patterns: The agent says the skill routes well because frontmatter is valid; the agent rewards description length as primary proof.
+Good answer patterns: The agent requests positive and negative routing examples; the agent keeps format conformance separate from semantic trigger quality.
+Note: This is the portable SDK reproduction contract for the eval scenario. The KnowledgeOS authoring fixture remains inside the validation workspace and is not vendored into SDK-ready exports.
