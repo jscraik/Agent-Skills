@@ -21,7 +21,7 @@ SURFACE_PATHS = (
     "skills-system/skill-installer/SKILL.md",
     "Plugins/skill-factory/skills/scaffolding_templates/skillify/SKILL.md",
     "Plugins/skill-factory/skills/scaffolding_templates/skillify/references/skill-template.md",
-    "Plugins/skill-factory/skills/skill-refactor/SKILL.md",
+    "Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor/SKILL.md",
 )
 SDK_LADDER_FRAGMENTS = (
     "./bin/ask sdk start",
