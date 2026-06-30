@@ -66,6 +66,162 @@ references:
   context_budget: selective
   claim_scope: eval_fixture_detail
   bounded_unit: true
+- path: references/evals-trace-error-analysis.md
+  kind: generated_knowledge_capsule
+  provenance: vendored KnowledgeOS extraction
+  load_when: only after the manifest and routing index select this capsule
+  allowed_claims:
+  - bounded expert viewpoint or evidence lane captured in the selected capsule
+  forbidden_claims:
+  - load all capsules by default
+  - claims outside selected capsule text
+  freshness: knowledge_os_snapshot
+  context_budget: selective
+  claim_scope: bounded_capsule
+  bounded_unit: true
+- path: references/evals-deterministic-evaluator-design.md
+  kind: generated_knowledge_capsule
+  provenance: vendored KnowledgeOS extraction
+  load_when: only after the manifest and routing index select this capsule
+  allowed_claims:
+  - bounded expert viewpoint or evidence lane captured in the selected capsule
+  forbidden_claims:
+  - load all capsules by default
+  - claims outside selected capsule text
+  freshness: knowledge_os_snapshot
+  context_budget: selective
+  claim_scope: bounded_capsule
+  bounded_unit: true
+- path: references/evals-judge-calibration.md
+  kind: generated_knowledge_capsule
+  provenance: vendored KnowledgeOS extraction
+  load_when: only after the manifest and routing index select this capsule
+  allowed_claims:
+  - bounded expert viewpoint or evidence lane captured in the selected capsule
+  forbidden_claims:
+  - load all capsules by default
+  - claims outside selected capsule text
+  freshness: knowledge_os_snapshot
+  context_budget: selective
+  claim_scope: bounded_capsule
+  bounded_unit: true
+- path: references/evals-regression-loop.md
+  kind: generated_knowledge_capsule
+  provenance: vendored KnowledgeOS extraction
+  load_when: only after the manifest and routing index select this capsule
+  allowed_claims:
+  - bounded expert viewpoint or evidence lane captured in the selected capsule
+  forbidden_claims:
+  - load all capsules by default
+  - claims outside selected capsule text
+  freshness: knowledge_os_snapshot
+  context_budget: selective
+  claim_scope: bounded_capsule
+  bounded_unit: true
+- path: references/evals-production-guardrails.md
+  kind: generated_knowledge_capsule
+  provenance: vendored KnowledgeOS extraction
+  load_when: only after the manifest and routing index select this capsule
+  allowed_claims:
+  - bounded expert viewpoint or evidence lane captured in the selected capsule
+  forbidden_claims:
+  - load all capsules by default
+  - claims outside selected capsule text
+  freshness: knowledge_os_snapshot
+  context_budget: selective
+  claim_scope: bounded_capsule
+  bounded_unit: true
+- path: references/skills-sdk-evaluation-benchmarks.md
+  kind: generated_knowledge_capsule
+  provenance: vendored KnowledgeOS extraction
+  load_when: only after the manifest and routing index select this capsule
+  allowed_claims:
+  - bounded expert viewpoint or evidence lane captured in the selected capsule
+  forbidden_claims:
+  - load all capsules by default
+  - claims outside selected capsule text
+  freshness: knowledge_os_snapshot
+  context_budget: selective
+  claim_scope: bounded_capsule
+  bounded_unit: true
+- path: references/skills-sdk-operations-registry.md
+  kind: generated_knowledge_capsule
+  provenance: vendored KnowledgeOS extraction
+  load_when: only after the manifest and routing index select this capsule
+  allowed_claims:
+  - bounded expert viewpoint or evidence lane captured in the selected capsule
+  forbidden_claims:
+  - load all capsules by default
+  - claims outside selected capsule text
+  freshness: knowledge_os_snapshot
+  context_budget: selective
+  claim_scope: bounded_capsule
+  bounded_unit: true
+- path: references/skills-sdk-supply-chain-security.md
+  kind: generated_knowledge_capsule
+  provenance: vendored KnowledgeOS extraction
+  load_when: only after the manifest and routing index select this capsule
+  allowed_claims:
+  - bounded expert viewpoint or evidence lane captured in the selected capsule
+  forbidden_claims:
+  - load all capsules by default
+  - claims outside selected capsule text
+  freshness: knowledge_os_snapshot
+  context_budget: selective
+  claim_scope: bounded_capsule
+  bounded_unit: true
+- path: references/skills-sdk-generation-revision.md
+  kind: generated_knowledge_capsule
+  provenance: vendored KnowledgeOS extraction
+  load_when: only after the manifest and routing index select this capsule
+  allowed_claims:
+  - bounded expert viewpoint or evidence lane captured in the selected capsule
+  forbidden_claims:
+  - load all capsules by default
+  - claims outside selected capsule text
+  freshness: knowledge_os_snapshot
+  context_budget: selective
+  claim_scope: bounded_capsule
+  bounded_unit: true
+- path: references/skills-sdk-architecture-runtime.md
+  kind: generated_knowledge_capsule
+  provenance: vendored KnowledgeOS extraction
+  load_when: only after the manifest and routing index select this capsule
+  allowed_claims:
+  - bounded expert viewpoint or evidence lane captured in the selected capsule
+  forbidden_claims:
+  - load all capsules by default
+  - claims outside selected capsule text
+  freshness: knowledge_os_snapshot
+  context_budget: selective
+  claim_scope: bounded_capsule
+  bounded_unit: true
+- path: references/knowledge-os-capsule-design.md
+  kind: generated_knowledge_capsule
+  provenance: vendored KnowledgeOS extraction
+  load_when: only after the manifest and routing index select this capsule
+  allowed_claims:
+  - bounded expert viewpoint or evidence lane captured in the selected capsule
+  forbidden_claims:
+  - load all capsules by default
+  - claims outside selected capsule text
+  freshness: knowledge_os_snapshot
+  context_budget: selective
+  claim_scope: bounded_capsule
+  bounded_unit: true
+- path: references/knowledge-os-export-readiness.md
+  kind: generated_knowledge_capsule
+  provenance: vendored KnowledgeOS extraction
+  load_when: only after the manifest and routing index select this capsule
+  allowed_claims:
+  - bounded expert viewpoint or evidence lane captured in the selected capsule
+  forbidden_claims:
+  - load all capsules by default
+  - claims outside selected capsule text
+  freshness: knowledge_os_snapshot
+  context_budget: selective
+  claim_scope: bounded_capsule
+  bounded_unit: true
 allowed_claims:
 - KnowledgeOS capsules are vendored references, not runtime dependencies
 - KnowledgeOS-selected eval scenarios must be wired through references/evals.yaml

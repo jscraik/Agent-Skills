@@ -69,6 +69,54 @@ Task evals for skill or context impact should compare behavior with and without 
 Interpretation notes:
 - Claims that a knowledge capsule, skill, or registry tile helped should keep baseline behavior, with-context behavior, and publication metadata separate.
 
+### claim.evals.online-offline-loop-closes-coverage-gap: Online Offline Loop Closes Coverage Gap
+
+- Type: claim-card
+- Status: draft
+- Claim strength: direct
+- Source boundaries: local_source_reference
+
+Offline evals and production monitoring should feed each other so test coverage follows live user behavior.
+
+Interpretation notes:
+- Use this when dashboard findings need to become durable dataset rows or regression cases.
+
+### claim.evals.subjective-quality-needs-human-review: Subjective Quality Needs Human Review
+
+- Type: claim-card
+- Status: draft
+- Claim strength: direct
+- Source boundaries: local_source_reference
+
+Subjective quality dimensions should use human review until their labels are stable enough to automate.
+
+Interpretation notes:
+- Use this to prevent brittle automation from replacing necessary human judgment.
+
+### claim.evals.production-clusters-seed-targeted-datasets: Production Clusters Seed Targeted Datasets
+
+- Type: claim-card
+- Status: draft
+- Claim strength: direct
+- Source boundaries: local_source_reference
+
+Production or production-like trace clusters should seed targeted eval datasets before a fix is scored.
+
+Interpretation notes:
+- Use this to resist writing generic synthetic edge cases before inspecting observed failure clusters.
+
+### claim.evals.scorers-need-obvious-case-calibration: Scorers Need Obvious Case Calibration
+
+- Type: claim-card
+- Status: draft
+- Claim strength: direct
+- Source boundaries: local_source_reference
+
+Eval score trends are not trustworthy until the scorer passes obvious correct and incorrect cases.
+
+Interpretation notes:
+- Treat score changes without scorer calibration as diagnostic input, not readiness evidence.
+
 ### claim.evals.testing-models-can-be-flawed: Testing Models Can Be Flawed
 
 - Type: claim-card
@@ -201,6 +249,26 @@ Coverage evidence is multidimensional; high coverage on one dimension can show i
 Interpretation notes:
 - Test closeout should report which coverage dimension was exercised and which independent dimensions remain unproven.
 
+## Principles
+
+### principle.evals.production-failure-loop: Production Failure Loop
+
+- Type: principle
+- Status: draft
+- Claim strength: synthesized
+- Source boundaries: local_source_reference
+- Derived from claims: claim.evals.production-clusters-seed-targeted-datasets, claim.evals.scorers-need-obvious-case-calibration, claim.evals.online-offline-loop-closes-coverage-gap, claim.evals.subjective-quality-needs-human-review
+
+Treat eval quality as a loop from observed traces to targeted datasets, calibrated scorers, baseline comparisons, focused fixes, and post-deploy monitoring.
+
+Rationale: This keeps eval work attached to real behavior, separates scorer validity from model quality, and prevents a one-off offline score from becoming an overclaimed production-readiness signal.
+
+Application notes:
+- Start from traces or a clearly stated production-risk proxy.
+- Convert clusters into replayable datasets before scoring a fix.
+- Validate scorers before trusting score trends.
+- Feed post-deploy failures back into the offline suite.
+
 ## Heuristics
 
 ### heuristic.evals.prefer-code-for-objective-checks: Prefer Code For Objective Checks
@@ -239,6 +307,28 @@ Use when:
 Avoid when:
 - The user only needs a narrow deterministic syntax or schema check.
 - The decision does not depend on comparing evidence lanes.
+
+## Checklists
+
+### checklist.evals.production-failure-to-regression: Production Failure To Regression Checklist
+
+- Type: checklist
+- Status: draft
+- Claim strength: synthesized
+- Source boundaries: local_source_reference
+- Derived from claims: claim.evals.production-clusters-seed-targeted-datasets, claim.evals.scorers-need-obvious-case-calibration, claim.evals.online-offline-loop-closes-coverage-gap, claim.evals.subjective-quality-needs-human-review
+
+- [ ] Identify the live trace, log query, review note, or production-risk proxy that exposed the issue.
+- [ ] Cluster similar failures by task, intent, sentiment, issue, or domain-specific facet.
+- [ ] Manually inspect a bounded sample and write concrete failure modes before automating.
+- [ ] Convert representative failures into a small replayable dataset with sensitive data removed.
+- [ ] Choose deterministic code checks for objective requirements and human review for subjective dimensions.
+- [ ] Validate each scorer on obvious pass and fail cases before trusting aggregate movement.
+- [ ] Record the baseline run, experiment, commit, prompt version, model, and dataset snapshot.
+- [ ] Make one targeted change when causal understanding matters.
+- [ ] Compare the new run against the baseline for target improvement and unrelated regressions.
+- [ ] Preserve unresolved failures as regression cases or explicitly document why they are out of scope.
+- [ ] After deployment, monitor fresh production traces and feed new failures back into the dataset.
 
 ## Lenses
 

@@ -117,6 +117,54 @@ Task evals for skill or context impact should compare behavior with and without 
 Interpretation notes:
 - Claims that a knowledge capsule, skill, or registry tile helped should keep baseline behavior, with-context behavior, and publication metadata separate.
 
+### claim.evals.production-clusters-seed-targeted-datasets: Production Clusters Seed Targeted Datasets
+
+- Type: claim-card
+- Status: draft
+- Claim strength: direct
+- Source boundaries: local_source_reference
+
+Production or production-like trace clusters should seed targeted eval datasets before a fix is scored.
+
+Interpretation notes:
+- Use this to resist writing generic synthetic edge cases before inspecting observed failure clusters.
+
+### claim.evals.online-offline-loop-closes-coverage-gap: Online Offline Loop Closes Coverage Gap
+
+- Type: claim-card
+- Status: draft
+- Claim strength: direct
+- Source boundaries: local_source_reference
+
+Offline evals and production monitoring should feed each other so test coverage follows live user behavior.
+
+Interpretation notes:
+- Use this when dashboard findings need to become durable dataset rows or regression cases.
+
+### claim.evals.scorers-need-obvious-case-calibration: Scorers Need Obvious Case Calibration
+
+- Type: claim-card
+- Status: draft
+- Claim strength: direct
+- Source boundaries: local_source_reference
+
+Eval score trends are not trustworthy until the scorer passes obvious correct and incorrect cases.
+
+Interpretation notes:
+- Treat score changes without scorer calibration as diagnostic input, not readiness evidence.
+
+### claim.evals.subjective-quality-needs-human-review: Subjective Quality Needs Human Review
+
+- Type: claim-card
+- Status: draft
+- Claim strength: direct
+- Source boundaries: local_source_reference
+
+Subjective quality dimensions should use human review until their labels are stable enough to automate.
+
+Interpretation notes:
+- Use this to prevent brittle automation from replacing necessary human judgment.
+
 ### claim.evals.ux-measurement-needs-method-fit: UX Measurement Needs Method Fit
 
 - Type: claim-card
@@ -140,6 +188,26 @@ Skill review checks structure and quality, while task and repo evals test whethe
 
 Interpretation notes:
 - Evals-router should not treat a static review score as proof that a skill improves behavior.
+
+## Principles
+
+### principle.evals.production-failure-loop: Production Failure Loop
+
+- Type: principle
+- Status: draft
+- Claim strength: synthesized
+- Source boundaries: local_source_reference
+- Derived from claims: claim.evals.production-clusters-seed-targeted-datasets, claim.evals.scorers-need-obvious-case-calibration, claim.evals.online-offline-loop-closes-coverage-gap, claim.evals.subjective-quality-needs-human-review
+
+Treat eval quality as a loop from observed traces to targeted datasets, calibrated scorers, baseline comparisons, focused fixes, and post-deploy monitoring.
+
+Rationale: This keeps eval work attached to real behavior, separates scorer validity from model quality, and prevents a one-off offline score from becoming an overclaimed production-readiness signal.
+
+Application notes:
+- Start from traces or a clearly stated production-risk proxy.
+- Convert clusters into replayable datasets before scoring a fix.
+- Validate scorers before trusting score trends.
+- Feed post-deploy failures back into the offline suite.
 
 ## Heuristics
 
@@ -180,6 +248,46 @@ Avoid when:
 - The user only needs a narrow deterministic syntax or schema check.
 - The decision does not depend on comparing evidence lanes.
 
+### heuristic.evals.cluster-to-dataset-before-fix: Cluster To Dataset Before Fix
+
+- Type: heuristic
+- Status: draft
+- Claim strength: synthesized
+- Source boundaries: local_source_reference
+- Derived from claims: claim.evals.production-clusters-seed-targeted-datasets, claim.evals.online-offline-loop-closes-coverage-gap
+
+When a production issue appears in traces, first name the cluster and preserve representative cases as a replayable dataset; then score the targeted fix against a recorded baseline.
+
+Use when:
+- A dashboard, trace search, topic cluster, support queue, or reviewer note reveals repeated AI behavior failures.
+- The team is tempted to patch a prompt or scorer directly from a few memorable examples.
+
+Avoid when:
+- The failure is a single deterministic code defect with an existing unit-test route.
+- No trace, log, or reproducible interaction can be preserved without exposing sensitive data.
+
+## Checklists
+
+### checklist.evals.production-failure-to-regression: Production Failure To Regression Checklist
+
+- Type: checklist
+- Status: draft
+- Claim strength: synthesized
+- Source boundaries: local_source_reference
+- Derived from claims: claim.evals.production-clusters-seed-targeted-datasets, claim.evals.scorers-need-obvious-case-calibration, claim.evals.online-offline-loop-closes-coverage-gap, claim.evals.subjective-quality-needs-human-review
+
+- [ ] Identify the live trace, log query, review note, or production-risk proxy that exposed the issue.
+- [ ] Cluster similar failures by task, intent, sentiment, issue, or domain-specific facet.
+- [ ] Manually inspect a bounded sample and write concrete failure modes before automating.
+- [ ] Convert representative failures into a small replayable dataset with sensitive data removed.
+- [ ] Choose deterministic code checks for objective requirements and human review for subjective dimensions.
+- [ ] Validate each scorer on obvious pass and fail cases before trusting aggregate movement.
+- [ ] Record the baseline run, experiment, commit, prompt version, model, and dataset snapshot.
+- [ ] Make one targeted change when causal understanding matters.
+- [ ] Compare the new run against the baseline for target improvement and unrelated regressions.
+- [ ] Preserve unresolved failures as regression cases or explicitly document why they are out of scope.
+- [ ] After deployment, monitor fresh production traces and feed new failures back into the dataset.
+
 ## Eval Scenarios
 
 ### eval.evals.score-without-action: Score Without Action
@@ -190,11 +298,11 @@ Avoid when:
 - Source boundaries: local_source_reference
 - Derived from claims: claim.evals.evals-close-loop
 
-Knowledge claim: The testing skill reports the score as incomplete proof and asks for the improvement loop evidence before claiming behavior improved.
-Behavior under test: The testing skill reports the score as incomplete proof and asks for the improvement loop evidence before claiming behavior improved.
+Knowledge claim: Principle under test: The testing skill reports the score as incomplete proof and asks for the improvement loop evidence before claiming behavior improved.
+Behavior under test: Observable agent behavior when an eval run produces a score and failure list, but the closeout does not identify root cause, fix path, rerun command, or retained regression case.
 Failure mode: The testing skill treats the score alone as completion evidence.
 Expected agent move: The testing skill reports the score as incomplete proof and asks for the improvement loop evidence before claiming behavior improved.
-Skill lift target: The testing skill reports the score as incomplete proof and asks for the improvement loop evidence before claiming behavior improved.
+Skill lift target: The response avoids the weak pattern (The testing skill treats the score alone as completion evidence) and instead shows the expected behavior (The testing skill reports the score as incomplete proof and asks for the improvement loop evidence before claiming behavior improved).
 Proof route: references/evals.yaml
 Fixture path: references/evals/eval.evals.score-without-action.md
 Promotion status: candidate
