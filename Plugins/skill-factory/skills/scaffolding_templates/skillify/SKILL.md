@@ -34,7 +34,7 @@ Start with 2-3 focused surfaces and capture the smallest validated workflow.
 - Artifact decision: BUILD_SKILL.
 - Rejected alternatives: creating a skill without owner or trigger proof, using broad discovery as proof, or publishing before validation.
 - Evidence required: source evidence, first package validation, strict audit, and scenario-quality receipt.
-- Validation proof: run strict audit before broader release checks.
+- Validation proof: run strict audit and `./bin/ask skills package verify <skill-path> --json --robot` before broader release checks.
 - Stop or pivot condition: if source evidence cannot prove triggers, inputs, outputs, and validation, return a plan and block creation.
 
 ## When To Use
