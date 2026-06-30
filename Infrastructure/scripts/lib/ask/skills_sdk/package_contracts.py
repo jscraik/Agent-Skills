@@ -3320,7 +3320,7 @@ def writing_quality_contract(
     evidence_contract_declared = markdown_heading_declared(text, "Evidence Contract")
     completion_reference_declared = (
         skill_md is not None
-        and (skill_md.parent / "references" / "validation-and-output.md").is_file()
+        and package_local_regular_file(skill_md, "references/validation-and-output.md")
         and "references/validation-and-output.md" in text
     )
     validation_body = markdown_section_body(text, "Validation")
