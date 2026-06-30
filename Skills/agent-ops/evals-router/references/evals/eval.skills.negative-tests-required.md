@@ -16,12 +16,6 @@ Given: A skill has ten happy-path scenarios that all pass, but none test halluci
 Should: The agent blocks live-readiness and asks for negative and pressure cases that exercise what the skill must refuse, isolate, or report.
 Expected failure: The agent treats an all-green happy-path suite as enough for behavioral readiness.
 
-Bad answer patterns:
-- The agent accepts ten happy-path passes as live readiness.
-- The agent ignores refusal and permission-boundary cases.
-
-Good answer patterns:
-- The agent blocks readiness until negative cases exist.
-- The agent names concrete negative case families.
-
-This is the portable SDK reproduction contract for the eval scenario. The KnowledgeOS authoring fixture remains inside the validation workspace and is not vendored into SDK-ready exports.
+Bad answer patterns: The agent accepts ten happy-path passes as live readiness; the agent ignores refusal and permission-boundary cases.
+Good answer patterns: The agent blocks readiness until negative cases exist; the agent names concrete negative case families.
+Note: This is the portable SDK reproduction contract for the eval scenario. The KnowledgeOS authoring fixture remains inside the validation workspace and is not vendored into SDK-ready exports.
