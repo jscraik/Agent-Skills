@@ -2206,6 +2206,66 @@ class RunSkillEvalsModeTests(unittest.TestCase):
             summary["artifacts"]["release_manifest"],
         )
 
+    def test_discovery_smoke_accepts_legacy_payload_heading(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            skill_dir = Path(tmpdir) / "demo-skill"
+            refs_dir = skill_dir / "references"
+            refs_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                textwrap.dedent(
+                    """
+                    ---
+                    name: demo-skill
+                    ---
+
+                    ## Discovery interview
+                    - ask one round at a time
+                    - use a plain-language question
+                    - explain why the round matters
+                    - avoid dumping the whole interview plan at once
+                    """
+                ).strip()
+                + "\n",
+                encoding="utf-8",
+            )
+            (refs_dir / "discovery-interview.md").write_text(
+                textwrap.dedent(
+                    """
+                    ## Request user input mini-templates
+
+                    What should this skill help you do?
+
+                    ## Copy paste payload examples
+
+                    ## Round 6: Confirmation
+
+                    Does this capture it well enough for me to build?
+                    Anything to add or change before I build it?
+                    """
+                ).strip()
+                + "\n",
+                encoding="utf-8",
+            )
+            output_path = Path(tmpdir) / "last-message.md"
+
+            exit_code, _, _, warnings = run_discovery_smoke(
+                skill_md_path=skill_md,
+                skill_dir=skill_dir,
+                case=EvalCase(
+                    id="discovery-round-one",
+                    name="discovery smoke",
+                    prompt="Help define the skill.",
+                    smoke_mode="discovery-round-one",
+                    should_trigger=True,
+                    acceptance=[],
+                ),
+                output_last_message_path=output_path,
+            )
+
+        self.assertEqual(0, exit_code)
+        self.assertNotIn("discovery-interview.md missing payload examples section", "\n".join(warnings))
+
     def test_pass_rate_policy_calibrates_only_when_artifact_exists(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             case_dir = Path(tmpdir) / "reports" / "demo-skill" / "01-calibrated"

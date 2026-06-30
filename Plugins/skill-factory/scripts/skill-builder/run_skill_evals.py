@@ -3757,7 +3757,7 @@ def run_discovery_smoke(
             discovery_text,
             [
                 "## Copy-paste payload examples",
-                "## Payload examples",
+                "## Copy paste payload examples",
             ],
         ):
             missing.append("discovery-interview.md missing payload examples section")
