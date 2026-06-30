@@ -19,8 +19,8 @@ _LOCAL_JUDGE_PROFILE_SPECS = (
         "larger_local_transcript_trial",
         LOCAL_SANDBOX_LARGE_TRANSCRIPT_SETTINGS,
     ),
-    ("oss-local-code", "oss-local-code", "qwen3-coder:30b", "code_heavy_specialist", LOCAL_SANDBOX_DEFAULT_SETTINGS),
-    ("oss-local-fallback", "oss-local-fallback", "qwen3.5:latest", "fast_fallback", LOCAL_SANDBOX_DEFAULT_SETTINGS),
+    ("oss-local-code", "oss-local", "qwen3-coder:30b", "code_heavy_specialist", LOCAL_SANDBOX_DEFAULT_SETTINGS),
+    ("oss-local-fallback", "oss-local", "qwen3.5:latest", "fast_fallback", LOCAL_SANDBOX_DEFAULT_SETTINGS),
 )
 
 
