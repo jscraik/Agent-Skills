@@ -59,7 +59,8 @@ def _scenario_id(case: dict[str, Any], index: int) -> str:
 
 
 def _case_has_release_mode(case: dict[str, Any]) -> bool:
-    return "release" in {str(mode) for mode in _list_field(case, "eval_modes")}
+    modes = {str(mode) for mode in _list_field(case, "eval_modes")}
+    return not modes or "release" in modes
 
 
 def _list_field(case: dict[str, Any], field: str) -> list[Any]:
