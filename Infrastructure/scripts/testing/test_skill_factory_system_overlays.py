@@ -20,3 +20,8 @@ SPEC.loader.exec_module(MODULE)
 
 def test_current_skill_factory_system_overlay_contract_passes() -> None:
     assert MODULE.main() == 0
+
+
+def test_skill_factory_overlay_validator_owns_semantic_surface_contract() -> None:
+    assert "scenario-quality" in MODULE.SDK_LADDER_FRAGMENTS
+    assert "reference_invocation" in MODULE._surface_text(MODULE.GOLD_RUBRIC)

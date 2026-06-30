@@ -409,6 +409,8 @@ def factory_override(skill_set: str, task: str, rows: list[dict[str, Any]]) -> d
             - "reason": short string describing the matched deterministic rule;
         or `None` if no deterministic rule applies.
     """
+    if skill_set == "skill-factory":
+        rows = [*rows, *_skill_factory_system_bridge_rows(rows)]
     task_text = task.lower()
     row_ids = {str(row.get("id")) for row in rows}
 
@@ -564,7 +566,40 @@ def factory_override(skill_set: str, task: str, rows: list[dict[str, Any]]) -> d
 def _preferred_factory_match(skill_set: str, matched: list[tuple[str, str]]) -> tuple[str, str] | None:
     if skill_set == "skill-factory" and ("skill-builder", "improve-skill-sdk-pipeline") in matched:
         return ("skill-builder", "improve-skill-sdk-pipeline")
+    if skill_set == "skill-factory" and ("skill-refactor", "refactor-skill") in matched:
+        return ("skill-refactor", "refactor-skill")
     return None
+
+
+def _skill_factory_system_bridge_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Return system skill rows that are intentionally routed by Skill Factory."""
+    existing_ids = {str(row.get("id")) for row in rows}
+    bridge_specs = {
+        "skill-creator": (
+            "Create or scaffold Codex skills through the system skill-creator with Skill Factory references.",
+            "skills-system/skill-creator/SKILL.md",
+            ["skill creator", "create skill", "scaffold skill"],
+        ),
+        "skill-installer": (
+            "Install, list, and validate Codex skills through the system skill-installer with Skill Factory references.",
+            "skills-system/skill-installer/SKILL.md",
+            ["skill installer", "install skill", "list skills"],
+        ),
+    }
+    bridges: list[dict[str, Any]] = []
+    for bridge_id, (description, source_path, triggers) in bridge_specs.items():
+        if bridge_id in existing_ids or not (repo_root() / source_path).is_file():
+            continue
+        bridges.append(
+            {
+                "id": bridge_id,
+                "description": description,
+                "level": "system-bridge",
+                "source_path": source_path,
+                "triggers": triggers,
+            }
+        )
+    return bridges
 
 
 def route(skill_set: str, task: str, *, top_k: int = MAX_TOP_K, skillsets_dir: Path = DEFAULT_SKILLSETS_DIR) -> dict[str, Any]:

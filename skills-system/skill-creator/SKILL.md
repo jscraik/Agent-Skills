@@ -108,7 +108,9 @@ patching or adapting behavior.
 
 Load-on-demand documentation such as schemas, policies, API details, or detailed
 workflow guides. Keep SKILL.md lean by moving bulky detail here, and add search
-patterns for very large files.
+patterns for very large files. Markdown reference files and vendored
+KnowledgeOS capsule bodies need specific, filename-aligned H1 headings so
+agents can invoke the right file from routing text.
 
 ##### Assets (`assets/`)
 
@@ -168,6 +170,8 @@ sync, or runtime-readiness claims until the shared SDK pipeline reaches them.
 Shared SDK pipeline:
 
 1. Strict audit and package verify.
+1a. Package verify must pass `reference_quality`, including
+    `reference_heading_invocable` for Markdown references and capsule bodies.
 2. ./bin/ask sdk security risk-modes <skill-path> --preview --json --robot.
 3. Scenario-quality, scorer-quality, and scorer-calibration previews.
 4. oss-local internal eval through ./bin/ask sdk eval run ... --codex-profile oss-local.

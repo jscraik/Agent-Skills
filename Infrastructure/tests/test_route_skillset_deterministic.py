@@ -27,6 +27,7 @@ SOURCE_PATHS = {
     "skill-builder": "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md",
     "skill-factory-router": "Plugins/skill-factory/skills/skill-factory-router/SKILL.md",
     "skill-creator": "Plugins/skill-factory/skills/scaffolding_templates/skill-creator/SKILL.md",
+    "skill-installer": "skills-system/skill-installer/SKILL.md",
     "skill-factory-router": "Plugins/skill-factory/skills/skill-factory-router/SKILL.md",
     "skill-refactor": "Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor/SKILL.md",
     "skillify": "Plugins/skill-factory/skills/scaffolding_templates/skillify/SKILL.md",
@@ -190,6 +191,86 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
 
         self.assertEqual(payload["selected"]["id"], "skill-builder")
         self.assertIn("improve-skill-sdk-pipeline", payload["candidates"][0]["reason"])
+
+    def test_skill_factory_external_install_routes_to_installer_not_builder(self) -> None:
+        payload = self._route(
+            "skill-factory",
+            "install an external skill from GitHub and run browseability checks",
+            [
+                _row("skill-builder", "Reviews and improves SKILL.md packages."),
+                _row("skill-creator", "Guide for creating effective skills."),
+                _row("skill-installer", "Install validated skills with provenance and rollback safety."),
+            ],
+        )
+
+        self.assertEqual(payload["selected"]["id"], "skill-installer")
+        self.assertNotEqual(payload["selected"]["id"], "skill-builder")
+
+    def test_skill_factory_install_uses_system_bridge_when_manifest_lacks_installer(self) -> None:
+        payload = self._route(
+            "skill-factory",
+            "install an external skill from GitHub and run browseability checks",
+            [
+                _row("skill-builder", "Reviews and improves SKILL.md packages."),
+                _row("skill-factory-router", "Route skill work."),
+            ],
+        )
+
+        self.assertEqual(payload["selected"]["id"], "skill-installer")
+        self.assertEqual(payload["selected"]["source_path"], "skills-system/skill-installer/SKILL.md")
+
+    def test_skill_factory_creation_uses_system_bridge_when_manifest_lacks_creator(self) -> None:
+        payload = self._route(
+            "skill-factory",
+            "create a new skill from a validated workflow",
+            [
+                _row("skill-builder", "Reviews and improves SKILL.md packages."),
+                _row("skill-factory-router", "Route skill work."),
+            ],
+        )
+
+        self.assertEqual(payload["selected"]["id"], "skill-creator")
+        self.assertEqual(payload["selected"]["source_path"], "skills-system/skill-creator/SKILL.md")
+
+    def test_skill_factory_refactor_prune_routes_to_refactor_not_creator(self) -> None:
+        payload = self._route(
+            "skill-factory",
+            "refactor and prune duplicated skill references without creating a new skill",
+            [
+                _row("skill-creator", "Guide for creating effective skills."),
+                _row("skill-refactor", "Analyze skill reliability from evidence."),
+                _row("skill-builder", "Reviews and improves SKILL.md packages."),
+            ],
+        )
+
+        self.assertEqual(payload["selected"]["id"], "skill-refactor")
+        self.assertNotEqual(payload["selected"]["id"], "skill-creator")
+
+    def test_skill_factory_plugin_hook_work_does_not_route_to_skill_creator(self) -> None:
+        payload = self._route(
+            "skill-factory",
+            "create a plugin bundled hook package with hooks/hooks.json",
+            [
+                _row("skill-creator", "Guide for creating effective skills."),
+                _row("skill-factory-router", "Route skill work."),
+            ],
+        )
+
+        self.assertNotEqual(payload["selected"]["id"] if payload["selected"] else None, "skill-creator")
+
+    def test_skill_factory_improve_existing_does_not_create_new_skill(self) -> None:
+        payload = self._route(
+            "skill-factory",
+            "improve existing skill documentation and references; do not create a new skill",
+            [
+                _row("skill-creator", "Guide for creating effective skills."),
+                _row("skill-builder", "Reviews and improves SKILL.md packages."),
+                _row("skill-refactor", "Analyze skill reliability from evidence."),
+            ],
+        )
+
+        self.assertEqual(payload["selected"]["id"], "skill-builder")
+        self.assertNotEqual(payload["selected"]["id"], "skill-creator")
 
     def test_skill_factory_context_feedback_routes_to_refactor(self) -> None:
         payload = self._route(
