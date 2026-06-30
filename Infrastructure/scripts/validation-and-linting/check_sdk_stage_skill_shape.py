@@ -6,6 +6,7 @@ from __future__ import annotations
 import re
 import sys
 import json
+import subprocess
 from pathlib import Path
 
 try:
@@ -195,15 +196,39 @@ def sdk_stage_skill_dirs(root: Path) -> list[Path]:
 
 
 def load_yaml(path: Path) -> dict:
+    text = path.read_text(encoding="utf-8")
     if yaml is None:
-        fail(
-            f"{path} requires PyYAML; run through "
-            "bash Infrastructure/scripts/run-infrastructure-python.sh"
-        )
-    payload = yaml.safe_load(path.read_text(encoding="utf-8"))  # type: ignore[union-attr]
+        payload = load_yaml_with_ruby(path, text)
+    else:
+        payload = yaml.safe_load(text)  # type: ignore[union-attr]
     if not isinstance(payload, dict):
         fail(f"{path} must contain a YAML mapping")
     return payload
+
+
+def load_yaml_with_ruby(path: Path, text: str) -> dict:
+    code = (
+        "require 'yaml'; require 'json'; "
+        "print JSON.generate(YAML.safe_load(STDIN.read, permitted_classes: [], aliases: true))"
+    )
+    try:
+        process = subprocess.run(
+            ["ruby", "-e", code],
+            input=text,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+        )
+    except FileNotFoundError:
+        fail(
+            f"{path} requires PyYAML or Ruby YAML; run through "
+            "bash Infrastructure/scripts/run-infrastructure-python.sh"
+        )
+    if process.returncode != 0:
+        fail(f"{path} is invalid YAML: {process.stderr.strip()}")
+    payload = json.loads(process.stdout)
+    return payload if isinstance(payload, dict) else {}
 
 
 def load_json(path: Path) -> dict:

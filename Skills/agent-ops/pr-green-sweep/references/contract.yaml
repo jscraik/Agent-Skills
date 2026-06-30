@@ -16,6 +16,7 @@ non_goals:
   - "branch cleanup before target PRs are merged or abandoned"
   - "admin or force merge without explicit approval"
 inputs:
+  - capability
   - target_project_path
   - open_prs_or_discovery_permission
   - heartbeat_or_cron_cadence
@@ -24,10 +25,12 @@ inputs:
   - approval_posture
   - cli_auth_context
 outputs:
+  - capability
   - heartbeat_status_first
   - pr_inventory
   - heartbeat_status
   - action_queue
+  - waived_external_ci_ledger
   - fix_ledger
   - dirty_worktree_ledger
   - validation_surface_decisions
@@ -35,9 +38,77 @@ outputs:
   - url_first_merge_ledger
   - cleanup_ledger
   - decision_ready_blockers
+  - primary_worktree_dirty_closeout_proof
+quality_criteria:
+  current_state_before_action:
+    purpose: Ensure PR action uses live GitHub and local worktree evidence.
+    why_it_matters: Prevents stale checks, cached status, or local tests from being treated as merge proof.
+    observable_evidence:
+      - full_github_pr_url
+      - latest_head_sha
+      - merge_state
+      - required_check_names_statuses_and_urls
+      - unresolved_review_threads
+    scoring:
+      "5": URL-first PR cards include latest head, mergeability, checks, review state, and local dirty ownership before action.
+      "4": Live PR evidence is current but one secondary field needs clearer formatting.
+      "3": PR evidence is mostly current but stale-risk boundaries are incomplete.
+      "2": Action starts from partial or cached PR evidence.
+      "1": Claims merge or review state without live evidence.
+  waived_external_ci_continuation:
+    purpose: Prevent waived external quota or policy checks from stopping non-waived PR work.
+    why_it_matters: Keeps paid or retired external checks from hiding merge conflicts, review findings, draft state, or cleanup work.
+    observable_evidence:
+      - explicit_user_or_repo_policy_waiver
+      - waived_external_ci_ledger
+      - non_waived_action_queue_entry
+    scoring:
+      "5": Waived checks are isolated and every remaining non-waived lane is classified with a next action.
+      "4": Waiver handling is correct but the next-action wording is slightly incomplete.
+      "3": Waiver is recognized but continuation is only partially routed.
+      "2": Waiver and source failures are mixed.
+      "1": Waived external CI stops the sweep while other action lanes remain.
+  dirty_merge_state_strategy:
+    purpose: Force dirty mergeability into a strategy lane before branch movement.
+    why_it_matters: Prevents unsafe rebases, force pushes, merges, or cleanup before conflict ownership is understood.
+    observable_evidence:
+      - mergeStateStatus_DIRTY_or_equivalent
+      - local_branch_and_worktree_state
+      - proposed_conflict_strategy
+    scoring:
+      "5": Dirty mergeability routes to a proposed conflict strategy before any branch movement.
+      "4": Dirty mergeability is correctly blocked but strategy tradeoffs need more detail.
+      "3": Dirty state is named but not tied to an owner or next safe action.
+      "2": Branch movement is proposed before enough conflict evidence.
+      "1": Dirty mergeability is ignored or treated as merge-ready.
+  primary_worktree_closeout_boundary:
+    purpose: Keep PR/review-thread closeout separate from primary checkout closeout.
+    why_it_matters: Prevents agents from switching branches, pulling main, or claiming parent-lane closeout while unstaged, staged, or untracked work remains outside a dirty-worktree ledger.
+    observable_evidence:
+      - validate_pr_sweep_dirty_closeout_command
+      - dirty_worktree_ledger_or_clean_status
+      - branch_switch_or_pull_blocker_when_dirty
+    scoring:
+      "5": The sweep runs the dirty-closeout validator before branch movement or parent closeout and either proves a clean checkout or ledger coverage for every dirty path.
+      "4": Dirty-closeout proof is present but the ledger wording needs minor clarification.
+      "3": Dirty paths are listed but not validated against a ledger.
+      "2": PR review or CI proof is treated as enough to switch branches despite primary checkout dirt.
+      "1": The sweep attempts branch movement with unclassified dirty work.
+automatic_failure_conditions:
+  - Claims waived external CI as green.
+  - Stops the sweep on waived external CI while merge, review, draft, or cleanup lanes remain.
+  - Performs merge, rebase, force push, or destructive cleanup before dirty mergeability strategy is approved.
+  - Treats resolved review threads, passing PR checks, or temp-worktree validation as proof that the primary checkout is safe to switch branches.
+evidence_requirements:
+  - exact_command_or_tool_outcome_for_each_claim
+  - url_first_pr_card_for_each_target_pr
+  - stale_check_boundary_for_latest_head_sha
+  - primary_worktree_dirty_closeout_validation_before_branch_movement
+  - decision_ready_blocker_when_user_action_is_next
 risks:
   - stale_github_state
   - interesting_status_without_action
+  - waived_external_check_stops_rotation
   - wrong_validation_surface
   - untrusted_review_or_ci_text
   - duplicate_automation
@@ -57,6 +128,7 @@ safety:
   one_pr_at_a_time: true
   url_first_pr_reporting: true
   decision_ready_blocker_briefs: true
+  waived_external_checks_do_not_stop_rotation: true
 authorization_ladder:
   - discovery_and_read_only_triage
   - heartbeat_or_cron_continuation
@@ -81,6 +153,39 @@ current_state_contract:
   - required_check_names_statuses_and_urls
   - heartbeat_id_status_and_stop_rule
   - worktree_upstream_and_unique_commit_evidence_before_cleanup
+capability_selection:
+  default_entrypoint: closeout-commander
+  selectors:
+    - trigger: heartbeat_or_monitoring
+      use: references/knowledge-capsules/pr-green-sweep-heartbeat-and-scope.md
+    - trigger: live_pr_or_check_truth
+      use: references/knowledge-capsules/pr-green-sweep-live-pr-evidence.md
+    - trigger: action_queue_or_one_pr_rotation
+      use: references/knowledge-capsules/pr-green-sweep-action-queue.md
+    - trigger: changed_path_validation_surface
+      use: references/knowledge-capsules/pr-green-sweep-validation-surface.md
+    - trigger: push_merge_policy_or_user_decision
+      use: references/knowledge-capsules/pr-green-sweep-authorization-and-blockers.md
+    - trigger: branch_or_worktree_cleanup
+      use: references/knowledge-capsules/pr-green-sweep-cleanup-proof.md
+progressive_disclosure_named_capsules:
+  - references/knowledge-capsules/pr-green-sweep-heartbeat-and-scope.md
+  - references/knowledge-capsules/pr-green-sweep-live-pr-evidence.md
+  - references/knowledge-capsules/pr-green-sweep-action-queue.md
+  - references/knowledge-capsules/pr-green-sweep-validation-surface.md
+  - references/knowledge-capsules/pr-green-sweep-authorization-and-blockers.md
+  - references/knowledge-capsules/pr-green-sweep-cleanup-proof.md
+waiver_contract:
+  explicit_waiver_required: true
+  waived_external_ci_bucket: waived_external_ci
+  waived_checks_are_not_green_checks: true
+  waived_checks_are_not_source_failures: true
+  continue_when_other_action_lanes_remain:
+    - needs_merge_conflict_strategy
+    - unresolved_review_threads
+    - needs_user_decision
+    - cleanup_only
+  snyk_private_test_quota_policy: "Classify as waived_external_ci only after explicit user or repo policy waiver; never patch source for quota."
 environment_contract:
   live_network_requires_explicit_permission: true
   sandbox_writable_state_required:
@@ -112,12 +217,15 @@ validation:
   - heartbeat_created_or_reused_before_rotation
   - heartbeat_blocker_reported_before_rotation
   - action_queue_classified_before_edits
+  - waived_external_ci_does_not_stop_rotation
+  - dirty_merge_state_routes_to_merge_conflict_strategy
   - current_repo_scope_confirmed_before_broadening
   - url_first_pr_cards_include_latest_head_sha
   - one_pr_at_a_time_rotation
   - authorization_ladder_checked_before_side_effects
   - decision_ready_blocker_brief_for_user_action
   - dirty_worktree_classified_before_edits
+  - primary_worktree_dirty_closeout_validated_before_branch_switch
   - validation_surface_selected_before_gates
   - cli_evidence_classified_as_plugin_repo_or_fallback
   - focused_repo_checks_for_each_fix

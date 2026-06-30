@@ -116,7 +116,7 @@ class SdkStageShapeValidatorTests(unittest.TestCase):
                 references_dir / "source-context.yaml",
             )
 
-    def test_load_yaml_requires_repo_wrapper_when_pyyaml_missing(self) -> None:
+    def test_load_yaml_uses_ruby_fallback_when_pyyaml_missing(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             source_context = Path(tmpdir) / "source-context.yaml"
             source_context.write_text(
@@ -133,10 +133,11 @@ references:
             original_yaml = validator.yaml
             try:
                 validator.yaml = None
-                with self.assertRaises(SystemExit):
-                    validator.load_yaml(source_context)
+                payload = validator.load_yaml(source_context)
             finally:
                 validator.yaml = original_yaml
+            self.assertEqual(payload["schema_version"], "source-context.v1")
+            self.assertEqual(payload["references"][0]["kind"], "expert_viewpoint")
 
 
 if __name__ == "__main__":

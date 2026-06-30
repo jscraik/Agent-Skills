@@ -1,0 +1,836 @@
+{
+  "schema_version": "pr-sweep-worktree-closeout/v1",
+  "generated_at": "2026-06-30T00:00:00Z",
+  "repo": {
+    "branch": "codex/sdk-eval-parity-guardrails",
+    "source_command": "git status --porcelain=v1 --untracked-files=all"
+  },
+  "purpose": "Account for primary-checkout dirty paths before branch movement, main checkout, pull, or parent PR/worktree closeout.",
+  "status": "ledgered_not_clean",
+  "branch_movement_allowed": false,
+  "dirty_path_count": 135,
+  "bucket_counts": {
+    "learning_ledger_lane": 1,
+    "pr_green_sweep_dirty_closeout_guardrail": 9,
+    "sdk_eval_parity_infrastructure_lane": 20,
+    "evals_router_knowledgeos_lane": 2,
+    "sdk_scenario_generator_knowledgeos_lane": 30,
+    "devrel_hack_coach_skill_factory_lane": 46,
+    "improve_codebase_architecture_audit_lane": 13,
+    "pm_thread_pr_sweep_evidence_lane": 5,
+    "generated_skillset_manifest_refresh": 9
+  },
+  "dirty_worktree_ledger": [
+    {
+      "path": ".harness/memory/LEARNINGS.md",
+      "git_status": "unstaged",
+      "bucket": "learning_ledger_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".harness/quality/steering-uptake.md",
+      "git_status": "unstaged",
+      "bucket": "pr_green_sweep_dirty_closeout_guardrail",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".harness/reports/pr-sweep-dirty-closeout-current.json",
+      "git_status": "untracked",
+      "bucket": "pr_green_sweep_dirty_closeout_guardrail",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".skillsets/agent-ops/manifest.jsonl",
+      "git_status": "unstaged",
+      "bucket": "sdk_eval_parity_infrastructure_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".skillsets/backend-platform/manifest.jsonl",
+      "git_status": "unstaged",
+      "bucket": "generated_skillset_manifest_refresh",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".skillsets/content-publishing/manifest.jsonl",
+      "git_status": "unstaged",
+      "bucket": "generated_skillset_manifest_refresh",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".skillsets/frontend-ui/manifest.jsonl",
+      "git_status": "unstaged",
+      "bucket": "generated_skillset_manifest_refresh",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".skillsets/harness-engineering/manifest.jsonl",
+      "git_status": "unstaged",
+      "bucket": "generated_skillset_manifest_refresh",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".skillsets/mobile-native/manifest.jsonl",
+      "git_status": "unstaged",
+      "bucket": "generated_skillset_manifest_refresh",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".skillsets/plugin-factory/manifest.jsonl",
+      "git_status": "unstaged",
+      "bucket": "generated_skillset_manifest_refresh",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".skillsets/product-strategy/manifest.jsonl",
+      "git_status": "unstaged",
+      "bucket": "generated_skillset_manifest_refresh",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".skillsets/security-ops/manifest.jsonl",
+      "git_status": "unstaged",
+      "bucket": "generated_skillset_manifest_refresh",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".skillsets/skill-factory/manifest.jsonl",
+      "git_status": "unstaged",
+      "bucket": "generated_skillset_manifest_refresh",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Docs/reference/skills-sdk-platform-atlas.html",
+      "git_status": "unstaged",
+      "bucket": "sdk_eval_parity_infrastructure_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Infrastructure/config/schemas/skills-sdk/ab-judge-score-receipt.v0.schema.json",
+      "git_status": "unstaged",
+      "bucket": "sdk_eval_parity_infrastructure_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Infrastructure/config/schemas/skills-sdk/eval-profile-preview-receipt.v0.schema.json",
+      "git_status": "unstaged",
+      "bucket": "sdk_eval_parity_infrastructure_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Infrastructure/config/skills-sdk/capability-matrix.v1.json",
+      "git_status": "unstaged",
+      "bucket": "sdk_eval_parity_infrastructure_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Infrastructure/scripts/lib/ask/skills_sdk/ab_contracts.py",
+      "git_status": "unstaged",
+      "bucket": "sdk_eval_parity_infrastructure_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Infrastructure/scripts/lib/ask/skills_sdk/eval_ab_judge.py",
+      "git_status": "unstaged",
+      "bucket": "sdk_eval_parity_infrastructure_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Infrastructure/scripts/lib/ask/skills_sdk/eval_profiles.py",
+      "git_status": "unstaged",
+      "bucket": "sdk_eval_parity_infrastructure_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Infrastructure/scripts/lib/ask/skills_sdk/package_contracts.py",
+      "git_status": "unstaged",
+      "bucket": "sdk_eval_parity_infrastructure_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Infrastructure/scripts/lib/ask/skills_sdk/release_scenario_sets.py",
+      "git_status": "unstaged",
+      "bucket": "sdk_eval_parity_infrastructure_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Infrastructure/scripts/lib/ask/skills_sdk/scenario_quality.py",
+      "git_status": "unstaged",
+      "bucket": "sdk_eval_parity_infrastructure_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Infrastructure/scripts/testing/test_validate_sdk_runtime_lane_contract.py",
+      "git_status": "unstaged",
+      "bucket": "sdk_eval_parity_infrastructure_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Infrastructure/scripts/validation-and-linting/validate_thread_pm_delivery.py",
+      "git_status": "unstaged",
+      "bucket": "sdk_eval_parity_infrastructure_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Infrastructure/scripts/validation-and-linting/validate_thread_report.py",
+      "git_status": "unstaged",
+      "bucket": "sdk_eval_parity_infrastructure_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/eval-profile-preview-receipt.json",
+      "git_status": "unstaged",
+      "bucket": "sdk_eval_parity_infrastructure_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Infrastructure/tests/test_ask_skills_package_contract.py",
+      "git_status": "unstaged",
+      "bucket": "sdk_eval_parity_infrastructure_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Infrastructure/tests/test_skills_sdk_eval_profiles.py",
+      "git_status": "unstaged",
+      "bucket": "sdk_eval_parity_infrastructure_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Infrastructure/tests/test_skills_sdk_scenario_quality.py",
+      "git_status": "unstaged",
+      "bucket": "sdk_eval_parity_infrastructure_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Infrastructure/tests/test_skills_sdk_schema_spine.py",
+      "git_status": "unstaged",
+      "bucket": "sdk_eval_parity_infrastructure_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/agent-ops/evals-router/references/evals/eval.knowledge-os.export-pass-overclaims-quality.md",
+      "git_status": "unstaged",
+      "bucket": "evals_router_knowledgeos_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/agent-ops/evals-router/references/evals/eval.skills.adapter-optimization-premature.md",
+      "git_status": "unstaged",
+      "bucket": "evals_router_knowledgeos_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/agent-ops/pr-green-sweep/SKILL.md",
+      "git_status": "unstaged",
+      "bucket": "pr_green_sweep_dirty_closeout_guardrail",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/agent-ops/pr-green-sweep/references/contract.yaml",
+      "git_status": "unstaged",
+      "bucket": "pr_green_sweep_dirty_closeout_guardrail",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/agent-ops/pr-green-sweep/references/evals.yaml",
+      "git_status": "unstaged",
+      "bucket": "pr_green_sweep_dirty_closeout_guardrail",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/agent-ops/sdk-scenario-generator/SKILL.md",
+      "git_status": "unstaged",
+      "bucket": "sdk_scenario_generator_knowledgeos_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/agent-ops/sdk-scenario-generator/references/contract.yaml",
+      "git_status": "unstaged",
+      "bucket": "sdk_scenario_generator_knowledgeos_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/agent-ops/sdk-scenario-generator/references/evals.yaml",
+      "git_status": "unstaged",
+      "bucket": "sdk_scenario_generator_knowledgeos_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/agent-ops/sdk-scenario-generator/references/gold-scenario-contract.md",
+      "git_status": "unstaged",
+      "bucket": "sdk_scenario_generator_knowledgeos_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".harness/evidence/factory-gates/devrel-hack-coach/factory-gate.json",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".harness/evidence/handoff/devrel-hack-coach/gate-chain.json",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".harness/evidence/handoff/devrel-hack-coach/oss-local-smoke-classification-20260630-135516.json",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".harness/evidence/handoff/devrel-hack-coach/oss-local-smoke-classification-20260630-140551.json",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".harness/evidence/handoff/devrel-hack-coach/oss-local-smoke-classification-20260630-141036.json",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".harness/evidence/handoff/devrel-hack-coach/package-verify.json",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".harness/evidence/handoff/devrel-hack-coach/plugin-shape.json",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".harness/evidence/handoff/devrel-hack-coach/scenario-quality.json",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".harness/evidence/handoff/devrel-hack-coach/scenario-sources.json",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".harness/evidence/handoff/devrel-hack-coach/scorer-calibration.json",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".harness/evidence/handoff/devrel-hack-coach/scorer-quality.json",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".harness/evidence/handoff/devrel-hack-coach/sdk-start.json",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".harness/evidence/handoff/devrel-hack-coach/security-risk-modes.json",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".harness/evidence/handoff/devrel-hack-coach/strict-audit.json",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".harness/evidence/handoff/improve-codebase-architecture/audit.json",
+      "git_status": "untracked",
+      "bucket": "improve_codebase_architecture_audit_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".harness/evidence/handoff/improve-codebase-architecture/evals-smoke-timeout.json",
+      "git_status": "untracked",
+      "bucket": "improve_codebase_architecture_audit_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".harness/evidence/handoff/improve-codebase-architecture/evals-smoke.json",
+      "git_status": "untracked",
+      "bucket": "improve_codebase_architecture_audit_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".harness/evidence/handoff/improve-codebase-architecture/family-benchmarks.json",
+      "git_status": "untracked",
+      "bucket": "improve_codebase_architecture_audit_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".harness/evidence/handoff/improve-codebase-architecture/package-verify.json",
+      "git_status": "untracked",
+      "bucket": "improve_codebase_architecture_audit_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".harness/evidence/handoff/improve-codebase-architecture/plugin-eval.json",
+      "git_status": "untracked",
+      "bucket": "improve_codebase_architecture_audit_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".harness/evidence/handoff/improve-codebase-architecture/pm-closeout-report.json",
+      "git_status": "untracked",
+      "bucket": "improve_codebase_architecture_audit_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".harness/evidence/handoff/improve-codebase-architecture/prepare-tessl-scenarios.json",
+      "git_status": "untracked",
+      "bucket": "improve_codebase_architecture_audit_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".harness/evidence/handoff/improve-codebase-architecture/scenario-quality.json",
+      "git_status": "untracked",
+      "bucket": "improve_codebase_architecture_audit_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".harness/evidence/handoff/improve-codebase-architecture/scorer-calibration.json",
+      "git_status": "untracked",
+      "bucket": "improve_codebase_architecture_audit_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".harness/evidence/handoff/improve-codebase-architecture/scorer-quality.json",
+      "git_status": "untracked",
+      "bucket": "improve_codebase_architecture_audit_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".harness/evidence/handoff/improve-codebase-architecture/tessl-live-dry-run.json",
+      "git_status": "untracked",
+      "bucket": "improve_codebase_architecture_audit_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".harness/reports/thread-replies/019f0314-ba59-7a00-ab78-9bd3174d1d03/latest.json",
+      "git_status": "untracked",
+      "bucket": "pm_thread_pr_sweep_evidence_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".harness/reports/thread-replies/019f0314-ba59-7a00-ab78-9bd3174d1d03/pm-delivery.json",
+      "git_status": "untracked",
+      "bucket": "pm_thread_pr_sweep_evidence_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".harness/reports/thread-replies/019f0314-ba59-7a00-ab78-9bd3174d1d03/pr-green-sweep-delivery.json",
+      "git_status": "untracked",
+      "bucket": "pm_thread_pr_sweep_evidence_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".harness/reports/thread-replies/019f0314-ba59-7a00-ab78-9bd3174d1d03/pr-green-sweep-latest.json",
+      "git_status": "untracked",
+      "bucket": "pm_thread_pr_sweep_evidence_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".harness/reports/thread-replies/019f0314-ba59-7a00-ab78-9bd3174d1d03/pr296-conflict-strategy.json",
+      "git_status": "untracked",
+      "bucket": "pm_thread_pr_sweep_evidence_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": ".harness/research/audits/2026-06-30-tessl-agent-evidence-led-codebase-gap-audit.md",
+      "git_status": "untracked",
+      "bucket": "improve_codebase_architecture_audit_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Infrastructure/scripts/testing/test_validate_pr_sweep_dirty_closeout.py",
+      "git_status": "untracked",
+      "bucket": "pr_green_sweep_dirty_closeout_guardrail",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Infrastructure/scripts/validation-and-linting/validate_pr_sweep_dirty_closeout.py",
+      "git_status": "untracked",
+      "bucket": "pr_green_sweep_dirty_closeout_guardrail",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/agent-ops/pr-green-sweep/references/evals/eval.pr-green-sweep.waived-external-ci-does-not-stop-rotation.md",
+      "git_status": "untracked",
+      "bucket": "pr_green_sweep_dirty_closeout_guardrail",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/agent-ops/pr-green-sweep/references/knowledge-capsule-routing.md",
+      "git_status": "untracked",
+      "bucket": "pr_green_sweep_dirty_closeout_guardrail",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/agent-ops/sdk-scenario-generator/references/eval-scenarios.json",
+      "git_status": "untracked",
+      "bucket": "sdk_scenario_generator_knowledgeos_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/agent-ops/sdk-scenario-generator/references/evals/eval.knowledge-os.capsule-design-without-relationships.md",
+      "git_status": "untracked",
+      "bucket": "sdk_scenario_generator_knowledgeos_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/agent-ops/sdk-scenario-generator/references/evals/eval.knowledge-os.consumer-receipt-stale-digest.md",
+      "git_status": "untracked",
+      "bucket": "sdk_scenario_generator_knowledgeos_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/agent-ops/sdk-scenario-generator/references/evals/eval.knowledge-os.export-pass-overclaims-quality.md",
+      "git_status": "untracked",
+      "bucket": "sdk_scenario_generator_knowledgeos_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/agent-ops/sdk-scenario-generator/references/evals/eval.knowledge-os.skills-sdk-handoff-overclaims-ingest.md",
+      "git_status": "untracked",
+      "bucket": "sdk_scenario_generator_knowledgeos_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/agent-ops/sdk-scenario-generator/references/evals/eval.skills.adapter-optimization-premature.md",
+      "git_status": "untracked",
+      "bucket": "sdk_scenario_generator_knowledgeos_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/agent-ops/sdk-scenario-generator/references/evals/eval.skills.baseline-lift-required.md",
+      "git_status": "untracked",
+      "bucket": "sdk_scenario_generator_knowledgeos_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/agent-ops/sdk-scenario-generator/references/evals/eval.skills.description-routing-not-conformance.md",
+      "git_status": "untracked",
+      "bucket": "sdk_scenario_generator_knowledgeos_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/agent-ops/sdk-scenario-generator/references/evals/eval.skills.library-maintenance-required.md",
+      "git_status": "untracked",
+      "bucket": "sdk_scenario_generator_knowledgeos_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/agent-ops/sdk-scenario-generator/references/evals/eval.skills.negative-tests-required.md",
+      "git_status": "untracked",
+      "bucket": "sdk_scenario_generator_knowledgeos_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/agent-ops/sdk-scenario-generator/references/evals/eval.skills.registry-semantic-risk.md",
+      "git_status": "untracked",
+      "bucket": "sdk_scenario_generator_knowledgeos_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/agent-ops/sdk-scenario-generator/references/evals/eval.skills.routing-scale-regression.md",
+      "git_status": "untracked",
+      "bucket": "sdk_scenario_generator_knowledgeos_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/agent-ops/sdk-scenario-generator/references/evals/eval.skills.skill-mcp-boundary-required.md",
+      "git_status": "untracked",
+      "bucket": "sdk_scenario_generator_knowledgeos_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/agent-ops/sdk-scenario-generator/references/evals/eval.skills.task-completion-not-quality.md",
+      "git_status": "untracked",
+      "bucket": "sdk_scenario_generator_knowledgeos_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/agent-ops/sdk-scenario-generator/references/evals/eval.skills.trace-revision-required.md",
+      "git_status": "untracked",
+      "bucket": "sdk_scenario_generator_knowledgeos_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/agent-ops/sdk-scenario-generator/references/knowledge-capsule-routing.md",
+      "git_status": "untracked",
+      "bucket": "sdk_scenario_generator_knowledgeos_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/agent-ops/sdk-scenario-generator/references/knowledge-capsule.manifest.yaml",
+      "git_status": "untracked",
+      "bucket": "sdk_scenario_generator_knowledgeos_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/agent-ops/sdk-scenario-generator/references/knowledge-demand.yaml",
+      "git_status": "untracked",
+      "bucket": "sdk_scenario_generator_knowledgeos_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/agent-ops/sdk-scenario-generator/references/knowledge-os-capsule-design.md",
+      "git_status": "untracked",
+      "bucket": "sdk_scenario_generator_knowledgeos_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/agent-ops/sdk-scenario-generator/references/knowledge-os-export-readiness.md",
+      "git_status": "untracked",
+      "bucket": "sdk_scenario_generator_knowledgeos_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/agent-ops/sdk-scenario-generator/references/skills-sdk-architecture-runtime.md",
+      "git_status": "untracked",
+      "bucket": "sdk_scenario_generator_knowledgeos_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/agent-ops/sdk-scenario-generator/references/skills-sdk-evaluation-benchmarks.md",
+      "git_status": "untracked",
+      "bucket": "sdk_scenario_generator_knowledgeos_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/agent-ops/sdk-scenario-generator/references/skills-sdk-generation-revision.md",
+      "git_status": "untracked",
+      "bucket": "sdk_scenario_generator_knowledgeos_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/agent-ops/sdk-scenario-generator/references/skills-sdk-operations-registry.md",
+      "git_status": "untracked",
+      "bucket": "sdk_scenario_generator_knowledgeos_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/agent-ops/sdk-scenario-generator/references/skills-sdk-supply-chain-security.md",
+      "git_status": "untracked",
+      "bucket": "sdk_scenario_generator_knowledgeos_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/agent-ops/sdk-scenario-generator/references/source-context.yaml",
+      "git_status": "untracked",
+      "bucket": "sdk_scenario_generator_knowledgeos_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/product-strategy/devrel-hack-coach/README.md",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/product-strategy/devrel-hack-coach/SKILL.md",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/product-strategy/devrel-hack-coach/agents/openai.yaml",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/product-strategy/devrel-hack-coach/references/coaching-style.md",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/product-strategy/devrel-hack-coach/references/contract.yaml",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/product-strategy/devrel-hack-coach/references/devcon-tracks.md",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/product-strategy/devrel-hack-coach/references/devrel-hack-coach-hackathon-workflow.md",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/product-strategy/devrel-hack-coach/references/devrel-hack-coach-ideation-pressure-test.md",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/product-strategy/devrel-hack-coach/references/devrel-hack-coach-one-hour-five-minute-software-presentation.md",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/product-strategy/devrel-hack-coach/references/devrel-hack-coach-pitch-and-judge-qa.md",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/product-strategy/devrel-hack-coach/references/devrel-hack-coach-scope-cutting.md",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/product-strategy/devrel-hack-coach/references/devrel-hack-coach-spec-first-demo.md",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/product-strategy/devrel-hack-coach/references/devrel-hack-coach-track-aware-selection.md",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/product-strategy/devrel-hack-coach/references/devrel-hack-coach-twenty-four-hour-plan.md",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/product-strategy/devrel-hack-coach/references/evals.yaml",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/product-strategy/devrel-hack-coach/references/example-quality-bars.md",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/product-strategy/devrel-hack-coach/references/examples/good-pitch.md",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/product-strategy/devrel-hack-coach/references/examples/good-spec.md",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/product-strategy/devrel-hack-coach/references/knowledge-capsule-routing.md",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/product-strategy/devrel-hack-coach/references/knowledge-capsule.manifest.yaml",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/product-strategy/devrel-hack-coach/references/knowledge-demand.yaml",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/product-strategy/devrel-hack-coach/references/pitch-template.md",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/product-strategy/devrel-hack-coach/references/scorer-calibration/examples.jsonl",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/product-strategy/devrel-hack-coach/references/scorer-calibration/manifest.json",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/product-strategy/devrel-hack-coach/references/scorer-calibration/raw/obvious-correct-phase-gate.json",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/product-strategy/devrel-hack-coach/references/scorer-calibration/raw/obvious-wrong-code-first.json",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/product-strategy/devrel-hack-coach/references/source-context.yaml",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/product-strategy/devrel-hack-coach/references/source-provenance.md",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/product-strategy/devrel-hack-coach/references/spec-template.md",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/product-strategy/devrel-hack-coach/references/task-profile.json",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/product-strategy/devrel-hack-coach/references/timebox-plans.md",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "Skills/product-strategy/devrel-hack-coach/references/validation-and-output.md",
+      "git_status": "untracked",
+      "bucket": "devrel_hack_coach_skill_factory_lane",
+      "action": "ledgered_not_yet_staged"
+    },
+    {
+      "path": "docs/reference/skills-sdk-skill-construction-contract.md",
+      "git_status": "untracked",
+      "bucket": "sdk_eval_parity_infrastructure_lane",
+      "action": "ledgered_not_yet_staged"
+    }
+  ],
+  "required_next_action": "Stage and validate one ownership bucket at a time, or explicitly park a bucket before attempting git checkout main."
+}
