@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 import re
+import subprocess
 from typing import Any
 
 from ask.skills_sdk.contracts import (
@@ -356,6 +357,9 @@ def read_reference_contract(skill_md: Path | None) -> dict[str, Any]:
         json_loaded = read_json_like_yaml_reference(text)
         if isinstance(json_loaded, dict):
             return json_loaded
+        ruby_loaded = read_yaml_with_ruby(text)
+        if isinstance(ruby_loaded, dict):
+            return ruby_loaded
         return read_reference_contract_fallback(text)
     try:
         loaded = yaml.safe_load(text) or {}
@@ -386,6 +390,9 @@ def read_structured_reference(path: Path) -> tuple[dict[str, Any] | list[Any] | 
             json_loaded = read_json_like_yaml_reference(text)
             if isinstance(json_loaded, (dict, list)):
                 return json_loaded, None
+            ruby_loaded = read_yaml_with_ruby(text)
+            if isinstance(ruby_loaded, (dict, list)):
+                return ruby_loaded, None
             loaded = read_structured_reference_fallback(text)
             return loaded, None
         try:
@@ -405,6 +412,27 @@ def read_json_like_yaml_reference(text: str) -> dict[str, Any] | list[Any] | Non
     try:
         loaded = json.loads(text)
     except ValueError:
+        return None
+    return loaded if isinstance(loaded, (dict, list)) else None
+
+
+def read_yaml_with_ruby(text: str) -> dict[str, Any] | list[Any] | None:
+    """Parse YAML with Ruby stdlib when PyYAML is unavailable."""
+    code = "require 'yaml'; require 'json'; print JSON.generate(YAML.safe_load(STDIN.read, permitted_classes: [], aliases: false))"
+    try:
+        completed = subprocess.run(
+            ["ruby", "-e", code],
+            input=text,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=True,
+        )
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        return None
+    try:
+        loaded = json.loads(completed.stdout)
+    except json.JSONDecodeError:
         return None
     return loaded if isinstance(loaded, (dict, list)) else None
 

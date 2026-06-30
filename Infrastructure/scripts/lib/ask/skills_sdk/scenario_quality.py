@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -94,11 +96,37 @@ def _yaml_safe_load(text: str) -> Any:
     try:
         import yaml  # type: ignore
     except ModuleNotFoundError:
+        try:
+            return _load_minimal_evals_yaml(text)
+        except ValueError:
+            pass
+        ruby_loaded = _ruby_yaml_safe_load(text)
+        if ruby_loaded is not None:
+            return ruby_loaded
         return _load_minimal_evals_yaml(text)
     try:
         return yaml.safe_load(text)
     except yaml.YAMLError as exc:  # type: ignore[attr-defined]
         raise ValueError(str(exc)) from exc
+
+
+def _ruby_yaml_safe_load(text: str) -> Any | None:
+    code = "require 'yaml'; require 'json'; print JSON.generate(YAML.safe_load(STDIN.read, permitted_classes: [], aliases: false))"
+    try:
+        completed = subprocess.run(
+            ["ruby", "-e", code],
+            input=text,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=True,
+        )
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        return None
+    try:
+        return json.loads(completed.stdout)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"ruby_yaml_json_decode_error: {exc}") from exc
 
 
 def _load_minimal_evals_yaml(text: str) -> dict[str, Any]:

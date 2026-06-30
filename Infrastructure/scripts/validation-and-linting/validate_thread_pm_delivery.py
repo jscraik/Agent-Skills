@@ -94,6 +94,18 @@ def _validate_delivered_state(delivery: dict[str, Any]) -> list[dict[str, str]]:
     return findings
 
 
+def _validate_blocked_state(delivery: dict[str, Any]) -> list[dict[str, str]]:
+    findings: list[dict[str, str]] = []
+    if delivery.get("delivery_status") != "blocked":
+        return findings
+
+    if delivery.get("delivery_method") != "blocked_no_thread_tool":
+        findings.append(_finding("delivery.delivery_method", "blocked status must use blocked_no_thread_tool"))
+    if delivery.get("delivered_at") or delivery.get("message_summary"):
+        findings.append(_finding("delivery.delivery_status", "blocked status must not include delivered metadata"))
+    return findings
+
+
 def _validate_delivery_fields(
     delivery: dict[str, Any],
     report: dict[str, Any],
@@ -119,11 +131,7 @@ def _validate_delivery_fields(
     if not _non_empty_string(delivery.get("delivery_evidence")):
         findings.append(_finding("delivery.delivery_evidence", "must record concrete PM delivery evidence or blocker"))
     findings.extend(_validate_delivered_state(delivery))
-    if delivery.get("delivery_status") == "blocked":
-        if delivery.get("delivery_method") != "blocked_no_thread_tool":
-            findings.append(_finding("delivery.delivery_method", "blocked status must use blocked_no_thread_tool"))
-        if delivery.get("delivered_at") or delivery.get("message_summary"):
-            findings.append(_finding("delivery.delivery_status", "blocked status must not include delivered metadata"))
+    findings.extend(_validate_blocked_state(delivery))
     if require_delivery and delivery.get("delivery_status") != "delivered":
         findings.append(_finding("delivery.delivery_status", "PM delivery is required and must be delivered"))
     return findings
