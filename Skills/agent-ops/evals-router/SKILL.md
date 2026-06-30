@@ -90,7 +90,7 @@ Detailed route checkpoints, judge audit fields, scorer checks, and capsule routi
 ~~~text
 Grade one binary criterion.
 Criterion: PASS iff every factual sentence in answer_text has exact support in source_references.
-Return JSON: {"sentence_results":[{"sentence_id":"s1","verdict":"supported|unsupported|not_factual","source_refs":["chunk-07"],"reason":"..."}],"overall_verdict":"judge_pass|judge_semantic_fail|judge_parse_error|judge_schema_error","failure_reason":""}
+Return JSON: {"sentence_results":[{"sentence_id":"s1","verdict":"supported|unsupported|not_factual","source_refs":["chunk-07"],"reason":"..."}],"overall_verdict":"judge_pass|judge_semantic_fail|judge_parse_error|judge_schema_error","failure_reason":"","confidence":"high|medium|low","evidence_refs":["ref1","ref2"],"suggested_validator":"human|deterministic|alternate_judge"}
 Use judge_pass only when every factual sentence is supported.
 ~~~
 
