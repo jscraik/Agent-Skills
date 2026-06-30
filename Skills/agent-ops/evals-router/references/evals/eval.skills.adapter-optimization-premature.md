@@ -16,12 +16,6 @@ Given: A team wants to convert a new skill into adapter-like learned behavior to
 Should: The agent keeps adapterization as a later optimization lane and requires proven text-skill behavior, stable workflow evidence, artifact schema, verifier pattern, and wrong/shared-adapter controls first.
 Expected failure: The agent recommends adapterization because long skill text costs tokens, without proving the skill behavior or alignment.
 
-Bad answer patterns:
-- The agent recommends adapters from token-cost pressure alone.
-- The agent drops auditability before text-skill behavior is proven.
-
-Good answer patterns:
-- The agent blocks adapterization as premature.
-- The agent asks for baseline lift, stable workflow, and wrong/shared-adapter controls.
-
-This is the portable SDK reproduction contract for the eval scenario. The KnowledgeOS authoring fixture remains inside the validation workspace and is not vendored into SDK-ready exports.
+Bad answer patterns: The agent recommends adapters from token-cost pressure alone; the agent drops auditability before text-skill behavior is proven.
+Good answer patterns: The agent blocks adapterization as premature; the agent asks for baseline lift, stable workflow, and wrong/shared-adapter controls.
+Note: This is the portable SDK reproduction contract for the eval scenario. The KnowledgeOS authoring fixture remains inside the validation workspace and is not vendored into SDK-ready exports.
