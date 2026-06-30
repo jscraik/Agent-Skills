@@ -5,12 +5,12 @@
   "evidence_sources": [
     {
       "kind": "codex_memory",
-      "path": "/Users/jamiecraik/.codex/memories/MEMORY.md",
+      "path": "codex:memories/MEMORY.md",
       "query": "Skills SDK, Skill Factory, Tessl, scenario, security, stale handle"
     },
     {
       "kind": "session_collector",
-      "path": "/Users/jamiecraik/.agents/session-collector",
+      "path": "session-collector:evidence-root",
       "query": "collector availability and canonical evidence-root pattern"
     },
     {

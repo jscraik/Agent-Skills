@@ -396,12 +396,12 @@ def harness_engineering_override(
 def factory_override(skill_set: str, task: str, rows: list[dict[str, Any]]) -> dict[str, Any] | None:
     """
     Route tasks deterministically for the `plugin-factory` and `skill-factory` skill sets before falling back to generic scoring.
-    
+
     Parameters:
         skill_set (str): Root skill set name, e.g., "plugin-factory" or "skill-factory".
         task (str): The user task text to evaluate for deterministic routing signals.
-        rows (list[dict[str, Any]]): Manifest rows for the skill set.
-    
+        rows (list[dict[str, Any]]): Manifest rows for the skill set (may include system-bridge rows for skill-factory).
+
     Returns:
         dict[str, Any] | None: A routing decision dict with keys:
             - "row": the selected manifest row (dict),
@@ -409,8 +409,6 @@ def factory_override(skill_set: str, task: str, rows: list[dict[str, Any]]) -> d
             - "reason": short string describing the matched deterministic rule;
         or `None` if no deterministic rule applies.
     """
-    if skill_set == "skill-factory":
-        rows = [*rows, *_skill_factory_system_bridge_rows(rows)]
     task_text = task.lower()
     row_ids = {str(row.get("id")) for row in rows}
 
@@ -605,13 +603,13 @@ def _skill_factory_system_bridge_rows(rows: list[dict[str, Any]]) -> list[dict[s
 def route(skill_set: str, task: str, *, top_k: int = MAX_TOP_K, skillsets_dir: Path = DEFAULT_SKILLSETS_DIR) -> dict[str, Any]:
     """
     Route a task to the best-matching stage within a root skill set.
-    
+
     Parameters:
     	skill_set (str): Root skill set name to route within.
     	task (str): The user task text to route.
     	top_k (int): Maximum number of candidate stages to return (bounded to 1..MAX_TOP_K).
     	skillsets_dir (Path): Directory containing skill-set subfolders.
-    
+
     Returns:
     	payload (dict): A structured routing result with these keys:
     		- schema_version (int): Payload schema version.
@@ -660,6 +658,12 @@ def route(skill_set: str, task: str, *, top_k: int = MAX_TOP_K, skillsets_dir: P
             "candidates": [],
             "operator_action": "Handle as ordinary product work; factory routing is excluded by the task text.",
         }
+
+    # For skill-factory, augment rows with system-bridge entries before override checks
+    augmented_rows = rows
+    if skill_set == "skill-factory":
+        augmented_rows = [*rows, *_skill_factory_system_bridge_rows(rows)]
+
     override = None
     try:
         if skill_set == "harness-engineering":
@@ -668,7 +672,7 @@ def route(skill_set: str, task: str, *, top_k: int = MAX_TOP_K, skillsets_dir: P
                 routing_map_path = None
             override = harness_engineering_override(task, rows, routing_map_path=routing_map_path)
         elif skill_set in {"plugin-factory", "skill-factory"}:
-            override = factory_override(skill_set, task, rows)
+            override = factory_override(skill_set, task, augmented_rows)
     except ValueError as exc:
         return {
             "schema_version": 1,
@@ -703,7 +707,7 @@ def route(skill_set: str, task: str, *, top_k: int = MAX_TOP_K, skillsets_dir: P
             "operator_action": None,
         }
     scored = []
-    for row in rows:
+    for row in augmented_rows:
         confidence, reasons = score_row(row, task)
         if confidence <= 0:
             continue
@@ -734,7 +738,7 @@ def route(skill_set: str, task: str, *, top_k: int = MAX_TOP_K, skillsets_dir: P
         selected_id = str(selected_row.get("id", ""))
         resolved_selected_id = resolve_he_stage_alias(selected_id)
         if resolved_selected_id != selected_id:
-            selected_row = row_by_id(rows, resolved_selected_id) or selected_row
+            selected_row = row_by_id(augmented_rows, resolved_selected_id) or selected_row
     status = "selected" if selected_confidence >= LOW_CONFIDENCE_THRESHOLD else "low_confidence"
     selected = None
     if status == "selected":

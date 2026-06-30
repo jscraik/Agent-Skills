@@ -23,9 +23,9 @@
       ],
       "why": "Encodes the repeated steering that package shape, rubric, warnings, scenario parity, security, and release-lane evidence must be deterministic before oss-cloud or Tessl.",
       "proof_required": [
-        "py_compile the validator and tests",
-        "pytest the release-ratchet tests and package-contract tests",
-        "run validate_skills_sdk_release_ratchets.py against a known incomplete candidate and confirm it blocks"
+        "bash Infrastructure/scripts/run-infrastructure-python.sh -m py_compile Infrastructure/scripts/validation-and-linting/validate_skills_sdk_release_ratchets.py",
+        "./bin/ask Infrastructure run-infrastructure-tests --filter test_validate_skills_sdk_release_ratchets --filter test_ask_skills_package_contract",
+        "bash Infrastructure/scripts/run-infrastructure-python.sh Infrastructure/scripts/validation-and-linting/validate_skills_sdk_release_ratchets.py skills-system/skill-installer"
       ],
       "lanes_blocked_until_proven": [
         "oss-cloud",

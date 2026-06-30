@@ -69,7 +69,7 @@ def build_receipt_findings(
     checks = [
         _check_factory_gate(root, factory_gate),
         _check_reference_routing(root, skill_dir / "SKILL.md", refs),
-        _check_no_carried_advisories(root, evidence_dir),
+        _check_no_carried_advisories(root, evidence_dir, target_gate),
         _check_gate_chain(root, evidence_dir, target_gate),
     ]
     if _gate_reached("package_verify", target_gate):
@@ -256,7 +256,7 @@ def _missing_plugin_shape(payload: dict[str, Any]) -> list[str]:
     if str(payload.get("target_kind") or "") == "standalone_skill":
         return []
     files = set(_json_path_list(payload, "files", "staged_files"))
-    return sorted(item for item in PLUGIN_SHAPE_REQUIRED if not any(path.startswith(item) or path == item for path in files))
+    return sorted(item for item in PLUGIN_SHAPE_REQUIRED if not any(path == item or path.startswith(item + "/") for path in files))
 
 
 def _plugin_flags(payload: dict[str, Any]) -> dict[str, bool]:
@@ -269,9 +269,15 @@ def _plugin_flags(payload: dict[str, Any]) -> dict[str, bool]:
     }
 
 
-def _check_no_carried_advisories(root: Path, evidence_dir: Path) -> dict[str, Any]:
+def _check_no_carried_advisories(root: Path, evidence_dir: Path, target_gate: str | None = None) -> dict[str, Any]:
     carried = []
+    required_gates = set(_required_gate_chain(target_gate))
     for path in sorted(evidence_dir.glob("*.json")) if evidence_dir.is_dir() else []:
+        # Skip receipts for gates beyond the target gate
+        if target_gate is not None:
+            gate_id = path.stem
+            if gate_id in REQUIRED_GATE_CHAIN and gate_id not in required_gates:
+                continue
         payload, error = _load_json(path)
         carried.extend([f"{_rel(path, root)}:{error}"] if payload is None else [f"{_rel(path, root)}:{item}" for item in _has_carried_advisories(payload)])
     return _finding("no_carried_advisories", "pass" if not carried else "fail", "Promotion gates must repair advisories or record accepted exceptions.", {"handoff_dir": _rel(evidence_dir, root), "carried": carried[:20]})
@@ -347,7 +353,16 @@ def _receipt_path(root: Path, value: Any) -> Path | None:
     if not isinstance(value, str) or not value.strip():
         return None
     path = Path(value)
-    return path if path.is_absolute() else root / path
+    if path.is_absolute():
+        candidate = path
+    else:
+        candidate = root / path
+    try:
+        resolved = candidate.resolve()
+        resolved.relative_to(root.resolve())
+    except (OSError, ValueError):
+        return None
+    return candidate
 
 
 def _check_repair_loop(root: Path, evidence_dir: Path) -> dict[str, Any]:

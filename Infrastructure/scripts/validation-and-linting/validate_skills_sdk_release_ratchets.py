@@ -377,8 +377,14 @@ def _scenario_missing_fields(cases: list[Any]) -> list[dict[str, Any]]:
     return missing_fields
 
 
-def _check_skill_factory_pipeline(root: Path, refs: Path) -> Finding:
-    contract = _structured(refs / "contract.yaml")
+def _check_skill_factory_pipeline(root: Path, refs: Path, contract: dict[str, Any] | None) -> Finding:
+    if contract is None:
+        return Finding(
+            "skill_factory_pipeline_commands",
+            "fail",
+            "Skill Factory pipeline check skipped due to missing or unparseable contract.",
+            {"path": _rel(refs / "contract.yaml", root)},
+        )
     commands = contract.get("commands")
     command_text = "\n".join(str(item) for item in commands) if isinstance(commands, list) else ""
     missing = [needle for needle in REQUIRED_CONTRACT_COMMANDS if needle not in command_text]
@@ -391,8 +397,14 @@ def _check_skill_factory_pipeline(root: Path, refs: Path) -> Finding:
     )
 
 
-def _check_security_lane(root: Path, refs: Path) -> Finding:
-    contract = _structured(refs / "contract.yaml")
+def _check_security_lane(root: Path, refs: Path, contract: dict[str, Any] | None) -> Finding:
+    if contract is None:
+        return Finding(
+            "security_risk_mode_lane",
+            "fail",
+            "Security lane check skipped due to missing or unparseable contract.",
+            {"path": _rel(refs / "contract.yaml", root)},
+        )
     commands = contract.get("commands")
     command_text = "\n".join(str(item) for item in commands) if isinstance(commands, list) else ""
     has_security_preview = "sdk security risk-modes" in command_text and "--preview" in command_text
@@ -451,7 +463,8 @@ def _case_blocks(case_text: str) -> list[str]:
     blocks: list[str] = []
     current: list[str] = []
     for line in case_text.splitlines():
-        if line.startswith("- id:") and current:
+        stripped = line.lstrip()
+        if stripped.startswith("- id:") and current:
             blocks.append("\n".join(current))
             current = []
         if line.strip():
@@ -484,8 +497,10 @@ def _check_session_pattern_uptake(root: Path) -> Finding:
     )
 
 
-def _receipt_checks(root: Path, skill_dir: Path, refs: Path, contract: dict[str, Any], target_gate: str | None) -> list[Finding]:
+def _receipt_checks(root: Path, skill_dir: Path, refs: Path, contract: dict[str, Any] | None, target_gate: str | None) -> list[Finding]:
     """Build receipt-level release ratchet findings."""
+    if contract is None:
+        return []
     commands = contract.get("commands")
     command_text = "\n".join(str(item) for item in commands) if isinstance(commands, list) else ""
     return [
@@ -503,7 +518,12 @@ def _receipt_checks(root: Path, skill_dir: Path, refs: Path, contract: dict[str,
 
 def validate(root: Path, target: str, target_gate: str | None = None) -> dict[str, Any]:
     skill_dir, skill_md, refs = _skill_paths(root, target)
-    contract = _structured(refs / "contract.yaml")
+    contract = None
+    try:
+        contract = _structured(refs / "contract.yaml")
+    except ValueError:
+        # contract_missing or contract_unparseable will be returned by _check_contract_rubric
+        pass
     receipt_checks = _receipt_checks(root, skill_dir, refs, contract, target_gate)
     checks = [
         _check_central_rubric(root),
@@ -513,8 +533,8 @@ def validate(root: Path, target: str, target_gate: str | None = None) -> dict[st
         _check_reference_heading_invocation(root, refs),
         _check_tessl_lane_naming(root, skill_dir),
         _check_scenario_parser_parity(root, refs),
-        _check_skill_factory_pipeline(root, refs),
-        _check_security_lane(root, refs),
+        _check_skill_factory_pipeline(root, refs, contract),
+        _check_security_lane(root, refs, contract),
         _check_advisory_policy(root, refs),
         _check_session_pattern_uptake(root),
         *receipt_checks,

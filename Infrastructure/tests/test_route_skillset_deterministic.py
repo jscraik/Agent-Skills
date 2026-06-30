@@ -256,7 +256,7 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
             ],
         )
 
-        self.assertNotEqual(payload["selected"]["id"] if payload["selected"] else None, "skill-creator")
+        self.assertEqual(payload["selected"]["id"], "skill-factory-router")
 
     def test_skill_factory_improve_existing_does_not_create_new_skill(self) -> None:
         payload = self._route(
