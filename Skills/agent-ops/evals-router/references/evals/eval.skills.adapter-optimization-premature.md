@@ -13,7 +13,7 @@ Skill lift after behavior: The Skills SDK treats adapterization as a later gated
 Observable delta: The answer names behavior proof, workflow stability, artifact schema, verifier pattern, and adapter controls.
 
 Given: A team wants to convert a new skill into adapter-like learned behavior to reduce context cost, but the text skill has no baseline lift, unstable workflow steps, and no adapter-alignment controls.
-Should: The agent keeps adapterization as a later optimization lane and requires proven text-skill behavior, stable workflow evidence, artifact schema, verifier pattern, and wrong/shared-adapter controls first.
+Should: The agent keeps adapterization as a later optimization lane and requires text-skill behavior, stable workflow evidence, artifact schema, verifier pattern, and wrong/shared-adapter controls to be proven first.
 Expected failure: The agent recommends adapterization because long skill text costs tokens, without proving the skill behavior or alignment.
 
 Bad answer patterns:
