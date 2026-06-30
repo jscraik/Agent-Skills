@@ -10,6 +10,14 @@ EVAL_PROFILE_PREVIEW_SCHEMA_URI = (
 EVAL_PROFILE_ACCEPTANCE_TRACE = ["FR-003", "FR-008", "SA-003", "SA-004", "VP-021", "VP-022", "VP-030"]
 LOCAL_SANDBOX_DEFAULT_SETTINGS = {"num_ctx": 8192, "temperature": 0.1, "top_p": 0.9}
 LOCAL_SANDBOX_LARGE_TRANSCRIPT_SETTINGS = {"num_ctx": 16384, "temperature": 0.1, "top_p": 0.9}
+LOCAL_SECURITY_SPECIALIST_SETTINGS = {
+    "num_ctx": 8192,
+    "num_predict": 2048,
+    "repeat_penalty": 1.15,
+    "temperature": 0.35,
+    "top_k": 40,
+    "top_p": 0.9,
+}
 _LOCAL_JUDGE_PROFILE_SPECS = (
     ("oss-local", "oss-local", "gpt-oss:20b", "local_sandbox_eval_default", LOCAL_SANDBOX_DEFAULT_SETTINGS),
     (
@@ -19,8 +27,15 @@ _LOCAL_JUDGE_PROFILE_SPECS = (
         "larger_local_transcript_trial",
         LOCAL_SANDBOX_LARGE_TRANSCRIPT_SETTINGS,
     ),
-    ("oss-local-code", "oss-local", "qwen3-coder:30b", "code_heavy_specialist", LOCAL_SANDBOX_DEFAULT_SETTINGS),
-    ("oss-local-fallback", "oss-local", "qwen3.5:latest", "fast_fallback", LOCAL_SANDBOX_DEFAULT_SETTINGS),
+    ("oss-local-code", "oss-local-code", "qwen3-coder:30b", "code_heavy_specialist", LOCAL_SANDBOX_DEFAULT_SETTINGS),
+    ("oss-local-fallback", "oss-local-fallback", "qwen3.5:latest", "fast_fallback", LOCAL_SANDBOX_DEFAULT_SETTINGS),
+    (
+        "oss-security",
+        "oss-security",
+        "CyberCrew/notmythos-8b",
+        "local_security_specialist",
+        LOCAL_SECURITY_SPECIALIST_SETTINGS,
+    ),
 )
 
 
@@ -129,7 +144,7 @@ def judge_profile_ids() -> tuple[str, ...]:
 
 
 def codex_score_judge_profile_ids() -> tuple[str, ...]:
-    supported_codex_profiles = {"oss-local", "oss-local-code", "oss-local-fallback", "oss-cloud"}
+    supported_codex_profiles = {"oss-local", "oss-local-code", "oss-local-fallback", "oss-security", "oss-cloud"}
     return tuple(
         str(profile["id"])
         for profile in _judge_profiles()
