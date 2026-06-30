@@ -32,7 +32,7 @@ Decide from bounded evidence; prefer narrow, reversible lifecycle moves.
 
 ## First-Principles Gate
 
-- Desired outcome: classify skill reliability evidence and route to keep, observe, improve, merge, fold, or retire without mutating source prematurely.
+- Desired outcome: classify skill reliability evidence and route to keep, observe, improve, capture, merge/fold with approval, or retire with approval without mutating source prematurely.
 - User-specific constraints: use bounded evidence, preserve approval boundaries, route improvements through Skill Factory hardening, and map eval disagreement to SDK gates.
 - Rejected copied assumption: a failing skill should immediately be rewritten or retired.
 - Fundamental constraints: evidence strength controls scope; lifecycle decisions need approval when destructive; weak evidence cannot justify broad canonical changes.
