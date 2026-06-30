@@ -1,0 +1,1793 @@
+{
+  "status": "success",
+  "trace_id": "a6b3d481-940b-4031-b422-4269d74c05d8",
+  "metadata": {
+    "version": "0.1.0",
+    "command": "sdk eval scenario-quality Skills/agent-ops/improve-codebase-architecture --preview --json --robot",
+    "next_steps": [],
+    "correction_note": null
+  },
+  "data": {
+    "skills_sdk_eval_scenario_quality": {
+      "schema_version": "skills-sdk-eval-scenario-quality.v0",
+      "status": "preview",
+      "query": "Skills/agent-ops/improve-codebase-architecture",
+      "canonical_source_path": "Skills/agent-ops/improve-codebase-architecture/SKILL.md",
+      "facade_command": "skills-sdk eval scenario-quality",
+      "receipt": {
+        "schema_version": "skills-sdk.scenario-quality-receipt.v0",
+        "schema_uri": "https://agent-skills.local/schemas/skills-sdk/scenario-quality-receipt.v0.schema.json",
+        "status": "preview",
+        "operation": "scenario_quality_preview",
+        "query": "Skills/agent-ops/improve-codebase-architecture",
+        "skill_path": "Skills/agent-ops/improve-codebase-architecture/SKILL.md",
+        "evals_path": "Skills/agent-ops/improve-codebase-architecture/references/evals.yaml",
+        "scenario_count": 20,
+        "promotion_ready_count": 20,
+        "blocked_count": 0,
+        "scenario_set_parity": null,
+        "scenario_rows": [
+          {
+            "id": "happy-main",
+            "category": "happy",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "happy-main"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "happy-main"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "happy-main"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "happy-main"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "happy-main"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "happy-main"
+                ]
+              },
+              {
+                "id": "text_output_runner_acceptance_supported",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario acceptance types must be executable by the text-output skill eval runner before release.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "happy-explicit",
+            "category": "happy",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "happy-explicit"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "happy-explicit"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "happy-explicit"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "happy-explicit"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "happy-explicit"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "happy-explicit"
+                ]
+              },
+              {
+                "id": "text_output_runner_acceptance_supported",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario acceptance types must be executable by the text-output skill eval runner before release.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "negative-domain",
+            "category": "negative",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "negative-domain"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "negative-domain"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "negative-domain"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "negative-domain"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "negative-domain"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "negative-domain"
+                ]
+              },
+              {
+                "id": "text_output_runner_acceptance_supported",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario acceptance types must be executable by the text-output skill eval runner before release.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "pressure-command",
+            "category": "pressure",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "pressure-command"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "pressure-command"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "pressure-command"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "pressure-command"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "pressure-command"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "pressure-command"
+                ]
+              },
+              {
+                "id": "text_output_runner_acceptance_supported",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario acceptance types must be executable by the text-output skill eval runner before release.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "pressure-pi",
+            "category": "pressure",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "pressure-pi"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "pressure-pi"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "pressure-pi"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "pressure-pi"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "pressure-pi"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "pressure-pi"
+                ]
+              },
+              {
+                "id": "text_output_runner_acceptance_supported",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario acceptance types must be executable by the text-output skill eval runner before release.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "deep-module-agent-boundary",
+            "category": "happy",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "deep-module-agent-boundary"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "deep-module-agent-boundary"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "deep-module-agent-boundary"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "deep-module-agent-boundary"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "deep-module-agent-boundary"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "deep-module-agent-boundary"
+                ]
+              },
+              {
+                "id": "text_output_runner_acceptance_supported",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario acceptance types must be executable by the text-output skill eval runner before release.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "knowledgeos-architecture-drift-human-sync",
+            "category": "edge",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "knowledgeos-architecture-drift-human-sync"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "knowledgeos-architecture-drift-human-sync"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "knowledgeos-architecture-drift-human-sync"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "knowledgeos-architecture-drift-human-sync"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "knowledgeos-architecture-drift-human-sync"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "knowledgeos-architecture-drift-human-sync"
+                ]
+              },
+              {
+                "id": "text_output_runner_acceptance_supported",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario acceptance types must be executable by the text-output skill eval runner before release.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "knowledgeos-capsule-lifecycle-boundary",
+            "category": "edge",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "knowledgeos-capsule-lifecycle-boundary"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "knowledgeos-capsule-lifecycle-boundary"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "knowledgeos-capsule-lifecycle-boundary"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "knowledgeos-capsule-lifecycle-boundary"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "knowledgeos-capsule-lifecycle-boundary"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "knowledgeos-capsule-lifecycle-boundary"
+                ]
+              },
+              {
+                "id": "text_output_runner_acceptance_supported",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario acceptance types must be executable by the text-output skill eval runner before release.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "interface-contract-migration",
+            "category": "edge",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "interface-contract-migration"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "interface-contract-migration"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "interface-contract-migration"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "interface-contract-migration"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "interface-contract-migration"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "interface-contract-migration"
+                ]
+              },
+              {
+                "id": "text_output_runner_acceptance_supported",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario acceptance types must be executable by the text-output skill eval runner before release.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "sdk-scenario-drift-review",
+            "category": "edge",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "sdk-scenario-drift-review"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "sdk-scenario-drift-review"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "sdk-scenario-drift-review"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "sdk-scenario-drift-review"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "sdk-scenario-drift-review"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "sdk-scenario-drift-review"
+                ]
+              },
+              {
+                "id": "text_output_runner_acceptance_supported",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario acceptance types must be executable by the text-output skill eval runner before release.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "structure-only-policy-boundary",
+            "category": "negative",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "structure-only-policy-boundary"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "structure-only-policy-boundary"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "structure-only-policy-boundary"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "structure-only-policy-boundary"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "structure-only-policy-boundary"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "structure-only-policy-boundary"
+                ]
+              },
+              {
+                "id": "text_output_runner_acceptance_supported",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario acceptance types must be executable by the text-output skill eval runner before release.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "tessl-below-baseline-remediation",
+            "category": "pressure",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "tessl-below-baseline-remediation"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "tessl-below-baseline-remediation"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "tessl-below-baseline-remediation"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "tessl-below-baseline-remediation"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "tessl-below-baseline-remediation"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "tessl-below-baseline-remediation"
+                ]
+              },
+              {
+                "id": "text_output_runner_acceptance_supported",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario acceptance types must be executable by the text-output skill eval runner before release.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "lift-generated-source-conflict",
+            "category": "edge",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "lift-generated-source-conflict"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "lift-generated-source-conflict"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "lift-generated-source-conflict"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "lift-generated-source-conflict"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "lift-generated-source-conflict"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "lift-generated-source-conflict"
+                ]
+              },
+              {
+                "id": "text_output_runner_acceptance_supported",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario acceptance types must be executable by the text-output skill eval runner before release.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "lift-tests-pass-ownership-drift",
+            "category": "edge",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "lift-tests-pass-ownership-drift"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "lift-tests-pass-ownership-drift"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "lift-tests-pass-ownership-drift"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "lift-tests-pass-ownership-drift"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "lift-tests-pass-ownership-drift"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "lift-tests-pass-ownership-drift"
+                ]
+              },
+              {
+                "id": "text_output_runner_acceptance_supported",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario acceptance types must be executable by the text-output skill eval runner before release.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "lift-pattern-name-no-variation",
+            "category": "edge",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "lift-pattern-name-no-variation"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "lift-pattern-name-no-variation"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "lift-pattern-name-no-variation"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "lift-pattern-name-no-variation"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "lift-pattern-name-no-variation"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "lift-pattern-name-no-variation"
+                ]
+              },
+              {
+                "id": "text_output_runner_acceptance_supported",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario acceptance types must be executable by the text-output skill eval runner before release.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "lift-public-surface-unknown-callers",
+            "category": "edge",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "lift-public-surface-unknown-callers"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "lift-public-surface-unknown-callers"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "lift-public-surface-unknown-callers"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "lift-public-surface-unknown-callers"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "lift-public-surface-unknown-callers"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "lift-public-surface-unknown-callers"
+                ]
+              },
+              {
+                "id": "text_output_runner_acceptance_supported",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario acceptance types must be executable by the text-output skill eval runner before release.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "lift-cache-as-authority-trap",
+            "category": "pressure",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "lift-cache-as-authority-trap"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "lift-cache-as-authority-trap"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "lift-cache-as-authority-trap"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "lift-cache-as-authority-trap"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "lift-cache-as-authority-trap"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "lift-cache-as-authority-trap"
+                ]
+              },
+              {
+                "id": "text_output_runner_acceptance_supported",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario acceptance types must be executable by the text-output skill eval runner before release.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "lift-no-verifier-first-move",
+            "category": "edge",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "lift-no-verifier-first-move"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "lift-no-verifier-first-move"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "lift-no-verifier-first-move"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "lift-no-verifier-first-move"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "lift-no-verifier-first-move"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "lift-no-verifier-first-move"
+                ]
+              },
+              {
+                "id": "text_output_runner_acceptance_supported",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario acceptance types must be executable by the text-output skill eval runner before release.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "knowledgeos-capsule-design-compact-route",
+            "category": "edge",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "knowledgeos-capsule-design-compact-route"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "knowledgeos-capsule-design-compact-route"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "knowledgeos-capsule-design-compact-route"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "knowledgeos-capsule-design-compact-route"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "knowledgeos-capsule-design-compact-route"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "knowledgeos-capsule-design-compact-route"
+                ]
+              },
+              {
+                "id": "text_output_runner_acceptance_supported",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario acceptance types must be executable by the text-output skill eval runner before release.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          },
+          {
+            "id": "knowledgeos-export-readiness-compact-route",
+            "category": "edge",
+            "realistic": true,
+            "promotion_status": "promotion_ready",
+            "checks": [
+              {
+                "id": "scenario_id",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare a stable id.",
+                "evidence": [
+                  "knowledgeos-export-readiness-compact-route"
+                ]
+              },
+              {
+                "id": "prompt_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must carry a prompt or stimulus.",
+                "evidence": [
+                  "knowledgeos-export-readiness-compact-route"
+                ]
+              },
+              {
+                "id": "oracle_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare acceptance checks as its oracle.",
+                "evidence": [
+                  "knowledgeos-export-readiness-compact-route"
+                ]
+              },
+              {
+                "id": "reproducibility_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare eval modes for reproducible runs.",
+                "evidence": [
+                  "knowledgeos-export-readiness-compact-route"
+                ]
+              },
+              {
+                "id": "safety_boundary_present",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario must declare deterministic safety checks before promotion.",
+                "evidence": [
+                  "knowledgeos-export-readiness-compact-route"
+                ]
+              },
+              {
+                "id": "raw_secret_absent",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario prompt must not embed raw secrets or token-like values.",
+                "evidence": [
+                  "knowledgeos-export-readiness-compact-route"
+                ]
+              },
+              {
+                "id": "text_output_runner_acceptance_supported",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Scenario acceptance types must be executable by the text-output skill eval runner before release.",
+                "evidence": []
+              },
+              {
+                "id": "typed_text_field_assertions_valid",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "text_field_* assertions must declare field/fields and expected values when required.",
+                "evidence": []
+              },
+              {
+                "id": "structured_fields_use_typed_assertions",
+                "status": "pass",
+                "severity": "blocker",
+                "message": "Known structured output fields must use text_field_* assertions instead of regex.",
+                "evidence": []
+              }
+            ],
+            "blockers": []
+          }
+        ],
+        "quality_checks": [
+          {
+            "id": "evals_yaml_present",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Skill must carry references/evals.yaml.",
+            "evidence": [
+              "Skills/agent-ops/improve-codebase-architecture/references/evals.yaml"
+            ]
+          },
+          {
+            "id": "evals_yaml_parse",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "references/evals.yaml must parse as YAML object.",
+            "evidence": []
+          },
+          {
+            "id": "cases_present",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "references/evals.yaml must contain one or more cases.",
+            "evidence": [
+              "Skills/agent-ops/improve-codebase-architecture/references/evals.yaml"
+            ]
+          },
+          {
+            "id": "cases_are_objects",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Every eval case must be an object.",
+            "evidence": []
+          },
+          {
+            "id": "release_minimum_scenario_count",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Release-mode behavioral scenario suites must include at least 20 scenarios unless they are structure-only.",
+            "evidence": []
+          },
+          {
+            "id": "release_pressure_coverage",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Release-mode scenario suites must include at least 4 pressure or regression cases.",
+            "evidence": []
+          },
+          {
+            "id": "release_negative_edge_coverage",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Release-mode scenario suites must include at least 2 negative or edge boundary cases.",
+            "evidence": []
+          }
+        ],
+        "blockers": [],
+        "mutation_performed": false,
+        "promotion_performed": false,
+        "acceptance_trace": [
+          "PU-030",
+          "FR-003",
+          "FR-008",
+          "SA-003",
+          "VP-030"
+        ],
+        "agent_summary": "scenario quality preview checked 20 scenario(s) for Skills/agent-ops/improve-codebase-architecture."
+      },
+      "scenario_count": 20,
+      "promotion_ready_count": 20,
+      "blocked_count": 0,
+      "mutation_performed": false,
+      "promotion_performed": false,
+      "validation_commands": [
+        "./bin/ask sdk eval scenario-quality Skills/agent-ops/improve-codebase-architecture --preview --json --robot"
+      ],
+      "agent_summary": "scenario quality preview checked 20 scenario(s) for Skills/agent-ops/improve-codebase-architecture."
+    }
+  },
+  "telemetry": {
+    "latency_ms": 10
+  },
+  "errors": []
+}

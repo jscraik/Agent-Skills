@@ -1,0 +1,1338 @@
+{
+  "status": "success",
+  "trace_id": "615b0cfb-533a-4b3e-803e-1b8b0294d52e",
+  "metadata": {
+    "version": "0.1.0",
+    "command": "skills package verify Skills/agent-ops/improve-codebase-architecture --json --robot",
+    "next_steps": [],
+    "correction_note": null
+  },
+  "data": {
+    "skill_package_verification": {
+      "schema_version": "skill-package-verify.v1",
+      "target_kind": "skill_directory",
+      "query": "Skills/agent-ops/improve-codebase-architecture",
+      "target_path": "Skills/agent-ops/improve-codebase-architecture/SKILL.md",
+      "archive_identity": null,
+      "provenance_identity": {
+        "trusted": true,
+        "policy": [
+          "agent-skills",
+          "agent-skills-kit",
+          "canonical-source",
+          "frontmatter",
+          "internal",
+          "local-fixture",
+          "repo-owned-fixture",
+          "trusted"
+        ],
+        "values": [
+          "frontmatter:agent-skills:canonical-source"
+        ]
+      },
+      "contract": {
+        "schema_version": "skill-package.v1",
+        "source_files": {
+          "skill_md": "Skills/agent-ops/improve-codebase-architecture/SKILL.md",
+          "agents_openai_yaml": "Skills/agent-ops/improve-codebase-architecture/agents/openai.yaml"
+        },
+        "codex_abi_source": {
+          "path": "codex-rs/core-skills/src/model.rs",
+          "struct": "SkillMetadata",
+          "evidence_fields": [
+            "name",
+            "description",
+            "short_description",
+            "interface",
+            "dependencies",
+            "policy",
+            "scope",
+            "plugin_id"
+          ]
+        },
+        "metadata": {
+          "name": "improve-codebase-architecture",
+          "description": "Review code architecture, code quality, dependency graphs, coupling, technical debt, modularization, ownership, and test seams. Use when refactors, restructuring, tightly coupled code, or architecture decisions need proof-backed options.",
+          "short_description": "Improve Codebase Architecture entrypoint",
+          "interface": {
+            "display_name": "Improve Codebase Architecture",
+            "short_description": "Improve Codebase Architecture entrypoint",
+            "default_prompt": "Use Improve Codebase Architecture. "
+          },
+          "dependencies": null,
+          "policy": {
+            "allow_implicit_invocation": false
+          },
+          "scope": null,
+          "plugin_id": null
+        },
+        "required_fields": {
+          "present": [
+            "description",
+            "name"
+          ],
+          "missing": []
+        },
+        "optional_fields": {
+          "present": [
+            "interface",
+            "policy",
+            "short_description"
+          ]
+        },
+        "compatibility_status": "compatible"
+      },
+      "sdk_contract": {
+        "schema_version": "skill-sdk-contract.v1",
+        "required_fields": {
+          "present": [
+            "agent_metadata",
+            "commands",
+            "evals",
+            "evidence_policy",
+            "inputs",
+            "knowledge_capsules",
+            "openai_platform_compat",
+            "optimization_contract",
+            "outputs",
+            "portability_profile",
+            "purpose",
+            "reference_contract",
+            "reference_quality",
+            "task_profile",
+            "workflow_contract",
+            "writing_quality"
+          ],
+          "missing": [
+            "permission_profile"
+          ]
+        },
+        "values": {
+          "agent_metadata": {
+            "declared": true,
+            "path": "Skills/agent-ops/improve-codebase-architecture/agents/openai.yaml",
+            "format": "agents/openai.yaml",
+            "authority": "skill_interface_and_dependency_metadata"
+          },
+          "reference_contract": {
+            "declared": true,
+            "path": "Skills/agent-ops/improve-codebase-architecture/references/contract.yaml",
+            "format": "references/contract.yaml",
+            "authority": "sdk_package_contract"
+          },
+          "reference_quality": {
+            "schema_version": "skill-reference-quality.v1",
+            "policy": "references_are_package_contract",
+            "required_for_package_readiness": true,
+            "status": "pass",
+            "references_dir": "Skills/agent-ops/improve-codebase-architecture/references",
+            "files": [
+              {
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/architecture-practice-contract.md",
+                "status": "pass",
+                "reason": null,
+                "size_bytes": 723,
+                "nonempty": true
+              },
+              {
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/classification-cheatsheet.md",
+                "status": "pass",
+                "reason": null,
+                "size_bytes": 982,
+                "nonempty": true
+              },
+              {
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/contract.yaml",
+                "status": "pass",
+                "reason": null,
+                "size_bytes": 1983,
+                "nonempty": true
+              },
+              {
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/deepening-workflow.md",
+                "status": "pass",
+                "reason": null,
+                "size_bytes": 770,
+                "nonempty": true
+              },
+              {
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/discovery-interview.md",
+                "status": "pass",
+                "reason": null,
+                "size_bytes": 113,
+                "nonempty": true
+              },
+              {
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/evals.yaml",
+                "status": "pass",
+                "reason": null,
+                "size_bytes": 9716,
+                "nonempty": true
+              },
+              {
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/examples.md",
+                "status": "pass",
+                "reason": null,
+                "size_bytes": 614,
+                "nonempty": true
+              },
+              {
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/knowledge-capsule-routing.md",
+                "status": "pass",
+                "reason": null,
+                "size_bytes": 167,
+                "nonempty": true
+              },
+              {
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/knowledge-capsule.manifest.yaml",
+                "status": "pass",
+                "reason": null,
+                "size_bytes": 1887,
+                "nonempty": true
+              },
+              {
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/knowledge-demand.yaml",
+                "status": "pass",
+                "reason": null,
+                "size_bytes": 65,
+                "nonempty": true
+              },
+              {
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/output-schema.md",
+                "status": "pass",
+                "reason": null,
+                "size_bytes": 1247,
+                "nonempty": true
+              },
+              {
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/scenario-review.md",
+                "status": "pass",
+                "reason": null,
+                "size_bytes": 133,
+                "nonempty": true
+              },
+              {
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/examples.jsonl",
+                "status": "pass",
+                "reason": null,
+                "size_bytes": 1127,
+                "nonempty": true
+              },
+              {
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/manifest.json",
+                "status": "pass",
+                "reason": null,
+                "size_bytes": 554,
+                "nonempty": true
+              },
+              {
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/concise-correct-vs-verbose-wrong.json",
+                "status": "pass",
+                "reason": null,
+                "size_bytes": 271,
+                "nonempty": true
+              },
+              {
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/copied-rubric-no-evidence.json",
+                "status": "pass",
+                "reason": null,
+                "size_bytes": 250,
+                "nonempty": true
+              },
+              {
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/obvious-correct-boundary-proof.json",
+                "status": "pass",
+                "reason": null,
+                "size_bytes": 253,
+                "nonempty": true
+              },
+              {
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/obvious-wrong-overclaim.json",
+                "status": "pass",
+                "reason": null,
+                "size_bytes": 236,
+                "nonempty": true
+              },
+              {
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/producer-proof-overclaim.json",
+                "status": "pass",
+                "reason": null,
+                "size_bytes": 258,
+                "nonempty": true
+              },
+              {
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/skill-name-only.json",
+                "status": "pass",
+                "reason": null,
+                "size_bytes": 237,
+                "nonempty": true
+              },
+              {
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/task-profile.json",
+                "status": "pass",
+                "reason": null,
+                "size_bytes": 680,
+                "nonempty": true
+              }
+            ],
+            "checks": [
+              {
+                "name": "reference_inventory",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references",
+                "file_count": 21
+              },
+              {
+                "name": "reference_file_nonempty",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/architecture-practice-contract.md",
+                "size_bytes": 723
+              },
+              {
+                "name": "reference_file_nonempty",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/classification-cheatsheet.md",
+                "size_bytes": 982
+              },
+              {
+                "name": "reference_file_nonempty",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/contract.yaml",
+                "size_bytes": 1983
+              },
+              {
+                "name": "reference_file_nonempty",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/deepening-workflow.md",
+                "size_bytes": 770
+              },
+              {
+                "name": "reference_file_nonempty",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/discovery-interview.md",
+                "size_bytes": 113
+              },
+              {
+                "name": "reference_file_nonempty",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/evals.yaml",
+                "size_bytes": 9716
+              },
+              {
+                "name": "reference_file_nonempty",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/examples.md",
+                "size_bytes": 614
+              },
+              {
+                "name": "reference_file_nonempty",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/knowledge-capsule-routing.md",
+                "size_bytes": 167
+              },
+              {
+                "name": "reference_file_nonempty",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/knowledge-capsule.manifest.yaml",
+                "size_bytes": 1887
+              },
+              {
+                "name": "reference_file_nonempty",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/knowledge-demand.yaml",
+                "size_bytes": 65
+              },
+              {
+                "name": "reference_file_nonempty",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/output-schema.md",
+                "size_bytes": 1247
+              },
+              {
+                "name": "reference_file_nonempty",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/scenario-review.md",
+                "size_bytes": 133
+              },
+              {
+                "name": "reference_file_nonempty",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/examples.jsonl",
+                "size_bytes": 1127
+              },
+              {
+                "name": "reference_file_nonempty",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/manifest.json",
+                "size_bytes": 554
+              },
+              {
+                "name": "reference_file_nonempty",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/concise-correct-vs-verbose-wrong.json",
+                "size_bytes": 271
+              },
+              {
+                "name": "reference_file_nonempty",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/copied-rubric-no-evidence.json",
+                "size_bytes": 250
+              },
+              {
+                "name": "reference_file_nonempty",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/obvious-correct-boundary-proof.json",
+                "size_bytes": 253
+              },
+              {
+                "name": "reference_file_nonempty",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/obvious-wrong-overclaim.json",
+                "size_bytes": 236
+              },
+              {
+                "name": "reference_file_nonempty",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/producer-proof-overclaim.json",
+                "size_bytes": 258
+              },
+              {
+                "name": "reference_file_nonempty",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/skill-name-only.json",
+                "size_bytes": 237
+              },
+              {
+                "name": "reference_file_nonempty",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/task-profile.json",
+                "size_bytes": 680
+              },
+              {
+                "name": "reference_heading_invocable",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/architecture-practice-contract.md",
+                "title": "Architecture Practice Contract",
+                "policy": "Markdown reference and KnowledgeOS capsule headings must be specific, filename-aligned, and invocable by routing agents."
+              },
+              {
+                "name": "reference_heading_invocable",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/classification-cheatsheet.md",
+                "title": "Classification Cheatsheet",
+                "policy": "Markdown reference and KnowledgeOS capsule headings must be specific, filename-aligned, and invocable by routing agents."
+              },
+              {
+                "name": "reference_heading_invocable",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/deepening-workflow.md",
+                "title": "Deepening Workflow",
+                "policy": "Markdown reference and KnowledgeOS capsule headings must be specific, filename-aligned, and invocable by routing agents."
+              },
+              {
+                "name": "reference_heading_invocable",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/discovery-interview.md",
+                "title": "Discovery interview",
+                "policy": "Markdown reference and KnowledgeOS capsule headings must be specific, filename-aligned, and invocable by routing agents."
+              },
+              {
+                "name": "reference_heading_invocable",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/examples.md",
+                "title": "Examples",
+                "policy": "Markdown reference and KnowledgeOS capsule headings must be specific, filename-aligned, and invocable by routing agents."
+              },
+              {
+                "name": "reference_heading_invocable",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/knowledge-capsule-routing.md",
+                "title": "Knowledge Capsule Routing",
+                "policy": "Markdown reference and KnowledgeOS capsule headings must be specific, filename-aligned, and invocable by routing agents."
+              },
+              {
+                "name": "reference_heading_invocable",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/output-schema.md",
+                "title": "Output Schema",
+                "policy": "Markdown reference and KnowledgeOS capsule headings must be specific, filename-aligned, and invocable by routing agents."
+              },
+              {
+                "name": "reference_heading_invocable",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/scenario-review.md",
+                "title": "Scenario Review",
+                "policy": "Markdown reference and KnowledgeOS capsule headings must be specific, filename-aligned, and invocable by routing agents."
+              },
+              {
+                "name": "structured_reference_parse",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/contract.yaml",
+                "format": "yaml"
+              },
+              {
+                "name": "reference_contract_core_fields",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/contract.yaml",
+                "missing": []
+              },
+              {
+                "name": "structured_reference_parse",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/evals.yaml",
+                "format": "yaml"
+              },
+              {
+                "name": "reference_evals_core_fields",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/evals.yaml",
+                "missing": []
+              },
+              {
+                "name": "structured_reference_parse",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/knowledge-capsule.manifest.yaml",
+                "format": "yaml"
+              },
+              {
+                "name": "structured_reference_parse",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/knowledge-demand.yaml",
+                "format": "yaml"
+              },
+              {
+                "name": "structured_reference_parse",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/manifest.json",
+                "format": "json"
+              },
+              {
+                "name": "structured_reference_parse",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/concise-correct-vs-verbose-wrong.json",
+                "format": "json"
+              },
+              {
+                "name": "structured_reference_parse",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/copied-rubric-no-evidence.json",
+                "format": "json"
+              },
+              {
+                "name": "structured_reference_parse",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/obvious-correct-boundary-proof.json",
+                "format": "json"
+              },
+              {
+                "name": "structured_reference_parse",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/obvious-wrong-overclaim.json",
+                "format": "json"
+              },
+              {
+                "name": "structured_reference_parse",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/producer-proof-overclaim.json",
+                "format": "json"
+              },
+              {
+                "name": "structured_reference_parse",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/skill-name-only.json",
+                "format": "json"
+              },
+              {
+                "name": "structured_reference_parse",
+                "status": "pass",
+                "path": "Skills/agent-ops/improve-codebase-architecture/references/task-profile.json",
+                "format": "json"
+              },
+              {
+                "name": "basic_requirement_rubric",
+                "status": "pass",
+                "path": "references/contract.yaml",
+                "missing": [],
+                "quality_criteria": [
+                  "architecture_decision_quality",
+                  "capability_selection"
+                ],
+                "selector_criteria": [
+                  "capability_selection"
+                ],
+                "rubric_profiles": [],
+                "policy": "Every Skills SDK contract must define observable quality criteria and evidence requirements for the skill's basic job before handoff."
+              },
+              {
+                "name": "analytic_rubric_quality",
+                "status": "pass",
+                "path": "references/contract.yaml",
+                "criteria_checked": [
+                  "architecture_decision_quality"
+                ],
+                "missing": [],
+                "rubric_profiles": [],
+                "policy": "Skills SDK rubric criteria must use an analytic rubric shape. Shared criteria may come from centralized rubric_profile entries; skill-local criteria should only add selectors or domain-specific overrides."
+              },
+              {
+                "name": "orphaned_bundle_reference",
+                "status": "pass",
+                "path": "references/knowledge-capsule.manifest.yaml",
+                "orphaned_paths": [],
+                "policy": "When a knowledge capsule manifest exists, bundle support files must be routed by SKILL.md, capsule routing, or package contracts."
+              },
+              {
+                "name": "capability_selector_contract",
+                "status": "pass",
+                "path": "references/contract.yaml",
+                "missing": [],
+                "selectors": [
+                  "capability_selection"
+                ],
+                "manifest_facets": [
+                  "agent_safe_boundary_proof",
+                  "architecture_drift_human_sync",
+                  "architecture_tracer_proof",
+                  "bounded_context_language_map",
+                  "capsule_design",
+                  "data_ownership_and_consistency",
+                  "deep_module_symptom_map",
+                  "export_readiness",
+                  "integration_boundary_contract",
+                  "knowledge_capsule_quality",
+                  "legacy_seam_characterization",
+                  "patch_vs_interface_decision",
+                  "pattern_fit_and_liability"
+                ],
+                "named_capsule_refs": []
+              }
+            ],
+            "blockers": []
+          },
+          "writing_quality": {
+            "schema_version": "skills-sdk.skill-writing-quality.v1",
+            "policy": "predictability_through_invocation_hierarchy_completion_and_scenarios",
+            "required_for_package_readiness": true,
+            "status": "pass",
+            "rubric": {
+              "source": "writing-great-skills",
+              "root_quality": "Predictability",
+              "dimensions": [
+                "invocation",
+                "information_hierarchy",
+                "steering",
+                "pruning",
+                "information_hierarchy",
+                "progressive_disclosure",
+                "completion_criteria",
+                "scenario_alignment",
+                "actionability",
+                "review_lens",
+                "safety_boundary",
+                "self_improving"
+              ]
+            },
+            "checks": [
+              {
+                "name": "description_trigger_shape",
+                "dimension": "invocation",
+                "status": "pass",
+                "evidence": {
+                  "user_invoked": false,
+                  "has_description": true,
+                  "has_action_term": true
+                }
+              },
+              {
+                "name": "skill_md_title",
+                "dimension": "information_hierarchy",
+                "status": "pass",
+                "evidence": {
+                  "headings": [
+                    "Improve Codebase Architecture",
+                    "Philosophy",
+                    "When To Use",
+                    "Avoid",
+                    "Inputs",
+                    "Outputs",
+                    "Procedure",
+                    "Constraints",
+                    "Execution Boundaries",
+                    "Failure Mode",
+                    "Validation",
+                    "Gotchas"
+                  ]
+                }
+              },
+              {
+                "name": "procedural_completion_criteria",
+                "dimension": "completion_criteria",
+                "status": "pass",
+                "evidence": {
+                  "procedural": true,
+                  "validation_declared": true,
+                  "output_contract_declared": false,
+                  "evidence_contract_declared": false,
+                  "completion_reference_declared": false
+                }
+              },
+              {
+                "name": "progressive_disclosure_rubric",
+                "dimension": "progressive_disclosure",
+                "status": "pass",
+                "evidence": {
+                  "line_count": 97,
+                  "under_250_lines": true,
+                  "near_threshold_line_limit": 220,
+                  "over_near_threshold": false,
+                  "reference_count": 0,
+                  "missing_references": []
+                }
+              },
+              {
+                "name": "construction_trigger_boundary",
+                "dimension": "invocation",
+                "status": "pass",
+                "evidence": {
+                  "glossary_axis": "Invocation",
+                  "root_quality": "Predictability",
+                  "user_invoked": false,
+                  "has_description": true,
+                  "has_action_term": true,
+                  "trigger_boundaries": [
+                    "when"
+                  ],
+                  "generic_trigger_terms": []
+                }
+              },
+              {
+                "name": "construction_steps_reference_structure",
+                "dimension": "information_hierarchy",
+                "status": "pass",
+                "evidence": {
+                  "glossary_axis": "Information Hierarchy",
+                  "root_quality": "Predictability",
+                  "procedural_heading_declared": true,
+                  "step_action_terms": [
+                    "classify",
+                    "compare",
+                    "gather",
+                    "map",
+                    "read",
+                    "review",
+                    "route",
+                    "run",
+                    "use"
+                  ],
+                  "reference_count": 0,
+                  "references_routed": true,
+                  "missing_references": []
+                }
+              },
+              {
+                "name": "construction_steering_phase_gate",
+                "dimension": "steering",
+                "status": "pass",
+                "evidence": {
+                  "glossary_axis": "Steering",
+                  "root_quality": "Predictability",
+                  "phase_like": true,
+                  "phase_gate_terms": [
+                    "after",
+                    "before",
+                    "block",
+                    "blocked",
+                    "gate",
+                    "stop"
+                  ]
+                }
+              },
+              {
+                "name": "construction_pruning_sediment",
+                "dimension": "pruning",
+                "status": "pass",
+                "evidence": {
+                  "glossary_axis": "Pruning",
+                  "root_quality": "Predictability",
+                  "long_paragraphs_without_behavior": [],
+                  "duplicate_instruction_lines": []
+                }
+              },
+              {
+                "name": "scenario_alignment_gold_shape",
+                "dimension": "scenario_alignment",
+                "status": "pass",
+                "evidence": {
+                  "path": "Skills/agent-ops/improve-codebase-architecture/references/evals.yaml",
+                  "case_count": 20,
+                  "missing_by_case": []
+                }
+              }
+            ],
+            "blockers": [],
+            "advisories": [
+              {
+                "rule_id": "orphaned_bundle_reference",
+                "dimension": "progressive_disclosure",
+                "severity": "advisory",
+                "path": "Skills/agent-ops/improve-codebase-architecture/SKILL.md",
+                "message": "Package support files should be routed by SKILL.md or package contracts.",
+                "evidence": {
+                  "orphaned_paths": [
+                    "Skills/agent-ops/improve-codebase-architecture/references/discovery-interview.md",
+                    "Skills/agent-ops/improve-codebase-architecture/references/examples.md",
+                    "Skills/agent-ops/improve-codebase-architecture/references/scenario-review.md",
+                    "Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/examples.jsonl",
+                    "Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/manifest.json",
+                    "Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/concise-correct-vs-verbose-wrong.json",
+                    "Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/copied-rubric-no-evidence.json",
+                    "Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/obvious-correct-boundary-proof.json",
+                    "Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/obvious-wrong-overclaim.json",
+                    "Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/producer-proof-overclaim.json",
+                    "Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/skill-name-only.json"
+                  ]
+                }
+              }
+            ],
+            "what_this_proves": [
+              "trigger_shape_checked",
+              "construction_trigger_checked",
+              "construction_structure_checked",
+              "construction_steering_checked",
+              "construction_pruning_checked",
+              "entrypoint_hierarchy_checked",
+              "completion_evidence_checked",
+              "reference_disclosure_checked",
+              "scenario_shape_checked",
+              "advisory_quality_patterns_scored"
+            ],
+            "what_this_does_not_prove": [
+              "behavioral_eval_pass",
+              "runtime_skill_activation",
+              "live_tessl_score",
+              "cloud_eval_confirmation"
+            ]
+          },
+          "openai_platform_compat": {
+            "schema_version": "skills-sdk.openai-platform-compat.v1",
+            "policy": "deterministic_openai_skill_and_plugin_projection",
+            "required_for_package_readiness": true,
+            "status": "pass",
+            "target_kind": "skill",
+            "rubric": {
+              "source": "openai-platform-and-codex-plugin-hook-contract",
+              "dimensions": [
+                "metadata_projection",
+                "plugin_manifest",
+                "plugin_hooks",
+                "path_portability",
+                "runtime_support"
+              ]
+            },
+            "checks": [
+              {
+                "name": "skill_metadata_projection",
+                "dimension": "metadata_projection",
+                "status": "pass",
+                "evidence": {
+                  "name_present": true,
+                  "description_present": true,
+                  "short_description_present": true
+                }
+              },
+              {
+                "name": "plugin_hook_contract",
+                "dimension": "plugin_hooks",
+                "status": "not_applicable",
+                "evidence": {
+                  "reason": "skill is not plugin-owned"
+                }
+              }
+            ],
+            "blockers": [],
+            "advisories": [],
+            "what_this_proves": [
+              "openai_facing_metadata_shape_checked",
+              "plugin_manifest_hook_pointer_checked",
+              "bundled_command_hook_shape_checked",
+              "plugin_command_path_portability_checked"
+            ],
+            "what_this_does_not_prove": [
+              "hosted_openai_acceptance",
+              "runtime_plugin_hook_execution",
+              "behavioral_eval_pass",
+              "marketplace_publication"
+            ]
+          },
+          "purpose": "Proof-backed architecture decisions from current repo evidence.",
+          "inputs": [
+            "target_path",
+            "user_request",
+            "capability",
+            "callers",
+            "tests",
+            "public_interfaces"
+          ],
+          "outputs": [
+            "fresh_evidence",
+            "capability",
+            "boundary_verdict",
+            "patch_design",
+            "interface_design",
+            "recommended_first_move",
+            "validation"
+          ],
+          "commands": [
+            "./bin/ask skills audit Skills/agent-ops/improve-codebase-architecture --level strict --json --robot",
+            "./bin/ask skills package verify Skills/agent-ops/improve-codebase-architecture --json --robot",
+            "./bin/ask evals prepare-tessl-scenarios Skills/agent-ops/improve-codebase-architecture --tessl-workspace jscraik --dry-run --json --robot",
+            "./bin/ask evals run Skills/agent-ops/improve-codebase-architecture --mode smoke --tessl-live-private --tessl-workspace jscraik --json --robot"
+          ],
+          "permission_profile": null,
+          "portability_profile": {
+            "compatible_roles": [],
+            "runtime_needs": [],
+            "provenance": "frontmatter:agent-skills:canonical-source",
+            "share_readiness": "ready"
+          },
+          "evals": {
+            "declared": true,
+            "paths": [
+              "Skills/agent-ops/improve-codebase-architecture/references/evals.yaml"
+            ]
+          },
+          "task_profile": {
+            "declared": true,
+            "path": "Skills/agent-ops/improve-codebase-architecture/references/task-profile.json"
+          },
+          "evidence_policy": "Report file line evidence, verifier output, and blocker class.",
+          "budget_classification": null,
+          "workflow_contract": {
+            "schema_version": "skillflow-contract.v1",
+            "skillflow_schema_version": "skillflow.v1",
+            "skillflow_schema_path": "Infrastructure/config/schemas/skillflow.v1.schema.json",
+            "status": "not_declared",
+            "execution_mode": "prose",
+            "required": false,
+            "declared": false,
+            "path": "Skills/agent-ops/improve-codebase-architecture/workflows/skillflow.json",
+            "node_count": 0,
+            "side_effecting_node_count": 0,
+            "human_gate_count": 0,
+            "outputs": [],
+            "adapt_policy": {
+              "retry_failed_node": "allowed",
+              "choose_declared_branch": "allowed",
+              "fill_typed_hole": "allowed",
+              "add_node": "forbidden",
+              "rewire_edge": "forbidden"
+            },
+            "amend_policy": "reviewed",
+            "checks": [
+              {
+                "name": "execution_mode_declared",
+                "status": "pass",
+                "value": "prose",
+                "allowed_values": [
+                  "deterministic_flow",
+                  "hybrid",
+                  "prose"
+                ]
+              },
+              {
+                "name": "workflow_file_presence",
+                "status": "not_applicable",
+                "path": "Skills/agent-ops/improve-codebase-architecture/workflows/skillflow.json",
+                "required": false
+              }
+            ],
+            "blockers": [],
+            "what_this_proves": [],
+            "what_this_does_not_prove": [
+              "workflow_runtime_execution",
+              "llm_node_quality",
+              "side_effect_idempotency"
+            ]
+          },
+          "optimization_contract": {
+            "schema_version": "skill-optimization-readiness.v1",
+            "optimization_schema_version": "skill-optimization-contract.v1",
+            "optimization_schema_path": "Infrastructure/config/schemas/skill-optimization-contract.v1.schema.json",
+            "status": "not_declared",
+            "enabled": false,
+            "target_artifact": "SKILL.md",
+            "target_path": "Skills/agent-ops/improve-codebase-architecture/SKILL.md",
+            "optimizer_mode": null,
+            "split_seed": null,
+            "edit_policy": null,
+            "acceptance_gate": null,
+            "anti_cheat": null,
+            "evidence": null,
+            "promotion": null,
+            "roles": null,
+            "checks": [
+              {
+                "name": "optimization_declared",
+                "status": "not_applicable",
+                "enabled": false
+              }
+            ],
+            "blockers": [],
+            "what_this_proves": [],
+            "what_this_does_not_prove": [
+              "optimized_skill_quality",
+              "selection_gate_pass",
+              "held_out_generalization",
+              "anti_cheat_pass"
+            ]
+          },
+          "knowledge_capsules": {
+            "schema_version": "skill-knowledge-capsule-first-party.v1",
+            "status": "advisory",
+            "manifest_declared": true,
+            "manifest_path": "Skills/agent-ops/improve-codebase-architecture/references/knowledge-capsule.manifest.yaml",
+            "capsule_count": 0,
+            "capsule_paths": [],
+            "unsafe_capsule_paths": [],
+            "first_party_routing_path": "Skills/agent-ops/improve-codebase-architecture/references/knowledge-capsule-routing.md",
+            "first_party_routing_declared": true,
+            "first_party_routing_safe": true,
+            "manifest_safe": true,
+            "skill_mentions_first_party_routing": true,
+            "contract_mentions_first_party_routing": true,
+            "missing_from_first_party_routing": [],
+            "ready": false,
+            "policy": "Knowledge capsule manifests select bounded generated capsules, but capsule use rules should be promoted into a first-party skill reference so agents see them without relying on buried capsule text."
+          }
+        },
+        "progressive_disclosure": {
+          "skill_md_declared": true,
+          "skill_md_line_count": 97,
+          "skill_md_under_500_lines": true,
+          "skill_md_under_250_lines": true,
+          "skill_md_near_threshold_line_limit": 220,
+          "skill_md_over_near_threshold": false,
+          "progressive_disclosure_declared": false,
+          "progressive_disclosure_reference_count": 0,
+          "progressive_disclosure_missing_references": [],
+          "progressive_disclosure_ready": false,
+          "operating_model_formats": {
+            "artifacts_declared": [],
+            "required_format_references": [],
+            "present_format_references": [],
+            "missing_format_references": [],
+            "format_references_ready": false,
+            "policy": "Skills that name durable workspace artifacts must preserve their operating-model docs as package-local references instead of compressing them into SKILL.md."
+          },
+          "source_operating_model": {
+            "schema_version": "source-operating-model-preservation.v1",
+            "status": "not_declared",
+            "source_context_declared": false,
+            "declared_references": [],
+            "present_references": [],
+            "missing_references": [],
+            "missing_progressive_routes": [],
+            "policy": "When source-context declares operating-model source material, the package must preserve it as package-local references and route agents to it through Progressive Disclosure."
+          },
+          "progressive_disclosure_policy": "Keep SKILL.md as the compact entrypoint and route task-specific details and source operating-model docs to existing references.",
+          "source_path": "Skills/agent-ops/improve-codebase-architecture/SKILL.md",
+          "agent_metadata_declared": true,
+          "references_contract_declared": true,
+          "references_quality_status": "pass",
+          "writing_quality_status": "pass",
+          "openai_platform_compat_status": "pass",
+          "evals_declared": true,
+          "task_profile_declared": true,
+          "agent_tomls_declared": false,
+          "agent_tomls": [],
+          "workflow_declared": false,
+          "workflow_status": "not_declared",
+          "execution_mode": "prose",
+          "optimization_declared": false,
+          "optimization_status": "not_declared",
+          "optimization_mode": null,
+          "knowledge_capsules_declared": true,
+          "knowledge_capsules_first_party_ready": false
+        },
+        "identity_and_assets": {
+          "schema_version": "skill-identity-assets.v1",
+          "policy": "Skill names should be stable kebab-case handles; descriptions should use natural action-trigger language; references and scripts should be purpose-named and browseable.",
+          "skill_identity": {
+            "name": "improve-codebase-architecture",
+            "directory_name": "improve-codebase-architecture",
+            "source_path": "Skills/agent-ops/improve-codebase-architecture/SKILL.md",
+            "name_present": true,
+            "name_kebab_case": true,
+            "name_matches_directory": true,
+            "description_present": true,
+            "description_length_chars": 237,
+            "description_length_ok": true,
+            "description_no_command_handles": true,
+            "description_has_action_term": true,
+            "short_description_length_ok": true,
+            "ready": true
+          },
+          "reference_inventory": {
+            "count": 21,
+            "filenames_kebab_case": false,
+            "generic_names": [],
+            "missing_descriptions": [
+              "Skills/agent-ops/improve-codebase-architecture/references/knowledge-demand.yaml",
+              "Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/examples.jsonl",
+              "Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/concise-correct-vs-verbose-wrong.json",
+              "Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/copied-rubric-no-evidence.json",
+              "Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/obvious-correct-boundary-proof.json",
+              "Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/obvious-wrong-overclaim.json",
+              "Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/producer-proof-overclaim.json",
+              "Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/skill-name-only.json"
+            ],
+            "weak_headings": [],
+            "description_coverage_count": 13,
+            "ready": false,
+            "bad_names": [
+              "Skills/agent-ops/improve-codebase-architecture/references/knowledge-capsule.manifest.yaml"
+            ],
+            "unsafe_paths": []
+          },
+          "script_inventory": {
+            "count": 0,
+            "filenames_kebab_case": true,
+            "generic_names": [],
+            "missing_descriptions": [],
+            "weak_headings": [],
+            "description_coverage_count": 0,
+            "ready": true,
+            "bad_names": [],
+            "unsafe_paths": []
+          },
+          "ready": false
+        },
+        "knowledge_capsules": {
+          "schema_version": "skill-knowledge-capsule-first-party.v1",
+          "status": "advisory",
+          "manifest_declared": true,
+          "manifest_path": "Skills/agent-ops/improve-codebase-architecture/references/knowledge-capsule.manifest.yaml",
+          "capsule_count": 0,
+          "capsule_paths": [],
+          "unsafe_capsule_paths": [],
+          "first_party_routing_path": "Skills/agent-ops/improve-codebase-architecture/references/knowledge-capsule-routing.md",
+          "first_party_routing_declared": true,
+          "first_party_routing_safe": true,
+          "manifest_safe": true,
+          "skill_mentions_first_party_routing": true,
+          "contract_mentions_first_party_routing": true,
+          "missing_from_first_party_routing": [],
+          "ready": false,
+          "policy": "Knowledge capsule manifests select bounded generated capsules, but capsule use rules should be promoted into a first-party skill reference so agents see them without relying on buried capsule text."
+        },
+        "agent_contract": {
+          "source_of_truth": "Skills/agent-ops/improve-codebase-architecture/SKILL.md",
+          "editable_paths": [
+            "Skills/agent-ops/improve-codebase-architecture"
+          ],
+          "generated_paths": [
+            ".agents/skills/**"
+          ],
+          "forbidden_actions": [
+            "edit_generated_runtime_projection",
+            "claim_eval_pass_as_runtime_proof"
+          ],
+          "next_safe_command": "./bin/ask skills package <handle-or-path> --checkout-test --json --robot",
+          "what_this_proves": [
+            "package_shape",
+            "declared_metadata",
+            "local_file_presence"
+          ],
+          "what_this_does_not_prove": [
+            "runtime_behavior",
+            "security_posture",
+            "human_approval"
+          ],
+          "workflow_policy": "SKILL.md remains the judgment layer; workflows/skillflow.json is optional deterministic mechanics. Runtime adaptation inside declared graph bounds may be autonomous; durable graph amendments require review.",
+          "optimization_policy": "Skill optimization may produce bounded candidate artifacts and rejected-edit evidence. Canonical SKILL.md promotion requires declared gates, anti-cheat checks, and review.",
+          "agent_toml_policy": "optional_per_skill_runtime_profiles; required only when the skill contract declares a dedicated subagent or persona runtime"
+        },
+        "evidence_providers": {
+          "schema_version": "skill-evidence-providers.v1",
+          "authority": "artifacts_decide_telemetry_explains",
+          "telemetry_confidence": "enriched",
+          "providers": [
+            {
+              "name": "otel_collector",
+              "optional": true,
+              "authority": "enrichment_only",
+              "status": "available",
+              "root": "/Users/jamiecraik/.agents/otel-collector",
+              "signals": [
+                "otlp_raw",
+                "processed_stats"
+              ],
+              "stats_freshness": "present"
+            },
+            {
+              "name": "session_collector",
+              "optional": true,
+              "authority": "enrichment_only",
+              "status": "available",
+              "root": "/Users/jamiecraik/.agents/session-collector",
+              "signals": [
+                "normalized_sessions",
+                "session_evidence"
+              ],
+              "stats_freshness": "not_applicable"
+            },
+            {
+              "name": "observability_stack",
+              "optional": true,
+              "authority": "enrichment_only",
+              "status": "available",
+              "root": "/Users/jamiecraik/.agents/observability-stack",
+              "signals": [
+                "jaeger",
+                "prometheus",
+                "loki",
+                "grafana"
+              ],
+              "stats_freshness": "not_applicable"
+            }
+          ],
+          "required_for_package_readiness": false
+        }
+      },
+      "checks": [
+        {
+          "name": "skill_md_present",
+          "status": "pass",
+          "evidence": {
+            "path": "Skills/agent-ops/improve-codebase-architecture/SKILL.md"
+          }
+        },
+        {
+          "name": "frontmatter_read",
+          "status": "pass",
+          "evidence": {
+            "fields": [
+              "description",
+              "metadata",
+              "name"
+            ]
+          }
+        },
+        {
+          "name": "package_metadata_complete",
+          "status": "pass",
+          "evidence": {
+            "missing": []
+          }
+        },
+        {
+          "name": "package_contract",
+          "status": "pass",
+          "evidence": {
+            "missing": []
+          }
+        },
+        {
+          "name": "reference_quality",
+          "status": "pass",
+          "evidence": {
+            "status": "pass",
+            "blockers": []
+          }
+        },
+        {
+          "name": "writing_quality",
+          "status": "pass",
+          "evidence": {
+            "status": "pass",
+            "blockers": []
+          }
+        },
+        {
+          "name": "openai_platform_compat",
+          "status": "pass",
+          "evidence": {
+            "status": "pass",
+            "blockers": []
+          }
+        },
+        {
+          "name": "trusted_provenance",
+          "status": "pass",
+          "evidence": {
+            "values": [
+              "frontmatter:agent-skills:canonical-source"
+            ],
+            "trusted_sources": [
+              "agent-skills",
+              "agent-skills-kit",
+              "canonical-source",
+              "frontmatter",
+              "internal",
+              "local-fixture",
+              "repo-owned-fixture",
+              "trusted"
+            ]
+          }
+        },
+        {
+          "name": "no_runtime_mutation",
+          "status": "pass",
+          "evidence": {
+            "install_attempted": false,
+            "archive_extracted": false
+          }
+        }
+      ],
+      "blockers": [],
+      "rule_results": [],
+      "status": "pass",
+      "agent_summary": "Package verification passed without install, extraction, or runtime-root mutation.",
+      "validation_commands": [
+        "./bin/ask skills package verify Skills/agent-ops/improve-codebase-architecture --json --robot"
+      ],
+      "mutation_status": {
+        "mutated": false,
+        "runtime_roots_mutated": false,
+        "install_attempted": false,
+        "archive_extracted": false,
+        "network_used": false,
+        "raw": {
+          "status": "pass",
+          "mutated": false,
+          "runtime_roots_mutated": false,
+          "install_attempted": false,
+          "archive_extracted": false,
+          "network_used": false
+        }
+      },
+      "rollback_journal": {
+        "status": "not_required",
+        "reason": "Directory verification is read-only and performs no extraction or install."
+      },
+      "rollback_hint": "Directory verification is read-only. Package archive verification must pass before install mutation.",
+      "target_identity": {
+        "kind": "skill_directory",
+        "path": "Skills/agent-ops/improve-codebase-architecture/SKILL.md",
+        "query": "Skills/agent-ops/improve-codebase-architecture"
+      },
+      "rule_evidence": [
+        "skill_md_present:true",
+        "frontmatter_read:true",
+        "package_metadata_complete:true",
+        "package_contract:true",
+        "reference_quality:true",
+        "writing_quality:true",
+        "openai_platform_compat:true",
+        "trusted_provenance:true",
+        "provenance_trusted:true",
+        "no_runtime_mutation:true"
+      ],
+      "next_command": "./bin/ask skills package verify Skills/agent-ops/improve-codebase-architecture --json --robot"
+    }
+  },
+  "telemetry": {
+    "latency_ms": 27
+  },
+  "errors": []
+}
