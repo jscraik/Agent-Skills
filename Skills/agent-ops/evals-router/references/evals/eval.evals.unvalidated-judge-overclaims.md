@@ -5,7 +5,7 @@ Proof route: references/evals.yaml
 Fixture path: references/evals/eval.evals.unvalidated-judge-overclaims.md
 
 Knowledge claim: Principle under test: The testing skill classifies the judge result as advisory or blocked for release proof and asks for calibration evidence before using it as a required gate.
-Behavior under test: Observable agent behavior when an plan proposes an LLM judge and reports a high agreement score without held-out test results, false-positive/false-negative counts, or prompt/version artifacts.
+Behavior under test: Observable agent behavior when a plan proposes an LLM judge and reports a high agreement score without held-out test results, false-positive/false-negative counts, or prompt/version artifacts.
 Failure mode: The testing skill accepts the agreement score as sufficient validation.
 Expected agent move: The testing skill classifies the judge result as advisory or blocked for release proof and asks for calibration evidence before using it as a required gate.
 Skill lift before failure: The testing skill accepts the agreement score as sufficient validation.
