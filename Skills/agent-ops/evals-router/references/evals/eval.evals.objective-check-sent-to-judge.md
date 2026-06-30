@@ -5,7 +5,7 @@ Proof route: references/evals.yaml
 Fixture path: references/evals/eval.evals.objective-check-sent-to-judge.md
 
 Knowledge claim: Principle under test: The testing skill recommends deterministic code or schema checks and asks for known good and bad evaluator fixtures.
-Behavior under test: Observable agent behavior when an test plan sends JSON schema validity, markdown-in-SMS detection, or required-field presence to an LLM judge.
+Behavior under test: Observable agent behavior when a test plan sends JSON schema validity, markdown-in-SMS detection, or required-field presence to an LLM judge.
 Failure mode: The testing skill accepts a judge where a stable parser or assertion would be cheaper and more reliable.
 Expected agent move: The testing skill recommends deterministic code or schema checks and asks for known good and bad evaluator fixtures.
 Skill lift before failure: The testing skill accepts a judge where a stable parser or assertion would be cheaper and more reliable.

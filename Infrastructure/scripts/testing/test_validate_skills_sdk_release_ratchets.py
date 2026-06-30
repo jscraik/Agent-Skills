@@ -406,6 +406,27 @@ def test_release_ratchets_allow_target_gate_prefix_without_future_receipts() -> 
     assert "scenario_quality" in full_gate["evidence"]["missing_gates"]
 
 
+def test_release_ratchets_target_gate_ignores_future_gate_failures() -> None:
+    module = _load_module()
+    with tempfile.TemporaryDirectory() as temp_dir:
+        root = Path(temp_dir)
+        _write_fixture(root)
+        chain = root / ".harness" / "evidence" / "handoff" / "fixture-skill" / "gate-chain.json"
+        payload = json.loads(chain.read_text(encoding="utf-8"))
+        for gate in payload["gates"]:
+            if gate["id"] == "oss_cloud":
+                gate["status"] = "fail"
+                gate["what_this_proves"] = ""
+        chain.write_text(json.dumps(payload), encoding="utf-8")
+
+        prefix_payload = module.validate(root, "Skills/agent-ops/fixture-skill", target_gate="security_risk_modes")
+        full_payload = module.validate(root, "Skills/agent-ops/fixture-skill")
+
+    assert prefix_payload["status"] == "pass"
+    full_gate = next(check for check in full_payload["checks"] if check["code"] == "ordered_gate_chain")
+    assert "oss_cloud" in full_gate["evidence"]["bad_status"]
+
+
 def test_release_ratchets_allow_skill_to_point_at_capsule_routing() -> None:
     module = _load_module()
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -573,6 +594,33 @@ def test_release_ratchets_fail_on_unclassified_repair_regression() -> None:
     repair_loop = next(check for check in result["checks"] if check["code"] == "repair_loop_monotonicity")
     assert repair_loop["status"] == "fail"
     assert repair_loop["evidence"]["unclassified_regressions"]
+
+
+def test_release_ratchets_ignore_missing_regressed_cases_on_no_regression_attempt() -> None:
+    module = _load_module()
+    with tempfile.TemporaryDirectory() as temp_dir:
+        root = Path(temp_dir)
+        _write_fixture(root)
+        repair = root / ".harness" / "evidence" / "handoff" / "fixture-skill" / "repair-loop.json"
+        repair.write_text(
+            json.dumps(
+                {
+                    "schema_version": "skills-sdk.repair-loop.v1",
+                    "attempts": [
+                        {
+                            "id": "pass-2",
+                            "fixed_cases": ["a"],
+                        }
+                    ],
+                }
+            ),
+            encoding="utf-8",
+        )
+
+        result = module.validate(root, "Skills/agent-ops/fixture-skill")
+
+    repair_loop = next(check for check in result["checks"] if check["code"] == "repair_loop_monotonicity")
+    assert repair_loop["status"] == "pass"
 
 
 def test_release_ratchets_fail_unjustified_legacy_knowledgeos_capsule_subdir() -> None:

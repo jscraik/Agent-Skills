@@ -299,16 +299,22 @@ def _check_gate_chain(root: Path, evidence_dir: Path, target_gate: str | None = 
 
 def _gate_chain_evidence(root: Path, evidence_dir: Path, gates: list[Any], required: tuple[str, ...], target_gate: str | None) -> dict[str, Any]:
     gate_ids = [str(gate.get("id")) for gate in gates if isinstance(gate, dict)]
-    receipt_errors = [_gate_receipt_error(root, evidence_dir, gate) for gate in gates if isinstance(gate, dict)]
+    required_gate_set = set(required)
+    scoped_gates = [
+        gate
+        for gate in gates
+        if isinstance(gate, dict) and str(gate.get("id")) in required_gate_set
+    ]
+    receipt_errors = [_gate_receipt_error(root, evidence_dir, gate) for gate in scoped_gates]
     return {
         "target_gate": target_gate or REQUIRED_GATE_CHAIN[-1],
         "required_gate_count": len(required),
         "missing_gates": _missing_required_gates(gate_ids, required),
         "extra_future_gates": _extra_future_gates(gate_ids, required),
-        "order_ok": [gate for gate in gate_ids if gate in REQUIRED_GATE_CHAIN] == list(required),
-        "bad_status": _bad_gate_statuses(gates),
+        "order_ok": [gate for gate in gate_ids if gate in required_gate_set] == list(required),
+        "bad_status": _bad_gate_statuses(scoped_gates),
         "missing_receipts": _missing_gate_receipts(receipt_errors),
-        "missing_claim_boundaries": _missing_claim_boundaries(gates),
+        "missing_claim_boundaries": _missing_claim_boundaries(scoped_gates),
         "carried_advisories": _gate_carried_advisories(receipt_errors),
     }
 
@@ -381,5 +387,11 @@ def _unclassified_regressions(payload: dict[str, Any]) -> list[dict[str, Any]]:
     regressions: list[dict[str, Any]] = []
     for attempt in attempts:
         cases = attempt.get("regressed_cases") if isinstance(attempt, dict) else None
-        regressions.extend({"attempt": attempt.get("id"), "case": case} for case in cases if isinstance(cases, list) and (not isinstance(case, dict) or _blank(case.get("classification"))))
+        if not isinstance(cases, list):
+            continue
+        regressions.extend(
+            {"attempt": attempt.get("id"), "case": case}
+            for case in cases
+            if not isinstance(case, dict) or _blank(case.get("classification"))
+        )
     return regressions

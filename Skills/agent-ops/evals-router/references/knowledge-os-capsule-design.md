@@ -283,7 +283,7 @@ Avoidance: Require the operational playbook plus capsule-design sections, and re
   - pass: The capsule includes deterministic validation ideas or eval scenarios with expected failure and expected agent move.
   - fail: The capsule has no testable scenario or relies on reader confidence.
 
-## Eval Scenarios
+## Downstream Eval Scenarios
 
 ### eval.knowledge-os.capsule-design-without-relationships: Capsule Design Requires Relationships And Evals
 

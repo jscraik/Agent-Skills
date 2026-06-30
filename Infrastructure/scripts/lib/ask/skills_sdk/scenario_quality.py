@@ -141,7 +141,7 @@ def _strip_yaml_comment(raw_line: str) -> str:
     in_single = False
     in_double = False
     for index, char in enumerate(raw_line):
-        if char == "'" and not in_double:
+        if char == "'" and not in_double and _is_yaml_single_quote_delimiter(raw_line, index):
             in_single = not in_single
             continue
         if char == '"' and not in_single and not _is_escaped(raw_line, index):
@@ -150,6 +150,12 @@ def _strip_yaml_comment(raw_line: str) -> str:
         if _is_yaml_comment_start(raw_line, index, char, in_single, in_double):
             return raw_line[:index]
     return raw_line
+
+
+def _is_yaml_single_quote_delimiter(text: str, index: int) -> bool:
+    previous_char = text[index - 1] if index > 0 else ""
+    next_char = text[index + 1] if index + 1 < len(text) else ""
+    return not (previous_char.isalnum() and next_char.isalnum())
 
 
 def _is_escaped(text: str, index: int) -> bool:

@@ -17,6 +17,7 @@ from ask.skills_sdk.scenario_quality import (  # noqa: E402
     ScenarioQualityError,
     build_scenario_quality_receipt,
     _load_minimal_evals_yaml,
+    _strip_yaml_comment,
     _yaml_safe_load,
 )
 from ask.skills_sdk.scenario_quality_contracts import validate_scenario_quality_receipt  # noqa: E402
@@ -33,6 +34,10 @@ def _write_skill_with_evals(root: Path, evals_text: str) -> Path:
     (skill_dir / "SKILL.md").write_text("---\nname: sample\n---\n# Sample\n", encoding="utf-8")
     (references_dir / "evals.yaml").write_text(evals_text, encoding="utf-8")
     return skill_dir
+
+
+def test_minimal_yaml_comment_strip_ignores_plain_scalar_apostrophe() -> None:
+    assert _strip_yaml_comment("description: don't # comment") == "description: don't "
 
 
 def _two_case_score_parity_evals_yaml() -> str:

@@ -7,6 +7,7 @@ import argparse
 import json
 import re
 import sys
+from contextlib import suppress
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -519,11 +520,9 @@ def _receipt_checks(root: Path, skill_dir: Path, refs: Path, contract: dict[str,
 def validate(root: Path, target: str, target_gate: str | None = None) -> dict[str, Any]:
     skill_dir, skill_md, refs = _skill_paths(root, target)
     contract = None
-    try:
+    with suppress(ValueError):
         contract = _structured(refs / "contract.yaml")
-    except ValueError:
-        # contract_missing or contract_unparseable will be returned by _check_contract_rubric
-        pass
+    # contract_missing or contract_unparseable will be returned by _check_contract_rubric
     receipt_checks = _receipt_checks(root, skill_dir, refs, contract, target_gate)
     checks = [
         _check_central_rubric(root),

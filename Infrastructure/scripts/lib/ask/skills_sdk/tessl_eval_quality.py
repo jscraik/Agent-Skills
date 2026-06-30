@@ -51,7 +51,9 @@ NEGATIVE_ACCEPTANCE_TYPES = {"not_regex", "not_contains", "must_not", "must_not_
 NO_INVENTION_CONSTRAINT_RE = re.compile(r"(?i)\b(?:do not invent|use only the supplied|missing evidence as blocked)\b")
 NO_INVENTION_SUPPORT_RE = re.compile(r"(?i)\b(?:support channels?|slack)\b")
 NO_INVENTION_COMMAND_RE = re.compile(r"(?i)\b(?:setup commands?|validation commands?|commands?)\b")
-BROAD_SUPPORT_CHANNEL_NEGATIVE_RE = re.compile(r"(?i)(?:#\[[^\]]+|#\[a-z|slack\s+(?:channel|support)|support\s+channel)")
+BROAD_SUPPORT_CHANNEL_NEGATIVE_RE = re.compile(
+    r"(?i)(?:#\[[^\]]+\]|#[a-z][\w-]*|slack\s+(?:channel|support)|support\s+channel)"
+)
 BROAD_COMMAND_NEGATIVE_RE = re.compile(
     r"(?i)(?:pytest|uv|mise|npm|pnpm|yarn|\./bin/ask|setup\s+command|validation\s+command)"
 )

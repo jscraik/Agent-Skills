@@ -67,6 +67,36 @@ def test_no_invention_scenarios_accept_broad_negative_acceptance() -> None:
     assert "narrow_no_invention_negative_acceptance" not in {finding["code"] for finding in findings}
 
 
+def test_no_invention_scenarios_accept_plain_slack_channel_negative() -> None:
+    findings = tessl_eval_quality_findings([
+        {
+            "id": "plain-channel-no-invention",
+            "unit": "service docs",
+            "given": "A supplied runbook excerpt has missing recovery and owner evidence.",
+            "should": "Mark missing evidence as blocked instead of inventing operational details.",
+            "prompt": (
+                "Use only the supplied excerpt. Do not invent support channels, setup "
+                "commands, validation commands, owner names, dates, recovery paths, or "
+                "acceptance criteria. If tools fail, ask in Slack."
+            ),
+            "actual_artifact": "artifacts/plain-channel-no-invention.md",
+            "eval_modes": ["release"],
+            "acceptance": [
+                {
+                    "type": "expected_signal",
+                    "value": "Uses blocked placeholders for missing owner, recovery path, and acceptance criteria.",
+                },
+                {
+                    "type": "not_regex",
+                    "value": r"(?i)(#support|#deploy-help|pytest|uv|mise|\./bin/ask|setup command|validation command)",
+                },
+            ],
+        }
+    ])
+
+    assert "narrow_no_invention_negative_acceptance" not in {finding["code"] for finding in findings}
+
+
 def test_no_invention_guardrail_does_not_self_trigger_from_acceptance_text() -> None:
     findings = tessl_eval_quality_findings([
         {

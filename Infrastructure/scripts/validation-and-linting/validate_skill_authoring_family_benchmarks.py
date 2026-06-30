@@ -117,7 +117,6 @@ def _require_yaml() -> Any:
         "PyYAML is required for validate_skill_authoring_family_benchmarks.py. "
         "Run through bash Infrastructure/scripts/run-infrastructure-python.sh ..."
     ) from _YAML_IMPORT_ERROR
-    ) from _YAML_IMPORT_ERROR
 
 
 # Optional contract fields expected at gold standard; absence produces WARN (not FAIL).

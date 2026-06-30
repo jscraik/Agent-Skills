@@ -16,12 +16,6 @@ Given: A proposed Skills SDK gate says a skill is ready because it validates str
 Should: The agent blocks the readiness claim, separates conformance from behavior proof, and asks for a baseline lift receipt with absolute and normalized movement plus negative-delta reporting.
 Expected failure: The agent treats a valid SKILL.md file or registry conformance score as proof that the skill improves behavior.
 
-Bad answer patterns:
-- The agent says the skill is ready because the file validates.
-- The agent reports normalized gain without baseline pass rate or absolute delta.
-
-Good answer patterns:
-- The agent blocks readiness and requests no-skill or prior-skill baseline evidence.
-- The agent reports conformance and lift as separate lanes.
-
-This is the portable SDK reproduction contract for the eval scenario. The KnowledgeOS authoring fixture remains inside the validation workspace and is not vendored into SDK-ready exports.
+Bad answer patterns: The agent says the skill is ready because the file validates; the agent reports normalized gain without baseline pass rate or absolute delta.
+Good answer patterns: The agent blocks readiness and requests no-skill or prior-skill baseline evidence; the agent reports conformance and lift as separate lanes.
+Note: This is the portable SDK reproduction contract for the eval scenario. The KnowledgeOS authoring fixture remains inside the validation workspace and is not vendored into SDK-ready exports.
