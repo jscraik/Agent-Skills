@@ -2469,7 +2469,7 @@ def _validate_tessl_projection_shape(
             "Skills SDK Tessl skill projections must not place skill support context in root rules/; use references/."
         )
     manifest_path = staged_root / ".tessl-plugin" / "plugin.json"
-    _validate_tessl_live_private_manifest(manifest_path, workspace)
+    _validate_tessl_live_private_manifest(manifest_path, workspace, project_slug)
     manifest = _load_json_object_file(manifest_path, label="staged Tessl plugin manifest")
     _validate_tessl_bundled_mcp(staged_root, manifest)
     _validate_tessl_registry_readme(staged_root)
