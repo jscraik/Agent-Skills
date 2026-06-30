@@ -1,153 +1,24 @@
 schema_version: 2
 skill: improve-codebase-architecture
-purpose: "Proof-backed architecture decisions from current repo evidence."
-triggers:
-  - architecture review
-  - dependency graph
-  - modularization
-  - ownership boundary
-  - patch-vs-interface decision
-non_goals:
-  - one-line bug fix
-  - plain formatting cleanup
-  - dependency upgrade without design pressure
-inputs:
-  - target_path
-  - user_request
-  - AGENTS.md
-  - CODESTYLE.md
-  - callers
-  - tests
-  - public_interfaces
-  - decision_records
-  - tracker_context
-outputs:
-  - fresh_evidence
-  - missing_evidence
-  - agent_safe_boundary
-  - patch_design
-  - interface_design
-  - request_user_input
-  - recommended_first_move
-  - tracer_proof
-  - validation
-  - decision_surface
-  - confidence
-commands:
-  - "./bin/ask skills audit Skills/agent-ops/improve-codebase-architecture --level strict --json --robot"
-  - "./bin/ask skills package verify Skills/agent-ops/improve-codebase-architecture --json --robot"
-  - "uv run --python 3.12 --with pyyaml --with jsonschema python Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py --skill Skills/agent-ops/improve-codebase-architecture --format json"
-  - "./bin/plugin-eval analyze Skills/agent-ops/improve-codebase-architecture --format json"
-  - "./bin/ask evals run Skills/agent-ops/improve-codebase-architecture --mode smoke --tessl-live-private --tessl-workspace skills-sdk --json --robot"
-permission_profile:
-  filesystem:
-    read:
-      - target_path
-      - AGENTS.md
-      - CODESTYLE.md
-      - docs
-      - tests
-      - references
-    write:
-      - target_path
-  network:
-    required: false
-    allowed_when: "Only for explicitly requested external validation lanes such as private Tessl workspace scoring."
-evidence_policy:
-  summary: "Local repo files decide architecture claims; KnowledgeOS capsules and eval fixtures are evidence assets, not runtime authority."
-  required:
-    - fresh local evidence before recommendation
-    - caller-visible proof before safe boundary claim
-    - explicit user choice before structural patch-vs-interface selection
-    - exact validation commands with pass, fail, or blocked outcomes
-budget_classification:
-  runtime_context:
-    - references/architecture-practice-contract.md
-    - references/classification-cheatsheet.md
-    - references/deepening-workflow.md
-    - references/discovery-interview.md
-    - references/output-schema.md
-  evidence_assets:
-    - references/contract.yaml
-    - references/evals.yaml
-    - references/evals/**
-    - references/examples.md
-    - references/scenario-review.md
-    - references/knowledge-demand.yaml
-    - references/source-context.yaml
-    - references/task-profile.json
-    - references/knowledge-capsule.manifest.yaml
-    - references/knowledge-capsules/**
-tessl_scenario_policy:
-  structure_only: false
-  version_policy:
-    live_run_package_changes_require_semver_bump: true
-    current_live_version: "0.1.7"
-    rule: "Before a live Tessl run, bump metadata.version when SKILL.md, references/evals.yaml, references/evals/*.md, references/contract.yaml, or runtime-context references changed since the previous live run. Identical retry runs may reuse the same version."
-  current_live_readiness:
-    package_version: "0.1.7"
-    status: completed_ready
-    reason: "Private Tessl run 019edf73-fbec-72a2-996c-97496991f63e completed for package version 0.1.7 on 2026-06-19 with usage-spec 56/57 (98.2456%) over baseline 53.3/57 (93.5088%) across 25 scored scenarios."
-    required_evidence: "Satisfied by private Tessl run 019edf73-fbec-72a2-996c-97496991f63e: package version 0.1.7, 25 scenarios, usage score 98.2456%, baseline score 93.5088%, improvement 1.05x."
-  live_private_requires:
-    - skill_owned_cases: references/evals.yaml
-    - generated_reviewed_fixtures: references/evals/*.md
-  generated_before_run: true
-  min_gold_scenarios: 20
-  current_reviewed_scenarios: 26
-  tessl_run_budget:
-    workspace_run_limit: 300
-    reserve_runs: 20
-    action_when_remaining_unknown: "Use dry-run/local validation only until remaining live-run capacity is confirmed."
-    action_when_at_or_below_reserve: "Block nonessential live Tessl runs and preserve capacity for remediation."
-  scenario_generation_lane: "./bin/ask evals prepare-tessl-scenarios Skills/agent-ops/improve-codebase-architecture --tessl-workspace skills-sdk --json --robot"
-  scenario_drift_review:
-    required_after_skill_change: true
-    review_surfaces:
-      - SKILL.md
-      - references/evals.yaml
-      - references/evals/*.md
-      - references/scenario-review.md
-      - references/knowledge-capsules/**
-    review_decisions:
-      - keep
-      - update
-      - add
-      - remove
-    must_finish_before:
-      - "./bin/ask evals run Skills/agent-ops/improve-codebase-architecture --mode smoke --tessl-live-private --tessl-workspace skills-sdk --json --robot"
-  last_proven_live_run:
-    run_id: "019ed7c8-dda2-744a-ab7b-9cf7a22fb1fa"
-    workspace: skills-sdk
-    package_version: "0.1.1"
-    status: completed_ready_superseded
-    scenarios: 20
-    usage_score: 0.98
-    baseline_score: 0.97
-    improvement: 1.01
-    cli_checklist_usage_score: 0.9875
-    cli_checklist_baseline_score: 0.975
-    cli_checklist_improvement: 1.0128
-    readiness_reason: "Usage was above the 90% minimum and above baseline in both Tessl UI card evidence and CLI recomputed checklist evidence for package version 0.1.1 only."
-    superseded_by_package_version: "0.1.2"
-    superseded_reason: "The skill behavior, classification references, output schema, and canonical lift scenarios changed after this run; the run remains evidence for 0.1.1 only."
-  prior_transition_run:
-    run_id: "019ed79f-c74a-75e8-b945-933f4f418b65"
-    workspace: skills-sdk
-    status: completed_not_ready
-    scenarios: 20
-    usage_score: 0.9375
-    baseline_score: 0.9625
-    improvement: 0.974
-    reason_not_ready: "Above 90% and 20 scenarios, but still below baseline."
-    weak_scenarios:
-      - explicit route
-      - safety
-risks:
-  - over_triggering
-  - untrusted_input
-  - premature_redesign
-  - treating generated projections as canonical
-  - claiming architecture safety from tests alone
-observability: "Report file and line evidence, dependency direction, caller-visible behavior, exact verifier output, and blocker class."
-rollback_procedure: "Revert scoped edits, restore prior public interface behavior, and rerun the narrowest verifier plus package gates."
+purpose: Proof-backed architecture decisions from current repo evidence.
+triggers: [architecture review, dependency graph, modularization, ownership boundary, patch-vs-interface decision]
+non_goals: [one-line bug fix, formatting cleanup, dependency upgrade without design pressure]
+inputs: [target_path, user_request, capability, callers, tests, public_interfaces]
+outputs: [fresh_evidence, capability, boundary_verdict, patch_design, interface_design, recommended_first_move, validation]
+risks: [over_triggering, untrusted_input, premature_redesign, generated_projection_authority]
+capability_selection: {source: references/knowledge-capsule.manifest.yaml, route: references/knowledge-capsule-routing.md, rule: one facet only}
+quality_criteria:
+  capability_selection:
+    purpose: Select the smallest facet.
+    why_it_matters: Prevents loading all capsules or overclaiming producer proof.
+    observable_evidence: [selected facet, separate local proof lane]
+    scoring: {5: narrow plus proof, 4: relevant minor gaps, 3: implicit, 2: selector missing, 1: loads all}
+  architecture_decision_quality:
+    purpose: Keep decisions source-backed and verifier-tied.
+    why_it_matters: Tests alone do not prove ownership, public surface, or dependency safety.
+    observable_evidence: [source, public surface, callers, change class, verdict, first move, verifier]
+    scoring: {5: evidence backed, 4: supported, 3: partial proof, 2: weak proof, 1: broad rewrite}
+automatic_failure_conditions: [Loads all capsules by default., Overclaims KnowledgeOS producer proof., Migrates interface without owner caller verifier proof.]
+evidence_requirements: [Cite manifest or selected flat capsule., Cite local source caller verifier proof., Name blocker class and fallback.]
+observability: Report file line evidence, verifier output, and blocker class.
+rollback_procedure: Revert scoped edits and rerun package, audit, and Plugin Eval gates.

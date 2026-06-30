@@ -30,6 +30,19 @@ Analyze bounded evidence about skill reliability and turn it into a lifecycle de
 
 Decide from bounded evidence; prefer narrow, reversible lifecycle moves.
 
+## First-Principles Gate
+
+- Desired outcome: classify skill reliability evidence and route to keep, observe, improve, capture, merge/fold with approval, or retire with approval without mutating source prematurely.
+- User-specific constraints: use bounded evidence, preserve approval boundaries, route improvements through Skill Factory hardening, and map eval disagreement to SDK gates.
+- Rejected copied assumption: a failing skill should immediately be rewritten or retired.
+- Fundamental constraints: evidence strength controls scope; lifecycle decisions need approval when destructive; weak evidence cannot justify broad canonical changes.
+- Smallest effective mechanism: produce a lifecycle decision and concrete repair handoff items before edits.
+- Artifact decision: IMPROVE_EXISTING.
+- Rejected alternatives: retiring from weak evidence, merging without approval, or patching source before classifying root cause.
+- Evidence required: evidence anchors, root-cause labels, and repair items with expected SDK gate.
+- Validation proof: each finding cites one source and one owning gate.
+- Stop or pivot condition: if evidence is missing or untrusted, ask for bounded evidence instead of recommending a lifecycle move.
+
 ## When To Use
 
 - The user asks which skill is failing, why a skill keeps producing bad outcomes, or whether a skill should be kept, improved, merged, split, retired, or observed.
@@ -77,6 +90,7 @@ Evidence routing lives in [evidence routing](./references/evidence-routing.md). 
 6. If recommending Skill Factory hardening, include concrete repair items: target file, finding class, expected SDK handoff gate, minimum patch surface, and blocker.
 7. When eval or Tessl disagreement is involved, map the evidence to `./bin/ask sdk start <skill-path> --json --robot` and the SDK
    handoff proof ladder instead of generic eval language: strict audit,
+   package verify with reference_quality/reference_heading_invocable clean,
    security risk-modes, scenario-quality, scorer-quality, scorer-calibration, oss-local, oss-cloud,
    Tessl local proof with `--execute`, Tessl live-private dry-run, then
    handoff-readiness.

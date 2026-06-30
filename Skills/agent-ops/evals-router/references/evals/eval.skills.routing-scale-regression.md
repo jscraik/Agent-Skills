@@ -23,5 +23,3 @@ Bad answer patterns:
 Good answer patterns:
 - The agent asks for routing regression evidence.
 - The agent separates individual package shape from library selection health.
-
-This is the portable SDK reproduction contract for the eval scenario. The KnowledgeOS authoring fixture remains inside the validation workspace and is not vendored into SDK-ready exports.

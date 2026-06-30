@@ -9,6 +9,7 @@ triggers:
 inputs:
   - target_skill_path
   - target_skill_contract
+  - capability
   - existing_evals
   - knowledgeos_extraction_optional
   - knowledgeos_handoff_eval_references_optional
@@ -21,6 +22,7 @@ inputs:
   - plugin_eval_report_optional
 outputs:
   - scenario_inventory
+  - capability
   - reviewed_scenario_patches
   - tessl_tile_eval_pack_optional
   - eval_result_diagnosis_optional
@@ -63,9 +65,28 @@ budget_classification:
     - references/eval-improvement-contract.md
     - references/sdk-pipeline-setup.md
     - references/knowledgeos-handoff-conversion.md
+    - references/source-context.yaml
+    - references/knowledge-capsule-routing.md
+    - references/knowledge-capsule.manifest.yaml
+    - references/knowledge-demand.yaml
+    - references/skills-sdk-evaluation-benchmarks.md
+    - references/skills-sdk-generation-revision.md
+    - references/skills-sdk-operations-registry.md
+    - references/skills-sdk-architecture-runtime.md
+    - references/skills-sdk-supply-chain-security.md
+    - references/knowledge-os-capsule-design.md
+    - references/knowledge-os-export-readiness.md
     - references/evals.yaml
   runtime_context:
     - SKILL.md
+capability_selection:
+  evaluation_benchmarks: "Use when scenario work involves scorer quality, benchmark design, lift interpretation, calibration, or eval signal strength."
+  generation_revision: "Use when scenario work involves drafting, revising, importing, or deduplicating SDK/Tessl scenario assets."
+  operations_registry: "Use when scenario work involves registry, workspace, plugin shape, installability, release, or Tessl distribution boundaries."
+  architecture_runtime: "Use when scenario work involves runtime lanes, oss-local/oss-cloud proof, local command evidence, or architecture proof boundaries."
+  supply_chain_security: "Use when scenario work involves risky commands, prompt injection, security warnings, dependency intake, or trust gates."
+  capsule_design: "Use when scenario work involves KnowledgeOS capsule shape, relationship maps, grounding, or capsule quality."
+  export_readiness: "Use when scenario work involves KnowledgeOS export handoff, digest freshness, source-context routing, or downstream ingest proof."
 tessl_tile_scenario_policy:
   output_root: "<tile>/evals"
   required_files:

@@ -196,7 +196,10 @@ def sdk_stage_skill_dirs(root: Path) -> list[Path]:
 
 def load_yaml(path: Path) -> dict:
     if yaml is None:
-        fail("PyYAML is required for SDK stage source-context validation")
+        fail(
+            f"{path} requires PyYAML; run through "
+            "bash Infrastructure/scripts/run-infrastructure-python.sh"
+        )
     payload = yaml.safe_load(path.read_text(encoding="utf-8"))  # type: ignore[union-attr]
     if not isinstance(payload, dict):
         fail(f"{path} must contain a YAML mapping")

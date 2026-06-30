@@ -79,6 +79,9 @@ SOURCE_OPERATING_MODEL_KINDS: set[str] = {
     "operating_model_format",
 }
 PACKAGE_IGNORED_FILE_NAMES: set[str] = {".DS_Store", "Thumbs.db", "desktop.ini"}
+CENTRAL_RUBRIC_PROFILES: dict[str, str] = {
+    "skills-sdk.gold-standard.v1": "Infrastructure/config/skills-sdk/gold-standard-rubric.v1.json",
+}
 OPENAI_PLATFORM_COMPAT_SCHEMA_VERSION = "skills-sdk.openai-platform-compat.v1"
 SKILLFLOW_NODE_TYPES: set[str] = {
     "command",
@@ -108,6 +111,16 @@ OPTIMIZATION_SPLIT_ROLES: dict[str, str] = {
 PACKAGE_FILE_STEM_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 SKILL_DESCRIPTION_HANDLE_RE = re.compile(r"\$[A-Za-z][A-Za-z0-9_-]*")
 GENERIC_PACKAGE_FILE_STEMS = {"details", "misc", "notes", "scratch", "todo", "tmp"}
+GENERIC_REFERENCE_HEADING_TERMS = {
+    "details",
+    "misc",
+    "notes",
+    "overview",
+    "reference",
+    "scratch",
+    "todo",
+    "tmp",
+}
 DESCRIPTION_ACTION_TERMS = {
     "audit",
     "build",
@@ -129,6 +142,66 @@ DESCRIPTION_ACTION_TERMS = {
     "use",
     "validate",
 }
+CONSTRUCTION_OBLIGATION_TERMS = DESCRIPTION_ACTION_TERMS | {
+    "accept",
+    "ask",
+    "block",
+    "choose",
+    "classify",
+    "collect",
+    "compare",
+    "decide",
+    "decline",
+    "fail",
+    "gather",
+    "link",
+    "load",
+    "map",
+    "open",
+    "produce",
+    "read",
+    "refuse",
+    "route",
+    "select",
+    "stop",
+}
+CONSTRUCTION_TRIGGER_BOUNDARY_TERMS = {
+    "avoid",
+    "boundary",
+    "delegate",
+    "except",
+    "handoff",
+    "instead",
+    "never",
+    "not",
+    "only",
+    "outside",
+    "refuse",
+    "unless",
+    "when",
+}
+CONSTRUCTION_PHASE_TERMS = {
+    "after",
+    "before",
+    "block",
+    "blocked",
+    "gate",
+    "gated",
+    "phase",
+    "step",
+    "stop",
+    "validate",
+}
+CONSTRUCTION_GENERIC_TRIGGER_TERMS = {
+    "anything",
+    "everything",
+    "general",
+    "misc",
+    "stuff",
+    "things",
+}
+CONSTRUCTION_SEDIMENT_WORD_LIMIT = 55
+CONSTRUCTION_DUPLICATE_LINE_WORD_LIMIT = 8
 
 
 def repo_relative_path(repo_root: Path, path: Path) -> str | None:
@@ -426,42 +499,93 @@ def _capability_selector_fields(contract: dict[str, Any]) -> dict[str, str]:
     return selectors
 
 
+def _contract_rubric_profile_ids(contract: dict[str, Any]) -> list[str]:
+    """Return declared centralized rubric profile ids."""
+    value = contract.get("rubric_profiles", contract.get("rubric_profile"))
+    if isinstance(value, str) and value.strip():
+        return [value.strip()]
+    if isinstance(value, list):
+        return [str(item).strip() for item in value if str(item).strip()]
+    return []
+
+
+def _central_rubric_profiles(
+    repo_root: Path | None,
+    contract: dict[str, Any],
+) -> tuple[dict[str, dict[str, Any]], list[str], list[str]]:
+    """Load centralized Skills SDK rubric profiles declared by a contract."""
+    profiles: dict[str, dict[str, Any]] = {}
+    errors: list[str] = []
+    profile_ids = _contract_rubric_profile_ids(contract)
+    for profile_id in profile_ids:
+        rel_path = CENTRAL_RUBRIC_PROFILES.get(profile_id)
+        if not rel_path:
+            errors.append(f"rubric_profile.{profile_id}:unknown")
+            continue
+        if repo_root is None:
+            errors.append(f"rubric_profile.{profile_id}:repo_root_unavailable")
+            continue
+        loaded, error = read_structured_reference(repo_root / rel_path)
+        if error is not None:
+            errors.append(f"rubric_profile.{profile_id}:{error}")
+            continue
+        if not isinstance(loaded, dict):
+            errors.append(f"rubric_profile.{profile_id}:invalid_shape")
+            continue
+        if str(loaded.get("rubric_id") or "") != profile_id:
+            errors.append(f"rubric_profile.{profile_id}:rubric_id_mismatch")
+            continue
+        profiles[profile_id] = loaded
+    return profiles, errors, profile_ids
+
+
+def _combined_rubric_quality_criteria(
+    repo_root: Path | None,
+    contract: dict[str, Any],
+) -> tuple[dict[str, Any], list[str], list[str], list[str]]:
+    """Merge centralized rubric criteria with skill-local selector/override criteria."""
+    central_profiles, profile_errors, profile_ids = _central_rubric_profiles(repo_root, contract)
+    combined: dict[str, Any] = {}
+    automatic_failures: list[str] = []
+    for profile in central_profiles.values():
+        profile_criteria = profile.get("quality_criteria")
+        if isinstance(profile_criteria, dict):
+            combined.update(profile_criteria)
+        profile_failures = profile.get("automatic_failure_conditions")
+        if isinstance(profile_failures, list):
+            automatic_failures.extend(str(item) for item in profile_failures if str(item).strip())
+    local_criteria = contract.get("quality_criteria")
+    if isinstance(local_criteria, dict):
+        combined.update(local_criteria)
+    local_failures = contract.get("automatic_failure_conditions")
+    if isinstance(local_failures, list):
+        automatic_failures.extend(str(item) for item in local_failures if str(item).strip())
+    return combined, automatic_failures, profile_errors, profile_ids
+
+
 def _basic_requirement_rubric_check(
     contract: dict[str, Any],
     selectors: dict[str, str],
+    repo_root: Path | None = None,
 ) -> tuple[dict[str, Any], list[dict[str, str]]]:
     """Return whether the reference contract defines observable skill success."""
-    quality_criteria = contract.get("quality_criteria")
     evidence_requirements = contract.get("evidence_requirements")
+    quality_criteria, _automatic_failures, profile_errors, profile_ids = _combined_rubric_quality_criteria(
+        repo_root,
+        contract,
+    )
     missing: list[str] = []
     quality_keys: list[str] = []
     selector_keys: list[str] = []
 
     # Check field presence (exists in contract) vs emptiness (present but no content)
-    quality_present = "quality_criteria" in contract
+    quality_present = "quality_criteria" in contract or bool(profile_ids)
     evidence_present = "evidence_requirements" in contract
 
     has_quality = isinstance(quality_criteria, dict) and quality_criteria
     has_evidence = isinstance(evidence_requirements, list) and [
         item for item in evidence_requirements if isinstance(item, str) and item.strip()
     ]
-
-    # Only validate if at least one rubric field is present (showing intent to migrate)
-    # Empty dict/list placeholders are treated as present-but-invalid, not absent
-    if not quality_present and not evidence_present:
-        # Legacy contract without rubric fields; skip validation
-        return {
-            "name": "basic_requirement_rubric",
-            "status": "skipped",
-            "path": "references/contract.yaml",
-            "missing": [],
-            "quality_criteria": [],
-            "selector_criteria": [],
-            "policy": (
-                "Skills SDK contracts should define observable quality criteria "
-                "and evidence requirements for the skill's basic job before handoff."
-            ),
-        }, []
 
     if not has_quality:
         missing.append("quality_criteria")
@@ -472,8 +596,10 @@ def _basic_requirement_rubric_check(
         if not observable_quality_keys:
             missing.append("quality_criteria.observable_success")
         for selector_key in selectors:
-            if selector_key not in quality_criteria:
+            if selector_key not in quality_criteria and not contract.get(selector_key):
                 missing.append(f"quality_criteria.{selector_key}")
+
+    missing.extend(profile_errors)
 
     if not has_evidence:
         missing.append("evidence_requirements")
@@ -485,6 +611,7 @@ def _basic_requirement_rubric_check(
         "missing": missing,
         "quality_criteria": quality_keys,
         "selector_criteria": selector_keys,
+        "rubric_profiles": profile_ids,
         "policy": (
             "Every Skills SDK contract must define observable quality criteria "
             "and evidence requirements for the skill's basic job before handoff."
@@ -517,8 +644,18 @@ ANALYTIC_RUBRIC_SCORES = {"5", "4", "3", "2", "1"}
 
 def _analytic_rubric_quality_check(contract: dict[str, Any]) -> tuple[dict[str, Any], list[dict[str, str]]]:
     """Return whether quality_criteria follow the gold-standard analytic rubric shape."""
-    quality_criteria = contract.get("quality_criteria")
-    automatic_failures = contract.get("automatic_failure_conditions")
+    return _analytic_rubric_quality_check_for_repo(contract, None)
+
+
+def _analytic_rubric_quality_check_for_repo(
+    contract: dict[str, Any],
+    repo_root: Path | None,
+) -> tuple[dict[str, Any], list[dict[str, str]]]:
+    """Return whether merged centralized/local rubric criteria follow analytic shape."""
+    quality_criteria, automatic_failures, profile_errors, profile_ids = _combined_rubric_quality_criteria(
+        repo_root,
+        contract,
+    )
     findings: list[str] = []
     checked: list[str] = []
 
@@ -561,9 +698,8 @@ def _analytic_rubric_quality_check(contract: dict[str, Any]) -> tuple[dict[str, 
 
     if not checked:
         findings.append("quality_criteria.observable_analytic_criterion")
-    if not isinstance(automatic_failures, list) or not [
-        item for item in automatic_failures if isinstance(item, str) and item.strip()
-    ]:
+    findings.extend(profile_errors)
+    if not [item for item in automatic_failures if isinstance(item, str) and item.strip()]:
         findings.append("automatic_failure_conditions")
 
     check = {
@@ -572,10 +708,11 @@ def _analytic_rubric_quality_check(contract: dict[str, Any]) -> tuple[dict[str, 
         "path": "references/contract.yaml",
         "criteria_checked": sorted(checked),
         "missing": sorted(findings),
+        "rubric_profiles": profile_ids,
         "policy": (
-            "references/contract.yaml quality_criteria must use an analytic rubric "
-            "shape: one observable dimension per criterion, purpose, why_it_matters, "
-            "observable_evidence, 1-5 scoring anchors, and package-level automatic failures."
+            "Skills SDK rubric criteria must use an analytic rubric shape. "
+            "Shared criteria may come from centralized rubric_profile entries; "
+            "skill-local criteria should only add selectors or domain-specific overrides."
         ),
     }
     blockers: list[dict[str, str]] = []
@@ -880,6 +1017,8 @@ def progressive_disclosure_contract(
     missing = missing_progressive_disclosure_references(skill_md, reference_paths)
     existing_count = len(reference_paths) - len(missing)
     compact_entrypoint = bool(text) and line_count <= 250
+    near_threshold_line_limit = 220
+    over_near_threshold = bool(text) and line_count > near_threshold_line_limit
     section_declared = bool(body)
     references_declared = existing_count > 0
     operating_model_formats = operating_model_format_contract(skill_md, text)
@@ -893,6 +1032,8 @@ def progressive_disclosure_contract(
         "skill_md_line_count": line_count,
         "skill_md_under_500_lines": line_count <= 500 if text else False,
         "skill_md_under_250_lines": compact_entrypoint,
+        "skill_md_near_threshold_line_limit": near_threshold_line_limit,
+        "skill_md_over_near_threshold": over_near_threshold,
         "progressive_disclosure_declared": section_declared,
         "progressive_disclosure_reference_count": existing_count,
         "progressive_disclosure_missing_references": missing,
@@ -928,6 +1069,32 @@ def text_contains_action_term(text: str) -> bool:
 def markdown_has_title(text: str) -> bool:
     """Return whether markdown text declares a top-level title."""
     return any(line.startswith("# ") and line[2:].strip() for line in text.splitlines())
+
+
+def markdown_title(text: str) -> str:
+    """Return the first top-level markdown title."""
+    for line in text.splitlines():
+        if line.startswith("# ") and line[2:].strip():
+            return line[2:].strip()
+    return ""
+
+
+def markdown_reference_heading_weak(path: Path, text: str) -> bool:
+    """Return whether a markdown reference title is too generic to route reliably."""
+    title = markdown_title(text)
+    if not title:
+        return True
+    title_tokens = _token_set(title)
+    if not title_tokens:
+        return True
+    if title_tokens.issubset(GENERIC_REFERENCE_HEADING_TERMS):
+        return True
+    stem_tokens = _token_set(path.stem)
+    meaningful_stem_tokens = stem_tokens - GENERIC_REFERENCE_HEADING_TERMS
+    meaningful_title_tokens = title_tokens - GENERIC_REFERENCE_HEADING_TERMS
+    if meaningful_stem_tokens and not (meaningful_stem_tokens & meaningful_title_tokens):
+        return True
+    return False
 
 
 def structured_reference_has_description(path: Path, text: str) -> bool:
@@ -1053,6 +1220,18 @@ def support_file_inventory(
     bad_names = [path for path in files if not package_file_stem_ok(path)]
     generic_names = [path for path in files if path.stem.lower() in GENERIC_PACKAGE_FILE_STEMS]
     missing_descriptions = [path for path in files if not support_file_has_description(path)]
+    weak_headings: list[Path] = []
+    if folder == "references":
+        for path in files:
+            if path.suffix.lower() != ".md":
+                continue
+            try:
+                text = path.read_text(encoding="utf-8", errors="replace")
+            except OSError:
+                weak_headings.append(path)
+                continue
+            if markdown_reference_heading_weak(path, text):
+                weak_headings.append(path)
     return {
         "count": len(files),
         "filenames_kebab_case": not bad_names,
@@ -1060,8 +1239,17 @@ def support_file_inventory(
         "missing_descriptions": [
             repo_relative_path(repo_root, path) or path.as_posix() for path in missing_descriptions
         ],
+        "weak_headings": [
+            repo_relative_path(repo_root, path) or path.as_posix() for path in weak_headings
+        ],
         "description_coverage_count": len(files) - len(missing_descriptions),
-        "ready": not unsafe_paths and not bad_names and not generic_names and not missing_descriptions,
+        "ready": (
+            not unsafe_paths
+            and not bad_names
+            and not generic_names
+            and not missing_descriptions
+            and not weak_headings
+        ),
         "bad_names": [repo_relative_path(repo_root, path) or path.as_posix() for path in bad_names],
         "unsafe_paths": [package_path_label(repo_root, path) for path in unsafe_paths],
     }
@@ -1159,7 +1347,12 @@ def knowledge_capsule_first_party_contract(repo_root: Path | None, skill_md: Pat
         path for path in capsule_paths
         if routing_declared and path and path not in routing_text
     ]
-    skill_mentions_routing = "knowledge-capsule-routing.md" in text
+    contract_path = skill_md.parent / "references" / "contract.yaml" if skill_md else None
+    contract_mentions_routing = (
+        bool(contract_path and contract_path.is_file())
+        and "knowledge-capsule-routing.md" in skill_markdown_text(contract_path)
+    )
+    skill_mentions_routing = "knowledge-capsule-routing.md" in text or contract_mentions_routing
     ready = (
         not manifest_declared
         or (
@@ -1187,6 +1380,7 @@ def knowledge_capsule_first_party_contract(repo_root: Path | None, skill_md: Pat
         "first_party_routing_safe": routing_safe,
         "manifest_safe": manifest_safe,
         "skill_mentions_first_party_routing": skill_mentions_routing,
+        "contract_mentions_first_party_routing": contract_mentions_routing,
         "missing_from_first_party_routing": missing_from_routing,
         "ready": ready,
         "policy": (
@@ -1906,6 +2100,77 @@ def reference_quality_contract(repo_root: Path | None, skill_md: Path | None) ->
             )
 
     if references_dir and references_dir.is_dir():
+        for candidate in sorted(references_dir.rglob("*.md")):
+            if not candidate.is_file():
+                continue
+            rel_path = repo_relative_path(repo_root, candidate) if repo_root else candidate.as_posix()
+            package_rel = (
+                candidate.relative_to(skill_md.parent).as_posix()
+                if skill_md is not None
+                else candidate.name
+            )
+            if skill_md is not None and not package_local_regular_file(skill_md, package_rel):
+                checks.append(
+                    {
+                        "name": "reference_heading_invocable",
+                        "status": "blocked_validation",
+                        "path": rel_path,
+                        "reason": "reference path must be a package-local regular file",
+                    }
+                )
+                blockers.append(
+                    {
+                        "rule_id": "reference_heading_not_invocable",
+                        "path": rel_path,
+                        "message": "Markdown reference must stay inside the package and must not be a symlink.",
+                    }
+                )
+                continue
+            try:
+                text = candidate.read_text(encoding="utf-8", errors="replace")
+            except OSError as exc:
+                checks.append(
+                    {
+                        "name": "reference_heading_invocable",
+                        "status": "blocked_validation",
+                        "path": rel_path,
+                        "reason": str(exc),
+                    }
+                )
+                blockers.append(
+                    {
+                        "rule_id": "reference_heading_not_invocable",
+                        "path": rel_path,
+                        "message": "Markdown reference could not be read for heading validation.",
+                    }
+                )
+                continue
+            weak_heading = markdown_reference_heading_weak(candidate, text)
+            checks.append(
+                {
+                    "name": "reference_heading_invocable",
+                    "status": "blocked_validation" if weak_heading else "pass",
+                    "path": rel_path,
+                    "title": markdown_title(text),
+                    "policy": (
+                        "Markdown reference and KnowledgeOS capsule headings must be "
+                        "specific, filename-aligned, and invocable by routing agents."
+                    ),
+                }
+            )
+            if weak_heading:
+                blockers.append(
+                    {
+                        "rule_id": "reference_heading_not_invocable",
+                        "path": rel_path,
+                        "message": (
+                            "Markdown reference heading is missing, generic, or misaligned "
+                            "with the file purpose; rewrite it as a specific routing trigger."
+                        ),
+                    }
+                )
+
+    if references_dir and references_dir.is_dir():
         for candidate in sorted(references_dir.rglob("*")):
             if not candidate.is_file() or candidate.suffix.lower() not in {".json", ".yaml", ".yml"}:
                 continue
@@ -1988,11 +2253,13 @@ def reference_quality_contract(repo_root: Path | None, skill_md: Path | None) ->
         rubric_check, rubric_blockers = _basic_requirement_rubric_check(
             reference_contract,
             reference_contract_selectors,
+            repo_root,
         )
         checks.append(rubric_check)
         blockers.extend(rubric_blockers)
-        analytic_rubric_check, analytic_rubric_blockers = _analytic_rubric_quality_check(
-            reference_contract
+        analytic_rubric_check, analytic_rubric_blockers = _analytic_rubric_quality_check_for_repo(
+            reference_contract,
+            repo_root,
         )
         checks.append(analytic_rubric_check)
         if requires_tessl_handoff_quality:
@@ -2001,6 +2268,35 @@ def reference_quality_contract(repo_root: Path | None, skill_md: Path | None) ->
         manifest_path = references_dir / "knowledge-capsule.manifest.yaml"
         routing_path = references_dir / "knowledge-capsule-routing.md"
         if manifest_path.is_file():
+            orphaned_bundle_files = _manifest_orphaned_bundle_files(
+                repo_root,
+                skill_md,
+                skill_markdown_text(skill_md),
+            )
+            checks.append(
+                {
+                    "name": "orphaned_bundle_reference",
+                    "status": "blocked_validation" if orphaned_bundle_files else "pass",
+                    "path": "references/knowledge-capsule.manifest.yaml",
+                    "orphaned_paths": orphaned_bundle_files,
+                    "policy": (
+                        "When a knowledge capsule manifest exists, bundle support files "
+                        "must be routed by SKILL.md, capsule routing, or package contracts."
+                    ),
+                }
+            )
+            if orphaned_bundle_files:
+                blockers.append(
+                    {
+                        "rule_id": "orphaned_bundle_reference",
+                        "path": "references/knowledge-capsule.manifest.yaml",
+                        "message": (
+                            "Knowledge capsule bundle files are present without a routed "
+                            "package entrypoint: "
+                            f"{', '.join(orphaned_bundle_files)}."
+                        ),
+                    }
+                )
             manifest, manifest_error = read_structured_reference(manifest_path)
             manifest_payload = manifest if isinstance(manifest, dict) else {}
             has_multi_capability_manifest, manifest_facets = _manifest_declares_multiple_capabilities(
@@ -2218,6 +2514,112 @@ def _token_set(text: str) -> set[str]:
     }
 
 
+def _skill_body_without_frontmatter(text: str) -> str:
+    """Return markdown body text with leading YAML frontmatter removed."""
+    lines = text.splitlines()
+    if lines and lines[0].strip() == "---":
+        for index, line in enumerate(lines[1:], start=1):
+            if line.strip() == "---":
+                return "\n".join(lines[index + 1 :]).strip()
+    return text.strip()
+
+
+def _construction_step_body(text: str) -> str:
+    """Return the combined procedural body used for construction checks."""
+    sections: list[str] = []
+    for heading in ("Workflow", "Procedure", "Steps"):
+        if markdown_heading_declared(text, heading):
+            sections.append(markdown_section_body(text, heading))
+    return "\n".join(section for section in sections if section.strip())
+
+
+def _construction_line_items(text: str) -> list[str]:
+    """Return non-heading text lines that are likely to carry instructions."""
+    items: list[str] = []
+    in_code_block = False
+    for raw_line in text.splitlines():
+        line = raw_line.strip()
+        if line.startswith("\u0060\u0060\u0060"):
+            in_code_block = not in_code_block
+            continue
+        if in_code_block or not line or line.startswith("#"):
+            continue
+        while line.startswith(("-", "*")):
+            line = line[1:].strip()
+        if len(line) >= 3 and line[0].isdigit() and line[1] == ".":
+            line = line[2:].strip()
+        if line:
+            items.append(line)
+    return items
+
+
+def _long_paragraphs_without_behavior(text: str) -> list[dict[str, Any]]:
+    """Return long prose paragraphs that lack routing, gate, output, or action terms."""
+    body = _skill_body_without_frontmatter(text)
+    paragraphs: list[str] = []
+    current: list[str] = []
+    in_code_block = False
+    for raw_line in body.splitlines():
+        line = raw_line.strip()
+        if line.startswith("\u0060\u0060\u0060"):
+            in_code_block = not in_code_block
+            continue
+        if in_code_block:
+            continue
+        if not line or line.startswith("#") or line.startswith(("-", "*")):
+            if current:
+                paragraphs.append(" ".join(current))
+                current = []
+            continue
+        current.append(line)
+    if current:
+        paragraphs.append(" ".join(current))
+
+    findings: list[dict[str, Any]] = []
+    for index, paragraph in enumerate(paragraphs, start=1):
+        tokens = _token_set(paragraph)
+        word_count = len([word for word in paragraph.split() if word.strip()])
+        carries_behavior = bool(
+            tokens & CONSTRUCTION_OBLIGATION_TERMS
+            or tokens & CONSTRUCTION_PHASE_TERMS
+            or "references/" in paragraph
+            or "Command:" in paragraph
+            or "Output Contract" in paragraph
+        )
+        if word_count >= CONSTRUCTION_SEDIMENT_WORD_LIMIT and not carries_behavior:
+            findings.append(
+                {
+                    "paragraph": index,
+                    "word_count": word_count,
+                    "preview": paragraph[:120],
+                }
+            )
+    return findings
+
+
+def _duplicate_instruction_lines(text: str) -> list[dict[str, Any]]:
+    """Return repeated instruction-shaped lines that should be deduplicated."""
+    seen: dict[str, dict[str, Any]] = {}
+    for line_number, item in enumerate(_construction_line_items(text), start=1):
+        tokens = _token_set(item)
+        if len(tokens) < CONSTRUCTION_DUPLICATE_LINE_WORD_LIMIT:
+            continue
+        if not (tokens & CONSTRUCTION_OBLIGATION_TERMS or "references/" in item):
+            continue
+        normalized = " ".join(sorted(tokens))
+        if normalized not in seen:
+            seen[normalized] = {
+                "line_numbers": [],
+                "text": item[:120],
+            }
+        seen[normalized]["line_numbers"].append(line_number)
+    duplicates: list[dict[str, Any]] = []
+    for record in seen.values():
+        if len(record["line_numbers"]) > 1:
+            duplicates.append(record)
+    return duplicates
+
+
 def _package_support_files(skill_md: Path | None) -> list[Path]:
     """Return package-local support files that should have a routing pointer."""
     if not skill_md:
@@ -2250,6 +2652,8 @@ def _package_text_surfaces(skill_md: Path | None, text: str) -> str:
         "agents/openai.yaml",
         "references/contract.yaml",
         "references/evals.yaml",
+        "references/knowledge-capsule-routing.md",
+        "references/source-provenance.md",
         "references/source-context.yaml",
         "workflows/skillflow.json",
     ):
@@ -2278,6 +2682,8 @@ def _orphaned_support_files(
         "agents/openai.yaml",
         "references/contract.yaml",
         "references/evals.yaml",
+        "references/knowledge-capsule.manifest.yaml",
+        "references/knowledge-demand.yaml",
         "references/task-profile.json",
     }
     for candidate in _package_support_files(skill_md):
@@ -2288,6 +2694,44 @@ def _orphaned_support_files(
             continue
         orphaned.append(repo_relative_path(repo_root, candidate) if repo_root else relative)
     return [path for path in orphaned if path]
+
+
+def _package_relative_path(skill_md: Path | None, path: str) -> str:
+    """Return a package-relative path when a repo-relative path points into a skill."""
+    if not skill_md:
+        return path
+    package_root = skill_md.parent
+    marker = f"{package_root.as_posix()}/"
+    if path.startswith(marker):
+        return path.removeprefix(marker)
+    parts = path.split("/")
+    for index, part in enumerate(parts):
+        if part == "references":
+            return "/".join(parts[index:])
+    return path
+
+
+def _manifest_orphaned_bundle_files(
+    repo_root: Path | None,
+    skill_md: Path | None,
+    text: str,
+) -> list[str]:
+    """Return bundle support files that must be routed when a capsule manifest exists."""
+    if not skill_md:
+        return []
+    manifest_path = skill_md.parent / "references" / "knowledge-capsule.manifest.yaml"
+    if not manifest_path.is_file():
+        return []
+    orphaned = _orphaned_support_files(repo_root, skill_md, text)
+    bundle_paths: list[str] = []
+    for path in orphaned:
+        package_path = _package_relative_path(skill_md, path)
+        if package_path.startswith("references/knowledge-capsules/") or package_path in {
+            "references/source-context.yaml",
+            "references/source-provenance.md",
+        }:
+            bundle_paths.append(path)
+    return sorted(bundle_paths)
 
 
 def _review_lens_skill(frontmatter: dict[str, Any], text: str) -> bool:
@@ -2493,7 +2937,7 @@ def _scenario_cases_from_reference(
 ) -> list[Any]:
     """Return eval cases, using a small fallback for nested cases YAML."""
     cases = loaded.get("cases")
-    if isinstance(cases, list) and all(isinstance(case, dict) for case in cases):
+    if isinstance(cases, list) and cases and all(isinstance(case, dict) for case in cases):
         return cases
     try:
         text = evals_path.read_text(encoding="utf-8")
@@ -2512,9 +2956,9 @@ def _scenario_cases_from_reference(
             if indent == 0 and stripped == "cases:":
                 in_cases = True
             continue
-        if indent == 0:
+        if indent == 0 and not stripped.startswith("- "):
             break
-        if indent == 2 and stripped.startswith("- "):
+        if indent in {0, 2} and stripped.startswith("- id:"):
             if current is not None:
                 parsed_cases.append(current)
             current = {}
@@ -2526,12 +2970,12 @@ def _scenario_cases_from_reference(
             continue
         if current is None:
             continue
-        if current_list_key and indent >= 4 and stripped.startswith("- "):
+        if current_list_key and indent >= 2 and stripped.startswith("- "):
             values = current.setdefault(current_list_key, [])
             if isinstance(values, list):
                 values.append(parse_frontmatter_scalar(stripped[2:].strip()))
             continue
-        if indent >= 4 and ":" in stripped:
+        if indent >= 2 and ":" in stripped:
             key, value = stripped.split(":", 1)
             key = key.strip()
             value = value.strip()
@@ -2663,6 +3107,171 @@ def _scenario_alignment_checks(
     return checks, blockers
 
 
+def _construction_quality_checks(
+    *,
+    repo_root: Path | None,
+    skill_md: Path | None,
+    text: str,
+    user_invoked: bool,
+    description: str,
+    procedural: bool,
+    references_count: int,
+    missing_references: list[Any],
+    source_path: str | None,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Return deterministic construction checks from the Predictability glossary."""
+    checks: list[dict[str, Any]] = []
+    blockers: list[dict[str, Any]] = []
+
+    description_tokens = _token_set(description)
+    trigger_boundaries = sorted(description_tokens & CONSTRUCTION_TRIGGER_BOUNDARY_TERMS)
+    generic_trigger_terms = sorted(description_tokens & CONSTRUCTION_GENERIC_TRIGGER_TERMS)
+    trigger_status = (
+        "not_applicable"
+        if user_invoked
+        else "pass"
+        if description
+        and text_contains_action_term(description)
+        and "when" in description_tokens
+        and not generic_trigger_terms
+        else "blocked_validation"
+    )
+    checks.append(
+        _quality_check(
+            "construction_trigger_boundary",
+            trigger_status,
+            dimension="invocation",
+            evidence={
+                "glossary_axis": "Invocation",
+                "root_quality": "Predictability",
+                "user_invoked": user_invoked,
+                "has_description": bool(description),
+                "has_action_term": text_contains_action_term(description),
+                "trigger_boundaries": trigger_boundaries,
+                "generic_trigger_terms": generic_trigger_terms,
+            },
+        )
+    )
+    if trigger_status == "blocked_validation":
+        blockers.append(
+            _quality_blocker(
+                "construction_trigger_boundary_missing",
+                "Trigger design must use a concrete action-shaped description and avoid generic catch-all routing terms.",
+                dimension="invocation",
+                path=source_path,
+            )
+        )
+
+    step_body = _construction_step_body(text)
+    step_tokens = _token_set(step_body)
+    step_action_terms = sorted(step_tokens & CONSTRUCTION_OBLIGATION_TERMS)
+    references_routed = references_count == 0 or "references/" in text
+    structure_status = (
+        "pass"
+        if procedural and step_action_terms and references_routed and not missing_references
+        else "blocked_validation"
+    )
+    checks.append(
+        _quality_check(
+            "construction_steps_reference_structure",
+            structure_status,
+            dimension="information_hierarchy",
+            evidence={
+                "glossary_axis": "Information Hierarchy",
+                "root_quality": "Predictability",
+                "procedural_heading_declared": procedural,
+                "step_action_terms": step_action_terms,
+                "reference_count": references_count,
+                "references_routed": references_routed,
+                "missing_references": missing_references,
+            },
+        )
+    )
+    if structure_status == "blocked_validation":
+        blockers.append(
+            _quality_blocker(
+                "construction_steps_reference_structure_missing",
+                "Skill construction must separate Steps from Reference with at least one action-shaped workflow step and routed context pointers.",
+                dimension="information_hierarchy",
+                path=source_path,
+            )
+        )
+
+    all_tokens = _token_set(text)
+    phase_like = bool(all_tokens & {"phase", "step", "stage", "gate"})
+    phase_gate_terms = sorted(all_tokens & CONSTRUCTION_PHASE_TERMS)
+    steering_status = (
+        "not_applicable"
+        if not phase_like
+        else "pass"
+        if phase_gate_terms and bool(all_tokens & {"before", "after", "stop", "block", "validate", "gate"})
+        else "blocked_validation"
+    )
+    checks.append(
+        _quality_check(
+            "construction_steering_phase_gate",
+            steering_status,
+            dimension="steering",
+            evidence={
+                "glossary_axis": "Steering",
+                "root_quality": "Predictability",
+                "phase_like": phase_like,
+                "phase_gate_terms": phase_gate_terms,
+            },
+        )
+    )
+    if steering_status == "blocked_validation":
+        blockers.append(
+            _quality_blocker(
+                "construction_steering_phase_gate_missing",
+                "Phase or step-based skills must say what blocks advancement, what evidence is required, or when to stop.",
+                dimension="steering",
+                path=source_path,
+            )
+        )
+
+    sediment_paragraphs = _long_paragraphs_without_behavior(text)
+    duplicate_lines = _duplicate_instruction_lines(text)
+    pruning_status = (
+        "pass"
+        if not sediment_paragraphs and not duplicate_lines
+        else "blocked_validation"
+    )
+    checks.append(
+        _quality_check(
+            "construction_pruning_sediment",
+            pruning_status,
+            dimension="pruning",
+            evidence={
+                "glossary_axis": "Pruning",
+                "root_quality": "Predictability",
+                "long_paragraphs_without_behavior": sediment_paragraphs,
+                "duplicate_instruction_lines": duplicate_lines,
+            },
+        )
+    )
+    if sediment_paragraphs:
+        blockers.append(
+            _quality_blocker(
+                "construction_sediment_paragraph",
+                "Long skill prose must carry an action, context pointer, completion criterion, output, or evidence obligation; otherwise it is sediment to move or prune.",
+                dimension="pruning",
+                path=source_path,
+            )
+        )
+    if duplicate_lines:
+        blockers.append(
+            _quality_blocker(
+                "construction_duplicate_instruction",
+                "Repeated instruction-shaped lines violate single source of truth and should be deduplicated or moved into one routed reference.",
+                dimension="pruning",
+                path=source_path,
+            )
+        )
+
+    return checks, blockers
+
+
 def writing_quality_contract(
     repo_root: Path | None,
     skill_md: Path | None,
@@ -2730,6 +3339,12 @@ def writing_quality_contract(
     procedural = _has_any_heading(text, ("Workflow", "Procedure", "Steps"))
     validation_declared = markdown_heading_declared(text, "Validation")
     output_contract_declared = markdown_heading_declared(text, "Output Contract")
+    evidence_contract_declared = markdown_heading_declared(text, "Evidence Contract")
+    completion_reference_declared = (
+        skill_md is not None
+        and package_local_regular_file(skill_md, "references/validation-and-output.md")
+        and "references/validation-and-output.md" in text
+    )
     validation_body = markdown_section_body(text, "Validation")
     validation_evidence_declared = (
         validation_declared
@@ -2739,7 +3354,10 @@ def writing_quality_contract(
         "not_applicable"
         if not procedural
         else "pass"
-        if output_contract_declared or validation_evidence_declared
+        if output_contract_declared
+        or evidence_contract_declared
+        or validation_evidence_declared
+        or completion_reference_declared
         else "blocked_validation"
     )
     checks.append(
@@ -2751,6 +3369,8 @@ def writing_quality_contract(
                 "procedural": procedural,
                 "validation_declared": validation_declared,
                 "output_contract_declared": output_contract_declared,
+                "evidence_contract_declared": evidence_contract_declared,
+                "completion_reference_declared": completion_reference_declared,
             },
         )
     )
@@ -2758,7 +3378,7 @@ def writing_quality_contract(
         blockers.append(
             _quality_blocker(
                 "missing_completion_criterion",
-                "Procedural skills must declare observable completion evidence through Validation or an Output Contract.",
+                "Procedural skills must declare observable completion evidence through Validation, an Output Contract, an Evidence Contract, or a routed validation-and-output reference.",
                 dimension="completion_criteria",
                 path=source_path,
             )
@@ -2766,11 +3386,18 @@ def writing_quality_contract(
 
     line_count = progressive_disclosure.get("skill_md_line_count", 0)
     entrypoint_compact = bool(progressive_disclosure.get("skill_md_under_250_lines"))
+    near_threshold_limit = int(
+        progressive_disclosure.get("skill_md_near_threshold_line_limit") or 220
+    )
+    over_near_threshold = bool(progressive_disclosure.get("skill_md_over_near_threshold"))
     references_count = int(progressive_disclosure.get("progressive_disclosure_reference_count") or 0)
     missing_references = progressive_disclosure.get("progressive_disclosure_missing_references") or []
+    near_threshold_sprawl = over_near_threshold and references_count > 0 and not missing_references
     disclosure_status = (
         "blocked_validation"
-        if missing_references or (not entrypoint_compact and references_count == 0)
+        if missing_references
+        or near_threshold_sprawl
+        or (not entrypoint_compact and references_count == 0)
         else "pass"
     )
     checks.append(
@@ -2781,6 +3408,8 @@ def writing_quality_contract(
             evidence={
                 "line_count": line_count,
                 "under_250_lines": entrypoint_compact,
+                "near_threshold_line_limit": near_threshold_limit,
+                "over_near_threshold": over_near_threshold,
                 "reference_count": references_count,
                 "missing_references": missing_references,
             },
@@ -2804,6 +3433,33 @@ def writing_quality_contract(
                 path=source_path,
             )
         )
+    elif near_threshold_sprawl:
+        blockers.append(
+            _quality_blocker(
+                "near_threshold_entrypoint_sprawl",
+                (
+                    "SKILL.md is above the 220-line package-readiness threshold while "
+                    "package references are present; move phase detail, examples, or "
+                    "reference-backed guidance into package-local references."
+                ),
+                dimension="progressive_disclosure",
+                path=source_path,
+            )
+        )
+
+    construction_checks, construction_blockers = _construction_quality_checks(
+        repo_root=repo_root,
+        skill_md=skill_md,
+        text=text,
+        user_invoked=user_invoked,
+        description=description,
+        procedural=procedural,
+        references_count=references_count,
+        missing_references=missing_references,
+        source_path=source_path,
+    )
+    checks.extend(construction_checks)
+    blockers.extend(construction_blockers)
 
     scenario_checks, scenario_blockers = _scenario_alignment_checks(repo_root, skill_md)
     checks.extend(scenario_checks)
@@ -2827,10 +3483,12 @@ def writing_quality_contract(
         "status": status,
         "rubric": {
             "source": "writing-great-skills",
-            "root_quality": "predictability",
+            "root_quality": "Predictability",
             "dimensions": [
                 "invocation",
                 "information_hierarchy",
+                "steering",
+                "pruning",
                 "progressive_disclosure",
                 "completion_criteria",
                 "scenario_alignment",
@@ -2845,6 +3503,10 @@ def writing_quality_contract(
         "advisories": advisories,
         "what_this_proves": [
             "trigger_shape_checked",
+            "construction_trigger_checked",
+            "construction_structure_checked",
+            "construction_steering_checked",
+            "construction_pruning_checked",
             "entrypoint_hierarchy_checked",
             "completion_evidence_checked",
             "reference_disclosure_checked",

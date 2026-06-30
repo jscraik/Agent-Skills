@@ -16,6 +16,8 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 from ask.skills_sdk.scenario_quality import (  # noqa: E402
     ScenarioQualityError,
     build_scenario_quality_receipt,
+    _load_minimal_evals_yaml,
+    _strip_yaml_comment,
     _yaml_safe_load,
 )
 from ask.skills_sdk.scenario_quality_contracts import validate_scenario_quality_receipt  # noqa: E402
@@ -32,6 +34,10 @@ def _write_skill_with_evals(root: Path, evals_text: str) -> Path:
     (skill_dir / "SKILL.md").write_text("---\nname: sample\n---\n# Sample\n", encoding="utf-8")
     (references_dir / "evals.yaml").write_text(evals_text, encoding="utf-8")
     return skill_dir
+
+
+def test_minimal_yaml_comment_strip_ignores_plain_scalar_apostrophe() -> None:
+    assert _strip_yaml_comment("description: don't # comment") == "description: don't "
 
 
 def _two_case_score_parity_evals_yaml() -> str:
@@ -605,6 +611,46 @@ cases:
         blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
         self.assertIn("platform_tessl_quality:missing_concrete_output_artifact", blocker_ids)
 
+    def test_builder_blocks_acceptance_type_unsupported_by_text_runner(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(
+                Path(temp_dir),
+                """schema_version: '2.0'
+skill_name: sample
+cases:
+- id: unsupported-text-assertion
+  category: edge
+  unit: release assertion support
+  eval_modes:
+  - release
+  realistic: true
+  why_realistic: Release cases must use assertions executable by the skill eval runner.
+  given: A release case uses a must_not assertion that the text-output runner cannot execute.
+  should: Block unsupported acceptance types before oss-local release.
+  actual_artifact: final response
+  expected_artifact: proof-backed response
+  reproduce: ./bin/ask sdk eval run sample
+  prompt: Review the staged docs task.
+  claim_ids:
+  - sample.claim
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: Names evidence and blocks unsupported claims.
+  - type: must_not
+    value: Invents command evidence.
+""",
+            )
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
+        self.assertIn("text_output_runner_acceptance_supported", blocker_ids)
+        validate_scenario_quality_receipt(raised.exception.receipt)
+
     def test_builder_blocks_hidden_reference_dependency_before_next_phase(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             skill_dir = _write_skill_with_evals(
@@ -672,8 +718,8 @@ cases:
   acceptance:
   - type: expected_signal
     value: Names the editable owner and separates refresh evidence.
-  - type: must_not
-    value: Edits the generated projection directly.
+  - type: not_regex
+    value: (?is)edited the generated projection directly
 """,
             )
 
@@ -721,8 +767,8 @@ cases:
   acceptance:
   - type: expected_signal
     value: Names the editable owner and separates refresh evidence.
-  - type: must_not
-    value: Edits the generated projection directly.
+  - type: not_regex
+    value: (?is)edited the generated projection directly
 """,
             )
 
@@ -761,8 +807,8 @@ cases:
   acceptance:
   - type: expected_signal
     value: Names evidence and separates the proof lane.
-  - type: must_not
-    value: Claims a file was saved in the read-only sandbox.
+  - type: not_regex
+    value: (?is)(saved|wrote) .*file .*read-only sandbox
 """,
             )
 
@@ -801,8 +847,8 @@ cases:
   acceptance:
   - type: expected_signal
     value: Names evidence and separates the proof lane.
-  - type: must_not
-    value: Claims a file was saved in the read-only sandbox.
+  - type: not_regex
+    value: (?is)(saved|wrote) .*file .*read-only sandbox
 """,
             )
 
@@ -1284,6 +1330,36 @@ cases:
         self.assertEqual(receipt["scenario_set_parity"]["missing_from_score_receipt"], ["usage-win-case"])
         self.assertIn("missing:usage-win-case", blockers["scenario_set_score_receipt_matches_sdk"]["evidence"])
         validate_scenario_quality_receipt(receipt)
+
+    def test_minimal_yaml_loader_preserves_quoted_regex_hashes(self) -> None:
+        payload = _load_minimal_evals_yaml(
+            """schema_version: '2.0'
+skill_name: sample
+cases:
+- id: quoted-regex
+  category: edge
+  eval_modes:
+  - release
+  realistic: true
+  unit: no invention
+  given: A staged excerpt lacks command evidence.
+  should: Do not invent setup commands or validation commands.
+  prompt: Use only the supplied excerpt. Do not invent setup commands or validation commands.
+  actual_artifact: artifacts/quoted-regex.md
+  expected_artifact: artifacts/quoted-regex.md
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: not_regex
+    value: '(?i)(#[a-z0-9_-]+|Slack channel|pytest|uv|mise|\\./bin/ask|setup command|validation command)'
+"""
+        )
+
+        acceptance = payload["cases"][0]["acceptance"]
+        self.assertEqual(acceptance[0]["type"], "not_regex")
+        self.assertIn("#[a-z0-9_-]+", acceptance[0]["value"])
+        self.assertIn("\\./bin/ask", acceptance[0]["value"])
 
     def test_scenario_set_parity_blocks_staged_tessl_drift(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

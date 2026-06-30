@@ -1,0 +1,141 @@
+{
+  "schema_version": "ollama-runtime-diagnostics/v1",
+  "repo_head": "ed27703b4",
+  "generated_at": "2026-06-29T02:46:27Z",
+  "diagnostic_class": "blocked_runtime",
+  "purpose": "Determine whether technical-writer oss-local release blockers are caused by skill behavior, Codex profile handling, model-store configuration, Computer Use access, or the local Ollama runtime.",
+  "model_store": {
+    "expected_external_store": "/Volumes/ExternalSSD/Ollama",
+    "observed_symlink": "/Users/jamiecraik/.ollama -> /Volumes/ExternalSSD/ollama",
+    "observed_realpaths": [
+      "/Users/jamiecraik/.ollama => /Volumes/ExternalSSD/ollama",
+      "/Users/jamiecraik/.ollama/models => /Volumes/ExternalSSD/ollama/models",
+      "/Volumes/ExternalSSD/Ollama => /Volumes/ExternalSSD/ollama"
+    ],
+    "assertion": "The model store is already symlinked to the external SSD; the active blocker is not a missing model-store symlink."
+  },
+  "computer_use": {
+    "requested_by_user": true,
+    "command_or_tool": "computer-use/list_apps",
+    "outcome": "blocked",
+    "evidence": "tool call failed for computer-use/list_apps; Caused by: Transport closed",
+    "assertion": "The Computer Use UI lane could not operate the Ollama app in this session because the Computer Use MCP transport is closed."
+  },
+  "app_launch": {
+    "app_path": "/Applications/Ollama.app",
+    "version_observed": "0.30.11",
+    "outcomes": [
+      {
+        "command": "open /Applications/Ollama.app",
+        "outcome": "blocked",
+        "evidence": "kLSNoExecutableErr: The executable is missing"
+      },
+      {
+        "command": "/Applications/Ollama.app/Contents/MacOS/Ollama",
+        "outcome": "blocked",
+        "evidence": "After granting .ollama and Application Support access, the app started Ollama and UI servers, then exited with SIGABRT in app_darwin.go."
+      }
+    ],
+    "assertion": "The GUI app path did not provide a usable repair lane from this sandboxed session."
+  },
+  "commands": [
+    {
+      "command": "ollama --version",
+      "outcome": "pass",
+      "evidence": "ollama version is 0.30.11"
+    },
+    {
+      "command": "ollama list",
+      "outcome": "pass",
+      "evidence": "Model inventory included qwen3-coder:30b, gpt-oss:20b, nomic-embed-text:latest, bge-m3:latest, gemma3n:e4b, and qwen3.5:latest."
+    },
+    {
+      "command": "ollama ps",
+      "outcome": "pass",
+      "evidence": "No models were loaded before diagnostics."
+    },
+    {
+      "command": "OLLAMA_HOST=127.0.0.1:11436 OLLAMA_LLM_LIBRARY=cpu OLLAMA_IGPU_ENABLE=false LLAMA_ARG_FIT=off OLLAMA_CONTEXT_LENGTH=1024 OLLAMA_NUM_PARALLEL=1 OLLAMA_MAX_LOADED_MODELS=1 OLLAMA_KEEP_ALIVE=30s ollama serve",
+      "outcome": "pass",
+      "evidence": "Server listened on 127.0.0.1:11436 and reported inference compute id=cpu library=cpu."
+    },
+    {
+      "command": "OLLAMA_HOST=127.0.0.1:11436 ollama run gemma3n:e4b 'Say ok.'",
+      "outcome": "blocked",
+      "evidence": "exit 1; 500 Internal Server Error; failed to allocate buffer, size = 0.02 MiB."
+    },
+    {
+      "command": "OLLAMA_HOST=127.0.0.1:11436 ollama run qwen3.5:latest 'Say ok.'",
+      "outcome": "blocked",
+      "evidence": "exit 1; 500 Internal Server Error; llama-server startup failed after projector CPU offload retry; failed to allocate buffer, size = 0.02 MiB."
+    },
+    {
+      "command": "OLLAMA_HOST=127.0.0.1:11436 ollama create qwen3.5-cpu-probe -f .harness/tmp/ollama/Modelfile.qwen35-cpu-probe",
+      "outcome": "pass",
+      "evidence": "Probe model with PARAMETER num_gpu 0 and num_ctx 1024 was created using existing layers."
+    },
+    {
+      "command": "OLLAMA_HOST=127.0.0.1:11436 ollama run qwen3.5-cpu-probe 'Say ok.'",
+      "outcome": "blocked",
+      "evidence": "exit 1; 500 Internal Server Error; failed to create command queue; failed to allocate context."
+    },
+    {
+      "command": "/opt/homebrew/Cellar/ollama/0.30.11/libexec/lib/ollama/llama-server --model /Users/jamiecraik/.ollama/models/blobs/sha256-dec52a44569a2a25341c4e4d3fee25846eed4f6f0b936278e3a3c900bb99d37c --port 60955 --host 127.0.0.1 --no-webui --offline -c 512 -np 1 --log-verbosity 3 --no-jinja --chat-template chatml --no-mmap --flash-attn off -b 128 -ub 128 --device none --gpu-layers 0 --no-op-offload --no-kv-offload --no-warmup",
+      "outcome": "pass",
+      "evidence": "Direct llama-server loaded qwen3.5 model and reported server is listening on http://127.0.0.1:60955."
+    },
+    {
+      "command": "curl -sS http://127.0.0.1:60955/health",
+      "outcome": "blocked",
+      "evidence": "Tenant policy rejected curl-based network actions; no indirect workaround was used."
+    },
+    {
+      "command": "OLLAMA_HOST=127.0.0.1:11438 OLLAMA_LLM_LIBRARY=cpu OLLAMA_IGPU_ENABLE=false GGML_METAL=0 GGML_NO_METAL=1 LLAMA_NO_METAL=1 LLAMA_ARG_FIT=off OLLAMA_CONTEXT_LENGTH=512 OLLAMA_NUM_PARALLEL=1 OLLAMA_MAX_LOADED_MODELS=1 OLLAMA_KEEP_ALIVE=30s ollama serve",
+      "outcome": "pass",
+      "evidence": "Server listened on 127.0.0.1:11438 and reported inference compute id=cpu library=cpu."
+    },
+    {
+      "command": "OLLAMA_HOST=127.0.0.1:11438 ollama run qwen3.5:latest 'Say ok.'",
+      "outcome": "blocked",
+      "evidence": "exit 1; 500 Internal Server Error; failed to allocate buffer, size = 0.02 MiB."
+    },
+    {
+      "command": "OLLAMA_HOST=127.0.0.1:11438 ollama rm qwen3.5-cpu-probe",
+      "outcome": "pass",
+      "evidence": "Temporary diagnostic model was deleted."
+    }
+  ],
+  "classification": {
+    "owner": "runtime/tooling",
+    "technical_writer_behavior_evidence_available": false,
+    "reason": "Native Ollama model execution fails before Codex or the technical-writer skill can produce an answer. The model store symlink is valid, and direct llama-server can load the qwen3.5 model only when explicit CPU-only flags are supplied that Ollama's normal runner invocation does not pass."
+  },
+  "root_cause_hypothesis": {
+    "likely_layer": "Ollama 0.30.11 runner invocation on macOS/Apple Silicon",
+    "evidence": [
+      "Ollama wrapper with OLLAMA_LLM_LIBRARY=cpu still starts llama-server without --device none, --no-op-offload, or --no-kv-offload.",
+      "Ollama wrapper logs still enter ggml_metal_init and fail to create a Metal command queue.",
+      "Direct llama-server with --device none --gpu-layers 0 --no-op-offload --no-kv-offload --no-warmup loads the same model blob."
+    ],
+    "not_supported_by_evidence": [
+      "Not a missing external SSD model-store symlink.",
+      "Not a missing installed model.",
+      "Not a technical-writer skill behavior failure."
+    ]
+  },
+  "blocked_next_gates": [
+    "oss-local-release-behavior",
+    "oss-cloud",
+    "tessl-dry-run",
+    "tessl-live"
+  ],
+  "recommended_next_action": "Patch the oss-local runtime lane or Codex profile environment to use a runner path that passes explicit CPU-only llama-server flags, or downgrade/upgrade Ollama to a build whose Ollama wrapper honors CPU-only execution without Metal initialization. Then prove native model execution and codex exec --profile oss-local each complete one turn before rerunning the technical-writer release lane.",
+  "cleanup": {
+    "temporary_ollama_model_removed": "qwen3.5-cpu-probe",
+    "temporary_servers_stopped": [
+      "127.0.0.1:11436",
+      "127.0.0.1:11438",
+      "direct llama-server 127.0.0.1:60955"
+    ]
+  }
+}

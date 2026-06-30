@@ -1,0 +1,156 @@
+{
+  "schema_version": "dirty-worktree-triage/v1",
+  "repo_head": "572222560",
+  "branch": "codex/sdk-eval-parity-guardrails",
+  "created_at": "2026-06-30",
+  "purpose": "Classify remaining dirty work after the technical-writer KnowledgeOS ingest checkpoint before resuming oss-local repair.",
+  "principle": "Do not resume eval repair until dirty work is split into ownership buckets with explicit proof or park decisions.",
+  "buckets": [
+    {
+      "id": "release-ratchet-validator",
+      "owner": "Skills SDK guardrails",
+      "decision": "commit_as_own_checkpoint",
+      "paths": [
+        "Infrastructure/config/skills-sdk/gold-standard-rubric.v1.json",
+        "Infrastructure/scripts/validation-and-linting/skills_sdk_release_receipts.py",
+        "Infrastructure/scripts/validation-and-linting/validate_skills_sdk_release_ratchets.py",
+        "Infrastructure/scripts/testing/test_validate_skills_sdk_release_ratchets.py",
+        "Infrastructure/scripts/lib/ask/skills_sdk/package_contracts.py",
+        "Infrastructure/tests/test_ask_skills_package_contract.py",
+        "Infrastructure/tests/fixtures/skill_package_snapshots/skill-package-readiness-public-output.v1.json",
+        ".harness/evidence/factory-gates/skills-sdk-ratchet-hardening/factory-gate.json",
+        ".harness/reports/skills-sdk-ratchet-patterns.json"
+      ],
+      "why": "Encodes the repeated steering that package shape, rubric, warnings, scenario parity, security, and release-lane evidence must be deterministic before oss-cloud or Tessl.",
+      "proof_required": [
+        "bash Infrastructure/scripts/run-infrastructure-python.sh -m py_compile Infrastructure/scripts/validation-and-linting/validate_skills_sdk_release_ratchets.py",
+        "bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q Infrastructure/scripts/testing/test_validate_skills_sdk_release_ratchets.py Infrastructure/tests/test_ask_skills_package_contract.py",
+        "bash Infrastructure/scripts/run-infrastructure-python.sh Infrastructure/scripts/validation-and-linting/validate_skills_sdk_release_ratchets.py skills-system/skill-installer --json"
+      ],
+      "lanes_blocked_until_proven": [
+        "oss-cloud",
+        "tessl-dry-run",
+        "tessl-live"
+      ]
+    },
+    {
+      "id": "skill-factory-sdk-pipeline-alignment",
+      "owner": "Skill Factory and Codex system skill overlays",
+      "decision": "commit_after_release_ratchet_or_park_if_tests_fail",
+      "paths": [
+        "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md",
+        "Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor/SKILL.md",
+        "Plugins/skill-factory/skills/scaffolding_templates/skillify/SKILL.md",
+        "Plugins/skill-factory/skills/scaffolding_templates/skillify/references/skill-template.md",
+        "skills-system/skill-creator/SKILL.md",
+        "skills-system/skill-installer/SKILL.md",
+        "Infrastructure/scripts/lifecycle-and-sync/route_skillset.py",
+        "Infrastructure/scripts/testing/test_skill_factory_system_overlays.py",
+        "Infrastructure/scripts/validation-and-linting/check_skill_factory_system_overlays.py",
+        "Infrastructure/tests/test_route_skillset_deterministic.py"
+      ],
+      "why": "Aligns create, install, build, refactor, and skillify surfaces with the Skills SDK ladder and prevents route drift.",
+      "proof_required": [
+        "python3 Infrastructure/scripts/validation-and-linting/check_skill_factory_system_overlays.py",
+        "bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q Infrastructure/scripts/testing/test_skill_factory_system_overlays.py Infrastructure/tests/test_route_skillset_deterministic.py",
+        "python3 Infrastructure/scripts/lifecycle-and-sync/route_skillset.py --skill-set skill-factory --task 'improve existing skill SDK pipeline' --json"
+      ],
+      "lanes_blocked_until_proven": [
+        "skill-factory release routing claims"
+      ]
+    },
+    {
+      "id": "knowledgeos-extraction-refreshes",
+      "owner": "improve-codebase-architecture and sdk-scenario-generator skills",
+      "decision": "park_until_each_skill_package_verify_and_scenario_quality_pass",
+      "paths": [
+        "Skills/agent-ops/improve-codebase-architecture/**",
+        "Skills/agent-ops/sdk-scenario-generator/**"
+      ],
+      "why": "Large KnowledgeOS extraction reshapes references, eval notes, and capsule routing for two skills. It should not be mixed with technical-writer or release-ratchet commits.",
+      "proof_required": [
+        "./bin/ask skills package verify Skills/agent-ops/improve-codebase-architecture --json --robot",
+        "./bin/ask skills package verify Skills/agent-ops/sdk-scenario-generator --json --robot",
+        "./bin/ask sdk eval scenario-quality Skills/agent-ops/improve-codebase-architecture --preview --json --robot",
+        "./bin/ask sdk eval scenario-quality Skills/agent-ops/sdk-scenario-generator --preview --json --robot",
+        "python3 Infrastructure/scripts/validation-and-linting/validate_skills_sdk_release_ratchets.py Skills/agent-ops/improve-codebase-architecture --target-gate scenario_quality --json",
+        "python3 Infrastructure/scripts/validation-and-linting/validate_skills_sdk_release_ratchets.py Skills/agent-ops/sdk-scenario-generator --target-gate scenario_quality --json"
+      ],
+      "lanes_blocked_until_proven": [
+        "skill-specific oss-local for improve-codebase-architecture",
+        "skill-specific oss-local for sdk-scenario-generator"
+      ]
+    },
+    {
+      "id": "technical-writer-oss-local-evidence",
+      "owner": "technical-writer release evidence",
+      "decision": "commit_or_archive_as_evidence_only_after_current_receipt_is_reconciled",
+      "paths": [
+        ".harness/evidence/handoff/technical-writer/oss-local.json",
+        ".harness/evidence/handoff/technical-writer/status.json",
+        ".harness/reports/thread-replies/019f0ab5-07bb-7091-a6a2-9f74d07a65cb/**",
+        ".harness/reports/skills-sdk-tracker-state-current.json"
+      ],
+      "why": "These files describe the still-blocked oss-local loop and PM thread reports. They are evidence, not skill source repair.",
+      "proof_required": [
+        "python3 Infrastructure/scripts/validation-and-linting/validate_thread_report.py .harness/reports/thread-replies/019f0ab5-07bb-7091-a6a2-9f74d07a65cb/latest.json --json",
+        "python3 Infrastructure/scripts/validation-and-linting/validate_thread_pm_delivery.py .harness/reports/thread-replies/019f0ab5-07bb-7091-a6a2-9f74d07a65cb/latest.json --require-delivery --json",
+        "jq '.status,.codex_profile,.passed_count,.failed_count' .harness/evidence/handoff/technical-writer/oss-local.json"
+      ],
+      "lanes_blocked_until_proven": [
+        "oss-cloud",
+        "tessl-dry-run",
+        "tessl-live"
+      ]
+    },
+    {
+      "id": "devrel-hack-coach-new-skill",
+      "owner": "product-strategy skill package",
+      "decision": "park_as_separate_skill_creation_lane",
+      "paths": [
+        "Skills/product-strategy/devrel-hack-coach/**"
+      ],
+      "why": "This is a new skill package and should not ride with technical-writer, SDK ratchets, or Skill Factory alignment.",
+      "proof_required": [
+        "./bin/ask skills audit Skills/product-strategy/devrel-hack-coach --level strict --json --robot",
+        "./bin/ask skills package verify Skills/product-strategy/devrel-hack-coach --json --robot",
+        "./bin/ask sdk eval scenario-quality Skills/product-strategy/devrel-hack-coach --preview --json --robot",
+        "python3 Infrastructure/scripts/lifecycle-and-sync/generate_skillset_manifests.py --write --json"
+      ],
+      "lanes_blocked_until_proven": [
+        "devrel-hack-coach release claims"
+      ]
+    },
+    {
+      "id": "generated-index-and-manifest-refresh",
+      "owner": "generated repo surfaces",
+      "decision": "commit_only_with_the_source_bucket_that_caused_it",
+      "paths": [
+        ".skillsets/**/manifest.jsonl",
+        "SKILL.md",
+        "Docs/skills-by-type.md",
+        "Docs/reference/index.md",
+        "Docs/reference/skills-sdk-platform-atlas.html",
+        "Infrastructure/artifacts/validation/projection-integrity/latest.json",
+        "Infrastructure/artifacts/skill-reviews/improve-agent-native-eval-latest.json"
+      ],
+      "why": "These are generated surfaces. Committing them without the owning source bucket obscures which behavior changed.",
+      "proof_required": [
+        "python3 Infrastructure/scripts/lifecycle-and-sync/generate_skillset_manifests.py --write --json",
+        "bash Infrastructure/scripts/lifecycle-and-sync/sync_projection_trees.sh all",
+        "./bin/ask repo closeout --changed --json --robot"
+      ],
+      "lanes_blocked_until_proven": [
+        "catalog/readiness claims"
+      ]
+    }
+  ],
+  "next_order": [
+    "release-ratchet-validator",
+    "skill-factory-sdk-pipeline-alignment",
+    "knowledgeos-extraction-refreshes",
+    "technical-writer-oss-local-evidence",
+    "devrel-hack-coach-new-skill",
+    "generated-index-and-manifest-refresh"
+  ]
+}

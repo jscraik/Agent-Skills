@@ -1,21 +1,25 @@
-# Adoption Budget Pattern Discovery Fixture
+# eval.ryan.adoption-budget-pattern-discovery: Adoption Budget Pattern Discovery
 
-A leader wants a policy for agent token budgets before the organization has
-learned which workflows create leverage. They ask whether every team should get
-the same strict cap, or whether top systems thinkers should be allowed to
-explore with fewer constraints.
+Promotion status: candidate
+Proof route: references/evals.yaml
+Fixture path: references/evals/eval.ryan.adoption-budget-pattern-discovery.md
 
-Expected behavior:
+Knowledge claim: Principle under test: The agent distinguishes exploration budget from permanent spend, recommends giving proven systems thinkers enough room to discover reusable patterns, names human authority and ROI-review boundaries, and avoids treating token volume itself as success.
+Behavior under test: Observable agent behavior when an leader asks whether to cap agent token spend tightly across the whole organization before teams know which workflows create leverage.
+Failure mode: The agent recommends a blanket cap or blanket unlimited spend without a learning loop, ownership model, or route for non-engineers to adopt proven workflows.
+Expected agent move: The agent distinguishes exploration budget from permanent spend, recommends giving proven systems thinkers enough room to discover reusable patterns, names human authority and ROI-review boundaries, and avoids treating token volume itself as success.
+Skill lift before failure: The agent recommends a blanket cap or blanket unlimited spend without a learning loop, ownership model, or route for non-engineers to adopt proven workflows.
+Skill lift after behavior: The agent distinguishes exploration budget from permanent spend, recommends giving proven systems thinkers enough room to discover reusable patterns, names human authority and ROI-review boundaries, and avoids treating token volume itself as success.
+Observable delta: The response avoids the weak pattern (The agent recommends a blanket cap or blanket unlimited spend without a learning loop, ownership model, or route for non-engineers to adopt proven workflows) and instead shows the expected behavior (The agent distinguishes exploration budget from permanent spend, recommends giving proven systems thinkers enough room to discover reusable patterns, names human authority and ROI-review boundaries, and avoids treating token volume itself as success).
 
-- Distinguish exploratory pattern-discovery budget from permanent operating
-  spend.
-- Recommend a bounded learning loop with clear human ownership and review.
-- Explain how discovered patterns become reusable practice for non-engineers.
-- Avoid treating token volume itself as proof of ROI or adoption readiness.
+Given: A leader asks whether to cap agent token spend tightly across the whole organization before teams know which workflows create leverage.
+Should: The agent distinguishes exploration budget from permanent spend, recommends giving proven systems thinkers enough room to discover reusable patterns, names human authority and ROI-review boundaries, and avoids treating token volume itself as success.
+Expected failure: The agent recommends a blanket cap or blanket unlimited spend without a learning loop, ownership model, or route for non-engineers to adopt proven workflows.
 
-## Skill-Local Evidence Boundary
+Bad answer patterns:
+- The agent recommends a blanket cap or blanket unlimited spend without a learning loop, ownership model, or route for non-engineers to adopt proven workflows.
 
-Failure category: seed eval requires behavioural scenario conversion.
-Evidence boundary: this fixture is skill-local evidence at references/evals/eval.ryan.adoption-budget-pattern-discovery.md; it does not by itself prove repository, pull request, remote-check, merge-readiness, or Tessl-readiness outcomes.
-Durable mechanism: use this fixture to generate scenario criteria that require the agent to distinguish exploration budget from permanent spend, gives proven systems thinkers room to find reusable patterns, and names ROI-review and human-authority boundaries.
-Validation status: not_run_with_reason until the scenario is executed by the local pipeline and private Tessl eval lane.
+Good answer patterns:
+- The agent distinguishes exploration budget from permanent spend, recommends giving proven systems thinkers enough room to discover reusable patterns, names human authority and ROI-review boundaries, and avoids treating token volume itself as success.
+
+This is the portable SDK reproduction contract for the eval scenario. The KnowledgeOS authoring fixture remains inside the validation workspace and is not vendored into SDK-ready exports.

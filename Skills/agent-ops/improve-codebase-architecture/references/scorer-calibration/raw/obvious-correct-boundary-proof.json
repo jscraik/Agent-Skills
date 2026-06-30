@@ -1,0 +1,9 @@
+{
+  "id": "obvious-correct-boundary-proof",
+  "probe_type": "obvious_correct",
+  "expected_label": "pass",
+  "predicted_label": "pass",
+  "score": 0.95,
+  "raw_artifact": "raw/obvious-correct-boundary-proof.json",
+  "rationale": "calibration fixture"
+}

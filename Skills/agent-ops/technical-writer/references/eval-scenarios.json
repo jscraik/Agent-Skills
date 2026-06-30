@@ -1,0 +1,667 @@
+[
+  {
+    "id": "eval.knowledge-os.capsule-design-without-relationships",
+    "type": "eval-scenario",
+    "title": "Capsule Design Requires Relationships And Evals",
+    "status": "reviewed",
+    "claim_strength": "synthesized",
+    "source_refs": [
+      {
+        "source_id": "sources.books.Systems Thinking & Decisions.Thinking in Systems — Donella Meadows",
+        "locator": "interconnections-and-feedback",
+        "boundary": "local_source_reference"
+      },
+      {
+        "source_id": "sources.books.Testing, Measurement & Experiments.Lessons Learned in Software Testing — Cem Kaner, James Bach & Bret Pettichord",
+        "locator": "tests-as-information",
+        "boundary": "local_source_reference"
+      },
+      {
+        "source_id": "sources.arXiv.SkillsBench",
+        "locator": "skill-evaluation-benchmarking",
+        "boundary": "local_source_reference"
+      }
+    ],
+    "derived_from_claims": [
+      "claim.knowledge-os.capsules-need-relationship-maps",
+      "claim.knowledge-os.capsules-need-eval-contracts",
+      "claim.knowledge-os.capsules-operational-references"
+    ],
+    "applies_to": [
+      "knowledge-os"
+    ],
+    "used_by": [],
+    "source_boundaries": [
+      "local_source_reference",
+      "article_source_note_paraphrase"
+    ],
+    "payload": {
+      "given": "A knowledge capsule design reference includes general guidance and ordinary operational headings but omits source model, relationship map, downstream integration, failure modes, and eval scenarios.",
+      "should": "The validator rejects the reference with capsule-design-missing-sections before the capsule can be treated as a portable handoff.",
+      "expected_failure": "The handoff passes because it is readable and has generic headings, even though it cannot improve downstream skill or Jamie Brain behavior deterministically.",
+      "reproduce_with": "references/evals/eval.knowledge-os.capsule-design-without-relationships.md",
+      "eval_intent": {
+        "capsule_refs": [
+          "knowledge-os"
+        ],
+        "knowledge_claim": "Capsule design references must include relationship and eval surfaces, not only prose guidance.",
+        "behavior_under_test": "Observable KnowledgeOS validator behavior when a capsule-design artifact omits relationship mapping and eval coverage.",
+        "failure_mode": "The validator accepts a polished but behavior-weak capsule-design reference.",
+        "expected_agent_move": "The validator rejects the capsule and points to the missing capsule-design sections.",
+        "proof_route": "references/evals.yaml",
+        "fixture_path": "references/evals/eval.knowledge-os.capsule-design-without-relationships.md",
+        "promotion_status": "candidate",
+        "source_trace": {
+          "capsule_id": "knowledge-os",
+          "section": "Eval Scenarios",
+          "source_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+          "extracted_principle": "Capsule design requires relationships, downstream integration, failure modes, and eval scenarios."
+        },
+        "bad_answer_pattern": [
+          "The validator accepts the capsule because ordinary operational headings are present."
+        ],
+        "good_answer_pattern": [
+          "The validator rejects the capsule with capsule-design-missing-sections."
+        ],
+        "weak_eval_flags": [],
+        "proposed_evals_yaml_case": {
+          "id": "eval.knowledge-os.capsule-design-without-relationships",
+          "unit": "knowledge-os",
+          "given": "A knowledge capsule design reference includes general guidance and ordinary operational headings but omits source model, relationship map, downstream integration, failure modes, and eval scenarios.",
+          "should": "The validator rejects the reference with capsule-design-missing-sections before the capsule can be treated as a portable handoff.",
+          "prompt": "Use the relevant KnowledgeOS capsule-design rules to judge the handoff.",
+          "knowledge_pack": {
+            "scenario_id": "eval.knowledge-os.capsule-design-without-relationships",
+            "fixture": "references/evals/eval.knowledge-os.capsule-design-without-relationships.md",
+            "capsule_refs": [
+              "knowledge-os"
+            ]
+          },
+          "acceptance": [
+            {
+              "type": "expected_signal",
+              "value": "capsule-design-missing-sections"
+            },
+            {
+              "type": "must_not_claim",
+              "value": "The capsule is valid because it has ordinary operational headings."
+            }
+          ]
+        },
+        "quality_findings": [],
+        "promotion": {
+          "scenario_status": "candidate",
+          "evals_yaml_status": "proposed",
+          "fixture_status": "present",
+          "tessl_status": "not_run",
+          "proof_status": "not_claimed",
+          "blocked_by": []
+        },
+        "skill_lift_target": {
+          "before_failure": "The validator accepts a readable but behavior-weak capsule-design reference.",
+          "after_behavior": "The validator rejects capsule-design references that lack relationship and eval surfaces.",
+          "observable_delta": "The negative fixture is rejected by the repo validator."
+        }
+      },
+      "capsule_refs": [
+        "knowledge-os"
+      ],
+      "knowledge_claim": "Capsule design references must include relationship and eval surfaces, not only prose guidance.",
+      "behavior_under_test": "Observable KnowledgeOS validator behavior when a capsule-design artifact omits relationship mapping and eval coverage.",
+      "failure_mode": "The validator accepts a polished but behavior-weak capsule-design reference.",
+      "expected_agent_move": "The validator rejects the capsule and points to the missing capsule-design sections.",
+      "proof_route": "references/evals.yaml",
+      "fixture_path": "references/evals/eval.knowledge-os.capsule-design-without-relationships.md",
+      "promotion_status": "candidate",
+      "source_trace": {
+        "capsule_id": "knowledge-os",
+        "section": "Eval Scenarios",
+        "source_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        "extracted_principle": "Capsule design requires relationships, downstream integration, failure modes, and eval scenarios."
+      },
+      "bad_answer_pattern": [
+        "The validator accepts the capsule because ordinary operational headings are present."
+      ],
+      "good_answer_pattern": [
+        "The validator rejects the capsule with capsule-design-missing-sections."
+      ],
+      "weak_eval_flags": [],
+      "proposed_evals_yaml_case": {
+        "id": "eval.knowledge-os.capsule-design-without-relationships",
+        "unit": "knowledge-os",
+        "given": "A knowledge capsule design reference includes general guidance and ordinary operational headings but omits source model, relationship map, downstream integration, failure modes, and eval scenarios.",
+        "should": "The validator rejects the reference with capsule-design-missing-sections before the capsule can be treated as a portable handoff.",
+        "prompt": "Use the relevant KnowledgeOS capsule-design rules to judge the handoff.",
+        "knowledge_pack": {
+          "scenario_id": "eval.knowledge-os.capsule-design-without-relationships",
+          "fixture": "references/evals/eval.knowledge-os.capsule-design-without-relationships.md",
+          "capsule_refs": [
+            "knowledge-os"
+          ]
+        },
+        "acceptance": [
+          {
+            "type": "expected_signal",
+            "value": "capsule-design-missing-sections"
+          },
+          {
+            "type": "must_not_claim",
+            "value": "The capsule is valid because it has ordinary operational headings."
+          }
+        ]
+      },
+      "quality_findings": [],
+      "promotion": {
+        "scenario_status": "candidate",
+        "evals_yaml_status": "proposed",
+        "fixture_status": "present",
+        "tessl_status": "not_run",
+        "proof_status": "not_claimed",
+        "blocked_by": []
+      },
+      "skill_lift_target": {
+        "before_failure": "The validator accepts a readable but behavior-weak capsule-design reference.",
+        "after_behavior": "The validator rejects capsule-design references that lack relationship and eval surfaces.",
+        "observable_delta": "The negative fixture is rejected by the repo validator."
+      }
+    }
+  },
+  {
+    "id": "eval.knowledge-os.export-pass-overclaims-quality",
+    "type": "eval-scenario",
+    "title": "Export Pass Must Not Overclaim Quality",
+    "status": "reviewed",
+    "claim_strength": "synthesized",
+    "source_refs": [
+      {
+        "source_id": "sources.books.Systems Thinking & Decisions.Thinking in Bets: Making Smarter Decisions When You Don't Have All the Facts - Annie Duke",
+        "locator": "chapter-1-the-hazards-of-resulting",
+        "boundary": "local_source_reference"
+      },
+      {
+        "source_id": "sources.books.Systems Thinking & Decisions.Superforecasting — Philip Tetlock & Dan Gardner",
+        "locator": "chapter-3-keeping-score",
+        "boundary": "local_source_reference"
+      },
+      {
+        "source_id": "sources.books.Systems Thinking & Decisions.Thinking in Systems — Donella Meadows",
+        "locator": "chapter-1-feedback-loop-delays",
+        "boundary": "local_source_reference"
+      }
+    ],
+    "derived_from_claims": [
+      "claim.knowledge-os.resulting-distorts-review",
+      "claim.knowledge-os.feedback-from-outcomes-is-noisy",
+      "claim.knowledge-os.forecasts-need-scoreable-terms",
+      "claim.knowledge-os.feedback-only-affects-future-behavior",
+      "claim.knowledge-os.calibration-needs-many-clear-judgments"
+    ],
+    "applies_to": [
+      "knowledge-os"
+    ],
+    "used_by": [],
+    "source_boundaries": [
+      "local_source_reference"
+    ],
+    "payload": {
+      "given": "A pack export smoke test passes, but the asset review history, claim-card quality, or lifecycle transition evidence has not been reviewed.",
+      "should": "The agent reports export smoke proof as one passing lane and keeps synthesis quality, review status, lifecycle status, and publication readiness separate.",
+      "expected_failure": "The agent says the pack is high quality, reviewed, validated, or publishable solely because the generated export passed a smoke test.",
+      "reproduce_with": "references/evals/eval.knowledge-os.export-pass-overclaims-quality.md",
+      "eval_intent": {
+        "capsule_refs": [
+          "knowledge-os"
+        ],
+        "knowledge_claim": "Principle under test: The agent reports export smoke proof as one passing lane and keeps synthesis quality, review status, lifecycle status, and publication readiness separate.",
+        "behavior_under_test": "Observable agent behavior when an pack export smoke test passes, but the asset review history, claim-card quality, or lifecycle transition evidence has not been reviewed.",
+        "failure_mode": "The agent says the pack is high quality, reviewed, validated, or publishable solely because the generated export passed a smoke test.",
+        "expected_agent_move": "The agent reports export smoke proof as one passing lane and keeps synthesis quality, review status, lifecycle status, and publication readiness separate.",
+        "proof_route": "references/evals.yaml",
+        "fixture_path": "references/evals/eval.knowledge-os.export-pass-overclaims-quality.md",
+        "promotion_status": "candidate",
+        "source_trace": {
+          "capsule_id": "knowledge-os",
+          "section": "Eval Scenarios",
+          "source_digest": "sha256:35fb3097eaa51b624c68ed90a48263dce5ea945babf3b22bd9ca37c895eb6e6b",
+          "extracted_principle": "The agent reports export smoke proof as one passing lane and keeps synthesis quality, review status, lifecycle status, and publication readiness separate."
+        },
+        "bad_answer_pattern": [
+          "The agent says the pack is high quality, reviewed, validated, or publishable solely because the generated export passed a smoke test."
+        ],
+        "good_answer_pattern": [
+          "The agent reports export smoke proof as one passing lane and keeps synthesis quality, review status, lifecycle status, and publication readiness separate."
+        ],
+        "weak_eval_flags": [],
+        "proposed_evals_yaml_case": {
+          "id": "eval.knowledge-os.export-pass-overclaims-quality",
+          "unit": "knowledge-os",
+          "given": "A pack export smoke test passes, but the asset review history, claim-card quality, or lifecycle transition evidence has not been reviewed.",
+          "should": "The agent reports export smoke proof as one passing lane and keeps synthesis quality, review status, lifecycle status, and publication readiness separate.",
+          "prompt": "Use the relevant skill guidance to respond to the scenario while preserving KnowledgeOS proof boundaries.",
+          "knowledge_pack": {
+            "scenario_id": "eval.knowledge-os.export-pass-overclaims-quality",
+            "fixture": "references/evals/eval.knowledge-os.export-pass-overclaims-quality.md",
+            "capsule_refs": [
+              "knowledge-os"
+            ]
+          },
+          "acceptance": [
+            {
+              "type": "expected_signal",
+              "value": "The agent reports export smoke proof as one passing lane and keeps synthesis quality, review status, lifecycle status, and publication readiness separate."
+            },
+            {
+              "type": "must_not_claim",
+              "value": "The agent says the pack is high quality, reviewed, validated, or publishable solely because the generated export passed a smoke test."
+            }
+          ]
+        },
+        "quality_findings": [],
+        "promotion": {
+          "scenario_status": "candidate",
+          "evals_yaml_status": "proposed",
+          "fixture_status": "present",
+          "tessl_status": "not_run",
+          "proof_status": "not_claimed",
+          "blocked_by": []
+        },
+        "skill_lift_target": {
+          "before_failure": "The agent says the pack is high quality, reviewed, validated, or publishable solely because the generated export passed a smoke test.",
+          "after_behavior": "The agent reports export smoke proof as one passing lane and keeps synthesis quality, review status, lifecycle status, and publication readiness separate.",
+          "observable_delta": "The response avoids the weak pattern (The agent says the pack is high quality, reviewed, validated, or publishable solely because the generated export passed a smoke test) and instead shows the expected behavior (The agent reports export smoke proof as one passing lane and keeps synthesis quality, review status, lifecycle status, and publication readiness separate)."
+        }
+      },
+      "capsule_refs": [
+        "knowledge-os"
+      ],
+      "knowledge_claim": "Principle under test: The agent reports export smoke proof as one passing lane and keeps synthesis quality, review status, lifecycle status, and publication readiness separate.",
+      "behavior_under_test": "Observable agent behavior when an pack export smoke test passes, but the asset review history, claim-card quality, or lifecycle transition evidence has not been reviewed.",
+      "failure_mode": "The agent says the pack is high quality, reviewed, validated, or publishable solely because the generated export passed a smoke test.",
+      "expected_agent_move": "The agent reports export smoke proof as one passing lane and keeps synthesis quality, review status, lifecycle status, and publication readiness separate.",
+      "proof_route": "references/evals.yaml",
+      "fixture_path": "references/evals/eval.knowledge-os.export-pass-overclaims-quality.md",
+      "promotion_status": "candidate",
+      "source_trace": {
+        "capsule_id": "knowledge-os",
+        "section": "Eval Scenarios",
+        "source_digest": "sha256:35fb3097eaa51b624c68ed90a48263dce5ea945babf3b22bd9ca37c895eb6e6b",
+        "extracted_principle": "The agent reports export smoke proof as one passing lane and keeps synthesis quality, review status, lifecycle status, and publication readiness separate."
+      },
+      "bad_answer_pattern": [
+        "The agent says the pack is high quality, reviewed, validated, or publishable solely because the generated export passed a smoke test."
+      ],
+      "good_answer_pattern": [
+        "The agent reports export smoke proof as one passing lane and keeps synthesis quality, review status, lifecycle status, and publication readiness separate."
+      ],
+      "weak_eval_flags": [],
+      "proposed_evals_yaml_case": {
+        "id": "eval.knowledge-os.export-pass-overclaims-quality",
+        "unit": "knowledge-os",
+        "given": "A pack export smoke test passes, but the asset review history, claim-card quality, or lifecycle transition evidence has not been reviewed.",
+        "should": "The agent reports export smoke proof as one passing lane and keeps synthesis quality, review status, lifecycle status, and publication readiness separate.",
+        "prompt": "Use the relevant skill guidance to respond to the scenario while preserving KnowledgeOS proof boundaries.",
+        "knowledge_pack": {
+          "scenario_id": "eval.knowledge-os.export-pass-overclaims-quality",
+          "fixture": "references/evals/eval.knowledge-os.export-pass-overclaims-quality.md",
+          "capsule_refs": [
+            "knowledge-os"
+          ]
+        },
+        "acceptance": [
+          {
+            "type": "expected_signal",
+            "value": "The agent reports export smoke proof as one passing lane and keeps synthesis quality, review status, lifecycle status, and publication readiness separate."
+          },
+          {
+            "type": "must_not_claim",
+            "value": "The agent says the pack is high quality, reviewed, validated, or publishable solely because the generated export passed a smoke test."
+          }
+        ]
+      },
+      "quality_findings": [],
+      "promotion": {
+        "scenario_status": "candidate",
+        "evals_yaml_status": "proposed",
+        "fixture_status": "present",
+        "tessl_status": "not_run",
+        "proof_status": "not_claimed",
+        "blocked_by": []
+      },
+      "skill_lift_target": {
+        "before_failure": "The agent says the pack is high quality, reviewed, validated, or publishable solely because the generated export passed a smoke test.",
+        "after_behavior": "The agent reports export smoke proof as one passing lane and keeps synthesis quality, review status, lifecycle status, and publication readiness separate.",
+        "observable_delta": "The response avoids the weak pattern (The agent says the pack is high quality, reviewed, validated, or publishable solely because the generated export passed a smoke test) and instead shows the expected behavior (The agent reports export smoke proof as one passing lane and keeps synthesis quality, review status, lifecycle status, and publication readiness separate)."
+      }
+    }
+  },
+  {
+    "id": "eval.knowledge-os.skills-sdk-handoff-overclaims-ingest",
+    "type": "eval-scenario",
+    "title": "Skills SDK Handoff Must Not Overclaim Ingest",
+    "status": "reviewed",
+    "claim_strength": "synthesized",
+    "source_refs": [
+      {
+        "source_id": "specs.knowledge-os-kernel",
+        "locator": "validation-harness",
+        "boundary": "local_source_reference"
+      },
+      {
+        "source_id": "UBIQUITOUS",
+        "locator": "extraction-and-receipt-language",
+        "boundary": "local_source_reference"
+      }
+    ],
+    "derived_from_claims": [
+      "claim.knowledge-os.feedback-delays-require-smoke-tests",
+      "claim.knowledge-os.permanent-notes-stand-alone-with-sources",
+      "claim.knowledge-os.visible-contribution-orients-exports"
+    ],
+    "applies_to": [
+      "knowledge-os"
+    ],
+    "used_by": [],
+    "source_boundaries": [
+      "local_source_reference"
+    ],
+    "payload": {
+      "given": "A Skills SDK ingest receipt points at an extraction package but the downstream ingest command is blocked or not run.",
+      "should": "The agent records the receipt as blocked and states that extraction structure does not prove downstream skill quality or SDK acceptance.",
+      "expected_failure": "The agent claims the skill was improved or accepted by Skills SDK from the extraction package alone.",
+      "reproduce_with": "references/evals/eval.knowledge-os.skills-sdk-handoff-overclaims-ingest.md",
+      "eval_intent": {
+        "capsule_refs": [
+          "knowledge-os"
+        ],
+        "knowledge_claim": "Skills SDK handoff receipts must separate producer extraction proof from downstream ingest proof.",
+        "behavior_under_test": "A Skills SDK ingest receipt points at an extraction package but the downstream ingest command is blocked or not run.",
+        "failure_mode": "The agent claims the skill was improved or accepted by Skills SDK from the extraction package alone.",
+        "expected_agent_move": "The agent records the receipt as blocked and states that extraction structure does not prove downstream skill quality or SDK acceptance.",
+        "proof_route": "references/evals.yaml",
+        "fixture_path": "references/evals/eval.knowledge-os.skills-sdk-handoff-overclaims-ingest.md",
+        "promotion_status": "candidate",
+        "source_trace": {
+          "capsule_id": "knowledge-os",
+          "section": "Evidence Extraction And Delivery Evals",
+          "source_digest": "sha256:59c607037f7a3656e9bf8cc8cdac6d2feefbcfa5bb87eb105943560dd99edb36",
+          "extracted_principle": "Skills SDK handoff receipts must separate producer extraction proof from downstream ingest proof."
+        },
+        "bad_answer_pattern": [
+          "The agent claims the skill was improved or accepted by Skills SDK from the extraction package alone."
+        ],
+        "good_answer_pattern": [
+          "The agent records the receipt as blocked and states that extraction structure does not prove downstream skill quality or SDK acceptance."
+        ],
+        "weak_eval_flags": [],
+        "proposed_evals_yaml_case": {
+          "id": "eval.knowledge-os.skills-sdk-handoff-overclaims-ingest",
+          "unit": "knowledge-os",
+          "given": "A Skills SDK ingest receipt points at an extraction package but the downstream ingest command is blocked or not run.",
+          "should": "The agent records the receipt as blocked and states that extraction structure does not prove downstream skill quality or SDK acceptance.",
+          "prompt": "Use the relevant KnowledgeOS kernel guidance to respond while preserving evidence and delivery proof boundaries.",
+          "knowledge_pack": {
+            "scenario_id": "eval.knowledge-os.skills-sdk-handoff-overclaims-ingest",
+            "fixture": "references/evals/eval.knowledge-os.skills-sdk-handoff-overclaims-ingest.md",
+            "capsule_refs": [
+              "knowledge-os"
+            ]
+          },
+          "acceptance": [
+            {
+              "type": "expected_signal",
+              "value": "The agent records the receipt as blocked and states that extraction structure does not prove downstream skill quality or SDK acceptance."
+            },
+            {
+              "type": "must_not_claim",
+              "value": "The agent claims the skill was improved or accepted by Skills SDK from the extraction package alone."
+            }
+          ]
+        },
+        "quality_findings": [],
+        "promotion": {
+          "scenario_status": "candidate",
+          "evals_yaml_status": "proposed",
+          "fixture_status": "missing",
+          "tessl_status": "not_run",
+          "proof_status": "not_claimed",
+          "blocked_by": [
+            "scenario is added as an asset before executable eval wiring"
+          ]
+        },
+        "skill_lift_target": {
+          "before_failure": "Producer proof is treated as downstream SDK acceptance.",
+          "after_behavior": "The receipt records blocked downstream validation without overclaiming.",
+          "observable_delta": "The response rejects the weak pattern and requires the named deterministic proof artifact."
+        }
+      },
+      "capsule_refs": [
+        "knowledge-os"
+      ],
+      "knowledge_claim": "Skills SDK handoff receipts must separate producer extraction proof from downstream ingest proof.",
+      "behavior_under_test": "A Skills SDK ingest receipt points at an extraction package but the downstream ingest command is blocked or not run.",
+      "failure_mode": "The agent claims the skill was improved or accepted by Skills SDK from the extraction package alone.",
+      "expected_agent_move": "The agent records the receipt as blocked and states that extraction structure does not prove downstream skill quality or SDK acceptance.",
+      "proof_route": "references/evals.yaml",
+      "fixture_path": "references/evals/eval.knowledge-os.skills-sdk-handoff-overclaims-ingest.md",
+      "promotion_status": "candidate",
+      "source_trace": {
+        "capsule_id": "knowledge-os",
+        "section": "Evidence Extraction And Delivery Evals",
+        "source_digest": "sha256:59c607037f7a3656e9bf8cc8cdac6d2feefbcfa5bb87eb105943560dd99edb36",
+        "extracted_principle": "Skills SDK handoff receipts must separate producer extraction proof from downstream ingest proof."
+      },
+      "bad_answer_pattern": [
+        "The agent claims the skill was improved or accepted by Skills SDK from the extraction package alone."
+      ],
+      "good_answer_pattern": [
+        "The agent records the receipt as blocked and states that extraction structure does not prove downstream skill quality or SDK acceptance."
+      ],
+      "weak_eval_flags": [],
+      "proposed_evals_yaml_case": {
+        "id": "eval.knowledge-os.skills-sdk-handoff-overclaims-ingest",
+        "unit": "knowledge-os",
+        "given": "A Skills SDK ingest receipt points at an extraction package but the downstream ingest command is blocked or not run.",
+        "should": "The agent records the receipt as blocked and states that extraction structure does not prove downstream skill quality or SDK acceptance.",
+        "prompt": "Use the relevant KnowledgeOS kernel guidance to respond while preserving evidence and delivery proof boundaries.",
+        "knowledge_pack": {
+          "scenario_id": "eval.knowledge-os.skills-sdk-handoff-overclaims-ingest",
+          "fixture": "references/evals/eval.knowledge-os.skills-sdk-handoff-overclaims-ingest.md",
+          "capsule_refs": [
+            "knowledge-os"
+          ]
+        },
+        "acceptance": [
+          {
+            "type": "expected_signal",
+            "value": "The agent records the receipt as blocked and states that extraction structure does not prove downstream skill quality or SDK acceptance."
+          },
+          {
+            "type": "must_not_claim",
+            "value": "The agent claims the skill was improved or accepted by Skills SDK from the extraction package alone."
+          }
+        ]
+      },
+      "quality_findings": [],
+      "promotion": {
+        "scenario_status": "candidate",
+        "evals_yaml_status": "proposed",
+        "fixture_status": "missing",
+        "tessl_status": "not_run",
+        "proof_status": "not_claimed",
+        "blocked_by": [
+          "scenario is added as an asset before executable eval wiring"
+        ]
+      },
+      "skill_lift_target": {
+        "before_failure": "Producer proof is treated as downstream SDK acceptance.",
+        "after_behavior": "The receipt records blocked downstream validation without overclaiming.",
+        "observable_delta": "The response rejects the weak pattern and requires the named deterministic proof artifact."
+      }
+    }
+  },
+  {
+    "id": "eval.knowledge-os.consumer-receipt-stale-digest",
+    "type": "eval-scenario",
+    "title": "Consumer Receipt Must Reject Stale Digest",
+    "status": "reviewed",
+    "claim_strength": "synthesized",
+    "source_refs": [
+      {
+        "source_id": "specs.knowledge-os-kernel",
+        "locator": "validation-harness",
+        "boundary": "local_source_reference"
+      },
+      {
+        "source_id": "UBIQUITOUS",
+        "locator": "extraction-and-receipt-language",
+        "boundary": "local_source_reference"
+      }
+    ],
+    "derived_from_claims": [
+      "claim.knowledge-os.feedback-delays-require-smoke-tests",
+      "claim.knowledge-os.permanent-notes-stand-alone-with-sources",
+      "claim.knowledge-os.visible-contribution-orients-exports"
+    ],
+    "applies_to": [
+      "knowledge-os"
+    ],
+    "used_by": [],
+    "source_boundaries": [
+      "local_source_reference"
+    ],
+    "payload": {
+      "given": "A consumer receipt references a feed path whose recorded digest no longer matches the current feed artifact.",
+      "should": "The agent rejects the receipt and rebuilds or revalidates the feed before using it as consumer proof.",
+      "expected_failure": "The stale receipt is accepted because the downstream command once passed.",
+      "reproduce_with": "references/evals/eval.knowledge-os.consumer-receipt-stale-digest.md",
+      "eval_intent": {
+        "capsule_refs": [
+          "knowledge-os"
+        ],
+        "knowledge_claim": "Consumer receipts must bind downstream validation to the exact feed artifact digest.",
+        "behavior_under_test": "A consumer receipt references a feed path whose recorded digest no longer matches the current feed artifact.",
+        "failure_mode": "The stale receipt is accepted because the downstream command once passed.",
+        "expected_agent_move": "The agent rejects the receipt and rebuilds or revalidates the feed before using it as consumer proof.",
+        "proof_route": "references/evals.yaml",
+        "fixture_path": "references/evals/eval.knowledge-os.consumer-receipt-stale-digest.md",
+        "promotion_status": "candidate",
+        "source_trace": {
+          "capsule_id": "knowledge-os",
+          "section": "Evidence Extraction And Delivery Evals",
+          "source_digest": "sha256:59c607037f7a3656e9bf8cc8cdac6d2feefbcfa5bb87eb105943560dd99edb36",
+          "extracted_principle": "Consumer receipts must bind downstream validation to the exact feed artifact digest."
+        },
+        "bad_answer_pattern": [
+          "The stale receipt is accepted because the downstream command once passed."
+        ],
+        "good_answer_pattern": [
+          "The agent rejects the receipt and rebuilds or revalidates the feed before using it as consumer proof."
+        ],
+        "weak_eval_flags": [],
+        "proposed_evals_yaml_case": {
+          "id": "eval.knowledge-os.consumer-receipt-stale-digest",
+          "unit": "knowledge-os",
+          "given": "A consumer receipt references a feed path whose recorded digest no longer matches the current feed artifact.",
+          "should": "The agent rejects the receipt and rebuilds or revalidates the feed before using it as consumer proof.",
+          "prompt": "Use the relevant KnowledgeOS kernel guidance to respond while preserving evidence and delivery proof boundaries.",
+          "knowledge_pack": {
+            "scenario_id": "eval.knowledge-os.consumer-receipt-stale-digest",
+            "fixture": "references/evals/eval.knowledge-os.consumer-receipt-stale-digest.md",
+            "capsule_refs": [
+              "knowledge-os"
+            ]
+          },
+          "acceptance": [
+            {
+              "type": "expected_signal",
+              "value": "The agent rejects the receipt and rebuilds or revalidates the feed before using it as consumer proof."
+            },
+            {
+              "type": "must_not_claim",
+              "value": "The stale receipt is accepted because the downstream command once passed."
+            }
+          ]
+        },
+        "quality_findings": [],
+        "promotion": {
+          "scenario_status": "candidate",
+          "evals_yaml_status": "proposed",
+          "fixture_status": "missing",
+          "tessl_status": "not_run",
+          "proof_status": "not_claimed",
+          "blocked_by": [
+            "scenario is added as an asset before executable eval wiring"
+          ]
+        },
+        "skill_lift_target": {
+          "before_failure": "Old downstream proof is reused for a changed feed.",
+          "after_behavior": "The receipt is rejected until the digest matches the current feed artifact.",
+          "observable_delta": "The response rejects the weak pattern and requires the named deterministic proof artifact."
+        }
+      },
+      "capsule_refs": [
+        "knowledge-os"
+      ],
+      "knowledge_claim": "Consumer receipts must bind downstream validation to the exact feed artifact digest.",
+      "behavior_under_test": "A consumer receipt references a feed path whose recorded digest no longer matches the current feed artifact.",
+      "failure_mode": "The stale receipt is accepted because the downstream command once passed.",
+      "expected_agent_move": "The agent rejects the receipt and rebuilds or revalidates the feed before using it as consumer proof.",
+      "proof_route": "references/evals.yaml",
+      "fixture_path": "references/evals/eval.knowledge-os.consumer-receipt-stale-digest.md",
+      "promotion_status": "candidate",
+      "source_trace": {
+        "capsule_id": "knowledge-os",
+        "section": "Evidence Extraction And Delivery Evals",
+        "source_digest": "sha256:59c607037f7a3656e9bf8cc8cdac6d2feefbcfa5bb87eb105943560dd99edb36",
+        "extracted_principle": "Consumer receipts must bind downstream validation to the exact feed artifact digest."
+      },
+      "bad_answer_pattern": [
+        "The stale receipt is accepted because the downstream command once passed."
+      ],
+      "good_answer_pattern": [
+        "The agent rejects the receipt and rebuilds or revalidates the feed before using it as consumer proof."
+      ],
+      "weak_eval_flags": [],
+      "proposed_evals_yaml_case": {
+        "id": "eval.knowledge-os.consumer-receipt-stale-digest",
+        "unit": "knowledge-os",
+        "given": "A consumer receipt references a feed path whose recorded digest no longer matches the current feed artifact.",
+        "should": "The agent rejects the receipt and rebuilds or revalidates the feed before using it as consumer proof.",
+        "prompt": "Use the relevant KnowledgeOS kernel guidance to respond while preserving evidence and delivery proof boundaries.",
+        "knowledge_pack": {
+          "scenario_id": "eval.knowledge-os.consumer-receipt-stale-digest",
+          "fixture": "references/evals/eval.knowledge-os.consumer-receipt-stale-digest.md",
+          "capsule_refs": [
+            "knowledge-os"
+          ]
+        },
+        "acceptance": [
+          {
+            "type": "expected_signal",
+            "value": "The agent rejects the receipt and rebuilds or revalidates the feed before using it as consumer proof."
+          },
+          {
+            "type": "must_not_claim",
+            "value": "The stale receipt is accepted because the downstream command once passed."
+          }
+        ]
+      },
+      "quality_findings": [],
+      "promotion": {
+        "scenario_status": "candidate",
+        "evals_yaml_status": "proposed",
+        "fixture_status": "missing",
+        "tessl_status": "not_run",
+        "proof_status": "not_claimed",
+        "blocked_by": [
+          "scenario is added as an asset before executable eval wiring"
+        ]
+      },
+      "skill_lift_target": {
+        "before_failure": "Old downstream proof is reused for a changed feed.",
+        "after_behavior": "The receipt is rejected until the digest matches the current feed artifact.",
+        "observable_delta": "The response rejects the weak pattern and requires the named deterministic proof artifact."
+      }
+    }
+  }
+]

@@ -15,10 +15,7 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import json
-import os
 import re
-import shutil
-import subprocess
 import sys
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
@@ -29,47 +26,10 @@ from typing import Any, Dict, List, Sequence, Set
 try:
     import yaml  # type: ignore
 except ModuleNotFoundError as exc:  # pragma: no cover
-    already_reexec = os.environ.get("SKILL_FAMILY_PYYAML_REEXEC") == "1"
-    if not already_reexec and __name__ == "__main__":
-        env = dict(os.environ)
-        env["SKILL_FAMILY_PYYAML_REEXEC"] = "1"
-        preferred = Path.home() / ".venvs" / "pyyaml" / "bin" / "python"
-        if preferred.exists() and os.access(preferred, os.X_OK):
-            try:
-                health = subprocess.run(
-                    [str(preferred), "-c", "import yaml"],
-                    env=env,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                    check=False,
-                )
-                if health.returncode == 0:
-                    os.execve(str(preferred), [str(preferred), __file__, *sys.argv[1:]], env)
-            except OSError:
-                pass
-        uv_bin = shutil.which("uv")
-        if uv_bin:
-            os.execvpe(
-                uv_bin,
-                [
-                    uv_bin,
-                    "run",
-                    "--python",
-                    "3.12",
-                    "--with",
-                    "pyyaml",
-                    "--with",
-                    "jsonschema",
-                    "python",
-                    __file__,
-                    *sys.argv[1:],
-                ],
-                env,
-            )
-    raise SystemExit(
-        "PyYAML is required for validate_skill_authoring_family_benchmarks.py. "
-        "Run with `uv run --python 3.12 --with pyyaml --with jsonschema python ...`."
-    ) from exc
+    yaml = None  # type: ignore[assignment]
+    _YAML_IMPORT_ERROR: ModuleNotFoundError | None = exc
+else:
+    _YAML_IMPORT_ERROR = None
 
 _JSONSCHEMA_AVAILABLE = importlib.util.find_spec("jsonschema") is not None
 
@@ -148,6 +108,16 @@ _RUBRIC_VERSION_STALE_DAYS = 180
 
 # rubric_version family divergence: WARN if spread across members exceeds this many days.
 _RUBRIC_VERSION_DIVERGENCE_DAYS = 90
+
+
+def _require_yaml() -> Any:
+    if yaml is not None:
+        return yaml
+    raise RuntimeError(
+        "PyYAML is required for validate_skill_authoring_family_benchmarks.py. "
+        "Run through bash Infrastructure/scripts/run-infrastructure-python.sh ..."
+    ) from _YAML_IMPORT_ERROR
+
 
 # Optional contract fields expected at gold standard; absence produces WARN (not FAIL).
 _RECOMMENDED_CONTRACT_KEYS = {"rollback_procedure", "observability"}
@@ -233,7 +203,8 @@ class Finding:
 
 
 def _load_yaml(path: Path) -> Dict[str, Any]:
-    obj = yaml.safe_load(path.read_text(encoding="utf-8"))
+    yaml_module = _require_yaml()
+    obj = yaml_module.safe_load(path.read_text(encoding="utf-8"))
     if not isinstance(obj, dict):
         raise ValueError("expected a YAML mapping/object")
     return obj
@@ -288,7 +259,8 @@ def _load_schema(schema_path: Path) -> Any:
     if not schema_path.exists():
         return None
     try:
-        return yaml.safe_load(schema_path.read_text(encoding="utf-8"))
+        yaml_module = _require_yaml()
+        return yaml_module.safe_load(schema_path.read_text(encoding="utf-8"))
     except Exception:  # noqa: BLE001
         return None
 

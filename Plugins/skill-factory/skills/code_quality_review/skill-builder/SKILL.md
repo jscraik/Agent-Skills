@@ -30,6 +30,19 @@ Repair one failing skill gate at a time.
 
 Prefer one evidence-backed repair over broad rewriting. A score is useful only when the artifact, command, baseline, and failed contract are preserved.
 
+## First-Principles Gate
+
+- Desired outcome: repair an existing skill through the Skills SDK proof ladder without replacing release evidence with prose.
+- User-specific constraints: use repo wrappers, keep oss-local before oss-cloud, keep Tessl live as confirmation only, and record lessons as guardrails.
+- Rejected copied assumption: a better SKILL.md alone proves release readiness.
+- Fundamental constraints: existing skill source is canonical; each failed gate owns the next patch; warnings must be repaired before promotion.
+- Smallest effective mechanism: patch the smallest failed skill, reference, eval, or validator surface that changes the failing gate.
+- Artifact decision: IMPROVE_EXISTING.
+- Rejected alternatives: rewriting the whole skill, running Tessl live before SDK receipts, or ignoring scenario drift.
+- Evidence required: factory gate receipt, package verify receipt, scenario-quality receipt, and oss-local receipt before oss-cloud.
+- Validation proof: rerun the failed gate after each repair.
+- Stop or pivot condition: after three flat repair loops, stop with blocker_notes and classify the owning gate.
+
 ## When To Use
 
 Use for SKILL.md repair, skill eval hardening, release proof, Tessl score improvement, reference quality fixes, and plugin-skill readiness work.
@@ -81,7 +94,7 @@ Before any live Tessl run, check the workspace run budget. Treat 300 live eval r
 - Repeated guidance -> delete the duplicate `SKILL.md` sentence; same score gate improves.
 - Vague validation -> add `Command: ... -> pass|fail|blocked`; audit/release `status == "success"`.
 - Missing recovery -> add the named failed-gate branch; rerun that gate.
-- Weak eval/reference -> patch cited `references/**`; package verify `reference_quality:true`.
+- Weak eval/reference -> patch cited `references/**`; package verify `reference_quality:true`, including `reference_heading_invocable` for Markdown references and vendored KnowledgeOS capsule bodies.
 - Unsafe request -> emit `Safety Verdict:`; make no edits.
 - Package handle -> keep `codex-eval-creation-loop` and `software-literature-expert-lens-pack`; use [package repairs](./references/package-specific-repairs.md).
 - Tessl or KnowledgeOS capsule handling -> load source handle `Plugins/skill-factory/references/tessl-knowledgeos-capsule.md`, prefer plugin-first Tessl layout, and keep KnowledgeOS evidence, Skill Factory package validation, Tessl review/eval proof, registry state, and runtime visibility as separate lanes.
@@ -126,7 +139,7 @@ If three repair loops leave the same score or blocker unchanged, stop and return
 - Live-private release evidence requires Tessl run-budget proof or an explicit blocker that preserves the 300-run operator-provided workspace limit and 20-run remediation reserve.
 - Live-private release evidence requires `./bin/ask sdk eval handoff-readiness --skill <target> --preview --json --robot` to pass for the current candidate.
 - Live-private release evidence requires scenario drift review after the latest skill change; stale or obsolete scenarios block professional readiness even when the live run completes.
-- References and scripts must be checked when they affect the skill behavior; weak supporting material blocks release claims.
+- References and scripts must be checked when they affect the skill behavior; weak supporting material blocks release claims. Markdown reference and capsule-body H1 headings must be specific, filename-aligned, and invocable before OSS, Tessl, or registry movement.
 
 ## Gotchas
 

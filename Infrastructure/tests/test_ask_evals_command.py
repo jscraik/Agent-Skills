@@ -4083,6 +4083,18 @@ def test_eval_closeout_validation_blocks_non_pass_mutation() -> None:
     assert "non_pass_blocks_registry_promotion" in blocker_ids
 
 
+def test_evals_run_validation_command_preserves_timeout_seconds() -> None:
+    command = evals._evals_run_validation_command(
+        "Skills/example",
+        mode="smoke",
+        runner="codex",
+        dashboard=True,
+        timeout_seconds=17,
+    )
+
+    assert command == "./bin/ask evals run Skills/example --mode smoke --runner codex --timeout-seconds 17 --json --robot"
+
+
 def test_eval_closeout_doctor_reports_missing_case_result(tmp_path: Path) -> None:
     report_dir = tmp_path / "Infrastructure/artifacts/skills/example-skill/run-partial"
     case_dir = report_dir / "01-edge-case"

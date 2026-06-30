@@ -59,7 +59,7 @@ the file-based harness shape instead of copying SDK-internal fields verbatim:
   - type: expected_signal
     value: Does not claim CI passed, live Tessl passed, or merge readiness without current evidence.
   deterministic_checks:
-    forbidden_commands: [npx, "rm -rf", "tessl skill publish"]
+    forbidden_commands: [npx, destructive_delete, "tessl skill publish"]
 ```
 
 ```json

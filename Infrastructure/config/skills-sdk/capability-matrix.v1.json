@@ -463,7 +463,7 @@
         "Infrastructure/tests/test_skills_sdk_eval_profiles.py"
       ],
       "next_slice": "Use the previewed profiles to drive Codex-backed A/B execution receipts without exposing judge secrets or authenticated Codex judge state to skill execution.",
-      "notes": "The SDK now previews Codex exec sandbox profiles and post-run judge profiles: oss-local layers the Codex oss-local profile for gpt-oss:20b, oss-local-code layers qwen3-coder:30b, oss-local-fallback layers qwen3.5:latest, oss-cloud layers the Codex oss-cloud profile for deepseek-v4-flash:cloud, Codex fast uses gpt-5.3-codex-spark through an authenticated Codex CLI boundary, and judge secrets are kept out of the candidate skill execution environment."
+      "notes": "The SDK now previews Codex exec sandbox profiles and post-run judge profiles: oss-local layers the Codex oss-local profile for gpt-oss:20b, oss-local-code layers qwen3-coder:30b, oss-local-fallback layers qwen3.5:latest, oss-security layers the Codex oss-security profile for CyberCrew/notmythos-8b advisory security-specialist review, oss-cloud layers the Codex oss-cloud profile for deepseek-v4-flash:cloud, Codex fast uses gpt-5.3-codex-spark through an authenticated Codex CLI boundary, and judge secrets are kept out of the candidate skill execution environment."
     },
     {
       "id": "ab_rubric",

@@ -48,6 +48,17 @@ TEXT_FIELD_ASSERTION_TYPES = {
     "text_field_present",
     "text_field_absent",
 }
+TEXT_OUTPUT_RUNNER_ACCEPTANCE_TYPES = {
+    "contains",
+    "not_contains",
+    "regex",
+    "not_regex",
+    "skill_selected",
+    "skill_not_selected",
+    "expected_signal",
+    "discovery_question",
+    *TEXT_FIELD_ASSERTION_TYPES,
+}
 STRUCTURED_FIELD_ASSERTION_KEYS = (
     "publication_gate_status",
     "publication_status",
@@ -122,8 +133,42 @@ def _load_minimal_evals_yaml(text: str) -> dict[str, Any]:
 
 
 def _minimal_line(raw_line: str) -> tuple[str, int]:
-    line = raw_line.split("#", 1)[0].rstrip()
+    line = _strip_yaml_comment(raw_line).rstrip()
     return line.strip(), len(line) - len(line.lstrip(" "))
+
+
+def _strip_yaml_comment(raw_line: str) -> str:
+    in_single = False
+    in_double = False
+    for index, char in enumerate(raw_line):
+        if char == "'" and not in_double and _is_yaml_single_quote_delimiter(raw_line, index):
+            in_single = not in_single
+            continue
+        if char == '"' and not in_single and not _is_escaped(raw_line, index):
+            in_double = not in_double
+            continue
+        if _is_yaml_comment_start(raw_line, index, char, in_single, in_double):
+            return raw_line[:index]
+    return raw_line
+
+
+def _is_yaml_single_quote_delimiter(text: str, index: int) -> bool:
+    previous_char = text[index - 1] if index > 0 else ""
+    next_char = text[index + 1] if index + 1 < len(text) else ""
+    return not (previous_char.isalnum() and next_char.isalnum())
+
+
+def _is_escaped(text: str, index: int) -> bool:
+    slash_count = 0
+    cursor = index - 1
+    while cursor >= 0 and text[cursor] == "\\":
+        slash_count += 1
+        cursor -= 1
+    return slash_count % 2 == 1
+
+
+def _is_yaml_comment_start(text: str, index: int, char: str, in_single: bool, in_double: bool) -> bool:
+    return char == "#" and not in_single and not in_double and (index == 0 or text[index - 1].isspace())
 
 
 def _consume_minimal_line(state: dict[str, Any], stripped: str, indent: int) -> bool:
@@ -312,15 +357,24 @@ def _acceptance_text(case: dict[str, Any]) -> str:
 def _acceptance_assertion_checks(case: dict[str, Any], scenario_id: str) -> list[dict[str, Any]]:
     malformed_text_fields: list[str] = []
     regex_structured_fields: list[str] = []
+    unsupported_text_assertions: list[str] = []
     for index, item in enumerate(_list_field(case, "acceptance"), start=1):
         if not isinstance(item, dict):
             continue
         assertion_type = str(item.get("type") or "")
         marker = f"{scenario_id}:acceptance[{index}]"
+        if assertion_type not in TEXT_OUTPUT_RUNNER_ACCEPTANCE_TYPES:
+            unsupported_text_assertions.append(f"{marker}:{assertion_type or 'missing_type'}")
         if _text_field_assertion_malformed(item, assertion_type):
             malformed_text_fields.append(marker)
         regex_structured_fields.extend(_regex_structured_field_refs(item, assertion_type, marker))
     return [
+        _check(
+            "text_output_runner_acceptance_supported",
+            "blocker" if unsupported_text_assertions else "pass",
+            "Scenario acceptance types must be executable by the text-output skill eval runner before release.",
+            unsupported_text_assertions,
+        ),
         _check(
             "typed_text_field_assertions_valid",
             "blocker" if malformed_text_fields else "pass",

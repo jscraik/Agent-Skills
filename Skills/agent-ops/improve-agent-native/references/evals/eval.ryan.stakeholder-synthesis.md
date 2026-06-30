@@ -1,25 +1,25 @@
-# Eval Fixture: Stakeholder Synthesis
+# eval.ryan.stakeholder-synthesis: Stakeholder Update Synthesizes Raw Activity
 
-## Input
+Promotion status: candidate
+Proof route: references/evals.yaml
+Fixture path: references/evals/eval.ryan.stakeholder-synthesis.md
 
-An agent has a raw log of commits, failing checks, fixed checks, review notes,
-and generated artifacts. A product stakeholder asks whether the work is ready.
+Knowledge claim: Principle under test: The agent compresses the activity into decision-relevant meaning, current state, risks, next action, and the evidence boundary.
+Behavior under test: Observable agent behavior when an agent has a long log of commits, tests, and review notes and must brief a cross-functional stakeholder.
+Failure mode: The agent dumps raw activity or validation output without explaining why it matters to the audience.
+Expected agent move: The agent compresses the activity into decision-relevant meaning, current state, risks, next action, and the evidence boundary.
+Skill lift before failure: The agent dumps raw activity or validation output without explaining why it matters to the audience.
+Skill lift after behavior: The agent compresses the activity into decision-relevant meaning, current state, risks, next action, and the evidence boundary.
+Observable delta: The response avoids the weak pattern (The agent dumps raw activity or validation output without explaining why it matters to the audience) and instead shows the expected behavior (The agent compresses the activity into decision-relevant meaning, current state, risks, next action, and the evidence boundary).
 
-## Expected Response Requirements
+Given: An agent has a long log of commits, tests, and review notes and must brief a cross-functional stakeholder.
+Should: The agent compresses the activity into decision-relevant meaning, current state, risks, next action, and the evidence boundary.
+Expected failure: The agent dumps raw activity or validation output without explaining why it matters to the audience.
 
-- Summarize current state, decision relevance, and next action.
-- Separate local validation, external CI, review, tracker, and merge readiness.
-- Include risks and evidence boundaries.
-- Avoid dumping raw activity.
+Bad answer patterns:
+- The agent dumps raw activity or validation output without explaining why it matters to the audience.
 
-## Failure Assertions
+Good answer patterns:
+- The agent compresses the activity into decision-relevant meaning, current state, risks, next action, and the evidence boundary.
 
-- Fails if the response lists command output without synthesis.
-- Fails if one proof lane is claimed to prove another without evidence.
-
-## Skill-Local Evidence Boundary
-
-Failure category: seed eval requires behavioural scenario conversion.
-Evidence boundary: this fixture is skill-local evidence at references/evals/eval.ryan.stakeholder-synthesis.md; it does not by itself prove repository, pull request, remote-check, merge-readiness, or Tessl-readiness outcomes.
-Durable mechanism: use this fixture to generate scenario criteria that require the agent to compress activity into decision-relevant meaning, current state, risks, next action, and evidence boundary without flooding the stakeholder with raw logs.
-Validation status: not_run_with_reason until the scenario is executed by the local pipeline and private Tessl eval lane.
+This is the portable SDK reproduction contract for the eval scenario. The KnowledgeOS authoring fixture remains inside the validation workspace and is not vendored into SDK-ready exports.

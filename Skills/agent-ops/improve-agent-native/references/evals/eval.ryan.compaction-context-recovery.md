@@ -1,25 +1,25 @@
-# Eval Fixture: Compaction Context Recovery
+# eval.ryan.compaction-context-recovery: Compaction Requires Context Recovery
 
-## Input
+Promotion status: candidate
+Proof route: references/evals.yaml
+Fixture path: references/evals/eval.ryan.compaction-context-recovery.md
 
-An agent resumes after context compaction. The summary says a pack was built,
-but the live repo may have changed and generated exports may be stale.
+Knowledge claim: Principle under test: The agent reconstructs state from repo files, manifests, generated artifacts, recent validation output, and source notes before continuing.
+Behavior under test: Observable agent behavior when an agent resumes a long-horizon task after context compaction with only a partial summary.
+Failure mode: The agent assumes the compressed chat summary is sufficient and continues from stale or incomplete context.
+Expected agent move: The agent reconstructs state from repo files, manifests, generated artifacts, recent validation output, and source notes before continuing.
+Skill lift before failure: The agent assumes the compressed chat summary is sufficient and continues from stale or incomplete context.
+Skill lift after behavior: The agent reconstructs state from repo files, manifests, generated artifacts, recent validation output, and source notes before continuing.
+Observable delta: The response avoids the weak pattern (The agent assumes the compressed chat summary is sufficient and continues from stale or incomplete context) and instead shows the expected behavior (The agent reconstructs state from repo files, manifests, generated artifacts, recent validation output, and source notes before continuing).
 
-## Expected Response Requirements
+Given: An agent resumes a long-horizon task after context compaction with only a partial summary.
+Should: The agent reconstructs state from repo files, manifests, generated artifacts, recent validation output, and source notes before continuing.
+Expected failure: The agent assumes the compressed chat summary is sufficient and continues from stale or incomplete context.
 
-- Reconstruct state from live files, manifests, generated artifacts, and git
-  status.
-- Validate source refs and generated exports before continuing.
-- State what the summary proves and what live evidence proves.
+Bad answer patterns:
+- The agent assumes the compressed chat summary is sufficient and continues from stale or incomplete context.
 
-## Failure Assertions
+Good answer patterns:
+- The agent reconstructs state from repo files, manifests, generated artifacts, recent validation output, and source notes before continuing.
 
-- Fails if the response trusts the summary without live repo inspection.
-- Fails if stale generated exports are treated as current.
-
-## Skill-Local Evidence Boundary
-
-Failure category: seed eval requires behavioural scenario conversion.
-Evidence boundary: this fixture is skill-local evidence at references/evals/eval.ryan.compaction-context-recovery.md; it does not by itself prove repository, pull request, remote-check, merge-readiness, or Tessl-readiness outcomes.
-Durable mechanism: use this fixture to generate scenario criteria that require the agent to reconstruct current state from repo files, manifests, generated artifacts, recent validation output, and source notes before resuming implementation.
-Validation status: not_run_with_reason until the scenario is executed by the local pipeline and private Tessl eval lane.
+This is the portable SDK reproduction contract for the eval scenario. The KnowledgeOS authoring fixture remains inside the validation workspace and is not vendored into SDK-ready exports.

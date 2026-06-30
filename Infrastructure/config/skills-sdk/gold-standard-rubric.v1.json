@@ -1,0 +1,129 @@
+{
+  "schema_version": "skills-sdk.gold-standard-rubric.v1",
+  "rubric_id": "skills-sdk.gold-standard.v1",
+  "rubric_version": "v1",
+  "quality_criteria": {
+    "domain_artifact_classification": {
+      "purpose": "Measures whether the package declares its domain, audience, objective, and release surface.",
+      "why_it_matters": "Reviewers need to know what artifact is being scored before they can judge whether the skill does its basic job.",
+      "observable_evidence": [
+        "SKILL.md names the user outcome and trigger boundary.",
+        "references/contract.yaml names purpose, inputs, and outputs.",
+        "Package files are owned by the skill or explicitly excluded."
+      ],
+      "scoring": {
+        "5": "Domain, audience, objective, and release surface are explicit and unambiguous.",
+        "4": "Domain and objective are clear with minor ambiguity in support files.",
+        "3": "The main skill is classifiable but audience or release surface is partly implicit.",
+        "2": "Reviewers must infer the domain or release surface from scattered files.",
+        "1": "The package purpose cannot be determined reliably."
+      }
+    },
+    "trigger_boundary": {
+      "purpose": "Measures whether the skill selects the right work and rejects adjacent or unsafe work.",
+      "why_it_matters": "Incorrect routing makes later eval scores meaningless because the wrong behavior is being exercised.",
+      "observable_evidence": [
+        "Description includes natural trigger terms and non-goals.",
+        "Boundaries route code, safety, or adjacent-domain requests away from the skill.",
+        "Evals include positive, edge, pressure, and negative trigger cases."
+      ],
+      "scoring": {
+        "5": "Trigger, non-trigger, user outcome, and handoffs are explicit and covered by scenarios.",
+        "4": "Trigger and handoff behavior are clear with minor edge-case ambiguity.",
+        "3": "Common cases route correctly but adjacent work can still over-trigger.",
+        "2": "Triggering relies on broad keywords or lacks clear non-goals.",
+        "1": "The skill cannot be selected predictably."
+      }
+    },
+    "construction_structure_steering_pruning": {
+      "purpose": "Measures whether the skill is constructed as an agent-operable workflow rather than accumulated prose.",
+      "why_it_matters": "Skills fail before OSS and Tessl when they lack executable steps, reference routing, phase gates, or deletion pressure against sediment.",
+      "observable_evidence": [
+        "SKILL.md separates executable steps from package-local references.",
+        "Phase or step-based workflows state stop conditions, evidence gates, or advancement blockers.",
+        "Long prose carries an action, routing, output, evidence, or gate obligation.",
+        "Repeated instruction-shaped lines are deduplicated or moved into one routed reference."
+      ],
+      "scoring": {
+        "5": "Trigger, structure, steering, and pruning are explicit, compact, and mechanically enforced.",
+        "4": "The workflow is executable with only minor duplication or routing ambiguity.",
+        "3": "The skill has usable steps but weak phase gates, reference separation, or pruning.",
+        "2": "The skill relies on prose accumulation instead of a clear executable procedure.",
+        "1": "The skill cannot reliably steer an agent through the intended workflow."
+      }
+    },
+    "reference_invocation": {
+      "purpose": "Measures whether package references and vendored KnowledgeOS capsule bodies can be selected by agents through specific headings and routing cues.",
+      "why_it_matters": "A reference that exists but has a generic or misleading heading is hard for agents to invoke at the right phase, which weakens progressive disclosure and capsule routing.",
+      "observable_evidence": [
+        "Markdown references use specific H1 headings aligned with the filename and task trigger.",
+        "KnowledgeOS capsule bodies are vendored as invocable reference files rather than opaque support blobs.",
+        "Package verify reference_quality emits reference_heading_invocable checks with no blockers."
+      ],
+      "scoring": {
+        "5": "All Markdown references and capsule bodies have specific, filename-aligned, routing-friendly H1 headings.",
+        "4": "References are invocable with only minor naming or heading polish needed.",
+        "3": "Most references can be selected, but some headings are generic or weakly aligned.",
+        "2": "Multiple support files exist but agents must infer purpose from content rather than headings.",
+        "1": "Reference files cannot be selected predictably."
+      }
+    },
+    "progressive_disclosure": {
+      "purpose": "Measures whether SKILL.md stays compact while routing deeper context to package-local references.",
+      "why_it_matters": "Entry-point sprawl raises runtime cost and hides the references agents need at the right phase.",
+      "observable_evidence": [
+        "SKILL.md is below the package line-budget threshold.",
+        "Progressive Disclosure names required references and when to open them.",
+        "Reference files are routed and non-orphaned."
+      ],
+      "scoring": {
+        "5": "The entrypoint is compact, all support files are routed, and task-specific references load only when needed.",
+        "4": "The entrypoint is compact with minor routing omissions that do not block the task.",
+        "3": "References exist but routing or line budget needs tightening.",
+        "2": "Important context is duplicated, buried, or orphaned.",
+        "1": "The package lacks usable progressive disclosure."
+      }
+    },
+    "scenario_evidence_quality": {
+      "purpose": "Measures whether scenarios test observable behavior rather than keywords or rubric copying.",
+      "why_it_matters": "Scenarios are the internal workbench that should catch failures before OSS and Tessl lanes.",
+      "observable_evidence": [
+        "references/evals.yaml has claims, cases, unit, given, should, acceptance, and deterministic checks.",
+        "Cases cover happy, edge, negative, pressure, and regression behavior where relevant.",
+        "Acceptance checks are executable and evidence anchored."
+      ],
+      "scoring": {
+        "5": "Scenarios are realistic, executable, behavior-specific, and cover regressions.",
+        "4": "Scenarios are executable with minor coverage gaps.",
+        "3": "Scenarios cover the main behavior but miss important boundary cases.",
+        "2": "Scenarios are generic, leaky, or weakly observable.",
+        "1": "Scenarios are missing or unusable."
+      }
+    },
+    "evidence_lane_separation": {
+      "purpose": "Measures whether package, runtime, OSS, Tessl, registry, and PR evidence remain separate.",
+      "why_it_matters": "A pass in one lane must not be used as proof for a different lane.",
+      "observable_evidence": [
+        "Validation text states what each command proves and does not prove.",
+        "Receipts name command, outcome, blocker, and lane.",
+        "Readiness claims require current evidence or workflow-closeout receipts."
+      ],
+      "scoring": {
+        "5": "Every evidence lane has explicit proof boundaries and current command evidence.",
+        "4": "Lanes are separated with minor missing proof detail.",
+        "3": "Most lanes are separated but one readiness boundary is ambiguous.",
+        "2": "Scores or summaries are used as proof for unrelated lanes.",
+        "1": "The package makes readiness claims without lane-specific evidence."
+      }
+    }
+  },
+  "automatic_failure_conditions": [
+    "Missing package purpose, inputs, or outputs.",
+    "Missing or unusable references/evals.yaml for behavioral skills.",
+    "Orphaned generated or KnowledgeOS support files when a manifest exists.",
+    "Markdown references or vendored KnowledgeOS capsule bodies with missing, generic, or filename-misaligned H1 headings.",
+    "Construction skills that lack executable steps, reference routing, phase gates for staged workflows, or pruning against sediment.",
+    "Behavioral live Tessl readiness claimed with fewer than 20 gold-standard structured scenarios.",
+    "Package, OSS, Tessl, registry, PR, or runtime readiness claims made without lane-specific evidence."
+  ]
+}

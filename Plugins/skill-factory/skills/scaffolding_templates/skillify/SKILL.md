@@ -24,6 +24,19 @@ Turn a proven workflow into a reusable skill package. Preserve repeatable behavi
 
 Start with 2-3 focused surfaces and capture the smallest validated workflow.
 
+## First-Principles Gate
+
+- Desired outcome: create only the smallest reusable skill package that has evidence, triggers, boundaries, evals, and a validation route.
+- User-specific constraints: interview for missing evidence, prefer Skill SDK package shape, avoid packaging transcript noise, and use the SDK proof ladder before release claims.
+- Rejected copied assumption: any repeated workflow deserves a new skill.
+- Fundamental constraints: repeatability must be evidenced; destination and owner must be known; the package must include contract and evals.
+- Smallest effective mechanism: build, skip, extend, or document based on first-principles artifact fit.
+- Artifact decision: BUILD_SKILL.
+- Rejected alternatives: creating a skill without owner or trigger proof, using broad discovery as proof, or publishing before validation.
+- Evidence required: source evidence, first package validation, strict audit, and scenario-quality receipt.
+- Validation proof: run strict audit and `./bin/ask skills package verify <skill-path> --json --robot` before broader release checks.
+- Stop or pivot condition: if source evidence cannot prove triggers, inputs, outputs, and validation, return a plan and block creation.
+
 ## When To Use
 
 - The user asks to skillify, create a skill, save a workflow, package a process, or make reusable guidance.
@@ -138,6 +151,9 @@ For a session-and-telemetry discovery pass, read [evidence discovery](./referenc
 - Do not edit generated `.agents/**`, runtime projections, caches, or archived fixtures as source.
 - Prompt before broad rewrites, external writes, installs, generated media persistence, or destructive cleanup.
 - Move long transcripts, examples, schemas, and templates to `references/`.
+- Give every Markdown reference and vendored KnowledgeOS capsule body a
+  specific, filename-aligned H1 heading so package verify can route it through
+  `reference_heading_invocable`.
 - In read-only runners, produce a blocked package plan rather than trying to
   create files or claiming validation passed.
 
@@ -184,17 +200,18 @@ install, sync, publish, live Tessl, or readiness claim:
 
 0. `./bin/ask sdk start <skill-path> --json --robot`
 1. `./bin/ask skills audit <skill-path> --level strict --json --robot`
-1a. `./bin/ask sdk security risk-modes <skill-path> --preview --json --robot`
-2. `./bin/ask sdk eval scenario-quality <skill-path> --preview --json --robot`
+1a. `./bin/ask skills package verify <skill-path> --json --robot`
+    - `reference_quality` must include no `reference_heading_invocable` blockers.
+1b. `./bin/ask sdk eval scenario-quality <skill-path> --preview --json --robot`
+2. `./bin/ask sdk security risk-modes <skill-path> --preview --json --robot`
 3. `./bin/ask sdk eval scorer-quality <skill-path> --preview --json --robot`
 4. `./bin/ask sdk eval scorer-calibration <skill-path> --preview --json --robot`
-5. `./bin/ask skills package verify <skill-path> --json --robot`
-6. `./bin/ask sdk eval run <skill-path> --runner internal --mode smoke --codex-profile oss-local --json --robot`
-7. `./bin/ask sdk eval run <skill-path> --runner internal --mode smoke --codex-profile oss-cloud --json --robot`
-8. `./bin/ask sdk eval tessl-local-proof --skill <skill-path> --workspace jscraik --execute --json --robot`
-9. `./bin/ask evals run <skill-path> --mode smoke --runner discovery-smoke --tessl-live-private --tessl-workspace jscraik --tessl-live-dry-run --json --robot`
-10. `./bin/ask sdk eval handoff-readiness --skill <skill-path> --preview --json --robot`
-11. `./bin/ask skills external-review <skill-path> --audit-level compat --json --robot`
+5. `./bin/ask sdk eval run <skill-path> --runner internal --mode smoke --codex-profile oss-local --json --robot`
+6. `./bin/ask sdk eval run <skill-path> --runner internal --mode smoke --codex-profile oss-cloud --json --robot`
+7. `./bin/ask sdk eval tessl-local-proof --skill <skill-path> --workspace jscraik --execute --json --robot`
+8. `./bin/ask evals run <skill-path> --mode smoke --runner discovery-smoke --tessl-live-private --tessl-workspace jscraik --tessl-live-dry-run --json --robot`
+9. `./bin/ask sdk eval handoff-readiness --skill <skill-path> --preview --json --robot`
+10. `./bin/ask skills external-review <skill-path> --audit-level compat --json --robot`
 
 Do not spend a Tessl live run until internal SDK evidence predicts >=90; if
 Tessl finds basic skill-behavior, format, scenario, rubric, judge, or reference

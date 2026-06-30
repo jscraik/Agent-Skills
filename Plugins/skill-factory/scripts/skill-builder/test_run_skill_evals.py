@@ -2636,6 +2636,64 @@ class RunSkillEvalsModeTests(unittest.TestCase):
             self.assertIn("Anything to add or change before I implement it?", round_six_response)
             self.assertEqual(round_six_path.read_text(encoding="utf-8"), round_six_response)
 
+    def test_discovery_smoke_accepts_legacy_payload_examples_heading(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            skill_dir = Path(tmpdir) / "docs-expert"
+            refs_dir = skill_dir / "references"
+            refs_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                textwrap.dedent(
+                    """
+                    ---
+                    name: docs-expert
+                    ---
+
+                    ## Discovery interview
+                    - ask one round at a time
+                    - use a plain-language question
+                    - explain why the round matters
+                    - avoid dumping the whole interview plan at once
+                    """
+                ).strip()
+                + "\n",
+                encoding="utf-8",
+            )
+            (refs_dir / "discovery-interview.md").write_text(
+                textwrap.dedent(
+                    """
+                    ## Request user input mini-templates
+
+                    Which documentation surface should this update target first?
+
+                    ## Payload examples
+
+                    ## Round 6: Confirmation
+
+                    Does this capture the docs work well enough for me to implement?
+                    Anything to add or change before I implement it?
+                    """
+                ).strip()
+                + "\n",
+                encoding="utf-8",
+            )
+            case = EvalCase(
+                id="legacy-heading",
+                name="legacy-heading",
+                prompt="discover",
+                acceptance=[],
+                smoke_mode="discovery-round-one",
+            )
+            exit_code, _response, _stderr, warnings = run_discovery_smoke(
+                skill_md_path=skill_md,
+                skill_dir=skill_dir,
+                case=case,
+                output_last_message_path=skill_dir / "legacy-heading.txt",
+            )
+
+        self.assertEqual(exit_code, 0)
+        self.assertNotIn("discovery-interview.md missing payload examples section", "\n".join(warnings))
+
     def test_summary_and_manifest_include_iteration_round_metadata(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             skill_dir = Path(tmpdir) / "demo-skill"

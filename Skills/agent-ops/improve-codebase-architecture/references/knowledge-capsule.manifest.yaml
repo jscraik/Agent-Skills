@@ -1,203 +1,30 @@
----
 schema_version: knowledge-os.knowledge-capsule-manifest.v1
-skill:
-  skill_id: improve-codebase-architecture
-  declared_name: improve-codebase-architecture
-  entrypoint_path: Skills/agent-ops/improve-codebase-architecture/SKILL.md
-  canonical_skill_path: Skills/agent-ops/improve-codebase-architecture/SKILL.md
-  writable_root: Skills/agent-ops/improve-codebase-architecture
-  apply_target_path: Skills/agent-ops/improve-codebase-architecture/SKILL.md
-upstream_pack:
-  pack_id: pack.codebase-architecture
-  export_root: exports/packs/pack.codebase-architecture
-  snapshot_digest: sha256:cbd151f1425d78841bac836cdd5380a18153ab5fdca141dc171f1da11135e322
-upstream_packs:
-- pack_id: pack.codebase-architecture
-  role: architecture_review_judgment
-  export_root: exports/packs/pack.codebase-architecture
-  snapshot_digest: sha256:cbd151f1425d78841bac836cdd5380a18153ab5fdca141dc171f1da11135e322
-  default_facets:
-  - agent_safe_boundary_proof
-  - patch_vs_interface_decision
-  - deep_module_symptom_map
-  - bounded_context_language_map
-  - integration_boundary_contract
-  - architecture_tracer_proof
-  optional_facets:
-  - data_ownership_and_consistency
-  - legacy_seam_characterization
-  - pattern_fit_and_liability
-  - architecture_drift_human_sync
-  - knowledge_capsule_quality
+skill: {skill_id: improve-codebase-architecture}
 selected_facets:
-- pack.codebase-architecture:agent_safe_boundary_proof
-- pack.codebase-architecture:patch_vs_interface_decision
-- pack.codebase-architecture:deep_module_symptom_map
-- pack.codebase-architecture:bounded_context_language_map
-- pack.codebase-architecture:integration_boundary_contract
-- pack.codebase-architecture:architecture_tracer_proof
-- pack.codebase-architecture:data_ownership_and_consistency
-- pack.codebase-architecture:legacy_seam_characterization
-- pack.codebase-architecture:pattern_fit_and_liability
-- pack.codebase-architecture:architecture_drift_human_sync
-- pack.codebase-architecture:knowledge_capsule_quality
-selected_asset_ids:
-- claim.arch.agent-safe-boundaries-need-seams
-- rubric.arch.agent-safe-boundary-proof
-- eval.arch.agent-safe-boundary-without-regression-proof
-- claim.arch.reversible-architecture-decisions-need-tests
-- checklist.arch.patch-vs-interface-decision
-- eval.arch.patch-vs-interface-without-shared-decision
-- claim.arch.deep-modules-hide-coordination
-- lens.arch.deep-module-symptom-map
-- claim.arch.language-bounds-context
-- checklist.arch.bounded-context-language-map
-- claim.arch.integration-contracts-need-message-shape
-- checklist.arch.integration-boundary-contract
-- eval.arch.integration-boundary-without-failure-contract
-- claim.arch.architecture-change-needs-tracer-proof
-- principle.arch.evidence-backed-boundary-decisions
-- checklist.arch.architecture-tracer-proof
-- claim.arch.data-ownership-needs-consistency-contract
-- rubric.arch.data-ownership-and-consistency
-- eval.arch.cache-treated-as-source-of-truth
-- claim.arch.legacy-change-starts-with-characterization
-- heuristic.arch.legacy-seam-characterization
-- claim.arch.patterns-need-forces-and-liabilities
-- anti-pattern.arch.pattern-authority-without-fit
-- eval.arch.pattern-name-launders-no-variation
-- claim.arch.drift-needs-human-sync
-- eval.arch.architecture-drift-human-sync
-- claim.arch.capsules-need-lineage
-- claim.arch.export-proof-is-not-lifecycle-proof
-- eval.arch.capsule-without-claim-lineage
-- eval.arch.pack-export-overclaims-lifecycle
-source_export_paths:
-- pack.index.yaml
-- snapshot.yaml
-- assets.json
-- eval-scenarios.json
-- pack.md
-- slices/*.md
+- agent_safe_boundary_proof
+- patch_vs_interface_decision
+- deep_module_symptom_map
+- bounded_context_language_map
+- integration_boundary_contract
+- architecture_tracer_proof
+- data_ownership_and_consistency
+- legacy_seam_characterization
+- pattern_fit_and_liability
+- architecture_drift_human_sync
+- knowledge_capsule_quality
+- capsule_design
+- export_readiness
 capsules:
-- pack_id: pack.codebase-architecture
-  role: architecture_review_judgment
-  facet_id: agent_safe_boundary_proof
-  optional: false
-  source_slice: slices/agent-safe-boundary-proof.md
-  target_path: references/knowledge-capsules/architecture-agent-safe-boundary-proof.md
-  asset_ids:
-  - claim.arch.agent-safe-boundaries-need-seams
-  - rubric.arch.agent-safe-boundary-proof
-  - eval.arch.agent-safe-boundary-without-regression-proof
-- pack_id: pack.codebase-architecture
-  role: architecture_review_judgment
-  facet_id: patch_vs_interface_decision
-  optional: false
-  source_slice: slices/patch-vs-interface-decision.md
-  target_path: references/knowledge-capsules/architecture-patch-vs-interface-decision.md
-  asset_ids:
-  - claim.arch.reversible-architecture-decisions-need-tests
-  - checklist.arch.patch-vs-interface-decision
-  - eval.arch.patch-vs-interface-without-shared-decision
-- pack_id: pack.codebase-architecture
-  role: architecture_review_judgment
-  facet_id: deep_module_symptom_map
-  optional: false
-  source_slice: slices/deep-module-symptom-map.md
-  target_path: references/knowledge-capsules/architecture-deep-module-symptom-map.md
-  asset_ids:
-  - claim.arch.deep-modules-hide-coordination
-  - lens.arch.deep-module-symptom-map
-- pack_id: pack.codebase-architecture
-  role: architecture_review_judgment
-  facet_id: bounded_context_language_map
-  optional: false
-  source_slice: slices/bounded-context-language-map.md
-  target_path: references/knowledge-capsules/architecture-bounded-context-language-map.md
-  asset_ids:
-  - claim.arch.language-bounds-context
-  - checklist.arch.bounded-context-language-map
-- pack_id: pack.codebase-architecture
-  role: architecture_review_judgment
-  facet_id: integration_boundary_contract
-  optional: false
-  source_slice: slices/integration-boundary-contract.md
-  target_path: references/knowledge-capsules/architecture-integration-boundary-contract.md
-  asset_ids:
-  - claim.arch.integration-contracts-need-message-shape
-  - checklist.arch.integration-boundary-contract
-  - eval.arch.integration-boundary-without-failure-contract
-- pack_id: pack.codebase-architecture
-  role: architecture_review_judgment
-  facet_id: architecture_tracer_proof
-  optional: false
-  source_slice: slices/architecture-tracer-proof.md
-  target_path: references/knowledge-capsules/architecture-architecture-tracer-proof.md
-  asset_ids:
-  - claim.arch.architecture-change-needs-tracer-proof
-  - principle.arch.evidence-backed-boundary-decisions
-  - checklist.arch.architecture-tracer-proof
-  - claim.arch.agent-safe-boundaries-need-seams
-  - claim.arch.deep-modules-hide-coordination
-- pack_id: pack.codebase-architecture
-  role: architecture_review_judgment
-  facet_id: data_ownership_and_consistency
-  optional: true
-  source_slice: slices/data-ownership-and-consistency.md
-  target_path: references/knowledge-capsules/architecture-data-ownership-and-consistency.md
-  asset_ids:
-  - claim.arch.data-ownership-needs-consistency-contract
-  - rubric.arch.data-ownership-and-consistency
-  - eval.arch.cache-treated-as-source-of-truth
-- pack_id: pack.codebase-architecture
-  role: architecture_review_judgment
-  facet_id: legacy_seam_characterization
-  optional: true
-  source_slice: slices/legacy-seam-characterization.md
-  target_path: references/knowledge-capsules/architecture-legacy-seam-characterization.md
-  asset_ids:
-  - claim.arch.legacy-change-starts-with-characterization
-  - heuristic.arch.legacy-seam-characterization
-- pack_id: pack.codebase-architecture
-  role: architecture_review_judgment
-  facet_id: pattern_fit_and_liability
-  optional: true
-  source_slice: slices/pattern-fit-and-liability.md
-  target_path: references/knowledge-capsules/architecture-pattern-fit-and-liability.md
-  asset_ids:
-  - claim.arch.patterns-need-forces-and-liabilities
-  - anti-pattern.arch.pattern-authority-without-fit
-  - eval.arch.pattern-name-launders-no-variation
-- pack_id: pack.codebase-architecture
-  role: architecture_review_judgment
-  facet_id: architecture_drift_human_sync
-  optional: true
-  source_slice: slices/architecture-drift-human-sync.md
-  target_path: references/knowledge-capsules/architecture-architecture-drift-human-sync.md
-  asset_ids:
-  - claim.arch.drift-needs-human-sync
-  - eval.arch.architecture-drift-human-sync
-- pack_id: pack.codebase-architecture
-  role: architecture_review_judgment
-  facet_id: knowledge_capsule_quality
-  optional: true
-  source_slice: slices/knowledge-capsule-quality.md
-  target_path: references/knowledge-capsules/architecture-knowledge-capsule-quality.md
-  asset_ids:
-  - claim.arch.capsules-need-lineage
-  - claim.arch.export-proof-is-not-lifecycle-proof
-  - eval.arch.capsule-without-claim-lineage
-  - eval.arch.pack-export-overclaims-lifecycle
-runtime_dependency_policy:
-  requires_knowledge_os_at_runtime: false
-  raw_sources_included: false
-  local_absolute_paths_required: false
-provenance:
-  profile: improve-codebase-architecture
-  profile_digest: sha256:8ab033c60cc363be49784ecca514d8b710421172cde558690fe00b977e36d063
-  packs:
-  - pack_id: pack.codebase-architecture
-    export_root: exports/packs/pack.codebase-architecture
-    snapshot_digest: sha256:cbd151f1425d78841bac836cdd5380a18153ab5fdca141dc171f1da11135e322
-    role: architecture_review_judgment
+- {facet_id: agent_safe_boundary_proof, target_path: references/architecture-agent-safe-boundary-proof.md}
+- {facet_id: patch_vs_interface_decision, target_path: references/architecture-patch-vs-interface-decision.md}
+- {facet_id: deep_module_symptom_map, target_path: references/architecture-deep-module-symptom-map.md}
+- {facet_id: bounded_context_language_map, target_path: references/architecture-bounded-context-language-map.md}
+- {facet_id: integration_boundary_contract, target_path: references/architecture-integration-boundary-contract.md}
+- {facet_id: architecture_tracer_proof, target_path: references/architecture-architecture-tracer-proof.md}
+- {facet_id: data_ownership_and_consistency, target_path: references/architecture-data-ownership-and-consistency.md}
+- {facet_id: legacy_seam_characterization, target_path: references/architecture-legacy-seam-characterization.md}
+- {facet_id: pattern_fit_and_liability, target_path: references/architecture-pattern-fit-and-liability.md}
+- {facet_id: architecture_drift_human_sync, target_path: references/architecture-architecture-drift-human-sync.md}
+- {facet_id: knowledge_capsule_quality, target_path: references/architecture-knowledge-capsule-quality.md}
+- {facet_id: capsule_design, target_path: references/knowledge-os-capsule-design.md}
+- {facet_id: export_readiness, target_path: references/knowledge-os-export-readiness.md}

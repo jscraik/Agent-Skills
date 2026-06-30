@@ -1,0 +1,9 @@
+{
+  "id": "obvious-wrong-overclaim",
+  "probe_type": "obvious_wrong",
+  "expected_label": "fail",
+  "predicted_label": "fail",
+  "score": 0.1,
+  "raw_artifact": "raw/obvious-wrong-overclaim.json",
+  "rationale": "calibration fixture"
+}

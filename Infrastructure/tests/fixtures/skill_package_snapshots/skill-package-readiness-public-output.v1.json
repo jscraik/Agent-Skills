@@ -163,6 +163,8 @@
         "sdk_contract:reference_contract",
         "sdk_contract:task_profile",
         "writing_quality:weak_description_triggers",
+        "writing_quality:construction_trigger_boundary_missing",
+        "writing_quality:construction_steps_reference_structure_missing",
         "openai_platform_compat:openai_skill_metadata_incomplete",
         "identity_incomplete"
       ],
@@ -185,6 +187,8 @@
           "sdk_contract:reference_contract",
           "sdk_contract:task_profile",
           "writing_quality:weak_description_triggers",
+          "writing_quality:construction_trigger_boundary_missing",
+          "writing_quality:construction_steps_reference_structure_missing",
           "openai_platform_compat:openai_skill_metadata_incomplete",
           "identity_incomplete"
         ],
@@ -204,6 +208,8 @@
           "sdk_contract:reference_contract",
           "sdk_contract:task_profile",
           "writing_quality:weak_description_triggers",
+          "writing_quality:construction_trigger_boundary_missing",
+          "writing_quality:construction_steps_reference_structure_missing",
           "openai_platform_compat:openai_skill_metadata_incomplete",
           "identity_incomplete"
         ],

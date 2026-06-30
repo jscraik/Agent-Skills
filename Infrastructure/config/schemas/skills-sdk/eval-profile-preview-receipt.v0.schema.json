@@ -103,6 +103,7 @@
             "larger_local_transcript_trial",
             "code_heavy_specialist",
             "fast_fallback",
+            "local_security_specialist",
             "cloud_confirmation",
             "codex_fast_smoke"
           ]
@@ -115,7 +116,10 @@
               "additionalProperties": false,
               "properties": {
                 "num_ctx": {"type": "integer", "minimum": 1},
+                "num_predict": {"type": "integer", "minimum": 1},
+                "repeat_penalty": {"type": "number", "minimum": 0},
                 "temperature": {"type": "number", "minimum": 0},
+                "top_k": {"type": "integer", "minimum": 0},
                 "top_p": {"type": "number", "minimum": 0, "maximum": 1}
               },
               "required": ["num_ctx", "temperature", "top_p"]

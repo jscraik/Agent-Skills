@@ -1,0 +1,103 @@
+# Knowledge Capsule Routing
+
+This first-party index promotes vendored capsule routing into the skill package.
+Use it before opening generated capsule bodies so capsule guidance is not hidden
+inside second-order references.
+
+## Capsules
+
+- `references/harness-evidence-boundary.md`
+  - facet: evidence_boundary
+  - pack: pack.harness-engineering
+  - selected_asset_count: 22
+  - load_when: task signals match this facet; load only this capsule before adding more.
+- `references/harness-review-feedback.md`
+  - facet: review_feedback
+  - pack: pack.harness-engineering
+  - selected_asset_count: 19
+  - load_when: task signals match this facet; load only this capsule before adding more.
+- `references/harness-skill-routing.md`
+  - facet: skill_routing
+  - pack: pack.harness-engineering
+  - selected_asset_count: 22
+  - load_when: task signals match this facet; load only this capsule before adding more.
+- `references/harness-brownfield-readiness.md`
+  - facet: brownfield_readiness
+  - pack: pack.harness-engineering
+  - selected_asset_count: 24
+  - load_when: task signals match this facet; load only this capsule before adding more.
+- `references/harness-pr-lifecycle.md`
+  - facet: pr_lifecycle
+  - pack: pack.harness-engineering
+  - selected_asset_count: 18
+  - load_when: task signals match this facet; load only this capsule before adding more.
+- `references/ryan-environment-design.md`
+  - facet: environment_design
+  - pack: pack.ryan-lopopolo-principal-engineering
+  - selected_asset_count: 19
+  - load_when: task signals match this facet; load only this capsule before adding more.
+- `references/ryan-repo-knowledge.md`
+  - facet: repo_knowledge
+  - pack: pack.ryan-lopopolo-principal-engineering
+  - selected_asset_count: 18
+  - load_when: task signals match this facet; load only this capsule before adding more.
+- `references/ryan-mechanical-boundaries.md`
+  - facet: mechanical_boundaries
+  - pack: pack.ryan-lopopolo-principal-engineering
+  - selected_asset_count: 12
+  - load_when: task signals match this facet; load only this capsule before adding more.
+- `references/ryan-continuous-cleanup.md`
+  - facet: continuous_cleanup
+  - pack: pack.ryan-lopopolo-principal-engineering
+  - selected_asset_count: 10
+  - load_when: task signals match this facet; load only this capsule before adding more.
+- `references/ryan-agent-operating-model.md`
+  - facet: agent_operating_model
+  - pack: pack.ryan-lopopolo-principal-engineering
+  - selected_asset_count: 27
+  - load_when: task signals match this facet; load only this capsule before adding more.
+- `references/ryan-safety-policy.md`
+  - facet: safety_policy
+  - pack: pack.ryan-lopopolo-principal-engineering
+  - selected_asset_count: 6
+  - load_when: task signals match this facet; load only this capsule before adding more.
+- `references/ryan-long-term-coherence.md`
+  - facet: long_term_coherence
+  - pack: pack.ryan-lopopolo-principal-engineering
+  - selected_asset_count: 15
+  - load_when: task signals match this facet; load only this capsule before adding more.
+- `references/ryan-maintenance-supply-chain.md`
+  - facet: maintenance_supply_chain
+  - pack: pack.ryan-lopopolo-principal-engineering
+  - selected_asset_count: 18
+  - load_when: task signals match this facet; load only this capsule before adding more.
+- `references/ryan-stakeholder-alignment.md`
+  - facet: stakeholder_alignment
+  - pack: pack.ryan-lopopolo-principal-engineering
+  - selected_asset_count: 9
+  - load_when: task signals match this facet; load only this capsule before adding more.
+- `references/ryan-adoption-economics.md`
+  - facet: adoption_economics
+  - pack: pack.ryan-lopopolo-principal-engineering
+  - selected_asset_count: 13
+  - load_when: task signals match this facet; load only this capsule before adding more.
+- `references/ryan-quality-standards.md`
+  - facet: quality_standards
+  - pack: pack.ryan-lopopolo-principal-engineering
+  - selected_asset_count: 16
+  - load_when: task signals match this facet; load only this capsule before adding more.
+- `references/ryan-sociotechnical-adoption.md`
+  - facet: sociotechnical_adoption
+  - pack: pack.ryan-lopopolo-principal-engineering
+  - selected_asset_count: 8
+  - load_when: task signals match this facet; load only this capsule before adding more.
+- `references/knowledge-os-capsule-design.md`
+  - facet: capsule_design
+  - pack: pack.knowledge-os-kernel-quality
+  - selected_asset_count: 20
+  - load_when: task signals match this facet; load only this capsule before adding more.
+- `references/knowledge-os-export-readiness.md`
+  - facet: export_readiness
+  - pack: pack.knowledge-os-kernel-quality
+  - selected_asset_count: 17
+  - load_when: task signals match this facet; load only this capsule before adding more.

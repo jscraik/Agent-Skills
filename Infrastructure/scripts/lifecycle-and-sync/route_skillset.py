@@ -396,12 +396,12 @@ def harness_engineering_override(
 def factory_override(skill_set: str, task: str, rows: list[dict[str, Any]]) -> dict[str, Any] | None:
     """
     Route tasks deterministically for the `plugin-factory` and `skill-factory` skill sets before falling back to generic scoring.
-    
+
     Parameters:
         skill_set (str): Root skill set name, e.g., "plugin-factory" or "skill-factory".
         task (str): The user task text to evaluate for deterministic routing signals.
-        rows (list[dict[str, Any]]): Manifest rows for the skill set.
-    
+        rows (list[dict[str, Any]]): Manifest rows for the skill set (may include system-bridge rows for skill-factory).
+
     Returns:
         dict[str, Any] | None: A routing decision dict with keys:
             - "row": the selected manifest row (dict),
@@ -446,6 +446,15 @@ def factory_override(skill_set: str, task: str, rows: list[dict[str, Any]]) -> d
     task_tokens = tokenize(task)
 
     if skill_set == "skill-factory":
+        plugin_boundary_tokens = {"plugin", "plugins", "hook", "hooks", "mcp"}
+        if task_tokens & plugin_boundary_tokens:
+            row = row_by_id(rows, "skill-factory-router")
+            if row:
+                return {
+                    "row": row,
+                    "confidence": 0.9,
+                    "reason": "matched deterministic skill-factory rule 'plugin-boundary-handoff'",
+                }
         feedback_source_tokens = {"feedback", "coderabbit", "codex"}
         recurrence_tokens = {"again", "across", "recurring", "repeat", "repeated", "same"}
         context_package_tokens = {"skill", "skills", "context", "package", "packages", "eval", "evals"}
@@ -564,19 +573,52 @@ def factory_override(skill_set: str, task: str, rows: list[dict[str, Any]]) -> d
 def _preferred_factory_match(skill_set: str, matched: list[tuple[str, str]]) -> tuple[str, str] | None:
     if skill_set == "skill-factory" and ("skill-builder", "improve-skill-sdk-pipeline") in matched:
         return ("skill-builder", "improve-skill-sdk-pipeline")
+    if skill_set == "skill-factory" and ("skill-refactor", "refactor-skill") in matched:
+        return ("skill-refactor", "refactor-skill")
     return None
+
+
+def _skill_factory_system_bridge_rows(rows: list[dict[str, Any]], *, repo_base: Path) -> list[dict[str, Any]]:
+    """Return system skill rows that are intentionally routed by Skill Factory."""
+    existing_ids = {str(row.get("id")) for row in rows}
+    bridge_specs = {
+        "skill-creator": (
+            "Create or scaffold Codex skills through the system skill-creator with Skill Factory references.",
+            "skills-system/skill-creator/SKILL.md",
+            ["skill creator", "create skill", "scaffold skill"],
+        ),
+        "skill-installer": (
+            "Install, list, and validate Codex skills through the system skill-installer with Skill Factory references.",
+            "skills-system/skill-installer/SKILL.md",
+            ["skill installer", "install skill", "list skills"],
+        ),
+    }
+    bridges: list[dict[str, Any]] = []
+    for bridge_id, (description, source_path, triggers) in bridge_specs.items():
+        if bridge_id in existing_ids or not (repo_base / source_path).is_file():
+            continue
+        bridges.append(
+            {
+                "id": bridge_id,
+                "description": description,
+                "level": "system-bridge",
+                "source_path": source_path,
+                "triggers": triggers,
+            }
+        )
+    return bridges
 
 
 def route(skill_set: str, task: str, *, top_k: int = MAX_TOP_K, skillsets_dir: Path = DEFAULT_SKILLSETS_DIR) -> dict[str, Any]:
     """
     Route a task to the best-matching stage within a root skill set.
-    
+
     Parameters:
     	skill_set (str): Root skill set name to route within.
     	task (str): The user task text to route.
     	top_k (int): Maximum number of candidate stages to return (bounded to 1..MAX_TOP_K).
     	skillsets_dir (Path): Directory containing skill-set subfolders.
-    
+
     Returns:
     	payload (dict): A structured routing result with these keys:
     		- schema_version (int): Payload schema version.
@@ -625,6 +667,12 @@ def route(skill_set: str, task: str, *, top_k: int = MAX_TOP_K, skillsets_dir: P
             "candidates": [],
             "operator_action": "Handle as ordinary product work; factory routing is excluded by the task text.",
         }
+
+    # For skill-factory, augment rows with system-bridge entries before override checks
+    augmented_rows = rows
+    if skill_set == "skill-factory":
+        augmented_rows = [*rows, *_skill_factory_system_bridge_rows(rows, repo_base=skillsets_dir.parent)]
+
     override = None
     try:
         if skill_set == "harness-engineering":
@@ -633,7 +681,7 @@ def route(skill_set: str, task: str, *, top_k: int = MAX_TOP_K, skillsets_dir: P
                 routing_map_path = None
             override = harness_engineering_override(task, rows, routing_map_path=routing_map_path)
         elif skill_set in {"plugin-factory", "skill-factory"}:
-            override = factory_override(skill_set, task, rows)
+            override = factory_override(skill_set, task, augmented_rows)
     except ValueError as exc:
         return {
             "schema_version": 1,
@@ -668,7 +716,7 @@ def route(skill_set: str, task: str, *, top_k: int = MAX_TOP_K, skillsets_dir: P
             "operator_action": None,
         }
     scored = []
-    for row in rows:
+    for row in augmented_rows:
         confidence, reasons = score_row(row, task)
         if confidence <= 0:
             continue
@@ -699,7 +747,7 @@ def route(skill_set: str, task: str, *, top_k: int = MAX_TOP_K, skillsets_dir: P
         selected_id = str(selected_row.get("id", ""))
         resolved_selected_id = resolve_he_stage_alias(selected_id)
         if resolved_selected_id != selected_id:
-            selected_row = row_by_id(rows, resolved_selected_id) or selected_row
+            selected_row = row_by_id(augmented_rows, resolved_selected_id) or selected_row
     status = "selected" if selected_confidence >= LOW_CONFIDENCE_THRESHOLD else "low_confidence"
     selected = None
     if status == "selected":

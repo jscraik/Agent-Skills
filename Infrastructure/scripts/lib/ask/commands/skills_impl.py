@@ -191,11 +191,65 @@ from ask.skill_review_dashboard import (  # noqa: E402
 TESSL_REVIEW_MIN_SCORE = 95
 TESSL_REVIEW_TARGET_SCORE = 95
 PLUGIN_EVAL_MIN_ACCEPTABLE_GRADE = "B+"
+PLUGIN_EVAL_EXCLUDED_PACKAGE_SURFACES = (
+    "README.md",
+    "references/evals.yaml",
+    "references/evals",
+    "references/scorer-calibration",
+)
 
 
 class _EvalCommandsProtocol(Protocol):
     def _scorecard_path_from_output(self, repo_root: Path, raw_output: str) -> Path | None: ...
     def _read_scorecard(self, path: Path | None) -> dict[str, Any]: ...
+
+
+def _reject_symlinked_stage_inputs(root: Path) -> None:
+    if root.is_symlink():
+        raise ValueError(f"plugin-eval staging rejects symlinked support path: {root}")
+    for candidate in root.rglob("*"):
+        if candidate.is_symlink():
+            raise ValueError(f"plugin-eval staging rejects symlinked support path: {candidate}")
+
+def _stage_plugin_eval_agent_context(repo_root: Path, target_abs: Path, audit_target: str) -> tuple[Path, dict[str, Any]]:
+    """Stage the agent-loaded skill context used by Plugin Eval budget checks."""
+    _reject_symlinked_stage_inputs(target_abs)
+    digest = hashlib.sha256(str(target_abs).encode("utf-8")).hexdigest()[:12]
+    safe_name = re.sub(r"[^A-Za-z0-9_.-]+", "__", str(audit_target).strip("/")) or "skill"
+    staging_root = Path(tempfile.gettempdir()) / "ask-plugin-eval-reviews" / f"{safe_name}-{digest}"
+    current = staging_root / "current"
+    if current.exists():
+        archive_root = staging_root / "archive"
+        archive_root.mkdir(parents=True, exist_ok=True)
+        current.replace(archive_root / f"current-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}")
+
+    excluded = set(PLUGIN_EVAL_EXCLUDED_PACKAGE_SURFACES)
+
+    def ignore(src: str, names: list[str]) -> set[str]:
+        src_path = Path(src)
+        try:
+            rel = src_path.relative_to(target_abs).as_posix()
+        except ValueError:
+            rel = "."
+        ignored: set[str] = {name for name in names if name in {".DS_Store", "Thumbs.db", "desktop.ini"}}
+        for name in names:
+            candidate = name if rel == "." else f"{rel}/{name}"
+            if candidate in excluded:
+                ignored.add(name)
+        return ignored
+
+    shutil.copytree(target_abs, current, ignore=ignore)
+    rel_current = _repo_relative_path(repo_root, current) if current.is_relative_to(repo_root) else current.as_posix()
+    return current, {
+        "mode": "agent_context_staging",
+        "staging_root": current.as_posix(),
+        "display_path": rel_current,
+        "excluded_package_surfaces": sorted(excluded),
+        "reason": (
+            "Plugin Eval budget checks should score agent-loaded skill context, not SDK workbench "
+            "surfaces such as README, canonical eval indexes, generated scenario notes, or scorer calibration."
+        ),
+    }
 
 
 __all__ = [
@@ -9803,6 +9857,11 @@ def external_review_skill(
         ),
         "tessl_review_role": "local_best_practice_content_review",
         "plugin_eval_role": "budget_and_ergonomics_guardrail",
+        "plugin_eval_context_policy": (
+            "Plugin Eval scores the agent-loaded context view. SDK workbench files "
+            "remain package-validated but are excluded from static context-budget scoring."
+        ),
+        "plugin_eval_excluded_package_surfaces": list(PLUGIN_EVAL_EXCLUDED_PACKAGE_SURFACES),
         "plugin_eval_min_acceptable_grade": PLUGIN_EVAL_MIN_ACCEPTABLE_GRADE,
         "plugin_eval_warning_policy": (
             "Plugin Eval warnings are visible follow-up work, but they are not release blockers when "
@@ -9909,7 +9968,13 @@ def external_review_skill(
                 fix_suggestion="Install or expose plugin-eval, then rerun this local-only review lane.",
             ))
         else:
-            command = [plugin_eval_bin, "analyze", audit_target_path, "--format", "markdown"]
+            plugin_eval_target, plugin_eval_context = _stage_plugin_eval_agent_context(
+                repo_root,
+                target_abs,
+                audit_target,
+            )
+            result.data["plugin_eval_context"] = plugin_eval_context
+            command = [plugin_eval_bin, "analyze", plugin_eval_target.as_posix(), "--format", "markdown"]
             try:
                 proc = _run_captured_tool(repo_root=repo_root, command=command, timeout_seconds=timeout_seconds)
                 payload = _completed_process_payload(proc)

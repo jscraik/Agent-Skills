@@ -331,7 +331,7 @@ def _validate_source_files(extraction_root: Path, source_files: list[Path], find
         relative = source_file.relative_to(extraction_root).as_posix()
         if relative in allowed_names:
             pass
-        elif relative.startswith("references/knowledge-capsules/") and relative.endswith(".md"):
+        elif _allowed_markdown_reference(relative):
             pass
         elif relative.startswith("references/evals/") and relative.endswith(".md"):
             pass
@@ -372,6 +372,15 @@ def _validate_eval_scenarios_json(text: str, findings: list[str], *, relative: s
             seen_ids.add(scenario_id)
         if not isinstance(scenario_payload, dict):
             findings.append(f"references:invalid_eval_scenarios_json:{relative}:{index}:missing_payload")
+
+
+def _allowed_markdown_reference(relative: str) -> bool:
+    if not relative.endswith(".md"):
+        return False
+    path = Path(relative)
+    return (len(path.parts) == 2 and path.parts[0] == "references") or relative.startswith(
+        "references/knowledge-capsules/"
+    ) or relative.startswith("references/evals/")
 
 
 def _update_skill_routing(skill_md: Path, *, eval_routes: dict[str, bool]) -> None:

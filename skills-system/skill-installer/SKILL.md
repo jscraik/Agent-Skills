@@ -98,6 +98,9 @@ package contract after download:
    `blocked_validation` rather than silently accepting the package.
 5. Run `./bin/ask skills package verify <installed-path-or-handle> --json --robot`
    when available.
+   Treat `reference_quality` blockers, including `reference_heading_invocable`
+   failures for Markdown references or vendored KnowledgeOS capsules, as
+   install validation blockers.
 6. Treat `package_contract.sdk_contract.required_fields.missing` as blocking
    for strict SDK installation. Required SDK fields are purpose, inputs,
    outputs, permission profile, evals, and evidence policy.

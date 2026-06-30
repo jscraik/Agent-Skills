@@ -1,25 +1,25 @@
-# Eval Fixture: Repeated Steering To Durable Mechanism
+# eval.ryan.repeated-steering-to-durable-mechanism: Repeated Steering Becomes A Durable Mechanism
 
-## Input
+Promotion status: candidate
+Proof route: references/evals.yaml
+Fixture path: references/evals/eval.ryan.repeated-steering-to-durable-mechanism.md
 
-A reviewer says: "This is the third time I have told agents not to hand-edit
-generated exports. Fix this instance."
+Knowledge claim: Principle under test: The agent identifies the recurrence, names the failure class, proposes the smallest durable repo mechanism, and records either the patch or a bounded skip reason.
+Behavior under test: Observable agent behavior when an user repeats the same correction across two agent tasks in a repository.
+Failure mode: The agent applies another one-off fix and treats the repeated feedback as ordinary task steering.
+Expected agent move: The agent identifies the recurrence, names the failure class, proposes the smallest durable repo mechanism, and records either the patch or a bounded skip reason.
+Skill lift before failure: The agent applies another one-off fix and treats the repeated feedback as ordinary task steering.
+Skill lift after behavior: The agent identifies the recurrence, names the failure class, proposes the smallest durable repo mechanism, and records either the patch or a bounded skip reason.
+Observable delta: The response avoids the weak pattern (The agent applies another one-off fix and treats the repeated feedback as ordinary task steering) and instead shows the expected behavior (The agent identifies the recurrence, names the failure class, proposes the smallest durable repo mechanism, and records either the patch or a bounded skip reason).
 
-## Expected Response Requirements
+Given: A user repeats the same correction across two agent tasks in a repository.
+Should: The agent identifies the recurrence, names the failure class, proposes the smallest durable repo mechanism, and records either the patch or a bounded skip reason.
+Expected failure: The agent applies another one-off fix and treats the repeated feedback as ordinary task steering.
 
-- Identify the repeated steering as an environment failure.
-- Name the durable surface that should change.
-- Propose or apply the smallest guardrail, validator, instruction, or fixture.
-- Preserve unrelated work and state any skip reason if no durable change is safe.
+Bad answer patterns:
+- The agent applies another one-off fix and treats the repeated feedback as ordinary task steering.
 
-## Failure Assertions
+Good answer patterns:
+- The agent identifies the recurrence, names the failure class, proposes the smallest durable repo mechanism, and records either the patch or a bounded skip reason.
 
-- Fails if the response only edits the current file.
-- Fails if the response treats repeated feedback as ordinary one-off steering.
-
-## Skill-Local Evidence Boundary
-
-Failure category: seed eval requires behavioural scenario conversion.
-Evidence boundary: this fixture is skill-local evidence at references/evals/eval.ryan.repeated-steering-to-durable-mechanism.md; it does not by itself prove repository, pull request, remote-check, merge-readiness, or Tessl-readiness outcomes.
-Durable mechanism: use this fixture to generate scenario criteria that require the agent to identify recurrence, classifies the failure, recommends the smallest repo mechanism, and records either the concrete patch or a bounded skip reason.
-Validation status: not_run_with_reason until the scenario is executed by the local pipeline and private Tessl eval lane.
+This is the portable SDK reproduction contract for the eval scenario. The KnowledgeOS authoring fixture remains inside the validation workspace and is not vendored into SDK-ready exports.

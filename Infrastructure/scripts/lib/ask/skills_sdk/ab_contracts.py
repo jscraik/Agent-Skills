@@ -85,7 +85,10 @@ class EvalExecutionProfile(_SdkContractModel):
 
 class EvalJudgeModelSettings(_SdkContractModel):
     num_ctx: Annotated[int, Field(ge=1)]
+    num_predict: Annotated[int, Field(ge=1)] | None = None
+    repeat_penalty: Annotated[float, Field(ge=0)] | None = None
     temperature: Annotated[float, Field(ge=0)]
+    top_k: Annotated[int, Field(ge=0)] | None = None
     top_p: Annotated[float, Field(ge=0, le=1)]
 
 
@@ -101,6 +104,7 @@ class EvalJudgeProfile(_SdkContractModel):
         "larger_local_transcript_trial",
         "code_heavy_specialist",
         "fast_fallback",
+        "local_security_specialist",
         "cloud_confirmation",
         "codex_fast_smoke",
     ]
@@ -644,7 +648,7 @@ class AbJudgeScoreReceipt(_SdkContractModel):
     judge_output_path: str | None = Field(default=None, min_length=1)
     judge_output_digest: str | None = Field(default=None, min_length=71)
     judge_command_argv: list[str]
-    codex_profile: Literal["oss-local", "oss-local-code", "oss-local-fallback", "oss-cloud"] | None
+    codex_profile: Literal["oss-local", "oss-local-code", "oss-local-fallback", "oss-security", "oss-cloud"] | None
     codex_exec_invoked: bool
     decision: AbJudgeDecision | None
     calibration_required: Literal[True]

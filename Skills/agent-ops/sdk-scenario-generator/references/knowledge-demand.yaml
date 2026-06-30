@@ -1,0 +1,33 @@
+---
+schema_version: knowledge-os.knowledge-demand.v1
+skill:
+  skill_id: sdk-scenario-generator
+  declared_name: sdk-scenario-generator
+  entrypoint_path: Skills/agent-ops/sdk-scenario-generator/SKILL.md
+  canonical_skill_path: Skills/agent-ops/sdk-scenario-generator/SKILL.md
+  writable_root: Skills/agent-ops/sdk-scenario-generator
+  apply_target_path: Skills/agent-ops/sdk-scenario-generator/SKILL.md
+knowledge_signals:
+- scenario_generation
+- baseline_lift
+- trace_revision
+- fixture_handoff
+- weak_eval_detection
+- promotion_policy
+- capsule_source_model
+- capsule_relationship_map
+- capsule_downstream_integration
+- capsule_failure_modes
+- capsule_eval_scenarios
+needed_facets:
+- pack.skills-sdk:evaluation_benchmarks
+- pack.skills-sdk:generation_revision
+- pack.skills-sdk:operations_registry
+- pack.skills-sdk:architecture_runtime
+- pack.skills-sdk:supply_chain_security
+- pack.knowledge-os-kernel-quality:capsule_design
+- pack.knowledge-os-kernel-quality:export_readiness
+runtime_dependency_policy:
+  requires_knowledge_os_at_runtime: false
+  raw_sources_included: false
+  local_absolute_paths_required: false

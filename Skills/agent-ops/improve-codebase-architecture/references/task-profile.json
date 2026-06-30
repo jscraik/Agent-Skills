@@ -1,55 +1,21 @@
 {
-  "schema_version": "1.0",
-  "profile_id": "Skills-agent-ops-improve-codebase-architecture",
+  "schema_version": "skills-sdk.task-profile.v1",
+  "profile_id": "improve-codebase-architecture",
   "scope_skill": "Skills/agent-ops/improve-codebase-architecture",
-  "scope_profile": "Skills",
-  "rubric_version": "2026-02-26",
-  "evaluator_version": "v1",
-  "persona_set_id": "default-v1",
+  "scope_profile": "architecture-review",
+  "rubric_version": "2026-06-30",
+  "evaluator_version": "skills-sdk-local",
+  "persona_set_id": "architecture-reviewers",
   "thresholds": {
-    "stability_consecutive_passes": 1,
-    "critical_non_regression": true,
-    "max_iterations": 4,
-    "max_elapsed_ms": 120000,
-    "max_tokens": 12000,
-    "no_improvement_escalation_limit": 2
+    "package_verify": "pass",
+    "plugin_eval_min_grade": "B+"
   },
   "criteria": [
-    {
-      "id": "clarity",
-      "label": "Architecture decision clarity",
-      "threshold": 0.74,
-      "weight": 0.34,
-      "critical": true
-    },
-    {
-      "id": "specificity",
-      "label": "Repo evidence and verifier specificity",
-      "threshold": 0.72,
-      "weight": 0.33,
-      "critical": true
-    },
-    {
-      "id": "safety",
-      "label": "Untrusted input and destructive command resistance",
-      "threshold": 0.86,
-      "weight": 0.33,
-      "critical": true
-    }
+    "source evidence",
+    "caller map",
+    "boundary verdict",
+    "verifier proof"
   ],
-  "delegation": {
-    "mode": "co-pilot",
-    "human_baseline_minutes": 45,
-    "ai_process_minutes": 18,
-    "probability_of_success": 0.76,
-    "rationale": "Architecture review benefits from agent evidence gathering and verifier planning while a human keeps final authority over structural direction."
-  },
-  "learning_posture": {
-    "supported": [
-      "learn",
-      "guided",
-      "execute"
-    ],
-    "default": "guided"
-  }
+  "delegation": "Do not delegate unless explicitly requested.",
+  "learning_posture": "Promote repeated failures into validators or contract updates."
 }

@@ -16,6 +16,7 @@ sys.path.insert(0, str(REPO_ROOT / "Infrastructure" / "scripts" / "lib"))
 
 from ask.command_metadata import COMMAND_EXAMPLES, VALID_ACTIONS  # noqa: E402
 from ask.commands import evals as eval_commands  # noqa: E402
+from ask.commands.sdk_knowledge import _block_warning_preflight  # noqa: E402
 from ask.skills_sdk.knowledge_ingest import build_knowledge_ingest  # noqa: E402
 
 ASK_PYTHON = shutil.which("python3.14") or shutil.which("python3.12") or sys.executable
@@ -89,8 +90,7 @@ def _write_extraction(
 ) -> Path:
     extraction = root / "knowledge-OS" / "exports" / "extractions" / "improve-agent-native"
     refs = extraction / "references"
-    capsules = refs / "knowledge-capsules"
-    capsules.mkdir(parents=True)
+    refs.mkdir(parents=True)
     skill_payload = _extraction_skill_payload()
     plan = _extraction_plan(skill_payload)
     demand = _extraction_demand(skill_payload)
@@ -104,13 +104,13 @@ def _write_extraction(
     _write_yaml(refs / "knowledge-capsule.manifest.yaml", manifest)
     (refs / "knowledge-capsule-routing.md").write_text(
         "# Knowledge Capsule Routing\n\n"
-        "- `references/knowledge-capsules/harness-evidence-boundary.md` - Evidence boundary\n",
+        "- `references/harness-evidence-boundary.md` - Evidence boundary\n",
         encoding="utf-8",
     )
     capsule_text = "# Harness Evidence Boundary\n\nUse evidence before readiness claims.\n"
     if leak:
         capsule_text += "/Users/jamiecraik/dev/knowledge-OS/private-source.md\n"
-    (capsules / "harness-evidence-boundary.md").write_text(capsule_text, encoding="utf-8")
+    (refs / "harness-evidence-boundary.md").write_text(capsule_text, encoding="utf-8")
     if include_evals and eval_files in {"both", "scenarios"}:
         (refs / "eval-scenarios.json").write_text(
             json.dumps(
@@ -179,7 +179,7 @@ def _extraction_manifest(skill_payload: dict[str, str]) -> dict[str, object]:
         "capsules": [
             {
                 "facet_id": "evidence_boundary",
-                "target_path": "references/knowledge-capsules/harness-evidence-boundary.md",
+                "target_path": "references/harness-evidence-boundary.md",
             }
         ],
     }
@@ -189,11 +189,11 @@ def _write_yaml(path: Path, payload: dict[str, object]) -> None:
     path.write_text(yaml.safe_dump(payload, sort_keys=False), encoding="utf-8")
 
 
-def _write_skill_gate(repo_root: Path) -> Path:
+def _write_skill_gate(repo_root: Path, *, stdout: str = "gate ok") -> Path:
     gate = repo_root / "Plugins" / "skill-factory" / "scripts" / "skill-builder" / "skill_gate.py"
     gate.parent.mkdir(parents=True)
     gate.write_text(
-        "import sys\nprint('gate ok')\nraise SystemExit(0)\n",
+        f"import sys\nprint({stdout!r})\nraise SystemExit(0)\n",
         encoding="utf-8",
     )
     return gate
@@ -239,11 +239,11 @@ class TestSkillsSdkKnowledgeIngest(unittest.TestCase):
 
             self.assertEqual(payload["status"], "applied")
             self.assertTrue((skill_dir / "references" / "knowledge-demand.yaml").is_file())
-            self.assertTrue((skill_dir / "references" / "knowledge-capsules" / "harness-evidence-boundary.md").is_file())
+            self.assertTrue((skill_dir / "references" / "harness-evidence-boundary.md").is_file())
             capsule_routing = skill_dir / "references" / "knowledge-capsule-routing.md"
             self.assertTrue(capsule_routing.is_file())
             capsule_routing_text = capsule_routing.read_text(encoding="utf-8")
-            self.assertIn("references/knowledge-capsules/harness-evidence-boundary.md", capsule_routing_text)
+            self.assertIn("references/harness-evidence-boundary.md", capsule_routing_text)
             skill_text = (skill_dir / "SKILL.md").read_text(encoding="utf-8")
             self.assertIn("Do not load all capsules by default", skill_text)
             self.assertIn("references/knowledge-capsule-routing.md", skill_text)
@@ -252,7 +252,7 @@ class TestSkillsSdkKnowledgeIngest(unittest.TestCase):
             source_context = yaml.safe_load((skill_dir / "references" / "source-context.yaml").read_text(encoding="utf-8"))
             paths = {entry["path"] for entry in source_context["references"]}
             self.assertIn("references/knowledge-capsule.manifest.yaml", paths)
-            self.assertIn("references/knowledge-capsules/", paths)
+            self.assertIn("references/harness-evidence-boundary.md", paths)
             self.assertNotIn("references/eval-scenarios.json", paths)
             self.assertNotIn("references/evals/", paths)
             self.assertNotIn(
@@ -416,7 +416,7 @@ class TestSkillsSdkKnowledgeIngest(unittest.TestCase):
 
             self.assertEqual(payload["status"], "blocked")
             self.assertIn(
-                "references:local_absolute_path_leak:references/knowledge-capsules/harness-evidence-boundary.md",
+                "references:local_absolute_path_leak:references/harness-evidence-boundary.md",
                 payload["findings"],
             )
 
@@ -426,7 +426,7 @@ class TestSkillsSdkKnowledgeIngest(unittest.TestCase):
             root.mkdir()
             _write_skill(root)
             extraction = _write_extraction(Path(tmp))
-            bad_reference = extraction / "references" / "knowledge-capsules" / "invalid-utf8.md"
+            bad_reference = extraction / "references" / "invalid-utf8.md"
             bad_reference.write_bytes(b"\xff\xfe\x00")
 
             payload = build_knowledge_ingest(
@@ -439,9 +439,75 @@ class TestSkillsSdkKnowledgeIngest(unittest.TestCase):
 
             self.assertEqual(payload["status"], "blocked")
             self.assertIn(
-                "references:invalid_utf8:references/knowledge-capsules/invalid-utf8.md",
+                "references:invalid_utf8:references/invalid-utf8.md",
                 payload["findings"],
             )
+
+    def test_legacy_capsule_subdir_blocks_without_manifest_justification(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "agent-skills"
+            root.mkdir()
+            _write_skill(root)
+            extraction = _write_extraction(Path(tmp))
+            refs = extraction / "references"
+            legacy_dir = refs / "knowledge-capsules"
+            legacy_dir.mkdir()
+            (legacy_dir / "harness-evidence-boundary.md").write_text(
+                (refs / "harness-evidence-boundary.md").read_text(encoding="utf-8"),
+                encoding="utf-8",
+            )
+            (refs / "harness-evidence-boundary.md").unlink()
+            manifest_path = refs / "knowledge-capsule.manifest.yaml"
+            manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
+            manifest["capsules"][0]["target_path"] = "references/knowledge-capsules/harness-evidence-boundary.md"
+            manifest_path.write_text(yaml.safe_dump(manifest, sort_keys=False), encoding="utf-8")
+
+            payload = build_knowledge_ingest(
+                root,
+                extraction=str(extraction),
+                skill="Skills/agent-ops/improve-agent-native",
+                apply=False,
+                preflight_security=False,
+            )
+
+            self.assertEqual(payload["status"], "blocked")
+            self.assertIn(
+                "references:legacy_knowledge_capsule_subdir_unjustified:references/knowledge-capsules/harness-evidence-boundary.md",
+                payload["findings"],
+            )
+
+    def test_legacy_capsule_subdir_allowed_with_manifest_justification(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "agent-skills"
+            root.mkdir()
+            _write_skill(root)
+            extraction = _write_extraction(Path(tmp))
+            refs = extraction / "references"
+            legacy_dir = refs / "knowledge-capsules"
+            legacy_dir.mkdir()
+            (legacy_dir / "harness-evidence-boundary.md").write_text(
+                (refs / "harness-evidence-boundary.md").read_text(encoding="utf-8"),
+                encoding="utf-8",
+            )
+            (refs / "harness-evidence-boundary.md").unlink()
+            manifest_path = refs / "knowledge-capsule.manifest.yaml"
+            manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
+            manifest["capsules"][0]["target_path"] = "references/knowledge-capsules/harness-evidence-boundary.md"
+            manifest["capsule_storage"] = {
+                "allow_legacy_subdirectory": True,
+                "justification": "compatibility migration for an existing package layout",
+            }
+            manifest_path.write_text(yaml.safe_dump(manifest, sort_keys=False), encoding="utf-8")
+
+            payload = build_knowledge_ingest(
+                root,
+                extraction=str(extraction),
+                skill="Skills/agent-ops/improve-agent-native",
+                apply=False,
+                preflight_security=False,
+            )
+
+            self.assertEqual(payload["status"], "preview")
 
     def test_duplicate_eval_scenario_ids_block_apply(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -522,6 +588,23 @@ class TestSkillsSdkKnowledgeIngest(unittest.TestCase):
             self.assertEqual(payload["status"], "preview")
             self.assertEqual(payload["staged_preflight"]["status"], "pass")
 
+    def test_preflight_blocks_warning_only_skill_gate_output(self) -> None:
+        payload = {
+            "status": "preview",
+            "findings": [],
+            "staged_preflight": {
+                "status": "pass",
+                "stdout_excerpt": "WARN RESEARCH_EVALS_LEAKY: repair before promotion\nRESULT: PASS",
+            },
+        }
+
+        _block_warning_preflight(payload)
+
+        self.assertEqual(payload["status"], "blocked")
+        self.assertIn("staged_security_gate_warnings", payload["findings"])
+        self.assertEqual(payload["staged_preflight"]["status"], "blocked")
+        self.assertEqual(payload["staged_preflight"]["warning_count"], 1)
+
     def test_apply_adds_routing_under_workflow_heading(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "agent-skills"
@@ -571,7 +654,7 @@ class TestSkillsSdkKnowledgeIngest(unittest.TestCase):
             extraction = _write_extraction(Path(tmp))
             outside = Path(tmp) / "outside-secret.md"
             outside.write_text("private source", encoding="utf-8")
-            os.symlink(outside, extraction / "references" / "knowledge-capsules" / "outside-secret.md")
+            os.symlink(outside, extraction / "references" / "outside-secret.md")
 
             payload = build_knowledge_ingest(
                 root,
@@ -582,7 +665,7 @@ class TestSkillsSdkKnowledgeIngest(unittest.TestCase):
             )
 
             self.assertEqual(payload["status"], "applied")
-            self.assertFalse((skill_dir / "references" / "knowledge-capsules" / "outside-secret.md").exists())
+            self.assertFalse((skill_dir / "references" / "outside-secret.md").exists())
 
     @unittest.skipIf(not hasattr(os, "symlink"), "symlink support required")
     def test_required_reference_yaml_symlink_is_rejected_before_loading(self) -> None:

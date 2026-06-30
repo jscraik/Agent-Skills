@@ -1,0 +1,7 @@
+interface:
+  display_name: Testing
+  short_description: "Select and report repo-native validation proof"
+  default_prompt: "Use Testing. "
+policy:
+  allow_implicit_invocation: false
+  requires_explicit_skill_route: true

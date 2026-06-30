@@ -889,7 +889,10 @@ Keep the entrypoint small.
 """,
                 encoding="utf-8",
             )
-            (references_dir / "details.md").write_text("# Details\n", encoding="utf-8")
+            (references_dir / "details.md").write_text(
+                "# Hidden File Skill Details\n",
+                encoding="utf-8",
+            )
 
             contract = package_contracts.sdk_package_contract(
                 repo_root,
@@ -903,6 +906,398 @@ Keep the entrypoint small.
         self.assertEqual(progressive["progressive_disclosure_reference_count"], 1)
         self.assertEqual(progressive["progressive_disclosure_missing_references"], [])
         self.assertTrue(progressive["progressive_disclosure_ready"])
+
+    def test_writing_quality_blocks_near_threshold_reference_backed_sprawl(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "near-threshold-skill"
+            references_dir = skill_dir / "references"
+            references_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            filler = "\n".join(f"Filler line {index}." for index in range(205))
+            skill_md.write_text(
+                f"""---
+name: near-threshold-skill
+description: Use when a user asks to run a near-threshold package fixture.
+---
+
+# Near Threshold Skill
+
+## Workflow
+
+Run the narrow fixture path.
+
+{filler}
+
+## Output Contract
+
+- Report the fixture result.
+
+## Validation
+
+- Command: fixture check -> pass
+
+## Progressive Disclosure
+
+- Read `references/details.md` for task-specific detail.
+""",
+                encoding="utf-8",
+            )
+            (references_dir / "details.md").write_text(
+                "# Hidden File Skill Details\n",
+                encoding="utf-8",
+            )
+
+            progressive = package_contracts.progressive_disclosure_contract(
+                repo_root,
+                skill_md,
+                skill_md.read_text(encoding="utf-8"),
+            )
+            contract = package_contracts.writing_quality_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+                skill_md.read_text(encoding="utf-8"),
+                progressive,
+            )
+
+        progressive_check = next(
+            check for check in contract["checks"] if check["name"] == "progressive_disclosure_rubric"
+        )
+        self.assertEqual(progressive_check["status"], "blocked_validation")
+        self.assertGreater(progressive_check["evidence"]["line_count"], 220)
+        self.assertTrue(progressive_check["evidence"]["over_near_threshold"])
+        self.assertIn(
+            "near_threshold_entrypoint_sprawl",
+            {blocker["rule_id"] for blocker in contract["blockers"]},
+        )
+
+    def test_writing_quality_accepts_evidence_contract_completion(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "evidence-contract-skill"
+            references_dir = skill_dir / "references"
+            references_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: evidence-contract-skill
+description: Use when a user asks to test evidence contract completion criteria.
+---
+
+# Evidence Contract Skill
+
+## Workflow
+
+Run the fixture path.
+
+## Evidence Contract
+
+Report the command evidence and blocker class.
+
+## Progressive Disclosure
+
+- Read `references/details.md` for task-specific detail.
+""",
+                encoding="utf-8",
+            )
+            (references_dir / "details.md").write_text("# Details\n", encoding="utf-8")
+
+            progressive = package_contracts.progressive_disclosure_contract(
+                repo_root,
+                skill_md,
+                skill_md.read_text(encoding="utf-8"),
+            )
+            contract = package_contracts.writing_quality_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+                skill_md.read_text(encoding="utf-8"),
+                progressive,
+            )
+
+        completion_check = next(
+            check for check in contract["checks"] if check["name"] == "procedural_completion_criteria"
+        )
+        self.assertEqual(completion_check["status"], "pass")
+        self.assertTrue(completion_check["evidence"]["evidence_contract_declared"])
+        self.assertNotIn(
+            "missing_completion_criterion",
+            {blocker["rule_id"] for blocker in contract["blockers"]},
+        )
+
+    def test_writing_quality_accepts_routed_validation_output_reference(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "routed-output-skill"
+            references_dir = skill_dir / "references"
+            references_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: routed-output-skill
+description: Use when a user asks to test routed validation output criteria.
+---
+
+# Routed Output Skill
+
+## Workflow
+
+Run the fixture path.
+
+## Progressive Disclosure
+
+- Read `references/validation-and-output.md` for output and evidence fields.
+""",
+                encoding="utf-8",
+            )
+            (references_dir / "validation-and-output.md").write_text(
+                "# Validation And Output\n\nReport command evidence.\n",
+                encoding="utf-8",
+            )
+
+            progressive = package_contracts.progressive_disclosure_contract(
+                repo_root,
+                skill_md,
+                skill_md.read_text(encoding="utf-8"),
+            )
+            contract = package_contracts.writing_quality_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+                skill_md.read_text(encoding="utf-8"),
+                progressive,
+            )
+
+        completion_check = next(
+            check for check in contract["checks"] if check["name"] == "procedural_completion_criteria"
+        )
+        self.assertEqual(completion_check["status"], "pass")
+        self.assertTrue(completion_check["evidence"]["completion_reference_declared"])
+        self.assertNotIn(
+            "missing_completion_criterion",
+            {blocker["rule_id"] for blocker in contract["blockers"]},
+        )
+
+    def test_writing_quality_blocks_generic_trigger_boundary(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "generic-trigger-skill"
+            skill_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: generic-trigger-skill
+description: Use when a user asks for help with anything.
+---
+
+# Generic Trigger Skill
+
+## Workflow
+
+Run the fixture path.
+
+## Output Contract
+
+- Report the fixture result.
+""",
+                encoding="utf-8",
+            )
+
+            progressive = package_contracts.progressive_disclosure_contract(
+                repo_root,
+                skill_md,
+                skill_md.read_text(encoding="utf-8"),
+            )
+            contract = package_contracts.writing_quality_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+                skill_md.read_text(encoding="utf-8"),
+                progressive,
+            )
+
+        trigger_check = next(
+            check for check in contract["checks"] if check["name"] == "construction_trigger_boundary"
+        )
+        self.assertEqual(trigger_check["status"], "blocked_validation")
+        self.assertEqual(trigger_check["dimension"], "invocation")
+        self.assertEqual(trigger_check["evidence"]["glossary_axis"], "Invocation")
+        self.assertIn("anything", trigger_check["evidence"]["generic_trigger_terms"])
+        self.assertIn(
+            "construction_trigger_boundary_missing",
+            {blocker["rule_id"] for blocker in contract["blockers"]},
+        )
+
+    def test_writing_quality_blocks_missing_steps_reference_structure(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "structureless-skill"
+            references_dir = skill_dir / "references"
+            references_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: structureless-skill
+description: Use when a user asks to validate structure checks.
+---
+
+# Structureless Skill
+
+This skill contains background material but no executable workflow section.
+
+## Output Contract
+
+- Report the fixture result.
+
+## Progressive Disclosure
+
+- Read references/details.md for task-specific detail.
+""",
+                encoding="utf-8",
+            )
+            (references_dir / "details.md").write_text("# Details\n", encoding="utf-8")
+
+            progressive = package_contracts.progressive_disclosure_contract(
+                repo_root,
+                skill_md,
+                skill_md.read_text(encoding="utf-8"),
+            )
+            contract = package_contracts.writing_quality_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+                skill_md.read_text(encoding="utf-8"),
+                progressive,
+            )
+
+        structure_check = next(
+            check for check in contract["checks"] if check["name"] == "construction_steps_reference_structure"
+        )
+        self.assertEqual(structure_check["status"], "blocked_validation")
+        self.assertEqual(structure_check["dimension"], "information_hierarchy")
+        self.assertEqual(structure_check["evidence"]["glossary_axis"], "Information Hierarchy")
+        self.assertFalse(structure_check["evidence"]["procedural_heading_declared"])
+        self.assertIn(
+            "construction_steps_reference_structure_missing",
+            {blocker["rule_id"] for blocker in contract["blockers"]},
+        )
+
+    def test_writing_quality_blocks_phase_steps_without_gate(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "ungated-phase-skill"
+            skill_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: ungated-phase-skill
+description: Use when a user asks to plan phase based skill work.
+---
+
+# Ungated Phase Skill
+
+## Workflow
+
+- Phase one: gather the request.
+- Phase two: write the answer.
+
+## Output Contract
+
+- Report the fixture result.
+""",
+                encoding="utf-8",
+            )
+
+            progressive = package_contracts.progressive_disclosure_contract(
+                repo_root,
+                skill_md,
+                skill_md.read_text(encoding="utf-8"),
+            )
+            contract = package_contracts.writing_quality_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+                skill_md.read_text(encoding="utf-8"),
+                progressive,
+            )
+
+        steering_check = next(
+            check for check in contract["checks"] if check["name"] == "construction_steering_phase_gate"
+        )
+        self.assertEqual(steering_check["status"], "blocked_validation")
+        self.assertEqual(steering_check["dimension"], "steering")
+        self.assertEqual(steering_check["evidence"]["glossary_axis"], "Steering")
+        self.assertTrue(steering_check["evidence"]["phase_like"])
+        self.assertIn(
+            "construction_steering_phase_gate_missing",
+            {blocker["rule_id"] for blocker in contract["blockers"]},
+        )
+
+    def test_writing_quality_blocks_sediment_and_duplicate_instructions(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "sediment-skill"
+            skill_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            sediment = " ".join(
+                [
+                    "This package represents a thoughtful and comprehensive perspective on collaboration"
+                    for _ in range(12)
+                ]
+            )
+            duplicate = (
+                "- Read references/details.md before creating the final report for the operator.\n"
+            )
+            references_dir = skill_dir / "references"
+            references_dir.mkdir()
+            (references_dir / "details.md").write_text("# Details\n", encoding="utf-8")
+            skill_md.write_text(
+                f"""---
+name: sediment-skill
+description: Use when a user asks to validate pruning checks.
+---
+
+# Sediment Skill
+
+{sediment}
+
+## Workflow
+
+- Run the fixture path.
+{duplicate}{duplicate}
+
+## Output Contract
+
+- Report the fixture result.
+""",
+                encoding="utf-8",
+            )
+
+            progressive = package_contracts.progressive_disclosure_contract(
+                repo_root,
+                skill_md,
+                skill_md.read_text(encoding="utf-8"),
+            )
+            contract = package_contracts.writing_quality_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+                skill_md.read_text(encoding="utf-8"),
+                progressive,
+            )
+
+        pruning_check = next(
+            check for check in contract["checks"] if check["name"] == "construction_pruning_sediment"
+        )
+        self.assertEqual(pruning_check["status"], "blocked_validation")
+        self.assertEqual(pruning_check["dimension"], "pruning")
+        self.assertEqual(pruning_check["evidence"]["glossary_axis"], "Pruning")
+        self.assertTrue(pruning_check["evidence"]["long_paragraphs_without_behavior"])
+        self.assertTrue(pruning_check["evidence"]["duplicate_instruction_lines"])
+        blocker_ids = {blocker["rule_id"] for blocker in contract["blockers"]}
+        self.assertIn("construction_sediment_paragraph", blocker_ids)
+        self.assertIn("construction_duplicate_instruction", blocker_ids)
 
     def test_sdk_contract_reports_missing_progressive_reference(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -1298,6 +1693,10 @@ description: sample
             identity["reference_inventory"]["missing_descriptions"],
         )
         self.assertIn(
+            "Skills/agent-ops/bad-skill/references/details.md",
+            identity["reference_inventory"]["weak_headings"],
+        )
+        self.assertIn(
             "Skills/agent-ops/bad-skill/references/undocumented-examples.jsonl",
             identity["reference_inventory"]["missing_descriptions"],
         )
@@ -1309,6 +1708,170 @@ description: sample
             "Skills/agent-ops/bad-skill/scripts/RunChecks.py",
             identity["script_inventory"]["missing_descriptions"],
         )
+
+    def test_reference_inventory_blocks_generic_markdown_headings(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "weak-reference-heading"
+            references_dir = skill_dir / "references"
+            references_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: weak-reference-heading
+description: Create reliable reference heading checks for package validation.
+---
+
+# Weak Reference Heading
+""",
+                encoding="utf-8",
+            )
+            (references_dir / "routing-boundary.md").write_text(
+                "# Details\n\nReference content.\n",
+                encoding="utf-8",
+            )
+
+            contract = package_contracts.sdk_package_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+            )
+
+        references = contract["identity_and_assets"]["reference_inventory"]
+        self.assertFalse(references["ready"])
+        self.assertEqual(
+            references["weak_headings"],
+            ["Skills/agent-ops/weak-reference-heading/references/routing-boundary.md"],
+        )
+
+    def test_reference_inventory_accepts_filename_aligned_markdown_heading(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "strong-reference-heading"
+            references_dir = skill_dir / "references"
+            references_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: strong-reference-heading
+description: Create reliable reference heading checks for package validation.
+---
+
+# Strong Reference Heading
+""",
+                encoding="utf-8",
+            )
+            (references_dir / "routing-boundary.md").write_text(
+                "# Routing Boundary\n\nReference content.\n",
+                encoding="utf-8",
+            )
+
+            contract = package_contracts.sdk_package_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+            )
+
+        references = contract["identity_and_assets"]["reference_inventory"]
+        self.assertEqual(references["weak_headings"], [])
+        self.assertEqual(references["missing_descriptions"], [])
+
+    def test_reference_inventory_blocks_weak_top_level_capsule_heading(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "weak-capsule-heading"
+            references_dir = skill_dir / "references"
+            references_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: weak-capsule-heading
+description: Create reliable capsule heading checks for package validation.
+---
+
+# Weak Capsule Heading
+
+## Progressive Disclosure
+
+- Read references/knowledge-capsule-routing.md before opening capsule files.
+""",
+                encoding="utf-8",
+            )
+            (references_dir / "knowledge-capsule.manifest.yaml").write_text(
+                """schema_version: knowledge-os.knowledge-capsule-manifest.v1
+capsules:
+  - target_path: references/spec-first-demo.md
+""",
+                encoding="utf-8",
+            )
+            (references_dir / "knowledge-capsule-routing.md").write_text(
+                "# Knowledge Capsule Routing\n\n- references/spec-first-demo.md for spec-first demo coaching.\n",
+                encoding="utf-8",
+            )
+            (references_dir / "spec-first-demo.md").write_text(
+                "# Reference\n\nCapsule content.\n",
+                encoding="utf-8",
+            )
+
+            contract = package_contracts.sdk_package_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+            )
+
+        references = contract["identity_and_assets"]["reference_inventory"]
+        self.assertFalse(references["ready"])
+        self.assertEqual(
+            references["weak_headings"],
+            ["Skills/agent-ops/weak-capsule-heading/references/spec-first-demo.md"],
+        )
+
+    def test_reference_inventory_accepts_invocable_top_level_capsule_heading(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "strong-capsule-heading"
+            references_dir = skill_dir / "references"
+            references_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: strong-capsule-heading
+description: Create reliable capsule heading checks for package validation.
+---
+
+# Strong Capsule Heading
+
+## Progressive Disclosure
+
+- Read references/knowledge-capsule-routing.md before opening capsule files.
+""",
+                encoding="utf-8",
+            )
+            (references_dir / "knowledge-capsule.manifest.yaml").write_text(
+                """schema_version: knowledge-os.knowledge-capsule-manifest.v1
+capsules:
+  - target_path: references/spec-first-demo.md
+""",
+                encoding="utf-8",
+            )
+            (references_dir / "knowledge-capsule-routing.md").write_text(
+                "# Knowledge Capsule Routing\n\n- references/spec-first-demo.md for spec-first demo coaching.\n",
+                encoding="utf-8",
+            )
+            (references_dir / "spec-first-demo.md").write_text(
+                "# Spec First Demo\n\nCapsule content.\n",
+                encoding="utf-8",
+            )
+
+            contract = package_contracts.sdk_package_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+            )
+
+        references = contract["identity_and_assets"]["reference_inventory"]
+        self.assertEqual(references["weak_headings"], [])
+        self.assertEqual(references["missing_descriptions"], [])
 
     def test_required_skillflow_missing_blocks_package_readiness(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -2057,6 +2620,220 @@ selected_facets:
             {blocker["rule_id"] for blocker in contract["blockers"]},
         )
 
+    def test_reference_quality_blocks_orphaned_capsules_when_manifest_exists(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "orphaned-capsule-skill"
+            references_dir = skill_dir / "references"
+            capsules_dir = references_dir / "knowledge-capsules"
+            capsules_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: orphaned-capsule-skill
+description: Use when a user asks to test capsule routing.
+version: "1.0.0"
+---
+
+# Orphaned Capsule Skill
+
+Select the task type before opening capsule bodies.
+
+## Progressive Disclosure
+- Read references/knowledge-capsule-routing.md before opening capsule bodies.
+- Read references/knowledge-capsules/<capsule>.md only through the routing table.
+""",
+                encoding="utf-8",
+            )
+            (references_dir / "contract.yaml").write_text(
+                """purpose: Test complete capability selector.
+inputs:
+  - user_request
+  - task_type
+outputs:
+  - result
+  - task_type
+quality_criteria:
+  task_type_selection:
+    alpha: alpha task
+    beta: beta task
+  result_quality:
+    purpose: Measures whether the skill returns the selected task result.
+    why_it_matters: Selector skills must prove that the selected capability changes the output.
+    observable_evidence:
+      - The result names the selected task type.
+      - The result cites selector evidence.
+    scoring:
+      5: Selects the task type, returns the matching result, and cites evidence.
+      4: Selects the task type and returns the matching result with minor evidence gaps.
+      3: Returns a plausible result but leaves selector evidence partly implicit.
+      2: Mentions a task type but does not use it to shape the result.
+      1: Does not select or apply a task type.
+automatic_failure_conditions:
+  - Missing or contradictory task type selection.
+evidence_requirements:
+  - Selection decisions must cite the selected task type and evidence.
+""",
+                encoding="utf-8",
+            )
+            (references_dir / "knowledge-capsule-routing.md").write_text(
+                "# Capsule Routing\n\nUse references/knowledge-capsules/routed.md for alpha tasks.\n",
+                encoding="utf-8",
+            )
+            (references_dir / "knowledge-capsule.manifest.yaml").write_text(
+                """schema_version: knowledge-os.knowledge-capsule-manifest.v1
+selected_facets:
+  - pack.example:alpha
+  - pack.example:beta
+""",
+                encoding="utf-8",
+            )
+            (capsules_dir / "routed.md").write_text("# Routed\n", encoding="utf-8")
+            (capsules_dir / "orphaned.md").write_text("# Orphaned\n", encoding="utf-8")
+
+            contract = package_contracts.reference_quality_contract(repo_root, skill_md)
+
+        orphan_check = next(
+            check for check in contract["checks"] if check["name"] == "orphaned_bundle_reference"
+        )
+        self.assertEqual(orphan_check["status"], "blocked_validation")
+        self.assertEqual(
+            orphan_check["orphaned_paths"],
+            ["Skills/agent-ops/orphaned-capsule-skill/references/knowledge-capsules/orphaned.md"],
+        )
+        self.assertIn(
+            "orphaned_bundle_reference",
+            {blocker["rule_id"] for blocker in contract["blockers"]},
+        )
+
+    def test_reference_quality_accepts_centralized_gold_rubric_profile(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            central_rubric = repo_root / "Infrastructure" / "config" / "skills-sdk"
+            central_rubric.mkdir(parents=True)
+            (central_rubric / "gold-standard-rubric.v1.json").write_text(
+                """{
+  "schema_version": "skills-sdk.gold-standard-rubric.v1",
+  "rubric_id": "skills-sdk.gold-standard.v1",
+  "quality_criteria": {
+    "trigger_boundary": {
+      "purpose": "Measures whether the skill selects the right work.",
+      "why_it_matters": "Incorrect routing makes later evidence meaningless.",
+      "observable_evidence": [
+        "The description names trigger and non-trigger cases."
+      ],
+      "scoring": {
+        "5": "Trigger and non-trigger behavior are explicit and covered.",
+        "4": "Trigger behavior is clear with minor edge ambiguity.",
+        "3": "Common cases route correctly but adjacent work can over-trigger.",
+        "2": "Triggering relies on broad keywords.",
+        "1": "The skill cannot be selected predictably."
+      }
+    }
+  },
+  "automatic_failure_conditions": [
+    "Missing package purpose, inputs, or outputs."
+  ]
+}
+""",
+                encoding="utf-8",
+            )
+            skill_dir = repo_root / "Skills" / "agent-ops" / "central-rubric-skill"
+            references_dir = skill_dir / "references"
+            references_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: central-rubric-skill
+description: Use when a user asks to test centralized rubric profiles.
+version: "1.0.0"
+---
+
+# Central Rubric Skill
+""",
+                encoding="utf-8",
+            )
+            (references_dir / "contract.yaml").write_text(
+                """rubric_profile: skills-sdk.gold-standard.v1
+purpose: Test centralized rubric profiles.
+inputs:
+  - user_request
+  - capability
+outputs:
+  - result
+  - capability
+capability_selection:
+  alpha: alpha task
+quality_criteria:
+  capability_selection:
+    alpha: alpha task
+evidence_requirements:
+  - Selection decisions must cite the selected capability.
+""",
+                encoding="utf-8",
+            )
+
+            contract = package_contracts.reference_quality_contract(repo_root, skill_md)
+
+        basic_check = next(
+            check for check in contract["checks"] if check["name"] == "basic_requirement_rubric"
+        )
+        self.assertEqual(basic_check["status"], "pass")
+        self.assertEqual(basic_check["rubric_profiles"], ["skills-sdk.gold-standard.v1"])
+        analytic_check = next(
+            check for check in contract["checks"] if check["name"] == "analytic_rubric_quality"
+        )
+        self.assertEqual(analytic_check["status"], "pass")
+        self.assertIn("trigger_boundary", analytic_check["criteria_checked"])
+        self.assertNotIn(
+            "analytic_rubric_quality_missing",
+            {blocker["rule_id"] for blocker in contract["blockers"]},
+        )
+
+    def test_scenario_case_fallback_ignores_nested_list_items(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            evals_path = Path(temp_dir) / "evals.yaml"
+            evals_path.write_text(
+                """schema_version: "2.0"
+cases:
+- id: first-case
+  category: happy
+  eval_modes:
+  - smoke
+  prompt: First prompt.
+  task: First task.
+  given: First given.
+  should: First should.
+  acceptance:
+  - type: expected_signal
+    value: First evidence.
+  deterministic_checks:
+    forbidden_commands:
+    - curl
+- id: second-case
+  category: negative
+  eval_modes:
+  - release
+  prompt: Second prompt.
+  task: Second task.
+  given: Second given.
+  should: Second should.
+  acceptance:
+  - type: not_regex
+    value: "(?i)code"
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+""",
+                encoding="utf-8",
+            )
+
+            cases = package_contracts._scenario_cases_from_reference(evals_path, {"cases": []})
+
+        self.assertEqual([case["id"] for case in cases], ["first-case", "second-case"])
+        self.assertEqual(cases[0]["eval_modes"], ["smoke"])
+        self.assertEqual(cases[1]["acceptance"][0], "type: not_regex")
+
     def test_reference_quality_validates_scenario_drift_review_shape(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir)
@@ -2210,7 +2987,10 @@ description: Hidden reference fixture.
                 encoding="utf-8",
             )
             (references_dir / ".DS_Store").write_bytes(b"\xff\x00binary")
-            (references_dir / "details.md").write_text("# Details\n", encoding="utf-8")
+            (references_dir / "details.md").write_text(
+                "# Hidden File Skill Details\n",
+                encoding="utf-8",
+            )
 
             contract = package_contracts.reference_quality_contract(repo_root, skill_md)
 
@@ -2218,6 +2998,44 @@ description: Hidden reference fixture.
         self.assertNotIn("Skills/agent-ops/hidden-file-skill/references/.DS_Store", paths)
         self.assertIn("Skills/agent-ops/hidden-file-skill/references/details.md", paths)
         self.assertEqual(contract["status"], "pass")
+
+    def test_reference_quality_blocks_non_invocable_markdown_heading(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "capsule-heading-skill"
+            references_dir = skill_dir / "references"
+            references_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: capsule-heading-skill
+description: Capsule heading fixture.
+---
+
+# Capsule Heading Skill
+""",
+                encoding="utf-8",
+            )
+            (references_dir / "capsule-routing.md").write_text(
+                "# Details\n\nRoute this capsule for routing tasks.\n",
+                encoding="utf-8",
+            )
+
+            contract = package_contracts.reference_quality_contract(repo_root, skill_md)
+
+        heading_check = next(
+            check for check in contract["checks"] if check["name"] == "reference_heading_invocable"
+        )
+        self.assertEqual(heading_check["status"], "blocked_validation")
+        self.assertEqual(
+            heading_check["path"],
+            "Skills/agent-ops/capsule-heading-skill/references/capsule-routing.md",
+        )
+        self.assertIn(
+            "reference_heading_not_invocable",
+            {blocker["rule_id"] for blocker in contract["blockers"]},
+        )
+        self.assertEqual(contract["status"], "blocked_validation")
 
     def test_reference_quality_blocks_non_utf8_reference_without_crashing(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

@@ -322,6 +322,7 @@ def main():
     evals_run_parser.add_argument("--model", help="Override the smoke eval Codex model")
     evals_run_parser.add_argument("--profile", help="Override the Codex config profile for codex-runner scenario proof")
     evals_run_parser.add_argument("--case", action="append", default=[], help="Run matching eval case ids/names")
+    evals_run_parser.add_argument("--timeout-seconds", type=int, help="Override the internal eval runner timeout")
     evals_run_parser.add_argument("--skip-tessl", action="store_true", help="Skip Tessl when policy or credentials block it")
     evals_run_parser.add_argument("--allow-tessl-project-save", action="store_true", help="Compatibility no-op for Tessl evals")
     evals_run_parser.add_argument("--tessl-live-private", action="store_true", help="Use opt-in private Tessl tile eval staging")
@@ -784,6 +785,7 @@ def main():
                 model=args.model,
                 codex_profile=args.profile,
                 cases=args.case,
+                timeout_seconds=args.timeout_seconds,
             )
         elif args.action == "benchmark":
             result = benchmark_portfolio(repo_root)

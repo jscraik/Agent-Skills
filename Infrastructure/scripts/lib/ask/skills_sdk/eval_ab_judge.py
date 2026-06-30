@@ -436,7 +436,7 @@ def _selected_score_profile(profile_id: str, blockers: list[str]) -> dict[str, A
     except ValueError:
         blockers.append("judge_profile_unknown")
         return None
-    supported_codex_profiles = {"oss-local", "oss-local-code", "oss-local-fallback", "oss-cloud"}
+    supported_codex_profiles = {"oss-local", "oss-local-code", "oss-local-fallback", "oss-security", "oss-cloud"}
     if profile["provider"] != "codex" or profile.get("codex_profile", profile["id"]) not in supported_codex_profiles:
         blockers.append("judge_profile_not_supported_for_codex_score")
     return profile

@@ -97,6 +97,27 @@
       "receives_sanitized_outputs_only": true
     },
     {
+      "id": "oss-security",
+      "codex_profile": "oss-security",
+      "provider": "codex",
+      "mode": "local",
+      "host": "codex-cli-profile",
+      "model": "CyberCrew/notmythos-8b",
+      "model_role": "local_security_specialist",
+      "model_settings": {
+        "num_ctx": 8192,
+        "num_predict": 2048,
+        "repeat_penalty": 1.15,
+        "temperature": 0.35,
+        "top_k": 40,
+        "top_p": 0.9
+      },
+      "network_required": true,
+      "secret_env_names": [],
+      "auth_boundary": "none",
+      "receives_sanitized_outputs_only": true
+    },
+    {
       "id": "oss-cloud",
       "codex_profile": "oss-cloud",
       "provider": "codex",

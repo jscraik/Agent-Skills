@@ -335,6 +335,14 @@ class TestAskSkillsErrors(unittest.TestCase):
         self.assertTrue(result.data["policy"]["no_publish"])
         self.assertFalse(result.data["policy"]["uses_npx"])
         self.assertEqual(result.data["plugin_eval"]["status"], "success")
+        self.assertEqual(result.data["plugin_eval_context"]["mode"], "agent_context_staging")
+        self.assertIn(
+            "references/evals.yaml",
+            result.data["plugin_eval_context"]["excluded_package_surfaces"],
+        )
+        plugin_eval_call = mock_run.call_args_list[0]
+        self.assertIn("/ask-plugin-eval-reviews/", plugin_eval_call.args[0][2])
+        self.assertNotEqual(plugin_eval_call.args[0][2], skill_dir)
         self.assertEqual(result.data["tessl_lint"]["status"], "success")
         self.assertEqual(result.data["tessl_review"]["status"], "success")
         self.assertEqual(result.data["tessl_review"]["target_score"], 95)
@@ -349,7 +357,7 @@ class TestAskSkillsErrors(unittest.TestCase):
         review_call = mock_run.call_args_list[2]
         self.assertEqual(review_call.args[0][1:3], ["skill", "review"])
         self.assertEqual(review_call.args[0][3:5], ["--json", "--threshold"])
-        self.assertEqual(review_call.args[0][5], "90")
+        self.assertEqual(review_call.args[0][5], "95")
         self.assertNotIn("agent-skills-tessl-", review_call.kwargs["env"].get("HOME", ""))
         self.assertTrue(result.data["tessl_plugin"]["support_refs_included"])
         self.assertTrue(result.data["tessl_plugin"]["plugin_manifest"].endswith("/.tessl-plugin/plugin.json"))

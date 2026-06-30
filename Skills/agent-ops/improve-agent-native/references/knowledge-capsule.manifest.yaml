@@ -1,4 +1,3 @@
----
 schema_version: knowledge-os.knowledge-capsule-manifest.v1
 skill:
   skill_id: improve-agent-native
@@ -10,12 +9,12 @@ skill:
 upstream_pack:
   pack_id: pack.harness-engineering
   export_root: exports/packs/pack.harness-engineering
-  snapshot_digest: sha256:2ef402d1e246bc223af3100b26ef8df3549e2875f6cb54c71a2df5a80ebbc096
+  snapshot_digest: sha256:e0a74ef79759b62cbfd4ca99451259ca7af0a01915f54aa420a7e20f7f97bc19
 upstream_packs:
 - pack_id: pack.harness-engineering
   role: audit_spine
   export_root: exports/packs/pack.harness-engineering
-  snapshot_digest: sha256:2ef402d1e246bc223af3100b26ef8df3549e2875f6cb54c71a2df5a80ebbc096
+  snapshot_digest: sha256:e0a74ef79759b62cbfd4ca99451259ca7af0a01915f54aa420a7e20f7f97bc19
   default_facets:
   - evidence_boundary
   - review_feedback
@@ -26,7 +25,7 @@ upstream_packs:
 - pack_id: pack.ryan-lopopolo-principal-engineering
   role: principal_engineering_judgment
   export_root: exports/packs/pack.ryan-lopopolo-principal-engineering
-  snapshot_digest: sha256:38295507a73d34f84698a337a926c08fb55316228a2603122b46ef410c46c175
+  snapshot_digest: sha256:c7cdae5e94b07ca271d3d51966703f1423b711b61445fae0603214e91abe9641
   default_facets:
   - environment_design
   - repo_knowledge
@@ -41,6 +40,14 @@ upstream_packs:
   - adoption_economics
   - quality_standards
   - sociotechnical_adoption
+- pack_id: pack.knowledge-os-kernel-quality
+  role: capsule_design_quality
+  export_root: exports/packs/pack.knowledge-os-kernel-quality
+  snapshot_digest: sha256:ae5a555ce44d1d04f212d1ea6e664f946de421ea7969d6cc9e035b73d41c75e4
+  default_facets:
+  - capsule_design
+  optional_facets:
+  - export_readiness
 selected_facets:
 - pack.harness-engineering:evidence_boundary
 - pack.harness-engineering:review_feedback
@@ -59,6 +66,8 @@ selected_facets:
 - pack.ryan-lopopolo-principal-engineering:adoption_economics
 - pack.ryan-lopopolo-principal-engineering:quality_standards
 - pack.ryan-lopopolo-principal-engineering:sociotechnical_adoption
+- pack.knowledge-os-kernel-quality:capsule_design
+- pack.knowledge-os-kernel-quality:export_readiness
 selected_asset_ids:
 - claim.harness.provenance-not-validation
 - claim.harness.review-needs-proof
@@ -269,11 +278,42 @@ selected_asset_ids:
 - principle.ryan.sociotechnical-priors-need-education
 - heuristic.ryan.educate-users-past-perception-lock
 - eval.ryan.perception-lock-adoption-decision
+- claim.knowledge-os.capsules-operational-references
+- claim.knowledge-os.capsules-need-source-models
+- claim.knowledge-os.capsules-need-relationship-maps
+- claim.knowledge-os.capsules-need-eval-contracts
+- claim.knowledge-os.capsules-route-by-downstream-job
+- principle.knowledge-os.behavioral-capsule-handoff
+- checklist.knowledge-os.operational-capsule-design
+- rubric.knowledge-os.capsule-design-quality
+- anti-pattern.knowledge-os.passive-capsule-design
+- eval.knowledge-os.capsule-design-without-relationships
+- claim.knowledge-os.permanent-notes-stand-alone-with-sources
+- claim.knowledge-os.visible-contribution-orients-exports
+- claim.knowledge-os.para-organizes-by-actionability
+- claim.knowledge-os.progressive-summarization-improves-discoverability
+- claim.knowledge-os.distilled-notes-need-context-links
+- claim.knowledge-os.information-flows-hold-systems-together
+- claim.knowledge-os.entry-links-create-reuse-contexts
+- claim.knowledge-os.forecasts-need-scoreable-terms
+- claim.knowledge-os.feedback-delays-require-smoke-tests
+- claim.knowledge-os.calibration-needs-many-clear-judgments
+- claim.knowledge-os.resulting-distorts-review
+- claim.knowledge-os.feedback-from-outcomes-is-noisy
+- claim.knowledge-os.resilience-differs-from-static-stability
+- checklist.knowledge-os.pack-facet-export-readiness
+- anti-pattern.knowledge-os.resulting-validation
+- eval.knowledge-os.export-pass-overclaims-quality
+- eval.knowledge-os.skills-sdk-handoff-overclaims-ingest
+- eval.knowledge-os.consumer-receipt-stale-digest
+- claim.knowledge-os.decision-process-not-outcome
+- claim.knowledge-os.feedback-only-affects-future-behavior
 source_export_paths:
 - pack.index.yaml
 - snapshot.yaml
 - assets.json
 - eval-scenarios.json
+- skills-sdk-ingest.yaml
 - pack.md
 - slices/*.md
 capsules:
@@ -282,7 +322,7 @@ capsules:
   facet_id: evidence_boundary
   optional: false
   source_slice: slices/evidence-boundary.md
-  target_path: references/knowledge-capsules/harness-evidence-boundary.md
+  target_path: references/harness-evidence-boundary.md
   asset_ids:
   - claim.harness.provenance-not-validation
   - claim.harness.review-needs-proof
@@ -311,7 +351,7 @@ capsules:
   facet_id: review_feedback
   optional: false
   source_slice: slices/review-feedback.md
-  target_path: references/knowledge-capsules/harness-review-feedback.md
+  target_path: references/harness-review-feedback.md
   asset_ids:
   - claim.harness.feedback-becomes-guardrails
   - claim.harness.review-loop-needs-protocol
@@ -337,7 +377,7 @@ capsules:
   facet_id: skill_routing
   optional: false
   source_slice: slices/skill-routing.md
-  target_path: references/knowledge-capsules/harness-skill-routing.md
+  target_path: references/harness-skill-routing.md
   asset_ids:
   - claim.harness.small-skill-set
   - claim.harness.content-shape-beats-path
@@ -366,7 +406,7 @@ capsules:
   facet_id: brownfield_readiness
   optional: false
   source_slice: slices/brownfield-readiness.md
-  target_path: references/knowledge-capsules/harness-brownfield-readiness.md
+  target_path: references/harness-brownfield-readiness.md
   asset_ids:
   - claim.harness.brownfield-ready-boundaries
   - claim.harness.codebase-new-starter
@@ -397,7 +437,7 @@ capsules:
   facet_id: pr_lifecycle
   optional: true
   source_slice: slices/pr-lifecycle.md
-  target_path: references/knowledge-capsules/harness-pr-lifecycle.md
+  target_path: references/harness-pr-lifecycle.md
   asset_ids:
   - claim.harness.pr-lifecycle-skill
   - claim.harness.full-job-verified-result
@@ -422,7 +462,7 @@ capsules:
   facet_id: environment_design
   optional: false
   source_slice: slices/environment-design.md
-  target_path: references/knowledge-capsules/ryan-environment-design.md
+  target_path: references/ryan-environment-design.md
   asset_ids:
   - claim.ryan.environment-design
   - claim.ryan.humans-steer-agents-execute
@@ -448,7 +488,7 @@ capsules:
   facet_id: repo_knowledge
   optional: false
   source_slice: slices/repo-knowledge.md
-  target_path: references/knowledge-capsules/ryan-repo-knowledge.md
+  target_path: references/ryan-repo-knowledge.md
   asset_ids:
   - claim.ryan.repo-knowledge-system-of-record
   - claim.ryan.agent-legibility
@@ -473,7 +513,7 @@ capsules:
   facet_id: mechanical_boundaries
   optional: false
   source_slice: slices/mechanical-boundaries.md
-  target_path: references/knowledge-capsules/ryan-mechanical-boundaries.md
+  target_path: references/ryan-mechanical-boundaries.md
   asset_ids:
   - claim.ryan.enforce-boundaries
   - claim.ryan.executable-conventions
@@ -492,7 +532,7 @@ capsules:
   facet_id: continuous_cleanup
   optional: false
   source_slice: slices/continuous-cleanup.md
-  target_path: references/knowledge-capsules/ryan-continuous-cleanup.md
+  target_path: references/ryan-continuous-cleanup.md
   asset_ids:
   - claim.ryan.continuous-garbage-collection
   - heuristic.ryan.promote-repeat-feedback-to-mechanism
@@ -509,7 +549,7 @@ capsules:
   facet_id: agent_operating_model
   optional: false
   source_slice: slices/agent-operating-model.md
-  target_path: references/knowledge-capsules/ryan-agent-operating-model.md
+  target_path: references/ryan-agent-operating-model.md
   asset_ids:
   - claim.ryan.codex-product-research-vehicle
   - claim.ryan.multi-trajectory-ooda
@@ -543,7 +583,7 @@ capsules:
   facet_id: safety_policy
   optional: false
   source_slice: slices/safety-policy.md
-  target_path: references/knowledge-capsules/ryan-safety-policy.md
+  target_path: references/ryan-safety-policy.md
   asset_ids:
   - claim.ryan.supplemental-safety-policy
   - claim.ryan.allowlist-ambient-fragility
@@ -556,7 +596,7 @@ capsules:
   facet_id: long_term_coherence
   optional: false
   source_slice: slices/long-term-coherence.md
-  target_path: references/knowledge-capsules/ryan-long-term-coherence.md
+  target_path: references/ryan-long-term-coherence.md
   asset_ids:
   - claim.ryan.zero-setup-agent-workspace
   - claim.ryan.prompts-carry-latent-principles
@@ -578,7 +618,7 @@ capsules:
   facet_id: maintenance_supply_chain
   optional: true
   source_slice: slices/maintenance-supply-chain.md
-  target_path: references/knowledge-capsules/ryan-maintenance-supply-chain.md
+  target_path: references/ryan-maintenance-supply-chain.md
   asset_ids:
   - claim.ryan.hardened-core-many-bindings
   - claim.ryan.harness-transfers-to-oss
@@ -603,7 +643,7 @@ capsules:
   facet_id: stakeholder_alignment
   optional: true
   source_slice: slices/stakeholder-alignment.md
-  target_path: references/knowledge-capsules/ryan-stakeholder-alignment.md
+  target_path: references/ryan-stakeholder-alignment.md
   asset_ids:
   - claim.ryan.consensus-builds-leverage
   - claim.ryan.shared-cross-functional-data
@@ -619,7 +659,7 @@ capsules:
   facet_id: adoption_economics
   optional: true
   source_slice: slices/adoption-economics.md
-  target_path: references/knowledge-capsules/ryan-adoption-economics.md
+  target_path: references/ryan-adoption-economics.md
   asset_ids:
   - claim.ryan.token-budgets-rd
   - claim.ryan.uncapped-systems-thinkers
@@ -639,7 +679,7 @@ capsules:
   facet_id: quality_standards
   optional: true
   source_slice: slices/quality-standards.md
-  target_path: references/knowledge-capsules/ryan-quality-standards.md
+  target_path: references/ryan-quality-standards.md
   asset_ids:
   - claim.ryan.distilled-quality-exemplars
   - claim.ryan.code-free-accessibility
@@ -662,7 +702,7 @@ capsules:
   facet_id: sociotechnical_adoption
   optional: true
   source_slice: slices/sociotechnical-adoption.md
-  target_path: references/knowledge-capsules/ryan-sociotechnical-adoption.md
+  target_path: references/ryan-sociotechnical-adoption.md
   asset_ids:
   - claim.ryan.public-perception-lag
   - claim.ryan.coding-agent-perception-lock
@@ -672,18 +712,74 @@ capsules:
   - principle.ryan.ai-priors-refresh-continuously
   - heuristic.ryan.educate-users-past-perception-lock
   - eval.ryan.perception-lock-adoption-decision
+- pack_id: pack.knowledge-os-kernel-quality
+  role: capsule_design_quality
+  facet_id: capsule_design
+  optional: false
+  source_slice: slices/capsule-design.md
+  target_path: references/knowledge-os-capsule-design.md
+  asset_ids:
+  - claim.knowledge-os.capsules-operational-references
+  - claim.knowledge-os.capsules-need-source-models
+  - claim.knowledge-os.capsules-need-relationship-maps
+  - claim.knowledge-os.capsules-need-eval-contracts
+  - claim.knowledge-os.capsules-route-by-downstream-job
+  - principle.knowledge-os.behavioral-capsule-handoff
+  - checklist.knowledge-os.operational-capsule-design
+  - rubric.knowledge-os.capsule-design-quality
+  - anti-pattern.knowledge-os.passive-capsule-design
+  - eval.knowledge-os.capsule-design-without-relationships
+  - claim.knowledge-os.permanent-notes-stand-alone-with-sources
+  - claim.knowledge-os.visible-contribution-orients-exports
+  - claim.knowledge-os.para-organizes-by-actionability
+  - claim.knowledge-os.progressive-summarization-improves-discoverability
+  - claim.knowledge-os.distilled-notes-need-context-links
+  - claim.knowledge-os.information-flows-hold-systems-together
+  - claim.knowledge-os.entry-links-create-reuse-contexts
+  - claim.knowledge-os.forecasts-need-scoreable-terms
+  - claim.knowledge-os.feedback-delays-require-smoke-tests
+  - claim.knowledge-os.calibration-needs-many-clear-judgments
+- pack_id: pack.knowledge-os-kernel-quality
+  role: capsule_design_quality
+  facet_id: export_readiness
+  optional: true
+  source_slice: slices/export-readiness.md
+  target_path: references/knowledge-os-export-readiness.md
+  asset_ids:
+  - claim.knowledge-os.visible-contribution-orients-exports
+  - claim.knowledge-os.para-organizes-by-actionability
+  - claim.knowledge-os.feedback-delays-require-smoke-tests
+  - claim.knowledge-os.resulting-distorts-review
+  - claim.knowledge-os.feedback-from-outcomes-is-noisy
+  - claim.knowledge-os.resilience-differs-from-static-stability
+  - checklist.knowledge-os.pack-facet-export-readiness
+  - anti-pattern.knowledge-os.resulting-validation
+  - eval.knowledge-os.export-pass-overclaims-quality
+  - eval.knowledge-os.skills-sdk-handoff-overclaims-ingest
+  - eval.knowledge-os.consumer-receipt-stale-digest
+  - claim.knowledge-os.information-flows-hold-systems-together
+  - claim.knowledge-os.decision-process-not-outcome
+  - claim.knowledge-os.forecasts-need-scoreable-terms
+  - claim.knowledge-os.feedback-only-affects-future-behavior
+  - claim.knowledge-os.calibration-needs-many-clear-judgments
+  - claim.knowledge-os.permanent-notes-stand-alone-with-sources
 runtime_dependency_policy:
   requires_knowledge_os_at_runtime: false
   raw_sources_included: false
   local_absolute_paths_required: false
 provenance:
   profile: improve-agent-native
+  profile_digest: sha256:9804728ddd3ee9683b44b843deb056572569ff701e2363aeddccea7962000ec4
   packs:
   - pack_id: pack.harness-engineering
     export_root: exports/packs/pack.harness-engineering
-    snapshot_digest: sha256:2ef402d1e246bc223af3100b26ef8df3549e2875f6cb54c71a2df5a80ebbc096
+    snapshot_digest: sha256:e0a74ef79759b62cbfd4ca99451259ca7af0a01915f54aa420a7e20f7f97bc19
     role: audit_spine
   - pack_id: pack.ryan-lopopolo-principal-engineering
     export_root: exports/packs/pack.ryan-lopopolo-principal-engineering
-    snapshot_digest: sha256:38295507a73d34f84698a337a926c08fb55316228a2603122b46ef410c46c175
+    snapshot_digest: sha256:c7cdae5e94b07ca271d3d51966703f1423b711b61445fae0603214e91abe9641
     role: principal_engineering_judgment
+  - pack_id: pack.knowledge-os-kernel-quality
+    export_root: exports/packs/pack.knowledge-os-kernel-quality
+    snapshot_digest: sha256:ae5a555ce44d1d04f212d1ea6e664f946de421ea7969d6cc9e035b73d41c75e4
+    role: capsule_design_quality

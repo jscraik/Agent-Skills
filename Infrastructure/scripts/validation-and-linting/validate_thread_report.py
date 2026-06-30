@@ -63,20 +63,18 @@ def _repo_path_exists(value: str) -> bool:
     if value.startswith(("https://", "http://")):
         return True
     path = Path(value)
-    if path.is_absolute():
-        try:
-            path.relative_to(ROOT)
-        except ValueError:
-            return False
-        return path.exists()
-    if value.startswith("../"):
+    candidate = path if path.is_absolute() else (ROOT / path)
+    try:
+        resolved = candidate.resolve(strict=True)
+        resolved.relative_to(ROOT.resolve())
+    except (FileNotFoundError, ValueError):
         return False
-    return (ROOT / path).exists()
+    return True
 
 
 def _validate_repo_path(value: Any, finding_path: str) -> list[dict[str, str]]:
     if not _non_empty_string(value):
-        return []
+        return [_finding(finding_path, "must be a non-empty final string")]
     return [] if _repo_path_exists(str(value)) else [_finding(finding_path, "must reference an existing repo path")]
 
 

@@ -27,6 +27,7 @@ SOURCE_PATHS = {
     "skill-builder": "Plugins/skill-factory/skills/code_quality_review/skill-builder/SKILL.md",
     "skill-factory-router": "Plugins/skill-factory/skills/skill-factory-router/SKILL.md",
     "skill-creator": "Plugins/skill-factory/skills/scaffolding_templates/skill-creator/SKILL.md",
+    "skill-installer": "skills-system/skill-installer/SKILL.md",
     "skill-factory-router": "Plugins/skill-factory/skills/skill-factory-router/SKILL.md",
     "skill-refactor": "Plugins/skill-factory/skills/data_fetch_analysis/skill-refactor/SKILL.md",
     "skillify": "Plugins/skill-factory/skills/scaffolding_templates/skillify/SKILL.md",
@@ -49,6 +50,13 @@ def _write_source_files(root: Path, rows: list[dict[str, object]]) -> None:
         skill_file = root / source_path
         skill_file.parent.mkdir(parents=True, exist_ok=True)
         skill_file.write_text("# Test skill\n", encoding="utf-8")
+
+
+def _write_system_bridge_files(root: Path) -> None:
+    for source_path in ("skills-system/skill-creator/SKILL.md", "skills-system/skill-installer/SKILL.md"):
+        skill_file = root / source_path
+        skill_file.parent.mkdir(parents=True, exist_ok=True)
+        skill_file.write_text("# Test system bridge\n", encoding="utf-8")
 
 
 def _row(skill_id: str, description: str) -> dict[str, object]:
@@ -74,6 +82,8 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
             fixture_root = Path(tmp)
             skillsets_dir = fixture_root / ".skillsets"
             _write_source_files(fixture_root, rows)
+            if skill_set == "skill-factory":
+                _write_system_bridge_files(fixture_root)
             _write_manifest(skillsets_dir, skill_set, rows)
             result = subprocess.run(
                 [
@@ -190,6 +200,86 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
 
         self.assertEqual(payload["selected"]["id"], "skill-builder")
         self.assertIn("improve-skill-sdk-pipeline", payload["candidates"][0]["reason"])
+
+    def test_skill_factory_external_install_routes_to_installer_not_builder(self) -> None:
+        payload = self._route(
+            "skill-factory",
+            "install an external skill from GitHub and run browseability checks",
+            [
+                _row("skill-builder", "Reviews and improves SKILL.md packages."),
+                _row("skill-creator", "Guide for creating effective skills."),
+                _row("skill-installer", "Install validated skills with provenance and rollback safety."),
+            ],
+        )
+
+        self.assertEqual(payload["selected"]["id"], "skill-installer")
+        self.assertNotEqual(payload["selected"]["id"], "skill-builder")
+
+    def test_skill_factory_install_uses_system_bridge_when_manifest_lacks_installer(self) -> None:
+        payload = self._route(
+            "skill-factory",
+            "install an external skill from GitHub and run browseability checks",
+            [
+                _row("skill-builder", "Reviews and improves SKILL.md packages."),
+                _row("skill-factory-router", "Route skill work."),
+            ],
+        )
+
+        self.assertEqual(payload["selected"]["id"], "skill-installer")
+        self.assertEqual(payload["selected"]["source_path"], "skills-system/skill-installer/SKILL.md")
+
+    def test_skill_factory_creation_uses_system_bridge_when_manifest_lacks_creator(self) -> None:
+        payload = self._route(
+            "skill-factory",
+            "create a new skill from a validated workflow",
+            [
+                _row("skill-builder", "Reviews and improves SKILL.md packages."),
+                _row("skill-factory-router", "Route skill work."),
+            ],
+        )
+
+        self.assertEqual(payload["selected"]["id"], "skill-creator")
+        self.assertEqual(payload["selected"]["source_path"], "skills-system/skill-creator/SKILL.md")
+
+    def test_skill_factory_refactor_prune_routes_to_refactor_not_creator(self) -> None:
+        payload = self._route(
+            "skill-factory",
+            "refactor and prune duplicated skill references without creating a new skill",
+            [
+                _row("skill-creator", "Guide for creating effective skills."),
+                _row("skill-refactor", "Analyze skill reliability from evidence."),
+                _row("skill-builder", "Reviews and improves SKILL.md packages."),
+            ],
+        )
+
+        self.assertEqual(payload["selected"]["id"], "skill-refactor")
+        self.assertNotEqual(payload["selected"]["id"], "skill-creator")
+
+    def test_skill_factory_plugin_hook_work_does_not_route_to_skill_creator(self) -> None:
+        payload = self._route(
+            "skill-factory",
+            "create a plugin bundled hook package with hooks/hooks.json",
+            [
+                _row("skill-creator", "Guide for creating effective skills."),
+                _row("skill-factory-router", "Route skill work."),
+            ],
+        )
+
+        self.assertEqual(payload["selected"]["id"], "skill-factory-router")
+
+    def test_skill_factory_improve_existing_does_not_create_new_skill(self) -> None:
+        payload = self._route(
+            "skill-factory",
+            "improve existing skill documentation and references; do not create a new skill",
+            [
+                _row("skill-creator", "Guide for creating effective skills."),
+                _row("skill-builder", "Reviews and improves SKILL.md packages."),
+                _row("skill-refactor", "Analyze skill reliability from evidence."),
+            ],
+        )
+
+        self.assertEqual(payload["selected"]["id"], "skill-builder")
+        self.assertNotEqual(payload["selected"]["id"], "skill-creator")
 
     def test_skill_factory_context_feedback_routes_to_refactor(self) -> None:
         payload = self._route(
@@ -369,6 +459,58 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
         self.assertIsNone(payload["selected"])
         self.assertIn("source_path", payload["error"])
         self.assertIn("does not exist", payload["error"])
+
+    def test_skill_factory_system_bridge_rows_use_supplied_root(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="route-skillset-") as tmp:
+            fixture_root = Path(tmp)
+            skillsets_dir = fixture_root / ".skillsets"
+            rows = [_row("skill-factory-router", "Route Skill Factory work.")]
+            _write_source_files(fixture_root, rows)
+            _write_manifest(skillsets_dir, "skill-factory", rows)
+
+            result_without_bridge = subprocess.run(
+                [
+                    "python3",
+                    ROUTE_SCRIPT,
+                    "--skill-set",
+                    "skill-factory",
+                    "--task",
+                    "create a skill",
+                    "--skillsets-dir",
+                    str(skillsets_dir),
+                    "--json",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(result_without_bridge.returncode, 0, result_without_bridge.stderr)
+            payload_without_bridge = json.loads(result_without_bridge.stdout)
+
+            bridge_file = fixture_root / "skills-system/skill-creator/SKILL.md"
+            bridge_file.parent.mkdir(parents=True)
+            bridge_file.write_text("# Fixture skill creator\n", encoding="utf-8")
+            result_with_bridge = subprocess.run(
+                [
+                    "python3",
+                    ROUTE_SCRIPT,
+                    "--skill-set",
+                    "skill-factory",
+                    "--task",
+                    "create a skill",
+                    "--skillsets-dir",
+                    str(skillsets_dir),
+                    "--json",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+        self.assertEqual(result_with_bridge.returncode, 0, result_with_bridge.stderr)
+        payload_with_bridge = json.loads(result_with_bridge.stdout)
+        self.assertNotEqual(payload_without_bridge["selected"]["id"], "skill-creator")
+        self.assertEqual(payload_with_bridge["selected"]["id"], "skill-creator")
 
 
 if __name__ == "__main__":

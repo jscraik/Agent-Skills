@@ -1,0 +1,11 @@
+{
+  "schema_version": "thread-report-delivery/v1",
+  "thread_id": "019f1572-5a95-7841-973a-d84d15409991",
+  "pm_thread_id": "019f0314-ba59-7a00-ab78-9bd3174d1d03",
+  "report_path": "latest.json",
+  "delivery_method": "codex_app__send_message_to_thread",
+  "delivery_status": "delivered",
+  "delivered_at": "2026-06-30T00:00:00Z",
+  "message_summary": "Delivered PM closeout report before artifact commit; amended PM evidence follows after artifact push.",
+  "delivery_evidence": "codex_app__send_message_to_thread returned threadId 019f0314-ba59-7a00-ab78-9bd3174d1d03."
+}

@@ -2314,11 +2314,16 @@ def _write_tesslignore(staged_root: Path) -> list[str]:
     return [".tesslignore"]
 
 
-def _validate_tessl_live_private_manifest(plugin_path: Path, workspace: str) -> None:
+def _validate_tessl_live_private_manifest(plugin_path: Path, workspace: str, project_slug: str | None = None) -> None:
     manifest = _load_json_object_file(plugin_path, label="staged Tessl plugin manifest")
     plugin_name = manifest.get("name")
     if not isinstance(plugin_name, str) or not plugin_name.startswith(f"{workspace}/"):
         raise ValueError("Staged Tessl plugin name must use workspace/plugin-name format for the requested workspace.")
+    if project_slug is not None and plugin_name != f"{workspace}/{project_slug}":
+        raise ValueError(
+            "Staged Tessl plugin name must match the requested workspace/project "
+            f"{workspace}/{project_slug}."
+        )
     description = manifest.get("description")
     if not isinstance(description, str) or not description.strip():
         raise ValueError("Staged Tessl plugin manifest must include a non-empty description.")
@@ -2469,7 +2474,7 @@ def _validate_tessl_projection_shape(
             "Skills SDK Tessl skill projections must not place skill support context in root rules/; use references/."
         )
     manifest_path = staged_root / ".tessl-plugin" / "plugin.json"
-    _validate_tessl_live_private_manifest(manifest_path, workspace)
+    _validate_tessl_live_private_manifest(manifest_path, workspace, project_slug)
     manifest = _load_json_object_file(manifest_path, label="staged Tessl plugin manifest")
     _validate_tessl_bundled_mcp(staged_root, manifest)
     _validate_tessl_registry_readme(staged_root)
@@ -4402,6 +4407,7 @@ def _evals_run_validation_command(
     tessl_live_private: bool = False,
     tessl_workspace: str | None = None,
     tessl_live_dry_run: bool = False,
+    timeout_seconds: int | None = None,
 ) -> str:
     parts = ["./bin/ask", "evals", "run", path, "--mode", mode, "--runner", runner]
     if codex_profile:
@@ -4412,6 +4418,8 @@ def _evals_run_validation_command(
         parts.extend(["--tessl-workspace", tessl_workspace])
     if tessl_live_dry_run:
         parts.append("--tessl-live-dry-run")
+    if timeout_seconds is not None:
+        parts.extend(["--timeout-seconds", str(timeout_seconds)])
     if not dashboard:
         parts.append("--no-dashboard")
     parts.extend(["--json", "--robot"])
@@ -5292,6 +5300,7 @@ def _write_eval_closeout(
     eval_status: str,
     blocker_class: str | None,
     started_at: float,
+    timeout_seconds: int | None = None,
 ) -> dict[str, object]:
     report_dir = _eval_report_dir(
         repo_root,
@@ -5359,6 +5368,7 @@ def _write_eval_closeout(
             tessl_live_private=False,
             tessl_workspace=None,
             tessl_live_dry_run=False,
+            timeout_seconds=timeout_seconds,
         ),
     }
     if closeout_path is not None:
@@ -6014,6 +6024,7 @@ def run_evals(
         eval_status=str(result.data.get("eval_status") or ("pass" if result.status == "success" else "fail")),
         blocker_class=result.data.get("blocker_class") if isinstance(result.data.get("blocker_class"), str) else None,
         started_at=eval_started_at,
+        timeout_seconds=timeout_seconds,
     )
     result.data["eval_closeout"] = closeout
     if closeout.get("path"):
