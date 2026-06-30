@@ -118,6 +118,8 @@ def test_contract_blocks_missing_fast_profile_smoke_boundary(monkeypatch) -> Non
     assert any("codex exec --profile fast" in finding.message for finding in findings)
 
 
+import re
+
 def test_contract_blocks_missing_tessl_references_not_rules_projection(monkeypatch) -> None:
     module = _load_module()
     original_read = module._read
@@ -125,9 +127,11 @@ def test_contract_blocks_missing_tessl_references_not_rules_projection(monkeypat
     def fake_read(path: Path) -> str:
         text = original_read(path)
         if path == module.CONTRACT_PATH:
-            return text.replace(
-                "Do not translate skill\n  references into Tessl `rules/`",
+            return re.sub(
+                r"Do not translate skill\s+references into Tessl `rules/`",
                 "Use Tessl package folders for support context",
+                text,
+                count=1,
             )
         return text
 
