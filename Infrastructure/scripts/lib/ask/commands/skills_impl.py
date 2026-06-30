@@ -204,8 +204,14 @@ class _EvalCommandsProtocol(Protocol):
     def _read_scorecard(self, path: Path | None) -> dict[str, Any]: ...
 
 
+def _reject_symlinked_stage_inputs(root: Path) -> None:
+    for candidate in root.rglob("*"):
+        if candidate.is_symlink():
+            raise ValueError(f"plugin-eval staging rejects symlinked support path: {candidate}")
+
 def _stage_plugin_eval_agent_context(repo_root: Path, target_abs: Path, audit_target: str) -> tuple[Path, dict[str, Any]]:
     """Stage the agent-loaded skill context used by Plugin Eval budget checks."""
+    _reject_symlinked_stage_inputs(target_abs)
     digest = hashlib.sha256(str(target_abs).encode("utf-8")).hexdigest()[:12]
     safe_name = re.sub(r"[^A-Za-z0-9_.-]+", "__", str(audit_target).strip("/")) or "skill"
     staging_root = Path(tempfile.gettempdir()) / "ask-plugin-eval-reviews" / f"{safe_name}-{digest}"
