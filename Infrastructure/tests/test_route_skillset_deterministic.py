@@ -52,6 +52,13 @@ def _write_source_files(root: Path, rows: list[dict[str, object]]) -> None:
         skill_file.write_text("# Test skill\n", encoding="utf-8")
 
 
+def _write_system_bridge_files(root: Path) -> None:
+    for source_path in ("skills-system/skill-creator/SKILL.md", "skills-system/skill-installer/SKILL.md"):
+        skill_file = root / source_path
+        skill_file.parent.mkdir(parents=True, exist_ok=True)
+        skill_file.write_text("# Test system bridge\n", encoding="utf-8")
+
+
 def _row(skill_id: str, description: str) -> dict[str, object]:
     return {
         "id": skill_id,
@@ -75,6 +82,8 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
             fixture_root = Path(tmp)
             skillsets_dir = fixture_root / ".skillsets"
             _write_source_files(fixture_root, rows)
+            if skill_set == "skill-factory":
+                _write_system_bridge_files(fixture_root)
             _write_manifest(skillsets_dir, skill_set, rows)
             result = subprocess.run(
                 [
@@ -450,6 +459,58 @@ class TestRouteSkillsetDeterministic(unittest.TestCase):
         self.assertIsNone(payload["selected"])
         self.assertIn("source_path", payload["error"])
         self.assertIn("does not exist", payload["error"])
+
+    def test_skill_factory_system_bridge_rows_use_supplied_root(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="route-skillset-") as tmp:
+            fixture_root = Path(tmp)
+            skillsets_dir = fixture_root / ".skillsets"
+            rows = [_row("skill-factory-router", "Route Skill Factory work.")]
+            _write_source_files(fixture_root, rows)
+            _write_manifest(skillsets_dir, "skill-factory", rows)
+
+            result_without_bridge = subprocess.run(
+                [
+                    "python3",
+                    ROUTE_SCRIPT,
+                    "--skill-set",
+                    "skill-factory",
+                    "--task",
+                    "create a skill",
+                    "--skillsets-dir",
+                    str(skillsets_dir),
+                    "--json",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(result_without_bridge.returncode, 0, result_without_bridge.stderr)
+            payload_without_bridge = json.loads(result_without_bridge.stdout)
+
+            bridge_file = fixture_root / "skills-system/skill-creator/SKILL.md"
+            bridge_file.parent.mkdir(parents=True)
+            bridge_file.write_text("# Fixture skill creator\n", encoding="utf-8")
+            result_with_bridge = subprocess.run(
+                [
+                    "python3",
+                    ROUTE_SCRIPT,
+                    "--skill-set",
+                    "skill-factory",
+                    "--task",
+                    "create a skill",
+                    "--skillsets-dir",
+                    str(skillsets_dir),
+                    "--json",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+        self.assertEqual(result_with_bridge.returncode, 0, result_with_bridge.stderr)
+        payload_with_bridge = json.loads(result_with_bridge.stdout)
+        self.assertNotEqual(payload_without_bridge["selected"]["id"], "skill-creator")
+        self.assertEqual(payload_with_bridge["selected"]["id"], "skill-creator")
 
 
 if __name__ == "__main__":

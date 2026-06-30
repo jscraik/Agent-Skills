@@ -24,8 +24,8 @@
       "why": "Encodes the repeated steering that package shape, rubric, warnings, scenario parity, security, and release-lane evidence must be deterministic before oss-cloud or Tessl.",
       "proof_required": [
         "bash Infrastructure/scripts/run-infrastructure-python.sh -m py_compile Infrastructure/scripts/validation-and-linting/validate_skills_sdk_release_ratchets.py",
-        "./bin/ask Infrastructure run-infrastructure-tests --filter test_validate_skills_sdk_release_ratchets --filter test_ask_skills_package_contract",
-        "bash Infrastructure/scripts/run-infrastructure-python.sh Infrastructure/scripts/validation-and-linting/validate_skills_sdk_release_ratchets.py skills-system/skill-installer"
+        "bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q Infrastructure/scripts/testing/test_validate_skills_sdk_release_ratchets.py Infrastructure/tests/test_ask_skills_package_contract.py",
+        "bash Infrastructure/scripts/run-infrastructure-python.sh Infrastructure/scripts/validation-and-linting/validate_skills_sdk_release_ratchets.py skills-system/skill-installer --json"
       ],
       "lanes_blocked_until_proven": [
         "oss-cloud",
@@ -51,10 +51,9 @@
       ],
       "why": "Aligns create, install, build, refactor, and skillify surfaces with the Skills SDK ladder and prevents route drift.",
       "proof_required": [
-        "run the first-principles factory gate evidence check",
-        "pytest skill factory overlay and route-skillset deterministic tests",
-        "run check_skill_factory_system_overlays.py",
-        "run route_skillset.py with --skill-set skill-factory for representative requests"
+        "python3 Infrastructure/scripts/validation-and-linting/check_skill_factory_system_overlays.py",
+        "bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q Infrastructure/scripts/testing/test_skill_factory_system_overlays.py Infrastructure/tests/test_route_skillset_deterministic.py",
+        "python3 Infrastructure/scripts/lifecycle-and-sync/route_skillset.py --skill-set skill-factory --task 'improve existing skill SDK pipeline' --json"
       ],
       "lanes_blocked_until_proven": [
         "skill-factory release routing claims"
@@ -70,9 +69,12 @@
       ],
       "why": "Large KnowledgeOS extraction reshapes references, eval notes, and capsule routing for two skills. It should not be mixed with technical-writer or release-ratchet commits.",
       "proof_required": [
-        "package verify each skill",
-        "scenario-quality preview each skill",
-        "confirm nested knowledge-capsules deletions are matched by top-level reference routing"
+        "./bin/ask skills package verify Skills/agent-ops/improve-codebase-architecture --json --robot",
+        "./bin/ask skills package verify Skills/agent-ops/sdk-scenario-generator --json --robot",
+        "./bin/ask sdk eval scenario-quality Skills/agent-ops/improve-codebase-architecture --preview --json --robot",
+        "./bin/ask sdk eval scenario-quality Skills/agent-ops/sdk-scenario-generator --preview --json --robot",
+        "python3 Infrastructure/scripts/validation-and-linting/validate_skills_sdk_release_ratchets.py Skills/agent-ops/improve-codebase-architecture --target-gate scenario_quality --json",
+        "python3 Infrastructure/scripts/validation-and-linting/validate_skills_sdk_release_ratchets.py Skills/agent-ops/sdk-scenario-generator --target-gate scenario_quality --json"
       ],
       "lanes_blocked_until_proven": [
         "skill-specific oss-local for improve-codebase-architecture",
@@ -91,9 +93,9 @@
       ],
       "why": "These files describe the still-blocked oss-local loop and PM thread reports. They are evidence, not skill source repair.",
       "proof_required": [
-        "validate thread-report artifacts",
-        "validate PM delivery artifacts where applicable",
-        "confirm latest oss-local receipt still owns the next gate decision"
+        "python3 Infrastructure/scripts/validation-and-linting/validate_thread_report.py .harness/reports/thread-replies/019f0ab5-07bb-7091-a6a2-9f74d07a65cb/latest.json --json",
+        "python3 Infrastructure/scripts/validation-and-linting/validate_thread_pm_delivery.py .harness/reports/thread-replies/019f0ab5-07bb-7091-a6a2-9f74d07a65cb/latest.json --require-delivery --json",
+        "jq '.status,.codex_profile,.passed_count,.failed_count' .harness/evidence/handoff/technical-writer/oss-local.json"
       ],
       "lanes_blocked_until_proven": [
         "oss-cloud",
@@ -110,10 +112,10 @@
       ],
       "why": "This is a new skill package and should not ride with technical-writer, SDK ratchets, or Skill Factory alignment.",
       "proof_required": [
-        "strict audit",
-        "package verify",
-        "scenario-quality preview",
-        "route manifest refresh for product-strategy only"
+        "./bin/ask skills audit Skills/product-strategy/devrel-hack-coach --level strict --json --robot",
+        "./bin/ask skills package verify Skills/product-strategy/devrel-hack-coach --json --robot",
+        "./bin/ask sdk eval scenario-quality Skills/product-strategy/devrel-hack-coach --preview --json --robot",
+        "python3 Infrastructure/scripts/lifecycle-and-sync/generate_skillset_manifests.py --write --json"
       ],
       "lanes_blocked_until_proven": [
         "devrel-hack-coach release claims"
@@ -134,9 +136,9 @@
       ],
       "why": "These are generated surfaces. Committing them without the owning source bucket obscures which behavior changed.",
       "proof_required": [
-        "rerun the repo generator for the owning source bucket",
-        "projection integrity pass",
-        "repo closeout or validate gate for changed generated surfaces"
+        "python3 Infrastructure/scripts/lifecycle-and-sync/generate_skillset_manifests.py --write --json",
+        "bash Infrastructure/scripts/lifecycle-and-sync/sync_projection_trees.sh all",
+        "./bin/ask repo closeout --changed --json --robot"
       ],
       "lanes_blocked_until_proven": [
         "catalog/readiness claims"

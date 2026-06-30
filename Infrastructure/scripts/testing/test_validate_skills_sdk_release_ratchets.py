@@ -427,6 +427,25 @@ def test_release_ratchets_target_gate_ignores_future_gate_failures() -> None:
     assert "oss_cloud" in full_gate["evidence"]["bad_status"]
 
 
+def test_release_ratchets_target_gate_maps_receipt_filenames_before_advisory_filtering() -> None:
+    module = _load_module()
+    with tempfile.TemporaryDirectory() as temp_dir:
+        root = Path(temp_dir)
+        _write_fixture(root)
+        evidence = root / ".harness" / "evidence" / "handoff" / "fixture-skill"
+        scenario_sources = evidence / "scenario-sources.json"
+        payload = json.loads(scenario_sources.read_text(encoding="utf-8"))
+        payload["advisories"] = [{"id": "future-scenario-advisory"}]
+        scenario_sources.write_text(json.dumps(payload), encoding="utf-8")
+
+        package_payload = module.validate(root, "Skills/agent-ops/fixture-skill", target_gate="package_verify")
+        full_payload = module.validate(root, "Skills/agent-ops/fixture-skill")
+
+    assert package_payload["status"] == "pass"
+    carried = next(check for check in full_payload["checks"] if check["code"] == "no_carried_advisories")
+    assert ".harness/evidence/handoff/fixture-skill/scenario-sources.json:advisories" in carried["evidence"]["carried"]
+
+
 def test_release_ratchets_allow_skill_to_point_at_capsule_routing() -> None:
     module = _load_module()
     with tempfile.TemporaryDirectory() as temp_dir:

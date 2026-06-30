@@ -269,13 +269,20 @@ def _plugin_flags(payload: dict[str, Any]) -> dict[str, bool]:
     }
 
 
+RECEIPT_STEM_GATES = {
+    "security-risk-modes": "security_risk_modes",
+    "scenario-sources": "scenario_quality",
+    "repair-loop": "oss_local",
+}
+
+
 def _check_no_carried_advisories(root: Path, evidence_dir: Path, target_gate: str | None = None) -> dict[str, Any]:
     carried = []
     required_gates = set(_required_gate_chain(target_gate))
     for path in sorted(evidence_dir.glob("*.json")) if evidence_dir.is_dir() else []:
         # Skip receipts for gates beyond the target gate
         if target_gate is not None:
-            gate_id = path.stem
+            gate_id = RECEIPT_STEM_GATES.get(path.stem, path.stem)
             if gate_id in REQUIRED_GATE_CHAIN and gate_id not in required_gates:
                 continue
         payload, error = _load_json(path)

@@ -7,7 +7,7 @@
   "status": "pass",
   "closeout_status": "closed_pr_updated_with_artifact_evidence",
   "branch": "codex/sdk-eval-parity-guardrails",
-  "repo_cwd": "/Users/jamiecraik/dev/agent-skills",
+  "repo_cwd": "<repo-root>",
   "current_gate": "skills-sdk-platform-cleanup-closeout",
   "next_gate_allowed": false,
   "blocked_next_gates": [
@@ -16,8 +16,8 @@
     "tessl-live",
     "additional-sdk-pipeline-work-from-primary-checkout"
   ],
-  "dirty_state_before": "Primary checkout /Users/jamiecraik/dev/agent-skills was dirty/divergent and had unrelated/user-owned staged and unstaged changes. The earlier temp worktree artifact commit attempt failed before staging because Git could not create /Users/jamiecraik/dev/agent-skills/.git/worktrees/agent-skills-pr296-oss-security/index.lock.",
-  "dirty_state_after": "Primary checkout changes were preserved. The closeout artifact commit was prepared from an isolated clone under /tmp on top of remote PR head 0af3857, avoiding the primary checkout and preserving unrelated/user-owned changes.",
+  "dirty_state_before": "Primary checkout <repo-root> was dirty/divergent and had unrelated/user-owned staged and unstaged changes. The earlier temp worktree artifact commit attempt failed before staging because Git could not create <repo-git-worktree>/index.lock.",
+  "dirty_state_after": "Primary checkout changes were preserved. The closeout artifact commit was prepared from an isolated temporary checkout on top of remote PR head 0af3857, avoiding the primary checkout and preserving unrelated/user-owned changes.",
   "files_changed_by_this_lane": [
     "Docs/reference/skills-sdk-platform-atlas.html",
     "Infrastructure/config/schemas/skills-sdk/ab-judge-score-receipt.v0.schema.json",

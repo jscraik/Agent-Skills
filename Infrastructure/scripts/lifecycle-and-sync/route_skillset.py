@@ -446,6 +446,15 @@ def factory_override(skill_set: str, task: str, rows: list[dict[str, Any]]) -> d
     task_tokens = tokenize(task)
 
     if skill_set == "skill-factory":
+        plugin_boundary_tokens = {"plugin", "plugins", "hook", "hooks", "mcp"}
+        if task_tokens & plugin_boundary_tokens:
+            row = row_by_id(rows, "skill-factory-router")
+            if row:
+                return {
+                    "row": row,
+                    "confidence": 0.9,
+                    "reason": "matched deterministic skill-factory rule 'plugin-boundary-handoff'",
+                }
         feedback_source_tokens = {"feedback", "coderabbit", "codex"}
         recurrence_tokens = {"again", "across", "recurring", "repeat", "repeated", "same"}
         context_package_tokens = {"skill", "skills", "context", "package", "packages", "eval", "evals"}
@@ -569,7 +578,7 @@ def _preferred_factory_match(skill_set: str, matched: list[tuple[str, str]]) -> 
     return None
 
 
-def _skill_factory_system_bridge_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def _skill_factory_system_bridge_rows(rows: list[dict[str, Any]], *, repo_base: Path) -> list[dict[str, Any]]:
     """Return system skill rows that are intentionally routed by Skill Factory."""
     existing_ids = {str(row.get("id")) for row in rows}
     bridge_specs = {
@@ -586,7 +595,7 @@ def _skill_factory_system_bridge_rows(rows: list[dict[str, Any]]) -> list[dict[s
     }
     bridges: list[dict[str, Any]] = []
     for bridge_id, (description, source_path, triggers) in bridge_specs.items():
-        if bridge_id in existing_ids or not (repo_root() / source_path).is_file():
+        if bridge_id in existing_ids or not (repo_base / source_path).is_file():
             continue
         bridges.append(
             {
@@ -662,7 +671,7 @@ def route(skill_set: str, task: str, *, top_k: int = MAX_TOP_K, skillsets_dir: P
     # For skill-factory, augment rows with system-bridge entries before override checks
     augmented_rows = rows
     if skill_set == "skill-factory":
-        augmented_rows = [*rows, *_skill_factory_system_bridge_rows(rows)]
+        augmented_rows = [*rows, *_skill_factory_system_bridge_rows(rows, repo_base=skillsets_dir.parent)]
 
     override = None
     try:
