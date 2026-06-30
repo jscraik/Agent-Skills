@@ -17,7 +17,6 @@ scorer_quality:
     sampled_count: 6
   bias_probes:
     - short_correct_vs_verbose_wrong
-    - verbosity_bias
   segmentation_fields:
     - category
     - claim_ids
