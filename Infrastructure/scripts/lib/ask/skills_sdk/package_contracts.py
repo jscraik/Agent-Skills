@@ -2104,6 +2104,28 @@ def reference_quality_contract(repo_root: Path | None, skill_md: Path | None) ->
             if not candidate.is_file():
                 continue
             rel_path = repo_relative_path(repo_root, candidate) if repo_root else candidate.as_posix()
+            package_rel = (
+                candidate.relative_to(skill_md.parent).as_posix()
+                if skill_md is not None
+                else candidate.name
+            )
+            if skill_md is not None and not package_local_regular_file(skill_md, package_rel):
+                checks.append(
+                    {
+                        "name": "reference_heading_invocable",
+                        "status": "blocked_validation",
+                        "path": rel_path,
+                        "reason": "reference path must be a package-local regular file",
+                    }
+                )
+                blockers.append(
+                    {
+                        "rule_id": "reference_heading_not_invocable",
+                        "path": rel_path,
+                        "message": "Markdown reference must stay inside the package and must not be a symlink.",
+                    }
+                )
+                continue
             try:
                 text = candidate.read_text(encoding="utf-8", errors="replace")
             except OSError as exc:
