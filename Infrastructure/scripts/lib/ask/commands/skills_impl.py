@@ -205,6 +205,8 @@ class _EvalCommandsProtocol(Protocol):
 
 
 def _reject_symlinked_stage_inputs(root: Path) -> None:
+    if root.is_symlink():
+        raise ValueError(f"plugin-eval staging rejects symlinked support path: {root}")
     for candidate in root.rglob("*"):
         if candidate.is_symlink():
             raise ValueError(f"plugin-eval staging rejects symlinked support path: {candidate}")
