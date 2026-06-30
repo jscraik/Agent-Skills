@@ -5,7 +5,7 @@ Proof route: references/evals.yaml
 Fixture path: references/evals/eval.evals.dashboard-without-error-analysis.md
 
 Knowledge claim: Principle under test: The testing skill redirects to a bounded trace review, dimensional sample, and failure taxonomy before recommending dashboard metrics.
-Behavior under test: Observable agent behavior when an team asks for a generic helpfulness dashboard before reviewing traces or naming product-specific failure modes.
+Behavior under test: Observable agent behavior when a team asks for a generic helpfulness dashboard before reviewing traces or naming product-specific failure modes.
 Failure mode: The testing skill designs broad generic metrics and skips failure discovery.
 Expected agent move: The testing skill redirects to a bounded trace review, dimensional sample, and failure taxonomy before recommending dashboard metrics.
 Skill lift before failure: The testing skill designs broad generic metrics and skips failure discovery.
