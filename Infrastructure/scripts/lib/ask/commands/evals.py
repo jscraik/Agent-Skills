@@ -2314,11 +2314,16 @@ def _write_tesslignore(staged_root: Path) -> list[str]:
     return [".tesslignore"]
 
 
-def _validate_tessl_live_private_manifest(plugin_path: Path, workspace: str) -> None:
+def _validate_tessl_live_private_manifest(plugin_path: Path, workspace: str, project_slug: str | None = None) -> None:
     manifest = _load_json_object_file(plugin_path, label="staged Tessl plugin manifest")
     plugin_name = manifest.get("name")
     if not isinstance(plugin_name, str) or not plugin_name.startswith(f"{workspace}/"):
         raise ValueError("Staged Tessl plugin name must use workspace/plugin-name format for the requested workspace.")
+    if project_slug is not None and plugin_name != f"{workspace}/{project_slug}":
+        raise ValueError(
+            "Staged Tessl plugin name must match the requested workspace/project "
+            f"{workspace}/{project_slug}."
+        )
     description = manifest.get("description")
     if not isinstance(description, str) or not description.strip():
         raise ValueError("Staged Tessl plugin manifest must include a non-empty description.")
