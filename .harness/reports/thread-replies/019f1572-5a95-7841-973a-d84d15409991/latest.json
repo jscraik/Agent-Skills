@@ -1,0 +1,173 @@
+{
+  "schema_version": "thread-report/v1",
+  "thread_id": "019f1572-5a95-7841-973a-d84d15409991",
+  "pm_thread_id": "019f0314-ba59-7a00-ab78-9bd3174d1d03",
+  "repo_head": "0af3857",
+  "task_id": "skills-sdk-oss-security-closeout",
+  "status": "pass",
+  "closeout_status": "closed_pr_updated_with_artifact_evidence",
+  "branch": "codex/sdk-eval-parity-guardrails",
+  "repo_cwd": "/Users/jamiecraik/dev/agent-skills",
+  "current_gate": "skills-sdk-platform-cleanup-closeout",
+  "next_gate_allowed": false,
+  "blocked_next_gates": [
+    "oss-cloud",
+    "tessl-dry-run",
+    "tessl-live",
+    "additional-sdk-pipeline-work-from-primary-checkout"
+  ],
+  "dirty_state_before": "Primary checkout /Users/jamiecraik/dev/agent-skills was dirty/divergent and had unrelated/user-owned staged and unstaged changes. The earlier temp worktree artifact commit attempt failed before staging because Git could not create /Users/jamiecraik/dev/agent-skills/.git/worktrees/agent-skills-pr296-oss-security/index.lock.",
+  "dirty_state_after": "Primary checkout changes were preserved. The closeout artifact commit was prepared from an isolated clone under /tmp on top of remote PR head 0af3857, avoiding the primary checkout and preserving unrelated/user-owned changes.",
+  "files_changed_by_this_lane": [
+    "Docs/reference/skills-sdk-platform-atlas.html",
+    "Infrastructure/config/schemas/skills-sdk/ab-judge-score-receipt.v0.schema.json",
+    "Infrastructure/config/schemas/skills-sdk/eval-profile-preview-receipt.v0.schema.json",
+    "Infrastructure/config/skills-sdk/capability-matrix.v1.json",
+    "Infrastructure/scripts/lib/ask/skills_sdk/ab_contracts.py",
+    "Infrastructure/scripts/lib/ask/skills_sdk/eval_ab_judge.py",
+    "Infrastructure/scripts/lib/ask/skills_sdk/eval_profiles.py",
+    "Infrastructure/tests/fixtures/skills_sdk/schema_spine/valid/eval-profile-preview-receipt.json",
+    "Infrastructure/tests/test_skills_sdk_eval_profiles.py",
+    "Infrastructure/tests/test_skills_sdk_schema_spine.py",
+    ".harness/quality/steering-uptake.md",
+    ".harness/reports/thread-replies/019f1572-5a95-7841-973a-d84d15409991/latest.json",
+    ".harness/reports/thread-replies/019f1572-5a95-7841-973a-d84d15409991/pm-delivery.json"
+  ],
+  "commits_created": [
+    {
+      "repo": "jscraik/Agent-Skills",
+      "branch": "codex/sdk-eval-parity-guardrails",
+      "commit": "a74cab3bfaeb1a70173bc56eca1729311a3f4dc9",
+      "subject": "feat(sdk): add oss-security eval profile",
+      "note": "Source lane commit pushed before closeout."
+    },
+    {
+      "repo": "jscraik/configs",
+      "branch": "codex/profile-autoreview-alignment",
+      "commit": "aed97a9da0b1e4e57bfb8a1a0521c35d97682dc7",
+      "subject": "feat(codex): add oss-security profile",
+      "note": "Companion Codex profile commit in configs PR #113."
+    }
+  ],
+  "push_result": "The first temp-worktree artifact commit/push attempt did not complete: git add/commit failed on index.lock permission and push was rejected as non-fast-forward. This report supersedes that state and is intended to be committed and pushed from the isolated clone before amended PM evidence is sent.",
+  "pr": {
+    "agent_skills": {
+      "url": "https://github.com/jscraik/Agent-Skills/pull/296",
+      "status": "OPEN non-draft; merge readiness not claimed"
+    },
+    "configs": {
+      "url": "https://github.com/jscraik/configs/pull/113",
+      "status": "OPEN draft; merge readiness not claimed"
+    }
+  },
+  "commands": [
+    {
+      "command": "git clone --depth=50 --branch codex/sdk-eval-parity-guardrails https://github.com/jscraik/Agent-Skills.git /tmp/agent-skills-pr296-closeout-clone-1782829403485",
+      "outcome": "pass",
+      "evidence": "Cloned current remote PR branch into isolated /tmp checkout without touching primary checkout."
+    },
+    {
+      "command": "git rev-parse --short HEAD",
+      "outcome": "pass",
+      "evidence": "0af3857 before closeout artifact commit."
+    },
+    {
+      "command": "git log -1 --oneline",
+      "outcome": "pass",
+      "evidence": "0af3857 docs(testing): tighten validation proof skill before closeout artifact commit."
+    },
+    {
+      "command": "python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json",
+      "outcome": "pass",
+      "evidence": "status=pass, findings=[]."
+    },
+    {
+      "command": "python3 Infrastructure/scripts/validation-and-linting/validate_thread_report.py .harness/reports/thread-replies/019f1572-5a95-7841-973a-d84d15409991/latest.json --json",
+      "outcome": "pass",
+      "evidence": "status=pass, findings=[]."
+    },
+    {
+      "command": "python3 Infrastructure/scripts/validation-and-linting/validate_thread_pm_delivery.py .harness/reports/thread-replies/019f1572-5a95-7841-973a-d84d15409991/latest.json --require-delivery --json",
+      "outcome": "pass",
+      "evidence": "status=pass, findings=[], require_delivery=true."
+    },
+    {
+      "command": "git diff --check -- .harness/quality/steering-uptake.md .harness/reports/thread-replies/019f1572-5a95-7841-973a-d84d15409991/latest.json .harness/reports/thread-replies/019f1572-5a95-7841-973a-d84d15409991/pm-delivery.json",
+      "outcome": "pass",
+      "evidence": "No output."
+    },
+    {
+      "command": "gh pr view 296 --repo jscraik/Agent-Skills --json url,number,state,headRefName,baseRefName,isDraft,title,headRefOid",
+      "outcome": "pass",
+      "evidence": "PR #296 is OPEN and non-draft; headRefName=codex/sdk-eval-parity-guardrails. Exact post-push head is reported in the amended PM message."
+    }
+  ],
+  "artifact_assertions": [
+    {
+      "artifact": ".harness/quality/steering-uptake.md",
+      "assertion": "Current stale wait-handle closeout recurrence is recorded as a steering-uptake row.",
+      "outcome": "pass"
+    },
+    {
+      "artifact": ".harness/reports/thread-replies/019f1572-5a95-7841-973a-d84d15409991/latest.json",
+      "assertion": "PM closeout report separates dirty local checkout, isolated PR branch artifact work, validation evidence, blocked next gates, and merge-readiness boundaries.",
+      "outcome": "pass"
+    },
+    {
+      "artifact": ".harness/reports/thread-replies/019f1572-5a95-7841-973a-d84d15409991/pm-delivery.json",
+      "assertion": "PM delivery receipt validates with --require-delivery for the PM thread update path.",
+      "outcome": "pass"
+    },
+    {
+      "artifact": "https://github.com/jscraik/Agent-Skills/pull/296",
+      "assertion": "Agent-Skills PR exists and is open; hosted mergeability is not claimed.",
+      "outcome": "pass"
+    },
+    {
+      "artifact": "https://github.com/jscraik/configs/pull/113",
+      "assertion": "Configs companion PR exists and is open draft; hosted mergeability is not claimed.",
+      "outcome": "pass"
+    }
+  ],
+  "contradictions": [
+    {
+      "artifact": ".harness/reports/thread-replies/019f1572-5a95-7841-973a-d84d15409991/latest.json",
+      "problem": "The earlier PM update said closeout_status=closed_pr_updated while also saying the closeout artifact commit was still being created/pushed. This report supersedes that ambiguous state and requires post-push amended PM evidence before final closure.",
+      "owner": "pm-closeout-reporting"
+    },
+    {
+      "artifact": ".harness/reports/thread-replies/019f1572-5a95-7841-973a-d84d15409991/latest.json",
+      "problem": "Primary checkout remains dirty/divergent; PR artifact closure is based on isolated clone evidence, not primary checkout cleanliness.",
+      "owner": "local-worktree-state"
+    }
+  ],
+  "files_changed": [
+    ".harness/quality/steering-uptake.md",
+    ".harness/reports/thread-replies/019f1572-5a95-7841-973a-d84d15409991/latest.json",
+    ".harness/reports/thread-replies/019f1572-5a95-7841-973a-d84d15409991/pm-delivery.json"
+  ],
+  "lessons": [
+    {
+      "lesson": "PM execution-thread closeout reports must not combine a final closed status with a pending artifact commit or push.",
+      "failure_pattern": "The report described closed_pr_updated while the closeout artifact commit was still not complete.",
+      "carry_forward_target": "Skills SDK PM closeout reports and delivery receipts.",
+      "deterministic_guardrail": "thread-report/v1 contradiction entry plus PM delivery validation before the PM thread treats the lane as decision input.",
+      "recorded_in": ".harness/memory/LEARNINGS.md",
+      "validation": "python3 Infrastructure/scripts/validation-and-linting/validate_thread_report.py .harness/reports/thread-replies/019f1572-5a95-7841-973a-d84d15409991/latest.json --json -> pass"
+    },
+    {
+      "lesson": "Stale wait-handle recovery in a closeout turn must be recorded and then constrained to direct repo commands and artifact validators.",
+      "failure_pattern": "The session probed wait handles that were not returned by an immediately preceding same-turn async operation.",
+      "carry_forward_target": "Codex runtime recovery and PM closeout turns.",
+      "deterministic_guardrail": ".harness/quality/steering-uptake.md closeout row and thread-report contradiction until session-level tool enforcement exists.",
+      "recorded_in": ".harness/quality/steering-uptake.md",
+      "validation": "python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json -> pass"
+    }
+  ],
+  "remaining_blockers": [
+    "Primary agent-skills checkout still requires a separate cleanup/reconciliation lane before oss-cloud, Tessl, or additional SDK pipeline work resumes.",
+    "No merge-readiness claim: hosted checks/reviews/mergeability were not checked in this closeout window.",
+    "Configs PR #113 remains draft and is treated as a review artifact only."
+  ],
+  "next_action": "PM authorized a separate local cleanup/reconciliation lane for the primary agent-skills checkout. Do not run oss-cloud, Tessl, or further SDK pipeline work from the primary checkout until that cleanup lane completes and the PM authorizes gate movement."
+}
