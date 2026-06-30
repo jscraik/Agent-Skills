@@ -141,11 +141,9 @@ python3 Infrastructure/scripts/validation-and-linting/docs_lint.py \
 | `recursive-skill-shadow-artifacts` | `Infrastructure/artifacts/skill-graphs/**` |
 | | `docs/skill-graphs/pilots/ui-skills-shadow-results.md` |
 | | `docs/skill-graphs/pilots/ui-skills-pilot-readout.md` |
-| | `docs/skill-graphs/pilots/arscontexta-intervention-queue.md` |
 | | `docs/skill-graphs/telemetry/daily-skill-health.md` |
 | | `Infrastructure/artifacts/skill-graphs/telemetry/failure-pattern-candidates.jsonl` |
 | | `Infrastructure/artifacts/skill-graphs/telemetry/promotion-queue.md` |
-| | `Infrastructure/artifacts/skill-graphs/telemetry/arscontexta-intervention-queue.json` |
 | | `/tmp/docs-lint-shadow.json` |
 
 ---
@@ -164,8 +162,8 @@ bash Infrastructure/scripts/lifecycle-and-sync/run_recursive_skill_shadow_cycle.
   --window-days 14 \
   --profiles-file custom-profiles.json
 
-# Review the Ars Contexta intervention queue
-sed -n '1,220p' docs/skill-graphs/pilots/arscontexta-intervention-queue.md
+# Review promotion candidates from the current shadow-cycle output
+sed -n '1,220p' Infrastructure/artifacts/skill-graphs/telemetry/promotion-queue.md
 
 # Docs lint
 python3 Infrastructure/scripts/validation-and-linting/docs_lint.py \
@@ -187,5 +185,4 @@ Workflow: `.github/workflows/recursive-skill-shadow.yml`
 - [Shadow cycle script](/Infrastructure/scripts/lifecycle-and-sync/run_recursive_skill_shadow_cycle.sh)
 - [Pilot profiles example](/docs/skill-graphs/schemas/examples/pilot-profiles.json)
 - [UI skills shadow results](/docs/skill-graphs/pilots/ui-skills-shadow-results.md)
-- [Ars Contexta intervention queue](/docs/skill-graphs/pilots/arscontexta-intervention-queue.md)
 - [Daily skill health](/docs/skill-graphs/telemetry/daily-skill-health.md)

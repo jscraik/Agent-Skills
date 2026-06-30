@@ -3753,7 +3753,13 @@ def run_discovery_smoke(
     else:
         if "## Request user input mini-templates" not in discovery_text:
             missing.append("discovery-interview.md missing mini-templates section")
-        if "## Copy-paste payload examples" not in discovery_text:
+        if not _contains_any(
+            discovery_text,
+            [
+                "## Copy-paste payload examples",
+                "## Copy paste payload examples",
+            ],
+        ):
             missing.append("discovery-interview.md missing payload examples section")
         if not _contains_any(
             discovery_text,

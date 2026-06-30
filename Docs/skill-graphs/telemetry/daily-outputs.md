@@ -8,8 +8,6 @@ Daily operator artifacts for recursive loop health monitoring.
 - `daily-skill-health.md`
 - `failure-pattern-candidates.jsonl`
 - `promotion-queue.md`
-- `arscontexta-intervention-queue.json`
-- `arscontexta-intervention-queue.md`
 
 `promotion-queue.md` entries should include:
 - run id + profile id
@@ -35,17 +33,6 @@ Daily operator artifacts for recursive loop health monitoring.
 - window size in days
 - pilot profile set
 - frozen summary metrics used for delta KPI comparison when no prior rolling window is available
-
-`arscontexta-intervention-queue.json` should include:
-- pilot profiles ordered by instability / recovery pressure
-- per-profile weak criteria, regression criteria, and repeated positive criteria
-- recommended hardening stage (`documentation|skill|hook-candidate`)
-- retrieval checkpoint questions for the next operator pass
-
-`arscontexta-intervention-queue.md` should include:
-- operator-facing summary of the same queue
-- explicit reminder that the shadow gate remains authoritative
-- documentation -> skill -> hook promotion guidance
 
 ## Minimum event envelope
 
