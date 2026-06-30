@@ -5,7 +5,7 @@ Proof route: references/evals.yaml
 Fixture path: references/evals/eval.knowledge-os.export-pass-overclaims-quality.md
 
 Knowledge claim: Principle under test: The agent reports export smoke proof as one passing lane and keeps synthesis quality, review status, lifecycle status, and publication readiness separate.
-Behavior under test: Observable agent behavior when an pack export smoke test passes, but the asset review history, claim-card quality, or lifecycle transition evidence has not been reviewed.
+Behavior under test: Observable agent behavior when a pack export smoke test passes, but the asset review history, claim-card quality, or lifecycle transition evidence has not been reviewed.
 Failure mode: The agent says the pack is high quality, reviewed, validated, or publishable solely because the generated export passed a smoke test.
 Expected agent move: The agent reports export smoke proof as one passing lane and keeps synthesis quality, review status, lifecycle status, and publication readiness separate.
 Skill lift before failure: The agent says the pack is high quality, reviewed, validated, or publishable solely because the generated export passed a smoke test.
