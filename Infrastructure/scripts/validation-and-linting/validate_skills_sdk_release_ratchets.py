@@ -25,7 +25,7 @@ from ask.skills_sdk.package_contracts import (  # noqa: E402
     read_structured_reference,
 )
 
-from skills_sdk_release_receipts import build_receipt_findings  # noqa: E402
+from skills_sdk_release_receipts import REQUIRED_GATE_CHAIN, build_receipt_findings  # noqa: E402
 
 
 CENTRAL_RUBRIC = Path("Infrastructure/config/skills-sdk/gold-standard-rubric.v1.json")
@@ -484,12 +484,11 @@ def _check_session_pattern_uptake(root: Path) -> Finding:
     )
 
 
-def validate(root: Path, target: str) -> dict[str, Any]:
-    skill_dir, skill_md, refs = _skill_paths(root, target)
-    contract = _structured(refs / "contract.yaml")
+def _receipt_checks(root: Path, skill_dir: Path, refs: Path, contract: dict[str, Any], target_gate: str | None) -> list[Finding]:
+    """Build receipt-level release ratchet findings."""
     commands = contract.get("commands")
     command_text = "\n".join(str(item) for item in commands) if isinstance(commands, list) else ""
-    receipt_checks = [
+    return [
         Finding(**finding)
         for finding in build_receipt_findings(
             root,
@@ -497,8 +496,15 @@ def validate(root: Path, target: str) -> dict[str, Any]:
             refs,
             sorted(_case_ids_from_refs(refs)),
             command_text,
+            target_gate,
         )
     ]
+
+
+def validate(root: Path, target: str, target_gate: str | None = None) -> dict[str, Any]:
+    skill_dir, skill_md, refs = _skill_paths(root, target)
+    contract = _structured(refs / "contract.yaml")
+    receipt_checks = _receipt_checks(root, skill_dir, refs, contract, target_gate)
     checks = [
         _check_central_rubric(root),
         _check_contract_rubric(root, refs),
@@ -519,6 +525,7 @@ def validate(root: Path, target: str) -> dict[str, Any]:
         "schema_version": "skills-sdk-release-ratchet-validation/v1",
         "status": status,
         "target": target,
+        "target_gate": target_gate or REQUIRED_GATE_CHAIN[-1],
         "skill_path": _rel(skill_md, root),
         "checks": findings,
         "finding_count": sum(1 for check in checks if check.status != "pass"),
@@ -529,9 +536,14 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("target", help="Repo-relative skill directory or SKILL.md path")
     parser.add_argument("--repo-root", default=str(ROOT), help="Repository root")
+    parser.add_argument(
+        "--target-gate",
+        choices=REQUIRED_GATE_CHAIN,
+        help="Validate receipts only through this sequential SDK gate. Defaults to the full release chain.",
+    )
     parser.add_argument("--json", action="store_true", help="Emit JSON")
     args = parser.parse_args(argv)
-    payload = validate(Path(args.repo_root).resolve(), args.target)
+    payload = validate(Path(args.repo_root).resolve(), args.target, args.target_gate)
     if args.json:
         print(json.dumps(payload, indent=2, sort_keys=True))
     else:

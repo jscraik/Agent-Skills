@@ -61,20 +61,38 @@ def build_receipt_findings(
     refs: Path,
     expected_case_ids: list[str],
     contract_command_text: str,
+    target_gate: str | None = None,
 ) -> list[dict[str, Any]]:
     """Return release receipt findings for the candidate package."""
     evidence_dir = root / ".harness" / "evidence" / "handoff" / skill_dir.name
     factory_gate = root / ".harness" / "evidence" / "factory-gates" / skill_dir.name / "factory-gate.json"
-    return [
+    checks = [
         _check_factory_gate(root, factory_gate),
         _check_reference_routing(root, skill_dir / "SKILL.md", refs),
-        _check_scenario_set(root, evidence_dir, refs, expected_case_ids),
-        _check_security(root, evidence_dir, contract_command_text),
-        _check_plugin_shape(root, evidence_dir),
         _check_no_carried_advisories(root, evidence_dir),
-        _check_gate_chain(root, evidence_dir),
-        _check_repair_loop(root, evidence_dir),
+        _check_gate_chain(root, evidence_dir, target_gate),
     ]
+    if _gate_reached("package_verify", target_gate):
+        checks.append(_check_plugin_shape(root, evidence_dir))
+    if _gate_reached("security_risk_modes", target_gate):
+        checks.append(_check_security(root, evidence_dir, contract_command_text))
+    if _gate_reached("scenario_quality", target_gate):
+        checks.append(_check_scenario_set(root, evidence_dir, refs, expected_case_ids))
+    if _gate_reached("oss_local", target_gate):
+        checks.append(_check_repair_loop(root, evidence_dir))
+    return checks
+
+
+def _required_gate_chain(target_gate: str | None = None) -> tuple[str, ...]:
+    if target_gate is None:
+        return REQUIRED_GATE_CHAIN
+    if target_gate not in REQUIRED_GATE_CHAIN:
+        raise ValueError(f"unknown target gate: {target_gate}")
+    return REQUIRED_GATE_CHAIN[: REQUIRED_GATE_CHAIN.index(target_gate) + 1]
+
+
+def _gate_reached(gate_id: str, target_gate: str | None) -> bool:
+    return gate_id in _required_gate_chain(target_gate)
 
 
 def _finding(code: str, status: str, message: str, evidence: dict[str, Any]) -> dict[str, Any]:
@@ -259,7 +277,7 @@ def _check_no_carried_advisories(root: Path, evidence_dir: Path) -> dict[str, An
     return _finding("no_carried_advisories", "pass" if not carried else "fail", "Promotion gates must repair advisories or record accepted exceptions.", {"handoff_dir": _rel(evidence_dir, root), "carried": carried[:20]})
 
 
-def _check_gate_chain(root: Path, evidence_dir: Path) -> dict[str, Any]:
+def _check_gate_chain(root: Path, evidence_dir: Path, target_gate: str | None = None) -> dict[str, Any]:
     path = evidence_dir / "gate-chain.json"
     payload, error = _load_json(path)
     if payload is None:
@@ -267,17 +285,21 @@ def _check_gate_chain(root: Path, evidence_dir: Path) -> dict[str, Any]:
     gates = payload.get("gates")
     if not isinstance(gates, list):
         return _finding("ordered_gate_chain", "fail", "Gate-chain receipt must contain a gates list.", {"path": _rel(path, root)})
-    evidence = _gate_chain_evidence(root, evidence_dir, gates)
+    required = _required_gate_chain(target_gate)
+    evidence = _gate_chain_evidence(root, evidence_dir, gates, required, target_gate)
     status = "pass" if all(not evidence[key] for key in ("missing_gates", "bad_status", "missing_receipts", "missing_claim_boundaries", "carried_advisories")) and evidence["order_ok"] else "fail"
     return _finding("ordered_gate_chain", status, "Gate receipts must exist, pass in order, and carry claim-boundary evidence.", {"path": _rel(path, root), **evidence})
 
 
-def _gate_chain_evidence(root: Path, evidence_dir: Path, gates: list[Any]) -> dict[str, Any]:
+def _gate_chain_evidence(root: Path, evidence_dir: Path, gates: list[Any], required: tuple[str, ...], target_gate: str | None) -> dict[str, Any]:
     gate_ids = [str(gate.get("id")) for gate in gates if isinstance(gate, dict)]
     receipt_errors = [_gate_receipt_error(root, evidence_dir, gate) for gate in gates if isinstance(gate, dict)]
     return {
-        "missing_gates": _missing_required_gates(gate_ids),
-        "order_ok": [gate for gate in gate_ids if gate in REQUIRED_GATE_CHAIN] == list(REQUIRED_GATE_CHAIN),
+        "target_gate": target_gate or REQUIRED_GATE_CHAIN[-1],
+        "required_gate_count": len(required),
+        "missing_gates": _missing_required_gates(gate_ids, required),
+        "extra_future_gates": _extra_future_gates(gate_ids, required),
+        "order_ok": [gate for gate in gate_ids if gate in REQUIRED_GATE_CHAIN] == list(required),
         "bad_status": _bad_gate_statuses(gates),
         "missing_receipts": _missing_gate_receipts(receipt_errors),
         "missing_claim_boundaries": _missing_claim_boundaries(gates),
@@ -285,8 +307,12 @@ def _gate_chain_evidence(root: Path, evidence_dir: Path, gates: list[Any]) -> di
     }
 
 
-def _missing_required_gates(gate_ids: list[str]) -> list[str]:
-    return [gate for gate in REQUIRED_GATE_CHAIN if gate not in gate_ids]
+def _missing_required_gates(gate_ids: list[str], required: tuple[str, ...]) -> list[str]:
+    return [gate for gate in required if gate not in gate_ids]
+
+
+def _extra_future_gates(gate_ids: list[str], required: tuple[str, ...]) -> list[str]:
+    return [gate for gate in gate_ids if gate in REQUIRED_GATE_CHAIN and gate not in required]
 
 
 def _bad_gate_statuses(gates: list[Any]) -> list[str]:

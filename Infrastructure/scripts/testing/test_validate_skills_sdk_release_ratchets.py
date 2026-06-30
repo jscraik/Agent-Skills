@@ -369,6 +369,43 @@ def test_release_ratchets_pass_for_valid_fixture() -> None:
     assert payload["finding_count"] == 0
 
 
+def test_release_ratchets_allow_target_gate_prefix_without_future_receipts() -> None:
+    module = _load_module()
+    with tempfile.TemporaryDirectory() as temp_dir:
+        root = Path(temp_dir)
+        _write_fixture(root)
+        evidence = root / ".harness" / "evidence" / "handoff" / "fixture-skill"
+        chain = evidence / "gate-chain.json"
+        payload = json.loads(chain.read_text(encoding="utf-8"))
+        payload["gates"] = payload["gates"][:4]
+        chain.write_text(json.dumps(payload), encoding="utf-8")
+        for future_receipt in (
+            "scenario-sources.json",
+            "scenario_quality.json",
+            "scorer_quality.json",
+            "scorer_calibration.json",
+            "oss_local.json",
+            "oss_cloud.json",
+            "tessl_local_proof.json",
+            "tessl_dry_run.json",
+            "handoff_readiness.json",
+            "repair-loop.json",
+        ):
+            path = evidence / future_receipt
+            if path.exists():
+                path.unlink()
+
+        prefix_payload = module.validate(root, "Skills/agent-ops/fixture-skill", target_gate="security_risk_modes")
+        full_payload = module.validate(root, "Skills/agent-ops/fixture-skill")
+
+    assert prefix_payload["status"] == "pass"
+    assert prefix_payload["target_gate"] == "security_risk_modes"
+    assert prefix_payload["finding_count"] == 0
+    assert full_payload["status"] == "fail"
+    full_gate = next(check for check in full_payload["checks"] if check["code"] == "ordered_gate_chain")
+    assert "scenario_quality" in full_gate["evidence"]["missing_gates"]
+
+
 def test_release_ratchets_allow_skill_to_point_at_capsule_routing() -> None:
     module = _load_module()
     with tempfile.TemporaryDirectory() as temp_dir:
