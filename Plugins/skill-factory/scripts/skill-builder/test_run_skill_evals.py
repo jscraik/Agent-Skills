@@ -2249,7 +2249,7 @@ class RunSkillEvalsModeTests(unittest.TestCase):
             )
             output_path = Path(tmpdir) / "last-message.md"
 
-            _, _, _, warnings = run_discovery_smoke(
+            exit_code, _, _, warnings = run_discovery_smoke(
                 skill_md_path=skill_md,
                 skill_dir=skill_dir,
                 case=EvalCase(
@@ -2263,7 +2263,8 @@ class RunSkillEvalsModeTests(unittest.TestCase):
                 output_last_message_path=output_path,
             )
 
-        self.assertNotIn("discovery-interview.md missing payload examples section", warnings)
+        self.assertEqual(0, exit_code)
+        self.assertNotIn("discovery-interview.md missing payload examples section", "\n".join(warnings))
 
     def test_pass_rate_policy_calibrates_only_when_artifact_exists(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
