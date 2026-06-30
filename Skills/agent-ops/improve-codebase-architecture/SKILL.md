@@ -66,8 +66,8 @@ Use exact commands when this package changes:
 ./bin/ask skills package verify Skills/agent-ops/improve-codebase-architecture --json --robot
 uv run --python 3.12 --with pyyaml --with jsonschema python Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py --skill Skills/agent-ops/improve-codebase-architecture --format json
 ./bin/plugin-eval analyze Skills/agent-ops/improve-codebase-architecture --format json
-./bin/ask evals prepare-tessl-scenarios Skills/agent-ops/improve-codebase-architecture --tessl-workspace skills-sdk --dry-run --json --robot
-./bin/ask evals run Skills/agent-ops/improve-codebase-architecture --mode smoke --tessl-live-private --tessl-workspace skills-sdk --json --robot
+./bin/ask evals prepare-tessl-scenarios Skills/agent-ops/improve-codebase-architecture --tessl-workspace jscraik --dry-run --json --robot
+./bin/ask evals run Skills/agent-ops/improve-codebase-architecture --mode smoke --tessl-live-private --tessl-workspace jscraik --json --robot
 ~~~
 
 Stop at the first failed gate; do not proceed until the blocker is classified. Report pass, fail, blocked, or not applicable.
@@ -94,4 +94,4 @@ If a gate fails, classify it as package shape, scenario quality, budget/scoring,
 - When the user asks: "Skills/** ownership changed while tests pass; decide whether agents need a human architecture decision."
 
 ## References
-Core: references/architecture-practice-contract.md, references/classification-cheatsheet.md, references/deepening-workflow.md, references/output-schema.md. Package policy: references/contract.yaml. Evidence assets: references/evals.yaml, references/evals/*.md, references/knowledge-capsules/*.md.
+Core: references/architecture-practice-contract.md, references/classification-cheatsheet.md, references/deepening-workflow.md, references/output-schema.md. Package policy: references/contract.yaml. Evidence assets: references/evals.yaml and selected flat capsule files listed in references/knowledge-capsule.manifest.yaml.

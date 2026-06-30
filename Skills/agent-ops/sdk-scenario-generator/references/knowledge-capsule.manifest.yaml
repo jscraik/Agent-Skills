@@ -1,0 +1,358 @@
+---
+schema_version: knowledge-os.knowledge-capsule-manifest.v1
+skill:
+  skill_id: sdk-scenario-generator
+  declared_name: sdk-scenario-generator
+  entrypoint_path: Skills/agent-ops/sdk-scenario-generator/SKILL.md
+  canonical_skill_path: Skills/agent-ops/sdk-scenario-generator/SKILL.md
+  writable_root: Skills/agent-ops/sdk-scenario-generator
+  apply_target_path: Skills/agent-ops/sdk-scenario-generator/SKILL.md
+upstream_pack:
+  pack_id: pack.skills-sdk
+  export_root: exports/packs/pack.skills-sdk
+  snapshot_digest: sha256:24e2aff49513e4e87f9d1656f999d71445376f3d98ffb2377ae97951f521912e
+upstream_packs:
+- pack_id: pack.skills-sdk
+  role: sdk_scenario_pipeline_research
+  export_root: exports/packs/pack.skills-sdk
+  snapshot_digest: sha256:24e2aff49513e4e87f9d1656f999d71445376f3d98ffb2377ae97951f521912e
+  default_facets:
+  - evaluation_benchmarks
+  - generation_revision
+  - operations_registry
+  optional_facets:
+  - architecture_runtime
+  - supply_chain_security
+- pack_id: pack.knowledge-os-kernel-quality
+  role: capsule_design_quality
+  export_root: exports/packs/pack.knowledge-os-kernel-quality
+  snapshot_digest: sha256:ae5a555ce44d1d04f212d1ea6e664f946de421ea7969d6cc9e035b73d41c75e4
+  default_facets:
+  - capsule_design
+  optional_facets:
+  - export_readiness
+selected_facets:
+- pack.skills-sdk:evaluation_benchmarks
+- pack.skills-sdk:generation_revision
+- pack.skills-sdk:operations_registry
+- pack.skills-sdk:architecture_runtime
+- pack.skills-sdk:supply_chain_security
+- pack.knowledge-os-kernel-quality:capsule_design
+- pack.knowledge-os-kernel-quality:export_readiness
+selected_asset_ids:
+- claim.skills.curated-skills-improve-unevenly
+- claim.skills.self-generated-skills-no-average-benefit
+- claim.skills.trajectory-mining-readable-not-transfer
+- claim.skills.boundary-detectors-over-split
+- claim.skills.frequency-priors-needed-for-mined-skills
+- claim.skills.absolute-and-normalized-gain-needed
+- claim.skills.quality-metrics-beyond-task-completion
+- principle.skills.behavioral-lift-over-structural-presence
+- principle.skills.gate-by-evidence-plane
+- heuristic.skills.prefer-focused-modules
+- heuristic.skills.measure-lift-before-readiness
+- heuristic.skills.require-trivial-baselines-for-generated-skills
+- anti-pattern.skills.syntax-valid-behavior-weak
+- rubric.skills.skill-readiness
+- checklist.skills.skill-packaging-evaluation-loop
+- checklist.skills.sdk-gate-evidence
+- lens.skills.skill-lifecycle-boundary
+- eval.skills.baseline-lift-required
+- eval.skills.negative-tests-required
+- eval.skills.task-completion-not-quality
+- claim.skills.execution-modifies-preparation
+- claim.skills.mcp-complementary-layers
+- claim.skills.adapters-require-alignment-and-stable-workflows
+- claim.skills.skilldex-separates-conformance-from-semantics
+- claim.skills.revision-needs-execution-evidence
+- claim.skills.libraries-accumulate-technical-debt
+- claim.skills.metadata-is-attack-surface
+- claim.skills.registries-need-format-and-coherence
+- claim.skills.verification-gates-need-permission-manifest
+- claim.skills.verification-needs-negative-tests
+- claim.skills.skillops-low-overhead-maintenance
+- claim.skills.agent-skills-load-procedural-context
+- claim.skills.skillrevise-improves-cold-start
+- heuristic.skills.revise-from-traces
+- eval.skills.trace-revision-required
+- claim.skills.library-size-can-degrade-selection
+- principle.skills.skills-are-maintained-ecosystems
+- anti-pattern.skills.task-time-only-maintenance
+- eval.skills.library-maintenance-required
+- eval.skills.description-routing-not-conformance
+- eval.skills.routing-scale-regression
+- claim.skills.adapters-can-represent-behavior
+- principle.skills.progressive-disclosure-with-proof
+- heuristic.skills.separate-text-from-learned-behavior
+- eval.skills.skill-mcp-boundary-required
+- eval.skills.adapter-optimization-premature
+- principle.skills.skill-text-is-supply-chain-control
+- heuristic.skills.audit-registry-semantics
+- anti-pattern.skills.passive-registry-text
+- eval.skills.registry-semantic-risk
+- claim.knowledge-os.capsules-operational-references
+- claim.knowledge-os.capsules-need-source-models
+- claim.knowledge-os.capsules-need-relationship-maps
+- claim.knowledge-os.capsules-need-eval-contracts
+- claim.knowledge-os.capsules-route-by-downstream-job
+- principle.knowledge-os.behavioral-capsule-handoff
+- checklist.knowledge-os.operational-capsule-design
+- rubric.knowledge-os.capsule-design-quality
+- anti-pattern.knowledge-os.passive-capsule-design
+- eval.knowledge-os.capsule-design-without-relationships
+- claim.knowledge-os.permanent-notes-stand-alone-with-sources
+- claim.knowledge-os.visible-contribution-orients-exports
+- claim.knowledge-os.para-organizes-by-actionability
+- claim.knowledge-os.progressive-summarization-improves-discoverability
+- claim.knowledge-os.distilled-notes-need-context-links
+- claim.knowledge-os.information-flows-hold-systems-together
+- claim.knowledge-os.entry-links-create-reuse-contexts
+- claim.knowledge-os.forecasts-need-scoreable-terms
+- claim.knowledge-os.feedback-delays-require-smoke-tests
+- claim.knowledge-os.calibration-needs-many-clear-judgments
+- claim.knowledge-os.resulting-distorts-review
+- claim.knowledge-os.feedback-from-outcomes-is-noisy
+- claim.knowledge-os.resilience-differs-from-static-stability
+- checklist.knowledge-os.pack-facet-export-readiness
+- anti-pattern.knowledge-os.resulting-validation
+- eval.knowledge-os.export-pass-overclaims-quality
+- eval.knowledge-os.skills-sdk-handoff-overclaims-ingest
+- eval.knowledge-os.consumer-receipt-stale-digest
+- claim.knowledge-os.decision-process-not-outcome
+- claim.knowledge-os.feedback-only-affects-future-behavior
+source_export_paths:
+- pack.index.yaml
+- snapshot.yaml
+- assets.json
+- eval-scenarios.json
+- skills-sdk-ingest.yaml
+- pack.md
+- slices/*.md
+capsules:
+- pack_id: pack.skills-sdk
+  role: sdk_scenario_pipeline_research
+  facet_id: evaluation_benchmarks
+  optional: false
+  source_slice: slices/evaluation-benchmarks.md
+  target_path: references/skills-sdk-evaluation-benchmarks.md
+  asset_ids:
+  - claim.skills.curated-skills-improve-unevenly
+  - claim.skills.self-generated-skills-no-average-benefit
+  - claim.skills.trajectory-mining-readable-not-transfer
+  - claim.skills.boundary-detectors-over-split
+  - claim.skills.frequency-priors-needed-for-mined-skills
+  - claim.skills.absolute-and-normalized-gain-needed
+  - claim.skills.quality-metrics-beyond-task-completion
+  - principle.skills.behavioral-lift-over-structural-presence
+  - principle.skills.gate-by-evidence-plane
+  - heuristic.skills.prefer-focused-modules
+  - heuristic.skills.measure-lift-before-readiness
+  - heuristic.skills.require-trivial-baselines-for-generated-skills
+  - anti-pattern.skills.syntax-valid-behavior-weak
+  - rubric.skills.skill-readiness
+  - checklist.skills.skill-packaging-evaluation-loop
+  - checklist.skills.sdk-gate-evidence
+  - lens.skills.skill-lifecycle-boundary
+  - eval.skills.baseline-lift-required
+  - eval.skills.negative-tests-required
+  - eval.skills.task-completion-not-quality
+  - claim.skills.execution-modifies-preparation
+  - claim.skills.mcp-complementary-layers
+  - claim.skills.adapters-require-alignment-and-stable-workflows
+  - claim.skills.skilldex-separates-conformance-from-semantics
+  - claim.skills.revision-needs-execution-evidence
+  - claim.skills.libraries-accumulate-technical-debt
+  - claim.skills.metadata-is-attack-surface
+  - claim.skills.registries-need-format-and-coherence
+  - claim.skills.verification-gates-need-permission-manifest
+  - claim.skills.verification-needs-negative-tests
+  - claim.skills.skillops-low-overhead-maintenance
+  - claim.skills.agent-skills-load-procedural-context
+- pack_id: pack.skills-sdk
+  role: sdk_scenario_pipeline_research
+  facet_id: generation_revision
+  optional: false
+  source_slice: slices/generation-revision.md
+  target_path: references/skills-sdk-generation-revision.md
+  asset_ids:
+  - claim.skills.self-generated-skills-no-average-benefit
+  - claim.skills.trajectory-mining-readable-not-transfer
+  - claim.skills.boundary-detectors-over-split
+  - claim.skills.frequency-priors-needed-for-mined-skills
+  - claim.skills.revision-needs-execution-evidence
+  - claim.skills.skillrevise-improves-cold-start
+  - principle.skills.behavioral-lift-over-structural-presence
+  - heuristic.skills.revise-from-traces
+  - heuristic.skills.require-trivial-baselines-for-generated-skills
+  - anti-pattern.skills.syntax-valid-behavior-weak
+  - checklist.skills.skill-packaging-evaluation-loop
+  - checklist.skills.sdk-gate-evidence
+  - eval.skills.trace-revision-required
+  - claim.skills.curated-skills-improve-unevenly
+  - claim.skills.libraries-accumulate-technical-debt
+  - claim.skills.registries-need-format-and-coherence
+  - claim.skills.metadata-is-attack-surface
+  - claim.skills.verification-gates-need-permission-manifest
+  - claim.skills.verification-needs-negative-tests
+  - claim.skills.absolute-and-normalized-gain-needed
+  - claim.skills.skillops-low-overhead-maintenance
+  - claim.skills.skilldex-separates-conformance-from-semantics
+- pack_id: pack.skills-sdk
+  role: sdk_scenario_pipeline_research
+  facet_id: operations_registry
+  optional: false
+  source_slice: slices/operations-registry.md
+  target_path: references/skills-sdk-operations-registry.md
+  asset_ids:
+  - claim.skills.libraries-accumulate-technical-debt
+  - claim.skills.skillops-low-overhead-maintenance
+  - claim.skills.library-size-can-degrade-selection
+  - claim.skills.quality-metrics-beyond-task-completion
+  - claim.skills.registries-need-format-and-coherence
+  - claim.skills.skilldex-separates-conformance-from-semantics
+  - principle.skills.skills-are-maintained-ecosystems
+  - principle.skills.gate-by-evidence-plane
+  - anti-pattern.skills.task-time-only-maintenance
+  - checklist.skills.skill-packaging-evaluation-loop
+  - checklist.skills.sdk-gate-evidence
+  - rubric.skills.skill-readiness
+  - lens.skills.skill-lifecycle-boundary
+  - eval.skills.library-maintenance-required
+  - eval.skills.description-routing-not-conformance
+  - eval.skills.routing-scale-regression
+  - eval.skills.task-completion-not-quality
+  - claim.skills.execution-modifies-preparation
+  - claim.skills.mcp-complementary-layers
+  - claim.skills.absolute-and-normalized-gain-needed
+  - claim.skills.adapters-require-alignment-and-stable-workflows
+  - claim.skills.curated-skills-improve-unevenly
+  - claim.skills.self-generated-skills-no-average-benefit
+  - claim.skills.revision-needs-execution-evidence
+  - claim.skills.metadata-is-attack-surface
+  - claim.skills.verification-gates-need-permission-manifest
+  - claim.skills.verification-needs-negative-tests
+  - claim.skills.trajectory-mining-readable-not-transfer
+  - claim.skills.agent-skills-load-procedural-context
+- pack_id: pack.skills-sdk
+  role: sdk_scenario_pipeline_research
+  facet_id: architecture_runtime
+  optional: true
+  source_slice: slices/architecture-runtime.md
+  target_path: references/skills-sdk-architecture-runtime.md
+  asset_ids:
+  - claim.skills.agent-skills-load-procedural-context
+  - claim.skills.execution-modifies-preparation
+  - claim.skills.mcp-complementary-layers
+  - claim.skills.adapters-can-represent-behavior
+  - claim.skills.adapters-require-alignment-and-stable-workflows
+  - principle.skills.progressive-disclosure-with-proof
+  - heuristic.skills.separate-text-from-learned-behavior
+  - lens.skills.skill-lifecycle-boundary
+  - eval.skills.skill-mcp-boundary-required
+  - eval.skills.adapter-optimization-premature
+  - claim.skills.curated-skills-improve-unevenly
+  - claim.skills.libraries-accumulate-technical-debt
+  - claim.skills.metadata-is-attack-surface
+  - claim.skills.verification-gates-need-permission-manifest
+- pack_id: pack.skills-sdk
+  role: sdk_scenario_pipeline_research
+  facet_id: supply_chain_security
+  optional: true
+  source_slice: slices/supply-chain-security.md
+  target_path: references/skills-sdk-supply-chain-security.md
+  asset_ids:
+  - claim.skills.metadata-is-attack-surface
+  - claim.skills.verification-gates-need-permission-manifest
+  - claim.skills.verification-needs-negative-tests
+  - claim.skills.registries-need-format-and-coherence
+  - claim.skills.skilldex-separates-conformance-from-semantics
+  - principle.skills.skill-text-is-supply-chain-control
+  - principle.skills.gate-by-evidence-plane
+  - heuristic.skills.audit-registry-semantics
+  - anti-pattern.skills.passive-registry-text
+  - checklist.skills.skill-packaging-evaluation-loop
+  - checklist.skills.sdk-gate-evidence
+  - rubric.skills.skill-readiness
+  - lens.skills.skill-lifecycle-boundary
+  - eval.skills.registry-semantic-risk
+  - eval.skills.description-routing-not-conformance
+  - eval.skills.negative-tests-required
+  - claim.skills.execution-modifies-preparation
+  - claim.skills.mcp-complementary-layers
+  - claim.skills.absolute-and-normalized-gain-needed
+  - claim.skills.adapters-require-alignment-and-stable-workflows
+  - claim.skills.quality-metrics-beyond-task-completion
+  - claim.skills.curated-skills-improve-unevenly
+  - claim.skills.self-generated-skills-no-average-benefit
+  - claim.skills.revision-needs-execution-evidence
+  - claim.skills.libraries-accumulate-technical-debt
+  - claim.skills.skillops-low-overhead-maintenance
+  - claim.skills.trajectory-mining-readable-not-transfer
+  - claim.skills.agent-skills-load-procedural-context
+- pack_id: pack.knowledge-os-kernel-quality
+  role: capsule_design_quality
+  facet_id: capsule_design
+  optional: false
+  source_slice: slices/capsule-design.md
+  target_path: references/knowledge-os-capsule-design.md
+  asset_ids:
+  - claim.knowledge-os.capsules-operational-references
+  - claim.knowledge-os.capsules-need-source-models
+  - claim.knowledge-os.capsules-need-relationship-maps
+  - claim.knowledge-os.capsules-need-eval-contracts
+  - claim.knowledge-os.capsules-route-by-downstream-job
+  - principle.knowledge-os.behavioral-capsule-handoff
+  - checklist.knowledge-os.operational-capsule-design
+  - rubric.knowledge-os.capsule-design-quality
+  - anti-pattern.knowledge-os.passive-capsule-design
+  - eval.knowledge-os.capsule-design-without-relationships
+  - claim.knowledge-os.permanent-notes-stand-alone-with-sources
+  - claim.knowledge-os.visible-contribution-orients-exports
+  - claim.knowledge-os.para-organizes-by-actionability
+  - claim.knowledge-os.progressive-summarization-improves-discoverability
+  - claim.knowledge-os.distilled-notes-need-context-links
+  - claim.knowledge-os.information-flows-hold-systems-together
+  - claim.knowledge-os.entry-links-create-reuse-contexts
+  - claim.knowledge-os.forecasts-need-scoreable-terms
+  - claim.knowledge-os.feedback-delays-require-smoke-tests
+  - claim.knowledge-os.calibration-needs-many-clear-judgments
+- pack_id: pack.knowledge-os-kernel-quality
+  role: capsule_design_quality
+  facet_id: export_readiness
+  optional: true
+  source_slice: slices/export-readiness.md
+  target_path: references/knowledge-os-export-readiness.md
+  asset_ids:
+  - claim.knowledge-os.visible-contribution-orients-exports
+  - claim.knowledge-os.para-organizes-by-actionability
+  - claim.knowledge-os.feedback-delays-require-smoke-tests
+  - claim.knowledge-os.resulting-distorts-review
+  - claim.knowledge-os.feedback-from-outcomes-is-noisy
+  - claim.knowledge-os.resilience-differs-from-static-stability
+  - checklist.knowledge-os.pack-facet-export-readiness
+  - anti-pattern.knowledge-os.resulting-validation
+  - eval.knowledge-os.export-pass-overclaims-quality
+  - eval.knowledge-os.skills-sdk-handoff-overclaims-ingest
+  - eval.knowledge-os.consumer-receipt-stale-digest
+  - claim.knowledge-os.information-flows-hold-systems-together
+  - claim.knowledge-os.decision-process-not-outcome
+  - claim.knowledge-os.forecasts-need-scoreable-terms
+  - claim.knowledge-os.feedback-only-affects-future-behavior
+  - claim.knowledge-os.calibration-needs-many-clear-judgments
+  - claim.knowledge-os.permanent-notes-stand-alone-with-sources
+runtime_dependency_policy:
+  requires_knowledge_os_at_runtime: false
+  raw_sources_included: false
+  local_absolute_paths_required: false
+provenance:
+  profile: sdk-scenario-generator
+  profile_digest: sha256:e2aee6bf4e9f4c8dd7c8d76dccdc54f2ec3aa04ee26767eb188223c1635b810a
+  packs:
+  - pack_id: pack.skills-sdk
+    export_root: exports/packs/pack.skills-sdk
+    snapshot_digest: sha256:24e2aff49513e4e87f9d1656f999d71445376f3d98ffb2377ae97951f521912e
+    role: sdk_scenario_pipeline_research
+  - pack_id: pack.knowledge-os-kernel-quality
+    export_root: exports/packs/pack.knowledge-os-kernel-quality
+    snapshot_digest: sha256:ae5a555ce44d1d04f212d1ea6e664f946de421ea7969d6cc9e035b73d41c75e4
+    role: capsule_design_quality

@@ -1,0 +1,2314 @@
+[
+  {
+    "id": "eval.skills.baseline-lift-required",
+    "type": "eval-scenario",
+    "title": "Baseline Lift Required",
+    "status": "draft",
+    "claim_strength": "synthesized",
+    "source_refs": [
+      {
+        "source_id": "sources.arXiv.SkillsBench",
+        "locator": "abstract-and-section-3.5-metrics",
+        "boundary": "local_source_reference"
+      }
+    ],
+    "derived_from_claims": [
+      "claim.skills.curated-skills-improve-unevenly",
+      "claim.skills.absolute-and-normalized-gain-needed",
+      "claim.skills.skilldex-separates-conformance-from-semantics"
+    ],
+    "applies_to": [
+      "skills-sdk"
+    ],
+    "used_by": [
+      "pack.skills-sdk"
+    ],
+    "source_boundaries": [
+      "local_source_reference"
+    ],
+    "payload": {
+      "given": "A proposed Skills SDK gate says a skill is ready because it validates structurally and has a high conformance score, but the receipt has no no-skill baseline, prior-skill baseline, absolute delta, normalized gain, or task denominator.",
+      "should": "The agent blocks the readiness claim, separates conformance from behavior proof, and asks for a baseline lift receipt with absolute and normalized movement plus negative-delta reporting.",
+      "expected_failure": "The agent treats a valid SKILL.md file or registry conformance score as proof that the skill improves behavior.",
+      "reproduce_with": "references/evals/eval.skills.baseline-lift-required.md",
+      "eval_intent": {
+        "capsule_refs": [
+          "skills-sdk:evaluation_benchmarks"
+        ],
+        "knowledge_claim": "Skill readiness requires behavioral lift evidence in addition to structural conformance.",
+        "behavior_under_test": "The Skills SDK gate refuses to claim skill readiness without baseline lift evidence.",
+        "failure_mode": "Structural validation is accepted as behavioral proof.",
+        "expected_agent_move": "Block readiness, name the missing baseline proof fields, and preserve conformance as a separate evidence lane.",
+        "proof_route": "references/evals.yaml",
+        "fixture_path": "references/evals/eval.skills.baseline-lift-required.md",
+        "promotion_status": "candidate",
+        "source_trace": {
+          "capsule_id": "skills-sdk:evaluation_benchmarks",
+          "section": "Baseline lift gate",
+          "source_digest": "sha256:fa853b3a44282a28bd816b46572e8fbab945834f01fb5f055ec8847ba1c31dae",
+          "extracted_principle": "Skill conformance is not skill lift; baseline comparison must remain visible."
+        },
+        "bad_answer_pattern": [
+          "The agent says the skill is ready because the file validates.",
+          "The agent reports normalized gain without baseline pass rate or absolute delta."
+        ],
+        "good_answer_pattern": [
+          "The agent blocks readiness and requests no-skill or prior-skill baseline evidence.",
+          "The agent reports conformance and lift as separate lanes."
+        ],
+        "weak_eval_flags": [],
+        "proposed_evals_yaml_case": {
+          "id": "eval.skills.baseline-lift-required",
+          "unit": "skills-sdk",
+          "given": "A proposed Skills SDK gate says a skill is ready because it validates structurally and has a high conformance score, but the receipt has no no-skill baseline, prior-skill baseline, absolute delta, normalized gain, or task denominator.",
+          "should": "The agent blocks the readiness claim, separates conformance from behavior proof, and asks for a baseline lift receipt with absolute and normalized movement plus negative-delta reporting.",
+          "prompt": "Use the Skills SDK research pack to respond to the scenario while preserving KnowledgeOS and downstream proof boundaries.",
+          "knowledge_pack": {
+            "scenario_id": "eval.skills.baseline-lift-required",
+            "fixture": "references/evals/eval.skills.baseline-lift-required.md",
+            "capsule_refs": [
+              "skills-sdk:evaluation_benchmarks"
+            ]
+          },
+          "acceptance": [
+            {
+              "type": "expected_signal",
+              "value": "baseline lift evidence required"
+            },
+            {
+              "type": "must_not_claim",
+              "value": "structural validation proves behavioral readiness"
+            }
+          ]
+        },
+        "quality_findings": [],
+        "promotion": {
+          "scenario_status": "candidate",
+          "evals_yaml_status": "proposed",
+          "fixture_status": "present",
+          "tessl_status": "not_run",
+          "proof_status": "not_claimed",
+          "blocked_by": []
+        },
+        "skill_lift_target": {
+          "before_failure": "The Skills SDK accepts structural conformance as behavior proof.",
+          "after_behavior": "The Skills SDK requires baseline lift fields before readiness.",
+          "observable_delta": "The answer names missing baseline, absolute delta, normalized gain, denominator, and negative-delta evidence."
+        }
+      },
+      "capsule_refs": [
+        "skills-sdk:evaluation_benchmarks"
+      ],
+      "knowledge_claim": "Skill readiness requires behavioral lift evidence in addition to structural conformance.",
+      "behavior_under_test": "The Skills SDK gate refuses to claim skill readiness without baseline lift evidence.",
+      "failure_mode": "Structural validation is accepted as behavioral proof.",
+      "expected_agent_move": "Block readiness, name the missing baseline proof fields, and preserve conformance as a separate evidence lane.",
+      "proof_route": "references/evals.yaml",
+      "fixture_path": "references/evals/eval.skills.baseline-lift-required.md",
+      "promotion_status": "candidate",
+      "source_trace": {
+        "capsule_id": "skills-sdk:evaluation_benchmarks",
+        "section": "Baseline lift gate",
+        "source_digest": "sha256:fa853b3a44282a28bd816b46572e8fbab945834f01fb5f055ec8847ba1c31dae",
+        "extracted_principle": "Skill conformance is not skill lift; baseline comparison must remain visible."
+      },
+      "bad_answer_pattern": [
+        "The agent says the skill is ready because the file validates.",
+        "The agent reports normalized gain without baseline pass rate or absolute delta."
+      ],
+      "good_answer_pattern": [
+        "The agent blocks readiness and requests no-skill or prior-skill baseline evidence.",
+        "The agent reports conformance and lift as separate lanes."
+      ],
+      "weak_eval_flags": [],
+      "proposed_evals_yaml_case": {
+        "id": "eval.skills.baseline-lift-required",
+        "unit": "skills-sdk",
+        "given": "A proposed Skills SDK gate says a skill is ready because it validates structurally and has a high conformance score, but the receipt has no no-skill baseline, prior-skill baseline, absolute delta, normalized gain, or task denominator.",
+        "should": "The agent blocks the readiness claim, separates conformance from behavior proof, and asks for a baseline lift receipt with absolute and normalized movement plus negative-delta reporting.",
+        "prompt": "Use the Skills SDK research pack to respond to the scenario while preserving KnowledgeOS and downstream proof boundaries.",
+        "knowledge_pack": {
+          "scenario_id": "eval.skills.baseline-lift-required",
+          "fixture": "references/evals/eval.skills.baseline-lift-required.md",
+          "capsule_refs": [
+            "skills-sdk:evaluation_benchmarks"
+          ]
+        },
+        "acceptance": [
+          {
+            "type": "expected_signal",
+            "value": "baseline lift evidence required"
+          },
+          {
+            "type": "must_not_claim",
+            "value": "structural validation proves behavioral readiness"
+          }
+        ]
+      },
+      "quality_findings": [],
+      "promotion": {
+        "scenario_status": "candidate",
+        "evals_yaml_status": "proposed",
+        "fixture_status": "present",
+        "tessl_status": "not_run",
+        "proof_status": "not_claimed",
+        "blocked_by": []
+      },
+      "skill_lift_target": {
+        "before_failure": "The Skills SDK accepts structural conformance as behavior proof.",
+        "after_behavior": "The Skills SDK requires baseline lift fields before readiness.",
+        "observable_delta": "The answer names missing baseline, absolute delta, normalized gain, denominator, and negative-delta evidence."
+      }
+    }
+  },
+  {
+    "id": "eval.skills.negative-tests-required",
+    "type": "eval-scenario",
+    "title": "Negative Tests Required",
+    "status": "draft",
+    "claim_strength": "synthesized",
+    "source_refs": [
+      {
+        "source_id": "sources.arXiv.Agent Skills for Large Language Models-",
+        "locator": "challenge-5-skill-verification-and-testing",
+        "boundary": "local_source_reference"
+      }
+    ],
+    "derived_from_claims": [
+      "claim.skills.verification-needs-negative-tests",
+      "claim.skills.verification-gates-need-permission-manifest"
+    ],
+    "applies_to": [
+      "skills-sdk"
+    ],
+    "used_by": [
+      "pack.skills-sdk"
+    ],
+    "source_boundaries": [
+      "local_source_reference"
+    ],
+    "payload": {
+      "given": "A skill has ten happy-path scenarios that all pass, but none test hallucinated procedures, conflicting skills, permission escalation, cascading execution failures, or adversarial chaining.",
+      "should": "The agent blocks live-readiness and asks for negative and pressure cases that exercise what the skill must refuse, isolate, or report.",
+      "expected_failure": "The agent treats an all-green happy-path suite as enough for behavioral readiness.",
+      "reproduce_with": "references/evals/eval.skills.negative-tests-required.md",
+      "eval_intent": {
+        "capsule_refs": [
+          "skills-sdk:supply_chain_security",
+          "skills-sdk:evaluation_benchmarks"
+        ],
+        "knowledge_claim": "Skill verification must prove what the skill does and what it refuses or prevents.",
+        "behavior_under_test": "The Skills SDK gate requires negative tests before readiness.",
+        "failure_mode": "Happy-path-only scenarios are accepted as release-grade eval coverage.",
+        "expected_agent_move": "Request negative tests for hallucination, permission, conflict, cascading failure, and adversarial chaining risks.",
+        "proof_route": "references/evals.yaml",
+        "fixture_path": "references/evals/eval.skills.negative-tests-required.md",
+        "promotion_status": "candidate",
+        "source_trace": {
+          "capsule_id": "skills-sdk:supply_chain_security",
+          "section": "Negative tests",
+          "source_digest": "sha256:a8aafd35134c6166d2d197235736cc47f04b749f51f77a02d688aa4ab3bed0dc",
+          "extracted_principle": "Skill tests should include negative cases for skill-specific failure modes."
+        },
+        "bad_answer_pattern": [
+          "The agent accepts ten happy-path passes as live readiness.",
+          "The agent ignores refusal and permission-boundary cases."
+        ],
+        "good_answer_pattern": [
+          "The agent blocks readiness until negative cases exist.",
+          "The agent names concrete negative case families."
+        ],
+        "weak_eval_flags": [],
+        "proposed_evals_yaml_case": {
+          "id": "eval.skills.negative-tests-required",
+          "unit": "skills-sdk",
+          "given": "A skill has ten happy-path scenarios that all pass, but none test hallucinated procedures, conflicting skills, permission escalation, cascading execution failures, or adversarial chaining.",
+          "should": "The agent blocks live-readiness and asks for negative and pressure cases that exercise what the skill must refuse, isolate, or report.",
+          "prompt": "Decide whether this scenario suite is sufficient for live readiness and name any missing proof.",
+          "knowledge_pack": {
+            "scenario_id": "eval.skills.negative-tests-required",
+            "fixture": "references/evals/eval.skills.negative-tests-required.md",
+            "capsule_refs": [
+              "skills-sdk:supply_chain_security",
+              "skills-sdk:evaluation_benchmarks"
+            ]
+          },
+          "acceptance": [
+            {
+              "type": "expected_signal",
+              "value": "Negative tests are required before live readiness."
+            },
+            {
+              "type": "must_not_claim",
+              "value": "Happy-path-only passing scenarios are enough."
+            }
+          ]
+        },
+        "quality_findings": [],
+        "promotion": {
+          "scenario_status": "candidate",
+          "evals_yaml_status": "proposed",
+          "fixture_status": "present",
+          "tessl_status": "not_run",
+          "proof_status": "not_claimed",
+          "blocked_by": []
+        },
+        "skill_lift_target": {
+          "before_failure": "The Skills SDK accepts happy-path-only proof.",
+          "after_behavior": "The Skills SDK requires negative and pressure coverage.",
+          "observable_delta": "The answer names at least three skill-specific negative case families and blocks readiness."
+        }
+      },
+      "capsule_refs": [
+        "skills-sdk:supply_chain_security",
+        "skills-sdk:evaluation_benchmarks"
+      ],
+      "knowledge_claim": "Skill verification must prove what the skill does and what it refuses or prevents.",
+      "behavior_under_test": "The Skills SDK gate requires negative tests before readiness.",
+      "failure_mode": "Happy-path-only scenarios are accepted as release-grade eval coverage.",
+      "expected_agent_move": "Request negative tests for hallucination, permission, conflict, cascading failure, and adversarial chaining risks.",
+      "proof_route": "references/evals.yaml",
+      "fixture_path": "references/evals/eval.skills.negative-tests-required.md",
+      "promotion_status": "candidate",
+      "source_trace": {
+        "capsule_id": "skills-sdk:supply_chain_security",
+        "section": "Negative tests",
+        "source_digest": "sha256:a8aafd35134c6166d2d197235736cc47f04b749f51f77a02d688aa4ab3bed0dc",
+        "extracted_principle": "Skill tests should include negative cases for skill-specific failure modes."
+      },
+      "bad_answer_pattern": [
+        "The agent accepts ten happy-path passes as live readiness.",
+        "The agent ignores refusal and permission-boundary cases."
+      ],
+      "good_answer_pattern": [
+        "The agent blocks readiness until negative cases exist.",
+        "The agent names concrete negative case families."
+      ],
+      "weak_eval_flags": [],
+      "proposed_evals_yaml_case": {
+        "id": "eval.skills.negative-tests-required",
+        "unit": "skills-sdk",
+        "given": "A skill has ten happy-path scenarios that all pass, but none test hallucinated procedures, conflicting skills, permission escalation, cascading execution failures, or adversarial chaining.",
+        "should": "The agent blocks live-readiness and asks for negative and pressure cases that exercise what the skill must refuse, isolate, or report.",
+        "prompt": "Decide whether this scenario suite is sufficient for live readiness and name any missing proof.",
+        "knowledge_pack": {
+          "scenario_id": "eval.skills.negative-tests-required",
+          "fixture": "references/evals/eval.skills.negative-tests-required.md",
+          "capsule_refs": [
+            "skills-sdk:supply_chain_security",
+            "skills-sdk:evaluation_benchmarks"
+          ]
+        },
+        "acceptance": [
+          {
+            "type": "expected_signal",
+            "value": "Negative tests are required before live readiness."
+          },
+          {
+            "type": "must_not_claim",
+            "value": "Happy-path-only passing scenarios are enough."
+          }
+        ]
+      },
+      "quality_findings": [],
+      "promotion": {
+        "scenario_status": "candidate",
+        "evals_yaml_status": "proposed",
+        "fixture_status": "present",
+        "tessl_status": "not_run",
+        "proof_status": "not_claimed",
+        "blocked_by": []
+      },
+      "skill_lift_target": {
+        "before_failure": "The Skills SDK accepts happy-path-only proof.",
+        "after_behavior": "The Skills SDK requires negative and pressure coverage.",
+        "observable_delta": "The answer names at least three skill-specific negative case families and blocks readiness."
+      }
+    }
+  },
+  {
+    "id": "eval.skills.task-completion-not-quality",
+    "type": "eval-scenario",
+    "title": "Task Completion Not Quality",
+    "status": "draft",
+    "claim_strength": "synthesized",
+    "source_refs": [
+      {
+        "source_id": "sources.arXiv.Agent Skills for Large Language Models-",
+        "locator": "challenge-7-evaluation-methodology",
+        "boundary": "local_source_reference"
+      }
+    ],
+    "derived_from_claims": [
+      "claim.skills.quality-metrics-beyond-task-completion",
+      "claim.skills.curated-skills-improve-unevenly",
+      "claim.skills.libraries-accumulate-technical-debt"
+    ],
+    "applies_to": [
+      "skills-sdk"
+    ],
+    "used_by": [
+      "pack.skills-sdk"
+    ],
+    "source_boundaries": [
+      "local_source_reference"
+    ],
+    "payload": {
+      "given": "A skill passes one verifier-backed task, and the report claims the skill is reusable and maintainable without any cross-task reuse, composition, or environment-change evidence.",
+      "should": "The agent accepts the task pass as local behavior evidence but refuses broader skill-quality claims until reusability, composability, and maintainability evidence exists.",
+      "expected_failure": "The agent turns a single task-completion pass into reusable skill-quality proof.",
+      "reproduce_with": "references/evals/eval.skills.task-completion-not-quality.md",
+      "eval_intent": {
+        "capsule_refs": [
+          "skills-sdk:evaluation_benchmarks",
+          "skills-sdk:operations_registry"
+        ],
+        "knowledge_claim": "Task completion does not prove reusable, composable, or maintainable skill quality.",
+        "behavior_under_test": "The Skills SDK gate keeps task pass evidence separate from ecosystem-quality evidence.",
+        "failure_mode": "A one-task pass is overclaimed as broad skill quality.",
+        "expected_agent_move": "Report local task proof, block reusable-quality claims, and request cross-task, composition, and drift evidence.",
+        "proof_route": "references/evals.yaml",
+        "fixture_path": "references/evals/eval.skills.task-completion-not-quality.md",
+        "promotion_status": "candidate",
+        "source_trace": {
+          "capsule_id": "skills-sdk:evaluation_benchmarks",
+          "section": "Skill quality beyond task completion",
+          "source_digest": "sha256:a8aafd35134c6166d2d197235736cc47f04b749f51f77a02d688aa4ab3bed0dc",
+          "extracted_principle": "Skill quality requires reusability, composability, and maintainability evidence beyond task completion."
+        },
+        "bad_answer_pattern": [
+          "The agent says one task pass proves the skill is reusable.",
+          "The agent does not ask for composition or maintainability evidence."
+        ],
+        "good_answer_pattern": [
+          "The agent accepts the local pass only within its narrow proof lane.",
+          "The agent asks for reusability, composability, and maintainability evidence."
+        ],
+        "weak_eval_flags": [],
+        "proposed_evals_yaml_case": {
+          "id": "eval.skills.task-completion-not-quality",
+          "unit": "skills-sdk",
+          "given": "A skill passes one verifier-backed task, and the report claims the skill is reusable and maintainable without any cross-task reuse, composition, or environment-change evidence.",
+          "should": "The agent accepts the task pass as local behavior evidence but refuses broader skill-quality claims until reusability, composability, and maintainability evidence exists.",
+          "prompt": "Summarize what this single verifier-backed pass proves and what it does not prove for skill quality.",
+          "knowledge_pack": {
+            "scenario_id": "eval.skills.task-completion-not-quality",
+            "fixture": "references/evals/eval.skills.task-completion-not-quality.md",
+            "capsule_refs": [
+              "skills-sdk:evaluation_benchmarks",
+              "skills-sdk:operations_registry"
+            ]
+          },
+          "acceptance": [
+            {
+              "type": "expected_signal",
+              "value": "Single-task pass is local behavior evidence only."
+            },
+            {
+              "type": "must_not_claim",
+              "value": "One pass proves reusability, composability, or maintainability."
+            }
+          ]
+        },
+        "quality_findings": [],
+        "promotion": {
+          "scenario_status": "candidate",
+          "evals_yaml_status": "proposed",
+          "fixture_status": "present",
+          "tessl_status": "not_run",
+          "proof_status": "not_claimed",
+          "blocked_by": []
+        },
+        "skill_lift_target": {
+          "before_failure": "The Skills SDK overclaims one task pass as broad skill quality.",
+          "after_behavior": "The Skills SDK separates task pass proof from reusable quality claims.",
+          "observable_delta": "The answer names local behavior proof and blocks broader quality claims pending additional evidence."
+        }
+      },
+      "capsule_refs": [
+        "skills-sdk:evaluation_benchmarks",
+        "skills-sdk:operations_registry"
+      ],
+      "knowledge_claim": "Task completion does not prove reusable, composable, or maintainable skill quality.",
+      "behavior_under_test": "The Skills SDK gate keeps task pass evidence separate from ecosystem-quality evidence.",
+      "failure_mode": "A one-task pass is overclaimed as broad skill quality.",
+      "expected_agent_move": "Report local task proof, block reusable-quality claims, and request cross-task, composition, and drift evidence.",
+      "proof_route": "references/evals.yaml",
+      "fixture_path": "references/evals/eval.skills.task-completion-not-quality.md",
+      "promotion_status": "candidate",
+      "source_trace": {
+        "capsule_id": "skills-sdk:evaluation_benchmarks",
+        "section": "Skill quality beyond task completion",
+        "source_digest": "sha256:a8aafd35134c6166d2d197235736cc47f04b749f51f77a02d688aa4ab3bed0dc",
+        "extracted_principle": "Skill quality requires reusability, composability, and maintainability evidence beyond task completion."
+      },
+      "bad_answer_pattern": [
+        "The agent says one task pass proves the skill is reusable.",
+        "The agent does not ask for composition or maintainability evidence."
+      ],
+      "good_answer_pattern": [
+        "The agent accepts the local pass only within its narrow proof lane.",
+        "The agent asks for reusability, composability, and maintainability evidence."
+      ],
+      "weak_eval_flags": [],
+      "proposed_evals_yaml_case": {
+        "id": "eval.skills.task-completion-not-quality",
+        "unit": "skills-sdk",
+        "given": "A skill passes one verifier-backed task, and the report claims the skill is reusable and maintainable without any cross-task reuse, composition, or environment-change evidence.",
+        "should": "The agent accepts the task pass as local behavior evidence but refuses broader skill-quality claims until reusability, composability, and maintainability evidence exists.",
+        "prompt": "Summarize what this single verifier-backed pass proves and what it does not prove for skill quality.",
+        "knowledge_pack": {
+          "scenario_id": "eval.skills.task-completion-not-quality",
+          "fixture": "references/evals/eval.skills.task-completion-not-quality.md",
+          "capsule_refs": [
+            "skills-sdk:evaluation_benchmarks",
+            "skills-sdk:operations_registry"
+          ]
+        },
+        "acceptance": [
+          {
+            "type": "expected_signal",
+            "value": "Single-task pass is local behavior evidence only."
+          },
+          {
+            "type": "must_not_claim",
+            "value": "One pass proves reusability, composability, or maintainability."
+          }
+        ]
+      },
+      "quality_findings": [],
+      "promotion": {
+        "scenario_status": "candidate",
+        "evals_yaml_status": "proposed",
+        "fixture_status": "present",
+        "tessl_status": "not_run",
+        "proof_status": "not_claimed",
+        "blocked_by": []
+      },
+      "skill_lift_target": {
+        "before_failure": "The Skills SDK overclaims one task pass as broad skill quality.",
+        "after_behavior": "The Skills SDK separates task pass proof from reusable quality claims.",
+        "observable_delta": "The answer names local behavior proof and blocks broader quality claims pending additional evidence."
+      }
+    }
+  },
+  {
+    "id": "eval.skills.trace-revision-required",
+    "type": "eval-scenario",
+    "title": "Trace Revision Required",
+    "status": "draft",
+    "claim_strength": "synthesized",
+    "source_refs": [
+      {
+        "source_id": "sources.arXiv.SkillRevise",
+        "locator": "abstract",
+        "boundary": "local_source_reference"
+      },
+      {
+        "source_id": "sources.arXiv.Automating SKILL.md Generation for Computer-Using",
+        "locator": "discussion-and-conclusion",
+        "boundary": "local_source_reference"
+      }
+    ],
+    "derived_from_claims": [
+      "claim.skills.revision-needs-execution-evidence",
+      "claim.skills.skillrevise-improves-cold-start",
+      "claim.skills.frequency-priors-needed-for-mined-skills"
+    ],
+    "applies_to": [
+      "skills-sdk"
+    ],
+    "used_by": [
+      "pack.skills-sdk"
+    ],
+    "source_boundaries": [
+      "local_source_reference"
+    ],
+    "payload": {
+      "given": "A generated skill failed on a verifier-backed task, and the proposed fix is a polished rewrite based on the task prompt alone with no failing trace, defect diagnosis, candidate rerun, or trivial baseline comparison.",
+      "should": "The agent rejects the one-shot rewrite as insufficient and routes the fix through trace-conditioned diagnosis, execution-anchored edits, candidate re-execution, and baseline controls.",
+      "expected_failure": "The agent accepts plausible new skill text without execution evidence.",
+      "reproduce_with": "references/evals/eval.skills.trace-revision-required.md",
+      "eval_intent": {
+        "capsule_refs": [
+          "skills-sdk:generation_revision"
+        ],
+        "knowledge_claim": "Generated skill revision should be grounded in execution traces and re-execution, not only prose quality.",
+        "behavior_under_test": "The Skills SDK gate requires trace evidence and reruns before accepting a generated-skill revision.",
+        "failure_mode": "A one-shot rewrite is accepted as a fix because it sounds better.",
+        "expected_agent_move": "Ask for the failing trace, defect class, repair principle, candidate rerun, verifier result, and baseline comparison.",
+        "proof_route": "references/evals.yaml",
+        "fixture_path": "references/evals/eval.skills.trace-revision-required.md",
+        "promotion_status": "candidate",
+        "source_trace": {
+          "capsule_id": "skills-sdk:generation_revision",
+          "section": "Trace revision gate",
+          "source_digest": "sha256:7adbda6d5a5f2d99fcd2437e5cebb687c9a9650123cba10cc6e0edc85a6e2e41",
+          "extracted_principle": "Skill revision should be execution-grounded and re-run within a revision budget."
+        },
+        "bad_answer_pattern": [
+          "The agent accepts the rewritten skill because it is clearer.",
+          "The agent ignores trivial frequency or transition baselines for a mined/generated skill."
+        ],
+        "good_answer_pattern": [
+          "The agent requires failing traces, defect diagnosis, repair principles, reruns, and baseline controls.",
+          "The agent separates reviewability from transfer proof."
+        ],
+        "weak_eval_flags": [],
+        "proposed_evals_yaml_case": {
+          "id": "eval.skills.trace-revision-required",
+          "unit": "skills-sdk",
+          "given": "A generated skill failed on a verifier-backed task, and the proposed fix is a polished rewrite based on the task prompt alone with no failing trace, defect diagnosis, candidate rerun, or trivial baseline comparison.",
+          "should": "The agent rejects the one-shot rewrite as insufficient and routes the fix through trace-conditioned diagnosis, execution-anchored edits, candidate re-execution, and baseline controls.",
+          "prompt": "Use the Skills SDK research pack to respond to the scenario while preserving KnowledgeOS and downstream proof boundaries.",
+          "knowledge_pack": {
+            "scenario_id": "eval.skills.trace-revision-required",
+            "fixture": "references/evals/eval.skills.trace-revision-required.md",
+            "capsule_refs": [
+              "skills-sdk:generation_revision"
+            ]
+          },
+          "acceptance": [
+            {
+              "type": "expected_signal",
+              "value": "trace-conditioned revision required"
+            },
+            {
+              "type": "must_not_claim",
+              "value": "polished rewrite is sufficient repair proof"
+            }
+          ]
+        },
+        "quality_findings": [],
+        "promotion": {
+          "scenario_status": "candidate",
+          "evals_yaml_status": "proposed",
+          "fixture_status": "present",
+          "tessl_status": "not_run",
+          "proof_status": "not_claimed",
+          "blocked_by": []
+        },
+        "skill_lift_target": {
+          "before_failure": "The Skills SDK accepts plausible generated skill text as repaired.",
+          "after_behavior": "The Skills SDK requires trace-conditioned revision and verifier-backed reruns.",
+          "observable_delta": "The answer names trace, defect, repair, rerun, and baseline evidence as required."
+        }
+      },
+      "capsule_refs": [
+        "skills-sdk:generation_revision"
+      ],
+      "knowledge_claim": "Generated skill revision should be grounded in execution traces and re-execution, not only prose quality.",
+      "behavior_under_test": "The Skills SDK gate requires trace evidence and reruns before accepting a generated-skill revision.",
+      "failure_mode": "A one-shot rewrite is accepted as a fix because it sounds better.",
+      "expected_agent_move": "Ask for the failing trace, defect class, repair principle, candidate rerun, verifier result, and baseline comparison.",
+      "proof_route": "references/evals.yaml",
+      "fixture_path": "references/evals/eval.skills.trace-revision-required.md",
+      "promotion_status": "candidate",
+      "source_trace": {
+        "capsule_id": "skills-sdk:generation_revision",
+        "section": "Trace revision gate",
+        "source_digest": "sha256:7adbda6d5a5f2d99fcd2437e5cebb687c9a9650123cba10cc6e0edc85a6e2e41",
+        "extracted_principle": "Skill revision should be execution-grounded and re-run within a revision budget."
+      },
+      "bad_answer_pattern": [
+        "The agent accepts the rewritten skill because it is clearer.",
+        "The agent ignores trivial frequency or transition baselines for a mined/generated skill."
+      ],
+      "good_answer_pattern": [
+        "The agent requires failing traces, defect diagnosis, repair principles, reruns, and baseline controls.",
+        "The agent separates reviewability from transfer proof."
+      ],
+      "weak_eval_flags": [],
+      "proposed_evals_yaml_case": {
+        "id": "eval.skills.trace-revision-required",
+        "unit": "skills-sdk",
+        "given": "A generated skill failed on a verifier-backed task, and the proposed fix is a polished rewrite based on the task prompt alone with no failing trace, defect diagnosis, candidate rerun, or trivial baseline comparison.",
+        "should": "The agent rejects the one-shot rewrite as insufficient and routes the fix through trace-conditioned diagnosis, execution-anchored edits, candidate re-execution, and baseline controls.",
+        "prompt": "Use the Skills SDK research pack to respond to the scenario while preserving KnowledgeOS and downstream proof boundaries.",
+        "knowledge_pack": {
+          "scenario_id": "eval.skills.trace-revision-required",
+          "fixture": "references/evals/eval.skills.trace-revision-required.md",
+          "capsule_refs": [
+            "skills-sdk:generation_revision"
+          ]
+        },
+        "acceptance": [
+          {
+            "type": "expected_signal",
+            "value": "trace-conditioned revision required"
+          },
+          {
+            "type": "must_not_claim",
+            "value": "polished rewrite is sufficient repair proof"
+          }
+        ]
+      },
+      "quality_findings": [],
+      "promotion": {
+        "scenario_status": "candidate",
+        "evals_yaml_status": "proposed",
+        "fixture_status": "present",
+        "tessl_status": "not_run",
+        "proof_status": "not_claimed",
+        "blocked_by": []
+      },
+      "skill_lift_target": {
+        "before_failure": "The Skills SDK accepts plausible generated skill text as repaired.",
+        "after_behavior": "The Skills SDK requires trace-conditioned revision and verifier-backed reruns.",
+        "observable_delta": "The answer names trace, defect, repair, rerun, and baseline evidence as required."
+      }
+    }
+  },
+  {
+    "id": "eval.skills.library-maintenance-required",
+    "type": "eval-scenario",
+    "title": "Library Maintenance Required",
+    "status": "draft",
+    "claim_strength": "synthesized",
+    "source_refs": [
+      {
+        "source_id": "sources.arXiv.SkillOps",
+        "locator": "abstract",
+        "boundary": "local_source_reference"
+      },
+      {
+        "source_id": "sources.arXiv.Agent Skills for Large Language Models-",
+        "locator": "section-4.6-and-challenge-7",
+        "boundary": "local_source_reference"
+      }
+    ],
+    "derived_from_claims": [
+      "claim.skills.libraries-accumulate-technical-debt",
+      "claim.skills.skillops-low-overhead-maintenance",
+      "claim.skills.library-size-can-degrade-selection",
+      "claim.skills.quality-metrics-beyond-task-completion"
+    ],
+    "applies_to": [
+      "skills-sdk"
+    ],
+    "used_by": [
+      "pack.skills-sdk"
+    ],
+    "source_boundaries": [
+      "local_source_reference"
+    ],
+    "payload": {
+      "given": "A skill library grows after several successful task-time fixes, but there is no library-level contract catalog, dependency or shared-asset check, utility/compatibility/risk/validation report, or routing-quality check as the library size increases.",
+      "should": "The agent classifies this as skill technical debt risk and asks for library-time maintenance evidence before treating the library as SDK-ready.",
+      "expected_failure": "The agent treats successful individual task repairs as proof that the library is healthy.",
+      "reproduce_with": "references/evals/eval.skills.library-maintenance-required.md",
+      "eval_intent": {
+        "capsule_refs": [
+          "skills-sdk:operations_registry"
+        ],
+        "knowledge_claim": "Skill libraries need library-time maintenance because individual task success does not prove ecosystem health.",
+        "behavior_under_test": "The Skills SDK gate requires library-level health evidence before SDK readiness claims.",
+        "failure_mode": "Task-time repair success is treated as library readiness.",
+        "expected_agent_move": "Request contract catalog, graph or dependency view, utility/compatibility/risk/validation checks, shared-asset coherence, and routing-quality evidence.",
+        "proof_route": "references/evals.yaml",
+        "fixture_path": "references/evals/eval.skills.library-maintenance-required.md",
+        "promotion_status": "candidate",
+        "source_trace": {
+          "capsule_id": "skills-sdk:operations_registry",
+          "section": "Library maintenance gate",
+          "source_digest": "sha256:b56e5f031d1ee2a480e2b21d840755ad894cf7d10936d8bf0ac7f384cbdefbfc",
+          "extracted_principle": "Skill libraries accumulate technical debt and need low-overhead library-time maintenance."
+        },
+        "bad_answer_pattern": [
+          "The agent says the library is healthy because recent tasks passed.",
+          "The agent ignores routing quality as the library size grows."
+        ],
+        "good_answer_pattern": [
+          "The agent asks for library-level maintenance and routing evidence.",
+          "The agent separates task-time repair proof from ecosystem health proof."
+        ],
+        "weak_eval_flags": [],
+        "proposed_evals_yaml_case": {
+          "id": "eval.skills.library-maintenance-required",
+          "unit": "skills-sdk",
+          "given": "A skill library grows after several successful task-time fixes, but there is no library-level contract catalog, dependency or shared-asset check, utility/compatibility/risk/validation report, or routing-quality check as the library size increases.",
+          "should": "The agent classifies this as skill technical debt risk and asks for library-time maintenance evidence before treating the library as SDK-ready.",
+          "prompt": "Use the Skills SDK research pack to respond to the scenario while preserving KnowledgeOS and downstream proof boundaries.",
+          "knowledge_pack": {
+            "scenario_id": "eval.skills.library-maintenance-required",
+            "fixture": "references/evals/eval.skills.library-maintenance-required.md",
+            "capsule_refs": [
+              "skills-sdk:operations_registry"
+            ]
+          },
+          "acceptance": [
+            {
+              "type": "expected_signal",
+              "value": "library-time maintenance evidence required"
+            },
+            {
+              "type": "must_not_claim",
+              "value": "individual task success proves library health"
+            }
+          ]
+        },
+        "quality_findings": [],
+        "promotion": {
+          "scenario_status": "candidate",
+          "evals_yaml_status": "proposed",
+          "fixture_status": "present",
+          "tessl_status": "not_run",
+          "proof_status": "not_claimed",
+          "blocked_by": []
+        },
+        "skill_lift_target": {
+          "before_failure": "The Skills SDK equates individual task repairs with library health.",
+          "after_behavior": "The Skills SDK requires library-time health checks and routing evidence.",
+          "observable_delta": "The answer names contract, graph, utility, compatibility, risk, validation, shared-asset, and routing evidence."
+        }
+      },
+      "capsule_refs": [
+        "skills-sdk:operations_registry"
+      ],
+      "knowledge_claim": "Skill libraries need library-time maintenance because individual task success does not prove ecosystem health.",
+      "behavior_under_test": "The Skills SDK gate requires library-level health evidence before SDK readiness claims.",
+      "failure_mode": "Task-time repair success is treated as library readiness.",
+      "expected_agent_move": "Request contract catalog, graph or dependency view, utility/compatibility/risk/validation checks, shared-asset coherence, and routing-quality evidence.",
+      "proof_route": "references/evals.yaml",
+      "fixture_path": "references/evals/eval.skills.library-maintenance-required.md",
+      "promotion_status": "candidate",
+      "source_trace": {
+        "capsule_id": "skills-sdk:operations_registry",
+        "section": "Library maintenance gate",
+        "source_digest": "sha256:b56e5f031d1ee2a480e2b21d840755ad894cf7d10936d8bf0ac7f384cbdefbfc",
+        "extracted_principle": "Skill libraries accumulate technical debt and need low-overhead library-time maintenance."
+      },
+      "bad_answer_pattern": [
+        "The agent says the library is healthy because recent tasks passed.",
+        "The agent ignores routing quality as the library size grows."
+      ],
+      "good_answer_pattern": [
+        "The agent asks for library-level maintenance and routing evidence.",
+        "The agent separates task-time repair proof from ecosystem health proof."
+      ],
+      "weak_eval_flags": [],
+      "proposed_evals_yaml_case": {
+        "id": "eval.skills.library-maintenance-required",
+        "unit": "skills-sdk",
+        "given": "A skill library grows after several successful task-time fixes, but there is no library-level contract catalog, dependency or shared-asset check, utility/compatibility/risk/validation report, or routing-quality check as the library size increases.",
+        "should": "The agent classifies this as skill technical debt risk and asks for library-time maintenance evidence before treating the library as SDK-ready.",
+        "prompt": "Use the Skills SDK research pack to respond to the scenario while preserving KnowledgeOS and downstream proof boundaries.",
+        "knowledge_pack": {
+          "scenario_id": "eval.skills.library-maintenance-required",
+          "fixture": "references/evals/eval.skills.library-maintenance-required.md",
+          "capsule_refs": [
+            "skills-sdk:operations_registry"
+          ]
+        },
+        "acceptance": [
+          {
+            "type": "expected_signal",
+            "value": "library-time maintenance evidence required"
+          },
+          {
+            "type": "must_not_claim",
+            "value": "individual task success proves library health"
+          }
+        ]
+      },
+      "quality_findings": [],
+      "promotion": {
+        "scenario_status": "candidate",
+        "evals_yaml_status": "proposed",
+        "fixture_status": "present",
+        "tessl_status": "not_run",
+        "proof_status": "not_claimed",
+        "blocked_by": []
+      },
+      "skill_lift_target": {
+        "before_failure": "The Skills SDK equates individual task repairs with library health.",
+        "after_behavior": "The Skills SDK requires library-time health checks and routing evidence.",
+        "observable_delta": "The answer names contract, graph, utility, compatibility, risk, validation, shared-asset, and routing evidence."
+      }
+    }
+  },
+  {
+    "id": "eval.skills.description-routing-not-conformance",
+    "type": "eval-scenario",
+    "title": "Description Routing Not Conformance",
+    "status": "draft",
+    "claim_strength": "synthesized",
+    "source_refs": [
+      {
+        "source_id": "sources.arXiv.Skilldex",
+        "locator": "limitations-description-quality-scoring",
+        "boundary": "local_source_reference"
+      }
+    ],
+    "derived_from_claims": [
+      "claim.skills.registries-need-format-and-coherence",
+      "claim.skills.skilldex-separates-conformance-from-semantics",
+      "claim.skills.metadata-is-attack-surface"
+    ],
+    "applies_to": [
+      "skills-sdk"
+    ],
+    "used_by": [
+      "pack.skills-sdk"
+    ],
+    "source_boundaries": [
+      "local_source_reference"
+    ],
+    "payload": {
+      "given": "A skill package passes frontmatter validation and description-length checks, but cold agents still select it for unrelated tasks and miss it for its intended task because the description uses broad generic language.",
+      "should": "The agent classifies conformance as passed but routing quality as unproven, then asks for trigger/non-trigger examples or selection evidence before readiness.",
+      "expected_failure": "The agent treats valid frontmatter and a long description as proof that the skill routes correctly.",
+      "reproduce_with": "references/evals/eval.skills.description-routing-not-conformance.md",
+      "eval_intent": {
+        "capsule_refs": [
+          "skills-sdk:operations_registry",
+          "skills-sdk:supply_chain_security"
+        ],
+        "knowledge_claim": "Format conformance is not semantic routing quality.",
+        "behavior_under_test": "The Skills SDK gate separates description conformance from trigger reliability.",
+        "failure_mode": "Description length and parseability are accepted as routing proof.",
+        "expected_agent_move": "Keep conformance green, mark routing quality unproven, and request trigger/non-trigger selection evidence.",
+        "proof_route": "references/evals.yaml",
+        "fixture_path": "references/evals/eval.skills.description-routing-not-conformance.md",
+        "promotion_status": "candidate",
+        "source_trace": {
+          "capsule_id": "skills-sdk:operations_registry",
+          "section": "Description quality scoring",
+          "source_digest": "sha256:3bf41d8e85f4956dd8d6c409c6faf1417c9d0b70d963718848419da476212f5f",
+          "extracted_principle": "Semantic description quality cannot be proven by syntax checks alone."
+        },
+        "bad_answer_pattern": [
+          "The agent says the skill routes well because frontmatter is valid.",
+          "The agent rewards description length as primary proof."
+        ],
+        "good_answer_pattern": [
+          "The agent requests positive and negative routing examples.",
+          "The agent keeps format conformance separate from semantic trigger quality."
+        ],
+        "weak_eval_flags": [],
+        "proposed_evals_yaml_case": {
+          "id": "eval.skills.description-routing-not-conformance",
+          "unit": "skills-sdk",
+          "given": "A skill package passes frontmatter validation and description-length checks, but cold agents still select it for unrelated tasks and miss it for its intended task because the description uses broad generic language.",
+          "should": "The agent classifies conformance as passed but routing quality as unproven, then asks for trigger/non-trigger examples or selection evidence before readiness.",
+          "prompt": "Assess whether this skill's passing package check is enough to call its routing ready.",
+          "knowledge_pack": {
+            "scenario_id": "eval.skills.description-routing-not-conformance",
+            "fixture": "references/evals/eval.skills.description-routing-not-conformance.md",
+            "capsule_refs": [
+              "skills-sdk:operations_registry",
+              "skills-sdk:supply_chain_security"
+            ]
+          },
+          "acceptance": [
+            {
+              "type": "expected_signal",
+              "value": "Routing quality needs positive and negative selection evidence."
+            },
+            {
+              "type": "must_not_claim",
+              "value": "Frontmatter conformance proves routing readiness."
+            }
+          ]
+        },
+        "quality_findings": [],
+        "promotion": {
+          "scenario_status": "candidate",
+          "evals_yaml_status": "proposed",
+          "fixture_status": "present",
+          "tessl_status": "not_run",
+          "proof_status": "not_claimed",
+          "blocked_by": []
+        },
+        "skill_lift_target": {
+          "before_failure": "The Skills SDK treats conformance as routing proof.",
+          "after_behavior": "The Skills SDK requires trigger and non-trigger routing evidence.",
+          "observable_delta": "The answer names conformance, semantic routing, and selection evidence as separate lanes."
+        }
+      },
+      "capsule_refs": [
+        "skills-sdk:operations_registry",
+        "skills-sdk:supply_chain_security"
+      ],
+      "knowledge_claim": "Format conformance is not semantic routing quality.",
+      "behavior_under_test": "The Skills SDK gate separates description conformance from trigger reliability.",
+      "failure_mode": "Description length and parseability are accepted as routing proof.",
+      "expected_agent_move": "Keep conformance green, mark routing quality unproven, and request trigger/non-trigger selection evidence.",
+      "proof_route": "references/evals.yaml",
+      "fixture_path": "references/evals/eval.skills.description-routing-not-conformance.md",
+      "promotion_status": "candidate",
+      "source_trace": {
+        "capsule_id": "skills-sdk:operations_registry",
+        "section": "Description quality scoring",
+        "source_digest": "sha256:3bf41d8e85f4956dd8d6c409c6faf1417c9d0b70d963718848419da476212f5f",
+        "extracted_principle": "Semantic description quality cannot be proven by syntax checks alone."
+      },
+      "bad_answer_pattern": [
+        "The agent says the skill routes well because frontmatter is valid.",
+        "The agent rewards description length as primary proof."
+      ],
+      "good_answer_pattern": [
+        "The agent requests positive and negative routing examples.",
+        "The agent keeps format conformance separate from semantic trigger quality."
+      ],
+      "weak_eval_flags": [],
+      "proposed_evals_yaml_case": {
+        "id": "eval.skills.description-routing-not-conformance",
+        "unit": "skills-sdk",
+        "given": "A skill package passes frontmatter validation and description-length checks, but cold agents still select it for unrelated tasks and miss it for its intended task because the description uses broad generic language.",
+        "should": "The agent classifies conformance as passed but routing quality as unproven, then asks for trigger/non-trigger examples or selection evidence before readiness.",
+        "prompt": "Assess whether this skill's passing package check is enough to call its routing ready.",
+        "knowledge_pack": {
+          "scenario_id": "eval.skills.description-routing-not-conformance",
+          "fixture": "references/evals/eval.skills.description-routing-not-conformance.md",
+          "capsule_refs": [
+            "skills-sdk:operations_registry",
+            "skills-sdk:supply_chain_security"
+          ]
+        },
+        "acceptance": [
+          {
+            "type": "expected_signal",
+            "value": "Routing quality needs positive and negative selection evidence."
+          },
+          {
+            "type": "must_not_claim",
+            "value": "Frontmatter conformance proves routing readiness."
+          }
+        ]
+      },
+      "quality_findings": [],
+      "promotion": {
+        "scenario_status": "candidate",
+        "evals_yaml_status": "proposed",
+        "fixture_status": "present",
+        "tessl_status": "not_run",
+        "proof_status": "not_claimed",
+        "blocked_by": []
+      },
+      "skill_lift_target": {
+        "before_failure": "The Skills SDK treats conformance as routing proof.",
+        "after_behavior": "The Skills SDK requires trigger and non-trigger routing evidence.",
+        "observable_delta": "The answer names conformance, semantic routing, and selection evidence as separate lanes."
+      }
+    }
+  },
+  {
+    "id": "eval.skills.routing-scale-regression",
+    "type": "eval-scenario",
+    "title": "Routing Scale Regression",
+    "status": "draft",
+    "claim_strength": "synthesized",
+    "source_refs": [
+      {
+        "source_id": "sources.arXiv.Agent Skills for Large Language Models-",
+        "locator": "section-4.6-skill-compilation",
+        "boundary": "local_source_reference"
+      }
+    ],
+    "derived_from_claims": [
+      "claim.skills.library-size-can-degrade-selection",
+      "claim.skills.libraries-accumulate-technical-debt",
+      "claim.skills.skillops-low-overhead-maintenance"
+    ],
+    "applies_to": [
+      "skills-sdk"
+    ],
+    "used_by": [
+      "pack.skills-sdk"
+    ],
+    "source_boundaries": [
+      "local_source_reference"
+    ],
+    "payload": {
+      "given": "A registry import adds many related skills and the package audit passes, but no one reruns selection accuracy checks, non-trigger cases, or duplicate-overlap analysis after the library size increase.",
+      "should": "The agent treats library growth as a routing-regression risk and asks for selection, non-selection, overlap, and maintenance evidence before accepting the import.",
+      "expected_failure": "The agent accepts the larger library because every individual skill package validates.",
+      "reproduce_with": "references/evals/eval.skills.routing-scale-regression.md",
+      "eval_intent": {
+        "capsule_refs": [
+          "skills-sdk:operations_registry"
+        ],
+        "knowledge_claim": "Growing a skill library can degrade selection quality even when individual skill files are valid.",
+        "behavior_under_test": "The Skills SDK gate requires routing regression checks after library growth.",
+        "failure_mode": "Individual package validation is accepted as library-level routing health.",
+        "expected_agent_move": "Request selection accuracy, negative routing, duplicate-overlap, and library maintenance checks.",
+        "proof_route": "references/evals.yaml",
+        "fixture_path": "references/evals/eval.skills.routing-scale-regression.md",
+        "promotion_status": "candidate",
+        "source_trace": {
+          "capsule_id": "skills-sdk:operations_registry",
+          "section": "Routing scale regression",
+          "source_digest": "sha256:a8aafd35134c6166d2d197235736cc47f04b749f51f77a02d688aa4ab3bed0dc",
+          "extracted_principle": "Skill library growth needs selection-quality and maintenance proof."
+        },
+        "bad_answer_pattern": [
+          "The agent says library import is ready because package audit passed.",
+          "The agent ignores overlap and non-trigger checks."
+        ],
+        "good_answer_pattern": [
+          "The agent asks for routing regression evidence.",
+          "The agent separates individual package shape from library selection health."
+        ],
+        "weak_eval_flags": [],
+        "proposed_evals_yaml_case": {
+          "id": "eval.skills.routing-scale-regression",
+          "unit": "skills-sdk",
+          "given": "A registry import adds many related skills and the package audit passes, but no one reruns selection accuracy checks, non-trigger cases, or duplicate-overlap analysis after the library size increase.",
+          "should": "The agent treats library growth as a routing-regression risk and asks for selection, non-selection, overlap, and maintenance evidence before accepting the import.",
+          "prompt": "Review this bulk skill import and decide whether package validation is sufficient.",
+          "knowledge_pack": {
+            "scenario_id": "eval.skills.routing-scale-regression",
+            "fixture": "references/evals/eval.skills.routing-scale-regression.md",
+            "capsule_refs": [
+              "skills-sdk:operations_registry"
+            ]
+          },
+          "acceptance": [
+            {
+              "type": "expected_signal",
+              "value": "Library growth requires routing regression evidence."
+            },
+            {
+              "type": "must_not_claim",
+              "value": "Individual package validation proves library selection health."
+            }
+          ]
+        },
+        "quality_findings": [],
+        "promotion": {
+          "scenario_status": "candidate",
+          "evals_yaml_status": "proposed",
+          "fixture_status": "present",
+          "tessl_status": "not_run",
+          "proof_status": "not_claimed",
+          "blocked_by": []
+        },
+        "skill_lift_target": {
+          "before_failure": "The Skills SDK treats individual package validation as library health.",
+          "after_behavior": "The Skills SDK requires routing regression and overlap checks.",
+          "observable_delta": "The answer names selection accuracy, non-trigger, duplicate-overlap, and maintenance checks."
+        }
+      },
+      "capsule_refs": [
+        "skills-sdk:operations_registry"
+      ],
+      "knowledge_claim": "Growing a skill library can degrade selection quality even when individual skill files are valid.",
+      "behavior_under_test": "The Skills SDK gate requires routing regression checks after library growth.",
+      "failure_mode": "Individual package validation is accepted as library-level routing health.",
+      "expected_agent_move": "Request selection accuracy, negative routing, duplicate-overlap, and library maintenance checks.",
+      "proof_route": "references/evals.yaml",
+      "fixture_path": "references/evals/eval.skills.routing-scale-regression.md",
+      "promotion_status": "candidate",
+      "source_trace": {
+        "capsule_id": "skills-sdk:operations_registry",
+        "section": "Routing scale regression",
+        "source_digest": "sha256:a8aafd35134c6166d2d197235736cc47f04b749f51f77a02d688aa4ab3bed0dc",
+        "extracted_principle": "Skill library growth needs selection-quality and maintenance proof."
+      },
+      "bad_answer_pattern": [
+        "The agent says library import is ready because package audit passed.",
+        "The agent ignores overlap and non-trigger checks."
+      ],
+      "good_answer_pattern": [
+        "The agent asks for routing regression evidence.",
+        "The agent separates individual package shape from library selection health."
+      ],
+      "weak_eval_flags": [],
+      "proposed_evals_yaml_case": {
+        "id": "eval.skills.routing-scale-regression",
+        "unit": "skills-sdk",
+        "given": "A registry import adds many related skills and the package audit passes, but no one reruns selection accuracy checks, non-trigger cases, or duplicate-overlap analysis after the library size increase.",
+        "should": "The agent treats library growth as a routing-regression risk and asks for selection, non-selection, overlap, and maintenance evidence before accepting the import.",
+        "prompt": "Review this bulk skill import and decide whether package validation is sufficient.",
+        "knowledge_pack": {
+          "scenario_id": "eval.skills.routing-scale-regression",
+          "fixture": "references/evals/eval.skills.routing-scale-regression.md",
+          "capsule_refs": [
+            "skills-sdk:operations_registry"
+          ]
+        },
+        "acceptance": [
+          {
+            "type": "expected_signal",
+            "value": "Library growth requires routing regression evidence."
+          },
+          {
+            "type": "must_not_claim",
+            "value": "Individual package validation proves library selection health."
+          }
+        ]
+      },
+      "quality_findings": [],
+      "promotion": {
+        "scenario_status": "candidate",
+        "evals_yaml_status": "proposed",
+        "fixture_status": "present",
+        "tessl_status": "not_run",
+        "proof_status": "not_claimed",
+        "blocked_by": []
+      },
+      "skill_lift_target": {
+        "before_failure": "The Skills SDK treats individual package validation as library health.",
+        "after_behavior": "The Skills SDK requires routing regression and overlap checks.",
+        "observable_delta": "The answer names selection accuracy, non-trigger, duplicate-overlap, and maintenance checks."
+      }
+    }
+  },
+  {
+    "id": "eval.skills.skill-mcp-boundary-required",
+    "type": "eval-scenario",
+    "title": "Skill MCP Boundary Required",
+    "status": "draft",
+    "claim_strength": "synthesized",
+    "source_refs": [
+      {
+        "source_id": "sources.arXiv.Agent Skills for Large Language Models-",
+        "locator": "section-3.3-agentic-stack-skills-and-mcp",
+        "boundary": "local_source_reference"
+      }
+    ],
+    "derived_from_claims": [
+      "claim.skills.execution-modifies-preparation",
+      "claim.skills.mcp-complementary-layers",
+      "claim.skills.verification-gates-need-permission-manifest"
+    ],
+    "applies_to": [
+      "skills-sdk"
+    ],
+    "used_by": [
+      "pack.skills-sdk"
+    ],
+    "source_boundaries": [
+      "local_source_reference"
+    ],
+    "payload": {
+      "given": "A proposed skill teaches a workflow that depends on a database MCP server and shell scripts, but the package records those dependencies only in prose and has no explicit tool, MCP, or permission boundary.",
+      "should": "The agent blocks SDK readiness until the skill separates procedural guidance from MCP/tool connectivity and records declared capabilities that can be compared with observed behavior.",
+      "expected_failure": "The agent treats the workflow prose as enough to authorize runtime tool and MCP access.",
+      "reproduce_with": "references/evals/eval.skills.skill-mcp-boundary-required.md",
+      "eval_intent": {
+        "capsule_refs": [
+          "skills-sdk:architecture_runtime"
+        ],
+        "knowledge_claim": "Skills prepare the agent while MCP and tools provide connectivity, so the SDK must keep procedure, tool access, and permission evidence separate.",
+        "behavior_under_test": "The Skills SDK gate refuses to hide MCP/tool dependencies inside skill prose.",
+        "failure_mode": "A skill package is accepted even though its runtime dependencies and permissions are not declared.",
+        "expected_agent_move": "Require explicit MCP/tool dependency declaration, permission manifest, and a later observed-behavior check.",
+        "proof_route": "references/evals.yaml",
+        "fixture_path": "references/evals/eval.skills.skill-mcp-boundary-required.md",
+        "promotion_status": "candidate",
+        "source_trace": {
+          "capsule_id": "skills-sdk:architecture_runtime",
+          "section": "Skill and MCP boundary",
+          "source_digest": "sha256:a8aafd35134c6166d2d197235736cc47f04b749f51f77a02d688aa4ab3bed0dc",
+          "extracted_principle": "Skill context and MCP/tool connectivity are complementary evidence lanes."
+        },
+        "bad_answer_pattern": [
+          "The agent accepts workflow prose as permission evidence.",
+          "The agent merges skill readiness with MCP server availability."
+        ],
+        "good_answer_pattern": [
+          "The agent requires explicit dependency and permission boundaries.",
+          "The agent keeps skill guidance proof separate from runtime connectivity proof."
+        ],
+        "weak_eval_flags": [],
+        "proposed_evals_yaml_case": {
+          "id": "eval.skills.skill-mcp-boundary-required",
+          "unit": "skills-sdk",
+          "given": "A proposed skill teaches a workflow that depends on a database MCP server and shell scripts, but the package records those dependencies only in prose and has no explicit tool, MCP, or permission boundary.",
+          "should": "The agent blocks SDK readiness until the skill separates procedural guidance from MCP/tool connectivity and records declared capabilities that can be compared with observed behavior.",
+          "prompt": "Review this skill-package readiness note and identify the smallest evidence missing before it can become SDK-ready.",
+          "knowledge_pack": {
+            "scenario_id": "eval.skills.skill-mcp-boundary-required",
+            "fixture": "references/evals/eval.skills.skill-mcp-boundary-required.md",
+            "capsule_refs": [
+              "skills-sdk:architecture_runtime"
+            ]
+          },
+          "acceptance": [
+            {
+              "type": "expected_signal",
+              "value": "MCP/tool dependencies and permissions must be declared separately from skill prose."
+            },
+            {
+              "type": "must_not_claim",
+              "value": "Workflow instructions alone authorize runtime access."
+            }
+          ]
+        },
+        "quality_findings": [],
+        "promotion": {
+          "scenario_status": "candidate",
+          "evals_yaml_status": "proposed",
+          "fixture_status": "present",
+          "tessl_status": "not_run",
+          "proof_status": "not_claimed",
+          "blocked_by": []
+        },
+        "skill_lift_target": {
+          "before_failure": "The Skills SDK accepts prose-hidden MCP dependencies.",
+          "after_behavior": "The Skills SDK requires explicit dependency and permission evidence.",
+          "observable_delta": "The answer names skill procedure, MCP connectivity, declared permissions, and observed behavior as separate checks."
+        }
+      },
+      "capsule_refs": [
+        "skills-sdk:architecture_runtime"
+      ],
+      "knowledge_claim": "Skills prepare the agent while MCP and tools provide connectivity, so the SDK must keep procedure, tool access, and permission evidence separate.",
+      "behavior_under_test": "The Skills SDK gate refuses to hide MCP/tool dependencies inside skill prose.",
+      "failure_mode": "A skill package is accepted even though its runtime dependencies and permissions are not declared.",
+      "expected_agent_move": "Require explicit MCP/tool dependency declaration, permission manifest, and a later observed-behavior check.",
+      "proof_route": "references/evals.yaml",
+      "fixture_path": "references/evals/eval.skills.skill-mcp-boundary-required.md",
+      "promotion_status": "candidate",
+      "source_trace": {
+        "capsule_id": "skills-sdk:architecture_runtime",
+        "section": "Skill and MCP boundary",
+        "source_digest": "sha256:a8aafd35134c6166d2d197235736cc47f04b749f51f77a02d688aa4ab3bed0dc",
+        "extracted_principle": "Skill context and MCP/tool connectivity are complementary evidence lanes."
+      },
+      "bad_answer_pattern": [
+        "The agent accepts workflow prose as permission evidence.",
+        "The agent merges skill readiness with MCP server availability."
+      ],
+      "good_answer_pattern": [
+        "The agent requires explicit dependency and permission boundaries.",
+        "The agent keeps skill guidance proof separate from runtime connectivity proof."
+      ],
+      "weak_eval_flags": [],
+      "proposed_evals_yaml_case": {
+        "id": "eval.skills.skill-mcp-boundary-required",
+        "unit": "skills-sdk",
+        "given": "A proposed skill teaches a workflow that depends on a database MCP server and shell scripts, but the package records those dependencies only in prose and has no explicit tool, MCP, or permission boundary.",
+        "should": "The agent blocks SDK readiness until the skill separates procedural guidance from MCP/tool connectivity and records declared capabilities that can be compared with observed behavior.",
+        "prompt": "Review this skill-package readiness note and identify the smallest evidence missing before it can become SDK-ready.",
+        "knowledge_pack": {
+          "scenario_id": "eval.skills.skill-mcp-boundary-required",
+          "fixture": "references/evals/eval.skills.skill-mcp-boundary-required.md",
+          "capsule_refs": [
+            "skills-sdk:architecture_runtime"
+          ]
+        },
+        "acceptance": [
+          {
+            "type": "expected_signal",
+            "value": "MCP/tool dependencies and permissions must be declared separately from skill prose."
+          },
+          {
+            "type": "must_not_claim",
+            "value": "Workflow instructions alone authorize runtime access."
+          }
+        ]
+      },
+      "quality_findings": [],
+      "promotion": {
+        "scenario_status": "candidate",
+        "evals_yaml_status": "proposed",
+        "fixture_status": "present",
+        "tessl_status": "not_run",
+        "proof_status": "not_claimed",
+        "blocked_by": []
+      },
+      "skill_lift_target": {
+        "before_failure": "The Skills SDK accepts prose-hidden MCP dependencies.",
+        "after_behavior": "The Skills SDK requires explicit dependency and permission evidence.",
+        "observable_delta": "The answer names skill procedure, MCP connectivity, declared permissions, and observed behavior as separate checks."
+      }
+    }
+  },
+  {
+    "id": "eval.skills.adapter-optimization-premature",
+    "type": "eval-scenario",
+    "title": "Adapter Optimization Premature",
+    "status": "draft",
+    "claim_strength": "synthesized",
+    "source_refs": [
+      {
+        "source_id": "sources.arXiv.Skill-to-LoRA",
+        "locator": "abstract-and-limitations",
+        "boundary": "local_source_reference"
+      }
+    ],
+    "derived_from_claims": [
+      "claim.skills.adapters-can-represent-behavior",
+      "claim.skills.adapters-require-alignment-and-stable-workflows",
+      "claim.skills.curated-skills-improve-unevenly"
+    ],
+    "applies_to": [
+      "skills-sdk"
+    ],
+    "used_by": [
+      "pack.skills-sdk"
+    ],
+    "source_boundaries": [
+      "local_source_reference"
+    ],
+    "payload": {
+      "given": "A team wants to convert a new skill into adapter-like learned behavior to reduce context cost, but the text skill has no baseline lift, unstable workflow steps, and no adapter-alignment controls.",
+      "should": "The agent keeps adapterization as a later optimization lane and requires proven text-skill behavior, stable workflow evidence, artifact schema, verifier pattern, and wrong/shared-adapter controls first.",
+      "expected_failure": "The agent recommends adapterization because long skill text costs tokens, without proving the skill behavior or alignment.",
+      "reproduce_with": "references/evals/eval.skills.adapter-optimization-premature.md",
+      "eval_intent": {
+        "capsule_refs": [
+          "skills-sdk:architecture_runtime"
+        ],
+        "knowledge_claim": "Learned behavior adapters are useful only after stable skill behavior and alignment controls exist.",
+        "behavior_under_test": "The Skills SDK gate blocks premature runtime optimization.",
+        "failure_mode": "Token-cost pressure is treated as enough to replace auditable skill text.",
+        "expected_agent_move": "Require behavior proof, workflow stability, schema/verifier evidence, and adapter-alignment controls before optimization.",
+        "proof_route": "references/evals.yaml",
+        "fixture_path": "references/evals/eval.skills.adapter-optimization-premature.md",
+        "promotion_status": "candidate",
+        "source_trace": {
+          "capsule_id": "skills-sdk:architecture_runtime",
+          "section": "Adapter optimization lane",
+          "source_digest": "sha256:4d7bae31edf1b684977d3d363cb68483e6e5a3f770af93cb99096263e0c663c2",
+          "extracted_principle": "Skill-to-adapter conversion depends on stable workflows and skill-specific alignment."
+        },
+        "bad_answer_pattern": [
+          "The agent recommends adapters from token-cost pressure alone.",
+          "The agent drops auditability before text-skill behavior is proven."
+        ],
+        "good_answer_pattern": [
+          "The agent blocks adapterization as premature.",
+          "The agent asks for baseline lift, stable workflow, and wrong/shared-adapter controls."
+        ],
+        "weak_eval_flags": [],
+        "proposed_evals_yaml_case": {
+          "id": "eval.skills.adapter-optimization-premature",
+          "unit": "skills-sdk",
+          "given": "A team wants to convert a new skill into adapter-like learned behavior to reduce context cost, but the text skill has no baseline lift, unstable workflow steps, and no adapter-alignment controls.",
+          "should": "The agent keeps adapterization as a later optimization lane and requires proven text-skill behavior, stable workflow evidence, artifact schema, verifier pattern, and wrong/shared-adapter controls first.",
+          "prompt": "Assess whether this skill should move from text guidance into a learned behavior adapter.",
+          "knowledge_pack": {
+            "scenario_id": "eval.skills.adapter-optimization-premature",
+            "fixture": "references/evals/eval.skills.adapter-optimization-premature.md",
+            "capsule_refs": [
+              "skills-sdk:architecture_runtime"
+            ]
+          },
+          "acceptance": [
+            {
+              "type": "expected_signal",
+              "value": "Adapterization is blocked until behavior and alignment evidence exist."
+            },
+            {
+              "type": "must_not_claim",
+              "value": "Token savings alone justify learned behavior adapters."
+            }
+          ]
+        },
+        "quality_findings": [],
+        "promotion": {
+          "scenario_status": "candidate",
+          "evals_yaml_status": "proposed",
+          "fixture_status": "present",
+          "tessl_status": "not_run",
+          "proof_status": "not_claimed",
+          "blocked_by": []
+        },
+        "skill_lift_target": {
+          "before_failure": "The Skills SDK optimizes runtime form before behavior is proven.",
+          "after_behavior": "The Skills SDK treats adapterization as a later gated optimization lane.",
+          "observable_delta": "The answer names behavior proof, workflow stability, artifact schema, verifier pattern, and adapter controls."
+        }
+      },
+      "capsule_refs": [
+        "skills-sdk:architecture_runtime"
+      ],
+      "knowledge_claim": "Learned behavior adapters are useful only after stable skill behavior and alignment controls exist.",
+      "behavior_under_test": "The Skills SDK gate blocks premature runtime optimization.",
+      "failure_mode": "Token-cost pressure is treated as enough to replace auditable skill text.",
+      "expected_agent_move": "Require behavior proof, workflow stability, schema/verifier evidence, and adapter-alignment controls before optimization.",
+      "proof_route": "references/evals.yaml",
+      "fixture_path": "references/evals/eval.skills.adapter-optimization-premature.md",
+      "promotion_status": "candidate",
+      "source_trace": {
+        "capsule_id": "skills-sdk:architecture_runtime",
+        "section": "Adapter optimization lane",
+        "source_digest": "sha256:4d7bae31edf1b684977d3d363cb68483e6e5a3f770af93cb99096263e0c663c2",
+        "extracted_principle": "Skill-to-adapter conversion depends on stable workflows and skill-specific alignment."
+      },
+      "bad_answer_pattern": [
+        "The agent recommends adapters from token-cost pressure alone.",
+        "The agent drops auditability before text-skill behavior is proven."
+      ],
+      "good_answer_pattern": [
+        "The agent blocks adapterization as premature.",
+        "The agent asks for baseline lift, stable workflow, and wrong/shared-adapter controls."
+      ],
+      "weak_eval_flags": [],
+      "proposed_evals_yaml_case": {
+        "id": "eval.skills.adapter-optimization-premature",
+        "unit": "skills-sdk",
+        "given": "A team wants to convert a new skill into adapter-like learned behavior to reduce context cost, but the text skill has no baseline lift, unstable workflow steps, and no adapter-alignment controls.",
+        "should": "The agent keeps adapterization as a later optimization lane and requires proven text-skill behavior, stable workflow evidence, artifact schema, verifier pattern, and wrong/shared-adapter controls first.",
+        "prompt": "Assess whether this skill should move from text guidance into a learned behavior adapter.",
+        "knowledge_pack": {
+          "scenario_id": "eval.skills.adapter-optimization-premature",
+          "fixture": "references/evals/eval.skills.adapter-optimization-premature.md",
+          "capsule_refs": [
+            "skills-sdk:architecture_runtime"
+          ]
+        },
+        "acceptance": [
+          {
+            "type": "expected_signal",
+            "value": "Adapterization is blocked until behavior and alignment evidence exist."
+          },
+          {
+            "type": "must_not_claim",
+            "value": "Token savings alone justify learned behavior adapters."
+          }
+        ]
+      },
+      "quality_findings": [],
+      "promotion": {
+        "scenario_status": "candidate",
+        "evals_yaml_status": "proposed",
+        "fixture_status": "present",
+        "tessl_status": "not_run",
+        "proof_status": "not_claimed",
+        "blocked_by": []
+      },
+      "skill_lift_target": {
+        "before_failure": "The Skills SDK optimizes runtime form before behavior is proven.",
+        "after_behavior": "The Skills SDK treats adapterization as a later gated optimization lane.",
+        "observable_delta": "The answer names behavior proof, workflow stability, artifact schema, verifier pattern, and adapter controls."
+      }
+    }
+  },
+  {
+    "id": "eval.skills.registry-semantic-risk",
+    "type": "eval-scenario",
+    "title": "Registry Semantic Risk",
+    "status": "draft",
+    "claim_strength": "synthesized",
+    "source_refs": [
+      {
+        "source_id": "sources.arXiv.Under the Hood of SKILL.md",
+        "locator": "abstract-and-results",
+        "boundary": "local_source_reference"
+      },
+      {
+        "source_id": "sources.arXiv.Agent Skills for Large Language Models-",
+        "locator": "verification-gates-and-permission-manifest",
+        "boundary": "local_source_reference"
+      }
+    ],
+    "derived_from_claims": [
+      "claim.skills.metadata-is-attack-surface",
+      "claim.skills.verification-gates-need-permission-manifest",
+      "claim.skills.verification-needs-negative-tests"
+    ],
+    "applies_to": [
+      "skills-sdk"
+    ],
+    "used_by": [
+      "pack.skills-sdk"
+    ],
+    "source_boundaries": [
+      "local_source_reference"
+    ],
+    "payload": {
+      "given": "A third-party skill package has valid frontmatter and a useful description, but it uses broad trigger language and requests scripts, file access, and network access without a permission manifest or sandbox observation.",
+      "should": "The agent treats the registry text as an operational supply-chain input and requires semantic review, permission-manifest validation, sandbox behavior checks, and negative tests before trust elevation.",
+      "expected_failure": "The agent installs or elevates the skill because the description sounds useful and the frontmatter parses.",
+      "reproduce_with": "references/evals/eval.skills.registry-semantic-risk.md",
+      "eval_intent": {
+        "capsule_refs": [
+          "skills-sdk:supply_chain_security"
+        ],
+        "knowledge_claim": "Registry-facing skill text can manipulate discovery, selection, and governance, so valid metadata is not enough for trust.",
+        "behavior_under_test": "The Skills SDK gate refuses to trust third-party registry text without semantic and permission checks.",
+        "failure_mode": "Valid frontmatter and useful prose are treated as security approval.",
+        "expected_agent_move": "Require semantic supply-chain review, declared permissions, sandbox-observed behavior, and negative tests before trust elevation.",
+        "proof_route": "references/evals.yaml",
+        "fixture_path": "references/evals/eval.skills.registry-semantic-risk.md",
+        "promotion_status": "candidate",
+        "source_trace": {
+          "capsule_id": "skills-sdk:supply_chain_security",
+          "section": "Registry semantic risk gate",
+          "source_digest": "sha256:92f1ef46b10ecdaa08060ec2a66530fcd3a859b2984a2d8c10accca934bb00eb",
+          "extracted_principle": "SKILL.md text is operational and can steer discovery, selection, loading, and governance."
+        },
+        "bad_answer_pattern": [
+          "The agent approves the skill because the metadata is valid.",
+          "The agent ignores trigger manipulation, permission manifest, and sandbox behavior."
+        ],
+        "good_answer_pattern": [
+          "The agent requires semantic review and permission-manifest checks.",
+          "The agent keeps installability separate from trust elevation."
+        ],
+        "weak_eval_flags": [],
+        "proposed_evals_yaml_case": {
+          "id": "eval.skills.registry-semantic-risk",
+          "unit": "skills-sdk",
+          "given": "A third-party skill package has valid frontmatter and a useful description, but it uses broad trigger language and requests scripts, file access, and network access without a permission manifest or sandbox observation.",
+          "should": "The agent treats the registry text as an operational supply-chain input and requires semantic review, permission-manifest validation, sandbox behavior checks, and negative tests before trust elevation.",
+          "prompt": "Use the Skills SDK research pack to respond to the scenario while preserving KnowledgeOS and downstream proof boundaries.",
+          "knowledge_pack": {
+            "scenario_id": "eval.skills.registry-semantic-risk",
+            "fixture": "references/evals/eval.skills.registry-semantic-risk.md",
+            "capsule_refs": [
+              "skills-sdk:supply_chain_security"
+            ]
+          },
+          "acceptance": [
+            {
+              "type": "expected_signal",
+              "value": "semantic supply-chain review required"
+            },
+            {
+              "type": "must_not_claim",
+              "value": "valid metadata grants trust"
+            }
+          ]
+        },
+        "quality_findings": [],
+        "promotion": {
+          "scenario_status": "candidate",
+          "evals_yaml_status": "proposed",
+          "fixture_status": "present",
+          "tessl_status": "not_run",
+          "proof_status": "not_claimed",
+          "blocked_by": []
+        },
+        "skill_lift_target": {
+          "before_failure": "The Skills SDK treats registry metadata validity as enough for installation trust.",
+          "after_behavior": "The Skills SDK gates trust through semantic review and observed permission behavior.",
+          "observable_delta": "The answer names semantic supply-chain review, manifest validation, sandboxing, and negative tests."
+        }
+      },
+      "capsule_refs": [
+        "skills-sdk:supply_chain_security"
+      ],
+      "knowledge_claim": "Registry-facing skill text can manipulate discovery, selection, and governance, so valid metadata is not enough for trust.",
+      "behavior_under_test": "The Skills SDK gate refuses to trust third-party registry text without semantic and permission checks.",
+      "failure_mode": "Valid frontmatter and useful prose are treated as security approval.",
+      "expected_agent_move": "Require semantic supply-chain review, declared permissions, sandbox-observed behavior, and negative tests before trust elevation.",
+      "proof_route": "references/evals.yaml",
+      "fixture_path": "references/evals/eval.skills.registry-semantic-risk.md",
+      "promotion_status": "candidate",
+      "source_trace": {
+        "capsule_id": "skills-sdk:supply_chain_security",
+        "section": "Registry semantic risk gate",
+        "source_digest": "sha256:92f1ef46b10ecdaa08060ec2a66530fcd3a859b2984a2d8c10accca934bb00eb",
+        "extracted_principle": "SKILL.md text is operational and can steer discovery, selection, loading, and governance."
+      },
+      "bad_answer_pattern": [
+        "The agent approves the skill because the metadata is valid.",
+        "The agent ignores trigger manipulation, permission manifest, and sandbox behavior."
+      ],
+      "good_answer_pattern": [
+        "The agent requires semantic review and permission-manifest checks.",
+        "The agent keeps installability separate from trust elevation."
+      ],
+      "weak_eval_flags": [],
+      "proposed_evals_yaml_case": {
+        "id": "eval.skills.registry-semantic-risk",
+        "unit": "skills-sdk",
+        "given": "A third-party skill package has valid frontmatter and a useful description, but it uses broad trigger language and requests scripts, file access, and network access without a permission manifest or sandbox observation.",
+        "should": "The agent treats the registry text as an operational supply-chain input and requires semantic review, permission-manifest validation, sandbox behavior checks, and negative tests before trust elevation.",
+        "prompt": "Use the Skills SDK research pack to respond to the scenario while preserving KnowledgeOS and downstream proof boundaries.",
+        "knowledge_pack": {
+          "scenario_id": "eval.skills.registry-semantic-risk",
+          "fixture": "references/evals/eval.skills.registry-semantic-risk.md",
+          "capsule_refs": [
+            "skills-sdk:supply_chain_security"
+          ]
+        },
+        "acceptance": [
+          {
+            "type": "expected_signal",
+            "value": "semantic supply-chain review required"
+          },
+          {
+            "type": "must_not_claim",
+            "value": "valid metadata grants trust"
+          }
+        ]
+      },
+      "quality_findings": [],
+      "promotion": {
+        "scenario_status": "candidate",
+        "evals_yaml_status": "proposed",
+        "fixture_status": "present",
+        "tessl_status": "not_run",
+        "proof_status": "not_claimed",
+        "blocked_by": []
+      },
+      "skill_lift_target": {
+        "before_failure": "The Skills SDK treats registry metadata validity as enough for installation trust.",
+        "after_behavior": "The Skills SDK gates trust through semantic review and observed permission behavior.",
+        "observable_delta": "The answer names semantic supply-chain review, manifest validation, sandboxing, and negative tests."
+      }
+    }
+  },
+  {
+    "id": "eval.knowledge-os.capsule-design-without-relationships",
+    "type": "eval-scenario",
+    "title": "Capsule Design Requires Relationships And Evals",
+    "status": "reviewed",
+    "claim_strength": "synthesized",
+    "source_refs": [
+      {
+        "source_id": "sources.books.Systems Thinking & Decisions.Thinking in Systems — Donella Meadows",
+        "locator": "interconnections-and-feedback",
+        "boundary": "local_source_reference"
+      },
+      {
+        "source_id": "sources.books.Testing, Measurement & Experiments.Lessons Learned in Software Testing — Cem Kaner, James Bach & Bret Pettichord",
+        "locator": "tests-as-information",
+        "boundary": "local_source_reference"
+      },
+      {
+        "source_id": "sources.arXiv.SkillsBench",
+        "locator": "skill-evaluation-benchmarking",
+        "boundary": "local_source_reference"
+      }
+    ],
+    "derived_from_claims": [
+      "claim.knowledge-os.capsules-need-relationship-maps",
+      "claim.knowledge-os.capsules-need-eval-contracts",
+      "claim.knowledge-os.capsules-operational-references"
+    ],
+    "applies_to": [
+      "knowledge-os"
+    ],
+    "used_by": [],
+    "source_boundaries": [
+      "local_source_reference",
+      "article_source_note_paraphrase"
+    ],
+    "payload": {
+      "given": "A knowledge capsule design reference includes general guidance and ordinary operational headings but omits source model, relationship map, downstream integration, failure modes, and eval scenarios.",
+      "should": "The validator rejects the reference with capsule-design-missing-sections before the capsule can be treated as a portable handoff.",
+      "expected_failure": "The handoff passes because it is readable and has generic headings, even though it cannot improve downstream skill or Jamie Brain behavior deterministically.",
+      "reproduce_with": "references/evals/eval.knowledge-os.capsule-design-without-relationships.md",
+      "eval_intent": {
+        "capsule_refs": [
+          "knowledge-os"
+        ],
+        "knowledge_claim": "Capsule design references must include relationship and eval surfaces, not only prose guidance.",
+        "behavior_under_test": "Observable KnowledgeOS validator behavior when a capsule-design artifact omits relationship mapping and eval coverage.",
+        "failure_mode": "The validator accepts a polished but behavior-weak capsule-design reference.",
+        "expected_agent_move": "The validator rejects the capsule and points to the missing capsule-design sections.",
+        "proof_route": "references/evals.yaml",
+        "fixture_path": "references/evals/eval.knowledge-os.capsule-design-without-relationships.md",
+        "promotion_status": "candidate",
+        "source_trace": {
+          "capsule_id": "knowledge-os",
+          "section": "Eval Scenarios",
+          "source_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+          "extracted_principle": "Capsule design requires relationships, downstream integration, failure modes, and eval scenarios."
+        },
+        "bad_answer_pattern": [
+          "The validator accepts the capsule because ordinary operational headings are present."
+        ],
+        "good_answer_pattern": [
+          "The validator rejects the capsule with capsule-design-missing-sections."
+        ],
+        "weak_eval_flags": [],
+        "proposed_evals_yaml_case": {
+          "id": "eval.knowledge-os.capsule-design-without-relationships",
+          "unit": "knowledge-os",
+          "given": "A knowledge capsule design reference includes general guidance and ordinary operational headings but omits source model, relationship map, downstream integration, failure modes, and eval scenarios.",
+          "should": "The validator rejects the reference with capsule-design-missing-sections before the capsule can be treated as a portable handoff.",
+          "prompt": "Use the relevant KnowledgeOS capsule-design rules to judge the handoff.",
+          "knowledge_pack": {
+            "scenario_id": "eval.knowledge-os.capsule-design-without-relationships",
+            "fixture": "references/evals/eval.knowledge-os.capsule-design-without-relationships.md",
+            "capsule_refs": [
+              "knowledge-os"
+            ]
+          },
+          "acceptance": [
+            {
+              "type": "expected_signal",
+              "value": "capsule-design-missing-sections"
+            },
+            {
+              "type": "must_not_claim",
+              "value": "The capsule is valid because it has ordinary operational headings."
+            }
+          ]
+        },
+        "quality_findings": [],
+        "promotion": {
+          "scenario_status": "candidate",
+          "evals_yaml_status": "proposed",
+          "fixture_status": "present",
+          "tessl_status": "not_run",
+          "proof_status": "not_claimed",
+          "blocked_by": []
+        },
+        "skill_lift_target": {
+          "before_failure": "The validator accepts a readable but behavior-weak capsule-design reference.",
+          "after_behavior": "The validator rejects capsule-design references that lack relationship and eval surfaces.",
+          "observable_delta": "The negative fixture is rejected by the repo validator."
+        }
+      },
+      "capsule_refs": [
+        "knowledge-os"
+      ],
+      "knowledge_claim": "Capsule design references must include relationship and eval surfaces, not only prose guidance.",
+      "behavior_under_test": "Observable KnowledgeOS validator behavior when a capsule-design artifact omits relationship mapping and eval coverage.",
+      "failure_mode": "The validator accepts a polished but behavior-weak capsule-design reference.",
+      "expected_agent_move": "The validator rejects the capsule and points to the missing capsule-design sections.",
+      "proof_route": "references/evals.yaml",
+      "fixture_path": "references/evals/eval.knowledge-os.capsule-design-without-relationships.md",
+      "promotion_status": "candidate",
+      "source_trace": {
+        "capsule_id": "knowledge-os",
+        "section": "Eval Scenarios",
+        "source_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+        "extracted_principle": "Capsule design requires relationships, downstream integration, failure modes, and eval scenarios."
+      },
+      "bad_answer_pattern": [
+        "The validator accepts the capsule because ordinary operational headings are present."
+      ],
+      "good_answer_pattern": [
+        "The validator rejects the capsule with capsule-design-missing-sections."
+      ],
+      "weak_eval_flags": [],
+      "proposed_evals_yaml_case": {
+        "id": "eval.knowledge-os.capsule-design-without-relationships",
+        "unit": "knowledge-os",
+        "given": "A knowledge capsule design reference includes general guidance and ordinary operational headings but omits source model, relationship map, downstream integration, failure modes, and eval scenarios.",
+        "should": "The validator rejects the reference with capsule-design-missing-sections before the capsule can be treated as a portable handoff.",
+        "prompt": "Use the relevant KnowledgeOS capsule-design rules to judge the handoff.",
+        "knowledge_pack": {
+          "scenario_id": "eval.knowledge-os.capsule-design-without-relationships",
+          "fixture": "references/evals/eval.knowledge-os.capsule-design-without-relationships.md",
+          "capsule_refs": [
+            "knowledge-os"
+          ]
+        },
+        "acceptance": [
+          {
+            "type": "expected_signal",
+            "value": "capsule-design-missing-sections"
+          },
+          {
+            "type": "must_not_claim",
+            "value": "The capsule is valid because it has ordinary operational headings."
+          }
+        ]
+      },
+      "quality_findings": [],
+      "promotion": {
+        "scenario_status": "candidate",
+        "evals_yaml_status": "proposed",
+        "fixture_status": "present",
+        "tessl_status": "not_run",
+        "proof_status": "not_claimed",
+        "blocked_by": []
+      },
+      "skill_lift_target": {
+        "before_failure": "The validator accepts a readable but behavior-weak capsule-design reference.",
+        "after_behavior": "The validator rejects capsule-design references that lack relationship and eval surfaces.",
+        "observable_delta": "The negative fixture is rejected by the repo validator."
+      }
+    }
+  },
+  {
+    "id": "eval.knowledge-os.export-pass-overclaims-quality",
+    "type": "eval-scenario",
+    "title": "Export Pass Must Not Overclaim Quality",
+    "status": "reviewed",
+    "claim_strength": "synthesized",
+    "source_refs": [
+      {
+        "source_id": "sources.books.Systems Thinking & Decisions.Thinking in Bets: Making Smarter Decisions When You Don't Have All the Facts - Annie Duke",
+        "locator": "chapter-1-the-hazards-of-resulting",
+        "boundary": "local_source_reference"
+      },
+      {
+        "source_id": "sources.books.Systems Thinking & Decisions.Superforecasting — Philip Tetlock & Dan Gardner",
+        "locator": "chapter-3-keeping-score",
+        "boundary": "local_source_reference"
+      },
+      {
+        "source_id": "sources.books.Systems Thinking & Decisions.Thinking in Systems — Donella Meadows",
+        "locator": "chapter-1-feedback-loop-delays",
+        "boundary": "local_source_reference"
+      }
+    ],
+    "derived_from_claims": [
+      "claim.knowledge-os.resulting-distorts-review",
+      "claim.knowledge-os.feedback-from-outcomes-is-noisy",
+      "claim.knowledge-os.forecasts-need-scoreable-terms",
+      "claim.knowledge-os.feedback-only-affects-future-behavior",
+      "claim.knowledge-os.calibration-needs-many-clear-judgments"
+    ],
+    "applies_to": [
+      "knowledge-os"
+    ],
+    "used_by": [],
+    "source_boundaries": [
+      "local_source_reference"
+    ],
+    "payload": {
+      "given": "A pack export smoke test passes, but the asset review history, claim-card quality, or lifecycle transition evidence has not been reviewed.",
+      "should": "The agent reports export smoke proof as one passing lane and keeps synthesis quality, review status, lifecycle status, and publication readiness separate.",
+      "expected_failure": "The agent says the pack is high quality, reviewed, validated, or publishable solely because the generated export passed a smoke test.",
+      "reproduce_with": "references/evals/eval.knowledge-os.export-pass-overclaims-quality.md",
+      "eval_intent": {
+        "capsule_refs": [
+          "knowledge-os"
+        ],
+        "knowledge_claim": "Principle under test: The agent reports export smoke proof as one passing lane and keeps synthesis quality, review status, lifecycle status, and publication readiness separate.",
+        "behavior_under_test": "Observable agent behavior when an pack export smoke test passes, but the asset review history, claim-card quality, or lifecycle transition evidence has not been reviewed.",
+        "failure_mode": "The agent says the pack is high quality, reviewed, validated, or publishable solely because the generated export passed a smoke test.",
+        "expected_agent_move": "The agent reports export smoke proof as one passing lane and keeps synthesis quality, review status, lifecycle status, and publication readiness separate.",
+        "proof_route": "references/evals.yaml",
+        "fixture_path": "references/evals/eval.knowledge-os.export-pass-overclaims-quality.md",
+        "promotion_status": "candidate",
+        "source_trace": {
+          "capsule_id": "knowledge-os",
+          "section": "Eval Scenarios",
+          "source_digest": "sha256:35fb3097eaa51b624c68ed90a48263dce5ea945babf3b22bd9ca37c895eb6e6b",
+          "extracted_principle": "The agent reports export smoke proof as one passing lane and keeps synthesis quality, review status, lifecycle status, and publication readiness separate."
+        },
+        "bad_answer_pattern": [
+          "The agent says the pack is high quality, reviewed, validated, or publishable solely because the generated export passed a smoke test."
+        ],
+        "good_answer_pattern": [
+          "The agent reports export smoke proof as one passing lane and keeps synthesis quality, review status, lifecycle status, and publication readiness separate."
+        ],
+        "weak_eval_flags": [],
+        "proposed_evals_yaml_case": {
+          "id": "eval.knowledge-os.export-pass-overclaims-quality",
+          "unit": "knowledge-os",
+          "given": "A pack export smoke test passes, but the asset review history, claim-card quality, or lifecycle transition evidence has not been reviewed.",
+          "should": "The agent reports export smoke proof as one passing lane and keeps synthesis quality, review status, lifecycle status, and publication readiness separate.",
+          "prompt": "Use the relevant skill guidance to respond to the scenario while preserving KnowledgeOS proof boundaries.",
+          "knowledge_pack": {
+            "scenario_id": "eval.knowledge-os.export-pass-overclaims-quality",
+            "fixture": "references/evals/eval.knowledge-os.export-pass-overclaims-quality.md",
+            "capsule_refs": [
+              "knowledge-os"
+            ]
+          },
+          "acceptance": [
+            {
+              "type": "expected_signal",
+              "value": "The agent reports export smoke proof as one passing lane and keeps synthesis quality, review status, lifecycle status, and publication readiness separate."
+            },
+            {
+              "type": "must_not_claim",
+              "value": "The agent says the pack is high quality, reviewed, validated, or publishable solely because the generated export passed a smoke test."
+            }
+          ]
+        },
+        "quality_findings": [],
+        "promotion": {
+          "scenario_status": "candidate",
+          "evals_yaml_status": "proposed",
+          "fixture_status": "present",
+          "tessl_status": "not_run",
+          "proof_status": "not_claimed",
+          "blocked_by": []
+        },
+        "skill_lift_target": {
+          "before_failure": "The agent says the pack is high quality, reviewed, validated, or publishable solely because the generated export passed a smoke test.",
+          "after_behavior": "The agent reports export smoke proof as one passing lane and keeps synthesis quality, review status, lifecycle status, and publication readiness separate.",
+          "observable_delta": "The response avoids the weak pattern (The agent says the pack is high quality, reviewed, validated, or publishable solely because the generated export passed a smoke test) and instead shows the expected behavior (The agent reports export smoke proof as one passing lane and keeps synthesis quality, review status, lifecycle status, and publication readiness separate)."
+        }
+      },
+      "capsule_refs": [
+        "knowledge-os"
+      ],
+      "knowledge_claim": "Principle under test: The agent reports export smoke proof as one passing lane and keeps synthesis quality, review status, lifecycle status, and publication readiness separate.",
+      "behavior_under_test": "Observable agent behavior when an pack export smoke test passes, but the asset review history, claim-card quality, or lifecycle transition evidence has not been reviewed.",
+      "failure_mode": "The agent says the pack is high quality, reviewed, validated, or publishable solely because the generated export passed a smoke test.",
+      "expected_agent_move": "The agent reports export smoke proof as one passing lane and keeps synthesis quality, review status, lifecycle status, and publication readiness separate.",
+      "proof_route": "references/evals.yaml",
+      "fixture_path": "references/evals/eval.knowledge-os.export-pass-overclaims-quality.md",
+      "promotion_status": "candidate",
+      "source_trace": {
+        "capsule_id": "knowledge-os",
+        "section": "Eval Scenarios",
+        "source_digest": "sha256:35fb3097eaa51b624c68ed90a48263dce5ea945babf3b22bd9ca37c895eb6e6b",
+        "extracted_principle": "The agent reports export smoke proof as one passing lane and keeps synthesis quality, review status, lifecycle status, and publication readiness separate."
+      },
+      "bad_answer_pattern": [
+        "The agent says the pack is high quality, reviewed, validated, or publishable solely because the generated export passed a smoke test."
+      ],
+      "good_answer_pattern": [
+        "The agent reports export smoke proof as one passing lane and keeps synthesis quality, review status, lifecycle status, and publication readiness separate."
+      ],
+      "weak_eval_flags": [],
+      "proposed_evals_yaml_case": {
+        "id": "eval.knowledge-os.export-pass-overclaims-quality",
+        "unit": "knowledge-os",
+        "given": "A pack export smoke test passes, but the asset review history, claim-card quality, or lifecycle transition evidence has not been reviewed.",
+        "should": "The agent reports export smoke proof as one passing lane and keeps synthesis quality, review status, lifecycle status, and publication readiness separate.",
+        "prompt": "Use the relevant skill guidance to respond to the scenario while preserving KnowledgeOS proof boundaries.",
+        "knowledge_pack": {
+          "scenario_id": "eval.knowledge-os.export-pass-overclaims-quality",
+          "fixture": "references/evals/eval.knowledge-os.export-pass-overclaims-quality.md",
+          "capsule_refs": [
+            "knowledge-os"
+          ]
+        },
+        "acceptance": [
+          {
+            "type": "expected_signal",
+            "value": "The agent reports export smoke proof as one passing lane and keeps synthesis quality, review status, lifecycle status, and publication readiness separate."
+          },
+          {
+            "type": "must_not_claim",
+            "value": "The agent says the pack is high quality, reviewed, validated, or publishable solely because the generated export passed a smoke test."
+          }
+        ]
+      },
+      "quality_findings": [],
+      "promotion": {
+        "scenario_status": "candidate",
+        "evals_yaml_status": "proposed",
+        "fixture_status": "present",
+        "tessl_status": "not_run",
+        "proof_status": "not_claimed",
+        "blocked_by": []
+      },
+      "skill_lift_target": {
+        "before_failure": "The agent says the pack is high quality, reviewed, validated, or publishable solely because the generated export passed a smoke test.",
+        "after_behavior": "The agent reports export smoke proof as one passing lane and keeps synthesis quality, review status, lifecycle status, and publication readiness separate.",
+        "observable_delta": "The response avoids the weak pattern (The agent says the pack is high quality, reviewed, validated, or publishable solely because the generated export passed a smoke test) and instead shows the expected behavior (The agent reports export smoke proof as one passing lane and keeps synthesis quality, review status, lifecycle status, and publication readiness separate)."
+      }
+    }
+  },
+  {
+    "id": "eval.knowledge-os.skills-sdk-handoff-overclaims-ingest",
+    "type": "eval-scenario",
+    "title": "Skills SDK Handoff Must Not Overclaim Ingest",
+    "status": "reviewed",
+    "claim_strength": "synthesized",
+    "source_refs": [
+      {
+        "source_id": "specs.knowledge-os-kernel",
+        "locator": "validation-harness",
+        "boundary": "local_source_reference"
+      },
+      {
+        "source_id": "UBIQUITOUS",
+        "locator": "extraction-and-receipt-language",
+        "boundary": "local_source_reference"
+      }
+    ],
+    "derived_from_claims": [
+      "claim.knowledge-os.feedback-delays-require-smoke-tests",
+      "claim.knowledge-os.permanent-notes-stand-alone-with-sources",
+      "claim.knowledge-os.visible-contribution-orients-exports"
+    ],
+    "applies_to": [
+      "knowledge-os"
+    ],
+    "used_by": [],
+    "source_boundaries": [
+      "local_source_reference"
+    ],
+    "payload": {
+      "given": "A Skills SDK ingest receipt points at an extraction package but the downstream ingest command is blocked or not run.",
+      "should": "The agent records the receipt as blocked and states that extraction structure does not prove downstream skill quality or SDK acceptance.",
+      "expected_failure": "The agent claims the skill was improved or accepted by Skills SDK from the extraction package alone.",
+      "reproduce_with": "references/evals/eval.knowledge-os.skills-sdk-handoff-overclaims-ingest.md",
+      "eval_intent": {
+        "capsule_refs": [
+          "knowledge-os"
+        ],
+        "knowledge_claim": "Skills SDK handoff receipts must separate producer extraction proof from downstream ingest proof.",
+        "behavior_under_test": "A Skills SDK ingest receipt points at an extraction package but the downstream ingest command is blocked or not run.",
+        "failure_mode": "The agent claims the skill was improved or accepted by Skills SDK from the extraction package alone.",
+        "expected_agent_move": "The agent records the receipt as blocked and states that extraction structure does not prove downstream skill quality or SDK acceptance.",
+        "proof_route": "references/evals.yaml",
+        "fixture_path": "references/evals/eval.knowledge-os.skills-sdk-handoff-overclaims-ingest.md",
+        "promotion_status": "candidate",
+        "source_trace": {
+          "capsule_id": "knowledge-os",
+          "section": "Evidence Extraction And Delivery Evals",
+          "source_digest": "sha256:59c607037f7a3656e9bf8cc8cdac6d2feefbcfa5bb87eb105943560dd99edb36",
+          "extracted_principle": "Skills SDK handoff receipts must separate producer extraction proof from downstream ingest proof."
+        },
+        "bad_answer_pattern": [
+          "The agent claims the skill was improved or accepted by Skills SDK from the extraction package alone."
+        ],
+        "good_answer_pattern": [
+          "The agent records the receipt as blocked and states that extraction structure does not prove downstream skill quality or SDK acceptance."
+        ],
+        "weak_eval_flags": [],
+        "proposed_evals_yaml_case": {
+          "id": "eval.knowledge-os.skills-sdk-handoff-overclaims-ingest",
+          "unit": "knowledge-os",
+          "given": "A Skills SDK ingest receipt points at an extraction package but the downstream ingest command is blocked or not run.",
+          "should": "The agent records the receipt as blocked and states that extraction structure does not prove downstream skill quality or SDK acceptance.",
+          "prompt": "Use the relevant KnowledgeOS kernel guidance to respond while preserving evidence and delivery proof boundaries.",
+          "knowledge_pack": {
+            "scenario_id": "eval.knowledge-os.skills-sdk-handoff-overclaims-ingest",
+            "fixture": "references/evals/eval.knowledge-os.skills-sdk-handoff-overclaims-ingest.md",
+            "capsule_refs": [
+              "knowledge-os"
+            ]
+          },
+          "acceptance": [
+            {
+              "type": "expected_signal",
+              "value": "The agent records the receipt as blocked and states that extraction structure does not prove downstream skill quality or SDK acceptance."
+            },
+            {
+              "type": "must_not_claim",
+              "value": "The agent claims the skill was improved or accepted by Skills SDK from the extraction package alone."
+            }
+          ]
+        },
+        "quality_findings": [],
+        "promotion": {
+          "scenario_status": "candidate",
+          "evals_yaml_status": "proposed",
+          "fixture_status": "missing",
+          "tessl_status": "not_run",
+          "proof_status": "not_claimed",
+          "blocked_by": [
+            "scenario is added as an asset before executable eval wiring"
+          ]
+        },
+        "skill_lift_target": {
+          "before_failure": "Producer proof is treated as downstream SDK acceptance.",
+          "after_behavior": "The receipt records blocked downstream validation without overclaiming.",
+          "observable_delta": "The response rejects the weak pattern and requires the named deterministic proof artifact."
+        }
+      },
+      "capsule_refs": [
+        "knowledge-os"
+      ],
+      "knowledge_claim": "Skills SDK handoff receipts must separate producer extraction proof from downstream ingest proof.",
+      "behavior_under_test": "A Skills SDK ingest receipt points at an extraction package but the downstream ingest command is blocked or not run.",
+      "failure_mode": "The agent claims the skill was improved or accepted by Skills SDK from the extraction package alone.",
+      "expected_agent_move": "The agent records the receipt as blocked and states that extraction structure does not prove downstream skill quality or SDK acceptance.",
+      "proof_route": "references/evals.yaml",
+      "fixture_path": "references/evals/eval.knowledge-os.skills-sdk-handoff-overclaims-ingest.md",
+      "promotion_status": "candidate",
+      "source_trace": {
+        "capsule_id": "knowledge-os",
+        "section": "Evidence Extraction And Delivery Evals",
+        "source_digest": "sha256:59c607037f7a3656e9bf8cc8cdac6d2feefbcfa5bb87eb105943560dd99edb36",
+        "extracted_principle": "Skills SDK handoff receipts must separate producer extraction proof from downstream ingest proof."
+      },
+      "bad_answer_pattern": [
+        "The agent claims the skill was improved or accepted by Skills SDK from the extraction package alone."
+      ],
+      "good_answer_pattern": [
+        "The agent records the receipt as blocked and states that extraction structure does not prove downstream skill quality or SDK acceptance."
+      ],
+      "weak_eval_flags": [],
+      "proposed_evals_yaml_case": {
+        "id": "eval.knowledge-os.skills-sdk-handoff-overclaims-ingest",
+        "unit": "knowledge-os",
+        "given": "A Skills SDK ingest receipt points at an extraction package but the downstream ingest command is blocked or not run.",
+        "should": "The agent records the receipt as blocked and states that extraction structure does not prove downstream skill quality or SDK acceptance.",
+        "prompt": "Use the relevant KnowledgeOS kernel guidance to respond while preserving evidence and delivery proof boundaries.",
+        "knowledge_pack": {
+          "scenario_id": "eval.knowledge-os.skills-sdk-handoff-overclaims-ingest",
+          "fixture": "references/evals/eval.knowledge-os.skills-sdk-handoff-overclaims-ingest.md",
+          "capsule_refs": [
+            "knowledge-os"
+          ]
+        },
+        "acceptance": [
+          {
+            "type": "expected_signal",
+            "value": "The agent records the receipt as blocked and states that extraction structure does not prove downstream skill quality or SDK acceptance."
+          },
+          {
+            "type": "must_not_claim",
+            "value": "The agent claims the skill was improved or accepted by Skills SDK from the extraction package alone."
+          }
+        ]
+      },
+      "quality_findings": [],
+      "promotion": {
+        "scenario_status": "candidate",
+        "evals_yaml_status": "proposed",
+        "fixture_status": "missing",
+        "tessl_status": "not_run",
+        "proof_status": "not_claimed",
+        "blocked_by": [
+          "scenario is added as an asset before executable eval wiring"
+        ]
+      },
+      "skill_lift_target": {
+        "before_failure": "Producer proof is treated as downstream SDK acceptance.",
+        "after_behavior": "The receipt records blocked downstream validation without overclaiming.",
+        "observable_delta": "The response rejects the weak pattern and requires the named deterministic proof artifact."
+      }
+    }
+  },
+  {
+    "id": "eval.knowledge-os.consumer-receipt-stale-digest",
+    "type": "eval-scenario",
+    "title": "Consumer Receipt Must Reject Stale Digest",
+    "status": "reviewed",
+    "claim_strength": "synthesized",
+    "source_refs": [
+      {
+        "source_id": "specs.knowledge-os-kernel",
+        "locator": "validation-harness",
+        "boundary": "local_source_reference"
+      },
+      {
+        "source_id": "UBIQUITOUS",
+        "locator": "extraction-and-receipt-language",
+        "boundary": "local_source_reference"
+      }
+    ],
+    "derived_from_claims": [
+      "claim.knowledge-os.feedback-delays-require-smoke-tests",
+      "claim.knowledge-os.permanent-notes-stand-alone-with-sources",
+      "claim.knowledge-os.visible-contribution-orients-exports"
+    ],
+    "applies_to": [
+      "knowledge-os"
+    ],
+    "used_by": [],
+    "source_boundaries": [
+      "local_source_reference"
+    ],
+    "payload": {
+      "given": "A consumer receipt references a feed path whose recorded digest no longer matches the current feed artifact.",
+      "should": "The agent rejects the receipt and rebuilds or revalidates the feed before using it as consumer proof.",
+      "expected_failure": "The stale receipt is accepted because the downstream command once passed.",
+      "reproduce_with": "references/evals/eval.knowledge-os.consumer-receipt-stale-digest.md",
+      "eval_intent": {
+        "capsule_refs": [
+          "knowledge-os"
+        ],
+        "knowledge_claim": "Consumer receipts must bind downstream validation to the exact feed artifact digest.",
+        "behavior_under_test": "A consumer receipt references a feed path whose recorded digest no longer matches the current feed artifact.",
+        "failure_mode": "The stale receipt is accepted because the downstream command once passed.",
+        "expected_agent_move": "The agent rejects the receipt and rebuilds or revalidates the feed before using it as consumer proof.",
+        "proof_route": "references/evals.yaml",
+        "fixture_path": "references/evals/eval.knowledge-os.consumer-receipt-stale-digest.md",
+        "promotion_status": "candidate",
+        "source_trace": {
+          "capsule_id": "knowledge-os",
+          "section": "Evidence Extraction And Delivery Evals",
+          "source_digest": "sha256:59c607037f7a3656e9bf8cc8cdac6d2feefbcfa5bb87eb105943560dd99edb36",
+          "extracted_principle": "Consumer receipts must bind downstream validation to the exact feed artifact digest."
+        },
+        "bad_answer_pattern": [
+          "The stale receipt is accepted because the downstream command once passed."
+        ],
+        "good_answer_pattern": [
+          "The agent rejects the receipt and rebuilds or revalidates the feed before using it as consumer proof."
+        ],
+        "weak_eval_flags": [],
+        "proposed_evals_yaml_case": {
+          "id": "eval.knowledge-os.consumer-receipt-stale-digest",
+          "unit": "knowledge-os",
+          "given": "A consumer receipt references a feed path whose recorded digest no longer matches the current feed artifact.",
+          "should": "The agent rejects the receipt and rebuilds or revalidates the feed before using it as consumer proof.",
+          "prompt": "Use the relevant KnowledgeOS kernel guidance to respond while preserving evidence and delivery proof boundaries.",
+          "knowledge_pack": {
+            "scenario_id": "eval.knowledge-os.consumer-receipt-stale-digest",
+            "fixture": "references/evals/eval.knowledge-os.consumer-receipt-stale-digest.md",
+            "capsule_refs": [
+              "knowledge-os"
+            ]
+          },
+          "acceptance": [
+            {
+              "type": "expected_signal",
+              "value": "The agent rejects the receipt and rebuilds or revalidates the feed before using it as consumer proof."
+            },
+            {
+              "type": "must_not_claim",
+              "value": "The stale receipt is accepted because the downstream command once passed."
+            }
+          ]
+        },
+        "quality_findings": [],
+        "promotion": {
+          "scenario_status": "candidate",
+          "evals_yaml_status": "proposed",
+          "fixture_status": "missing",
+          "tessl_status": "not_run",
+          "proof_status": "not_claimed",
+          "blocked_by": [
+            "scenario is added as an asset before executable eval wiring"
+          ]
+        },
+        "skill_lift_target": {
+          "before_failure": "Old downstream proof is reused for a changed feed.",
+          "after_behavior": "The receipt is rejected until the digest matches the current feed artifact.",
+          "observable_delta": "The response rejects the weak pattern and requires the named deterministic proof artifact."
+        }
+      },
+      "capsule_refs": [
+        "knowledge-os"
+      ],
+      "knowledge_claim": "Consumer receipts must bind downstream validation to the exact feed artifact digest.",
+      "behavior_under_test": "A consumer receipt references a feed path whose recorded digest no longer matches the current feed artifact.",
+      "failure_mode": "The stale receipt is accepted because the downstream command once passed.",
+      "expected_agent_move": "The agent rejects the receipt and rebuilds or revalidates the feed before using it as consumer proof.",
+      "proof_route": "references/evals.yaml",
+      "fixture_path": "references/evals/eval.knowledge-os.consumer-receipt-stale-digest.md",
+      "promotion_status": "candidate",
+      "source_trace": {
+        "capsule_id": "knowledge-os",
+        "section": "Evidence Extraction And Delivery Evals",
+        "source_digest": "sha256:59c607037f7a3656e9bf8cc8cdac6d2feefbcfa5bb87eb105943560dd99edb36",
+        "extracted_principle": "Consumer receipts must bind downstream validation to the exact feed artifact digest."
+      },
+      "bad_answer_pattern": [
+        "The stale receipt is accepted because the downstream command once passed."
+      ],
+      "good_answer_pattern": [
+        "The agent rejects the receipt and rebuilds or revalidates the feed before using it as consumer proof."
+      ],
+      "weak_eval_flags": [],
+      "proposed_evals_yaml_case": {
+        "id": "eval.knowledge-os.consumer-receipt-stale-digest",
+        "unit": "knowledge-os",
+        "given": "A consumer receipt references a feed path whose recorded digest no longer matches the current feed artifact.",
+        "should": "The agent rejects the receipt and rebuilds or revalidates the feed before using it as consumer proof.",
+        "prompt": "Use the relevant KnowledgeOS kernel guidance to respond while preserving evidence and delivery proof boundaries.",
+        "knowledge_pack": {
+          "scenario_id": "eval.knowledge-os.consumer-receipt-stale-digest",
+          "fixture": "references/evals/eval.knowledge-os.consumer-receipt-stale-digest.md",
+          "capsule_refs": [
+            "knowledge-os"
+          ]
+        },
+        "acceptance": [
+          {
+            "type": "expected_signal",
+            "value": "The agent rejects the receipt and rebuilds or revalidates the feed before using it as consumer proof."
+          },
+          {
+            "type": "must_not_claim",
+            "value": "The stale receipt is accepted because the downstream command once passed."
+          }
+        ]
+      },
+      "quality_findings": [],
+      "promotion": {
+        "scenario_status": "candidate",
+        "evals_yaml_status": "proposed",
+        "fixture_status": "missing",
+        "tessl_status": "not_run",
+        "proof_status": "not_claimed",
+        "blocked_by": [
+          "scenario is added as an asset before executable eval wiring"
+        ]
+      },
+      "skill_lift_target": {
+        "before_failure": "Old downstream proof is reused for a changed feed.",
+        "after_behavior": "The receipt is rejected until the digest matches the current feed artifact.",
+        "observable_delta": "The response rejects the weak pattern and requires the named deterministic proof artifact."
+      }
+    }
+  }
+]

@@ -1,0 +1,18 @@
+{
+  "schema_version": "skills-sdk.scorer-calibration-bundle.v1",
+  "scorer_id": "improve-codebase-architecture-evidence-scorer",
+  "scorer_version_or_digest": "sha256:compact-architecture-scorer-v1",
+  "prompt_version": "compact-architecture-scorer-v1",
+  "threshold": 0.8,
+  "split": "held_out",
+  "minimum_examples": 6,
+  "minimum_true_positives": 1,
+  "minimum_true_negatives": 1,
+  "parameters": {
+    "model": "deterministic-local",
+    "temperature": 0,
+    "trial_count": 1
+  },
+  "examples_path": "examples.jsonl",
+  "raw_artifacts_dir": "raw"
+}
