@@ -115,8 +115,8 @@ def _require_yaml() -> Any:
         return yaml
     raise RuntimeError(
         "PyYAML is required for validate_skill_authoring_family_benchmarks.py. "
-        "Run with uv run --python 3.12 --with pyyaml --with jsonschema python ... "
-        "or through bash Infrastructure/scripts/run-infrastructure-python.sh"
+        "Run through bash Infrastructure/scripts/run-infrastructure-python.sh ..."
+    ) from _YAML_IMPORT_ERROR
     ) from _YAML_IMPORT_ERROR
 
 
