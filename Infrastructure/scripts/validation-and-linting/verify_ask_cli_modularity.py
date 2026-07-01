@@ -283,8 +283,13 @@ def _complexity(node: ast.AST) -> int:
     return score
 
 
-def _function_metrics(text: str) -> dict[str, tuple[int, int]]:
-    tree = ast.parse(text)
+def _function_metrics(text: str, *, relpath: str, source: str, issues: list[str]) -> dict[str, tuple[int, int]]:
+    try:
+        tree = ast.parse(text)
+    except SyntaxError as exc:
+        if source == "baseline":
+            return {}
+        raise
     metrics: dict[str, tuple[int, int]] = {}
     for node in ast.walk(tree):
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
@@ -319,8 +324,8 @@ def _check_function_shape(path: Path, current: str, baseline: str | None, args: 
     relpath = path.relative_to(REPO_ROOT).as_posix()
     if relpath in LEGACY_SHAPE_DEBT_PATHS:
         return
-    current_metrics = _function_metrics(current)
-    baseline_metrics = _function_metrics(baseline) if baseline is not None else {}
+    current_metrics = _function_metrics(current, relpath=relpath, source="current", issues=issues)
+    baseline_metrics = _function_metrics(baseline, relpath=relpath, source="baseline", issues=issues) if baseline is not None else {}
     for name, (line_count, complexity) in sorted(current_metrics.items()):
         old_lines, old_complexity = baseline_metrics.get(name, (0, 0))
         if line_count > args.max_function_lines and line_count > old_lines:

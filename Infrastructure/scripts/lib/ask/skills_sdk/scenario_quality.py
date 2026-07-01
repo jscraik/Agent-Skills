@@ -84,11 +84,15 @@ def _yaml_safe_load(text: str) -> Any:
     try:
         import yaml  # type: ignore
     except ModuleNotFoundError:
-        except ModuleNotFoundError:
-            ruby_loaded = _ruby_yaml_safe_load(text)
-            if ruby_loaded is not None:
-                return ruby_loaded
+        minimal_error: ValueError | None = None
+        try:
             return _load_minimal_evals_yaml(text)
+        except ValueError as exc:
+            minimal_error = exc
+        ruby_loaded = _ruby_yaml_safe_load(text)
+        if ruby_loaded is not None:
+            return ruby_loaded
+        raise minimal_error
     try:
         return yaml.safe_load(text)
     except yaml.YAMLError as exc:  # type: ignore[attr-defined]
@@ -98,14 +102,7 @@ def _yaml_safe_load(text: str) -> Any:
 def _ruby_yaml_safe_load(text: str) -> Any | None:
     code = "require 'yaml'; require 'json'; print JSON.generate(YAML.safe_load(STDIN.read, permitted_classes: [], aliases: false))"
     try:
-        completed = subprocess.run(
-            ["ruby", "-e", code],
-            input=text,
-            text=True,
-            capture_output=True,
-            check=True,
-            timeout=10,
-        )
+        completed = subprocess.run(["ruby", "-e", code], input=text, text=True, capture_output=True, check=True, timeout=10)
     except (FileNotFoundError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
         return None
     try:
