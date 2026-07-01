@@ -120,8 +120,6 @@ def _ruby_yaml_safe_load(text: str) -> Any | None:
         )
     except (FileNotFoundError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
         return None
-    except (FileNotFoundError, subprocess.CalledProcessError):
-        return None
     try:
         return json.loads(completed.stdout)
     except json.JSONDecodeError as exc:
