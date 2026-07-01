@@ -804,12 +804,20 @@ quality_criteria:
 automatic_failure_conditions:
   - Claims waived external CI as green.
 """
+        mock_stdout = '{"schema_version":1,"quality_criteria":{"current_state_before_action":{"purpose":"Uses live PR state.","why_it_matters":"Prevents stale merge claims.","observable_evidence":["latest_head_sha","required_checks"],"scoring":{"5":"Latest-head proof is complete.","4":"Minor evidence detail is missing.","3":"Evidence is present but incomplete.","2":"Evidence is stale or partial.","1":"No live PR evidence is provided."}}},"automatic_failure_conditions":["Claims waived external CI as green."]}'
+        mock_process = package_contracts.subprocess.CompletedProcess(
+            args=["ruby"],
+            returncode=0,
+            stdout=mock_stdout,
+            stderr="",
+        )
 
         with tempfile.NamedTemporaryFile("w", suffix=".yaml", encoding="utf-8") as handle:
             handle.write(text)
             handle.flush()
             with patch.object(package_contracts, "yaml", None):
-                loaded, error = package_contracts.read_structured_reference(Path(handle.name))
+                with patch.object(package_contracts.subprocess, "run", return_value=mock_process):
+                    loaded, error = package_contracts.read_structured_reference(Path(handle.name))
 
         self.assertIsNone(error)
         self.assertIsInstance(loaded, dict)

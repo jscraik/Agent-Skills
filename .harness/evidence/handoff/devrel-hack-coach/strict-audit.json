@@ -3,7 +3,7 @@
   "gate": "strict_audit",
   "status": "pass",
   "target": "Skills/product-strategy/devrel-hack-coach",
-  "command": "jq '.' .harness/evidence/handoff/devrel-hack-coach/oss-local-smoke-classification-20260630-135516.json",
+  "command": "jq '.' .harness/evidence/handoff/devrel-hack-coach/oss-local-smoke-classification-20260630-140551.json",
   "evidence_refs": [
     "Skills/product-strategy/devrel-hack-coach/SKILL.md",
     "Skills/product-strategy/devrel-hack-coach/references/evals.yaml"

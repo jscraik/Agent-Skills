@@ -28,13 +28,22 @@ class GitDirtyState:
 
 
 def _run_git(repo_root: Path, args: list[str]) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        ["/usr/bin/git", *args],
-        cwd=repo_root,
-        text=True,
-        capture_output=True,
-        check=False,
-    )
+    try:
+        return subprocess.run(
+            ["/usr/bin/git", *args],
+            cwd=repo_root,
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=30,
+        )
+    except subprocess.TimeoutExpired as exc:
+        return subprocess.CompletedProcess(
+            args=exc.args or ["/usr/bin/git", *args],
+            returncode=-1,
+            stdout=exc.stdout.decode("utf-8") if isinstance(exc.stdout, bytes) else (exc.stdout or ""),
+            stderr=f"git command timed out after 30 seconds: {exc}",
+        )
 
 
 def _parse_porcelain_path(raw_path: str) -> tuple[str, ...]:

@@ -155,7 +155,7 @@
           ".agents/plugins-runtime/*"
         ],
         "target_patterns": [
-          "/Users/jamiecraik/dev/agent-skills/plugins*",
+          "../../plugins*",
           "../../foundry/plugins/*"
         ],
         "owner": "plugin runtime sync",
@@ -170,7 +170,7 @@
           "plugins/browser-use"
         ],
         "target_patterns": [
-          "/Users/jamiecraik/.codex/plugins/*",
+          "~/.codex/plugins/*",
           "/Applications/Codex.app/*"
         ],
         "owner": "local runtime integration",

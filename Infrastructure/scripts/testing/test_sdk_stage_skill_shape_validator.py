@@ -134,9 +134,17 @@ references:
             )
 
             original_yaml = validator.yaml
+            mock_stdout = '{"schema_version":"source-context.v1","skill":"fixture","references":[{"path":"references/expert.md","kind":"expert_viewpoint","bounded_unit":true}]}'
+            mock_process = validator.subprocess.CompletedProcess(
+                args=["ruby"],
+                returncode=0,
+                stdout=mock_stdout,
+                stderr="",
+            )
             try:
                 validator.yaml = None
-                payload = validator.load_yaml(source_context)
+                with mock.patch.object(validator.subprocess, "run", return_value=mock_process):
+                    payload = validator.load_yaml(source_context)
             finally:
                 validator.yaml = original_yaml
             self.assertEqual(payload["schema_version"], "source-context.v1")

@@ -275,7 +275,7 @@ cases:
   - type: regex
     value: "(?is)(T.{0,4}|[+])2.*(T.{0,4}|[+])8.*(T.{0,4}|[+])16.*(T.{0,4}|[+])22"
   - type: regex
-    value: "(?is)(smoke.?test|happy.?path|golden.?path)"
+    value: "(?is)(smoke[ -]?test|happy[ -]?path|golden[ -]?path)"
   - type: regex
     value: "(?is)(mock/stub|mocked|stubbed|deferred|live|fully demonstrated|real data)"
   unit: Produce Phase 3 checkpoint structure.
