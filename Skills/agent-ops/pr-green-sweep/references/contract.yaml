@@ -182,6 +182,7 @@ waiver_contract:
   waived_checks_are_not_green_checks: true
   waived_checks_are_not_source_failures: true
   continue_when_other_action_lanes_remain:
+    - auto_fixable_now
     - needs_merge_conflict_strategy
     - unresolved_review_threads
     - needs_user_decision
