@@ -2,8 +2,7 @@
 
 ## Sentence 1 - The Wedge
 
-"When you add a timestamp to your Claude system prompt, you silently burn your
-entire prompt cache on every call."
+"When you add a timestamp to your Claude system prompt, you burn your entire prompt cache on every call."
 
 ## Sentence 2 - The Move
 
