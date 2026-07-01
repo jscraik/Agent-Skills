@@ -775,7 +775,26 @@ cases:
             handle.write(text)
             handle.flush()
             with patch.object(package_contracts, "yaml", None):
-                loaded, error = package_contracts.read_structured_reference(Path(handle.name))
+                process = package_contracts.subprocess.CompletedProcess(
+                    args=["ruby"],
+                    returncode=0,
+                    stdout=json.dumps(
+                        {
+                            "schema_version": "2.0",
+                            "skill_name": "example",
+                            "claims": [
+                                {
+                                    "id": "global-target-repository",
+                                    "statement": "Uses active repository.",
+                                }
+                            ],
+                            "cases": [{"id": "smoke-discovery", "name": "Discovery"}],
+                        }
+                    ),
+                    stderr="",
+                )
+                with patch.object(package_contracts.subprocess, "run", return_value=process):
+                    loaded, error = package_contracts.read_structured_reference(Path(handle.name))
 
         self.assertIsNone(error)
         self.assertIsInstance(loaded, dict)

@@ -4,8 +4,10 @@
   "metadata": {
     "version": "0.1.0",
     "command": "skills package verify Skills/agent-ops/improve-codebase-architecture --json --robot",
-    "next_steps": [],
-    "correction_note": null
+    "next_steps": [
+      "Regenerate package verification after adding permission_profile to the skill contract."
+    ],
+    "correction_note": "This archived receipt is not current package-pass evidence because sdk_contract.required_fields.missing includes permission_profile."
   },
   "data": {
     "skill_package_verification": {
@@ -1284,10 +1286,12 @@
           }
         }
       ],
-      "blockers": [],
+      "blockers": [
+        "sdk_contract.permission_profile missing"
+      ],
       "rule_results": [],
-      "status": "pass",
-      "agent_summary": "Package verification passed without install, extraction, or runtime-root mutation.",
+      "status": "fail",
+      "agent_summary": "Archived package verification is internally incomplete: sdk_contract.permission_profile is missing, so this receipt must not be used as package-pass evidence.",
       "validation_commands": [
         "./bin/ask skills package verify Skills/agent-ops/improve-codebase-architecture --json --robot"
       ],

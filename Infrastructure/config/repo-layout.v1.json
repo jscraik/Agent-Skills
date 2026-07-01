@@ -156,6 +156,7 @@
         ],
         "target_patterns": [
           "../../plugins*",
+          "*/agent-skills/plugins*",
           "../../foundry/plugins/*"
         ],
         "owner": "plugin runtime sync",
@@ -167,11 +168,13 @@
         "status": "allowed",
         "path_patterns": [
           ".agents/personal-plugins/*",
+          "Plugins/browser-use",
           "plugins/browser-use"
         ],
         "target_patterns": [
           "~/.codex/plugins/*",
-          "/Applications/Codex.app/*"
+          "*/.codex/plugins/*",
+          "*/Codex.app/*"
         ],
         "owner": "local runtime integration",
         "reason": "Personal and app-bundled plugin links are local runtime integration surfaces, not package source."

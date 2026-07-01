@@ -430,8 +430,6 @@ def read_yaml_with_ruby(text: str) -> dict[str, Any] | list[Any] | None:
         )
     except (FileNotFoundError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
         return None
-    except (FileNotFoundError, subprocess.CalledProcessError):
-        return None
     try:
         loaded = json.loads(completed.stdout)
     except json.JSONDecodeError:

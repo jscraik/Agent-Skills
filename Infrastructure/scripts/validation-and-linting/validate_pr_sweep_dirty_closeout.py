@@ -47,6 +47,9 @@ def _run_git(repo_root: Path, args: list[str]) -> subprocess.CompletedProcess[st
 
 
 def _parse_porcelain_path(raw_path: str) -> tuple[str, ...]:
+    if "\x00" in raw_path:
+        paths = tuple(path for path in raw_path.split("\x00") if path)
+        return paths or ("",)
     if " -> " in raw_path:
         before, after = raw_path.split(" -> ", 1)
         return (before, after)
@@ -57,11 +60,18 @@ def parse_porcelain(output: str) -> GitDirtyState:
     staged: set[str] = set()
     unstaged: set[str] = set()
     untracked: set[str] = set()
-    for line in output.splitlines():
+    records = output.split("\x00") if "\x00" in output else output.splitlines()
+    index = 0
+    while index < len(records):
+        line = records[index]
+        index += 1
         if not line:
             continue
         status = line[:2]
         path_part = line[3:]
+        if "\x00" in output and status.strip() in {"R", "C"} and index < len(records):
+            path_part = f"{path_part}\x00{records[index]}"
+            index += 1
         paths = _parse_porcelain_path(path_part)
         if status == "??":
             untracked.update(paths)
@@ -78,7 +88,7 @@ def parse_porcelain(output: str) -> GitDirtyState:
 
 
 def git_dirty_state(repo_root: Path) -> tuple[GitDirtyState | None, str | None]:
-    result = _run_git(repo_root, ["status", "--porcelain=v1", "--untracked-files=all"])
+    result = _run_git(repo_root, ["status", "--porcelain=v1", "-z", "--untracked-files=all"])
     if result.returncode != 0:
         return None, (result.stderr or result.stdout or "git status failed").strip()
     return parse_porcelain(result.stdout), None

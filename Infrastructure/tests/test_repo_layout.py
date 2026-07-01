@@ -88,6 +88,26 @@ def test_capitalized_plugin_internal_alias_is_allowed(tmp_path: Path) -> None:
     assert alias_findings[0]["classification"] == "compatibility_alias"
 
 
+def test_capitalized_browser_use_runtime_link_is_allowed(tmp_path: Path) -> None:
+    root = _minimal_repo(tmp_path)
+    (root / "Plugins").mkdir(exist_ok=True)
+    os.symlink(
+        "/Applications/Codex.app/Contents/Resources/plugins/openai-bundled/plugins/browser-use",
+        root / "Plugins" / "browser-use",
+    )
+
+    report = validate_repo_layout.validate_repo_layout(
+        root, root / "Infrastructure" / "config" / "repo-layout.v1.json"
+    )
+
+    assert report["status"] == "pass"
+    browser_findings = [
+        finding for finding in report["findings"] if finding["path"] == "Plugins/browser-use"
+    ]
+    assert browser_findings
+    assert browser_findings[0]["classification"] == "external_runtime_link"
+
+
 def test_future_nested_foundry_paths_classify_top_level_root(tmp_path: Path) -> None:
     root = _minimal_repo(tmp_path)
     (root / "foundry" / "skills").mkdir(parents=True)

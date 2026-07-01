@@ -1,5 +1,14 @@
 {
   "schema_version": "skills-sdk-smoke-failure-classification/v1",
+  "status": "classified",
+  "classification": "scenario_criteria_false_negative",
+  "summary": "The oss-local smoke failure was traced to an overly strict checkpoint matcher, not a skill behavior regression.",
+  "counts": {
+    "case_count": 6,
+    "passed_count": 5,
+    "failed_count": 1,
+    "blocked_count": 0
+  },
   "generated_at": "2026-06-30T13:02:36.614Z",
   "target": "Skills/product-strategy/devrel-hack-coach",
   "latest_oss_local_run": {

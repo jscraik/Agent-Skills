@@ -1,8 +1,13 @@
 {
   "schema_version": "pm-closeout-report/v1",
-  "status": "closed_pr_updated",
+  "status": "superseded_archived_evidence",
   "thread_id": "019f0314-ba59-7a00-ab78-9bd3174d1d03",
   "branch": "codex/sdk-eval-parity-guardrails",
+  "superseded_by": {
+    "reason": "Archived closeout evidence belongs to PR #296 and must not be used as current PR #298 closeout evidence.",
+    "current_pr": 298,
+    "current_branch": "codex/sdk-cleanup-followup"
+  },
   "repo": "/Users/jamiecraik/dev/agent-skills",
   "cwd": "/Users/jamiecraik/dev/agent-skills",
   "dirty_state_before": {
@@ -88,8 +93,8 @@
     "Command: gh pr checks 296 --watch=false -> fail (Snyk quota failed; CodeRabbit pending; CircleCI passed)"
   ],
   "runtime_proof": "No fresh runtime/Tessl/oss-cloud lane was run after PM closeout order.",
-  "hosted_ci_pr_proof": "PR #296 checked after push: open, not draft, head 8814d28d5, mergeStateStatus DIRTY; checks not green.",
-  "review_state": "CodeRabbit pending; independent reviewer and Codex review pending.",
+  "hosted_ci_pr_proof": "Archived PR #296 evidence only; not current PR #298 CI proof.",
+  "review_state": "Archived PR #296 review state only; not current PR #298 review-thread proof.",
   "tracker_state": "No Linear/tracker state was provided or updated.",
   "merge_readiness": "not_claimed; hosted checks/review are not complete.",
   "remaining_blockers": [

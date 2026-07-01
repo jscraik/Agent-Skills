@@ -93,3 +93,18 @@ def test_staged_path_is_included_in_dirty_paths(tmp_path: Path) -> None:
     assert payload["status"] == "fail"
     assert payload["dirty_state"]["staged_paths"] == ["tracked.txt"]
     assert payload["unledgered_paths"] == ["tracked.txt"]
+
+
+def test_paths_with_spaces_match_ledger_entries(tmp_path: Path) -> None:
+    repo = _make_repo(tmp_path)
+    (repo / "file with space.txt").write_text("new\n", encoding="utf-8")
+    ledger = tmp_path / "ledger.json"
+    ledger.write_text(
+        json.dumps({"dirty_worktree_ledger": [{"path": "file with space.txt"}]}),
+        encoding="utf-8",
+    )
+
+    payload = validate_pr_sweep_dirty_closeout.validate(repo, ledger_path=ledger)
+
+    assert payload["status"] == "pass"
+    assert payload["dirty_state"]["untracked_paths"] == ["file with space.txt"]

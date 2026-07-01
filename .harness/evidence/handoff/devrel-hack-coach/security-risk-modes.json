@@ -1,39 +1,19 @@
 {
-  "schema_version": "skills-sdk-security-risk-modes/v1",
+  "schema_version": "skills-sdk.security-risk-modes.v1",
   "gate": "security_risk_modes",
   "status": "pass",
   "preview": true,
   "command": "./bin/ask skills package verify Skills/product-strategy/devrel-hack-coach --json --robot",
   "risk_modes": {
-    "prompt_injection": {
-      "status": "pass",
-      "evidence": "covered by package contract, SKILL boundaries, or deterministic scenario checks"
-    },
-    "unsafe_command_escalation": {
-      "status": "pass",
-      "evidence": "covered by package contract, SKILL boundaries, or deterministic scenario checks"
-    },
-    "secret_redaction": {
-      "status": "pass",
-      "evidence": "covered by package contract, SKILL boundaries, or deterministic scenario checks"
-    },
-    "external_url_trust": {
-      "status": "pass",
-      "evidence": "covered by package contract, SKILL boundaries, or deterministic scenario checks"
-    },
-    "local_path_leakage": {
-      "status": "pass",
-      "evidence": "covered by package contract, SKILL boundaries, or deterministic scenario checks"
-    },
-    "permission_profile": {
-      "status": "pass",
-      "evidence": "covered by package contract, SKILL boundaries, or deterministic scenario checks"
-    },
-    "mcp_tool_side_effects": {
-      "status": "pass",
-      "evidence": "covered by package contract, SKILL boundaries, or deterministic scenario checks"
-    }
+    "prompt_injection": "pass",
+    "unsafe_command_escalation": "pass",
+    "secret_redaction": "pass",
+    "external_url_trust": "pass",
+    "local_path_leakage": "pass",
+    "permission_profile": "pass",
+    "mcp_tool_side_effects": "pass"
   },
+  "evidence": "covered by package contract, SKILL boundaries, or deterministic scenario checks",
   "proves": "Non-mutating security risk-mode receipt coverage exists for the ratchet.",
   "does_not_prove": "Not an external security scan.",
   "generated_at": "2026-06-30T13:05:30.283Z"
