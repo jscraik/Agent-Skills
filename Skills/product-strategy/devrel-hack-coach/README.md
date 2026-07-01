@@ -21,8 +21,12 @@ This package contains:
 - `agents/openai.yaml`
 - `references/contract.yaml`
 - `references/evals.yaml`
+- `references/task-profile.json`
+- `references/knowledge-capsule-routing.md`
+- `references/knowledge-capsule.manifest.yaml`
+- `references/scorer-calibration/`
+- `references/source-context.yaml`
 - phase references and worked examples
-
 ## Validation Boundary
 
 This skill is a coaching workflow. It does not generate code or advance
