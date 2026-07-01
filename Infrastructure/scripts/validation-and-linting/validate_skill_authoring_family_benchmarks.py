@@ -224,10 +224,14 @@ def _load_yaml_with_ruby(path: Path, text: str) -> Dict[str, Any]:
             ["ruby", "-e", code],
             input=text,
             text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
             check=False,
+            timeout=10,
         )
+    except FileNotFoundError:
+        _require_yaml()
+    except subprocess.TimeoutExpired as exc:
+        raise ValueError(f"{path} ruby YAML fallback timed out") from exc
     except FileNotFoundError:
         _require_yaml()
     if process.returncode != 0:
