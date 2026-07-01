@@ -337,3 +337,5 @@ Repo-specific agent knowledge base. Append-only.
 **2026-06-30 [Codex]:** Bash command 'jq' failed with exit code 2 -> summarize the failure and change approach before rerunning the same command (auto-key:371112923)
 
 **2026-06-30 [Codex]:** DevRel Hack Coach oss-local smoke exposed generic phase-question drift despite correct buried rules -> promote evaluator-critical routing into non-negotiable entrypoint overrides when a skill must choose before asking, then classify the failure as skill_behavior and rerun the same oss-local lane before oss-cloud or Tessl.
+
+**2026-07-01 [Codex]:** Private Tessl plugin publication must still be gated by SDK scenario-quality, not only package shape and Tessl CLI privacy flags -> when `./bin/ask sdk eval scenario-quality <skill> --preview --json --robot` reports blockers such as unsupported text-output acceptance types or missing release-case metadata, stop before plugin lint/pack/publish, record the failing scenario ids, and route a dedicated eval-repair lane before any private workspace publication attempt.
