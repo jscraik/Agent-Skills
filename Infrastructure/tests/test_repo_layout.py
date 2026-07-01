@@ -251,6 +251,44 @@ def test_caller_inventory_classifies_legacy_root_references(
     assert report["summary"]["category_counts"]["docs_reference_link"] >= 1
 
 
+def test_caller_inventory_scans_nested_extensionless_scripts(
+    tmp_path: Path, monkeypatch
+) -> None:
+    root = _minimal_repo(tmp_path)
+    rel_path = "Infrastructure/bin/ask"
+    path = root / rel_path
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("exec ./bin/ask skills package verify Skills/agent-ops/testing\n", encoding="utf-8")
+    monkeypatch.setattr(generate_repo_layout_caller_inventory, "_tracked_files", lambda _root: [rel_path])
+
+    report = generate_repo_layout_caller_inventory.generate_inventory(root)
+
+    assert report["summary"]["scanned_files"] == 1
+    assert report["summary"]["root_counts"]["Skills/"] == 1
+    assert report["summary"]["category_counts"]["ask_cli_route"] >= 1
+
+
+def test_actionable_inventory_keeps_generated_command_callers(
+    tmp_path: Path, monkeypatch
+) -> None:
+    root = _minimal_repo(tmp_path)
+    rel_path = "Infrastructure/scripts/run-migration.py"
+    path = root / rel_path
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        "cmd = 'python3 Infrastructure/scripts/generate_skillset_manifests.py --write'\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(generate_repo_layout_caller_inventory, "_tracked_files", lambda _root: [rel_path])
+
+    report = generate_repo_layout_caller_inventory.generate_inventory(root)
+    actionable = generate_repo_layout_caller_inventory.filter_actionable(report)
+
+    assert report["summary"]["root_counts"]["Infrastructure/"] == 1
+    assert actionable["summary"]["root_counts"]["Infrastructure/"] == 1
+    assert "generated_artifact_input" not in actionable["occurrences"][0]["categories"]
+
+
 def test_caller_inventory_markdown_summary_is_written(tmp_path: Path, monkeypatch) -> None:
     root = _minimal_repo(tmp_path)
     rel_path = "README.md"

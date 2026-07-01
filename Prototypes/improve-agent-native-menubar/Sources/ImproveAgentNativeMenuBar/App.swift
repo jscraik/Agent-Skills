@@ -905,10 +905,25 @@ enum Shell {
         let stderr = Pipe()
         process.standardOutput = stdout
         process.standardError = stderr
+        let stdoutHandle = stdout.fileHandleForReading
+        let stderrHandle = stderr.fileHandleForReading
+        let outputGroup = DispatchGroup()
+        var stdoutData = Data()
+        var stderrData = Data()
         do {
             try process.run()
         } catch {
             return CommandResult(exitCode: -1, stdout: "", stderr: error.localizedDescription)
+        }
+        outputGroup.enter()
+        DispatchQueue.global(qos: .utility).async {
+            stdoutData = stdoutHandle.readDataToEndOfFile()
+            outputGroup.leave()
+        }
+        outputGroup.enter()
+        DispatchQueue.global(qos: .utility).async {
+            stderrData = stderrHandle.readDataToEndOfFile()
+            outputGroup.leave()
         }
         let deadline = Date().addingTimeInterval(timeout)
         while process.isRunning && Date() < deadline {
@@ -916,10 +931,11 @@ enum Shell {
         }
         if process.isRunning { process.terminate() }
         process.waitUntilExit()
+        outputGroup.wait()
         return CommandResult(
             exitCode: process.terminationStatus,
-            stdout: String(data: stdout.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? "",
-            stderr: String(data: stderr.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
+            stdout: String(data: stdoutData, encoding: .utf8) ?? "",
+            stderr: String(data: stderrData, encoding: .utf8) ?? ""
         )
     }
 }

@@ -97,7 +97,7 @@ def _is_text_candidate(path: str) -> bool:
         return True
     if path_obj.suffix in TEXT_SUFFIXES:
         return True
-    if "/" not in path and "." not in path:
+    if "." not in path_obj.name:
         return True
     return False
 
@@ -139,7 +139,12 @@ def _classify_line(line: str) -> set[str]:
         ("tessl_staging_input", "tessl" in lowered),
         ("ask_cli_route", "./bin/ask" in line or " bin/ask" in line or "ask " in line),
         ("runtime_projection_input", "projection" in lowered or ".agents/" in line or ".skillsets/" in line),
-        ("generated_artifact_input", "generate" in lowered or "generated" in lowered or "artifact" in lowered),
+        (
+            "generated_artifact_input",
+            ".harness/evidence/" in line
+            or "Infrastructure/artifacts/" in line
+            or "artifacts/" in line,
+        ),
         ("ci_workflow", "github/workflows" in lowered or "circleci" in lowered),
     )
     return {category for category, matched in rules if matched}
