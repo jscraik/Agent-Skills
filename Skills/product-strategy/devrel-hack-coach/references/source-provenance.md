@@ -2,8 +2,7 @@
 
 This SDK package was created from a local Tessl plugin source at:
 
-`/Users/jamiecraik/Documents/tessl/.tessl/plugins/paker-it/devcon-hack-coach`
-
+`<local-tessl-workspace>/.tessl/plugins/paker-it/devcon-hack-coach`
 Observed source metadata:
 
 - Tessl package name: `paker-it/devcon-hack-coach`
