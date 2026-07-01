@@ -1,0 +1,17 @@
+{
+  "schema_version": "skills-sdk.eval-run-attempt.v1",
+  "status": "blocked_runtime",
+  "skill": "Skills/agent-ops/improve-agent-native",
+  "command": "./bin/ask evals run Skills/agent-ops/improve-agent-native --mode release --skip-tessl --no-dashboard --json --robot > .harness/evidence/handoff/improve-agent-native/evals-run-release-regex-ratchet-rerun.json",
+  "evidence": [
+    "Command did not return a normal exit code through the wrapper call in the 30 second command window.",
+    "Rediscovery showed the output file existed with zero bytes before this blocked receipt was written.",
+    "Process inspection with ps was unavailable in the sandbox: operation not permitted."
+  ],
+  "nearest_meaningful_evidence": [
+    ".harness/evidence/handoff/improve-agent-native/package-verify-regex-ratchet-rerun.json",
+    ".harness/evidence/handoff/improve-agent-native/scenario-quality-regex-ratchet-rerun.json",
+    ".harness/evidence/handoff/improve-agent-native/scorer-quality-regex-ratchet-rerun.json",
+    ".harness/evidence/handoff/improve-agent-native/scorer-calibration-regex-ratchet-rerun.json"
+  ]
+}
