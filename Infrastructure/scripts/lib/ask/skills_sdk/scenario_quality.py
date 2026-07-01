@@ -117,10 +117,12 @@ def _ruby_yaml_safe_load(text: str) -> Any | None:
             ["ruby", "-e", code],
             input=text,
             text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
             check=True,
+            timeout=10,
         )
+    except (FileNotFoundError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
+        return None
     except (FileNotFoundError, subprocess.CalledProcessError):
         return None
     try:
