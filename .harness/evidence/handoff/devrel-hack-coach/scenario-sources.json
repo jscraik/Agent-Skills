@@ -24,7 +24,9 @@
     "regression-terminal-stop",
     "regression-three-sentence-limit"
   ],
-  "receipts": [],
+  "receipts": [
+    "scorer-calibration.json"
+  ],
   "exclusions": [],
   "proves": "Canonical scenario IDs match references/evals.yaml through scorer_calibration.",
   "does_not_prove": "Does not prove oss-local/Tessl used the same set yet.",
