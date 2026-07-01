@@ -7,7 +7,8 @@ from typing import Any
 
 from ask.skills_sdk.release_scenario_sets import build_release_scenario_set_checks, release_scenario_set_case_ids
 from ask.skills_sdk.scenario_set_parity import build_scenario_set_parity_checks
-
+from ask.skills_sdk.generated_eval_fixtures import parse_generated_eval_fixtures
+from ask.skills_sdk.release_rubric_checks import release_rubric_regex_checks
 
 SCENARIO_QUALITY_SCHEMA_VERSION = "skills-sdk.scenario-quality-receipt.v0"
 SCENARIO_QUALITY_SCHEMA_URI = (
@@ -44,22 +45,10 @@ RUBRIC_EVIDENCE_TERMS = (
     "source",
     "validation",
 )
-TEXT_FIELD_ASSERTION_TYPES = {
-    "text_field_equals",
-    "text_field_in",
-    "text_field_present",
-    "text_field_absent",
-}
+TEXT_FIELD_ASSERTION_TYPES = {"text_field_equals", "text_field_in", "text_field_present", "text_field_absent"}
 TEXT_OUTPUT_RUNNER_ACCEPTANCE_TYPES = {
-    "contains",
-    "not_contains",
-    "regex",
-    "not_regex",
-    "skill_selected",
-    "skill_not_selected",
-    "expected_signal",
-    "discovery_question",
-    *TEXT_FIELD_ASSERTION_TYPES,
+    "contains", "not_contains", "regex", "not_regex", "skill_selected", "skill_not_selected",
+    "expected_signal", "discovery_question", *TEXT_FIELD_ASSERTION_TYPES,
 }
 STRUCTURED_FIELD_ASSERTION_KEYS = (
     "publication_gate_status",
@@ -73,7 +62,6 @@ STRUCTURED_FIELD_ASSERTION_KEYS = (
     "source_confidence",
 )
 PLATFORM_PARITY_GATE_ID_PREFIX = "platform_tessl_quality"
-
 
 class ScenarioQualityError(ValueError):
     def __init__(self, receipt: dict[str, Any]) -> None:
@@ -549,6 +537,7 @@ def _release_rubric_checks(case: dict[str, Any], scenario_id: str) -> list[dict[
             [scenario_id] if not has_evidence_anchor else [],
         ),
     ]
+    checks.extend(release_rubric_regex_checks(acceptance, scenario_id))
     if needs_failure_guard:
         checks.append(
             _check(
@@ -739,6 +728,44 @@ def _selected_canonical_ids(
     return selected_release_ids or all_canonical_ids, []
 
 
+def _scenario_quality_inputs(
+    skill_md: Path,
+) -> tuple[Path, dict[str, Any] | None, str | None, list[dict[str, Any]]]:
+    evals_path = skill_md.parent / "references" / "evals.yaml"
+    evals_payload, load_error = _load_evals(evals_path) if evals_path.is_file() else (None, "missing_evals_yaml")
+    cases = evals_payload.get("cases") if isinstance(evals_payload, dict) else None
+    base_case_list = cases if isinstance(cases, list) else []
+    known_ids = {str(case.get("id")) for case in base_case_list if isinstance(case, dict)}
+    return evals_path, evals_payload, load_error, [
+        *base_case_list,
+        *[
+            case
+            for case in parse_generated_eval_fixtures(skill_md.parent)
+            if str(case.get("id")) not in known_ids
+        ],
+    ]
+
+
+def _scenario_quality_parity(
+    repo_root: Path,
+    skill_md: Path,
+    evals_payload: dict[str, Any] | None,
+    scenario_set: str | None,
+    scenario_rows: list[dict[str, Any]],
+    tessl_staged_json: Path | None,
+    tessl_score_json: Path | None,
+) -> tuple[dict[str, Any] | None, list[dict[str, Any]]]:
+    canonical_ids, selector_checks = _selected_canonical_ids(
+        evals_payload,
+        scenario_set,
+        {row["id"] for row in scenario_rows},
+    )
+    scenario_set_parity, parity_checks = build_scenario_set_parity_checks(
+        repo_root, skill_md.parent, canonical_ids, tessl_staged_json, tessl_score_json
+    )
+    return scenario_set_parity, [*selector_checks, *parity_checks]
+
+
 def build_scenario_quality_receipt(
     repo_root: Path,
     *,
@@ -749,21 +776,11 @@ def build_scenario_quality_receipt(
     scenario_set: str | None = None,
 ) -> dict[str, Any]:
     skill_md = source_path if source_path.name == "SKILL.md" else source_path / "SKILL.md"
-    evals_path = skill_md.parent / "references" / "evals.yaml"
-    evals_payload, load_error = _load_evals(evals_path) if evals_path.is_file() else (None, "missing_evals_yaml")
-    cases = evals_payload.get("cases") if isinstance(evals_payload, dict) else None
-    case_list = cases if isinstance(cases, list) else []
+    evals_path, evals_payload, load_error, case_list = _scenario_quality_inputs(skill_md)
     scenario_rows, row_errors = _rows(case_list)
     receipt_checks = _quality_checks(repo_root, evals_path, evals_payload, case_list, load_error, row_errors)
-    all_canonical_ids = {row["id"] for row in scenario_rows}
-    canonical_ids, selector_checks = _selected_canonical_ids(evals_payload, scenario_set, all_canonical_ids)
-    receipt_checks.extend(selector_checks)
-    scenario_set_parity, parity_checks = build_scenario_set_parity_checks(
-        repo_root,
-        skill_md.parent,
-        canonical_ids,
-        tessl_staged_json,
-        tessl_score_json,
+    scenario_set_parity, parity_checks = _scenario_quality_parity(
+        repo_root, skill_md, evals_payload, scenario_set, scenario_rows, tessl_staged_json, tessl_score_json
     )
     receipt_checks.extend(parity_checks)
     receipt = _receipt(

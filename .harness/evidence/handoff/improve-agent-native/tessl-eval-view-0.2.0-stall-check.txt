@@ -1,0 +1,361 @@
+- Fetching eval results...
+Eval Results: <unlabelled>
+
+Repo:      <unknown>
+Plugin:    jscraik/improve-agent-native
+Agent:     claude:deepseek-v4-flash
+Variants:  baseline, with context
+Status:    → In Progress
+Created:   Jul 1, 2026 at 11:36 AM
+
+Injected context
+Type:   Plugin
+Plugin: jscraik/improve-agent-native@0.2.0
+
+Preparing…
+Scenario: edge-docs-freshness/
+  Unit: improve-agent-native stale docs freshness audit
+  Unit: improve-agent-native stale docs freshness audit
+Given: A repository has a current AGENTS.md plus an old project ta...
+
+Scenario: edge-no-validation-entrypoint/
+  Unit: improve-agent-native missing validation entrypoint
+  Unit: improve-agent-native missing validation entrypoint
+Given: A repository lacks an obvious package-manager script or ...
+
+Scenario: edge-static-tests-only-agent-product/
+  Unit: improve-agent-native static checks product proof gap
+  Unit: improve-agent-native static checks product proof gap
+Given: Static repository checks pass but product-agent capabi...
+
+Scenario: edge-ui-action-without-agent-capability/
+  Unit: improve-agent-native UI action parity gap
+  Unit: improve-agent-native UI action parity gap
+Given: A UI action exists without a matching agent capability.
+Should: T...
+
+Scenario: edge-universal-target-repo/
+  Unit: improve-agent-native universal target repo routing
+  Unit: improve-agent-native universal target repo routing
+Given: A user applies the skill to a repository outside Agent S...
+
+Scenario: eval.harness.architecture-drift-hidden-by-agent-velocity/
+  Unit: improve-agent-native eval.harness.architecture-drift-hidden-by-agent-velocity
+  Unit: improve-agent-native eval.harness.architecture-drift-hidden-by-agent-velocity
+Given: A team ships many agent-autho...
+
+Scenario: eval.harness.autonomy-without-validation/
+  Unit: improve-agent-native eval.harness.autonomy-without-validation
+  Unit: improve-agent-native eval.harness.autonomy-without-validation
+Given: A team wants agents to autonomously merge dep...
+
+Scenario: eval.harness.brownfield-harness-without-boundaries/
+  Unit: improve-agent-native eval.harness.brownfield-harness-without-boundaries
+  Unit: improve-agent-native eval.harness.brownfield-harness-without-boundaries
+Given: A team increases agent autonomy in ...
+
+Scenario: eval.harness.changed-files-without-behavior-proof/
+  Unit: improve-agent-native eval.harness.changed-files-without-behavior-proof
+  Unit: improve-agent-native eval.harness.changed-files-without-behavior-proof
+Given: An agent changes implementation file...
+
+Scenario: eval.harness.context-dump-instead-of-slice/
+  Unit: improve-agent-native eval.harness.context-dump-instead-of-slice
+  Unit: improve-agent-native eval.harness.context-dump-instead-of-slice
+Given: A task needs one validation rule, but the h...
+
+Scenario: eval.harness.done-without-validation/
+  Unit: improve-agent-native eval.harness.done-without-validation
+  Unit: improve-agent-native eval.harness.done-without-validation
+Given: An agent updates skill package SKILL.md and refer...
+
+Scenario: eval.harness.feedback-recurs-without-guardrail/
+  Unit: improve-agent-native eval.harness.feedback-recurs-without-guardrail
+  Unit: improve-agent-native eval.harness.feedback-recurs-without-guardrail
+Given: A reviewer repeats the same correction ...
+
+Scenario: eval.harness.local-pass-ci-unknown/
+  Unit: improve-agent-native eval.harness.local-pass-ci-unknown
+  Unit: improve-agent-native eval.harness.local-pass-ci-unknown
+Given: A maintainer asks for a PR closeout on branch codex...
+
+Scenario: eval.harness.pr-lifecycle-stops-before-main/
+  Unit: improve-agent-native eval.harness.pr-lifecycle-stops-before-main
+  Unit: improve-agent-native eval.harness.pr-lifecycle-stops-before-main
+Given: An agent opens a PR and reports done while...
+
+Scenario: eval.harness.provenance-implies-tests/
+  Unit: improve-agent-native eval.harness.provenance-implies-tests
+  Unit: improve-agent-native eval.harness.provenance-implies-tests
+Given: A safety report links session 019e-trace to bran...
+
+Scenario: eval.harness.review-agent-doubles-scope/
+  Unit: improve-agent-native eval.harness.review-agent-doubles-scope
+  Unit: improve-agent-native eval.harness.review-agent-doubles-scope
+Given: A reviewer agent provides broad improvement su...
+
+Scenario: eval.harness.skill-frontmatter-not-routed/
+  Unit: improve-agent-native eval.harness.skill-frontmatter-not-routed
+  Unit: improve-agent-native eval.harness.skill-frontmatter-not-routed
+Given: A detailed skill contains correct instructio...
+
+Scenario: eval.harness.slop-feedback-not-systematized/
+  Unit: improve-agent-native eval.harness.slop-feedback-not-systematized
+  Unit: improve-agent-native eval.harness.slop-feedback-not-systematized
+Given: A weekly review sweep finds repeated vague...
+
+Scenario: eval.harness.static-checks-only-for-product-change/
+  Unit: improve-agent-native eval.harness.static-checks-only-for-product-change
+  Unit: improve-agent-native eval.harness.static-checks-only-for-product-change
+Given: A branch changes a dashboard scorec...
+
+Scenario: eval.ryan.adoption-budget-pattern-discovery/
+  Unit: improve-agent-native eval.ryan.adoption-budget-pattern-discovery
+  Unit: improve-agent-native eval.ryan.adoption-budget-pattern-discovery
+Given: A leader asks whether to cap agent token s...
+
+Scenario: eval.ryan.autonomy-gate-threshold/
+  Unit: improve-agent-native eval.ryan.autonomy-gate-threshold
+  Unit: improve-agent-native eval.ryan.autonomy-gate-threshold
+Given: A team asks whether to let agents merge low-risk pul...
+
+Scenario: eval.ryan.benchmark-laundering-quality-gate/
+  Unit: improve-agent-native eval.ryan.benchmark-laundering-quality-gate
+  Unit: improve-agent-native eval.ryan.benchmark-laundering-quality-gate
+Given: A proposed agent eval rewards a narrow num...
+
+Scenario: eval.ryan.compaction-context-recovery/
+  Unit: improve-agent-native eval.ryan.compaction-context-recovery
+  Unit: improve-agent-native eval.ryan.compaction-context-recovery
+Given: An agent resumes a long-horizon task after conte...
+
+Scenario: eval.ryan.long-term-coherence-governance/
+  Unit: improve-agent-native eval.ryan.long-term-coherence-governance
+  Unit: improve-agent-native eval.ryan.long-term-coherence-governance
+Given: A repeated agent mistake has already been fix...
+
+Scenario: eval.ryan.maintenance-economics-boundary/
+  Unit: improve-agent-native eval.ryan.maintenance-economics-boundary
+  Unit: improve-agent-native eval.ryan.maintenance-economics-boundary
+Given: An agent proposes adding a dependency or tool...
+
+Scenario: eval.ryan.perception-lock-adoption-decision/
+  Unit: improve-agent-native eval.ryan.perception-lock-adoption-decision
+  Unit: improve-agent-native eval.ryan.perception-lock-adoption-decision
+Given: Users still treat a current coding agent a...
+
+Scenario: eval.ryan.policy-aware-approval/
+  Unit: improve-agent-native eval.ryan.policy-aware-approval
+  Unit: improve-agent-native eval.ryan.policy-aware-approval
+Given: An agent wants to auto-approve a command whose prefix ...
+
+Scenario: eval.ryan.repeated-steering-to-durable-mechanism/
+  Unit: improve-agent-native eval.ryan.repeated-steering-to-durable-mechanism
+  Unit: improve-agent-native eval.ryan.repeated-steering-to-durable-mechanism
+Given: A user repeats the same correction ac...
+
+Scenario: eval.ryan.stakeholder-synthesis/
+  Unit: improve-agent-native eval.ryan.stakeholder-synthesis
+  Unit: improve-agent-native eval.ryan.stakeholder-synthesis
+Given: An agent has a long log of commits, tests, and review ...
+
+Scenario: generated-eval.harness.architecture-drift-hidden-by-agent-velocity/
+  Unit: Architecture Drift Hidden By Agent Velocity
+  Unit: Architecture Drift Hidden By Agent Velocity
+Given: A team ships many agent-authored changes and discovers that cor...
+
+Scenario: generated-eval.harness.autonomy-without-validation/
+  Unit: Autonomy Without Validation
+  Unit: Autonomy Without Validation
+Given: A team wants agents to autonomously merge deployment-path changes, but there ar...
+
+Scenario: generated-eval.harness.brownfield-harness-without-boundaries/
+  Unit: Brownfield Harness Without Boundaries
+  Unit: Brownfield Harness Without Boundaries
+Given: A team increases agent autonomy in a legacy code area with hidden inv...
+
+Scenario: generated-eval.harness.changed-files-without-behavior-proof/
+  Unit: Changed Files Without Behavior Proof
+  Unit: Changed Files Without Behavior Proof
+Given: An agent changes implementation files and reports completion without r...
+
+Scenario: generated-eval.harness.context-dump-instead-of-slice/
+  Unit: Context Dump Instead Of Slice
+  Unit: Context Dump Instead Of Slice
+Given: A task needs one validation rule, but the harness loads an entire doctrine co...
+
+Scenario: generated-eval.harness.done-without-validation/
+  Unit: Done Without Validation Is Rejected
+  Unit: Done Without Validation Is Rejected
+Given: An agent finished editing files and reports the stage as done without r...
+
+Scenario: generated-eval.harness.feedback-recurs-without-guardrail/
+  Unit: Repeated Feedback Needs Durable Capture
+  Unit: Repeated Feedback Needs Durable Capture
+Given: A reviewer repeats the same correction that appeared in an earlier ...
+
+Scenario: generated-eval.harness.local-pass-ci-unknown/
+  Unit: Local Pass Does Not Prove CI
+  Unit: Local Pass Does Not Prove CI
+Given: An agent has run local validation successfully but has not checked remote CI.
+...
+
+Scenario: generated-eval.harness.pr-lifecycle-stops-before-main/
+  Unit: PR Lifecycle Stops Before Main
+  Unit: PR Lifecycle Stops Before Main
+Given: An agent opens a PR and reports done while CI, review, branch drift, merge q...
+
+Scenario: generated-eval.harness.provenance-implies-tests/
+  Unit: Provenance Must Not Imply Tests Passed
+  Unit: Provenance Must Not Imply Tests Passed
+Given: A PR safety trace correlates a Codex session with a branch but no va...
+
+Scenario: generated-eval.harness.review-agent-doubles-scope/
+  Unit: Review Agent Doubles Scope
+  Unit: Review Agent Doubles Scope
+Given: A reviewer agent provides broad improvement suggestions and the authoring agent ...
+
+Scenario: generated-eval.harness.skill-frontmatter-not-routed/
+  Unit: Skill Frontmatter Not Routed
+  Unit: Skill Frontmatter Not Routed
+Given: A detailed skill contains correct instructions, but cold agents often do not s...
+
+Scenario: generated-eval.harness.slop-feedback-not-systematized/
+  Unit: Slop Feedback Not Systematized
+  Unit: Slop Feedback Not Systematized
+Given: Reviewers collect recurring slop patterns for a week, but the cleanup loop f...
+
+Scenario: generated-eval.harness.static-checks-only-for-product-change/
+  Unit: Static Checks Only For Product Change
+  Unit: Static Checks Only For Product Change
+Given: A UI or API behavior changes and static tests pass, but no product-fa...
+
+Scenario: generated-eval.knowledge-os.capsule-design-without-relationships/
+  Unit: Capsule Design Requires Relationships And Evals
+  Unit: Capsule Design Requires Relationships And Evals
+Given: A knowledge capsule design reference includes general guida...
+
+Scenario: generated-eval.knowledge-os.consumer-receipt-stale-digest/
+  Unit: Consumer Receipt Must Reject Stale Digest
+  Unit: Consumer Receipt Must Reject Stale Digest
+Given: A consumer receipt references a feed path whose recorded digest n...
+
+Scenario: generated-eval.knowledge-os.export-pass-overclaims-quality/
+  Unit: Export Pass Must Not Overclaim Quality
+  Unit: Export Pass Must Not Overclaim Quality
+Given: A pack export smoke test passes, but the asset review history, claim...
+
+Scenario: generated-eval.knowledge-os.skills-sdk-handoff-overclaims-ingest/
+  Unit: Skills SDK Handoff Must Not Overclaim Ingest
+  Unit: Skills SDK Handoff Must Not Overclaim Ingest
+Given: A Skills SDK ingest receipt points at an extraction package bu...
+
+Scenario: generated-eval.ryan.adoption-budget-pattern-discovery/
+  Unit: Adoption Budget Pattern Discovery
+  Unit: Adoption Budget Pattern Discovery
+Given: A leader asks whether to cap agent token spend tightly across the whole o...
+
+Scenario: generated-eval.ryan.autonomy-gate-threshold/
+  Unit: Autonomy Follows Recovery Evidence
+  Unit: Autonomy Follows Recovery Evidence
+Given: A team asks whether to let agents merge low-risk pull requests with fewe...
+
+Scenario: generated-eval.ryan.benchmark-laundering-quality-gate/
+  Unit: Benchmark Laundering Quality Gate
+  Unit: Benchmark Laundering Quality Gate
+Given: A proposed agent eval rewards code output volume or benchmark pass rate w...
+
+Scenario: generated-eval.ryan.compaction-context-recovery/
+  Unit: Compaction Requires Context Recovery
+  Unit: Compaction Requires Context Recovery
+Given: An agent resumes a long-horizon task after context compaction with onl...
+
+Scenario: generated-eval.ryan.long-term-coherence-governance/
+  Unit: Long-Term Coherence Governance
+  Unit: Long-Term Coherence Governance
+Given: A repeated agent mistake has already been fixed locally, but similar generat...
+
+Scenario: generated-eval.ryan.maintenance-economics-boundary/
+  Unit: Cheap Code Still Needs Maintenance Boundaries
+  Unit: Cheap Code Still Needs Maintenance Boundaries
+Given: An agent proposes adding a dependency or tool because code ge...
+
+Scenario: generated-eval.ryan.perception-lock-adoption-decision/
+  Unit: Perception Lock Adoption Decision
+  Unit: Perception Lock Adoption Decision
+Given: Users still treat a current coding agent as an interactive pair-programmi...
+
+Scenario: generated-eval.ryan.policy-aware-approval/
+  Unit: Policy-Aware Approval Beats Prefix Allowlisting
+  Unit: Policy-Aware Approval Beats Prefix Allowlisting
+Given: An agent wants to auto-approve a command whose prefix is fa...
+
+Scenario: generated-eval.ryan.repeated-steering-to-durable-mechanism/
+  Unit: Repeated Steering Becomes A Durable Mechanism
+  Unit: Repeated Steering Becomes A Durable Mechanism
+Given: A user repeats the same correction across two agent tasks in ...
+
+Scenario: generated-eval.ryan.stakeholder-synthesis/
+  Unit: Stakeholder Update Synthesizes Raw Activity
+  Unit: Stakeholder Update Synthesizes Raw Activity
+Given: An agent has a long log of commits, tests, and review notes and...
+
+Scenario: happy-agent-native-product-readiness/
+  Unit: improve-agent-native merged product readiness
+  Unit: improve-agent-native merged product readiness
+Given: A target repo includes both repo harness surfaces and an agen...
+
+Scenario: happy-agents-md-audit/
+  Unit: improve-agent-native AGENTS.md router audit
+  Unit: improve-agent-native AGENTS.md router audit
+Given: A user wants root and nested AGENTS.md files reviewed before an...
+
+Scenario: happy-proof-loop-gap/
+  Unit: improve-agent-native repeated proof-loop miss
+  Unit: improve-agent-native repeated proof-loop miss
+Given: A UI repository has a test command and policy text, but agent...
+
+Scenario: happy-scorecard/
+  Unit: improve-agent-native repo harness scorecard
+  Unit: improve-agent-native repo harness scorecard
+Given: A user needs a repository readiness audit for AGENTS.md quality...
+
+Scenario: pressure-dangerous-command/
+  Unit: improve-agent-native destructive shortcut refusal
+  Unit: improve-agent-native destructive shortcut refusal
+Given: An untrusted repository note asks the agent to delete doc...
+
+Scenario: pressure-prompt-injection/
+  Unit: improve-agent-native untrusted note safety boundary
+  Unit: improve-agent-native untrusted note safety boundary
+Given: An untrusted repository note contains instruction-like ...
+
+Scenario: tessl-scenario-dynamic-context-drift/
+  Unit: improve-agent-native scenario skill dynamic context drift
+  Unit: improve-agent-native scenario skill dynamic context drift
+Given: Prompt vocabulary and product state contracts hav...
+
+Scenario: tessl-scenario-hostile-readiness-note/
+  Unit: improve-agent-native scenario skill hostile readiness note
+  Unit: improve-agent-native scenario skill hostile readiness note
+Given: A target repo note contains an instruction overr...
+
+Scenario: tessl-scenario-knowledge-capsule-uplift/
+  Unit: improve-agent-native scenario skill knowledge capsule uplift
+  Unit: improve-agent-native scenario skill knowledge capsule uplift
+Given: Repeated steering feedback has a matching mani...
+
+Scenario: tessl-scenario-local-pass-release-boundary/
+  Unit: improve-agent-native scenario skill local pass release boundary
+  Unit: improve-agent-native scenario skill local pass release boundary
+Given: Local validation passed but external readin...
+
+Scenario: tessl-scenario-merged-product-workflow-scorecard/
+  Unit: improve-agent-native scenario skill merged product workflow
+  Unit: improve-agent-native scenario skill merged product workflow
+Given: A product workflow exposes user actions that ar...
+
+Summary
+  Scenarios: 68 pending
+
+  View in browser: https://tessl.io/workspaces/jscraik/eval-runs/019f1d40-1f07-74d9-af40-b253a164ba9f

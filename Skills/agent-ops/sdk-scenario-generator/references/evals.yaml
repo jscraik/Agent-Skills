@@ -452,8 +452,8 @@ cases:
   expected_artifact: package-relative review artifact with case id, owner classification, acceptance decision, evidence references, and blocked-lane summary
   reproduce: ./bin/ask sdk eval run SKILL.md --runner internal --mode smoke --case regression-registry-metadata-not-readiness
     --json --robot
-  prompt: Assess whether a Tessl tile with plugin.json identity, local lint, registry metadata, a private visibility setting,
-    and a repo-local file install is ready to publish publicly or use as proof for a target repository.
+  prompt: A maintainer asks whether a Tessl tile can move from a private workspace experiment to broader use. Review the
+    supplied facts and write a short release decision with any blocked next steps.
   claim_ids:
   - sdk-scenario-generator.lifecycle
   - sdk-scenario-generator.anti-easy
@@ -487,9 +487,8 @@ cases:
   expected_artifact: registry intake decision with separated trust signals and local proof lane
   reproduce: ./bin/ask sdk eval run SKILL.md --runner internal --mode smoke --case pressure-registry-dependency-intake
     --json --robot
-  prompt: A Tessl Registry search returns a private workspace tile with a 96 review score, positive impact metadata, a high
-    security warning, and an install command without an explicit version. Decide whether to install it and whether it proves
-    the target repo is ready.
+  prompt: A maintainer found a promising Tessl Registry tile and wants to add it to a repository today. Review the registry
+    facts and write an intake decision before any install or readiness claim.
   claim_ids:
   - sdk-scenario-generator.registry-dependency
   deterministic_checks:
@@ -627,8 +626,8 @@ cases:
   expected_artifact: package-relative review artifact with case id, owner classification, acceptance decision, evidence references, and blocked-lane summary
   reproduce: ./bin/ask sdk eval run SKILL.md --runner internal --mode smoke --case pressure-sdk-pipeline-setup-before-readiness
     --json --robot
-  prompt: Confirm whether the scenario package is ready for live Tessl scoring after local package verification, where the
-    native Tessl smoke command produced quiet output and scenario-source review has not happened.
+  prompt: A local package check was quiet and the team wants to spend a live Tessl run. Review the current evidence and
+    decide whether the package should advance.
   claim_ids:
   - sdk-scenario-generator.lifecycle
   - sdk-scenario-generator.run-budget
@@ -852,7 +851,7 @@ cases:
   actual_artifact: package-relative scenario-review.md decision record or generated eval-pack files
   expected_artifact: package-relative review artifact with case id, owner classification, acceptance decision, evidence references, and blocked-lane summary
   reproduce: ./bin/ask sdk eval run SKILL.md --runner internal --mode smoke --case pressure-measurement-fake-aggregate-score --json --robot
-  prompt: "Strengthen this draft eval: it marks a skill ready when the average of local test pass rate, Tessl Registry quality score, maintainer satisfaction rating, and live Tessl usage is above 85. Explain what is wrong and rewrite the measurement plan."
+  prompt: "Review this draft eval plan: it combines local checks, registry signals, maintainer feedback, and usage into one numeric readiness threshold. Explain whether that measurement design is valid and propose a safer plan."
   claim_ids:
   - sdk-scenario-generator.measurement-quality
   - sdk-scenario-generator.anti-easy
@@ -887,7 +886,7 @@ cases:
   actual_artifact: package-relative scenario-review.md decision record or generated eval-pack files
   expected_artifact: package-relative review artifact with case id, owner classification, acceptance decision, evidence references, and blocked-lane summary
   reproduce: ./bin/ask sdk eval run SKILL.md --runner internal --mode smoke --case pressure-break-test-happy-path-only-pack --json --robot
-  prompt: "Review a generated eval pack that contains only successful scenario generation examples. Strengthen it with realistic break-test scenarios for invalid category values, missing inputs, repeated reruns, stale generated assets, and shared proof-boundary confusion."
+  prompt: "Review a generated eval pack that only covers successful scenario generation. Recommend the missing stress cases a maintainer should add before using it for release evidence."
   claim_ids:
   - sdk-scenario-generator.break-test-coverage
   - sdk-scenario-generator.anti-easy
@@ -922,7 +921,7 @@ cases:
   actual_artifact: package-relative scenario-review.md decision record or generated eval-pack files
   expected_artifact: package-relative review artifact with case id, owner classification, acceptance decision, evidence references, and blocked-lane summary
   reproduce: ./bin/ask sdk eval run SKILL.md --runner internal --mode smoke --case happy-measurement-break-fixture-conversion --json --robot
-  prompt: "Turn this source note into reviewed SDK eval scenarios: local package verification passed, but hosted CI was not checked; a draft used unsupported category 'regression'; the agent reran generation without clearing stale scenario assets; and the final report claimed live Tessl readiness. Preserve concrete evidence, name the measured constructs, and add break-test pressure for invalid category and stale asset sequencing."
+  prompt: "Turn this source note into reviewed SDK eval scenarios: a recent evaluation lane mixed several proof and generation mistakes, then reported a stronger release state than the evidence supported."
   claim_ids:
   - sdk-scenario-generator.measurement-quality
   - sdk-scenario-generator.break-test-coverage

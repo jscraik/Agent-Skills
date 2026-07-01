@@ -1,0 +1,54 @@
+{
+  "schema_version": "tessl-runtime-stall-classification/v1",
+  "recorded_at_utc": "2026-07-01T11:26:32Z",
+  "skill": "Skills/agent-ops/improve-agent-native",
+  "plugin": "jscraik/improve-agent-native",
+  "version": "0.2.0",
+  "classification": "blocked_tessl_runtime_preparing_stall",
+  "owner": "tessl_runtime_or_queue",
+  "not_owner": [
+    "skill_package_shape",
+    "sdk_scenario_quality",
+    "tessl_plugin_lint",
+    "tessl_plugin_pack",
+    "private_visibility"
+  ],
+  "evidence": [
+    {
+      "run_id": "019f1d40-1f07-74d9-af40-b253a164ba9f",
+      "trigger": "plugin publish --workspace jscraik --with-scenario-quality-check",
+      "status": "pending",
+      "queue": "preparing",
+      "completed": 0,
+      "total": 68,
+      "created_at": "2026-07-01T10:36:09.350Z",
+      "updated_at": "2026-07-01T10:36:09.350Z",
+      "artifact": ".harness/evidence/handoff/improve-agent-native/tessl-eval-view-0.2.0-stall-check.json"
+    },
+    {
+      "run_id": "019f1d6d-0e9b-7076-a14d-22cc6a9b1a78",
+      "trigger": "eval run --quality-check --yes --json",
+      "status": "pending",
+      "queue": "preparing",
+      "completed": 0,
+      "total": 68,
+      "created_at": "2026-07-01T11:25:14.266Z",
+      "updated_at": "2026-07-01T11:25:14.266Z",
+      "artifact": ".harness/evidence/handoff/improve-agent-native/tessl-direct-eval-view-0.2.0-poll-2.json"
+    }
+  ],
+  "supporting_evidence": [
+    {
+      "command": "tessl eval retry --help",
+      "result": "pass",
+      "note": "CLI describes retry as re-running a failed eval run; current runs are pending, not failed."
+    },
+    {
+      "command": "tessl eval list --json --status pending",
+      "result": "pass",
+      "artifact": ".harness/evidence/handoff/improve-agent-native/tessl-pending-runs-all.json",
+      "note": "Both improve-agent-native 0.2.0 runs appear as pending with unchanged updatedAt timestamps."
+    }
+  ],
+  "next_action": "Do not patch the skill or scenarios for this stall. Wait for Tessl runtime movement or contact Tessl/support with the two run IDs and artifacts. Only start another run after a supported cancel/retry/restart path is available or the pending runs transition to failed/completed."
+}

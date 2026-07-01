@@ -40,6 +40,7 @@ HARNESS_HISTORICAL_PREFIXES = (
 
 SOURCE_PREFIXES = (
     "Skills",
+    "skills-sdk",
     "Infrastructure/scripts",
     "Infrastructure/bin",
     "Infrastructure/tests",
@@ -123,6 +124,7 @@ FIXTURE_PREFIXES = (".workouts", "Infrastructure/templates", "Infrastructure/ven
 
 AUTHORED_SOURCE_PREFIXES = (
     "Plugins",
+    "Prototypes",
     "Infrastructure/factory",
     "Infrastructure/ops",
     "Infrastructure/reports",
@@ -786,10 +788,7 @@ def main() -> int:
         else:
             print(f"repo surface inventory failed: {exc}", file=sys.stderr)
         return 1
-    if args.json:
-        print(json.dumps(report, sort_keys=True))
-    else:
-        print_human_report(report)
+    print(json.dumps(report, sort_keys=True)) if args.json else print_human_report(report)
 
     if args.strict and report["summary"]["blocking_findings"]:
         return 1

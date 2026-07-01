@@ -168,21 +168,10 @@ def _find_section_text(body: str, aliases: Sequence[str]) -> str:
 
 
 _CANONICAL_SKILLS_SDK_SECTION_ORDER: List[Tuple[str, str, List[str]]] = [
-    ("philosophy", "Philosophy", ["philosophy", "principles", "mental model"]),
     ("when_to_use", "When To Use", ["when to use", "usage", "triggers", "invocation"]),
-    ("avoid", "Avoid", ["avoid", "when not to use", "anti-trigger"]),
     ("inputs", "Inputs", ["inputs", "preconditions", "assumptions", "requirements"]),
     ("outputs", "Outputs", ["outputs", "output format", "deliverables", "result"]),
-    ("procedure", "Procedure/Workflow", ["workflow", "procedure", "steps", "process"]),
-    ("constraints", "Constraints", ["constraints", "safety", "safety boundaries", "approval boundaries", "security constraints"]),
-    ("execution_boundaries", "Execution Boundaries", [
-        "execution boundaries",
-        "boundary map",
-        "ownership boundaries",
-        "codex harness placement",
-        "command boundaries",
-        "human approval",
-    ]),
+    ("workflow", "Workflow", ["workflow", "procedure", "steps", "process"]),
     ("failure_mode", "Failure Mode", [
         "failure mode",
         "failure modes",
@@ -195,10 +184,7 @@ _CANONICAL_SKILLS_SDK_SECTION_ORDER: List[Tuple[str, str, List[str]]] = [
         "handoff rules",
     ]),
     ("validation", "Validation", ["validation", "checks", "verify", "acceptance", "gates"]),
-    ("gotchas", "Gotchas", ["gotchas", "operational traps", "known traps", "known failure modes", "false confidence risks"]),
-    ("antipatterns", "Anti-Patterns", ["anti-pattern", "anti patterns", "pitfalls"]),
-    ("examples", "Examples", ["examples", "example prompts"]),
-    ("progressive_disclosure", "Progressive Disclosure/References", ["progressive disclosure", "references"]),
+    ("references", "References", ["references", "progressive disclosure"]),
 ]
 
 
@@ -754,19 +740,7 @@ def check_required_sections(doc: SkillDoc, *, require_philosophy: bool) -> List[
         "when_to_use": ["when to use", "usage", "triggers", "invocation"],
         "inputs": ["inputs", "preconditions", "assumptions", "requirements"],
         "outputs": ["outputs", "output format", "deliverables", "result"],
-        "procedure": ["workflow", "procedure", "steps", "process"],
-        "validation": ["validation", "checks", "verify", "acceptance", "gates"],
-        "antipatterns": ["anti-pattern", "anti patterns", "anti-trigger", "when not to use", "what to avoid", "pitfalls"],
-        "constraints": ["constraints", "safety", "safety boundaries", "approval boundaries"],
-        "execution_boundaries": [
-            "execution boundaries",
-            "safety boundaries",
-            "boundary map",
-            "ownership boundaries",
-            "codex harness placement",
-            "command boundaries",
-            "human approval",
-        ],
+        "workflow": ["workflow", "procedure", "steps", "process"],
         "failure_mode": [
             "failure mode",
             "failure modes",
@@ -778,14 +752,8 @@ def check_required_sections(doc: SkillDoc, *, require_philosophy: bool) -> List[
             "rollback path",
             "handoff rules",
         ],
-        "gotchas": ["gotchas", "operational traps", "known traps", "known failure modes", "false confidence risks"],
-    }
-
-    if require_philosophy:
-        required["philosophy"] = ["philosophy", "principles", "mental model"]
-
-    should: Dict[str, List[str]] = {
-        "examples": ["examples", "example prompts"],
+        "validation": ["validation", "checks", "verify", "acceptance", "gates"],
+        "references": ["references", "progressive disclosure"],
     }
 
     def present(aliases: Sequence[str]) -> bool:
@@ -797,15 +765,15 @@ def check_required_sections(doc: SkillDoc, *, require_philosophy: bool) -> List[
                 Level.WARN,
                 f"SEC_{key.upper()}_MISSING",
                 (
-                    f"Missing house-style section: {key.replace('_', ' ')}. "
-                    "This is not an SDK-required header; add it only when it improves browseability."
+                    f"Missing canonical Skills SDK section: {key.replace('_', ' ')}. "
+                    "Use the required KISS header set: When To Use, Inputs, Outputs, "
+                    "Workflow, Failure Mode, Validation, References."
                 ),
             ))
 
     critical_content: Dict[str, List[str]] = {
-        "execution_boundaries": required["execution_boundaries"],
         "failure_mode": required["failure_mode"],
-        "gotchas": required["gotchas"],
+        "validation": required["validation"],
     }
     placeholder_pattern = re.compile(r"^(?:n/?a|none|tbd|todo|coming soon|placeholder)\.?\s*$", re.IGNORECASE)
     for key, aliases in critical_content.items():
@@ -823,15 +791,7 @@ def check_required_sections(doc: SkillDoc, *, require_philosophy: bool) -> List[
             out.append(Finding(
                 Level.WARN,
                 f"SEC_{key.upper()}_THIN",
-                f"House-style section is too thin to be operational: {key.replace('_', ' ')}.",
-            ))
-
-    for key, aliases in should.items():
-        if not present(aliases):
-            out.append(Finding(
-                Level.WARN,
-                f"SEC_{key.upper()}_MISSING",
-                f"Missing recommended section: {key.replace('_', ' ')} (add a ## heading).",
+                f"Canonical section is too thin to be operational: {key.replace('_', ' ')}.",
             ))
 
     return out

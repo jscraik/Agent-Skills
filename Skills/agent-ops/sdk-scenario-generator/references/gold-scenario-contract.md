@@ -117,9 +117,17 @@ must be flagged for user choice rather than silently removed.
 Flag a scenario before live scoring when:
 
 - Long expected-answer text appears in the visible task, given, should, or prompt.
+- The visible task previews the same answer dimensions that positive criteria
+  later score, even when the wording is paraphrased rather than copied.
+- The visible task contains `Required behavior`, `Failure mode to avoid`,
+  `Return:`, or other generated-scenario scaffolding that tells the agent how
+  the scorer will judge the answer.
 - Baseline ties or beats the skill run.
 - Acceptance is keyword-only or provenance-only.
 - The task tells the agent which skill, fixture, criteria, or rubric to use.
+- A release or Tessl scenario is only an unrelated creative negative. Keep that
+  in local routing smoke, or rewrite it as a realistic safety, authority,
+  evidence-boundary, or should-not-trigger pressure case.
 - The scenario only checks package shape while claiming behavioral readiness.
 - Criteria can be satisfied by copying file paths or saying "validate evidence" without making the domain decision.
 - The scenario depends on hidden setup, external credentials, missing input

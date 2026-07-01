@@ -1,122 +1,194 @@
 {
   "schema_version": "thread-report/v1",
   "thread_id": "019f1b02-6f25-7721-8c57-795cae870be9",
-  "repo_head": "e1b1c377f",
-  "task_id": "publish-improve-agent-native-private-tessl-plugin",
-  "status": "blocked",
-  "publication_status": "blocked_validation",
-  "current_gate": "sdk-scenario-quality",
+  "repo_head": "8192826d0",
+  "task_id": "publish-improve-agent-native-private-tessl-plugin-with-evals",
+  "status": "pass",
+  "publication_status": "published_private_with_evals",
+  "current_gate": "tessl-eval-run-pending",
   "next_gate_allowed": false,
   "blocked_next_gates": [
-    "scorer-quality",
-    "scorer-calibration",
-    "tessl-plugin-lint",
-    "tessl-plugin-pack",
-    "private-tessl-publish",
-    "post-publish-verify"
+    "tessl-eval-score-closeout",
+    "tessl-score-feedback-loop",
+    "oss-cloud",
+    "separate-release-readiness-claim"
   ],
   "commands": [
     {
-      "command": "git status --short --branch && git rev-parse --short HEAD",
+      "command": "git status --short --branch",
       "outcome": "pass",
-      "evidence": "cwd=/Users/jamiecraik/dev/agent-skills; branch codex/sdk-cleanup-followup ahead origin/main; repo_head=e1b1c377f; unrelated modified files Docs/skills-by-type.md and SKILL.md preserved."
-    },
-    {
-      "command": "tessl --help && tessl plugin --help && tessl plugin new --help && tessl plugin publish --help",
-      "outcome": "pass",
-      "evidence": "Current Tessl CLI exposes plugin new/lint/pack/publish/info. plugin new documents --public and states default is private; plugin publish exposes --workspace but no --private flag."
-    },
-    {
-      "command": "tessl whoami && tessl workspace list",
-      "outcome": "pass",
-      "evidence": "Authenticated Tessl user observed; workspace list includes jscraik with id 019e6040-8f97-7296-8630-0b5ffdaf95c2. No token or secret was printed."
-    },
-    {
-      "command": "tessl plugin new --workspace jscraik --name jscraik/improve-agent-native --skill-name improve-agent-native --skill-description 'Probe skill' /tmp/tessl-plugin-shape-probe.FMQ4GF",
-      "outcome": "pass",
-      "evidence": "Probe scaffold generated .tessl-plugin/plugin.json with name jscraik/improve-agent-native and private:true, plus skills/improve-agent-native/SKILL.md."
+      "evidence": "branch codex/sdk-cleanup-followup; unrelated dirty work preserved; lane-owned improve-agent-native/report files remain uncommitted."
     },
     {
       "command": "./bin/ask skills package verify Skills/agent-ops/improve-agent-native --json --robot",
       "outcome": "pass",
-      "evidence": "trace_id=02276990-f25f-419d-848e-506c7703da93; full JSON saved at /tmp/improve-agent-native-private-publish-evidence.l5fGrA/package-verify.json."
+      "evidence": "trace_id=a3a60ea5-e670-43c2-850e-916c8f615ece; status=success; blockers empty."
     },
     {
-      "command": "./bin/ask skills audit Skills/agent-ops/improve-agent-native --level strict --json --robot",
+      "command": "XDG_CACHE_HOME=/private/tmp/agent-skills-xdg-cache XDG_STATE_HOME=/private/tmp/agent-skills-xdg-state MISE_CACHE_DIR=/private/tmp/agent-skills-mise-cache MISE_STATE_DIR=/private/tmp/agent-skills-mise-state MISE_TRUSTED_CONFIG_PATHS=/Users/jamiecraik/dev/agent-skills/.mise.toml UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache ./bin/ask skills audit Skills/agent-ops/improve-agent-native --level strict --json --robot",
       "outcome": "pass",
-      "evidence": "trace_id=ad319ded-efd5-4ac8-9e26-55be90780b98; full JSON saved at /tmp/improve-agent-native-private-publish-evidence.l5fGrA/strict-audit.json."
+      "evidence": "trace_id=7b752909-b847-4e22-9f73-fd2dffee18ba; status=success; diagnostics/security/family gates returned exit_code=0. Plain run without temp cache was blocked by uv cache permission and is not source-owned."
     },
     {
       "command": "./bin/ask sdk eval scenario-quality Skills/agent-ops/improve-agent-native --preview --json --robot",
-      "outcome": "fail",
-      "evidence": "trace_id=d0cc70f1-54cc-4e97-abd5-4a7e442e89e2; status=error; scenario_count=43; promotion_ready_count=4; blocked_count=39; full JSON saved at /tmp/improve-agent-native-private-publish-evidence.l5fGrA/scenario-quality.json. First blockers include missing scenario id/prompt/oracle/reproducibility/safety fields and unsupported text-output acceptance types such as must_not_claim."
+      "outcome": "pass",
+      "evidence": "trace_id=c2a4e2b4-5395-4233-802d-c0459f9e275d; scenario_count=43; promotion_ready_count=43; blocked_count=0."
     },
     {
       "command": "./bin/ask sdk eval scorer-quality Skills/agent-ops/improve-agent-native --preview --json --robot",
-      "outcome": "blocked",
-      "evidence": "Not run because scenario-quality is a required pre-publication gate and failed with 39 blockers."
+      "outcome": "pass",
+      "evidence": "trace_id=a8039f4b-9a74-4f27-ad3b-fd8d622f181b; ready=true; blockers empty."
     },
     {
       "command": "./bin/ask sdk eval scorer-calibration Skills/agent-ops/improve-agent-native --preview --json --robot",
-      "outcome": "blocked",
-      "evidence": "Not run because scenario-quality is a required pre-publication gate and failed with 39 blockers."
+      "outcome": "pass",
+      "evidence": "trace_id=5f3142ea-e5f8-44eb-8ddd-a6bbceca9262; ready=true; example_count=6; scorer_id=improve-agent-native-release-scorer."
     },
     {
-      "command": "tessl plugin lint was not run; tessl plugin pack was not run; tessl plugin publish --workspace jscraik was not run",
-      "outcome": "blocked",
-      "evidence": "Not run because SDK scenario-quality failed before the Tessl plugin lint/pack/publish stage. Private publication was intentionally not attempted."
+      "command": "python3 runtime/reference check over Skills/agent-ops/improve-agent-native/SKILL.md and README.md",
+      "outcome": "pass",
+      "evidence": "runtime_shape_check=pass; SKILL metadata has no numeric-like metadata values; 15 SKILL references exist; no SKILL references are deeper than one level; README references exist."
+    },
+    {
+      "command": "tessl plugin lint /tmp/ask-tessl-scenario-generation/Skills__agent-ops__improve-agent-native-e5d7a86b4e36/target-tile",
+      "outcome": "pass",
+      "evidence": "Plugin jscraik/improve-agent-native@0.1.2 is valid."
+    },
+    {
+      "command": "tessl plugin publish --dry-run --workspace jscraik --with-scenario-quality-check /tmp/ask-tessl-scenario-generation/Skills__agent-ops__improve-agent-native-e5d7a86b4e36/target-tile",
+      "outcome": "pass",
+      "evidence": "Dry run reported plugin structure valid, workspace jscraik exists, user has publish permission, version 0.1.2 available, and pre-publish checks passed."
+    },
+    {
+      "command": "tessl plugin publish --workspace jscraik --with-scenario-quality-check /tmp/ask-tessl-scenario-generation/Skills__agent-ops__improve-agent-native-e5d7a86b4e36/target-tile",
+      "outcome": "pass",
+      "evidence": "Published jscraik/improve-agent-native@0.1.2; Uploaded 43 eval scenarios; eval run id 019f1ce3-7894-77b8-8da9-0ca851ad95cc."
+    },
+    {
+      "command": "tessl plugin info jscraik/improve-agent-native@0.1.2",
+      "outcome": "pass",
+      "evidence": "Version 0.1.2; Visibility Private; Moderation Passed; Quality 94%; Security Passed with no known issues."
+    },
+    {
+      "command": "tessl eval view 019f1ce3-7894-77b8-8da9-0ca851ad95cc --json",
+      "outcome": "pass",
+      "evidence": "JSON artifact written at /private/tmp/improve-agent-native-publish-with-evals-012/tessl-eval-view-019f1ce3-latest.json; status=pending; workspaceName=jscraik; visibility=private; tileVersion=0.1.2; tileIsPrivate=true; scenario_count=43; progress completed=0 failed=0 total=43."
+    },
+    {
+      "command": "tessl install --yes --strict jscraik/improve-agent-native@0.1.2 in /private/tmp/improve-agent-native-install-verify-012.aBEORc",
+      "outcome": "pass",
+      "evidence": "Installed jscraik/improve-agent-native@0.1.2; projected .tessl plugin content includes README.md, skills/improve-agent-native/SKILL.md, references, eval fixtures, and scorer-calibration bundle."
+    },
+    {
+      "command": "python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json",
+      "outcome": "pass",
+      "evidence": "status=pass; findings=[]; confirms repeated stale-handle recurrence was recorded before resuming direct repo/Tessl commands."
     }
   ],
   "artifact_assertions": [
     {
+      "artifact": "Skills/agent-ops/improve-agent-native/SKILL.md",
+      "assertion": "Frontmatter metadata version is a string; capsule-routing guidance is consolidated; runtime-visible references are top-level and exist.",
+      "outcome": "pass"
+    },
+    {
+      "artifact": "Skills/agent-ops/improve-agent-native/README.md",
+      "assertion": "README documents purpose, workflow, maintenance commands, evidence boundaries, Tessl publication boundaries, and recovery guidance without pointing runtime users at missing YAML-only source contracts.",
+      "outcome": "pass"
+    },
+    {
       "artifact": "Skills/agent-ops/improve-agent-native/references/evals.yaml",
-      "assertion": "The skill's canonical eval scenario source is not publishable yet because scenario-quality reported 39 blockers across 43 scenarios.",
-      "outcome": "fail"
+      "assertion": "Canonical eval source now passes scenario-quality and scorer-quality previews with 43 promotion-ready scenarios and ready scorer metadata.",
+      "outcome": "pass"
+    },
+    {
+      "artifact": "Skills/agent-ops/improve-agent-native/references/scorer-calibration/manifest.json",
+      "assertion": "Scorer-calibration bundle validates with 6 held-out examples and no scorer-calibration blockers.",
+      "outcome": "pass"
     },
     {
       "artifact": ".harness/memory/LEARNINGS.md",
-      "assertion": "The publication-lane failure pattern was recorded as a carry-forward lesson so future private publish attempts stop before Tessl packaging when scenario-quality blocks.",
+      "assertion": "Tessl projection, criteria-schema, and staged-vs-source eval lessons are recorded for future publication lanes.",
       "outcome": "pass"
     },
     {
       "artifact": ".harness/reports/thread-replies/019f1b02-6f25-7721-8c57-795cae870be9/latest.json",
-      "assertion": "This thread-report/v1 artifact records the blocked_validation publication state for the PM decision surface.",
+      "assertion": "Report separates local SDK gates, Tessl plugin publication, install projection, plugin quality, and pending eval-run closeout.",
       "outcome": "pass"
     }
   ],
   "contradictions": [
     {
       "artifact": "AGENTS.md",
-      "problem": "Repo Tessl eval guidance says not to use publish/package upload commands, while the PM delegated a private publication lane. The conflict was classified as eval-lane-specific rather than a blanket ban, but no publish command was run because SDK scenario-quality failed first.",
+      "problem": "Repo Tessl eval guidance says not to use publish commands for eval lanes. This task was explicitly a private publication lane with eval-scenario publication, so publish was allowed after SDK gates and private visibility proof.",
       "owner": "Skills SDK publication workflow"
+    },
+    {
+      "artifact": "tessl plugin info vs tessl eval view",
+      "problem": "plugin info reports Quality 94% while the explicit eval run 019f1ce3-7894-77b8-8da9-0ca851ad95cc still reports pending. Treat plugin quality and eval-run closeout as separate evidence lanes.",
+      "owner": "Tessl CLI / Skills SDK evidence model"
+    },
+    {
+      "artifact": "installed runtime projection",
+      "problem": "Installed 0.1.2 projects eval fixtures and scorer-calibration files, while SKILL.md runtime navigation intentionally uses top-level references. Do not reintroduce deep runtime references into the entrypoint.",
+      "owner": "Tessl install projection / Skills SDK Tessl packaging policy"
     }
   ],
   "files_changed": [
     ".harness/memory/LEARNINGS.md",
-    ".harness/reports/thread-replies/019f1b02-6f25-7721-8c57-795cae870be9/latest.json"
+    ".harness/reports/thread-replies/019f1b02-6f25-7721-8c57-795cae870be9/latest.json",
+    ".harness/reports/thread-replies/019f1b02-6f25-7721-8c57-795cae870be9/pm-delivery.json",
+    "Skills/agent-ops/improve-agent-native/SKILL.md",
+    "Skills/agent-ops/improve-agent-native/README.md",
+    "Skills/agent-ops/improve-agent-native/references/evals.yaml",
+    "Skills/agent-ops/improve-agent-native/references/scorer-calibration/manifest.json",
+    "Skills/agent-ops/improve-agent-native/references/scorer-calibration/examples.jsonl",
+    "Skills/agent-ops/improve-agent-native/references/scorer-calibration/raw/obvious-correct-evidence-boundary.json",
+    "Skills/agent-ops/improve-agent-native/references/scorer-calibration/raw/obvious-wrong-readiness-overclaim.json",
+    "Skills/agent-ops/improve-agent-native/references/scorer-calibration/raw/concise-correct-beats-verbose-overclaim.json",
+    "Skills/agent-ops/improve-agent-native/references/scorer-calibration/raw/copied-rubric-without-repo-evidence.json",
+    "Skills/agent-ops/improve-agent-native/references/scorer-calibration/raw/skill-name-mentioned-without-scorecard-proof.json",
+    "Skills/agent-ops/improve-agent-native/references/scorer-calibration/raw/local-proof-overclaims-ci-or-tessl.json"
   ],
   "tessl_workspace_project_visibility": {
     "workspace": "jscraik",
-    "intended_plugin_identity": "jscraik/improve-agent-native",
-    "privacy_pre_publish_evidence": "tessl plugin new --help states default is private unless --public is supplied; scaffold probe generated .tessl-plugin/plugin.json with private:true.",
-    "publish_performed": false,
-    "visibility_after_publish": "not_applicable_publish_blocked_before_tessl_stage"
+    "plugin_identity": "jscraik/improve-agent-native",
+    "version": "0.1.2",
+    "visibility": "Private",
+    "moderation": "Passed",
+    "quality": "94%",
+    "security": "Passed",
+    "publish_url": "https://tessl.io/registry/jscraik/improve-agent-native/0.1.2",
+    "publish_performed": true,
+    "published_without_skip_evals": true,
+    "uploaded_eval_scenarios": 43,
+    "eval_run_id": "019f1ce3-7894-77b8-8da9-0ca851ad95cc",
+    "eval_run_status": "pending",
+    "install_content_verification": "pass"
   },
-  "publication_receipt_path": "not_applicable_publish_blocked_before_tessl_stage",
+  "publication_receipt_path": "/private/tmp/improve-agent-native-publish-with-evals-012",
   "residual_risks": [
-    "No private Tessl plugin was published in this lane.",
-    "Tessl plugin lint, pack, dry-run publish, publish, and post-publish verification were not run because SDK scenario-quality failed.",
-    "The improve-agent-native eval repair is broad enough to deserve a dedicated eval-repair lane rather than an opportunistic publication-lane patch."
+    "Tessl eval run 019f1ce3-7894-77b8-8da9-0ca851ad95cc is still pending with 0/43 completed in the latest JSON artifact; no final eval-run score or feedback-loop closure is claimed.",
+    "Tessl plugin info reports Quality 94%, but this does not replace explicit eval-run closeout for the run id.",
+    "Primary checkout still contains unrelated dirty work from other lanes; this report only classifies the improve-agent-native publication/eval repair slice."
   ],
   "lessons": [
     {
-      "lesson": "Private Tessl plugin publication must still stop at SDK scenario-quality blockers before Tessl plugin packaging or publish.",
-      "failure_pattern": "Publication lane reached Tessl CLI privacy proof but the target skill had 39 scenario-quality blockers in references/evals.yaml.",
-      "carry_forward_target": "Skills SDK publication wrapper and eval-repair routing for improve-agent-native.",
-      "deterministic_guardrail": "Require scenario-quality status success with blocked_count=0 before tessl plugin lint, pack, dry-run publish, or private publish.",
+      "lesson": "Tessl scenario failures can come from staged task/criteria leakage even when the skill itself is valid.",
+      "failure_pattern": "0.1.1 uploaded 43 scenarios but the completed Tessl eval excluded 39 by quality filter; source-side and staged scenario generation must be aligned before publish.",
+      "carry_forward_target": "Skills SDK Tessl scenario synthesis wrapper.",
+      "deterministic_guardrail": "Generate Tessl task.md without expected-behavior leakage, hide rubric details in criteria.json, inline minimal fixtures for local-path prompts, and run Tessl dry-run with scenario-quality check before live publish.",
+      "recorded_in": ".harness/memory/LEARNINGS.md",
+      "validation": "./bin/ask sdk eval scenario-quality Skills/agent-ops/improve-agent-native --preview --json --robot -> pass with 43/43 promotion-ready; tessl plugin publish --dry-run --with-scenario-quality-check -> pass before 0.1.2 publish."
+    },
+    {
+      "lesson": "Tessl plugin quality, eval-run closeout, package installability, and source SDK gates are separate proof lanes.",
+      "failure_pattern": "plugin info can report Quality 94% while the explicit eval run remains pending, and install projection can differ from staged source contents.",
+      "carry_forward_target": "Skills SDK private publication closeout checklist.",
+      "deterministic_guardrail": "Record plugin info, eval run id/status, install verification, and SDK gate receipts as separate fields; block next gates until the explicit eval run has a final receipt.",
       "recorded_in": ".harness/memory/LEARNINGS.md",
       "validation": "python3 Infrastructure/scripts/validation-and-linting/validate_thread_report.py .harness/reports/thread-replies/019f1b02-6f25-7721-8c57-795cae870be9/latest.json --json"
     }
   ],
-  "next_action": "Open a dedicated improve-agent-native eval-repair lane to repair references/evals.yaml scenario metadata and unsupported acceptance types, then rerun scenario-quality before returning to private Tessl plugin publication."
+  "next_action": "Poll tessl eval view 019f1ce3-7894-77b8-8da9-0ca851ad95cc until scoring completes, then run the SDK tessl-score feedback receipt path. Do not advance oss-cloud or release-readiness claims from the private publication or plugin-quality lane alone."
 }

@@ -1,0 +1,6 @@
+{"id":"obvious-correct-evidence-boundary","probe_type":"obvious_correct","expected_label":"pass","predicted_label":"pass","score":0.95,"raw_artifact":"raw/obvious-correct-evidence-boundary.json"}
+{"id":"obvious-wrong-readiness-overclaim","probe_type":"obvious_wrong","expected_label":"fail","predicted_label":"fail","score":0.05,"raw_artifact":"raw/obvious-wrong-readiness-overclaim.json"}
+{"id":"concise-correct-beats-verbose-overclaim","probe_type":"short_correct_vs_verbose_wrong","expected_label":"fail","predicted_label":"fail","score":0.2,"raw_artifact":"raw/concise-correct-beats-verbose-overclaim.json"}
+{"id":"copied-rubric-without-repo-evidence","probe_type":"rubric_copying_rejected","expected_label":"fail","predicted_label":"fail","score":0.1,"raw_artifact":"raw/copied-rubric-without-repo-evidence.json"}
+{"id":"skill-name-mentioned-without-scorecard-proof","probe_type":"skill_name_mention_not_enough","expected_label":"fail","predicted_label":"fail","score":0.2,"raw_artifact":"raw/skill-name-mentioned-without-scorecard-proof.json"}
+{"id":"local-proof-overclaims-ci-or-tessl","probe_type":"evidence_lane_overclaim_rejected","expected_label":"fail","predicted_label":"fail","score":0.05,"raw_artifact":"raw/local-proof-overclaims-ci-or-tessl.json"}

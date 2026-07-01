@@ -1,0 +1,2 @@
+
+✔ Plugin jscraik/improve-agent-native@0.2.0 is valid

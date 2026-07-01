@@ -6,6 +6,6 @@
   "delivery_method": "codex_app__send_message_to_thread",
   "delivery_status": "delivered",
   "delivery_evidence": "codex_app__send_message_to_thread returned threadId 019f0314-ba59-7a00-ab78-9bd3174d1d03",
-  "delivered_at": "2026-07-01T00:23:29Z",
-  "message_summary": "PM notified that private Tessl publication is blocked at SDK scenario-quality for improve-agent-native: 43 scenarios checked, 4 promotion-ready, 39 blocked; no Tessl publish was run."
+  "delivered_at": "2026-07-01T09:07:07Z",
+  "message_summary": "PM notified that jscraik/improve-agent-native@0.1.2 is private, Tessl info reports Quality 94% and Security Passed, 43 eval scenarios were uploaded, install verification passed, source SDK gates pass, and explicit eval run 019f1ce3 remains pending."
 }

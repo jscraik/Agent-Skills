@@ -21,6 +21,7 @@ from ask.skills_sdk.tessl_eval_quality import (
     normalize_tessl_acceptance_item,
     tessl_eval_quality_findings,
 )
+from ask.skills_sdk.generated_eval_fixtures import parse_generated_eval_fixtures
 
 
 SKILL_BUILDER_SCRIPTS = "Plugins/skill-factory/scripts/skill-builder"
@@ -1433,15 +1434,7 @@ def _parse_generated_eval_fixture(fixture_path: Path, source_root: Path) -> dict
 
 
 def _parse_generated_eval_fixtures(source_root: Path) -> list[dict[str, object]]:
-    fixture_root = source_root / "references" / "evals"
-    if not fixture_root.is_dir():
-        return []
-    cases: list[dict[str, object]] = []
-    for fixture_path in sorted(fixture_root.glob("*.md")):
-        parsed = _parse_generated_eval_fixture(fixture_path, source_root)
-        if parsed is not None:
-            cases.append(parsed)
-    return cases
+    return parse_generated_eval_fixtures(source_root)
 
 
 def _tessl_structure_only_scenario_policy(source_root: Path) -> bool:
