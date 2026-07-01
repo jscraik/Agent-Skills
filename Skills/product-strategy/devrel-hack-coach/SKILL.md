@@ -41,7 +41,8 @@ missing spec fields, checkpoint artifacts, and grounded decisions so far.
 
 ## Outputs
 
-Deliver hack angles, spec, checkpoints, pitch, Q&A, state map, and stop message.
+Deliver hack angles, spec, checkpoints, pitch, Q&A, state map, a consolidated
+hackathon spec-and-plan artifact, and stop message.
 
 ## Workflow
 
@@ -51,9 +52,9 @@ as "OK, Phase N - <name>." Do not skip ahead. Track-choice answers are Phase
 
 Keep a grounded-state map because a later artifact can only lean on decisions
 the user has already made. Track stack, track, itch, selected angle, demo
-moment, scope cuts, checkpoint artifacts, real-vs-mocked boundary, and pitch
-wedge. If the next move needs an ungrounded decision, ask for that decision
-before writing the artifact.
+moment, scope cuts, checkpoint artifacts, real-vs-mocked boundary, artifact
+status, and pitch wedge. If the next move needs an ungrounded decision, ask for
+that decision before writing the artifact.
 
 Non-negotiable overrides:
 
@@ -110,7 +111,8 @@ again."
 
 Step B: read `references/spec-template.md` and fill every field with the user:
 Goal, User, Demo moment, What's in, What's out, Timebox success, Red flags,
-and fallback path.
+and fallback path. Keep fields compatible with
+`references/hackathon-spec-plan-artifact.md`.
 
 Exit gate: every field filled; demo moment is concrete stage directions. If it
 is abstract, ask: "That's not a demo. What does the judge see in the first 10
@@ -123,9 +125,10 @@ Use `references/example-quality-bars.md` only as a quality-bar index.
 Goal: fit the spec into hard checkpoints for the user's timebox.
 
 Read `references/timebox-plans.md` for the 24-hour build checkpoints and the
-1-hour prep sprint shape. Exit gate: one concrete named artifact at each
-checkpoint, the one live golden path, and what is mocked, stubbed, or deferred.
-If the user cannot name the artifact, go back to Phase 2 and cut scope.
+1-hour prep sprint shape. Capture known checkpoints for the final artifact.
+Exit gate: one concrete named artifact at each checkpoint, the one
+live golden path, and what is mocked, stubbed, or deferred. If the user cannot
+name the artifact, go back to Phase 2 and cut scope.
 
 For 24-hour plans, always name T+2h smoke test, T+8h golden path, T+16h second
 scenario, and T+22h pitch dry-run before asking for missing artifacts.
@@ -149,17 +152,26 @@ Then generate five judge questions with one-line answers:
 - Who pays?
 - What's your moat?
 
-Exit gate: three sentences under 20 words each, five Q&A lines, real-vs-mocked
-boundaries, and a dry-run instruction. Use `references/example-quality-bars.md`
-only as a quality-bar index.
+Before the stop message, read `references/hackathon-spec-plan-artifact.md` and
+emit one consolidated artifact with locked spec, checkpoints, pitch, Q&A,
+live/mocked/stubbed/deferred boundary, validation evidence or not-run reason,
+and next handoff. Exit gate: three sentences under 20 words each, five Q&A
+lines, real-vs-mocked boundaries, a dry-run instruction, and the artifact.
 
 ### Terminal State
 
-When Phase 4 is complete, say: "You have a spec, a plan, and a pitch. Stop
-planning. Go build within the timebox." Then stop coaching. Do not offer
-implementation help.
+When Phase 4 is complete, emit the Hackathon Spec And Plan Artifact, then say:
+"You have a spec, a plan, and a pitch. Stop planning. Go build within the
+timebox." Then stop coaching. Do not offer implementation help.
 
 Read `references/knowledge-capsule-routing.md` when an audit needs pack-backed harness or principal-engineering judgment. Prefer harness capsules for evidence, proof, routing, review feedback, PR lifecycle, and brownfield-readiness gaps. Prefer Ryan capsules for environment design, repo knowledge, mechanical boundaries, safety policy, operating model, and long-term coherence. Do not load all capsules by default; use the routing table to select the smallest relevant capsule.
+
+## See Also
+
+| Skill | When to use together |
+|---|---|
+| [[interview-me]] | Gather user motivation, constraints, and proof points before narrowing the hack angle |
+| [[technical-writer]] | Polish the locked spec, pitch, or handoff after the coaching workflow is complete |
 
 ## Constraints
 
@@ -197,14 +209,11 @@ Read `references/coaching-style.md` for anti-pattern responses.
 
 ## Progressive Disclosure
 
-- Read `references/devcon-tracks.md` when track selection or idea mapping is
-  needed.
+- Read `references/devcon-tracks.md` when track selection or idea mapping is needed.
 - Read `references/spec-template.md` at Phase 2 Step B.
+- Read `references/hackathon-spec-plan-artifact.md` before the Phase 4 artifact.
 - Read `references/pitch-template.md` at Phase 4.
 - Read `references/timebox-plans.md` at Phase 3.
-- Read `references/coaching-style.md` when example wording or anti-pattern
-  responses are needed.
-- Read `references/example-quality-bars.md` only as a quality-bar index, not
-  as a template to copy blindly.
-- Read `references/validation-and-output.md` when validating package shape,
-  output fields, or evidence lane boundaries.
+- Read `references/coaching-style.md` for example wording or anti-patterns.
+- Read `references/example-quality-bars.md` only as a quality-bar index.
+- Read `references/validation-and-output.md` for package shape and evidence lanes.

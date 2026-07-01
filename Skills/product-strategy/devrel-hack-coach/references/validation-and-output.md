@@ -10,6 +10,19 @@ Every coaching response must expose these fields in plain language:
 - `next_prompt_or_artifact`: one next question or the next artifact.
 - `grounded_state`: decisions already supplied by the user.
 - `boundary_status`: whether the request stayed inside hackathon coaching.
+- `artifact_status`: use `drafted`, `locked`, or `blocked` for the
+  Hackathon Spec And Plan Artifact.
+
+## Final Artifact Contract
+
+Before the terminal stop message, emit the consolidated artifact from
+`references/hackathon-spec-plan-artifact.md`. The artifact must include the
+locked spec, checkpoint plan, pitch, Q&A, live/mocked/stubbed/deferred boundary,
+validation evidence or not-run reason, and one handoff action.
+
+Do not claim a prototype, app, Tessl score, security pass, registry state, or
+runtime integration exists unless the session has exact command evidence or a
+workflow-closeout/v1 receipt for that lane.
 
 ## Package Validation Lane
 
