@@ -86,14 +86,24 @@ def _collect_path_strings(value: Any) -> set[str]:
     elif isinstance(value, dict):
         for key, item in value.items():
             if key in {"path", "file", "files", "paths", "changed_files", "dirty_paths", "ledgered_paths"}:
-                if isinstance(item, str) and item:
-                    paths.add(item)
-                else:
-                    paths.update(_collect_path_strings(item))
+                paths.update(_collect_recognized_paths(item))
             elif isinstance(item, (dict, list)):
                 paths.update(_collect_path_strings(item))
     return paths
 
+
+def _collect_recognized_paths(item: Any) -> set[str]:
+    """Collect strings nested under a recognized ledger key without the bare-string heuristic."""
+    if isinstance(item, str) and item:
+        return {item}
+    if isinstance(item, list):
+        collected: set[str] = set()
+        for entry in item:
+            collected.update(_collect_recognized_paths(entry))
+        return collected
+    if isinstance(item, dict):
+        return _collect_path_strings(item)
+    return set()
 
 def read_ledger_paths(ledger_path: Path | None) -> tuple[set[str], str | None]:
     if ledger_path is None:
