@@ -16,9 +16,10 @@ Every coaching response must expose these fields in plain language:
 ## Final Artifact Contract
 
 Before the terminal stop message, emit the consolidated artifact from
-`references/hackathon-spec-plan-artifact.md`. The artifact must include the
-locked spec, checkpoint plan, pitch, Q&A, live/mocked/stubbed/deferred boundary,
-validation evidence or not-run reason, and one handoff action.
+`references/hackathon-spec-plan-artifact.md`.
+Start with the compact status block from that artifact contract, then include
+the locked spec, checkpoint plan, pitch, Q&A, live/mocked/stubbed/deferred
+boundary, validation evidence or not-run reason, and one handoff action.
 
 Do not claim a prototype, app, Tessl score, security pass, registry state, or
 runtime integration exists unless the session has exact command evidence or a
