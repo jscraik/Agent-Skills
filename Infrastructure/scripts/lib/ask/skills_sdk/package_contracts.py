@@ -424,10 +424,12 @@ def read_yaml_with_ruby(text: str) -> dict[str, Any] | list[Any] | None:
             ["ruby", "-e", code],
             input=text,
             text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
             check=True,
+            timeout=10,
         )
+    except (FileNotFoundError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
+        return None
     except (FileNotFoundError, subprocess.CalledProcessError):
         return None
     try:
