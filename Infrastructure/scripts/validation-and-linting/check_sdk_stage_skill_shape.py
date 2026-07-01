@@ -216,10 +216,12 @@ def load_yaml_with_ruby(path: Path, text: str) -> dict:
             ["ruby", "-e", code],
             input=text,
             text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
             check=False,
+            timeout=10,
         )
+    except (FileNotFoundError, subprocess.TimeoutExpired) as exc:
+        fail_yaml_runtime_unavailable(path, str(exc))
     except FileNotFoundError:
         fail_yaml_runtime_unavailable(path)
     if process.returncode != 0:
