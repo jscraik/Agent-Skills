@@ -106,10 +106,12 @@ esac
 
 if [[ "$changed_files_mode" -eq 1 ]]; then
   normalized_changed_files=()
-  for changed_file in "${changed_files[@]}"; do
-    [[ -n "$changed_file" ]] || continue
-    normalized_changed_files+=("${changed_file#./}")
-  done
+  if [[ ${#changed_files[@]} -gt 0 ]]; then
+    for changed_file in "${changed_files[@]}"; do
+      [[ -n "$changed_file" ]] || continue
+      normalized_changed_files+=("${changed_file#./}")
+    done
+  fi
   changed_files=("${normalized_changed_files[@]}")
 fi
 

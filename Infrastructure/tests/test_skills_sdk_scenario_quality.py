@@ -125,6 +125,8 @@ def _release_set_20_evals_yaml() -> str:
                 "  acceptance:",
                 "  - type: expected_signal",
                 f"    value: Returns {case_id}.md content with evidence-backed documentation behavior.",
+                "  - type: expected_signal",
+                f"    value: Avoids release readiness claims without external proof for {case_id}.",
                 "  - type: not_contains",
                 "    value: does not contain unsupported claim",
             ]
@@ -719,6 +721,90 @@ cases:
         blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
         self.assertIn("release_rubric_regex_not_primary", blocker_ids)
         self.assertIn("release_rubric_semantic_coverage", blocker_ids)
+        validate_scenario_quality_receipt(raised.exception.receipt)
+
+    def test_builder_blocks_single_positive_regex_in_release_rubric(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(
+                Path(temp_dir),
+                """schema_version: '2.0'
+skill_name: sample
+cases:
+- id: regex-single-release
+  category: happy
+  eval_modes:
+  - release
+  realistic: true
+  why_realistic: Maintainers ask for release decisions that should allow wording variation.
+  unit: release scorer brittleness
+  given: A repository has package validation but missing hosted review evidence.
+  should: Separate local package validation from external review readiness.
+  actual_artifact: artifacts/release-decision.md
+  expected_artifact: release decision note
+  reproduce: ./bin/ask sdk eval run sample
+  prompt: Create a short release decision note for a repo with local package validation but no hosted review evidence.
+  claim_ids:
+  - sample.claim
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: regex
+    value: (?is)(package validation|hosted review)
+  - type: expected_signal
+    value: Separates local package validation from external review readiness.
+  - type: expected_signal
+    value: Names hosted review evidence as the next proof lane.
+""",
+            )
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
+        self.assertIn("release_rubric_regex_not_primary", blocker_ids)
+        self.assertNotIn("release_rubric_semantic_coverage", blocker_ids)
+        validate_scenario_quality_receipt(raised.exception.receipt)
+
+    def test_builder_blocks_release_rubric_without_two_semantic_checks(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(
+                Path(temp_dir),
+                """schema_version: '2.0'
+skill_name: sample
+cases:
+- id: semantic-thin-release
+  category: happy
+  eval_modes:
+  - release
+  realistic: true
+  why_realistic: Maintainers ask for release decisions that should be checked by behavior, not phrasing.
+  unit: release scorer semantic coverage
+  given: A repository has local validation but no external review evidence.
+  should: Separate local validation from external release readiness.
+  actual_artifact: artifacts/release-decision.md
+  expected_artifact: release decision note
+  reproduce: ./bin/ask sdk eval run sample
+  prompt: Create a release decision note for a repo with local validation but no external review evidence.
+  claim_ids:
+  - sample.claim
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: Separates local validation from external release readiness.
+  - type: not_regex
+    value: (?is)(release ready|mergeable)
+""",
+            )
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
+        self.assertIn("release_rubric_semantic_coverage", blocker_ids)
+        self.assertNotIn("release_rubric_regex_not_primary", blocker_ids)
         validate_scenario_quality_receipt(raised.exception.receipt)
 
     def test_builder_accepts_discovery_question_as_behavioral_lift(self) -> None:
