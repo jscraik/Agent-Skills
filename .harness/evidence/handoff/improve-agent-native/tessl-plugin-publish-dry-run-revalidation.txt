@@ -1,0 +1,9 @@
+- Validating plugin structure
+✔ Plugin structure is valid
+- Running pre-publish checks
+✔ Workspace "jscraik" exists
+- Running pre-publish checks
+✔ User has publish permission
+- Running pre-publish checks
+✔ Version 0.2.0 is available
+✔ Dry run complete — all pre-publish checks passed

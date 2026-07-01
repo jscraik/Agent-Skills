@@ -25,121 +25,66 @@ metadata:
 
 # SDK Scenario Generator
 
-Create gold-standard Skills SDK scenarios, then stage them for internal evals and Tessl without making the evals easy to game.
-
-## Philosophy
-
-- Scenario count is a floor, not quality proof.
-- SDK scenario-quality and Tessl live-private staging must use the same
-  behavioral quality gate; a scenario blocked by Tessl must also block SDK
-  scenario-quality promotion.
-- A good scenario makes the right skill useful and a strong baseline plausibly wrong.
-- Task text is for the agent; criteria are for the scorer. Do not leak the answer into the task.
-- Strong scenarios are grounded in concrete past or current evidence, not
-  opinions, compliments, hypotheticals, or future promises.
+Create gold-standard Skills SDK scenarios that survive internal checks, OSS lanes, and Tessl quality filtering without leaking the answer.
 
 ## When To Use
 
-- Creating, installing, or updating a skill that will be evaluated.
-- Adding KnowledgeOS capabilities with suggested eval scenarios.
-- Turning Tessl scenario-skill output into repo-owned SDK eval assets.
-- Checking whether scenarios are stale after a skill change.
-- Live private Tessl readiness, dry Tessl staging, or internal eval hardening.
+- Create, import, repair, or retire `references/evals.yaml` cases for a skill.
+- Turn KnowledgeOS, Tessl, or plugin-generated scenario drafts into canonical SDK evals.
+- Diagnose low lift, baseline wins, Tessl quality-filter rejection, or oss-local/oss-cloud failures.
+- Prepare dry Tessl or live private Tessl staging after internal gates pass.
 
-## Avoid
+Do not use this skill to make scenarios easier after a failed eval. Fix the skill, task, criteria, scorer, fixture, or runtime owner that the evidence names.
 
-- Do not use this skill to work around a failed live eval by making scenarios easier.
-- Do not use it for structure-only package checks unless the skill contract explicitly declares that exception.
+## Inputs
 
-## Required inputs
-
-- Target skill path and latest `SKILL.md`.
-- `references/contract.yaml`, `references/evals.yaml`, and selected
-  `references/evals/*.md` fixture notes.
-- KnowledgeOS capsule or handoff evidence only when the task requires it; route
-  through `references/source-context.yaml` and
-  `references/knowledge-capsule-routing.md`.
-- Latest internal, oss-local, oss-cloud, dry Tessl, live Tessl, or Plugin Eval
-  receipt when the task asks for diagnosis or readiness.
-- Tessl workspace, run-budget, registry, or tile context only for the named
-  Tessl lane; keep package shape, registry, runtime, and live proof separate.
+- Target skill path, latest `SKILL.md`, `references/contract.yaml`, and `references/evals.yaml`.
+- Selected `references/evals/*.md` fixture notes or KnowledgeOS capsule evidence only when routed by the task.
+- Latest internal, oss-local, oss-cloud, dry Tessl, live Tessl, or Plugin Eval receipt when diagnosing quality or readiness.
+- Tessl `qualityFilterStatus`, leakage, scenario-value, baseline, and with-context evidence when Tessl rejected or down-scored scenarios.
 
 ## Outputs
 
-- Every machine-readable output or scenario inventory must include
-  `schema_version` so downstream validators can reject stale or ambiguous
-  shapes deterministically.
-- Scenario inventory with keep, update, add, or remove decisions.
-- Gold-standard scenario drafts or canonical eval patches.
-- Tessl tile scenario assets when requested:
-  `instructions.json`, `summary.json`, `summary_infeasible.json`, and
-  sequential `scenario-N/{task.md,criteria.json,capability.txt}` folders.
-- Eval-result diagnosis when requested: Bucket A/B/C/D classification,
-  prioritized fix plan, file-to-fix hypotheses, and before/after rerun plan.
-- Lift analysis when curation is requested: floor-model lift, weak/no-lift
-  cause, skill/task/criteria owner, and keep/rewrite/retire decision.
-- Weak-eval critique and anti-easy notes.
-- Tessl run-budget evidence or blocker.
-- Internal eval, dry Tessl, and live Tessl readiness summary.
+- Scenario inventory with keep, rewrite, retire, or add decisions.
+- Canonical eval patches or reviewed scenario drafts with `schema_version`.
+- Owner classification for failures: skill, task, criteria, scorer, fixture, runtime, or pipeline guardrail.
+- Tessl tile scenario assets when requested: `instructions.json`, `summary.json`, `summary_infeasible.json`, and `scenario-N/{task.md,criteria.json,capability.txt}`.
+- Readiness summary that keeps internal proof, OSS proof, Tessl dry-run, live Tessl, Registry, and publication lanes separate.
 
 ## Workflow
 
-1. Confirm the named gate with `references/sdk-pipeline-setup.md`; start with
-   the two or three surfaces needed for that gate and widen only after evidence.
-2. Use evals-router to choose assertion, scorer-quality, and calibration checks.
-3. Inspect the target skill, contract, eval YAML, selected fixture notes,
-   selected KnowledgeOS capsule or handoff evidence, and latest receipts.
-4. Review drafts against `references/gold-scenario-contract.md` before import.
-   Apply concrete-evidence, measurement-quality, break-test, anti-easy, and
-   registry-boundary checks.
-5. Import only reviewed cases into canonical eval assets; never import raw
-   generated output.
-6. Run package, scenario-quality, scorer-quality, and scorer-calibration gates
-   before oss-local, oss-cloud, Tessl local proof, dry Tessl, or live Tessl.
-7. Use read-only Codex profile lanes for behavioral proof: `oss-local` before
-   `oss-cloud`. A wrapper counts only when its receipt proves
-   `codex_exec_invoked=true` and the matching profile. `fast` is smoke only.
-8. Treat Tessl as staged confirmation: local proof execute receipt, dry-run
-   receipt, and live score receipt stay separate from internal SDK proof.
-
-When checking behavior proof, use KnowledgeOS eval scenario IDs wired through
-`references/evals.yaml`; vendored scenario files are evidence, not an alternate
-eval runner.
-
-## Constraints
-
-- Do not leak exact expected answers or scoring mechanics in task text.
-- Do not score skill-name mentions, file paths, generic quality phrases, or copied rubric text as primary proof.
-- Do not treat opinions, compliments, future promises, or "would use" answers as quality evidence.
-- Do not collapse unrelated measured dimensions into one aggregate score or readiness claim.
-- Do not ship happy-path-only suites or accept all-green results when baseline ties or beats usage.
-- Do not run live Tessl when scenario count, quality, or run-budget evidence is below the gate.
-- Redact secrets, tokens, private URLs, credentials, and sensitive local paths from scenario text and run reports.
-- Do not assume graders can see tool logs, chat transcripts, or process traces.
-- Do not create scenario folders for infeasible capabilities; record them only in `summary_infeasible.json`.
-- Do not treat Tessl lint/review, install state, Registry metadata, workspace
-  membership, publication, or repo-local tile presence as proving any other lane.
-- Do not install, update, or trust a Registry tile from review score alone.
-- Do not retire low-lift scenarios from a strong solver alone.
-
-## Execution Boundaries
-
-- Edit only canonical skill eval assets and references unless the user explicitly approves broader skill changes.
-- Treat Tessl-generated scenarios as drafts until reviewed against `references/gold-scenario-contract.md`.
-- Keep target-tile or staged Tessl output disposable; import only reviewed cases into canonical sources.
-- When exporting a tile eval pack, keep every task self-contained: inline any
-  required input files in `task.md`, avoid heavyweight downloads, and require
-  cleanup of files larger than 50 MB.
-- Do not run live Tessl scoring when dry-run staging, run-budget evidence, or scenario quality gates are missing.
+1. Confirm the named gate in `references/sdk-pipeline-setup.md`; load only the target skill, contract, eval YAML, selected fixtures, and latest relevant receipt.
+2. Classify each failing case before editing: leakage, low scenario value, weak comparator, vague criteria, missing fixture, baseline tie, baseline win, stale task, hidden dependency, unsupported assertion, or runtime mismatch.
+3. Treat Tessl rejection as a pipeline defect until SDK scenario-quality also blocks that class. Patch the shared quality gate or generator contract before rerunning live Tessl.
+4. Keep task text realistic and agent-facing. Do not include `Required behavior`, `Failure mode`, `Return these exact fields`, copied criteria, long expected answers, or scoring mechanics in the visible task.
+5. Keep criteria scorer-facing. Put expected behavior, failure modes, and rubric dimensions in acceptance criteria or hidden metadata, not in `prompt` or exported `task.md`.
+6. Keep low-value unrelated negatives in local routing smoke only. Release/Tessl negatives must test realistic safety, authority, evidence, boundary, or should-not-trigger pressure.
+7. Use concrete fixtures for repo-audit scenarios. If the case asks for file-path evidence, command evidence, or repo state, inline the relevant files in `task.md` or provide a staged fixture artifact.
+8. Import only reviewed cases into canonical eval assets; never copy raw generated scenarios into `references/evals.yaml`.
+9. Run package verify, scenario-quality, scorer-quality, and scorer-calibration before oss-local, oss-cloud, Tessl local proof, dry Tessl, or live Tessl.
+10. Use `oss-local` before `oss-cloud`; `fast` is smoke only. Treat Tessl as staged confirmation after internal gates and run-budget proof.
 
 ## Failure Mode
 
-If generated scenarios are too easy, classify the failure before changing the skill:
-scenario leakage, weak comparator, vague criteria, baseline tie, usage regression, stale scenario, or unsupported hidden dependency.
-Fix the scenario set before rerunning live Tessl unless per-scenario evidence proves the skill itself is wrong.
-Use concrete evidence, named measurement constructs, realistic break tests, and
-Bucket A/B/C/D diagnosis; see `references/gold-scenario-contract.md` and
-`references/eval-improvement-contract.md` for anchors.
+Stop before the next gate when:
+
+- Tessl rejects any scenario for leakage, low value, hidden dependency, or infeasibility while SDK scenario-quality still marks it promotion-ready.
+- A task can be answered by copying the prompt, naming the skill, citing a fixture path, or repeating generic quality language.
+- A scenario requires hidden files, credentials, process logs, tool traces, or side effects the runner cannot observe.
+- A Bucket D regression shows context made the answer worse than baseline.
+- Scenario-quality, scorer-quality, scorer-calibration, dry Tessl, or live Tessl evidence is missing for the claimed gate.
+
+When blocked, classify the owner and patch only that surface before rerunning the same gate.
+
+## Gotchas
+
+- Execution boundaries matter: internal SDK receipts, OSS runs, Tessl local proof, live Tessl scoring, Registry state, and publication are separate proof lanes.
+- Do not make a scenario easier to pass when the named owner is the skill, fixture, runner, scorer, or quality gate.
+
+## Execution Boundaries
+
+- Scenario authoring updates canonical eval assets; it does not prove OSS, Tessl, Registry, or publication state.
+- Live Tessl work starts only after internal receipts and workspace identity are current, staged, and separated from publication proof.
 
 ## Validation
 
@@ -147,66 +92,26 @@ Bucket A/B/C/D diagnosis; see `references/gold-scenario-contract.md` and
 - `./bin/ask sdk eval scenario-quality <skill-path> --preview --json --robot`
 - `./bin/ask sdk eval scorer-quality <skill-path> --preview --json --robot`
 - `./bin/ask sdk eval scorer-calibration <skill-path> --preview --json --robot`
-- `codex exec --profile oss-local` then `codex exec --profile oss-cloud`, or
-  SDK receipts proving `codex_exec_invoked=true` and the matching profile.
-- `codex exec --profile fast` only as a quick smoke/check lane.
+- `codex exec --profile oss-local`, then `codex exec --profile oss-cloud`, or SDK receipts proving `codex_exec_invoked=true` and the matching profile.
+- `codex exec --profile fast` only for quick smoke checks.
 - `./bin/ask sdk eval tessl-local-proof --skill <skill-path> --workspace <workspace> --execute --json --robot`
 - `./bin/ask sdk eval tessl-score --view-json <view-json> --skill <skill-path> --preview --json --robot`
 - `./bin/plugin-eval analyze <skill-path> --format json`
-- Run Tessl scenario preparation only when workspace auth/project link exists.
-- Live Tessl only after Tessl local proof, dry-run staging, and run-budget gates.
-- Fail fast: stop at first failed gate; do not proceed. Classify the blocker
-  before rerunning.
 
-## Gotchas
+Do not run live Tessl until scenario-quality, scorer-quality, scorer-calibration, staged Tessl proof, run-budget proof, and project/workspace identity are current and separated from publication or Registry proof.
 
-- `realistic: true` is not enough; each realistic case needs concrete task
-  context, observable artifacts, and a plausible weak-answer path.
-- A forbidden-command list is scorer metadata, not permission to execute those
-  commands.
-- If live capacity, workspace link, or project identity cannot be verified,
-  record the blocker and continue internal repair lanes.
-- Bucket D regressions can mean the context makes the agent worse; inspect
-  contradictions before adding more instructions.
+Completion evidence is the current gate receipt or command output with explicit pass, fail, or blocked status and the scenario ids affected.
 
-## Anti-Patterns
+## References
 
-- Importing raw generated scenarios directly into `references/evals.yaml`.
-- Fixing a live-score gap by weakening the prompt or criteria.
-- Treating a package-shape pass, Registry score, or Tessl auth state as live
-  behavioral readiness.
-- Expanding a repair loop across unrelated skill, scorer, and runtime surfaces
-  before one failure cluster has a classified owner.
-
-## Examples
-
-- "technical-writer oss-local is stuck at 15/20": classify one scenario owner,
-  name the smallest TDD guardrail, and keep oss-cloud/Tessl blocked.
-- "KnowledgeOS exported eval references": preview ingest, reject warnings before
-  apply, import reviewed cases only, then run package and scenario quality.
-- "Tessl beat neither baseline nor 90 percent": classify Bucket D regressions
-  first and rerun the same lane only after repair evidence.
-
-## Progressive Disclosure
-
-- Read `references/gold-scenario-contract.md` for required shape and anti-easy gates.
-- Read `references/tessl-tile-scenario-contract.md` when producing portable
-  `evals/` folders for Tessl tile scoring.
-- Read `references/tessl-registry-boundaries.md` when scenarios involve
-  Tessl tiles, `plugin.json`, registry publication, workspace access, installs,
-  or repo-local versus registry distribution.
-- Read `references/eval-improvement-contract.md` when scenarios involve
-  diagnosing eval results, fixing tile/context regressions, committing changes,
-  or rerunning Tessl evals.
-- Read `references/sdk-pipeline-setup.md` before making SDK readiness claims or
-  choosing validation commands for this skill.
-- Read `references/knowledgeos-handoff-conversion.md` before converting
-  KnowledgeOS handoff eval markdown into SDK scenario YAML or reviewed fixtures.
-- Read `references/source-context.yaml` to identify the allowed KnowledgeOS
-  source surfaces before loading capsules.
-- Read `references/knowledge-capsule-routing.md` to select one top-level
-  capsule facet before opening capsule content.
-- Read `references/knowledge-capsule.manifest.yaml` only after routing selects
-  a bounded capsule or fixture.
-- Read `references/contract.yaml` for package contract, run budget, and live Tessl thresholds.
-- Read `references/evals.yaml` for starter scenarios that validate this skill.
+- `references/gold-scenario-contract.md`
+- `references/eval-improvement-contract.md`
+- `references/tessl-tile-scenario-contract.md`
+- `references/tessl-registry-boundaries.md`
+- `references/sdk-pipeline-setup.md`
+- `references/knowledgeos-handoff-conversion.md`
+- `references/source-context.yaml`
+- `references/knowledge-capsule-routing.md`
+- `references/knowledge-capsule.manifest.yaml`
+- `references/contract.yaml`
+- `references/evals.yaml`

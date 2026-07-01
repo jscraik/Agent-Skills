@@ -1,0 +1,13 @@
+- Fetching plugin jscraik/improve-agent-native...
+Name        jscraik/improve-agent-native
+ID          019f1b21-1566-76ae-8c12-d3b5466c7c92
+Version     0.2.0
+Summary     Private live eval plugin for improve-agent-native.
+Visibility  Private
+Verified    -
+Moderation  ⋯ Pending
+Created     7/1/2026, 1:43:00 AM
+Updated     7/1/2026, 1:43:00 AM
+
+⚠ No security review available.
+  View full report: https://tessl.io/registry/jscraik/improve-agent-native/security

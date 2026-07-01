@@ -24,7 +24,7 @@ from skill_gate import (
 
 
 class SkillGateContractEvalTests(unittest.TestCase):
-    def test_house_style_sections_do_not_fail_sdk_shaped_skill_body(self) -> None:
+    def test_required_sections_do_not_warn_for_removed_house_style_headers(self) -> None:
         doc = SkillDoc(
             path=Path("SKILL.md"),
             raw="""---
@@ -40,14 +40,29 @@ metadata:
                 "description": "Validate SDK-shaped skill metadata.",
                 "metadata": {"version": "1.0.0"},
             },
-            body="# Sample\n\nUse repo-native validation.\n",
+            body=(
+                "# Sample\n\n"
+                "## When To Use\n\nUse when testing.\n"
+                "## Inputs\n\nTarget.\n"
+                "## Outputs\n\nReport.\n"
+                "## Workflow\n\nInspect.\n"
+                "## Failure Mode\n\nStop with blocker.\n"
+                "## Validation\n\nRun package gates.\n"
+                "## References\n\nNo references.\n"
+            ),
             fm_start_line=1,
             fm_end_line=6,
         )
 
         findings = check_required_sections(doc, require_philosophy=True)
 
-        self.assertTrue(findings)
+        codes = {finding.code for finding in findings}
+        self.assertNotIn("SEC_PHILOSOPHY_MISSING", codes)
+        self.assertNotIn("SEC_ANTIPATTERNS_MISSING", codes)
+        self.assertNotIn("SEC_CONSTRAINTS_MISSING", codes)
+        self.assertNotIn("SEC_EXECUTION_BOUNDARIES_MISSING", codes)
+        self.assertNotIn("SEC_EXAMPLES_MISSING", codes)
+        self.assertNotIn("SEC_GOTCHAS_MISSING", codes)
         self.assertFalse([finding for finding in findings if finding.level == Level.FAIL])
 
     def test_canonical_header_order_accepts_sdk_order(self) -> None:
@@ -57,19 +72,13 @@ metadata:
             frontmatter={},
             body=(
                 "# Sample\n\n"
-                "## Philosophy\n\nA.\n"
                 "## When To Use\n\nB.\n"
-                "## Avoid\n\nC.\n"
                 "## Inputs\n\nD.\n"
                 "## Outputs\n\nE.\n"
                 "## Workflow\n\nF.\n"
-                "## Security Constraints\n\nG.\n"
-                "## Execution Boundaries\n\nH.\n"
                 "## Failure Mode\n\nI.\n"
                 "## Validation\n\nJ.\n"
-                "## Gotchas\n\nK.\n"
-                "## Anti-Patterns\n\nL.\n"
-                "## Examples\n\nM.\n"
+                "## References\n\nK.\n"
             ),
             fm_start_line=1,
             fm_end_line=1,
@@ -84,7 +93,6 @@ metadata:
             frontmatter={},
             body=(
                 "# Sample\n\n"
-                "## Philosophy\n\nA.\n"
                 "## Inputs\n\nD.\n"
                 "## When To Use\n\nB.\n"
                 "## Outputs\n\nE.\n"

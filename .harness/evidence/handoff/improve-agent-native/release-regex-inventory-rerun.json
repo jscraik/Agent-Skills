@@ -1,0 +1,22 @@
+{
+  "schema_version": "skills-sdk.release-regex-inventory.v1",
+  "skill": "Skills/agent-ops/improve-agent-native",
+  "release_cases_checked": 42,
+  "release_positive_regex_or_low_semantic_violations": [],
+  "non_release_positive_regex_cases": [
+    {
+      "id": "smoke-discovery-target",
+      "eval_modes": [
+        "smoke"
+      ],
+      "tessl_live_private": false,
+      "positive_regex": [
+        1,
+        2
+      ],
+      "semantic_checks": [
+        3
+      ]
+    }
+  ]
+}

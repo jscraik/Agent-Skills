@@ -21,6 +21,7 @@ from ask.skills_sdk.scenario_quality import (  # noqa: E402
     _yaml_safe_load,
 )
 from ask.skills_sdk.scenario_quality_contracts import validate_scenario_quality_receipt  # noqa: E402
+from ask.skills_sdk.tessl_eval_quality import tessl_eval_quality_findings  # noqa: E402
 
 
 FIXTURE_SKILL = "Infrastructure/tests/fixtures/skills_sdk/scenario_quality_skill"
@@ -124,6 +125,8 @@ def _release_set_20_evals_yaml() -> str:
                 "  acceptance:",
                 "  - type: expected_signal",
                 f"    value: Returns {case_id}.md content with evidence-backed documentation behavior.",
+                "  - type: expected_signal",
+                f"    value: Avoids release readiness claims without external proof for {case_id}.",
                 "  - type: not_contains",
                 "    value: does not contain unsupported claim",
             ]
@@ -492,6 +495,150 @@ cases:
         self.assertIn("platform_tessl_quality:missing_scenario_context", blocker_ids)
         validate_scenario_quality_receipt(raised.exception.receipt)
 
+    def test_builder_blocks_tessl_semantic_answer_leakage_before_next_phase(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(
+                Path(temp_dir),
+                """schema_version: '2.0'
+skill_name: sample
+cases:
+- id: leaked-scorecard
+  category: happy
+  eval_modes:
+  - release
+  realistic: true
+  why_realistic: Maintainers ask for repository readiness reviews before release.
+  unit: repo readiness scorecard
+  given: A user needs a repository readiness audit for routing, validation entrypoints, proof loops, and residual risk.
+  should: Return a scored gap list with severity-ranked gaps, next-move mechanisms, validation outcomes, and residual risk.
+  actual_artifact: artifacts/leaked-scorecard.md
+  expected_artifact: readiness.md
+  reproduce: ./bin/ask sdk eval run sample
+  prompt: Audit this repository for routing, validation entrypoints, proof loops, severity-ranked gaps, next-move mechanisms, validation outcomes, and residual risk.
+  claim_ids:
+  - sample.claim
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: Returns a scorecard with routing, validation entrypoints, proof loops, severity-ranked gaps, next-move mechanisms, validation outcomes, and residual risk.
+  - type: not_contains
+    value: fully ready
+""",
+            )
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
+        self.assertIn("platform_tessl_quality:semantic_answer_leakage", blocker_ids)
+        validate_scenario_quality_receipt(raised.exception.receipt)
+
+    def test_builder_blocks_low_value_negative_release_scenario_before_next_phase(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(
+                Path(temp_dir),
+                """schema_version: '2.0'
+skill_name: sample
+cases:
+- id: unrelated-poem-negative
+  category: negative
+  eval_modes:
+  - release
+  realistic: true
+  why_realistic: A local routing smoke can check unrelated creative prompts.
+  unit: unrelated creative prompt
+  given: A user asks for a short poem.
+  should: Avoid selecting the skill for unrelated creative writing.
+  actual_artifact: artifacts/unrelated-poem-negative.md
+  expected_artifact: routing response
+  reproduce: ./bin/ask sdk eval run sample
+  prompt: Write a short poem about a lighthouse.
+  claim_ids:
+  - sample.claim
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: not_contains
+    value: sample
+  - type: expected_signal
+    value: Treats the request as unrelated creative writing and avoids an audit.
+""",
+            )
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
+        self.assertIn("platform_tessl_quality:low_value_negative_scenario", blocker_ids)
+        validate_scenario_quality_receipt(raised.exception.receipt)
+
+    def test_builder_includes_reviewed_generated_fixtures_before_tessl_staging(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(Path(temp_dir), _release_set_20_evals_yaml())
+            fixture_dir = skill_dir / "references" / "evals"
+            fixture_dir.mkdir()
+            (fixture_dir / "eval.harness.feedback-recurs-without-guardrail.md").write_text(
+                """# eval.harness.feedback-recurs-without-guardrail: Repeated Feedback Needs Durable Capture
+
+Knowledge claim: The agent classifies repeated feedback as an operational failure.
+Behavior under test: Observable agent behavior when a reviewer repeats the same correction.
+Failure mode: The agent applies another one-off fix without addressing recurrence.
+Expected agent move: The agent records a durable mechanism, validator, test, instruction route, or bounded skip reason.
+
+Given: A reviewer repeats the same correction that appeared in an earlier agent task.
+Should: The agent classifies the repeated failure and proposes a durable mechanism, validator, test, instruction route, or bounded skip reason.
+Expected failure: The agent applies another one-off fix without addressing recurrence.
+""",
+                encoding="utf-8",
+            )
+
+            receipt = build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        self.assertEqual(receipt["scenario_count"], 21)
+        self.assertIn(
+            "generated-eval.harness.feedback-recurs-without-guardrail",
+            {row["id"] for row in receipt["scenario_rows"]},
+        )
+        validate_scenario_quality_receipt(receipt)
+
+    def test_durable_guardrail_language_is_not_hallucination_guardrail_calibration(self) -> None:
+        case = {
+            "id": "durable-feedback-guardrail",
+            "prompt": "A reviewer repeats the same correction; identify the durable guardrail or validator that prevents recurrence.",
+            "given": "Repeated steering happened twice.",
+            "should": "Record a durable mechanism.",
+            "acceptance": [
+                {"type": "expected_signal", "value": "Records a durable guardrail, validator, or bounded skip reason."}
+            ],
+        }
+
+        finding_codes = {finding["code"] for finding in tessl_eval_quality_findings([case])}
+
+        self.assertNotIn("guardrail_missing_calibration_shape", finding_codes)
+        self.assertNotIn("guardrail_missing_paired_examples", finding_codes)
+        self.assertNotIn("guardrail_missing_judge_outcomes", finding_codes)
+        self.assertNotIn("guardrail_missing_response_schema", finding_codes)
+        self.assertNotIn("guardrail_missing_source_reference_quality", finding_codes)
+
+    def test_hallucination_guardrail_eval_still_requires_calibration_shape(self) -> None:
+        case = {
+            "id": "hallucination-guardrail",
+            "prompt": "Run a guardrail eval for hallucinated source claims.",
+            "given": "A model may invent citations.",
+            "should": "Fail unsupported factual claims.",
+            "acceptance": [
+                {"type": "expected_signal", "value": "Flags hallucinated source claims."}
+            ],
+        }
+
+        finding_codes = {finding["code"] for finding in tessl_eval_quality_findings([case])}
+
+        self.assertIn("guardrail_missing_calibration_shape", finding_codes)
+        self.assertIn("guardrail_missing_paired_examples", finding_codes)
+
     def test_builder_blocks_skill_name_as_primary_tessl_proof_before_next_phase(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             skill_dir = _write_skill_with_evals(
@@ -529,6 +676,135 @@ cases:
 
         blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
         self.assertIn("platform_tessl_quality:skill_name_primary_proof", blocker_ids)
+        validate_scenario_quality_receipt(raised.exception.receipt)
+
+    def test_builder_blocks_regex_heavy_release_rubric_before_tessl(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(
+                Path(temp_dir),
+                """schema_version: '2.0'
+skill_name: sample
+cases:
+- id: regex-heavy-release
+  category: edge
+  eval_modes:
+  - release
+  realistic: true
+  why_realistic: Maintainers ask for evidence-backed release decisions that allow wording variation.
+  unit: release scorer brittleness
+  given: A repository has local validation but missing external proof.
+  should: Separate local proof from release readiness and name the next evidence lane.
+  actual_artifact: artifacts/release-decision.md
+  expected_artifact: release decision note
+  reproduce: ./bin/ask sdk eval run sample
+  prompt: Create a short release decision note for a repo with local tests but no CI evidence.
+  claim_ids:
+  - sample.claim
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: regex
+    value: (?is)(local tests|validation)
+  - type: regex
+    value: (?is)(CI|review|release)
+  - type: not_regex
+    value: (?is)(release ready|CI passed)
+  - type: expected_signal
+    value: Separates local validation evidence from external release readiness and names the next proof lane.
+""",
+            )
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
+        self.assertIn("release_rubric_regex_not_primary", blocker_ids)
+        self.assertIn("release_rubric_semantic_coverage", blocker_ids)
+        validate_scenario_quality_receipt(raised.exception.receipt)
+
+    def test_builder_blocks_single_positive_regex_in_release_rubric(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(
+                Path(temp_dir),
+                """schema_version: '2.0'
+skill_name: sample
+cases:
+- id: regex-single-release
+  category: happy
+  eval_modes:
+  - release
+  realistic: true
+  why_realistic: Maintainers ask for release decisions that should allow wording variation.
+  unit: release scorer brittleness
+  given: A repository has package validation but missing hosted review evidence.
+  should: Separate local package validation from external review readiness.
+  actual_artifact: artifacts/release-decision.md
+  expected_artifact: release decision note
+  reproduce: ./bin/ask sdk eval run sample
+  prompt: Create a short release decision note for a repo with local package validation but no hosted review evidence.
+  claim_ids:
+  - sample.claim
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: regex
+    value: (?is)(package validation|hosted review)
+  - type: expected_signal
+    value: Separates local package validation from external review readiness.
+  - type: expected_signal
+    value: Names hosted review evidence as the next proof lane.
+""",
+            )
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
+        self.assertIn("release_rubric_regex_not_primary", blocker_ids)
+        self.assertNotIn("release_rubric_semantic_coverage", blocker_ids)
+        validate_scenario_quality_receipt(raised.exception.receipt)
+
+    def test_builder_blocks_release_rubric_without_two_semantic_checks(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_dir = _write_skill_with_evals(
+                Path(temp_dir),
+                """schema_version: '2.0'
+skill_name: sample
+cases:
+- id: semantic-thin-release
+  category: happy
+  eval_modes:
+  - release
+  realistic: true
+  why_realistic: Maintainers ask for release decisions that should be checked by behavior, not phrasing.
+  unit: release scorer semantic coverage
+  given: A repository has local validation but no external review evidence.
+  should: Separate local validation from external release readiness.
+  actual_artifact: artifacts/release-decision.md
+  expected_artifact: release decision note
+  reproduce: ./bin/ask sdk eval run sample
+  prompt: Create a release decision note for a repo with local validation but no external review evidence.
+  claim_ids:
+  - sample.claim
+  deterministic_checks:
+    forbidden_commands:
+    - rm -rf
+  acceptance:
+  - type: expected_signal
+    value: Separates local validation from external release readiness.
+  - type: not_regex
+    value: (?is)(release ready|mergeable)
+""",
+            )
+
+            with self.assertRaises(ScenarioQualityError) as raised:
+                build_scenario_quality_receipt(Path(temp_dir), source_path=skill_dir, query="sample_skill")
+
+        blocker_ids = {check["id"] for check in raised.exception.receipt["blockers"]}
+        self.assertIn("release_rubric_semantic_coverage", blocker_ids)
+        self.assertNotIn("release_rubric_regex_not_primary", blocker_ids)
         validate_scenario_quality_receipt(raised.exception.receipt)
 
     def test_builder_accepts_discovery_question_as_behavioral_lift(self) -> None:

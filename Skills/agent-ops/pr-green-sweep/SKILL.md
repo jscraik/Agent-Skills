@@ -84,7 +84,7 @@ verification.
    checks, review-thread status, CI status, and local branch/worktree ownership.
 4. Create, update, or reuse one heartbeat and record the stop rule: all target
    PRs merged to `main`, cleanup completed, or a concrete blocker needs the user.
-5. Apply explicit user waivers before stop-rule evaluation. Put waived external
+5. Apply explicit user or repo-policy waivers before stop-rule evaluation. Put waived external
    checks in `waived_external_ci`; do not patch source for them and do not let
    them stop rotation while merge conflicts, review findings, draft decisions,
    or cleanup proof remain unresolved.

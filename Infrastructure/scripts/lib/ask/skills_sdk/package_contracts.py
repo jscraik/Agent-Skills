@@ -203,6 +203,19 @@ CONSTRUCTION_GENERIC_TRIGGER_TERMS = {
 }
 CONSTRUCTION_SEDIMENT_WORD_LIMIT = 55
 CONSTRUCTION_DUPLICATE_LINE_WORD_LIMIT = 8
+CANONICAL_SKILL_H2_HEADERS: tuple[str, ...] = (
+    "When To Use",
+    "Inputs",
+    "Outputs",
+    "Workflow",
+    "Failure Mode",
+    "Validation",
+    "References",
+)
+OPTIONAL_SKILL_H2_HEADERS: tuple[str, ...] = (
+    "Gotchas",
+    "Execution Boundaries",
+)
 
 
 def repo_relative_path(repo_root: Path, path: Path) -> str | None:
@@ -2523,6 +2536,22 @@ def markdown_heading_titles(text: str) -> list[str]:
     return titles
 
 
+def markdown_heading_titles_for_level(text: str, level: int) -> list[str]:
+    """Return normalized markdown heading titles at one heading level."""
+    titles: list[str] = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped.startswith("#"):
+            continue
+        marker = stripped.split(maxsplit=1)[0]
+        if len(marker) != level or set(marker) != {"#"}:
+            continue
+        title = stripped[len(marker):].strip()
+        if title:
+            titles.append(title)
+    return titles
+
+
 def _has_any_heading(text: str, headings: tuple[str, ...]) -> bool:
     return any(markdown_heading_declared(text, heading) for heading in headings)
 
@@ -2717,6 +2746,14 @@ def _orphaned_support_files(
     for candidate in _package_support_files(skill_md):
         relative = candidate.relative_to(package_root).as_posix()
         if relative in implicitly_routed:
+            continue
+        if relative.startswith("references/evals/") and (
+            package_root / "references" / "evals.yaml"
+        ).is_file():
+            continue
+        if relative.startswith("references/scorer-calibration/") and (
+            package_root / "references" / "scorer-calibration" / "manifest.json"
+        ).is_file():
             continue
         if relative in package_text or candidate.name in package_text:
             continue
@@ -3297,6 +3334,46 @@ def _construction_quality_checks(
             )
         )
 
+    fragmented_boundary_sections = [
+        heading
+        for heading in ("Constraints", "Execution Boundaries", "Validation", "Handoff")
+        if markdown_heading_declared(text, heading)
+    ]
+    boundary_fragmentation_status = (
+        "blocked_validation"
+        if procedural and len(fragmented_boundary_sections) >= 3
+        else "pass"
+    )
+    checks.append(
+        _quality_check(
+            "construction_boundary_fragmentation",
+            boundary_fragmentation_status,
+            dimension="pruning",
+            evidence={
+                "glossary_axis": "Pruning",
+                "root_quality": "Predictability",
+                "fragmented_sections": fragmented_boundary_sections,
+                "policy": (
+                    "Procedural skills should not split the same safety, validation, "
+                    "and handoff obligations across overlapping boundary sections."
+                ),
+            },
+        )
+    )
+    if boundary_fragmentation_status == "blocked_validation":
+        blockers.append(
+            _quality_blocker(
+                "construction_boundary_fragmentation",
+                (
+                    "Three or more overlapping boundary sections appear in one "
+                    "procedural skill; merge completion and boundary rules into a "
+                    "concise validation/output section or route detail into references."
+                ),
+                dimension="pruning",
+                path=source_path,
+            )
+        )
+
     return checks, blockers
 
 
@@ -3359,6 +3436,64 @@ def writing_quality_contract(
             _quality_blocker(
                 "missing_skill_title",
                 "SKILL.md must declare a top-level title so agents can identify the entrypoint.",
+                dimension="information_hierarchy",
+                path=source_path,
+            )
+        )
+
+    metadata = frontmatter.get("metadata")
+    sdk_managed_skill = isinstance(metadata, dict) and bool(
+        metadata.get("skill-type")
+        or metadata.get("lifecycle_state")
+        or metadata.get("metadata_source")
+    )
+    h2_headings = markdown_heading_titles_for_level(text, 2)
+    missing_canonical_headers = [
+        heading for heading in CANONICAL_SKILL_H2_HEADERS if heading not in h2_headings
+    ]
+    allowed_h2_headings = {*CANONICAL_SKILL_H2_HEADERS, *OPTIONAL_SKILL_H2_HEADERS}
+    extra_h2_headings = [heading for heading in h2_headings if heading not in allowed_h2_headings]
+    canonical_positions = [
+        h2_headings.index(heading)
+        for heading in CANONICAL_SKILL_H2_HEADERS
+        if heading in h2_headings
+    ]
+    canonical_header_order_ok = canonical_positions == sorted(canonical_positions)
+    canonical_header_status = (
+        "not_applicable"
+        if not sdk_managed_skill
+        else "pass"
+        if not missing_canonical_headers
+        and not extra_h2_headings
+        and canonical_header_order_ok
+        else "blocked_validation"
+    )
+    checks.append(
+        _quality_check(
+            "canonical_skill_headers",
+            canonical_header_status,
+            dimension="information_hierarchy",
+            evidence={
+                "sdk_managed_skill": sdk_managed_skill,
+                "required_headers": list(CANONICAL_SKILL_H2_HEADERS),
+                "optional_headers": list(OPTIONAL_SKILL_H2_HEADERS),
+                "actual_h2_headings": h2_headings,
+                "missing_headers": missing_canonical_headers,
+                "extra_h2_headings": extra_h2_headings,
+                "order_ok": canonical_header_order_ok,
+            },
+        )
+    )
+    if canonical_header_status == "blocked_validation":
+        blockers.append(
+            _quality_blocker(
+                "canonical_skill_headers_required",
+                (
+                    "SDK-managed SKILL.md files must use only the canonical H2 "
+                    "headers in order: When To Use, Inputs, Outputs, Workflow, "
+                    "Failure Mode, Validation, References; optional package "
+                    "safety sections may use Gotchas or Execution Boundaries."
+                ),
                 dimension="information_hierarchy",
                 path=source_path,
             )

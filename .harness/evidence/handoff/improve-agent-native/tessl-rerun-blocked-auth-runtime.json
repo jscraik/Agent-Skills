@@ -1,0 +1,31 @@
+{
+  "schema_version": "skills-sdk.tessl-rerun-attempt.v1",
+  "status": "blocked_auth_runtime",
+  "skill": "Skills/agent-ops/improve-agent-native",
+  "workspace": "jscraik",
+  "plugin": "jscraik/improve-agent-native",
+  "target_version_checked": "0.2.0",
+  "commands": [
+    {
+      "command": "op run --env-file /Users/jamiecraik/.codex/.env -- sh -c 'echo op-run-ok'",
+      "outcome": "blocked",
+      "evidence": "No output or exit code returned in the approved wait window."
+    },
+    {
+      "command": "command -v op && op --version",
+      "outcome": "pass",
+      "evidence": "/Users/jamiecraik/.local/share/mise/shims/op; version 2.34.1"
+    },
+    {
+      "command": "tessl plugin info jscraik/improve-agent-native@0.2.0 --json",
+      "outcome": "fail",
+      "evidence": "No flag registered for --json"
+    },
+    {
+      "command": "tessl plugin info jscraik/improve-agent-native@0.2.0",
+      "outcome": "fail",
+      "evidence": "Please authenticate with Tessl to continue. Run tessl login to sign up or log in."
+    }
+  ],
+  "claim_boundary": "Tessl private rerun was not started in this turn; internal SDK gates were rerun and passed separately."
+}

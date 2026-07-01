@@ -125,6 +125,18 @@ Exit criteria:
 - Layout validator still passes.
 - No physical root move has happened.
 
+Phase 1 checkpoint artifacts:
+
+- .harness/refactors/root-layout/caller-inventory.current.json
+- .harness/refactors/root-layout/caller-inventory.current.md
+- .harness/refactors/root-layout/compatibility-wrapper-policy.md
+- .harness/refactors/root-layout/phase-1-first-bucket-selection.md
+
+Current first-bucket decision:
+
+- First physical migration bucket: brand/ -> skills-sdk/brand/.
+- First compatibility-alias retirement candidate: scripts.
+
 ## Phase 2: Foundry Source Migration
 
 Move source package roots one bucket at a time:

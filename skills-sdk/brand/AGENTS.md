@@ -2,12 +2,12 @@
 schema_version: 1
 ---
 
-# brand Agent Guide
+# Skills SDK Brand Agent Guide
 
 ## Scope
 
-- Applies to `brand/**`.
-- Inherits the repository root [AGENTS.md](../AGENTS.md).
+- Applies to `skills-sdk/brand/**`.
+- Inherits the repository root [AGENTS.md](../../AGENTS.md).
 
 ## Edit Policy
 
@@ -22,7 +22,7 @@ schema_version: 1
 ## Context Pointers
 
 - Brand entrypoint: [README.md](README.md).
-- Repository vocabulary: [UBIQUITOUS_LANGUAGE.md](../UBIQUITOUS_LANGUAGE.md).
+- Repository vocabulary: [UBIQUITOUS_LANGUAGE.md](../../UBIQUITOUS_LANGUAGE.md).
 
 ## Validation
 

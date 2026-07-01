@@ -1,0 +1,44 @@
+{
+  "status": "success",
+  "trace_id": "f23bc692-4e07-408a-8ba0-8c3341389e5e",
+  "metadata": {
+    "version": "0.1.0",
+    "command": "skills audit Skills/agent-ops/improve-agent-native --level strict --json --robot",
+    "next_steps": [],
+    "correction_note": null
+  },
+  "data": {
+    "validation_commands": [
+      "./bin/ask skills audit Skills/agent-ops/improve-agent-native --level strict --json --robot"
+    ],
+    "target": "Skills/agent-ops/improve-agent-native",
+    "audit_scope": {
+      "classification": "foundry_repo_skill",
+      "repo_coupled_gates": true
+    },
+    "diagnostics": {
+      "exit_code": 0,
+      "stdout": "\n📋 Diagnostic report: Skills/agent-ops/improve-agent-native\n--------------------------------------------------\n  \u001b[32m✓\u001b[0m skill directory: Found at Skills/agent-ops/improve-agent-native\n  \u001b[32m✓\u001b[0m SKILL.md: Valid YAML frontmatter with name and description\n  \u001b[32m✓\u001b[0m nested .git: No nested .git directory\n  \u001b[32m✓\u001b[0m workspace projection: SDK-flat projection OK: .agents/skills/improve-agent-native/SKILL.md\n  \u001b[33m⚠\u001b[0m symlink (codex): Symlink points to unexpected location: /Users/jamiecraik/dev/Agent-Skills/Skills/agent-ops/improve-agent-native\n  \u001b[32m✓\u001b[0m symlink (agents): Symlink OK in /Users/jamiecraik/.agents/skills\n  \u001b[32m✓\u001b[0m skill index: Listed in SKILL.md index\n  \u001b[90m○\u001b[0m task profile: No task profile found (neither legacy binding nor implicit path)\n  \u001b[32m✓\u001b[0m lifecycle readiness: healthy\n--------------------------------------------------\n⚠️  1 warning(s), 0 advisory note(s)\n",
+      "stderr": ""
+    },
+    "security_gate": {
+      "exit_code": 0,
+      "stdout": "Skill: improve-agent-native\nPath:  /Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-agent-native/SKILL.md\n\nWARN SEC_CONSTRAINTS_MISSING: Missing house-style section: constraints. This is not an SDK-required header; add it only when it improves browseability.\nWARN SEC_EXECUTION_BOUNDARIES_MISSING: Missing house-style section: execution boundaries. This is not an SDK-required header; add it only when it improves browseability.\nWARN SEC_PHILOSOPHY_MISSING: Missing house-style section: philosophy. This is not an SDK-required header; add it only when it improves browseability.\n\nRESULT: PASS\n",
+      "stderr": ""
+    },
+    "family_benchmarks": {
+      "exit_code": 0,
+      "stdout": "[family-benchmark] checked skills:\n  - Skills/agent-ops/improve-agent-native\n[family-benchmark] pass: all family benchmark checks satisfied\n",
+      "stderr": ""
+    },
+    "openclaw_guard": {
+      "exit_code": 0,
+      "stdout": "OpenClaw skill guard: improve-agent-native\nSummary: 0 critical · 0 warn · 2 info\nINFO readiness.checked: Operational readiness checks completed\nINFO security.no_scripts: No executable scripts found; static security scan skipped\n",
+      "stderr": ""
+    }
+  },
+  "telemetry": {
+    "latency_ms": 1841
+  },
+  "errors": []
+}

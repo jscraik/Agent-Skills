@@ -1,0 +1,7 @@
+{
+  "id": "concise-correct-beats-verbose-overclaim",
+  "probe_type": "short_correct_vs_verbose_wrong",
+  "predicted_label": "fail",
+  "score": 0.2,
+  "rationale": "Fail fixture violates the improve-agent-native scorer contract by overclaiming readiness, copying rubric language, or relying on skill naming without repo evidence."
+}

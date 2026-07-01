@@ -1,0 +1,18 @@
+[
+  {
+    "evalRunId": "019f1d6d-0e9b-7076-a14d-22cc6a9b1a78",
+    "scenariosCount": 68,
+    "context": {
+      "definition": {
+        "type": "plugin-directory",
+        "path": "."
+      },
+      "meta": {
+        "plugin": {
+          "name": "jscraik/improve-agent-native",
+          "version": "0.2.0"
+        }
+      }
+    }
+  }
+]

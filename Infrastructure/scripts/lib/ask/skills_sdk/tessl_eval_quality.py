@@ -57,7 +57,12 @@ BROAD_SUPPORT_CHANNEL_NEGATIVE_RE = re.compile(
 BROAD_COMMAND_NEGATIVE_RE = re.compile(
     r"(?i)(?:pytest|uv|mise|npm|pnpm|yarn|\./bin/ask|setup\s+command|validation\s+command)"
 )
-GUARDRAIL_CASE_RE = re.compile(r"(?i)\b(?:guardrail|hallucinat(?:e|ion|ions|ed|ing))\b")
+GUARDRAIL_CASE_RE = re.compile(
+    r"(?i)\b(?:hallucinat(?:e|ion|ions|ed|ing)|faithfulness|"
+    r"(?:judge|grader|scorer|factual|source-of-truth|source of truth|"
+    r"policy|safety|security)\s+guardrail|"
+    r"guardrail\s+(?:judge|grader|scorer|eval|evaluation|check))\b"
+)
 GUARDRAIL_LABEL_RE = re.compile(
     r"(?i)\b(?:label(?:ed|led)?|human labels?|pass/fail|ordinary|adversarial|"
     r"true-positive|true-negative|false-positive|false-negative|precision|recall|held-out|calibrat(?:e|ed|ion))\b"
@@ -82,8 +87,94 @@ SOURCE_REFERENCE_PASS_RE = re.compile(
     r"\bpass\b.*\b(?:exact|supporting)\b.*\b(?:source_references|source references|references?)\b"
 )
 FAIL_RATIONALE_RE = re.compile(r"(?is)\b(?:rationale|failure_reason|reason)\b.*\bfail\b|\bfail\b.*\b(?:rationale|failure_reason|reason)\b")
-JUDGE_CASE_RE = re.compile(r"(?i)\b(?:judge|grader|guardrail|hallucinat(?:e|ion|ions|ed|ing)|faithfulness)\b")
+JUDGE_CASE_RE = re.compile(
+    r"(?i)\b(?:judge|grader|hallucinat(?:e|ion|ions|ed|ing)|faithfulness|"
+    r"(?:judge|grader|scorer|factual|source-of-truth|source of truth|"
+    r"policy|safety|security)\s+guardrail|"
+    r"guardrail\s+(?:judge|grader|scorer|eval|evaluation|check))\b"
+)
 ROLE_TERMS = ("assistant", "agent", "model", "skill")
+LEAKAGE_STOP_WORDS = {
+    "about",
+    "across",
+    "after",
+    "against",
+    "also",
+    "and",
+    "any",
+    "are",
+    "artifact",
+    "artifacts",
+    "audit",
+    "audits",
+    "before",
+    "being",
+    "between",
+    "case",
+    "cases",
+    "check",
+    "checks",
+    "claim",
+    "claims",
+    "command",
+    "commands",
+    "concrete",
+    "criteria",
+    "current",
+    "decision",
+    "does",
+    "evidence",
+    "file",
+    "files",
+    "final",
+    "from",
+    "given",
+    "have",
+    "into",
+    "must",
+    "name",
+    "names",
+    "next",
+    "not",
+    "one",
+    "output",
+    "proof",
+    "repo",
+    "repository",
+    "return",
+    "review",
+    "scenario",
+    "score",
+    "scored",
+    "scorecard",
+    "skill",
+    "state",
+    "status",
+    "that",
+    "the",
+    "this",
+    "through",
+    "used",
+    "using",
+    "validation",
+    "what",
+    "when",
+    "with",
+    "without",
+}
+SKILL_VALUE_CONTEXT_RE = re.compile(
+    r"(?i)\b(?:agent|assistant|repo|repository|harness|readiness|validation|"
+    r"workflow|tool|mcp|context|proof|evidence|guardrail|steering|"
+    r"ci|pr|review|security|package|plugin|tessl|sdk|knowledge|capsule)\b"
+)
+UNRELATED_CREATIVE_RE = re.compile(
+    r"(?i)\b(?:poem|haiku|sonnet|story|joke|song|recipe|lighthouse|"
+    r"creative writing)\b"
+)
+SAFETY_OR_REFUSAL_RE = re.compile(
+    r"(?i)\b(?:prompt injection|secret|credential|unsafe|malicious|hostile|"
+    r"untrusted|override|ignore previous|delete|remove|exfiltrat|refuse)\b"
+)
 UNSTAGED_TESSL_REPO_PATH_RE = re.compile(
     r"(?<![A-Za-z0-9_./-])"
     r"(?:Infrastructure|Skills|Plugins|Docs|docs|skills-system|runtime|\.agents|\.codex|\.harness|\.skillsets)"
@@ -279,6 +370,66 @@ def _case_has_answer_leakage(case: dict[str, object]) -> bool:
         if len(value) >= 80 and value.lower() in visible_text:
             return True
     return False
+
+
+def _token_stem(token: str) -> str:
+    for suffix in ("iness", "ation", "ments", "ment", "ing", "ed", "es", "s"):
+        if len(token) > len(suffix) + 4 and token.endswith(suffix):
+            return token[: -len(suffix)]
+    return token
+
+
+def _leakage_tokens(text: str) -> set[str]:
+    tokens: set[str] = set()
+    for raw in re.findall(r"[a-zA-Z][a-zA-Z0-9_-]{3,}", text.lower()):
+        if raw in LEAKAGE_STOP_WORDS:
+            continue
+        tokens.add(_token_stem(raw.replace("_", "-")))
+    return tokens
+
+
+def _positive_acceptance_values(case: dict[str, object]) -> list[str]:
+    values: list[str] = []
+    for item in _normalized_acceptance_items(case):
+        item_type = str(item.get("type") or "acceptance").strip().lower()
+        if item_type != "expected_signal":
+            continue
+        if item_type.startswith(("must_not", "forbidden", "not_")):
+            continue
+        value = _acceptance_value(item)
+        if value:
+            values.append(value)
+    return values
+
+
+def _case_has_semantic_answer_leakage(case: dict[str, object]) -> bool:
+    visible_text = "\n".join(str(case.get(field) or "") for field in ("prompt", "task"))
+    visible_tokens = _leakage_tokens(visible_text)
+    if not visible_tokens:
+        return False
+    for value in _positive_acceptance_values(case):
+        value_tokens = _leakage_tokens(value)
+        if len(value_tokens) < 6:
+            continue
+        overlap = value_tokens & visible_tokens
+        if len(overlap) >= 5 and len(overlap) / len(value_tokens) >= 0.35:
+            return True
+    return False
+
+
+def _case_is_low_value_negative(case: dict[str, object]) -> bool:
+    if str(case.get("category") or "").strip().lower() != "negative":
+        return False
+    eval_modes = case.get("eval_modes")
+    modes = {str(mode).strip().lower() for mode in eval_modes} if isinstance(eval_modes, list) else set()
+    if "release" not in modes:
+        return False
+    instruction_text = "\n".join(str(case.get(field) or "") for field in ("prompt", "given"))
+    if SAFETY_OR_REFUSAL_RE.search(instruction_text):
+        return False
+    if SKILL_VALUE_CONTEXT_RE.search(instruction_text):
+        return False
+    return bool(UNRELATED_CREATIVE_RE.search(instruction_text))
 
 
 def _case_has_unstaged_repo_path_reference(case: dict[str, object]) -> bool:
@@ -551,6 +702,16 @@ TESSL_CASE_FINDING_RULES = (
         _case_has_answer_leakage,
         "answer_leakage",
         "Tessl eval task text must not contain the long-form expected answer that is later used as the scoring signal. Keep expected behaviour in hidden metadata or acceptance criteria, not in the agent-visible task.",
+    ),
+    (
+        _case_has_semantic_answer_leakage,
+        "semantic_answer_leakage",
+        "Tessl eval task text must not preview the same answer dimensions later scored by positive criteria. Move expected dimensions into criteria and keep the visible task realistic.",
+    ),
+    (
+        _case_is_low_value_negative,
+        "low_value_negative_scenario",
+        "Release scenarios should not spend live Tessl budget on unrelated creative negative prompts. Keep such cases in local routing smoke or rewrite them into realistic safety, authority, or boundary pressure.",
     ),
     (
         _case_has_unstaged_repo_path_reference,

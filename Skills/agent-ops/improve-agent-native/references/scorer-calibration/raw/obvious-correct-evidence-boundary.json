@@ -1,0 +1,7 @@
+{
+  "id": "obvious-correct-evidence-boundary",
+  "probe_type": "obvious_correct",
+  "predicted_label": "pass",
+  "score": 0.95,
+  "rationale": "Pass fixture preserves the evidence boundary, names concrete validation state, and avoids cross-lane readiness claims."
+}

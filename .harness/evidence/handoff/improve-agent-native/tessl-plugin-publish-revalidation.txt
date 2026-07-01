@@ -1,0 +1,14 @@
+- Validating plugin structure
+✔ Plugin structure is valid
+- Running pre-publish checks
+✔ Workspace "jscraik" exists
+- Running pre-publish checks
+✔ User has publish permission
+- Running pre-publish checks
+✔ Version 0.2.0 is available
+- Publishing...
+✔ Published jscraik/improve-agent-native@0.2.0 to https://tessl.io/registry/jscraik/improve-agent-native/0.2.0
+✔ Uploaded 68 eval scenarios
+✔ Eval run started. View results at: https://tessl.io/registry/jscraik/improve-agent-native/0.2.0/evals
+Run tessl eval view 019f1d40-1f07-74d9-af40-b253a164ba9f to check status from the CLI.
+Plugins pass through a moderation process and may take a few minutes to appear in the registry

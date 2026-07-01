@@ -1,0 +1,39 @@
+{
+  "status": "error",
+  "trace_id": "4fa40a2a-fd1d-4163-8113-f4bfb101c501",
+  "metadata": {
+    "version": "0.1.0",
+    "command": "skills audit Skills/agent-ops/improve-agent-native --level strict --json --robot",
+    "next_steps": [],
+    "correction_note": null
+  },
+  "data": {
+    "validation_commands": [
+      "./bin/ask skills audit Skills/agent-ops/improve-agent-native --level strict --json --robot"
+    ],
+    "target": "Skills/agent-ops/improve-agent-native",
+    "audit_scope": {
+      "classification": "foundry_repo_skill",
+      "repo_coupled_gates": true
+    },
+    "diagnostics": {
+      "exit_code": 2,
+      "stdout": "",
+      "stderr": "error: Failed to initialize cache at `/Users/jamiecraik/.cache/uv`\n  Caused by: failed to open file `/Users/jamiecraik/.cache/uv/sdists-v9/.git`: Operation not permitted (os error 1)\n"
+    },
+    "security_gate": {
+      "exit_code": 2,
+      "stdout": "",
+      "stderr": "error: Failed to initialize cache at `/Users/jamiecraik/.cache/uv`\n  Caused by: failed to open file `/Users/jamiecraik/.cache/uv/sdists-v9/.git`: Operation not permitted (os error 1)\n"
+    }
+  },
+  "telemetry": {
+    "latency_ms": 96
+  },
+  "errors": [
+    {
+      "code": "ERR_VALIDATION",
+      "message": "Security gate failed."
+    }
+  ]
+}

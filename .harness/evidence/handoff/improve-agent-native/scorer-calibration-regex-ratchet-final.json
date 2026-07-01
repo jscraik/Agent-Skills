@@ -1,0 +1,241 @@
+{
+  "status": "success",
+  "trace_id": "54ce0dbb-a9be-46d9-a031-b8ce7f83e0e4",
+  "metadata": {
+    "version": "0.1.0",
+    "command": "sdk eval scorer-calibration Skills/agent-ops/improve-agent-native --preview --json --robot",
+    "next_steps": [],
+    "correction_note": null
+  },
+  "data": {
+    "skills_sdk_eval_scorer_calibration": {
+      "schema_version": "skills-sdk-eval-scorer-calibration.v0",
+      "status": "preview",
+      "query": "Skills/agent-ops/improve-agent-native",
+      "canonical_source_path": "Skills/agent-ops/improve-agent-native/SKILL.md",
+      "facade_command": "skills-sdk eval scorer-calibration",
+      "receipt": {
+        "schema_version": "skills-sdk.scorer-calibration-receipt.v0",
+        "schema_uri": "https://agent-skills.local/schemas/skills-sdk/scorer-calibration-receipt.v0.schema.json",
+        "status": "preview",
+        "operation": "scorer_calibration_preview",
+        "query": "Skills/agent-ops/improve-agent-native",
+        "skill_path": "Skills/agent-ops/improve-agent-native/SKILL.md",
+        "bundle_path": "Skills/agent-ops/improve-agent-native/references/scorer-calibration/manifest.json",
+        "examples_path": "Skills/agent-ops/improve-agent-native/references/scorer-calibration/examples.jsonl",
+        "raw_artifacts_dir": "Skills/agent-ops/improve-agent-native/references/scorer-calibration/raw",
+        "ready": true,
+        "scorer_id": "improve-agent-native-release-scorer",
+        "scorer_version_or_digest": "improve-agent-native-evals-2026-07-01",
+        "prompt_version": "improve-agent-native-release-scorer.v1",
+        "threshold": 0.85,
+        "parameters": {
+          "model": "deterministic-local",
+          "temperature": 0,
+          "trial_count": 1
+        },
+        "example_count": 6,
+        "confusion_matrix": {
+          "tp": 1,
+          "tn": 5,
+          "fp": 0,
+          "fn": 0
+        },
+        "metrics": {
+          "tpr": 1.0,
+          "tnr": 1.0,
+          "precision": 1.0,
+          "accuracy": 1.0
+        },
+        "quality_checks": [
+          {
+            "id": "calibration_bundle_present",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Skill must carry a scorer calibration bundle manifest.",
+            "evidence": [
+              "Skills/agent-ops/improve-agent-native/references/scorer-calibration/manifest.json"
+            ]
+          },
+          {
+            "id": "calibration_bundle_parse",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Scorer calibration bundle manifest must parse as a JSON object.",
+            "evidence": []
+          },
+          {
+            "id": "judge_parameters_present",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Calibration bundle must record model, temperature, and trial_count.",
+            "evidence": []
+          },
+          {
+            "id": "scorer_id_present",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Calibration bundle must declare scorer_id.",
+            "evidence": [
+              "scorer_id"
+            ]
+          },
+          {
+            "id": "scorer_version_or_digest_present",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Calibration bundle must declare scorer_version_or_digest.",
+            "evidence": [
+              "scorer_version_or_digest"
+            ]
+          },
+          {
+            "id": "prompt_version_present",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Calibration bundle must declare prompt_version.",
+            "evidence": [
+              "prompt_version"
+            ]
+          },
+          {
+            "id": "threshold_valid",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Calibration threshold must be a number between 0 and 1.",
+            "evidence": [
+              "0.85"
+            ]
+          },
+          {
+            "id": "calibration_bundle_schema_version",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Calibration bundle must declare the supported schema_version.",
+            "evidence": [
+              "skills-sdk.scorer-calibration-bundle.v1"
+            ]
+          },
+          {
+            "id": "calibration_split_held_out",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Calibration bundle must identify the examples as held_out.",
+            "evidence": [
+              "held_out"
+            ]
+          },
+          {
+            "id": "calibration_examples_present",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Calibration bundle must include an examples JSONL artifact.",
+            "evidence": [
+              "Skills/agent-ops/improve-agent-native/references/scorer-calibration/examples.jsonl"
+            ]
+          },
+          {
+            "id": "calibration_examples_parse",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Calibration examples must parse as JSONL objects.",
+            "evidence": []
+          },
+          {
+            "id": "calibration_example_shape",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Every calibration example must include id, labels, score, probe_type, and raw_artifact.",
+            "evidence": []
+          },
+          {
+            "id": "score_threshold_consistent",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Predicted labels must match the bundle threshold and per-example score.",
+            "evidence": []
+          },
+          {
+            "id": "raw_artifact_dir_present",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Calibration bundle must include a raw artifact directory.",
+            "evidence": [
+              "Skills/agent-ops/improve-agent-native/references/scorer-calibration/raw"
+            ]
+          },
+          {
+            "id": "raw_artifacts_present",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Every calibration example must point to an existing raw artifact.",
+            "evidence": []
+          },
+          {
+            "id": "raw_artifacts_match_examples",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Raw scorer artifacts must match example ids, labels, and scores.",
+            "evidence": []
+          },
+          {
+            "id": "held_out_example_count",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Calibration bundle must include the declared minimum held-out examples.",
+            "evidence": []
+          },
+          {
+            "id": "true_positive_coverage",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Calibration must include enough known-pass examples caught as pass.",
+            "evidence": []
+          },
+          {
+            "id": "true_negative_coverage",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Calibration must include enough known-fail examples caught as fail.",
+            "evidence": []
+          },
+          {
+            "id": "false_positive_limit",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Calibration false positives must stay within the declared limit.",
+            "evidence": []
+          },
+          {
+            "id": "false_negative_limit",
+            "status": "pass",
+            "severity": "blocker",
+            "message": "Calibration false negatives must stay within the declared limit.",
+            "evidence": []
+          }
+        ],
+        "blockers": [],
+        "mutation_performed": false,
+        "promotion_performed": false,
+        "acceptance_trace": [
+          "Braintrust scorer validation",
+          "PU-030",
+          "VP-030"
+        ],
+        "agent_summary": "scorer calibration preview checked 6 held-out example(s) for Skills/agent-ops/improve-agent-native."
+      },
+      "ready": true,
+      "blocked_count": 0,
+      "mutation_performed": false,
+      "promotion_performed": false,
+      "validation_commands": [
+        "./bin/ask sdk eval scorer-calibration Skills/agent-ops/improve-agent-native --preview --json --robot"
+      ],
+      "agent_summary": "scorer calibration preview checked 6 held-out example(s) for Skills/agent-ops/improve-agent-native."
+    }
+  },
+  "telemetry": {
+    "latency_ms": 10
+  },
+  "errors": []
+}

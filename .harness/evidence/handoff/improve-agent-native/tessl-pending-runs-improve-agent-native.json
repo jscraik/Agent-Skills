@@ -1,0 +1,57 @@
+{
+  "links": {
+    "self": "http://api.tessl.io/experimental/eval-runs?sort=-createdAt&page[size]=20&mineOnly=false&workspaceNameFilter=jscraik&tileNameFilter=jscraik%2Fimprove-agent-native&status=pending",
+    "next": null,
+    "prev": null
+  },
+  "meta": {
+    "count": 1
+  },
+  "data": [
+    {
+      "id": "019f1d40-1f07-74d9-af40-b253a164ba9f",
+      "type": "eval-run",
+      "attributes": {
+        "status": "pending",
+        "metadata": {
+          "cwd": "/Users/jamiecraik/dev/agent-skills",
+          "cliInvocation": "plugin publish --workspace jscraik --with-scenario-quality-check /tmp/ask-tessl-evals/Skills__agent-ops__improve-agent-native-e5d7a86b4e36",
+          "tileName": "improve-agent-native",
+          "tileVersion": "0.2.0",
+          "tileSummary": "Private live eval plugin for improve-agent-native.",
+          "tileIsPrivate": true
+        },
+        "createdBy": {
+          "type": "api_key",
+          "id": "019f1d2c-87f1-7178-a665-0597d13f138c",
+          "firstName": "Tessl",
+          "lastName": "(api key)"
+        },
+        "label": null,
+        "createdAt": "2026-07-01T10:36:09.350Z",
+        "updatedAt": "2026-07-01T10:36:09.350Z",
+        "visibility": "private",
+        "agent": "claude",
+        "model": "deepseek-v4-flash",
+        "skipForcedContextActivation": false,
+        "skipScoring": false,
+        "runQualityCheck": true,
+        "evalRunFixtures": {
+          "context": {
+            "type": "plugin",
+            "name": "jscraik/improve-agent-native",
+            "version": "0.2.0"
+          }
+        }
+      },
+      "relationships": {
+        "tile": {
+          "data": {
+            "id": "019f1b21-1566-76ae-8c12-d3b5466c7c92",
+            "fullName": "jscraik/improve-agent-native"
+          }
+        }
+      }
+    }
+  ]
+}

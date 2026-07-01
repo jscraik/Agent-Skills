@@ -56,15 +56,15 @@
       "legacy_paths": [
         "Infrastructure",
         "Docs",
-        "artifacts",
-        "brand"
+        "artifacts"
       ]
     },
     "evidence_control": {
-      "purpose": "Plans, specs, PM reports, runtime evidence, research, memory, and closeout artifacts.",
+      "purpose": "Plans, specs, PM reports, runtime evidence, research, memory, closeout artifacts, and explicitly bounded prototype workbenches that support evidence gathering before productization.",
       "paths": [
         ".harness",
-        "logs"
+        "logs",
+        "Prototypes"
       ]
     },
     "runtime_projection": {

@@ -11,6 +11,7 @@ if str(VALIDATOR_DIR) not in sys.path:
     sys.path.insert(0, str(VALIDATOR_DIR))
 
 import validate_repo_layout  # noqa: E402
+import generate_repo_layout_caller_inventory  # noqa: E402
 
 
 def _write_config(path: Path) -> None:
@@ -123,6 +124,21 @@ def test_future_nested_foundry_paths_classify_top_level_root(tmp_path: Path) -> 
     )
 
 
+def test_future_nested_skills_sdk_brand_path_classifies_top_level_root(tmp_path: Path) -> None:
+    root = _minimal_repo(tmp_path)
+    (root / "skills-sdk" / "brand").mkdir(parents=True)
+
+    report = validate_repo_layout.validate_repo_layout(
+        root, root / "Infrastructure" / "config" / "repo-layout.v1.json"
+    )
+
+    assert report["status"] == "pass"
+    assert not any(
+        finding["code"] == "top_level_unclassified" and finding["path"] == "skills-sdk"
+        for finding in report["findings"]
+    )
+
+
 def test_root_infrastructure_alias_is_deprecated_warning(tmp_path: Path) -> None:
     root = _minimal_repo(tmp_path)
     os.symlink("Infrastructure/scripts", root / "scripts")
@@ -155,6 +171,40 @@ def test_unknown_top_level_directory_blocks(tmp_path: Path) -> None:
     )
 
 
+def test_root_brand_directory_blocks_after_skills_sdk_brand_migration(tmp_path: Path) -> None:
+    root = _minimal_repo(tmp_path)
+    (root / "brand").mkdir()
+
+    report = validate_repo_layout.validate_repo_layout(
+        root, root / "Infrastructure" / "config" / "repo-layout.v1.json"
+    )
+
+    assert report["status"] == "fail"
+    assert any(
+        finding["code"] == "top_level_unclassified" and finding["path"] == "brand"
+        for finding in report["findings"]
+    )
+
+
+def test_prototypes_root_is_classified_as_evidence_control(tmp_path: Path) -> None:
+    root = _minimal_repo(tmp_path)
+    (root / "Prototypes" / "improve-agent-native-menubar").mkdir(parents=True)
+    (root / "Prototypes" / "improve-agent-native-menubar" / "README.md").write_text(
+        "Prototype workbench.\n",
+        encoding="utf-8",
+    )
+
+    report = validate_repo_layout.validate_repo_layout(
+        root, root / "Infrastructure" / "config" / "repo-layout.v1.json"
+    )
+
+    assert report["status"] == "pass"
+    assert not any(
+        finding["code"] == "top_level_unclassified" and finding["path"] == "Prototypes"
+        for finding in report["findings"]
+    )
+
+
 def test_json_report_is_serializable(tmp_path: Path) -> None:
     root = _minimal_repo(tmp_path)
     report = validate_repo_layout.validate_repo_layout(
@@ -162,3 +212,98 @@ def test_json_report_is_serializable(tmp_path: Path) -> None:
     )
 
     assert json.loads(json.dumps(report))["schema_version"] == "repo-layout-validation.v1"
+
+
+def test_caller_inventory_classifies_legacy_root_references(
+    tmp_path: Path, monkeypatch
+) -> None:
+    root = _minimal_repo(tmp_path)
+    (root / "Infrastructure" / "scripts" / "lib" / "ask").mkdir(parents=True)
+    (root / ".github" / "workflows").mkdir(parents=True)
+    (root / "Docs" / "reference").mkdir(parents=True)
+    files = {
+        "Infrastructure/scripts/lib/ask/commands.py": (
+            'command = "./bin/ask skills package verify Skills/agent-ops/testing"\n'
+        ),
+        ".github/workflows/ci.yml": "run: bash Infrastructure/scripts/validate_all.sh\n",
+        "Docs/reference/example.md": "See Plugins/skill-factory and docs-policy.json.\n",
+    }
+    for rel_path, content in files.items():
+        path = root / rel_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(content, encoding="utf-8")
+
+    monkeypatch.setattr(
+        generate_repo_layout_caller_inventory,
+        "_tracked_files",
+        lambda _root: sorted(files),
+    )
+
+    report = generate_repo_layout_caller_inventory.generate_inventory(root)
+
+    assert report["schema_version"] == "repo-layout-caller-inventory.v1"
+    assert report["summary"]["root_counts"]["Skills/"] == 1
+    assert report["summary"]["root_counts"]["Infrastructure/"] == 1
+    assert report["summary"]["root_counts"]["Plugins/"] == 1
+    assert report["summary"]["root_counts"]["docs-policy.json"] == 1
+    assert report["summary"]["category_counts"]["ask_cli_route"] >= 1
+    assert report["summary"]["category_counts"]["ci_workflow"] >= 1
+    assert report["summary"]["category_counts"]["docs_reference_link"] >= 1
+
+
+def test_caller_inventory_scans_nested_extensionless_scripts(
+    tmp_path: Path, monkeypatch
+) -> None:
+    root = _minimal_repo(tmp_path)
+    rel_path = "Infrastructure/bin/ask"
+    path = root / rel_path
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("exec ./bin/ask skills package verify Skills/agent-ops/testing\n", encoding="utf-8")
+    monkeypatch.setattr(generate_repo_layout_caller_inventory, "_tracked_files", lambda _root: [rel_path])
+
+    report = generate_repo_layout_caller_inventory.generate_inventory(root)
+
+    assert report["summary"]["scanned_files"] == 1
+    assert report["summary"]["root_counts"]["Skills/"] == 1
+    assert report["summary"]["category_counts"]["ask_cli_route"] >= 1
+
+
+def test_actionable_inventory_keeps_generated_command_callers(
+    tmp_path: Path, monkeypatch
+) -> None:
+    root = _minimal_repo(tmp_path)
+    rel_path = "Infrastructure/scripts/run-migration.py"
+    path = root / rel_path
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        "cmd = 'python3 Infrastructure/scripts/generate_skillset_manifests.py --write'\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(generate_repo_layout_caller_inventory, "_tracked_files", lambda _root: [rel_path])
+
+    report = generate_repo_layout_caller_inventory.generate_inventory(root)
+    actionable = generate_repo_layout_caller_inventory.filter_actionable(report)
+
+    assert report["summary"]["root_counts"]["Infrastructure/"] == 1
+    assert actionable["summary"]["root_counts"]["Infrastructure/"] == 1
+    assert "generated_artifact_input" not in actionable["occurrences"][0]["categories"]
+
+
+def test_caller_inventory_markdown_summary_is_written(tmp_path: Path, monkeypatch) -> None:
+    root = _minimal_repo(tmp_path)
+    rel_path = "README.md"
+    (root / rel_path).write_text("Use scripts/check.sh for old entrypoints.\n", encoding="utf-8")
+    monkeypatch.setattr(
+        generate_repo_layout_caller_inventory,
+        "_tracked_files",
+        lambda _root: [rel_path],
+    )
+
+    report = generate_repo_layout_caller_inventory.generate_inventory(root)
+    output = tmp_path / "inventory.md"
+    generate_repo_layout_caller_inventory.write_markdown(report, output)
+
+    text = output.read_text(encoding="utf-8")
+    assert "Repo Layout Caller Inventory" in text
+    assert "scripts" in text
+    assert "Migration Use" in text

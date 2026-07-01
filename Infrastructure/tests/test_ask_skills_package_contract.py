@@ -1361,6 +1361,220 @@ description: Use when a user asks to validate pruning checks.
         self.assertIn("construction_sediment_paragraph", blocker_ids)
         self.assertIn("construction_duplicate_instruction", blocker_ids)
 
+    def test_writing_quality_blocks_three_way_boundary_fragmentation(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "fragmented-boundary-skill"
+            skill_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: fragmented-boundary-skill
+description: Use when a user asks to validate fragmented boundary checks.
+---
+
+# Fragmented Boundary Skill
+
+## Workflow
+
+1. Inspect the target and report command evidence.
+
+## Constraints
+
+- Keep the audit read-only.
+
+## Execution Boundaries
+
+- Use target repo commands as authority.
+
+## Failure Mode
+
+- Stop with the blocker.
+
+## Validation
+
+- Command: fixture check -> pass
+
+""",
+                encoding="utf-8",
+            )
+
+            progressive = package_contracts.progressive_disclosure_contract(
+                repo_root,
+                skill_md,
+                skill_md.read_text(encoding="utf-8"),
+            )
+            contract = package_contracts.writing_quality_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+                skill_md.read_text(encoding="utf-8"),
+                progressive,
+            )
+
+        fragmentation_check = next(
+            check for check in contract["checks"] if check["name"] == "construction_boundary_fragmentation"
+        )
+        self.assertEqual(fragmentation_check["status"], "blocked_validation")
+        self.assertEqual(fragmentation_check["dimension"], "pruning")
+        self.assertEqual(
+            fragmentation_check["evidence"]["fragmented_sections"],
+            ["Constraints", "Execution Boundaries", "Validation"],
+        )
+        self.assertIn(
+            "construction_boundary_fragmentation",
+            {blocker["rule_id"] for blocker in contract["blockers"]},
+        )
+
+    def test_writing_quality_blocks_extra_headers_for_sdk_managed_skill(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "extra-header-skill"
+            skill_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: extra-header-skill
+description: Use when a user asks to validate canonical skill headers.
+metadata:
+  skill-type: runbook
+  lifecycle_state: active
+  metadata_source: frontmatter
+---
+
+# Extra Header Skill
+
+Short purpose paragraph.
+
+## Principle
+
+Keep the entrypoint small.
+
+## When To Use
+
+- Use when testing canonical headers.
+
+## Inputs
+
+- Target path.
+
+## Outputs
+
+- Report.
+
+## Workflow
+
+1. Inspect the target.
+
+## Failure Mode
+
+- Stop with the blocker.
+
+## Validation
+
+- Command: fixture check -> pass
+
+## References
+
+- No references.
+""",
+                encoding="utf-8",
+            )
+
+            progressive = package_contracts.progressive_disclosure_contract(
+                repo_root,
+                skill_md,
+                skill_md.read_text(encoding="utf-8"),
+            )
+            contract = package_contracts.writing_quality_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+                skill_md.read_text(encoding="utf-8"),
+                progressive,
+            )
+
+        header_check = next(
+            check for check in contract["checks"] if check["name"] == "canonical_skill_headers"
+        )
+        self.assertEqual(header_check["status"], "blocked_validation")
+        self.assertEqual(header_check["evidence"]["extra_h2_headings"], ["Principle"])
+        self.assertIn(
+            "canonical_skill_headers_required",
+            {blocker["rule_id"] for blocker in contract["blockers"]},
+        )
+
+    def test_writing_quality_accepts_canonical_headers_for_sdk_managed_skill(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "canonical-header-skill"
+            skill_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: canonical-header-skill
+description: Use when a user asks to validate canonical skill headers.
+metadata:
+  skill-type: runbook
+  lifecycle_state: active
+  metadata_source: frontmatter
+---
+
+# Canonical Header Skill
+
+Short purpose paragraph.
+
+## When To Use
+
+- Use when testing canonical headers.
+
+## Inputs
+
+- Target path.
+
+## Outputs
+
+- Report.
+
+## Workflow
+
+1. Inspect the target.
+
+## Failure Mode
+
+- Stop with the blocker.
+
+## Validation
+
+- Command: fixture check -> pass
+
+## References
+
+- No references.
+""",
+                encoding="utf-8",
+            )
+
+            progressive = package_contracts.progressive_disclosure_contract(
+                repo_root,
+                skill_md,
+                skill_md.read_text(encoding="utf-8"),
+            )
+            contract = package_contracts.writing_quality_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+                skill_md.read_text(encoding="utf-8"),
+                progressive,
+            )
+
+        header_check = next(
+            check for check in contract["checks"] if check["name"] == "canonical_skill_headers"
+        )
+        self.assertEqual(header_check["status"], "pass")
+        self.assertEqual(header_check["evidence"]["missing_headers"], [])
+        self.assertEqual(header_check["evidence"]["extra_h2_headings"], [])
+
     def test_sdk_contract_reports_missing_progressive_reference(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir)
@@ -2767,6 +2981,95 @@ selected_facets:
             "orphaned_bundle_reference",
             {blocker["rule_id"] for blocker in contract["blockers"]},
         )
+
+    def test_writing_quality_accepts_routed_eval_and_scorer_bundles(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            skill_dir = repo_root / "Skills" / "agent-ops" / "routed-eval-bundle-skill"
+            references_dir = skill_dir / "references"
+            evals_dir = references_dir / "evals"
+            scorer_dir = references_dir / "scorer-calibration"
+            raw_dir = scorer_dir / "raw"
+            raw_dir.mkdir(parents=True)
+            evals_dir.mkdir(parents=True)
+            skill_md = skill_dir / "SKILL.md"
+            skill_md.write_text(
+                """---
+name: routed-eval-bundle-skill
+description: Use when a user asks to validate routed eval bundle support files.
+metadata:
+  skill-type: runbook
+  lifecycle_state: active
+  metadata_source: frontmatter
+---
+
+# Routed Eval Bundle Skill
+
+Short purpose paragraph.
+
+## When To Use
+
+- Use when testing eval bundle routing.
+
+## Inputs
+
+- Target path.
+
+## Outputs
+
+- Report.
+
+## Workflow
+
+1. Inspect the target.
+
+## Failure Mode
+
+- Stop with the blocker.
+
+## Validation
+
+- ./bin/ask sdk eval scenario-quality Skills/agent-ops/routed-eval-bundle-skill --preview --json --robot
+
+## References
+
+- references/evals.yaml
+- references/scorer-calibration/manifest.json
+""",
+                encoding="utf-8",
+            )
+            (references_dir / "evals.yaml").write_text(
+                "claims:\n  - id: routed-eval\ncases:\n  - id: routed-eval\n",
+                encoding="utf-8",
+            )
+            (evals_dir / "eval.routed-eval.md").write_text("# Routed Eval\n", encoding="utf-8")
+            (scorer_dir / "manifest.json").write_text(
+                """{
+  "schema_version": "skills-sdk.scorer-calibration-bundle.v1",
+  "examples_path": "examples.jsonl",
+  "raw_artifacts_dir": "raw"
+}
+""",
+                encoding="utf-8",
+            )
+            (scorer_dir / "examples.jsonl").write_text("{}\n", encoding="utf-8")
+            (raw_dir / "example.json").write_text("{}\n", encoding="utf-8")
+
+            progressive = package_contracts.progressive_disclosure_contract(
+                repo_root,
+                skill_md,
+                skill_md.read_text(encoding="utf-8"),
+            )
+            contract = package_contracts.writing_quality_contract(
+                repo_root,
+                skill_md,
+                read_skill_frontmatter_fields(skill_md),
+                skill_md.read_text(encoding="utf-8"),
+                progressive,
+            )
+
+        advisory_ids = {advisory["rule_id"] for advisory in contract["advisories"]}
+        self.assertNotIn("orphaned_bundle_reference", advisory_ids)
 
     def test_reference_quality_accepts_centralized_gold_rubric_profile(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
