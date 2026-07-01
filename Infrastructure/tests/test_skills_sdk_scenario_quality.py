@@ -352,7 +352,10 @@ cases:
   realistic: true
     continuation
 """
-        with mock.patch("builtins.__import__", side_effect=import_without_yaml):
+        with (
+            mock.patch("builtins.__import__", side_effect=import_without_yaml),
+            mock.patch("ask.skills_sdk.scenario_quality.subprocess.run", side_effect=FileNotFoundError()),
+        ):
             with self.assertRaises(ValueError):
                 _yaml_safe_load(evals_text)
 

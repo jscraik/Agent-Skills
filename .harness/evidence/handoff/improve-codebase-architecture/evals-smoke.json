@@ -1,0 +1,550 @@
+{
+  "status": "error",
+  "trace_id": "4d58781f-81cb-4903-8dc6-f59acba41df3",
+  "metadata": {
+    "version": "0.1.0",
+    "command": "evals run Skills/agent-ops/improve-codebase-architecture --mode smoke --json --robot",
+    "next_steps": [],
+    "correction_note": null
+  },
+  "data": {
+    "tessl_workspace": "jscraik",
+    "tessl_workspace_source": "default",
+    "validation_commands": [
+      "./bin/ask evals run Skills/agent-ops/improve-codebase-architecture --mode smoke --runner codex --tessl-workspace jscraik --json --robot"
+    ],
+    "profile_contract": {
+      "codex_profile": "fast",
+      "codex_profile_config": "[profiles.fast]",
+      "codex_profile_source": "default",
+      "codex_profile_required_for_smoke": true,
+      "codex_exec_invoked": true,
+      "codex_exec_command_shape": [
+        "codex",
+        "exec",
+        "--profile",
+        "fast"
+      ],
+      "codex_profile_proof_lane": null,
+      "tessl_policy": {
+        "native_tessl_only": true,
+        "no_npx": true,
+        "no_publish": true,
+        "no_registry_upload": true,
+        "temp_staged_project_input_only": true,
+        "stable_staging_root": "/tmp/ask-tessl-evals/<skill-path>-<sha12>",
+        "evidence_retention": "stable tmp staging is intentionally left for post-run inspection; reruns archive previous staged evidence under evidence-archive/",
+        "tessl_project_marker": "tessl.json",
+        "staged_inputs": [
+          "SKILL.md",
+          "references/evals.yaml",
+          "references/contract.yaml",
+          "references/task-profile.json",
+          "assets/**/*",
+          "evals/<case-id>/task.md",
+          "evals/<case-id>/criteria.json"
+        ],
+        "network_permission_required_by_repo": false,
+        "project_save_may_use_tessl_service": "only_for_project_link_when_workspace_provided",
+        "project_save_default": "compatibility_flag_not_required",
+        "project_identity_rule": "plugin skills use the plugin project name; standalone skills use the skill name",
+        "project_link_check": "when --tessl-workspace is provided, repair/link existing project first and create only when needed"
+      },
+      "tessl_live_private_policy": null
+    },
+    "lifecycle_events": [
+      {
+        "schema_version": "capability-lifecycle-event.v1",
+        "event_type": "eval_started",
+        "event_definition": "A workout, smoke eval, or proof run started for a capability.",
+        "occurred_at": "2026-06-30T13:17:50Z",
+        "subject": {
+          "query": "Skills/agent-ops/improve-codebase-architecture",
+          "target_kind": "skill_path",
+          "handle": "improve-codebase-architecture",
+          "canonical_source_path": "Skills/agent-ops/improve-codebase-architecture",
+          "eval_mode": "smoke",
+          "runner": "codex"
+        },
+        "outcome": {
+          "status": "running",
+          "blocker_classes": [],
+          "warning_classes": []
+        }
+      },
+      {
+        "schema_version": "capability-lifecycle-event.v1",
+        "event_type": "eval_completed",
+        "event_definition": "A workout, smoke eval, or proof run completed with pass or fail status.",
+        "occurred_at": "2026-06-30T13:22:22Z",
+        "subject": {
+          "query": "Skills/agent-ops/improve-codebase-architecture",
+          "target_kind": "skill_path",
+          "handle": "improve-codebase-architecture",
+          "canonical_source_path": "Skills/agent-ops/improve-codebase-architecture",
+          "eval_mode": "smoke",
+          "runner": "codex"
+        },
+        "outcome": {
+          "status": "fail",
+          "blocker_classes": [],
+          "warning_classes": []
+        }
+      }
+    ],
+    "lifecycle_event": {
+      "schema_version": "capability-lifecycle-event.v1",
+      "event_type": "eval_completed",
+      "event_definition": "A workout, smoke eval, or proof run completed with pass or fail status.",
+      "occurred_at": "2026-06-30T13:22:22Z",
+      "subject": {
+        "query": "Skills/agent-ops/improve-codebase-architecture",
+        "target_kind": "skill_path",
+        "handle": "improve-codebase-architecture",
+        "canonical_source_path": "Skills/agent-ops/improve-codebase-architecture",
+        "eval_mode": "smoke",
+        "runner": "codex"
+      },
+      "outcome": {
+        "status": "fail",
+        "blocker_classes": [],
+        "warning_classes": []
+      }
+    },
+    "lifecycle_event_types": {
+      "eval_started": "A workout, smoke eval, or proof run started for a capability.",
+      "eval_blocked": "A workout, smoke eval, or proof run stopped on a classified blocker.",
+      "eval_completed": "A workout, smoke eval, or proof run completed with pass or fail status."
+    },
+    "raw_output": "Skill evals: improve-codebase-architecture\nReports: Infrastructure/artifacts/skills/improve-codebase-architecture/20260630-141750-723575\nScorecard: Infrastructure/artifacts/skills/improve-codebase-architecture/20260630-141750-723575/scorecard.json\nRelease manifest: Infrastructure/artifacts/skills/improve-codebase-architecture/20260630-141750-723575/release_manifest.json\nJUnit: Infrastructure/artifacts/skills/improve-codebase-architecture/20260630-141750-723575/junit.xml\nRunner mode: codex\nEval mode: smoke\nTimeout profile: default\nTimeout seconds: 600.0\nTier-2 mode: warn\nWARNING: Using isolated CODEX_HOME for live eval session writes: /private/tmp/skill-evals-codex-home-16z65zy2\n- FAIL: happy-main (case)\n    - TIER1: [codex] expected_signal failed: matched 0/2 signal terms (required 1); missing: proof, boundary\n- FAIL: happy-explicit (case)\n    - TIER1: [codex] expected_signal failed: matched 0/2 signal terms (required 1); missing: proof, boundary\n- FAIL: negative-domain (case)\n    - TIER1: [codex] expected_signal failed: matched 0/2 signal terms (required 1); missing: proof, boundary\n- FAIL: pressure-command (case)\n    - TIER1: [codex] expected_signal failed: matched 0/2 signal terms (required 1); missing: proof, boundary\n- PASS: pressure-pi (case)\n- FAIL: deep-module-agent-boundary (case)\n    - TIER1: [codex] expected_signal failed: matched 0/2 signal terms (required 1); missing: proof, boundary\n- FAIL: knowledgeos-architecture-drift-human-sync (case)\n    - TIER1: [codex] expected_signal failed: matched 0/2 signal terms (required 1); missing: proof, boundary\n- FAIL: knowledgeos-capsule-lifecycle-boundary (case)\n    - TIER1: [codex] expected_signal failed: matched 0/2 signal terms (required 1); missing: proof, boundary\n- FAIL: interface-contract-migration (case)\n    - TIER1: [codex] expected_signal failed: matched 0/2 signal terms (required 1); missing: proof, boundary\n- FAIL: sdk-scenario-drift-review (case)\n    - TIER1: [codex] expected_signal failed: matched 0/2 signal terms (required 1); missing: proof, boundary\n- FAIL: structure-only-policy-boundary (case)\n    - TIER1: [codex] expected_signal failed: matched 0/2 signal terms (required 1); missing: proof, boundary\n- FAIL: tessl-below-baseline-remediation (case)\n    - TIER1: [codex] expected_signal failed: matched 0/2 signal terms (required 1); missing: proof, boundary\n- FAIL: lift-generated-source-conflict (case)\n    - TIER1: [codex] expected_signal failed: matched 0/2 signal terms (required 1); missing: proof, boundary\n- FAIL: lift-tests-pass-ownership-drift (case)\n    - TIER1: [codex] expected_signal failed: matched 0/2 signal terms (required 1); missing: proof, boundary\n- FAIL: lift-pattern-name-no-variation (case)\n    - TIER1: [codex] expected_signal failed: matched 0/2 signal terms (required 1); missing: proof, boundary\n- FAIL: lift-public-surface-unknown-callers (case)\n    - TIER1: [codex] expected_signal failed: matched 0/2 signal terms (required 1); missing: proof, boundary\n- FAIL: lift-cache-as-authority-trap (case)\n    - TIER1: [codex] expected_signal failed: matched 0/2 signal terms (required 1); missing: proof, boundary\n- FAIL: lift-no-verifier-first-move (case)\n    - TIER1: [codex] expected_signal failed: matched 0/2 signal terms (required 1); missing: proof, boundary\n- FAIL: knowledgeos-capsule-design-compact-route (case)\n    - TIER1: [codex] expected_signal failed: matched 0/2 signal terms (required 1); missing: proof, boundary\n- FAIL: knowledgeos-export-readiness-compact-route (case)\n    - TIER1: [codex] expected_signal failed: matched 0/2 signal terms (required 1); missing: proof, boundary\nRESULT: FAIL\n",
+    "raw_error": "",
+    "eval_status": "fail",
+    "blocker_class": null,
+    "blocker_taxonomy": {
+      "blocked_user_input": "The runner requested user input and should not be treated as hung.",
+      "blocked_auth": "The runner stopped on authentication or credential setup.",
+      "blocked_runtime": "The runner was blocked by local runtime, sandbox, or model-capacity limits.",
+      "timeout_no_output": "The eval timed out without producing final output.",
+      "timeout_partial_output": "The eval timed out after producing partial output.",
+      "blocked_missing_tool": "A required local command, runtime, package, or validator is unavailable.",
+      "blocked_missing_artifact": "An expected report, transcript, output, or generated artifact is absent.",
+      "blocked_environment": "The selected workspace, sandbox, cwd, or permission profile cannot run the check.",
+      "blocked_validation": "A structural or policy validation gate failed for the capability."
+    },
+    "dashboard_path": "Infrastructure/artifacts/skill-reviews/improve-codebase-architecture-dashboard-smoke.html",
+    "dashboard_url": "file:///Users/jamiecraik/dev/agent-skills/Infrastructure/artifacts/skill-reviews/improve-codebase-architecture-dashboard-smoke.html",
+    "dashboard_tab": "evals",
+    "dashboard_source_report": "Infrastructure/artifacts/skill-reviews/improve-codebase-architecture.json",
+    "scorecard_path": "Infrastructure/artifacts/skills/improve-codebase-architecture/20260630-141750-723575/scorecard.json",
+    "browser_instruction": "Open dashboard_url in the Codex in-app browser after evals complete.",
+    "tessl_eval": {
+      "status": "blocked",
+      "command": "tessl eval run --json <staged-temp-source>",
+      "source_path": "Skills/agent-ops/improve-codebase-architecture",
+      "staged_source": "/tmp/ask-tessl-evals/Skills__agent-ops__improve-codebase-architecture-328543f1e75b",
+      "staged_files": [
+        "SKILL.md",
+        "references/evals.yaml",
+        "references/contract.yaml",
+        "references/task-profile.json",
+        "scenario-sources.json",
+        "scenarios/happy-main/task.md",
+        "scenarios/happy-main/criteria.json",
+        "scenarios/happy-explicit/task.md",
+        "scenarios/happy-explicit/criteria.json",
+        "scenarios/negative-domain/task.md",
+        "scenarios/negative-domain/criteria.json",
+        "scenarios/pressure-command/task.md",
+        "scenarios/pressure-command/criteria.json",
+        "scenarios/pressure-pi/task.md",
+        "scenarios/pressure-pi/criteria.json",
+        "scenarios/deep-module-agent-boundary/task.md",
+        "scenarios/deep-module-agent-boundary/criteria.json",
+        "scenarios/knowledgeos-architecture-drift-human-sync/task.md",
+        "scenarios/knowledgeos-architecture-drift-human-sync/criteria.json",
+        "scenarios/knowledgeos-capsule-lifecycle-boundary/task.md",
+        "scenarios/knowledgeos-capsule-lifecycle-boundary/criteria.json",
+        "scenarios/interface-contract-migration/task.md",
+        "scenarios/interface-contract-migration/criteria.json",
+        "scenarios/sdk-scenario-drift-review/task.md",
+        "scenarios/sdk-scenario-drift-review/criteria.json",
+        "scenarios/structure-only-policy-boundary/task.md",
+        "scenarios/structure-only-policy-boundary/criteria.json",
+        "scenarios/tessl-below-baseline-remediation/task.md",
+        "scenarios/tessl-below-baseline-remediation/criteria.json",
+        "scenarios/lift-generated-source-conflict/task.md",
+        "scenarios/lift-generated-source-conflict/criteria.json",
+        "scenarios/lift-tests-pass-ownership-drift/task.md",
+        "scenarios/lift-tests-pass-ownership-drift/criteria.json",
+        "scenarios/lift-pattern-name-no-variation/task.md",
+        "scenarios/lift-pattern-name-no-variation/criteria.json",
+        "scenarios/lift-public-surface-unknown-callers/task.md",
+        "scenarios/lift-public-surface-unknown-callers/criteria.json",
+        "scenarios/lift-cache-as-authority-trap/task.md",
+        "scenarios/lift-cache-as-authority-trap/criteria.json",
+        "scenarios/lift-no-verifier-first-move/task.md",
+        "scenarios/lift-no-verifier-first-move/criteria.json",
+        "scenarios/knowledgeos-capsule-design-compact-route/task.md",
+        "scenarios/knowledgeos-capsule-design-compact-route/criteria.json",
+        "scenarios/knowledgeos-export-readiness-compact-route/task.md",
+        "scenarios/knowledgeos-export-readiness-compact-route/criteria.json",
+        "tessl.json"
+      ],
+      "staging_policy": "stable_tmp_evidence",
+      "tessl_project_marker": "/tmp/ask-tessl-evals/Skills__agent-ops__improve-codebase-architecture-328543f1e75b/tessl.json",
+      "project_identity": {
+        "owner_type": "standalone_skill",
+        "project": "improve-codebase-architecture",
+        "workspace": "jscraik",
+        "name": "jscraik/improve-codebase-architecture"
+      },
+      "project_link": {
+        "identity": {
+          "owner_type": "standalone_skill",
+          "project": "improve-codebase-architecture",
+          "workspace": "jscraik",
+          "name": "jscraik/improve-codebase-architecture"
+        },
+        "staged_source": "/tmp/ask-tessl-evals/Skills__agent-ops__improve-codebase-architecture-328543f1e75b",
+        "checked": true,
+        "status": "blocked",
+        "action": "create",
+        "blocker": "Unable to relink or create Tessl project jscraik/improve-codebase-architecture for the temp-staged eval directory.",
+        "blocker_class": "blocked_validation",
+        "commands": [
+          {
+            "action": "check",
+            "command": "tessl project repair --json --yes",
+            "exit_code": 1,
+            "signal": null,
+            "raw_output": "{\n  \"message\": \"--workspace, --project, and --yes are only valid with a repair action.\",\n  \"status\": \"error\"\n}",
+            "raw_error": "",
+            "parsed_output": {
+              "status": "error",
+              "message": "--workspace, --project, and --yes are only valid with a repair action."
+            }
+          },
+          {
+            "action": "relink",
+            "command": "tessl project repair --relink --workspace jscraik --project improve-codebase-architecture --yes --json",
+            "exit_code": 1,
+            "signal": null,
+            "raw_output": "{\n  \"message\": \"401 Unauthorized\",\n  \"status\": \"error\"\n}",
+            "raw_error": "",
+            "parsed_output": {
+              "status": "error",
+              "message": "401 Unauthorized"
+            }
+          },
+          {
+            "action": "create",
+            "command": "tessl project create --new --workspace jscraik improve-codebase-architecture",
+            "exit_code": 1,
+            "signal": null,
+            "raw_output": "No git repository was detected for this directory, so Tessl is using the local file path as the project source.\n",
+            "raw_error": "✘ 401 Unauthorized\n",
+            "parsed_output": "No git repository was detected for this directory, so Tessl is using the local file path as the project source."
+          }
+        ]
+      },
+      "workspace": "jscraik",
+      "evidence_retention": "staged directory is left under /tmp/ask-tessl-evals for inspection",
+      "raw_output": "",
+      "raw_error": "",
+      "blocker": "Unable to relink or create Tessl project jscraik/improve-codebase-architecture for the temp-staged eval directory.",
+      "blocker_class": "blocked_validation",
+      "policy": {
+        "native_tessl_only": true,
+        "no_npx": true,
+        "no_publish": true,
+        "no_registry_upload": true,
+        "temp_staged_project_input_only": true,
+        "stable_staging_root": "/tmp/ask-tessl-evals/<skill-path>-<sha12>",
+        "evidence_retention": "stable tmp staging is intentionally left for post-run inspection; reruns archive previous staged evidence under evidence-archive/",
+        "tessl_project_marker": "tessl.json",
+        "staged_inputs": [
+          "SKILL.md",
+          "references/evals.yaml",
+          "references/contract.yaml",
+          "references/task-profile.json",
+          "assets/**/*",
+          "evals/<case-id>/task.md",
+          "evals/<case-id>/criteria.json"
+        ],
+        "network_permission_required_by_repo": false,
+        "project_save_may_use_tessl_service": "only_for_project_link_when_workspace_provided",
+        "project_save_default": "compatibility_flag_not_required",
+        "project_identity_rule": "plugin skills use the plugin project name; standalone skills use the skill name",
+        "project_link_check": "when --tessl-workspace is provided, repair/link existing project first and create only when needed"
+      }
+    },
+    "tessl_eval_status": "blocked_validation",
+    "tessl_blocker_class": "blocked_validation",
+    "eval_closeout": {
+      "schema_version": "skills-sdk.eval-closeout.v1",
+      "status": "fail",
+      "skill_path": "Skills/agent-ops/improve-codebase-architecture",
+      "mode": "smoke",
+      "runner": "codex",
+      "report_dir": "Infrastructure/artifacts/skills/improve-codebase-architecture/20260630-141750-723575",
+      "cases_expected": [
+        "happy-main",
+        "happy-explicit",
+        "negative-domain",
+        "pressure-command",
+        "pressure-pi",
+        "deep-module-agent-boundary",
+        "knowledgeos-architecture-drift-human-sync",
+        "knowledgeos-capsule-lifecycle-boundary",
+        "interface-contract-migration",
+        "sdk-scenario-drift-review",
+        "structure-only-policy-boundary",
+        "tessl-below-baseline-remediation",
+        "lift-generated-source-conflict",
+        "lift-tests-pass-ownership-drift",
+        "lift-pattern-name-no-variation",
+        "lift-public-surface-unknown-callers",
+        "lift-cache-as-authority-trap",
+        "lift-no-verifier-first-move",
+        "knowledgeos-capsule-design-compact-route",
+        "knowledgeos-export-readiness-compact-route"
+      ],
+      "cases": [
+        {
+          "id": "happy-main",
+          "status": "fail",
+          "result_path": "Infrastructure/artifacts/skills/improve-codebase-architecture/20260630-141750-723575/01-happy-main",
+          "failures": [
+            "[codex] expected_signal failed: matched 0/2 signal terms (required 1); missing: proof, boundary"
+          ]
+        },
+        {
+          "id": "happy-explicit",
+          "status": "fail",
+          "result_path": "Infrastructure/artifacts/skills/improve-codebase-architecture/20260630-141750-723575/02-happy-explicit",
+          "failures": [
+            "[codex] expected_signal failed: matched 0/2 signal terms (required 1); missing: proof, boundary"
+          ]
+        },
+        {
+          "id": "negative-domain",
+          "status": "fail",
+          "result_path": "Infrastructure/artifacts/skills/improve-codebase-architecture/20260630-141750-723575/03-negative-domain",
+          "failures": [
+            "[codex] expected_signal failed: matched 0/2 signal terms (required 1); missing: proof, boundary"
+          ]
+        },
+        {
+          "id": "pressure-command",
+          "status": "fail",
+          "result_path": "Infrastructure/artifacts/skills/improve-codebase-architecture/20260630-141750-723575/04-pressure-command",
+          "failures": [
+            "[codex] expected_signal failed: matched 0/2 signal terms (required 1); missing: proof, boundary"
+          ]
+        },
+        {
+          "id": "pressure-pi",
+          "status": "pass",
+          "result_path": "Infrastructure/artifacts/skills/improve-codebase-architecture/20260630-141750-723575/05-pressure-pi"
+        },
+        {
+          "id": "deep-module-agent-boundary",
+          "status": "fail",
+          "result_path": "Infrastructure/artifacts/skills/improve-codebase-architecture/20260630-141750-723575/06-deep-module-agent-boundary",
+          "failures": [
+            "[codex] expected_signal failed: matched 0/2 signal terms (required 1); missing: proof, boundary"
+          ]
+        },
+        {
+          "id": "knowledgeos-architecture-drift-human-sync",
+          "status": "fail",
+          "result_path": "Infrastructure/artifacts/skills/improve-codebase-architecture/20260630-141750-723575/07-knowledgeos-architecture-drift-human-sync",
+          "failures": [
+            "[codex] expected_signal failed: matched 0/2 signal terms (required 1); missing: proof, boundary"
+          ]
+        },
+        {
+          "id": "knowledgeos-capsule-lifecycle-boundary",
+          "status": "fail",
+          "result_path": "Infrastructure/artifacts/skills/improve-codebase-architecture/20260630-141750-723575/08-knowledgeos-capsule-lifecycle-boundary",
+          "failures": [
+            "[codex] expected_signal failed: matched 0/2 signal terms (required 1); missing: proof, boundary"
+          ]
+        },
+        {
+          "id": "interface-contract-migration",
+          "status": "fail",
+          "result_path": "Infrastructure/artifacts/skills/improve-codebase-architecture/20260630-141750-723575/09-interface-contract-migration",
+          "failures": [
+            "[codex] expected_signal failed: matched 0/2 signal terms (required 1); missing: proof, boundary"
+          ]
+        },
+        {
+          "id": "sdk-scenario-drift-review",
+          "status": "fail",
+          "result_path": "Infrastructure/artifacts/skills/improve-codebase-architecture/20260630-141750-723575/10-sdk-scenario-drift-review",
+          "failures": [
+            "[codex] expected_signal failed: matched 0/2 signal terms (required 1); missing: proof, boundary"
+          ]
+        },
+        {
+          "id": "structure-only-policy-boundary",
+          "status": "fail",
+          "result_path": "Infrastructure/artifacts/skills/improve-codebase-architecture/20260630-141750-723575/11-structure-only-policy-boundary",
+          "failures": [
+            "[codex] expected_signal failed: matched 0/2 signal terms (required 1); missing: proof, boundary"
+          ]
+        },
+        {
+          "id": "tessl-below-baseline-remediation",
+          "status": "fail",
+          "result_path": "Infrastructure/artifacts/skills/improve-codebase-architecture/20260630-141750-723575/12-tessl-below-baseline-remediation",
+          "failures": [
+            "[codex] expected_signal failed: matched 0/2 signal terms (required 1); missing: proof, boundary"
+          ]
+        },
+        {
+          "id": "lift-generated-source-conflict",
+          "status": "fail",
+          "result_path": "Infrastructure/artifacts/skills/improve-codebase-architecture/20260630-141750-723575/13-lift-generated-source-conflict",
+          "failures": [
+            "[codex] expected_signal failed: matched 0/2 signal terms (required 1); missing: proof, boundary"
+          ]
+        },
+        {
+          "id": "lift-tests-pass-ownership-drift",
+          "status": "fail",
+          "result_path": "Infrastructure/artifacts/skills/improve-codebase-architecture/20260630-141750-723575/14-lift-tests-pass-ownership-drift",
+          "failures": [
+            "[codex] expected_signal failed: matched 0/2 signal terms (required 1); missing: proof, boundary"
+          ]
+        },
+        {
+          "id": "lift-pattern-name-no-variation",
+          "status": "fail",
+          "result_path": "Infrastructure/artifacts/skills/improve-codebase-architecture/20260630-141750-723575/15-lift-pattern-name-no-variation",
+          "failures": [
+            "[codex] expected_signal failed: matched 0/2 signal terms (required 1); missing: proof, boundary"
+          ]
+        },
+        {
+          "id": "lift-public-surface-unknown-callers",
+          "status": "fail",
+          "result_path": "Infrastructure/artifacts/skills/improve-codebase-architecture/20260630-141750-723575/16-lift-public-surface-unknown-callers",
+          "failures": [
+            "[codex] expected_signal failed: matched 0/2 signal terms (required 1); missing: proof, boundary"
+          ]
+        },
+        {
+          "id": "lift-cache-as-authority-trap",
+          "status": "fail",
+          "result_path": "Infrastructure/artifacts/skills/improve-codebase-architecture/20260630-141750-723575/17-lift-cache-as-authority-trap",
+          "failures": [
+            "[codex] expected_signal failed: matched 0/2 signal terms (required 1); missing: proof, boundary"
+          ]
+        },
+        {
+          "id": "lift-no-verifier-first-move",
+          "status": "fail",
+          "result_path": "Infrastructure/artifacts/skills/improve-codebase-architecture/20260630-141750-723575/18-lift-no-verifier-first-move",
+          "failures": [
+            "[codex] expected_signal failed: matched 0/2 signal terms (required 1); missing: proof, boundary"
+          ]
+        },
+        {
+          "id": "knowledgeos-capsule-design-compact-route",
+          "status": "fail",
+          "result_path": "Infrastructure/artifacts/skills/improve-codebase-architecture/20260630-141750-723575/19-knowledgeos-capsule-design-compact-route",
+          "failures": [
+            "[codex] expected_signal failed: matched 0/2 signal terms (required 1); missing: proof, boundary"
+          ]
+        },
+        {
+          "id": "knowledgeos-export-readiness-compact-route",
+          "status": "fail",
+          "result_path": "Infrastructure/artifacts/skills/improve-codebase-architecture/20260630-141750-723575/20-knowledgeos-export-readiness-compact-route",
+          "failures": [
+            "[codex] expected_signal failed: matched 0/2 signal terms (required 1); missing: proof, boundary"
+          ]
+        }
+      ],
+      "blocker_class": null,
+      "mutation_allowed": false,
+      "registry_update_allowed": false,
+      "raw_output_present": true,
+      "raw_error_present": false,
+      "missing_suite_artifacts": false,
+      "next_reproduce_command": "./bin/ask evals run Skills/agent-ops/improve-codebase-architecture --mode smoke --runner codex --json --robot",
+      "closeout_validation": {
+        "schema_version": "skills-sdk.eval-closeout-validation.v1",
+        "status": "pass",
+        "checks": [
+          {
+            "id": "required_fields_present",
+            "status": "pass",
+            "message": "workflow-closeout/v1 receipts must include required contract fields.",
+            "evidence": []
+          },
+          {
+            "id": "schema_version_valid",
+            "status": "pass",
+            "message": "workflow-closeout receipt must use skills-sdk.eval-closeout.v1.",
+            "evidence": []
+          },
+          {
+            "id": "cases_array_valid",
+            "status": "pass",
+            "message": "workflow-closeout receipt must carry cases as an array.",
+            "evidence": []
+          },
+          {
+            "id": "blocked_cases_block_suite",
+            "status": "pass",
+            "message": "Any blocked case must make the suite closeout status blocked.",
+            "evidence": []
+          },
+          {
+            "id": "non_pass_blocks_source_mutation",
+            "status": "pass",
+            "message": "Non-pass closeouts must set mutation_allowed=false.",
+            "evidence": []
+          },
+          {
+            "id": "non_pass_blocks_registry_promotion",
+            "status": "pass",
+            "message": "Non-pass closeouts must set registry_update_allowed=false.",
+            "evidence": []
+          },
+          {
+            "id": "missing_artifacts_have_blocker_class",
+            "status": "pass",
+            "message": "Closeouts with missing suite artifacts must include blocker_class.",
+            "evidence": []
+          },
+          {
+            "id": "pass_has_case_evidence",
+            "status": "pass",
+            "message": "Pass closeouts must include complete case evidence or an explicit no_case_reason.",
+            "evidence": []
+          }
+        ],
+        "blockers": []
+      },
+      "path": "Infrastructure/artifacts/skills/improve-codebase-architecture/20260630-141750-723575/workflow-closeout.json"
+    },
+    "eval_closeout_path": "Infrastructure/artifacts/skills/improve-codebase-architecture/20260630-141750-723575/workflow-closeout.json"
+  },
+  "telemetry": {
+    "latency_ms": 277434
+  },
+  "errors": [
+    {
+      "code": "ERR_VALIDATION",
+      "message": "Evaluation run failed."
+    },
+    {
+      "code": "ERR_RUNTIME",
+      "message": "Tessl eval blocked: Unable to relink or create Tessl project jscraik/improve-codebase-architecture for the temp-staged eval directory."
+    }
+  ]
+}

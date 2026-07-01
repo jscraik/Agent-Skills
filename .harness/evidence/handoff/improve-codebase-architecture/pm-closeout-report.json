@@ -1,0 +1,119 @@
+{
+  "schema_version": "pm-closeout-report/v1",
+  "status": "superseded_archived_evidence",
+  "thread_id": "019f0314-ba59-7a00-ab78-9bd3174d1d03",
+  "branch": "codex/sdk-eval-parity-guardrails",
+  "superseded_by": {
+    "reason": "Archived closeout evidence belongs to PR #296 and must not be used as current PR #298 closeout evidence.",
+    "current_pr": 298,
+    "current_branch": "codex/sdk-cleanup-followup"
+  },
+  "repo": "/Users/jamiecraik/dev/agent-skills",
+  "cwd": "/Users/jamiecraik/dev/agent-skills",
+  "dirty_state_before": {
+    "summary": "Primary checkout had mixed staged/unstaged/untracked work across this improve-codebase-architecture lane and unrelated SDK/eval-profile, evals-router, devrel-hack-coach, evidence, and memory buckets. Initial index was polluted with unrelated staged files and was unstaged before scoping this lane."
+  },
+  "dirty_state_after": {
+    "summary": "Primary checkout preserves unrelated/user-owned dirty work unstaged. This lane was committed locally at 7f5cceb30, then cherry-picked onto a clean temporary worktree based on the remote PR branch and pushed as 8814d28d5. Temporary tracked stash was popped; .skillsets/agent-ops conflict was resolved to the restored unrelated dirty-worktree version and left unstaged.",
+    "remaining_dirty_buckets": [
+      ".harness/memory/LEARNINGS.md",
+      ".skillsets/agent-ops/manifest.jsonl from unrelated dirty bucket",
+      "SDK eval-profile/platform files",
+      "evals-router reference files",
+      "sdk-scenario-generator files",
+      "devrel-hack-coach files and evidence",
+      "improve-codebase-architecture local evidence/report artifacts"
+    ]
+  },
+  "files_changed_by_this_lane": [
+    ".skillsets/agent-ops/manifest.jsonl in pushed commit",
+    "Infrastructure/scripts/lib/ask/commands/evals.py in pushed commit",
+    "Skills/agent-ops/improve-codebase-architecture/** already present on PR branch and validated in this lane",
+    ".harness/evidence/handoff/improve-codebase-architecture/pm-closeout-report.json",
+    ".harness/reports/thread-replies/019f0314-ba59-7a00-ab78-9bd3174d1d03/latest.json"
+  ],
+  "commits_created": [
+    {
+      "sha": "7f5cceb30",
+      "subject": "fix(improve-codebase-architecture): compact capsule handoff",
+      "location": "primary dirty checkout; not pushed directly because branch diverged"
+    },
+    {
+      "sha": "8814d28d512f30068cdb11099c59f002d29278b1",
+      "subject": "fix(improve-codebase-architecture): compact capsule handoff",
+      "location": "clean temporary worktree based on origin/codex/sdk-eval-parity-guardrails; pushed to PR branch"
+    }
+  ],
+  "push_result": {
+    "status": "pass",
+    "command": "git push origin HEAD:codex/sdk-eval-parity-guardrails",
+    "evidence": "7c7bc89cb..8814d28d5 HEAD -> codex/sdk-eval-parity-guardrails"
+  },
+  "pr": {
+    "url": "https://github.com/jscraik/Agent-Skills/pull/296",
+    "number": 296,
+    "state": "OPEN",
+    "is_draft": false,
+    "head_ref_oid": "8814d28d512f30068cdb11099c59f002d29278b1",
+    "merge_state_status": "DIRTY",
+    "body_updated": true,
+    "hosted_checks": {
+      "command": "gh pr checks 296 --watch=false",
+      "outcome": "fail",
+      "checks": [
+        "security/snyk (jscraik): fail - private test limit used",
+        "Socket Security: Project Report: pass",
+        "pr-pipeline: pass",
+        "ci/circleci: pr-pipeline: pass",
+        "CodeRabbit: pending - Review queued"
+      ]
+    }
+  },
+  "validation_commands": [
+    "Command: uv run --python 3.12 python -m py_compile Infrastructure/scripts/lib/ask/commands/evals.py -> pass (exit 0)",
+    "Command: ./bin/ask skills package verify Skills/agent-ops/improve-codebase-architecture --json --robot -> pass (status success; package status pass; blockers [])",
+    "Command: ./bin/ask skills audit Skills/agent-ops/improve-codebase-architecture --level strict --json --robot -> pass (status success; diagnostics exit 0; security gate exit 0; family benchmarks exit 0)",
+    "Command: uv run --python 3.12 --with pyyaml --with jsonschema python Infrastructure/scripts/validation-and-linting/validate_skill_authoring_family_benchmarks.py --skill Skills/agent-ops/improve-codebase-architecture --format json -> pass (findings []; pass true)",
+    "Command: ./bin/ask sdk eval scenario-quality Skills/agent-ops/improve-codebase-architecture --preview --json --robot -> pass (status success; scenario_count 20; promotion_ready_count 20; blocked_count 0)",
+    "Command: ./bin/ask sdk eval scorer-quality Skills/agent-ops/improve-codebase-architecture --preview --json --robot -> pass (status success; ready true; blockers [])",
+    "Command: ./bin/ask sdk eval scorer-calibration Skills/agent-ops/improve-codebase-architecture --preview --json --robot -> pass (status success; ready true; example_count 6; blockers [])",
+    "Command: ./bin/plugin-eval analyze Skills/agent-ops/improve-codebase-architecture --format json -> pass (grade A; score 100; riskLevel low)",
+    "Command: python3 Infrastructure/scripts/lifecycle-and-sync/generate_skillset_manifests.py --write --json -> pass (status pass; staged only .skillsets/agent-ops/manifest.jsonl for this lane)",
+    "Command: python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --json -> pass (status pass; violations 0 after regenerating manifest from staged snapshot)",
+    "Command: git diff --cached --check -- .skillsets/agent-ops/manifest.jsonl Infrastructure/scripts/lib/ask/commands/evals.py Skills/agent-ops/improve-codebase-architecture -> pass (exit 0)",
+    "Command: git commit -F /tmp/improve-arch-commit.* -> blocked (first attempts hit SKILLSET_SOURCE_HASH_STALE until unrelated tracked work was stashed and manifest regenerated from staged snapshot; final pre-commit validation passed and created local commit 7f5cceb30)",
+    "Command: git fetch origin codex/sdk-eval-parity-guardrails -> pass (remote PR branch fetched)",
+    "Command: git cherry-pick 7f5cceb30 -> blocked (manifest conflict in clean worktree; resolved by regenerating .skillsets/agent-ops/manifest.jsonl from post-cherry-pick source snapshot)",
+    "Command: uv run --python 3.12 python -m py_compile Infrastructure/scripts/lib/ask/commands/evals.py -> pass (clean worktree pushed-state candidate exit 0)",
+    "Command: ./bin/ask skills package verify Skills/agent-ops/improve-codebase-architecture --json --robot -> pass (clean worktree pushed-state candidate status success; package status pass)",
+    "Command: python3 Infrastructure/scripts/validation-and-linting/check_context_budget.py --json | jq -r '.status, (.violations|length)' -> pass (clean worktree pushed-state candidate status pass; violations 0)",
+    "Command: git diff HEAD^ --check -> pass (clean worktree pushed-state candidate exit 0)",
+    "Command: git push origin HEAD:codex/sdk-eval-parity-guardrails -> pass (pushed 8814d28d5)",
+    "Command: gh pr view codex/sdk-eval-parity-guardrails --json number,url,state,isDraft,mergeStateStatus,headRefOid,title,body -> pass (PR #296 open; not draft; head 8814d28d5; mergeStateStatus DIRTY)",
+    "Command: gh pr checks 296 --watch=false -> fail (Snyk quota failed; CodeRabbit pending; CircleCI passed)"
+  ],
+  "runtime_proof": "No fresh runtime/Tessl/oss-cloud lane was run after PM closeout order.",
+  "hosted_ci_pr_proof": "Archived PR #296 evidence only; not current PR #298 CI proof.",
+  "review_state": "Archived PR #296 review state only; not current PR #298 review-thread proof.",
+  "tracker_state": "No Linear/tracker state was provided or updated.",
+  "merge_readiness": "not_claimed; hosted checks/review are not complete.",
+  "remaining_blockers": [
+    {
+      "class": "external_ci_quota",
+      "detail": "security/snyk (jscraik) failed: private test limit used."
+    },
+    {
+      "class": "hosted_review_pending",
+      "detail": "CodeRabbit review queued/pending."
+    },
+    {
+      "class": "unrelated_dirty_worktree",
+      "detail": "Primary checkout intentionally retains unrelated dirty buckets."
+    },
+    {
+      "class": "not_merge_ready",
+      "detail": "PR mergeStateStatus is DIRTY; merge readiness not claimed."
+    }
+  ],
+  "next_pm_decision_needed": "Decide whether to wait for CodeRabbit, resolve/waive Snyk quota externally, and authorize any further Tessl/oss-cloud/runtime proof lanes."
+}

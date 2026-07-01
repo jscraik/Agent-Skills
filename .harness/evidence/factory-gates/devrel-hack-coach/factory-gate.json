@@ -1,0 +1,15 @@
+{
+  "schema_version": "factory-gate/v1",
+  "skill": "devrel-hack-coach",
+  "target": "Skills/product-strategy/devrel-hack-coach",
+  "user_outcome": "Validate the SDK devrel-hack-coach skill through the Skills SDK pipeline.",
+  "copied_assumption": "Do not treat original Tessl package shape or eval prompt snapshots as release proof.",
+  "smallest_effective_mechanism": "Restore the SDK package from stash and patch only the scenario criteria that own the oss-local failures.",
+  "artifact_decision": "BUILD_SKILL",
+  "proof_needed": "Package verify, scenario-quality, release ratchet, and full oss-local smoke before oss-cloud or Tessl.",
+  "command_evidence": [
+    "./bin/ask skills package verify Skills/product-strategy/devrel-hack-coach --json --robot -> pass",
+    "./bin/ask sdk eval scenario-quality Skills/product-strategy/devrel-hack-coach --preview --json --robot -> pass"
+  ],
+  "generated_at": "2026-06-30T13:05:30.283Z"
+}

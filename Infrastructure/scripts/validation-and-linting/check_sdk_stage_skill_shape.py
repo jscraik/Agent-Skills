@@ -6,6 +6,7 @@ from __future__ import annotations
 import re
 import sys
 import json
+import subprocess
 from pathlib import Path
 
 try:
@@ -195,15 +196,61 @@ def sdk_stage_skill_dirs(root: Path) -> list[Path]:
 
 
 def load_yaml(path: Path) -> dict:
+    text = path.read_text(encoding="utf-8")
     if yaml is None:
-        fail(
-            f"{path} requires PyYAML; run through "
-            "bash Infrastructure/scripts/run-infrastructure-python.sh"
-        )
-    payload = yaml.safe_load(path.read_text(encoding="utf-8"))  # type: ignore[union-attr]
+        payload = load_yaml_with_ruby(path, text)
+    else:
+        payload = yaml.safe_load(text)  # type: ignore[union-attr]
     if not isinstance(payload, dict):
         fail(f"{path} must contain a YAML mapping")
     return payload
+
+
+def load_yaml_with_ruby(path: Path, text: str) -> dict:
+    code = (
+        "require 'yaml'; require 'json'; "
+        "print JSON.generate(YAML.safe_load(STDIN.read, permitted_classes: [], aliases: true))"
+    )
+    try:
+        process = subprocess.run(
+            ["ruby", "-e", code],
+            input=text,
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+    except (FileNotFoundError, subprocess.TimeoutExpired, OSError) as exc:
+        fail_yaml_runtime_unavailable(path, str(exc))
+    if process.returncode != 0:
+        if ruby_yaml_runtime_unavailable(process.stderr):
+            fail_yaml_runtime_unavailable(path, process.stderr)
+        fail(f"{path} is invalid YAML: {process.stderr.strip()}")
+    payload = json.loads(process.stdout)
+    if not isinstance(payload, dict):
+        fail(f"{path} must contain a YAML mapping")
+    return payload
+
+
+def ruby_yaml_runtime_unavailable(stderr: str) -> bool:
+    lowered = stderr.lower()
+    tooling_markers = (
+        "mise",
+        "shim",
+        "trust",
+        "permission denied",
+        "command not found",
+        "no such file or directory",
+    )
+    return any(marker in lowered for marker in tooling_markers)
+
+
+def fail_yaml_runtime_unavailable(path: Path, stderr: str = "") -> None:
+    detail = f" Ruby stderr: {stderr.strip()}" if stderr.strip() else ""
+    fail(
+        f"{path} requires PyYAML or runnable Ruby YAML; run through "
+        f"bash Infrastructure/scripts/run-infrastructure-python.sh.{detail}"
+    )
 
 
 def load_json(path: Path) -> dict:

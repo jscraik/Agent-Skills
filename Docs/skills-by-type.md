@@ -18,10 +18,10 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `scaffolding_templates`: 16
 - `code_quality_review`: 25
 - `ci_cd_deployment`: 0
-- `runbook`: 15
+- `runbook`: 16
 - `infrastructure_ops`: 3
 - `invalid`: 45
-- `total_tagged`: 115
+- `total_tagged`: 116
 
 ## Semantic Types
 
@@ -119,7 +119,6 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `baseline-ui` — `Skills/frontend-ui`
 - `best-practices` — `Skills/security-ops`
 - `codex-review` — `Skills/agent-ops`
-- `technical-writer` — `Skills/agent-ops`
 - `elixir-pro` — `Skills/agent-ops`
 - `evals-router` — `Skills/agent-ops`
 - `fixing-accessibility` — `Skills/frontend-ui`
@@ -134,6 +133,7 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `sdk-scenario-generator` — `Skills/agent-ops`
 - `simplify` — `Skills/agent-ops`
 - `skill-builder` — `Plugins/skill-factory/skills/code_quality_review`
+- `technical-writer` — `Skills/agent-ops`
 - `testing` — `Skills/agent-ops`
 - `toml` — `Skills/agent-ops`
 - `typescript` — `Skills/agent-ops`
@@ -150,6 +150,7 @@ Entries are grouped by declared semantic type; each path names the owning skill 
 - `bash-hygiene` — `Skills/agent-ops`
 - `biome-linting` — `Skills/agent-ops`
 - `codex-environment-creator` — `Skills/agent-ops`
+- `devrel-hack-coach` — `Skills/product-strategy`
 - `diagram-cli` — `Skills/agent-ops`
 - `improve-agent-native` — `Skills/agent-ops`
 - `keep-codex-fast` — `Skills/agent-ops`

@@ -1,0 +1,17 @@
+{
+  "schema_version": "skills-sdk-gate-receipt/v1",
+  "gate": "scenario_quality",
+  "status": "pass",
+  "target": "Skills/product-strategy/devrel-hack-coach",
+  "command": "./bin/ask sdk eval scenario-quality Skills/product-strategy/devrel-hack-coach --preview --json --robot",
+  "evidence_refs": [
+    "Skills/product-strategy/devrel-hack-coach/SKILL.md",
+    "Skills/product-strategy/devrel-hack-coach/references/evals.yaml"
+  ],
+  "proves": "The scenario-quality preview passed for 20 scenarios.",
+  "does_not_prove": "Does not prove oss-local, oss-cloud, Tessl, PR, CI, or merge readiness.",
+  "generated_at": "2026-06-30T13:05:30.283Z",
+  "scenario_count": 20,
+  "promotion_ready_count": 20,
+  "blocked_count": 0
+}

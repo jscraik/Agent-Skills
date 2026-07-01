@@ -1,0 +1,11 @@
+{
+  "schema_version": "thread-report-delivery/v1",
+  "thread_id": "019f1b02-6f25-7721-8c57-795cae870be9",
+  "pm_thread_id": "019f0314-ba59-7a00-ab78-9bd3174d1d03",
+  "report_path": "latest.json",
+  "delivery_method": "codex_app__send_message_to_thread",
+  "delivery_status": "delivered",
+  "delivery_evidence": "codex_app__send_message_to_thread returned threadId 019f0314-ba59-7a00-ab78-9bd3174d1d03",
+  "delivered_at": "2026-07-01T00:23:29Z",
+  "message_summary": "PM notified that private Tessl publication is blocked at SDK scenario-quality for improve-agent-native: 43 scenarios checked, 4 promotion-ready, 39 blocked; no Tessl publish was run."
+}

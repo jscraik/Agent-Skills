@@ -1,0 +1,271 @@
+{
+  "schema_version": "repo-layout.v1",
+  "status": "compatibility_target",
+  "owner": "Agent Skills Kit",
+  "purpose": "Classify repository layout surfaces before migrating toward foundry/ and skills-sdk/ roots.",
+  "target_layout": {
+    "root_governance": {
+      "purpose": "Repo bootstrap, governance, contribution, security, and instruction entrypoints.",
+      "paths": [
+        "AGENTS.md",
+        "ARCHITECTURE.md",
+        "CHANGELOG.md",
+        "CODEOWNERS",
+        "CODESTYLE.md",
+        "CODE_OF_CONDUCT.md",
+        "CONTEXT.md",
+        "CONTRIBUTING.md",
+        "FORJAMIE.md",
+        "LICENSE",
+        "Makefile",
+        "README.md",
+        "SECURITY.md",
+        "SKILL.md",
+        "SUPPORT.md",
+        "UBIQUITOUS_LANGUAGE.md",
+        "WORKFLOW.md",
+        "harness.contract.json",
+        "justfile",
+        "bin",
+        "memory.json",
+        "prek.toml"
+      ]
+    },
+    "foundry": {
+      "purpose": "Future canonical source home for skills, plugins, and system-skill overlays.",
+      "future_paths": [
+        "foundry/skills",
+        "foundry/plugins",
+        "foundry/system-skills"
+      ],
+      "legacy_paths": [
+        "Skills",
+        "Plugins",
+        "plugins",
+        "skills-system"
+      ]
+    },
+    "skills_sdk": {
+      "purpose": "Future canonical home for Skills SDK lifecycle implementation, validators, schemas, docs, artifacts, and brand.",
+      "future_paths": [
+        "skills-sdk/Infrastructure",
+        "skills-sdk/docs",
+        "skills-sdk/artifacts",
+        "skills-sdk/brand"
+      ],
+      "legacy_paths": [
+        "Infrastructure",
+        "Docs",
+        "artifacts",
+        "brand"
+      ]
+    },
+    "evidence_control": {
+      "purpose": "Plans, specs, PM reports, runtime evidence, research, memory, and closeout artifacts.",
+      "paths": [
+        ".harness",
+        "logs"
+      ]
+    },
+    "runtime_projection": {
+      "purpose": "Generated or runtime-facing local projection and integration surfaces.",
+      "paths": [
+        ".agents",
+        ".agent",
+        ".codex",
+        ".skillsets",
+        ".skill-telemetry",
+        ".workouts"
+      ]
+    },
+    "repo_automation": {
+      "purpose": "Hosted CI, repository automation, local tool config, and policy files.",
+      "paths": [
+        ".circleci",
+        ".github",
+        ".diagram",
+        ".vale",
+        ".architecture.yml",
+        ".coderabbit.yaml",
+        ".diagramrc",
+        ".gitleaks.toml",
+        ".gitignore",
+        ".markdownlint.yaml",
+        ".memory-metrics.json",
+        ".mise.toml",
+        ".npmrc",
+        ".pylintrc",
+        ".qdrant-initialized",
+        ".semgrepignore",
+        ".vale.ini",
+        "biome.json"
+      ]
+    },
+    "supporting_reference": {
+      "purpose": "Repository reference libraries and local knowledge surfaces that are neither SDK implementation nor skill source.",
+      "paths": [
+        "Wiki",
+        ".obsidian"
+      ]
+    },
+    "compatibility_aliases": {
+      "purpose": "Deprecated root aliases that preserve older entrypoints until explicit wrappers or migrated paths replace them.",
+      "paths": [
+        "GOVERNANCE",
+        "docs-policy.json",
+        "scripts"
+      ]
+    },
+    "local_runtime_ignored": {
+      "purpose": "Local caches, virtual environments, dependency directories, and scratch state. These are ignored for layout authority.",
+      "paths": [
+        ".cache",
+        ".pytest_cache",
+        ".ruff_cache",
+        ".venv",
+        ".DS_Store",
+        "node_modules",
+        "npython3"
+      ]
+    }
+  },
+  "symlink_policy": {
+    "unknown_symlink_status": "error",
+    "classes": [
+      {
+        "id": "runtime_skill_projection",
+        "classification": "runtime_projection",
+        "status": "allowed",
+        "path_patterns": [
+          ".agents/skills/*"
+        ],
+        "target_patterns": [
+          "../../Skills/*",
+          "../../foundry/skills/*"
+        ],
+        "owner": "skills projection sync",
+        "reason": ".agents/skills exposes canonical skill source to the local runtime without becoming editable source."
+      },
+      {
+        "id": "runtime_plugin_projection",
+        "classification": "runtime_projection",
+        "status": "allowed",
+        "path_patterns": [
+          ".agents/plugins",
+          ".agents/plugins-runtime/*"
+        ],
+        "target_patterns": [
+          "../../plugins*",
+          "*/agent-skills/plugins*",
+          "../../foundry/plugins/*"
+        ],
+        "owner": "plugin runtime sync",
+        "reason": "Plugin runtime links are runtime-facing projection or compatibility surfaces."
+      },
+      {
+        "id": "personal_plugin_runtime_links",
+        "classification": "external_runtime_link",
+        "status": "allowed",
+        "path_patterns": [
+          ".agents/personal-plugins/*",
+          "Plugins/browser-use",
+          "plugins/browser-use"
+        ],
+        "target_patterns": [
+          "~/.codex/plugins/*",
+          "*/.codex/plugins/*",
+          "*/Codex.app/*"
+        ],
+        "owner": "local runtime integration",
+        "reason": "Personal and app-bundled plugin links are local runtime integration surfaces, not package source."
+      },
+      {
+        "id": "deferred_reference_links",
+        "classification": "compatibility_alias",
+        "status": "allowed",
+        "path_patterns": [
+          "Infrastructure/references/deferred-skill-context/*"
+        ],
+        "target_patterns": [
+          "*"
+        ],
+        "owner": "deferred skill context archive",
+        "reason": "Deferred context links preserve historical reference bundles and are not editable canonical skill source."
+      },
+      {
+        "id": "plugin_internal_aliases",
+        "classification": "compatibility_alias",
+        "status": "allowed",
+        "path_patterns": [
+          "Plugins/*/fixtures/*",
+          "Plugins/*/skills/*",
+          "plugins/*/fixtures/*",
+          "plugins/*/skills/*"
+        ],
+        "target_patterns": [
+          "*"
+        ],
+        "owner": "plugin compatibility surface",
+        "reason": "Plugin-internal aliases preserve legacy skill or fixture entrypoints until foundry/plugin migration classifies them."
+      },
+      {
+        "id": "plugin_cache_runtime_links",
+        "classification": "external_runtime_link",
+        "status": "ignored",
+        "path_patterns": [
+          "plugins/cache/*"
+        ],
+        "target_patterns": [
+          "*"
+        ],
+        "owner": "local plugin cache",
+        "reason": "Plugin cache links are local runtime cache state and do not define source layout."
+      },
+      {
+        "id": "system_skill_compatibility_links",
+        "classification": "compatibility_alias",
+        "status": "allowed",
+        "path_patterns": [
+          "skills-system/plugin-installer",
+          "skills-system/plugin-creator"
+        ],
+        "target_patterns": [
+          "../Plugins/plugin-factory/skills/*",
+          "../foundry/plugins/plugin-factory/skills/*"
+        ],
+        "owner": "system skill overlays",
+        "reason": "Legacy system-skill entrypoints remain compatibility aliases until foundry/system-skills migration."
+      },
+      {
+        "id": "root_infrastructure_aliases",
+        "classification": "compatibility_alias",
+        "status": "deprecated",
+        "path_patterns": [
+          "scripts",
+          "GOVERNANCE",
+          "docs-policy.json"
+        ],
+        "target_patterns": [
+          "Infrastructure/*",
+          "skills-sdk/Infrastructure/*"
+        ],
+        "owner": "Skills SDK layout migration",
+        "reason": "Root aliases preserve older command paths but should be retired or converted to explicit wrappers during layout migration."
+      },
+      {
+        "id": "dependency_manager_links",
+        "classification": "dependency_manager_link",
+        "status": "ignored",
+        "path_patterns": [
+          "node_modules/.bin/*",
+          ".venv/bin/*"
+        ],
+        "target_patterns": [
+          "*"
+        ],
+        "owner": "dependency managers",
+        "reason": "Package managers and virtualenvs own these links; they do not define repository architecture."
+      }
+    ]
+  }
+}

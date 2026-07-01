@@ -1,0 +1,7 @@
+interface:
+  display_name: "DevRel Hack Coach"
+  short_description: "Spec-first hackathon coaching"
+  default_prompt: "Coach me through scoping a timeboxed AI-native hackathon project."
+
+policy:
+  allow_implicit_invocation: true

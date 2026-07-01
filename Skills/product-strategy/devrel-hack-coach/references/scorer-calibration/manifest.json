@@ -1,0 +1,20 @@
+{
+  "examples_path": "examples.jsonl",
+  "max_false_negatives": 0,
+  "max_false_positives": 0,
+  "minimum_examples": 2,
+  "minimum_true_negatives": 1,
+  "minimum_true_positives": 1,
+  "parameters": {
+    "model": "deterministic-local",
+    "temperature": 0,
+    "trial_count": 1
+  },
+  "prompt_version": "devrel-hack-coach-evidence-scorer.v1",
+  "raw_artifacts_dir": "raw",
+  "schema_version": "skills-sdk.scorer-calibration-bundle.v1",
+  "scorer_id": "devrel-hack-coach-evidence-scorer",
+  "scorer_version_or_digest": "sha256:5a8b808dc0df7f313f5f23d7d2ac3c9fb3a75e2c31a2201d52f71db35670d82c",
+  "split": "held_out",
+  "threshold": 0.8
+}

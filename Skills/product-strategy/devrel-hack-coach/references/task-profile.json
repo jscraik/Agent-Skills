@@ -1,0 +1,68 @@
+{
+  "schema_version": "1.0",
+  "profile_id": "Skills-product-strategy-devrel-hack-coach",
+  "scope_skill": "Skills/product-strategy/devrel-hack-coach",
+  "scope_profile": "Skills",
+  "rubric_version": "2026-06-29",
+  "evaluator_version": "v1",
+  "persona_set_id": "default-v1",
+  "task_type": "coaching_workflow",
+  "thresholds": {
+    "stability_consecutive_passes": 1,
+    "critical_non_regression": true,
+    "max_iterations": 4,
+    "max_elapsed_ms": 120000,
+    "max_tokens": 12000,
+    "no_improvement_escalation_limit": 2,
+    "oss_local_target_min": 0.7,
+    "oss_cloud_target_min": 0.9,
+    "tessl_review_min": 90
+  },
+  "criteria": [
+    {
+      "id": "phase_gate_control",
+      "label": "Phase Gate Control",
+      "threshold": 0.8,
+      "weight": 0.34,
+      "critical": true
+    },
+    {
+      "id": "timebox_fit",
+      "label": "Timebox Fit",
+      "threshold": 0.75,
+      "weight": 0.33,
+      "critical": true
+    },
+    {
+      "id": "boundary_safety",
+      "label": "Boundary Safety",
+      "threshold": 0.9,
+      "weight": 0.33,
+      "critical": true
+    }
+  ],
+  "delegation": {
+    "mode": "co-pilot",
+    "human_baseline_minutes": 45,
+    "ai_process_minutes": 15,
+    "probability_of_success": 0.75,
+    "rationale": "Human oversight is required before registry, Tessl, or release claims."
+  },
+  "learning_posture": {
+    "supported": [
+      "learn",
+      "guided",
+      "execute"
+    ],
+    "default": "guided"
+  },
+  "validation_profile": {
+    "package_verify": true,
+    "scenario_quality": true,
+    "oss_local_required_before_release": true,
+    "tessl_confirmational_only": true
+  },
+  "openai_lint": {
+    "openai_yaml_required": true
+  }
+}

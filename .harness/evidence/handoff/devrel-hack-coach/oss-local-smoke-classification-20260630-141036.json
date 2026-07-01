@@ -1,0 +1,37 @@
+{
+  "schema_version": "oss-local-smoke-classification/v1",
+  "skill": "Skills/product-strategy/devrel-hack-coach",
+  "run_id": "20260630-141036-416431",
+  "command": "./bin/ask sdk eval run Skills/product-strategy/devrel-hack-coach --runner internal --mode smoke --codex-profile oss-local --json --robot",
+  "receipt": "Infrastructure/artifacts/skills/devrel-hack-coach/20260630-141036-416431/scorecard.json",
+  "status": "classified",
+  "summary": {
+    "decision": "fail",
+    "case_count": 6,
+    "passed_count": 4,
+    "failed_count": 2,
+    "blocked_count": 0
+  },
+  "failures": [
+    {
+      "case_id": "happy-track-selection",
+      "owner": "skill_behavior",
+      "actual": "Asked for stack only and did not recommend one track, give a reason, or offer veto.",
+      "expected": "Pick one likely track from the context-loss itch, explain why, offer veto, then ask for stack.",
+      "minimal_patch_target": "SKILL.md non-negotiable track-choice override"
+    },
+    {
+      "case_id": "happy-plan-checkpoints",
+      "owner": "skill_behavior",
+      "actual": "Asked for spec fields only and did not name T+2h/T+8h/T+16h/T+22h checkpoint artifacts.",
+      "expected": "Name the four 24-hour checkpoint artifacts before asking for missing spec details.",
+      "minimal_patch_target": "SKILL.md non-negotiable locked-spec planning override"
+    }
+  ],
+  "gate_state": {
+    "oss_local": "blocked_behavior",
+    "oss_cloud": "blocked",
+    "tessl_dry_run": "blocked",
+    "tessl_live": "blocked"
+  }
+}

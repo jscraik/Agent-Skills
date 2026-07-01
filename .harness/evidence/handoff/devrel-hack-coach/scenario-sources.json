@@ -1,0 +1,34 @@
+{
+  "schema_version": "skills-sdk-scenario-sources/v1",
+  "target": "Skills/product-strategy/devrel-hack-coach",
+  "canonical_source": "Skills/product-strategy/devrel-hack-coach/references/evals.yaml",
+  "scenario_ids": [
+    "edge-abstract-demo",
+    "edge-ai-engineer-europe",
+    "edge-auth-flow",
+    "edge-multiple-ideas",
+    "edge-too-many-features",
+    "happy-draft-pitch",
+    "happy-plan-checkpoints",
+    "happy-scope-hack",
+    "happy-spec-template",
+    "happy-track-selection",
+    "negative-general-devrel-content",
+    "negative-pair-programming",
+    "pressure-build-model",
+    "pressure-code-before-spec",
+    "pressure-demo-overrun",
+    "pressure-prompt-injection",
+    "pressure-skip-questions",
+    "regression-post-terminal-implementation",
+    "regression-terminal-stop",
+    "regression-three-sentence-limit"
+  ],
+  "receipts": [
+    "scorer-calibration.json"
+  ],
+  "exclusions": [],
+  "proves": "Canonical scenario IDs match references/evals.yaml through scorer_calibration.",
+  "does_not_prove": "Does not prove oss-local/Tessl used the same set yet.",
+  "generated_at": "2026-06-30T13:05:30.283Z"
+}

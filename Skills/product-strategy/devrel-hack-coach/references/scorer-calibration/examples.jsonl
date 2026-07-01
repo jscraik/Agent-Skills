@@ -1,0 +1,2 @@
+{"id":"obvious-correct-phase-gate","expected_label":"pass","predicted_label":"pass","score":0.95,"probe_type":"obvious_correct","raw_artifact":"raw/obvious-correct-phase-gate.json"}
+{"id":"obvious-wrong-code-first","expected_label":"fail","predicted_label":"fail","score":0.1,"probe_type":"obvious_wrong","raw_artifact":"raw/obvious-wrong-code-first.json"}

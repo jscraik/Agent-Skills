@@ -1,0 +1,30 @@
+schema_version: knowledge-os.knowledge-demand.v1
+skill:
+  skill_id: devrel-hack-coach
+  declared_name: devrel-hack-coach
+  entrypoint_path: Skills/product-strategy/devrel-hack-coach/SKILL.md
+  canonical_skill_path: Skills/product-strategy/devrel-hack-coach/SKILL.md
+  writable_root: Skills/product-strategy/devrel-hack-coach
+  apply_target_path: Skills/product-strategy/devrel-hack-coach/SKILL.md
+knowledge_signals:
+  - hackathon_workflow
+  - ideation_pressure_test
+  - track_aware_selection
+  - spec_first_demo
+  - twenty_four_hour_plan
+  - pitch_and_judge_qa
+  - scope_cutting
+  - one_hour_five_minute_software_presentation
+needed_facets:
+  - pack.devrel-hack-coach-source-workbench:hackathon_workflow
+  - pack.devrel-hack-coach-source-workbench:ideation_pressure_test
+  - pack.devrel-hack-coach-source-workbench:track_aware_selection
+  - pack.devrel-hack-coach-source-workbench:spec_first_demo
+  - pack.devrel-hack-coach-source-workbench:twenty_four_hour_plan
+  - pack.devrel-hack-coach-source-workbench:pitch_and_judge_qa
+  - pack.devrel-hack-coach-source-workbench:scope_cutting
+  - pack.devrel-hack-coach-source-workbench:one_hour_five_minute_software_presentation
+runtime_dependency_policy:
+  requires_knowledge_os_at_runtime: false
+  raw_sources_included: false
+  local_absolute_paths_required: false

@@ -1,0 +1,78 @@
+schema_version: knowledge-os.knowledge-capsule-manifest.v1
+skill:
+  skill_id: devrel-hack-coach
+  declared_name: devrel-hack-coach
+  entrypoint_path: Skills/product-strategy/devrel-hack-coach/SKILL.md
+  canonical_skill_path: Skills/product-strategy/devrel-hack-coach/SKILL.md
+  writable_root: Skills/product-strategy/devrel-hack-coach
+  apply_target_path: Skills/product-strategy/devrel-hack-coach/SKILL.md
+upstream_pack:
+  pack_id: pack.devrel-hack-coach-source-workbench
+  export_root: exports/packs/pack.devrel-hack-coach-source-workbench
+  snapshot_digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
+selected_facets:
+  - pack.devrel-hack-coach-source-workbench:hackathon_workflow
+  - pack.devrel-hack-coach-source-workbench:ideation_pressure_test
+  - pack.devrel-hack-coach-source-workbench:track_aware_selection
+  - pack.devrel-hack-coach-source-workbench:spec_first_demo
+  - pack.devrel-hack-coach-source-workbench:twenty_four_hour_plan
+  - pack.devrel-hack-coach-source-workbench:pitch_and_judge_qa
+  - pack.devrel-hack-coach-source-workbench:scope_cutting
+  - pack.devrel-hack-coach-source-workbench:one_hour_five_minute_software_presentation
+selected_asset_ids:
+  - candidate.devcon-hack-coach.workflow
+  - candidate.devcon-hack-coach.ideation
+  - candidate.devcon-hack-coach.track-aware-selection
+  - candidate.devcon-hack-coach.spec-first-demo
+  - candidate.devcon-hack-coach.twenty-four-hour-plan
+  - candidate.devcon-hack-coach.pitch-qa
+  - candidate.devcon-hack-coach.scope-anti-patterns
+  - candidate.devcon-hack-coach.one-hour-five-minute-software-presentation
+source_export_paths:
+  pack_index: pack.index.yaml
+  snapshot: snapshot.yaml
+  assets: assets.json
+  eval_scenarios: eval-scenarios.json
+  slices: slices/*.md
+capsules:
+  - facet_id: hackathon_workflow
+    target_path: references/devrel-hack-coach-hackathon-workflow.md
+    asset_ids:
+      - candidate.devcon-hack-coach.workflow
+  - facet_id: ideation_pressure_test
+    target_path: references/devrel-hack-coach-ideation-pressure-test.md
+    asset_ids:
+      - candidate.devcon-hack-coach.ideation
+  - facet_id: track_aware_selection
+    target_path: references/devrel-hack-coach-track-aware-selection.md
+    asset_ids:
+      - candidate.devcon-hack-coach.track-aware-selection
+  - facet_id: spec_first_demo
+    target_path: references/devrel-hack-coach-spec-first-demo.md
+    asset_ids:
+      - candidate.devcon-hack-coach.spec-first-demo
+  - facet_id: twenty_four_hour_plan
+    target_path: references/devrel-hack-coach-twenty-four-hour-plan.md
+    asset_ids:
+      - candidate.devcon-hack-coach.twenty-four-hour-plan
+  - facet_id: pitch_and_judge_qa
+    target_path: references/devrel-hack-coach-pitch-and-judge-qa.md
+    asset_ids:
+      - candidate.devcon-hack-coach.pitch-qa
+  - facet_id: scope_cutting
+    target_path: references/devrel-hack-coach-scope-cutting.md
+    asset_ids:
+      - candidate.devcon-hack-coach.scope-anti-patterns
+  - facet_id: one_hour_five_minute_software_presentation
+    target_path: references/devrel-hack-coach-one-hour-five-minute-software-presentation.md
+    asset_ids:
+      - candidate.devcon-hack-coach.one-hour-five-minute-software-presentation
+runtime_dependency_policy:
+  requires_knowledge_os_at_runtime: false
+  raw_sources_included: false
+  local_absolute_paths_required: false
+provenance:
+  pack_index: pack.index.yaml
+  snapshot: snapshot.yaml
+  assets: assets.json
+  eval_scenarios: eval-scenarios.json

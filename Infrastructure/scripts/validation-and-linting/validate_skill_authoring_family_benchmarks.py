@@ -16,6 +16,7 @@ import argparse
 import importlib.util
 import json
 import re
+import subprocess
 import sys
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
@@ -203,8 +204,37 @@ class Finding:
 
 
 def _load_yaml(path: Path) -> Dict[str, Any]:
-    yaml_module = _require_yaml()
-    obj = yaml_module.safe_load(path.read_text(encoding="utf-8"))
+    text = path.read_text(encoding="utf-8")
+    if yaml is not None:
+        obj = yaml.safe_load(text)
+    else:
+        obj = _load_yaml_with_ruby(path, text)
+    if not isinstance(obj, dict):
+        raise ValueError("expected a YAML mapping/object")
+    return obj
+
+
+def _load_yaml_with_ruby(path: Path, text: str) -> Dict[str, Any]:
+    code = (
+        "require 'yaml'; require 'json'; "
+        "print JSON.generate(YAML.safe_load(STDIN.read, permitted_classes: [], aliases: true))"
+    )
+    try:
+        process = subprocess.run(
+            ["ruby", "-e", code],
+            input=text,
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=10,
+        )
+    except FileNotFoundError:
+        _require_yaml()
+    except subprocess.TimeoutExpired as exc:
+        raise ValueError(f"{path} ruby YAML fallback timed out") from exc
+    if process.returncode != 0:
+        raise ValueError(process.stderr.strip())
+    obj = json.loads(process.stdout)
     if not isinstance(obj, dict):
         raise ValueError("expected a YAML mapping/object")
     return obj

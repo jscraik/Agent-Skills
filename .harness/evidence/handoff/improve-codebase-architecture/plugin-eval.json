@@ -1,0 +1,1074 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "plugin-eval",
+    "version": "0.1.0"
+  },
+  "createdAt": "2026-06-30T13:16:32.072Z",
+  "target": {
+    "kind": "skill",
+    "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture",
+    "entryPath": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/SKILL.md",
+    "name": "improve-codebase-architecture",
+    "relativePath": "Skills/agent-ops/improve-codebase-architecture"
+  },
+  "summary": {
+    "score": 100,
+    "grade": "A",
+    "riskLevel": "low",
+    "riskReasons": [
+      "No failing or warning checks were found; remaining items are informational only."
+    ],
+    "scoreBreakdown": {
+      "startingScore": 100,
+      "totalDeductions": 0.25,
+      "finalScore": 100,
+      "gradeThresholds": {
+        "A": 93,
+        "B": 85,
+        "C": 70,
+        "D": 55
+      }
+    },
+    "checkCounts": {
+      "total": 2,
+      "pass": 0,
+      "warn": 0,
+      "fail": 0,
+      "info": 2,
+      "error": 0,
+      "warning": 0
+    },
+    "deductions": [
+      {
+        "id": "coverage-artifacts-unavailable",
+        "category": "coverage",
+        "severity": "info",
+        "status": "info",
+        "message": "No coverage artifacts were found for this target.",
+        "penalty": 0.25,
+        "remediation": [
+          "Generate `lcov.info`, `coverage.xml`, or an Istanbul coverage JSON file if you want coverage scoring."
+        ],
+        "source": "core"
+      }
+    ],
+    "categoryDeductions": [
+      {
+        "category": "coverage",
+        "totalPenalty": 0.25,
+        "checks": 1
+      }
+    ],
+    "topRecommendations": [],
+    "whyBullets": [
+      "coverage is the largest source of score loss at -0.25 points.",
+      "Budget pressure is not the dominant issue right now.",
+      "No observed usage is attached yet, so budget conclusions are still based on static estimates."
+    ],
+    "fixFirst": [],
+    "watchNext": []
+  },
+  "budgets": {
+    "method": "estimated-static-policy-aware",
+    "invocation_policy": {
+      "allow_implicit_invocation": false,
+      "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/agents/openai.yaml"
+    },
+    "trigger_cost_tokens": {
+      "value": 0,
+      "band": "good",
+      "thresholds": {
+        "goodMax": 139,
+        "moderateMax": 182,
+        "heavyMax": 182
+      },
+      "components": []
+    },
+    "invoke_cost_tokens": {
+      "value": 1761,
+      "band": "moderate",
+      "thresholds": {
+        "goodMax": 1396,
+        "moderateMax": 2640,
+        "heavyMax": 2640
+      },
+      "components": [
+        {
+          "label": "skill-file",
+          "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/SKILL.md",
+          "tokens": 1761,
+          "note": "Loaded when the skill is invoked"
+        }
+      ]
+    },
+    "deferred_cost_tokens": {
+      "value": 5494,
+      "band": "moderate",
+      "thresholds": {
+        "goodMax": 0,
+        "moderateMax": 5616,
+        "heavyMax": 5616
+      },
+      "components": [
+        {
+          "label": "agents/openai.yaml",
+          "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/agents/openai.yaml",
+          "tokens": 56,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "references/architecture-practice-contract.md",
+          "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/architecture-practice-contract.md",
+          "tokens": 181,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "references/classification-cheatsheet.md",
+          "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/classification-cheatsheet.md",
+          "tokens": 246,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "references/contract.yaml",
+          "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/contract.yaml",
+          "tokens": 496,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "references/deepening-workflow.md",
+          "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/deepening-workflow.md",
+          "tokens": 193,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "references/discovery-interview.md",
+          "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/discovery-interview.md",
+          "tokens": 29,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "references/evals.yaml",
+          "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/evals.yaml",
+          "tokens": 2574,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "references/examples.md",
+          "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/examples.md",
+          "tokens": 154,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "references/knowledge-capsule-routing.md",
+          "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/knowledge-capsule-routing.md",
+          "tokens": 42,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "references/knowledge-capsule.manifest.yaml",
+          "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/knowledge-capsule.manifest.yaml",
+          "tokens": 472,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "references/knowledge-demand.yaml",
+          "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/knowledge-demand.yaml",
+          "tokens": 17,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "references/output-schema.md",
+          "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/output-schema.md",
+          "tokens": 312,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "references/scenario-review.md",
+          "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/scenario-review.md",
+          "tokens": 34,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "references/scorer-calibration/manifest.json",
+          "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/manifest.json",
+          "tokens": 139,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "references/scorer-calibration/raw/concise-correct-vs-verbose-wrong.json",
+          "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/concise-correct-vs-verbose-wrong.json",
+          "tokens": 68,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "references/scorer-calibration/raw/copied-rubric-no-evidence.json",
+          "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/copied-rubric-no-evidence.json",
+          "tokens": 63,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "references/scorer-calibration/raw/obvious-correct-boundary-proof.json",
+          "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/obvious-correct-boundary-proof.json",
+          "tokens": 64,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "references/scorer-calibration/raw/obvious-wrong-overclaim.json",
+          "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/obvious-wrong-overclaim.json",
+          "tokens": 59,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "references/scorer-calibration/raw/producer-proof-overclaim.json",
+          "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/producer-proof-overclaim.json",
+          "tokens": 65,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "references/scorer-calibration/raw/skill-name-only.json",
+          "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/skill-name-only.json",
+          "tokens": 60,
+          "note": "Deferred supporting file"
+        },
+        {
+          "label": "references/task-profile.json",
+          "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/task-profile.json",
+          "tokens": 170,
+          "note": "Deferred supporting file"
+        }
+      ]
+    },
+    "total_tokens": {
+      "value": 7255,
+      "band": "moderate"
+    }
+  },
+  "observedUsage": null,
+  "checks": [
+    {
+      "id": "coverage-artifacts-unavailable",
+      "category": "coverage",
+      "severity": "info",
+      "status": "info",
+      "message": "No coverage artifacts were found for this target.",
+      "evidence": [
+        "Skills/agent-ops/improve-codebase-architecture"
+      ],
+      "remediation": [
+        "Generate `lcov.info`, `coverage.xml`, or an Istanbul coverage JSON file if you want coverage scoring."
+      ],
+      "source": "core"
+    }
+  ],
+  "metrics": [
+    {
+      "id": "skill_line_count",
+      "category": "budget",
+      "value": 98,
+      "unit": "lines",
+      "band": "good",
+      "source": "core",
+      "targetPath": "Skills/agent-ops/improve-codebase-architecture"
+    },
+    {
+      "id": "description_length_chars",
+      "category": "budget",
+      "value": 237,
+      "unit": "chars",
+      "band": "good",
+      "source": "core",
+      "targetPath": "Skills/agent-ops/improve-codebase-architecture"
+    },
+    {
+      "id": "relative_link_count",
+      "category": "documentation",
+      "value": 0,
+      "unit": "links",
+      "band": "good",
+      "source": "core",
+      "targetPath": "Skills/agent-ops/improve-codebase-architecture"
+    },
+    {
+      "id": "code_fence_count",
+      "category": "readability",
+      "value": 0,
+      "unit": "blocks",
+      "band": "good",
+      "source": "core",
+      "targetPath": "Skills/agent-ops/improve-codebase-architecture"
+    },
+    {
+      "id": "support_file_count",
+      "category": "documentation",
+      "value": 22,
+      "unit": "files",
+      "band": "good",
+      "source": "core",
+      "targetPath": "Skills/agent-ops/improve-codebase-architecture"
+    },
+    {
+      "id": "trigger_cost_tokens",
+      "category": "budget",
+      "value": 0,
+      "unit": "tokens",
+      "band": "good",
+      "source": "core"
+    },
+    {
+      "id": "invoke_cost_tokens",
+      "category": "budget",
+      "value": 1761,
+      "unit": "tokens",
+      "band": "moderate",
+      "source": "core"
+    },
+    {
+      "id": "deferred_cost_tokens",
+      "category": "budget",
+      "value": 5494,
+      "unit": "tokens",
+      "band": "moderate",
+      "source": "core"
+    },
+    {
+      "id": "coverage_artifact_count",
+      "category": "coverage",
+      "value": 0,
+      "unit": "files",
+      "band": "info",
+      "source": "core"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "skill-link-inventory",
+      "type": "inventory",
+      "label": "Skill relative links",
+      "description": "Relative links found in SKILL.md.",
+      "source": "core",
+      "data": {
+        "links": []
+      }
+    },
+    {
+      "id": "budget-breakdown",
+      "type": "budget",
+      "label": "Budget breakdown",
+      "description": "Trigger, invoke, and deferred token budget analysis.",
+      "source": "core",
+      "data": {
+        "budgets": {
+          "method": "estimated-static-policy-aware",
+          "invocation_policy": {
+            "allow_implicit_invocation": false,
+            "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/agents/openai.yaml"
+          },
+          "trigger_cost_tokens": {
+            "value": 0,
+            "band": "good",
+            "thresholds": {
+              "goodMax": 139,
+              "moderateMax": 182,
+              "heavyMax": 182
+            },
+            "components": []
+          },
+          "invoke_cost_tokens": {
+            "value": 1761,
+            "band": "moderate",
+            "thresholds": {
+              "goodMax": 1396,
+              "moderateMax": 2640,
+              "heavyMax": 2640
+            },
+            "components": [
+              {
+                "label": "skill-file",
+                "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/SKILL.md",
+                "tokens": 1761,
+                "note": "Loaded when the skill is invoked"
+              }
+            ]
+          },
+          "deferred_cost_tokens": {
+            "value": 5494,
+            "band": "moderate",
+            "thresholds": {
+              "goodMax": 0,
+              "moderateMax": 5616,
+              "heavyMax": 5616
+            },
+            "components": [
+              {
+                "label": "agents/openai.yaml",
+                "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/agents/openai.yaml",
+                "tokens": 56,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "references/architecture-practice-contract.md",
+                "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/architecture-practice-contract.md",
+                "tokens": 181,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "references/classification-cheatsheet.md",
+                "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/classification-cheatsheet.md",
+                "tokens": 246,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "references/contract.yaml",
+                "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/contract.yaml",
+                "tokens": 496,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "references/deepening-workflow.md",
+                "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/deepening-workflow.md",
+                "tokens": 193,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "references/discovery-interview.md",
+                "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/discovery-interview.md",
+                "tokens": 29,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "references/evals.yaml",
+                "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/evals.yaml",
+                "tokens": 2574,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "references/examples.md",
+                "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/examples.md",
+                "tokens": 154,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "references/knowledge-capsule-routing.md",
+                "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/knowledge-capsule-routing.md",
+                "tokens": 42,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "references/knowledge-capsule.manifest.yaml",
+                "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/knowledge-capsule.manifest.yaml",
+                "tokens": 472,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "references/knowledge-demand.yaml",
+                "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/knowledge-demand.yaml",
+                "tokens": 17,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "references/output-schema.md",
+                "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/output-schema.md",
+                "tokens": 312,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "references/scenario-review.md",
+                "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/scenario-review.md",
+                "tokens": 34,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "references/scorer-calibration/manifest.json",
+                "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/manifest.json",
+                "tokens": 139,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "references/scorer-calibration/raw/concise-correct-vs-verbose-wrong.json",
+                "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/concise-correct-vs-verbose-wrong.json",
+                "tokens": 68,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "references/scorer-calibration/raw/copied-rubric-no-evidence.json",
+                "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/copied-rubric-no-evidence.json",
+                "tokens": 63,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "references/scorer-calibration/raw/obvious-correct-boundary-proof.json",
+                "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/obvious-correct-boundary-proof.json",
+                "tokens": 64,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "references/scorer-calibration/raw/obvious-wrong-overclaim.json",
+                "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/obvious-wrong-overclaim.json",
+                "tokens": 59,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "references/scorer-calibration/raw/producer-proof-overclaim.json",
+                "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/producer-proof-overclaim.json",
+                "tokens": 65,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "references/scorer-calibration/raw/skill-name-only.json",
+                "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/scorer-calibration/raw/skill-name-only.json",
+                "tokens": 60,
+                "note": "Deferred supporting file"
+              },
+              {
+                "label": "references/task-profile.json",
+                "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/references/task-profile.json",
+                "tokens": 170,
+                "note": "Deferred supporting file"
+              }
+            ]
+          },
+          "total_tokens": {
+            "value": 7255,
+            "band": "moderate"
+          }
+        },
+        "baselineEvidence": {
+          "skillSamples": 5,
+          "pluginSamples": 176,
+          "sourceRoots": [
+            "../../.codex/skills",
+            "../../.codex/plugins/cache/openai-curated",
+            "../../.codex/.tmp/plugins/plugins"
+          ]
+        }
+      }
+    },
+    {
+      "id": "measurement-plan",
+      "type": "measurement-plan",
+      "label": "Measurement plan",
+      "description": "Recommended toolsets for measuring the real-world effect of this skill or plugin.",
+      "source": "core",
+      "data": {
+        "recommendedToolsets": [
+          "token-usage-observer",
+          "task-outcome-scorecard"
+        ],
+        "toolsets": [
+          {
+            "id": "token-usage-observer",
+            "label": "Token Usage Observer",
+            "priority": "high",
+            "goal": "Measure how many tokens the skill or plugin actually burns in representative runs.",
+            "why": "Static estimates are useful guardrails, but observed usage is what tells you whether a real workflow is affordable and whether caching or reasoning changes the picture.",
+            "signals": [
+              "observed_usage_sample_count",
+              "observed_input_tokens_avg",
+              "observed_total_tokens_avg",
+              "estimate_vs_observed_input_ratio"
+            ],
+            "evidenceSources": [
+              "Responses API usage logs",
+              "Codex-like session exports",
+              "JSONL traces captured from local benchmarking harnesses"
+            ],
+            "starterPack": {
+              "manifestName": "token-usage-pack",
+              "focus": "Validate sample size, cold-start versus warm-cache behavior, and estimate drift over time."
+            }
+          },
+          {
+            "id": "task-outcome-scorecard",
+            "label": "Task Outcome Scorecard",
+            "priority": "high",
+            "goal": "Measure whether the skill helps users finish the intended job with fewer retries and less cleanup.",
+            "why": "A low-token skill is still a miss if it fails the task, and a verbose skill may be worth it if it consistently improves first-pass success.",
+            "signals": [
+              "task_success_rate",
+              "first_pass_success_rate",
+              "retry_rate",
+              "human_override_rate"
+            ],
+            "evidenceSources": [
+              "Task run logs",
+              "Structured user acceptance checklist",
+              "Before/after comparison runs on the same prompts"
+            ],
+            "starterPack": {
+              "manifestName": "task-outcomes-pack",
+              "focus": "Score success, retries, and manual intervention across a fixed prompt set."
+            }
+          },
+          {
+            "id": "tool-call-audit",
+            "label": "Tool Call Audit",
+            "priority": "medium",
+            "goal": "Check whether the agent uses the right tools, arguments, and sequencing when the skill is active.",
+            "why": "For Codex plugins and many higher-agency skills, tool correctness is often the real determinant of user value.",
+            "signals": [
+              "tool_call_success_rate",
+              "invalid_tool_argument_rate",
+              "recoverable_tool_failure_rate"
+            ],
+            "evidenceSources": [
+              "Tool invocation traces",
+              "Recorded sessions",
+              "Golden-path scenario replays"
+            ],
+            "starterPack": {
+              "manifestName": "tool-audit-pack",
+              "focus": "Flag wrong tool selection, malformed args, and missing follow-up calls."
+            }
+          },
+          {
+            "id": "latency-efficiency",
+            "label": "Latency And Efficiency",
+            "priority": "medium",
+            "goal": "Track whether the skill speeds users up enough to justify its cost.",
+            "why": "DX improvements usually win when they reduce waiting or rework, not only when they reduce absolute token counts.",
+            "signals": [
+              "p50_time_to_first_acceptable_answer_seconds",
+              "p95_time_to_task_completion_seconds",
+              "tokens_per_successful_run"
+            ],
+            "evidenceSources": [
+              "Benchmark harness timings",
+              "Manual stopwatch runs on canonical tasks",
+              "Responses API timestamps combined with usage logs"
+            ],
+            "starterPack": {
+              "manifestName": "latency-efficiency-pack",
+              "focus": "Measure time-to-value and cost-per-success on a stable prompt suite."
+            }
+          },
+          {
+            "id": "human-rubric-review",
+            "label": "Human Rubric Review",
+            "priority": "medium",
+            "goal": "Capture clarity, trust, and usefulness signals that automated checks will miss.",
+            "why": "The best skills often reduce confusion and editing effort in ways that do not show up in static lint-like checks.",
+            "signals": [
+              "clarity_score_avg",
+              "confidence_score_avg",
+              "follow_up_question_rate"
+            ],
+            "evidenceSources": [
+              "Reviewer scorecards",
+              "Team rubric sheets",
+              "Annotated transcripts"
+            ],
+            "starterPack": {
+              "manifestName": "human-rubric-pack",
+              "focus": "Collect 1 to 5 scores for clarity, trust, and edit burden across a small evaluator panel."
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "extensions": [],
+  "measurementPlan": {
+    "kind": "measurement-plan",
+    "createdAt": "2026-06-30T13:16:32.957Z",
+    "target": {
+      "kind": "skill",
+      "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture",
+      "entryPath": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/SKILL.md",
+      "name": "improve-codebase-architecture",
+      "relativePath": "Skills/agent-ops/improve-codebase-architecture"
+    },
+    "title": "Measurement plan for improve-codebase-architecture",
+    "summary": "Combine cost, outcome, and trust signals so you can tell whether the skill or plugin is genuinely helping instead of only looking well-structured on paper.",
+    "recommendedToolsets": [
+      "token-usage-observer",
+      "task-outcome-scorecard"
+    ],
+    "toolsets": [
+      {
+        "id": "token-usage-observer",
+        "label": "Token Usage Observer",
+        "priority": "high",
+        "goal": "Measure how many tokens the skill or plugin actually burns in representative runs.",
+        "why": "Static estimates are useful guardrails, but observed usage is what tells you whether a real workflow is affordable and whether caching or reasoning changes the picture.",
+        "signals": [
+          "observed_usage_sample_count",
+          "observed_input_tokens_avg",
+          "observed_total_tokens_avg",
+          "estimate_vs_observed_input_ratio"
+        ],
+        "evidenceSources": [
+          "Responses API usage logs",
+          "Codex-like session exports",
+          "JSONL traces captured from local benchmarking harnesses"
+        ],
+        "starterPack": {
+          "manifestName": "token-usage-pack",
+          "focus": "Validate sample size, cold-start versus warm-cache behavior, and estimate drift over time."
+        }
+      },
+      {
+        "id": "task-outcome-scorecard",
+        "label": "Task Outcome Scorecard",
+        "priority": "high",
+        "goal": "Measure whether the skill helps users finish the intended job with fewer retries and less cleanup.",
+        "why": "A low-token skill is still a miss if it fails the task, and a verbose skill may be worth it if it consistently improves first-pass success.",
+        "signals": [
+          "task_success_rate",
+          "first_pass_success_rate",
+          "retry_rate",
+          "human_override_rate"
+        ],
+        "evidenceSources": [
+          "Task run logs",
+          "Structured user acceptance checklist",
+          "Before/after comparison runs on the same prompts"
+        ],
+        "starterPack": {
+          "manifestName": "task-outcomes-pack",
+          "focus": "Score success, retries, and manual intervention across a fixed prompt set."
+        }
+      },
+      {
+        "id": "tool-call-audit",
+        "label": "Tool Call Audit",
+        "priority": "medium",
+        "goal": "Check whether the agent uses the right tools, arguments, and sequencing when the skill is active.",
+        "why": "For Codex plugins and many higher-agency skills, tool correctness is often the real determinant of user value.",
+        "signals": [
+          "tool_call_success_rate",
+          "invalid_tool_argument_rate",
+          "recoverable_tool_failure_rate"
+        ],
+        "evidenceSources": [
+          "Tool invocation traces",
+          "Recorded sessions",
+          "Golden-path scenario replays"
+        ],
+        "starterPack": {
+          "manifestName": "tool-audit-pack",
+          "focus": "Flag wrong tool selection, malformed args, and missing follow-up calls."
+        }
+      },
+      {
+        "id": "latency-efficiency",
+        "label": "Latency And Efficiency",
+        "priority": "medium",
+        "goal": "Track whether the skill speeds users up enough to justify its cost.",
+        "why": "DX improvements usually win when they reduce waiting or rework, not only when they reduce absolute token counts.",
+        "signals": [
+          "p50_time_to_first_acceptable_answer_seconds",
+          "p95_time_to_task_completion_seconds",
+          "tokens_per_successful_run"
+        ],
+        "evidenceSources": [
+          "Benchmark harness timings",
+          "Manual stopwatch runs on canonical tasks",
+          "Responses API timestamps combined with usage logs"
+        ],
+        "starterPack": {
+          "manifestName": "latency-efficiency-pack",
+          "focus": "Measure time-to-value and cost-per-success on a stable prompt suite."
+        }
+      },
+      {
+        "id": "human-rubric-review",
+        "label": "Human Rubric Review",
+        "priority": "medium",
+        "goal": "Capture clarity, trust, and usefulness signals that automated checks will miss.",
+        "why": "The best skills often reduce confusion and editing effort in ways that do not show up in static lint-like checks.",
+        "signals": [
+          "clarity_score_avg",
+          "confidence_score_avg",
+          "follow_up_question_rate"
+        ],
+        "evidenceSources": [
+          "Reviewer scorecards",
+          "Team rubric sheets",
+          "Annotated transcripts"
+        ],
+        "starterPack": {
+          "manifestName": "human-rubric-pack",
+          "focus": "Collect 1 to 5 scores for clarity, trust, and edit burden across a small evaluator panel."
+        }
+      }
+    ],
+    "artifact": {
+      "id": "measurement-plan",
+      "type": "measurement-plan",
+      "label": "Measurement plan",
+      "description": "Recommended toolsets for measuring the real-world effect of this skill or plugin.",
+      "source": "core",
+      "data": {
+        "recommendedToolsets": [
+          "token-usage-observer",
+          "task-outcome-scorecard"
+        ],
+        "toolsets": [
+          {
+            "id": "token-usage-observer",
+            "label": "Token Usage Observer",
+            "priority": "high",
+            "goal": "Measure how many tokens the skill or plugin actually burns in representative runs.",
+            "why": "Static estimates are useful guardrails, but observed usage is what tells you whether a real workflow is affordable and whether caching or reasoning changes the picture.",
+            "signals": [
+              "observed_usage_sample_count",
+              "observed_input_tokens_avg",
+              "observed_total_tokens_avg",
+              "estimate_vs_observed_input_ratio"
+            ],
+            "evidenceSources": [
+              "Responses API usage logs",
+              "Codex-like session exports",
+              "JSONL traces captured from local benchmarking harnesses"
+            ],
+            "starterPack": {
+              "manifestName": "token-usage-pack",
+              "focus": "Validate sample size, cold-start versus warm-cache behavior, and estimate drift over time."
+            }
+          },
+          {
+            "id": "task-outcome-scorecard",
+            "label": "Task Outcome Scorecard",
+            "priority": "high",
+            "goal": "Measure whether the skill helps users finish the intended job with fewer retries and less cleanup.",
+            "why": "A low-token skill is still a miss if it fails the task, and a verbose skill may be worth it if it consistently improves first-pass success.",
+            "signals": [
+              "task_success_rate",
+              "first_pass_success_rate",
+              "retry_rate",
+              "human_override_rate"
+            ],
+            "evidenceSources": [
+              "Task run logs",
+              "Structured user acceptance checklist",
+              "Before/after comparison runs on the same prompts"
+            ],
+            "starterPack": {
+              "manifestName": "task-outcomes-pack",
+              "focus": "Score success, retries, and manual intervention across a fixed prompt set."
+            }
+          },
+          {
+            "id": "tool-call-audit",
+            "label": "Tool Call Audit",
+            "priority": "medium",
+            "goal": "Check whether the agent uses the right tools, arguments, and sequencing when the skill is active.",
+            "why": "For Codex plugins and many higher-agency skills, tool correctness is often the real determinant of user value.",
+            "signals": [
+              "tool_call_success_rate",
+              "invalid_tool_argument_rate",
+              "recoverable_tool_failure_rate"
+            ],
+            "evidenceSources": [
+              "Tool invocation traces",
+              "Recorded sessions",
+              "Golden-path scenario replays"
+            ],
+            "starterPack": {
+              "manifestName": "tool-audit-pack",
+              "focus": "Flag wrong tool selection, malformed args, and missing follow-up calls."
+            }
+          },
+          {
+            "id": "latency-efficiency",
+            "label": "Latency And Efficiency",
+            "priority": "medium",
+            "goal": "Track whether the skill speeds users up enough to justify its cost.",
+            "why": "DX improvements usually win when they reduce waiting or rework, not only when they reduce absolute token counts.",
+            "signals": [
+              "p50_time_to_first_acceptable_answer_seconds",
+              "p95_time_to_task_completion_seconds",
+              "tokens_per_successful_run"
+            ],
+            "evidenceSources": [
+              "Benchmark harness timings",
+              "Manual stopwatch runs on canonical tasks",
+              "Responses API timestamps combined with usage logs"
+            ],
+            "starterPack": {
+              "manifestName": "latency-efficiency-pack",
+              "focus": "Measure time-to-value and cost-per-success on a stable prompt suite."
+            }
+          },
+          {
+            "id": "human-rubric-review",
+            "label": "Human Rubric Review",
+            "priority": "medium",
+            "goal": "Capture clarity, trust, and usefulness signals that automated checks will miss.",
+            "why": "The best skills often reduce confusion and editing effort in ways that do not show up in static lint-like checks.",
+            "signals": [
+              "clarity_score_avg",
+              "confidence_score_avg",
+              "follow_up_question_rate"
+            ],
+            "evidenceSources": [
+              "Reviewer scorecards",
+              "Team rubric sheets",
+              "Annotated transcripts"
+            ],
+            "starterPack": {
+              "manifestName": "human-rubric-pack",
+              "focus": "Collect 1 to 5 scores for clarity, trust, and edit burden across a small evaluator panel."
+            }
+          }
+        ]
+      }
+    },
+    "nextAction": {
+      "label": "Start with Token Usage Observer",
+      "why": "Measure how many tokens the skill or plugin actually burns in representative runs.",
+      "command": "plugin-eval start ~/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture --request 'What should I run next?' --format markdown",
+      "chatPrompt": "What should I run next?",
+      "toolsetId": "token-usage-observer"
+    }
+  },
+  "improvementBrief": {
+    "title": "Improve improve-codebase-architecture",
+    "target": {
+      "kind": "skill",
+      "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture",
+      "entryPath": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/SKILL.md",
+      "name": "improve-codebase-architecture",
+      "relativePath": "Skills/agent-ops/improve-codebase-architecture"
+    },
+    "summary": "Raise the evaluation from grade A (100/100) with a focus on the highest-signal structural and budget issues first.",
+    "goals": [],
+    "measurementGoals": [
+      "token-usage-observer",
+      "task-outcome-scorecard"
+    ],
+    "requiredFixes": [],
+    "recommendedFixes": [],
+    "suggestedPrompt": "Use the skill-creator guidance to improve improve-codebase-architecture. Keep the structure compact and move bulky details into references or scripts. Define success measures with these toolsets: token-usage-observer, task-outcome-scorecard."
+  },
+  "nextAction": {
+    "label": "Choose the next workflow from chat",
+    "why": "The report is clean enough that the best next step depends on whether you want budgets, benchmarks, or comparisons.",
+    "command": "plugin-eval start ~/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture --request 'What should I run next?' --format markdown",
+    "chatPrompt": "What should I run next?"
+  },
+  "workflowGuide": {
+    "kind": "workflow-guide",
+    "createdAt": "2026-06-30T13:16:32.958Z",
+    "target": {
+      "kind": "skill",
+      "path": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture",
+      "entryPath": "/Users/jamiecraik/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/SKILL.md",
+      "name": "improve-codebase-architecture",
+      "relativePath": "Skills/agent-ops/improve-codebase-architecture"
+    },
+    "requestedGoal": "evaluate",
+    "requestedChatPrompt": null,
+    "requestRouting": null,
+    "recommendedWorkflowId": "evaluate",
+    "recommendedWorkflow": {
+      "id": "evaluate",
+      "label": "Evaluate Skill",
+      "chatPrompt": "Evaluate this skill.",
+      "summary": "Start here when you want the overall report for a skill, including structure, budgets, and code checks.",
+      "firstCommand": "plugin-eval analyze ~/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture --format markdown",
+      "commands": [
+        "plugin-eval analyze ~/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture --format markdown"
+      ],
+      "startCommand": "plugin-eval start ~/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture --request 'Evaluate this skill.' --format markdown"
+    },
+    "workflowStatus": {
+      "hasBenchmarkConfig": false,
+      "hasUsageLog": false
+    },
+    "beginnerSummary": "Start with a natural chat request, then let plugin-eval show the exact local command sequence behind it.",
+    "startHere": {
+      "chatPrompt": "Evaluate this skill.",
+      "label": "Evaluate Skill",
+      "summary": "Start here when you want the overall report for a skill, including structure, budgets, and code checks.",
+      "routingExplanation": "Plugin Eval recommended Evaluate Skill from the current local state for this skill.",
+      "startCommand": "plugin-eval start ~/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture --request 'Evaluate this skill.' --format markdown",
+      "firstCommand": "plugin-eval analyze ~/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture --format markdown",
+      "commands": [
+        "plugin-eval analyze ~/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture --format markdown"
+      ]
+    },
+    "entrypoints": [
+      {
+        "id": "analysis",
+        "label": "Full Skill Analysis",
+        "chatPrompt": "Give me a full analysis of this skill, including benchmark setup.",
+        "summary": "Use this when you want the full report and starter benchmark setup for this skill in one guided path.",
+        "firstCommand": "plugin-eval analyze ~/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture --format markdown",
+        "commands": [
+          "plugin-eval analyze ~/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture --format markdown",
+          "plugin-eval init-benchmark ~/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture",
+          "plugin-eval benchmark ~/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture --config ~/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/.plugin-eval/benchmark.json"
+        ],
+        "startCommand": "plugin-eval start ~/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture --request 'Give me a full analysis of this skill, including benchmark setup.' --format markdown"
+      },
+      {
+        "id": "evaluate",
+        "label": "Evaluate Skill",
+        "chatPrompt": "Evaluate this skill.",
+        "summary": "Start here when you want the overall report for a skill, including structure, budgets, and code checks.",
+        "firstCommand": "plugin-eval analyze ~/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture --format markdown",
+        "commands": [
+          "plugin-eval analyze ~/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture --format markdown"
+        ],
+        "startCommand": "plugin-eval start ~/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture --request 'Evaluate this skill.' --format markdown"
+      },
+      {
+        "id": "budget",
+        "label": "Explain Token Budget",
+        "chatPrompt": "Explain the token budget for this skill.",
+        "summary": "Use this when the main question is why the skill feels expensive before you collect any live measurements.",
+        "firstCommand": "plugin-eval explain-budget ~/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture --format markdown",
+        "commands": [
+          "plugin-eval explain-budget ~/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture --format markdown"
+        ],
+        "startCommand": "plugin-eval start ~/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture --request 'Explain the token budget for this skill.' --format markdown"
+      },
+      {
+        "id": "measure",
+        "label": "Measure Real Token Usage",
+        "chatPrompt": "Measure the real token usage of this skill.",
+        "summary": "Use this when you want real token usage instead of only the static estimate.",
+        "firstCommand": "plugin-eval init-benchmark ~/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture",
+        "commands": [
+          "plugin-eval init-benchmark ~/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture",
+          "plugin-eval benchmark ~/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture --config ~/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/.plugin-eval/benchmark.json",
+          "plugin-eval analyze ~/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture --observed-usage ~/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture/.plugin-eval/benchmark-usage.jsonl --format markdown"
+        ],
+        "startCommand": "plugin-eval start ~/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture --request 'Measure the real token usage of this skill.' --format markdown"
+      },
+      {
+        "id": "benchmark",
+        "label": "Benchmark With Starter Scenarios",
+        "chatPrompt": "Help me benchmark this skill.",
+        "summary": "Use this when you want starter scenarios and a repeatable real-Codex benchmark run for this skill.",
+        "firstCommand": "plugin-eval init-benchmark ~/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture",
+        "commands": [
+          "plugin-eval init-benchmark ~/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture"
+        ],
+        "startCommand": "plugin-eval start ~/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture --request 'Help me benchmark this skill.' --format markdown"
+      },
+      {
+        "id": "next",
+        "label": "Start Here",
+        "chatPrompt": "What should I run next?",
+        "summary": "If you are new to plugin-eval, start with the overall evaluation report for this skill.",
+        "firstCommand": "plugin-eval analyze ~/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture --format markdown",
+        "commands": [
+          "plugin-eval analyze ~/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture --format markdown"
+        ],
+        "startCommand": "plugin-eval start ~/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture --request 'What should I run next?' --format markdown"
+      }
+    ],
+    "nextSteps": [
+      "plugin-eval analyze ~/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture --format markdown"
+    ],
+    "nextAction": {
+      "label": "Evaluate Skill",
+      "why": "Plugin Eval recommended Evaluate Skill from the current local state for this skill.",
+      "command": "plugin-eval analyze ~/dev/agent-skills/Skills/agent-ops/improve-codebase-architecture --format markdown",
+      "chatPrompt": "Evaluate this skill."
+    }
+  }
+}

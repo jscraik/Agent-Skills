@@ -775,7 +775,26 @@ cases:
             handle.write(text)
             handle.flush()
             with patch.object(package_contracts, "yaml", None):
-                loaded, error = package_contracts.read_structured_reference(Path(handle.name))
+                process = package_contracts.subprocess.CompletedProcess(
+                    args=["ruby"],
+                    returncode=0,
+                    stdout=json.dumps(
+                        {
+                            "schema_version": "2.0",
+                            "skill_name": "example",
+                            "claims": [
+                                {
+                                    "id": "global-target-repository",
+                                    "statement": "Uses active repository.",
+                                }
+                            ],
+                            "cases": [{"id": "smoke-discovery", "name": "Discovery"}],
+                        }
+                    ),
+                    stderr="",
+                )
+                with patch.object(package_contracts.subprocess, "run", return_value=process):
+                    loaded, error = package_contracts.read_structured_reference(Path(handle.name))
 
         self.assertIsNone(error)
         self.assertIsInstance(loaded, dict)
@@ -785,6 +804,49 @@ cases:
         self.assertIsInstance(loaded.get("cases"), list)
         self.assertTrue(loaded["claims"])
         self.assertTrue(loaded["cases"])
+
+    def test_structured_reference_fallback_preserves_nested_rubric_scoring(self) -> None:
+        text = """schema_version: 1
+quality_criteria:
+  current_state_before_action:
+    purpose: Uses live PR state.
+    why_it_matters: Prevents stale merge claims.
+    observable_evidence:
+      - latest_head_sha
+      - required_checks
+    scoring:
+      "5": Latest-head proof is complete.
+      "4": Minor evidence detail is missing.
+      "3": Evidence is present but incomplete.
+      "2": Evidence is stale or partial.
+      "1": No live PR evidence is provided.
+automatic_failure_conditions:
+  - Claims waived external CI as green.
+"""
+        mock_stdout = '{"schema_version":1,"quality_criteria":{"current_state_before_action":{"purpose":"Uses live PR state.","why_it_matters":"Prevents stale merge claims.","observable_evidence":["latest_head_sha","required_checks"],"scoring":{"5":"Latest-head proof is complete.","4":"Minor evidence detail is missing.","3":"Evidence is present but incomplete.","2":"Evidence is stale or partial.","1":"No live PR evidence is provided."}}},"automatic_failure_conditions":["Claims waived external CI as green."]}'
+        mock_process = package_contracts.subprocess.CompletedProcess(
+            args=["ruby"],
+            returncode=0,
+            stdout=mock_stdout,
+            stderr="",
+        )
+
+        with tempfile.NamedTemporaryFile("w", suffix=".yaml", encoding="utf-8") as handle:
+            handle.write(text)
+            handle.flush()
+            with (
+                patch.object(package_contracts, "yaml", None),
+                patch.object(package_contracts.subprocess, "run", return_value=mock_process),
+            ):
+                loaded, error = package_contracts.read_structured_reference(Path(handle.name))
+
+        self.assertIsNone(error)
+        self.assertIsInstance(loaded, dict)
+        if not isinstance(loaded, dict):
+            self.fail("expected structured reference fallback to return a dict")
+        criterion = loaded["quality_criteria"]["current_state_before_action"]
+        self.assertEqual(criterion["observable_evidence"], ["latest_head_sha", "required_checks"])
+        self.assertEqual(criterion["scoring"]["5"], "Latest-head proof is complete.")
 
     def test_sdk_contract_accepts_optional_valid_skillflow(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
