@@ -4,8 +4,11 @@
 from __future__ import annotations
 
 import importlib.util
+import io
 import tempfile
 import unittest
+from contextlib import redirect_stderr
+from unittest import mock
 from pathlib import Path
 
 
@@ -138,6 +141,29 @@ references:
                 validator.yaml = original_yaml
             self.assertEqual(payload["schema_version"], "source-context.v1")
             self.assertEqual(payload["references"][0]["kind"], "expert_viewpoint")
+
+    def test_load_yaml_classifies_ruby_shim_failure_as_tooling_unavailable(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            source_context = Path(tmpdir) / "source-context.yaml"
+            source_context.write_text("schema_version: source-context.v1\n", encoding="utf-8")
+
+            original_yaml = validator.yaml
+            process = validator.subprocess.CompletedProcess(
+                args=["ruby"],
+                returncode=1,
+                stdout="",
+                stderr="mise: config is not trusted; ruby shim failed",
+            )
+            stderr = io.StringIO()
+            try:
+                validator.yaml = None
+                with mock.patch.object(validator.subprocess, "run", return_value=process):
+                    with self.assertRaises(SystemExit), redirect_stderr(stderr):
+                        validator.load_yaml(source_context)
+            finally:
+                validator.yaml = original_yaml
+            self.assertIn("requires PyYAML or runnable Ruby YAML", stderr.getvalue())
+            self.assertNotIn("is invalid YAML", stderr.getvalue())
 
 
 if __name__ == "__main__":

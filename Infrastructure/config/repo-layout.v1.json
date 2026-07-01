@@ -194,6 +194,8 @@
         "classification": "compatibility_alias",
         "status": "allowed",
         "path_patterns": [
+          "Plugins/*/fixtures/*",
+          "Plugins/*/skills/*",
           "plugins/*/fixtures/*",
           "plugins/*/skills/*"
         ],

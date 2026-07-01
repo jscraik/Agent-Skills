@@ -221,14 +221,34 @@ def load_yaml_with_ruby(path: Path, text: str) -> dict:
             check=False,
         )
     except FileNotFoundError:
-        fail(
-            f"{path} requires PyYAML or Ruby YAML; run through "
-            "bash Infrastructure/scripts/run-infrastructure-python.sh"
-        )
+        fail_yaml_runtime_unavailable(path)
     if process.returncode != 0:
+        if ruby_yaml_runtime_unavailable(process.stderr):
+            fail_yaml_runtime_unavailable(path, process.stderr)
         fail(f"{path} is invalid YAML: {process.stderr.strip()}")
     payload = json.loads(process.stdout)
     return payload if isinstance(payload, dict) else {}
+
+
+def ruby_yaml_runtime_unavailable(stderr: str) -> bool:
+    lowered = stderr.lower()
+    tooling_markers = (
+        "mise",
+        "shim",
+        "trust",
+        "permission denied",
+        "command not found",
+        "no such file or directory",
+    )
+    return any(marker in lowered for marker in tooling_markers)
+
+
+def fail_yaml_runtime_unavailable(path: Path, stderr: str = "") -> None:
+    detail = f" Ruby stderr: {stderr.strip()}" if stderr.strip() else ""
+    fail(
+        f"{path} requires PyYAML or runnable Ruby YAML; run through "
+        f"bash Infrastructure/scripts/run-infrastructure-python.sh.{detail}"
+    )
 
 
 def load_json(path: Path) -> dict:

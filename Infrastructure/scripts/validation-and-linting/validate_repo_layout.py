@@ -75,17 +75,21 @@ def _iter_layout_entries(config: dict[str, Any]) -> dict[str, dict[str, Any]]:
             if isinstance(raw_paths, list):
                 paths.extend(str(item).rstrip("/") for item in raw_paths)
         for path in paths:
-            entries[path] = {
+            status = (
+                "future"
+                if path in section.get("future_paths", [])
+                else "legacy"
+                if path in section.get("legacy_paths", [])
+                else "current"
+            )
+            entry = {
                 "section": section_id,
                 "purpose": section.get("purpose", ""),
-                "status": (
-                    "future"
-                    if path in section.get("future_paths", [])
-                    else "legacy"
-                    if path in section.get("legacy_paths", [])
-                    else "current"
-                ),
+                "status": status,
             }
+            entries[path] = entry
+            top_level = path.split("/", 1)[0]
+            entries.setdefault(top_level, entry)
     return entries
 
 

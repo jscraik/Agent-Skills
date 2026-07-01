@@ -101,11 +101,12 @@ verification.
    protection, and mergeability from live GitHub state.
 11. Before claiming the parent PR/worktree lane is closed, or before switching
     the primary checkout to `main`, run
-    `python3 Infrastructure/scripts/validation-and-linting/validate_pr_sweep_dirty_closeout.py --json`
-    from the primary checkout. If it fails, create or update a dirty-worktree
-    ledger and rerun with `--ledger <path>`, or block branch movement until the
-    checkout is clean. Review-thread closeout does not prove primary-worktree
-    closeout.
+    `python3 Infrastructure/scripts/validation-and-linting/validate_pr_sweep_dirty_closeout.py --json --require-clean`
+    from the primary checkout. Use `--ledger <path>` without `--require-clean`
+    only for non-destructive closeout accounting; ledger-only validation must
+    not authorize branch movement. If the clean check fails, block checkout-main
+    until the checkout is clean. Review-thread closeout does not prove
+    primary-worktree closeout.
 12. After target PRs merge, checkout `main`, pull with repo policy, and prune
    branches/worktrees only with merge proof, upstream state, unique-commit
    evidence, and primary-worktree dirty-closeout proof.
@@ -135,7 +136,8 @@ next safe action and keep the repair loop explicit:
 - waived_external_ci: the check is explicitly waived and other lanes continue.
 - needs_merge_conflict_strategy: dirty mergeability or branch divergence needs
   a proposed strategy before branch movement.
-- blocked_dirty_worktree: primary checkout dirt is not clean or ledgered.
+- blocked_dirty_worktree: primary checkout dirt is not clean for branch
+  movement, or not ledgered for non-destructive closeout accounting.
 - needs_user_decision: approval, credentials, draft state, or policy choice is
   required before edits, push, merge, or cleanup.
 

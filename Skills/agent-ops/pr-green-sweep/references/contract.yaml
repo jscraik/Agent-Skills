@@ -83,16 +83,17 @@ quality_criteria:
       "1": Dirty mergeability is ignored or treated as merge-ready.
   primary_worktree_closeout_boundary:
     purpose: Keep PR/review-thread closeout separate from primary checkout closeout.
-    why_it_matters: Prevents agents from switching branches, pulling main, or claiming parent-lane closeout while unstaged, staged, or untracked work remains outside a dirty-worktree ledger.
+    why_it_matters: Prevents agents from switching branches or pulling main while the primary checkout is dirty, and keeps ledger-only validation limited to non-destructive parent-lane closeout accounting.
     observable_evidence:
       - validate_pr_sweep_dirty_closeout_command
-      - dirty_worktree_ledger_or_clean_status
+      - clean_status_for_branch_movement
+      - dirty_worktree_ledger_for_non_destructive_closeout_only
       - branch_switch_or_pull_blocker_when_dirty
     scoring:
-      "5": The sweep runs the dirty-closeout validator before branch movement or parent closeout and either proves a clean checkout or ledger coverage for every dirty path.
-      "4": Dirty-closeout proof is present but the ledger wording needs minor clarification.
-      "3": Dirty paths are listed but not validated against a ledger.
-      "2": PR review or CI proof is treated as enough to switch branches despite primary checkout dirt.
+      "5": The sweep runs the dirty-closeout validator with clean mode before branch movement and uses ledger-only validation only for non-destructive parent-closeout accounting.
+      "4": Dirty-closeout proof is present but branch-movement versus ledger-only wording needs minor clarification.
+      "3": Dirty paths are listed but the distinction between clean checkout authority and ledger accounting is unclear.
+      "2": Ledger-only validation is treated as enough to switch branches despite primary checkout dirt.
       "1": The sweep attempts branch movement with unclassified dirty work.
 automatic_failure_conditions:
   - Claims waived external CI as green.
