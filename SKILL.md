@@ -10,6 +10,7 @@ Do not hand-edit runtime projections.
 ## Table of Contents
 - [Summary](#summary)
 - [Catalog](#catalog)
+- [.Agents — Skills — .System](#agents-skills-system)
 - [Skills — Agent Ops](#skills-agent-ops)
 - [Skills — Backend Platform](#skills-backend-platform)
 - [Skills — Content Publishing](#skills-content-publishing)
@@ -18,15 +19,19 @@ Do not hand-edit runtime projections.
 - [Skills — Mobile Native](#skills-mobile-native)
 - [Skills — Product Strategy](#skills-product-strategy)
 - [Skills — Security Ops](#skills-security-ops)
-- [Skills System](#skills-system)
 
 ## Summary
-- `total_skills`: 83
+- `total_skills`: 84
 - `catalog_source`: default user-visible catalog surface
 - `visibility`: default
 - `policy_identity`: a4a5d9c1461c4d06
 
 ## Catalog
+
+## .Agents — Skills — .System
+
+- `imagegen` — Generate or edit raster images when the task benefits from AI-created bitmap visuals such as photos, illustrations, textures, sprites, mockups, or transparent-background cutouts. Use when Codex should create a brand-new image, transform an existing image, or derive visual variants from references, and the output should be a bitmap asset rather than repo-native code or vector. Do not use when the task is better handled by editing existing SVG/vector/code-native assets, extending an established icon or logo system, or building the visual directly in HTML/CSS/canvas.
+- `openai-docs` — Use when the user asks how to build with OpenAI products or APIs, asks about Codex itself or choosing Codex surfaces, needs up-to-date official documentation with citations, help choosing the latest model for a use case, or model upgrade and prompt-upgrade guidance; use OpenAI docs MCP tools for non-Codex docs questions, use the Codex manual helper first for broad Codex self-knowledge, and restrict fallback browsing to official OpenAI domains.
 
 ## Skills — Agent Ops
 
@@ -123,6 +128,7 @@ Do not hand-edit runtime projections.
 
 - `architecture-interview` — Analyze, review, and plan architecture alternatives through a structured interview. Use when the user needs tradeoffs surfaced before implementation or a Linear decision note instead of an ADR.
 - `deep-interview` — Analyze, deepen, and validate an existing doc or topic through a structured interview. Use when refining PRDs, Linear tickets, notes, or draft specs before planning or execution.
+- `devrel-hack-coach` — Plan AI-native hackathon scope, demo pitch, and judge Q&A. Use when the user needs 1-hour pitch prep, 24-hour build scoping, AI Native DevCon-style track choice, idea pressure tests, or a spec-led hack plan. Do not use for code generation, implementation support, or non-hackathon DevRel content.
 - `interview-me` — Analyze underspecified requests with a short decision interview. Use this skill when guessing would risk the wrong plan.
 
 ## Skills — Security Ops
@@ -132,8 +138,3 @@ Do not hand-edit runtime projections.
 - `create-auth` — Create, migrate, or validate Better Auth implementation work. Use when the user wants Better Auth added or changed in code, including OAuth, passkeys, 2FA, magic links, or org flows.
 - `recon-workbench` — Run, audit, and design authorized Recon Workbench workflows when scoped target interrogation needs evidence artifacts, redaction, validation, and safe reporting.
 - `security-ownership-map` — Analyze git-history security ownership when sensitive files, CODEOWNERS coverage, bus factor, contributor concentration, and remediation evidence need mapping.
-
-## Skills System
-
-- `imagegen` — Generate or edit raster images when the task benefits from AI-created bitmap visuals such as photos, illustrations, textures, sprites, mockups, or transparent-background cutouts. Use when Codex should create a brand-new image, transform an existing image, or derive visual variants from references, and the output should be a bitmap asset rather than repo-native code or vector. Do not use when the task is better handled by editing existing SVG/vector/code-native assets, extending an established icon or logo system, or building the visual directly in HTML/CSS/canvas.
-- `openai-docs` — Use when the user asks how to build with OpenAI products or APIs, asks about Codex itself or choosing Codex surfaces, needs up-to-date official documentation with citations, help choosing the latest model for a use case, or model upgrade and prompt-upgrade guidance; use OpenAI docs MCP tools for non-Codex docs questions, use the Codex manual helper first for broad Codex self-knowledge, and restrict fallback browsing to official OpenAI domains.

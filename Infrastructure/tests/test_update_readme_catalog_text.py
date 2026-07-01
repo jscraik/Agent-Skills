@@ -86,6 +86,19 @@ class TestUpdateReadmeCatalogText(unittest.TestCase):
 
         self.assertIn(f"# Agent Skills\n\n{CURRENT_AGENT_SKILLS_KIT_SENTENCE}\n\nBody.", refreshed)
 
+    def test_updates_catalog_parity_marker(self) -> None:
+        content = (
+            "# Agent Skills\n\n"
+            f"{CURRENT_AGENT_SKILLS_KIT_SENTENCE}\n\n"
+            "- Catalog parity marker: **83 canonical skills**. Regenerate this marker with\n"
+            "  the repo skill sync when catalog membership changes.\n"
+        )
+
+        refreshed = refresh_readme_catalog_text(content, 84)
+
+        self.assertIn("Catalog parity marker: **84 canonical skills**", refreshed)
+        self.assertNotIn("**83 canonical skills**", refreshed)
+
     def test_raises_when_heading_is_missing(self) -> None:
         with self.assertRaises(ValueError):
             refresh_readme_catalog_text("Body only.\n", 25)

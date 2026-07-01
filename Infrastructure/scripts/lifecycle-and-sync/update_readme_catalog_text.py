@@ -42,6 +42,23 @@ COUNT_PATTERNS: tuple[str, ...] = (
 )
 
 
+def _refresh_count_markers(content: str, catalog_count: str) -> str:
+    replacements = (
+        (
+            r"This repository currently exposes \*\*\d+ skills\*\* in the default catalog",
+            f"This repository currently exposes **{catalog_count} skills** in the default catalog",
+        ),
+        (r"currently expects \*\*\d+\*\* skills", f"currently expects **{catalog_count}** skills"),
+        (
+            r"Catalog parity marker: \*\*\d+ canonical skills\*\*",
+            f"Catalog parity marker: **{catalog_count} canonical skills**",
+        ),
+    )
+    for pattern, replacement in replacements:
+        content = re.sub(pattern, replacement, content, count=1)
+    return content
+
+
 def refresh_readme_catalog_text(content: str, catalog_count: int | str) -> str:
     """Return README content with canonical intro and catalog count text."""
     catalog_count = str(catalog_count)
@@ -87,19 +104,7 @@ def refresh_readme_catalog_text(content: str, catalog_count: int | str) -> str:
             CURRENT_AGENT_SKILLS_KIT_SENTENCE + "\n\n",
             content,
         )
-    content = re.sub(
-        r"This repository currently exposes \*\*\d+ skills\*\* in the default catalog",
-        f"This repository currently exposes **{catalog_count} skills** in the default catalog",
-        content,
-        count=1,
-    )
-    content = re.sub(
-        r"currently expects \*\*\d+\*\* skills",
-        f"currently expects **{catalog_count}** skills",
-        content,
-        count=1,
-    )
-    return content
+    return _refresh_count_markers(content, catalog_count)
 
 
 def parse_args() -> argparse.Namespace:
