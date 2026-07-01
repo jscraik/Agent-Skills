@@ -226,7 +226,10 @@ def load_yaml_with_ruby(path: Path, text: str) -> dict:
         if ruby_yaml_runtime_unavailable(process.stderr):
             fail_yaml_runtime_unavailable(path, process.stderr)
         fail(f"{path} is invalid YAML: {process.stderr.strip()}")
-    payload = json.loads(process.stdout)
+    try:
+        payload = json.loads(process.stdout)
+    except json.JSONDecodeError as exc:
+        fail_yaml_runtime_unavailable(path, f"ruby returned non-JSON output: {exc}")
     if not isinstance(payload, dict):
         fail(f"{path} must contain a YAML mapping")
     return payload
