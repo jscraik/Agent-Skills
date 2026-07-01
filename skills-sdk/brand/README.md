@@ -21,8 +21,8 @@ Use this snippet at the bottom of root README files:
 ---
 
 <img
-  src="./brand/brand-mark.webp"
-  srcset="./brand/brand-mark.webp 1x, ./brand/brand-mark@2x.webp 2x"
+  src="./skills-sdk/brand/brand-mark.webp"
+  srcset="./skills-sdk/brand/brand-mark.webp 1x, ./skills-sdk/brand/brand-mark@2x.webp 2x"
   alt="brAInwav"
   height="28"
   align="left"

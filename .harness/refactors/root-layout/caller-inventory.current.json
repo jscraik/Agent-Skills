@@ -15,17 +15,17 @@
     "docs-policy.json"
   ],
   "summary": {
-    "scanned_files": 10337,
-    "skipped_files": 720,
-    "occurrence_count": 14421,
-    "file_count": 1619,
+    "scanned_files": 10340,
+    "skipped_files": 722,
+    "occurrence_count": 14404,
+    "file_count": 1615,
     "root_counts": {
       "Docs/": 740,
       "GOVERNANCE": 215,
-      "Infrastructure/": 4908,
+      "Infrastructure/": 4909,
       "Plugins/": 2231,
       "Skills/": 2597,
-      "brand/": 39,
+      "brand/": 21,
       "docs-policy.json": 64,
       "plugins/": 125,
       "scripts": 3379,
@@ -34,17 +34,17 @@
     "category_counts": {
       "ask_cli_route": 889,
       "ci_workflow": 147,
-      "docs_reference_link": 7225,
+      "docs_reference_link": 7211,
       "external_operator_entrypoint": 68,
-      "internal_python_import": 3384,
+      "internal_python_import": 3382,
       "precommit_or_hook": 16,
       "runtime_projection_input": 486,
       "shell_command": 687,
       "tessl_staging_input": 186,
       "test_fixture": 2500,
-      "unclassified": 2338
+      "unclassified": 2337
     },
-    "excluded_generated_or_evidence_occurrences": 113188
+    "excluded_generated_or_evidence_occurrences": 113258
   },
   "top_files": [
     {
@@ -197,7 +197,7 @@
     },
     {
       "path": "ARCHITECTURE.md",
-      "occurrence_count": 61
+      "occurrence_count": 60
     },
     {
       "path": "Plugins/skill-factory/fixtures/budget-archive/2026-04-19/README.md",
@@ -3669,36 +3669,27 @@
       "snippet": "- first-class source directories: `Infrastructure/`, `Skills/`, `Plugins/`,"
     },
     {
-      "legacy_root": "skills-system/",
-      "path": "ARCHITECTURE.md",
-      "line": 279,
-      "categories": [
-        "docs_reference_link"
-      ],
-      "snippet": "`Docs/`, `Wiki/`, `bin/`, `brand/`, and `skills-system/`."
-    },
-    {
       "legacy_root": "Docs/",
       "path": "ARCHITECTURE.md",
       "line": 279,
       "categories": [
         "docs_reference_link"
       ],
-      "snippet": "`Docs/`, `Wiki/`, `bin/`, `brand/`, and `skills-system/`."
+      "snippet": "`Docs/`, `Wiki/`, `bin/`, `skills-sdk/brand/`, and"
     },
     {
-      "legacy_root": "brand/",
+      "legacy_root": "skills-system/",
       "path": "ARCHITECTURE.md",
-      "line": 279,
+      "line": 280,
       "categories": [
         "docs_reference_link"
       ],
-      "snippet": "`Docs/`, `Wiki/`, `bin/`, `brand/`, and `skills-system/`."
+      "snippet": "`skills-system/`."
     },
     {
       "legacy_root": "Skills/",
       "path": "ARCHITECTURE.md",
-      "line": 295,
+      "line": 296,
       "categories": [
         "docs_reference_link"
       ],
@@ -3707,7 +3698,7 @@
     {
       "legacy_root": "Plugins/",
       "path": "ARCHITECTURE.md",
-      "line": 295,
+      "line": 296,
       "categories": [
         "docs_reference_link"
       ],
@@ -3716,7 +3707,7 @@
     {
       "legacy_root": "Infrastructure/",
       "path": "ARCHITECTURE.md",
-      "line": 296,
+      "line": 297,
       "categories": [
         "docs_reference_link"
       ],
@@ -3725,7 +3716,7 @@
     {
       "legacy_root": "Docs/",
       "path": "ARCHITECTURE.md",
-      "line": 343,
+      "line": 344,
       "categories": [
         "docs_reference_link"
       ],
@@ -3734,7 +3725,7 @@
     {
       "legacy_root": "Docs/",
       "path": "ARCHITECTURE.md",
-      "line": 344,
+      "line": 345,
       "categories": [
         "docs_reference_link"
       ],
@@ -3743,7 +3734,7 @@
     {
       "legacy_root": "Docs/",
       "path": "ARCHITECTURE.md",
-      "line": 345,
+      "line": 346,
       "categories": [
         "docs_reference_link"
       ],
@@ -3752,7 +3743,7 @@
     {
       "legacy_root": "Docs/",
       "path": "ARCHITECTURE.md",
-      "line": 346,
+      "line": 347,
       "categories": [
         "docs_reference_link",
         "runtime_projection_input"
@@ -3762,7 +3753,7 @@
     {
       "legacy_root": "Docs/",
       "path": "ARCHITECTURE.md",
-      "line": 347,
+      "line": 348,
       "categories": [
         "docs_reference_link"
       ],
@@ -4236,15 +4227,6 @@
         "docs_reference_link"
       ],
       "snippet": "| `/Plugins/` | Plugin packages and plugin manifests |"
-    },
-    {
-      "legacy_root": "brand/",
-      "path": "Docs/DIRECTORY_MAP.md",
-      "line": 56,
-      "categories": [
-        "docs_reference_link"
-      ],
-      "snippet": "| `/brand/` | Brand assets and visual references |"
     },
     {
       "legacy_root": "Infrastructure/",
@@ -47405,7 +47387,7 @@
     {
       "legacy_root": "GOVERNANCE",
       "path": "Infrastructure/config/repo-layout.v1.json",
-      "line": 115,
+      "line": 114,
       "categories": [
         "unclassified"
       ],
@@ -47414,7 +47396,7 @@
     {
       "legacy_root": "docs-policy.json",
       "path": "Infrastructure/config/repo-layout.v1.json",
-      "line": 116,
+      "line": 115,
       "categories": [
         "unclassified"
       ],
@@ -47423,7 +47405,7 @@
     {
       "legacy_root": "scripts",
       "path": "Infrastructure/config/repo-layout.v1.json",
-      "line": 117,
+      "line": 116,
       "categories": [
         "unclassified"
       ],
@@ -47432,7 +47414,7 @@
     {
       "legacy_root": "Skills/",
       "path": "Infrastructure/config/repo-layout.v1.json",
-      "line": 144,
+      "line": 143,
       "categories": [
         "unclassified"
       ],
@@ -47441,7 +47423,7 @@
     {
       "legacy_root": "plugins/",
       "path": "Infrastructure/config/repo-layout.v1.json",
-      "line": 161,
+      "line": 160,
       "categories": [
         "unclassified"
       ],
@@ -47450,7 +47432,7 @@
     {
       "legacy_root": "Plugins/",
       "path": "Infrastructure/config/repo-layout.v1.json",
-      "line": 172,
+      "line": 171,
       "categories": [
         "unclassified"
       ],
@@ -47459,7 +47441,7 @@
     {
       "legacy_root": "plugins/",
       "path": "Infrastructure/config/repo-layout.v1.json",
-      "line": 173,
+      "line": 172,
       "categories": [
         "unclassified"
       ],
@@ -47468,7 +47450,7 @@
     {
       "legacy_root": "plugins/",
       "path": "Infrastructure/config/repo-layout.v1.json",
-      "line": 176,
+      "line": 175,
       "categories": [
         "unclassified"
       ],
@@ -47477,7 +47459,7 @@
     {
       "legacy_root": "plugins/",
       "path": "Infrastructure/config/repo-layout.v1.json",
-      "line": 177,
+      "line": 176,
       "categories": [
         "unclassified"
       ],
@@ -47486,7 +47468,7 @@
     {
       "legacy_root": "Infrastructure/",
       "path": "Infrastructure/config/repo-layout.v1.json",
-      "line": 188,
+      "line": 187,
       "categories": [
         "unclassified"
       ],
@@ -47495,7 +47477,7 @@
     {
       "legacy_root": "Plugins/",
       "path": "Infrastructure/config/repo-layout.v1.json",
-      "line": 201,
+      "line": 200,
       "categories": [
         "unclassified"
       ],
@@ -47504,7 +47486,7 @@
     {
       "legacy_root": "Plugins/",
       "path": "Infrastructure/config/repo-layout.v1.json",
-      "line": 202,
+      "line": 201,
       "categories": [
         "unclassified"
       ],
@@ -47513,7 +47495,7 @@
     {
       "legacy_root": "plugins/",
       "path": "Infrastructure/config/repo-layout.v1.json",
-      "line": 203,
+      "line": 202,
       "categories": [
         "unclassified"
       ],
@@ -47522,7 +47504,7 @@
     {
       "legacy_root": "plugins/",
       "path": "Infrastructure/config/repo-layout.v1.json",
-      "line": 204,
+      "line": 203,
       "categories": [
         "unclassified"
       ],
@@ -47531,7 +47513,7 @@
     {
       "legacy_root": "plugins/",
       "path": "Infrastructure/config/repo-layout.v1.json",
-      "line": 217,
+      "line": 216,
       "categories": [
         "unclassified"
       ],
@@ -47540,7 +47522,7 @@
     {
       "legacy_root": "skills-system/",
       "path": "Infrastructure/config/repo-layout.v1.json",
-      "line": 230,
+      "line": 229,
       "categories": [
         "unclassified"
       ],
@@ -47549,7 +47531,7 @@
     {
       "legacy_root": "skills-system/",
       "path": "Infrastructure/config/repo-layout.v1.json",
-      "line": 231,
+      "line": 230,
       "categories": [
         "unclassified"
       ],
@@ -47558,7 +47540,7 @@
     {
       "legacy_root": "Plugins/",
       "path": "Infrastructure/config/repo-layout.v1.json",
-      "line": 234,
+      "line": 233,
       "categories": [
         "unclassified"
       ],
@@ -47567,7 +47549,7 @@
     {
       "legacy_root": "plugins/",
       "path": "Infrastructure/config/repo-layout.v1.json",
-      "line": 235,
+      "line": 234,
       "categories": [
         "unclassified"
       ],
@@ -47576,7 +47558,7 @@
     {
       "legacy_root": "scripts",
       "path": "Infrastructure/config/repo-layout.v1.json",
-      "line": 245,
+      "line": 244,
       "categories": [
         "unclassified"
       ],
@@ -47585,7 +47567,7 @@
     {
       "legacy_root": "GOVERNANCE",
       "path": "Infrastructure/config/repo-layout.v1.json",
-      "line": 246,
+      "line": 245,
       "categories": [
         "unclassified"
       ],
@@ -47594,7 +47576,7 @@
     {
       "legacy_root": "docs-policy.json",
       "path": "Infrastructure/config/repo-layout.v1.json",
-      "line": 247,
+      "line": 246,
       "categories": [
         "unclassified"
       ],
@@ -47603,7 +47585,7 @@
     {
       "legacy_root": "Infrastructure/",
       "path": "Infrastructure/config/repo-layout.v1.json",
-      "line": 250,
+      "line": 249,
       "categories": [
         "unclassified"
       ],
@@ -47612,7 +47594,7 @@
     {
       "legacy_root": "Infrastructure/",
       "path": "Infrastructure/config/repo-layout.v1.json",
-      "line": 251,
+      "line": 250,
       "categories": [
         "unclassified"
       ],
@@ -52881,15 +52863,6 @@
       "snippet": "4. `docs-expert` fallback brand profile (`Infrastructure/references/BRAND_GUIDELINES.md`, `assets/brand/*`) only when 1-3 are unavailable."
     },
     {
-      "legacy_root": "brand/",
-      "path": "Infrastructure/references/deferred-skill-context/agent-ops-docs-expert/SKILL.original.md",
-      "line": 189,
-      "categories": [
-        "docs_reference_link"
-      ],
-      "snippet": "4. `docs-expert` fallback brand profile (`Infrastructure/references/BRAND_GUIDELINES.md`, `assets/brand/*`) only when 1-3 are unavailable."
-    },
-    {
       "legacy_root": "Infrastructure/",
       "path": "Infrastructure/references/deferred-skill-context/agent-ops-docs-expert/SKILL.original.md",
       "line": 218,
@@ -52999,51 +52972,6 @@
     },
     {
       "legacy_root": "brand/",
-      "path": "Infrastructure/references/deferred-skill-context/agent-ops-docs-expert/assets/README_TEMPLATE.md",
-      "line": 97,
-      "categories": [
-        "docs_reference_link"
-      ],
-      "snippet": "src=\"./brand/brand-mark.webp\""
-    },
-    {
-      "legacy_root": "brand/",
-      "path": "Infrastructure/references/deferred-skill-context/agent-ops-docs-expert/assets/README_TEMPLATE.md",
-      "line": 98,
-      "categories": [
-        "docs_reference_link"
-      ],
-      "snippet": "srcset=\"./brand/brand-mark.webp 1x, ./brand/brand-mark@2x.webp 2x\""
-    },
-    {
-      "legacy_root": "brand/",
-      "path": "Infrastructure/references/deferred-skill-context/agent-ops-docs-expert/references/BRAND_GUIDELINES.md",
-      "line": 45,
-      "categories": [
-        "docs_reference_link"
-      ],
-      "snippet": "src=\"./brand/brand-mark.webp\""
-    },
-    {
-      "legacy_root": "brand/",
-      "path": "Infrastructure/references/deferred-skill-context/agent-ops-docs-expert/references/BRAND_GUIDELINES.md",
-      "line": 46,
-      "categories": [
-        "docs_reference_link"
-      ],
-      "snippet": "srcset=\"./brand/brand-mark.webp 1x, ./brand/brand-mark@2x.webp 2x\""
-    },
-    {
-      "legacy_root": "brand/",
-      "path": "Infrastructure/references/deferred-skill-context/agent-ops-docs-expert/references/BRAND_GUIDELINES.md",
-      "line": 165,
-      "categories": [
-        "docs_reference_link"
-      ],
-      "snippet": "- `/brand/` assets exist (`brand-mark.webp`, `brand-mark@2x.webp`, optional PNGs)."
-    },
-    {
-      "legacy_root": "brand/",
       "path": "Infrastructure/references/deferred-skill-context/agent-ops-docs-expert/references/BRAND_GUIDELINES.md",
       "line": 171,
       "categories": [
@@ -53095,42 +53023,6 @@
         "docs_reference_link"
       ],
       "snippet": "The official mark assets are stored in this skill and can be copied into a repo's `brand/` directory:"
-    },
-    {
-      "legacy_root": "brand/",
-      "path": "Infrastructure/references/deferred-skill-context/agent-ops-docs-expert/references/BRAND_GUIDELINES.md",
-      "line": 181,
-      "categories": [
-        "docs_reference_link"
-      ],
-      "snippet": "- `assets/brand/brand-mark.webp`"
-    },
-    {
-      "legacy_root": "brand/",
-      "path": "Infrastructure/references/deferred-skill-context/agent-ops-docs-expert/references/BRAND_GUIDELINES.md",
-      "line": 182,
-      "categories": [
-        "docs_reference_link"
-      ],
-      "snippet": "- `assets/brand/brand-mark@2x.webp`"
-    },
-    {
-      "legacy_root": "brand/",
-      "path": "Infrastructure/references/deferred-skill-context/agent-ops-docs-expert/references/BRAND_GUIDELINES.md",
-      "line": 183,
-      "categories": [
-        "docs_reference_link"
-      ],
-      "snippet": "- `assets/brand/brand-mark.png`"
-    },
-    {
-      "legacy_root": "brand/",
-      "path": "Infrastructure/references/deferred-skill-context/agent-ops-docs-expert/references/BRAND_GUIDELINES.md",
-      "line": 184,
-      "categories": [
-        "docs_reference_link"
-      ],
-      "snippet": "- `assets/brand/brand-mark@2x.png`"
     },
     {
       "legacy_root": "Infrastructure/",
@@ -53251,15 +53143,6 @@
       "snippet": "- If `Infrastructure/scripts/check_readability.py` exists, run it and record the score and target range (default target: 45-70 Flesch Reading Ease; override with `--min/--max` or use `--no-range`)."
     },
     {
-      "legacy_root": "brand/",
-      "path": "Infrastructure/references/deferred-skill-context/agent-ops-docs-expert/references/evals.yaml",
-      "line": 177,
-      "categories": [
-        "unclassified"
-      ],
-      "snippet": "prompt: \"Please update the docs, but follow brand guidance in `docs/brand/official-guidelines.md` and do not use fallback branding.\""
-    },
-    {
       "legacy_root": "Infrastructure/",
       "path": "Infrastructure/references/deferred-skill-context/agent-ops-docs-expert/references/prompt-injection-expected-context.json",
       "line": 3,
@@ -53312,24 +53195,6 @@
         "unclassified"
       ],
       "snippet": "\"scope_skill\": \"Skills/agent-ops/docs-expert\","
-    },
-    {
-      "legacy_root": "brand/",
-      "path": "Infrastructure/references/deferred-skill-context/agent-ops-docs-expert/scripts/bootstrap_doc_qa.py",
-      "line": 82,
-      "categories": [
-        "internal_python_import"
-      ],
-      "snippet": "src=\"./brand/brand-mark.webp\""
-    },
-    {
-      "legacy_root": "brand/",
-      "path": "Infrastructure/references/deferred-skill-context/agent-ops-docs-expert/scripts/bootstrap_doc_qa.py",
-      "line": 83,
-      "categories": [
-        "internal_python_import"
-      ],
-      "snippet": "srcset=\"./brand/brand-mark.webp 1x, ./brand/brand-mark@2x.webp 2x\""
     },
     {
       "legacy_root": "Docs/",
@@ -66940,7 +66805,7 @@
     {
       "legacy_root": "scripts",
       "path": "Infrastructure/scripts/lib/ask/skills_sdk/package_contracts.py",
-      "line": 1201,
+      "line": 1205,
       "categories": [
         "ask_cli_route",
         "internal_python_import"
@@ -66950,7 +66815,7 @@
     {
       "legacy_root": "scripts",
       "path": "Infrastructure/scripts/lib/ask/skills_sdk/package_contracts.py",
-      "line": 1207,
+      "line": 1211,
       "categories": [
         "ask_cli_route",
         "internal_python_import"
@@ -66960,7 +66825,7 @@
     {
       "legacy_root": "scripts",
       "path": "Infrastructure/scripts/lib/ask/skills_sdk/package_contracts.py",
-      "line": 1349,
+      "line": 1353,
       "categories": [
         "ask_cli_route",
         "internal_python_import"
@@ -66970,7 +66835,7 @@
     {
       "legacy_root": "scripts",
       "path": "Infrastructure/scripts/lib/ask/skills_sdk/package_contracts.py",
-      "line": 2683,
+      "line": 2687,
       "categories": [
         "ask_cli_route",
         "internal_python_import"
@@ -78221,7 +78086,7 @@
     {
       "legacy_root": "Infrastructure/",
       "path": "Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py",
-      "line": 43,
+      "line": 44,
       "categories": [
         "internal_python_import"
       ],
@@ -78230,7 +78095,7 @@
     {
       "legacy_root": "Infrastructure/",
       "path": "Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py",
-      "line": 44,
+      "line": 45,
       "categories": [
         "internal_python_import"
       ],
@@ -78239,7 +78104,7 @@
     {
       "legacy_root": "Infrastructure/",
       "path": "Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py",
-      "line": 45,
+      "line": 46,
       "categories": [
         "internal_python_import"
       ],
@@ -78248,7 +78113,7 @@
     {
       "legacy_root": "scripts",
       "path": "Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py",
-      "line": 47,
+      "line": 48,
       "categories": [
         "internal_python_import"
       ],
@@ -78257,7 +78122,7 @@
     {
       "legacy_root": "Infrastructure/",
       "path": "Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py",
-      "line": 53,
+      "line": 54,
       "categories": [
         "internal_python_import"
       ],
@@ -78266,7 +78131,7 @@
     {
       "legacy_root": "Infrastructure/",
       "path": "Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py",
-      "line": 87,
+      "line": 88,
       "categories": [
         "internal_python_import"
       ],
@@ -78275,7 +78140,7 @@
     {
       "legacy_root": "Infrastructure/",
       "path": "Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py",
-      "line": 88,
+      "line": 89,
       "categories": [
         "internal_python_import"
       ],
@@ -78284,7 +78149,7 @@
     {
       "legacy_root": "Infrastructure/",
       "path": "Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py",
-      "line": 89,
+      "line": 90,
       "categories": [
         "internal_python_import"
       ],
@@ -78293,20 +78158,11 @@
     {
       "legacy_root": "GOVERNANCE",
       "path": "Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py",
-      "line": 89,
-      "categories": [
-        "internal_python_import"
-      ],
-      "snippet": "\"Infrastructure/GOVERNANCE\","
-    },
-    {
-      "legacy_root": "Infrastructure/",
-      "path": "Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py",
       "line": 90,
       "categories": [
         "internal_python_import"
       ],
-      "snippet": "\"Infrastructure/SECURITY\","
+      "snippet": "\"Infrastructure/GOVERNANCE\","
     },
     {
       "legacy_root": "Infrastructure/",
@@ -78315,7 +78171,7 @@
       "categories": [
         "internal_python_import"
       ],
-      "snippet": "\"Infrastructure/config\","
+      "snippet": "\"Infrastructure/SECURITY\","
     },
     {
       "legacy_root": "Infrastructure/",
@@ -78324,7 +78180,7 @@
       "categories": [
         "internal_python_import"
       ],
-      "snippet": "\"Infrastructure/catalog\","
+      "snippet": "\"Infrastructure/config\","
     },
     {
       "legacy_root": "Infrastructure/",
@@ -78333,12 +78189,21 @@
       "categories": [
         "internal_python_import"
       ],
+      "snippet": "\"Infrastructure/catalog\","
+    },
+    {
+      "legacy_root": "Infrastructure/",
+      "path": "Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py",
+      "line": 94,
+      "categories": [
+        "internal_python_import"
+      ],
       "snippet": "\"Infrastructure/policy\","
     },
     {
       "legacy_root": "GOVERNANCE",
       "path": "Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py",
-      "line": 112,
+      "line": 113,
       "categories": [
         "internal_python_import"
       ],
@@ -78347,7 +78212,7 @@
     {
       "legacy_root": "Infrastructure/",
       "path": "Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py",
-      "line": 113,
+      "line": 114,
       "categories": [
         "internal_python_import"
       ],
@@ -78356,20 +78221,11 @@
     {
       "legacy_root": "docs-policy.json",
       "path": "Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py",
-      "line": 113,
-      "categories": [
-        "internal_python_import"
-      ],
-      "snippet": "\"Infrastructure/docs-policy.json\","
-    },
-    {
-      "legacy_root": "Infrastructure/",
-      "path": "Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py",
       "line": 114,
       "categories": [
         "internal_python_import"
       ],
-      "snippet": "\"Infrastructure/Makefile\","
+      "snippet": "\"Infrastructure/docs-policy.json\","
     },
     {
       "legacy_root": "Infrastructure/",
@@ -78378,7 +78234,7 @@
       "categories": [
         "internal_python_import"
       ],
-      "snippet": "\"Infrastructure/memory.json\","
+      "snippet": "\"Infrastructure/Makefile\","
     },
     {
       "legacy_root": "Infrastructure/",
@@ -78387,7 +78243,7 @@
       "categories": [
         "internal_python_import"
       ],
-      "snippet": "\"Infrastructure/prek.toml\","
+      "snippet": "\"Infrastructure/memory.json\","
     },
     {
       "legacy_root": "Infrastructure/",
@@ -78396,7 +78252,7 @@
       "categories": [
         "internal_python_import"
       ],
-      "snippet": "\"Infrastructure/pyproject.toml\","
+      "snippet": "\"Infrastructure/prek.toml\","
     },
     {
       "legacy_root": "Infrastructure/",
@@ -78405,12 +78261,21 @@
       "categories": [
         "internal_python_import"
       ],
+      "snippet": "\"Infrastructure/pyproject.toml\","
+    },
+    {
+      "legacy_root": "Infrastructure/",
+      "path": "Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py",
+      "line": 119,
+      "categories": [
+        "internal_python_import"
+      ],
       "snippet": "\"Infrastructure/uv.lock\","
     },
     {
       "legacy_root": "Infrastructure/",
       "path": "Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py",
-      "line": 122,
+      "line": 123,
       "categories": [
         "internal_python_import"
       ],
@@ -78419,7 +78284,7 @@
     {
       "legacy_root": "Infrastructure/",
       "path": "Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py",
-      "line": 127,
+      "line": 128,
       "categories": [
         "internal_python_import"
       ],
@@ -78428,7 +78293,7 @@
     {
       "legacy_root": "Infrastructure/",
       "path": "Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py",
-      "line": 128,
+      "line": 129,
       "categories": [
         "internal_python_import"
       ],
@@ -78437,7 +78302,7 @@
     {
       "legacy_root": "Infrastructure/",
       "path": "Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py",
-      "line": 129,
+      "line": 130,
       "categories": [
         "internal_python_import"
       ],
@@ -78446,7 +78311,7 @@
     {
       "legacy_root": "Infrastructure/",
       "path": "Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py",
-      "line": 130,
+      "line": 131,
       "categories": [
         "internal_python_import"
       ],
@@ -78455,7 +78320,7 @@
     {
       "legacy_root": "docs-policy.json",
       "path": "Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py",
-      "line": 230,
+      "line": 231,
       "categories": [
         "internal_python_import"
       ],
@@ -78464,7 +78329,7 @@
     {
       "legacy_root": "Docs/",
       "path": "Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py",
-      "line": 296,
+      "line": 297,
       "categories": [
         "internal_python_import"
       ],
@@ -78473,7 +78338,7 @@
     {
       "legacy_root": "Infrastructure/",
       "path": "Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py",
-      "line": 342,
+      "line": 343,
       "categories": [
         "internal_python_import"
       ],
@@ -78482,7 +78347,7 @@
     {
       "legacy_root": "Plugins/",
       "path": "Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py",
-      "line": 344,
+      "line": 345,
       "categories": [
         "internal_python_import"
       ],
@@ -78491,7 +78356,7 @@
     {
       "legacy_root": "Infrastructure/",
       "path": "Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py",
-      "line": 370,
+      "line": 371,
       "categories": [
         "internal_python_import"
       ],
@@ -78500,7 +78365,7 @@
     {
       "legacy_root": "Infrastructure/",
       "path": "Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py",
-      "line": 643,
+      "line": 644,
       "categories": [
         "internal_python_import"
       ],
@@ -78509,7 +78374,7 @@
     {
       "legacy_root": "scripts",
       "path": "Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py",
-      "line": 643,
+      "line": 644,
       "categories": [
         "internal_python_import"
       ],
@@ -78518,7 +78383,7 @@
     {
       "legacy_root": "Infrastructure/",
       "path": "Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py",
-      "line": 648,
+      "line": 649,
       "categories": [
         "internal_python_import"
       ],
@@ -78527,7 +78392,7 @@
     {
       "legacy_root": "Docs/",
       "path": "Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py",
-      "line": 648,
+      "line": 649,
       "categories": [
         "internal_python_import"
       ],
@@ -78536,7 +78401,7 @@
     {
       "legacy_root": "Infrastructure/",
       "path": "Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py",
-      "line": 775,
+      "line": 776,
       "categories": [
         "internal_python_import"
       ],
@@ -78545,7 +78410,7 @@
     {
       "legacy_root": "scripts",
       "path": "Infrastructure/scripts/validation-and-linting/check_repo_surface_inventory.py",
-      "line": 775,
+      "line": 776,
       "categories": [
         "internal_python_import"
       ],
@@ -78855,7 +78720,7 @@
       "categories": [
         "internal_python_import"
       ],
-      "snippet": "\"brand/\": [re.compile(r\"(?<![A-Za-z0-9_.-])brand/\")],"
+      "snippet": "\"brand/\": [re.compile(r\"(?<![A-Za-z0-9_.\\-/])brand/\")],"
     },
     {
       "legacy_root": "scripts",
@@ -78896,38 +78761,38 @@
     {
       "legacy_root": "Infrastructure/",
       "path": "Infrastructure/scripts/validation-and-linting/generate_repo_layout_caller_inventory.py",
-      "line": 126,
+      "line": 124,
       "categories": [
         "internal_python_import"
       ],
-      "snippet": "if path.startswith(\"Infrastructure/scripts/lib/ask/\") or path == \"bin/ask\":"
+      "snippet": "(\"ask_cli_route\", path.startswith(\"Infrastructure/scripts/lib/ask/\") or path == \"bin/ask\"),"
     },
     {
       "legacy_root": "scripts",
       "path": "Infrastructure/scripts/validation-and-linting/generate_repo_layout_caller_inventory.py",
-      "line": 126,
+      "line": 124,
       "categories": [
         "internal_python_import"
       ],
-      "snippet": "if path.startswith(\"Infrastructure/scripts/lib/ask/\") or path == \"bin/ask\":"
+      "snippet": "(\"ask_cli_route\", path.startswith(\"Infrastructure/scripts/lib/ask/\") or path == \"bin/ask\"),"
     },
     {
       "legacy_root": "Infrastructure/",
+      "path": "Infrastructure/scripts/validation-and-linting/generate_repo_layout_caller_inventory.py",
+      "line": 125,
+      "categories": [
+        "internal_python_import"
+      ],
+      "snippet": "(\"test_fixture\", path.startswith(\"Infrastructure/tests/\") or \"/tests/\" in path or name.startswith(\"test_\")),"
+    },
+    {
+      "legacy_root": "Docs/",
       "path": "Infrastructure/scripts/validation-and-linting/generate_repo_layout_caller_inventory.py",
       "line": 128,
       "categories": [
         "internal_python_import"
       ],
-      "snippet": "if path.startswith(\"Infrastructure/tests/\") or \"/tests/\" in path or Path(path).name.startswith(\"test_\"):"
-    },
-    {
-      "legacy_root": "Docs/",
-      "path": "Infrastructure/scripts/validation-and-linting/generate_repo_layout_caller_inventory.py",
-      "line": 134,
-      "categories": [
-        "internal_python_import"
-      ],
-      "snippet": "if suffix in {\".md\", \".mdx\", \".html\"} or path.startswith(\"Docs/\") or path == \"README.md\":"
+      "snippet": "(\"docs_reference_link\", suffix in {\".md\", \".mdx\", \".html\"} or path.startswith(\"Docs/\") or path == \"README.md\"),"
     },
     {
       "legacy_root": "Infrastructure/",
@@ -92989,7 +92854,7 @@
     {
       "legacy_root": "Infrastructure/",
       "path": "Infrastructure/tests/test_repo_layout.py",
-      "line": 129,
+      "line": 144,
       "categories": [
         "internal_python_import",
         "test_fixture"
@@ -92999,7 +92864,7 @@
     {
       "legacy_root": "scripts",
       "path": "Infrastructure/tests/test_repo_layout.py",
-      "line": 129,
+      "line": 144,
       "categories": [
         "internal_python_import",
         "test_fixture"
@@ -93009,7 +92874,7 @@
     {
       "legacy_root": "scripts",
       "path": "Infrastructure/tests/test_repo_layout.py",
-      "line": 135,
+      "line": 150,
       "categories": [
         "internal_python_import",
         "test_fixture"
@@ -93019,7 +92884,7 @@
     {
       "legacy_root": "scripts",
       "path": "Infrastructure/tests/test_repo_layout.py",
-      "line": 191,
+      "line": 221,
       "categories": [
         "internal_python_import",
         "test_fixture"
@@ -93029,7 +92894,7 @@
     {
       "legacy_root": "Infrastructure/",
       "path": "Infrastructure/tests/test_repo_layout.py",
-      "line": 195,
+      "line": 225,
       "categories": [
         "internal_python_import",
         "test_fixture"
@@ -93039,7 +92904,7 @@
     {
       "legacy_root": "scripts",
       "path": "Infrastructure/tests/test_repo_layout.py",
-      "line": 195,
+      "line": 225,
       "categories": [
         "internal_python_import",
         "test_fixture"
@@ -93049,7 +92914,7 @@
     {
       "legacy_root": "Skills/",
       "path": "Infrastructure/tests/test_repo_layout.py",
-      "line": 196,
+      "line": 226,
       "categories": [
         "ask_cli_route",
         "internal_python_import",
@@ -93060,7 +92925,7 @@
     {
       "legacy_root": "Infrastructure/",
       "path": "Infrastructure/tests/test_repo_layout.py",
-      "line": 198,
+      "line": 228,
       "categories": [
         "ci_workflow",
         "internal_python_import",
@@ -93071,7 +92936,7 @@
     {
       "legacy_root": "scripts",
       "path": "Infrastructure/tests/test_repo_layout.py",
-      "line": 198,
+      "line": 228,
       "categories": [
         "ci_workflow",
         "internal_python_import",
@@ -93082,7 +92947,7 @@
     {
       "legacy_root": "Plugins/",
       "path": "Infrastructure/tests/test_repo_layout.py",
-      "line": 199,
+      "line": 229,
       "categories": [
         "internal_python_import",
         "test_fixture"
@@ -93092,7 +92957,7 @@
     {
       "legacy_root": "Docs/",
       "path": "Infrastructure/tests/test_repo_layout.py",
-      "line": 199,
+      "line": 229,
       "categories": [
         "internal_python_import",
         "test_fixture"
@@ -93102,7 +92967,7 @@
     {
       "legacy_root": "docs-policy.json",
       "path": "Infrastructure/tests/test_repo_layout.py",
-      "line": 199,
+      "line": 229,
       "categories": [
         "internal_python_import",
         "test_fixture"
@@ -93112,7 +92977,7 @@
     {
       "legacy_root": "Skills/",
       "path": "Infrastructure/tests/test_repo_layout.py",
-      "line": 215,
+      "line": 245,
       "categories": [
         "internal_python_import",
         "test_fixture"
@@ -93122,7 +92987,7 @@
     {
       "legacy_root": "Infrastructure/",
       "path": "Infrastructure/tests/test_repo_layout.py",
-      "line": 216,
+      "line": 246,
       "categories": [
         "internal_python_import",
         "test_fixture"
@@ -93132,7 +92997,7 @@
     {
       "legacy_root": "Plugins/",
       "path": "Infrastructure/tests/test_repo_layout.py",
-      "line": 217,
+      "line": 247,
       "categories": [
         "internal_python_import",
         "test_fixture"
@@ -93142,7 +93007,7 @@
     {
       "legacy_root": "docs-policy.json",
       "path": "Infrastructure/tests/test_repo_layout.py",
-      "line": 218,
+      "line": 248,
       "categories": [
         "internal_python_import",
         "test_fixture"
@@ -93152,7 +93017,7 @@
     {
       "legacy_root": "scripts",
       "path": "Infrastructure/tests/test_repo_layout.py",
-      "line": 227,
+      "line": 257,
       "categories": [
         "internal_python_import",
         "test_fixture"
@@ -93162,7 +93027,7 @@
     {
       "legacy_root": "scripts",
       "path": "Infrastructure/tests/test_repo_layout.py",
-      "line": 240,
+      "line": 270,
       "categories": [
         "internal_python_import",
         "test_fixture"
@@ -121398,7 +121263,16 @@
     {
       "legacy_root": "Infrastructure/",
       "path": "Plugins/skill-factory/skills/skill-factory-router/SKILL.md",
-      "line": 85,
+      "line": 75,
+      "categories": [
+        "docs_reference_link"
+      ],
+      "snippet": "Use Infrastructure/references/first-principles-factory-gate.md for the first-principles factory gate before routing create, harden, refactor, or skillify work."
+    },
+    {
+      "legacy_root": "Infrastructure/",
+      "path": "Plugins/skill-factory/skills/skill-factory-router/SKILL.md",
+      "line": 115,
       "categories": [
         "docs_reference_link"
       ],
@@ -121407,7 +121281,7 @@
     {
       "legacy_root": "scripts",
       "path": "Plugins/skill-factory/skills/skill-factory-router/SKILL.md",
-      "line": 85,
+      "line": 115,
       "categories": [
         "docs_reference_link"
       ],
@@ -121416,7 +121290,7 @@
     {
       "legacy_root": "Plugins/",
       "path": "Plugins/skill-factory/skills/skill-factory-router/SKILL.md",
-      "line": 86,
+      "line": 116,
       "categories": [
         "ask_cli_route",
         "docs_reference_link"
@@ -127439,7 +127313,7 @@
     {
       "legacy_root": "Skills/",
       "path": "Skills/agent-ops/improve-agent-native/SKILL.md",
-      "line": 104,
+      "line": 114,
       "categories": [
         "ask_cli_route",
         "docs_reference_link"
@@ -127449,7 +127323,7 @@
     {
       "legacy_root": "Skills/",
       "path": "Skills/agent-ops/improve-agent-native/SKILL.md",
-      "line": 105,
+      "line": 115,
       "categories": [
         "ask_cli_route",
         "docs_reference_link"
@@ -127459,7 +127333,7 @@
     {
       "legacy_root": "Skills/",
       "path": "Skills/agent-ops/improve-agent-native/SKILL.md",
-      "line": 106,
+      "line": 116,
       "categories": [
         "ask_cli_route",
         "docs_reference_link"
@@ -132055,33 +131929,6 @@
         "docs_reference_link"
       ],
       "snippet": "3. Run targeted local Infrastructure/tests/compile checks."
-    },
-    {
-      "legacy_root": "brand/",
-      "path": "brand/AGENTS.md",
-      "line": 9,
-      "categories": [
-        "docs_reference_link"
-      ],
-      "snippet": "- Applies to `brand/**`."
-    },
-    {
-      "legacy_root": "brand/",
-      "path": "brand/README.md",
-      "line": 24,
-      "categories": [
-        "docs_reference_link"
-      ],
-      "snippet": "src=\"./brand/brand-mark.webp\""
-    },
-    {
-      "legacy_root": "brand/",
-      "path": "brand/README.md",
-      "line": 25,
-      "categories": [
-        "docs_reference_link"
-      ],
-      "snippet": "srcset=\"./brand/brand-mark.webp 1x, ./brand/brand-mark@2x.webp 2x\""
     },
     {
       "legacy_root": "Docs/",

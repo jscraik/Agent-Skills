@@ -56,8 +56,7 @@
       "legacy_paths": [
         "Infrastructure",
         "Docs",
-        "artifacts",
-        "brand"
+        "artifacts"
       ]
     },
     "evidence_control": {

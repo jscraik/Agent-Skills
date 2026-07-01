@@ -5,11 +5,11 @@ migration Phase 1 caller inventory.
 
 ## Summary
 
-- Scanned files: 10337
-- Skipped non-text files: 720
-- Files with legacy-root references: 1619
-- Total legacy-root references: 14421
-- Excluded generated/evidence references: 113188
+- Scanned files: 10340
+- Skipped non-text files: 722
+- Files with legacy-root references: 1615
+- Total legacy-root references: 14404
+- Excluded generated/evidence references: 113258
 
 ## Counts By Legacy Root
 
@@ -17,10 +17,10 @@ migration Phase 1 caller inventory.
 | --- | ---: |
 | Docs/ | 740 |
 | GOVERNANCE | 215 |
-| Infrastructure/ | 4908 |
+| Infrastructure/ | 4909 |
 | Plugins/ | 2231 |
 | Skills/ | 2597 |
-| brand/ | 39 |
+| brand/ | 21 |
 | docs-policy.json | 64 |
 | plugins/ | 125 |
 | scripts | 3379 |
@@ -32,15 +32,15 @@ migration Phase 1 caller inventory.
 | --- | ---: |
 | ask_cli_route | 889 |
 | ci_workflow | 147 |
-| docs_reference_link | 7225 |
+| docs_reference_link | 7211 |
 | external_operator_entrypoint | 68 |
-| internal_python_import | 3384 |
+| internal_python_import | 3382 |
 | precommit_or_hook | 16 |
 | runtime_projection_input | 486 |
 | shell_command | 687 |
 | tessl_staging_input | 186 |
 | test_fixture | 2500 |
-| unclassified | 2338 |
+| unclassified | 2337 |
 
 ## Top Files
 

@@ -124,6 +124,21 @@ def test_future_nested_foundry_paths_classify_top_level_root(tmp_path: Path) -> 
     )
 
 
+def test_future_nested_skills_sdk_brand_path_classifies_top_level_root(tmp_path: Path) -> None:
+    root = _minimal_repo(tmp_path)
+    (root / "skills-sdk" / "brand").mkdir(parents=True)
+
+    report = validate_repo_layout.validate_repo_layout(
+        root, root / "Infrastructure" / "config" / "repo-layout.v1.json"
+    )
+
+    assert report["status"] == "pass"
+    assert not any(
+        finding["code"] == "top_level_unclassified" and finding["path"] == "skills-sdk"
+        for finding in report["findings"]
+    )
+
+
 def test_root_infrastructure_alias_is_deprecated_warning(tmp_path: Path) -> None:
     root = _minimal_repo(tmp_path)
     os.symlink("Infrastructure/scripts", root / "scripts")
@@ -152,6 +167,21 @@ def test_unknown_top_level_directory_blocks(tmp_path: Path) -> None:
     assert any(
         finding["code"] == "top_level_unclassified"
         and finding["path"] == "random-new-root"
+        for finding in report["findings"]
+    )
+
+
+def test_root_brand_directory_blocks_after_skills_sdk_brand_migration(tmp_path: Path) -> None:
+    root = _minimal_repo(tmp_path)
+    (root / "brand").mkdir()
+
+    report = validate_repo_layout.validate_repo_layout(
+        root, root / "Infrastructure" / "config" / "repo-layout.v1.json"
+    )
+
+    assert report["status"] == "fail"
+    assert any(
+        finding["code"] == "top_level_unclassified" and finding["path"] == "brand"
         for finding in report["findings"]
     )
 

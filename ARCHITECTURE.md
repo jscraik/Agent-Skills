@@ -276,7 +276,8 @@ The root is a front door and contract boundary. Root files should be one of:
   `harness.contract.json`, `memory.json`, `package-lock.json`, and dotfile
   tool configuration.
 - first-class source directories: `Infrastructure/`, `Skills/`, `Plugins/`,
-  `Docs/`, `Wiki/`, `bin/`, `brand/`, and `skills-system/`.
+  `Docs/`, `Wiki/`, `bin/`, `skills-sdk/brand/`, and
+  `skills-system/`.
 
 Root files should not be one-off migration scripts, local logs, scratch files,
 stale proposal documents, or generated runtime output.

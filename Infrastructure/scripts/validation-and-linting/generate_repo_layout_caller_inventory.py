@@ -23,7 +23,7 @@ ROOT_PATTERNS: dict[str, list[re.Pattern[str]]] = {
     "Infrastructure/": [re.compile(r"(?<![A-Za-z0-9_.-])Infrastructure/")],
     "Docs/": [re.compile(r"(?<![A-Za-z0-9_.-])Docs/")],
     "artifacts/": [re.compile(r"(?<![A-Za-z0-9_.-])artifacts/")],
-    "brand/": [re.compile(r"(?<![A-Za-z0-9_.-])brand/")],
+    "brand/": [re.compile(r"(?<![A-Za-z0-9_.\-/])brand/")],
     "scripts": [
         re.compile(r"(?<![A-Za-z0-9_.-])(?:\./)?scripts/"),
         re.compile(r"(?<![A-Za-z0-9_.-])['\"]scripts['\"]"),
