@@ -232,8 +232,6 @@ def _load_yaml_with_ruby(path: Path, text: str) -> Dict[str, Any]:
         _require_yaml()
     except subprocess.TimeoutExpired as exc:
         raise ValueError(f"{path} ruby YAML fallback timed out") from exc
-    except FileNotFoundError:
-        _require_yaml()
     if process.returncode != 0:
         raise ValueError(process.stderr.strip())
     obj = json.loads(process.stdout)

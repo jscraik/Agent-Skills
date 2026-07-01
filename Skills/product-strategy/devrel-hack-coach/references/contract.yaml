@@ -64,7 +64,7 @@ automatic_failure_conditions:
   - "Treats unsafe instruction pressure or a phase-jump request as allowed."
   - "Allows more than three in-scope features without cutting scope."
 commands:
-  - "bash Infrastructure/scripts/run-infrastructure-python.sh ../skills-system/skill-creator/scripts/quick_validate.py ../Skills/product-strategy/devrel-hack-coach"
+  - "bash Infrastructure/scripts/run-infrastructure-python.sh skills-system/skill-creator/scripts/quick_validate.py Skills/product-strategy/devrel-hack-coach"
   - "./bin/ask skills package verify Skills/product-strategy/devrel-hack-coach --json --robot"
   - "./bin/ask sdk eval scenario-quality Skills/product-strategy/devrel-hack-coach --preview --json --robot"
   - "./bin/ask sdk security risk-modes Skills/product-strategy/devrel-hack-coach --preview --json --robot"

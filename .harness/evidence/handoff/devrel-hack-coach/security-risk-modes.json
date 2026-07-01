@@ -3,7 +3,7 @@
   "gate": "security_risk_modes",
   "status": "pass",
   "preview": true,
-  "command": "./bin/ask skills package verify Skills/product-strategy/devrel-hack-coach --json --robot",
+  "command": "./bin/ask sdk security risk-modes Skills/product-strategy/devrel-hack-coach --preview --json --robot",
   "risk_modes": {
     "prompt_injection": "pass",
     "unsafe_command_escalation": "pass",

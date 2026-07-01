@@ -39,7 +39,7 @@ def _run_git(repo_root: Path, args: list[str]) -> subprocess.CompletedProcess[st
         )
     except subprocess.TimeoutExpired as exc:
         return subprocess.CompletedProcess(
-            args=exc.args or ["/usr/bin/git", *args],
+            args=exc.cmd,
             returncode=-1,
             stdout=exc.stdout.decode("utf-8") if isinstance(exc.stdout, bytes) else (exc.stdout or ""),
             stderr=f"git command timed out after 30 seconds: {exc}",

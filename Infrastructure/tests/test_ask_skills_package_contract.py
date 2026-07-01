@@ -834,9 +834,11 @@ automatic_failure_conditions:
         with tempfile.NamedTemporaryFile("w", suffix=".yaml", encoding="utf-8") as handle:
             handle.write(text)
             handle.flush()
-            with patch.object(package_contracts, "yaml", None):
-                with patch.object(package_contracts.subprocess, "run", return_value=mock_process):
-                    loaded, error = package_contracts.read_structured_reference(Path(handle.name))
+            with (
+                patch.object(package_contracts, "yaml", None),
+                patch.object(package_contracts.subprocess, "run", return_value=mock_process),
+            ):
+                loaded, error = package_contracts.read_structured_reference(Path(handle.name))
 
         self.assertIsNone(error)
         self.assertIsInstance(loaded, dict)
