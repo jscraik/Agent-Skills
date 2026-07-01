@@ -74,7 +74,7 @@
       "owner_type": "standalone_skill",
       "project": "improve-codebase-architecture",
       "workspace": "jscraik",
-      "name": "improve-codebase-architecture"
+      "name": "jscraik/improve-codebase-architecture"
     },
     "dry_run": true,
     "scenario_tool_tile": "tessl-labs/tessl-skill-eval-scenarios",

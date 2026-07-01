@@ -207,11 +207,13 @@ rerun that same gate before moving to the next phase or validation lane.
 
 Read `references/coaching-style.md` for anti-pattern responses.
 
-- Use `references/devrel-tracks.md` when track selection or idea mapping is needed.
-- Consult `references/spec-template.md` at Phase 2 Step B.
-- Load `references/hackathon-spec-plan-artifact.md` before the Phase 4 artifact.
-- Review `references/pitch-template.md` at Phase 4.
-- Check `references/timebox-plans.md` at Phase 3.
-- Review `references/coaching-style.md` for example wording or anti-patterns.
-- Use `references/example-quality-bars.md` only as a quality-bar index.
-- Review `references/validation-and-output.md` for package shape and evidence lanes.
+## Progressive Disclosure
+
+- Read `references/devcon-tracks.md` when track selection or idea mapping is needed.
+- Read `references/spec-template.md` at Phase 2 Step B.
+- Read `references/hackathon-spec-plan-artifact.md` before the Phase 4 artifact.
+- Read `references/pitch-template.md` at Phase 4.
+- Read `references/timebox-plans.md` at Phase 3.
+- Read `references/coaching-style.md` for example wording or anti-patterns.
+- Read `references/example-quality-bars.md` only as a quality-bar index.
+- Read `references/validation-and-output.md` for package shape and evidence lanes.
