@@ -283,7 +283,7 @@ def _markdown_summary_lines(summary: dict[str, Any]) -> list[str]:
         "## Summary",
         "",
         f"- Scanned files: {summary['scanned_files']}",
-        f"- Skipped non-text files: {summary['skipped_files']}",
+        f"- Skipped non-text or unreadable files: {summary['skipped_files']}",
         f"- Files with legacy-root references: {summary['file_count']}",
         f"- Total legacy-root references: {summary['occurrence_count']}",
     ]
