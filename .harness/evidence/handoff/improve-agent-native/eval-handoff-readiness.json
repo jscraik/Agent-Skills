@@ -18,7 +18,7 @@
     {
       "id": "oss-cloud",
       "status": "skip",
-      "command": "set -a; source <redacted-codex-env>; set +a; XDG_CACHE_HOME=/private/tmp/agent-skills-xdg-cache XDG_STATE_HOME=/private/tmp/agent-skills-xdg-state MISE_CACHE_DIR=/private/tmp/agent-skills-mise-cache MISE_STATE_DIR=/private/tmp/agent-skills-mise-state MISE_TRUSTED_CONFIG_PATHS=<redacted-trusted-config> UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache ./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode smoke --codex-profile oss-cloud --timeout-seconds 180 --json --robot",
+      "command": "set -a; source \"$HOME/.codex/.env\"; set +a; XDG_CACHE_HOME=/private/tmp/agent-skills-xdg-cache XDG_STATE_HOME=/private/tmp/agent-skills-xdg-state MISE_CACHE_DIR=/private/tmp/agent-skills-mise-cache MISE_STATE_DIR=/private/tmp/agent-skills-mise-state MISE_TRUSTED_CONFIG_PATHS=.mise.toml UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache ./bin/ask sdk eval run Skills/agent-ops/improve-agent-native --runner internal --mode smoke --codex-profile oss-cloud --timeout-seconds 180 --json --robot",
       "receipt_path": ".harness/evidence/handoff/improve-agent-native/oss-cloud-current.json",
       "blocker": "operator_waived_for_demo: Jamie explicitly waived oss-cloud on 2026-07-01 to proceed to Tessl local proof, Tessl dry-run, then live Tessl for tonight's demo. Underlying receipt remains blocked_runtime: oss-cloud diagnostic did not produce a JSON receipt within the evidence window and was interrupted."
     },
