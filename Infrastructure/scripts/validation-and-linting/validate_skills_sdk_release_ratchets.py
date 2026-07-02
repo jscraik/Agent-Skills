@@ -311,7 +311,12 @@ def _check_tessl_lane_naming(root: Path, skill_dir: Path) -> Finding:
         except (OSError, ValueError):
             missing.append(_rel(receipt, root))
             continue
-        lane = payload.get("tessl_lane") or payload.get("lane") or payload.get("tessl", {}).get("lane")
+        if not isinstance(payload, dict):
+            missing.append(_rel(receipt, root))
+            continue
+        tessl_payload = payload.get("tessl")
+        tessl_lane = tessl_payload.get("lane") if isinstance(tessl_payload, dict) else None
+        lane = payload.get("tessl_lane") or payload.get("lane") or tessl_lane
         if lane not in {"review", "dry_run", "live_eval", "score_receipt", "local_proof"}:
             missing.append(_rel(receipt, root))
     status = "pass" if not missing else "fail"

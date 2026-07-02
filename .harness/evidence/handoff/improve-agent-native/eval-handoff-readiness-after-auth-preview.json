@@ -1,0 +1,312 @@
+{
+  "status": "error",
+  "trace_id": "f4e20669-b6fc-4fc8-b6bd-37b2b26ee4bc",
+  "metadata": {
+    "version": "0.1.0",
+    "command": "sdk eval handoff-readiness --skill Skills/agent-ops/improve-agent-native --preview --json --robot",
+    "next_steps": [],
+    "correction_note": null
+  },
+  "data": {
+    "skills_sdk_eval_handoff_readiness": {
+      "schema_version": "skills-sdk-eval-handoff-readiness.v0",
+      "status": "blocked",
+      "ready_for_live_tessl": false,
+      "skill": "Skills/agent-ops/improve-agent-native",
+      "receipt": {
+        "schema_version": "skills-sdk.eval-handoff-readiness.v0",
+        "schema_uri": "https://agent-skills.local/schemas/skills-sdk/eval-handoff-readiness.v0.schema.json",
+        "status": "blocked",
+        "operation": "eval_handoff_readiness_preview",
+        "query": "Skills/agent-ops/improve-agent-native",
+        "skill_path": "Skills/agent-ops/improve-agent-native/SKILL.md",
+        "readiness_path": ".harness/evidence/handoff/improve-agent-native/eval-handoff-readiness.json",
+        "tessl_score_path": null,
+        "tessl_score_summary": null,
+        "required_lanes": [
+          "deterministic_local_gates",
+          "oss-local",
+          "oss-cloud",
+          "tessl-local-proof",
+          "tessl-live-dry-run"
+        ],
+        "required_order": [
+          "deterministic_local_gates",
+          "oss-local",
+          "patch_oss_local_failures",
+          "oss-cloud",
+          "patch_oss_cloud_failures",
+          "tessl-local-proof",
+          "tessl-live-dry-run",
+          "tessl-live",
+          "patch_tessl_failures"
+        ],
+        "lanes": [
+          {
+            "id": "deterministic_local_gates",
+            "status": "blocked",
+            "declared_status": null,
+            "command": null,
+            "receipt_path": null,
+            "blocker": "blocked_validation: lane_present",
+            "checks": [
+              {
+                "id": "lane_present",
+                "status": "blocker",
+                "severity": "blocker",
+                "message": "Every live handoff lane must be represented by current evidence.",
+                "evidence": [
+                  "deterministic_local_gates"
+                ]
+              }
+            ],
+            "blockers": [
+              {
+                "id": "lane_present",
+                "status": "blocker",
+                "severity": "blocker",
+                "message": "Every live handoff lane must be represented by current evidence.",
+                "evidence": [
+                  "deterministic_local_gates"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "oss-local",
+            "status": "blocked",
+            "declared_status": null,
+            "command": null,
+            "receipt_path": null,
+            "blocker": "blocked_validation: lane_present",
+            "checks": [
+              {
+                "id": "lane_present",
+                "status": "blocker",
+                "severity": "blocker",
+                "message": "Every live handoff lane must be represented by current evidence.",
+                "evidence": [
+                  "oss-local"
+                ]
+              }
+            ],
+            "blockers": [
+              {
+                "id": "lane_present",
+                "status": "blocker",
+                "severity": "blocker",
+                "message": "Every live handoff lane must be represented by current evidence.",
+                "evidence": [
+                  "oss-local"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "oss-cloud",
+            "status": "blocked",
+            "declared_status": null,
+            "command": null,
+            "receipt_path": null,
+            "blocker": "blocked_validation: lane_present",
+            "checks": [
+              {
+                "id": "lane_present",
+                "status": "blocker",
+                "severity": "blocker",
+                "message": "Every live handoff lane must be represented by current evidence.",
+                "evidence": [
+                  "oss-cloud"
+                ]
+              }
+            ],
+            "blockers": [
+              {
+                "id": "lane_present",
+                "status": "blocker",
+                "severity": "blocker",
+                "message": "Every live handoff lane must be represented by current evidence.",
+                "evidence": [
+                  "oss-cloud"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "tessl-local-proof",
+            "status": "blocked",
+            "declared_status": null,
+            "command": null,
+            "receipt_path": null,
+            "blocker": "blocked_validation: lane_present",
+            "checks": [
+              {
+                "id": "lane_present",
+                "status": "blocker",
+                "severity": "blocker",
+                "message": "Every live handoff lane must be represented by current evidence.",
+                "evidence": [
+                  "tessl-local-proof"
+                ]
+              }
+            ],
+            "blockers": [
+              {
+                "id": "lane_present",
+                "status": "blocker",
+                "severity": "blocker",
+                "message": "Every live handoff lane must be represented by current evidence.",
+                "evidence": [
+                  "tessl-local-proof"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "tessl-live-dry-run",
+            "status": "blocked",
+            "declared_status": null,
+            "command": null,
+            "receipt_path": null,
+            "blocker": "blocked_validation: lane_present",
+            "checks": [
+              {
+                "id": "lane_present",
+                "status": "blocker",
+                "severity": "blocker",
+                "message": "Every live handoff lane must be represented by current evidence.",
+                "evidence": [
+                  "tessl-live-dry-run"
+                ]
+              }
+            ],
+            "blockers": [
+              {
+                "id": "lane_present",
+                "status": "blocker",
+                "severity": "blocker",
+                "message": "Every live handoff lane must be represented by current evidence.",
+                "evidence": [
+                  "tessl-live-dry-run"
+                ]
+              }
+            ]
+          }
+        ],
+        "quality_checks": [
+          {
+            "id": "readiness_artifact_present",
+            "status": "blocker",
+            "severity": "blocker",
+            "message": "Live Tessl requires a current handoff readiness artifact under .harness/evidence.",
+            "evidence": [
+              "missing_readiness_artifact"
+            ]
+          },
+          {
+            "id": "readiness_schema_supported",
+            "status": "blocker",
+            "severity": "blocker",
+            "message": "The handoff readiness input schema_version must match the SDK contract.",
+            "evidence": [
+              "skills-sdk.eval-handoff-readiness-input.v1"
+            ]
+          }
+        ],
+        "blockers": [
+          {
+            "id": "readiness_artifact_present",
+            "status": "blocker",
+            "severity": "blocker",
+            "message": "Live Tessl requires a current handoff readiness artifact under .harness/evidence.",
+            "evidence": [
+              "missing_readiness_artifact"
+            ]
+          },
+          {
+            "id": "readiness_schema_supported",
+            "status": "blocker",
+            "severity": "blocker",
+            "message": "The handoff readiness input schema_version must match the SDK contract.",
+            "evidence": [
+              "skills-sdk.eval-handoff-readiness-input.v1"
+            ]
+          },
+          {
+            "id": "lane_present",
+            "status": "blocker",
+            "severity": "blocker",
+            "message": "Every live handoff lane must be represented by current evidence.",
+            "evidence": [
+              "deterministic_local_gates"
+            ]
+          },
+          {
+            "id": "lane_present",
+            "status": "blocker",
+            "severity": "blocker",
+            "message": "Every live handoff lane must be represented by current evidence.",
+            "evidence": [
+              "oss-local"
+            ]
+          },
+          {
+            "id": "lane_present",
+            "status": "blocker",
+            "severity": "blocker",
+            "message": "Every live handoff lane must be represented by current evidence.",
+            "evidence": [
+              "oss-cloud"
+            ]
+          },
+          {
+            "id": "lane_present",
+            "status": "blocker",
+            "severity": "blocker",
+            "message": "Every live handoff lane must be represented by current evidence.",
+            "evidence": [
+              "tessl-local-proof"
+            ]
+          },
+          {
+            "id": "lane_present",
+            "status": "blocker",
+            "severity": "blocker",
+            "message": "Every live handoff lane must be represented by current evidence.",
+            "evidence": [
+              "tessl-live-dry-run"
+            ]
+          }
+        ],
+        "next_gate_allowed": false,
+        "blocked_next_gates": [
+          "oss-cloud",
+          "tessl-dry-run",
+          "tessl-live"
+        ],
+        "ready_for_live_tessl": false,
+        "required_next_actions": [
+          "Create .harness/evidence/handoff/improve-agent-native/eval-handoff-readiness.json with deterministic, oss-local, oss-cloud, and Tessl dry-run lane receipts."
+        ],
+        "mutation_performed": false,
+        "promotion_performed": false,
+        "agent_summary": "Handoff readiness for Skills/agent-ops/improve-agent-native is blocked: live Tessl requires current deterministic, oss-local, oss-cloud, and Tessl dry-run evidence."
+      },
+      "mutation_performed": false,
+      "validation_commands": [
+        "./bin/ask sdk eval handoff-readiness --skill Skills/agent-ops/improve-agent-native --preview --json --robot"
+      ],
+      "agent_summary": "Handoff readiness for Skills/agent-ops/improve-agent-native is blocked: live Tessl requires current deterministic, oss-local, oss-cloud, and Tessl dry-run evidence."
+    }
+  },
+  "telemetry": {
+    "latency_ms": 7
+  },
+  "errors": [
+    {
+      "code": "ERR_VALIDATION",
+      "message": "Handoff readiness for Skills/agent-ops/improve-agent-native is blocked: live Tessl requires current deterministic, oss-local, oss-cloud, and Tessl dry-run evidence.",
+      "fix_suggestion": "./bin/ask sdk eval handoff-readiness --skill Skills/agent-ops/improve-agent-native --preview --json --robot"
+    }
+  ]
+}
