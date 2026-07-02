@@ -901,14 +901,13 @@ struct TesslRegistrySnapshot {
         if let impactScore {
             return MetricSignal(score: impactScore, detail: "Tessl registry impact score.", source: "Tessl registry")
         }
-        guard let scenarioCount, scenarioCount > 0 else { return nil }
-        return MetricSignal(score: nil, detail: "\(scenarioCount) Tessl eval scenarios available.", source: "Tessl registry")
+        return nil
     }
 
     var securitySignal: SecuritySignal? {
         guard let securityStatus else { return nil }
         let normalized = securityStatus.lowercased()
-        if normalized.contains("pass") {
+        if normalized.contains("pass") || normalized.contains("no issues") || normalized.contains("clean") || normalized.contains("clear") {
             return SecuritySignal(score: 100, status: "Passed", detail: "Tessl registry security passed.", sourceLabel: "Tessl registry", segmentCount: 4)
         }
         if normalized.contains("flag") || normalized.contains("fail") || normalized.contains("issue") {
