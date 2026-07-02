@@ -1,0 +1,472 @@
+{
+  "checks": [
+    {
+      "code": "central_rubric_profile",
+      "evidence": {
+        "missing_criteria": [],
+        "path": "Infrastructure/config/skills-sdk/gold-standard-rubric.v1.json",
+        "rubric_id": "skills-sdk.gold-standard.v1"
+      },
+      "message": "Central Skills SDK gold rubric must expose the shared release criteria.",
+      "status": "pass"
+    },
+    {
+      "code": "contract_rubric_profile",
+      "evidence": {
+        "duplicated_global_criteria": [],
+        "path": "Skills/agent-ops/improve-agent-native/references/contract.yaml",
+        "rubric_profile": null
+      },
+      "message": "Skill contracts should select the central gold rubric and avoid duplicating global criteria locally.",
+      "status": "fail"
+    },
+    {
+      "code": "reference_boundary",
+      "evidence": {
+        "mentioned_in_skill": [],
+        "missing_contract_routes": [
+          "references/knowledge-demand.yaml",
+          "references/source-context.yaml"
+        ],
+        "skill": "Skills/agent-ops/improve-agent-native/SKILL.md"
+      },
+      "message": "Package-management references should be routed by package contracts, not always-loaded SKILL.md progressive disclosure.",
+      "status": "fail"
+    },
+    {
+      "code": "knowledgeos_reference_shape",
+      "evidence": {
+        "capsule_paths": [
+          "references/harness-evidence-boundary.md",
+          "references/harness-review-feedback.md",
+          "references/harness-skill-routing.md",
+          "references/harness-brownfield-readiness.md",
+          "references/harness-pr-lifecycle.md",
+          "references/ryan-environment-design.md",
+          "references/ryan-repo-knowledge.md",
+          "references/ryan-mechanical-boundaries.md",
+          "references/ryan-continuous-cleanup.md",
+          "references/ryan-agent-operating-model.md",
+          "references/ryan-safety-policy.md",
+          "references/ryan-long-term-coherence.md",
+          "references/ryan-maintenance-supply-chain.md",
+          "references/ryan-stakeholder-alignment.md",
+          "references/ryan-adoption-economics.md",
+          "references/ryan-quality-standards.md",
+          "references/ryan-sociotechnical-adoption.md",
+          "references/knowledge-os-capsule-design.md",
+          "references/knowledge-os-export-readiness.md"
+        ],
+        "legacy_capsule_paths": [],
+        "legacy_subdirectory_allowed": false,
+        "legacy_subdirectory_justification_present": false,
+        "missing_files": [],
+        "missing_routing": [],
+        "path": "Skills/agent-ops/improve-agent-native/references/knowledge-capsule.manifest.yaml"
+      },
+      "message": "KnowledgeOS exports must vendor capsule bodies as top-level references/*.md by default; legacy subdirectories need manifest justification.",
+      "status": "pass"
+    },
+    {
+      "code": "reference_heading_invocation",
+      "evidence": {
+        "checked_markdown_count": 55,
+        "references_dir": "Skills/agent-ops/improve-agent-native/references",
+        "weak_headings": [
+          {
+            "path": "Skills/agent-ops/improve-agent-native/references/harness-brownfield-readiness.md",
+            "reason": "missing_generic_or_filename_misaligned_h1",
+            "title": "Brownfield Readiness"
+          },
+          {
+            "path": "Skills/agent-ops/improve-agent-native/references/harness-evidence-boundary.md",
+            "reason": "missing_generic_or_filename_misaligned_h1",
+            "title": "Evidence Boundary"
+          },
+          {
+            "path": "Skills/agent-ops/improve-agent-native/references/harness-pr-lifecycle.md",
+            "reason": "missing_generic_or_filename_misaligned_h1",
+            "title": "PR Lifecycle"
+          },
+          {
+            "path": "Skills/agent-ops/improve-agent-native/references/harness-review-feedback.md",
+            "reason": "missing_generic_or_filename_misaligned_h1",
+            "title": "Review Feedback"
+          },
+          {
+            "path": "Skills/agent-ops/improve-agent-native/references/harness-skill-routing.md",
+            "reason": "missing_generic_or_filename_misaligned_h1",
+            "title": "Skill Routing"
+          },
+          {
+            "path": "Skills/agent-ops/improve-agent-native/references/knowledge-os-export-readiness.md",
+            "reason": "missing_generic_or_filename_misaligned_h1",
+            "title": "Export Readiness"
+          },
+          {
+            "path": "Skills/agent-ops/improve-agent-native/references/ryan-adoption-economics.md",
+            "reason": "missing_generic_or_filename_misaligned_h1",
+            "title": "Adoption Economics"
+          },
+          {
+            "path": "Skills/agent-ops/improve-agent-native/references/ryan-agent-operating-model.md",
+            "reason": "missing_generic_or_filename_misaligned_h1",
+            "title": "Agent Operating Model"
+          },
+          {
+            "path": "Skills/agent-ops/improve-agent-native/references/ryan-continuous-cleanup.md",
+            "reason": "missing_generic_or_filename_misaligned_h1",
+            "title": "Continuous Cleanup"
+          },
+          {
+            "path": "Skills/agent-ops/improve-agent-native/references/ryan-environment-design.md",
+            "reason": "missing_generic_or_filename_misaligned_h1",
+            "title": "Environment Design"
+          },
+          {
+            "path": "Skills/agent-ops/improve-agent-native/references/ryan-harness-principles.md",
+            "reason": "missing_generic_or_filename_misaligned_h1",
+            "title": "Harness Principles"
+          },
+          {
+            "path": "Skills/agent-ops/improve-agent-native/references/ryan-long-term-coherence.md",
+            "reason": "missing_generic_or_filename_misaligned_h1",
+            "title": "Long-Term Coherence"
+          },
+          {
+            "path": "Skills/agent-ops/improve-agent-native/references/ryan-maintenance-supply-chain.md",
+            "reason": "missing_generic_or_filename_misaligned_h1",
+            "title": "Maintenance And Supply Chain"
+          },
+          {
+            "path": "Skills/agent-ops/improve-agent-native/references/ryan-mechanical-boundaries.md",
+            "reason": "missing_generic_or_filename_misaligned_h1",
+            "title": "Mechanical Boundaries"
+          },
+          {
+            "path": "Skills/agent-ops/improve-agent-native/references/ryan-quality-standards.md",
+            "reason": "missing_generic_or_filename_misaligned_h1",
+            "title": "Quality Standards"
+          },
+          {
+            "path": "Skills/agent-ops/improve-agent-native/references/ryan-repo-knowledge.md",
+            "reason": "missing_generic_or_filename_misaligned_h1",
+            "title": "Repo Knowledge"
+          },
+          {
+            "path": "Skills/agent-ops/improve-agent-native/references/ryan-safety-policy.md",
+            "reason": "missing_generic_or_filename_misaligned_h1",
+            "title": "Safety Policy"
+          },
+          {
+            "path": "Skills/agent-ops/improve-agent-native/references/ryan-sociotechnical-adoption.md",
+            "reason": "missing_generic_or_filename_misaligned_h1",
+            "title": "Sociotechnical Adoption"
+          },
+          {
+            "path": "Skills/agent-ops/improve-agent-native/references/ryan-stakeholder-alignment.md",
+            "reason": "missing_generic_or_filename_misaligned_h1",
+            "title": "Stakeholder Alignment"
+          }
+        ]
+      },
+      "message": "Markdown references and vendored KnowledgeOS capsule bodies must have specific filename-aligned H1 headings.",
+      "status": "fail"
+    },
+    {
+      "code": "tessl_lane_naming",
+      "evidence": {
+        "handoff_dir": ".harness/evidence/handoff/improve-agent-native",
+        "missing_lane": [
+          ".harness/evidence/handoff/improve-agent-native/tessl-direct-eval-run-0.2.0.json",
+          ".harness/evidence/handoff/improve-agent-native/tessl-direct-eval-view-0.2.0-current.json",
+          ".harness/evidence/handoff/improve-agent-native/tessl-direct-eval-view-0.2.0-poll-2.json",
+          ".harness/evidence/handoff/improve-agent-native/tessl-eval-view-0.2.0-current.json",
+          ".harness/evidence/handoff/improve-agent-native/tessl-eval-view-0.2.0-poll-1.json",
+          ".harness/evidence/handoff/improve-agent-native/tessl-eval-view-0.2.0-poll-2.json",
+          ".harness/evidence/handoff/improve-agent-native/tessl-eval-view-0.2.0-poll-3.json",
+          ".harness/evidence/handoff/improve-agent-native/tessl-eval-view-0.2.0-stall-check.json",
+          ".harness/evidence/handoff/improve-agent-native/tessl-eval-view-0.2.0.json",
+          ".harness/evidence/handoff/improve-agent-native/tessl-eval-view-019f1d40-1f07-74d9-af40-b253a164ba9f-oprun-poll.json",
+          ".harness/evidence/handoff/improve-agent-native/tessl-eval-view-019f1d40-repoll-2.json",
+          ".harness/evidence/handoff/improve-agent-native/tessl-eval-view-019f1d40-repoll.json",
+          ".harness/evidence/handoff/improve-agent-native/tessl-eval-view-019f1d6d-0e9b-7076-a14d-22cc6a9b1a78-oprun-poll.json",
+          ".harness/evidence/handoff/improve-agent-native/tessl-eval-view-019f1d6d-repoll-2.json",
+          ".harness/evidence/handoff/improve-agent-native/tessl-eval-view-019f1d6d-repoll.json",
+          ".harness/evidence/handoff/improve-agent-native/tessl-live-dry-run-after-auth.json",
+          ".harness/evidence/handoff/improve-agent-native/tessl-live-dry-run-revalidation.json",
+          ".harness/evidence/handoff/improve-agent-native/tessl-live-run-after-auth.json",
+          ".harness/evidence/handoff/improve-agent-native/tessl-pending-runs-all.json",
+          ".harness/evidence/handoff/improve-agent-native/tessl-pending-runs-improve-agent-native.json",
+          ".harness/evidence/handoff/improve-agent-native/tessl-plugin-info-0.2.0-direct-rerun.json",
+          ".harness/evidence/handoff/improve-agent-native/tessl-rerun-blocked-auth-runtime.json",
+          ".harness/evidence/handoff/improve-agent-native/tessl-runtime-stall-classification.json"
+        ],
+        "receipt_count": 23
+      },
+      "message": "Tessl artifacts must name their lane so review, dry-run, live eval, and score receipts cannot be conflated.",
+      "status": "fail"
+    },
+    {
+      "code": "scenario_parser_parity",
+      "evidence": {
+        "alias_lines": [],
+        "deterministic_checks_count": 43,
+        "fallback_case_count": 43,
+        "missing_fields": [
+          {
+            "id": "smoke-discovery-target",
+            "missing": [
+              "task"
+            ]
+          },
+          {
+            "id": "happy-scorecard",
+            "missing": [
+              "task"
+            ]
+          },
+          {
+            "id": "happy-agents-md-audit",
+            "missing": [
+              "task"
+            ]
+          },
+          {
+            "id": "happy-proof-loop-gap",
+            "missing": [
+              "task"
+            ]
+          },
+          {
+            "id": "edge-no-validation-entrypoint",
+            "missing": [
+              "task"
+            ]
+          },
+          {
+            "id": "edge-universal-target-repo",
+            "missing": [
+              "task"
+            ]
+          },
+          {
+            "id": "edge-docs-freshness",
+            "missing": [
+              "task"
+            ]
+          },
+          {
+            "id": "happy-agent-native-product-readiness",
+            "missing": [
+              "task"
+            ]
+          },
+          {
+            "id": "edge-ui-action-without-agent-capability",
+            "missing": [
+              "task"
+            ]
+          },
+          {
+            "id": "edge-static-tests-only-agent-product",
+            "missing": [
+              "task"
+            ]
+          },
+          {
+            "id": "tessl-scenario-merged-product-workflow-scorecard",
+            "missing": [
+              "task"
+            ]
+          },
+          {
+            "id": "tessl-scenario-dynamic-context-drift",
+            "missing": [
+              "task"
+            ]
+          },
+          {
+            "id": "tessl-scenario-local-pass-release-boundary",
+            "missing": [
+              "task"
+            ]
+          },
+          {
+            "id": "tessl-scenario-knowledge-capsule-uplift",
+            "missing": [
+              "task"
+            ]
+          },
+          {
+            "id": "tessl-scenario-hostile-readiness-note",
+            "missing": [
+              "task"
+            ]
+          },
+          {
+            "id": "adversarial-prompt-injection-audit-boundary",
+            "missing": [
+              "task"
+            ]
+          },
+          {
+            "id": "negative-poem",
+            "missing": [
+              "task"
+            ]
+          },
+          {
+            "id": "pressure-prompt-injection",
+            "missing": [
+              "task"
+            ]
+          },
+          {
+            "id": "pressure-dangerous-command",
+            "missing": [
+              "task"
+            ]
+          },
+          {
+            "id": "eval.harness.local-pass-ci-unknown",
+            "missing": [
+              "task"
+            ]
+          }
+        ],
+        "path": "Skills/agent-ops/improve-agent-native/references/evals.yaml",
+        "structured_error": null,
+        "text_id_count": 43
+      },
+      "message": "Scenario YAML must parse to the same case set under SDK fallback parsing and avoid alias-dependent deterministic checks.",
+      "status": "fail"
+    },
+    {
+      "code": "skill_factory_pipeline_commands",
+      "evidence": {
+        "missing_command_fragments": [
+          "skills package verify",
+          "sdk eval scenario-quality",
+          "sdk security risk-modes"
+        ],
+        "path": "Skills/agent-ops/improve-agent-native/references/contract.yaml"
+      },
+      "message": "Skill Factory-created or hardened skills must advertise the same Skills SDK package, scenario, and security gates.",
+      "status": "fail"
+    },
+    {
+      "code": "security_risk_mode_lane",
+      "evidence": {
+        "has_security_preview": false,
+        "path": "Skills/agent-ops/improve-agent-native/references/contract.yaml"
+      },
+      "message": "Skills SDK release candidates must include the non-mutating security risk-mode preview before Tessl movement.",
+      "status": "fail"
+    },
+    {
+      "code": "advisory_carry_forward_policy",
+      "evidence": {
+        "path": "Skills/agent-ops/improve-agent-native/references/evals.yaml",
+        "weak_cases": []
+      },
+      "message": "Scenario warnings should be repaired before the next phase; release cases need executable acceptance and deterministic checks.",
+      "status": "pass"
+    },
+    {
+      "code": "session_memory_pattern_uptake",
+      "evidence": {
+        "missing_pattern_ids": [],
+        "path": ".harness/reports/skills-sdk-ratchet-patterns.json",
+        "stale_wait_recorded": true
+      },
+      "message": "Recurring session, memory, and session-collector patterns must be recorded before the pipeline moves on.",
+      "status": "pass"
+    },
+    {
+      "code": "factory_gate_receipt",
+      "evidence": {
+        "error": "missing",
+        "path": ".harness/evidence/factory-gates/improve-agent-native/factory-gate.json"
+      },
+      "message": "Factory work must record a factory-gate/v1 receipt.",
+      "status": "fail"
+    },
+    {
+      "code": "reference_routing_completeness",
+      "evidence": {
+        "unrouted_references": [
+          "Skills/agent-ops/improve-agent-native/references/evals/eval.knowledge-os.capsule-design-without-relationships.md",
+          "Skills/agent-ops/improve-agent-native/references/evals/eval.knowledge-os.consumer-receipt-stale-digest.md",
+          "Skills/agent-ops/improve-agent-native/references/evals/eval.knowledge-os.export-pass-overclaims-quality.md",
+          "Skills/agent-ops/improve-agent-native/references/evals/eval.knowledge-os.skills-sdk-handoff-overclaims-ingest.md"
+        ]
+      },
+      "message": "Every Markdown reference must be discoverable through entrypoint, contract, capsule routing, task profile, or evals.",
+      "status": "fail"
+    },
+    {
+      "code": "no_carried_advisories",
+      "evidence": {
+        "carried": [
+          ".harness/evidence/handoff/improve-agent-native/package-verify-after-boundary-ratchet.json:data.skill_package_verification.sdk_contract.values.writing_quality.advisories",
+          ".harness/evidence/handoff/improve-agent-native/package-verify-after-concise-cut.json:data.skill_package_verification.sdk_contract.values.writing_quality.advisories",
+          ".harness/evidence/handoff/improve-agent-native/release-ratchets-scorer-calibration-after-auth.json:Expecting value: line 1 column 1 (char 0)",
+          ".harness/evidence/handoff/improve-agent-native/tessl-direct-eval-run-0.2.0.json:json_root_not_object",
+          ".harness/evidence/handoff/improve-agent-native/tessl-eval-view-019f1d40-1f07-74d9-af40-b253a164ba9f-oprun-poll.json:Expecting value: line 1 column 1 (char 0)",
+          ".harness/evidence/handoff/improve-agent-native/tessl-eval-view-019f1d40-repoll-2.json:Expecting value: line 1 column 1 (char 0)",
+          ".harness/evidence/handoff/improve-agent-native/tessl-eval-view-019f1d6d-0e9b-7076-a14d-22cc6a9b1a78-oprun-poll.json:Expecting value: line 1 column 1 (char 0)",
+          ".harness/evidence/handoff/improve-agent-native/tessl-eval-view-019f1d6d-repoll-2.json:Expecting value: line 1 column 1 (char 0)",
+          ".harness/evidence/handoff/improve-agent-native/tessl-plugin-info-0.2.0-direct-rerun.json:Expecting value: line 1 column 1 (char 0)"
+        ],
+        "handoff_dir": ".harness/evidence/handoff/improve-agent-native"
+      },
+      "message": "Promotion gates must repair advisories or record accepted exceptions.",
+      "status": "fail"
+    },
+    {
+      "code": "ordered_gate_chain",
+      "evidence": {
+        "error": "missing",
+        "path": ".harness/evidence/handoff/improve-agent-native/gate-chain.json"
+      },
+      "message": "Release movement requires a current ordered gate-chain receipt.",
+      "status": "fail"
+    },
+    {
+      "code": "plugin_shape_parity",
+      "evidence": {
+        "error": "missing",
+        "path": ".harness/evidence/handoff/improve-agent-native/plugin-shape.json"
+      },
+      "message": "OpenAI/Codex and Tessl plugin shape parity must be recorded.",
+      "status": "fail"
+    },
+    {
+      "code": "security_package_gate",
+      "evidence": {
+        "contract_mentions_security": false,
+        "error": "missing",
+        "path": ".harness/evidence/handoff/improve-agent-native/security-risk-modes.json"
+      },
+      "message": "Security risk-mode preview receipt is required before OSS/Tessl movement.",
+      "status": "fail"
+    },
+    {
+      "code": "scenario_set_parity",
+      "evidence": {
+        "error": "missing",
+        "expected_count": 43,
+        "path": ".harness/evidence/handoff/improve-agent-native/scenario-sources.json"
+      },
+      "message": "OSS and Tessl lanes must use the same explained scenario set.",
+      "status": "fail"
+    }
+  ],
+  "finding_count": 14,
+  "schema_version": "skills-sdk-release-ratchet-validation/v1",
+  "skill_path": "Skills/agent-ops/improve-agent-native/SKILL.md",
+  "status": "fail",
+  "target": "Skills/agent-ops/improve-agent-native",
+  "target_gate": "scorer_calibration"
+}
