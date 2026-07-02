@@ -386,6 +386,26 @@ def test_release_ratchets_fail_tessl_list_receipt_without_crashing() -> None:
     ]
 
 
+def test_release_ratchets_fail_nested_malformed_tessl_receipt_without_crashing() -> None:
+    module = _load_module()
+    with tempfile.TemporaryDirectory() as temp_dir:
+        root = Path(temp_dir)
+        _write_fixture(root)
+        evidence = root / ".harness" / "evidence" / "handoff" / "fixture-skill"
+        (evidence / "tessl-malformed.json").write_text(
+            json.dumps({"tessl": []}),
+            encoding="utf-8",
+        )
+
+        payload = module.validate(root, "Skills/agent-ops/fixture-skill")
+
+    lane = next(check for check in payload["checks"] if check["code"] == "tessl_lane_naming")
+    assert lane["status"] == "fail"
+    assert lane["evidence"]["missing_lane"] == [
+        ".harness/evidence/handoff/fixture-skill/tessl-malformed.json"
+    ]
+
+
 def test_release_ratchets_allow_target_gate_prefix_without_future_receipts() -> None:
     module = _load_module()
     with tempfile.TemporaryDirectory() as temp_dir:

@@ -849,6 +849,21 @@ struct DashboardLoader {
     }
 
     private func tesslSnapshot(root: URL) async -> TesslRegistrySnapshot {
+        if Self.tesslCliDisabled {
+            return TesslRegistrySnapshot(
+                signal: TesslSignal(
+                    ok: false,
+                    cliAvailable: false,
+                    displayStatus: "CLI disabled",
+                    detail: "Tessl CLI probe disabled by IMPROVE_AGENT_NATIVE_DISABLE_TESSL_CLI for bounded launch validation."
+                ),
+                version: nil,
+                summary: nil,
+                quality: nil,
+                upliftText: nil,
+                security: nil
+            )
+        }
         let info = await run(root: root, command: "if [ -n \"$TESSL_TOKEN\" ]; then tessl plugin info jscraik/improve-agent-native; elif command -v op >/dev/null 2>&1; then op run -- tessl plugin info jscraik/improve-agent-native; else tessl plugin info jscraik/improve-agent-native; fi")
         let cliAvailable = info.exitCode != 127 && !info.combinedOutput.localizedCaseInsensitiveContains("command not found")
         if info.exitCode == 0, !info.combinedOutput.localizedCaseInsensitiveContains("authenticate") {
@@ -940,6 +955,10 @@ struct DashboardLoader {
         guard let text = metricValue(after: label, in: output) else { return nil }
         let digits = text.prefix { $0.isNumber }
         return Int(digits)
+    }
+
+    private static var tesslCliDisabled: Bool {
+        ProcessInfo.processInfo.environment["IMPROVE_AGENT_NATIVE_DISABLE_TESSL_CLI"] == "1"
     }
 
     private func probe(url: URL) async -> Int? {
