@@ -29,6 +29,7 @@ class EvalQualityGates(_EvalContractModel):
     decision: str | None
     passed: bool | None
     promotion_eligible: bool | None
+    case_count: int = Field(ge=0)
     blocked_cases: int = Field(ge=0)
     tier1_failures: int = Field(ge=0)
     tier2_findings: int = Field(ge=0)

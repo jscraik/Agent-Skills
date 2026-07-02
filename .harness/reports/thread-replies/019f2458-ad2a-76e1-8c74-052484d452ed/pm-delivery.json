@@ -1,0 +1,12 @@
+{
+  "schema_version": "thread-report-delivery/v1",
+  "thread_id": "019f2458-ad2a-76e1-8c74-052484d452ed",
+  "pm_thread_id": "019f0314-ba59-7a00-ab78-9bd3174d1d03",
+  "report_path": "latest.json",
+  "delivery_method": "codex_app__send_message_to_thread",
+  "delivery_status": "delivered",
+  "delivered_at": "2026-07-02T21:25:00Z",
+  "message_summary": "PM update delivered for oss-local qwen lane: qwen3.5:9b-mlx runtime smoke passes, but oss-local behavior eval is blocked/failed. smoke-discovery-target now blocks as a discovery-only case on live runners, and happy-agents-md-audit executed one qwen case but failed expected_signal criteria. oss-cloud and Tessl remain blocked.",
+  "delivery_evidence": "send_message_to_thread returned threadId 019f0314-ba59-7a00-ab78-9bd3174d1d03",
+  "report_artifact": ".harness/reports/thread-replies/019f2458-ad2a-76e1-8c74-052484d452ed/latest.json"
+}

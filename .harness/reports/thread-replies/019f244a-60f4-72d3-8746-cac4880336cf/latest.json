@@ -1,0 +1,203 @@
+{
+  "schema_version": "thread-report/v1",
+  "thread_id": "019f244a-60f4-72d3-8746-cac4880336cf",
+  "source_pm_thread_id": "019f0314-ba59-7a00-ab78-9bd3174d1d03",
+  "task_id": "improve-agent-native-menubar-launchservices-debug",
+  "status": "blocked",
+  "status_detail": "The prototype builds, signs, validates, and the XCTest passes with Xcode beta. LaunchServices still refuses to open the generated app bundle with kLSNoExecutableErr. A minimal generated /private/tmp app bundle with a C executable also fails with the same LaunchServices error while running directly, so the remaining launch blocker is classified as LaunchServices/session handling of generated bundles, not the prototype executable or Info.plist alone.",
+  "current_gate": "prototype-launchservices-open",
+  "next_gate_allowed": false,
+  "blocked_next_gates": [
+    "prototype-runtime-ui-proof",
+    "hosted-pr-readiness",
+    "sdk-release-eval"
+  ],
+  "current_branch": "codex/improve-native-release-ratchets",
+  "repo_head": "d21eb4674",
+  "dirty_state_before": "Branch codex/improve-native-release-ratchets was behind origin by 1 with unrelated qwen/release-ratchet/prototype dirty files already present. This lane preserved unrelated dirty work.",
+  "dirty_state_after": "Prototype-local launcher and startup receipt instrumentation changed. Unrelated qwen/PR/release-ratchet dirt remains preserved.",
+  "files_changed": [
+    "Prototypes/improve-agent-native-menubar/Launch.command",
+    "Prototypes/improve-agent-native-menubar/Sources/ImproveAgentNativeMenuBar/App.swift",
+    ".harness/memory/LEARNINGS.md",
+    ".harness/reports/thread-replies/019f244a-60f4-72d3-8746-cac4880336cf/latest.json",
+    "artifacts/reviews/default.md",
+    "artifacts/agent-runs/default-019f2466-0878-7523-9a82-7016a5b7c251/manifest.json"
+  ],
+  "commands": [
+    {
+      "command": "find 'dist/Improve Agent Native.app' -maxdepth 4 -print | sort; plutil -p 'dist/Improve Agent Native.app/Contents/Info.plist'; ls -la 'dist/Improve Agent Native.app/Contents/MacOS'; file 'dist/Improve Agent Native.app/Contents/MacOS/ImproveAgentNativeMenuBar'; lipo -info 'dist/Improve Agent Native.app/Contents/MacOS/ImproveAgentNativeMenuBar'; xattr 'dist/Improve Agent Native.app' 'dist/Improve Agent Native.app/Contents/MacOS/ImproveAgentNativeMenuBar' || true; codesign -dv --verbose=4 'dist/Improve Agent Native.app'; codesign --verify --deep --strict --verbose=4 'dist/Improve Agent Native.app'",
+      "cwd": "/Users/jamiecraik/dev/agent-skills/Prototypes/improve-agent-native-menubar",
+      "outcome": "pass",
+      "evidence": "Bundle layout is conventional; CFBundleExecutable=ImproveAgentNativeMenuBar; executable is arm64 Mach-O; codesign verification passed; xattrs only showed com.apple.provenance."
+    },
+    {
+      "command": "CLANG_MODULE_CACHE_PATH=/private/tmp/minimal-probe-clang-cache xcrun swiftc -target \"$(uname -m)-apple-macos14.0\" /private/tmp/minimal-probe.swift -o /private/tmp/MinimalMenuBarProbe.app/Contents/MacOS/MinimalProbe; codesign --force --sign - /private/tmp/MinimalMenuBarProbe.app; open -n /private/tmp/MinimalMenuBarProbe.app",
+      "cwd": "/Users/jamiecraik/dev/agent-skills",
+      "outcome": "fail",
+      "evidence": "Minimal generated app had valid plist, arm64 executable, and signature, but LaunchServices returned the same kLSNoExecutableErr. This reproduced the failure outside the prototype bundle."
+    },
+    {
+      "command": "printf 'APPL????' > 'dist/Improve Agent Native.app/Contents/PkgInfo'; codesign --force --deep --sign - 'dist/Improve Agent Native.app'; open -n \"$(pwd)/dist/Improve Agent Native.app\"",
+      "cwd": "/Users/jamiecraik/dev/agent-skills/Prototypes/improve-agent-native-menubar",
+      "outcome": "fail",
+      "evidence": "Adding PkgInfo and re-signing did not change the LaunchServices failure; kLSNoExecutableErr persisted."
+    },
+    {
+      "command": "shellcheck Launch.command",
+      "cwd": "/Users/jamiecraik/dev/agent-skills/Prototypes/improve-agent-native-menubar",
+      "outcome": "pass",
+      "evidence": "No shellcheck findings after launcher repairs."
+    },
+    {
+      "command": "bash -n Launch.command",
+      "cwd": "/Users/jamiecraik/dev/agent-skills/Prototypes/improve-agent-native-menubar",
+      "outcome": "pass",
+      "evidence": "Bash syntax validation passed."
+    },
+    {
+      "command": "zsh -n Launch.command",
+      "cwd": "/Users/jamiecraik/dev/agent-skills/Prototypes/improve-agent-native-menubar",
+      "outcome": "pass",
+      "evidence": "Zsh parse validation passed."
+    },
+    {
+      "command": "CLANG_MODULE_CACHE_PATH=/private/tmp/improve-agent-native-menubar-clang-cache xcrun swiftc -parse Sources/ImproveAgentNativeMenuBar/App.swift Sources/ImproveAgentNativeMenuBarCore/Shell.swift",
+      "cwd": "/Users/jamiecraik/dev/agent-skills/Prototypes/improve-agent-native-menubar",
+      "outcome": "pass",
+      "evidence": "App.swift with StartupReceipt instrumentation and the core Shell module parse."
+    },
+    {
+      "command": "NO_OPEN=1 ./Launch.command; jq . dist/ImproveAgentNativeMenuBar.build-receipt.json; test -f 'dist/Improve Agent Native.app/Contents/PkgInfo' && cat 'dist/Improve Agent Native.app/Contents/PkgInfo'; codesign --verify --deep --strict 'dist/Improve Agent Native.app'",
+      "cwd": "/Users/jamiecraik/dev/agent-skills/Prototypes/improve-agent-native-menubar",
+      "outcome": "pass",
+      "evidence": "SwiftPM build completed, build receipt status=pass, PkgInfo=APPL????, and codesign verification passed. Bundle executable timestamp=2026-07-02T21:28:25+0100."
+    },
+    {
+      "command": "IMPROVE_AGENT_NATIVE_DISABLE_TESSL_CLI=1 IMPROVE_AGENT_NATIVE_STARTUP_RECEIPT=\"$(pwd)/dist/ImproveAgentNativeMenuBar.startup-direct.json\" 'dist/Improve Agent Native.app/Contents/MacOS/ImproveAgentNativeMenuBar' >dist/ImproveAgentNativeMenuBar.direct.log 2>&1 & pid=$!; sleep 2; jq . dist/ImproveAgentNativeMenuBar.startup-direct.json; kill -0 \"$pid\"",
+      "cwd": "/Users/jamiecraik/dev/agent-skills/Prototypes/improve-agent-native-menubar",
+      "outcome": "blocked",
+      "evidence": "The app emitted startup receipt status=started with process_identifier=75408, proving binary startup reached app initialization. The process was not still running after two seconds; shell also reported zsh: nice(5) failed: operation not permitted."
+    },
+    {
+      "command": "./Launch.command --open-safe; launch_exit=$?; echo LAUNCH_EXIT=$launch_exit; jq . dist/ImproveAgentNativeMenuBar.launch-receipt.json; if [ -s dist/ImproveAgentNativeMenuBar.startup-receipt.json ]; then jq . dist/ImproveAgentNativeMenuBar.startup-receipt.json; else echo launchservices-startup-receipt-missing; fi; exit 0",
+      "cwd": "/Users/jamiecraik/dev/agent-skills/Prototypes/improve-agent-native-menubar",
+      "outcome": "fail",
+      "evidence": "LaunchServices returned kLSNoExecutableErr, LAUNCH_EXIT=1, launch receipt status=failed, and no LaunchServices startup receipt was written."
+    },
+    {
+      "command": "/usr/bin/open -n -a \"$(pwd)/dist/Improve Agent Native.app\"; echo OPEN_A_EXIT=$?",
+      "cwd": "/Users/jamiecraik/dev/agent-skills/Prototypes/improve-agent-native-menubar",
+      "outcome": "fail",
+      "evidence": "open -a returned the same kLSNoExecutableErr and OPEN_A_EXIT=1."
+    },
+    {
+      "command": "./Launch.command --open",
+      "cwd": "/Users/jamiecraik/dev/agent-skills/Prototypes/improve-agent-native-menubar",
+      "outcome": "fail",
+      "evidence": "Build and signing completed, then open returned NSOSStatusErrorDomain Code=-10827 kLSNoExecutableErr."
+    },
+    {
+      "command": "find 'dist/Improve Agent Native.app' -print0 | xargs -0 xattr -c && /usr/bin/codesign --force --sign - 'dist/Improve Agent Native.app' >/dev/null && /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f 'dist/Improve Agent Native.app' 2>&1; reg=$?; /usr/bin/open -n 'dist/Improve Agent Native.app' 2>&1; open_exit=$?; echo LSREGISTER_EXIT:$reg OPEN_EXIT:$open_exit; exit $open_exit",
+      "cwd": "/Users/jamiecraik/dev/agent-skills/Prototypes/improve-agent-native-menubar",
+      "outcome": "fail",
+      "evidence": "Clearing xattrs and re-signing did not change LaunchServices: lsregister returned -10822 and open returned -10827."
+    },
+    {
+      "command": "create and open /private/tmp/MinimalProbe.app with a signed C executable",
+      "cwd": "/Users/jamiecraik/dev/agent-skills",
+      "outcome": "fail",
+      "evidence": "Direct executable returned probe-ok with exit 0, but open returned NSOSStatusErrorDomain Code=-10827 kLSNoExecutableErr; same failure as prototype app."
+    }
+  ],
+  "commands_run": [
+    "bundle layout/plist/executable/codesign inspection",
+    "minimal generated app LaunchServices probe",
+    "PkgInfo packaging variant",
+    "shellcheck Launch.command",
+    "bash -n Launch.command",
+    "zsh -n Launch.command",
+    "swiftc -parse App.swift Shell.swift",
+    "NO_OPEN=1 ./Launch.command",
+    "direct executable startup receipt probe",
+    "./Launch.command --open-safe",
+    "open -n -a generated app"
+  ],
+  "artifact_assertions": [
+    {
+      "artifact": "Prototypes/improve-agent-native-menubar/Launch.command",
+      "assertion": "The launcher now builds with SwiftPM, writes PkgInfo, signs the bundle, and writes deterministic build/launch receipts.",
+      "outcome": "pass"
+    },
+    {
+      "artifact": "Prototypes/improve-agent-native-menubar/Sources/ImproveAgentNativeMenuBar/App.swift",
+      "assertion": "The app writes a startup receipt when IMPROVE_AGENT_NATIVE_STARTUP_RECEIPT is set.",
+      "outcome": "pass"
+    },
+    {
+      "artifact": "Prototypes/improve-agent-native-menubar/dist/ImproveAgentNativeMenuBar.startup-direct.json",
+      "assertion": "Direct executable startup wrote status=started and process_identifier=75408.",
+      "outcome": "pass"
+    },
+    {
+      "artifact": "Prototypes/improve-agent-native-menubar/dist/ImproveAgentNativeMenuBar.launch-receipt.json",
+      "assertion": "LaunchServices launch receipt records status=failed and startup receipt remains missing.",
+      "outcome": "blocked"
+    }
+  ],
+  "termination_method_evidence": [
+    "Launch.command attempts application-scoped quit through osascript for bundle id local.jscraik.improve-agent-native-menubar.",
+    "Launch.command attempts application-scoped quit through osascript for application name Improve Agent Native.",
+    "Launch.command attempts pkill -x ImproveAgentNativeMenuBar and pkill -f the exact app executable path.",
+    "No killed PIDs can be reported because process enumeration is blocked by the sandbox."
+  ],
+  "killed_process_ids": [],
+  "launched_executable_or_app_path": null,
+  "rebuilt_app_path": "/Users/jamiecraik/dev/agent-skills/Prototypes/improve-agent-native-menubar/dist/Improve Agent Native.app",
+  "rebuilt_bundle_executable": "/Users/jamiecraik/dev/agent-skills/Prototypes/improve-agent-native-menubar/dist/Improve Agent Native.app/Contents/MacOS/ImproveAgentNativeMenuBar",
+  "rebuilt_bundle_executable_timestamp": "2026-07-02T21:28:25+0100",
+  "build_receipt": "/Users/jamiecraik/dev/agent-skills/Prototypes/improve-agent-native-menubar/dist/ImproveAgentNativeMenuBar.build-receipt.json",
+  "launch_receipt": "/Users/jamiecraik/dev/agent-skills/Prototypes/improve-agent-native-menubar/dist/ImproveAgentNativeMenuBar.launch-receipt.json",
+  "startup_direct_receipt": "/Users/jamiecraik/dev/agent-skills/Prototypes/improve-agent-native-menubar/dist/ImproveAgentNativeMenuBar.startup-direct.json",
+  "what_proves": [
+    "The generated bundle has correct executable/plist/signature shape.",
+    "The launcher now builds and packages the latest SwiftPM executable.",
+    "The app binary can start far enough to emit its startup receipt on direct execution.",
+    "LaunchServices failure reproduces on a minimal generated app, so the remaining blocker is not unique to this prototype bundle."
+  ],
+  "what_remains_unproven": [
+    "Menu bar UI is visible through LaunchServices.",
+    "LaunchServices can open generated local app bundles in this Codex session.",
+    "Hosted PR state, SDK release readiness, oss-cloud, Tessl dry-run, or Tessl live behavior."
+  ],
+  "owner_classification": "LaunchServices/session handling of generated local app bundles; prototype executable, Info.plist, signing, and xattrs have evidence against being the sole owner.",
+  "contradictions": [
+    {
+      "artifact": "LaunchServices",
+      "problem": "LaunchServices reports kLSNoExecutableErr even when the executable exists, plist points to it, architecture is arm64, and codesign verifies. The same failure occurs for a minimal generated probe app.",
+      "owner": "LaunchServices sandbox/runtime"
+    }
+  ],
+  "lessons": [
+    {
+      "lesson": "LaunchServices proof must be separated from app-binary startup proof.",
+      "failure_pattern": "A valid generated app bundle and a minimal probe both fail under LaunchServices while the direct binary can emit startup proof.",
+      "carry_forward_target": "Prototypes/improve-agent-native-menubar runtime proof contract",
+      "deterministic_guardrail": "Require build receipt, launch receipt, and app-emitted startup receipt as separate artifacts; classify LaunchServices failures separately from packaging failures after a minimal probe reproduces them.",
+      "recorded_in": ".harness/memory/LEARNINGS.md",
+      "validation": "python3 Infrastructure/scripts/validation-and-linting/validate_thread_report.py .harness/reports/thread-replies/019f244a-60f4-72d3-8746-cac4880336cf/latest.json --json"
+    }
+  ],
+  "remaining_blockers": [
+    {
+      "class": "launchservices_generated_bundle_runtime",
+      "detail": "open returns kLSNoExecutableErr for both the prototype bundle and a minimal generated signed app bundle, even though both executables exist and run directly."
+    },
+    {
+      "class": "dirty_worktree_unrelated",
+      "detail": "The checkout contains unrelated qwen/release-ratchet dirty files and branch is behind origin by 1, so no commit was attempted from this mixed worktree."
+    }
+  ],
+  "next_action": "Validate the app bundle from Finder or a normal Terminal session outside this Codex sandbox, or add a controlled installed-app staging path if LaunchServices only accepts bundles from trusted user app locations in this environment.",
+  "recommended_next_pm_decision": "Treat build/test as passing but launch as blocked by LaunchServices/session behavior. Decide whether to test outside Codex sandbox or add an installed-app staging lane before more prototype source edits."
+}

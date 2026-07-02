@@ -133,6 +133,7 @@ _READINESS_STATE_CHOICES = {
 }
 _METRIC_AVAILABILITY_CHOICES = {"available", "unavailable"}
 RUNNER_BLOCKER_TAXONOMY: Dict[str, str] = {
+    "blocked_validation": "The selected eval configuration was invalid or produced no executable case evidence.",
     "blocked_user_input": "The runner requested user input and should not be classified as a hang.",
     "blocked_auth": "The runner stopped on authentication or credential setup.",
     "blocked_runtime": "The runner was blocked by local runtime, sandbox, or model-capacity limits.",
@@ -1577,6 +1578,16 @@ def _write_junit_report(summary: Dict[str, Any], destination: Path) -> None:
 
     destination.parent.mkdir(parents=True, exist_ok=True)
     destination.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def _mark_no_case_evidence_blocked(summary: Dict[str, Any]) -> bool:
+    if summary.get("cases"):
+        return False
+    summary["blocked_class_summary"]["blocked_validation"] = (
+        summary["blocked_class_summary"].get("blocked_validation", 0) + 1
+    )
+    summary["no_case_evidence"] = True
+    return True
 
 
 def _json_get_path(obj: Any, path: str) -> Any:
@@ -4044,6 +4055,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         return 1
     elif not smoke_runners_only and has_smoke_cases:
         cases = [c for c in cases if not _is_smoke_only_case(c)]
+        if case_filters and not cases:
+            print(
+                "ERROR: selected case filters matched only smoke-only discovery contract cases, "
+                "which live/model runners skip. Use --runner discovery-smoke for discovery "
+                "contract cases or select a behavior smoke case for live/model runners.",
+                file=sys.stderr,
+            )
+            return 1
 
     capture_jsonl = bool(
         args.capture_jsonl
@@ -4828,6 +4847,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     )
     snyk_gate_passed = _snyk_release_gate_passed(summary["security_dependency_screening"])
     claim_gate_passed = bool(summary["claim_to_evidence"].get("passed", True))
+    if _mark_no_case_evidence_blocked(summary):
+        any_blocked = True
     summary["passed"] = (not any_blocked) and (not any_tier1_failed) and snyk_gate_passed and (
         args.tier2_mode != "fail" or (not any_tier2_failed)
     )

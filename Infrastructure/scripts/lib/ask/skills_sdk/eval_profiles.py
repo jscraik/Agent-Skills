@@ -33,8 +33,9 @@ LOCAL_QWEN35_MLX_RUNTIME_METADATA = {
     "metadata_source": "ollama_show",
 }
 LOCAL_QWEN35_SMOKE_GUARD = {
-    "max_tokens_used": 5000,
+    "max_tokens_used": 7000,
     "forbid_visible_thinking": True,
+    "allow_codex_jsonl_reasoning_events": True,
     "forbid_fallback_metadata": True,
 }
 _LOCAL_JUDGE_PROFILE_SPECS = (

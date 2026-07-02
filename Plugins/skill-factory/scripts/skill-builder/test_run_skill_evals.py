@@ -24,6 +24,7 @@ if repo_root_str not in sys.path:
 SKILL_DIR = SCRIPT_DIR.parents[1] / "skills" / "code_quality_review" / "skill-builder"
 
 from defusedxml import ElementTree as ET  # noqa: E402
+import run_skill_evals  # noqa: E402
 
 existing_runner = sys.modules.get("run_skill_evals")
 if existing_runner is not None:
@@ -53,6 +54,7 @@ from run_skill_evals import (  # noqa: E402
     _isolated_codex_home_for_eval,
     _is_runner_runtime_blocked,
     _is_smoke_only_case,
+    _mark_no_case_evidence_blocked,
     _repo_mise_node_version,
     _scrub_mcp_servers_from_toml,
     _weak_acceptance_reasons,
@@ -1677,6 +1679,18 @@ class RunSkillEvalsModeTests(unittest.TestCase):
 
         self.assertEqual(len(cases), 1)
         self.assertEqual(cases[0].eval_modes, ("smoke", "release"))
+
+    def test_no_case_evidence_marks_summary_blocked_validation(self) -> None:
+        summary = {
+            "cases": [],
+            "blocked_class_summary": {key: 0 for key in run_skill_evals.RUNNER_BLOCKER_TAXONOMY},
+        }
+
+        marked = _mark_no_case_evidence_blocked(summary)
+
+        self.assertTrue(marked)
+        self.assertTrue(summary["no_case_evidence"])
+        self.assertEqual(summary["blocked_class_summary"]["blocked_validation"], 1)
 
     def test_new_family_contract_cases_survive_smoke_filter(self) -> None:
         evals_path = SKILL_DIR / "references" / "evals.yaml"

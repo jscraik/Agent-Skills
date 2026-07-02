@@ -32,6 +32,15 @@ raw executable directly; --open uses LaunchServices only.
 
 Validation:
 
+  DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer CLANG_MODULE_CACHE_PATH=/private/tmp/improve-agent-native-menubar-clang-cache swift test --disable-sandbox --build-path /private/tmp/improve-agent-native-menubar-xcode-beta-build
+
+Use the explicit DEVELOPER_DIR on this workstation. xcode-select currently
+points at Command Line Tools, and the default SwiftPM runner fails before
+testing with an XCBuild property-list initialization error. The Xcode beta
+developer directory is required for XCTest resolution.
+
+Build-only validation:
+
   HOME=/private/tmp/improve-agent-native-menubar-home XDG_CACHE_HOME=/private/tmp/improve-agent-native-menubar-xdg CLANG_MODULE_CACHE_PATH=/private/tmp/improve-agent-native-menubar-clang-cache swift build --build-system native --disable-sandbox --build-path /private/tmp/improve-agent-native-menubar-native-build
 
 Launcher validation:

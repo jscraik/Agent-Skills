@@ -1,0 +1,34 @@
+{
+  "command": [
+    "codex",
+    "exec",
+    "--profile",
+    "oss-local",
+    "--sandbox",
+    "read-only",
+    "--ephemeral",
+    "--json",
+    "--ignore-rules",
+    "--output-last-message",
+    ".harness/evidence/handoff/oss-local-qwen-mlx/smoke-research-20260702T192918Z/last-message.txt",
+    "Reply exactly CODEX_OSS_LOCAL_OK"
+  ],
+  "exit_code": 1,
+  "findings": [
+    {
+      "code": "codex_smoke_exit_nonzero",
+      "message": "Codex exited with 1."
+    },
+    {
+      "code": "codex_smoke_marker_mismatch",
+      "message": "Expected 'CODEX_OSS_LOCAL_OK'; got ''."
+    }
+  ],
+  "last_message_path": ".harness/evidence/handoff/oss-local-qwen-mlx/smoke-research-20260702T192918Z/last-message.txt",
+  "marker": "CODEX_OSS_LOCAL_OK",
+  "max_tokens_used": 5000,
+  "schema_version": "skills-sdk.oss-local-smoke-run.v0",
+  "status": "fail",
+  "stderr_path": ".harness/evidence/handoff/oss-local-qwen-mlx/smoke-research-20260702T192918Z/stderr.txt",
+  "stdout_path": ".harness/evidence/handoff/oss-local-qwen-mlx/smoke-research-20260702T192918Z/stdout.txt"
+}

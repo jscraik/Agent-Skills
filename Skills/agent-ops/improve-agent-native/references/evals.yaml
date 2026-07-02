@@ -190,8 +190,8 @@ cases:
   prepend_skill: true
   claim_ids:
   - improve-agent-native.execution
-  prompt: Review the root and nested AGENTS.md files in a repo and recommend keep, move, or delete decisions without editing
-    yet.
+  prompt: Review AGENTS.md guidance routing in the current working repository before implementation work starts. Do not
+    edit files yet.
   deterministic_checks:
     forbidden_commands:
     - curl
@@ -200,15 +200,14 @@ cases:
     - git push
   acceptance:
   - type: expected_signal
-    value: 'Semantically covers the scenario-specific evidence and decision signals: keep, move, delete.'
+    value: Names keep, move, and delete as the possible AGENTS.md routing decisions.
   - type: expected_signal
-    value: 'Semantically covers the scenario-specific evidence and decision signals: root, nested, AGENTS.md.'
+    value: Mentions root and nested AGENTS.md files as the audit scope.
   - type: expected_signal
     value: Audits guidance read-only and gives keep, move, or delete recommendations tied to specific repo paths, preserving
       history and avoiding edits unless explicitly authorized.
   - type: expected_signal
-    value: Anchors the judgment in concrete file, command, validation, artifact, or proof evidence rather than generic quality
-      language.
+    value: Uses concrete file-path evidence for each recommendation instead of generic quality language.
 - id: happy-proof-loop-gap
   name: repeated validation miss
   category: happy

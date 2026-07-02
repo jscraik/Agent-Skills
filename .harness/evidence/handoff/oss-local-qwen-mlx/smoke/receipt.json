@@ -1,0 +1,32 @@
+{
+  "command": [
+    "codex",
+    "exec",
+    "--profile",
+    "oss-local",
+    "--sandbox",
+    "read-only",
+    "--ephemeral",
+    "--output-last-message",
+    ".harness/evidence/handoff/oss-local-qwen-mlx/smoke/last-message.txt",
+    "Reply with exactly: CODEX_OSS_LOCAL_OK"
+  ],
+  "exit_code": 0,
+  "findings": [
+    {
+      "code": "codex_runtime_metadata_fallback",
+      "message": "Codex reported missing model metadata or fallback metadata."
+    },
+    {
+      "code": "codex_runtime_token_budget_exceeded",
+      "message": "Smoke transcript used 8279 tokens; limit is 5000."
+    }
+  ],
+  "last_message_path": ".harness/evidence/handoff/oss-local-qwen-mlx/smoke/last-message.txt",
+  "marker": "CODEX_OSS_LOCAL_OK",
+  "max_tokens_used": 5000,
+  "schema_version": "skills-sdk.oss-local-smoke-run.v0",
+  "status": "fail",
+  "stderr_path": ".harness/evidence/handoff/oss-local-qwen-mlx/smoke/stderr.txt",
+  "stdout_path": ".harness/evidence/handoff/oss-local-qwen-mlx/smoke/stdout.txt"
+}

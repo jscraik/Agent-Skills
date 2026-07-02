@@ -1,0 +1,11 @@
+{
+  "schema_version": "thread-report-delivery/v1",
+  "thread_id": "019f2411-aafc-7032-8fd6-f09f1ca0dd45",
+  "pm_thread_id": "019f0314-ba59-7a00-ab78-9bd3174d1d03",
+  "report_path": "latest.json",
+  "delivery_method": "codex_app__send_message_to_thread",
+  "delivery_status": "delivered",
+  "delivered_at": "2026-07-02T19:38:46Z",
+  "message_summary": "PM update delivered for oss-local qwen runtime research lane: runner/checker now produce quantifiable qwen receipts; final smoke remains blocked on metadata fallback and visible reasoning.",
+  "delivery_evidence": "send_message_to_thread returned threadId 019f0314-ba59-7a00-ab78-9bd3174d1d03"
+}

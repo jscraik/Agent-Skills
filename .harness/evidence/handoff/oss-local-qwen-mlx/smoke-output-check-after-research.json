@@ -1,0 +1,25 @@
+{
+  "findings": [
+    {
+      "code": "codex_runtime_metadata_fallback",
+      "message": "Codex reported missing model metadata or fallback metadata."
+    },
+    {
+      "code": "codex_runtime_visible_thinking",
+      "message": "Model output exposed a thinking trace in the smoke transcript."
+    }
+  ],
+  "max_tokens_used": 7000,
+  "paths_checked": [
+    ".harness/evidence/handoff/oss-local-qwen-mlx/smoke-timeout-20260702T193141Z/stderr.txt",
+    ".harness/evidence/handoff/oss-local-qwen-mlx/smoke-timeout-20260702T193141Z/stdout.txt",
+    ".harness/evidence/handoff/oss-local-qwen-mlx/smoke-timeout-20260702T193141Z/last-message.txt"
+  ],
+  "runtime_observations": {
+    "metadata_fallback_observed": true,
+    "tokens_used": 6406,
+    "visible_thinking_observed": true
+  },
+  "schema_version": "skills-sdk.oss-local-smoke-output-check.v0",
+  "status": "fail"
+}

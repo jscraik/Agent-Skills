@@ -2,8 +2,6 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
-SOURCE="$SCRIPT_DIR/Sources/ImproveAgentNativeMenuBar/App.swift"
 BUILD_ROOT="$SCRIPT_DIR/dist"
 APP_DIR="$BUILD_ROOT/Improve Agent Native.app"
 CONTENTS_DIR="$APP_DIR/Contents"
@@ -12,6 +10,8 @@ RESOURCES_DIR="$CONTENTS_DIR/Resources"
 EXECUTABLE="$MACOS_DIR/ImproveAgentNativeMenuBar"
 MODULE_CACHE="$BUILD_ROOT/clang-module-cache"
 SWIFTPM_BUILD="$BUILD_ROOT/swiftpm-build"
+BUILD_RECEIPT="$BUILD_ROOT/ImproveAgentNativeMenuBar.build-receipt.json"
+LAUNCH_RECEIPT="$BUILD_ROOT/ImproveAgentNativeMenuBar.launch-receipt.json"
 OPEN_APP=0
 SAFE_OPEN=0
 
@@ -53,6 +53,12 @@ rm -rf "$APP_DIR" "$MODULE_CACHE"
 mkdir -p "$MACOS_DIR" "$RESOURCES_DIR" "$MODULE_CACHE"
 
 stop_existing() {
+  /usr/bin/osascript <<'APPLESCRIPT' >/dev/null 2>&1 || true
+tell application id "local.jscraik.improve-agent-native-menubar" to quit
+APPLESCRIPT
+  /usr/bin/osascript <<'APPLESCRIPT' >/dev/null 2>&1 || true
+tell application "Improve Agent Native" to quit
+APPLESCRIPT
   if command -v pkill >/dev/null 2>&1; then
     pkill -x ImproveAgentNativeMenuBar >/dev/null 2>&1 || true
     pkill -f "Improve Agent Native.app/Contents/MacOS/ImproveAgentNativeMenuBar" >/dev/null 2>&1 || true
@@ -108,13 +114,38 @@ XDG_STATE_HOME="$BUILD_ROOT/xdg-state" \
 MISE_CACHE_DIR="$BUILD_ROOT/mise-cache" \
 MISE_STATE_DIR="$BUILD_ROOT/mise-state" \
 CLANG_MODULE_CACHE_PATH="$MODULE_CACHE" \
-xcrun swiftc -target "$(uname -m)-apple-macos14.0" -parse-as-library "$SOURCE" -o "$EXECUTABLE"
+swift build --build-system native --disable-sandbox --build-path "$SWIFTPM_BUILD"
 popd >/dev/null
+
+BUILT_EXECUTABLE="$SWIFTPM_BUILD/$(uname -m)-apple-macosx/debug/ImproveAgentNativeMenuBar"
+if [[ ! -x "$BUILT_EXECUTABLE" ]]; then
+  BUILT_EXECUTABLE="$(find "$SWIFTPM_BUILD" -type f -perm -111 -name ImproveAgentNativeMenuBar | head -n 1)"
+fi
+if [[ -z "${BUILT_EXECUTABLE:-}" || ! -x "$BUILT_EXECUTABLE" ]]; then
+  echo "SwiftPM build did not produce ImproveAgentNativeMenuBar" >&2
+  exit 1
+fi
+
+cp "$BUILT_EXECUTABLE" "$EXECUTABLE"
 chmod +x "$EXECUTABLE"
 cp "$SCRIPT_DIR/Sources/ImproveAgentNativeMenuBar/Resources/TesslLogo.png" "$RESOURCES_DIR/TesslLogo.png"
+printf 'APPL????' > "$CONTENTS_DIR/PkgInfo"
 /usr/bin/codesign --force --sign - "$APP_DIR" >/dev/null
 
+EXECUTABLE_MTIME="$(stat -f '%Sm' -t '%Y-%m-%dT%H:%M:%S%z' "$EXECUTABLE")"
+cat > "$BUILD_RECEIPT" <<JSON
+{
+  "schema_version": "improve-agent-native-menubar-build/v1",
+  "status": "pass",
+  "app_dir": "$APP_DIR",
+  "built_executable": "$BUILT_EXECUTABLE",
+  "bundle_executable": "$EXECUTABLE",
+  "bundle_executable_mtime": "$EXECUTABLE_MTIME"
+}
+JSON
+
 echo "Built $APP_DIR"
+echo "Build receipt $BUILD_RECEIPT"
 
 if [[ "${NO_OPEN:-0}" == "1" || "$OPEN_APP" != "1" ]]; then
   echo "Build-only mode; not launching. Use ./Launch.command --open or ./Launch.command --open-safe to launch deliberately."
@@ -128,12 +159,39 @@ else
 fi
 LOG_FILE="$BUILD_ROOT/ImproveAgentNativeMenuBar.log"
 PID_FILE="$BUILD_ROOT/ImproveAgentNativeMenuBar.pid"
+STARTUP_RECEIPT="$BUILD_ROOT/ImproveAgentNativeMenuBar.startup-receipt.json"
 rm -f "$PID_FILE"
+rm -f "$STARTUP_RECEIPT"
 : > "$LOG_FILE"
-if /usr/bin/open -n "$APP_DIR"; then
+if IMPROVE_AGENT_NATIVE_STARTUP_RECEIPT="$STARTUP_RECEIPT" /usr/bin/open -n "$APP_DIR"; then
+  cat > "$LAUNCH_RECEIPT" <<JSON
+{
+  "schema_version": "improve-agent-native-menubar-launch/v1",
+  "status": "requested",
+  "launch_method": "LaunchServices",
+  "app_dir": "$APP_DIR",
+  "bundle_executable": "$EXECUTABLE",
+  "safe_open": $SAFE_OPEN,
+  "log_file": "$LOG_FILE",
+  "startup_receipt": "$STARTUP_RECEIPT"
+}
+JSON
   echo "LaunchServices open requested for $APP_DIR"
+  echo "Launch receipt $LAUNCH_RECEIPT"
   exit 0
 else
+  cat > "$LAUNCH_RECEIPT" <<JSON
+{
+  "schema_version": "improve-agent-native-menubar-launch/v1",
+  "status": "failed",
+  "launch_method": "LaunchServices",
+  "app_dir": "$APP_DIR",
+  "bundle_executable": "$EXECUTABLE",
+  "safe_open": $SAFE_OPEN,
+  "log_file": "$LOG_FILE",
+  "startup_receipt": "$STARTUP_RECEIPT"
+}
+JSON
   echo "LaunchServices open failed; see $LOG_FILE" >&2
   exit 1
 fi

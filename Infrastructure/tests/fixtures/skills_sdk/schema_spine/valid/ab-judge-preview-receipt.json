@@ -22,7 +22,22 @@
     "network_required": true,
     "secret_env_names": [],
     "auth_boundary": "none",
-    "receives_sanitized_outputs_only": true
+    "receives_sanitized_outputs_only": true,
+    "runtime_metadata": {
+      "model_id": "203e30078279",
+      "size_gb": 8.9,
+      "architecture": "qwen3_5",
+      "parameters": "9.4B",
+      "quantization": "nvfp4",
+      "context_length": 262144,
+      "metadata_source": "ollama_show"
+    },
+    "smoke_guard": {
+      "max_tokens_used": 7000,
+      "forbid_visible_thinking": true,
+      "allow_codex_jsonl_reasoning_events": true,
+      "forbid_fallback_metadata": true
+    }
   },
   "rubric_id": "skills-sdk.ab-rubric.v0",
   "rubric_digest": "sha256:65e2c3a27f20e18ff2199f840045ac1b62b6d1babce538391b084b8a8a9824d1",

@@ -1,0 +1,39 @@
+{
+  "command": [
+    "codex",
+    "exec",
+    "--profile",
+    "oss-local",
+    "--sandbox",
+    "read-only",
+    "--ephemeral",
+    "--json",
+    "--ignore-rules",
+    "--skip-git-repo-check",
+    "--output-last-message",
+    "/Users/jamiecraik/dev/agent-skills/.harness/evidence/handoff/oss-local-qwen-mlx/smoke-research-20260702T193055Z/last-message.txt",
+    "Reply exactly CODEX_OSS_LOCAL_OK"
+  ],
+  "exit_code": 0,
+  "findings": [
+    {
+      "code": "codex_runtime_metadata_fallback",
+      "message": "Codex reported missing model metadata or fallback metadata."
+    },
+    {
+      "code": "codex_runtime_visible_thinking",
+      "message": "Model output exposed a thinking trace in the smoke transcript."
+    },
+    {
+      "code": "codex_runtime_token_budget_exceeded",
+      "message": "Smoke transcript used 6415 tokens; limit is 5000."
+    }
+  ],
+  "last_message_path": "/Users/jamiecraik/dev/agent-skills/.harness/evidence/handoff/oss-local-qwen-mlx/smoke-research-20260702T193055Z/last-message.txt",
+  "marker": "CODEX_OSS_LOCAL_OK",
+  "max_tokens_used": 5000,
+  "schema_version": "skills-sdk.oss-local-smoke-run.v0",
+  "status": "fail",
+  "stderr_path": "/Users/jamiecraik/dev/agent-skills/.harness/evidence/handoff/oss-local-qwen-mlx/smoke-research-20260702T193055Z/stderr.txt",
+  "stdout_path": "/Users/jamiecraik/dev/agent-skills/.harness/evidence/handoff/oss-local-qwen-mlx/smoke-research-20260702T193055Z/stdout.txt"
+}

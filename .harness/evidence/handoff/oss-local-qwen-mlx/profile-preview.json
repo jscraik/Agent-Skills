@@ -1,0 +1,242 @@
+{
+  "status": "success",
+  "trace_id": "4d2a31b2-c599-4917-9d18-bca77f3a29ee",
+  "metadata": {
+    "version": "0.1.0",
+    "command": "sdk eval profiles --preview --json --robot",
+    "next_steps": [],
+    "correction_note": null
+  },
+  "data": {
+    "skills_sdk_eval_profiles": {
+      "schema_version": "skills-sdk-eval-profile-preview.v0",
+      "status": "preview",
+      "facade_command": "skills-sdk eval profiles",
+      "receipt": {
+        "schema_version": "skills-sdk.eval-profile-preview-receipt.v0",
+        "schema_uri": "https://agent-skills.local/schemas/skills-sdk/eval-profile-preview-receipt.v0.schema.json",
+        "status": "preview",
+        "operation": "eval_profile_preview",
+        "execution_profiles": [
+          {
+            "id": "codex-read-only",
+            "runner": "codex_exec",
+            "sandbox_mode": "read-only",
+            "approval_policy": "on-request",
+            "codex_json_events_required": true,
+            "output_schema_supported": true,
+            "mutation_allowed": false
+          },
+          {
+            "id": "codex-workspace-write",
+            "runner": "codex_exec",
+            "sandbox_mode": "workspace-write",
+            "approval_policy": "on-request",
+            "codex_json_events_required": true,
+            "output_schema_supported": true,
+            "mutation_allowed": true
+          }
+        ],
+        "judge_profiles": [
+          {
+            "id": "oss-local",
+            "codex_profile": "oss-local",
+            "provider": "codex",
+            "mode": "local",
+            "host": "codex-cli-profile",
+            "model": "qwen3.5:9b-mlx",
+            "model_role": "local_sandbox_eval_default",
+            "model_settings": {
+              "num_ctx": 8192,
+              "num_predict": 1024,
+              "temperature": 0.1,
+              "top_p": 0.9
+            },
+            "runtime_metadata": {
+              "model_id": "203e30078279",
+              "size_gb": 8.9,
+              "architecture": "qwen3_5",
+              "parameters": "9.4B",
+              "quantization": "nvfp4",
+              "context_length": 262144,
+              "metadata_source": "ollama_show"
+            },
+            "smoke_guard": {
+              "max_tokens_used": 7000,
+              "forbid_visible_thinking": true,
+              "forbid_fallback_metadata": true
+            },
+            "network_required": true,
+            "secret_env_names": [],
+            "auth_boundary": "none",
+            "receives_sanitized_outputs_only": true
+          },
+          {
+            "id": "oss-local-large-transcript",
+            "codex_profile": "oss-local",
+            "provider": "codex",
+            "mode": "local",
+            "host": "codex-cli-profile",
+            "model": "qwen3.5:9b-mlx",
+            "model_role": "larger_local_transcript_trial",
+            "model_settings": {
+              "num_ctx": 16384,
+              "num_predict": 1536,
+              "temperature": 0.1,
+              "top_p": 0.9
+            },
+            "runtime_metadata": {
+              "model_id": "203e30078279",
+              "size_gb": 8.9,
+              "architecture": "qwen3_5",
+              "parameters": "9.4B",
+              "quantization": "nvfp4",
+              "context_length": 262144,
+              "metadata_source": "ollama_show"
+            },
+            "smoke_guard": {
+              "max_tokens_used": 7000,
+              "forbid_visible_thinking": true,
+              "forbid_fallback_metadata": true
+            },
+            "network_required": true,
+            "secret_env_names": [],
+            "auth_boundary": "none",
+            "receives_sanitized_outputs_only": true
+          },
+          {
+            "id": "oss-local-code",
+            "codex_profile": "oss-local-code",
+            "provider": "codex",
+            "mode": "local",
+            "host": "codex-cli-profile",
+            "model": "qwen3-coder:30b",
+            "model_role": "code_heavy_specialist",
+            "model_settings": {
+              "num_ctx": 8192,
+              "num_predict": 1024,
+              "temperature": 0.1,
+              "top_p": 0.9
+            },
+            "runtime_metadata": null,
+            "smoke_guard": null,
+            "network_required": true,
+            "secret_env_names": [],
+            "auth_boundary": "none",
+            "receives_sanitized_outputs_only": true
+          },
+          {
+            "id": "oss-local-fallback",
+            "codex_profile": "oss-local-fallback",
+            "provider": "codex",
+            "mode": "local",
+            "host": "codex-cli-profile",
+            "model": "qwen3.5:latest",
+            "model_role": "fast_fallback",
+            "model_settings": {
+              "num_ctx": 8192,
+              "num_predict": 1024,
+              "temperature": 0.1,
+              "top_p": 0.9
+            },
+            "runtime_metadata": null,
+            "smoke_guard": null,
+            "network_required": true,
+            "secret_env_names": [],
+            "auth_boundary": "none",
+            "receives_sanitized_outputs_only": true
+          },
+          {
+            "id": "oss-security",
+            "codex_profile": "oss-security",
+            "provider": "codex",
+            "mode": "local",
+            "host": "codex-cli-profile",
+            "model": "CyberCrew/notmythos-8b",
+            "model_role": "local_security_specialist",
+            "model_settings": {
+              "num_ctx": 8192,
+              "num_predict": 1024,
+              "repeat_penalty": 1.15,
+              "temperature": 0.35,
+              "top_k": 40,
+              "top_p": 0.9
+            },
+            "runtime_metadata": null,
+            "smoke_guard": null,
+            "network_required": true,
+            "secret_env_names": [],
+            "auth_boundary": "none",
+            "receives_sanitized_outputs_only": true
+          },
+          {
+            "id": "oss-cloud",
+            "codex_profile": "oss-cloud",
+            "provider": "codex",
+            "mode": "cloud",
+            "host": "codex-cli-profile",
+            "model": "deepseek-v4-flash:cloud",
+            "model_role": "cloud_confirmation",
+            "model_settings": null,
+            "runtime_metadata": null,
+            "smoke_guard": null,
+            "network_required": true,
+            "secret_env_names": [
+              "OLLAMA_API_KEY"
+            ],
+            "auth_boundary": "codex_cli_auth",
+            "receives_sanitized_outputs_only": true
+          },
+          {
+            "id": "codex-fast",
+            "codex_profile": "fast",
+            "provider": "codex",
+            "mode": "codex-fast",
+            "host": "codex-cli-authenticated-session",
+            "model": "gpt-5.3-codex-spark",
+            "model_role": "codex_fast_smoke",
+            "model_settings": null,
+            "runtime_metadata": null,
+            "smoke_guard": null,
+            "network_required": true,
+            "secret_env_names": [],
+            "auth_boundary": "codex_cli_auth",
+            "receives_sanitized_outputs_only": true
+          }
+        ],
+        "secret_boundary": {
+          "skill_execution_env_secret_names": [],
+          "judge_env_secret_names": [
+            "OLLAMA_API_KEY"
+          ],
+          "skill_execution_receives_judge_secrets": false
+        },
+        "execution_boundary": "codex_exec_sandbox",
+        "external_intake_boundary": "sdk_quarantine_only",
+        "mutation_performed": false,
+        "network_accessed": false,
+        "provider_invoked": false,
+        "blockers": [],
+        "acceptance_trace": [
+          "FR-003",
+          "FR-008",
+          "SA-003",
+          "SA-004",
+          "VP-021",
+          "VP-022",
+          "VP-030"
+        ],
+        "agent_summary": "eval profile preview declares Codex sandbox execution profiles and isolated Codex-profile judge profiles without invoking providers."
+      },
+      "mutation_performed": false,
+      "validation_commands": [
+        "./bin/ask sdk eval profiles --preview --json --robot"
+      ],
+      "agent_summary": "eval profile preview declares Codex sandbox execution profiles and isolated Codex-profile judge profiles without invoking providers."
+    }
+  },
+  "telemetry": {
+    "latency_ms": 7
+  },
+  "errors": []
+}

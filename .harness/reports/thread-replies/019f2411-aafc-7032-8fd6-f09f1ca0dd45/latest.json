@@ -1,0 +1,134 @@
+{
+  "schema_version": "thread-report/v1",
+  "thread_id": "019f2411-aafc-7032-8fd6-f09f1ca0dd45",
+  "repo_head": "d21eb4674",
+  "task_id": "oss-local-qwen-mlx-runtime-research-and-smoke-stabilization",
+  "status": "blocked",
+  "status_detail": "blocked_runtime",
+  "current_branch": "codex/improve-native-release-ratchets",
+  "current_gate": "oss-local-qwen-runtime-smoke",
+  "next_gate_allowed": false,
+  "blocked_next_gates": [
+    "oss-cloud",
+    "tessl-dry-run",
+    "tessl-live"
+  ],
+  "dirty_state_before": "agent-skills had existing unrelated staged files from improve-native release ratchets; configs repo was dirty and divergent. This lane preserved unrelated changes and only touched qwen smoke/profile guard surfaces plus evidence/report artifacts.",
+  "exact_model_target": "qwen3.5:9b-mlx",
+  "config_profile_surfaces_touched": [
+    "/Users/jamiecraik/dev/configs/codex/oss-local.config.toml",
+    "/Users/jamiecraik/dev/configs/codex/scripts/validate-codex-config.py",
+    "/Users/jamiecraik/dev/configs/codex/scripts/tests/test_validate_codex_config.py",
+    "Infrastructure/scripts/lib/ask/skills_sdk/eval_profiles.py",
+    "scripts/lib/ask/skills_sdk/eval_profiles.py",
+    "Infrastructure/scripts/validation-and-linting/run_oss_local_smoke.py",
+    "Infrastructure/scripts/validation-and-linting/check_oss_local_smoke_output.py",
+    "Infrastructure/tests/test_oss_local_smoke_output_check.py",
+    "Infrastructure/tests/test_skills_sdk_eval_profiles.py"
+  ],
+  "commands": [
+    {
+      "command": "ollama show qwen3.5:9b-mlx | sed -n '1,160p'",
+      "outcome": "pass",
+      "evidence": "local runtime reports architecture=qwen3_5, parameters=9.4B, context length=262144, quantization=nvfp4, capabilities completion/vision/thinking/tools"
+    },
+    {
+      "command": "codex exec --help | sed -n '1,160p'",
+      "outcome": "pass",
+      "evidence": "installed Codex supports --profile, --sandbox, --ephemeral, --json, --ignore-rules, --skip-git-repo-check, and --output-last-message"
+    },
+    {
+      "command": "./bin/ask sdk eval profiles --preview --json --robot > .harness/evidence/handoff/oss-local-qwen-mlx/profile-preview.json && jq '{status, oss_local: (.data.skills_sdk_eval_profiles.receipt.judge_profiles[] | select(.id==\"oss-local\") | {id, codex_profile, model, model_settings, smoke_guard, runtime_metadata})}' .harness/evidence/handoff/oss-local-qwen-mlx/profile-preview.json",
+      "outcome": "pass",
+      "evidence": "oss-local uses qwen3.5:9b-mlx; model_settings num_ctx=8192 num_predict=1024 temperature=0.1 top_p=0.9; smoke_guard max_tokens_used=7000 forbid_visible_thinking=true forbid_fallback_metadata=true"
+    },
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache bash Infrastructure/scripts/run-infrastructure-python.sh -m pytest -q tests/test_skills_sdk_eval_profiles.py tests/test_skills_sdk_schema_spine.py::TestSkillsSdkSchemaSpine::test_eval_profile_preview_fixture_records_codex_profile_boundaries tests/test_oss_local_smoke_output_check.py",
+      "outcome": "pass",
+      "evidence": "11 passed in 0.46s"
+    },
+    {
+      "command": "python3 Infrastructure/scripts/validation-and-linting/run_oss_local_smoke.py --output-dir .harness/evidence/handoff/oss-local-qwen-mlx/smoke-final-20260702T193609Z --work-dir /private/tmp/oss-local-qwen-empty-workdir --timeout-seconds 10 --json",
+      "outcome": "fail",
+      "evidence": "receipt status=fail; exit_code=0; marker matched; duration_seconds=2.906; model=qwen3.5:9b-mlx; provider=ollama; findings=codex_runtime_metadata_fallback,codex_runtime_visible_thinking"
+    },
+    {
+      "command": "python3 Infrastructure/scripts/validation-and-linting/check_oss_local_smoke_output.py .harness/evidence/handoff/oss-local-qwen-mlx/smoke-final-20260702T193609Z/stderr.txt .harness/evidence/handoff/oss-local-qwen-mlx/smoke-final-20260702T193609Z/stdout.txt .harness/evidence/handoff/oss-local-qwen-mlx/smoke-final-20260702T193609Z/last-message.txt --json > .harness/evidence/handoff/oss-local-qwen-mlx/smoke-output-check-final.json",
+      "outcome": "fail",
+      "evidence": "runtime_observations model=qwen3.5:9b-mlx tokens_used=6405 metadata_fallback_observed=true visible_thinking_observed=true; token budget no longer fails under 7000 guard"
+    },
+    {
+      "command": "git diff --check -- Infrastructure/scripts/validation-and-linting/check_oss_local_smoke_output.py Infrastructure/scripts/validation-and-linting/run_oss_local_smoke.py Infrastructure/tests/test_oss_local_smoke_output_check.py Infrastructure/tests/test_skills_sdk_eval_profiles.py Infrastructure/scripts/lib/ask/skills_sdk/eval_profiles.py scripts/lib/ask/skills_sdk/eval_profiles.py .harness/research/oss-local-qwen-mlx-runtime-tuning.md .harness/memory/LEARNINGS.md",
+      "outcome": "pass",
+      "evidence": "no whitespace errors on touched lane files"
+    }
+  ],
+  "artifact_assertions": [
+    {
+      "artifact": ".harness/research/oss-local-qwen-mlx-runtime-tuning.md",
+      "assertion": "Research artifact records official Ollama, local Ollama, and official OpenAI Codex evidence with proposed deterministic smoke changes.",
+      "outcome": "pass"
+    },
+    {
+      "artifact": ".harness/evidence/handoff/oss-local-qwen-mlx/profile-preview.json",
+      "assertion": "SDK eval profile preview records qwen3.5:9b-mlx and a 7000-token smoke guard.",
+      "outcome": "pass"
+    },
+    {
+      "artifact": ".harness/evidence/handoff/oss-local-qwen-mlx/smoke-final-20260702T193609Z/receipt.json",
+      "assertion": "Final bounded smoke produces a complete quantifiable receipt with model, provider, profile, work_dir, duration, and findings.",
+      "outcome": "fail"
+    },
+    {
+      "artifact": ".harness/evidence/handoff/oss-local-qwen-mlx/smoke-output-check-final.json",
+      "assertion": "Final output checker isolates remaining blockers to fallback metadata and visible reasoning; token budget is no longer the active blocker.",
+      "outcome": "fail"
+    }
+  ],
+  "contradictions": [
+    {
+      "artifact": ".harness/evidence/handoff/oss-local-qwen-mlx/smoke-final-20260702T193609Z/receipt.json",
+      "problem": "The smoke now proves qwen profile invocation and bounded receipt shape, but it still fails runtime acceptance because Codex reports missing model metadata and qwen emits a reasoning event in JSONL output.",
+      "owner": "Codex runtime metadata/catalog plus qwen visible-reasoning behavior"
+    }
+  ],
+  "files_changed": [
+    ".harness/memory/LEARNINGS.md",
+    ".harness/research/oss-local-qwen-mlx-runtime-tuning.md",
+    "Infrastructure/scripts/lib/ask/skills_sdk/eval_profiles.py",
+    "scripts/lib/ask/skills_sdk/eval_profiles.py",
+    "Infrastructure/scripts/validation-and-linting/check_oss_local_smoke_output.py",
+    "Infrastructure/scripts/validation-and-linting/run_oss_local_smoke.py",
+    "Infrastructure/tests/test_oss_local_smoke_output_check.py",
+    "Infrastructure/tests/test_skills_sdk_eval_profiles.py",
+    ".harness/evidence/handoff/oss-local-qwen-mlx/profile-preview.json",
+    ".harness/evidence/handoff/oss-local-qwen-mlx/smoke-output-check-final.json"
+  ],
+  "receipt_result_artifact_paths": [
+    ".harness/evidence/handoff/oss-local-qwen-mlx/profile-preview.json",
+    ".harness/evidence/handoff/oss-local-qwen-mlx/config-blocker.json",
+    ".harness/evidence/handoff/oss-local-qwen-mlx/smoke-final-20260702T193609Z/receipt.json",
+    ".harness/evidence/handoff/oss-local-qwen-mlx/smoke-final-20260702T193609Z/stdout.txt",
+    ".harness/evidence/handoff/oss-local-qwen-mlx/smoke-final-20260702T193609Z/stderr.txt",
+    ".harness/evidence/handoff/oss-local-qwen-mlx/smoke-final-20260702T193609Z/last-message.txt",
+    ".harness/evidence/handoff/oss-local-qwen-mlx/smoke-output-check-final.json"
+  ],
+  "lessons": [
+    {
+      "lesson": "A bounded oss-local marker smoke must avoid repo context, close stdin, use JSONL, skip git repo checks in temp workdirs, and record model/provider/profile/duration even when runtime behavior fails.",
+      "failure_pattern": "The qwen smoke originally mixed repo context, inherited stdin, relative evidence paths, and too-low token budget, which hid the true remaining blockers.",
+      "carry_forward_target": "run_oss_local_smoke.py and check_oss_local_smoke_output.py",
+      "deterministic_guardrail": "Runner now uses --json, --ignore-rules, --skip-git-repo-check, stdin DEVNULL, absolute paths, receipt model/provider/profile/duration fields, and a 7000-token guard aligned to observed Codex baseline.",
+      "recorded_in": ".harness/memory/LEARNINGS.md",
+      "validation": "focused smoke/profile tests -> 11 passed; final bounded smoke receipt records model=qwen3.5:9b-mlx duration_seconds=2.906 tokens_used=6405 and fails closed on metadata fallback plus visible reasoning"
+    }
+  ],
+  "remaining_blockers": [
+    "Codex runtime reports Model metadata for qwen3.5:9b-mlx not found and uses fallback metadata.",
+    "Codex JSONL output includes a reasoning item for qwen3.5:9b-mlx, so forbid_visible_thinking remains an active blocker.",
+    "Configs repo remains dirty and divergent with qwen profile edits plus unrelated local runtime files; commit or park separately.",
+    "agent-skills branch is behind origin by one commit and contains unrelated pre-existing staged files outside this lane."
+  ],
+  "recommended_next_pm_decision": "Open a Codex runtime/profile metadata lane to add or repair local model catalog metadata for qwen3.5:9b-mlx, and decide whether qwen visible reasoning should be suppressed by profile/config or whether oss-local should use a non-thinking tag/model for evaluator work.",
+  "next_action": "Do not run oss-cloud or Tessl. Resolve Codex metadata fallback and visible-reasoning behavior, then rerun the same bounded oss-local smoke."
+}

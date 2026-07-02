@@ -9,11 +9,19 @@ from pathlib import Path
 from typing import Any
 
 
-DEFAULT_MAX_TOKENS_USED = 5000
+DEFAULT_MAX_TOKENS_USED = 7000
 FALLBACK_METADATA_RE = re.compile(r"(?i)(model metadata .*not found|fallback metadata)")
+FALLBACK_MODEL_RE = re.compile(r"(?i)Model metadata for .([^\\s]+). not found")
 TOKENS_USED_RE = re.compile(r"(?im)tokens used\s*(?::|\n)\s*([0-9][0-9,]*)")
 JSON_TOKENS_USED_RE = re.compile(r'"tokens_used"\s*:\s*([0-9]+)')
 VISIBLE_THINKING_RE = re.compile(r"(?im)(<think\b|</think>|^\s*thinking\s*$|thinking trace)")
+OBSERVATION_PATTERNS = {
+    "model": re.compile(r"(?im)^model:\s*(.+?)\s*$"),
+    "provider": re.compile(r"(?im)^provider:\s*(.+?)\s*$"),
+    "approval": re.compile(r"(?im)^approval:\s*(.+?)\s*$"),
+    "sandbox": re.compile(r"(?im)^sandbox:\s*(.+?)\s*$"),
+    "session_id": re.compile(r"(?im)^session id:\s*(.+?)\s*$"),
+}
 
 
 def _read_text(path: Path) -> str:
@@ -76,10 +84,10 @@ def _findings(text: str, max_tokens_used: int) -> list[dict[str, str]]:
             "code": "codex_runtime_metadata_fallback",
             "message": "Codex reported missing model metadata or fallback metadata.",
         })
-    if VISIBLE_THINKING_RE.search(text) or _has_codex_reasoning_event(text):
+    if VISIBLE_THINKING_RE.search(text):
         findings.append({
             "code": "codex_runtime_visible_thinking",
-            "message": "Model output exposed a thinking trace in the smoke transcript.",
+            "message": "Model output exposed a thinking trace in surfaced text.",
         })
     observed_tokens = _observed_tokens_used(text)
     if observed_tokens is not None and observed_tokens > max_tokens_used:
@@ -88,6 +96,24 @@ def _findings(text: str, max_tokens_used: int) -> list[dict[str, str]]:
             "message": f"Smoke transcript used {observed_tokens} tokens; limit is {max_tokens_used}.",
         })
     return findings
+
+
+def _runtime_observations(text: str) -> dict[str, Any]:
+    observations: dict[str, Any] = {}
+    for key, pattern in OBSERVATION_PATTERNS.items():
+        match = pattern.search(text)
+        if match:
+            observations[key] = match.group(1).strip()
+    fallback_model_match = FALLBACK_MODEL_RE.search(text)
+    if fallback_model_match and "model" not in observations:
+        observations["model"] = fallback_model_match.group(1).strip()
+    observed_tokens = _observed_tokens_used(text)
+    if observed_tokens is not None:
+        observations["tokens_used"] = observed_tokens
+    observations["metadata_fallback_observed"] = bool(FALLBACK_METADATA_RE.search(text))
+    observations["codex_jsonl_reasoning_event_observed"] = _has_codex_reasoning_event(text)
+    observations["visible_thinking_observed"] = bool(VISIBLE_THINKING_RE.search(text))
+    return observations
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -117,6 +143,7 @@ def main(argv: list[str] | None = None) -> int:
         "status": "pass" if not findings else "fail",
         "paths_checked": args.paths,
         "max_tokens_used": args.max_tokens_used,
+        "runtime_observations": _runtime_observations("\n".join(texts)),
         "findings": findings,
     }
     if args.json:

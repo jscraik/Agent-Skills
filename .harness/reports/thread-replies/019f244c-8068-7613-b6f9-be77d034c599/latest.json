@@ -1,0 +1,218 @@
+{
+  "schema_version": "thread-report/v1",
+  "thread_id": "019f244c-8068-7613-b6f9-be77d034c599",
+  "source_pm_thread_id": "019f0314-ba59-7a00-ab78-9bd3174d1d03",
+  "repo_head": "97c4ba5f402a1ebf909b0c2c32c86bcf3774bbf7",
+  "task_id": "pr-green-sweep-agent-skills-pr301-live-review-fix",
+  "heartbeat_status": "blocked_policy_or_approval",
+  "status": "blocked",
+  "current_gate": "pr-green-sweep-review-thread-resolution",
+  "next_gate_allowed": false,
+  "blocked_next_gates": [
+    "pr-301-review-thread-resolution",
+    "pr-301-final-hosted-check-closeout",
+    "pr-301-final-mergeability-refresh"
+  ],
+  "next_action": "User or policy approval is required before mutating GitHub review-thread state. The source fix for PR #301 was applied, validated, committed, and pushed to head 97c4ba5f4; fresh hosted checks are still pending on that head.",
+  "commands": [
+    {
+      "command": "gh pr view 301 --repo jscraik/Agent-Skills --json number,url,state,isDraft,headRefName,headRefOid,baseRefName,mergeStateStatus,statusCheckRollup",
+      "outcome": "pass",
+      "evidence": "Before patch, PR #301 head was 497f4de21d750795be2673d61df064367f5c8eaa, state OPEN, non-draft, mergeStateStatus=BLOCKED."
+    },
+    {
+      "command": "gh pr checks 301 --repo jscraik/Agent-Skills --watch=false",
+      "outcome": "pass",
+      "evidence": "Before patch, all listed PR #301 checks passed on head 497f4de21, including CodeRabbit and CircleCI."
+    },
+    {
+      "command": "sed -n '872,920p' Prototypes/improve-agent-native-menubar/Sources/ImproveAgentNativeMenuBar/App.swift && sed -n '1170,1198p' Prototypes/improve-agent-native-menubar/Sources/ImproveAgentNativeMenuBar/App.swift",
+      "outcome": "pass",
+      "evidence": "Confirmed impactMetric replaced localImpact when only scenarioCount existed and securitySignal matched issue before clean issue strings."
+    },
+    {
+      "command": "apply_patch to /private/tmp/agent-skills-pr301-conflict/Prototypes/improve-agent-native-menubar/Sources/ImproveAgentNativeMenuBar/App.swift",
+      "outcome": "pass",
+      "evidence": "Changed impactMetric to return nil without impactScore and classify pass/no issues/clean/clear before issue/fail/flag."
+    },
+    {
+      "command": "PYTHONPYCACHEPREFIX=/private/tmp/pr301-pycache python3 -m py_compile Infrastructure/scripts/validation-and-linting/run_oss_local_smoke.py Infrastructure/scripts/validation-and-linting/check_oss_local_smoke_output.py Infrastructure/scripts/validation-and-linting/validate_skills_sdk_release_ratchets.py Infrastructure/scripts/testing/test_validate_skills_sdk_release_ratchets.py",
+      "outcome": "pass",
+      "evidence": "Python compile passed for focused qwen/release-ratchet surfaces."
+    },
+    {
+      "command": "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache PYTHONPYCACHEPREFIX=/private/tmp/pr301-pycache python3 -m pytest -q Infrastructure/scripts/testing/test_validate_skills_sdk_release_ratchets.py Infrastructure/tests/test_oss_local_smoke_output_check.py",
+      "outcome": "pass",
+      "evidence": "25 passed."
+    },
+    {
+      "command": "python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json",
+      "outcome": "pass",
+      "evidence": "status=pass, findings=[]"
+    },
+    {
+      "command": "CLANG_MODULE_CACHE_PATH=/private/tmp/improve-agent-native-menubar-clang-cache xcrun swiftc -parse Prototypes/improve-agent-native-menubar/Sources/ImproveAgentNativeMenuBar/App.swift",
+      "outcome": "pass",
+      "evidence": "Swift source parse passed for App.swift after the review-thread fix."
+    },
+    {
+      "command": "git diff --check",
+      "outcome": "pass",
+      "evidence": "No whitespace errors in the patched temp worktree."
+    },
+    {
+      "command": "git add Prototypes/improve-agent-native-menubar/Sources/ImproveAgentNativeMenuBar/App.swift && git diff --cached --check && git commit -m \"fix: preserve tessl fallback signals\" && GIT_TERMINAL_PROMPT=0 git push origin HEAD:codex/qwen-local-eval-guardrails",
+      "outcome": "pass",
+      "evidence": "Created commit 97c4ba5f402a1ebf909b0c2c32c86bcf3774bbf7 and pushed 497f4de21..97c4ba5f4 to codex/qwen-local-eval-guardrails."
+    },
+    {
+      "command": "gh pr view 301 --repo jscraik/Agent-Skills --json number,url,state,isDraft,headRefName,headRefOid,baseRefName,mergeStateStatus,statusCheckRollup",
+      "outcome": "pass",
+      "evidence": "After push, PR #301 head is 97c4ba5f402a1ebf909b0c2c32c86bcf3774bbf7, state OPEN, non-draft, mergeStateStatus=BLOCKED, and fresh checks started."
+    },
+    {
+      "command": "gh pr checks 301 --repo jscraik/Agent-Skills --watch=false",
+      "outcome": "blocked",
+      "evidence": "Latest poll on 97c4ba5f4 showed all listed checks passed except Semgrep (SAST) and Semgrep OSS still pending."
+    },
+    {
+      "command": "GraphQL reviewThreads query for PR #301 after push",
+      "outcome": "pass",
+      "evidence": "head=97c4ba5f402a1ebf909b0c2c32c86bcf3774bbf7, total review threads=20, unresolved=3, live_unresolved=1. The remaining live unresolved thread is PRRT_kwDOQ6nR9s6OBjkn on App.swift line 914."
+    },
+    {
+      "command": "gh api graphql resolveReviewThread for PRRT_kwDOQ6nR9s6OBjkl and PRRT_kwDOQ6nR9s6OBjkn",
+      "outcome": "blocked",
+      "evidence": "CreateProcess rejected by approval reviewer: tenant policy denies mutating GitHub review-thread state without explicit user approval. No workaround was attempted."
+    }
+  ],
+  "artifact_assertions": [
+    {
+      "artifact": ".harness/reports/thread-replies/019f244c-8068-7613-b6f9-be77d034c599/latest.json",
+      "assertion": "PM report records the pushed PR #301 source fix, focused validation, pending hosted checks, and review-thread mutation blocker.",
+      "outcome": "pass"
+    },
+    {
+      "artifact": "https://github.com/jscraik/Agent-Skills/pull/301",
+      "assertion": "PR #301 has the App.swift fix pushed at 97c4ba5f4; final hosted checks and review-thread resolution are not complete.",
+      "outcome": "pass"
+    }
+  ],
+  "contradictions": [
+    {
+      "artifact": "https://github.com/jscraik/Agent-Skills/pull/301",
+      "problem": "CodeRabbit status context is success, but GraphQL still reports one live unresolved review thread after the source patch.",
+      "owner": "review-thread resolution policy/approval"
+    }
+  ],
+  "files_changed": [
+    "Prototypes/improve-agent-native-menubar/Sources/ImproveAgentNativeMenuBar/App.swift",
+    ".harness/reports/thread-replies/019f244c-8068-7613-b6f9-be77d034c599/latest.json"
+  ],
+  "lessons": [
+    {
+      "lesson": "PR Green Sweep source fixes and review-thread mutations are separate gates; a pushed fix does not authorize resolving review threads when tenant policy blocks mutation.",
+      "failure_pattern": "Review-thread resolution was attempted after source proof and was rejected by policy.",
+      "carry_forward_target": "pr-green-sweep workflow and PM authorization rules",
+      "deterministic_guardrail": "Report source-fix evidence and ask PM for review-thread mutation approval rather than trying alternate mutation routes.",
+      "recorded_in": ".harness/memory/LEARNINGS.md",
+      "validation": "python3 Infrastructure/scripts/validation-and-linting/validate_thread_report.py .harness/reports/thread-replies/019f244c-8068-7613-b6f9-be77d034c599/latest.json --json"
+    }
+  ],
+  "pr_302_live_state": {
+    "url": "https://github.com/jscraik/Agent-Skills/pull/302",
+    "state": "MERGED",
+    "cleanup_status": "cleanup_only"
+  },
+  "target_prs": [
+    {
+      "number": 301,
+      "url": "https://github.com/jscraik/Agent-Skills/pull/301",
+      "title": "feat(sdk): tighten local eval guardrails",
+      "head_branch": "codex/qwen-local-eval-guardrails",
+      "head_sha": "97c4ba5f402a1ebf909b0c2c32c86bcf3774bbf7",
+      "state": "OPEN",
+      "draft": false,
+      "merge_state_status": "BLOCKED",
+      "rest_mergeability": {
+        "mergeable": "not refreshed after push",
+        "mergeable_state": "not refreshed after push",
+        "rebaseable": "not refreshed after push"
+      },
+      "checks_state": "pending",
+      "review_threads_state": {
+        "total_unresolved": 3,
+        "live_unresolved": 1,
+        "unresolved_threads": [
+          {
+            "id": "PRRT_kwDOQ6nR9s6OAoDw",
+            "isOutdated": true,
+            "path": "Infrastructure/scripts/validation-and-linting/run_oss_local_smoke.py",
+            "line": 72,
+            "summary": "Clear stale last-message before smoke runs"
+          },
+          {
+            "id": "PRRT_kwDOQ6nR9s6OBjkl",
+            "isOutdated": true,
+            "path": "Prototypes/improve-agent-native-menubar/Sources/ImproveAgentNativeMenuBar/App.swift",
+            "line": null,
+            "summary": "Preserve local impact when Tessl lacks a score"
+          },
+          {
+            "id": "PRRT_kwDOQ6nR9s6OBjkn",
+            "isOutdated": false,
+            "path": "Prototypes/improve-agent-native-menubar/Sources/ImproveAgentNativeMenuBar/App.swift",
+            "line": 914,
+            "summary": "Treat clean issue statuses as passing"
+          }
+        ]
+      },
+      "patch_commit": "97c4ba5f402a1ebf909b0c2c32c86bcf3774bbf7"
+    }
+  ],
+  "action_queue": {
+    "auto_fixable_now": [],
+    "needs_merge_conflict_strategy": [],
+    "blocked_policy_or_approval": [
+      "GitHub review-thread mutation is blocked by tenant policy until explicit approval.",
+        "Latest hosted poll still has Semgrep (SAST) and Semgrep OSS pending on head 97c4ba5f4."
+    ],
+    "blocked_external_ci": [],
+    "waived_external_ci": [],
+    "needs_user_decision": [
+      "Approve review-thread mutation for proven-fixed App.swift threads, or leave GitHub threads unresolved and wait for CodeRabbit/GitHub to update.",
+      "Wait for fresh hosted checks on 97c4ba5f4 before any mergeability decision."
+    ],
+    "cleanup_only": [
+      "PR #302 merged."
+    ]
+  },
+  "review_threads_state": {
+    "pr_301": "GraphQL after push reports unresolved=3 and live_unresolved=1; review-thread mutation was blocked by tenant policy.",
+    "pr_302": "merged cleanup-only"
+  },
+  "ci_failures_state": {
+    "pr_301": "No failure observed after push; latest poll showed Semgrep (SAST) and Semgrep OSS pending, with the other listed checks passed.",
+    "pr_302": "Merged cleanup-only."
+  },
+  "validation_commands": [
+    "PYTHONPYCACHEPREFIX=/private/tmp/pr301-pycache python3 -m py_compile Infrastructure/scripts/validation-and-linting/run_oss_local_smoke.py Infrastructure/scripts/validation-and-linting/check_oss_local_smoke_output.py Infrastructure/scripts/validation-and-linting/validate_skills_sdk_release_ratchets.py Infrastructure/scripts/testing/test_validate_skills_sdk_release_ratchets.py -> pass",
+    "UV_CACHE_DIR=/private/tmp/agent-skills-uv-cache PYTHONPYCACHEPREFIX=/private/tmp/pr301-pycache python3 -m pytest -q Infrastructure/scripts/testing/test_validate_skills_sdk_release_ratchets.py Infrastructure/tests/test_oss_local_smoke_output_check.py -> pass, 25 passed",
+    "python3 Infrastructure/scripts/validation-and-linting/validate_steering_uptake.py --json -> pass",
+    "CLANG_MODULE_CACHE_PATH=/private/tmp/improve-agent-native-menubar-clang-cache xcrun swiftc -parse Prototypes/improve-agent-native-menubar/Sources/ImproveAgentNativeMenuBar/App.swift -> pass",
+    "git diff --check -> pass"
+  ],
+  "push_evidence": "Command: GIT_TERMINAL_PROMPT=0 git push origin HEAD:codex/qwen-local-eval-guardrails -> pass (497f4de21..97c4ba5f4)",
+  "mergeability_state": {
+    "pr_301": "GitHub mergeStateStatus remains BLOCKED after push; REST mergeability was not refreshed after the fresh push/check start.",
+    "pr_302": "MERGED"
+  },
+  "cleanup_state": "No merge, rebase, force-push, worktree deletion, oss-cloud, Tessl, publish, release, tag, or admin action was run by this fork.",
+  "remaining_blockers": [
+    "Tenant policy blocks review-thread mutation without explicit user approval.",
+    "PR #301 still has Semgrep (SAST) and Semgrep OSS pending on head 97c4ba5f4 in the latest poll.",
+    "PR #301 GraphQL still reports one live unresolved review thread.",
+    "Primary checkout remains dirty and should be reconciled separately."
+  ],
+  "recommended_next_pm_decision": "Approve or deny GitHub review-thread mutation for the proven-fixed App.swift threads. Then poll Semgrep/Semgrep OSS on 97c4ba5f4 and refresh mergeability before any merge/readiness claim."
+}
