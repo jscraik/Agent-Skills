@@ -846,6 +846,8 @@ final class TesslProbeCache {
     private var cachedSignal: TesslSignal?
     private var probeRunning = false
 
+    deinit {}
+
     func beginOrCached() -> TesslSignal? {
         lock.lock()
         defer { lock.unlock() }
