@@ -221,3 +221,6 @@ npython3
 .harness/reframes/20*
 .harness/linear/20*/**
 .harness/linear/20*.md
+
+# Captured Codex homes contain local runtime databases, install IDs, and temp wrappers.
+.harness/evidence/**/codex-home/

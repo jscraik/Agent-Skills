@@ -92,6 +92,60 @@
       "review_after": "2026-10-02"
     },
     {
+      "id": "improve-agent-native-smoke-closeout-20260702-212055",
+      "match_type": "exact",
+      "pattern": "Infrastructure/artifacts/evals/closeouts/20260702T212055Z-Skills-agent-ops-improve-agent-native-smoke-codex.json",
+      "classification": "historical_artifact",
+      "reason": "Blocked smoke closeout receipt retained as reviewed Skills SDK evidence for improve-agent-native release-ratchet reconciliation until a governed receipt store replaces this artifact path.",
+      "owner": "skills-sdk",
+      "review_after": "2026-10-02"
+    },
+    {
+      "id": "improve-agent-native-smoke-closeout-20260702-212122",
+      "match_type": "exact",
+      "pattern": "Infrastructure/artifacts/evals/closeouts/20260702T212122Z-Skills-agent-ops-improve-agent-native-smoke-codex.json",
+      "classification": "historical_artifact",
+      "reason": "Blocked smoke closeout receipt retained as reviewed Skills SDK evidence for improve-agent-native release-ratchet reconciliation until a governed receipt store replaces this artifact path.",
+      "owner": "skills-sdk",
+      "review_after": "2026-10-02"
+    },
+    {
+      "id": "improve-agent-native-menubar-launchservices-run-manifest",
+      "match_type": "exact",
+      "pattern": "artifacts/agent-runs/default-019f2466-0878-7523-9a82-7016a5b7c251/manifest.json",
+      "classification": "historical_artifact",
+      "reason": "Agent-run manifest retained as reviewed handoff evidence linking the menubar LaunchServices debug lane to its PM report and review artifact.",
+      "owner": "skills-sdk",
+      "review_after": "2026-10-02"
+    },
+    {
+      "id": "improve-agent-native-ratchet-review-run-manifest",
+      "match_type": "exact",
+      "pattern": "artifacts/agent-runs/default-019f24aa-b948-7fe2-8155-f4457bb4e47d/manifest.json",
+      "classification": "historical_artifact",
+      "reason": "Agent-run manifest retained as reviewed handoff evidence linking the improve-native release-ratchet review lane to its PM report and review artifact.",
+      "owner": "skills-sdk",
+      "review_after": "2026-10-02"
+    },
+    {
+      "id": "improve-agent-native-ratchet-validator-run-manifest",
+      "match_type": "exact",
+      "pattern": "artifacts/agent-runs/default-019f24ba-a5c8-7e01-9767-e1544212b3df/manifest.json",
+      "classification": "historical_artifact",
+      "reason": "Agent-run manifest retained as reviewed handoff evidence linking the improve-native validator lane to its PM report and review artifact.",
+      "owner": "skills-sdk",
+      "review_after": "2026-10-02"
+    },
+    {
+      "id": "improve-agent-native-default-review-artifact",
+      "match_type": "exact",
+      "pattern": "artifacts/reviews/default.md",
+      "classification": "historical_artifact",
+      "reason": "Current review artifact retained as reviewed handoff evidence for improve-agent-native release-ratchet reconciliation until review output moves to a governed receipt store.",
+      "owner": "skills-sdk",
+      "review_after": "2026-10-02"
+    },
+    {
       "id": "teach-scorer-calibration-bundle",
       "match_type": "prefix",
       "pattern": "Skills/github/teach/references/scorer-calibration/",
